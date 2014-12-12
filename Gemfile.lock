@@ -1,0 +1,17 @@
+PATH
+  remote: .
+  specs:
+    upjs-rails (0.0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    rake (10.3.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 1.3)
+  rake
+  upjs-rails!
