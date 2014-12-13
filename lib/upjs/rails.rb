@@ -2,6 +2,7 @@ require "upjs/rails/version"
 
 module Upjs
   module Rails
-    # Your code goes here...
+    class Engine < ::Rails::Engine
+    end
   end
 end
