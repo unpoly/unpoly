@@ -7,52 +7,30 @@ up.api = (->
     $source = $element.closest("[up-source]")
     $source.attr("up-source") || location.href
 
-  replace = (targetSelector, url, options) ->
-    substituteSelector = options?.substituteSelector || targetSelector
-    $target = $(targetSelector)
-    $target = up.util.$createElementFromSelector(targetSelector) unless $target.length
+  replace = (selector, url) ->
+    $target = $(selector)
+    $target = up.util.$createElementFromSelector(selector) unless $target.length
     $target.addClass("up-loading")
-    up.util.get(url, selector: substituteSelector).done((html) ->
+    up.util.get(url, selector: selector).done((html) ->
       $target.removeClass("up-loading")
-      implantHtml($target, substituteSelector, html)
+      implantHtml(selector, html, historyUrl: url)
     ).fail(up.util.error)
 
-  implantHtml = ($targetOrSelector, substituteSelector, html) ->
-    $target = if _.isString($targetOrSelector) then $($targetOrSelector) else $targetOrSelector
+  implantHtml = (selector, html, options) ->
+    $target = $(selector)
     $html = $(html)
-    $substitute = $html.find(substituteSelector)
+    $substitute = $html.find(selector)
     if $substitute.length
       $target.replaceWith($substitute)
       title = $html.filter("title").text()
-      document.title = title
-      up.past.push(url)
-      # Remember where the element came from so we can make
-      # smaller page loads in the future (does this even make sense?).
-      rememberSource($target)
+      if url = options.historyUrl
+        document.title = title if title
+        up.past.push(url)
+        # Remember where the element came from so we can make
+        # smaller page loads in the future (does this even make sense?).
+        rememberSource($target)
     else
-      up.util.error("Could not find selector (" + substituteSelector + ") in response (" + html + ")")
-
-
-#  replaceTargetSelector = (targetSelector, htmlPromise) ->
-#    substituteSelector = options?.substituteSelector || targetSelector
-#    $target = $(targetSelector)
-#    $target = up.util.$createElementFromSelector(targetSelector) unless $target.length
-#    $target.addClass("up-loading")
-#    htmlPromise.done((html) ->
-#      $target.removeClass("up-loading")
-#      $html = $(html)
-#      $substitute = $html.find(substituteSelector)
-#      if $substitute.length
-#        $target.replaceWith($substitute)
-#        title = $html.filter("title").text()
-#        document.title = title
-#        up.past.push(url)
-#        # Remember where the element came from so we can make
-#        # smaller page loads in the future (does this even make sense?).
-#        rememberSource($target)
-#      else
-#        error("Could not find selector (" + substituteSelector + ") in response (" + html + ")")
-#    )
+      up.util.error("Could not find selector (#{selector}) in response (#{html})")
 
   reload = (selector) ->
     replace(selector, recallSource($(selector)))
@@ -62,32 +40,39 @@ up.api = (->
 
   submit = (form) ->
     $form = $(form)
+    successSelector = $form.attr('up-target') || 'body'
+    failureSelector = $form.attr('up-fail-target') || up.util.createSelectorFromElement($form)
     $form.addClass('up-loading')
-    $.ajax(
+    request = {
       url: $form.attr('action') || location.href
       type: $form.attr('method') || 'POST',
       data: $form.serialize()
-    ).always((html, textStatus, xhr) ->
+    }
+    $.ajax(request).always((html, textStatus, xhr) ->
       $form.removeClass('up-loading')
       if redirectLocation = xhr.getResponseHeader('X-Up-Redirect-Location')
-        # target ersetzen
+        implantHtml(successSelector, html, historyUrl: redirectLocation)
 
       else
-        implantHtml($form, html, up.util.createSelectorFromElement($form))
+        implantHtml(failureSelector, html)
     )
 
   visit = (url) ->
     replace('body', url)
 
+  follow = (link) ->
+    $link = $(link)
+    url = $link.attr("href")
+    selector = $link.attr("up-target")
+    replace(selector, url)
+
   $(document).on("click", "a[up-target]", (event) ->
-    url = $(this).attr("href")
-    targetSelector = $(this).attr("up-target")
-    replace(targetSelector, url)
+    follow(this)
     false
   )
 
   $(document).on("submit", "form[up-target]", (event) ->
-    submit($(this))
+    submit(this)
     false
   )
 
@@ -97,6 +82,7 @@ up.api = (->
     remove: remove
     submit: submit
     visit: visit
+    follow: follow
   )
 
 )()
