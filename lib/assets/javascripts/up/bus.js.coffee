@@ -1,11 +1,13 @@
-up.bus = ->
+up.bus = (->
 
   callbacksByEvent = {}
 
   callbacksFor = (event) ->
     callbacksByEvent[event] ||= []
 
-  on = (event, block) ->
+  # We cannot call this function "on" because Coffeescript
+  # https://makandracards.com/makandra/29733-english-words-that-you-cannot-use-in-coffeescript
+  listen = (event, block) ->
     callbacksFor(event).push(block)
 
   emit = (event, args...) ->
@@ -15,6 +17,7 @@ up.bus = ->
     )
 
   return (
-    on: on
+    on: listen
     emit: emit
   )
+)()

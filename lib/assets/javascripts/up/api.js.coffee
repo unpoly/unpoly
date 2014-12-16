@@ -11,10 +11,11 @@ up.api = (->
     $target = $(selector)
     $target = up.util.$createElementFromSelector(selector) unless $target.length
     $target.addClass("up-loading")
-    up.util.get(url, selector: selector).done((html) ->
-      $target.removeClass("up-loading")
-      implantFragment(selector, html, historyUrl: url)
-    ).fail(up.util.error)
+    up.util.get(url, selector: selector)
+      .done (html) ->
+        $target.removeClass("up-loading")
+        implantFragment(selector, html, historyUrl: url)
+      .fail(up.util.error)
 
   implantFragment = (selector, html, options) ->
     $target = $(selector)
@@ -70,24 +71,22 @@ up.api = (->
     selector = $link.attr("up-target")
     replace(selector, url)
 
-  up.magic.app.selector('a[up-target]', 'click', (event) ->
+  up.app.on 'click', 'a[up-target]', (event, $link) ->
     event.preventDefault()
-    follow(this)
-  )
+    follow($link)
 
-  up.magic.app.selector("form[up-target]", 'submit', (event) ->
+  up.app.on 'submit', 'form[up-target]', (event, $form) ->
     event.preventDefault()
-    submit(this)
-  )
+    submit($form)
 
-  return (
-    replace: replace
-    reload: reload
-    remove: remove
-    submit: submit
-    visit: visit
-    follow: follow
-    compile: compile
-  )
+  replace: replace
+  reload: reload
+  remove: remove
+  submit: submit
+  visit: visit
+  follow: follow
+  compile: compile
+  app: magic.app
+  page: magic.page
 
 )()
