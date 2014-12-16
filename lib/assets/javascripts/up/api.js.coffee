@@ -13,15 +13,16 @@ up.api = (->
     $target.addClass("up-loading")
     up.util.get(url, selector: selector).done((html) ->
       $target.removeClass("up-loading")
-      implantHtml(selector, html, historyUrl: url)
+      implantFragment(selector, html, historyUrl: url)
     ).fail(up.util.error)
 
-  implantHtml = (selector, html, options) ->
+  implantFragment = (selector, html, options) ->
     $target = $(selector)
     $html = $(html)
-    $substitute = $html.find(selector)
-    if $substitute.length
-      $target.replaceWith($substitute)
+    $fragment = $html.find(selector)
+    if $fragment.length
+      $target.replaceWith($fragment)
+      compile($fragment)
       title = $html.filter("title").text()
       if url = options.historyUrl
         document.title = title if title
@@ -31,6 +32,9 @@ up.api = (->
         rememberSource($target)
     else
       up.util.error("Could not find selector (#{selector}) in response (#{html})")
+
+  compile = (fragment) ->
+    up.bus.emit('fragment:ready', $(fragment))
 
   reload = (selector) ->
     replace(selector, recallSource($(selector)))
@@ -51,10 +55,10 @@ up.api = (->
     $.ajax(request).always((html, textStatus, xhr) ->
       $form.removeClass('up-loading')
       if redirectLocation = xhr.getResponseHeader('X-Up-Redirect-Location')
-        implantHtml(successSelector, html, historyUrl: redirectLocation)
+        implantFragment(successSelector, html, historyUrl: redirectLocation)
 
       else
-        implantHtml(failureSelector, html)
+        implantFragment(failureSelector, html)
     )
 
   visit = (url) ->
@@ -66,14 +70,14 @@ up.api = (->
     selector = $link.attr("up-target")
     replace(selector, url)
 
-  $(document).on("click", "a[up-target]", (event) ->
+  up.magic.app.selector('a[up-target]', 'click', (event) ->
+    event.preventDefault()
     follow(this)
-    false
   )
 
-  $(document).on("submit", "form[up-target]", (event) ->
+  up.magic.app.selector("form[up-target]", 'submit', (event) ->
+    event.preventDefault()
     submit(this)
-    false
   )
 
   return (
@@ -83,6 +87,7 @@ up.api = (->
     submit: submit
     visit: visit
     follow: follow
+    compile: compile
   )
 
 )()
