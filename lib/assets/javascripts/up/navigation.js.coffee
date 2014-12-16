@@ -20,8 +20,8 @@ up.navigation = (->
     $(SELECTOR_SECTION).removeClass(CLASS_ACTIVE)
     $section.addClass(CLASS_ACTIVE)
 
+  console.log("Registering section clicked to up.app.on")
   up.app.on 'click', SELECTOR_SECTION, (event, $section) ->
-    console.log("section clicked", $section)
     sectionClicked($section)
 
   up.bus.on 'fragment:ready', ($fragment) ->

@@ -16,7 +16,7 @@ up.magic = (->
       outerArgs = arguments
       console.log "installing registered", registered, outerArgs
       up.util.each registered, (description) ->
-        args = [description] + outerArgs
+        args = [description].concat(outerArgs)
         description = options.install.apply(this, args)
         installed.push(description) if description
 
@@ -24,6 +24,8 @@ up.magic = (->
       description = undefined
       while description = installed.pop()
         options.uninstall.apply(this, arguments)
+
+    behavior.registered = registered
 
     behavior
 
@@ -116,15 +118,14 @@ up.magic = (->
   up.bus.on "app:ready", ->
     app.timeout.install()
     app.interval.install()
+    console.log("Installing app.on events: ", app.on.registered)
     app.on.install()
     up.bus.emit "fragment:ready", $(document.body)
-    return
 
   up.bus.on "page:hibernate", ->
     page.on.uninstall()
     page.timeout.uninstall()
     page.interval.uninstall()
-    return
 
   # don't need to uninstall element behavior since we will discard the elements anyway
   up.bus.on "fragment:ready", ($fragment) ->
@@ -133,10 +134,9 @@ up.magic = (->
     page.on.install()
     page.timeout.install()
     page.interval.install()
-    return
 
-  app: newBehaviorRegistry()
-  page: newBehaviorRegistry()
+  app: app
+  page: page
 )()
 
 up.util.extend up, up.magic

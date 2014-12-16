@@ -23,7 +23,6 @@ up.api = (->
     $fragment = $html.find(selector)
     if $fragment.length
       $target.replaceWith($fragment)
-      compile($fragment)
       title = $html.filter("title").text()
       if url = options.historyUrl
         document.title = title if title
@@ -31,6 +30,7 @@ up.api = (->
         # Remember where the element came from so we can make
         # smaller page loads in the future (does this even make sense?).
         rememberSource($target)
+      compile($fragment)
     else
       up.util.error("Could not find selector (#{selector}) in response (#{html})")
 
