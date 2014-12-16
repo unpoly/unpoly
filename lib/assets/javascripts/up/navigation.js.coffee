@@ -21,6 +21,7 @@ up.navigation = (->
     $section.addClass(CLASS_ACTIVE)
 
   up.app.on 'click', SELECTOR_SECTION, (event, $section) ->
+    console.log("section clicked", $section)
     sectionClicked($section)
 
   up.bus.on 'fragment:ready', ($fragment) ->

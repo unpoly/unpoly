@@ -86,7 +86,7 @@ up.api = (->
   visit: visit
   follow: follow
   compile: compile
-  app: magic.app
-  page: magic.page
 
 )()
+
+up.util.extend(up, up.api)

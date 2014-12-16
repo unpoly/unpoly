@@ -11,6 +11,7 @@ up.bus = (->
     callbacksFor(event).push(block)
 
   emit = (event, args...) ->
+    console.log("bus emitting", event, args)
     callbacks = callbacksFor(event)
     up.util.each(callbacks, (callback) ->
       callback(args...)
