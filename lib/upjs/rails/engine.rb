@@ -1,5 +1,3 @@
-require "upjs/rails/version"
-
 module Upjs
   module Rails
     class Engine < ::Rails::Engine

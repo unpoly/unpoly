@@ -26,7 +26,7 @@ up.api = (->
       title = $html.filter("title").text()
       if url = options.historyUrl
         document.title = title if title
-        up.past.push(url)
+        up.past.push(url, html)
         # Remember where the element came from so we can make
         # smaller page loads in the future (does this even make sense?).
         rememberSource($target)
@@ -55,7 +55,7 @@ up.api = (->
     }
     $.ajax(request).always((html, textStatus, xhr) ->
       $form.removeClass('up-loading')
-      if redirectLocation = xhr.getResponseHeader('X-Up-Redirect-Location')
+      if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
         implantFragment(successSelector, html, historyUrl: redirectLocation)
 
       else

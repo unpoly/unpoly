@@ -6,26 +6,23 @@ up.magic = (->
     installed = []
 
     behavior = (args...) ->
-      console.log("self function called", args)
       description = options.register(args...)
-      console.log("Got back description", description)
       registered.push(description) if description
-      console.log("current registered", registered)
 
     behavior.install = ->
       outerArgs = arguments
-      console.log "installing registered", registered, outerArgs
       up.util.each registered, (description) ->
         args = [description].concat(outerArgs)
         description = options.install.apply(this, args)
         installed.push(description) if description
 
     behavior.uninstall = ->
-      description = undefined
       while description = installed.pop()
-        options.uninstall.apply(this, arguments)
+        options.uninstall.apply(this, description)
 
-    behavior.registered = registered
+    behavior.clear = ->
+      behavior.uninstall
+      registered = []
 
     behavior
 
@@ -71,8 +68,6 @@ up.magic = (->
 
       register: (events, selector, callback) ->
 
-        console.log "Registering", events, selector
-
         apiTranslator = (event) ->
           callback.apply this, [
             event
@@ -84,13 +79,11 @@ up.magic = (->
         callback: apiTranslator
 
       install: (description) ->
-        console.log "Installting description", description
         $(document).on description.events, description.selector, description.callback
         description
 
       uninstall: (description) ->
         $(document).off description.events, description.selector, description.callback
-        return
     )
 
     element = newBehavior(
@@ -102,10 +95,14 @@ up.magic = (->
       install: ($element, description) ->
         $element.find(description.selector).addBack().each ->
           description.callback.apply this, [$(this)]
-          return
-        false
+        false # element behaviors cannot be uninstalled, so we're not tracking them
     )
 
+    clear = ->
+      for behavior in [element, live, timeout, interval]
+        behavior.clear
+
+    clear: clear
     element: element
     on: live
     timeout: timeout
@@ -118,14 +115,11 @@ up.magic = (->
   up.bus.on "app:ready", ->
     app.timeout.install()
     app.interval.install()
-    console.log("Installing app.on events: ", app.on.registered)
     app.on.install()
     up.bus.emit "fragment:ready", $(document.body)
 
   up.bus.on "page:hibernate", ->
-    page.on.uninstall()
-    page.timeout.uninstall()
-    page.interval.uninstall()
+    page.clear()
 
   # don't need to uninstall element behavior since we will discard the elements anyway
   up.bus.on "fragment:ready", ($fragment) ->
