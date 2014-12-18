@@ -19,14 +19,18 @@ up.api = (->
 
   implantFragment = (selector, html, options) ->
     $target = $(selector)
-    $html = $(html)
+    $html = up.util.$createElementFromHtml(html)
     $fragment = $html.find(selector)
+    console.log("selector", selector)
+    console.log("el", $html)
+    console.log("find", $html.find(selector))
+    console.log("filter", $html.filter(selector))
     if $fragment.length
       $target.replaceWith($fragment)
       title = $html.filter("title").text()
       if url = options.historyUrl
         document.title = title if title
-        up.past.push(url, html)
+        up.past.push(url, $html.find('body').html())
         # Remember where the element came from so we can make
         # smaller page loads in the future (does this even make sense?).
         rememberSource($target)
