@@ -42,14 +42,12 @@ up.util = (->
               id = expression.substr(1)
             else
               tag = expression
-          c++
         html = "<" + tag
         html += " class=\"" + classes.join(" ") + "\""  if classes.length
         html += " id=\"" + id + "\""  if id
         html += ">"
         $element = $(html)
         $element.appendTo $parent
-      p++
     $element
 
   createBody = (html) ->
@@ -74,14 +72,28 @@ up.util = (->
     selector
 
   # jQuery's implementation of $(...) cannot create elements that have
-  # an <html> or <body> tag.
-  $createElementFromHtml = (html) ->
+  # an <html> or <body> tag. So we're using native elements.
+  createElementFromHtml = (html) ->
     htmlElementPattern = /<html>((?:.|\n)*)<\/html>/i
-    #    console.log("match", html.match(htmlElementPattern), htmlElementPattern, html)
+    innerHtml = undefined
     if match = html.match(htmlElementPattern)
-      $(createElement('html', match[1]))
+      innerHtml = match[1]
     else
-      $(html)
+      innerHtml = "<html><body>#{html}</body></html>"
+    createElement('html', innerHtml)
+
+#  # jQuery's implementation of $(...) cannot create elements that have
+#  # an <html> or <body> tag.
+#  $createElementFromHtml = (html) ->
+#    htmlElementPattern = /<html>((?:.|\n)*)<\/html>/i
+#    #    console.log("match", html.match(htmlElementPattern), htmlElementPattern, html)
+#    if match = html.match(htmlElementPattern)
+##      console.log("creating element from string", match[1])
+##      console.log("got element", createElement('html', match[1]))
+##      window.LAST_ELEMENT = createElement('html', match[1])
+#      $(createElement('html', match[1]))
+#    else
+#      $(html)
 
   each = (collection, block) ->
     block(item) for item in collection
@@ -89,7 +101,7 @@ up.util = (->
   createBody: createBody
   createElement: createElement
   normalizeUrl: normalizeUrl
-  $createElementFromHtml: $createElementFromHtml
+  createElementFromHtml: createElementFromHtml
   $createElementFromSelector: $createElementFromSelector
   createSelectorFromElement: createSelectorFromElement
   get: get

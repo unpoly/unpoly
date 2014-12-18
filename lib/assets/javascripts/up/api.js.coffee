@@ -19,22 +19,29 @@ up.api = (->
 
   implantFragment = (selector, html, options) ->
     $target = $(selector)
-    $html = up.util.$createElementFromHtml(html)
-    $fragment = $html.find(selector)
-    console.log("selector", selector)
-    console.log("el", $html)
-    console.log("find", $html.find(selector))
-    console.log("filter", $html.filter(selector))
-    if $fragment.length
-      $target.replaceWith($fragment)
-      title = $html.filter("title").text()
+    # jQuery cannot construct transient elements that contain
+    # <html> or <body> tags, so we're using the native browser
+    # API to grep through the HTML
+    htmlElement = up.util.createElementFromHtml(html)
+    if fragment = htmlElement.querySelector(selector)
+      $target.replaceWith(fragment)
+      title = htmlElement.querySelector("title").textContent
       if url = options.historyUrl
         document.title = title if title
-        up.past.push(url, $html.find('body').html())
+#        $html = up.util.$createElementFromHtml(html)
+        # Why do I need to do this again??
+        htmlElement = up.util.createElementFromHtml(html)
+        # We're pushing the last HTML <body> we got from the server
+        # and *NOT* the current document.body.innerHTML. The reason is
+        # that our current document body has already been compiled
+        # and might have suffered non-idempotent transformations during
+        # transformation.
+        console.log("pushing", htmlElement.querySelector('body').innerHTML)
+        up.past.push(url, htmlElement.querySelector('body').innerHTML)
         # Remember where the element came from so we can make
         # smaller page loads in the future (does this even make sense?).
         rememberSource($target)
-      compile($fragment)
+      compile(fragment)
     else
       up.util.error("Could not find selector (#{selector}) in response (#{html})")
 
