@@ -23,7 +23,7 @@ up.past = (->
 
   restorePage = (page) ->
     up.bus.emit "page:hibernate"
-    console.log('restoring page from', page.bodyHtml)
+#    console.log('restoring page from', page.bodyHtml)
 #    console.log("created body", up.util.createBody(page.bodyHtml))
     document.title = page.title
     document.documentElement.replaceChild up.util.createBody(page.bodyHtml), document.body
@@ -45,7 +45,7 @@ up.past = (->
     else
       console.log "null state"
 
-  up.app.timeout 300, ->
+  up.app.timeout 200, ->
     $(window).on "popstate", pop
     replace()
 

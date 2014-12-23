@@ -28,15 +28,15 @@ up.api = (->
       title = htmlElement.querySelector("title").textContent
       if url = options.historyUrl
         document.title = title if title
-#        $html = up.util.$createElementFromHtml(html)
-        # Why do I need to do this again??
+        # For some reason we need to recreate the HTML element at this point.
+        # We cannot reuse the element we created earlier. I have no idea why.
         htmlElement = up.util.createElementFromHtml(html)
         # We're pushing the last HTML <body> we got from the server
         # and *NOT* the current document.body.innerHTML. The reason is
         # that our current document body has already been compiled
         # and might have suffered non-idempotent transformations during
         # transformation.
-        console.log("pushing", htmlElement.querySelector('body').innerHTML)
+#        console.log("pushing", htmlElement.querySelector('body').innerHTML)
         up.past.push(url, htmlElement.querySelector('body').innerHTML)
         # Remember where the element came from so we can make
         # smaller page loads in the future (does this even make sense?).
