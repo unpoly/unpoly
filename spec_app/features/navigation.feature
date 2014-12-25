@@ -1,4 +1,4 @@
-Feature: up-navigation
+Feature: Navigation bars with [up-navigation]
 
   @javascript
   Scenario: User clicks through sections in a navigation bar

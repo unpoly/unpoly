@@ -27,9 +27,8 @@ module PathHelpers
       route = "new_#{model_prose_to_route_segment(model_prose)}_path"
       send(route)
 
-      # ....
-      # your own paths go here
-      # ...
+    when /^the screen selection$/
+      root_path
 
     end
 
@@ -50,4 +49,3 @@ module PathHelpers
 end
 
 World(PathHelpers)
-
