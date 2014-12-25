@@ -1,0 +1,9 @@
+.panel
+  = render 'side'
+
+  .panel__main
+    .card
+      .card__title
+        = @card.title
+      .card__body
+        = simple_format @card.body

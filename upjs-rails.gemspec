@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Upjs::Rails::VERSION
   spec.authors       = ["Henning Koch"]
   spec.email         = ["henning.koch@makandra.de"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = ''
+  spec.summary       = spec.description
   spec.homepage      = ""
   spec.license       = "MIT"
 

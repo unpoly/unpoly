@@ -1,3 +1,9 @@
+PATH
+  remote: ..
+  specs:
+    upjs-rails (0.0.1)
+      rails (>= 3)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -50,6 +56,8 @@ GEM
       rack (>= 1.0.0)
       rack-test (>= 0.5.4)
       xpath (~> 2.0)
+    childprocess (0.5.3)
+      ffi (~> 1.0, >= 1.0.11)
     coffee-rails (4.1.0)
       coffee-script (>= 2.2.0)
       railties (>= 4.0.0, < 5.0)
@@ -75,11 +83,26 @@ GEM
     diff-lcs (1.2.5)
     erubis (2.7.0)
     execjs (2.2.2)
+    ffi (1.9.5)
     gherkin (2.12.2)
       multi_json (~> 1.3)
     globalid (0.3.0)
       activesupport (>= 4.1.0)
+    haml (4.1.0.beta.1)
+      tilt
+    haml-rails (0.6.0)
+      actionpack (>= 4.0.1)
+      activesupport (>= 4.0.1)
+      haml (>= 3.1, < 5.0)
+      html2haml (>= 1.0.1)
+      railties (>= 4.0.1)
     hike (1.2.3)
+    hpricot (0.8.6)
+    html2haml (1.0.1)
+      erubis (~> 2.7.0)
+      haml (>= 4.0.0.rc.1)
+      hpricot (~> 0.8.6)
+      ruby_parser (~> 3.1.1)
     i18n (0.7.0)
     jquery-rails (4.0.2)
       rails-dom-testing (~> 1.0)
@@ -127,6 +150,25 @@ GEM
       thor (>= 0.18.1, < 2.0)
     rake (10.4.2)
     ref (1.0.5)
+    rspec-core (3.0.4)
+      rspec-support (~> 3.0.0)
+    rspec-expectations (3.0.4)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.0.0)
+    rspec-mocks (3.0.4)
+      rspec-support (~> 3.0.0)
+    rspec-rails (3.0.2)
+      actionpack (>= 3.0)
+      activesupport (>= 3.0)
+      railties (>= 3.0)
+      rspec-core (~> 3.0.0)
+      rspec-expectations (~> 3.0.0)
+      rspec-mocks (~> 3.0.0)
+      rspec-support (~> 3.0.0)
+    rspec-support (3.0.4)
+    ruby_parser (3.1.3)
+      sexp_processor (~> 4.1)
+    rubyzip (1.1.6)
     sass (3.4.9)
     sass-rails (5.0.0)
       railties (>= 4.0.0, < 5.0)
@@ -134,7 +176,17 @@ GEM
       sprockets (>= 2.8, < 4.0)
       sprockets-rails (>= 2.0, < 4.0)
       tilt (~> 1.1)
+    selenium-webdriver (2.42.0)
+      childprocess (>= 0.5.0)
+      multi_json (~> 1.0)
+      rubyzip (~> 1.0)
+      websocket (~> 1.0.4)
+    sexp_processor (4.4.4)
     slop (3.6.0)
+    spreewald (1.1.1)
+      capybara
+      cucumber
+      cucumber-rails
     sprockets (2.12.3)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -161,6 +213,7 @@ GEM
       binding_of_caller (>= 0.7.2)
       railties (~> 4.0)
       sprockets-rails (>= 2.0, < 4.0)
+    websocket (1.0.7)
     xpath (2.0.0)
       nokogiri (~> 1.3)
 
@@ -172,10 +225,15 @@ DEPENDENCIES
   coffee-rails (~> 4.1.0)
   cucumber-rails
   database_cleaner
+  haml-rails
   jquery-rails
   rails (= 4.2.0)
+  rspec-rails
   sass-rails (~> 5.0)
+  selenium-webdriver
+  spreewald
   sqlite3
   therubyracer
   uglifier (>= 1.3.0)
+  upjs-rails!
   web-console (~> 2.0)
