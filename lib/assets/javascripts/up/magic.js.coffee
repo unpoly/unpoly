@@ -116,7 +116,7 @@ up.magic = (->
     app.timeout.install()
     app.interval.install()
     app.on.install()
-    up.bus.emit "fragment:ready", $(document.body)
+    up.compile(document.body)
 
   up.bus.on "page:hibernate", ->
     page.clear()

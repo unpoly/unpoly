@@ -3,7 +3,7 @@ up.past = (->
   pages = {}
 
   pageSnapshot = (bodyHtml) ->
-    console.log("making snapshot for html", bodyHtml)
+#    console.log("making snapshot for html", bodyHtml)
     bodyHtml: bodyHtml or document.body.innerHTML
     title: document.title
     positionY: window.pageYOffset
@@ -11,12 +11,13 @@ up.past = (->
     cachedAt: new Date().getTime()
 
   replace = (url, bodyHtml) ->
-    manipulateHistory "replaceState", url, bodyHtml
+    manipulate "replace", url, bodyHtml
 
   push = (url, bodyHtml) ->
-    manipulateHistory "pushState", url, bodyHtml
+    manipulate "push", url, bodyHtml
 
-  manipulateHistory = (method, url, bodyHtml) ->
+  manipulate = (method, url, bodyHtml) ->
+    method += "State" # resulting in either pushState or replaceState
     url = up.util.normalizeUrl(url or location.href)
     pages[url] = pageSnapshot(bodyHtml)
     history[method] { fromUp: true, url: url }, '', url
@@ -27,7 +28,7 @@ up.past = (->
 #    console.log("created body", up.util.createBody(page.bodyHtml))
     document.title = page.title
     document.documentElement.replaceChild up.util.createBody(page.bodyHtml), document.body
-    up.bus.emit "fragment:ready", $(document.body)
+    up.compile(document.body)
 
   pop = (event) ->
     state = event.originalEvent.state
