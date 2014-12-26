@@ -41,7 +41,7 @@ up.api = (->
 #        console.log("pushing", htmlElement.querySelector('body').innerHTML)
         # historyOptions = up.util.options(historyOptions, method: 'push', url: url)
         method = options.history.method || 'push'
-        up.past[method](options.history.url, htmlElement.querySelector('body').innerHTML)
+        up.history[method](options.history.url, htmlElement.querySelector('body').innerHTML)
         # Remember where the element came from so we can make
         # smaller page loads in the future (does this even make sense?).
         rememberSource($target)

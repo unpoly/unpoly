@@ -1,4 +1,4 @@
-up.past = (->
+up.history = (->
 
   pages = {}
 
@@ -20,7 +20,7 @@ up.past = (->
     method += "State" # resulting in either pushState or replaceState
     url = up.util.normalizeUrl(url or location.href)
     pages[url] = pageSnapshot(bodyHtml)
-    history[method] { fromUp: true, url: url }, '', url
+    window.history[method] { fromUp: true, url: url }, '', url
 
   restorePage = (page) ->
     up.bus.emit "page:hibernate"
