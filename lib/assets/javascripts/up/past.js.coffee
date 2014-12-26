@@ -41,7 +41,7 @@ up.past = (->
         restorePage page
       else
         console.log("cache miss")
-        up.visit url
+        up.visit url, history: { method: 'replace' }
       false
     else
       console.log "null state"
@@ -51,5 +51,6 @@ up.past = (->
     replace()
 
   push: push
+  replace: replace
 
 )()

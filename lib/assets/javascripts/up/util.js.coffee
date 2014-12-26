@@ -95,8 +95,41 @@ up.util = (->
 #    else
 #      $(html)
 
+  extend = $.extend
+
   each = (collection, block) ->
     block(item) for item in collection
+
+  isNull = (object) ->
+    object == null
+
+  isUndefined = (object) ->
+    object == `void(0)`
+
+  isGiven = (object) ->
+    !isUndefined(object) && !isNull(object)
+
+  isObject = (object) ->
+    type = typeof object
+    type == 'function' || type == 'object' && !!object
+
+  copy = (object)  ->
+    extend({}, object)
+
+  # Non-destructive extend
+  merge = (object, otherObject) ->
+    extend(copy(object), otherObject)
+
+  options = (object, defaults) ->
+    merged = if object then copy(object) else {}
+    if defaults
+      for key, defaultValue of defaults
+        value = merged[key]
+        if isObject(defaultValue)
+          merged[key] = options(value, defaultValue)
+        else if not isGiven(value)
+          merged[key] = defaultValue
+    merged
 
   createBody: createBody
   createElement: createElement
@@ -106,7 +139,14 @@ up.util = (->
   createSelectorFromElement: createSelectorFromElement
   get: get
   ajax: ajax
-  extend: $.extend
+  extend: extend
+  copy: copy
+  merge: merge
+  options: options
   error: error
   each: each
+  isNull: isNull
+  isUndefined: isUndefined
+  isGiven: isGiven
+  isObject: isObject
 )()

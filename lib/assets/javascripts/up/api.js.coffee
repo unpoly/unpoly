@@ -7,14 +7,16 @@ up.api = (->
     $source = $element.closest("[up-source]")
     $source.attr("up-source") || location.href
 
-  replace = (selector, url) ->
+  replace = (selector, url, options) ->
     $target = $(selector)
     $target = up.util.$createElementFromSelector(selector) unless $target.length
     $target.addClass("up-loading")
+    options = up.util.options(options, history: { url: url })
+
     up.util.get(url, selector: selector)
       .done (html) ->
         $target.removeClass("up-loading")
-        implantFragment(selector, html, historyUrl: url)
+        implantFragment(selector, html, options)
       .fail(up.util.error)
 
   implantFragment = (selector, html, options) ->
@@ -26,7 +28,7 @@ up.api = (->
     if fragment = htmlElement.querySelector(selector)
       $target.replaceWith(fragment)
       title = htmlElement.querySelector("title").textContent
-      if url = options.historyUrl
+      if options.history?.url
         document.title = title if title
         # For some reason we need to recreate the HTML element at this point.
         # We cannot reuse the element we created earlier. I have no idea why.
@@ -37,7 +39,9 @@ up.api = (->
         # and might have suffered non-idempotent transformations during
         # transformation.
 #        console.log("pushing", htmlElement.querySelector('body').innerHTML)
-        up.past.push(url, htmlElement.querySelector('body').innerHTML)
+        # historyOptions = up.util.options(historyOptions, method: 'push', url: url)
+        method = options.history.method || 'push'
+        up.past[method](options.history.url, htmlElement.querySelector('body').innerHTML)
         # Remember where the element came from so we can make
         # smaller page loads in the future (does this even make sense?).
         rememberSource($target)
@@ -46,6 +50,7 @@ up.api = (->
       up.util.error("Could not find selector (#{selector}) in response (#{html})")
 
   compile = (fragment) ->
+    console.log("compiling fragment")
     up.bus.emit('fragment:ready', $(fragment))
 
   reload = (selector) ->
@@ -67,22 +72,23 @@ up.api = (->
     $.ajax(request).always((html, textStatus, xhr) ->
       $form.removeClass('up-loading')
       if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
-        implantFragment(successSelector, html, historyUrl: redirectLocation)
+        implantFragment(successSelector, html, history: { url: redirectLocation })
 
       else
         implantFragment(failureSelector, html)
     )
 
-  visit = (url) ->
-    replace('body', url)
+  visit = (url, options) ->
+    console.log("up.visit", url)
+    replace('body', url, options)
 
-  follow = (link) ->
+  follow = (link, options) ->
     $link = $(link)
     url = $link.attr("href")
-    selector = $link.attr("up-target")
-    replace(selector, url)
+    selector = $link.attr("up-target") || 'body'
+    replace(selector, url, options)
 
-  up.app.on 'click', 'a[up-target]', (event, $link) ->
+  up.app.on 'click', 'a[up-target], a[up-follow]', (event, $link) ->
     event.preventDefault()
     follow($link)
 

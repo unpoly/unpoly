@@ -10,6 +10,7 @@ up.navigation = (->
     up.util.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       normalizedDestination = up.util.normalizeUrl($section.attr('href'))
+      console.log("Nav comp", normalizedLocation, normalizedDestination)
       if normalizedLocation == normalizedDestination
         $section.addClass(CLASS_CURRENT)
       else
