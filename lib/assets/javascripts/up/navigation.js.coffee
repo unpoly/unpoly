@@ -10,7 +10,6 @@ up.navigation = (->
     up.util.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       normalizedDestination = up.util.normalizeUrl($section.attr('href'))
-      console.log("Nav comp", normalizedLocation, normalizedDestination)
       if normalizedLocation == normalizedDestination
         $section.addClass(CLASS_CURRENT)
       else
@@ -22,7 +21,7 @@ up.navigation = (->
     $section.addClass(CLASS_ACTIVE)
 
   console.log("Registering section clicked to up.app.on")
-  up.app.on 'click', SELECTOR_SECTION, (event, $section) ->
+  up.on 'click', SELECTOR_SECTION, (event, $section) ->
     sectionClicked($section)
 
   up.bus.on 'fragment:ready', ($fragment) ->

@@ -21,37 +21,31 @@ up.api = (->
 
   implantFragment = (selector, html, options) ->
     $target = $(selector)
-    # jQuery cannot construct transient elements that contain
-    # <html> or <body> tags, so we're using the native browser
-    # API to grep through the HTML
+    options = up.util.options(options, history: { method: 'push' })
+    # jQuery cannot construct transient elements that contain <html> or <body> tags,
+    # so we're using the native browser API to grep through the HTML
     htmlElement = up.util.createElementFromHtml(html)
     if fragment = htmlElement.querySelector(selector)
+      $fragment = $(fragment)
+      up.bus.emit('fragment:destroy', $target)
       $target.replaceWith(fragment)
-      title = htmlElement.querySelector("title").textContent
+      title = htmlElement.querySelector("title")?.textContent # todo: extract title from header
       if options.history?.url
         document.title = title if title
-        # For some reason we need to recreate the HTML element at this point.
-        # We cannot reuse the element we created earlier. I have no idea why.
-        htmlElement = up.util.createElementFromHtml(html)
-        # We're pushing the last HTML <body> we got from the server
-        # and *NOT* the current document.body.innerHTML. The reason is
-        # that our current document body has already been compiled
-        # and might have suffered non-idempotent transformations during
-        # transformation.
-#        console.log("pushing", htmlElement.querySelector('body').innerHTML)
-        # historyOptions = up.util.options(historyOptions, method: 'push', url: url)
-        method = options.history.method || 'push'
-        up.history[method](options.history.url, htmlElement.querySelector('body').innerHTML)
+        up.history[options.history.method](options.history.url)
         # Remember where the element came from so we can make
         # smaller page loads in the future (does this even make sense?).
         rememberSource($target)
-      compile(fragment)
+      # The fragment is only ready after the history was (or wasn't) changed above
+      up.bus.emit('fragment:ready', $fragment)
+
     else
       up.util.error("Could not find selector (#{selector}) in response (#{html})")
 
-  compile = (fragment) ->
-    console.log("compiling fragment")
-    up.bus.emit('fragment:ready', $(fragment))
+#  replaceElement = (target, replacement) ->
+#    target = up.util.unwrap(target)
+#    replacement = up.util.unwrap(replacement)
+#    document.documentElement.replaceChild()
 
   reload = (selector) ->
     replace(selector, recallSource($(selector)))
@@ -67,10 +61,12 @@ up.api = (->
     request = {
       url: $form.attr('action') || location.href
       type: $form.attr('method') || 'POST',
-      data: $form.serialize()
+      data: $form.serialize(),
+      selector: successSelector
     }
-    $.ajax(request).always((html, textStatus, xhr) ->
+    up.util.ajax(request).always((html, textStatus, xhr) ->
       $form.removeClass('up-loading')
+      console.log("always args", xhr, xhr.getResponseHeader)
       if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
         implantFragment(successSelector, html, history: { url: redirectLocation })
 
@@ -88,11 +84,11 @@ up.api = (->
     selector = $link.attr("up-target") || 'body'
     replace(selector, url, options)
 
-  up.app.on 'click', 'a[up-target], a[up-follow]', (event, $link) ->
+  up.on 'click', 'a[up-target], a[up-follow]', (event, $link) ->
     event.preventDefault()
     follow($link)
 
-  up.app.on 'submit', 'form[up-target]', (event, $form) ->
+  up.on 'submit', 'form[up-target]', (event, $form) ->
     event.preventDefault()
     submit($form)
 
@@ -102,7 +98,6 @@ up.api = (->
   submit: submit
   visit: visit
   follow: follow
-  compile: compile
 
 )()
 

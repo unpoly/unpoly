@@ -50,15 +50,14 @@ up.util = (->
         $element.appendTo $parent
     $element
 
-  createBody = (html) ->
-    createElement "body", html
-
   createElement = (tagName, html) ->
     element = document.createElement(tagName)
     element.innerHTML = html
     element
 
-  error = (message) ->
+  error = (object) ->
+    message = if up.util.isObject(object) then JSON.stringify(object) else object
+    console.log("[UP] Error: #{message}", object)
     alert message
     throw message
 
@@ -109,12 +108,24 @@ up.util = (->
   isGiven = (object) ->
     !isUndefined(object) && !isNull(object)
 
+  isFunction = (object) ->
+    typeof(object) == 'function'
+
   isObject = (object) ->
     type = typeof object
     type == 'function' || type == 'object' && !!object
 
+  isJQuery = (object) ->
+    object instanceof jQuery
+
   copy = (object)  ->
     extend({}, object)
+
+  unwrap = (object) ->
+    if isJQuery(object)
+      object.get(0)
+    else
+      object
 
   # Non-destructive extend
   merge = (object, otherObject) ->
@@ -131,7 +142,6 @@ up.util = (->
           merged[key] = defaultValue
     merged
 
-  createBody: createBody
   createElement: createElement
   normalizeUrl: normalizeUrl
   createElementFromHtml: createElementFromHtml
@@ -149,4 +159,8 @@ up.util = (->
   isUndefined: isUndefined
   isGiven: isGiven
   isObject: isObject
+  isFunction: isFunction
+  isJQuery: isJQuery
+  unwrap: unwrap
+
 )()

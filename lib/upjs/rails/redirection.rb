@@ -2,7 +2,7 @@ module Upjs
   module Rails
     module Redirection
 
-      def redirect_to
+      def redirect_to(*args)
         super
         flash[:redirected_to] = self.location if request.up?
       end

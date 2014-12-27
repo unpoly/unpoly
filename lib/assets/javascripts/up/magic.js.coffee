@@ -1,136 +1,44 @@
 up.magic = (->
 
-  newBehavior = (options) ->
+  AWAKENED_CLASS = 'up-awakened'
+  DESTROYER_KEY = 'up-destroyer'
 
-    registered = []
-    installed = []
+  live = (events, selector, behavior) ->
+    $(document).on events, selector, (event) ->
+      behavior.apply(this, [event, $(this)])
 
-    behavior = (args...) ->
-      description = options.register(args...)
-      registered.push(description) if description
+  awakeners = []
 
-    behavior.install = ->
-      outerArgs = arguments
-      up.util.each registered, (description) ->
-        args = [description].concat(outerArgs)
-        description = options.install.apply(this, args)
-        installed.push(description) if description
+  awaken = (selector, behavior) ->
+    awakeners.push
+      selector: selector
+      behavior: behavior
 
-    behavior.uninstall = ->
-      while description = installed.pop()
-        options.uninstall.apply(this, description)
+  $deepFilter = ($element, selector) ->
+    $element.find(selector).addBack(selector)
 
-    behavior.clear = ->
-      behavior.uninstall
-      registered = []
+  compile = ($fragment) ->
+    for awakener in awakeners
+      $deepFilter($fragment, awakener.selector).each ->
+        $element = $(this)
+        destroyer = awakener.behavior.apply(this, [$element])
+        if up.util.isFunction(destroyer)
+          $element.prop(AWAKENED_CLASS, true)
+          $element.data(DESTROYER_KEY, destroyer)
 
-    behavior
+  destroy = ($fragment) ->
+    $deepFilter($fragment, "[#{AWAKENED_CLASS}]").each ->
+      $element = $(this)
+      destroyer = $element.data(DESTROYER_KEY)
+      destroyer()
 
-  newBehaviorRegistry = ->
+  up.bus.on 'app:ready', (-> up.bus.emit 'fragment:ready', $(document.body))
+  up.bus.on 'fragment:ready', compile
+  up.bus.on 'fragment:destroy', destroy
 
-    timeout = newBehavior(
+  awaken: awaken
+  on: live
 
-      register: (delay, callback) ->
-        delay: delay
-        callback: callback
-
-      install: (description) ->
-        setTimeout description.callback, description.delay
-
-      uninstall: window.clearTimeout
-    )
-
-    interval = newBehavior(
-
-      register: (delay, callback) ->
-        delay: delay
-        callback: callback
-
-      install: (description) ->
-        setInterval description.callback, description.delay
-
-      uninstall: window.clearInterval
-    )
-
-    #    var once = newBehavior({
-    #
-    #      register: function(callback) {
-    #        return { callback: callback };
-    #      },
-    #
-    #      install: function(description) {
-    #        description.callback();
-    #        return false;
-    #      }
-    #
-    #    });
-    live = newBehavior(
-
-      register: (events, selector, callback) ->
-
-        apiTranslator = (event) ->
-          callback.apply this, [
-            event
-            $(this)
-          ]
-
-        events: events
-        selector: selector
-        callback: apiTranslator
-
-      install: (description) ->
-        $(document).on description.events, description.selector, description.callback
-        description
-
-      uninstall: (description) ->
-        $(document).off description.events, description.selector, description.callback
-    )
-
-    element = newBehavior(
-
-      register: (selector, callback) ->
-        selector: selector
-        callback: callback
-
-      install: ($element, description) ->
-        $element.find(description.selector).addBack().each ->
-          description.callback.apply this, [$(this)]
-        false # element behaviors cannot be uninstalled, so we're not tracking them
-    )
-
-    clear = ->
-      for behavior in [element, live, timeout, interval]
-        behavior.clear
-
-    clear: clear
-    element: element
-    on: live
-    timeout: timeout
-    interval: interval
-
-  #      once: once
-  app = newBehaviorRegistry()
-  page = newBehaviorRegistry()
-
-  up.bus.on "app:ready", ->
-    app.timeout.install()
-    app.interval.install()
-    app.on.install()
-    up.compile(document.body)
-
-  up.bus.on "page:hibernate", ->
-    page.clear()
-
-  # don't need to uninstall element behavior since we will discard the elements anyway
-  up.bus.on "fragment:ready", ($fragment) ->
-    app.element.install $fragment
-    page.element.install $fragment
-    page.on.install()
-    page.timeout.install()
-    page.interval.install()
-
-  app: app
-  page: page
 )()
 
-up.util.extend up, up.magic
+up.util.extend(up, up.magic)

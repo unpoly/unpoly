@@ -2,4 +2,9 @@
   = render 'side'
 
   .panel__main
-    Please select a card on the left.
+    %p
+      Please select a card on the left.
+
+    .tools
+      = link_to 'New card', new_card_path
+
