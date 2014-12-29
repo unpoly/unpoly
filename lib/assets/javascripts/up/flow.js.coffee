@@ -1,4 +1,4 @@
-up.api = (->
+up.flow = (->
 
   rememberSource = ($element) ->
     $element.attr("up-source", location.href)
@@ -16,10 +16,10 @@ up.api = (->
     up.util.get(url, selector: selector)
       .done (html) ->
         $target.removeClass("up-loading")
-        implantFragment(selector, html, options)
+        implant(selector, html, options)
       .fail(up.util.error)
 
-  implantFragment = (selector, html, options) ->
+  implant = (selector, html, options) ->
     $target = $(selector)
     options = up.util.options(options, history: { method: 'push' })
     # jQuery cannot construct transient elements that contain <html> or <body> tags,
@@ -42,63 +42,20 @@ up.api = (->
     else
       up.util.error("Could not find selector (#{selector}) in response (#{html})")
 
-#  replaceElement = (target, replacement) ->
-#    target = up.util.unwrap(target)
-#    replacement = up.util.unwrap(replacement)
-#    document.documentElement.replaceChild()
-
   reload = (selector) ->
     replace(selector, recallSource($(selector)))
 
   remove = (elementOrSelector) ->
     $(elementOrSelector).remove()
 
-  submit = (form) ->
-    $form = $(form)
-    successSelector = $form.attr('up-target') || 'body'
-    failureSelector = $form.attr('up-fail-target') || up.util.createSelectorFromElement($form)
-    $form.addClass('up-loading')
-    request = {
-      url: $form.attr('action') || location.href
-      type: $form.attr('method') || 'POST',
-      data: $form.serialize(),
-      selector: successSelector
-    }
-    up.util.ajax(request).always((html, textStatus, xhr) ->
-      $form.removeClass('up-loading')
-      console.log("always args", xhr, xhr.getResponseHeader)
-      if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
-        implantFragment(successSelector, html, history: { url: redirectLocation })
-
-      else
-        implantFragment(failureSelector, html)
-    )
-
-  visit = (url, options) ->
-    console.log("up.visit", url)
-    replace('body', url, options)
-
-  follow = (link, options) ->
-    $link = $(link)
-    url = $link.attr("href")
-    selector = $link.attr("up-target") || 'body'
-    replace(selector, url, options)
-
-  up.on 'click', 'a[up-target], a[up-follow]', (event, $link) ->
-    event.preventDefault()
-    follow($link)
-
-  up.on 'submit', 'form[up-target]', (event, $form) ->
-    event.preventDefault()
-    submit($form)
-
   replace: replace
   reload: reload
   remove: remove
-  submit: submit
-  visit: visit
-  follow: follow
 
 )()
 
-up.util.extend(up, up.api)
+up.replace = up.flow.replace
+up.reload = up.flow.reload
+up.remove = up.flow.remove
+
+

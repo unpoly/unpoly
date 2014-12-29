@@ -62,7 +62,8 @@ up.util = (->
     throw message
 
   createSelectorFromElement = ($element) ->
-    classes = $element.attr("class").split(" ")
+    console.log("Creating selector from element", $element)
+    classes = if classString = $element.attr("class") then classString.split(" ") else []
     id = $element.attr("id")
     selector = $element.prop("tagName").toLowerCase()
     selector += "#" + id  if id

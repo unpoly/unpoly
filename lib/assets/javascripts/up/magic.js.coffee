@@ -35,10 +35,13 @@ up.magic = (->
   up.bus.on 'app:ready', (-> up.bus.emit 'fragment:ready', $(document.body))
   up.bus.on 'fragment:ready', compile
   up.bus.on 'fragment:destroy', destroy
+  $(document).on 'ready', -> up.bus.emit('app:ready')
 
   awaken: awaken
   on: live
 
 )()
 
-up.util.extend(up, up.magic)
+up.awaken = up.magic.awaken
+up.on = up.magic.on
+
