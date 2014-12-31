@@ -109,12 +109,18 @@ up.util = (->
   isGiven = (object) ->
     !isUndefined(object) && !isNull(object)
 
+  isPresent = (object) ->
+    isGiven(object) && !(isString(object) && object == "")
+
   isFunction = (object) ->
     typeof(object) == 'function'
 
+  isString = (object) ->
+    typeof(object) == 'string'
+
   isObject = (object) ->
     type = typeof object
-    type == 'function' || type == 'object' && !!object
+    type == 'function' || (type == 'object' && !!object)
 
   isJQuery = (object) ->
     object instanceof jQuery
@@ -143,6 +149,21 @@ up.util = (->
           merged[key] = defaultValue
     merged
 
+  detect = (array, tester) ->
+    match = null
+    array.every (element) ->
+      if tester(element)
+        match = element
+        false
+      else
+        true
+    match
+
+  presentAttr = ($element, attrNames...) ->
+    values = ($element.attr(attrName) for attrName in attrNames)
+    detect(values, isPresent)
+
+  presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl
   createElementFromHtml: createElementFromHtml
@@ -156,11 +177,14 @@ up.util = (->
   options: options
   error: error
   each: each
+  detect: detect
   isNull: isNull
   isUndefined: isUndefined
   isGiven: isGiven
+  isPresent: isPresent
   isObject: isObject
   isFunction: isFunction
+  isString: isString
   isJQuery: isJQuery
   unwrap: unwrap
 

@@ -1,7 +1,7 @@
 up.navigation = (->
 
   SELECTOR_NAVIGATION = '[up-navigation]'
-  SELECTOR_SECTION = "#{SELECTOR_NAVIGATION} [href]"
+  SELECTOR_SECTION = "#{SELECTOR_NAVIGATION} [href], #{SELECTOR_NAVIGATION} [up-follow]"
   CLASS_ACTIVE = 'up-active'
   CLASS_CURRENT = 'up-current'
 
@@ -9,7 +9,10 @@ up.navigation = (->
     normalizedLocation = up.util.normalizeUrl(location.href)
     up.util.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
-      normalizedDestination = up.util.normalizeUrl($section.attr('href'))
+      # if $section is marked up with up-follow, the actual link might be
+      # a child element.
+      url = up.link.findUrl($section)
+      normalizedDestination = up.util.normalizeUrl(url)
       if normalizedLocation == normalizedDestination
         $section.addClass(CLASS_CURRENT)
       else

@@ -51,6 +51,7 @@ up.flow = (->
   replace: replace
   reload: reload
   remove: remove
+  implant: implant
 
 )()
 
