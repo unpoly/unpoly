@@ -13,7 +13,6 @@ up.navigation = (->
       # a child element.
       url = up.link.resolveUrl($section)
       normalizedDestination = up.util.normalizeUrl(url)
-      console.log(normalizedDestination, normalizedLocation, normalizedLocation == normalizedDestination)
       if normalizedLocation == normalizedDestination
         $section.addClass(CLASS_CURRENT)
       else

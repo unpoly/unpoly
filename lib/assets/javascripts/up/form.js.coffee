@@ -11,6 +11,8 @@ up.form = (->
     successSelector = options.target || $form.attr('up-target') || 'body'
     failureSelector = options.failTarget || $form.attr('up-fail-target') || up.util.createSelectorFromElement($form)
     pushHistory = options.history != false && $form.attr('up-history') != 'false'
+    successTransition = options.transition || $form.attr('up-transition')
+    failureTransition = options.failTransition || $form.attr('up-fail-transition')
     $form.addClass('up-active')
 
     request = {
@@ -29,14 +31,22 @@ up.form = (->
           redirectLocation
         else if request.type == 'GET'
           request.url + '?' + request.data
+        else
+          null
 
     promise = up.util.ajax(request)
     promise.always (html, textStatus, xhr) ->
       $form.removeClass('up-active')
       if success(xhr)
-        up.flow.implant(successSelector, html, history: { url: successUrl(xhr) })
+#        alert("success form with transition #{successTransition}")
+        up.flow.implant(successSelector, html,
+          history: { url: successUrl(xhr) },
+          transition: successTransition
+        )
       else
-        up.flow.implant(failureSelector, html)
+        up.flow.implant(failureSelector, html,
+          transition: failureTransition
+        )
 
     promise
 

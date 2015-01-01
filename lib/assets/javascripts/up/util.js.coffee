@@ -125,6 +125,9 @@ up.util = (->
   isJQuery = (object) ->
     object instanceof jQuery
 
+  isPromise = (object) ->
+    isFunction(object.then)
+
   copy = (object)  ->
     extend({}, object)
 
@@ -186,6 +189,7 @@ up.util = (->
   isFunction: isFunction
   isString: isString
   isJQuery: isJQuery
+  isPromise: isPromise
   unwrap: unwrap
 
 )()

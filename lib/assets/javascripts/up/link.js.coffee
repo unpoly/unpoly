@@ -10,6 +10,7 @@ up.link = (->
     options = up.util.options(options)
     url = up.util.presentAttr($link, 'href', 'up-follow')
     selector = options.target || $link.attr("up-target") || 'body'
+    options.transition ||= $link.attr('up-transition')
     up.replace(selector, url, options)
 
   resolve = (element) ->
@@ -33,15 +34,9 @@ up.link = (->
       $target = $(event.target)
       $target.closest('a').length > 0 && $element.has($target).length > 0
 
-    relevantElement = ->
-      if up.util.presentAttr($element, 'up-follow')
-        $element
-      else
-        $element.find('a:first')
-
     unless childLinkClicked()
       event.preventDefault()
-      follow(relevantElement())
+      follow(resolve($element))
 
   visit: visit
   follow: follow

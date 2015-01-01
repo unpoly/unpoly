@@ -28,7 +28,7 @@ up.flow = (->
     if fragment = htmlElement.querySelector(selector)
       $fragment = $(fragment)
       up.bus.emit('fragment:destroy', $target)
-      $target.replaceWith(fragment)
+      swapElements($target, $fragment, options.transition)
       title = htmlElement.querySelector("title")?.textContent # todo: extract title from header
       if options.history?.url
         document.title = title if title
@@ -41,6 +41,16 @@ up.flow = (->
 
     else
       up.util.error("Could not find selector (#{selector}) in response (#{html})")
+
+  swapElements = ($old, $new, transitionName) ->
+    if up.util.isGiven(transitionName)
+      if $old.is('body')
+        up.util.error('Cannot apply transitions to body-elements')
+      $new.insertAfter($old)
+      up.transition($old, $new, transitionName).then -> $old.remove()
+    else
+      $old.replaceWith($new)
+
 
   reload = (selector) ->
     replace(selector, recallSource($(selector)))
