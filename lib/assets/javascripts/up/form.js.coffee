@@ -10,6 +10,7 @@ up.form = (->
     $form = $(form)
     successSelector = options.target || $form.attr('up-target') || 'body'
     failureSelector = options.failTarget || $form.attr('up-fail-target') || up.util.createSelectorFromElement($form)
+    pushHistory = options.history != false && $form.attr('up-history') != 'false'
     $form.addClass('up-active')
 
     request = {
@@ -23,10 +24,11 @@ up.form = (->
       xhr.status == 200
 
     successUrl = (xhr) ->
-      if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
-        redirectLocation
-      else if request.type == 'GET'
-        request.url
+      if pushHistory
+        if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
+          redirectLocation
+        else if request.type == 'GET'
+          request.url + '?' + request.data
 
     promise = up.util.ajax(request)
     promise.always (html, textStatus, xhr) ->

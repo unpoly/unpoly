@@ -11,8 +11,9 @@ up.navigation = (->
       $section = $(section)
       # if $section is marked up with up-follow, the actual link might be
       # a child element.
-      url = up.link.findUrl($section)
+      url = up.link.resolveUrl($section)
       normalizedDestination = up.util.normalizeUrl(url)
+      console.log(normalizedDestination, normalizedLocation, normalizedLocation == normalizedDestination)
       if normalizedLocation == normalizedDestination
         $section.addClass(CLASS_CURRENT)
       else
@@ -29,6 +30,7 @@ up.navigation = (->
 
   up.bus.on 'fragment:ready', ($fragment) ->
     # Make sections inactive everywhere
+#    alert("Navigation receiving ready")
     $(SELECTOR_SECTION).removeClass(CLASS_ACTIVE)
     highlightCurrentSection()
 

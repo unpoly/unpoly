@@ -12,15 +12,15 @@ up.link = (->
     selector = options.target || $link.attr("up-target") || 'body'
     up.replace(selector, url, options)
 
-  find = (element) ->
+  resolve = (element) ->
     $element = $(element)
     if $element.is('a') || up.util.presentAttr($element, 'up-follow')
       $element
     else
       $element.find('a:first')
 
-  findUrl = (element) ->
-    if link = find(element)
+  resolveUrl = (element) ->
+    if link = resolve(element)
       up.util.presentAttr(link, 'href', 'up-follow')
 
   up.on 'click', 'a[up-target]', (event, $link) ->
@@ -45,8 +45,8 @@ up.link = (->
 
   visit: visit
   follow: follow
-  find: find
-  findUrl: findUrl
+  resolve: resolve
+  resolveUrl: resolveUrl
 
 )()
 
