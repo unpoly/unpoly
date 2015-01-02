@@ -1,0 +1,3 @@
+#!/bin/sh
+
+npm install -g yuidocjs yuidoc-theme-blue

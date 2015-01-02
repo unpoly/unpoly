@@ -1,13 +1,30 @@
+###*
+Form handling
+@class up.form
+###
 up.form = (->
 
+  ###*
+  Submits a form using the Up.js flow.
+
+  @method up.submit
+  @param {Element|jQuery|String} formOrSelector
+    A reference or selector for the form to submit.
+  @param {String} [options.target]
+  @param {String} [options.failTarget]
+  @param {Boolean} [options.history=true]
+    Successful form submissions will add a history entry and change the browser's
+    location bar if the form either uses the `GET` method or the response redirected
+    to another page (this requires the `upjs-rails` gem).
+    If want to prevent history changes in any case, set this to `false`.
+  @param {String} [options.transition]
+  @param {String} [options.failTransition]
+  @return {Promise}
+    A promise for the AJAX response
   ###
-  # Submits a form using the Up.js flow.
-  #
-  # @return {Promise} A promise for the AJAX call.
-  ###
-  submit = (form, options) ->
+  submit = (formOrSelector, options) ->
     options = up.util.options(options)
-    $form = $(form)
+    $form = $(formOrSelector)
     successSelector = options.target || $form.attr('up-target') || 'body'
     failureSelector = options.failTarget || $form.attr('up-fail-target') || up.util.createSelectorFromElement($form)
     pushHistory = options.history != false && $form.attr('up-history') != 'false'
@@ -50,10 +67,39 @@ up.form = (->
 
     promise
 
-  # Observes an input field by periodic polling and executes code when its value changes.
-  observe = (field, options) ->
+  ###*
+  Observes an input field by periodic polling its value.
+  Executes code when the value changes.
 
-    $field = $(field)
+  This is useful for observing text fields while the user is typing,
+  since browsers will only fire a `change` event once the user
+  blurs the text field.
+
+  **Shorthand UJS example**
+
+  ```
+  
+  <form method="GET" action="/search">
+    <input type="query" up-observe="up.form.submit(this)">
+  </form>
+  ```
+
+  @method up.observe
+  @param {Element|jQuery|String} fieldOrSelector
+  @param {Function|String} options.change
+    The callback to execute when the field's value changes.
+    If given as a function, it must take two arguments (`value`, `$field`).
+    If given as a string, it will be evaled as Javascript code in a context where
+    (`value`, `$field`) are set.
+  @param {Number} [options.frequency=500]
+  @example
+      Foo
+      Bar
+        Bat
+  ###
+  observe = (fieldOrSelector, options) ->
+
+    $field = $(fieldOrSelector)
     options = up.util.options(options, frequency: 500)
     knownValue = null
     timer = null

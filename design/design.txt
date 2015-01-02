@@ -1,0 +1,34 @@
+Gedanke 1
+---------
+- Immer die ganze Seite rendern ist langsam
+  - Optimierung nicht möglich: Layout überspringen wenn up-Request
+  - Optimierung nicht möglich: Manche Bereiche nicht rendern wenn up-Request
+  - Optimierung nicht möglich: Manche Bereiche nur für bestimmte X-Up-Selectors rendern
+- Das alles nur, um beim Back-Button sofort das HTML anzeigen zu können?
+- Sogar Turbolinks macht das nur Opt-In
+- Ich kann genauso gut bei popstate den aktuellen State replacen
+- Später: Opportunistisch cachen. Wann immer ich einen vollen Page-Load (mit/ohne Layout) sehe => cachen
+
+Gedanke 2
+---------
+- Das mit dem up.app und up.page checkt kein Mensch
+- In der Praxis wird es so sein, dass wichtige page-Handler nicht mehr in der Seite stehen
+- Ich brauche auch noch Code, um <script>-Tags auszuführen
+- Die Unterscheidung mache ich ja nur, um installierte Callbacks wieder wegzuräumen
+- Was ich eigentlich bräuchte, wäre ein Weg, installierte Callbacks geregelt lozuwerden
+
+     z. B.
+
+     up.awaken('.note_form', function($element) {
+
+      var timer = setTimeout(...)
+
+      function uninstall() {
+        clearInterval(timer);
+      }
+
+      return uninstall;
+
+     });
+
+- Vor dem Ersetzen eines Elements kann ich dann die uninstall-Funktion aufrufen.

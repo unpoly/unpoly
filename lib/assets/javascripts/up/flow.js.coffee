@@ -1,3 +1,8 @@
+###*
+Page flow.
+
+@class up.flow
+###
 up.flow = (->
 
   rememberSource = ($element) ->
@@ -7,9 +12,34 @@ up.flow = (->
     $source = $element.closest("[up-source]")
     $source.attr("up-source") || location.href
 
-  replace = (selector, url, options) ->
-    $target = $(selector)
-    $target = up.util.$createElementFromSelector(selector) unless $target.length
+  ###*
+  Replaces elements on the current page with corresponding elements
+  from a new page fetched from the server.
+
+  The current and new elements must have the same CSS selector.
+
+  @method up.replace
+  @param {String|Element|jQuery} selectorOrElement
+    The CSS selector to update. You can also pass a DOM element or jQuery element
+    here, in which case a selector will be inferred from the element's class and ID.
+  @param {String} url
+    The URL to fetch from the server.
+  @param {String} [options.history.url=url]
+    An alternative URL to use for the browser's location bar and history.
+  @param {String} [options.history.method='push']
+  ###
+  replace = (selectorOrElement, url, options) ->
+
+    selector = null
+    $target = null
+    if up.util.isString(selectorOrElement)
+      selector = selectorOrElement
+      $target = $(selector)
+      $target = up.util.$createElementFromSelector(selector) unless $target.length
+    else
+      selector = up.util.createSelectorFromElement($(selectorOrElement))
+      $target = $(selectorOrElement)
+
     $target.addClass("up-loading")
     options = up.util.options(options, history: { url: url })
 
@@ -19,6 +49,15 @@ up.flow = (->
         implant(selector, html, options)
       .fail(up.util.error)
 
+  ###*
+  @method up.flow.implant
+  @protected
+  @param {String} selector
+  @param {String} html
+  @param {String} [options.history.url]
+  @param {String} [options.history.method='push']
+  @param {String} [options.transition]
+  ###
   implant = (selector, html, options) ->
     $target = $(selector)
     options = up.util.options(options, history: { method: 'push' })
@@ -52,11 +91,24 @@ up.flow = (->
       $old.replaceWith($new)
 
 
-  reload = (selector) ->
-    replace(selector, recallSource($(selector)))
+  ###*
+  Replaces the given selector or element with a fresh copy
+  fetched from the server.
 
-  remove = (elementOrSelector) ->
-    $(elementOrSelector).remove()
+  @method up.reload
+  @param {String|Element|jQuery} selectorOrElement
+  ###
+  reload = (selectorOrElement) ->
+    replace(selectorOrElement, recallSource($(selectorOrElement)))
+
+  ###*
+  Removes the given selector or element from the DOM tree.
+
+  @method up.remove
+  @param {String|Element|jQuery} selectorOrElement
+  ###
+  remove = (selectorOrElement) ->
+    $(selectorOrElement).remove()
 
   replace: replace
   reload: reload
@@ -68,5 +120,3 @@ up.flow = (->
 up.replace = up.flow.replace
 up.reload = up.flow.reload
 up.remove = up.flow.remove
-
-
