@@ -21,6 +21,13 @@ up.form = (->
   @param {String} [options.failTransition]
   @return {Promise}
     A promise for the AJAX response
+  @example
+      up.submit('form')
+  @example
+      <form method="POST" action="/users" up-target=".main">  
+        ...    
+      </form>
+
   ###
   submit = (formOrSelector, options) ->
     options = up.util.options(options)
@@ -75,15 +82,6 @@ up.form = (->
   since browsers will only fire a `change` event once the user
   blurs the text field.
 
-  **Shorthand UJS example**
-
-  ```
-  
-  <form method="GET" action="/search">
-    <input type="query" up-observe="up.form.submit(this)">
-  </form>
-  ```
-
   @method up.observe
   @param {Element|jQuery|String} fieldOrSelector
   @param {Function|String} options.change
@@ -93,9 +91,13 @@ up.form = (->
     (`value`, `$field`) are set.
   @param {Number} [options.frequency=500]
   @example
-      Foo
-      Bar
-        Bat
+      up.observe('form', { change: function(value, $form) { 
+        up.submit($form) 
+      } }); 
+  @example
+      <form method="GET" action="/search">  
+        <input type="query" up-observe="up.form.submit(this)">    
+      </form>
   ###
   observe = (fieldOrSelector, options) ->
 

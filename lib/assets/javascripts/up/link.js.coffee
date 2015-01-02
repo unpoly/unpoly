@@ -1,5 +1,6 @@
 up.link = (->
 
+  
   visit = (url, options) ->
     console.log("up.visit", url)
     # options = up.util.options(options, )
