@@ -1,4 +1,4 @@
 .panel__side
   .menu(up-navigation)
     - @cards.each do |card|
-      = link_to card.title, card, 'up-target' => '.panel__main', class: 'menu__item'
+      = link_to card.title, card, class: 'menu__item', 'up-target' => '.panel__main'

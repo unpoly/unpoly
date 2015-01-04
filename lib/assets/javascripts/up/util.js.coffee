@@ -55,9 +55,9 @@ up.util = (->
     element.innerHTML = html
     element
 
-  error = (object) ->
-    message = if up.util.isObject(object) then JSON.stringify(object) else object
-    console.log("[UP] Error: #{message}", object)
+  error = (args...) ->
+    message = if args.length == 1 && up.util.isString(args[0]) then args[0] else JSON.stringify(args)
+    console.log("[UP] Error: #{message}", args...)
     alert message
     throw message
 
@@ -165,6 +165,9 @@ up.util = (->
   presentAttr = ($element, attrNames...) ->
     values = ($element.attr(attrName) for attrName in attrNames)
     detect(values, isPresent)
+    
+  nextFrame = (block) ->
+    setTimeout(block, 0)
 
   presentAttr: presentAttr
   createElement: createElement
@@ -191,5 +194,6 @@ up.util = (->
   isJQuery: isJQuery
   isPromise: isPromise
   unwrap: unwrap
+  nextFrame: nextFrame
 
 )()

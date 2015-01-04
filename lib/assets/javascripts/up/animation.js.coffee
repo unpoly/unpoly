@@ -4,32 +4,37 @@ up.animation = (->
   transitions = {}
 
   animate = ($element, animationName, options) ->
-    options = up.util.options(options, easing: 'swing', duration: 250)
-    animation = animations[animationName] or up.util.error("Unknown animation: #{animationName}")
+    console.log("animate", animationName)
+    options = up.util.options(options, easing: 'swing', duration: 300)
+    animation = animations[animationName] or up.util.error("Unknown animation", animationName)
     promise = animation($element, options)
     up.util.isPromise(promise) or up.util.error("Animation did not return a Promise: #{animationName}")
     promise
 
-  transition = ($old, $new, transitionName, options) ->
-    transition = transitions[transitionName] or up.util.error("Unknown transition: #{transitionName}")
-    $.when(
-      animate($old, transition.oldAnimationName, options),
-      animate($new, transition.newAnimationName, options)
-    )
+  morph = ($old, $new, transitionName, options) ->
+    parts = transitionName.split('/')
+    if parts.length == 2
+      transition = ($old, $new, options) ->
+        $.when(
+          animate($old, parts[0], options),
+          animate($new, parts[1], options)
+        )
+    else
+      transition = transitions[transitionName] or up.util.error("Unknown transition: #{transitionName}")
+    promise = transition($old, $new, options)
+    up.util.isPromise(promise) or up.util.error("Transition did not return a Promise: #{transitionName}")
+    promise
 
-  defineTransition = (name, oldAnimationName, newAnimationName) ->
-    transitions[name] = {
-      oldAnimationName: oldAnimationName,
-      newAnimationName: newAnimationName
-    }
+  transition = (name, transition) ->
+    transitions[name] = transition
 
-  defineAnimation = (name, animation) ->
+  animation = (name, animation) ->
     animations[name] = animation
 
-  transition: transition
+  morph: morph
   animate: animate
-  defineTransition: defineTransition
-  defineAnimation: defineAnimation
+  transition: transition
+  animation: animation
 
 )()
 
@@ -39,42 +44,74 @@ up.animate = up.animation.animate
 
 up.util.extend(up, up.animation)
 
-up.defineAnimation('fade-in', ($element, options) ->
+up.animation('fade-in', ($element, options) ->
   $element.css(opacity: 0)
   $element.animate({ opacity: 1 }, options)
   $element.promise()
 )
 
-up.defineAnimation('fade-out', ($element, options) ->
+up.animation('fade-out', ($element, options) ->
   $element.css(opacity: 1)
   $element.animate({ opacity: 0 }, options)
   $element.promise()
 )
 
-up.defineAnimation('move-to-left', ($element, options) ->
+up.animation('move-to-bottom', ($element, options) ->
+  $element.css(top: '0%')
+  $element.animate({ top: '100%' }, options)
+  $element.promise()
+)
+
+up.animation('move-to-left', ($element, options) ->
   $element.css(left: '0%')
   $element.animate({ left: '-100%' }, options)
   $element.promise()
 )
 
-up.defineAnimation('move-from-left', ($element, options) ->
+up.animation('move-from-left', ($element, options) ->
+#  firstFrame = { left: '-100%' }
+#  firstFrame.right = ''
+#  lastFrame = { left: '0%' }
   $element.css(left: '-100%')
   $element.animate({ left: '0%' }, options)
   $element.promise()
 )
 
-up.defineAnimation('move-to-right', ($element, options) ->
+up.animation('move-to-right', ($element, options) ->
   $element.css(left: '0%')
   $element.animate({ left: '100%' }, options)
   $element.promise()
 )
 
-up.defineAnimation('move-from-right', ($element, options) ->
+up.animation('move-from-right', ($element, options) ->
   $element.css(left: '100%')
   $element.animate({ left: '0%' }, options)
   $element.promise()
 )
 
-up.defineTransition('move-left', 'move-to-left', 'move-from-right')
-up.defineTransition('move-right', 'move-to-right', 'move-from-left')
-up.defineTransition('cross-fade', 'fade-out', 'fade-in')
+#up.animation('zoom-in', ($element, options) ->
+#  $element.css(scale: '0.5', opacity: 1)
+#  $element.animate({ scale: '1', opacity: 1 }, options)
+#  $element.promise()
+#)
+
+up.transition('move-left', ($old, $new, options) ->
+  $.when(
+    up.animate($old, 'move-to-left', options),
+    up.animate($new, 'move-from-right', options)
+  )
+)
+
+up.transition('move-right', ($old, $new, options) ->
+  $.when(
+    up.animate($old, 'move-to-right', options),
+    up.animate($new, 'move-from-left', options)
+  )
+)
+
+up.transition('cross-fade', ($old, $new, options) ->
+  $.when(
+    up.animate($old, 'fade-out', options),
+    up.animate($new, 'fade-in', options)
+  )
+)

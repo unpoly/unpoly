@@ -67,28 +67,32 @@ up.flow = (->
     if fragment = htmlElement.querySelector(selector)
       $fragment = $(fragment)
       up.bus.emit('fragment:destroy', $target)
-      swapElements($target, $fragment, options.transition)
-      title = htmlElement.querySelector("title")?.textContent # todo: extract title from header
-      if options.history?.url
-        document.title = title if title
-        up.history[options.history.method](options.history.url)
-        # Remember where the element came from so we can make
-        # smaller page loads in the future (does this even make sense?).
-        rememberSource($target)
-      # The fragment is only ready after the history was (or wasn't) changed above
-      up.bus.emit('fragment:ready', $fragment)
+      swapElements $target, $fragment, options.transition, ->
+        title = htmlElement.querySelector("title")?.textContent # todo: extract title from header
+        if options.history?.url
+          document.title = title if title
+          up.history[options.history.method](options.history.url)
+          # Remember where the element came from so we can make
+          # smaller page loads in the future (does this even make sense?).
+          rememberSource($target)
+        # The fragment is only ready after the history was (or wasn't) changed above
+        up.bus.emit('fragment:ready', $fragment)
 
     else
       up.util.error("Could not find selector (#{selector}) in response (#{html})")
 
-  swapElements = ($old, $new, transitionName) ->
+  swapElements = ($old, $new, transitionName, afterInsert) ->
     if up.util.isGiven(transitionName)
       if $old.is('body')
         up.util.error('Cannot apply transitions to body-elements')
       $new.insertAfter($old)
-      up.transition($old, $new, transitionName).then -> $old.remove()
+      # Make sure that any element enhancements happen BEFORE we morph
+      # through the transition.
+      afterInsert()
+      up.morph($old, $new, transitionName).then -> $old.remove()
     else
       $old.replaceWith($new)
+      afterInsert()
 
 
   ###*
