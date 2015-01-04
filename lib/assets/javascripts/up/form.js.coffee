@@ -58,21 +58,19 @@ up.form = (->
         else
           null
 
-    promise = up.util.ajax(request)
-    promise.always (html, textStatus, xhr) ->
-      $form.removeClass('up-active')
-      if success(xhr)
-#        alert("success form with transition #{successTransition}")
+    up.util.ajax(request)
+      .always ->
+        $form.removeClass('up-active')
+      .done (html, textStatus, xhr) ->
         up.flow.implant(successSelector, html,
           history: { url: successUrl(xhr) },
           transition: successTransition
         )
-      else
+      .fail (xhr, textStatus, errorThrown) ->
+        html = xhr.responseText
         up.flow.implant(failureSelector, html,
           transition: failureTransition
         )
-
-    promise
 
   ###*
   Observes an input field by periodic polling its value.
