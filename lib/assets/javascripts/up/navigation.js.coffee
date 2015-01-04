@@ -6,14 +6,17 @@ up.navigation = (->
   CLASS_CURRENT = 'up-current'
 
   highlightCurrentSection = ->
-    normalizedLocation = up.util.normalizeUrl(location.href)
+    normalizedLocation = up.util.normalizeUrl(location.href, search: false)
     up.util.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       # if $section is marked up with up-follow, the actual link might be
       # a child element.
       url = up.link.resolveUrl($section)
-      normalizedDestination = up.util.normalizeUrl(url)
+      normalizedDestination = up.util.normalizeUrl(url, search: false)
       if normalizedLocation == normalizedDestination
+        # $navigation = $section.closest(SELECTOR_NAVIGATION)
+#        console.log("closest", $navigation, $section)
+        # $navigation.scrollTop($section.position().top)
         $section.addClass(CLASS_CURRENT)
       else
         $section.removeClass(CLASS_CURRENT)

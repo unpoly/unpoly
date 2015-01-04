@@ -19,9 +19,14 @@ up.util = (->
       }
     $.ajax options
 
-  normalizeUrl = (string) ->
+  normalizeUrl = (string, options) ->
+    options = up.util.options(options, search: true)
     anchor = $("<a>").attr(href: string)[0]
-    anchor.protocol + "//" + anchor.hostname + ":" + anchor.port + anchor.pathname + anchor.search
+    normalized = anchor.protocol + "//" + anchor.hostname
+    normalized += ":" + anchor.port unless (anchor.port == 80 && anchor.protocol == 'http') || (anchor.port == 443 && anchor.protocol == 'https')  
+    normalized += anchor.pathname
+    normalized += anchor.search if options.search
+    normalized
 
   $createElementFromSelector = (selector) ->
     path = selector.split(/[ >]/)
@@ -98,7 +103,7 @@ up.util = (->
   extend = $.extend
 
   each = (collection, block) ->
-    block(item) for item in collection
+    block(item, index) for item, index in collection
 
   isNull = (object) ->
     object == null
@@ -168,6 +173,9 @@ up.util = (->
     
   nextFrame = (block) ->
     setTimeout(block, 0)
+    
+  last = (array) ->
+    array[array.length - 1]
 
   presentAttr: presentAttr
   createElement: createElement
@@ -184,6 +192,7 @@ up.util = (->
   error: error
   each: each
   detect: detect
+  last: last
   isNull: isNull
   isUndefined: isUndefined
   isGiven: isGiven

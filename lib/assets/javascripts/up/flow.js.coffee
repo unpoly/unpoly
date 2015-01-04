@@ -30,22 +30,15 @@ up.flow = (->
   ###
   replace = (selectorOrElement, url, options) ->
 
-    selector = null
-    $target = null
-    if up.util.isString(selectorOrElement)
-      selector = selectorOrElement
-      $target = $(selector)
-      $target = up.util.$createElementFromSelector(selector) unless $target.length
+    selector = if up.util.isString(selectorOrElement)
+      selectorOrElement
     else
-      selector = up.util.createSelectorFromElement($(selectorOrElement))
-      $target = $(selectorOrElement)
+      up.util.createSelectorFromElement($(selectorOrElement))
 
-    $target.addClass("up-loading")
     options = up.util.options(options, history: { url: url })
 
     up.util.get(url, selector: selector)
       .done (html) ->
-        $target.removeClass("up-loading")
         implant(selector, html, options)
       .fail(up.util.error)
 
@@ -59,27 +52,30 @@ up.flow = (->
   @param {String} [options.transition]
   ###
   implant = (selector, html, options) ->
-    $target = $(selector)
+    
     options = up.util.options(options, history: { method: 'push' })
     # jQuery cannot construct transient elements that contain <html> or <body> tags,
     # so we're using the native browser API to grep through the HTML
     htmlElement = up.util.createElementFromHtml(html)
-    if fragment = htmlElement.querySelector(selector)
-      $fragment = $(fragment)
-      up.bus.emit('fragment:destroy', $target)
-      swapElements $target, $fragment, options.transition, ->
-        title = htmlElement.querySelector("title")?.textContent # todo: extract title from header
-        if options.history?.url
-          document.title = title if title
-          up.history[options.history.method](options.history.url)
-          # Remember where the element came from so we can make
-          # smaller page loads in the future (does this even make sense?).
-          rememberSource($target)
-        # The fragment is only ready after the history was (or wasn't) changed above
-        up.bus.emit('fragment:ready', $fragment)
-
-    else
-      up.util.error("Could not find selector (#{selector}) in response (#{html})")
+        
+    for step in implantSteps(selector, options.transition)
+      $target = $(step.selector)
+      if fragment = htmlElement.querySelector(step.selector)
+        $fragment = $(fragment)
+        up.bus.emit('fragment:destroy', $target)
+        swapElements $target, $fragment, step.transition, ->
+          title = htmlElement.querySelector("title")?.textContent # todo: extract title from header
+          if options.history?.url
+            document.title = title if title
+            up.history[options.history.method](options.history.url)
+            # Remember where the element came from so we can make
+            # smaller page loads in the future (does this even make sense?).
+            rememberSource($target)
+          # The fragment is only ready after the history was (or wasn't) changed above
+          up.bus.emit('fragment:ready', $fragment)
+  
+      else
+        up.util.error("Could not find selectorAtom (#{selectorAtom}) in response (#{html})")
 
   swapElements = ($old, $new, transitionName, afterInsert) ->
     if up.util.isGiven(transitionName)
@@ -94,7 +90,16 @@ up.flow = (->
       $old.replaceWith($new)
       afterInsert()
 
-
+  implantSteps = (selector, transitionString) ->
+    comma = /\ *,\ */
+    disjunction = selector.split(comma)
+    transitions = transitionString.split(comma) if up.util.isPresent(transitionString)    
+    for selectorAtom, i in disjunction
+      if transitions
+        transition = transitions[i] || up.util.last(transitions)
+      selector: selectorAtom
+      transition: transition
+      
   ###*
   Replaces the given selector or element with a fresh copy
   fetched from the server.

@@ -46,9 +46,6 @@ up.form = (->
       selector: successSelector
     }
 
-    success = (xhr) ->
-      xhr.status == 200
-
     successUrl = (xhr) ->
       if pushHistory
         if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
