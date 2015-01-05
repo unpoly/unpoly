@@ -80,9 +80,9 @@ up.flow = (->
         up.util.error("Could not find selector (#{step.selector}) in response (#{html})")
 
   swapElements = ($old, $new, transitionName, afterInsert) ->
-    if up.util.isGiven(transitionName)
-      if $old.is('body')
-        up.util.error('Cannot apply transitions to body-elements')
+    if up.util.isGiven(transitionName) 
+      if $old.is('body') && transitionName != 'none'
+        up.util.error('Cannot apply transitions to body-elements', transitionName)
       $new.insertAfter($old)
       # Make sure that any element enhancements happen BEFORE we morph
       # through the transition.
