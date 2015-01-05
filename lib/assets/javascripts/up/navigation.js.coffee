@@ -1,39 +1,42 @@
 up.navigation = (->
 
-  SELECTOR_NAVIGATION = '[up-navigation]'
-  SELECTOR_SECTION = "#{SELECTOR_NAVIGATION} [href], #{SELECTOR_NAVIGATION} [up-follow]"
   CLASS_ACTIVE = 'up-active'
   CLASS_CURRENT = 'up-current'
+  SELECTOR_SECTION = '[href], [up-follow], [up-modal], [up-popup]'
+  SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
 
-  highlightCurrentSection = ->
+  locationChanged = ->
+    unmarkActive()
     normalizedLocation = up.util.normalizeUrl(location.href, search: false)
     up.util.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
-      # if $section is marked up with up-follow, the actual link might be
-      # a child element.
+      # if $section is marked up with up-follow,
+      # the actual link might be a child element.
       url = up.link.resolveUrl($section)
       normalizedDestination = up.util.normalizeUrl(url, search: false)
       if normalizedLocation == normalizedDestination
-        # $navigation = $section.closest(SELECTOR_NAVIGATION)
-#        console.log("closest", $navigation, $section)
-        # $navigation.scrollTop($section.position().top)
         $section.addClass(CLASS_CURRENT)
       else
         $section.removeClass(CLASS_CURRENT)
 
   sectionClicked = ($section) ->
-    # Make the clicked section the only active section on the page
-    $(SELECTOR_SECTION).removeClass(CLASS_ACTIVE)
+    unmarkActive()
+    $section = enlargeClickArea($section)
     $section.addClass(CLASS_ACTIVE)
+    
+  enlargeClickArea = ($section) ->
+    $largerClickArea = $section.parents(SELECTOR_SECTION)
+    if $largerClickArea.length
+      $largerClickArea
+    else
+      $section
+    
+  unmarkActive = ->
+    $(SELECTOR_ACTIVE).removeClass(CLASS_ACTIVE)
 
-  console.log("Registering section clicked to up.app.on")
   up.on 'click', SELECTOR_SECTION, (event, $section) ->
     sectionClicked($section)
 
-  up.bus.on 'fragment:ready', ($fragment) ->
-    # Make sections inactive everywhere
-#    alert("Navigation receiving ready")
-    $(SELECTOR_SECTION).removeClass(CLASS_ACTIVE)
-    highlightCurrentSection()
+  up.bus.on 'fragment:ready', locationChanged
 
 )()

@@ -1,5 +1,4 @@
 up.link = (->
-
   
   visit = (url, options) ->
     console.log("up.visit", url)
@@ -24,6 +23,16 @@ up.link = (->
   resolveUrl = (element) ->
     if link = resolve(element)
       up.util.presentAttr(link, 'href', 'up-follow')
+      
+  markActive = (element) ->
+    markUnactive()
+    $element = $(element)
+    $clickArea = $element.ancestors('up-follow')
+    $clickArea = $element unless $clickArea.length
+    $clickArea.addClass('up-active')
+    
+  markUnactive = ->
+    $('[up-active]').removeClass('up-active')
 
   up.on 'click', 'a[up-target]', (event, $link) ->
     event.preventDefault()

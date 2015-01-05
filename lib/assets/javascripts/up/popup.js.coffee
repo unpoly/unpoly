@@ -38,7 +38,6 @@ up.popup = (->
     
   updated = ($link, $popup, origin, animation) ->
     $popup.show()
-    $link.removeClass('up-active')
     $link.addClass('up-current')
     position($link, $popup, origin)
     up.animate($popup, animation)
@@ -70,7 +69,6 @@ up.popup = (->
 
     close()
     $popup = createHiddenPopup($link, selector, sticky)
-    $link.addClass('up-active')
     
     up.replace(selector, url,
       history: history
@@ -86,7 +84,7 @@ up.popup = (->
     $popup = $('.up-popup')
     if $popup.length
       up.animate($popup, options.animation).then -> $popup.remove()
-    $('[up-popup]').removeClass('up-active up-current')
+    $('[up-popup]').removeClass('up-current')
     
   autoclose = ->
     unless $('.up-popup').is('[up-sticky]')
