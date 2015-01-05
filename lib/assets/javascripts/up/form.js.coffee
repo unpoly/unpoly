@@ -30,6 +30,7 @@ up.form = (->
 
   ###
   submit = (formOrSelector, options) ->
+    
     options = up.util.options(options)
     $form = $(formOrSelector)
     successSelector = options.target || $form.attr('up-target') || 'body'

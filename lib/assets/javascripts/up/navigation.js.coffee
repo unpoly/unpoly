@@ -2,7 +2,7 @@ up.navigation = (->
 
   CLASS_ACTIVE = 'up-active'
   CLASS_CURRENT = 'up-current'
-  SELECTOR_SECTION = '[href], [up-follow], [up-modal], [up-popup]'
+  SELECTOR_SECTION = 'a[href], a[up-target], [up-follow], [up-modal], [up-popup]'
   SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
 
   locationChanged = ->

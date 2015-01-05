@@ -25,6 +25,8 @@ up.popup = (->
         bottom: linkBox.top
       else
         up.util.error("Unknown origin", origin)
+#    for key, value of css
+#      css[key] = Math.max(value, 0)
     $popup.css(css)
     
   createHiddenPopup = ($link, selector, sticky) ->
@@ -102,7 +104,6 @@ up.popup = (->
   up.on('click', 'body', (event, $body) ->
     $target = $(event.target)
     unless $target.closest('.up-popup').length || $target.closest('[up-popup]').length
-      event.preventDefault()
       close()
   )
   
