@@ -1,15 +1,43 @@
 animate($element)
 
-1. Ich kopiere $element zu $ghost
+  1. Ich kopiere $element zu $ghost
 
-2. Ich setze die opacity von $element auf 0
+  2. Ich setze die opacity von $element auf 0
 
-3. Ich setze $ghost auf die Größe von $element
-  mit position: fixed
-  mit ausmessen des originals
-    left, top setzen
-    right, bottom löschen
-    width, height setzen
-    margin löschen
+  3. Ich setze $ghost auf die Größe von $element
+    mit position: fixed
+    mit ausmessen des originals
+      left, top setzen
+      right, bottom löschen
+      width, height setzen
+      margin löschen
 
-1. Ich ersetze $element durch 
+  4. ich gebe $ghost an die animation
+
+  5. nach der animation
+    setze ich $opacity von $element auf 1
+    lösche ich $ghost
+
+
+transition($old, $new)
+
+  1. Ich kopiere $old zu $ghost
+
+  2. Ich setze die opacity von $old auf 0
+
+  3. Ich setze $ghost auf die Größe von $old
+    mit position: fixed
+    mit ausmessen des originals
+      left, top setzen
+      right, bottom löschen
+      width, height setzen
+      margin löschen
+      
+  ???????????
+
+  4. ich gebe $ghost an die animation
+
+  5. nach der animation
+    setze ich $opacity von $element auf 1
+    lösche ich $ghost
+

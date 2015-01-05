@@ -1,36 +1,91 @@
+###*
+Animation and transition effects.
+  
+@class up.motion
+###
 up.motion = (->
 
   animations = {}
   transitions = {}
-
-  animate = ($element, animationName, options) ->
-    console.log("animate", animationName)
+  
+  ###*
+  Animates an element.
+  
+  @method up.animate
+  @param {Element|jQuery|String} elementOrSelector
+  @param {String|Function} animationOrName
+  @param {Number} [options.duration]
+  @param {String} [options.easing]
+  ###
+  animate = (elementOrSelector, animationOrName, options) ->
+    $element = $(elementOrSelector)
+    console.log("animate", animationOrName)
     options = up.util.options(options, easing: 'swing', duration: 300)
-    anim = animations[animationName] or up.util.error("Unknown animation", animationName)
+    anim = if up.util.isFunction(animationOrName)
+      animationOrName
+    else
+      animations[animationOrName] or up.util.error("Unknown animation", animationName)
     promise = anim($element, options)
     up.util.isPromise(promise) or up.util.error("Animation did not return a Promise: #{animationName}")
     promise
-
-  morph = ($old, $new, transitionName, options) ->
-    parts = transitionName.split('/')
-    if parts.length == 2
+  
+  ###*
+  Performs a transition between two elements.
+  
+  @method up.morph
+  @param {Element|jQuery|String} source
+  @param {Element|jQuery|String} target
+  @param {String} transitionName
+  @param {Number} [options.duration]
+  @param {String} [options.easing]
+  ###  
+  morph = (source, target, transitionName, options) ->
+    $old = $(source)
+    $new = $(target)
+    if transition = transitions[transitionName]
+      promise = transition($old, $new, options)
+      up.util.isPromise(promise) or up.util.error("Transition did not return a Promise: #{transitionName}")
+      promise
+    else if animation = animations[transitionName]
+      $old.hide()
+      animate($new, animation, options)
+    else if transitionName.indexOf('/') >= 0
+      parts = transitionName.split('/')
       transition = ($old, $new, options) ->
         $.when(
           animate($old, parts[0], options),
           animate($new, parts[1], options)
         )
     else
-      transition = transitions[transitionName] or up.util.error("Unknown transition: #{transitionName}")
-    promise = transition($old, $new, options)
-    up.util.isPromise(promise) or up.util.error("Transition did not return a Promise: #{transitionName}")
-    promise
+      up.util.error("Unknown transition: #{transitionName}")
 
+  ###*
+  Defines a named transition.
+  
+  @method up.transition
+  @param {String} name
+  @param {Function} transition
+  ###
   transition = (name, transition) ->
     transitions[name] = transition
 
+  ###*
+  Defines a named animation.
+  
+  @method up.animation
+  @param {String} name
+  @param {Function} animation
+  ###
   animation = (name, animation) ->
     animations[name] = animation
-    
+  
+  ###*
+  Returns a no-op animation or transition which has no visual effects
+  and completes instantly.
+  
+  @method up.motion.none
+  @return {Promise} A resolved promise  
+  ###
   none = ->
     deferred = $.Deferred()
     deferred.resolve()
@@ -63,9 +118,6 @@ up.motion = (->
   )
   
   animation('move-from-left', ($element, options) ->
-  #  firstFrame = { left: '-100%' }
-  #  firstFrame.right = ''
-  #  lastFrame = { left: '0%' }
     $element.css(left: '-100%')
     $element.animate({ left: '0%' }, options)
     $element.promise()
@@ -83,11 +135,18 @@ up.motion = (->
     $element.promise()
   )
   
-  #up.animation('zoom-in', ($element, options) ->
-  #  $element.css(scale: '0.5', opacity: 1)
-  #  $element.animate({ scale: '1', opacity: 1 }, options)
-  #  $element.promise()
-  # )
+  animation('roll-down', ($element, options) ->
+    fullHeight = $element.height()
+    oldStyle =
+      height: $element.css('height')
+      overflow: $element.css('overflow')
+    $element.css(
+      height: '0px'
+      overflow: 'hidden'
+    )
+    $element.animate({ height: "#{fullHeight}px" }, options)
+    $element.promise().then(-> $element.css(oldStyle))
+  )
   
   transition('none', none)
   

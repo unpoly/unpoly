@@ -35,7 +35,7 @@ up.util = (->
       $parent = $element or $(document.body)
       $element = $parent.find(depthSelector)
       if $element.length is 0
-        conjunction = depthSelector.match(/(^|\.|\#)\w+/g)
+        conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g)
         tag = "div"
         classes = []
         id = null
@@ -87,19 +87,6 @@ up.util = (->
       innerHtml = "<html><body>#{html}</body></html>"
     createElement('html', innerHtml)
 
-#  # jQuery's implementation of $(...) cannot create elements that have
-#  # an <html> or <body> tag.
-#  $createElementFromHtml = (html) ->
-#    htmlElementPattern = /<html>((?:.|\n)*)<\/html>/i
-#    #    console.log("match", html.match(htmlElementPattern), htmlElementPattern, html)
-#    if match = html.match(htmlElementPattern)
-##      console.log("creating element from string", match[1])
-##      console.log("got element", createElement('html', match[1]))
-##      window.LAST_ELEMENT = createElement('html', match[1])
-#      $(createElement('html', match[1]))
-#    else
-#      $(html)
-
   extend = $.extend
 
   each = (collection, block) ->
@@ -132,6 +119,9 @@ up.util = (->
 
   isPromise = (object) ->
     isFunction(object.then)
+    
+  ifGiven = (object) ->
+    object if isGiven(object)
 
   copy = (object)  ->
     extend({}, object)
@@ -151,10 +141,10 @@ up.util = (->
     if defaults
       for key, defaultValue of defaults
         value = merged[key]
-        if isObject(defaultValue)
-          merged[key] = options(value, defaultValue)
-        else if not isGiven(value)
+        if !isGiven(value)
           merged[key] = defaultValue
+        else if isObject(defaultValue) && isObject(value)
+          merged[key] = options(value, defaultValue)
     merged
 
   detect = (array, tester) ->
@@ -176,6 +166,24 @@ up.util = (->
     
   last = (array) ->
     array[array.length - 1]
+    
+  clientSize = ->
+    element = document.documentElement
+    width: element.clientWidth
+    height: element.clientHeight
+
+  measure = ($element, options) ->
+    offset = $element.offset()
+    box = 
+      left: offset.left
+      top: offset.top
+      width: $element.outerWidth()
+      height: $element.outerHeight()
+    if options?.full
+      viewport = clientSize()
+      box.right = viewport.width - (box.left + box.width)
+      box.bottom = viewport.height - (box.top + box.height)
+    box
 
   presentAttr: presentAttr
   createElement: createElement
@@ -202,7 +210,9 @@ up.util = (->
   isString: isString
   isJQuery: isJQuery
   isPromise: isPromise
+  ifGiven: ifGiven
   unwrap: unwrap
   nextFrame: nextFrame
+  measure: measure
 
 )()

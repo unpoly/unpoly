@@ -38,8 +38,7 @@ up.flow = (->
     options = up.util.options(options, history: { url: url })
 
     up.util.get(url, selector: selector)
-      .done (html) ->
-        implant(selector, html, options)
+      .done (html) -> implant(selector, html, options)
       .fail(up.util.error)
 
   ###*
@@ -58,14 +57,17 @@ up.flow = (->
     # so we're using the native browser API to grep through the HTML
     htmlElement = up.util.createElementFromHtml(html)
         
-    for step in implantSteps(selector, options.transition)
+    for step in implantSteps(selector, options)
       $target = $(step.selector)
       if fragment = htmlElement.querySelector(step.selector)
         $fragment = $(fragment)
         up.bus.emit('fragment:destroy', $target)
         swapElements $target, $fragment, step.transition, ->
+          options.insert?($fragment)
           title = htmlElement.querySelector("title")?.textContent # todo: extract title from header
           if options.history?.url
+#            alert(options.history)
+#            alert(options.history.url)
             document.title = title if title
             up.history[options.history.method](options.history.url)
             # Remember where the element came from so we can make
@@ -75,7 +77,7 @@ up.flow = (->
           up.bus.emit('fragment:ready', $fragment)
   
       else
-        up.util.error("Could not find selectorAtom (#{selectorAtom}) in response (#{html})")
+        up.util.error("Could not find selector (#{step.selector}) in response (#{html})")
 
   swapElements = ($old, $new, transitionName, afterInsert) ->
     if up.util.isGiven(transitionName)
@@ -90,13 +92,13 @@ up.flow = (->
       $old.replaceWith($new)
       afterInsert()
 
-  implantSteps = (selector, transitionString) ->
+  implantSteps = (selector, options) ->
+    transitionString = options.transition || options.animation || 'none'
     comma = /\ *,\ */
     disjunction = selector.split(comma)
     transitions = transitionString.split(comma) if up.util.isPresent(transitionString)    
     for selectorAtom, i in disjunction
-      if transitions
-        transition = transitions[i] || up.util.last(transitions)
+      transition = transitions[i] || up.util.last(transitions)
       selector: selectorAtom
       transition: transition
       
