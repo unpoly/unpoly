@@ -1,0 +1,15 @@
+animate($element)
+
+1. Ich kopiere $element zu $ghost
+
+2. Ich setze die opacity von $element auf 0
+
+3. Ich setze $ghost auf die Größe von $element
+  mit position: fixed
+  mit ausmessen des originals
+    left, top setzen
+    right, bottom löschen
+    width, height setzen
+    margin löschen
+
+1. Ich ersetze $element durch 
