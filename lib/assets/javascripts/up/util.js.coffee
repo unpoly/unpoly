@@ -1,12 +1,5 @@
 up.util = (->
 
-  #    function createDocument(html) {
-  #      var doc = document.documentElement.cloneNode();
-  #      doc.innerHTML = html;
-  #//    doc.head = doc.querySelector('head');
-  #      doc.body = doc.querySelector('body');
-  #      return doc;
-  #    }
   get = (url, options) ->
     options = options or {}
     options.url = url
@@ -18,42 +11,46 @@ up.util = (->
         "X-Up-Selector": options.selector
       }
     $.ajax options
+    
+  isStandardPort = (protocol, port) ->
+    (port == 80 && protocol == 'http') || (port == 443 && protocol == 'https')
 
-  normalizeUrl = (string, options) ->
-    options = up.util.options(options, search: true)
-    anchor = $("<a>").attr(href: string)[0]
+  normalizeUrl = (urlOrAnchor, options) ->
+    anchor = if isString(urlOrAnchor) 
+      $('<a>').attr(href: urlOrAnchor).get(0)
+    else 
+      unwrap(urlOrAnchor)
     normalized = anchor.protocol + "//" + anchor.hostname
-    normalized += ":" + anchor.port unless (anchor.port == 80 && anchor.protocol == 'http') || (anchor.port == 443 && anchor.protocol == 'https')  
+    normalized += ":#{anchor.port}" unless isStandardPort(anchor.protocol, anchor.port)  
     normalized += anchor.pathname
-    normalized += anchor.search if options.search
+    normalized += anchor.search unless options?.search == false
     normalized
 
   $createElementFromSelector = (selector) ->
     path = selector.split(/[ >]/)
-    $element = undefined
-    for depthSelector in path
-      $parent = $element or $(document.body)
-      $element = $parent.find(depthSelector)
-      if $element.length is 0
-        conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g)
-        tag = "div"
-        classes = []
-        id = null
-        for expression in conjunction
-          switch expression[0]
-            when "."
-              classes.push expression.substr(1)
-            when "#"
-              id = expression.substr(1)
-            else
-              tag = expression
-        html = "<" + tag
-        html += " class=\"" + classes.join(" ") + "\""  if classes.length
-        html += " id=\"" + id + "\""  if id
-        html += ">"
-        $element = $(html)
-        $element.appendTo $parent
-    $element
+    $root = null
+    for depthSelector, iteration in path
+      conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g)
+      tag = "div"
+      classes = []
+      id = null
+      for expression in conjunction
+        switch expression[0]
+          when "."
+            classes.push expression.substr(1)
+          when "#"
+            id = expression.substr(1)
+          else
+            tag = expression
+      html = "<" + tag
+      html += " class=\"" + classes.join(" ") + "\""  if classes.length
+      html += " id=\"" + id + "\""  if id
+      html += ">"
+      $element = $(html)
+      $element.appendTo($parent) if $parent
+      $root = $element if iteration == 0
+      $parent = $element
+    $root
 
   createElement = (tagName, html) ->
     element = document.createElement(tagName)
@@ -97,12 +94,26 @@ up.util = (->
 
   isUndefined = (object) ->
     object == `void(0)`
+    
+  isDefined = (object) ->
+    !isUndefined(object)
+    
+  isMissing = (object) ->
+    isUndefined(object) || isNull(object)
 
   isGiven = (object) ->
-    !isUndefined(object) && !isNull(object)
-
+    !isMissing(object)
+    
+  isBlank = (object) ->
+    isMissing(object) ||                  # null or undefined 
+#    (isString(object) && object == "") || # String
+    (object.length == 0)                  # String, Array, jQuery
+  
+  presence = (object) ->
+    if isPresent(object) then object else null
+  
   isPresent = (object) ->
-    isGiven(object) && !(isString(object) && object == "")
+    !isBlank(object)
 
   isFunction = (object) ->
     typeof(object) == 'function'
@@ -156,6 +167,13 @@ up.util = (->
       else
         true
     match
+    
+  select = (array, tester) ->
+    matches = []
+    each array, (element) ->
+      if tester(element)
+        matches.push(element)
+    matches
 
   presentAttr = ($element, attrNames...) ->
     values = ($element.attr(attrName) for attrName in attrNames)
@@ -200,11 +218,16 @@ up.util = (->
   error: error
   each: each
   detect: detect
+  select: select
   last: last
   isNull: isNull
+  isDefined: isDefined
   isUndefined: isUndefined
   isGiven: isGiven
+  isMissing: isMissing
   isPresent: isPresent
+  isBlank: isBlank
+  presence: presence
   isObject: isObject
   isFunction: isFunction
   isString: isString

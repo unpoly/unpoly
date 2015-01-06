@@ -42,7 +42,7 @@ up.link = (->
 
     childLinkClicked = ->
       $target = $(event.target)
-      $target.closest('a').length > 0 && $element.has($target).length > 0
+      $target.closest('a').length && $element.has($target).length
 
     unless childLinkClicked()
       event.preventDefault()

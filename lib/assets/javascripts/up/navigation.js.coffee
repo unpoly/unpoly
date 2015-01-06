@@ -7,14 +7,17 @@ up.navigation = (->
 
   locationChanged = ->
     unmarkActive()
-    normalizedLocation = up.util.normalizeUrl(location.href, search: false)
+    windowLocation = up.util.normalizeUrl(location.href, search: false)
+    modalLocation = up.modal.source()
+    popupLocation = up.popup.source()
+    
     up.util.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       # if $section is marked up with up-follow,
       # the actual link might be a child element.
       url = up.link.resolveUrl($section)
-      normalizedDestination = up.util.normalizeUrl(url, search: false)
-      if normalizedLocation == normalizedDestination
+      url = up.util.normalizeUrl(url, search: false)
+      if url == windowLocation || url == modalLocation || url == popupLocation
         $section.addClass(CLASS_CURRENT)
       else
         $section.removeClass(CLASS_CURRENT)
@@ -25,11 +28,7 @@ up.navigation = (->
     $section.addClass(CLASS_ACTIVE)
     
   enlargeClickArea = ($section) ->
-    $largerClickArea = $section.parents(SELECTOR_SECTION)
-    if $largerClickArea.length
-      $largerClickArea
-    else
-      $section
+    up.util.presence($section.parents(SELECTOR_SECTION)) || $section
     
   unmarkActive = ->
     $(SELECTOR_ACTIVE).removeClass(CLASS_ACTIVE)
@@ -38,5 +37,6 @@ up.navigation = (->
     sectionClicked($section)
 
   up.bus.on 'fragment:ready', locationChanged
+  up.bus.on 'fragment:destroy', locationChanged
 
 )()

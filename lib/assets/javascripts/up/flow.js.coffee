@@ -5,12 +5,14 @@ Page flow.
 ###
 up.flow = (->
 
-  rememberSource = ($element) ->
-    $element.attr("up-source", location.href)
+  setSource = (element, sourceUrl) ->
+    $element = $(element)
+    sourceUrl = up.util.normalizeUrl(sourceUrl) if up.util.isPresent(sourceUrl)
+    $element.attr("up-source", sourceUrl)
 
-  recallSource = ($element) ->
-    $source = $element.closest("[up-source]")
-    $source.attr("up-source") || location.href
+  source = (element) ->
+    $element = $(element).closest("[up-source]")
+    $element.attr("up-source") || location.href
 
   ###*
   Replaces elements on the current page with corresponding elements
@@ -27,6 +29,8 @@ up.flow = (->
   @param {String} [options.history.url=url]
     An alternative URL to use for the browser's location bar and history.
   @param {String} [options.history.method='push']
+  @param {String} [options.transition]
+  @param {String|Boolean} [options.source]
   ###
   replace = (selectorOrElement, url, options) ->
 
@@ -36,7 +40,10 @@ up.flow = (->
       up.util.createSelectorFromElement($(selectorOrElement))
 
     options = up.util.options(options, history: { url: url })
-
+    
+    if up.util.isMissing(options.source) || options.source == true
+      options.source = url
+      
     up.util.get(url, selector: selector)
       .done (html) -> implant(selector, html, options)
       .fail(up.util.error)
@@ -46,6 +53,7 @@ up.flow = (->
   @protected
   @param {String} selector
   @param {String} html
+  @param {String} [options.source]
   @param {String} [options.history.url]
   @param {String} [options.history.method='push']
   @param {String} [options.transition]
@@ -58,23 +66,20 @@ up.flow = (->
     htmlElement = up.util.createElementFromHtml(html)
         
     for step in implantSteps(selector, options)
-      $target = $(step.selector)
+      $old = $(step.selector)
       if fragment = htmlElement.querySelector(step.selector)
-        $fragment = $(fragment)
-        up.bus.emit('fragment:destroy', $target)
-        swapElements $target, $fragment, step.transition, ->
-          options.insert?($fragment)
+        $new = $(fragment)
+        swapElements $old, $new, step.transition, ->
+          options.insert?($new)
           title = htmlElement.querySelector("title")?.textContent # todo: extract title from header
-          if options.history?.url
+          if options.history.url
 #            alert(options.history)
 #            alert(options.history.url)
             document.title = title if title
             up.history[options.history.method](options.history.url)
             # Remember where the element came from so we can make
             # smaller page loads in the future (does this even make sense?).
-            rememberSource($target)
-          # The fragment is only ready after the history was (or wasn't) changed above
-          up.bus.emit('fragment:ready', $fragment)
+          setSource($new, options.source || history.url)
   
       else
         up.util.error("Could not find selector (#{step.selector}) in response (#{html})")
@@ -87,10 +92,14 @@ up.flow = (->
       # Make sure that any element enhancements happen BEFORE we morph
       # through the transition.
       afterInsert()
-      up.morph($old, $new, transitionName).then -> $old.remove()
+      up.bus.emit('fragment:ready', $new) # this should happen before the transition, so transitions see .up-current classes
+      up.morph($old, $new, transitionName).then -> destroy($old)
     else
+      up.bus.emit('fragment:destroy', old)
       $old.replaceWith($new)
+      up.bus.emit('fragment:ready', $new)
       afterInsert()
+    
 
   implantSteps = (selector, options) ->
     transitionString = options.transition || options.animation || 'none'
@@ -101,6 +110,22 @@ up.flow = (->
       transition = transitions[i] || up.util.last(transitions)
       selector: selectorAtom
       transition: transition
+
+  
+  ###*
+  Destroys the given element or selector.
+  Takes care that all destructors, if any, are called.
+  
+  @method up.destroy
+  @param {String|Element|jQuery} selectorOrElement 
+  ###
+  destroy = (selectorOrElement, options) ->
+    $element = $(selectorOrElement)
+    options = up.util.options(options, animation: 'none')
+    $element.addClass('up-destroying')
+    up.bus.emit('fragment:destroy', $element)
+    up.motion.animate($element, options.animation).then ->
+      $element.remove()
       
   ###*
   Replaces the given selector or element with a fresh copy
@@ -110,24 +135,21 @@ up.flow = (->
   @param {String|Element|jQuery} selectorOrElement
   ###
   reload = (selectorOrElement) ->
-    replace(selectorOrElement, recallSource($(selectorOrElement)))
+    sourceUrl = source(selectorOrElement)
+    replace(selectorOrElement, sourceUrl)
 
-  ###*
-  Removes the given selector or element from the DOM tree.
-
-  @method up.remove
-  @param {String|Element|jQuery} selectorOrElement
-  ###
-  remove = (selectorOrElement) ->
-    $(selectorOrElement).remove()
+  
+  up.bus.on('app:ready', ->
+    setSource(document.body, location.href)
+  )
 
   replace: replace
   reload: reload
-  remove: remove
+  destroy: destroy
   implant: implant
 
 )()
 
 up.replace = up.flow.replace
 up.reload = up.flow.reload
-up.remove = up.flow.remove
+up.destroy = up.flow.destroy

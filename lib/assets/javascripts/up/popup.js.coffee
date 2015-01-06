@@ -9,7 +9,6 @@ up.popup = (->
   
   position = ($link, $popup, origin) ->
     linkBox = up.util.measure($link, full: true)
-    console.log("linkBox", linkBox)
     css = switch origin
       when "bottom-right"
         right: linkBox.right
@@ -40,7 +39,6 @@ up.popup = (->
     
   updated = ($link, $popup, origin, animation) ->
     $popup.show()
-    $link.addClass('up-current')
     position($link, $popup, origin)
     up.animate($popup, animation)
     
@@ -72,10 +70,18 @@ up.popup = (->
     close()
     $popup = createHiddenPopup($link, selector, sticky)
     
+#    console.log("before replace", $link, $popup)
+    
     up.replace(selector, url,
       history: history
+      source: true
       insert: -> updated($link, $popup, origin, animation) 
     )
+    
+  source = ->
+    $popup = $('.up-popup')
+    unless $popup.is('.up-destroying')
+      $popup.find('[up-source]').attr('up-source')
 
   ###*
   @method up.popup.close
@@ -85,8 +91,7 @@ up.popup = (->
     options = up.util.options(options, animation: 'fade-out')
     $popup = $('.up-popup')
     if $popup.length
-      up.animate($popup, options.animation).then -> $popup.remove()
-    $('[up-popup]').removeClass('up-current')
+      up.destroy($popup, animation: options.animation)
     
   autoclose = ->
     unless $('.up-popup').is('[up-sticky]')
@@ -114,7 +119,6 @@ up.popup = (->
   
   open: open
   close: close
+  source: source
   
 )()
-
-
