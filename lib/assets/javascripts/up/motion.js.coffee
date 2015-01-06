@@ -25,9 +25,34 @@ up.motion = (->
       animationOrName
     else
       animations[animationOrName] or up.util.error("Unknown animation", animationName)
-    promise = anim($element, options)
-    up.util.isPromise(promise) or up.util.error("Animation did not return a Promise: #{animationName}")
-    promise
+    assertIsPromise(
+      anim($element, options),
+      ["Animation did not return a Promise", animationOrName]
+    )
+    
+  withGhosts = ($old, $new, block) ->
+    $oldGhost = null
+    $newGhost = null
+    up.util.temporaryCss $new, display: 'none', ->
+      $oldGhost = up.util.prependGhost($old)
+    up.util.temporaryCss $old, display: 'none', ->
+      $newGhost = up.util.prependGhost($new)
+    # $old should take up space in the page flow until the transition ends
+    $old.css(visibility: 'hidden')
+    newCssMemo = up.util.temporaryCss($new, display: 'none')
+    promise = block($oldGhost, $newGhost)
+    promise.then ->
+      $oldGhost.remove()
+      $newGhost.remove()
+      # Now that the transition is over we show $new again.
+      # Since we expect $old to be removed in a heartblink,
+      # $new should take up space
+      $old.css(display: 'none')
+      newCssMemo()
+      
+  assertIsPromise = (object, messageParts) ->
+    up.util.isPromise(object) or up.util.error(messageParts...)
+    object
   
   ###*
   Performs a transition between two elements.
@@ -35,29 +60,33 @@ up.motion = (->
   @method up.morph
   @param {Element|jQuery|String} source
   @param {Element|jQuery|String} target
-  @param {String} transitionName
+  @param {Function|String} transitionOrName
   @param {Number} [options.duration]
   @param {String} [options.easing]
   ###  
-  morph = (source, target, transitionName, options) ->
+  morph = (source, target, transitionOrName, options) ->
     $old = $(source)
     $new = $(target)
-    if transition = transitions[transitionName]
-      promise = transition($old, $new, options)
-      up.util.isPromise(promise) or up.util.error("Transition did not return a Promise: #{transitionName}")
-      promise
-    else if animation = animations[transitionName]
+    transition = up.util.presence(transitionOrName, up.util.isFunction) || transitions[transitionOrName]
+    if transition
+      withGhosts $old, $new, ($oldGhost, $newGhost) ->
+        assertIsPromise(
+          transition($oldGhost, $newGhost, options),
+          ["Transition did not return a promise", transitionOrName]
+        )
+    else if animation = animations[transitionOrName]
       $old.hide()
       animate($new, animation, options)
-    else if transitionName.indexOf('/') >= 0
-      parts = transitionName.split('/')
+    else if up.util.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0
+      parts = transitionOrName.split('/')
       transition = ($old, $new, options) ->
         $.when(
           animate($old, parts[0], options),
           animate($new, parts[1], options)
         )
+      morph($old, $new, transition, options)
     else
-      up.util.error("Unknown transition: #{transitionName}")
+      up.util.error("Unknown transition: #{transitionOrName}")
 
   ###*
   Defines a named transition.

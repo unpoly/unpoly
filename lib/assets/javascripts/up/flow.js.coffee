@@ -34,7 +34,7 @@ up.flow = (->
   ###
   replace = (selectorOrElement, url, options) ->
 
-    selector = if up.util.isString(selectorOrElement)
+    selector = if up.util.presence(selectorOrElement)
       selectorOrElement
     else
       up.util.createSelectorFromElement($(selectorOrElement))

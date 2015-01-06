@@ -109,8 +109,8 @@ up.util = (->
 #    (isString(object) && object == "") || # String
     (object.length == 0)                  # String, Array, jQuery
   
-  presence = (object) ->
-    if isPresent(object) then object else null
+  presence = (object, checker = isPresent) ->
+    if checker(object) then object else null
   
   isPresent = (object) ->
     !isBlank(object)
@@ -189,6 +189,18 @@ up.util = (->
     element = document.documentElement
     width: element.clientWidth
     height: element.clientHeight
+    
+  temporaryCss = ($element, css, block) ->
+    oldCss = {}
+    for property of css
+      oldCss[property] = $element.css(property)
+    $element.css(css)
+    memo = -> $element.css(oldCss)
+    if block
+      block()
+      memo()
+    else
+      memo
 
   measure = ($element, options) ->
     offset = $element.offset()
@@ -202,6 +214,18 @@ up.util = (->
       box.right = viewport.width - (box.left + box.width)
       box.bottom = viewport.height - (box.top + box.height)
     box
+
+  prependGhost = ($element) ->
+    dimensions = measure($element)
+    $ghost = $element.clone()
+    $ghost.css
+      right: ''
+      bottom: ''
+      margin: 0
+      position: 'fixed'
+    $ghost.css(dimensions)
+    $ghost.addClass('up-ghost')
+    $ghost.prependTo(document.body)
 
   presentAttr: presentAttr
   createElement: createElement
@@ -237,5 +261,7 @@ up.util = (->
   unwrap: unwrap
   nextFrame: nextFrame
   measure: measure
+  temporaryCss: temporaryCss
+  prependGhost: prependGhost
 
 )()
