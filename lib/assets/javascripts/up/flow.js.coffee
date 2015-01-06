@@ -80,6 +80,7 @@ up.flow = (->
             # Remember where the element came from so we can make
             # smaller page loads in the future (does this even make sense?).
           setSource($new, options.source || history.url)
+          autofocus($new)
   
       else
         up.util.error("Could not find selector (#{step.selector}) in response (#{html})")
@@ -111,7 +112,11 @@ up.flow = (->
       selector: selectorAtom
       transition: transition
 
-  
+  autofocus = ($element) ->
+    $control = $element.find('[autofocus]:last')
+    if $control.length && $control.get(0) != document.activeElement
+      $control.focus()
+      
   ###*
   Destroys the given element or selector.
   Takes care that all destructors, if any, are called.
