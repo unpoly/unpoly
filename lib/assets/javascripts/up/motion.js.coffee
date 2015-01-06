@@ -122,59 +122,77 @@ up.motion = (->
     
   animation('none', none)
 
-  animation('fade-in', ($element, options) ->
-    $element.css(opacity: 0)
-    $element.animate({ opacity: 1 }, options)
-    $element.promise()
+  animation('fade-in', ($ghost, options) ->
+    $ghost.css(opacity: 0)
+    $ghost.animate({ opacity: 1 }, options)
+    $ghost.promise()
   )
   
-  animation('fade-out', ($element, options) ->
-    $element.css(opacity: 1)
-    $element.animate({ opacity: 0 }, options)
-    $element.promise()
+  animation('fade-out', ($ghost, options) ->
+    $ghost.css(opacity: 1)
+    $ghost.animate({ opacity: 0 }, options)
+    $ghost.promise()
   )
   
-  animation('move-to-bottom', ($element, options) ->
-    $element.css(top: '0%')
-    $element.animate({ top: '100%' }, options)
-    $element.promise()
+  animation('move-to-top', ($ghost, options) ->
+    $ghost.css('margin-top': '0%')
+    $ghost.animate({ 'margin-top': '-100%' }, options)
+    $ghost.promise()
   )
   
-  animation('move-to-left', ($element, options) ->
-    $element.css(left: '0%')
-    $element.animate({ left: '-100%' }, options)
-    $element.promise()
+  animation('move-from-top', ($ghost, options) ->
+    $ghost.css('margin-top': '-100%')
+    $ghost.animate({ 'margin-top': '0%' }, options)
+    $ghost.promise()
+  )
+    
+  animation('move-to-bottom', ($ghost, options) ->
+    $ghost.css('margin-top': '0%')
+    $ghost.animate({ 'margin-top': '100%' }, options)
+    $ghost.promise()
   )
   
-  animation('move-from-left', ($element, options) ->
-    $element.css(left: '-100%')
-    $element.animate({ left: '0%' }, options)
-    $element.promise()
+  animation('move-from-bottom', ($ghost, options) ->
+    $ghost.css('margin-top': '100%')
+    $ghost.animate({ 'margin-top': '0%' }, options)
+    $ghost.promise()
   )
   
-  animation('move-to-right', ($element, options) ->
-    $element.css(left: '0%')
-    $element.animate({ left: '100%' }, options)
-    $element.promise()
+  animation('move-to-left', ($ghost, options) ->
+    $ghost.css('margin-left': '0%')
+    $ghost.animate({ 'margin-left': '-100%' }, options)
+    $ghost.promise()
   )
   
-  animation('move-from-right', ($element, options) ->
-    $element.css(left: '100%')
-    $element.animate({ left: '0%' }, options)
-    $element.promise()
+  animation('move-from-left', ($ghost, options) ->
+    $ghost.css('margin-left': '-100%')
+    $ghost.animate({ 'margin-left': '0%' }, options)
+    $ghost.promise()
   )
   
-  animation('roll-down', ($element, options) ->
-    fullHeight = $element.height()
+  animation('move-to-right', ($ghost, options) ->
+    $ghost.css('margin-left': '0%')
+    $ghost.animate({ 'margin-left': '100%' }, options)
+    $ghost.promise()
+  )
+  
+  animation('move-from-right', ($ghost, options) ->
+    $ghost.css('margin-left': '100%')
+    $ghost.animate({ 'margin-left': '0%' }, options)
+    $ghost.promise()
+  )
+  
+  animation('roll-down', ($ghost, options) ->
+    fullHeight = $ghost.height()
     oldStyle =
-      height: $element.css('height')
-      overflow: $element.css('overflow')
-    $element.css(
+      height: $ghost.css('height')
+      overflow: $ghost.css('overflow')
+    $ghost.css(
       height: '0px'
       overflow: 'hidden'
     )
-    $element.animate({ height: "#{fullHeight}px" }, options)
-    $element.promise().then(-> $element.css(oldStyle))
+    $ghost.animate({ height: "#{fullHeight}px" }, options)
+    $ghost.promise().then(-> $ghost.css(oldStyle))
   )
   
   transition('none', none)
