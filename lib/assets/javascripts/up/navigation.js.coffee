@@ -6,7 +6,6 @@ up.navigation = (->
   SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
 
   locationChanged = ->
-    unmarkActive()
     windowLocation = up.util.normalizeUrl(location.href, search: false)
     modalLocation = up.modal.source()
     popupLocation = up.popup.source()
@@ -36,7 +35,16 @@ up.navigation = (->
   up.on 'click', SELECTOR_SECTION, (event, $section) ->
     sectionClicked($section)
 
-  up.bus.on 'fragment:ready', locationChanged
-  up.bus.on 'fragment:destroy', locationChanged
+  # If a new fragment is inserted, it's likely to be the result
+  # to the active action. So we can remove the active marker.
+  up.bus.on 'fragment:ready', ->
+    unmarkActive()
+    locationChanged()
+
+  # If the destroyed fragment is a modal or popup container
+  # this changes which URLs we consider currents.
+  up.bus.on 'fragment:destroy', ($fragment) ->
+    if $fragment.is('.up-modal, .up-popup')
+      locationChanged()
 
 )()
