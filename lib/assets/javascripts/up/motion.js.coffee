@@ -11,11 +11,27 @@ up.motion = (->
   ###*
   Animates an element.
   
+  The following animations are pre-registered:
+  
+  - `fade-in`
+  - `fade-out`
+  - `move-to-top`
+  - `move-from-top`
+  - `move-to-bottom`
+  - `move-from-bottom`
+  - `move-to-left`
+  - `move-from-left`
+  - `move-to-right`
+  - `move-from-right`
+  - `none`
+  
   @method up.animate
   @param {Element|jQuery|String} elementOrSelector
   @param {String|Function} animationOrName
   @param {Number} [options.duration]
   @param {String} [options.easing]
+  @return {Promise}
+    A promise for the animation's end.
   ###
   animate = (elementOrSelector, animationOrName, options) ->
     $element = $(elementOrSelector)
@@ -57,12 +73,29 @@ up.motion = (->
   ###*
   Performs a transition between two elements.
   
+  The following transitions  are pre-registered:
+  
+  - `cross-fade`
+  - `move-top`
+  - `move-bottom`
+  - `move-left`
+  - `move-right`
+  - `none`
+  
+  You can also compose a transition from two animation names
+  separated by a slash character (`/`):
+  
+  - `move-to-bottom/fade-in`
+  - `move-to-left/move-from-top`
+  
   @method up.morph
   @param {Element|jQuery|String} source
   @param {Element|jQuery|String} target
   @param {Function|String} transitionOrName
   @param {Number} [options.duration]
   @param {String} [options.easing]
+  @return {Promise}
+    A promise for the transition's end.
   ###  
   morph = (source, target, transitionOrName, options) ->
     $old = $(source)
@@ -113,7 +146,8 @@ up.motion = (->
   and completes instantly.
   
   @method up.motion.none
-  @return {Promise} A resolved promise  
+  @return {Promise}
+    A resolved promise  
   ###
   none = ->
     deferred = $.Deferred()
@@ -208,6 +242,20 @@ up.motion = (->
     $.when(
       animate($old, 'move-to-right', options),
       animate($new, 'move-from-left', options)
+    )
+  )
+  
+  transition('move-top', ($old, $new, options) ->
+    $.when(
+      animate($old, 'move-to-top', options),
+      animate($new, 'move-from-bottom', options)
+    )
+  )
+  
+  transition('move-bottom', ($old, $new, options) ->
+    $.when(
+      animate($old, 'move-to-bottom', options),
+      animate($new, 'move-from-top', options)
     )
   )
   

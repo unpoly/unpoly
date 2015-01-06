@@ -50,7 +50,8 @@ up.popup = (->
   @param {String} [options.origin='bottom-right']
   @param {String} [options.animation]
   @param {Boolean} [options.sticky=false]
-    If `true`, keeps the popup open even if the page changes in the background.
+    If set to `true`, the popup remains
+    open even if the page changes in the background.
   @param {Object} [options.history=false]
   @example
       <a href="/decks" up-popup=".deck_list">Switch deck</a>
@@ -78,12 +79,24 @@ up.popup = (->
       insert: -> updated($link, $popup, origin, animation) 
     )
     
+  ###*
+  Returns the source URL for the fragment displayed
+  in the current popup overlay, or `undefined` if no
+  popup is open.
+  
+  @method up.popup.source
+  @return {String}
+    the source URL
+  ###
   source = ->
     $popup = $('.up-popup')
     unless $popup.is('.up-destroying')
       $popup.find('[up-source]').attr('up-source')
 
   ###*
+  Closes a currently opened popup overlay.
+  Does nothing if no popup is currently open.
+  
   @method up.popup.close
   @param options.animation {String}
   ###

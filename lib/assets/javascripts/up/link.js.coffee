@@ -1,10 +1,46 @@
+###*
+Links.
+  
+@class up.link
+###
+
 up.link = (->
   
+  ###*
+  Visits the given URL without a full page load.
+  This is done by fetching `url` through an AJAX request
+  and replaceing the current `<body>` tag with the response's `<body>` tag.. 
+  
+  @method up.visit
+  @param {String} url
+    The URL to visit.
+  @param {Object} options
+    See options for {{#crossLink "up.flow/up.replace"}}{{/crossLink}}.
+  @example
+      <a href="/users" up-follow>User list</a>
+  ###
   visit = (url, options) ->
     console.log("up.visit", url)
     # options = up.util.options(options, )
     up.replace('body', url, options)
 
+  ###*
+  Follows the given link and replaces a selector in the current page
+  with corresponding elements from a new page fetched from the server.
+  
+  @method up.follow
+  @param {Element|jQuery|String} link
+    An element or selector which resolves to an `<a>` tag
+    or any element that is marked up with an `up-follow` attribute.
+  @param {String} [options.target]
+    The selector to replace.
+    Defaults to the `up-target` attribute on `link`,
+    or to `body` if such an attribute does not exist.
+  @param {Function|String} [options.transition]
+    A transition function or name.
+  @example
+      <a href="/users" up-target=".main">User list</a>
+  ###
   follow = (link, options) ->
     $link = $(link)
     options = up.util.options(options)

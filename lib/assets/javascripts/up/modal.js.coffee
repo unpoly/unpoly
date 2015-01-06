@@ -1,3 +1,8 @@
+###*
+Modal dialogs (WIP).
+  
+@class up.modal
+###
 up.modal = (->
 
 #  configuration =
