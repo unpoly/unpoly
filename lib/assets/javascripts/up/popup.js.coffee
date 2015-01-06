@@ -1,5 +1,5 @@
 ###*
-Popup overlays.
+Pop-up overlays.
   
 For modal dialogs see {{#crossLink "up.modal"}}{{/crossLink}}.
   
@@ -115,6 +115,12 @@ up.popup = (->
   up.bus.on('fragment:ready', ($fragment) ->
     unless $fragment.closest('.up-popup').length
       autoclose()
+  )
+  
+  # Close the pop-up overlay when the user presses ESC.
+  $(document).on('keydown', (event) ->
+    if event.keyCode == 27
+      close()
   )
   
   open: open
