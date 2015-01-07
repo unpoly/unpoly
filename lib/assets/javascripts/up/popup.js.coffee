@@ -24,6 +24,7 @@ up.popup = (->
         bottom: linkBox.top
       else
         up.util.error("Unknown origin", origin)
+    $popup.attr('up-origin', origin)
 #    for key, value of css
 #      css[key] = Math.max(value, 0)
     $popup.css(css)
@@ -98,13 +99,14 @@ up.popup = (->
   Does nothing if no popup is currently open.
   
   @method up.popup.close
-  @param options.animation {String}
+  @param {Object} options
+    See options for {{#crossLink "up.motion/up.animate"}}{{/crossLink}}.
   ###
   close = (options) ->
-    options = up.util.options(options, animation: 'fade-out')
     $popup = $('.up-popup')
     if $popup.length
-      up.destroy($popup, animation: options.animation)
+      options = up.util.options(options, animation: 'fade-out')
+      up.destroy($popup, options)
     
   autoclose = ->
     unless $('.up-popup').is('[up-sticky]')
@@ -118,7 +120,8 @@ up.popup = (->
     else
       open($link)
   )
-  
+
+  # Close the popup when someone clicks outside the popup
   up.on('click', 'body', (event, $body) ->
     $target = $(event.target)
     unless $target.closest('.up-popup').length || $target.closest('[up-popup]').length
@@ -131,10 +134,7 @@ up.popup = (->
   )
   
   # Close the pop-up overlay when the user presses ESC.
-  up.on('keydown', 'body', (event) ->
-    if event.keyCode == 27
-      close()
-  )
+  up.magic.onEscape(-> close())
   
   up.on('click', '[up-close]', (event, $element) ->
     if $element.closest('.up-popup')

@@ -251,6 +251,9 @@ up.util = (->
     $ghost.addClass('up-ghost')
     $ghost.prependTo(document.body)
 
+  escapePressed = (event) ->
+    event.keyCode == 27
+    
   presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl
@@ -288,5 +291,6 @@ up.util = (->
   temporaryCss: temporaryCss
   cssAnimate: cssAnimate
   prependGhost: prependGhost
+  escapePressed: escapePressed
 
 )()

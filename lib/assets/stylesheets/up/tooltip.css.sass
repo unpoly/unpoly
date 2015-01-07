@@ -1,0 +1,17 @@
+$stratum: 30000
+$distance-from-trigger: 6px
+
+.up-tooltip
+  z-index: $stratum
+  position: fixed
+  background-color: rgba(30, 30, 30, 0.8)
+  color: white
+  padding: 6px 8px
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2)
+  
+  &[up-origin=top]
+    margin-top: -$distance-from-trigger
+  
+  &[up-origin=bottom]
+    margin-bottom: -$distance-from-trigger
+    

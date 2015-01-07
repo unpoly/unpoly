@@ -64,6 +64,12 @@ up.magic = (->
       destroyer = $element.data(DESTROYER_KEY)
       destroyer()
 
+  onEscape = (handler) ->
+    live('keydown', 'body', (event) ->
+      if up.util.escapePressed(event)
+        handler(event)
+    )
+
   up.bus.on 'app:ready', (-> up.bus.emit 'fragment:ready', $(document.body))
   up.bus.on 'fragment:ready', compile
   up.bus.on 'fragment:destroy', destroy
@@ -71,6 +77,7 @@ up.magic = (->
 
   awaken: awaken
   on: live
+  onEscape: onEscape
 
 )()
 
