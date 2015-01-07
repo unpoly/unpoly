@@ -131,8 +131,13 @@ up.popup = (->
   )
   
   # Close the pop-up overlay when the user presses ESC.
-  $(document).on('keydown', (event) ->
+  up.on('keydown', 'body', (event) ->
     if event.keyCode == 27
+      close()
+  )
+  
+  up.on('click', '[up-close]', (event, $element) ->
+    if $element.closest('.up-popup')
       close()
   )
   
