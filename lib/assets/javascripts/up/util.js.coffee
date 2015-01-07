@@ -191,9 +191,11 @@ up.util = (->
     height: element.clientHeight
     
   temporaryCss = ($element, css, block) ->
-    oldCss = {}
-    for property of css
-      oldCss[property] = $element.css(property)
+    
+    oldCss = $element.css(Object.keys(css))
+#    oldCss = {}
+#    for property of css
+#      oldCss[property] = $element.css(property)
     $element.css(css)
     memo = -> $element.css(oldCss)
     if block
@@ -201,6 +203,23 @@ up.util = (->
       memo()
     else
       memo
+
+  cssAnimate = ($element, lastFrame, opts) ->
+    opts = options(opts, duration: 300, easing: 'ease')
+    deferred = $.Deferred()
+    # This should really be "one" instead of "on".
+    # We only want this event to be called once, then clean up after ourselves.
+    # $element.one(up.browser.transitionEndEvent(), -> deferred.resolve())
+    transition =
+      'transition-property': Object.keys(lastFrame).join(', ')
+      'transition-duration': "#{opts.duration}ms"
+      'transition-timing-function': opts.easing
+    console.log("CSS transition with", transition)
+    withoutTransition = temporaryCss($element, transition)
+    $element.css(lastFrame)
+    deferred.then(withoutTransition)
+    setTimeout((-> deferred.resolve()), opts.duration)
+    deferred.promise()
 
   measure = ($element, options) ->
     offset = $element.offset()
@@ -262,6 +281,7 @@ up.util = (->
   nextFrame: nextFrame
   measure: measure
   temporaryCss: temporaryCss
+  cssAnimate: cssAnimate
   prependGhost: prependGhost
 
 )()

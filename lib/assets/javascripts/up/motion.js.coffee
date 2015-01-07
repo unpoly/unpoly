@@ -4,9 +4,15 @@ Animation and transition effects.
 @class up.motion
 ###
 up.motion = (->
+  
+  defaultOptions =
+    duration: 300
+    easing: 'ease'
 
   animations = {}
   transitions = {}
+  
+  cssAnimate = up.util.cssAnimate
   
   ###*
   Animates an element.
@@ -35,8 +41,8 @@ up.motion = (->
   ###
   animate = (elementOrSelector, animationOrName, options) ->
     $element = $(elementOrSelector)
-    console.log("animate", animationOrName)
-    options = up.util.options(options, easing: 'swing', duration: 300)
+    console.log("animating with", animationOrName)
+    options = up.util.options(options, defaultOptions)
     anim = if up.util.isFunction(animationOrName)
       animationOrName
     else
@@ -45,7 +51,7 @@ up.motion = (->
       anim($element, options),
       ["Animation did not return a Promise", animationOrName]
     )
-    
+
   withGhosts = ($old, $new, block) ->
     $oldGhost = null
     $newGhost = null
@@ -69,7 +75,10 @@ up.motion = (->
   assertIsPromise = (object, messageParts) ->
     up.util.isPromise(object) or up.util.error(messageParts...)
     object
-  
+
+
+    
+
   ###*
   Performs a transition between two elements.
   
@@ -98,6 +107,7 @@ up.motion = (->
     A promise for the transition's end.
   ###  
   morph = (source, target, transitionOrName, options) ->
+    options = up.util.options(defaultOptions)
     $old = $(source)
     $new = $(target)
     transition = up.util.presence(transitionOrName, up.util.isFunction) || transitions[transitionOrName]
@@ -158,75 +168,61 @@ up.motion = (->
 
   animation('fade-in', ($ghost, options) ->
     $ghost.css(opacity: 0)
-    $ghost.animate({ opacity: 1 }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { opacity: 1 }, options)
   )
   
   animation('fade-out', ($ghost, options) ->
     $ghost.css(opacity: 1)
-    $ghost.animate({ opacity: 0 }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { opacity: 0 }, options)
   )
   
   animation('move-to-top', ($ghost, options) ->
     $ghost.css('margin-top': '0%')
-    $ghost.animate({ 'margin-top': '-100%' }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { 'margin-top': '-100%' }, options)
   )
   
   animation('move-from-top', ($ghost, options) ->
     $ghost.css('margin-top': '-100%')
-    $ghost.animate({ 'margin-top': '0%' }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { 'margin-top': '0%' }, options)
   )
     
   animation('move-to-bottom', ($ghost, options) ->
     $ghost.css('margin-top': '0%')
-    $ghost.animate({ 'margin-top': '100%' }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { 'margin-top': '100%' }, options)
   )
   
   animation('move-from-bottom', ($ghost, options) ->
     $ghost.css('margin-top': '100%')
-    $ghost.animate({ 'margin-top': '0%' }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { 'margin-top': '0%' }, options)
   )
   
   animation('move-to-left', ($ghost, options) ->
     $ghost.css('margin-left': '0%')
-    $ghost.animate({ 'margin-left': '-100%' }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { 'margin-left': '-100%' }, options)
   )
   
   animation('move-from-left', ($ghost, options) ->
     $ghost.css('margin-left': '-100%')
-    $ghost.animate({ 'margin-left': '0%' }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { 'margin-left': '0%' }, options)
   )
   
   animation('move-to-right', ($ghost, options) ->
     $ghost.css('margin-left': '0%')
-    $ghost.animate({ 'margin-left': '100%' }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { 'margin-left': '100%' }, options)
   )
   
   animation('move-from-right', ($ghost, options) ->
     $ghost.css('margin-left': '100%')
-    $ghost.animate({ 'margin-left': '0%' }, options)
-    $ghost.promise()
+    cssAnimate($ghost, { 'margin-left': '0%' }, options)
   )
   
   animation('roll-down', ($ghost, options) ->
     fullHeight = $ghost.height()
-    oldStyle =
-      height: $ghost.css('height')
-      overflow: $ghost.css('overflow')
-    $ghost.css(
+    styleMemo = up.util.temporaryCss($ghost,
       height: '0px'
       overflow: 'hidden'
     )
-    $ghost.animate({ height: "#{fullHeight}px" }, options)
-    $ghost.promise().then(-> $ghost.css(oldStyle))
+    cssAnimate($ghost, { height: "#{fullHeight}px" }, options).then(styleMemo)
   )
   
   transition('none', none)
