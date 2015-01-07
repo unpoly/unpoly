@@ -1,4 +1,4 @@
-# Up + Rails bindings
+# Up + Rails bindings (WIP)
 
 Up.js is a solution for Rails apps that need fast-responding UI
 but don't want to pay the Javascript MVC complexity tax.
