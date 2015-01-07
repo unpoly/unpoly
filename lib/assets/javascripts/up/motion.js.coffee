@@ -7,6 +7,7 @@ up.motion = (->
   
   defaultOptions =
     duration: 300
+    delay: 0
     easing: 'ease'
 
   animations = {}
@@ -36,13 +37,14 @@ up.motion = (->
   @param {String|Function} animationOrName
   @param {Number} [options.duration]
   @param {String} [options.easing]
+  @param {Number} [options.delay]
   @return {Promise}
     A promise for the animation's end.
   ###
   animate = (elementOrSelector, animationOrName, options) ->
     $element = $(elementOrSelector)
-    console.log("animating with", animationOrName)
     options = up.util.options(options, defaultOptions)
+    console.log("animating with", animationOrName, "duration:", options.duration)
     anim = if up.util.isFunction(animationOrName)
       animationOrName
     else
@@ -103,6 +105,7 @@ up.motion = (->
   @param {Function|String} transitionOrName
   @param {Number} [options.duration]
   @param {String} [options.easing]
+  @param {Number} [options.delay]
   @return {Promise}
     A promise for the transition's end.
   ###  
