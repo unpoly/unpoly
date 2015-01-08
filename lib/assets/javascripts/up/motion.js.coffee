@@ -58,7 +58,7 @@ up.motion = (->
     $oldGhost = null
     $newGhost = null
     up.util.temporaryCss $new, display: 'none', ->
-      $oldGhost = up.util.prependGhost($old)
+      $oldGhost = up.util.prependGhost($old).addClass('up-destroying')
     up.util.temporaryCss $old, display: 'none', ->
       $newGhost = up.util.prependGhost($new)
     # $old should take up space in the page flow until the transition ends

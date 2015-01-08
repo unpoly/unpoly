@@ -242,11 +242,12 @@ up.util = (->
   prependGhost = ($element) ->
     dimensions = measure($element)
     $ghost = $element.clone()
+    $ghost.find('script').remove()
     $ghost.css
       right: ''
       bottom: ''
       margin: 0
-      position: 'fixed'
+      position: 'absolute'
     $ghost.css(dimensions)
     $ghost.addClass('up-ghost')
     $ghost.prependTo(document.body)

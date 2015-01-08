@@ -81,26 +81,25 @@ up.flow = (->
             # smaller page loads in the future (does this even make sense?).
           setSource($new, options.source || history.url)
           autofocus($new)
+#          executeScripts($new)
   
       else
         up.util.error("Could not find selector (#{step.selector}) in response (#{html})")
 
   swapElements = ($old, $new, transitionName, afterInsert) ->
-    if up.util.isGiven(transitionName) 
+    # Wrap the whole task as a destroy animation, so $old will
+    # get market as .up-destroying right away.
+    destroy $old, animation: ->
+      transitionName ||= 'none'
+      $new.insertAfter($old)
+      # Set history etc.
+      afterInsert()
+      # The fragment should be readiet before the transition,
+      # so transitions see .up-current classes
+      up.ready($new)
       if $old.is('body') && transitionName != 'none'
         up.util.error('Cannot apply transitions to body-elements', transitionName)
-      $new.insertAfter($old)
-      # Make sure that any element enhancements happen BEFORE we morph
-      # through the transition.
-      afterInsert()
-      up.bus.emit('fragment:ready', $new) # this should happen before the transition, so transitions see .up-current classes
-      up.morph($old, $new, transitionName).then -> destroy($old)
-    else
-      up.bus.emit('fragment:destroy', old)
-      $old.replaceWith($new)
-      up.bus.emit('fragment:ready', $new)
-      afterInsert()
-    
+      up.morph($old, $new, transitionName)
 
   implantSteps = (selector, options) ->
     transitionString = options.transition || options.animation || 'none'
@@ -117,6 +116,15 @@ up.flow = (->
     if $control.length && $control.get(0) != document.activeElement
       $control.focus()
       
+#  executeScripts = ($new) ->
+#    $new.find('script').each ->
+#      $script = $(this)
+#      type = $script.attr('type')
+#      if up.util.isBlank(type) || type.indexOf('text/javascript') == 0
+#        code = $script.text()
+#        console.log("Evaling javascript code", code)
+#        eval(code)
+      
   ###*
   Destroys the given element or selector.
   Takes care that all destructors, if any, are called.
@@ -129,8 +137,10 @@ up.flow = (->
     options = up.util.options(options, animation: 'none')
     $element.addClass('up-destroying')
     up.bus.emit('fragment:destroy', $element)
-    up.motion.animate($element, options.animation).then ->
-      $element.remove()
+    animationPromise = up.util.presence(options.animation, up.util.isPromise) ||
+      up.motion.animate($element, options.animation)
+    animationPromise.then -> $element.remove()
+    
       
   ###*
   Replaces the given selector or element with a fresh copy
