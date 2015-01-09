@@ -211,15 +211,11 @@ up.util = (->
       easing: 'ease'
     )
     deferred = $.Deferred()
-    # This should really be "one" instead of "on".
-    # We only want this event to be called once, then clean up after ourselves.
-    # $element.one(up.browser.transitionEndEvent(), -> deferred.resolve())
     transition =
       'transition-property': Object.keys(lastFrame).join(', ')
       'transition-duration': "#{opts.duration}ms"
       'transition-delay': "#{opts.delay}ms"
       'transition-timing-function': opts.easing
-    console.log("CSS transition with", transition, opts.delay)
     withoutTransition = temporaryCss($element, transition)
     $element.css(lastFrame)
     deferred.then(withoutTransition)
