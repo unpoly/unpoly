@@ -204,12 +204,32 @@ up.util = (->
     else
       memo
 
-  cssAnimate = ($element, lastFrame, opts) ->
+  ###*
+  Animates the given element's CSS properties using CSS transitions.
+
+  @method up.util.cssAnimate
+  @param {Element|jQuery|String} elementOrSelector
+    The element to animate.
+  @param {Object} lastFrame
+    The CSS properties that should be transitioned to.
+  @param {Number} [opts.duration=300]
+    The duration of the animation, in milliseconds.
+  @param {Number} [opts.delay=0]
+    The delay before the animation starts, in milliseconds.
+  @param {String} [opts.easing='ease']
+    The timing function that controls the animation's acceleration.
+    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    for a list of pre-defined timing functions.
+  @return
+    A promise for the animation's end.
+  ###
+  cssAnimate = (elementOrSelector, lastFrame, opts) ->
     opts = options(opts, 
       duration: 300, 
       delay: 0, 
       easing: 'ease'
     )
+    $element = $(elementOrSelector)
     deferred = $.Deferred()
     transition =
       'transition-property': Object.keys(lastFrame).join(', ')
