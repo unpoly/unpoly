@@ -243,7 +243,7 @@ up.util = (->
     deferred.then(withoutTransition)
     setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
     deferred.promise()
-
+    
   measure = ($element, options) ->
     offset = $element.offset()
     box = 

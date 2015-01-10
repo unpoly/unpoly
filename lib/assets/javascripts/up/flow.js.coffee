@@ -4,6 +4,8 @@ Page flow.
 @class up.flow
 ###
 up.flow = (->
+  
+  presence = up.util.presence
 
   setSource = (element, sourceUrl) ->
     $element = $(element)
@@ -34,7 +36,7 @@ up.flow = (->
   ###
   replace = (selectorOrElement, url, options) ->
 
-    selector = if up.util.presence(selectorOrElement)
+    selector = if presence(selectorOrElement)
       selectorOrElement
     else
       up.util.createSelectorFromElement($(selectorOrElement))
@@ -66,37 +68,39 @@ up.flow = (->
     htmlElement = up.util.createElementFromHtml(html)
         
     for step in implantSteps(selector, options)
-      $old = $(step.selector)
+      $old =
+        # always prefer to replace content in popups or modals
+        presence($(".up-popup " + step.selector)) || 
+        presence($(".up-modal " + step.selector)) || 
+        presence($(step.selector)) 
       if fragment = htmlElement.querySelector(step.selector)
         $new = $(fragment)
-        swapElements $old, $new, step.transition, ->
-          options.insert?($new)
-          title = htmlElement.querySelector("title")?.textContent # todo: extract title from header
-          if options.history.url
-#            alert(options.history)
-#            alert(options.history.url)
-            document.title = title if title
-            up.history[options.history.method](options.history.url)
-            # Remember where the element came from so we can make
-            # smaller page loads in the future (does this even make sense?).
-          setSource($new, options.source || history.url)
-          autofocus($new)
-#          executeScripts($new)
-  
+        options.title ||= htmlElement.querySelector("title")?.textContent # todo: extract title from header
+        swapElements $old, $new, step.transition, options
       else
         up.util.error("Could not find selector (#{step.selector}) in response (#{html})")
+        
+  elementInserted = ($new, options) ->
+    options.insert?($new)
+    if options.history.url
+      document.title = options.title if options.title
+      up.history[options.history.method](options.history.url)
+    # Remember where the element came from so we can
+    # offer reload functionality.
+    setSource($new, options.source || history.url)
+    autofocus($new)
+    up.ready($new)
 
-  swapElements = ($old, $new, transitionName, afterInsert) ->
+  swapElements = ($old, $new, transitionName, options) ->
     # Wrap the whole task as a destroy animation, so $old will
     # get market as .up-destroying right away.
     destroy $old, animation: ->
       transitionName ||= 'none'
       $new.insertAfter($old)
       # Set history etc.
-      afterInsert()
+      elementInserted($new, options)
       # The fragment should be readiet before the transition,
       # so transitions see .up-current classes
-      up.ready($new)
       if $old.is('body') && transitionName != 'none'
         up.util.error('Cannot apply transitions to body-elements', transitionName)
       up.morph($old, $new, transitionName)
@@ -137,7 +141,7 @@ up.flow = (->
     options = up.util.options(options, animation: 'none')
     $element.addClass('up-destroying')
     up.bus.emit('fragment:destroy', $element)
-    animationPromise = up.util.presence(options.animation, up.util.isPromise) ||
+    animationPromise = presence(options.animation, up.util.isPromise) ||
       up.motion.animate($element, options.animation)
     animationPromise.then -> $element.remove()
     
