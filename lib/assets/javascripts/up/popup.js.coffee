@@ -28,6 +28,34 @@ up.popup = (->
 #    for key, value of css
 #      css[key] = Math.max(value, 0)
     $popup.css(css)
+    ensureInViewport($popup)
+
+  ensureInViewport = ($popup) ->
+    box = up.util.measure($popup, full: true)
+    errorX = null
+    errorY = null
+    if box.right < 0
+      errorX = -box.right  # errorX is positive
+    if box.bottom < 0
+      errorY = -box.bottom # errorY is positive
+    if box.left < 0
+      errorX = box.left # errorX is negative
+    if box.top < 0
+      errorY = box.top # errorY is negative
+    if errorX
+      # We use parseInt to:
+      # 1) convert "50px" to 50
+      # 2) convert "auto" to NaN
+      if left = parseInt($popup.css('left'))
+        $popup.css('left', left - errorX)
+      else if right = parseInt($popup.css('right'))
+        $popup.css('right', right + errorX)
+    if errorY
+      if top = parseInt($popup.css('top'))
+        $popup.css('top', top - errorY)
+      else if bottom = parseInt($popup.css('bottom'))
+        $popup.css('bottom', bottom + errorY)
+    
     
   createHiddenPopup = ($link, selector, sticky) ->
     $popup = up.util.$createElementFromSelector('.up-popup')

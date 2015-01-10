@@ -66,13 +66,14 @@ up.motion = (->
       $newGhost = up.util.prependGhost($new)
     # $old should take up space in the page flow until the transition ends
     $old.css(visibility: 'hidden')
+    
     newCssMemo = up.util.temporaryCss($new, display: 'none')
     promise = block($oldGhost, $newGhost)
     promise.then ->
       $oldGhost.remove()
       $newGhost.remove()
       # Now that the transition is over we show $new again.
-      # Since we expect $old to be removed in a heartblink,
+      # Since we expect $old to be removed in a heartbeat,
       # $new should take up space
       $old.css(display: 'none')
       newCssMemo()
