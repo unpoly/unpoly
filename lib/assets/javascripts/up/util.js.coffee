@@ -120,10 +120,12 @@ up.util = (->
 
   isString = (object) ->
     typeof(object) == 'string'
+    
+  isHash = (object) ->
+    typeof(object) == 'object' && !!object
 
   isObject = (object) ->
-    type = typeof object
-    type == 'function' || (type == 'object' && !!object)
+    isHash(object) || (typeof object == 'function')
 
   isJQuery = (object) ->
     object instanceof jQuery
@@ -301,6 +303,7 @@ up.util = (->
   isString: isString
   isJQuery: isJQuery
   isPromise: isPromise
+  isHash: isHash
   ifGiven: ifGiven
   unwrap: unwrap
   nextFrame: nextFrame

@@ -13,8 +13,6 @@ up.motion = (->
   animations = {}
   transitions = {}
   
-  cssAnimate = up.util.cssAnimate
-  
   ###*
   Animates an element.
   
@@ -34,25 +32,30 @@ up.motion = (->
   
   @method up.animate
   @param {Element|jQuery|String} elementOrSelector
-  @param {String|Function} animationOrName
+  @param {String|Function|Object} animation
   @param {Number} [options.duration]
   @param {String} [options.easing]
   @param {Number} [options.delay]
   @return {Promise}
     A promise for the animation's end.
   ###
-  animate = (elementOrSelector, animationOrName, options) ->
+  animate = (elementOrSelector, animation, options) ->
     $element = $(elementOrSelector)
     options = up.util.options(options, defaultOptions)
-    console.log("animating with", animationOrName, "duration:", options.duration)
-    anim = if up.util.isFunction(animationOrName)
-      animationOrName
+    if up.util.isFunction(animation)
+      assertIsPromise(
+        animation($element, options),
+        ["Animation did not return a Promise", animation]
+      )
+    else if up.util.isString(animation)
+      animate($element, findAnimation(animation), options)
+    else if up.util.isHash(animation)
+      up.util.cssAnimate($element, animation, options)
     else
-      animations[animationOrName] or up.util.error("Unknown animation", animationName)
-    assertIsPromise(
-      anim($element, options),
-      ["Animation did not return a Promise", animationOrName]
-    )
+      up.util.error("Unknown animation type", animation)
+      
+  findAnimation = (name) ->
+    animations[name] or up.util.error("Unknown animation", animation)
 
   withGhosts = ($old, $new, block) ->
     $oldGhost = null
@@ -171,52 +174,52 @@ up.motion = (->
 
   animation('fade-in', ($ghost, options) ->
     $ghost.css(opacity: 0)
-    cssAnimate($ghost, { opacity: 1 }, options)
+    animate($ghost, { opacity: 1 }, options)
   )
   
   animation('fade-out', ($ghost, options) ->
     $ghost.css(opacity: 1)
-    cssAnimate($ghost, { opacity: 0 }, options)
+    animate($ghost, { opacity: 0 }, options)
   )
   
   animation('move-to-top', ($ghost, options) ->
     $ghost.css('margin-top': '0%')
-    cssAnimate($ghost, { 'margin-top': '-100%' }, options)
+    animate($ghost, { 'margin-top': '-100%' }, options)
   )
   
   animation('move-from-top', ($ghost, options) ->
     $ghost.css('margin-top': '-100%')
-    cssAnimate($ghost, { 'margin-top': '0%' }, options)
+    animate($ghost, { 'margin-top': '0%' }, options)
   )
     
   animation('move-to-bottom', ($ghost, options) ->
     $ghost.css('margin-top': '0%')
-    cssAnimate($ghost, { 'margin-top': '100%' }, options)
+    animate($ghost, { 'margin-top': '100%' }, options)
   )
   
   animation('move-from-bottom', ($ghost, options) ->
     $ghost.css('margin-top': '100%')
-    cssAnimate($ghost, { 'margin-top': '0%' }, options)
+    animate($ghost, { 'margin-top': '0%' }, options)
   )
   
   animation('move-to-left', ($ghost, options) ->
     $ghost.css('margin-left': '0%')
-    cssAnimate($ghost, { 'margin-left': '-100%' }, options)
+    animate($ghost, { 'margin-left': '-100%' }, options)
   )
   
   animation('move-from-left', ($ghost, options) ->
     $ghost.css('margin-left': '-100%')
-    cssAnimate($ghost, { 'margin-left': '0%' }, options)
+    animate($ghost, { 'margin-left': '0%' }, options)
   )
   
   animation('move-to-right', ($ghost, options) ->
     $ghost.css('margin-left': '0%')
-    cssAnimate($ghost, { 'margin-left': '100%' }, options)
+    animate($ghost, { 'margin-left': '100%' }, options)
   )
   
   animation('move-from-right', ($ghost, options) ->
     $ghost.css('margin-left': '100%')
-    cssAnimate($ghost, { 'margin-left': '0%' }, options)
+    animate($ghost, { 'margin-left': '0%' }, options)
   )
   
   animation('roll-down', ($ghost, options) ->
@@ -225,7 +228,7 @@ up.motion = (->
       height: '0px'
       overflow: 'hidden'
     )
-    cssAnimate($ghost, { height: "#{fullHeight}px" }, options).then(styleMemo)
+    animate($ghost, { height: "#{fullHeight}px" }, options).then(styleMemo)
   )
   
   transition('none', none)
