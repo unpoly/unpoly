@@ -25,8 +25,6 @@ up.popup = (->
       else
         up.util.error("Unknown origin", origin)
     $popup.attr('up-origin', origin)
-#    for key, value of css
-#      css[key] = Math.max(value, 0)
     $popup.css(css)
     ensureInViewport($popup)
 

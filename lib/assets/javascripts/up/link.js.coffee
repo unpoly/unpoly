@@ -46,7 +46,12 @@ up.link = (->
     options = up.util.options(options)
     url = up.util.presentAttr($link, 'href', 'up-follow')
     selector = options.target || $link.attr("up-target") || 'body'
-    options.transition ||= $link.attr('up-transition')
+    options.transition ||= up.util.presence($link.attr('up-transition')) || up.util.presence($link.attr('up-animation')) 
+    if history = $link.attr('up-history')
+      if history == 'false'
+        options.history = false
+      else
+        options.history = { url: history }
     up.replace(selector, url, options)
 
   resolve = (element) ->
@@ -60,16 +65,6 @@ up.link = (->
     if link = resolve(element)
       up.util.presentAttr(link, 'href', 'up-follow')
       
-  markActive = (element) ->
-    markUnactive()
-    $element = $(element)
-    $clickArea = $element.ancestors('up-follow')
-    $clickArea = $element unless $clickArea.length
-    $clickArea.addClass('up-active')
-    
-  markUnactive = ->
-    $('[up-active]').removeClass('up-active')
-
   up.on 'click', 'a[up-target]', (event, $link) ->
     event.preventDefault()
     follow($link)

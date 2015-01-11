@@ -256,6 +256,11 @@ up.util = (->
       box.right = viewport.width - (box.left + box.width)
       box.bottom = viewport.height - (box.top + box.height)
     box
+    
+  copyAttributes = ($source, $target) ->
+    for attr in $source.get(0).attributes
+      if attr.specified
+        $target.attr(attr.name, attr.value)
 
   prependGhost = ($element) ->
     dimensions = measure($element)
@@ -269,6 +274,9 @@ up.util = (->
     $ghost.css(dimensions)
     $ghost.addClass('up-ghost')
     $ghost.prependTo(document.body)
+
+  findWithSelf = ($element, selector) ->
+    $element.find(selector).addBack(selector)
 
   escapePressed = (event) ->
     event.keyCode == 27
@@ -312,5 +320,7 @@ up.util = (->
   cssAnimate: cssAnimate
   prependGhost: prependGhost
   escapePressed: escapePressed
+  copyAttributes: copyAttributes
+  findWithSelf: findWithSelf
 
 )()

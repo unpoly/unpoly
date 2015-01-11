@@ -66,7 +66,9 @@ up.flow = (->
     # jQuery cannot construct transient elements that contain <html> or <body> tags,
     # so we're using the native browser API to grep through the HTML
     htmlElement = up.util.createElementFromHtml(html)
-        
+
+    options.title ||= htmlElement.querySelector("title")?.textContent # todo: extract title from header
+
     for step in implantSteps(selector, options)
       $old =
         # always prefer to replace content in popups or modals
@@ -75,35 +77,49 @@ up.flow = (->
         presence($(step.selector)) 
       if fragment = htmlElement.querySelector(step.selector)
         $new = $(fragment)
-        options.title ||= htmlElement.querySelector("title")?.textContent # todo: extract title from header
-        swapElements $old, $new, step.transition, options
+        swapElements $old, $new, step.pseudoClass, step.transition, options
       else
         up.util.error("Could not find selector (#{step.selector}) in response (#{html})")
         
-  elementInserted = ($new, options) ->
-    options.insert?($new)
-    if options.history.url
-      document.title = options.title if options.title
-      up.history[options.history.method](options.history.url)
-    # Remember where the element came from so we can
-    # offer reload functionality.
-    setSource($new, options.source || history.url)
-    autofocus($new)
-    up.ready($new)
-
-  swapElements = ($old, $new, transitionName, options) ->
-    # Wrap the whole task as a destroy animation, so $old will
-    # get market as .up-destroying right away.
-    destroy $old, animation: ->
-      transitionName ||= 'none'
-      $new.insertAfter($old)
-      # Set history etc.
-      elementInserted($new, options)
+  elementsInserted = ($new, options) ->
+    $new.each ->
+      $element = $(this)
+      options.insert?($element)
+      if options.history.url
+        document.title = options.title if options.title
+        up.history[options.history.method](options.history.url)
+      # Remember where the element came from so we can
+      # offer reload functionality.
+      setSource($element, options.source || history.url)
+      autofocus($element)
       # The fragment should be readiet before the transition,
       # so transitions see .up-current classes
-      if $old.is('body') && transitionName != 'none'
-        up.util.error('Cannot apply transitions to body-elements', transitionName)
-      up.morph($old, $new, transitionName)
+      up.ready($element)
+
+  swapElements = ($old, $new, pseudoClass, transition, options) ->
+    transition ||= 'none'
+    if pseudoClass
+      insertionMethod = if pseudoClass == 'before' then 'prepend' else 'append'
+      # Keep a reference to the children append/prepend because
+      # we need to compile them further down
+      $addedChildren = $new.children()
+      # Insert contents() instead of $children since contents()
+      # also includes text nodes.
+      $old[insertionMethod]($new.contents())
+      up.util.copyAttributes($new, $old)
+      elementsInserted($addedChildren, options)
+      # Since we're adding content instead of replacing, we'll only
+      # animate $new instead of morphing between $old and $new
+      up.animate($new, transition)
+    else
+      # Wrap the replacement as a destroy animation, so $old will
+      # get marked as .up-destroying right away.
+      destroy $old, animation: ->
+        $new.insertAfter($old)
+        elementsInserted($new, options)
+        if $old.is('body') && transition != 'none'
+          up.util.error('Cannot apply transitions to body-elements', transition)
+        up.morph($old, $new, transition)
 
   implantSteps = (selector, options) ->
     transitionString = options.transition || options.animation || 'none'
@@ -111,12 +127,16 @@ up.flow = (->
     disjunction = selector.split(comma)
     transitions = transitionString.split(comma) if up.util.isPresent(transitionString)    
     for selectorAtom, i in disjunction
+      # Splitting the atom
+      selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/)
       transition = transitions[i] || up.util.last(transitions)
-      selector: selectorAtom
+      selector: selectorParts[1]
+      pseudoClass: selectorParts[2]
       transition: transition
 
   autofocus = ($element) ->
-    $control = $element.find('[autofocus]:last')
+    selector = '[autofocus]:last'
+    $control = up.util.findWithSelf($element, selector)
     if $control.length && $control.get(0) != document.activeElement
       $control.focus()
       

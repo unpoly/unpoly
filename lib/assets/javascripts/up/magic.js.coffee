@@ -5,7 +5,7 @@ Event handling.
 ###
 up.magic = (->
 
-  AWAKENED_CLASS = 'up-awakened'
+  DESTROYABLE_CLASS = 'up-destroyable'
   DESTROYER_KEY = 'up-destroyer'
 
   ###*
@@ -46,20 +46,17 @@ up.magic = (->
       selector: selector
       behavior: awakener
 
-  $deepFilter = ($element, selector) ->
-    $element.find(selector).addBack(selector)
-
   compile = ($fragment) ->
     for awakener in awakeners
-      $deepFilter($fragment, awakener.selector).each ->
+      up.util.findWithSelf($fragment, awakener.selector).each ->
         $element = $(this)
         destroyer = awakener.behavior.apply(this, [$element])
         if up.util.isFunction(destroyer)
-          $element.prop(AWAKENED_CLASS, true)
+          $element.addClass(DESTROYABLE_CLASS)
           $element.data(DESTROYER_KEY, destroyer)
 
   destroy = ($fragment) ->
-    $deepFilter($fragment, "[#{AWAKENED_CLASS}]").each ->
+    up.util.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
       $element = $(this)
       destroyer = $element.data(DESTROYER_KEY)
       destroyer()
