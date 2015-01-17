@@ -51,13 +51,25 @@ describe 'up.flow', ->
       up.ready(affix('.element'))
       up.destroy('.element')
       expect(destructor).toHaveBeenCalled()
-
-  
       
-#    it 'sends a notification that the element is being destroyed', ->
-#      $element = affix('.element')
-#      spyOn(up.bus, 'emit').and.callFake ($element) ->
-#        expect($element).toExist()
-#      expect(up.bus.emit).toHaveBeenCalledWith('fragment:destroy', $element)
-#      up.destroy($element)
+  describe '.reload', ->
     
+    it 'reloads the given selector from the closest known source URL', (done) ->
+      affix('.container[up-source="/source"] .element').find('.element').text('old text')
+
+      up.reload('.element').then ->
+        expect($('.element')).toHaveText('new text')
+        done()
+        
+      request = jasmine.Ajax.requests.mostRecent()
+      expect(request.url).toMatch(/\/source$/)
+
+      request.respondWith
+        status: 200
+        contentType: '/text/html'
+        responseText:
+          """
+          <div class="container">
+            <div class="element">new text</div>
+          </div>
+          """
