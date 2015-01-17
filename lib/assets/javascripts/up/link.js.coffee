@@ -9,7 +9,7 @@ up.link = (->
   ###*
   Visits the given URL without a full page load.
   This is done by fetching `url` through an AJAX request
-  and replaceing the current `<body>` tag with the response's `<body>` tag.. 
+  and replacing the current `<body>` tag with the response's `<body>` tag.. 
   
   @method up.visit
   @param {String} url

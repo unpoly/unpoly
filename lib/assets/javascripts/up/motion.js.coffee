@@ -248,14 +248,14 @@ up.motion = (->
     )
   )
   
-  transition('move-top', ($old, $new, options) ->
+  transition('move-up', ($old, $new, options) ->
     $.when(
       animate($old, 'move-to-top', options),
       animate($new, 'move-from-bottom', options)
     )
   )
   
-  transition('move-bottom', ($old, $new, options) ->
+  transition('move-down', ($old, $new, options) ->
     $.when(
       animate($old, 'move-to-bottom', options),
       animate($new, 'move-from-top', options)
