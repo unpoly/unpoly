@@ -1,0 +1,21 @@
+{
+  "name": "jasmine-ajax",
+  "description": "A library for faking Ajax responses in your Jasmine suite",
+  "url": "https://github.com/pivotal/jasmine-ajax",
+  "main": "lib/mock-ajax.js",
+  "version": "2.99.0",
+  "private": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pivotal/jasmine-ajax"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "0.4.0",
+    "grunt-cli": "~0.1.13",
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-contrib-jshint": "~0.1.1",
+    "grunt-shell": "~0.2.1"
+  }
+}

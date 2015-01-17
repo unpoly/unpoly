@@ -1,0 +1,3 @@
+asset 'jasmine-jquery'
+asset 'jasmine-fixture'
+asset 'jasmine-ajax'

@@ -1,0 +1,8 @@
+{
+  "name": "dsl-generated dependencies",
+  "dependencies": {
+    "jasmine-jquery": "latest",
+    "jasmine-fixture": "latest",
+    "jasmine-ajax": "latest"
+  }
+}

@@ -85,7 +85,7 @@ up.flow = (->
     $new.each ->
       $element = $(this)
       options.insert?($element)
-      if options.history.url
+      if options.history?.url
         document.title = options.title if options.title
         up.history[options.history.method](options.history.url)
       # Remember where the element came from so we can

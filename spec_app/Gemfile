@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+# source 'https://rails-assets.org'
 
 gem 'rails', '4.2.0'
 gem 'sqlite3'
@@ -9,10 +10,15 @@ gem 'coffee-rails', '~> 4.1.0'
 gem 'therubyracer', platforms: :ruby
 gem 'jquery-rails'
 gem 'upjs-rails', path: '..'
+gem 'bower-rails'
 
 group :development, :test do
   gem 'byebug'
   gem 'web-console', '~> 2.0'
+  gem 'jasmine-rails'
+  # gem 'rails-assets-jasmine-jquery'
+  # gem 'rails-assets-jasmine-fixture'
+  # gem 'rails-assets-jasmine-ajax'
 end
 
 group :test do
