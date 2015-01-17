@@ -32,6 +32,11 @@ describe 'up.flow', ->
       @promise.then ->
         expect(window.location.pathname).toBe('/path')
         done()
+        
+    it 'marks the element with the URL from which it was retrieved', (done) ->
+      @promise.then ->
+        expect($('.middle').attr('up-source')).toMatch(/\/path$/)
+        done()
 
   describe '.destroy', ->
     
@@ -41,13 +46,13 @@ describe 'up.flow', ->
       expect($('.element')).not.toExist()
       
     it 'calls destructors for custom elements', ->
-      console.log '------------'
       up.awaken('.element', ($element) -> destructor)
       destructor = jasmine.createSpy('destructor')
       up.ready(affix('.element'))
       up.destroy('.element')
-      console.log '------------'
       expect(destructor).toHaveBeenCalled()
+
+  
       
 #    it 'sends a notification that the element is being destroyed', ->
 #      $element = affix('.element')
@@ -55,6 +60,4 @@ describe 'up.flow', ->
 #        expect($element).toExist()
 #      expect(up.bus.emit).toHaveBeenCalledWith('fragment:destroy', $element)
 #      up.destroy($element)
-
-    
     
