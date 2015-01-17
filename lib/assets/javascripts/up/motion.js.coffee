@@ -5,13 +5,17 @@ Animation and transition effects.
 ###
 up.motion = (->
   
+  util = up.util
+  
   defaultOptions =
     duration: 300
     delay: 0
     easing: 'ease'
 
   animations = {}
+  defaultAnimations = {}
   transitions = {}
+  defaultTransitions = {}
   
   ###*
   Animates an element.
@@ -41,33 +45,33 @@ up.motion = (->
   ###
   animate = (elementOrSelector, animation, options) ->
     $element = $(elementOrSelector)
-    options = up.util.options(options, defaultOptions)
-    if up.util.isFunction(animation)
+    options = util.options(options, defaultOptions)
+    if util.isFunction(animation)
       assertIsPromise(
         animation($element, options),
         ["Animation did not return a Promise", animation]
       )
-    else if up.util.isString(animation)
+    else if util.isString(animation)
       animate($element, findAnimation(animation), options)
-    else if up.util.isHash(animation)
-      up.util.cssAnimate($element, animation, options)
+    else if util.isHash(animation)
+      util.cssAnimate($element, animation, options)
     else
-      up.util.error("Unknown animation type", animation)
+      util.error("Unknown animation type", animation)
       
   findAnimation = (name) ->
-    animations[name] or up.util.error("Unknown animation", animation)
+    animations[name] or util.error("Unknown animation", animation)
 
   withGhosts = ($old, $new, block) ->
     $oldGhost = null
     $newGhost = null
-    up.util.temporaryCss $new, display: 'none', ->
-      $oldGhost = up.util.prependGhost($old).addClass('up-destroying')
-    up.util.temporaryCss $old, display: 'none', ->
-      $newGhost = up.util.prependGhost($new)
+    util.temporaryCss $new, display: 'none', ->
+      $oldGhost = util.prependGhost($old).addClass('up-destroying')
+    util.temporaryCss $old, display: 'none', ->
+      $newGhost = util.prependGhost($new)
     # $old should take up space in the page flow until the transition ends
     $old.css(visibility: 'hidden')
     
-    newCssMemo = up.util.temporaryCss($new, display: 'none')
+    newCssMemo = util.temporaryCss($new, display: 'none')
     promise = block($oldGhost, $newGhost)
     promise.then ->
       $oldGhost.remove()
@@ -79,7 +83,7 @@ up.motion = (->
       newCssMemo()
       
   assertIsPromise = (object, messageParts) ->
-    up.util.isPromise(object) or up.util.error(messageParts...)
+    util.isPromise(object) or util.error(messageParts...)
     object
 
 
@@ -114,10 +118,10 @@ up.motion = (->
     A promise for the transition's end.
   ###  
   morph = (source, target, transitionOrName, options) ->
-    options = up.util.options(defaultOptions)
+    options = util.options(defaultOptions)
     $old = $(source)
     $new = $(target)
-    transition = up.util.presence(transitionOrName, up.util.isFunction) || transitions[transitionOrName]
+    transition = util.presence(transitionOrName, util.isFunction) || transitions[transitionOrName]
     if transition
       withGhosts $old, $new, ($oldGhost, $newGhost) ->
         assertIsPromise(
@@ -127,7 +131,7 @@ up.motion = (->
     else if animation = animations[transitionOrName]
       $old.hide()
       animate($new, animation, options)
-    else if up.util.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0
+    else if util.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0
       parts = transitionOrName.split('/')
       transition = ($old, $new, options) ->
         $.when(
@@ -136,7 +140,7 @@ up.motion = (->
         )
       morph($old, $new, transition, options)
     else
-      up.util.error("Unknown transition: #{transitionOrName}")
+      util.error("Unknown transition: #{transitionOrName}")
 
   ###*
   Defines a named transition.
@@ -157,6 +161,14 @@ up.motion = (->
   ###
   animation = (name, animation) ->
     animations[name] = animation
+    
+  snapshot = ->
+    defaultAnimations = util.copy(animations)
+    defaultTransitions = util.copy(transitions)
+    
+  reset = ->
+    animations = util.copy(defaultAnimations)
+    transitions = util.copy(defaultTransitions)
   
   ###*
   Returns a no-op animation or transition which has no visual effects
@@ -225,7 +237,7 @@ up.motion = (->
   
   animation('roll-down', ($ghost, options) ->
     fullHeight = $ghost.height()
-    styleMemo = up.util.temporaryCss($ghost,
+    styleMemo = util.temporaryCss($ghost,
       height: '0px'
       overflow: 'hidden'
     )
@@ -268,6 +280,9 @@ up.motion = (->
       animate($new, 'fade-in', options)
     )
   )
+
+  up.bus.on 'framework:ready', snapshot
+  up.bus.on 'framework:reset', reset
     
   morph: morph
   animate: animate

@@ -4,6 +4,8 @@ Event handling.
 @class up.magic
 ###
 up.magic = (->
+  
+  util = up.util
 
   DESTROYABLE_CLASS = 'up-destroyable'
   DESTROYER_KEY = 'up-destroyer'
@@ -21,12 +23,18 @@ up.magic = (->
   @param {Function} behavior
     The handler that should be called.
   ###
+  liveDescriptions = []
+  defaultLiveDescriptions = null
+
   live = (events, selector, behavior) ->
-    $(document).on events, selector, (event) ->
-      behavior.apply(this, [event, $(this)])
-
-  awakeners = []
-
+    description = [
+      events,
+      selector,
+      (event) -> behavior.apply(this, [event, $(this)])
+    ]
+    liveDescriptions.push(description)
+    $(document).on(description...)
+  
   ###*
   Registers a function to be called whenever an element with
   the given selector is inserted into the DOM through Up.js.
@@ -41,25 +49,51 @@ up.magic = (->
     object when it is removed from the DOM, by clearing global state such as
     time-outs and event handlers bound to the document.
   ###
+  awakeners = []
+  defaultAwakeners = null
+
   awaken = (selector, awakener) ->
     awakeners.push
       selector: selector
-      behavior: awakener
+      callback: awakener
 
   compile = ($fragment) ->
+    console.log("Compiling fragment", $fragment, "with", awakeners)
     for awakener in awakeners
-      up.util.findWithSelf($fragment, awakener.selector).each ->
+      console.log("running", awakener.selector, "on", $fragment)
+      util.findWithSelf($fragment, awakener.selector).each ->
         $element = $(this)
-        destroyer = awakener.behavior.apply(this, [$element])
-        if up.util.isFunction(destroyer)
+        destroyer = awakener.callback.apply(this, [$element])
+        console.log("got destroyer", destroyer)
+        if util.isFunction(destroyer)
           $element.addClass(DESTROYABLE_CLASS)
           $element.data(DESTROYER_KEY, destroyer)
 
   destroy = ($fragment) ->
-    up.util.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
+    util.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
       $element = $(this)
       destroyer = $element.data(DESTROYER_KEY)
       destroyer()
+      
+  ###*
+  Makes a snapshot of the currently registered event listeners,
+  to later be restored through {{#crossLink "up.magic/up.magic.reset"}}{{/crossLink}}
+  
+  @private
+  @method up.magic.snapshot
+  ###
+  snapshot = ->
+    defaultLiveDescriptions = util.copy(liveDescriptions) 
+    defaultAwakeners = util.copy(awakeners) 
+
+  reset = ->
+    for description in liveDescriptions
+      unless util.contains(defaultLiveDescriptions, description)
+        $(document).off(description...)
+    liveDescriptions = util.copy(defaultLiveDescriptions)
+    awakeners = util.copy(defaultAwakeners)
+    
+    
 
   ###*
   @method up.ready
@@ -69,14 +103,15 @@ up.magic = (->
 
   onEscape = (handler) ->
     live('keydown', 'body', (event) ->
-      if up.util.escapePressed(event)
+      if util.escapePressed(event)
         handler(event)
     )
 
   up.bus.on 'app:ready', (-> ready(document.body))
   up.bus.on 'fragment:ready', compile
   up.bus.on 'fragment:destroy', destroy
-  $(document).on 'ready', -> up.bus.emit('app:ready')
+  up.bus.on 'framework:ready', snapshot
+  up.bus.on 'framework:reset', reset
 
   awaken: awaken
   on: live

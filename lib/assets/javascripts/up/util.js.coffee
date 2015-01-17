@@ -136,8 +136,14 @@ up.util = (->
   ifGiven = (object) ->
     object if isGiven(object)
 
+  # https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
+  isArray = Array.isArray
+
   copy = (object)  ->
-    extend({}, object)
+    if isArray(object)
+      object.slice()
+    else
+      extend({}, object)
 
   unwrap = (object) ->
     if isJQuery(object)
@@ -281,6 +287,25 @@ up.util = (->
   escapePressed = (event) ->
     event.keyCode == 27
     
+  contains = (array, element) ->
+    array.indexOf(element) >= 0
+
+#  memoArray = ->
+#    array = []
+#    defaults = []
+#    array.snapshot = ->
+#      defaults = copy(array)
+#    array.reset = (destroyer) ->
+#      if destroyer
+#        for element in array
+#          unless contains(defaults, element)
+#            destroyer()
+#      replaceInPlace(array, defaults)
+#    array
+#  
+#  replaceInPlace = (array, replacement) ->
+#    array.splice(0, array.length, replacement...)    
+    
   presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl
@@ -322,5 +347,9 @@ up.util = (->
   escapePressed: escapePressed
   copyAttributes: copyAttributes
   findWithSelf: findWithSelf
+  contains: contains
+  isArray: isArray
+#  memoArray: memoArray
+#  replaceInPlace: replaceInPlace
 
 )()

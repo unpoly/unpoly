@@ -21,7 +21,7 @@ describe 'up.flow', ->
           <div class="after">new-after</div>
           """      
     
-    it 'should replace the given selector with the same selector from a freshly fetched page', (done) ->
+    it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
       @promise.then ->
         expect($('.before')).toHaveText('old-before')
         expect($('.middle')).toHaveText('new-middle')
@@ -32,3 +32,29 @@ describe 'up.flow', ->
       @promise.then ->
         expect(window.location.pathname).toBe('/path')
         done()
+
+  describe '.destroy', ->
+    
+    it 'removes the element with the given selector', ->
+      affix('.element')
+      up.destroy('.element')
+      expect($('.element')).not.toExist()
+      
+    it 'calls destructors for custom elements', ->
+      console.log '------------'
+      up.awaken('.element', ($element) -> destructor)
+      destructor = jasmine.createSpy('destructor')
+      up.ready(affix('.element'))
+      up.destroy('.element')
+      console.log '------------'
+      expect(destructor).toHaveBeenCalled()
+      
+#    it 'sends a notification that the element is being destroyed', ->
+#      $element = affix('.element')
+#      spyOn(up.bus, 'emit').and.callFake ($element) ->
+#        expect($element).toExist()
+#      expect(up.bus.emit).toHaveBeenCalledWith('fragment:destroy', $element)
+#      up.destroy($element)
+
+    
+    

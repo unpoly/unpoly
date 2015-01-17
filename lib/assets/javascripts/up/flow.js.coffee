@@ -177,6 +177,19 @@ up.flow = (->
     sourceUrl = source(selectorOrElement)
     replace(selectorOrElement, sourceUrl)
 
+  ###*
+  Resets Up.js to the state when it was booted.
+  All custom event handlers, animations, etc. that have been registered
+  will be discarded.
+  
+  This is an internal method for to enable unit testing.
+  Don't use this in production.
+  
+  @protected
+  @method up.reset
+  ###
+  reset = ->
+    up.bus.emit('framework:reset')
   
   up.bus.on('app:ready', ->
     setSource(document.body, location.href)
@@ -186,9 +199,11 @@ up.flow = (->
   reload: reload
   destroy: destroy
   implant: implant
+  reset: reset
 
 )()
 
 up.replace = up.flow.replace
 up.reload = up.flow.reload
 up.destroy = up.flow.destroy
+up.reset = up.flow.reset

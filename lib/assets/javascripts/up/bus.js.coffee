@@ -12,9 +12,25 @@ TODO: This might eventually be rolled into regular document events.
 up.bus = (->
 
   callbacksByEvent = {}
+  defaultCallbacksByEvent = {}
 
   callbacksFor = (event) ->
     callbacksByEvent[event] ||= []
+
+  ###*
+  Makes a snapshot of the currently registered bus listeners,
+  to later be restored through {{#crossLink "up.bus/up.bus.reset"}}{{/crossLink}}
+  
+  @private
+  @method up.bus.snapshot
+  ###
+  snapshot = ->
+    defaultCallbacksByEvent = {}
+    for event, callbacks of callbacksByEvent
+      defaultCallbacksByEvent[event] = up.util.copy(callbacks)
+    
+  reset = ->
+    callbacksByEvent = up.util.copy(defaultCallbacksByEvent)
 
   ###*
   Registers an event handler to be called when the given
@@ -47,8 +63,9 @@ up.bus = (->
       callback(args...)
     )
 
-  return (
-    on: listen
-    emit: emit
-  )
+  listen 'framework:ready', snapshot
+  listen 'framework:reset', reset
+
+  on: listen
+  emit: emit
 )()
