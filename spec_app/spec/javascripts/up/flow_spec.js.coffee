@@ -5,9 +5,9 @@ describe 'up.flow', ->
     beforeEach ->
       jasmine.Ajax.install()
 
-      before = affix('.before').text('old-before')
-      middle = affix('.middle').text('old-middle')
-      after = affix('.after').text('old-after')
+      affix('.before').text('old-before')
+      affix('.middle').text('old-middle')
+      affix('.after').text('old-after')
 
       @promise = up.replace('.middle', '/path')
 
