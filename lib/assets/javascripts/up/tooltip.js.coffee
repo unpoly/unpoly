@@ -33,8 +33,6 @@ up.tooltip = (->
   @param {String} html
   @param {String} [options.origin='top']
   @param {String} [options.animation]
-  @example
-      <a href="/decks" up-tooltip="Show all decks">Decks</a>
   ###
   open = (linkOrSelector, options = {}) ->
     $link = $(linkOrSelector)
@@ -60,9 +58,15 @@ up.tooltip = (->
       options = up.util.options(options, animation: 'fade-out')
       up.destroy($tooltip, options)
 
-  # Don't register these events on document since *every*
-  # mouse move interaction  bubbles up to the document. 
+
+  ###*
+  @method [up-tooltip]
+  @example
+      <a href="/decks" up-tooltip="Show all decks">Decks</a>
+  ###
   up.awaken('[up-tooltip]', ($link) ->
+    # Don't register these events on document since *every*
+    # mouse move interaction  bubbles up to the document. 
     $link.on('mouseover', -> open($link))
     $link.on('mouseout', -> close())
   )

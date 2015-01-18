@@ -84,16 +84,21 @@ up.magic = (->
   ###
   snapshot = ->
     defaultLiveDescriptions = util.copy(liveDescriptions) 
-    defaultAwakeners = util.copy(awakeners) 
+    defaultAwakeners = util.copy(awakeners)
 
+  ###*
+  Resets the list of registered event listeners to the
+  moment when the framework was booted.
+  
+  @private
+  @method up.magic.reset
+  ###
   reset = ->
     for description in liveDescriptions
       unless util.contains(defaultLiveDescriptions, description)
         $(document).off(description...)
     liveDescriptions = util.copy(defaultLiveDescriptions)
     awakeners = util.copy(defaultAwakeners)
-    
-    
 
   ###*
   @method up.ready

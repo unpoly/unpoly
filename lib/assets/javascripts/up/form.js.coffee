@@ -10,6 +10,8 @@ up.form = (->
   @method up.submit
   @param {Element|jQuery|String} formOrSelector
     A reference or selector for the form to submit.
+    If the argument points to an element that is not a form,
+    Up.js will search its ancestors for the closest form.
   @param {String} [options.target]
   @param {String} [options.failTarget]
   @param {Boolean} [options.history=true]
@@ -23,16 +25,11 @@ up.form = (->
     A promise for the AJAX response
   @example
       up.submit('form')
-  @example
-      <form method="POST" action="/users" up-target=".main">  
-        ...    
-      </form>
-
   ###
   submit = (formOrSelector, options) ->
     
     options = up.util.options(options)
-    $form = $(formOrSelector)
+    $form = $(formOrSelector).closest('form')
     successSelector = options.target || $form.attr('up-target') || 'body'
     failureSelector = options.failTarget || $form.attr('up-fail-target') || up.util.createSelectorFromElement($form)
     pushHistory = options.history != false && $form.attr('up-history') != 'false'
@@ -87,13 +84,9 @@ up.form = (->
     (`value`, `$field`) are set.
   @param {Number} [options.frequency=500]
   @example
-      up.observe('form', { change: function(value, $form) { 
-        up.submit($form) 
+      up.observe('input', { change: function(value, $input) { 
+        up.submit($input) 
       } }); 
-  @example
-      <form method="GET" action="/search">  
-        <input type="query" up-observe="up.form.submit(this)">    
-      </form>
   ###
   observe = (fieldOrSelector, options) ->
 
@@ -138,10 +131,30 @@ up.form = (->
     # return destructor
     return clearTimer
 
+  ###*
+  @method form[up-target]
+  @param {String} up-target
+  @param {String} [up-fail-target]
+  @param {String} [up-history]
+  @param {String} [up-transition]
+  @param {String} [up-fail-transition]
+  @example
+      <form method="POST" action="/users" up-target=".main">  
+        ...    
+      </form>
+  ###
   up.on 'submit', 'form[up-target]', (event, $form) ->
     event.preventDefault()
     submit($form)
 
+  ###*
+  @method input[up-observe]
+  @param {String} up-observe 
+  @example
+      <form method="GET" action="/search">  
+        <input type="query" up-observe="up.form.submit(this)">    
+      </form>
+  ###
   up.awaken '[up-observe]', ($field) ->
     return observe($field)
 

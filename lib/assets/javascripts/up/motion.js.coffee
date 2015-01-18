@@ -86,9 +86,6 @@ up.motion = (->
     util.isPromise(object) or util.error(messageParts...)
     object
 
-
-    
-
   ###*
   Performs a transition between two elements.
   

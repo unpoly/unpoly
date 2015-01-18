@@ -51,14 +51,15 @@ up.flow = (->
       .fail(up.util.error)
 
   ###*
+  Replaces the given selector with the same selector from the given HTML string.
+  
   @method up.flow.implant
   @protected
   @param {String} selector
   @param {String} html
   @param {String} [options.source]
-  @param {String} [options.history.url]
-  @param {String} [options.history.method='push']
-  @param {String} [options.transition]
+  @param {Object} [options]
+    See options for {{#crossLink "up.flow/up.replace"}}{{/crossLink}}.
   ###
   implant = (selector, html, options) ->
     

@@ -17,7 +17,7 @@ up.link = (->
   @param {Object} options
     See options for {{#crossLink "up.flow/up.replace"}}{{/crossLink}}.
   @example
-      <a href="/users" up-follow>User list</a>
+      up.visit('/users')
   ###
   visit = (url, options) ->
     console.log("up.visit", url)
@@ -38,8 +38,6 @@ up.link = (->
     or to `body` if such an attribute does not exist.
   @param {Function|String} [options.transition]
     A transition function or name.
-  @example
-      <a href="/users" up-target=".main">User list</a>
   ###
   follow = (link, options) ->
     $link = $(link)
@@ -65,10 +63,22 @@ up.link = (->
     if link = resolve(element)
       up.util.presentAttr(link, 'href', 'up-follow')
       
+  ###*
+  @method a[up-target]
+  @param {String} up-target
+  @example
+      <a href="/users" up-target=".main">User list</a>
+  ###
   up.on 'click', 'a[up-target]', (event, $link) ->
     event.preventDefault()
     follow($link)
 
+  ###*
+  @method [up-follow]
+  @param {String} [up-follow]
+  @example
+      <a href="/users" up-follow>User list</a>
+  ###
   up.on 'click', '[up-follow]', (event, $element) ->
 
     childLinkClicked = ->
@@ -88,3 +98,5 @@ up.link = (->
 
 up.visit = up.link.visit
 up.follow = up.link.follow
+
+

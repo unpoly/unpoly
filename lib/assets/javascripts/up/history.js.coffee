@@ -1,8 +1,21 @@
+###*
+@class up.history
+###
 up.history = (->
 
+  ###*
+  @method up.history.replace
+  @param {String} url
+  @protected
+  ###
   replace = (url) ->
     manipulate "replace", url
 
+  ###*
+  @method up.history.push  
+  @param {String} url
+  @protected
+  ###
   push = (url) ->
     manipulate "push", url
 
@@ -22,6 +35,8 @@ up.history = (->
   currentUrl = ->
     location.href
 
+  # Defeat an unnecessary popstate that some browsers trigger on pageload (Chrome?).
+  # We should check in 2016 if we can remove this.
   setTimeout (->
     $(window).on "popstate", pop
     replace(currentUrl())

@@ -80,10 +80,6 @@ up.popup = (->
     If set to `true`, the popup remains
     open even if the page changes in the background.
   @param {Object} [options.history=false]
-  @example
-      <a href="/decks" up-popup=".deck_list">Switch deck</a>
-  @example
-      <a href="/settings" up-popup=".options" up-popup-sticky>Settings</a>  
   ###
   open = (linkOrSelector, options = {}) ->
     $link = $(linkOrSelector)
@@ -139,7 +135,14 @@ up.popup = (->
       close()
     
 
-  up.on('click', '[up-popup]', (event, $link) ->
+  ###*
+  @method a[up-popup]
+  @example
+      <a href="/decks" up-popup=".deck_list">Switch deck</a>
+  @example
+      <a href="/settings" up-popup=".options" up-popup-sticky>Settings</a>  
+  ###
+  up.on('click', 'a[up-popup]', (event, $link) ->
     event.preventDefault()
     if $link.is('.up-current')
       close()
@@ -161,7 +164,10 @@ up.popup = (->
   
   # Close the pop-up overlay when the user presses ESC.
   up.magic.onEscape(-> close())
-  
+
+  ###*
+  @method [up-close]
+  ###
   up.on('click', '[up-close]', (event, $element) ->
     if $element.closest('.up-popup')
       close()

@@ -1,3 +1,6 @@
+###*
+@class up.browser
+###
 up.browser = (->
   
 #  safari = false
