@@ -19,5 +19,10 @@ up.browser = (->
 #  detect()
 #  
 #  transitionEndEvent: transitionEndEvent
+  
+  url = ->
+    location.href
+    
+  url: url
       
 )()

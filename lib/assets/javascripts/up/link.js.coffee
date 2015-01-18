@@ -40,6 +40,7 @@ up.link = (->
     A transition function or name.
   ###
   follow = (link, options) ->
+    console.log("!!! following", link)
     $link = $(link)
     options = up.util.options(options)
     url = up.util.presentAttr($link, 'href', 'up-follow')
@@ -83,7 +84,8 @@ up.link = (->
 
     childLinkClicked = ->
       $target = $(event.target)
-      $target.closest('a').length && $element.has($target).length
+      targetIsLink = $target.closest('a, [up-follow]').length
+      targetIsLink && $element.has($target).length
 
     unless childLinkClicked()
       event.preventDefault()

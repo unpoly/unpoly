@@ -26,20 +26,17 @@ up.history = (->
   pop = (event) ->
     state = event.originalEvent.state
     console.log "popping state", state
-    console.log "current href", currentUrl()
+    console.log "current href", up.browser.url()
     if state?.fromUp
-      up.visit currentUrl(), history: { method: 'replace' }
+      up.visit up.browser.url(), history: { method: 'replace' }
     else
       console.log "null state"
-
-  currentUrl = ->
-    location.href
 
   # Defeat an unnecessary popstate that some browsers trigger on pageload (Chrome?).
   # We should check in 2016 if we can remove this.
   setTimeout (->
     $(window).on "popstate", pop
-    replace(currentUrl())
+    replace(up.browser.url())
   ), 200
 
   push: push

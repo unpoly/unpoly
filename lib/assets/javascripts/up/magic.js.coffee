@@ -104,7 +104,9 @@ up.magic = (->
   @method up.ready
   ###
   ready = (selectorOrFragment) ->
-    up.bus.emit('fragment:ready', $(selectorOrFragment))
+    $fragment = $(selectorOrFragment)
+    up.bus.emit('fragment:ready', $fragment)
+    $fragment
 
   onEscape = (handler) ->
     live('keydown', 'body', (event) ->

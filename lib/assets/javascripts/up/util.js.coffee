@@ -20,9 +20,13 @@ up.util = (->
         "X-Up-Selector": options.selector
       }
     $.ajax options
-    
+
+  ###*
+  @method up.util.isStandardPort
+  @private
+  ###  
   isStandardPort = (protocol, port) ->
-    (port == 80 && protocol == 'http') || (port == 443 && protocol == 'https')
+    ((port == "" || port == "80") && protocol == 'http:') || (port == "443" && protocol == 'https:')
 
   normalizeUrl = (urlOrAnchor, options) ->
     anchor = if isString(urlOrAnchor) 

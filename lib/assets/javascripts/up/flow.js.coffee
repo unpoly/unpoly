@@ -14,7 +14,7 @@ up.flow = (->
 
   source = (element) ->
     $element = $(element).closest("[up-source]")
-    $element.attr("up-source") || location.href
+    $element.attr("up-source") || up.browser.url()
 
   ###*
   Replaces elements on the current page with corresponding elements
@@ -193,7 +193,7 @@ up.flow = (->
     up.bus.emit('framework:reset')
   
   up.bus.on('app:ready', ->
-    setSource(document.body, location.href)
+    setSource(document.body, up.browser.url())
   )
 
   replace: replace

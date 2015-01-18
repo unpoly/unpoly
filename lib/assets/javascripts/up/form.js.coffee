@@ -38,7 +38,7 @@ up.form = (->
     $form.addClass('up-active')
 
     request = {
-      url: $form.attr('action') || location.href
+      url: $form.attr('action') || up.browser.url()
       type: $form.attr('method')?.toUpperCase() || 'POST',
       data: $form.serialize(),
       selector: successSelector

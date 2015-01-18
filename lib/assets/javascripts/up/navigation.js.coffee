@@ -19,7 +19,7 @@ up.navigation = (->
   SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
 
   locationChanged = ->
-    windowLocation = up.util.normalizeUrl(location.href, search: false)
+    windowLocation = up.util.normalizeUrl(up.browser.url(), search: false)
     modalLocation = up.modal.source()
     popupLocation = up.popup.source()
     
