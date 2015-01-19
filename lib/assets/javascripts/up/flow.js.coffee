@@ -41,6 +41,8 @@ up.flow = (->
     else
       up.util.createSelectorFromElement($(selectorOrElement))
 
+    if options.history == true
+      options.history = null
     options = up.util.options(options, history: { url: url })
     
     if up.util.isMissing(options.source) || options.source == true

@@ -6,6 +6,21 @@ For modal dialogs see {{#crossLink "up.modal"}}{{/crossLink}}.
 @class up.popup 
 ###
 up.popup = (->
+
+  presence = up.util.presence
+
+  config =
+    openAnimation: 'fade-in'
+    closeAnimation: 'fade-out'
+    origin: 'bottom-right'    
+
+  ###*
+  @method up.popup.defaults
+  @param {String} options.animation
+  @param {String} options.origin
+  ###
+  defaults = (options) ->
+    up.util.extend(config, options)
   
   position = ($link, $popup, origin) ->
     linkBox = up.util.measure($link, full: true)
@@ -58,8 +73,8 @@ up.popup = (->
   createHiddenPopup = ($link, selector, sticky) ->
     $popup = up.util.$createElementFromSelector('.up-popup')
     $popup.attr('up-sticky', '') if sticky
-    $content = up.util.$createElementFromSelector(selector)
-    $content.appendTo($popup)
+    $placeholder = up.util.$createElementFromSelector(selector)
+    $placeholder.appendTo($popup)
     $popup.appendTo(document.body)
     $popup.hide()
     $popup
@@ -85,9 +100,9 @@ up.popup = (->
     $link = $(linkOrSelector)
 
     url = up.util.presentAttr($link, 'href')
-    selector = options.target || $link.attr('up-popup') || 'body'
-    origin = options.origin || $link.attr('up-origin') || 'bottom-right'
-    animation = options.animation || $link.attr('up-animation') || 'roll-down'
+    selector = options.target || presence($link.attr('up-popup')) || 'body'
+    origin = options.origin || presence($link.attr('up-origin')) || config.origin
+    animation = options.animation || presence($link.attr('up-animation')) || config.openAnimation
     sticky = options.sticky || $link.is('[up-sticky]')
     history = options.history || false
 
@@ -98,7 +113,7 @@ up.popup = (->
     
     up.replace(selector, url,
       history: history
-      source: true
+      # source: true
       insert: -> updated($link, $popup, origin, animation) 
     )
     
@@ -127,7 +142,7 @@ up.popup = (->
   close = (options) ->
     $popup = $('.up-popup')
     if $popup.length
-      options = up.util.options(options, animation: 'fade-out')
+      options = up.util.options(options, animation: config.closeAnimation)
       up.destroy($popup, options)
     
   autoclose = ->
@@ -140,7 +155,7 @@ up.popup = (->
   @example
       <a href="/decks" up-popup=".deck_list">Switch deck</a>
   @example
-      <a href="/settings" up-popup=".options" up-popup-sticky>Settings</a>  
+      <a href="/settings" up-popup=".options" up-sticky>Settings</a>  
   ###
   up.on('click', 'a[up-popup]', (event, $link) ->
     event.preventDefault()
@@ -151,6 +166,7 @@ up.popup = (->
   )
 
   # Close the popup when someone clicks outside the popup
+  # (but not on a popup opener).
   up.on('click', 'body', (event, $body) ->
     $target = $(event.target)
     unless $target.closest('.up-popup').length || $target.closest('[up-popup]').length
@@ -176,5 +192,6 @@ up.popup = (->
   open: open
   close: close
   source: source
+  defaults: defaults
   
 )()
