@@ -14,15 +14,12 @@ up.modal = (->
     height: 300
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
-    template:
+    closeLabel: 'X'
+    template: (config) ->
       """
       <div class="up-modal">
-        <div class="up-modal-overlay"></div>
         <div class="up-modal-dialog">
-          <span class="up-modal-close" up-close>
-            <span class="up-modal-close-label">Close</span>
-            <span class="up-modal-close-key">ESC</span>
-          </span>
+          <div class="up-modal-close" up-close>#{config.closeLabel}</div>
           <div class="up-modal-content"></div>
         </div>
       </div>
@@ -32,14 +29,23 @@ up.modal = (->
   @method up.modal.defaults
   @param {Number} options.width
   @param {Number} options.height
-  @param {String} options.template
-  @param {String} options.animation
+  @param {String|Function} options.template
+  @param {String} options.closeLabel
+  @param {String} options.openAnimation
+  @param {String} options.closeAnimation
   ###
   defaults = (options) ->
     up.util.extend(config, options)
+    
+  templateHtml = ->
+    template = config.template
+    if up.util.isFunction(template)
+      template(config)
+    else
+      template
 
   createHiddenElements = (selector, sticky) ->
-    $container = $(config.template)
+    $container = $(templateHtml())
     $container.attr('up-sticky', '') if sticky
     $dialog = $container.find('.up-modal-dialog')
     $content = $dialog.find('.up-modal-content')
