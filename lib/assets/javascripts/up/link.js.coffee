@@ -5,6 +5,8 @@ Links.
 ###
 
 up.link = (->
+
+  u = up.util
   
   ###*
   Visits the given URL without a full page load.
@@ -21,7 +23,7 @@ up.link = (->
   ###
   visit = (url, options) ->
     console.log("up.visit", url)
-    # options = up.util.options(options, )
+    # options = util.options(options, )
     up.replace('body', url, options)
 
   ###*
@@ -40,29 +42,26 @@ up.link = (->
     A transition function or name.
   ###
   follow = (link, options) ->
-    console.log("!!! following", link)
     $link = $(link)
-    options = up.util.options(options)
-    url = up.util.presentAttr($link, 'href', 'up-follow')
-    selector = options.target || $link.attr("up-target") || 'body'
-    options.transition ||= up.util.presence($link.attr('up-transition')) || up.util.presence($link.attr('up-animation')) 
-    if history = $link.attr('up-history')
-      if history == 'false'
-        options.history = false
-      else
-        options.history = { url: history }
+
+    options = u.options(options)
+    url = u.option($link.attr('href'), $link.attr('up-follow'))
+    selector = u.option(options.target, $link.attr('up-target'), 'body')
+    options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation')) 
+    options.history = u.option(options.history, $link.attr('up-history'))
+    
     up.replace(selector, url, options)
 
   resolve = (element) ->
     $element = $(element)
-    if $element.is('a') || up.util.presentAttr($element, 'up-follow')
+    if $element.is('a') || u.presentAttr($element, 'up-follow')
       $element
     else
       $element.find('a:first')
 
   resolveUrl = (element) ->
-    if link = resolve(element)
-      up.util.presentAttr(link, 'href', 'up-follow')
+    if $link = resolve(element)
+      u.option($link.attr('href'), $link.attr('up-follow'))
       
   ###*
   @method a[up-target]
@@ -81,12 +80,12 @@ up.link = (->
       <a href="/users" up-follow>User list</a>
   ###
   up.on 'click', '[up-follow]', (event, $element) ->
-
+    
     childLinkClicked = ->
       $target = $(event.target)
-      targetIsLink = $target.closest('a, [up-follow]').length
-      targetIsLink && $element.has($target).length
-
+      $targetLink = $target.closest('a, [up-follow]')
+      $targetLink.length && $element.find($targetLink).length
+      
     unless childLinkClicked()
       event.preventDefault()
       follow(resolve($element))

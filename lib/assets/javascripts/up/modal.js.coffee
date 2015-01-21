@@ -7,7 +7,7 @@ For modal dialogs see {{#crossLink "up.modal"}}{{/crossLink}}.
 ###
 up.modal = (->
 
-  presence = up.util.presence
+  u = up.util
 
   config =
     width: 500
@@ -35,11 +35,11 @@ up.modal = (->
   @param {String} options.closeAnimation
   ###
   defaults = (options) ->
-    up.util.extend(config, options)
+    u.extend(config, options)
     
   templateHtml = ->
     template = config.template
-    if up.util.isFunction(template)
+    if u.isFunction(template)
       template(config)
     else
       template
@@ -49,7 +49,7 @@ up.modal = (->
     $container.attr('up-sticky', '') if sticky
     $dialog = $container.find('.up-modal-dialog')
     $content = $dialog.find('.up-modal-content')
-    $placeholder = up.util.$createElementFromSelector(selector)
+    $placeholder = u.$createElementFromSelector(selector)
     $placeholder.appendTo($content)
     $container.appendTo(document.body)
     $container.hide()
@@ -71,16 +71,17 @@ up.modal = (->
     open even if the page changes in the background.
   @param {Object} [options.history=true]
   ###
-  open = (linkOrSelector, options = {}) ->
+  open = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
 
-    url = up.util.presentAttr($link, 'href')
-    selector = options.target || $link.attr('up-modal') || 'body'
-    width = options.width || $link.attr('up-width') || config.width
-    height = options.height || $link.attr('up-height') || config.height
-    animation = options.animation || $link.attr('up-animation') || config.openAnimation
-    sticky = options.sticky || $link.is('[up-sticky]')
-    history = presence(options.history) || true
+    options = u.options(options)
+    url = u.option($link.attr('href'))
+    selector = u.option(options.target, $link.attr('up-modal'), 'body')
+    width = u.option(options.width, $link.attr('up-width'), config.width)
+    height = u.option(options.height, $link.attr('up-height'), config.height)
+    animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
+    sticky = u.option(options.sticky, $link.is('[up-sticky]'))
+    history = u.option(options.history, $link.attr('up-history'), true)
 
     close()
     $container = createHiddenElements(selector, sticky)
@@ -116,7 +117,7 @@ up.modal = (->
   close = (options) ->
     $popup = $('.up-modal')
     if $popup.length
-      options = up.util.options(options, animation: config.closeAnimation)
+      options = u.options(options, animation: config.closeAnimation)
       up.destroy($popup, options)
 
   autoclose = ->

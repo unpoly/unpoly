@@ -179,6 +179,24 @@ up.util = (->
           merged[key] = options(value, defaultValue)
     merged
 
+  ###*
+  Returns the first argument that is considered present.
+  If an argument is a function, it is called and the value is checked for presence.
+  
+  This function is useful when you have multiple option sources and the value can be boolean.
+  In that case you cannot change the sources with a `||` operator
+  (since that doesn't short-circuit at `false`).
+  
+  @method up.util.option
+  @param {Array} args...
+  ###
+  option = (args...) ->
+    detect(args, (arg) ->
+      value = arg
+      value = value() if isFunction(value)
+      isPresent(value)
+    )
+
   detect = (array, tester) ->
     match = null
     array.every (element) ->
@@ -302,6 +320,12 @@ up.util = (->
     
   contains = (array, element) ->
     array.indexOf(element) >= 0
+    
+  castsToTrue = (object) ->
+    String(object) == "true"
+    
+  castsToFalse = (object) ->
+    String(object) == "false"
 
 #  memoArray = ->
 #    array = []
@@ -331,6 +355,7 @@ up.util = (->
   copy: copy
   merge: merge
   options: options
+  option: option
   error: error
   each: each
   detect: detect
@@ -362,6 +387,8 @@ up.util = (->
   findWithSelf: findWithSelf
   contains: contains
   isArray: isArray
+  castsToTrue: castsToTrue
+  castsToFalse: castsToFalse
 #  memoArray: memoArray
 #  replaceInPlace: replaceInPlace
 

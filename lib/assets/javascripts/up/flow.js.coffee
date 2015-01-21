@@ -5,16 +5,16 @@ Page flow.
 ###
 up.flow = (->
   
-  presence = up.util.presence
+  u = up.util
 
   setSource = (element, sourceUrl) ->
     $element = $(element)
-    sourceUrl = up.util.normalizeUrl(sourceUrl) if up.util.isPresent(sourceUrl)
+    sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
     $element.attr("up-source", sourceUrl)
 
   source = (element) ->
     $element = $(element).closest("[up-source]")
-    $element.attr("up-source") || up.browser.url()
+    u.presence($element.attr("up-source")) || up.browser.url()
 
   ###*
   Replaces elements on the current page with corresponding elements
@@ -28,29 +28,33 @@ up.flow = (->
     here, in which case a selector will be inferred from the element's class and ID.
   @param {String} url
     The URL to fetch from the server.
-  @param {String} [options.history.url=url]
-    An alternative URL to use for the browser's location bar and history.
-  @param {String} [options.history.method='push']
+  @param {String} [options.title]
+  @param {String|Boolean} [options.history=true]
+    If a `String` is given, it is used as the URL the browser's location bar and history.
+    If omitted or true, the `url` argument will be used.
+    If set to `false`, the history will remain unchanged.
+  @param {String|Boolean} [options.source=true]
   @param {String} [options.transition]
-  @param {String|Boolean} [options.source]
+  @param {String} [options.historyMethod='push']
   ###
   replace = (selectorOrElement, url, options) ->
 
-    selector = if presence(selectorOrElement)
+    options = u.options(options)
+    
+    selector = if u.presence(selectorOrElement)
       selectorOrElement
     else
-      up.util.createSelectorFromElement($(selectorOrElement))
+      u.createSelectorFromElement($(selectorOrElement))
 
-    if options.history == true
-      options.history = null
-    options = up.util.options(options, history: { url: url })
+    if u.isMissing(options.history) || u.castsToTrue(options.history) 
+      options.history = url
     
-    if up.util.isMissing(options.source) || options.source == true
+    if u.isMissing(options.source) || u.castsToTrue(options.source)
       options.source = url
       
-    up.util.get(url, selector: selector)
+    u.get(url, selector: selector)
       .done (html) -> implant(selector, html, options)
-      .fail(up.util.error)
+      .fail(u.error)
 
   ###*
   Replaces the given selector with the same selector from the given HTML string.
@@ -59,41 +63,46 @@ up.flow = (->
   @protected
   @param {String} selector
   @param {String} html
+  @param {String} [options.title]
   @param {String} [options.source]
-  @param {Object} [options]
-    See options for {{#crossLink "up.flow/up.replace"}}{{/crossLink}}.
+  @param {Object} [options.transition]
+  @param {String] [options.history]
+  @param {String] [options.historyMethod='push']
   ###
   implant = (selector, html, options) ->
     
-    options = up.util.options(options, history: { method: 'push' })
+    options = u.options(options, 
+      historyMethod: 'push'
+    )
     # jQuery cannot construct transient elements that contain <html> or <body> tags,
     # so we're using the native browser API to grep through the HTML
-    htmlElement = up.util.createElementFromHtml(html)
+    htmlElement = u.createElementFromHtml(html)
 
-    options.title ||= htmlElement.querySelector("title")?.textContent # todo: extract title from header
+    # TODO: extract title from HTTP header
+    options.title ||= htmlElement.querySelector("title")?.textContent 
 
     for step in implantSteps(selector, options)
       $old =
         # always prefer to replace content in popups or modals
-        presence($(".up-popup " + step.selector)) || 
-        presence($(".up-modal " + step.selector)) || 
-        presence($(step.selector)) 
+        u.presence($(".up-popup " + step.selector)) || 
+        u.presence($(".up-modal " + step.selector)) || 
+        u.presence($(step.selector)) 
       if fragment = htmlElement.querySelector(step.selector)
         $new = $(fragment)
         swapElements $old, $new, step.pseudoClass, step.transition, options
       else
-        up.util.error("Could not find selector (#{step.selector}) in response (#{html})")
+        u.error("Could not find selector (#{step.selector}) in response (#{html})")
         
   elementsInserted = ($new, options) ->
     $new.each ->
       $element = $(this)
       options.insert?($element)
-      if options.history?.url
+      if options.history
         document.title = options.title if options.title
-        up.history[options.history.method](options.history.url)
+        up.history[options.historyMethod](options.history)
       # Remember where the element came from so we can
       # offer reload functionality.
-      setSource($element, options.source || history.url)
+      setSource($element, u.presence(options.source) || options.history)
       autofocus($element)
       # The fragment should be readiet before the transition,
       # so transitions see .up-current classes
@@ -109,7 +118,7 @@ up.flow = (->
       # Insert contents() instead of $children since contents()
       # also includes text nodes.
       $old[insertionMethod]($new.contents())
-      up.util.copyAttributes($new, $old)
+      u.copyAttributes($new, $old)
       elementsInserted($addedChildren, options)
       # Since we're adding content instead of replacing, we'll only
       # animate $new instead of morphing between $old and $new
@@ -121,25 +130,25 @@ up.flow = (->
         $new.insertAfter($old)
         elementsInserted($new, options)
         if $old.is('body') && transition != 'none'
-          up.util.error('Cannot apply transitions to body-elements', transition)
+          u.error('Cannot apply transitions to body-elements', transition)
         up.morph($old, $new, transition)
 
   implantSteps = (selector, options) ->
     transitionString = options.transition || options.animation || 'none'
     comma = /\ *,\ */
     disjunction = selector.split(comma)
-    transitions = transitionString.split(comma) if up.util.isPresent(transitionString)    
+    transitions = transitionString.split(comma) if u.isPresent(transitionString)    
     for selectorAtom, i in disjunction
       # Splitting the atom
       selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/)
-      transition = transitions[i] || up.util.last(transitions)
+      transition = transitions[i] || u.last(transitions)
       selector: selectorParts[1]
       pseudoClass: selectorParts[2]
       transition: transition
 
   autofocus = ($element) ->
     selector = '[autofocus]:last'
-    $control = up.util.findWithSelf($element, selector)
+    $control = u.findWithSelf($element, selector)
     if $control.length && $control.get(0) != document.activeElement
       $control.focus()
       
@@ -147,7 +156,7 @@ up.flow = (->
 #    $new.find('script').each ->
 #      $script = $(this)
 #      type = $script.attr('type')
-#      if up.util.isBlank(type) || type.indexOf('text/javascript') == 0
+#      if u.isBlank(type) || type.indexOf('text/javascript') == 0
 #        code = $script.text()
 #        console.log("Evaling javascript code", code)
 #        eval(code)
@@ -161,10 +170,10 @@ up.flow = (->
   ###
   destroy = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
-    options = up.util.options(options, animation: 'none')
+    options = u.options(options, animation: 'none')
     $element.addClass('up-destroying')
     up.bus.emit('fragment:destroy', $element)
-    animationPromise = presence(options.animation, up.util.isPromise) ||
+    animationPromise = u.presence(options.animation, u.isPromise) ||
       up.motion.animate($element, options.animation)
     animationPromise.then -> $element.remove()
     

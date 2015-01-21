@@ -7,7 +7,7 @@ For modal dialogs see {{#crossLink "up.modal"}}{{/crossLink}}.
 ###
 up.popup = (->
 
-  presence = up.util.presence
+  u = up.util
 
   config =
     openAnimation: 'fade-in'
@@ -20,10 +20,10 @@ up.popup = (->
   @param {String} options.origin
   ###
   defaults = (options) ->
-    up.util.extend(config, options)
+    u.extend(config, options)
   
   position = ($link, $popup, origin) ->
-    linkBox = up.util.measure($link, full: true)
+    linkBox = u.measure($link, full: true)
     css = switch origin
       when "bottom-right"
         right: linkBox.right
@@ -38,13 +38,13 @@ up.popup = (->
         left: linkBox.left
         bottom: linkBox.top
       else
-        up.util.error("Unknown origin", origin)
+        u.error("Unknown origin", origin)
     $popup.attr('up-origin', origin)
     $popup.css(css)
     ensureInViewport($popup)
 
   ensureInViewport = ($popup) ->
-    box = up.util.measure($popup, full: true)
+    box = u.measure($popup, full: true)
     errorX = null
     errorY = null
     if box.right < 0
@@ -71,9 +71,9 @@ up.popup = (->
     
     
   createHiddenPopup = ($link, selector, sticky) ->
-    $popup = up.util.$createElementFromSelector('.up-popup')
+    $popup = u.$createElementFromSelector('.up-popup')
     $popup.attr('up-sticky', '') if sticky
-    $placeholder = up.util.$createElementFromSelector(selector)
+    $placeholder = u.$createElementFromSelector(selector)
     $placeholder.appendTo($popup)
     $popup.appendTo(document.body)
     $popup.hide()
@@ -96,15 +96,16 @@ up.popup = (->
     open even if the page changes in the background.
   @param {Object} [options.history=false]
   ###
-  open = (linkOrSelector, options = {}) ->
+  open = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
 
-    url = up.util.presentAttr($link, 'href')
-    selector = options.target || presence($link.attr('up-popup')) || 'body'
-    origin = options.origin || presence($link.attr('up-origin')) || config.origin
-    animation = options.animation || presence($link.attr('up-animation')) || config.openAnimation
-    sticky = options.sticky || $link.is('[up-sticky]')
-    history = options.history || false
+    options = u.options(options)
+    url = u.option($link.attr('href'))
+    selector = u.option(options.target, $link.attr('up-popup'), 'body')
+    origin = u.option(options.origin, $link.attr('up-origin'), config.origin)
+    animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
+    sticky = u.option(options.sticky, $link.is('[up-sticky]'))
+    history = u.option(options.history, $link.attr('up-history'), false)
 
     close()
     $popup = createHiddenPopup($link, selector, sticky)
@@ -142,7 +143,7 @@ up.popup = (->
   close = (options) ->
     $popup = $('.up-popup')
     if $popup.length
-      options = up.util.options(options, animation: config.closeAnimation)
+      options = u.options(options, animation: config.closeAnimation)
       up.destroy($popup, options)
     
   autoclose = ->

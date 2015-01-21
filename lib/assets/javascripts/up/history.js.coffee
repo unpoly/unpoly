@@ -28,7 +28,7 @@ up.history = (->
     console.log "popping state", state
     console.log "current href", up.browser.url()
     if state?.fromUp
-      up.visit up.browser.url(), history: { method: 'replace' }
+      up.visit up.browser.url(), historyMethod: 'replace'
     else
       console.log "null state"
 

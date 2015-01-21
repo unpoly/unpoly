@@ -3,6 +3,8 @@ Form handling
 @class up.form
 ###
 up.form = (->
+  
+  u = up.util
 
   ###*
   Submits a form using the Up.js flow.
@@ -14,11 +16,12 @@ up.form = (->
     Up.js will search its ancestors for the closest form.
   @param {String} [options.target]
   @param {String} [options.failTarget]
-  @param {Boolean} [options.history=true]
+  @param {Boolean|String} [options.history=true]
     Successful form submissions will add a history entry and change the browser's
     location bar if the form either uses the `GET` method or the response redirected
     to another page (this requires the `upjs-rails` gem).
     If want to prevent history changes in any case, set this to `false`.
+    If you pass a `String`, it is used as the URL for the browser history.
   @param {String} [options.transition]
   @param {String} [options.failTransition]
   @return {Promise}
@@ -28,13 +31,15 @@ up.form = (->
   ###
   submit = (formOrSelector, options) ->
     
-    options = up.util.options(options)
     $form = $(formOrSelector).closest('form')
-    successSelector = options.target || $form.attr('up-target') || 'body'
-    failureSelector = options.failTarget || $form.attr('up-fail-target') || up.util.createSelectorFromElement($form)
-    pushHistory = options.history != false && $form.attr('up-history') != 'false'
-    successTransition = options.transition || $form.attr('up-transition')
-    failureTransition = options.failTransition || $form.attr('up-fail-transition')
+
+    options = u.options(options)
+    successSelector = u.option(options.target, $form.attr('up-target'), 'body')
+    failureSelector = u.option(options.failTarget, $form.attr('up-fail-target'), -> u.createSelectorFromElement($form))
+    historyOption = u.option(options.history, $form.attr('up-history'), true)
+    successTransition = u.option(options.transition, $form.attr('up-transition'))
+    failureTransition = u.option(options.failTransition, $form.attr('up-fail-transition'))
+    
     $form.addClass('up-active')
 
     request = {
@@ -45,20 +50,21 @@ up.form = (->
     }
 
     successUrl = (xhr) ->
-      if pushHistory
-        if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
+      url = if historyOption
+        if u.isString(historyOption)
+          historyOption
+        else if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
           redirectLocation
         else if request.type == 'GET'
           request.url + '?' + request.data
-        else
-          null
+      u.option(url, false)
 
-    up.util.ajax(request)
+    u.ajax(request)
       .always ->
         $form.removeClass('up-active')
       .done (html, textStatus, xhr) ->
         up.flow.implant(successSelector, html,
-          history: { url: successUrl(xhr) },
+          history: successUrl(xhr),
           transition: successTransition
         )
       .fail (xhr, textStatus, errorThrown) ->
@@ -91,7 +97,7 @@ up.form = (->
   observe = (fieldOrSelector, options) ->
 
     $field = $(fieldOrSelector)
-    options = up.util.options(options, frequency: 500)
+    options = u.options(options, frequency: 500)
     knownValue = null
     timer = null
     callback = null
@@ -101,7 +107,7 @@ up.form = (->
     else if options.change
       callback = options.change
     else
-      up.util.error('observe: No change callback given')
+      u.error('observe: No change callback given')
 
     check = ->
       value = $field.val()

@@ -4,10 +4,12 @@ Tooltips.
 @class up.tooltip 
 ###
 up.tooltip = (->
+  
+  u = up.util
 
   position = ($link, $tooltip, origin) ->
-    linkBox = up.util.measure($link)
-    tooltipBox = up.util.measure($tooltip)
+    linkBox = u.measure($link)
+    tooltipBox = u.measure($tooltip)
     css = switch origin
       when "top"
         left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
@@ -16,12 +18,12 @@ up.tooltip = (->
         left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
         top: linkBox.top + linkBox.height
       else
-        up.util.error("Unknown origin", origin)
+        u.error("Unknown origin", origin)
     $tooltip.attr('up-origin', origin)
     $tooltip.css(css)
 
   createElement = (html) ->
-    up.util.$createElementFromSelector('.up-tooltip')
+    u.$createElementFromSelector('.up-tooltip')
       .html(html)
       .appendTo(document.body)
 
@@ -36,9 +38,9 @@ up.tooltip = (->
   ###
   open = (linkOrSelector, options = {}) ->
     $link = $(linkOrSelector)
-    html = options.html || $link.attr('up-tooltip')
-    origin = options.origin || $link.attr('up-origin') || 'top'
-    animation = options.animation || $link.attr('up-animation') || 'fade-in'
+    html = u.option(options.html, $link.attr('up-tooltip'))
+    origin = u.option(options.origin, $link.attr('up-origin'), 'top')
+    animation = u.option(options.animation, $link.attr('up-animation'), 'fade-in')
     close()
     $tooltip = createElement(html)
     position($link, $tooltip, origin)
@@ -55,7 +57,7 @@ up.tooltip = (->
   close = (options) ->
     $tooltip = $('.up-tooltip')
     if $tooltip.length
-      options = up.util.options(options, animation: 'fade-out')
+      options = u.options(options, animation: 'fade-out')
       up.destroy($tooltip, options)
 
 
