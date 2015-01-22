@@ -28,6 +28,18 @@ up.util = (->
   isStandardPort = (protocol, port) ->
     ((port == "" || port == "80") && protocol == 'http:') || (port == "443" && protocol == 'https:')
 
+    
+  ###*
+  Normalizes URLs, relative paths and absolute paths to a full URL
+  that can be checked for equality with other normalized URL.
+  
+  By default hashes are ignored, search queries are included.
+  
+  @method up.util.normalizeUrl
+  @param {Boolean} [options.hash=false]
+  @param {Boolean} [options.search=true]
+  @protected
+  ###
   normalizeUrl = (urlOrAnchor, options) ->
     anchor = if isString(urlOrAnchor) 
       $('<a>').attr(href: urlOrAnchor).get(0)
@@ -36,6 +48,7 @@ up.util = (->
     normalized = anchor.protocol + "//" + anchor.hostname
     normalized += ":#{anchor.port}" unless isStandardPort(anchor.protocol, anchor.port)  
     normalized += anchor.pathname
+    normalized += anchor.hash if options?.hash == true
     normalized += anchor.search unless options?.search == false
     normalized
 

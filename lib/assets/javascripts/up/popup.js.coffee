@@ -73,6 +73,8 @@ up.popup = (->
   createHiddenPopup = ($link, selector, sticky) ->
     $popup = u.$createElementFromSelector('.up-popup')
     $popup.attr('up-sticky', '') if sticky
+    $popup.attr('up-previous-url', up.browser.url())
+    $popup.attr('up-previous-title', document.title)
     $placeholder = u.$createElementFromSelector(selector)
     $placeholder.appendTo($popup)
     $popup.appendTo(document.body)
@@ -143,14 +145,17 @@ up.popup = (->
   close = (options) ->
     $popup = $('.up-popup')
     if $popup.length
-      options = u.options(options, animation: config.closeAnimation)
+      options = u.options(options,
+        animation: config.closeAnimation,
+        url: $popup.attr('up-previous-url'),
+        title: $popup.attr('up-previous-title')
+      )
       up.destroy($popup, options)
     
   autoclose = ->
     unless $('.up-popup').is('[up-sticky]')
       close()
     
-
   ###*
   @method a[up-popup]
   @example
@@ -183,6 +188,9 @@ up.popup = (->
   up.magic.onEscape(-> close())
 
   ###*
+  When an element with this attribute is clicked,
+  a currently open popup is closed. 
+  
   @method [up-close]
   ###
   up.on('click', '[up-close]', (event, $element) ->

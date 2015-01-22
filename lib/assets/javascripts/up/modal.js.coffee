@@ -44,16 +44,20 @@ up.modal = (->
     else
       template
 
-  createHiddenElements = (selector, sticky) ->
-    $container = $(templateHtml())
-    $container.attr('up-sticky', '') if sticky
-    $dialog = $container.find('.up-modal-dialog')
+  createHiddenModal = (selector, width, height, sticky) ->
+    $modal = $(templateHtml())
+    $modal.attr('up-sticky', '') if sticky
+    $modal.attr('up-previous-url', up.browser.url())
+    $modal.attr('up-previous-title', document.title)
+    $dialog = $modal.find('.up-modal-dialog')
+    $dialog.css('width', width) if u.isPresent(width)
+    $dialog.css('height', height) if u.isPresent(height)
     $content = $dialog.find('.up-modal-content')
     $placeholder = u.$createElementFromSelector(selector)
     $placeholder.appendTo($content)
-    $container.appendTo(document.body)
-    $container.hide()
-    $container
+    $modal.appendTo(document.body)
+    $modal.hide()
+    $modal
 
   updated = ($modal, animation) ->
     $modal.show()
@@ -64,6 +68,8 @@ up.modal = (->
   
   @method up.modal.open
   @param {Element|jQuery|String} elementOrSelector
+  @param {Number} [options.width]
+  @param {Number} [options.height]
   @param {String} [options.origin='bottom-right']
   @param {String} [options.animation]
   @param {Boolean} [options.sticky=false]
@@ -84,12 +90,11 @@ up.modal = (->
     history = u.option(options.history, $link.attr('up-history'), true)
 
     close()
-    $container = createHiddenElements(selector, sticky)
+    $modal = createHiddenModal(selector, width, height, sticky)
 
     up.replace(selector, url,
       history: history
-      # source: true
-      insert: -> updated($container, animation)
+      insert: -> updated($modal, animation)
     )
 
   ###*
@@ -102,9 +107,9 @@ up.modal = (->
     the source URL
   ###
   source = ->
-    $popup = $('.up-modal')
-    unless $popup.is('.up-destroying')
-      $popup.find('[up-source]').attr('up-source')
+    $modal = $('.up-modal')
+    unless $modal.is('.up-destroying')
+      $modal.find('[up-source]').attr('up-source')
 
   ###*
   Closes a currently opened modal overlay.
@@ -115,10 +120,14 @@ up.modal = (->
     See options for {{#crossLink "up.motion/up.animate"}}{{/crossLink}}.
   ###
   close = (options) ->
-    $popup = $('.up-modal')
-    if $popup.length
-      options = u.options(options, animation: config.closeAnimation)
-      up.destroy($popup, options)
+    $modal = $('.up-modal')
+    if $modal.length
+      options = u.options(options, 
+        animation: config.closeAnimation,
+        url: $modal.attr('up-previous-url')
+        title: $modal.attr('up-previous-title')
+      )
+      up.destroy($modal, options)
 
   autoclose = ->
     unless $('.up-modal').is('[up-sticky]')

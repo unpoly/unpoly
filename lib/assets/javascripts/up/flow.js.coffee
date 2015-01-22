@@ -167,12 +167,17 @@ up.flow = (->
   
   @method up.destroy
   @param {String|Element|jQuery} selectorOrElement 
+  @param {String|Function|Object} [options.animation]
+  @param {String} [options.url]
+  @param {String} [options.title]
   ###
   destroy = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
     options = u.options(options, animation: 'none')
     $element.addClass('up-destroying')
     up.bus.emit('fragment:destroy', $element)
+    up.history.push(options.url) if u.isPresent(options.url)
+    document.title = options.title if u.isPresent(options.title)
     animationPromise = u.presence(options.animation, u.isPromise) ||
       up.motion.animate($element, options.animation)
     animationPromise.then -> $element.remove()

@@ -2,14 +2,19 @@
 @class up.history
 ###
 up.history = (->
-
+  
+  u = up.util
+  
+  isCurrentUrl = (url) ->
+    u.normalizeUrl(url, hash: true) == u.normalizeUrl(up.browser.url(), hash: true)
+    
   ###*
   @method up.history.replace
   @param {String} url
   @protected
   ###
   replace = (url) ->
-    manipulate "replace", url
+    manipulate("replace", url) unless isCurrentUrl(url)
 
   ###*
   @method up.history.push  
@@ -17,7 +22,7 @@ up.history = (->
   @protected
   ###
   push = (url) ->
-    manipulate "push", url
+    manipulate("push", url) unless isCurrentUrl(url)
 
   manipulate = (method, url) ->
     method += "State" # resulting in either pushState or replaceState

@@ -48,15 +48,21 @@ up.navigation = (->
   up.on 'click', SELECTOR_SECTION, (event, $section) ->
     sectionClicked($section)
 
-  # If a new fragment is inserted, it's likely to be the result
-  # to the active action. So we can remove the active marker.
+  # When a fragment is ready it might either have brought a location change
+  # with it, or it might have opened a modal / popup which we consider
+  # to be secondary location sources (the primary being the browser's
+  # location bar.
   up.bus.on 'fragment:ready', ->
     unmarkActive()
+    # If a new fragment is inserted, it's likely to be the result
+    # to the active action. So we can remove the active marker.
     locationChanged()
 
-  # If the destroyed fragment is a modal or popup container
-  # this changes which URLs we consider currents.
   up.bus.on 'fragment:destroy', ($fragment) ->
+    # If the destroyed fragment is a modal or popup container
+    # this changes which URLs we consider currents.
+    # Also modals and popups restore their previous history
+    # once they close.
     if $fragment.is('.up-modal, .up-popup')
       locationChanged()
 

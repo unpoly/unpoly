@@ -1,6 +1,8 @@
 $stratum: 10000
 $width: 700px
 $height: 450px
+$close-height: 24px
+$close-width: 36px
 
 .up-modal
   position: fixed
@@ -27,14 +29,18 @@ $height: 450px
 
 .up-modal-close
   position: absolute
-  top: 0
   right: 0
-  background-color: rgba(0, 0, 0, 0.2)
+  top: 0
+  width: $close-width
+  text-align: center
+  line-height: $close-height
+  height: $close-height
+  background-color: #999
   color: #fff
   font-weight: bold
   text-transform: uppercase
-  padding: 5px 15px
   cursor: pointer
+  transform: translateY(-100%)
 
 .up-modal-content
   overflow-x: hidden
