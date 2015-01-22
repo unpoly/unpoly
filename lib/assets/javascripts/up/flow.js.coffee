@@ -175,9 +175,12 @@ up.flow = (->
     $element = $(selectorOrElement)
     options = u.options(options, animation: 'none')
     $element.addClass('up-destroying')
-    up.bus.emit('fragment:destroy', $element)
+    # If e.g. a modal or popup asks us to restore a URL, do this
+    # before emitting `fragment:destroy`. This way up.navigate sees the
+    # new URL and can assign/remove .up-current classes accordingly.
     up.history.push(options.url) if u.isPresent(options.url)
     document.title = options.title if u.isPresent(options.title)
+    up.bus.emit('fragment:destroy', $element)
     animationPromise = u.presence(options.animation, u.isPromise) ||
       up.motion.animate($element, options.animation)
     animationPromise.then -> $element.remove()
