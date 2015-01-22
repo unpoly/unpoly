@@ -1,8 +1,6 @@
 ###*
-Pop-up overlays.
-  
-For modal dialogs see {{#crossLink "up.modal"}}{{/crossLink}}.
-  
+Modal dialogs.
+    
 @class up.modal 
 ###
 up.modal = (->
@@ -10,8 +8,8 @@ up.modal = (->
   u = up.util
 
   config =
-    width: 500
-    height: 300
+    width: 'auto'
+    height: 'auto'
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
     closeLabel: 'X'
