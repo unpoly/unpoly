@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" class="yui-overrride">
+<head>
+    <meta charset="utf-8">
+    <title>lib/assets/javascripts/up/util.js.coffee - up.js</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1 class="blue-main-title">up.js</h1>
+        </div>
+        <div class="yui3-u-1-4 version project-version">
+            API Docs for: 0.0
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/up.browser.html">up.browser</a></li>
+                                <li><a href="../classes/up.bus.html">up.bus</a></li>
+                                <li><a href="../classes/up.flow.html">up.flow</a></li>
+                                <li><a href="../classes/up.form.html">up.form</a></li>
+                                <li><a href="../classes/up.history.html">up.history</a></li>
+                                <li><a href="../classes/up.link.html">up.link</a></li>
+                                <li><a href="../classes/up.magic.html">up.magic</a></li>
+                                <li><a href="../classes/up.marker.html">up.marker</a></li>
+                                <li><a href="../classes/up.modal.html">up.modal</a></li>
+                                <li><a href="../classes/up.motion.html">up.motion</a></li>
+                                <li><a href="../classes/up.navigation.html">up.navigation</a></li>
+                                <li><a href="../classes/up.popup.html">up.popup</a></li>
+                                <li><a href="../classes/up.tooltip.html">up.tooltip</a></li>
+                                <li><a href="../classes/up.util.html">up.util</a></li>
+                            </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                                <li><a href="../modules/up.html">up</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: lib/assets/javascripts/up/util.js.coffee</h1>
+                        
+                        <div class="file">
+                            <pre class="code prettyprint linenums">
+                        ###*
+                        Utility functions.
+                          
+                        All methods in this module are for internal use by the Up.js framework
+                        and will frequently change between releases.  
+                          
+                        @protected
+                        @class up.util
+                        ###
+                        up.util = (-&gt;
+                        
+                          get = (url, options) -&gt;
+                            options = options or {}
+                            options.url = url
+                            ajax options
+                        
+                          ajax = (options) -&gt;
+                            if options.selector
+                              options.headers = {
+                                &quot;X-Up-Selector&quot;: options.selector
+                              }
+                            $.ajax options
+                        
+                          ###*
+                          @method up.util.isStandardPort
+                          @private
+                          ###  
+                          isStandardPort = (protocol, port) -&gt;
+                            ((port == &quot;&quot; || port == &quot;80&quot;) &amp;&amp; protocol == &#x27;http:&#x27;) || (port == &quot;443&quot; &amp;&amp; protocol == &#x27;https:&#x27;)
+                        
+                            
+                          ###*
+                          Normalizes URLs, relative paths and absolute paths to a full URL
+                          that can be checked for equality with other normalized URL.
+                          
+                          By default hashes are ignored, search queries are included.
+                          
+                          @method up.util.normalizeUrl
+                          @param {Boolean} [options.hash=false]
+                          @param {Boolean} [options.search=true]
+                          @protected
+                          ###
+                          normalizeUrl = (urlOrAnchor, options) -&gt;
+                            anchor = if isString(urlOrAnchor) 
+                              $(&#x27;&lt;a&gt;&#x27;).attr(href: urlOrAnchor).get(0)
+                            else 
+                              unwrap(urlOrAnchor)
+                            normalized = anchor.protocol + &quot;//&quot; + anchor.hostname
+                            normalized += &quot;:#{anchor.port}&quot; unless isStandardPort(anchor.protocol, anchor.port)  
+                            normalized += anchor.pathname
+                            normalized += anchor.hash if options?.hash == true
+                            normalized += anchor.search unless options?.search == false
+                            normalized
+                        
+                          $createElementFromSelector = (selector) -&gt;
+                            path = selector.split(/[ &gt;]/)
+                            $root = null
+                            for depthSelector, iteration in path
+                              conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g)
+                              tag = &quot;div&quot;
+                              classes = []
+                              id = null
+                              for expression in conjunction
+                                switch expression[0]
+                                  when &quot;.&quot;
+                                    classes.push expression.substr(1)
+                                  when &quot;#&quot;
+                                    id = expression.substr(1)
+                                  else
+                                    tag = expression
+                              html = &quot;&lt;&quot; + tag
+                              html += &quot; class=\&quot;&quot; + classes.join(&quot; &quot;) + &quot;\&quot;&quot;  if classes.length
+                              html += &quot; id=\&quot;&quot; + id + &quot;\&quot;&quot;  if id
+                              html += &quot;&gt;&quot;
+                              $element = $(html)
+                              $element.appendTo($parent) if $parent
+                              $root = $element if iteration == 0
+                              $parent = $element
+                            $root
+                        
+                          createElement = (tagName, html) -&gt;
+                            element = document.createElement(tagName)
+                            element.innerHTML = html
+                            element
+                        
+                          error = (args...) -&gt;
+                            message = if args.length == 1 &amp;&amp; up.util.isString(args[0]) then args[0] else JSON.stringify(args)
+                            console.log(&quot;[UP] Error: #{message}&quot;, args...)
+                            alert message
+                            throw message
+                        
+                          createSelectorFromElement = ($element) -&gt;
+                            console.log(&quot;Creating selector from element&quot;, $element)
+                            classes = if classString = $element.attr(&quot;class&quot;) then classString.split(&quot; &quot;) else []
+                            id = $element.attr(&quot;id&quot;)
+                            selector = $element.prop(&quot;tagName&quot;).toLowerCase()
+                            selector += &quot;#&quot; + id  if id
+                            for klass in classes
+                              selector += &quot;.&quot; + klass
+                            selector
+                        
+                          # jQuery&#x27;s implementation of $(...) cannot create elements that have
+                          # an &lt;html&gt; or &lt;body&gt; tag. So we&#x27;re using native elements.
+                          createElementFromHtml = (html) -&gt;
+                            htmlElementPattern = /&lt;html&gt;((?:.|\n)*)&lt;\/html&gt;/i
+                            innerHtml = undefined
+                            if match = html.match(htmlElementPattern)
+                              innerHtml = match[1]
+                            else
+                              innerHtml = &quot;&lt;html&gt;&lt;body&gt;#{html}&lt;/body&gt;&lt;/html&gt;&quot;
+                            createElement(&#x27;html&#x27;, innerHtml)
+                        
+                          extend = $.extend
+                        
+                          each = (collection, block) -&gt;
+                            block(item, index) for item, index in collection
+                        
+                          isNull = (object) -&gt;
+                            object == null
+                        
+                          isUndefined = (object) -&gt;
+                            object == &#x60;void(0)&#x60;
+                            
+                          isDefined = (object) -&gt;
+                            !isUndefined(object)
+                            
+                          isMissing = (object) -&gt;
+                            isUndefined(object) || isNull(object)
+                        
+                          isGiven = (object) -&gt;
+                            !isMissing(object)
+                            
+                          isBlank = (object) -&gt;
+                            isMissing(object) ||                  # null or undefined 
+                        #    (isString(object) &amp;&amp; object == &quot;&quot;) || # String
+                            (object.length == 0)                  # String, Array, jQuery
+                          
+                          presence = (object, checker = isPresent) -&gt;
+                            if checker(object) then object else null
+                          
+                          isPresent = (object) -&gt;
+                            !isBlank(object)
+                        
+                          isFunction = (object) -&gt;
+                            typeof(object) == &#x27;function&#x27;
+                        
+                          isString = (object) -&gt;
+                            typeof(object) == &#x27;string&#x27;
+                            
+                          isHash = (object) -&gt;
+                            typeof(object) == &#x27;object&#x27; &amp;&amp; !!object
+                        
+                          isObject = (object) -&gt;
+                            isHash(object) || (typeof object == &#x27;function&#x27;)
+                        
+                          isJQuery = (object) -&gt;
+                            object instanceof jQuery
+                        
+                          isPromise = (object) -&gt;
+                            isFunction(object.then)
+                            
+                          ifGiven = (object) -&gt;
+                            object if isGiven(object)
+                        
+                          # https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
+                          isArray = Array.isArray
+                        
+                          copy = (object)  -&gt;
+                            if isArray(object)
+                              object.slice()
+                            else
+                              extend({}, object)
+                        
+                          unwrap = (object) -&gt;
+                            if isJQuery(object)
+                              object.get(0)
+                            else
+                              object
+                        
+                          # Non-destructive extend
+                          merge = (object, otherObject) -&gt;
+                            extend(copy(object), otherObject)
+                        
+                          options = (object, defaults) -&gt;
+                            merged = if object then copy(object) else {}
+                            if defaults
+                              for key, defaultValue of defaults
+                                value = merged[key]
+                                if !isGiven(value)
+                                  merged[key] = defaultValue
+                                else if isObject(defaultValue) &amp;&amp; isObject(value)
+                                  merged[key] = options(value, defaultValue)
+                            merged
+                        
+                          ###*
+                          Returns the first argument that is considered present.
+                          If an argument is a function, it is called and the value is checked for presence.
+                          
+                          This function is useful when you have multiple option sources and the value can be boolean.
+                          In that case you cannot change the sources with a &#x60;||&#x60; operator
+                          (since that doesn&#x27;t short-circuit at &#x60;false&#x60;).
+                          
+                          @method up.util.option
+                          @param {Array} args...
+                          ###
+                          option = (args...) -&gt;
+                            detect(args, (arg) -&gt;
+                              value = arg
+                              value = value() if isFunction(value)
+                              isPresent(value)
+                            )
+                        
+                          detect = (array, tester) -&gt;
+                            match = null
+                            array.every (element) -&gt;
+                              if tester(element)
+                                match = element
+                                false
+                              else
+                                true
+                            match
+                            
+                          select = (array, tester) -&gt;
+                            matches = []
+                            each array, (element) -&gt;
+                              if tester(element)
+                                matches.push(element)
+                            matches
+                        
+                          presentAttr = ($element, attrNames...) -&gt;
+                            values = ($element.attr(attrName) for attrName in attrNames)
+                            detect(values, isPresent)
+                            
+                          nextFrame = (block) -&gt;
+                            setTimeout(block, 0)
+                            
+                          last = (array) -&gt;
+                            array[array.length - 1]
+                            
+                          clientSize = -&gt;
+                            element = document.documentElement
+                            width: element.clientWidth
+                            height: element.clientHeight
+                            
+                          temporaryCss = ($element, css, block) -&gt;
+                            
+                            oldCss = $element.css(Object.keys(css))
+                        #    oldCss = {}
+                        #    for property of css
+                        #      oldCss[property] = $element.css(property)
+                            $element.css(css)
+                            memo = -&gt; $element.css(oldCss)
+                            if block
+                              block()
+                              memo()
+                            else
+                              memo
+                        
+                          ###*
+                          Animates the given element&#x27;s CSS properties using CSS transitions.
+                        
+                          @method up.util.cssAnimate
+                          @param {Element|jQuery|String} elementOrSelector
+                            The element to animate.
+                          @param {Object} lastFrame
+                            The CSS properties that should be transitioned to.
+                          @param {Number} [opts.duration=300]
+                            The duration of the animation, in milliseconds.
+                          @param {Number} [opts.delay=0]
+                            The delay before the animation starts, in milliseconds.
+                          @param {String} [opts.easing=&#x27;ease&#x27;]
+                            The timing function that controls the animation&#x27;s acceleration.
+                            See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+                            for a list of pre-defined timing functions.
+                          @return
+                            A promise for the animation&#x27;s end.
+                          ###
+                          cssAnimate = (elementOrSelector, lastFrame, opts) -&gt;
+                            opts = options(opts, 
+                              duration: 300, 
+                              delay: 0, 
+                              easing: &#x27;ease&#x27;
+                            )
+                            $element = $(elementOrSelector)
+                            deferred = $.Deferred()
+                            transition =
+                              &#x27;transition-property&#x27;: Object.keys(lastFrame).join(&#x27;, &#x27;)
+                              &#x27;transition-duration&#x27;: &quot;#{opts.duration}ms&quot;
+                              &#x27;transition-delay&#x27;: &quot;#{opts.delay}ms&quot;
+                              &#x27;transition-timing-function&#x27;: opts.easing
+                            withoutTransition = temporaryCss($element, transition)
+                            $element.css(lastFrame)
+                            deferred.then(withoutTransition)
+                            setTimeout((-&gt; deferred.resolve()), opts.duration + opts.delay)
+                            deferred.promise()
+                            
+                          measure = ($element, options) -&gt;
+                            offset = $element.offset()
+                            box = 
+                              left: offset.left
+                              top: offset.top
+                              width: $element.outerWidth()
+                              height: $element.outerHeight()
+                            if options?.full
+                              viewport = clientSize()
+                              box.right = viewport.width - (box.left + box.width)
+                              box.bottom = viewport.height - (box.top + box.height)
+                            box
+                            
+                          copyAttributes = ($source, $target) -&gt;
+                            for attr in $source.get(0).attributes
+                              if attr.specified
+                                $target.attr(attr.name, attr.value)
+                        
+                          prependGhost = ($element) -&gt;
+                            dimensions = measure($element)
+                            $ghost = $element.clone()
+                            $ghost.find(&#x27;script&#x27;).remove()
+                            $ghost.css
+                              right: &#x27;&#x27;
+                              bottom: &#x27;&#x27;
+                              margin: 0
+                              position: &#x27;absolute&#x27;
+                            $ghost.css(dimensions)
+                            $ghost.addClass(&#x27;up-ghost&#x27;)
+                            $ghost.prependTo(document.body)
+                        
+                          findWithSelf = ($element, selector) -&gt;
+                            $element.find(selector).addBack(selector)
+                        
+                          escapePressed = (event) -&gt;
+                            event.keyCode == 27
+                            
+                          contains = (array, element) -&gt;
+                            array.indexOf(element) &gt;= 0
+                            
+                          castsToTrue = (object) -&gt;
+                            String(object) == &quot;true&quot;
+                            
+                          castsToFalse = (object) -&gt;
+                            String(object) == &quot;false&quot;
+                        
+                        #  memoArray = -&gt;
+                        #    array = []
+                        #    defaults = []
+                        #    array.snapshot = -&gt;
+                        #      defaults = copy(array)
+                        #    array.reset = (destroyer) -&gt;
+                        #      if destroyer
+                        #        for element in array
+                        #          unless contains(defaults, element)
+                        #            destroyer()
+                        #      replaceInPlace(array, defaults)
+                        #    array
+                        #  
+                        #  replaceInPlace = (array, replacement) -&gt;
+                        #    array.splice(0, array.length, replacement...)    
+                            
+                          presentAttr: presentAttr
+                          createElement: createElement
+                          normalizeUrl: normalizeUrl
+                          createElementFromHtml: createElementFromHtml
+                          $createElementFromSelector: $createElementFromSelector
+                          createSelectorFromElement: createSelectorFromElement
+                          get: get
+                          ajax: ajax
+                          extend: extend
+                          copy: copy
+                          merge: merge
+                          options: options
+                          option: option
+                          error: error
+                          each: each
+                          detect: detect
+                          select: select
+                          last: last
+                          isNull: isNull
+                          isDefined: isDefined
+                          isUndefined: isUndefined
+                          isGiven: isGiven
+                          isMissing: isMissing
+                          isPresent: isPresent
+                          isBlank: isBlank
+                          presence: presence
+                          isObject: isObject
+                          isFunction: isFunction
+                          isString: isString
+                          isJQuery: isJQuery
+                          isPromise: isPromise
+                          isHash: isHash
+                          ifGiven: ifGiven
+                          unwrap: unwrap
+                          nextFrame: nextFrame
+                          measure: measure
+                          temporaryCss: temporaryCss
+                          cssAnimate: cssAnimate
+                          prependGhost: prependGhost
+                          escapePressed: escapePressed
+                          copyAttributes: copyAttributes
+                          findWithSelf: findWithSelf
+                          contains: contains
+                          isArray: isArray
+                          castsToTrue: castsToTrue
+                          castsToFalse: castsToFalse
+                        #  memoArray: memoArray
+                        #  replaceInPlace: replaceInPlace
+                        
+                        )()
+                        
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>
+</script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

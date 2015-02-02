@@ -1,0 +1,15 @@
+{
+  "name": "up.js",
+  "description": "Fast-responding UI for server-side applications",
+  "version": "0.0",
+  "url": "https://github.com/makandra/upjs-rails",
+
+  "options": {
+    "outdir": "doc/api",
+    "syntaxtype": "coffee",
+    "extension": ".coffee",
+    "themedir": "doc/theme",
+    "paths": ["lib/assets/javascripts/**"],
+    "helpers": ["doc/yuidoc-helpers.js"]
+  }
+}

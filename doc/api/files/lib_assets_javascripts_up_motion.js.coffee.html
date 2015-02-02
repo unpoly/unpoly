@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en" class="yui-overrride">
+<head>
+    <meta charset="utf-8">
+    <title>lib/assets/javascripts/up/motion.js.coffee - up.js</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            <h1 class="blue-main-title">up.js</h1>
+        </div>
+        <div class="yui3-u-1-4 version project-version">
+            API Docs for: 0.0
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/up.browser.html">up.browser</a></li>
+                                <li><a href="../classes/up.bus.html">up.bus</a></li>
+                                <li><a href="../classes/up.flow.html">up.flow</a></li>
+                                <li><a href="../classes/up.form.html">up.form</a></li>
+                                <li><a href="../classes/up.history.html">up.history</a></li>
+                                <li><a href="../classes/up.link.html">up.link</a></li>
+                                <li><a href="../classes/up.magic.html">up.magic</a></li>
+                                <li><a href="../classes/up.marker.html">up.marker</a></li>
+                                <li><a href="../classes/up.modal.html">up.modal</a></li>
+                                <li><a href="../classes/up.motion.html">up.motion</a></li>
+                                <li><a href="../classes/up.navigation.html">up.navigation</a></li>
+                                <li><a href="../classes/up.popup.html">up.popup</a></li>
+                                <li><a href="../classes/up.tooltip.html">up.tooltip</a></li>
+                                <li><a href="../classes/up.util.html">up.util</a></li>
+                            </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                                <li><a href="../modules/up.html">up</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: lib/assets/javascripts/up/motion.js.coffee</h1>
+                        
+                        <div class="file">
+                            <pre class="code prettyprint linenums">
+                        ###*
+                        Animation and transition effects.
+                          
+                        @class up.motion
+                        ###
+                        up.motion = (-&gt;
+                          
+                          u = up.util
+                          
+                          defaultOptions =
+                            duration: 300
+                            delay: 0
+                            easing: &#x27;ease&#x27;
+                        
+                          animations = {}
+                          defaultAnimations = {}
+                          transitions = {}
+                          defaultTransitions = {}
+                          
+                          ###*
+                          Animates an element.
+                          
+                          The following animations are pre-registered:
+                          
+                          - &#x60;fade-in&#x60;
+                          - &#x60;fade-out&#x60;
+                          - &#x60;move-to-top&#x60;
+                          - &#x60;move-from-top&#x60;
+                          - &#x60;move-to-bottom&#x60;
+                          - &#x60;move-from-bottom&#x60;
+                          - &#x60;move-to-left&#x60;
+                          - &#x60;move-from-left&#x60;
+                          - &#x60;move-to-right&#x60;
+                          - &#x60;move-from-right&#x60;
+                          - &#x60;none&#x60;
+                          
+                          @method up.animate
+                          @param {Element|jQuery|String} elementOrSelector
+                          @param {String|Function|Object} animation
+                          @param {Number} [options.duration]
+                          @param {String} [options.easing]
+                          @param {Number} [options.delay]
+                          @return {Promise}
+                            A promise for the animation&#x27;s end.
+                          ###
+                          animate = (elementOrSelector, animation, options) -&gt;
+                            $element = $(elementOrSelector)
+                            options = u.options(options, defaultOptions)
+                            if u.isFunction(animation)
+                              assertIsPromise(
+                                animation($element, options),
+                                [&quot;Animation did not return a Promise&quot;, animation]
+                              )
+                            else if u.isString(animation)
+                              animate($element, findAnimation(animation), options)
+                            else if u.isHash(animation)
+                              u.cssAnimate($element, animation, options)
+                            else
+                              u.error(&quot;Unknown animation type&quot;, animation)
+                              
+                          findAnimation = (name) -&gt;
+                            animations[name] or u.error(&quot;Unknown animation&quot;, animation)
+                        
+                          withGhosts = ($old, $new, block) -&gt;
+                            $oldGhost = null
+                            $newGhost = null
+                            u.temporaryCss $new, display: &#x27;none&#x27;, -&gt;
+                              $oldGhost = u.prependGhost($old).addClass(&#x27;up-destroying&#x27;)
+                            u.temporaryCss $old, display: &#x27;none&#x27;, -&gt;
+                              $newGhost = u.prependGhost($new)
+                            # $old should take up space in the page flow until the transition ends
+                            $old.css(visibility: &#x27;hidden&#x27;)
+                            
+                            newCssMemo = u.temporaryCss($new, display: &#x27;none&#x27;)
+                            promise = block($oldGhost, $newGhost)
+                            promise.then -&gt;
+                              $oldGhost.remove()
+                              $newGhost.remove()
+                              # Now that the transition is over we show $new again.
+                              # Since we expect $old to be removed in a heartbeat,
+                              # $new should take up space
+                              $old.css(display: &#x27;none&#x27;)
+                              newCssMemo()
+                              
+                          assertIsPromise = (object, messageParts) -&gt;
+                            u.isPromise(object) or u.error(messageParts...)
+                            object
+                        
+                          ###*
+                          Performs a transition between two elements.
+                          
+                          The following transitions  are pre-registered:
+                          
+                          - &#x60;cross-fade&#x60;
+                          - &#x60;move-top&#x60;
+                          - &#x60;move-bottom&#x60;
+                          - &#x60;move-left&#x60;
+                          - &#x60;move-right&#x60;
+                          - &#x60;none&#x60;
+                          
+                          You can also compose a transition from two animation names
+                          separated by a slash character (&#x60;/&#x60;):
+                          
+                          - &#x60;move-to-bottom/fade-in&#x60;
+                          - &#x60;move-to-left/move-from-top&#x60;
+                          
+                          @method up.morph
+                          @param {Element|jQuery|String} source
+                          @param {Element|jQuery|String} target
+                          @param {Function|String} transitionOrName
+                          @param {Number} [options.duration]
+                          @param {String} [options.easing]
+                          @param {Number} [options.delay]
+                          @return {Promise}
+                            A promise for the transition&#x27;s end.
+                          ###  
+                          morph = (source, target, transitionOrName, options) -&gt;
+                            options = u.options(defaultOptions)
+                            $old = $(source)
+                            $new = $(target)
+                            transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
+                            if transition
+                              withGhosts $old, $new, ($oldGhost, $newGhost) -&gt;
+                                assertIsPromise(
+                                  transition($oldGhost, $newGhost, options),
+                                  [&quot;Transition did not return a promise&quot;, transitionOrName]
+                                )
+                            else if animation = animations[transitionOrName]
+                              $old.hide()
+                              animate($new, animation, options)
+                            else if u.isString(transitionOrName) &amp;&amp; transitionOrName.indexOf(&#x27;/&#x27;) &gt;= 0
+                              parts = transitionOrName.split(&#x27;/&#x27;)
+                              transition = ($old, $new, options) -&gt;
+                                $.when(
+                                  animate($old, parts[0], options),
+                                  animate($new, parts[1], options)
+                                )
+                              morph($old, $new, transition, options)
+                            else
+                              u.error(&quot;Unknown transition: #{transitionOrName}&quot;)
+                        
+                          ###*
+                          Defines a named transition.
+                          
+                          @method up.transition
+                          @param {String} name
+                          @param {Function} transition
+                          ###
+                          transition = (name, transition) -&gt;
+                            transitions[name] = transition
+                        
+                          ###*
+                          Defines a named animation.
+                          
+                          @method up.animation
+                          @param {String} name
+                          @param {Function} animation
+                          ###
+                          animation = (name, animation) -&gt;
+                            animations[name] = animation
+                            
+                          snapshot = -&gt;
+                            defaultAnimations = u.copy(animations)
+                            defaultTransitions = u.copy(transitions)
+                            
+                          reset = -&gt;
+                            animations = u.copy(defaultAnimations)
+                            transitions = u.copy(defaultTransitions)
+                          
+                          ###*
+                          Returns a no-op animation or transition which has no visual effects
+                          and completes instantly.
+                          
+                          @method up.motion.none
+                          @return {Promise}
+                            A resolved promise  
+                          ###
+                          none = -&gt;
+                            deferred = $.Deferred()
+                            deferred.resolve()
+                            deferred.promise()
+                            
+                          animation(&#x27;none&#x27;, none)
+                        
+                          animation(&#x27;fade-in&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(opacity: 0)
+                            animate($ghost, { opacity: 1 }, options)
+                          )
+                          
+                          animation(&#x27;fade-out&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(opacity: 1)
+                            animate($ghost, { opacity: 0 }, options)
+                          )
+                          
+                          animation(&#x27;move-to-top&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(&#x27;margin-top&#x27;: &#x27;0%&#x27;)
+                            animate($ghost, { &#x27;margin-top&#x27;: &#x27;-100%&#x27; }, options)
+                          )
+                          
+                          animation(&#x27;move-from-top&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(&#x27;margin-top&#x27;: &#x27;-100%&#x27;)
+                            animate($ghost, { &#x27;margin-top&#x27;: &#x27;0%&#x27; }, options)
+                          )
+                            
+                          animation(&#x27;move-to-bottom&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(&#x27;margin-top&#x27;: &#x27;0%&#x27;)
+                            animate($ghost, { &#x27;margin-top&#x27;: &#x27;100%&#x27; }, options)
+                          )
+                          
+                          animation(&#x27;move-from-bottom&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(&#x27;margin-top&#x27;: &#x27;100%&#x27;)
+                            animate($ghost, { &#x27;margin-top&#x27;: &#x27;0%&#x27; }, options)
+                          )
+                          
+                          animation(&#x27;move-to-left&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(&#x27;margin-left&#x27;: &#x27;0%&#x27;)
+                            animate($ghost, { &#x27;margin-left&#x27;: &#x27;-100%&#x27; }, options)
+                          )
+                          
+                          animation(&#x27;move-from-left&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(&#x27;margin-left&#x27;: &#x27;-100%&#x27;)
+                            animate($ghost, { &#x27;margin-left&#x27;: &#x27;0%&#x27; }, options)
+                          )
+                          
+                          animation(&#x27;move-to-right&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(&#x27;margin-left&#x27;: &#x27;0%&#x27;)
+                            animate($ghost, { &#x27;margin-left&#x27;: &#x27;100%&#x27; }, options)
+                          )
+                          
+                          animation(&#x27;move-from-right&#x27;, ($ghost, options) -&gt;
+                            $ghost.css(&#x27;margin-left&#x27;: &#x27;100%&#x27;)
+                            animate($ghost, { &#x27;margin-left&#x27;: &#x27;0%&#x27; }, options)
+                          )
+                          
+                          animation(&#x27;roll-down&#x27;, ($ghost, options) -&gt;
+                            fullHeight = $ghost.height()
+                            styleMemo = u.temporaryCss($ghost,
+                              height: &#x27;0px&#x27;
+                              overflow: &#x27;hidden&#x27;
+                            )
+                            animate($ghost, { height: &quot;#{fullHeight}px&quot; }, options).then(styleMemo)
+                          )
+                          
+                          transition(&#x27;none&#x27;, none)
+                          
+                          transition(&#x27;move-left&#x27;, ($old, $new, options) -&gt;
+                            $.when(
+                              animate($old, &#x27;move-to-left&#x27;, options),
+                              animate($new, &#x27;move-from-right&#x27;, options)
+                            )
+                          )
+                          
+                          transition(&#x27;move-right&#x27;, ($old, $new, options) -&gt;
+                            $.when(
+                              animate($old, &#x27;move-to-right&#x27;, options),
+                              animate($new, &#x27;move-from-left&#x27;, options)
+                            )
+                          )
+                          
+                          transition(&#x27;move-up&#x27;, ($old, $new, options) -&gt;
+                            $.when(
+                              animate($old, &#x27;move-to-top&#x27;, options),
+                              animate($new, &#x27;move-from-bottom&#x27;, options)
+                            )
+                          )
+                          
+                          transition(&#x27;move-down&#x27;, ($old, $new, options) -&gt;
+                            $.when(
+                              animate($old, &#x27;move-to-bottom&#x27;, options),
+                              animate($new, &#x27;move-from-top&#x27;, options)
+                            )
+                          )
+                          
+                          transition(&#x27;cross-fade&#x27;, ($old, $new, options) -&gt;
+                            $.when(
+                              animate($old, &#x27;fade-out&#x27;, options),
+                              animate($new, &#x27;fade-in&#x27;, options)
+                            )
+                          )
+                        
+                          up.bus.on &#x27;framework:ready&#x27;, snapshot
+                          up.bus.on &#x27;framework:reset&#x27;, reset
+                            
+                          morph: morph
+                          animate: animate
+                          transition: transition
+                          animation: animation
+                          none: none
+                        
+                        )()
+                        
+                        up.transition = up.motion.transition
+                        up.animation = up.motion.animation
+                        up.morph = up.motion.morph
+                        up.animate = up.motion.animate
+                        
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>
+</script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>
