@@ -1,7 +1,7 @@
 ###*
 Tooltips.
 
-@class up.tooltip 
+@class up.tooltip
 ###
 up.tooltip = (->
   

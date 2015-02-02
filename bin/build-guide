@@ -3,23 +3,23 @@
 module Upjs
   module Guide
 
-    module Symbol
+    module Logger
 
-      def initialize(name)
-        @name = name
-        @visibility = 'public'
+      def log(*args)
+        puts ([self.class.name] + args).inspect
       end
 
     end
 
     class Parser
+      include Logger
 
       class CannotParse < StandardError; end
 
       BLOCK_PATTERN = %r{
-        \#\#\#\*[\ \t]*\n  # YUIDoc begin symbol
-        (.*?)              # block content ($1)
-        \#\#\#[\ \t]\n     # YUIDoc end symbol
+        ^[\ \t]*\#\#\#\*[\ \t]*\n  # YUIDoc begin symbol
+        ((?:.|\n)*?)               # block content ($1)
+        ^[\ \t]*\#\#\#[\ \t]*\n    # YUIDoc end symbol
       }x
 
       KLASS_PATTERN = %r{
@@ -28,10 +28,10 @@ module Upjs
         (.+)     # class name ($1)
       }x
 
-      METHOD_PATTERN = %r{
-        \@method  # @method
+      FUNCTION_PATTERN = %r{
+        \@function  # @function
         \         # space
-        (.+)      # method name ($1)
+        (.+)      # function name ($1)
       }x
 
       VISIBILITY_PATTERN = %r{
@@ -51,11 +51,14 @@ module Upjs
       }x
 
       PARAM_PATTERN = %r{
-        (^[ \t]*)     # first line indent ($1)
-        \@param       # @param
-        (             # param spec ($2)
-          .+\n        # .. remainder of first line
-          \1[\ \t]+   # .. subsequent lines that are indented further than the first line
+        (^[ \t]*)      # first line indent ($1)
+        \@param        # @param
+        (              # param spec ($2)
+          .+\n         # .. remainder of first line
+          (?:          # .. subsequent lines that are indented further than the first line
+            \1[\ \t]+
+            .*$
+          )*
         )
       }x
 
@@ -94,51 +97,58 @@ module Upjs
       end
 
       def parse(path)
+        log("Block pattern", BLOCK_PATTERN)
+        log("try", "###*\nfoo\n###\n".match(BLOCK_PATTERN))
         code = File.read(path)
         blocks = find_blocks(code)
+        log("Found blocks", blocks)
         blocks.each do |block|
-          parse_klass!(block) || parse_method!(block)
+          puts block
+          parse_klass!(block) || parse_function!(block)
         end
       end
 
       def parse_klass!(block)
+        log("Trying to parse klass", block)
         if block.sub!(KLASS_PATTERN, '')
           klass_name = $1
+          log("Parsed klass name", klass_name)
           klass = Klass.new(klass_name)
           if visibility = parse_visibility!(block)
-            method.visibility = visibility
+            klass.visibility = visibility
           end
           # All the remaining text is guide prose
           klass.guide_markdown = block
-          repository.klasses << klass
+          @repository.klasses << klass
           @last_klass = klass
           klass
         end
       end
 
-      def parse_method!(block)
-        if block.sub!(METHOD_PATTERN, '')
-          method_name = $1
-          method = Method.new(method_name)
+      def parse_function!(block)
+        if block.sub!(FUNCTION_PATTERN, '')
+          function_name = $1
+          log("Parsed function name", function_name)
+          function = Function.new(function_name)
           if visibility = parse_visibility!(block)
-            method.visibility = visibility
+            function.visibility = visibility
           end
           while param = parse_param!(block)
-            method.params << param
+            function.params << param
           end
           # while example = parse_example(block)
-          #   method.examples << example
+          #   function.examples << example
           # end
-          if response = parse_response(block)
-            method.response = response
-          end
+          # if response = parse_response!(block)
+          #   function.response = response
+          # end
           if parse_ujs!(block)
-            method.ujs = true
+            function.ujs = true
           end
           # All the remaining text is guide prose
-          method.guide_markdown = block
-          @last_klass.methods << method
-          method
+          function.guide_markdown = block
+          @last_klass.functions << function
+          function
         end
       end
 
@@ -166,7 +176,7 @@ module Upjs
 
       # A param's name, optional/required property and
       # eventual default value are so interwoven syntax-wise
-      # that we parse all three with a single method.
+      # that we parse all three with a single function.
       def parse_param_name_and_optionality!(param_spec)
         if param_spec.sub!(PARAM_NAME_PATTERN, '')
           required_param_name = $1
@@ -200,6 +210,7 @@ module Upjs
 
       def find_blocks(code)
         code.scan(BLOCK_PATTERN).collect do |match|
+          log("match", match[0])
           unindent(match[0])
         end
       end
@@ -209,23 +220,39 @@ module Upjs
       def unindent(text_or_lines)
         lines = text_or_lines.is_a?(String) ? split_lines(text_or_lines) : text_or_lines.dup
         remove_preceding_blank_lines!(lines)
-        first_indent = lines.first.match(/^[ \t]+/)[0]
-        lines.collect { |line|
-          line.gsub(/^[ \t]{0, #{first_indent.size}}/, '')
-        }.join("\n")
+        if lines.size > 0
+          first_indent = lines.first.match(/^[ \t]*/)[0]
+          lines.collect { |line|
+            line.gsub(/^[ \t]{0, #{first_indent.size}}/, '')
+          }.join("\n")
+        else
+          ''
+        end
       end
 
       # Removes all leading whitespace from the first line
       # and unindents all subsequent lines by the second line's indent.
       def unindent_hanging(block)
-        first_line, *other_lines = split_lines(block)
+        first_line, other_lines = first_and_other_lines(block)
         first_line.sub!(/^[\ \t]+/, '')
-        other_lines = unindent(other_lines)
-        ([first_line] + other_lines).join("\n")
+        unindented_other_lines = unindent(other_lines)
+        log("first_line", first_line)
+        log("other_lines", other_lines)
+        [first_line, unindented_other_lines].join("\n")
       end
 
       def split_lines(text)
         text.split(/\n/)
+      end
+
+      def first_and_other_lines(text)
+        lines = split_lines(text)
+        if lines.length == 0
+          ['', []]
+        else
+          first_line, *other_lines = lines
+          [first_line, other_lines]
+        end
       end
 
       def remove_preceding_blank_lines!(lines)
@@ -238,6 +265,7 @@ module Upjs
     end
 
     class Repository
+      include Logger
 
       def initialize(input_path)
         @input_path = input_path
@@ -248,11 +276,13 @@ module Upjs
       attr_reader :klasses
 
       def source_paths
+        log("Input pattern", File.join(@input_path, "**/*.coffee"))
         Dir[File.join(@input_path, "**/*.coffee")]
       end
 
       def parse
         parser = Parser.new(self)
+        log("Source paths", source_paths)
         source_paths.each do |source_path|
           parser.parse(source_path)
         end
@@ -261,37 +291,39 @@ module Upjs
     end
 
     class Klass
+      include Logger
 
       def initialize(name)
         @name = name
         @visibility = 'public'
-        @methods = []
+        @functions = []
         @guide_markdown = ''
       end
 
       attr_accessor :visibility
       attr_accessor :name
       attr_accessor :guide_markdown
-      attr_reader :methods
+      attr_accessor :functions
 
       def guide_filename(extension)
-        "#{@name}.#{extension}"
+        "#{@name}#{extension}"
       end
 
       attr_accessor :guide_markdown
 
 
-      def js_methods
-        methods.reject(&:ujs?)
+      def js_functions
+        functions.reject(&:ujs?)
       end
 
-      def ujs_methods
-        methods.select(&:ujs?)
+      def ujs_functions
+        functions.select(&:ujs?)
       end
 
     end
 
-    class Method
+    class Function
+      include Logger
 
       def initialize(name)
         @name = name
@@ -305,21 +337,26 @@ module Upjs
       end
 
       attr_accessor :response
-      attr_reader :name
+      attr_accessor :name
       attr_accessor :visibility
+      attr_accessor :guide_markdown
+      attr_accessor :params
 
     end
 
     class Param
+      include Logger
 
       def initialize(name = nil)
         @name = name
         @types = []
         @guide_markdown = ''
+        @optional = false
       end
 
+      attr_accessor :optional
       attr_accessor :name
-      attr_reader :types
+      attr_accessor :types
       attr_accessor :guide_markdown
 
     end
@@ -327,41 +364,45 @@ module Upjs
 
     # This is actually "return", but that's reserved in Ruby.
     class Response
+      include Logger
 
       def initialize
         @types = []
         @guide_markdown = ''
       end
 
-      attr_reader :types
+      attr_accessor :types
       attr_accessor :guide_markdown
 
     end
 
     class Compiler
+      include Logger
 
       def input_folder
-        File.join(__FILE__, '../lib/assets/javascripts')
+        File.join(File.dirname(__FILE__), '../lib/assets/javascripts')
       end
 
       def output_folder
-        File.join(__FILE__, '../doc/guides')
+        File.join(File.dirname(__FILE__), '../doc/guide')
       end
 
       def run
         repository = Repository.new(input_folder)
+        log("Got repository", repository)
         repository.klasses.each do |klass|
           output_path = File.join(output_folder, klass.guide_filename('.md'))
+          log("Writing to output path", output_path)
           File.open(output_path, "w") do |file|
             file.write klass.guide_markdown
-            klass.js_methods.each do |js_method|
+            klass.js_functions.each do |js_function|
               file.write "\n"
-              file.write "JS Method: #{js_method.name}"
+              file.write "JS Function: #{js_function.name}"
               file.write "\n"
             end
-            klass.ujs_methods.each do |ujs_method|
+            klass.ujs_functions.each do |ujs_function|
               file.write "\n"
-              file.write "UJS Method: #{ujs_method.name}"
+              file.write "UJS Function: #{ujs_function.name}"
               file.write "\n"
             end
           end
@@ -374,4 +415,4 @@ module Upjs
 end
 
 
-Upjs::Guide::Compiler.run
+Upjs::Guide::Compiler.new.run

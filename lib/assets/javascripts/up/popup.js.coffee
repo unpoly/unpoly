@@ -3,7 +3,7 @@ Pop-up overlays.
   
 For modal dialogs see {{#crossLink "up.modal"}}{{/crossLink}}.
   
-@class up.popup 
+@class up.popup
 ###
 up.popup = (->
 
