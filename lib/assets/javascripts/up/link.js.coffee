@@ -65,6 +65,7 @@ up.link = (->
       
   ###*
   @method a[up-target]
+  @ujs
   @param {String} up-target
   @example
       <a href="/users" up-target=".main">User list</a>
@@ -75,6 +76,7 @@ up.link = (->
 
   ###*
   @method [up-follow]
+  @ujs
   @param {String} [up-follow]
   @example
       <a href="/users" up-follow>User list</a>

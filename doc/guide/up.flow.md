@@ -78,3 +78,13 @@ Read on
 
 
 
+
+JS Function: up.replace
+
+JS Function: up.flow.implant
+
+JS Function: up.destroy
+
+JS Function: up.reload
+
+JS Function: up.reset
