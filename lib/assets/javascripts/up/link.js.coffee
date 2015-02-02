@@ -99,5 +99,3 @@ up.link = (->
 
 up.visit = up.link.visit
 up.follow = up.link.follow
-
-
