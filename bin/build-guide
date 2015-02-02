@@ -1,0 +1,377 @@
+#!/usr/bin/env ruby
+
+module Upjs
+  module Guide
+
+    module Symbol
+
+      def initialize(name)
+        @name = name
+        @visibility = 'public'
+      end
+
+    end
+
+    class Parser
+
+      class CannotParse < StandardError; end
+
+      BLOCK_PATTERN = %r{
+        \#\#\#\*[\ \t]*\n  # YUIDoc begin symbol
+        (.*?)              # block content ($1)
+        \#\#\#[\ \t]\n     # YUIDoc end symbol
+      }x
+
+      KLASS_PATTERN = %r{
+        \@class  # @class
+        \        # space
+        (.+)     # class name ($1)
+      }x
+
+      METHOD_PATTERN = %r{
+        \@method  # @method
+        \         # space
+        (.+)      # method name ($1)
+      }x
+
+      VISIBILITY_PATTERN = %r{
+        \@(public|protected|private)
+      }x
+
+      TYPES_PATTERN = %r{
+        \{        # opening brace
+        ([^\}]+)  # pipe-separated list of types ($1)
+        \}        # closing brace
+      }x
+
+      TYPES_SEPARATOR = %r{
+        [\ \t]*  # whitespace
+        \|       # pipe symbol
+        [\ \t]*  # whitespace
+      }x
+
+      PARAM_PATTERN = %r{
+        (^[ \t]*)     # first line indent ($1)
+        \@param       # @param
+        (             # param spec ($2)
+          .+\n        # .. remainder of first line
+          \1[\ \t]+   # .. subsequent lines that are indented further than the first line
+        )
+      }x
+
+      PARAM_NAME_PATTERN = %r{
+        ([^\ \t]+)      # required param name ($1)
+        |
+        (?:
+          \[
+            ([^\ \t]+)  # optional param name ($2)
+            (?:
+              [\ \t]*   # .. whitespace around equals symbol
+              \=        # .. equals symbol
+              [\ \t]*   # .. whitespace around equals symbol
+              (.*?)     # .. default value ($3)
+            )?
+          \]
+        )
+      }x
+
+      UJS_PATTERN = %r{
+        \@ujs
+      }x
+
+      # EXAMPLE_PATTERN = %r{
+      #   (^[ \t]*)     # first line indent ($1)
+      #   \@example     # @example
+      #   (             # example body ($1)
+      #     .+\n        # .. remainder of first line
+      #     \1[\ \t]+   # .. subsequent lines that are indented further than the first line
+      #   )
+      # }x
+
+      def initialize(repository)
+        @repository = repository
+        @last_klass = nil
+      end
+
+      def parse(path)
+        code = File.read(path)
+        blocks = find_blocks(code)
+        blocks.each do |block|
+          parse_klass!(block) || parse_method!(block)
+        end
+      end
+
+      def parse_klass!(block)
+        if block.sub!(KLASS_PATTERN, '')
+          klass_name = $1
+          klass = Klass.new(klass_name)
+          if visibility = parse_visibility!(block)
+            method.visibility = visibility
+          end
+          # All the remaining text is guide prose
+          klass.guide_markdown = block
+          repository.klasses << klass
+          @last_klass = klass
+          klass
+        end
+      end
+
+      def parse_method!(block)
+        if block.sub!(METHOD_PATTERN, '')
+          method_name = $1
+          method = Method.new(method_name)
+          if visibility = parse_visibility!(block)
+            method.visibility = visibility
+          end
+          while param = parse_param!(block)
+            method.params << param
+          end
+          # while example = parse_example(block)
+          #   method.examples << example
+          # end
+          if response = parse_response(block)
+            method.response = response
+          end
+          if parse_ujs!(block)
+            method.ujs = true
+          end
+          # All the remaining text is guide prose
+          method.guide_markdown = block
+          @last_klass.methods << method
+          method
+        end
+      end
+
+      def parse_visibility!(block)
+        if block.sub!(VISIBILITY_PATTERN, '')
+          visibility = $1
+          visibility
+        end
+      end
+
+      def parse_param!(block)
+        if block.sub!(PARAM_PATTERN, '')
+          param_spec = unindent($2)
+          param = Param.new
+          param.types = parse_types!(param_spec)
+          if name_props = parse_param_name_and_optionality!(param_spec)
+            param.name = name_props[:name]
+            param.optional = name_props[:optional] if name_props.has_key?(:optional)
+            param.default = name_props[:default] if name_props.has_key?(:default)
+          end
+          param.guide_markdown = unindent_hanging(param_spec)
+          param
+        end
+      end
+
+      # A param's name, optional/required property and
+      # eventual default value are so interwoven syntax-wise
+      # that we parse all three with a single method.
+      def parse_param_name_and_optionality!(param_spec)
+        if param_spec.sub!(PARAM_NAME_PATTERN, '')
+          required_param_name = $1
+          optional_param_name = $2
+          default_value = $2
+          if required_param_name
+            { name: required_param_name,
+              optional: false }
+          else
+            { name: optional_param_name,
+              optional: true,
+              default: default_value }
+          end
+        end
+      end
+
+      def parse_ujs!(block)
+        if block.sub!(UJS_PATTERN, '')
+          true
+        end
+      end
+
+      def parse_types!(block)
+        if block.sub!(TYPES_PATTERN, '')
+          types = $1.split(TYPES_SEPARATOR)
+          types
+        end
+      end
+
+      private
+
+      def find_blocks(code)
+        code.scan(BLOCK_PATTERN).collect do |match|
+          unindent(match[0])
+        end
+      end
+
+      # Takes a multi-line string (or an Array of single lines)
+      # and unindents all lines by the first line's indent.
+      def unindent(text_or_lines)
+        lines = text_or_lines.is_a?(String) ? split_lines(text_or_lines) : text_or_lines.dup
+        remove_preceding_blank_lines!(lines)
+        first_indent = lines.first.match(/^[ \t]+/)[0]
+        lines.collect { |line|
+          line.gsub(/^[ \t]{0, #{first_indent.size}}/, '')
+        }.join("\n")
+      end
+
+      # Removes all leading whitespace from the first line
+      # and unindents all subsequent lines by the second line's indent.
+      def unindent_hanging(block)
+        first_line, *other_lines = split_lines(block)
+        first_line.sub!(/^[\ \t]+/, '')
+        other_lines = unindent(other_lines)
+        ([first_line] + other_lines).join("\n")
+      end
+
+      def split_lines(text)
+        text.split(/\n/)
+      end
+
+      def remove_preceding_blank_lines!(lines)
+        while lines.first =~ /^([ \t]*)$/
+          lines.shift
+        end
+        lines
+      end
+
+    end
+
+    class Repository
+
+      def initialize(input_path)
+        @input_path = input_path
+        @klasses = []
+        parse
+      end
+
+      attr_reader :klasses
+
+      def source_paths
+        Dir[File.join(@input_path, "**/*.coffee")]
+      end
+
+      def parse
+        parser = Parser.new(self)
+        source_paths.each do |source_path|
+          parser.parse(source_path)
+        end
+      end
+
+    end
+
+    class Klass
+
+      def initialize(name)
+        @name = name
+        @visibility = 'public'
+        @methods = []
+        @guide_markdown = ''
+      end
+
+      attr_accessor :visibility
+      attr_accessor :name
+      attr_accessor :guide_markdown
+      attr_reader :methods
+
+      def guide_filename(extension)
+        "#{@name}.#{extension}"
+      end
+
+      attr_accessor :guide_markdown
+
+
+      def js_methods
+        methods.reject(&:ujs?)
+      end
+
+      def ujs_methods
+        methods.select(&:ujs?)
+      end
+
+    end
+
+    class Method
+
+      def initialize(name)
+        @name = name
+        @visibility = 'public'
+        @ujs = false
+        @params = []
+        @guide_markdown = ''
+        @response = nil
+        @default = nil
+        @optional = false
+      end
+
+      attr_accessor :response
+      attr_reader :name
+      attr_accessor :visibility
+
+    end
+
+    class Param
+
+      def initialize(name = nil)
+        @name = name
+        @types = []
+        @guide_markdown = ''
+      end
+
+      attr_accessor :name
+      attr_reader :types
+      attr_accessor :guide_markdown
+
+    end
+
+
+    # This is actually "return", but that's reserved in Ruby.
+    class Response
+
+      def initialize
+        @types = []
+        @guide_markdown = ''
+      end
+
+      attr_reader :types
+      attr_accessor :guide_markdown
+
+    end
+
+    class Compiler
+
+      def input_folder
+        File.join(__FILE__, '../lib/assets/javascripts')
+      end
+
+      def output_folder
+        File.join(__FILE__, '../doc/guides')
+      end
+
+      def run
+        repository = Repository.new(input_folder)
+        repository.klasses.each do |klass|
+          output_path = File.join(output_folder, klass.guide_filename('.md'))
+          File.open(output_path, "w") do |file|
+            file.write klass.guide_markdown
+            klass.js_methods.each do |js_method|
+              file.write "\n"
+              file.write "JS Method: #{js_method.name}"
+              file.write "\n"
+            end
+            klass.ujs_methods.each do |ujs_method|
+              file.write "\n"
+              file.write "UJS Method: #{ujs_method.name}"
+              file.write "\n"
+            end
+          end
+        end
+      end
+
+    end
+
+  end
+end
+
+
+Upjs::Guide::Compiler.run
