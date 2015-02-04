@@ -1,5 +1,8 @@
 ###*
-Links.
+Links
+=====
+
+TODO: Write some docs or merge with `up.flow` docs.
   
 @class up.link
 ###
@@ -11,7 +14,7 @@ up.link = (->
   ###*
   Visits the given URL without a full page load.
   This is done by fetching `url` through an AJAX request
-  and replacing the current `<body>` tag with the response's `<body>` tag.. 
+  and replacing the current `<body>` element with the response's `<body>` element.
   
   @method up.visit
   @param {String} url
@@ -27,7 +30,7 @@ up.link = (->
     up.replace('body', url, options)
 
   ###*
-  Follows the given link and replaces a selector in the current page
+  Follows the given link via AJAX and replaces a CSS selector in the current page
   with corresponding elements from a new page fetched from the server.
   
   @method up.follow
@@ -64,20 +67,39 @@ up.link = (->
       u.option($link.attr('href'), $link.attr('up-follow'))
       
   ###*
+  Follows this link via AJAX and replaces a CSS selector in the current page
+  with corresponding elements from a new page fetched from the server.
+
+      <a href="/users" up-target=".main">User list</a>
+
   @method a[up-target]
   @param {String} up-target
-  @example
-      <a href="/users" up-target=".main">User list</a>
+    The CSS selector to replace
   ###
   up.on 'click', 'a[up-target]', (event, $link) ->
     event.preventDefault()
     follow($link)
 
   ###*
-  @method [up-follow]
-  @param {String} [up-follow]
-  @example
+  If applied on a link, Follows this link via AJAX and replaces the
+  current `<body>` element with the response's `<body>` element
+
       <a href="/users" up-follow>User list</a>
+
+  You can also apply `[up-follow]` to any element that contains a link
+  in order to enlarge the link's click area:
+
+      <div class="notification" up-follow>
+         Record was saved!
+         <a href="/records">Close</a>
+      </div>
+
+  In the example above, clicking anywhere within `.notification` element
+  would follow the `Close` link.
+
+  @method [up-follow]
+  @ujs
+  @param {String} [up-follow]
   ###
   up.on 'click', '[up-follow]', (event, $element) ->
     

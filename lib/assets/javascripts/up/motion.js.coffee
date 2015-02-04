@@ -16,7 +16,7 @@ up.motion = (->
   defaultAnimations = {}
   transitions = {}
   defaultTransitions = {}
-  
+
   ###*
   Animates an element.
   

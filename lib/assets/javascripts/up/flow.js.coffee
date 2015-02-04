@@ -42,7 +42,7 @@ In Up.js you annotate navigation links with an `up-target` attribute.
 The value of this attribute is a CSS selector that indicates which page
 fragment to update.
 
-Since we only want to update the ´<article>` tag, we will use `up-target="article`:
+Since we only want to update the `<article>` tag, we will use `up-target="article"`:
 
 
 ```
@@ -61,23 +61,14 @@ Javascript will not be reloaded, no white flash during a full page reload.
 
 Read on
 -------
-
-- You can [animate page transitions](#) by definining animations for fragments as they enter or leave the screen.
-- The `up-target` mechanism also works with [forms](#form).
-- As you switch through pages, Up.js will [update your browser's location bar and history](#history)
-- You can [open fragments in popups or modal dialogs](#modal).
+- More info on [links](/up.link).
+- You can [animate page transitions](/up.motion) by definining animations for fragments as they enter or leave the screen.
+- The `up-target` mechanism also works with [forms](/up.form).
+- As you switch through pages, Up.js will [update your browser's location bar and history](/up.history)
+- You can [open fragments in popups or modal dialogs](/up.modal).
 - You can give users [immediate feedback](#navigation) when a link is clicked or becomes current, without waiting for the server.
-- [Controlling Up.js pragmatically through Javascript](#???)
-- [Defining custom tags and event handlers](#magic)
-
-
-
-
-
-
-
-
-
+- [Controlling Up.js pragmatically through Javascript](#)
+- [Defining custom tags and event handlers](/magic)
 
 @class up.flow
 ###
