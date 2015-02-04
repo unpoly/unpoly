@@ -144,8 +144,8 @@ up.flow = (->
   @param {String} [options.title]
   @param {String} [options.source]
   @param {Object} [options.transition]
-  @param {String] [options.history]
-  @param {String] [options.historyMethod='push']
+  @param {String} [options.history]
+  @param {String} [options.historyMethod='push']
   ###
   implant = (selector, html, options) ->
     
