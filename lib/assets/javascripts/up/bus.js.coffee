@@ -7,7 +7,7 @@ Event bus for up-related events:
   
 TODO: This might eventually be rolled into regular document events.
   
-@class up.bus  
+@class up.bus
 ###
 up.bus = (->
 

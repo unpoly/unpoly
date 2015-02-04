@@ -9,7 +9,7 @@ The current location is either:
 - the source URL of a currently opened {{#crossLink "up.modal"}}modal dialog{{/crossLink}} 
 - the source URL of a currently opened {{#crossLink "up.popup"}}popup overlay{{/crossLink}} 
   
-@class up.navigation  
+@class up.navigation
 ###
 up.navigation = (->
 

@@ -73,6 +73,7 @@ up.link = (->
       <a href="/users" up-target=".main">User list</a>
 
   @method a[up-target]
+  @ujs
   @param {String} up-target
     The CSS selector to replace
   ###
