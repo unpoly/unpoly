@@ -1,2 +1,0 @@
-
-JS Function: [up-marker]
