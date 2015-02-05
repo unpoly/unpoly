@@ -13,6 +13,7 @@
 #= require up/tooltip
 #= require up/navigation
 #= require up/marker
+#= require_self
 
 up.bus.emit('framework:ready')
 $(document).on 'ready', -> up.bus.emit('app:ready')

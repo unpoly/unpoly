@@ -12,7 +12,8 @@ by providing instant feedback for user interactions.
 The classes are added and removed automatically whenever
 a page fragment is added, changed or destroyed through Up.js.
 
-### How Up.js computes the current location
+How Up.js computes the current location
+---------------------------------------
 
 From Up's point of view the "current" location is either:
   
@@ -20,8 +21,6 @@ From Up's point of view the "current" location is either:
 - the source URL of a currently opened [modal dialog](/up.modal)
 - the source URL of a currently opened [popup overlay](/up.popup)
 
-
-  
 @class up.navigation
 ###
 up.navigation = (->
