@@ -23,7 +23,7 @@ up.bus = (->
 
   ###*
   Makes a snapshot of the currently registered bus listeners,
-  to later be restored through {{#crossLink "up.bus/up.bus.reset"}}{{/crossLink}}
+  to later be restored through [`up.bus.reset`](/up.bus#up.bus.reset)
   
   @private
   @method up.bus.snapshot

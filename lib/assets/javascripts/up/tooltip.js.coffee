@@ -55,7 +55,7 @@ up.tooltip = (->
   
   @method up.tooltip.close
   @param {Object} options
-    See options for {{#crossLink "up.motion/up.animate"}}{{/crossLink}}.
+    See options for See options for [`up.animate`](/up.motion#up.animate).
   ###
   close = (options) ->
     $tooltip = $('.up-tooltip')
@@ -65,9 +65,12 @@ up.tooltip = (->
 
 
   ###*
-  @method [up-tooltip]
-  @example
+  Displays a tooltip when hovering the mouse over this element:
+
       <a href="/decks" up-tooltip="Show all decks">Decks</a>
+
+  @method [up-tooltip]
+  @ujs
   ###
   up.awaken('[up-tooltip]', ($link) ->
     # Don't register these events on document since *every*

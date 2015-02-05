@@ -277,6 +277,7 @@ up.util = (->
     for a list of pre-defined timing functions.
   @return
     A promise for the animation's end.
+
   ###
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
     opts = options(opts, 

@@ -45,10 +45,11 @@ up.magic = (->
   @method up.awaken
   @param {String} selector
     The selector to match.
-  @param {Function} awakener
+  @param {Function($element)} awakener
     The function to call when a matching element is inserted.
     The function takes the new element as the first argument (as a jQuery object).
-    It may return another function that destroys the awakened
+
+    The function may return another function that destroys the awakened
     object when it is removed from the DOM, by clearing global state such as
     time-outs and event handlers bound to the document.
   ###
@@ -80,7 +81,7 @@ up.magic = (->
       
   ###*
   Makes a snapshot of the currently registered event listeners,
-  to later be restored through {{#crossLink "up.magic/up.magic.reset"}}{{/crossLink}}
+  to later be restored through [`up.bus.reset`](/up.bus#up.bus.reset).
   
   @private
   @method up.magic.snapshot
@@ -104,7 +105,16 @@ up.magic = (->
     awakeners = util.copy(defaultAwakeners)
 
   ###*
+  Sends a notification that the given element has been inserted
+  into the DOM. This causes Up.js to compile the fragment (apply
+  event listeners, etc.).
+
+  This method is called automatically if you change elements through
+  other Up.js methods. You will only need to call this if you
+  manipulate the DOM without going through Up.js.
+
   @method up.ready
+  @param {String|Element|jQuery} selectorOrFragment
   ###
   ready = (selectorOrFragment) ->
     $fragment = $(selectorOrFragment)

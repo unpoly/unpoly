@@ -11,7 +11,9 @@ up.form = (->
   u = up.util
 
   ###*
-  Submits a form using the Up.js flow.
+  Submits a form using the Up.js flow:
+
+      up.submit('form.new_user')
 
   @method up.submit
   @param {Element|jQuery|String} formOrSelector
@@ -30,8 +32,6 @@ up.form = (->
   @param {String} [options.failTransition]
   @return {Promise}
     A promise for the AJAX response
-  @example
-      up.submit('form')
   ###
   submit = (formOrSelector, options) ->
     
@@ -81,22 +81,22 @@ up.form = (->
   Observes an input field by periodic polling its value.
   Executes code when the value changes.
 
+      up.observe('input', { change: function(value, $input) {
+        up.submit($input)
+      } });
+
   This is useful for observing text fields while the user is typing,
   since browsers will only fire a `change` event once the user
   blurs the text field.
 
   @method up.observe
   @param {Element|jQuery|String} fieldOrSelector
-  @param {Function|String} options.change
+  @param {Function(value, $field)|String} options.change
     The callback to execute when the field's value changes.
     If given as a function, it must take two arguments (`value`, `$field`).
     If given as a string, it will be evaled as Javascript code in a context where
     (`value`, `$field`) are set.
   @param {Number} [options.frequency=500]
-  @example
-      up.observe('input', { change: function(value, $input) { 
-        up.submit($input) 
-      } }); 
   ###
   observe = (fieldOrSelector, options) ->
 
@@ -142,28 +142,40 @@ up.form = (->
     return clearTimer
 
   ###*
+  Submits the form through AJAX, searches the response for the selector
+  given in `up-target` and replaces the selector content in the current page:
+
+      <form method="POST" action="/users" up-target=".main">
+        ...
+      </form>
+
   @method form[up-target]
+  @ujs
   @param {String} up-target
   @param {String} [up-fail-target]
   @param {String} [up-history]
   @param {String} [up-transition]
   @param {String} [up-fail-transition]
-  @example
-      <form method="POST" action="/users" up-target=".main">  
-        ...    
-      </form>
   ###
   up.on 'submit', 'form[up-target]', (event, $form) ->
     event.preventDefault()
     submit($form)
 
   ###*
-  @method input[up-observe]
-  @param {String} up-observe 
-  @example
-      <form method="GET" action="/search">  
-        <input type="query" up-observe="up.form.submit(this)">    
+  Observes this form control by periodically polling its value.
+  Executes the given Javascript if the value changes:
+
+      <form method="GET" action="/search">
+        <input type="query" up-observe="up.form.submit(this)">
       </form>
+
+  This is useful for observing text fields while the user is typing,
+  since browsers will only fire a `change` event once the user
+  blurs the text field.
+
+  @method input[up-observe]
+  @ujs
+  @param {String} up-observe 
   ###
   up.awaken '[up-observe]', ($field) ->
     return observe($field)

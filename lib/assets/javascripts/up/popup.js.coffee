@@ -2,7 +2,7 @@
 Pop-up overlays
 ===============
   
-For modal dialogs see {{#crossLink "up.modal"}}{{/crossLink}}.
+For modal dialogs see [up.modal](/up.modal).
   
 @class up.popup
 ###
@@ -141,7 +141,7 @@ up.popup = (->
   
   @method up.popup.close
   @param {Object} options
-    See options for {{#crossLink "up.motion/up.animate"}}{{/crossLink}}.
+    See options for [`up.animate`](/up.motion#up.animate).
   ###
   close = (options) ->
     $popup = $('.up-popup')
@@ -158,11 +158,21 @@ up.popup = (->
       close()
     
   ###*
-  @method a[up-popup]
-  @example
+  Opens the target of this link in a modal dialog:
+
+      <a href="/decks" up-modal=".deck_list">Switch deck</a>
+
+  If the `up-sticky` attribute is set, the dialog does not auto-close
+  if a page fragment below the dialog updates:
+
       <a href="/decks" up-popup=".deck_list">Switch deck</a>
-  @example
-      <a href="/settings" up-popup=".options" up-sticky>Settings</a>  
+      <a href="/settings" up-popup=".options" up-sticky>Settings</a>
+
+  @method a[up-popup]
+  @ujs
+  @param up-target
+  @param [up-sticky]
+  @param [up-origin]
   ###
   up.on('click', 'a[up-popup]', (event, $link) ->
     event.preventDefault()
@@ -193,6 +203,7 @@ up.popup = (->
   a currently open popup is closed. 
   
   @method [up-close]
+  @ujs
   ###
   up.on('click', '[up-close]', (event, $element) ->
     if $element.closest('.up-popup')

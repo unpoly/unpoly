@@ -1,16 +1,24 @@
 ###*
 Fast interaction feedback
-=========================  
+=========================
   
 This module marks up link elements with classes indicating that
 they are currently loading (class `up-active`) or linking
 to the current location (class `up-current`).
+
+The classes are added and removed automatically whenever
+a page fragment is added, changed or destroyed through Up.js.
+
+How Up.js computes the current location
+---------------------------------------
   
-The current location is either:
+From Up's point of view the "current" location is either:
   
 - the URL displayed in the browser window's location bar
-- the source URL of a currently opened {{#crossLink "up.modal"}}modal dialog{{/crossLink}} 
-- the source URL of a currently opened {{#crossLink "up.popup"}}popup overlay{{/crossLink}} 
+- the source URL of a currently opened [modal dialog](/up.modal)
+- the source URL of a currently opened [popup overlay](/up.popup)
+
+
   
 @class up.navigation
 ###

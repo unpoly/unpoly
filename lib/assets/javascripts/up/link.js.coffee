@@ -20,7 +20,7 @@ up.link = (->
   @param {String} url
     The URL to visit.
   @param {Object} options
-    See options for {{#crossLink "up.flow/up.replace"}}{{/crossLink}}.
+    See options for [`up.replace`](/up.flow#up.replace)
   @example
       up.visit('/users')
   ###

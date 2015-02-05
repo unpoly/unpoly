@@ -30,7 +30,7 @@ up.modal = (->
   @method up.modal.defaults
   @param {Number} options.width
   @param {Number} options.height
-  @param {String|Function} options.template
+  @param {String|Function(config)} options.template
   @param {String} options.closeLabel
   @param {String} options.openAnimation
   @param {String} options.closeAnimation
@@ -118,7 +118,7 @@ up.modal = (->
   
   @method up.modal.close
   @param {Object} options
-    See options for {{#crossLink "up.motion/up.animate"}}{{/crossLink}}.
+    See options for [`up.animate`](/up.motion#up.animate)
   ###
   close = (options) ->
     $modal = $('.up-modal')
@@ -135,11 +135,19 @@ up.modal = (->
       close()
 
   ###*
-  @method a[up-modal]
-  @example
+  Opens the target of this link in a modal dialog:
+
       <a href="/decks" up-modal=".deck_list">Switch deck</a>
-  @example
-      <a href="/settings" up-modal=".options" up-sticky>Settings</a>  
+
+  If the `up-sticky` attribute is set, the dialog does not auto-close
+  if a page fragment below the dialog updates:
+
+      <a href="/settings" up-modal=".options" up-sticky>Settings</a>
+
+  @method a[up-modal]
+  @ujs
+  @param up-target
+  @param [up-sticky]
   ###
   up.on('click', 'a[up-modal]', (event, $link) ->
     event.preventDefault()
@@ -166,7 +174,10 @@ up.modal = (->
   up.magic.onEscape(-> close())
 
   ###*
+  When this element is clicked, closes a currently open dialog.
+
   @method [up-close]
+  @ujs
   ###
   up.on('click', '[up-close]', (event, $element) ->
     if $element.closest('.up-modal')
