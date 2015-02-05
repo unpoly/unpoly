@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Upjs::Rails::VERSION
   spec.authors       = ["Henning Koch"]
   spec.email         = ["henning.koch@makandra.de"]
-  spec.description   = 'Fast-responding UI for server-side applications'
+  spec.description   = 'Snappy UI for server-side web applications'
   spec.summary       = spec.description
   spec.homepage      = ""
   spec.license       = "MIT"
