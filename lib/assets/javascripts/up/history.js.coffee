@@ -1,5 +1,5 @@
 ###*
-History
+Manipulating the browser history
 =======
   
 TODO: Write some documentation

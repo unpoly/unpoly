@@ -3,14 +3,14 @@ Framework events
 ================
   
 TODO: Write some documentation  
-  
-  
+
+This class is kind-of internal and in flux.
+This might eventually be rolled into regular document events.
+
 - `app:ready`
 - `fragment:ready` with arguments `($fragment)`
 - `fragment:destroy` with arguments `($fragment)`
-  
-TODO: This might eventually be rolled into regular document events.
-  
+
 @class up.bus
 ###
 up.bus = (->

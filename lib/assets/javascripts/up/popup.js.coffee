@@ -158,12 +158,12 @@ up.popup = (->
       close()
     
   ###*
-  Opens the target of this link in a modal dialog:
+  Opens the target of this link in a popup overlay:
 
       <a href="/decks" up-modal=".deck_list">Switch deck</a>
 
   If the `up-sticky` attribute is set, the dialog does not auto-close
-  if a page fragment below the dialog updates:
+  if a page fragment below the popup overlay updates:
 
       <a href="/decks" up-popup=".deck_list">Switch deck</a>
       <a href="/settings" up-popup=".options" up-sticky>Settings</a>

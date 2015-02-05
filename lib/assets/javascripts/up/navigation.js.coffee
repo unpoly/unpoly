@@ -6,12 +6,14 @@ This module marks up link elements with classes indicating that
 they are currently loading (class `up-active`) or linking
 to the current location (class `up-current`).
 
+This dramatically improves the perceived speed of your user interface
+by providing instant feedback for user interactions.
+
 The classes are added and removed automatically whenever
 a page fragment is added, changed or destroyed through Up.js.
 
-How Up.js computes the current location
----------------------------------------
-  
+### How Up.js computes the current location
+
 From Up's point of view the "current" location is either:
   
 - the URL displayed in the browser window's location bar
