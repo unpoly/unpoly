@@ -1,0 +1,21 @@
+{
+  "name": "upjs",
+  "homepage": "https://github.com/makanda/upjs",
+  "authors": [
+    "Henning Koch <henning.koch@makandra.de>"
+  ],
+  "description": "Snappy UI for server-side web applications",
+  "main": ["dist/up.js", "dist/up.css"],
+  "license": "MIT",
+  "ignore": [
+    "bin",
+    "design",
+    "doc",
+    "lib",
+    "pkg",
+    "spec_app"
+  ],
+  "dependencies": {
+    "jquery": ">= 1.9.1"
+  }
+}
