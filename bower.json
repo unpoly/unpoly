@@ -13,7 +13,12 @@
     "doc",
     "lib",
     "pkg",
-    "spec_app"
+    "spec_app",
+    "Gemfile",
+    "Gemfile.lock",
+    "Rakefile",
+    ".ruby-version",
+    "upjs-rails.gemspec"
   ],
   "dependencies": {
     "jquery": ">= 1.9.1"
