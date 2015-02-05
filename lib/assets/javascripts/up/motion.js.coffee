@@ -1,5 +1,8 @@
 ###*
-Animation and transition effects.
+Animation and transitions
+=========================
+  
+TODO: Write some documentation.
   
 @class up.motion
 ###

@@ -1,5 +1,9 @@
 ###*
-Form handling
+Forms and controls
+==================
+  
+TODO: Write some documentation
+  
 @class up.form
 ###
 up.form = (->

@@ -1,4 +1,9 @@
 ###*
+Markers
+=======
+  
+TODO: Write some documentation
+  
 @class up.marker
 ###
 up.marker = (->

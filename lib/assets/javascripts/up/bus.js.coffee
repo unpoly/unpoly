@@ -1,5 +1,9 @@
 ###*
-Event bus for up-related events:
+Framework events
+================
+  
+TODO: Write some documentation  
+  
   
 - `app:ready`
 - `fragment:ready` with arguments `($fragment)`

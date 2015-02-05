@@ -1,4 +1,9 @@
 ###*
+History
+=======
+  
+TODO: Write some documentation
+  
 @class up.history
 ###
 up.history = (->

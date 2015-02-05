@@ -1,4 +1,7 @@
 ###*
+Browser interface
+=================
+  
 @class up.browser
 ###
 up.browser = (->

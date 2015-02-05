@@ -1,5 +1,8 @@
 ###*
-Tooltips.
+Tooltips
+========
+  
+TODO: Write some documentation.
 
 @class up.tooltip
 ###

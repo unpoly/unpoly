@@ -1,5 +1,8 @@
 ###*
-Event handling.
+Registering behavior and custom elements
+========================================
+  
+TODO: Write some documentation  
   
 @class up.magic
 ###
