@@ -1,9 +1,9 @@
 ###*
 Modal dialogs
 =============
-  
+
 TODO: Write some documentation
-    
+
 @class up.modal 
 ###
 up.modal = (->

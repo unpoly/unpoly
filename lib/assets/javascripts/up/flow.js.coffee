@@ -28,7 +28,7 @@ Your markup markup could look like this:
 </nav>
 
 <article>
-    Page A
+  Page A
 </article>
 ```
 
