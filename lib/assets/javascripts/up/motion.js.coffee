@@ -2,7 +2,20 @@
 Animation and transitions
 =========================
   
-TODO: Write some documentation.
+Any fragment change in Up.js can be animated.
+Up.js ships with a number of predefined animations and transitions,
+and you can easily define your own using Javascript or CSS. 
+  
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Explain the difference between transitions and animations
+- Demo the built-in animations and transitions
+- Examples for defining your own animations and transitions
+- Explain ghosting
+
   
 @class up.motion
 ###

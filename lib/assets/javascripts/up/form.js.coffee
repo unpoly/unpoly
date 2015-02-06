@@ -2,7 +2,22 @@
 Forms and controls
 ==================
   
-TODO: Write some documentation
+Up.js comes with functionality to submit forms without
+leaving the current page. This means you can replace page fragments,
+open dialogs with sub-forms, etc. all without losing form state.
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Explain how to display form errors
+- Explain that the server needs to send 2xx or 5xx status codes so
+  Up.js can decide whether the form submission was successful
+- Explain that the server needs to send an `X-Up-Previous-Redirect-Location` header
+  if an successful form submission resulted in a redirect
+- Examples
+  
+
   
 @class up.form
 ###

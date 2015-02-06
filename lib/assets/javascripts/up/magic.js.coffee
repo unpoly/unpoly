@@ -2,7 +2,19 @@
 Registering behavior and custom elements
 ========================================
   
-TODO: Write some documentation  
+Up.js keeps a persistent Javascript environment during page transitions.
+To prevent memory leaks it is important to cleanly set up and tear down
+event handlers and custom elements.
+    
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Explain when to use `up.on` and when to use `up.awaken`
+- Example for integrating an external JS lib that is not aware of Up.js
+- Example for defining a custom element
+- Tell more about memory leaks and why they don't matter
+  so much when you have full page loads.
   
 @class up.magic
 ###

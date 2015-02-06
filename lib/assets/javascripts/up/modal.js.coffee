@@ -2,7 +2,18 @@
 Modal dialogs
 =============
 
-TODO: Write some documentation
+Instead of linking to another page fragment, you can also choose
+to open any target CSS selector in a modal dialog.
+  
+For popup overlays see [up.popup](/up.popup) instead.
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+
+- Show the HTML structure of the dialog elements, and how to style them via CSS
+- Explain how dialogs auto-close themselves when a fragment changes behind the modal layer
+- Document method parameters
 
 @class up.modal 
 ###
@@ -146,7 +157,6 @@ up.modal = (->
 
   @method a[up-modal]
   @ujs
-  @param up-target
   @param [up-sticky]
   ###
   up.on('click', 'a[up-modal]', (event, $link) ->

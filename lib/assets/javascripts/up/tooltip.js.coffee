@@ -2,7 +2,17 @@
 Tooltips
 ========
   
-TODO: Write some documentation.
+Elements that have an `up-tooltip` attribute will show the attribute
+value in a tooltip when a user hovers over the element. 
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Show the tooltip's HTML structure and how to style the elements
+- Explain how to position tooltips using `up-origin`
+- We should have a position about tooltips that contain HTML.
+  
 
 @class up.tooltip
 ###

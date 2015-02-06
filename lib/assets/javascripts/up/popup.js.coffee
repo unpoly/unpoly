@@ -1,8 +1,23 @@
 ###*
 Pop-up overlays
 ===============
+
+Instead of linking to another page fragment, you can also choose
+to "roll up" any target CSS selector in a popup overlay. 
+Popup overlays close themselves if the user clicks somewhere outside the
+popup area. 
   
-For modal dialogs see [up.modal](/up.modal).
+For modal dialogs see [up.modal](/up.modal) instead.
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+
+- Show the HTML structure of the popup elements, and how to style them via CSS
+- Explain how to position popup using `up-origin`
+- Explain how dialogs auto-close themselves when a fragment changes behind the popup layer
+- Document method parameters
+  
   
 @class up.popup
 ###
@@ -170,7 +185,6 @@ up.popup = (->
 
   @method a[up-popup]
   @ujs
-  @param up-target
   @param [up-sticky]
   @param [up-origin]
   ###

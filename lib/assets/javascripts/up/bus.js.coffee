@@ -2,15 +2,25 @@
 Framework events
 ================
   
-TODO: Write some documentation  
+This class is kind-of internal and in constant flux.
+  
+The framework event bus might eventually be rolled
+into regular document events.
 
-This class is kind-of internal and in flux.
-This might eventually be rolled into regular document events.
-
+\#\#\# Available events
+  
 - `app:ready`
 - `fragment:ready` with arguments `($fragment)`
 - `fragment:destroy` with arguments `($fragment)`
 
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+
+- Decide whether to refactor this into document events
+- Document events
+  
+  
 @class up.bus
 ###
 up.bus = (->
@@ -64,7 +74,7 @@ up.bus = (->
   @method up.bus.emit
   @param {String} eventName
     The name of the event.
-  @param {Anything...} args
+  @param args...
     The arguments that describe the event. 
   ###
   emit = (eventName, args...) ->

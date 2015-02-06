@@ -1,10 +1,18 @@
 ###*
 Changing page fragments programmatically
 ========================================
+  
+This module contains Up's core functions to insert, change
+or destroy page fragments.
 
-TODO: Write some documentation
-
-
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Explain the UJS approach vs. pragmatic approach
+- Examples
+  
+  
 @class up.flow
 ###
 up.flow = (->
