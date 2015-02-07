@@ -49,8 +49,10 @@ up.util = (->
     else 
       unwrap(urlOrAnchor)
     normalized = anchor.protocol + "//" + anchor.hostname
-    normalized += ":#{anchor.port}" unless isStandardPort(anchor.protocol, anchor.port)  
-    normalized += anchor.pathname
+    normalized += ":#{anchor.port}" unless isStandardPort(anchor.protocol, anchor.port)
+    pathname = anchor.pathname
+    pathname = pathname.replace(/\/$/, '') if options?.stripTrailingSlash == true
+    normalized += pathname
     normalized += anchor.hash if options?.hash == true
     normalized += anchor.search unless options?.search == false
     normalized
@@ -343,6 +345,9 @@ up.util = (->
     
   castsToFalse = (object) ->
     String(object) == "false"
+    
+  locationFromXhr = (xhr) ->
+    xhr.getResponseHeader('X-Up-Current-Location')
 
 #  memoArray = ->
 #    array = []
@@ -406,6 +411,7 @@ up.util = (->
   isArray: isArray
   castsToTrue: castsToTrue
   castsToFalse: castsToFalse
+  locationFromXhr: locationFromXhr
 #  memoArray: memoArray
 #  replaceInPlace: replaceInPlace
 

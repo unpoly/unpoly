@@ -72,8 +72,8 @@ up.form = (->
       url = if historyOption
         if u.isString(historyOption)
           historyOption
-        else if redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')
-          redirectLocation
+        else if currentLocation = u.locationFromXhr(xhr)
+          currentLocation
         else if request.type == 'GET'
           request.url + '?' + request.data
       u.option(url, false)

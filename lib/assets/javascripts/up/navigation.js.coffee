@@ -25,22 +25,31 @@ From Up's point of view the "current" location is either:
 ###
 up.navigation = (->
 
+  u = up.util
+
   CLASS_ACTIVE = 'up-active'
   CLASS_CURRENT = 'up-current'
   SELECTOR_SECTION = 'a[href], a[up-target], [up-follow], [up-modal], [up-popup]'
   SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
+  
+  normalizeUrl = (url) ->
+    if u.isPresent(url)
+      u.normalizeUrl(url,
+        search: false
+        stripTrailingSlash: true
+      )
 
   locationChanged = ->
-    windowLocation = up.util.normalizeUrl(up.browser.url(), search: false)
-    modalLocation = up.modal.source()
-    popupLocation = up.popup.source()
+    windowLocation = normalizeUrl(up.browser.url())
+    modalLocation = normalizeUrl(up.modal.source())
+    popupLocation = normalizeUrl(up.popup.source())
     
-    up.util.each $(SELECTOR_SECTION), (section) ->
+    u.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       # if $section is marked up with up-follow,
       # the actual link might be a child element.
       url = up.link.resolveUrl($section)
-      url = up.util.normalizeUrl(url, search: false)
+      url = normalizeUrl(url)
       if url == windowLocation || url == modalLocation || url == popupLocation
         $section.addClass(CLASS_CURRENT)
       else
@@ -52,7 +61,7 @@ up.navigation = (->
     $section.addClass(CLASS_ACTIVE)
     
   enlargeClickArea = ($section) ->
-    up.util.presence($section.parents(SELECTOR_SECTION)) || $section
+    u.presence($section.parents(SELECTOR_SECTION)) || $section
     
   unmarkActive = ->
     $(SELECTOR_ACTIVE).removeClass(CLASS_ACTIVE)

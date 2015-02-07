@@ -57,16 +57,25 @@ up.flow = (->
       selectorOrElement
     else
       u.createSelectorFromElement($(selectorOrElement))
-
-    if u.isMissing(options.history) || u.castsToTrue(options.history) 
-      options.history = url
-    
-    if u.isMissing(options.source) || u.castsToTrue(options.source)
-      options.source = url
       
-    u.get(url, selector: selector)
-      .done (html) -> implant(selector, html, options)
-      .fail(u.error)
+    u.ajax(
+      url: url, 
+      selector: selector
+    )
+    .done (html, textStatus, xhr) ->
+      # The server can send us the current path using a header value.
+      # This way we know the actual URL if the server has redirected.
+      if currentLocation = u.locationFromXhr(xhr)
+        url = currentLocation
+
+      if u.isMissing(options.history) || u.castsToTrue(options.history)
+        options.history = url
+  
+      if u.isMissing(options.source) || u.castsToTrue(options.source)
+        options.source = url
+        
+      implant(selector, html, options)
+    .fail(u.error)
 
   ###*
   Replaces the given selector with the same selector from the given HTML string.
