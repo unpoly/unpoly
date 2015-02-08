@@ -45,7 +45,6 @@ describe 'up.navigation', ->
       responseText: '<div class="main">new-text</div>'
     expect($link).not.toHaveClass('up-active')
     expect($link).toHaveClass('up-current')
-    
 
   it 'prefers to mark an enclosing [up-follow] click area'
  

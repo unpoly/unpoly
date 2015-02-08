@@ -1,6 +1,6 @@
 describe 'up.flow', ->
   
-  describe '.replace', ->
+  describe 'up.replace', ->
     
     beforeEach ->
       jasmine.Ajax.install()
@@ -38,7 +38,7 @@ describe 'up.flow', ->
         expect($('.middle').attr('up-source')).toMatch(/\/path$/)
         done()
 
-  describe '.destroy', ->
+  describe 'up.destroy', ->
     
     it 'removes the element with the given selector', ->
       affix('.element')
@@ -52,7 +52,7 @@ describe 'up.flow', ->
       up.destroy('.element')
       expect(destructor).toHaveBeenCalled()
       
-  describe '.reload', ->
+  describe 'up.reload', ->
     
     it 'reloads the given selector from the closest known source URL', (done) ->
       affix('.container[up-source="/source"] .element').find('.element').text('old text')

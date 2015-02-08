@@ -1,6 +1,6 @@
 describe 'up.form', ->
 
-  describe '.submit', ->
+  describe 'up.submit', ->
     
     beforeEach ->
       jasmine.Ajax.install()
