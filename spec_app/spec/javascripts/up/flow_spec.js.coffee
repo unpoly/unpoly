@@ -37,6 +37,8 @@ describe 'up.flow', ->
       @promise.then ->
         expect($('.middle').attr('up-source')).toMatch(/\/path$/)
         done()
+        
+    it 'replaces multiple selectors separated with a comma'
 
   describe 'up.destroy', ->
     

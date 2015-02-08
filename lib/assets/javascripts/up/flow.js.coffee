@@ -78,7 +78,7 @@ up.flow = (->
     .fail(u.error)
 
   ###*
-  Replaces the given selector with the same selector from the given HTML string.
+  Replaces the given selector with the same CSS selector from the given HTML string.
   
   @method up.flow.implant
   @protected
