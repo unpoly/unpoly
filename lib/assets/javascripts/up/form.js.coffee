@@ -35,6 +35,8 @@ up.form = (->
     A reference or selector for the form to submit.
     If the argument points to an element that is not a form,
     Up.js will search its ancestors for the closest form.
+  @param {String} [options.url]
+  @param {String} [options.method]
   @param {String} [options.target]
   @param {String} [options.failTarget]
   @param {Boolean|String} [options.history=true]
@@ -58,12 +60,14 @@ up.form = (->
     historyOption = u.option(options.history, $form.attr('up-history'), true)
     successTransition = u.option(options.transition, $form.attr('up-transition'))
     failureTransition = u.option(options.failTransition, $form.attr('up-fail-transition'))
+    httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase()
+    url = u.option(options.url, $form.attr('action'), up.browser.url())
     
     $form.addClass('up-active')
 
     request = {
-      url: $form.attr('action') || up.browser.url()
-      type: $form.attr('method')?.toUpperCase() || 'POST',
+      url: url
+      type: httpMethod
       data: $form.serialize(),
       selector: successSelector
     }
@@ -160,7 +164,7 @@ up.form = (->
   Submits the form through AJAX, searches the response for the selector
   given in `up-target` and replaces the selector content in the current page:
 
-      <form method="POST" action="/users" up-target=".main">
+      <form method="post" action="/users" up-target=".main">
         ...
       </form>
 
@@ -168,9 +172,14 @@ up.form = (->
   @ujs
   @param {String} up-target
   @param {String} [up-fail-target]
-  @param {String} [up-history]
   @param {String} [up-transition]
   @param {String} [up-fail-transition]
+  @param {String} [up-history]
+  @param {String} [up-method]
+    The HTTP method to be used to submit the form
+    (`get`, `post`, `put`, `delete`, `patch`).
+    Alternately you can use an attribute `data-method` (Rails UJS)
+    or `method` (vanilla HTML) for the same purpose.  
   ###
   up.on 'submit', 'form[up-target]', (event, $form) ->
     event.preventDefault()

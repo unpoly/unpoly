@@ -209,11 +209,17 @@ up.util = (->
   @param {Array} args...
   ###
   option = (args...) ->
-    detect(args, (arg) ->
+    # This behavior is subtly different from detect!
+    match = null
+    args.every (arg) ->
       value = arg
       value = value() if isFunction(value)
-      isPresent(value)
-    )
+      if isPresent(value)
+        match = value
+        false
+      else
+        true
+    match    
 
   detect = (array, tester) ->
     match = null

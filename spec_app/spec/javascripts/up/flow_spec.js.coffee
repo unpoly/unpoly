@@ -13,7 +13,7 @@ describe 'up.flow', ->
 
       jasmine.Ajax.requests.mostRecent().respondWith
         status: 200
-        contentType: '/text/html'
+        contentType: 'text/html'
         responseText:
           """
           <div class="before">new-before</div>
