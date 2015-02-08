@@ -35,7 +35,7 @@ up.magic = (->
     A space-separated list of event names to bind.
   @param {String} selector
     The selector an on which the event must be triggered.
-  @param {Function} behavior
+  @param {Function(event, $element)} behavior
     The handler that should be called.
   ###
   liveDescriptions = []
