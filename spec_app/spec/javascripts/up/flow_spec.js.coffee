@@ -94,10 +94,6 @@ describe 'up.flow', ->
             </div>
             """
   
-    describe 'up.reload', ->
-  
-      it 'should have tests'
-  
     describe 'up.reset', ->
   
       it 'should have tests'
