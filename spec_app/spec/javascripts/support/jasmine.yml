@@ -22,6 +22,7 @@ src_files:
 # list of file expressions to include as css files
 # relative path from css_dir
 css_files:
+ - "application.{css.sass,css,sass}"
 
 # path to parent directory of spec_files
 # relative path from Rails.root

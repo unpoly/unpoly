@@ -223,7 +223,11 @@ up.popup = (->
     if $element.closest('.up-popup')
       close()
   )
-  
+
+  # The framework is reset between tests, so also close
+  # a currently open popup.
+  up.bus.on 'framework:reset', close
+
   open: open
   close: close
   source: source

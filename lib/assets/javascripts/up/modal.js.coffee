@@ -194,6 +194,10 @@ up.modal = (->
       close()
   )
 
+  # The framework is reset between tests, so also close
+  # a currently open modal dialog.
+  up.bus.on 'framework:reset', close
+
   open: open
   close: close
   source: source

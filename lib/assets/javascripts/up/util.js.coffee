@@ -307,10 +307,14 @@ up.util = (->
     deferred.promise()
     
   measure = ($element, options) ->
-    offset = $element.offset()
+    coordinates = if options?.relative
+      $element.position()
+    else
+      $element.offset()
+    
     box = 
-      left: offset.left
-      top: offset.top
+      left: coordinates.left
+      top: coordinates.top
       width: $element.outerWidth()
       height: $element.outerHeight()
     if options?.full
