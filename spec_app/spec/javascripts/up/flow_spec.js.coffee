@@ -9,36 +9,49 @@ describe 'up.flow', ->
       affix('.middle').text('old-middle')
       affix('.after').text('old-after')
 
-      @promise = up.replace('.middle', '/path')
-
-      jasmine.Ajax.requests.mostRecent().respondWith
-        status: 200
-        contentType: 'text/html'
-        responseText:
-          """
-          <div class="before">new-before</div>
-          <div class="middle">new-middle</div>
-          <div class="after">new-after</div>
-          """      
+      @respond = ->
+        jasmine.Ajax.requests.mostRecent().respondWith
+          status: 200
+          contentType: 'text/html'
+          responseText:
+            """
+            <div class="before">new-before</div>
+            <div class="middle">new-middle</div>
+            <div class="after">new-after</div>
+            """      
     
     it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
-      @promise.then ->
+      @request = up.replace('.middle', '/path')
+      @respond()
+      @request.then ->
         expect($('.before')).toHaveText('old-before')
         expect($('.middle')).toHaveText('new-middle')
         expect($('.after')).toHaveText('old-after')
         done()      
       
     it 'should set the browser location to the given URL', (done) ->
-      @promise.then ->
+      @request = up.replace('.middle', '/path')
+      @respond()
+      @request.then ->
         expect(window.location.pathname).toBe('/path')
         done()
         
     it 'marks the element with the URL from which it was retrieved', (done) ->
-      @promise.then ->
+      @request = up.replace('.middle', '/path')
+      @respond()
+      @request.then ->
         expect($('.middle').attr('up-source')).toMatch(/\/path$/)
         done()
         
-    it 'replaces multiple selectors separated with a comma'
+    it 'replaces multiple selectors separated with a comma', (done) ->
+      @request = up.replace('.middle, .after', '/path')
+      @respond()
+      @request.then ->
+        expect($('.before')).toHaveText('old-before')
+        expect($('.middle')).toHaveText('new-middle')
+        expect($('.after')).toHaveText('new-after')
+        done()
+      
 
   describe 'up.destroy', ->
     
