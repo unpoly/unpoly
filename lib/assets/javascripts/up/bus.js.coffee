@@ -57,7 +57,7 @@ up.bus = (->
   Registers an event handler to be called when the given
   event is triggered.
   
-  @method up.bus.listen
+  @method up.bus.on
   @param {String} eventName
     The event name to match.
   @param {Function} handler
