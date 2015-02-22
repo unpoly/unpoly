@@ -1,17 +1,43 @@
 $stratum: 30000
 $distance-from-trigger: 6px
+$corner-size: 8px
+$background: #666
 
 .up-tooltip
   z-index: $stratum
   position: fixed
-  background-color: rgba(30, 30, 30, 0.8)
+  background-color: $background
   color: white
-  padding: 6px 8px
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2)
+  padding: 6px 9px
+  //box-shadow: 0 0 4px rgba(0, 0, 0, 0.2)
   
   &[up-origin=top]
     margin-top: -$distance-from-trigger
+    &:after
+      content: ''
+      position: absolute
+      border-style: solid
+      border-width: $corner-size $corner-size 0
+      border-color: $background transparent
+      display: block
+      width: 0
+      z-index: 1
+      bottom: -$corner-size
+      left: 50%
+      margin-left: -$corner-size
   
   &[up-origin=bottom]
-    margin-bottom: -$distance-from-trigger
+    margin-top: $distance-from-trigger
+    &:after
+      content: ''
+      position: absolute
+      border-style: solid
+      border-width: 0 $corner-size $corner-size
+      border-color: $background transparent
+      display: block
+      width: 0
+      z-index: 1
+      top: -$corner-size
+      left: 50%
+      margin-left: -$corner-size
     
