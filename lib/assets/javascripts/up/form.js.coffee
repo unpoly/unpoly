@@ -78,7 +78,9 @@ up.form = (->
 
     successUrl = (xhr) ->
       url = if historyOption
-        if u.isString(historyOption)
+        if historyOption == 'false'
+          false
+        else if u.isString(historyOption)
           historyOption
         else if currentLocation = u.locationFromXhr(xhr)
           currentLocation
