@@ -30,6 +30,7 @@ Sprockets::Standalone::RakeTask.new(:minified_assets) do |task, sprockets|
 end
 
 namespace :assets do
+  desc 'Compile assets for Bower and manual download'
   task :compile do
     Rake::Task['minified_assets:compile'].invoke
     File.rename('dist/up.js', 'dist/up.min.js')
