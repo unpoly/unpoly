@@ -74,13 +74,13 @@ up.magic = (->
       callback: awakener
 
   compile = ($fragment) ->
-    console.log("Compiling fragment", $fragment, "with", awakeners)
+    # console.log("Compiling fragment", $fragment, "with", awakeners)
     for awakener in awakeners
-      console.log("running", awakener.selector, "on", $fragment)
+      # console.log("running", awakener.selector, "on", $fragment)
       util.findWithSelf($fragment, awakener.selector).each ->
         $element = $(this)
         destroyer = awakener.callback.apply(this, [$element])
-        console.log("got destroyer", destroyer)
+        # console.log("got destroyer", destroyer)
         if util.isFunction(destroyer)
           $element.addClass(DESTROYABLE_CLASS)
           $element.data(DESTROYER_KEY, destroyer)
