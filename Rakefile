@@ -1,4 +1,6 @@
 require "bundler/gem_tasks"
+require 'sass/util'
+require 'sass/script'
 require 'sprockets/standalone'
 
 module Upjs

@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var __slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, get, ifGiven, isArray, isBlank, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, last, measure, merge, nextFrame, normalizeUrl, option, options, prependGhost, presence, presentAttr, select, temporaryCss, unwrap;
+    var $createElementFromSelector, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, get, ifGiven, isArray, isBlank, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, last, locationFromXhr, measure, merge, nextFrame, normalizeUrl, option, options, prependGhost, presence, presentAttr, select, temporaryCss, unwrap;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -60,7 +60,7 @@ If you use them in your own code, you will get hurt.
     @protected
      */
     normalizeUrl = function(urlOrAnchor, options) {
-      var anchor, normalized;
+      var anchor, normalized, pathname;
       anchor = isString(urlOrAnchor) ? $('<a>').attr({
         href: urlOrAnchor
       }).get(0) : unwrap(urlOrAnchor);
@@ -68,7 +68,11 @@ If you use them in your own code, you will get hurt.
       if (!isStandardPort(anchor.protocol, anchor.port)) {
         normalized += ":" + anchor.port;
       }
-      normalized += anchor.pathname;
+      pathname = anchor.pathname;
+      if ((options != null ? options.stripTrailingSlash : void 0) === true) {
+        pathname = pathname.replace(/\/$/, '');
+      }
+      normalized += pathname;
       if ((options != null ? options.hash : void 0) === true) {
         normalized += anchor.hash;
       }
@@ -270,16 +274,23 @@ If you use them in your own code, you will get hurt.
     @param {Array} args...
      */
     option = function() {
-      var args;
+      var args, match;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return detect(args, function(arg) {
+      match = null;
+      args.every(function(arg) {
         var value;
         value = arg;
         if (isFunction(value)) {
           value = value();
         }
-        return isPresent(value);
+        if (isPresent(value)) {
+          match = value;
+          return false;
+        } else {
+          return true;
+        }
       });
+      return match;
     };
     detect = function(array, tester) {
       var match;
@@ -390,11 +401,11 @@ If you use them in your own code, you will get hurt.
       return deferred.promise();
     };
     measure = function($element, options) {
-      var box, offset, viewport;
-      offset = $element.offset();
+      var box, coordinates, viewport;
+      coordinates = (options != null ? options.relative : void 0) ? $element.position() : $element.offset();
       box = {
-        left: offset.left,
-        top: offset.top,
+        left: coordinates.left,
+        top: coordinates.top,
         width: $element.outerWidth(),
         height: $element.outerHeight()
       };
@@ -449,6 +460,9 @@ If you use them in your own code, you will get hurt.
     castsToFalse = function(object) {
       return String(object) === "false";
     };
+    locationFromXhr = function(xhr) {
+      return xhr.getResponseHeader('X-Up-Current-Location');
+    };
     return {
       presentAttr: presentAttr,
       createElement: createElement,
@@ -495,7 +509,8 @@ If you use them in your own code, you will get hurt.
       contains: contains,
       isArray: isArray,
       castsToTrue: castsToTrue,
-      castsToFalse: castsToFalse
+      castsToFalse: castsToFalse,
+      locationFromXhr: locationFromXhr
     };
   })();
 
@@ -525,15 +540,25 @@ Browser interface
 Framework events
 ================
   
-TODO: Write some documentation  
+This class is kind-of internal and in constant flux.
+  
+The framework event bus might eventually be rolled
+into regular document events.
 
-This class is kind-of internal and in flux.
-This might eventually be rolled into regular document events.
-
+\#\#\# Available events
+  
 - `app:ready`
 - `fragment:ready` with arguments `($fragment)`
 - `fragment:destroy` with arguments `($fragment)`
 
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+
+- Decide whether to refactor this into document events
+- Document events
+  
+  
 @class up.bus
  */
 
@@ -581,7 +606,7 @@ This might eventually be rolled into regular document events.
     Registers an event handler to be called when the given
     event is triggered.
     
-    @method up.bus.listen
+    @method up.bus.on
     @param {String} eventName
       The event name to match.
     @param {Function} handler
@@ -597,7 +622,7 @@ This might eventually be rolled into regular document events.
     @method up.bus.emit
     @param {String} eventName
       The name of the event.
-    @param {Anything...} args
+    @param args...
       The arguments that describe the event.
      */
     emit = function() {
@@ -622,10 +647,18 @@ This might eventually be rolled into regular document events.
 /**
 Changing page fragments programmatically
 ========================================
+  
+This module contains Up's core functions to insert, change
+or destroy page fragments.
 
-TODO: Write some documentation
-
-
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Explain the UJS approach vs. pragmatic approach
+- Examples
+  
+  
 @class up.flow
  */
 
@@ -672,21 +705,26 @@ TODO: Write some documentation
       var selector;
       options = u.options(options);
       selector = u.presence(selectorOrElement) ? selectorOrElement : u.createSelectorFromElement($(selectorOrElement));
-      if (u.isMissing(options.history) || u.castsToTrue(options.history)) {
-        options.history = url;
-      }
-      if (u.isMissing(options.source) || u.castsToTrue(options.source)) {
-        options.source = url;
-      }
-      return u.get(url, {
+      return u.ajax({
+        url: url,
         selector: selector
-      }).done(function(html) {
+      }).done(function(html, textStatus, xhr) {
+        var currentLocation;
+        if (currentLocation = u.locationFromXhr(xhr)) {
+          url = currentLocation;
+        }
+        if (u.isMissing(options.history) || u.castsToTrue(options.history)) {
+          options.history = url;
+        }
+        if (u.isMissing(options.source) || u.castsToTrue(options.source)) {
+          options.source = url;
+        }
         return implant(selector, html, options);
       }).fail(u.error);
     };
 
     /**
-    Replaces the given selector with the same selector from the given HTML string.
+    Replaces the given selector with the same CSS selector from the given HTML string.
     
     @method up.flow.implant
     @protected
@@ -873,7 +911,19 @@ TODO: Write some documentation
 Registering behavior and custom elements
 ========================================
   
-TODO: Write some documentation  
+Up.js keeps a persistent Javascript environment during page transitions.
+To prevent memory leaks it is important to cleanly set up and tear down
+event handlers and custom elements.
+    
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Explain when to use `up.on` and when to use `up.awaken`
+- Example for integrating an external JS lib that is not aware of Up.js
+- Example for defining a custom element
+- Tell more about memory leaks and why they don't matter
+  so much when you have full page loads.
   
 @class up.magic
  */
@@ -895,7 +945,7 @@ TODO: Write some documentation
       A space-separated list of event names to bind.
     @param {String} selector
       The selector an on which the event must be triggered.
-    @param {Function} behavior
+    @param {Function(event, $element)} behavior
       The handler that should be called.
      */
     liveDescriptions = [];
@@ -936,16 +986,13 @@ TODO: Write some documentation
     };
     compile = function($fragment) {
       var awakener, _i, _len, _results;
-      console.log("Compiling fragment", $fragment, "with", awakeners);
       _results = [];
       for (_i = 0, _len = awakeners.length; _i < _len; _i++) {
         awakener = awakeners[_i];
-        console.log("running", awakener.selector, "on", $fragment);
         _results.push(util.findWithSelf($fragment, awakener.selector).each(function() {
           var $element, destroyer;
           $element = $(this);
           destroyer = awakener.callback.apply(this, [$element]);
-          console.log("got destroyer", destroyer);
           if (util.isFunction(destroyer)) {
             $element.addClass(DESTROYABLE_CLASS);
             return $element.data(DESTROYER_KEY, destroyer);
@@ -1046,8 +1093,15 @@ TODO: Write some documentation
 Manipulating the browser history
 =======
   
-TODO: Write some documentation
+\#\#\# Incomplete documentation!
   
+We need to work on this page:
+
+- Explain how the other modules manipulate history
+- Decide whether we want to expose these methods as public API
+- Document methods and parameters
+  
+    
 @class up.history
  */
 
@@ -1119,7 +1173,20 @@ TODO: Write some documentation
 Animation and transitions
 =========================
   
-TODO: Write some documentation.
+Any fragment change in Up.js can be animated.
+Up.js ships with a number of predefined animations and transitions,
+and you can easily define your own using Javascript or CSS. 
+  
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Explain the difference between transitions and animations
+- Demo the built-in animations and transitions
+- Examples for defining your own animations and transitions
+- Explain ghosting
+
   
 @class up.motion
  */
@@ -1648,7 +1715,22 @@ Read on
 Forms and controls
 ==================
   
-TODO: Write some documentation
+Up.js comes with functionality to submit forms without
+leaving the current page. This means you can replace page fragments,
+open dialogs with sub-forms, etc. all without losing form state.
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Explain how to display form errors
+- Explain that the server needs to send 2xx or 5xx status codes so
+  Up.js can decide whether the form submission was successful
+- Explain that the server needs to send an `X-Up-Current-Location` header
+  if an successful form submission resulted in a redirect
+- Examples
+  
+
   
 @class up.form
  */
@@ -1663,11 +1745,17 @@ TODO: Write some documentation
     
         up.submit('form.new_user')
     
+    Instead of loading a new page, the form is submitted via AJAX.
+    The response is parsed for a CSS selector and the matching elements will
+    replace corresponding elements on the current page.
+    
     @method up.submit
     @param {Element|jQuery|String} formOrSelector
       A reference or selector for the form to submit.
       If the argument points to an element that is not a form,
       Up.js will search its ancestors for the closest form.
+    @param {String} [options.url]
+    @param {String} [options.method]
     @param {String} [options.target]
     @param {String} [options.failTarget]
     @param {Boolean|String} [options.history=true]
@@ -1682,7 +1770,7 @@ TODO: Write some documentation
       A promise for the AJAX response
      */
     submit = function(formOrSelector, options) {
-      var $form, failureSelector, failureTransition, historyOption, request, successSelector, successTransition, successUrl, _ref;
+      var $form, failureSelector, failureTransition, historyOption, httpMethod, request, successSelector, successTransition, successUrl, url;
       $form = $(formOrSelector).closest('form');
       options = u.options(options);
       successSelector = u.option(options.target, $form.attr('up-target'), 'body');
@@ -1692,16 +1780,18 @@ TODO: Write some documentation
       historyOption = u.option(options.history, $form.attr('up-history'), true);
       successTransition = u.option(options.transition, $form.attr('up-transition'));
       failureTransition = u.option(options.failTransition, $form.attr('up-fail-transition'));
+      httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase();
+      url = u.option(options.url, $form.attr('action'), up.browser.url());
       $form.addClass('up-active');
       request = {
-        url: $form.attr('action') || up.browser.url(),
-        type: ((_ref = $form.attr('method')) != null ? _ref.toUpperCase() : void 0) || 'POST',
+        url: url,
+        type: httpMethod,
         data: $form.serialize(),
         selector: successSelector
       };
       successUrl = function(xhr) {
-        var redirectLocation, url;
-        url = historyOption ? u.isString(historyOption) ? historyOption : (redirectLocation = xhr.getResponseHeader('X-Up-Previous-Redirect-Location')) ? redirectLocation : request.type === 'GET' ? request.url + '?' + request.data : void 0 : void 0;
+        var currentLocation;
+        url = historyOption ? historyOption === 'false' ? false : u.isString(historyOption) ? historyOption : (currentLocation = u.locationFromXhr(xhr)) ? currentLocation : request.type === 'GET' ? request.url + '?' + request.data : void 0 : void 0;
         return u.option(url, false);
       };
       return u.ajax(request).always(function() {
@@ -1793,7 +1883,7 @@ TODO: Write some documentation
     Submits the form through AJAX, searches the response for the selector
     given in `up-target` and replaces the selector content in the current page:
     
-        <form method="POST" action="/users" up-target=".main">
+        <form method="post" action="/users" up-target=".main">
           ...
         </form>
     
@@ -1801,9 +1891,14 @@ TODO: Write some documentation
     @ujs
     @param {String} up-target
     @param {String} [up-fail-target]
-    @param {String} [up-history]
     @param {String} [up-transition]
     @param {String} [up-fail-transition]
+    @param {String} [up-history]
+    @param {String} [up-method]
+      The HTTP method to be used to submit the form
+      (`get`, `post`, `put`, `delete`, `patch`).
+      Alternately you can use an attribute `data-method` (Rails UJS)
+      or `method` (vanilla HTML) for the same purpose.
      */
     up.on('submit', 'form[up-target]', function(event, $form) {
       event.preventDefault();
@@ -1844,8 +1939,23 @@ TODO: Write some documentation
 /**
 Pop-up overlays
 ===============
+
+Instead of linking to another page fragment, you can also choose
+to "roll up" any target CSS selector in a popup overlay. 
+Popup overlays close themselves if the user clicks somewhere outside the
+popup area. 
   
-For modal dialogs see [up.modal](/up.modal).
+For modal dialogs see [up.modal](/up.modal) instead.
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+
+- Show the HTML structure of the popup elements, and how to style them via CSS
+- Explain how to position popup using `up-origin`
+- Explain how dialogs auto-close themselves when a fragment changes behind the popup layer
+- Document method parameters
+  
   
 @class up.popup
  */
@@ -2045,7 +2155,6 @@ For modal dialogs see [up.modal](/up.modal).
     
     @method a[up-popup]
     @ujs
-    @param up-target
     @param [up-sticky]
     @param [up-origin]
      */
@@ -2085,6 +2194,7 @@ For modal dialogs see [up.modal](/up.modal).
         return close();
       }
     });
+    up.bus.on('framework:reset', close);
     return {
       open: open,
       close: close,
@@ -2099,7 +2209,18 @@ For modal dialogs see [up.modal](/up.modal).
 Modal dialogs
 =============
 
-TODO: Write some documentation
+Instead of linking to another page fragment, you can also choose
+to open any target CSS selector in a modal dialog.
+  
+For popup overlays see [up.popup](/up.popup) instead.
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+
+- Show the HTML structure of the dialog elements, and how to style them via CSS
+- Explain how dialogs auto-close themselves when a fragment changes behind the modal layer
+- Document method parameters
 
 @class up.modal
  */
@@ -2257,7 +2378,6 @@ TODO: Write some documentation
     
     @method a[up-modal]
     @ujs
-    @param up-target
     @param [up-sticky]
      */
     up.on('click', 'a[up-modal]', function(event, $link) {
@@ -2295,6 +2415,7 @@ TODO: Write some documentation
         return close();
       }
     });
+    up.bus.on('framework:reset', close);
     return {
       open: open,
       close: close,
@@ -2309,7 +2430,17 @@ TODO: Write some documentation
 Tooltips
 ========
   
-TODO: Write some documentation.
+Elements that have an `up-tooltip` attribute will show the attribute
+value in a tooltip when a user hovers over the element. 
+  
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Show the tooltip's HTML structure and how to style the elements
+- Explain how to position tooltips using `up-origin`
+- We should have a position about tooltips that contain HTML.
+  
 
 @class up.tooltip
  */
@@ -2407,6 +2538,7 @@ TODO: Write some documentation.
     up.on('click', 'body', function(event, $body) {
       return close();
     });
+    up.bus.on('framework:reset', close);
     up.magic.onEscape(function() {
       return close();
     });
@@ -2446,25 +2578,30 @@ From Up's point of view the "current" location is either:
 
 (function() {
   up.navigation = (function() {
-    var CLASS_ACTIVE, CLASS_CURRENT, SELECTOR_ACTIVE, SELECTOR_SECTION, enlargeClickArea, locationChanged, sectionClicked, unmarkActive;
+    var CLASS_ACTIVE, CLASS_CURRENT, SELECTOR_ACTIVE, SELECTOR_SECTION, enlargeClickArea, locationChanged, normalizeUrl, sectionClicked, u, unmarkActive;
+    u = up.util;
     CLASS_ACTIVE = 'up-active';
     CLASS_CURRENT = 'up-current';
     SELECTOR_SECTION = 'a[href], a[up-target], [up-follow], [up-modal], [up-popup]';
     SELECTOR_ACTIVE = "." + CLASS_ACTIVE;
+    normalizeUrl = function(url) {
+      if (u.isPresent(url)) {
+        return u.normalizeUrl(url, {
+          search: false,
+          stripTrailingSlash: true
+        });
+      }
+    };
     locationChanged = function() {
       var modalLocation, popupLocation, windowLocation;
-      windowLocation = up.util.normalizeUrl(up.browser.url(), {
-        search: false
-      });
-      modalLocation = up.modal.source();
-      popupLocation = up.popup.source();
-      return up.util.each($(SELECTOR_SECTION), function(section) {
+      windowLocation = normalizeUrl(up.browser.url());
+      modalLocation = normalizeUrl(up.modal.source());
+      popupLocation = normalizeUrl(up.popup.source());
+      return u.each($(SELECTOR_SECTION), function(section) {
         var $section, url;
         $section = $(section);
         url = up.link.resolveUrl($section);
-        url = up.util.normalizeUrl(url, {
-          search: false
-        });
+        url = normalizeUrl(url);
         if (url === windowLocation || url === modalLocation || url === popupLocation) {
           return $section.addClass(CLASS_CURRENT);
         } else {
@@ -2478,7 +2615,7 @@ From Up's point of view the "current" location is either:
       return $section.addClass(CLASS_ACTIVE);
     };
     enlargeClickArea = function($section) {
-      return up.util.presence($section.parents(SELECTOR_SECTION)) || $section;
+      return u.presence($section.parents(SELECTOR_SECTION)) || $section;
     };
     unmarkActive = function() {
       return $(SELECTOR_ACTIVE).removeClass(CLASS_ACTIVE);

@@ -56,14 +56,37 @@
 .up-tooltip {
   z-index: 30000;
   position: fixed;
-  background-color: rgba(30, 30, 30, 0.8);
+  background-color: #666;
   color: white;
-  padding: 6px 8px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2); }
+  padding: 6px 9px; }
   .up-tooltip[up-origin=top] {
     margin-top: -6px; }
+    .up-tooltip[up-origin=top]:after {
+      content: "";
+      position: absolute;
+      border-style: solid;
+      border-width: 8px 8px 0;
+      border-color: #666 transparent;
+      display: block;
+      width: 0;
+      z-index: 1;
+      bottom: -8px;
+      left: 50%;
+      margin-left: -8px; }
   .up-tooltip[up-origin=bottom] {
-    margin-bottom: -6px; }
+    margin-top: 6px; }
+    .up-tooltip[up-origin=bottom]:after {
+      content: "";
+      position: absolute;
+      border-style: solid;
+      border-width: 0 8px 8px;
+      border-color: #666 transparent;
+      display: block;
+      width: 0;
+      z-index: 1;
+      top: -8px;
+      left: 50%;
+      margin-left: -8px; }
 /*
 
  */
