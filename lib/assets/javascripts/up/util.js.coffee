@@ -266,7 +266,19 @@ up.util = (->
       memo()
     else
       memo
-
+      
+  forceCompositing = ($element) ->
+    oldTransforms = $element.css(['transform', '-webkit-transform'])
+    if isBlank(oldTransforms)
+      memo = -> $element.css(oldTransforms)
+      $element.css
+        'transform': 'translateZ(0)'
+        '-webkit-transform': 'translateZ(0)' # Safari
+    else
+      memo = ->
+    memo
+      
+      
   ###*
   Animates the given element's CSS properties using CSS transitions.
 
@@ -300,8 +312,10 @@ up.util = (->
       'transition-duration': "#{opts.duration}ms"
       'transition-delay': "#{opts.delay}ms"
       'transition-timing-function': opts.easing
+    withoutCompositing = forceCompositing($element)
     withoutTransition = temporaryCss($element, transition)
     $element.css(lastFrame)
+    deferred.then(withoutCompositing)
     deferred.then(withoutTransition)
     setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
     deferred.promise()
@@ -413,6 +427,7 @@ up.util = (->
   measure: measure
   temporaryCss: temporaryCss
   cssAnimate: cssAnimate
+  forceCompositing: forceCompositing
   prependGhost: prependGhost
   escapePressed: escapePressed
   copyAttributes: copyAttributes
