@@ -136,8 +136,8 @@ up.util = (->
     !isMissing(object)
     
   isBlank = (object) ->
-    isMissing(object) ||                  # null or undefined 
-#    (isString(object) && object == "") || # String
+    isMissing(object) ||                  # null or undefined
+    (isObject(object) && Object.keys(object).length == 0) ||
     (object.length == 0)                  # String, Array, jQuery
   
   presence = (object, checker = isPresent) ->

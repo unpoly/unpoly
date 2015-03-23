@@ -27,3 +27,10 @@ describe 'up.util', ->
         
       it 'returns false for an array with at least one element', ->
         expect(up.util.isBlank(['element'])).toBe(false)
+
+      it 'returns true for an empty object', ->
+        expect(up.util.isBlank({})).toBe(true)
+
+      it 'returns true for an object with at least one key', ->
+        expect(up.util.isBlank({key: 'value'})).toBe(false)
+        
