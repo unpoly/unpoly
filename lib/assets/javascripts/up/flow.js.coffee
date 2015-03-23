@@ -95,6 +95,12 @@ up.flow = (->
     options = u.options(options, 
       historyMethod: 'push'
     )
+    
+    if options.history == 'false'
+      options.history = null
+      
+    options.source = u.option(options.source, options.history)
+    
     # jQuery cannot construct transient elements that contain <html> or <body> tags,
     # so we're using the native browser API to grep through the HTML
     htmlElement = u.createElementFromHtml(html)
@@ -121,9 +127,10 @@ up.flow = (->
       if options.history
         document.title = options.title if options.title
         up.history[options.historyMethod](options.history)
+        
       # Remember where the element came from so we can
       # offer reload functionality.
-      setSource($element, u.presence(options.source) || options.history)
+      setSource($element, options.source)
       autofocus($element)
       # The fragment should be readiet before the transition,
       # so transitions see .up-current classes
