@@ -23,7 +23,7 @@ up.motion = (->
   
   u = up.util
   
-  defaultOptions =
+  config =
     duration: 300
     delay: 0
     easing: 'ease'
@@ -33,6 +33,15 @@ up.motion = (->
   transitions = {}
   defaultTransitions = {}
 
+  ###*
+  @method up.modal.defaults
+  @param {Number} options.duration
+  @param {Number} options.delay
+  @param {String} options.easing
+  ###
+  defaults = (options) ->
+    u.extend(config, options)
+  
   ###*
   Animates an element.
   
@@ -61,7 +70,7 @@ up.motion = (->
   ###
   animate = (elementOrSelector, animation, options) ->
     $element = $(elementOrSelector)
-    options = u.options(options, defaultOptions)
+    options = u.options(options, config)
     if u.isFunction(animation)
       assertIsPromise(
         animation($element, options),
@@ -108,8 +117,8 @@ up.motion = (->
   The following transitions  are pre-registered:
   
   - `cross-fade`
-  - `move-top`
-  - `move-bottom`
+  - `move-up`
+  - `move-down`
   - `move-left`
   - `move-right`
   - `none`
@@ -131,7 +140,7 @@ up.motion = (->
     A promise for the transition's end.
   ###  
   morph = (source, target, transitionOrName, options) ->
-    options = u.options(defaultOptions)
+    options = u.options(config)
     $old = $(source)
     $new = $(target)
     transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
@@ -301,6 +310,7 @@ up.motion = (->
   animate: animate
   transition: transition
   animation: animation
+  defaults: defaults
   none: none
 
 )()
