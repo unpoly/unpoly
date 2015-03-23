@@ -437,6 +437,7 @@ up.util = (->
   castsToTrue: castsToTrue
   castsToFalse: castsToFalse
   locationFromXhr: locationFromXhr
+  clientSize: clientSize
 #  memoArray: memoArray
 #  replaceInPlace: replaceInPlace
 
