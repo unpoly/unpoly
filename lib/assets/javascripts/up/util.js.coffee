@@ -254,11 +254,7 @@ up.util = (->
     height: element.clientHeight
     
   temporaryCss = ($element, css, block) ->
-    
     oldCss = $element.css(Object.keys(css))
-#    oldCss = {}
-#    for property of css
-#      oldCss[property] = $element.css(property)
     $element.css(css)
     memo = -> $element.css(oldCss)
     if block
@@ -329,8 +325,14 @@ up.util = (->
     box = 
       left: coordinates.left
       top: coordinates.top
-      width: $element.outerWidth()
-      height: $element.outerHeight()
+
+    if options?.inner
+      box.width = $element.width()
+      box.height = $element.height()
+    else
+      box.width = $element.outerWidth()
+      box.height = $element.outerHeight()
+      
     if options?.full
       viewport = clientSize()
       box.right = viewport.width - (box.left + box.width)
@@ -343,17 +345,18 @@ up.util = (->
         $target.attr(attr.name, attr.value)
 
   prependGhost = ($element) ->
-    dimensions = measure($element)
+    dimensions = measure($element, relative: true, inner: true)
     $ghost = $element.clone()
     $ghost.find('script').remove()
     $ghost.css
       right: ''
       bottom: ''
-      margin: 0
+#      margin: 0
       position: 'absolute'
     $ghost.css(dimensions)
     $ghost.addClass('up-ghost')
-    $ghost.prependTo(document.body)
+    $ghost.insertBefore($element)
+#    $ghost.prependTo(document.body)
 
   findWithSelf = ($element, selector) ->
     $element.find(selector).addBack(selector)
