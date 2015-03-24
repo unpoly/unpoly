@@ -171,7 +171,7 @@ up.modal = (->
   # (but not on a modal opener).
   up.on('click', 'body', (event, $body) ->
     $target = $(event.target)
-    unless $target.closest('.up-modal').length || $target.closest('[up-modal]').length
+    unless $target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length
       close()
   )
 
