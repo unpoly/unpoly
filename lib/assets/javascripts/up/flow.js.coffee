@@ -121,27 +121,26 @@ up.flow = (->
         u.error("Could not find selector (#{step.selector}) in response (#{html})")
         
   elementsInserted = ($new, options) ->
-    $new.each ->
-      $element = $(this)
-      options.insert?($element)
-      if options.history
-        document.title = options.title if options.title
-        up.history[options.historyMethod](options.history)
-        
-      # Remember where the element came from so we can
-      # offer reload functionality.
-      setSource($element, options.source)
-      autofocus($element)
-      # The fragment should be readiet before the transition,
-      # so transitions see .up-current classes
-      up.ready($element)
+    options.insert?($new)
+    if options.history
+      document.title = options.title if options.title
+      up.history[options.historyMethod](options.history)
+    # Remember where the element came from so we can
+    # offer reload functionality.
+    setSource($new, options.source)
+    autofocus($new)
+    # The fragment should be readiet before animating,
+    # so transitions see .up-current classes
+    up.ready($new)
 
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'
     if pseudoClass
       insertionMethod = if pseudoClass == 'before' then 'prepend' else 'append'
       # Keep a reference to the children append/prepend because
-      # we need to compile them further down
+      # we need to compile them further down. Note that since we're
+      # prepending/appending instead of rpelacing, `$new` will not
+      # actually be inserted into the DOM, only its children.
       $addedChildren = $new.children()
       # Insert contents() instead of $children since contents()
       # also includes text nodes.

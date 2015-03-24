@@ -20,7 +20,7 @@ We need to work on this page:
 ###
 up.magic = (->
   
-  util = up.util
+  u = up.util
 
   DESTROYABLE_CLASS = 'up-destroyable'
   DESTROYER_KEY = 'up-destroyer'
@@ -57,6 +57,10 @@ up.magic = (->
   @method up.awaken
   @param {String} selector
     The selector to match.
+  @param {Boolean} [options.batch=false]
+    If set to `true` and a fragment insertion contains multiple
+    elements matching the selector, `awakener` is only called once
+    with a jQuery collection containing all matching elements. 
   @param {Function($element)} awakener
     The function to call when a matching element is inserted.
     The function takes the new element as the first argument (as a jQuery object).
@@ -68,25 +72,33 @@ up.magic = (->
   awakeners = []
   defaultAwakeners = null
 
-  awaken = (selector, awakener) ->
+  awaken = (selector, args...) ->
+    awakener = args.pop()
+    options = u.options(args[0], batch: false)
     awakeners.push
       selector: selector
       callback: awakener
+      batch: options.batch
+  
+  applyAwakener = (awakener, $jqueryElement, nativeElement) ->
+    destroyer = awakener.callback.apply(nativeElement, [$jqueryElement])
+    if u.isFunction(destroyer)
+      $jqueryElement.addClass(DESTROYABLE_CLASS)
+      $jqueryElement.data(DESTROYER_KEY, destroyer)    
 
   compile = ($fragment) ->
-    # console.log("Compiling fragment", $fragment, "with", awakeners)
+    console.log("Compiling fragment", $fragment)
     for awakener in awakeners
-      # console.log("running", awakener.selector, "on", $fragment)
-      util.findWithSelf($fragment, awakener.selector).each ->
-        $element = $(this)
-        destroyer = awakener.callback.apply(this, [$element])
-        # console.log("got destroyer", destroyer)
-        if util.isFunction(destroyer)
-          $element.addClass(DESTROYABLE_CLASS)
-          $element.data(DESTROYER_KEY, destroyer)
+#      console.log("running", awakener.selector, "on", $fragment)
+      $matches = u.findWithSelf($fragment, awakener.selector)
+      if $matches.length
+        if awakener.batch
+          applyAwakener(awakener, $matches, $matches.get())
+        else
+          $matches.each -> applyAwakener(awakener, $(this), this)
 
   destroy = ($fragment) ->
-    util.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
+    u.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
       $element = $(this)
       destroyer = $element.data(DESTROYER_KEY)
       destroyer()
@@ -99,8 +111,8 @@ up.magic = (->
   @method up.magic.snapshot
   ###
   snapshot = ->
-    defaultLiveDescriptions = util.copy(liveDescriptions) 
-    defaultAwakeners = util.copy(awakeners)
+    defaultLiveDescriptions = u.copy(liveDescriptions) 
+    defaultAwakeners = u.copy(awakeners)
 
   ###*
   Resets the list of registered event listeners to the
@@ -111,10 +123,10 @@ up.magic = (->
   ###
   reset = ->
     for description in liveDescriptions
-      unless util.contains(defaultLiveDescriptions, description)
+      unless u.contains(defaultLiveDescriptions, description)
         $(document).off(description...)
-    liveDescriptions = util.copy(defaultLiveDescriptions)
-    awakeners = util.copy(defaultAwakeners)
+    liveDescriptions = u.copy(defaultLiveDescriptions)
+    awakeners = u.copy(defaultAwakeners)
 
   ###*
   Sends a notification that the given element has been inserted
@@ -135,7 +147,7 @@ up.magic = (->
 
   onEscape = (handler) ->
     live('keydown', 'body', (event) ->
-      if util.escapePressed(event)
+      if u.escapePressed(event)
         handler(event)
     )
 
