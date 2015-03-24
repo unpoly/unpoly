@@ -318,7 +318,7 @@ up.motion = (->
       animate($new, 'fade-in', options)
     )
   )
-
+  
   up.bus.on 'framework:ready', snapshot
   up.bus.on 'framework:reset', reset
     

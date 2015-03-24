@@ -25,8 +25,10 @@ up.history = (->
   @param {String} url
   @protected
   ###
-  replace = (url) ->
-    manipulate("replace", url) unless isCurrentUrl(url)
+  replace = (url, options) ->
+    options = u.options(options, force: false)
+    if options.force || !isCurrentUrl(url)
+      manipulate("replace", url)
 
   ###*
   @method up.history.push  
@@ -47,13 +49,13 @@ up.history = (->
     if state?.fromUp
       up.visit up.browser.url(), historyMethod: 'replace'
     else
-      console.log "null state"
+      console.log "strange state", state
 
   # Defeat an unnecessary popstate that some browsers trigger on pageload (Chrome?).
   # We should check in 2016 if we can remove this.
   setTimeout (->
     $(window).on "popstate", pop
-    replace(up.browser.url())
+    replace(up.browser.url(), force: true)
   ), 200
 
   push: push
