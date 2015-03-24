@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var __slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, get, ifGiven, isArray, isBlank, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, last, locationFromXhr, measure, merge, nextFrame, normalizeUrl, option, options, prependGhost, presence, presentAttr, select, temporaryCss, unwrap;
+    var $createElementFromSelector, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, forceCompositing, get, ifGiven, isArray, isBlank, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, last, locationFromXhr, measure, merge, nextFrame, normalizeUrl, option, options, prependGhost, presence, presentAttr, select, temporaryCss, unwrap;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -189,7 +189,7 @@ If you use them in your own code, you will get hurt.
       return !isMissing(object);
     };
     isBlank = function(object) {
-      return isMissing(object) || (object.length === 0);
+      return isMissing(object) || (isObject(object) && Object.keys(object).length === 0) || (object.length === 0);
     };
     presence = function(object, checker) {
       if (checker == null) {
@@ -357,6 +357,22 @@ If you use them in your own code, you will get hurt.
         return memo;
       }
     };
+    forceCompositing = function($element) {
+      var memo, oldTransforms;
+      oldTransforms = $element.css(['transform', '-webkit-transform']);
+      if (isBlank(oldTransforms)) {
+        memo = function() {
+          return $element.css(oldTransforms);
+        };
+        $element.css({
+          'transform': 'translateZ(0)',
+          '-webkit-transform': 'translateZ(0)'
+        });
+      } else {
+        memo = function() {};
+      }
+      return memo;
+    };
 
     /**
     Animates the given element's CSS properties using CSS transitions.
@@ -378,7 +394,7 @@ If you use them in your own code, you will get hurt.
       A promise for the animation's end.
      */
     cssAnimate = function(elementOrSelector, lastFrame, opts) {
-      var $element, deferred, transition, withoutTransition;
+      var $element, deferred, transition, withoutCompositing, withoutTransition;
       opts = options(opts, {
         duration: 300,
         delay: 0,
@@ -392,8 +408,10 @@ If you use them in your own code, you will get hurt.
         'transition-delay': opts.delay + "ms",
         'transition-timing-function': opts.easing
       };
+      withoutCompositing = forceCompositing($element);
       withoutTransition = temporaryCss($element, transition);
       $element.css(lastFrame);
+      deferred.then(withoutCompositing);
       deferred.then(withoutTransition);
       setTimeout((function() {
         return deferred.resolve();
@@ -405,10 +423,15 @@ If you use them in your own code, you will get hurt.
       coordinates = (options != null ? options.relative : void 0) ? $element.position() : $element.offset();
       box = {
         left: coordinates.left,
-        top: coordinates.top,
-        width: $element.outerWidth(),
-        height: $element.outerHeight()
+        top: coordinates.top
       };
+      if (options != null ? options.inner : void 0) {
+        box.width = $element.width();
+        box.height = $element.height();
+      } else {
+        box.width = $element.outerWidth();
+        box.height = $element.outerHeight();
+      }
       if (options != null ? options.full : void 0) {
         viewport = clientSize();
         box.right = viewport.width - (box.left + box.width);
@@ -432,18 +455,20 @@ If you use them in your own code, you will get hurt.
     };
     prependGhost = function($element) {
       var $ghost, dimensions;
-      dimensions = measure($element);
+      dimensions = measure($element, {
+        relative: true,
+        inner: true
+      });
       $ghost = $element.clone();
       $ghost.find('script').remove();
       $ghost.css({
         right: '',
         bottom: '',
-        margin: 0,
         position: 'absolute'
       });
       $ghost.css(dimensions);
       $ghost.addClass('up-ghost');
-      return $ghost.prependTo(document.body);
+      return $ghost.insertBefore($element);
     };
     findWithSelf = function($element, selector) {
       return $element.find(selector).addBack(selector);
@@ -502,6 +527,7 @@ If you use them in your own code, you will get hurt.
       measure: measure,
       temporaryCss: temporaryCss,
       cssAnimate: cssAnimate,
+      forceCompositing: forceCompositing,
       prependGhost: prependGhost,
       escapePressed: escapePressed,
       copyAttributes: copyAttributes,
@@ -510,7 +536,8 @@ If you use them in your own code, you will get hurt.
       isArray: isArray,
       castsToTrue: castsToTrue,
       castsToFalse: castsToFalse,
-      locationFromXhr: locationFromXhr
+      locationFromXhr: locationFromXhr,
+      clientSize: clientSize
     };
   })();
 
@@ -741,6 +768,10 @@ We need to work on this page:
       options = u.options(options, {
         historyMethod: 'push'
       });
+      if (options.history === 'false') {
+        options.history = null;
+      }
+      options.source = u.option(options.source, options.history);
       htmlElement = u.createElementFromHtml(html);
       options.title || (options.title = (_ref = htmlElement.querySelector("title")) != null ? _ref.textContent : void 0);
       _ref1 = implantSteps(selector, options);
@@ -758,22 +789,18 @@ We need to work on this page:
       return _results;
     };
     elementsInserted = function($new, options) {
-      return $new.each(function() {
-        var $element;
-        $element = $(this);
-        if (typeof options.insert === "function") {
-          options.insert($element);
+      if (typeof options.insert === "function") {
+        options.insert($new);
+      }
+      if (options.history) {
+        if (options.title) {
+          document.title = options.title;
         }
-        if (options.history) {
-          if (options.title) {
-            document.title = options.title;
-          }
-          up.history[options.historyMethod](options.history);
-        }
-        setSource($element, u.presence(options.source) || options.history);
-        autofocus($element);
-        return up.ready($element);
-      });
+        up.history[options.historyMethod](options.history);
+      }
+      setSource($new, options.source);
+      autofocus($new);
+      return up.ready($new);
     };
     swapElements = function($old, $new, pseudoClass, transition, options) {
       var $addedChildren, insertionMethod;
@@ -929,9 +956,11 @@ We need to work on this page:
  */
 
 (function() {
+  var __slice = [].slice;
+
   up.magic = (function() {
-    var DESTROYABLE_CLASS, DESTROYER_KEY, awaken, awakeners, compile, defaultAwakeners, defaultLiveDescriptions, destroy, live, liveDescriptions, onEscape, ready, reset, snapshot, util;
-    util = up.util;
+    var DESTROYABLE_CLASS, DESTROYER_KEY, applyAwakener, awaken, awakeners, compile, defaultAwakeners, defaultLiveDescriptions, destroy, live, liveDescriptions, onEscape, ready, reset, snapshot, u;
+    u = up.util;
     DESTROYABLE_CLASS = 'up-destroyable';
     DESTROYER_KEY = 'up-destroyer';
 
@@ -968,6 +997,10 @@ We need to work on this page:
     @method up.awaken
     @param {String} selector
       The selector to match.
+    @param {Boolean} [options.batch=false]
+      If set to `true` and a fragment insertion contains multiple
+      elements matching the selector, `awakener` is only called once
+      with a jQuery collection containing all matching elements. 
     @param {Function($element)} awakener
       The function to call when a matching element is inserted.
       The function takes the new element as the first argument (as a jQuery object).
@@ -978,31 +1011,50 @@ We need to work on this page:
      */
     awakeners = [];
     defaultAwakeners = null;
-    awaken = function(selector, awakener) {
+    awaken = function() {
+      var args, awakener, options, selector;
+      selector = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      awakener = args.pop();
+      options = u.options(args[0], {
+        batch: false
+      });
       return awakeners.push({
         selector: selector,
-        callback: awakener
+        callback: awakener,
+        batch: options.batch
       });
     };
+    applyAwakener = function(awakener, $jqueryElement, nativeElement) {
+      var destroyer;
+      destroyer = awakener.callback.apply(nativeElement, [$jqueryElement]);
+      if (u.isFunction(destroyer)) {
+        $jqueryElement.addClass(DESTROYABLE_CLASS);
+        return $jqueryElement.data(DESTROYER_KEY, destroyer);
+      }
+    };
     compile = function($fragment) {
-      var awakener, _i, _len, _results;
+      var $matches, awakener, _i, _len, _results;
+      console.log("Compiling fragment", $fragment);
       _results = [];
       for (_i = 0, _len = awakeners.length; _i < _len; _i++) {
         awakener = awakeners[_i];
-        _results.push(util.findWithSelf($fragment, awakener.selector).each(function() {
-          var $element, destroyer;
-          $element = $(this);
-          destroyer = awakener.callback.apply(this, [$element]);
-          if (util.isFunction(destroyer)) {
-            $element.addClass(DESTROYABLE_CLASS);
-            return $element.data(DESTROYER_KEY, destroyer);
+        $matches = u.findWithSelf($fragment, awakener.selector);
+        if ($matches.length) {
+          if (awakener.batch) {
+            _results.push(applyAwakener(awakener, $matches, $matches.get()));
+          } else {
+            _results.push($matches.each(function() {
+              return applyAwakener(awakener, $(this), this);
+            }));
           }
-        }));
+        } else {
+          _results.push(void 0);
+        }
       }
       return _results;
     };
     destroy = function($fragment) {
-      return util.findWithSelf($fragment, "." + DESTROYABLE_CLASS).each(function() {
+      return u.findWithSelf($fragment, "." + DESTROYABLE_CLASS).each(function() {
         var $element, destroyer;
         $element = $(this);
         destroyer = $element.data(DESTROYER_KEY);
@@ -1018,8 +1070,8 @@ We need to work on this page:
     @method up.magic.snapshot
      */
     snapshot = function() {
-      defaultLiveDescriptions = util.copy(liveDescriptions);
-      return defaultAwakeners = util.copy(awakeners);
+      defaultLiveDescriptions = u.copy(liveDescriptions);
+      return defaultAwakeners = u.copy(awakeners);
     };
 
     /**
@@ -1033,12 +1085,12 @@ We need to work on this page:
       var description, _i, _len, _ref;
       for (_i = 0, _len = liveDescriptions.length; _i < _len; _i++) {
         description = liveDescriptions[_i];
-        if (!util.contains(defaultLiveDescriptions, description)) {
+        if (!u.contains(defaultLiveDescriptions, description)) {
           (_ref = $(document)).off.apply(_ref, description);
         }
       }
-      liveDescriptions = util.copy(defaultLiveDescriptions);
-      return awakeners = util.copy(defaultAwakeners);
+      liveDescriptions = u.copy(defaultLiveDescriptions);
+      return awakeners = u.copy(defaultAwakeners);
     };
 
     /**
@@ -1061,7 +1113,7 @@ We need to work on this page:
     };
     onEscape = function(handler) {
       return live('keydown', 'body', function(event) {
-        if (util.escapePressed(event)) {
+        if (u.escapePressed(event)) {
           return handler(event);
         }
       });
@@ -1122,8 +1174,11 @@ We need to work on this page:
     @param {String} url
     @protected
      */
-    replace = function(url) {
-      if (!isCurrentUrl(url)) {
+    replace = function(url, options) {
+      options = u.options(options, {
+        force: false
+      });
+      if (options.force || !isCurrentUrl(url)) {
         return manipulate("replace", url);
       }
     };
@@ -1154,12 +1209,14 @@ We need to work on this page:
           historyMethod: 'replace'
         });
       } else {
-        return console.log("null state");
+        return console.log("strange state", state);
       }
     };
     setTimeout((function() {
       $(window).on("popstate", pop);
-      return replace(up.browser.url());
+      return replace(up.browser.url(), {
+        force: true
+      });
     }), 200);
     return {
       push: push,
@@ -1193,9 +1250,9 @@ We need to work on this page:
 
 (function() {
   up.motion = (function() {
-    var animate, animation, animations, assertIsPromise, defaultAnimations, defaultOptions, defaultTransitions, findAnimation, morph, none, reset, snapshot, transition, transitions, u, withGhosts;
+    var animate, animation, animations, assertIsPromise, config, defaultAnimations, defaultTransitions, defaults, findAnimation, morph, none, reset, snapshot, transition, transitions, u, withGhosts;
     u = up.util;
-    defaultOptions = {
+    config = {
       duration: 300,
       delay: 0,
       easing: 'ease'
@@ -1204,6 +1261,16 @@ We need to work on this page:
     defaultAnimations = {};
     transitions = {};
     defaultTransitions = {};
+
+    /**
+    @method up.modal.defaults
+    @param {Number} options.duration
+    @param {Number} options.delay
+    @param {String} options.easing
+     */
+    defaults = function(options) {
+      return u.extend(config, options);
+    };
 
     /**
     Animates an element.
@@ -1234,7 +1301,7 @@ We need to work on this page:
     animate = function(elementOrSelector, animation, options) {
       var $element;
       $element = $(elementOrSelector);
-      options = u.options(options, defaultOptions);
+      options = u.options(options, config);
       if (u.isFunction(animation)) {
         return assertIsPromise(animation($element, options), ["Animation did not return a Promise", animation]);
       } else if (u.isString(animation)) {
@@ -1289,8 +1356,8 @@ We need to work on this page:
     The following transitions  are pre-registered:
     
     - `cross-fade`
-    - `move-top`
-    - `move-bottom`
+    - `move-up`
+    - `move-down`
     - `move-left`
     - `move-right`
     - `none`
@@ -1313,7 +1380,7 @@ We need to work on this page:
      */
     morph = function(source, target, transitionOrName, options) {
       var $new, $old, animation, parts, transition;
-      options = u.options(defaultOptions);
+      options = u.options(config);
       $old = $(source);
       $new = $(target);
       transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName];
@@ -1397,67 +1464,91 @@ We need to work on this page:
       }, options);
     });
     animation('move-to-top', function($ghost, options) {
+      var box, travelDistance;
+      box = u.measure($ghost);
+      travelDistance = box.top + box.height;
       $ghost.css({
-        'margin-top': '0%'
+        'margin-top': '0px'
       });
       return animate($ghost, {
-        'margin-top': '-100%'
+        'margin-top': "-" + travelDistance + "px"
       }, options);
     });
     animation('move-from-top', function($ghost, options) {
+      var box, travelDistance;
+      box = u.measure($ghost);
+      travelDistance = box.top + box.height;
       $ghost.css({
-        'margin-top': '-100%'
+        'margin-top': "-" + travelDistance + "px"
       });
       return animate($ghost, {
-        'margin-top': '0%'
+        'margin-top': '0px'
       }, options);
     });
     animation('move-to-bottom', function($ghost, options) {
+      var box, travelDistance;
+      box = u.measure($ghost);
+      travelDistance = u.clientSize().height - box.top;
       $ghost.css({
-        'margin-top': '0%'
+        'margin-top': '0px'
       });
       return animate($ghost, {
-        'margin-top': '100%'
+        'margin-top': travelDistance + "px"
       }, options);
     });
     animation('move-from-bottom', function($ghost, options) {
+      var box, travelDistance;
+      box = u.measure($ghost);
+      travelDistance = u.clientSize().height - box.top;
       $ghost.css({
-        'margin-top': '100%'
+        'margin-top': travelDistance + "px"
       });
       return animate($ghost, {
-        'margin-top': '0%'
+        'margin-top': '0px'
       }, options);
     });
     animation('move-to-left', function($ghost, options) {
+      var box, travelDistance;
+      box = u.measure($ghost);
+      travelDistance = box.left + box.width;
       $ghost.css({
-        'margin-left': '0%'
+        'margin-left': '0px'
       });
       return animate($ghost, {
-        'margin-left': '-100%'
+        'margin-left': "-" + travelDistance + "px"
       }, options);
     });
     animation('move-from-left', function($ghost, options) {
+      var box, travelDistance;
+      box = u.measure($ghost);
+      travelDistance = box.left + box.width;
       $ghost.css({
-        'margin-left': '-100%'
+        'margin-left': "-" + travelDistance + "px"
       });
       return animate($ghost, {
-        'margin-left': '0%'
+        'margin-left': '0px'
       }, options);
     });
     animation('move-to-right', function($ghost, options) {
+      var box, travelDistance;
+      box = u.measure($ghost);
+      travelDistance = u.clientSize().width - box.left;
       $ghost.css({
-        'margin-left': '0%'
+        'margin-left': '0px'
       });
       return animate($ghost, {
-        'margin-left': '100%'
+        'margin-left': travelDistance + "px"
       }, options);
     });
     animation('move-from-right', function($ghost, options) {
+      var box, travelDistance;
+      box = u.measure($ghost);
+      travelDistance = u.clientSize().width - box.left;
       $ghost.css({
-        'margin-left': '100%'
+        'margin-left': travelDistance + "px"
       });
       return animate($ghost, {
-        'margin-left': '0%'
+        'margin-left': '0px'
       }, options);
     });
     animation('roll-down', function($ghost, options) {
@@ -1494,6 +1585,7 @@ We need to work on this page:
       animate: animate,
       transition: transition,
       animation: animation,
+      defaults: defaults,
       none: none
     };
   })();
@@ -2391,12 +2483,13 @@ We need to work on this page:
     up.on('click', 'body', function(event, $body) {
       var $target;
       $target = $(event.target);
-      if (!($target.closest('.up-dialog').length || $target.closest('[up-modal]').length)) {
+      if (!($target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length)) {
         return close();
       }
     });
     up.bus.on('fragment:ready', function($fragment) {
       if (!$fragment.closest('.up-modal').length) {
+        console.log('fragment inserted', $fragment, $fragment.closest('.up-modal'));
         return autoclose();
       }
     });
