@@ -3,5 +3,5 @@ beforeEach ->
   @previousTitle = document.title
   
 afterEach ->
-  window.history.replaceState({}, @previousTitle, @previousHref)
+  history.replaceState?({}, @previousTitle, @previousHref)
  

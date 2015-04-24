@@ -41,6 +41,7 @@ up.flow = (->
   @param {String} url
     The URL to fetch from the server.
   @param {String} [options.title]
+  @param {String} [options.method='get']
   @param {String|Boolean} [options.history=true]
     If a `String` is given, it is used as the URL the browser's location bar and history.
     If omitted or true, the `url` argument will be used.
@@ -58,9 +59,14 @@ up.flow = (->
     else
       u.createSelectorFromElement($(selectorOrElement))
       
+    if !up.browser.canPushState() && !u.castsToFalse(options.history)
+      up.browser.loadPage(url, u.only(options, 'method'))
+      return
+      
     u.ajax(
       url: url, 
-      selector: selector
+      selector: selector,
+      u.only(options, 'method')
     )
     .done (html, textStatus, xhr) ->
       # The server can send us the current path using a header value.

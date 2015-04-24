@@ -68,6 +68,10 @@ up.form = (->
     url = u.option(options.url, $form.attr('action'), up.browser.url())
     
     $form.addClass('up-active')
+    
+    if !up.browser.canPushState() && !u.castsToFalse(historyOption)
+      $form.get(0).submit()
+      return
 
     request = {
       url: url

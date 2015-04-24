@@ -375,6 +375,16 @@ up.util = (->
     
   locationFromXhr = (xhr) ->
     xhr.getResponseHeader('X-Up-Current-Location')
+    
+#  willChangeHistory = (historyOption) ->
+#    isPresent(historyOption) && !castsToFalse(historyOption)
+    
+  only = (object, keys...) ->
+    filtered = {}
+    for key in keys
+      if object.hasOwnProperty(key)
+        filtered[key] = object[key]
+    filtered
 
 #  memoArray = ->
 #    array = []
@@ -441,6 +451,8 @@ up.util = (->
   castsToFalse: castsToFalse
   locationFromXhr: locationFromXhr
   clientSize: clientSize
+#  willChangeHistory: willChangeHistory
+  only: only
 #  memoArray: memoArray
 #  replaceInPlace: replaceInPlace
 
