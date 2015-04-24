@@ -8,21 +8,23 @@ describe 'up.flow', ->
     describe 'up.replace', ->
 
       if up.browser.canPushState()
+
+        beforeEach ->
+
+          affix('.before').text('old-before')
+          affix('.middle').text('old-middle')
+          affix('.after').text('old-after')
     
-        affix('.before').text('old-before')
-        affix('.middle').text('old-middle')
-        affix('.after').text('old-after')
-  
-        @respond = ->
-          jasmine.Ajax.requests.mostRecent().respondWith
-            status: 200
-            contentType: 'text/html'
-            responseText:
-              """
-              <div class="before">new-before</div>
-              <div class="middle">new-middle</div>
-              <div class="after">new-after</div>
-              """      
+          @respond = ->
+            jasmine.Ajax.requests.mostRecent().respondWith
+              status: 200
+              contentType: 'text/html'
+              responseText:
+                """
+                <div class="before">new-before</div>
+                <div class="middle">new-middle</div>
+                <div class="after">new-after</div>
+                """      
         
         it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
           @request = up.replace('.middle', '/path')
