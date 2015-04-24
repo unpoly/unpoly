@@ -8,11 +8,13 @@ TODO: Write some documentation
 ###
 up.marker = (->
   
+  u = up.util
+  
   hasContent = ($marker) ->
-    $marker.html().trim() != ''
+    u.trim($marker.html()) != ''
 
   check = ($element) ->
-    up.util.findWithSelf($element, '[up-marker]').each ->
+    u.findWithSelf($element, '[up-marker]').each ->
       $marker = $(this)
       unless hasContent($marker)
         $marker.hide()

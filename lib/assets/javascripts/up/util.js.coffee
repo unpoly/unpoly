@@ -116,6 +116,8 @@ up.util = (->
     createElement('html', innerHtml)
 
   extend = $.extend
+  
+  trim = $.trim
 
   each = (collection, block) ->
     block(item, index) for item, index in collection
@@ -453,6 +455,7 @@ up.util = (->
   clientSize: clientSize
 #  willChangeHistory: willChangeHistory
   only: only
+  trim: trim
 #  memoArray: memoArray
 #  replaceInPlace: replaceInPlace
 
