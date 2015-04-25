@@ -336,25 +336,29 @@ up.util = (->
 
   ###
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
-    opts = options(opts, 
-      duration: 300, 
-      delay: 0, 
-      easing: 'ease'
-    )
     $element = $(elementOrSelector)
-    deferred = $.Deferred()
-    transition =
-      'transition-property': keys(lastFrame).join(', ')
-      'transition-duration': "#{opts.duration}ms"
-      'transition-delay': "#{opts.delay}ms"
-      'transition-timing-function': opts.easing
-    withoutCompositing = forceCompositing($element)
-    withoutTransition = temporaryCss($element, transition)
-    $element.css(lastFrame)
-    deferred.then(withoutCompositing)
-    deferred.then(withoutTransition)
-    setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
-    deferred.promise()
+    if up.browser.canCssTransitions()
+      opts = options(opts, 
+        duration: 300, 
+        delay: 0, 
+        easing: 'ease'
+      )
+      deferred = $.Deferred()
+      transition =
+        'transition-property': keys(lastFrame).join(', ')
+        'transition-duration': "#{opts.duration}ms"
+        'transition-delay': "#{opts.delay}ms"
+        'transition-timing-function': opts.easing
+      withoutCompositing = forceCompositing($element)
+      withoutTransition = temporaryCss($element, transition)
+      $element.css(lastFrame)
+      deferred.then(withoutCompositing)
+      deferred.then(withoutTransition)
+      setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
+      deferred.promise()
+    else
+      $element.css(lastFrame)
+      resolvedPromise()
     
   measure = ($element, options) ->
     coordinates = if options?.relative
@@ -426,6 +430,11 @@ up.util = (->
         filtered[key] = object[key]
     filtered
 
+  resolvedPromise = ->
+    deferred = $.Deferred()
+    deferred.resolve()
+    deferred.promise()
+
 #  memoArray = ->
 #    array = []
 #    defaults = []
@@ -491,11 +500,9 @@ up.util = (->
   castsToFalse: castsToFalse
   locationFromXhr: locationFromXhr
   clientSize: clientSize
-#  willChangeHistory: willChangeHistory
   only: only
   trim: trim
   keys: keys
-#  memoArray: memoArray
-#  replaceInPlace: replaceInPlace
+  resolvedPromise: resolvedPromise
 
 )()

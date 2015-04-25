@@ -140,29 +140,34 @@ up.motion = (->
     A promise for the transition's end.
   ###  
   morph = (source, target, transitionOrName, options) ->
-    options = u.options(config)
-    $old = $(source)
-    $new = $(target)
-    transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
-    if transition
-      withGhosts $old, $new, ($oldGhost, $newGhost) ->
-        assertIsPromise(
-          transition($oldGhost, $newGhost, options),
-          ["Transition did not return a promise", transitionOrName]
-        )
-    else if animation = animations[transitionOrName]
-      $old.hide()
-      animate($new, animation, options)
-    else if u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0
-      parts = transitionOrName.split('/')
-      transition = ($old, $new, options) ->
-        $.when(
-          animate($old, parts[0], options),
-          animate($new, parts[1], options)
-        )
-      morph($old, $new, transition, options)
+    if up.browser.canCssTransitions()
+      options = u.options(config)
+      $old = $(source)
+      $new = $(target)
+      transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
+      if transition
+        withGhosts $old, $new, ($oldGhost, $newGhost) ->
+          assertIsPromise(
+            transition($oldGhost, $newGhost, options),
+            ["Transition did not return a promise", transitionOrName]
+          )
+      else if animation = animations[transitionOrName]
+        $old.hide()
+        animate($new, animation, options)
+      else if u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0
+        parts = transitionOrName.split('/')
+        transition = ($old, $new, options) ->
+          $.when(
+            animate($old, parts[0], options),
+            animate($new, parts[1], options)
+          )
+        morph($old, $new, transition, options)
+      else
+        u.error("Unknown transition: #{transitionOrName}")
     else
-      u.error("Unknown transition: #{transitionOrName}")
+      # Skip ghosting and all the other stuff that can go wrong
+      # in ancient browsers
+      u.resolvedPromise()        
 
   ###*
   Defines a named transition.
@@ -200,10 +205,7 @@ up.motion = (->
   @return {Promise}
     A resolved promise  
   ###
-  none = ->
-    deferred = $.Deferred()
-    deferred.resolve()
-    deferred.promise()
+  none = u.resolvedPromise
     
   animation('none', none)
 

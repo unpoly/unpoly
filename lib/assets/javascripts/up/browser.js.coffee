@@ -54,9 +54,13 @@ up.browser = (->
   canPushState = ->
     u.isDefined(history.pushState)
     
+  canCssTransitions = ->
+    'transition' of document.documentElement.style
+    
   url: url
   ensureConsoleExists: ensureConsoleExists
   loadPage: loadPage
   canPushState: canPushState
+  canCssTransitions: canCssTransitions
       
 )()
