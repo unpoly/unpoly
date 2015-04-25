@@ -57,10 +57,16 @@ up.browser = (->
   canCssTransitions = ->
     'transition' of document.documentElement.style
     
+  isSupported = ->
+    # This is the most concise way to exclude IE8 and lower
+    # while keeping all relevant desktop and mobile browsers.
+    u.isDefined(document.addEventListener)
+    
   url: url
   ensureConsoleExists: ensureConsoleExists
   loadPage: loadPage
   canPushState: canPushState
   canCssTransitions: canCssTransitions
+  isSupported: isSupported
       
 )()

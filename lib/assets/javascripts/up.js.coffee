@@ -15,7 +15,9 @@
 #= require up/marker
 #= require_self
 
-up.browser.ensureConsoleExists()
+if up.browser.isSupported()
 
-up.bus.emit('framework:ready')
-$(document).on 'ready', -> up.bus.emit('app:ready')
+  up.browser.ensureConsoleExists()
+
+  up.bus.emit('framework:ready')
+  $(document).on 'ready', -> up.bus.emit('app:ready')

@@ -119,7 +119,8 @@ up.flow = (->
         # always prefer to replace content in popups or modals
         u.presence($(".up-popup " + step.selector)) || 
         u.presence($(".up-modal " + step.selector)) || 
-        u.presence($(step.selector)) 
+        u.presence($(step.selector)) ||
+        u.error("Could not find selector (#{step.selector}) in current body HTML")
       if fragment = htmlElement.querySelector(step.selector)
         $new = $(fragment)
         swapElements $old, $new, step.pseudoClass, step.transition, options

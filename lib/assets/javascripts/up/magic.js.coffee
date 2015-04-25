@@ -42,6 +42,8 @@ up.magic = (->
   defaultLiveDescriptions = null
 
   live = (events, selector, behavior) ->
+    # Silently discard any awakeners that are registered on unsupported browsers
+    return unless up.browser.isSupported()
     description = [
       events,
       selector,
@@ -73,6 +75,8 @@ up.magic = (->
   defaultAwakeners = null
 
   awaken = (selector, args...) ->
+    # Silently discard any awakeners that are registered on unsupported browsers
+    return unless up.browser.isSupported()
     awakener = args.pop()
     options = u.options(args[0], batch: false)
     awakeners.push
