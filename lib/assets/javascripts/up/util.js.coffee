@@ -221,24 +221,20 @@ up.util = (->
   option = (args...) ->
     # This behavior is subtly different from detect!
     match = null
-    args.every (arg) ->
+    for arg in args
       value = arg
       value = value() if isFunction(value)
       if isPresent(value)
         match = value
-        false
-      else
-        true
+        break
     match    
 
   detect = (array, tester) ->
     match = null
-    array.every (element) ->
+    for element in array
       if tester(element)
         match = element
-        false
-      else
-        true
+        break
     match
     
   select = (array, tester) ->
