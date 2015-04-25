@@ -85,7 +85,7 @@ up.util = (->
 
   createElement = (tagName, html) ->
     element = document.createElement(tagName)
-    element.innerHTML = html
+    element.innerHTML = html if isPresent(html)
     element
 
   error = (args...) ->
@@ -106,14 +106,48 @@ up.util = (->
 
   # jQuery's implementation of $(...) cannot create elements that have
   # an <html> or <body> tag. So we're using native elements.
+  # Also IE9 cannot set innerHTML on a <html> or <head> element.
   createElementFromHtml = (html) ->
-    htmlElementPattern = /<html>((?:.|\n)*)<\/html>/i
-    innerHtml = undefined
-    if match = html.match(htmlElementPattern)
-      innerHtml = match[1]
+
+    openTag = (tag) -> "<#{tag}(?: [^>]*)?>"
+    closeTag = (tag) -> "</#{tag}>"
+    anything = '(?:.|\\n)*?'
+    capture = (pattern) -> "(#{pattern})"
+    
+    titlePattern = new RegExp(
+      openTag('head') + 
+        anything + 
+        openTag('title') + 
+          capture(anything) + 
+        closeTag('title') + 
+        anything + 
+      closeTag('body'), 
+    'i')
+    
+    bodyPattern = new RegExp(
+      openTag('body') + 
+        capture(anything) + 
+      closeTag('body'), 
+    'i')
+    
+    if bodyMatch = html.match(bodyPattern)
+
+      htmlElement = document.createElement('html')
+      bodyElement = createElement('body', bodyMatch[1])
+      htmlElement.appendChild(bodyElement)
+
+      if titleMatch = html.match(titlePattern)
+        headElement = createElement('head')
+        htmlElement.appendChild(headElement)
+        titleElement = createElement('title', titleMatch[1])
+        headElement.appendChild(titleElement)
+        
+      htmlElement
+        
     else
-      innerHtml = "<html><body>#{html}</body></html>"
-    createElement('html', innerHtml)
+      
+      # we possibly received a layout-less fragment
+      createElement('div', html)
 
   extend = $.extend
   
