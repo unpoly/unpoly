@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var __slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, forceCompositing, get, ifGiven, isArray, isBlank, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, keys, last, locationFromXhr, measure, merge, nextFrame, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, select, temporaryCss, trim, unwrap;
+    var $createElementFromSelector, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, forceCompositing, get, ifGiven, isArray, isBlank, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, keys, last, locationFromXhr, measure, merge, nextFrame, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, resolvedPromise, select, temporaryCss, trim, unwrap;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -126,7 +126,9 @@ If you use them in your own code, you will get hurt.
     createElement = function(tagName, html) {
       var element;
       element = document.createElement(tagName);
-      element.innerHTML = html;
+      if (isPresent(html)) {
+        element.innerHTML = html;
+      }
       return element;
     };
     error = function() {
@@ -153,15 +155,33 @@ If you use them in your own code, you will get hurt.
       return selector;
     };
     createElementFromHtml = function(html) {
-      var htmlElementPattern, innerHtml, match;
-      htmlElementPattern = /<html>((?:.|\n)*)<\/html>/i;
-      innerHtml = void 0;
-      if (match = html.match(htmlElementPattern)) {
-        innerHtml = match[1];
+      var anything, bodyElement, bodyMatch, bodyPattern, capture, closeTag, headElement, htmlElement, openTag, titleElement, titleMatch, titlePattern;
+      openTag = function(tag) {
+        return "<" + tag + "(?: [^>]*)?>";
+      };
+      closeTag = function(tag) {
+        return "</" + tag + ">";
+      };
+      anything = '(?:.|\\n)*?';
+      capture = function(pattern) {
+        return "(" + pattern + ")";
+      };
+      titlePattern = new RegExp(openTag('head') + anything + openTag('title') + capture(anything) + closeTag('title') + anything + closeTag('body'), 'i');
+      bodyPattern = new RegExp(openTag('body') + capture(anything) + closeTag('body'), 'i');
+      if (bodyMatch = html.match(bodyPattern)) {
+        htmlElement = document.createElement('html');
+        bodyElement = createElement('body', bodyMatch[1]);
+        htmlElement.appendChild(bodyElement);
+        if (titleMatch = html.match(titlePattern)) {
+          headElement = createElement('head');
+          htmlElement.appendChild(headElement);
+          titleElement = createElement('title', titleMatch[1]);
+          headElement.appendChild(titleElement);
+        }
+        return htmlElement;
       } else {
-        innerHtml = "<html><body>" + html + "</body></html>";
+        return createElement('div', html);
       }
-      return createElement('html', innerHtml);
     };
     extend = $.extend;
     trim = $.trim;
@@ -288,35 +308,32 @@ If you use them in your own code, you will get hurt.
     @param {Array} args...
      */
     option = function() {
-      var args, match;
+      var arg, args, match, value, _i, _len;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       match = null;
-      args.every(function(arg) {
-        var value;
+      for (_i = 0, _len = args.length; _i < _len; _i++) {
+        arg = args[_i];
         value = arg;
         if (isFunction(value)) {
           value = value();
         }
         if (isPresent(value)) {
           match = value;
-          return false;
-        } else {
-          return true;
+          break;
         }
-      });
+      }
       return match;
     };
     detect = function(array, tester) {
-      var match;
+      var element, match, _i, _len;
       match = null;
-      array.every(function(element) {
+      for (_i = 0, _len = array.length; _i < _len; _i++) {
+        element = array[_i];
         if (tester(element)) {
           match = element;
-          return false;
-        } else {
-          return true;
+          break;
         }
-      });
+      }
       return match;
     };
     select = function(array, tester) {
@@ -409,28 +426,33 @@ If you use them in your own code, you will get hurt.
      */
     cssAnimate = function(elementOrSelector, lastFrame, opts) {
       var $element, deferred, transition, withoutCompositing, withoutTransition;
-      opts = options(opts, {
-        duration: 300,
-        delay: 0,
-        easing: 'ease'
-      });
       $element = $(elementOrSelector);
-      deferred = $.Deferred();
-      transition = {
-        'transition-property': keys(lastFrame).join(', '),
-        'transition-duration': opts.duration + "ms",
-        'transition-delay': opts.delay + "ms",
-        'transition-timing-function': opts.easing
-      };
-      withoutCompositing = forceCompositing($element);
-      withoutTransition = temporaryCss($element, transition);
-      $element.css(lastFrame);
-      deferred.then(withoutCompositing);
-      deferred.then(withoutTransition);
-      setTimeout((function() {
-        return deferred.resolve();
-      }), opts.duration + opts.delay);
-      return deferred.promise();
+      if (up.browser.canCssAnimation()) {
+        opts = options(opts, {
+          duration: 300,
+          delay: 0,
+          easing: 'ease'
+        });
+        deferred = $.Deferred();
+        transition = {
+          'transition-property': keys(lastFrame).join(', '),
+          'transition-duration': opts.duration + "ms",
+          'transition-delay': opts.delay + "ms",
+          'transition-timing-function': opts.easing
+        };
+        withoutCompositing = forceCompositing($element);
+        withoutTransition = temporaryCss($element, transition);
+        $element.css(lastFrame);
+        deferred.then(withoutCompositing);
+        deferred.then(withoutTransition);
+        setTimeout((function() {
+          return deferred.resolve();
+        }), opts.duration + opts.delay);
+        return deferred.promise();
+      } else {
+        $element.css(lastFrame);
+        return resolvedPromise();
+      }
     };
     measure = function($element, options) {
       var box, coordinates, viewport;
@@ -514,6 +536,12 @@ If you use them in your own code, you will get hurt.
       }
       return filtered;
     };
+    resolvedPromise = function() {
+      var deferred;
+      deferred = $.Deferred();
+      deferred.resolve();
+      return deferred.promise();
+    };
     return {
       presentAttr: presentAttr,
       createElement: createElement,
@@ -566,7 +594,8 @@ If you use them in your own code, you will get hurt.
       clientSize: clientSize,
       only: only,
       trim: trim,
-      keys: keys
+      keys: keys,
+      resolvedPromise: resolvedPromise
     };
   })();
 
@@ -580,8 +609,10 @@ Browser interface
  */
 
 (function() {
+  var __slice = [].slice;
+
   up.browser = (function() {
-    var canPushState, ensureConsoleExists, loadPage, u, url;
+    var canCssAnimation, canPushState, ensureConsoleExists, isSupported, loadPage, memoize, u, url;
     u = up.util;
     loadPage = function(url, options) {
       var $form, csrfParam, csrfToken, metadataInput, method, target;
@@ -617,14 +648,37 @@ Browser interface
       window.console || (window.console = {});
       return (_base = window.console).log || (_base.log = function() {});
     };
-    canPushState = function() {
-      return u.isDefined(history.pushState);
+    memoize = function(func) {
+      var cache, cached;
+      cache = void 0;
+      cached = false;
+      return function() {
+        var args;
+        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        if (cached) {
+          return cache;
+        } else {
+          cached = true;
+          return cache = func.apply(null, args);
+        }
+      };
     };
+    canPushState = memoize(function() {
+      return u.isDefined(history.pushState);
+    });
+    canCssAnimation = memoize(function() {
+      return 'transition' in document.documentElement.style;
+    });
+    isSupported = memoize(function() {
+      return u.isDefined(document.addEventListener);
+    });
     return {
       url: url,
       ensureConsoleExists: ensureConsoleExists,
       loadPage: loadPage,
-      canPushState: canPushState
+      canPushState: canPushState,
+      canCssAnimation: canCssAnimation,
+      isSupported: isSupported
     };
   })();
 
@@ -850,7 +904,7 @@ We need to work on this page:
       _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         step = _ref1[_i];
-        $old = u.presence($(".up-popup " + step.selector)) || u.presence($(".up-modal " + step.selector)) || u.presence($(step.selector));
+        $old = u.presence($(".up-popup " + step.selector)) || u.presence($(".up-modal " + step.selector)) || u.presence($(step.selector)) || u.error("Could not find selector (" + step.selector + ") in current body HTML");
         if (fragment = htmlElement.querySelector(step.selector)) {
           $new = $(fragment);
           _results.push(swapElements($old, $new, step.pseudoClass, step.transition, options));
@@ -1053,6 +1107,9 @@ We need to work on this page:
     defaultLiveDescriptions = null;
     live = function(events, selector, behavior) {
       var description, _ref;
+      if (!up.browser.isSupported()) {
+        return;
+      }
       description = [
         events, selector, function(event) {
           return behavior.apply(this, [event, $(this)]);
@@ -1086,6 +1143,9 @@ We need to work on this page:
     awaken = function() {
       var args, awakener, options, selector;
       selector = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      if (!up.browser.isSupported()) {
+        return;
+      }
       awakener = args.pop();
       options = u.options(args[0], {
         batch: false
@@ -1458,25 +1518,29 @@ We need to work on this page:
      */
     morph = function(source, target, transitionOrName, options) {
       var $new, $old, animation, parts, transition;
-      options = u.options(config);
-      $old = $(source);
-      $new = $(target);
-      transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName];
-      if (transition) {
-        return withGhosts($old, $new, function($oldGhost, $newGhost) {
-          return assertIsPromise(transition($oldGhost, $newGhost, options), ["Transition did not return a promise", transitionOrName]);
-        });
-      } else if (animation = animations[transitionOrName]) {
-        $old.hide();
-        return animate($new, animation, options);
-      } else if (u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0) {
-        parts = transitionOrName.split('/');
-        transition = function($old, $new, options) {
-          return $.when(animate($old, parts[0], options), animate($new, parts[1], options));
-        };
-        return morph($old, $new, transition, options);
+      if (up.browser.canCssAnimation()) {
+        options = u.options(config);
+        $old = $(source);
+        $new = $(target);
+        transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName];
+        if (transition) {
+          return withGhosts($old, $new, function($oldGhost, $newGhost) {
+            return assertIsPromise(transition($oldGhost, $newGhost, options), ["Transition did not return a promise", transitionOrName]);
+          });
+        } else if (animation = animations[transitionOrName]) {
+          $old.hide();
+          return animate($new, animation, options);
+        } else if (u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0) {
+          parts = transitionOrName.split('/');
+          transition = function($old, $new, options) {
+            return $.when(animate($old, parts[0], options), animate($new, parts[1], options));
+          };
+          return morph($old, $new, transition, options);
+        } else {
+          return u.error("Unknown transition: " + transitionOrName);
+        }
       } else {
-        return u.error("Unknown transition: " + transitionOrName);
+        return u.resolvedPromise();
       }
     };
 
@@ -1518,12 +1582,7 @@ We need to work on this page:
     @return {Promise}
       A resolved promise
      */
-    none = function() {
-      var deferred;
-      deferred = $.Deferred();
-      deferred.resolve();
-      return deferred.promise();
-    };
+    none = u.resolvedPromise;
     animation('none', none);
     animation('fade-in', function($ghost, options) {
       $ghost.css({
@@ -2262,7 +2321,7 @@ We need to work on this page:
       origin = u.option(options.origin, $link.attr('up-origin'), config.origin);
       animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
       sticky = u.option(options.sticky, $link.is('[up-sticky]'));
-      history = u.option(options.history, $link.attr('up-history'), false);
+      history = up.browser.canPushState() ? u.option(options.history, $link.attr('up-history'), false) : false;
       close();
       $popup = createHiddenPopup($link, selector, sticky);
       return up.replace(selector, url, {
@@ -2486,7 +2545,7 @@ We need to work on this page:
       height = u.option(options.height, $link.attr('up-height'), config.height);
       animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
       sticky = u.option(options.sticky, $link.is('[up-sticky]'));
-      history = u.option(options.history, $link.attr('up-history'), true);
+      history = up.browser.canPushState() ? u.option(options.history, $link.attr('up-history'), true) : false;
       close();
       $modal = createHiddenModal(selector, width, height, sticky);
       return up.replace(selector, url, {
@@ -2856,12 +2915,12 @@ TODO: Write some documentation
 
 }).call(this);
 (function() {
-  up.browser.ensureConsoleExists();
-
-  up.bus.emit('framework:ready');
-
-  $(document).on('ready', function() {
-    return up.bus.emit('app:ready');
-  });
+  if (up.browser.isSupported()) {
+    up.browser.ensureConsoleExists();
+    up.bus.emit('framework:ready');
+    $(document).on('ready', function() {
+      return up.bus.emit('app:ready');
+    });
+  }
 
 }).call(this);
