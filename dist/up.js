@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var __slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, forceCompositing, get, ifGiven, isArray, isBlank, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, last, locationFromXhr, measure, merge, nextFrame, normalizeUrl, option, options, prependGhost, presence, presentAttr, select, temporaryCss, unwrap;
+    var $createElementFromSelector, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, forceCompositing, get, ifGiven, isArray, isBlank, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, keys, last, locationFromXhr, measure, merge, nextFrame, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, select, temporaryCss, trim, unwrap;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -164,6 +164,18 @@ If you use them in your own code, you will get hurt.
       return createElement('html', innerHtml);
     };
     extend = $.extend;
+    trim = $.trim;
+    keys = Object.keys || function(object) {
+      var key, result, _i, _len;
+      result = [];
+      for (_i = 0, _len = object.length; _i < _len; _i++) {
+        key = object[_i];
+        if (object.hasOwnProperty(key)) {
+          result.push(key);
+        }
+      }
+      return result;
+    };
     each = function(collection, block) {
       var index, item, _i, _len, _results;
       _results = [];
@@ -189,7 +201,7 @@ If you use them in your own code, you will get hurt.
       return !isMissing(object);
     };
     isBlank = function(object) {
-      return isMissing(object) || (isObject(object) && Object.keys(object).length === 0) || (object.length === 0);
+      return isMissing(object) || (isObject(object) && keys(object).length === 0) || (object.length === 0);
     };
     presence = function(object, checker) {
       if (checker == null) {
@@ -227,7 +239,9 @@ If you use them in your own code, you will get hurt.
         return object;
       }
     };
-    isArray = Array.isArray;
+    isArray = Array.isArray || function(object) {
+      return Object.prototype.toString.call(object) === '[object Array]';
+    };
     copy = function(object) {
       if (isArray(object)) {
         return object.slice();
@@ -345,7 +359,7 @@ If you use them in your own code, you will get hurt.
     };
     temporaryCss = function($element, css, block) {
       var memo, oldCss;
-      oldCss = $element.css(Object.keys(css));
+      oldCss = $element.css(keys(css));
       $element.css(css);
       memo = function() {
         return $element.css(oldCss);
@@ -403,7 +417,7 @@ If you use them in your own code, you will get hurt.
       $element = $(elementOrSelector);
       deferred = $.Deferred();
       transition = {
-        'transition-property': Object.keys(lastFrame).join(', '),
+        'transition-property': keys(lastFrame).join(', '),
         'transition-duration': opts.duration + "ms",
         'transition-delay': opts.delay + "ms",
         'transition-timing-function': opts.easing
@@ -488,6 +502,18 @@ If you use them in your own code, you will get hurt.
     locationFromXhr = function(xhr) {
       return xhr.getResponseHeader('X-Up-Current-Location');
     };
+    only = function() {
+      var filtered, key, keys, object, _i, _len;
+      object = arguments[0], keys = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      filtered = {};
+      for (_i = 0, _len = keys.length; _i < _len; _i++) {
+        key = keys[_i];
+        if (object.hasOwnProperty(key)) {
+          filtered[key] = object[key];
+        }
+      }
+      return filtered;
+    };
     return {
       presentAttr: presentAttr,
       createElement: createElement,
@@ -537,7 +563,10 @@ If you use them in your own code, you will get hurt.
       castsToTrue: castsToTrue,
       castsToFalse: castsToFalse,
       locationFromXhr: locationFromXhr,
-      clientSize: clientSize
+      clientSize: clientSize,
+      only: only,
+      trim: trim,
+      keys: keys
     };
   })();
 
@@ -552,12 +581,50 @@ Browser interface
 
 (function() {
   up.browser = (function() {
-    var url;
+    var canPushState, ensureConsoleExists, loadPage, u, url;
+    u = up.util;
+    loadPage = function(url, options) {
+      var $form, csrfParam, csrfToken, metadataInput, method, target;
+      if (options == null) {
+        options = {};
+      }
+      method = u.option(options.method, 'get').toLowerCase();
+      if (method === 'get') {
+        return location.href = url;
+      } else if ($.rails) {
+        target = options.target;
+        csrfToken = $.rails.csrfToken();
+        csrfParam = $.rails.csrfParam();
+        $form = $("<form method='post' action='" + url + "'></form>");
+        metadataInput = "<input name='_method' value='" + method + "' type='hidden' />";
+        if (u.isDefined(csrfParam) && u.isDefined(csrfToken)) {
+          metadataInput += "<input name='" + csrfParam + "' value='" + csrfToken + "' type='hidden' />";
+        }
+        if (target) {
+          $form.attr('target', target);
+        }
+        $form.hide().append(metadataInput).appendTo('body');
+        return $form.submit();
+      } else {
+        return error("Can't fake a " + (method.toUpperCase()) + " request without Rails UJS");
+      }
+    };
     url = function() {
       return location.href;
     };
+    ensureConsoleExists = function() {
+      var _base;
+      window.console || (window.console = {});
+      return (_base = window.console).log || (_base.log = function() {});
+    };
+    canPushState = function() {
+      return u.isDefined(history.pushState);
+    };
     return {
-      url: url
+      url: url,
+      ensureConsoleExists: ensureConsoleExists,
+      loadPage: loadPage,
+      canPushState: canPushState
     };
   })();
 
@@ -720,6 +787,7 @@ We need to work on this page:
     @param {String} url
       The URL to fetch from the server.
     @param {String} [options.title]
+    @param {String} [options.method='get']
     @param {String|Boolean} [options.history=true]
       If a `String` is given, it is used as the URL the browser's location bar and history.
       If omitted or true, the `url` argument will be used.
@@ -732,10 +800,14 @@ We need to work on this page:
       var selector;
       options = u.options(options);
       selector = u.presence(selectorOrElement) ? selectorOrElement : u.createSelectorFromElement($(selectorOrElement));
+      if (!up.browser.canPushState() && !u.castsToFalse(options.history)) {
+        up.browser.loadPage(url, u.only(options, 'method'));
+        return;
+      }
       return u.ajax({
         url: url,
         selector: selector
-      }).done(function(html, textStatus, xhr) {
+      }, u.only(options, 'method')).done(function(html, textStatus, xhr) {
         var currentLocation;
         if (currentLocation = u.locationFromXhr(xhr)) {
           url = currentLocation;
@@ -1194,10 +1266,14 @@ We need to work on this page:
       }
     };
     manipulate = function(method, url) {
-      method += "State";
-      return window.history[method]({
-        fromUp: true
-      }, '', url);
+      if (up.browser.canPushState()) {
+        method += "State";
+        return window.history[method]({
+          fromUp: true
+        }, '', url);
+      } else {
+        return u.error("This browser doesn't support history.pushState");
+      }
     };
     pop = function(event) {
       var state;
@@ -1212,12 +1288,14 @@ We need to work on this page:
         return console.log("strange state", state);
       }
     };
-    setTimeout((function() {
-      $(window).on("popstate", pop);
-      return replace(up.browser.url(), {
-        force: true
-      });
-    }), 200);
+    if (up.browser.canPushState()) {
+      setTimeout((function() {
+        $(window).on("popstate", pop);
+        return replace(up.browser.url(), {
+          force: true
+        });
+      }), 200);
+    }
     return {
       push: push,
       replace: replace
@@ -1875,6 +1953,10 @@ We need to work on this page:
       httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase();
       url = u.option(options.url, $form.attr('action'), up.browser.url());
       $form.addClass('up-active');
+      if (!up.browser.canPushState() && !u.castsToFalse(historyOption)) {
+        $form.get(0).submit();
+        return;
+      }
       request = {
         url: url,
         type: httpMethod,
@@ -2740,12 +2822,13 @@ TODO: Write some documentation
 
 (function() {
   up.marker = (function() {
-    var check, hasContent;
+    var check, hasContent, u;
+    u = up.util;
     hasContent = function($marker) {
-      return $marker.html().trim() !== '';
+      return u.trim($marker.html()) !== '';
     };
     check = function($element) {
-      return up.util.findWithSelf($element, '[up-marker]').each(function() {
+      return u.findWithSelf($element, '[up-marker]').each(function() {
         var $marker;
         $marker = $(this);
         if (!hasContent($marker)) {
@@ -2773,6 +2856,8 @@ TODO: Write some documentation
 
 }).call(this);
 (function() {
+  up.browser.ensureConsoleExists();
+
   up.bus.emit('framework:ready');
 
   $(document).on('ready', function() {
