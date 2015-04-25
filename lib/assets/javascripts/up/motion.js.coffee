@@ -140,7 +140,7 @@ up.motion = (->
     A promise for the transition's end.
   ###  
   morph = (source, target, transitionOrName, options) ->
-    if up.browser.canCssTransitions()
+    if up.browser.canCssAnimation()
       options = u.options(config)
       $old = $(source)
       $new = $(target)

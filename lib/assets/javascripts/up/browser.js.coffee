@@ -51,13 +51,23 @@ up.browser = (->
     window.console ||= {}
     window.console.log ||= () ->
       
-  canPushState = ->
+  memoize = (func) ->
+    cache = undefined
+    cached = false
+    (args...) ->
+      if cached
+        cache
+      else
+        cached = true
+        cache = func(args...)
+      
+  canPushState = memoize ->
     u.isDefined(history.pushState)
     
-  canCssTransitions = ->
+  canCssAnimation = memoize ->
     'transition' of document.documentElement.style
     
-  isSupported = ->
+  isSupported = memoize ->
     # This is the most concise way to exclude IE8 and lower
     # while keeping all relevant desktop and mobile browsers.
     u.isDefined(document.addEventListener)
@@ -66,7 +76,8 @@ up.browser = (->
   ensureConsoleExists: ensureConsoleExists
   loadPage: loadPage
   canPushState: canPushState
-  canCssTransitions: canCssTransitions
+  canCssAnimation: canCssAnimation
   isSupported: isSupported
       
 )()
+
