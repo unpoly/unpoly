@@ -99,7 +99,7 @@ up.modal = (->
     height = u.option(options.height, $link.attr('up-height'), config.height)
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
     sticky = u.option(options.sticky, $link.is('[up-sticky]'))
-    history = u.option(options.history, $link.attr('up-history'), true)
+    history = if up.browser.canPushState() then u.option(options.history, $link.attr('up-history'), true) else false
 
     close()
     $modal = createHiddenModal(selector, width, height, sticky)

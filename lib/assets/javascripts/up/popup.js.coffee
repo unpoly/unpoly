@@ -123,7 +123,7 @@ up.popup = (->
     origin = u.option(options.origin, $link.attr('up-origin'), config.origin)
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
     sticky = u.option(options.sticky, $link.is('[up-sticky]'))
-    history = u.option(options.history, $link.attr('up-history'), false)
+    history = if up.browser.canPushState() then u.option(options.history, $link.attr('up-history'), false) else false
 
     close()
     $popup = createHiddenPopup($link, selector, sticky)
