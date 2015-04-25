@@ -39,8 +39,11 @@ up.history = (->
     manipulate("push", url) unless isCurrentUrl(url)
 
   manipulate = (method, url) ->
-    method += "State" # resulting in either pushState or replaceState
-    window.history[method]({ fromUp: true }, '', url)
+    if up.browser.canPushState()
+      method += "State" # resulting in either pushState or replaceState
+      window.history[method]({ fromUp: true }, '', url)
+    else
+      u.error("This browser doesn't support history.pushState")
 
   pop = (event) ->
     state = event.originalEvent.state
@@ -53,10 +56,11 @@ up.history = (->
 
   # Defeat an unnecessary popstate that some browsers trigger on pageload (Chrome?).
   # We should check in 2016 if we can remove this.
-  setTimeout (->
-    $(window).on "popstate", pop
-    replace(up.browser.url(), force: true)
-  ), 200
+  if up.browser.canPushState()
+    setTimeout (->
+      $(window).on "popstate", pop
+      replace(up.browser.url(), force: true)
+    ), 200
 
   push: push
   replace: replace

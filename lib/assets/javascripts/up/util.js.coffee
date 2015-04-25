@@ -118,6 +118,13 @@ up.util = (->
   extend = $.extend
   
   trim = $.trim
+  
+  keys = Object.keys || (object) ->
+    result = []
+    for key in object
+      if object.hasOwnProperty(key)
+        result.push(key)
+    result
 
   each = (collection, block) ->
     block(item, index) for item, index in collection
@@ -139,7 +146,7 @@ up.util = (->
     
   isBlank = (object) ->
     isMissing(object) ||                  # null or undefined
-    (isObject(object) && Object.keys(object).length == 0) ||
+    (isObject(object) && keys(object).length == 0) ||
     (object.length == 0)                  # String, Array, jQuery
   
   presence = (object, checker = isPresent) ->
@@ -170,7 +177,8 @@ up.util = (->
     object if isGiven(object)
 
   # https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
-  isArray = Array.isArray
+  isArray = Array.isArray || 
+      (object) -> Object.prototype.toString.call(object) == '[object Array]'
 
   copy = (object)  ->
     if isArray(object)
@@ -256,7 +264,7 @@ up.util = (->
     height: element.clientHeight
     
   temporaryCss = ($element, css, block) ->
-    oldCss = $element.css(Object.keys(css))
+    oldCss = $element.css(keys(css))
     $element.css(css)
     memo = -> $element.css(oldCss)
     if block
@@ -306,7 +314,7 @@ up.util = (->
     $element = $(elementOrSelector)
     deferred = $.Deferred()
     transition =
-      'transition-property': Object.keys(lastFrame).join(', ')
+      'transition-property': keys(lastFrame).join(', ')
       'transition-duration': "#{opts.duration}ms"
       'transition-delay': "#{opts.delay}ms"
       'transition-timing-function': opts.easing
@@ -456,6 +464,7 @@ up.util = (->
 #  willChangeHistory: willChangeHistory
   only: only
   trim: trim
+  keys: keys
 #  memoArray: memoArray
 #  replaceInPlace: replaceInPlace
 
