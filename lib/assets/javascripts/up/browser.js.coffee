@@ -66,6 +66,9 @@ up.browser = (->
     
   canCssAnimation = memoize ->
     'transition' of document.documentElement.style
+
+  canInputEvent = memoize ->
+    'oninput' of document.createElement('input')
     
   isSupported = memoize ->
     # This is the most concise way to exclude IE8 and lower
@@ -77,6 +80,7 @@ up.browser = (->
   loadPage: loadPage
   canPushState: canPushState
   canCssAnimation: canCssAnimation
+  canInputEvent: canInputEvent
   isSupported: isSupported
       
 )()

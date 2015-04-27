@@ -205,7 +205,7 @@ up.util = (->
     object instanceof jQuery
 
   isPromise = (object) ->
-    isFunction(object.then)
+    isObject(object) && isFunction(object.then)
     
   ifGiven = (object) ->
     object if isGiven(object)

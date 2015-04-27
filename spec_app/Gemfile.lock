@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    upjs-rails (0.3.0)
+    upjs-rails (0.3.2)
       rails (>= 3)
 
 GEM

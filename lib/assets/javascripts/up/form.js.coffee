@@ -107,8 +107,7 @@ up.form = (->
         )
 
   ###*
-  Observes an input field by periodic polling its value.
-  Executes code when the value changes.
+  Observes an input field and executes code when its value changes.
 
       up.observe('input', { change: function(value, $input) {
         up.submit($input)
@@ -125,47 +124,68 @@ up.form = (->
     If given as a function, it must take two arguments (`value`, `$field`).
     If given as a string, it will be evaled as Javascript code in a context where
     (`value`, `$field`) are set.
-  @param {Number} [options.frequency=500]
+  @param {Number} [options.delay=100]
+    The number of miliseconds to wait before executing the callback
+    after the input value changes. Use this to limit how often the callback
+    will be invoked for a fast typist.
   ###
   observe = (fieldOrSelector, options) ->
 
     $field = $(fieldOrSelector)
-    options = u.options(options, frequency: 500)
+    options = u.options(options)
+    delay = u.option($field.attr('up-delay'), options.delay, 0)
+    delay = parseInt(delay)
+    delay = 100
+
     knownValue = null
-    timer = null
     callback = null
+    callbackTimer = null
+
     if codeOnChange = $field.attr('up-observe')
       callback = (value, $field) ->
+        console.log("Change!", value)
         eval(codeOnChange)
     else if options.change
       callback = options.change
     else
       u.error('observe: No change callback given')
 
+    callbackPromise = u.resolvedPromise()
+
+    nextCallback = null
+
+    runNextCallback = ->
+      if nextCallback
+        returnValue = nextCallback()
+        nextCallback = null
+        returnValue
+
     check = ->
       value = $field.val()
       skipCallback = _.isNull(knownValue) # don't run the callback for the check during initialization
       if knownValue != value
         knownValue = value
-        callback.apply($field.get(0), [value, $field]) unless skipCallback
-
-    resetTimer = ->
-      if timer
-        clearTimer()
-        startTimer()
+        unless skipCallback
+          clearTimer()
+          nextCallback = -> callback.apply($field.get(0), [value, $field])
+          callbackTimer = setTimeout(
+            ->
+              callbackPromise.then ->
+                callbackReturn = runNextCallback()
+                if u.isPromise(callbackReturn)
+                  callbackPromise = callbackReturn
+                else
+                  callbackPromise = u.resolvedPromise()
+          , delay
+          )
 
     clearTimer = ->
-      clearInterval(timer)
-      timer = null
+      clearTimeout(callbackTimer)
 
-    startTimer = ->
-      timer = setInterval(check, options.frequency)
-
-    # reset counter after user interaction
-    $field.bind "keyup click mousemove", resetTimer # mousemove is for selects
+    changeEvents = if up.browser.canInputEvent() then 'input' else 'keypress paste cut change click propertychange'
+    $field.on changeEvents, check
 
     check()
-    startTimer()
 
     # return destructor
     return clearTimer
