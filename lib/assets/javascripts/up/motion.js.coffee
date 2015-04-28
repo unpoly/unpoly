@@ -45,6 +45,9 @@ up.motion = (->
   ###*
   Animates an element.
   
+  If the element is already being animated, the previous animation
+  will instantly jump to its last frame before the new animation begins. 
+  
   The following animations are pre-registered:
   
   - `fade-in`
