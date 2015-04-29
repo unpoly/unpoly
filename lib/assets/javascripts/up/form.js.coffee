@@ -124,7 +124,7 @@ up.form = (->
     If given as a function, it must take two arguments (`value`, `$field`).
     If given as a string, it will be evaled as Javascript code in a context where
     (`value`, `$field`) are set.
-  @param {Number} [options.delay=100]
+  @param {Number} [options.delay=0]
     The number of miliseconds to wait before executing the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
@@ -135,7 +135,6 @@ up.form = (->
     options = u.options(options)
     delay = u.option($field.attr('up-delay'), options.delay, 0)
     delay = parseInt(delay)
-    delay = 100
 
     knownValue = null
     callback = null
@@ -143,7 +142,6 @@ up.form = (->
 
     if codeOnChange = $field.attr('up-observe')
       callback = (value, $field) ->
-        console.log("Change!", value)
         eval(codeOnChange)
     else if options.change
       callback = options.change
@@ -152,6 +150,10 @@ up.form = (->
 
     callbackPromise = u.resolvedPromise()
 
+    # This holds the next callback function, curried with `value` and `$field`.
+    # Since we're waiting for callback promises to resolve before running
+    # another callback, this might be overwritten while we're waiting for a
+    # previous callback to finish.
     nextCallback = null
 
     runNextCallback = ->
@@ -162,7 +164,8 @@ up.form = (->
 
     check = ->
       value = $field.val()
-      skipCallback = _.isNull(knownValue) # don't run the callback for the check during initialization
+      # don't run the callback for the check during initialization
+      skipCallback = _.isNull(knownValue)
       if knownValue != value
         knownValue = value
         unless skipCallback
@@ -170,10 +173,14 @@ up.form = (->
           nextCallback = -> callback.apply($field.get(0), [value, $field])
           callbackTimer = setTimeout(
             ->
+              # Only run the callback once the previous callback's
+              # promise resolves.
               callbackPromise.then ->
-                callbackReturn = runNextCallback()
-                if u.isPromise(callbackReturn)
-                  callbackPromise = callbackReturn
+                returnValue = runNextCallback()
+                # If the callback returns a promise, we will remember it
+                # and chain additional callback invocations to it.
+                if u.isPromise(returnValue)
+                  callbackPromise = returnValue
                 else
                   callbackPromise = u.resolvedPromise()
           , delay

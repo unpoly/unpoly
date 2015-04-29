@@ -89,10 +89,10 @@ up.util = (->
     element
 
   error = (args...) ->
-    message = if args.length == 1 && up.util.isString(args[0]) then args[0] else JSON.stringify(args)
-    console.log("[UP] Error: #{message}", args...)
-    alert message
-    throw message
+    console.log("[UP] Error", args...)
+    asString = if args.length == 1 && up.util.isString(args[0]) then args[0] else JSON.stringify(args)
+    alert asString
+    throw asString
 
   createSelectorFromElement = ($element) ->
     console.log("Creating selector from element", $element)
@@ -206,7 +206,10 @@ up.util = (->
 
   isPromise = (object) ->
     isObject(object) && isFunction(object.then)
-    
+
+  isDeferred = (object) ->
+    isPromise(object) && isFunction(object.resolve)
+
   ifGiven = (object) ->
     object if isGiven(object)
 
@@ -460,10 +463,19 @@ up.util = (->
         filtered[key] = object[key]
     filtered
 
-  resolvedPromise = ->
+  resolvedDeferred = ->
     deferred = $.Deferred()
     deferred.resolve()
-    deferred.promise()
+    deferred
+
+  resolvedPromise = ->
+    resolvedDeferred().promise()
+
+  resolvableWhen = (deferreds...) ->
+    joined = $.when(deferreds...)
+    joined.resolve = ->
+      each deferreds, (deferred) -> deferred.resolve?()
+    joined
 
 #  memoArray = ->
 #    array = []
@@ -512,6 +524,7 @@ up.util = (->
   isString: isString
   isJQuery: isJQuery
   isPromise: isPromise
+  isDeferred: isDeferred
   isHash: isHash
   ifGiven: ifGiven
   unwrap: unwrap
@@ -535,5 +548,7 @@ up.util = (->
   trim: trim
   keys: keys
   resolvedPromise: resolvedPromise
+  resolvedDeferred: resolvedDeferred
+  resolvableWhen: resolvableWhen
 
 )()

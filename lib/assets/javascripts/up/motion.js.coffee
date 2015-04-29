@@ -76,10 +76,7 @@ up.motion = (->
     finish($element)
     options = u.options(options, config)
     if u.isFunction(animation)
-      assertIsPromise(
-        animation($element, options),
-        ["Animation did not return a Promise", animation]
-      )
+      assertIsDeferred(animation($element, options), animation)
     else if u.isString(animation)
       animate($element, findAnimation(animation), options)
     else if u.isHash(animation)
@@ -117,6 +114,8 @@ up.motion = (->
       # $new should take up space
       $old.css(display: 'none')
       newCssMemo()
+
+    promise
       
   ###
   Completes all animations and transitions for the given element
@@ -130,16 +129,19 @@ up.motion = (->
   finish = (elementOrSelector) ->
     $(elementOrSelector).each ->
       $element = $(this)
-      u.finishCssAnimation($element)
+      u.finishCssAnimate($element)
       finishGhosting($element)
   
   finishGhosting = ($element) ->
     if existingGhosting = $element.data(GHOSTING_PROMISE_KEY)
-      existingGhosting.resolve()
+      console.log("EXISTING", existingGhosting)
+      existingGhosting.resolve?()
       
-  assertIsPromise = (object, messageParts) ->
-    u.isPromise(object) or u.error(messageParts...)
-    object
+  assertIsDeferred = (object, origin) ->
+    if u.isDeferred(object)
+      object
+    else
+      u.error("Did not return a promise with .then and .resolve methods: ", origin)
 
   ###*
   Performs a transition between two elements.
@@ -179,17 +181,14 @@ up.motion = (->
       transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
       if transition
         withGhosts $old, $new, ($oldGhost, $newGhost) ->
-          assertIsPromise(
-            transition($oldGhost, $newGhost, options),
-            ["Transition did not return a promise", transitionOrName]
-          )
+          assertIsDeferred(transition($oldGhost, $newGhost, options), transitionOrName)
       else if animation = animations[transitionOrName]
         $old.hide()
         animate($new, animation, options)
       else if u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0
         parts = transitionOrName.split('/')
         transition = ($old, $new, options) ->
-          $.when(
+          resolvableWhen(
             animate($old, parts[0], options),
             animate($new, parts[1], options)
           )
@@ -199,11 +198,11 @@ up.motion = (->
     else
       # Skip ghosting and all the other stuff that can go wrong
       # in ancient browsers
-      u.resolvedPromise()        
+      u.resolvedDeferred()
 
   ###*
   Defines a named transition.
-  
+
   @method up.transition
   @param {String} name
   @param {Function} transition
@@ -213,100 +212,109 @@ up.motion = (->
 
   ###*
   Defines a named animation.
-  
+
   @method up.animation
   @param {String} name
   @param {Function} animation
   ###
   animation = (name, animation) ->
     animations[name] = animation
-    
+
   snapshot = ->
     defaultAnimations = u.copy(animations)
     defaultTransitions = u.copy(transitions)
-    
+
   reset = ->
     animations = u.copy(defaultAnimations)
     transitions = u.copy(defaultTransitions)
-  
+
+  ###*
+  Returns a new promise that resolves once all promises in the given array resolve.
+  Other then e.g. `$.then`, the combined promise will have a `resolve` method.
+
+  @method up.motion.when
+  @param promises...
+  ###
+  resolvableWhen = u.resolvableWhen
+
   ###*
   Returns a no-op animation or transition which has no visual effects
   and completes instantly.
-  
+
   @method up.motion.none
   @return {Promise}
-    A resolved promise  
+    A resolved promise
   ###
-  none = u.resolvedPromise
-    
+  none = u.resolvedDeferred
+
   animation('none', none)
 
   animation('fade-in', ($ghost, options) ->
     $ghost.css(opacity: 0)
     animate($ghost, { opacity: 1 }, options)
   )
-  
+
   animation('fade-out', ($ghost, options) ->
     $ghost.css(opacity: 1)
     animate($ghost, { opacity: 0 }, options)
   )
-  
+
   animation('move-to-top', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = box.top + box.height
     $ghost.css('margin-top': '0px')
     animate($ghost, { 'margin-top': "-#{travelDistance}px" }, options)
   )
-  
+
   animation('move-from-top', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = box.top + box.height
     $ghost.css('margin-top': "-#{travelDistance}px")
     animate($ghost, { 'margin-top': '0px' }, options)
   )
-    
+
   animation('move-to-bottom', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = u.clientSize().height - box.top
     $ghost.css('margin-top': '0px')
     animate($ghost, { 'margin-top': "#{travelDistance}px" }, options)
   )
-  
+
   animation('move-from-bottom', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = u.clientSize().height - box.top
     $ghost.css('margin-top': "#{travelDistance}px")
     animate($ghost, { 'margin-top': '0px' }, options)
   )
-  
+
   animation('move-to-left', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = box.left + box.width
     $ghost.css('margin-left': '0px')
     animate($ghost, { 'margin-left': "-#{travelDistance}px" }, options)
   )
-  
+
   animation('move-from-left', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = box.left + box.width
     $ghost.css('margin-left': "-#{travelDistance}px")
     animate($ghost, { 'margin-left': '0px' }, options)
   )
-  
+
   animation('move-to-right', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = u.clientSize().width - box.left
     $ghost.css('margin-left': '0px')
     animate($ghost, { 'margin-left': "#{travelDistance}px" }, options)
   )
-  
+
   animation('move-from-right', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = u.clientSize().width - box.left
     $ghost.css('margin-left': "#{travelDistance}px")
     animate($ghost, { 'margin-left': '0px' }, options)
   )
-  
+
   animation('roll-down', ($ghost, options) ->
     fullHeight = $ghost.height()
     styleMemo = u.temporaryCss($ghost,
@@ -315,39 +323,39 @@ up.motion = (->
     )
     animate($ghost, { height: "#{fullHeight}px" }, options).then(styleMemo)
   )
-  
+
   transition('none', none)
-  
+
   transition('move-left', ($old, $new, options) ->
-    $.when(
+    resolvableWhen(
       animate($old, 'move-to-left', options),
       animate($new, 'move-from-right', options)
     )
   )
-  
+
   transition('move-right', ($old, $new, options) ->
-    $.when(
+    resolvableWhen(
       animate($old, 'move-to-right', options),
       animate($new, 'move-from-left', options)
     )
   )
-  
+
   transition('move-up', ($old, $new, options) ->
-    $.when(
+    resolvableWhen(
       animate($old, 'move-to-top', options),
       animate($new, 'move-from-bottom', options)
     )
   )
-  
+
   transition('move-down', ($old, $new, options) ->
-    $.when(
+    resolvableWhen(
       animate($old, 'move-to-bottom', options),
       animate($new, 'move-from-top', options)
     )
   )
-  
+
   transition('cross-fade', ($old, $new, options) ->
-    $.when(
+    resolvableWhen(
       animate($old, 'fade-out', options),
       animate($new, 'fade-in', options)
     )
@@ -363,6 +371,7 @@ up.motion = (->
   animation: animation
   defaults: defaults
   none: none
+  when: resolvableWhen
 
 )()
 
