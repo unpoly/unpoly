@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var __slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, forceCompositing, get, ifGiven, isArray, isBlank, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, keys, last, locationFromXhr, measure, merge, nextFrame, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, resolvedPromise, select, temporaryCss, trim, unwrap;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, keys, last, locationFromXhr, measure, merge, nextFrame, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, temporaryCss, trim, unwrap;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -132,12 +132,12 @@ If you use them in your own code, you will get hurt.
       return element;
     };
     error = function() {
-      var args, message;
+      var args, asString;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      message = args.length === 1 && up.util.isString(args[0]) ? args[0] : JSON.stringify(args);
-      console.log.apply(console, ["[UP] Error: " + message].concat(__slice.call(args)));
-      alert(message);
-      throw message;
+      console.log.apply(console, ["[UP] Error"].concat(__slice.call(args)));
+      asString = args.length === 1 && up.util.isString(args[0]) ? args[0] : JSON.stringify(args);
+      alert(asString);
+      throw asString;
     };
     createSelectorFromElement = function($element) {
       var classString, classes, id, klass, selector, _i, _len;
@@ -252,7 +252,10 @@ If you use them in your own code, you will get hurt.
       return object instanceof jQuery;
     };
     isPromise = function(object) {
-      return isFunction(object.then);
+      return isObject(object) && isFunction(object.then);
+    };
+    isDeferred = function(object) {
+      return isPromise(object) && isFunction(object.resolve);
     };
     ifGiven = function(object) {
       if (isGiven(object)) {
@@ -408,6 +411,12 @@ If you use them in your own code, you will get hurt.
     /**
     Animates the given element's CSS properties using CSS transitions.
     
+    If the element is already being animated, the previous animation
+    will instantly jump to its last frame before the new animation begins. 
+    
+    To improve performance, the element will be forced into compositing for
+    the duration of the animation.
+    
     @method up.util.cssAnimate
     @param {Element|jQuery|String} elementOrSelector
       The element to animate.
@@ -425,7 +434,7 @@ If you use them in your own code, you will get hurt.
       A promise for the animation's end.
      */
     cssAnimate = function(elementOrSelector, lastFrame, opts) {
-      var $element, deferred, transition, withoutCompositing, withoutTransition;
+      var $element, deferred, endTimeout, transition, withoutCompositing, withoutTransition;
       $element = $(elementOrSelector);
       if (up.browser.canCssAnimation()) {
         opts = options(opts, {
@@ -445,14 +454,40 @@ If you use them in your own code, you will get hurt.
         $element.css(lastFrame);
         deferred.then(withoutCompositing);
         deferred.then(withoutTransition);
-        setTimeout((function() {
+        $element.data(ANIMATION_PROMISE_KEY, deferred);
+        deferred.then(function() {
+          return $element.removeData(ANIMATION_PROMISE_KEY);
+        });
+        endTimeout = setTimeout((function() {
           return deferred.resolve();
         }), opts.duration + opts.delay);
-        return deferred.promise();
+        deferred.then(function() {
+          return clearTimeout(endTimeout);
+        });
+        return deferred;
       } else {
         $element.css(lastFrame);
         return resolvedPromise();
       }
+    };
+    ANIMATION_PROMISE_KEY = 'up-animation-promise';
+
+    /*
+    Completes the animation for  the given element by jumping
+    to the last frame instantly. All callbacks chained to
+    the original animation's promise will be called.
+    
+    Does nothing if the given element is not currently animating.
+    
+    @param {Element|jQuery|String} elementOrSelector
+     */
+    finishCssAnimate = function(elementOrSelector) {
+      return $(elementOrSelector).each(function() {
+        var existingAnimation;
+        if (existingAnimation = $(this).data(ANIMATION_PROMISE_KEY)) {
+          return existingAnimation.resolve();
+        }
+      });
     };
     measure = function($element, options) {
       var box, coordinates, viewport;
@@ -536,11 +571,25 @@ If you use them in your own code, you will get hurt.
       }
       return filtered;
     };
-    resolvedPromise = function() {
+    resolvedDeferred = function() {
       var deferred;
       deferred = $.Deferred();
       deferred.resolve();
-      return deferred.promise();
+      return deferred;
+    };
+    resolvedPromise = function() {
+      return resolvedDeferred().promise();
+    };
+    resolvableWhen = function() {
+      var deferreds, joined;
+      deferreds = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      joined = $.when.apply($, deferreds);
+      joined.resolve = function() {
+        return each(deferreds, function(deferred) {
+          return typeof deferred.resolve === "function" ? deferred.resolve() : void 0;
+        });
+      };
+      return joined;
     };
     return {
       presentAttr: presentAttr,
@@ -574,6 +623,7 @@ If you use them in your own code, you will get hurt.
       isString: isString,
       isJQuery: isJQuery,
       isPromise: isPromise,
+      isDeferred: isDeferred,
       isHash: isHash,
       ifGiven: ifGiven,
       unwrap: unwrap,
@@ -581,6 +631,7 @@ If you use them in your own code, you will get hurt.
       measure: measure,
       temporaryCss: temporaryCss,
       cssAnimate: cssAnimate,
+      finishCssAnimate: finishCssAnimate,
       forceCompositing: forceCompositing,
       prependGhost: prependGhost,
       escapePressed: escapePressed,
@@ -595,7 +646,9 @@ If you use them in your own code, you will get hurt.
       only: only,
       trim: trim,
       keys: keys,
-      resolvedPromise: resolvedPromise
+      resolvedPromise: resolvedPromise,
+      resolvedDeferred: resolvedDeferred,
+      resolvableWhen: resolvableWhen
     };
   })();
 
@@ -612,7 +665,7 @@ Browser interface
   var __slice = [].slice;
 
   up.browser = (function() {
-    var canCssAnimation, canPushState, ensureConsoleExists, isSupported, loadPage, memoize, u, url;
+    var canCssAnimation, canInputEvent, canPushState, ensureConsoleExists, isSupported, loadPage, memoize, u, url;
     u = up.util;
     loadPage = function(url, options) {
       var $form, csrfParam, csrfToken, metadataInput, method, target;
@@ -669,6 +722,9 @@ Browser interface
     canCssAnimation = memoize(function() {
       return 'transition' in document.documentElement.style;
     });
+    canInputEvent = memoize(function() {
+      return 'oninput' in document.createElement('input');
+    });
     isSupported = memoize(function() {
       return u.isDefined(document.addEventListener);
     });
@@ -678,6 +734,7 @@ Browser interface
       loadPage: loadPage,
       canPushState: canPushState,
       canCssAnimation: canCssAnimation,
+      canInputEvent: canInputEvent,
       isSupported: isSupported
     };
   })();
@@ -904,6 +961,7 @@ We need to work on this page:
       _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         step = _ref1[_i];
+        up.motion.finish(step.selector);
         $old = u.presence($(".up-popup " + step.selector)) || u.presence($(".up-modal " + step.selector)) || u.presence($(step.selector)) || u.error("Could not find selector (" + step.selector + ") in current body HTML");
         if (fragment = htmlElement.querySelector(step.selector)) {
           $new = $(fragment);
@@ -1388,7 +1446,7 @@ We need to work on this page:
 
 (function() {
   up.motion = (function() {
-    var animate, animation, animations, assertIsPromise, config, defaultAnimations, defaultTransitions, defaults, findAnimation, morph, none, reset, snapshot, transition, transitions, u, withGhosts;
+    var GHOSTING_PROMISE_KEY, animate, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, defaults, findAnimation, finish, finishGhosting, morph, none, reset, resolvableWhen, snapshot, transition, transitions, u, withGhosts;
     u = up.util;
     config = {
       duration: 300,
@@ -1412,6 +1470,9 @@ We need to work on this page:
 
     /**
     Animates an element.
+    
+    If the element is already being animated, the previous animation
+    will instantly jump to its last frame before the new animation begins. 
     
     The following animations are pre-registered:
     
@@ -1439,9 +1500,10 @@ We need to work on this page:
     animate = function(elementOrSelector, animation, options) {
       var $element;
       $element = $(elementOrSelector);
+      finish($element);
       options = u.options(options, config);
       if (u.isFunction(animation)) {
-        return assertIsPromise(animation($element, options), ["Animation did not return a Promise", animation]);
+        return assertIsDeferred(animation($element, options), animation);
       } else if (u.isString(animation)) {
         return animate($element, findAnimation(animation), options);
       } else if (u.isHash(animation)) {
@@ -1453,6 +1515,7 @@ We need to work on this page:
     findAnimation = function(name) {
       return animations[name] || u.error("Unknown animation", animation);
     };
+    GHOSTING_PROMISE_KEY = 'up-ghosting-promise';
     withGhosts = function($old, $new, block) {
       var $newGhost, $oldGhost, newCssMemo, promise;
       $oldGhost = null;
@@ -1474,7 +1537,11 @@ We need to work on this page:
         display: 'none'
       });
       promise = block($oldGhost, $newGhost);
-      return promise.then(function() {
+      $old.data(GHOSTING_PROMISE_KEY, promise);
+      $new.data(GHOSTING_PROMISE_KEY, promise);
+      promise.then(function() {
+        $old.removeData(GHOSTING_PROMISE_KEY);
+        $new.removeData(GHOSTING_PROMISE_KEY);
         $oldGhost.remove();
         $newGhost.remove();
         $old.css({
@@ -1482,10 +1549,39 @@ We need to work on this page:
         });
         return newCssMemo();
       });
+      return promise;
     };
-    assertIsPromise = function(object, messageParts) {
-      u.isPromise(object) || u.error.apply(u, messageParts);
-      return object;
+
+    /*
+    Completes all animations and transitions for the given element
+    by jumping to the last animation frame instantly. All callbacks chained to
+    the original animation's promise will be called.
+    
+    Does nothing if the given element is not currently animating.
+    
+    @param {Element|jQuery|String} elementOrSelector
+     */
+    finish = function(elementOrSelector) {
+      return $(elementOrSelector).each(function() {
+        var $element;
+        $element = $(this);
+        u.finishCssAnimate($element);
+        return finishGhosting($element);
+      });
+    };
+    finishGhosting = function($element) {
+      var existingGhosting;
+      if (existingGhosting = $element.data(GHOSTING_PROMISE_KEY)) {
+        console.log("EXISTING", existingGhosting);
+        return typeof existingGhosting.resolve === "function" ? existingGhosting.resolve() : void 0;
+      }
+    };
+    assertIsDeferred = function(object, origin) {
+      if (u.isDeferred(object)) {
+        return object;
+      } else {
+        return u.error("Did not return a promise with .then and .resolve methods: ", origin);
+      }
     };
 
     /**
@@ -1522,10 +1618,12 @@ We need to work on this page:
         options = u.options(config);
         $old = $(source);
         $new = $(target);
+        finish($old);
+        finish($new);
         transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName];
         if (transition) {
           return withGhosts($old, $new, function($oldGhost, $newGhost) {
-            return assertIsPromise(transition($oldGhost, $newGhost, options), ["Transition did not return a promise", transitionOrName]);
+            return assertIsDeferred(transition($oldGhost, $newGhost, options), transitionOrName);
           });
         } else if (animation = animations[transitionOrName]) {
           $old.hide();
@@ -1533,14 +1631,14 @@ We need to work on this page:
         } else if (u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0) {
           parts = transitionOrName.split('/');
           transition = function($old, $new, options) {
-            return $.when(animate($old, parts[0], options), animate($new, parts[1], options));
+            return resolvableWhen(animate($old, parts[0], options), animate($new, parts[1], options));
           };
           return morph($old, $new, transition, options);
         } else {
           return u.error("Unknown transition: " + transitionOrName);
         }
       } else {
-        return u.resolvedPromise();
+        return u.resolvedDeferred();
       }
     };
 
@@ -1575,6 +1673,15 @@ We need to work on this page:
     };
 
     /**
+    Returns a new promise that resolves once all promises in the given array resolve.
+    Other then e.g. `$.then`, the combined promise will have a `resolve` method.
+    
+    @method up.motion.when
+    @param promises...
+     */
+    resolvableWhen = u.resolvableWhen;
+
+    /**
     Returns a no-op animation or transition which has no visual effects
     and completes instantly.
     
@@ -1582,7 +1689,7 @@ We need to work on this page:
     @return {Promise}
       A resolved promise
      */
-    none = u.resolvedPromise;
+    none = u.resolvedDeferred;
     animation('none', none);
     animation('fade-in', function($ghost, options) {
       $ghost.css({
@@ -1701,29 +1808,31 @@ We need to work on this page:
     });
     transition('none', none);
     transition('move-left', function($old, $new, options) {
-      return $.when(animate($old, 'move-to-left', options), animate($new, 'move-from-right', options));
+      return resolvableWhen(animate($old, 'move-to-left', options), animate($new, 'move-from-right', options));
     });
     transition('move-right', function($old, $new, options) {
-      return $.when(animate($old, 'move-to-right', options), animate($new, 'move-from-left', options));
+      return resolvableWhen(animate($old, 'move-to-right', options), animate($new, 'move-from-left', options));
     });
     transition('move-up', function($old, $new, options) {
-      return $.when(animate($old, 'move-to-top', options), animate($new, 'move-from-bottom', options));
+      return resolvableWhen(animate($old, 'move-to-top', options), animate($new, 'move-from-bottom', options));
     });
     transition('move-down', function($old, $new, options) {
-      return $.when(animate($old, 'move-to-bottom', options), animate($new, 'move-from-top', options));
+      return resolvableWhen(animate($old, 'move-to-bottom', options), animate($new, 'move-from-top', options));
     });
     transition('cross-fade', function($old, $new, options) {
-      return $.when(animate($old, 'fade-out', options), animate($new, 'fade-in', options));
+      return resolvableWhen(animate($old, 'fade-out', options), animate($new, 'fade-in', options));
     });
     up.bus.on('framework:ready', snapshot);
     up.bus.on('framework:reset', reset);
     return {
       morph: morph,
       animate: animate,
+      finish: finish,
       transition: transition,
       animation: animation,
       defaults: defaults,
-      none: none
+      none: none,
+      when: resolvableWhen
     };
   })();
 
@@ -2044,8 +2153,7 @@ We need to work on this page:
     };
 
     /**
-    Observes an input field by periodic polling its value.
-    Executes code when the value changes.
+    Observes an input field and executes code when its value changes.
     
         up.observe('input', { change: function(value, $input) {
           up.submit($input)
@@ -2062,17 +2170,20 @@ We need to work on this page:
       If given as a function, it must take two arguments (`value`, `$field`).
       If given as a string, it will be evaled as Javascript code in a context where
       (`value`, `$field`) are set.
-    @param {Number} [options.frequency=500]
+    @param {Number} [options.delay=0]
+      The number of miliseconds to wait before executing the callback
+      after the input value changes. Use this to limit how often the callback
+      will be invoked for a fast typist.
      */
     observe = function(fieldOrSelector, options) {
-      var $field, callback, check, clearTimer, codeOnChange, knownValue, resetTimer, startTimer, timer;
+      var $field, callback, callbackPromise, callbackTimer, changeEvents, check, clearTimer, codeOnChange, delay, knownValue, nextCallback, runNextCallback;
       $field = $(fieldOrSelector);
-      options = u.options(options, {
-        frequency: 500
-      });
+      options = u.options(options);
+      delay = u.option($field.attr('up-delay'), options.delay, 0);
+      delay = parseInt(delay);
       knownValue = null;
-      timer = null;
       callback = null;
+      callbackTimer = null;
       if (codeOnChange = $field.attr('up-observe')) {
         callback = function(value, $field) {
           return eval(codeOnChange);
@@ -2082,6 +2193,16 @@ We need to work on this page:
       } else {
         u.error('observe: No change callback given');
       }
+      callbackPromise = u.resolvedPromise();
+      nextCallback = null;
+      runNextCallback = function() {
+        var returnValue;
+        if (nextCallback) {
+          returnValue = nextCallback();
+          nextCallback = null;
+          return returnValue;
+        }
+      };
       check = function() {
         var skipCallback, value;
         value = $field.val();
@@ -2089,26 +2210,30 @@ We need to work on this page:
         if (knownValue !== value) {
           knownValue = value;
           if (!skipCallback) {
-            return callback.apply($field.get(0), [value, $field]);
+            clearTimer();
+            nextCallback = function() {
+              return callback.apply($field.get(0), [value, $field]);
+            };
+            return callbackTimer = setTimeout(function() {
+              return callbackPromise.then(function() {
+                var returnValue;
+                returnValue = runNextCallback();
+                if (u.isPromise(returnValue)) {
+                  return callbackPromise = returnValue;
+                } else {
+                  return callbackPromise = u.resolvedPromise();
+                }
+              });
+            }, delay);
           }
         }
       };
-      resetTimer = function() {
-        if (timer) {
-          clearTimer();
-          return startTimer();
-        }
-      };
       clearTimer = function() {
-        clearInterval(timer);
-        return timer = null;
+        return clearTimeout(callbackTimer);
       };
-      startTimer = function() {
-        return timer = setInterval(check, options.frequency);
-      };
-      $field.bind("keyup click mousemove", resetTimer);
+      changeEvents = up.browser.canInputEvent() ? 'input' : 'keypress paste cut change click propertychange';
+      $field.on(changeEvents, check);
       check();
-      startTimer();
       return clearTimer;
     };
 
