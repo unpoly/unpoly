@@ -344,12 +344,13 @@ up.util = (->
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
     $element = $(elementOrSelector)
     if up.browser.canCssAnimation()
-      cancelCssAnimate($element)
       opts = options(opts, 
         duration: 300, 
         delay: 0, 
         easing: 'ease'
       )
+      # We don't finish an existing animation here, since
+      # the public API `up.motion.animate` already does this.
       deferred = $.Deferred()
       transition =
         'transition-property': keys(lastFrame).join(', ')
@@ -374,10 +375,20 @@ up.util = (->
       resolvedPromise()
       
   ANIMATION_PROMISE_KEY = 'up-animation-promise'
+
+  ###
+  Completes the animation for  the given element by jumping
+  to the last frame instantly. All callbacks chained to
+  the original animation's promise will be called.
   
-  cancelCssAnimate = ($element) ->
-    if existingAnimation = $element.data(ANIMATION_PROMISE_KEY)
-      existingAnimation.resolve()
+  Does nothing if the given element is not currently animating.
+  
+  @param {Element|jQuery|String} elementOrSelector
+  ###
+  finishCssAnimate = (elementOrSelector) ->
+    $(elementOrSelector).each ->
+      if existingAnimation = $(this).data(ANIMATION_PROMISE_KEY)
+        existingAnimation.resolve()
 
   measure = ($element, options) ->
     coordinates = if options?.relative
@@ -508,6 +519,7 @@ up.util = (->
   measure: measure
   temporaryCss: temporaryCss
   cssAnimate: cssAnimate
+  finishCssAnimate: finishCssAnimate
   forceCompositing: forceCompositing
   prependGhost: prependGhost
   escapePressed: escapePressed

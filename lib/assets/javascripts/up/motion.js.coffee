@@ -73,6 +73,7 @@ up.motion = (->
   ###
   animate = (elementOrSelector, animation, options) ->
     $element = $(elementOrSelector)
+    finish($element)
     options = u.options(options, config)
     if u.isFunction(animation)
       assertIsPromise(
@@ -88,6 +89,8 @@ up.motion = (->
       
   findAnimation = (name) ->
     animations[name] or u.error("Unknown animation", animation)
+    
+  GHOSTING_PROMISE_KEY = 'up-ghosting-promise'
 
   withGhosts = ($old, $new, block) ->
     $oldGhost = null
@@ -101,7 +104,12 @@ up.motion = (->
     
     newCssMemo = u.temporaryCss($new, display: 'none')
     promise = block($oldGhost, $newGhost)
+    $old.data(GHOSTING_PROMISE_KEY, promise)
+    $new.data(GHOSTING_PROMISE_KEY, promise)
+    
     promise.then ->
+      $old.removeData(GHOSTING_PROMISE_KEY)
+      $new.removeData(GHOSTING_PROMISE_KEY)
       $oldGhost.remove()
       $newGhost.remove()
       # Now that the transition is over we show $new again.
@@ -109,6 +117,25 @@ up.motion = (->
       # $new should take up space
       $old.css(display: 'none')
       newCssMemo()
+      
+  ###
+  Completes all animations and transitions for the given element
+  by jumping to the last animation frame instantly. All callbacks chained to
+  the original animation's promise will be called.
+  
+  Does nothing if the given element is not currently animating.
+  
+  @param {Element|jQuery|String} elementOrSelector
+  ###
+  finish = (elementOrSelector) ->
+    $(elementOrSelector).each ->
+      $element = $(this)
+      u.finishCssAnimation($element)
+      finishGhosting($element)
+  
+  finishGhosting = ($element) ->
+    if existingGhosting = $element.data(GHOSTING_PROMISE_KEY)
+      existingGhosting.resolve()
       
   assertIsPromise = (object, messageParts) ->
     u.isPromise(object) or u.error(messageParts...)
@@ -147,6 +174,8 @@ up.motion = (->
       options = u.options(config)
       $old = $(source)
       $new = $(target)
+      finish($old)
+      finish($new)
       transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
       if transition
         withGhosts $old, $new, ($oldGhost, $newGhost) ->
@@ -329,6 +358,7 @@ up.motion = (->
     
   morph: morph
   animate: animate
+  finish: finish
   transition: transition
   animation: animation
   defaults: defaults
