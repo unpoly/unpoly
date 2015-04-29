@@ -317,6 +317,12 @@ up.util = (->
       
   ###*
   Animates the given element's CSS properties using CSS transitions.
+  
+  If the element is already being animated, the previous animation
+  will instantly jump to its last frame before the new animation begins. 
+  
+  To improve performance, the element will be forced into compositing for
+  the duration of the animation.
 
   @method up.util.cssAnimate
   @param {Element|jQuery|String} elementOrSelector
@@ -343,6 +349,8 @@ up.util = (->
         delay: 0, 
         easing: 'ease'
       )
+      # We don't finish an existing animation here, since
+      # the public API `up.motion.animate` already does this.
       deferred = $.Deferred()
       transition =
         'transition-property': keys(lastFrame).join(', ')
@@ -354,12 +362,34 @@ up.util = (->
       $element.css(lastFrame)
       deferred.then(withoutCompositing)
       deferred.then(withoutTransition)
-      setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
-      deferred.promise()
+      $element.data(ANIMATION_PROMISE_KEY, deferred)
+      deferred.then(-> $element.removeData(ANIMATION_PROMISE_KEY))
+      endTimeout = setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
+      deferred.then(-> clearTimeout(endTimeout)) # clean up in case we're canceled
+      # Return the whole deferred and not just return a thenable.
+      # Other code will need the possibility to cancel the animation
+      # by resolving the deferred.
+      deferred
     else
       $element.css(lastFrame)
       resolvedPromise()
-    
+      
+  ANIMATION_PROMISE_KEY = 'up-animation-promise'
+
+  ###
+  Completes the animation for  the given element by jumping
+  to the last frame instantly. All callbacks chained to
+  the original animation's promise will be called.
+  
+  Does nothing if the given element is not currently animating.
+  
+  @param {Element|jQuery|String} elementOrSelector
+  ###
+  finishCssAnimate = (elementOrSelector) ->
+    $(elementOrSelector).each ->
+      if existingAnimation = $(this).data(ANIMATION_PROMISE_KEY)
+        existingAnimation.resolve()
+
   measure = ($element, options) ->
     coordinates = if options?.relative
       $element.position()
@@ -489,6 +519,7 @@ up.util = (->
   measure: measure
   temporaryCss: temporaryCss
   cssAnimate: cssAnimate
+  finishCssAnimate: finishCssAnimate
   forceCompositing: forceCompositing
   prependGhost: prependGhost
   escapePressed: escapePressed

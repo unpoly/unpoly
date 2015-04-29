@@ -113,8 +113,15 @@ up.flow = (->
 
     # TODO: extract title from HTTP header
     options.title ||= htmlElement.querySelector("title")?.textContent 
-
+    
     for step in implantSteps(selector, options)
+
+      # Before we select a replacement target, ensure that all transitions
+      # and animations have been run. Finishing a transition usually removes
+      # the element that is being morphed, so it will affect further selections
+      # using the same selector.
+      up.motion.finish(step.selector)
+
       $old =
         # always prefer to replace content in popups or modals
         u.presence($(".up-popup " + step.selector)) || 
