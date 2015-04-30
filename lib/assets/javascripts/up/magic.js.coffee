@@ -126,6 +126,22 @@ up.magic = (->
   @method up.magic.data
   @param {String|Element|jQuery} elementOrSelector
   ###
+
+  ###
+  Stores a JSON-string with the element.
+
+  If an element annotated with [`up-data`] is inserted into the DOM,
+  Up will parse the JSON and pass the resulting object to any matching
+  [`up.awaken`](/up.magic#up.magic.awaken) handlers.
+
+  Similarly, when an event is triggered on an element annotated with
+  [`up-data`], the parsed object will be passed to any matching
+  [`up.on`](/up.magic#up.on) handlers.
+
+  @ujs
+  @method [up-data]
+  @param {JSON} [up-data]
+  ###
   data = (elementOrSelector) ->
     $element = $(elementOrSelector)
     json = $element.attr('up-data')
