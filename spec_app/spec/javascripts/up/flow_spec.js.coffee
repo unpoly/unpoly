@@ -14,18 +14,20 @@ describe 'up.flow', ->
           affix('.before').text('old-before')
           affix('.middle').text('old-middle')
           affix('.after').text('old-after')
-    
+
+          @responseText =
+            """
+            <div class="before">new-before</div>
+            <div class="middle">new-middle</div>
+            <div class="after">new-after</div>
+            """
+
           @respond = ->
             jasmine.Ajax.requests.mostRecent().respondWith
               status: 200
               contentType: 'text/html'
-              responseText:
-                """
-                <div class="before">new-before</div>
-                <div class="middle">new-middle</div>
-                <div class="after">new-after</div>
-                """      
-        
+              responseText: @responseText
+
         it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
           @request = up.replace('.middle', '/path')
           @respond()
@@ -57,7 +59,34 @@ describe 'up.flow', ->
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('new-after')
             done()
-            
+
+        it 'executes those script-tags in the response that get inserted into the DOM', (done) ->
+          window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
+
+          @responseText =
+            """
+            <div class="before">
+              new-before
+              <script type="text/javascript">
+                window.scriptTagExecuted('before')
+              </script>
+            </div>
+            <div class="middle">
+              new-middle
+              <script type="text/javascript">
+                window.scriptTagExecuted('middle')
+              </script>
+            </div>
+            """
+
+          @request = up.replace('.middle', '/path')
+          @respond()
+
+          @request.then ->
+            expect(window.scriptTagExecuted).not.toHaveBeenCalledWith('before')
+            expect(window.scriptTagExecuted).toHaveBeenCalledWith('middle')
+            done()
+
       else
         
         it 'makes a full page load', ->
