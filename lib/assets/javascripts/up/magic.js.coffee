@@ -35,8 +35,11 @@ up.magic = (->
     A space-separated list of event names to bind.
   @param {String} selector
     The selector an on which the event must be triggered.
-  @param {Function(event, $element)} behavior
+  @param {Function(event, $element, data)} behavior
     The handler that should be called.
+    The function takes the affected element as the first argument (as a jQuery object).
+    If the element has an `up-data` attribute, its value is parsed as JSON
+    and passed as a second argument.
   ###
   liveDescriptions = []
   defaultLiveDescriptions = null
@@ -47,7 +50,8 @@ up.magic = (->
     description = [
       events,
       selector,
-      (event) -> behavior.apply(this, [event, $(this)])
+      (event) ->
+        behavior.apply(this, [event, $(this), data(this)])
     ]
     liveDescriptions.push(description)
     $(document).on(description...)
@@ -63,9 +67,11 @@ up.magic = (->
     If set to `true` and a fragment insertion contains multiple
     elements matching the selector, `awakener` is only called once
     with a jQuery collection containing all matching elements. 
-  @param {Function($element)} awakener
+  @param {Function($element, data)} awakener
     The function to call when a matching element is inserted.
     The function takes the new element as the first argument (as a jQuery object).
+    If the element has an `up-data` attribute, its value is parsed as JSON
+    and passed as a second argument.
 
     The function may return another function that destroys the awakened
     object when it is removed from the DOM, by clearing global state such as
@@ -85,10 +91,10 @@ up.magic = (->
       batch: options.batch
   
   applyAwakener = (awakener, $jqueryElement, nativeElement) ->
-    destroyer = awakener.callback.apply(nativeElement, [$jqueryElement])
+    destroyer = awakener.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
     if u.isFunction(destroyer)
       $jqueryElement.addClass(DESTROYABLE_CLASS)
-      $jqueryElement.data(DESTROYER_KEY, destroyer)    
+      $jqueryElement.data(DESTROYER_KEY, destroyer)
 
   compile = ($fragment) ->
     console.log("Compiling fragment", $fragment)
@@ -106,7 +112,28 @@ up.magic = (->
       $element = $(this)
       destroyer = $element.data(DESTROYER_KEY)
       destroyer()
-      
+
+  ###
+  Checks if the given element has an `up-data` attribute.
+  If yes, parses the attribute value as JSON and returns the parsed object.
+
+  Returns an empty object if the element has no `up-data` attribute.
+
+  The API of this method is likely to change in the future, so
+  we can support getting or setting individual keys.
+
+  @protected
+  @method up.magic.data
+  @param {String|Element|jQuery} elementOrSelector
+  ###
+  data = (elementOrSelector) ->
+    $element = $(elementOrSelector)
+    json = $element.attr('up-data')
+    if u.isString(json) && u.trim(json) != ''
+      JSON.parse(json)
+    else
+      {}
+
   ###*
   Makes a snapshot of the currently registered event listeners,
   to later be restored through [`up.bus.reset`](/up.bus#up.bus.reset).
@@ -165,6 +192,7 @@ up.magic = (->
   on: live
   ready: ready
   onEscape: onEscape
+  data: data
 
 )()
 
