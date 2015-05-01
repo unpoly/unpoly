@@ -76,6 +76,14 @@ up.browser = (->
   canInputEvent = memoize ->
     'oninput' of document.createElement('input')
     
+  ensureRecentJquery = ->
+    version = $.fn.jquery
+    parts = version.split('.')
+    major = parseInt(parts[0])
+    minor = parseInt(parts[1])
+    compatible = major >= 2 || (major == 1 && minor >= 9)
+    compatible or u.error("jQuery %o found, but Up.js requires 1.9+", version)
+    
   isSupported = memoize ->
     # This is the most concise way to exclude IE8 and lower
     # while keeping all relevant desktop and mobile browsers.
@@ -88,6 +96,7 @@ up.browser = (->
   canCssAnimation: canCssAnimation
   canInputEvent: canInputEvent
   isSupported: isSupported
+  ensureRecentJquery: ensureRecentJquery
       
 )()
 

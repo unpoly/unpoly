@@ -15,8 +15,10 @@
 #= require up/marker
 #= require_self
 
-if up.browser.isSupported()
+up.browser.ensureRecentJquery()
 
+if up.browser.isSupported()
+  
   up.browser.ensureConsoleExists()
 
   up.bus.emit('framework:ready')
