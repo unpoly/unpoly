@@ -189,7 +189,15 @@ up.form = (->
     clearTimer = ->
       clearTimeout(callbackTimer)
 
-    changeEvents = if up.browser.canInputEvent() then 'input' else 'keypress paste cut change click propertychange'
+    changeEvents = if up.browser.canInputEvent()
+      # Actually we only need `input`, but we want to notice
+      # if another script manually triggers `change` on the element.
+      'input change'
+    else
+      # Actually we won't ever get `input` from the user in this browser,
+      # but we want to notice if another script  manually triggers `input`
+      # on the element.
+      'input change keypress paste cut click propertychange'
     $field.on changeEvents, check
 
     check()
