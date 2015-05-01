@@ -92,7 +92,7 @@ up.util = (->
     args = toArray(args)
     message = args.shift()
     message = "[UP] #{message}"
-    placeHolderCount = message.match(CONSOLE_PLACEHOLDERS).length
+    placeHolderCount = message.match(CONSOLE_PLACEHOLDERS)?.length || 0
     if isFunction(last(args)) && placeHolderCount < args.length
       group = args.pop()
     value = console.debug(message, args...)
@@ -337,8 +337,11 @@ up.util = (->
     
   temporaryCss = ($element, css, block) ->
     oldCss = $element.css(keys(css))
+#    debug("Stored old CSS", oldCss)
     $element.css(css)
-    memo = -> $element.css(oldCss)
+    memo = ->
+#      debug("Restoring CSS %o on %o", oldCss, $element)
+      $element.css(oldCss)
     if block
       block()
       memo()
