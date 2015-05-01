@@ -54,7 +54,7 @@ up.popup = (->
         left: linkBox.left
         bottom: linkBox.top
       else
-        u.error("Unknown origin", origin)
+        u.error("Unknown origin %o", origin)
     $popup.attr('up-origin', origin)
     $popup.css(css)
     ensureInViewport($popup)
@@ -116,7 +116,7 @@ up.popup = (->
   ###
   open = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
-
+    
     options = u.options(options)
     url = u.option($link.attr('href'))
     selector = u.option(options.target, $link.attr('up-popup'), 'body')
@@ -127,8 +127,6 @@ up.popup = (->
 
     close()
     $popup = createHiddenPopup($link, selector, sticky)
-    
-#    console.log("before replace", $link, $popup)
     
     up.replace(selector, url,
       history: history

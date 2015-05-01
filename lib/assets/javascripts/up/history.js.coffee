@@ -43,16 +43,15 @@ up.history = (->
       method += "State" # resulting in either pushState or replaceState
       window.history[method]({ fromUp: true }, '', url)
     else
-      u.error("This browser doesn't support history.pushState")
+      u.error "This browser doesn't support history.pushState"
 
   pop = (event) ->
     state = event.originalEvent.state
-    console.log "popping state", state
-    console.log "current href", up.browser.url()
     if state?.fromUp
+      u.debug "Restoring state %o (now on #{up.browser.url()})", state
       up.visit up.browser.url(), historyMethod: 'replace'
     else
-      console.log "strange state", state
+      u.debug 'Discarding unknown state %o', state
 
   # Defeat an unnecessary popstate that some browsers trigger on pageload (Chrome?).
   # We should check in 2016 if we can remove this.

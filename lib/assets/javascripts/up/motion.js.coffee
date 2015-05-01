@@ -82,10 +82,10 @@ up.motion = (->
     else if u.isHash(animation)
       u.cssAnimate($element, animation, options)
     else
-      u.error("Unknown animation type", animation)
+      u.error("Unknown animation type %o", animation)
       
   findAnimation = (name) ->
-    animations[name] or u.error("Unknown animation", animation)
+    animations[name] or u.error("Unknown animation %o", animation)
     
   GHOSTING_PROMISE_KEY = 'up-ghosting-promise'
 
@@ -134,14 +134,14 @@ up.motion = (->
   
   finishGhosting = ($element) ->
     if existingGhosting = $element.data(GHOSTING_PROMISE_KEY)
-      console.log("EXISTING", existingGhosting)
+      u.debug('Canceling existing ghosting on %o', $element)
       existingGhosting.resolve?()
       
   assertIsDeferred = (object, origin) ->
     if u.isDeferred(object)
       object
     else
-      u.error("Did not return a promise with .then and .resolve methods: ", origin)
+      u.error("Did not return a promise with .then and .resolve methods: %o", origin)
 
   ###*
   Performs a transition between two elements.
@@ -194,7 +194,7 @@ up.motion = (->
           )
         morph($old, $new, transition, options)
       else
-        u.error("Unknown transition: #{transitionOrName}")
+        u.error("Unknown transition %o", transitionOrName)
     else
       # Skip ghosting and all the other stuff that can go wrong
       # in ancient browsers

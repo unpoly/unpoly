@@ -24,6 +24,8 @@ We need to work on this page:
 @class up.bus
 ###
 up.bus = (->
+  
+  u = up.util
 
   callbacksByEvent = {}
   defaultCallbacksByEvent = {}
@@ -41,7 +43,7 @@ up.bus = (->
   snapshot = ->
     defaultCallbacksByEvent = {}
     for event, callbacks of callbacksByEvent
-      defaultCallbacksByEvent[event] = up.util.copy(callbacks)
+      defaultCallbacksByEvent[event] = u.copy(callbacks)
   
   ###*
   Resets the list of registered event listeners to the
@@ -51,7 +53,7 @@ up.bus = (->
   @method up.bus.reset
   ###
   reset = ->
-    callbacksByEvent = up.util.copy(defaultCallbacksByEvent)
+    callbacksByEvent = u.copy(defaultCallbacksByEvent)
 
   ###*
   Registers an event handler to be called when the given
@@ -78,9 +80,9 @@ up.bus = (->
     The arguments that describe the event. 
   ###
   emit = (eventName, args...) ->
-    console.log("bus emitting", eventName, args)
+    u.debug("Emitting event %o with args %o", eventName, args)
     callbacks = callbacksFor(eventName)
-    up.util.each(callbacks, (callback) ->
+    u.each(callbacks, (callback) ->
       callback(args...)
     )
 

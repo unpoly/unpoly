@@ -87,15 +87,51 @@ up.util = (->
     element = document.createElement(tagName)
     element.innerHTML = html if isPresent(html)
     element
+    
+  debug = (args...) ->
+    args = toArray(args)
+    message = args.shift()
+    message = "[UP] #{message}"
+    placeHolderCount = message.match(CONSOLE_PLACEHOLDERS).length
+    if isFunction(last(args)) && placeHolderCount < args.length
+      group = args.pop()
+    value = console.debug(message, args...)
+    if group
+      console.groupCollapsed()
+      try
+        value = group()
+      finally
+        console.groupEnd()
+    value
 
   error = (args...) ->
-    console.log("[UP] Error", args...)
-    asString = if args.length == 1 && up.util.isString(args[0]) then args[0] else JSON.stringify(args)
-    alert asString
+    args[0] = "[UP] #{args[0]}"
+    console.error(args...)
+    asString = stringifyConsoleArgs(args)
+    alert "#{asString}\n\nOpen the developer console for details."
     throw asString
+    
+  CONSOLE_PLACEHOLDERS = /\%[odisf]/g
+    
+  stringifyConsoleArgs = (args) ->
+    message = args[0]
+    i = 0
+    maxLength = 30
+    message.replace CONSOLE_PLACEHOLDERS, ->
+      i += 1
+      arg = args[i]
+      argType = (typeof arg)
+      if argType == 'string'
+        arg = arg.replace(/\s+/g, ' ')
+        arg = "#{arg.substr(0, maxLength)}…" if arg.length > maxLength
+        "\"#{arg}\""
+      else if argType == 'number'
+        arg.toString()
+      else
+        "(#{argType})"
 
   createSelectorFromElement = ($element) ->
-    console.log("Creating selector from element", $element)
+    debug("Creating selector from element %o", $element)
     classes = if classString = $element.attr("class") then classString.split(" ") else []
     id = $element.attr("id")
     selector = $element.prop("tagName").toLowerCase()
@@ -216,6 +252,9 @@ up.util = (->
   # https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
   isArray = Array.isArray || 
       (object) -> Object.prototype.toString.call(object) == '[object Array]'
+        
+  toArray = (object) ->
+    Array.prototype.slice.call(object)
 
   copy = (object)  ->
     if isArray(object)
@@ -507,6 +546,7 @@ up.util = (->
   options: options
   option: option
   error: error
+  debug: debug
   each: each
   detect: detect
   select: select
@@ -540,6 +580,7 @@ up.util = (->
   findWithSelf: findWithSelf
   contains: contains
   isArray: isArray
+  toArray: toArray
   castsToTrue: castsToTrue
   castsToFalse: castsToFalse
   locationFromXhr: locationFromXhr

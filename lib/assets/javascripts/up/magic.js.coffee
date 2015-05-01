@@ -97,15 +97,15 @@ up.magic = (->
       $jqueryElement.data(DESTROYER_KEY, destroyer)
 
   compile = ($fragment) ->
-    console.log("Compiling fragment", $fragment)
-    for awakener in awakeners
-#      console.log("running", awakener.selector, "on", $fragment)
-      $matches = u.findWithSelf($fragment, awakener.selector)
-      if $matches.length
-        if awakener.batch
-          applyAwakener(awakener, $matches, $matches.get())
-        else
-          $matches.each -> applyAwakener(awakener, $(this), this)
+    u.debug "Compiling fragment %o", $fragment, ->
+      for awakener in awakeners
+        u.debug "Applying awakener %o on %o", awakener.selector, $fragment, ->
+          $matches = u.findWithSelf($fragment, awakener.selector)
+          if $matches.length
+            if awakener.batch
+              applyAwakener(awakener, $matches, $matches.get())
+            else
+              $matches.each -> applyAwakener(awakener, $(this), this)
 
   destroy = ($fragment) ->
     u.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->

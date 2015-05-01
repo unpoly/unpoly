@@ -146,7 +146,7 @@ up.form = (->
     else if options.change
       callback = options.change
     else
-      u.error('observe: No change callback given')
+      u.error('up.observe: No change callback given')
 
     callbackPromise = u.resolvedPromise()
 

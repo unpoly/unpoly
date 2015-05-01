@@ -177,8 +177,6 @@ up.modal = (->
 
   up.bus.on('fragment:ready', ($fragment) ->
     unless $fragment.closest('.up-modal').length
-      console.log('fragment inserted', $fragment, $fragment.closest('.up-modal'))
-      # alert("autoclosing due to inserted fragment")
       autoclose()
   )
 

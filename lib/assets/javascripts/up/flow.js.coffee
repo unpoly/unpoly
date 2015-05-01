@@ -127,12 +127,12 @@ up.flow = (->
         u.presence($(".up-popup " + step.selector)) || 
         u.presence($(".up-modal " + step.selector)) || 
         u.presence($(step.selector)) ||
-        u.error("Could not find selector (#{step.selector}) in current body HTML")
+        u.error('Could not find selector %o in current body HTML', step.selector)
       if fragment = htmlElement.querySelector(step.selector)
         $new = $(fragment)
         swapElements $old, $new, step.pseudoClass, step.transition, options
       else
-        u.error("Could not find selector (#{step.selector}) in response (#{html})")
+        u.error("Could not find selector %o in response %o", step.selector, html)
         
   elementsInserted = ($new, options) ->
     options.insert?($new)
@@ -171,7 +171,7 @@ up.flow = (->
         $new.insertAfter($old)
         elementsInserted($new, options)
         if $old.is('body') && transition != 'none'
-          u.error('Cannot apply transitions to body-elements', transition)
+          u.error('Cannot apply transitions to body-elements (%o)', transition)
         up.morph($old, $new, transition)
 
   implantSteps = (selector, options) ->

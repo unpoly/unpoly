@@ -31,7 +31,7 @@ up.tooltip = (->
         left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
         top: linkBox.top + linkBox.height
       else
-        u.error("Unknown origin", origin)
+        u.error("Unknown origin %o", origin)
     $tooltip.attr('up-origin', origin)
     $tooltip.css(css)
 

@@ -91,7 +91,7 @@ up.link = (->
       up.visit('/users')
   ###
   visit = (url, options) ->
-    console.log("up.visit", url)
+    u.debug "Visiting #{url}"
     # options = util.options(options, )
     up.replace('body', url, options)
 

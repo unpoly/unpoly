@@ -49,7 +49,13 @@ up.browser = (->
     
   ensureConsoleExists = ->
     window.console ||= {}
-    window.console.log ||= () ->
+    noop = () ->
+    window.console.log ||= noop
+    window.console.error ||= noop
+    window.console.debug ||= noop
+    window.console.group ||= noop
+    window.console.groupCollapsed ||= noop
+    window.console.groupEnd ||= noop
       
   memoize = (func) ->
     cache = undefined
