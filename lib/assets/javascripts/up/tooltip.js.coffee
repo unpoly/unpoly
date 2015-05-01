@@ -51,7 +51,7 @@ up.tooltip = (->
   ###
   open = (linkOrSelector, options = {}) ->
     $link = $(linkOrSelector)
-    html = u.option(options.html, $link.attr('up-tooltip'))
+    html = u.option(options.html, $link.attr('up-tooltip'), $link.attr('title'))
     origin = u.option(options.origin, $link.attr('up-origin'), 'top')
     animation = u.option(options.animation, $link.attr('up-animation'), 'fade-in')
     close()
@@ -78,6 +78,10 @@ up.tooltip = (->
   Displays a tooltip when hovering the mouse over this element:
 
       <a href="/decks" up-tooltip="Show all decks">Decks</a>
+  
+  You can also make an existing `title` attribute appear as a tooltip:
+  
+      <a href="/decks" title="Show all decks" up-tooltip>Decks</a>
 
   @method [up-tooltip]
   @ujs
