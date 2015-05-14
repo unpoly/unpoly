@@ -1,3 +1,4 @@
+
 ###*
 Utility functions
 =================
@@ -56,6 +57,16 @@ up.util = (->
     normalized += anchor.hash if options?.hash == true
     normalized += anchor.search unless options?.search == false
     normalized
+
+  ###
+  @method up.util.normalizeMethod
+  @protected
+  ###
+  normalizeMethod = (method) ->
+    if method
+      method.toUpperCase()
+    else
+      'GET'
 
   $createElementFromSelector = (selector) ->
     path = selector.split(/[ >]/)
@@ -493,7 +504,10 @@ up.util = (->
     String(object) == "false"
     
   locationFromXhr = (xhr) ->
-    xhr.getResponseHeader('X-Up-Current-Location')
+    xhr.getResponseHeader('X-Up-Location')
+    
+  methodFromXhr = (xhr) ->
+    xhr.getResponseHeader('X-Up-Method')
     
 #  willChangeHistory = (historyOption) ->
 #    isPresent(historyOption) && !castsToFalse(historyOption)
@@ -538,6 +552,7 @@ up.util = (->
   presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl
+  normalizeMethod: normalizeMethod
   createElementFromHtml: createElementFromHtml
   $createElementFromSelector: $createElementFromSelector
   createSelectorFromElement: createSelectorFromElement
@@ -587,6 +602,7 @@ up.util = (->
   castsToTrue: castsToTrue
   castsToFalse: castsToFalse
   locationFromXhr: locationFromXhr
+  methodFromXhr: methodFromXhr
   clientSize: clientSize
   only: only
   trim: trim

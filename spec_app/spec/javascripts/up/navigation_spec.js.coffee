@@ -19,7 +19,7 @@ describe 'up.navigation', ->
         jasmine.Ajax.requests.mostRecent().respondWith
           status: 200
           contentType: 'text/html'
-          responseHeaders: { 'X-Up-Current-Location': '/foo/' }
+          responseHeaders: { 'X-Up-Location': '/foo/' }
           responseText: '<div class="main">new-text</div>'
         expect($link).toHaveClass('up-current')
       
@@ -31,7 +31,7 @@ describe 'up.navigation', ->
         jasmine.Ajax.requests.mostRecent().respondWith
           status: 200
           contentType: 'text/html'
-          responseHeaders: { 'X-Up-Current-Location': '/foo' }
+          responseHeaders: { 'X-Up-Location': '/foo' }
           responseText: '<div class="main">new-text</div>'
         expect($link).toHaveClass('up-current')
         

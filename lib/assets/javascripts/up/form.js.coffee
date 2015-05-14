@@ -13,7 +13,7 @@ We need to work on this page:
 - Explain how to display form errors
 - Explain that the server needs to send 2xx or 5xx status codes so
   Up.js can decide whether the form submission was successful
-- Explain that the server needs to send an `X-Up-Current-Location` header
+- Explain that the server needs to send `X-Up-Location` and `X-Up-Method` headers
   if an successful form submission resulted in a redirect
 - Examples
   

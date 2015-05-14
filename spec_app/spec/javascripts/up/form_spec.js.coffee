@@ -72,12 +72,12 @@ describe 'up.form', ->
             expect($('body')).not.toHaveText('text-after')
             done()
         
-        it 'respects a X-Up-Current-Location header that the server sends in case of a redirect', (done) ->
+        it 'respects a X-Up-Location header that the server sends in case of a redirect', (done) ->
     
           @request.respondWith
             status: 200
             contentType: 'text/html'
-            responseHeaders: { 'X-Up-Current-Location': '/other/path' }
+            responseHeaders: { 'X-Up-Location': '/other/path' }
             responseText:
               """
               <div class="response">

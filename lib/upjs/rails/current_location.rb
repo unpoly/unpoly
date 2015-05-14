@@ -9,7 +9,8 @@ module Upjs
       private
       
       def set_header_for_current_location
-        headers['X-Up-Current-Location'] = url_for({})
+        headers['X-Up-Location'] = request.original_url
+        headers['X-Up-Method'] = request.method
       end
 
       ActionController::Base.include(self)

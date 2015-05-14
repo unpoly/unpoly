@@ -60,28 +60,37 @@ up.flow = (->
       u.createSelectorFromElement($(selectorOrElement))
       
     if !up.browser.canPushState() && !u.castsToFalse(options.history)
-      up.browser.loadPage(url, u.only(options, 'method'))
+      if !options.preload
+        up.browser.loadPage(url, u.only(options, 'method'))
       return
+    
+    request =
+      url: url
+      method: options.method
+      selector: selector
       
-    u.ajax(
-      url: url, 
-      selector: selector,
-      u.only(options, 'method')
-    )
-    .done (html, textStatus, xhr) ->
+    promise = up.cache.ajax(request)
+    
+    promise.done (html, textStatus, xhr) ->
       # The server can send us the current path using a header value.
       # This way we know the actual URL if the server has redirected.
       if currentLocation = u.locationFromXhr(xhr)
+        u.debug('Location from server: %o', currentLocation)
+        newRequest =
+          url: currentLocation
+          method: u.methodFromXhr(xhr)
+          selector: selector
+        up.cache.alias(request, newRequest)
         url = currentLocation
-
       if u.isMissing(options.history) || u.castsToTrue(options.history)
         options.history = url
-  
       if u.isMissing(options.source) || u.castsToTrue(options.source)
         options.source = url
-        
-      implant(selector, html, options)
-    .fail(u.error)
+      implant(selector, html, options) unless options.preload
+
+    promise.fail(u.error)
+      
+    promise
 
   ###*
   Replaces the given selector with the same CSS selector from the given HTML string.

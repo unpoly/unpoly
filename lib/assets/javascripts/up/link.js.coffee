@@ -147,6 +147,15 @@ up.link = (->
     event.preventDefault()
     follow($link)
 
+  ###
+  @method up.link.childClicked
+  @private
+  ###
+  childClicked = (event, $link) ->
+    $target = $(event.target)
+    $targetLink = $target.closest('a, [up-follow]')
+    $targetLink.length && $link.find($targetLink).length
+    
   ###*
   If applied on a link, Follows this link via AJAX and replaces the
   current `<body>` element with the response's `<body>` element
@@ -169,13 +178,7 @@ up.link = (->
   @param {String} [up-follow]
   ###
   up.on 'click', '[up-follow]', (event, $element) ->
-    
-    childLinkClicked = ->
-      $target = $(event.target)
-      $targetLink = $target.closest('a, [up-follow]')
-      $targetLink.length && $element.find($targetLink).length
-      
-    unless childLinkClicked()
+    unless childClicked(event, $element)
       event.preventDefault()
       follow(resolve($element))
 
@@ -183,6 +186,7 @@ up.link = (->
   follow: follow
   resolve: resolve
   resolveUrl: resolveUrl
+  childClicked: childClicked
 
 )()
 
