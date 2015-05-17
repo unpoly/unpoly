@@ -123,7 +123,8 @@ up.link = (->
 
   resolve = (element) ->
     $element = $(element)
-    if $element.is('a') || u.presentAttr($element, 'up-follow')
+    followAttr = $element.attr('up-follow')
+    if $element.is('a') || (u.isPresent(followAttr) && !u.castsToTrue(followAttr))
       $element
     else
       $element.find('a:first')
@@ -134,18 +135,38 @@ up.link = (->
       
   ###*
   Follows this link via AJAX and replaces a CSS selector in the current page
-  with corresponding elements from a new page fetched from the server.
+  with corresponding elements from a new page fetched from the server:
 
       <a href="/users" up-target=".main">User list</a>
+  
+  By also adding an `up-instant` attribute, the page will be fetched
+  on `mousedown` instead of `click`, making the interaction even faster:
+  
+      <a href="/users" up-target=".main" up-instant>User list</a>
+  
+  Note that using `[up-instant]` will prevent a user from canceling a link
+  click by moving the mouse away from the interaction area. However, for
+  navigation actions this isn't needed. E.g. popular operation
+  systems switch tabs on `mousedown`.
 
   @method a[up-target]
   @ujs
   @param {String} up-target
     The CSS selector to replace
+  @param up-instant
+    If set, fetches the element on `mousedown` instead of `click`.
+    This makes the interaction faster.
   ###
   up.on 'click', 'a[up-target]', (event, $link) ->
     event.preventDefault()
-    follow($link)
+    # Check if the event was already triggered by `mousedown`
+    unless $link.is('[up-instant]')
+      follow($link)
+    
+  up.on 'mousedown', 'a[up-target][up-instant]', (event, $link) ->
+    if event.which is 1
+      event.preventDefault()
+      follow($link)
 
   ###
   @method up.link.childClicked
@@ -176,12 +197,22 @@ up.link = (->
   @method [up-follow]
   @ujs
   @param {String} [up-follow]
+  @param up-instant
+    If set, fetches the element on `mousedown` instead of `click`.
+    This makes the interaction faster.
   ###
   up.on 'click', '[up-follow]', (event, $element) ->
     unless childClicked(event, $element)
       event.preventDefault()
+      # Check if the event was already triggered by `mousedown`
+      unless $element.is('[up-instant]')
+        follow(resolve($element))
+        
+  up.on 'mousedown', '[up-follow][up-instant]', (event, $element) ->
+    if !childClicked(event, $element) && event.which == 1
+      event.preventDefault()
       follow(resolve($element))
-
+    
   visit: visit
   follow: follow
   resolve: resolve

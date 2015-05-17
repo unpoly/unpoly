@@ -9,7 +9,7 @@ Document me.
 up.cache = (->
 
   DELAY = 50
-  SIZE = 40
+  SIZE = 70
   DURATION = 1000 * 60 * 5
   
   cache = {}
@@ -92,9 +92,11 @@ up.cache = (->
         undefined
       else
         u.debug("Cache hit for %o (%o)", request.url, request)
+#        $('body').css('background-color': 'green')
         promise
     else
       u.debug("Cache miss for %o (%o)", request.url, request)
+#      $('body').css('background-color': 'yellow')
       undefined
       
   set = (request, promise) ->
