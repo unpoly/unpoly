@@ -119,7 +119,11 @@ up.util = (->
     args[0] = "[UP] #{args[0]}"
     console.error(args...)
     asString = stringifyConsoleArgs(args)
-    alert "#{asString}\n\nOpen the developer console for details."
+    # $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body')
+    $error = $('body')
+    $error.addClass('up-error')
+    $error.text(asString)
+    # alert "#{asString}\n\nOpen the developer console for details."
     throw asString
     
   CONSOLE_PLACEHOLDERS = /\%[odisf]/g

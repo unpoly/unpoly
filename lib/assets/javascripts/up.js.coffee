@@ -6,7 +6,7 @@
 #= require up/magic
 #= require up/history
 #= require up/motion
-#= require up/cache
+#= require up/proxy
 #= require up/link
 #= require up/form
 #= require up/popup

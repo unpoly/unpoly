@@ -39,12 +39,12 @@ up.modal = (->
   
   ###*
   @method up.modal.defaults
-  @param {Number} options.width
-  @param {Number} options.height
-  @param {String|Function(config)} options.template
-  @param {String} options.closeLabel
-  @param {String} options.openAnimation
-  @param {String} options.closeAnimation
+  @param {Number} [options.width]
+  @param {Number} [options.height]
+  @param {String|Function(config)} [options.template]
+  @param {String} [options.closeLabel]
+  @param {String} [options.openAnimation]
+  @param {String} [options.closeAnimation]
   ###
   defaults = (options) ->
     u.extend(config, options)

@@ -1,16 +1,27 @@
 ###*
 Caching and preloading
 ======================
-  
+
 Document me.
 
-@class up.cache  
+@class up.proxy  
 ###
-up.cache = (->
+up.proxy = (->
 
-  DELAY = 50
-  SIZE = 70
-  DURATION = 1000 * 60 * 5
+  config =
+    preloadDelay: 50
+    cacheSize: 70
+    cacheExpiry: 1000 * 60 * 5
+
+  ###*
+  @method up.proxy.defaults
+  @param {Number} [preloadDelay]
+  @param {Number} [cacheSize]
+  @param {Number} [cacheExpiry]
+    The number of milliseconds until a cache entry expires.
+  ###
+  defaults = (options) ->
+    u.extend(config, options)
   
   cache = {}
   
@@ -28,7 +39,7 @@ up.cache = (->
     
   trim = ->
     keys = u.keys(cache)
-    if keys.length > SIZE
+    if keys.length > config.cacheSize
       oldestKey = null
       oldestTimestamp = null
       u.each keys, (key) ->
@@ -44,7 +55,6 @@ up.cache = (->
     
   normalizeRequest = (request) ->
     debugger unless u.isHash(request)
-    u.debug("normalizing request %o", request)
     unless request._requestNormalized
       request.method = u.normalizeMethod(request.method)
       request.url = u.normalizeUrl(request.url) if request.url
@@ -53,10 +63,16 @@ up.cache = (->
     request
     
   alias = (oldRequest, newRequest) ->
-    console.log("Aliasing %o to %o", oldRequest, newRequest)
+    u.debug("Aliasing %o to %o", oldRequest, newRequest)
     if promise = get(oldRequest)
       set(newRequest, promise)
-    
+  
+  ###
+  @method up.proxy.ajax
+  @param {String} options.url
+  @param {String} [options.method='GET']
+  @param {String} [options.selector]
+  ###
   ajax = (request) ->
     if !isIdempotent(request)
       clear()
@@ -78,7 +94,7 @@ up.cache = (->
     
   isFresh = (promise) ->
     timeSinceTouch = timestamp() - promise.timestamp
-    timeSinceTouch < DURATION
+    timeSinceTouch < config.cacheExpiry
     
   touch = (promise) ->
     promise.timestamp = timestamp()
@@ -114,13 +130,15 @@ up.cache = (->
     cache = {}
   
   checkPreload = ($link) ->
+    delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay 
     unless $link.is($waitingLink)
       $waitingLink = $link
       cancelDelay()
-      startDelay(-> preload($link))
+      curriedPreload = -> preload($link)
+      startDelay(curriedPreload, delay)
       
-  startDelay = (block) ->
-    delayTimer = setTimeout(block, DELAY)
+  startDelay = (block, delay) ->
+    delayTimer = setTimeout(block, delay)
     
   cancelDelay = ->
     clearTimeout(delayTimer)
@@ -139,6 +157,10 @@ up.cache = (->
 
   up.bus.on 'framework:reset', reset
 
+  ###
+  @method [up-preload]
+  @ujs
+  ###
   up.on 'mouseover mousedown touchstart', '[up-preload]', (event, $element) ->
     # Don't do anything if we are hovering over the child
     # of a link. The actual link will receive the event
@@ -152,5 +174,6 @@ up.cache = (->
   set: set
   alias: alias
   clear: clear
+  defaults: defaults
   
 )()

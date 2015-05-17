@@ -69,7 +69,7 @@ up.flow = (->
       method: options.method
       selector: selector
       
-    promise = up.cache.ajax(request)
+    promise = up.proxy.ajax(request)
     
     promise.done (html, textStatus, xhr) ->
       # The server can send us the current path using a header value.
@@ -80,7 +80,7 @@ up.flow = (->
           url: currentLocation
           method: u.methodFromXhr(xhr)
           selector: selector
-        up.cache.alias(request, newRequest)
+        up.proxy.alias(request, newRequest)
         url = currentLocation
       if u.isMissing(options.history) || u.castsToTrue(options.history)
         options.history = url
