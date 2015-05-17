@@ -537,6 +537,27 @@ up.util = (->
       each deferreds, (deferred) -> deferred.resolve?()
     joined
 
+  stringSet = (array) ->
+    set = {}
+    
+    includes = (string) ->
+      set[key(string)]
+      
+    includesAny = (strings) ->
+      detect strings, includes
+      
+    put = (string) ->
+      set[key(string)] = true
+      
+    key = (string) ->
+      "_#{string}"
+      
+    put(string) for string in array
+    
+    put: put
+    includes: includes
+    includesAny: includesAny
+
 #  memoArray = ->
 #    array = []
 #    defaults = []
@@ -614,5 +635,6 @@ up.util = (->
   resolvedPromise: resolvedPromise
   resolvedDeferred: resolvedDeferred
   resolvableWhen: resolvableWhen
+  stringSet: stringSet
 
 )()

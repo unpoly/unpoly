@@ -29,7 +29,7 @@ up.navigation = (->
 
   CLASS_ACTIVE = 'up-active'
   CLASS_CURRENT = 'up-current'
-  SELECTOR_SECTION = 'a[href], a[up-target], [up-follow], [up-modal], [up-popup]'
+  SELECTOR_SECTION = 'a[href], a[up-target], [up-follow], [up-modal], [up-popup], [up-source]'
   SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
   
   normalizeUrl = (url) ->
@@ -38,19 +38,29 @@ up.navigation = (->
         search: false
         stripTrailingSlash: true
       )
+    
+  sectionUrls = ($section) ->
+    urls = []
+    if $link = up.link.resolve($section)
+      for attr in ['href', 'up-follow', 'up-source']
+        if url = u.presentAttr($link, attr)
+          url = normalizeUrl(url)
+          urls.push(url)
+    urls
 
   locationChanged = ->
-    windowLocation = normalizeUrl(up.browser.url())
-    modalLocation = normalizeUrl(up.modal.source())
-    popupLocation = normalizeUrl(up.popup.source())
+    currentUrls = u.stringSet [
+      normalizeUrl(up.browser.url()),
+      normalizeUrl(up.modal.source()),
+      normalizeUrl(up.popup.source())
+    ]
     
     u.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       # if $section is marked up with up-follow,
       # the actual link might be a child element.
-      url = up.link.resolveUrl($section)
-      url = normalizeUrl(url)
-      if url == windowLocation || url == modalLocation || url == popupLocation
+      urls = sectionUrls($section)
+      if currentUrls.includesAny(urls)
         $section.addClass(CLASS_CURRENT)
       else
         $section.removeClass(CLASS_CURRENT)

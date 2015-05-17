@@ -128,10 +128,6 @@ up.link = (->
       $element
     else
       $element.find('a:first')
-
-  resolveUrl = (element) ->
-    if $link = resolve(element)
-      u.option($link.attr('href'), $link.attr('up-follow'))
       
   ###*
   Follows this link via AJAX and replaces a CSS selector in the current page
@@ -216,7 +212,6 @@ up.link = (->
   visit: visit
   follow: follow
   resolve: resolve
-  resolveUrl: resolveUrl
   childClicked: childClicked
 
 )()
