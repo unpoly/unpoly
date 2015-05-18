@@ -91,21 +91,21 @@ up.magic = (->
       batch: options.batch
   
   applyAwakener = (awakener, $jqueryElement, nativeElement) ->
+    u.debug "Applying awakener %o on %o", awakener.selector, nativeElement
     destroyer = awakener.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
     if u.isFunction(destroyer)
       $jqueryElement.addClass(DESTROYABLE_CLASS)
       $jqueryElement.data(DESTROYER_KEY, destroyer)
 
   compile = ($fragment) ->
-    u.debug "Compiling fragment %o", $fragment, ->
-      for awakener in awakeners
-        u.debug "Applying awakener %o on %o", awakener.selector, $fragment, ->
-          $matches = u.findWithSelf($fragment, awakener.selector)
-          if $matches.length
-            if awakener.batch
-              applyAwakener(awakener, $matches, $matches.get())
-            else
-              $matches.each -> applyAwakener(awakener, $(this), this)
+    u.debug "Compiling fragment %o", $fragment
+    for awakener in awakeners
+      $matches = u.findWithSelf($fragment, awakener.selector)
+      if $matches.length
+        if awakener.batch
+          applyAwakener(awakener, $matches, $matches.get())
+        else
+          $matches.each -> applyAwakener(awakener, $(this), this)
 
   destroy = ($fragment) ->
     u.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
