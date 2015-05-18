@@ -51,6 +51,7 @@ up.browser = (->
     window.console ||= {}
     noop = () ->
     window.console.log ||= noop
+    window.console.info ||= noop
     window.console.error ||= noop
     window.console.debug ||= noop
     window.console.group ||= noop

@@ -123,8 +123,6 @@ up.flow = (->
     # TODO: extract title from HTTP header
     options.title ||= htmlElement.querySelector("title")?.textContent
     
-    console.log("got", htmlElement, options.title)
-    
     for step in implantSteps(selector, options)
 
       # Before we select a replacement target, ensure that all transitions
