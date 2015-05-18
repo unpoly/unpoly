@@ -178,8 +178,10 @@ up.motion = (->
       $new = $(target)
       finish($old)
       finish($new)
-      transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
-      if transition
+      if transitionOrName == 'none'
+        # don't create ghosts if we aren't really transitioning
+        none()
+      else if transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
         withGhosts $old, $new, ($oldGhost, $newGhost) ->
           assertIsDeferred(transition($oldGhost, $newGhost, options), transitionOrName)
       else if animation = animations[transitionOrName]
