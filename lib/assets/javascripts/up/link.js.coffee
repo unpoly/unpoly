@@ -178,6 +178,9 @@ up.link = (->
   current `<body>` element with the response's `<body>` element
 
       <a href="/users" up-follow>User list</a>
+  
+  See [`[up-dash]`](/up.link#up-dash) for a variant of `[up-target]` that
+  comes with additional 
 
   You can also apply `[up-follow]` to any element that contains a link
   in order to enlarge the link's click area:
@@ -208,6 +211,46 @@ up.link = (->
     if !childClicked(event, $element) && event.which == 1
       event.preventDefault()
       follow(resolve($element))
+  
+  ###
+  Marks up the current link to be followed *as fast as possible*.
+  This is done by:
+  
+  - [Following the link through AJAX](/up.link#up-target) instead of a full page load
+  - [Preloading the link's destination URL](/up.proxy#up-preload)
+  - [Triggering the link on `mousedown`](/up.link#up-instant) instead of on `click`
+  
+  Use `up-dash` like this:
+  
+      <a href="/users" up-dash=".main">User list</a>
+  
+  Note that this is shorthand for:
+  
+    <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
+
+  You can also apply `[up-dash]` to any element that contains a link
+  in order to enlarge the link's click area:
+
+      <div class="notification" up-dash>
+         Record was saved!
+         <a href="/records" up-dash='.main'>Close</a>
+      </div>
+  
+  @method [up-dash]
+  @ujs
+  ###
+  up.awaken '[up-dash]', ($element) ->
+    target = $element.attr('up-dash')
+    newAttrs = {
+      'up-preload': 'true',
+      'up-instant': 'true'
+    }
+    if u.isBlank(target) || u.castsToTrue(target)
+      newAttrs['up-follow'] = ''
+    else
+      newAttrs['up-target'] = target
+    u.setMissingAttrs($element, newAttrs)
+    $element.removeAttr('up-dash')
     
   visit: visit
   follow: follow

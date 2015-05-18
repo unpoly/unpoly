@@ -536,6 +536,11 @@ up.util = (->
     joined.resolve = ->
       each deferreds, (deferred) -> deferred.resolve?()
     joined
+    
+  setMissingAttrs = ($element, attrs) ->
+    for key, value of attrs
+      if isMissing($element.attr(key))
+        $element.attr(key, value)
 
   stringSet = (array) ->
     set = {}
@@ -635,6 +640,7 @@ up.util = (->
   resolvedPromise: resolvedPromise
   resolvedDeferred: resolvedDeferred
   resolvableWhen: resolvableWhen
+  setMissingAttrs: setMissingAttrs
   stringSet: stringSet
 
 )()
