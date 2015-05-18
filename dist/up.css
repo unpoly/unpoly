@@ -1,5 +1,19 @@
 [up-close] {
   cursor: pointer; }
+.up-error {
+  background-color: #e10;
+  color: white;
+  padding: 5px;
+  font-family: arial, helvetica, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 18px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  z-index: 99999999; }
 [up-follow] {
   cursor: pointer; }
 .up-modal {
@@ -62,7 +76,8 @@
   position: fixed;
   background-color: #666;
   color: white;
-  padding: 6px 9px; }
+  padding: 6px 9px;
+  white-space: nowrap; }
   .up-tooltip[up-origin=top] {
     margin-top: -6px; }
     .up-tooltip[up-origin=top]:after {
