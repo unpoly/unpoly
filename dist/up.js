@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var __slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, stringSet, stringifyConsoleArgs, temporaryCss, toArray, trim, unwrap;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringSet, stringifyConsoleArgs, temporaryCss, toArray, trim, unwrap;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -657,6 +657,19 @@ If you use them in your own code, you will get hurt.
       };
       return joined;
     };
+    setMissingAttrs = function($element, attrs) {
+      var key, value, _results;
+      _results = [];
+      for (key in attrs) {
+        value = attrs[key];
+        if (isMissing($element.attr(key))) {
+          _results.push($element.attr(key, value));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
     stringSet = function(array) {
       var includes, includesAny, key, put, set, string, _i, _len;
       set = {};
@@ -744,6 +757,7 @@ If you use them in your own code, you will get hurt.
       resolvedPromise: resolvedPromise,
       resolvedDeferred: resolvedDeferred,
       resolvableWhen: resolvableWhen,
+      setMissingAttrs: setMissingAttrs,
       stringSet: stringSet
     };
   })();
@@ -2011,14 +2025,23 @@ We need to work on this page:
 Caching and preloading
 ======================
 
-Document me.
+All HTTP requests go through the Up.js proxy.
+It caches a limited number
+  
+The cache is cleared whenever the user makes a non-´GET` request
+(like `POST`, `PUT`, `DELETE`).
+
+The proxy can also used to speed up reaction times by preloading
+links when the user hovers over the click area (or puts the mouse/finger
+down before releasing). This way the
+response will already be cached when the user performs the click.   
 
 @class up.proxy
  */
 
 (function() {
   up.proxy = (function() {
-    var $waitingLink, ajax, alias, cache, cacheKey, cancelDelay, checkPreload, clear, config, defaults, delayTimer, ensureIsIdempotent, get, isFresh, isIdempotent, normalizeRequest, preload, remove, reset, set, startDelay, timestamp, touch, trim, u;
+    var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, cache, cacheKey, cancelDelay, checkPreload, clear, config, defaults, delayTimer, ensureIsIdempotent, get, isFresh, isIdempotent, normalizeRequest, preload, remove, reset, set, startDelay, timestamp, touch, trim, u;
     config = {
       preloadDelay: 50,
       cacheSize: 70,
@@ -2107,9 +2130,10 @@ Document me.
       }
       return promise;
     };
+    SAFE_HTTP_METHODS = ['GET', 'OPTIONS', 'HEAD'];
     isIdempotent = function(request) {
       normalizeRequest(request);
-      return request.method === 'GET';
+      return u.contains(SAFE_HTTP_METHODS, request.method);
     };
     ensureIsIdempotent = function(request) {
       return isIdempotent(request) || u.error("Won't preload non-GET request %o", request);
@@ -2188,6 +2212,12 @@ Document me.
     up.bus.on('framework:reset', reset);
 
     /*
+    Links with an `up-preload` attribute will silently fetch their target
+    when the user hovers over the click area, or when the user puts her
+    mouse/finger down (before releasing). This way the
+    response will already be cached when the user performs the click,
+    making the interaction feel instant.   
+    
     @method [up-preload]
     @ujs
      */
@@ -2397,6 +2427,16 @@ Read on
     
         <a href="/users" up-follow>User list</a>
     
+    By also adding an `up-instant` attribute, the page will be fetched
+    on `mousedown` instead of `click`, making the interaction even faster:
+    
+        <a href="/users" up-follow up-instant>User list</a>
+    
+    Note that using `[up-instant]` will prevent a user from canceling a link
+    click by moving the mouse away from the interaction area. However, for
+    navigation actions this isn't needed. E.g. popular operation
+    systems switch tabs on `mousedown`.
+    
     You can also apply `[up-follow]` to any element that contains a link
     in order to enlarge the link's click area:
     
@@ -2413,7 +2453,6 @@ Read on
     @param {String} [up-follow]
     @param up-instant
       If set, fetches the element on `mousedown` instead of `click`.
-      This makes the interaction faster.
      */
     up.on('click', '[up-follow]', function(event, $element) {
       if (!childClicked(event, $element)) {
@@ -2428,6 +2467,49 @@ Read on
         event.preventDefault();
         return follow(resolve($element));
       }
+    });
+
+    /*
+    Marks up the current link to be followed *as fast as possible*.
+    This is done by:
+    
+    - [Following the link through AJAX](/up.link#up-target) instead of a full page load
+    - [Preloading the link's destination URL](/up.proxy#up-preload)
+    - [Triggering the link on `mousedown`](/up.link#up-instant) instead of on `click`
+    
+    Use `up-dash` like this:
+    
+        <a href="/users" up-dash=".main">User list</a>
+    
+    Note that this is shorthand for:
+    
+      <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
+    
+    You can also apply `[up-dash]` to any element that contains a link
+    in order to enlarge the link's click area:
+    
+        <div class="notification" up-dash>
+           Record was saved!
+           <a href="/records" up-dash='.main'>Close</a>
+        </div>
+    
+    @method [up-dash]
+    @ujs
+     */
+    up.awaken('[up-dash]', function($element) {
+      var newAttrs, target;
+      target = $element.attr('up-dash');
+      newAttrs = {
+        'up-preload': 'true',
+        'up-instant': 'true'
+      };
+      if (u.isBlank(target) || u.castsToTrue(target)) {
+        newAttrs['up-follow'] = '';
+      } else {
+        newAttrs['up-target'] = target;
+      }
+      u.setMissingAttrs($element, newAttrs);
+      return $element.removeAttr('up-dash');
     });
     return {
       visit: visit,
