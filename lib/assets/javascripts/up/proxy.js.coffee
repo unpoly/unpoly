@@ -2,7 +2,16 @@
 Caching and preloading
 ======================
 
-Document me.
+All HTTP requests go through the Up.js proxy.
+It caches a limited number
+  
+The cache is cleared whenever the user makes a non-´GET` request
+(like `POST`, `PUT`, `DELETE`).
+
+The proxy can also used to speed up reaction times by preloading
+links when the user hovers over the click area (or puts the mouse/finger
+down before releasing). This way the
+response will already be cached when the user performs the click.   
 
 @class up.proxy  
 ###
@@ -84,10 +93,12 @@ up.proxy = (->
       promise = u.ajax(request)
       set(request, promise)
     promise
+
+  SAFE_HTTP_METHODS = ['GET', 'OPTIONS', 'HEAD']
     
   isIdempotent = (request) ->
     normalizeRequest(request)
-    request.method == 'GET'
+    u.contains(SAFE_HTTP_METHODS, request.method)
     
   ensureIsIdempotent = (request) ->
     isIdempotent(request) or u.error("Won't preload non-GET request %o", request)
@@ -158,6 +169,12 @@ up.proxy = (->
   up.bus.on 'framework:reset', reset
 
   ###
+  Links with an `up-preload` attribute will silently fetch their target
+  when the user hovers over the click area, or when the user puts her
+  mouse/finger down (before releasing). This way the
+  response will already be cached when the user performs the click,
+  making the interaction feel instant.   
+
   @method [up-preload]
   @ujs
   ###

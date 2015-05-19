@@ -179,8 +179,15 @@ up.link = (->
 
       <a href="/users" up-follow>User list</a>
   
-  See [`[up-dash]`](/up.link#up-dash) for a variant of `[up-target]` that
-  comes with additional 
+  By also adding an `up-instant` attribute, the page will be fetched
+  on `mousedown` instead of `click`, making the interaction even faster:
+  
+      <a href="/users" up-follow up-instant>User list</a>
+  
+  Note that using `[up-instant]` will prevent a user from canceling a link
+  click by moving the mouse away from the interaction area. However, for
+  navigation actions this isn't needed. E.g. popular operation
+  systems switch tabs on `mousedown`.
 
   You can also apply `[up-follow]` to any element that contains a link
   in order to enlarge the link's click area:
@@ -198,7 +205,6 @@ up.link = (->
   @param {String} [up-follow]
   @param up-instant
     If set, fetches the element on `mousedown` instead of `click`.
-    This makes the interaction faster.
   ###
   up.on 'click', '[up-follow]', (event, $element) ->
     unless childClicked(event, $element)
@@ -206,7 +212,7 @@ up.link = (->
       # Check if the event was already triggered by `mousedown`
       unless $element.is('[up-instant]')
         follow(resolve($element))
-        
+
   up.on 'mousedown', '[up-follow][up-instant]', (event, $element) ->
     if !childClicked(event, $element) && event.which == 1
       event.preventDefault()
