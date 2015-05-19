@@ -37,11 +37,26 @@ describe 'up.navigation', ->
         
       it 'changes .up-current marks as the URL changes'
         
-      it 'marks clicked linked as .up-active until the request finishes', ->
+      it 'marks clicked links as .up-active until the request finishes', ->
         $link = affix('a[href="/foo"][up-target=".main"]')
         affix('.main')
         jasmine.Ajax.install()
         $link.click()
+#        console.log($link)
+        expect($link).toHaveClass('up-active')
+        jasmine.Ajax.requests.mostRecent().respondWith
+          status: 200
+          contentType: 'text/html'
+          responseText: '<div class="main">new-text</div>'
+        expect($link).not.toHaveClass('up-active')
+        expect($link).toHaveClass('up-current')
+        
+      it 'marks links with [up-instant] on mousedown as .up-active until the request finishes', ->
+        $link = affix('a[href="/foo"][up-instant][up-target=".main"]')
+        affix('.main')
+        jasmine.Ajax.install()
+        event = new MouseEvent('mousedown', view: window, cancelable: true, bubbles: true)
+        $link.get(0).dispatchEvent(event)
         expect($link).toHaveClass('up-active')
         jasmine.Ajax.requests.mostRecent().respondWith
           status: 200

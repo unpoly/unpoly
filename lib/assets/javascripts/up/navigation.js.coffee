@@ -29,7 +29,9 @@ up.navigation = (->
 
   CLASS_ACTIVE = 'up-active'
   CLASS_CURRENT = 'up-current'
-  SELECTOR_SECTION = 'a[href], a[up-target], [up-follow], [up-modal], [up-popup], [up-source]'
+  SELECTORS_SECTION = ['a[href]', 'a[up-target]', '[up-follow]', '[up-modal]', '[up-popup]', '[up-href]']
+  SELECTOR_SECTION = SELECTORS_SECTION.join(', ')
+  SELECTOR_SECTION_INSTANT = ("#{selector}[up-instant]" for selector in SELECTORS_SECTION).join(', ')
   SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
   
   normalizeUrl = (url) ->
@@ -42,7 +44,7 @@ up.navigation = (->
   sectionUrls = ($section) ->
     urls = []
     if $link = up.link.resolve($section)
-      for attr in ['href', 'up-follow', 'up-source']
+      for attr in ['href', 'up-follow', 'up-href']
         if url = u.presentAttr($link, attr)
           url = normalizeUrl(url)
           urls.push(url)
@@ -66,8 +68,11 @@ up.navigation = (->
         $section.removeClass(CLASS_CURRENT)
 
   sectionClicked = ($section) ->
+    console.log('start of method', $section)
     unmarkActive()
+    console.log('before enlarge', $section)
     $section = enlargeClickArea($section)
+    console.log('after enlarge', $section)
     $section.addClass(CLASS_ACTIVE)
     
   enlargeClickArea = ($section) ->
@@ -77,8 +82,13 @@ up.navigation = (->
     $(SELECTOR_ACTIVE).removeClass(CLASS_ACTIVE)
 
   up.on 'click', SELECTOR_SECTION, (event, $section) ->
-    sectionClicked($section)
-
+    unless $section.is('[up-instant]')
+      sectionClicked($section)
+  
+  up.on 'mousedown', SELECTOR_SECTION_INSTANT, (event, $section) ->
+    if event.which == 1
+      sectionClicked($section)
+      
   # When a fragment is ready it might either have brought a location change
   # with it, or it might have opened a modal / popup which we consider
   # to be secondary location sources (the primary being the browser's

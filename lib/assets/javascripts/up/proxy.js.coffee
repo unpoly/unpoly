@@ -3,10 +3,12 @@ Caching and preloading
 ======================
 
 All HTTP requests go through the Up.js proxy.
-It caches a limited number
+It caches a [limited](/up.proxy#up.proxy.defaults) number of server responses
+  for a [limited](/up.proxy#up.proxy.defaults) amount of time,
+making requests to these URLs return insantly.
   
 The cache is cleared whenever the user makes a non-`GET` request
-(like `POST`, `PUT`, `DELETE`).
+(like `POST`, `PUT` or `DELETE`).
 
 The proxy can also used to speed up reaction times by preloading
 links when the user hovers over the click area (or puts the mouse/finger
@@ -77,10 +79,18 @@ up.proxy = (->
       set(newRequest, promise)
   
   ###*
+  Makes a request to the given URL and caches the response.
+  If the response was already cached, returns the HTML instantly.
+  
+  If requesting a URL that is not read-only, the response will
+  not be cached and the entire cache will be cleared.
+  Only requests with a method of `GET`, `OPTIONS` and `HEAD`
+  are considered to be read-only.
+  
   @method up.proxy.ajax
-  @param {String} options.url
-  @param {String} [options.method='GET']
-  @param {String} [options.selector]
+  @param {String} request.url
+  @param {String} [request.method='GET']
+  @param {String} [request.selector]
   ###
   ajax = (request) ->
     if !isIdempotent(request)

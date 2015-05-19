@@ -232,7 +232,7 @@ up.link = (->
   
   Note that this is shorthand for:
   
-    <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
+      <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
 
   You can also apply `[up-dash]` to any element that contains a link
   in order to enlarge the link's click area:
