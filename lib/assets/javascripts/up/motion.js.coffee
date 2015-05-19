@@ -117,13 +117,14 @@ up.motion = (->
 
     promise
       
-  ###
+  ###*
   Completes all animations and transitions for the given element
   by jumping to the last animation frame instantly. All callbacks chained to
   the original animation's promise will be called.
   
   Does nothing if the given element is not currently animating.
   
+  @method up.motion.finish
   @param {Element|jQuery|String} elementOrSelector
   ###
   finish = (elementOrSelector) ->

@@ -5,7 +5,7 @@ Caching and preloading
 All HTTP requests go through the Up.js proxy.
 It caches a limited number
   
-The cache is cleared whenever the user makes a non-´GET` request
+The cache is cleared whenever the user makes a non-`GET` request
 (like `POST`, `PUT`, `DELETE`).
 
 The proxy can also used to speed up reaction times by preloading
@@ -24,9 +24,9 @@ up.proxy = (->
 
   ###*
   @method up.proxy.defaults
-  @param {Number} [preloadDelay]
-  @param {Number} [cacheSize]
-  @param {Number} [cacheExpiry]
+  @param {Number} [options.preloadDelay]
+  @param {Number} [options.cacheSize]
+  @param {Number} [options.cacheExpiry]
     The number of milliseconds until a cache entry expires.
   ###
   defaults = (options) ->
@@ -76,7 +76,7 @@ up.proxy = (->
     if promise = get(oldRequest)
       set(newRequest, promise)
   
-  ###
+  ###*
   @method up.proxy.ajax
   @param {String} options.url
   @param {String} [options.method='GET']
@@ -168,7 +168,7 @@ up.proxy = (->
 
   up.bus.on 'framework:reset', reset
 
-  ###
+  ###*
   Links with an `up-preload` attribute will silently fetch their target
   when the user hovers over the click area, or when the user puts her
   mouse/finger down (before releasing). This way the
@@ -176,6 +176,10 @@ up.proxy = (->
   making the interaction feel instant.   
 
   @method [up-preload]
+  @param [[up-delay]=50]
+    The number of milliseconds to wait between hovering
+    and preloading. Increasing this will lower the load in your server,
+    but will also make the interaction feel less instant.
   @ujs
   ###
   up.on 'mouseover mousedown touchstart', '[up-preload]', (event, $element) ->

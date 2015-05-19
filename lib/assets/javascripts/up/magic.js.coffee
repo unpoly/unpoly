@@ -113,7 +113,7 @@ up.magic = (->
       destroyer = $element.data(DESTROYER_KEY)
       destroyer()
 
-  ###
+  ###*
   Checks if the given element has an `up-data` attribute.
   If yes, parses the attribute value as JSON and returns the parsed object.
 

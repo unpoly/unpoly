@@ -58,7 +58,7 @@ up.util = (->
     normalized += anchor.search unless options?.search == false
     normalized
 
-  ###
+  ###*
   @method up.util.normalizeMethod
   @protected
   ###
@@ -436,13 +436,17 @@ up.util = (->
       
   ANIMATION_PROMISE_KEY = 'up-animation-promise'
 
-  ###
+  ###*
   Completes the animation for  the given element by jumping
   to the last frame instantly. All callbacks chained to
   the original animation's promise will be called.
   
   Does nothing if the given element is not currently animating.
   
+  Also see [`up.motion.finish`](/up.motion#up.motion.finish).
+  
+  @method up.util.finishCssAnimate
+  @protected
   @param {Element|jQuery|String} elementOrSelector
   ###
   finishCssAnimate = (elementOrSelector) ->

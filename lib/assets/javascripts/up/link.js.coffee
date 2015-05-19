@@ -164,7 +164,7 @@ up.link = (->
       event.preventDefault()
       follow($link)
 
-  ###
+  ###*
   @method up.link.childClicked
   @private
   ###
@@ -218,7 +218,7 @@ up.link = (->
       event.preventDefault()
       follow(resolve($element))
   
-  ###
+  ###*
   Marks up the current link to be followed *as fast as possible*.
   This is done by:
   
