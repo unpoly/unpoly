@@ -129,7 +129,7 @@ up.flow = (->
       $old = findOldFragment(step.selector)
       $new = response.find(step.selector)
       prepareForReplacement($old, options).then ->
-        swapElements $old, $new, step.pseudoClass, step.transition, options
+        swapElements($old, $new, step.pseudoClass, step.transition, options)
 
   findOldFragment = (selector) ->
     u.presence($(".up-popup " + selector)) ||
@@ -196,7 +196,10 @@ up.flow = (->
       # Wrap the replacement as a destroy animation, so $old will
       # get marked as .up-destroying right away.
       destroy $old, animation: ->
-        $new.insertAfter($old)
+        # Don't insert the new element after the old element.
+        # For some reason this will make the browser scroll to the
+        # bottom of the new element.
+        $new.insertBefore($old)
         elementsInserted($new, options)
         if $old.is('body') && transition != 'none'
           u.error('Cannot apply transitions to body-elements (%o)', transition)

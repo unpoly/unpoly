@@ -64,6 +64,7 @@ up.viewport = (->
 
       deferred
     else
+      $view.scrollTop(scrollPos)
       u.resolvedDeferred()
 
   ###*
@@ -86,6 +87,7 @@ up.viewport = (->
   @protected
   ###
   reveal = (elementOrSelector, options) ->
+
     options = u.options(options)
     view = u.option(options.view, config.view)
     padding = u.option(options.padding, config.padding)
