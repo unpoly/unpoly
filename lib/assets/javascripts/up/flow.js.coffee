@@ -123,7 +123,7 @@ up.flow = (->
 
     response = parseResponse(html)
 
-    options.title ||= response.title
+    options.title ||= response.title()
 
     for step in parseImplantSteps(selector, options)
       $old = findOldFragment(step.selector)
