@@ -82,7 +82,7 @@ up.form = (->
 
     successUrl = (xhr) ->
       url = if historyOption
-        if historyOption == 'false'
+        if u.castsToFalse(historyOption)
           false
         else if u.isString(historyOption)
           historyOption

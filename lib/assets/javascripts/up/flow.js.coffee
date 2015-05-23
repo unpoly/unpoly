@@ -48,6 +48,7 @@ up.flow = (->
     If set to `false`, the history will remain unchanged.
   @param {String|Boolean} [options.source=true]
   @param {String} [options.transition]
+  @param {String} [options.scroll]
   @param {String} [options.historyMethod='push']
   ###
   replace = (selectorOrElement, url, options) ->
@@ -102,6 +103,7 @@ up.flow = (->
   @param {String} [options.title]
   @param {String} [options.source]
   @param {Object} [options.transition]
+  @param {String} [options.scroll]
   @param {String} [options.history]
   @param {String} [options.historyMethod='push']
   ###
@@ -111,38 +113,55 @@ up.flow = (->
       historyMethod: 'push'
     )
     
-    if options.history == 'false'
+    if u.castsToFalse(options.history)
       options.history = null
-      
+
+    if u.castsToFalse(options.scroll)
+      options.scroll = null
+
     options.source = u.option(options.source, options.history)
-    
+
+    response = parseResponse(html)
+
+    options.title ||= response.title
+
+    for step in parseImplantSteps(selector, options)
+      $old = findOldFragment(step.selector)
+      $new = response.find(step.selector)
+      prepareForReplacement($old, options).then ->
+        swapElements $old, $new, step.pseudoClass, step.transition, options
+
+  findOldFragment = (selector) ->
+    u.presence($(".up-popup " + selector)) ||
+    u.presence($(".up-modal " + selector)) ||
+    u.presence($(selector)) ||
+    u.error('Could not find selector %o in current body HTML', selector)
+
+  parseResponse = (html) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags,
     # so we're using the native browser API to grep through the HTML
     htmlElement = u.createElementFromHtml(html)
-
-    # TODO: extract title from HTTP header
-    options.title ||= htmlElement.querySelector("title")?.textContent
-    
-    for step in implantSteps(selector, options)
-
-      # Before we select a replacement target, ensure that all transitions
-      # and animations have been run. Finishing a transition usually removes
-      # the element that is being morphed, so it will affect further selections
-      # using the same selector.
-      up.motion.finish(step.selector)
-
-      $old =
-        # always prefer to replace content in popups or modals
-        u.presence($(".up-popup " + step.selector)) || 
-        u.presence($(".up-modal " + step.selector)) || 
-        u.presence($(step.selector)) ||
-        u.error('Could not find selector %o in current body HTML', step.selector)
-      if fragment = htmlElement.querySelector(step.selector)
-        $new = $(fragment)
-        swapElements $old, $new, step.pseudoClass, step.transition, options
+    title: -> htmlElement.querySelector("title")?.textContent
+    find: (selector) ->
+      if child = htmlElement.querySelector(selector)
+        $(child)
       else
-        u.error("Could not find selector %o in response %o", step.selector, html)
-        
+        u.error("Could not find selector %o in response %o", selector, html)
+
+  prepareForReplacement = ($element, options) ->
+    # Before we select a replacement target, ensure that all transitions
+    # and animations have been run. Finishing a transition usually removes
+    # the element that is being morphed, so it will affect further selections
+    # using the same selector.
+    up.motion.finish($element)
+    reveal($element, options.scroll)
+
+  reveal = ($element, view) ->
+    if view
+      up.reveal($element, view: view)
+    else
+      u.resolvedDeferred()
+
   elementsInserted = ($new, options) ->
     options.insert?($new)
     if options.history
@@ -183,7 +202,7 @@ up.flow = (->
           u.error('Cannot apply transitions to body-elements (%o)', transition)
         up.morph($old, $new, transition)
 
-  implantSteps = (selector, options) ->
+  parseImplantSteps = (selector, options) ->
     transitionString = options.transition || options.animation || 'none'
     comma = /\ *,\ */
     disjunction = selector.split(comma)
@@ -201,16 +220,7 @@ up.flow = (->
     $control = u.findWithSelf($element, selector)
     if $control.length && $control.get(0) != document.activeElement
       $control.focus()
-      
-#  executeScripts = ($new) ->
-#    $new.find('script').each ->
-#      $script = $(this)
-#      type = $script.attr('type')
-#      if u.isBlank(type) || type.indexOf('text/javascript') == 0
-#        code = $script.text()
-#        console.log("Evaling javascript code", code)
-#        eval(code)
-      
+
   ###*
   Destroys the given element or selector.
   Takes care that all destructors, if any, are called.

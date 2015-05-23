@@ -2,6 +2,7 @@
 #= require up/util
 #= require up/browser
 #= require up/bus
+#= require up/viewport
 #= require up/flow
 #= require up/magic
 #= require up/history

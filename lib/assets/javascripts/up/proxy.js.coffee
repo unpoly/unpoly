@@ -20,7 +20,7 @@ response will already be cached when the user performs the click.
 up.proxy = (->
 
   config =
-    preloadDelay: 50
+    preloadDelay: 75
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
 
