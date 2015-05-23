@@ -68,11 +68,8 @@ up.navigation = (->
         $section.removeClass(CLASS_CURRENT)
 
   sectionClicked = ($section) ->
-    console.log('start of method', $section)
     unmarkActive()
-    console.log('before enlarge', $section)
     $section = enlargeClickArea($section)
-    console.log('after enlarge', $section)
     $section.addClass(CLASS_ACTIVE)
     
   enlargeClickArea = ($section) ->
