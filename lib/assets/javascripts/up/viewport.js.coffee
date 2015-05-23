@@ -1,43 +1,70 @@
 ###*
-Scrolling
-=========
+Viewport scrolling
+==================
+
+This modules contains functions to scroll the viewport and reveal contained elements.
+
+By default Up.js will always scroll to an element before updating it.
 
 @class up.viewport  
 ###
 up.viewport = (->
 
-  SCROLL_PROMISE_KEY = 'up-scroll-promise'
-  
   u = up.util
+
+  config =
+    duration: 0
+    view: 'body'
+    easing: 'swing'
+
+  ###*
+  @method up.viewport.defaults
+  @param {Number} [options.duration]
+  @param {String} [options.easing]
+  @param {Number} [options.padding]
+  @param {String|Element|jQuery} [options.view]
+  ###
+  defaults = (options) ->
+    u.extend(config, options)
+
+  SCROLL_PROMISE_KEY = 'up-scroll-promise'
+
   ###*
   @method up.scroll
+  @param {String|Element|jQuery} viewOrSelector
   @param {Number} scrollPos
-  @param {String|Element|jQuery} [options.duration=100]
+  @param {String}[options.duration]
+  @param {String}[options.easing]
   @returns {Deferred}
   @protected 
   ###
   scroll = (viewOrSelector, scrollPos, options) ->
     $view = $(viewOrSelector)
     options = u.options(options)
-    duration = u.option(options.duration, 0)
+    duration = u.option(options.duration, config.duration)
+    easing = u.option(options.easing, config.easing)
 
     finishScrolling($view)
 
-    deferred = $.Deferred()
+    if duration > 0
+      deferred = $.Deferred()
 
-    $view.data(SCROLL_PROMISE_KEY, deferred)
-    deferred.then ->
-      $view.removeData(SCROLL_PROMISE_KEY)
-      $view.finish()
+      $view.data(SCROLL_PROMISE_KEY, deferred)
+      deferred.then ->
+        $view.removeData(SCROLL_PROMISE_KEY)
+        $view.finish()
 
-    targetProps =
-      scrollTop: scrollPos
+      targetProps =
+        scrollTop: scrollPos
 
-    $view.animate targetProps,
-      duration: duration
-      complete: -> deferred.resolve()
+      $view.animate targetProps,
+        duration: duration,
+        easing: easing,
+        complete: -> deferred.resolve()
 
-    deferred
+      deferred
+    else
+      u.resolvedDeferred()
 
   ###*
   @method up.viewport.finishScrolling
@@ -51,16 +78,17 @@ up.viewport = (->
   ###*
   @method up.reveal
   @param {String|Element|jQuery} element
-  @param {String|Element|jQuery} [options.view='body']
-  @param {String|Element|jQuery} [options.duration=100]
-  @param {Number} [options.padding=0]
+  @param {String|Element|jQuery} [options.view]
+  @param {Number} [options.duration]
+  @param {String} [options.easing]
+  @param {Number} [options.padding]
   @returns {Deferred}
   @protected
   ###
   reveal = (elementOrSelector, options) ->
     options = u.options(options)
-    view = u.option(options.view, 'body')
-    padding = u.option(options.padding, 0)
+    view = u.option(options.view, config.view)
+    padding = u.option(options.padding, config.padding)
 
     $element = $(elementOrSelector)
     $view = $(view)
@@ -87,6 +115,7 @@ up.viewport = (->
   reveal: reveal
   scroll: scroll
   finishScrolling: finishScrolling
+  defaults: defaults
 
 )()
 

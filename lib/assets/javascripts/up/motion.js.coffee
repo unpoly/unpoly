@@ -22,22 +22,22 @@ We need to work on this page:
 up.motion = (->
   
   u = up.util
-  
-  config =
-    duration: 300
-    delay: 0
-    easing: 'ease'
 
   animations = {}
   defaultAnimations = {}
   transitions = {}
   defaultTransitions = {}
 
+  config =
+    duration: 300
+    delay: 0
+    easing: 'ease'
+
   ###*
   @method up.modal.defaults
-  @param {Number} options.duration
-  @param {Number} options.delay
-  @param {String} options.easing
+  @param {Number} [options.duration]
+  @param {Number} [options.delay]
+  @param {String} [options.easing]
   ###
   defaults = (options) ->
     u.extend(config, options)

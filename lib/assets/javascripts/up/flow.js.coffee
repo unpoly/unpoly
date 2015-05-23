@@ -48,7 +48,7 @@ up.flow = (->
     If set to `false`, the history will remain unchanged.
   @param {String|Boolean} [options.source=true]
   @param {String} [options.transition]
-  @param {String} [options.scroll]
+  @param {String} [options.scroll='body']
   @param {String} [options.historyMethod='push']
   ###
   replace = (selectorOrElement, url, options) ->
@@ -103,7 +103,7 @@ up.flow = (->
   @param {String} [options.title]
   @param {String} [options.source]
   @param {Object} [options.transition]
-  @param {String} [options.scroll]
+  @param {String} [options.scroll='body']
   @param {String} [options.history]
   @param {String} [options.historyMethod='push']
   ###
