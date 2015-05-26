@@ -56,6 +56,16 @@ up.modal = (->
     else
       template
 
+  rememberHistory = ->
+    $popup = $('.up-modal')
+    $popup.attr('up-previous-url', up.browser.url())
+    $popup.attr('up-previous-title', document.title)
+
+  discardHistory = ->
+    $popup = $('.up-modal')
+    $popup.removeAttr('up-previous-url')
+    $popup.removeAttr('up-previous-title')
+
   createHiddenModal = (selector, width, height, sticky) ->
     $modal = $(templateHtml())
     $modal.attr('up-sticky', '') if sticky
@@ -68,6 +78,7 @@ up.modal = (->
     $placeholder = u.$createElementFromSelector(selector)
     $placeholder.appendTo($content)
     $modal.appendTo(document.body)
+    rememberHistory()
     $modal.hide()
     $modal
 
@@ -143,6 +154,7 @@ up.modal = (->
 
   autoclose = ->
     unless $('.up-modal').is('[up-sticky]')
+      discardHistory()
       close()
 
   ###*

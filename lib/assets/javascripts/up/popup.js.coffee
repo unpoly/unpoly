@@ -84,16 +84,24 @@ up.popup = (->
         $popup.css('top', top - errorY)
       else if bottom = parseInt($popup.css('bottom'))
         $popup.css('bottom', bottom + errorY)
-    
+          
+  rememberHistory = ->
+    $popup = $('.up-popup')
+    $popup.attr('up-previous-url', up.browser.url())
+    $popup.attr('up-previous-title', document.title)
+          
+  discardHistory = ->
+    $popup = $('.up-popup')
+    $popup.removeAttr('up-previous-url')
+    $popup.removeAttr('up-previous-title')
     
   createHiddenPopup = ($link, selector, sticky) ->
     $popup = u.$createElementFromSelector('.up-popup')
     $popup.attr('up-sticky', '') if sticky
-    $popup.attr('up-previous-url', up.browser.url())
-    $popup.attr('up-previous-title', document.title)
     $placeholder = u.$createElementFromSelector(selector)
     $placeholder.appendTo($popup)
     $popup.appendTo(document.body)
+    rememberHistory()
     $popup.hide()
     $popup
     
@@ -204,6 +212,7 @@ up.popup = (->
   
   up.bus.on('fragment:ready', ($fragment) ->
     unless $fragment.closest('.up-popup').length
+      discardHistory()
       autoclose()
   )
   
