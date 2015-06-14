@@ -28,7 +28,7 @@ describe 'up.flow', ->
               contentType: 'text/html'
               responseText: @responseText
 
-        it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
+          it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
           @request = up.replace('.middle', '/path')
           @respond()
           @request.then ->

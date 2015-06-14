@@ -104,8 +104,9 @@ describe 'up.form', ->
     
     describe 'form[up-target]', ->
 
-      it 'should have tests'
-      
+      it 'rigs the form to use up.submit instead of a standard submit'
+
+
     describe 'input[up-observe]', ->
 
       it 'should have tests'
