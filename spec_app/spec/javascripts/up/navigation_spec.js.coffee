@@ -55,8 +55,7 @@ describe 'up.navigation', ->
         $link = affix('a[href="/foo"][up-instant][up-target=".main"]')
         affix('.main')
         jasmine.Ajax.install()
-        event = new MouseEvent('mousedown', view: window, cancelable: true, bubbles: true)
-        $link.get(0).dispatchEvent(event)
+        Trigger.mousedown($link)
         expect($link).toHaveClass('up-active')
         jasmine.Ajax.requests.mostRecent().respondWith
           status: 200

@@ -164,9 +164,9 @@ up.link = (->
       follow($link)
     
   up.on 'mousedown', 'a[up-target][up-instant]', (event, $link) ->
-    if event.which is 1
+    if activeInstantLink(event, $link)
       event.preventDefault()
-      follow($link)
+      up.follow($link)
 
   ###*
   @method up.link.childClicked
@@ -176,6 +176,9 @@ up.link = (->
     $target = $(event.target)
     $targetLink = $target.closest('a, [up-follow]')
     $targetLink.length && $link.find($targetLink).length
+    
+  activeInstantLink = (event, $link) ->
+    u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link)
     
   ###*
   If applied on a link, Follows this link via AJAX and replaces the
@@ -210,17 +213,17 @@ up.link = (->
   @param up-instant
     If set, fetches the element on `mousedown` instead of `click`.
   ###
-  up.on 'click', '[up-follow]', (event, $element) ->
-    unless childClicked(event, $element)
+  up.on 'click', '[up-follow]', (event, $link) ->
+    unless childClicked(event, $link)
       event.preventDefault()
       # Check if the event was already triggered by `mousedown`
-      unless $element.is('[up-instant]')
-        follow(resolve($element))
+      unless $link.is('[up-instant]')
+        follow(resolve($link))
 
-  up.on 'mousedown', '[up-follow][up-instant]', (event, $element) ->
-    if !childClicked(event, $element) && event.which == 1
+  up.on 'mousedown', '[up-follow][up-instant]', (event, $link) ->
+    if activeInstantLink(event, $link)
       event.preventDefault()
-      follow(resolve($element))
+      up.follow(resolve($link))
   
   ###*
   Marks up the current link to be followed *as fast as possible*.

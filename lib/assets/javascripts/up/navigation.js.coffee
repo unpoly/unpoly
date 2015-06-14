@@ -83,7 +83,7 @@ up.navigation = (->
       sectionClicked($section)
   
   up.on 'mousedown', SELECTOR_SECTION_INSTANT, (event, $section) ->
-    if event.which == 1
+    if u.isUnmodifiedMouseEvent(event)
       sectionClicked($section)
       
   # When a fragment is ready it might either have brought a location change

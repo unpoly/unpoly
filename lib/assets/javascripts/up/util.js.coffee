@@ -527,6 +527,12 @@ up.util = (->
         filtered[key] = object[key]
     filtered
 
+  isUnmodifiedKeyEvent = (event) ->
+    not (event.metaKey or event.shiftKey or event.ctrlKey)
+
+  isUnmodifiedMouseEvent = (event) ->
+    event.button is 0 and isUnmodifiedKeyEvent(event)
+
   resolvedDeferred = ->
     deferred = $.Deferred()
     deferred.resolve()
@@ -619,6 +625,8 @@ up.util = (->
   isDeferred: isDeferred
   isHash: isHash
   ifGiven: ifGiven
+  isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
+  isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   unwrap: unwrap
   nextFrame: nextFrame
   measure: measure
