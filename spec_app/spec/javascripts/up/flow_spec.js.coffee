@@ -28,14 +28,14 @@ describe 'up.flow', ->
               contentType: 'text/html'
               responseText: @responseText
 
-          it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
+        it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
           @request = up.replace('.middle', '/path')
           @respond()
           @request.then ->
             expect($('.before')).toHaveText('old-before')
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('old-after')
-            done()      
+            done()
           
         it 'should set the browser location to the given URL', (done) ->
           @request = up.replace('.middle', '/path')
