@@ -20,6 +20,7 @@ To run Jasmine tests:
 - Install Ruby 2.1.2
 - `cd` into `spec_app`
 - Install dependencies by running `bundle install`
+- Migrate
 - Start the Rails server
 - Access `http://localhost:3000/specs`
 
@@ -44,6 +45,3 @@ Now make the release for manual download and bower:
 - From the project root, type `rake assets:compile`
 - This will output minified JS and CSS files to the `dist` folder
 - Commit and push the generated files
-
-  
-  
