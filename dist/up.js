@@ -22,10 +22,10 @@ If you use them in your own code, you will get hurt.
  */
 
 (function() {
-  var __slice = [].slice;
+  var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringSet, stringifyConsoleArgs, temporaryCss, toArray, trim, unwrap;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringSet, stringifyConsoleArgs, temporaryCss, toArray, trim, unwrap;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -82,7 +82,7 @@ If you use them in your own code, you will get hurt.
       return normalized;
     };
 
-    /*
+    /**
     @method up.util.normalizeMethod
     @protected
      */
@@ -94,17 +94,17 @@ If you use them in your own code, you will get hurt.
       }
     };
     $createElementFromSelector = function(selector) {
-      var $element, $parent, $root, classes, conjunction, depthSelector, expression, html, id, iteration, path, tag, _i, _j, _len, _len1;
+      var $element, $parent, $root, classes, conjunction, depthSelector, expression, html, id, iteration, j, k, len, len1, path, tag;
       path = selector.split(/[ >]/);
       $root = null;
-      for (iteration = _i = 0, _len = path.length; _i < _len; iteration = ++_i) {
+      for (iteration = j = 0, len = path.length; j < len; iteration = ++j) {
         depthSelector = path[iteration];
         conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g);
         tag = "div";
         classes = [];
         id = null;
-        for (_j = 0, _len1 = conjunction.length; _j < _len1; _j++) {
-          expression = conjunction[_j];
+        for (k = 0, len1 = conjunction.length; k < len1; k++) {
+          expression = conjunction[k];
           switch (expression[0]) {
             case ".":
               classes.push(expression.substr(1));
@@ -144,16 +144,16 @@ If you use them in your own code, you will get hurt.
       return element;
     };
     debug = function() {
-      var args, group, message, placeHolderCount, value, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      var args, group, message, placeHolderCount, ref, value;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       args = toArray(args);
       message = args.shift();
       message = "[UP] " + message;
-      placeHolderCount = ((_ref = message.match(CONSOLE_PLACEHOLDERS)) != null ? _ref.length : void 0) || 0;
+      placeHolderCount = ((ref = message.match(CONSOLE_PLACEHOLDERS)) != null ? ref.length : void 0) || 0;
       if (isFunction(last(args)) && placeHolderCount < args.length) {
         group = args.pop();
       }
-      value = console.debug.apply(console, [message].concat(__slice.call(args)));
+      value = console.debug.apply(console, [message].concat(slice.call(args)));
       if (group) {
         console.groupCollapsed();
         try {
@@ -166,7 +166,7 @@ If you use them in your own code, you will get hurt.
     };
     error = function() {
       var $error, args, asString;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       args[0] = "[UP] " + args[0];
       console.error.apply(console, args);
       asString = stringifyConsoleArgs(args);
@@ -200,7 +200,7 @@ If you use them in your own code, you will get hurt.
       });
     };
     createSelectorFromElement = function($element) {
-      var classString, classes, id, klass, selector, _i, _len;
+      var classString, classes, id, j, klass, len, selector;
       debug("Creating selector from element %o", $element);
       classes = (classString = $element.attr("class")) ? classString.split(" ") : [];
       id = $element.attr("id");
@@ -208,8 +208,8 @@ If you use them in your own code, you will get hurt.
       if (id) {
         selector += "#" + id;
       }
-      for (_i = 0, _len = classes.length; _i < _len; _i++) {
-        klass = classes[_i];
+      for (j = 0, len = classes.length; j < len; j++) {
+        klass = classes[j];
         selector += "." + klass;
       }
       return selector;
@@ -246,10 +246,10 @@ If you use them in your own code, you will get hurt.
     extend = $.extend;
     trim = $.trim;
     keys = Object.keys || function(object) {
-      var key, result, _i, _len;
+      var j, key, len, result;
       result = [];
-      for (_i = 0, _len = object.length; _i < _len; _i++) {
-        key = object[_i];
+      for (j = 0, len = object.length; j < len; j++) {
+        key = object[j];
         if (object.hasOwnProperty(key)) {
           result.push(key);
         }
@@ -257,13 +257,13 @@ If you use them in your own code, you will get hurt.
       return result;
     };
     each = function(collection, block) {
-      var index, item, _i, _len, _results;
-      _results = [];
-      for (index = _i = 0, _len = collection.length; _i < _len; index = ++_i) {
+      var index, item, j, len, results;
+      results = [];
+      for (index = j = 0, len = collection.length; j < len; index = ++j) {
         item = collection[index];
-        _results.push(block(item, index));
+        results.push(block(item, index));
       }
-      return _results;
+      return results;
     };
     isNull = function(object) {
       return object === null;
@@ -374,11 +374,11 @@ If you use them in your own code, you will get hurt.
     @param {Array} args...
      */
     option = function() {
-      var arg, args, match, value, _i, _len;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      var arg, args, j, len, match, value;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       match = null;
-      for (_i = 0, _len = args.length; _i < _len; _i++) {
-        arg = args[_i];
+      for (j = 0, len = args.length; j < len; j++) {
+        arg = args[j];
         value = arg;
         if (isFunction(value)) {
           value = value();
@@ -391,10 +391,10 @@ If you use them in your own code, you will get hurt.
       return match;
     };
     detect = function(array, tester) {
-      var element, match, _i, _len;
+      var element, j, len, match;
       match = null;
-      for (_i = 0, _len = array.length; _i < _len; _i++) {
-        element = array[_i];
+      for (j = 0, len = array.length; j < len; j++) {
+        element = array[j];
         if (tester(element)) {
           match = element;
           break;
@@ -414,15 +414,15 @@ If you use them in your own code, you will get hurt.
     };
     presentAttr = function() {
       var $element, attrName, attrNames, values;
-      $element = arguments[0], attrNames = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      $element = arguments[0], attrNames = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       values = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = attrNames.length; _i < _len; _i++) {
-          attrName = attrNames[_i];
-          _results.push($element.attr(attrName));
+        var j, len, results;
+        results = [];
+        for (j = 0, len = attrNames.length; j < len; j++) {
+          attrName = attrNames[j];
+          results.push($element.attr(attrName));
         }
-        return _results;
+        return results;
       })();
       return detect(values, isPresent);
     };
@@ -535,13 +535,17 @@ If you use them in your own code, you will get hurt.
     };
     ANIMATION_PROMISE_KEY = 'up-animation-promise';
 
-    /*
+    /**
     Completes the animation for  the given element by jumping
     to the last frame instantly. All callbacks chained to
     the original animation's promise will be called.
     
     Does nothing if the given element is not currently animating.
     
+    Also see [`up.motion.finish`](/up.motion#up.motion.finish).
+    
+    @method up.util.finishCssAnimate
+    @protected
     @param {Element|jQuery|String} elementOrSelector
      */
     finishCssAnimate = function(elementOrSelector) {
@@ -574,18 +578,18 @@ If you use them in your own code, you will get hurt.
       return box;
     };
     copyAttributes = function($source, $target) {
-      var attr, _i, _len, _ref, _results;
-      _ref = $source.get(0).attributes;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        attr = _ref[_i];
+      var attr, j, len, ref, results;
+      ref = $source.get(0).attributes;
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        attr = ref[j];
         if (attr.specified) {
-          _results.push($target.attr(attr.name, attr.value));
+          results.push($target.attr(attr.name, attr.value));
         } else {
-          _results.push(void 0);
+          results.push(void 0);
         }
       }
-      return _results;
+      return results;
     };
     prependGhost = function($element) {
       var $ghost, dimensions;
@@ -626,16 +630,22 @@ If you use them in your own code, you will get hurt.
       return xhr.getResponseHeader('X-Up-Method');
     };
     only = function() {
-      var filtered, key, keys, object, _i, _len;
-      object = arguments[0], keys = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      var filtered, j, key, keys, len, object;
+      object = arguments[0], keys = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       filtered = {};
-      for (_i = 0, _len = keys.length; _i < _len; _i++) {
-        key = keys[_i];
+      for (j = 0, len = keys.length; j < len; j++) {
+        key = keys[j];
         if (object.hasOwnProperty(key)) {
           filtered[key] = object[key];
         }
       }
       return filtered;
+    };
+    isUnmodifiedKeyEvent = function(event) {
+      return !(event.metaKey || event.shiftKey || event.ctrlKey);
+    };
+    isUnmodifiedMouseEvent = function(event) {
+      return event.button === 0 && isUnmodifiedKeyEvent(event);
     };
     resolvedDeferred = function() {
       var deferred;
@@ -648,7 +658,7 @@ If you use them in your own code, you will get hurt.
     };
     resolvableWhen = function() {
       var deferreds, joined;
-      deferreds = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      deferreds = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       joined = $.when.apply($, deferreds);
       joined.resolve = function() {
         return each(deferreds, function(deferred) {
@@ -658,20 +668,20 @@ If you use them in your own code, you will get hurt.
       return joined;
     };
     setMissingAttrs = function($element, attrs) {
-      var key, value, _results;
-      _results = [];
+      var key, results, value;
+      results = [];
       for (key in attrs) {
         value = attrs[key];
         if (isMissing($element.attr(key))) {
-          _results.push($element.attr(key, value));
+          results.push($element.attr(key, value));
         } else {
-          _results.push(void 0);
+          results.push(void 0);
         }
       }
-      return _results;
+      return results;
     };
     stringSet = function(array) {
-      var includes, includesAny, key, put, set, string, _i, _len;
+      var includes, includesAny, j, key, len, put, set, string;
       set = {};
       includes = function(string) {
         return set[key(string)];
@@ -685,8 +695,8 @@ If you use them in your own code, you will get hurt.
       key = function(string) {
         return "_" + string;
       };
-      for (_i = 0, _len = array.length; _i < _len; _i++) {
-        string = array[_i];
+      for (j = 0, len = array.length; j < len; j++) {
+        string = array[j];
         put(string);
       }
       return {
@@ -732,6 +742,8 @@ If you use them in your own code, you will get hurt.
       isDeferred: isDeferred,
       isHash: isHash,
       ifGiven: ifGiven,
+      isUnmodifiedKeyEvent: isUnmodifiedKeyEvent,
+      isUnmodifiedMouseEvent: isUnmodifiedMouseEvent,
       unwrap: unwrap,
       nextFrame: nextFrame,
       measure: measure,
@@ -772,7 +784,7 @@ Browser interface
  */
 
 (function() {
-  var __slice = [].slice;
+  var slice = [].slice;
 
   up.browser = (function() {
     var canCssAnimation, canInputEvent, canPushState, ensureConsoleExists, ensureRecentJquery, isSupported, loadPage, memoize, u, url;
@@ -807,16 +819,16 @@ Browser interface
       return location.href;
     };
     ensureConsoleExists = function() {
-      var noop, _base, _base1, _base2, _base3, _base4, _base5, _base6;
+      var base, base1, base2, base3, base4, base5, base6, noop;
       window.console || (window.console = {});
       noop = function() {};
-      (_base = window.console).log || (_base.log = noop);
-      (_base1 = window.console).info || (_base1.info = noop);
-      (_base2 = window.console).error || (_base2.error = noop);
-      (_base3 = window.console).debug || (_base3.debug = noop);
-      (_base4 = window.console).group || (_base4.group = noop);
-      (_base5 = window.console).groupCollapsed || (_base5.groupCollapsed = noop);
-      return (_base6 = window.console).groupEnd || (_base6.groupEnd = noop);
+      (base = window.console).log || (base.log = noop);
+      (base1 = window.console).info || (base1.info = noop);
+      (base2 = window.console).error || (base2.error = noop);
+      (base3 = window.console).debug || (base3.debug = noop);
+      (base4 = window.console).group || (base4.group = noop);
+      (base5 = window.console).groupCollapsed || (base5.groupCollapsed = noop);
+      return (base6 = window.console).groupEnd || (base6.groupEnd = noop);
     };
     memoize = function(func) {
       var cache, cached;
@@ -824,7 +836,7 @@ Browser interface
       cached = false;
       return function() {
         var args;
-        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
         if (cached) {
           return cache;
         } else {
@@ -895,7 +907,7 @@ We need to work on this page:
  */
 
 (function() {
-  var __slice = [].slice;
+  var slice = [].slice;
 
   up.bus = (function() {
     var callbacksByEvent, callbacksFor, defaultCallbacksByEvent, emit, listen, reset, snapshot, u;
@@ -914,14 +926,14 @@ We need to work on this page:
     @method up.bus.snapshot
      */
     snapshot = function() {
-      var callbacks, event, _results;
+      var callbacks, event, results;
       defaultCallbacksByEvent = {};
-      _results = [];
+      results = [];
       for (event in callbacksByEvent) {
         callbacks = callbacksByEvent[event];
-        _results.push(defaultCallbacksByEvent[event] = u.copy(callbacks));
+        results.push(defaultCallbacksByEvent[event] = u.copy(callbacks));
       }
-      return _results;
+      return results;
     };
 
     /**
@@ -960,7 +972,7 @@ We need to work on this page:
      */
     emit = function() {
       var args, callbacks, eventName;
-      eventName = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      eventName = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       u.debug("Emitting event %o with args %o", eventName, args);
       callbacks = callbacksFor(eventName);
       return u.each(callbacks, function(callback) {
@@ -974,6 +986,139 @@ We need to work on this page:
       emit: emit
     };
   })();
+
+}).call(this);
+
+/**
+Viewport scrolling
+==================
+
+This modules contains functions to scroll the viewport and reveal contained elements.
+
+By default Up.js will always scroll to an element before updating it.
+
+@class up.viewport
+ */
+
+(function() {
+  up.viewport = (function() {
+    var SCROLL_PROMISE_KEY, config, defaults, finishScrolling, reveal, scroll, u;
+    u = up.util;
+    config = {
+      duration: 0,
+      view: 'body',
+      easing: 'swing'
+    };
+
+    /**
+    @method up.viewport.defaults
+    @param {Number} [options.duration]
+    @param {String} [options.easing]
+    @param {Number} [options.padding]
+    @param {String|Element|jQuery} [options.view]
+     */
+    defaults = function(options) {
+      return u.extend(config, options);
+    };
+    SCROLL_PROMISE_KEY = 'up-scroll-promise';
+
+    /**
+    @method up.scroll
+    @param {String|Element|jQuery} viewOrSelector
+    @param {Number} scrollPos
+    @param {String}[options.duration]
+    @param {String}[options.easing]
+    @returns {Deferred}
+    @protected
+     */
+    scroll = function(viewOrSelector, scrollPos, options) {
+      var $view, deferred, duration, easing, targetProps;
+      $view = $(viewOrSelector);
+      options = u.options(options);
+      duration = u.option(options.duration, config.duration);
+      easing = u.option(options.easing, config.easing);
+      finishScrolling($view);
+      if (duration > 0) {
+        deferred = $.Deferred();
+        $view.data(SCROLL_PROMISE_KEY, deferred);
+        deferred.then(function() {
+          $view.removeData(SCROLL_PROMISE_KEY);
+          return $view.finish();
+        });
+        targetProps = {
+          scrollTop: scrollPos
+        };
+        $view.animate(targetProps, {
+          duration: duration,
+          easing: easing,
+          complete: function() {
+            return deferred.resolve();
+          }
+        });
+        return deferred;
+      } else {
+        $view.scrollTop(scrollPos);
+        return u.resolvedDeferred();
+      }
+    };
+
+    /**
+    @method up.viewport.finishScrolling
+    @private
+     */
+    finishScrolling = function(elementOrSelector) {
+      return $(elementOrSelector).each(function() {
+        var existingScrolling;
+        if (existingScrolling = $(this).data(SCROLL_PROMISE_KEY)) {
+          return existingScrolling.resolve();
+        }
+      });
+    };
+
+    /**
+    @method up.reveal
+    @param {String|Element|jQuery} element
+    @param {String|Element|jQuery} [options.view]
+    @param {Number} [options.duration]
+    @param {String} [options.easing]
+    @param {Number} [options.padding]
+    @returns {Deferred}
+    @protected
+     */
+    reveal = function(elementOrSelector, options) {
+      var $element, $view, elementTooHigh, elementTooLow, elementTop, firstVisibleRow, lastVisibleRow, padding, scrollPos, view, viewHeight;
+      options = u.options(options);
+      view = u.option(options.view, config.view);
+      padding = u.option(options.padding, config.padding);
+      $element = $(elementOrSelector);
+      $view = $(view);
+      viewHeight = $view.height();
+      scrollPos = $view.scrollTop();
+      firstVisibleRow = scrollPos;
+      lastVisibleRow = scrollPos + viewHeight;
+      elementTop = $element.position().top;
+      elementTooHigh = elementTop - padding < firstVisibleRow;
+      elementTooLow = elementTop > lastVisibleRow - padding;
+      if (elementTooHigh || elementTooLow) {
+        scrollPos = elementTop - padding;
+        scrollPos = Math.max(scrollPos, 0);
+        scrollPos = Math.min(scrollPos, viewHeight - 1);
+        return scroll($view, scrollPos, options);
+      } else {
+        return u.resolvedDeferred();
+      }
+    };
+    return {
+      reveal: reveal,
+      scroll: scroll,
+      finishScrolling: finishScrolling,
+      defaults: defaults
+    };
+  })();
+
+  up.scroll = up.viewport.scroll;
+
+  up.reveal = up.viewport.reveal;
 
 }).call(this);
 
@@ -997,7 +1142,7 @@ We need to work on this page:
 
 (function() {
   up.flow = (function() {
-    var autofocus, destroy, elementsInserted, implant, implantSteps, reload, replace, reset, setSource, source, swapElements, u;
+    var autofocus, destroy, elementsInserted, findOldFragment, implant, parseImplantSteps, parseResponse, prepareForReplacement, reload, replace, reset, reveal, setSource, source, swapElements, u;
     u = up.util;
     setSource = function(element, sourceUrl) {
       var $element;
@@ -1033,6 +1178,7 @@ We need to work on this page:
       If set to `false`, the history will remain unchanged.
     @param {String|Boolean} [options.source=true]
     @param {String} [options.transition]
+    @param {String} [options.scroll='body']
     @param {String} [options.historyMethod='push']
      */
     replace = function(selectorOrElement, url, options) {
@@ -1087,34 +1233,69 @@ We need to work on this page:
     @param {String} [options.title]
     @param {String} [options.source]
     @param {Object} [options.transition]
+    @param {String} [options.scroll='body']
     @param {String} [options.history]
     @param {String} [options.historyMethod='push']
      */
     implant = function(selector, html, options) {
-      var $new, $old, fragment, htmlElement, step, _i, _len, _ref, _ref1, _results;
+      var $new, $old, j, len, ref, response, results, step;
       options = u.options(options, {
         historyMethod: 'push'
       });
-      if (options.history === 'false') {
+      if (u.castsToFalse(options.history)) {
         options.history = null;
       }
-      options.source = u.option(options.source, options.history);
-      htmlElement = u.createElementFromHtml(html);
-      options.title || (options.title = (_ref = htmlElement.querySelector("title")) != null ? _ref.textContent : void 0);
-      _ref1 = implantSteps(selector, options);
-      _results = [];
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        step = _ref1[_i];
-        up.motion.finish(step.selector);
-        $old = u.presence($(".up-popup " + step.selector)) || u.presence($(".up-modal " + step.selector)) || u.presence($(step.selector)) || u.error('Could not find selector %o in current body HTML', step.selector);
-        if (fragment = htmlElement.querySelector(step.selector)) {
-          $new = $(fragment);
-          _results.push(swapElements($old, $new, step.pseudoClass, step.transition, options));
-        } else {
-          _results.push(u.error("Could not find selector %o in response %o", step.selector, html));
-        }
+      if (u.castsToFalse(options.scroll)) {
+        options.scroll = null;
       }
-      return _results;
+      options.source = u.option(options.source, options.history);
+      response = parseResponse(html);
+      options.title || (options.title = response.title());
+      ref = parseImplantSteps(selector, options);
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        step = ref[j];
+        $old = findOldFragment(step.selector);
+        $new = response.find(step.selector);
+        results.push(prepareForReplacement($old, options).then(function() {
+          return swapElements($old, $new, step.pseudoClass, step.transition, options);
+        }));
+      }
+      return results;
+    };
+    findOldFragment = function(selector) {
+      return u.presence($(".up-popup " + selector)) || u.presence($(".up-modal " + selector)) || u.presence($(selector)) || u.error('Could not find selector %o in current body HTML', selector);
+    };
+    parseResponse = function(html) {
+      var htmlElement;
+      htmlElement = u.createElementFromHtml(html);
+      return {
+        title: function() {
+          var ref;
+          return (ref = htmlElement.querySelector("title")) != null ? ref.textContent : void 0;
+        },
+        find: function(selector) {
+          var child;
+          if (child = htmlElement.querySelector(selector)) {
+            return $(child);
+          } else {
+            return u.error("Could not find selector %o in response %o", selector, html);
+          }
+        }
+      };
+    };
+    prepareForReplacement = function($element, options) {
+      up.motion.finish($element);
+      return reveal($element, options.scroll);
+    };
+    reveal = function($element, view) {
+      if (view) {
+        return up.reveal($element, {
+          view: view
+        });
+      } else {
+        return u.resolvedDeferred();
+      }
     };
     elementsInserted = function($new, options) {
       if (typeof options.insert === "function") {
@@ -1143,7 +1324,7 @@ We need to work on this page:
       } else {
         return destroy($old, {
           animation: function() {
-            $new.insertAfter($old);
+            $new.insertBefore($old);
             elementsInserted($new, options);
             if ($old.is('body') && transition !== 'none') {
               u.error('Cannot apply transitions to body-elements (%o)', transition);
@@ -1153,26 +1334,26 @@ We need to work on this page:
         });
       }
     };
-    implantSteps = function(selector, options) {
-      var comma, disjunction, i, selectorAtom, selectorParts, transition, transitionString, transitions, _i, _len, _results;
+    parseImplantSteps = function(selector, options) {
+      var comma, disjunction, i, j, len, results, selectorAtom, selectorParts, transition, transitionString, transitions;
       transitionString = options.transition || options.animation || 'none';
       comma = /\ *,\ */;
       disjunction = selector.split(comma);
       if (u.isPresent(transitionString)) {
         transitions = transitionString.split(comma);
       }
-      _results = [];
-      for (i = _i = 0, _len = disjunction.length; _i < _len; i = ++_i) {
+      results = [];
+      for (i = j = 0, len = disjunction.length; j < len; i = ++j) {
         selectorAtom = disjunction[i];
         selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/);
         transition = transitions[i] || u.last(transitions);
-        _results.push({
+        results.push({
           selector: selectorParts[1],
           pseudoClass: selectorParts[2],
           transition: transition
         });
       }
-      return _results;
+      return results;
     };
     autofocus = function($element) {
       var $control, selector;
@@ -1284,7 +1465,7 @@ We need to work on this page:
  */
 
 (function() {
-  var __slice = [].slice;
+  var slice = [].slice;
 
   up.magic = (function() {
     var DESTROYABLE_CLASS, DESTROYER_KEY, applyAwakener, awaken, awakeners, compile, data, defaultAwakeners, defaultLiveDescriptions, destroy, live, liveDescriptions, onEscape, ready, reset, snapshot, u;
@@ -1311,7 +1492,7 @@ We need to work on this page:
     liveDescriptions = [];
     defaultLiveDescriptions = null;
     live = function(events, selector, behavior) {
-      var description, _ref;
+      var description, ref;
       if (!up.browser.isSupported()) {
         return;
       }
@@ -1321,7 +1502,7 @@ We need to work on this page:
         }
       ];
       liveDescriptions.push(description);
-      return (_ref = $(document)).on.apply(_ref, description);
+      return (ref = $(document)).on.apply(ref, description);
     };
 
     /**
@@ -1349,7 +1530,7 @@ We need to work on this page:
     defaultAwakeners = null;
     awaken = function() {
       var args, awakener, options, selector;
-      selector = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (!up.browser.isSupported()) {
         return;
       }
@@ -1373,25 +1554,25 @@ We need to work on this page:
       }
     };
     compile = function($fragment) {
-      var $matches, awakener, _i, _len, _results;
+      var $matches, awakener, i, len, results;
       u.debug("Compiling fragment %o", $fragment);
-      _results = [];
-      for (_i = 0, _len = awakeners.length; _i < _len; _i++) {
-        awakener = awakeners[_i];
+      results = [];
+      for (i = 0, len = awakeners.length; i < len; i++) {
+        awakener = awakeners[i];
         $matches = u.findWithSelf($fragment, awakener.selector);
         if ($matches.length) {
           if (awakener.batch) {
-            _results.push(applyAwakener(awakener, $matches, $matches.get()));
+            results.push(applyAwakener(awakener, $matches, $matches.get()));
           } else {
-            _results.push($matches.each(function() {
+            results.push($matches.each(function() {
               return applyAwakener(awakener, $(this), this);
             }));
           }
         } else {
-          _results.push(void 0);
+          results.push(void 0);
         }
       }
-      return _results;
+      return results;
     };
     destroy = function($fragment) {
       return u.findWithSelf($fragment, "." + DESTROYABLE_CLASS).each(function() {
@@ -1402,7 +1583,7 @@ We need to work on this page:
       });
     };
 
-    /*
+    /**
     Checks if the given element has an `up-data` attribute.
     If yes, parses the attribute value as JSON and returns the parsed object.
     
@@ -1414,6 +1595,22 @@ We need to work on this page:
     @protected
     @method up.magic.data
     @param {String|Element|jQuery} elementOrSelector
+     */
+
+    /*
+    Stores a JSON-string with the element.
+    
+    If an element annotated with [`up-data`] is inserted into the DOM,
+    Up will parse the JSON and pass the resulting object to any matching
+    [`up.awaken`](/up.magic#up.magic.awaken) handlers.
+    
+    Similarly, when an event is triggered on an element annotated with
+    [`up-data`], the parsed object will be passed to any matching
+    [`up.on`](/up.magic#up.on) handlers.
+    
+    @ujs
+    @method [up-data]
+    @param {JSON} [up-data]
      */
     data = function(elementOrSelector) {
       var $element, json;
@@ -1446,11 +1643,11 @@ We need to work on this page:
     @method up.magic.reset
      */
     reset = function() {
-      var description, _i, _len, _ref;
-      for (_i = 0, _len = liveDescriptions.length; _i < _len; _i++) {
-        description = liveDescriptions[_i];
+      var description, i, len, ref;
+      for (i = 0, len = liveDescriptions.length; i < len; i++) {
+        description = liveDescriptions[i];
         if (!u.contains(defaultLiveDescriptions, description)) {
-          (_ref = $(document)).off.apply(_ref, description);
+          (ref = $(document)).off.apply(ref, description);
         }
       }
       liveDescriptions = u.copy(defaultLiveDescriptions);
@@ -1622,21 +1819,21 @@ We need to work on this page:
   up.motion = (function() {
     var GHOSTING_PROMISE_KEY, animate, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, defaults, findAnimation, finish, finishGhosting, morph, none, reset, resolvableWhen, snapshot, transition, transitions, u, withGhosts;
     u = up.util;
+    animations = {};
+    defaultAnimations = {};
+    transitions = {};
+    defaultTransitions = {};
     config = {
       duration: 300,
       delay: 0,
       easing: 'ease'
     };
-    animations = {};
-    defaultAnimations = {};
-    transitions = {};
-    defaultTransitions = {};
 
     /**
     @method up.modal.defaults
-    @param {Number} options.duration
-    @param {Number} options.delay
-    @param {String} options.easing
+    @param {Number} [options.duration]
+    @param {Number} [options.delay]
+    @param {String} [options.easing]
      */
     defaults = function(options) {
       return u.extend(config, options);
@@ -1726,13 +1923,14 @@ We need to work on this page:
       return promise;
     };
 
-    /*
+    /**
     Completes all animations and transitions for the given element
     by jumping to the last animation frame instantly. All callbacks chained to
     the original animation's promise will be called.
     
     Does nothing if the given element is not currently animating.
     
+    @method up.motion.finish
     @param {Element|jQuery|String} elementOrSelector
      */
     finish = function(elementOrSelector) {
@@ -2026,10 +2224,12 @@ Caching and preloading
 ======================
 
 All HTTP requests go through the Up.js proxy.
-It caches a limited number
+It caches a [limited](/up.proxy#up.proxy.defaults) number of server responses
+  for a [limited](/up.proxy#up.proxy.defaults) amount of time,
+making requests to these URLs return insantly.
   
-The cache is cleared whenever the user makes a non-´GET` request
-(like `POST`, `PUT`, `DELETE`).
+The cache is cleared whenever the user makes a non-`GET` request
+(like `POST`, `PUT` or `DELETE`).
 
 The proxy can also used to speed up reaction times by preloading
 links when the user hovers over the click area (or puts the mouse/finger
@@ -2043,16 +2243,16 @@ response will already be cached when the user performs the click.
   up.proxy = (function() {
     var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, cache, cacheKey, cancelDelay, checkPreload, clear, config, defaults, delayTimer, ensureIsIdempotent, get, isFresh, isIdempotent, normalizeRequest, preload, remove, reset, set, startDelay, timestamp, touch, trim, u;
     config = {
-      preloadDelay: 50,
+      preloadDelay: 75,
       cacheSize: 70,
       cacheExpiry: 1000 * 60 * 5
     };
 
     /**
     @method up.proxy.defaults
-    @param {Number} [preloadDelay]
-    @param {Number} [cacheSize]
-    @param {Number} [cacheExpiry]
+    @param {Number} [options.preloadDelay]
+    @param {Number} [options.cacheSize]
+    @param {Number} [options.cacheExpiry]
       The number of milliseconds until a cache entry expires.
      */
     defaults = function(options) {
@@ -2111,11 +2311,19 @@ response will already be cached when the user performs the click.
       }
     };
 
-    /*
+    /**
+    Makes a request to the given URL and caches the response.
+    If the response was already cached, returns the HTML instantly.
+    
+    If requesting a URL that is not read-only, the response will
+    not be cached and the entire cache will be cleared.
+    Only requests with a method of `GET`, `OPTIONS` and `HEAD`
+    are considered to be read-only.
+    
     @method up.proxy.ajax
-    @param {String} options.url
-    @param {String} [options.method='GET']
-    @param {String} [options.selector]
+    @param {String} request.url
+    @param {String} [request.method='GET']
+    @param {String} [request.selector]
      */
     ajax = function(request) {
       var promise;
@@ -2211,7 +2419,7 @@ response will already be cached when the user performs the click.
     };
     up.bus.on('framework:reset', reset);
 
-    /*
+    /**
     Links with an `up-preload` attribute will silently fetch their target
     when the user hovers over the click area, or when the user puts her
     mouse/finger down (before releasing). This way the
@@ -2219,6 +2427,10 @@ response will already be cached when the user performs the click.
     making the interaction feel instant.   
     
     @method [up-preload]
+    @param [[up-delay]=50]
+      The number of milliseconds to wait between hovering
+      and preloading. Increasing this will lower the load in your server,
+      but will also make the interaction feel less instant.
     @ujs
      */
     up.on('mouseover mousedown touchstart', '[up-preload]', function(event, $element) {
@@ -2316,7 +2528,7 @@ Read on
 
 (function() {
   up.link = (function() {
-    var childClicked, follow, resolve, u, visit;
+    var activeInstantLink, childClicked, follow, resolve, u, visit;
     u = up.util;
 
     /**
@@ -2351,6 +2563,9 @@ Read on
       or to `body` if such an attribute does not exist.
     @param {Function|String} [options.transition]
       A transition function or name.
+    @param {Element|jQuery|String} scroll
+      An element or selector that will be scrolled to the top in
+      case the replaced element is not visible in the viewport.
      */
     follow = function(link, options) {
       var $link, selector, url;
@@ -2360,6 +2575,7 @@ Read on
       selector = u.option(options.target, $link.attr('up-target'), 'body');
       options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation'));
       options.history = u.option(options.history, $link.attr('up-history'));
+      options.scroll = u.option(options.history, $link.attr('up-scroll'), 'body');
       return up.replace(selector, url, options);
     };
     resolve = function(element) {
@@ -2404,13 +2620,13 @@ Read on
       }
     });
     up.on('mousedown', 'a[up-target][up-instant]', function(event, $link) {
-      if (event.which === 1) {
+      if (activeInstantLink(event, $link)) {
         event.preventDefault();
-        return follow($link);
+        return up.follow($link);
       }
     });
 
-    /*
+    /**
     @method up.link.childClicked
     @private
      */
@@ -2419,6 +2635,9 @@ Read on
       $target = $(event.target);
       $targetLink = $target.closest('a, [up-follow]');
       return $targetLink.length && $link.find($targetLink).length;
+    };
+    activeInstantLink = function(event, $link) {
+      return u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link);
     };
 
     /**
@@ -2454,22 +2673,22 @@ Read on
     @param up-instant
       If set, fetches the element on `mousedown` instead of `click`.
      */
-    up.on('click', '[up-follow]', function(event, $element) {
-      if (!childClicked(event, $element)) {
+    up.on('click', '[up-follow]', function(event, $link) {
+      if (!childClicked(event, $link)) {
         event.preventDefault();
-        if (!$element.is('[up-instant]')) {
-          return follow(resolve($element));
+        if (!$link.is('[up-instant]')) {
+          return follow(resolve($link));
         }
       }
     });
-    up.on('mousedown', '[up-follow][up-instant]', function(event, $element) {
-      if (!childClicked(event, $element) && event.which === 1) {
+    up.on('mousedown', '[up-follow][up-instant]', function(event, $link) {
+      if (activeInstantLink(event, $link)) {
         event.preventDefault();
-        return follow(resolve($element));
+        return up.follow(resolve($link));
       }
     });
 
-    /*
+    /**
     Marks up the current link to be followed *as fast as possible*.
     This is done by:
     
@@ -2483,7 +2702,7 @@ Read on
     
     Note that this is shorthand for:
     
-      <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
+        <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
     
     You can also apply `[up-dash]` to any element that contains a link
     in order to enlarge the link's click area:
@@ -2609,7 +2828,7 @@ We need to work on this page:
       };
       successUrl = function(xhr) {
         var currentLocation;
-        url = historyOption ? historyOption === 'false' ? false : u.isString(historyOption) ? historyOption : (currentLocation = u.locationFromXhr(xhr)) ? currentLocation : request.type === 'GET' ? request.url + '?' + request.data : void 0 : void 0;
+        url = historyOption ? u.castsToFalse(historyOption) ? false : u.isString(historyOption) ? historyOption : (currentLocation = u.locationFromXhr(xhr)) ? currentLocation : request.type === 'GET' ? request.url + '?' + request.data : void 0 : void 0;
         return u.option(url, false);
       };
       return u.ajax(request).always(function() {
@@ -2682,7 +2901,7 @@ We need to work on this page:
       check = function() {
         var skipCallback, value;
         value = $field.val();
-        skipCallback = _.isNull(knownValue);
+        skipCallback = u.isNull(knownValue);
         if (knownValue !== value) {
           knownValue = value;
           if (!skipCallback) {
@@ -2796,7 +3015,7 @@ We need to work on this page:
 
 (function() {
   up.popup = (function() {
-    var autoclose, close, config, createHiddenPopup, defaults, ensureInViewport, open, position, source, u, updated;
+    var autoclose, close, config, createHiddenPopup, defaults, discardHistory, ensureInViewport, open, position, rememberHistory, source, u, updated;
     u = up.util;
     config = {
       openAnimation: 'fade-in',
@@ -2881,17 +3100,28 @@ We need to work on this page:
         }
       }
     };
+    rememberHistory = function() {
+      var $popup;
+      $popup = $('.up-popup');
+      $popup.attr('up-previous-url', up.browser.url());
+      return $popup.attr('up-previous-title', document.title);
+    };
+    discardHistory = function() {
+      var $popup;
+      $popup = $('.up-popup');
+      $popup.removeAttr('up-previous-url');
+      return $popup.removeAttr('up-previous-title');
+    };
     createHiddenPopup = function($link, selector, sticky) {
       var $placeholder, $popup;
       $popup = u.$createElementFromSelector('.up-popup');
       if (sticky) {
         $popup.attr('up-sticky', '');
       }
-      $popup.attr('up-previous-url', up.browser.url());
-      $popup.attr('up-previous-title', document.title);
       $placeholder = u.$createElementFromSelector(selector);
       $placeholder.appendTo($popup);
       $popup.appendTo(document.body);
+      rememberHistory();
       $popup.hide();
       return $popup;
     };
@@ -3009,6 +3239,7 @@ We need to work on this page:
     });
     up.bus.on('fragment:ready', function($fragment) {
       if (!$fragment.closest('.up-popup').length) {
+        discardHistory();
         return autoclose();
       }
     });
@@ -3061,7 +3292,7 @@ We need to work on this page:
 
 (function() {
   up.modal = (function() {
-    var autoclose, close, config, createHiddenModal, defaults, open, source, templateHtml, u, updated;
+    var autoclose, close, config, createHiddenModal, defaults, discardHistory, open, rememberHistory, source, templateHtml, u, updated;
     u = up.util;
     config = {
       width: 'auto',
@@ -3095,6 +3326,18 @@ We need to work on this page:
         return template;
       }
     };
+    rememberHistory = function() {
+      var $popup;
+      $popup = $('.up-modal');
+      $popup.attr('up-previous-url', up.browser.url());
+      return $popup.attr('up-previous-title', document.title);
+    };
+    discardHistory = function() {
+      var $popup;
+      $popup = $('.up-modal');
+      $popup.removeAttr('up-previous-url');
+      return $popup.removeAttr('up-previous-title');
+    };
     createHiddenModal = function(selector, width, height, sticky) {
       var $content, $dialog, $modal, $placeholder;
       $modal = $(templateHtml());
@@ -3114,6 +3357,7 @@ We need to work on this page:
       $placeholder = u.$createElementFromSelector(selector);
       $placeholder.appendTo($content);
       $modal.appendTo(document.body);
+      rememberHistory();
       $modal.hide();
       return $modal;
     };
@@ -3196,6 +3440,7 @@ We need to work on this page:
     };
     autoclose = function() {
       if (!$('.up-modal').is('[up-sticky]')) {
+        discardHistory();
         return close();
       }
     };
@@ -3416,11 +3661,21 @@ From Up's point of view the "current" location is either:
 
 (function() {
   up.navigation = (function() {
-    var CLASS_ACTIVE, CLASS_CURRENT, SELECTOR_ACTIVE, SELECTOR_SECTION, enlargeClickArea, locationChanged, normalizeUrl, sectionClicked, sectionUrls, u, unmarkActive;
+    var CLASS_ACTIVE, CLASS_CURRENT, SELECTORS_SECTION, SELECTOR_ACTIVE, SELECTOR_SECTION, SELECTOR_SECTION_INSTANT, enlargeClickArea, locationChanged, normalizeUrl, sectionClicked, sectionUrls, selector, u, unmarkActive;
     u = up.util;
     CLASS_ACTIVE = 'up-active';
     CLASS_CURRENT = 'up-current';
-    SELECTOR_SECTION = 'a[href], a[up-target], [up-follow], [up-modal], [up-popup], [up-source]';
+    SELECTORS_SECTION = ['a[href]', 'a[up-target]', '[up-follow]', '[up-modal]', '[up-popup]', '[up-href]'];
+    SELECTOR_SECTION = SELECTORS_SECTION.join(', ');
+    SELECTOR_SECTION_INSTANT = ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = SELECTORS_SECTION.length; i < len; i++) {
+        selector = SELECTORS_SECTION[i];
+        results.push(selector + "[up-instant]");
+      }
+      return results;
+    })()).join(', ');
     SELECTOR_ACTIVE = "." + CLASS_ACTIVE;
     normalizeUrl = function(url) {
       if (u.isPresent(url)) {
@@ -3431,12 +3686,12 @@ From Up's point of view the "current" location is either:
       }
     };
     sectionUrls = function($section) {
-      var $link, attr, url, urls, _i, _len, _ref;
+      var $link, attr, i, len, ref, url, urls;
       urls = [];
       if ($link = up.link.resolve($section)) {
-        _ref = ['href', 'up-follow', 'up-source'];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          attr = _ref[_i];
+        ref = ['href', 'up-follow', 'up-href'];
+        for (i = 0, len = ref.length; i < len; i++) {
+          attr = ref[i];
           if (url = u.presentAttr($link, attr)) {
             url = normalizeUrl(url);
             urls.push(url);
@@ -3471,7 +3726,14 @@ From Up's point of view the "current" location is either:
       return $(SELECTOR_ACTIVE).removeClass(CLASS_ACTIVE);
     };
     up.on('click', SELECTOR_SECTION, function(event, $section) {
-      return sectionClicked($section);
+      if (!$section.is('[up-instant]')) {
+        return sectionClicked($section);
+      }
+    });
+    up.on('mousedown', SELECTOR_SECTION_INSTANT, function(event, $section) {
+      if (u.isUnmodifiedMouseEvent(event)) {
+        return sectionClicked($section);
+      }
     });
     up.bus.on('fragment:ready', function() {
       unmarkActive();
