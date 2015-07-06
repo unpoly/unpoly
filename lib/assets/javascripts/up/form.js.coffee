@@ -165,7 +165,7 @@ up.form = (->
     check = ->
       value = $field.val()
       # don't run the callback for the check during initialization
-      skipCallback = _.isNull(knownValue)
+      skipCallback = u.isNull(knownValue)
       if knownValue != value
         knownValue = value
         unless skipCallback
