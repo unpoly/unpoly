@@ -33,4 +33,16 @@ describe 'up.util', ->
 
       it 'returns true for an object with at least one key', ->
         expect(up.util.isBlank({key: 'value'})).toBe(false)
-        
+
+    describe '.normalizeUrl', ->
+
+      it 'normalizes a relative path', ->
+        expect(up.util.normalizeUrl('foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
+
+      it 'normalizes an absolute path', ->
+        expect(up.util.normalizeUrl('/foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
+
+      it 'normalizes a full URL', ->
+        expect(up.util.normalizeUrl('http://example.com/foo/bar')).toBe('http://example.com/foo/bar')
+
+
