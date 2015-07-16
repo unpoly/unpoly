@@ -81,14 +81,16 @@ up.link = (->
   Visits the given URL without a full page load.
   This is done by fetching `url` through an AJAX request
   and replacing the current `<body>` element with the response's `<body>` element.
-  
+
+  For example, this would fetch the `/users` URL:
+
+      up.visit('/users')
+
   @method up.visit
   @param {String} url
     The URL to visit.
   @param {Object} options
     See options for [`up.replace`](/up.flow#up.replace)
-  @example
-      up.visit('/users')
   ###
   visit = (url, options) ->
     u.debug "Visiting #{url}"
@@ -98,7 +100,16 @@ up.link = (->
   ###*
   Follows the given link via AJAX and replaces a CSS selector in the current page
   with corresponding elements from a new page fetched from the server.
-  
+
+  Any Up.js UJS attributes on the given link will be honored. E. g. you have this link:
+
+      <a href="/users" up-target=".main">Users</a>
+
+  You can update the page's `.main` selector with the `.main` from `/users` like this:
+
+      var $link = $('a:first'); // select link with jQuery
+      up.follow($link);
+
   @method up.follow
   @param {Element|jQuery|String} link
     An element or selector which resolves to an `<a>` tag

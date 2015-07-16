@@ -1,25 +1,44 @@
 ###*
 Framework events
 ================
-  
-This class is kind-of internal and in constant flux.
-  
-The framework event bus might eventually be rolled
-into regular document events.
 
-\#\#\# Available events
+Up.js uses an internal event bus that you can use to hook into lifecycle events like "an HTML fragment into the DOM".
   
-- `app:ready`
-- `fragment:ready` with arguments `($fragment)`
-- `fragment:destroy` with arguments `($fragment)`
+This internal event bus might eventually be rolled into regular events that we trigger on `document`.
+
+\#\#\# `fragment:ready` event
+
+This event is triggered after Up.js has inserted an HTML fragment into the DOM through mechanisms like [`[up-target]`](/up.flow#up-target) or [`up.replace`](/up.flow#up.replace):
+
+    up.bus.on('fragment:ready', function($fragment) {
+      console.log("Looks like we have a new %o!", $fragment);
+    });
+
+The event is triggered *before* Up has compiled the fragment with your [custom behavior](/up.magic).
+Upon receiving the event, Up.js will start compilation.
+
+
+\#\#\# `fragment:destroy` event
+
+This event is triggered when Up.js is destroying an HTML fragment, e.g. because it's being replaced
+with a new version or because someone explicitly called [`up.destroy`](/up.flow#up.destroy):
+
+    up.bus.on('fragment:destroy', function($fragment) {
+      console.log("Looks like we lost %o!", $fragment);
+    });
+
+After triggering this event, Up.js will remove the fragment from the DOM.
+In case the fragment destruction is animated, Up.js will complete the
+animation before removing the fragment from the DOM.
+
 
 \#\#\# Incomplete documentation!
   
 We need to work on this page:
 
 - Decide whether to refactor this into document events
-- Document events
-  
+- Decide whether `fragment:enter` and `fragment:leave` would be better names
+
   
 @class up.bus
 ###
@@ -71,8 +90,22 @@ up.bus = (->
     callbacksFor(eventName).push(handler)
 
   ###*
-  Triggers an event.
-  
+  Triggers an event over the framework bus.
+
+  All arguments will be passed as arguments to event listeners:
+
+      up.bus.on('foo:bar', function(x, y) {
+        console.log("Value of x is " + x);
+        console.log("Value of y is " + y);
+      });
+
+      up.bus.emit('foo:bar', 'arg1', 'arg2')
+
+      // This prints to the console:
+      //
+      //   Value of x is arg1
+      //   Value of y is arg2
+
   @method up.bus.emit
   @param {String} eventName
     The name of the event.

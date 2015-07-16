@@ -5,17 +5,13 @@ Registering behavior and custom elements
 Up.js keeps a persistent Javascript environment during page transitions.
 To prevent memory leaks it is important to cleanly set up and tear down
 event handlers and custom elements.
-    
+
 \#\#\# Incomplete documentation!
-  
+
 We need to work on this page:
-  
-- Explain when to use `up.on` and when to use `up.awaken`
-- Example for integrating an external JS lib that is not aware of Up.js
-- Example for defining a custom element
-- Tell more about memory leaks and why they don't matter
-  so much when you have full page loads.
-  
+
+- Better class-level introduction for this module
+
 @class up.magic
 ###
 up.magic = (->
@@ -26,10 +22,50 @@ up.magic = (->
   DESTROYER_KEY = 'up-destroyer'
 
   ###*
-  Binds an event handler to the document,
-  which will be executed whenever the given event
-  is triggered on the given selector.
-  
+  Binds an event handler to the document, which will be executed whenever the
+  given event is triggered on the given selector:
+
+      up.on('click', '.button', function(event, $element) {
+        console.log("Someone clicked the button %o", $element);
+      });
+
+  This is roughly equivalent to binding a jQuery element to `document`.
+
+
+  \#\#\#\# Attaching structured data
+
+  In case you want to attach structured data to the event you're observing,
+  you can serialize the data to JSON and put it into an `[up-data]` attribute:
+
+      <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
+      <span class="person" up-data="{ age: 22, name: 'Jim' }">Jim</span>
+
+  The JSON will parsed and handed to your event handler as a third argument:
+
+      up.on('click', '.person', function(event, $element, data) {
+        console.log("This is %o who is %o years old", data.name, data.age);
+      });
+
+
+  \#\#\#\# Migrating jQuery event handlers to `up.on`
+
+  Within the event handler, Up.js will bind `this` to the
+  native DOM element to help you migrate your existing jQuery code to
+  this new syntax.
+
+  So if you had this before:
+
+      $(document).on('click', '.button', function() {
+        $(this).something();
+      });
+
+  ... you can simply copy the event handler to `up.on`:
+
+      up.on('click', '.button', function() {
+        $(this).something();
+      });
+
+
   @method up.on
   @param {String} events
     A space-separated list of event names to bind.
@@ -59,6 +95,110 @@ up.magic = (->
   ###*
   Registers a function to be called whenever an element with
   the given selector is inserted into the DOM through Up.js.
+
+  This is a great way to integrate jQuery plugins.
+  Let's say your Javascript plugin wants you to call `lightboxify()`
+  on links that should open a lightbox. You decide to
+  do this for all links with an `[rel=lightbox]` attribute:
+
+      <a href="river.png" rel="lightbox">River</a>
+      <a href="ocean.png" rel="lightbox">Ocean</a>
+
+  This Javascript will do exactly that:
+
+      up.awaken('a[rel=lightbox]', function($element) {
+        $element.lightboxify();
+      });
+
+  Note that within the awakener, Up.js will bind `this` to the
+  native DOM element to help you migrate your existing jQuery code to
+  this new syntax.
+
+
+  \#\#\#\# Custom elements
+
+  You can also use `up.awaken` to implement custom elements like this:
+
+      <current-time></current-time>
+
+  Here is the Javascript that inserts the current time into to these elements:
+
+      up.awaken('current-time', function($element) {
+        var now = new Date();
+        $element.text(now.toString()));
+      });
+
+
+  \#\#\#\# Cleaning up after yourself
+
+  If your awakener returns a function, Up.js will use this as a *destructor* to
+  clean up if the element leaves the DOM. Note that in Up.js the same DOM ad Javascript environment
+  will persist through many page loads, so it's important to not create
+  [memory leaks](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
+
+  You should clean up after yourself whenever your awakeners have global
+  side effects, like a [`setInterval`](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setInterval)
+  or event handlers bound to the document root.
+
+  Here is a version of `<current-time>` that updates
+  the time every second, and cleans up once it's done:
+
+      up.awaken('current-time', function($element) {
+
+        function update() {
+          var now = new Date();
+          $element.text(now.toString()));
+        }
+
+        setInterval(update, 1000);
+
+        return function() {
+          clearInterval(update);
+        };
+
+      });
+
+  If we didn't clean up after ourselves, we would have many ticking intervals
+  operating on detached DOM elements after we have created and removed a couple
+  of `<current-time>` elements.
+
+
+  \#\#\#\# Attaching structured data
+
+  In case you want to attach structured data to the event you're observing,
+  you can serialize the data to JSON and put it into an `[up-data]` attribute.
+  For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
+  might attach the location and names of its marker pins:
+
+      <div class="google-map" up-data="[
+        { lat: 48.36, lng: 10.99, title: 'Friedberg' },
+        { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
+      ]"></div>
+
+  The JSON will parsed and handed to your event handler as a second argument:
+
+      up.awaken('.google-map', function($element, pins) {
+
+        var map = new google.maps.Map($element);
+
+        pins.forEach(function(pin) {
+          var position = new google.maps.LatLng(pin.lat, pin.lng);
+          new google.maps.Marker({
+            position: position,
+            map: map,
+            title: pin.title
+          });
+        });
+
+      });
+
+
+  \#\#\#\# Migrating jQuery event handlers to `up.on`
+
+  Within the awakener, Up.js will bind `this` to the
+  native DOM element to help you migrate your existing jQuery code to
+  this new syntax.
+
   
   @method up.awaken
   @param {String} selector

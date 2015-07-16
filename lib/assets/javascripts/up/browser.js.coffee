@@ -1,7 +1,10 @@
 ###*
 Browser interface
 =================
-  
+
+Some browser-interfacing methods and switches that we can't currently get rid off.
+
+@protected
 @class up.browser
 ###
 up.browser = (->
