@@ -35,7 +35,7 @@ up.viewport = (->
   @param {Number} scrollPos
   @param {String}[options.duration]
   @param {String}[options.easing]
-  @returns {Deferred}
+  @return {Deferred}
   @protected 
   ###
   scroll = (viewOrSelector, scrollPos, options) ->
@@ -83,7 +83,7 @@ up.viewport = (->
   @param {Number} [options.duration]
   @param {String} [options.easing]
   @param {Number} [options.padding]
-  @returns {Deferred}
+  @return {Deferred}
   @protected
   ###
   reveal = (elementOrSelector, options) ->
