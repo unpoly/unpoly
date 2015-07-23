@@ -115,6 +115,7 @@ up.popup = (->
   
   @method up.popup.open
   @param {Element|jQuery|String} elementOrSelector
+  @param {String} [options.url]
   @param {String} [options.origin='bottom-right']
   @param {String} [options.animation]
   @param {Boolean} [options.sticky=false]
@@ -126,7 +127,7 @@ up.popup = (->
     $link = $(linkOrSelector)
     
     options = u.options(options)
-    url = u.option($link.attr('href'))
+    url = u.option(options.url, $link.attr('href'))
     selector = u.option(options.target, $link.attr('up-popup'), 'body')
     origin = u.option(options.origin, $link.attr('up-origin'), config.origin)
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
