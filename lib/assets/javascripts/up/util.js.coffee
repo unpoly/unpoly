@@ -45,13 +45,23 @@ up.util = (->
   @protected
   ###
   normalizeUrl = (urlOrAnchor, options) ->
-    anchor = if isString(urlOrAnchor) 
-      $('<a>').attr(href: urlOrAnchor).get(0)
-    else 
-      unwrap(urlOrAnchor)
+    anchor = null
+    if isString(urlOrAnchor)
+      anchor = $('<a>').attr(href: urlOrAnchor).get(0)
+      # In IE11 the #hostname and #port properties of such a link are empty
+      # strings. However, we can fix this by assigning the anchor its own
+      # href because computer:
+      # https://gist.github.com/jlong/2428561#comment-1461205
+      anchor.href = anchor.href if isBlank(anchor.hostname)
+    else
+      anchor = unwrap(urlOrAnchor)
     normalized = anchor.protocol + "//" + anchor.hostname
     normalized += ":#{anchor.port}" unless isStandardPort(anchor.protocol, anchor.port)
     pathname = anchor.pathname
+    # Some IEs don't include a leading slash in the #pathname property.
+    # We have seen this in IE11 and W3Schools claims it happens in IE9 or earlier
+    # http://www.w3schools.com/jsref/prop_anchor_pathname.asp
+    pathname = "/#{pathname}" unless pathname[0] == '/'
     pathname = pathname.replace(/\/$/, '') if options?.stripTrailingSlash == true
     normalized += pathname
     normalized += anchor.hash if options?.hash == true
