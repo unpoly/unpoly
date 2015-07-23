@@ -32,7 +32,16 @@ Your HTML could look like this:
 </article>
 ```
 
-Slow, full page loads. White flash during loading.
+Using this document-oriented way of navigating between pages
+is not a good fit for modern applications, for a multitude of reasons:
+
+- State changes caused by AJAX updates get lost during the page transition.
+- Unsaved form changes get lost during the page transition.
+- The Javascript VM is reset during the page transition.
+- If the page layout is composed from multiple srollable containers
+  (e.g. a pane view), the scroll positions get lost during the page transition.
+- The user sees a "flash" as the browser loads and renders the new page,
+  even if large portions of the old and new page are the same (navigation, layout, etc.).
 
 
 Smoother flow by updating fragments
@@ -148,7 +157,40 @@ up.link = (->
   Follows this link via AJAX and replaces a CSS selector in the current page
   with corresponding elements from a new page fetched from the server:
 
-      <a href="/users" up-target=".main">User list</a>
+      <a href="/posts/5" up-target=".main">Read post</a>
+
+  \#\#\#\# Updating multiple fragments
+
+  You can update multiple fragments from a single request by separating
+  separators with a comma (like in CSS). E.g. if opening a post should
+  also update a bubble showing the number of unread posts, you might
+  do this:
+
+      <a href="/posts/5" up-target=".main, .unread-count">Read post</a>
+
+  \#\#\#\# Appending or prepending instead of replacing
+
+  By default Up.js will replace the given selector with the same
+  selector from a freshly fetched page. Instead of replacing you
+  can *append* the loaded content to the existing content by using the
+  `:after` pseudo selector. In the same fashion, you can use `:before`
+  to indicate that you would like the *prepend* the loaded content.
+
+  A practical example would be a paginated list of items. Below the list is
+  a button to load the next page. You can append to the existing list
+  by using `:after` in the `up-target` selector like this:
+
+      <ul class="tasks">
+        <li>Wash car</li>
+        <li>Purchase supplies</li>
+        <li>Fix tent</li>
+      </ul>
+
+      <a href="/page/2" class="next-page" up-target=".tasks:after, .next-page">
+        Load more tasks
+      </a>
+
+  \#\#\#\# Following on mousedown
   
   By also adding an `up-instant` attribute, the page will be fetched
   on `mousedown` instead of `click`, making the interaction even faster:
@@ -196,7 +238,9 @@ up.link = (->
   current `<body>` element with the response's `<body>` element
 
       <a href="/users" up-follow>User list</a>
-  
+
+  \#\#\#\# Following on mousedown
+
   By also adding an `up-instant` attribute, the page will be fetched
   on `mousedown` instead of `click`, making the interaction even faster:
   
@@ -207,6 +251,8 @@ up.link = (->
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown`.
 
+  \#\#\#\# Enlarging the click area
+
   You can also apply `[up-follow]` to any element that contains a link
   in order to enlarge the link's click area:
 
@@ -216,7 +262,7 @@ up.link = (->
       </div>
 
   In the example above, clicking anywhere within `.notification` element
-  would follow the `Close` link.
+  would follow the *Close* link.
 
   @method [up-follow]
   @ujs
