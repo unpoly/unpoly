@@ -22,10 +22,10 @@ If you use them in your own code, you will get hurt.
  */
 
 (function() {
-  var slice = [].slice;
+  var __slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringSet, stringifyConsoleArgs, temporaryCss, toArray, trim, unwrap;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringSet, stringifyConsoleArgs, temporaryCss, toArray, trim, unwrap;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -105,17 +105,17 @@ If you use them in your own code, you will get hurt.
       }
     };
     $createElementFromSelector = function(selector) {
-      var $element, $parent, $root, classes, conjunction, depthSelector, expression, html, id, iteration, j, k, len, len1, path, tag;
+      var $element, $parent, $root, classes, conjunction, depthSelector, expression, html, id, iteration, path, tag, _i, _j, _len, _len1;
       path = selector.split(/[ >]/);
       $root = null;
-      for (iteration = j = 0, len = path.length; j < len; iteration = ++j) {
+      for (iteration = _i = 0, _len = path.length; _i < _len; iteration = ++_i) {
         depthSelector = path[iteration];
         conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g);
         tag = "div";
         classes = [];
         id = null;
-        for (k = 0, len1 = conjunction.length; k < len1; k++) {
-          expression = conjunction[k];
+        for (_j = 0, _len1 = conjunction.length; _j < _len1; _j++) {
+          expression = conjunction[_j];
           switch (expression[0]) {
             case ".":
               classes.push(expression.substr(1));
@@ -155,16 +155,16 @@ If you use them in your own code, you will get hurt.
       return element;
     };
     debug = function() {
-      var args, group, message, placeHolderCount, ref, value;
-      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      var args, group, message, placeHolderCount, value, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       args = toArray(args);
       message = args.shift();
       message = "[UP] " + message;
-      placeHolderCount = ((ref = message.match(CONSOLE_PLACEHOLDERS)) != null ? ref.length : void 0) || 0;
+      placeHolderCount = ((_ref = message.match(CONSOLE_PLACEHOLDERS)) != null ? _ref.length : void 0) || 0;
       if (isFunction(last(args)) && placeHolderCount < args.length) {
         group = args.pop();
       }
-      value = console.debug.apply(console, [message].concat(slice.call(args)));
+      value = console.debug.apply(console, [message].concat(__slice.call(args)));
       if (group) {
         console.groupCollapsed();
         try {
@@ -177,7 +177,7 @@ If you use them in your own code, you will get hurt.
     };
     error = function() {
       var $error, args, asString;
-      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       args[0] = "[UP] " + args[0];
       console.error.apply(console, args);
       asString = stringifyConsoleArgs(args);
@@ -211,7 +211,7 @@ If you use them in your own code, you will get hurt.
       });
     };
     createSelectorFromElement = function($element) {
-      var classString, classes, id, j, klass, len, selector;
+      var classString, classes, id, klass, selector, _i, _len;
       debug("Creating selector from element %o", $element);
       classes = (classString = $element.attr("class")) ? classString.split(" ") : [];
       id = $element.attr("id");
@@ -219,8 +219,8 @@ If you use them in your own code, you will get hurt.
       if (id) {
         selector += "#" + id;
       }
-      for (j = 0, len = classes.length; j < len; j++) {
-        klass = classes[j];
+      for (_i = 0, _len = classes.length; _i < _len; _i++) {
+        klass = classes[_i];
         selector += "." + klass;
       }
       return selector;
@@ -257,10 +257,10 @@ If you use them in your own code, you will get hurt.
     extend = $.extend;
     trim = $.trim;
     keys = Object.keys || function(object) {
-      var j, key, len, result;
+      var key, result, _i, _len;
       result = [];
-      for (j = 0, len = object.length; j < len; j++) {
-        key = object[j];
+      for (_i = 0, _len = object.length; _i < _len; _i++) {
+        key = object[_i];
         if (object.hasOwnProperty(key)) {
           result.push(key);
         }
@@ -268,13 +268,13 @@ If you use them in your own code, you will get hurt.
       return result;
     };
     each = function(collection, block) {
-      var index, item, j, len, results;
-      results = [];
-      for (index = j = 0, len = collection.length; j < len; index = ++j) {
+      var index, item, _i, _len, _results;
+      _results = [];
+      for (index = _i = 0, _len = collection.length; _i < _len; index = ++_i) {
         item = collection[index];
-        results.push(block(item, index));
+        _results.push(block(item, index));
       }
-      return results;
+      return _results;
     };
     isNull = function(object) {
       return object === null;
@@ -318,6 +318,9 @@ If you use them in your own code, you will get hurt.
     };
     isObject = function(object) {
       return isHash(object) || (typeof object === 'function');
+    };
+    isElement = function(object) {
+      return !!(object && object.nodeType === 1);
     };
     isJQuery = function(object) {
       return object instanceof jQuery;
@@ -385,11 +388,11 @@ If you use them in your own code, you will get hurt.
     @param {Array} args...
      */
     option = function() {
-      var arg, args, j, len, match, value;
-      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      var arg, args, match, value, _i, _len;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       match = null;
-      for (j = 0, len = args.length; j < len; j++) {
-        arg = args[j];
+      for (_i = 0, _len = args.length; _i < _len; _i++) {
+        arg = args[_i];
         value = arg;
         if (isFunction(value)) {
           value = value();
@@ -402,10 +405,10 @@ If you use them in your own code, you will get hurt.
       return match;
     };
     detect = function(array, tester) {
-      var element, j, len, match;
+      var element, match, _i, _len;
       match = null;
-      for (j = 0, len = array.length; j < len; j++) {
-        element = array[j];
+      for (_i = 0, _len = array.length; _i < _len; _i++) {
+        element = array[_i];
         if (tester(element)) {
           match = element;
           break;
@@ -425,15 +428,15 @@ If you use them in your own code, you will get hurt.
     };
     presentAttr = function() {
       var $element, attrName, attrNames, values;
-      $element = arguments[0], attrNames = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      $element = arguments[0], attrNames = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       values = (function() {
-        var j, len, results;
-        results = [];
-        for (j = 0, len = attrNames.length; j < len; j++) {
-          attrName = attrNames[j];
-          results.push($element.attr(attrName));
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = attrNames.length; _i < _len; _i++) {
+          attrName = attrNames[_i];
+          _results.push($element.attr(attrName));
         }
-        return results;
+        return _results;
       })();
       return detect(values, isPresent);
     };
@@ -589,18 +592,18 @@ If you use them in your own code, you will get hurt.
       return box;
     };
     copyAttributes = function($source, $target) {
-      var attr, j, len, ref, results;
-      ref = $source.get(0).attributes;
-      results = [];
-      for (j = 0, len = ref.length; j < len; j++) {
-        attr = ref[j];
+      var attr, _i, _len, _ref, _results;
+      _ref = $source.get(0).attributes;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        attr = _ref[_i];
         if (attr.specified) {
-          results.push($target.attr(attr.name, attr.value));
+          _results.push($target.attr(attr.name, attr.value));
         } else {
-          results.push(void 0);
+          _results.push(void 0);
         }
       }
-      return results;
+      return _results;
     };
     prependGhost = function($element) {
       var $ghost, dimensions;
@@ -641,11 +644,11 @@ If you use them in your own code, you will get hurt.
       return xhr.getResponseHeader('X-Up-Method');
     };
     only = function() {
-      var filtered, j, key, keys, len, object;
-      object = arguments[0], keys = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      var filtered, key, keys, object, _i, _len;
+      object = arguments[0], keys = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       filtered = {};
-      for (j = 0, len = keys.length; j < len; j++) {
-        key = keys[j];
+      for (_i = 0, _len = keys.length; _i < _len; _i++) {
+        key = keys[_i];
         if (object.hasOwnProperty(key)) {
           filtered[key] = object[key];
         }
@@ -667,9 +670,20 @@ If you use them in your own code, you will get hurt.
     resolvedPromise = function() {
       return resolvedDeferred().promise();
     };
+    nullJquery = function() {
+      return {
+        is: function() {
+          return false;
+        },
+        attr: function() {},
+        find: function() {
+          return [];
+        }
+      };
+    };
     resolvableWhen = function() {
       var deferreds, joined;
-      deferreds = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      deferreds = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       joined = $.when.apply($, deferreds);
       joined.resolve = function() {
         return each(deferreds, function(deferred) {
@@ -679,20 +693,20 @@ If you use them in your own code, you will get hurt.
       return joined;
     };
     setMissingAttrs = function($element, attrs) {
-      var key, results, value;
-      results = [];
+      var key, value, _results;
+      _results = [];
       for (key in attrs) {
         value = attrs[key];
         if (isMissing($element.attr(key))) {
-          results.push($element.attr(key, value));
+          _results.push($element.attr(key, value));
         } else {
-          results.push(void 0);
+          _results.push(void 0);
         }
       }
-      return results;
+      return _results;
     };
     stringSet = function(array) {
-      var includes, includesAny, j, key, len, put, set, string;
+      var includes, includesAny, key, put, set, string, _i, _len;
       set = {};
       includes = function(string) {
         return set[key(string)];
@@ -706,8 +720,8 @@ If you use them in your own code, you will get hurt.
       key = function(string) {
         return "_" + string;
       };
-      for (j = 0, len = array.length; j < len; j++) {
-        string = array[j];
+      for (_i = 0, _len = array.length; _i < _len; _i++) {
+        string = array[_i];
         put(string);
       }
       return {
@@ -748,6 +762,7 @@ If you use them in your own code, you will get hurt.
       isObject: isObject,
       isFunction: isFunction,
       isString: isString,
+      isElement: isElement,
       isJQuery: isJQuery,
       isPromise: isPromise,
       isDeferred: isDeferred,
@@ -755,6 +770,7 @@ If you use them in your own code, you will get hurt.
       ifGiven: ifGiven,
       isUnmodifiedKeyEvent: isUnmodifiedKeyEvent,
       isUnmodifiedMouseEvent: isUnmodifiedMouseEvent,
+      nullJquery: nullJquery,
       unwrap: unwrap,
       nextFrame: nextFrame,
       measure: measure,
@@ -798,7 +814,7 @@ Some browser-interfacing methods and switches that we can't currently get rid of
  */
 
 (function() {
-  var slice = [].slice;
+  var __slice = [].slice;
 
   up.browser = (function() {
     var canCssAnimation, canInputEvent, canPushState, ensureConsoleExists, ensureRecentJquery, isSupported, loadPage, memoize, u, url;
@@ -833,16 +849,16 @@ Some browser-interfacing methods and switches that we can't currently get rid of
       return location.href;
     };
     ensureConsoleExists = function() {
-      var base, base1, base2, base3, base4, base5, base6, noop;
+      var noop, _base, _base1, _base2, _base3, _base4, _base5, _base6;
       window.console || (window.console = {});
       noop = function() {};
-      (base = window.console).log || (base.log = noop);
-      (base1 = window.console).info || (base1.info = noop);
-      (base2 = window.console).error || (base2.error = noop);
-      (base3 = window.console).debug || (base3.debug = noop);
-      (base4 = window.console).group || (base4.group = noop);
-      (base5 = window.console).groupCollapsed || (base5.groupCollapsed = noop);
-      return (base6 = window.console).groupEnd || (base6.groupEnd = noop);
+      (_base = window.console).log || (_base.log = noop);
+      (_base1 = window.console).info || (_base1.info = noop);
+      (_base2 = window.console).error || (_base2.error = noop);
+      (_base3 = window.console).debug || (_base3.debug = noop);
+      (_base4 = window.console).group || (_base4.group = noop);
+      (_base5 = window.console).groupCollapsed || (_base5.groupCollapsed = noop);
+      return (_base6 = window.console).groupEnd || (_base6.groupEnd = noop);
     };
     memoize = function(func) {
       var cache, cached;
@@ -850,7 +866,7 @@ Some browser-interfacing methods and switches that we can't currently get rid of
       cached = false;
       return function() {
         var args;
-        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         if (cached) {
           return cache;
         } else {
@@ -940,7 +956,7 @@ We need to work on this page:
  */
 
 (function() {
-  var slice = [].slice;
+  var __slice = [].slice;
 
   up.bus = (function() {
     var callbacksByEvent, callbacksFor, defaultCallbacksByEvent, emit, listen, reset, snapshot, u;
@@ -959,14 +975,14 @@ We need to work on this page:
     @method up.bus.snapshot
      */
     snapshot = function() {
-      var callbacks, event, results;
+      var callbacks, event, _results;
       defaultCallbacksByEvent = {};
-      results = [];
+      _results = [];
       for (event in callbacksByEvent) {
         callbacks = callbacksByEvent[event];
-        results.push(defaultCallbacksByEvent[event] = u.copy(callbacks));
+        _results.push(defaultCallbacksByEvent[event] = u.copy(callbacks));
       }
-      return results;
+      return _results;
     };
 
     /**
@@ -1019,7 +1035,7 @@ We need to work on this page:
      */
     emit = function() {
       var args, callbacks, eventName;
-      eventName = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      eventName = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       u.debug("Emitting event %o with args %o", eventName, args);
       callbacks = callbacksFor(eventName);
       return u.each(callbacks, function(callback) {
@@ -1227,6 +1243,8 @@ We need to work on this page:
     @param {String} [options.transition]
     @param {String} [options.scroll='body']
     @param {String} [options.historyMethod='push']
+    @return {Promise}
+      A promise that will be resolved when the page has been updated.
      */
     replace = function(selectorOrElement, url, options) {
       var promise, request, selector;
@@ -1285,7 +1303,7 @@ We need to work on this page:
     @param {String} [options.historyMethod='push']
      */
     implant = function(selector, html, options) {
-      var $new, $old, j, len, ref, response, results, step;
+      var $new, $old, response, step, _i, _len, _ref, _results;
       options = u.options(options, {
         historyMethod: 'push'
       });
@@ -1298,17 +1316,17 @@ We need to work on this page:
       options.source = u.option(options.source, options.history);
       response = parseResponse(html);
       options.title || (options.title = response.title());
-      ref = parseImplantSteps(selector, options);
-      results = [];
-      for (j = 0, len = ref.length; j < len; j++) {
-        step = ref[j];
+      _ref = parseImplantSteps(selector, options);
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        step = _ref[_i];
         $old = findOldFragment(step.selector);
         $new = response.find(step.selector);
-        results.push(prepareForReplacement($old, options).then(function() {
+        _results.push(prepareForReplacement($old, options).then(function() {
           return swapElements($old, $new, step.pseudoClass, step.transition, options);
         }));
       }
-      return results;
+      return _results;
     };
     findOldFragment = function(selector) {
       return u.presence($(".up-popup " + selector)) || u.presence($(".up-modal " + selector)) || u.presence($(selector)) || u.error('Could not find selector %o in current body HTML', selector);
@@ -1318,8 +1336,8 @@ We need to work on this page:
       htmlElement = u.createElementFromHtml(html);
       return {
         title: function() {
-          var ref;
-          return (ref = htmlElement.querySelector("title")) != null ? ref.textContent : void 0;
+          var _ref;
+          return (_ref = htmlElement.querySelector("title")) != null ? _ref.textContent : void 0;
         },
         find: function(selector) {
           var child;
@@ -1382,25 +1400,25 @@ We need to work on this page:
       }
     };
     parseImplantSteps = function(selector, options) {
-      var comma, disjunction, i, j, len, results, selectorAtom, selectorParts, transition, transitionString, transitions;
+      var comma, disjunction, i, selectorAtom, selectorParts, transition, transitionString, transitions, _i, _len, _results;
       transitionString = options.transition || options.animation || 'none';
       comma = /\ *,\ */;
       disjunction = selector.split(comma);
       if (u.isPresent(transitionString)) {
         transitions = transitionString.split(comma);
       }
-      results = [];
-      for (i = j = 0, len = disjunction.length; j < len; i = ++j) {
+      _results = [];
+      for (i = _i = 0, _len = disjunction.length; _i < _len; i = ++_i) {
         selectorAtom = disjunction[i];
         selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/);
         transition = transitions[i] || u.last(transitions);
-        results.push({
+        _results.push({
           selector: selectorParts[1],
           pseudoClass: selectorParts[2],
           transition: transition
         });
       }
-      return results;
+      return _results;
     };
     autofocus = function($element) {
       var $control, selector;
@@ -1508,7 +1526,7 @@ We need to work on this page:
  */
 
 (function() {
-  var slice = [].slice;
+  var __slice = [].slice;
 
   up.magic = (function() {
     var DESTROYABLE_CLASS, DESTROYER_KEY, applyAwakener, awaken, awakeners, compile, data, defaultAwakeners, defaultLiveDescriptions, destroy, live, liveDescriptions, onEscape, ready, reset, snapshot, u;
@@ -1575,7 +1593,7 @@ We need to work on this page:
     liveDescriptions = [];
     defaultLiveDescriptions = null;
     live = function(events, selector, behavior) {
-      var description, ref;
+      var description, _ref;
       if (!up.browser.isSupported()) {
         return;
       }
@@ -1585,7 +1603,7 @@ We need to work on this page:
         }
       ];
       liveDescriptions.push(description);
-      return (ref = $(document)).on.apply(ref, description);
+      return (_ref = $(document)).on.apply(_ref, description);
     };
 
     /**
@@ -1717,7 +1735,7 @@ We need to work on this page:
     defaultAwakeners = null;
     awaken = function() {
       var args, awakener, options, selector;
-      selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      selector = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       if (!up.browser.isSupported()) {
         return;
       }
@@ -1741,25 +1759,25 @@ We need to work on this page:
       }
     };
     compile = function($fragment) {
-      var $matches, awakener, i, len, results;
+      var $matches, awakener, _i, _len, _results;
       u.debug("Compiling fragment %o", $fragment);
-      results = [];
-      for (i = 0, len = awakeners.length; i < len; i++) {
-        awakener = awakeners[i];
+      _results = [];
+      for (_i = 0, _len = awakeners.length; _i < _len; _i++) {
+        awakener = awakeners[_i];
         $matches = u.findWithSelf($fragment, awakener.selector);
         if ($matches.length) {
           if (awakener.batch) {
-            results.push(applyAwakener(awakener, $matches, $matches.get()));
+            _results.push(applyAwakener(awakener, $matches, $matches.get()));
           } else {
-            results.push($matches.each(function() {
+            _results.push($matches.each(function() {
               return applyAwakener(awakener, $(this), this);
             }));
           }
         } else {
-          results.push(void 0);
+          _results.push(void 0);
         }
       }
-      return results;
+      return _results;
     };
     destroy = function($fragment) {
       return u.findWithSelf($fragment, "." + DESTROYABLE_CLASS).each(function() {
@@ -1830,11 +1848,11 @@ We need to work on this page:
     @method up.magic.reset
      */
     reset = function() {
-      var description, i, len, ref;
-      for (i = 0, len = liveDescriptions.length; i < len; i++) {
-        description = liveDescriptions[i];
+      var description, _i, _len, _ref;
+      for (_i = 0, _len = liveDescriptions.length; _i < _len; _i++) {
+        description = liveDescriptions[_i];
         if (!u.contains(defaultLiveDescriptions, description)) {
-          (ref = $(document)).off.apply(ref, description);
+          (_ref = $(document)).off.apply(_ref, description);
         }
       }
       liveDescriptions = u.copy(defaultLiveDescriptions);
@@ -2761,7 +2779,7 @@ Read on
       or to `body` if such an attribute does not exist.
     @param {Function|String} [options.transition]
       A transition function or name.
-    @param {Element|jQuery|String} scroll
+    @param {Element|jQuery|String} [options.scroll]
       An element or selector that will be scrolled to the top in
       case the replaced element is not visible in the viewport.
      */
@@ -2773,7 +2791,7 @@ Read on
       selector = u.option(options.target, $link.attr('up-target'), 'body');
       options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation'));
       options.history = u.option(options.history, $link.attr('up-history'));
-      options.scroll = u.option(options.history, $link.attr('up-scroll'), 'body');
+      options.scroll = u.option(options.scroll, $link.attr('up-scroll'), 'body');
       return up.replace(selector, url, options);
     };
     resolve = function(element) {
@@ -3334,6 +3352,7 @@ We need to work on this page:
     
     @method up.popup.open
     @param {Element|jQuery|String} elementOrSelector
+    @param {String} [options.url]
     @param {String} [options.origin='bottom-right']
     @param {String} [options.animation]
     @param {Boolean} [options.sticky=false]
@@ -3345,7 +3364,7 @@ We need to work on this page:
       var $link, $popup, animation, history, origin, selector, sticky, url;
       $link = $(linkOrSelector);
       options = u.options(options);
-      url = u.option($link.attr('href'));
+      url = u.option(options.url, $link.attr('href'));
       selector = u.option(options.target, $link.attr('up-popup'), 'body');
       origin = u.option(options.origin, $link.attr('up-origin'), config.origin);
       animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
@@ -3475,20 +3494,14 @@ Modal dialogs
 Instead of linking to another page fragment, you can also choose
 to open any target CSS selector in a modal dialog.
   
-For popup overlays see [up.popup](/up.popup) instead.
-  
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-
-- Show the HTML structure of the dialog elements, and how to style them via CSS
-- Explain how dialogs auto-close themselves when a fragment changes behind the modal layer
-- Document method parameters
+For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
 
 @class up.modal
  */
 
 (function() {
+  var __slice = [].slice;
+
   up.modal = (function() {
     var autoclose, close, config, createHiddenModal, defaults, discardHistory, open, rememberHistory, source, templateHtml, u, updated;
     u = up.util;
@@ -3504,13 +3517,31 @@ We need to work on this page:
     };
 
     /**
+    Sets default options for future modals.
+    
     @method up.modal.defaults
-    @param {Number} [options.width]
-    @param {Number} [options.height]
+    @param {Number} [options.width='auto']
+      The width of the dialog.
+      Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
+    @param {Number} [options.height='auto']
+      The height of the dialog.
+      Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
     @param {String|Function(config)} [options.template]
-    @param {String} [options.closeLabel]
-    @param {String} [options.openAnimation]
-    @param {String} [options.closeAnimation]
+      A string containing the HTML structure of the modal.
+      You can supply an alternative template string, but make sure that it
+      contains tags with the classes `up-modal`, `up-modal-dialog` and `up-modal-content`.
+    
+      You can also supply a function that returns a HTML string.
+      The function will be called with the modal options (merged from these defaults
+      and any per-open overrides) whenever a modal opens.
+    @param {String} [options.closeLabel='X']
+      The label of the button that closes the dialog.
+    @param {String} [options.openAnimation='fade-in']
+      The animation used to open the modal. The animation will be applied
+      to both the dialog box and the overlay dimming the page.
+    @param {String} [options.closeAnimation='fade-out']
+      The animation used to close the modal. The animation will be applied
+      to both the dialog box and the overlay dimming the page.
      */
     defaults = function(options) {
       return u.extend(config, options);
@@ -3565,24 +3596,42 @@ We need to work on this page:
     };
 
     /**
-    Opens a modal overlay.
+    Opens the given link's destination in a modal overlay:
+    
+        var $link = $('...');
+        up.modal.open($link);
+    
+    Any option attributes for [`a[up-modal]`](#a.up-modal) will be honored.
+    
+    You can also open a URL directly like this:
+    
+        up.modal.open({ url: '/foo' })
     
     @method up.modal.open
     @param {Element|jQuery|String} elementOrSelector
+    @param {String} [options.url]
     @param {Number} [options.width]
     @param {Number} [options.height]
-    @param {String} [options.origin='bottom-right']
     @param {String} [options.animation]
     @param {Boolean} [options.sticky=false]
       If set to `true`, the modal remains
       open even if the page changes in the background.
     @param {Object} [options.history=true]
+    @return {Promise}
+      A promise that will be resolved when the modal has finished loading.
      */
-    open = function(linkOrSelector, options) {
-      var $link, $modal, animation, height, history, selector, sticky, url, width;
-      $link = $(linkOrSelector);
+    open = function() {
+      var $link, $modal, animation, args, height, history, options, selector, sticky, url, width;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (u.isObject(args[0]) && !u.isElement(args[0]) && !u.isJQuery(args[0])) {
+        $link = u.nullJquery();
+        options = args[0];
+      } else {
+        $link = $(args[0]);
+        options = args[1];
+      }
       options = u.options(options);
-      url = u.option($link.attr('href'));
+      url = u.option(options.url, $link.attr('href'), $link.attr('up-href'));
       selector = u.option(options.target, $link.attr('up-modal'), 'body');
       width = u.option(options.width, $link.attr('up-width'), config.width);
       height = u.option(options.height, $link.attr('up-height'), config.height);
@@ -3644,18 +3693,68 @@ We need to work on this page:
     };
 
     /**
-    Opens the target of this link in a modal dialog:
+    Clicking this link will load the destination via AJAX and open
+    the given selector in a modal dialog.
     
-        <a href="/decks" up-modal=".deck_list">Switch deck</a>
+    Example:
     
-    If the `up-sticky` attribute is set, the dialog does not auto-close
-    if a page fragment below the dialog updates:
+        <a href="/blogs" up-modal=".blog-list">Switch blog</a>
+    
+    Clicking would request the path `/blog` and select `.blog-list` from
+    the HTML response. Up.js will dim the page with an overlay
+    and place the matching `.blog_list` tag will be placed in
+    a modal dialog.
+    
+    
+    \#\#\#\# Customizing the dialog design
+    
+    Loading the Up.js stylesheet will give you a minimal dialog design:
+    
+    - Dialog contents are displayed in a white box that is centered vertically and horizontally.
+    - There is a a subtle box shadow around the dialog
+    - The box will grow to fit the dialog contents, but never grow larger than the screen
+    - The box is placed over a semi-transparent background to dim the rest of the page
+    - There is a button to close the dialog in the top-right corner
+    
+    The easiest way to change how the dialog looks is by overriding the [default CSS styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/modal.css.sass).
+    
+    By default the dialog uses the following DOM structure (continuing the blog-switcher example from above):
+    
+        <div class="up-modal">
+          <div class="up-modal-dialog">
+            <div class="up-modal-close" up-close>X</div>
+            <div class="up-modal-content">
+              <ul class="blog-list">
+                ...
+              </ul>
+            </div>
+          </div>
+        </div>
+    
+    If you want to change the design beyond CSS, you can
+    configure Up.js to [use a different HTML structure](#up.modal.defaults).
+    
+    
+    \#\#\#\# Closing behavior
+    
+    By default the dialog automatically closes
+    *whenever a page fragment below the dialog is updated*.
+    This is useful to have the dialog interact with the page that
+    opened it, e.g. by updating parts of a larger form or by signing in a user
+    and revealing additional information.
+    
+    To disable this behavior, give the opening link an `up-sticky` attribute:
     
         <a href="/settings" up-modal=".options" up-sticky>Settings</a>
+    
     
     @method a[up-modal]
     @ujs
     @param [up-sticky]
+    @param [up-animation]
+    @param [up-height]
+    @param [up-width]
+    @param [up-history]
      */
     up.on('click', 'a[up-modal]', function(event, $link) {
       event.preventDefault();
@@ -3866,13 +3965,13 @@ From Up's point of view the "current" location is either:
     SELECTORS_SECTION = ['a[href]', 'a[up-target]', '[up-follow]', '[up-modal]', '[up-popup]', '[up-href]'];
     SELECTOR_SECTION = SELECTORS_SECTION.join(', ');
     SELECTOR_SECTION_INSTANT = ((function() {
-      var i, len, results;
-      results = [];
-      for (i = 0, len = SELECTORS_SECTION.length; i < len; i++) {
-        selector = SELECTORS_SECTION[i];
-        results.push(selector + "[up-instant]");
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = SELECTORS_SECTION.length; _i < _len; _i++) {
+        selector = SELECTORS_SECTION[_i];
+        _results.push(selector + "[up-instant]");
       }
-      return results;
+      return _results;
     })()).join(', ');
     SELECTOR_ACTIVE = "." + CLASS_ACTIVE;
     normalizeUrl = function(url) {
@@ -3884,12 +3983,12 @@ From Up's point of view the "current" location is either:
       }
     };
     sectionUrls = function($section) {
-      var $link, attr, i, len, ref, url, urls;
+      var $link, attr, url, urls, _i, _len, _ref;
       urls = [];
       if ($link = up.link.resolve($section)) {
-        ref = ['href', 'up-follow', 'up-href'];
-        for (i = 0, len = ref.length; i < len; i++) {
-          attr = ref[i];
+        _ref = ['href', 'up-follow', 'up-href'];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          attr = _ref[_i];
           if (url = u.presentAttr($link, attr)) {
             url = normalizeUrl(url);
             urls.push(url);
