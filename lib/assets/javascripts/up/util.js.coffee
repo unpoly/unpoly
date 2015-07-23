@@ -252,6 +252,9 @@ up.util = (->
   isObject = (object) ->
     isHash(object) || (typeof object == 'function')
 
+  isElement = (object) ->
+    !!(object && object.nodeType == 1)
+
   isJQuery = (object) ->
     object instanceof jQuery
 
@@ -541,6 +544,11 @@ up.util = (->
   resolvedPromise = ->
     resolvedDeferred().promise()
 
+  nullJquery = ->
+    is: -> false
+    attr: ->
+    find: -> []
+
   resolvableWhen = (deferreds...) ->
     joined = $.when(deferreds...)
     joined.resolve = ->
@@ -620,6 +628,7 @@ up.util = (->
   isObject: isObject
   isFunction: isFunction
   isString: isString
+  isElement: isElement
   isJQuery: isJQuery
   isPromise: isPromise
   isDeferred: isDeferred
@@ -627,6 +636,7 @@ up.util = (->
   ifGiven: ifGiven
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
+  nullJquery: nullJquery
   unwrap: unwrap
   nextFrame: nextFrame
   measure: measure
