@@ -15,6 +15,7 @@ We need to work on this page:
 - Demo the built-in animations and transitions
 - Examples for defining your own animations and transitions
 - Explain ghosting
+- Explain how many elements accept arguments for animation.
 
   
 @class up.motion
@@ -43,25 +44,53 @@ up.motion = (->
     u.extend(config, options)
   
   ###*
-  Animates an element.
-  
-  If the element is already being animated, the previous animation
-  will instantly jump to its last frame before the new animation begins. 
-  
-  The following animations are pre-registered:
-  
-  - `fade-in`
-  - `fade-out`
-  - `move-to-top`
-  - `move-from-top`
-  - `move-to-bottom`
-  - `move-from-bottom`
-  - `move-to-left`
-  - `move-from-left`
-  - `move-to-right`
-  - `move-from-right`
-  - `none`
-  
+  Applies the given animation to the given element:
+
+      up.animate('.warning', 'fade-in');
+
+  You can pass additional options:
+
+      up.animate('warning', '.fade-in', {
+        delay: 1000,
+        duration: 250,
+        easing: 'linear'
+      });
+
+  \#\#\#\# Named animations
+
+  The following animations come pre-defined:
+
+  | `fade-in`          | Changes the element's opacity from 0% to 100% |
+  | `fade-out`         | Changes the element's opacity from 100% to 0% |
+  | `move-to-top`      | Moves the element upwards until it exits the screen at the top edge |
+  | `move-from-top`    | Moves the element downwards from beyond the top edge of the screen until it reaches its current position |
+  | `move-to-bottom`   | Moves the element downwards until it exits the screen at the bottom edge |
+  | `move-from-bottom` | Moves the element upwards from beyond the bottom edge of the screen until it reaches its current position |
+  | `move-to-left`     | Moves the element leftwards until it exists the screen at the left edge  |
+  | `move-from-left`   | Moves the element rightwards from beyond the left edge of the screen until it reaches its current position |
+  | `move-to-right`    | Moves the element rightwards until it exists the screen at the right edge  |
+  | `move-from-right`  | Moves the element leftwards from beyond the right  edge of the screen until it reaches its current position |
+  | `none`             | An animation that has no visible effect. Sounds useless at first, but can save you a lot of `if` statements. |
+
+  You can define additional named animations using [`up.animation`](#up.animation).
+
+  \#\#\#\# Animating CSS properties directly
+
+  By passing an object instead of an animation name, you can animate
+  the CSS properties of the given element:
+
+      var $warning = $('.warning');
+      $warning.css({ opacity: 0 });
+      up.animate($warning, { opacity: 1 });
+
+  \#\#\#\# Multiple animations on the same element
+
+  Up.js doesn't allow more than one concurrent animation on the same element.
+
+  If you attempt to animate an element that is already being animated,
+  the previous animation will instantly jump to its last frame before
+  the new animation begins.
+
   @method up.animate
   @param {Element|jQuery|String} elementOrSelector
   @param {String|Function|Object} animation
@@ -215,6 +244,29 @@ up.motion = (->
 
   ###*
   Defines a named animation.
+
+  Here is the definition of the pre-defined `fade-in` animation:
+
+      animation('fade-in', ($ghost, options) ->
+        $ghost.css(opacity: 0)
+        animate($ghost, { opacity: 1 }, options)
+      )
+
+  It is recommended that your definitions always end by calling
+  calling [`up.animate`](#up.animate) with an object argument, passing along
+  the `options` that were passed to you.
+
+  If you choose to *not* use `up.animate` and roll your own
+  animation code instead, your code must honor the following contract:
+
+  1. It must honor the passed options.
+  2. It must not remove the passed element from the DOM.
+  3. It returns a promise that is resolved when the animation ends
+  4. The returned promise responds to a `resolve()` function that
+     instantly jumps to the last animation frame and resolves the promise.
+
+  Calling [`up.animate`](#up.animate) with an object argument
+  will take care of all these points.
 
   @method up.animation
   @param {String} name
