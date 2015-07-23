@@ -50,6 +50,8 @@ up.flow = (->
   @param {String} [options.transition]
   @param {String} [options.scroll='body']
   @param {String} [options.historyMethod='push']
+  @return {Promise}
+    A promise that will be resolved when the page has been updated.
   ###
   replace = (selectorOrElement, url, options) ->
 

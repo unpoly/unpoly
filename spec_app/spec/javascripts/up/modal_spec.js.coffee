@@ -8,7 +8,29 @@ describe 'up.modal', ->
         
     describe 'up.modal.open', ->
 
-      it 'should have tests'
+      it "loads the given link's destination in a dialog window", (done) ->
+        jasmine.Ajax.install()
+        $link = affix('a[href="/path/to"][up-modal=".middle"]').text('link')
+        promise = up.modal.open($link)
+        request = jasmine.Ajax.requests.mostRecent()
+        expect(request.url).toMatch /\/path\/to$/
+        request.respondWith
+          status: 200
+          contentType: 'text/html'
+          responseText:
+            """
+            <div class="before">new-before</div>
+            <div class="middle">new-middle</div>
+            <div class="after">new-after</div>
+            """
+        promise.then ->
+          expect($('.up-modal')).toExist()
+          expect($('.up-modal-dialog')).toExist()
+          expect($('.up-modal-dialog .middle')).toExist()
+          expect($('.up-modal-dialog .middle')).toHaveText('new-middle')
+          expect($('.up-modal-dialog .before')).not.toExist()
+          expect($('.up-modal-dialog .after')).not.toExist()
+          done()
 
     describe 'up.modal.close', ->
 

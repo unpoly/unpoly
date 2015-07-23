@@ -5,15 +5,7 @@ Modal dialogs
 Instead of linking to another page fragment, you can also choose
 to open any target CSS selector in a modal dialog.
   
-For popup overlays see [up.popup](/up.popup) instead.
-  
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-
-- Show the HTML structure of the dialog elements, and how to style them via CSS
-- Explain how dialogs auto-close themselves when a fragment changes behind the modal layer
-- Document method parameters
+For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
 
 @class up.modal 
 ###
@@ -38,13 +30,31 @@ up.modal = (->
       """
   
   ###*
+  Sets default options for future modals.
+
   @method up.modal.defaults
-  @param {Number} [options.width]
-  @param {Number} [options.height]
+  @param {Number} [options.width='auto']
+    The width of the dialog.
+    Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
+  @param {Number} [options.height='auto']
+    The height of the dialog.
+    Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
   @param {String|Function(config)} [options.template]
-  @param {String} [options.closeLabel]
-  @param {String} [options.openAnimation]
-  @param {String} [options.closeAnimation]
+    A string containing the HTML structure of the modal.
+    You can supply an alternative template string, but make sure that it
+    contains tags with the classes `up-modal`, `up-modal-dialog` and `up-modal-content`.
+
+    You can also supply a function that returns a HTML string.
+    The function will be called with the modal options (merged from these defaults
+    and any per-open overrides) whenever a modal opens.
+  @param {String} [options.closeLabel='X']
+    The label of the button that closes the dialog.
+  @param {String} [options.openAnimation='fade-in']
+    The animation used to open the modal. The animation will be applied
+    to both the dialog box and the overlay dimming the page.
+  @param {String} [options.closeAnimation='fade-out']
+    The animation used to close the modal. The animation will be applied
+    to both the dialog box and the overlay dimming the page.
   ###
   defaults = (options) ->
     u.extend(config, options)
@@ -87,24 +97,40 @@ up.modal = (->
     up.animate($modal, animation)
 
   ###*
-  Opens a modal overlay.
+  Opens the given link's destination in a modal overlay:
+
+      var $link = $('...');
+      up.modal.open($link);
+
+  Any option attributes for [`a[up-modal]`](#a.up-modal) will be honored.
+
+  You can also open a URL directly like this:
+
+      up.modal.open({ url: '/foo' })
   
   @method up.modal.open
   @param {Element|jQuery|String} elementOrSelector
+  @param {String} [options.url]
   @param {Number} [options.width]
   @param {Number} [options.height]
-  @param {String} [options.origin='bottom-right']
   @param {String} [options.animation]
   @param {Boolean} [options.sticky=false]
     If set to `true`, the modal remains
     open even if the page changes in the background.
   @param {Object} [options.history=true]
+  @return {Promise}
+    A promise that will be resolved when the modal has finished loading.
   ###
-  open = (linkOrSelector, options) ->
-    $link = $(linkOrSelector)
+  open = (args...) ->
+    if u.isObject(args[0]) && !u.isElement(args[0]) && !u.isJQuery(args[0])
+      $link = u.nullJquery()
+      options = args[0]
+    else
+      $link = $(args[0])
+      options = args[1]
 
     options = u.options(options)
-    url = u.option($link.attr('href'))
+    url = u.option(options.url, $link.attr('href'), $link.attr('up-href'))
     selector = u.option(options.target, $link.attr('up-modal'), 'body')
     width = u.option(options.width, $link.attr('up-width'), config.width)
     height = u.option(options.height, $link.attr('up-height'), config.height)
@@ -158,18 +184,68 @@ up.modal = (->
       close()
 
   ###*
-  Opens the target of this link in a modal dialog:
+  Clicking this link will load the destination via AJAX and open
+  the given selector in a modal dialog.
 
-      <a href="/decks" up-modal=".deck_list">Switch deck</a>
+  Example:
 
-  If the `up-sticky` attribute is set, the dialog does not auto-close
-  if a page fragment below the dialog updates:
+      <a href="/blogs" up-modal=".blog-list">Switch blog</a>
+
+  Clicking would request the path `/blog` and select `.blog-list` from
+  the HTML response. Up.js will dim the page with an overlay
+  and place the matching `.blog_list` tag will be placed in
+  a modal dialog.
+
+
+  \#\#\#\# Customizing the dialog design
+
+  Loading the Up.js stylesheet will give you a minimal dialog design:
+
+  - Dialog contents are displayed in a white box that is centered vertically and horizontally.
+  - There is a a subtle box shadow around the dialog
+  - The box will grow to fit the dialog contents, but never grow larger than the screen
+  - The box is placed over a semi-transparent background to dim the rest of the page
+  - There is a button to close the dialog in the top-right corner
+
+  The easiest way to change how the dialog looks is by overriding the [default CSS styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/modal.css.sass).
+
+  By default the dialog uses the following DOM structure (continuing the blog-switcher example from above):
+
+      <div class="up-modal">
+        <div class="up-modal-dialog">
+          <div class="up-modal-close" up-close>X</div>
+          <div class="up-modal-content">
+            <ul class="blog-list">
+              ...
+            </ul>
+          </div>
+        </div>
+      </div>
+
+  If you want to change the design beyond CSS, you can
+  configure Up.js to [use a different HTML structure](#up.modal.defaults).
+
+
+  \#\#\#\# Closing behavior
+
+  By default the dialog automatically closes
+  *whenever a page fragment below the dialog is updated*.
+  This is useful to have the dialog interact with the page that
+  opened it, e.g. by updating parts of a larger form or by signing in a user
+  and revealing additional information.
+
+  To disable this behavior, give the opening link an `up-sticky` attribute:
 
       <a href="/settings" up-modal=".options" up-sticky>Settings</a>
+
 
   @method a[up-modal]
   @ujs
   @param [up-sticky]
+  @param [up-animation]
+  @param [up-height]
+  @param [up-width]
+  @param [up-history]
   ###
   up.on('click', 'a[up-modal]', (event, $link) ->
     event.preventDefault()
