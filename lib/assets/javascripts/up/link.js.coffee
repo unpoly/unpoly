@@ -120,7 +120,7 @@ up.link = (->
     or to `body` if such an attribute does not exist.
   @param {Function|String} [options.transition]
     A transition function or name.
-  @param {Element|jQuery|String} scroll
+  @param {Element|jQuery|String} [options.scroll]
     An element or selector that will be scrolled to the top in
     case the replaced element is not visible in the viewport.
   ###
@@ -132,7 +132,7 @@ up.link = (->
     selector = u.option(options.target, $link.attr('up-target'), 'body')
     options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation')) 
     options.history = u.option(options.history, $link.attr('up-history'))
-    options.scroll = u.option(options.history, $link.attr('up-scroll'), 'body')
+    options.scroll = u.option(options.scroll, $link.attr('up-scroll'), 'body')
     
     up.replace(selector, url, options)
 
