@@ -58,7 +58,7 @@ up.motion = (->
 
   \#\#\#\# Named animations
 
-  The following animations come pre-defined:
+  The following animations are pre-defined:
 
   | `fade-in`          | Changes the element's opacity from 0% to 100% |
   | `fade-out`         | Changes the element's opacity from 100% to 0% |
@@ -150,7 +150,7 @@ up.motion = (->
   Completes all animations and transitions for the given element
   by jumping to the last animation frame instantly. All callbacks chained to
   the original animation's promise will be called.
-  
+
   Does nothing if the given element is not currently animating.
   
   @method up.motion.finish
@@ -174,18 +174,24 @@ up.motion = (->
       u.error("Did not return a promise with .then and .resolve methods: %o", origin)
 
   ###*
-  Performs a transition between two elements.
+  Performs an animated transition between two elements.
+  Transitions are implement by performing two animations in parallel,
+  causing one element to disappear and the other to appear.
+
+  \#\#\#\# Named transitions
+
+  The following transitions are pre-defined:
+
+  | `cross-fade` | Fades out the first element. Simultaneously fades in the second element. |
+  | `move-up`    | Moves the first element upwards until it exits the screen at the top edge. Simultaneously moves the second element upwards from beyond the bottom edge of the screen until it reaches its current position. |
+  | `move-down`  | Moves the first element downwards until it exits the screen at the bottom edge. Simultaneously moves the second element downwards from beyond the top edge of the screen until it reaches its current position. |
+  | `move-left`  | Moves the first element leftwards until it exists the screen at the left edge. Simultaneously moves the second element leftwards from beyond the right  edge of the screen until it reaches its current position. |
+  | `move-right` | Moves the first element rightwards until it exists the screen at the right edge. Simultaneously moves the second element rightwards from beyond the left edge of the screen until it reaches its current position. |
+  | `none`       | A transition that has no visible effect. Sounds useless at first, but can save you a lot of `if` statements. |
+
+  You can define additional named transitions using [`up.transition`](#up.transition).
   
-  The following transitions  are pre-registered:
-  
-  - `cross-fade`
-  - `move-up`
-  - `move-down`
-  - `move-left`
-  - `move-right`
-  - `none`
-  
-  You can also compose a transition from two animation names
+  You can also compose a transition from two [named animations](#named-animations).
   separated by a slash character (`/`):
   
   - `move-to-bottom/fade-in`
