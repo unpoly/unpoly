@@ -204,6 +204,9 @@ up.motion = (->
   Transitions are implement by performing two animations in parallel,
   causing one element to disappear and the other to appear.
 
+  Note that the transition does not remove any elements from the DOM.
+  The first element will remain in the DOM, albeit hidden using `display: none`.
+
   \#\#\#\# Named transitions
 
   The following transitions are pre-defined:
