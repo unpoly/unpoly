@@ -99,11 +99,11 @@ up.motion = (->
     - The animation's name
     - A function performing the animation
     - An object of CSS attributes describing the last frame of the animation
-  @param {Number} [opts.duration=300]
+  @param {Number} [options.duration=300]
     The duration of the animation, in milliseconds.
-  @param {Number} [opts.delay=0]
+  @param {Number} [options.delay=0]
     The delay before the animation starts, in milliseconds.
-  @param {String} [opts.easing='ease']
+  @param {String} [options.easing='ease']
     The timing function that controls the animation's acceleration.
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
@@ -230,11 +230,11 @@ up.motion = (->
   @param {Element|jQuery|String} source
   @param {Element|jQuery|String} target
   @param {Function|String} transitionOrName
-  @param {Number} [opts.duration=300]
+  @param {Number} [options.duration=300]
     The duration of the animation, in milliseconds.
-  @param {Number} [opts.delay=0]
+  @param {Number} [options.delay=0]
     The delay before the animation starts, in milliseconds.
-  @param {String} [opts.easing='ease']
+  @param {String} [options.easing='ease']
     The timing function that controls the transition's acceleration.
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.

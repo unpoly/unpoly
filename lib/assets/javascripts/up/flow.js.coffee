@@ -239,11 +239,11 @@ up.flow = (->
   @param {String} [options.title]
   @param {String} [options.animation='none']
     The animation to use before the element is removed from the DOM.
-  @param {Number} [opts.duration]
+  @param {Number} [options.duration]
     The duration of the animation. See [`up.animate`](/up.motion#up.animate).
-  @param {Number} [opts.delay]
+  @param {Number} [options.delay]
     The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
-  @param {String} [opts.easing]
+  @param {String} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
   ###
   destroy = (selectorOrElement, options) ->

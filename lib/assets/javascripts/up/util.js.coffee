@@ -402,11 +402,11 @@ up.util = (->
     The element to animate.
   @param {Object} lastFrame
     The CSS properties that should be transitioned to.
-  @param {Number} [opts.duration=300]
+  @param {Number} [options.duration=300]
     The duration of the animation, in milliseconds.
-  @param {Number} [opts.delay=0]
+  @param {Number} [options.delay=0]
     The delay before the animation starts, in milliseconds.
-  @param {String} [opts.easing='ease']
+  @param {String} [options.easing='ease']
     The timing function that controls the animation's acceleration.
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.

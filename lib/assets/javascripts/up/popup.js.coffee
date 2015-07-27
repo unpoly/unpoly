@@ -119,11 +119,11 @@ up.popup = (->
   @param {String} [options.origin='bottom-right']
   @param {String} [options.animation]
     The animation to use when opening the popup.
-  @param {Number} [opts.duration]
+  @param {Number} [options.duration]
     The duration of the animation. See [`up.animate`](/up.motion#up.animate).
-  @param {Number} [opts.delay]
+  @param {Number} [options.delay]
     The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
-  @param {String} [opts.easing]
+  @param {String} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
   @param {Boolean} [options.sticky=false]
     If set to `true`, the popup remains
