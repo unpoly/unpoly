@@ -397,7 +397,7 @@ If you use them in your own code, you will get hurt.
         if (isFunction(value)) {
           value = value();
         }
-        if (isPresent(value)) {
+        if (isGiven(value)) {
           match = value;
           break;
         }
@@ -499,11 +499,11 @@ If you use them in your own code, you will get hurt.
       The element to animate.
     @param {Object} lastFrame
       The CSS properties that should be transitioned to.
-    @param {Number} [opts.duration=300]
+    @param {Number} [options.duration=300]
       The duration of the animation, in milliseconds.
-    @param {Number} [opts.delay=0]
+    @param {Number} [options.delay=0]
       The delay before the animation starts, in milliseconds.
-    @param {String} [opts.easing='ease']
+    @param {String} [options.easing='ease']
       The timing function that controls the animation's acceleration.
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
@@ -1233,15 +1233,17 @@ We need to work on this page:
       here, in which case a selector will be inferred from the element's class and ID.
     @param {String} url
       The URL to fetch from the server.
-    @param {String} [options.title]
     @param {String} [options.method='get']
+    @param {String} [options.title]
+    @param {String} [options.transition='none']
     @param {String|Boolean} [options.history=true]
       If a `String` is given, it is used as the URL the browser's location bar and history.
       If omitted or true, the `url` argument will be used.
       If set to `false`, the history will remain unchanged.
     @param {String|Boolean} [options.source=true]
-    @param {String} [options.transition]
     @param {String} [options.scroll='body']
+    @param {Boolean} [options.cache]
+      Whether to use a [cached response](/up.proxy) if available.
     @param {String} [options.historyMethod='push']
     @return {Promise}
       A promise that will be resolved when the page has been updated.
@@ -1259,7 +1261,8 @@ We need to work on this page:
       request = {
         url: url,
         method: options.method,
-        selector: selector
+        selector: selector,
+        cache: options.cache
       };
       promise = up.proxy.ajax(request);
       promise.done(function(html, textStatus, xhr) {
@@ -1434,19 +1437,28 @@ We need to work on this page:
     /**
     Destroys the given element or selector.
     Takes care that all destructors, if any, are called.
+    The element is removed from the DOM.
     
     @method up.destroy
     @param {String|Element|jQuery} selectorOrElement 
-    @param {String|Function|Object} [options.animation]
     @param {String} [options.url]
     @param {String} [options.title]
+    @param {String} [options.animation='none']
+      The animation to use before the element is removed from the DOM.
+    @param {Number} [options.duration]
+      The duration of the animation. See [`up.animate`](/up.motion#up.animate).
+    @param {Number} [options.delay]
+      The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
+    @param {String} [options.easing]
+      The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
      */
     destroy = function(selectorOrElement, options) {
-      var $element, animationPromise;
+      var $element, animateOptions, animationPromise;
       $element = $(selectorOrElement);
       options = u.options(options, {
         animation: 'none'
       });
+      animateOptions = up.motion.animateOptions(options);
       $element.addClass('up-destroying');
       if (u.isPresent(options.url)) {
         up.history.push(options.url);
@@ -1455,7 +1467,7 @@ We need to work on this page:
         document.title = options.title;
       }
       up.bus.emit('fragment:destroy', $element);
-      animationPromise = u.presence(options.animation, u.isPromise) || up.motion.animate($element, options.animation);
+      animationPromise = u.presence(options.animation, u.isPromise) || up.motion.animate($element, options.animation, animateOptions);
       return animationPromise.then(function() {
         return $element.remove();
       });
@@ -1465,13 +1477,21 @@ We need to work on this page:
     Replaces the given selector or element with a fresh copy
     fetched from the server.
     
+    Up.js remembers the URL from which a fragment was loaded, so you
+    don't usually need to give an URL when reloading.
+    
     @method up.reload
     @param {String|Element|jQuery} selectorOrElement
+    @param {Object} [options]
+      See options for [`up.replace`](#up.replace)
      */
-    reload = function(selectorOrElement) {
+    reload = function(selectorOrElement, options) {
       var sourceUrl;
-      sourceUrl = source(selectorOrElement);
-      return replace(selectorOrElement, sourceUrl);
+      options = u.options(options, {
+        cache: false
+      });
+      sourceUrl = options.url || source(selectorOrElement);
+      return replace(selectorOrElement, sourceUrl, options);
     };
 
     /**
@@ -1921,8 +1941,7 @@ We need to work on this page:
 - Explain how the other modules manipulate history
 - Decide whether we want to expose these methods as public API
 - Document methods and parameters
-  
-    
+
 @class up.history
  */
 
@@ -2005,6 +2024,13 @@ Animation and transitions
 =========================
   
 Any fragment change in Up.js can be animated.
+
+    <a href="/users" data-target=".list" up-transition="cross-fade">Show users</a>
+
+Or a dialog open:
+
+    <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
+
 Up.js ships with a number of predefined animations and transitions,
 and you can easily define your own using Javascript or CSS. 
   
@@ -2015,9 +2041,7 @@ We need to work on this page:
   
 - Explain the difference between transitions and animations
 - Demo the built-in animations and transitions
-- Examples for defining your own animations and transitions
 - Explain ghosting
-- Explain how many elements accept arguments for animation.
 
   
 @class up.motion
@@ -2038,10 +2062,10 @@ We need to work on this page:
     };
 
     /**
-    @method up.modal.defaults
-    @param {Number} [options.duration]
-    @param {Number} [options.delay]
-    @param {String} [options.easing]
+    @method up.motion.defaults
+    @param {Number} [options.duration=300]
+    @param {Number} [options.delay=0]
+    @param {String} [options.easing='ease']
      */
     defaults = function(options) {
       return u.extend(config, options);
@@ -2103,11 +2127,11 @@ We need to work on this page:
       - The animation's name
       - A function performing the animation
       - An object of CSS attributes describing the last frame of the animation
-    @param {Number} [opts.duration=300]
+    @param {Number} [options.duration=300]
       The duration of the animation, in milliseconds.
-    @param {Number} [opts.delay=0]
+    @param {Number} [options.delay=0]
       The delay before the animation starts, in milliseconds.
-    @param {String} [opts.easing='ease']
+    @param {String} [options.easing='ease']
       The timing function that controls the animation's acceleration.
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
@@ -2228,6 +2252,9 @@ We need to work on this page:
     Transitions are implement by performing two animations in parallel,
     causing one element to disappear and the other to appear.
     
+    Note that the transition does not remove any elements from the DOM.
+    The first element will remain in the DOM, albeit hidden using `display: none`.
+    
     \#\#\#\# Named transitions
     
     The following transitions are pre-defined:
@@ -2251,11 +2278,11 @@ We need to work on this page:
     @param {Element|jQuery|String} source
     @param {Element|jQuery|String} target
     @param {Function|String} transitionOrName
-    @param {Number} [opts.duration=300]
+    @param {Number} [options.duration=300]
       The duration of the animation, in milliseconds.
-    @param {Number} [opts.delay=0]
+    @param {Number} [options.delay=0]
       The delay before the animation starts, in milliseconds.
-    @param {String} [opts.easing='ease']
+    @param {String} [options.easing='ease']
       The timing function that controls the transition's acceleration.
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
@@ -2296,6 +2323,30 @@ We need to work on this page:
     /**
     Defines a named transition.
     
+    Here is the definition of the pre-defined `cross-fade` animation:
+    
+        up.transition('cross-fade', ($old, $new, options) ->
+          up.motion.when(
+            animate($old, 'fade-out', options),
+            animate($new, 'fade-in', options)
+          )
+        )
+    
+    It is recommended that your transitions use [`up.animate`](#up.animate),
+    passing along the `options` that were passed to you.
+    
+    If you choose to *not* use `up.animate` and roll your own
+    logic instead, your code must honor the following contract:
+    
+    1. It must honor the passed options.
+    2. It must *not* remove any of the given elements from the DOM.
+    3. It returns a promise that is resolved when the transition ends
+    4. The returned promise responds to a `resolve()` function that
+       instantly jumps to the last transition frame and resolves the promise.
+    
+    Calling [`up.animate`](#up.animate) with an object argument
+    will take care of all these points.
+    
     @method up.transition
     @param {String} name
     @param {Function} transition
@@ -2309,7 +2360,7 @@ We need to work on this page:
     
     Here is the definition of the pre-defined `fade-in` animation:
     
-        animation('fade-in', ($ghost, options) ->
+        up.animation('fade-in', ($ghost, options) ->
           $ghost.css(opacity: 0)
           animate($ghost, { opacity: 1 }, options)
         )
@@ -2322,7 +2373,7 @@ We need to work on this page:
     animation code instead, your code must honor the following contract:
     
     1. It must honor the passed options.
-    2. It must not remove the passed element from the DOM.
+    2. It must *not* remove the passed element from the DOM.
     3. It returns a promise that is resolved when the animation ends
     4. The returned promise responds to a `resolve()` function that
        instantly jumps to the last animation frame and resolves the promise.
@@ -2347,11 +2398,14 @@ We need to work on this page:
     };
 
     /**
-    Returns a new promise that resolves once all promises in the given array resolve.
-    Other then e.g. `$.then`, the combined promise will have a `resolve` method.
+    Returns a new promise that resolves once all promises in arguments resolve.
+    
+    Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
+    the combined promise will have a `resolve` method.
     
     @method up.motion.when
     @param promises...
+    @return A new promise.
      */
     resolvableWhen = u.resolvableWhen;
 
@@ -2543,7 +2597,7 @@ response will already be cached when the user performs the click.
 
 (function() {
   up.proxy = (function() {
-    var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, cache, cacheKey, cancelDelay, checkPreload, clear, config, defaults, delayTimer, ensureIsIdempotent, get, isFresh, isIdempotent, normalizeRequest, preload, remove, reset, set, startDelay, timestamp, touch, trim, u;
+    var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, cache, cacheKey, cancelDelay, checkPreload, clear, config, defaults, delayTimer, ensureIsIdempotent, get, isFresh, isIdempotent, normalizeRequest, preload, remove, reset, set, startDelay, timestamp, trim, u;
     config = {
       preloadDelay: 75,
       cacheSize: 70,
@@ -2552,10 +2606,15 @@ response will already be cached when the user performs the click.
 
     /**
     @method up.proxy.defaults
-    @param {Number} [options.preloadDelay]
-    @param {Number} [options.cacheSize]
-    @param {Number} [options.cacheExpiry]
+    @param {Number} [options.preloadDelay=75]
+      The number of milliseconds to wait before [`[up-preload]`](#up-preload)
+      starts preloading.
+    @param {Number} [options.cacheSize=70]
+      The maximum number of responses to cache.
+      If the size is exceeded, the oldest items will be dropped from the cache.
+    @param {Number} [options.cacheExpiry=300000]
       The number of milliseconds until a cache entry expires.
+      Defaults to 5 minutes.
      */
     defaults = function(options) {
       return u.extend(config, options);
@@ -2626,14 +2685,20 @@ response will already be cached when the user performs the click.
     @param {String} request.url
     @param {String} [request.method='GET']
     @param {String} [request.selector]
+    @param {Boolean} [request.cache]
+      Whether to use a cached response, if available.
+      If set to `false` a network connection will always be attempted.
      */
-    ajax = function(request) {
-      var promise;
-      if (!isIdempotent(request)) {
+    ajax = function(options) {
+      var forceCache, ignoreCache, promise, request;
+      forceCache = u.castsToTrue(options.cache);
+      ignoreCache = u.castsToFalse(options.cache);
+      request = u.only(options, 'url', 'method', 'selector');
+      if (!isIdempotent(request) && !forceCache) {
         clear();
         promise = u.ajax(request);
-      } else if (promise = get(request)) {
-        touch(promise);
+      } else if (promise = get(request) && !ignoreCache) {
+        promise;
       } else {
         promise = u.ajax(request);
         set(request, promise);
@@ -2652,9 +2717,6 @@ response will already be cached when the user performs the click.
       var timeSinceTouch;
       timeSinceTouch = timestamp() - promise.timestamp;
       return timeSinceTouch < config.cacheExpiry;
-    };
-    touch = function(promise) {
-      return promise.timestamp = timestamp();
     };
     get = function(request) {
       var key, promise;
@@ -2677,8 +2739,8 @@ response will already be cached when the user performs the click.
       var key;
       trim();
       key = cacheKey(request);
+      promise.timestamp = timestamp();
       cache[key] = promise;
-      touch(promise);
       return promise;
     };
     remove = function(request) {
@@ -2747,6 +2809,7 @@ response will already be cached when the user performs the click.
       set: set,
       alias: alias,
       clear: clear,
+      remove: remove,
       defaults: defaults
     };
   })();
@@ -2888,11 +2951,11 @@ Read on
     @param {Element|jQuery|String} [options.scroll]
       An element or selector that will be scrolled to the top in
       case the replaced element is not visible in the viewport.
-    @param {Number} [opts.duration]
+    @param {Number} [options.duration]
       The duration of the transition. See [`up.morph`](/up.motion#up.morph).
-    @param {Number} [opts.delay]
+    @param {Number} [options.delay]
       The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
-    @param {String} [opts.easing]
+    @param {String} [options.easing]
       The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
      */
     follow = function(link, options) {
@@ -2904,6 +2967,7 @@ Read on
       options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation'));
       options.history = u.option(options.history, $link.attr('up-history'));
       options.scroll = u.option(options.scroll, $link.attr('up-scroll'), 'body');
+      options.cache = u.option(options.cache, $link.attr('up-cache'));
       options = u.merge(options, up.motion.animateOptions(options, $link));
       return up.replace(selector, url, options);
     };
@@ -3179,17 +3243,19 @@ We need to work on this page:
     @param {String} [options.failTransition='none']
       The transition to use when a failed form submission updates the `options.failTarget` selector.
       Defaults to the form's `up-fail-transition` attribute, or to `options.transition`, or to `'none'`.
-    @param {Number} [opts.duration]
+    @param {Number} [options.duration]
       The duration of the transition. See [`up.morph`](/up.motion#up.morph).
-    @param {Number} [opts.delay]
+    @param {Number} [options.delay]
       The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
-    @param {String} [opts.easing]
+    @param {String} [options.easing]
       The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
+    @param {Boolean} [options.cache]
+      Whether to accept a cached response.
     @return {Promise}
       A promise for the AJAX response
      */
     submit = function(formOrSelector, options) {
-      var $form, animateOptions, failureSelector, failureTransition, historyOption, httpMethod, request, successSelector, successTransition, successUrl, url;
+      var $form, animateOptions, failureSelector, failureTransition, historyOption, httpMethod, request, successSelector, successTransition, successUrl, url, useCache;
       $form = $(formOrSelector).closest('form');
       options = u.options(options);
       successSelector = u.option(options.target, $form.attr('up-target'), 'body');
@@ -3201,6 +3267,7 @@ We need to work on this page:
       failureTransition = u.option(options.failTransition, $form.attr('up-fail-transition'), successTransition);
       httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase();
       animateOptions = up.motion.animateOptions(options, $form);
+      useCache = u.option(options.cache, $form.attr('up-cache'));
       url = u.option(options.url, $form.attr('action'), up.browser.url());
       $form.addClass('up-active');
       if (!up.browser.canPushState() && !u.castsToFalse(historyOption)) {
@@ -3211,7 +3278,8 @@ We need to work on this page:
         url: url,
         type: httpMethod,
         data: $form.serialize(),
-        selector: successSelector
+        selector: successSelector,
+        cache: useCache
       };
       successUrl = function(xhr) {
         var currentLocation;
@@ -3530,11 +3598,11 @@ We need to work on this page:
     @param {String} [options.origin='bottom-right']
     @param {String} [options.animation]
       The animation to use when opening the popup.
-    @param {Number} [opts.duration]
+    @param {Number} [options.duration]
       The duration of the animation. See [`up.animate`](/up.motion#up.animate).
-    @param {Number} [opts.delay]
+    @param {Number} [options.delay]
       The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
-    @param {String} [opts.easing]
+    @param {String} [options.easing]
       The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
     @param {Boolean} [options.sticky=false]
       If set to `true`, the popup remains
@@ -3800,11 +3868,11 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     @param {Object} [options.history=true]
     @param {String} [options.animation]
       The animation to use when opening the modal.
-    @param {Number} [opts.duration]
+    @param {Number} [options.duration]
       The duration of the animation. See [`up.animate`](/up.motion#up.animate).
-    @param {Number} [opts.delay]
+    @param {Number} [options.delay]
       The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
-    @param {String} [opts.easing]
+    @param {String} [options.easing]
       The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
     @return {Promise}
       A promise that will be resolved when the modal has finished loading.
@@ -4236,27 +4304,54 @@ From Up's point of view the "current" location is either:
 }).call(this);
 
 /**
-Markers
-=======
-  
+Content slots
+=============
+
+It can be useful to mark "slots" in your page layout where you expect
+content to appear in the future.
+
+For example, you might have
+
+    <div up-slot class="alerts"></div>
+
+    <script>
+      up.awaken('.alerts', function ($element) {
+
+        RELOAD SHOULD NOT CACHE
+
+        setInterval(3000, function() { up.reload('.alerts') });
+      });
+    </script>
+
+Seeing that the `.alerts` container is empty, Up.js will hide it:
+
+    <div class="alerts" up-slot style="display: none"></div>
+
+As soon as you
+
+    <div class="alerts" up-slot>
+      Meeting at 11:30 AM
+    </div>
+
+
 TODO: Write some documentation
   
-@class up.marker
+@class up.slot
  */
 
 (function() {
-  up.marker = (function() {
+  up.slot = (function() {
     var check, hasContent, u;
     u = up.util;
-    hasContent = function($marker) {
-      return u.trim($marker.html()) !== '';
+    hasContent = function($slot) {
+      return u.trim($slot.html()) !== '';
     };
     check = function($element) {
-      return u.findWithSelf($element, '[up-marker]').each(function() {
-        var $marker;
-        $marker = $(this);
-        if (!hasContent($marker)) {
-          return $marker.hide();
+      return u.findWithSelf($element, '[up-slot]').each(function() {
+        var $slot;
+        $slot = $(this);
+        if (!hasContent($slot)) {
+          return $slot.hide();
         }
       });
     };
@@ -4272,7 +4367,7 @@ TODO: Write some documentation
     This is useful to prevent the element from applying unwanted
     margins to the surrounding page flow.
     
-    @method [up-marker]
+    @method [up-slot]
     @ujs
      */
     return up.bus.on('fragment:ready', check);
