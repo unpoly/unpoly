@@ -40,14 +40,14 @@ up.flow = (->
     here, in which case a selector will be inferred from the element's class and ID.
   @param {String} url
     The URL to fetch from the server.
-  @param {String} [options.title]
   @param {String} [options.method='get']
+  @param {String} [options.title]
+  @param {String} [options.transition='none']
   @param {String|Boolean} [options.history=true]
     If a `String` is given, it is used as the URL the browser's location bar and history.
     If omitted or true, the `url` argument will be used.
     If set to `false`, the history will remain unchanged.
   @param {String|Boolean} [options.source=true]
-  @param {String} [options.transition]
   @param {String} [options.scroll='body']
   @param {Boolean} [options.cache]
     Whether to use a [cached response](/up.proxy) if available.
@@ -269,8 +269,13 @@ up.flow = (->
   Replaces the given selector or element with a fresh copy
   fetched from the server.
 
+  Up.js remembers the URL from which a fragment was loaded, so you
+  don't usually need to give an URL when reloading.
+
   @method up.reload
   @param {String|Element|jQuery} selectorOrElement
+  @param {Object} [options]
+    See options for [`up.replace`](#up.replace)
   ###
   reload = (selectorOrElement, options) ->
     options = u.options(options, cache: false)

@@ -26,10 +26,15 @@ up.proxy = (->
 
   ###*
   @method up.proxy.defaults
-  @param {Number} [options.preloadDelay]
-  @param {Number} [options.cacheSize]
-  @param {Number} [options.cacheExpiry]
+  @param {Number} [options.preloadDelay=75]
+    The number of milliseconds to wait before [`[up-preload]`](#up-preload)
+    starts preloading.
+  @param {Number} [options.cacheSize=70]
+    The maximum number of responses to cache.
+    If the size is exceeded, the oldest items will be dropped from the cache.
+  @param {Number} [options.cacheExpiry=300000]
     The number of milliseconds until a cache entry expires.
+    Defaults to 5 minutes.
   ###
   defaults = (options) ->
     u.extend(config, options)

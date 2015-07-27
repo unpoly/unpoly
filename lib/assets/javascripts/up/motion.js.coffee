@@ -3,6 +3,13 @@ Animation and transitions
 =========================
   
 Any fragment change in Up.js can be animated.
+
+    <a href="/users" data-target=".list" up-transition="cross-fade">Show users</a>
+
+Or a dialog open:
+
+    <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
+
 Up.js ships with a number of predefined animations and transitions,
 and you can easily define your own using Javascript or CSS. 
   
@@ -13,9 +20,7 @@ We need to work on this page:
   
 - Explain the difference between transitions and animations
 - Demo the built-in animations and transitions
-- Examples for defining your own animations and transitions
 - Explain ghosting
-- Explain how many elements accept arguments for animation.
 
   
 @class up.motion
@@ -35,10 +40,10 @@ up.motion = (->
     easing: 'ease'
 
   ###*
-  @method up.modal.defaults
-  @param {Number} [options.duration]
-  @param {Number} [options.delay]
-  @param {String} [options.easing]
+  @method up.motion.defaults
+  @param {Number} [options.duration=300]
+  @param {Number} [options.delay=0]
+  @param {String} [options.easing='ease']
   ###
   defaults = (options) ->
     u.extend(config, options)
@@ -275,6 +280,30 @@ up.motion = (->
   ###*
   Defines a named transition.
 
+  Here is the definition of the pre-defined `cross-fade` animation:
+
+      up.transition('cross-fade', ($old, $new, options) ->
+        up.motion.when(
+          animate($old, 'fade-out', options),
+          animate($new, 'fade-in', options)
+        )
+      )
+
+  It is recommended that your transitions use [`up.animate`](#up.animate),
+  passing along the `options` that were passed to you.
+
+  If you choose to *not* use `up.animate` and roll your own
+  logic instead, your code must honor the following contract:
+
+  1. It must honor the passed options.
+  2. It must *not* remove any of the given elements from the DOM.
+  3. It returns a promise that is resolved when the transition ends
+  4. The returned promise responds to a `resolve()` function that
+     instantly jumps to the last transition frame and resolves the promise.
+
+  Calling [`up.animate`](#up.animate) with an object argument
+  will take care of all these points.
+
   @method up.transition
   @param {String} name
   @param {Function} transition
@@ -287,7 +316,7 @@ up.motion = (->
 
   Here is the definition of the pre-defined `fade-in` animation:
 
-      animation('fade-in', ($ghost, options) ->
+      up.animation('fade-in', ($ghost, options) ->
         $ghost.css(opacity: 0)
         animate($ghost, { opacity: 1 }, options)
       )
@@ -300,7 +329,7 @@ up.motion = (->
   animation code instead, your code must honor the following contract:
 
   1. It must honor the passed options.
-  2. It must not remove the passed element from the DOM.
+  2. It must *not* remove the passed element from the DOM.
   3. It returns a promise that is resolved when the animation ends
   4. The returned promise responds to a `resolve()` function that
      instantly jumps to the last animation frame and resolves the promise.
@@ -324,11 +353,14 @@ up.motion = (->
     transitions = u.copy(defaultTransitions)
 
   ###*
-  Returns a new promise that resolves once all promises in the given array resolve.
-  Other then e.g. `$.then`, the combined promise will have a `resolve` method.
+  Returns a new promise that resolves once all promises in arguments resolve.
+
+  Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
+  the combined promise will have a `resolve` method.
 
   @method up.motion.when
   @param promises...
+  @return A new promise.
   ###
   resolvableWhen = u.resolvableWhen
 
