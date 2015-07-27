@@ -231,16 +231,25 @@ up.flow = (->
   ###*
   Destroys the given element or selector.
   Takes care that all destructors, if any, are called.
+  The element is removed from the DOM.
   
   @method up.destroy
   @param {String|Element|jQuery} selectorOrElement 
-  @param {String|Function|Object} [options.animation]
   @param {String} [options.url]
   @param {String} [options.title]
+  @param {String} [options.animation='none']
+    The animation to use before the element is removed from the DOM.
+  @param {Number} [opts.duration]
+    The duration of the animation. See [`up.animate`](/up.motion#up.animate).
+  @param {Number} [opts.delay]
+    The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
+  @param {String} [opts.easing]
+    The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
   ###
   destroy = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
     options = u.options(options, animation: 'none')
+    animateOptions = up.motion.animateOptions(options)
     $element.addClass('up-destroying')
     # If e.g. a modal or popup asks us to restore a URL, do this
     # before emitting `fragment:destroy`. This way up.navigate sees the
@@ -249,7 +258,7 @@ up.flow = (->
     document.title = options.title if u.isPresent(options.title)
     up.bus.emit('fragment:destroy', $element)
     animationPromise = u.presence(options.animation, u.isPromise) ||
-      up.motion.animate($element, options.animation)
+      up.motion.animate($element, options.animation, animateOptions)
     animationPromise.then -> $element.remove()
     
       
