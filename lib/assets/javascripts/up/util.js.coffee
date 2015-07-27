@@ -1,4 +1,3 @@
-
 ###*
 Utility functions
 =================
@@ -517,7 +516,7 @@ up.util = (->
     
   contains = (array, element) ->
     array.indexOf(element) >= 0
-    
+
   castsToTrue = (object) ->
     String(object) == "true"
     

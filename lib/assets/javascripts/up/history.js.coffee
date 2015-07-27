@@ -9,8 +9,7 @@ We need to work on this page:
 - Explain how the other modules manipulate history
 - Decide whether we want to expose these methods as public API
 - Document methods and parameters
-  
-    
+
 @class up.history
 ###
 up.history = (->
