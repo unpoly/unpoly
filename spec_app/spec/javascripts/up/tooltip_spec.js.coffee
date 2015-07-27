@@ -19,8 +19,8 @@ describe 'up.tooltip', ->
         expect($tooltip).toHaveText('tooltip text')
         tooltipBox = up.util.measure($tooltip, relative: true)
         linkBox = up.util.measure($link, relative: true)
-        expect(tooltipBox.top).toBeCloseTo(linkBox.top - tooltipBox.height, 15)
-        expect(tooltipBox.left).toBeCloseTo(linkBox.left + 0.5 * (linkBox.width - tooltipBox.width), 15)
+        expect(tooltipBox.top).toBeAround(linkBox.top - tooltipBox.height, 15)
+        expect(tooltipBox.left).toBeAround(linkBox.left + 0.5 * (linkBox.width - tooltipBox.width), 15)
         
       it 'allows HTML for the tooltip text'
         
