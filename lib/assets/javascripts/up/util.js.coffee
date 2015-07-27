@@ -327,7 +327,7 @@ up.util = (->
     for arg in args
       value = arg
       value = value() if isFunction(value)
-      if isPresent(value)
+      if isGiven(value)
         match = value
         break
     match    
