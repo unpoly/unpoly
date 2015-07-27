@@ -14,7 +14,7 @@
 #= require up/modal
 #= require up/tooltip
 #= require up/navigation
-#= require up/marker
+#= require up/slot
 #= require_self
 
 up.browser.ensureRecentJquery()
