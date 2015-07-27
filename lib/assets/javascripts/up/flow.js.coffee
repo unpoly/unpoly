@@ -134,9 +134,11 @@ up.flow = (->
         swapElements($old, $new, step.pseudoClass, step.transition, options)
 
   findOldFragment = (selector) ->
-    u.presence($(".up-popup " + selector)) ||
-    u.presence($(".up-modal " + selector)) ||
-    u.presence($(selector)) ||
+    selectorWithExcludes = "#{selector}:not(.up-ghost, .up-destroying)"
+    # Prefer to replace fragments in an open popup or modal
+    u.presence($(".up-popup #{selectorWithExcludes}")) ||
+    u.presence($(".up-modal #{selectorWithExcludes}")) ||
+    u.presence($(selectorWithExcludes)) ||
     u.error('Could not find selector %o in current body HTML', selector)
 
   parseResponse = (html) ->
