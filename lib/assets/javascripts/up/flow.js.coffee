@@ -195,7 +195,7 @@ up.flow = (->
       elementsInserted($addedChildren, options)
       # Since we're adding content instead of replacing, we'll only
       # animate $new instead of morphing between $old and $new
-      up.animate($new, transition)
+      up.animate($new, transition, options)
     else
       # Wrap the replacement as a destroy animation, so $old will
       # get marked as .up-destroying right away.
@@ -207,7 +207,7 @@ up.flow = (->
         elementsInserted($new, options)
         if $old.is('body') && transition != 'none'
           u.error('Cannot apply transitions to body-elements (%o)', transition)
-        up.morph($old, $new, transition)
+        up.morph($old, $new, transition, options)
 
   parseImplantSteps = (selector, options) ->
     transitionString = options.transition || options.animation || 'none'

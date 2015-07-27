@@ -105,10 +105,10 @@ up.popup = (->
     $popup.hide()
     $popup
     
-  updated = ($link, $popup, origin, animation) ->
+  updated = ($link, $popup, origin, animation, animateOptions) ->
     $popup.show()
     position($link, $popup, origin)
-    up.animate($popup, animation)
+    up.animate($popup, animation, animateOptions)
     
   ###*
   Opens a popup overlay.
@@ -118,6 +118,13 @@ up.popup = (->
   @param {String} [options.url]
   @param {String} [options.origin='bottom-right']
   @param {String} [options.animation]
+    The animation to use when opening the popup.
+  @param {Number} [opts.duration]
+    The duration of the animation. See [`up.animate`](/up.motion#up.animate).
+  @param {Number} [opts.delay]
+    The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
+  @param {String} [opts.easing]
+    The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
   @param {Boolean} [options.sticky=false]
     If set to `true`, the popup remains
     open even if the page changes in the background.
@@ -133,14 +140,14 @@ up.popup = (->
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
     sticky = u.option(options.sticky, $link.is('[up-sticky]'))
     history = if up.browser.canPushState() then u.option(options.history, $link.attr('up-history'), false) else false
+    animateOptions = up.motion.animateOptions(options, $link)
 
     close()
     $popup = createHiddenPopup($link, selector, sticky)
     
     up.replace(selector, url,
       history: history
-      # source: true
-      insert: -> updated($link, $popup, origin, animation) 
+      insert: -> updated($link, $popup, origin, animation, animateOptions)
     )
     
   ###*

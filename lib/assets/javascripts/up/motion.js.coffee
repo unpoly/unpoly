@@ -93,17 +93,27 @@ up.motion = (->
 
   @method up.animate
   @param {Element|jQuery|String} elementOrSelector
+    The element to animate.
   @param {String|Function|Object} animation
-  @param {Number} [options.duration]
-  @param {String} [options.easing]
-  @param {Number} [options.delay]
+    Can either be:
+    - The animation's name
+    - A function performing the animation
+    - An object of CSS attributes describing the last frame of the animation
+  @param {Number} [opts.duration=300]
+    The duration of the animation, in milliseconds.
+  @param {Number} [opts.delay=0]
+    The delay before the animation starts, in milliseconds.
+  @param {String} [opts.easing='ease']
+    The timing function that controls the animation's acceleration.
+    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    for a list of pre-defined timing functions.
   @return {Promise}
     A promise for the animation's end.
   ###
   animate = (elementOrSelector, animation, options) ->
     $element = $(elementOrSelector)
     finish($element)
-    options = u.options(options, config)
+    options = animateOptions(options)
     if u.isFunction(animation)
       assertIsDeferred(animation($element, options), animation)
     else if u.isString(animation)
@@ -112,6 +122,22 @@ up.motion = (->
       u.cssAnimate($element, animation, options)
     else
       u.error("Unknown animation type %o", animation)
+
+  ###*
+  Extracts animation-related options from the given options hash.
+  If `$element` is given, also inspects the element for animation-related
+  attributes like `up-easing` or `up-duration`.
+
+  @protected
+  @method up.motion.animateOptions
+  ###
+  animateOptions = (allOptions, $element = null) ->
+    allOptions = u.options(allOptions)
+    options = {}
+    options.easing = u.option(allOptions.easing, $element?.attr('up-easing'), config.easing)
+    options.duration = Number(u.option(allOptions.duration, $element?.attr('up-duration'), config.duration))
+    options.delay = Number(u.option(allOptions.delay, $element?.attr('up-delay'), config.delay))
+    options
       
   findAnimation = (name) ->
     animations[name] or u.error("Unknown animation %o", animation)
@@ -128,7 +154,7 @@ up.motion = (->
     # $old should take up space in the page flow until the transition ends
     $old.css(visibility: 'hidden')
     
-    newCssMemo = u.temporaryCss($new, display: 'none')
+    showNew = u.temporaryCss($new, display: 'none')
     promise = block($oldGhost, $newGhost)
     $old.data(GHOSTING_PROMISE_KEY, promise)
     $new.data(GHOSTING_PROMISE_KEY, promise)
@@ -142,7 +168,7 @@ up.motion = (->
       # Since we expect $old to be removed in a heartbeat,
       # $new should take up space
       $old.css(display: 'none')
-      newCssMemo()
+      showNew()
 
     promise
       
@@ -201,15 +227,20 @@ up.motion = (->
   @param {Element|jQuery|String} source
   @param {Element|jQuery|String} target
   @param {Function|String} transitionOrName
-  @param {Number} [options.duration]
-  @param {String} [options.easing]
-  @param {Number} [options.delay]
+  @param {Number} [opts.duration=300]
+    The duration of the animation, in milliseconds.
+  @param {Number} [opts.delay=0]
+    The delay before the animation starts, in milliseconds.
+  @param {String} [opts.easing='ease']
+    The timing function that controls the transition's acceleration.
+    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    for a list of pre-defined timing functions.
   @return {Promise}
     A promise for the transition's end.
   ###  
   morph = (source, target, transitionOrName, options) ->
     if up.browser.canCssAnimation()
-      options = u.options(config)
+      options = animateOptions(options)
       $old = $(source)
       $new = $(target)
       finish($old)
@@ -427,6 +458,7 @@ up.motion = (->
     
   morph: morph
   animate: animate
+  animateOptions: animateOptions
   finish: finish
   transition: transition
   animation: animation

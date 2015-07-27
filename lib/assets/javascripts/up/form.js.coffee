@@ -40,17 +40,37 @@ up.form = (->
     If the argument points to an element that is not a form,
     Up.js will search its ancestors for the closest form.
   @param {String} [options.url]
+    The URL where to submit the form.
+    Defaults to the form's `action` attribute, or to the current URL of the browser window.
   @param {String} [options.method]
+    The HTTP method used for the form submission.
+    Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
+    if none of these attributes are given.
   @param {String} [options.target]
+    The selector to update when the form submission succeeds.
+    Defaults to the form's `up-target` attribute, or to `'body'`.
   @param {String} [options.failTarget]
+    The selector to update when the form submission succeeds.
+    Defaults to the form's `up-fail-target` attribute, or to an auto-generated
+    selector that matches the form itself.
   @param {Boolean|String} [options.history=true]
     Successful form submissions will add a history entry and change the browser's
     location bar if the form either uses the `GET` method or the response redirected
     to another page (this requires the `upjs-rails` gem).
     If want to prevent history changes in any case, set this to `false`.
     If you pass a `String`, it is used as the URL for the browser history.
-  @param {String} [options.transition]
-  @param {String} [options.failTransition]
+  @param {String} [options.transition='none']
+    The transition to use when a successful form submission updates the `options.target` selector.
+    Defaults to the form's `up-transition` attribute, or to `'none'`.
+  @param {String} [options.failTransition='none']
+    The transition to use when a failed form submission updates the `options.failTarget` selector.
+    Defaults to the form's `up-fail-transition` attribute, or to `options.transition`, or to `'none'`.
+  @param {Number} [opts.duration]
+    The duration of the transition. See [`up.morph`](/up.motion#up.morph).
+  @param {Number} [opts.delay]
+    The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
+  @param {String} [opts.easing]
+    The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
   @return {Promise}
     A promise for the AJAX response
   ###
@@ -63,8 +83,9 @@ up.form = (->
     failureSelector = u.option(options.failTarget, $form.attr('up-fail-target'), -> u.createSelectorFromElement($form))
     historyOption = u.option(options.history, $form.attr('up-history'), true)
     successTransition = u.option(options.transition, $form.attr('up-transition'))
-    failureTransition = u.option(options.failTransition, $form.attr('up-fail-transition'))
+    failureTransition = u.option(options.failTransition, $form.attr('up-fail-transition'), successTransition)
     httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase()
+    animateOptions = up.motion.animateOptions(options, $form)
     url = u.option(options.url, $form.attr('action'), up.browser.url())
     
     $form.addClass('up-active')
@@ -96,15 +117,15 @@ up.form = (->
       .always ->
         $form.removeClass('up-active')
       .done (html, textStatus, xhr) ->
-        up.flow.implant(successSelector, html,
+        successOptions = u.merge(animateOptions,
           history: successUrl(xhr),
           transition: successTransition
         )
+        up.flow.implant(successSelector, html, successOptions)
       .fail (xhr, textStatus, errorThrown) ->
         html = xhr.responseText
-        up.flow.implant(failureSelector, html,
-          transition: failureTransition
-        )
+        failureOptions = u.merge(animateOptions, transition: failureTransition)
+        up.flow.implant(failureSelector, html, failureOptions)
 
   ###*
   Observes an input field and executes code when its value changes.

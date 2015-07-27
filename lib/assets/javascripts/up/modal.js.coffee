@@ -92,9 +92,9 @@ up.modal = (->
     $modal.hide()
     $modal
 
-  updated = ($modal, animation) ->
+  updated = ($modal, animation, animateOptions) ->
     $modal.show()
-    up.animate($modal, animation)
+    up.animate($modal, animation, animateOptions)
 
   ###*
   Opens the given link's destination in a modal overlay:
@@ -113,11 +113,18 @@ up.modal = (->
   @param {String} [options.url]
   @param {Number} [options.width]
   @param {Number} [options.height]
-  @param {String} [options.animation]
   @param {Boolean} [options.sticky=false]
     If set to `true`, the modal remains
     open even if the page changes in the background.
   @param {Object} [options.history=true]
+  @param {String} [options.animation]
+    The animation to use when opening the modal.
+  @param {Number} [opts.duration]
+    The duration of the animation. See [`up.animate`](/up.motion#up.animate).
+  @param {Number} [opts.delay]
+    The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
+  @param {String} [opts.easing]
+    The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
   @return {Promise}
     A promise that will be resolved when the modal has finished loading.
   ###
@@ -137,13 +144,14 @@ up.modal = (->
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
     sticky = u.option(options.sticky, $link.is('[up-sticky]'))
     history = if up.browser.canPushState() then u.option(options.history, $link.attr('up-history'), true) else false
+    animateOptions = up.motion.animateOptions(options, $link)
 
     close()
     $modal = createHiddenModal(selector, width, height, sticky)
 
     up.replace(selector, url,
       history: history
-      insert: -> updated($modal, animation)
+      insert: -> updated($modal, animation, animateOptions)
     )
 
   ###*

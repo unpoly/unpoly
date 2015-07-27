@@ -132,6 +132,12 @@ up.link = (->
   @param {Element|jQuery|String} [options.scroll]
     An element or selector that will be scrolled to the top in
     case the replaced element is not visible in the viewport.
+  @param {Number} [opts.duration]
+    The duration of the transition. See [`up.morph`](/up.motion#up.morph).
+  @param {Number} [opts.delay]
+    The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
+  @param {String} [opts.easing]
+    The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
   ###
   follow = (link, options) ->
     $link = $(link)
@@ -142,7 +148,8 @@ up.link = (->
     options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation')) 
     options.history = u.option(options.history, $link.attr('up-history'))
     options.scroll = u.option(options.scroll, $link.attr('up-scroll'), 'body')
-    
+    options = u.merge(options, up.motion.animateOptions(options, $link))
+
     up.replace(selector, url, options)
 
   resolve = (element) ->
