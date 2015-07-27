@@ -91,17 +91,29 @@ up.proxy = (->
   @param {String} request.url
   @param {String} [request.method='GET']
   @param {String} [request.selector]
+  @param {Boolean} [request.cache]
+    Whether to use a cached response, if available.
+    If set to `false` a network connection will always be attempted.
   ###
-  ajax = (request) ->
-    if !isIdempotent(request)
+  ajax = (options) ->
+    forceCache = u.castsToTrue(options.cache)
+    ignoreCache = u.castsToFalse(options.cache)
+
+    request = u.only(options, 'url', 'method', 'selector')
+
+    # We don't cache non-GET responses unless `options.cache`
+    # is explicitly set to `true`.
+    if !isIdempotent(request) && !forceCache
       clear()
-      # We don't cache non-GET responses
       promise = u.ajax(request)
-    else if promise = get(request)
-      touch(promise)
+    # If a cached response is available, we use it unless
+    # `options.cache` is explicitly set to `false`.
+    else if promise = get(request) && !ignoreCache
+      promise
     else
       promise = u.ajax(request)
       set(request, promise)
+
     promise
 
   SAFE_HTTP_METHODS = ['GET', 'OPTIONS', 'HEAD']
@@ -116,10 +128,7 @@ up.proxy = (->
   isFresh = (promise) ->
     timeSinceTouch = timestamp() - promise.timestamp
     timeSinceTouch < config.cacheExpiry
-    
-  touch = (promise) ->
-    promise.timestamp = timestamp()
-    
+
   get = (request) ->
     key = cacheKey(request)
     if promise = cache[key]
@@ -139,8 +148,8 @@ up.proxy = (->
   set = (request, promise) ->
     trim()
     key = cacheKey(request)
+    promise.timestamp = timestamp()
     cache[key] = promise
-    touch(promise)
     promise
     
   remove = (request) ->
@@ -205,6 +214,7 @@ up.proxy = (->
   set: set
   alias: alias
   clear: clear
+  remove: remove
   defaults: defaults
   
 )()

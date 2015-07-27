@@ -71,6 +71,8 @@ up.form = (->
     The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
   @param {String} [options.easing]
     The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
+  @param {Boolean} [options.cache]
+    Whether to accept a cached response.
   @return {Promise}
     A promise for the AJAX response
   ###
@@ -86,6 +88,7 @@ up.form = (->
     failureTransition = u.option(options.failTransition, $form.attr('up-fail-transition'), successTransition)
     httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase()
     animateOptions = up.motion.animateOptions(options, $form)
+    useCache = u.option(options.cache, $form.attr('up-cache'))
     url = u.option(options.url, $form.attr('action'), up.browser.url())
     
     $form.addClass('up-active')
@@ -98,7 +101,8 @@ up.form = (->
       url: url
       type: httpMethod
       data: $form.serialize(),
-      selector: successSelector
+      selector: successSelector,
+      cache: useCache
     }
 
     successUrl = (xhr) ->

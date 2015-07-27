@@ -49,6 +49,8 @@ up.flow = (->
   @param {String|Boolean} [options.source=true]
   @param {String} [options.transition]
   @param {String} [options.scroll='body']
+  @param {Boolean} [options.cache]
+    Whether to use a [cached response](/up.proxy) if available.
   @param {String} [options.historyMethod='push']
   @return {Promise}
     A promise that will be resolved when the page has been updated.
@@ -71,6 +73,7 @@ up.flow = (->
       url: url
       method: options.method
       selector: selector
+      cache: options.cache
       
     promise = up.proxy.ajax(request)
     
@@ -269,9 +272,10 @@ up.flow = (->
   @method up.reload
   @param {String|Element|jQuery} selectorOrElement
   ###
-  reload = (selectorOrElement) ->
-    sourceUrl = source(selectorOrElement)
-    replace(selectorOrElement, sourceUrl)
+  reload = (selectorOrElement, options) ->
+    options = u.options(options, cache: false)
+    sourceUrl = options.url || source(selectorOrElement)
+    replace(selectorOrElement, sourceUrl, options)
 
   ###*
   Resets Up.js to the state when it was booted.

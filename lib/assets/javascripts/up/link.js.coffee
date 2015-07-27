@@ -148,6 +148,7 @@ up.link = (->
     options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation')) 
     options.history = u.option(options.history, $link.attr('up-history'))
     options.scroll = u.option(options.scroll, $link.attr('up-scroll'), 'body')
+    options.cache = u.option(options.cache, $link.attr('up-cache'))
     options = u.merge(options, up.motion.animateOptions(options, $link))
 
     up.replace(selector, url, options)
