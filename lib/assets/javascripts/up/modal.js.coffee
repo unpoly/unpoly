@@ -34,10 +34,10 @@ up.modal = (->
 
   @method up.modal.defaults
   @param {Number} [options.width='auto']
-    The width of the dialog.
+    The width of the dialog in pixels.
     Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
   @param {Number} [options.height='auto']
-    The height of the dialog.
+    The height of the dialog in pixels.
     Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
   @param {String|Function(config)} [options.template]
     A string containing the HTML structure of the modal.
@@ -106,17 +106,31 @@ up.modal = (->
 
   You can also open a URL directly like this:
 
-      up.modal.open({ url: '/foo' })
+      up.modal.open({ url: '/foo', target: '.list' })
+
+  This will request `/foo`, extract the `.list` selector from the response
+  and open the selected container in a modal dialog.
   
   @method up.modal.open
-  @param {Element|jQuery|String} elementOrSelector
+  @param {Element|jQuery|String} [elementOrSelector]
+    The link to follow.
+    Can be omitted if you give `options.url` instead.
   @param {String} [options.url]
+    The URL to open.
+    Can be omitted if you give `elementOrSelector` instead.
+  @param {String} [options.target]
+    The selector to extract from the response and open in a modal dialog.
   @param {Number} [options.width]
+    The width of the dialog in pixels.
+    By [default](#up.modal.defaults) the dialog will grow to fit its contents.
   @param {Number} [options.height]
+    The width of the dialog in pixels.
+    By [default](#up.modal.defaults) the dialog will grow to fit its contents.
   @param {Boolean} [options.sticky=false]
     If set to `true`, the modal remains
     open even if the page changes in the background.
   @param {Object} [options.history=true]
+    Whether to add a browser history entry for the modal's source URL.
   @param {String} [options.animation]
     The animation to use when opening the modal.
   @param {Number} [options.duration]
@@ -155,9 +169,8 @@ up.modal = (->
     )
 
   ###*
-  Returns the source URL for the fragment displayed
-  in the current modal overlay, or `undefined` if no
-  modal is open.
+  Returns the source URL for the fragment displayed in the current modal overlay,
+  or `undefined` if no modal is currently open.
   
   @method up.modal.source
   @return {String}
@@ -201,7 +214,7 @@ up.modal = (->
 
   Clicking would request the path `/blog` and select `.blog-list` from
   the HTML response. Up.js will dim the page with an overlay
-  and place the matching `.blog_list` tag will be placed in
+  and place the matching `.blog-list` tag will be placed in
   a modal dialog.
 
 
@@ -281,6 +294,7 @@ up.modal = (->
 
   ###*
   When this element is clicked, closes a currently open dialog.
+  Does nothing if no modal is currently open.
 
   @method [up-close]
   @ujs

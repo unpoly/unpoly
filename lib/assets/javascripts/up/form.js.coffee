@@ -47,10 +47,10 @@ up.form = (->
     Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
     if none of these attributes are given.
   @param {String} [options.target]
-    The selector to update when the form submission succeeds.
+    The selector to update when the form submission succeeds (server responds with status 200).
     Defaults to the form's `up-target` attribute, or to `'body'`.
   @param {String} [options.failTarget]
-    The selector to update when the form submission succeeds.
+    The selector to update when the form submission fails (server responds with non-200 status).
     Defaults to the form's `up-fail-target` attribute, or to an auto-generated
     selector that matches the form itself.
   @param {Boolean|String} [options.history=true]
@@ -100,8 +100,8 @@ up.form = (->
     request = {
       url: url
       type: httpMethod
-      data: $form.serialize(),
-      selector: successSelector,
+      data: $form.serialize()
+      selector: successSelector
       cache: useCache
     }
 
@@ -132,15 +132,37 @@ up.form = (->
         up.flow.implant(failureSelector, html, failureOptions)
 
   ###*
-  Observes an input field and executes code when its value changes.
+  Observes a form field and runs a callback when its value changes.
+  This is useful for observing text fields while the user is typing.
+
+  For instance, the following would submit the form whenever the
+  text field value changes:
 
       up.observe('input', { change: function(value, $input) {
         up.submit($input)
       } });
 
-  This is useful for observing text fields while the user is typing,
-  since browsers will only fire a `change` event once the user
-  blurs the text field.
+  \#\#\#\# Preventing concurrency
+
+  Firing asynchronous code after a form field can cause
+  [concurrency issues](https://makandracards.com/makandra/961-concurrency-issues-with-find-as-you-type-boxes).
+
+  To mitigate this, `up.observe` will try to never run a callback
+  before the previous callback has completed.
+  To take advantage of this, your callback code must return a promise.
+  Note that all asynchronous Up.js functions return promises.
+
+  \#\#\#\# Throttling
+
+  If you are concerned about fast typists causing too much
+  load on your server, you can use a `delay` option to wait before
+  executing the callback:
+
+      up.observe('input', {
+        delay: 100,
+        change: function(value, $input) { up.submit($input) }
+      });
+
 
   @method up.observe
   @param {Element|jQuery|String} fieldOrSelector
@@ -241,14 +263,15 @@ up.form = (->
   @method form[up-target]
   @ujs
   @param {String} up-target
+    The selector to replace if the form submission is successful (200 status code).
   @param {String} [up-fail-target]
   @param {String} [up-transition]
   @param {String} [up-fail-transition]
   @param {String} [up-history]
   @param {String} [up-method]
-    The HTTP method to be used to submit the form
-    (`get`, `post`, `put`, `delete`, `patch`).
-    Alternately you can use an attribute `data-method` (Rails UJS)
+    The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
+    Alternately you can use an attribute `data-method`
+    ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
     or `method` (vanilla HTML) for the same purpose.  
   ###
   up.on 'submit', 'form[up-target]', (event, $form) ->
@@ -256,18 +279,29 @@ up.form = (->
     submit($form)
 
   ###*
-  Observes this form control by periodically polling its value.
-  Executes the given Javascript if the value changes:
+  Observes this form field and runs the given script
+  when its value changes. This is useful for observing text fields
+  while the user is typing.
+
+  For instance, the following would submit the form whenever the
+  text field value changes:
 
       <form method="GET" action="/search">
         <input type="query" up-observe="up.form.submit(this)">
       </form>
 
-  This is useful for observing text fields while the user is typing,
-  since browsers will only fire a `change` event once the user
-  blurs the text field.
+  The script given with `up-observe` runs with the following context:
+
+  | Name     | Type      | Description                           |
+  | -------- | --------- | ------------------------------------- |
+  | `value`  | `String`  | The current value of the field        |
+  | `this`   | `Element` | The form field                        |
+  | `$field` | `jQuery`  | The form field as a jQuery collection |
+
+  See up.observe.
 
   @method input[up-observe]
+    The code to run when the field's value changes.
   @ujs
   @param {String} up-observe 
   ###
