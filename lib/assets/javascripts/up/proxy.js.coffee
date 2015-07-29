@@ -113,7 +113,7 @@ up.proxy = (->
       promise = u.ajax(request)
     # If a cached response is available, we use it unless
     # `options.cache` is explicitly set to `false`.
-    else if promise = get(request) && !ignoreCache
+    else if (promise = get(request)) && !ignoreCache
       promise
     else
       promise = u.ajax(request)

@@ -2697,7 +2697,7 @@ response will already be cached when the user performs the click.
       if (!isIdempotent(request) && !forceCache) {
         clear();
         promise = u.ajax(request);
-      } else if (promise = get(request) && !ignoreCache) {
+      } else if ((promise = get(request)) && !ignoreCache) {
         promise;
       } else {
         promise = u.ajax(request);
@@ -3225,10 +3225,10 @@ We need to work on this page:
       Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
       if none of these attributes are given.
     @param {String} [options.target]
-      The selector to update when the form submission succeeds.
+      The selector to update when the form submission succeeds (server responds with status 200).
       Defaults to the form's `up-target` attribute, or to `'body'`.
     @param {String} [options.failTarget]
-      The selector to update when the form submission succeeds.
+      The selector to update when the form submission fails (server responds with non-200 status).
       Defaults to the form's `up-fail-target` attribute, or to an auto-generated
       selector that matches the form itself.
     @param {Boolean|String} [options.history=true]
@@ -3306,15 +3306,37 @@ We need to work on this page:
     };
 
     /**
-    Observes an input field and executes code when its value changes.
+    Observes a form field and runs a callback when its value changes.
+    This is useful for observing text fields while the user is typing.
+    
+    For instance, the following would submit the form whenever the
+    text field value changes:
     
         up.observe('input', { change: function(value, $input) {
           up.submit($input)
         } });
     
-    This is useful for observing text fields while the user is typing,
-    since browsers will only fire a `change` event once the user
-    blurs the text field.
+    \#\#\#\# Preventing concurrency
+    
+    Firing asynchronous code after a form field can cause
+    [concurrency issues](https://makandracards.com/makandra/961-concurrency-issues-with-find-as-you-type-boxes).
+    
+    To mitigate this, `up.observe` will try to never run a callback
+    before the previous callback has completed.
+    To take advantage of this, your callback code must return a promise.
+    Note that all asynchronous Up.js functions return promises.
+    
+    \#\#\#\# Throttling
+    
+    If you are concerned about fast typists causing too much
+    load on your server, you can use a `delay` option to wait before
+    executing the callback:
+    
+        up.observe('input', {
+          delay: 100,
+          change: function(value, $input) { up.submit($input) }
+        });
+    
     
     @method up.observe
     @param {Element|jQuery|String} fieldOrSelector
@@ -3401,14 +3423,15 @@ We need to work on this page:
     @method form[up-target]
     @ujs
     @param {String} up-target
+      The selector to replace if the form submission is successful (200 status code).
     @param {String} [up-fail-target]
     @param {String} [up-transition]
     @param {String} [up-fail-transition]
     @param {String} [up-history]
     @param {String} [up-method]
-      The HTTP method to be used to submit the form
-      (`get`, `post`, `put`, `delete`, `patch`).
-      Alternately you can use an attribute `data-method` (Rails UJS)
+      The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
+      Alternately you can use an attribute `data-method`
+      ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
       or `method` (vanilla HTML) for the same purpose.
      */
     up.on('submit', 'form[up-target]', function(event, $form) {
@@ -3417,18 +3440,29 @@ We need to work on this page:
     });
 
     /**
-    Observes this form control by periodically polling its value.
-    Executes the given Javascript if the value changes:
+    Observes this form field and runs the given script
+    when its value changes. This is useful for observing text fields
+    while the user is typing.
+    
+    For instance, the following would submit the form whenever the
+    text field value changes:
     
         <form method="GET" action="/search">
           <input type="query" up-observe="up.form.submit(this)">
         </form>
     
-    This is useful for observing text fields while the user is typing,
-    since browsers will only fire a `change` event once the user
-    blurs the text field.
+    The script given with `up-observe` runs with the following context:
+    
+    | Name     | Type      | Description                           |
+    | -------- | --------- | ------------------------------------- |
+    | `value`  | `String`  | The current value of the field        |
+    | `this`   | `Element` | The form field                        |
+    | `$field` | `jQuery`  | The form field as a jQuery collection |
+    
+    See up.observe.
     
     @method input[up-observe]
+      The code to run when the field's value changes.
     @ujs
     @param {String} up-observe
      */
@@ -3771,10 +3805,10 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     
     @method up.modal.defaults
     @param {Number} [options.width='auto']
-      The width of the dialog.
+      The width of the dialog in pixels.
       Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
     @param {Number} [options.height='auto']
-      The height of the dialog.
+      The height of the dialog in pixels.
       Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
     @param {String|Function(config)} [options.template]
       A string containing the HTML structure of the modal.
@@ -3855,17 +3889,31 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     
     You can also open a URL directly like this:
     
-        up.modal.open({ url: '/foo' })
+        up.modal.open({ url: '/foo', target: '.list' })
+    
+    This will request `/foo`, extract the `.list` selector from the response
+    and open the selected container in a modal dialog.
     
     @method up.modal.open
-    @param {Element|jQuery|String} elementOrSelector
+    @param {Element|jQuery|String} [elementOrSelector]
+      The link to follow.
+      Can be omitted if you give `options.url` instead.
     @param {String} [options.url]
+      The URL to open.
+      Can be omitted if you give `elementOrSelector` instead.
+    @param {String} [options.target]
+      The selector to extract from the response and open in a modal dialog.
     @param {Number} [options.width]
+      The width of the dialog in pixels.
+      By [default](#up.modal.defaults) the dialog will grow to fit its contents.
     @param {Number} [options.height]
+      The width of the dialog in pixels.
+      By [default](#up.modal.defaults) the dialog will grow to fit its contents.
     @param {Boolean} [options.sticky=false]
       If set to `true`, the modal remains
       open even if the page changes in the background.
     @param {Object} [options.history=true]
+      Whether to add a browser history entry for the modal's source URL.
     @param {String} [options.animation]
       The animation to use when opening the modal.
     @param {Number} [options.duration]
@@ -3907,9 +3955,8 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     };
 
     /**
-    Returns the source URL for the fragment displayed
-    in the current modal overlay, or `undefined` if no
-    modal is open.
+    Returns the source URL for the fragment displayed in the current modal overlay,
+    or `undefined` if no modal is currently open.
     
     @method up.modal.source
     @return {String}
@@ -3960,7 +4007,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     
     Clicking would request the path `/blog` and select `.blog-list` from
     the HTML response. Up.js will dim the page with an overlay
-    and place the matching `.blog_list` tag will be placed in
+    and place the matching `.blog-list` tag will be placed in
     a modal dialog.
     
     
@@ -4040,6 +4087,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
 
     /**
     When this element is clicked, closes a currently open dialog.
+    Does nothing if no modal is currently open.
     
     @method [up-close]
     @ujs
