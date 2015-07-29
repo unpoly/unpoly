@@ -65,10 +65,9 @@ up.flow = (->
       u.createSelectorFromElement($(selectorOrElement))
       
     if !up.browser.canPushState() && !u.castsToFalse(options.history)
-      if !options.preload
-        up.browser.loadPage(url, u.only(options, 'method'))
-      return
-    
+      up.browser.loadPage(url, u.only(options, 'method')) unless options.preload
+      return u.resolvedPromise()
+
     request =
       url: url
       method: options.method
