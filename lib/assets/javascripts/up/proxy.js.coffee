@@ -204,12 +204,14 @@ up.proxy = (->
     $link = $(linkOrSelector)
     options = u.options(options)
 
-    alert("hier ist noch ein fehler! options wird immer idempotent sein!")
-
-    ensureIsIdempotent(options)
-    u.debug("Preloading %o", $link)
-    options.preload = true
-    up.link.follow(link, options)
+    method = up.link.followMethod($link, options)
+    if isIdempotent(method: method)
+      u.debug("Preloading %o", $link)
+      options.preload = true
+      up.link.follow($link, options)
+    else
+      u.debug("Won't preload %o due to unsafe method %o", $link, method)
+      u.resolvedPromise()
     
   reset = ->
     cancelDelay()

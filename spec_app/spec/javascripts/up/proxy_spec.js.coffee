@@ -89,7 +89,15 @@ describe 'up.proxy', ->
 
     describe 'up.proxy.preload', ->
 
-      it 'should have tests'
+      it "loads and caches the given link's destination", ->
+        $link = affix('a[href="/path"]')
+        up.proxy.preload($link)
+        expect(u.isPromise(up.proxy.get(url: '/path'))).toBe(true)
+
+      it "does not load a link whose method has side-effects", ->
+        $link = affix('a[href="/path"][data-method="post"]')
+        up.proxy.preload($link)
+        expect(up.proxy.get(url: '/path')).toBeUndefined()
 
     describe 'up.proxy.get', ->
 
