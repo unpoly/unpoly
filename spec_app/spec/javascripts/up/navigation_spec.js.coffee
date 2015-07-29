@@ -14,7 +14,6 @@ describe 'up.navigation', ->
       it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', ->
         $link = affix('a[href="/foo"][up-target=".main"]')
         affix('.main')
-        jasmine.Ajax.install()
         $link.click()
         jasmine.Ajax.requests.mostRecent().respondWith
           status: 200
@@ -26,7 +25,6 @@ describe 'up.navigation', ->
       it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', ->
         $link = affix('a[href="/foo/"][up-target=".main"]')
         affix('.main')
-        jasmine.Ajax.install()
         $link.click()
         jasmine.Ajax.requests.mostRecent().respondWith
           status: 200
@@ -40,7 +38,6 @@ describe 'up.navigation', ->
       it 'marks clicked links as .up-active until the request finishes', ->
         $link = affix('a[href="/foo"][up-target=".main"]')
         affix('.main')
-        jasmine.Ajax.install()
         $link.click()
 #        console.log($link)
         expect($link).toHaveClass('up-active')
@@ -54,7 +51,6 @@ describe 'up.navigation', ->
       it 'marks links with [up-instant] on mousedown as .up-active until the request finishes', ->
         $link = affix('a[href="/foo"][up-instant][up-target=".main"]')
         affix('.main')
-        jasmine.Ajax.install()
         Trigger.mousedown($link)
         expect($link).toHaveClass('up-active')
         jasmine.Ajax.requests.mostRecent().respondWith
@@ -68,7 +64,6 @@ describe 'up.navigation', ->
         $area = affix('div[up-follow] a[href="/foo"][up-target=".main"]')
         $link = $area.find('a')
         affix('.main')
-        jasmine.Ajax.install()
         $link.click()
         expect($area).toHaveClass('up-active')
         jasmine.Ajax.requests.mostRecent().respondWith

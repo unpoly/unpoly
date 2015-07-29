@@ -2,9 +2,6 @@ describe 'up.flow', ->
   
   describe 'Javascript functions', ->
 
-    beforeEach ->
-      jasmine.Ajax.install()
-    
     describe 'up.replace', ->
 
       if up.browser.canPushState()

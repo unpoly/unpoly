@@ -9,7 +9,6 @@ describe 'up.modal', ->
     describe 'up.modal.open', ->
 
       it "loads the given link's destination in a dialog window", (done) ->
-        jasmine.Ajax.install()
         $link = affix('a[href="/path/to"][up-modal=".middle"]').text('link')
         promise = up.modal.open($link)
         request = jasmine.Ajax.requests.mostRecent()

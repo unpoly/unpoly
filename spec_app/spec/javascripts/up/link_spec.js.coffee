@@ -7,8 +7,6 @@ describe 'up.link', ->
       if up.browser.canPushState()
       
         it 'loads the given link via AJAX and replaces the response in the given target', (done) ->
-          jasmine.Ajax.install()
-    
           affix('.before').text('old-before')
           affix('.middle').text('old-middle')
           affix('.after').text('old-after')

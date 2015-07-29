@@ -11,8 +11,6 @@ describe 'up.form', ->
       if up.browser.canPushState()
       
         beforeEach ->
-          jasmine.Ajax.install()
-    
           $form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
           $form.append('<input name="field1" value="value1">')
           $form.append('<input name="field2" value="value2">')
