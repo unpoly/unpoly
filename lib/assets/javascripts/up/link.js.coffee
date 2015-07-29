@@ -149,9 +149,18 @@ up.link = (->
     options.history = u.option(options.history, $link.attr('up-history'))
     options.scroll = u.option(options.scroll, $link.attr('up-scroll'), 'body')
     options.cache = u.option(options.cache, $link.attr('up-cache'))
+    options.method = followMethod($link, options)
     options = u.merge(options, up.motion.animateOptions(options, $link))
 
     up.replace(selector, url, options)
+
+  ###*
+  @protected
+  @method up.link.followMethod
+  ###
+  followMethod = ($link, options) ->
+    options = u.options(options)
+    u.option(options.method, $link.attr('up-method'), $link.attr('data-method'), 'get').toUpperCase()
 
   resolve = (element) ->
     $element = $(element)
@@ -335,6 +344,7 @@ up.link = (->
   follow: follow
   resolve: resolve
   childClicked: childClicked
+  followMethod: followMethod
 
 )()
 

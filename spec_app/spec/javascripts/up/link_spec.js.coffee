@@ -31,15 +31,27 @@ describe 'up.link', ->
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('old-after')
             done()
-            
+
+        it 'uses the method from a data-method attribute', ->
+          $link = affix('a[href="/path"][data-method="PUT"]')
+          up.follow($link)
+          request = jasmine.Ajax.requests.mostRecent()
+          expect(request.method).toBe('PUT')
+
       else
         
         it 'follows the given link', ->
-          $link = affix('a[href="/path"][up-target=".middle"]')
+          $link = affix('a[href="/path"]')
           spyOn(up.browser, 'loadPage')
           up.follow($link)
           expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
-          
+
+        it 'uses the method from a data-method attribute', ->
+          $link = affix('a[href="/path"][data-method="PUT"]')
+          spyOn(up.browser, 'loadPage')
+          up.follow($link)
+          expect(up.browser.loadPage).toHaveBeenCalledWith('/path', { method: 'PUT' })
+
 
     describe 'up.visit', ->
       
