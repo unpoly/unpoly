@@ -15,5 +15,6 @@
 //= require jasmine-jquery
 //= require jasmine-fixture
 //= require jasmine-ajax
+//= require helpers/knife
 //= require up
 //= require_tree .

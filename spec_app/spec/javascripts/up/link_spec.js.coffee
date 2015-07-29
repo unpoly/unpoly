@@ -56,40 +56,43 @@ describe 'up.link', ->
       it 'should have tests'
       
     describe '[up-instant]', ->
-      
+
       beforeEach ->
         @$link = affix('a[href="/path"][up-follow][up-instant]')
-        spyOn(up, 'follow')
-      
+        @followSpy = up.link.knife.mock('follow')
+
+      afterEach ->
+        Knife.reset()
+
       it 'follows an [up-follow] link on mousedown (instead of on click)', ->
         Trigger.mousedown(@$link)
-        expect(up.follow.calls.mostRecent().args[0]).toEqual(@$link)
+        expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link)
       
       it 'follows an [up-target] link on mousedown (instead of on click)', ->
         Trigger.mousedown(@$link)
-        expect(up.follow.calls.mostRecent().args[0]).toEqual(@$link)
+        expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link)
       
       it 'does nothing on mouseup', ->
         Trigger.mouseup(@$link)
-        expect(up.follow).not.toHaveBeenCalled()
+        expect(@followSpy).not.toHaveBeenCalled()
       
       it 'does nothing on click', ->
         Trigger.click(@$link)
-        expect(up.follow).not.toHaveBeenCalled()
+        expect(@followSpy).not.toHaveBeenCalled()
               
       it 'does nothing if the right mouse button is pressed down', ->
         Trigger.mousedown(@$link, button: 2)
-        expect(up.follow).not.toHaveBeenCalled()
+        expect(@followSpy).not.toHaveBeenCalled()
       
       it 'does nothing if shift is pressed during mousedown', ->
         Trigger.mousedown(@$link, shiftKey: true)
-        expect(up.follow).not.toHaveBeenCalled()
+        expect(@followSpy).not.toHaveBeenCalled()
       
       it 'does nothing if ctrl is pressed during mousedown', ->
         Trigger.mousedown(@$link, ctrlKey: true)
-        expect(up.follow).not.toHaveBeenCalled()
+        expect(@followSpy).not.toHaveBeenCalled()
       
       it 'does nothing if meta is pressed during mousedown', ->
         Trigger.mousedown(@$link, metaKey: true)
-        expect(up.follow).not.toHaveBeenCalled()
+        expect(@followSpy).not.toHaveBeenCalled()
       

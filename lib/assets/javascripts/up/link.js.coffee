@@ -288,7 +288,7 @@ up.link = (->
   up.on 'mousedown', '[up-follow][up-instant]', (event, $link) ->
     if activeInstantLink(event, $link)
       event.preventDefault()
-      up.follow(resolve($link))
+      follow(resolve($link))
   
   ###*
   Marks up the current link to be followed *as fast as possible*.
@@ -329,7 +329,8 @@ up.link = (->
       newAttrs['up-target'] = target
     u.setMissingAttrs($element, newAttrs)
     $element.removeAttr('up-dash')
-    
+
+  knife: eval(Knife?.point)
   visit: visit
   follow: follow
   resolve: resolve

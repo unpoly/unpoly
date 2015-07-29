@@ -590,22 +590,6 @@ up.util = (->
     includes: includes
     includesAny: includesAny
 
-#  memoArray = ->
-#    array = []
-#    defaults = []
-#    array.snapshot = ->
-#      defaults = copy(array)
-#    array.reset = (destroyer) ->
-#      if destroyer
-#        for element in array
-#          unless contains(defaults, element)
-#            destroyer()
-#      replaceInPlace(array, defaults)
-#    array
-#  
-#  replaceInPlace = (array, replacement) ->
-#    array.splice(0, array.length, replacement...)    
-    
   presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl
