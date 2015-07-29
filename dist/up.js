@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var __slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringSet, stringifyConsoleArgs, temporaryCss, toArray, trim, unwrap;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringSet, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unwrap;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -273,6 +273,14 @@ If you use them in your own code, you will get hurt.
       for (index = _i = 0, _len = collection.length; _i < _len; index = ++_i) {
         item = collection[index];
         _results.push(block(item, index));
+      }
+      return _results;
+    };
+    times = function(count, block) {
+      var iteration, _i, _ref, _results;
+      _results = [];
+      for (iteration = _i = 0, _ref = count - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; iteration = 0 <= _ref ? ++_i : --_i) {
+        _results.push(block(iteration));
       }
       return _results;
     };
@@ -748,6 +756,7 @@ If you use them in your own code, you will get hurt.
       error: error,
       debug: debug,
       each: each,
+      times: times,
       detect: detect,
       select: select,
       last: last,
@@ -1256,7 +1265,7 @@ We need to work on this page:
         if (!options.preload) {
           up.browser.loadPage(url, u.only(options, 'method'));
         }
-        return;
+        return u.resolvedPromise();
       }
       request = {
         url: url,
@@ -2654,13 +2663,13 @@ response will already be cached when the user performs the click.
       if (!u.isHash(request)) {
         debugger;
       }
-      if (!request._requestNormalized) {
+      if (!request._normalized) {
         request.method = u.normalizeMethod(request.method);
         if (request.url) {
           request.url = u.normalizeUrl(request.url);
         }
         request.selector || (request.selector = 'body');
-        request._requestNormalized = true;
+        request._normalized = true;
       }
       return request;
     };
@@ -2693,7 +2702,7 @@ response will already be cached when the user performs the click.
       var forceCache, ignoreCache, promise, request;
       forceCache = u.castsToTrue(options.cache);
       ignoreCache = u.castsToFalse(options.cache);
-      request = u.only(options, 'url', 'method', 'selector');
+      request = u.only(options, 'url', 'method', 'selector', '_normalized');
       if (!isIdempotent(request) && !forceCache) {
         clear();
         promise = u.ajax(request);
@@ -2718,6 +2727,11 @@ response will already be cached when the user performs the click.
       timeSinceTouch = timestamp() - promise.timestamp;
       return timeSinceTouch < config.cacheExpiry;
     };
+
+    /**
+    @protected
+    @method up.proxy.get
+     */
     get = function(request) {
       var key, promise;
       key = cacheKey(request);
@@ -2735,6 +2749,11 @@ response will already be cached when the user performs the click.
         return void 0;
       }
     };
+
+    /**
+    @protected
+    @method up.proxy.set
+     */
     set = function(request, promise) {
       var key;
       trim();
@@ -2743,11 +2762,21 @@ response will already be cached when the user performs the click.
       cache[key] = promise;
       return promise;
     };
+
+    /**
+    @protected
+    @method up.proxy.remove
+     */
     remove = function(request) {
       var key;
       key = cacheKey(request);
       return delete cache[key];
     };
+
+    /**
+    @protected
+    @method up.proxy.clear
+     */
     clear = function() {
       return cache = {};
     };
@@ -2770,12 +2799,28 @@ response will already be cached when the user performs the click.
       clearTimeout(delayTimer);
       return delayTimer = null;
     };
-    preload = function(link, options) {
-      options = u.options();
-      ensureIsIdempotent(options);
-      u.debug("Preloading %o", link);
-      options.preload = true;
-      return up.link.follow(link, options);
+
+    /**
+    @protected
+    @method up.proxy.preload
+    @return
+      A promise that will be resolved when the request was loaded and cached
+     */
+    preload = function(linkOrSelector, options) {
+      var $link, method;
+      $link = $(linkOrSelector);
+      options = u.options(options);
+      method = up.link.followMethod($link, options);
+      if (isIdempotent({
+        method: method
+      })) {
+        u.debug("Preloading %o", $link);
+        options.preload = true;
+        return up.link.follow($link, options);
+      } else {
+        u.debug("Won't preload %o due to unsafe method %o", $link, method);
+        return u.resolvedPromise();
+      }
     };
     reset = function() {
       cancelDelay();
@@ -2791,7 +2836,7 @@ response will already be cached when the user performs the click.
     making the interaction feel instant.   
     
     @method [up-preload]
-    @param [[up-delay]=50]
+    @param [up-delay=75]
       The number of milliseconds to wait between hovering
       and preloading. Increasing this will lower the load in your server,
       but will also make the interaction feel less instant.
@@ -2902,7 +2947,7 @@ Read on
 
 (function() {
   up.link = (function() {
-    var activeInstantLink, childClicked, follow, resolve, u, visit;
+    var activeInstantLink, childClicked, follow, followMethod, resolve, u, visit;
     u = up.util;
 
     /**
@@ -2968,8 +3013,18 @@ Read on
       options.history = u.option(options.history, $link.attr('up-history'));
       options.scroll = u.option(options.scroll, $link.attr('up-scroll'), 'body');
       options.cache = u.option(options.cache, $link.attr('up-cache'));
+      options.method = followMethod($link, options);
       options = u.merge(options, up.motion.animateOptions(options, $link));
       return up.replace(selector, url, options);
+    };
+
+    /**
+    @protected
+    @method up.link.followMethod
+     */
+    followMethod = function($link, options) {
+      options = u.options(options);
+      return u.option(options.method, $link.attr('up-method'), $link.attr('data-method'), 'get').toUpperCase();
     };
     resolve = function(element) {
       var $element, followAttr;
@@ -3114,7 +3169,7 @@ Read on
     up.on('mousedown', '[up-follow][up-instant]', function(event, $link) {
       if (activeInstantLink(event, $link)) {
         event.preventDefault();
-        return up.follow(resolve($link));
+        return follow(resolve($link));
       }
     });
 
@@ -3161,10 +3216,12 @@ Read on
       return $element.removeAttr('up-dash');
     });
     return {
+      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       visit: visit,
       follow: follow,
       resolve: resolve,
-      childClicked: childClicked
+      childClicked: childClicked,
+      followMethod: followMethod
     };
   })();
 
