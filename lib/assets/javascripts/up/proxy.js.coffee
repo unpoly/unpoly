@@ -71,11 +71,11 @@ up.proxy = (->
     
   normalizeRequest = (request) ->
     debugger unless u.isHash(request)
-    unless request._requestNormalized
+    unless request._normalized
       request.method = u.normalizeMethod(request.method)
       request.url = u.normalizeUrl(request.url) if request.url
       request.selector ||= 'body'
-      request._requestNormalized = true
+      request._normalized = true
     request
     
   alias = (oldRequest, newRequest) ->
@@ -104,7 +104,7 @@ up.proxy = (->
     forceCache = u.castsToTrue(options.cache)
     ignoreCache = u.castsToFalse(options.cache)
 
-    request = u.only(options, 'url', 'method', 'selector')
+    request = u.only(options, 'url', 'method', 'selector', '_normalized')
 
     # We don't cache non-GET responses unless `options.cache`
     # is explicitly set to `true`.
@@ -200,10 +200,14 @@ up.proxy = (->
   @return
     A promise that will be resolved when the request was loaded and cached
   ###
-  preload = (link, options) ->
-    options = u.options()
+  preload = (linkOrSelector, options) ->
+    $link = $(linkOrSelector)
+    options = u.options(options)
+
+    alert("hier ist noch ein fehler! options wird immer idempotent sein!")
+
     ensureIsIdempotent(options)
-    u.debug("Preloading %o", link)
+    u.debug("Preloading %o", $link)
     options.preload = true
     up.link.follow(link, options)
     

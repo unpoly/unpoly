@@ -223,6 +223,9 @@ up.util = (->
   each = (collection, block) ->
     block(item, index) for item, index in collection
 
+  times = (count, block) ->
+    block(iteration) for iteration in [0..(count - 1)]
+
   isNull = (object) ->
     object == null
 
@@ -607,6 +610,7 @@ up.util = (->
   error: error
   debug: debug
   each: each
+  times: times
   detect: detect
   select: select
   last: last
