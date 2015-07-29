@@ -134,6 +134,10 @@ up.proxy = (->
     timeSinceTouch = timestamp() - promise.timestamp
     timeSinceTouch < config.cacheExpiry
 
+  ###*
+  @protected
+  @method up.proxy.get
+  ###
   get = (request) ->
     key = cacheKey(request)
     if promise = cache[key]
@@ -147,20 +151,31 @@ up.proxy = (->
         promise
     else
       u.debug("Cache miss for %o (%o)", request.url, request)
-#      $('body').css('background-color': 'yellow')
       undefined
-      
+
+  ###*
+  @protected
+  @method up.proxy.set
+  ###
   set = (request, promise) ->
     trim()
     key = cacheKey(request)
     promise.timestamp = timestamp()
     cache[key] = promise
     promise
-    
+
+  ###*
+  @protected
+  @method up.proxy.remove
+  ###
   remove = (request) ->
     key = cacheKey(request)
     delete cache[key]
-    
+
+  ###*
+  @protected
+  @method up.proxy.clear
+  ###
   clear = ->
     cache = {}
   
@@ -179,6 +194,12 @@ up.proxy = (->
     clearTimeout(delayTimer)
     delayTimer = null
 
+  ###*
+  @protected
+  @method up.proxy.preload
+  @return
+    A promise that will be resolved when the request was loaded and cached
+  ###
   preload = (link, options) ->
     options = u.options()
     ensureIsIdempotent(options)
@@ -200,7 +221,7 @@ up.proxy = (->
   making the interaction feel instant.   
 
   @method [up-preload]
-  @param [[up-delay]=50]
+  @param [up-delay=75]
     The number of milliseconds to wait between hovering
     and preloading. Increasing this will lower the load in your server,
     but will also make the interaction feel less instant.
