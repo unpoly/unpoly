@@ -133,8 +133,8 @@ up.util = (->
     $error.addClass('up-error')
     $error.text(asString)
     # alert "#{asString}\n\nOpen the developer console for details."
-    throw asString
-    
+    throw new Error(asString)
+
   CONSOLE_PLACEHOLDERS = /\%[odisf]/g
     
   stringifyConsoleArgs = (args) ->
