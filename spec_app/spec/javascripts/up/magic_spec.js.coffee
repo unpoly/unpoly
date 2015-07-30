@@ -17,12 +17,12 @@ describe 'up.magic', ->
         expect(observeClass).not.toHaveBeenCalledWith('container')
         expect(observeClass).toHaveBeenCalledWith('child')           
       
-    describe 'up.awaken', ->
+    describe 'up.compiler', ->
       
       it 'applies an event initializer whenever a matching fragment is inserted', ->
   
         observeClass = jasmine.createSpy()
-        up.awaken '.child', ($element) ->
+        up.compiler '.child', ($element) ->
           observeClass($element.attr('class'))
   
         up.ready(affix('.container .child'))
@@ -30,10 +30,10 @@ describe 'up.magic', ->
         expect(observeClass).not.toHaveBeenCalledWith('container')
         expect(observeClass).toHaveBeenCalledWith('child')           
   
-      it 'lets allows initializers return a destructor function, which is called when the awakened fragments gets destroyed', ->
+      it 'lets allows initializers return a destructor function, which is called when a compiled fragment gets destroyed', ->
   
         destructor = jasmine.createSpy()
-        up.awaken '.child', ($element) ->
+        up.compiler '.child', ($element) ->
           destructor
   
         up.ready(affix('.container .child'))
@@ -45,7 +45,7 @@ describe 'up.magic', ->
       it 'parses an up-data attribute as JSON and passes the parsed object as a second argument to the initializer', ->
 
         observeArgs = jasmine.createSpy()
-        up.awaken '.child', ($element, data) ->
+        up.compiler '.child', ($element, data) ->
           observeArgs($element.attr('class'), data)
 
         data = { key1: 'value1', key2: 'value2' }
@@ -58,7 +58,7 @@ describe 'up.magic', ->
       it 'passes an empty object as a second argument to the initializer if there is no up-data attribute', ->
 
         observeArgs = jasmine.createSpy()
-        up.awaken '.child', ($element, data) ->
+        up.compiler '.child', ($element, data) ->
           observeArgs($element.attr('class'), data)
 
         up.ready(affix(".child"))

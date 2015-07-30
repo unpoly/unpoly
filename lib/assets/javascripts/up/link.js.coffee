@@ -326,7 +326,7 @@ up.link = (->
   @method [up-dash]
   @ujs
   ###
-  up.awaken '[up-dash]', ($element) ->
+  up.compiler '[up-dash]', ($element) ->
     target = $element.attr('up-dash')
     newAttrs = {
       'up-preload': 'true',

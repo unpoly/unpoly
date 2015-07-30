@@ -81,7 +81,7 @@ up.magic = (->
   defaultLiveDescriptions = null
 
   live = (events, selector, behavior) ->
-    # Silently discard any awakeners that are registered on unsupported browsers
+    # Silently discard any event handlers that are registered on unsupported browsers
     return unless up.browser.isSupported()
     description = [
       events,
@@ -106,24 +106,24 @@ up.magic = (->
 
   This Javascript will do exactly that:
 
-      up.awaken('a[rel=lightbox]', function($element) {
+      up.compiler('a[rel=lightbox]', function($element) {
         $element.lightboxify();
       });
 
-  Note that within the awakener, Up.js will bind `this` to the
+  Note that within the compiler, Up.js will bind `this` to the
   native DOM element to help you migrate your existing jQuery code to
   this new syntax.
 
 
   \#\#\#\# Custom elements
 
-  You can also use `up.awaken` to implement custom elements like this:
+  You can also use `up.compiler` to implement custom elements like this:
 
       <current-time></current-time>
 
   Here is the Javascript that inserts the current time into to these elements:
 
-      up.awaken('current-time', function($element) {
+      up.compiler('current-time', function($element) {
         var now = new Date();
         $element.text(now.toString()));
       });
@@ -131,19 +131,19 @@ up.magic = (->
 
   \#\#\#\# Cleaning up after yourself
 
-  If your awakener returns a function, Up.js will use this as a *destructor* to
+  If your compiler returns a function, Up.js will use this as a *destructor* to
   clean up if the element leaves the DOM. Note that in Up.js the same DOM ad Javascript environment
   will persist through many page loads, so it's important to not create
   [memory leaks](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
 
-  You should clean up after yourself whenever your awakeners have global
+  You should clean up after yourself whenever your compilers have global
   side effects, like a [`setInterval`](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setInterval)
   or event handlers bound to the document root.
 
   Here is a version of `<current-time>` that updates
   the time every second, and cleans up once it's done:
 
-      up.awaken('current-time', function($element) {
+      up.compiler('current-time', function($element) {
 
         function update() {
           var now = new Date();
@@ -177,7 +177,7 @@ up.magic = (->
 
   The JSON will parsed and handed to your event handler as a second argument:
 
-      up.awaken('.google-map', function($element, pins) {
+      up.compiler('.google-map', function($element, pins) {
 
         var map = new google.maps.Map($element);
 
@@ -195,57 +195,59 @@ up.magic = (->
 
   \#\#\#\# Migrating jQuery event handlers to `up.on`
 
-  Within the awakener, Up.js will bind `this` to the
+  Within the compiler, Up.js will bind `this` to the
   native DOM element to help you migrate your existing jQuery code to
   this new syntax.
 
   
-  @method up.awaken
+  @method up.compiler
   @param {String} selector
     The selector to match.
   @param {Boolean} [options.batch=false]
     If set to `true` and a fragment insertion contains multiple
-    elements matching the selector, `awakener` is only called once
+    elements matching the selector, `compiler` is only called once
     with a jQuery collection containing all matching elements. 
-  @param {Function($element, data)} awakener
+  @param {Function($element, data)} compiler
     The function to call when a matching element is inserted.
     The function takes the new element as the first argument (as a jQuery object).
     If the element has an `up-data` attribute, its value is parsed as JSON
     and passed as a second argument.
 
-    The function may return another function that destroys the awakened
-    object when it is removed from the DOM, by clearing global state such as
-    time-outs and event handlers bound to the document.
+    The function may return a destructor function that destroys the compiled
+    object before it is removed from the DOM. The destructor is supposed to
+    clear global state such as time-outs and event handlers bound to the document.
+    The destructor is *not* expected to remove the element from the DOM, which
+    is already handled by [`up.destroy`](/up.flow#up.destroy).
   ###
-  awakeners = []
-  defaultAwakeners = null
+  compilers = []
+  defaultCompilers = null
 
-  awaken = (selector, args...) ->
-    # Silently discard any awakeners that are registered on unsupported browsers
+  compiler = (selector, args...) ->
+    # Silently discard any compilers that are registered on unsupported browsers
     return unless up.browser.isSupported()
-    awakener = args.pop()
+    compiler = args.pop()
     options = u.options(args[0], batch: false)
-    awakeners.push
+    compilers.push
       selector: selector
-      callback: awakener
+      callback: compiler
       batch: options.batch
   
-  applyAwakener = (awakener, $jqueryElement, nativeElement) ->
-    u.debug "Applying awakener %o on %o", awakener.selector, nativeElement
-    destroyer = awakener.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
+  applyCompiler = (compiler, $jqueryElement, nativeElement) ->
+    u.debug "Applying compiler %o on %o", compiler.selector, nativeElement
+    destroyer = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
     if u.isFunction(destroyer)
       $jqueryElement.addClass(DESTROYABLE_CLASS)
       $jqueryElement.data(DESTROYER_KEY, destroyer)
 
   compile = ($fragment) ->
     u.debug "Compiling fragment %o", $fragment
-    for awakener in awakeners
-      $matches = u.findWithSelf($fragment, awakener.selector)
+    for compiler in compilers
+      $matches = u.findWithSelf($fragment, compiler.selector)
       if $matches.length
-        if awakener.batch
-          applyAwakener(awakener, $matches, $matches.get())
+        if compiler.batch
+          applyCompiler(compiler, $matches, $matches.get())
         else
-          $matches.each -> applyAwakener(awakener, $(this), this)
+          $matches.each -> applyCompiler(compiler, $(this), this)
 
   destroy = ($fragment) ->
     u.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
@@ -272,7 +274,7 @@ up.magic = (->
 
   If an element annotated with [`up-data`] is inserted into the DOM,
   Up will parse the JSON and pass the resulting object to any matching
-  [`up.awaken`](/up.magic#up.magic.awaken) handlers.
+  [`up.compiler`](/up.magic#up.magic.compiler) handlers.
 
   Similarly, when an event is triggered on an element annotated with
   [`up-data`], the parsed object will be passed to any matching
@@ -299,7 +301,7 @@ up.magic = (->
   ###
   snapshot = ->
     defaultLiveDescriptions = u.copy(liveDescriptions) 
-    defaultAwakeners = u.copy(awakeners)
+    defaultCompilers = u.copy(compilers)
 
   ###*
   Resets the list of registered event listeners to the
@@ -313,7 +315,7 @@ up.magic = (->
       unless u.contains(defaultLiveDescriptions, description)
         $(document).off(description...)
     liveDescriptions = u.copy(defaultLiveDescriptions)
-    awakeners = u.copy(defaultAwakeners)
+    compilers = u.copy(defaultCompilers)
 
   ###*
   Sends a notification that the given element has been inserted
@@ -344,7 +346,7 @@ up.magic = (->
   up.bus.on 'framework:ready', snapshot
   up.bus.on 'framework:reset', reset
 
-  awaken: awaken
+  compiler: compiler
   on: live
   ready: ready
   onEscape: onEscape
@@ -352,6 +354,8 @@ up.magic = (->
 
 )()
 
-up.awaken = up.magic.awaken
+up.compiler = up.magic.compiler
 up.on = up.magic.on
 up.ready = up.magic.ready
+up.awaken = (args...) ->
+

@@ -86,7 +86,7 @@ up.tooltip = (->
   @method [up-tooltip]
   @ujs
   ###
-  up.awaken('[up-tooltip]', ($link) ->
+  up.compiler('[up-tooltip]', ($link) ->
     # Don't register these events on document since *every*
     # mouse move interaction  bubbles up to the document. 
     $link.on('mouseover', -> open($link))

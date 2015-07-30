@@ -19,7 +19,7 @@ Gedanke 2
 
      z. B.
 
-     up.awaken('.note_form', function($element) {
+     up.compiler('.note_form', function($element) {
 
       var timer = setTimeout(...)
 

@@ -158,7 +158,7 @@ describe 'up.flow', ->
         expect($('.element')).not.toExist()
         
       it 'calls destructors for custom elements', ->
-        up.awaken('.element', ($element) -> destructor)
+        up.compiler('.element', ($element) -> destructor)
         destructor = jasmine.createSpy('destructor')
         up.ready(affix('.element'))
         up.destroy('.element')
