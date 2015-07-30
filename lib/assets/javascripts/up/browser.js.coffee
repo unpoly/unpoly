@@ -57,6 +57,7 @@ up.browser = (->
     window.console.info ||= noop
     window.console.error ||= noop
     window.console.debug ||= noop
+    window.console.warn ||= noop
     window.console.group ||= noop
     window.console.groupCollapsed ||= noop
     window.console.groupEnd ||= noop

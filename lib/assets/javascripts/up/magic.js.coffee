@@ -358,4 +358,5 @@ up.compiler = up.magic.compiler
 up.on = up.magic.on
 up.ready = up.magic.ready
 up.awaken = (args...) ->
-
+  up.util.warn("up.awaken has been renamed to up.compiler and will be removed in a future version")
+  up.compiler(args...)

@@ -108,21 +108,13 @@ up.util = (->
     element.innerHTML = html if isPresent(html)
     element
     
-  debug = (args...) ->
-    args = toArray(args)
-    message = args.shift()
+  debug = (message, args...) ->
     message = "[UP] #{message}"
-    placeHolderCount = message.match(CONSOLE_PLACEHOLDERS)?.length || 0
-    if isFunction(last(args)) && placeHolderCount < args.length
-      group = args.pop()
-    value = console.debug(message, args...)
-    if group
-      console.groupCollapsed()
-      try
-        value = group()
-      finally
-        console.groupEnd()
-    value
+    console.debug(message, args...)
+
+  warn = (message, args...) ->
+    message = "[UP] #{message}"
+    console.warn(message, args...)
 
   error = (args...) ->
     args[0] = "[UP] #{args[0]}"
@@ -609,6 +601,7 @@ up.util = (->
   option: option
   error: error
   debug: debug
+  warn: warn
   each: each
   times: times
   detect: detect
