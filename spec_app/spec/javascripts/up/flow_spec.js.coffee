@@ -57,9 +57,32 @@ describe 'up.flow', ->
             expect($('.after')).toHaveText('new-after')
             done()
 
-        it 'prepends instead of replacing when the target has a :before pseudo-selector'
+        it 'prepends instead of replacing when the target has a :before pseudo-selector', (done) ->
+          @request = up.replace('.middle:before', '/path')
+          @respond()
+          @request.then ->
+            expect($('.before')).toHaveText('old-before')
+            expect($('.middle')).toHaveText('new-middleold-middle')
+            expect($('.after')).toHaveText('old-after')
+            done()
 
-        it 'appends instead of replacing when the target has a :after pseudo-selector'
+        it 'appends instead of replacing when the target has a :after pseudo-selector', (done) ->
+          @request = up.replace('.middle:after', '/path')
+          @respond()
+          @request.then ->
+            expect($('.before')).toHaveText('old-before')
+            expect($('.middle')).toHaveText('old-middlenew-middle')
+            expect($('.after')).toHaveText('old-after')
+            done()
+
+        it "lets the developer choose between replacing/prepending/appending for each selector", (done) ->
+          @request = up.replace('.before:before, .middle, .after:after', '/path')
+          @respond()
+          @request.then ->
+            expect($('.before')).toHaveText('new-beforeold-before')
+            expect($('.middle')).toHaveText('new-middle')
+            expect($('.after')).toHaveText('old-afternew-after')
+            done()
 
         it 'executes those script-tags in the response that get inserted into the DOM', (done) ->
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
@@ -121,7 +144,7 @@ describe 'up.flow', ->
         implant = -> up.flow.implant('.foo-bar', html)
         expect(implant).toThrowError(/Could not find selector ".foo-bar" in current body/i)
 
-      it "throws an error if the selector can't be found in te given HTML string", ->
+      it "throws an error if the selector can't be found in the given HTML string", ->
         affix('.foo-bar')
         implant = -> up.flow.implant('.foo-bar', '')
         expect(implant).toThrowError(/Could not find selector ".foo-bar" in response/i)
