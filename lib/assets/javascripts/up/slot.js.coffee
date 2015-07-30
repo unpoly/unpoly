@@ -11,9 +11,6 @@ For example, you might have
 
     <script>
       up.awaken('.alerts', function ($element) {
-
-        RELOAD SHOULD NOT CACHE
-
         setInterval(3000, function() { up.reload('.alerts') });
       });
     </script>
