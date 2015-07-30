@@ -98,7 +98,16 @@ up.flow = (->
     promise
 
   ###*
-  Replaces the given selector with the same CSS selector from the given HTML string.
+  Updates a selector on the current page with the
+  same selector from the given HTML string.
+
+  Example:
+
+      html = '<div class="before">new-before</div>' +
+             '<div class="middle">new-middle</div>' +
+              '<div class="after">new-after</div>';
+
+      up.flow.implant('.middle', html):
   
   @method up.flow.implant
   @protected
@@ -139,9 +148,15 @@ up.flow = (->
     selectorWithExcludes = "#{selector}:not(.up-ghost, .up-destroying)"
     # Prefer to replace fragments in an open popup or modal
     u.presence($(".up-popup #{selectorWithExcludes}")) ||
-    u.presence($(".up-modal #{selectorWithExcludes}")) ||
-    u.presence($(selectorWithExcludes)) ||
-    u.error('Could not find selector %o in current body HTML', selector)
+      u.presence($(".up-modal #{selectorWithExcludes}")) ||
+      u.presence($(selectorWithExcludes)) ||
+      fragmentNotFound(selector)
+
+  fragmentNotFound = (selector) ->
+    message = 'Could not find selector %o in current body HTML'
+    if message[0] == '#'
+      message += ' (avoid using IDs)'
+    u.error(message, selector)
 
   parseResponse = (html) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags,

@@ -57,6 +57,10 @@ describe 'up.flow', ->
             expect($('.after')).toHaveText('new-after')
             done()
 
+        it 'prepends instead of replacing when the target has a :before pseudo-selector'
+
+        it 'appends instead of replacing when the target has a :after pseudo-selector'
+
         it 'executes those script-tags in the response that get inserted into the DOM', (done) ->
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
 
@@ -91,10 +95,38 @@ describe 'up.flow', ->
           up.replace('.selector', '/path')
           expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
           
-    describe 'up.implant', ->
+    describe 'up.flow.implant', ->
       
-      it 'should have tests'
-      
+      it 'Updates a selector on the current page with the same selector from the given HTML string', ->
+
+        affix('.before').text('old-before')
+        affix('.middle').text('old-middle')
+        affix('.after').text('old-after')
+
+        html =
+          """
+          <div class="before">new-before</div>
+          <div class="middle">new-middle</div>
+          <div class="after">new-after</div>
+          """
+
+        up.flow.implant('.middle', html)
+
+        expect($('.before')).toHaveText('old-before')
+        expect($('.middle')).toHaveText('new-middle')
+        expect($('.after')).toHaveText('old-after')
+
+      it "throws an error if the selector can't be found on the current page", ->
+        html = '<div class="foo-bar">text</div>'
+        implant = -> up.flow.implant('.foo-bar', html)
+        expect(implant).toThrowError(/Could not find selector ".foo-bar" in current body/i)
+
+      it "throws an error if the selector can't be found in te given HTML string", ->
+        affix('.foo-bar')
+        implant = -> up.flow.implant('.foo-bar', '')
+        expect(implant).toThrowError(/Could not find selector ".foo-bar" in response/i)
+
+
     describe 'up.destroy', ->
       
       it 'removes the element with the given selector', ->
