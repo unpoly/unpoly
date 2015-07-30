@@ -2966,7 +2966,7 @@ Read on
 
 (function() {
   up.link = (function() {
-    var activeInstantLink, childClicked, follow, followMethod, resolve, u, visit;
+    var childClicked, follow, followMethod, resolve, shouldProcessLinkEvent, u, visit;
     u = up.util;
 
     /**
@@ -3114,13 +3114,17 @@ Read on
       This makes the interaction faster.
      */
     up.on('click', 'a[up-target]', function(event, $link) {
-      event.preventDefault();
-      if (!$link.is('[up-instant]')) {
-        return follow($link);
+      if (shouldProcessLinkEvent(event, $link)) {
+        if ($link.is('[up-instant]')) {
+          return event.preventDefault();
+        } else {
+          event.preventDefault();
+          return follow($link);
+        }
       }
     });
     up.on('mousedown', 'a[up-target][up-instant]', function(event, $link) {
-      if (activeInstantLink(event, $link)) {
+      if (shouldProcessLinkEvent(event, $link)) {
         event.preventDefault();
         return up.follow($link);
       }
@@ -3136,7 +3140,7 @@ Read on
       $targetLink = $target.closest('a, [up-follow]');
       return $targetLink.length && $link.find($targetLink).length;
     };
-    activeInstantLink = function(event, $link) {
+    shouldProcessLinkEvent = function(event, $link) {
       return u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link);
     };
 
@@ -3178,15 +3182,17 @@ Read on
       If set, fetches the element on `mousedown` instead of `click`.
      */
     up.on('click', '[up-follow]', function(event, $link) {
-      if (!childClicked(event, $link)) {
-        event.preventDefault();
-        if (!$link.is('[up-instant]')) {
+      if (shouldProcessLinkEvent(event, $link)) {
+        if ($link.is('[up-instant]')) {
+          return event.preventDefault();
+        } else {
+          event.preventDefault();
           return follow(resolve($link));
         }
       }
     });
     up.on('mousedown', '[up-follow][up-instant]', function(event, $link) {
-      if (activeInstantLink(event, $link)) {
+      if (shouldProcessLinkEvent(event, $link)) {
         event.preventDefault();
         return follow(resolve($link));
       }
@@ -4405,7 +4411,7 @@ From Up's point of view the "current" location is either:
       return $(SELECTOR_ACTIVE).removeClass(CLASS_ACTIVE);
     };
     up.on('click', SELECTOR_SECTION, function(event, $section) {
-      if (!$section.is('[up-instant]')) {
+      if (u.isUnmodifiedMouseEvent(event) && !$section.is('[up-instant]')) {
         return sectionClicked($section);
       }
     });
