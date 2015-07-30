@@ -79,7 +79,7 @@ up.navigation = (->
     $(SELECTOR_ACTIVE).removeClass(CLASS_ACTIVE)
 
   up.on 'click', SELECTOR_SECTION, (event, $section) ->
-    unless $section.is('[up-instant]')
+    if u.isUnmodifiedMouseEvent(event) && !$section.is('[up-instant]')
       sectionClicked($section)
   
   up.on 'mousedown', SELECTOR_SECTION_INSTANT, (event, $section) ->

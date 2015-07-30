@@ -228,13 +228,17 @@ up.link = (->
     This makes the interaction faster.
   ###
   up.on 'click', 'a[up-target]', (event, $link) ->
-    event.preventDefault()
-    # Check if the event was already triggered by `mousedown`
-    unless $link.is('[up-instant]')
-      follow($link)
-    
+    if shouldProcessLinkEvent(event, $link)
+      if $link.is('[up-instant]')
+        # If the link was already processed on mousedown, we still need
+        # to prevent the later click event's default behavior.
+        event.preventDefault()
+      else
+        event.preventDefault()
+        follow($link)
+
   up.on 'mousedown', 'a[up-target][up-instant]', (event, $link) ->
-    if activeInstantLink(event, $link)
+    if shouldProcessLinkEvent(event, $link)
       event.preventDefault()
       up.follow($link)
 
@@ -247,7 +251,7 @@ up.link = (->
     $targetLink = $target.closest('a, [up-follow]')
     $targetLink.length && $link.find($targetLink).length
     
-  activeInstantLink = (event, $link) ->
+  shouldProcessLinkEvent = (event, $link) ->
     u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link)
     
   ###*
@@ -288,14 +292,17 @@ up.link = (->
     If set, fetches the element on `mousedown` instead of `click`.
   ###
   up.on 'click', '[up-follow]', (event, $link) ->
-    unless childClicked(event, $link)
-      event.preventDefault()
-      # Check if the event was already triggered by `mousedown`
-      unless $link.is('[up-instant]')
+    if shouldProcessLinkEvent(event, $link)
+      if $link.is('[up-instant]')
+        # If the link was already processed on mousedown, we still need
+        # to prevent the later click event's default behavior.
+        event.preventDefault()
+      else
+        event.preventDefault()
         follow(resolve($link))
 
   up.on 'mousedown', '[up-follow][up-instant]', (event, $link) ->
-    if activeInstantLink(event, $link)
+    if shouldProcessLinkEvent(event, $link)
       event.preventDefault()
       follow(resolve($link))
   
