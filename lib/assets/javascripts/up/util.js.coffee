@@ -538,7 +538,8 @@ up.util = (->
     not (event.metaKey or event.shiftKey or event.ctrlKey)
 
   isUnmodifiedMouseEvent = (event) ->
-    event.button is 0 and isUnmodifiedKeyEvent(event)
+    isLeftButton = isUndefined(event.button) || event.button == 0
+    isLeftButton && isUnmodifiedKeyEvent(event)
 
   resolvedDeferred = ->
     deferred = $.Deferred()
