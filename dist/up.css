@@ -78,9 +78,9 @@
   color: white;
   padding: 6px 9px;
   white-space: nowrap; }
-  .up-tooltip[up-origin=top] {
+  .up-tooltip[up-position=top] {
     margin-top: -6px; }
-    .up-tooltip[up-origin=top]:after {
+    .up-tooltip[up-position=top]:after {
       content: "";
       position: absolute;
       border-style: solid;
@@ -92,9 +92,9 @@
       bottom: -8px;
       left: 50%;
       margin-left: -8px; }
-  .up-tooltip[up-origin=bottom] {
+  .up-tooltip[up-position=bottom] {
     margin-top: 6px; }
-    .up-tooltip[up-origin=bottom]:after {
+    .up-tooltip[up-position=bottom]:after {
       content: "";
       position: absolute;
       border-style: solid;

@@ -658,7 +658,9 @@ If you use them in your own code, you will get hurt.
       return !(event.metaKey || event.shiftKey || event.ctrlKey);
     };
     isUnmodifiedMouseEvent = function(event) {
-      return event.button === 0 && isUnmodifiedKeyEvent(event);
+      var isLeftButton;
+      isLeftButton = isUndefined(event.button) || event.button === 0;
+      return isLeftButton && isUnmodifiedKeyEvent(event);
     };
     resolvedDeferred = function() {
       var deferred;
@@ -3579,7 +3581,7 @@ For modal dialogs see [up.modal](/up.modal) instead.
 We need to work on this page:
 
 - Show the HTML structure of the popup elements, and how to style them via CSS
-- Explain how to position popup using `up-origin`
+- Explain how to position popup using `up-position`
 - Explain how dialogs auto-close themselves when a fragment changes behind the popup layer
 - Document method parameters
   
@@ -3589,29 +3591,29 @@ We need to work on this page:
 
 (function() {
   up.popup = (function() {
-    var autoclose, close, config, createHiddenPopup, defaults, discardHistory, ensureInViewport, open, position, rememberHistory, source, u, updated;
+    var autoclose, close, config, createHiddenPopup, defaults, discardHistory, ensureInViewport, open, rememberHistory, setPosition, source, u, updated;
     u = up.util;
     config = {
       openAnimation: 'fade-in',
       closeAnimation: 'fade-out',
-      origin: 'bottom-right'
+      position: 'bottom-right'
     };
 
     /**
     @method up.popup.defaults
     @param {String} options.animation
-    @param {String} options.origin
+    @param {String} options.position
      */
     defaults = function(options) {
       return u.extend(config, options);
     };
-    position = function($link, $popup, origin) {
+    setPosition = function($link, $popup, position) {
       var css, linkBox;
       linkBox = u.measure($link, {
         full: true
       });
       css = (function() {
-        switch (origin) {
+        switch (position) {
           case "bottom-right":
             return {
               right: linkBox.right,
@@ -3633,10 +3635,10 @@ We need to work on this page:
               bottom: linkBox.top
             };
           default:
-            return u.error("Unknown origin %o", origin);
+            return u.error("Unknown position %o", position);
         }
       })();
-      $popup.attr('up-origin', origin);
+      $popup.attr('up-position', position);
       $popup.css(css);
       return ensureInViewport($popup);
     };
@@ -3699,9 +3701,9 @@ We need to work on this page:
       $popup.hide();
       return $popup;
     };
-    updated = function($link, $popup, origin, animation, animateOptions) {
+    updated = function($link, $popup, position, animation, animateOptions) {
       $popup.show();
-      position($link, $popup, origin);
+      setPosition($link, $popup, position);
       return up.animate($popup, animation, animateOptions);
     };
 
@@ -3711,7 +3713,7 @@ We need to work on this page:
     @method up.popup.open
     @param {Element|jQuery|String} elementOrSelector
     @param {String} [options.url]
-    @param {String} [options.origin='bottom-right']
+    @param {String} [options.position='bottom-right']
     @param {String} [options.animation]
       The animation to use when opening the popup.
     @param {Number} [options.duration]
@@ -3726,12 +3728,12 @@ We need to work on this page:
     @param {Object} [options.history=false]
      */
     open = function(linkOrSelector, options) {
-      var $link, $popup, animateOptions, animation, history, origin, selector, sticky, url;
+      var $link, $popup, animateOptions, animation, history, position, selector, sticky, url;
       $link = $(linkOrSelector);
       options = u.options(options);
       url = u.option(options.url, $link.attr('href'));
       selector = u.option(options.target, $link.attr('up-popup'), 'body');
-      origin = u.option(options.origin, $link.attr('up-origin'), config.origin);
+      position = u.option(options.position, $link.attr('up-position'), config.position);
       animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
       sticky = u.option(options.sticky, $link.is('[up-sticky]'));
       history = up.browser.canPushState() ? u.option(options.history, $link.attr('up-history'), false) : false;
@@ -3741,7 +3743,7 @@ We need to work on this page:
       return up.replace(selector, url, {
         history: history,
         insert: function() {
-          return updated($link, $popup, origin, animation, animateOptions);
+          return updated($link, $popup, position, animation, animateOptions);
         }
       });
     };
@@ -3803,7 +3805,7 @@ We need to work on this page:
     @method a[up-popup]
     @ujs
     @param [up-sticky]
-    @param [up-origin]
+    @param [up-position]
      */
     up.on('click', 'a[up-popup]', function(event, $link) {
       event.preventDefault();
@@ -4202,7 +4204,7 @@ value in a tooltip when a user hovers over the element.
 We need to work on this page:
   
 - Show the tooltip's HTML structure and how to style the elements
-- Explain how to position tooltips using `up-origin`
+- Explain how to position tooltips using `up-position`
 - We should have a position about tooltips that contain HTML.
   
 
@@ -4211,14 +4213,14 @@ We need to work on this page:
 
 (function() {
   up.tooltip = (function() {
-    var close, createElement, open, position, u;
+    var close, createElement, open, setPosition, u;
     u = up.util;
-    position = function($link, $tooltip, origin) {
+    setPosition = function($link, $tooltip, position) {
       var css, linkBox, tooltipBox;
       linkBox = u.measure($link);
       tooltipBox = u.measure($tooltip);
       css = (function() {
-        switch (origin) {
+        switch (position) {
           case "top":
             return {
               left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width),
@@ -4230,10 +4232,10 @@ We need to work on this page:
               top: linkBox.top + linkBox.height
             };
           default:
-            return u.error("Unknown origin %o", origin);
+            return u.error("Unknown position %o", position);
         }
       })();
-      $tooltip.attr('up-origin', origin);
+      $tooltip.attr('up-position', position);
       return $tooltip.css(css);
     };
     createElement = function(html) {
@@ -4241,27 +4243,35 @@ We need to work on this page:
     };
 
     /**
-    Opens a tooltip.
+    Opens a tooltip over the given element.
+    
+        up.tooltip.open('.help', {
+          html: 'Enter multiple words or phrases'
+        });
     
     @method up.tooltip.open
     @param {Element|jQuery|String} elementOrSelector
-    @param {String} html
-    @param {String} [options.origin='top']
+    @param {String} [options.html]
+      The HTML to display in the tooltip.
+    @param {String} [options.position='top']
+      The position of the tooltip. Known values are `top` and `bottom`.
     @param {String} [options.animation]
+      The animation to use when opening the tooltip.
      */
     open = function(linkOrSelector, options) {
-      var $link, $tooltip, animation, html, origin;
+      var $link, $tooltip, animateOptions, animation, html, position;
       if (options == null) {
         options = {};
       }
       $link = $(linkOrSelector);
       html = u.option(options.html, $link.attr('up-tooltip'), $link.attr('title'));
-      origin = u.option(options.origin, $link.attr('up-origin'), 'top');
+      position = u.option(options.position, $link.attr('up-position'), 'top');
       animation = u.option(options.animation, $link.attr('up-animation'), 'fade-in');
+      animateOptions = up.motion.animateOptions(options, $link);
       close();
       $tooltip = createElement(html);
-      position($link, $tooltip, origin);
-      return up.animate($tooltip, animation, options);
+      setPosition($link, $tooltip, position);
+      return up.animate($tooltip, animation, animateOptions);
     };
 
     /**
@@ -4270,7 +4280,7 @@ We need to work on this page:
     
     @method up.tooltip.close
     @param {Object} options
-      See options for See options for [`up.animate`](/up.motion#up.animate).
+      See options for [`up.animate`](/up.motion#up.animate).
      */
     close = function(options) {
       var $tooltip;
@@ -4279,6 +4289,7 @@ We need to work on this page:
         options = u.options(options, {
           animation: 'fade-out'
         });
+        options = u.merge(options, up.motion.animateOptions(options));
         return up.destroy($tooltip, options);
       }
     };
