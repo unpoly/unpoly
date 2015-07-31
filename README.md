@@ -33,15 +33,13 @@ We are currently feeding three release channels:
 - Bower
 - Rubygems (as the `upjs-rails` gem)
 
-To make a new Release, start with the gem:
+To make a new release:
 
 - Edit `lib/upjs/rails/version.rb` and bump the version number. Use [semantic versioning](http://semver.org/).
 - Commit and push the version bump
+- From the project root, type `rake assets:compile`. This will output minified JS and CSS files to the `dist` folder.
+- Commit and push the generated files
 - From the project root, type `rake release`. This will publish a new gem version to Rubygems.org.
   It will also push a tag for this version, which Bower requires for its own versioning scheme.
-  
-Now make the release for manual download and bower:
 
-- From the project root, type `rake assets:compile`
-- This will output minified JS and CSS files to the `dist` folder
-- Commit and push the generated files
+Always run `rake assets:compile` before `rake release` so the git tag points to the correct commit (required for Bower versioning).
