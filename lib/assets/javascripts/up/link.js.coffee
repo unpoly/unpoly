@@ -162,14 +162,6 @@ up.link = (->
     options = u.options(options)
     u.option(options.method, $link.attr('up-method'), $link.attr('data-method'), 'get').toUpperCase()
 
-  resolve = (element) ->
-    $element = $(element)
-    followAttr = $element.attr('up-follow')
-    if $element.is('a') || (u.isPresent(followAttr) && !u.castsToTrue(followAttr))
-      $element
-    else
-      $element.find('a:first')
-      
   ###*
   Follows this link via AJAX and replaces a CSS selector in the current page
   with corresponding elements from a new page fetched from the server:
@@ -207,18 +199,6 @@ up.link = (->
         Load more tasks
       </a>
 
-  \#\#\#\# Following on mousedown
-  
-  By also adding an `up-instant` attribute, the page will be fetched
-  on `mousedown` instead of `click`, making the interaction even faster:
-  
-      <a href="/users" up-target=".main" up-instant>User list</a>
-  
-  Note that using `[up-instant]` will prevent a user from canceling a link
-  click by moving the mouse away from the interaction area. However, for
-  navigation actions this isn't needed. E.g. popular operation
-  systems switch tabs on `mousedown`.
-
   \#\#\#\# Following elements that are no links
 
   You can also use `[up-target]` to turn an arbitrary element into a link.
@@ -229,18 +209,15 @@ up.link = (->
   Note that using any element other than `<a>` will prevent users from
   opening the destination in a new tab.
 
-  @method a[up-target]
+  @method [up-target]
   @ujs
   @param {String} up-target
     The CSS selector to replace
-  @param [up-instant]
-    If set, fetches the element on `mousedown` instead of `click`.
-    This makes the interaction faster.
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
   ###
-  up.on 'click', 'a[up-target]', (event, $link) ->
+  up.on 'click', '[up-target]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
       if $link.is('[up-instant]')
         # If the link was already processed on mousedown, we still need
@@ -250,10 +227,29 @@ up.link = (->
         event.preventDefault()
         follow($link)
 
-  up.on 'mousedown', 'a[up-target][up-instant]', (event, $link) ->
+  ###*
+  By adding an `up-instant` attribute to a link, the destination will be
+  fetched on `mousedown` instead of `click` (`mouseup`).
+
+      <a href="/users" up-target=".main" up-instant>User list</a>
+
+  This will save precious milliseconds that otherwise spent
+  on waiting for the user to release the mouse button. Since an
+  AJAX request will be triggered right way, the interaction will
+  appear faster.
+
+  Note that using `[up-instant]` will prevent a user from canceling a link
+  click by moving the mouse away from the interaction area. However, for
+  navigation actions this isn't needed. E.g. popular operation
+  systems switch tabs on `mousedown` instead of `click`.
+
+  @method [up-instant]
+  @ujs
+  ###
+  up.on 'mousedown', '[up-instant]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
       event.preventDefault()
-      up.follow($link)
+      follow($link)
 
   ###*
   @method up.link.childClicked
@@ -269,38 +265,14 @@ up.link = (->
     
   ###*
   If applied on a link, Follows this link via AJAX and replaces the
-  current `<body>` element with the response's `<body>` element
+  current `<body>` element with the response's `<body>` element.
+
+  Example:
 
       <a href="/users" up-follow>User list</a>
 
-  Note that this is equivalent to the following:
-
-      <a href="/users" up-target="body">User list</a>
-
-  \#\#\#\# Following on mousedown
-
-  By also adding an `up-instant` attribute, the page will be fetched
-  on `mousedown` instead of `click`, making the interaction even faster:
-  
-      <a href="/users" up-follow up-instant>User list</a>
-  
-  Note that using `[up-instant]` will prevent a user from canceling a link
-  click by moving the mouse away from the interaction area. However, for
-  navigation actions this isn't needed. E.g. popular operation
-  systems switch tabs on `mousedown`.
-
-  \#\#\#\# Enlarging the click area
-
-  You can also apply `[up-follow]` to any element that contains a link
-  in order to enlarge the link's click area:
-
-      <div class="notification" up-follow>
-         Record was saved!
-         <a href="/records">Close</a>
-      </div>
-
-  In the example above, clicking anywhere within `.notification` element
-  would follow the *Close* link.
+  To only update a fragment instead of the entire page,
+  see [`up-target`](#up-target).
 
   \#\#\#\# Turn any element into a link
 
@@ -315,8 +287,6 @@ up.link = (->
   @method [up-follow]
   @ujs
   @param {String} [up-follow]
-  @param [up-instant]
-    If set, fetches the element on `mousedown` instead of `click`.
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
@@ -329,12 +299,37 @@ up.link = (->
         event.preventDefault()
       else
         event.preventDefault()
-        follow(resolve($link))
+        follow($link)
 
-  up.on 'mousedown', '[up-follow][up-instant]', (event, $link) ->
-    if shouldProcessLinkEvent(event, $link)
-      event.preventDefault()
-      follow(resolve($link))
+  ###*
+  Add an `up-expand` class to any element that contains a link
+  in order to enlarge the link's click area:
+
+      <div class="notification" up-expand>
+        Record was saved!
+        <a href="/records">Close</a>
+      </div>
+
+  In the example above, clicking anywhere within `.notification` element
+  would [follow](#up-follow) the *Close* link.
+
+  `up-expand` honors all the UJS behavior in expanded links
+  (`up-target`, `up-instant`, `up-preload`, etc.).
+
+  @ujs
+  @method [up-expand]
+  ###
+  up.compiler '[up-expand]', ($fragment) ->
+    link = $fragment.find('[up-href], [href]').get(0)
+    link or u.error('No link to expand within %o', $fragment)
+    upAttributePattern = /^up-/
+    newAttrs = {}
+    for attribute in link.attributes
+      name = attribute.name
+      if name == 'href' || name.match(upAttributePattern)
+        newAttrs[name] = attribute.value
+    u.setMissingAttrs($fragment, newAttrs)
+    $fragment.removeAttr('up-expand')
   
   ###*
   Marks up the current link to be followed *as fast as possible*.
@@ -352,14 +347,6 @@ up.link = (->
   
       <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
 
-  You can also apply `[up-dash]` to any element that contains a link
-  in order to enlarge the link's click area:
-
-      <div class="notification" up-dash>
-         Record was saved!
-         <a href="/records" up-dash='.main'>Close</a>
-      </div>
-  
   @method [up-dash]
   @ujs
   ###
@@ -379,7 +366,6 @@ up.link = (->
   knife: eval(Knife?.point)
   visit: visit
   follow: follow
-  resolve: resolve
   childClicked: childClicked
   followMethod: followMethod
 

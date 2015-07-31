@@ -151,7 +151,7 @@ up.modal = (->
       options = args[1]
 
     options = u.options(options)
-    url = u.option(options.url, $link.attr('href'), $link.attr('up-href'))
+    url = u.option(options.url, $link.attr('up-href'), $link.attr('href'))
     selector = u.option(options.target, $link.attr('up-modal'), 'body')
     width = u.option(options.width, $link.attr('up-width'), config.width)
     height = u.option(options.height, $link.attr('up-height'), config.height)

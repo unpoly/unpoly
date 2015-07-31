@@ -126,10 +126,7 @@ up.proxy = (->
   isIdempotent = (request) ->
     normalizeRequest(request)
     u.contains(SAFE_HTTP_METHODS, request.method)
-    
-  ensureIsIdempotent = (request) ->
-    isIdempotent(request) or u.error("Won't preload non-GET request %o", request)
-    
+
   isFresh = (promise) ->
     timeSinceTouch = timestamp() - promise.timestamp
     timeSinceTouch < config.cacheExpiry
@@ -238,7 +235,7 @@ up.proxy = (->
     # of a link. The actual link will receive the event
     # and bubble in a second.
     unless up.link.childClicked(event, $element) 
-      checkPreload(up.link.resolve($element))
+      checkPreload($element)
 
   preload: preload
   ajax: ajax

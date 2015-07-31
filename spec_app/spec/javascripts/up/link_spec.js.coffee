@@ -57,14 +57,29 @@ describe 'up.link', ->
           
   describe 'unobtrusive behavior', ->
 
-    describe 'a[up-target]', ->
+    describe '[up-target]', ->
 
       it 'should have tests'
 
     describe '[up-follow]', ->
 
-      it 'should have tests'
-      
+      it "calls up.follow with the clicked link", ->
+        followSpy = up.link.knife.mock('follow')
+        $link = affix('a[href="/path"][up-follow]')
+        up.ready($link)
+        $link.click()
+        expect(followSpy).toHaveBeenCalledWith($link)
+
+    describe '[up-expand]', ->
+
+      it 'copies up-related attributes of a contained link', ->
+        $area = affix('div[up-expand] a[href="/path"][up-target="selector"][up-instant][up-preload]')
+        up.ready($area)
+        expect($area.attr('href')).toEqual('/path')
+        expect($area.attr('up-target')).toEqual('selector')
+        expect($area.attr('up-instant')).toEqual('')
+        expect($area.attr('up-preload')).toEqual('')
+
     describe '[up-instant]', ->
 
       beforeEach ->
@@ -74,14 +89,10 @@ describe 'up.link', ->
       afterEach ->
         Knife.reset()
 
-      it 'follows an [up-follow] link on mousedown (instead of on click)', ->
+      it 'follows a link on mousedown (instead of on click)', ->
         Trigger.mousedown(@$link)
         expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link)
-      
-      it 'follows an [up-target] link on mousedown (instead of on click)', ->
-        Trigger.mousedown(@$link)
-        expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link)
-      
+
       it 'does nothing on mouseup', ->
         Trigger.mouseup(@$link)
         expect(@followSpy).not.toHaveBeenCalled()

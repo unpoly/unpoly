@@ -17,7 +17,7 @@ up.navigation = (->
 
   CLASS_ACTIVE = 'up-active'
   CLASS_CURRENT = 'up-current'
-  SELECTORS_SECTION = ['a[href]', 'a[up-target]', '[up-follow]', '[up-modal]', '[up-popup]', '[up-href]']
+  SELECTORS_SECTION = ['[href]', '[up-target]', '[up-follow]', '[up-modal]', '[up-popup]', '[up-href]']
   SELECTOR_SECTION = SELECTORS_SECTION.join(', ')
   SELECTOR_SECTION_INSTANT = ("#{selector}[up-instant]" for selector in SELECTORS_SECTION).join(', ')
   SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
@@ -31,11 +31,10 @@ up.navigation = (->
     
   sectionUrls = ($section) ->
     urls = []
-    if $link = up.link.resolve($section)
-      for attr in ['href', 'up-follow', 'up-href']
-        if url = u.presentAttr($link, attr)
-          url = normalizeUrl(url)
-          urls.push(url)
+    for attr in ['up-href', 'href']
+      if url = u.presentAttr($section, attr)
+        url = normalizeUrl(url)
+        urls.push(url)
     urls
 
   locationChanged = ->
