@@ -2627,7 +2627,7 @@ response will already be cached when the user performs the click.
 
 (function() {
   up.proxy = (function() {
-    var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, cache, cacheKey, cancelDelay, checkPreload, clear, config, defaults, delayTimer, ensureIsIdempotent, get, isFresh, isIdempotent, normalizeRequest, preload, remove, reset, set, startDelay, timestamp, trim, u;
+    var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, cache, cacheKey, cancelDelay, checkPreload, clear, config, defaults, delayTimer, get, isFresh, isIdempotent, normalizeRequest, preload, remove, reset, set, startDelay, timestamp, trim, u;
     config = {
       preloadDelay: 75,
       cacheSize: 70,
@@ -2739,9 +2739,6 @@ response will already be cached when the user performs the click.
     isIdempotent = function(request) {
       normalizeRequest(request);
       return u.contains(SAFE_HTTP_METHODS, request.method);
-    };
-    ensureIsIdempotent = function(request) {
-      return isIdempotent(request) || u.error("Won't preload non-GET request %o", request);
     };
     isFresh = function(promise) {
       var timeSinceTouch;
@@ -2865,7 +2862,7 @@ response will already be cached when the user performs the click.
      */
     up.on('mouseover mousedown touchstart', '[up-preload]', function(event, $element) {
       if (!up.link.childClicked(event, $element)) {
-        return checkPreload(up.link.resolve($element));
+        return checkPreload($element);
       }
     });
     return {
@@ -2968,7 +2965,7 @@ Read on
 
 (function() {
   up.link = (function() {
-    var childClicked, follow, followMethod, resolve, shouldProcessLinkEvent, u, visit;
+    var childClicked, follow, followMethod, shouldProcessLinkEvent, u, visit;
     u = up.util;
 
     /**
@@ -3028,7 +3025,7 @@ Read on
       var $link, selector, url;
       $link = $(link);
       options = u.options(options);
-      url = u.option($link.attr('href'), $link.attr('up-follow'));
+      url = u.option($link.attr('href'), $link.attr('up-href'));
       selector = u.option(options.target, $link.attr('up-target'), 'body');
       options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation'));
       options.history = u.option(options.history, $link.attr('up-history'));
@@ -3046,16 +3043,6 @@ Read on
     followMethod = function($link, options) {
       options = u.options(options);
       return u.option(options.method, $link.attr('up-method'), $link.attr('data-method'), 'get').toUpperCase();
-    };
-    resolve = function(element) {
-      var $element, followAttr;
-      $element = $(element);
-      followAttr = $element.attr('up-follow');
-      if ($element.is('a') || (u.isPresent(followAttr) && !u.castsToTrue(followAttr))) {
-        return $element;
-      } else {
-        return $element.find('a:first');
-      }
     };
 
     /**
@@ -3095,27 +3082,25 @@ Read on
           Load more tasks
         </a>
     
-    \#\#\#\# Following on mousedown
+    \#\#\#\# Following elements that are no links
     
-    By also adding an `up-instant` attribute, the page will be fetched
-    on `mousedown` instead of `click`, making the interaction even faster:
+    You can also use `[up-target]` to turn an arbitrary element into a link.
+    In this case, put the link's destination into the `up-href` attribute:
     
-        <a href="/users" up-target=".main" up-instant>User list</a>
+        <button up-target=".main" up-href="/foo/bar">Go</button>
     
-    Note that using `[up-instant]` will prevent a user from canceling a link
-    click by moving the mouse away from the interaction area. However, for
-    navigation actions this isn't needed. E.g. popular operation
-    systems switch tabs on `mousedown`.
+    Note that using any element other than `<a>` will prevent users from
+    opening the destination in a new tab.
     
-    @method a[up-target]
+    @method [up-target]
     @ujs
     @param {String} up-target
       The CSS selector to replace
-    @param up-instant
-      If set, fetches the element on `mousedown` instead of `click`.
-      This makes the interaction faster.
+    @param [up-href]
+      The destination URL to follow.
+      If omitted, the the link's `href` attribute will be used.
      */
-    up.on('click', 'a[up-target]', function(event, $link) {
+    up.on('click', '[up-target]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
         if ($link.is('[up-instant]')) {
           return event.preventDefault();
@@ -3125,10 +3110,30 @@ Read on
         }
       }
     });
-    up.on('mousedown', 'a[up-target][up-instant]', function(event, $link) {
+
+    /**
+    By adding an `up-instant` attribute to a link, the destination will be
+    fetched on `mousedown` instead of `click` (`mouseup`).
+    
+        <a href="/users" up-target=".main" up-instant>User list</a>
+    
+    This will save precious milliseconds that otherwise spent
+    on waiting for the user to release the mouse button. Since an
+    AJAX request will be triggered right way, the interaction will
+    appear faster.
+    
+    Note that using `[up-instant]` will prevent a user from canceling a link
+    click by moving the mouse away from the interaction area. However, for
+    navigation actions this isn't needed. E.g. popular operation
+    systems switch tabs on `mousedown` instead of `click`.
+    
+    @method [up-instant]
+    @ujs
+     */
+    up.on('mousedown', '[up-instant]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
         event.preventDefault();
-        return up.follow($link);
+        return follow($link);
       }
     });
 
@@ -3148,40 +3153,31 @@ Read on
 
     /**
     If applied on a link, Follows this link via AJAX and replaces the
-    current `<body>` element with the response's `<body>` element
+    current `<body>` element with the response's `<body>` element.
+    
+    Example:
     
         <a href="/users" up-follow>User list</a>
     
-    \#\#\#\# Following on mousedown
+    To only update a fragment instead of the entire page,
+    see [`up-target`](#up-target).
     
-    By also adding an `up-instant` attribute, the page will be fetched
-    on `mousedown` instead of `click`, making the interaction even faster:
+    \#\#\#\# Turn any element into a link
     
-        <a href="/users" up-follow up-instant>User list</a>
+    You can also use `[up-follow]` to turn an arbitrary element into a link.
+    In this case, put the link's destination into the `up-href` attribute:
     
-    Note that using `[up-instant]` will prevent a user from canceling a link
-    click by moving the mouse away from the interaction area. However, for
-    navigation actions this isn't needed. E.g. popular operation
-    systems switch tabs on `mousedown`.
+        <span up-follow up-href="/foo/bar">Go</span>
     
-    \#\#\#\# Enlarging the click area
-    
-    You can also apply `[up-follow]` to any element that contains a link
-    in order to enlarge the link's click area:
-    
-        <div class="notification" up-follow>
-           Record was saved!
-           <a href="/records">Close</a>
-        </div>
-    
-    In the example above, clicking anywhere within `.notification` element
-    would follow the *Close* link.
+    Note that using any element other than `<a>` will prevent users from
+    opening the destination in a new tab.
     
     @method [up-follow]
     @ujs
     @param {String} [up-follow]
-    @param up-instant
-      If set, fetches the element on `mousedown` instead of `click`.
+    @param [up-href]
+      The destination URL to follow.
+      If omitted, the the link's `href` attribute will be used.
      */
     up.on('click', '[up-follow]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
@@ -3189,15 +3185,45 @@ Read on
           return event.preventDefault();
         } else {
           event.preventDefault();
-          return follow(resolve($link));
+          return follow($link);
         }
       }
     });
-    up.on('mousedown', '[up-follow][up-instant]', function(event, $link) {
-      if (shouldProcessLinkEvent(event, $link)) {
-        event.preventDefault();
-        return follow(resolve($link));
+
+    /**
+    Add an `up-expand` class to any element that contains a link
+    in order to enlarge the link's click area:
+    
+        <div class="notification" up-expand>
+          Record was saved!
+          <a href="/records">Close</a>
+        </div>
+    
+    In the example above, clicking anywhere within `.notification` element
+    would [follow](#up-follow) the *Close* link.
+    
+    `up-expand` honors all the UJS behavior in expanded links
+    (`up-target`, `up-instant`, `up-preload`, etc.).
+    
+    @ujs
+    @method [up-expand]
+     */
+    up.compiler('[up-expand]', function($fragment) {
+      var attribute, i, len, link, name, newAttrs, ref, upAttributePattern;
+      link = $fragment.find('[up-href], [href]').get(0);
+      link || u.error('No link to expand within %o', $fragment);
+      upAttributePattern = /^up-/;
+      newAttrs = {};
+      ref = link.attributes;
+      for (i = 0, len = ref.length; i < len; i++) {
+        attribute = ref[i];
+        name = attribute.name;
+        if (name === 'href' || name.match(upAttributePattern)) {
+          newAttrs[name] = attribute.value;
+        }
       }
+      u.setMissingAttrs($fragment, newAttrs);
+      return $fragment.removeAttr('up-expand');
     });
 
     /**
@@ -3215,14 +3241,6 @@ Read on
     Note that this is shorthand for:
     
         <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
-    
-    You can also apply `[up-dash]` to any element that contains a link
-    in order to enlarge the link's click area:
-    
-        <div class="notification" up-dash>
-           Record was saved!
-           <a href="/records" up-dash='.main'>Close</a>
-        </div>
     
     @method [up-dash]
     @ujs
@@ -3246,7 +3264,6 @@ Read on
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       visit: visit,
       follow: follow,
-      resolve: resolve,
       childClicked: childClicked,
       followMethod: followMethod
     };
@@ -4020,7 +4037,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
         options = args[1];
       }
       options = u.options(options);
-      url = u.option(options.url, $link.attr('href'), $link.attr('up-href'));
+      url = u.option(options.url, $link.attr('up-href'), $link.attr('href'));
       selector = u.option(options.target, $link.attr('up-modal'), 'body');
       width = u.option(options.width, $link.attr('up-width'), config.width);
       height = u.option(options.height, $link.attr('up-height'), config.height);
@@ -4340,18 +4357,6 @@ to the current location (class `up-current`).
 This dramatically improves the perceived speed of your user interface
 by providing instant feedback for user interactions.
 
-The classes are added and removed automatically whenever
-a page fragment is added, changed or destroyed through Up.js.
-
-How Up.js computes the current location
----------------------------------------
-
-From Up's point of view the "current" location is either:
-  
-- the URL displayed in the browser window's location bar
-- the source URL of a currently opened [modal dialog](/up.modal)
-- the source URL of a currently opened [popup overlay](/up.popup)
-
 @class up.navigation
  */
 
@@ -4361,7 +4366,7 @@ From Up's point of view the "current" location is either:
     u = up.util;
     CLASS_ACTIVE = 'up-active';
     CLASS_CURRENT = 'up-current';
-    SELECTORS_SECTION = ['a[href]', 'a[up-target]', '[up-follow]', '[up-modal]', '[up-popup]', '[up-href]'];
+    SELECTORS_SECTION = ['[href]', '[up-target]', '[up-follow]', '[up-modal]', '[up-popup]', '[up-href]'];
     SELECTOR_SECTION = SELECTORS_SECTION.join(', ');
     SELECTOR_SECTION_INSTANT = ((function() {
       var i, len, results;
@@ -4382,16 +4387,14 @@ From Up's point of view the "current" location is either:
       }
     };
     sectionUrls = function($section) {
-      var $link, attr, i, len, ref, url, urls;
+      var attr, i, len, ref, url, urls;
       urls = [];
-      if ($link = up.link.resolve($section)) {
-        ref = ['href', 'up-follow', 'up-href'];
-        for (i = 0, len = ref.length; i < len; i++) {
-          attr = ref[i];
-          if (url = u.presentAttr($link, attr)) {
-            url = normalizeUrl(url);
-            urls.push(url);
-          }
+      ref = ['up-href', 'href'];
+      for (i = 0, len = ref.length; i < len; i++) {
+        attr = ref[i];
+        if (url = u.presentAttr($section, attr)) {
+          url = normalizeUrl(url);
+          urls.push(url);
         }
       }
       return urls;
@@ -4410,6 +4413,34 @@ From Up's point of view the "current" location is either:
         }
       });
     };
+
+    /**
+    Links that are currently loading are assigned the `up-active`
+    class automatically. Style `.up-active` in your CSS to improve the
+    perceived responsiveness of your user interface.
+    
+    The `up-active` class will be removed as soon as another
+    page fragment is added or updated through Up.js.
+    
+    \#\#\#\# Example
+    
+    We have a link:
+    
+        <a href="/foo" up-follow>Foo</a>
+    
+    The user clicks on the link. While the request is loading,
+    the link has the `up-active` class:
+    
+        <a href="/foo" up-follow up-active>Foo</a>
+    
+    Once the fragment is loaded the browser's location bar is updated
+    to `http://yourhost/foo` via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries):
+    
+        <a href="/foo" up-follow up-current>Foo</a>
+    
+    @ujs
+    @method [up-active]
+     */
     sectionClicked = function($section) {
       unmarkActive();
       $section = enlargeClickArea($section);
@@ -4431,6 +4462,41 @@ From Up's point of view the "current" location is either:
         return sectionClicked($section);
       }
     });
+
+    /**
+    Links that point to the current location are assigned
+    the `up-current` class automatically.
+    
+    The use case for this is navigation bars:
+    
+        <nav>
+          <a href="/foo">Foo</a>
+          <a href="/bar">Bar</a>
+        </nav>
+    
+    If the browser location changes to `/foo`, the markup changes to this:
+    
+        <nav>
+          <a href="/foo" up-current>Foo</a>
+          <a href="/bar">Bar</a>
+        </nav>
+    
+    \#\#\#\# What's considered to be "current"?
+    
+    The current location is considered to be either:
+    
+    - the URL displayed in the browser window's location bar
+    - the source URL of a currently opened [modal dialog](/up.modal)
+    - the source URL of a currently opened [popup overlay](/up.popup)
+    
+    A link matches the current location (and is marked as `.up-current`) if it matches either:
+    
+    - the link's `href` attribute
+    - the link's [`up-href`](/up.link#turn-any-element-into-a-link) attribute
+    
+    @method [up-current]
+    @ujs
+     */
     up.bus.on('fragment:ready', function() {
       unmarkActive();
       return locationChanged();
