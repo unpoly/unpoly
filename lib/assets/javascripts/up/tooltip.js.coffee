@@ -10,7 +10,7 @@ value in a tooltip when a user hovers over the element.
 We need to work on this page:
   
 - Show the tooltip's HTML structure and how to style the elements
-- Explain how to position tooltips using `up-origin`
+- Explain how to position tooltips using `up-position`
 - We should have a position about tooltips that contain HTML.
   
 
@@ -20,10 +20,10 @@ up.tooltip = (->
   
   u = up.util
 
-  position = ($link, $tooltip, origin) ->
+  setPosition = ($link, $tooltip, position) ->
     linkBox = u.measure($link)
     tooltipBox = u.measure($tooltip)
-    css = switch origin
+    css = switch position
       when "top"
         left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
         top: linkBox.top - tooltipBox.height
@@ -31,8 +31,8 @@ up.tooltip = (->
         left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
         top: linkBox.top + linkBox.height
       else
-        u.error("Unknown origin %o", origin)
-    $tooltip.attr('up-origin', origin)
+        u.error("Unknown position %o", position)
+    $tooltip.attr('up-position', position)
     $tooltip.css(css)
 
   createElement = (html) ->
@@ -41,23 +41,31 @@ up.tooltip = (->
       .appendTo(document.body)
 
   ###*
-  Opens a tooltip.
+  Opens a tooltip over the given element.
+
+      up.tooltip.open('.help', {
+        html: 'Enter multiple words or phrases'
+      });
   
   @method up.tooltip.open
   @param {Element|jQuery|String} elementOrSelector
-  @param {String} html
-  @param {String} [options.origin='top']
+  @param {String} [options.html]
+    The HTML to display in the tooltip.
+  @param {String} [options.position='top']
+    The position of the tooltip. Known values are `top` and `bottom`.
   @param {String} [options.animation]
+    The animation to use when opening the tooltip.
   ###
   open = (linkOrSelector, options = {}) ->
     $link = $(linkOrSelector)
     html = u.option(options.html, $link.attr('up-tooltip'), $link.attr('title'))
-    origin = u.option(options.origin, $link.attr('up-origin'), 'top')
+    position = u.option(options.position, $link.attr('up-position'), 'top')
     animation = u.option(options.animation, $link.attr('up-animation'), 'fade-in')
+    animateOptions = up.motion.animateOptions(options, $link)
     close()
     $tooltip = createElement(html)
-    position($link, $tooltip, origin)
-    up.animate($tooltip, animation, options)
+    setPosition($link, $tooltip, position)
+    up.animate($tooltip, animation, animateOptions)
 
   ###*
   Closes a currently shown tooltip.
@@ -65,14 +73,14 @@ up.tooltip = (->
   
   @method up.tooltip.close
   @param {Object} options
-    See options for See options for [`up.animate`](/up.motion#up.animate).
+    See options for [`up.animate`](/up.motion#up.animate).
   ###
   close = (options) ->
     $tooltip = $('.up-tooltip')
     if $tooltip.length
       options = u.options(options, animation: 'fade-out')
+      options = u.merge(options, up.motion.animateOptions(options))
       up.destroy($tooltip, options)
-
 
   ###*
   Displays a tooltip when hovering the mouse over this element:

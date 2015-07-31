@@ -14,7 +14,7 @@ For modal dialogs see [up.modal](/up.modal) instead.
 We need to work on this page:
 
 - Show the HTML structure of the popup elements, and how to style them via CSS
-- Explain how to position popup using `up-origin`
+- Explain how to position popup using `up-position`
 - Explain how dialogs auto-close themselves when a fragment changes behind the popup layer
 - Document method parameters
   
@@ -28,19 +28,19 @@ up.popup = (->
   config =
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
-    origin: 'bottom-right'    
+    position: 'bottom-right'
 
   ###*
   @method up.popup.defaults
   @param {String} options.animation
-  @param {String} options.origin
+  @param {String} options.position
   ###
   defaults = (options) ->
     u.extend(config, options)
   
-  position = ($link, $popup, origin) ->
+  setPosition = ($link, $popup, position) ->
     linkBox = u.measure($link, full: true)
-    css = switch origin
+    css = switch position
       when "bottom-right"
         right: linkBox.right
         top: linkBox.top + linkBox.height
@@ -54,8 +54,8 @@ up.popup = (->
         left: linkBox.left
         bottom: linkBox.top
       else
-        u.error("Unknown origin %o", origin)
-    $popup.attr('up-origin', origin)
+        u.error("Unknown position %o", position)
+    $popup.attr('up-position', position)
     $popup.css(css)
     ensureInViewport($popup)
 
@@ -105,9 +105,9 @@ up.popup = (->
     $popup.hide()
     $popup
     
-  updated = ($link, $popup, origin, animation, animateOptions) ->
+  updated = ($link, $popup, position, animation, animateOptions) ->
     $popup.show()
-    position($link, $popup, origin)
+    setPosition($link, $popup, position)
     up.animate($popup, animation, animateOptions)
     
   ###*
@@ -116,7 +116,7 @@ up.popup = (->
   @method up.popup.open
   @param {Element|jQuery|String} elementOrSelector
   @param {String} [options.url]
-  @param {String} [options.origin='bottom-right']
+  @param {String} [options.position='bottom-right']
   @param {String} [options.animation]
     The animation to use when opening the popup.
   @param {Number} [options.duration]
@@ -136,7 +136,7 @@ up.popup = (->
     options = u.options(options)
     url = u.option(options.url, $link.attr('href'))
     selector = u.option(options.target, $link.attr('up-popup'), 'body')
-    origin = u.option(options.origin, $link.attr('up-origin'), config.origin)
+    position = u.option(options.position, $link.attr('up-position'), config.position)
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
     sticky = u.option(options.sticky, $link.is('[up-sticky]'))
     history = if up.browser.canPushState() then u.option(options.history, $link.attr('up-history'), false) else false
@@ -147,7 +147,7 @@ up.popup = (->
     
     up.replace(selector, url,
       history: history
-      insert: -> updated($link, $popup, origin, animation, animateOptions)
+      insert: -> updated($link, $popup, position, animation, animateOptions)
     )
     
   ###*
@@ -200,7 +200,7 @@ up.popup = (->
   @method a[up-popup]
   @ujs
   @param [up-sticky]
-  @param [up-origin]
+  @param [up-position]
   ###
   up.on('click', 'a[up-popup]', (event, $link) ->
     event.preventDefault()

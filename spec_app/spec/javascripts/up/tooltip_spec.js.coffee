@@ -26,7 +26,7 @@ describe 'up.tooltip', ->
         
       it 'closes an existing tooltip'
       
-      describe 'with origin option', ->
+      describe 'with position option', ->
         
         it 'anchors the tooltip at a different edge of the element'
       
