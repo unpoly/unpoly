@@ -143,7 +143,7 @@ up.link = (->
     $link = $(link)
 
     options = u.options(options)
-    url = u.option($link.attr('href'), $link.attr('up-follow'))
+    url = u.option($link.attr('href'), $link.attr('up-href'))
     selector = u.option(options.target, $link.attr('up-target'), 'body')
     options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation')) 
     options.history = u.option(options.history, $link.attr('up-history'))
@@ -219,13 +219,26 @@ up.link = (->
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown`.
 
+  \#\#\#\# Following elements that are no links
+
+  You can also use `[up-target]` to turn an arbitrary element into a link.
+  In this case, put the link's destination into the `up-href` attribute:
+
+      <button up-target=".main" up-href="/foo/bar">Go</button>
+
+  Note that using any element other than `<a>` will prevent users from
+  opening the destination in a new tab.
+
   @method a[up-target]
   @ujs
   @param {String} up-target
     The CSS selector to replace
-  @param up-instant
+  @param [up-instant]
     If set, fetches the element on `mousedown` instead of `click`.
     This makes the interaction faster.
+  @param [up-href]
+    The destination URL to follow.
+    If omitted, the the link's `href` attribute will be used.
   ###
   up.on 'click', 'a[up-target]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
@@ -260,6 +273,10 @@ up.link = (->
 
       <a href="/users" up-follow>User list</a>
 
+  Note that this is equivalent to the following:
+
+      <a href="/users" up-target="body">User list</a>
+
   \#\#\#\# Following on mousedown
 
   By also adding an `up-instant` attribute, the page will be fetched
@@ -285,11 +302,24 @@ up.link = (->
   In the example above, clicking anywhere within `.notification` element
   would follow the *Close* link.
 
+  \#\#\#\# Turn any element into a link
+
+  You can also use `[up-follow]` to turn an arbitrary element into a link.
+  In this case, put the link's destination into the `up-href` attribute:
+
+      <span up-follow up-href="/foo/bar">Go</span>
+
+  Note that using any element other than `<a>` will prevent users from
+  opening the destination in a new tab.
+
   @method [up-follow]
   @ujs
   @param {String} [up-follow]
-  @param up-instant
+  @param [up-instant]
     If set, fetches the element on `mousedown` instead of `click`.
+  @param [up-href]
+    The destination URL to follow.
+    If omitted, the the link's `href` attribute will be used.
   ###
   up.on 'click', '[up-follow]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)

@@ -9,18 +9,6 @@ to the current location (class `up-current`).
 This dramatically improves the perceived speed of your user interface
 by providing instant feedback for user interactions.
 
-The classes are added and removed automatically whenever
-a page fragment is added, changed or destroyed through Up.js.
-
-How Up.js computes the current location
----------------------------------------
-
-From Up's point of view the "current" location is either:
-  
-- the URL displayed in the browser window's location bar
-- the source URL of a currently opened [modal dialog](/up.modal)
-- the source URL of a currently opened [popup overlay](/up.popup)
-
 @class up.navigation
 ###
 up.navigation = (->
@@ -67,6 +55,33 @@ up.navigation = (->
       else
         $section.removeClass(CLASS_CURRENT)
 
+  ###*
+  Links that are currently loading are assigned the `up-active`
+  class automatically. Style `.up-active` in your CSS to improve the
+  perceived responsiveness of your user interface.
+
+  The `up-active` class will be removed as soon as another
+  page fragment is added or updated through Up.js.
+
+  \#\#\#\# Example
+
+  We have a link:
+
+      <a href="/foo" up-follow>Foo</a>
+
+  The user clicks on the link. While the request is loading,
+  the link has the `up-active` class:
+
+      <a href="/foo" up-follow up-active>Foo</a>
+
+  Once the fragment is loaded the browser's location bar is updated
+  to `http://yourhost/foo` via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries):
+
+      <a href="/foo" up-follow up-current>Foo</a>
+
+  @ujs
+  @method [up-active]
+  ###
   sectionClicked = ($section) ->
     unmarkActive()
     $section = enlargeClickArea($section)
@@ -85,12 +100,46 @@ up.navigation = (->
   up.on 'mousedown', SELECTOR_SECTION_INSTANT, (event, $section) ->
     if u.isUnmodifiedMouseEvent(event)
       sectionClicked($section)
-      
-  # When a fragment is ready it might either have brought a location change
-  # with it, or it might have opened a modal / popup which we consider
-  # to be secondary location sources (the primary being the browser's
-  # location bar.
+
+  ###*
+  Links that point to the current location are assigned
+  the `up-current` class automatically.
+
+  The use case for this is navigation bars:
+
+      <nav>
+        <a href="/foo">Foo</a>
+        <a href="/bar">Bar</a>
+      </nav>
+
+  If the browser location changes to `/foo`, the markup changes to this:
+
+      <nav>
+        <a href="/foo" up-current>Foo</a>
+        <a href="/bar">Bar</a>
+      </nav>
+
+  \#\#\#\# What's considered to be "current"?
+
+  The current location is considered to be either:
+
+  - the URL displayed in the browser window's location bar
+  - the source URL of a currently opened [modal dialog](/up.modal)
+  - the source URL of a currently opened [popup overlay](/up.popup)
+
+  A link matches the current location (and is marked as `.up-current`) if it matches either:
+
+  - the link's `href` attribute
+  - the link's [`up-href`](/up.link#turn-any-element-into-a-link) attribute
+
+  @method [up-current]
+  @ujs
+  ###
   up.bus.on 'fragment:ready', ->
+    # When a fragment is ready it might either have brought a location change
+    # with it, or it might have opened a modal / popup which we consider
+    # to be secondary location sources (the primary being the browser's
+    # location bar).
     unmarkActive()
     # If a new fragment is inserted, it's likely to be the result
     # to the active action. So we can remove the active marker.
