@@ -1676,11 +1676,11 @@ We need to work on this page:
     
     You can also use `up.compiler` to implement custom elements like this:
     
-        <current-time></current-time>
+        <clock></clock>
     
     Here is the Javascript that inserts the current time into to these elements:
     
-        up.compiler('current-time', function($element) {
+        up.compiler('clock', function($element) {
           var now = new Date();
           $element.text(now.toString()));
         });
@@ -1697,10 +1697,10 @@ We need to work on this page:
     side effects, like a [`setInterval`](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setInterval)
     or event handlers bound to the document root.
     
-    Here is a version of `<current-time>` that updates
+    Here is a version of `<clock>` that updates
     the time every second, and cleans up once it's done:
     
-        up.compiler('current-time', function($element) {
+        up.compiler('clock', function($element) {
     
           function update() {
             var now = new Date();
@@ -1717,7 +1717,7 @@ We need to work on this page:
     
     If we didn't clean up after ourselves, we would have many ticking intervals
     operating on detached DOM elements after we have created and removed a couple
-    of `<current-time>` elements.
+    of `<clock>` elements.
     
     
     \#\#\#\# Attaching structured data
@@ -2681,9 +2681,6 @@ response will already be cached when the user performs the click.
       return (new Date()).valueOf();
     };
     normalizeRequest = function(request) {
-      if (!u.isHash(request)) {
-        debugger;
-      }
       if (!request._normalized) {
         request.method = u.normalizeMethod(request.method);
         if (request.url) {
@@ -3004,7 +3001,7 @@ Read on
     @method up.follow
     @param {Element|jQuery|String} link
       An element or selector which resolves to an `<a>` tag
-      or any element that is marked up with an `up-follow` attribute.
+      or any element that is marked up with an `up-href` attribute.
     @param {String} [options.target]
       The selector to replace.
       Defaults to the `up-target` attribute on `link`,
@@ -3025,7 +3022,7 @@ Read on
       var $link, selector, url;
       $link = $(link);
       options = u.options(options);
-      url = u.option($link.attr('href'), $link.attr('up-href'));
+      url = u.option($link.attr('up-href'), $link.attr('href'));
       selector = u.option(options.target, $link.attr('up-target'), 'body');
       options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation'));
       options.history = u.option(options.history, $link.attr('up-history'));
@@ -3092,7 +3089,7 @@ Read on
     Note that using any element other than `<a>` will prevent users from
     opening the destination in a new tab.
     
-    @method [up-target]
+    @method a[up-target]
     @ujs
     @param {String} up-target
       The CSS selector to replace
@@ -3100,7 +3097,7 @@ Read on
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
      */
-    up.on('click', '[up-target]', function(event, $link) {
+    up.on('click', 'a[up-target], [up-href][up-target]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
         if ($link.is('[up-instant]')) {
           return event.preventDefault();
@@ -3127,10 +3124,10 @@ Read on
     navigation actions this isn't needed. E.g. popular operation
     systems switch tabs on `mousedown` instead of `click`.
     
-    @method [up-instant]
+    @method a[up-instant]
     @ujs
      */
-    up.on('mousedown', '[up-instant]', function(event, $link) {
+    up.on('mousedown', 'a[up-instant], [up-href][up-instant]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
         event.preventDefault();
         return follow($link);
@@ -3144,7 +3141,7 @@ Read on
     childClicked = function(event, $link) {
       var $target, $targetLink;
       $target = $(event.target);
-      $targetLink = $target.closest('a, [up-follow]');
+      $targetLink = $target.closest('a, [up-href]');
       return $targetLink.length && $link.find($targetLink).length;
     };
     shouldProcessLinkEvent = function(event, $link) {
@@ -3172,14 +3169,13 @@ Read on
     Note that using any element other than `<a>` will prevent users from
     opening the destination in a new tab.
     
-    @method [up-follow]
+    @method a[up-follow]
     @ujs
-    @param {String} [up-follow]
     @param [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
      */
-    up.on('click', '[up-follow]', function(event, $link) {
+    up.on('click', 'a[up-follow], [up-href][up-follow]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
         if ($link.is('[up-instant]')) {
           return event.preventDefault();
@@ -3210,15 +3206,16 @@ Read on
      */
     up.compiler('[up-expand]', function($fragment) {
       var attribute, i, len, link, name, newAttrs, ref, upAttributePattern;
-      link = $fragment.find('[up-href], [href]').get(0);
+      link = $fragment.find('a, [up-href]').get(0);
       link || u.error('No link to expand within %o', $fragment);
       upAttributePattern = /^up-/;
       newAttrs = {};
+      newAttrs['up-href'] = $(link).attr('href');
       ref = link.attributes;
       for (i = 0, len = ref.length; i < len; i++) {
         attribute = ref[i];
         name = attribute.name;
-        if (name === 'href' || name.match(upAttributePattern)) {
+        if (name.match(upAttributePattern)) {
           newAttrs[name] = attribute.value;
         }
       }
@@ -4366,7 +4363,7 @@ by providing instant feedback for user interactions.
     u = up.util;
     CLASS_ACTIVE = 'up-active';
     CLASS_CURRENT = 'up-current';
-    SELECTORS_SECTION = ['[href]', '[up-target]', '[up-follow]', '[up-modal]', '[up-popup]', '[up-href]'];
+    SELECTORS_SECTION = ['a', '[up-href]'];
     SELECTOR_SECTION = SELECTORS_SECTION.join(', ');
     SELECTOR_SECTION_INSTANT = ((function() {
       var i, len, results;
