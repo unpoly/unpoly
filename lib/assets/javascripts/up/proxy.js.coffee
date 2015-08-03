@@ -70,7 +70,6 @@ up.proxy = (->
     (new Date()).valueOf()
     
   normalizeRequest = (request) ->
-    debugger unless u.isHash(request)
     unless request._normalized
       request.method = u.normalizeMethod(request.method)
       request.url = u.normalizeUrl(request.url) if request.url

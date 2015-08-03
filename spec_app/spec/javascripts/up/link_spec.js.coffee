@@ -57,11 +57,16 @@ describe 'up.link', ->
           
   describe 'unobtrusive behavior', ->
 
-    describe '[up-target]', ->
+    describe 'a[up-target]', ->
 
-      it 'should have tests'
+      it 'does not follow a form with up-target attribute (bugfix)', ->
+        $form = affix('form[up-target]')
+        up.ready($form)
+        followSpy = up.link.knife.mock('follow')
+        $form.click()
+        expect(followSpy).not.toHaveBeenCalled()
 
-    describe '[up-follow]', ->
+    describe 'a[up-follow]', ->
 
       it "calls up.follow with the clicked link", ->
         followSpy = up.link.knife.mock('follow')
@@ -75,10 +80,14 @@ describe 'up.link', ->
       it 'copies up-related attributes of a contained link', ->
         $area = affix('div[up-expand] a[href="/path"][up-target="selector"][up-instant][up-preload]')
         up.ready($area)
-        expect($area.attr('href')).toEqual('/path')
         expect($area.attr('up-target')).toEqual('selector')
         expect($area.attr('up-instant')).toEqual('')
         expect($area.attr('up-preload')).toEqual('')
+
+      it "renames a contained link's href attribute to up-href so the container is considered a link", ->
+        $area = affix('div[up-expand] a[href="/path"]')
+        up.ready($area)
+        expect($area.attr('up-href')).toEqual('/path')
 
     describe '[up-instant]', ->
 

@@ -122,7 +122,7 @@ up.link = (->
   @method up.follow
   @param {Element|jQuery|String} link
     An element or selector which resolves to an `<a>` tag
-    or any element that is marked up with an `up-follow` attribute.
+    or any element that is marked up with an `up-href` attribute.
   @param {String} [options.target]
     The selector to replace.
     Defaults to the `up-target` attribute on `link`,
@@ -143,7 +143,7 @@ up.link = (->
     $link = $(link)
 
     options = u.options(options)
-    url = u.option($link.attr('href'), $link.attr('up-href'))
+    url = u.option($link.attr('up-href'), $link.attr('href'))
     selector = u.option(options.target, $link.attr('up-target'), 'body')
     options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation')) 
     options.history = u.option(options.history, $link.attr('up-history'))
@@ -209,7 +209,7 @@ up.link = (->
   Note that using any element other than `<a>` will prevent users from
   opening the destination in a new tab.
 
-  @method [up-target]
+  @method a[up-target]
   @ujs
   @param {String} up-target
     The CSS selector to replace
@@ -217,7 +217,7 @@ up.link = (->
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
   ###
-  up.on 'click', '[up-target]', (event, $link) ->
+  up.on 'click', 'a[up-target], [up-href][up-target]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
       if $link.is('[up-instant]')
         # If the link was already processed on mousedown, we still need
@@ -243,10 +243,10 @@ up.link = (->
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown` instead of `click`.
 
-  @method [up-instant]
+  @method a[up-instant]
   @ujs
   ###
-  up.on 'mousedown', '[up-instant]', (event, $link) ->
+  up.on 'mousedown', 'a[up-instant], [up-href][up-instant]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
       event.preventDefault()
       follow($link)
@@ -257,7 +257,7 @@ up.link = (->
   ###
   childClicked = (event, $link) ->
     $target = $(event.target)
-    $targetLink = $target.closest('a, [up-follow]')
+    $targetLink = $target.closest('a, [up-href]')
     $targetLink.length && $link.find($targetLink).length
     
   shouldProcessLinkEvent = (event, $link) ->
@@ -284,14 +284,13 @@ up.link = (->
   Note that using any element other than `<a>` will prevent users from
   opening the destination in a new tab.
 
-  @method [up-follow]
+  @method a[up-follow]
   @ujs
-  @param {String} [up-follow]
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
   ###
-  up.on 'click', '[up-follow]', (event, $link) ->
+  up.on 'click', 'a[up-follow], [up-href][up-follow]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
       if $link.is('[up-instant]')
         # If the link was already processed on mousedown, we still need
@@ -320,13 +319,14 @@ up.link = (->
   @method [up-expand]
   ###
   up.compiler '[up-expand]', ($fragment) ->
-    link = $fragment.find('[up-href], [href]').get(0)
+    link = $fragment.find('a, [up-href]').get(0)
     link or u.error('No link to expand within %o', $fragment)
     upAttributePattern = /^up-/
     newAttrs = {}
+    newAttrs['up-href'] = $(link).attr('href')
     for attribute in link.attributes
       name = attribute.name
-      if name == 'href' || name.match(upAttributePattern)
+      if name.match(upAttributePattern)
         newAttrs[name] = attribute.value
     u.setMissingAttrs($fragment, newAttrs)
     $fragment.removeAttr('up-expand')
