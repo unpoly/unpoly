@@ -119,11 +119,11 @@ up.magic = (->
 
   You can also use `up.compiler` to implement custom elements like this:
 
-      <current-time></current-time>
+      <clock></clock>
 
   Here is the Javascript that inserts the current time into to these elements:
 
-      up.compiler('current-time', function($element) {
+      up.compiler('clock', function($element) {
         var now = new Date();
         $element.text(now.toString()));
       });
@@ -140,10 +140,10 @@ up.magic = (->
   side effects, like a [`setInterval`](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setInterval)
   or event handlers bound to the document root.
 
-  Here is a version of `<current-time>` that updates
+  Here is a version of `<clock>` that updates
   the time every second, and cleans up once it's done:
 
-      up.compiler('current-time', function($element) {
+      up.compiler('clock', function($element) {
 
         function update() {
           var now = new Date();
@@ -160,7 +160,7 @@ up.magic = (->
 
   If we didn't clean up after ourselves, we would have many ticking intervals
   operating on detached DOM elements after we have created and removed a couple
-  of `<current-time>` elements.
+  of `<clock>` elements.
 
 
   \#\#\#\# Attaching structured data
