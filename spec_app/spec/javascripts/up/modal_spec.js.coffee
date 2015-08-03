@@ -57,3 +57,4 @@ describe 'up.modal', ->
 
       it "doesn't auto-close the modal if a selector behind the modal if the modal is sticky"
 
+      it "doesn't auto-close the modal if the new fragment is a popup"

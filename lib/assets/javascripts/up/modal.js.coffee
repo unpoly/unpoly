@@ -285,7 +285,7 @@ up.modal = (->
   )
 
   up.bus.on('fragment:ready', ($fragment) ->
-    unless $fragment.closest('.up-modal').length
+    unless $fragment.closest('.up-modal, .up-popup').length
       autoclose()
   )
 
