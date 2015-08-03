@@ -17,7 +17,7 @@ up.navigation = (->
 
   CLASS_ACTIVE = 'up-active'
   CLASS_CURRENT = 'up-current'
-  SELECTORS_SECTION = ['a', '[up-href]']
+  SELECTORS_SECTION = ['a', '[up-href]', '[up-alias]']
   SELECTOR_SECTION = SELECTORS_SECTION.join(', ')
   SELECTOR_SECTION_INSTANT = ("#{selector}[up-instant]" for selector in SELECTORS_SECTION).join(', ')
   SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
@@ -31,11 +31,13 @@ up.navigation = (->
     
   sectionUrls = ($section) ->
     urls = []
-    for attr in ['up-href', 'href']
-      if url = u.presentAttr($section, attr)
-        url = normalizeUrl(url)
-        urls.push(url)
-    urls
+    for attr in ['href', 'up-href']
+      if value = u.presentAttr($section, attr)
+        urls.push(value)
+    if aliases = u.presentAttr($section, 'up-alias')
+      values = aliases.split(' ')
+      urls = urls.concat(values)
+    urls.map normalizeUrl
 
   locationChanged = ->
     currentUrls = u.stringSet [
@@ -43,12 +45,19 @@ up.navigation = (->
       normalizeUrl(up.modal.source()),
       normalizeUrl(up.popup.source())
     ]
+
+    console.log("current urls",
+      normalizeUrl(up.browser.url()),
+      normalizeUrl(up.modal.source()),
+      normalizeUrl(up.popup.source())
+    )
     
     u.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       # if $section is marked up with up-follow,
       # the actual link might be a child element.
       urls = sectionUrls($section)
+      console.log("urls %o", urls)
       if currentUrls.includesAny(urls)
         $section.addClass(CLASS_CURRENT)
       else
@@ -130,6 +139,7 @@ up.navigation = (->
 
   - the link's `href` attribute
   - the link's [`up-href`](/up.link#turn-any-element-into-a-link) attribute
+  - a space-separated list of URLs in the link's `up-alias` attribute
 
   @method [up-current]
   @ujs

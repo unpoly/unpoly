@@ -2,13 +2,27 @@ describe 'up.navigation', ->
   
   describe 'unobtrusive behavior', ->
 
-    it 'marks a link as .up-current iff it links to the current URL', ->
+    it 'marks a link as .up-current if it links to the current URL', ->
       spyOn(up.browser, 'url').and.returnValue('/foo')
       $currentLink = up.ready(affix('a[href="/foo"]'))
       $otherLink = up.ready(affix('a[href="/bar"]'))
       expect($currentLink).toHaveClass('up-current')
       expect($otherLink).not.toHaveClass('up-current')
       
+    it 'marks any link as .up-current if its up-href attribute matches the current URL', ->
+      spyOn(up.browser, 'url').and.returnValue('/foo')
+      $currentLink = up.ready(affix('span[up-href="/foo"]'))
+      $otherLink = up.ready(affix('span[up-href="/bar"]'))
+      expect($currentLink).toHaveClass('up-current')
+      expect($otherLink).not.toHaveClass('up-current')
+
+    it 'marks any link as .up-current if any of its space-separated up-alias values matches the current URL', ->
+      spyOn(up.browser, 'url').and.returnValue('/foo')
+      $currentLink = up.ready(affix('span[up-alias="/aaa /foo /bbb"]'))
+      $otherLink = up.ready(affix('span[up-alias="/bar"]'))
+      expect($currentLink).toHaveClass('up-current')
+      expect($otherLink).not.toHaveClass('up-current')
+
     if up.browser.canPushState()
       
       it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', ->
