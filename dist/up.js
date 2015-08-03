@@ -2655,7 +2655,7 @@ response will already be cached when the user performs the click.
     delayTimer = null;
     cacheKey = function(request) {
       normalizeRequest(request);
-      return [request.url, request.method, request.selector].join('|');
+      return [request.url, request.method, request.data, request.selector].join('|');
     };
     trim = function() {
       var keys, oldestKey, oldestTimestamp;
@@ -2720,7 +2720,7 @@ response will already be cached when the user performs the click.
       var forceCache, ignoreCache, promise, request;
       forceCache = u.castsToTrue(options.cache);
       ignoreCache = u.castsToFalse(options.cache);
-      request = u.only(options, 'url', 'method', 'selector', '_normalized');
+      request = u.only(options, 'url', 'method', 'data', 'selector', '_normalized');
       if (!isIdempotent(request) && !forceCache) {
         clear();
         promise = u.ajax(request);
@@ -3374,7 +3374,7 @@ We need to work on this page:
       }
       request = {
         url: url,
-        type: httpMethod,
+        method: httpMethod,
         data: $form.serialize(),
         selector: successSelector,
         cache: useCache
@@ -3384,7 +3384,7 @@ We need to work on this page:
         url = historyOption ? u.castsToFalse(historyOption) ? false : u.isString(historyOption) ? historyOption : (currentLocation = u.locationFromXhr(xhr)) ? currentLocation : request.type === 'GET' ? request.url + '?' + request.data : void 0 : void 0;
         return u.option(url, false);
       };
-      return u.ajax(request).always(function() {
+      return up.proxy.ajax(request).always(function() {
         return $form.removeClass('up-active');
       }).done(function(html, textStatus, xhr) {
         var successOptions;
@@ -4402,12 +4402,10 @@ by providing instant feedback for user interactions.
     locationChanged = function() {
       var currentUrls;
       currentUrls = u.stringSet([normalizeUrl(up.browser.url()), normalizeUrl(up.modal.source()), normalizeUrl(up.popup.source())]);
-      console.log("current urls", normalizeUrl(up.browser.url()), normalizeUrl(up.modal.source()), normalizeUrl(up.popup.source()));
       return u.each($(SELECTOR_SECTION), function(section) {
         var $section, urls;
         $section = $(section);
         urls = sectionUrls($section);
-        console.log("urls %o", urls);
         if (currentUrls.includesAny(urls)) {
           return $section.addClass(CLASS_CURRENT);
         } else {
