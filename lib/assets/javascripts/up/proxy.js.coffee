@@ -48,8 +48,9 @@ up.proxy = (->
   
   cacheKey = (request) ->
     normalizeRequest(request)
-    [ request.url, 
-      request.method, 
+    [ request.url,
+      request.method,
+      request.data,
       request.selector
     ].join('|')
     
@@ -103,7 +104,7 @@ up.proxy = (->
     forceCache = u.castsToTrue(options.cache)
     ignoreCache = u.castsToFalse(options.cache)
 
-    request = u.only(options, 'url', 'method', 'selector', '_normalized')
+    request = u.only(options, 'url', 'method', 'data', 'selector', '_normalized')
 
     # We don't cache non-GET responses unless `options.cache`
     # is explicitly set to `true`.

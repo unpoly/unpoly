@@ -99,7 +99,7 @@ up.form = (->
 
     request = {
       url: url
-      type: httpMethod
+      method: httpMethod
       data: $form.serialize()
       selector: successSelector
       cache: useCache
@@ -117,7 +117,7 @@ up.form = (->
           request.url + '?' + request.data
       u.option(url, false)
 
-    u.ajax(request)
+    up.proxy.ajax(request)
       .always ->
         $form.removeClass('up-active')
       .done (html, textStatus, xhr) ->

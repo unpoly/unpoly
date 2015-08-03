@@ -46,18 +46,11 @@ up.navigation = (->
       normalizeUrl(up.popup.source())
     ]
 
-    console.log("current urls",
-      normalizeUrl(up.browser.url()),
-      normalizeUrl(up.modal.source()),
-      normalizeUrl(up.popup.source())
-    )
-    
     u.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       # if $section is marked up with up-follow,
       # the actual link might be a child element.
       urls = sectionUrls($section)
-      console.log("urls %o", urls)
       if currentUrls.includesAny(urls)
         $section.addClass(CLASS_CURRENT)
       else

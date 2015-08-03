@@ -133,9 +133,7 @@ up.flow = (->
       options.scroll = null
 
     options.source = u.option(options.source, options.history)
-
     response = parseResponse(html)
-
     options.title ||= response.title()
 
     for step in parseImplantSteps(selector, options)
