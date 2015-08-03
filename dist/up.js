@@ -4363,7 +4363,7 @@ by providing instant feedback for user interactions.
     u = up.util;
     CLASS_ACTIVE = 'up-active';
     CLASS_CURRENT = 'up-current';
-    SELECTORS_SECTION = ['a', '[up-href]'];
+    SELECTORS_SECTION = ['a', '[up-href]', '[up-alias]'];
     SELECTOR_SECTION = SELECTORS_SECTION.join(', ');
     SELECTOR_SECTION_INSTANT = ((function() {
       var i, len, results;
@@ -4384,25 +4384,30 @@ by providing instant feedback for user interactions.
       }
     };
     sectionUrls = function($section) {
-      var attr, i, len, ref, url, urls;
+      var aliases, attr, i, len, ref, urls, value, values;
       urls = [];
-      ref = ['up-href', 'href'];
+      ref = ['href', 'up-href'];
       for (i = 0, len = ref.length; i < len; i++) {
         attr = ref[i];
-        if (url = u.presentAttr($section, attr)) {
-          url = normalizeUrl(url);
-          urls.push(url);
+        if (value = u.presentAttr($section, attr)) {
+          urls.push(value);
         }
       }
-      return urls;
+      if (aliases = u.presentAttr($section, 'up-alias')) {
+        values = aliases.split(' ');
+        urls = urls.concat(values);
+      }
+      return urls.map(normalizeUrl);
     };
     locationChanged = function() {
       var currentUrls;
       currentUrls = u.stringSet([normalizeUrl(up.browser.url()), normalizeUrl(up.modal.source()), normalizeUrl(up.popup.source())]);
+      console.log("current urls", normalizeUrl(up.browser.url()), normalizeUrl(up.modal.source()), normalizeUrl(up.popup.source()));
       return u.each($(SELECTOR_SECTION), function(section) {
         var $section, urls;
         $section = $(section);
         urls = sectionUrls($section);
+        console.log("urls %o", urls);
         if (currentUrls.includesAny(urls)) {
           return $section.addClass(CLASS_CURRENT);
         } else {
@@ -4490,6 +4495,7 @@ by providing instant feedback for user interactions.
     
     - the link's `href` attribute
     - the link's [`up-href`](/up.link#turn-any-element-into-a-link) attribute
+    - a space-separated list of URLs in the link's `up-alias` attribute
     
     @method [up-current]
     @ujs
