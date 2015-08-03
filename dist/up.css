@@ -64,7 +64,7 @@
   box-sizing: border-box; }
 .up-popup {
   z-index: 10000;
-  position: fixed;
+  position: absolute;
   background-color: #fff;
   padding: 15px;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3); }
@@ -73,7 +73,7 @@
   z-index: 15000; }
 .up-tooltip {
   z-index: 30000;
-  position: fixed;
+  position: absolute;
   background-color: #666;
   color: white;
   padding: 6px 9px;

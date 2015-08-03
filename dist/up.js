@@ -4175,7 +4175,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       }
     });
     up.bus.on('fragment:ready', function($fragment) {
-      if (!$fragment.closest('.up-modal').length) {
+      if (!$fragment.closest('.up-modal, .up-popup').length) {
         return autoclose();
       }
     });
