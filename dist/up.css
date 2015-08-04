@@ -14,7 +14,7 @@
   max-width: 100%;
   box-sizing: border-box;
   z-index: 99999999; }
-[up-follow] {
+[up-href][up-follow], [up-href][up-target] {
   cursor: pointer; }
 .up-modal {
   position: fixed;

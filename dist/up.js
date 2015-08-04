@@ -3219,6 +3219,7 @@ Read on
           newAttrs[name] = attribute.value;
         }
       }
+      u.isGiven(newAttrs['up-target']) || (newAttrs['up-follow'] = '');
       u.setMissingAttrs($fragment, newAttrs);
       return $fragment.removeAttr('up-expand');
     });
