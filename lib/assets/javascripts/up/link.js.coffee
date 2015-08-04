@@ -328,6 +328,8 @@ up.link = (->
       name = attribute.name
       if name.match(upAttributePattern)
         newAttrs[name] = attribute.value
+    # Make sure that the containing area will be considered a link
+    u.isGiven(newAttrs['up-target']) or newAttrs['up-follow'] = ''
     u.setMissingAttrs($fragment, newAttrs)
     $fragment.removeAttr('up-expand')
   

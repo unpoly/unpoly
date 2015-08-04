@@ -85,9 +85,19 @@ describe 'up.link', ->
         expect($area.attr('up-preload')).toEqual('')
 
       it "renames a contained link's href attribute to up-href so the container is considered a link", ->
-        $area = affix('div[up-expand] a[href="/path"]')
+        $area = affix('div[up-expand] a[up-follow][href="/path"]')
         up.ready($area)
         expect($area.attr('up-href')).toEqual('/path')
+
+      it "copies an contained non-link element with up-href attribute", ->
+        $area = affix('div[up-expand] span[up-follow][up-href="/path"]')
+        up.ready($area)
+        expect($area.attr('up-href')).toEqual('/path')
+
+      it 'adds an up-follow attribute if the contained link has neither up-follow nor up-target attributes', ->
+        $area = affix('div[up-expand] a[href="/path"]')
+        up.ready($area)
+        expect($area.attr('up-follow')).toEqual('')
 
     describe '[up-instant]', ->
 
