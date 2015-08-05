@@ -1209,7 +1209,7 @@ We need to work on this page:
 
 (function() {
   up.flow = (function() {
-    var autofocus, destroy, elementsInserted, findOldFragment, fragmentNotFound, implant, parseImplantSteps, parseResponse, prepareForReplacement, reload, replace, reset, reveal, setSource, source, swapElements, u;
+    var autofocus, destroy, elementsInserted, findOldFragment, first, fragmentNotFound, implant, isRealElement, parseImplantSteps, parseResponse, prepareForReplacement, reload, replace, reset, reveal, setSource, source, swapElements, u;
     u = up.util;
     setSource = function(element, sourceUrl) {
       var $element;
@@ -1345,9 +1345,7 @@ We need to work on this page:
       return results;
     };
     findOldFragment = function(selector) {
-      var selectorWithExcludes;
-      selectorWithExcludes = selector + ":not(.up-ghost, .up-destroying)";
-      return u.presence($(".up-popup " + selectorWithExcludes)) || u.presence($(".up-modal " + selectorWithExcludes)) || u.presence($(selectorWithExcludes)) || fragmentNotFound(selector);
+      return first(".up-popup " + selector) || first(".up-modal " + selector) || first(selector) || fragmentNotFound(selector);
     };
     fragmentNotFound = function(selector) {
       var message;
@@ -1454,6 +1452,37 @@ We need to work on this page:
         return $control.focus();
       }
     };
+    isRealElement = function($element) {
+      var unreal;
+      unreal = '.up-ghost, .up-destroying';
+      return $element.closest(unreal).length === 0;
+    };
+
+    /**
+    Returns the first element matching the given selector.
+    Excludes elements that also match `.up-ghost` or `.up-destroying`
+    or that are children of elements with these selectors.
+    
+    Returns `null` if no element matches these conditions.
+    
+    @protected
+    @method up.first
+    @param {String} selector
+     */
+    first = function(selector) {
+      var $element, $match, element, elements, j, len;
+      elements = $(selector).get();
+      $match = null;
+      for (j = 0, len = elements.length; j < len; j++) {
+        element = elements[j];
+        $element = $(element);
+        if (isRealElement($element)) {
+          $match = $element;
+          break;
+        }
+      }
+      return $match;
+    };
 
     /**
     Destroys the given element or selector.
@@ -1537,7 +1566,8 @@ We need to work on this page:
       reload: reload,
       destroy: destroy,
       implant: implant,
-      reset: reset
+      reset: reset,
+      first: first
     };
   })();
 
@@ -1548,6 +1578,8 @@ We need to work on this page:
   up.destroy = up.flow.destroy;
 
   up.reset = up.flow.reset;
+
+  up.first = up.flow.first;
 
 }).call(this);
 
@@ -3606,8 +3638,9 @@ We need to work on this page:
 
 (function() {
   up.popup = (function() {
-    var autoclose, close, config, createHiddenPopup, defaults, discardHistory, ensureInViewport, open, rememberHistory, setPosition, source, u, updated;
+    var autoclose, close, config, contains, createHiddenPopup, currentSource, defaults, discardHistory, ensureInViewport, open, rememberHistory, setPosition, source, u, updated;
     u = up.util;
+    currentSource = void 0;
     config = {
       openAnimation: 'fade-in',
       closeAnimation: 'fade-out',
@@ -3773,11 +3806,7 @@ We need to work on this page:
       the source URL
      */
     source = function() {
-      var $popup;
-      $popup = $('.up-popup');
-      if (!$popup.is('.up-destroying')) {
-        return $popup.find('[up-source]').attr('up-source');
-      }
+      return currentSource;
     };
 
     /**
@@ -3797,13 +3826,29 @@ We need to work on this page:
           url: $popup.attr('up-previous-url'),
           title: $popup.attr('up-previous-title')
         });
+        currentSource = void 0;
         return up.destroy($popup, options);
       }
     };
     autoclose = function() {
       if (!$('.up-popup').is('[up-sticky]')) {
+        discardHistory();
         return close();
       }
+    };
+
+    /**
+    Returns whether the given element or selector is contained
+    within the current popup.
+    
+    @methods up.popup.contains
+    @param {String} elementOrSelector
+    @protected
+     */
+    contains = function(elementOrSelector) {
+      var $element;
+      $element = $(elementOrSelector);
+      return $element.closest('.up-popup').length > 0;
     };
 
     /**
@@ -3838,8 +3883,12 @@ We need to work on this page:
       }
     });
     up.bus.on('fragment:ready', function($fragment) {
-      if (!$fragment.closest('.up-popup').length) {
-        discardHistory();
+      var newSource;
+      if (contains($fragment)) {
+        if (newSource = $fragment.attr('up-source')) {
+          return currentSource = newSource;
+        }
+      } else {
         return autoclose();
       }
     });
@@ -3864,7 +3913,8 @@ We need to work on this page:
       open: open,
       close: close,
       source: source,
-      defaults: defaults
+      defaults: defaults,
+      contains: contains
     };
   })();
 
@@ -3886,8 +3936,9 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
   var slice = [].slice;
 
   up.modal = (function() {
-    var autoclose, close, config, createHiddenModal, defaults, discardHistory, open, rememberHistory, source, templateHtml, u, updated;
+    var autoclose, close, config, contains, createHiddenModal, currentSource, defaults, discardHistory, open, rememberHistory, source, templateHtml, u, updated;
     u = up.util;
+    currentSource = void 0;
     config = {
       width: 'auto',
       height: 'auto',
@@ -4062,11 +4113,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       the source URL
      */
     source = function() {
-      var $modal;
-      $modal = $('.up-modal');
-      if (!$modal.is('.up-destroying')) {
-        return $modal.find('[up-source]').attr('up-source');
-      }
+      return currentSource;
     };
 
     /**
@@ -4086,6 +4133,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
           url: $modal.attr('up-previous-url'),
           title: $modal.attr('up-previous-title')
         });
+        currentSource = void 0;
         return up.destroy($modal, options);
       }
     };
@@ -4094,6 +4142,20 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
         discardHistory();
         return close();
       }
+    };
+
+    /**
+    Returns whether the given element or selector is contained
+    within the current modal.
+    
+    @methods up.modal.contains
+    @param {String} elementOrSelector
+    @protected
+     */
+    contains = function(elementOrSelector) {
+      var $element;
+      $element = $(elementOrSelector);
+      return $element.closest('.up-modal').length > 0;
     };
 
     /**
@@ -4176,7 +4238,12 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       }
     });
     up.bus.on('fragment:ready', function($fragment) {
-      if (!$fragment.closest('.up-modal, .up-popup').length) {
+      var newSource;
+      if (contains($fragment)) {
+        if (newSource = $fragment.attr('up-source')) {
+          return currentSource = newSource;
+        }
+      } else if (!up.popup.contains($fragment)) {
         return autoclose();
       }
     });
@@ -4201,7 +4268,8 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       open: open,
       close: close,
       source: source,
-      defaults: defaults
+      defaults: defaults,
+      contains: contains
     };
   })();
 
