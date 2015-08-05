@@ -143,11 +143,10 @@ up.flow = (->
         swapElements($old, $new, step.pseudoClass, step.transition, options)
 
   findOldFragment = (selector) ->
-    selectorWithExcludes = "#{selector}:not(.up-ghost, .up-destroying)"
     # Prefer to replace fragments in an open popup or modal
-    u.presence($(".up-popup #{selectorWithExcludes}")) ||
-      u.presence($(".up-modal #{selectorWithExcludes}")) ||
-      u.presence($(selectorWithExcludes)) ||
+    first(".up-popup #{selector}") ||
+      first(".up-modal #{selector}") ||
+      first(selector) ||
       fragmentNotFound(selector)
 
   fragmentNotFound = (selector) ->
@@ -243,6 +242,33 @@ up.flow = (->
     if $control.length && $control.get(0) != document.activeElement
       $control.focus()
 
+  isRealElement = ($element) ->
+    unreal = '.up-ghost, .up-destroying'
+    # Closest matches both the element itself
+    # as well as its ancestors
+    $element.closest(unreal).length == 0
+
+  ###*
+  Returns the first element matching the given selector.
+  Excludes elements that also match `.up-ghost` or `.up-destroying`
+  or that are children of elements with these selectors.
+
+  Returns `null` if no element matches these conditions.
+
+  @protected
+  @method up.first
+  @param {String} selector
+  ###
+  first = (selector) ->
+    elements = $(selector).get()
+    $match = null
+    for element in elements
+      $element = $(element)
+      if isRealElement($element)
+        $match = $element
+        break
+    $match
+
   ###*
   Destroys the given element or selector.
   Takes care that all destructors, if any, are called.
@@ -317,6 +343,7 @@ up.flow = (->
   destroy: destroy
   implant: implant
   reset: reset
+  first: first
 
 )()
 
@@ -324,3 +351,4 @@ up.replace = up.flow.replace
 up.reload = up.flow.reload
 up.destroy = up.flow.destroy
 up.reset = up.flow.reset
+up.first = up.flow.first

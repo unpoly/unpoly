@@ -160,8 +160,7 @@ up.popup = (->
     the source URL
   ###
   source = ->
-    $popup = $('.up-popup')
-    unless $popup.is('.up-destroying')
+    if $popup = up.first('.up-popup')
       $popup.find('[up-source]').attr('up-source')
 
   ###*

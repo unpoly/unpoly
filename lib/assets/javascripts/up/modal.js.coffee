@@ -177,8 +177,7 @@ up.modal = (->
     the source URL
   ###
   source = ->
-    $modal = $('.up-modal')
-    unless $modal.is('.up-destroying')
+    if $modal = up.first('.up-modal')
       $modal.find('[up-source]').attr('up-source')
 
   ###*

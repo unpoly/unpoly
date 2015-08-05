@@ -45,4 +45,14 @@ describe 'up.util', ->
       it 'normalizes a full URL', ->
         expect(up.util.normalizeUrl('http://example.com/foo/bar')).toBe('http://example.com/foo/bar')
 
+    describe '.detect', ->
 
+      it 'finds the first element in the given array that matches the given tester', ->
+        array = ['foo', 'bar', 'baz']
+        tester = (element) -> element[0] == 'b'
+        expect(up.util.detect(array, tester)).toEqual('bar')
+
+      it "returns null if the given array doesn't contain a matching element", ->
+        array = ['foo', 'bar', 'baz']
+        tester = (element) -> element[0] == 'z'
+        expect(up.util.detect(array, tester)).toBeNull()

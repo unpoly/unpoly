@@ -84,7 +84,7 @@ describe 'up.flow', ->
             expect($('.after')).toHaveText('old-afternew-after')
             done()
 
-        it 'executes those script-tags in the response that get inserted into the DOM', (done) ->
+        it 'executes only those script-tags in the response that get inserted into the DOM', (done) ->
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
 
           @responseText =
@@ -149,6 +149,40 @@ describe 'up.flow', ->
         implant = -> up.flow.implant('.foo-bar', '')
         expect(implant).toThrowError(/Could not find selector ".foo-bar" in response/i)
 
+      it "ignores an element that matches the selector but also matches .up-destroying", ->
+        html = '<div class="foo-bar">text</div>'
+        affix('.foo-bar.up-destroying')
+        implant = -> up.flow.implant('.foo-bar', html)
+        expect(implant).toThrowError(/Could not find selector/i)
+
+      it "ignores an element that matches the selector but also matches .up-ghost", ->
+        html = '<div class="foo-bar">text</div>'
+        affix('.foo-bar.up-ghost')
+        implant = -> up.flow.implant('.foo-bar', html)
+        expect(implant).toThrowError(/Could not find selector/i)
+
+      it "ignores an element that matches the selector but also has a parent matching .up-destroying", ->
+        html = '<div class="foo-bar">text</div>'
+        $parent = affix('.up-destroying')
+        $child = affix('.foo-bar').appendTo($parent)
+        implant = -> up.flow.implant('.foo-bar', html)
+        expect(implant).toThrowError(/Could not find selector/i)
+
+      it "ignores an element that matches the selector but also has a parent matching .up-ghost", ->
+        html = '<div class="foo-bar">text</div>'
+        $parent = affix('.up-ghost')
+        $child = affix('.foo-bar').appendTo($parent)
+        implant = -> up.flow.implant('.foo-bar', html)
+        expect(implant).toThrowError(/Could not find selector/i)
+
+      it 'only replaces the first element matching the selector', ->
+        html = '<div class="foo-bar">text</div>'
+        affix('.foo-bar')
+        affix('.foo-bar')
+        up.flow.implant('.foo-bar', html)
+        elements = $('.foo-bar')
+        expect($(elements.get(0)).text()).toEqual('text')
+        expect($(elements.get(1)).text()).toEqual('')
 
     describe 'up.destroy', ->
       
