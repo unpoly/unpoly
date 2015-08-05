@@ -25,6 +25,8 @@ up.popup = (->
 
   u = up.util
 
+  currentSource = undefined
+
   config =
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
@@ -160,8 +162,7 @@ up.popup = (->
     the source URL
   ###
   source = ->
-    if $popup = up.first('.up-popup')
-      $popup.find('[up-source]').attr('up-source')
+    currentSource
 
   ###*
   Closes a currently opened popup overlay.
@@ -179,12 +180,26 @@ up.popup = (->
         url: $popup.attr('up-previous-url'),
         title: $popup.attr('up-previous-title')
       )
+      currentSource = undefined
       up.destroy($popup, options)
     
   autoclose = ->
     unless $('.up-popup').is('[up-sticky]')
+      discardHistory()
       close()
-    
+
+  ###*
+  Returns whether the given element or selector is contained
+  within the current popup.
+
+  @methods up.popup.contains
+  @param {String} elementOrSelector
+  @protected
+  ###
+  contains = (elementOrSelector) ->
+    $element = $(elementOrSelector)
+    $element.closest('.up-popup').length > 0
+
   ###*
   Opens the target of this link in a popup overlay:
 
@@ -218,8 +233,10 @@ up.popup = (->
   )
   
   up.bus.on('fragment:ready', ($fragment) ->
-    unless $fragment.closest('.up-popup').length
-      discardHistory()
+    if contains($fragment)
+      if newSource = $fragment.attr('up-source')
+        currentSource = newSource
+    else
       autoclose()
   )
   
@@ -246,5 +263,6 @@ up.popup = (->
   close: close
   source: source
   defaults: defaults
+  contains: contains
   
 )()

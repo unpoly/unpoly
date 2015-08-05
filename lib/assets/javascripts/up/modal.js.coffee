@@ -13,6 +13,8 @@ up.modal = (->
 
   u = up.util
 
+  currentSource = undefined
+
   config =
     width: 'auto'
     height: 'auto'
@@ -177,8 +179,7 @@ up.modal = (->
     the source URL
   ###
   source = ->
-    if $modal = up.first('.up-modal')
-      $modal.find('[up-source]').attr('up-source')
+    currentSource
 
   ###*
   Closes a currently opened modal overlay.
@@ -196,12 +197,25 @@ up.modal = (->
         url: $modal.attr('up-previous-url')
         title: $modal.attr('up-previous-title')
       )
+      currentSource = undefined
       up.destroy($modal, options)
 
   autoclose = ->
     unless $('.up-modal').is('[up-sticky]')
       discardHistory()
       close()
+
+  ###*
+  Returns whether the given element or selector is contained
+  within the current modal.
+
+  @methods up.modal.contains
+  @param {String} elementOrSelector
+  @protected
+  ###
+  contains = (elementOrSelector) ->
+    $element = $(elementOrSelector)
+    $element.closest('.up-modal').length > 0
 
   ###*
   Clicking this link will load the destination via AJAX and open
@@ -284,7 +298,10 @@ up.modal = (->
   )
 
   up.bus.on('fragment:ready', ($fragment) ->
-    unless $fragment.closest('.up-modal, .up-popup').length
+    if contains($fragment)
+      if newSource = $fragment.attr('up-source')
+        currentSource = newSource
+    else if !up.popup.contains($fragment)
       autoclose()
   )
 
@@ -311,5 +328,6 @@ up.modal = (->
   close: close
   source: source
   defaults: defaults
+  contains: contains
 
 )()

@@ -46,7 +46,11 @@ describe 'up.navigation', ->
           responseHeaders: { 'X-Up-Location': '/foo' }
           responseText: '<div class="main">new-text</div>'
         expect($link).toHaveClass('up-current')
-        
+
+      it 'marks a link as .up-current if it links to the URL currently shown in the modal'
+
+      it 'marks a link as .up-current if it links to the URL currently shown in the popup'
+
       it 'changes .up-current marks as the URL changes'
         
       it 'marks clicked links as .up-active until the request finishes', ->
