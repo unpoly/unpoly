@@ -39,19 +39,40 @@ up.navigation = (->
       urls = urls.concat(values)
     urls.map normalizeUrl
 
+  urlSet = (urls) ->
+
+    matches = (testUrl) ->
+      if testUrl.substr(-1) == '*'
+        doesMatchPrefix(testUrl.slice(0, -1))
+      else
+        doesMatchFully(testUrl)
+
+    doesMatchFully = (testUrl) ->
+      u.contains(urls, testUrl)
+
+    doesMatchPrefix = (prefix) ->
+      u.detect urls, (url) ->
+        url.indexOf(prefix) == 0
+
+    matchesAny = (testUrls) ->
+      u.detect(testUrls, matches)
+
+    matchesAny: matchesAny
+
   locationChanged = ->
-    currentUrls = u.stringSet [
+    currentUrls = urlSet([
       normalizeUrl(up.browser.url()),
       normalizeUrl(up.modal.source()),
       normalizeUrl(up.popup.source())
-    ]
+    ])
 
     u.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       # if $section is marked up with up-follow,
       # the actual link might be a child element.
       urls = sectionUrls($section)
-      if currentUrls.includesAny(urls)
+
+      if currentUrls.matchesAny(urls)
         $section.addClass(CLASS_CURRENT)
       else
         $section.removeClass(CLASS_CURRENT)
@@ -133,6 +154,15 @@ up.navigation = (->
   - the link's `href` attribute
   - the link's [`up-href`](/up.link#turn-any-element-into-a-link) attribute
   - a space-separated list of URLs in the link's `up-alias` attribute
+
+  \#\#\#\# Matching URL by prefix
+
+  You can mark a link as `.up-current` whenever the current URL matches a prefix.
+  To do so, end the `up-alias` attribute in an asterisk (`*`).
+
+  For instance, the following link is highlighted for both `/reports` and `/reports/123`:
+
+      <a href="/reports" up-alias="/reports/*">Reports</a>
 
   @method [up-current]
   @ujs

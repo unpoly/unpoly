@@ -23,6 +23,13 @@ describe 'up.navigation', ->
       expect($currentLink).toHaveClass('up-current')
       expect($otherLink).not.toHaveClass('up-current')
 
+    it 'marks URL prefixes as .up-current if an up-alias value ends in *', ->
+      spyOn(up.browser, 'url').and.returnValue('/foo/123')
+      $currentLink = up.ready(affix('span[up-alias="/aaa /foo/* /bbb"]'))
+      $otherLink = up.ready(affix('span[up-alias="/bar"]'))
+      expect($currentLink).toHaveClass('up-current')
+      expect($otherLink).not.toHaveClass('up-current')
+
     if up.browser.canPushState()
       
       it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', ->

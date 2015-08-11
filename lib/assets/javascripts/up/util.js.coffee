@@ -565,27 +565,6 @@ up.util = (->
       if isMissing($element.attr(key))
         $element.attr(key, value)
 
-  stringSet = (array) ->
-    set = {}
-    
-    includes = (string) ->
-      set[key(string)]
-      
-    includesAny = (strings) ->
-      detect strings, includes
-      
-    put = (string) ->
-      set[key(string)] = true
-      
-    key = (string) ->
-      "_#{string}"
-      
-    put(string) for string in array
-    
-    put: put
-    includes: includes
-    includesAny: includesAny
-
   presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl
@@ -654,6 +633,5 @@ up.util = (->
   resolvedDeferred: resolvedDeferred
   resolvableWhen: resolvableWhen
   setMissingAttrs: setMissingAttrs
-  stringSet: stringSet
 
 )()
