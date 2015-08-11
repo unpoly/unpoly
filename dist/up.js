@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringSet, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unwrap, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unwrap, warn;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -706,31 +706,6 @@ If you use them in your own code, you will get hurt.
       }
       return results;
     };
-    stringSet = function(array) {
-      var includes, includesAny, j, key, len, put, set, string;
-      set = {};
-      includes = function(string) {
-        return set[key(string)];
-      };
-      includesAny = function(strings) {
-        return detect(strings, includes);
-      };
-      put = function(string) {
-        return set[key(string)] = true;
-      };
-      key = function(string) {
-        return "_" + string;
-      };
-      for (j = 0, len = array.length; j < len; j++) {
-        string = array[j];
-        put(string);
-      }
-      return {
-        put: put,
-        includes: includes,
-        includesAny: includesAny
-      };
-    };
     return {
       presentAttr: presentAttr,
       createElement: createElement,
@@ -799,8 +774,7 @@ If you use them in your own code, you will get hurt.
       resolvedPromise: resolvedPromise,
       resolvedDeferred: resolvedDeferred,
       resolvableWhen: resolvableWhen,
-      setMissingAttrs: setMissingAttrs,
-      stringSet: stringSet
+      setMissingAttrs: setMissingAttrs
     };
   })();
 
@@ -4428,7 +4402,7 @@ by providing instant feedback for user interactions.
 
 (function() {
   up.navigation = (function() {
-    var CLASS_ACTIVE, CLASS_CURRENT, SELECTORS_SECTION, SELECTOR_ACTIVE, SELECTOR_SECTION, SELECTOR_SECTION_INSTANT, enlargeClickArea, locationChanged, normalizeUrl, sectionClicked, sectionUrls, selector, u, unmarkActive;
+    var CLASS_ACTIVE, CLASS_CURRENT, SELECTORS_SECTION, SELECTOR_ACTIVE, SELECTOR_SECTION, SELECTOR_SECTION_INSTANT, enlargeClickArea, locationChanged, normalizeUrl, sectionClicked, sectionUrls, selector, u, unmarkActive, urlSet;
     u = up.util;
     CLASS_ACTIVE = 'up-active';
     CLASS_CURRENT = 'up-current';
@@ -4468,14 +4442,38 @@ by providing instant feedback for user interactions.
       }
       return urls.map(normalizeUrl);
     };
+    urlSet = function(urls) {
+      var doesMatchFully, doesMatchPrefix, matches, matchesAny;
+      matches = function(testUrl) {
+        if (testUrl.substr(-1) === '*') {
+          return doesMatchPrefix(testUrl.slice(0, -1));
+        } else {
+          return doesMatchFully(testUrl);
+        }
+      };
+      doesMatchFully = function(testUrl) {
+        return u.contains(urls, testUrl);
+      };
+      doesMatchPrefix = function(prefix) {
+        return u.detect(urls, function(url) {
+          return url.indexOf(prefix) === 0;
+        });
+      };
+      matchesAny = function(testUrls) {
+        return u.detect(testUrls, matches);
+      };
+      return {
+        matchesAny: matchesAny
+      };
+    };
     locationChanged = function() {
       var currentUrls;
-      currentUrls = u.stringSet([normalizeUrl(up.browser.url()), normalizeUrl(up.modal.source()), normalizeUrl(up.popup.source())]);
+      currentUrls = urlSet([normalizeUrl(up.browser.url()), normalizeUrl(up.modal.source()), normalizeUrl(up.popup.source())]);
       return u.each($(SELECTOR_SECTION), function(section) {
         var $section, urls;
         $section = $(section);
         urls = sectionUrls($section);
-        if (currentUrls.includesAny(urls)) {
+        if (currentUrls.matchesAny(urls)) {
           return $section.addClass(CLASS_CURRENT);
         } else {
           return $section.removeClass(CLASS_CURRENT);
@@ -4563,6 +4561,15 @@ by providing instant feedback for user interactions.
     - the link's `href` attribute
     - the link's [`up-href`](/up.link#turn-any-element-into-a-link) attribute
     - a space-separated list of URLs in the link's `up-alias` attribute
+    
+    \#\#\#\# Matching URL by prefix
+    
+    You can mark a link as `.up-current` whenever the current URL matches a prefix.
+    To do so, end the `up-alias` attribute in an asterisk (`*`).
+    
+    For instance, the following link is highlighted for both `/reports` and `/reports/123`:
+    
+        <a href="/reports" up-alias="/reports/*">Reports</a>
     
     @method [up-current]
     @ujs
