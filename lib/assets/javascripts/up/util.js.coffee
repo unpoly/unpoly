@@ -334,6 +334,9 @@ up.util = (->
         match = element
         break
     match
+
+  compact = (array) ->
+    select array, isGiven
     
   select = (array, tester) ->
     matches = []
@@ -586,6 +589,7 @@ up.util = (->
   times: times
   detect: detect
   select: select
+  compact: compact
   last: last
   isNull: isNull
   isDefined: isDefined

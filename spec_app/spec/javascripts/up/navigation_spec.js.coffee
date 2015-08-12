@@ -23,6 +23,10 @@ describe 'up.navigation', ->
       expect($currentLink).toHaveClass('up-current')
       expect($otherLink).not.toHaveClass('up-current')
 
+    it 'does not throw if the current location does not match an up-alias wildcard (bugfix)', ->
+      inserter = -> up.ready(affix('a[up-alias="/qqqq*"]'))
+      expect(inserter).not.toThrow()
+
     it 'marks URL prefixes as .up-current if an up-alias value ends in *', ->
       spyOn(up.browser, 'url').and.returnValue('/foo/123')
       $currentLink = up.ready(affix('span[up-alias="/aaa /foo/* /bbb"]'))

@@ -40,6 +40,7 @@ up.navigation = (->
     urls.map normalizeUrl
 
   urlSet = (urls) ->
+    urls = u.compact(urls)
 
     matches = (testUrl) ->
       if testUrl.substr(-1) == '*'
