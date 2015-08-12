@@ -169,13 +169,13 @@ up.navigation = (->
   @ujs
   ###
   up.bus.on 'fragment:ready', ->
+    # If a new fragment is inserted, it's likely to be the result
+    # of the active action. So we can remove the active marker.
+    unmarkActive()
     # When a fragment is ready it might either have brought a location change
     # with it, or it might have opened a modal / popup which we consider
     # to be secondary location sources (the primary being the browser's
     # location bar).
-    unmarkActive()
-    # If a new fragment is inserted, it's likely to be the result
-    # to the active action. So we can remove the active marker.
     locationChanged()
 
   up.bus.on 'fragment:destroy', ($fragment) ->
