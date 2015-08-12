@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unwrap, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unwrap, warn;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -415,6 +415,9 @@ If you use them in your own code, you will get hurt.
       }
       return match;
     };
+    compact = function(array) {
+      return select(array, isGiven);
+    };
     select = function(array, tester) {
       var matches;
       matches = [];
@@ -728,6 +731,7 @@ If you use them in your own code, you will get hurt.
       times: times,
       detect: detect,
       select: select,
+      compact: compact,
       last: last,
       isNull: isNull,
       isDefined: isDefined,
@@ -4444,6 +4448,7 @@ by providing instant feedback for user interactions.
     };
     urlSet = function(urls) {
       var doesMatchFully, doesMatchPrefix, matches, matchesAny;
+      urls = u.compact(urls);
       matches = function(testUrl) {
         if (testUrl.substr(-1) === '*') {
           return doesMatchPrefix(testUrl.slice(0, -1));
