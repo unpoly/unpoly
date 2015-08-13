@@ -1,5 +1,5 @@
 module Upjs
   module Rails
-    VERSION = '0.7.8'
+    VERSION = '0.8.0'
   end
 end
