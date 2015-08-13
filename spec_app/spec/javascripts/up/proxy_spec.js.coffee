@@ -90,6 +90,7 @@ describe 'up.proxy', ->
       describe 'events', ->
         
         beforeEach ->
+          up.proxy.defaults(busyDelay: 0)
           @events = []
           u.each ['proxy:load', 'proxy:receive', 'proxy:busy', 'proxy:idle'], (eventName) =>
             up.bus.on eventName, =>
@@ -169,6 +170,62 @@ describe 'up.proxy', ->
             'proxy:idle'
           ])
           expect(up.proxy.busy()).toBe(false)
+
+        it 'can delay the proxy:busy event to prevent flickering of spinners', ->
+          jasmine.clock().install()
+          up.proxy.defaults(busyDelay: 100)
+
+          up.proxy.ajax(url: '/foo')
+          expect(@events).toEqual([
+            'proxy:load'
+          ])
+
+          jasmine.clock().tick(50)
+          expect(@events).toEqual([
+            'proxy:load'
+          ])
+
+          jasmine.clock().tick(50)
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy'
+          ])
+
+          jasmine.Ajax.requests.at(0).respondWith
+            status: 200
+            contentType: 'text/html'
+            responseText: 'foo'
+
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy',
+            'proxy:receive',
+            'proxy:idle'
+          ])
+
+        it 'does not emit proxy:idle if a delayed proxy:busy was never emitted due to a fast response', ->
+          jasmine.clock().install()
+          up.proxy.defaults(busyDelay: 100)
+
+          up.proxy.ajax(url: '/foo')
+          expect(@events).toEqual([
+            'proxy:load'
+          ])
+
+          jasmine.clock().tick(50)
+
+          jasmine.Ajax.requests.at(0).respondWith
+            status: 200
+            contentType: 'text/html'
+            responseText: 'foo'
+
+          jasmine.clock().tick(100)
+
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:receive'
+          ])
+
 
     describe 'up.proxy.preload', ->
 

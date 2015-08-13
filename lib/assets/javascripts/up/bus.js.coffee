@@ -38,8 +38,8 @@ We need to work on this page:
 
 - Decide whether to refactor this into document events
 - Decide whether `fragment:enter` and `fragment:leave` would be better names
+- Decide if we wouldn't rather document events in the respective module (e.g. proxy).
 
-  
 @class up.bus
 ###
 up.bus = (->
@@ -82,13 +82,29 @@ up.bus = (->
   @param {String} eventNames
     A space-separated list of event names to match.
   @param {Function} handler
-    The event handler to be called with the event arguments.  
+    The event handler to be called with the event arguments.
+  @return {Function}
+    A function that unregisters the given handlers
   ###
   # We cannot call this function "on" because Coffeescript
   # https://makandracards.com/makandra/29733-english-words-that-you-cannot-use-in-coffeescript
   listen = (eventNames, handler) ->
     for eventName in eventNames.split(' ')
       callbacksFor(eventName).push(handler)
+    -> stopListen(eventNames, handler)
+
+  ###*
+  Unregisters the given handler from the given events.
+
+  @method up.bus.off
+  @param {String} eventNames
+    A space-separated list of event names .
+  @param {Function} handler
+    The event handler that should stop listening.
+  ###
+  stopListen = (eventNames, handler) ->
+    for eventName in eventNames.split(' ')
+      u.remove(callbacksFor(eventName), handler)
 
   ###*
   Triggers an event over the framework bus.
@@ -124,5 +140,6 @@ up.bus = (->
   listen 'framework:reset', reset
 
   on: listen
+  off: stopListen
   emit: emit
 )()

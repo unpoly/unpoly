@@ -4,7 +4,7 @@ Caching and preloading
 
 All HTTP requests go through the Up.js proxy.
 It caches a [limited](/up.proxy#up.proxy.defaults) number of server responses
-  for a [limited](/up.proxy#up.proxy.defaults) amount of time,
+for a [limited](/up.proxy#up.proxy.defaults) amount of time,
 making requests to these URLs return insantly.
   
 The cache is cleared whenever the user makes a non-`GET` request
@@ -13,7 +13,39 @@ The cache is cleared whenever the user makes a non-`GET` request
 The proxy can also used to speed up reaction times by preloading
 links when the user hovers over the click area (or puts the mouse/finger
 down before releasing). This way the
-response will already be cached when the user performs the click.   
+response will already be cached when the user performs the click.
+
+Spinners
+---------
+
+You can listen to [framework events](/up.bus) to implement a spinner
+(progress indicator) that appears during a long-running request,
+and disappears once the response has been received:
+
+    <div class="spinner">Please wait!</div>
+
+Here is the Javascript to make it alive:
+
+    up.compiler('.spinner', function($element) {
+
+      show = function() { $element.show() };
+      hide = function() { $element.hide() };
+
+      up.bus.on('proxy:busy', show);
+      up.bus.on('proxy:idle', hide);
+
+      return function() {
+        up.bus.off('proxy:busy', show);
+        up.bus.off('proxy:idle', hide);
+      };
+
+    });
+
+The `proxy:busy` event will be emitted after a delay of 300 ms
+to prevent the spinner from flickering on and off.
+You can change (or remove) this delay like this:
+
+    up.proxy.defaults({ busyDelay: 150 });
 
 @class up.proxy  
 ###
@@ -27,7 +59,7 @@ up.proxy = (->
   busyDelayTimer = undefined
   pendingCount = undefined
   config = undefined
-  busyEmitted = undefined
+  busyEventEmitted = undefined
   FACTORY_CONFIG =
     busyDelay: 300
     preloadDelay: 75
@@ -49,7 +81,7 @@ up.proxy = (->
     cancelBusyDelay()
     pendingCount = 0
     config = u.copy(FACTORY_CONFIG)
-    busyEmitted = false
+    busyEventEmitted = false
 
   reset()
 
@@ -119,6 +151,8 @@ up.proxy = (->
 
   If a network connection is attempted, the proxy will emit
   a `proxy:load` event with the `request` as its argument.
+  Once the response is received, a `proxy:receive` event will
+  be emitted.
   
   @method up.proxy.ajax
   @param {String} request.url
@@ -197,13 +231,20 @@ up.proxy = (->
     wasIdle = idle()
     pendingCount += 1
     if wasIdle
-      up.bus.emit('proxy:busy')
+      emission = ->
+        if busy() # a fast response might have beaten the delay
+          up.bus.emit('proxy:busy')
+          busyEventEmitted = true
+      if config.busyDelay > 0
+        busyDelayTimer = setTimeout(emission, config.busyDelay)
+      else
+        emission()
 
   loadEnded = ->
-    wasBusy = busy()
     pendingCount -= 1
-    if wasBusy && idle()
+    if idle() && busyEventEmitted
       up.bus.emit('proxy:idle')
+      busyEventEmitted = false
 
   load = (request) ->
     up.bus.emit('proxy:load', request)

@@ -568,6 +568,12 @@ up.util = (->
       if isMissing($element.attr(key))
         $element.attr(key, value)
 
+  remove = (array, element) ->
+    index = array.indexOf(element)
+    if index >= 0
+      array.splice(index, 1)
+      element
+
   presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl
@@ -637,5 +643,6 @@ up.util = (->
   resolvedDeferred: resolvedDeferred
   resolvableWhen: resolvableWhen
   setMissingAttrs: setMissingAttrs
+  remove: remove
 
 )()
