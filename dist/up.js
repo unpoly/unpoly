@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unwrap, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unwrap, warn;
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -709,6 +709,14 @@ If you use them in your own code, you will get hurt.
       }
       return results;
     };
+    remove = function(array, element) {
+      var index;
+      index = array.indexOf(element);
+      if (index >= 0) {
+        array.splice(index, 1);
+        return element;
+      }
+    };
     return {
       presentAttr: presentAttr,
       createElement: createElement,
@@ -778,7 +786,8 @@ If you use them in your own code, you will get hurt.
       resolvedPromise: resolvedPromise,
       resolvedDeferred: resolvedDeferred,
       resolvableWhen: resolvableWhen,
-      setMissingAttrs: setMissingAttrs
+      setMissingAttrs: setMissingAttrs,
+      remove: remove
     };
   })();
 
@@ -932,8 +941,8 @@ We need to work on this page:
 
 - Decide whether to refactor this into document events
 - Decide whether `fragment:enter` and `fragment:leave` would be better names
+- Decide if we wouldn't rather document events in the respective module (e.g. proxy).
 
-  
 @class up.bus
  */
 
@@ -941,7 +950,7 @@ We need to work on this page:
   var slice = [].slice;
 
   up.bus = (function() {
-    var callbacksByEvent, callbacksFor, defaultCallbacksByEvent, emit, listen, reset, snapshot, u;
+    var callbacksByEvent, callbacksFor, defaultCallbacksByEvent, emit, listen, reset, snapshot, stopListen, u;
     u = up.util;
     callbacksByEvent = {};
     defaultCallbacksByEvent = {};
@@ -983,13 +992,43 @@ We need to work on this page:
     event is triggered.
     
     @method up.bus.on
-    @param {String} eventName
-      The event name to match.
+    @param {String} eventNames
+      A space-separated list of event names to match.
     @param {Function} handler
       The event handler to be called with the event arguments.
+    @return {Function}
+      A function that unregisters the given handlers
      */
-    listen = function(eventName, handler) {
-      return callbacksFor(eventName).push(handler);
+    listen = function(eventNames, handler) {
+      var eventName, i, len, ref;
+      ref = eventNames.split(' ');
+      for (i = 0, len = ref.length; i < len; i++) {
+        eventName = ref[i];
+        callbacksFor(eventName).push(handler);
+      }
+      return function() {
+        return stopListen(eventNames, handler);
+      };
+    };
+
+    /**
+    Unregisters the given handler from the given events.
+    
+    @method up.bus.off
+    @param {String} eventNames
+      A space-separated list of event names .
+    @param {Function} handler
+      The event handler that should stop listening.
+     */
+    stopListen = function(eventNames, handler) {
+      var eventName, i, len, ref, results;
+      ref = eventNames.split(' ');
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        eventName = ref[i];
+        results.push(u.remove(callbacksFor(eventName), handler));
+      }
+      return results;
     };
 
     /**
@@ -1028,6 +1067,7 @@ We need to work on this page:
     listen('framework:reset', reset);
     return {
       on: listen,
+      off: stopListen,
       emit: emit
     };
   })();
@@ -1244,7 +1284,8 @@ We need to work on this page:
         url: url,
         method: options.method,
         selector: selector,
-        cache: options.cache
+        cache: options.cache,
+        preload: options.preload
       };
       promise = up.proxy.ajax(request);
       promise.done(function(html, textStatus, xhr) {
@@ -2621,7 +2662,7 @@ Caching and preloading
 
 All HTTP requests go through the Up.js proxy.
 It caches a [limited](/up.proxy#up.proxy.defaults) number of server responses
-  for a [limited](/up.proxy#up.proxy.defaults) amount of time,
+for a [limited](/up.proxy#up.proxy.defaults) amount of time,
 making requests to these URLs return insantly.
   
 The cache is cleared whenever the user makes a non-`GET` request
@@ -2630,19 +2671,78 @@ The cache is cleared whenever the user makes a non-`GET` request
 The proxy can also used to speed up reaction times by preloading
 links when the user hovers over the click area (or puts the mouse/finger
 down before releasing). This way the
-response will already be cached when the user performs the click.   
+response will already be cached when the user performs the click.
+
+Spinners
+---------
+
+You can listen to [framework events](/up.bus) to implement a spinner
+(progress indicator) that appears during a long-running request,
+and disappears once the response has been received:
+
+    <div class="spinner">Please wait!</div>
+
+Here is the Javascript to make it alive:
+
+    up.compiler('.spinner', function($element) {
+
+      show = function() { $element.show() };
+      hide = function() { $element.hide() };
+
+      up.bus.on('proxy:busy', show);
+      up.bus.on('proxy:idle', hide);
+
+      return function() {
+        up.bus.off('proxy:busy', show);
+        up.bus.off('proxy:idle', hide);
+      };
+
+    });
+
+The `proxy:busy` event will be emitted after a delay of 300 ms
+to prevent the spinner from flickering on and off.
+You can change (or remove) this delay like this:
+
+    up.proxy.defaults({ busyDelay: 150 });
 
 @class up.proxy
  */
 
 (function() {
   up.proxy = (function() {
-    var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, cache, cacheKey, cancelDelay, checkPreload, clear, config, defaults, delayTimer, get, isFresh, isIdempotent, normalizeRequest, preload, remove, reset, set, startDelay, timestamp, trim, u;
-    config = {
+    var $waitingLink, FACTORY_CONFIG, SAFE_HTTP_METHODS, ajax, alias, busy, busyDelayTimer, busyEventEmitted, cache, cacheKey, cancelBusyDelay, cancelPreloadDelay, checkPreload, clear, config, defaults, get, idle, isFresh, isIdempotent, load, loadEnded, loadStarted, normalizeRequest, pendingCount, preload, preloadDelayTimer, remove, reset, set, startPreloadDelay, timestamp, trim, u;
+    u = up.util;
+    cache = void 0;
+    $waitingLink = void 0;
+    preloadDelayTimer = void 0;
+    busyDelayTimer = void 0;
+    pendingCount = void 0;
+    config = void 0;
+    busyEventEmitted = void 0;
+    FACTORY_CONFIG = {
+      busyDelay: 300,
       preloadDelay: 75,
       cacheSize: 70,
       cacheExpiry: 1000 * 60 * 5
     };
+    cancelPreloadDelay = function() {
+      clearTimeout(preloadDelayTimer);
+      return preloadDelayTimer = null;
+    };
+    cancelBusyDelay = function() {
+      clearTimeout(busyDelayTimer);
+      return busyDelayTimer = null;
+    };
+    reset = function() {
+      cache = {};
+      $waitingLink = null;
+      cancelPreloadDelay();
+      cancelBusyDelay();
+      pendingCount = 0;
+      config = u.copy(FACTORY_CONFIG);
+      return busyEventEmitted = false;
+    };
+    reset();
 
     /**
     @method up.proxy.defaults
@@ -2655,14 +2755,13 @@ response will already be cached when the user performs the click.
     @param {Number} [options.cacheExpiry=300000]
       The number of milliseconds until a cache entry expires.
       Defaults to 5 minutes.
+    @param {Number} [options.busyDelay=300]
+      How long the proxy waits until emitting the `proxy:busy` [event](/up.bus).
+      Use this to prevent flickering of spinners.
      */
     defaults = function(options) {
       return u.extend(config, options);
     };
-    cache = {};
-    u = up.util;
-    $waitingLink = null;
-    delayTimer = null;
     cacheKey = function(request) {
       normalizeRequest(request);
       return [request.url, request.method, request.data, request.selector].join('|');
@@ -2718,6 +2817,11 @@ response will already be cached when the user performs the click.
     Only requests with a method of `GET`, `OPTIONS` and `HEAD`
     are considered to be read-only.
     
+    If a network connection is attempted, the proxy will emit
+    a `proxy:load` event with the `request` as its argument.
+    Once the response is received, a `proxy:receive` event will
+    be emitted.
+    
     @method up.proxy.ajax
     @param {String} request.url
     @param {String} [request.method='GET']
@@ -2727,22 +2831,89 @@ response will already be cached when the user performs the click.
       If set to `false` a network connection will always be attempted.
      */
     ajax = function(options) {
-      var forceCache, ignoreCache, promise, request;
+      var forceCache, ignoreCache, pending, promise, request;
       forceCache = u.castsToTrue(options.cache);
       ignoreCache = u.castsToFalse(options.cache);
       request = u.only(options, 'url', 'method', 'data', 'selector', '_normalized');
+      pending = true;
       if (!isIdempotent(request) && !forceCache) {
         clear();
-        promise = u.ajax(request);
+        promise = load(request);
       } else if ((promise = get(request)) && !ignoreCache) {
-        promise;
+        pending = promise.state() === 'pending';
       } else {
-        promise = u.ajax(request);
+        promise = load(request);
         set(request, promise);
+      }
+      if (pending && !options.preload) {
+        loadStarted();
+        promise.then(loadEnded);
       }
       return promise;
     };
     SAFE_HTTP_METHODS = ['GET', 'OPTIONS', 'HEAD'];
+
+    /**
+    Returns `true` if the proxy is not currently waiting
+    for a request to finish. Returns `false` otherwise.
+    
+    The proxy will also emit an `proxy:idle` [event](/up.bus) if it
+    used to busy, but is now idle.
+    
+    @method up.proxy.idle
+    @return {Boolean} Whether the proxy is idle
+     */
+    idle = function() {
+      return pendingCount === 0;
+    };
+
+    /**
+    Returns `true` if the proxy is currently waiting
+    for a request to finish. Returns `false` otherwise.
+    
+    The proxy will also emit an `proxy:busy` [event](/up.bus) if it
+    used to idle, but is now busy.
+    
+    @method up.proxy.busy
+    @return {Boolean} Whether the proxy is busy
+     */
+    busy = function() {
+      return pendingCount > 0;
+    };
+    loadStarted = function() {
+      var emission, wasIdle;
+      wasIdle = idle();
+      pendingCount += 1;
+      if (wasIdle) {
+        emission = function() {
+          if (busy()) {
+            up.bus.emit('proxy:busy');
+            return busyEventEmitted = true;
+          }
+        };
+        if (config.busyDelay > 0) {
+          return busyDelayTimer = setTimeout(emission, config.busyDelay);
+        } else {
+          return emission();
+        }
+      }
+    };
+    loadEnded = function() {
+      pendingCount -= 1;
+      if (idle() && busyEventEmitted) {
+        up.bus.emit('proxy:idle');
+        return busyEventEmitted = false;
+      }
+    };
+    load = function(request) {
+      var promise;
+      up.bus.emit('proxy:load', request);
+      promise = u.ajax(request);
+      promise.then(function() {
+        return up.bus.emit('proxy:receive', request);
+      });
+      return promise;
+    };
     isIdempotent = function(request) {
       normalizeRequest(request);
       return u.contains(SAFE_HTTP_METHODS, request.method);
@@ -2810,19 +2981,15 @@ response will already be cached when the user performs the click.
       delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay;
       if (!$link.is($waitingLink)) {
         $waitingLink = $link;
-        cancelDelay();
+        cancelPreloadDelay();
         curriedPreload = function() {
           return preload($link);
         };
-        return startDelay(curriedPreload, delay);
+        return startPreloadDelay(curriedPreload, delay);
       }
     };
-    startDelay = function(block, delay) {
-      return delayTimer = setTimeout(block, delay);
-    };
-    cancelDelay = function() {
-      clearTimeout(delayTimer);
-      return delayTimer = null;
+    startPreloadDelay = function(block, delay) {
+      return preloadDelayTimer = setTimeout(block, delay);
     };
 
     /**
@@ -2846,10 +3013,6 @@ response will already be cached when the user performs the click.
         u.debug("Won't preload %o due to unsafe method %o", $link, method);
         return u.resolvedPromise();
       }
-    };
-    reset = function() {
-      cancelDelay();
-      return cache = {};
     };
     up.bus.on('framework:reset', reset);
 
@@ -2880,6 +3043,8 @@ response will already be cached when the user performs the click.
       alias: alias,
       clear: clear,
       remove: remove,
+      idle: idle,
+      busy: busy,
       defaults: defaults
     };
   })();
