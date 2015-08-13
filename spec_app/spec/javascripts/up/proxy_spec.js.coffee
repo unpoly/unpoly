@@ -86,6 +86,89 @@ describe 'up.proxy', ->
         it "caches #{method} requests with cache: true option", ->
           u.times 2, -> up.proxy.ajax(url: '/foo', method: method, cache: true)
           expect(jasmine.Ajax.requests.count()).toEqual(1)
+          
+      describe 'events', ->
+        
+        beforeEach ->
+          @events = []
+          u.each ['proxy:load', 'proxy:receive', 'proxy:busy', 'proxy:idle'], (eventName) =>
+            up.bus.on eventName, =>
+              @events.push eventName
+
+        it 'emits an proxy:busy event once the proxy started loading, and proxy:idle if it is done loading', ->
+  
+          up.proxy.ajax(url: '/foo')
+  
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy'
+          ])
+  
+          up.proxy.ajax(url: '/bar')
+  
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy',
+            'proxy:load'
+          ])
+  
+          jasmine.Ajax.requests.at(0).respondWith
+            status: 200
+            contentType: 'text/html'
+            responseText: 'foo'
+  
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy',
+            'proxy:load',
+            'proxy:receive'
+          ])
+  
+          jasmine.Ajax.requests.at(1).respondWith
+            status: 200
+            contentType: 'text/html'
+            responseText: 'bar'
+  
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy',
+            'proxy:load',
+            'proxy:receive',
+            'proxy:receive',
+            'proxy:idle'
+          ])
+  
+        it 'does not emit an proxy:busy event if preloading', ->
+
+          # A request for preloading preloading purposes
+          # doesn't make us busy.
+          up.proxy.ajax(url: '/foo', preload: true)
+          expect(@events).toEqual([
+            'proxy:load'
+          ])
+          expect(up.proxy.busy()).toBe(false)
+
+          # The same request with preloading does make us busy.
+          up.proxy.ajax(url: '/foo')
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy'
+          ])
+          expect(up.proxy.busy()).toBe(true)
+
+          # The response resolves both promises and makes
+          # the proxy idle again.
+          jasmine.Ajax.requests.at(0).respondWith
+            status: 200
+            contentType: 'text/html'
+            responseText: 'foo'
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy',
+            'proxy:receive',
+            'proxy:idle'
+          ])
+          expect(up.proxy.busy()).toBe(false)
 
     describe 'up.proxy.preload', ->
 

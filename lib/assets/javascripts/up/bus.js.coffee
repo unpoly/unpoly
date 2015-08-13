@@ -79,15 +79,16 @@ up.bus = (->
   event is triggered.
   
   @method up.bus.on
-  @param {String} eventName
-    The event name to match.
+  @param {String} eventNames
+    A space-separated list of event names to match.
   @param {Function} handler
     The event handler to be called with the event arguments.  
   ###
   # We cannot call this function "on" because Coffeescript
   # https://makandracards.com/makandra/29733-english-words-that-you-cannot-use-in-coffeescript
-  listen = (eventName, handler) ->
-    callbacksFor(eventName).push(handler)
+  listen = (eventNames, handler) ->
+    for eventName in eventNames.split(' ')
+      callbacksFor(eventName).push(handler)
 
   ###*
   Triggers an event over the framework bus.

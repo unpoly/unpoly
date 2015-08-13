@@ -19,10 +19,39 @@ response will already be cached when the user performs the click.
 ###
 up.proxy = (->
 
-  config =
+  u = up.util
+
+  cache = undefined
+  $waitingLink = undefined
+  preloadDelayTimer = undefined
+  busyDelayTimer = undefined
+  pendingCount = undefined
+  config = undefined
+  busyEmitted = undefined
+  FACTORY_CONFIG =
+    busyDelay: 300
     preloadDelay: 75
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
+
+  cancelPreloadDelay = ->
+    clearTimeout(preloadDelayTimer)
+    preloadDelayTimer = null
+
+  cancelBusyDelay = ->
+    clearTimeout(busyDelayTimer)
+    busyDelayTimer = null
+
+  reset = ->
+    cache = {}
+    $waitingLink = null
+    cancelPreloadDelay()
+    cancelBusyDelay()
+    pendingCount = 0
+    config = u.copy(FACTORY_CONFIG)
+    busyEmitted = false
+
+  reset()
 
   ###*
   @method up.proxy.defaults
@@ -35,17 +64,13 @@ up.proxy = (->
   @param {Number} [options.cacheExpiry=300000]
     The number of milliseconds until a cache entry expires.
     Defaults to 5 minutes.
+  @param {Number} [options.busyDelay=300]
+    How long the proxy waits until emitting the `proxy:busy` [event](/up.bus).
+    Use this to prevent flickering of spinners.
   ###
   defaults = (options) ->
     u.extend(config, options)
-  
-  cache = {}
-  
-  u = up.util
-  
-  $waitingLink = null
-  delayTimer = null
-  
+
   cacheKey = (request) ->
     normalizeRequest(request)
     [ request.url,
@@ -82,7 +107,7 @@ up.proxy = (->
     u.debug("Aliasing %o to %o", oldRequest, newRequest)
     if promise = get(oldRequest)
       set(newRequest, promise)
-  
+
   ###*
   Makes a request to the given URL and caches the response.
   If the response was already cached, returns the HTML instantly.
@@ -91,6 +116,9 @@ up.proxy = (->
   not be cached and the entire cache will be cleared.
   Only requests with a method of `GET`, `OPTIONS` and `HEAD`
   are considered to be read-only.
+
+  If a network connection is attempted, the proxy will emit
+  a `proxy:load` event with the `request` as its argument.
   
   @method up.proxy.ajax
   @param {String} request.url
@@ -106,23 +134,84 @@ up.proxy = (->
 
     request = u.only(options, 'url', 'method', 'data', 'selector', '_normalized')
 
+    pending = true
+
     # We don't cache non-GET responses unless `options.cache`
     # is explicitly set to `true`.
     if !isIdempotent(request) && !forceCache
       clear()
-      promise = u.ajax(request)
+      promise = load(request)
     # If a cached response is available, we use it unless
     # `options.cache` is explicitly set to `false`.
     else if (promise = get(request)) && !ignoreCache
-      promise
+      pending = (promise.state() == 'pending')
     else
-      promise = u.ajax(request)
+      promise = load(request)
       set(request, promise)
+
+    if pending && !options.preload
+      # This will actually make `pendingCount` higher than the actual
+      # number of outstanding requests. However, we need to cover the
+      # following case:
+      #
+      # - User starts preloading a request.
+      #   This triggers *no* `proxy:busy`.
+      # - User starts loading the request (without preloading).
+      #   This triggers `proxy:busy`.
+      # - The request finishes.
+      #   This triggers `proxy:idle`.
+      loadStarted()
+      promise.then(loadEnded)
 
     promise
 
   SAFE_HTTP_METHODS = ['GET', 'OPTIONS', 'HEAD']
-    
+
+  ###*
+  Returns `true` if the proxy is not currently waiting
+  for a request to finish. Returns `false` otherwise.
+
+  The proxy will also emit an `proxy:idle` [event](/up.bus) if it
+  used to busy, but is now idle.
+
+  @method up.proxy.idle
+  @return {Boolean} Whether the proxy is idle
+  ###
+  idle = ->
+    pendingCount == 0
+
+  ###*
+  Returns `true` if the proxy is currently waiting
+  for a request to finish. Returns `false` otherwise.
+
+  The proxy will also emit an `proxy:busy` [event](/up.bus) if it
+  used to idle, but is now busy.
+
+  @method up.proxy.busy
+  @return {Boolean} Whether the proxy is busy
+  ###
+  busy = ->
+    pendingCount > 0
+
+  loadStarted = ->
+    wasIdle = idle()
+    pendingCount += 1
+    if wasIdle
+      up.bus.emit('proxy:busy')
+
+  loadEnded = ->
+    wasBusy = busy()
+    pendingCount -= 1
+    if wasBusy && idle()
+      up.bus.emit('proxy:idle')
+
+  load = (request) ->
+    up.bus.emit('proxy:load', request)
+    promise = u.ajax(request)
+    promise.then ->
+      up.bus.emit('proxy:receive', request)
+    promise
+
   isIdempotent = (request) ->
     normalizeRequest(request)
     u.contains(SAFE_HTTP_METHODS, request.method)
@@ -180,16 +269,12 @@ up.proxy = (->
     delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay 
     unless $link.is($waitingLink)
       $waitingLink = $link
-      cancelDelay()
+      cancelPreloadDelay()
       curriedPreload = -> preload($link)
-      startDelay(curriedPreload, delay)
+      startPreloadDelay(curriedPreload, delay)
       
-  startDelay = (block, delay) ->
-    delayTimer = setTimeout(block, delay)
-    
-  cancelDelay = ->
-    clearTimeout(delayTimer)
-    delayTimer = null
+  startPreloadDelay = (block, delay) ->
+    preloadDelayTimer = setTimeout(block, delay)
 
   ###*
   @protected
@@ -209,10 +294,6 @@ up.proxy = (->
     else
       u.debug("Won't preload %o due to unsafe method %o", $link, method)
       u.resolvedPromise()
-    
-  reset = ->
-    cancelDelay()
-    cache = {}
 
   up.bus.on 'framework:reset', reset
 
@@ -244,6 +325,8 @@ up.proxy = (->
   alias: alias
   clear: clear
   remove: remove
+  idle: idle
+  busy: busy
   defaults: defaults
   
 )()

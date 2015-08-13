@@ -73,6 +73,7 @@ up.flow = (->
       method: options.method
       selector: selector
       cache: options.cache
+      preload: options.preload
       
     promise = up.proxy.ajax(request)
     
