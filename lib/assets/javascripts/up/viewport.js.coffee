@@ -12,11 +12,6 @@ up.viewport = (->
 
   u = up.util
 
-  config =
-    duration: 0
-    view: 'body'
-    easing: 'swing'
-
   ###*
   @method up.viewport.defaults
   @param {Number} [options.duration]
@@ -24,8 +19,13 @@ up.viewport = (->
   @param {Number} [options.padding]
   @param {String|Element|jQuery} [options.view]
   ###
-  defaults = (options) ->
-    u.extend(config, options)
+  config = u.config
+    duration: 0
+    view: 'body'
+    easing: 'swing'
+
+  reset = ->
+    config.reset()
 
   SCROLL_PROMISE_KEY = 'up-scroll-promise'
 
@@ -114,10 +114,12 @@ up.viewport = (->
     else
       u.resolvedDeferred()
 
+  up.bus.on 'framework:reset', reset
+
   reveal: reveal
   scroll: scroll
   finishScrolling: finishScrolling
-  defaults: defaults
+  defaults: config.update
 
 )()
 

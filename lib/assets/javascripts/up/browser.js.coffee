@@ -2,7 +2,8 @@
 Browser interface
 =================
 
-Some browser-interfacing methods and switches that we can't currently get rid off.
+Some browser-interfacing methods and switches that
+we can't currently get rid off.
 
 @protected
 @class up.browser
@@ -10,24 +11,7 @@ Some browser-interfacing methods and switches that we can't currently get rid of
 up.browser = (->
   
   u = up.util
-  
-#  safari = false
-#  
-#  detect = ->
-#    agent = navigator.userAgent
-#    agentHas = (substring) -> agent.indexOf(substring) >= 1
-#    safari = agentHas('Safari') && !agentHas('Chrome')
-#    
-#  transitionEndEvent = ->
-#    if safari
-#      'webkitTransitionEnd'
-#    else
-#      'transitionend'
-#
-#  detect()
-#  
-#  transitionEndEvent: transitionEndEvent
-  
+
   loadPage = (url, options = {}) ->
     method = u.option(options.method, 'get').toLowerCase()
     if method == 'get'
@@ -61,24 +45,14 @@ up.browser = (->
     window.console.group ||= noop
     window.console.groupCollapsed ||= noop
     window.console.groupEnd ||= noop
-      
-  memoize = (func) ->
-    cache = undefined
-    cached = false
-    (args...) ->
-      if cached
-        cache
-      else
-        cached = true
-        cache = func(args...)
-      
-  canPushState = memoize ->
+
+  canPushState = u.memoize ->
     u.isDefined(history.pushState)
     
-  canCssAnimation = memoize ->
+  canCssAnimation = u.memoize ->
     'transition' of document.documentElement.style
 
-  canInputEvent = memoize ->
+  canInputEvent = u.memoize ->
     'oninput' of document.createElement('input')
     
   ensureRecentJquery = ->
@@ -89,11 +63,11 @@ up.browser = (->
     compatible = major >= 2 || (major == 1 && minor >= 9)
     compatible or u.error("jQuery %o found, but Up.js requires 1.9+", version)
     
-  isSupported = memoize ->
+  isSupported = u.memoize ->
     # This is the most concise way to exclude IE8 and lower
     # while keeping all relevant desktop and mobile browsers.
     u.isDefined(document.addEventListener)
-    
+
   url: url
   ensureConsoleExists: ensureConsoleExists
   loadPage: loadPage

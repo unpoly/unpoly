@@ -49,6 +49,16 @@ up.bus = (->
   callbacksByEvent = {}
   defaultCallbacksByEvent = {}
 
+  ###*
+  Resets the list of registered event listeners to the
+  moment when the framework was booted.
+
+  @private
+  @method up.bus.reset
+  ###
+  reset = ->
+    callbacksByEvent = u.copy(defaultCallbacksByEvent)
+
   callbacksFor = (event) ->
     callbacksByEvent[event] ||= []
 
@@ -63,16 +73,6 @@ up.bus = (->
     defaultCallbacksByEvent = {}
     for event, callbacks of callbacksByEvent
       defaultCallbacksByEvent[event] = u.copy(callbacks)
-  
-  ###*
-  Resets the list of registered event listeners to the
-  moment when the framework was booted.
-  
-  @private
-  @method up.bus.reset
-  ###
-  reset = ->
-    callbacksByEvent = u.copy(defaultCallbacksByEvent)
 
   ###*
   Registers an event handler to be called when the given

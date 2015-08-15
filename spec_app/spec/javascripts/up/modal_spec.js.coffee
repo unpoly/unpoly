@@ -31,6 +31,32 @@ describe 'up.modal', ->
           expect($('.up-modal-dialog .after')).not.toExist()
           done()
 
+      it "brings its own scrollbar, padding the body on the right in order to prevent jumping", (done) ->
+        promise = up.modal.open(url: '/foo', target: '.container')
+
+        jasmine.Ajax.requests.mostRecent().respondWith
+          status: 200
+          contentType: 'text/html'
+          responseText:
+            """
+            <div class="container">text</div>
+            """
+
+        promise.then ->
+
+          $modal = $('.up-modal')
+          $body = $('body')
+          expect($modal).toExist()
+          expect($modal.css('overflow-y')).toEqual('scroll')
+          expect($body.css('overflow-y')).toEqual('hidden')
+          expect(parseInt($body.css('padding-right'))).toBeAround(15, 10)
+
+          up.modal.close().then ->
+            expect($body.css('overflow-y')).toEqual('scroll')
+            expect(parseInt($body.css('padding-right'))).toBe(0)
+
+            done()
+
     describe 'up.modal.close', ->
 
       it 'should have tests'

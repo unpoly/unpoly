@@ -56,3 +56,27 @@ describe 'up.util', ->
         array = ['foo', 'bar', 'baz']
         tester = (element) -> element[0] == 'z'
         expect(up.util.detect(array, tester)).toBeNull()
+
+    describe '.config', ->
+
+      it 'creates an object with the given attributes', ->
+        object = up.util.config(a: 1, b: 2)
+        expect(object.a).toBe(1)
+        expect(object.b).toBe(2)
+
+      it 'provies an #update method that merges the given options into the object', ->
+        object = up.util.config(a: 1)
+        object.update(b: 2, c: 3)
+        expect(object.b).toBe(2)
+        expect(object.c).toBe(3)
+
+      it 'provides a #reset method that resets the object to its original state', ->
+        object = up.util.config(a: 1)
+        expect(object.b).toBeUndefined()
+        object.b = 2
+        expect(object.b).toBe(2)
+        object.reset()
+        expect(object.b).toBeUndefined()
+        # Make sure that resetting doesn't remove #reset or #update
+        expect(object.reset).toBeDefined()
+        expect(object.update).toBeDefined()

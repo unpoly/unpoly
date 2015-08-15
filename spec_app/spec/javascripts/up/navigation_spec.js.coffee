@@ -34,6 +34,12 @@ describe 'up.navigation', ->
       expect($currentLink).toHaveClass('up-current')
       expect($otherLink).not.toHaveClass('up-current')
 
+    it 'allows to configure a custom "current" class, but always also sets .up-current', ->
+      up.navigation.defaults(currentClass: 'highlight')
+      spyOn(up.browser, 'url').and.returnValue('/foo')
+      $currentLink = up.ready(affix('a[href="/foo"]'))
+      expect($currentLink).toHaveClass('highlight up-current')
+
     if up.browser.canPushState()
       
       it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', ->

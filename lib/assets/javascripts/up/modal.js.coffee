@@ -13,38 +13,29 @@ up.modal = (->
 
   u = up.util
 
-  currentSource = undefined
-
-  config =
-    width: 'auto'
-    height: 'auto'
-    openAnimation: 'fade-in'
-    closeAnimation: 'fade-out'
-    closeLabel: 'X'
-    template: (config) ->
-      """
-      <div class="up-modal">
-        <div class="up-modal-dialog">
-          <div class="up-modal-close" up-close>#{config.closeLabel}</div>
-          <div class="up-modal-content"></div>
-        </div>
-      </div>
-      """
-  
   ###*
   Sets default options for future modals.
 
   @method up.modal.defaults
-  @param {Number} [options.width='auto']
-    The width of the dialog in pixels.
-    Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
+  @param {Number} [options.width]
+    The width of the dialog as a CSS value like `'400px'` or `50%`.
+
+    Defaults to `undefined`, meaning that the dialog will grow to fit its contents
+    until it reaches `options.maxWidth`. Leaving this as `undefined` will
+    also allow you to control the width using CSS.
+  @param {Number} [options.maxWidth]
+    The width of the dialog as a CSS value like `'400px'` or `50%`.
+    You can set this to `undefined` to make the dialog fit its contents.
+    Be aware however, that e.g. Bootstrap stretches input elements
+    to `width: 100%`, meaning the dialog will also stretch to the full
+    width of the screen.
   @param {Number} [options.height='auto']
     The height of the dialog in pixels.
-    Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
+    Defaults to `undefined`, meaning that the dialog will grow to fit its contents.
   @param {String|Function(config)} [options.template]
     A string containing the HTML structure of the modal.
     You can supply an alternative template string, but make sure that it
-    contains tags with the classes `up-modal`, `up-modal-dialog` and `up-modal-content`.
+    defines tag with the classes `up-modal`, `up-modal-dialog` and  `up-modal-content`.
 
     You can also supply a function that returns a HTML string.
     The function will be called with the modal options (merged from these defaults
@@ -58,9 +49,31 @@ up.modal = (->
     The animation used to close the modal. The animation will be applied
     to both the dialog box and the overlay dimming the page.
   ###
-  defaults = (options) ->
-    u.extend(config, options)
-    
+  config = u.config
+    maxWidth: undefined
+    minWidth: undefined
+    width: undefined
+    height: undefined
+    openAnimation: 'fade-in'
+    closeAnimation: 'fade-out'
+    closeLabel: '×'
+    template: (config) ->
+      """
+      <div class="up-modal">
+        <div class="up-modal-dialog">
+          <div class="up-modal-close" up-close>#{config.closeLabel}</div>
+          <div class="up-modal-content"></div>
+        </div>
+      </div>
+      """
+
+  currentSource = undefined
+
+  reset = ->
+    close()
+    currentSource = undefined
+    config.reset()
+
   templateHtml = ->
     template = config.template
     if u.isFunction(template)
@@ -78,25 +91,44 @@ up.modal = (->
     $popup.removeAttr('up-previous-url')
     $popup.removeAttr('up-previous-title')
 
-  createHiddenModal = (selector, width, height, sticky) ->
+  createHiddenModal = (options) ->
     $modal = $(templateHtml())
-    $modal.attr('up-sticky', '') if sticky
+    $modal.attr('up-sticky', '') if options.sticky
     $modal.attr('up-previous-url', up.browser.url())
     $modal.attr('up-previous-title', document.title)
     $dialog = $modal.find('.up-modal-dialog')
-    $dialog.css('width', width) if u.isPresent(width)
-    $dialog.css('height', height) if u.isPresent(height)
-    $content = $dialog.find('.up-modal-content')
-    $placeholder = u.$createElementFromSelector(selector)
+    $dialog.css('width', options.width) if u.isPresent(options.width)
+    $dialog.css('max-width', options.maxWidth) if u.isPresent(options.maxWidth)
+    $dialog.css('height', options.height) if u.isPresent(options.height)
+    $content = $modal.find('.up-modal-content')
+    $placeholder = u.$createElementFromSelector(options.selector)
     $placeholder.appendTo($content)
     $modal.appendTo(document.body)
     rememberHistory()
     $modal.hide()
     $modal
 
+  unshiftBody = undefined
+
+  # Gives `<body>` a right padding in the width of a scrollbar.
+  # This is to prevent the body from jumping when we add the
+  # overlay, which has its own scroll bar.
+  shiftBody = ->
+    scrollbarWidth = u.scrollbarWidth()
+    bodyRightPadding = parseInt($('body').css('padding-right'))
+    bodyRightShift = scrollbarWidth + bodyRightPadding
+    unshiftBody = u.temporaryCss($('body'),
+      'padding-right': "#{bodyRightShift}px",
+      'overflow-y': 'hidden'
+    )
+
   updated = ($modal, animation, animateOptions) ->
+    up.bus.emit('modal:open')
+    shiftBody()
     $modal.show()
-    up.animate($modal, animation, animateOptions)
+    promise = up.animate($modal, animation, animateOptions)
+    promise.then -> up.bus.emit('modal:opened')
+    promise
 
   ###*
   Opens the given link's destination in a modal overlay:
@@ -112,7 +144,14 @@ up.modal = (->
 
   This will request `/foo`, extract the `.list` selector from the response
   and open the selected container in a modal dialog.
-  
+
+  \#\#\#\# Events
+
+  - Emits an [event](/up.bus) `modal:open` when the modal
+    is starting to open.
+  - Emits an [event](/up.bus) `modal:opened` when the opening
+    animation has finished and the modal contents are fully visible.
+
   @method up.modal.open
   @param {Element|jQuery|String} [elementOrSelector]
     The link to follow.
@@ -156,6 +195,7 @@ up.modal = (->
     url = u.option(options.url, $link.attr('up-href'), $link.attr('href'))
     selector = u.option(options.target, $link.attr('up-modal'), 'body')
     width = u.option(options.width, $link.attr('up-width'), config.width)
+    maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), config.maxWidth)
     height = u.option(options.height, $link.attr('up-height'), config.height)
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
     sticky = u.option(options.sticky, $link.is('[up-sticky]'))
@@ -163,7 +203,12 @@ up.modal = (->
     animateOptions = up.motion.animateOptions(options, $link)
 
     close()
-    $modal = createHiddenModal(selector, width, height, sticky)
+    $modal = createHiddenModal
+      selector: selector
+      width: width
+      maxWidth: maxWidth
+      height: height
+      sticky: sticky
 
     up.replace(selector, url,
       history: history
@@ -184,6 +229,13 @@ up.modal = (->
   ###*
   Closes a currently opened modal overlay.
   Does nothing if no modal is currently open.
+
+  \#\#\#\# Events
+
+  - Emits an [event](/up.bus) `modal:close` when the modal
+    is starting to close.
+  - Emits an [event](/up.bus) `modal:closed` when the closing
+    animation has finished and the modal has been removed from the DOM.
   
   @method up.modal.close
   @param {Object} options
@@ -198,7 +250,14 @@ up.modal = (->
         title: $modal.attr('up-previous-title')
       )
       currentSource = undefined
-      up.destroy($modal, options)
+      up.bus.emit('modal:close')
+      promise = up.destroy($modal, options)
+      promise.then ->
+        unshiftBody()
+        up.bus.emit('modal:closed')
+      promise
+    else
+      u.resolvedPromise()
 
   autoclose = ->
     unless $('.up-modal').is('[up-sticky]')
@@ -320,14 +379,13 @@ up.modal = (->
       close()
   )
 
-  # The framework is reset between tests, so also close
-  # a currently open modal dialog.
-  up.bus.on 'framework:reset', close
+  # The framework is reset between tests
+  up.bus.on 'framework:reset', reset
 
   open: open
   close: close
   source: source
-  defaults: defaults
+  defaults: config.update
   contains: contains
 
 )()

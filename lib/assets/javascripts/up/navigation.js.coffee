@@ -15,8 +15,26 @@ up.navigation = (->
 
   u = up.util
 
+  ###*
+  Sets default options for this module.
+
+  @method up.navigation.defaults
+  @param {Number} [options.currentClass]
+    The class to set on [links that point the current location](#up-current).
+  ###
+  config = u.config
+    currentClass: 'up-current'
+
+  reset = ->
+    config.reset()
+
+  currentClass = ->
+    klass = config.currentClass
+    unless u.contains(klass, 'up-current')
+      klass += ' up-current'
+    klass
+
   CLASS_ACTIVE = 'up-active'
-  CLASS_CURRENT = 'up-current'
   SELECTORS_SECTION = ['a', '[up-href]', '[up-alias]']
   SELECTOR_SECTION = SELECTORS_SECTION.join(', ')
   SELECTOR_SECTION_INSTANT = ("#{selector}[up-instant]" for selector in SELECTORS_SECTION).join(', ')
@@ -67,6 +85,8 @@ up.navigation = (->
       normalizeUrl(up.popup.source())
     ])
 
+    klass = currentClass()
+
     u.each $(SELECTOR_SECTION), (section) ->
       $section = $(section)
       # if $section is marked up with up-follow,
@@ -74,9 +94,9 @@ up.navigation = (->
       urls = sectionUrls($section)
 
       if currentUrls.matchesAny(urls)
-        $section.addClass(CLASS_CURRENT)
+        $section.addClass(klass)
       else
-        $section.removeClass(CLASS_CURRENT)
+        $section.removeClass(klass)
 
   ###*
   Links that are currently loading are assigned the `up-active`
@@ -185,5 +205,10 @@ up.navigation = (->
     # once they close.
     if $fragment.is('.up-modal, .up-popup')
       locationChanged()
+
+  # The framework is reset between tests
+  up.bus.on 'framework:reset', reset
+
+  defaults: config.update
 
 )()

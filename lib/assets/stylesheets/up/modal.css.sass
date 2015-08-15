@@ -1,8 +1,11 @@
 $stratum: 10000
-//$width: 700px
-//$height: 450px
-$close-height: 24px
+$substratum-dialog:  1000
+$substratum-content: 2000
+$substratum-close:   3000
+
+$close-height: 36px
 $close-width: 36px
+$close-font-size: 34px
 
 =transform($transform)
   transform: $transform
@@ -17,22 +20,42 @@ $close-width: 36px
   right: 0
   z-index: $stratum
   background-color: rgba(90, 90, 90, 0.4)
+  overflow-x: hidden
+  overflow-y: scroll
+  // We prefer centering the dialog as an `inline-block`
+  // to giving it a horizontal margin of `auto`. This way
+  // the width of `.up-modal-dialog` is controlled by the
+  // contents of `.up-modal-content`.
+  text-align: center
 
 .up-modal-dialog
-  position: absolute
-  top: 50%
-  left: 50%
-  +transform(translate(-50%, -50%))
-  max-width: 100%
-  max-height: 100%
-  background-color: #fff
-  box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.3)
+  // The z-index lives in the stacking context of .up-modal
+  z-index: $substratum-dialog
+  // Make sure .up-modal-close is relative to the dialog
+  position: relative
   // In case someone sets padding on the dialog box,
   // the width and height attributes set by up.modal
   // should be honored exactly.
-  box-sizing: border-box 
+  box-sizing: border-box
+  margin: 30px 10px
+
+  // In case someone sets a huge width on the dialog.
+  max-width: 100%
+
+  // Make it grow with the width of .up-modal-content
+  display: inline-block
+  text-align: left
+
+.up-modal-content
+  // The z-index lives in the stacking context of .up-modal
+  z-index: $substratum-content
+  padding: 20px
+  background-color: #fff
+  box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.3)
 
 .up-modal-close
+  // The z-index lives in the stacking context of .up-modal
+  z-index: $substratum-close
   position: absolute
   right: 0
   top: 0
@@ -40,17 +63,7 @@ $close-width: 36px
   text-align: center
   line-height: $close-height
   height: $close-height
-  background-color: #999
-  color: #fff
-  font-weight: bold
-  text-transform: uppercase
+  font-size: $close-font-size
+  color: #666
   cursor: pointer
-  +transform(translateY(-100%))
 
-.up-modal-content
-  overflow-x: hidden
-  overflow-y: auto
-  width: 100%
-  height: 100%
-  padding: 20px
-  box-sizing: border-box

@@ -12,6 +12,16 @@ If you use them in your own code, you will get hurt.
 ###
 up.util = (->
 
+  memoize = (func) ->
+    cache = undefined
+    cached = false
+    (args...) ->
+      if cached
+        cache
+      else
+        cached = true
+        cache = func(args...)
+
   get = (url, options) ->
     options = options or {}
     options.url = url
@@ -337,7 +347,15 @@ up.util = (->
 
   compact = (array) ->
     select array, isGiven
-    
+
+  uniq = (array) ->
+    seen = {}
+    select array, (element) ->
+      if seen.hasOwnProperty(element)
+        false
+      else
+        seen[element] = true
+
   select = (array, tester) ->
     matches = []
     each array, (element) ->
@@ -359,19 +377,47 @@ up.util = (->
     element = document.documentElement
     width: element.clientWidth
     height: element.clientHeight
-    
+
+  # This is how Bootstrap does it also:
+  # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
+  scrollbarWidth = memoize ->
+    $outer = $('<div>').css
+      position:  'absolute'
+      top:       '0'
+      left:      '0'
+      width:     '50px'
+      height:    '50px'
+      overflowY: 'scroll'
+    $outer.appendTo(document.body)
+    outer = $outer.get(0)
+    width = outer.offsetWidth - outer.clientWidth
+    $outer.remove()
+    width
+
+
+  ###*
+  Modifies the given function so it only runs once.
+  Subsequent calls will return the previous return value.
+
+  @method up.util.once
+  @private
+  ###
+  once = (fun) ->
+    result = undefined
+    ->
+      result = fun() if fun?
+      fun = undefined
+      result
+
   temporaryCss = ($element, css, block) ->
     oldCss = $element.css(keys(css))
-#    debug("Stored old CSS", oldCss)
     $element.css(css)
-    memo = ->
-#      debug("Restoring CSS %o on %o", oldCss, $element)
-      $element.css(oldCss)
+    memo = -> $element.css(oldCss)
     if block
       block()
       memo()
     else
-      memo
+      once(memo)
       
   forceCompositing = ($element) ->
     oldTransforms = $element.css(['transform', '-webkit-transform'])
@@ -512,8 +558,8 @@ up.util = (->
   escapePressed = (event) ->
     event.keyCode == 27
     
-  contains = (array, element) ->
-    array.indexOf(element) >= 0
+  contains = (stringOrArray, element) ->
+    stringOrArray.indexOf(element) >= 0
 
   castsToTrue = (object) ->
     String(object) == "true"
@@ -574,6 +620,19 @@ up.util = (->
       array.splice(index, 1)
       element
 
+  config = (factoryOptions = {}) ->
+    hash =
+      reset: ->
+        ownKeys = Object.getOwnPropertyNames(hash)
+        for key in ownKeys
+          delete hash[key] unless contains(apiKeys, key)
+        hash.update copy(factoryOptions)
+      update: (options) ->
+        extend(hash, options)
+    apiKeys = Object.getOwnPropertyNames(hash)
+    hash.reset()
+    hash
+
   presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl
@@ -596,6 +655,7 @@ up.util = (->
   detect: detect
   select: select
   compact: compact
+  uniq: uniq
   last: last
   isNull: isNull
   isDefined: isDefined
@@ -644,5 +704,8 @@ up.util = (->
   resolvableWhen: resolvableWhen
   setMissingAttrs: setMissingAttrs
   remove: remove
+  memoize: memoize
+  scrollbarWidth: scrollbarWidth
+  config: config
 
 )()

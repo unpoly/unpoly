@@ -5,7 +5,7 @@ require 'sprockets/standalone'
 
 module Upjs
   module Assets
-    MANIFESTS = %w(up.js up.css)
+    MANIFESTS = %w(up.js up-bootstrap.js up.css up-bootstrap.css)
     SOURCES = %w(lib/assets/javascripts lib/assets/stylesheets)
     OUTPUT = 'dist'
   end
@@ -35,8 +35,11 @@ namespace :assets do
   desc 'Compile assets for Bower and manual download'
   task :compile do
     Rake::Task['minified_assets:compile'].invoke
-    File.rename('dist/up.js', 'dist/up.min.js')
-    File.rename('dist/up.css', 'dist/up.min.css')
+    Upjs::Assets::MANIFESTS.each do |manifest|
+      source = "dist/#{manifest}"
+      target = "dist/#{manifest.sub(/\.([^\.]+)$/, '.min.\\1')}"
+      File.rename(source, target)
+    end
     Rake::Task['source_assets:compile'].invoke
   end
 end

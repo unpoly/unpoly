@@ -25,7 +25,22 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, only, option, options, prependGhost, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, select, setMissingAttrs, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unwrap, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, memoize, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, prependGhost, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, stringifyConsoleArgs, temporaryCss, times, toArray, trim, uniq, unwrap, warn;
+    memoize = function(func) {
+      var cache, cached;
+      cache = void 0;
+      cached = false;
+      return function() {
+        var args;
+        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        if (cached) {
+          return cache;
+        } else {
+          cached = true;
+          return cache = func.apply(null, args);
+        }
+      };
+    };
     get = function(url, options) {
       options = options || {};
       options.url = url;
@@ -418,6 +433,17 @@ If you use them in your own code, you will get hurt.
     compact = function(array) {
       return select(array, isGiven);
     };
+    uniq = function(array) {
+      var seen;
+      seen = {};
+      return select(array, function(element) {
+        if (seen.hasOwnProperty(element)) {
+          return false;
+        } else {
+          return seen[element] = true;
+        }
+      });
+    };
     select = function(array, tester) {
       var matches;
       matches = [];
@@ -456,6 +482,41 @@ If you use them in your own code, you will get hurt.
         height: element.clientHeight
       };
     };
+    scrollbarWidth = memoize(function() {
+      var $outer, outer, width;
+      $outer = $('<div>').css({
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '50px',
+        height: '50px',
+        overflowY: 'scroll'
+      });
+      $outer.appendTo(document.body);
+      outer = $outer.get(0);
+      width = outer.offsetWidth - outer.clientWidth;
+      $outer.remove();
+      return width;
+    });
+
+    /**
+    Modifies the given function so it only runs once.
+    Subsequent calls will return the previous return value.
+    
+    @method up.util.once
+    @private
+     */
+    once = function(fun) {
+      var result;
+      result = void 0;
+      return function() {
+        if (fun != null) {
+          result = fun();
+        }
+        fun = void 0;
+        return result;
+      };
+    };
     temporaryCss = function($element, css, block) {
       var memo, oldCss;
       oldCss = $element.css(keys(css));
@@ -467,7 +528,7 @@ If you use them in your own code, you will get hurt.
         block();
         return memo();
       } else {
-        return memo;
+        return once(memo);
       }
     };
     forceCompositing = function($element) {
@@ -630,8 +691,8 @@ If you use them in your own code, you will get hurt.
     escapePressed = function(event) {
       return event.keyCode === 27;
     };
-    contains = function(array, element) {
-      return array.indexOf(element) >= 0;
+    contains = function(stringOrArray, element) {
+      return stringOrArray.indexOf(element) >= 0;
     };
     castsToTrue = function(object) {
       return String(object) === "true";
@@ -717,6 +778,31 @@ If you use them in your own code, you will get hurt.
         return element;
       }
     };
+    config = function(factoryOptions) {
+      var apiKeys, hash;
+      if (factoryOptions == null) {
+        factoryOptions = {};
+      }
+      hash = {
+        reset: function() {
+          var j, key, len, ownKeys;
+          ownKeys = Object.getOwnPropertyNames(hash);
+          for (j = 0, len = ownKeys.length; j < len; j++) {
+            key = ownKeys[j];
+            if (!contains(apiKeys, key)) {
+              delete hash[key];
+            }
+          }
+          return hash.update(copy(factoryOptions));
+        },
+        update: function(options) {
+          return extend(hash, options);
+        }
+      };
+      apiKeys = Object.getOwnPropertyNames(hash);
+      hash.reset();
+      return hash;
+    };
     return {
       presentAttr: presentAttr,
       createElement: createElement,
@@ -740,6 +826,7 @@ If you use them in your own code, you will get hurt.
       detect: detect,
       select: select,
       compact: compact,
+      uniq: uniq,
       last: last,
       isNull: isNull,
       isDefined: isDefined,
@@ -787,7 +874,10 @@ If you use them in your own code, you will get hurt.
       resolvedDeferred: resolvedDeferred,
       resolvableWhen: resolvableWhen,
       setMissingAttrs: setMissingAttrs,
-      remove: remove
+      remove: remove,
+      memoize: memoize,
+      scrollbarWidth: scrollbarWidth,
+      config: config
     };
   })();
 
@@ -797,17 +887,16 @@ If you use them in your own code, you will get hurt.
 Browser interface
 =================
 
-Some browser-interfacing methods and switches that we can't currently get rid off.
+Some browser-interfacing methods and switches that
+we can't currently get rid off.
 
 @protected
 @class up.browser
  */
 
 (function() {
-  var slice = [].slice;
-
   up.browser = (function() {
-    var canCssAnimation, canInputEvent, canPushState, ensureConsoleExists, ensureRecentJquery, isSupported, loadPage, memoize, u, url;
+    var canCssAnimation, canInputEvent, canPushState, ensureConsoleExists, ensureRecentJquery, isSupported, loadPage, u, url;
     u = up.util;
     loadPage = function(url, options) {
       var $form, csrfParam, csrfToken, metadataInput, method, target;
@@ -851,28 +940,13 @@ Some browser-interfacing methods and switches that we can't currently get rid of
       (base6 = window.console).groupCollapsed || (base6.groupCollapsed = noop);
       return (base7 = window.console).groupEnd || (base7.groupEnd = noop);
     };
-    memoize = function(func) {
-      var cache, cached;
-      cache = void 0;
-      cached = false;
-      return function() {
-        var args;
-        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-        if (cached) {
-          return cache;
-        } else {
-          cached = true;
-          return cache = func.apply(null, args);
-        }
-      };
-    };
-    canPushState = memoize(function() {
+    canPushState = u.memoize(function() {
       return u.isDefined(history.pushState);
     });
-    canCssAnimation = memoize(function() {
+    canCssAnimation = u.memoize(function() {
       return 'transition' in document.documentElement.style;
     });
-    canInputEvent = memoize(function() {
+    canInputEvent = u.memoize(function() {
       return 'oninput' in document.createElement('input');
     });
     ensureRecentJquery = function() {
@@ -884,7 +958,7 @@ Some browser-interfacing methods and switches that we can't currently get rid of
       compatible = major >= 2 || (major === 1 && minor >= 9);
       return compatible || u.error("jQuery %o found, but Up.js requires 1.9+", version);
     };
-    isSupported = memoize(function() {
+    isSupported = u.memoize(function() {
       return u.isDefined(document.addEventListener);
     });
     return {
@@ -954,6 +1028,17 @@ We need to work on this page:
     u = up.util;
     callbacksByEvent = {};
     defaultCallbacksByEvent = {};
+
+    /**
+    Resets the list of registered event listeners to the
+    moment when the framework was booted.
+    
+    @private
+    @method up.bus.reset
+     */
+    reset = function() {
+      return callbacksByEvent = u.copy(defaultCallbacksByEvent);
+    };
     callbacksFor = function(event) {
       return callbacksByEvent[event] || (callbacksByEvent[event] = []);
     };
@@ -974,17 +1059,6 @@ We need to work on this page:
         results.push(defaultCallbacksByEvent[event] = u.copy(callbacks));
       }
       return results;
-    };
-
-    /**
-    Resets the list of registered event listeners to the
-    moment when the framework was booted.
-    
-    @private
-    @method up.bus.reset
-     */
-    reset = function() {
-      return callbacksByEvent = u.copy(defaultCallbacksByEvent);
     };
 
     /**
@@ -1087,13 +1161,8 @@ By default Up.js will always scroll to an element before updating it.
 
 (function() {
   up.viewport = (function() {
-    var SCROLL_PROMISE_KEY, config, defaults, finishScrolling, reveal, scroll, u;
+    var SCROLL_PROMISE_KEY, config, finishScrolling, reset, reveal, scroll, u;
     u = up.util;
-    config = {
-      duration: 0,
-      view: 'body',
-      easing: 'swing'
-    };
 
     /**
     @method up.viewport.defaults
@@ -1102,8 +1171,13 @@ By default Up.js will always scroll to an element before updating it.
     @param {Number} [options.padding]
     @param {String|Element|jQuery} [options.view]
      */
-    defaults = function(options) {
-      return u.extend(config, options);
+    config = u.config({
+      duration: 0,
+      view: 'body',
+      easing: 'swing'
+    });
+    reset = function() {
+      return config.reset();
     };
     SCROLL_PROMISE_KEY = 'up-scroll-promise';
 
@@ -1193,11 +1267,12 @@ By default Up.js will always scroll to an element before updating it.
         return u.resolvedDeferred();
       }
     };
+    up.bus.on('framework:reset', reset);
     return {
       reveal: reveal,
       scroll: scroll,
       finishScrolling: finishScrolling,
-      defaults: defaults
+      defaults: config.update
     };
   })();
 
@@ -2130,26 +2205,30 @@ We need to work on this page:
 
 (function() {
   up.motion = (function() {
-    var GHOSTING_PROMISE_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, defaults, findAnimation, finish, finishGhosting, morph, none, reset, resolvableWhen, snapshot, transition, transitions, u, withGhosts;
+    var GHOSTING_PROMISE_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, findAnimation, finish, finishGhosting, morph, none, reset, resolvableWhen, snapshot, transition, transitions, u, withGhosts;
     u = up.util;
     animations = {};
     defaultAnimations = {};
     transitions = {};
     defaultTransitions = {};
-    config = {
-      duration: 300,
-      delay: 0,
-      easing: 'ease'
-    };
 
     /**
+    Sets default options for animations and transitions.
+    
     @method up.motion.defaults
     @param {Number} [options.duration=300]
     @param {Number} [options.delay=0]
     @param {String} [options.easing='ease']
      */
-    defaults = function(options) {
-      return u.extend(config, options);
+    config = u.config({
+      duration: 300,
+      delay: 0,
+      easing: 'ease'
+    });
+    reset = function() {
+      animations = u.copy(defaultAnimations);
+      transitions = u.copy(defaultTransitions);
+      return config.reset();
     };
 
     /**
@@ -2473,10 +2552,6 @@ We need to work on this page:
       defaultAnimations = u.copy(animations);
       return defaultTransitions = u.copy(transitions);
     };
-    reset = function() {
-      animations = u.copy(defaultAnimations);
-      return transitions = u.copy(defaultTransitions);
-    };
 
     /**
     Returns a new promise that resolves once all promises in arguments resolve.
@@ -2640,7 +2715,7 @@ We need to work on this page:
       finish: finish,
       transition: transition,
       animation: animation,
-      defaults: defaults,
+      defaults: config.update,
       none: none,
       when: resolvableWhen
     };
@@ -2710,39 +2785,14 @@ You can change (or remove) this delay like this:
 
 (function() {
   up.proxy = (function() {
-    var $waitingLink, FACTORY_CONFIG, SAFE_HTTP_METHODS, ajax, alias, busy, busyDelayTimer, busyEventEmitted, cache, cacheKey, cancelBusyDelay, cancelPreloadDelay, checkPreload, clear, config, defaults, get, idle, isFresh, isIdempotent, load, loadEnded, loadStarted, normalizeRequest, pendingCount, preload, preloadDelayTimer, remove, reset, set, startPreloadDelay, timestamp, trim, u;
+    var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, busy, busyDelayTimer, busyEventEmitted, cache, cacheKey, cancelBusyDelay, cancelPreloadDelay, checkPreload, clear, config, get, idle, isFresh, isIdempotent, load, loadEnded, loadStarted, normalizeRequest, pendingCount, preload, preloadDelayTimer, remove, reset, set, startPreloadDelay, timestamp, trim, u;
     u = up.util;
     cache = void 0;
     $waitingLink = void 0;
     preloadDelayTimer = void 0;
     busyDelayTimer = void 0;
     pendingCount = void 0;
-    config = void 0;
     busyEventEmitted = void 0;
-    FACTORY_CONFIG = {
-      busyDelay: 300,
-      preloadDelay: 75,
-      cacheSize: 70,
-      cacheExpiry: 1000 * 60 * 5
-    };
-    cancelPreloadDelay = function() {
-      clearTimeout(preloadDelayTimer);
-      return preloadDelayTimer = null;
-    };
-    cancelBusyDelay = function() {
-      clearTimeout(busyDelayTimer);
-      return busyDelayTimer = null;
-    };
-    reset = function() {
-      cache = {};
-      $waitingLink = null;
-      cancelPreloadDelay();
-      cancelBusyDelay();
-      pendingCount = 0;
-      config = u.copy(FACTORY_CONFIG);
-      return busyEventEmitted = false;
-    };
-    reset();
 
     /**
     @method up.proxy.defaults
@@ -2759,9 +2809,30 @@ You can change (or remove) this delay like this:
       How long the proxy waits until emitting the `proxy:busy` [event](/up.bus).
       Use this to prevent flickering of spinners.
      */
-    defaults = function(options) {
-      return u.extend(config, options);
+    config = u.config({
+      busyDelay: 300,
+      preloadDelay: 75,
+      cacheSize: 70,
+      cacheExpiry: 1000 * 60 * 5
+    });
+    cancelPreloadDelay = function() {
+      clearTimeout(preloadDelayTimer);
+      return preloadDelayTimer = null;
     };
+    cancelBusyDelay = function() {
+      clearTimeout(busyDelayTimer);
+      return busyDelayTimer = null;
+    };
+    reset = function() {
+      cache = {};
+      $waitingLink = null;
+      cancelPreloadDelay();
+      cancelBusyDelay();
+      pendingCount = 0;
+      config.reset();
+      return busyEventEmitted = false;
+    };
+    reset();
     cacheKey = function(request) {
       normalizeRequest(request);
       return [request.url, request.method, request.data, request.selector].join('|');
@@ -3014,7 +3085,6 @@ You can change (or remove) this delay like this:
         return u.resolvedPromise();
       }
     };
-    up.bus.on('framework:reset', reset);
 
     /**
     Links with an `up-preload` attribute will silently fetch their target
@@ -3035,6 +3105,7 @@ You can change (or remove) this delay like this:
         return checkPreload($element);
       }
     });
+    up.bus.on('framework:reset', reset);
     return {
       preload: preload,
       ajax: ajax,
@@ -3045,7 +3116,7 @@ You can change (or remove) this delay like this:
       remove: remove,
       idle: idle,
       busy: busy,
-      defaults: defaults
+      defaults: config.update
     };
   })();
 
@@ -3781,22 +3852,23 @@ We need to work on this page:
 
 (function() {
   up.popup = (function() {
-    var autoclose, close, config, contains, createHiddenPopup, currentSource, defaults, discardHistory, ensureInViewport, open, rememberHistory, setPosition, source, u, updated;
+    var autoclose, close, config, contains, createHiddenPopup, currentSource, discardHistory, ensureInViewport, open, rememberHistory, reset, setPosition, source, u, updated;
     u = up.util;
     currentSource = void 0;
-    config = {
-      openAnimation: 'fade-in',
-      closeAnimation: 'fade-out',
-      position: 'bottom-right'
-    };
 
     /**
     @method up.popup.defaults
     @param {String} options.animation
     @param {String} options.position
      */
-    defaults = function(options) {
-      return u.extend(config, options);
+    config = u.config({
+      openAnimation: 'fade-in',
+      closeAnimation: 'fade-out',
+      position: 'bottom-right'
+    });
+    reset = function() {
+      close();
+      return config.reset();
     };
     setPosition = function($link, $popup, position) {
       var css, linkBox;
@@ -3971,6 +4043,8 @@ We need to work on this page:
         });
         currentSource = void 0;
         return up.destroy($popup, options);
+      } else {
+        return u.resolvedPromise();
       }
     };
     autoclose = function() {
@@ -4051,12 +4125,12 @@ We need to work on this page:
         return close();
       }
     });
-    up.bus.on('framework:reset', close);
+    up.bus.on('framework:reset', reset);
     return {
       open: open,
       close: close,
       source: source,
-      defaults: defaults,
+      defaults: config.update,
       contains: contains
     };
   })();
@@ -4079,34 +4153,32 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
   var slice = [].slice;
 
   up.modal = (function() {
-    var autoclose, close, config, contains, createHiddenModal, currentSource, defaults, discardHistory, open, rememberHistory, source, templateHtml, u, updated;
+    var autoclose, close, config, contains, createHiddenModal, currentSource, discardHistory, open, rememberHistory, reset, shiftBody, source, templateHtml, u, unshiftBody, updated;
     u = up.util;
-    currentSource = void 0;
-    config = {
-      width: 'auto',
-      height: 'auto',
-      openAnimation: 'fade-in',
-      closeAnimation: 'fade-out',
-      closeLabel: 'X',
-      template: function(config) {
-        return "<div class=\"up-modal\">\n  <div class=\"up-modal-dialog\">\n    <div class=\"up-modal-close\" up-close>" + config.closeLabel + "</div>\n    <div class=\"up-modal-content\"></div>\n  </div>\n</div>";
-      }
-    };
 
     /**
     Sets default options for future modals.
     
     @method up.modal.defaults
-    @param {Number} [options.width='auto']
-      The width of the dialog in pixels.
-      Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
+    @param {Number} [options.width]
+      The width of the dialog as a CSS value like `'400px'` or `50%`.
+    
+      Defaults to `undefined`, meaning that the dialog will grow to fit its contents
+      until it reaches `options.maxWidth`. Leaving this as `undefined` will
+      also allow you to control the width using CSS.
+    @param {Number} [options.maxWidth]
+      The width of the dialog as a CSS value like `'400px'` or `50%`.
+      You can set this to `undefined` to make the dialog fit its contents.
+      Be aware however, that e.g. Bootstrap stretches input elements
+      to `width: 100%`, meaning the dialog will also stretch to the full
+      width of the screen.
     @param {Number} [options.height='auto']
       The height of the dialog in pixels.
-      Defaults to `'auto'`, meaning that the dialog will grow to fit its contents.
+      Defaults to `undefined`, meaning that the dialog will grow to fit its contents.
     @param {String|Function(config)} [options.template]
       A string containing the HTML structure of the modal.
       You can supply an alternative template string, but make sure that it
-      contains tags with the classes `up-modal`, `up-modal-dialog` and `up-modal-content`.
+      contains a containing tag with the class `up-modal`.
     
       You can also supply a function that returns a HTML string.
       The function will be called with the modal options (merged from these defaults
@@ -4120,8 +4192,23 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       The animation used to close the modal. The animation will be applied
       to both the dialog box and the overlay dimming the page.
      */
-    defaults = function(options) {
-      return u.extend(config, options);
+    config = u.config({
+      maxWidth: void 0,
+      minWidth: void 0,
+      width: void 0,
+      height: void 0,
+      openAnimation: 'fade-in',
+      closeAnimation: 'fade-out',
+      closeLabel: '×',
+      template: function(config) {
+        return "<div class=\"up-modal\">\n  <div class=\"up-modal-dialog\">\n    <div class=\"up-modal-close\" up-close>" + config.closeLabel + "</div>\n    <div class=\"up-modal-content\"></div>\n  </div>\n</div>";
+      }
+    });
+    currentSource = void 0;
+    reset = function() {
+      close();
+      currentSource = void 0;
+      return config.reset();
     };
     templateHtml = function() {
       var template;
@@ -4144,32 +4231,53 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       $popup.removeAttr('up-previous-url');
       return $popup.removeAttr('up-previous-title');
     };
-    createHiddenModal = function(selector, width, height, sticky) {
+    createHiddenModal = function(options) {
       var $content, $dialog, $modal, $placeholder;
       $modal = $(templateHtml());
-      if (sticky) {
+      if (options.sticky) {
         $modal.attr('up-sticky', '');
       }
       $modal.attr('up-previous-url', up.browser.url());
       $modal.attr('up-previous-title', document.title);
       $dialog = $modal.find('.up-modal-dialog');
-      if (u.isPresent(width)) {
-        $dialog.css('width', width);
+      if (u.isPresent(options.width)) {
+        $dialog.css('width', options.width);
       }
-      if (u.isPresent(height)) {
-        $dialog.css('height', height);
+      if (u.isPresent(options.maxWidth)) {
+        $dialog.css('max-width', options.maxWidth);
       }
-      $content = $dialog.find('.up-modal-content');
-      $placeholder = u.$createElementFromSelector(selector);
+      if (u.isPresent(options.height)) {
+        $dialog.css('height', options.height);
+      }
+      $content = $modal.find('.up-modal-content');
+      $placeholder = u.$createElementFromSelector(options.selector);
       $placeholder.appendTo($content);
       $modal.appendTo(document.body);
       rememberHistory();
       $modal.hide();
       return $modal;
     };
+    unshiftBody = void 0;
+    shiftBody = function() {
+      var bodyRightPadding, bodyRightShift, scrollbarWidth;
+      scrollbarWidth = u.scrollbarWidth();
+      bodyRightPadding = parseInt($('body').css('padding-right'));
+      bodyRightShift = scrollbarWidth + bodyRightPadding;
+      return unshiftBody = u.temporaryCss($('body'), {
+        'padding-right': bodyRightShift + "px",
+        'overflow-y': 'hidden'
+      });
+    };
     updated = function($modal, animation, animateOptions) {
+      var promise;
+      up.bus.emit('modal:open');
+      shiftBody();
       $modal.show();
-      return up.animate($modal, animation, animateOptions);
+      promise = up.animate($modal, animation, animateOptions);
+      promise.then(function() {
+        return up.bus.emit('modal:opened');
+      });
+      return promise;
     };
 
     /**
@@ -4186,6 +4294,13 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     
     This will request `/foo`, extract the `.list` selector from the response
     and open the selected container in a modal dialog.
+    
+    \#\#\#\# Events
+    
+    - Emits an [event](/up.bus) `modal:open` when the modal
+      is starting to open.
+    - Emits an [event](/up.bus) `modal:opened` when the opening
+      animation has finished and the modal contents are fully visible.
     
     @method up.modal.open
     @param {Element|jQuery|String} [elementOrSelector]
@@ -4219,7 +4334,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       A promise that will be resolved when the modal has finished loading.
      */
     open = function() {
-      var $link, $modal, animateOptions, animation, args, height, history, options, selector, sticky, url, width;
+      var $link, $modal, animateOptions, animation, args, height, history, maxWidth, options, selector, sticky, url, width;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       if (u.isObject(args[0]) && !u.isElement(args[0]) && !u.isJQuery(args[0])) {
         $link = u.nullJquery();
@@ -4232,13 +4347,20 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       url = u.option(options.url, $link.attr('up-href'), $link.attr('href'));
       selector = u.option(options.target, $link.attr('up-modal'), 'body');
       width = u.option(options.width, $link.attr('up-width'), config.width);
+      maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), config.maxWidth);
       height = u.option(options.height, $link.attr('up-height'), config.height);
       animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
       sticky = u.option(options.sticky, $link.is('[up-sticky]'));
       history = up.browser.canPushState() ? u.option(options.history, $link.attr('up-history'), true) : false;
       animateOptions = up.motion.animateOptions(options, $link);
       close();
-      $modal = createHiddenModal(selector, width, height, sticky);
+      $modal = createHiddenModal({
+        selector: selector,
+        width: width,
+        maxWidth: maxWidth,
+        height: height,
+        sticky: sticky
+      });
       return up.replace(selector, url, {
         history: history,
         insert: function() {
@@ -4263,12 +4385,19 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     Closes a currently opened modal overlay.
     Does nothing if no modal is currently open.
     
+    \#\#\#\# Events
+    
+    - Emits an [event](/up.bus) `modal:close` when the modal
+      is starting to close.
+    - Emits an [event](/up.bus) `modal:closed` when the closing
+      animation has finished and the modal has been removed from the DOM.
+    
     @method up.modal.close
     @param {Object} options
       See options for [`up.animate`](/up.motion#up.animate)
      */
     close = function(options) {
-      var $modal;
+      var $modal, promise;
       $modal = $('.up-modal');
       if ($modal.length) {
         options = u.options(options, {
@@ -4277,7 +4406,15 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
           title: $modal.attr('up-previous-title')
         });
         currentSource = void 0;
-        return up.destroy($modal, options);
+        up.bus.emit('modal:close');
+        promise = up.destroy($modal, options);
+        promise.then(function() {
+          unshiftBody();
+          return up.bus.emit('modal:closed');
+        });
+        return promise;
+      } else {
+        return u.resolvedPromise();
       }
     };
     autoclose = function() {
@@ -4406,12 +4543,12 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
         return close();
       }
     });
-    up.bus.on('framework:reset', close);
+    up.bus.on('framework:reset', reset);
     return {
       open: open,
       close: close,
       source: source,
-      defaults: defaults,
+      defaults: config.update,
       contains: contains
     };
   })();
@@ -4571,10 +4708,31 @@ by providing instant feedback for user interactions.
 
 (function() {
   up.navigation = (function() {
-    var CLASS_ACTIVE, CLASS_CURRENT, SELECTORS_SECTION, SELECTOR_ACTIVE, SELECTOR_SECTION, SELECTOR_SECTION_INSTANT, enlargeClickArea, locationChanged, normalizeUrl, sectionClicked, sectionUrls, selector, u, unmarkActive, urlSet;
+    var CLASS_ACTIVE, SELECTORS_SECTION, SELECTOR_ACTIVE, SELECTOR_SECTION, SELECTOR_SECTION_INSTANT, config, currentClass, enlargeClickArea, locationChanged, normalizeUrl, reset, sectionClicked, sectionUrls, selector, u, unmarkActive, urlSet;
     u = up.util;
+
+    /**
+    Sets default options for this module.
+    
+    @param {Number} [options.currentClass]
+      The class to set on [links that point the current location](#up-current).
+    @method up.navigation.defaults
+     */
+    config = u.config({
+      currentClass: 'up-current'
+    });
+    reset = function() {
+      return config.reset();
+    };
+    currentClass = function() {
+      var klass;
+      klass = config.currentClass;
+      if (!u.contains(klass, 'up-current')) {
+        klass += ' up-current';
+      }
+      return klass;
+    };
     CLASS_ACTIVE = 'up-active';
-    CLASS_CURRENT = 'up-current';
     SELECTORS_SECTION = ['a', '[up-href]', '[up-alias]'];
     SELECTOR_SECTION = SELECTORS_SECTION.join(', ');
     SELECTOR_SECTION_INSTANT = ((function() {
@@ -4637,16 +4795,17 @@ by providing instant feedback for user interactions.
       };
     };
     locationChanged = function() {
-      var currentUrls;
+      var currentUrls, klass;
       currentUrls = urlSet([normalizeUrl(up.browser.url()), normalizeUrl(up.modal.source()), normalizeUrl(up.popup.source())]);
+      klass = currentClass();
       return u.each($(SELECTOR_SECTION), function(section) {
         var $section, urls;
         $section = $(section);
         urls = sectionUrls($section);
         if (currentUrls.matchesAny(urls)) {
-          return $section.addClass(CLASS_CURRENT);
+          return $section.addClass(klass);
         } else {
-          return $section.removeClass(CLASS_CURRENT);
+          return $section.removeClass(klass);
         }
       });
     };
@@ -4748,11 +4907,15 @@ by providing instant feedback for user interactions.
       unmarkActive();
       return locationChanged();
     });
-    return up.bus.on('fragment:destroy', function($fragment) {
+    up.bus.on('fragment:destroy', function($fragment) {
       if ($fragment.is('.up-modal, .up-popup')) {
         return locationChanged();
       }
     });
+    up.bus.on('framework:reset', reset);
+    return {
+      defaults: config.update
+    };
   })();
 
 }).call(this);

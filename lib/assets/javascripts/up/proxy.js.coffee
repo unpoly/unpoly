@@ -58,9 +58,24 @@ up.proxy = (->
   preloadDelayTimer = undefined
   busyDelayTimer = undefined
   pendingCount = undefined
-  config = undefined
   busyEventEmitted = undefined
-  FACTORY_CONFIG =
+
+  ###*
+  @method up.proxy.defaults
+  @param {Number} [options.preloadDelay=75]
+    The number of milliseconds to wait before [`[up-preload]`](#up-preload)
+    starts preloading.
+  @param {Number} [options.cacheSize=70]
+    The maximum number of responses to cache.
+    If the size is exceeded, the oldest items will be dropped from the cache.
+  @param {Number} [options.cacheExpiry=300000]
+    The number of milliseconds until a cache entry expires.
+    Defaults to 5 minutes.
+  @param {Number} [options.busyDelay=300]
+    How long the proxy waits until emitting the `proxy:busy` [event](/up.bus).
+    Use this to prevent flickering of spinners.
+  ###
+  config = u.config
     busyDelay: 300
     preloadDelay: 75
     cacheSize: 70
@@ -80,28 +95,10 @@ up.proxy = (->
     cancelPreloadDelay()
     cancelBusyDelay()
     pendingCount = 0
-    config = u.copy(FACTORY_CONFIG)
+    config.reset()
     busyEventEmitted = false
 
   reset()
-
-  ###*
-  @method up.proxy.defaults
-  @param {Number} [options.preloadDelay=75]
-    The number of milliseconds to wait before [`[up-preload]`](#up-preload)
-    starts preloading.
-  @param {Number} [options.cacheSize=70]
-    The maximum number of responses to cache.
-    If the size is exceeded, the oldest items will be dropped from the cache.
-  @param {Number} [options.cacheExpiry=300000]
-    The number of milliseconds until a cache entry expires.
-    Defaults to 5 minutes.
-  @param {Number} [options.busyDelay=300]
-    How long the proxy waits until emitting the `proxy:busy` [event](/up.bus).
-    Use this to prevent flickering of spinners.
-  ###
-  defaults = (options) ->
-    u.extend(config, options)
 
   cacheKey = (request) ->
     normalizeRequest(request)
@@ -336,8 +333,6 @@ up.proxy = (->
       u.debug("Won't preload %o due to unsafe method %o", $link, method)
       u.resolvedPromise()
 
-  up.bus.on 'framework:reset', reset
-
   ###*
   Links with an `up-preload` attribute will silently fetch their target
   when the user hovers over the click area, or when the user puts her
@@ -359,6 +354,8 @@ up.proxy = (->
     unless up.link.childClicked(event, $element) 
       checkPreload($element)
 
+  up.bus.on 'framework:reset', reset
+
   preload: preload
   ajax: ajax
   get: get
@@ -368,6 +365,6 @@ up.proxy = (->
   remove: remove
   idle: idle
   busy: busy
-  defaults: defaults
+  defaults: config.update
   
 )()

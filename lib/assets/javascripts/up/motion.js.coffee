@@ -34,20 +34,24 @@ up.motion = (->
   transitions = {}
   defaultTransitions = {}
 
-  config =
-    duration: 300
-    delay: 0
-    easing: 'ease'
-
   ###*
+  Sets default options for animations and transitions.
+
   @method up.motion.defaults
   @param {Number} [options.duration=300]
   @param {Number} [options.delay=0]
   @param {String} [options.easing='ease']
   ###
-  defaults = (options) ->
-    u.extend(config, options)
-  
+  config = u.config
+    duration: 300
+    delay: 0
+    easing: 'ease'
+
+  reset = ->
+    animations = u.copy(defaultAnimations)
+    transitions = u.copy(defaultTransitions)
+    config.reset()
+
   ###*
   Applies the given animation to the given element:
 
@@ -348,10 +352,6 @@ up.motion = (->
     defaultAnimations = u.copy(animations)
     defaultTransitions = u.copy(transitions)
 
-  reset = ->
-    animations = u.copy(defaultAnimations)
-    transitions = u.copy(defaultTransitions)
-
   ###*
   Returns a new promise that resolves once all promises in arguments resolve.
 
@@ -497,7 +497,7 @@ up.motion = (->
   finish: finish
   transition: transition
   animation: animation
-  defaults: defaults
+  defaults: config.update
   none: none
   when: resolvableWhen
 
