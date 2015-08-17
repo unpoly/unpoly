@@ -27,6 +27,10 @@ describe 'up.navigation', ->
       inserter = -> up.ready(affix('a[up-alias="/qqqq*"]'))
       expect(inserter).not.toThrow()
 
+    it 'does not highlight a link to "#" (commonly used for JS-only buttons)', ->
+      $link = up.ready(affix('a[href="#"]'))
+      expect($link).not.toHaveClass('up-current')
+
     it 'marks URL prefixes as .up-current if an up-alias value ends in *', ->
       spyOn(up.browser, 'url').and.returnValue('/foo/123')
       $currentLink = up.ready(affix('span[up-alias="/aaa /foo/* /bbb"]'))

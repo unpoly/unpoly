@@ -49,13 +49,14 @@ up.navigation = (->
     
   sectionUrls = ($section) ->
     urls = []
-    for attr in ['href', 'up-href']
+    for attr in ['href', 'up-href', 'up-alias']
       if value = u.presentAttr($section, attr)
-        urls.push(value)
-    if aliases = u.presentAttr($section, 'up-alias')
-      values = aliases.split(' ')
-      urls = urls.concat(values)
-    urls.map normalizeUrl
+        values = if attr == 'up-alias' then value.split(' ') else [value]
+        for url in values
+          unless url == '#'
+            url = normalizeUrl(url)
+            urls.push(url)
+    urls
 
   urlSet = (urls) ->
     urls = u.compact(urls)
