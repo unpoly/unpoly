@@ -64,19 +64,32 @@ describe 'up.util', ->
         expect(object.a).toBe(1)
         expect(object.b).toBe(2)
 
-      it 'provies an #update method that merges the given options into the object', ->
-        object = up.util.config(a: 1)
-        object.update(b: 2, c: 3)
-        expect(object.b).toBe(2)
-        expect(object.c).toBe(3)
+      describe '#update', ->
 
-      it 'provides a #reset method that resets the object to its original state', ->
-        object = up.util.config(a: 1)
-        expect(object.b).toBeUndefined()
-        object.b = 2
-        expect(object.b).toBe(2)
-        object.reset()
-        expect(object.b).toBeUndefined()
-        # Make sure that resetting doesn't remove #reset or #update
-        expect(object.reset).toBeDefined()
-        expect(object.update).toBeDefined()
+        it 'merges the given options into the object', ->
+          object = up.util.config(a: 1, b: undefined, c: undefined)
+          object.update(b: 2, c: 3)
+          expect(object.b).toBe(2)
+          expect(object.c).toBe(3)
+
+        it 'throws an error when setting a key that was not included in the factory settings', ->
+          object = up.util.config(a: 1)
+          update = -> object.update(b: 2)
+          expect(update).toThrowError(/unknown setting/i)
+
+      describe '#reset', ->
+
+        it 'resets the object to its original state', ->
+          object = up.util.config(a: 1)
+          expect(object.b).toBeUndefined()
+          object.b = 2
+          expect(object.b).toBe(2)
+          object.reset()
+          expect(object.b).toBeUndefined()
+
+        it 'does not remove #reset or #update methods from the object', ->
+          object = up.util.config(a: 1)
+          object.b = 2
+          object.reset()
+          expect(object.reset).toBeDefined()
+          expect(object.update).toBeDefined()
