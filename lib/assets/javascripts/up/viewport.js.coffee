@@ -58,6 +58,9 @@ up.viewport = (->
       $view.data(SCROLL_PROMISE_KEY, deferred)
       deferred.then ->
         $view.removeData(SCROLL_PROMISE_KEY)
+        # Since we're scrolling using #animate, #finish can be
+        # used to jump to the last frame:
+        # https://api.jquery.com/finish/
         $view.finish()
 
       targetProps =
