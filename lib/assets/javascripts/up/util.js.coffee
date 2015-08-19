@@ -623,7 +623,7 @@ up.util = (->
   config = (factoryOptions = {}) ->
     hash =
       reset: ->
-        ownKeys = Object.getOwnPropertyNames(hash)
+        ownKeys = copy(Object.getOwnPropertyNames(hash))
         for key in ownKeys
           delete hash[key] unless contains(apiKeys, key)
         hash.update copy(factoryOptions)

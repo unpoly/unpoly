@@ -168,15 +168,14 @@ up.flow = (->
         u.error("Could not find selector %o in response %o", selector, html)
 
   prepareForReplacement = ($element, options) ->
-    # Before we select a replacement target, ensure that all transitions
-    # and animations have been run. Finishing a transition usually removes
-    # the element that is being morphed, so it will affect further selections
-    # using the same selector.
+    # Ensure that all transitions and animations have completed.
     up.motion.finish($element)
+    # Make sure the old element is visible in the viewport
+    # to mimick browser behavior during a page switch.
     reveal($element, options.scroll)
 
   reveal = ($element, view) ->
-    if view
+    if view # empty strings are falsish in Javascript
       up.reveal($element, view: view)
     else
       u.resolvedDeferred()

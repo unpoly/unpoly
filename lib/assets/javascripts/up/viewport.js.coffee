@@ -6,6 +6,13 @@ This modules contains functions to scroll the viewport and reveal contained elem
 
 By default Up.js will always scroll to an element before updating it.
 
+The container that will be scrolled is the closest parent of the element that is either:
+
+- The currently open [modal](/up.modal)
+- An element with the attribute `[up-viewport]`
+- The `<body>` element
+- An element matching the selector you have configured using `up.viewport.defaults({ viewSelector: 'my-custom-selector' })`.
+
 @class up.viewport  
 ###
 up.viewport = (->
@@ -16,12 +23,11 @@ up.viewport = (->
   @method up.viewport.defaults
   @param {Number} [options.duration]
   @param {String} [options.easing]
-  @param {Number} [options.padding]
-  @param {String|Element|jQuery} [options.view]
+  @param {String} [options.viewSelector]
   ###
   config = u.config
     duration: 0
-    view: 'body'
+    viewSelector: 'body, .up-modal, [up-viewport]'
     easing: 'swing'
 
   reset = ->
@@ -38,7 +44,7 @@ up.viewport = (->
   @return {Deferred}
   @protected 
   ###
-  scroll = (viewOrSelector, scrollPos, options) ->
+  scroll = (viewOrSelector, scrollTop, options) ->
     $view = $(viewOrSelector)
     options = u.options(options)
     duration = u.option(options.duration, config.duration)
@@ -55,7 +61,7 @@ up.viewport = (->
         $view.finish()
 
       targetProps =
-        scrollTop: scrollPos
+        scrollTop: scrollTop
 
       $view.animate targetProps,
         duration: duration,
@@ -64,7 +70,7 @@ up.viewport = (->
 
       deferred
     else
-      $view.scrollTop(scrollPos)
+      $view.scrollTop(scrollTop)
       u.resolvedDeferred()
 
   ###*
@@ -82,37 +88,75 @@ up.viewport = (->
   @param {String|Element|jQuery} [options.view]
   @param {Number} [options.duration]
   @param {String} [options.easing]
-  @param {Number} [options.padding]
   @return {Deferred}
   @protected
   ###
   reveal = (elementOrSelector, options) ->
 
     options = u.options(options)
-    view = u.option(options.view, config.view)
-    padding = u.option(options.padding, config.padding)
 
     $element = $(elementOrSelector)
-    $view = $(view)
+    $view = findView($element, options.view)
+    viewIsBody = $view.is('body')
 
-    viewHeight = $view.height()
-    scrollPos = $view.scrollTop()
+    viewHeight = if viewIsBody then u.clientSize().height else $view.height()
 
-    firstVisibleRow = scrollPos
-    lastVisibleRow = scrollPos + viewHeight
+    originalScrollPos = $view.scrollTop()
+    newScrollPos = originalScrollPos
 
-    elementTop = $element.position().top
-    
-    elementTooHigh = elementTop - padding < firstVisibleRow
-    elementTooLow = elementTop > lastVisibleRow - padding
+    # When the scrolled element is not <body> but instead a container
+    # with overflow-y: scroll, $.position returns the position the
+    # the first row of the client area instead of the first row of
+    # the canvas buffer.
+    # http://codepen.io/anon/pen/jPojGE
+    offsetShift = if viewIsBody then 0 else originalScrollPos
 
-    if elementTooHigh || elementTooLow
-      scrollPos = elementTop - padding
-      scrollPos = Math.max(scrollPos, 0)
-      scrollPos = Math.min(scrollPos, viewHeight - 1)
-      scroll($view, scrollPos, options)
+    firstVisibleRow = -> newScrollPos
+    lastVisibleRow = -> newScrollPos + viewHeight - 1
+
+    elementDims = u.measure($element, relative: true)
+    firstElementRow = elementDims.top + offsetShift
+    lastElementRow = firstElementRow + elementDims.height - 1
+
+    if lastElementRow > lastVisibleRow()
+      # Try to show the full height of the element
+      newScrollPos += (lastElementRow - lastVisibleRow())
+
+    if firstElementRow < firstVisibleRow()
+      # If the full element does not fit, scroll to the first row
+      newScrollPos = firstElementRow
+
+    if newScrollPos != originalScrollPos
+      scroll($view, newScrollPos, options)
     else
       u.resolvedDeferred()
+
+  ###*
+  @private
+  @method up.viewport.findView
+  ###
+  findView = ($element, viewSelectorOrElement) ->
+    $view = undefined
+    # If someone has handed as a jQuery element, that's the
+    # view period.
+    if u.isJQuery(viewSelectorOrElement)
+      $view = viewSelectorOrElement
+    else
+      # If we have been given
+      viewSelector = u.presence(viewSelectorOrElement) || config.viewSelector
+      $view = $element.closest(viewSelector)
+
+    $view.length or u.error("Could not find view to scroll for %o (tried selectors %o)", $element, viewSelectors)
+    $view
+
+
+  ###*
+  Marks this element as a scrolling container.
+  Use this e.g. if your app uses a custom panel layout with fixed positioning
+  instead of scrolling `<body>`.
+
+  @method [up-viewport]
+  ###
 
   up.bus.on 'framework:reset', reset
 
