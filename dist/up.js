@@ -786,7 +786,7 @@ If you use them in your own code, you will get hurt.
       hash = {
         reset: function() {
           var j, key, len, ownKeys;
-          ownKeys = Object.getOwnPropertyNames(hash);
+          ownKeys = copy(Object.getOwnPropertyNames(hash));
           for (j = 0, len = ownKeys.length; j < len; j++) {
             key = ownKeys[j];
             if (!contains(apiKeys, key)) {
@@ -796,7 +796,17 @@ If you use them in your own code, you will get hurt.
           return hash.update(copy(factoryOptions));
         },
         update: function(options) {
-          return extend(hash, options);
+          var key, results, value;
+          results = [];
+          for (key in options) {
+            value = options[key];
+            if (factoryOptions.hasOwnProperty(key)) {
+              results.push(hash[key] = value);
+            } else {
+              results.push(error("Unknown setting %o", key));
+            }
+          }
+          return results;
         }
       };
       apiKeys = Object.getOwnPropertyNames(hash);
@@ -1156,24 +1166,30 @@ This modules contains functions to scroll the viewport and reveal contained elem
 
 By default Up.js will always scroll to an element before updating it.
 
+The container that will be scrolled is the closest parent of the element that is either:
+
+- The currently open [modal](/up.modal)
+- An element with the attribute `[up-viewport]`
+- The `<body>` element
+- An element matching the selector you have configured using `up.viewport.defaults({ viewSelector: 'my-custom-selector' })`.
+
 @class up.viewport
  */
 
 (function() {
   up.viewport = (function() {
-    var SCROLL_PROMISE_KEY, config, finishScrolling, reset, reveal, scroll, u;
+    var SCROLL_PROMISE_KEY, config, findView, finishScrolling, reset, reveal, scroll, u;
     u = up.util;
 
     /**
     @method up.viewport.defaults
     @param {Number} [options.duration]
     @param {String} [options.easing]
-    @param {Number} [options.padding]
-    @param {String|Element|jQuery} [options.view]
+    @param {String} [options.viewSelector]
      */
     config = u.config({
       duration: 0,
-      view: 'body',
+      viewSelector: 'body, .up-modal, [up-viewport]',
       easing: 'swing'
     });
     reset = function() {
@@ -1190,7 +1206,7 @@ By default Up.js will always scroll to an element before updating it.
     @return {Deferred}
     @protected
      */
-    scroll = function(viewOrSelector, scrollPos, options) {
+    scroll = function(viewOrSelector, scrollTop, options) {
       var $view, deferred, duration, easing, targetProps;
       $view = $(viewOrSelector);
       options = u.options(options);
@@ -1205,7 +1221,7 @@ By default Up.js will always scroll to an element before updating it.
           return $view.finish();
         });
         targetProps = {
-          scrollTop: scrollPos
+          scrollTop: scrollTop
         };
         $view.animate(targetProps, {
           duration: duration,
@@ -1216,7 +1232,7 @@ By default Up.js will always scroll to an element before updating it.
         });
         return deferred;
       } else {
-        $view.scrollTop(scrollPos);
+        $view.scrollTop(scrollTop);
         return u.resolvedDeferred();
       }
     };
@@ -1240,33 +1256,67 @@ By default Up.js will always scroll to an element before updating it.
     @param {String|Element|jQuery} [options.view]
     @param {Number} [options.duration]
     @param {String} [options.easing]
-    @param {Number} [options.padding]
     @return {Deferred}
     @protected
      */
     reveal = function(elementOrSelector, options) {
-      var $element, $view, elementTooHigh, elementTooLow, elementTop, firstVisibleRow, lastVisibleRow, padding, scrollPos, view, viewHeight;
+      var $element, $view, elementDims, firstElementRow, firstVisibleRow, lastElementRow, lastVisibleRow, newScrollPos, offsetShift, originalScrollPos, viewHeight, viewIsBody;
       options = u.options(options);
-      view = u.option(options.view, config.view);
-      padding = u.option(options.padding, config.padding);
       $element = $(elementOrSelector);
-      $view = $(view);
-      viewHeight = $view.height();
-      scrollPos = $view.scrollTop();
-      firstVisibleRow = scrollPos;
-      lastVisibleRow = scrollPos + viewHeight;
-      elementTop = $element.position().top;
-      elementTooHigh = elementTop - padding < firstVisibleRow;
-      elementTooLow = elementTop > lastVisibleRow - padding;
-      if (elementTooHigh || elementTooLow) {
-        scrollPos = elementTop - padding;
-        scrollPos = Math.max(scrollPos, 0);
-        scrollPos = Math.min(scrollPos, viewHeight - 1);
-        return scroll($view, scrollPos, options);
+      $view = findView($element, options.view);
+      viewIsBody = $view.is('body');
+      viewHeight = viewIsBody ? u.clientSize().height : $view.height();
+      originalScrollPos = $view.scrollTop();
+      newScrollPos = originalScrollPos;
+      offsetShift = viewIsBody ? 0 : originalScrollPos;
+      firstVisibleRow = function() {
+        return newScrollPos;
+      };
+      lastVisibleRow = function() {
+        return newScrollPos + viewHeight - 1;
+      };
+      elementDims = u.measure($element, {
+        relative: true
+      });
+      firstElementRow = elementDims.top + offsetShift;
+      lastElementRow = firstElementRow + elementDims.height - 1;
+      if (lastElementRow > lastVisibleRow()) {
+        newScrollPos += lastElementRow - lastVisibleRow();
+      }
+      if (firstElementRow < firstVisibleRow()) {
+        newScrollPos = firstElementRow;
+      }
+      if (newScrollPos !== originalScrollPos) {
+        return scroll($view, newScrollPos, options);
       } else {
         return u.resolvedDeferred();
       }
     };
+
+    /**
+    @private
+    @method up.viewport.findView
+     */
+    findView = function($element, viewSelectorOrElement) {
+      var $view, viewSelector;
+      $view = void 0;
+      if (u.isJQuery(viewSelectorOrElement)) {
+        $view = viewSelectorOrElement;
+      } else {
+        viewSelector = u.presence(viewSelectorOrElement) || config.viewSelector;
+        $view = $element.closest(viewSelector);
+      }
+      $view.length || u.error("Could not find view to scroll for %o (tried selectors %o)", $element, viewSelectors);
+      return $view;
+    };
+
+    /**
+    Marks this element as a scrolling container.
+    Use this e.g. if your app uses a custom panel layout with fixed positioning
+    instead of scrolling `<body>`.
+    
+    @method [up-viewport]
+     */
     up.bus.on('framework:reset', reset);
     return {
       reveal: reveal,
@@ -4178,7 +4228,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     @param {String|Function(config)} [options.template]
       A string containing the HTML structure of the modal.
       You can supply an alternative template string, but make sure that it
-      contains a containing tag with the class `up-modal`.
+      defines tag with the classes `up-modal`, `up-modal-dialog` and  `up-modal-content`.
     
       You can also supply a function that returns a HTML string.
       The function will be called with the modal options (merged from these defaults
@@ -4714,9 +4764,9 @@ by providing instant feedback for user interactions.
     /**
     Sets default options for this module.
     
+    @method up.navigation.defaults
     @param {Number} [options.currentClass]
       The class to set on [links that point the current location](#up-current).
-    @method up.navigation.defaults
      */
     config = u.config({
       currentClass: 'up-current'
@@ -4754,20 +4804,23 @@ by providing instant feedback for user interactions.
       }
     };
     sectionUrls = function($section) {
-      var aliases, attr, i, len, ref, urls, value, values;
+      var attr, i, j, len, len1, ref, url, urls, value, values;
       urls = [];
-      ref = ['href', 'up-href'];
+      ref = ['href', 'up-href', 'up-alias'];
       for (i = 0, len = ref.length; i < len; i++) {
         attr = ref[i];
         if (value = u.presentAttr($section, attr)) {
-          urls.push(value);
+          values = attr === 'up-alias' ? value.split(' ') : [value];
+          for (j = 0, len1 = values.length; j < len1; j++) {
+            url = values[j];
+            if (url !== '#') {
+              url = normalizeUrl(url);
+              urls.push(url);
+            }
+          }
         }
       }
-      if (aliases = u.presentAttr($section, 'up-alias')) {
-        values = aliases.split(' ');
-        urls = urls.concat(values);
-      }
-      return urls.map(normalizeUrl);
+      return urls;
     };
     urlSet = function(urls) {
       var doesMatchFully, doesMatchPrefix, matches, matchesAny;
