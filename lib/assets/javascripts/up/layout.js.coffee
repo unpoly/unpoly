@@ -21,13 +21,17 @@ up.layout = (->
 
   ###*
   @method up.viewport.defaults
+  @param {String} [options.viewport]
+  @param {String} [options.fixedTop]
+  @param {String} [options.fixedBottom]
   @param {Number} [options.duration]
   @param {String} [options.easing]
-  @param {String} [options.viewSelector]
   ###
   config = u.config
     duration: 0
-    viewSelector: 'body, .up-modal, [up-viewport]'
+    viewport: 'body, .up-modal, [up-viewport]'
+    fixedTop: '[up-fixed=top]'
+    fixedBottom: '[up-fixed=bottom]'
     easing: 'swing'
 
   reset = ->
@@ -98,7 +102,7 @@ up.layout = (->
   ###*
   @method up.reveal
   @param {String|Element|jQuery} element
-  @param {String|Element|jQuery} [options.view]
+  @param {String|Element|jQuery} [options.viewport]
   @param {Number} [options.duration]
   @param {String} [options.easing]
   @return {Deferred}
@@ -109,38 +113,55 @@ up.layout = (->
     options = u.options(options)
 
     $element = $(elementOrSelector)
-    $view = findView($element, options.view)
-    viewIsBody = $view.is('body')
+    $viewport = findViewport($element, options.viewport)
+    viewportIsBody = $viewport.is('body')
 
-    viewHeight = if viewIsBody then u.clientSize().height else $view.height()
+    viewportHeight = if viewportIsBody then u.clientSize().height else $viewport.height()
 
-    originalScrollPos = $view.scrollTop()
+    originalScrollPos = $viewport.scrollTop()
     newScrollPos = originalScrollPos
 
-    # When the scrolled element is not <body> but instead a container
-    # with overflow-y: scroll, $.position returns the position the
-    # the first row of the client area instead of the first row of
-    # the canvas buffer.
-    # http://codepen.io/anon/pen/jPojGE
-    offsetShift = if viewIsBody then 0 else originalScrollPos
+    offsetShift = 0
+    obstructionTop = 0
 
-    firstVisibleRow = -> newScrollPos
-    lastVisibleRow = -> newScrollPos + viewHeight - 1
+    if viewportIsBody
+      bottoms = for obstructor in $(config.fixedTop)
+        $obstructor = $(obstructor)
+        top = $obstructor.position().top
+        parseInt(top + $obstructor.height())
+      obstructionTop = Math.max(0, bottoms...)
+      console.log("obstructionTop", obstructionTop)
+    else
+      # When the scrolled element is not <body> but instead a container
+      # with overflow-y: scroll, $.position returns the position the
+      # the first row of the client area instead of the first row of
+      # the canvas buffer.
+      # http://codepen.io/anon/pen/jPojGE
+      offsetShift = originalScrollPos
+
+    console.log("viewport is %o, isBody is %o, offsetShift is %o", $viewport.get(0), viewportIsBody, offsetShift)
+
+    predictFirstVisibleRow = -> newScrollPos + obstructionTop
+    predictLastVisibleRow = -> newScrollPos + viewportHeight - 1
 
     elementDims = u.measure($element, relative: true)
     firstElementRow = elementDims.top + offsetShift
     lastElementRow = firstElementRow + elementDims.height - 1
 
-    if lastElementRow > lastVisibleRow()
-      # Try to show the full height of the element
-      newScrollPos += (lastElementRow - lastVisibleRow())
+    console.log("Aligning")
 
-    if firstElementRow < firstVisibleRow()
+    if lastElementRow > predictLastVisibleRow()
+      console.log("Trying to align to bottom")
+      # Try to show the full height of the element
+      newScrollPos += (lastElementRow - predictLastVisibleRow() - obstructionTop)
+
+    if firstElementRow < predictFirstVisibleRow()
+      console.log("Trying to align to top", firstElementRow, offsetShift, obstructionTop)
       # If the full element does not fit, scroll to the first row
-      newScrollPos = firstElementRow
+      newScrollPos = firstElementRow - obstructionTop
 
     if newScrollPos != originalScrollPos
-      scroll($view, newScrollPos, options)
+      scroll($viewport, newScrollPos, options)
     else
       u.resolvedDeferred()
 
@@ -148,20 +169,18 @@ up.layout = (->
   @private
   @method up.viewport.findView
   ###
-  findView = ($element, viewSelectorOrElement) ->
-    $view = undefined
+  findViewport = ($element, viewportSelectorOrElement) ->
+    $viewport = undefined
     # If someone has handed as a jQuery element, that's the
     # view period.
-    if u.isJQuery(viewSelectorOrElement)
-      $view = viewSelectorOrElement
+    if u.isJQuery(viewportSelectorOrElement)
+      $viewport = viewportSelectorOrElement
     else
-      # If we have been given
-      viewSelector = u.presence(viewSelectorOrElement) || config.viewSelector
-      $view = $element.closest(viewSelector)
+      vieportSelector = u.presence(viewportSelectorOrElement) || config.viewport
+      $viewport = $element.closest(vieportSelector)
 
-    $view.length or u.error("Could not find view to scroll for %o (tried selectors %o)", $element, viewSelectors)
-    $view
-
+    $viewport.length or u.error("Could not find viewport for %o", $element)
+    $viewport
 
   ###*
   Marks this element as a scrolling container.

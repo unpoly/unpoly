@@ -174,9 +174,9 @@ up.flow = (->
     # to mimick browser behavior during a page switch.
     reveal($element, options.scroll)
 
-  reveal = ($element, view) ->
-    if view # empty strings are falsish in Javascript
-      up.reveal($element, view: view)
+  reveal = ($element, viewport) ->
+    if viewport # empty strings are falsish in Javascript
+      up.reveal($element, viewport: viewport)
     else
       u.resolvedDeferred()
 
