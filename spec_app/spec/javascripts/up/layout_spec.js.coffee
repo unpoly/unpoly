@@ -1,4 +1,4 @@
-describe 'up.viewport', ->
+describe 'up.layout', ->
 
   u = up.util
 

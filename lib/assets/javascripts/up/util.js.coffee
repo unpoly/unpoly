@@ -627,12 +627,13 @@ up.util = (->
         for key in ownKeys
           delete hash[key] unless contains(apiKeys, key)
         hash.update copy(factoryOptions)
-      update: (options) ->
+      update: (options = {}) ->
         for key, value of options
           if factoryOptions.hasOwnProperty(key)
             hash[key] = value
           else
             error("Unknown setting %o", key)
+        hash
     apiKeys = Object.getOwnPropertyNames(hash)
     hash.reset()
     hash

@@ -15,7 +15,7 @@ The container that will be scrolled is the closest parent of the element that is
 
 @class up.viewport  
 ###
-up.viewport = (->
+up.layout = (->
 
   u = up.util
 
@@ -84,6 +84,16 @@ up.viewport = (->
     $(elementOrSelector).each ->
       if existingScrolling = $(this).data(SCROLL_PROMISE_KEY)
         existingScrolling.resolve()
+
+#  obstructionTop = ->
+#    line = 0
+#    if config.fixedSelector
+#      for element in $(config.fixedSelector) ->
+#        $element = $(this)
+#        top = parseInt($element.css('top'))
+#        if $element.css('top').match(/^\d/) && $element.css('bottom') == 'auto'
+#
+#    line
 
   ###*
   @method up.reveal
@@ -170,5 +180,5 @@ up.viewport = (->
 
 )()
 
-up.scroll = up.viewport.scroll
-up.reveal = up.viewport.reveal
+up.scroll = up.layout.scroll
+up.reveal = up.layout.reveal

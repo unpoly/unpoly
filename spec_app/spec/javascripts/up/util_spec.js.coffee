@@ -72,6 +72,12 @@ describe 'up.util', ->
           expect(object.b).toBe(2)
           expect(object.c).toBe(3)
 
+        it 'returns the current hash when called without arguments', ->
+          object = up.util.config(a: 1, b: 2)
+          result = object.update()
+          expect(result.a).toBe(1)
+          expect(result.b).toBe(2)
+
         it 'throws an error when setting a key that was not included in the factory settings', ->
           object = up.util.config(a: 1)
           update = -> object.update(b: 2)
