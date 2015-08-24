@@ -114,8 +114,6 @@ up.layout = (->
     fixedBottomTops = for obstructor in $(config.fixedBottom)
       measurePosition(obstructor, 'bottom')
 
-    console.log("measuring", fixedBottomTops, Math.max(0, fixedBottomTops...))
-
     top: Math.max(0, fixedTopBottoms...)
     bottom: Math.max(0, fixedBottomTops...)
 
@@ -158,9 +156,6 @@ up.layout = (->
       # http://codepen.io/anon/pen/jPojGE
       offsetShift = originalScrollPos
 
-    console.log("viewport is %o, isBody is %o, offsetShift is %o", $viewport.get(0), viewportIsBody, offsetShift)
-    console.log("obstruction is %o", obstruction)
-
     predictFirstVisibleRow = -> newScrollPos + obstruction.top
     predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom - 1
 
@@ -168,16 +163,11 @@ up.layout = (->
     firstElementRow = elementDims.top + offsetShift
     lastElementRow = firstElementRow + elementDims.height - 1
 
-    console.log("Aligning")
-
     if lastElementRow > predictLastVisibleRow()
-      console.log("Trying to align to bottom")
-      console.log("clientHeight: %o, lastElementRow: %o, predictLastVisibleRow: %o", u.clientSize().height, lastElementRow, predictLastVisibleRow())
       # Try to show the full height of the element
       newScrollPos += (lastElementRow - predictLastVisibleRow())
 
     if firstElementRow < predictFirstVisibleRow()
-      console.log("Trying to align to top", firstElementRow, offsetShift, obstruction.top)
       # If the full element does not fit, scroll to the first row
       newScrollPos = firstElementRow - obstruction.top
 

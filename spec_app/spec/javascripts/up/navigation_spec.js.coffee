@@ -102,7 +102,6 @@ describe 'up.navigation', ->
       it 'prefers to mark an enclosing [up-expand] click area', ->
         $area = affix('div[up-expand] a[href="/foo"][up-target=".main"]')
         up.ready($area)
-        console.log($area)
         $link = $area.find('a')
         affix('.main')
         $link.click()
