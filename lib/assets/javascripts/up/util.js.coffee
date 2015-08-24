@@ -225,6 +225,8 @@ up.util = (->
   each = (collection, block) ->
     block(item, index) for item, index in collection
 
+  map = each
+
   times = (count, block) ->
     block(iteration) for iteration in [0..(count - 1)]
 
@@ -557,7 +559,13 @@ up.util = (->
 
   escapePressed = (event) ->
     event.keyCode == 27
-    
+
+  startsWith = (string, element) ->
+    string.indexOf(element) == 0
+
+  endsWith = (string, element) ->
+    string.indexOf(element) == string.length - element.length
+
   contains = (stringOrArray, element) ->
     stringOrArray.indexOf(element) >= 0
 
@@ -656,6 +664,7 @@ up.util = (->
   debug: debug
   warn: warn
   each: each
+  map: map
   times: times
   detect: detect
   select: select
@@ -694,6 +703,8 @@ up.util = (->
   copyAttributes: copyAttributes
   findWithSelf: findWithSelf
   contains: contains
+  startsWith: startsWith
+  endsWith: endsWith
   isArray: isArray
   toArray: toArray
   castsToTrue: castsToTrue

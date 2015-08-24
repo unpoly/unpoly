@@ -30,8 +30,8 @@ up.layout = (->
   config = u.config
     duration: 0
     viewport: 'body, .up-modal, [up-viewport]'
-    fixedTop: '[up-fixed=top]'
-    fixedBottom: '[up-fixed=bottom]'
+    fixedTop: '[up-fixed~=top]'
+    fixedBottom: '[up-fixed~=bottom]'
     easing: 'swing'
 
   reset = ->
@@ -99,6 +99,26 @@ up.layout = (->
 #
 #    line
 
+  measureObstruction = ->
+
+    measurePosition = (obstructor, cssAttr) ->
+      $obstructor = $(obstructor)
+      anchorPosition = $obstructor.css(cssAttr)
+      unless anchorPosition == '0' or u.endsWith(anchorPosition, 'px')
+        u.error("Fixed element must have an anchor position in px, but was %o", anchorPosition)
+      parseInt(anchorPosition) + $obstructor.height()
+
+    fixedTopBottoms = for obstructor in $(config.fixedTop)
+      measurePosition(obstructor, 'top')
+
+    fixedBottomTops = for obstructor in $(config.fixedBottom)
+      measurePosition(obstructor, 'bottom')
+
+    console.log("measuring", fixedBottomTops, Math.max(0, fixedBottomTops...))
+
+    top: Math.max(0, fixedTopBottoms...)
+    bottom: Math.max(0, fixedBottomTops...)
+
   ###*
   @method up.reveal
   @param {String|Element|jQuery} element
@@ -121,28 +141,28 @@ up.layout = (->
     originalScrollPos = $viewport.scrollTop()
     newScrollPos = originalScrollPos
 
-    offsetShift = 0
-    obstructionTop = 0
+    offsetShift = undefined
+    obstruction = undefined
 
     if viewportIsBody
-      bottoms = for obstructor in $(config.fixedTop)
-        $obstructor = $(obstructor)
-        top = $obstructor.position().top
-        parseInt(top + $obstructor.height())
-      obstructionTop = Math.max(0, bottoms...)
-      console.log("obstructionTop", obstructionTop)
+      obstruction = measureObstruction()
+      # Within the body, $.position will always return the distance
+      # from the document top and *not* the distance of the viewport
+      # top. This is what the calculations below expect, so don't shift.
+      offsetShift = 0
     else
+      obstruction = { top: 0, bottom: 0 }
       # When the scrolled element is not <body> but instead a container
       # with overflow-y: scroll, $.position returns the position the
-      # the first row of the client area instead of the first row of
-      # the canvas buffer.
+      # viewport's top edge instead of the first row of  the canvas buffer.
       # http://codepen.io/anon/pen/jPojGE
       offsetShift = originalScrollPos
 
     console.log("viewport is %o, isBody is %o, offsetShift is %o", $viewport.get(0), viewportIsBody, offsetShift)
+    console.log("obstruction is %o", obstruction)
 
-    predictFirstVisibleRow = -> newScrollPos + obstructionTop
-    predictLastVisibleRow = -> newScrollPos + viewportHeight - 1
+    predictFirstVisibleRow = -> newScrollPos + obstruction.top
+    predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom - 1
 
     elementDims = u.measure($element, relative: true)
     firstElementRow = elementDims.top + offsetShift
@@ -152,13 +172,14 @@ up.layout = (->
 
     if lastElementRow > predictLastVisibleRow()
       console.log("Trying to align to bottom")
+      console.log("clientHeight: %o, lastElementRow: %o, predictLastVisibleRow: %o", u.clientSize().height, lastElementRow, predictLastVisibleRow())
       # Try to show the full height of the element
-      newScrollPos += (lastElementRow - predictLastVisibleRow() - obstructionTop)
+      newScrollPos += (lastElementRow - predictLastVisibleRow())
 
     if firstElementRow < predictFirstVisibleRow()
-      console.log("Trying to align to top", firstElementRow, offsetShift, obstructionTop)
+      console.log("Trying to align to top", firstElementRow, offsetShift, obstruction.top)
       # If the full element does not fit, scroll to the first row
-      newScrollPos = firstElementRow - obstructionTop
+      newScrollPos = firstElementRow - obstruction.top
 
     if newScrollPos != originalScrollPos
       scroll($viewport, newScrollPos, options)

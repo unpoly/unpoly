@@ -15,8 +15,11 @@ describe 'up.layout', ->
 
           @$elements = []
           @$container = $('<div class="container">').prependTo(@$viewport)
-          for i in [0..2]
-            $element = $('<div>').css(height: '5000px').text("Child #{i}")
+
+          @clientHeight = u.clientSize().height
+
+          for height in [@clientHeight, '50px', '5000px']
+            $element = $('<div>').css(height: height)
             $element.appendTo(@$container)
             @$elements.push($element)
 
@@ -25,28 +28,29 @@ describe 'up.layout', ->
           @restoreMargin()
 
         it 'reveals the given element', ->
-          # --------------
-          #  [0] 00000..04999
-          # --------------
-          #  [1] 05000..09999
-          #  [3] 10000..14999
+          up.reveal(@$elements[0], viewport: @$viewport)
+          # ---------------------
+          # [0] 0 .......... ch-1
+          # ---------------------
+          # [1] ch+0 ...... ch+49
+          # [2] ch+50 ... ch+5049
           expect(@$viewport.scrollTop()).toBe(0)
 
           up.reveal(@$elements[1], viewport: @$viewport)
-          #  [0] 00000..04999
-          # --------------
-          #  [1] 05000..09999
-          # --------------
-          #  [3] 10000..14999
-          expect(@$viewport.scrollTop()).toBe(5000)
+          # ---------------------
+          # [0] 0 .......... ch-1
+          # [1] ch+0 ...... ch+49
+          # ---------------------
+          # [2] ch+50 ... ch+5049
+          expect(@$viewport.scrollTop()).toBe(50)
 
           up.reveal(@$elements[2], viewport: @$viewport)
-          #  [0] 00000..04999
-          #  [1] 05000..09999
-          # --------------
-          #  [3] 10000..14999
-          # --------------
-          expect(@$viewport.scrollTop()).toBe(10000)
+          # [0] 0 .......... ch-1
+          # [1] ch+0 ...... ch+49
+          # ---------------------
+          # [2] ch+50 ... ch+5049
+          # ---------------------
+          expect(@$viewport.scrollTop()).toBe(@clientHeight + 50)
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the top', ->
           $topNav = affix('[up-fixed=top]').css(
@@ -56,30 +60,84 @@ describe 'up.layout', ->
             right: '0'
             height: '100px'
           )
-          # --------------
-          #  [0] 00000..04999
-          # --------------
-          #  [1] 05000..09999
-          #  [3] 10000..14999
+
+          up.reveal(@$elements[0], viewport: @viewport)
+          # ---------------------
+          # [F] 0 ............ 99
+          # [0] 0 .......... ch-1
+          # ---------------------
+          # [1] ch+0 ...... ch+49
+          # [2] ch+50 ... ch+5049
           expect(@$viewport.scrollTop()).toBe(0) # would need to be -100
 
           up.reveal(@$elements[1], viewport: @$viewport)
-          #  [0] 00000..04999
-          # --------------
-          #  [1] 05000..09999
-          # --------------
-          #  [3] 10000..14999
-          expect(@$viewport.scrollTop()).toBe(4900)
+          # ---------------------
+          # [F] 0 ............ 99
+          # [0] 00000 ...... ch-1
+          # [1] ch+0 ...... ch+49
+          # ---------------------
+          # [2] ch+50 ... ch+5049
+
+          expect(@$viewport.scrollTop()).toBe(50)
 
           up.reveal(@$elements[2], viewport: @$viewport)
-          #  [0] 00000..04999
-          #  [1] 05000..09999
-          # --------------
-          #  [3] 10000..14999
-          # --------------
-          expect(@$viewport.scrollTop()).toBe(9900)
+          # [0] 00000 ...... ch-1
+          # [1] ch+0 ...... ch+49
+          # ---------------------
+          # [F] 0 ............ 99
+          # [2] ch+50 ... ch+5049
+          # ----------------
+          expect(@$viewport.scrollTop()).toBe(@clientHeight + 50 - 100)
 
-          
+          up.reveal(@$elements[1], viewport: @$viewport)
+          # [0] 00000 ...... ch-1
+          # ---------------------
+          # [F] 0 ............ 99
+          # [1] ch+0 ...... ch+49
+          # [2] ch+50 ... ch+5049
+          # ----------------
+          expect(@$viewport.scrollTop()).toBe(@clientHeight + 50 - 100 - 50)
+
+
+        it 'scrolls far enough so the element is not obstructed by an element fixed to the bottom', ->
+          $bottomNav = affix('[up-fixed=bottom]').css(
+            position: 'fixed',
+            bottom: '0',
+            left: '0',
+            right: '0'
+            height: '100px'
+          )
+
+          up.reveal(@$elements[0], viewport: @$viewport)
+          # ---------------------
+          # [0] 0 .......... ch-1
+          # [F] 0 ............ 99
+          # ---------------------
+          # [1] ch+0 ...... ch+49
+          # [2] ch+50 ... ch+5049
+          expect(@$viewport.scrollTop()).toBe(0)
+
+          up.reveal(@$elements[1], viewport: @$viewport)
+          # ---------------------
+          # [0] 0 .......... ch-1
+          # [1] ch+0 ...... ch+49
+          # [F] 0 ............ 99
+          # ---------------------
+          # [2] ch+50 ... ch+5049
+          expect(@$viewport.scrollTop()).toBe(150)
+
+          up.reveal(@$elements[2], viewport: @$viewport)
+          # ---------------------
+          # [0] 0 .......... ch-1
+          # [1] ch+0 ...... ch+49
+          # ---------------------
+          # [2] ch+50 ... ch+5049
+          # [F] 0 ............ 99
+          expect(@$viewport.scrollTop()).toBe(@clientHeight + 50)
+
+
+
+
       describe 'when the viewport is a container with overflow-y: scroll', ->
 
         it 'reveals the given element', ->
@@ -96,27 +154,27 @@ describe 'up.layout', ->
             $element.appendTo($viewport)
             $elements.push($element)
 
-          # --------------
-          #  [0] 000..049
-          #  [1] 050..099
-          # --------------
-          #  [2] 100..149
-          #  [3] 150..199
-          #  [4] 200..249
-          #  [5] 250..399
+          # ------------
+          # [0] 000..049
+          # [1] 050..099
+          # ------------
+          # [2] 100..149
+          # [3] 150..199
+          # [4] 200..249
+          # [5] 250..399
           expect($viewport.scrollTop()).toBe(0)
 
           # See that the view only scrolls down as little as possible
           # in order to reveal the element
           up.reveal($elements[3], viewport: $viewport)
-          #  [0] 000..049
-          #  [1] 050..099
-          # --------------
-          #  [2] 100..149
-          #  [3] 150..199
-          # --------------
-          #  [4] 200..249
-          #  [5] 250..399
+          # [0] 000..049
+          # [1] 050..099
+          # ------------
+          # [2] 100..149
+          # [3] 150..199
+          # ------------
+          # [4] 200..249
+          # [5] 250..399
           expect($viewport.scrollTop()).toBe(100)
 
           # See that the view doesn't move if the element
@@ -127,27 +185,27 @@ describe 'up.layout', ->
           # See that the view scrolls as far down as it cans
           # to show the bottom element
           up.reveal($elements[5], viewport: $viewport)
-          #  [0] 000..049
-          #  [1] 050..099
-          #  [2] 100..149
-          #  [3] 150..199
-          # --------------
-          #  [4] 200..249
-          #  [5] 250..399
-          # --------------
+          # [0] 000..049
+          # [1] 050..099
+          # [2] 100..149
+          # [3] 150..199
+          # ------------
+          # [4] 200..249
+          # [5] 250..399
+          # ------------
           expect($viewport.scrollTop()).toBe(200)
 
           # See that the view only scrolls up as little as possible
           # in order to reveal the element
           up.reveal($elements[1], viewport: $viewport)
-          #  [0] 000..049
-          # --------------
-          #  [1] 050..099
-          #  [2] 100..149
-          # --------------
-          #  [3] 150..199
-          #  [4] 200..249
-          #  [5] 250..399
+          # [0] 000..049
+          # ------------
+          # [1] 050..099
+          # [2] 100..149
+          # ------------
+          # [3] 150..199
+          # [4] 200..249
+          # [5] 250..399
           expect($viewport.scrollTop()).toBe(50)
 
     describe 'up.scroll', ->
