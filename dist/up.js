@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, measure, memoize, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, prependGhost, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, stringifyConsoleArgs, temporaryCss, times, toArray, trim, uniq, unwrap, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, prependGhost, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -85,7 +85,7 @@ If you use them in your own code, you will get hurt.
           anchor.href = anchor.href;
         }
       } else {
-        anchor = unwrap(urlOrAnchor);
+        anchor = unJquery(urlOrAnchor);
       }
       normalized = anchor.protocol + "//" + anchor.hostname;
       if (!isStandardPort(anchor.protocol, anchor.port)) {
@@ -197,7 +197,7 @@ If you use them in your own code, you will get hurt.
       var i, maxLength, message;
       message = args[0];
       i = 0;
-      maxLength = 30;
+      maxLength = 50;
       return message.replace(CONSOLE_PLACEHOLDERS, function() {
         var arg, argType;
         i += 1;
@@ -208,12 +208,16 @@ If you use them in your own code, you will get hurt.
           if (arg.length > maxLength) {
             arg = (arg.substr(0, maxLength)) + "…";
           }
-          return "\"" + arg + "\"";
+          arg = "\"" + arg + "\"";
         } else if (argType === 'number') {
-          return arg.toString();
+          arg = arg.toString();
         } else {
-          return "(" + argType + ")";
+          arg = JSON.stringify(arg);
+          if (arg.length > maxLength) {
+            arg = (arg.substr(0, maxLength)) + "…";
+          }
         }
+        return arg;
       });
     };
     createSelectorFromElement = function($element) {
@@ -281,6 +285,10 @@ If you use them in your own code, you will get hurt.
         results.push(block(item, index));
       }
       return results;
+    };
+    map = each;
+    identity = function(x) {
+      return x;
     };
     times = function(count, block) {
       var iteration, j, ref, results;
@@ -363,7 +371,7 @@ If you use them in your own code, you will get hurt.
         return extend({}, object);
       }
     };
-    unwrap = function(object) {
+    unJquery = function(object) {
       if (isJQuery(object)) {
         return object.get(0);
       } else {
@@ -691,6 +699,12 @@ If you use them in your own code, you will get hurt.
     escapePressed = function(event) {
       return event.keyCode === 27;
     };
+    startsWith = function(string, element) {
+      return string.indexOf(element) === 0;
+    };
+    endsWith = function(string, element) {
+      return string.indexOf(element) === string.length - element.length;
+    };
     contains = function(stringOrArray, element) {
       return stringOrArray.indexOf(element) >= 0;
     };
@@ -796,22 +810,34 @@ If you use them in your own code, you will get hurt.
           return hash.update(copy(factoryOptions));
         },
         update: function(options) {
-          var key, results, value;
-          results = [];
+          var key, value;
+          if (options == null) {
+            options = {};
+          }
           for (key in options) {
             value = options[key];
             if (factoryOptions.hasOwnProperty(key)) {
-              results.push(hash[key] = value);
+              hash[key] = value;
             } else {
-              results.push(error("Unknown setting %o", key));
+              error("Unknown setting %o", key);
             }
           }
-          return results;
+          return hash;
         }
       };
       apiKeys = Object.getOwnPropertyNames(hash);
       hash.reset();
       return hash;
+    };
+    unwrapElement = function(wrapper) {
+      var parent, wrappedNodes;
+      wrapper = unJquery(wrapper);
+      parent = wrapper.parentNode;
+      wrappedNodes = toArray(wrapper.childNodes);
+      each(wrappedNodes, function(wrappedNode) {
+        return parent.insertBefore(wrappedNode, wrapper);
+      });
+      return parent.removeChild(wrapper);
     };
     return {
       presentAttr: presentAttr,
@@ -832,6 +858,8 @@ If you use them in your own code, you will get hurt.
       debug: debug,
       warn: warn,
       each: each,
+      map: map,
+      identity: identity,
       times: times,
       detect: detect,
       select: select,
@@ -858,7 +886,7 @@ If you use them in your own code, you will get hurt.
       isUnmodifiedKeyEvent: isUnmodifiedKeyEvent,
       isUnmodifiedMouseEvent: isUnmodifiedMouseEvent,
       nullJquery: nullJquery,
-      unwrap: unwrap,
+      unJquery: unJquery,
       nextFrame: nextFrame,
       measure: measure,
       temporaryCss: temporaryCss,
@@ -870,6 +898,8 @@ If you use them in your own code, you will get hurt.
       copyAttributes: copyAttributes,
       findWithSelf: findWithSelf,
       contains: contains,
+      startsWith: startsWith,
+      endsWith: endsWith,
       isArray: isArray,
       toArray: toArray,
       castsToTrue: castsToTrue,
@@ -887,7 +917,8 @@ If you use them in your own code, you will get hurt.
       remove: remove,
       memoize: memoize,
       scrollbarWidth: scrollbarWidth,
-      config: config
+      config: config,
+      unwrapElement: unwrapElement
     };
   })();
 
@@ -1164,32 +1195,33 @@ Viewport scrolling
 
 This modules contains functions to scroll the viewport and reveal contained elements.
 
-By default Up.js will always scroll to an element before updating it.
-
-The container that will be scrolled is the closest parent of the element that is either:
-
-- The currently open [modal](/up.modal)
-- An element with the attribute `[up-viewport]`
-- The `<body>` element
-- An element matching the selector you have configured using `up.viewport.defaults({ viewSelector: 'my-custom-selector' })`.
-
-@class up.viewport
+@class up.layout
  */
 
 (function() {
-  up.viewport = (function() {
-    var SCROLL_PROMISE_KEY, config, findView, finishScrolling, reset, reveal, scroll, u;
+  var slice = [].slice;
+
+  up.layout = (function() {
+    var SCROLL_PROMISE_KEY, config, findViewport, finishScrolling, measureObstruction, reset, reveal, scroll, u;
     u = up.util;
 
     /**
-    @method up.viewport.defaults
+    
+    
+    @method up.layout.defaults
+    @param {String} [options.viewport]
+    @param {String} [options.fixedTop]
+    @param {String} [options.fixedBottom]
     @param {Number} [options.duration]
     @param {String} [options.easing]
-    @param {String} [options.viewSelector]
+    @param {Number} [options.snap]
      */
     config = u.config({
       duration: 0,
-      viewSelector: 'body, .up-modal, [up-viewport]',
+      viewport: 'body, .up-modal, [up-viewport]',
+      fixedTop: '[up-fixed~=top]',
+      fixedBottom: '[up-fixed~=bottom]',
+      snap: 50,
       easing: 'swing'
     });
     reset = function() {
@@ -1198,17 +1230,46 @@ The container that will be scrolled is the closest parent of the element that is
     SCROLL_PROMISE_KEY = 'up-scroll-promise';
 
     /**
-    @method up.scroll
-    @param {String|Element|jQuery} viewOrSelector
-    @param {Number} scrollPos
-    @param {String}[options.duration]
-    @param {String}[options.easing]
-    @return {Deferred}
+    Scrolls the given viewport to the given Y-position.
+    
+    A "viewport" is an element that has scrollbars, e.g. `<body>` or
+    a container with `overflow-x: scroll`.
+    
+    \#\#\#\# Example
+    
+    This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
+    
+        up.scoll('.main', 100);
+    
+    \#\#\#\# Animating the scrolling motion
+    
+    The scrolling can (optionally) be animated.
+    
+      up.scoll('.main', 100, {
+        easing: 'swing',
+        duration: 250
+      });
+    
+    If the given viewport is already in a scroll animation when `up.scroll`
+    is called a second time, the previous animation will instantly jump to the
+    last frame before the next animation is started.
+    
     @protected
+    @method up.scroll
+    @param {String|Element|jQuery} viewport
+      The container element to scroll.
+    @param {Number} scrollPos
+      The absolute number of pixels to set the scroll position to.
+    @param {Number}[options.duration]
+      The number of miliseconds for the scrolling's animation.
+    @param {String}[options.easing]
+      The timing function that controls the acceleration for the scrolling's animation.
+    @return {Deferred}
+      A promise that will be resolved when the scrolling ends.
      */
-    scroll = function(viewOrSelector, scrollTop, options) {
+    scroll = function(viewport, scrollTop, options) {
       var $view, deferred, duration, easing, targetProps;
-      $view = $(viewOrSelector);
+      $view = $(viewport);
       options = u.options(options);
       duration = u.option(options.duration, config.duration);
       easing = u.option(options.easing, config.easing);
@@ -1249,45 +1310,124 @@ The container that will be scrolled is the closest parent of the element that is
         }
       });
     };
+    measureObstruction = function() {
+      var fixedBottomTops, fixedTopBottoms, measurePosition, obstructor;
+      measurePosition = function(obstructor, cssAttr) {
+        var $obstructor, anchorPosition;
+        $obstructor = $(obstructor);
+        anchorPosition = $obstructor.css(cssAttr);
+        if (!(anchorPosition === '0' || u.endsWith(anchorPosition, 'px'))) {
+          u.error("Fixed element must have an anchor position in px, but was %o", anchorPosition);
+        }
+        return parseInt(anchorPosition) + $obstructor.height();
+      };
+      fixedTopBottoms = (function() {
+        var i, len, ref, results;
+        ref = $(config.fixedTop);
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          obstructor = ref[i];
+          results.push(measurePosition(obstructor, 'top'));
+        }
+        return results;
+      })();
+      fixedBottomTops = (function() {
+        var i, len, ref, results;
+        ref = $(config.fixedBottom);
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          obstructor = ref[i];
+          results.push(measurePosition(obstructor, 'bottom'));
+        }
+        return results;
+      })();
+      return {
+        top: Math.max.apply(Math, [0].concat(slice.call(fixedTopBottoms))),
+        bottom: Math.max.apply(Math, [0].concat(slice.call(fixedBottomTops)))
+      };
+    };
 
     /**
+    Scroll's the given element's viewport so the element
+    is visible for the user.
+    
+    By default Up.js will always reveal an element before
+    updating it with Javascript functions like [`up.replace`](/up.flow#up.replace)
+    or UJS behavior like [`[up-target]`](/up.link#up-target).
+    
+    \#\#\#\# How Up.js finds the viewport
+    
+    The viewport (the container that is going to be scrolled)
+    is the closest parent of the element that is either:
+    
+    - the currently open [modal](/up.modal)
+    - an element with the attribute `[up-viewport]`
+    - the `<body>` element
+    - an element matching the selector you have configured using `up.viewport.defaults({ viewSelector: 'my-custom-selector' })`
+    
+    \#\#\#\# Fixed elements obstruction the viewport
+    
+    Many applications have a navigation bar fixed to the top or bottom,
+    obstructing the view on an element.
+    
+    To make `up.aware` of these fixed elements you can either:
+    
+    - give the element an attribute [`up-fixed="top"`](#up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
+    - [configure default options](#up.layout.defaults) for `fixedTop` or `fixedBottom`
+    
     @method up.reveal
     @param {String|Element|jQuery} element
-    @param {String|Element|jQuery} [options.view]
+    @param {String|Element|jQuery} [options.viewport]
     @param {Number} [options.duration]
     @param {String} [options.easing]
+    @param {String} [options.snap]
     @return {Deferred}
-    @protected
+      A promise that will be resolved when the element is revealed.
      */
     reveal = function(elementOrSelector, options) {
-      var $element, $view, elementDims, firstElementRow, firstVisibleRow, lastElementRow, lastVisibleRow, newScrollPos, offsetShift, originalScrollPos, viewHeight, viewIsBody;
+      var $element, $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsBody;
       options = u.options(options);
       $element = $(elementOrSelector);
-      $view = findView($element, options.view);
-      viewIsBody = $view.is('body');
-      viewHeight = viewIsBody ? u.clientSize().height : $view.height();
-      originalScrollPos = $view.scrollTop();
+      $viewport = findViewport($element, options.viewport);
+      snap = u.option(options.snap, config.snap);
+      viewportIsBody = $viewport.is('body');
+      viewportHeight = viewportIsBody ? u.clientSize().height : $viewport.height();
+      originalScrollPos = $viewport.scrollTop();
       newScrollPos = originalScrollPos;
-      offsetShift = viewIsBody ? 0 : originalScrollPos;
-      firstVisibleRow = function() {
-        return newScrollPos;
+      offsetShift = void 0;
+      obstruction = void 0;
+      if (viewportIsBody) {
+        obstruction = measureObstruction();
+        offsetShift = 0;
+      } else {
+        obstruction = {
+          top: 0,
+          bottom: 0
+        };
+        offsetShift = originalScrollPos;
+      }
+      predictFirstVisibleRow = function() {
+        return newScrollPos + obstruction.top;
       };
-      lastVisibleRow = function() {
-        return newScrollPos + viewHeight - 1;
+      predictLastVisibleRow = function() {
+        return newScrollPos + viewportHeight - obstruction.bottom - 1;
       };
       elementDims = u.measure($element, {
         relative: true
       });
       firstElementRow = elementDims.top + offsetShift;
       lastElementRow = firstElementRow + elementDims.height - 1;
-      if (lastElementRow > lastVisibleRow()) {
-        newScrollPos += lastElementRow - lastVisibleRow();
+      if (lastElementRow > predictLastVisibleRow()) {
+        newScrollPos += lastElementRow - predictLastVisibleRow();
       }
-      if (firstElementRow < firstVisibleRow()) {
-        newScrollPos = firstElementRow;
+      if (firstElementRow < predictFirstVisibleRow()) {
+        newScrollPos = firstElementRow - obstruction.top;
+      }
+      if (newScrollPos < snap) {
+        newScrollPos = 0;
       }
       if (newScrollPos !== originalScrollPos) {
-        return scroll($view, newScrollPos, options);
+        return scroll($viewport, newScrollPos, options);
       } else {
         return u.resolvedDeferred();
       }
@@ -1295,27 +1435,99 @@ The container that will be scrolled is the closest parent of the element that is
 
     /**
     @private
-    @method up.viewport.findView
+    @method up.viewport.findViewport
      */
-    findView = function($element, viewSelectorOrElement) {
-      var $view, viewSelector;
-      $view = void 0;
-      if (u.isJQuery(viewSelectorOrElement)) {
-        $view = viewSelectorOrElement;
+    findViewport = function($element, viewportSelectorOrElement) {
+      var $viewport, vieportSelector;
+      $viewport = void 0;
+      if (u.isJQuery(viewportSelectorOrElement)) {
+        $viewport = viewportSelectorOrElement;
       } else {
-        viewSelector = u.presence(viewSelectorOrElement) || config.viewSelector;
-        $view = $element.closest(viewSelector);
+        vieportSelector = u.presence(viewportSelectorOrElement) || config.viewport;
+        $viewport = $element.closest(vieportSelector);
       }
-      $view.length || u.error("Could not find view to scroll for %o (tried selectors %o)", $element, viewSelectors);
-      return $view;
+      $viewport.length || u.error("Could not find viewport for %o", $element);
+      return $viewport;
     };
 
     /**
-    Marks this element as a scrolling container.
-    Use this e.g. if your app uses a custom panel layout with fixed positioning
-    instead of scrolling `<body>`.
+    Marks this element as a scrolling container. Apply this ttribute if your app uses
+    a custom panel layout with fixed positioning instead of scrolling `<body>`.
+    
+    [`up.reveal`](/up.reveal) will always try to scroll the viewport closest
+    to the element that is being revealed. By default this is the `<body>` element.
+    
+    \#\#\#\# Example
+    
+    Here is an example for a layout for an e-mail client, showing a list of e-mails
+    on the left side and the e-mail text on the right side:
+    
+        .side {
+          position: fixed;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          width: 100px;
+          overflow-y: scroll;
+        }
+    
+        .main {
+          position: fixed;
+          top: 0;
+          bottom: 0;
+          left: 100px;
+          right: 0;
+          overflow-y: scroll;
+        }
+    
+    This would be the HTML (notice the `up-viewport` attribute):
+    
+        <div class=".side" up-viewport>
+          <a href="/emails/5001" up-target=".main">Re: Your invoice</a>
+          <a href="/emails/2023" up-target=".main">Quote for services</a>
+          <a href="/emails/9002" up-target=".main">Fwd: Room reservation</a>
+        </div>
+    
+        <div class="main" up-viewport>
+          <h1>Re: Your Invoice</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
+            Stet clita kasd gubergren, no sea takimata sanctus est.
+          </p>
+        </div>
     
     @method [up-viewport]
+    @ujs
+     */
+
+    /**
+    Marks this element as a navigation fixed to the top edge of the screen
+    using `position: fixed`.
+    
+    [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
+    the viewport far enough so the revealed element is fully visible.
+    
+    Example:
+    
+        <div class="top-nav" up-fixed="top">...</div>
+    
+    @method [up-fixed=top]
+    @ujs
+     */
+
+    /**
+    Marks this element as a navigation fixed to the bottom edge of the screen
+    using `position: fixed`.
+    
+    [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
+    the viewport far enough so the revealed element is fully visible.
+    
+    Example:
+    
+        <div class="bottom-nav" up-fixed="bottom">...</div>
+    
+    @method [up-fixed=bottom]
+    @ujs
      */
     up.bus.on('framework:reset', reset);
     return {
@@ -1326,9 +1538,9 @@ The container that will be scrolled is the closest parent of the element that is
     };
   })();
 
-  up.scroll = up.viewport.scroll;
+  up.scroll = up.layout.scroll;
 
-  up.reveal = up.viewport.reveal;
+  up.reveal = up.layout.reveal;
 
 }).call(this);
 
@@ -1352,7 +1564,7 @@ We need to work on this page:
 
 (function() {
   up.flow = (function() {
-    var autofocus, destroy, elementsInserted, findOldFragment, first, fragmentNotFound, implant, isRealElement, parseImplantSteps, parseResponse, prepareForReplacement, reload, replace, reset, reveal, setSource, source, swapElements, u;
+    var autofocus, destroy, elementsInserted, findOldFragment, first, fragmentNotFound, implant, isRealElement, parseImplantSteps, parseResponse, reload, replace, reset, reveal, setSource, source, swapElements, u;
     u = up.util;
     setSource = function(element, sourceUrl) {
       var $element;
@@ -1388,7 +1600,11 @@ We need to work on this page:
       If omitted or true, the `url` argument will be used.
       If set to `false`, the history will remain unchanged.
     @param {String|Boolean} [options.source=true]
-    @param {String} [options.scroll='body']
+    @param {String} [options.scroll]
+      Up.js will try to [reveal](/up.layout#up.reveal) the element being updated, by
+      scrolling its containing viewport. Set this option to `false` to prevent any scrolling.
+    
+      If omitted, this will use the [default from `up.layout`](/up.layout#up.layout.defaults).
     @param {Boolean} [options.cache]
       Whether to use a [cached response](/up.proxy) if available.
     @param {String} [options.historyMethod='push']
@@ -1471,7 +1687,7 @@ We need to work on this page:
         options.history = null;
       }
       if (u.castsToFalse(options.scroll)) {
-        options.scroll = null;
+        options.scroll = false;
       }
       options.source = u.option(options.source, options.history);
       response = parseResponse(html);
@@ -1481,10 +1697,8 @@ We need to work on this page:
       for (j = 0, len = ref.length; j < len; j++) {
         step = ref[j];
         $old = findOldFragment(step.selector);
-        $new = response.find(step.selector);
-        results.push(prepareForReplacement($old, options).then(function() {
-          return swapElements($old, $new, step.pseudoClass, step.transition, options);
-        }));
+        $new = response.find(step.selector).first();
+        results.push(swapElements($old, $new, step.pseudoClass, step.transition, options));
       }
       return results;
     };
@@ -1517,14 +1731,12 @@ We need to work on this page:
         }
       };
     };
-    prepareForReplacement = function($element, options) {
-      up.motion.finish($element);
-      return reveal($element, options.scroll);
-    };
-    reveal = function($element, view) {
-      if (view) {
+    reveal = function($element, options) {
+      var viewport;
+      viewport = options.scroll;
+      if (viewport !== false) {
         return up.reveal($element, {
-          view: view
+          viewport: viewport
         });
       } else {
         return u.resolvedDeferred();
@@ -1545,25 +1757,32 @@ We need to work on this page:
       return up.ready($new);
     };
     swapElements = function($old, $new, pseudoClass, transition, options) {
-      var $addedChildren, insertionMethod;
+      var $wrapper, insertionMethod;
       transition || (transition = 'none');
+      up.motion.finish($old);
       if (pseudoClass) {
         insertionMethod = pseudoClass === 'before' ? 'prepend' : 'append';
-        $addedChildren = $new.children();
-        $old[insertionMethod]($new.contents());
+        $wrapper = $new.contents().wrap('<span class="up-insertion"></span>').parent();
+        $old[insertionMethod]($wrapper);
         u.copyAttributes($new, $old);
-        elementsInserted($addedChildren, options);
-        return up.animate($new, transition, options);
+        elementsInserted($wrapper.children(), options);
+        return reveal($wrapper, options).then(function() {
+          return up.animate($wrapper, transition, options);
+        }).then(function() {
+          u.unwrapElement($wrapper);
+        });
       } else {
-        return destroy($old, {
-          animation: function() {
-            $new.insertBefore($old);
-            elementsInserted($new, options);
-            if ($old.is('body') && transition !== 'none') {
-              u.error('Cannot apply transitions to body-elements (%o)', transition);
+        return reveal($old, options).then(function() {
+          return destroy($old, {
+            animation: function() {
+              $new.insertBefore($old);
+              elementsInserted($new, options);
+              if ($old.is('body') && transition !== 'none') {
+                u.error('Cannot apply transitions to body-elements (%o)', transition);
+              }
+              return up.morph($old, $new, transition, options);
             }
-            return up.morph($old, $new, transition, options);
-          }
+          });
         });
       }
     };
@@ -1662,9 +1881,10 @@ We need to work on this page:
       }
       up.bus.emit('fragment:destroy', $element);
       animationPromise = u.presence(options.animation, u.isPromise) || up.motion.animate($element, options.animation, animateOptions);
-      return animationPromise.then(function() {
+      animationPromise.then(function() {
         return $element.remove();
       });
+      return animationPromise;
     };
 
     /**
@@ -3273,12 +3493,17 @@ Read on
     @method up.visit
     @param {String} url
       The URL to visit.
+    @param {String} [options.target='body']
+      The selector to replace.
+      See options for [`up.replace`](/up.flow#up.replace)
     @param {Object} options
       See options for [`up.replace`](/up.flow#up.replace)
      */
     visit = function(url, options) {
-      u.debug("Visiting " + url);
-      return up.replace('body', url, options);
+      var selector;
+      options = u.options(options);
+      selector = u.option(options.target, 'body');
+      return up.replace(selector, url, options);
     };
 
     /**
@@ -4338,13 +4563,6 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     
     Any option attributes for [`a[up-modal]`](#a.up-modal) will be honored.
     
-    You can also open a URL directly like this:
-    
-        up.modal.open({ url: '/foo', target: '.list' })
-    
-    This will request `/foo`, extract the `.list` selector from the response
-    and open the selected container in a modal dialog.
-    
     \#\#\#\# Events
     
     - Emits an [event](/up.bus) `modal:open` when the modal
@@ -4353,12 +4571,8 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       animation has finished and the modal contents are fully visible.
     
     @method up.modal.open
-    @param {Element|jQuery|String} [elementOrSelector]
+    @param {Element|jQuery|String} elementOrSelector
       The link to follow.
-      Can be omitted if you give `options.url` instead.
-    @param {String} [options.url]
-      The URL to open.
-      Can be omitted if you give `elementOrSelector` instead.
     @param {String} [options.target]
       The selector to extract from the response and open in a modal dialog.
     @param {Number} [options.width]
@@ -4382,6 +4596,26 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
     @return {Promise}
       A promise that will be resolved when the modal has finished loading.
+     */
+
+    /**
+    Opens a modal for the given URL.
+    
+    Example:
+    
+        up.modal.open({ url: '/foo', target: '.list' })
+    
+    This will request `/foo`, extract the `.list` selector from the response
+    and open the selected container in a modal dialog.
+    
+    @method up.modal.open
+    @param {String} options.url
+      The URL to load.
+    @param {String} options.target
+      The CSS selector to extract from the response.
+      The extracted content will be placed into the dialog window.
+    @param {Object} options
+      See options for [previous `up.modal.open` variant](#up.modal.open).
      */
     open = function() {
       var $link, $modal, animateOptions, animation, args, height, history, maxWidth, options, selector, sticky, url, width;
