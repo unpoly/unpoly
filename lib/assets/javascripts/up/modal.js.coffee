@@ -138,13 +138,6 @@ up.modal = (->
 
   Any option attributes for [`a[up-modal]`](#a.up-modal) will be honored.
 
-  You can also open a URL directly like this:
-
-      up.modal.open({ url: '/foo', target: '.list' })
-
-  This will request `/foo`, extract the `.list` selector from the response
-  and open the selected container in a modal dialog.
-
   \#\#\#\# Events
 
   - Emits an [event](/up.bus) `modal:open` when the modal
@@ -153,12 +146,8 @@ up.modal = (->
     animation has finished and the modal contents are fully visible.
 
   @method up.modal.open
-  @param {Element|jQuery|String} [elementOrSelector]
+  @param {Element|jQuery|String} elementOrSelector
     The link to follow.
-    Can be omitted if you give `options.url` instead.
-  @param {String} [options.url]
-    The URL to open.
-    Can be omitted if you give `elementOrSelector` instead.
   @param {String} [options.target]
     The selector to extract from the response and open in a modal dialog.
   @param {Number} [options.width]
@@ -182,6 +171,26 @@ up.modal = (->
     The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
   @return {Promise}
     A promise that will be resolved when the modal has finished loading.
+  ###
+
+  ###*
+  Opens a modal for the given URL.
+
+  Example:
+
+      up.modal.open({ url: '/foo', target: '.list' })
+
+  This will request `/foo`, extract the `.list` selector from the response
+  and open the selected container in a modal dialog.
+
+  @method up.modal.open
+  @param {String} options.url
+    The URL to load.
+  @param {String} options.target
+    The CSS selector to extract from the response.
+    The extracted content will be placed into the dialog window.
+  @param {Object} options
+    See options for [previous `up.modal.open` variant](#up.modal.open).
   ###
   open = (args...) ->
     if u.isObject(args[0]) && !u.isElement(args[0]) && !u.isJQuery(args[0])

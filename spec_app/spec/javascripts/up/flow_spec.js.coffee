@@ -1,4 +1,6 @@
 describe 'up.flow', ->
+
+  u = up.util
   
   describe 'Javascript functions', ->
 
@@ -8,9 +10,9 @@ describe 'up.flow', ->
 
         beforeEach ->
 
-          affix('.before').text('old-before')
-          affix('.middle').text('old-middle')
-          affix('.after').text('old-after')
+          @oldBefore = affix('.before').text('old-before')
+          @oldMiddle = affix('.middle').text('old-middle')
+          @oldAfter = affix('.after').text('old-after')
 
           @responseText =
             """
@@ -62,6 +64,7 @@ describe 'up.flow', ->
           @respond()
           @request.then ->
             expect($('.before')).toHaveText('old-before')
+            console.log("foooo", $('.middle').text())
             expect($('.middle')).toHaveText('new-middleold-middle')
             expect($('.after')).toHaveText('old-after')
             done()
@@ -110,6 +113,47 @@ describe 'up.flow', ->
             expect(window.scriptTagExecuted).not.toHaveBeenCalledWith('before')
             expect(window.scriptTagExecuted).toHaveBeenCalledWith('middle')
             done()
+
+        describe 'automatic scrolling', ->
+
+          beforeEach ->
+            @revealedHTML = ''
+            spyOn(up, 'reveal').and.callFake ($revealedElement) =>
+              @revealedHTML = $revealedElement.get(0).outerHTML
+              u.resolvedPromise()
+
+          it 'reveals an old element before it is being replaced', (done) ->
+            @request = up.replace('.middle', '/path')
+            @respond()
+            @request.then =>
+              expect(up.reveal).toHaveBeenCalledWith(@oldMiddle, jasmine.any(Object))
+              done()
+
+          it 'reveals a new element that is being appended', (done) ->
+            @request = up.replace('.middle:after', '/path')
+            @respond()
+            @request.then =>
+              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle, jasmine.any(Object))
+              # Text nodes are wrapped in a .up-insertion container so we can
+              # animate them and measure their position/size for scrolling.
+              # This is not possible for container-less text nodes.
+              expect(@revealedHTML).toEqual('<span class="up-insertion">new-middle</span>')
+              # Show that the wrapper is done after the insertion.
+              expect($('.up-insertion')).not.toExist()
+              done()
+
+          it 'reveals a new element that is being prepended', (done) ->
+            @request = up.replace('.middle:before', '/path')
+            @respond()
+            @request.then =>
+              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle, jasmine.any(Object))
+              # Text nodes are wrapped in a .up-insertion container so we can
+              # animate them and measure their position/size for scrolling.
+              # This is not possible for container-less text nodes.
+              expect(@revealedHTML).toEqual('<span class="up-insertion">new-middle</span>')
+              # Show that the wrapper is done after the insertion.
+              expect($('.up-insertion')).not.toExist()
+              done()
 
       else
         

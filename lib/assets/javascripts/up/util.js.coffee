@@ -63,7 +63,7 @@ up.util = (->
       # https://gist.github.com/jlong/2428561#comment-1461205
       anchor.href = anchor.href if isBlank(anchor.hostname)
     else
-      anchor = unwrap(urlOrAnchor)
+      anchor = unJquery(urlOrAnchor)
     normalized = anchor.protocol + "//" + anchor.hostname
     normalized += ":#{anchor.port}" unless isStandardPort(anchor.protocol, anchor.port)
     pathname = anchor.pathname
@@ -142,7 +142,7 @@ up.util = (->
   stringifyConsoleArgs = (args) ->
     message = args[0]
     i = 0
-    maxLength = 30
+    maxLength = 50
     message.replace CONSOLE_PLACEHOLDERS, ->
       i += 1
       arg = args[i]
@@ -150,11 +150,13 @@ up.util = (->
       if argType == 'string'
         arg = arg.replace(/\s+/g, ' ')
         arg = "#{arg.substr(0, maxLength)}…" if arg.length > maxLength
-        "\"#{arg}\""
+        arg = "\"#{arg}\""
       else if argType == 'number'
-        arg.toString()
+        arg = arg.toString()
       else
-        "(#{argType})"
+        arg = JSON.stringify(arg)
+        arg = "#{arg.substr(0, maxLength)}…" if arg.length > maxLength
+      arg
 
   createSelectorFromElement = ($element) ->
     debug("Creating selector from element %o", $element)
@@ -227,6 +229,8 @@ up.util = (->
 
   map = each
 
+  identity = (x) -> x
+
   times = (count, block) ->
     block(iteration) for iteration in [0..(count - 1)]
 
@@ -296,7 +300,7 @@ up.util = (->
     else
       extend({}, object)
 
-  unwrap = (object) ->
+  unJquery = (object) ->
     if isJQuery(object)
       object.get(0)
     else
@@ -646,6 +650,14 @@ up.util = (->
     hash.reset()
     hash
 
+  unwrapElement = (wrapper) ->
+    wrapper = unJquery(wrapper)
+    parent = wrapper.parentNode;
+    wrappedNodes = toArray(wrapper.childNodes)
+    each wrappedNodes, (wrappedNode) ->
+      parent.insertBefore(wrappedNode, wrapper)
+    parent.removeChild(wrapper)
+
   presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl
@@ -665,6 +677,7 @@ up.util = (->
   warn: warn
   each: each
   map: map
+  identity: identity
   times: times
   detect: detect
   select: select
@@ -691,7 +704,7 @@ up.util = (->
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   nullJquery: nullJquery
-  unwrap: unwrap
+  unJquery: unJquery
   nextFrame: nextFrame
   measure: measure
   temporaryCss: temporaryCss
@@ -723,5 +736,6 @@ up.util = (->
   memoize: memoize
   scrollbarWidth: scrollbarWidth
   config: config
+  unwrapElement: unwrapElement
 
 )()

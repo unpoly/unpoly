@@ -48,7 +48,11 @@ up.flow = (->
     If omitted or true, the `url` argument will be used.
     If set to `false`, the history will remain unchanged.
   @param {String|Boolean} [options.source=true]
-  @param {String} [options.scroll='body']
+  @param {String} [options.scroll]
+    Up.js will try to [reveal](/up.layout#up.reveal) the element being updated, by
+    scrolling its containing viewport. Set this option to `false` to prevent any scrolling.
+
+    If omitted, this will use the [default from `up.layout`](/up.layout#up.layout.defaults).
   @param {Boolean} [options.cache]
     Whether to use a [cached response](/up.proxy) if available.
   @param {String} [options.historyMethod='push']
@@ -131,7 +135,7 @@ up.flow = (->
       options.history = null
 
     if u.castsToFalse(options.scroll)
-      options.scroll = null
+      options.scroll = false
 
     options.source = u.option(options.source, options.history)
     response = parseResponse(html)
@@ -139,9 +143,8 @@ up.flow = (->
 
     for step in parseImplantSteps(selector, options)
       $old = findOldFragment(step.selector)
-      $new = response.find(step.selector)
-      prepareForReplacement($old, options).then ->
-        swapElements($old, $new, step.pseudoClass, step.transition, options)
+      $new = response.find(step.selector).first()
+      swapElements($old, $new, step.pseudoClass, step.transition, options)
 
   findOldFragment = (selector) ->
     # Prefer to replace fragments in an open popup or modal
@@ -167,15 +170,9 @@ up.flow = (->
       else
         u.error("Could not find selector %o in response %o", selector, html)
 
-  prepareForReplacement = ($element, options) ->
-    # Ensure that all transitions and animations have completed.
-    up.motion.finish($element)
-    # Make sure the old element is visible in the viewport
-    # to mimick browser behavior during a page switch.
-    reveal($element, options.scroll)
-
-  reveal = ($element, viewport) ->
-    if viewport # empty strings are falsish in Javascript
+  reveal = ($element, options) ->
+    viewport = options.scroll
+    if viewport != false
       up.reveal($element, viewport: viewport)
     else
       u.resolvedDeferred()
@@ -195,33 +192,50 @@ up.flow = (->
 
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'
+
+    # Ensure that all transitions and animations have completed.
+    up.motion.finish($old)
+
     if pseudoClass
       insertionMethod = if pseudoClass == 'before' then 'prepend' else 'append'
-      # Keep a reference to the children append/prepend because
-      # we need to compile them further down. Note that since we're
-      # prepending/appending instead of rpelacing, `$new` will not
-      # actually be inserted into the DOM, only its children.
-      $addedChildren = $new.children()
-      # Insert contents() instead of $children since contents()
-      # also includes text nodes.
-      $old[insertionMethod]($new.contents())
+
+      # Text nodes are wrapped in a .up-insertion container so we can
+      # animate them and measure their position/size for scrolling.
+      # This is not possible for container-less text nodes.
+      $wrapper = $new.contents().wrap('<span class="up-insertion"></span>').parent()
+
+      # Note that since we're prepending/appending instead of replacing,
+      # `$new` will not actually be inserted into the DOM, only its children.
+      $old[insertionMethod]($wrapper)
+
       u.copyAttributes($new, $old)
-      elementsInserted($addedChildren, options)
-      # Since we're adding content instead of replacing, we'll only
-      # animate $new instead of morphing between $old and $new
-      up.animate($new, transition, options)
+      elementsInserted($wrapper.children(), options)
+
+      # Show the first element that was being prepended/appended.
+      reveal($wrapper, options)
+        .then ->
+          # Since we're adding content instead of replacing, we'll only
+          # animate $new instead of morphing between $old and $new
+          return up.animate($wrapper, transition, options)
+        .then ->
+          u.unwrapElement($wrapper)
+          return
     else
-      # Wrap the replacement as a destroy animation, so $old will
-      # get marked as .up-destroying right away.
-      destroy $old, animation: ->
-        # Don't insert the new element after the old element.
-        # For some reason this will make the browser scroll to the
-        # bottom of the new element.
-        $new.insertBefore($old)
-        elementsInserted($new, options)
-        if $old.is('body') && transition != 'none'
-          u.error('Cannot apply transitions to body-elements (%o)', transition)
-        up.morph($old, $new, transition, options)
+      # Make sure the old element is visible before replacing it.
+      # This mimicks what the browser does during a full page load.
+      reveal($old, options)
+        .then ->
+          # Wrap the replacement as a destroy animation, so $old will
+          # get marked as .up-destroying right away.
+          destroy $old, animation: ->
+            # Don't insert the new element after the old element.
+            # For some reason this will make the browser scroll to the
+            # bottom of the new element.
+            $new.insertBefore($old)
+            elementsInserted($new, options)
+            if $old.is('body') && transition != 'none'
+              u.error('Cannot apply transitions to body-elements (%o)', transition)
+            up.morph($old, $new, transition, options)
 
   parseImplantSteps = (selector, options) ->
     transitionString = options.transition || options.animation || 'none'
@@ -301,8 +315,8 @@ up.flow = (->
     animationPromise = u.presence(options.animation, u.isPromise) ||
       up.motion.animate($element, options.animation, animateOptions)
     animationPromise.then -> $element.remove()
-    
-      
+    animationPromise
+
   ###*
   Replaces the given selector or element with a fresh copy
   fetched from the server.
