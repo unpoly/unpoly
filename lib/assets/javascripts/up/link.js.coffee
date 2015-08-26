@@ -98,13 +98,16 @@ up.link = (->
   @method up.visit
   @param {String} url
     The URL to visit.
+  @param {String} [options.target='body']
+    The selector to replace.
+    See options for [`up.replace`](/up.flow#up.replace)
   @param {Object} options
     See options for [`up.replace`](/up.flow#up.replace)
   ###
   visit = (url, options) ->
-    u.debug "Visiting #{url}"
-    # options = util.options(options, )
-    up.replace('body', url, options)
+    options = u.options(options)
+    selector = u.option(options.target, 'body')
+    up.replace(selector, url, options)
 
   ###*
   Follows the given link via AJAX and replaces a CSS selector in the current page
