@@ -19,12 +19,14 @@ up.layout = (->
   @param {String} [options.fixedBottom]
   @param {Number} [options.duration]
   @param {String} [options.easing]
+  @param {Number} [options.snap]
   ###
   config = u.config
     duration: 0
     viewport: 'body, .up-modal, [up-viewport]'
     fixedTop: '[up-fixed~=top]'
     fixedBottom: '[up-fixed~=bottom]'
+    snap: 50
     easing: 'swing'
 
   reset = ->
@@ -57,6 +59,7 @@ up.layout = (->
   is called a second time, the previous animation will instantly jump to the
   last frame before the next animation is started.
 
+  @protected
   @method up.scroll
   @param {String|Element|jQuery} viewport
     The container element to scroll.
@@ -161,6 +164,7 @@ up.layout = (->
   @param {String|Element|jQuery} [options.viewport]
   @param {Number} [options.duration]
   @param {String} [options.easing]
+  @param {String} [options.snap]
   @return {Deferred}
     A promise that will be resolved when the element is revealed.
   ###
@@ -168,6 +172,8 @@ up.layout = (->
     options = u.options(options)
     $element = $(elementOrSelector)
     $viewport = findViewport($element, options.viewport)
+
+    snap = u.option(options.snap, config.snap)
 
     viewportIsBody = $viewport.is('body')
     viewportHeight = if viewportIsBody then u.clientSize().height else $viewport.height()
@@ -205,6 +211,9 @@ up.layout = (->
     if firstElementRow < predictFirstVisibleRow()
       # If the full element does not fit, scroll to the first row
       newScrollPos = firstElementRow - obstruction.top
+
+    if newScrollPos < snap
+      newScrollPos = 0
 
     if newScrollPos != originalScrollPos
       scroll($viewport, newScrollPos, options)

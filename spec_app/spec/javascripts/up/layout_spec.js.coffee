@@ -6,6 +6,9 @@ describe 'up.layout', ->
 
     describe 'up.reveal', ->
 
+      beforeEach ->
+        up.layout.defaults(snap: 0)
+
       describe 'when the container is body', ->
 
         beforeEach ->
@@ -51,6 +54,30 @@ describe 'up.layout', ->
           # [2] ch+50 ... ch+5049
           # ---------------------
           expect(@$viewport.scrollTop()).toBe(@clientHeight + 50)
+
+        it 'snaps to the top if the space above the future-visible area is smaller than the value of config.snap', ->
+
+          up.layout.defaults(snap: 30)
+
+          @$elements[0].css(height: '20px')
+
+          up.reveal(@$elements[2], viewport: @$viewport)
+          # [0] 0 ............ 19
+          # [1] 20 ........... 69
+          # ---------------------
+          # [2] 70 ......... 5069
+          # ---------------------
+          expect(@$viewport.scrollTop()).toBe(70)
+
+          # Even though we're revealing the second element, the viewport
+          # snaps to the top edge.
+          up.reveal(@$elements[1], viewport: @$viewport)
+          # ---------------------
+          # [0] 0 ............ 19
+          # [1] 20 ........... 69
+          # ---------------------
+          # [2] 70 ......... 5069
+          expect(@$viewport.scrollTop()).toBe(0)
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the top', ->
           $topNav = affix('[up-fixed=top]').css(
