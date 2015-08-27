@@ -544,20 +544,6 @@ up.util = (->
       if attr.specified
         $target.attr(attr.name, attr.value)
 
-  prependGhost = ($element) ->
-    dimensions = measure($element, relative: true, inner: true)
-    $ghost = $element.clone()
-    $ghost.find('script').remove()
-    $ghost.css
-      right: ''
-      bottom: ''
-#      margin: 0
-      position: 'absolute'
-    $ghost.css(dimensions)
-    $ghost.addClass('up-ghost')
-    $ghost.insertBefore($element)
-#    $ghost.prependTo(document.body)
-
   findWithSelf = ($element, selector) ->
     $element.find(selector).addBack(selector)
 
@@ -711,7 +697,6 @@ up.util = (->
   cssAnimate: cssAnimate
   finishCssAnimate: finishCssAnimate
   forceCompositing: forceCompositing
-  prependGhost: prependGhost
   escapePressed: escapePressed
   copyAttributes: copyAttributes
   findWithSelf: findWithSelf

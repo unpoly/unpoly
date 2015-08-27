@@ -63,11 +63,16 @@ describe 'up.motion', ->
           expect($oldGhost).toExist()
           expect($newGhost).toExist()
 
+          $oldBounds = $oldGhost.parent('.up-bounds')
+          $newBounds = $newGhost.parent('.up-bounds')
+          expect($oldBounds).toExist()
+          expect($newBounds).toExist()
+
           # Ghosts should be inserted before (not after) the element
           # or the browser scroll position will be too low after the
           # transition ends.
-          expect($oldGhost.next()).toEqual($old)
-          expect($newGhost.next()).toEqual($new)
+          expect($oldGhost.parent().next()).toEqual($old)
+          expect($newGhost.parent().next()).toEqual($new)
 
           # The actual elements are hidden, but $old will take up its original
           # space until the animation completes.
@@ -82,14 +87,14 @@ describe 'up.motion', ->
 
           # Ghosts will hover over $old and $new using absolute positioning,
           # matching the coordinates of the original elements.
-          expect($oldGhost.css(['position', 'top', 'left', 'width', 'height'])).toEqual(
+          expect($oldBounds.css(['position', 'top', 'left', 'width', 'height'])).toEqual(
             position: 'absolute'
             top:      '10px'
             left:     '11px',
             width:    '12px',
             height:   '13px'
           )
-          expect($newGhost.css(['position', 'top', 'left', 'width', 'height'])).toEqual(
+          expect($newBounds.css(['position', 'top', 'left', 'width', 'height'])).toEqual(
             position: 'absolute'
             top:      '20px'
             left:     '21px',
@@ -166,4 +171,46 @@ describe 'up.motion', ->
 
       it 'should have tests'
 
-    
+    describe 'up.motion.prependGhost', ->
+
+      beforeEach ->
+        @$element = affix('.element')
+
+      afterEach ->
+        $('.up-bounds, .up-ghost').remove()
+
+      it 'clones the given element into a .up-ghost-bounds container and inserts it as a sibling before the element', ->
+        @$element.text('element text')
+        up.motion.prependGhost(@$element)
+        $bounds = @$element.prev()
+        expect($bounds).toExist()
+        expect($bounds).toHaveClass('up-bounds')
+        $ghost = $bounds.children(':first')# $ghost.find('.element')
+        expect($ghost).toExist()
+        expect($ghost).toHaveClass('element')
+        expect($ghost).toHaveText('element text')
+
+      it 'removes <script> tags from the cloned element', ->
+        $('<script></script>').appendTo(@$element)
+        up.motion.prependGhost(@$element)
+        $ghost = $('.up-ghost')
+        expect($ghost.find('script')).not.toExist()
+
+      it 'absolutely positions the ghost over the given element', ->
+        up.motion.prependGhost(@$element)
+        $ghost = $('.up-ghost')
+        expect($ghost.offset()).toEqual(@$element.offset())
+        expect($ghost.width()).toEqual(@$element.width())
+        expect($ghost.height()).toEqual(@$element.height())
+
+      it 'accurately positions the ghost over an element with margins', ->
+        @$element.css(margin: '40px')
+        up.motion.prependGhost(@$element)
+        $ghost = $('.up-ghost')
+        expect($ghost.offset()).toEqual(@$element.offset())
+
+      it "doesn't change the position of a child whose margins no longer collapse", ->
+        $child = $('<div class="child"></div>').css(margin: '40px').appendTo(@$element)
+        up.motion.prependGhost(@$element)
+        $clonedChild = $('.up-ghost .child')
+        expect($clonedChild.offset()).toEqual($child.offset())

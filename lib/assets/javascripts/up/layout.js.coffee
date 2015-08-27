@@ -50,10 +50,10 @@ up.layout = (->
 
   The scrolling can (optionally) be animated.
 
-    up.scoll('.main', 100, {
-      easing: 'swing',
-      duration: 250
-    });
+      up.scoll('.main', 100, {
+        easing: 'swing',
+        duration: 250
+      });
 
   If the given viewport is already in a scroll animation when `up.scroll`
   is called a second time, the previous animation will instantly jump to the
@@ -118,8 +118,8 @@ up.layout = (->
     measurePosition = (obstructor, cssAttr) ->
       $obstructor = $(obstructor)
       anchorPosition = $obstructor.css(cssAttr)
-      unless anchorPosition == '0' or u.endsWith(anchorPosition, 'px')
-        u.error("Fixed element must have an anchor position in px, but was %o", anchorPosition)
+      unless u.isPresent(anchorPosition)
+        u.error("Fixed element %o must have a CSS attribute %o", $obstructor, cssAttr)
       parseInt(anchorPosition) + $obstructor.height()
 
     fixedTopBottoms = for obstructor in $(config.fixedTop)

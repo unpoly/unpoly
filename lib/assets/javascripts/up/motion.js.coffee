@@ -154,25 +154,28 @@ up.motion = (->
   GHOSTING_PROMISE_KEY = 'up-ghosting-promise'
 
   withGhosts = ($old, $new, block) ->
-    $oldGhost = null
-    $newGhost = null
+    oldCopy = null
+    newCopy = null
+
     u.temporaryCss $new, display: 'none', ->
-      $oldGhost = u.prependGhost($old).addClass('up-destroying')
+      oldCopy = prependGhost($old)
+      oldCopy.$ghost.addClass('up-destroying')
+      oldCopy.$bounds.addClass('up-destroying')
     u.temporaryCss $old, display: 'none', ->
-      $newGhost = u.prependGhost($new)
+      newCopy = prependGhost($new)
     # $old should take up space in the page flow until the transition ends
     $old.css(visibility: 'hidden')
     
     showNew = u.temporaryCss($new, display: 'none')
-    promise = block($oldGhost, $newGhost)
+    promise = block(oldCopy.$ghost, newCopy.$ghost)
     $old.data(GHOSTING_PROMISE_KEY, promise)
     $new.data(GHOSTING_PROMISE_KEY, promise)
     
     promise.then ->
       $old.removeData(GHOSTING_PROMISE_KEY)
       $new.removeData(GHOSTING_PROMISE_KEY)
-      $oldGhost.remove()
-      $newGhost.remove()
+      oldCopy.$bounds.remove()
+      newCopy.$bounds.remove()
       # Now that the transition is over we show $new again.
       # Since we expect $old to be removed in a heartbeat,
       # $new should take up space
@@ -280,6 +283,42 @@ up.motion = (->
       # Skip ghosting and all the other stuff that can go wrong
       # in ancient browsers
       u.resolvedDeferred()
+
+  ###*
+  @private
+  ###
+  prependGhost = ($element) ->
+    elementDims = u.measure($element, relative: true, inner: true)
+
+    $ghost = $element.clone()
+    $ghost.find('script').remove()
+    $ghost.css
+      position: if $element.css('position') == 'static' then 'static' else 'relative'
+      top:    ''
+      right:  ''
+      bottom: ''
+      left:   ''
+      width:  '100%'
+      height: '100%'
+    $ghost.addClass('up-ghost')
+
+    # Wrap the ghost in another container so its margin can expand
+    # freely. If we would position the element directly (old implementation),
+    # it would gain a layout context which cannot be crossed by margins.
+    $bounds = $('<div class="up-bounds"></div>')
+    $bounds.css(position: 'absolute')
+    $bounds.css(elementDims)
+
+    $ghost.appendTo($bounds)
+    $bounds.insertBefore($element)
+
+    # Make sure that we don't shift a child element with margins
+    # that can no longer collapse against a previous sibling
+    diff = $ghost.offset().top - $element.offset().top
+    $bounds.css(top: elementDims.top - diff) if diff != 0
+
+    $ghost: $ghost
+    $bounds: $bounds
 
   ###*
   Defines a named transition.
@@ -500,6 +539,7 @@ up.motion = (->
   defaults: config.update
   none: none
   when: resolvableWhen
+  prependGhost: prependGhost
 
 )()
 
