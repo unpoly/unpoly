@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, prependGhost, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -676,23 +676,6 @@ If you use them in your own code, you will get hurt.
       }
       return results;
     };
-    prependGhost = function($element) {
-      var $ghost, dimensions;
-      dimensions = measure($element, {
-        relative: true,
-        inner: true
-      });
-      $ghost = $element.clone();
-      $ghost.find('script').remove();
-      $ghost.css({
-        right: '',
-        bottom: '',
-        position: 'absolute'
-      });
-      $ghost.css(dimensions);
-      $ghost.addClass('up-ghost');
-      return $ghost.insertBefore($element);
-    };
     findWithSelf = function($element, selector) {
       return $element.find(selector).addBack(selector);
     };
@@ -893,7 +876,6 @@ If you use them in your own code, you will get hurt.
       cssAnimate: cssAnimate,
       finishCssAnimate: finishCssAnimate,
       forceCompositing: forceCompositing,
-      prependGhost: prependGhost,
       escapePressed: escapePressed,
       copyAttributes: copyAttributes,
       findWithSelf: findWithSelf,
@@ -1245,10 +1227,10 @@ This modules contains functions to scroll the viewport and reveal contained elem
     
     The scrolling can (optionally) be animated.
     
-      up.scoll('.main', 100, {
-        easing: 'swing',
-        duration: 250
-      });
+        up.scoll('.main', 100, {
+          easing: 'swing',
+          duration: 250
+        });
     
     If the given viewport is already in a scroll animation when `up.scroll`
     is called a second time, the previous animation will instantly jump to the
@@ -1316,8 +1298,8 @@ This modules contains functions to scroll the viewport and reveal contained elem
         var $obstructor, anchorPosition;
         $obstructor = $(obstructor);
         anchorPosition = $obstructor.css(cssAttr);
-        if (!(anchorPosition === '0' || u.endsWith(anchorPosition, 'px'))) {
-          u.error("Fixed element must have an anchor position in px, but was %o", anchorPosition);
+        if (!u.isPresent(anchorPosition)) {
+          u.error("Fixed element %o must have a CSS attribute %o", $obstructor, cssAttr);
         }
         return parseInt(anchorPosition) + $obstructor.height();
       };
@@ -2475,7 +2457,7 @@ We need to work on this page:
 
 (function() {
   up.motion = (function() {
-    var GHOSTING_PROMISE_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, findAnimation, finish, finishGhosting, morph, none, reset, resolvableWhen, snapshot, transition, transitions, u, withGhosts;
+    var GHOSTING_PROMISE_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, findAnimation, finish, finishGhosting, morph, none, prependGhost, reset, resolvableWhen, snapshot, transition, transitions, u, withGhosts;
     u = up.util;
     animations = {};
     defaultAnimations = {};
@@ -2609,18 +2591,20 @@ We need to work on this page:
     };
     GHOSTING_PROMISE_KEY = 'up-ghosting-promise';
     withGhosts = function($old, $new, block) {
-      var $newGhost, $oldGhost, promise, showNew;
-      $oldGhost = null;
-      $newGhost = null;
+      var newCopy, oldCopy, promise, showNew;
+      oldCopy = null;
+      newCopy = null;
       u.temporaryCss($new, {
         display: 'none'
       }, function() {
-        return $oldGhost = u.prependGhost($old).addClass('up-destroying');
+        oldCopy = prependGhost($old);
+        oldCopy.$ghost.addClass('up-destroying');
+        return oldCopy.$bounds.addClass('up-destroying');
       });
       u.temporaryCss($old, {
         display: 'none'
       }, function() {
-        return $newGhost = u.prependGhost($new);
+        return newCopy = prependGhost($new);
       });
       $old.css({
         visibility: 'hidden'
@@ -2628,14 +2612,14 @@ We need to work on this page:
       showNew = u.temporaryCss($new, {
         display: 'none'
       });
-      promise = block($oldGhost, $newGhost);
+      promise = block(oldCopy.$ghost, newCopy.$ghost);
       $old.data(GHOSTING_PROMISE_KEY, promise);
       $new.data(GHOSTING_PROMISE_KEY, promise);
       promise.then(function() {
         $old.removeData(GHOSTING_PROMISE_KEY);
         $new.removeData(GHOSTING_PROMISE_KEY);
-        $oldGhost.remove();
-        $newGhost.remove();
+        oldCopy.$bounds.remove();
+        newCopy.$bounds.remove();
         $old.css({
           display: 'none'
         });
@@ -2748,6 +2732,46 @@ We need to work on this page:
       } else {
         return u.resolvedDeferred();
       }
+    };
+
+    /**
+    @private
+     */
+    prependGhost = function($element) {
+      var $bounds, $ghost, diff, elementDims;
+      elementDims = u.measure($element, {
+        relative: true,
+        inner: true
+      });
+      $ghost = $element.clone();
+      $ghost.find('script').remove();
+      $ghost.css({
+        position: $element.css('position') === 'static' ? 'static' : 'relative',
+        top: '',
+        right: '',
+        bottom: '',
+        left: '',
+        width: '100%',
+        height: '100%'
+      });
+      $ghost.addClass('up-ghost');
+      $bounds = $('<div class="up-bounds"></div>');
+      $bounds.css({
+        position: 'absolute'
+      });
+      $bounds.css(elementDims);
+      $ghost.appendTo($bounds);
+      $bounds.insertBefore($element);
+      diff = $ghost.offset().top - $element.offset().top;
+      if (diff !== 0) {
+        $bounds.css({
+          top: elementDims.top - diff
+        });
+      }
+      return {
+        $ghost: $ghost,
+        $bounds: $bounds
+      };
     };
 
     /**
@@ -2987,7 +3011,8 @@ We need to work on this page:
       animation: animation,
       defaults: config.update,
       none: none,
-      when: resolvableWhen
+      when: resolvableWhen,
+      prependGhost: prependGhost
     };
   })();
 
