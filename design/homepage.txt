@@ -1,0 +1,236 @@
+
+
+
+  PROGRESSIVE ENHANCEMENT, RELOADED
+  
+  
+  
+  Demo
+  
+    Update a page fragment via AJAX
+
+
+
+    Animate a page transition
+
+
+
+    Open a link in a modal dialog
+
+
+
+    Custom HTML tags
+  
+  Batteries included
+  
+    We will ship a basic implementation for the most established
+    UI patterns like navigation bars, infinite scrolling,
+    drop-down menus, modals dialogs, etc.
+    
+  Plays nice with existing Javascript
+  
+    Convert to up.compiler directives.
+  
+  Plays nice with existing styles
+  
+    Unoppinionated about style
+    Bootstrap users can include `up-bootstrap`.
+  
+  Plays nice with existing JS code
+
+    You can wire your existing JS code into the Up.js page flow.
+
+  URLs are important
+  
+    In Up.js every page or screen state has a URL which you can
+    bookmark and share. This also means you get all the SEO love from Google.
+
+  Server-side code should stay the same
+  
+    (Rewrite)
+
+  Lightweight
+  
+    Up.js is 13 KB gzipped. 
+    The only dependency is jQuery.
+
+  Both UJS and programmatic interfaces
+    
+    All Up.js functionality is available as both unobtrusive behavior
+    (through HTML attributes like up-target) and Javascript functions
+    for programmatic access and integration with your code.  
+  
+  
+
+
+
+
+
+
+
+
+
+.example
+  .example__column
+    .example__title
+      page.html
+    .example__asset
+      <%= ... %>
+  .example__column
+    .example__title
+      Demo
+    iframe.example__demo
+      
+    
+  
+
+
+
+Update a page fragment via AJAX:
+
+    <div class="story">
+      Story summary.
+      
+      <a href="full.html" up-target=".story">
+        Read full story
+      </a>
+    </div>
+    
+Animate a page transition:
+
+    <a href="/page/2" up-follow up-transition="move-right">Next page</a>
+
+    <div class="story">
+      Story summary.
+      
+      <a href="/stories/443/full" up-target=".story" up-transition="cross-fade">
+        Read full story
+      </a>
+    </div>
+
+    
+Infinite pagination:
+
+    <div class="stories">
+      <a href="/stories/1">Foo</a>
+      <a href="/stories/2">Bar</a>
+      <a href="/stories/3">Baz</a>
+    </div>
+
+    <a href="/pages/2" class="load-more" up-target=".stories:after, .load-more">
+      Load more
+    </a>
+    
+Open a link in a modal dialog:
+
+    <a href="/login" up-modal=".content">
+      Log in to continue
+    </a>
+    
+    
+    
+Custom tag:
+
+
+
+/examples/timestamp-tag/
+
+  page.html
+
+    <p>
+      The time is <timestamp />
+    </p>
+    
+  scripts.js
+    
+    up.compiler('timestamp', function($element) {
+      now = new Date();
+      $element.text(now);
+    });
+    
+    
+
+
+/examples/clock-tag/
+
+  page.html
+
+    <clock />
+    
+  scripts.js
+
+    up.compiler('clock', function($element) {
+
+      function update() {
+        var now = new Date();
+        $element.text(now);
+      }
+
+      setInterval(update, 1000);
+
+      return function() { clearInterval(update) };
+
+    });
+
+
+
+
+/examples/transition
+
+  story1.html
+  
+    <div class="story">
+
+      <h1>The first story</h1>
+
+      <a href="story2.html" up-transition="move-left">
+        Show next story
+      </a>
+    </div>  
+  
+  story2.html
+
+    <div class="story">
+    
+      <h1>The second story</h1>
+    
+      <a href="story1.html" up-transition="move-right">
+        Show previous story
+      </a>
+    </div>
+
+
+
+
+
+
+
+
+/examples/transition
+
+  summary.html
+  
+    <div class="story">
+      Story summary.
+      
+      <a href="full" up-target=".story" up-transition="cross-fade">
+        Read full story
+      </a>
+    </div>  
+  
+  full.html
+
+    <div class="story">
+      Full story here
+
+      <a href="summary" up-target=".story" up-transition="cross-fade">
+        Show summary
+      </a>
+    </div>
+    
+
+
+
+Example:
+
+  
