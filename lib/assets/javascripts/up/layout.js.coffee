@@ -14,18 +14,18 @@ up.layout = (->
 
 
   @method up.layout.defaults
-  @param {String} [options.viewport]
-  @param {String} [options.fixedTop]
-  @param {String} [options.fixedBottom]
+  @param {Array<String>} [options.viewports]
+  @param {Array<String>} [options.fixedTop]
+  @param {Array<String>} [options.fixedBottom]
   @param {Number} [options.duration]
   @param {String} [options.easing]
   @param {Number} [options.snap]
   ###
   config = u.config
     duration: 0
-    viewport: 'body, .up-modal, [up-viewport]'
-    fixedTop: '[up-fixed~=top]'
-    fixedBottom: '[up-fixed~=bottom]'
+    viewports: ['body', '.up-modal', '[up-viewport]']
+    fixedTop: ['[up-fixed~=top]']
+    fixedBottom: ['[up-fixed~=bottom]']
     snap: 50
     easing: 'swing'
 
@@ -122,10 +122,10 @@ up.layout = (->
         u.error("Fixed element %o must have a CSS attribute %o", $obstructor, cssAttr)
       parseInt(anchorPosition) + $obstructor.height()
 
-    fixedTopBottoms = for obstructor in $(config.fixedTop)
+    fixedTopBottoms = for obstructor in $(config.fixedTop.join(', '))
       measurePosition(obstructor, 'top')
 
-    fixedBottomTops = for obstructor in $(config.fixedBottom)
+    fixedBottomTops = for obstructor in $(config.fixedBottom.join(', '))
       measurePosition(obstructor, 'bottom')
 
     top: Math.max(0, fixedTopBottoms...)
@@ -231,7 +231,7 @@ up.layout = (->
     if u.isJQuery(viewportSelectorOrElement)
       $viewport = viewportSelectorOrElement
     else
-      vieportSelector = u.presence(viewportSelectorOrElement) || config.viewport
+      vieportSelector = u.presence(viewportSelectorOrElement) || config.viewports.join(', ')
       $viewport = $element.closest(vieportSelector)
 
     $viewport.length or u.error("Could not find viewport for %o", $element)

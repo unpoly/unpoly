@@ -23,16 +23,16 @@ up.navigation = (->
     The class to set on [links that point the current location](#up-current).
   ###
   config = u.config
-    currentClass: 'up-current'
+    currentClasses: ['up-current']
 
   reset = ->
     config.reset()
 
   currentClass = ->
-    klass = config.currentClass
-    unless u.contains(klass, 'up-current')
-      klass += ' up-current'
-    klass
+    classes = config.currentClasses
+    classes = classes.concat(['up-current'])
+    classes = u.uniq(classes)
+    classes.join(' ')
 
   CLASS_ACTIVE = 'up-active'
   SELECTORS_SECTION = ['a', '[up-href]', '[up-alias]']
