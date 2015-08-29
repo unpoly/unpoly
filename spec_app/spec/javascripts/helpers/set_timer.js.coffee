@@ -1,3 +1,3 @@
-@setTimer = (millis, fun) ->
-  setTimeout(fun, millis)
-
+beforeEach ->
+  @setTimer = (millis, fun) ->
+    setTimeout(fun, millis)

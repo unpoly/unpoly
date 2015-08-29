@@ -1,5 +1,7 @@
 describe 'up.link', ->
-  
+
+  u = up.util
+
   describe 'Javascript functions', ->
   
     describe 'up.follow', ->
@@ -35,6 +37,60 @@ describe 'up.link', ->
           up.follow($link)
           request = jasmine.Ajax.requests.mostRecent()
           expect(request.method).toBe('PUT')
+
+        it 'adds a push-state entry', (done) ->
+
+          # By default, up.history will replace the <body> tag when
+          # the user presses the back-button. We reconfigure this
+          # so we don't lose the Jasmine runner interface.
+          up.history.defaults
+            popTarget: '.container'
+
+          lastRequest = ->
+            jasmine.Ajax.requests.mostRecent()
+
+          respondWith = (html) ->
+            lastRequest().respondWith
+              status: 200
+              contentType: 'text/html'
+              responseText: "<div class='container'><div class='target'>#{html}</div></div>"
+
+          followAndRespond = ($link, html) ->
+            promise = up.follow($link)
+            respondWith(html)
+            promise
+
+          $link1 = affix('a[href="/one"][up-target=".target"]')
+          $link2 = affix('a[href="/two"][up-target=".target"]')
+          $link3 = affix('a[href="/three"][up-target=".target"]')
+          $container = affix('.container')
+          $target = affix('.target').appendTo($container).text('original text')
+
+          followAndRespond($link1, 'text from one').then =>
+            expect($('.target')).toHaveText('text from one')
+            expect(location.pathname).toEqual('/one')
+
+            followAndRespond($link2, 'text from two').then =>
+              expect($('.target')).toHaveText('text from two')
+              expect(location.pathname).toEqual('/two')
+
+              followAndRespond($link3, 'text from three').then =>
+                expect($('.target')).toHaveText('text from three')
+                expect(location.pathname).toEqual('/three')
+
+                history.back()
+                @setTimer 50, =>
+                  respondWith('restored text from two')
+                  expect($('.target')).toHaveText('restored text from two')
+                  expect(location.pathname).toEqual('/two')
+
+                  history.back()
+                  @setTimer 50, =>
+                    respondWith('restored text from one')
+                    expect($('.target')).toHaveText('restored text from one')
+                    expect(location.pathname).toEqual('/one')
+
+                    done()
 
       else
         

@@ -15,6 +15,16 @@ We need to work on this page:
 up.history = (->
   
   u = up.util
+
+  ###*
+  @method up.history.defaults
+  @param [options.popTarget]
+  ###
+  config = u.config
+    popTarget: 'body'
+
+  reset = ->
+    config.reset()
   
   isCurrentUrl = (url) ->
     u.normalizeUrl(url, hash: true) == u.normalizeUrl(up.browser.url(), hash: true)
@@ -22,6 +32,7 @@ up.history = (->
   ###*
   @method up.history.replace
   @param {String} url
+  @param {Boolean} [options.force=false]
   @protected
   ###
   replace = (url, options) ->
@@ -48,18 +59,27 @@ up.history = (->
     state = event.originalEvent.state
     if state?.fromUp
       u.debug "Restoring state %o (now on #{up.browser.url()})", state
-      up.visit up.browser.url(), historyMethod: 'replace'
+      up.replace config.popTarget, up.browser.url(), historyMethod: 'replace'
     else
       u.debug 'Discarding unknown state %o', state
 
-  # Defeat an unnecessary popstate that some browsers trigger on pageload (Chrome?).
-  # We should check in 2016 if we can remove this.
   if up.browser.canPushState()
-    setTimeout (->
+    register = ->
       $(window).on "popstate", pop
       replace(up.browser.url(), force: true)
-    ), 200
 
+    if jasmine?
+      # Can't delay this in tests.
+      register()
+    else
+      # Defeat an unnecessary popstate that some browsers trigger
+      # on pageload (Safari, Chrome < 34).
+      # We should check in 2023 if we can remove this.
+      setTimeout register, 100
+
+  up.bus.on 'framework:reset', reset
+
+  defaults: config.update
   push: push
   replace: replace
 

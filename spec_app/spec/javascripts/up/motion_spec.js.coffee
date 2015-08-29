@@ -11,11 +11,11 @@ describe 'up.motion', ->
           opacity = -> Number($element.css('opacity'))
           up.animate($element, 'fade-in', duration: 100, easing: 'linear')
 
-          setTimer 0, ->
+          @setTimer 0, ->
             expect(opacity()).toBeAround(0.0, 0.25)
-          setTimer 50, ->
+          @setTimer 50, ->
             expect(opacity()).toBeAround(0.5, 0.25)
-          setTimer 100, ->
+          @setTimer 100, ->
             expect(opacity()).toBeAround(1.0, 0.25)
             done()
 
@@ -104,19 +104,19 @@ describe 'up.motion', ->
 
           opacity = ($element) -> Number($element.css('opacity'))
 
-          setTimer 0, ->
+          @setTimer 0, ->
             expect(opacity($newGhost)).toBeAround(0.0, 0.25)
             expect(opacity($oldGhost)).toBeAround(1.0, 0.25)
 
-          setTimer 40, ->
+          @setTimer 40, ->
             expect(opacity($newGhost)).toBeAround(0.4, 0.25)
             expect(opacity($oldGhost)).toBeAround(0.6, 0.25)
 
-          setTimer 70, ->
+          @setTimer 70, ->
             expect(opacity($newGhost)).toBeAround(0.7, 0.25)
             expect(opacity($oldGhost)).toBeAround(0.3, 0.25)
 
-          setTimer 125, ->
+          @setTimer 125, ->
             # Once our two ghosts have rendered their visual effect,
             # we remove them from the DOM.
             expect($newGhost).not.toBeInDOM()

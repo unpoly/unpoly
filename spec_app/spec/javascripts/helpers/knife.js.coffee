@@ -59,7 +59,7 @@
   me.reset = reset
   me.cleaners = []
 
-  if jasmine
+  if jasmine?
     me.point = "(#{contextBleeder.toString()})()"
     # Jasmine defines afterEach on window
     afterEach reset
