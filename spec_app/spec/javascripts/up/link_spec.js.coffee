@@ -38,7 +38,7 @@ describe 'up.link', ->
           request = jasmine.Ajax.requests.mostRecent()
           expect(request.method).toBe('PUT')
 
-        it 'adds a push-state entry', (done) ->
+        it 'adds history entries and allows the user to use the back- and forward-buttons', (done) ->
 
           # By default, up.history will replace the <body> tag when
           # the user presses the back-button. We reconfigure this
@@ -90,7 +90,13 @@ describe 'up.link', ->
                     expect($('.target')).toHaveText('restored text from one')
                     expect(location.pathname).toEqual('/one')
 
-                    done()
+                    history.forward()
+                    @setTimer 150, =>
+                      # Since the response is cached, we don't have to respond
+                      expect($('.target')).toHaveText('restored text from two')
+                      expect(location.pathname).toEqual('/two')
+
+                      done()
 
       else
         
