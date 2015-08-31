@@ -2,10 +2,10 @@
 #= require up/util
 #= require up/browser
 #= require up/bus
-#= require up/layout
-#= require up/flow
 #= require up/magic
 #= require up/history
+#= require up/layout
+#= require up/flow
 #= require up/motion
 #= require up/proxy
 #= require up/link

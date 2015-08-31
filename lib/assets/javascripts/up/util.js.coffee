@@ -265,7 +265,10 @@ up.util = (->
 
   isString = (object) ->
     typeof(object) == 'string'
-    
+
+  isNumber = (object) ->
+    typeof(object) == 'number'
+
   isHash = (object) ->
     typeof(object) == 'object' && !!object
 
@@ -559,11 +562,19 @@ up.util = (->
   contains = (stringOrArray, element) ->
     stringOrArray.indexOf(element) >= 0
 
-  castsToTrue = (object) ->
-    String(object) == "true"
-    
-  castsToFalse = (object) ->
-    String(object) == "false"
+  castedAttr = ($element, attrName) ->
+    value = $element.attr(attrName)
+    switch value
+      when 'false'  then false
+      when 'true'   then true
+      when ''       then true
+      else value # other strings, undefined, null, ...
+
+#  castsToTrue = (object) ->
+#    String(object) == "true"
+#
+#  castsToFalse = (object) ->
+#    String(object) == "false"
     
   locationFromXhr = (xhr) ->
     xhr.getResponseHeader('X-Up-Location')
@@ -618,20 +629,138 @@ up.util = (->
       array.splice(index, 1)
       element
 
+  ###*
+  @method up.util.cache
+  @param {Number|Function} [config.size]
+    Maximum number of cache entries.
+    Set to `undefined` to not limit the cache size.
+  @param {Number|Function} [config.expiry]
+    The number of milliseconds after which a cache entry
+    will be discarded.
+  @param {String} [config.log]
+    A prefix for log entries printed by this cache object.
+  ###
+  cache = (config) ->
+
+    store = undefined
+
+    clear = ->
+      store = {}
+
+    clear()
+
+    log = (args...) ->
+      if config.log
+        args[0] = "[#{config.log}] #{args[0]}"
+        debug(args...)
+
+    maxSize = ->
+      if isMissing(config.size)
+        undefined
+      else if isFunction(config.size)
+        config.size()
+      else if isNumber(config.size)
+        config.size
+      else
+        error("Invalid size config: %o", config.size)
+
+    expiryMilis = ->
+      if isMissing(config.expiry)
+        undefined
+      else if isFunction(config.expiry)
+        config.expiry()
+      else if isNumber(config.expiry)
+        config.expiry
+      else
+        error("Invalid expiry config: %o", config.expiry)
+
+    normalizeStoreKey = (key) ->
+      if config.key
+        config.key(key)
+      else
+        key.toString()
+
+    trim = ->
+      storeKeys = copy(keys(store))
+      size = maxSize()
+      if size && storeKeys.length > size
+        oldestKey = null
+        oldestTimestamp = null
+        each storeKeys, (key) ->
+          promise = store[key] # we don't need to call cacheKey here
+          timestamp = promise.timestamp
+          if !oldestTimestamp || oldestTimestamp > timestamp
+            oldestKey = key
+            oldestTimestamp = timestamp
+        delete store[oldestKey] if oldestKey
+
+    alias = (oldKey, newKey) ->
+      value = get(oldKey)
+      if isDefined(value)
+        set(newKey, value)
+
+    timestamp = ->
+      (new Date()).valueOf()
+
+    set = (key, value) ->
+      storeKey = normalizeStoreKey(key)
+      store[storeKey] =
+        timestamp: timestamp()
+        value: value
+
+    remove = (key) ->
+      storeKey = normalizeStoreKey(key)
+      delete store[storeKey]
+
+    isFresh = (entry) ->
+      expiry = expiryMilis()
+      if expiry
+        timeSinceTouch = timestamp() - entry.timestamp
+        timeSinceTouch < expiryMilis()
+      else
+        true
+
+    get = (key, fallback = undefined) ->
+      storeKey = normalizeStoreKey(key)
+      if entry = store[storeKey]
+        if !isFresh(entry)
+          log("Discarding stale cache entry for %o", key)
+          remove(key)
+          fallback
+        else
+          log("Cache hit for %o", key)
+          entry.value
+      else
+        log("Cache miss for %o", key)
+        fallback
+
+    alias: alias
+    get: get
+    set: set
+    remove: remove
+    clear: clear
+
+
   config = (factoryOptions = {}) ->
     hash =
+      ensureKeyExists: (key) ->
+        factoryOptions.hasOwnProperty(key) or error("Unknown setting %o", key)
       reset: ->
         ownKeys = copy(Object.getOwnPropertyNames(hash))
         for key in ownKeys
           delete hash[key] unless contains(apiKeys, key)
         hash.update copy(factoryOptions)
-      update: (options = {}) ->
-        for key, value of options
-          if factoryOptions.hasOwnProperty(key)
-            hash[key] = value
+      update: (options) ->
+        if options
+          if isString(options)
+            hash.ensureKeyExists(options)
+            hash[options]
           else
-            error("Unknown setting %o", key)
-        hash
+            for key, value of options
+              hash.ensureKeyExists(key)
+              hash[key] = value
+        else
+          hash
     apiKeys = Object.getOwnPropertyNames(hash)
     hash.reset()
     hash
@@ -705,8 +834,9 @@ up.util = (->
   endsWith: endsWith
   isArray: isArray
   toArray: toArray
-  castsToTrue: castsToTrue
-  castsToFalse: castsToFalse
+#  castsToTrue: castsToTrue
+#  castsToFalse: castsToFalse
+  castedAttr: castedAttr
   locationFromXhr: locationFromXhr
   methodFromXhr: methodFromXhr
   clientSize: clientSize
@@ -721,6 +851,7 @@ up.util = (->
   memoize: memoize
   scrollbarWidth: scrollbarWidth
   config: config
+  cache: cache
   unwrapElement: unwrapElement
 
 )()

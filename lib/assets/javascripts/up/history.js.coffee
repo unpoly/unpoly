@@ -18,17 +18,57 @@ up.history = (->
 
   ###*
   @method up.history.defaults
-  @param [options.popTarget]
+  @param {Array<String>} [options.popTargets=['body']]
+    An array of CSS selectors to replace when the user goes
+    back in history.
+  @param {Boolean} [options.restoreScroll=true]
+    Whether to restore the known scroll positions
+    when the user goes back or forward in history.
   ###
   config = u.config
-    popTarget: 'body'
+    popTargets: ['body']
+    restoreScroll: true
+
+  ###*
+  Returns the previous URL in the browser history.
+
+  Note that this will only work reliably for history changes that
+  were applied by [`up.history.push`](#up.history.replace) or
+  [`up.history.replace`](#up.history.replace).
+
+  @method up.history.previousUrl
+  @protected
+  ###
+  previousUrl = undefined
+  nextPreviousUrl = undefined
 
   reset = ->
     config.reset()
+    previousUrl = undefined
+    nextPreviousUrl = undefined
+
+  normalizeUrl = (url) ->
+    u.normalizeUrl(url, hash: true)
+
+  ###*
+  Returns a normalized URL for the current history entry.
+
+  @method up.history.url
+  @protected
+  ####
+  currentUrl = ->
+    normalizeUrl(up.browser.url())
   
   isCurrentUrl = (url) ->
-    u.normalizeUrl(url, hash: true) == u.normalizeUrl(up.browser.url(), hash: true)
-    
+    normalizeUrl(url) == currentUrl()
+
+  observeNewUrl = (url) ->
+    console.log("observing new url %o", url)
+    if nextPreviousUrl
+      previousUrl = nextPreviousUrl
+      nextPreviousUrl = undefined
+    nextPreviousUrl = url
+
   ###*
   @method up.history.replace
   @param {String} url
@@ -36,37 +76,58 @@ up.history = (->
   @protected
   ###
   replace = (url, options) ->
-    options = u.options(options, force: false)
-    if options.force || !isCurrentUrl(url)
-      manipulate("replace", url)
+    manipulate('replace', url, options)
 
   ###*
   @method up.history.push  
   @param {String} url
   @protected
   ###
-  push = (url) ->
-    manipulate("push", url) unless isCurrentUrl(url)
+  push = (url, options) ->
+    manipulate('push', url, options)
 
-  manipulate = (method, url) ->
-    if up.browser.canPushState()
-      method += "State" # resulting in either pushState or replaceState
-      window.history[method]({ fromUp: true }, '', url)
-    else
-      u.error "This browser doesn't support history.pushState"
+  manipulate = (method, url, options) ->
+    options = u.options(options, force: false)
+    if options.force || !isCurrentUrl(url)
+      if up.browser.canPushState()
+        fullMethod = "#{method}State" # resulting in either pushState or replaceState
+        state = buildState()
+        # console.log("[#{method}] URL %o with state %o", url, state)
+        u.debug("Changing history to URL %o (%o)", url, method)
+        # previousUrl = url
+        window.history[fullMethod](state, '', url)
+        observeNewUrl(currentUrl())
+      else
+        u.error "This browser doesn't support history.pushState"
+
+  buildState = ->
+    fromUp: true
+
+  restoreStateOnPop = (state) ->
+    url = currentUrl()
+    u.debug "Restoring state %o (now on #{url})", state
+    popSelector = config.popTargets.join(', ')
+    up.replace popSelector, url,
+      history: false,
+      reveal: false,
+      transition: 'none',
+      saveScroll: false # since the URL was already changed by the browser, don't save scroll state
+      restoreScroll: config.restoreScroll
 
   pop = (event) ->
+    u.debug("History state popped to URL %o", currentUrl())
+    observeNewUrl(currentUrl())
+    up.layout.saveScroll(url: previousUrl)
     state = event.originalEvent.state
     if state?.fromUp
-      u.debug "Restoring state %o (now on #{up.browser.url()})", state
-      up.replace config.popTarget, up.browser.url(), historyMethod: 'replace'
+      restoreStateOnPop(state)
     else
       u.debug 'Discarding unknown state %o', state
 
   if up.browser.canPushState()
     register = ->
       $(window).on "popstate", pop
-      replace(up.browser.url(), force: true)
+      replace(currentUrl(), force: true)
 
     if jasmine?
       # Can't delay this in tests.
@@ -77,10 +138,46 @@ up.history = (->
       # We should check in 2023 if we can remove this.
       setTimeout register, 100
 
+
+  ###*
+  Changes the link's destination so it points to the previous URL.
+
+  Note that this will *not* call `location.back()`, but will set
+  the link's `up-href` attribute to the actual, previous URL.
+
+  \#\#\#\# Under the hood
+
+  This link ...
+
+      <a href="/default" up-back>
+        Go back
+      </a>
+
+  ... will be transformed to:
+
+      <a href="/default" up-href="/previous-page" up-restore-scroll up-follow>
+        Goback
+      </a>
+
+  @ujs
+  @method [up-back]
+  ###
+  up.compiler '[up-back]', ($link) ->
+    console.log("up-back", $link, previousUrl)
+    if u.isPresent(previousUrl)
+      u.setMissingAttrs $link,
+        'up-href': previousUrl,
+        'up-restore-scroll': ''
+      $link.removeAttr 'up-back'
+      up.link.makeFollowable($link)
+
   up.bus.on 'framework:reset', reset
 
   defaults: config.update
   push: push
   replace: replace
+  url: currentUrl
+  previousUrl: -> previousUrl
+  normalizeUrl: normalizeUrl
 
 )()

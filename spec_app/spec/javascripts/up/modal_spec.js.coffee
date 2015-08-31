@@ -11,7 +11,7 @@ describe 'up.modal', ->
       it "loads the given link's destination in a dialog window", (done) ->
         $link = affix('a[href="/path/to"][up-modal=".middle"]').text('link')
         promise = up.modal.open($link)
-        request = jasmine.Ajax.requests.mostRecent()
+        request = @lastRequest()
         expect(request.url).toMatch /\/path\/to$/
         request.respondWith
           status: 200
@@ -34,7 +34,7 @@ describe 'up.modal', ->
       it "brings its own scrollbar, padding the body on the right in order to prevent jumping", (done) ->
         promise = up.modal.open(url: '/foo', target: '.container')
 
-        jasmine.Ajax.requests.mostRecent().respondWith
+        @lastRequest().respondWith
           status: 200
           contentType: 'text/html'
           responseText:

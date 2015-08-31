@@ -207,8 +207,8 @@ up.modal = (->
     maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), config.maxWidth)
     height = u.option(options.height, $link.attr('up-height'), config.height)
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
-    sticky = u.option(options.sticky, $link.is('[up-sticky]'))
-    history = if up.browser.canPushState() then u.option(options.history, $link.attr('up-history'), true) else false
+    sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
+    history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), true) else false
     animateOptions = up.motion.animateOptions(options, $link)
 
     close()

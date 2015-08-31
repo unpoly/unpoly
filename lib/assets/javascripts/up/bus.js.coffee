@@ -130,7 +130,7 @@ up.bus = (->
     The arguments that describe the event. 
   ###
   emit = (eventName, args...) ->
-    u.debug("Emitting event %o with args %o", eventName, args)
+    # u.debug("Emitting event %o with args %o", eventName, args)
     callbacks = callbacksFor(eventName)
     u.each(callbacks, (callback) ->
       callback(args...)

@@ -22,7 +22,7 @@ describe 'up.flow', ->
             """
 
           @respond = ->
-            jasmine.Ajax.requests.mostRecent().respondWith
+            @lastRequest().respondWith
               status: 200
               contentType: 'text/html'
               responseText: @responseText
@@ -114,7 +114,9 @@ describe 'up.flow', ->
             expect(window.scriptTagExecuted).toHaveBeenCalledWith('middle')
             done()
 
-        describe 'automatic scrolling', ->
+        it 'restores the scroll positions of all viewports within the target with options.restoreScroll'
+
+        describe 'revealing of elements', ->
 
           beforeEach ->
             @revealedHTML = ''
@@ -126,14 +128,14 @@ describe 'up.flow', ->
             @request = up.replace('.middle', '/path')
             @respond()
             @request.then =>
-              expect(up.reveal).toHaveBeenCalledWith(@oldMiddle, jasmine.any(Object))
+              expect(up.reveal).toHaveBeenCalledWith(@oldMiddle)
               done()
 
           it 'reveals a new element that is being appended', (done) ->
             @request = up.replace('.middle:after', '/path')
             @respond()
             @request.then =>
-              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle, jasmine.any(Object))
+              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle)
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
@@ -146,7 +148,7 @@ describe 'up.flow', ->
             @request = up.replace('.middle:before', '/path')
             @respond()
             @request.then =>
-              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle, jasmine.any(Object))
+              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle)
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
@@ -253,7 +255,7 @@ describe 'up.flow', ->
             expect($('.element')).toHaveText('new text')
             done()
             
-          request = jasmine.Ajax.requests.mostRecent()
+          request = @lastRequest()
           expect(request.url).toMatch(/\/source$/)
     
           request.respondWith

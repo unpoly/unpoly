@@ -53,7 +53,6 @@ up.proxy = (->
 
   u = up.util
 
-  cache = undefined
   $waitingLink = undefined
   preloadDelayTimer = undefined
   busyDelayTimer = undefined
@@ -81,6 +80,44 @@ up.proxy = (->
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
 
+  cacheKey = (request) ->
+    normalizeRequest(request)
+    [ request.url,
+      request.method,
+      request.data,
+      request.selector
+    ].join('|')
+
+  cache = u.cache
+    size: -> config.cacheSize
+    expiry: -> config.cacheExpiry
+    key: cacheKey
+    log: 'up.proxy'
+
+  ###*
+  @protected
+  @method up.proxy.get
+  ###
+  get = cache.get
+
+  ###*
+  @protected
+  @method up.proxy.set
+  ###
+  set = cache.set
+
+  ###*
+  @protected
+  @method up.proxy.remove
+  ###
+  remove = cache.remove
+
+  ###*
+  @protected
+  @method up.proxy.clear
+  ###
+  clear = cache.clear
+
   cancelPreloadDelay = ->
     clearTimeout(preloadDelayTimer)
     preloadDelayTimer = null
@@ -90,40 +127,18 @@ up.proxy = (->
     busyDelayTimer = null
 
   reset = ->
-    cache = {}
     $waitingLink = null
     cancelPreloadDelay()
     cancelBusyDelay()
     pendingCount = 0
     config.reset()
     busyEventEmitted = false
+    cache.clear()
 
   reset()
 
-  cacheKey = (request) ->
-    normalizeRequest(request)
-    [ request.url,
-      request.method,
-      request.data,
-      request.selector
-    ].join('|')
-    
-  trim = ->
-    keys = u.keys(cache)
-    if keys.length > config.cacheSize
-      oldestKey = null
-      oldestTimestamp = null
-      u.each keys, (key) ->
-        promise = cache[key] # we don't need to call cacheKey here
-        timestamp = promise.timestamp
-        if !oldestTimestamp || oldestTimestamp > timestamp
-          oldestKey = key
-          oldestTimestamp = timestamp
-      delete cache[oldestKey] if oldestKey
-    
-  timestamp = ->
-    (new Date()).valueOf()
-    
+  alias = cache.alias
+
   normalizeRequest = (request) ->
     unless request._normalized
       request.method = u.normalizeMethod(request.method)
@@ -131,11 +146,6 @@ up.proxy = (->
       request.selector ||= 'body'
       request._normalized = true
     request
-    
-  alias = (oldRequest, newRequest) ->
-    u.debug("Aliasing %o to %o", oldRequest, newRequest)
-    if promise = get(oldRequest)
-      set(newRequest, promise)
 
   ###*
   Makes a request to the given URL and caches the response.
@@ -160,8 +170,8 @@ up.proxy = (->
     If set to `false` a network connection will always be attempted.
   ###
   ajax = (options) ->
-    forceCache = u.castsToTrue(options.cache)
-    ignoreCache = u.castsToFalse(options.cache)
+    forceCache = (options.cache == true)
+    ignoreCache = (options.cache == false)
 
     request = u.only(options, 'url', 'method', 'data', 'selector', '_normalized')
 
@@ -254,55 +264,6 @@ up.proxy = (->
     normalizeRequest(request)
     u.contains(SAFE_HTTP_METHODS, request.method)
 
-  isFresh = (promise) ->
-    timeSinceTouch = timestamp() - promise.timestamp
-    timeSinceTouch < config.cacheExpiry
-
-  ###*
-  @protected
-  @method up.proxy.get
-  ###
-  get = (request) ->
-    key = cacheKey(request)
-    if promise = cache[key]
-      if !isFresh(promise)
-        u.debug("Discarding stale cache entry for %o (%o)", request.url, request)
-        remove(request)
-        undefined
-      else
-        u.debug("Cache hit for %o (%o)", request.url, request)
-#        $('body').css('background-color': 'green')
-        promise
-    else
-      u.debug("Cache miss for %o (%o)", request.url, request)
-      undefined
-
-  ###*
-  @protected
-  @method up.proxy.set
-  ###
-  set = (request, promise) ->
-    trim()
-    key = cacheKey(request)
-    promise.timestamp = timestamp()
-    cache[key] = promise
-    promise
-
-  ###*
-  @protected
-  @method up.proxy.remove
-  ###
-  remove = (request) ->
-    key = cacheKey(request)
-    delete cache[key]
-
-  ###*
-  @protected
-  @method up.proxy.clear
-  ###
-  clear = ->
-    cache = {}
-  
   checkPreload = ($link) ->
     delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay 
     unless $link.is($waitingLink)

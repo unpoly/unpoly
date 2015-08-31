@@ -48,11 +48,16 @@ up.flow = (->
     If omitted or true, the `url` argument will be used.
     If set to `false`, the history will remain unchanged.
   @param {String|Boolean} [options.source=true]
-  @param {String} [options.scroll]
+  @param {String} [options.reveal]
     Up.js will try to [reveal](/up.layout#up.reveal) the element being updated, by
     scrolling its containing viewport. Set this option to `false` to prevent any scrolling.
 
     If omitted, this will use the [default from `up.layout`](/up.layout#up.layout.defaults).
+  @param {Boolean} [options.restoreScroll=`false`]
+    If set to true, Up.js will try to restore the scroll position
+    of all the viewports within the updated element. The position
+    will be reset to the last known top position before a previous
+    history change for the current URL.
   @param {Boolean} [options.cache]
     Whether to use a [cached response](/up.proxy) if available.
   @param {String} [options.historyMethod='push']
@@ -61,6 +66,8 @@ up.flow = (->
   ###
   replace = (selectorOrElement, url, options) ->
 
+    u.debug("Replace %o with %o", selectorOrElement, url)
+
     options = u.options(options)
     
     selector = if u.presence(selectorOrElement)
@@ -68,7 +75,7 @@ up.flow = (->
     else
       u.createSelectorFromElement($(selectorOrElement))
       
-    if !up.browser.canPushState() && !u.castsToFalse(options.history)
+    if !up.browser.canPushState() && options.history != false
       up.browser.loadPage(url, u.only(options, 'method')) unless options.preload
       return u.resolvedPromise()
 
@@ -92,9 +99,9 @@ up.flow = (->
           selector: selector
         up.proxy.alias(request, newRequest)
         url = currentLocation
-      if u.isMissing(options.history) || u.castsToTrue(options.history)
+      unless options.history is false
         options.history = url
-      if u.isMissing(options.source) || u.castsToTrue(options.source)
+      unless options.source is false
         options.source = url
       implant(selector, html, options) unless options.preload
 
@@ -118,28 +125,20 @@ up.flow = (->
   @protected
   @param {String} selector
   @param {String} html
-  @param {String} [options.title]
-  @param {String} [options.source]
-  @param {Object} [options.transition]
-  @param {String} [options.scroll='body']
-  @param {String} [options.history]
-  @param {String} [options.historyMethod='push']
+  @param {Object} [options]
+    See options for [`up.replace`](#up.replace).
   ###
   implant = (selector, html, options) ->
     
     options = u.options(options, 
       historyMethod: 'push'
     )
-    
-    if u.castsToFalse(options.history)
-      options.history = null
-
-    if u.castsToFalse(options.scroll)
-      options.scroll = false
 
     options.source = u.option(options.source, options.history)
     response = parseResponse(html)
     options.title ||= response.title()
+
+    up.layout.saveScroll() unless options.saveScroll == false
 
     for step in parseImplantSteps(selector, options)
       $old = findOldFragment(step.selector)
@@ -171,9 +170,8 @@ up.flow = (->
         u.error("Could not find selector %o in response %o", selector, html)
 
   reveal = ($element, options) ->
-    viewport = options.scroll
-    if viewport != false
-      up.reveal($element, viewport: viewport)
+    if options.reveal != false
+      up.reveal($element)
     else
       u.resolvedDeferred()
 
@@ -184,7 +182,10 @@ up.flow = (->
       up.history[options.historyMethod](options.history)
     # Remember where the element came from so we can
     # offer reload functionality.
-    setSource($new, options.source)
+    unless options.source is false
+      setSource($new, options.source)
+    if options.restoreScroll
+      up.layout.restoreScroll(within: $new)
     autofocus($new)
     # The fragment should be readiet before animating,
     # so transitions see .up-current classes

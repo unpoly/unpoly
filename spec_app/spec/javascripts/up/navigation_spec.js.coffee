@@ -50,7 +50,7 @@ describe 'up.navigation', ->
         $link = affix('a[href="/foo"][up-target=".main"]')
         affix('.main')
         $link.click()
-        jasmine.Ajax.requests.mostRecent().respondWith
+        @lastRequest().respondWith
           status: 200
           contentType: 'text/html'
           responseHeaders: { 'X-Up-Location': '/foo/' }
@@ -61,7 +61,7 @@ describe 'up.navigation', ->
         $link = affix('a[href="/foo/"][up-target=".main"]')
         affix('.main')
         $link.click()
-        jasmine.Ajax.requests.mostRecent().respondWith
+        @lastRequest().respondWith
           status: 200
           contentType: 'text/html'
           responseHeaders: { 'X-Up-Location': '/foo' }
@@ -80,7 +80,7 @@ describe 'up.navigation', ->
         $link.click()
 #        console.log($link)
         expect($link).toHaveClass('up-active')
-        jasmine.Ajax.requests.mostRecent().respondWith
+        @lastRequest().respondWith
           status: 200
           contentType: 'text/html'
           responseText: '<div class="main">new-text</div>'
@@ -92,7 +92,7 @@ describe 'up.navigation', ->
         affix('.main')
         Trigger.mousedown($link)
         expect($link).toHaveClass('up-active')
-        jasmine.Ajax.requests.mostRecent().respondWith
+        @lastRequest().respondWith
           status: 200
           contentType: 'text/html'
           responseText: '<div class="main">new-text</div>'
@@ -106,7 +106,7 @@ describe 'up.navigation', ->
         affix('.main')
         $link.click()
         expect($area).toHaveClass('up-active')
-        jasmine.Ajax.requests.mostRecent().respondWith
+        @lastRequest().respondWith
           status: 200
           contentType: 'text/html'
           responseText: '<div class="main">new-text</div>'

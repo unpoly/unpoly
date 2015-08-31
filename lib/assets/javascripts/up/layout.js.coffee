@@ -11,15 +11,28 @@ up.layout = (->
   u = up.util
 
   ###*
-
+  Configures the application layout.
 
   @method up.layout.defaults
   @param {Array<String>} [options.viewports]
+    An array of CSS selectors that find viewports
+    (containers that scroll their contents).
   @param {Array<String>} [options.fixedTop]
+    An array of CSS selectors that find elements fixed to the
+    top edge of the screen (using `position: fixed`).
   @param {Array<String>} [options.fixedBottom]
+    An array of CSS selectors that find elements fixed to the
+    bottom edge of the screen (using `position: fixed`).
   @param {Number} [options.duration]
+    The duration of the scrolling animation in milliseconds.
+    Setting this to `0` will disable scrolling animations.
   @param {String} [options.easing]
+    The timing function that controls the animation's acceleration.
+    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    for a list of pre-defined timing functions.
   @param {Number} [options.snap]
+    When [revealing](#up.reveal) elements, Up.js will scroll an viewport
+    to the top when the revealed element is closer to the top than `options.snap`.
   ###
   config = u.config
     duration: 0
@@ -29,8 +42,13 @@ up.layout = (->
     snap: 50
     easing: 'swing'
 
+  lastScrollTops = u.cache
+    size: 30,
+    key: up.history.normalizeUrl
+
   reset = ->
     config.reset()
+    lastScrollTops.clear()
 
   SCROLL_PROMISE_KEY = 'up-scroll-promise'
 
@@ -73,35 +91,35 @@ up.layout = (->
     A promise that will be resolved when the scrolling ends.
   ###
   scroll = (viewport, scrollTop, options) ->
-    $view = $(viewport)
+    $viewport = $(viewport)
     options = u.options(options)
     duration = u.option(options.duration, config.duration)
     easing = u.option(options.easing, config.easing)
 
-    finishScrolling($view)
+    finishScrolling($viewport)
 
     if duration > 0
       deferred = $.Deferred()
 
-      $view.data(SCROLL_PROMISE_KEY, deferred)
+      $viewport.data(SCROLL_PROMISE_KEY, deferred)
       deferred.then ->
-        $view.removeData(SCROLL_PROMISE_KEY)
+        $viewport.removeData(SCROLL_PROMISE_KEY)
         # Since we're scrolling using #animate, #finish can be
         # used to jump to the last frame:
         # https://api.jquery.com/finish/
-        $view.finish()
+        $viewport.finish()
 
       targetProps =
         scrollTop: scrollTop
 
-      $view.animate targetProps,
+      $viewport.animate targetProps,
         duration: duration,
         easing: easing,
         complete: -> deferred.resolve()
 
       deferred
     else
-      $view.scrollTop(scrollTop)
+      $viewport.scrollTop(scrollTop)
       u.resolvedDeferred()
 
   ###*
@@ -171,7 +189,7 @@ up.layout = (->
   reveal = (elementOrSelector, options) ->
     options = u.options(options)
     $element = $(elementOrSelector)
-    $viewport = findViewport($element, options.viewport)
+    $viewport = viewportOf($element, options.viewport)
 
     snap = u.option(options.snap, config.snap)
 
@@ -220,22 +238,111 @@ up.layout = (->
     else
       u.resolvedDeferred()
 
+  viewportSelector = ->
+    config.viewports.join(', ')
+
   ###*
-  @private
-  @method up.viewport.findViewport
+  Returns the viewport for the given element.
+
+  Throws an error if no viewport could be found.
+
+  @protected
+  @method up.layout.viewportOf
+  @param {String|Element|jQuery} selectorOrElement
   ###
-  findViewport = ($element, viewportSelectorOrElement) ->
+  viewportOf = (selectorOrElement, viewportSelectorOrElement) ->
+    $element = $(selectorOrElement)
     $viewport = undefined
     # If someone has handed as a jQuery element, that's the
     # view period.
     if u.isJQuery(viewportSelectorOrElement)
       $viewport = viewportSelectorOrElement
     else
-      vieportSelector = u.presence(viewportSelectorOrElement) || config.viewports.join(', ')
+      vieportSelector = u.presence(viewportSelectorOrElement) || viewportSelector()
       $viewport = $element.closest(vieportSelector)
 
     $viewport.length or u.error("Could not find viewport for %o", $element)
     $viewport
+
+  ###*
+  Returns a jQuery collection of all the viewports contained within the
+  given selector or element.
+
+  @protected
+  @method up.layout.viewportsIn
+  @param {String|Element|jQuery} selectorOrElement
+  @return jQuery
+  ###
+  viewportsIn = (selectorOrElement) ->
+    $element = $(selectorOrElement)
+    u.findWithSelf($element, viewportSelector())
+
+  ###*
+  Returns a jQuery collection of all the viewports on the screen.
+
+  @protected
+  @method up.layout.viewports
+  ###
+  viewports = ->
+    $(viewportSelector())
+
+  ###*
+  Returns a hash with scroll positions.
+
+  Each key in the hash is a viewport selector. The corresponding
+  value is the viewport's top scroll position:
+
+      up.layout.scrollTops()
+      => { '.main': 0, '.sidebar': 73 }
+
+  @protected
+  @method up.layout.scrollTops
+  @return Object<String, Number>
+  ###
+  scrollTops = ->
+    topsBySelector = {}
+    for viewport in config.viewports
+      $viewport = $(viewport)
+      if $viewport.length
+        topsBySelector[viewport] = $viewport.scrollTop()
+    topsBySelector
+
+  ###*
+  Saves the top scroll positions of all the
+  viewports configured in `up.layout.defaults('viewports').
+  The saved scroll positions can be restored by calling
+  [`up.layout.restoreScroll()`](#up.layout.restoreScroll).
+
+  @method up.layout.saveScroll
+  @param {String} [options.url]
+  @param {Object<String, Number>} [options.tops]
+  @protected
+  ###
+  saveScroll = (options = {}) ->
+    url = u.option(options.url, up.history.url())
+    tops = u.option(options.tops, scrollTops())
+    lastScrollTops.set(url, tops)
+
+  ###*
+  Restores the top scroll positions of all the
+  viewports configured in `up.layout.defaults('viewports')`.
+
+  @method up.layout.restoreScroll
+  @param {String} [options.within]
+  @protected
+  ###
+  restoreScroll = (options = {}) ->
+
+    $viewports = if options.within
+      viewportsIn(options.within)
+    else
+      viewports()
+
+    tops = lastScrollTops.get(up.history.url())
+
+    for selector, scrollTop of tops
+      $matchingViewport = $viewports.filter(selector)
+      up.scroll($matchingViewport, scrollTop, duration: 0)
 
   ###*
   Marks this element as a scrolling container. Apply this ttribute if your app uses
@@ -323,6 +430,12 @@ up.layout = (->
   scroll: scroll
   finishScrolling: finishScrolling
   defaults: config.update
+  viewportOf: viewportOf
+  viewportsIn: viewportsIn
+  viewports: viewports
+  scrollTops: scrollTops
+  saveScroll: saveScroll
+  restoreScroll: restoreScroll
 
 )()
 

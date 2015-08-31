@@ -83,17 +83,17 @@ up.form = (->
     options = u.options(options)
     successSelector = u.option(options.target, $form.attr('up-target'), 'body')
     failureSelector = u.option(options.failTarget, $form.attr('up-fail-target'), -> u.createSelectorFromElement($form))
-    historyOption = u.option(options.history, $form.attr('up-history'), true)
-    successTransition = u.option(options.transition, $form.attr('up-transition'))
-    failureTransition = u.option(options.failTransition, $form.attr('up-fail-transition'), successTransition)
+    historyOption = u.option(options.history, u.castedAttr($form, 'up-history'), true)
+    successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'))
+    failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition)
     httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase()
     animateOptions = up.motion.animateOptions(options, $form)
-    useCache = u.option(options.cache, $form.attr('up-cache'))
+    useCache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
     url = u.option(options.url, $form.attr('action'), up.browser.url())
     
     $form.addClass('up-active')
     
-    if !up.browser.canPushState() && !u.castsToFalse(historyOption)
+    if !up.browser.canPushState() && historyOption != false
       $form.get(0).submit()
       return
 
@@ -106,15 +106,14 @@ up.form = (->
     }
 
     successUrl = (xhr) ->
-      url = if historyOption
-        if u.castsToFalse(historyOption)
-          false
-        else if u.isString(historyOption)
-          historyOption
+      url = undefined
+      if u.isGiven(historyOption)
+        if historyOption == false || u.isString(historyOption)
+          url = historyOption
         else if currentLocation = u.locationFromXhr(xhr)
-          currentLocation
+          url = currentLocation
         else if request.type == 'GET'
-          request.url + '?' + request.data
+          url = request.url + '?' + request.data
       u.option(url, false)
 
     up.proxy.ajax(request)

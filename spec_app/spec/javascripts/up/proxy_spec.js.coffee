@@ -22,7 +22,7 @@ describe 'up.proxy', ->
         expect(jasmine.Ajax.requests.count()).toEqual(1)
         expect(responses).toEqual([])
 
-        jasmine.Ajax.requests.mostRecent().respondWith
+        @lastRequest().respondWith
           status: 200
           contentType: 'text/html'
           responseText: 'foo'
@@ -39,7 +39,7 @@ describe 'up.proxy', ->
         # See that we have triggered a second request
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        jasmine.Ajax.requests.mostRecent().respondWith
+        @lastRequest().respondWith
           status: 200
           contentType: 'text/html'
           responseText: 'bar'

@@ -141,8 +141,8 @@ up.popup = (->
     selector = u.option(options.target, $link.attr('up-popup'), 'body')
     position = u.option(options.position, $link.attr('up-position'), config.position)
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
-    sticky = u.option(options.sticky, $link.is('[up-sticky]'))
-    history = if up.browser.canPushState() then u.option(options.history, $link.attr('up-history'), false) else false
+    sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
+    history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), false) else false
     animateOptions = up.motion.animateOptions(options, $link)
 
     close()

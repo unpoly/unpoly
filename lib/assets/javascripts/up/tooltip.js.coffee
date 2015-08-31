@@ -60,7 +60,7 @@ up.tooltip = (->
     $link = $(linkOrSelector)
     html = u.option(options.html, $link.attr('up-tooltip'), $link.attr('title'))
     position = u.option(options.position, $link.attr('up-position'), 'top')
-    animation = u.option(options.animation, $link.attr('up-animation'), 'fade-in')
+    animation = u.option(options.animation, u.castedAttr($link, 'up-animation'), 'fade-in')
     animateOptions = up.motion.animateOptions(options, $link)
     close()
     $tooltip = createElement(html)

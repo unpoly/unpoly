@@ -123,6 +123,8 @@ up.motion = (->
     $element = $(elementOrSelector)
     finish($element)
     options = animateOptions(options)
+    if animation == 'none' || animation == false
+      none()
     if u.isFunction(animation)
       assertIsDeferred(animation($element, options), animation)
     else if u.isString(animation)
@@ -260,7 +262,7 @@ up.motion = (->
       $new = $(target)
       finish($old)
       finish($new)
-      if transitionOrName == 'none'
+      if transitionOrName == 'none' or transitionOrName == false
         # don't create ghosts if we aren't really transitioning
         none()
       else if transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]

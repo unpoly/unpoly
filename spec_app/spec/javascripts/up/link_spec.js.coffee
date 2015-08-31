@@ -16,7 +16,7 @@ describe 'up.link', ->
     
           promise = up.follow($link)
     
-          jasmine.Ajax.requests.mostRecent().respondWith
+          @lastRequest().respondWith
             status: 200
             contentType: 'text/html'
             responseText:
@@ -35,7 +35,7 @@ describe 'up.link', ->
         it 'uses the method from a data-method attribute', ->
           $link = affix('a[href="/path"][data-method="PUT"]')
           up.follow($link)
-          request = jasmine.Ajax.requests.mostRecent()
+          request = @lastRequest()
           expect(request.method).toBe('PUT')
 
         it 'adds history entries and allows the user to use the back- and forward-buttons', (done) ->
@@ -44,13 +44,11 @@ describe 'up.link', ->
           # the user presses the back-button. We reconfigure this
           # so we don't lose the Jasmine runner interface.
           up.history.defaults
-            popTarget: '.container'
+            popTargets: ['.container']
 
-          lastRequest = ->
-            jasmine.Ajax.requests.mostRecent()
 
-          respondWith = (html) ->
-            lastRequest().respondWith
+          respondWith = (html) =>
+            @lastRequest().respondWith
               status: 200
               contentType: 'text/html'
               responseText: "<div class='container'><div class='target'>#{html}</div></div>"
@@ -91,7 +89,7 @@ describe 'up.link', ->
                     expect(location.pathname).toEqual('/one')
 
                     history.forward()
-                    @setTimer 150, =>
+                    @setTimer 50, =>
                       # Since the response is cached, we don't have to respond
                       expect($('.target')).toHaveText('restored text from two')
                       expect(location.pathname).toEqual('/two')
@@ -116,7 +114,7 @@ describe 'up.link', ->
     describe 'up.visit', ->
       
       it 'should have tests'
-          
+
   describe 'unobtrusive behavior', ->
 
     describe 'a[up-target]', ->

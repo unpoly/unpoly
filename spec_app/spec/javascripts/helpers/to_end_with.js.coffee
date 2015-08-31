@@ -1,5 +1,5 @@
 beforeEach ->
   jasmine.addMatchers
-    toEndWidth: (util, customEqualityTesters) ->
+    toEndWith: (util, customEqualityTesters) ->
       compare: (actual, expected) ->
         pass: up.util.endsWith(actual, expected)

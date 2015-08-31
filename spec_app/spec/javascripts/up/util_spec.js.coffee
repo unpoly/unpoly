@@ -2,7 +2,25 @@ describe 'up.util', ->
   
   describe 'Javascript functions', ->
 
-    describe '.isBlank', ->
+    describe 'up.util.castedAttr', ->
+
+      it 'returns true if the attribute value is the string "true"', ->
+        $element = affix('div').attr('foo', 'true')
+        expect(up.util.castedAttr($element, 'foo')).toBe(true)
+
+      it 'returns false if the attribute value is the string "false"', ->
+        $element = affix('div').attr('foo', 'false')
+        expect(up.util.castedAttr($element, 'foo')).toBe(false)
+
+      it 'returns undefined if the element has no such attribute', ->
+        $element = affix('div')
+        expect(up.util.castedAttr($element, 'foo')).toBe(undefined)
+
+      it 'returns the attribute value unchanged if the value is some string', ->
+        $element = affix('div').attr('foo', 'some text')
+        expect(up.util.castedAttr($element, 'foo')).toBe('some text')
+
+    describe 'up.util.isBlank', ->
   
       it 'returns false for false', ->
         expect(up.util.isBlank(false)).toBe(false)
@@ -34,7 +52,7 @@ describe 'up.util', ->
       it 'returns true for an object with at least one key', ->
         expect(up.util.isBlank({key: 'value'})).toBe(false)
 
-    describe '.normalizeUrl', ->
+    describe 'up.util.normalizeUrl', ->
 
       it 'normalizes a relative path', ->
         expect(up.util.normalizeUrl('foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
@@ -45,7 +63,7 @@ describe 'up.util', ->
       it 'normalizes a full URL', ->
         expect(up.util.normalizeUrl('http://example.com/foo/bar')).toBe('http://example.com/foo/bar')
 
-    describe '.detect', ->
+    describe 'up.util.detect', ->
 
       it 'finds the first element in the given array that matches the given tester', ->
         array = ['foo', 'bar', 'baz']
@@ -57,7 +75,7 @@ describe 'up.util', ->
         tester = (element) -> element[0] == 'z'
         expect(up.util.detect(array, tester)).toBeNull()
 
-    describe '.config', ->
+    describe 'up.util.config', ->
 
       it 'creates an object with the given attributes', ->
         object = up.util.config(a: 1, b: 2)

@@ -19,7 +19,7 @@ describe 'up.form', ->
     
           @promise = up.submit($form)
     
-          @request = jasmine.Ajax.requests.mostRecent()
+          @request = @lastRequest()
           expect(@request.url).toMatch /\/path\/to$/
           expect(@request.method).toBe 'PUT'
           expect(@request.data()).toEqual
