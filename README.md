@@ -4,6 +4,8 @@ Up.js gives your traditional web application fast-responding views with minimal 
 
 See [upjs.io](http://upjs.io) for more information and API documentation.
 
+See [`CHANGELOG.md`](https://github.com/makandra/upjs/blob/master/CHANGELOG.md) for notable changes.
+
 
 ## Running tests
 
@@ -36,7 +38,8 @@ We are currently feeding three release channels:
 To make a new release:
 
 - Edit `lib/upjs/rails/version.rb` and bump the version number. Use [semantic versioning](http://semver.org/).
-- Commit and push the version bump
+- Add an entry to `CHANGELOG.md`
+- Commit and push the version bump and `CHANGELOG.md`
 - From the project root, type `rake assets:compile`. This will output minified JS and CSS files to the `dist` folder.
 - Commit and push the generated files
 - From the project root, type `rake release`. This will publish a new gem version to Rubygems.org.
