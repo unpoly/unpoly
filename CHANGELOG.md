@@ -11,8 +11,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Compatible changes
 
 - Viewport scroll positions are saved when the URL changes and restored when the user hits the back/forward button
-- Allow to link to the previous page using [`[up-back]`](https://guide.upjs.io/up.history#up-back)
-- Allow to restore previous scroll state using [`[up-restore-scroll]`](https://guide.upjs.io/up.link#a-up-target)
+- Allow to link to the previous page using [`[up-back]`](http://upjs.io/up.history#up-back)
+- Allow to restore previous scroll state using [`[up-restore-scroll]`](http://upjs.io/up.link#a-up-target)
 - Instead of saying `<tag up-something="true">` you can now simply say `<tag up-something>`.
 - Create this Changelog.
 
@@ -37,10 +37,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Compatible changes
 
-- Elements are now being [revealed](http://guide.upjs.io/up.layout#up.reveal) within their viewport before they are updated
+- Elements are now being [revealed](http://upjs.io/up.layout#up.reveal) within their viewport before they are updated
 - Elements that are prepended or appended using `:before` or `:after` pseudo-selectors are now scrolled into view after insertion.
 - New option `up.layout.defaults('snap')` lets you define a number of pixels under which Up.js will snap to the top edge of the viewport when revealing an element
-- You can now make [`up.reveal`]((http://guide.upjs.io/up.layout#up.reveal) aware of fixed navigation bars blocking the viewport by setting new options `up.layout.defaults('fixedTop')` and `up.layout.defaults('fixedBottom')`.
+- You can now make [`up.reveal`]((http://upjs.io/up.layout#up.reveal) aware of fixed navigation bars blocking the viewport by setting new options `up.layout.defaults('fixedTop')` and `up.layout.defaults('fixedBottom')`.
 
 
 0.8.2
@@ -48,7 +48,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Compatible changes
 
-- [`up.reveal`](http://guide.upjs.io/up.layout#up.reveal) can now reveal content in modals and containers with `overflow-y: scroll`.
+- [`up.reveal`](http://upjs.io/up.layout#up.reveal) can now reveal content in modals and containers with `overflow-y: scroll`.
 - Changing the default configuration of an Up.js module now raises an error if a config key is unknown.
 - Links linking to `"#"` are now never marked as `.up-current`.
 
@@ -72,7 +72,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Compatible changes
 
-- Up.js will now emit [events](http://guide.upjs.io/up.bus) `proxy:busy` and `proxy:idle` whenever it is loading or is done loading content over HTTP.
+- Up.js will now emit [events](http://upjs.io/up.bus) `proxy:busy` and `proxy:idle` whenever it is loading or is done loading content over HTTP.
 - Add an option `up.proxy.defaults('busyDelay')` to delay the `proxy:busy` event in order to prevent flickering of loading spinners.
 
 
@@ -123,7 +123,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Compatible changes
 
-- Use [up.proxy](http://guide.upjs.io/up.proxy) when submitting a form.
+- Use [up.proxy](http://upjs.io/up.proxy) when submitting a form.
 
 
 0.7.2
