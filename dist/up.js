@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, castsToFalse, castsToTrue, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -334,6 +334,9 @@ If you use them in your own code, you will get hurt.
     };
     isString = function(object) {
       return typeof object === 'string';
+    };
+    isNumber = function(object) {
+      return typeof object === 'number';
     };
     isHash = function(object) {
       return typeof object === 'object' && !!object;
@@ -691,11 +694,19 @@ If you use them in your own code, you will get hurt.
     contains = function(stringOrArray, element) {
       return stringOrArray.indexOf(element) >= 0;
     };
-    castsToTrue = function(object) {
-      return String(object) === "true";
-    };
-    castsToFalse = function(object) {
-      return String(object) === "false";
+    castedAttr = function($element, attrName) {
+      var value;
+      value = $element.attr(attrName);
+      switch (value) {
+        case 'false':
+          return false;
+        case 'true':
+          return true;
+        case '':
+          return true;
+        default:
+          return value;
+      }
     };
     locationFromXhr = function(xhr) {
       return xhr.getResponseHeader('X-Up-Location');
@@ -775,12 +786,153 @@ If you use them in your own code, you will get hurt.
         return element;
       }
     };
+
+    /**
+    @method up.util.cache
+    @param {Number|Function} [config.size]
+      Maximum number of cache entries.
+      Set to `undefined` to not limit the cache size.
+    @param {Number|Function} [config.expiry]
+      The number of milliseconds after which a cache entry
+      will be discarded.
+    @param {String} [config.log]
+      A prefix for log entries printed by this cache object.
+     */
+    cache = function(config) {
+      var alias, clear, expiryMilis, isFresh, log, maxSize, normalizeStoreKey, set, store, timestamp;
+      store = void 0;
+      clear = function() {
+        return store = {};
+      };
+      clear();
+      log = function() {
+        var args;
+        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        if (config.log) {
+          args[0] = "[" + config.log + "] " + args[0];
+          return debug.apply(null, args);
+        }
+      };
+      maxSize = function() {
+        if (isMissing(config.size)) {
+          return void 0;
+        } else if (isFunction(config.size)) {
+          return config.size();
+        } else if (isNumber(config.size)) {
+          return config.size;
+        } else {
+          return error("Invalid size config: %o", config.size);
+        }
+      };
+      expiryMilis = function() {
+        if (isMissing(config.expiry)) {
+          return void 0;
+        } else if (isFunction(config.expiry)) {
+          return config.expiry();
+        } else if (isNumber(config.expiry)) {
+          return config.expiry;
+        } else {
+          return error("Invalid expiry config: %o", config.expiry);
+        }
+      };
+      normalizeStoreKey = function(key) {
+        if (config.key) {
+          return config.key(key);
+        } else {
+          return key.toString();
+        }
+      };
+      trim = function() {
+        var oldestKey, oldestTimestamp, size, storeKeys;
+        storeKeys = copy(keys(store));
+        size = maxSize();
+        if (size && storeKeys.length > size) {
+          oldestKey = null;
+          oldestTimestamp = null;
+          each(storeKeys, function(key) {
+            var promise, timestamp;
+            promise = store[key];
+            timestamp = promise.timestamp;
+            if (!oldestTimestamp || oldestTimestamp > timestamp) {
+              oldestKey = key;
+              return oldestTimestamp = timestamp;
+            }
+          });
+          if (oldestKey) {
+            return delete store[oldestKey];
+          }
+        }
+      };
+      alias = function(oldKey, newKey) {
+        var value;
+        value = get(oldKey);
+        if (isDefined(value)) {
+          return set(newKey, value);
+        }
+      };
+      timestamp = function() {
+        return (new Date()).valueOf();
+      };
+      set = function(key, value) {
+        var storeKey;
+        storeKey = normalizeStoreKey(key);
+        return store[storeKey] = {
+          timestamp: timestamp(),
+          value: value
+        };
+      };
+      remove = function(key) {
+        var storeKey;
+        storeKey = normalizeStoreKey(key);
+        return delete store[storeKey];
+      };
+      isFresh = function(entry) {
+        var expiry, timeSinceTouch;
+        expiry = expiryMilis();
+        if (expiry) {
+          timeSinceTouch = timestamp() - entry.timestamp;
+          return timeSinceTouch < expiryMilis();
+        } else {
+          return true;
+        }
+      };
+      get = function(key, fallback) {
+        var entry, storeKey;
+        if (fallback == null) {
+          fallback = void 0;
+        }
+        storeKey = normalizeStoreKey(key);
+        if (entry = store[storeKey]) {
+          if (!isFresh(entry)) {
+            log("Discarding stale cache entry for %o", key);
+            remove(key);
+            return fallback;
+          } else {
+            log("Cache hit for %o", key);
+            return entry.value;
+          }
+        } else {
+          log("Cache miss for %o", key);
+          return fallback;
+        }
+      };
+      return {
+        alias: alias,
+        get: get,
+        set: set,
+        remove: remove,
+        clear: clear
+      };
+    };
     config = function(factoryOptions) {
       var apiKeys, hash;
       if (factoryOptions == null) {
         factoryOptions = {};
       }
       hash = {
+        ensureKeyExists: function(key) {
+          return factoryOptions.hasOwnProperty(key) || error("Unknown setting %o", key);
+        },
         reset: function() {
           var j, key, len, ownKeys;
           ownKeys = copy(Object.getOwnPropertyNames(hash));
@@ -793,19 +945,23 @@ If you use them in your own code, you will get hurt.
           return hash.update(copy(factoryOptions));
         },
         update: function(options) {
-          var key, value;
-          if (options == null) {
-            options = {};
-          }
-          for (key in options) {
-            value = options[key];
-            if (factoryOptions.hasOwnProperty(key)) {
-              hash[key] = value;
+          var key, results, value;
+          if (options) {
+            if (isString(options)) {
+              hash.ensureKeyExists(options);
+              return hash[options];
             } else {
-              error("Unknown setting %o", key);
+              results = [];
+              for (key in options) {
+                value = options[key];
+                hash.ensureKeyExists(key);
+                results.push(hash[key] = value);
+              }
+              return results;
             }
+          } else {
+            return hash;
           }
-          return hash;
         }
       };
       apiKeys = Object.getOwnPropertyNames(hash);
@@ -884,8 +1040,7 @@ If you use them in your own code, you will get hurt.
       endsWith: endsWith,
       isArray: isArray,
       toArray: toArray,
-      castsToTrue: castsToTrue,
-      castsToFalse: castsToFalse,
+      castedAttr: castedAttr,
       locationFromXhr: locationFromXhr,
       methodFromXhr: methodFromXhr,
       clientSize: clientSize,
@@ -900,6 +1055,7 @@ If you use them in your own code, you will get hurt.
       memoize: memoize,
       scrollbarWidth: scrollbarWidth,
       config: config,
+      cache: cache,
       unwrapElement: unwrapElement
     };
   })();
@@ -1154,7 +1310,6 @@ We need to work on this page:
     emit = function() {
       var args, callbacks, eventName;
       eventName = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      u.debug("Emitting event %o with args %o", eventName, args);
       callbacks = callbacksFor(eventName);
       return u.each(callbacks, function(callback) {
         return callback.apply(null, args);
@@ -1168,764 +1323,6 @@ We need to work on this page:
       emit: emit
     };
   })();
-
-}).call(this);
-
-/**
-Viewport scrolling
-==================
-
-This modules contains functions to scroll the viewport and reveal contained elements.
-
-@class up.layout
- */
-
-(function() {
-  var slice = [].slice;
-
-  up.layout = (function() {
-    var SCROLL_PROMISE_KEY, config, findViewport, finishScrolling, measureObstruction, reset, reveal, scroll, u;
-    u = up.util;
-
-    /**
-    
-    
-    @method up.layout.defaults
-    @param {String} [options.viewport]
-    @param {String} [options.fixedTop]
-    @param {String} [options.fixedBottom]
-    @param {Number} [options.duration]
-    @param {String} [options.easing]
-    @param {Number} [options.snap]
-     */
-    config = u.config({
-      duration: 0,
-      viewport: 'body, .up-modal, [up-viewport]',
-      fixedTop: '[up-fixed~=top]',
-      fixedBottom: '[up-fixed~=bottom]',
-      snap: 50,
-      easing: 'swing'
-    });
-    reset = function() {
-      return config.reset();
-    };
-    SCROLL_PROMISE_KEY = 'up-scroll-promise';
-
-    /**
-    Scrolls the given viewport to the given Y-position.
-    
-    A "viewport" is an element that has scrollbars, e.g. `<body>` or
-    a container with `overflow-x: scroll`.
-    
-    \#\#\#\# Example
-    
-    This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
-    
-        up.scoll('.main', 100);
-    
-    \#\#\#\# Animating the scrolling motion
-    
-    The scrolling can (optionally) be animated.
-    
-        up.scoll('.main', 100, {
-          easing: 'swing',
-          duration: 250
-        });
-    
-    If the given viewport is already in a scroll animation when `up.scroll`
-    is called a second time, the previous animation will instantly jump to the
-    last frame before the next animation is started.
-    
-    @protected
-    @method up.scroll
-    @param {String|Element|jQuery} viewport
-      The container element to scroll.
-    @param {Number} scrollPos
-      The absolute number of pixels to set the scroll position to.
-    @param {Number}[options.duration]
-      The number of miliseconds for the scrolling's animation.
-    @param {String}[options.easing]
-      The timing function that controls the acceleration for the scrolling's animation.
-    @return {Deferred}
-      A promise that will be resolved when the scrolling ends.
-     */
-    scroll = function(viewport, scrollTop, options) {
-      var $view, deferred, duration, easing, targetProps;
-      $view = $(viewport);
-      options = u.options(options);
-      duration = u.option(options.duration, config.duration);
-      easing = u.option(options.easing, config.easing);
-      finishScrolling($view);
-      if (duration > 0) {
-        deferred = $.Deferred();
-        $view.data(SCROLL_PROMISE_KEY, deferred);
-        deferred.then(function() {
-          $view.removeData(SCROLL_PROMISE_KEY);
-          return $view.finish();
-        });
-        targetProps = {
-          scrollTop: scrollTop
-        };
-        $view.animate(targetProps, {
-          duration: duration,
-          easing: easing,
-          complete: function() {
-            return deferred.resolve();
-          }
-        });
-        return deferred;
-      } else {
-        $view.scrollTop(scrollTop);
-        return u.resolvedDeferred();
-      }
-    };
-
-    /**
-    @method up.viewport.finishScrolling
-    @private
-     */
-    finishScrolling = function(elementOrSelector) {
-      return $(elementOrSelector).each(function() {
-        var existingScrolling;
-        if (existingScrolling = $(this).data(SCROLL_PROMISE_KEY)) {
-          return existingScrolling.resolve();
-        }
-      });
-    };
-    measureObstruction = function() {
-      var fixedBottomTops, fixedTopBottoms, measurePosition, obstructor;
-      measurePosition = function(obstructor, cssAttr) {
-        var $obstructor, anchorPosition;
-        $obstructor = $(obstructor);
-        anchorPosition = $obstructor.css(cssAttr);
-        if (!u.isPresent(anchorPosition)) {
-          u.error("Fixed element %o must have a CSS attribute %o", $obstructor, cssAttr);
-        }
-        return parseInt(anchorPosition) + $obstructor.height();
-      };
-      fixedTopBottoms = (function() {
-        var i, len, ref, results;
-        ref = $(config.fixedTop);
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          obstructor = ref[i];
-          results.push(measurePosition(obstructor, 'top'));
-        }
-        return results;
-      })();
-      fixedBottomTops = (function() {
-        var i, len, ref, results;
-        ref = $(config.fixedBottom);
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          obstructor = ref[i];
-          results.push(measurePosition(obstructor, 'bottom'));
-        }
-        return results;
-      })();
-      return {
-        top: Math.max.apply(Math, [0].concat(slice.call(fixedTopBottoms))),
-        bottom: Math.max.apply(Math, [0].concat(slice.call(fixedBottomTops)))
-      };
-    };
-
-    /**
-    Scroll's the given element's viewport so the element
-    is visible for the user.
-    
-    By default Up.js will always reveal an element before
-    updating it with Javascript functions like [`up.replace`](/up.flow#up.replace)
-    or UJS behavior like [`[up-target]`](/up.link#up-target).
-    
-    \#\#\#\# How Up.js finds the viewport
-    
-    The viewport (the container that is going to be scrolled)
-    is the closest parent of the element that is either:
-    
-    - the currently open [modal](/up.modal)
-    - an element with the attribute `[up-viewport]`
-    - the `<body>` element
-    - an element matching the selector you have configured using `up.viewport.defaults({ viewSelector: 'my-custom-selector' })`
-    
-    \#\#\#\# Fixed elements obstruction the viewport
-    
-    Many applications have a navigation bar fixed to the top or bottom,
-    obstructing the view on an element.
-    
-    To make `up.aware` of these fixed elements you can either:
-    
-    - give the element an attribute [`up-fixed="top"`](#up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
-    - [configure default options](#up.layout.defaults) for `fixedTop` or `fixedBottom`
-    
-    @method up.reveal
-    @param {String|Element|jQuery} element
-    @param {String|Element|jQuery} [options.viewport]
-    @param {Number} [options.duration]
-    @param {String} [options.easing]
-    @param {String} [options.snap]
-    @return {Deferred}
-      A promise that will be resolved when the element is revealed.
-     */
-    reveal = function(elementOrSelector, options) {
-      var $element, $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsBody;
-      options = u.options(options);
-      $element = $(elementOrSelector);
-      $viewport = findViewport($element, options.viewport);
-      snap = u.option(options.snap, config.snap);
-      viewportIsBody = $viewport.is('body');
-      viewportHeight = viewportIsBody ? u.clientSize().height : $viewport.height();
-      originalScrollPos = $viewport.scrollTop();
-      newScrollPos = originalScrollPos;
-      offsetShift = void 0;
-      obstruction = void 0;
-      if (viewportIsBody) {
-        obstruction = measureObstruction();
-        offsetShift = 0;
-      } else {
-        obstruction = {
-          top: 0,
-          bottom: 0
-        };
-        offsetShift = originalScrollPos;
-      }
-      predictFirstVisibleRow = function() {
-        return newScrollPos + obstruction.top;
-      };
-      predictLastVisibleRow = function() {
-        return newScrollPos + viewportHeight - obstruction.bottom - 1;
-      };
-      elementDims = u.measure($element, {
-        relative: true
-      });
-      firstElementRow = elementDims.top + offsetShift;
-      lastElementRow = firstElementRow + elementDims.height - 1;
-      if (lastElementRow > predictLastVisibleRow()) {
-        newScrollPos += lastElementRow - predictLastVisibleRow();
-      }
-      if (firstElementRow < predictFirstVisibleRow()) {
-        newScrollPos = firstElementRow - obstruction.top;
-      }
-      if (newScrollPos < snap) {
-        newScrollPos = 0;
-      }
-      if (newScrollPos !== originalScrollPos) {
-        return scroll($viewport, newScrollPos, options);
-      } else {
-        return u.resolvedDeferred();
-      }
-    };
-
-    /**
-    @private
-    @method up.viewport.findViewport
-     */
-    findViewport = function($element, viewportSelectorOrElement) {
-      var $viewport, vieportSelector;
-      $viewport = void 0;
-      if (u.isJQuery(viewportSelectorOrElement)) {
-        $viewport = viewportSelectorOrElement;
-      } else {
-        vieportSelector = u.presence(viewportSelectorOrElement) || config.viewport;
-        $viewport = $element.closest(vieportSelector);
-      }
-      $viewport.length || u.error("Could not find viewport for %o", $element);
-      return $viewport;
-    };
-
-    /**
-    Marks this element as a scrolling container. Apply this ttribute if your app uses
-    a custom panel layout with fixed positioning instead of scrolling `<body>`.
-    
-    [`up.reveal`](/up.reveal) will always try to scroll the viewport closest
-    to the element that is being revealed. By default this is the `<body>` element.
-    
-    \#\#\#\# Example
-    
-    Here is an example for a layout for an e-mail client, showing a list of e-mails
-    on the left side and the e-mail text on the right side:
-    
-        .side {
-          position: fixed;
-          top: 0;
-          bottom: 0;
-          left: 0;
-          width: 100px;
-          overflow-y: scroll;
-        }
-    
-        .main {
-          position: fixed;
-          top: 0;
-          bottom: 0;
-          left: 100px;
-          right: 0;
-          overflow-y: scroll;
-        }
-    
-    This would be the HTML (notice the `up-viewport` attribute):
-    
-        <div class=".side" up-viewport>
-          <a href="/emails/5001" up-target=".main">Re: Your invoice</a>
-          <a href="/emails/2023" up-target=".main">Quote for services</a>
-          <a href="/emails/9002" up-target=".main">Fwd: Room reservation</a>
-        </div>
-    
-        <div class="main" up-viewport>
-          <h1>Re: Your Invoice</h1>
-          <p>
-            Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
-            Stet clita kasd gubergren, no sea takimata sanctus est.
-          </p>
-        </div>
-    
-    @method [up-viewport]
-    @ujs
-     */
-
-    /**
-    Marks this element as a navigation fixed to the top edge of the screen
-    using `position: fixed`.
-    
-    [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
-    the viewport far enough so the revealed element is fully visible.
-    
-    Example:
-    
-        <div class="top-nav" up-fixed="top">...</div>
-    
-    @method [up-fixed=top]
-    @ujs
-     */
-
-    /**
-    Marks this element as a navigation fixed to the bottom edge of the screen
-    using `position: fixed`.
-    
-    [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
-    the viewport far enough so the revealed element is fully visible.
-    
-    Example:
-    
-        <div class="bottom-nav" up-fixed="bottom">...</div>
-    
-    @method [up-fixed=bottom]
-    @ujs
-     */
-    up.bus.on('framework:reset', reset);
-    return {
-      reveal: reveal,
-      scroll: scroll,
-      finishScrolling: finishScrolling,
-      defaults: config.update
-    };
-  })();
-
-  up.scroll = up.layout.scroll;
-
-  up.reveal = up.layout.reveal;
-
-}).call(this);
-
-/**
-Changing page fragments programmatically
-========================================
-  
-This module contains Up's core functions to insert, change
-or destroy page fragments.
-
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-  
-- Explain the UJS approach vs. pragmatic approach
-- Examples
-  
-  
-@class up.flow
- */
-
-(function() {
-  up.flow = (function() {
-    var autofocus, destroy, elementsInserted, findOldFragment, first, fragmentNotFound, implant, isRealElement, parseImplantSteps, parseResponse, reload, replace, reset, reveal, setSource, source, swapElements, u;
-    u = up.util;
-    setSource = function(element, sourceUrl) {
-      var $element;
-      $element = $(element);
-      if (u.isPresent(sourceUrl)) {
-        sourceUrl = u.normalizeUrl(sourceUrl);
-      }
-      return $element.attr("up-source", sourceUrl);
-    };
-    source = function(element) {
-      var $element;
-      $element = $(element).closest("[up-source]");
-      return u.presence($element.attr("up-source")) || up.browser.url();
-    };
-
-    /**
-    Replaces elements on the current page with corresponding elements
-    from a new page fetched from the server.
-    
-    The current and new elements must have the same CSS selector.
-    
-    @method up.replace
-    @param {String|Element|jQuery} selectorOrElement
-      The CSS selector to update. You can also pass a DOM element or jQuery element
-      here, in which case a selector will be inferred from the element's class and ID.
-    @param {String} url
-      The URL to fetch from the server.
-    @param {String} [options.method='get']
-    @param {String} [options.title]
-    @param {String} [options.transition='none']
-    @param {String|Boolean} [options.history=true]
-      If a `String` is given, it is used as the URL the browser's location bar and history.
-      If omitted or true, the `url` argument will be used.
-      If set to `false`, the history will remain unchanged.
-    @param {String|Boolean} [options.source=true]
-    @param {String} [options.scroll]
-      Up.js will try to [reveal](/up.layout#up.reveal) the element being updated, by
-      scrolling its containing viewport. Set this option to `false` to prevent any scrolling.
-    
-      If omitted, this will use the [default from `up.layout`](/up.layout#up.layout.defaults).
-    @param {Boolean} [options.cache]
-      Whether to use a [cached response](/up.proxy) if available.
-    @param {String} [options.historyMethod='push']
-    @return {Promise}
-      A promise that will be resolved when the page has been updated.
-     */
-    replace = function(selectorOrElement, url, options) {
-      var promise, request, selector;
-      options = u.options(options);
-      selector = u.presence(selectorOrElement) ? selectorOrElement : u.createSelectorFromElement($(selectorOrElement));
-      if (!up.browser.canPushState() && !u.castsToFalse(options.history)) {
-        if (!options.preload) {
-          up.browser.loadPage(url, u.only(options, 'method'));
-        }
-        return u.resolvedPromise();
-      }
-      request = {
-        url: url,
-        method: options.method,
-        selector: selector,
-        cache: options.cache,
-        preload: options.preload
-      };
-      promise = up.proxy.ajax(request);
-      promise.done(function(html, textStatus, xhr) {
-        var currentLocation, newRequest;
-        if (currentLocation = u.locationFromXhr(xhr)) {
-          u.debug('Location from server: %o', currentLocation);
-          newRequest = {
-            url: currentLocation,
-            method: u.methodFromXhr(xhr),
-            selector: selector
-          };
-          up.proxy.alias(request, newRequest);
-          url = currentLocation;
-        }
-        if (u.isMissing(options.history) || u.castsToTrue(options.history)) {
-          options.history = url;
-        }
-        if (u.isMissing(options.source) || u.castsToTrue(options.source)) {
-          options.source = url;
-        }
-        if (!options.preload) {
-          return implant(selector, html, options);
-        }
-      });
-      promise.fail(u.error);
-      return promise;
-    };
-
-    /**
-    Updates a selector on the current page with the
-    same selector from the given HTML string.
-    
-    Example:
-    
-        html = '<div class="before">new-before</div>' +
-               '<div class="middle">new-middle</div>' +
-                '<div class="after">new-after</div>';
-    
-        up.flow.implant('.middle', html):
-    
-    @method up.flow.implant
-    @protected
-    @param {String} selector
-    @param {String} html
-    @param {String} [options.title]
-    @param {String} [options.source]
-    @param {Object} [options.transition]
-    @param {String} [options.scroll='body']
-    @param {String} [options.history]
-    @param {String} [options.historyMethod='push']
-     */
-    implant = function(selector, html, options) {
-      var $new, $old, j, len, ref, response, results, step;
-      options = u.options(options, {
-        historyMethod: 'push'
-      });
-      if (u.castsToFalse(options.history)) {
-        options.history = null;
-      }
-      if (u.castsToFalse(options.scroll)) {
-        options.scroll = false;
-      }
-      options.source = u.option(options.source, options.history);
-      response = parseResponse(html);
-      options.title || (options.title = response.title());
-      ref = parseImplantSteps(selector, options);
-      results = [];
-      for (j = 0, len = ref.length; j < len; j++) {
-        step = ref[j];
-        $old = findOldFragment(step.selector);
-        $new = response.find(step.selector).first();
-        results.push(swapElements($old, $new, step.pseudoClass, step.transition, options));
-      }
-      return results;
-    };
-    findOldFragment = function(selector) {
-      return first(".up-popup " + selector) || first(".up-modal " + selector) || first(selector) || fragmentNotFound(selector);
-    };
-    fragmentNotFound = function(selector) {
-      var message;
-      message = 'Could not find selector %o in current body HTML';
-      if (message[0] === '#') {
-        message += ' (avoid using IDs)';
-      }
-      return u.error(message, selector);
-    };
-    parseResponse = function(html) {
-      var htmlElement;
-      htmlElement = u.createElementFromHtml(html);
-      return {
-        title: function() {
-          var ref;
-          return (ref = htmlElement.querySelector("title")) != null ? ref.textContent : void 0;
-        },
-        find: function(selector) {
-          var child;
-          if (child = htmlElement.querySelector(selector)) {
-            return $(child);
-          } else {
-            return u.error("Could not find selector %o in response %o", selector, html);
-          }
-        }
-      };
-    };
-    reveal = function($element, options) {
-      var viewport;
-      viewport = options.scroll;
-      if (viewport !== false) {
-        return up.reveal($element, {
-          viewport: viewport
-        });
-      } else {
-        return u.resolvedDeferred();
-      }
-    };
-    elementsInserted = function($new, options) {
-      if (typeof options.insert === "function") {
-        options.insert($new);
-      }
-      if (options.history) {
-        if (options.title) {
-          document.title = options.title;
-        }
-        up.history[options.historyMethod](options.history);
-      }
-      setSource($new, options.source);
-      autofocus($new);
-      return up.ready($new);
-    };
-    swapElements = function($old, $new, pseudoClass, transition, options) {
-      var $wrapper, insertionMethod;
-      transition || (transition = 'none');
-      up.motion.finish($old);
-      if (pseudoClass) {
-        insertionMethod = pseudoClass === 'before' ? 'prepend' : 'append';
-        $wrapper = $new.contents().wrap('<span class="up-insertion"></span>').parent();
-        $old[insertionMethod]($wrapper);
-        u.copyAttributes($new, $old);
-        elementsInserted($wrapper.children(), options);
-        return reveal($wrapper, options).then(function() {
-          return up.animate($wrapper, transition, options);
-        }).then(function() {
-          u.unwrapElement($wrapper);
-        });
-      } else {
-        return reveal($old, options).then(function() {
-          return destroy($old, {
-            animation: function() {
-              $new.insertBefore($old);
-              elementsInserted($new, options);
-              if ($old.is('body') && transition !== 'none') {
-                u.error('Cannot apply transitions to body-elements (%o)', transition);
-              }
-              return up.morph($old, $new, transition, options);
-            }
-          });
-        });
-      }
-    };
-    parseImplantSteps = function(selector, options) {
-      var comma, disjunction, i, j, len, results, selectorAtom, selectorParts, transition, transitionString, transitions;
-      transitionString = options.transition || options.animation || 'none';
-      comma = /\ *,\ */;
-      disjunction = selector.split(comma);
-      if (u.isPresent(transitionString)) {
-        transitions = transitionString.split(comma);
-      }
-      results = [];
-      for (i = j = 0, len = disjunction.length; j < len; i = ++j) {
-        selectorAtom = disjunction[i];
-        selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/);
-        transition = transitions[i] || u.last(transitions);
-        results.push({
-          selector: selectorParts[1],
-          pseudoClass: selectorParts[2],
-          transition: transition
-        });
-      }
-      return results;
-    };
-    autofocus = function($element) {
-      var $control, selector;
-      selector = '[autofocus]:last';
-      $control = u.findWithSelf($element, selector);
-      if ($control.length && $control.get(0) !== document.activeElement) {
-        return $control.focus();
-      }
-    };
-    isRealElement = function($element) {
-      var unreal;
-      unreal = '.up-ghost, .up-destroying';
-      return $element.closest(unreal).length === 0;
-    };
-
-    /**
-    Returns the first element matching the given selector.
-    Excludes elements that also match `.up-ghost` or `.up-destroying`
-    or that are children of elements with these selectors.
-    
-    Returns `null` if no element matches these conditions.
-    
-    @protected
-    @method up.first
-    @param {String} selector
-     */
-    first = function(selector) {
-      var $element, $match, element, elements, j, len;
-      elements = $(selector).get();
-      $match = null;
-      for (j = 0, len = elements.length; j < len; j++) {
-        element = elements[j];
-        $element = $(element);
-        if (isRealElement($element)) {
-          $match = $element;
-          break;
-        }
-      }
-      return $match;
-    };
-
-    /**
-    Destroys the given element or selector.
-    Takes care that all destructors, if any, are called.
-    The element is removed from the DOM.
-    
-    @method up.destroy
-    @param {String|Element|jQuery} selectorOrElement 
-    @param {String} [options.url]
-    @param {String} [options.title]
-    @param {String} [options.animation='none']
-      The animation to use before the element is removed from the DOM.
-    @param {Number} [options.duration]
-      The duration of the animation. See [`up.animate`](/up.motion#up.animate).
-    @param {Number} [options.delay]
-      The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
-    @param {String} [options.easing]
-      The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
-     */
-    destroy = function(selectorOrElement, options) {
-      var $element, animateOptions, animationPromise;
-      $element = $(selectorOrElement);
-      options = u.options(options, {
-        animation: 'none'
-      });
-      animateOptions = up.motion.animateOptions(options);
-      $element.addClass('up-destroying');
-      if (u.isPresent(options.url)) {
-        up.history.push(options.url);
-      }
-      if (u.isPresent(options.title)) {
-        document.title = options.title;
-      }
-      up.bus.emit('fragment:destroy', $element);
-      animationPromise = u.presence(options.animation, u.isPromise) || up.motion.animate($element, options.animation, animateOptions);
-      animationPromise.then(function() {
-        return $element.remove();
-      });
-      return animationPromise;
-    };
-
-    /**
-    Replaces the given selector or element with a fresh copy
-    fetched from the server.
-    
-    Up.js remembers the URL from which a fragment was loaded, so you
-    don't usually need to give an URL when reloading.
-    
-    @method up.reload
-    @param {String|Element|jQuery} selectorOrElement
-    @param {Object} [options]
-      See options for [`up.replace`](#up.replace)
-     */
-    reload = function(selectorOrElement, options) {
-      var sourceUrl;
-      options = u.options(options, {
-        cache: false
-      });
-      sourceUrl = options.url || source(selectorOrElement);
-      return replace(selectorOrElement, sourceUrl, options);
-    };
-
-    /**
-    Resets Up.js to the state when it was booted.
-    All custom event handlers, animations, etc. that have been registered
-    will be discarded.
-    
-    This is an internal method for to enable unit testing.
-    Don't use this in production.
-    
-    @protected
-    @method up.reset
-     */
-    reset = function() {
-      return up.bus.emit('framework:reset');
-    };
-    up.bus.on('app:ready', function() {
-      return setSource(document.body, up.browser.url());
-    });
-    return {
-      replace: replace,
-      reload: reload,
-      destroy: destroy,
-      implant: implant,
-      reset: reset,
-      first: first
-    };
-  })();
-
-  up.replace = up.flow.replace;
-
-  up.reload = up.flow.reload;
-
-  up.destroy = up.flow.destroy;
-
-  up.reset = up.flow.reset;
-
-  up.first = up.flow.first;
 
 }).call(this);
 
@@ -2355,28 +1752,75 @@ We need to work on this page:
 
 (function() {
   up.history = (function() {
-    var isCurrentUrl, manipulate, pop, push, replace, u;
+    var buildState, config, currentUrl, isCurrentUrl, manipulate, nextPreviousUrl, normalizeUrl, observeNewUrl, pop, previousUrl, push, register, replace, reset, restoreStateOnPop, u;
     u = up.util;
-    isCurrentUrl = function(url) {
+
+    /**
+    @method up.history.defaults
+    @param {Array<String>} [options.popTargets=['body']]
+      An array of CSS selectors to replace when the user goes
+      back in history.
+    @param {Boolean} [options.restoreScroll=true]
+      Whether to restore the known scroll positions
+      when the user goes back or forward in history.
+     */
+    config = u.config({
+      popTargets: ['body'],
+      restoreScroll: true
+    });
+
+    /**
+    Returns the previous URL in the browser history.
+    
+    Note that this will only work reliably for history changes that
+    were applied by [`up.history.push`](#up.history.replace) or
+    [`up.history.replace`](#up.history.replace).
+    
+    @method up.history.previousUrl
+    @protected
+     */
+    previousUrl = void 0;
+    nextPreviousUrl = void 0;
+    reset = function() {
+      config.reset();
+      previousUrl = void 0;
+      return nextPreviousUrl = void 0;
+    };
+    normalizeUrl = function(url) {
       return u.normalizeUrl(url, {
-        hash: true
-      }) === u.normalizeUrl(up.browser.url(), {
         hash: true
       });
     };
 
     /**
+    Returns a normalized URL for the current history entry.
+    
+    @method up.history.url
+    @protected
+     */
+    currentUrl = function() {
+      return normalizeUrl(up.browser.url());
+    };
+    isCurrentUrl = function(url) {
+      return normalizeUrl(url) === currentUrl();
+    };
+    observeNewUrl = function(url) {
+      console.log("observing new url %o", url);
+      if (nextPreviousUrl) {
+        previousUrl = nextPreviousUrl;
+        nextPreviousUrl = void 0;
+      }
+      return nextPreviousUrl = url;
+    };
+
+    /**
     @method up.history.replace
     @param {String} url
+    @param {Boolean} [options.force=false]
     @protected
      */
     replace = function(url, options) {
-      options = u.options(options, {
-        force: false
-      });
-      if (options.force || !isCurrentUrl(url)) {
-        return manipulate("replace", url);
-      }
+      return manipulate('replace', url, options);
     };
 
     /**
@@ -2384,46 +1828,1010 @@ We need to work on this page:
     @param {String} url
     @protected
      */
-    push = function(url) {
-      if (!isCurrentUrl(url)) {
-        return manipulate("push", url);
+    push = function(url, options) {
+      return manipulate('push', url, options);
+    };
+    manipulate = function(method, url, options) {
+      var fullMethod, state;
+      options = u.options(options, {
+        force: false
+      });
+      if (options.force || !isCurrentUrl(url)) {
+        if (up.browser.canPushState()) {
+          fullMethod = method + "State";
+          state = buildState();
+          u.debug("Changing history to URL %o (%o)", url, method);
+          window.history[fullMethod](state, '', url);
+          return observeNewUrl(currentUrl());
+        } else {
+          return u.error("This browser doesn't support history.pushState");
+        }
       }
     };
-    manipulate = function(method, url) {
-      if (up.browser.canPushState()) {
-        method += "State";
-        return window.history[method]({
-          fromUp: true
-        }, '', url);
-      } else {
-        return u.error("This browser doesn't support history.pushState");
-      }
+    buildState = function() {
+      return {
+        fromUp: true
+      };
+    };
+    restoreStateOnPop = function(state) {
+      var popSelector, url;
+      url = currentUrl();
+      u.debug("Restoring state %o (now on " + url + ")", state);
+      popSelector = config.popTargets.join(', ');
+      return up.replace(popSelector, url, {
+        history: false,
+        reveal: false,
+        transition: 'none',
+        saveScroll: false,
+        restoreScroll: config.restoreScroll
+      });
     };
     pop = function(event) {
       var state;
+      u.debug("History state popped to URL %o", currentUrl());
+      observeNewUrl(currentUrl());
+      up.layout.saveScroll({
+        url: previousUrl
+      });
       state = event.originalEvent.state;
       if (state != null ? state.fromUp : void 0) {
-        u.debug("Restoring state %o (now on " + (up.browser.url()) + ")", state);
-        return up.visit(up.browser.url(), {
-          historyMethod: 'replace'
-        });
+        return restoreStateOnPop(state);
       } else {
         return u.debug('Discarding unknown state %o', state);
       }
     };
     if (up.browser.canPushState()) {
-      setTimeout((function() {
+      register = function() {
         $(window).on("popstate", pop);
-        return replace(up.browser.url(), {
+        return replace(currentUrl(), {
           force: true
         });
-      }), 200);
+      };
+      if (typeof jasmine !== "undefined" && jasmine !== null) {
+        register();
+      } else {
+        setTimeout(register, 100);
+      }
     }
+
+    /**
+    Changes the link's destination so it points to the previous URL.
+    
+    Note that this will *not* call `location.back()`, but will set
+    the link's `up-href` attribute to the actual, previous URL.
+    
+    \#\#\#\# Under the hood
+    
+    This link ...
+    
+        <a href="/default" up-back>
+          Go back
+        </a>
+    
+    ... will be transformed to:
+    
+        <a href="/default" up-href="/previous-page" up-restore-scroll up-follow>
+          Goback
+        </a>
+    
+    @ujs
+    @method [up-back]
+     */
+    up.compiler('[up-back]', function($link) {
+      console.log("up-back", $link, previousUrl);
+      if (u.isPresent(previousUrl)) {
+        u.setMissingAttrs($link, {
+          'up-href': previousUrl,
+          'up-restore-scroll': ''
+        });
+        $link.removeAttr('up-back');
+        return up.link.makeFollowable($link);
+      }
+    });
+    up.bus.on('framework:reset', reset);
     return {
+      defaults: config.update,
       push: push,
-      replace: replace
+      replace: replace,
+      url: currentUrl,
+      previousUrl: function() {
+        return previousUrl;
+      },
+      normalizeUrl: normalizeUrl
     };
   })();
+
+}).call(this);
+
+/**
+Viewport scrolling
+==================
+
+This modules contains functions to scroll the viewport and reveal contained elements.
+
+@class up.layout
+ */
+
+(function() {
+  var slice = [].slice;
+
+  up.layout = (function() {
+    var SCROLL_PROMISE_KEY, config, finishScrolling, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsIn;
+    u = up.util;
+
+    /**
+    Configures the application layout.
+    
+    @method up.layout.defaults
+    @param {Array<String>} [options.viewports]
+      An array of CSS selectors that find viewports
+      (containers that scroll their contents).
+    @param {Array<String>} [options.fixedTop]
+      An array of CSS selectors that find elements fixed to the
+      top edge of the screen (using `position: fixed`).
+    @param {Array<String>} [options.fixedBottom]
+      An array of CSS selectors that find elements fixed to the
+      bottom edge of the screen (using `position: fixed`).
+    @param {Number} [options.duration]
+      The duration of the scrolling animation in milliseconds.
+      Setting this to `0` will disable scrolling animations.
+    @param {String} [options.easing]
+      The timing function that controls the animation's acceleration.
+      See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+      for a list of pre-defined timing functions.
+    @param {Number} [options.snap]
+      When [revealing](#up.reveal) elements, Up.js will scroll an viewport
+      to the top when the revealed element is closer to the top than `options.snap`.
+     */
+    config = u.config({
+      duration: 0,
+      viewports: ['body', '.up-modal', '[up-viewport]'],
+      fixedTop: ['[up-fixed~=top]'],
+      fixedBottom: ['[up-fixed~=bottom]'],
+      snap: 50,
+      easing: 'swing'
+    });
+    lastScrollTops = u.cache({
+      size: 30,
+      key: up.history.normalizeUrl
+    });
+    reset = function() {
+      config.reset();
+      return lastScrollTops.clear();
+    };
+    SCROLL_PROMISE_KEY = 'up-scroll-promise';
+
+    /**
+    Scrolls the given viewport to the given Y-position.
+    
+    A "viewport" is an element that has scrollbars, e.g. `<body>` or
+    a container with `overflow-x: scroll`.
+    
+    \#\#\#\# Example
+    
+    This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
+    
+        up.scoll('.main', 100);
+    
+    \#\#\#\# Animating the scrolling motion
+    
+    The scrolling can (optionally) be animated.
+    
+        up.scoll('.main', 100, {
+          easing: 'swing',
+          duration: 250
+        });
+    
+    If the given viewport is already in a scroll animation when `up.scroll`
+    is called a second time, the previous animation will instantly jump to the
+    last frame before the next animation is started.
+    
+    @protected
+    @method up.scroll
+    @param {String|Element|jQuery} viewport
+      The container element to scroll.
+    @param {Number} scrollPos
+      The absolute number of pixels to set the scroll position to.
+    @param {Number}[options.duration]
+      The number of miliseconds for the scrolling's animation.
+    @param {String}[options.easing]
+      The timing function that controls the acceleration for the scrolling's animation.
+    @return {Deferred}
+      A promise that will be resolved when the scrolling ends.
+     */
+    scroll = function(viewport, scrollTop, options) {
+      var $viewport, deferred, duration, easing, targetProps;
+      $viewport = $(viewport);
+      options = u.options(options);
+      duration = u.option(options.duration, config.duration);
+      easing = u.option(options.easing, config.easing);
+      finishScrolling($viewport);
+      if (duration > 0) {
+        deferred = $.Deferred();
+        $viewport.data(SCROLL_PROMISE_KEY, deferred);
+        deferred.then(function() {
+          $viewport.removeData(SCROLL_PROMISE_KEY);
+          return $viewport.finish();
+        });
+        targetProps = {
+          scrollTop: scrollTop
+        };
+        $viewport.animate(targetProps, {
+          duration: duration,
+          easing: easing,
+          complete: function() {
+            return deferred.resolve();
+          }
+        });
+        return deferred;
+      } else {
+        $viewport.scrollTop(scrollTop);
+        return u.resolvedDeferred();
+      }
+    };
+
+    /**
+    @method up.viewport.finishScrolling
+    @private
+     */
+    finishScrolling = function(elementOrSelector) {
+      return $(elementOrSelector).each(function() {
+        var existingScrolling;
+        if (existingScrolling = $(this).data(SCROLL_PROMISE_KEY)) {
+          return existingScrolling.resolve();
+        }
+      });
+    };
+    measureObstruction = function() {
+      var fixedBottomTops, fixedTopBottoms, measurePosition, obstructor;
+      measurePosition = function(obstructor, cssAttr) {
+        var $obstructor, anchorPosition;
+        $obstructor = $(obstructor);
+        anchorPosition = $obstructor.css(cssAttr);
+        if (!u.isPresent(anchorPosition)) {
+          u.error("Fixed element %o must have a CSS attribute %o", $obstructor, cssAttr);
+        }
+        return parseInt(anchorPosition) + $obstructor.height();
+      };
+      fixedTopBottoms = (function() {
+        var i, len, ref, results;
+        ref = $(config.fixedTop.join(', '));
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          obstructor = ref[i];
+          results.push(measurePosition(obstructor, 'top'));
+        }
+        return results;
+      })();
+      fixedBottomTops = (function() {
+        var i, len, ref, results;
+        ref = $(config.fixedBottom.join(', '));
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          obstructor = ref[i];
+          results.push(measurePosition(obstructor, 'bottom'));
+        }
+        return results;
+      })();
+      return {
+        top: Math.max.apply(Math, [0].concat(slice.call(fixedTopBottoms))),
+        bottom: Math.max.apply(Math, [0].concat(slice.call(fixedBottomTops)))
+      };
+    };
+
+    /**
+    Scroll's the given element's viewport so the element
+    is visible for the user.
+    
+    By default Up.js will always reveal an element before
+    updating it with Javascript functions like [`up.replace`](/up.flow#up.replace)
+    or UJS behavior like [`[up-target]`](/up.link#up-target).
+    
+    \#\#\#\# How Up.js finds the viewport
+    
+    The viewport (the container that is going to be scrolled)
+    is the closest parent of the element that is either:
+    
+    - the currently open [modal](/up.modal)
+    - an element with the attribute `[up-viewport]`
+    - the `<body>` element
+    - an element matching the selector you have configured using `up.viewport.defaults({ viewSelector: 'my-custom-selector' })`
+    
+    \#\#\#\# Fixed elements obstruction the viewport
+    
+    Many applications have a navigation bar fixed to the top or bottom,
+    obstructing the view on an element.
+    
+    To make `up.aware` of these fixed elements you can either:
+    
+    - give the element an attribute [`up-fixed="top"`](#up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
+    - [configure default options](#up.layout.defaults) for `fixedTop` or `fixedBottom`
+    
+    @method up.reveal
+    @param {String|Element|jQuery} element
+    @param {String|Element|jQuery} [options.viewport]
+    @param {Number} [options.duration]
+    @param {String} [options.easing]
+    @param {String} [options.snap]
+    @return {Deferred}
+      A promise that will be resolved when the element is revealed.
+     */
+    reveal = function(elementOrSelector, options) {
+      var $element, $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsBody;
+      options = u.options(options);
+      $element = $(elementOrSelector);
+      $viewport = viewportOf($element, options.viewport);
+      snap = u.option(options.snap, config.snap);
+      viewportIsBody = $viewport.is('body');
+      viewportHeight = viewportIsBody ? u.clientSize().height : $viewport.height();
+      originalScrollPos = $viewport.scrollTop();
+      newScrollPos = originalScrollPos;
+      offsetShift = void 0;
+      obstruction = void 0;
+      if (viewportIsBody) {
+        obstruction = measureObstruction();
+        offsetShift = 0;
+      } else {
+        obstruction = {
+          top: 0,
+          bottom: 0
+        };
+        offsetShift = originalScrollPos;
+      }
+      predictFirstVisibleRow = function() {
+        return newScrollPos + obstruction.top;
+      };
+      predictLastVisibleRow = function() {
+        return newScrollPos + viewportHeight - obstruction.bottom - 1;
+      };
+      elementDims = u.measure($element, {
+        relative: true
+      });
+      firstElementRow = elementDims.top + offsetShift;
+      lastElementRow = firstElementRow + elementDims.height - 1;
+      if (lastElementRow > predictLastVisibleRow()) {
+        newScrollPos += lastElementRow - predictLastVisibleRow();
+      }
+      if (firstElementRow < predictFirstVisibleRow()) {
+        newScrollPos = firstElementRow - obstruction.top;
+      }
+      if (newScrollPos < snap) {
+        newScrollPos = 0;
+      }
+      if (newScrollPos !== originalScrollPos) {
+        return scroll($viewport, newScrollPos, options);
+      } else {
+        return u.resolvedDeferred();
+      }
+    };
+    viewportSelector = function() {
+      return config.viewports.join(', ');
+    };
+
+    /**
+    Returns the viewport for the given element.
+    
+    Throws an error if no viewport could be found.
+    
+    @protected
+    @method up.layout.viewportOf
+    @param {String|Element|jQuery} selectorOrElement
+     */
+    viewportOf = function(selectorOrElement, viewportSelectorOrElement) {
+      var $element, $viewport, vieportSelector;
+      $element = $(selectorOrElement);
+      $viewport = void 0;
+      if (u.isJQuery(viewportSelectorOrElement)) {
+        $viewport = viewportSelectorOrElement;
+      } else {
+        vieportSelector = u.presence(viewportSelectorOrElement) || viewportSelector();
+        $viewport = $element.closest(vieportSelector);
+      }
+      $viewport.length || u.error("Could not find viewport for %o", $element);
+      return $viewport;
+    };
+
+    /**
+    Returns a jQuery collection of all the viewports contained within the
+    given selector or element.
+    
+    @protected
+    @method up.layout.viewportsIn
+    @param {String|Element|jQuery} selectorOrElement
+    @return jQuery
+     */
+    viewportsIn = function(selectorOrElement) {
+      var $element;
+      $element = $(selectorOrElement);
+      return u.findWithSelf($element, viewportSelector());
+    };
+
+    /**
+    Returns a jQuery collection of all the viewports on the screen.
+    
+    @protected
+    @method up.layout.viewports
+     */
+    viewports = function() {
+      return $(viewportSelector());
+    };
+
+    /**
+    Returns a hash with scroll positions.
+    
+    Each key in the hash is a viewport selector. The corresponding
+    value is the viewport's top scroll position:
+    
+        up.layout.scrollTops()
+        => { '.main': 0, '.sidebar': 73 }
+    
+    @protected
+    @method up.layout.scrollTops
+    @return Object<String, Number>
+     */
+    scrollTops = function() {
+      var $viewport, i, len, ref, topsBySelector, viewport;
+      topsBySelector = {};
+      ref = config.viewports;
+      for (i = 0, len = ref.length; i < len; i++) {
+        viewport = ref[i];
+        $viewport = $(viewport);
+        if ($viewport.length) {
+          topsBySelector[viewport] = $viewport.scrollTop();
+        }
+      }
+      return topsBySelector;
+    };
+
+    /**
+    Saves the top scroll positions of all the
+    viewports configured in `up.layout.defaults('viewports').
+    The saved scroll positions can be restored by calling
+    [`up.layout.restoreScroll()`](#up.layout.restoreScroll).
+    
+    @method up.layout.saveScroll
+    @param {String} [options.url]
+    @param {Object<String, Number>} [options.tops]
+    @protected
+     */
+    saveScroll = function(options) {
+      var tops, url;
+      if (options == null) {
+        options = {};
+      }
+      url = u.option(options.url, up.history.url());
+      tops = u.option(options.tops, scrollTops());
+      return lastScrollTops.set(url, tops);
+    };
+
+    /**
+    Restores the top scroll positions of all the
+    viewports configured in `up.layout.defaults('viewports')`.
+    
+    @method up.layout.restoreScroll
+    @param {String} [options.within]
+    @protected
+     */
+    restoreScroll = function(options) {
+      var $matchingViewport, $viewports, results, scrollTop, selector, tops;
+      if (options == null) {
+        options = {};
+      }
+      $viewports = options.within ? viewportsIn(options.within) : viewports();
+      tops = lastScrollTops.get(up.history.url());
+      results = [];
+      for (selector in tops) {
+        scrollTop = tops[selector];
+        $matchingViewport = $viewports.filter(selector);
+        results.push(up.scroll($matchingViewport, scrollTop, {
+          duration: 0
+        }));
+      }
+      return results;
+    };
+
+    /**
+    Marks this element as a scrolling container. Apply this ttribute if your app uses
+    a custom panel layout with fixed positioning instead of scrolling `<body>`.
+    
+    [`up.reveal`](/up.reveal) will always try to scroll the viewport closest
+    to the element that is being revealed. By default this is the `<body>` element.
+    
+    \#\#\#\# Example
+    
+    Here is an example for a layout for an e-mail client, showing a list of e-mails
+    on the left side and the e-mail text on the right side:
+    
+        .side {
+          position: fixed;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          width: 100px;
+          overflow-y: scroll;
+        }
+    
+        .main {
+          position: fixed;
+          top: 0;
+          bottom: 0;
+          left: 100px;
+          right: 0;
+          overflow-y: scroll;
+        }
+    
+    This would be the HTML (notice the `up-viewport` attribute):
+    
+        <div class=".side" up-viewport>
+          <a href="/emails/5001" up-target=".main">Re: Your invoice</a>
+          <a href="/emails/2023" up-target=".main">Quote for services</a>
+          <a href="/emails/9002" up-target=".main">Fwd: Room reservation</a>
+        </div>
+    
+        <div class="main" up-viewport>
+          <h1>Re: Your Invoice</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
+            Stet clita kasd gubergren, no sea takimata sanctus est.
+          </p>
+        </div>
+    
+    @method [up-viewport]
+    @ujs
+     */
+
+    /**
+    Marks this element as a navigation fixed to the top edge of the screen
+    using `position: fixed`.
+    
+    [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
+    the viewport far enough so the revealed element is fully visible.
+    
+    Example:
+    
+        <div class="top-nav" up-fixed="top">...</div>
+    
+    @method [up-fixed=top]
+    @ujs
+     */
+
+    /**
+    Marks this element as a navigation fixed to the bottom edge of the screen
+    using `position: fixed`.
+    
+    [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
+    the viewport far enough so the revealed element is fully visible.
+    
+    Example:
+    
+        <div class="bottom-nav" up-fixed="bottom">...</div>
+    
+    @method [up-fixed=bottom]
+    @ujs
+     */
+    up.bus.on('framework:reset', reset);
+    return {
+      reveal: reveal,
+      scroll: scroll,
+      finishScrolling: finishScrolling,
+      defaults: config.update,
+      viewportOf: viewportOf,
+      viewportsIn: viewportsIn,
+      viewports: viewports,
+      scrollTops: scrollTops,
+      saveScroll: saveScroll,
+      restoreScroll: restoreScroll
+    };
+  })();
+
+  up.scroll = up.layout.scroll;
+
+  up.reveal = up.layout.reveal;
+
+}).call(this);
+
+/**
+Changing page fragments programmatically
+========================================
+  
+This module contains Up's core functions to insert, change
+or destroy page fragments.
+
+\#\#\# Incomplete documentation!
+  
+We need to work on this page:
+  
+- Explain the UJS approach vs. pragmatic approach
+- Examples
+  
+  
+@class up.flow
+ */
+
+(function() {
+  up.flow = (function() {
+    var autofocus, destroy, elementsInserted, findOldFragment, first, fragmentNotFound, implant, isRealElement, parseImplantSteps, parseResponse, reload, replace, reset, reveal, setSource, source, swapElements, u;
+    u = up.util;
+    setSource = function(element, sourceUrl) {
+      var $element;
+      $element = $(element);
+      if (u.isPresent(sourceUrl)) {
+        sourceUrl = u.normalizeUrl(sourceUrl);
+      }
+      return $element.attr("up-source", sourceUrl);
+    };
+    source = function(element) {
+      var $element;
+      $element = $(element).closest("[up-source]");
+      return u.presence($element.attr("up-source")) || up.browser.url();
+    };
+
+    /**
+    Replaces elements on the current page with corresponding elements
+    from a new page fetched from the server.
+    
+    The current and new elements must have the same CSS selector.
+    
+    @method up.replace
+    @param {String|Element|jQuery} selectorOrElement
+      The CSS selector to update. You can also pass a DOM element or jQuery element
+      here, in which case a selector will be inferred from the element's class and ID.
+    @param {String} url
+      The URL to fetch from the server.
+    @param {String} [options.method='get']
+    @param {String} [options.title]
+    @param {String} [options.transition='none']
+    @param {String|Boolean} [options.history=true]
+      If a `String` is given, it is used as the URL the browser's location bar and history.
+      If omitted or true, the `url` argument will be used.
+      If set to `false`, the history will remain unchanged.
+    @param {String|Boolean} [options.source=true]
+    @param {String} [options.reveal]
+      Up.js will try to [reveal](/up.layout#up.reveal) the element being updated, by
+      scrolling its containing viewport. Set this option to `false` to prevent any scrolling.
+    
+      If omitted, this will use the [default from `up.layout`](/up.layout#up.layout.defaults).
+    @param {Boolean} [options.restoreScroll=`false`]
+      If set to true, Up.js will try to restore the scroll position
+      of all the viewports within the updated element. The position
+      will be reset to the last known top position before a previous
+      history change for the current URL.
+    @param {Boolean} [options.cache]
+      Whether to use a [cached response](/up.proxy) if available.
+    @param {String} [options.historyMethod='push']
+    @return {Promise}
+      A promise that will be resolved when the page has been updated.
+     */
+    replace = function(selectorOrElement, url, options) {
+      var promise, request, selector;
+      u.debug("Replace %o with %o", selectorOrElement, url);
+      options = u.options(options);
+      selector = u.presence(selectorOrElement) ? selectorOrElement : u.createSelectorFromElement($(selectorOrElement));
+      if (!up.browser.canPushState() && options.history !== false) {
+        if (!options.preload) {
+          up.browser.loadPage(url, u.only(options, 'method'));
+        }
+        return u.resolvedPromise();
+      }
+      request = {
+        url: url,
+        method: options.method,
+        selector: selector,
+        cache: options.cache,
+        preload: options.preload
+      };
+      promise = up.proxy.ajax(request);
+      promise.done(function(html, textStatus, xhr) {
+        var currentLocation, newRequest;
+        if (currentLocation = u.locationFromXhr(xhr)) {
+          u.debug('Location from server: %o', currentLocation);
+          newRequest = {
+            url: currentLocation,
+            method: u.methodFromXhr(xhr),
+            selector: selector
+          };
+          up.proxy.alias(request, newRequest);
+          url = currentLocation;
+        }
+        if (options.history !== false) {
+          options.history = url;
+        }
+        if (options.source !== false) {
+          options.source = url;
+        }
+        if (!options.preload) {
+          return implant(selector, html, options);
+        }
+      });
+      promise.fail(u.error);
+      return promise;
+    };
+
+    /**
+    Updates a selector on the current page with the
+    same selector from the given HTML string.
+    
+    Example:
+    
+        html = '<div class="before">new-before</div>' +
+               '<div class="middle">new-middle</div>' +
+                '<div class="after">new-after</div>';
+    
+        up.flow.implant('.middle', html):
+    
+    @method up.flow.implant
+    @protected
+    @param {String} selector
+    @param {String} html
+    @param {Object} [options]
+      See options for [`up.replace`](#up.replace).
+     */
+    implant = function(selector, html, options) {
+      var $new, $old, j, len, ref, response, results, step;
+      options = u.options(options, {
+        historyMethod: 'push'
+      });
+      options.source = u.option(options.source, options.history);
+      response = parseResponse(html);
+      options.title || (options.title = response.title());
+      if (options.saveScroll !== false) {
+        up.layout.saveScroll();
+      }
+      ref = parseImplantSteps(selector, options);
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        step = ref[j];
+        $old = findOldFragment(step.selector);
+        $new = response.find(step.selector).first();
+        results.push(swapElements($old, $new, step.pseudoClass, step.transition, options));
+      }
+      return results;
+    };
+    findOldFragment = function(selector) {
+      return first(".up-popup " + selector) || first(".up-modal " + selector) || first(selector) || fragmentNotFound(selector);
+    };
+    fragmentNotFound = function(selector) {
+      var message;
+      message = 'Could not find selector %o in current body HTML';
+      if (message[0] === '#') {
+        message += ' (avoid using IDs)';
+      }
+      return u.error(message, selector);
+    };
+    parseResponse = function(html) {
+      var htmlElement;
+      htmlElement = u.createElementFromHtml(html);
+      return {
+        title: function() {
+          var ref;
+          return (ref = htmlElement.querySelector("title")) != null ? ref.textContent : void 0;
+        },
+        find: function(selector) {
+          var child;
+          if (child = htmlElement.querySelector(selector)) {
+            return $(child);
+          } else {
+            return u.error("Could not find selector %o in response %o", selector, html);
+          }
+        }
+      };
+    };
+    reveal = function($element, options) {
+      if (options.reveal !== false) {
+        return up.reveal($element);
+      } else {
+        return u.resolvedDeferred();
+      }
+    };
+    elementsInserted = function($new, options) {
+      if (typeof options.insert === "function") {
+        options.insert($new);
+      }
+      if (options.history) {
+        if (options.title) {
+          document.title = options.title;
+        }
+        up.history[options.historyMethod](options.history);
+      }
+      if (options.source !== false) {
+        setSource($new, options.source);
+      }
+      if (options.restoreScroll) {
+        up.layout.restoreScroll({
+          within: $new
+        });
+      }
+      autofocus($new);
+      return up.ready($new);
+    };
+    swapElements = function($old, $new, pseudoClass, transition, options) {
+      var $wrapper, insertionMethod;
+      transition || (transition = 'none');
+      up.motion.finish($old);
+      if (pseudoClass) {
+        insertionMethod = pseudoClass === 'before' ? 'prepend' : 'append';
+        $wrapper = $new.contents().wrap('<span class="up-insertion"></span>').parent();
+        $old[insertionMethod]($wrapper);
+        u.copyAttributes($new, $old);
+        elementsInserted($wrapper.children(), options);
+        return reveal($wrapper, options).then(function() {
+          return up.animate($wrapper, transition, options);
+        }).then(function() {
+          u.unwrapElement($wrapper);
+        });
+      } else {
+        return reveal($old, options).then(function() {
+          return destroy($old, {
+            animation: function() {
+              $new.insertBefore($old);
+              elementsInserted($new, options);
+              if ($old.is('body') && transition !== 'none') {
+                u.error('Cannot apply transitions to body-elements (%o)', transition);
+              }
+              return up.morph($old, $new, transition, options);
+            }
+          });
+        });
+      }
+    };
+    parseImplantSteps = function(selector, options) {
+      var comma, disjunction, i, j, len, results, selectorAtom, selectorParts, transition, transitionString, transitions;
+      transitionString = options.transition || options.animation || 'none';
+      comma = /\ *,\ */;
+      disjunction = selector.split(comma);
+      if (u.isPresent(transitionString)) {
+        transitions = transitionString.split(comma);
+      }
+      results = [];
+      for (i = j = 0, len = disjunction.length; j < len; i = ++j) {
+        selectorAtom = disjunction[i];
+        selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/);
+        transition = transitions[i] || u.last(transitions);
+        results.push({
+          selector: selectorParts[1],
+          pseudoClass: selectorParts[2],
+          transition: transition
+        });
+      }
+      return results;
+    };
+    autofocus = function($element) {
+      var $control, selector;
+      selector = '[autofocus]:last';
+      $control = u.findWithSelf($element, selector);
+      if ($control.length && $control.get(0) !== document.activeElement) {
+        return $control.focus();
+      }
+    };
+    isRealElement = function($element) {
+      var unreal;
+      unreal = '.up-ghost, .up-destroying';
+      return $element.closest(unreal).length === 0;
+    };
+
+    /**
+    Returns the first element matching the given selector.
+    Excludes elements that also match `.up-ghost` or `.up-destroying`
+    or that are children of elements with these selectors.
+    
+    Returns `null` if no element matches these conditions.
+    
+    @protected
+    @method up.first
+    @param {String} selector
+     */
+    first = function(selector) {
+      var $element, $match, element, elements, j, len;
+      elements = $(selector).get();
+      $match = null;
+      for (j = 0, len = elements.length; j < len; j++) {
+        element = elements[j];
+        $element = $(element);
+        if (isRealElement($element)) {
+          $match = $element;
+          break;
+        }
+      }
+      return $match;
+    };
+
+    /**
+    Destroys the given element or selector.
+    Takes care that all destructors, if any, are called.
+    The element is removed from the DOM.
+    
+    @method up.destroy
+    @param {String|Element|jQuery} selectorOrElement 
+    @param {String} [options.url]
+    @param {String} [options.title]
+    @param {String} [options.animation='none']
+      The animation to use before the element is removed from the DOM.
+    @param {Number} [options.duration]
+      The duration of the animation. See [`up.animate`](/up.motion#up.animate).
+    @param {Number} [options.delay]
+      The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
+    @param {String} [options.easing]
+      The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
+     */
+    destroy = function(selectorOrElement, options) {
+      var $element, animateOptions, animationPromise;
+      $element = $(selectorOrElement);
+      options = u.options(options, {
+        animation: 'none'
+      });
+      animateOptions = up.motion.animateOptions(options);
+      $element.addClass('up-destroying');
+      if (u.isPresent(options.url)) {
+        up.history.push(options.url);
+      }
+      if (u.isPresent(options.title)) {
+        document.title = options.title;
+      }
+      up.bus.emit('fragment:destroy', $element);
+      animationPromise = u.presence(options.animation, u.isPromise) || up.motion.animate($element, options.animation, animateOptions);
+      animationPromise.then(function() {
+        return $element.remove();
+      });
+      return animationPromise;
+    };
+
+    /**
+    Replaces the given selector or element with a fresh copy
+    fetched from the server.
+    
+    Up.js remembers the URL from which a fragment was loaded, so you
+    don't usually need to give an URL when reloading.
+    
+    @method up.reload
+    @param {String|Element|jQuery} selectorOrElement
+    @param {Object} [options]
+      See options for [`up.replace`](#up.replace)
+     */
+    reload = function(selectorOrElement, options) {
+      var sourceUrl;
+      options = u.options(options, {
+        cache: false
+      });
+      sourceUrl = options.url || source(selectorOrElement);
+      return replace(selectorOrElement, sourceUrl, options);
+    };
+
+    /**
+    Resets Up.js to the state when it was booted.
+    All custom event handlers, animations, etc. that have been registered
+    will be discarded.
+    
+    This is an internal method for to enable unit testing.
+    Don't use this in production.
+    
+    @protected
+    @method up.reset
+     */
+    reset = function() {
+      return up.bus.emit('framework:reset');
+    };
+    up.bus.on('app:ready', function() {
+      return setSource(document.body, up.browser.url());
+    });
+    return {
+      replace: replace,
+      reload: reload,
+      destroy: destroy,
+      implant: implant,
+      reset: reset,
+      first: first
+    };
+  })();
+
+  up.replace = up.flow.replace;
+
+  up.reload = up.flow.reload;
+
+  up.destroy = up.flow.destroy;
+
+  up.reset = up.flow.reset;
+
+  up.first = up.flow.first;
 
 }).call(this);
 
@@ -2555,6 +2963,9 @@ We need to work on this page:
       $element = $(elementOrSelector);
       finish($element);
       options = animateOptions(options);
+      if (animation === 'none' || animation === false) {
+        none();
+      }
       if (u.isFunction(animation)) {
         return assertIsDeferred(animation($element, options), animation);
       } else if (u.isString(animation)) {
@@ -2711,7 +3122,7 @@ We need to work on this page:
         $new = $(target);
         finish($old);
         finish($new);
-        if (transitionOrName === 'none') {
+        if (transitionOrName === 'none' || transitionOrName === false) {
           return none();
         } else if (transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]) {
           return withGhosts($old, $new, function($oldGhost, $newGhost) {
@@ -3080,9 +3491,8 @@ You can change (or remove) this delay like this:
 
 (function() {
   up.proxy = (function() {
-    var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, busy, busyDelayTimer, busyEventEmitted, cache, cacheKey, cancelBusyDelay, cancelPreloadDelay, checkPreload, clear, config, get, idle, isFresh, isIdempotent, load, loadEnded, loadStarted, normalizeRequest, pendingCount, preload, preloadDelayTimer, remove, reset, set, startPreloadDelay, timestamp, trim, u;
+    var $waitingLink, SAFE_HTTP_METHODS, ajax, alias, busy, busyDelayTimer, busyEventEmitted, cache, cacheKey, cancelBusyDelay, cancelPreloadDelay, checkPreload, clear, config, get, idle, isIdempotent, load, loadEnded, loadStarted, normalizeRequest, pendingCount, preload, preloadDelayTimer, remove, reset, set, startPreloadDelay, u;
     u = up.util;
-    cache = void 0;
     $waitingLink = void 0;
     preloadDelayTimer = void 0;
     busyDelayTimer = void 0;
@@ -3110,6 +3520,44 @@ You can change (or remove) this delay like this:
       cacheSize: 70,
       cacheExpiry: 1000 * 60 * 5
     });
+    cacheKey = function(request) {
+      normalizeRequest(request);
+      return [request.url, request.method, request.data, request.selector].join('|');
+    };
+    cache = u.cache({
+      size: function() {
+        return config.cacheSize;
+      },
+      expiry: function() {
+        return config.cacheExpiry;
+      },
+      key: cacheKey,
+      log: 'up.proxy'
+    });
+
+    /**
+    @protected
+    @method up.proxy.get
+     */
+    get = cache.get;
+
+    /**
+    @protected
+    @method up.proxy.set
+     */
+    set = cache.set;
+
+    /**
+    @protected
+    @method up.proxy.remove
+     */
+    remove = cache.remove;
+
+    /**
+    @protected
+    @method up.proxy.clear
+     */
+    clear = cache.clear;
     cancelPreloadDelay = function() {
       clearTimeout(preloadDelayTimer);
       return preloadDelayTimer = null;
@@ -3119,42 +3567,16 @@ You can change (or remove) this delay like this:
       return busyDelayTimer = null;
     };
     reset = function() {
-      cache = {};
       $waitingLink = null;
       cancelPreloadDelay();
       cancelBusyDelay();
       pendingCount = 0;
       config.reset();
-      return busyEventEmitted = false;
+      busyEventEmitted = false;
+      return cache.clear();
     };
     reset();
-    cacheKey = function(request) {
-      normalizeRequest(request);
-      return [request.url, request.method, request.data, request.selector].join('|');
-    };
-    trim = function() {
-      var keys, oldestKey, oldestTimestamp;
-      keys = u.keys(cache);
-      if (keys.length > config.cacheSize) {
-        oldestKey = null;
-        oldestTimestamp = null;
-        u.each(keys, function(key) {
-          var promise, timestamp;
-          promise = cache[key];
-          timestamp = promise.timestamp;
-          if (!oldestTimestamp || oldestTimestamp > timestamp) {
-            oldestKey = key;
-            return oldestTimestamp = timestamp;
-          }
-        });
-        if (oldestKey) {
-          return delete cache[oldestKey];
-        }
-      }
-    };
-    timestamp = function() {
-      return (new Date()).valueOf();
-    };
+    alias = cache.alias;
     normalizeRequest = function(request) {
       if (!request._normalized) {
         request.method = u.normalizeMethod(request.method);
@@ -3165,13 +3587,6 @@ You can change (or remove) this delay like this:
         request._normalized = true;
       }
       return request;
-    };
-    alias = function(oldRequest, newRequest) {
-      var promise;
-      u.debug("Aliasing %o to %o", oldRequest, newRequest);
-      if (promise = get(oldRequest)) {
-        return set(newRequest, promise);
-      }
     };
 
     /**
@@ -3198,8 +3613,8 @@ You can change (or remove) this delay like this:
      */
     ajax = function(options) {
       var forceCache, ignoreCache, pending, promise, request;
-      forceCache = u.castsToTrue(options.cache);
-      ignoreCache = u.castsToFalse(options.cache);
+      forceCache = options.cache === true;
+      ignoreCache = options.cache === false;
       request = u.only(options, 'url', 'method', 'data', 'selector', '_normalized');
       pending = true;
       if (!isIdempotent(request) && !forceCache) {
@@ -3283,64 +3698,6 @@ You can change (or remove) this delay like this:
     isIdempotent = function(request) {
       normalizeRequest(request);
       return u.contains(SAFE_HTTP_METHODS, request.method);
-    };
-    isFresh = function(promise) {
-      var timeSinceTouch;
-      timeSinceTouch = timestamp() - promise.timestamp;
-      return timeSinceTouch < config.cacheExpiry;
-    };
-
-    /**
-    @protected
-    @method up.proxy.get
-     */
-    get = function(request) {
-      var key, promise;
-      key = cacheKey(request);
-      if (promise = cache[key]) {
-        if (!isFresh(promise)) {
-          u.debug("Discarding stale cache entry for %o (%o)", request.url, request);
-          remove(request);
-          return void 0;
-        } else {
-          u.debug("Cache hit for %o (%o)", request.url, request);
-          return promise;
-        }
-      } else {
-        u.debug("Cache miss for %o (%o)", request.url, request);
-        return void 0;
-      }
-    };
-
-    /**
-    @protected
-    @method up.proxy.set
-     */
-    set = function(request, promise) {
-      var key;
-      trim();
-      key = cacheKey(request);
-      promise.timestamp = timestamp();
-      cache[key] = promise;
-      return promise;
-    };
-
-    /**
-    @protected
-    @method up.proxy.remove
-     */
-    remove = function(request) {
-      var key;
-      key = cacheKey(request);
-      return delete cache[key];
-    };
-
-    /**
-    @protected
-    @method up.proxy.clear
-     */
-    clear = function() {
-      return cache = {};
     };
     checkPreload = function($link) {
       var curriedPreload, delay;
@@ -3503,7 +3860,7 @@ Read on
 
 (function() {
   up.link = (function() {
-    var childClicked, follow, followMethod, shouldProcessLinkEvent, u, visit;
+    var childClicked, follow, followMethod, makeFollowable, shouldProcessLinkEvent, u, visit;
     u = up.util;
 
     /**
@@ -3554,9 +3911,8 @@ Read on
       or to `body` if such an attribute does not exist.
     @param {Function|String} [options.transition]
       A transition function or name.
-    @param {Element|jQuery|String} [options.scroll]
-      An element or selector that will be scrolled to the top in
-      case the replaced element is not visible in the viewport.
+    @param {Element|jQuery|String} [options.reveal]
+      Whether to reveal the followed element within its viewport.
     @param {Number} [options.duration]
       The duration of the transition. See [`up.morph`](/up.motion#up.morph).
     @param {Number} [options.delay]
@@ -3570,10 +3926,11 @@ Read on
       options = u.options(options);
       url = u.option($link.attr('up-href'), $link.attr('href'));
       selector = u.option(options.target, $link.attr('up-target'), 'body');
-      options.transition = u.option(options.transition, $link.attr('up-transition'), $link.attr('up-animation'));
-      options.history = u.option(options.history, $link.attr('up-history'));
-      options.scroll = u.option(options.scroll, $link.attr('up-scroll'), 'body');
-      options.cache = u.option(options.cache, $link.attr('up-cache'));
+      options.transition = u.option(options.transition, u.castedAttr($link, 'up-transition'), u.castedAttr($link, 'up-animation'));
+      options.history = u.option(options.history, u.castedAttr($link, 'up-history'));
+      options.reveal = u.option(options.reveal, u.castedAttr($link, 'up-reveal'));
+      options.cache = u.option(options.cache, u.castedAttr($link, 'up-cache'));
+      options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'));
       options.method = followMethod($link, options);
       options = u.merge(options, up.motion.animateOptions(options, $link));
       return up.replace(selector, url, options);
@@ -3642,6 +3999,9 @@ Read on
     @param [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
+    @param [up-restore-scroll='false']
+      Whether to restore the scroll position of all viewports
+      within the target selector.
      */
     up.on('click', 'a[up-target], [up-href][up-target]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
@@ -3695,6 +4055,23 @@ Read on
     };
 
     /**
+    Makes sure that the given link is handled by Up.js.
+    
+    This is done by giving the link an `up-follow` attribute
+    if it doesn't already have it an `up-target` or `up-follow` attribute.
+    
+    @method up.link.makeFollowable
+    @protected
+     */
+    makeFollowable = function(link) {
+      var $link;
+      $link = $(link);
+      if (u.isMissing($link.attr('up-target')) && u.isMissing($link.attr('up-follow'))) {
+        return $link.attr('up-follow', '');
+      }
+    };
+
+    /**
     If applied on a link, Follows this link via AJAX and replaces the
     current `<body>` element with the response's `<body>` element.
     
@@ -3720,6 +4097,9 @@ Read on
     @param [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
+    @param [up-restore-scroll='false']
+      Whether to restore the scroll position of all viewports
+      within the response.
      */
     up.on('click', 'a[up-follow], [up-href][up-follow]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
@@ -3750,10 +4130,10 @@ Read on
     @ujs
     @method [up-expand]
      */
-    up.compiler('[up-expand]', function($fragment) {
+    up.compiler('[up-expand]', function($area) {
       var attribute, i, len, link, name, newAttrs, ref, upAttributePattern;
-      link = $fragment.find('a, [up-href]').get(0);
-      link || u.error('No link to expand within %o', $fragment);
+      link = $area.find('a, [up-href]').get(0);
+      link || u.error('No link to expand within %o', $area);
       upAttributePattern = /^up-/;
       newAttrs = {};
       newAttrs['up-href'] = $(link).attr('href');
@@ -3765,9 +4145,9 @@ Read on
           newAttrs[name] = attribute.value;
         }
       }
-      u.isGiven(newAttrs['up-target']) || (newAttrs['up-follow'] = '');
-      u.setMissingAttrs($fragment, newAttrs);
-      return $fragment.removeAttr('up-expand');
+      u.setMissingAttrs($area, newAttrs);
+      $area.removeAttr('up-expand');
+      return makeFollowable($area);
     });
 
     /**
@@ -3791,12 +4171,12 @@ Read on
      */
     up.compiler('[up-dash]', function($element) {
       var newAttrs, target;
-      target = $element.attr('up-dash');
+      target = u.castedAttr($element, 'up-dash');
       newAttrs = {
         'up-preload': 'true',
         'up-instant': 'true'
       };
-      if (u.isBlank(target) || u.castsToTrue(target)) {
+      if (target === true) {
         newAttrs['up-follow'] = '';
       } else {
         newAttrs['up-target'] = target;
@@ -3808,6 +4188,7 @@ Read on
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       visit: visit,
       follow: follow,
+      makeFollowable: makeFollowable,
       childClicked: childClicked,
       followMethod: followMethod
     };
@@ -3907,15 +4288,15 @@ We need to work on this page:
       failureSelector = u.option(options.failTarget, $form.attr('up-fail-target'), function() {
         return u.createSelectorFromElement($form);
       });
-      historyOption = u.option(options.history, $form.attr('up-history'), true);
-      successTransition = u.option(options.transition, $form.attr('up-transition'));
-      failureTransition = u.option(options.failTransition, $form.attr('up-fail-transition'), successTransition);
+      historyOption = u.option(options.history, u.castedAttr($form, 'up-history'), true);
+      successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'));
+      failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition);
       httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase();
       animateOptions = up.motion.animateOptions(options, $form);
-      useCache = u.option(options.cache, $form.attr('up-cache'));
+      useCache = u.option(options.cache, u.castedAttr($form, 'up-cache'));
       url = u.option(options.url, $form.attr('action'), up.browser.url());
       $form.addClass('up-active');
-      if (!up.browser.canPushState() && !u.castsToFalse(historyOption)) {
+      if (!up.browser.canPushState() && historyOption !== false) {
         $form.get(0).submit();
         return;
       }
@@ -3928,7 +4309,16 @@ We need to work on this page:
       };
       successUrl = function(xhr) {
         var currentLocation;
-        url = historyOption ? u.castsToFalse(historyOption) ? false : u.isString(historyOption) ? historyOption : (currentLocation = u.locationFromXhr(xhr)) ? currentLocation : request.type === 'GET' ? request.url + '?' + request.data : void 0 : void 0;
+        url = void 0;
+        if (u.isGiven(historyOption)) {
+          if (historyOption === false || u.isString(historyOption)) {
+            url = historyOption;
+          } else if (currentLocation = u.locationFromXhr(xhr)) {
+            url = currentLocation;
+          } else if (request.type === 'GET') {
+            url = request.url + '?' + request.data;
+          }
+        }
         return u.option(url, false);
       };
       return up.proxy.ajax(request).always(function() {
@@ -4298,8 +4688,8 @@ We need to work on this page:
       selector = u.option(options.target, $link.attr('up-popup'), 'body');
       position = u.option(options.position, $link.attr('up-position'), config.position);
       animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
-      sticky = u.option(options.sticky, $link.is('[up-sticky]'));
-      history = up.browser.canPushState() ? u.option(options.history, $link.attr('up-history'), false) : false;
+      sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'));
+      history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($link, 'up-history'), false) : false;
       animateOptions = up.motion.animateOptions(options, $link);
       close();
       $popup = createHiddenPopup($link, selector, sticky);
@@ -4659,8 +5049,8 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), config.maxWidth);
       height = u.option(options.height, $link.attr('up-height'), config.height);
       animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
-      sticky = u.option(options.sticky, $link.is('[up-sticky]'));
-      history = up.browser.canPushState() ? u.option(options.history, $link.attr('up-history'), true) : false;
+      sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'));
+      history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($link, 'up-history'), true) : false;
       animateOptions = up.motion.animateOptions(options, $link);
       close();
       $modal = createHiddenModal({
@@ -4938,7 +5328,7 @@ We need to work on this page:
       $link = $(linkOrSelector);
       html = u.option(options.html, $link.attr('up-tooltip'), $link.attr('title'));
       position = u.option(options.position, $link.attr('up-position'), 'top');
-      animation = u.option(options.animation, $link.attr('up-animation'), 'fade-in');
+      animation = u.option(options.animation, u.castedAttr($link, 'up-animation'), 'fade-in');
       animateOptions = up.motion.animateOptions(options, $link);
       close();
       $tooltip = createElement(html);
@@ -5028,18 +5418,17 @@ by providing instant feedback for user interactions.
       The class to set on [links that point the current location](#up-current).
      */
     config = u.config({
-      currentClass: 'up-current'
+      currentClasses: ['up-current']
     });
     reset = function() {
       return config.reset();
     };
     currentClass = function() {
-      var klass;
-      klass = config.currentClass;
-      if (!u.contains(klass, 'up-current')) {
-        klass += ' up-current';
-      }
-      return klass;
+      var classes;
+      classes = config.currentClasses;
+      classes = classes.concat(['up-current']);
+      classes = u.uniq(classes);
+      return classes.join(' ');
     };
     CLASS_ACTIVE = 'up-active';
     SELECTORS_SECTION = ['a', '[up-href]', '[up-alias]'];

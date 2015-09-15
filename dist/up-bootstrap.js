@@ -4,8 +4,8 @@
   defaults = up.layout.defaults();
 
   up.layout.defaults({
-    fixedTop: defaults.fixedTop + ", .navbar-fixed-top",
-    fixedBottom: defaults.fixedBottom + ", .navbar-fixed-bottom"
+    fixedTop: defaults.fixedTop.concat(['.navbar-fixed-top']),
+    fixedBottom: defaults.fixedBottom.concat(['.navbar-fixed-bottom'])
   });
 
 }).call(this);
@@ -16,8 +16,12 @@
 
 }).call(this);
 (function() {
+  var defaults;
+
+  defaults = up.navigation.defaults();
+
   up.navigation.defaults({
-    currentClass: 'active'
+    currentClasses: defaults.currentClasses.concat(['active'])
   });
 
 }).call(this);
