@@ -1982,6 +1982,8 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @param {Number} [options.snap]
       When [revealing](#up.reveal) elements, Up.js will scroll an viewport
       to the top when the revealed element is closer to the top than `options.snap`.
+    @param {Number} [options.substance]
+      The top number of pixel rows of an element to [reveal](#up.reveal).
      */
     config = u.config({
       duration: 0,
@@ -1989,6 +1991,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       fixedTop: ['[up-fixed~=top]'],
       fixedBottom: ['[up-fixed~=bottom]'],
       snap: 50,
+      substance: 150,
       easing: 'swing'
     });
     lastScrollTops = u.cache({
@@ -2120,8 +2123,8 @@ This modules contains functions to scroll the viewport and reveal contained elem
     };
 
     /**
-    Scroll's the given element's viewport so the element
-    is visible for the user.
+    Scroll's the given element's viewport so the first rows of the
+    element are visible for the user.
     
     By default Up.js will always reveal an element before
     updating it with Javascript functions like [`up.replace`](/up.flow#up.replace)
@@ -2188,7 +2191,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
         relative: true
       });
       firstElementRow = elementDims.top + offsetShift;
-      lastElementRow = firstElementRow + elementDims.height - 1;
+      lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1;
       if (lastElementRow > predictLastVisibleRow()) {
         newScrollPos += lastElementRow - predictLastVisibleRow();
       }
