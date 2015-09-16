@@ -33,6 +33,8 @@ up.layout = (->
   @param {Number} [options.snap]
     When [revealing](#up.reveal) elements, Up.js will scroll an viewport
     to the top when the revealed element is closer to the top than `options.snap`.
+  @param {Number} [options.substance]
+    The top number of pixel rows of an element to [reveal](#up.reveal).
   ###
   config = u.config
     duration: 0
@@ -40,6 +42,7 @@ up.layout = (->
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     snap: 50
+    substance: 150
     easing: 'swing'
 
   lastScrollTops = u.cache
@@ -150,8 +153,8 @@ up.layout = (->
     bottom: Math.max(0, fixedBottomTops...)
 
   ###*
-  Scroll's the given element's viewport so the element
-  is visible for the user.
+  Scroll's the given element's viewport so the first rows of the
+  element are visible for the user.
 
   By default Up.js will always reveal an element before
   updating it with Javascript functions like [`up.replace`](/up.flow#up.replace)
@@ -220,7 +223,10 @@ up.layout = (->
 
     elementDims = u.measure($element, relative: true)
     firstElementRow = elementDims.top + offsetShift
-    lastElementRow = firstElementRow + elementDims.height - 1
+
+    # console.log("min of %o is ", elementDims.height, Math.min(elementDims.height, 999999))
+
+    lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1
 
     if lastElementRow > predictLastVisibleRow()
       # Try to show the full height of the element
