@@ -34,7 +34,7 @@ up.layout = (->
     When [revealing](#up.reveal) elements, Up.js will scroll an viewport
     to the top when the revealed element is closer to the top than `options.snap`.
   @param {Number} [options.substance]
-    The top number of pixel rows of an element to [reveal](#up.reveal).
+    A number indicating how many top pixel rows of an element to [reveal](#up.reveal).
   ###
   config = u.config
     duration: 0

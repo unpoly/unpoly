@@ -48,11 +48,9 @@ up.flow = (->
     If omitted or true, the `url` argument will be used.
     If set to `false`, the history will remain unchanged.
   @param {String|Boolean} [options.source=true]
-  @param {String} [options.reveal]
-    Up.js will try to [reveal](/up.layout#up.reveal) the element being updated, by
-    scrolling its containing viewport. Set this option to `false` to prevent any scrolling.
-
-    If omitted, this will use the [default from `up.layout`](/up.layout#up.layout.defaults).
+  @param {String} [options.reveal=false]
+    Whether to [reveal](/up.layout#up.reveal) the element being updated, by
+    scrolling its containing viewport.
   @param {Boolean} [options.restoreScroll=`false`]
     If set to true, Up.js will try to restore the scroll position
     of all the viewports within the updated element. The position
@@ -170,7 +168,7 @@ up.flow = (->
         u.error("Could not find selector %o in response %o", selector, html)
 
   reveal = ($element, options) ->
-    if options.reveal != false
+    if options.reveal
       up.reveal($element)
     else
       u.resolvedDeferred()

@@ -2,13 +2,32 @@ Changelog
 =========
 
 All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
+This project mostly adheres to [Semantic Versioning](http://semver.org/).
+
+
+0.10.2
+------
+
+### Breaking changes
+
+- While following links and submitting forms will still reveal elements by default,
+  direct calls of [`up.replace`](http://upjs.io/up.flow#up.replace) no longer do.
+  This behavior can be activated using the `{ reveal: true }` option.
+
+### Compatible changes
+
+- Options to control scrolling and cache use for
+  [`up.submit`](http://upjs.io/up.form#up.submit),
+  [`up.follow`](http://upjs.io/up.link#up.follow),
+  [`up.visit`](http://upjs.io/up.link#up.visit),
+  [`form[up-target]`](http://upjs.io/up.form#form-up-target) and
+  [`a[up-target]`](http://upjs.io/up.link#a-up-target).
 
 
 0.10.1
 ------
 
-### Compatible changes
+### Breaking changes
 
 - [`up.reveal`](http://upjs.io/up.layout#up.reveal) now only reveals the first 150 pixels of an element.
 

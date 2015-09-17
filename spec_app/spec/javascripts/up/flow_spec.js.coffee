@@ -116,7 +116,7 @@ describe 'up.flow', ->
 
         it 'restores the scroll positions of all viewports within the target with options.restoreScroll'
 
-        describe 'revealing of elements', ->
+        describe 'with { reveal: true } option', ->
 
           beforeEach ->
             @revealedHTML = ''
@@ -125,14 +125,14 @@ describe 'up.flow', ->
               u.resolvedPromise()
 
           it 'reveals an old element before it is being replaced', (done) ->
-            @request = up.replace('.middle', '/path')
+            @request = up.replace('.middle', '/path', reveal: true)
             @respond()
             @request.then =>
               expect(up.reveal).toHaveBeenCalledWith(@oldMiddle)
               done()
 
           it 'reveals a new element that is being appended', (done) ->
-            @request = up.replace('.middle:after', '/path')
+            @request = up.replace('.middle:after', '/path', reveal: true)
             @respond()
             @request.then =>
               expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle)
@@ -145,7 +145,7 @@ describe 'up.flow', ->
               done()
 
           it 'reveals a new element that is being prepended', (done) ->
-            @request = up.replace('.middle:before', '/path')
+            @request = up.replace('.middle:before', '/path', reveal: true)
             @respond()
             @request.then =>
               expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle)

@@ -100,7 +100,6 @@ up.link = (->
     The URL to visit.
   @param {String} [options.target='body']
     The selector to replace.
-    See options for [`up.replace`](/up.flow#up.replace)
   @param {Object} options
     See options for [`up.replace`](/up.flow#up.replace)
   ###
@@ -132,14 +131,21 @@ up.link = (->
     or to `body` if such an attribute does not exist.
   @param {Function|String} [options.transition]
     A transition function or name.
-  @param {Element|jQuery|String} [options.reveal]
-    Whether to reveal the followed element within its viewport.
   @param {Number} [options.duration]
     The duration of the transition. See [`up.morph`](/up.motion#up.morph).
   @param {Number} [options.delay]
     The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
   @param {String} [options.easing]
     The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
+  @param {Element|jQuery|String} [options.reveal]
+    Whether to reveal the target  element within its viewport before updating.
+  @param {Boolean} [options.restoreScroll]
+    If set to `true`, this will attempt to [`restore scroll positions`](/up.layout#up.restoreScroll)
+    previously seen on the destination URL.
+  @param {Boolean} [options.cache]
+    Whether to force the use of a cached response (`true`)
+    or never use the cache (`false`)
+    or make an educated guess (`undefined`).
   ###
   follow = (link, options) ->
     $link = $(link)
@@ -149,7 +155,7 @@ up.link = (->
     selector = u.option(options.target, $link.attr('up-target'), 'body')
     options.transition = u.option(options.transition, u.castedAttr($link, 'up-transition'), u.castedAttr($link, 'up-animation'))
     options.history = u.option(options.history, u.castedAttr($link, 'up-history'))
-    options.reveal = u.option(options.reveal, u.castedAttr($link, 'up-reveal'))
+    options.reveal = u.option(options.reveal, u.castedAttr($link, 'up-reveal'), true)
     options.cache = u.option(options.cache, u.castedAttr($link, 'up-cache'))
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'))
     options.method = followMethod($link, options)
@@ -216,12 +222,18 @@ up.link = (->
   @ujs
   @param {String} up-target
     The CSS selector to replace
-  @param [up-href]
+  @param {String} [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
-  @param [up-restore-scroll='false']
-    Whether to restore the scroll position of all viewports
+  @param {String} [up-reveal='true']
+    Whether to reveal the target element within its viewport before updating.
+  @param {String} [up-restore-scroll='false']
+    Whether to restore previously known scroll position of all viewports
     within the target selector.
+  @param {String} [up-cache]
+    Whether to force the use of a cached response (`true`)
+    or never use the cache (`false`)
+    or make an educated guess (`undefined`).
   ###
   up.on 'click', 'a[up-target], [up-href][up-target]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)

@@ -71,10 +71,20 @@ up.form = (->
     The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
   @param {String} [options.easing]
     The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
+  @param {Element|jQuery|String} [options.reveal]
+    Whether to reveal the target element within its viewport.
+  @param {Boolean} [options.restoreScroll]
+    If set to `true`, this will attempt to [`restore scroll positions`](/up.layout#up.restoreScroll)
+    previously seen on the destination URL.
   @param {Boolean} [options.cache]
-    Whether to accept a cached response.
+    Whether to force the use of a cached response (`true`)
+    or never use the cache (`false`)
+    or make an educated guess (`undefined`).
+
+    By default only responses to `GET` requests are cached
+    for a few minutes.
   @return {Promise}
-    A promise for the AJAX response
+    A promise for the successful form submission.
   ###
   submit = (formOrSelector, options) ->
     
@@ -87,7 +97,13 @@ up.form = (->
     successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'))
     failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition)
     httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase()
-    animateOptions = up.motion.animateOptions(options, $form)
+
+    implantOptions = {}
+    implantOptions.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true)
+    implantOptions.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
+    implantOptions.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
+    implantOptions = u.extend(implantOptions, up.motion.animateOptions(options, $form))
+
     useCache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
     url = u.option(options.url, $form.attr('action'), up.browser.url())
     
@@ -120,14 +136,14 @@ up.form = (->
       .always ->
         $form.removeClass('up-active')
       .done (html, textStatus, xhr) ->
-        successOptions = u.merge(animateOptions,
+        successOptions = u.merge(implantOptions,
           history: successUrl(xhr),
           transition: successTransition
         )
         up.flow.implant(successSelector, html, successOptions)
       .fail (xhr, textStatus, errorThrown) ->
         html = xhr.responseText
-        failureOptions = u.merge(animateOptions, transition: failureTransition)
+        failureOptions = u.merge(implantOptions, transition: failureTransition)
         up.flow.implant(failureSelector, html, failureOptions)
 
   ###*
@@ -271,7 +287,18 @@ up.form = (->
     The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
     Alternately you can use an attribute `data-method`
     ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
-    or `method` (vanilla HTML) for the same purpose.  
+    or `method` (vanilla HTML) for the same purpose.
+  @param {String} [up-reveal='true']
+    Whether to reveal the target element within its viewport before updating.
+  @param {String} [up-restore-scroll='false']
+    Whether to restore previously known scroll position of all viewports
+    within the target selector.
+  @param {String} [up-cache]
+    Whether to force the use of a cached response (`true`)
+    or never use the cache (`false`)
+    or make an educated guess (`undefined`).
+
+    By default only responses to `GET` requests are cached for a few minutes.
   ###
   up.on 'submit', 'form[up-target]', (event, $form) ->
     event.preventDefault()

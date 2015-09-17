@@ -1983,7 +1983,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       When [revealing](#up.reveal) elements, Up.js will scroll an viewport
       to the top when the revealed element is closer to the top than `options.snap`.
     @param {Number} [options.substance]
-      The top number of pixel rows of an element to [reveal](#up.reveal).
+      A number indicating how many top pixel rows of an element to [reveal](#up.reveal).
      */
     config = u.config({
       duration: 0,
@@ -2489,11 +2489,9 @@ We need to work on this page:
       If omitted or true, the `url` argument will be used.
       If set to `false`, the history will remain unchanged.
     @param {String|Boolean} [options.source=true]
-    @param {String} [options.reveal]
-      Up.js will try to [reveal](/up.layout#up.reveal) the element being updated, by
-      scrolling its containing viewport. Set this option to `false` to prevent any scrolling.
-    
-      If omitted, this will use the [default from `up.layout`](/up.layout#up.layout.defaults).
+    @param {String} [options.reveal=false]
+      Whether to [reveal](/up.layout#up.reveal) the element being updated, by
+      scrolling its containing viewport.
     @param {Boolean} [options.restoreScroll=`false`]
       If set to true, Up.js will try to restore the scroll position
       of all the viewports within the updated element. The position
@@ -2620,7 +2618,7 @@ We need to work on this page:
       };
     };
     reveal = function($element, options) {
-      if (options.reveal !== false) {
+      if (options.reveal) {
         return up.reveal($element);
       } else {
         return u.resolvedDeferred();
@@ -3880,7 +3878,6 @@ Read on
       The URL to visit.
     @param {String} [options.target='body']
       The selector to replace.
-      See options for [`up.replace`](/up.flow#up.replace)
     @param {Object} options
       See options for [`up.replace`](/up.flow#up.replace)
      */
@@ -3914,14 +3911,21 @@ Read on
       or to `body` if such an attribute does not exist.
     @param {Function|String} [options.transition]
       A transition function or name.
-    @param {Element|jQuery|String} [options.reveal]
-      Whether to reveal the followed element within its viewport.
     @param {Number} [options.duration]
       The duration of the transition. See [`up.morph`](/up.motion#up.morph).
     @param {Number} [options.delay]
       The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
     @param {String} [options.easing]
       The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
+    @param {Element|jQuery|String} [options.reveal]
+      Whether to reveal the target  element within its viewport before updating.
+    @param {Boolean} [options.restoreScroll]
+      If set to `true`, this will attempt to [`restore scroll positions`](/up.layout#up.restoreScroll)
+      previously seen on the destination URL.
+    @param {Boolean} [options.cache]
+      Whether to force the use of a cached response (`true`)
+      or never use the cache (`false`)
+      or make an educated guess (`undefined`).
      */
     follow = function(link, options) {
       var $link, selector, url;
@@ -3931,7 +3935,7 @@ Read on
       selector = u.option(options.target, $link.attr('up-target'), 'body');
       options.transition = u.option(options.transition, u.castedAttr($link, 'up-transition'), u.castedAttr($link, 'up-animation'));
       options.history = u.option(options.history, u.castedAttr($link, 'up-history'));
-      options.reveal = u.option(options.reveal, u.castedAttr($link, 'up-reveal'));
+      options.reveal = u.option(options.reveal, u.castedAttr($link, 'up-reveal'), true);
       options.cache = u.option(options.cache, u.castedAttr($link, 'up-cache'));
       options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'));
       options.method = followMethod($link, options);
@@ -3999,12 +4003,18 @@ Read on
     @ujs
     @param {String} up-target
       The CSS selector to replace
-    @param [up-href]
+    @param {String} [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
-    @param [up-restore-scroll='false']
-      Whether to restore the scroll position of all viewports
+    @param {String} [up-reveal='true']
+      Whether to reveal the target element within its viewport before updating.
+    @param {String} [up-restore-scroll='false']
+      Whether to restore previously known scroll position of all viewports
       within the target selector.
+    @param {String} [up-cache]
+      Whether to force the use of a cached response (`true`)
+      or never use the cache (`false`)
+      or make an educated guess (`undefined`).
      */
     up.on('click', 'a[up-target], [up-href][up-target]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
@@ -4278,13 +4288,23 @@ We need to work on this page:
       The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
     @param {String} [options.easing]
       The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
+    @param {Element|jQuery|String} [options.reveal]
+      Whether to reveal the target element within its viewport.
+    @param {Boolean} [options.restoreScroll]
+      If set to `true`, this will attempt to [`restore scroll positions`](/up.layout#up.restoreScroll)
+      previously seen on the destination URL.
     @param {Boolean} [options.cache]
-      Whether to accept a cached response.
+      Whether to force the use of a cached response (`true`)
+      or never use the cache (`false`)
+      or make an educated guess (`undefined`).
+    
+      By default only responses to `GET` requests are cached
+      for a few minutes.
     @return {Promise}
-      A promise for the AJAX response
+      A promise for the successful form submission.
      */
     submit = function(formOrSelector, options) {
-      var $form, animateOptions, failureSelector, failureTransition, historyOption, httpMethod, request, successSelector, successTransition, successUrl, url, useCache;
+      var $form, failureSelector, failureTransition, historyOption, httpMethod, implantOptions, request, successSelector, successTransition, successUrl, url, useCache;
       $form = $(formOrSelector).closest('form');
       options = u.options(options);
       successSelector = u.option(options.target, $form.attr('up-target'), 'body');
@@ -4295,7 +4315,11 @@ We need to work on this page:
       successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'));
       failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition);
       httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase();
-      animateOptions = up.motion.animateOptions(options, $form);
+      implantOptions = {};
+      implantOptions.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true);
+      implantOptions.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'));
+      implantOptions.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'));
+      implantOptions = u.extend(implantOptions, up.motion.animateOptions(options, $form));
       useCache = u.option(options.cache, u.castedAttr($form, 'up-cache'));
       url = u.option(options.url, $form.attr('action'), up.browser.url());
       $form.addClass('up-active');
@@ -4328,7 +4352,7 @@ We need to work on this page:
         return $form.removeClass('up-active');
       }).done(function(html, textStatus, xhr) {
         var successOptions;
-        successOptions = u.merge(animateOptions, {
+        successOptions = u.merge(implantOptions, {
           history: successUrl(xhr),
           transition: successTransition
         });
@@ -4336,7 +4360,7 @@ We need to work on this page:
       }).fail(function(xhr, textStatus, errorThrown) {
         var failureOptions, html;
         html = xhr.responseText;
-        failureOptions = u.merge(animateOptions, {
+        failureOptions = u.merge(implantOptions, {
           transition: failureTransition
         });
         return up.flow.implant(failureSelector, html, failureOptions);
@@ -4471,6 +4495,17 @@ We need to work on this page:
       Alternately you can use an attribute `data-method`
       ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
       or `method` (vanilla HTML) for the same purpose.
+    @param {String} [up-reveal='true']
+      Whether to reveal the target element within its viewport before updating.
+    @param {String} [up-restore-scroll='false']
+      Whether to restore previously known scroll position of all viewports
+      within the target selector.
+    @param {String} [up-cache]
+      Whether to force the use of a cached response (`true`)
+      or never use the cache (`false`)
+      or make an educated guess (`undefined`).
+    
+      By default only responses to `GET` requests are cached for a few minutes.
      */
     up.on('submit', 'form[up-target]', function(event, $form) {
       event.preventDefault();
