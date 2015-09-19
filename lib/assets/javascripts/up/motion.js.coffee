@@ -295,6 +295,8 @@ up.motion = (->
     $ghost = $element.clone()
     $ghost.find('script').remove()
     $ghost.css
+      # If the element had a layout context before, make sure the
+      # ghost will have layout context as well (and vice versa).
       position: if $element.css('position') == 'static' then 'static' else 'relative'
       top:    ''
       right:  ''

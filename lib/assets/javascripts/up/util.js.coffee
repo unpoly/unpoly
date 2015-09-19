@@ -418,6 +418,17 @@ up.util = (->
       fun = undefined
       result
 
+  ###*
+  # Temporarily sets the CSS for the given element.
+  #
+  # @method up.util.temporaryCss
+  # @param {jQuery} $element
+  # @param {Object} css
+  # @param {Function} [block]
+  #   If given, the CSS is set, the block is called and
+  #   the old CSS is restored.
+  # @private
+  ###
   temporaryCss = ($element, css, block) ->
     oldCss = $element.css(keys(css))
     $element.css(css)
