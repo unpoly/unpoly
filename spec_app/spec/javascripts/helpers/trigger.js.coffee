@@ -35,9 +35,9 @@
     )
     event = document.createEvent('MouseEvent')
     event.initMouseEvent(type,
-      options.view,
       options.bubbles,
       options.cancelable,
+      options.view,
       options.detail,
       options.screenX,
       options.screenY,
