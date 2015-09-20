@@ -53,7 +53,7 @@ up.flow = (->
     scrolling its containing viewport.
   @param {Boolean} [options.restoreScroll=`false`]
     If set to true, Up.js will try to restore the scroll position
-    of all the viewports within the updated element. The position
+    of all the viewports around or below the updated element. The position
     will be reset to the last known top position before a previous
     history change for the current URL.
   @param {Boolean} [options.cache]
@@ -183,7 +183,7 @@ up.flow = (->
     unless options.source is false
       setSource($new, options.source)
     if options.restoreScroll
-      up.layout.restoreScroll(within: $new)
+      up.layout.restoreScroll(around: $new)
     autofocus($new)
     # The fragment should be readiet before animating,
     # so transitions see .up-current classes

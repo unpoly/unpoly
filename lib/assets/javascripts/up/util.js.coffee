@@ -337,7 +337,7 @@ up.util = (->
   ###
   option = (args...) ->
     # This behavior is subtly different from detect!
-    match = null
+    match = undefined
     for arg in args
       value = arg
       value = value() if isFunction(value)
@@ -347,12 +347,16 @@ up.util = (->
     match    
 
   detect = (array, tester) ->
-    match = null
+    match = undefined
     for element in array
       if tester(element)
         match = element
         break
     match
+
+  any = (array, tester) ->
+    match = detect(array, tester)
+    isDefined(match)
 
   compact = (array) ->
     select array, isGiven
@@ -640,6 +644,62 @@ up.util = (->
       array.splice(index, 1)
       element
 
+  emptyJQuery = ->
+    $([])
+
+  multiSelector = (parts) ->
+
+    obj = {}
+    selectors = []
+    elements = []
+
+    for part in parts
+      if isString(part)
+        selectors.push(part)
+      else
+        elements.push(part)
+
+    obj.parsed = elements
+
+    if selectors.length
+      # Although other methods would work with an array of
+      # selectors, we combine them to a single separator for
+      # performance reasons.
+      combinedSelector = selectors.join(', ')
+      obj.parsed.push(combinedSelector)
+
+    obj.select = ->
+      obj.find(undefined)
+
+    obj.find = ($root) ->
+      $result = emptyJQuery()
+      for selector in obj.parsed
+        $matches = if $root then $root.find(selector) else $(selector)
+        $result = $result.add($matches)
+      $result
+
+    obj.findWithSelf = ($start) ->
+      $matches = obj.find($start)
+      $matches = $matches.add($start) if obj.doesMatch($start)
+      $matches
+
+    obj.doesMatch = (element) ->
+      $element = $(element)
+      any obj.parsed, (selector) -> $element.is(selector)
+
+    obj.seekUp = (start) ->
+      $start = $(start)
+      $element = $start
+      $result = undefined
+      while $element.length
+        if obj.doesMatch($element)
+          $result = $element
+          break
+        $element = $element.parent()
+      $result || emptyJQuery()
+
+    obj
+
   ###*
   @method up.util.cache
   @param {Number|Function} [config.size]
@@ -751,7 +811,6 @@ up.util = (->
     remove: remove
     clear: clear
 
-
   config = (factoryOptions = {}) ->
     hash =
       ensureKeyExists: (key) ->
@@ -805,6 +864,7 @@ up.util = (->
   map: map
   identity: identity
   times: times
+  any: any
   detect: detect
   select: select
   compact: compact
@@ -864,5 +924,7 @@ up.util = (->
   config: config
   cache: cache
   unwrapElement: unwrapElement
+  multiSelector: multiSelector
+  emptyJQuery: emptyJQuery
 
 )()

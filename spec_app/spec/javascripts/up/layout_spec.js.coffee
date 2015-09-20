@@ -10,16 +10,17 @@ describe 'up.layout', ->
         up.layout.defaults
           snap: 0
           substance: 99999
+          viewports: [document]
 
-      describe 'when the container is body', ->
+      describe 'when the viewport is the document', ->
 
         beforeEach ->
-          @$viewport = $('body')
-          @restoreMargin = u.temporaryCss(@$viewport, 'margin-top': 0)
-          @$viewport.scrollTop(0)
+          $body = $('body')
+
+          @restoreMargin = u.temporaryCss($body, 'margin-top': 0)
 
           @$elements = []
-          @$container = $('<div class="container">').prependTo(@$viewport)
+          @$container = $('<div class="container">').prependTo($body)
 
           @clientHeight = u.clientSize().height
 
@@ -33,29 +34,29 @@ describe 'up.layout', ->
           @restoreMargin()
 
         it 'reveals the given element', ->
-          up.reveal(@$elements[0], viewport: @$viewport)
+          up.reveal(@$elements[0])
           # ---------------------
           # [0] 0 .......... ch-1
           # ---------------------
           # [1] ch+0 ...... ch+49
           # [2] ch+50 ... ch+5049
-          expect(@$viewport.scrollTop()).toBe(0)
+          expect($(document).scrollTop()).toBe(0)
 
-          up.reveal(@$elements[1], viewport: @$viewport)
+          up.reveal(@$elements[1])
           # ---------------------
           # [0] 0 .......... ch-1
           # [1] ch+0 ...... ch+49
           # ---------------------
           # [2] ch+50 ... ch+5049
-          expect(@$viewport.scrollTop()).toBe(50)
+          expect($(document).scrollTop()).toBe(50)
 
-          up.reveal(@$elements[2], viewport: @$viewport)
+          up.reveal(@$elements[2])
           # [0] 0 .......... ch-1
           # [1] ch+0 ...... ch+49
           # ---------------------
           # [2] ch+50 ... ch+5049
           # ---------------------
-          expect(@$viewport.scrollTop()).toBe(@clientHeight + 50)
+          expect($(document).scrollTop()).toBe(@clientHeight + 50)
 
         it 'snaps to the top if the space above the future-visible area is smaller than the value of config.snap', ->
 
@@ -63,23 +64,23 @@ describe 'up.layout', ->
 
           @$elements[0].css(height: '20px')
 
-          up.reveal(@$elements[2], viewport: @$viewport)
+          up.reveal(@$elements[2])
           # [0] 0 ............ 19
           # [1] 20 ........... 69
           # ---------------------
           # [2] 70 ......... 5069
           # ---------------------
-          expect(@$viewport.scrollTop()).toBe(70)
+          expect($(document).scrollTop()).toBe(70)
 
           # Even though we're revealing the second element, the viewport
           # snaps to the top edge.
-          up.reveal(@$elements[1], viewport: @$viewport)
+          up.reveal(@$elements[1])
           # ---------------------
           # [0] 0 ............ 19
           # [1] 20 ........... 69
           # ---------------------
           # [2] 70 ......... 5069
-          expect(@$viewport.scrollTop()).toBe(0)
+          expect($(document).scrollTop()).toBe(0)
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the top', ->
           $topNav = affix('[up-fixed=top]').css(
@@ -97,9 +98,9 @@ describe 'up.layout', ->
           # ---------------------
           # [1] ch+0 ...... ch+49
           # [2] ch+50 ... ch+5049
-          expect(@$viewport.scrollTop()).toBe(0) # would need to be -100
+          expect($(document).scrollTop()).toBe(0) # would need to be -100
 
-          up.reveal(@$elements[1], viewport: @$viewport)
+          up.reveal(@$elements[1])
           # ---------------------
           # [F] 0 ............ 99
           # [0] 00000 ...... ch-1
@@ -107,25 +108,25 @@ describe 'up.layout', ->
           # ---------------------
           # [2] ch+50 ... ch+5049
 
-          expect(@$viewport.scrollTop()).toBe(50)
+          expect($(document).scrollTop()).toBe(50)
 
-          up.reveal(@$elements[2], viewport: @$viewport)
+          up.reveal(@$elements[2])
           # [0] 00000 ...... ch-1
           # [1] ch+0 ...... ch+49
           # ---------------------
           # [F] 0 ............ 99
-          # [2] ch+50 ... ch+5049
-          # ----------------
-          expect(@$viewport.scrollTop()).toBe(@clientHeight + 50 - 100)
-
-          up.reveal(@$elements[1], viewport: @$viewport)
-          # [0] 00000 ...... ch-1
-          # ---------------------
-          # [F] 0 ............ 99
-          # [1] ch+0 ...... ch+49
           # [2] ch+50 ... ch+5049
           # ----------------
-          expect(@$viewport.scrollTop()).toBe(@clientHeight + 50 - 100 - 50)
+          expect($(document).scrollTop()).toBe(@clientHeight + 50 - 100)
+
+          up.reveal(@$elements[1])
+          # [0] 00000 ...... ch-1
+          # ---------------------
+          # [F] 0 ............ 99
+          # [1] ch+0 ...... ch+49
+          # [2] ch+50 ... ch+5049
+          # ----------------
+          expect($(document).scrollTop()).toBe(@clientHeight + 50 - 100 - 50)
 
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the bottom', ->
@@ -137,32 +138,32 @@ describe 'up.layout', ->
             height: '100px'
           )
 
-          up.reveal(@$elements[0], viewport: @$viewport)
+          up.reveal(@$elements[0])
           # ---------------------
           # [0] 0 .......... ch-1
           # [F] 0 ............ 99
           # ---------------------
           # [1] ch+0 ...... ch+49
           # [2] ch+50 ... ch+5049
-          expect(@$viewport.scrollTop()).toBe(0)
+          expect($(document).scrollTop()).toBe(0)
 
-          up.reveal(@$elements[1], viewport: @$viewport)
+          up.reveal(@$elements[1])
           # ---------------------
           # [0] 0 .......... ch-1
           # [1] ch+0 ...... ch+49
           # [F] 0 ............ 99
           # ---------------------
           # [2] ch+50 ... ch+5049
-          expect(@$viewport.scrollTop()).toBe(150)
+          expect($(document).scrollTop()).toBe(150)
 
-          up.reveal(@$elements[2], viewport: @$viewport)
+          up.reveal(@$elements[2])
           # ---------------------
           # [0] 0 .......... ch-1
           # [1] ch+0 ...... ch+49
           # ---------------------
           # [2] ch+50 ... ch+5049
           # [F] 0 ............ 99
-          expect(@$viewport.scrollTop()).toBe(@clientHeight + 50)
+          expect($(document).scrollTop()).toBe(@clientHeight + 50)
 
 
       describe 'when the viewport is a container with overflow-y: scroll', ->

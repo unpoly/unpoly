@@ -70,10 +70,10 @@ describe 'up.util', ->
         tester = (element) -> element[0] == 'b'
         expect(up.util.detect(array, tester)).toEqual('bar')
 
-      it "returns null if the given array doesn't contain a matching element", ->
+      it "returns undefined if the given array doesn't contain a matching element", ->
         array = ['foo', 'bar', 'baz']
         tester = (element) -> element[0] == 'z'
-        expect(up.util.detect(array, tester)).toBeNull()
+        expect(up.util.detect(array, tester)).toBeUndefined()
 
     describe 'up.util.config', ->
 

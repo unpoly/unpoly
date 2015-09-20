@@ -38,7 +38,7 @@ up.layout = (->
   ###
   config = u.config
     duration: 0
-    viewports: ['body', '.up-modal', '[up-viewport]']
+    viewports: [document, '.up-modal', '[up-viewport]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     snap: 50
@@ -182,29 +182,29 @@ up.layout = (->
 
   @method up.reveal
   @param {String|Element|jQuery} element
-  @param {String|Element|jQuery} [options.viewport]
   @param {Number} [options.duration]
   @param {String} [options.easing]
   @param {String} [options.snap]
+  @param {String|Element|jQuery} [options.viewport]
   @return {Deferred}
     A promise that will be resolved when the element is revealed.
   ###
   reveal = (elementOrSelector, options) ->
     options = u.options(options)
     $element = $(elementOrSelector)
-    $viewport = viewportOf($element, options.viewport)
+    $viewport = if options.viewport then $(options.viewport) else viewportOf($element)
 
     snap = u.option(options.snap, config.snap)
 
-    viewportIsBody = $viewport.is('body')
-    viewportHeight = if viewportIsBody then u.clientSize().height else $viewport.height()
+    viewportIsDocument = $viewport.is(document)
+    viewportHeight = if viewportIsDocument then u.clientSize().height else $viewport.height()
     originalScrollPos = $viewport.scrollTop()
     newScrollPos = originalScrollPos
 
     offsetShift = undefined
     obstruction = undefined
 
-    if viewportIsBody
+    if viewportIsDocument
       obstruction = measureObstruction()
       # Within the body, $.position will always return the distance
       # from the document top and *not* the distance of the viewport
@@ -245,7 +245,7 @@ up.layout = (->
       u.resolvedDeferred()
 
   viewportSelector = ->
-    config.viewports.join(', ')
+    u.multiSelector(config.viewports)
 
   ###*
   Returns the viewport for the given element.
@@ -256,17 +256,9 @@ up.layout = (->
   @method up.layout.viewportOf
   @param {String|Element|jQuery} selectorOrElement
   ###
-  viewportOf = (selectorOrElement, viewportSelectorOrElement) ->
+  viewportOf = (selectorOrElement) ->
     $element = $(selectorOrElement)
-    $viewport = undefined
-    # If someone has handed as a jQuery element, that's the
-    # view period.
-    if u.isJQuery(viewportSelectorOrElement)
-      $viewport = viewportSelectorOrElement
-    else
-      vieportSelector = u.presence(viewportSelectorOrElement) || viewportSelector()
-      $viewport = $element.closest(vieportSelector)
-
+    $viewport = viewportSelector().seekUp($element)
     $viewport.length or u.error("Could not find viewport for %o", $element)
     $viewport
 
@@ -281,7 +273,7 @@ up.layout = (->
   ###
   viewportsIn = (selectorOrElement) ->
     $element = $(selectorOrElement)
-    u.findWithSelf($element, viewportSelector())
+    viewportSelector().findWithSelf($element)
 
   ###*
   Returns a jQuery collection of all the viewports on the screen.
@@ -290,7 +282,7 @@ up.layout = (->
   @method up.layout.viewports
   ###
   viewports = ->
-    $(viewportSelector())
+    viewportSelector().select()
 
   ###*
   Returns a hash with scroll positions.
@@ -310,7 +302,9 @@ up.layout = (->
     for viewport in config.viewports
       $viewport = $(viewport)
       if $viewport.length
-        topsBySelector[viewport] = $viewport.scrollTop()
+        key = viewport
+        key = 'document' if viewport == document
+        topsBySelector[key] = $viewport.scrollTop()
     topsBySelector
 
   ###*
@@ -334,20 +328,27 @@ up.layout = (->
   viewports configured in `up.layout.defaults('viewports')`.
 
   @method up.layout.restoreScroll
-  @param {String} [options.within]
+  @param {jQuery} [options.around]
+    If set, only restores viewports that are either an ancestor
+    or descendant of the given element.
   @protected
   ###
   restoreScroll = (options = {}) ->
 
-    $viewports = if options.within
-      viewportsIn(options.within)
+    $viewports = undefined
+
+    if options.around
+      $descendantViewports = viewportsIn(options.around)
+      $ancestorViewports = viewportOf(options.around)
+      $viewports = $ancestorViewports.add($descendantViewports)
     else
-      viewports()
+      $viewports = viewports()
 
     tops = lastScrollTops.get(up.history.url())
 
-    for selector, scrollTop of tops
-      $matchingViewport = $viewports.filter(selector)
+    for key, scrollTop of tops
+      right = if key == 'document' then document else key
+      $matchingViewport = $viewports.filter(right)
       up.scroll($matchingViewport, scrollTop, duration: 0)
 
   ###*
