@@ -269,7 +269,9 @@ up.proxy = (->
     unless $link.is($waitingLink)
       $waitingLink = $link
       cancelPreloadDelay()
-      curriedPreload = -> preload($link)
+      curriedPreload = ->
+        preload($link)
+        $waitingLink = null
       startPreloadDelay(curriedPreload, delay)
       
   startPreloadDelay = (block, delay) ->
@@ -289,7 +291,7 @@ up.proxy = (->
     if isIdempotent(method: method)
       u.debug("Preloading %o", $link)
       options.preload = true
-      up.link.follow($link, options)
+      up.follow($link, options)
     else
       u.debug("Won't preload %o due to unsafe method %o", $link, method)
       u.resolvedPromise()
@@ -312,7 +314,7 @@ up.proxy = (->
     # Don't do anything if we are hovering over the child
     # of a link. The actual link will receive the event
     # and bubble in a second.
-    unless up.link.childClicked(event, $element) 
+    unless up.link.childClicked(event, $element)
       checkPreload($element)
 
   up.bus.on 'framework:reset', reset

@@ -2,10 +2,14 @@
   
   u = up.util
   
+  mouseover = ($element, options) ->
+    event = createMouseEvent('mouseover', options)
+    dispatch($element, event)
+
   mousedown = ($element, options) ->
     event = createMouseEvent('mousedown', options)
     dispatch($element, event)
-  
+
   mouseup = ($element, options) ->
     event = createMouseEvent('mouseup', options)
     dispatch($element, event)
@@ -55,7 +59,8 @@
   dispatch = ($element, event) ->
     $element.each ->
       this.dispatchEvent(event)
-      
+
+  mouseover: mouseover
   mousedown: mousedown
   mouseup: mouseup
   click: click

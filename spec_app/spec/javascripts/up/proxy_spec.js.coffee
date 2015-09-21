@@ -259,4 +259,19 @@ describe 'up.proxy', ->
 
     describe '[up-preload]', ->
 
-      it 'preloads the link destination after a delay'
+      it 'preloads the link destination on mouseover, after a delay'
+
+      it 'triggers a separate AJAX request with a short cache expiry when hovered multiple times', (done) ->
+        up.proxy.defaults
+          cacheExpiry: 10
+          preloadDelay: 0
+        spyOn(up, 'follow')
+        $element = affix('a[href="/foo"][up-preload]')
+        Trigger.mouseover($element)
+        @setTimer 1, =>
+          expect(up.follow.calls.count()).toBe(1)
+          @setTimer 16, =>
+            Trigger.mouseover($element)
+            @setTimer 1, =>
+              expect(up.follow.calls.count()).toBe(2)
+              done()
