@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -40,11 +40,6 @@ If you use them in your own code, you will get hurt.
           return cache = func.apply(null, args);
         }
       };
-    };
-    get = function(url, options) {
-      options = options || {};
-      options.url = url;
-      return ajax(options);
     };
     ajax = function(options) {
       if (options.selector) {
@@ -882,7 +877,7 @@ If you use them in your own code, you will get hurt.
       A prefix for log entries printed by this cache object.
      */
     cache = function(config) {
-      var alias, clear, expiryMilis, isFresh, log, maxSize, normalizeStoreKey, set, store, timestamp;
+      var alias, clear, expiryMilis, get, isFresh, log, maxSize, normalizeStoreKey, set, store, timestamp;
       store = void 0;
       clear = function() {
         return store = {};
@@ -986,13 +981,13 @@ If you use them in your own code, you will get hurt.
         }
         storeKey = normalizeStoreKey(key);
         if (entry = store[storeKey]) {
-          if (!isFresh(entry)) {
+          if (isFresh(entry)) {
+            log("Cache hit for %o", key);
+            return entry.value;
+          } else {
             log("Discarding stale cache entry for %o", key);
             remove(key);
             return fallback;
-          } else {
-            log("Cache hit for %o", key);
-            return entry.value;
           }
         } else {
           log("Cache miss for %o", key);
@@ -1069,7 +1064,6 @@ If you use them in your own code, you will get hurt.
       createElementFromHtml: createElementFromHtml,
       $createElementFromSelector: $createElementFromSelector,
       createSelectorFromElement: createSelectorFromElement,
-      get: get,
       ajax: ajax,
       extend: extend,
       copy: copy,
@@ -3801,7 +3795,8 @@ You can change (or remove) this delay like this:
         $waitingLink = $link;
         cancelPreloadDelay();
         curriedPreload = function() {
-          return preload($link);
+          preload($link);
+          return $waitingLink = null;
         };
         return startPreloadDelay(curriedPreload, delay);
       }
@@ -3826,7 +3821,7 @@ You can change (or remove) this delay like this:
       })) {
         u.debug("Preloading %o", $link);
         options.preload = true;
-        return up.link.follow($link, options);
+        return up.follow($link, options);
       } else {
         u.debug("Won't preload %o due to unsafe method %o", $link, method);
         return u.resolvedPromise();

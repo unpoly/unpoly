@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.10.4
+------
+
+### Compatible changes
+
+- Fix a bug where hovering multiple times over the same [up-preload] link would
+  not trigger a new request after the cache expired
+
+
+0.10.3
+------
+
+### Compatible changes
+
+- The default viewport is now `document` instead of the `<body>` element.
+
+
 0.10.2
 ------
 
@@ -24,15 +41,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   [`a[up-target]`](http://upjs.io/up.link#a-up-target).
 
 
-0.10.3
-------
-
-### Compatible changes
-
-- The default viewport is now `document` instead of the `<body>` element.
-
-
-0.10.2
+0.10.1
 ------
 
 ### Breaking changes
