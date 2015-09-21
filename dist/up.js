@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, get, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -415,7 +415,7 @@ If you use them in your own code, you will get hurt.
     option = function() {
       var arg, args, j, len, match, value;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      match = null;
+      match = void 0;
       for (j = 0, len = args.length; j < len; j++) {
         arg = args[j];
         value = arg;
@@ -431,7 +431,7 @@ If you use them in your own code, you will get hurt.
     };
     detect = function(array, tester) {
       var element, j, len, match;
-      match = null;
+      match = void 0;
       for (j = 0, len = array.length; j < len; j++) {
         element = array[j];
         if (tester(element)) {
@@ -440,6 +440,11 @@ If you use them in your own code, you will get hurt.
         }
       }
       return match;
+    };
+    any = function(array, tester) {
+      var match;
+      match = detect(array, tester);
+      return isDefined(match);
     };
     compact = function(array) {
       return select(array, isGiven);
@@ -528,6 +533,18 @@ If you use them in your own code, you will get hurt.
         return result;
       };
     };
+
+    /**
+     * Temporarily sets the CSS for the given element.
+    #
+     * @method up.util.temporaryCss
+     * @param {jQuery} $element
+     * @param {Object} css
+     * @param {Function} [block]
+     *   If given, the CSS is set, the block is called and
+     *   the old CSS is restored.
+     * @private
+     */
     temporaryCss = function($element, css, block) {
       var memo, oldCss;
       oldCss = $element.css(keys(css));
@@ -786,6 +803,72 @@ If you use them in your own code, you will get hurt.
         return element;
       }
     };
+    emptyJQuery = function() {
+      return $([]);
+    };
+    multiSelector = function(parts) {
+      var combinedSelector, elements, j, len, obj, part, selectors;
+      obj = {};
+      selectors = [];
+      elements = [];
+      for (j = 0, len = parts.length; j < len; j++) {
+        part = parts[j];
+        if (isString(part)) {
+          selectors.push(part);
+        } else {
+          elements.push(part);
+        }
+      }
+      obj.parsed = elements;
+      if (selectors.length) {
+        combinedSelector = selectors.join(', ');
+        obj.parsed.push(combinedSelector);
+      }
+      obj.select = function() {
+        return obj.find(void 0);
+      };
+      obj.find = function($root) {
+        var $matches, $result, k, len1, ref, selector;
+        $result = emptyJQuery();
+        ref = obj.parsed;
+        for (k = 0, len1 = ref.length; k < len1; k++) {
+          selector = ref[k];
+          $matches = $root ? $root.find(selector) : $(selector);
+          $result = $result.add($matches);
+        }
+        return $result;
+      };
+      obj.findWithSelf = function($start) {
+        var $matches;
+        $matches = obj.find($start);
+        if (obj.doesMatch($start)) {
+          $matches = $matches.add($start);
+        }
+        return $matches;
+      };
+      obj.doesMatch = function(element) {
+        var $element;
+        $element = $(element);
+        return any(obj.parsed, function(selector) {
+          return $element.is(selector);
+        });
+      };
+      obj.seekUp = function(start) {
+        var $element, $result, $start;
+        $start = $(start);
+        $element = $start;
+        $result = void 0;
+        while ($element.length) {
+          if (obj.doesMatch($element)) {
+            $result = $element;
+            break;
+          }
+          $element = $element.parent();
+        }
+        return $result || emptyJQuery();
+      };
+      return obj;
+    };
 
     /**
     @method up.util.cache
@@ -1000,6 +1083,7 @@ If you use them in your own code, you will get hurt.
       map: map,
       identity: identity,
       times: times,
+      any: any,
       detect: detect,
       select: select,
       compact: compact,
@@ -1056,7 +1140,9 @@ If you use them in your own code, you will get hurt.
       scrollbarWidth: scrollbarWidth,
       config: config,
       cache: cache,
-      unwrapElement: unwrapElement
+      unwrapElement: unwrapElement,
+      multiSelector: multiSelector,
+      emptyJQuery: emptyJQuery
     };
   })();
 
@@ -1987,7 +2073,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
      */
     config = u.config({
       duration: 0,
-      viewports: ['body', '.up-modal', '[up-viewport]'],
+      viewports: [document, '.up-modal', '[up-viewport]'],
       fixedTop: ['[up-fixed~=top]'],
       fixedBottom: ['[up-fixed~=bottom]'],
       snap: 50,
@@ -2152,26 +2238,26 @@ This modules contains functions to scroll the viewport and reveal contained elem
     
     @method up.reveal
     @param {String|Element|jQuery} element
-    @param {String|Element|jQuery} [options.viewport]
     @param {Number} [options.duration]
     @param {String} [options.easing]
     @param {String} [options.snap]
+    @param {String|Element|jQuery} [options.viewport]
     @return {Deferred}
       A promise that will be resolved when the element is revealed.
      */
     reveal = function(elementOrSelector, options) {
-      var $element, $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsBody;
+      var $element, $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsDocument;
       options = u.options(options);
       $element = $(elementOrSelector);
-      $viewport = viewportOf($element, options.viewport);
+      $viewport = options.viewport ? $(options.viewport) : viewportOf($element);
       snap = u.option(options.snap, config.snap);
-      viewportIsBody = $viewport.is('body');
-      viewportHeight = viewportIsBody ? u.clientSize().height : $viewport.height();
+      viewportIsDocument = $viewport.is(document);
+      viewportHeight = viewportIsDocument ? u.clientSize().height : $viewport.height();
       originalScrollPos = $viewport.scrollTop();
       newScrollPos = originalScrollPos;
       offsetShift = void 0;
       obstruction = void 0;
-      if (viewportIsBody) {
+      if (viewportIsDocument) {
         obstruction = measureObstruction();
         offsetShift = 0;
       } else {
@@ -2208,7 +2294,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       }
     };
     viewportSelector = function() {
-      return config.viewports.join(', ');
+      return u.multiSelector(config.viewports);
     };
 
     /**
@@ -2220,16 +2306,10 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @method up.layout.viewportOf
     @param {String|Element|jQuery} selectorOrElement
      */
-    viewportOf = function(selectorOrElement, viewportSelectorOrElement) {
-      var $element, $viewport, vieportSelector;
+    viewportOf = function(selectorOrElement) {
+      var $element, $viewport;
       $element = $(selectorOrElement);
-      $viewport = void 0;
-      if (u.isJQuery(viewportSelectorOrElement)) {
-        $viewport = viewportSelectorOrElement;
-      } else {
-        vieportSelector = u.presence(viewportSelectorOrElement) || viewportSelector();
-        $viewport = $element.closest(vieportSelector);
-      }
+      $viewport = viewportSelector().seekUp($element);
       $viewport.length || u.error("Could not find viewport for %o", $element);
       return $viewport;
     };
@@ -2246,7 +2326,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
     viewportsIn = function(selectorOrElement) {
       var $element;
       $element = $(selectorOrElement);
-      return u.findWithSelf($element, viewportSelector());
+      return viewportSelector().findWithSelf($element);
     };
 
     /**
@@ -2256,7 +2336,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @method up.layout.viewports
      */
     viewports = function() {
-      return $(viewportSelector());
+      return viewportSelector().select();
     };
 
     /**
@@ -2273,14 +2353,18 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @return Object<String, Number>
      */
     scrollTops = function() {
-      var $viewport, i, len, ref, topsBySelector, viewport;
+      var $viewport, i, key, len, ref, topsBySelector, viewport;
       topsBySelector = {};
       ref = config.viewports;
       for (i = 0, len = ref.length; i < len; i++) {
         viewport = ref[i];
         $viewport = $(viewport);
         if ($viewport.length) {
-          topsBySelector[viewport] = $viewport.scrollTop();
+          key = viewport;
+          if (viewport === document) {
+            key = 'document';
+          }
+          topsBySelector[key] = $viewport.scrollTop();
         }
       }
       return topsBySelector;
@@ -2312,20 +2396,30 @@ This modules contains functions to scroll the viewport and reveal contained elem
     viewports configured in `up.layout.defaults('viewports')`.
     
     @method up.layout.restoreScroll
-    @param {String} [options.within]
+    @param {jQuery} [options.around]
+      If set, only restores viewports that are either an ancestor
+      or descendant of the given element.
     @protected
      */
     restoreScroll = function(options) {
-      var $matchingViewport, $viewports, results, scrollTop, selector, tops;
+      var $ancestorViewports, $descendantViewports, $matchingViewport, $viewports, key, results, right, scrollTop, tops;
       if (options == null) {
         options = {};
       }
-      $viewports = options.within ? viewportsIn(options.within) : viewports();
+      $viewports = void 0;
+      if (options.around) {
+        $descendantViewports = viewportsIn(options.around);
+        $ancestorViewports = viewportOf(options.around);
+        $viewports = $ancestorViewports.add($descendantViewports);
+      } else {
+        $viewports = viewports();
+      }
       tops = lastScrollTops.get(up.history.url());
       results = [];
-      for (selector in tops) {
-        scrollTop = tops[selector];
-        $matchingViewport = $viewports.filter(selector);
+      for (key in tops) {
+        scrollTop = tops[key];
+        right = key === 'document' ? document : key;
+        $matchingViewport = $viewports.filter(right);
         results.push(up.scroll($matchingViewport, scrollTop, {
           duration: 0
         }));
@@ -2494,7 +2588,7 @@ We need to work on this page:
       scrolling its containing viewport.
     @param {Boolean} [options.restoreScroll=`false`]
       If set to true, Up.js will try to restore the scroll position
-      of all the viewports within the updated element. The position
+      of all the viewports around or below the updated element. The position
       will be reset to the last known top position before a previous
       history change for the current URL.
     @param {Boolean} [options.cache]
@@ -2639,7 +2733,7 @@ We need to work on this page:
       }
       if (options.restoreScroll) {
         up.layout.restoreScroll({
-          within: $new
+          around: $new
         });
       }
       autofocus($new);
