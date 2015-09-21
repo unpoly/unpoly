@@ -24,15 +24,15 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   [`a[up-target]`](http://upjs.io/up.link#a-up-target).
 
 
-Unreleased
-----------
+0.10.3
+------
 
 ### Compatible changes
 
 - The default viewport is now `document` instead of the `<body>` element.
 
 
-0.10.1
+0.10.2
 ------
 
 ### Breaking changes
