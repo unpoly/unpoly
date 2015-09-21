@@ -789,13 +789,13 @@ up.util = (->
     get = (key, fallback = undefined) ->
       storeKey = normalizeStoreKey(key)
       if entry = store[storeKey]
-        if !isFresh(entry)
+        if isFresh(entry)
+          log("Cache hit for %o", key)
+          entry.value
+        else
           log("Discarding stale cache entry for %o", key)
           remove(key)
           fallback
-        else
-          log("Cache hit for %o", key)
-          entry.value
       else
         log("Cache miss for %o", key)
         fallback
