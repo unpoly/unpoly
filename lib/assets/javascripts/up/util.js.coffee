@@ -22,11 +22,6 @@ up.util = (->
         cached = true
         cache = func(args...)
 
-  get = (url, options) ->
-    options = options or {}
-    options.url = url
-    ajax options
-
   ajax = (options) ->
     if options.selector
       options.headers = {
@@ -850,7 +845,6 @@ up.util = (->
   createElementFromHtml: createElementFromHtml
   $createElementFromSelector: $createElementFromSelector
   createSelectorFromElement: createSelectorFromElement
-  get: get
   ajax: ajax
   extend: extend
   copy: copy
