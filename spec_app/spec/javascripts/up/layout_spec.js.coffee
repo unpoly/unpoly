@@ -287,6 +287,36 @@ describe 'up.layout', ->
         # Viewing 100 to 199
         expect($viewport.scrollTop()).toBe(100)
 
+    describe 'up.layout.viewportsWithin', ->
+
+      it 'should have tests'
+
+    describe 'up.layout.viewportsOf', ->
+
+      it 'seeks upwards from the given element', ->
+        up.layout.defaults(viewports: ['.viewport1', '.viewport2'])
+        $viewport1 = affix('.viewport1')
+        $viewport2 = affix('.viewport2')
+        $element = affix('div').appendTo($viewport2)
+        expect(up.layout.viewportOf($element)).toEqual($viewport2)
+
+      it 'returns the given element if it is a configured viewport itself', ->
+        up.layout.defaults(viewports: ['.viewport'])
+        $viewport = affix('.viewport')
+        expect(up.layout.viewportOf($viewport)).toEqual($viewport)
+
+      it 'finds the document if the viewport is the document', ->
+        # This actually tests that the hierarchy returned by `$.parent`
+        # is $element => ... => $('body') => $('html') => $(document)
+        up.layout.defaults(viewports: [document])
+        $element = affix('div')
+        expect(up.layout.viewportOf($element)).toEqual($(document))
+
+      it 'throws an error if no viewport could be found', ->
+        up.layout.defaults(viewports: ['.does-not-exist'])
+        $element = affix('div')
+        lookup = -> up.layout.viewportOf($element)
+        expect(lookup).toThrowError(/Could not find viewport/i)
 
     describe 'up.scroll', ->
 

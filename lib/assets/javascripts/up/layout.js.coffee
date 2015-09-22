@@ -267,11 +267,11 @@ up.layout = (->
   given selector or element.
 
   @protected
-  @method up.layout.viewportsIn
+  @method up.layout.viewportsWithin
   @param {String|Element|jQuery} selectorOrElement
   @return jQuery
   ###
-  viewportsIn = (selectorOrElement) ->
+  viewportsWithin = (selectorOrElement) ->
     $element = $(selectorOrElement)
     viewportSelector().findWithSelf($element)
 
@@ -338,7 +338,7 @@ up.layout = (->
     $viewports = undefined
 
     if options.around
-      $descendantViewports = viewportsIn(options.around)
+      $descendantViewports = viewportsWithin(options.around)
       $ancestorViewports = viewportOf(options.around)
       $viewports = $ancestorViewports.add($descendantViewports)
     else
@@ -438,7 +438,7 @@ up.layout = (->
   finishScrolling: finishScrolling
   defaults: config.update
   viewportOf: viewportOf
-  viewportsIn: viewportsIn
+  viewportsWithin: viewportsWithin
   viewports: viewports
   scrollTops: scrollTops
   saveScroll: saveScroll
