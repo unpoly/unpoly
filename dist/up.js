@@ -2036,7 +2036,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
   var slice = [].slice;
 
   up.layout = (function() {
-    var SCROLL_PROMISE_KEY, config, finishScrolling, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsIn;
+    var SCROLL_PROMISE_KEY, config, finishScrolling, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
     u = up.util;
 
     /**
@@ -2313,11 +2313,11 @@ This modules contains functions to scroll the viewport and reveal contained elem
     given selector or element.
     
     @protected
-    @method up.layout.viewportsIn
+    @method up.layout.viewportsWithin
     @param {String|Element|jQuery} selectorOrElement
     @return jQuery
      */
-    viewportsIn = function(selectorOrElement) {
+    viewportsWithin = function(selectorOrElement) {
       var $element;
       $element = $(selectorOrElement);
       return viewportSelector().findWithSelf($element);
@@ -2402,7 +2402,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       }
       $viewports = void 0;
       if (options.around) {
-        $descendantViewports = viewportsIn(options.around);
+        $descendantViewports = viewportsWithin(options.around);
         $ancestorViewports = viewportOf(options.around);
         $viewports = $ancestorViewports.add($descendantViewports);
       } else {
@@ -2507,7 +2507,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       finishScrolling: finishScrolling,
       defaults: config.update,
       viewportOf: viewportOf,
-      viewportsIn: viewportsIn,
+      viewportsWithin: viewportsWithin,
       viewports: viewports,
       scrollTops: scrollTops,
       saveScroll: saveScroll,
@@ -3717,7 +3717,7 @@ You can change (or remove) this delay like this:
       }
       if (pending && !options.preload) {
         loadStarted();
-        promise.then(loadEnded);
+        promise.always(loadEnded);
       }
       return promise;
     };
@@ -3779,7 +3779,7 @@ You can change (or remove) this delay like this:
       var promise;
       up.bus.emit('proxy:load', request);
       promise = u.ajax(request);
-      promise.then(function() {
+      promise.always(function() {
         return up.bus.emit('proxy:receive', request);
       });
       return promise;
