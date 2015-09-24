@@ -202,7 +202,7 @@ up.proxy = (->
       # - The request finishes.
       #   This triggers `proxy:idle`.
       loadStarted()
-      promise.then(loadEnded)
+      promise.always(loadEnded)
 
     promise
 
@@ -256,8 +256,7 @@ up.proxy = (->
   load = (request) ->
     up.bus.emit('proxy:load', request)
     promise = u.ajax(request)
-    promise.then ->
-      up.bus.emit('proxy:receive', request)
+    promise.always -> up.bus.emit('proxy:receive', request)
     promise
 
   isIdempotent = (request) ->

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.10.5
+------
+
+### Compatible changes
+
+- Fix a bug where the proxy would remain busy forever if a response failed.
+
+
 0.10.4
 ------
 

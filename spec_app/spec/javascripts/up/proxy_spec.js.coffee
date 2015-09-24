@@ -226,6 +226,27 @@ describe 'up.proxy', ->
             'proxy:receive'
           ])
 
+        it 'emits proxy:idle if a request returned but failed', ->
+
+          up.proxy.ajax(url: '/foo')
+
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy'
+          ])
+
+          jasmine.Ajax.requests.at(0).respondWith
+            status: 500
+            contentType: 'text/html'
+            responseText: 'something went wrong'
+
+          expect(@events).toEqual([
+            'proxy:load',
+            'proxy:busy',
+            'proxy:receive',
+            'proxy:idle'
+          ])
+
 
     describe 'up.proxy.preload', ->
 
