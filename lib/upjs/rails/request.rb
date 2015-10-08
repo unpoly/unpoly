@@ -6,7 +6,7 @@ module Upjs
         headers['X-Up-Selector'].present?
       end
 
-      ActionDispatch::Request.include(self)
+      ActionDispatch::Request.send(:include, self)
 
     end
   end

@@ -13,7 +13,7 @@ module Upjs
         headers['X-Up-Method'] = request.method
       end
 
-      ActionController::Base.include(self)
+      ActionController::Base.send(:include, self)
 
     end
   end
