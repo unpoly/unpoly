@@ -22,7 +22,7 @@ up.modal = (->
 
     Defaults to `undefined`, meaning that the dialog will grow to fit its contents
     until it reaches `options.maxWidth`. Leaving this as `undefined` will
-    also allow you to control the width using CSS.
+    also allow you to control the width using CSS on `.up-modal-dialog´.
   @param {Number} [options.maxWidth]
     The width of the dialog as a CSS value like `'400px'` or `50%`.
     You can set this to `undefined` to make the dialog fit its contents.
@@ -108,12 +108,16 @@ up.modal = (->
     $modal.hide()
     $modal
 
-  unshiftBody = undefined
+  unshiftElements = []
 
   # Gives `<body>` a right padding in the width of a scrollbar.
-  # This is to prevent the body from jumping when we add the
-  # overlay, which has its own scroll bar.
-  shiftBody = ->
+  # Also gives elements anchored to the right side of the screen
+  # an increased `right`.
+  #
+  # This is to prevent the body and elements from jumping when we add the
+  # modal overlay, which has its own scroll bar.
+  # This is screwed up, but Bootstrap does the same.
+  shiftElements = ->
     scrollbarWidth = u.scrollbarWidth()
     bodyRightPadding = parseInt($('body').css('padding-right'))
     bodyRightShift = scrollbarWidth + bodyRightPadding
@@ -121,10 +125,17 @@ up.modal = (->
       'padding-right': "#{bodyRightShift}px",
       'overflow-y': 'hidden'
     )
+    unshiftElements.push(unshiftBody)
+    up.layout.anchoredRight().each ->
+      $element = $(this)
+      elementRight = parseInt($element.css('right'))
+      elementRightShift = scrollbarWidth + elementRight
+      unshiftElement = u.temporaryCss($element, 'right': elementRightShift)
+      unshiftElements.push(unshiftElement)
 
   updated = ($modal, animation, animateOptions) ->
     up.bus.emit('modal:open')
-    shiftBody()
+    shiftElements()
     $modal.show()
     promise = up.animate($modal, animation, animateOptions)
     promise.then -> up.bus.emit('modal:opened')
@@ -262,7 +273,7 @@ up.modal = (->
       up.bus.emit('modal:close')
       promise = up.destroy($modal, options)
       promise.then ->
-        unshiftBody()
+        unshifter() while unshifter = unshiftElements.pop()
         up.bus.emit('modal:closed')
       promise
     else

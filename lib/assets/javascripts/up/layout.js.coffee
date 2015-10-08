@@ -23,6 +23,9 @@ up.layout = (->
   @param {Array<String>} [options.fixedBottom]
     An array of CSS selectors that find elements fixed to the
     bottom edge of the screen (using `position: fixed`).
+  @param {Array<String>} [options.anchoredRight]
+    An array of CSS selectors that find elements anchored to the
+    right edge of the screen (using `position: fixed` or `position: absolute`).
   @param {Number} [options.duration]
     The duration of the scrolling animation in milliseconds.
     Setting this to `0` will disable scrolling animations.
@@ -41,6 +44,7 @@ up.layout = (->
     viewports: [document, '.up-modal', '[up-viewport]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
+    anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
     snap: 50
     substance: 150
     easing: 'swing'
@@ -133,6 +137,13 @@ up.layout = (->
     $(elementOrSelector).each ->
       if existingScrolling = $(this).data(SCROLL_PROMISE_KEY)
         existingScrolling.resolve()
+
+  ###*
+  @method up.viewport.anchoredRight
+  @private
+  ###
+  anchoredRight = ->
+    u.multiSelector(config.anchoredRight).select()
 
   measureObstruction = ->
 
@@ -443,6 +454,7 @@ up.layout = (->
   scrollTops: scrollTops
   saveScroll: saveScroll
   restoreScroll: restoreScroll
+  anchoredRight: anchoredRight
 
 )()
 
