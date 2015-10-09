@@ -241,8 +241,6 @@ up.layout = (->
     elementDims = u.measure($element, relative: $viewport)
     firstElementRow = elementDims.top + offsetShift
 
-    # console.log("min of %o is ", elementDims.height, Math.min(elementDims.height, 999999))
-
     lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1
 
     if lastElementRow > predictLastVisibleRow()
