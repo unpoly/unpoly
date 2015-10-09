@@ -254,8 +254,12 @@ up.popup = (->
   @ujs
   ###
   up.on('click', '[up-close]', (event, $element) ->
-    if $element.closest('.up-popup')
+    if $element.closest('.up-popup').length
       close()
+      # Only prevent the default when we actually closed a popup.
+      # This way we can have buttons that close a popup when within a popup,
+      # but link to a destination if not.
+      event.preventDefault()
   )
 
   # The framework is reset between tests

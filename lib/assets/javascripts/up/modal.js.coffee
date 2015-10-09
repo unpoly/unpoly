@@ -395,8 +395,12 @@ up.modal = (->
   @ujs
   ###
   up.on('click', '[up-close]', (event, $element) ->
-    if $element.closest('.up-modal')
+    if $element.closest('.up-modal').length
       close()
+      # Only prevent the default when we actually closed a modal.
+      # This way we can have buttons that close a modal when within a modal,
+      # but link to a destination if not.
+      event.preventDefault()
   )
 
   # The framework is reset between tests
