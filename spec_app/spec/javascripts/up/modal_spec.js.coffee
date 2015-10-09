@@ -8,6 +8,8 @@ describe 'up.modal', ->
         
     describe 'up.modal.open', ->
 
+      assumedScrollbarWidth = 15
+
       it "loads the given link's destination in a dialog window", (done) ->
         $link = affix('a[href="/path/to"][up-modal=".middle"]').text('link')
         promise = up.modal.open($link)
@@ -49,12 +51,36 @@ describe 'up.modal', ->
           expect($modal).toExist()
           expect($modal.css('overflow-y')).toEqual('scroll')
           expect($body.css('overflow-y')).toEqual('hidden')
-          expect(parseInt($body.css('padding-right'))).toBeAround(15, 10)
+          expect(parseInt($body.css('padding-right'))).toBeAround(assumedScrollbarWidth, 10)
 
           up.modal.close().then ->
             expect($body.css('overflow-y')).toEqual('scroll')
             expect(parseInt($body.css('padding-right'))).toBe(0)
 
+            done()
+
+      it 'pushes right-anchored elements away from the edge of the screen in order to prevent jumping', (done) ->
+
+        $anchoredElement = affix('div[up-anchored=right]').css
+          position: 'absolute'
+          top: '0'
+          right: '30px'
+
+        promise = up.modal.open(url: '/foo', target: '.container')
+
+        @lastRequest().respondWith
+          status: 200
+          contentType: 'text/html'
+          responseText:
+            """
+            <div class="container">text</div>
+            """
+
+        promise.then ->
+          expect(parseInt($anchoredElement.css('right'))).toBeAround(30 + assumedScrollbarWidth, 10)
+
+          up.modal.close().then ->
+            expect(parseInt($anchoredElement.css('right'))).toBeAround(30 , 10)
             done()
 
     describe 'up.modal.close', ->
