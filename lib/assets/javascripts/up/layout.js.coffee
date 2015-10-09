@@ -200,6 +200,9 @@ up.layout = (->
   @param {String} [options.easing]
   @param {String} [options.snap]
   @param {String|Element|jQuery} [options.viewport]
+  @param {Boolean} [options.top=false]
+    Whether to scroll the viewport so that the first element row aligns
+    with the top edge of the viewport.
   @return {Deferred}
     A promise that will be resolved when the element is revealed.
   ###
@@ -246,7 +249,7 @@ up.layout = (->
       # Try to show the full height of the element
       newScrollPos += (lastElementRow - predictLastVisibleRow())
 
-    if firstElementRow < predictFirstVisibleRow()
+    if firstElementRow < predictFirstVisibleRow() || options.top
       # If the full element does not fit, scroll to the first row
       newScrollPos = firstElementRow - obstruction.top
 
