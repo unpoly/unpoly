@@ -529,24 +529,38 @@ up.util = (->
       if existingAnimation = $(this).data(ANIMATION_PROMISE_KEY)
         existingAnimation.resolve()
 
-  measure = ($element, options) ->
-    coordinates = if options?.relative
-      $element.position()
+  measure = ($element, opts) ->
+    opts = options(opts, relative: false, inner: false, full: false)
+
+    if opts.relative
+      if opts.relative == true
+        coordinates = $element.position()
+      else
+        $context = $(opts.relative)
+        elementCoords = $element.offset()
+        if $context.is(document)
+          # The document is always at the origin
+          coordinates = elementCoords
+        else
+          contextCoords = $context.offset()
+          coordinates =
+            left: elementCoords.left - contextCoords.left
+            top: elementCoords.top - contextCoords.top
     else
-      $element.offset()
+      coordinates = $element.offset()
     
     box = 
       left: coordinates.left
       top: coordinates.top
 
-    if options?.inner
+    if opts.inner
       box.width = $element.width()
       box.height = $element.height()
     else
       box.width = $element.outerWidth()
       box.height = $element.outerHeight()
       
-    if options?.full
+    if opts.full
       viewport = clientSize()
       box.right = viewport.width - (box.left + box.width)
       box.bottom = viewport.height - (box.top + box.height)

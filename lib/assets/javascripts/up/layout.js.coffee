@@ -238,7 +238,7 @@ up.layout = (->
     predictFirstVisibleRow = -> newScrollPos + obstruction.top
     predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom - 1
 
-    elementDims = u.measure($element, relative: true)
+    elementDims = u.measure($element, relative: $viewport)
     firstElementRow = elementDims.top + offsetShift
 
     # console.log("min of %o is ", elementDims.height, Math.min(elementDims.height, 999999))
