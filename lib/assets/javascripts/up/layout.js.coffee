@@ -119,6 +119,9 @@ up.layout = (->
       targetProps =
         scrollTop: scrollTop
 
+      if $viewport.get(0) == document
+        $viewport = $('html, body') # FML
+
       $viewport.animate targetProps,
         duration: duration,
         easing: easing,
