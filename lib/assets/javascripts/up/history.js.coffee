@@ -63,7 +63,6 @@ up.history = (->
     normalizeUrl(url) == currentUrl()
 
   observeNewUrl = (url) ->
-    console.log("observing new url %o", url)
     if nextPreviousUrl
       previousUrl = nextPreviousUrl
       nextPreviousUrl = undefined
