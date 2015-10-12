@@ -219,6 +219,9 @@ up.modal = (->
     height = u.option(options.height, $link.attr('up-height'), config.height)
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
     sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
+    # Although we usually fall back to full page loads if a browser doesn't support pushState,
+    # in the case of modals we assume that the developer would rather see a dialog
+    # without an URL update.
     history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), true) else false
     animateOptions = up.motion.animateOptions(options, $link)
 

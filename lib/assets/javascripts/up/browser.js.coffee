@@ -9,7 +9,7 @@ we can't currently get rid off.
 @class up.browser
 ###
 up.browser = (->
-  
+
   u = up.util
 
   loadPage = (url, options = {}) ->
@@ -47,7 +47,23 @@ up.browser = (->
     window.console.groupEnd ||= noop
 
   canPushState = u.memoize ->
-    u.isDefined(history.pushState)
+    # We cannot use pushState if the initial request method is a POST for two reasons:
+    #
+    # 1. Up.js replaces the initial state so it can handle the pop event when the
+    #    user goes back to the initial URL later. If the initial request was a POST,
+    #    Up.js will wrongly assumed that it can restore the state by reloading with GET.
+    #
+    # 2. Some browsers have a bug where the initial request method is used for all
+    #    subsequently pushed states. That means if the user reloads the page on a later
+    #    GET state, the browser will wrongly attempt a POST request.
+    #    Modern Firefoxes, Chromes and IE10+ don't seem to be affected by this,
+    #    but we saw this behavior with Safari 8 and IE9 (IE9 can't do pushState anyway).
+    #
+    # The way that we work around this is that we don't support pushState if the
+    # initial request method was anything other than GET (but allow the rest of the
+    # Up.js framework to work). This way Up.js will fall back to full page loads until
+    # the framework was booted from a GET request.
+    u.isDefined(history.pushState) && initialRequestMethod == 'get'
     
   canCssAnimation = u.memoize ->
     'transition' of document.documentElement.style
@@ -62,7 +78,20 @@ up.browser = (->
     minor = parseInt(parts[1])
     compatible = major >= 2 || (major == 1 && minor >= 9)
     compatible or u.error("jQuery %o found, but Up.js requires 1.9+", version)
-    
+
+  # Returns and deletes a cookie with the given name
+  # Inspired by Turbolinks: https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/lib/assets/javascripts/turbolinks.coffee#L292
+  popCookie = (name) ->
+    value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
+    if u.isPresent(value)
+      document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
+    value
+
+  # Server-side companion libraries like upjs-rails set this cookie so we
+  # have a way to detect the request method of the initial page load.
+  # There is no Javascript API for this.
+  initialRequestMethod = (popCookie('_up_request_method') || 'get').toLowerCase()
+
   isSupported = u.memoize ->
     # This is the most concise way to exclude IE8 and lower
     # while keeping all relevant desktop and mobile browsers.
@@ -76,6 +105,5 @@ up.browser = (->
   canInputEvent: canInputEvent
   isSupported: isSupported
   ensureRecentJquery: ensureRecentJquery
-      
-)()
 
+)()

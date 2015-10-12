@@ -1,14 +1,14 @@
 module Upjs
   module Rails
-    module CurrentLocation
+    module RequestEchoHeaders
 
       def self.included(base)
-        base.before_filter :set_header_for_current_location
+        base.before_filter :set_up_request_echo_headers
       end
 
       private
       
-      def set_header_for_current_location
+      def set_up_request_echo_headers
         headers['X-Up-Location'] = request.original_url
         headers['X-Up-Method'] = request.method
       end

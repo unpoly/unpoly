@@ -1,4 +1,5 @@
 require "upjs/rails/version"
 require "upjs/rails/engine"
-require "upjs/rails/current_location"
-require "upjs/rails/request"
+require "upjs/rails/request_echo_headers"
+require "upjs/rails/request_method_cookie"
+require "upjs/rails/request_ext"
