@@ -189,6 +189,8 @@ up.proxy = (->
     else
       promise = load(request)
       set(request, promise)
+      # Don't cache failed requests
+      promise.fail -> remove(request)
 
     if pending && !options.preload
       # This will actually make `pendingCount` higher than the actual

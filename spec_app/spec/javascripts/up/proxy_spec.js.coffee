@@ -86,7 +86,21 @@ describe 'up.proxy', ->
         it "caches #{method} requests with cache: true option", ->
           u.times 2, -> up.proxy.ajax(url: '/foo', method: method, cache: true)
           expect(jasmine.Ajax.requests.count()).toEqual(1)
-          
+
+      it 'does not responses with a non-200 status code', ->
+        # Send the same request for the same path, 3 minutes apart
+        up.proxy.ajax(url: '/foo')
+
+        @lastRequest().respondWith
+          status: 500
+          contentType: 'text/html'
+          responseText: 'foo'
+
+        up.proxy.ajax(url: '/foo')
+
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+
       describe 'events', ->
         
         beforeEach ->
