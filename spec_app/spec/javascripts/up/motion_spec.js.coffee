@@ -53,7 +53,7 @@ describe 'up.motion', ->
             width:    '22px',
             height:   '23px'
           )
-          up.morph($old, $new, 'cross-fade', duration: 100, easing: 'linear')
+          up.morph($old, $new, 'cross-fade', duration: 200, easing: 'linear')
 
           # The actual animation will be performed on Ghosts since
           # two element usually cannot exist in the DOM at the same time
@@ -108,15 +108,15 @@ describe 'up.motion', ->
             expect(opacity($newGhost)).toBeAround(0.0, 0.25)
             expect(opacity($oldGhost)).toBeAround(1.0, 0.25)
 
-          @setTimer 40, ->
+          @setTimer 80, ->
             expect(opacity($newGhost)).toBeAround(0.4, 0.25)
             expect(opacity($oldGhost)).toBeAround(0.6, 0.25)
 
-          @setTimer 70, ->
+          @setTimer 140, ->
             expect(opacity($newGhost)).toBeAround(0.7, 0.25)
             expect(opacity($oldGhost)).toBeAround(0.3, 0.25)
 
-          @setTimer 125, ->
+          @setTimer 250, ->
             # Once our two ghosts have rendered their visual effect,
             # we remove them from the DOM.
             expect($newGhost).not.toBeInDOM()
