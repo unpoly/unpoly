@@ -852,6 +852,33 @@ up.util = (->
       parent.insertBefore(wrappedNode, wrapper)
     parent.removeChild(wrapper)
 
+  offsetParent = ($element) ->
+    $match = undefined
+    while ($element = $element.parent()) && $element.length
+      position = $element.css('position')
+      console.log("Iteration element is %o with position %o", $element, position)
+      if position == 'absolute' || position == 'relative' || $element.is('body')
+        $match = $element
+        break
+    $match
+
+  fixedToAbsolute = (element, $viewport) ->
+    $element = $(element)
+    $futureOffsetParent = offsetParent($element)
+    # To get a fixed elements distance from the edge of the screen,
+    # use position(), not offset(). offset() would include the current
+    # scrollTop of the viewport.
+    elementCoords = $element.position()
+    futureParentCoords = $futureOffsetParent.offset()
+    $element.css
+      position: 'absolute'
+      left: elementCoords.left - futureParentCoords.left
+      top: elementCoords.top - futureParentCoords.top + $viewport.scrollTop()
+      right: ''
+      bottom: ''
+
+  offsetParent: offsetParent
+  fixedToAbsolute: fixedToAbsolute
   presentAttr: presentAttr
   createElement: createElement
   normalizeUrl: normalizeUrl

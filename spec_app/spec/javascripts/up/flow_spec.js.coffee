@@ -124,11 +124,12 @@ describe 'up.flow', ->
               @revealedHTML = $revealedElement.get(0).outerHTML
               u.resolvedPromise()
 
-          it 'reveals an old element before it is being replaced', (done) ->
+          it 'reveals a new element before it is being replaced', (done) ->
             @request = up.replace('.middle', '/path', reveal: true)
             @respond()
             @request.then =>
-              expect(up.reveal).toHaveBeenCalledWith(@oldMiddle)
+              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle)
+              expect(@revealedHTML).toContain('new-middle')
               done()
 
           it 'reveals a new element that is being appended', (done) ->

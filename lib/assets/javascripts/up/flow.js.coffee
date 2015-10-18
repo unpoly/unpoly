@@ -64,7 +64,7 @@ up.flow = (->
   ###
   replace = (selectorOrElement, url, options) ->
 
-    u.debug("Replace %o with %o", selectorOrElement, url)
+    u.debug("Replace %o with %o (options %o)", selectorOrElement, url, options)
 
     options = u.options(options)
     
@@ -210,7 +210,7 @@ up.flow = (->
       u.copyAttributes($new, $old)
       elementsInserted($wrapper.children(), options)
 
-      # Show the first element that was being prepended/appended.
+      # Reveal element that was being prepended/appended.
       reveal($wrapper, options)
         .then ->
           # Since we're adding content instead of replacing, we'll only
@@ -220,21 +220,18 @@ up.flow = (->
           u.unwrapElement($wrapper)
           return
     else
-      # Make sure the old element is visible before replacing it.
-      # This mimicks what the browser does during a full page load.
-      reveal($old, options)
-        .then ->
-          # Wrap the replacement as a destroy animation, so $old will
-          # get marked as .up-destroying right away.
-          destroy $old, animation: ->
-            # Don't insert the new element after the old element.
-            # For some reason this will make the browser scroll to the
-            # bottom of the new element.
-            $new.insertBefore($old)
-            elementsInserted($new, options)
-            if $old.is('body') && transition != 'none'
-              u.error('Cannot apply transitions to body-elements (%o)', transition)
-            up.morph($old, $new, transition, options)
+      # Wrap the replacement as a destroy animation, so $old will
+      # get marked as .up-destroying right away.
+      destroy $old, animation: ->
+        # Don't insert the new element after the old element.
+        # For some reason this will make the browser scroll to the
+        # bottom of the new element.
+        $new.insertBefore($old)
+        elementsInserted($new, options)
+        if $old.is('body') && transition != 'none'
+          u.error('Cannot apply transitions to body-elements (%o)', transition)
+        # Morphing will also process options.reveal
+        up.morph($old, $new, transition, options)
 
   parseImplantSteps = (selector, options) ->
     transitionString = options.transition || options.animation || 'none'

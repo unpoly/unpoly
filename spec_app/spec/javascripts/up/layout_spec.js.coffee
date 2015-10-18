@@ -17,8 +17,6 @@ describe 'up.layout', ->
         beforeEach ->
           $body = $('body')
 
-          @restoreMargin = u.temporaryCss($body, 'margin-top': 0)
-
           @$elements = []
           @$container = $('<div class="container">').prependTo($body)
 
@@ -31,7 +29,6 @@ describe 'up.layout', ->
 
         afterEach ->
           @$container.remove()
-          @restoreMargin()
 
         it 'reveals the given element', ->
           up.reveal(@$elements[0])

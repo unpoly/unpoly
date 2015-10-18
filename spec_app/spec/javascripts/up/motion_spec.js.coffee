@@ -37,7 +37,7 @@ describe 'up.motion', ->
 
       if up.browser.canCssAnimation()
 
-        it 'transitions between two element using ghosts', (done) ->
+        it 'transitions between two element by animating two copies while keeping the originals in the background', (done) ->
 
           $old = affix('.old').text('old content').css(
             position: 'absolute'
@@ -76,13 +76,11 @@ describe 'up.motion', ->
 
           # The actual elements are hidden, but $old will take up its original
           # space until the animation completes.
-          expect($old.css(['display', 'visibility'])).toEqual(
+          expect($old.css('display')).toEqual('none')
+
+          expect($new.css(['display', 'visibility'])).toEqual(
             display: 'block',
             visibility: 'hidden'
-          )
-          expect($new.css(['display', 'visibility'])).toEqual(
-            display: 'none',
-            visibility: 'visible'
           )
 
           # Ghosts will hover over $old and $new using absolute positioning,
@@ -124,10 +122,7 @@ describe 'up.motion', ->
 
             # The old element is still in the DOM, but hidden.
             # Morphing does *not* remove the target element.
-            expect($old.css(['display', 'visibility'])).toEqual(
-              display: 'none',
-              visibility: 'hidden'
-            )
+            expect($old.css('display')).toEqual('none')
             expect($new.css(['display', 'visibility'])).toEqual(
               display: 'block',
               visibility: 'visible'
@@ -150,6 +145,39 @@ describe 'up.motion', ->
           # Check that it's a different ghosts
           expect($ghost2).not.toEqual($ghost1)
 
+        describe 'with { reveal: true } option', ->
+
+          it 'reveals the new element while making the old element within the same viewport appear as if it would keep its scroll position', ->
+            $container = affix('.container[up-viewport]').css
+              'width': '200px'
+              'height': '200px'
+              'overflow-y': 'scroll'
+              'position': 'fixed'
+              'left': 0,
+              'top': 0
+            $old = affix('.old').appendTo($container).css(height: '600px')
+            $container.scrollTop(300)
+
+            $new = affix('.new').insertBefore($old).css(height: '600px')
+
+            up.morph($old, $new, 'cross-fade', duration: 50, reveal: true)
+
+            $oldGhost = $('.old.up-ghost')
+            $newGhost = $('.new.up-ghost')
+
+            # Container is scrolled up due to { reveal: true } option.
+            # Since $old and $new are sitting in the same viewport with a
+            # single shares scrollbar This will make the ghost for $old jump.
+            expect($container.scrollTop()).toEqual(0)
+
+            # See that the ghost for $new is aligned with the top edge
+            # of the viewport.
+            expect($newGhost.offset().top).toEqual(0)
+
+            # The ghost for $old is shifted upwards to make it looks like it
+            # was at the scroll position before we revealed $new.
+            expect($oldGhost.offset().top).toEqual(-300)
+
       else
 
         it "doesn't animate and hides the first element instead", ->
@@ -171,14 +199,14 @@ describe 'up.motion', ->
 
       it 'should have tests'
 
-    describe 'up.motion.prependGhost', ->
+    describe 'up.motion.prependCopy', ->
 
       afterEach ->
         $('.up-bounds, .up-ghost, .fixture').remove()
 
       it 'clones the given element into a .up-ghost-bounds container and inserts it as a sibling before the element', ->
         $element = affix('.element').text('element text')
-        up.motion.prependGhost($element)
+        up.motion.prependCopy($element)
         $bounds = $element.prev()
         expect($bounds).toExist()
         expect($bounds).toHaveClass('up-bounds')
@@ -190,13 +218,13 @@ describe 'up.motion', ->
       it 'removes <script> tags from the cloned element', ->
         $element = affix('.element')
         $('<script></script>').appendTo($element)
-        up.motion.prependGhost($element)
+        up.motion.prependCopy($element)
         $ghost = $('.up-ghost')
         expect($ghost.find('script')).not.toExist()
 
       it 'absolutely positions the ghost over the given element', ->
         $element = affix('.element')
-        up.motion.prependGhost($element)
+        up.motion.prependCopy($element)
         $ghost = $('.up-ghost')
         expect($ghost.offset()).toEqual($element.offset())
         expect($ghost.width()).toEqual($element.width())
@@ -204,25 +232,43 @@ describe 'up.motion', ->
 
       it 'accurately positions the ghost over an element with margins', ->
         $element = affix('.element').css(margin: '40px')
-        up.motion.prependGhost($element)
+        up.motion.prependCopy($element)
         $ghost = $('.up-ghost')
         expect($ghost.offset()).toEqual($element.offset())
 
       it "doesn't change the position of a child whose margins no longer collapse", ->
         $element = affix('.element')
         $child = $('<div class="child"></div>').css(margin: '40px').appendTo($element)
-        up.motion.prependGhost($element)
+        up.motion.prependCopy($element)
         $clonedChild = $('.up-ghost .child')
         expect($clonedChild.offset()).toEqual($child.offset())
 
       it 'correctly positions the ghost over an element within a scrolled body', ->
-        $body = $('body').css(margin: 0)
+        $body = $('body')
         $element1 = $('<div class="fixture"></div>').css(height: '75px').prependTo($body)
         $element2 = $('<div class="fixture"></div>').css(height: '100px').insertAfter($element1)
         $body.scrollTop(17)
-        { $bounds, $ghost } = up.motion.prependGhost($element2)
+        { $bounds, $ghost } = up.motion.prependCopy($element2)
         expect($bounds.css('position')).toBe('absolute')
         expect($bounds.css('top')).toEqual('75px')
         expect($ghost.css('position')).toBe('static')
 
       it 'correctly positions the ghost over an element within a viewport with overflow-y: scroll'
+
+      it 'converts fixed elements within the copies to absolutely positioning', ->
+        $element = affix('.element').css
+          position: 'absolute'
+          top: '50px'
+          left: '50px'
+        $fixedChild = $('<div class="fixed-child" up-fixed></div>').css
+          position: 'fixed'
+          left: '77px'
+          top: '77px'
+        $fixedChild.appendTo($element)
+        up.motion.prependCopy($element, $('body'))
+        $fixedChildGhost = $('.up-ghost .fixed-child')
+        expect($fixedChildGhost.css(['position', 'left', 'top'])).toEqual
+          position: 'absolute',
+          left: '27px',
+          top: '27px'
+

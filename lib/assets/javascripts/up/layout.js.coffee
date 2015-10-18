@@ -308,9 +308,9 @@ up.layout = (->
       up.layout.scrollTops()
       => { '.main': 0, '.sidebar': 73 }
 
-  @protected
   @method up.layout.scrollTops
   @return Object<String, Number>
+  @protected
   ###
   scrollTops = ->
     topsBySelector = {}
@@ -321,6 +321,18 @@ up.layout = (->
         key = 'document' if viewport == document
         topsBySelector[key] = $viewport.scrollTop()
     topsBySelector
+
+  ###*
+  @method up.layout.fixedChildren
+  @protected
+  ###
+  fixedChildren = (root = undefined) ->
+    root ||= document.body
+    $root = $(root)
+    $elements = $root.find('[up-fixed]')
+    $elements = $elements.add($root.find(config.fixedTop.join(', '))) if u.isPresent(config.fixedTop)
+    $elements = $elements.add($root.find(config.fixedBottom.join(', '))) if u.isPresent(config.fixedBottom)
+    $elements
 
   ###*
   Saves the top scroll positions of all the
@@ -459,6 +471,7 @@ up.layout = (->
   saveScroll: saveScroll
   restoreScroll: restoreScroll
   anchoredRight: anchoredRight
+  fixedChildren: fixedChildren
 
 )()
 
