@@ -112,24 +112,44 @@ up.util = (->
     element = document.createElement(tagName)
     element.innerHTML = html if isPresent(html)
     element
-    
+
+  ###*
+  @method up.debug
+  @protected
+  ###
   debug = (message, args...) ->
     message = "[UP] #{message}"
     console.debug(message, args...)
 
+  ###*
+  @method up.warn
+  @protected
+  ###
   warn = (message, args...) ->
     message = "[UP] #{message}"
     console.warn(message, args...)
 
+  ###*
+  Throws a fatal error with the given message.
+
+  - The error will be printed to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/Console/error)
+  - An [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) (exception) will be thrown, unwinding the current call stack
+  - The error message will be printed in a corner of the screen
+
+  \#\#\#\# Examples
+
+      up.error('Division by zero')
+      up.error('Unexpected result %o', result)
+
+  @method up.error
+  ###
   error = (args...) ->
     args[0] = "[UP] #{args[0]}"
     console.error(args...)
     asString = stringifyConsoleArgs(args)
     $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body')
-    # $error = $('body')
     $error.addClass('up-error')
     $error.text(asString)
-    # alert "#{asString}\n\nOpen the developer console for details."
     throw new Error(asString)
 
   CONSOLE_PLACEHOLDERS = /\%[odisf]/g
@@ -507,7 +527,7 @@ up.util = (->
       deferred
     else
       $element.css(lastFrame)
-      resolvedPromise()
+      resolvedDeferred()
       
   ANIMATION_PROMISE_KEY = 'up-animation-promise'
 
@@ -963,3 +983,7 @@ up.util = (->
   emptyJQuery: emptyJQuery
 
 )()
+
+up.error = up.util.error
+up.warn = up.util.warn
+up.debug = up.util.debug
