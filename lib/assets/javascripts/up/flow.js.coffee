@@ -296,6 +296,8 @@ up.flow = (->
     The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
   @param {String} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
+  @return {Deferred}
+    A promise for the destroying animation's end
   ###
   destroy = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
@@ -308,10 +310,10 @@ up.flow = (->
     up.history.push(options.url) if u.isPresent(options.url)
     document.title = options.title if u.isPresent(options.title)
     up.bus.emit('fragment:destroy', $element)
-    animationPromise = u.presence(options.animation, u.isPromise) ||
+    animationDeferred = u.presence(options.animation, u.isDeferred) ||
       up.motion.animate($element, options.animation, animateOptions)
-    animationPromise.then -> $element.remove()
-    animationPromise
+    animationDeferred.then -> $element.remove()
+    animationDeferred
 
   ###*
   Replaces the given selector or element with a fresh copy

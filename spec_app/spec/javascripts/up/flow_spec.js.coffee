@@ -122,7 +122,7 @@ describe 'up.flow', ->
             @revealedHTML = ''
             spyOn(up, 'reveal').and.callFake ($revealedElement) =>
               @revealedHTML = $revealedElement.get(0).outerHTML
-              u.resolvedPromise()
+              u.resolvedDeferred()
 
           it 'reveals a new element before it is being replaced', (done) ->
             @request = up.replace('.middle', '/path', reveal: true)

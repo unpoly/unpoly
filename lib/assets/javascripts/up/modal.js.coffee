@@ -274,13 +274,13 @@ up.modal = (->
       )
       currentSource = undefined
       up.bus.emit('modal:close')
-      promise = up.destroy($modal, options)
-      promise.then ->
+      deferred = up.destroy($modal, options)
+      deferred.then ->
         unshifter() while unshifter = unshiftElements.pop()
         up.bus.emit('modal:closed')
-      promise
+      deferred
     else
-      u.resolvedPromise()
+      u.resolvedDeferred()
 
   autoclose = ->
     unless $('.up-modal').is('[up-sticky]')
