@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, offsetParent, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -656,21 +656,44 @@ If you use them in your own code, you will get hurt.
         }
       });
     };
-    measure = function($element, options) {
-      var box, coordinates, viewport;
-      coordinates = (options != null ? options.relative : void 0) ? $element.position() : $element.offset();
+    measure = function($element, opts) {
+      var $context, box, contextCoords, coordinates, elementCoords, viewport;
+      opts = options(opts, {
+        relative: false,
+        inner: false,
+        full: false
+      });
+      if (opts.relative) {
+        if (opts.relative === true) {
+          coordinates = $element.position();
+        } else {
+          $context = $(opts.relative);
+          elementCoords = $element.offset();
+          if ($context.is(document)) {
+            coordinates = elementCoords;
+          } else {
+            contextCoords = $context.offset();
+            coordinates = {
+              left: elementCoords.left - contextCoords.left,
+              top: elementCoords.top - contextCoords.top
+            };
+          }
+        }
+      } else {
+        coordinates = $element.offset();
+      }
       box = {
         left: coordinates.left,
         top: coordinates.top
       };
-      if (options != null ? options.inner : void 0) {
+      if (opts.inner) {
         box.width = $element.width();
         box.height = $element.height();
       } else {
         box.width = $element.outerWidth();
         box.height = $element.outerHeight();
       }
-      if (options != null ? options.full : void 0) {
+      if (opts.full) {
         viewport = clientSize();
         box.right = viewport.width - (box.left + box.width);
         box.bottom = viewport.height - (box.top + box.height);
@@ -1056,7 +1079,36 @@ If you use them in your own code, you will get hurt.
       });
       return parent.removeChild(wrapper);
     };
+    offsetParent = function($element) {
+      var $match, position;
+      $match = void 0;
+      while (($element = $element.parent()) && $element.length) {
+        position = $element.css('position');
+        console.log("Iteration element is %o with position %o", $element, position);
+        if (position === 'absolute' || position === 'relative' || $element.is('body')) {
+          $match = $element;
+          break;
+        }
+      }
+      return $match;
+    };
+    fixedToAbsolute = function(element, $viewport) {
+      var $element, $futureOffsetParent, elementCoords, futureParentCoords;
+      $element = $(element);
+      $futureOffsetParent = offsetParent($element);
+      elementCoords = $element.position();
+      futureParentCoords = $futureOffsetParent.offset();
+      return $element.css({
+        position: 'absolute',
+        left: elementCoords.left - futureParentCoords.left,
+        top: elementCoords.top - futureParentCoords.top + $viewport.scrollTop(),
+        right: '',
+        bottom: ''
+      });
+    };
     return {
+      offsetParent: offsetParent,
+      fixedToAbsolute: fixedToAbsolute,
       presentAttr: presentAttr,
       createElement: createElement,
       normalizeUrl: normalizeUrl,
@@ -1155,7 +1207,7 @@ we can't currently get rid off.
 
 (function() {
   up.browser = (function() {
-    var canCssAnimation, canInputEvent, canPushState, ensureConsoleExists, ensureRecentJquery, isSupported, loadPage, u, url;
+    var canCssAnimation, canInputEvent, canPushState, ensureConsoleExists, ensureRecentJquery, initialRequestMethod, isSupported, loadPage, popCookie, u, url;
     u = up.util;
     loadPage = function(url, options) {
       var $form, csrfParam, csrfToken, metadataInput, method, target;
@@ -1200,7 +1252,7 @@ we can't currently get rid off.
       return (base7 = window.console).groupEnd || (base7.groupEnd = noop);
     };
     canPushState = u.memoize(function() {
-      return u.isDefined(history.pushState);
+      return u.isDefined(history.pushState) && initialRequestMethod === 'get';
     });
     canCssAnimation = u.memoize(function() {
       return 'transition' in document.documentElement.style;
@@ -1217,6 +1269,15 @@ we can't currently get rid off.
       compatible = major >= 2 || (major === 1 && minor >= 9);
       return compatible || u.error("jQuery %o found, but Up.js requires 1.9+", version);
     };
+    popCookie = function(name) {
+      var ref, value;
+      value = (ref = document.cookie.match(new RegExp(name + "=(\\w+)"))) != null ? ref[1] : void 0;
+      if (u.isPresent(value)) {
+        document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/';
+      }
+      return value;
+    };
+    initialRequestMethod = (popCookie('_up_request_method') || 'get').toLowerCase();
     isSupported = u.memoize(function() {
       return u.isDefined(document.addEventListener);
     });
@@ -1885,7 +1946,6 @@ We need to work on this page:
       return normalizeUrl(url) === currentUrl();
     };
     observeNewUrl = function(url) {
-      console.log("observing new url %o", url);
       if (nextPreviousUrl) {
         previousUrl = nextPreviousUrl;
         nextPreviousUrl = void 0;
@@ -2036,7 +2096,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
   var slice = [].slice;
 
   up.layout = (function() {
-    var SCROLL_PROMISE_KEY, config, finishScrolling, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
+    var SCROLL_PROMISE_KEY, anchoredRight, config, finishScrolling, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
     u = up.util;
 
     /**
@@ -2052,6 +2112,9 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @param {Array<String>} [options.fixedBottom]
       An array of CSS selectors that find elements fixed to the
       bottom edge of the screen (using `position: fixed`).
+    @param {Array<String>} [options.anchoredRight]
+      An array of CSS selectors that find elements anchored to the
+      right edge of the screen (using `position: fixed` or `position: absolute`).
     @param {Number} [options.duration]
       The duration of the scrolling animation in milliseconds.
       Setting this to `0` will disable scrolling animations.
@@ -2070,6 +2133,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       viewports: [document, '.up-modal', '[up-viewport]'],
       fixedTop: ['[up-fixed~=top]'],
       fixedBottom: ['[up-fixed~=bottom]'],
+      anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]'],
       snap: 50,
       substance: 150,
       easing: 'swing'
@@ -2139,6 +2203,9 @@ This modules contains functions to scroll the viewport and reveal contained elem
         targetProps = {
           scrollTop: scrollTop
         };
+        if ($viewport.get(0) === document) {
+          $viewport = $('html, body');
+        }
         $viewport.animate(targetProps, {
           duration: duration,
           easing: easing,
@@ -2164,6 +2231,14 @@ This modules contains functions to scroll the viewport and reveal contained elem
           return existingScrolling.resolve();
         }
       });
+    };
+
+    /**
+    @method up.viewport.anchoredRight
+    @private
+     */
+    anchoredRight = function() {
+      return u.multiSelector(config.anchoredRight).select();
     };
     measureObstruction = function() {
       var fixedBottomTops, fixedTopBottoms, measurePosition, obstructor;
@@ -2236,6 +2311,9 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @param {String} [options.easing]
     @param {String} [options.snap]
     @param {String|Element|jQuery} [options.viewport]
+    @param {Boolean} [options.top=false]
+      Whether to scroll the viewport so that the first element row aligns
+      with the top edge of the viewport.
     @return {Deferred}
       A promise that will be resolved when the element is revealed.
      */
@@ -2268,14 +2346,14 @@ This modules contains functions to scroll the viewport and reveal contained elem
         return newScrollPos + viewportHeight - obstruction.bottom - 1;
       };
       elementDims = u.measure($element, {
-        relative: true
+        relative: $viewport
       });
       firstElementRow = elementDims.top + offsetShift;
       lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1;
       if (lastElementRow > predictLastVisibleRow()) {
         newScrollPos += lastElementRow - predictLastVisibleRow();
       }
-      if (firstElementRow < predictFirstVisibleRow()) {
+      if (firstElementRow < predictFirstVisibleRow() || options.top) {
         newScrollPos = firstElementRow - obstruction.top;
       }
       if (newScrollPos < snap) {
@@ -2342,9 +2420,9 @@ This modules contains functions to scroll the viewport and reveal contained elem
         up.layout.scrollTops()
         => { '.main': 0, '.sidebar': 73 }
     
-    @protected
     @method up.layout.scrollTops
     @return Object<String, Number>
+    @protected
      */
     scrollTops = function() {
       var $viewport, i, key, len, ref, topsBySelector, viewport;
@@ -2362,6 +2440,27 @@ This modules contains functions to scroll the viewport and reveal contained elem
         }
       }
       return topsBySelector;
+    };
+
+    /**
+    @method up.layout.fixedChildren
+    @protected
+     */
+    fixedChildren = function(root) {
+      var $elements, $root;
+      if (root == null) {
+        root = void 0;
+      }
+      root || (root = document.body);
+      $root = $(root);
+      $elements = $root.find('[up-fixed]');
+      if (u.isPresent(config.fixedTop)) {
+        $elements = $elements.add($root.find(config.fixedTop.join(', ')));
+      }
+      if (u.isPresent(config.fixedBottom)) {
+        $elements = $elements.add($root.find(config.fixedBottom.join(', ')));
+      }
+      return $elements;
     };
 
     /**
@@ -2511,7 +2610,9 @@ This modules contains functions to scroll the viewport and reveal contained elem
       viewports: viewports,
       scrollTops: scrollTops,
       saveScroll: saveScroll,
-      restoreScroll: restoreScroll
+      restoreScroll: restoreScroll,
+      anchoredRight: anchoredRight,
+      fixedChildren: fixedChildren
     };
   })();
 
@@ -2593,7 +2694,7 @@ We need to work on this page:
      */
     replace = function(selectorOrElement, url, options) {
       var promise, request, selector;
-      u.debug("Replace %o with %o", selectorOrElement, url);
+      u.debug("Replace %o with %o (options %o)", selectorOrElement, url, options);
       options = u.options(options);
       selector = u.presence(selectorOrElement) ? selectorOrElement : u.createSelectorFromElement($(selectorOrElement));
       if (!up.browser.canPushState() && options.history !== false) {
@@ -2749,17 +2850,15 @@ We need to work on this page:
           u.unwrapElement($wrapper);
         });
       } else {
-        return reveal($old, options).then(function() {
-          return destroy($old, {
-            animation: function() {
-              $new.insertBefore($old);
-              elementsInserted($new, options);
-              if ($old.is('body') && transition !== 'none') {
-                u.error('Cannot apply transitions to body-elements (%o)', transition);
-              }
-              return up.morph($old, $new, transition, options);
+        return destroy($old, {
+          animation: function() {
+            $new.insertBefore($old);
+            elementsInserted($new, options);
+            if ($old.is('body') && transition !== 'none') {
+              u.error('Cannot apply transitions to body-elements (%o)', transition);
             }
-          });
+            return up.morph($old, $new, transition, options);
+          }
         });
       }
     };
@@ -2954,7 +3053,7 @@ We need to work on this page:
 
 (function() {
   up.motion = (function() {
-    var GHOSTING_PROMISE_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, findAnimation, finish, finishGhosting, morph, none, prependGhost, reset, resolvableWhen, snapshot, transition, transitions, u, withGhosts;
+    var GHOSTING_PROMISE_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, findAnimation, finish, finishGhosting, morph, none, prependCopy, reset, resolvableWhen, snapshot, transition, transitions, u, withGhosts;
     u = up.util;
     animations = {};
     defaultAnimations = {};
@@ -3090,27 +3189,36 @@ We need to work on this page:
       return animations[name] || u.error("Unknown animation %o", animation);
     };
     GHOSTING_PROMISE_KEY = 'up-ghosting-promise';
-    withGhosts = function($old, $new, block) {
-      var newCopy, oldCopy, promise, showNew;
-      oldCopy = null;
-      newCopy = null;
+    withGhosts = function($old, $new, options, block) {
+      var $viewport, newCopy, newScrollTop, oldCopy, oldScrollTop, promise, showNew;
+      oldCopy = void 0;
+      newCopy = void 0;
+      oldScrollTop = void 0;
+      newScrollTop = void 0;
+      $viewport = up.layout.viewportOf($old);
       u.temporaryCss($new, {
         display: 'none'
       }, function() {
-        oldCopy = prependGhost($old);
+        oldCopy = prependCopy($old, $viewport);
         oldCopy.$ghost.addClass('up-destroying');
-        return oldCopy.$bounds.addClass('up-destroying');
+        oldCopy.$bounds.addClass('up-destroying');
+        return oldScrollTop = $viewport.scrollTop();
       });
       u.temporaryCss($old, {
         display: 'none'
       }, function() {
-        return newCopy = prependGhost($new);
+        if (options.reveal) {
+          up.reveal($new, {
+            viewport: $viewport
+          });
+        }
+        newCopy = prependCopy($new, $viewport);
+        return newScrollTop = $viewport.scrollTop();
       });
-      $old.css({
-        visibility: 'hidden'
-      });
+      oldCopy.moveTop(newScrollTop - oldScrollTop);
+      $old.hide();
       showNew = u.temporaryCss($new, {
-        display: 'none'
+        visibility: 'hidden'
       });
       promise = block(oldCopy.$ghost, newCopy.$ghost);
       $old.data(GHOSTING_PROMISE_KEY, promise);
@@ -3120,9 +3228,6 @@ We need to work on this page:
         $new.removeData(GHOSTING_PROMISE_KEY);
         oldCopy.$bounds.remove();
         newCopy.$bounds.remove();
-        $old.css({
-          display: 'none'
-        });
         return showNew();
       });
       return promise;
@@ -3153,11 +3258,11 @@ We need to work on this page:
         return typeof existingGhosting.resolve === "function" ? existingGhosting.resolve() : void 0;
       }
     };
-    assertIsDeferred = function(object, origin) {
+    assertIsDeferred = function(object, source) {
       if (u.isDeferred(object)) {
         return object;
       } else {
-        return u.error("Did not return a promise with .then and .resolve methods: %o", origin);
+        return u.error("Did not return a promise with .then and .resolve methods: %o", source);
       }
     };
 
@@ -3200,32 +3305,38 @@ We need to work on this page:
       The timing function that controls the transition's acceleration.
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
+    @param {Boolean} [options.reveal=false]
+      Whether to reveal the new element by scrolling its parent viewport.
     @return {Promise}
       A promise for the transition's end.
      */
     morph = function(source, target, transitionOrName, options) {
-      var $new, $old, animation, parts, transition;
+      var $new, $old, animation, parsedOptions, parts, transition;
       if (up.browser.canCssAnimation()) {
-        options = animateOptions(options);
+        parsedOptions = u.only(options, 'reveal');
+        parsedOptions = u.extend(parsedOptions, animateOptions(options));
         $old = $(source);
         $new = $(target);
         finish($old);
         finish($new);
-        if (transitionOrName === 'none' || transitionOrName === false) {
-          return none();
-        } else if (transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]) {
-          return withGhosts($old, $new, function($oldGhost, $newGhost) {
-            return assertIsDeferred(transition($oldGhost, $newGhost, options), transitionOrName);
-          });
-        } else if (animation = animations[transitionOrName]) {
+        if (transitionOrName === 'none' || transitionOrName === false || (animation = animations[transitionOrName])) {
           $old.hide();
-          return animate($new, animation, options);
+          if (options.reveal) {
+            up.reveal($new);
+          }
+          return animate($new, animation || 'none', options);
+        } else if (transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]) {
+          return withGhosts($old, $new, parsedOptions, function($oldGhost, $newGhost) {
+            var transitionPromise;
+            transitionPromise = transition($oldGhost, $newGhost, parsedOptions);
+            return assertIsDeferred(transitionPromise, transitionOrName);
+          });
         } else if (u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0) {
           parts = transitionOrName.split('/');
           transition = function($old, $new, options) {
             return resolvableWhen(animate($old, parts[0], options), animate($new, parts[1], options));
           };
-          return morph($old, $new, transition, options);
+          return morph($old, $new, transition, parsedOptions);
         } else {
           return u.error("Unknown transition %o", transitionOrName);
         }
@@ -3237,8 +3348,8 @@ We need to work on this page:
     /**
     @private
      */
-    prependGhost = function($element) {
-      var $bounds, $ghost, diff, elementDims;
+    prependCopy = function($element, $viewport) {
+      var $bounds, $fixedElements, $ghost, elementDims, fixedElement, i, len, moveTop, top;
       elementDims = u.measure($element, {
         relative: true,
         inner: true
@@ -3260,17 +3371,27 @@ We need to work on this page:
         position: 'absolute'
       });
       $bounds.css(elementDims);
+      top = elementDims.top;
+      moveTop = function(diff) {
+        if (diff !== 0) {
+          top += diff;
+          return $bounds.css({
+            top: top
+          });
+        }
+      };
       $ghost.appendTo($bounds);
       $bounds.insertBefore($element);
-      diff = $ghost.offset().top - $element.offset().top;
-      if (diff !== 0) {
-        $bounds.css({
-          top: elementDims.top - diff
-        });
+      moveTop($element.offset().top - $ghost.offset().top);
+      $fixedElements = up.layout.fixedChildren($ghost);
+      for (i = 0, len = $fixedElements.length; i < len; i++) {
+        fixedElement = $fixedElements[i];
+        u.fixedToAbsolute(fixedElement, $viewport);
       }
       return {
         $ghost: $ghost,
-        $bounds: $bounds
+        $bounds: $bounds,
+        moveTop: moveTop
       };
     };
 
@@ -3512,7 +3633,7 @@ We need to work on this page:
       defaults: config.update,
       none: none,
       when: resolvableWhen,
-      prependGhost: prependGhost
+      prependCopy: prependCopy
     };
   })();
 
@@ -3714,6 +3835,9 @@ You can change (or remove) this delay like this:
       } else {
         promise = load(request);
         set(request, promise);
+        promise.fail(function() {
+          return remove(request);
+        });
       }
       if (pending && !options.preload) {
         loadStarted();
@@ -4938,8 +5062,9 @@ We need to work on this page:
     @ujs
      */
     up.on('click', '[up-close]', function(event, $element) {
-      if ($element.closest('.up-popup')) {
-        return close();
+      if ($element.closest('.up-popup').length) {
+        close();
+        return event.preventDefault();
       }
     });
     up.bus.on('framework:reset', reset);
@@ -4970,7 +5095,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
   var slice = [].slice;
 
   up.modal = (function() {
-    var autoclose, close, config, contains, createHiddenModal, currentSource, discardHistory, open, rememberHistory, reset, shiftBody, source, templateHtml, u, unshiftBody, updated;
+    var autoclose, close, config, contains, createHiddenModal, currentSource, discardHistory, open, rememberHistory, reset, shiftElements, source, templateHtml, u, unshiftElements, updated;
     u = up.util;
 
     /**
@@ -4982,7 +5107,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     
       Defaults to `undefined`, meaning that the dialog will grow to fit its contents
       until it reaches `options.maxWidth`. Leaving this as `undefined` will
-      also allow you to control the width using CSS.
+      also allow you to control the width using CSS on `.up-modal-dialog´.
     @param {Number} [options.maxWidth]
       The width of the dialog as a CSS value like `'400px'` or `50%`.
       You can set this to `undefined` to make the dialog fit its contents.
@@ -5074,21 +5199,32 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       $modal.hide();
       return $modal;
     };
-    unshiftBody = void 0;
-    shiftBody = function() {
-      var bodyRightPadding, bodyRightShift, scrollbarWidth;
+    unshiftElements = [];
+    shiftElements = function() {
+      var bodyRightPadding, bodyRightShift, scrollbarWidth, unshiftBody;
       scrollbarWidth = u.scrollbarWidth();
       bodyRightPadding = parseInt($('body').css('padding-right'));
       bodyRightShift = scrollbarWidth + bodyRightPadding;
-      return unshiftBody = u.temporaryCss($('body'), {
+      unshiftBody = u.temporaryCss($('body'), {
         'padding-right': bodyRightShift + "px",
         'overflow-y': 'hidden'
+      });
+      unshiftElements.push(unshiftBody);
+      return up.layout.anchoredRight().each(function() {
+        var $element, elementRight, elementRightShift, unshiftElement;
+        $element = $(this);
+        elementRight = parseInt($element.css('right'));
+        elementRightShift = scrollbarWidth + elementRight;
+        unshiftElement = u.temporaryCss($element, {
+          'right': elementRightShift
+        });
+        return unshiftElements.push(unshiftElement);
       });
     };
     updated = function($modal, animation, animateOptions) {
       var promise;
       up.bus.emit('modal:open');
-      shiftBody();
+      shiftElements();
       $modal.show();
       promise = up.animate($modal, animation, animateOptions);
       promise.then(function() {
@@ -5235,7 +5371,10 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
         up.bus.emit('modal:close');
         promise = up.destroy($modal, options);
         promise.then(function() {
-          unshiftBody();
+          var unshifter;
+          while (unshifter = unshiftElements.pop()) {
+            unshifter();
+          }
           return up.bus.emit('modal:closed');
         });
         return promise;
@@ -5365,8 +5504,9 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     @ujs
      */
     up.on('click', '[up-close]', function(event, $element) {
-      if ($element.closest('.up-modal')) {
-        return close();
+      if ($element.closest('.up-modal').length) {
+        close();
+        return event.preventDefault();
       }
     });
     up.bus.on('framework:reset', reset);

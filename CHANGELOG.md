@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.11.0
+------
+
+### Compatible changes
+
+- Rework the scrolling implementation so we don't need to scroll elements to the top before replacing them.
+- `up.ajax` now only caches responses with a status code of `200 OK`
+- When a link with an `[up-close]` attribute is clicked, the link's default action will only be prevented
+  if the link was actually within a modal or popup.
+- When revealing an element, Up will now compute the correct element position if there are
+  additional positioning contexts between the viewport and the element
+- New option "top" for `up.reveal`: Whether to scroll the viewport so that the first element row aligns with
+  the top edge of the viewport. Without this option, `up.reveal` scrolls as little as possible.
+- Allow to animate scrolling when the `document` is the viewport.
+- New `up.layout` setting `fixedRight` that contains selectors for elements that are anchored to
+  the right edge of the screen. When opening a modal, these elements will be prevented from jumping
+  around. If you're using `up-bootstrap.js`, this will default to `['.navbar-fixed-top', '.navbar-fixed-bottom', '.footer']`.
+- Fix a bug in `upjs-rails` where the gem would fail to `include` itself in some versions
+  of Ruby and Rails.
+
+
+### Incompatible changes
+
+- Interactions that would result in an URL change ("pushState") now fall back to a full page load
+  if Up.js was booted from a non-GET request. [More information about the reasons for this](https://github.com/makandra/upjs/commit/d81d9007aa3bfae0fca8c55a71d180d1044acae5).
+
+  This currently works out of the box if you're using Up.js via the `upjs-rails` Rubygem.
+  If you're integrating Up.js with Bower or manually, you need to have your server app
+  set an `_up_request_method` cookie with the current request method on every request.
+
+
+
 0.10.5
 ------
 
