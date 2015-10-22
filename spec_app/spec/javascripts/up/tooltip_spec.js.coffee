@@ -22,8 +22,18 @@ describe 'up.tooltip', ->
         expect(tooltipBox.top).toBeAround(linkBox.top - tooltipBox.height, 15)
         expect(tooltipBox.left).toBeAround(linkBox.left + 0.5 * (linkBox.width - tooltipBox.width), 15)
         
-      it 'allows HTML for the tooltip text'
-        
+      it 'allows HTML for the tooltip text when contents are given as .html option', ->
+        $link = affix('span')
+        up.tooltip.attach($link, html: '<b>text</b>')
+        $tooltip = $('.up-tooltip')
+        expect($tooltip.html()).toEqual('<b>text</b>')
+
+      it 'escapes HTML for the tooltip text when contents given as .html option', ->
+        $link = affix('span')
+        up.tooltip.attach($link, text: '<b>text</b>')
+        $tooltip = $('.up-tooltip')
+        expect($tooltip.html()).toEqual('&lt;b&gt;text&lt;/b&gt;')
+
       it 'closes an existing tooltip'
       
       describe 'with position option', ->
@@ -39,7 +49,11 @@ describe 'up.tooltip', ->
     describe '[up-tooltip]', ->
 
       it 'should have tests'
-      
+
+    describe '[up-tooltip-html]', ->
+
+      it 'should have tests'
+
     describe 'body', ->
       
       it 'closes a tooltip when clicked'

@@ -35,10 +35,14 @@ up.tooltip = (($) ->
     $tooltip.attr('up-position', position)
     $tooltip.css(css)
 
-  createElement = (html) ->
-    u.$createElementFromSelector('.up-tooltip')
-      .html(html)
-      .appendTo(document.body)
+  createElement = (options) ->
+    $element = u.$createElementFromSelector('.up-tooltip')
+    if u.isGiven(options.text)
+      $element.text(options.text)
+    else
+      $element.html(options.html)
+    $element.appendTo(document.body)
+    $element
 
   ###*
   Opens a tooltip over the given element.
@@ -58,12 +62,13 @@ up.tooltip = (($) ->
   ###
   attach = (linkOrSelector, options = {}) ->
     $link = $(linkOrSelector)
-    html = u.option(options.html, $link.attr('up-tooltip'), $link.attr('title'))
+    html = u.option(options.html, $link.attr('up-tooltip-html'))
+    text = u.option(options.text, $link.attr('up-tooltip'), $link.attr('title'))
     position = u.option(options.position, $link.attr('up-position'), 'top')
     animation = u.option(options.animation, u.castedAttr($link, 'up-animation'), 'fade-in')
     animateOptions = up.motion.animateOptions(options, $link)
     close()
-    $tooltip = createElement(html)
+    $tooltip = createElement(text: text, html: html)
     setPosition($link, $tooltip, position)
     up.animate($tooltip, animation, animateOptions)
 
@@ -83,7 +88,7 @@ up.tooltip = (($) ->
       up.destroy($tooltip, options)
 
   ###*
-  Displays a tooltip when hovering the mouse over this element:
+  Displays a tooltip with text content when hovering the mouse over this element:
 
       <a href="/decks" up-tooltip="Show all decks">Decks</a>
   
@@ -94,7 +99,15 @@ up.tooltip = (($) ->
   @method [up-tooltip]
   @ujs
   ###
-  up.compiler('[up-tooltip]', ($link) ->
+  ###*
+  Displays a tooltip with HTML content when hovering the mouse over this element:
+
+      <a href="/decks" up-tooltip="Show &lt;b&gt;all&lt;/b&gt; decks">Decks</a>
+
+  @method [up-tooltip-html]
+  @ujs
+  ###
+  up.compiler('[up-tooltip], [up-tooltip-html]', ($link) ->
     # Don't register these events on document since *every*
     # mouse move interaction  bubbles up to the document. 
     $link.on('mouseover', -> open($link))
