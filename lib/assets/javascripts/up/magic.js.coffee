@@ -369,6 +369,11 @@ up.magic = (($) ->
 up.compiler = up.magic.compiler
 up.on = up.magic.on
 up.hello = up.magic.hello
+
+up.ready = (args...) ->
+  up.util.warn("up.ready has been renamed to up.hello and will be removed in a future version")
+  up.hello(args...)
+
 up.awaken = (args...) ->
   up.util.warn("up.awaken has been renamed to up.compiler and will be removed in a future version")
   up.compiler(args...)
