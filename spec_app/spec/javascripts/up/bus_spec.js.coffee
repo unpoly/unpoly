@@ -37,7 +37,7 @@ describe 'up.bus', ->
 
         $element = affix('.element').text('foo')
 
-        up.on 'foo', '.element', (event, $target) ->
+        up.on 'foo', (event, $target) ->
           emittedEvent = event
           emitted$Target = $target
 

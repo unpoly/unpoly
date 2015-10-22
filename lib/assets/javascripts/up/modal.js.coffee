@@ -393,7 +393,7 @@ up.modal = (($) ->
       close()
   )
 
-  up.on('up:fragment:inserted', ($fragment) ->
+  up.on('up:fragment:inserted', (event, $fragment) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
         currentSource = newSource

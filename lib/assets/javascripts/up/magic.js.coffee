@@ -87,7 +87,9 @@ up.magic = (($) ->
   # as a jQuery collection) to a vanilla jQuery listener
   ###
   upListenerToJqueryListener = (upListener) ->
-    (event) -> upListener.apply(this, [event, $(this), data(this)])
+    (event) ->
+      $me = event.$element || $(this)
+      upListener.apply($me.get(0), [event, $me, data($me)])
 
   live = (args...) ->
     # Silently discard any event handlers that are registered on unsupported browsers
