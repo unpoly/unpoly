@@ -49,7 +49,7 @@ You can change (or remove) this delay like this:
 
 @class up.proxy  
 ###
-up.proxy = (->
+up.proxy = (($) ->
 
   u = up.util
 
@@ -332,4 +332,4 @@ up.proxy = (->
   busy: busy
   defaults: config.update
   
-)()
+)(jQuery)

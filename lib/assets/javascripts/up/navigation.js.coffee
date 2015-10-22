@@ -11,7 +11,7 @@ by providing instant feedback for user interactions.
 
 @class up.navigation
 ###
-up.navigation = (->
+up.navigation = (($) ->
 
   u = up.util
 
@@ -212,4 +212,4 @@ up.navigation = (->
 
   defaults: config.update
 
-)()
+)(jQuery)

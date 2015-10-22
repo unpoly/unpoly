@@ -9,7 +9,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
 
 @class up.modal 
 ###
-up.modal = (->
+up.modal = (($) ->
 
   u = up.util
 
@@ -422,4 +422,4 @@ up.modal = (->
   defaults: config.update
   contains: contains
 
-)()
+)(jQuery)

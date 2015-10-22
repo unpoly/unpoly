@@ -8,7 +8,7 @@ we can't currently get rid off.
 @protected
 @class up.browser
 ###
-up.browser = (->
+up.browser = (($) ->
 
   u = up.util
 
@@ -122,4 +122,4 @@ up.browser = (->
   isSupported: isSupported
   puts: puts
 
-)()
+)(jQuery)

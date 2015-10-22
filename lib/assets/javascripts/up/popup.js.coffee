@@ -21,7 +21,7 @@ We need to work on this page:
   
 @class up.popup
 ###
-up.popup = (->
+up.popup = (($) ->
 
   u = up.util
 
@@ -271,4 +271,4 @@ up.popup = (->
   defaults: config.update
   contains: contains
   
-)()
+)(jQuery)

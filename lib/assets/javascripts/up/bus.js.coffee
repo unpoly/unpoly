@@ -42,7 +42,7 @@ We need to work on this page:
 
 @class up.bus
 ###
-up.bus = (->
+up.bus = (($) ->
   
   u = up.util
 
@@ -87,11 +87,10 @@ up.bus = (->
   reset = ->
     up.bus.emit('up:framework:reset')
 
-
   emit: emit
   nobodyPrevents: nobodyPrevents
   reset: reset
 
-)()
+)(jQuery)
 
 up.reset = up.bus.reset

@@ -6,7 +6,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
 
 @class up.layout
 ###
-up.layout = (->
+up.layout = (($) ->
 
   u = up.util
 
@@ -473,7 +473,7 @@ up.layout = (->
   anchoredRight: anchoredRight
   fixedChildren: fixedChildren
 
-)()
+)(jQuery)
 
 up.scroll = up.layout.scroll
 up.reveal = up.layout.reveal

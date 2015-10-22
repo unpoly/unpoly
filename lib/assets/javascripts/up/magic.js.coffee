@@ -14,7 +14,7 @@ We need to work on this page:
 
 @class up.magic
 ###
-up.magic = (->
+up.magic = (($) ->
   
   u = up.util
 
@@ -364,7 +364,7 @@ up.magic = (->
   onEscape: onEscape
   data: data
 
-)()
+)(jQuery)
 
 up.compiler = up.magic.compiler
 up.on = up.magic.on

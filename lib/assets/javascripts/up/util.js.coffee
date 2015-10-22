@@ -10,7 +10,7 @@ If you use them in your own code, you will get hurt.
 @protected
 @class up.util
 ###
-up.util = (->
+up.util = (($) ->
 
   memoize = (func) ->
     cache = undefined
@@ -996,7 +996,7 @@ up.util = (->
   emptyJQuery: emptyJQuery
   evalConsoleTemplate: evalConsoleTemplate
 
-)()
+)($)
 
 up.error = up.util.error
 up.warn = up.util.warn

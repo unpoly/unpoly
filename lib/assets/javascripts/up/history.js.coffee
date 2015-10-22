@@ -12,7 +12,7 @@ We need to work on this page:
 
 @class up.history
 ###
-up.history = (->
+up.history = (($) ->
   
   u = up.util
 
@@ -179,4 +179,4 @@ up.history = (->
   previousUrl: -> previousUrl
   normalizeUrl: normalizeUrl
 
-)()
+)(jQuery)

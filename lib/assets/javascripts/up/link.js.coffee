@@ -82,7 +82,7 @@ Read on
 @class up.link
 ###
 
-up.link = (->
+up.link = (($) ->
 
   u = up.util
   
@@ -409,7 +409,7 @@ up.link = (->
   childClicked: childClicked
   followMethod: followMethod
 
-)()
+)(jQuery)
 
 up.visit = up.link.visit
 up.follow = up.link.follow

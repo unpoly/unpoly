@@ -21,7 +21,7 @@ We need to work on this page:
   
 @class up.form
 ###
-up.form = (->
+up.form = (($) ->
   
   u = up.util
 
@@ -345,7 +345,7 @@ up.form = (->
   submit: submit
   observe: observe
 
-)()
+)(jQuery)
 
 up.submit = up.form.submit
 up.observe = up.form.observe

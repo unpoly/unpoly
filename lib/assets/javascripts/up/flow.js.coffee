@@ -15,7 +15,7 @@ We need to work on this page:
   
 @class up.flow
 ###
-up.flow = (->
+up.flow = (($) ->
   
   u = up.util
 
@@ -350,7 +350,7 @@ up.flow = (->
   implant: implant
   first: first
 
-)()
+)(jQuery)
 
 up.replace = up.flow.replace
 up.reload = up.flow.reload

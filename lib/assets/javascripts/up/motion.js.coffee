@@ -25,7 +25,7 @@ We need to work on this page:
   
 @class up.motion
 ###
-up.motion = (->
+up.motion = (($) ->
   
   u = up.util
 
@@ -591,7 +591,7 @@ up.motion = (->
   when: resolvableWhen
   prependCopy: prependCopy
 
-)()
+)(jQuery)
 
 up.transition = up.motion.transition
 up.animation = up.motion.animation

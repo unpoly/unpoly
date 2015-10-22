@@ -16,7 +16,7 @@ We need to work on this page:
 
 @class up.tooltip
 ###
-up.tooltip = (->
+up.tooltip = (($) ->
   
   u = up.util
 
@@ -116,4 +116,4 @@ up.tooltip = (->
   open: open
   close: close
 
-)()
+)(jQuery)
