@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.11.1
+------
+
+### Compatible changes
+
+- Fix a bug where browsers without CSS animation support would crash after an animation call
+- Expose `up.error` as public API. This prints an error message to the error console and throws a new `Error` with that message.
+- Fix a million bugs related to compatibility with IE9 and IE10
+
+
 0.11.0
 ------
 
@@ -34,7 +44,6 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   This currently works out of the box if you're using Up.js via the `upjs-rails` Rubygem.
   If you're integrating Up.js with Bower or manually, you need to have your server app
   set an `_up_request_method` cookie with the current request method on every request.
-
 
 
 0.10.5

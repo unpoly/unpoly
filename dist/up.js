@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function() {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, keys, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, offsetParent, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, stringifyConsoleArgs, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, evalConsoleTemplate, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, offsetParent, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -41,13 +41,14 @@ If you use them in your own code, you will get hurt.
         }
       };
     };
-    ajax = function(options) {
-      if (options.selector) {
-        options.headers = {
-          "X-Up-Selector": options.selector
+    ajax = function(request) {
+      request = copy(request);
+      if (request.selector) {
+        request.headers = {
+          "X-Up-Selector": request.selector
         };
       }
-      return $.ajax(options);
+      return $.ajax(request);
     };
 
     /**
@@ -164,35 +165,61 @@ If you use them in your own code, you will get hurt.
       }
       return element;
     };
+
+    /**
+    @method up.debug
+    @protected
+     */
     debug = function() {
-      var args, message;
+      var args, message, ref;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       message = "[UP] " + message;
-      return console.debug.apply(console, [message].concat(slice.call(args)));
+      return (ref = up.browser).puts.apply(ref, ['debug', message].concat(slice.call(args)));
     };
+
+    /**
+    @method up.warn
+    @protected
+     */
     warn = function() {
-      var args, message;
+      var args, message, ref;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       message = "[UP] " + message;
-      return console.warn.apply(console, [message].concat(slice.call(args)));
+      return (ref = up.browser).puts.apply(ref, ['warn', message].concat(slice.call(args)));
     };
+
+    /**
+    Throws a fatal error with the given message.
+    
+    - The error will be printed to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/Console/error)
+    - An [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) (exception) will be thrown, unwinding the current call stack
+    - The error message will be printed in a corner of the screen
+    
+    \#\#\#\# Examples
+    
+        up.error('Division by zero')
+        up.error('Unexpected result %o', result)
+    
+    @method up.error
+     */
     error = function() {
-      var $error, args, asString;
+      var $error, args, asString, ref;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       args[0] = "[UP] " + args[0];
-      console.error.apply(console, args);
-      asString = stringifyConsoleArgs(args);
+      (ref = up.browser).puts.apply(ref, ['error'].concat(slice.call(args)));
+      asString = evalConsoleTemplate.apply(null, args);
       $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body');
       $error.addClass('up-error');
       $error.text(asString);
       throw new Error(asString);
     };
     CONSOLE_PLACEHOLDERS = /\%[odisf]/g;
-    stringifyConsoleArgs = function(args) {
-      var i, maxLength, message;
+    evalConsoleTemplate = function() {
+      var args, i, maxLength, message;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       message = args[0];
       i = 0;
-      maxLength = 50;
+      maxLength = 80;
       return message.replace(CONSOLE_PLACEHOLDERS, function() {
         var arg, argType;
         i += 1;
@@ -204,12 +231,17 @@ If you use them in your own code, you will get hurt.
             arg = (arg.substr(0, maxLength)) + "…";
           }
           arg = "\"" + arg + "\"";
-        } else if (argType === 'number') {
+        } else if (argType === 'undefined') {
+          arg = 'undefined';
+        } else if (argType === 'number' || argType === 'function') {
           arg = arg.toString();
         } else {
           arg = JSON.stringify(arg);
-          if (arg.length > maxLength) {
-            arg = (arg.substr(0, maxLength)) + "…";
+        }
+        if (arg.length > maxLength) {
+          arg = (arg.substr(0, maxLength)) + " …";
+          if (argType === 'object' || argType === 'function') {
+            arg += " }";
           }
         }
         return arg;
@@ -261,17 +293,6 @@ If you use them in your own code, you will get hurt.
     };
     extend = $.extend;
     trim = $.trim;
-    keys = Object.keys || function(object) {
-      var j, key, len, result;
-      result = [];
-      for (j = 0, len = object.length; j < len; j++) {
-        key = object[j];
-        if (object.hasOwnProperty(key)) {
-          result.push(key);
-        }
-      }
-      return result;
-    };
     each = function(collection, block) {
       var index, item, j, len, results;
       results = [];
@@ -309,7 +330,7 @@ If you use them in your own code, you will get hurt.
       return !isMissing(object);
     };
     isBlank = function(object) {
-      return isMissing(object) || (isObject(object) && keys(object).length === 0) || (object.length === 0);
+      return isMissing(object) || (isObject(object) && Object.keys(object).length === 0) || (object.length === 0);
     };
     presence = function(object, checker) {
       if (checker == null) {
@@ -542,7 +563,7 @@ If you use them in your own code, you will get hurt.
      */
     temporaryCss = function($element, css, block) {
       var memo, oldCss;
-      oldCss = $element.css(keys(css));
+      oldCss = $element.css(Object.keys(css));
       $element.css(css);
       memo = function() {
         return $element.css(oldCss);
@@ -607,7 +628,7 @@ If you use them in your own code, you will get hurt.
         });
         deferred = $.Deferred();
         transition = {
-          'transition-property': keys(lastFrame).join(', '),
+          'transition-property': Object.keys(lastFrame).join(', '),
           'transition-duration': opts.duration + "ms",
           'transition-delay': opts.delay + "ms",
           'transition-timing-function': opts.easing
@@ -630,7 +651,7 @@ If you use them in your own code, you will get hurt.
         return deferred;
       } else {
         $element.css(lastFrame);
-        return resolvedPromise();
+        return resolvedDeferred();
       }
     };
     ANIMATION_PROMISE_KEY = 'up-animation-promise';
@@ -900,7 +921,10 @@ If you use them in your own code, you will get hurt.
       A prefix for log entries printed by this cache object.
      */
     cache = function(config) {
-      var alias, clear, expiryMilis, get, isFresh, log, maxSize, normalizeStoreKey, set, store, timestamp;
+      var alias, clear, expiryMilis, get, isFresh, keys, log, maxSize, normalizeStoreKey, set, store, timestamp;
+      if (config == null) {
+        config = {};
+      }
       store = void 0;
       clear = function() {
         return store = {};
@@ -913,6 +937,9 @@ If you use them in your own code, you will get hurt.
           args[0] = "[" + config.log + "] " + args[0];
           return debug.apply(null, args);
         }
+      };
+      keys = function() {
+        return Object.keys(store);
       };
       maxSize = function() {
         if (isMissing(config.size)) {
@@ -945,7 +972,7 @@ If you use them in your own code, you will get hurt.
       };
       trim = function() {
         var oldestKey, oldestTimestamp, size, storeKeys;
-        storeKeys = copy(keys(store));
+        storeKeys = copy(keys());
         size = maxSize();
         if (size && storeKeys.length > size) {
           oldestKey = null;
@@ -1022,7 +1049,8 @@ If you use them in your own code, you will get hurt.
         get: get,
         set: set,
         remove: remove,
-        clear: clear
+        clear: clear,
+        keys: keys
       };
     };
     config = function(factoryOptions) {
@@ -1084,7 +1112,6 @@ If you use them in your own code, you will get hurt.
       $match = void 0;
       while (($element = $element.parent()) && $element.length) {
         position = $element.css('position');
-        console.log("Iteration element is %o with position %o", $element, position);
         if (position === 'absolute' || position === 'relative' || $element.is('body')) {
           $match = $element;
           break;
@@ -1176,7 +1203,6 @@ If you use them in your own code, you will get hurt.
       clientSize: clientSize,
       only: only,
       trim: trim,
-      keys: keys,
       resolvedPromise: resolvedPromise,
       resolvedDeferred: resolvedDeferred,
       resolvableWhen: resolvableWhen,
@@ -1188,9 +1214,16 @@ If you use them in your own code, you will get hurt.
       cache: cache,
       unwrapElement: unwrapElement,
       multiSelector: multiSelector,
-      emptyJQuery: emptyJQuery
+      emptyJQuery: emptyJQuery,
+      evalConsoleTemplate: evalConsoleTemplate
     };
   })();
+
+  up.error = up.util.error;
+
+  up.warn = up.util.warn;
+
+  up.debug = up.util.debug;
 
 }).call(this);
 
@@ -1206,8 +1239,10 @@ we can't currently get rid off.
  */
 
 (function() {
+  var slice = [].slice;
+
   up.browser = (function() {
-    var canCssAnimation, canInputEvent, canPushState, ensureConsoleExists, ensureRecentJquery, initialRequestMethod, isSupported, loadPage, popCookie, u, url;
+    var canCssAnimation, canInputEvent, canLogSubstitution, canPushState, initialRequestMethod, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, u, url;
     u = up.util;
     loadPage = function(url, options) {
       var $form, csrfParam, csrfToken, metadataInput, method, target;
@@ -1235,24 +1270,39 @@ we can't currently get rid off.
         return error("Can't fake a " + (method.toUpperCase()) + " request without Rails UJS");
       }
     };
+
+    /**
+    Makes native `console.log`, `console.error`, etc. functions safer in multiple ways:
+    
+    - Falls back to `console.log` if the output stream is not implemented
+    - Prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`) as a single
+      string if the browser console does not support substitution strings.
+    
+    @method up.browser.puts
+    @protected
+     */
+    puts = function() {
+      var args, message, stream;
+      stream = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      u.isDefined(console[stream]) || (stream = 'log');
+      if (canLogSubstitution()) {
+        return console[stream].apply(console, args);
+      } else {
+        message = u.evalConsoleTemplate.apply(u, args);
+        return console[stream](message);
+      }
+    };
     url = function() {
       return location.href;
     };
-    ensureConsoleExists = function() {
-      var base, base1, base2, base3, base4, base5, base6, base7, noop;
-      window.console || (window.console = {});
-      noop = function() {};
-      (base = window.console).log || (base.log = noop);
-      (base1 = window.console).info || (base1.info = noop);
-      (base2 = window.console).error || (base2.error = noop);
-      (base3 = window.console).debug || (base3.debug = noop);
-      (base4 = window.console).warn || (base4.warn = noop);
-      (base5 = window.console).group || (base5.group = noop);
-      (base6 = window.console).groupCollapsed || (base6.groupCollapsed = noop);
-      return (base7 = window.console).groupEnd || (base7.groupEnd = noop);
-    };
     canPushState = u.memoize(function() {
-      return u.isDefined(history.pushState) && initialRequestMethod === 'get';
+      return u.isDefined(history.pushState) && initialRequestMethod() === 'get';
+    });
+    isIE8OrWorse = u.memoize(function() {
+      return u.isUndefined(document.addEventListener);
+    });
+    isIE9OrWorse = u.memoize(function() {
+      return isIE8OrWorse() || navigator.appVersion.indexOf('MSIE 9.') !== -1;
     });
     canCssAnimation = u.memoize(function() {
       return 'transition' in document.documentElement.style;
@@ -1260,15 +1310,17 @@ we can't currently get rid off.
     canInputEvent = u.memoize(function() {
       return 'oninput' in document.createElement('input');
     });
-    ensureRecentJquery = function() {
-      var compatible, major, minor, parts, version;
+    canLogSubstitution = u.memoize(function() {
+      return !isIE9OrWorse();
+    });
+    isRecentJQuery = u.memoize(function() {
+      var major, minor, parts, version;
       version = $.fn.jquery;
       parts = version.split('.');
       major = parseInt(parts[0]);
       minor = parseInt(parts[1]);
-      compatible = major >= 2 || (major === 1 && minor >= 9);
-      return compatible || u.error("jQuery %o found, but Up.js requires 1.9+", version);
-    };
+      return major >= 2 || (major === 1 && minor >= 9);
+    });
     popCookie = function(name) {
       var ref, value;
       value = (ref = document.cookie.match(new RegExp(name + "=(\\w+)"))) != null ? ref[1] : void 0;
@@ -1277,19 +1329,21 @@ we can't currently get rid off.
       }
       return value;
     };
-    initialRequestMethod = (popCookie('_up_request_method') || 'get').toLowerCase();
-    isSupported = u.memoize(function() {
-      return u.isDefined(document.addEventListener);
+    initialRequestMethod = u.memoize(function() {
+      return (popCookie('_up_request_method') || 'get').toLowerCase();
     });
+    isSupported = function() {
+      return (!isIE8OrWorse()) && isRecentJQuery();
+    };
     return {
       url: url,
-      ensureConsoleExists: ensureConsoleExists,
       loadPage: loadPage,
       canPushState: canPushState,
       canCssAnimation: canCssAnimation,
       canInputEvent: canInputEvent,
+      canLogSubstitution: canLogSubstitution,
       isSupported: isSupported,
-      ensureRecentJquery: ensureRecentJquery
+      puts: puts
     };
   })();
 
@@ -2058,7 +2112,6 @@ We need to work on this page:
     @method [up-back]
      */
     up.compiler('[up-back]', function($link) {
-      console.log("up-back", $link, previousUrl);
       if (u.isPresent(previousUrl)) {
         u.setMissingAttrs($link, {
           'up-href': previousUrl,
@@ -2940,9 +2993,11 @@ We need to work on this page:
       The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
     @param {String} [options.easing]
       The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
+    @return {Deferred}
+      A promise for the destroying animation's end
      */
     destroy = function(selectorOrElement, options) {
-      var $element, animateOptions, animationPromise;
+      var $element, animateOptions, animationDeferred;
       $element = $(selectorOrElement);
       options = u.options(options, {
         animation: 'none'
@@ -2956,11 +3011,11 @@ We need to work on this page:
         document.title = options.title;
       }
       up.bus.emit('fragment:destroy', $element);
-      animationPromise = u.presence(options.animation, u.isPromise) || up.motion.animate($element, options.animation, animateOptions);
-      animationPromise.then(function() {
+      animationDeferred = u.presence(options.animation, u.isDeferred) || up.motion.animate($element, options.animation, animateOptions);
+      animationDeferred.then(function() {
         return $element.remove();
       });
-      return animationPromise;
+      return animationDeferred;
     };
 
     /**
@@ -3312,11 +3367,11 @@ We need to work on this page:
      */
     morph = function(source, target, transitionOrName, options) {
       var $new, $old, animation, parsedOptions, parts, transition;
+      $old = $(source);
+      $new = $(target);
       if (up.browser.canCssAnimation()) {
         parsedOptions = u.only(options, 'reveal');
         parsedOptions = u.extend(parsedOptions, animateOptions(options));
-        $old = $(source);
-        $new = $(target);
         finish($old);
         finish($new);
         if (transitionOrName === 'none' || transitionOrName === false || (animation = animations[transitionOrName])) {
@@ -3341,6 +3396,7 @@ We need to work on this page:
           return u.error("Unknown transition %o", transitionOrName);
         }
       } else {
+        $old.hide();
         return u.resolvedDeferred();
       }
     };
@@ -3901,6 +3957,7 @@ You can change (or remove) this delay like this:
     };
     load = function(request) {
       var promise;
+      u.debug('Loading URL %o', request.url);
       up.bus.emit('proxy:load', request);
       promise = u.ajax(request);
       promise.always(function() {
@@ -3976,7 +4033,6 @@ You can change (or remove) this delay like this:
       preload: preload,
       ajax: ajax,
       get: get,
-      set: set,
       alias: alias,
       clear: clear,
       remove: remove,
@@ -5359,7 +5415,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       See options for [`up.animate`](/up.motion#up.animate)
      */
     close = function(options) {
-      var $modal, promise;
+      var $modal, deferred;
       $modal = $('.up-modal');
       if ($modal.length) {
         options = u.options(options, {
@@ -5369,17 +5425,17 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
         });
         currentSource = void 0;
         up.bus.emit('modal:close');
-        promise = up.destroy($modal, options);
-        promise.then(function() {
+        deferred = up.destroy($modal, options);
+        deferred.then(function() {
           var unshifter;
           while (unshifter = unshiftElements.pop()) {
             unshifter();
           }
           return up.bus.emit('modal:closed');
         });
-        return promise;
+        return deferred;
       } else {
-        return u.resolvedPromise();
+        return u.resolvedDeferred();
       }
     };
     autoclose = function() {
@@ -5957,14 +6013,15 @@ TODO: Write some documentation
 
 }).call(this);
 (function() {
-  up.browser.ensureRecentJquery();
-
   if (up.browser.isSupported()) {
-    up.browser.ensureConsoleExists();
     up.bus.emit('framework:ready');
     $(document).on('ready', function() {
       return up.bus.emit('app:ready');
     });
   }
+
+}).call(this);
+(function() {
+
 
 }).call(this);
