@@ -34,17 +34,24 @@ up.browser = (->
   url = ->
     location.href
     
-  ensureConsoleExists = ->
+  installConsolePolyfill = ->
     window.console ||= {}
     noop = () ->
+    simpleLog = (args...) ->
+      # Old IEs cannot pass varargs to console.log using Function#apply because IE
+      message = u.evalConsoleTemplate(args...)
+      console.log(message)
     window.console.log ||= noop
-    window.console.info ||= noop
-    window.console.error ||= noop
-    window.console.debug ||= noop
-    window.console.warn ||= noop
+    window.console.info ||= simpleLog
+    window.console.error ||= simpleLog
+    window.console.debug ||= simpleLog
+    window.console.warn ||= simpleLog
     window.console.group ||= noop
     window.console.groupCollapsed ||= noop
     window.console.groupEnd ||= noop
+
+  installPolyfills = ->
+    installConsolePolyfill()
 
   canPushState = u.memoize ->
     # We cannot use pushState if the initial request method is a POST for two reasons:
@@ -63,21 +70,25 @@ up.browser = (->
     # initial request method was anything other than GET (but allow the rest of the
     # Up.js framework to work). This way Up.js will fall back to full page loads until
     # the framework was booted from a GET request.
-    u.isDefined(history.pushState) && initialRequestMethod == 'get'
+    u.isDefined(history.pushState) && initialRequestMethod() == 'get'
     
   canCssAnimation = u.memoize ->
     'transition' of document.documentElement.style
 
   canInputEvent = u.memoize ->
     'oninput' of document.createElement('input')
-    
-  ensureRecentJquery = ->
+
+  isRecentBrowser = u.memoize ->
+    # This is the most concise way to exclude IE8 and lower
+    # while keeping all relevant desktop and mobile browsers.
+    u.isDefined(document.addEventListener)
+
+  isRecentJQuery = u.memoize ->
     version = $.fn.jquery
     parts = version.split('.')
     major = parseInt(parts[0])
     minor = parseInt(parts[1])
-    compatible = major >= 2 || (major == 1 && minor >= 9)
-    compatible or u.error("jQuery %o found, but Up.js requires 1.9+", version)
+    major >= 2 || (major == 1 && minor >= 9)
 
   # Returns and deletes a cookie with the given name
   # Inspired by Turbolinks: https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/lib/assets/javascripts/turbolinks.coffee#L292
@@ -90,20 +101,22 @@ up.browser = (->
   # Server-side companion libraries like upjs-rails set this cookie so we
   # have a way to detect the request method of the initial page load.
   # There is no Javascript API for this.
-  initialRequestMethod = (popCookie('_up_request_method') || 'get').toLowerCase()
+  initialRequestMethod = u.memoize ->
+    (popCookie('_up_request_method') || 'get').toLowerCase()
 
-  isSupported = u.memoize ->
-    # This is the most concise way to exclude IE8 and lower
-    # while keeping all relevant desktop and mobile browsers.
-    u.isDefined(document.addEventListener)
+  isSupported = ->
+    isRecentBrowser() && isRecentJQuery()
+
+  # We need to install polyfills as soon as possible, since Up.js
+  # won't even require completely on old IEs without the `console`
+  # polyfills.
+  installPolyfills() if isSupported()
 
   url: url
-  ensureConsoleExists: ensureConsoleExists
   loadPage: loadPage
   canPushState: canPushState
   canCssAnimation: canCssAnimation
   canInputEvent: canInputEvent
   isSupported: isSupported
-  ensureRecentJquery: ensureRecentJquery
 
 )()

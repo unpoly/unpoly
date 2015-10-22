@@ -15,13 +15,4 @@
 #= require up/tooltip
 #= require up/navigation
 #= require up/slot
-#= require_self
-
-up.browser.ensureRecentJquery()
-
-if up.browser.isSupported()
-  
-  up.browser.ensureConsoleExists()
-
-  up.bus.emit('framework:ready')
-  $(document).on 'ready', -> up.bus.emit('app:ready')
+#= require up/boot

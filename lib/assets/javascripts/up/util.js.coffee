@@ -146,7 +146,7 @@ up.util = (->
   error = (args...) ->
     args[0] = "[UP] #{args[0]}"
     console.error(args...)
-    asString = stringifyConsoleArgs(args)
+    asString = evalConsoleTemplate(args...)
     $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body')
     $error.addClass('up-error')
     $error.text(asString)
@@ -154,7 +154,7 @@ up.util = (->
 
   CONSOLE_PLACEHOLDERS = /\%[odisf]/g
     
-  stringifyConsoleArgs = (args) ->
+  evalConsoleTemplate = (args...) ->
     message = args[0]
     i = 0
     maxLength = 50
@@ -981,6 +981,7 @@ up.util = (->
   unwrapElement: unwrapElement
   multiSelector: multiSelector
   emptyJQuery: emptyJQuery
+  evalConsoleTemplate: evalConsoleTemplate
 
 )()
 
