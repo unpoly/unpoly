@@ -114,9 +114,9 @@ up.popup = (($) ->
     up.animate($popup, animation, animateOptions)
     
   ###*
-  Opens a popup overlay.
+  Attaches a popup overlay to the given element or selector.
   
-  @method up.popup.open
+  @method up.popup.attach
   @param {Element|jQuery|String} elementOrSelector
   @param {String} [options.url]
   @param {String} [options.position='bottom-right']
@@ -133,7 +133,7 @@ up.popup = (($) ->
     open even if the page changes in the background.
   @param {Object} [options.history=false]
   ###
-  open = (linkOrSelector, options) ->
+  attach = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
     
     options = u.options(options)
@@ -204,9 +204,9 @@ up.popup = (($) ->
     $element.closest('.up-popup').length > 0
 
   ###*
-  Opens the target of this link in a popup overlay:
+  Opens this link's destination of in a popup overlay:
 
-      <a href="/decks" up-modal=".deck_list">Switch deck</a>
+      <a href="/decks" up-popup=".deck_list">Switch deck</a>
 
   If the `up-sticky` attribute is set, the dialog does not auto-close
   if a page fragment below the popup overlay updates:
@@ -224,7 +224,7 @@ up.popup = (($) ->
     if $link.is('.up-current')
       close()
     else
-      open($link)
+      attach($link)
   )
 
   # Close the popup when someone clicks outside the popup
@@ -265,10 +265,13 @@ up.popup = (($) ->
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
 
-  open: open
+  attach: attach
   close: close
   source: source
   defaults: config.update
   contains: contains
-  
+  open: (args...) ->
+    up.warn('up.popup.open has been renamed to up.popup.attach and will be removed in a future version')
+    attach(args...)
+
 )(jQuery)
