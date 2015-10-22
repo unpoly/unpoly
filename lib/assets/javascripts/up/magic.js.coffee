@@ -338,12 +338,12 @@ up.magic = (->
   other Up.js methods. You will only need to call this if you
   manipulate the DOM without going through Up.js.
 
-  @method up.ready
+  @method up.hello
   @param {String|Element|jQuery} selectorOrElement
   ###
-  ready = (selectorOrElement) ->
+  hello = (selectorOrElement) ->
     $element = $(selectorOrElement)
-    up.bus.emit('up:fragment:ready', $element: $element)
+    up.bus.emit('up:fragment:inserted', $element: $element)
     $element
 
   onEscape = (handler) ->
@@ -352,15 +352,15 @@ up.magic = (->
         handler(event)
     )
 
-  live 'ready', (-> ready(document.body))
-  live 'up:fragment:ready', (event) -> compile(event.$element)
+  live 'ready', (-> hello(document.body))
+  live 'up:fragment:inserted', (event) -> compile(event.$element)
   live 'up:fragment:destroy', (event) -> destroy(event.$element)
   live 'up:framework:boot', snapshot
   live 'up:framework:reset', reset
 
   compiler: compiler
   on: live
-  ready: ready
+  hello: hello
   onEscape: onEscape
   data: data
 
@@ -368,7 +368,7 @@ up.magic = (->
 
 up.compiler = up.magic.compiler
 up.on = up.magic.on
-up.ready = up.magic.ready
+up.hello = up.magic.hello
 up.awaken = (args...) ->
   up.util.warn("up.awaken has been renamed to up.compiler and will be removed in a future version")
   up.compiler(args...)

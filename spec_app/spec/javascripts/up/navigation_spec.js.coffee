@@ -4,44 +4,44 @@ describe 'up.navigation', ->
 
     it 'marks a link as .up-current if it links to the current URL', ->
       spyOn(up.browser, 'url').and.returnValue('/foo')
-      $currentLink = up.ready(affix('a[href="/foo"]'))
-      $otherLink = up.ready(affix('a[href="/bar"]'))
+      $currentLink = up.hello(affix('a[href="/foo"]'))
+      $otherLink = up.hello(affix('a[href="/bar"]'))
       expect($currentLink).toHaveClass('up-current')
       expect($otherLink).not.toHaveClass('up-current')
       
     it 'marks any link as .up-current if its up-href attribute matches the current URL', ->
       spyOn(up.browser, 'url').and.returnValue('/foo')
-      $currentLink = up.ready(affix('span[up-href="/foo"]'))
-      $otherLink = up.ready(affix('span[up-href="/bar"]'))
+      $currentLink = up.hello(affix('span[up-href="/foo"]'))
+      $otherLink = up.hello(affix('span[up-href="/bar"]'))
       expect($currentLink).toHaveClass('up-current')
       expect($otherLink).not.toHaveClass('up-current')
 
     it 'marks any link as .up-current if any of its space-separated up-alias values matches the current URL', ->
       spyOn(up.browser, 'url').and.returnValue('/foo')
-      $currentLink = up.ready(affix('span[up-alias="/aaa /foo /bbb"]'))
-      $otherLink = up.ready(affix('span[up-alias="/bar"]'))
+      $currentLink = up.hello(affix('span[up-alias="/aaa /foo /bbb"]'))
+      $otherLink = up.hello(affix('span[up-alias="/bar"]'))
       expect($currentLink).toHaveClass('up-current')
       expect($otherLink).not.toHaveClass('up-current')
 
     it 'does not throw if the current location does not match an up-alias wildcard (bugfix)', ->
-      inserter = -> up.ready(affix('a[up-alias="/qqqq*"]'))
+      inserter = -> up.hello(affix('a[up-alias="/qqqq*"]'))
       expect(inserter).not.toThrow()
 
     it 'does not highlight a link to "#" (commonly used for JS-only buttons)', ->
-      $link = up.ready(affix('a[href="#"]'))
+      $link = up.hello(affix('a[href="#"]'))
       expect($link).not.toHaveClass('up-current')
 
     it 'marks URL prefixes as .up-current if an up-alias value ends in *', ->
       spyOn(up.browser, 'url').and.returnValue('/foo/123')
-      $currentLink = up.ready(affix('span[up-alias="/aaa /foo/* /bbb"]'))
-      $otherLink = up.ready(affix('span[up-alias="/bar"]'))
+      $currentLink = up.hello(affix('span[up-alias="/aaa /foo/* /bbb"]'))
+      $otherLink = up.hello(affix('span[up-alias="/bar"]'))
       expect($currentLink).toHaveClass('up-current')
       expect($otherLink).not.toHaveClass('up-current')
 
     it 'allows to configure a custom "current" class, but always also sets .up-current', ->
       up.navigation.defaults(currentClasses: ['highlight'])
       spyOn(up.browser, 'url').and.returnValue('/foo')
-      $currentLink = up.ready(affix('a[href="/foo"]'))
+      $currentLink = up.hello(affix('a[href="/foo"]'))
       expect($currentLink).toHaveClass('highlight up-current')
 
     if up.browser.canPushState()
@@ -101,7 +101,7 @@ describe 'up.navigation', ->
     
       it 'prefers to mark an enclosing [up-expand] click area', ->
         $area = affix('div[up-expand] a[href="/foo"][up-target=".main"]')
-        up.ready($area)
+        up.hello($area)
         $link = $area.find('a')
         affix('.main')
         $link.click()

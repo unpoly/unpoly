@@ -189,11 +189,11 @@ up.navigation = (->
   @method [up-current]
   @ujs
   ###
-  up.on 'up:fragment:ready', ->
+  up.on 'up:fragment:inserted', ->
     # If a new fragment is inserted, it's likely to be the result
     # of the active action. So we can remove the active marker.
     unmarkActive()
-    # When a fragment is ready it might either have brought a location change
+    # When a fragment is inserted it might either have brought a location change
     # with it, or it might have opened a modal / popup which we consider
     # to be secondary location sources (the primary being the browser's
     # location bar).

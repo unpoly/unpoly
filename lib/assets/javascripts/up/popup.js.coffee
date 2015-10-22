@@ -235,7 +235,7 @@ up.popup = (->
       close()
   )
   
-  up.on('up:fragment:ready', (event, $fragment) ->
+  up.on('up:fragment:inserted', (event, $fragment) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
         currentSource = newSource

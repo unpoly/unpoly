@@ -187,7 +187,7 @@ up.flow = (->
     autofocus($new)
     # The fragment should be readiet before animating,
     # so transitions see .up-current classes
-    up.ready($new)
+    up.hello($new)
 
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'

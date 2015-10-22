@@ -19,7 +19,7 @@ describe 'up.history', ->
         it 'sets an [up-href] attribute to the previous URL and sets the up-restore-scroll attribute to "true"', ->
           up.history.push('/one')
           up.history.push('/two')
-          $element = up.ready(affix('a[href="/three"][up-back]').text('text'))
+          $element = up.hello(affix('a[href="/three"][up-back]').text('text'))
           expect($element.attr('href')).toEndWith('/three')
           expect($element.attr('up-href')).toEndWith('/one')
           expect($element.attr('up-restore-scroll')).toBe('')

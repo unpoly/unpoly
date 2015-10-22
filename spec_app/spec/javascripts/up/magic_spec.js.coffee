@@ -25,7 +25,7 @@ describe 'up.magic', ->
         up.compiler '.child', ($element) ->
           observeClass($element.attr('class'))
   
-        up.ready(affix('.container .child'))
+        up.hello(affix('.container .child'))
    
         expect(observeClass).not.toHaveBeenCalledWith('container')
         expect(observeClass).toHaveBeenCalledWith('child')           
@@ -36,7 +36,7 @@ describe 'up.magic', ->
         up.compiler '.child', ($element) ->
           destructor
   
-        up.ready(affix('.container .child'))
+        up.hello(affix('.container .child'))
         expect(destructor).not.toHaveBeenCalled()
         
         up.destroy('.container')
@@ -51,7 +51,7 @@ describe 'up.magic', ->
         data = { key1: 'value1', key2: 'value2' }
 
         $tag = affix(".child").attr('up-data', JSON.stringify(data))
-        up.ready($tag)
+        up.hello($tag)
 
         expect(observeArgs).toHaveBeenCalledWith('child', data)
 
@@ -61,12 +61,12 @@ describe 'up.magic', ->
         up.compiler '.child', ($element, data) ->
           observeArgs($element.attr('class'), data)
 
-        up.ready(affix(".child"))
+        up.hello(affix(".child"))
 
         expect(observeArgs).toHaveBeenCalledWith('child', {})
 
 
-    describe 'up.ready', ->
+    describe 'up.hello', ->
 
       it 'should have tests'
       

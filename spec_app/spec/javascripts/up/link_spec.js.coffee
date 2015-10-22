@@ -121,7 +121,7 @@ describe 'up.link', ->
 
       it 'does not follow a form with up-target attribute (bugfix)', ->
         $form = affix('form[up-target]')
-        up.ready($form)
+        up.hello($form)
         followSpy = up.link.knife.mock('follow')
         $form.click()
         expect(followSpy).not.toHaveBeenCalled()
@@ -131,7 +131,7 @@ describe 'up.link', ->
       it "calls up.follow with the clicked link", ->
         followSpy = up.link.knife.mock('follow')
         $link = affix('a[href="/path"][up-follow]')
-        up.ready($link)
+        up.hello($link)
         $link.click()
         expect(followSpy).toHaveBeenCalledWith($link)
 
@@ -139,24 +139,24 @@ describe 'up.link', ->
 
       it 'copies up-related attributes of a contained link', ->
         $area = affix('div[up-expand] a[href="/path"][up-target="selector"][up-instant][up-preload]')
-        up.ready($area)
+        up.hello($area)
         expect($area.attr('up-target')).toEqual('selector')
         expect($area.attr('up-instant')).toEqual('')
         expect($area.attr('up-preload')).toEqual('')
 
       it "renames a contained link's href attribute to up-href so the container is considered a link", ->
         $area = affix('div[up-expand] a[up-follow][href="/path"]')
-        up.ready($area)
+        up.hello($area)
         expect($area.attr('up-href')).toEqual('/path')
 
       it "copies an contained non-link element with up-href attribute", ->
         $area = affix('div[up-expand] span[up-follow][up-href="/path"]')
-        up.ready($area)
+        up.hello($area)
         expect($area.attr('up-href')).toEqual('/path')
 
       it 'adds an up-follow attribute if the contained link has neither up-follow nor up-target attributes', ->
         $area = affix('div[up-expand] a[href="/path"]')
-        up.ready($area)
+        up.hello($area)
         expect($area.attr('up-follow')).toEqual('')
 
     describe '[up-instant]', ->
