@@ -143,18 +143,18 @@ up.modal = (($) ->
   Opens the given link's destination in a modal overlay:
 
       var $link = $('...');
-      up.modal.open($link);
+      up.modal.follow($link);
 
   Any option attributes for [`a[up-modal]`](#a.up-modal) will be honored.
 
   \#\#\#\# Events
 
-  - Emits an [event](/up.bus) `modal:open` when the modal
+  - Emits an [event](/up.bus) `up:modal:open` when the modal
     is starting to open.
-  - Emits an [event](/up.bus) `modal:opened` when the opening
+  - Emits an [event](/up.bus) `up:modal:opened` when the opening
     animation has finished and the modal contents are fully visible.
 
-  @method up.modal.open
+  @method up.modal.follow
   @param {Element|jQuery|String} elementOrSelector
     The link to follow.
   @param {String} [options.target]
@@ -181,19 +181,24 @@ up.modal = (($) ->
   @return {Promise}
     A promise that will be resolved when the modal has finished loading.
   ###
+  follow = ($link, options) ->
+    options = u.options(options)
+    options.$link = $link
+    open(options)
+
 
   ###*
   Opens a modal for the given URL.
 
   Example:
 
-      up.modal.open({ url: '/foo', target: '.list' })
+      up.modal.visit('/foo', { target: '.list' })
 
   This will request `/foo`, extract the `.list` selector from the response
   and open the selected container in a modal dialog.
 
-  @method up.modal.open
-  @param {String} options.url
+  @method up.modal.visit
+  @param {String} url
     The URL to load.
   @param {String} options.target
     The CSS selector to extract from the response.
@@ -201,15 +206,18 @@ up.modal = (($) ->
   @param {Object} options
     See options for [previous `up.modal.open` variant](#up.modal.open).
   ###
-  open = (args...) ->
-    if u.isObject(args[0]) && !u.isElement(args[0]) && !u.isJQuery(args[0])
-      $link = u.nullJquery()
-      options = args[0]
-    else
-      $link = $(args[0])
-      options = args[1]
-
+  visit = (url, options) ->
     options = u.options(options)
+    options.url = url
+    open(options)
+
+
+  ###*
+  @private
+  ###
+  open = (options) ->
+    options = u.options(options)
+    $link = u.option(options.$link, u.nullJquery())
     url = u.option(options.url, $link.attr('up-href'), $link.attr('href'))
     selector = u.option(options.target, $link.attr('up-modal'), 'body')
     width = u.option(options.width, $link.attr('up-width'), config.width)
@@ -239,7 +247,6 @@ up.modal = (($) ->
       # Although someone prevented the destruction, keep a uniform API for
       # callers by returning a Deferred that will never be resolved.
       $.Deferred()
-
 
   ###*
   Returns the source URL for the fragment displayed in the current modal overlay,
@@ -416,7 +423,9 @@ up.modal = (($) ->
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
 
-  open: open
+  visit: visit
+  follow: follow
+  open: -> up.error('up.modal.open no longer exists. Please use either up.modal.follow or up.modal.visit.')
   close: close
   source: source
   defaults: config.update

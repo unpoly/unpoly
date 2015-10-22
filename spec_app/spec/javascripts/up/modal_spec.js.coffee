@@ -1,18 +1,18 @@
 describe 'up.modal', ->
   
   describe 'Javascript functions', ->
-    
+
+    assumedScrollbarWidth = 15
+
     describe 'up.modal.defaults', ->
       
       it 'should have tests'
         
-    describe 'up.modal.open', ->
-
-      assumedScrollbarWidth = 15
+    describe 'up.modal.follow', ->
 
       it "loads the given link's destination in a dialog window", (done) ->
         $link = affix('a[href="/path/to"][up-modal=".middle"]').text('link')
-        promise = up.modal.open($link)
+        promise = up.modal.follow($link)
         request = @lastRequest()
         expect(request.url).toMatch /\/path\/to$/
         request.respondWith
@@ -33,8 +33,10 @@ describe 'up.modal', ->
           expect($('.up-modal-dialog .after')).not.toExist()
           done()
 
+    describe 'up.modal.visit', ->
+
       it "brings its own scrollbar, padding the body on the right in order to prevent jumping", (done) ->
-        promise = up.modal.open(url: '/foo', target: '.container')
+        promise = up.modal.visit('/foo', target: '.container')
 
         @lastRequest().respondWith
           status: 200
@@ -66,7 +68,7 @@ describe 'up.modal', ->
           top: '0'
           right: '30px'
 
-        promise = up.modal.open(url: '/foo', target: '.container')
+        promise = up.modal.visit('/foo', target: '.container')
 
         @lastRequest().respondWith
           status: 200

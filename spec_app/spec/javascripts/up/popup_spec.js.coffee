@@ -6,7 +6,7 @@ describe 'up.popup', ->
 
       it 'should have tests'
 
-    describe 'up.popup.open', ->
+    describe 'up.popup.attach', ->
 
       it 'should have tests'
 

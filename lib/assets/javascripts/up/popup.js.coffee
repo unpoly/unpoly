@@ -270,8 +270,6 @@ up.popup = (($) ->
   source: source
   defaults: config.update
   contains: contains
-  open: (args...) ->
-    up.warn('up.popup.open has been renamed to up.popup.attach and will be removed in a future version')
-    attach(args...)
+  open: -> up.warn('up.popup.open no longer exists. Please use up.popup.attach instead.')
 
 )(jQuery)
