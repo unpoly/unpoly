@@ -9,13 +9,13 @@ describe 'up.motion', ->
         it 'animates the given element', (done) ->
           $element = affix('.element').text('content')
           opacity = -> Number($element.css('opacity'))
-          up.animate($element, 'fade-in', duration: 100, easing: 'linear')
+          up.animate($element, 'fade-in', duration: 200, easing: 'linear')
 
           @setTimer 0, ->
             expect(opacity()).toBeAround(0.0, 0.25)
-          @setTimer 50, ->
-            expect(opacity()).toBeAround(0.5, 0.25)
           @setTimer 100, ->
+            expect(opacity()).toBeAround(0.5, 0.25)
+          @setTimer 200, ->
             expect(opacity()).toBeAround(1.0, 0.25)
             done()
 
@@ -180,7 +180,7 @@ describe 'up.motion', ->
 
       else
 
-        it "doesn't animate and hides the first element instead", ->
+        it "doesn't animate and hides the old element instead", ->
           $old = affix('.old').text('old content')
           $new = affix('.new').text('new content')
           up.morph($old, $new, 'cross-fade', duration: 1000)

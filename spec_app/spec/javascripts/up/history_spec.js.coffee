@@ -14,14 +14,16 @@ describe 'up.history', ->
 
     describe '[up-back]', ->
 
-      it 'sets an [up-href] attribute to the previous URL and sets the up-restore-scroll attribute to "true"', ->
-        up.history.push('/one')
-        up.history.push('/two')
-        $element = up.ready(affix('a[href="/three"][up-back]').text('text'))
-        expect($element.attr('href')).toEndWith('/three')
-        expect($element.attr('up-href')).toEndWith('/one')
-        expect($element.attr('up-restore-scroll')).toBe('')
-        expect($element.attr('up-follow')).toBe('')
+      if up.browser.canPushState()
+
+        it 'sets an [up-href] attribute to the previous URL and sets the up-restore-scroll attribute to "true"', ->
+          up.history.push('/one')
+          up.history.push('/two')
+          $element = up.ready(affix('a[href="/three"][up-back]').text('text'))
+          expect($element.attr('href')).toEndWith('/three')
+          expect($element.attr('up-href')).toEndWith('/one')
+          expect($element.attr('up-restore-scroll')).toBe('')
+          expect($element.attr('up-follow')).toBe('')
 
       it 'does not overwrite an existing up-href or up-restore-scroll attribute'
 
@@ -29,60 +31,64 @@ describe 'up.history', ->
 
     describe 'scroll restauration', ->
 
-      afterEach ->
-        $('.viewport').remove()
+      if up.browser.canPushState()
 
-      it 'restores the scroll position of viewports when the user hits the back button', (done) ->
+        afterEach ->
+          $('.viewport').remove()
 
-        longContentHtml = """
-          <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
-            <div class="content" style="height: 1000px"></div>
-          </div>
-        """
+        it 'restores the scroll position of viewports when the user hits the back button', (done) ->
 
-        respond = (html) =>
-          @lastRequest().respondWith
-            status: 200
-            contentType: 'text/html'
-            responseText: longContentHtml
+          longContentHtml = """
+            <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
+              <div class="content" style="height: 1000px"></div>
+            </div>
+          """
 
-        $viewport = $(longContentHtml).appendTo(document.body)
+          respond = (html) =>
+            @lastRequest().respondWith
+              status: 200
+              contentType: 'text/html'
+              responseText: longContentHtml
 
-        up.layout.defaults(viewports: ['.viewport'])
-        up.history.defaults(popTargets: ['.viewport'])
+          $viewport = $(longContentHtml).appendTo(document.body)
 
-        $viewport.append(longContentHtml)
+          up.layout.defaults(viewports: ['.viewport'])
+          up.history.defaults(popTargets: ['.viewport'])
 
-        up.replace('.content', '/one')
-        respond()
-        $viewport.scrollTop(50)
+          $viewport.append(longContentHtml)
 
-        up.replace('.content', '/two')
-        respond()
-        $('.viewport').scrollTop(150)
+          up.replace('.content', '/one')
+          respond()
 
-        up.replace('.content', '/three')
-        respond()
-        $('.viewport').scrollTop(250)
+          $viewport.scrollTop(50)
 
-        history.back()
-        @setTimer 50, =>
-          respond() # we need to respond since we've never requested /two with the popTarget
-          expect($('.viewport').scrollTop()).toBe(150)
+          up.replace('.content', '/two')
+          respond()
+
+          $('.viewport').scrollTop(150)
+
+          up.replace('.content', '/three')
+          respond()
+          $('.viewport').scrollTop(250)
 
           history.back()
           @setTimer 50, =>
-            respond() # we need to respond since we've never requested /one with the popTarget
-            expect($('.viewport').scrollTop()).toBe(50)
+            respond() # we need to respond since we've never requested /two with the popTarget
+            expect($('.viewport').scrollTop()).toBe(150)
 
-            history.forward()
+            history.back()
             @setTimer 50, =>
-              # No need to respond since we requested /two with the popTarget
-              # when we went backwards
-              expect($('.viewport').scrollTop()).toBe(150)
+              respond() # we need to respond since we've never requested /one with the popTarget
+              expect($('.viewport').scrollTop()).toBe(50)
 
               history.forward()
               @setTimer 50, =>
-                respond() # we need to respond since we've never requested /three with the popTarget
-                expect($('.viewport').scrollTop()).toBe(250)
-                done()
+                # No need to respond since we requested /two with the popTarget
+                # when we went backwards
+                expect($('.viewport').scrollTop()).toBe(150)
+
+                history.forward()
+                @setTimer 50, =>
+                  respond() # we need to respond since we've never requested /three with the popTarget
+                  expect($('.viewport').scrollTop()).toBe(250)
+                  done()

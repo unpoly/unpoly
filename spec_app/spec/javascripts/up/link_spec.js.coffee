@@ -7,7 +7,7 @@ describe 'up.link', ->
     describe 'up.follow', ->
       
       if up.browser.canPushState()
-      
+
         it 'loads the given link via AJAX and replaces the response in the given target', (done) ->
           affix('.before').text('old-before')
           affix('.middle').text('old-middle')

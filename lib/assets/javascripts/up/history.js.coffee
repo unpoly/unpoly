@@ -123,6 +123,7 @@ up.history = (->
     else
       u.debug 'Discarding unknown state %o', state
 
+  # up.on 'framework:ready', ->
   if up.browser.canPushState()
     register = ->
       $(window).on "popstate", pop
@@ -162,7 +163,6 @@ up.history = (->
   @method [up-back]
   ###
   up.compiler '[up-back]', ($link) ->
-    console.log("up-back", $link, previousUrl)
     if u.isPresent(previousUrl)
       u.setMissingAttrs $link,
         'up-href': previousUrl,

@@ -264,15 +264,24 @@ describe 'up.proxy', ->
 
     describe 'up.proxy.preload', ->
 
-      it "loads and caches the given link's destination", ->
-        $link = affix('a[href="/path"]')
-        up.proxy.preload($link)
-        expect(u.isPromise(up.proxy.get(url: '/path'))).toBe(true)
+      if up.browser.canPushState()
 
-      it "does not load a link whose method has side-effects", ->
-        $link = affix('a[href="/path"][data-method="post"]')
-        up.proxy.preload($link)
-        expect(up.proxy.get(url: '/path')).toBeUndefined()
+        it "loads and caches the given link's destination", ->
+          $link = affix('a[href="/path"]')
+          up.proxy.preload($link)
+          expect(u.isPromise(up.proxy.get(url: '/path'))).toBe(true)
+
+        it "does not load a link whose method has side-effects", ->
+          $link = affix('a[href="/path"][data-method="post"]')
+          up.proxy.preload($link)
+          expect(up.proxy.get(url: '/path')).toBeUndefined()
+
+      else
+
+        it "does nothing", ->
+          $link = affix('a[href="/path"]')
+          up.proxy.preload($link)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
 
     describe 'up.proxy.get', ->
 

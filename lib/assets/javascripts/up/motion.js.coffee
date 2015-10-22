@@ -283,11 +283,12 @@ up.motion = (->
     A promise for the transition's end.
   ###  
   morph = (source, target, transitionOrName, options) ->
+    $old = $(source)
+    $new = $(target)
+
     if up.browser.canCssAnimation()
       parsedOptions = u.only(options, 'reveal')
       parsedOptions = u.extend(parsedOptions, animateOptions(options))
-      $old = $(source)
-      $new = $(target)
 
       finish($old)
       finish($new)
@@ -313,8 +314,9 @@ up.motion = (->
       else
         u.error("Unknown transition %o", transitionOrName)
     else
-      # Skip ghosting and all the other stuff that can go wrong
-      # in ancient browsers
+      # Skip ghosting and all the other stuff that can go wrong in ancient browsers.
+      # We simple hide the old element, which would be the side effect of withGhosts(...) above.
+      $old.hide()
       u.resolvedDeferred()
 
   ###*

@@ -83,7 +83,7 @@ up.flow = (->
       selector: selector
       cache: options.cache
       preload: options.preload
-      
+
     promise = up.proxy.ajax(request)
     
     promise.done (html, textStatus, xhr) ->

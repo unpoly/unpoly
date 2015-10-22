@@ -36,7 +36,6 @@ up.util = (->
   isStandardPort = (protocol, port) ->
     ((port == "" || port == "80") && protocol == 'http:') || (port == "443" && protocol == 'https:')
 
-    
   ###*
   Normalizes URLs, relative paths and absolute paths to a full URL
   that can be checked for equality with other normalized URL.
@@ -235,13 +234,6 @@ up.util = (->
   
   trim = $.trim
   
-  keys = Object.keys || (object) ->
-    result = []
-    for key in object
-      if object.hasOwnProperty(key)
-        result.push(key)
-    result
-
   each = (collection, block) ->
     block(item, index) for item, index in collection
 
@@ -269,7 +261,7 @@ up.util = (->
     
   isBlank = (object) ->
     isMissing(object) ||                  # null or undefined
-    (isObject(object) && keys(object).length == 0) ||
+    (isObject(object) && Object.keys(object).length == 0) ||
     (object.length == 0)                  # String, Array, jQuery
   
   presence = (object, checker = isPresent) ->
@@ -452,7 +444,7 @@ up.util = (->
   # @private
   ###
   temporaryCss = ($element, css, block) ->
-    oldCss = $element.css(keys(css))
+    oldCss = $element.css(Object.keys(css))
     $element.css(css)
     memo = -> $element.css(oldCss)
     if block
@@ -511,7 +503,7 @@ up.util = (->
       # the public API `up.motion.animate` already does this.
       deferred = $.Deferred()
       transition =
-        'transition-property': keys(lastFrame).join(', ')
+        'transition-property': Object.keys(lastFrame).join(', ')
         'transition-duration': "#{opts.duration}ms"
         'transition-delay': "#{opts.delay}ms"
         'transition-timing-function': opts.easing
@@ -743,7 +735,7 @@ up.util = (->
   @param {String} [config.log]
     A prefix for log entries printed by this cache object.
   ###
-  cache = (config) ->
+  cache = (config = {}) ->
 
     store = undefined
 
@@ -756,6 +748,9 @@ up.util = (->
       if config.log
         args[0] = "[#{config.log}] #{args[0]}"
         debug(args...)
+
+    keys = ->
+      Object.keys(store)
 
     maxSize = ->
       if isMissing(config.size)
@@ -784,7 +779,7 @@ up.util = (->
         key.toString()
 
     trim = ->
-      storeKeys = copy(keys(store))
+      storeKeys = copy(keys())
       size = maxSize()
       if size && storeKeys.length > size
         oldestKey = null
@@ -842,6 +837,7 @@ up.util = (->
     set: set
     remove: remove
     clear: clear
+    keys: keys
 
   config = (factoryOptions = {}) ->
     hash =
@@ -879,7 +875,6 @@ up.util = (->
     $match = undefined
     while ($element = $element.parent()) && $element.length
       position = $element.css('position')
-      console.log("Iteration element is %o with position %o", $element, position)
       if position == 'absolute' || position == 'relative' || $element.is('body')
         $match = $element
         break
@@ -971,7 +966,6 @@ up.util = (->
   clientSize: clientSize
   only: only
   trim: trim
-  keys: keys
   resolvedPromise: resolvedPromise
   resolvedDeferred: resolvedDeferred
   resolvableWhen: resolvableWhen

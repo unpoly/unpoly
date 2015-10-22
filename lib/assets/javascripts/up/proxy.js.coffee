@@ -170,6 +170,7 @@ up.proxy = (->
     If set to `false` a network connection will always be attempted.
   ###
   ajax = (options) ->
+
     forceCache = (options.cache == true)
     ignoreCache = (options.cache == false)
 
@@ -323,7 +324,6 @@ up.proxy = (->
   preload: preload
   ajax: ajax
   get: get
-  set: set
   alias: alias
   clear: clear
   remove: remove

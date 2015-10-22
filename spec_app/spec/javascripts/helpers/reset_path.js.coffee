@@ -3,5 +3,6 @@ beforeEach ->
   @previousTitle = document.title
   
 afterEach ->
-  history.replaceState?({}, @previousTitle, @previousHref)
- 
+  if up.browser.canPushState()
+    history.replaceState?({}, @previousTitle, @previousHref)
+
