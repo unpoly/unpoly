@@ -1,6 +1,6 @@
 {
   "name": "jasmine-fixture",
-  "version": "1.2.2",
+  "version": "1.3.3",
   "main": "dist/jasmine-fixture.js",
   "ignore": [
     "app",
@@ -15,11 +15,11 @@
   "dependencies": {},
   "devDependencies": {},
   "homepage": "https://github.com/searls/jasmine-fixture",
-  "_release": "1.2.2",
+  "_release": "1.3.3",
   "_resolution": {
     "type": "version",
-    "tag": "1.2.2",
-    "commit": "3c93cdda697780c0cf36cf2cecdb4c82414274b3"
+    "tag": "1.3.3",
+    "commit": "688c26fd5f56d7c843ae18f45f8cf87e4ebd7cb8"
   },
   "_source": "git://github.com/searls/jasmine-fixture.git",
   "_target": "*",

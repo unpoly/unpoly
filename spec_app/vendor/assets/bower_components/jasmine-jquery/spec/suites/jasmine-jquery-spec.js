@@ -425,6 +425,15 @@ describe("jasmine.Fixtures using real AJAX call", function () {
       expect($("#anchor_01").length).toBe(1)
     })
   })
+  
+  describe("When the fixture contains a HTML 5 style checked checkbox", function () {
+	var fixtureUrl = "fixture_with_checkbox_with_checked.html"
+	
+	it("Then the fixture is loaded successfully", function () {
+	  jasmine.getFixtures().load(fixtureUrl)
+	  expect('#' + jasmine.getFixtures().containerId).toContainElement('#checked-box')
+	})
+  })
 })
 
 describe("jQuery matcher", function () {
@@ -1023,9 +1032,10 @@ describe("jQuery matcher", function () {
   })
 
   describe('toHaveBeenTriggeredOn', function () {
+    var spyEvents = {}
     beforeEach(function () {
       setFixtures(sandbox().html('<a id="clickme">Click Me</a> <a id="otherlink">Other Link</a>'))
-      spyOnEvent($('#clickme'), 'click')
+      spyEvents['#clickme'] = spyOnEvent($('#clickme'), 'click')
       spyOnEvent(document, 'click')
       spyOnEvent($('#otherlink'), 'click')
     })
@@ -1058,6 +1068,20 @@ describe("jQuery matcher", function () {
       expect('click').not.toHaveBeenTriggeredOn($('#clickme'))
       expect('click').not.toHaveBeenTriggeredOn('#clickme')
     })
+
+    it('should pass if the event call count is incremented', function () {
+      expect(spyEvents['#clickme'].calls.any()).toEqual(false);
+      expect(spyEvents['#clickme'].calls.count()).toEqual(0);
+      $('#clickme').click()
+      expect('click').toHaveBeenTriggeredOn($('#clickme'))
+      expect('click').toHaveBeenTriggeredOn('#clickme')
+      expect(spyEvents['#clickme'].calls.count()).toEqual(1);
+      expect(spyEvents['#clickme'].calls.any()).toEqual(true);
+      $('#clickme').click()
+      $('#clickme').click()
+      expect(spyEvents['#clickme'].calls.count()).toEqual(3);
+      expect(spyEvents['#clickme'].calls.any()).toEqual(true);
+    })
   })
 
   describe('toHaveBeenTriggeredOnAndWith', function () {
@@ -1089,6 +1113,11 @@ describe("jQuery matcher", function () {
         expect('event').not.toHaveBeenTriggeredOnAndWith(document, { key1: "value1" })
         $(document).trigger('event', { different_key: "value1" })
         expect('event').not.toHaveBeenTriggeredOnAndWith(document, { key1: "value1" })
+      })
+
+      it('should pass if the arguments match using jasmine.objectContaining', function () {
+        $(document).trigger('event', { key1: "value1", key2: "value2" })
+        expect('event').toHaveBeenTriggeredOnAndWith(document, jasmine.objectContaining({ key1: "value1" }))
       })
     })
 
@@ -1149,6 +1178,19 @@ describe("jQuery matcher", function () {
       expect('click').not.toHaveBeenTriggeredOn($('#clickme'))
       expect('click').not.toHaveBeenTriggeredOn('#clickme')
       expect(spyEvents['#clickme']).not.toHaveBeenTriggered()
+    })
+
+    it('should pass if the event call count is incremented', function () {
+      expect(spyEvents['#clickme'].calls.any()).toEqual(false);
+      expect(spyEvents['#clickme'].calls.count()).toEqual(0);
+      $('#clickme').click()
+      expect(spyEvents['#clickme']).toHaveBeenTriggered()
+      expect(spyEvents['#clickme'].calls.count()).toEqual(1);
+      expect(spyEvents['#clickme'].calls.any()).toEqual(true);
+      $('#clickme').click()
+      $('#clickme').click()
+      expect(spyEvents['#clickme'].calls.count()).toEqual(3);
+      expect(spyEvents['#clickme'].calls.any()).toEqual(true);
     })
   })
 
@@ -1338,6 +1380,15 @@ describe("jQuery matcher", function () {
       $(object).bind('click', function (){})
       expect($(object)).toHandle('click')
     })
+
+    it('should not fail when actual has no matches', function (){
+        expect($('#notreal')).not.toHandle('click')
+    })
+
+    it('should not fail when actual is null', function (){
+        expect(null).not.toHandle('click')
+    })
+
   })
 
   describe('toHandleWith', function () {
@@ -1412,6 +1463,15 @@ describe("jQuery matcher", function () {
       $(object).bind('click.namespaced', handler)
       expect($(object)).toHandleWith('click.namespaced', handler)
     })
+
+    it('should not fail when actual has no matches', function (){
+      expect($('#notreal')).not.toHandleWith('click')
+    })
+
+    it('should not fail when actual is null', function (){
+      expect(null).not.toHandleWith('click')
+    })
+
   })
 })
 

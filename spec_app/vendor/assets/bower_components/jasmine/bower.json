@@ -37,14 +37,5 @@
     "lib/jasmine-core/version.rb",
     "lib/jasmine-core/*.py",
     "sauce_connect.log"
-  ],
-  "_release": "2.3.4",
-  "_resolution": {
-    "type": "version",
-    "tag": "v2.3.4",
-    "commit": "651426b6583020e2f3fdae56d2873514963ba65e"
-  },
-  "_source": "git://github.com/pivotal/jasmine.git",
-  "_target": "~2",
-  "_originalSource": "jasmine"
+  ]
 }

@@ -1,4 +1,4 @@
-/* jasmine-fixture - 1.2.2
+/* jasmine-fixture - 1.3.3
  * Makes injecting HTML snippets into the DOM easy & clean!
  * https://github.com/searls/jasmine-fixture
  */
@@ -8,7 +8,7 @@
 
   (function($) {
     var ewwSideEffects, jasmineFixture, originalAffix, originalJasmineDotFixture, originalJasmineFixture, root, _, _ref;
-    root = this;
+    root = (1, eval)('this');
     originalJasmineFixture = root.jasmineFixture;
     originalJasmineDotFixture = (_ref = root.jasmine) != null ? _ref.fixture : void 0;
     originalAffix = root.affix;
@@ -33,7 +33,7 @@
       create = function(selectorOptions, attach) {
         var $top;
         $top = null;
-        _(selectorOptions.split(/[ ](?=[^\]]*?(?:\[|$))/)).inject(function($parent, elementSelector) {
+        _(selectorOptions.trim().split(/[ ](?![^\{]*\})(?=[^\]]*?(?:\[|$))/)).inject(function($parent, elementSelector) {
           var $el;
           if (elementSelector === ">") {
             return $parent;
@@ -58,7 +58,7 @@
         return currentJasmineFixture;
       };
       $whatsTheRootOf = function(that) {
-        if (that.jquery != null) {
+        if ((that != null ? that.jquery : void 0) != null) {
           return that;
         } else if ($('#jasmine_content').length > 0) {
           return $('#jasmine_content');
