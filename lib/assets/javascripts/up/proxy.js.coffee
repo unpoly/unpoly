@@ -257,6 +257,7 @@ up.proxy = (->
       busyEventEmitted = false
 
   load = (request) ->
+    u.debug('Loading URL %o', request.url)
     up.bus.emit('proxy:load', request)
     promise = u.ajax(request)
     promise.always -> up.bus.emit('proxy:receive', request)

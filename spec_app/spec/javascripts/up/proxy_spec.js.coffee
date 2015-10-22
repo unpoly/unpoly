@@ -77,7 +77,7 @@ describe 'up.proxy', ->
           u.times 2, -> up.proxy.ajax(url: '/foo', method: method, cache: false)
           expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-      u.each ['POST', 'PUT', 'DELETE', 'DESTROY'], (method) ->
+      u.each ['POST', 'PUT', 'DELETE'], (method) ->
 
         it "does not cache #{method} requests", ->
           u.times 2, -> up.proxy.ajax(url: '/foo', method: method)

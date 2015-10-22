@@ -22,12 +22,14 @@ up.util = (->
         cached = true
         cache = func(args...)
 
-  ajax = (options) ->
-    if options.selector
-      options.headers = {
-        "X-Up-Selector": options.selector
+  ajax = (request) ->
+    request = copy(request)
+    if request.selector
+      request.headers = {
+        "X-Up-Selector": request.selector
       }
-    $.ajax options
+    # Delegate to jQuery
+    $.ajax(request)
 
   ###*
   @method up.util.isStandardPort
@@ -156,7 +158,7 @@ up.util = (->
   evalConsoleTemplate = (args...) ->
     message = args[0]
     i = 0
-    maxLength = 50
+    maxLength = 80
     message.replace CONSOLE_PLACEHOLDERS, ->
       i += 1
       arg = args[i]
@@ -168,11 +170,16 @@ up.util = (->
       else if argType == 'undefined'
         # JSON.stringify(undefined) is actually undefined
         arg = 'undefined'
-      else if argType == 'number'
+      else if argType == 'number' || argType == 'function'
         arg = arg.toString()
       else
         arg = JSON.stringify(arg)
-        arg = "#{arg.substr(0, maxLength)}…" if arg.length > maxLength
+      if arg.length > maxLength
+        arg = "#{arg.substr(0, maxLength)} …"
+        # For truncated objects or functions, add a trailing brace so
+        # long log lines are easier to parse visually
+        if argType == 'object' || argType == 'function'
+          arg += " }"
       arg
 
   createSelectorFromElement = ($element) ->
