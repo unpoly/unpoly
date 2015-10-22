@@ -30,28 +30,28 @@ up.browser = (->
       $form.submit()
     else
       error("Can't fake a #{method.toUpperCase()} request without Rails UJS")
-  
+
+  ###*
+  Makes native `console.log`, `console.error`, etc. functions safer in multiple ways:
+
+  - Falls back to `console.log` if the output stream is not implemented
+  - Prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`) as a single
+    string if the browser console does not support substitution strings.
+
+  @method up.browser.puts
+  @protected
+  ###
+  puts = (stream, args...) ->
+    u.isDefined(console[stream]) or stream = 'log'
+    if canLogSubstitution()
+      console[stream](args...)
+    else
+      # IE <= 9 cannot pass varargs to console.log using Function#apply because IE
+      message = u.evalConsoleTemplate(args...)
+      console[stream](message)
+
   url = ->
     location.href
-    
-  installConsolePolyfill = ->
-    window.console ||= {}
-    noop = () ->
-    simpleLog = (args...) ->
-      # Old IEs cannot pass varargs to console.log using Function#apply because IE
-      message = u.evalConsoleTemplate(args...)
-      console.log(message)
-    window.console.log ||= noop
-    window.console.info ||= simpleLog
-    window.console.error ||= simpleLog
-    window.console.debug ||= simpleLog
-    window.console.warn ||= simpleLog
-    window.console.group ||= noop
-    window.console.groupCollapsed ||= noop
-    window.console.groupEnd ||= noop
-
-  installPolyfills = ->
-    installConsolePolyfill()
 
   canPushState = u.memoize ->
     # We cannot use pushState if the initial request method is a POST for two reasons:
@@ -71,17 +71,23 @@ up.browser = (->
     # Up.js framework to work). This way Up.js will fall back to full page loads until
     # the framework was booted from a GET request.
     u.isDefined(history.pushState) && initialRequestMethod() == 'get'
-    
+
+  isIE8OrWorse = u.memoize ->
+    # This is the most concise way to exclude IE8 and lower
+    # while keeping all relevant desktop and mobile browsers.
+    u.isUndefined(document.addEventListener)
+
+  isIE9OrWorse = u.memoize ->
+    isIE8OrWorse() || navigator.appVersion.indexOf('MSIE 9.') != -1
+
   canCssAnimation = u.memoize ->
     'transition' of document.documentElement.style
 
   canInputEvent = u.memoize ->
     'oninput' of document.createElement('input')
 
-  isRecentBrowser = u.memoize ->
-    # This is the most concise way to exclude IE8 and lower
-    # while keeping all relevant desktop and mobile browsers.
-    u.isDefined(document.addEventListener)
+  canLogSubstitution = u.memoize ->
+    !isIE9OrWorse()
 
   isRecentJQuery = u.memoize ->
     version = $.fn.jquery
@@ -105,18 +111,15 @@ up.browser = (->
     (popCookie('_up_request_method') || 'get').toLowerCase()
 
   isSupported = ->
-    isRecentBrowser() && isRecentJQuery()
-
-  # We need to install polyfills as soon as possible, since Up.js
-  # won't even require completely on old IEs without the `console`
-  # polyfills.
-  installPolyfills() if isSupported()
+    (!isIE8OrWorse()) && isRecentJQuery()
 
   url: url
   loadPage: loadPage
   canPushState: canPushState
   canCssAnimation: canCssAnimation
   canInputEvent: canInputEvent
+  canLogSubstitution: canLogSubstitution
   isSupported: isSupported
+  puts: puts
 
 )()

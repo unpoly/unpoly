@@ -119,7 +119,7 @@ up.util = (->
   ###
   debug = (message, args...) ->
     message = "[UP] #{message}"
-    console.debug(message, args...)
+    up.browser.puts('debug', message, args...)
 
   ###*
   @method up.warn
@@ -127,7 +127,7 @@ up.util = (->
   ###
   warn = (message, args...) ->
     message = "[UP] #{message}"
-    console.warn(message, args...)
+    up.browser.puts('warn', message, args...)
 
   ###*
   Throws a fatal error with the given message.
@@ -145,7 +145,7 @@ up.util = (->
   ###
   error = (args...) ->
     args[0] = "[UP] #{args[0]}"
-    console.error(args...)
+    up.browser.puts('error', args...)
     asString = evalConsoleTemplate(args...)
     $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body')
     $error.addClass('up-error')
@@ -166,6 +166,9 @@ up.util = (->
         arg = arg.replace(/\s+/g, ' ')
         arg = "#{arg.substr(0, maxLength)}…" if arg.length > maxLength
         arg = "\"#{arg}\""
+      else if argType == 'undefined'
+        # JSON.stringify(undefined) is actually undefined
+        arg = 'undefined'
       else if argType == 'number'
         arg = arg.toString()
       else
