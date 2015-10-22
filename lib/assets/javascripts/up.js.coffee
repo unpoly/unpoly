@@ -14,5 +14,4 @@
 #= require up/modal
 #= require up/tooltip
 #= require up/navigation
-#= require up/slot
 #= require up/boot
