@@ -47,7 +47,7 @@ up.tooltip = (($) ->
         html: 'Enter multiple words or phrases'
       });
   
-  @method up.tooltip.open
+  @method up.tooltip.attach
   @param {Element|jQuery|String} elementOrSelector
   @param {String} [options.html]
     The HTML to display in the tooltip.
@@ -56,7 +56,7 @@ up.tooltip = (($) ->
   @param {String} [options.animation]
     The animation to use when opening the tooltip.
   ###
-  open = (linkOrSelector, options = {}) ->
+  attach = (linkOrSelector, options = {}) ->
     $link = $(linkOrSelector)
     html = u.option(options.html, $link.attr('up-tooltip'), $link.attr('title'))
     position = u.option(options.position, $link.attr('up-position'), 'top')
@@ -113,7 +113,8 @@ up.tooltip = (($) ->
   # Close the tooltip when the user presses ESC.
   up.magic.onEscape(-> close())
 
-  open: open
+  attach: attach
   close: close
+  open: -> u.error('up.tooltip.open no longer exists. Use up.tooltip.attach instead.')
 
 )(jQuery)

@@ -2,7 +2,7 @@ describe 'up.tooltip', ->
   
   describe 'Javascript functions', ->
     
-    describe 'up.tooltip.open', ->
+    describe 'up.tooltip.attach', ->
       
       it 'opens a tooltop above the center of the given element', ->
         $link = affix('span').text('button label')
@@ -13,7 +13,7 @@ describe 'up.tooltip', ->
           width: '50px'
           height: '50px'
         )
-        up.tooltip.open($link, html: 'tooltip text')
+        up.tooltip.attach($link, html: 'tooltip text')
         $tooltip = $('.up-tooltip')
         expect($tooltip).toBeInDOM()
         expect($tooltip).toHaveText('tooltip text')
