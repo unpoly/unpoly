@@ -106,25 +106,25 @@ describe 'up.proxy', ->
         beforeEach ->
           up.proxy.defaults(busyDelay: 0)
           @events = []
-          u.each ['proxy:load', 'proxy:receive', 'proxy:busy', 'proxy:idle'], (eventName) =>
-            up.bus.on eventName, =>
+          u.each ['up:proxy:load', 'up:proxy:receive', 'up:proxy:busy', 'up:proxy:idle'], (eventName) =>
+            up.on eventName, =>
               @events.push eventName
 
-        it 'emits an proxy:busy event once the proxy started loading, and proxy:idle if it is done loading', ->
+        it 'emits an up:proxy:busy event once the proxy started loading, and up:proxy:idle if it is done loading', ->
   
           up.proxy.ajax(url: '/foo')
   
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy'
+            'up:proxy:load',
+            'up:proxy:busy'
           ])
   
           up.proxy.ajax(url: '/bar')
   
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy',
-            'proxy:load'
+            'up:proxy:load',
+            'up:proxy:busy',
+            'up:proxy:load'
           ])
   
           jasmine.Ajax.requests.at(0).respondWith
@@ -133,10 +133,10 @@ describe 'up.proxy', ->
             responseText: 'foo'
   
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy',
-            'proxy:load',
-            'proxy:receive'
+            'up:proxy:load',
+            'up:proxy:busy',
+            'up:proxy:load',
+            'up:proxy:receive'
           ])
   
           jasmine.Ajax.requests.at(1).respondWith
@@ -145,29 +145,29 @@ describe 'up.proxy', ->
             responseText: 'bar'
   
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy',
-            'proxy:load',
-            'proxy:receive',
-            'proxy:receive',
-            'proxy:idle'
+            'up:proxy:load',
+            'up:proxy:busy',
+            'up:proxy:load',
+            'up:proxy:receive',
+            'up:proxy:receive',
+            'up:proxy:idle'
           ])
   
-        it 'does not emit an proxy:busy event if preloading', ->
+        it 'does not emit an up:proxy:busy event if preloading', ->
 
           # A request for preloading preloading purposes
           # doesn't make us busy.
           up.proxy.ajax(url: '/foo', preload: true)
           expect(@events).toEqual([
-            'proxy:load'
+            'up:proxy:load'
           ])
           expect(up.proxy.busy()).toBe(false)
 
           # The same request with preloading does make us busy.
           up.proxy.ajax(url: '/foo')
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy'
+            'up:proxy:load',
+            'up:proxy:busy'
           ])
           expect(up.proxy.busy()).toBe(true)
 
@@ -178,31 +178,31 @@ describe 'up.proxy', ->
             contentType: 'text/html'
             responseText: 'foo'
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy',
-            'proxy:receive',
-            'proxy:idle'
+            'up:proxy:load',
+            'up:proxy:busy',
+            'up:proxy:receive',
+            'up:proxy:idle'
           ])
           expect(up.proxy.busy()).toBe(false)
 
-        it 'can delay the proxy:busy event to prevent flickering of spinners', ->
+        it 'can delay the up:proxy:busy event to prevent flickering of spinners', ->
           jasmine.clock().install()
           up.proxy.defaults(busyDelay: 100)
 
           up.proxy.ajax(url: '/foo')
           expect(@events).toEqual([
-            'proxy:load'
+            'up:proxy:load'
           ])
 
           jasmine.clock().tick(50)
           expect(@events).toEqual([
-            'proxy:load'
+            'up:proxy:load'
           ])
 
           jasmine.clock().tick(50)
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy'
+            'up:proxy:load',
+            'up:proxy:busy'
           ])
 
           jasmine.Ajax.requests.at(0).respondWith
@@ -211,19 +211,19 @@ describe 'up.proxy', ->
             responseText: 'foo'
 
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy',
-            'proxy:receive',
-            'proxy:idle'
+            'up:proxy:load',
+            'up:proxy:busy',
+            'up:proxy:receive',
+            'up:proxy:idle'
           ])
 
-        it 'does not emit proxy:idle if a delayed proxy:busy was never emitted due to a fast response', ->
+        it 'does not emit up:proxy:idle if a delayed up:proxy:busy was never emitted due to a fast response', ->
           jasmine.clock().install()
           up.proxy.defaults(busyDelay: 100)
 
           up.proxy.ajax(url: '/foo')
           expect(@events).toEqual([
-            'proxy:load'
+            'up:proxy:load'
           ])
 
           jasmine.clock().tick(50)
@@ -236,17 +236,17 @@ describe 'up.proxy', ->
           jasmine.clock().tick(100)
 
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:receive'
+            'up:proxy:load',
+            'up:proxy:receive'
           ])
 
-        it 'emits proxy:idle if a request returned but failed', ->
+        it 'emits up:proxy:idle if a request returned but failed', ->
 
           up.proxy.ajax(url: '/foo')
 
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy'
+            'up:proxy:load',
+            'up:proxy:busy'
           ])
 
           jasmine.Ajax.requests.at(0).respondWith
@@ -255,10 +255,10 @@ describe 'up.proxy', ->
             responseText: 'something went wrong'
 
           expect(@events).toEqual([
-            'proxy:load',
-            'proxy:busy',
-            'proxy:receive',
-            'proxy:idle'
+            'up:proxy:load',
+            'up:proxy:busy',
+            'up:proxy:receive',
+            'up:proxy:idle'
           ])
 
 

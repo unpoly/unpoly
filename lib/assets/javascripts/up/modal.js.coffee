@@ -134,12 +134,10 @@ up.modal = (->
       unshiftElements.push(unshiftElement)
 
   updated = ($modal, animation, animateOptions) ->
-    up.bus.emit('modal:open')
     shiftElements()
     $modal.show()
-    promise = up.animate($modal, animation, animateOptions)
-    promise.then -> up.bus.emit('modal:opened')
-    promise
+    deferred = up.animate($modal, animation, animateOptions)
+    deferred.then -> up.bus.emit('up:modal:opened')
 
   ###*
   Opens the given link's destination in a modal overlay:
@@ -226,17 +224,22 @@ up.modal = (->
     animateOptions = up.motion.animateOptions(options, $link)
 
     close()
-    $modal = createHiddenModal
-      selector: selector
-      width: width
-      maxWidth: maxWidth
-      height: height
-      sticky: sticky
 
-    up.replace(selector, url,
-      history: history
-      insert: -> updated($modal, animation, animateOptions)
-    )
+    if up.bus.nobodyPrevents('up:modal:open', url: url)
+      $modal = createHiddenModal
+        selector: selector
+        width: width
+        maxWidth: maxWidth
+        height: height
+        sticky: sticky
+      up.replace selector, url,
+        history: history
+        insert: -> updated($modal, animation, animateOptions)
+    else
+      # Although someone prevented the destruction, keep a uniform API for
+      # callers by returning a Deferred that will never be resolved.
+      $.Deferred()
+
 
   ###*
   Returns the source URL for the fragment displayed in the current modal overlay,
@@ -267,18 +270,22 @@ up.modal = (->
   close = (options) ->
     $modal = $('.up-modal')
     if $modal.length
-      options = u.options(options, 
-        animation: config.closeAnimation,
-        url: $modal.attr('up-previous-url')
-        title: $modal.attr('up-previous-title')
-      )
-      currentSource = undefined
-      up.bus.emit('modal:close')
-      deferred = up.destroy($modal, options)
-      deferred.then ->
-        unshifter() while unshifter = unshiftElements.pop()
-        up.bus.emit('modal:closed')
-      deferred
+      if up.bus.nobodyPrevents('up:modal:close', $element: $modal)
+        options = u.options(options,
+          animation: config.closeAnimation,
+          url: $modal.attr('up-previous-url')
+          title: $modal.attr('up-previous-title')
+        )
+        currentSource = undefined
+        deferred = up.destroy($modal, options)
+        deferred.then ->
+          unshifter() while unshifter = unshiftElements.pop()
+          up.bus.emit('up:modal:closed')
+        deferred
+      else
+        # Although someone prevented the destruction, keep a uniform API for
+        # callers by returning a Deferred that will never be resolved.
+        $.Deferred()
     else
       u.resolvedDeferred()
 
@@ -379,7 +386,7 @@ up.modal = (->
       close()
   )
 
-  up.bus.on('fragment:ready', ($fragment) ->
+  up.on('up:fragment:ready', ($fragment) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
         currentSource = newSource
@@ -407,7 +414,7 @@ up.modal = (->
   )
 
   # The framework is reset between tests
-  up.bus.on 'framework:reset', reset
+  up.on 'up:framework:reset', reset
 
   open: open
   close: close

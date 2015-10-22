@@ -170,7 +170,7 @@ up.history = (->
       $link.removeAttr 'up-back'
       up.link.makeFollowable($link)
 
-  up.bus.on 'framework:reset', reset
+  up.on 'up:framework:reset', reset
 
   defaults: config.update
   push: push

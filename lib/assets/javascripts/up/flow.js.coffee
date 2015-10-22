@@ -301,19 +301,27 @@ up.flow = (->
   ###
   destroy = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
-    options = u.options(options, animation: 'none')
-    animateOptions = up.motion.animateOptions(options)
-    $element.addClass('up-destroying')
-    # If e.g. a modal or popup asks us to restore a URL, do this
-    # before emitting `fragment:destroy`. This way up.navigate sees the
-    # new URL and can assign/remove .up-current classes accordingly.
-    up.history.push(options.url) if u.isPresent(options.url)
-    document.title = options.title if u.isPresent(options.title)
-    up.bus.emit('fragment:destroy', $element)
-    animationDeferred = u.presence(options.animation, u.isDeferred) ||
-      up.motion.animate($element, options.animation, animateOptions)
-    animationDeferred.then -> $element.remove()
-    animationDeferred
+    if up.bus.nobodyPrevents('up:fragment:destroy', $element: $element)
+      options = u.options(options, animation: 'none')
+      animateOptions = up.motion.animateOptions(options)
+      $element.addClass('up-destroying')
+      # If e.g. a modal or popup asks us to restore a URL, do this
+      # before emitting `fragment:destroy`. This way up.navigate sees the
+      # new URL and can assign/remove .up-current classes accordingly.
+      up.history.push(options.url) if u.isPresent(options.url)
+      document.title = options.title if u.isPresent(options.title)
+      animationDeferred = u.presence(options.animation, u.isDeferred) ||
+        up.motion.animate($element, options.animation, animateOptions)
+      animationDeferred.then ->
+        # Emit this while $element is still part of the DOM, so event
+        # listeners bound to the document will receive the event.
+        up.bus.emit('up:fragment:destroyed', $element: $element)
+        $element.remove()
+      animationDeferred
+    else
+      # Although someone prevented the destruction, keep a uniform API for
+      # callers by returning a Deferred that will never be resolved.
+      $.Deferred()
 
   ###*
   Replaces the given selector or element with a fresh copy
@@ -332,21 +340,7 @@ up.flow = (->
     sourceUrl = options.url || source(selectorOrElement)
     replace(selectorOrElement, sourceUrl, options)
 
-  ###*
-  Resets Up.js to the state when it was booted.
-  All custom event handlers, animations, etc. that have been registered
-  will be discarded.
-  
-  This is an internal method for to enable unit testing.
-  Don't use this in production.
-  
-  @protected
-  @method up.reset
-  ###
-  reset = ->
-    up.bus.emit('framework:reset')
-  
-  up.bus.on('app:ready', ->
+  up.on('ready', ->
     setSource(document.body, up.browser.url())
   )
 
@@ -354,7 +348,6 @@ up.flow = (->
   reload: reload
   destroy: destroy
   implant: implant
-  reset: reset
   first: first
 
 )()
@@ -362,5 +355,4 @@ up.flow = (->
 up.replace = up.flow.replace
 up.reload = up.flow.reload
 up.destroy = up.flow.destroy
-up.reset = up.flow.reset
 up.first = up.flow.first

@@ -46,100 +46,52 @@ up.bus = (->
   
   u = up.util
 
-  callbacksByEvent = {}
-  defaultCallbacksByEvent = {}
-
   ###*
-  Resets the list of registered event listeners to the
-  moment when the framework was booted.
-
-  @private
-  @method up.bus.reset
-  ###
-  reset = ->
-    callbacksByEvent = u.copy(defaultCallbacksByEvent)
-
-  callbacksFor = (event) ->
-    callbacksByEvent[event] ||= []
-
-  ###*
-  Makes a snapshot of the currently registered bus listeners,
-  to later be restored through [`up.bus.reset`](/up.bus#up.bus.reset)
-  
-  @private
-  @method up.bus.snapshot
-  ###
-  snapshot = ->
-    defaultCallbacksByEvent = {}
-    for event, callbacks of callbacksByEvent
-      defaultCallbacksByEvent[event] = u.copy(callbacks)
-
-  ###*
-  Registers an event handler to be called when the given
-  event is triggered.
-  
-  @method up.bus.on
-  @param {String} eventNames
-    A space-separated list of event names to match.
-  @param {Function} handler
-    The event handler to be called with the event arguments.
-  @return {Function}
-    A function that unregisters the given handlers
-  ###
-  # We cannot call this function "on" because Coffeescript
-  # https://makandracards.com/makandra/29733-english-words-that-you-cannot-use-in-coffeescript
-  listen = (eventNames, handler) ->
-    for eventName in eventNames.split(' ')
-      callbacksFor(eventName).push(handler)
-    -> stopListen(eventNames, handler)
-
-  ###*
-  Unregisters the given handler from the given events.
-
-  @method up.bus.off
-  @param {String} eventNames
-    A space-separated list of event names .
-  @param {Function} handler
-    The event handler that should stop listening.
-  ###
-  stopListen = (eventNames, handler) ->
-    for eventName in eventNames.split(' ')
-      u.remove(callbacksFor(eventName), handler)
-
-  ###*
-  Triggers an event over the framework bus.
-
-  All arguments will be passed as arguments to event listeners:
-
-      up.bus.on('foo:bar', function(x, y) {
-        console.log("Value of x is " + x);
-        console.log("Value of y is " + y);
-      });
-
-      up.bus.emit('foo:bar', 'arg1', 'arg2')
-
-      // This prints to the console:
-      //
-      //   Value of x is arg1
-      //   Value of y is arg2
-
   @method up.bus.emit
   @param {String} eventName
     The name of the event.
   @param args...
-    The arguments that describe the event. 
+    The arguments that describe the event.
+  @protected
   ###
-  emit = (eventName, args...) ->
-    # u.debug("Emitting event %o with args %o", eventName, args)
-    callbacks = callbacksFor(eventName)
-    u.each(callbacks, (callback) ->
-      callback(args...)
-    )
+  emit = (eventName, eventProps = {}) ->
+    event = $.Event(eventName, eventProps)
+    $target = eventProps.$element || $(document)
+    u.debug("Emitting %o on %o with props %o", eventName, $target, eventProps)
+    $target.trigger(event)
+    event
 
-  listen 'framework:ready', snapshot
-  listen 'framework:reset', reset
+  ###*
+  Emits an event with the given name and property.
+  Returns whether any event listener has prevented the default action.
 
-  on: listen
-  off: stopListen
+  @method nobodyPrevents
+  @protected
+  ###
+  nobodyPrevents = (args...) ->
+    event = emit(args...)
+    not event.isDefaultPrevented()
+
+
+  ###*
+  Resets Up.js to the state when it was booted.
+  All custom event handlers, animations, etc. that have been registered
+  will be discarded.
+
+  This is an internal method for to enable unit testing.
+  Don't use this in production.
+
+  @protected
+  @method up.reset
+  ###
+  reset = ->
+    up.bus.emit('up:framework:reset')
+
+
   emit: emit
+  nobodyPrevents: nobodyPrevents
+  reset: reset
+
 )()
+
+up.reset = up.bus.reset

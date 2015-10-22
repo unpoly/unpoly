@@ -189,7 +189,7 @@ up.navigation = (->
   @method [up-current]
   @ujs
   ###
-  up.bus.on 'fragment:ready', ->
+  up.on 'up:fragment:ready', ->
     # If a new fragment is inserted, it's likely to be the result
     # of the active action. So we can remove the active marker.
     unmarkActive()
@@ -199,7 +199,7 @@ up.navigation = (->
     # location bar).
     locationChanged()
 
-  up.bus.on 'fragment:destroy', ($fragment) ->
+  up.on 'up:fragment:destroy', (event, $fragment) ->
     # If the destroyed fragment is a modal or popup container
     # this changes which URLs we consider currents.
     # Also modals and popups restore their previous history
@@ -208,7 +208,7 @@ up.navigation = (->
       locationChanged()
 
   # The framework is reset between tests
-  up.bus.on 'framework:reset', reset
+  up.on 'up:framework:reset', reset
 
   defaults: config.update
 

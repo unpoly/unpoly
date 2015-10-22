@@ -108,7 +108,7 @@ up.tooltip = (->
 
   # The framework is reset between tests, so also close
   # a currently open tooltip.
-  up.bus.on 'framework:reset', close
+  up.on 'up:framework:reset', close
 
   # Close the tooltip when the user presses ESC.
   up.magic.onEscape(-> close())

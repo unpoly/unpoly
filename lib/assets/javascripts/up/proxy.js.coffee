@@ -243,7 +243,7 @@ up.proxy = (->
     if wasIdle
       emission = ->
         if busy() # a fast response might have beaten the delay
-          up.bus.emit('proxy:busy')
+          up.bus.emit('up:proxy:busy')
           busyEventEmitted = true
       if config.busyDelay > 0
         busyDelayTimer = setTimeout(emission, config.busyDelay)
@@ -253,14 +253,14 @@ up.proxy = (->
   loadEnded = ->
     pendingCount -= 1
     if idle() && busyEventEmitted
-      up.bus.emit('proxy:idle')
+      up.bus.emit('up:proxy:idle')
       busyEventEmitted = false
 
   load = (request) ->
     u.debug('Loading URL %o', request.url)
-    up.bus.emit('proxy:load', request)
+    up.bus.emit('up:proxy:load', request)
     promise = u.ajax(request)
-    promise.always -> up.bus.emit('proxy:receive', request)
+    promise.always -> up.bus.emit('up:proxy:receive', request)
     promise
 
   isIdempotent = (request) ->
@@ -320,7 +320,7 @@ up.proxy = (->
     unless up.link.childClicked(event, $element)
       checkPreload($element)
 
-  up.bus.on 'framework:reset', reset
+  up.on 'up:framework:reset', reset
 
   preload: preload
   ajax: ajax

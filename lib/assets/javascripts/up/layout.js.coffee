@@ -458,7 +458,7 @@ up.layout = (->
   @ujs
   ###
 
-  up.bus.on 'framework:reset', reset
+  up.on 'up:framework:reset', reset
 
   reveal: reveal
   scroll: scroll

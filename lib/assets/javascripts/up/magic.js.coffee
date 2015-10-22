@@ -69,8 +69,10 @@ up.magic = (->
   @method up.on
   @param {String} events
     A space-separated list of event names to bind.
-  @param {String} selector
-    The selector an on which the event must be triggered.
+  @param {String} [selector]
+    The selector of an element on which the event must be triggered.
+    Omit the selector to listen to all events with that name, regardless
+    of the event target.
   @param {Function(event, $element, data)} behavior
     The handler that should be called.
     The function takes the affected element as the first argument (as a jQuery object).
@@ -80,16 +82,26 @@ up.magic = (->
   liveDescriptions = []
   defaultLiveDescriptions = null
 
-  live = (events, selector, behavior) ->
+  ###*
+  # Convert an Up.js style listener (second argument is the event target
+  # as a jQuery collection) to a vanilla jQuery listener
+  ###
+  upListenerToJqueryListener = (upListener) ->
+    (event) -> upListener.apply(this, [event, $(this), data(this)])
+
+  live = (args...) ->
     # Silently discard any event handlers that are registered on unsupported browsers
     return unless up.browser.isSupported()
-    description = [
-      events,
-      selector,
-      (event) ->
-        behavior.apply(this, [event, $(this), data(this)])
-    ]
+
+    description = u.copy(args)
+    lastIndex = description.length - 1
+    behavior = description[lastIndex]
+    description[lastIndex] = upListenerToJqueryListener(behavior)
+
+    # Remember the descriptions we registered, so we can
+    # clean up after ourselves during a reset
     liveDescriptions.push(description)
+
     $(document).on(description...)
   
   ###*
@@ -327,12 +339,12 @@ up.magic = (->
   manipulate the DOM without going through Up.js.
 
   @method up.ready
-  @param {String|Element|jQuery} selectorOrFragment
+  @param {String|Element|jQuery} selectorOrElement
   ###
-  ready = (selectorOrFragment) ->
-    $fragment = $(selectorOrFragment)
-    up.bus.emit('fragment:ready', $fragment)
-    $fragment
+  ready = (selectorOrElement) ->
+    $element = $(selectorOrElement)
+    up.bus.emit('up:fragment:ready', $element: $element)
+    $element
 
   onEscape = (handler) ->
     live('keydown', 'body', (event) ->
@@ -340,11 +352,11 @@ up.magic = (->
         handler(event)
     )
 
-  up.bus.on 'app:ready', (-> ready(document.body))
-  up.bus.on 'fragment:ready', compile
-  up.bus.on 'fragment:destroy', destroy
-  up.bus.on 'framework:ready', snapshot
-  up.bus.on 'framework:reset', reset
+  live 'ready', (-> ready(document.body))
+  live 'up:fragment:ready', (event) -> compile(event.$element)
+  live 'up:fragment:destroy', (event) -> destroy(event.$element)
+  live 'up:framework:boot', snapshot
+  live 'up:framework:reset', reset
 
   compiler: compiler
   on: live

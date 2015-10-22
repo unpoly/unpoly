@@ -151,7 +151,7 @@ up.motion = (->
     options
       
   findAnimation = (name) ->
-    animations[name] or u.error("Unknown animation %o", animation)
+    animations[name] or u.error("Unknown animation %o", name)
     
   GHOSTING_PROMISE_KEY = 'up-ghosting-promise'
 
@@ -577,8 +577,8 @@ up.motion = (->
     )
   )
   
-  up.bus.on 'framework:ready', snapshot
-  up.bus.on 'framework:reset', reset
+  up.on 'up:framework:boot', snapshot
+  up.on 'up:framework:reset', reset
     
   morph: morph
   animate: animate

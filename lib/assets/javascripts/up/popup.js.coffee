@@ -235,7 +235,7 @@ up.popup = (->
       close()
   )
   
-  up.bus.on('fragment:ready', ($fragment) ->
+  up.on('up:fragment:ready', (event, $fragment) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
         currentSource = newSource
@@ -263,7 +263,7 @@ up.popup = (->
   )
 
   # The framework is reset between tests
-  up.bus.on 'framework:reset', reset
+  up.on 'up:framework:reset', reset
 
   open: open
   close: close

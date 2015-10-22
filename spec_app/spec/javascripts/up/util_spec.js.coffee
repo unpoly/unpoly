@@ -2,6 +2,12 @@ describe 'up.util', ->
   
   describe 'Javascript functions', ->
 
+    describe 'up.util.argNames', ->
+
+      it 'returns an array of argument names for the given function', ->
+        fun = ($element, data) ->
+        expect(up.util.argNames(fun)).toEqual(['$element', 'data'])
+
     describe 'up.util.castedAttr', ->
 
       it 'returns true if the attribute value is the string "true"', ->
