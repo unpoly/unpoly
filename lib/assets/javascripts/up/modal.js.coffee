@@ -16,23 +16,23 @@ up.modal = (($) ->
   ###*
   Sets default options for future modals.
 
-  @method up.modal.defaults
-  @param {Number} [options.width]
+  @method up.modal.config
+  @param {Number} [config.width]
     The width of the dialog as a CSS value like `'400px'` or `50%`.
 
     Defaults to `undefined`, meaning that the dialog will grow to fit its contents
-    until it reaches `options.maxWidth`. Leaving this as `undefined` will
+    until it reaches `config.maxWidth`. Leaving this as `undefined` will
     also allow you to control the width using CSS on `.up-modal-dialog´.
-  @param {Number} [options.maxWidth]
+  @param {Number} [config.maxWidth]
     The width of the dialog as a CSS value like `'400px'` or `50%`.
     You can set this to `undefined` to make the dialog fit its contents.
     Be aware however, that e.g. Bootstrap stretches input elements
     to `width: 100%`, meaning the dialog will also stretch to the full
     width of the screen.
-  @param {Number} [options.height='auto']
+  @param {Number} [config.height='auto']
     The height of the dialog in pixels.
     Defaults to `undefined`, meaning that the dialog will grow to fit its contents.
-  @param {String|Function(config)} [options.template]
+  @param {String|Function(config)} [config.template]
     A string containing the HTML structure of the modal.
     You can supply an alternative template string, but make sure that it
     defines tag with the classes `up-modal`, `up-modal-dialog` and  `up-modal-content`.
@@ -40,12 +40,12 @@ up.modal = (($) ->
     You can also supply a function that returns a HTML string.
     The function will be called with the modal options (merged from these defaults
     and any per-open overrides) whenever a modal opens.
-  @param {String} [options.closeLabel='X']
+  @param {String} [config.closeLabel='X']
     The label of the button that closes the dialog.
-  @param {String} [options.openAnimation='fade-in']
+  @param {String} [config.openAnimation='fade-in']
     The animation used to open the modal. The animation will be applied
     to both the dialog box and the overlay dimming the page.
-  @param {String} [options.closeAnimation='fade-out']
+  @param {String} [config.closeAnimation='fade-out']
     The animation used to close the modal. The animation will be applied
     to both the dialog box and the overlay dimming the page.
   ###
@@ -353,7 +353,7 @@ up.modal = (($) ->
       </div>
 
   If you want to change the design beyond CSS, you can
-  configure Up.js to [use a different HTML structure](#up.modal.defaults).
+  configure Up.js to [use a different HTML structure](#up.modal.config).
 
 
   \#\#\#\# Closing behavior
@@ -428,7 +428,8 @@ up.modal = (($) ->
   open: -> up.error('up.modal.open no longer exists. Please use either up.modal.follow or up.modal.visit.')
   close: close
   source: source
-  defaults: config.update
+  config: config
+  defaults: -> u.error('up.modal.defaults(...) no longer exists. Set values on he up.modal.config property instead.')
   contains: contains
 
 )(jQuery)

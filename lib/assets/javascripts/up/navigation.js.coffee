@@ -18,9 +18,9 @@ up.navigation = (($) ->
   ###*
   Sets default options for this module.
 
-  @method up.navigation.defaults
-  @param {Number} [options.currentClass]
-    The class to set on [links that point the current location](#up-current).
+  @method up.navigation.config
+  @param {Number} [config.currentClasses]
+    An array of classes to set on [links that point the current location](#up-current).
   ###
   config = u.config
     currentClasses: ['up-current']
@@ -210,6 +210,7 @@ up.navigation = (($) ->
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
 
-  defaults: config.update
+  config: config
+  defaults: -> u.error('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.')
 
 )(jQuery)

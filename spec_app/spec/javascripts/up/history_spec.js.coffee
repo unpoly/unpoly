@@ -52,8 +52,8 @@ describe 'up.history', ->
 
           $viewport = $(longContentHtml).appendTo(document.body)
 
-          up.layout.defaults(viewports: ['.viewport'])
-          up.history.defaults(popTargets: ['.viewport'])
+          up.layout.config.viewports = ['.viewport']
+          up.history.config.popTargets = ['.viewport']
 
           $viewport.append(longContentHtml)
 

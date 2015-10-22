@@ -4,10 +4,6 @@ describe 'up.modal', ->
 
     assumedScrollbarWidth = 15
 
-    describe 'up.modal.defaults', ->
-      
-      it 'should have tests'
-        
     describe 'up.modal.follow', ->
 
       it "loads the given link's destination in a dialog window", (done) ->

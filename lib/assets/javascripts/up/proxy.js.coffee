@@ -3,8 +3,8 @@ Caching and preloading
 ======================
 
 All HTTP requests go through the Up.js proxy.
-It caches a [limited](/up.proxy#up.proxy.defaults) number of server responses
-for a [limited](/up.proxy#up.proxy.defaults) amount of time,
+It caches a [limited](/up.proxy#up.proxy.config) number of server responses
+for a [limited](/up.proxy#up.proxy.config) amount of time,
 making requests to these URLs return insantly.
   
 The cache is cleared whenever the user makes a non-`GET` request
@@ -45,7 +45,7 @@ The `proxy:busy` event will be emitted after a delay of 300 ms
 to prevent the spinner from flickering on and off.
 You can change (or remove) this delay like this:
 
-    up.proxy.defaults({ busyDelay: 150 });
+    up.proxy.config.busyDelay = 150;
 
 @class up.proxy  
 ###
@@ -60,17 +60,17 @@ up.proxy = (($) ->
   busyEventEmitted = undefined
 
   ###*
-  @method up.proxy.defaults
-  @param {Number} [options.preloadDelay=75]
+  @method up.proxy.config
+  @param {Number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](#up-preload)
     starts preloading.
-  @param {Number} [options.cacheSize=70]
+  @param {Number} [config.cacheSize=70]
     The maximum number of responses to cache.
     If the size is exceeded, the oldest items will be dropped from the cache.
-  @param {Number} [options.cacheExpiry=300000]
+  @param {Number} [config.cacheExpiry=300000]
     The number of milliseconds until a cache entry expires.
     Defaults to 5 minutes.
-  @param {Number} [options.busyDelay=300]
+  @param {Number} [config.busyDelay=300]
     How long the proxy waits until emitting the `proxy:busy` [event](/up.bus).
     Use this to prevent flickering of spinners.
   ###
@@ -330,6 +330,7 @@ up.proxy = (($) ->
   remove: remove
   idle: idle
   busy: busy
-  defaults: config.update
+  config: config
+  defaults: -> u.error('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.')
   
 )(jQuery)

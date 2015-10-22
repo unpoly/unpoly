@@ -28,9 +28,10 @@ up.popup = (($) ->
   currentSource = undefined
 
   ###*
-  @method up.popup.defaults
-  @param {String} options.animation
-  @param {String} options.position
+  @method up.popup.config
+  @param {String} config.openAnimation
+  @param {String} config.closeAnimation
+  @param {String} config.position
   ###
   config = u.config
     openAnimation: 'fade-in'
@@ -268,7 +269,8 @@ up.popup = (($) ->
   attach: attach
   close: close
   source: source
-  defaults: config.update
+  config: config
+  defaults: -> u.error('up.popup.defaults(...) no longer exists. Set values on he up.popup.config property instead.')
   contains: contains
   open: -> up.warn('up.popup.open no longer exists. Please use up.popup.attach instead.')
 

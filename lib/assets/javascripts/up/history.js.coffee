@@ -17,11 +17,11 @@ up.history = (($) ->
   u = up.util
 
   ###*
-  @method up.history.defaults
-  @param {Array<String>} [options.popTargets=['body']]
+  @method up.history.config
+  @param {Array<String>} [config.popTargets=['body']]
     An array of CSS selectors to replace when the user goes
     back in history.
-  @param {Boolean} [options.restoreScroll=true]
+  @param {Boolean} [config.restoreScroll=true]
     Whether to restore the known scroll positions
     when the user goes back or forward in history.
   ###
@@ -172,7 +172,8 @@ up.history = (($) ->
 
   up.on 'up:framework:reset', reset
 
-  defaults: config.update
+  config: config
+  defaults: -> u.error('up.history.defaults(...) no longer exists. Set values on he up.history.config property instead.')
   push: push
   replace: replace
   url: currentUrl

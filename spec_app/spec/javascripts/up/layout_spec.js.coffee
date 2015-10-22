@@ -7,10 +7,9 @@ describe 'up.layout', ->
     describe 'up.reveal', ->
 
       beforeEach ->
-        up.layout.defaults
-          snap: 0
-          substance: 99999
-          viewports: [document]
+        up.layout.config.snap = 0
+        up.layout.config.substance = 99999
+        up.layout.config.viewports = [document]
 
       describe 'when the viewport is the document', ->
 
@@ -57,7 +56,7 @@ describe 'up.layout', ->
 
         it 'snaps to the top if the space above the future-visible area is smaller than the value of config.snap', ->
 
-          up.layout.defaults(snap: 30)
+          up.layout.config.snap = 30
 
           @$elements[0].css(height: '20px')
 
@@ -235,8 +234,7 @@ describe 'up.layout', ->
 
       it 'only reveals the top number of pixels defined in config.substance', ->
 
-        up.layout.defaults
-          substance: 20
+        up.layout.config.substance = 20
 
         $viewport = affix('div').css
           'position': 'absolute'
@@ -291,26 +289,26 @@ describe 'up.layout', ->
     describe 'up.layout.viewportsOf', ->
 
       it 'seeks upwards from the given element', ->
-        up.layout.defaults(viewports: ['.viewport1', '.viewport2'])
+        up.layout.config.viewports = ['.viewport1', '.viewport2']
         $viewport1 = affix('.viewport1')
         $viewport2 = affix('.viewport2')
         $element = affix('div').appendTo($viewport2)
         expect(up.layout.viewportOf($element)).toEqual($viewport2)
 
       it 'returns the given element if it is a configured viewport itself', ->
-        up.layout.defaults(viewports: ['.viewport'])
+        up.layout.config.viewports = ['.viewport']
         $viewport = affix('.viewport')
         expect(up.layout.viewportOf($viewport)).toEqual($viewport)
 
       it 'finds the document if the viewport is the document', ->
         # This actually tests that the hierarchy returned by `$.parent`
         # is $element => ... => $('body') => $('html') => $(document)
-        up.layout.defaults(viewports: [document])
+        up.layout.config.viewports = [document]
         $element = affix('div')
         expect(up.layout.viewportOf($element)).toEqual($(document))
 
       it 'throws an error if no viewport could be found', ->
-        up.layout.defaults(viewports: ['.does-not-exist'])
+        up.layout.config.viewports = ['.does-not-exist']
         $element = affix('div')
         lookup = -> up.layout.viewportOf($element)
         expect(lookup).toThrowError(/Could not find viewport/i)

@@ -88,38 +88,23 @@ describe 'up.util', ->
         expect(object.a).toBe(1)
         expect(object.b).toBe(2)
 
-      describe '#update', ->
-
-        it 'merges the given options into the object', ->
-          object = up.util.config(a: 1, b: undefined, c: undefined)
-          object.update(b: 2, c: 3)
-          expect(object.b).toBe(2)
-          expect(object.c).toBe(3)
-
-        it 'returns the current hash when called without arguments', ->
-          object = up.util.config(a: 1, b: 2)
-          result = object.update()
-          expect(result.a).toBe(1)
-          expect(result.b).toBe(2)
-
-        it 'throws an error when setting a key that was not included in the factory settings', ->
-          object = up.util.config(a: 1)
-          update = -> object.update(b: 2)
-          expect(update).toThrowError(/unknown setting/i)
+      it 'does not allow to set a key that was not included in the factory settings', ->
+        object = up.util.config(a: 1)
+        object.b = 2
+        expect(object.b).toBeUndefined()
 
       describe '#reset', ->
 
         it 'resets the object to its original state', ->
           object = up.util.config(a: 1)
           expect(object.b).toBeUndefined()
-          object.b = 2
-          expect(object.b).toBe(2)
+          object.a = 2
+          expect(object.a).toBe(2)
           object.reset()
-          expect(object.b).toBeUndefined()
+          expect(object.a).toBe(1)
 
-        it 'does not remove #reset or #update methods from the object', ->
+        it 'does not remove the #reset or #update method from the object', ->
           object = up.util.config(a: 1)
           object.b = 2
           object.reset()
           expect(object.reset).toBeDefined()
-          expect(object.update).toBeDefined()

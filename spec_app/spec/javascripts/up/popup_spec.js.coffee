@@ -2,10 +2,6 @@ describe 'up.popup', ->
 
   describe 'Javascript functions', ->
 
-    describe 'up.popup.defaults', ->
-
-      it 'should have tests'
-
     describe 'up.popup.attach', ->
 
       it 'should have tests'

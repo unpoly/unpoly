@@ -39,7 +39,7 @@ describe 'up.navigation', ->
       expect($otherLink).not.toHaveClass('up-current')
 
     it 'allows to configure a custom "current" class, but always also sets .up-current', ->
-      up.navigation.defaults(currentClasses: ['highlight'])
+      up.navigation.config.currentClasses = ['highlight']
       spyOn(up.browser, 'url').and.returnValue('/foo')
       $currentLink = up.hello(affix('a[href="/foo"]'))
       expect($currentLink).toHaveClass('highlight up-current')

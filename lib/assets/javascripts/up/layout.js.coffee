@@ -13,30 +13,30 @@ up.layout = (($) ->
   ###*
   Configures the application layout.
 
-  @method up.layout.defaults
-  @param {Array<String>} [options.viewports]
+  @method up.layout.config
+  @param {Array<String>} [config.viewports]
     An array of CSS selectors that find viewports
     (containers that scroll their contents).
-  @param {Array<String>} [options.fixedTop]
+  @param {Array<String>} [config.fixedTop]
     An array of CSS selectors that find elements fixed to the
     top edge of the screen (using `position: fixed`).
-  @param {Array<String>} [options.fixedBottom]
+  @param {Array<String>} [config.fixedBottom]
     An array of CSS selectors that find elements fixed to the
     bottom edge of the screen (using `position: fixed`).
-  @param {Array<String>} [options.anchoredRight]
+  @param {Array<String>} [config.anchoredRight]
     An array of CSS selectors that find elements anchored to the
     right edge of the screen (using `position: fixed` or `position: absolute`).
-  @param {Number} [options.duration]
+  @param {Number} [config.duration]
     The duration of the scrolling animation in milliseconds.
     Setting this to `0` will disable scrolling animations.
-  @param {String} [options.easing]
+  @param {String} [config.easing]
     The timing function that controls the animation's acceleration.
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
-  @param {Number} [options.snap]
+  @param {Number} [config.snap]
     When [revealing](#up.reveal) elements, Up.js will scroll an viewport
-    to the top when the revealed element is closer to the top than `options.snap`.
-  @param {Number} [options.substance]
+    to the top when the revealed element is closer to the top than `config.snap`.
+  @param {Number} [config.substance]
     A number indicating how many top pixel rows of an element to [reveal](#up.reveal).
   ###
   config = u.config
@@ -182,7 +182,7 @@ up.layout = (($) ->
   - the currently open [modal](/up.modal)
   - an element with the attribute `[up-viewport]`
   - the `<body>` element
-  - an element matching the selector you have configured using `up.viewport.defaults({ viewSelector: 'my-custom-selector' })`
+  - an element matching the selector you have configured using `up.viewport.config.viewports.push('my-custom-selector')`
 
   \#\#\#\# Fixed elements obstruction the viewport
 
@@ -192,7 +192,7 @@ up.layout = (($) ->
   To make `up.aware` of these fixed elements you can either:
 
   - give the element an attribute [`up-fixed="top"`](#up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
-  - [configure default options](#up.layout.defaults) for `fixedTop` or `fixedBottom`
+  - [configure default options](#up.layout.config) for `fixedTop` or `fixedBottom`
 
   @method up.reveal
   @param {String|Element|jQuery} element
@@ -336,7 +336,7 @@ up.layout = (($) ->
 
   ###*
   Saves the top scroll positions of all the
-  viewports configured in `up.layout.defaults('viewports').
+  viewports configured in [`up.layout.config.viewports`](#up.layout.config).
   The saved scroll positions can be restored by calling
   [`up.layout.restoreScroll()`](#up.layout.restoreScroll).
 
@@ -352,7 +352,7 @@ up.layout = (($) ->
 
   ###*
   Restores the top scroll positions of all the
-  viewports configured in `up.layout.defaults('viewports')`.
+  viewports configured in [`up.layout.config.viewports`](#up.layout.config).
 
   @method up.layout.restoreScroll
   @param {jQuery} [options.around]
@@ -463,7 +463,8 @@ up.layout = (($) ->
   reveal: reveal
   scroll: scroll
   finishScrolling: finishScrolling
-  defaults: config.update
+  config: config
+  defaults: -> u.error('up.layout.defaults(...) no longer exists. Set values on he up.layout.config property instead.')
   viewportOf: viewportOf
   viewportsWithin: viewportsWithin
   viewports: viewports

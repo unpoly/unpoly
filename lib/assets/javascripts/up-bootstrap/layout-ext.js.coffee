@@ -1,6 +1,5 @@
-defaults = up.layout.defaults()
-
-up.layout.defaults
-  fixedTop: defaults.fixedTop.concat(['.navbar-fixed-top'])
-  fixedBottom: defaults.fixedBottom.concat(['.navbar-fixed-bottom'])
-  anchoredRight: defaults.anchoredRight.concat(['.navbar-fixed-top', '.navbar-fixed-bottom', '.footer'])
+up.layout.config.fixedTop.push('.navbar-fixed-top')
+up.layout.config.fixedBottom.push('.navbar-fixed-bottom')
+up.layout.config.anchoredRight.push('.navbar-fixed-top')
+up.layout.config.anchoredRight.push('.navbar-fixed-bottom')
+up.layout.config.anchoredRight.push('.footer')

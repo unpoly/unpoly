@@ -847,27 +847,10 @@ up.util = (($) ->
     keys: keys
 
   config = (factoryOptions = {}) ->
-    hash =
-      ensureKeyExists: (key) ->
-        factoryOptions.hasOwnProperty(key) or error("Unknown setting %o", key)
-      reset: ->
-        ownKeys = copy(Object.getOwnPropertyNames(hash))
-        for key in ownKeys
-          delete hash[key] unless contains(apiKeys, key)
-        hash.update copy(factoryOptions)
-      update: (options) ->
-        if options
-          if isString(options)
-            hash.ensureKeyExists(options)
-            hash[options]
-          else
-            for key, value of options
-              hash.ensureKeyExists(key)
-              hash[key] = value
-        else
-          hash
-    apiKeys = Object.getOwnPropertyNames(hash)
+    hash = {}
+    hash.reset = -> extend(hash, factoryOptions)
     hash.reset()
+    Object.preventExtensions(hash)
     hash
 
   unwrapElement = (wrapper) ->

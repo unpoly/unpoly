@@ -104,7 +104,7 @@ describe 'up.proxy', ->
       describe 'events', ->
         
         beforeEach ->
-          up.proxy.defaults(busyDelay: 0)
+          up.proxy.config.busyDelay = 0
           @events = []
           u.each ['up:proxy:load', 'up:proxy:receive', 'up:proxy:busy', 'up:proxy:idle'], (eventName) =>
             up.on eventName, =>
@@ -187,7 +187,7 @@ describe 'up.proxy', ->
 
         it 'can delay the up:proxy:busy event to prevent flickering of spinners', ->
           jasmine.clock().install()
-          up.proxy.defaults(busyDelay: 100)
+          up.proxy.config.busyDelay = 100
 
           up.proxy.ajax(url: '/foo')
           expect(@events).toEqual([
@@ -219,7 +219,7 @@ describe 'up.proxy', ->
 
         it 'does not emit up:proxy:idle if a delayed up:proxy:busy was never emitted due to a fast response', ->
           jasmine.clock().install()
-          up.proxy.defaults(busyDelay: 100)
+          up.proxy.config.busyDelay = 100
 
           up.proxy.ajax(url: '/foo')
           expect(@events).toEqual([
@@ -306,9 +306,8 @@ describe 'up.proxy', ->
       it 'preloads the link destination on mouseover, after a delay'
 
       it 'triggers a separate AJAX request with a short cache expiry when hovered multiple times', (done) ->
-        up.proxy.defaults
-          cacheExpiry: 10
-          preloadDelay: 0
+        up.proxy.config.cacheExpiry = 10
+        up.proxy.config.preloadDelay = 0
         spyOn(up, 'follow')
         $element = affix('a[href="/foo"][up-preload]')
         Trigger.mouseover($element)

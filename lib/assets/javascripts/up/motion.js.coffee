@@ -37,10 +37,10 @@ up.motion = (($) ->
   ###*
   Sets default options for animations and transitions.
 
-  @method up.motion.defaults
-  @param {Number} [options.duration=300]
-  @param {Number} [options.delay=0]
-  @param {String} [options.easing='ease']
+  @method up.motion.config
+  @param {Number} [config.duration=300]
+  @param {Number} [config.delay=0]
+  @param {String} [config.easing='ease']
   ###
   config = u.config
     duration: 300
@@ -586,7 +586,8 @@ up.motion = (($) ->
   finish: finish
   transition: transition
   animation: animation
-  defaults: config.update
+  config: config
+  defaults: -> u.error('up.motion.defaults(...) no longer exists. Set values on he up.motion.config property instead.')
   none: none
   when: resolvableWhen
   prependCopy: prependCopy
