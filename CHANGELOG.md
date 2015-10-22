@@ -15,7 +15,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Incompatible changes
 
-- Remove the `up.`slot, which was poorly implemented, untested, and not much better than the `:empty` pseudo-selector
+- Remove `up.slot`, which was poorly implemented, untested, and not much better than the `:empty` pseudo-selector
   which has great browser support
 - Replaced the `up.bus.on(...)` event registry with vanilla DOM events bound to `document`. Also renamed
   events in the process.
