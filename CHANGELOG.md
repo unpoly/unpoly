@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.12.0
+------
+
+### Compatible changes
+
+- Up.js can now be used with [`jQuery.noConflict()`](https://api.jquery.com/jquery.noconflict/).
+
+
+### Incompatible changes
+
+- Remove the `up.`slot, which was poorly implemented, untested, and not much better than the `:empty` pseudo-selector
+  which has great browser support
+- Replaced the `up.bus.on(...)` event registry with vanilla DOM events bound to `document`. Also renamed
+  events in the process.
+
+  Instead of the old ...
+
+      up.bus.on('fragment:ready', function($fragment) {
+        ...
+      };
+
+  ... you now need to write ...
+
+      $(document).on('up:fragment:inserted', function(event) {
+        var $fragment = $(this);
+        ...
+      };
+
+  ... or shorter:
+
+      up.on('up:fragment:inserted', function(event, $fragment) {
+         ...
+      };
+- Renamed `up.ready` to `up.hello`. This will emit an `up:event:inserted` event for the given element,
+  causing it to be compiled etc.
+- `up.popup.open` has been renamed to `up.popup.attach`.
+- `up.modal.open` has been split into two methods `up.modal.visit(url)` and `up.modal.follow($link)`.
+- `up.tooltip.open` has been renamed to `up.tooltip.attach`.
+- Tooltips now escape HTML by default; To use HTML content, use an `[up-tooltip-html]` attribute instead.
+- Module configurations are now simple properties like `up.layout.config` instead of methods like `up.layout.defaults(...)`.
+
+  Instead of the old ...
+
+      up.layout.defaults({ snap: 100 });
+
+  ... you now need to write:
+
+      up.layout.config.snap = 100;
+
+
 0.11.1
 ------
 
