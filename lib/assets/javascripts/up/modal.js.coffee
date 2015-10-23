@@ -182,9 +182,9 @@ up.modal = (($) ->
   @return {Promise}
     A promise that will be resolved when the modal has finished loading.
   ###
-  follow = ($link, options) ->
+  follow = (linkOrSelector, options) ->
     options = u.options(options)
-    options.$link = $link
+    options.$link = $(linkOrSelector)
     open(options)
 
 
@@ -383,7 +383,7 @@ up.modal = (($) ->
     if $link.is('.up-current')
       close()
     else
-      open($link)
+      follow($link)
   )
 
   # Close the modal when someone clicks outside the dialog

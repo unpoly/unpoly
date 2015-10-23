@@ -110,7 +110,7 @@ up.tooltip = (($) ->
   up.compiler('[up-tooltip], [up-tooltip-html]', ($link) ->
     # Don't register these events on document since *every*
     # mouse move interaction  bubbles up to the document. 
-    $link.on('mouseover', -> open($link))
+    $link.on('mouseover', -> attach($link))
     $link.on('mouseout', -> close())
   )
 
