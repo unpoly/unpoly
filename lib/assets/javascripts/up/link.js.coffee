@@ -101,7 +101,7 @@ up.link = (($) ->
   @param {String} [options.target='body']
     The selector to replace.
   @param {Object} options
-    See options for [`up.replace`](/up.flow#up.replace)
+    See options for [`up.replace`](/up.replace)
   ###
   visit = (url, options) ->
     options = u.options(options)
@@ -132,15 +132,15 @@ up.link = (($) ->
   @param {Function|String} [options.transition]
     A transition function or name.
   @param {Number} [options.duration]
-    The duration of the transition. See [`up.morph`](/up.motion#up.morph).
+    The duration of the transition. See [`up.morph`](/up.morph).
   @param {Number} [options.delay]
-    The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
+    The delay before the transition starts. See [`up.morph`](/up.morph).
   @param {String} [options.easing]
-    The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
+    The timing function that controls the transition's acceleration. [`up.morph`](/up.morph).
   @param {Element|jQuery|String} [options.reveal]
     Whether to reveal the target  element within its viewport before updating.
   @param {Boolean} [options.restoreScroll]
-    If set to `true`, this will attempt to [`restore scroll positions`](/up.layout#up.restoreScroll)
+    If set to `true`, this will attempt to [`restore scroll positions`](/up.restoreScroll)
     previously seen on the destination URL.
   @param {Boolean} [options.cache]
     Whether to force the use of a cached response (`true`)
@@ -372,9 +372,9 @@ up.link = (($) ->
   Marks up the current link to be followed *as fast as possible*.
   This is done by:
   
-  - [Following the link through AJAX](/up.link#up-target) instead of a full page load
-  - [Preloading the link's destination URL](/up.proxy#up-preload)
-  - [Triggering the link on `mousedown`](/up.link#up-instant) instead of on `click`
+  - [Following the link through AJAX](/up-target) instead of a full page load
+  - [Preloading the link's destination URL](/up-preload)
+  - [Triggering the link on `mousedown`](/up-instant) instead of on `click`
   
   Use `up-dash` like this:
   

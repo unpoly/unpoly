@@ -3,8 +3,8 @@ Caching and preloading
 ======================
 
 All HTTP requests go through the Up.js proxy.
-It caches a [limited](/up.proxy#up.proxy.config) number of server responses
-for a [limited](/up.proxy#up.proxy.config) amount of time,
+It caches a [limited](/up.proxy.config) number of server responses
+for a [limited](/up.proxy.config) amount of time,
 making requests to these URLs return insantly.
   
 The cache is cleared whenever the user makes a non-`GET` request

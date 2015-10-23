@@ -125,11 +125,11 @@ up.popup = (($) ->
   @param {String} [options.animation]
     The animation to use when opening the popup.
   @param {Number} [options.duration]
-    The duration of the animation. See [`up.animate`](/up.motion#up.animate).
+    The duration of the animation. See [`up.animate`](/up.animate).
   @param {Number} [options.delay]
-    The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
+    The delay before the animation starts. See [`up.animate`](/up.animate).
   @param {String} [options.easing]
-    The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
+    The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
   @param {Boolean} [options.sticky=false]
     If set to `true`, the popup remains
     open even if the page changes in the background.
@@ -173,7 +173,7 @@ up.popup = (($) ->
   
   @method up.popup.close
   @param {Object} options
-    See options for [`up.animate`](/up.motion#up.animate).
+    See options for [`up.animate`](/up.animate).
   ###
   close = (options) ->
     $popup = $('.up-popup')

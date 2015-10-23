@@ -78,7 +78,7 @@ up.tooltip = (($) ->
   
   @method up.tooltip.close
   @param {Object} options
-    See options for [`up.animate`](/up.motion#up.animate).
+    See options for [`up.animate`](/up.animate).
   ###
   close = (options) ->
     $tooltip = $('.up-tooltip')

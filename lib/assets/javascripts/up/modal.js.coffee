@@ -174,11 +174,11 @@ up.modal = (($) ->
   @param {String} [options.animation]
     The animation to use when opening the modal.
   @param {Number} [options.duration]
-    The duration of the animation. See [`up.animate`](/up.motion#up.animate).
+    The duration of the animation. See [`up.animate`](/up.animate).
   @param {Number} [options.delay]
-    The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
+    The delay before the animation starts. See [`up.animate`](/up.animate).
   @param {String} [options.easing]
-    The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
+    The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
   @return {Promise}
     A promise that will be resolved when the modal has finished loading.
   ###
@@ -273,7 +273,7 @@ up.modal = (($) ->
   
   @method up.modal.close
   @param {Object} options
-    See options for [`up.animate`](/up.motion#up.animate)
+    See options for [`up.animate`](/up.animate)
   ###
   close = (options) ->
     $modal = $('.up-modal')

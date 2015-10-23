@@ -540,7 +540,7 @@ up.util = (($) ->
   
   Does nothing if the given element is not currently animating.
   
-  Also see [`up.motion.finish`](/up.motion#up.motion.finish).
+  Also see [`up.motion.finish`](/up.motion.finish).
   
   @method up.util.finishCssAnimate
   @protected

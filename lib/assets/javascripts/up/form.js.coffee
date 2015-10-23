@@ -66,15 +66,15 @@ up.form = (($) ->
     The transition to use when a failed form submission updates the `options.failTarget` selector.
     Defaults to the form's `up-fail-transition` attribute, or to `options.transition`, or to `'none'`.
   @param {Number} [options.duration]
-    The duration of the transition. See [`up.morph`](/up.motion#up.morph).
+    The duration of the transition. See [`up.morph`](/up.morph).
   @param {Number} [options.delay]
-    The delay before the transition starts. See [`up.morph`](/up.motion#up.morph).
+    The delay before the transition starts. See [`up.morph`](/up.morph).
   @param {String} [options.easing]
-    The timing function that controls the transition's acceleration. [`up.morph`](/up.motion#up.morph).
+    The timing function that controls the transition's acceleration. [`up.morph`](/up.morph).
   @param {Element|jQuery|String} [options.reveal]
     Whether to reveal the target element within its viewport.
   @param {Boolean} [options.restoreScroll]
-    If set to `true`, this will attempt to [`restore scroll positions`](/up.layout#up.restoreScroll)
+    If set to `true`, this will attempt to [`restore scroll positions`](/up.restoreScroll)
     previously seen on the destination URL.
   @param {Boolean} [options.cache]
     Whether to force the use of a cached response (`true`)

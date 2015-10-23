@@ -8,7 +8,7 @@ This internal event bus might eventually be rolled into regular events that we t
 
 \#\#\# `fragment:inserted` event
 
-This event is triggered after Up.js has inserted an HTML fragment into the DOM through mechanisms like [`[up-target]`](/up.flow#up-target) or [`up.replace`](/up.flow#up.replace):
+This event is triggered after Up.js has inserted an HTML fragment into the DOM through mechanisms like [`[up-target]`](/a-up-target) or [`up.replace`](/up.replace):
 
     up.on('up:fragment:inserted', function($fragment) {
       console.log("Looks like we have a new %o!", $fragment);
@@ -21,7 +21,7 @@ Upon receiving the event, Up.js will start compilation.
 \#\#\# `fragment:destroyed` event
 
 This event is triggered when Up.js is destroying an HTML fragment, e.g. because it's being replaced
-with a new version or because someone explicitly called [`up.destroy`](/up.flow#up.destroy):
+with a new version or because someone explicitly called [`up.destroy`](/up.destroy):
 
     up.on('up:fragment:destroyed', function($fragment) {
       console.log("Looks like we lost %o!", $fragment);

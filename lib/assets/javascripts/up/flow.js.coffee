@@ -49,7 +49,7 @@ up.flow = (($) ->
     If set to `false`, the history will remain unchanged.
   @param {String|Boolean} [options.source=true]
   @param {String} [options.reveal=false]
-    Whether to [reveal](/up.layout#up.reveal) the element being updated, by
+    Whether to [reveal](/up.reveal) the element being updated, by
     scrolling its containing viewport.
   @param {Boolean} [options.restoreScroll=`false`]
     If set to true, Up.js will try to restore the scroll position
@@ -283,11 +283,11 @@ up.flow = (($) ->
   @param {String} [options.animation='none']
     The animation to use before the element is removed from the DOM.
   @param {Number} [options.duration]
-    The duration of the animation. See [`up.animate`](/up.motion#up.animate).
+    The duration of the animation. See [`up.animate`](/up.animate).
   @param {Number} [options.delay]
-    The delay before the animation starts. See [`up.animate`](/up.motion#up.animate).
+    The delay before the animation starts. See [`up.animate`](/up.animate).
   @param {String} [options.easing]
-    The timing function that controls the animation's acceleration. [`up.animate`](/up.motion#up.animate).
+    The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
   @return {Deferred}
     A promise for the destroying animation's end
   ###

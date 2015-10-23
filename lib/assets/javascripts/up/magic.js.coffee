@@ -238,7 +238,7 @@ up.magic = (($) ->
     object before it is removed from the DOM. The destructor is supposed to
     clear global state such as time-outs and event handlers bound to the document.
     The destructor is *not* expected to remove the element from the DOM, which
-    is already handled by [`up.destroy`](/up.flow#up.destroy).
+    is already handled by [`up.destroy`](/up.destroy).
   ###
   compilers = []
   defaultCompilers = null
@@ -295,11 +295,11 @@ up.magic = (($) ->
 
   If an element annotated with [`up-data`] is inserted into the DOM,
   Up will parse the JSON and pass the resulting object to any matching
-  [`up.compiler`](/up.magic#up.magic.compiler) handlers.
+  [`up.compiler`](/up.magic.compiler) handlers.
 
   Similarly, when an event is triggered on an element annotated with
   [`up-data`], the parsed object will be passed to any matching
-  [`up.on`](/up.magic#up.on) handlers.
+  [`up.on`](/up.on) handlers.
 
   @ujs
   @method [up-data]
@@ -315,7 +315,7 @@ up.magic = (($) ->
 
   ###*
   Makes a snapshot of the currently registered event listeners,
-  to later be restored through [`up.bus.reset`](/up.bus#up.bus.reset).
+  to later be restored through [`up.bus.reset`](/up.bus.reset).
   
   @private
   @method up.magic.snapshot

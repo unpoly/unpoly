@@ -172,8 +172,8 @@ up.layout = (($) ->
   element are visible for the user.
 
   By default Up.js will always reveal an element before
-  updating it with Javascript functions like [`up.replace`](/up.flow#up.replace)
-  or UJS behavior like [`[up-target]`](/up.link#up-target).
+  updating it with Javascript functions like [`up.replace`](/up.replace)
+  or UJS behavior like [`[up-target]`](/up-target).
 
   \#\#\#\# How Up.js finds the viewport
 

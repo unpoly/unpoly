@@ -138,17 +138,17 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 ### Breaking changes
 
 - While following links and submitting forms will still reveal elements by default,
-  direct calls of [`up.replace`](http://upjs.io/up.flow#up.replace) no longer do.
+  direct calls of [`up.replace`](/up.replace) no longer do.
   This behavior can be activated using the `{ reveal: true }` option.
 
 ### Compatible changes
 
 - Options to control scrolling and cache use for
-  [`up.submit`](http://upjs.io/up.form#up.submit),
-  [`up.follow`](http://upjs.io/up.link#up.follow),
-  [`up.visit`](http://upjs.io/up.link#up.visit),
-  [`form[up-target]`](http://upjs.io/up.form#form-up-target) and
-  [`a[up-target]`](http://upjs.io/up.link#a-up-target).
+  [`up.submit`](/up.submit),
+  [`up.follow`](/up.follow),
+  [`up.visit`](/up.visit),
+  [`form[up-target]`](/form-up-target) and
+  [`a[up-target]`](/a-up-target).
 
 
 0.10.1
@@ -156,7 +156,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Breaking changes
 
-- [`up.reveal`](http://upjs.io/up.layout#up.reveal) now only reveals the first 150 pixels of an element.
+- [`up.reveal`](/up.reveal) now only reveals the first 150 pixels of an element.
 
 
 0.10.0
@@ -165,8 +165,8 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 ### Compatible changes
 
 - Viewport scroll positions are saved when the URL changes and restored when the user hits the back/forward button
-- Allow to link to the previous page using [`[up-back]`](http://upjs.io/up.history#up-back)
-- Allow to restore previous scroll state using [`[up-restore-scroll]`](http://upjs.io/up.link#a-up-target)
+- Allow to link to the previous page using [`[up-back]`](/up-back)
+- Allow to restore previous scroll state using [`[up-restore-scroll]`](/a-up-target)
 - Instead of saying `<tag up-something="true">` you can now simply say `<tag up-something>`.
 - Create this Changelog.
 
@@ -191,10 +191,10 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Compatible changes
 
-- Elements are now being [revealed](http://upjs.io/up.layout#up.reveal) within their viewport before they are updated
+- Elements are now being [revealed](/up.reveal) within their viewport before they are updated
 - Elements that are prepended or appended using `:before` or `:after` pseudo-selectors are now scrolled into view after insertion.
 - New option `up.layout.defaults('snap')` lets you define a number of pixels under which Up.js will snap to the top edge of the viewport when revealing an element
-- You can now make [`up.reveal`]((http://upjs.io/up.layout#up.reveal) aware of fixed navigation bars blocking the viewport by setting new options `up.layout.defaults('fixedTop')` and `up.layout.defaults('fixedBottom')`.
+- You can now make [`up.reveal`](/up.reveal) aware of fixed navigation bars blocking the viewport by setting new options `up.layout.defaults('fixedTop')` and `up.layout.defaults('fixedBottom')`.
 
 
 0.8.2
@@ -202,7 +202,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Compatible changes
 
-- [`up.reveal`](http://upjs.io/up.layout#up.reveal) can now reveal content in modals and containers with `overflow-y: scroll`.
+- [`up.reveal`](/up.reveal) can now reveal content in modals and containers with `overflow-y: scroll`.
 - Changing the default configuration of an Up.js module now raises an error if a config key is unknown.
 - Links linking to `"#"` are now never marked as `.up-current`.
 

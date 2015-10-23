@@ -176,7 +176,7 @@ up.navigation = (($) ->
   A link matches the current location (and is marked as `.up-current`) if it matches either:
 
   - the link's `href` attribute
-  - the link's [`up-href`](/up.link#turn-any-element-into-a-link) attribute
+  - the link's [`up-href`](#turn-any-element-into-a-link) attribute
   - a space-separated list of URLs in the link's `up-alias` attribute
 
   \#\#\#\# Matching URL by prefix
