@@ -94,8 +94,9 @@ up.magic = (($) ->
       upListener.apply($me.get(0), [event, $me, data($me)])
 
   live = (args...) ->
-    # Silently discard any event handlers that are registered on unsupported browsers
-    return unless up.browser.isSupported()
+    # Silently discard any event handlers that are registered on unsupported
+    # browsers and return a no-op destructor
+    return (->) unless up.browser.isSupported()
 
     description = u.copy(args)
     lastIndex = description.length - 1
@@ -106,7 +107,11 @@ up.magic = (($) ->
     # clean up after ourselves during a reset
     liveDescriptions.push(description)
 
-    $(document).on(description...)
+    $document = $(document)
+    $document.on(description...)
+
+    # Return destructor
+    -> $document.off(description...)
   
   ###*
   Registers a function to be called whenever an element with
