@@ -65,7 +65,7 @@ up.bus = (($) ->
   Emits an event with the given name and property.
   Returns whether any event listener has prevented the default action.
 
-  @method nobodyPrevents
+  @method up.bus.nobodyPrevents
   @protected
   ###
   nobodyPrevents = (args...) ->

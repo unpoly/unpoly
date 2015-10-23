@@ -14,6 +14,7 @@ up.layout = (($) ->
   Configures the application layout.
 
   @method up.layout.config
+  @property
   @param {Array<String>} [config.viewports]
     An array of CSS selectors that find viewports
     (containers that scroll their contents).

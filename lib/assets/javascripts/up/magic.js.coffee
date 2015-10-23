@@ -78,6 +78,8 @@ up.magic = (($) ->
     The function takes the affected element as the first argument (as a jQuery object).
     If the element has an `up-data` attribute, its value is parsed as JSON
     and passed as a second argument.
+  @return {Function}
+    A function that unbinds the event listeners when called.
   ###
   liveDescriptions = []
   defaultLiveDescriptions = null

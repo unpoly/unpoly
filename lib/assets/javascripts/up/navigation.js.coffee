@@ -19,6 +19,7 @@ up.navigation = (($) ->
   Sets default options for this module.
 
   @method up.navigation.config
+  @property
   @param {Number} [config.currentClasses]
     An array of classes to set on [links that point the current location](#up-current).
   ###

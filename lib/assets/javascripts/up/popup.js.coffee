@@ -29,9 +29,10 @@ up.popup = (($) ->
 
   ###*
   @method up.popup.config
-  @param {String} config.openAnimation
-  @param {String} config.closeAnimation
-  @param {String} config.position
+  @property
+  @param {String} [config.openAnimation]
+  @param {String} [config.closeAnimation]
+  @param {String} [config.position]
   ###
   config = u.config
     openAnimation: 'fade-in'

@@ -17,6 +17,7 @@ up.modal = (($) ->
   Sets default options for future modals.
 
   @method up.modal.config
+  @property
   @param {Number} [config.width]
     The width of the dialog as a CSS value like `'400px'` or `50%`.
 
@@ -155,7 +156,7 @@ up.modal = (($) ->
     animation has finished and the modal contents are fully visible.
 
   @method up.modal.follow
-  @param {Element|jQuery|String} elementOrSelector
+  @param {Element|jQuery|String} linkOrSelector
     The link to follow.
   @param {String} [options.target]
     The selector to extract from the response and open in a modal dialog.
