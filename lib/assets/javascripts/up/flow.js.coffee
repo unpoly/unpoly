@@ -124,7 +124,7 @@ up.flow = (($) ->
   @param {String} selector
   @param {String} html
   @param {Object} [options]
-    See options for [`up.replace`](#up.replace).
+    See options for [`up.replace`](/up.replace).
   ###
   implant = (selector, html, options) ->
     
@@ -325,7 +325,7 @@ up.flow = (($) ->
   @method up.reload
   @param {String|Element|jQuery} selectorOrElement
   @param {Object} [options]
-    See options for [`up.replace`](#up.replace)
+    See options for [`up.replace`](/up.replace)
   ###
   reload = (selectorOrElement, options) ->
     options = u.options(options, cache: false)

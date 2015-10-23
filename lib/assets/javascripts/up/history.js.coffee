@@ -34,8 +34,8 @@ up.history = (($) ->
   Returns the previous URL in the browser history.
 
   Note that this will only work reliably for history changes that
-  were applied by [`up.history.push`](#up.history.replace) or
-  [`up.history.replace`](#up.history.replace).
+  were applied by [`up.history.push`](/up.history.replace) or
+  [`up.history.replace`](/up.history.replace).
 
   @method up.history.previousUrl
   @protected

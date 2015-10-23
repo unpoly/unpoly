@@ -21,7 +21,7 @@ up.navigation = (($) ->
   @method up.navigation.config
   @property
   @param {Number} [config.currentClasses]
-    An array of classes to set on [links that point the current location](#up-current).
+    An array of classes to set on [links that point the current location](/up-current).
   ###
   config = u.config
     currentClasses: ['up-current']

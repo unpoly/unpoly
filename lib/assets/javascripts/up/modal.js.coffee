@@ -146,7 +146,7 @@ up.modal = (($) ->
       var $link = $('...');
       up.modal.follow($link);
 
-  Any option attributes for [`a[up-modal]`](#a.up-modal) will be honored.
+  Any option attributes for [`a[up-modal]`](/a.up-modal) will be honored.
 
   \#\#\#\# Events
 
@@ -162,10 +162,10 @@ up.modal = (($) ->
     The selector to extract from the response and open in a modal dialog.
   @param {Number} [options.width]
     The width of the dialog in pixels.
-    By [default](#up.modal.defaults) the dialog will grow to fit its contents.
+    By [default](/up.modal.defaults) the dialog will grow to fit its contents.
   @param {Number} [options.height]
     The width of the dialog in pixels.
-    By [default](#up.modal.defaults) the dialog will grow to fit its contents.
+    By [default](/up.modal.defaults) the dialog will grow to fit its contents.
   @param {Boolean} [options.sticky=false]
     If set to `true`, the modal remains
     open even if the page changes in the background.
@@ -205,7 +205,7 @@ up.modal = (($) ->
     The CSS selector to extract from the response.
     The extracted content will be placed into the dialog window.
   @param {Object} options
-    See options for [previous `up.modal.open` variant](#up.modal.open).
+    See options for [previous `up.modal.open` variant](/up.modal.open).
   ###
   visit = (url, options) ->
     options = u.options(options)
@@ -354,7 +354,7 @@ up.modal = (($) ->
       </div>
 
   If you want to change the design beyond CSS, you can
-  configure Up.js to [use a different HTML structure](#up.modal.config).
+  configure Up.js to [use a different HTML structure](/up.modal.config).
 
 
   \#\#\#\# Closing behavior

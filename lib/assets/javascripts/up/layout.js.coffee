@@ -35,10 +35,10 @@ up.layout = (($) ->
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
   @param {Number} [config.snap]
-    When [revealing](#up.reveal) elements, Up.js will scroll an viewport
+    When [revealing](/up.reveal) elements, Up.js will scroll an viewport
     to the top when the revealed element is closer to the top than `config.snap`.
   @param {Number} [config.substance]
-    A number indicating how many top pixel rows of an element to [reveal](#up.reveal).
+    A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
   ###
   config = u.config
     duration: 0
@@ -192,8 +192,8 @@ up.layout = (($) ->
 
   To make `up.aware` of these fixed elements you can either:
 
-  - give the element an attribute [`up-fixed="top"`](#up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
-  - [configure default options](#up.layout.config) for `fixedTop` or `fixedBottom`
+  - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
+  - [configure default options](/up.layout.config) for `fixedTop` or `fixedBottom`
 
   @method up.reveal
   @param {String|Element|jQuery} element
@@ -338,9 +338,9 @@ up.layout = (($) ->
 
   ###*
   Saves the top scroll positions of all the
-  viewports configured in [`up.layout.config.viewports`](#up.layout.config).
+  viewports configured in [`up.layout.config.viewports`](/up.layout.config).
   The saved scroll positions can be restored by calling
-  [`up.layout.restoreScroll()`](#up.layout.restoreScroll).
+  [`up.layout.restoreScroll()`](/up.layout.restoreScroll).
 
   @method up.layout.saveScroll
   @param {String} [options.url]
@@ -355,7 +355,7 @@ up.layout = (($) ->
 
   ###*
   Restores the top scroll positions of all the
-  viewports configured in [`up.layout.config.viewports`](#up.layout.config).
+  viewports configured in [`up.layout.config.viewports`](/up.layout.config).
 
   @method up.layout.restoreScroll
   @param {jQuery} [options.around]

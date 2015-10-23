@@ -63,7 +63,7 @@ up.proxy = (($) ->
   @method up.proxy.config
   @property
   @param {Number} [config.preloadDelay=75]
-    The number of milliseconds to wait before [`[up-preload]`](#up-preload)
+    The number of milliseconds to wait before [`[up-preload]`](/up-preload)
     starts preloading.
   @param {Number} [config.cacheSize=70]
     The maximum number of responses to cache.
