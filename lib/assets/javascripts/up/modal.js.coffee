@@ -51,10 +51,10 @@ up.modal = (($) ->
     to both the dialog box and the overlay dimming the page.
   ###
   config = u.config
-    maxWidth: undefined
-    minWidth: undefined
-    width: undefined
-    height: undefined
+    maxWidth: null
+    minWidth: null
+    width: null
+    height: null
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
     closeLabel: '×'
