@@ -64,7 +64,6 @@ describe 'up.flow', ->
           @respond()
           @request.then ->
             expect($('.before')).toHaveText('old-before')
-            console.log("foooo", $('.middle').text())
             expect($('.middle')).toHaveText('new-middleold-middle')
             expect($('.after')).toHaveText('old-after')
             done()
@@ -114,13 +113,43 @@ describe 'up.flow', ->
             expect(window.scriptTagExecuted).toHaveBeenCalledWith('middle')
             done()
 
-        it 'restores the scroll positions of all viewports within the target with options.restoreScroll'
+        describe 'with { restoreScroll: true } option', ->
+
+          it 'restores the scroll positions of all viewports around the target', ->
+
+            $viewport = affix('div[up-viewport] .element').css
+              'height': '100px'
+              'width': '100px'
+              'overflow-y': 'scroll'
+
+            respond = =>
+              @lastRequest().respondWith
+                status: 200
+                contentType: 'text/html'
+                responseText: '<div class="element" style="height: 300px"></div>'
+
+            up.replace('.element', '/foo')
+            respond()
+
+            $viewport.scrollTop(65)
+
+            up.replace('.element', '/bar')
+            respond()
+
+            $viewport.scrollTop(0)
+
+            up.replace('.element', '/foo', restoreScroll: true)
+            # No need to respond because /foo has been cached before
+
+            expect($viewport.scrollTop()).toEqual(65)
+
 
         describe 'with { reveal: true } option', ->
 
           beforeEach ->
             @revealedHTML = ''
-            spyOn(up, 'reveal').and.callFake ($revealedElement) =>
+
+            @revealMock = up.layout.knife.mock('reveal').and.callFake ($revealedElement) =>
               @revealedHTML = $revealedElement.get(0).outerHTML
               u.resolvedDeferred()
 
@@ -128,7 +157,7 @@ describe 'up.flow', ->
             @request = up.replace('.middle', '/path', reveal: true)
             @respond()
             @request.then =>
-              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle)
+              expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
               expect(@revealedHTML).toContain('new-middle')
               done()
 
@@ -136,7 +165,7 @@ describe 'up.flow', ->
             @request = up.replace('.middle:after', '/path', reveal: true)
             @respond()
             @request.then =>
-              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle)
+              expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
@@ -149,7 +178,7 @@ describe 'up.flow', ->
             @request = up.replace('.middle:before', '/path', reveal: true)
             @respond()
             @request.then =>
-              expect(up.reveal).not.toHaveBeenCalledWith(@oldMiddle)
+              expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.

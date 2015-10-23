@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Compatible changes
+
+- Fixed a bug where restoring previous scroll positions was not worked
+  in situations where the same operation would also reveal the replaced element.
+
+
 0.12.0
 ------
 

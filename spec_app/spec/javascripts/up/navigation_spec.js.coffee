@@ -78,7 +78,6 @@ describe 'up.navigation', ->
         $link = affix('a[href="/foo"][up-target=".main"]')
         affix('.main')
         $link.click()
-#        console.log($link)
         expect($link).toHaveClass('up-active')
         @lastRequest().respondWith
           status: 200

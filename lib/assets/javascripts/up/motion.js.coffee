@@ -175,7 +175,7 @@ up.motion = (($) ->
 
     u.temporaryCss $old, display: 'none', ->
       # Within this block, $old is hidden but $new is visible
-      up.reveal($new, viewport: $viewport) if options.reveal
+      up.layout.revealOrRestoreScroll($new, options)
       newCopy = prependCopy($new, $viewport)
       newScrollTop = $viewport.scrollTop()
 
@@ -286,19 +286,17 @@ up.motion = (($) ->
     $old = $(source)
     $new = $(target)
 
-    if up.browser.canCssAnimation()
-      parsedOptions = u.only(options, 'reveal')
-      parsedOptions = u.extend(parsedOptions, animateOptions(options))
+    parsedOptions = u.only(options, 'reveal', 'restoreScroll')
+    parsedOptions = u.extend(parsedOptions, animateOptions(options))
 
+    if up.browser.canCssAnimation()
       finish($old)
       finish($new)
 
       if transitionOrName == 'none' || transitionOrName == false || animation = animations[transitionOrName]
-        $old.hide()
-        # Since we can not longer rely on withGhosts to process options.reveal
-        # in this branch, we need to do it ourselves.
-        up.reveal($new) if options.reveal
-        animate($new, animation || 'none', options)
+        deferred = skipMorph($old, $new, parsedOptions)
+        deferred.then -> animate($new, animation || 'none', options)
+        deferred
       else if transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
         withGhosts $old, $new, parsedOptions, ($oldGhost, $newGhost) ->
           transitionPromise = transition($oldGhost, $newGhost, parsedOptions)
@@ -314,10 +312,21 @@ up.motion = (($) ->
       else
         u.error("Unknown transition %o", transitionOrName)
     else
-      # Skip ghosting and all the other stuff that can go wrong in ancient browsers.
-      # We simple hide the old element, which would be the side effect of withGhosts(...) above.
-      $old.hide()
-      u.resolvedDeferred()
+      skipMorph($old, $new, parsedOptions)
+
+  ###*
+  Cause the side effects of a successful transitions, but instantly.
+  We use this to skip morphing for old browsers, or when the developer
+  decides to only animate the new element (i.e. no real ghosting or transition)   .
+
+  @private
+  ###
+  skipMorph = ($old, $new, options) ->
+    # Simply hide the old element, which would be the side effect of withGhosts(...) below.
+    $old.hide()
+    # Since we cannot rely on withGhosts to control the scroll position
+    # in this branch, we need to do it ourselves.
+    up.layout.revealOrRestoreScroll($new, options)
 
   ###*
   @private

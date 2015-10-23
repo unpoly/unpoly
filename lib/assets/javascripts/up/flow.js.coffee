@@ -167,12 +167,6 @@ up.flow = (($) ->
       else
         u.error("Could not find selector %o in response %o", selector, html)
 
-  reveal = ($element, options) ->
-    if options.reveal
-      up.reveal($element)
-    else
-      u.resolvedDeferred()
-
   elementsInserted = ($new, options) ->
     options.insert?($new)
     if options.history
@@ -182,8 +176,6 @@ up.flow = (($) ->
     # offer reload functionality.
     unless options.source is false
       setSource($new, options.source)
-    if options.restoreScroll
-      up.layout.restoreScroll(around: $new)
     autofocus($new)
     # The fragment should be readiet before animating,
     # so transitions see .up-current classes
@@ -211,7 +203,7 @@ up.flow = (($) ->
       elementsInserted($wrapper.children(), options)
 
       # Reveal element that was being prepended/appended.
-      reveal($wrapper, options)
+      up.layout.revealOrRestoreScroll($wrapper, options)
         .then ->
           # Since we're adding content instead of replacing, we'll only
           # animate $new instead of morphing between $old and $new

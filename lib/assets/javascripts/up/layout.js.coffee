@@ -207,6 +207,7 @@ up.layout = (($) ->
     A promise that will be resolved when the element is revealed.
   ###
   reveal = (elementOrSelector, options) ->
+    u.debug('Revealing %o', elementOrSelector)
     options = u.options(options)
     $element = $(elementOrSelector)
     $viewport = if options.viewport then $(options.viewport) else viewportOf($element)
@@ -348,6 +349,7 @@ up.layout = (($) ->
   saveScroll = (options = {}) ->
     url = u.option(options.url, up.history.url())
     tops = u.option(options.tops, scrollTops())
+    u.debug('Saving scroll positions for URL %o: %o', url, tops)
     lastScrollTops.set(url, tops)
 
   ###*
@@ -362,6 +364,8 @@ up.layout = (($) ->
   ###
   restoreScroll = (options = {}) ->
 
+    url = up.history.url()
+
     $viewports = undefined
 
     if options.around
@@ -371,12 +375,33 @@ up.layout = (($) ->
     else
       $viewports = viewports()
 
-    tops = lastScrollTops.get(up.history.url())
+    tops = lastScrollTops.get(url)
+
+    u.debug('Restoring scroll positions for URL %o (viewports are %o, saved tops are %o)', url, $viewports, tops)
 
     for key, scrollTop of tops
       right = if key == 'document' then document else key
       $matchingViewport = $viewports.filter(right)
-      up.scroll($matchingViewport, scrollTop, duration: 0)
+      scroll($matchingViewport, scrollTop, duration: 0)
+
+    # Since scrolling happens without animation, we don't need to
+    # join promises from the up.scroll call above
+    u.resolvedDeferred()
+
+  ###*
+  @protected
+  @method up.layout.revealOrRestoreScroll
+  @return {Deferred} A promise for when the revealing or scroll restauration ends
+  ###
+  revealOrRestoreScroll = (selectorOrElement, options) ->
+    $element = $(selectorOrElement)
+    if options.restoreScroll
+      restoreScroll(around: $element)
+    else if options.reveal
+      reveal($element)
+    else
+      u.resolvedDeferred()
+
 
   ###*
   Marks this element as a scrolling container. Apply this ttribute if your app uses
@@ -460,6 +485,7 @@ up.layout = (($) ->
 
   up.on 'up:framework:reset', reset
 
+  knife: eval(Knife?.point)
   reveal: reveal
   scroll: scroll
   finishScrolling: finishScrolling
@@ -471,6 +497,7 @@ up.layout = (($) ->
   scrollTops: scrollTops
   saveScroll: saveScroll
   restoreScroll: restoreScroll
+  revealOrRestoreScroll: revealOrRestoreScroll
   anchoredRight: anchoredRight
   fixedChildren: fixedChildren
 

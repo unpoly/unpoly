@@ -94,6 +94,47 @@ describe 'up.link', ->
 
                       done()
 
+        describe 'with { restoreScroll: true } option', ->
+
+          it 'does not reveal, but instead restores the scroll positions of all viewports around the target', ->
+
+            $viewport = affix('div[up-viewport] .element').css
+              'height': '100px'
+              'width': '100px'
+              'overflow-y': 'scroll'
+
+            followLink = (options = {}) ->
+              $link = $viewport.find('.link')
+              up.follow($link, options)
+
+            respond = (linkDestination) =>
+              @lastRequest().respondWith
+                status: 200
+                contentType: 'text/html'
+                responseText: """
+                  <div class="element" style="height: 300px">
+                    <a class="link" href="#{linkDestination}" up-target=".element">Link</a>
+                  </div>
+                  """
+
+            up.replace('.element', '/foo')
+            # Provide the content at /foo with a link to /bar in the HTML
+            respond('/bar')
+
+            $viewport.scrollTop(65)
+
+            # Follow the link to /bar
+            followLink()
+
+            # Provide the content at /bar with a link back to /foo in the HTML
+            respond('/foo')
+
+            # Follow the link back to /foo, restoring the scroll position of 65px
+            followLink(restoreScroll: true)
+            # No need to respond because /foo has been cached before
+
+            expect($viewport.scrollTop()).toEqual(65)
+
       else
         
         it 'follows the given link', ->
