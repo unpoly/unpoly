@@ -5,13 +5,15 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.12.1
+------
 
 ### Compatible changes
 
+- `up.on` now returns a function that unbinds the events when called
 - Fixed a bug where restoring previous scroll positions was not worked
   in situations where the same operation would also reveal the replaced element.
+- Various bugfixes
 
 
 0.12.0

@@ -1405,7 +1405,7 @@ We need to work on this page:
     Emits an event with the given name and property.
     Returns whether any event listener has prevented the default action.
     
-    @method nobodyPrevents
+    @method up.bus.nobodyPrevents
     @protected
      */
     nobodyPrevents = function() {
@@ -1523,6 +1523,8 @@ We need to work on this page:
       The function takes the affected element as the first argument (as a jQuery object).
       If the element has an `up-data` attribute, its value is parsed as JSON
       and passed as a second argument.
+    @return {Function}
+      A function that unbinds the event listeners when called.
      */
     liveDescriptions = [];
     defaultLiveDescriptions = null;
@@ -1539,17 +1541,21 @@ We need to work on this page:
       };
     };
     live = function() {
-      var args, behavior, description, lastIndex, ref;
+      var $document, args, behavior, description, lastIndex;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       if (!up.browser.isSupported()) {
-        return;
+        return (function() {});
       }
       description = u.copy(args);
       lastIndex = description.length - 1;
       behavior = description[lastIndex];
       description[lastIndex] = upListenerToJqueryListener(behavior);
       liveDescriptions.push(description);
-      return (ref = $(document)).on.apply(ref, description);
+      $document = $(document);
+      $document.on.apply($document, description);
+      return function() {
+        return $document.off.apply($document, description);
+      };
     };
 
     /**
@@ -1892,6 +1898,7 @@ We need to work on this page:
 
     /**
     @method up.history.config
+    @property
     @param {Array<String>} [config.popTargets=['body']]
       An array of CSS selectors to replace when the user goes
       back in history.
@@ -2092,13 +2099,14 @@ This modules contains functions to scroll the viewport and reveal contained elem
   var slice = [].slice;
 
   up.layout = (function($) {
-    var SCROLL_PROMISE_KEY, anchoredRight, config, finishScrolling, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
+    var SCROLL_PROMISE_KEY, anchoredRight, config, finishScrolling, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealOrRestoreScroll, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
     u = up.util;
 
     /**
     Configures the application layout.
     
     @method up.layout.config
+    @property
     @param {Array<String>} [config.viewports]
       An array of CSS selectors that find viewports
       (containers that scroll their contents).
@@ -2315,6 +2323,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
      */
     reveal = function(elementOrSelector, options) {
       var $element, $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsDocument;
+      u.debug('Revealing %o', elementOrSelector);
       options = u.options(options);
       $element = $(elementOrSelector);
       $viewport = options.viewport ? $(options.viewport) : viewportOf($element);
@@ -2477,6 +2486,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       }
       url = u.option(options.url, up.history.url());
       tops = u.option(options.tops, scrollTops());
+      u.debug('Saving scroll positions for URL %o: %o', url, tops);
       return lastScrollTops.set(url, tops);
     };
 
@@ -2491,10 +2501,11 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @protected
      */
     restoreScroll = function(options) {
-      var $ancestorViewports, $descendantViewports, $matchingViewport, $viewports, key, results, right, scrollTop, tops;
+      var $ancestorViewports, $descendantViewports, $matchingViewport, $viewports, key, right, scrollTop, tops, url;
       if (options == null) {
         options = {};
       }
+      url = up.history.url();
       $viewports = void 0;
       if (options.around) {
         $descendantViewports = viewportsWithin(options.around);
@@ -2503,17 +2514,36 @@ This modules contains functions to scroll the viewport and reveal contained elem
       } else {
         $viewports = viewports();
       }
-      tops = lastScrollTops.get(up.history.url());
-      results = [];
+      tops = lastScrollTops.get(url);
+      u.debug('Restoring scroll positions for URL %o (viewports are %o, saved tops are %o)', url, $viewports, tops);
       for (key in tops) {
         scrollTop = tops[key];
         right = key === 'document' ? document : key;
         $matchingViewport = $viewports.filter(right);
-        results.push(up.scroll($matchingViewport, scrollTop, {
+        scroll($matchingViewport, scrollTop, {
           duration: 0
-        }));
+        });
       }
-      return results;
+      return u.resolvedDeferred();
+    };
+
+    /**
+    @protected
+    @method up.layout.revealOrRestoreScroll
+    @return {Deferred} A promise for when the revealing or scroll restauration ends
+     */
+    revealOrRestoreScroll = function(selectorOrElement, options) {
+      var $element;
+      $element = $(selectorOrElement);
+      if (options.restoreScroll) {
+        return restoreScroll({
+          around: $element
+        });
+      } else if (options.reveal) {
+        return reveal($element);
+      } else {
+        return u.resolvedDeferred();
+      }
     };
 
     /**
@@ -2597,6 +2627,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
      */
     up.on('up:framework:reset', reset);
     return {
+      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       reveal: reveal,
       scroll: scroll,
       finishScrolling: finishScrolling,
@@ -2610,6 +2641,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       scrollTops: scrollTops,
       saveScroll: saveScroll,
       restoreScroll: restoreScroll,
+      revealOrRestoreScroll: revealOrRestoreScroll,
       anchoredRight: anchoredRight,
       fixedChildren: fixedChildren
     };
@@ -2641,7 +2673,7 @@ We need to work on this page:
 
 (function() {
   up.flow = (function($) {
-    var autofocus, destroy, elementsInserted, findOldFragment, first, fragmentNotFound, implant, isRealElement, parseImplantSteps, parseResponse, reload, replace, reveal, setSource, source, swapElements, u;
+    var autofocus, destroy, elementsInserted, findOldFragment, first, fragmentNotFound, implant, isRealElement, parseImplantSteps, parseResponse, reload, replace, setSource, source, swapElements, u;
     u = up.util;
     setSource = function(element, sourceUrl) {
       var $element;
@@ -2805,13 +2837,6 @@ We need to work on this page:
         }
       };
     };
-    reveal = function($element, options) {
-      if (options.reveal) {
-        return up.reveal($element);
-      } else {
-        return u.resolvedDeferred();
-      }
-    };
     elementsInserted = function($new, options) {
       if (typeof options.insert === "function") {
         options.insert($new);
@@ -2824,11 +2849,6 @@ We need to work on this page:
       }
       if (options.source !== false) {
         setSource($new, options.source);
-      }
-      if (options.restoreScroll) {
-        up.layout.restoreScroll({
-          around: $new
-        });
       }
       autofocus($new);
       return up.hello($new);
@@ -2843,7 +2863,7 @@ We need to work on this page:
         $old[insertionMethod]($wrapper);
         u.copyAttributes($new, $old);
         elementsInserted($wrapper.children(), options);
-        return reveal($wrapper, options).then(function() {
+        return up.layout.revealOrRestoreScroll($wrapper, options).then(function() {
           return up.animate($wrapper, transition, options);
         }).then(function() {
           u.unwrapElement($wrapper);
@@ -3044,7 +3064,7 @@ We need to work on this page:
 
 (function() {
   up.motion = (function($) {
-    var GHOSTING_PROMISE_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, findAnimation, finish, finishGhosting, morph, none, prependCopy, reset, resolvableWhen, snapshot, transition, transitions, u, withGhosts;
+    var GHOSTING_PROMISE_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, findAnimation, finish, finishGhosting, morph, none, prependCopy, reset, resolvableWhen, skipMorph, snapshot, transition, transitions, u, withGhosts;
     u = up.util;
     animations = {};
     defaultAnimations = {};
@@ -3055,6 +3075,7 @@ We need to work on this page:
     Sets default options for animations and transitions.
     
     @method up.motion.config
+    @property
     @param {Number} [config.duration=300]
     @param {Number} [config.delay=0]
     @param {String} [config.easing='ease']
@@ -3198,11 +3219,7 @@ We need to work on this page:
       u.temporaryCss($old, {
         display: 'none'
       }, function() {
-        if (options.reveal) {
-          up.reveal($new, {
-            viewport: $viewport
-          });
-        }
+        up.layout.revealOrRestoreScroll($new, options);
         newCopy = prependCopy($new, $viewport);
         return newScrollTop = $viewport.scrollTop();
       });
@@ -3302,20 +3319,20 @@ We need to work on this page:
       A promise for the transition's end.
      */
     morph = function(source, target, transitionOrName, options) {
-      var $new, $old, animation, parsedOptions, parts, transition;
+      var $new, $old, animation, deferred, parsedOptions, parts, transition;
       $old = $(source);
       $new = $(target);
+      parsedOptions = u.only(options, 'reveal', 'restoreScroll');
+      parsedOptions = u.extend(parsedOptions, animateOptions(options));
       if (up.browser.canCssAnimation()) {
-        parsedOptions = u.only(options, 'reveal');
-        parsedOptions = u.extend(parsedOptions, animateOptions(options));
         finish($old);
         finish($new);
         if (transitionOrName === 'none' || transitionOrName === false || (animation = animations[transitionOrName])) {
-          $old.hide();
-          if (options.reveal) {
-            up.reveal($new);
-          }
-          return animate($new, animation || 'none', options);
+          deferred = skipMorph($old, $new, parsedOptions);
+          deferred.then(function() {
+            return animate($new, animation || 'none', options);
+          });
+          return deferred;
         } else if (transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]) {
           return withGhosts($old, $new, parsedOptions, function($oldGhost, $newGhost) {
             var transitionPromise;
@@ -3332,9 +3349,20 @@ We need to work on this page:
           return u.error("Unknown transition %o", transitionOrName);
         }
       } else {
-        $old.hide();
-        return u.resolvedDeferred();
+        return skipMorph($old, $new, parsedOptions);
       }
+    };
+
+    /**
+    Cause the side effects of a successful transitions, but instantly.
+    We use this to skip morphing for old browsers, or when the developer
+    decides to only animate the new element (i.e. no real ghosting or transition)   .
+    
+    @private
+     */
+    skipMorph = function($old, $new, options) {
+      $old.hide();
+      return up.layout.revealOrRestoreScroll($new, options);
     };
 
     /**
@@ -3706,6 +3734,7 @@ You can change (or remove) this delay like this:
 
     /**
     @method up.proxy.config
+    @property
     @param {Number} [config.preloadDelay=75]
       The number of milliseconds to wait before [`[up-preload]`](#up-preload)
       starts preloading.
@@ -4797,9 +4826,10 @@ We need to work on this page:
 
     /**
     @method up.popup.config
-    @param {String} config.openAnimation
-    @param {String} config.closeAnimation
-    @param {String} config.position
+    @property
+    @param {String} [config.openAnimation]
+    @param {String} [config.closeAnimation]
+    @param {String} [config.position]
      */
     config = u.config({
       openAnimation: 'fade-in',
@@ -5105,6 +5135,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     Sets default options for future modals.
     
     @method up.modal.config
+    @property
     @param {Number} [config.width]
       The width of the dialog as a CSS value like `'400px'` or `50%`.
     
@@ -5138,10 +5169,10 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       to both the dialog box and the overlay dimming the page.
      */
     config = u.config({
-      maxWidth: void 0,
-      minWidth: void 0,
-      width: void 0,
-      height: void 0,
+      maxWidth: null,
+      minWidth: null,
+      width: null,
+      height: null,
       openAnimation: 'fade-in',
       closeAnimation: 'fade-out',
       closeLabel: '×',
@@ -5250,7 +5281,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       animation has finished and the modal contents are fully visible.
     
     @method up.modal.follow
-    @param {Element|jQuery|String} elementOrSelector
+    @param {Element|jQuery|String} linkOrSelector
       The link to follow.
     @param {String} [options.target]
       The selector to extract from the response and open in a modal dialog.
@@ -5276,9 +5307,9 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
     @return {Promise}
       A promise that will be resolved when the modal has finished loading.
      */
-    follow = function($link, options) {
+    follow = function(linkOrSelector, options) {
       options = u.options(options);
-      options.$link = $link;
+      options.$link = $(linkOrSelector);
       return open(options);
     };
 
@@ -5491,7 +5522,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
       if ($link.is('.up-current')) {
         return close();
       } else {
-        return open($link);
+        return follow($link);
       }
     });
     up.on('click', 'body', function(event, $body) {
@@ -5684,7 +5715,7 @@ We need to work on this page:
      */
     up.compiler('[up-tooltip], [up-tooltip-html]', function($link) {
       $link.on('mouseover', function() {
-        return open($link);
+        return attach($link);
       });
       return $link.on('mouseout', function() {
         return close();
@@ -5731,6 +5762,7 @@ by providing instant feedback for user interactions.
     Sets default options for this module.
     
     @method up.navigation.config
+    @property
     @param {Number} [config.currentClasses]
       An array of classes to set on [links that point the current location](#up-current).
      */
@@ -5925,7 +5957,7 @@ by providing instant feedback for user interactions.
       unmarkActive();
       return locationChanged();
     });
-    up.on('up:fragment:destroy', function(event, $fragment) {
+    up.on('up:fragment:destroyed', function(event, $fragment) {
       if ($fragment.is('.up-modal, .up-popup')) {
         return locationChanged();
       }
