@@ -201,7 +201,7 @@ up.navigation = (($) ->
     # location bar).
     locationChanged()
 
-  up.on 'up:fragment:destroy', (event, $fragment) ->
+  up.on 'up:fragment:destroyed', (event, $fragment) ->
     # If the destroyed fragment is a modal or popup container
     # this changes which URLs we consider currents.
     # Also modals and popups restore their previous history
