@@ -81,11 +81,12 @@ up.navigation = (($) ->
     matchesAny: matchesAny
 
   locationChanged = ->
-
     currentUrls = urlSet([
       normalizeUrl(up.browser.url()),
-      normalizeUrl(up.modal.source()),
-      normalizeUrl(up.popup.source())
+      normalizeUrl(up.modal.url()),
+      normalizeUrl(up.modal.coveredUrl()),
+      normalizeUrl(up.popup.url()),
+      normalizeUrl(up.popup.coveredUrl())
     ])
 
     klass = currentClass()

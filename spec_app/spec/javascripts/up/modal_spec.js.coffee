@@ -81,6 +81,26 @@ describe 'up.modal', ->
             expect(parseInt($anchoredElement.css('right'))).toBeAround(30 , 10)
             done()
 
+
+    describe 'up.modal.coveredUrl', ->
+
+      it 'returns the URL behind the modal overlay', (done) ->
+        up.history.replace('/foo')
+        expect(up.modal.coveredUrl()).toBeUndefined()
+        up.modal.visit('/bar', target: '.container')
+        @lastRequest().respondWith
+          status: 200
+          contentType: 'text/html'
+          responseText:
+            """
+            <div class="container">text</div>
+            """
+        expect(up.modal.coveredUrl()).toEndWith('/foo')
+        up.modal.close().then ->
+          expect(up.modal.coveredUrl()).toBeUndefined()
+          done()
+
+
     describe 'up.modal.close', ->
 
       it 'should have tests'

@@ -68,11 +68,30 @@ up.modal = (($) ->
       </div>
       """
 
-  currentSource = undefined
+  ###*
+  Returns the source URL for the fragment displayed in the current modal overlay,
+  or `undefined` if no modal is currently open.
+
+  @method up.modal.url
+  @return {String}
+    the source URL
+  ###
+  currentUrl = undefined
+
+  ###*
+  Returns the URL of the page below the modal overlay.
+
+  @method up.modal.coveredUrl()
+  @return {String}
+  @protected
+  ###
+  coveredUrl = ->
+    $modal = $('.up-modal')
+    $modal.attr('up-covered-url')
 
   reset = ->
     close()
-    currentSource = undefined
+    currentUrl = undefined
     config.reset()
 
   templateHtml = ->
@@ -83,20 +102,20 @@ up.modal = (($) ->
       template
 
   rememberHistory = ->
-    $popup = $('.up-modal')
-    $popup.attr('up-previous-url', up.browser.url())
-    $popup.attr('up-previous-title', document.title)
+    $modal = $('.up-modal')
+    $modal.attr('up-covered-url', up.browser.url())
+    $modal.attr('up-covered-title', document.title)
 
   discardHistory = ->
-    $popup = $('.up-modal')
-    $popup.removeAttr('up-previous-url')
-    $popup.removeAttr('up-previous-title')
+    $modal = $('.up-modal')
+    $modal.removeAttr('up-covered-url')
+    $modal.removeAttr('up-covered-title')
 
   createHiddenModal = (options) ->
     $modal = $(templateHtml())
     $modal.attr('up-sticky', '') if options.sticky
-    $modal.attr('up-previous-url', up.browser.url())
-    $modal.attr('up-previous-title', document.title)
+    $modal.attr('up-covered-url', up.browser.url())
+    $modal.attr('up-covered-title', document.title)
     $dialog = $modal.find('.up-modal-dialog')
     $dialog.css('width', options.width) if u.isPresent(options.width)
     $dialog.css('max-width', options.maxWidth) if u.isPresent(options.maxWidth)
@@ -162,10 +181,10 @@ up.modal = (($) ->
     The selector to extract from the response and open in a modal dialog.
   @param {Number} [options.width]
     The width of the dialog in pixels.
-    By [default](/up.modal.defaults) the dialog will grow to fit its contents.
+    By [default](/up.modal.config) the dialog will grow to fit its contents.
   @param {Number} [options.height]
     The width of the dialog in pixels.
-    By [default](/up.modal.defaults) the dialog will grow to fit its contents.
+    By [default](/up.modal.config) the dialog will grow to fit its contents.
   @param {Boolean} [options.sticky=false]
     If set to `true`, the modal remains
     open even if the page changes in the background.
@@ -250,17 +269,6 @@ up.modal = (($) ->
       $.Deferred()
 
   ###*
-  Returns the source URL for the fragment displayed in the current modal overlay,
-  or `undefined` if no modal is currently open.
-  
-  @method up.modal.source
-  @return {String}
-    the source URL
-  ###
-  source = ->
-    currentSource
-
-  ###*
   Closes a currently opened modal overlay.
   Does nothing if no modal is currently open.
 
@@ -281,10 +289,10 @@ up.modal = (($) ->
       if up.bus.nobodyPrevents('up:modal:close', $element: $modal)
         options = u.options(options,
           animation: config.closeAnimation,
-          url: $modal.attr('up-previous-url')
-          title: $modal.attr('up-previous-title')
+          url: $modal.attr('up-covered-url')
+          title: $modal.attr('up-covered-title')
         )
-        currentSource = undefined
+        currentUrl = undefined
         deferred = up.destroy($modal, options)
         deferred.then ->
           unshifter() while unshifter = unshiftElements.pop()
@@ -397,7 +405,7 @@ up.modal = (($) ->
   up.on('up:fragment:inserted', (event, $fragment) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
-        currentSource = newSource
+        currentUrl = newSource
     else if !up.popup.contains($fragment)
       autoclose()
   )
@@ -428,9 +436,11 @@ up.modal = (($) ->
   follow: follow
   open: -> up.error('up.modal.open no longer exists. Please use either up.modal.follow or up.modal.visit.')
   close: close
-  source: source
+  url: -> currentUrl
+  coveredUrl: coveredUrl
   config: config
   defaults: -> u.error('up.modal.defaults(...) no longer exists. Set values on he up.modal.config property instead.')
   contains: contains
+  source: -> up.error('up.popup.source no longer exists. Please use up.popup.url instead.')
 
 )(jQuery)

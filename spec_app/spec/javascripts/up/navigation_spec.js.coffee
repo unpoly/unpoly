@@ -68,9 +68,47 @@ describe 'up.navigation', ->
           responseText: '<div class="main">new-text</div>'
         expect($link).toHaveClass('up-current')
 
-      it 'marks a link as .up-current if it links to the URL currently shown in the modal'
+      it 'marks a link as .up-current if it links to an URL currently shown either within or below the modal', (done) ->
+        up.history.replace('/foo')
+        $backgroundLink = affix('a[href="/foo"]')
+        $modalLink = affix('a[href="/bar"][up-modal=".main"]')
+        $unrelatedLink = affix('a[href="/baz]')
 
-      it 'marks a link as .up-current if it links to the URL currently shown in the popup'
+        $modalLink.click()
+        @lastRequest().respondWith
+          status: 200
+          contentType: 'text/html'
+          responseText: '<div class="main">new-text</div>'
+        expect($backgroundLink).toHaveClass('up-current')
+        expect($modalLink).toHaveClass('up-current')
+        expect($unrelatedLink).not.toHaveClass('up-current')
+
+        up.modal.close().then ->
+          expect($backgroundLink).toHaveClass('up-current')
+          expect($modalLink).not.toHaveClass('up-current')
+          expect($unrelatedLink).not.toHaveClass('up-current')
+          done()
+
+      it 'marks a link as .up-current if it links to the URL currently either within or below the popup', (done) ->
+        up.history.replace('/foo')
+        $backgroundLink = affix('a[href="/foo"]')
+        $popupLink = affix('a[href="/bar"][up-popup=".main"]')
+        $unrelatedLink = affix('a[href="/baz]')
+
+        $popupLink.click()
+        @lastRequest().respondWith
+          status: 200
+          contentType: 'text/html'
+          responseText: '<div class="main">new-text</div>'
+        expect($backgroundLink).toHaveClass('up-current')
+        expect($popupLink).toHaveClass('up-current')
+        expect($unrelatedLink).not.toHaveClass('up-current')
+
+        up.popup.close().then ->
+          expect($backgroundLink).toHaveClass('up-current')
+          expect($popupLink).not.toHaveClass('up-current')
+          expect($unrelatedLink).not.toHaveClass('up-current')
+          done()
 
       it 'changes .up-current marks as the URL changes'
         
@@ -110,4 +148,4 @@ describe 'up.navigation', ->
           contentType: 'text/html'
           responseText: '<div class="main">new-text</div>'
         expect($area).toHaveClass('up-current')
-        
+

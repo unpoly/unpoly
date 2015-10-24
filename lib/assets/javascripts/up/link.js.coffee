@@ -345,7 +345,7 @@ up.link = (($) ->
       </div>
 
   In the example above, clicking anywhere within `.notification` element
-  would [follow](/up-follow) the *Close* link.
+  would [follow](/up.follow) the *Close* link.
 
   `up-expand` honors all the UJS behavior in expanded links
   (`up-target`, `up-instant`, `up-preload`, etc.).

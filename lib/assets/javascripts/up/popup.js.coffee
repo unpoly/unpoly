@@ -25,7 +25,26 @@ up.popup = (($) ->
 
   u = up.util
 
-  currentSource = undefined
+  ###*
+  Returns the source URL for the fragment displayed
+  in the current popup, or `undefined` if no  popup is open.
+
+  @method up.popup.url
+  @return {String}
+    the source URL
+  ###
+  currentUrl = undefined
+
+  ###*
+  Returns the URL of the page or modal below the popup.
+
+  @method up.popup.coveredUrl()
+  @return {String}
+  @protected
+  ###
+  coveredUrl = ->
+    $popup = $('.up-popup')
+    $popup.attr('up-covered-url')
 
   ###*
   @method up.popup.config
@@ -92,13 +111,13 @@ up.popup = (($) ->
           
   rememberHistory = ->
     $popup = $('.up-popup')
-    $popup.attr('up-previous-url', up.browser.url())
-    $popup.attr('up-previous-title', document.title)
+    $popup.attr('up-covered-url', up.browser.url())
+    $popup.attr('up-covered-title', document.title)
           
   discardHistory = ->
     $popup = $('.up-popup')
-    $popup.removeAttr('up-previous-url')
-    $popup.removeAttr('up-previous-title')
+    $popup.removeAttr('up-covered-url')
+    $popup.removeAttr('up-covered-title')
     
   createHiddenPopup = ($link, selector, sticky) ->
     $popup = u.$createElementFromSelector('.up-popup')
@@ -156,18 +175,6 @@ up.popup = (($) ->
     )
     
   ###*
-  Returns the source URL for the fragment displayed
-  in the current popup overlay, or `undefined` if no
-  popup is open.
-  
-  @method up.popup.source
-  @return {String}
-    the source URL
-  ###
-  source = ->
-    currentSource
-
-  ###*
   Closes a currently opened popup overlay.
   Does nothing if no popup is currently open.
   
@@ -180,10 +187,10 @@ up.popup = (($) ->
     if $popup.length
       options = u.options(options,
         animation: config.closeAnimation,
-        url: $popup.attr('up-previous-url'),
-        title: $popup.attr('up-previous-title')
+        url: $popup.attr('up-covered-url'),
+        title: $popup.attr('up-covered-title')
       )
-      currentSource = undefined
+      currentUrl = undefined
       up.destroy($popup, options)
     else
       u.resolvedPromise()
@@ -240,7 +247,7 @@ up.popup = (($) ->
   up.on('up:fragment:inserted', (event, $fragment) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
-        currentSource = newSource
+        currentUrl = newSource
     else
       autoclose()
   )
@@ -269,10 +276,12 @@ up.popup = (($) ->
 
   attach: attach
   close: close
-  source: source
+  url: -> currentUrl
+  coveredUrl: coveredUrl
   config: config
   defaults: -> u.error('up.popup.defaults(...) no longer exists. Set values on he up.popup.config property instead.')
   contains: contains
-  open: -> up.warn('up.popup.open no longer exists. Please use up.popup.attach instead.')
+  open: -> up.error('up.popup.open no longer exists. Please use up.popup.attach instead.')
+  source: -> up.error('up.popup.source no longer exists. Please use up.popup.url instead.')
 
 )(jQuery)
