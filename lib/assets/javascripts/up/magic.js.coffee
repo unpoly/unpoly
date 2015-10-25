@@ -352,7 +352,7 @@ up.magic = (($) ->
   ###
   hello = (selectorOrElement) ->
     $element = $(selectorOrElement)
-    up.bus.emit('up:fragment:inserted', $element: $element)
+    up.emit('up:fragment:inserted', $element: $element)
     $element
 
   onEscape = (handler) ->

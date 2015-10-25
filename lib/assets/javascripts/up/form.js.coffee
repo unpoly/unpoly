@@ -16,9 +16,7 @@ We need to work on this page:
 - Explain that the server needs to send `X-Up-Location` and `X-Up-Method` headers
   if an successful form submission resulted in a redirect
 - Examples
-  
 
-  
 @class up.form
 ###
 up.form = (($) ->

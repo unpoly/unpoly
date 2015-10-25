@@ -2,7 +2,7 @@ describe 'up.bus', ->
   
   describe 'Javascript functions', ->
     
-    describe 'up.bus.emit', ->
+    describe 'up.emit', ->
 
       it 'triggers an event on the document', ->
         emittedEvent = undefined
@@ -15,7 +15,7 @@ describe 'up.bus', ->
         expect(emittedEvent).toBeUndefined()
         expect(emitted$Target).toBeUndefined()
 
-        up.bus.emit('foo')
+        up.emit('foo')
 
         expect(emittedEvent).toBeDefined()
         expect(emittedEvent.preventDefault).toBeDefined()
@@ -27,7 +27,7 @@ describe 'up.bus', ->
         up.on 'foo', (event) ->
           emittedEvent = event
 
-        up.bus.emit('foo', { customField: 'custom-value' })
+        up.emit('foo', { customField: 'custom-value' })
 
         expect(emittedEvent.customField).toEqual('custom-value')
 
@@ -41,7 +41,7 @@ describe 'up.bus', ->
           emittedEvent = event
           emitted$Target = $target
 
-        up.bus.emit('foo', $element: $element)
+        up.emit('foo', $element: $element)
 
         expect(emittedEvent).toBeDefined()
         expect(emitted$Target).toEqual($element)

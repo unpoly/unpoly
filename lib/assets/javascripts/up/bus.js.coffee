@@ -47,11 +47,27 @@ up.bus = (($) ->
   u = up.util
 
   ###*
-  @method up.bus.emit
+  Emits an event with the given name and properties.
+
+  \#\#\#\# Example
+
+      up.on('my:event', function(event) {
+        console.log(event.foo);
+      });
+
+      up.emit('my:event', { foo: 'bar' });
+      # Prints "bar" to the console
+
+  @method up.emit
   @param {String} eventName
     The name of the event.
-  @param args...
-    The arguments that describe the event.
+  @param {Object} [eventProps={}]
+    A list of properties to become part of the event object
+    that will be passed to listeners. Note that the event object
+    will by default include properties like `preventDefault()`
+    or `stopPropagation()`.
+  @param {jQuery} [eventProps.$element=$(document)]
+    The element on which the event is trigered.
   @protected
   ###
   emit = (eventName, eventProps = {}) ->
@@ -62,10 +78,11 @@ up.bus = (($) ->
     event
 
   ###*
-  Emits an event with the given name and property.
-  Returns whether any event listener has prevented the default action.
+  [Emits an event](/up.emit) and returns whether any listener has prevented the default action.
 
   @method up.bus.nobodyPrevents
+  @param {String} eventName
+  @param {Object} eventProps
   @protected
   ###
   nobodyPrevents = (args...) ->
@@ -85,7 +102,7 @@ up.bus = (($) ->
   @method up.reset
   ###
   reset = ->
-    up.bus.emit('up:framework:reset')
+    up.emit('up:framework:reset')
 
   emit: emit
   nobodyPrevents: nobodyPrevents
@@ -94,3 +111,4 @@ up.bus = (($) ->
 )(jQuery)
 
 up.reset = up.bus.reset
+up.emit = up.bus.emit

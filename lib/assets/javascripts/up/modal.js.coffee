@@ -157,7 +157,7 @@ up.modal = (($) ->
     shiftElements()
     $modal.show()
     deferred = up.animate($modal, animation, animateOptions)
-    deferred.then -> up.bus.emit('up:modal:opened')
+    deferred.then -> up.emit('up:modal:opened')
 
   ###*
   Opens the given link's destination in a modal overlay:
@@ -296,7 +296,7 @@ up.modal = (($) ->
         deferred = up.destroy($modal, options)
         deferred.then ->
           unshifter() while unshifter = unshiftElements.pop()
-          up.bus.emit('up:modal:closed')
+          up.emit('up:modal:closed')
         deferred
       else
         # Although someone prevented the destruction, keep a uniform API for

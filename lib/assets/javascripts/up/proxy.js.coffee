@@ -244,7 +244,7 @@ up.proxy = (($) ->
     if wasIdle
       emission = ->
         if busy() # a fast response might have beaten the delay
-          up.bus.emit('up:proxy:busy')
+          up.emit('up:proxy:busy')
           busyEventEmitted = true
       if config.busyDelay > 0
         busyDelayTimer = setTimeout(emission, config.busyDelay)
@@ -254,14 +254,14 @@ up.proxy = (($) ->
   loadEnded = ->
     pendingCount -= 1
     if idle() && busyEventEmitted
-      up.bus.emit('up:proxy:idle')
+      up.emit('up:proxy:idle')
       busyEventEmitted = false
 
   load = (request) ->
     u.debug('Loading URL %o', request.url)
-    up.bus.emit('up:proxy:load', request)
+    up.emit('up:proxy:load', request)
     promise = u.ajax(request)
-    promise.always -> up.bus.emit('up:proxy:receive', request)
+    promise.always -> up.emit('up:proxy:receive', request)
     promise
 
   isIdempotent = (request) ->

@@ -24,8 +24,8 @@ up.flow = (($) ->
     sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
     $element.attr("up-source", sourceUrl)
 
-  source = (element) ->
-    $element = $(element).closest("[up-source]")
+  source = (selectorOrElement) ->
+    $element = $(selectorOrElement).closest('[up-source]')
     u.presence($element.attr("up-source")) || up.browser.url()
 
   ###*
@@ -51,7 +51,7 @@ up.flow = (($) ->
   @param {String} [options.reveal=false]
     Whether to [reveal](/up.reveal) the element being updated, by
     scrolling its containing viewport.
-  @param {Boolean} [options.restoreScroll=`false`]
+  @param {Boolean} [options.restoreScroll=false]
     If set to true, Up.js will try to restore the scroll position
     of all the viewports around or below the updated element. The position
     will be reset to the last known top position before a previous
@@ -111,7 +111,7 @@ up.flow = (($) ->
   Updates a selector on the current page with the
   same selector from the given HTML string.
 
-  Example:
+  \#\#\#\# Example
 
       html = '<div class="before">new-before</div>' +
              '<div class="middle">new-middle</div>' +
@@ -252,6 +252,7 @@ up.flow = (($) ->
 
   ###*
   Returns the first element matching the given selector.
+
   Excludes elements that also match `.up-ghost` or `.up-destroying`
   or that are children of elements with these selectors.
 
@@ -273,7 +274,9 @@ up.flow = (($) ->
 
   ###*
   Destroys the given element or selector.
-  Takes care that all destructors, if any, are called.
+
+  Takes care that all [`up.compiler`](/up.compiler) destructors, if any, are called.
+
   The element is removed from the DOM.
   
   @method up.destroy
@@ -307,7 +310,7 @@ up.flow = (($) ->
       animationDeferred.then ->
         # Emit this while $element is still part of the DOM, so event
         # listeners bound to the document will receive the event.
-        up.bus.emit('up:fragment:destroyed', $element: $element)
+        up.emit('up:fragment:destroyed', $element: $element)
         $element.remove()
       animationDeferred
     else
@@ -326,6 +329,9 @@ up.flow = (($) ->
   @param {String|Element|jQuery} selectorOrElement
   @param {Object} [options]
     See options for [`up.replace`](/up.replace)
+  @param {String} [options.url]
+    The URL from which to reload the fragment.
+    This defaults to the URL from which the fragment was originally loaded.
   ###
   reload = (selectorOrElement, options) ->
     options = u.options(options, cache: false)
