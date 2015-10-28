@@ -256,7 +256,7 @@ up.flow = (($) ->
   Excludes elements that also match `.up-ghost` or `.up-destroying`
   or that are children of elements with these selectors.
 
-  Returns `null` if no element matches these conditions.
+  Returns `undefined` if no element matches these conditions.
 
   @protected
   @method up.first
@@ -264,7 +264,7 @@ up.flow = (($) ->
   ###
   first = (selector) ->
     elements = $(selector).get()
-    $match = null
+    $match = undefined
     for element in elements
       $element = $(element)
       if isRealElement($element)
