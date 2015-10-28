@@ -1,5 +1,5 @@
 ###*
-Viewport scrolling
+Application layout
 ==================
 
 This modules contains functions to scroll the viewport and reveal contained elements.
@@ -134,7 +134,7 @@ up.layout = (($) ->
       u.resolvedDeferred()
 
   ###*
-  @method up.viewport.finishScrolling
+  @method up.layout.finishScrolling
   @private
   ###
   finishScrolling = (elementOrSelector) ->
@@ -143,7 +143,7 @@ up.layout = (($) ->
         existingScrolling.resolve()
 
   ###*
-  @method up.viewport.anchoredRight
+  @method up.layout.anchoredRight
   @private
   ###
   anchoredRight = ->
@@ -183,7 +183,7 @@ up.layout = (($) ->
   - the currently open [modal](/up.modal)
   - an element with the attribute `[up-viewport]`
   - the `<body>` element
-  - an element matching the selector you have configured using `up.viewport.config.viewports.push('my-custom-selector')`
+  - an element matching the selector you have configured using `up.layout.config.viewports.push('my-custom-selector')`
 
   \#\#\#\# Fixed elements obstruction the viewport
 
@@ -339,8 +339,12 @@ up.layout = (($) ->
   ###*
   Saves the top scroll positions of all the
   viewports configured in [`up.layout.config.viewports`](/up.layout.config).
-  The saved scroll positions can be restored by calling
-  [`up.layout.restoreScroll()`](/up.layout.restoreScroll).
+
+  The scroll positions will be associated with the current URL.
+  They can later be restored by calling [`up.layout.restoreScroll()`](/up.layout.restoreScroll)
+  at the same URL.
+
+  Up.js automatically saves scroll positions whenever a fragment was updated on the page.
 
   @method up.layout.saveScroll
   @param {String} [options.url]
@@ -354,8 +358,11 @@ up.layout = (($) ->
     lastScrollTops.set(url, tops)
 
   ###*
-  Restores the top scroll positions of all the
+  Restores [previously saved](/up.layout.saveScroll) scroll positions of viewports
   viewports configured in [`up.layout.config.viewports`](/up.layout.config).
+
+  Up.js automatically restores scroll positions when the user presses the back button.
+  You can disable this behavior by setting [`up.history.config.restoreScroll = false`](/up.history.config).
 
   @method up.layout.restoreScroll
   @param {jQuery} [options.around]
@@ -405,8 +412,11 @@ up.layout = (($) ->
 
 
   ###*
-  Marks this element as a scrolling container. Apply this ttribute if your app uses
-  a custom panel layout with fixed positioning instead of scrolling `<body>`.
+  Marks this element as a scrolling container ("viewport").
+
+  Apply this attribute if your app uses a custom panel layout with fixed positioning
+  instead of scrolling `<body>`. As an alternative you can also push a selector
+  matching your custom viewport to the [`up.layout.config.viewports`](/up.layout.config) array.
 
   [`up.reveal`](/up.reveal) will always try to scroll the viewport closest
   to the element that is being revealed. By default this is the `<body>` element.

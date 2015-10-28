@@ -110,6 +110,15 @@ up.browser = (($) ->
   initialRequestMethod = u.memoize ->
     (popCookie('_up_request_method') || 'get').toLowerCase()
 
+  ###*
+  Returns whether Up.js supports the current browser.
+
+  Currently Up.js supports IE9 with jQuery 1.9+.
+  On older browsers Up.js will prevent itself from booting, leaving you with
+  a classic server-side application.
+
+  @up.browser.isSupported
+  ###
   isSupported = ->
     (!isIE8OrWorse()) && isRecentJQuery()
 

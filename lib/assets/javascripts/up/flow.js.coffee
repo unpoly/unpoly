@@ -34,6 +34,31 @@ up.flow = (($) ->
 
   The current and new elements must have the same CSS selector.
 
+  \#\#\#\# Example
+
+  Let's say your curent HTML looks like this:
+
+      <div class="one">old one</div>
+      <div class="two">old two</div>
+
+  We now replace the second `<div>`:
+
+      up.replace('.two', '/new');
+
+  The server renders a response for `/new`:
+
+      <div class="one">new one</div>
+      <div class="two">new two</div>
+
+  Up.js looks for the selector `.two` in the response and [implants](/up.implant) it into
+  the current page. The current page now looks like this:
+
+      <div class="one">old one</div>
+      <div class="two">new two</div>
+
+  Note how only `.two` has changed. The update for `.one` was
+  discarded, since it didn't match the selector.
+
   @method up.replace
   @param {String|Element|jQuery} selectorOrElement
     The CSS selector to update. You can also pass a DOM element or jQuery element
@@ -113,12 +138,28 @@ up.flow = (($) ->
 
   \#\#\#\# Example
 
-      html = '<div class="before">new-before</div>' +
-             '<div class="middle">new-middle</div>' +
-              '<div class="after">new-after</div>';
+  Let's say your curent HTML looks like this:
 
-      up.flow.implant('.middle', html):
-  
+      <div class="one">old one</div>
+      <div class="two">old two</div>
+
+  We now replace the second `<div>`, using an HTML string
+  as the source:
+
+      html = '<div class="one">new one</div>' +
+             '<div class="two">new two</div>';
+
+      up.flow.implant('.two', html);
+
+  Up.js looks for the selector `.two` in the strings and updates its
+  contents in the current page. The current page now looks like this:
+
+      <div class="one">old one</div>
+      <div class="two">new two</div>
+
+  Note how only `.two` has changed. The update for `.one` was
+  discarded, since it didn't match the selector.
+
   @method up.flow.implant
   @protected
   @param {String} selector
@@ -278,12 +319,14 @@ up.flow = (($) ->
   Takes care that all [`up.compiler`](/up.compiler) destructors, if any, are called.
 
   The element is removed from the DOM.
+  Note that if you choose to animate the element removal using `options.animate`,
+  the element won't be removed until after the animation has completed.
   
   @method up.destroy
   @param {String|Element|jQuery} selectorOrElement 
   @param {String} [options.url]
   @param {String} [options.title]
-  @param {String} [options.animation='none']
+  @param {String|Function} [options.animation='none']
     The animation to use before the element is removed from the DOM.
   @param {Number} [options.duration]
     The duration of the animation. See [`up.animate`](/up.animate).
@@ -292,7 +335,7 @@ up.flow = (($) ->
   @param {String} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
   @return {Deferred}
-    A promise for the destroying animation's end
+    A promise that will be resolved once the element has been removed from the DOM.
   ###
   destroy = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
@@ -319,8 +362,13 @@ up.flow = (($) ->
       $.Deferred()
 
   ###*
-  Replaces the given selector or element with a fresh copy
-  fetched from the server.
+  Replaces the given element with a fresh copy fetched from the server.
+
+  \#\#\#\# Example
+
+      up.on('new-mail', function() {
+        up.reload('.inbox');
+      });
 
   Up.js remembers the URL from which a fragment was loaded, so you
   don't usually need to give an URL when reloading.

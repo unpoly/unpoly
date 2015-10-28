@@ -21,15 +21,36 @@ up.magic = (($) ->
   DESTROYABLE_CLASS = 'up-destroyable'
   DESTROYER_KEY = 'up-destroyer'
 
+  liveDescriptions = []
+  defaultLiveDescriptions = null
+
   ###*
-  Binds an event handler to the document, which will be executed whenever the
-  given event is triggered on the given selector:
+  # Convert an Up.js style listener (second argument is the event target
+  # as a jQuery collection) to a vanilla jQuery listener
+  ###
+  upListenerToJqueryListener = (upListener) ->
+    (event) ->
+      $me = event.$element || $(this)
+      upListener.apply($me.get(0), [event, $me, data($me)])
+
+  ###*
+  Listens to an event on `document`.
+
+  The given event listener which will be executed whenever the
+  given event is [triggered](/up.emit) on the given selector:
 
       up.on('click', '.button', function(event, $element) {
         console.log("Someone clicked the button %o", $element);
       });
 
-  This is roughly equivalent to binding a jQuery element to `document`.
+  This is roughly equivalent to binding an event listener to `document`:
+
+      $(document).on('click', '.button', function(event) {
+        console.log("Someone clicked the button %o", $(this));
+      });
+
+  Other than jQuery, Up.js will silently discard event listeners
+  on [browsers that it doesn't support](/up.browser.isSupported).
 
 
   \#\#\#\# Attaching structured data
@@ -81,18 +102,6 @@ up.magic = (($) ->
   @return {Function}
     A function that unbinds the event listeners when called.
   ###
-  liveDescriptions = []
-  defaultLiveDescriptions = null
-
-  ###*
-  # Convert an Up.js style listener (second argument is the event target
-  # as a jQuery collection) to a vanilla jQuery listener
-  ###
-  upListenerToJqueryListener = (upListener) ->
-    (event) ->
-      $me = event.$element || $(this)
-      upListener.apply($me.get(0), [event, $me, data($me)])
-
   live = (args...) ->
     # Silently discard any event handlers that are registered on unsupported
     # browsers and return a no-op destructor
@@ -112,12 +121,26 @@ up.magic = (($) ->
 
     # Return destructor
     -> $document.off(description...)
-  
+
+
   ###*
   Registers a function to be called whenever an element with
-  the given selector is inserted into the DOM through Up.js.
+  the given selector is inserted into the DOM.
 
-  This is a great way to integrate jQuery plugins.
+      $('.action').compiler(function($element) {
+        // your code here
+      });
+
+  Compiler functions will be called on matching elements when
+  the page loads, or whenever a matching fragment is [updated through Up.js](/up.replace)
+  later.
+
+  If you have used Angular.js before, this resembles [Angular directives](https://docs.angularjs.org/guide/directive).
+
+
+  \#\#\#\# Integrating jQuery plugins
+
+  `up.compiler` is a great way to integrate jQuery plugins.
   Let's say your Javascript plugin wants you to call `lightboxify()`
   on links that should open a lightbox. You decide to
   do this for all links with an `[rel=lightbox]` attribute:
@@ -131,14 +154,10 @@ up.magic = (($) ->
         $element.lightboxify();
       });
 
-  Note that within the compiler, Up.js will bind `this` to the
-  native DOM element to help you migrate your existing jQuery code to
-  this new syntax.
-
 
   \#\#\#\# Custom elements
 
-  You can also use `up.compiler` to implement custom elements like this:
+  You can use `up.compiler` to implement custom elements like this:
 
       <clock></clock>
 
@@ -214,11 +233,27 @@ up.magic = (($) ->
       });
 
 
-  \#\#\#\# Migrating jQuery event handlers to `up.on`
+  \#\#\#\# Migrating jQuery event handlers to `up.compiler`
 
   Within the compiler, Up.js will bind `this` to the
   native DOM element to help you migrate your existing jQuery code to
   this new syntax.
+
+  So if you had this before:
+
+      $(function() {
+        $('.action').on('click', function() {
+          $(this).something();
+        });
+      });
+
+  ... you can reuse the event handler like this:
+
+      $('.action').compiler(function($element) {
+        $element.on('click', function() {
+          $(this).something();
+        });
+      });
 
   
   @method up.compiler
@@ -343,9 +378,14 @@ up.magic = (($) ->
   into the DOM. This causes Up.js to compile the fragment (apply
   event listeners, etc.).
 
-  This method is called automatically if you change elements through
-  other Up.js methods. You will only need to call this if you
-  manipulate the DOM without going through Up.js.
+  **As long as you manipulate the DOM using Up.js, you will never
+  need to call this method.** You only need to use `up.hello` if the
+  DOM is manipulated without Up.js' involvement, e.g. by plugin code that
+  is not aware of Up.js:
+
+      // Add an element with naked jQuery, without going through Upjs:
+      $element = $('<div>...</div>').appendTo(document.body);
+      up.hello($element);
 
   @method up.hello
   @param {String|Element|jQuery} selectorOrElement

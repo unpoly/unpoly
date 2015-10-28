@@ -109,7 +109,7 @@ up.link = (($) ->
     up.replace(selector, url, options)
 
   ###*
-  Follows the given link via AJAX and replaces a CSS selector in the current page
+  Follows the given link via AJAX and [replaces](/up.replace) a CSS selector in the current page
   with corresponding elements from a new page fetched from the server.
 
   Any Up.js UJS attributes on the given link will be honored. E. g. you have this link:
@@ -122,7 +122,7 @@ up.link = (($) ->
       up.follow($link);
 
   @method up.follow
-  @param {Element|jQuery|String} link
+  @param {Element|jQuery|String} linkOrSelector
     An element or selector which resolves to an `<a>` tag
     or any element that is marked up with an `up-href` attribute.
   @param {String} [options.target]
@@ -147,8 +147,8 @@ up.link = (($) ->
     or never use the cache (`false`)
     or make an educated guess (`undefined`).
   ###
-  follow = (link, options) ->
-    $link = $(link)
+  follow = (linkOrSelector, options) ->
+    $link = $(linkOrSelector)
 
     options = u.options(options)
     url = u.option($link.attr('up-href'), $link.attr('href'))
@@ -164,10 +164,18 @@ up.link = (($) ->
     up.replace(selector, url, options)
 
   ###*
+  Returns the HTTP method that should be used when following the given link.
+
+  Looks at the link's `up-method` or `data-method` attribute.
+  Defaults to `get`.
+
   @protected
   @method up.link.followMethod
+  @param linkOrSelector
+  @param options.method {String}
   ###
-  followMethod = ($link, options) ->
+  followMethod = (linkOrSelector, options) ->
+    $link = $(linkOrSelector)
     options = u.options(options)
     u.option(options.method, $link.attr('up-method'), $link.attr('data-method'), 'get').toUpperCase()
 

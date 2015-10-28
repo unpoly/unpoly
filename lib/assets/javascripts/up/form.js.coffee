@@ -151,7 +151,7 @@ up.form = (($) ->
   For instance, the following would submit the form whenever the
   text field value changes:
 
-      up.observe('input', { change: function(value, $input) {
+      up.observe('input[name=query]', { change: function(value, $input) {
         up.submit($input)
       } });
 
@@ -168,8 +168,8 @@ up.form = (($) ->
   \#\#\#\# Throttling
 
   If you are concerned about fast typists causing too much
-  load on your server, you can use a `delay` option to wait before
-  executing the callback:
+  load on your server, you can use a `delay` option to wait
+  a few miliseconds before executing the callback:
 
       up.observe('input', {
         delay: 100,
@@ -267,7 +267,7 @@ up.form = (($) ->
 
   ###*
   Submits the form through AJAX, searches the response for the selector
-  given in `up-target` and replaces the selector content in the current page:
+  given in `up-target` and [replaces](/up.replace) the selector content in the current page:
 
       <form method="post" action="/users" up-target=".main">
         ...
@@ -276,11 +276,16 @@ up.form = (($) ->
   @method form[up-target]
   @ujs
   @param {String} up-target
-    The selector to replace if the form submission is successful (200 status code).
+    The selector to [replace](/up.replace) if the form submission is successful (200 status code).
   @param {String} [up-fail-target]
+    The selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
+    If omitted, Up.js will replace the `<form>` tag itself, assuming that the
+    server has echoed the form with validation errors.
   @param {String} [up-transition]
+    The animation to use when the form is replaced after a successful submission.
   @param {String} [up-fail-transition]
-  @param {String} [up-history]
+    The animation to use when the form is replaced after a failed submission.
+  @param {String} [up-history='true']
   @param {String} [up-method]
     The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
     Alternately you can use an attribute `data-method`
