@@ -38,7 +38,7 @@ up.popup = (($) ->
   ###*
   Returns the URL of the page or modal below the popup.
 
-  @method up.popup.coveredUrl()
+  @method up.popup.coveredUrl
   @return {String}
   @protected
   ###

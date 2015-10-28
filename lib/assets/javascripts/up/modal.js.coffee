@@ -81,7 +81,7 @@ up.modal = (($) ->
   ###*
   Returns the URL of the page below the modal overlay.
 
-  @method up.modal.coveredUrl()
+  @method up.modal.coveredUrl
   @return {String}
   @protected
   ###
