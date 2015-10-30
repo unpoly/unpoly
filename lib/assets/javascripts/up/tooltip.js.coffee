@@ -20,6 +20,27 @@ up.tooltip = (($) ->
   
   u = up.util
 
+  ###*
+  Sets default options for future tooltips.
+
+  @method up.tooltip.config
+  @property
+  @param {String} [config.position]
+    The default position of tooltips relative to the element.
+    Can be either `"top"` or `"bottom"`.
+  @param {String} [config.openAnimation='fade-in']
+    The animation used to open a tooltip.
+  @param {String} [config.closeAnimation='fade-out']
+    The animation used to close a tooltip.
+  ###
+  config = u.config
+    position: 'top'
+    openAnimation: 'fade-in'
+    closeAnimation: 'fade-out'
+
+  reset = ->
+    config.reset()
+
   setPosition = ($link, $tooltip, position) ->
     linkBox = u.measure($link)
     tooltipBox = u.measure($tooltip)
@@ -63,9 +84,9 @@ up.tooltip = (($) ->
   attach = (linkOrSelector, options = {}) ->
     $link = $(linkOrSelector)
     html = u.option(options.html, $link.attr('up-tooltip-html'))
-    text = u.option(options.text, $link.attr('up-tooltip'), $link.attr('title'))
-    position = u.option(options.position, $link.attr('up-position'), 'top')
-    animation = u.option(options.animation, u.castedAttr($link, 'up-animation'), 'fade-in')
+    text = u.option(options.text, $link.attr('up-tooltip'))
+    position = u.option(options.position, $link.attr('up-position'), config.position)
+    animation = u.option(options.animation, u.castedAttr($link, 'up-animation'), config.openAnimation)
     animateOptions = up.motion.animateOptions(options, $link)
     close()
     $tooltip = createElement(text: text, html: html)
@@ -83,7 +104,7 @@ up.tooltip = (($) ->
   close = (options) ->
     $tooltip = $('.up-tooltip')
     if $tooltip.length
-      options = u.options(options, animation: 'fade-out')
+      options = u.options(options, animation: config.closeAnimation)
       options = u.merge(options, up.motion.animateOptions(options))
       up.destroy($tooltip, options)
 
@@ -91,14 +112,23 @@ up.tooltip = (($) ->
   Displays a tooltip with text content when hovering the mouse over this element:
 
       <a href="/decks" up-tooltip="Show all decks">Decks</a>
-  
-  You can also make an existing `title` attribute appear as a tooltip:
-  
-      <a href="/decks" title="Show all decks" up-tooltip>Decks</a>
+
+  To make the tooltip appear below the element instead of above the element,
+  add an `up-position` attribute:
+
+      <a href="/decks" up-tooltip="Show all decks" up-position="bottom">Decks</a>
 
   @method [up-tooltip]
+  @param {String} [up-animation]
+    The animation used to open the tooltip.
+    Defaults to [`up.tooltip.config.openAnimation`](/up.tooltip.config).
+  @param {String} [up-position]
+    The default position of tooltips relative to the element.
+    Can be either `"top"` or `"bottom"`.
+    Defaults to [`up.tooltip.config.position`](/up.tooltip.config).
   @ujs
   ###
+
   ###*
   Displays a tooltip with HTML content when hovering the mouse over this element:
 
@@ -125,6 +155,9 @@ up.tooltip = (($) ->
 
   # Close the tooltip when the user presses ESC.
   up.magic.onEscape(-> close())
+
+  # The framework is reset between tests
+  up.on 'up:framework:reset', reset
 
   attach: attach
   close: close
