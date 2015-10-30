@@ -117,7 +117,7 @@ up.browser = (($) ->
   On older browsers Up.js will prevent itself from booting, leaving you with
   a classic server-side application.
 
-  @up.browser.isSupported
+  @method up.browser.isSupported
   ###
   isSupported = ->
     (!isIE8OrWorse()) && isRecentJQuery()
