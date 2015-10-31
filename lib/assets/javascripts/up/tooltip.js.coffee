@@ -1,18 +1,31 @@
 ###*
 Tooltips
 ========
-  
-Elements that have an `up-tooltip` attribute will show the attribute
-value in a tooltip when a user hovers over the element. 
-  
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-  
-- Show the tooltip's HTML structure and how to style the elements
-- Explain how to position tooltips using `up-position`
-- We should have a position about tooltips that contain HTML.
-  
+
+Up.js comes with a basic tooltip implementation.
+
+You can an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a tooltip whenever
+  the user hovers over the element:
+
+      <a href="/decks" up-tooltip="Show all decks">Decks</a>
+
+
+\#\#\#\# Styling
+
+The [default styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/tooltip.css.sass)
+show a simple tooltip with white text on a gray background.
+A gray triangle points to the element.
+
+To change the styling, simply override CSS rules for the `.up-tooltip` selector and its `:after`
+selector that is used the triangle.
+
+The HTML of a tooltip element is simply this:
+
+    <div class="up-tooltip">
+      Show all decks
+    </div>
+
+The tooltip element is appended to the end of `<body>`.
 
 @class up.tooltip
 ###
@@ -68,7 +81,7 @@ up.tooltip = (($) ->
   ###*
   Opens a tooltip over the given element.
 
-      up.tooltip.open('.help', {
+      up.tooltip.attach('.help', {
         html: 'Enter multiple words or phrases'
       });
   

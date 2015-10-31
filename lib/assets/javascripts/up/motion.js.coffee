@@ -316,7 +316,7 @@ up.motion = (($) ->
       skipMorph($old, $new, parsedOptions)
 
   ###*
-  Cause the side effects of a successful transitions, but instantly.
+  This causes the side effects of a successful transition, but instantly.
   We use this to skip morphing for old browsers, or when the developer
   decides to only animate the new element (i.e. no real ghosting or transition)   .
 
