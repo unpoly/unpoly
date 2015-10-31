@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.12.2
+------
+
+### Compatible changes
+
+- When marking links as `.up-current`, also consider the URL behind a current modal or popup to
+  be the "current" URL.
+
+
+### Incompatible changes
+
+- `up.bus.emit` is now [`up.emit`](http://upjs.io/up.emit/)
+- When `up.first` finds no match, return `undefined` instead of `null`.
+
+
 0.12.1
 ------
 
