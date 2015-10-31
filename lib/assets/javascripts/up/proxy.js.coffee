@@ -10,13 +10,13 @@ making requests to these URLs return insantly.
 The cache is cleared whenever the user makes a non-`GET` request
 (like `POST`, `PUT` or `DELETE`).
 
-The proxy can also used to speed up reaction times by preloading
-links when the user hovers over the click area (or puts the mouse/finger
-down before releasing). This way the
-response will already be cached when the user performs the click.
+The proxy can also used to speed up reaction times by [preloading
+links when the user hovers over the click area](/up-preload) (or puts the mouse/finger
+down before releasing). This way the response will already be cached when
+the user performs the click.
 
 Spinners
----------
+--------
 
 You can listen to [framework events](/up.bus) to implement a spinner
 (progress indicator) that appears during a long-running request,
@@ -31,12 +31,15 @@ Here is the Javascript to make it alive:
       show = function() { $element.show() };
       hide = function() { $element.hide() };
 
-      up.bus.on('proxy:busy', show);
-      up.bus.on('proxy:idle', hide);
+      showOff = up.on('proxy:busy', show);
+      hideOff = up.on('proxy:idle', hide);
 
+      hide();
+
+      // Clean up when the element is removed from the DOM
       return function() {
-        up.bus.off('proxy:busy', show);
-        up.bus.off('proxy:idle', hide);
+        showOff();
+        hideOff();
       };
 
     });
