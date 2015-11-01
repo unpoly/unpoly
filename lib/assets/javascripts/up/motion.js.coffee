@@ -1,26 +1,30 @@
 ###*
-Animation and transitions
-=========================
+Animation
+=========
   
-Any fragment change in Up.js can be animated.
+Whenever you change a page fragment (through methods like
+[`up.replace`](/up.replace) or UJS attributes like [`up-target`](/up-target))
+you can animate the change.
 
-    <a href="/users" data-target=".list" up-transition="cross-fade">Show users</a>
+For instance, when you replace a selector `.list` with a new `.list`
+from the server, you can add an `up-transition="cross-fade"` attribute
+to smoothly fade out the old `.list` while fading in the new `.list`:
 
-Or a dialog open:
+    <a href="/users" up-target=".list" up-transition="cross-fade">Show users</a>
+
+When we morph between an old an new element, we call it a *transition*.
+In contrast, when we animate a new element without simultaneously removing an
+old element, we call it an *animation*.
+
+An example for an animation is opening a new dialog, which we can animate
+using the `up-animation` attribute:
 
     <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
 
-Up.js ships with a number of predefined animations and transitions,
-and you can easily define your own using Javascript or CSS. 
-  
-  
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-  
-- Explain the difference between transitions and animations
-- Demo the built-in animations and transitions
-- Explain ghosting
+Up.js ships with a number of predefined [animations](/up.animate#named-animation)
+and [transitions](/up.morph#named-animation).
+You can also easily [define your own animations](/up.animation)
+or [transitions](/up.transition) using Javascript or CSS.
 
   
 @class up.motion
@@ -265,7 +269,25 @@ up.motion = (($) ->
   
   - `move-to-bottom/fade-in`
   - `move-to-left/move-from-top`
-  
+
+  \#\#\#\# Implementation details
+
+  During a transition both the old and new element occupy
+  the same position on the screen.
+
+  Since the CSS layout flow will usually not allow two elements to
+  overlay the same space, Up.js:
+
+  - The old and new elements are cloned
+  - The old element is removed from the layout flow using `display: hidden`
+  - The new element is hidden, but still leaves space in the layout flow by setting `visibility: hidden`
+  - The clones are [absolutely positioned](https://developer.mozilla.org/en-US/docs/Web/CSS/position#Absolute_positioning)
+    over the original elements.
+  - The transition is applied to the cloned elements.
+    At no point will the hidden, original elements be animated.
+  - When the transition has finished, the clones are removed from the DOM and the new element is shown.
+    The old element remains hidden in the DOM.
+
   @method up.morph
   @param {Element|jQuery|String} source
   @param {Element|jQuery|String} target
@@ -455,7 +477,8 @@ up.motion = (($) ->
   Returns a new promise that resolves once all promises in arguments resolve.
 
   Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
-  the combined promise will have a `resolve` method.
+  the combined promise will have a `resolve` method. This `resolve` method
+  will resolve all the wrapped promises.
 
   @method up.motion.when
   @param promises...
