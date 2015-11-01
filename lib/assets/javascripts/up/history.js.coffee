@@ -1,6 +1,6 @@
 ###*
-Manipulating the browser history
-=======
+Browser history
+===============
   
 \#\#\# Incomplete documentation!
   
