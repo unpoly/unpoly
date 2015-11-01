@@ -76,7 +76,7 @@ Read on
 - You can [open fragments in popups or modal dialogs](/up.modal).
 - You can give users [immediate feedback](/up.navigation) when a link is clicked or becomes current, without waiting for the server.
 - [Controlling Up.js pragmatically through Javascript](/up.flow)
-- [Defining custom tags and event handlers](/up.magic)
+- [Defining custom tags](/up.syntax)
 
   
 @class up.link

@@ -1,6 +1,6 @@
 ###*
-Registering behavior and custom elements
-========================================
+Custom elements
+===============
   
 Up.js keeps a persistent Javascript environment during page transitions.
 To prevent memory leaks it is important to cleanly set up and tear down
@@ -12,9 +12,9 @@ We need to work on this page:
 
 - Better class-level introduction for this module
 
-@class up.magic
+@class up.syntax
 ###
-up.magic = (($) ->
+up.syntax = (($) ->
   
   u = up.util
 
@@ -220,7 +220,7 @@ up.magic = (($) ->
   we can support getting or setting individual keys.
 
   @protected
-  @method up.magic.data
+  @method up.syntax.data
   @param {String|Element|jQuery} elementOrSelector
   ###
 
@@ -230,7 +230,7 @@ up.magic = (($) ->
 
   If an element annotated with [`up-data`] is inserted into the DOM,
   Up will parse the JSON and pass the resulting object to any matching
-  [`up.compiler`](/up.magic.compiler) handlers.
+  [`up.compiler`](/up.syntax.compiler) handlers.
 
   Similarly, when an event is triggered on an element annotated with
   [`up-data`], the parsed object will be passed to any matching
@@ -304,8 +304,8 @@ up.magic = (($) ->
 
 )(jQuery)
 
-up.compiler = up.magic.compiler
-up.hello = up.magic.hello
+up.compiler = up.syntax.compiler
+up.hello = up.syntax.hello
 
 up.ready = -> up.util.error('up.ready no longer exists. Please use up.hello instead.')
 up.awaken = -> up.util.error('up.awaken no longer exists. Please use up.compiler instead.')

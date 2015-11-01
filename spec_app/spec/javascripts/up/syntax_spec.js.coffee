@@ -1,4 +1,4 @@
-describe 'up.magic', ->
+describe 'up.syntax', ->
   
   describe 'Javascript functions', ->
   

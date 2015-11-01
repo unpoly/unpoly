@@ -14,7 +14,7 @@ This event is triggered after Up.js has inserted an HTML fragment into the DOM t
       console.log("Looks like we have a new %o!", $fragment);
     });
 
-The event is triggered *before* Up has compiled the fragment with your [custom behavior](/up.magic).
+The event is triggered *before* Up has compiled the fragment with your [custom elements](/up.syntax).
 Upon receiving the event, Up.js will start compilation.
 
 
@@ -54,7 +54,7 @@ up.bus = (($) ->
   upListenerToJqueryListener = (upListener) ->
     (event) ->
       $me = event.$element || $(this)
-      upListener.apply($me.get(0), [event, $me, up.magic.data($me)])
+      upListener.apply($me.get(0), [event, $me, up.syntax.data($me)])
 
   ###*
   Listens to an event on `document`.

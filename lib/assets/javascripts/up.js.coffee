@@ -2,7 +2,7 @@
 #= require up/util
 #= require up/browser
 #= require up/bus
-#= require up/magic
+#= require up/syntax
 #= require up/history
 #= require up/layout
 #= require up/flow
