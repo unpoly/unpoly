@@ -2,16 +2,11 @@
 Changing page fragments programmatically
 ========================================
   
-This module contains Up's core functions to insert, change
-or destroy page fragments.
+This module contains Up.js's core functions to [change](/up.replace) or [destroy](/up.destroy)
+  page fragments via Javascript.
 
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-  
-- Explain the UJS approach vs. pragmatic approach
-- Examples
-  
+All the other Up.js modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
+are based on this module.
   
 @class up.flow
 ###
