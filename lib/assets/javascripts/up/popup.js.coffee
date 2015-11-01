@@ -253,7 +253,7 @@ up.popup = (($) ->
   )
   
   # Close the pop-up overlay when the user presses ESC.
-  up.magic.onEscape(-> close())
+  up.bus.onEscape(-> close())
 
   ###*
   When an element with this attribute is clicked,

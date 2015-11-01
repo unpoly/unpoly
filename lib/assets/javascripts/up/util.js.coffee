@@ -885,15 +885,14 @@ up.util = (($) ->
       right: ''
       bottom: ''
 
-  argNames = (fun) ->
-    code = fun.toString()
-    pattern = new RegExp('\\(([^\\)]*)\\)')
-    if match = code.match(pattern)
-      match[1].split(/\s*,\s*/)
-    else
-      error('Could not parse argument names of %o', fun)
+#  argNames = (fun) ->
+#    code = fun.toString()
+#    pattern = new RegExp('\\(([^\\)]*)\\)')
+#    if match = code.match(pattern)
+#      match[1].split(/\s*,\s*/)
+#    else
+#      error('Could not parse argument names of %o', fun)
 
-  argNames: argNames
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   presentAttr: presentAttr

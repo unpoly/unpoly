@@ -21,107 +21,6 @@ up.magic = (($) ->
   DESTROYABLE_CLASS = 'up-destroyable'
   DESTROYER_KEY = 'up-destroyer'
 
-  liveDescriptions = []
-  defaultLiveDescriptions = null
-
-  ###*
-  # Convert an Up.js style listener (second argument is the event target
-  # as a jQuery collection) to a vanilla jQuery listener
-  ###
-  upListenerToJqueryListener = (upListener) ->
-    (event) ->
-      $me = event.$element || $(this)
-      upListener.apply($me.get(0), [event, $me, data($me)])
-
-  ###*
-  Listens to an event on `document`.
-
-  The given event listener which will be executed whenever the
-  given event is [triggered](/up.emit) on the given selector:
-
-      up.on('click', '.button', function(event, $element) {
-        console.log("Someone clicked the button %o", $element);
-      });
-
-  This is roughly equivalent to binding an event listener to `document`:
-
-      $(document).on('click', '.button', function(event) {
-        console.log("Someone clicked the button %o", $(this));
-      });
-
-  Other than jQuery, Up.js will silently discard event listeners
-  on [browsers that it doesn't support](/up.browser.isSupported).
-
-
-  \#\#\#\# Attaching structured data
-
-  In case you want to attach structured data to the event you're observing,
-  you can serialize the data to JSON and put it into an `[up-data]` attribute:
-
-      <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
-      <span class="person" up-data="{ age: 22, name: 'Jim' }">Jim</span>
-
-  The JSON will parsed and handed to your event handler as a third argument:
-
-      up.on('click', '.person', function(event, $element, data) {
-        console.log("This is %o who is %o years old", data.name, data.age);
-      });
-
-
-  \#\#\#\# Migrating jQuery event handlers to `up.on`
-
-  Within the event handler, Up.js will bind `this` to the
-  native DOM element to help you migrate your existing jQuery code to
-  this new syntax.
-
-  So if you had this before:
-
-      $(document).on('click', '.button', function() {
-        $(this).something();
-      });
-
-  ... you can simply copy the event handler to `up.on`:
-
-      up.on('click', '.button', function() {
-        $(this).something();
-      });
-
-
-  @method up.on
-  @param {String} events
-    A space-separated list of event names to bind.
-  @param {String} [selector]
-    The selector of an element on which the event must be triggered.
-    Omit the selector to listen to all events with that name, regardless
-    of the event target.
-  @param {Function(event, $element, data)} behavior
-    The handler that should be called.
-    The function takes the affected element as the first argument (as a jQuery object).
-    If the element has an `up-data` attribute, its value is parsed as JSON
-    and passed as a second argument.
-  @return {Function}
-    A function that unbinds the event listeners when called.
-  ###
-  live = (args...) ->
-    # Silently discard any event handlers that are registered on unsupported
-    # browsers and return a no-op destructor
-    return (->) unless up.browser.isSupported()
-
-    description = u.copy(args)
-    lastIndex = description.length - 1
-    behavior = description[lastIndex]
-    description[lastIndex] = upListenerToJqueryListener(behavior)
-
-    # Remember the descriptions we registered, so we can
-    # clean up after ourselves during a reset
-    liveDescriptions.push(description)
-
-    $document = $(document)
-    $document.on(description...)
-
-    # Return destructor
-    -> $document.off(description...)
-
 
   ###*
   Registers a function to be called whenever an element with
@@ -355,27 +254,20 @@ up.magic = (($) ->
 
   ###*
   Makes a snapshot of the currently registered event listeners,
-  to later be restored through [`up.bus.reset`](/up.bus.reset).
+  to later be restored through `reset`.
   
   @private
-  @method up.magic.snapshot
   ###
   snapshot = ->
-    defaultLiveDescriptions = u.copy(liveDescriptions) 
     defaultCompilers = u.copy(compilers)
 
   ###*
-  Resets the list of registered event listeners to the
+  Resets the list of registered compiler directives to the
   moment when the framework was booted.
   
   @private
-  @method up.magic.reset
   ###
   reset = ->
-    for description in liveDescriptions
-      unless u.contains(defaultLiveDescriptions, description)
-        $(document).off(description...)
-    liveDescriptions = u.copy(defaultLiveDescriptions)
     compilers = u.copy(defaultCompilers)
 
   ###*
@@ -400,28 +292,19 @@ up.magic = (($) ->
     up.emit('up:fragment:inserted', $element: $element)
     $element
 
-  onEscape = (handler) ->
-    live('keydown', 'body', (event) ->
-      if u.escapePressed(event)
-        handler(event)
-    )
-
-  live 'ready', (-> hello(document.body))
-  live 'up:fragment:inserted', (event) -> compile(event.$element)
-  live 'up:fragment:destroy', (event) -> destroy(event.$element)
-  live 'up:framework:boot', snapshot
-  live 'up:framework:reset', reset
+  up.on 'ready', (-> hello(document.body))
+  up.on 'up:fragment:inserted', (event) -> compile(event.$element)
+  up.on 'up:fragment:destroy', (event) -> destroy(event.$element)
+  up.on 'up:framework:boot', snapshot
+  up.on 'up:framework:reset', reset
 
   compiler: compiler
-  on: live
   hello: hello
-  onEscape: onEscape
   data: data
 
 )(jQuery)
 
 up.compiler = up.magic.compiler
-up.on = up.magic.on
 up.hello = up.magic.hello
 
 up.ready = -> up.util.error('up.ready no longer exists. Please use up.hello instead.')

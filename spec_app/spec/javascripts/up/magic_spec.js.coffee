@@ -2,31 +2,6 @@ describe 'up.magic', ->
   
   describe 'Javascript functions', ->
   
-    describe 'up.on', ->
-      
-      it 'registers a delagating event listener to the document body', ->
-        
-        affix('.container .child')
-        observeClass = jasmine.createSpy()
-        up.on 'click', '.child', (event, $element) ->
-          observeClass($element.attr('class'))
-   
-        $('.container').click()
-        $('.child').click()
-   
-        expect(observeClass).not.toHaveBeenCalledWith('container')
-        expect(observeClass).toHaveBeenCalledWith('child')           
-
-      it 'returns a method that unregisters the event listener when called', ->
-        $child = affix('.child')
-        clickSpy = jasmine.createSpy()
-        unsubscribe = up.on 'click', '.child', clickSpy
-        $('.child').click()
-        unsubscribe()
-        $('.child').click()
-        expect(clickSpy.calls.count()).toEqual(1)
-
-
     describe 'up.compiler', ->
       
       it 'applies an event initializer whenever a matching fragment is inserted', ->

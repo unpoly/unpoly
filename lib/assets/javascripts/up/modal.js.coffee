@@ -411,7 +411,7 @@ up.modal = (($) ->
   )
 
   # Close the pop-up overlay when the user presses ESC.
-  up.magic.onEscape(-> close())
+  up.bus.onEscape(-> close())
 
   ###*
   When this element is clicked, closes a currently open dialog.

@@ -1,7 +1,52 @@
 describe 'up.bus', ->
   
   describe 'Javascript functions', ->
-    
+
+    describe 'up.on', ->
+
+      it 'registers a delagating event listener to the document body, which passes the $element as a second argument to the listener', ->
+
+        affix('.container .child')
+        observeClass = jasmine.createSpy()
+        up.on 'click', '.child', (event, $element) ->
+          observeClass($element.attr('class'))
+
+        $('.container').click()
+        $('.child').click()
+
+        expect(observeClass).not.toHaveBeenCalledWith('container')
+        expect(observeClass).toHaveBeenCalledWith('child')
+
+      it 'returns a method that unregisters the event listener when called', ->
+        $child = affix('.child')
+        clickSpy = jasmine.createSpy()
+        unsubscribe = up.on 'click', '.child', clickSpy
+        $('.child').click()
+        unsubscribe()
+        $('.child').click()
+        expect(clickSpy.calls.count()).toEqual(1)
+
+      it 'parses an up-data attribute as JSON and passes the parsed object as a third argument to the initializer', ->
+        $child = affix('.child')
+        observeArgs = jasmine.createSpy()
+        up.on 'click', '.child', (event, $element, data) ->
+          observeArgs($element.attr('class'), data)
+
+        data = { key1: 'value1', key2: 'value2' }
+        $tag = affix(".child").attr('up-data', JSON.stringify(data))
+
+        $('.child').click()
+        expect(observeArgs).toHaveBeenCalledWith('child', data)
+
+      it 'passes an empty object as a second argument to the listener if there is no up-data attribute', ->
+        $child = affix('.child')
+        observeArgs = jasmine.createSpy()
+        up.on 'click', '.child', (event, $element, data) ->
+          observeArgs($element.attr('class'), data)
+
+        $('.child').click()
+        expect(observeArgs).toHaveBeenCalledWith('child', {})
+
     describe 'up.emit', ->
 
       it 'triggers an event on the document', ->
