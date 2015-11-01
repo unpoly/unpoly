@@ -326,7 +326,8 @@ up.magic = (($) ->
   ###
 
   ###
-  Stores a JSON-string with the element.
+  Looks for an `up-data` attribute on the given element, then parses
+  its value as JSON and returns the JSON object.
 
   If an element annotated with [`up-data`] is inserted into the DOM,
   Up will parse the JSON and pass the resulting object to any matching
@@ -339,6 +340,10 @@ up.magic = (($) ->
   @ujs
   @method [up-data]
   @param {JSON} [up-data]
+  @return
+    The JSON-decoded value of the `up-data` attribute.
+
+    Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
   ###
   data = (elementOrSelector) ->
     $element = $(elementOrSelector)
