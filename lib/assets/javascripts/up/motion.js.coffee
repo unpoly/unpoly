@@ -195,7 +195,10 @@ up.motion = (($) ->
     # We will let $new take up space in the element flow, but hide it.
     # The user will only see the two animated ghosts until the transition
     # is over.
-    showNew = u.temporaryCss($new, visibility: 'hidden')
+    # Note that we must **not** use `visibility: hidden` to hide the new
+    # element. This would delay browser painting until the element is
+    # shown again, causing a flicker while the browser is painting.
+    showNew = u.temporaryCss($new, opacity: '0')
 
     promise = block(oldCopy.$ghost, newCopy.$ghost)
 
@@ -209,10 +212,10 @@ up.motion = (($) ->
     promise.then ->
       $old.removeData(GHOSTING_PROMISE_KEY)
       $new.removeData(GHOSTING_PROMISE_KEY)
-      oldCopy.$bounds.remove()
-      newCopy.$bounds.remove()
       # Now that the transition is over we show $new again.
       showNew()
+      oldCopy.$bounds.remove()
+      newCopy.$bounds.remove()
 
     promise
       
@@ -306,6 +309,9 @@ up.motion = (($) ->
     A promise for the transition's end.
   ###  
   morph = (source, target, transitionOrName, options) ->
+
+    u.debug('Morphing %o to %o (using %o)', source, target, transitionOrName)
+
     $old = $(source)
     $new = $(target)
 

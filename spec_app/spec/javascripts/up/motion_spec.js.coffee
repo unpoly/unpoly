@@ -74,14 +74,21 @@ describe 'up.motion', ->
           expect($oldGhost.parent().next()).toEqual($old)
           expect($newGhost.parent().next()).toEqual($new)
 
-          # The actual elements are hidden, but $old will take up its original
-          # space until the animation completes.
+          # The old element is removed from the layout flow.
+          # It will be removed from the DOM after the animation has ended.
           expect($old.css('display')).toEqual('none')
 
-          expect($new.css(['display', 'visibility'])).toEqual(
+          # The new element is invisible due to an opacity of zero,
+          # but takes up the space in the layout flow.
+          expect($new.css(['display', 'opacity'])).toEqual(
             display: 'block',
-            visibility: 'hidden'
+            opacity: '0'
           )
+
+          # We **must not** use `visibility: hidden` to hide the new
+          # element. This would delay browser painting until the element is
+          # shown again, causing a flicker while the browser is painting.
+          expect($new.css('visibility')).not.toEqual('hidden')
 
           # Ghosts will hover over $old and $new using absolute positioning,
           # matching the coordinates of the original elements.
