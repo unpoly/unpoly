@@ -99,7 +99,7 @@ up.navigation = (($) ->
 
       if currentUrls.matchesAny(urls)
         $section.addClass(klass)
-      else
+      else if $section.hasClass(klass) && $section.closest('.up-destroying').length == 0
         $section.removeClass(klass)
 
   ###*
