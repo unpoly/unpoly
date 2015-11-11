@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function($) {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, argNames, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, evalConsoleTemplate, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, offsetParent, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, evalConsoleTemplate, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, offsetParent, once, only, option, options, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, temporaryCss, times, toArray, trim, unJquery, uniq, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -578,7 +578,7 @@ If you use them in your own code, you will get hurt.
     forceCompositing = function($element) {
       var memo, oldTransforms;
       oldTransforms = $element.css(['transform', '-webkit-transform']);
-      if (isBlank(oldTransforms)) {
+      if (isBlank(oldTransforms) || oldTransforms['transform'] === 'none') {
         memo = function() {
           return $element.css(oldTransforms);
         };
@@ -1102,18 +1102,7 @@ If you use them in your own code, you will get hurt.
         bottom: ''
       });
     };
-    argNames = function(fun) {
-      var code, match, pattern;
-      code = fun.toString();
-      pattern = new RegExp('\\(([^\\)]*)\\)');
-      if (match = code.match(pattern)) {
-        return match[1].split(/\s*,\s*/);
-      } else {
-        return error('Could not parse argument names of %o', fun);
-      }
-    };
     return {
-      argNames: argNames,
       offsetParent: offsetParent,
       fixedToAbsolute: fixedToAbsolute,
       presentAttr: presentAttr,
@@ -1320,7 +1309,7 @@ we can't currently get rid off.
     On older browsers Up.js will prevent itself from booting, leaving you with
     a classic server-side application.
     
-    @up.browser.isSupported
+    @method up.browser.isSupported
      */
     isSupported = function() {
       return (!isIE8OrWorse()) && isRecentJQuery();
@@ -1355,7 +1344,7 @@ This event is triggered after Up.js has inserted an HTML fragment into the DOM t
       console.log("Looks like we have a new %o!", $fragment);
     });
 
-The event is triggered *before* Up has compiled the fragment with your [custom behavior](/up.magic).
+The event is triggered *before* Up has compiled the fragment with your [custom elements](/up.syntax).
 Upon receiving the event, Up.js will start compilation.
 
 
@@ -1377,8 +1366,6 @@ animation before removing the fragment from the DOM.
   
 We need to work on this page:
 
-- Decide whether to refactor this into document events
-- Decide whether `fragment:enter` and `fragment:leave` would be better names
 - Decide if we wouldn't rather document events in the respective module (e.g. proxy).
 
 @class up.bus
@@ -1388,112 +1375,8 @@ We need to work on this page:
   var slice = [].slice;
 
   up.bus = (function($) {
-    var emit, nobodyPrevents, reset, u;
+    var defaultLiveDescriptions, emit, emitReset, live, liveDescriptions, nobodyPrevents, onEscape, restoreSnapshot, snapshot, u, upListenerToJqueryListener;
     u = up.util;
-
-    /**
-    Emits an event with the given name and properties.
-    
-    \#\#\#\# Example
-    
-        up.on('my:event', function(event) {
-          console.log(event.foo);
-        });
-    
-        up.emit('my:event', { foo: 'bar' });
-         * Prints "bar" to the console
-    
-    @method up.emit
-    @param {String} eventName
-      The name of the event.
-    @param {Object} [eventProps={}]
-      A list of properties to become part of the event object
-      that will be passed to listeners. Note that the event object
-      will by default include properties like `preventDefault()`
-      or `stopPropagation()`.
-    @param {jQuery} [eventProps.$element=$(document)]
-      The element on which the event is trigered.
-    @protected
-     */
-    emit = function(eventName, eventProps) {
-      var $target, event;
-      if (eventProps == null) {
-        eventProps = {};
-      }
-      event = $.Event(eventName, eventProps);
-      $target = eventProps.$element || $(document);
-      u.debug("Emitting %o on %o with props %o", eventName, $target, eventProps);
-      $target.trigger(event);
-      return event;
-    };
-
-    /**
-    [Emits an event](/up.emit) and returns whether any listener has prevented the default action.
-    
-    @method up.bus.nobodyPrevents
-    @param {String} eventName
-    @param {Object} eventProps
-    @protected
-     */
-    nobodyPrevents = function() {
-      var args, event;
-      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      event = emit.apply(null, args);
-      return !event.isDefaultPrevented();
-    };
-
-    /**
-    Resets Up.js to the state when it was booted.
-    All custom event handlers, animations, etc. that have been registered
-    will be discarded.
-    
-    This is an internal method for to enable unit testing.
-    Don't use this in production.
-    
-    @protected
-    @method up.reset
-     */
-    reset = function() {
-      return up.emit('up:framework:reset');
-    };
-    return {
-      emit: emit,
-      nobodyPrevents: nobodyPrevents,
-      reset: reset
-    };
-  })(jQuery);
-
-  up.reset = up.bus.reset;
-
-  up.emit = up.bus.emit;
-
-}).call(this);
-
-/**
-Registering behavior and custom elements
-========================================
-  
-Up.js keeps a persistent Javascript environment during page transitions.
-To prevent memory leaks it is important to cleanly set up and tear down
-event handlers and custom elements.
-
-\#\#\# Incomplete documentation!
-
-We need to work on this page:
-
-- Better class-level introduction for this module
-
-@class up.magic
- */
-
-(function() {
-  var slice = [].slice;
-
-  up.magic = (function($) {
-    var DESTROYABLE_CLASS, DESTROYER_KEY, applyCompiler, compile, compiler, compilers, data, defaultCompilers, defaultLiveDescriptions, destroy, hello, live, liveDescriptions, onEscape, reset, snapshot, u, upListenerToJqueryListener;
-    u = up.util;
-    DESTROYABLE_CLASS = 'up-destroyable';
-    DESTROYER_KEY = 'up-destroyer';
     liveDescriptions = [];
     defaultLiveDescriptions = null;
 
@@ -1505,7 +1388,7 @@ We need to work on this page:
       return function(event) {
         var $me;
         $me = event.$element || $(this);
-        return upListener.apply($me.get(0), [event, $me, data($me)]);
+        return upListener.apply($me.get(0), [event, $me, up.syntax.data($me)]);
       };
     };
 
@@ -1562,7 +1445,6 @@ We need to work on this page:
           $(this).something();
         });
     
-    
     @method up.on
     @param {String} events
       A space-separated list of event names to bind.
@@ -1595,6 +1477,150 @@ We need to work on this page:
         return $document.off.apply($document, description);
       };
     };
+
+    /**
+    Emits an event with the given name and properties.
+    
+    \#\#\#\# Example
+    
+        up.on('my:event', function(event) {
+          console.log(event.foo);
+        });
+    
+        up.emit('my:event', { foo: 'bar' });
+         * Prints "bar" to the console
+    
+    @method up.emit
+    @param {String} eventName
+      The name of the event.
+    @param {Object} [eventProps={}]
+      A list of properties to become part of the event object
+      that will be passed to listeners. Note that the event object
+      will by default include properties like `preventDefault()`
+      or `stopPropagation()`.
+    @param {jQuery} [eventProps.$element=$(document)]
+      The element on which the event is trigered.
+    @protected
+     */
+    emit = function(eventName, eventProps) {
+      var $target, event;
+      if (eventProps == null) {
+        eventProps = {};
+      }
+      event = $.Event(eventName, eventProps);
+      $target = eventProps.$element || $(document);
+      u.debug("Emitting %o on %o with props %o", eventName, $target, eventProps);
+      $target.trigger(event);
+      return event;
+    };
+
+    /**
+    [Emits an event](/up.emit) and returns whether any listener has prevented the default action.
+    
+    @method up.bus.nobodyPrevents
+    @param {String} eventName
+    @param {Object} eventProps
+    @protected
+     */
+    nobodyPrevents = function() {
+      var args, event;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      event = emit.apply(null, args);
+      return !event.isDefaultPrevented();
+    };
+    onEscape = function(handler) {
+      return live('keydown', 'body', function(event) {
+        if (u.escapePressed(event)) {
+          return handler(event);
+        }
+      });
+    };
+
+    /**
+    Makes a snapshot of the currently registered event listeners,
+    to later be restored through [`up.bus.reset`](/up.bus.reset).
+    
+    @private
+     */
+    snapshot = function() {
+      return defaultLiveDescriptions = u.copy(liveDescriptions);
+    };
+
+    /**
+    Resets the list of registered event listeners to the
+    moment when the framework was booted.
+    
+    @private
+     */
+    restoreSnapshot = function() {
+      var description, i, len, ref;
+      for (i = 0, len = liveDescriptions.length; i < len; i++) {
+        description = liveDescriptions[i];
+        if (!u.contains(defaultLiveDescriptions, description)) {
+          (ref = $(document)).off.apply(ref, description);
+        }
+      }
+      return liveDescriptions = u.copy(defaultLiveDescriptions);
+    };
+
+    /**
+    Resets Up.js to the state when it was booted.
+    All custom event handlers, animations, etc. that have been registered
+    will be discarded.
+    
+    This is an internal method for to enable unit testing.
+    Don't use this in production.
+    
+    @protected
+    @method up.reset
+     */
+    emitReset = function() {
+      return up.emit('up:framework:reset');
+    };
+    live('up:framework:boot', snapshot);
+    live('up:framework:reset', restoreSnapshot);
+    return {
+      on: live,
+      emit: emit,
+      nobodyPrevents: nobodyPrevents,
+      onEscape: onEscape,
+      emitReset: emitReset
+    };
+  })(jQuery);
+
+  up.on = up.bus.on;
+
+  up.emit = up.bus.emit;
+
+  up.reset = up.bus.emitReset;
+
+}).call(this);
+
+/**
+Custom elements
+===============
+  
+Up.js keeps a persistent Javascript environment during page transitions.
+To prevent memory leaks it is important to cleanly set up and tear down
+event handlers and custom elements.
+
+\#\#\# Incomplete documentation!
+
+We need to work on this page:
+
+- Better class-level introduction for this module
+
+@class up.syntax
+ */
+
+(function() {
+  var slice = [].slice;
+
+  up.syntax = (function($) {
+    var DESTROYABLE_CLASS, DESTROYER_KEY, applyCompiler, compile, compiler, compilers, data, defaultCompilers, destroy, hello, reset, snapshot, u;
+    u = up.util;
+    DESTROYABLE_CLASS = 'up-destroyable';
+    DESTROYER_KEY = 'up-destroyer';
 
     /**
     Registers a function to be called whenever an element with
@@ -1815,16 +1841,17 @@ We need to work on this page:
     we can support getting or setting individual keys.
     
     @protected
-    @method up.magic.data
+    @method up.syntax.data
     @param {String|Element|jQuery} elementOrSelector
      */
 
     /*
-    Stores a JSON-string with the element.
+    Looks for an `up-data` attribute on the given element, then parses
+    its value as JSON and returns the JSON object.
     
     If an element annotated with [`up-data`] is inserted into the DOM,
     Up will parse the JSON and pass the resulting object to any matching
-    [`up.compiler`](/up.magic.compiler) handlers.
+    [`up.compiler`](/up.syntax.compiler) handlers.
     
     Similarly, when an event is triggered on an element annotated with
     [`up-data`], the parsed object will be passed to any matching
@@ -1833,6 +1860,10 @@ We need to work on this page:
     @ujs
     @method [up-data]
     @param {JSON} [up-data]
+    @return
+      The JSON-decoded value of the `up-data` attribute.
+    
+      Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
      */
     data = function(elementOrSelector) {
       var $element, json;
@@ -1847,32 +1878,21 @@ We need to work on this page:
 
     /**
     Makes a snapshot of the currently registered event listeners,
-    to later be restored through [`up.bus.reset`](/up.bus.reset).
+    to later be restored through `reset`.
     
     @private
-    @method up.magic.snapshot
      */
     snapshot = function() {
-      defaultLiveDescriptions = u.copy(liveDescriptions);
       return defaultCompilers = u.copy(compilers);
     };
 
     /**
-    Resets the list of registered event listeners to the
+    Resets the list of registered compiler directives to the
     moment when the framework was booted.
     
     @private
-    @method up.magic.reset
      */
     reset = function() {
-      var description, i, len, ref;
-      for (i = 0, len = liveDescriptions.length; i < len; i++) {
-        description = liveDescriptions[i];
-        if (!u.contains(defaultLiveDescriptions, description)) {
-          (ref = $(document)).off.apply(ref, description);
-        }
-      }
-      liveDescriptions = u.copy(defaultLiveDescriptions);
       return compilers = u.copy(defaultCompilers);
     };
 
@@ -1901,38 +1921,27 @@ We need to work on this page:
       });
       return $element;
     };
-    onEscape = function(handler) {
-      return live('keydown', 'body', function(event) {
-        if (u.escapePressed(event)) {
-          return handler(event);
-        }
-      });
-    };
-    live('ready', (function() {
+    up.on('ready', (function() {
       return hello(document.body);
     }));
-    live('up:fragment:inserted', function(event) {
+    up.on('up:fragment:inserted', function(event) {
       return compile(event.$element);
     });
-    live('up:fragment:destroy', function(event) {
+    up.on('up:fragment:destroy', function(event) {
       return destroy(event.$element);
     });
-    live('up:framework:boot', snapshot);
-    live('up:framework:reset', reset);
+    up.on('up:framework:boot', snapshot);
+    up.on('up:framework:reset', reset);
     return {
       compiler: compiler,
-      on: live,
       hello: hello,
-      onEscape: onEscape,
       data: data
     };
   })(jQuery);
 
-  up.compiler = up.magic.compiler;
+  up.compiler = up.syntax.compiler;
 
-  up.on = up.magic.on;
-
-  up.hello = up.magic.hello;
+  up.hello = up.syntax.hello;
 
   up.ready = function() {
     return up.util.error('up.ready no longer exists. Please use up.hello instead.');
@@ -2230,13 +2239,13 @@ This modules contains functions to scroll the viewport and reveal contained elem
     
     This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
     
-        up.scoll('.main', 100);
+        up.scroll('.main', 100);
     
     \#\#\#\# Animating the scrolling motion
     
     The scrolling can (optionally) be animated.
     
-        up.scoll('.main', 100, {
+        up.scroll('.main', 100, {
           easing: 'swing',
           duration: 250
         });
@@ -2735,16 +2744,11 @@ This modules contains functions to scroll the viewport and reveal contained elem
 Changing page fragments programmatically
 ========================================
   
-This module contains Up's core functions to insert, change
-or destroy page fragments.
+This module contains Up.js's core functions to [change](/up.replace) or [destroy](/up.destroy)
+  page fragments via Javascript.
 
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-  
-- Explain the UJS approach vs. pragmatic approach
-- Examples
-  
+All the other Up.js modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
+are based on this module.
   
 @class up.flow
  */
@@ -3167,28 +3171,32 @@ We need to work on this page:
 }).call(this);
 
 /**
-Animation and transitions
-=========================
+Animation
+=========
   
-Any fragment change in Up.js can be animated.
+Whenever you change a page fragment (through methods like
+[`up.replace`](/up.replace) or UJS attributes like [`up-target`](/up-target))
+you can animate the change.
 
-    <a href="/users" data-target=".list" up-transition="cross-fade">Show users</a>
+For instance, when you replace a selector `.list` with a new `.list`
+from the server, you can add an `up-transition="cross-fade"` attribute
+to smoothly fade out the old `.list` while fading in the new `.list`:
 
-Or a dialog open:
+    <a href="/users" up-target=".list" up-transition="cross-fade">Show users</a>
+
+When we morph between an old an new element, we call it a *transition*.
+In contrast, when we animate a new element without simultaneously removing an
+old element, we call it an *animation*.
+
+An example for an animation is opening a new dialog, which we can animate
+using the `up-animation` attribute:
 
     <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
 
-Up.js ships with a number of predefined animations and transitions,
-and you can easily define your own using Javascript or CSS. 
-  
-  
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-  
-- Explain the difference between transitions and animations
-- Demo the built-in animations and transitions
-- Explain ghosting
+Up.js ships with a number of predefined [animations](/up.animate#named-animation)
+and [transitions](/up.morph#named-animation).
+You can also easily [define your own animations](/up.animation)
+or [transitions](/up.transition) using Javascript or CSS.
 
   
 @class up.motion
@@ -3358,7 +3366,7 @@ We need to work on this page:
       oldCopy.moveTop(newScrollTop - oldScrollTop);
       $old.hide();
       showNew = u.temporaryCss($new, {
-        visibility: 'hidden'
+        opacity: '0'
       });
       promise = block(oldCopy.$ghost, newCopy.$ghost);
       $old.data(GHOSTING_PROMISE_KEY, promise);
@@ -3366,9 +3374,9 @@ We need to work on this page:
       promise.then(function() {
         $old.removeData(GHOSTING_PROMISE_KEY);
         $new.removeData(GHOSTING_PROMISE_KEY);
+        showNew();
         oldCopy.$bounds.remove();
-        newCopy.$bounds.remove();
-        return showNew();
+        return newCopy.$bounds.remove();
       });
       return promise;
     };
@@ -3433,6 +3441,24 @@ We need to work on this page:
     - `move-to-bottom/fade-in`
     - `move-to-left/move-from-top`
     
+    \#\#\#\# Implementation details
+    
+    During a transition both the old and new element occupy
+    the same position on the screen.
+    
+    Since the CSS layout flow will usually not allow two elements to
+    overlay the same space, Up.js:
+    
+    - The old and new elements are cloned
+    - The old element is removed from the layout flow using `display: hidden`
+    - The new element is hidden, but still leaves space in the layout flow by setting `visibility: hidden`
+    - The clones are [absolutely positioned](https://developer.mozilla.org/en-US/docs/Web/CSS/position#Absolute_positioning)
+      over the original elements.
+    - The transition is applied to the cloned elements.
+      At no point will the hidden, original elements be animated.
+    - When the transition has finished, the clones are removed from the DOM and the new element is shown.
+      The old element remains hidden in the DOM.
+    
     @method up.morph
     @param {Element|jQuery|String} source
     @param {Element|jQuery|String} target
@@ -3452,6 +3478,7 @@ We need to work on this page:
      */
     morph = function(source, target, transitionOrName, options) {
       var $new, $old, animation, deferred, parsedOptions, parts, transition;
+      u.debug('Morphing %o to %o (using %o)', source, target, transitionOrName);
       $old = $(source);
       $new = $(target);
       parsedOptions = u.only(options, 'reveal', 'restoreScroll');
@@ -3486,7 +3513,7 @@ We need to work on this page:
     };
 
     /**
-    Cause the side effects of a successful transitions, but instantly.
+    This causes the side effects of a successful transition, but instantly.
     We use this to skip morphing for old browsers, or when the developer
     decides to only animate the new element (i.e. no real ghosting or transition)   .
     
@@ -3624,7 +3651,8 @@ We need to work on this page:
     Returns a new promise that resolves once all promises in arguments resolve.
     
     Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
-    the combined promise will have a `resolve` method.
+    the combined promise will have a `resolve` method. This `resolve` method
+    will resolve all the wrapped promises.
     
     @method up.motion.when
     @param promises...
@@ -3814,13 +3842,13 @@ making requests to these URLs return insantly.
 The cache is cleared whenever the user makes a non-`GET` request
 (like `POST`, `PUT` or `DELETE`).
 
-The proxy can also used to speed up reaction times by preloading
-links when the user hovers over the click area (or puts the mouse/finger
-down before releasing). This way the
-response will already be cached when the user performs the click.
+The proxy can also used to speed up reaction times by [preloading
+links when the user hovers over the click area](/up-preload) (or puts the mouse/finger
+down before releasing). This way the response will already be cached when
+the user performs the click.
 
 Spinners
----------
+--------
 
 You can listen to [framework events](/up.bus) to implement a spinner
 (progress indicator) that appears during a long-running request,
@@ -3835,12 +3863,15 @@ Here is the Javascript to make it alive:
       show = function() { $element.show() };
       hide = function() { $element.hide() };
 
-      up.bus.on('proxy:busy', show);
-      up.bus.on('proxy:idle', hide);
+      showOff = up.on('proxy:busy', show);
+      hideOff = up.on('proxy:idle', hide);
 
+      hide();
+
+      // Clean up when the element is removed from the DOM
       return function() {
-        up.bus.off('proxy:busy', show);
-        up.bus.off('proxy:idle', hide);
+        showOff();
+        hideOff();
       };
 
     });
@@ -4225,7 +4256,7 @@ Read on
 - You can [open fragments in popups or modal dialogs](/up.modal).
 - You can give users [immediate feedback](/up.navigation) when a link is clicked or becomes current, without waiting for the server.
 - [Controlling Up.js pragmatically through Javascript](/up.flow)
-- [Defining custom tags and event handlers](/up.magic)
+- [Defining custom tags](/up.syntax)
 
   
 @class up.link
@@ -5232,7 +5263,7 @@ We need to work on this page:
         return autoclose();
       }
     });
-    up.magic.onEscape(function() {
+    up.bus.onEscape(function() {
       return close();
     });
 
@@ -5711,7 +5742,7 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
         return autoclose();
       }
     });
-    up.magic.onEscape(function() {
+    up.bus.onEscape(function() {
       return close();
     });
 
@@ -5756,26 +5787,61 @@ For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
 /**
 Tooltips
 ========
-  
-Elements that have an `up-tooltip` attribute will show the attribute
-value in a tooltip when a user hovers over the element. 
-  
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-  
-- Show the tooltip's HTML structure and how to style the elements
-- Explain how to position tooltips using `up-position`
-- We should have a position about tooltips that contain HTML.
-  
+
+Up.js comes with a basic tooltip implementation.
+
+You can an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a tooltip whenever
+  the user hovers over the element:
+
+      <a href="/decks" up-tooltip="Show all decks">Decks</a>
+
+
+\#\#\#\# Styling
+
+The [default styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/tooltip.css.sass)
+show a simple tooltip with white text on a gray background.
+A gray triangle points to the element.
+
+To change the styling, simply override CSS rules for the `.up-tooltip` selector and its `:after`
+selector that is used the triangle.
+
+The HTML of a tooltip element is simply this:
+
+    <div class="up-tooltip">
+      Show all decks
+    </div>
+
+The tooltip element is appended to the end of `<body>`.
 
 @class up.tooltip
  */
 
 (function() {
   up.tooltip = (function($) {
-    var attach, close, createElement, setPosition, u;
+    var attach, close, config, createElement, reset, setPosition, u;
     u = up.util;
+
+    /**
+    Sets default options for future tooltips.
+    
+    @method up.tooltip.config
+    @property
+    @param {String} [config.position]
+      The default position of tooltips relative to the element.
+      Can be either `"top"` or `"bottom"`.
+    @param {String} [config.openAnimation='fade-in']
+      The animation used to open a tooltip.
+    @param {String} [config.closeAnimation='fade-out']
+      The animation used to close a tooltip.
+     */
+    config = u.config({
+      position: 'top',
+      openAnimation: 'fade-in',
+      closeAnimation: 'fade-out'
+    });
+    reset = function() {
+      return config.reset();
+    };
     setPosition = function($link, $tooltip, position) {
       var css, linkBox, tooltipBox;
       linkBox = u.measure($link);
@@ -5814,7 +5880,7 @@ We need to work on this page:
     /**
     Opens a tooltip over the given element.
     
-        up.tooltip.open('.help', {
+        up.tooltip.attach('.help', {
           html: 'Enter multiple words or phrases'
         });
     
@@ -5834,9 +5900,9 @@ We need to work on this page:
       }
       $link = $(linkOrSelector);
       html = u.option(options.html, $link.attr('up-tooltip-html'));
-      text = u.option(options.text, $link.attr('up-tooltip'), $link.attr('title'));
-      position = u.option(options.position, $link.attr('up-position'), 'top');
-      animation = u.option(options.animation, u.castedAttr($link, 'up-animation'), 'fade-in');
+      text = u.option(options.text, $link.attr('up-tooltip'));
+      position = u.option(options.position, $link.attr('up-position'), config.position);
+      animation = u.option(options.animation, u.castedAttr($link, 'up-animation'), config.openAnimation);
       animateOptions = up.motion.animateOptions(options, $link);
       close();
       $tooltip = createElement({
@@ -5860,7 +5926,7 @@ We need to work on this page:
       $tooltip = $('.up-tooltip');
       if ($tooltip.length) {
         options = u.options(options, {
-          animation: 'fade-out'
+          animation: config.closeAnimation
         });
         options = u.merge(options, up.motion.animateOptions(options));
         return up.destroy($tooltip, options);
@@ -5872,11 +5938,19 @@ We need to work on this page:
     
         <a href="/decks" up-tooltip="Show all decks">Decks</a>
     
-    You can also make an existing `title` attribute appear as a tooltip:
+    To make the tooltip appear below the element instead of above the element,
+    add an `up-position` attribute:
     
-        <a href="/decks" title="Show all decks" up-tooltip>Decks</a>
+        <a href="/decks" up-tooltip="Show all decks" up-position="bottom">Decks</a>
     
     @method [up-tooltip]
+    @param {String} [up-animation]
+      The animation used to open the tooltip.
+      Defaults to [`up.tooltip.config.openAnimation`](/up.tooltip.config).
+    @param {String} [up-position]
+      The default position of tooltips relative to the element.
+      Can be either `"top"` or `"bottom"`.
+      Defaults to [`up.tooltip.config.position`](/up.tooltip.config).
     @ujs
      */
 
@@ -5900,9 +5974,10 @@ We need to work on this page:
       return close();
     });
     up.on('up:framework:reset', close);
-    up.magic.onEscape(function() {
+    up.bus.onEscape(function() {
       return close();
     });
+    up.on('up:framework:reset', reset);
     return {
       attach: attach,
       close: close,
@@ -6029,7 +6104,7 @@ by providing instant feedback for user interactions.
         urls = sectionUrls($section);
         if (currentUrls.matchesAny(urls)) {
           return $section.addClass(klass);
-        } else {
+        } else if ($section.hasClass(klass) && $section.closest('.up-destroying').length === 0) {
           return $section.removeClass(klass);
         }
       });

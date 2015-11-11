@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.12.4
+------
+
+### Compatible changes
+
+- When [morphing](/up.morph), prevent flickering caused by long repaint frames
+- When [morphing](/up.morph) don't un-highlight current navigation sections in the element that is being destroyed. This makes for a smoother transition.
+- Fix a bug where compositing wasn't forced properly during an animation
+
+
 0.12.3
 ------
 
