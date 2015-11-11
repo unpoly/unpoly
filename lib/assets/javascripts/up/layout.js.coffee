@@ -70,13 +70,13 @@ up.layout = (($) ->
 
   This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
 
-      up.scoll('.main', 100);
+      up.scroll('.main', 100);
 
   \#\#\#\# Animating the scrolling motion
 
   The scrolling can (optionally) be animated.
 
-      up.scoll('.main', 100, {
+      up.scroll('.main', 100, {
         easing: 'swing',
         duration: 250
       });
