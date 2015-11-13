@@ -106,7 +106,7 @@ describe 'up.proxy', ->
         beforeEach ->
           up.proxy.config.busyDelay = 0
           @events = []
-          u.each ['up:proxy:load', 'up:proxy:receive', 'up:proxy:busy', 'up:proxy:idle'], (eventName) =>
+          u.each ['up:proxy:load', 'up:proxy:received', 'up:proxy:busy', 'up:proxy:idle'], (eventName) =>
             up.on eventName, =>
               @events.push eventName
 
@@ -136,7 +136,7 @@ describe 'up.proxy', ->
             'up:proxy:load',
             'up:proxy:busy',
             'up:proxy:load',
-            'up:proxy:receive'
+            'up:proxy:received'
           ])
   
           jasmine.Ajax.requests.at(1).respondWith
@@ -148,8 +148,8 @@ describe 'up.proxy', ->
             'up:proxy:load',
             'up:proxy:busy',
             'up:proxy:load',
-            'up:proxy:receive',
-            'up:proxy:receive',
+            'up:proxy:received',
+            'up:proxy:received',
             'up:proxy:idle'
           ])
   
@@ -180,7 +180,7 @@ describe 'up.proxy', ->
           expect(@events).toEqual([
             'up:proxy:load',
             'up:proxy:busy',
-            'up:proxy:receive',
+            'up:proxy:received',
             'up:proxy:idle'
           ])
           expect(up.proxy.busy()).toBe(false)
@@ -213,7 +213,7 @@ describe 'up.proxy', ->
           expect(@events).toEqual([
             'up:proxy:load',
             'up:proxy:busy',
-            'up:proxy:receive',
+            'up:proxy:received',
             'up:proxy:idle'
           ])
 
@@ -237,7 +237,7 @@ describe 'up.proxy', ->
 
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:receive'
+            'up:proxy:received'
           ])
 
         it 'emits up:proxy:idle if a request returned but failed', ->
@@ -257,7 +257,7 @@ describe 'up.proxy', ->
           expect(@events).toEqual([
             'up:proxy:load',
             'up:proxy:busy',
-            'up:proxy:receive',
+            'up:proxy:received',
             'up:proxy:idle'
           ])
 

@@ -264,7 +264,7 @@ up.proxy = (($) ->
     u.debug('Loading URL %o', request.url)
     up.emit('up:proxy:load', request)
     promise = u.ajax(request)
-    promise.always -> up.emit('up:proxy:receive', request)
+    promise.always -> up.emit('up:proxy:received', request)
     promise
 
   isIdempotent = (request) ->
