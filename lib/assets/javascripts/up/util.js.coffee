@@ -462,12 +462,14 @@ up.util = (($) ->
       
   forceCompositing = ($element) ->
     oldTransforms = $element.css(['transform', '-webkit-transform'])
-    if isBlank(oldTransforms)
+    if isBlank(oldTransforms) || oldTransforms['transform'] == 'none'
       memo = -> $element.css(oldTransforms)
       $element.css
         'transform': 'translateZ(0)'
         '-webkit-transform': 'translateZ(0)' # Safari
     else
+      # Since the element already has a transform, it is already
+      # drawn using compositing. Do nothing.
       memo = ->
     memo
       
