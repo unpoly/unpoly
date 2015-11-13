@@ -95,7 +95,7 @@ up.flow = (($) ->
       
     if !up.browser.canPushState() && options.history != false
       up.browser.loadPage(url, u.only(options, 'method')) unless options.preload
-      return u.resolvedPromise()
+      return u.unresolvablePromise()
 
     request =
       url: url
