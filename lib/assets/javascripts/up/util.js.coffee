@@ -655,6 +655,9 @@ up.util = (($) ->
   resolvedPromise = ->
     resolvedDeferred().promise()
 
+  unresolvablePromise = ->
+    $.Deferred().promise()
+
   nullJquery = ->
     is: -> false
     attr: ->
@@ -966,6 +969,7 @@ up.util = (($) ->
   clientSize: clientSize
   only: only
   trim: trim
+  unresolvablePromise: unresolvablePromise
   resolvedPromise: resolvedPromise
   resolvedDeferred: resolvedDeferred
   resolvableWhen: resolvableWhen
