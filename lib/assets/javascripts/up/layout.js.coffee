@@ -13,8 +13,7 @@ up.layout = (($) ->
   ###*
   Configures the application layout.
 
-  @method up.layout.config
-  @property
+  @property up.layout.config
   @param {Array<String>} [config.viewports]
     An array of CSS selectors that find viewports
     (containers that scroll their contents).
@@ -86,7 +85,7 @@ up.layout = (($) ->
   last frame before the next animation is started.
 
   @protected
-  @method up.scroll
+  @function up.scroll
   @param {String|Element|jQuery} viewport
     The container element to scroll.
   @param {Number} scrollPos
@@ -134,7 +133,7 @@ up.layout = (($) ->
       u.resolvedDeferred()
 
   ###*
-  @method up.layout.finishScrolling
+  @function up.layout.finishScrolling
   @private
   ###
   finishScrolling = (elementOrSelector) ->
@@ -143,7 +142,7 @@ up.layout = (($) ->
         existingScrolling.resolve()
 
   ###*
-  @method up.layout.anchoredRight
+  @function up.layout.anchoredRight
   @private
   ###
   anchoredRight = ->
@@ -195,7 +194,7 @@ up.layout = (($) ->
   - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
   - [configure default options](/up.layout.config) for `fixedTop` or `fixedBottom`
 
-  @method up.reveal
+  @function up.reveal
   @param {String|Element|jQuery} element
   @param {Number} [options.duration]
   @param {String} [options.easing]
@@ -270,7 +269,7 @@ up.layout = (($) ->
   Throws an error if no viewport could be found.
 
   @protected
-  @method up.layout.viewportOf
+  @function up.layout.viewportOf
   @param {String|Element|jQuery} selectorOrElement
   ###
   viewportOf = (selectorOrElement) ->
@@ -284,7 +283,7 @@ up.layout = (($) ->
   given selector or element.
 
   @protected
-  @method up.layout.viewportsWithin
+  @function up.layout.viewportsWithin
   @param {String|Element|jQuery} selectorOrElement
   @return jQuery
   ###
@@ -296,7 +295,7 @@ up.layout = (($) ->
   Returns a jQuery collection of all the viewports on the screen.
 
   @protected
-  @method up.layout.viewports
+  @function up.layout.viewports
   ###
   viewports = ->
     viewportSelector().select()
@@ -310,7 +309,7 @@ up.layout = (($) ->
       up.layout.scrollTops()
       => { '.main': 0, '.sidebar': 73 }
 
-  @method up.layout.scrollTops
+  @function up.layout.scrollTops
   @return Object<String, Number>
   @protected
   ###
@@ -325,7 +324,7 @@ up.layout = (($) ->
     topsBySelector
 
   ###*
-  @method up.layout.fixedChildren
+  @function up.layout.fixedChildren
   @protected
   ###
   fixedChildren = (root = undefined) ->
@@ -346,7 +345,7 @@ up.layout = (($) ->
 
   Up.js automatically saves scroll positions whenever a fragment was updated on the page.
 
-  @method up.layout.saveScroll
+  @function up.layout.saveScroll
   @param {String} [options.url]
   @param {Object<String, Number>} [options.tops]
   @protected
@@ -364,7 +363,7 @@ up.layout = (($) ->
   Up.js automatically restores scroll positions when the user presses the back button.
   You can disable this behavior by setting [`up.history.config.restoreScroll = false`](/up.history.config).
 
-  @method up.layout.restoreScroll
+  @function up.layout.restoreScroll
   @param {jQuery} [options.around]
     If set, only restores viewports that are either an ancestor
     or descendant of the given element.
@@ -398,7 +397,7 @@ up.layout = (($) ->
 
   ###*
   @protected
-  @method up.layout.revealOrRestoreScroll
+  @function up.layout.revealOrRestoreScroll
   @return {Deferred} A promise for when the revealing or scroll restauration ends
   ###
   revealOrRestoreScroll = (selectorOrElement, options) ->
@@ -460,8 +459,7 @@ up.layout = (($) ->
         </p>
       </div>
 
-  @method [up-viewport]
-  @ujs
+  @selector [up-viewport]
   ###
 
   ###*
@@ -475,8 +473,7 @@ up.layout = (($) ->
 
       <div class="top-nav" up-fixed="top">...</div>
 
-  @method [up-fixed=top]
-  @ujs
+  @selector [up-fixed=top]
   ###
 
   ###*
@@ -490,8 +487,7 @@ up.layout = (($) ->
 
       <div class="bottom-nav" up-fixed="bottom">...</div>
 
-  @method [up-fixed=bottom]
-  @ujs
+  @selector [up-fixed=bottom]
   ###
 
   up.on 'up:framework:reset', reset

@@ -16,8 +16,7 @@ up.modal = (($) ->
   ###*
   Sets default options for future modals.
 
-  @method up.modal.config
-  @property
+  @property up.modal.config
   @param {Number} [config.width]
     The width of the dialog as a CSS value like `'400px'` or `50%`.
 
@@ -72,7 +71,7 @@ up.modal = (($) ->
   Returns the source URL for the fragment displayed in the current modal overlay,
   or `undefined` if no modal is currently open.
 
-  @method up.modal.url
+  @function up.modal.url
   @return {String}
     the source URL
   ###
@@ -81,7 +80,7 @@ up.modal = (($) ->
   ###*
   Returns the URL of the page below the modal overlay.
 
-  @method up.modal.coveredUrl
+  @function up.modal.coveredUrl
   @return {String}
   @protected
   ###
@@ -167,14 +166,9 @@ up.modal = (($) ->
 
   Any option attributes for [`a[up-modal]`](/a.up-modal) will be honored.
 
-  \#\#\#\# Events
+  Emits events [`up:modal:open`](/up:modal:open) and [`up:modal:opened`](/up:modal:opened).
 
-  - Emits an [event](/up.bus) `up:modal:open` when the modal
-    is starting to open.
-  - Emits an [event](/up.bus) `up:modal:opened` when the opening
-    animation has finished and the modal contents are fully visible.
-
-  @method up.modal.follow
+  @function up.modal.follow
   @param {Element|jQuery|String} linkOrSelector
     The link to follow.
   @param {String} [options.target]
@@ -206,7 +200,6 @@ up.modal = (($) ->
     options.$link = $(linkOrSelector)
     open(options)
 
-
   ###*
   Opens a modal for the given URL.
 
@@ -217,7 +210,9 @@ up.modal = (($) ->
   This will request `/foo`, extract the `.list` selector from the response
   and open the selected container in a modal dialog.
 
-  @method up.modal.visit
+  Emits events [`up:modal:open`](/up:modal:open) and [`up:modal:opened`](/up:modal:opened).
+
+  @function up.modal.visit
   @param {String} url
     The URL to load.
   @param {String} options.target
@@ -231,8 +226,8 @@ up.modal = (($) ->
     options.url = url
     open(options)
 
-
   ###*
+  @function up.modal.open
   @private
   ###
   open = (options) ->
@@ -269,17 +264,26 @@ up.modal = (($) ->
       $.Deferred()
 
   ###*
+  This event is [emitted](/up.emit) when a modal dialog is starting to open.
+
+  @event up:modal:open
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the modal from opening.
+  ###
+
+  ###*
+  This event is [emitted](/up.emit) when a modal dialog has finished opening.
+
+  @event up:modal:opened
+  ###
+
+  ###*
   Closes a currently opened modal overlay.
   Does nothing if no modal is currently open.
 
-  \#\#\#\# Events
+  Emits events [`up:modal:close`](/up:modal:close) and [`up:modal:closed`](/up:modal:closed).
 
-  - Emits an [event](/up.bus) `modal:close` when the modal
-    is starting to close.
-  - Emits an [event](/up.bus) `modal:closed` when the closing
-    animation has finished and the modal has been removed from the DOM.
-  
-  @method up.modal.close
+  @function up.modal.close
   @param {Object} options
     See options for [`up.animate`](/up.animate)
   ###
@@ -305,6 +309,22 @@ up.modal = (($) ->
     else
       u.resolvedDeferred()
 
+  ###*
+  This event is [emitted](/up.emit) when a modal dialog
+  is starting to [close](/up.modal.close).
+
+  @event up:modal:close
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the modal from closing.
+  ###
+
+  ###*
+  This event is [emitted](/up.emit) when a modal dialog
+  is done [closing](/up.modal.close).
+
+  @event up:modal:closed
+  ###
+
   autoclose = ->
     unless $('.up-modal').is('[up-sticky]')
       discardHistory()
@@ -314,7 +334,7 @@ up.modal = (($) ->
   Returns whether the given element or selector is contained
   within the current modal.
 
-  @methods up.modal.contains
+  @function up.modal.contains
   @param {String} elementOrSelector
   @protected
   ###
@@ -378,8 +398,7 @@ up.modal = (($) ->
       <a href="/settings" up-modal=".options" up-sticky>Settings</a>
 
 
-  @method a[up-modal]
-  @ujs
+  @selector a[up-modal]
   @param [up-sticky]
   @param [up-animation]
   @param [up-height]
@@ -417,8 +436,7 @@ up.modal = (($) ->
   When this element is clicked, closes a currently open dialog.
   Does nothing if no modal is currently open.
 
-  @method [up-close]
-  @ujs
+  @selector [up-close]
   ###
   up.on('click', '[up-close]', (event, $element) ->
     if $element.closest('.up-modal').length

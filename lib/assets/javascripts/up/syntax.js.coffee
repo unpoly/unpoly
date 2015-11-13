@@ -155,7 +155,7 @@ up.syntax = (($) ->
       });
 
   
-  @method up.compiler
+  @function up.compiler
   @param {String} selector
     The selector to match.
   @param {Boolean} [options.batch=false]
@@ -204,7 +204,7 @@ up.syntax = (($) ->
         else
           $matches.each -> applyCompiler(compiler, $(this), this)
 
-  destroy = ($fragment) ->
+  runDestroyers = ($fragment) ->
     u.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
       $element = $(this)
       destroyer = $element.data(DESTROYER_KEY)
@@ -220,14 +220,15 @@ up.syntax = (($) ->
   we can support getting or setting individual keys.
 
   @protected
-  @method up.syntax.data
+  @function up.syntax.data
   @param {String|Element|jQuery} elementOrSelector
+  @return
+    The JSON-decoded value of the `up-data` attribute.
+
+    Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
   ###
 
   ###
-  Looks for an `up-data` attribute on the given element, then parses
-  its value as JSON and returns the JSON object.
-
   If an element annotated with [`up-data`] is inserted into the DOM,
   Up will parse the JSON and pass the resulting object to any matching
   [`up.compiler`](/up.syntax.compiler) handlers.
@@ -236,13 +237,9 @@ up.syntax = (($) ->
   [`up-data`], the parsed object will be passed to any matching
   [`up.on`](/up.on) handlers.
 
-  @ujs
-  @method [up-data]
-  @param {JSON} [up-data]
-  @return
-    The JSON-decoded value of the `up-data` attribute.
-
-    Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
+  @selector [up-data]
+  @param {JSON} up-data
+    A serialized JSON string
   ###
   data = (elementOrSelector) ->
     $element = $(elementOrSelector)
@@ -284,7 +281,10 @@ up.syntax = (($) ->
       $element = $('<div>...</div>').appendTo(document.body);
       up.hello($element);
 
-  @method up.hello
+  This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
+  event.
+
+  @function up.hello
   @param {String|Element|jQuery} selectorOrElement
   ###
   hello = (selectorOrElement) ->
@@ -292,9 +292,18 @@ up.syntax = (($) ->
     up.emit('up:fragment:inserted', $element: $element)
     $element
 
+  ###*
+  When a page fragment has been [inserted or updated](/up.replace),
+  this event is [emitted](/up.emit) on the fragment.
+
+  @event up:fragment:inserted
+  @param {jQuery} event.$element
+    The fragment that has been inserted or updated.
+  ###
+
   up.on 'ready', (-> hello(document.body))
   up.on 'up:fragment:inserted', (event) -> compile(event.$element)
-  up.on 'up:fragment:destroy', (event) -> destroy(event.$element)
+  up.on 'up:fragment:destroy', (event) -> runDestroyers(event.$element)
   up.on 'up:framework:boot', snapshot
   up.on 'up:framework:reset', reset
 

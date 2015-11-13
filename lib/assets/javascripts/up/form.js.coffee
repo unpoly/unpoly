@@ -32,7 +32,7 @@ up.form = (($) ->
   The response is parsed for a CSS selector and the matching elements will
   replace corresponding elements on the current page.
   
-  @method up.submit
+  @function up.submit
   @param {Element|jQuery|String} formOrSelector
     A reference or selector for the form to submit.
     If the argument points to an element that is not a form,
@@ -177,7 +177,7 @@ up.form = (($) ->
       });
 
 
-  @method up.observe
+  @function up.observe
   @param {Element|jQuery|String} fieldOrSelector
   @param {Function(value, $field)|String} options.change
     The callback to execute when the field's value changes.
@@ -273,8 +273,7 @@ up.form = (($) ->
         ...
       </form>
 
-  @method form[up-target]
-  @ujs
+  @selector form[up-target]
   @param {String} up-target
     The selector to [replace](/up.replace) if the form submission is successful (200 status code).
   @param {String} [up-fail-target]
@@ -329,10 +328,9 @@ up.form = (($) ->
 
   See up.observe.
 
-  @method input[up-observe]
+  @selector input[up-observe]
     The code to run when the field's value changes.
-  @ujs
-  @param {String} up-observe 
+  @param {String} up-observe
   ###
   up.compiler '[up-observe]', ($field) ->
     return observe($field)

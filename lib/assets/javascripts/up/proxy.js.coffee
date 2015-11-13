@@ -18,8 +18,9 @@ the user performs the click.
 Spinners
 --------
 
-You can listen to [framework events](/up.bus) to implement a spinner
-(progress indicator) that appears during a long-running request,
+You can [listen](/up.on) to the [`up:proxy:busy`](/up:proxy:busy)
+and [`up:proxy:idle`](/up:proxy:idle) events  to implement a spinner
+that appears during a long-running request,
 and disappears once the response has been received:
 
     <div class="spinner">Please wait!</div>
@@ -31,8 +32,8 @@ Here is the Javascript to make it alive:
       show = function() { $element.show() };
       hide = function() { $element.hide() };
 
-      showOff = up.on('proxy:busy', show);
-      hideOff = up.on('proxy:idle', hide);
+      showOff = up.on('up:proxy:busy', show);
+      hideOff = up.on('up:proxy:idle', hide);
 
       hide();
 
@@ -44,9 +45,9 @@ Here is the Javascript to make it alive:
 
     });
 
-The `proxy:busy` event will be emitted after a delay of 300 ms
+The `up:proxy:busy` event will be emitted after a delay of 300 ms
 to prevent the spinner from flickering on and off.
-You can change (or remove) this delay like this:
+You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.config) like this:
 
     up.proxy.config.busyDelay = 150;
 
@@ -63,8 +64,7 @@ up.proxy = (($) ->
   busyEventEmitted = undefined
 
   ###*
-  @method up.proxy.config
-  @property
+  @property up.proxy.config
   @param {Number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](/up-preload)
     starts preloading.
@@ -100,25 +100,26 @@ up.proxy = (($) ->
 
   ###*
   @protected
-  @method up.proxy.get
+  @function up.proxy.get
   ###
   get = cache.get
 
   ###*
   @protected
-  @method up.proxy.set
+  @function up.proxy.set
   ###
   set = cache.set
 
   ###*
   @protected
-  @method up.proxy.remove
+  @function up.proxy.remove
   ###
   remove = cache.remove
 
   ###*
-  @protected
-  @method up.proxy.clear
+  Removes all cache entries.
+
+  @function up.proxy.clear
   ###
   clear = cache.clear
 
@@ -165,7 +166,7 @@ up.proxy = (($) ->
   Once the response is received, a `proxy:receive` event will
   be emitted.
   
-  @method up.proxy.ajax
+  @function up.proxy.ajax
   @param {String} request.url
   @param {String} [request.method='GET']
   @param {String} [request.selector]
@@ -222,7 +223,7 @@ up.proxy = (($) ->
   The proxy will also emit an `proxy:idle` [event](/up.bus) if it
   used to busy, but is now idle.
 
-  @method up.proxy.idle
+  @function up.proxy.idle
   @return {Boolean} Whether the proxy is idle
   ###
   idle = ->
@@ -235,7 +236,7 @@ up.proxy = (($) ->
   The proxy will also emit an `proxy:busy` [event](/up.bus) if it
   used to idle, but is now busy.
 
-  @method up.proxy.busy
+  @function up.proxy.busy
   @return {Boolean} Whether the proxy is busy
   ###
   busy = ->
@@ -245,6 +246,8 @@ up.proxy = (($) ->
     wasIdle = idle()
     pendingCount += 1
     if wasIdle
+      # Since the emission of up:proxy:busy might be delayed by config.busyDelay,
+      # we wrap the mission in a function for scheduling below.
       emission = ->
         if busy() # a fast response might have beaten the delay
           up.emit('up:proxy:busy')
@@ -254,11 +257,36 @@ up.proxy = (($) ->
       else
         emission()
 
+  ###*
+  This event is [emitted]/(up.emit) when [AJAX requests](/up.proxy.ajax)
+  are taking long to finish.
+
+  By default Up.js will wait 300 ms for an AJAX request to finish
+  before emitting `up:proxy:busy`. You can configure this time like this:
+
+      up.proxy.config.busyDelay = 150;
+
+  Once all responses have been received, an [`up:proxy:idle`](/up:proxy:idle)
+  will be emitted.
+
+  Note that if additional requests are made while Up.js is already busy
+  waiting, **no** additional `up:proxy:busy` events will be triggered.
+
+  @event up:proxy:busy
+  ###
+
   loadEnded = ->
     pendingCount -= 1
     if idle() && busyEventEmitted
       up.emit('up:proxy:idle')
       busyEventEmitted = false
+
+  ###*
+  This event is [emitted]/(up.emit) when [AJAX requests](/up.proxy.ajax)
+  have [taken long to finish](/up:proxy:busy), but have finished now.
+
+  @event up:proxy:busy
+  ###
 
   load = (request) ->
     u.debug('Loading URL %o', request.url)
@@ -266,6 +294,28 @@ up.proxy = (($) ->
     promise = u.ajax(request)
     promise.always -> up.emit('up:proxy:received', request)
     promise
+
+  ###*
+  This event is [emitted]/(up.emit) before an [AJAX request](/up.proxy.ajax)
+  is starting to load.
+
+  @event up:proxy:load
+  @protected
+  @param event.url
+  @param event.method
+  @param event.selector
+  ###
+
+  ###*
+  This event is [emitted]/(up.emit) when the response to an [AJAX request](/up.proxy.ajax)
+  has been received.
+
+  @event up:proxy:received
+  @protected
+  @param event.url
+  @param event.method
+  @param event.selector
+  ###
 
   isIdempotent = (request) ->
     normalizeRequest(request)
@@ -286,7 +336,9 @@ up.proxy = (($) ->
 
   ###*
   @protected
-  @method up.proxy.preload
+  @function up.proxy.preload
+  @param {String|Element|jQuery}
+    The element whose destination should be preloaded.
   @return
     A promise that will be resolved when the request was loaded and cached
   ###
@@ -310,12 +362,11 @@ up.proxy = (($) ->
   response will already be cached when the user performs the click,
   making the interaction feel instant.   
 
-  @method [up-preload]
+  @selector [up-preload]
   @param [up-delay=75]
     The number of milliseconds to wait between hovering
     and preloading. Increasing this will lower the load in your server,
     but will also make the interaction feel less instant.
-  @ujs
   ###
   up.on 'mouseover mousedown touchstart', '[up-preload]', (event, $element) ->
     # Don't do anything if we are hovering over the child

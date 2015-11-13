@@ -54,7 +54,7 @@ up.flow = (($) ->
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
-  @method up.replace
+  @function up.replace
   @param {String|Element|jQuery} selectorOrElement
     The CSS selector to update. You can also pass a DOM element or jQuery element
     here, in which case a selector will be inferred from the element's class and ID.
@@ -155,7 +155,7 @@ up.flow = (($) ->
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
-  @method up.flow.implant
+  @function up.flow.implant
   @protected
   @param {String} selector
   @param {String} html
@@ -295,7 +295,7 @@ up.flow = (($) ->
   Returns `undefined` if no element matches these conditions.
 
   @protected
-  @method up.first
+  @function up.first
   @param {String} selector
   ###
   first = (selector) ->
@@ -316,8 +316,10 @@ up.flow = (($) ->
   The element is removed from the DOM.
   Note that if you choose to animate the element removal using `options.animate`,
   the element won't be removed until after the animation has completed.
+
+  Emits events [`up:fragment:destroy`](/up:fragment:destroy) and [`up:fragment:destroyed`](/up:fragment:destroyed).
   
-  @method up.destroy
+  @function up.destroy
   @param {String|Element|jQuery} selectorOrElement 
   @param {String} [options.url]
   @param {String} [options.title]
@@ -357,6 +359,32 @@ up.flow = (($) ->
       $.Deferred()
 
   ###*
+  Before a page fragment is being [destroyed](/up.destroy), this
+  event is [emitted](/up.emit) on the fragment.
+
+  If the destruction is animated, this event is emitted before the
+  animation begins.
+
+  @event up:fragment:destroy
+  @param {jQuery} event.$element
+    The page fragment that is about to be destroyed.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the fragment from being destroyed.
+  ###
+
+  ###*
+  This event is [emitted](/up.emit) right before a [destroyed](/up.destroy)
+  page fragment is removed from the DOM.
+
+  If the destruction is animated, this event is emitted after
+  the animation has ended.
+
+  @event up:fragment:destroyed
+  @param {jQuery} event.$element
+    The page fragment that is about to be removed from the DOM.
+  ###
+
+  ###*
   Replaces the given element with a fresh copy fetched from the server.
 
   \#\#\#\# Example
@@ -368,7 +396,7 @@ up.flow = (($) ->
   Up.js remembers the URL from which a fragment was loaded, so you
   don't usually need to give an URL when reloading.
 
-  @method up.reload
+  @function up.reload
   @param {String|Element|jQuery} selectorOrElement
   @param {Object} [options]
     See options for [`up.replace`](/up.replace)

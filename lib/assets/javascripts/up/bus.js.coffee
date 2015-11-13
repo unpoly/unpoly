@@ -109,7 +109,7 @@ up.bus = (($) ->
         $(this).something();
       });
 
-  @method up.on
+  @function up.on
   @param {String} events
     A space-separated list of event names to bind.
   @param {String} [selector]
@@ -157,7 +157,7 @@ up.bus = (($) ->
       up.emit('my:event', { foo: 'bar' });
       # Prints "bar" to the console
 
-  @method up.emit
+  @function up.emit
   @param {String} eventName
     The name of the event.
   @param {Object} [eventProps={}]
@@ -180,7 +180,7 @@ up.bus = (($) ->
   ###*
   [Emits an event](/up.emit) and returns whether any listener has prevented the default action.
 
-  @method up.bus.nobodyPrevents
+  @function up.bus.nobodyPrevents
   @param {String} eventName
   @param {Object} eventProps
   @protected
@@ -225,10 +225,39 @@ up.bus = (($) ->
   Don't use this in production.
 
   @protected
-  @method up.reset
+  @function up.reset
   ###
   emitReset = ->
     up.emit('up:framework:reset')
+
+  ###*
+  This event is [emitted](/up.emit) when Up.js is [reset](/up.reset) during unit tests.
+
+  @protected
+  @event up:framework:reset
+  ###
+
+  ###*
+  Boots the Up.js framework.
+  This is done automatically by including the Up.js Javascript.
+
+  Does nothing if the current browser is [not supported](/up.browser.isSupported).
+
+  Emits the [`up:framework:boot`](/up:framework:boot) event.
+
+  @protected
+  @function up.boot
+  ###
+  boot = ->
+    if up.browser.isSupported()
+      up.emit('up:framework:boot')
+
+  ###*
+  This event is [emitted](/up.emit) when Up.js [boots](/up.boot).
+
+  @event up:framework:boot
+  @protected
+  ###
 
   live 'up:framework:boot', snapshot
   live 'up:framework:reset', restoreSnapshot
@@ -238,9 +267,11 @@ up.bus = (($) ->
   nobodyPrevents: nobodyPrevents
   onEscape: onEscape
   emitReset: emitReset
+  boot: boot
 
 )(jQuery)
 
 up.on = up.bus.on
 up.emit = up.bus.emit
 up.reset = up.bus.emitReset
+up.boot = up.bus.boot

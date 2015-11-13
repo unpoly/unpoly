@@ -95,7 +95,7 @@ up.link = (($) ->
 
       up.visit('/users')
 
-  @method up.visit
+  @function up.visit
   @param {String} url
     The URL to visit.
   @param {String} [options.target='body']
@@ -121,7 +121,7 @@ up.link = (($) ->
       var $link = $('a:first'); // select link with jQuery
       up.follow($link);
 
-  @method up.follow
+  @function up.follow
   @param {Element|jQuery|String} linkOrSelector
     An element or selector which resolves to an `<a>` tag
     or any element that is marked up with an `up-href` attribute.
@@ -170,7 +170,7 @@ up.link = (($) ->
   Defaults to `get`.
 
   @protected
-  @method up.link.followMethod
+  @function up.link.followMethod
   @param linkOrSelector
   @param options.method {String}
   ###
@@ -226,8 +226,7 @@ up.link = (($) ->
   Note that using any element other than `<a>` will prevent users from
   opening the destination in a new tab.
 
-  @method a[up-target]
-  @ujs
+  @selector a[up-target]
   @param {String} up-target
     The CSS selector to replace
   @param {String} [up-href]
@@ -269,8 +268,7 @@ up.link = (($) ->
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown` instead of `click`.
 
-  @method a[up-instant]
-  @ujs
+  @selector a[up-instant]
   ###
   up.on 'mousedown', 'a[up-instant], [up-href][up-instant]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
@@ -278,7 +276,7 @@ up.link = (($) ->
       follow($link)
 
   ###*
-  @method up.link.childClicked
+  @function up.link.childClicked
   @private
   ###
   childClicked = (event, $link) ->
@@ -295,7 +293,7 @@ up.link = (($) ->
   This is done by giving the link an `up-follow` attribute
   if it doesn't already have it an `up-target` or `up-follow` attribute.
 
-  @method up.link.makeFollowable
+  @function up.link.makeFollowable
   @protected
   ###
   makeFollowable = (link) ->
@@ -324,8 +322,7 @@ up.link = (($) ->
   Note that using any element other than `<a>` will prevent users from
   opening the destination in a new tab.
 
-  @method a[up-follow]
-  @ujs
+  @selector a[up-follow]
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
@@ -358,8 +355,7 @@ up.link = (($) ->
   `up-expand` honors all the UJS behavior in expanded links
   (`up-target`, `up-instant`, `up-preload`, etc.).
 
-  @ujs
-  @method [up-expand]
+  @selector [up-expand]
   ###
   up.compiler '[up-expand]', ($area) ->
     link = $area.find('a, [up-href]').get(0)
@@ -392,8 +388,7 @@ up.link = (($) ->
   
       <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
 
-  @method [up-dash]
-  @ujs
+  @selector [up-dash]
   ###
   up.compiler '[up-dash]', ($element) ->
     target = u.castedAttr($element, 'up-dash')

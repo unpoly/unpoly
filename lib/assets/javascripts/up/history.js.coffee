@@ -17,8 +17,7 @@ up.history = (($) ->
   u = up.util
 
   ###*
-  @method up.history.config
-  @property
+  @property up.history.config
   @param {Array<String>} [config.popTargets=['body']]
     An array of CSS selectors to replace when the user goes
     back in history.
@@ -37,7 +36,7 @@ up.history = (($) ->
   were applied by [`up.history.push`](/up.history.replace) or
   [`up.history.replace`](/up.history.replace).
 
-  @method up.history.previousUrl
+  @function up.history.previousUrl
   @protected
   ###
   previousUrl = undefined
@@ -54,7 +53,7 @@ up.history = (($) ->
   ###*
   Returns a normalized URL for the current history entry.
 
-  @method up.history.url
+  @function up.history.url
   @protected
   ####
   currentUrl = ->
@@ -70,7 +69,7 @@ up.history = (($) ->
     nextPreviousUrl = url
 
   ###*
-  @method up.history.replace
+  @function up.history.replace
   @param {String} url
   @param {Boolean} [options.force=false]
   @protected
@@ -79,7 +78,7 @@ up.history = (($) ->
     manipulate('replace', url, options)
 
   ###*
-  @method up.history.push  
+  @function up.history.push
   @param {String} url
   @protected
   ###
@@ -160,8 +159,7 @@ up.history = (($) ->
         Goback
       </a>
 
-  @ujs
-  @method [up-back]
+  @selector [up-back]
   ###
   up.compiler '[up-back]', ($link) ->
     if u.isPresent(previousUrl)

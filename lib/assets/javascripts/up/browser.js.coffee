@@ -32,13 +32,13 @@ up.browser = (($) ->
       error("Can't fake a #{method.toUpperCase()} request without Rails UJS")
 
   ###*
-  Makes native `console.log`, `console.error`, etc. functions safer in multiple ways:
+  A cross-browser way to interact with `console.log`, `console.error`, etc.
 
-  - Falls back to `console.log` if the output stream is not implemented
-  - Prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`) as a single
-    string if the browser console does not support substitution strings.
+  This function falls back to `console.log` if the output stream is not implemented.
+  It also prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`)
+  as a single string if the browser console does not support substitution strings.
 
-  @method up.browser.puts
+  @function up.browser.puts
   @protected
   ###
   puts = (stream, args...) ->
@@ -114,10 +114,10 @@ up.browser = (($) ->
   Returns whether Up.js supports the current browser.
 
   Currently Up.js supports IE9 with jQuery 1.9+.
-  On older browsers Up.js will prevent itself from booting, leaving you with
-  a classic server-side application.
+  On older browsers Up.js will prevent itself from [booting](/up.boot),
+  leaving you with a classic server-side application.
 
-  @method up.browser.isSupported
+  @function up.browser.isSupported
   ###
   isSupported = ->
     (!isIE8OrWorse()) && isRecentJQuery()

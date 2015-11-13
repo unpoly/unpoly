@@ -41,8 +41,7 @@ up.motion = (($) ->
   ###*
   Sets default options for animations and transitions.
 
-  @method up.motion.config
-  @property
+  @property up.motion.config
   @param {Number} [config.duration=300]
   @param {Number} [config.delay=0]
   @param {String} [config.easing='ease']
@@ -105,7 +104,7 @@ up.motion = (($) ->
   the previous animation will instantly jump to its last frame before
   the new animation begins.
 
-  @method up.animate
+  @function up.animate
   @param {Element|jQuery|String} elementOrSelector
     The element to animate.
   @param {String|Function|Object} animation
@@ -145,7 +144,7 @@ up.motion = (($) ->
   attributes like `up-easing` or `up-duration`.
 
   @protected
-  @method up.motion.animateOptions
+  @function up.motion.animateOptions
   ###
   animateOptions = (allOptions, $element = null) ->
     allOptions = u.options(allOptions)
@@ -226,7 +225,7 @@ up.motion = (($) ->
 
   Does nothing if the given element is not currently animating.
   
-  @method up.motion.finish
+  @function up.motion.finish
   @param {Element|jQuery|String} elementOrSelector
   ###
   finish = (elementOrSelector) ->
@@ -291,7 +290,7 @@ up.motion = (($) ->
   - When the transition has finished, the clones are removed from the DOM and the new element is shown.
     The old element remains hidden in the DOM.
 
-  @method up.morph
+  @function up.morph
   @param {Element|jQuery|String} source
   @param {Element|jQuery|String} target
   @param {Function|String} transitionOrName
@@ -435,7 +434,7 @@ up.motion = (($) ->
   Calling [`up.animate`](/up.animate) with an object argument
   will take care of all these points.
 
-  @method up.transition
+  @function up.transition
   @param {String} name
   @param {Function} transition
   ###
@@ -468,7 +467,7 @@ up.motion = (($) ->
   Calling [`up.animate`](/up.animate) with an object argument
   will take care of all these points.
 
-  @method up.animation
+  @function up.animation
   @param {String} name
   @param {Function} animation
   ###
@@ -486,7 +485,7 @@ up.motion = (($) ->
   the combined promise will have a `resolve` method. This `resolve` method
   will resolve all the wrapped promises.
 
-  @method up.motion.when
+  @function up.motion.when
   @param promises...
   @return A new promise.
   ###
@@ -496,7 +495,7 @@ up.motion = (($) ->
   Returns a no-op animation or transition which has no visual effects
   and completes instantly.
 
-  @method up.motion.none
+  @function up.motion.none
   @return {Promise}
     A resolved promise
   ###

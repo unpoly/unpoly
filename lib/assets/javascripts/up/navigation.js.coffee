@@ -18,8 +18,7 @@ up.navigation = (($) ->
   ###*
   Sets default options for this module.
 
-  @method up.navigation.config
-  @property
+  @property up.navigation.config
   @param {Number} [config.currentClasses]
     An array of classes to set on [links that point the current location](/up-current).
   ###
@@ -126,8 +125,7 @@ up.navigation = (($) ->
 
       <a href="/foo" up-follow up-current>Foo</a>
 
-  @ujs
-  @method [up-active]
+  @selector [up-active]
   ###
   sectionClicked = ($section) ->
     unmarkActive()
@@ -189,8 +187,7 @@ up.navigation = (($) ->
 
       <a href="/reports" up-alias="/reports/*">Reports</a>
 
-  @method [up-current]
-  @ujs
+  @selector [up-current]
   ###
   up.on 'up:fragment:inserted', ->
     # If a new fragment is inserted, it's likely to be the result

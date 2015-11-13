@@ -29,7 +29,7 @@ up.popup = (($) ->
   Returns the source URL for the fragment displayed
   in the current popup, or `undefined` if no  popup is open.
 
-  @method up.popup.url
+  @function up.popup.url
   @return {String}
     the source URL
   ###
@@ -38,7 +38,7 @@ up.popup = (($) ->
   ###*
   Returns the URL of the page or modal below the popup.
 
-  @method up.popup.coveredUrl
+  @function up.popup.coveredUrl
   @return {String}
   @protected
   ###
@@ -47,8 +47,7 @@ up.popup = (($) ->
     $popup.attr('up-covered-url')
 
   ###*
-  @method up.popup.config
-  @property
+  @property up.popup.config
   @param {String} [config.openAnimation]
   @param {String} [config.closeAnimation]
   @param {String} [config.position]
@@ -137,7 +136,7 @@ up.popup = (($) ->
   ###*
   Attaches a popup overlay to the given element or selector.
   
-  @method up.popup.attach
+  @function up.popup.attach
   @param {Element|jQuery|String} elementOrSelector
   @param {String} [options.url]
   @param {String} [options.position='bottom-right']
@@ -178,7 +177,7 @@ up.popup = (($) ->
   Closes a currently opened popup overlay.
   Does nothing if no popup is currently open.
   
-  @method up.popup.close
+  @function up.popup.close
   @param {Object} options
     See options for [`up.animate`](/up.animate).
   ###
@@ -223,8 +222,7 @@ up.popup = (($) ->
       <a href="/decks" up-popup=".deck_list">Switch deck</a>
       <a href="/settings" up-popup=".options" up-sticky>Settings</a>
 
-  @method a[up-popup]
-  @ujs
+  @selector a[up-popup]
   @param [up-sticky]
   @param [up-position]
   ###
@@ -259,8 +257,7 @@ up.popup = (($) ->
   When an element with this attribute is clicked,
   a currently open popup is closed. 
   
-  @method [up-close]
-  @ujs
+  @selector [up-close]
   ###
   up.on('click', '[up-close]', (event, $element) ->
     if $element.closest('.up-popup').length

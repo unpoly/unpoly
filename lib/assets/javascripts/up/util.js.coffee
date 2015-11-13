@@ -32,7 +32,7 @@ up.util = (($) ->
     $.ajax(request)
 
   ###*
-  @method up.util.isStandardPort
+  @function up.util.isStandardPort
   @private
   ###  
   isStandardPort = (protocol, port) ->
@@ -44,7 +44,7 @@ up.util = (($) ->
   
   By default hashes are ignored, search queries are included.
   
-  @method up.util.normalizeUrl
+  @function up.util.normalizeUrl
   @param {Boolean} [options.hash=false]
   @param {Boolean} [options.search=true]
   @protected
@@ -74,7 +74,7 @@ up.util = (($) ->
     normalized
 
   ###*
-  @method up.util.normalizeMethod
+  @function up.util.normalizeMethod
   @protected
   ###
   normalizeMethod = (method) ->
@@ -115,7 +115,7 @@ up.util = (($) ->
     element
 
   ###*
-  @method up.debug
+  @function up.debug
   @protected
   ###
   debug = (message, args...) ->
@@ -123,7 +123,7 @@ up.util = (($) ->
     up.browser.puts('debug', message, args...)
 
   ###*
-  @method up.warn
+  @function up.warn
   @protected
   ###
   warn = (message, args...) ->
@@ -142,7 +142,7 @@ up.util = (($) ->
       up.error('Division by zero')
       up.error('Unexpected result %o', result)
 
-  @method up.error
+  @function up.error
   ###
   error = (args...) ->
     args[0] = "[UP] #{args[0]}"
@@ -349,7 +349,7 @@ up.util = (($) ->
   In that case you cannot change the sources with a `||` operator
   (since that doesn't short-circuit at `false`).
   
-  @method up.util.option
+  @function up.util.option
   @param {Array} args...
   ###
   option = (args...) ->
@@ -429,7 +429,7 @@ up.util = (($) ->
   Modifies the given function so it only runs once.
   Subsequent calls will return the previous return value.
 
-  @method up.util.once
+  @function up.util.once
   @private
   ###
   once = (fun) ->
@@ -442,7 +442,7 @@ up.util = (($) ->
   ###*
   # Temporarily sets the CSS for the given element.
   #
-  # @method up.util.temporaryCss
+  # @function up.util.temporaryCss
   # @param {jQuery} $element
   # @param {Object} css
   # @param {Function} [block]
@@ -483,7 +483,7 @@ up.util = (($) ->
   To improve performance, the element will be forced into compositing for
   the duration of the animation.
 
-  @method up.util.cssAnimate
+  @function up.util.cssAnimate
   @param {Element|jQuery|String} elementOrSelector
     The element to animate.
   @param {Object} lastFrame
@@ -544,7 +544,7 @@ up.util = (($) ->
   
   Also see [`up.motion.finish`](/up.motion.finish).
   
-  @method up.util.finishCssAnimate
+  @function up.util.finishCssAnimate
   @protected
   @param {Element|jQuery|String} elementOrSelector
   ###
@@ -734,7 +734,7 @@ up.util = (($) ->
     obj
 
   ###*
-  @method up.util.cache
+  @function up.util.cache
   @param {Number|Function} [config.size]
     Maximum number of cache entries.
     Set to `undefined` to not limit the cache size.

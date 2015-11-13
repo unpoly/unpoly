@@ -36,8 +36,7 @@ up.tooltip = (($) ->
   ###*
   Sets default options for future tooltips.
 
-  @method up.tooltip.config
-  @property
+  @property up.tooltip.config
   @param {String} [config.position]
     The default position of tooltips relative to the element.
     Can be either `"top"` or `"bottom"`.
@@ -85,7 +84,7 @@ up.tooltip = (($) ->
         html: 'Enter multiple words or phrases'
       });
   
-  @method up.tooltip.attach
+  @function up.tooltip.attach
   @param {Element|jQuery|String} elementOrSelector
   @param {String} [options.html]
     The HTML to display in the tooltip.
@@ -110,7 +109,7 @@ up.tooltip = (($) ->
   Closes a currently shown tooltip.
   Does nothing if no tooltip is currently shown.
   
-  @method up.tooltip.close
+  @function up.tooltip.close
   @param {Object} options
     See options for [`up.animate`](/up.animate).
   ###
@@ -131,7 +130,7 @@ up.tooltip = (($) ->
 
       <a href="/decks" up-tooltip="Show all decks" up-position="bottom">Decks</a>
 
-  @method [up-tooltip]
+  @selector [up-tooltip]
   @param {String} [up-animation]
     The animation used to open the tooltip.
     Defaults to [`up.tooltip.config.openAnimation`](/up.tooltip.config).
@@ -139,7 +138,6 @@ up.tooltip = (($) ->
     The default position of tooltips relative to the element.
     Can be either `"top"` or `"bottom"`.
     Defaults to [`up.tooltip.config.position`](/up.tooltip.config).
-  @ujs
   ###
 
   ###*
@@ -147,8 +145,7 @@ up.tooltip = (($) ->
 
       <a href="/decks" up-tooltip="Show &lt;b&gt;all&lt;/b&gt; decks">Decks</a>
 
-  @method [up-tooltip-html]
-  @ujs
+  @selector [up-tooltip-html]
   ###
   up.compiler('[up-tooltip], [up-tooltip-html]', ($link) ->
     # Don't register these events on document since *every*
