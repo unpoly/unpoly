@@ -2,22 +2,46 @@
 Pop-up overlays
 ===============
 
-Instead of linking to another page fragment, you can also choose
-to "roll up" any target CSS selector in a popup overlay. 
-Popup overlays close themselves if the user clicks somewhere outside the
-popup area. 
-  
-For modal dialogs see [up.modal](/up.modal) instead.
-  
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
+Instead of [linking to a page fragment](/up.link), you can choose
+to show a fragment in a popup overlay.
 
-- Show the HTML structure of the popup elements, and how to style them via CSS
-- Explain how to position popup using `up-position`
-- Explain how dialogs auto-close themselves when a fragment changes behind the popup layer
-- Document method parameters
-  
+To open a popup, add an [`up-popup` attribute](/a-up-popup) to a link,
+or call the Javascript function [`up.popup.attach`](/up.popup.attach).
+
+For modal dialogs see [up.modal](/up.modal) instead.
+
+
+\#\#\#\# Customizing the popup design
+
+Loading the Up.js stylesheet will give you a minimal popup design:
+
+- Popup contents are displayed in a white box
+- There is a a subtle box shadow around the popup
+- The box will grow to fit the popup contents
+
+The easiest way to change how the popup looks is by overriding the [default CSS styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/popup.css.sass).
+
+By default the popup uses the following DOM structure:
+
+    <div class="up-popup">
+      ...
+    </div>
+
+
+\#\#\#\# Closing behavior
+
+The popup closes when the user clicks anywhere outside the popup area.
+
+By default the popup also closes
+*whenever a page fragment below the popup is updated*.
+This is useful to have the popup interact with the page that
+opened it, e.g. by updating parts of a larger form or by signing in a user
+and revealing additional information.
+
+To disable this behavior, give the opening link an `up-sticky` attribute:
+
+    <a href="/settings" up-popup=".options" up-sticky>Settings</a>
+
   
 @class up.popup
 ###
@@ -47,10 +71,17 @@ up.popup = (($) ->
     $popup.attr('up-covered-url')
 
   ###*
+  Sets default options for future popups.
+
   @property up.popup.config
-  @param {String} [config.openAnimation]
-  @param {String} [config.closeAnimation]
-  @param {String} [config.position]
+  @param {String} [config.openAnimation='fade-in']
+    The animation used to open a popup.
+  @param {String} [config.closeAnimation='fade-out']
+    The animation used to close a popup.
+  @param {String} [config.position='bottom-right']
+    Defines where the popup is attached to the opening element.
+
+    Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
   ###
   config = u.config
     openAnimation: 'fade-in'

@@ -1,42 +1,40 @@
 ###*
-Framework events
-================
+Events
+======
 
-Up.js uses an internal event bus that you can use to hook into lifecycle events like "an HTML fragment into the DOM".
-  
-This internal event bus might eventually be rolled into regular events that we trigger on `document`.
+Up.js has a convenient way to [listen to DOM events](/up.on):
 
-\#\#\# `fragment:inserted` event
-
-This event is triggered after Up.js has inserted an HTML fragment into the DOM through mechanisms like [`[up-target]`](/a-up-target) or [`up.replace`](/up.replace):
-
-    up.on('up:fragment:inserted', function($fragment) {
-      console.log("Looks like we have a new %o!", $fragment);
+    up.on('click', 'button', function(event, $button) {
+      // $button is a jQuery collection containing
+      // the clicked <button> element
     });
 
-The event is triggered *before* Up has compiled the fragment with your [custom elements](/up.syntax).
-Upon receiving the event, Up.js will start compilation.
+This is roughly equivalent to binding an event listener to `document`
+using jQuery's [`on`](http://api.jquery.com/on/).
 
+- Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
+  leaving you with an application without Javascript. This is typically preferable to
+  a soup of randomly broken Javascript in ancient browsers.
+- A jQuery object with the target element is automatically passed to the event handler.
+- You can [attach structured data](/up.on#attaching-structured-data) to observed elements.
+- The call is shorter.
 
-\#\#\# `fragment:destroyed` event
+Many Up.js interactions also emit DOM events that are prefixed with `up:`.
 
-This event is triggered when Up.js is destroying an HTML fragment, e.g. because it's being replaced
-with a new version or because someone explicitly called [`up.destroy`](/up.destroy):
-
-    up.on('up:fragment:destroyed', function($fragment) {
-      console.log("Looks like we lost %o!", $fragment);
+    up.on('up:modal:opened', function(event) {
+      console.log('A new modal has just opened!');
     });
 
-After triggering this event, Up.js will remove the fragment from the DOM.
-In case the fragment destruction is animated, Up.js will complete the
-animation before removing the fragment from the DOM.
+Events often have both present (`up:modal:open`) and past forms (`up:modal:opened`).
+You can usually prevent an action by listening to the present form
+and call `preventDefault()` on the `event` object:
 
-
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-
-- Decide if we wouldn't rather document events in the respective module (e.g. proxy).
+    up.on('up:modal:open', function(event) {
+      if (event.url == '/evil') {
+        // Prevent the modal from opening
+        event.preventDefault();
+      }
+    });
 
 @class up.bus
 ###
@@ -73,7 +71,7 @@ up.bus = (($) ->
       });
 
   Other than jQuery, Up.js will silently discard event listeners
-  on [browsers that it doesn't support](/up.browser.isSupported).
+  on [unsupported browsers](/up.browser.isSupported).
 
 
   \#\#\#\# Attaching structured data
@@ -176,9 +174,9 @@ up.bus = (($) ->
     $target.trigger(event)
     event
 
-
   ###*
-  [Emits an event](/up.emit) and returns whether any listener has prevented the default action.
+  [Emits an event](/up.emit) and returns whether any listener
+  has prevented the default action.
 
   @function up.bus.nobodyPrevents
   @param {String} eventName
@@ -189,10 +187,21 @@ up.bus = (($) ->
     event = emit(args...)
     not event.isDefaultPrevented()
 
-  onEscape = (handler) ->
+  ###*
+  Registers an event listener to be called when the user
+  presses the `Escape` key.
+
+  @function up.bus.onEscape
+  @param {Function} listener
+    The listener function to register.
+  @return {Function}
+    A function that unbinds the event listeners when called.
+  @protected
+  ###
+  onEscape = (listener) ->
     live('keydown', 'body', (event) ->
       if u.escapePressed(event)
-        handler(event)
+        listener(event)
     )
 
   ###*

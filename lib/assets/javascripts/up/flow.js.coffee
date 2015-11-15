@@ -54,6 +54,12 @@ up.flow = (($) ->
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
+  \#\#\#\# Events
+
+  Up.js will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
+  that was replaced and [`up:fragment:inserted`](/up:fragment:inserted) on the new
+  element that replaces it.
+
   @function up.replace
   @param {String|Element|jQuery} selectorOrElement
     The CSS selector to update. You can also pass a DOM element or jQuery element

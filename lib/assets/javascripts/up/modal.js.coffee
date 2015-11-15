@@ -2,10 +2,55 @@
 Modal dialogs
 =============
 
-Instead of linking to another page fragment, you can also choose
-to open any target CSS selector in a modal dialog.
+Instead of [linking to a page fragment](/up.link), you can choose
+to show a fragment in a modal dialog.
+
+To open a modal, add an [`up-modal` attribute](/a-up-modal) to a link,
+or call the Javascript functions [`up.modal.follow`](/up.modal.follow)
+and [`up.modal.visit`](/up.modal.visit).
   
-For small popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
+For smaller popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
+
+
+\#\#\#\# Customizing the dialog design
+
+Loading the Up.js stylesheet will give you a minimal dialog design:
+
+- Dialog contents are displayed in a white box that is centered vertically and horizontally.
+- There is a a subtle box shadow around the dialog
+- The box will grow to fit the dialog contents, but never grow larger than the screen
+- The box is placed over a semi-transparent background to dim the rest of the page
+- There is a button to close the dialog in the top-right corner
+
+The easiest way to change how the dialog looks is by overriding the [default CSS styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/modal.css.sass).
+
+By default the dialog uses the following DOM structure:
+
+    <div class="up-modal">
+      <div class="up-modal-dialog">
+        <div class="up-modal-close" up-close>X</div>
+        <div class="up-modal-content">
+          ...
+        </div>
+      </div>
+    </div>
+
+If you want to change the design beyond CSS, you can
+configure Up.js to [use a different HTML structure](/up.modal.config).
+
+
+\#\#\#\# Closing behavior
+
+By default the dialog automatically closes
+*whenever a page fragment below the dialog is updated*.
+This is useful to have the dialog interact with the page that
+opened it, e.g. by updating parts of a larger form or by signing in a user
+and revealing additional information.
+
+To disable this behavior, give the opening link an `up-sticky` attribute:
+
+    <a href="/settings" up-modal=".options" up-sticky>Settings</a>
+
 
 @class up.modal 
 ###
@@ -354,49 +399,6 @@ up.modal = (($) ->
   the HTML response. Up.js will dim the page with an overlay
   and place the matching `.blog-list` tag will be placed in
   a modal dialog.
-
-
-  \#\#\#\# Customizing the dialog design
-
-  Loading the Up.js stylesheet will give you a minimal dialog design:
-
-  - Dialog contents are displayed in a white box that is centered vertically and horizontally.
-  - There is a a subtle box shadow around the dialog
-  - The box will grow to fit the dialog contents, but never grow larger than the screen
-  - The box is placed over a semi-transparent background to dim the rest of the page
-  - There is a button to close the dialog in the top-right corner
-
-  The easiest way to change how the dialog looks is by overriding the [default CSS styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/modal.css.sass).
-
-  By default the dialog uses the following DOM structure (continuing the blog-switcher example from above):
-
-      <div class="up-modal">
-        <div class="up-modal-dialog">
-          <div class="up-modal-close" up-close>X</div>
-          <div class="up-modal-content">
-            <ul class="blog-list">
-              ...
-            </ul>
-          </div>
-        </div>
-      </div>
-
-  If you want to change the design beyond CSS, you can
-  configure Up.js to [use a different HTML structure](/up.modal.config).
-
-
-  \#\#\#\# Closing behavior
-
-  By default the dialog automatically closes
-  *whenever a page fragment below the dialog is updated*.
-  This is useful to have the dialog interact with the page that
-  opened it, e.g. by updating parts of a larger form or by signing in a user
-  and revealing additional information.
-
-  To disable this behavior, give the opening link an `up-sticky` attribute:
-
-      <a href="/settings" up-modal=".options" up-sticky>Settings</a>
-
 
   @selector a[up-modal]
   @param [up-sticky]

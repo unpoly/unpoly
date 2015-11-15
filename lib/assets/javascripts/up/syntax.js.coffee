@@ -296,6 +296,12 @@ up.syntax = (($) ->
   When a page fragment has been [inserted or updated](/up.replace),
   this event is [emitted](/up.emit) on the fragment.
 
+  \#\#\#\# Example
+
+      up.on('up:fragment:inserted', function(event, $fragment) {
+        console.log("Looks like we have a new %o!", $fragment);
+      });
+
   @event up:fragment:inserted
   @param {jQuery} event.$element
     The fragment that has been inserted or updated.
