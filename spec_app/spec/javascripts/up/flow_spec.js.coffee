@@ -161,6 +161,36 @@ describe 'up.flow', ->
               expect(@revealedHTML).toContain('new-middle')
               done()
 
+          describe 'when there is an anchor #hash in the URL', ->
+
+            it 'reveals a child with the ID of that #hash', (done) ->
+              @request = up.replace('.middle', '/path#three', reveal: true)
+              @responseText =
+                """
+                <div class="middle">
+                  <div id="one">one</div>
+                  <div id="two">two</div>
+                  <div id="three">three</div>
+                </div>
+                """
+              @respond()
+              @request.then =>
+                expect(@revealedHTML).toEqual('<div id="three">three</div>')
+                done()
+
+            it "reveals the entire element if it has no child with the ID of that #hash", (done) ->
+              @request = up.replace('.middle', '/path#four', reveal: true)
+              @responseText =
+                """
+                <div class="middle">
+                  new-middle
+                </div>
+                """
+              @respond()
+              @request.then =>
+                expect(@revealedHTML).toContain('new-middle')
+                done()
+
           it 'reveals a new element that is being appended', (done) ->
             @request = up.replace('.middle:after', '/path', reveal: true)
             @respond()

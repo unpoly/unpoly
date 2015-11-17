@@ -135,6 +135,12 @@ describe 'up.link', ->
 
             expect($viewport.scrollTop()).toEqual(65)
 
+#        describe "when the browser is already on the link's destination", ->
+#
+#          it "doesn't make a request and reveals the target container"
+#
+#          it "doesn't make a request and reveals the target of a #hash in the URL"
+
       else
         
         it 'follows the given link', ->

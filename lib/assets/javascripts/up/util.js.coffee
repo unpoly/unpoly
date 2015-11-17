@@ -46,20 +46,15 @@ up.util = (($) ->
   
   @function up.util.normalizeUrl
   @param {Boolean} [options.hash=false]
+    Whether to include an `#hash` anchor in the normalized URL
   @param {Boolean} [options.search=true]
+    Whether to include a `?query` string in the normalized URL
+  @param {Boolean} [options.stripTrailingSlash=false]
+    Whether to strip a trailing slash from the pathname
   @protected
   ###
   normalizeUrl = (urlOrAnchor, options) ->
-    anchor = null
-    if isString(urlOrAnchor)
-      anchor = $('<a>').attr(href: urlOrAnchor).get(0)
-      # In IE11 the #hostname and #port properties of such a link are empty
-      # strings. However, we can fix this by assigning the anchor its own
-      # href because computer:
-      # https://gist.github.com/jlong/2428561#comment-1461205
-      anchor.href = anchor.href if isBlank(anchor.hostname)
-    else
-      anchor = unJquery(urlOrAnchor)
+    anchor = parseUrl(urlOrAnchor)
     normalized = anchor.protocol + "//" + anchor.hostname
     normalized += ":#{anchor.port}" unless isStandardPort(anchor.protocol, anchor.port)
     pathname = anchor.pathname
@@ -72,6 +67,23 @@ up.util = (($) ->
     normalized += anchor.hash if options?.hash == true
     normalized += anchor.search unless options?.search == false
     normalized
+
+  ###*
+  @function up.util.parseUrl
+  @private
+  ###
+  parseUrl = (urlOrAnchor) ->
+    anchor = null
+    if isString(urlOrAnchor)
+      anchor = $('<a>').attr(href: urlOrAnchor).get(0)
+      # In IE11 the #hostname and #port properties of such a link are empty
+      # strings. However, we can fix this by assigning the anchor its own
+      # href because computer:
+      # https://gist.github.com/jlong/2428561#comment-1461205
+      anchor.href = anchor.href if isBlank(anchor.hostname)
+    else
+      anchor = unJquery(urlOrAnchor)
+    anchor
 
   ###*
   @function up.util.normalizeMethod
@@ -902,6 +914,7 @@ up.util = (($) ->
   fixedToAbsolute: fixedToAbsolute
   presentAttr: presentAttr
   createElement: createElement
+  parseUrl: parseUrl
   normalizeUrl: normalizeUrl
   normalizeMethod: normalizeMethod
   createElementFromHtml: createElementFromHtml

@@ -314,7 +314,7 @@ up.motion = (($) ->
     $old = $(source)
     $new = $(target)
 
-    parsedOptions = u.only(options, 'reveal', 'restoreScroll')
+    parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source')
     parsedOptions = u.extend(parsedOptions, animateOptions(options))
 
     if up.browser.canCssAnimation()
@@ -414,8 +414,8 @@ up.motion = (($) ->
 
       up.transition('cross-fade', ($old, $new, options) ->
         up.motion.when(
-          animate($old, 'fade-out', options),
-          animate($new, 'fade-in', options)
+          up.animate($old, 'fade-out', options),
+          up.animate($new, 'fade-in', options)
         )
       )
 
@@ -446,10 +446,10 @@ up.motion = (($) ->
 
   Here is the definition of the pre-defined `fade-in` animation:
 
-      up.animation('fade-in', ($ghost, options) ->
-        $ghost.css(opacity: 0)
-        animate($ghost, { opacity: 1 }, options)
-      )
+      up.animation('fade-in', function($ghost, options) {
+        $ghost.css(opacity: 0);
+        up.animate($ghost, { opacity: 1 }, options);
+      })
 
   It is recommended that your definitions always end by calling
   calling [`up.animate`](/up.animate) with an object argument, passing along
