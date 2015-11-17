@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.12.5
+------
+
+### Compatible changes
+
+- `a[up-target]` and `up.follow` now scroll to a #hash in the link's destination URL
+- When up.replace cannot make a change in old browsers, return an unresolved promise instead of a resolved promise.
+
+
 0.12.4
 ------
 
@@ -30,7 +39,7 @@ Refactored internals. No API changes.
   be the "current" URL.
 
 
-### Incompatible changes
+### Breaking changes
 
 - `up.bus.emit` is now [`up.emit`](http://upjs.io/up.emit/)
 - When `up.first` finds no match, return `undefined` instead of `null`.
@@ -55,7 +64,7 @@ Refactored internals. No API changes.
 - Up.js can now be used with [`jQuery.noConflict()`](https://api.jquery.com/jquery.noconflict/).
 
 
-### Incompatible changes
+### Breaking changes
 
 - Remove `up.slot`, which was poorly implemented, untested, and not much better than the `:empty` pseudo-selector
   which has great browser support
@@ -128,7 +137,7 @@ Refactored internals. No API changes.
   of Ruby and Rails.
 
 
-### Incompatible changes
+### Breaking changes
 
 - Interactions that would result in an URL change ("pushState") now fall back to a full page load
   if Up.js was booted from a non-GET request. [More information about the reasons for this](https://github.com/makandra/upjs/commit/d81d9007aa3bfae0fca8c55a71d180d1044acae5).
