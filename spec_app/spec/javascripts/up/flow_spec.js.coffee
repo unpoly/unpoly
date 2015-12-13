@@ -21,11 +21,7 @@ describe 'up.flow', ->
             <div class="after">new-after</div>
             """
 
-          @respond = ->
-            @lastRequest().respondWith
-              status: 200
-              contentType: 'text/html'
-              responseText: @responseText
+          @respond = -> @respondWith(@responseText)
 
         it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
           @request = up.replace('.middle', '/path')
@@ -315,18 +311,13 @@ describe 'up.flow', ->
             expect($('.element')).toHaveText('new text')
             done()
             
-          request = @lastRequest()
-          expect(request.url).toMatch(/\/source$/)
+          expect(@lastRequest().url).toMatch(/\/source$/)
     
-          request.respondWith
-            status: 200
-            contentType: '/text/html'
-            responseText:
-              """
-              <div class="container">
-                <div class="element">new text</div>
-              </div>
-              """
+          @respondWith """
+            <div class="container">
+              <div class="element">new text</div>
+            </div>
+            """
             
       else
         

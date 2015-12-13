@@ -14,13 +14,7 @@ describe 'up.popup', ->
 
         $popupLink = affix('a[href="/bar"][up-popup=".container"]')
         $popupLink.click()
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText:
-            """
-            <div class="container">text</div>
-            """
+        @respondWith('<div class="container">text</div>')
         expect(up.popup.coveredUrl()).toEndWith('/foo')
         up.popup.close().then ->
           expect(up.popup.coveredUrl()).toBeUndefined()

@@ -16,15 +16,11 @@ describe 'up.link', ->
     
           promise = up.follow($link)
     
-          @lastRequest().respondWith
-            status: 200
-            contentType: 'text/html'
-            responseText:
-              """
-              <div class="before">new-before</div>
-              <div class="middle">new-middle</div>
-              <div class="after">new-after</div>
-              """      
+          @respondWith """
+            <div class="before">new-before</div>
+            <div class="middle">new-middle</div>
+            <div class="after">new-after</div>
+            """
           
           promise.then ->
             expect($('.before')).toHaveText('old-before')
@@ -108,14 +104,11 @@ describe 'up.link', ->
               up.follow($link, options)
 
             respond = (linkDestination) =>
-              @lastRequest().respondWith
-                status: 200
-                contentType: 'text/html'
-                responseText: """
-                  <div class="element" style="height: 300px">
-                    <a class="link" href="#{linkDestination}" up-target=".element">Link</a>
-                  </div>
-                  """
+              @respondWith """
+                <div class="element" style="height: 300px">
+                  <a class="link" href="#{linkDestination}" up-target=".element">Link</a>
+                </div>
+                """
 
             up.replace('.element', '/foo')
             # Provide the content at /foo with a link to /bar in the HTML

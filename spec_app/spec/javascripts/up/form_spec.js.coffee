@@ -28,19 +28,15 @@ describe 'up.form', ->
         
         it 'submits the given form and replaces the target with the response', (done) ->
     
-          @request.respondWith
-            status: 200
-            contentType: 'text/html'
-            responseText:
-              """
-              text-before
-    
-              <div class="response">
-                new-text
-              </div>
-    
-              text-after
-              """
+          @respondWith """
+            text-before
+
+            <div class="response">
+              new-text
+            </div>
+
+            text-after
+            """
     
           @promise.then ->
             expect($('.response')).toHaveText('new-text')

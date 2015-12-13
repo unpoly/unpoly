@@ -44,11 +44,7 @@ describe 'up.history', ->
             </div>
           """
 
-          respond = (html) =>
-            @lastRequest().respondWith
-              status: 200
-              contentType: 'text/html'
-              responseText: longContentHtml
+          respond = => @respondWith(longContentHtml)
 
           $viewport = $(longContentHtml).appendTo(document.body)
 

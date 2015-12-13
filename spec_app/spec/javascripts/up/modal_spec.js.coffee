@@ -9,17 +9,12 @@ describe 'up.modal', ->
       it "loads the given link's destination in a dialog window", (done) ->
         $link = affix('a[href="/path/to"][up-modal=".middle"]').text('link')
         promise = up.modal.follow($link)
-        request = @lastRequest()
-        expect(request.url).toMatch /\/path\/to$/
-        request.respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText:
-            """
-            <div class="before">new-before</div>
-            <div class="middle">new-middle</div>
-            <div class="after">new-after</div>
-            """
+        expect(@lastRequest().url).toMatch /\/path\/to$/
+        @respondWith """
+          <div class="before">new-before</div>
+          <div class="middle">new-middle</div>
+          <div class="after">new-after</div>
+          """
         promise.then ->
           expect($('.up-modal')).toExist()
           expect($('.up-modal-dialog')).toExist()
@@ -34,13 +29,7 @@ describe 'up.modal', ->
       it "brings its own scrollbar, padding the body on the right in order to prevent jumping", (done) ->
         promise = up.modal.visit('/foo', target: '.container')
 
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText:
-            """
-            <div class="container">text</div>
-            """
+        @respondWith('<div class="container">text</div>')
 
         promise.then ->
 
@@ -66,13 +55,7 @@ describe 'up.modal', ->
 
         promise = up.modal.visit('/foo', target: '.container')
 
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText:
-            """
-            <div class="container">text</div>
-            """
+        @respondWith('<div class="container">text</div>')
 
         promise.then ->
           expect(parseInt($anchoredElement.css('right'))).toBeAround(30 + assumedScrollbarWidth, 10)
@@ -88,13 +71,7 @@ describe 'up.modal', ->
         up.history.replace('/foo')
         expect(up.modal.coveredUrl()).toBeUndefined()
         up.modal.visit('/bar', target: '.container')
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText:
-            """
-            <div class="container">text</div>
-            """
+        @respondWith('<div class="container">text</div>')
         expect(up.modal.coveredUrl()).toEndWith('/foo')
         up.modal.close().then ->
           expect(up.modal.coveredUrl()).toBeUndefined()

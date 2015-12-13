@@ -22,10 +22,7 @@ describe 'up.proxy', ->
         expect(jasmine.Ajax.requests.count()).toEqual(1)
         expect(responses).toEqual([])
 
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText: 'foo'
+        @respondWith('foo')
 
         # See that both requests have been fulfilled by the same response
         expect(responses).toEqual(['foo', 'foo'])
@@ -39,10 +36,7 @@ describe 'up.proxy', ->
         # See that we have triggered a second request
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText: 'bar'
+        @respondWith('bar')
 
         expect(responses).toEqual(['foo', 'foo', 'bar'])
 
@@ -91,7 +85,7 @@ describe 'up.proxy', ->
         # Send the same request for the same path, 3 minutes apart
         up.proxy.ajax(url: '/foo')
 
-        @lastRequest().respondWith
+        @respondWith
           status: 500
           contentType: 'text/html'
           responseText: 'foo'

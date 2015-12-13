@@ -50,9 +50,7 @@ describe 'up.navigation', ->
         $link = affix('a[href="/foo"][up-target=".main"]')
         affix('.main')
         $link.click()
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
+        @respondWith
           responseHeaders: { 'X-Up-Location': '/foo/' }
           responseText: '<div class="main">new-text</div>'
         expect($link).toHaveClass('up-current')
@@ -61,9 +59,7 @@ describe 'up.navigation', ->
         $link = affix('a[href="/foo/"][up-target=".main"]')
         affix('.main')
         $link.click()
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
+        @respondWith
           responseHeaders: { 'X-Up-Location': '/foo' }
           responseText: '<div class="main">new-text</div>'
         expect($link).toHaveClass('up-current')
@@ -75,10 +71,7 @@ describe 'up.navigation', ->
         $unrelatedLink = affix('a[href="/baz]')
 
         $modalLink.click()
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText: '<div class="main">new-text</div>'
+        @respondWith('<div class="main">new-text</div>')
         expect($backgroundLink).toHaveClass('up-current')
         expect($modalLink).toHaveClass('up-current')
         expect($unrelatedLink).not.toHaveClass('up-current')
@@ -96,10 +89,7 @@ describe 'up.navigation', ->
         $unrelatedLink = affix('a[href="/baz]')
 
         $popupLink.click()
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText: '<div class="main">new-text</div>'
+        @respondWith('<div class="main">new-text</div>')
         expect($backgroundLink).toHaveClass('up-current')
         expect($popupLink).toHaveClass('up-current')
         expect($unrelatedLink).not.toHaveClass('up-current')
@@ -117,10 +107,7 @@ describe 'up.navigation', ->
         affix('.main')
         $link.click()
         expect($link).toHaveClass('up-active')
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText: '<div class="main">new-text</div>'
+        @respondWith('<div class="main">new-text</div>')
         expect($link).not.toHaveClass('up-active')
         expect($link).toHaveClass('up-current')
         
@@ -129,10 +116,7 @@ describe 'up.navigation', ->
         affix('.main')
         Trigger.mousedown($link)
         expect($link).toHaveClass('up-active')
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText: '<div class="main">new-text</div>'
+        @respondWith('<div class="main">new-text</div>')
         expect($link).not.toHaveClass('up-active')
         expect($link).toHaveClass('up-current')
     
@@ -143,9 +127,6 @@ describe 'up.navigation', ->
         affix('.main')
         $link.click()
         expect($area).toHaveClass('up-active')
-        @lastRequest().respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText: '<div class="main">new-text</div>'
+        @respondWith('<div class="main">new-text</div>')
         expect($area).toHaveClass('up-current')
 
