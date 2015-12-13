@@ -103,7 +103,9 @@ describe 'up.modal', ->
 
     describe 'up.modal.close', ->
 
-      it 'should have tests'
+      it 'closes a currently open modal'
+
+      it 'does nothing if no modal is open'
 
     describe 'up.modal.source', ->
 
@@ -113,15 +115,31 @@ describe 'up.modal', ->
     
     describe 'a[up-modal]', ->
       
-      it 'should have tests'
-      
+      it 'opens the clicked link in a modal', ->
+        followSpy = up.modal.knife.mock('follow')
+        $link = affix('a[href="/path"][up-modal=".foo"]')
+        up.hello($link)
+        $link.click()
+        expect(followSpy).toHaveBeenCalledWith($link)
+
     describe '[up-close]', ->
       
-      it 'should have tests'
+      it 'closes the modal when clicked', ->
+        closeSpy = up.modal.knife.mock('close')
+        $link = affix('a[up-close]')
+        up.hello($link)
+        $link.click()
+        expect(closeSpy).toHaveBeenCalled()
 
     describe 'when following links inside a modal', ->
 
-      it 'prefers to replace a selector within the modal'
+      it 'prefers to replace a selector within the modal', ->
+        $outside = affix('.foo').text('old outside')
+        up.modal.visit('/path', target: '.foo')
+        @respondWith("<div class='foo'>old inside</div>")
+        up.flow.implant('.foo', "<div class='foo'>new text</div>")
+        expect($outside).toHaveText('old outside')
+        expect($('.up-modal-content')).toHaveText('new text')
 
       it 'auto-closes the modal if a selector behind the modal gets replaced'
 

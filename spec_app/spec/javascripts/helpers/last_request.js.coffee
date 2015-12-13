@@ -1,4 +1,21 @@
+u = up.util
+
 beforeEach ->
   @lastRequest = ->
     jasmine.Ajax.requests.mostRecent() or up.util.error('There is no last request')
 
+  @respondWith = (args...) ->
+    firstArg = args.shift()
+    responseText = undefined
+    options = undefined
+    if u.isString(firstArg)
+      responseText = firstArg
+      options = args[0] || {}
+    else
+      options = firstArg
+      responseText = options.responseText
+    request = options.request || @lastRequest()
+    request.respondWith
+      status: options.status || 200
+      contentType: options.contentType || 'text/html'
+      responseText: responseText

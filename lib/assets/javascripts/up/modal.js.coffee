@@ -452,6 +452,7 @@ up.modal = (($) ->
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
 
+  knife: eval(Knife?.point)
   visit: visit
   follow: follow
   open: -> up.error('up.modal.open no longer exists. Please use either up.modal.follow or up.modal.visit.')
