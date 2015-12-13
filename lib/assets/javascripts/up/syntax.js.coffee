@@ -1,16 +1,34 @@
 ###*
-Custom elements
-===============
-  
+Enhancing elements
+==================
+
 Up.js keeps a persistent Javascript environment during page transitions.
-To prevent memory leaks it is important to cleanly set up and tear down
-event handlers and custom elements.
+If you wire Javascript to run on `ready` or `onload` events, those scripts will
+only run during the initial page load. Subsequently [inserted](/up.replace)
+page fragments will not be compiled.
 
-\#\#\# Incomplete documentation!
+Let's say your Javascript plugin wants you to call `lightboxify()`
+on links that should open a lightbox. You decide to
+do this for all links with an `lightbox` class:
 
-We need to work on this page:
+    <a href="river.png" class="lightbox">River</a>
+    <a href="ocean.png" class="lightbox">Ocean</a>
 
-- Better class-level introduction for this module
+You should **avoid** doing this on page load:
+
+    $(document).on('ready', function() {
+      $('a.lightbox').lightboxify();
+    });
+
+Instead you should register a [`compiler`](/up.compiler) for the `a.lightbox` selector:
+
+    up.compiler('a.lightbox', function($element) {
+      $element.lightboxify();
+    });
+
+The compiler function will be called on matching elements when
+the page loads, or whenever a matching fragment is [updated through Up.js](/up.replace)
+later.
 
 @class up.syntax
 ###
@@ -34,7 +52,8 @@ up.syntax = (($) ->
   the page loads, or whenever a matching fragment is [updated through Up.js](/up.replace)
   later.
 
-  If you have used Angular.js before, this resembles [Angular directives](https://docs.angularjs.org/guide/directive).
+  If you have used Angular.js before, this resembles
+  [Angular directives](https://docs.angularjs.org/guide/directive).
 
 
   \#\#\#\# Integrating jQuery plugins
@@ -42,14 +61,14 @@ up.syntax = (($) ->
   `up.compiler` is a great way to integrate jQuery plugins.
   Let's say your Javascript plugin wants you to call `lightboxify()`
   on links that should open a lightbox. You decide to
-  do this for all links with an `[rel=lightbox]` attribute:
+  do this for all links with an `lightbox` class:
 
-      <a href="river.png" rel="lightbox">River</a>
-      <a href="ocean.png" rel="lightbox">Ocean</a>
+      <a href="river.png" class="lightbox">River</a>
+      <a href="ocean.png" class="lightbox">Ocean</a>
 
   This Javascript will do exactly that:
 
-      up.compiler('a[rel=lightbox]', function($element) {
+      up.compiler('a.lightbox', function($element) {
         $element.lightboxify();
       });
 
@@ -268,17 +287,17 @@ up.syntax = (($) ->
     compilers = u.copy(defaultCompilers)
 
   ###*
-  Sends a notification that the given element has been inserted
-  into the DOM. This causes Up.js to compile the fragment (apply
-  event listeners, etc.).
+  Compiles a page fragment that has been inserted into the DOM
+  without Up.js.
 
   **As long as you manipulate the DOM using Up.js, you will never
   need to call this method.** You only need to use `up.hello` if the
-  DOM is manipulated without Up.js' involvement, e.g. by plugin code that
-  is not aware of Up.js:
+  DOM is manipulated without Up.js' involvement, e.g. by setting
+  the `innerHTML` property or calling jQuery methods like
+  `html`, `insertAfter` or `appendTo`:
 
-      // Add an element with naked jQuery, without going through Upjs:
-      $element = $('<div>...</div>').appendTo(document.body);
+      $element = $('.element');
+      $element.html('<div>...</div>');
       up.hello($element);
 
   This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
