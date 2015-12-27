@@ -194,14 +194,25 @@ up.util = (($) ->
           arg += " }"
       arg
 
-  createSelectorFromElement = ($element) ->
-    debug("Creating selector from element %o", $element)
-    classes = if classString = $element.attr("class") then classString.split(" ") else []
-    id = $element.attr("id")
-    selector = $element.prop("tagName").toLowerCase()
-    selector += "#" + id  if id
-    for klass in classes
-      selector += "." + klass
+  createSelectorFromElement = (element) ->
+    $element = $(element)
+    selector = undefined
+
+    debug("Creating selector from element %o", $element.get(0))
+
+    if upId = presence($element.attr("up-id"))
+      selector = "[up-id='#{upId}']"
+    else if id = presence($element.attr("id"))
+      selector = "##{id}"
+    else if name = presence($element.attr("name"))
+      selector = "[name='#{name}']"
+    else if classString = presence($element.attr("class"))
+      classes = classString.split(' ')
+      selector = ''
+      for klass in classes
+        selector += ".#{klass}"
+    else
+      selector = $element.prop('tagName').toLowerCase()
     selector
 
   # jQuery's implementation of $(...) cannot create elements that have

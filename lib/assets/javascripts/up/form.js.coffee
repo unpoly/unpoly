@@ -100,6 +100,7 @@ up.form = (($) ->
     implantOptions.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true)
     implantOptions.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
     implantOptions.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
+    implantOptions.origin = u.option(options.origin, $form)
     implantOptions = u.extend(implantOptions, up.motion.animateOptions(options, $form))
 
     useCache = u.option(options.cache, u.castedAttr($form, 'up-cache'))

@@ -159,6 +159,7 @@ up.link = (($) ->
     options.cache = u.option(options.cache, u.castedAttr($link, 'up-cache'))
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'))
     options.method = followMethod($link, options)
+    options.origin = u.option(options.origin, $link)
     options = u.merge(options, up.motion.animateOptions(options, $link))
 
     up.replace(selector, url, options)

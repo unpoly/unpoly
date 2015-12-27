@@ -34,6 +34,14 @@ describe 'up.link', ->
           request = @lastRequest()
           expect(request.method).toBe('PUT')
 
+        it 'allows to refer to the link itself as "&" in the CSS selector', ->
+          $container = affix('div')
+          $link1 = $('<a id="first" href="/path" up-target="&">first-link</a>').appendTo($container)
+          $link2 = $('<a id="second" href="/path" up-target="&">second-link</a>').appendTo($container)
+          up.follow($link2)
+          @respondWith '<div id="second">second-div</div>'
+          expect($container.text()).toBe('first-linksecond-div')
+
         it 'adds history entries and allows the user to use the back- and forward-buttons', (done) ->
 
           # By default, up.history will replace the <body> tag when

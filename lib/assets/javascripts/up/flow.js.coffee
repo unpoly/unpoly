@@ -23,6 +23,19 @@ up.flow = (($) ->
     $element = $(selectorOrElement).closest('[up-source]')
     u.presence($element.attr("up-source")) || up.browser.url()
 
+  resolveSelector = (selectorOrElement, options) ->
+    if u.isString(selectorOrElement)
+      selector = selectorOrElement
+      if u.contains(selector, '&')
+        if origin = u.presence(options.origin)
+          originSelector = u.createSelectorFromElement(origin)
+          selector = selector.replace(/\&/, originSelector)
+        else
+          u.error("Found origin reference %o in selector %o, but options.origin is missing", '&', selector)
+    else
+      selector = u.createSelectorFromElement(selectorOrElement)
+    selector
+
   ###*
   Replaces elements on the current page with corresponding elements
   from a new page fetched from the server.
@@ -54,6 +67,27 @@ up.flow = (($) ->
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
+  \#\#\#\# Appending or prepending instead of replacing
+
+  By default Up.js will replace the given selector with the same
+  selector from a freshly fetched page. Instead of replacing you
+  can *append* the loaded content to the existing content by using the
+  `:after` pseudo selector. In the same fashion, you can use `:before`
+  to indicate that you would like the *prepend* the loaded content.
+
+  A practical example would be a paginated list of items:
+
+      <ul class="tasks">
+        <li>Wash car</li>
+        <li>Purchase supplies</li>
+        <li>Fix tent</li>
+      </ul>
+
+  In order to append more items from a URL, replace into
+  the `.tasks:after` selector:
+
+      up.replace('.tasks:after', '/page/2')
+
   \#\#\#\# Events
 
   Up.js will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
@@ -84,6 +118,9 @@ up.flow = (($) ->
     history change for the current URL.
   @param {Boolean} [options.cache]
     Whether to use a [cached response](/up.proxy) if available.
+  @param {Element|jQuery} options.origin
+    The element that triggered the replacement. The element's selector will
+    be substituted for the `&` shorthand in the target selector.
   @param {String} [options.historyMethod='push']
   @return {Promise}
     A promise that will be resolved when the page has been updated.
@@ -94,10 +131,7 @@ up.flow = (($) ->
 
     options = u.options(options)
     
-    selector = if u.presence(selectorOrElement)
-      selectorOrElement
-    else
-      u.createSelectorFromElement($(selectorOrElement))
+    selector = resolveSelector(selectorOrElement, options)
       
     if !up.browser.canPushState() && options.history != false
       up.browser.loadPage(url, u.only(options, 'method')) unless options.preload
@@ -163,17 +197,16 @@ up.flow = (($) ->
 
   @function up.flow.implant
   @protected
-  @param {String} selector
+  @param {String|Element|jQuery} selectorOrElement
   @param {String} html
   @param {Object} [options]
     See options for [`up.replace`](/up.replace).
   ###
-  implant = (selector, html, options) ->
-    
-    options = u.options(options, 
+  implant = (selectorOrElement, html, options) ->
+    selector = resolveSelector(selectorOrElement, options)
+    options = u.options(options,
       historyMethod: 'push'
     )
-
     options.source = u.option(options.source, options.history)
     response = parseResponse(html)
     options.title ||= response.title()
