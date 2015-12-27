@@ -331,14 +331,25 @@ up.flow = (($) ->
   Excludes elements that also match `.up-ghost` or `.up-destroying`
   or that are children of elements with these selectors.
 
+  If the given argument is already a jQuery collection (or an array
+  of DOM elements), the first element  matching these conditions
+  is returned.
+
   Returns `undefined` if no element matches these conditions.
 
   @protected
   @function up.first
-  @param {String} selector
+  @param {String|Element|jQuery} selectorOrElement
+  @return {jQuery}
+    The first element that is neither a ghost or being destroyed,
+    or `undefined` if no such element was given.
   ###
-  first = (selector) ->
-    elements = $(selector).get()
+  first = (selectorOrElement) ->
+    elements = undefined
+    if u.isString(selectorOrElement)
+      elements = $(selectorOrElement).get()
+    else
+      elements = selectorOrElement
     $match = undefined
     for element in elements
       $element = $(element)
