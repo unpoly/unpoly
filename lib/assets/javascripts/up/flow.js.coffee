@@ -23,6 +23,10 @@ up.flow = (($) ->
     $element = $(selectorOrElement).closest('[up-source]')
     u.presence($element.attr("up-source")) || up.browser.url()
 
+  ###*
+  @function up.flow.resolveSelector
+  @private
+  ###
   resolveSelector = (selectorOrElement, options) ->
     if u.isString(selectorOrElement)
       selector = selectorOrElement
@@ -122,6 +126,9 @@ up.flow = (($) ->
     The element that triggered the replacement. The element's selector will
     be substituted for the `&` shorthand in the target selector.
   @param {String} [options.historyMethod='push']
+  @param {Object} [options.headers={}]
+    An object of additional header key/value pairs to send along
+    with the request.
   @return {Promise}
     A promise that will be resolved when the page has been updated.
   ###
@@ -143,6 +150,7 @@ up.flow = (($) ->
       selector: selector
       cache: options.cache
       preload: options.preload
+      headers: options.headers
 
     promise = up.proxy.ajax(request)
     
@@ -237,7 +245,10 @@ up.flow = (($) ->
     htmlElement = u.createElementFromHtml(html)
     title: -> htmlElement.querySelector("title")?.textContent
     find: (selector) ->
-      if child = htmlElement.querySelector(selector)
+      # jQuery.find is the Sizzle function, which gives us non-standard
+      # CSS selectors such as `:has`. It returns an array of DOM elements,
+      # and NOT a jQuery collection.
+      if child = jQuery.find(selector, htmlElement)[0]
         $(child)
       else
         u.error("Could not find selector %o in response %o", selector, html)
@@ -468,6 +479,7 @@ up.flow = (($) ->
   destroy: destroy
   implant: implant
   first: first
+  resolveSelector: resolveSelector
 
 )(jQuery)
 

@@ -25,9 +25,8 @@ up.util = (($) ->
   ajax = (request) ->
     request = copy(request)
     if request.selector
-      request.headers = {
-        "X-Up-Selector": request.selector
-      }
+      request.headers ||= {}
+      request.headers['X-Up-Selector'] = request.selector
     # Delegate to jQuery
     $.ajax(request)
 

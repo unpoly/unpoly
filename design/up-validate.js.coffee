@@ -263,6 +263,12 @@ Alle Varianten: In Rails Controller
 
       def create
         build_user
+
+        if up?
+
+        if up.validate?
+
+
         if request.up.validate?   # same as `params['up-validate'].present?`
           @user.valid?            # run validations
           render 'new'

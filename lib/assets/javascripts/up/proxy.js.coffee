@@ -173,13 +173,16 @@ up.proxy = (($) ->
   @param {Boolean} [request.cache]
     Whether to use a cached response, if available.
     If set to `false` a network connection will always be attempted.
+  @param {Object} [request.headers={}]
+    An object of additional header key/value pairs to send along
+    with the request.
   ###
   ajax = (options) ->
 
     forceCache = (options.cache == true)
     ignoreCache = (options.cache == false)
 
-    request = u.only(options, 'url', 'method', 'data', 'selector', '_normalized')
+    request = u.only(options, 'url', 'method', 'data', 'selector', 'headers', '_normalized')
 
     pending = true
 

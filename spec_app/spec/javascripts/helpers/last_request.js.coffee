@@ -18,4 +18,5 @@ beforeEach ->
     request.respondWith
       status: options.status || 200
       contentType: options.contentType || 'text/html'
+      responseHeaders: options.responseHeaders
       responseText: responseText

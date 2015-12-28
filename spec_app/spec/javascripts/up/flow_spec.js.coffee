@@ -24,59 +24,84 @@ describe 'up.flow', ->
           @respond = -> @respondWith(@responseText)
 
         it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
-          @request = up.replace('.middle', '/path')
+          promise = up.replace('.middle', '/path')
           @respond()
-          @request.then ->
+          promise.then ->
             expect($('.before')).toHaveText('old-before')
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('old-after')
             done()
           
         it 'should set the browser location to the given URL', (done) ->
-          @request = up.replace('.middle', '/path')
+          promise = up.replace('.middle', '/path')
           @respond()
-          @request.then ->
+          promise.then ->
             expect(window.location.pathname).toBe('/path')
             done()
-            
+
+        it "detects a redirect's new URL when the server sets an X-Up-Location header", (done) ->
+          promise = up.replace('.middle', '/path')
+          @respondWith(@responseText, responseHeaders: { 'X-Up-Location': '/other-path' })
+          promise.then ->
+            expect(window.location.pathname).toBe('/other-path')
+            done()
+
+        it 'understands non-standard CSS selector extensions such as :has(...)', (done) ->
+          $first = affix('.boxx#first')
+          $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
+          $second = affix('.boxx#second')
+          $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
+
+          promise = up.replace('.boxx:has(.first-child)', '/path')
+          @respondWith """
+            <div class="boxx" id="first">
+              <span class="first-child">new first</span>
+            </div>
+            """
+
+          promise.then ->
+            expect($('#first span')).toHaveText('new first')
+            expect($('#second span')).toHaveText('old second')
+            done()
+
         it 'marks the element with the URL from which it was retrieved', (done) ->
-          @request = up.replace('.middle', '/path')
+          promise = up.replace('.middle', '/path')
           @respond()
-          @request.then ->
+          promise.then ->
             expect($('.middle').attr('up-source')).toMatch(/\/path$/)
             done()
             
         it 'replaces multiple selectors separated with a comma', (done) ->
-          @request = up.replace('.middle, .after', '/path')
+          promise = up.replace('.middle, .after', '/path')
           @respond()
-          @request.then ->
+          promise.then ->
             expect($('.before')).toHaveText('old-before')
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('new-after')
             done()
 
         it 'prepends instead of replacing when the target has a :before pseudo-selector', (done) ->
-          @request = up.replace('.middle:before', '/path')
+          promise = up.replace('.middle:before', '/path')
           @respond()
-          @request.then ->
+          promise.then ->
             expect($('.before')).toHaveText('old-before')
             expect($('.middle')).toHaveText('new-middleold-middle')
             expect($('.after')).toHaveText('old-after')
             done()
 
         it 'appends instead of replacing when the target has a :after pseudo-selector', (done) ->
-          @request = up.replace('.middle:after', '/path')
+          promise = up.replace('.middle:after', '/path')
           @respond()
-          @request.then ->
+          promise.then ->
             expect($('.before')).toHaveText('old-before')
             expect($('.middle')).toHaveText('old-middlenew-middle')
             expect($('.after')).toHaveText('old-after')
             done()
 
         it "lets the developer choose between replacing/prepending/appending for each selector", (done) ->
-          @request = up.replace('.before:before, .middle, .after:after', '/path')
+          promise = up.replace('.before:before, .middle, .after:after', '/path')
           @respond()
-          @request.then ->
+          promise.then ->
             expect($('.before')).toHaveText('new-beforeold-before')
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('old-afternew-after')
@@ -101,10 +126,10 @@ describe 'up.flow', ->
             </div>
             """
 
-          @request = up.replace('.middle', '/path')
+          promise = up.replace('.middle', '/path')
           @respond()
 
-          @request.then ->
+          promise.then ->
             expect(window.scriptTagExecuted).not.toHaveBeenCalledWith('before')
             expect(window.scriptTagExecuted).toHaveBeenCalledWith('middle')
             done()
@@ -150,9 +175,9 @@ describe 'up.flow', ->
               u.resolvedDeferred()
 
           it 'reveals a new element before it is being replaced', (done) ->
-            @request = up.replace('.middle', '/path', reveal: true)
+            promise = up.replace('.middle', '/path', reveal: true)
             @respond()
-            @request.then =>
+            promise.then =>
               expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
               expect(@revealedHTML).toContain('new-middle')
               done()
@@ -160,7 +185,7 @@ describe 'up.flow', ->
           describe 'when there is an anchor #hash in the URL', ->
 
             it 'reveals a child with the ID of that #hash', (done) ->
-              @request = up.replace('.middle', '/path#three', reveal: true)
+              promise = up.replace('.middle', '/path#three', reveal: true)
               @responseText =
                 """
                 <div class="middle">
@@ -170,12 +195,12 @@ describe 'up.flow', ->
                 </div>
                 """
               @respond()
-              @request.then =>
+              promise.then =>
                 expect(@revealedHTML).toEqual('<div id="three">three</div>')
                 done()
 
             it "reveals the entire element if it has no child with the ID of that #hash", (done) ->
-              @request = up.replace('.middle', '/path#four', reveal: true)
+              promise = up.replace('.middle', '/path#four', reveal: true)
               @responseText =
                 """
                 <div class="middle">
@@ -183,14 +208,14 @@ describe 'up.flow', ->
                 </div>
                 """
               @respond()
-              @request.then =>
+              promise.then =>
                 expect(@revealedHTML).toContain('new-middle')
                 done()
 
           it 'reveals a new element that is being appended', (done) ->
-            @request = up.replace('.middle:after', '/path', reveal: true)
+            promise = up.replace('.middle:after', '/path', reveal: true)
             @respond()
-            @request.then =>
+            promise.then =>
               expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
@@ -201,9 +226,9 @@ describe 'up.flow', ->
               done()
 
           it 'reveals a new element that is being prepended', (done) ->
-            @request = up.replace('.middle:before', '/path', reveal: true)
+            promise = up.replace('.middle:before', '/path', reveal: true)
             @respond()
-            @request.then =>
+            promise.then =>
               expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.

@@ -81,6 +81,9 @@ up.form = (($) ->
 
     By default only responses to `GET` requests are cached
     for a few minutes.
+  @param {Object} [options.headers={}]
+    An object of additional header key/value pairs to send along
+    with the request.
   @return {Promise}
     A promise for the successful form submission.
   ###
@@ -89,8 +92,8 @@ up.form = (($) ->
     $form = $(formOrSelector).closest('form')
 
     options = u.options(options)
-    successSelector = u.option(options.target, $form.attr('up-target'), 'body')
-    failureSelector = u.option(options.failTarget, $form.attr('up-fail-target'), -> u.createSelectorFromElement($form))
+    successSelector = up.flow.resolveSelector(u.option(options.target, $form.attr('up-target'), 'body'), options)
+    failureSelector = up.flow.resolveSelector(u.option(options.failTarget, $form.attr('up-fail-target'), -> u.createSelectorFromElement($form)), options)
     historyOption = u.option(options.history, u.castedAttr($form, 'up-history'), true)
     successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'))
     failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition)
@@ -118,6 +121,7 @@ up.form = (($) ->
       data: $form.serialize()
       selector: successSelector
       cache: useCache
+      headers: options.headers
     }
 
     successUrl = (xhr) ->
@@ -176,7 +180,6 @@ up.form = (($) ->
         delay: 100,
         change: function(value, $input) { up.submit($input) }
       });
-
 
   @function up.observe
   @param {Element|jQuery|String} fieldOrSelector
@@ -267,6 +270,28 @@ up.form = (($) ->
     return clearTimer
 
   ###*
+  @function up.validate
+  @param {String|Element|jQuery} fieldOrSelector
+  @param {String|Element|jQuery} [options.target]
+  ###
+  validate = (fieldOrSelector, options) ->
+    $field = $(fieldOrSelector)
+    options = u.options(options)
+    options.target = u.option(options.target, $field.attr('up-validate'), fieldOrSelector)
+    options.target = u.createSelectorFromElement(options.target) unless u.isString(options.target)
+    options.failTarget = options.target
+    options.history = false
+    options.origin = $field
+    options.headers = u.option(options.headers, {})
+    # Make sure the X-Up-Validate header is present, so the server-side
+    # knows that it should not persist the form submission
+    options.headers['X-Up-Validate'] = $field.attr('name') || '1'
+    options = u.merge(options, up.motion.animateOptions(options, $field))
+    $form = $field.closest('form')
+    promise = up.submit($form, options)
+    promise
+
+  ###*
   Submits the form through AJAX, searches the response for the selector
   given in `up-target` and [replaces](/up.replace) the selector content in the current page:
 
@@ -306,6 +331,14 @@ up.form = (($) ->
   up.on 'submit', 'form[up-target]', (event, $form) ->
     event.preventDefault()
     submit($form)
+
+  ###*
+  ...
+
+  @selector [up-validate]
+  ###
+  up.on 'change', '[up-validate]', (event, $field) ->
+    validate($field)
 
   ###*
   Observes this form field and runs the given script

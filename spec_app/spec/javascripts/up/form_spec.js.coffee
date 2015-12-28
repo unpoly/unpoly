@@ -92,17 +92,41 @@ describe 'up.form', ->
           
           up.submit($form)
           expect(form.submit).toHaveBeenCalled()
-          
 
   describe 'unobtrusive behavior', ->
-    
+
     describe 'form[up-target]', ->
 
       it 'rigs the form to use up.submit instead of a standard submit'
 
-
     describe 'input[up-observe]', ->
 
       it 'should have tests'
-      
-     
+
+    describe 'input[up-validate]', ->
+
+      it "submits the input's form with an 'X-Up-Validate' header and replaces the given selector with the response", ->
+
+        $form = affix('form[action="/path/to"]')
+        $group = $("""
+          <div class="field-group">
+            <input name="user" value="judy" up-validate=".field-group:has(&)">
+          </div>
+        """).appendTo($form)
+        $group.find('input').trigger('change')
+
+        request = @lastRequest()
+        expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
+        expect(request.requestHeaders['X-Up-Selector']).toEqual(".field-group:has([name='user'])")
+
+        @respondWith """
+          <div class="field-group has-error">
+            <div class='error'>Username has already been taken</div>
+            <input name="user" value="judy" up-validate=".field-group:has(&)">
+          </div>
+        """
+
+        $group = $('.field-group')
+        expect($group.length).toBe(1)
+        expect($group).toHaveClass('has-error')
+        expect($group).toHaveText('Username has already been taken')

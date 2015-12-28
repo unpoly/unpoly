@@ -146,6 +146,9 @@ up.link = (($) ->
     Whether to force the use of a cached response (`true`)
     or never use the cache (`false`)
     or make an educated guess (`undefined`).
+  @param {Object} [options.headers={}]
+    An object of additional header key/value pairs to send along
+    with the request.
   ###
   follow = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
@@ -372,7 +375,6 @@ up.link = (($) ->
     $area.removeAttr('up-expand')
     makeFollowable($area)
 
-  
   ###*
   Marks up the current link to be followed *as fast as possible*.
   This is done by:
