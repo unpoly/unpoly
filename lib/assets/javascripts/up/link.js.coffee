@@ -140,7 +140,7 @@ up.link = (($) ->
   @param {Element|jQuery|String} [options.reveal]
     Whether to reveal the target  element within its viewport before updating.
   @param {Boolean} [options.restoreScroll]
-    If set to `true`, this will attempt to [`restore scroll positions`](/up.restoreScroll)
+    If set to `true`, this will attempt to [restore scroll positions](/up.restoreScroll)
     previously seen on the destination URL.
   @param {Boolean} [options.cache]
     Whether to force the use of a cached response (`true`)

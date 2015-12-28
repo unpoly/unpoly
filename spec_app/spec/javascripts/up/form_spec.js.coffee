@@ -105,28 +105,70 @@ describe 'up.form', ->
 
     describe 'input[up-validate]', ->
 
-      it "submits the input's form with an 'X-Up-Validate' header and replaces the given selector with the response", ->
+      describe 'when a selector is given', ->
 
-        $form = affix('form[action="/path/to"]')
-        $group = $("""
-          <div class="field-group">
-            <input name="user" value="judy" up-validate=".field-group:has(&)">
-          </div>
-        """).appendTo($form)
-        $group.find('input').trigger('change')
+        it "submits the input's form with an 'X-Up-Validate' header and replaces the selector with the response", ->
 
-        request = @lastRequest()
-        expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
-        expect(request.requestHeaders['X-Up-Selector']).toEqual(".field-group:has([name='user'])")
+          $form = affix('form[action="/path/to"]')
+          $group = $("""
+            <div class="field-group">
+              <input name="user" value="judy" up-validate=".field-group:has(&)">
+            </div>
+          """).appendTo($form)
+          $group.find('input').trigger('change')
 
-        @respondWith """
-          <div class="field-group has-error">
-            <div class='error'>Username has already been taken</div>
-            <input name="user" value="judy" up-validate=".field-group:has(&)">
-          </div>
-        """
+          request = @lastRequest()
+          expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
+          expect(request.requestHeaders['X-Up-Selector']).toEqual(".field-group:has([name='user'])")
 
-        $group = $('.field-group')
-        expect($group.length).toBe(1)
-        expect($group).toHaveClass('has-error')
-        expect($group).toHaveText('Username has already been taken')
+          @respondWith """
+            <div class="field-group has-error">
+              <div class='error'>Username has already been taken</div>
+              <input name="user" value="judy" up-validate=".field-group:has(&)">
+            </div>
+          """
+
+          $group = $('.field-group')
+          expect($group.length).toBe(1)
+          expect($group).toHaveClass('has-error')
+          expect($group).toHaveText('Username has already been taken')
+
+      describe 'when no selector is given', ->
+
+        it 'automatically finds a form group around the input field and only updates that', ->
+
+          @appendFixture """
+            <form action="/users" id="registration">
+
+              <label>
+                <input type="text" name="email" up-validate />
+              </label>
+
+              <label>
+                <input type="password" name="password" up-validate />
+              </label>
+
+            </form>
+          """
+
+          $('#registration input[name=password]').trigger('change')
+
+          @respondWith """
+            <form action="/users" id="registration">
+
+              <label>
+                Validation message
+                <input type="text" name="email" up-validate />
+              </label>
+
+              <label>
+                Validation message
+                <input type="password" name="password" up-validate />
+              </label>
+
+            </form>
+          """
+
+          $labels = $('#registration label')
+          expect($labels[0]).not.toHaveText('Validation message')
+          expect($labels[1]).toHaveText('Validation message')

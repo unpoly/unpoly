@@ -14,16 +14,16 @@ up.layout = (($) ->
   Configures the application layout.
 
   @property up.layout.config
-  @param {Array<String>} [config.viewports]
+  @param {Array} [config.viewports]
     An array of CSS selectors that find viewports
     (containers that scroll their contents).
-  @param {Array<String>} [config.fixedTop]
+  @param {Array} [config.fixedTop]
     An array of CSS selectors that find elements fixed to the
     top edge of the screen (using `position: fixed`).
-  @param {Array<String>} [config.fixedBottom]
+  @param {Array} [config.fixedBottom]
     An array of CSS selectors that find elements fixed to the
     bottom edge of the screen (using `position: fixed`).
-  @param {Array<String>} [config.anchoredRight]
+  @param {Array} [config.anchoredRight]
     An array of CSS selectors that find elements anchored to the
     right edge of the screen (using `position: fixed` or `position: absolute`).
   @param {Number} [config.duration]

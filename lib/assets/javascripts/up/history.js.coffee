@@ -18,7 +18,7 @@ up.history = (($) ->
 
   ###*
   @property up.history.config
-  @param {Array<String>} [config.popTargets=['body']]
+  @param {Array} [config.popTargets=['body']]
     An array of CSS selectors to replace when the user goes
     back in history.
   @param {Boolean} [config.restoreScroll=true]

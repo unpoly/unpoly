@@ -75,7 +75,7 @@ up.proxy = (($) ->
     The number of milliseconds until a cache entry expires.
     Defaults to 5 minutes.
   @param {Number} [config.busyDelay=300]
-    How long the proxy waits until emitting the `proxy:busy` [event](/up.bus).
+    How long the proxy waits until emitting the [`up:proxy:busy` event](/up:proxy:busy).
     Use this to prevent flickering of spinners.
   ###
   config = u.config
@@ -162,8 +162,8 @@ up.proxy = (($) ->
   are considered to be read-only.
 
   If a network connection is attempted, the proxy will emit
-  a `proxy:load` event with the `request` as its argument.
-  Once the response is received, a `proxy:receive` event will
+  a `up:proxy:load` event with the `request` as its argument.
+  Once the response is received, a `up:proxy:receive` event will
   be emitted.
   
   @function up.proxy.ajax
@@ -207,11 +207,11 @@ up.proxy = (($) ->
       # following case:
       #
       # - User starts preloading a request.
-      #   This triggers *no* `proxy:busy`.
+      #   This triggers *no* `up:proxy:busy`.
       # - User starts loading the request (without preloading).
-      #   This triggers `proxy:busy`.
+      #   This triggers `up:proxy:busy`.
       # - The request finishes.
-      #   This triggers `proxy:idle`.
+      #   This triggers `up:proxy:idle`.
       loadStarted()
       promise.always(loadEnded)
 
@@ -223,7 +223,7 @@ up.proxy = (($) ->
   Returns `true` if the proxy is not currently waiting
   for a request to finish. Returns `false` otherwise.
 
-  The proxy will also emit an `proxy:idle` [event](/up.bus) if it
+  The proxy will also emit an [`up:proxy:idle` event](/up:proxy:idle) if it
   used to busy, but is now idle.
 
   @function up.proxy.idle
@@ -236,8 +236,8 @@ up.proxy = (($) ->
   Returns `true` if the proxy is currently waiting
   for a request to finish. Returns `false` otherwise.
 
-  The proxy will also emit an `proxy:busy` [event](/up.bus) if it
-  used to idle, but is now busy.
+  The proxy will also emit an [`up:proxy:busy` event](/up:proxy:busy) if it
+  used to be idle, but is now busy.
 
   @function up.proxy.busy
   @return {Boolean} Whether the proxy is busy
@@ -288,7 +288,7 @@ up.proxy = (($) ->
   This event is [emitted]/(up.emit) when [AJAX requests](/up.proxy.ajax)
   have [taken long to finish](/up:proxy:busy), but have finished now.
 
-  @event up:proxy:busy
+  @event up:proxy:idle
   ###
 
   load = (request) ->
