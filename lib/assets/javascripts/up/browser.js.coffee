@@ -114,8 +114,9 @@ up.browser = (($) ->
   Returns whether Up.js supports the current browser.
 
   Currently Up.js supports IE9 with jQuery 1.9+.
-  On older browsers Up.js will prevent itself from [booting](/up.boot),
-  leaving you with a classic server-side application.
+  On older browsers Up.js will prevent itself from [booting](/up.boot)
+  and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
+  This leaves you with a classic server-side application.
 
   @function up.browser.isSupported
   ###
