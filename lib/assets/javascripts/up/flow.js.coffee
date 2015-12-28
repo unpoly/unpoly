@@ -240,15 +240,16 @@ up.flow = (($) ->
     u.error(message, selector)
 
   parseResponse = (html) ->
-    # jQuery cannot construct transient elements that contain <html> or <body> tags,
-    # so we're using the native browser API to grep through the HTML
+    # jQuery cannot construct transient elements that contain <html> or <body> tags
     htmlElement = u.createElementFromHtml(html)
     title: -> htmlElement.querySelector("title")?.textContent
     find: (selector) ->
-      # jQuery.find is the Sizzle function, which gives us non-standard
-      # CSS selectors such as `:has`. It returns an array of DOM elements,
-      # and NOT a jQuery collection.
-      if child = jQuery.find(selector, htmlElement)[0]
+      # Although we cannot have a jQuery collection from an entire HTML document,
+      # we can use jQuery's Sizzle engine to grep through a DOM tree.
+      # jQuery.find is the Sizzle function (https://github.com/jquery/sizzle/wiki#public-api)
+      # which gives us non-standard CSS selectors such as `:has`.
+      # It returns an array of DOM elements, NOT a jQuery collection.
+      if child = $.find(selector, htmlElement)[0]
         $(child)
       else
         u.error("Could not find selector %o in response %o", selector, html)
