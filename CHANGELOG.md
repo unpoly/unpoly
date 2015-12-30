@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.13.0
+------
+
+### Compatible changes
+
+- Support for server-side live validation of forms
+  using the [`[up-validate]`](/up-validate) selector.
+- Support for [non-standard CSS selectors from jQuery](https://api.jquery.com/category/selectors/),
+  such as [`:has`](http://api.jquery.com/has-selector/) or [`:visible`](http://api.jquery.com/visible-selector/).
+- Allow to refer to the current element as `&` in target selectors. This is useful
+  to reference containers that contain the triggering element, e.g.
+  `<a href="/path" up-target=".container:has(&)">`
+- Improve automatic generation of selectors for elements when no
+  explicit selector is given.
+- Forms with `file` inputs will now cause forms to fall back to a standard submission without AJAX.
+  In a future release we will be able to submit file inputs via AJAX.
+- The [request cache](/up.proxy) now reuses responses for `body` and `html` when asked for other selectors.
+- Server responses can now change the document title by including an `X-Up-Title` header.
+
+
 0.12.5
 ------
 

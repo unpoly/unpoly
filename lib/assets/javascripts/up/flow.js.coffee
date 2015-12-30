@@ -136,7 +136,7 @@ up.flow = (($) ->
     history change for the current URL.
   @param {Boolean} [options.cache]
     Whether to use a [cached response](/up.proxy) if available.
-  @param {Element|jQuery} options.origin
+  @param {Element|jQuery} [options.origin]
     The element that triggered the replacement. The element's selector will
     be substituted for the `&` shorthand in the target selector.
   @param {String} [options.historyMethod='push']

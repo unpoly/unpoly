@@ -4,6 +4,6 @@ module Upjs
     # The current version of the upjs-rails gem.
     # This version number is also used for releases of the Up.js
     # frontend code.
-    VERSION = '0.12.5'
+    VERSION = '0.13.0'
   end
 end

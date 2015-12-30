@@ -1,4 +1,8 @@
 (function() {
+  up.form.config.validateTargets.unshift('.form-group:has(&)');
+
+}).call(this);
+(function() {
   up.layout.config.fixedTop.push('.navbar-fixed-top');
 
   up.layout.config.fixedBottom.push('.navbar-fixed-bottom');

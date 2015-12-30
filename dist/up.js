@@ -25,7 +25,7 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function($) {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, evalConsoleTemplate, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, offsetParent, once, only, option, options, parseUrl, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, temporaryCss, times, toArray, trim, unJquery, uniq, unresolvablePromise, unwrapElement, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, evalConsoleTemplate, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, offsetParent, once, only, option, options, parseUrl, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, temporaryCss, times, titleFromXhr, toArray, trim, unJquery, uniq, unresolvablePromise, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -44,9 +44,8 @@ If you use them in your own code, you will get hurt.
     ajax = function(request) {
       request = copy(request);
       if (request.selector) {
-        request.headers = {
-          "X-Up-Selector": request.selector
-        };
+        request.headers || (request.headers = {});
+        request.headers['X-Up-Selector'] = request.selector;
       }
       return $.ajax(request);
     };
@@ -261,18 +260,26 @@ If you use them in your own code, you will get hurt.
         return arg;
       });
     };
-    createSelectorFromElement = function($element) {
-      var classString, classes, id, j, klass, len, selector;
-      debug("Creating selector from element %o", $element);
-      classes = (classString = $element.attr("class")) ? classString.split(" ") : [];
-      id = $element.attr("id");
-      selector = $element.prop("tagName").toLowerCase();
-      if (id) {
-        selector += "#" + id;
-      }
-      for (j = 0, len = classes.length; j < len; j++) {
-        klass = classes[j];
-        selector += "." + klass;
+    createSelectorFromElement = function(element) {
+      var $element, classString, classes, id, j, klass, len, name, selector, upId;
+      $element = $(element);
+      selector = void 0;
+      debug("Creating selector from element %o", $element.get(0));
+      if (upId = presence($element.attr("up-id"))) {
+        selector = "[up-id='" + upId + "']";
+      } else if (id = presence($element.attr("id"))) {
+        selector = "#" + id;
+      } else if (name = presence($element.attr("name"))) {
+        selector = "[name='" + name + "']";
+      } else if (classString = presence($element.attr("class"))) {
+        classes = classString.split(' ');
+        selector = '';
+        for (j = 0, len = classes.length; j < len; j++) {
+          klass = classes[j];
+          selector += "." + klass;
+        }
+      } else {
+        selector = $element.prop('tagName').toLowerCase();
       }
       return selector;
     };
@@ -781,6 +788,9 @@ If you use them in your own code, you will get hurt.
     locationFromXhr = function(xhr) {
       return xhr.getResponseHeader('X-Up-Location');
     };
+    titleFromXhr = function(xhr) {
+      return xhr.getResponseHeader('X-Up-Title');
+    };
     methodFromXhr = function(xhr) {
       return xhr.getResponseHeader('X-Up-Method');
     };
@@ -936,6 +946,9 @@ If you use them in your own code, you will get hurt.
       will be discarded.
     @param {String} [config.log]
       A prefix for log entries printed by this cache object.
+    @param {Function<Object>} [config.key]
+      A function that takes an argument and returns a `String` key
+      for storage. If omitted, `toString()` is called on the argument.
      */
     cache = function(config) {
       var alias, clear, expiryMilis, get, isFresh, keys, log, maxSize, normalizeStoreKey, set, store, timestamp;
@@ -1186,6 +1199,7 @@ If you use them in your own code, you will get hurt.
       toArray: toArray,
       castedAttr: castedAttr,
       locationFromXhr: locationFromXhr,
+      titleFromXhr: titleFromXhr,
       methodFromXhr: methodFromXhr,
       clientSize: clientSize,
       only: only,
@@ -1325,8 +1339,9 @@ we can't currently get rid off.
     Returns whether Up.js supports the current browser.
     
     Currently Up.js supports IE9 with jQuery 1.9+.
-    On older browsers Up.js will prevent itself from [booting](/up.boot),
-    leaving you with a classic server-side application.
+    On older browsers Up.js will prevent itself from [booting](/up.boot)
+    and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
+    This leaves you with a classic server-side application.
     
     @function up.browser.isSupported
      */
@@ -1661,18 +1676,36 @@ and call `preventDefault()` on the `event` object:
 }).call(this);
 
 /**
-Custom elements
-===============
-  
+Enhancing elements
+==================
+
 Up.js keeps a persistent Javascript environment during page transitions.
-To prevent memory leaks it is important to cleanly set up and tear down
-event handlers and custom elements.
+If you wire Javascript to run on `ready` or `onload` events, those scripts will
+only run during the initial page load. Subsequently [inserted](/up.replace)
+page fragments will not be compiled.
 
-\#\#\# Incomplete documentation!
+Let's say your Javascript plugin wants you to call `lightboxify()`
+on links that should open a lightbox. You decide to
+do this for all links with an `lightbox` class:
 
-We need to work on this page:
+    <a href="river.png" class="lightbox">River</a>
+    <a href="ocean.png" class="lightbox">Ocean</a>
 
-- Better class-level introduction for this module
+You should **avoid** doing this on page load:
+
+    $(document).on('ready', function() {
+      $('a.lightbox').lightboxify();
+    });
+
+Instead you should register a [`compiler`](/up.compiler) for the `a.lightbox` selector:
+
+    up.compiler('a.lightbox', function($element) {
+      $element.lightboxify();
+    });
+
+The compiler function will be called on matching elements when
+the page loads, or whenever a matching fragment is [updated through Up.js](/up.replace)
+later.
 
 @class up.syntax
  */
@@ -1698,7 +1731,8 @@ We need to work on this page:
     the page loads, or whenever a matching fragment is [updated through Up.js](/up.replace)
     later.
     
-    If you have used Angular.js before, this resembles [Angular directives](https://docs.angularjs.org/guide/directive).
+    If you have used Angular.js before, this resembles
+    [Angular directives](https://docs.angularjs.org/guide/directive).
     
     
     \#\#\#\# Integrating jQuery plugins
@@ -1706,14 +1740,14 @@ We need to work on this page:
     `up.compiler` is a great way to integrate jQuery plugins.
     Let's say your Javascript plugin wants you to call `lightboxify()`
     on links that should open a lightbox. You decide to
-    do this for all links with an `[rel=lightbox]` attribute:
+    do this for all links with an `lightbox` class:
     
-        <a href="river.png" rel="lightbox">River</a>
-        <a href="ocean.png" rel="lightbox">Ocean</a>
+        <a href="river.png" class="lightbox">River</a>
+        <a href="ocean.png" class="lightbox">Ocean</a>
     
     This Javascript will do exactly that:
     
-        up.compiler('a[rel=lightbox]', function($element) {
+        up.compiler('a.lightbox', function($element) {
           $element.lightboxify();
         });
     
@@ -1958,17 +1992,17 @@ We need to work on this page:
     };
 
     /**
-    Sends a notification that the given element has been inserted
-    into the DOM. This causes Up.js to compile the fragment (apply
-    event listeners, etc.).
+    Compiles a page fragment that has been inserted into the DOM
+    without Up.js.
     
     **As long as you manipulate the DOM using Up.js, you will never
     need to call this method.** You only need to use `up.hello` if the
-    DOM is manipulated without Up.js' involvement, e.g. by plugin code that
-    is not aware of Up.js:
+    DOM is manipulated without Up.js' involvement, e.g. by setting
+    the `innerHTML` property or calling jQuery methods like
+    `html`, `insertAfter` or `appendTo`:
     
-        // Add an element with naked jQuery, without going through Upjs:
-        $element = $('<div>...</div>').appendTo(document.body);
+        $element = $('.element');
+        $element.html('<div>...</div>');
         up.hello($element);
     
     This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
@@ -2054,7 +2088,7 @@ We need to work on this page:
 
     /**
     @property up.history.config
-    @param {Array<String>} [config.popTargets=['body']]
+    @param {Array} [config.popTargets=['body']]
       An array of CSS selectors to replace when the user goes
       back in history.
     @param {Boolean} [config.restoreScroll=true]
@@ -2260,16 +2294,16 @@ This modules contains functions to scroll the viewport and reveal contained elem
     Configures the application layout.
     
     @property up.layout.config
-    @param {Array<String>} [config.viewports]
+    @param {Array} [config.viewports]
       An array of CSS selectors that find viewports
       (containers that scroll their contents).
-    @param {Array<String>} [config.fixedTop]
+    @param {Array} [config.fixedTop]
       An array of CSS selectors that find elements fixed to the
       top edge of the screen (using `position: fixed`).
-    @param {Array<String>} [config.fixedBottom]
+    @param {Array} [config.fixedBottom]
       An array of CSS selectors that find elements fixed to the
       bottom edge of the screen (using `position: fixed`).
-    @param {Array<String>} [config.anchoredRight]
+    @param {Array} [config.anchoredRight]
       An array of CSS selectors that find elements anchored to the
       right edge of the screen (using `position: fixed` or `position: absolute`).
     @param {Number} [config.duration]
@@ -2838,7 +2872,7 @@ are based on this module.
 
 (function() {
   up.flow = (function($) {
-    var autofocus, destroy, elementsInserted, findOldFragment, first, fragmentNotFound, implant, isRealElement, parseImplantSteps, parseResponse, reload, replace, setSource, source, swapElements, u;
+    var autofocus, destroy, elementsInserted, findOldFragment, first, fragmentNotFound, implant, isRealElement, parseImplantSteps, parseResponse, reload, replace, resolveSelector, setSource, source, swapElements, u;
     u = up.util;
     setSource = function(element, sourceUrl) {
       var $element;
@@ -2852,6 +2886,28 @@ are based on this module.
       var $element;
       $element = $(selectorOrElement).closest('[up-source]');
       return u.presence($element.attr("up-source")) || up.browser.url();
+    };
+
+    /**
+    @function up.flow.resolveSelector
+    @private
+     */
+    resolveSelector = function(selectorOrElement, options) {
+      var origin, originSelector, selector;
+      if (u.isString(selectorOrElement)) {
+        selector = selectorOrElement;
+        if (u.contains(selector, '&')) {
+          if (origin = u.presence(options.origin)) {
+            originSelector = u.createSelectorFromElement(origin);
+            selector = selector.replace(/\&/, originSelector);
+          } else {
+            u.error("Found origin reference %o in selector %o, but options.origin is missing", '&', selector);
+          }
+        }
+      } else {
+        selector = u.createSelectorFromElement(selectorOrElement);
+      }
+      return selector;
     };
 
     /**
@@ -2885,6 +2941,41 @@ are based on this module.
     Note how only `.two` has changed. The update for `.one` was
     discarded, since it didn't match the selector.
     
+    \#\#\#\# Appending or prepending instead of replacing
+    
+    By default Up.js will replace the given selector with the same
+    selector from a freshly fetched page. Instead of replacing you
+    can *append* the loaded content to the existing content by using the
+    `:after` pseudo selector. In the same fashion, you can use `:before`
+    to indicate that you would like the *prepend* the loaded content.
+    
+    A practical example would be a paginated list of items:
+    
+        <ul class="tasks">
+          <li>Wash car</li>
+          <li>Purchase supplies</li>
+          <li>Fix tent</li>
+        </ul>
+    
+    In order to append more items from a URL, replace into
+    the `.tasks:after` selector:
+    
+        up.replace('.tasks:after', '/page/2')
+    
+    \#\#\#\# Setting the window title from the server
+    
+    If the `replace` call changes history, the document title will be set
+    to the contents of a `<title>` tag in the response.
+    
+    The server can also change the document title by setting
+    an `X-Up-Title` header in the response.
+    
+    \#\#\#\# Optimizing response rendering
+    
+    The server is free to optimize Up.js requests by only rendering the HTML fragment
+    that is being updated. The request's `X-Up-Selector` header will contain
+    the CSS selector for the updating fragment.
+    
     \#\#\#\# Events
     
     Up.js will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
@@ -2915,7 +3006,13 @@ are based on this module.
       history change for the current URL.
     @param {Boolean} [options.cache]
       Whether to use a [cached response](/up.proxy) if available.
+    @param {Element|jQuery} [options.origin]
+      The element that triggered the replacement. The element's selector will
+      be substituted for the `&` shorthand in the target selector.
     @param {String} [options.historyMethod='push']
+    @param {Object} [options.headers={}]
+      An object of additional header key/value pairs to send along
+      with the request.
     @return {Promise}
       A promise that will be resolved when the page has been updated.
      */
@@ -2923,7 +3020,7 @@ are based on this module.
       var promise, request, selector;
       u.debug("Replace %o with %o (options %o)", selectorOrElement, url, options);
       options = u.options(options);
-      selector = u.presence(selectorOrElement) ? selectorOrElement : u.createSelectorFromElement($(selectorOrElement));
+      selector = resolveSelector(selectorOrElement, options);
       if (!up.browser.canPushState() && options.history !== false) {
         if (!options.preload) {
           up.browser.loadPage(url, u.only(options, 'method'));
@@ -2935,7 +3032,8 @@ are based on this module.
         method: options.method,
         selector: selector,
         cache: options.cache,
-        preload: options.preload
+        preload: options.preload,
+        headers: options.headers
       };
       promise = up.proxy.ajax(request);
       promise.done(function(html, textStatus, xhr) {
@@ -2956,6 +3054,7 @@ are based on this module.
         if (options.source !== false) {
           options.source = url;
         }
+        options.title || (options.title = u.titleFromXhr(xhr));
         if (!options.preload) {
           return implant(selector, html, options);
         }
@@ -2994,13 +3093,14 @@ are based on this module.
     
     @function up.flow.implant
     @protected
-    @param {String} selector
+    @param {String|Element|jQuery} selectorOrElement
     @param {String} html
     @param {Object} [options]
       See options for [`up.replace`](/up.replace).
      */
-    implant = function(selector, html, options) {
-      var $new, $old, j, len, ref, response, results, step;
+    implant = function(selectorOrElement, html, options) {
+      var $new, $old, j, len, ref, response, results, selector, step;
+      selector = resolveSelector(selectorOrElement, options);
       options = u.options(options, {
         historyMethod: 'push'
       });
@@ -3041,7 +3141,7 @@ are based on this module.
         },
         find: function(selector) {
           var child;
-          if (child = htmlElement.querySelector(selector)) {
+          if (child = $.find(selector, htmlElement)[0]) {
             return $(child);
           } else {
             return u.error("Could not find selector %o in response %o", selector, html);
@@ -3094,7 +3194,7 @@ are based on this module.
       }
     };
     parseImplantSteps = function(selector, options) {
-      var comma, disjunction, i, j, len, results, selectorAtom, selectorParts, transition, transitionString, transitions;
+      var comma, disjunction, i, j, len, pseudoClass, results, selectorAtom, selectorParts, transition, transitionString, transitions;
       transitionString = options.transition || options.animation || 'none';
       comma = /\ *,\ */;
       disjunction = selector.split(comma);
@@ -3105,10 +3205,15 @@ are based on this module.
       for (i = j = 0, len = disjunction.length; j < len; i = ++j) {
         selectorAtom = disjunction[i];
         selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/);
+        selector = selectorParts[1];
+        if (selector === 'html') {
+          selector = 'body';
+        }
+        pseudoClass = selectorParts[2];
         transition = transitions[i] || u.last(transitions);
         results.push({
-          selector: selectorParts[1],
-          pseudoClass: selectorParts[2],
+          selector: selector,
+          pseudoClass: pseudoClass,
           transition: transition
         });
       }
@@ -3134,15 +3239,27 @@ are based on this module.
     Excludes elements that also match `.up-ghost` or `.up-destroying`
     or that are children of elements with these selectors.
     
+    If the given argument is already a jQuery collection (or an array
+    of DOM elements), the first element  matching these conditions
+    is returned.
+    
     Returns `undefined` if no element matches these conditions.
     
     @protected
     @function up.first
-    @param {String} selector
+    @param {String|Element|jQuery} selectorOrElement
+    @return {jQuery}
+      The first element that is neither a ghost or being destroyed,
+      or `undefined` if no such element was given.
      */
-    first = function(selector) {
+    first = function(selectorOrElement) {
       var $element, $match, element, elements, j, len;
-      elements = $(selector).get();
+      elements = void 0;
+      if (u.isString(selectorOrElement)) {
+        elements = $(selectorOrElement).get();
+      } else {
+        elements = selectorOrElement;
+      }
       $match = void 0;
       for (j = 0, len = elements.length; j < len; j++) {
         element = elements[j];
@@ -3273,7 +3390,8 @@ are based on this module.
       reload: reload,
       destroy: destroy,
       implant: implant,
-      first: first
+      first: first,
+      resolveSelector: resolveSelector
     };
   })(jQuery);
 
@@ -4024,7 +4142,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
       The number of milliseconds until a cache entry expires.
       Defaults to 5 minutes.
     @param {Number} [config.busyDelay=300]
-      How long the proxy waits until emitting the `proxy:busy` [event](/up.bus).
+      How long the proxy waits until emitting the [`up:proxy:busy` event](/up:proxy:busy).
       Use this to prevent flickering of spinners.
      */
     config = u.config({
@@ -4052,7 +4170,29 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     @protected
     @function up.proxy.get
      */
-    get = cache.get;
+    get = function(request) {
+      var candidate, candidates, i, len, requestForBody, requestForHtml, response;
+      request = normalizeRequest(request);
+      candidates = [request];
+      if (request.selector !== 'html') {
+        requestForHtml = u.merge(request, {
+          selector: 'html'
+        });
+        candidates.push(requestForHtml);
+        if (request.selector !== 'body') {
+          requestForBody = u.merge(request, {
+            selector: 'body'
+          });
+          candidates.push(requestForBody);
+        }
+      }
+      for (i = 0, len = candidates.length; i < len; i++) {
+        candidate = candidates[i];
+        if (response = cache.get(candidate)) {
+          return response;
+        }
+      }
+    };
 
     /**
     @protected
@@ -4113,8 +4253,8 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     are considered to be read-only.
     
     If a network connection is attempted, the proxy will emit
-    a `proxy:load` event with the `request` as its argument.
-    Once the response is received, a `proxy:receive` event will
+    a `up:proxy:load` event with the `request` as its argument.
+    Once the response is received, a `up:proxy:receive` event will
     be emitted.
     
     @function up.proxy.ajax
@@ -4124,12 +4264,15 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     @param {Boolean} [request.cache]
       Whether to use a cached response, if available.
       If set to `false` a network connection will always be attempted.
+    @param {Object} [request.headers={}]
+      An object of additional header key/value pairs to send along
+      with the request.
      */
     ajax = function(options) {
       var forceCache, ignoreCache, pending, promise, request;
       forceCache = options.cache === true;
       ignoreCache = options.cache === false;
-      request = u.only(options, 'url', 'method', 'data', 'selector', '_normalized');
+      request = u.only(options, 'url', 'method', 'data', 'selector', 'headers', '_normalized');
       pending = true;
       if (!isIdempotent(request) && !forceCache) {
         clear();
@@ -4155,7 +4298,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     Returns `true` if the proxy is not currently waiting
     for a request to finish. Returns `false` otherwise.
     
-    The proxy will also emit an `proxy:idle` [event](/up.bus) if it
+    The proxy will also emit an [`up:proxy:idle` event](/up:proxy:idle) if it
     used to busy, but is now idle.
     
     @function up.proxy.idle
@@ -4169,8 +4312,8 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     Returns `true` if the proxy is currently waiting
     for a request to finish. Returns `false` otherwise.
     
-    The proxy will also emit an `proxy:busy` [event](/up.bus) if it
-    used to idle, but is now busy.
+    The proxy will also emit an [`up:proxy:busy` event](/up:proxy:busy) if it
+    used to be idle, but is now busy.
     
     @function up.proxy.busy
     @return {Boolean} Whether the proxy is busy
@@ -4226,7 +4369,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     This event is [emitted]/(up.emit) when [AJAX requests](/up.proxy.ajax)
     have [taken long to finish](/up:proxy:busy), but have finished now.
     
-    @event up:proxy:busy
+    @event up:proxy:idle
      */
     load = function(request) {
       var promise;
@@ -4488,12 +4631,15 @@ Read on
     @param {Element|jQuery|String} [options.reveal]
       Whether to reveal the target  element within its viewport before updating.
     @param {Boolean} [options.restoreScroll]
-      If set to `true`, this will attempt to [`restore scroll positions`](/up.restoreScroll)
+      If set to `true`, this will attempt to [restore scroll positions](/up.restoreScroll)
       previously seen on the destination URL.
     @param {Boolean} [options.cache]
       Whether to force the use of a cached response (`true`)
       or never use the cache (`false`)
       or make an educated guess (`undefined`).
+    @param {Object} [options.headers={}]
+      An object of additional header key/value pairs to send along
+      with the request.
      */
     follow = function(linkOrSelector, options) {
       var $link, selector, url;
@@ -4507,6 +4653,7 @@ Read on
       options.cache = u.option(options.cache, u.castedAttr($link, 'up-cache'));
       options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'));
       options.method = followMethod($link, options);
+      options.origin = u.option(options.origin, $link);
       options = u.merge(options, up.motion.animateOptions(options, $link));
       return up.replace(selector, url, options);
     };
@@ -4786,40 +4933,53 @@ Read on
 }).call(this);
 
 /**
-Forms and controls
-==================
+Forms
+=====
   
-Up.js comes with functionality to submit forms without
-leaving the current page. This means you can replace page fragments,
+Up.js comes with functionality to [submit](/form-up-target) and [validate](/up-validate)
+forms without leaving the current page. This means you can replace page fragments,
 open dialogs with sub-forms, etc. all without losing form state.
-  
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
-  
-- Explain how to display form errors
-- Explain that the server needs to send 2xx or 5xx status codes so
-  Up.js can decide whether the form submission was successful
-- Explain that the server needs to send `X-Up-Location` and `X-Up-Method` headers
-  if an successful form submission resulted in a redirect
-- Examples
 
 @class up.form
  */
 
 (function() {
   up.form = (function($) {
-    var observe, submit, u;
+    var config, observe, reset, resolveValidateTarget, submit, u, validate;
     u = up.util;
 
     /**
-    Submits a form using the Up.js flow:
+    Sets default options for form submission and validation.
     
-        up.submit('form.new_user')
+    @property up.form.config
+    @param {Array} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
+      An array of CSS selectors that are searched around a form field
+      that wants to [validate](/up.validate). The first matching selector
+      will be updated with the validation messages from the server.
+    
+      By default this looks for a `<fieldset>`, `<label>` or `<form>`
+      around the validating input field, or any element with an
+      `up-fieldset` attribute.
+     */
+    config = u.config({
+      validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
+    });
+    reset = function() {
+      return config.reset();
+    };
+
+    /**
+    Submits a form via AJAX and updates a page fragment with the response.
+    
+        up.submit('form.new-user', { target: '.main' })
     
     Instead of loading a new page, the form is submitted via AJAX.
     The response is parsed for a CSS selector and the matching elements will
     replace corresponding elements on the current page.
+    
+    The UJS variant of this is the [`form[up-target]`](/form-up-target) selector.
+    See the documentation for [`form[up-target]`](/form-up-target) for more
+    information on how AJAX form submissions work in Up.js.
     
     @function up.submit
     @param {Element|jQuery|String} formOrSelector
@@ -4870,39 +5030,52 @@ We need to work on this page:
     
       By default only responses to `GET` requests are cached
       for a few minutes.
+    @param {Object} [options.headers={}]
+      An object of additional header key/value pairs to send along
+      with the request.
     @return {Promise}
       A promise for the successful form submission.
      */
     submit = function(formOrSelector, options) {
-      var $form, failureSelector, failureTransition, historyOption, httpMethod, implantOptions, request, successSelector, successTransition, successUrl, url, useCache;
+      var $form, failureSelector, failureTransition, hasFileInputs, headers, historyOption, httpMethod, implantOptions, request, successSelector, successTransition, successUrl, url, useCache;
       $form = $(formOrSelector).closest('form');
       options = u.options(options);
-      successSelector = u.option(options.target, $form.attr('up-target'), 'body');
-      failureSelector = u.option(options.failTarget, $form.attr('up-fail-target'), function() {
+      successSelector = up.flow.resolveSelector(u.option(options.target, $form.attr('up-target'), 'body'), options);
+      failureSelector = up.flow.resolveSelector(u.option(options.failTarget, $form.attr('up-fail-target'), function() {
         return u.createSelectorFromElement($form);
-      });
+      }), options);
       historyOption = u.option(options.history, u.castedAttr($form, 'up-history'), true);
       successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'));
       failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition);
       httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase();
+      headers = u.option(options.headers, {});
       implantOptions = {};
       implantOptions.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true);
       implantOptions.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'));
       implantOptions.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'));
+      implantOptions.origin = u.option(options.origin, $form);
       implantOptions = u.extend(implantOptions, up.motion.animateOptions(options, $form));
       useCache = u.option(options.cache, u.castedAttr($form, 'up-cache'));
       url = u.option(options.url, $form.attr('action'), up.browser.url());
+      hasFileInputs = $form.find('input[type=file]').length;
+      if (options.validate) {
+        headers['X-Up-Validate'] = options.validate;
+        if (hasFileInputs) {
+          return u.unresolvablePromise();
+        }
+      }
       $form.addClass('up-active');
-      if (!up.browser.canPushState() && historyOption !== false) {
+      if (hasFileInputs || (!up.browser.canPushState() && historyOption !== false)) {
         $form.get(0).submit();
-        return;
+        return u.unresolvablePromise();
       }
       request = {
         url: url,
         method: httpMethod,
         data: $form.serialize(),
         selector: successSelector,
-        cache: useCache
+        cache: useCache,
+        headers: headers
       };
       successUrl = function(xhr) {
         var currentLocation;
@@ -4941,7 +5114,11 @@ We need to work on this page:
     Observes a form field and runs a callback when its value changes.
     This is useful for observing text fields while the user is typing.
     
-    For instance, the following would submit the form whenever the
+    The UJS variant of this is the [`up-observe`](/up-observe) attribute.
+    
+    \#\#\#\# Example
+    
+    The following would submit the form whenever the
     text field value changes:
     
         up.observe('input[name=query]', { change: function(value, $input) {
@@ -4968,7 +5145,6 @@ We need to work on this page:
           delay: 100,
           change: function(value, $input) { up.submit($input) }
         });
-    
     
     @function up.observe
     @param {Element|jQuery|String} fieldOrSelector
@@ -5043,14 +5219,130 @@ We need to work on this page:
       check();
       return clearTimer;
     };
+    resolveValidateTarget = function($field, options) {
+      var target;
+      target = u.option(options.target, $field.attr('up-validate'));
+      if (u.isBlank(target)) {
+        target || (target = u.detect(config.validateTargets, function(defaultTarget) {
+          var resolvedDefault;
+          resolvedDefault = up.flow.resolveSelector(defaultTarget, options);
+          return $field.closest(resolvedDefault).length;
+        }));
+      }
+      if (u.isBlank(target)) {
+        error('Could not find default validation target for %o (tried ancestors %o)', $field, config.validateTargets);
+      }
+      if (!u.isString(target)) {
+        target = u.createSelectorFromElement(target);
+      }
+      return target;
+    };
 
     /**
-    Submits the form through AJAX, searches the response for the selector
-    given in `up-target` and [replaces](/up.replace) the selector content in the current page:
+    Performs a server-side validation of a form and update the form
+    with validation messages.
+    
+    `up.validate` submits the given field's form with an additional `X-Up-Validate`
+    HTTP header. Upon seeing this header, the server is expected to validate (but not save)
+    the form submission and render a new copy of the form with validation errors.
+    
+    The UJS variant of this is the [`[up-validate]`](/up-validate) selector.
+    See the documentation for [`[up-validate]`](/up-validate) for more information
+    on how server-side validation works in Up.js.
+    
+    \#\#\#\# Example
+    
+        up.validate('input[name=email]', { target: '.email-errors' })
+    
+    @function up.validate
+    @param {String|Element|jQuery} fieldOrSelector
+    @param {String|Element|jQuery} [options.target]
+    @return {Promise}
+      A promise that is resolved when the server-side
+      validation is received and the form was updated.
+     */
+    validate = function(fieldOrSelector, options) {
+      var $field, $form, promise;
+      $field = $(fieldOrSelector);
+      options = u.options(options);
+      options.origin = $field;
+      options.target = resolveValidateTarget($field, options);
+      options.failTarget = options.target;
+      options.history = false;
+      options.headers = u.option(options.headers, {});
+      options.validate = $field.attr('name') || '__none__';
+      options = u.merge(options, up.motion.animateOptions(options, $field));
+      $form = $field.closest('form');
+      promise = up.submit($form, options);
+      return promise;
+    };
+
+    /**
+    Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
+    instead of triggering a full page reload.
     
         <form method="post" action="/users" up-target=".main">
           ...
         </form>
+    
+    The server response is searched for the selector given in `up-target`.
+    The selector content is then [replaced](/up.replace) in the current page.
+    
+    The programmatic variant of this is the [`up.submit`](/up.submit) function.
+    
+    \#\#\#\# Validation errors
+    
+    When the server was unable to save the form due to invalid data,
+    it will usually re-render an updated copy of the form with
+    validation messages.
+    
+    For Up.js to be able to pick up a validation failure,
+    the form must be re-rendered with a non-200 HTTP status code.
+    We recommend to use either 400 (bad request) or
+    422 (unprocessable entity).
+    
+    In Ruby on Rails, you can pass a
+    [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option)
+    for this:
+    
+        class UsersController < ApplicationController
+    
+          def create
+            user_params = params[:user].permit(:email, :password)
+            @user = User.new(user_params)
+            if @user.save?
+              sign_in @user
+            else
+              render 'form', status: :bad_request
+            end
+          end
+    
+        end
+    
+    Note that you can also use the
+    [`up-validate`](/up-validate) attribute to perform server-side
+    validations while the user is completing fields.
+    
+    \#\#\#\# Redirects
+    
+    Up.js requires two additional response headers to detect redirects,
+    which are otherwise undetectable for an AJAX client.
+    
+    When the form's action performs a redirect, the server should echo
+    the new request's URL as a response header `X-Up-Location`
+    and the request's HTTP method as `X-Up-Method`.
+    
+    If you are using Up.js via the `upjs-rails` gem, these headers
+    are set automatically for every request.
+    
+    \#\#\#\# Giving feedback while the form is processing
+    
+    The `<form>` element will be assigned a CSS class `up-active` while
+    the submission is loading.
+    
+    You can also [implement a spinner](/up.proxy/#spinners)
+    by [listening](/up.on) to the [`up:proxy:busy`](/up:proxy:busy)
+    and [`up:proxy:idle`](/up:proxy:idle) events.
     
     @selector form[up-target]
     @param {String} up-target
@@ -5087,9 +5379,159 @@ We need to work on this page:
     });
 
     /**
+    When a form field with this attribute is changed,
+    the form is validated on the server and is updated with
+    validation messages.
+    
+    The programmatic variant of this is the [`up.validate`](/up.validate) function.
+    
+    \#\#\#\# Example
+    
+    Let's look at a standard registration form that asks for an e-mail and password:
+    
+        <form action="/users">
+    
+          <label>
+            E-mail: <input type="text" name="email" />
+          </label>
+    
+          <label>
+            Password: <input type="password" name="password" />
+          </label>
+    
+          <button type="submit">Register</button>
+    
+        </form>
+    
+    When the user changes the `email` field, we want to validate that
+    the e-mail address is valid and still available. Also we want to
+    change the `password` field for the minimum required password length.
+    We can do this by giving both fields an `up-validate` attribute:
+    
+        <form action="/users">
+    
+          <label>
+            E-mail: <input type="text" name="email" up-validate />
+          </label>
+    
+          <label>
+            Password: <input type="password" name="password" up-validate />
+          </label>
+    
+          <button type="submit">Register</button>
+    
+        </form>
+    
+    Whenever a field with `up-validate` changes, the form is POSTed to
+    `/users` with an additional `X-Up-Validate` HTTP header.
+    Upon seeing this header, the server is expected to validate (but not save)
+    the form submission and render a new copy of the form with validation errors.
+    
+    In Ruby on Rails the processing action should behave like this:
+    
+        class UsersController < ApplicationController
+    
+           * This action handles POST /users
+          def create
+            user_params = params[:user].permit(:email, :password)
+            @user = User.new(user_params)
+            if request.headers['X-Up-Validate']
+              @user.valid?  # run validations, but don't save to the database
+              render 'form' # render form with error messages
+            elsif @user.save?
+              sign_in @user
+            else
+              render 'form', status: :bad_request
+            end
+          end
+    
+        end
+    
+    Note that if you're using the `upjs-rails` gem you can simply say `up.validate?`
+    instead of manually checking for `request.headers['X-Up-Validate']`.
+    
+    The server now renders an updated copy of the form with eventual validation errors:
+    
+        <form action="/users">
+    
+          <label class="has-error">
+            E-mail: <input type="text" name="email" value="foo@bar.com" />
+            Has already been taken!
+          </label>
+    
+          <button type="submit">Register</button>
+    
+        </form>
+    
+    The `<label>` around the e-mail field is now updated to have the `has-error`
+    class and display the validation message.
+    
+    \#\#\#\# How validation results are displayed
+    
+    Although the server will usually respond to a validation with a complete,
+    fresh copy of the form, Up.js will by default not update the entire form.
+    This is done in order to preserve volatile state such as the scroll position
+    of `<textarea>` elements.
+    
+    By default Up.js looks for a `<fieldset>`, `<label>` or `<form>`
+    around the validating input field, or any element with an
+    `up-fieldset` attribute.
+    With the Bootstrap bindings, Up.js will also look
+    for a container with the `form-group` class.
+    
+    You can change this default behavior by setting `up.config.validateTargets`:
+    
+        // Always update the entire form containing the current field ("&")
+        up.config.validateTargets = ['form &']
+    
+    You can also individually override what to update by setting the `up-validate`
+    attribute to a CSS selector:
+    
+        <input type="text" name="email" up-validate=".email-errors">
+        <span class="email-errors"></span>
+    
+    
+    \#\#\#\# Updating dependent fields
+    
+    The `[up-validate]` behavior is also a great way to partially update a form
+    when one fields depends on the value of another field.
+    
+    Let's say you have a form with one `<select>` to pick a department (sales, engineering, ...)
+    and another `<select>` to pick an employeee from the selected department:
+    
+        <form action="/contracts">
+          <select name="department">...</select> <!-- options for all departments -->
+          <select name="employeed">...</select> <!-- options for employees of selected department -->
+        </form>
+    
+    The list of employees needs to be updated as the appartment changes:
+    
+        <form action="/contracts">
+          <select name="department" up-validate="[name=employee]">...</select>
+          <select name="employee">...</select>
+        </form>
+    
+    In order to update the `department` field in addition to the `employee` field, you could say
+    `up-validate="&, [name=employee]"`, or simply `up-validate="form"` to update the entire form.
+    
+    @selector [up-validate]
+    @param {String} up-validate
+      The CSS selector to update with the server response.
+    
+      This defaults to a fieldset or form group around the validating field.
+     */
+    up.on('change', '[up-validate]', function(event, $field) {
+      return validate($field);
+    });
+
+    /**
     Observes this form field and runs the given script
     when its value changes. This is useful for observing text fields
     while the user is typing.
+    
+    The programmatic variant of this is the [`up.observe`](/up.observe) function.
+    
+    \#\#\#\# Example
     
     For instance, the following would submit the form whenever the
     text field value changes:
@@ -5098,7 +5540,7 @@ We need to work on this page:
           <input type="query" up-observe="up.form.submit(this)">
         </form>
     
-    The script given with `up-observe` runs with the following context:
+    The script given to `up-observe` runs with the following context:
     
     | Name     | Type      | Description                           |
     | -------- | --------- | ------------------------------------- |
@@ -5106,24 +5548,26 @@ We need to work on this page:
     | `this`   | `Element` | The form field                        |
     | `$field` | `jQuery`  | The form field as a jQuery collection |
     
-    See up.observe.
-    
-    @selector input[up-observe]
-      The code to run when the field's value changes.
+    @selector [up-observe]
     @param {String} up-observe
+      The code to run when the field's value changes.
      */
     up.compiler('[up-observe]', function($field) {
       return observe($field);
     });
+    up.on('up:framework:reset', reset);
     return {
       submit: submit,
-      observe: observe
+      observe: observe,
+      validate: validate
     };
   })(jQuery);
 
   up.submit = up.form.submit;
 
   up.observe = up.form.observe;
+
+  up.validate = up.form.validate;
 
 }).call(this);
 
@@ -5969,6 +6413,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     });
     up.on('up:framework:reset', reset);
     return {
+      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       visit: visit,
       follow: follow,
       open: function() {
