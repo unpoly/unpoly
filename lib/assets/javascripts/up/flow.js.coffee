@@ -92,6 +92,20 @@ up.flow = (($) ->
 
       up.replace('.tasks:after', '/page/2')
 
+  \#\#\#\# Setting the window title from the server
+
+  If the `replace` call changes history, the document title will be set
+  to the contents of a `<title>` tag in the response.
+
+  The server can also change the document title by setting
+  an `X-Up-Title` header in the response.
+
+  \#\#\#\# Optimizing response rendering
+
+  The server is free to optimize Up.js requests by only rendering the HTML fragment
+  that is being updated. The request's `X-Up-Selector` header will contain
+  the CSS selector for the updating fragment.
+
   \#\#\#\# Events
 
   Up.js will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
