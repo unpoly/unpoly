@@ -35,7 +35,7 @@ describe TestController do
         expect(response.body).to eq('true')
       end
 
-      it 'returns true if the request is not an Up.js validation call' do
+      it 'returns false if the request is not an Up.js validation call' do
         get :is_up_validate
         expect(response.body).to eq('false')
       end
