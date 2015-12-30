@@ -16,9 +16,6 @@ group :development, :test do
   gem 'byebug'
   gem 'web-console', '~> 2.0'
   gem 'jasmine-rails'
-  # gem 'rails-assets-jasmine-jquery'
-  # gem 'rails-assets-jasmine-fixture'
-  # gem 'rails-assets-jasmine-ajax'
 end
 
 group :test do

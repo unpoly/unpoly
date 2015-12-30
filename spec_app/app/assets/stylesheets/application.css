@@ -11,7 +11,7 @@
  * file per style scope.
  *
  *= require up
- *= require_tree .
+ *= require_tree ./blocks
  *= require_self
  */
 
