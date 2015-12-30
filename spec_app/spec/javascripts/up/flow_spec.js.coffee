@@ -80,6 +80,8 @@ describe 'up.flow', ->
             expect($('.after')).toHaveText('new-after')
             done()
 
+        it 'replaces the body if asked to replace the "html" selector'
+
         it 'prepends instead of replacing when the target has a :before pseudo-selector', (done) ->
           promise = up.replace('.middle:before', '/path')
           @respond()

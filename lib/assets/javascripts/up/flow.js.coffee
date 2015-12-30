@@ -320,9 +320,15 @@ up.flow = (($) ->
     for selectorAtom, i in disjunction
       # Splitting the atom
       selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/)
+      selector = selectorParts[1]
+      if selector == 'html'
+        # If someone really asked us to replace the <html> root, the best
+        # we can do is replace the <body>.
+        selector = 'body'
+      pseudoClass = selectorParts[2]
       transition = transitions[i] || u.last(transitions)
-      selector: selectorParts[1]
-      pseudoClass: selectorParts[2]
+      selector: selector
+      pseudoClass: pseudoClass
       transition: transition
 
   autofocus = ($element) ->

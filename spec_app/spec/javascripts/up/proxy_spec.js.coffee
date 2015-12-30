@@ -40,26 +40,33 @@ describe 'up.proxy', ->
 
         expect(responses).toEqual(['foo', 'foo', 'bar'])
 
-      it "doesn't reuse responses for different paths", ->
-        responses = []
-
-        up.proxy.ajax(url: '/foo').then (data) -> responses.push(data)
-        up.proxy.ajax(url: '/bar').then (data) -> responses.push(data)
-
-        # See that only a single network request was triggered
+      it "doesn't reuse responses when asked for the same path, but different selectors", ->
+        up.proxy.ajax(url: '/path', selector: '.a')
+        up.proxy.ajax(url: '/path', selector: '.b')
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        jasmine.Ajax.requests.at(0).respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText: 'foo'
+      it "reuses a response for an 'html' selector when asked for the same path and any other selector", ->
+        up.proxy.ajax(url: '/path', selector: 'html')
+        up.proxy.ajax(url: '/path', selector: 'body')
+        up.proxy.ajax(url: '/path', selector: 'p')
+        up.proxy.ajax(url: '/path', selector: '.klass')
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        jasmine.Ajax.requests.at(1).respondWith
-          status: 200
-          contentType: 'text/html'
-          responseText: 'bar'
+      it "reuses a response for a 'body' selector when asked for the same path and any other selector other than 'html'", ->
+        up.proxy.ajax(url: '/path', selector: 'body')
+        up.proxy.ajax(url: '/path', selector: 'p')
+        up.proxy.ajax(url: '/path', selector: '.klass')
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        expect(responses).toEqual(['foo', 'bar'])
+      it "doesn't reuse a response for a 'body' selector when asked for the same path but an 'html' selector", ->
+        up.proxy.ajax(url: '/path', selector: 'body')
+        up.proxy.ajax(url: '/path', selector: 'html')
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+      it "doesn't reuse responses for different paths", ->
+        up.proxy.ajax(url: '/foo')
+        up.proxy.ajax(url: '/bar')
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       u.each ['GET', 'HEAD', 'OPTIONS'], (method) ->
 

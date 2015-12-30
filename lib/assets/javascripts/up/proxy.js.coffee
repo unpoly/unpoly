@@ -98,11 +98,23 @@ up.proxy = (($) ->
     key: cacheKey
     log: 'up.proxy'
 
+
   ###*
   @protected
   @function up.proxy.get
   ###
-  get = cache.get
+  get = (request) ->
+    request = normalizeRequest(request)
+    candidates = [request]
+    unless request.selector is 'html'
+      requestForHtml = u.merge(request, selector: 'html')
+      candidates.push(requestForHtml)
+      unless request.selector is 'body'
+        requestForBody = u.merge(request, selector: 'body')
+        candidates.push(requestForBody)
+    for candidate in candidates
+      if response = cache.get(candidate)
+        return response
 
   ###*
   @protected

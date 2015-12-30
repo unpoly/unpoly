@@ -768,6 +768,9 @@ up.util = (($) ->
     will be discarded.
   @param {String} [config.log]
     A prefix for log entries printed by this cache object.
+  @param {Function<Object>} [config.key]
+    A function that takes an argument and returns a `String` key
+    for storage. If omitted, `toString()` is called on the argument.
   ###
   cache = (config = {}) ->
 
