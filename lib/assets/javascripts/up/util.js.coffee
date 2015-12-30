@@ -648,7 +648,10 @@ up.util = (($) ->
     
   locationFromXhr = (xhr) ->
     xhr.getResponseHeader('X-Up-Location')
-    
+
+  titleFromXhr = (xhr) ->
+    xhr.getResponseHeader('X-Up-Title')
+
   methodFromXhr = (xhr) ->
     xhr.getResponseHeader('X-Up-Method')
     
@@ -991,6 +994,7 @@ up.util = (($) ->
 #  castsToFalse: castsToFalse
   castedAttr: castedAttr
   locationFromXhr: locationFromXhr
+  titleFromXhr: titleFromXhr
   methodFromXhr: methodFromXhr
   clientSize: clientSize
   only: only

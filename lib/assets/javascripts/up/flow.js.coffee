@@ -169,6 +169,7 @@ up.flow = (($) ->
         options.history = url
       unless options.source is false
         options.source = url
+      options.title ||= u.titleFromXhr(xhr)
       implant(selector, html, options) unless options.preload
 
     promise.fail(u.error)

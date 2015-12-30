@@ -82,6 +82,38 @@ describe 'up.flow', ->
 
         it 'replaces the body if asked to replace the "html" selector'
 
+        it "sets the document title to a 'title' tag in the response", ->
+          affix('.container').text('old container text')
+          up.replace('.container', '/path')
+          @respondWith """
+            <html>
+              <head>
+                <title>Title from HTML</title>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          """
+          expect($('.container')).toHaveText('new container text')
+          expect(document.title).toBe('Title from HTML')
+
+        it "sets the document title to an 'X-Up-Title' header in the response", ->
+          affix('.container').text('old container text')
+          up.replace('.container', '/path')
+          @respondWith
+            responseHeaders:
+              'X-Up-Title': 'Title from header'
+            responseText: """
+              <div class='container'>
+                new container text
+              </div>
+              """
+          expect($('.container')).toHaveText('new container text')
+          expect(document.title).toBe('Title from header')
+
         it 'prepends instead of replacing when the target has a :before pseudo-selector', (done) ->
           promise = up.replace('.middle:before', '/path')
           @respond()
