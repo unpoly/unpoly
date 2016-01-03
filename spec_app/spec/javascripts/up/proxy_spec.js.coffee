@@ -187,7 +187,6 @@ describe 'up.proxy', ->
           expect(up.proxy.busy()).toBe(false)
 
         it 'can delay the up:proxy:busy event to prevent flickering of spinners', ->
-          jasmine.clock().install()
           up.proxy.config.busyDelay = 100
 
           up.proxy.ajax(url: '/foo')
@@ -219,7 +218,6 @@ describe 'up.proxy', ->
           ])
 
         it 'does not emit up:proxy:idle if a delayed up:proxy:busy was never emitted due to a fast response', ->
-          jasmine.clock().install()
           up.proxy.config.busyDelay = 100
 
           up.proxy.ajax(url: '/foo')

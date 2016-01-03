@@ -12,6 +12,12 @@ gem 'jquery-rails'
 gem 'upjs-rails', path: '..'
 gem 'bower-rails'
 
+# Jasmine spec runner won't boot with a more modern version of sprockets.
+# It crashes with an "asset not precompiled" error.
+gem 'tilt', '=1.4.1'
+gem 'sprockets-rails', '=2.2.4'
+gem 'sprockets', '=2.12.3'
+
 group :development, :test do
   gem 'byebug'
   gem 'web-console', '~> 2.0'
