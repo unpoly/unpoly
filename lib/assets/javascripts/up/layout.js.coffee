@@ -84,7 +84,6 @@ up.layout = (($) ->
   is called a second time, the previous animation will instantly jump to the
   last frame before the next animation is started.
 
-  @protected
   @function up.scroll
   @param {String|Element|jQuery} viewport
     The container element to scroll.
@@ -96,6 +95,7 @@ up.layout = (($) ->
     The timing function that controls the acceleration for the scrolling's animation.
   @return {Deferred}
     A promise that will be resolved when the scrolling ends.
+  @experimental
   ###
   scroll = (viewport, scrollTop, options) ->
     $viewport = $(viewport)
@@ -134,7 +134,9 @@ up.layout = (($) ->
 
   ###*
   @function up.layout.finishScrolling
-  @private
+  @param {String|Element|jQuery}
+    The element that might currently be scrolling.
+  @internal
   ###
   finishScrolling = (elementOrSelector) ->
     $(elementOrSelector).each ->
@@ -143,7 +145,7 @@ up.layout = (($) ->
 
   ###*
   @function up.layout.anchoredRight
-  @private
+  @internal
   ###
   anchoredRight = ->
     u.multiSelector(config.anchoredRight).select()
@@ -205,6 +207,7 @@ up.layout = (($) ->
     with the top edge of the viewport.
   @return {Deferred}
     A promise that will be resolved when the element is revealed.
+  @stable
   ###
   reveal = (elementOrSelector, options) ->
     u.debug('Revealing %o', elementOrSelector)
@@ -268,9 +271,9 @@ up.layout = (($) ->
 
   Throws an error if no viewport could be found.
 
-  @protected
   @function up.layout.viewportOf
   @param {String|Element|jQuery} selectorOrElement
+  @internal
   ###
   viewportOf = (selectorOrElement) ->
     $element = $(selectorOrElement)
@@ -282,10 +285,10 @@ up.layout = (($) ->
   Returns a jQuery collection of all the viewports contained within the
   given selector or element.
 
-  @protected
   @function up.layout.viewportsWithin
   @param {String|Element|jQuery} selectorOrElement
   @return jQuery
+  @internal
   ###
   viewportsWithin = (selectorOrElement) ->
     $element = $(selectorOrElement)
@@ -294,8 +297,8 @@ up.layout = (($) ->
   ###*
   Returns a jQuery collection of all the viewports on the screen.
 
-  @protected
   @function up.layout.viewports
+  @internal
   ###
   viewports = ->
     viewportSelector().select()
@@ -311,7 +314,7 @@ up.layout = (($) ->
 
   @function up.layout.scrollTops
   @return Object<String, Number>
-  @protected
+  @internal
   ###
   scrollTops = ->
     topsBySelector = {}
@@ -325,7 +328,7 @@ up.layout = (($) ->
 
   ###*
   @function up.layout.fixedChildren
-  @protected
+  @internal
   ###
   fixedChildren = (root = undefined) ->
     root ||= document.body
@@ -348,7 +351,7 @@ up.layout = (($) ->
   @function up.layout.saveScroll
   @param {String} [options.url]
   @param {Object<String, Number>} [options.tops]
-  @protected
+  @experimental
   ###
   saveScroll = (options = {}) ->
     url = u.option(options.url, up.history.url())
@@ -367,7 +370,7 @@ up.layout = (($) ->
   @param {jQuery} [options.around]
     If set, only restores viewports that are either an ancestor
     or descendant of the given element.
-  @protected
+  @experimental
   ###
   restoreScroll = (options = {}) ->
 
@@ -396,9 +399,10 @@ up.layout = (($) ->
     u.resolvedDeferred()
 
   ###*
-  @protected
   @function up.layout.revealOrRestoreScroll
-  @return {Deferred} A promise for when the revealing or scroll restauration ends
+  @return {Deferred}
+    A promise for when the revealing or scroll restauration ends
+  @internal
   ###
   revealOrRestoreScroll = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
@@ -466,6 +470,7 @@ up.layout = (($) ->
       </div>
 
   @selector [up-viewport]
+  @stable
   ###
 
   ###*
@@ -480,6 +485,7 @@ up.layout = (($) ->
       <div class="top-nav" up-fixed="top">...</div>
 
   @selector [up-fixed=top]
+  @stable
   ###
 
   ###*
@@ -494,6 +500,7 @@ up.layout = (($) ->
       <div class="bottom-nav" up-fixed="bottom">...</div>
 
   @selector [up-fixed=bottom]
+  @stable
   ###
 
   up.on 'up:framework:reset', reset

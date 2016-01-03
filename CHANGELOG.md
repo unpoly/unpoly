@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.14.0
+------
+
+### Compatible changes
+
+- Published the [up.util](/up.util) module.
+  This might save you from loading something like [Underscore.js](http://underscorejs.org/).
+
+
 0.13.0
 ------
 

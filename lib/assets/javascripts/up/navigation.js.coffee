@@ -126,6 +126,7 @@ up.navigation = (($) ->
       <a href="/foo" up-follow up-current>Foo</a>
 
   @selector [up-active]
+  @stable
   ###
   sectionClicked = ($section) ->
     unmarkActive()
@@ -188,6 +189,7 @@ up.navigation = (($) ->
       <a href="/reports" up-alias="/reports/*">Reports</a>
 
   @selector [up-current]
+  @stable
   ###
   up.on 'up:fragment:inserted', ->
     # If a new fragment is inserted, it's likely to be the result

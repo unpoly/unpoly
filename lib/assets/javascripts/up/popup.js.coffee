@@ -56,6 +56,7 @@ up.popup = (($) ->
   @function up.popup.url
   @return {String}
     the source URL
+  @stable
   ###
   currentUrl = undefined
 
@@ -64,7 +65,7 @@ up.popup = (($) ->
 
   @function up.popup.coveredUrl
   @return {String}
-  @protected
+  @experimental
   ###
   coveredUrl = ->
     $popup = $('.up-popup')
@@ -183,6 +184,9 @@ up.popup = (($) ->
     If set to `true`, the popup remains
     open even if the page changes in the background.
   @param {Object} [options.history=false]
+  @return {Promise}
+    A promise that will be resolved when the popup has been loaded and rendered.
+  @stable
   ###
   attach = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
@@ -211,6 +215,7 @@ up.popup = (($) ->
   @function up.popup.close
   @param {Object} options
     See options for [`up.animate`](/up.animate).
+  @stable
   ###
   close = (options) ->
     $popup = $('.up-popup')
@@ -236,7 +241,7 @@ up.popup = (($) ->
 
   @methods up.popup.contains
   @param {String} elementOrSelector
-  @protected
+  @stable
   ###
   contains = (elementOrSelector) ->
     $element = $(elementOrSelector)
@@ -256,6 +261,7 @@ up.popup = (($) ->
   @selector a[up-popup]
   @param [up-sticky]
   @param [up-position]
+  @stable
   ###
   up.on('click', 'a[up-popup]', (event, $link) ->
     event.preventDefault()
@@ -289,6 +295,7 @@ up.popup = (($) ->
   a currently open popup is closed. 
   
   @selector [up-close]
+  @stable
   ###
   up.on('click', '[up-close]', (event, $element) ->
     if $element.closest('.up-popup').length

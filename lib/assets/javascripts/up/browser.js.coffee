@@ -5,7 +5,6 @@ Browser interface
 Some browser-interfacing methods and switches that
 we can't currently get rid off.
 
-@protected
 @class up.browser
 ###
 up.browser = (($) ->
@@ -38,8 +37,13 @@ up.browser = (($) ->
   It also prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`)
   as a single string if the browser console does not support substitution strings.
 
+  \#\#\#\# Example
+
+      up.browser.puts('log', 'Hi world');
+      up.browser.puts('error', 'There was an error in %o', obj);
+
   @function up.browser.puts
-  @protected
+  @internal
   ###
   puts = (stream, args...) ->
     u.isDefined(console[stream]) or stream = 'log'
@@ -119,6 +123,7 @@ up.browser = (($) ->
   This leaves you with a classic server-side application.
 
   @function up.browser.isSupported
+  @experimental
   ###
   isSupported = ->
     (!isIE8OrWorse()) && isRecentJQuery()

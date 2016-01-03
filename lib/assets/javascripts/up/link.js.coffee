@@ -102,6 +102,7 @@ up.link = (($) ->
     The selector to replace.
   @param {Object} options
     See options for [`up.replace`](/up.replace)
+  @stable
   ###
   visit = (url, options) ->
     options = u.options(options)
@@ -149,6 +150,10 @@ up.link = (($) ->
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
+  @return {Promise}
+    A promise that will be resolved when the link destination
+    has been loaded and rendered.
+  @stable
   ###
   follow = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
@@ -171,12 +176,12 @@ up.link = (($) ->
   Returns the HTTP method that should be used when following the given link.
 
   Looks at the link's `up-method` or `data-method` attribute.
-  Defaults to `get`.
+  Defaults to `"get"`.
 
-  @protected
   @function up.link.followMethod
   @param linkOrSelector
   @param options.method {String}
+  @internal
   ###
   followMethod = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
@@ -245,6 +250,7 @@ up.link = (($) ->
     Whether to force the use of a cached response (`true`)
     or never use the cache (`false`)
     or make an educated guess (`undefined`).
+  @stable
   ###
   up.on 'click', 'a[up-target], [up-href][up-target]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
@@ -273,6 +279,7 @@ up.link = (($) ->
   systems switch tabs on `mousedown` instead of `click`.
 
   @selector a[up-instant]
+  @stable
   ###
   up.on 'mousedown', 'a[up-instant], [up-href][up-instant]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
@@ -281,7 +288,7 @@ up.link = (($) ->
 
   ###*
   @function up.link.childClicked
-  @private
+  @internal
   ###
   childClicked = (event, $link) ->
     $target = $(event.target)
@@ -295,10 +302,10 @@ up.link = (($) ->
   Makes sure that the given link is handled by Up.js.
 
   This is done by giving the link an `up-follow` attribute
-  if it doesn't already have it an `up-target` or `up-follow` attribute.
+  unless it already have it an `up-target` or `up-follow` attribute.
 
   @function up.link.makeFollowable
-  @protected
+  @internal
   ###
   makeFollowable = (link) ->
     $link = $(link)
@@ -313,8 +320,7 @@ up.link = (($) ->
 
       <a href="/users" up-follow>User list</a>
 
-  To only update a fragment instead of the entire page,
-  see [`up-target`](/up-target).
+  To only update a fragment instead of the entire page, see [`up-target`](/up-target).
 
   \#\#\#\# Turn any element into a link
 
@@ -333,6 +339,7 @@ up.link = (($) ->
   @param [up-restore-scroll='false']
     Whether to restore the scroll position of all viewports
     within the response.
+  @stable
   ###
   up.on 'click', 'a[up-follow], [up-href][up-follow]', (event, $link) ->
     if shouldProcessLinkEvent(event, $link)
@@ -360,6 +367,7 @@ up.link = (($) ->
   (`up-target`, `up-instant`, `up-preload`, etc.).
 
   @selector [up-expand]
+  @stable
   ###
   up.compiler '[up-expand]', ($area) ->
     link = $area.find('a, [up-href]').get(0)
@@ -392,6 +400,7 @@ up.link = (($) ->
       <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
 
   @selector [up-dash]
+  @stable
   ###
   up.compiler '[up-dash]', ($element) ->
     target = u.castedAttr($element, 'up-dash')

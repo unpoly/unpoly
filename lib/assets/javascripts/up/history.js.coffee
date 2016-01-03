@@ -37,7 +37,7 @@ up.history = (($) ->
   [`up.history.replace`](/up.history.replace).
 
   @function up.history.previousUrl
-  @protected
+  @internal
   ###
   previousUrl = undefined
   nextPreviousUrl = undefined
@@ -54,8 +54,8 @@ up.history = (($) ->
   Returns a normalized URL for the current history entry.
 
   @function up.history.url
-  @protected
-  ####
+  @experimental
+  ###
   currentUrl = ->
     normalizeUrl(up.browser.url())
   
@@ -69,18 +69,40 @@ up.history = (($) ->
     nextPreviousUrl = url
 
   ###*
+  Replaces the current history entry and updates the
+  browser's location bar with the given URL.
+
+  When the user navigates to the replaced history entry at a later time,
+  Up.js will [`replace`](/up.replace) the document body with
+  the body from that URL.
+
+  Note that functions like [`up.replace`](/up.replace) or
+  [`up.submit`](/up.submit) will automatically update the
+  browser's location bar for you.
+
   @function up.history.replace
   @param {String} url
   @param {Boolean} [options.force=false]
-  @protected
+  @experimental
   ###
   replace = (url, options) ->
     manipulate('replace', url, options)
 
   ###*
+  Adds a new history entry and updates the browser's
+  address bar with the given URL.
+
+  When the user navigates to the added  history entry at a later time,
+  Up.js will [`replace`](/up.replace) the document body with
+  the body from that URL.
+
+  Note that functions like [`up.replace`](/up.replace) or
+  [`up.submit`](/up.submit) will automatically update the
+  browser's location bar for you.
+
   @function up.history.push
   @param {String} url
-  @protected
+  @experimental
   ###
   push = (url, options) ->
     manipulate('push', url, options)
@@ -160,6 +182,7 @@ up.history = (($) ->
       </a>
 
   @selector [up-back]
+  @stable
   ###
   up.compiler '[up-back]', ($link) ->
     if u.isPresent(previousUrl)

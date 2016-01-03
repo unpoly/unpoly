@@ -8,27 +8,27 @@ describe 'up.util', ->
 #        fun = ($element, data) ->
 #        expect(up.util.argNames(fun)).toEqual(['$element', 'data'])
 
-    describe 'up.util.createSelectorFromElement', ->
+    describe 'up.util.selectorForElement', ->
 
       it "prefers using the element's 'up-id' attribute to using the element's ID", ->
         $element = affix('div[up-id=up-id-value]#id-value')
-        expect(up.util.createSelectorFromElement($element)).toBe("[up-id='up-id-value']")
+        expect(up.util.selectorForElement($element)).toBe("[up-id='up-id-value']")
 
       it "prefers using the element's ID to using the element's name", ->
         $element = affix('div#id-value[name=name-value]')
-        expect(up.util.createSelectorFromElement($element)).toBe("#id-value")
+        expect(up.util.selectorForElement($element)).toBe("#id-value")
 
       it "prefers using the element's name to using the element's classes", ->
         $element = affix('div[name=name-value].class1.class2')
-        expect(up.util.createSelectorFromElement($element)).toBe("[name='name-value']")
+        expect(up.util.selectorForElement($element)).toBe("[name='name-value']")
 
       it "prefers using the element's classes to using the element's tag name", ->
         $element = affix('div.class1.class2')
-        expect(up.util.createSelectorFromElement($element)).toBe(".class1.class2")
+        expect(up.util.selectorForElement($element)).toBe(".class1.class2")
 
       it "uses the element's tag name if no better description is available", ->
         $element = affix('div')
-        expect(up.util.createSelectorFromElement($element)).toBe("div")
+        expect(up.util.selectorForElement($element)).toBe("div")
 
 
     describe 'up.util.castedAttr', ->

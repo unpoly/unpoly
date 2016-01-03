@@ -12,12 +12,9 @@
 Utility functions
 =================
   
-All methods in this module are for internal use by the Up.js framework
-and will frequently change between releases.
-  
-If you use them in your own code, you will get hurt.  
-  
-@protected
+Up.js comes with a number of utility functions
+that might save you from loading something like [Underscore.js](http://underscorejs.org/).
+
 @class up.util
  */
 
@@ -25,7 +22,12 @@ If you use them in your own code, you will get hurt.
   var slice = [].slice;
 
   up.util = (function($) {
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, createSelectorFromElement, cssAnimate, debug, detect, each, emptyJQuery, endsWith, error, escapePressed, evalConsoleTemplate, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, identity, ifGiven, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJquery, offsetParent, once, only, option, options, parseUrl, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, setMissingAttrs, startsWith, temporaryCss, times, titleFromXhr, toArray, trim, unJquery, uniq, unresolvablePromise, unwrapElement, warn;
+
+    /**
+    @function up.util.memoize
+    @internal
+     */
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, debug, detect, each, error, escapePressed, evalConsoleTemplate, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -41,6 +43,11 @@ If you use them in your own code, you will get hurt.
         }
       };
     };
+
+    /**
+    @function up.util.ajax
+    @internal
+     */
     ajax = function(request) {
       request = copy(request);
       if (request.selector) {
@@ -51,16 +58,19 @@ If you use them in your own code, you will get hurt.
     };
 
     /**
+    Returns if the given port is the default port for the given protocol.
+    
     @function up.util.isStandardPort
-    @private
+    @internal
      */
     isStandardPort = function(protocol, port) {
+      port = port.toString();
       return ((port === "" || port === "80") && protocol === 'http:') || (port === "443" && protocol === 'https:');
     };
 
     /**
-    Normalizes URLs, relative paths and absolute paths to a full URL
-    that can be checked for equality with other normalized URL.
+    Normalizes relative paths and absolute paths to a full URL
+    that can be checked for equality with other normalized URLs.
     
     By default hashes are ignored, search queries are included.
     
@@ -71,7 +81,7 @@ If you use them in your own code, you will get hurt.
       Whether to include a `?query` string in the normalized URL
     @param {Boolean} [options.stripTrailingSlash=false]
       Whether to strip a trailing slash from the pathname
-    @protected
+    @internal
      */
     normalizeUrl = function(urlOrAnchor, options) {
       var anchor, normalized, pathname;
@@ -98,8 +108,17 @@ If you use them in your own code, you will get hurt.
     };
 
     /**
+    Parses the given URL into components such as hostname and path.
+    
+    If the given URL is not fully qualified, it is assumed to be relative
+    to the current page.
+    
     @function up.util.parseUrl
-    @private
+    @return {Object}
+      The parsed URL as an object with
+      `protocol`, `hostname`, `port`, `pathname`, `search` and `hash`
+      properties.
+    @experimental
      */
     parseUrl = function(urlOrAnchor) {
       var anchor;
@@ -112,14 +131,14 @@ If you use them in your own code, you will get hurt.
           anchor.href = anchor.href;
         }
       } else {
-        anchor = unJquery(urlOrAnchor);
+        anchor = unJQuery(urlOrAnchor);
       }
       return anchor;
     };
 
     /**
     @function up.util.normalizeMethod
-    @protected
+    @internal
      */
     normalizeMethod = function(method) {
       if (method) {
@@ -128,6 +147,11 @@ If you use them in your own code, you will get hurt.
         return 'GET';
       }
     };
+
+    /**
+    @function $createElementFromSelector
+    @internal
+     */
     $createElementFromSelector = function(selector) {
       var $element, $parent, $root, classes, conjunction, depthSelector, expression, html, id, iteration, j, k, len, len1, path, tag;
       path = selector.split(/[ >]/);
@@ -180,8 +204,12 @@ If you use them in your own code, you will get hurt.
     };
 
     /**
+    Prints a debugging message to the browser console.
+    
     @function up.debug
-    @protected
+    @param {String} message
+    @param {Array} args...
+    @internal
      */
     debug = function() {
       var args, message, ref;
@@ -192,7 +220,7 @@ If you use them in your own code, you will get hurt.
 
     /**
     @function up.warn
-    @protected
+    @internal
      */
     warn = function() {
       var args, message, ref;
@@ -214,6 +242,7 @@ If you use them in your own code, you will get hurt.
         up.error('Unexpected result %o', result)
     
     @function up.error
+    @internal
      */
     error = function() {
       var $error, args, asString, ref;
@@ -260,7 +289,24 @@ If you use them in your own code, you will get hurt.
         return arg;
       });
     };
-    createSelectorFromElement = function(element) {
+
+    /**
+    Returns a CSS selector that matches the given element as good as possible.
+    
+    This uses, in decreasing order of priority:
+    
+    - The element's `up-id` attribute
+    - The element's ID
+    - The element's name
+    - The element's classes
+    - The element's tag names
+    
+    @function up.util.selectorForElement
+    @param {String|Element|jQuery}
+      The element for which to create a selector.
+    @experimental
+     */
+    selectorForElement = function(element) {
       var $element, classString, classes, id, j, klass, len, name, selector, upId;
       $element = $(element);
       selector = void 0;
@@ -312,21 +358,70 @@ If you use them in your own code, you will get hurt.
         return createElement('div', html);
       }
     };
+
+    /**
+    Merge the contents of two or more objects together into the first object.
+    
+    @function up.util.extend
+    @param {Object} target
+    @param {Array<Object>} sources...
+    @stable
+     */
     extend = $.extend;
+
+    /**
+    Returns a new string with whitespace removed from the beginning
+    and end of the given string.
+    
+    @param {String}
+      A string that might have whitespace at the beginning and end.
+    @return {String}
+      The trimmed string.
+    @stable
+     */
     trim = $.trim;
-    each = function(collection, block) {
+
+    /**
+    Calls the given function for each element (and, optional, index)
+    of the given array.
+    
+    @function up.util.each
+    @param {Array} array
+    @param {Function<Object, Number>} block
+      A function that will be called with each element and (optional) iteration index.
+    @stable
+     */
+    each = function(array, block) {
       var index, item, j, len, results;
       results = [];
-      for (index = j = 0, len = collection.length; j < len; index = ++j) {
-        item = collection[index];
+      for (index = j = 0, len = array.length; j < len; index = ++j) {
+        item = array[index];
         results.push(block(item, index));
       }
       return results;
     };
+
+    /**
+    Translate all items in an array to new array of items.
+    
+    @function up.util.map
+    @param {Array} array
+    @param {Function<Object, Number>} block
+      A function that will be called with each element and (optional) iteration index.
+    @return {Array}
+      A new array containing the result of each function call.
+    @stable
+     */
     map = each;
-    identity = function(x) {
-      return x;
-    };
+
+    /**
+    Calls the given function for the given number of times.
+    
+    @function up.util.times
+    @param {Number} count
+    @param {Function} block
+    @stable
+     */
     times = function(count, block) {
       var iteration, j, ref, results;
       results = [];
@@ -335,75 +430,281 @@ If you use them in your own code, you will get hurt.
       }
       return results;
     };
+
+    /**
+    Returns whether the given argument is `null`.
+    
+    @function up.util.isNull
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isNull = function(object) {
       return object === null;
     };
+
+    /**
+    Returns whether the given argument is `undefined`.
+    
+    @function up.util.isUndefined
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isUndefined = function(object) {
       return object === void(0);
     };
+
+    /**
+    Returns whether the given argument is not `undefined`.
+    
+    @function up.util.isDefined
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isDefined = function(object) {
       return !isUndefined(object);
     };
+
+    /**
+    Returns whether the given argument is either `undefined` or `null`.
+    
+    Note that empty strings or zero are *not* considered to be "missing".
+    
+    For the opposite of `up.util.isMissing` see [`up.util.isGiven`](/up.util.isGiven).
+    
+    @function up.util.isMissing
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isMissing = function(object) {
       return isUndefined(object) || isNull(object);
     };
+
+    /**
+    Returns whether the given argument is neither `undefined` nor `null`.
+    
+    Note that empty strings or zero *are* considered to be "given".
+    
+    For the opposite of `up.util.isGiven` see [`up.util.isMissing`](/up.util.isMissing).
+    
+    @function up.util.isGiven
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isGiven = function(object) {
       return !isMissing(object);
     };
+
+    /**
+    Return whether the given argument is considered to be blank.
+    
+    This returns `true` for:
+    
+    - `undefined`
+    - `null`
+    - Empty strings
+    - Empty arrays
+    - An object without own enumerable properties
+    
+    All other arguments return `false`.
+    
+    @function up.util.isBlank
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isBlank = function(object) {
       return isMissing(object) || (isObject(object) && Object.keys(object).length === 0) || (object.length === 0);
     };
-    presence = function(object, checker) {
-      if (checker == null) {
-        checker = isPresent;
+
+    /**
+    Returns the given argument if the argument is [present](/up.util.isPresent),
+    otherwise returns `undefined`.
+    
+    @function up.util.presence
+    @param object
+    @param {Function<T>} [tester=up.util.isPresent]
+      The function that will be used to test whether the argument is present.
+    @return {T|Undefined}
+    @stable
+     */
+    presence = function(object, tester) {
+      if (tester == null) {
+        tester = isPresent;
       }
-      if (checker(object)) {
+      if (tester(object)) {
         return object;
       } else {
-        return null;
+        return void 0;
       }
     };
+
+    /**
+    Returns whether the given argument is not [blank](/up.util.isBlank).
+    
+    @function up.util.isPresent
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isPresent = function(object) {
       return !isBlank(object);
     };
+
+    /**
+    Returns whether the given argument is a function.
+    
+    @function up.util.isFunction
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isFunction = function(object) {
       return typeof object === 'function';
     };
+
+    /**
+    Returns whether the given argument is a string.
+    
+    @function up.util.isString
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isString = function(object) {
       return typeof object === 'string';
     };
+
+    /**
+    Returns whether the given argument is a number.
+    
+    Note that this will check the argument's *type*.
+    It will return `false` for a string like `"123"`.
+    
+    @function up.util.isNumber
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isNumber = function(object) {
       return typeof object === 'number';
     };
+
+    /**
+    Returns whether the given argument is an object, but not a function.
+    
+    @function up.util.isHash
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isHash = function(object) {
       return typeof object === 'object' && !!object;
     };
+
+    /**
+    Returns whether the given argument is an object.
+    
+    This also returns `true` for functions, which may behave like objects in Javascript.
+    For an alternative that returns `false` for functions, see [`up.util.isHash`](/up.util.isHash).
+    
+    @function up.util.isObject
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isObject = function(object) {
       return isHash(object) || (typeof object === 'function');
     };
+
+    /**
+    Returns whether the given argument is a DOM element.
+    
+    @function up.util.isElement
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isElement = function(object) {
       return !!(object && object.nodeType === 1);
     };
+
+    /**
+    Returns whether the given argument is a jQuery collection.
+    
+    @function up.util.isJQuery
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isJQuery = function(object) {
       return object instanceof jQuery;
     };
+
+    /**
+    Returns whether the given argument is an object with a `then` method.
+    
+    @function up.util.isPromise
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isPromise = function(object) {
       return isObject(object) && isFunction(object.then);
     };
+
+    /**
+    Returns whether the given argument is an object with `then` and `resolve` methods.
+    
+    @function up.util.isDeferred
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isDeferred = function(object) {
       return isPromise(object) && isFunction(object.resolve);
     };
-    ifGiven = function(object) {
-      if (isGiven(object)) {
-        return object;
-      }
-    };
+
+    /**
+    Returns whether the given argument is an array.
+    
+    @function up.util.isArray
+    @param object
+    @return {Boolean}
+    @stable
+     */
     isArray = Array.isArray || function(object) {
       return Object.prototype.toString.call(object) === '[object Array]';
     };
+
+    /**
+    Converts the given array-like argument into an array.
+    
+    Returns the array.
+    
+    @function up.util.isDeferred
+    @param object
+    @return {Array}
+    @stable
+     */
     toArray = function(object) {
       return Array.prototype.slice.call(object);
     };
+
+    /**
+    Shallow-copies the given array or object into a new array or object.
+    
+    Returns the new array or object.
+    
+    @function up.util.copy
+    @param {Object|Array} object
+    @return {Object|Array}
+    @stable
+     */
     copy = function(object) {
       if (isArray(object)) {
         return object.slice();
@@ -411,16 +712,49 @@ If you use them in your own code, you will get hurt.
         return extend({}, object);
       }
     };
-    unJquery = function(object) {
+
+    /**
+    If given a jQuery collection, returns the underlying array of DOM element.
+    If given any other argument, returns the argument unchanged.
+    
+    @function up.util.unJQuery
+    @param object
+    @internal
+     */
+    unJQuery = function(object) {
       if (isJQuery(object)) {
         return object.get(0);
       } else {
         return object;
       }
     };
-    merge = function(object, otherObject) {
-      return extend(copy(object), otherObject);
+
+    /**
+    Creates a new object by merging together the properties from the given objects.
+    
+    @function up.util.merge
+    @param {Array<Object>} sources...
+    @return Object
+    @stable
+     */
+    merge = function() {
+      var sources;
+      sources = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      return extend.apply(null, [{}].concat(slice.call(sources)));
     };
+
+    /**
+    Creates an options hash from the given argument and some defaults.
+    
+    The semantics of this function are confusing.
+    We want to get rid of this in the future.
+    
+    @function up.util.options
+    @param {Object} object
+    @param {Object} [defaults]
+    @return {Object}
+    @internal
+     */
     options = function(object, defaults) {
       var defaultValue, key, merged, value;
       merged = object ? copy(object) : {};
@@ -448,6 +782,7 @@ If you use them in your own code, you will get hurt.
     
     @function up.util.option
     @param {Array} args...
+    @internal
      */
     option = function() {
       var arg, args, j, len, match, value;
@@ -466,6 +801,19 @@ If you use them in your own code, you will get hurt.
       }
       return match;
     };
+
+    /**
+    Passes each element in the given array to the given function.
+    Returns the first element for which the function returns a truthy value.
+    
+    If no object matches, returns `undefined`.
+    
+    @function up.util.detect
+    @param {Array<T>} array
+    @param {Function<T>} tester
+    @return {T|Undefined}
+    @stable
+     */
     detect = function(array, tester) {
       var element, j, len, match;
       match = void 0;
@@ -478,14 +826,51 @@ If you use them in your own code, you will get hurt.
       }
       return match;
     };
+
+    /**
+    Returns whether the given function returns a truthy value
+    for any element in the given array.
+    
+    @function up.util.any
+    @param {Array<T>} array
+    @param {Function<T>} tester
+    @return {Boolean}
+    @experimental
+     */
     any = function(array, tester) {
-      var match;
-      match = detect(array, tester);
-      return isDefined(match);
+      var element, j, len, match;
+      match = false;
+      for (j = 0, len = array.length; j < len; j++) {
+        element = array[j];
+        if (tester(element)) {
+          match = true;
+          break;
+        }
+      }
+      return match;
     };
+
+    /**
+    Returns all elements from the given array that are
+    neither `null` or `undefined`.
+    
+    @function up.util.compact
+    @param {Array<T>} array
+    @return {Array<T>}
+    @stable
+     */
     compact = function(array) {
       return select(array, isGiven);
     };
+
+    /**
+    Returns the given array without duplicates.
+    
+    @function up.util.uniq
+    @param {Array<T>} array
+    @return {Array<T>}
+    @stable
+     */
     uniq = function(array) {
       var seen;
       seen = {};
@@ -497,6 +882,16 @@ If you use them in your own code, you will get hurt.
         }
       });
     };
+
+    /**
+    Returns all elements from the given array that return
+    a truthy value when passed to the given function.
+    
+    @function up.util.select
+    @param {Array<T>} array
+    @return {Array<T>}
+    @stable
+     */
     select = function(array, tester) {
       var matches;
       matches = [];
@@ -507,6 +902,14 @@ If you use them in your own code, you will get hurt.
       });
       return matches;
     };
+
+    /**
+    Returns the first [present](/up.util.isPresent) element attribute
+    among the given list of attribute names.
+    
+    @function up.util.presentAttr
+    @internal
+     */
     presentAttr = function() {
       var $element, attrName, attrNames, values;
       $element = arguments[0], attrNames = 2 <= arguments.length ? slice.call(arguments, 1) : [];
@@ -521,12 +924,36 @@ If you use them in your own code, you will get hurt.
       })();
       return detect(values, isPresent);
     };
+
+    /**
+    Schedules the given function to be called in the
+    next Javascript execution frame.
+    
+    @function up.util.nextFrame
+    @param {Function} block
+    @stable
+     */
     nextFrame = function(block) {
       return setTimeout(block, 0);
     };
+
+    /**
+    Returns the last element of the given array.
+    
+    @function up.util.last
+    @param {Array<T>} array
+    @return {T}
+     */
     last = function(array) {
       return array[array.length - 1];
     };
+
+    /**
+    Measures the drawable area of the document.
+    
+    @function up.util.clientSize
+    @internal
+     */
     clientSize = function() {
       var element;
       element = document.documentElement;
@@ -535,6 +962,15 @@ If you use them in your own code, you will get hurt.
         height: element.clientHeight
       };
     };
+
+    /**
+    Returns the width of a scrollbar.
+    
+    This only runs once per page load.
+    
+    @function up.util.scrollbarWidth
+    @internal
+     */
     scrollbarWidth = memoize(function() {
       var $outer, outer, width;
       $outer = $('<div>').css({
@@ -557,14 +993,17 @@ If you use them in your own code, you will get hurt.
     Subsequent calls will return the previous return value.
     
     @function up.util.once
-    @private
+    @param {Function} fun
+    @experimental
      */
     once = function(fun) {
       var result;
       result = void 0;
       return function() {
+        var args;
+        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
         if (fun != null) {
-          result = fun();
+          result = fun.apply(null, args);
         }
         fun = void 0;
         return result;
@@ -572,15 +1011,17 @@ If you use them in your own code, you will get hurt.
     };
 
     /**
-     * Temporarily sets the CSS for the given element.
-    #
-     * @function up.util.temporaryCss
-     * @param {jQuery} $element
-     * @param {Object} css
-     * @param {Function} [block]
-     *   If given, the CSS is set, the block is called and
-     *   the old CSS is restored.
-     * @private
+    Temporarily sets the CSS for the given element.
+    
+    @function up.util.temporaryCss
+    @param {jQuery} $element
+    @param {Object} css
+    @param {Function} [block]
+      If given, the CSS is set, the block is called and
+      the old CSS is restored.
+    @return {Function}
+      A function that restores the original CSS when called.
+    @internal
      */
     temporaryCss = function($element, css, block) {
       var memo, oldCss;
@@ -596,6 +1037,13 @@ If you use them in your own code, you will get hurt.
         return once(memo);
       }
     };
+
+    /**
+    Forces the given jQuery element into an accelerated compositing layer.
+    
+    @function up.util.forceCompositing
+    @internal
+     */
     forceCompositing = function($element) {
       var memo, oldTransforms;
       oldTransforms = $element.css(['transform', '-webkit-transform']);
@@ -637,6 +1085,7 @@ If you use them in your own code, you will get hurt.
       for a list of pre-defined timing functions.
     @return
       A promise for the animation's end.
+    @internal
      */
     cssAnimate = function(elementOrSelector, lastFrame, opts) {
       var $element, deferred, endTimeout, transition, withoutCompositing, withoutTransition;
@@ -687,8 +1136,8 @@ If you use them in your own code, you will get hurt.
     Also see [`up.motion.finish`](/up.motion.finish).
     
     @function up.util.finishCssAnimate
-    @protected
     @param {Element|jQuery|String} elementOrSelector
+    @internal
      */
     finishCssAnimate = function(elementOrSelector) {
       return $(elementOrSelector).each(function() {
@@ -698,6 +1147,13 @@ If you use them in your own code, you will get hurt.
         }
       });
     };
+
+    /**
+    Measures the given element.
+    
+    @function up.util.measure
+    @internal
+     */
     measure = function($element, opts) {
       var $context, box, contextCoords, coordinates, elementCoords, viewport;
       opts = options(opts, {
@@ -742,6 +1198,13 @@ If you use them in your own code, you will get hurt.
       }
       return box;
     };
+
+    /**
+    Copies all attributes from the source element to the target element.
+    
+    @function up.util.copyAttributes
+    @internal
+     */
     copyAttributes = function($source, $target) {
       var attr, j, len, ref, results;
       ref = $source.get(0).attributes;
@@ -756,21 +1219,43 @@ If you use them in your own code, you will get hurt.
       }
       return results;
     };
+
+    /**
+    Looks for the given selector in the element and its descendants.
+    
+    @function up.util.findWithSelf
+    @internal
+     */
     findWithSelf = function($element, selector) {
       return $element.find(selector).addBack(selector);
     };
+
+    /**
+    Returns whether the given keyboard event involved the ESC key.
+    
+    @function up.util.escapePressed
+    @internal
+     */
     escapePressed = function(event) {
       return event.keyCode === 27;
     };
-    startsWith = function(string, element) {
-      return string.indexOf(element) === 0;
+
+    /**
+    Returns whether the given array or string contains the given element or substring.
+    
+    @function up.util.contains
+    @param {Array|String} arrayOrString
+    @param elementOrSubstring
+    @stable
+     */
+    contains = function(arrayOrString, elementOrSubstring) {
+      return arrayOrString.indexOf(elementOrSubstring) >= 0;
     };
-    endsWith = function(string, element) {
-      return string.indexOf(element) === string.length - element.length;
-    };
-    contains = function(stringOrArray, element) {
-      return stringOrArray.indexOf(element) >= 0;
-    };
+
+    /**
+    @function up.util.castedAttr
+    @internal
+     */
     castedAttr = function($element, attrName) {
       var value;
       value = $element.attr(attrName);
@@ -785,58 +1270,127 @@ If you use them in your own code, you will get hurt.
           return value;
       }
     };
+
+    /**
+    @function up.util.locationFromXhr
+    @internal
+     */
     locationFromXhr = function(xhr) {
       return xhr.getResponseHeader('X-Up-Location');
     };
+
+    /**
+    @function up.util.titleFromXhr
+    @internal
+     */
     titleFromXhr = function(xhr) {
       return xhr.getResponseHeader('X-Up-Title');
     };
+
+    /**
+    @function up.util.methodFromXhr
+    @internal
+     */
     methodFromXhr = function(xhr) {
       return xhr.getResponseHeader('X-Up-Method');
     };
+
+    /**
+    Returns a copy of the given object that only contains
+    the given properties.
+    
+    @function up.util.only
+    @param {Object} object
+    @param {Array} keys...
+    @stable
+     */
     only = function() {
-      var filtered, j, key, keys, len, object;
-      object = arguments[0], keys = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      var filtered, j, len, object, properties, property;
+      object = arguments[0], properties = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       filtered = {};
-      for (j = 0, len = keys.length; j < len; j++) {
-        key = keys[j];
-        if (object.hasOwnProperty(key)) {
-          filtered[key] = object[key];
+      for (j = 0, len = properties.length; j < len; j++) {
+        property = properties[j];
+        if (object.hasOwnProperty(property)) {
+          filtered[property] = object[property];
         }
       }
       return filtered;
     };
+
+    /**
+    @function up.util.isUnmodifiedKeyEvent
+    @internal
+     */
     isUnmodifiedKeyEvent = function(event) {
       return !(event.metaKey || event.shiftKey || event.ctrlKey);
     };
+
+    /**
+    @function up.util.isUnmodifiedMouseEvent
+    @internal
+     */
     isUnmodifiedMouseEvent = function(event) {
       var isLeftButton;
       isLeftButton = isUndefined(event.button) || event.button === 0;
       return isLeftButton && isUnmodifiedKeyEvent(event);
     };
+
+    /**
+    Returns a [Deferred object](https://api.jquery.com/category/deferred-object/) that is
+    already resolved.
+    
+    @function up.util.resolvedDeferred
+    @return {Deferred}
+    @stable
+     */
     resolvedDeferred = function() {
       var deferred;
       deferred = $.Deferred();
       deferred.resolve();
       return deferred;
     };
+
+    /**
+    Returns a promise that is already resolved.
+    
+    @function up.util.resolvedPromise
+    @return {Promise}
+    @stable
+     */
     resolvedPromise = function() {
       return resolvedDeferred().promise();
     };
+
+    /**
+    Returns a promise that will never be resolved.
+    
+    @function up.util.unresolvablePromise
+    @experimental
+     */
     unresolvablePromise = function() {
       return $.Deferred().promise();
     };
-    nullJquery = function() {
-      return {
-        is: function() {
-          return false;
-        },
-        attr: function() {},
-        find: function() {
-          return [];
-        }
-      };
+
+    /**
+    Returns an empty jQuery collection.
+    
+    @function up.util.nullJQuery
+    @internal
+     */
+    nullJQuery = function() {
+      return $();
     };
+
+    /**
+    Returns a new promise that resolves once all promises in arguments resolve.
+    
+    Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
+    the combined promise will have a `resolve` method. This `resolve` method
+    will resolve all the wrapped promises.
+    
+    @function up.util.resolvableWhen
+    @internal
+     */
     resolvableWhen = function() {
       var deferreds, joined;
       deferreds = 1 <= arguments.length ? slice.call(arguments, 0) : [];
@@ -848,6 +1402,13 @@ If you use them in your own code, you will get hurt.
       };
       return joined;
     };
+
+    /**
+    On the given element, set attributes that are still missing.
+    
+    @function up.util.setMissingAttrs
+    @internal
+     */
     setMissingAttrs = function($element, attrs) {
       var key, results, value;
       results = [];
@@ -861,6 +1422,17 @@ If you use them in your own code, you will get hurt.
       }
       return results;
     };
+
+    /**
+    Removes the given element from the given array.
+    
+    This changes the given array.
+    
+    @function up.util.remove
+    @param {Array<T>} array
+    @param {T} element
+    @stable
+     */
     remove = function(array, element) {
       var index;
       index = array.indexOf(element);
@@ -869,9 +1441,11 @@ If you use them in your own code, you will get hurt.
         return element;
       }
     };
-    emptyJQuery = function() {
-      return $([]);
-    };
+
+    /**
+    @function up.util.multiSelector
+    @internal
+     */
     multiSelector = function(parts) {
       var combinedSelector, elements, j, len, obj, part, selectors;
       obj = {};
@@ -895,7 +1469,7 @@ If you use them in your own code, you will get hurt.
       };
       obj.find = function($root) {
         var $matches, $result, k, len1, ref, selector;
-        $result = emptyJQuery();
+        $result = nullJQuery();
         ref = obj.parsed;
         for (k = 0, len1 = ref.length; k < len1; k++) {
           selector = ref[k];
@@ -931,7 +1505,7 @@ If you use them in your own code, you will get hurt.
           }
           $element = $element.parent();
         }
-        return $result || emptyJQuery();
+        return $result || nullJQuery();
       };
       return obj;
     };
@@ -949,6 +1523,7 @@ If you use them in your own code, you will get hurt.
     @param {Function<Object>} [config.key]
       A function that takes an argument and returns a `String` key
       for storage. If omitted, `toString()` is called on the argument.
+    @internal
      */
     cache = function(config) {
       var alias, clear, expiryMilis, get, isFresh, keys, log, maxSize, normalizeStoreKey, set, store, timestamp;
@@ -1083,6 +1658,11 @@ If you use them in your own code, you will get hurt.
         keys: keys
       };
     };
+
+    /**
+    @function up.util.config
+    @internal
+     */
     config = function(factoryOptions) {
       var hash;
       if (factoryOptions == null) {
@@ -1096,9 +1676,14 @@ If you use them in your own code, you will get hurt.
       Object.preventExtensions(hash);
       return hash;
     };
+
+    /**
+    @function up.util.unwrapElement
+    @internal
+     */
     unwrapElement = function(wrapper) {
       var parent, wrappedNodes;
-      wrapper = unJquery(wrapper);
+      wrapper = unJQuery(wrapper);
       parent = wrapper.parentNode;
       wrappedNodes = toArray(wrapper.childNodes);
       each(wrappedNodes, function(wrappedNode) {
@@ -1106,6 +1691,11 @@ If you use them in your own code, you will get hurt.
       });
       return parent.removeChild(wrapper);
     };
+
+    /**
+    @function up.util.offsetParent
+    @internal
+     */
     offsetParent = function($element) {
       var $match, position;
       $match = void 0;
@@ -1118,6 +1708,11 @@ If you use them in your own code, you will get hurt.
       }
       return $match;
     };
+
+    /**
+    @function up.util.fixedToAbsolute
+    @internal
+     */
     fixedToAbsolute = function(element, $viewport) {
       var $element, $futureOffsetParent, elementCoords, futureParentCoords;
       $element = $(element);
@@ -1142,7 +1737,7 @@ If you use them in your own code, you will get hurt.
       normalizeMethod: normalizeMethod,
       createElementFromHtml: createElementFromHtml,
       $createElementFromSelector: $createElementFromSelector,
-      createSelectorFromElement: createSelectorFromElement,
+      selectorForElement: selectorForElement,
       ajax: ajax,
       extend: extend,
       copy: copy,
@@ -1154,7 +1749,6 @@ If you use them in your own code, you will get hurt.
       warn: warn,
       each: each,
       map: map,
-      identity: identity,
       times: times,
       any: any,
       detect: detect,
@@ -1178,11 +1772,10 @@ If you use them in your own code, you will get hurt.
       isPromise: isPromise,
       isDeferred: isDeferred,
       isHash: isHash,
-      ifGiven: ifGiven,
       isUnmodifiedKeyEvent: isUnmodifiedKeyEvent,
       isUnmodifiedMouseEvent: isUnmodifiedMouseEvent,
-      nullJquery: nullJquery,
-      unJquery: unJquery,
+      nullJQuery: nullJQuery,
+      unJQuery: unJQuery,
       nextFrame: nextFrame,
       measure: measure,
       temporaryCss: temporaryCss,
@@ -1193,8 +1786,6 @@ If you use them in your own code, you will get hurt.
       copyAttributes: copyAttributes,
       findWithSelf: findWithSelf,
       contains: contains,
-      startsWith: startsWith,
-      endsWith: endsWith,
       isArray: isArray,
       toArray: toArray,
       castedAttr: castedAttr,
@@ -1216,7 +1807,6 @@ If you use them in your own code, you will get hurt.
       cache: cache,
       unwrapElement: unwrapElement,
       multiSelector: multiSelector,
-      emptyJQuery: emptyJQuery,
       evalConsoleTemplate: evalConsoleTemplate
     };
   })($);
@@ -1236,7 +1826,6 @@ Browser interface
 Some browser-interfacing methods and switches that
 we can't currently get rid off.
 
-@protected
 @class up.browser
  */
 
@@ -1280,8 +1869,13 @@ we can't currently get rid off.
     It also prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`)
     as a single string if the browser console does not support substitution strings.
     
+    \#\#\#\# Example
+    
+        up.browser.puts('log', 'Hi world');
+        up.browser.puts('error', 'There was an error in %o', obj);
+    
     @function up.browser.puts
-    @protected
+    @internal
      */
     puts = function() {
       var args, message, stream;
@@ -1344,6 +1938,7 @@ we can't currently get rid off.
     This leaves you with a classic server-side application.
     
     @function up.browser.isSupported
+    @experimental
      */
     isSupported = function() {
       return (!isIE8OrWorse()) && isRecentJQuery();
@@ -1491,6 +2086,7 @@ and call `preventDefault()` on the `event` object:
       and passed as a second argument.
     @return {Function}
       A function that unbinds the event listeners when called.
+    @stable
      */
     live = function() {
       var $document, args, behavior, description, lastIndex;
@@ -1532,7 +2128,7 @@ and call `preventDefault()` on the `event` object:
       or `stopPropagation()`.
     @param {jQuery} [eventProps.$element=$(document)]
       The element on which the event is trigered.
-    @protected
+    @experimental
      */
     emit = function(eventName, eventProps) {
       var $target, event;
@@ -1553,7 +2149,7 @@ and call `preventDefault()` on the `event` object:
     @function up.bus.nobodyPrevents
     @param {String} eventName
     @param {Object} eventProps
-    @protected
+    @experimental
      */
     nobodyPrevents = function() {
       var args, event;
@@ -1571,7 +2167,7 @@ and call `preventDefault()` on the `event` object:
       The listener function to register.
     @return {Function}
       A function that unbinds the event listeners when called.
-    @protected
+    @experimental
      */
     onEscape = function(listener) {
       return live('keydown', 'body', function(event) {
@@ -1585,7 +2181,7 @@ and call `preventDefault()` on the `event` object:
     Makes a snapshot of the currently registered event listeners,
     to later be restored through [`up.bus.reset`](/up.bus.reset).
     
-    @private
+    @internal
      */
     snapshot = function() {
       return defaultLiveDescriptions = u.copy(liveDescriptions);
@@ -1595,7 +2191,7 @@ and call `preventDefault()` on the `event` object:
     Resets the list of registered event listeners to the
     moment when the framework was booted.
     
-    @private
+    @internal
      */
     restoreSnapshot = function() {
       var description, i, len, ref;
@@ -1616,8 +2212,8 @@ and call `preventDefault()` on the `event` object:
     This is an internal method for to enable unit testing.
     Don't use this in production.
     
-    @protected
     @function up.reset
+    @experimental
      */
     emitReset = function() {
       return up.emit('up:framework:reset');
@@ -1626,8 +2222,8 @@ and call `preventDefault()` on the `event` object:
     /**
     This event is [emitted](/up.emit) when Up.js is [reset](/up.reset) during unit tests.
     
-    @protected
     @event up:framework:reset
+    @experimental
      */
 
     /**
@@ -1638,8 +2234,8 @@ and call `preventDefault()` on the `event` object:
     
     Emits the [`up:framework:boot`](/up:framework:boot) event.
     
-    @protected
     @function up.boot
+    @experimental
      */
     boot = function() {
       if (up.browser.isSupported()) {
@@ -1651,7 +2247,7 @@ and call `preventDefault()` on the `event` object:
     This event is [emitted](/up.emit) when Up.js [boots](/up.boot).
     
     @event up:framework:boot
-    @protected
+    @experimental
      */
     live('up:framework:boot', snapshot);
     live('up:framework:reset', restoreSnapshot);
@@ -1871,6 +2467,7 @@ later.
       clear global state such as time-outs and event handlers bound to the document.
       The destructor is *not* expected to remove the element from the DOM, which
       is already handled by [`up.destroy`](/up.destroy).
+    @stable
      */
     compilers = [];
     defaultCompilers = null;
@@ -1935,16 +2532,13 @@ later.
     
     Returns an empty object if the element has no `up-data` attribute.
     
-    The API of this method is likely to change in the future, so
-    we can support getting or setting individual keys.
-    
-    @protected
     @function up.syntax.data
     @param {String|Element|jQuery} elementOrSelector
     @return
       The JSON-decoded value of the `up-data` attribute.
     
       Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
+    @experimental
      */
 
     /*
@@ -1959,6 +2553,7 @@ later.
     @selector [up-data]
     @param {JSON} up-data
       A serialized JSON string
+    @stable
      */
     data = function(elementOrSelector) {
       var $element, json;
@@ -1975,7 +2570,7 @@ later.
     Makes a snapshot of the currently registered event listeners,
     to later be restored through `reset`.
     
-    @private
+    @internal
      */
     snapshot = function() {
       return defaultCompilers = u.copy(compilers);
@@ -1985,7 +2580,7 @@ later.
     Resets the list of registered compiler directives to the
     moment when the framework was booted.
     
-    @private
+    @internal
      */
     reset = function() {
       return compilers = u.copy(defaultCompilers);
@@ -2010,6 +2605,7 @@ later.
     
     @function up.hello
     @param {String|Element|jQuery} selectorOrElement
+    @stable
      */
     hello = function(selectorOrElement) {
       var $element;
@@ -2033,6 +2629,7 @@ later.
     @event up:fragment:inserted
     @param {jQuery} event.$element
       The fragment that has been inserted or updated.
+    @stable
      */
     up.on('ready', (function() {
       return hello(document.body);
@@ -2108,7 +2705,7 @@ We need to work on this page:
     [`up.history.replace`](/up.history.replace).
     
     @function up.history.previousUrl
-    @protected
+    @internal
      */
     previousUrl = void 0;
     nextPreviousUrl = void 0;
@@ -2127,7 +2724,7 @@ We need to work on this page:
     Returns a normalized URL for the current history entry.
     
     @function up.history.url
-    @protected
+    @experimental
      */
     currentUrl = function() {
       return normalizeUrl(up.browser.url());
@@ -2144,19 +2741,41 @@ We need to work on this page:
     };
 
     /**
+    Replaces the current history entry and updates the
+    browser's location bar with the given URL.
+    
+    When the user navigates to the replaced history entry at a later time,
+    Up.js will [`replace`](/up.replace) the document body with
+    the body from that URL.
+    
+    Note that functions like [`up.replace`](/up.replace) or
+    [`up.submit`](/up.submit) will automatically update the
+    browser's location bar for you.
+    
     @function up.history.replace
     @param {String} url
     @param {Boolean} [options.force=false]
-    @protected
+    @experimental
      */
     replace = function(url, options) {
       return manipulate('replace', url, options);
     };
 
     /**
+    Adds a new history entry and updates the browser's
+    address bar with the given URL.
+    
+    When the user navigates to the added  history entry at a later time,
+    Up.js will [`replace`](/up.replace) the document body with
+    the body from that URL.
+    
+    Note that functions like [`up.replace`](/up.replace) or
+    [`up.submit`](/up.submit) will automatically update the
+    browser's location bar for you.
+    
     @function up.history.push
     @param {String} url
-    @protected
+    @experimental
      */
     push = function(url, options) {
       return manipulate('push', url, options);
@@ -2245,6 +2864,7 @@ We need to work on this page:
         </a>
     
     @selector [up-back]
+    @stable
      */
     up.compiler('[up-back]', function($link) {
       if (u.isPresent(previousUrl)) {
@@ -2364,7 +2984,6 @@ This modules contains functions to scroll the viewport and reveal contained elem
     is called a second time, the previous animation will instantly jump to the
     last frame before the next animation is started.
     
-    @protected
     @function up.scroll
     @param {String|Element|jQuery} viewport
       The container element to scroll.
@@ -2376,6 +2995,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       The timing function that controls the acceleration for the scrolling's animation.
     @return {Deferred}
       A promise that will be resolved when the scrolling ends.
+    @experimental
      */
     scroll = function(viewport, scrollTop, options) {
       var $viewport, deferred, duration, easing, targetProps;
@@ -2413,7 +3033,9 @@ This modules contains functions to scroll the viewport and reveal contained elem
 
     /**
     @function up.layout.finishScrolling
-    @private
+    @param {String|Element|jQuery}
+      The element that might currently be scrolling.
+    @internal
      */
     finishScrolling = function(elementOrSelector) {
       return $(elementOrSelector).each(function() {
@@ -2426,7 +3048,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
 
     /**
     @function up.layout.anchoredRight
-    @private
+    @internal
      */
     anchoredRight = function() {
       return u.multiSelector(config.anchoredRight).select();
@@ -2507,6 +3129,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       with the top edge of the viewport.
     @return {Deferred}
       A promise that will be resolved when the element is revealed.
+    @stable
      */
     reveal = function(elementOrSelector, options) {
       var $element, $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsDocument;
@@ -2566,9 +3189,9 @@ This modules contains functions to scroll the viewport and reveal contained elem
     
     Throws an error if no viewport could be found.
     
-    @protected
     @function up.layout.viewportOf
     @param {String|Element|jQuery} selectorOrElement
+    @internal
      */
     viewportOf = function(selectorOrElement) {
       var $element, $viewport;
@@ -2582,10 +3205,10 @@ This modules contains functions to scroll the viewport and reveal contained elem
     Returns a jQuery collection of all the viewports contained within the
     given selector or element.
     
-    @protected
     @function up.layout.viewportsWithin
     @param {String|Element|jQuery} selectorOrElement
     @return jQuery
+    @internal
      */
     viewportsWithin = function(selectorOrElement) {
       var $element;
@@ -2596,8 +3219,8 @@ This modules contains functions to scroll the viewport and reveal contained elem
     /**
     Returns a jQuery collection of all the viewports on the screen.
     
-    @protected
     @function up.layout.viewports
+    @internal
      */
     viewports = function() {
       return viewportSelector().select();
@@ -2614,7 +3237,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
     
     @function up.layout.scrollTops
     @return Object<String, Number>
-    @protected
+    @internal
      */
     scrollTops = function() {
       var $viewport, i, key, len, ref, topsBySelector, viewport;
@@ -2636,7 +3259,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
 
     /**
     @function up.layout.fixedChildren
-    @protected
+    @internal
      */
     fixedChildren = function(root) {
       var $elements, $root;
@@ -2668,7 +3291,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @function up.layout.saveScroll
     @param {String} [options.url]
     @param {Object<String, Number>} [options.tops]
-    @protected
+    @experimental
      */
     saveScroll = function(options) {
       var tops, url;
@@ -2692,7 +3315,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @param {jQuery} [options.around]
       If set, only restores viewports that are either an ancestor
       or descendant of the given element.
-    @protected
+    @experimental
      */
     restoreScroll = function(options) {
       var $ancestorViewports, $descendantViewports, $matchingViewport, $viewports, key, right, scrollTop, tops, url;
@@ -2722,9 +3345,10 @@ This modules contains functions to scroll the viewport and reveal contained elem
     };
 
     /**
-    @protected
     @function up.layout.revealOrRestoreScroll
-    @return {Deferred} A promise for when the revealing or scroll restauration ends
+    @return {Deferred}
+      A promise for when the revealing or scroll restauration ends
+    @internal
      */
     revealOrRestoreScroll = function(selectorOrElement, options) {
       var $element, $target, id, parsed;
@@ -2800,6 +3424,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
         </div>
     
     @selector [up-viewport]
+    @stable
      */
 
     /**
@@ -2814,6 +3439,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
         <div class="top-nav" up-fixed="top">...</div>
     
     @selector [up-fixed=top]
+    @stable
      */
 
     /**
@@ -2828,6 +3454,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
         <div class="bottom-nav" up-fixed="bottom">...</div>
     
     @selector [up-fixed=bottom]
+    @stable
      */
     up.on('up:framework:reset', reset);
     return {
@@ -2890,7 +3517,7 @@ are based on this module.
 
     /**
     @function up.flow.resolveSelector
-    @private
+    @internal
      */
     resolveSelector = function(selectorOrElement, options) {
       var origin, originSelector, selector;
@@ -2898,14 +3525,14 @@ are based on this module.
         selector = selectorOrElement;
         if (u.contains(selector, '&')) {
           if (origin = u.presence(options.origin)) {
-            originSelector = u.createSelectorFromElement(origin);
+            originSelector = u.selectorForElement(origin);
             selector = selector.replace(/\&/, originSelector);
           } else {
             u.error("Found origin reference %o in selector %o, but options.origin is missing", '&', selector);
           }
         }
       } else {
-        selector = u.createSelectorFromElement(selectorOrElement);
+        selector = u.selectorForElement(selectorOrElement);
       }
       return selector;
     };
@@ -3015,6 +3642,7 @@ are based on this module.
       with the request.
     @return {Promise}
       A promise that will be resolved when the page has been updated.
+    @stable
      */
     replace = function(selectorOrElement, url, options) {
       var promise, request, selector;
@@ -3091,12 +3719,12 @@ are based on this module.
     Note how only `.two` has changed. The update for `.one` was
     discarded, since it didn't match the selector.
     
-    @function up.flow.implant
-    @protected
+    @function up.implant
     @param {String|Element|jQuery} selectorOrElement
     @param {String} html
     @param {Object} [options]
       See options for [`up.replace`](/up.replace).
+    @experimental
      */
     implant = function(selectorOrElement, html, options) {
       var $new, $old, j, len, ref, response, results, selector, step;
@@ -3245,12 +3873,12 @@ are based on this module.
     
     Returns `undefined` if no element matches these conditions.
     
-    @protected
     @function up.first
-    @param {String|Element|jQuery} selectorOrElement
+    @param {String|Element|jQuery|Array<Element>} selectorOrElement
     @return {jQuery}
       The first element that is neither a ghost or being destroyed,
       or `undefined` if no such element was given.
+    @experimental
      */
     first = function(selectorOrElement) {
       var $element, $match, element, elements, j, len;
@@ -3297,6 +3925,7 @@ are based on this module.
       The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
     @return {Deferred}
       A promise that will be resolved once the element has been removed from the DOM.
+    @stable
      */
     destroy = function(selectorOrElement, options) {
       var $element, animateOptions, animationDeferred;
@@ -3340,6 +3969,7 @@ are based on this module.
       The page fragment that is about to be destroyed.
     @param event.preventDefault()
       Event listeners may call this method to prevent the fragment from being destroyed.
+    @stable
      */
 
     /**
@@ -3352,6 +3982,7 @@ are based on this module.
     @event up:fragment:destroyed
     @param {jQuery} event.$element
       The page fragment that is about to be removed from the DOM.
+    @stable
      */
 
     /**
@@ -3373,6 +4004,7 @@ are based on this module.
     @param {String} [options.url]
       The URL from which to reload the fragment.
       This defaults to the URL from which the fragment was originally loaded.
+    @stable
      */
     reload = function(selectorOrElement, options) {
       var sourceUrl;
@@ -3396,6 +4028,8 @@ are based on this module.
   })(jQuery);
 
   up.replace = up.flow.replace;
+
+  up.implant = up.flow.implant;
 
   up.reload = up.flow.reload;
 
@@ -3531,6 +4165,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       for a list of pre-defined timing functions.
     @return {Promise}
       A promise for the animation's end.
+    @stable
      */
     animate = function(elementOrSelector, animation, options) {
       var $element;
@@ -3556,8 +4191,8 @@ or [transitions](/up.transition) using Javascript or CSS.
     If `$element` is given, also inspects the element for animation-related
     attributes like `up-easing` or `up-duration`.
     
-    @protected
     @function up.motion.animateOptions
+    @internal
      */
     animateOptions = function(allOptions, $element) {
       var options;
@@ -3624,6 +4259,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     
     @function up.motion.finish
     @param {Element|jQuery|String} elementOrSelector
+    @stable
      */
     finish = function(elementOrSelector) {
       return $(elementOrSelector).each(function() {
@@ -3709,6 +4345,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       Whether to reveal the new element by scrolling its parent viewport.
     @return {Promise}
       A promise for the transition's end.
+    @stable
      */
     morph = function(source, target, transitionOrName, options) {
       var $new, $old, animation, deferred, parsedOptions, parts, transition;
@@ -3751,7 +4388,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     We use this to skip morphing for old browsers, or when the developer
     decides to only animate the new element (i.e. no real ghosting or transition)   .
     
-    @private
+    @internal
      */
     skipMorph = function($old, $new, options) {
       $old.hide();
@@ -3759,7 +4396,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     };
 
     /**
-    @private
+    @internal
      */
     prependCopy = function($element, $viewport) {
       var $bounds, $fixedElements, $ghost, elementDims, fixedElement, i, len, moveTop, top;
@@ -3838,6 +4475,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     @function up.transition
     @param {String} name
     @param {Function} transition
+    @stable
      */
     transition = function(name, transition) {
       return transitions[name] = transition;
@@ -3872,6 +4510,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     @function up.animation
     @param {String} name
     @param {Function} animation
+    @stable
      */
     animation = function(name, animation) {
       return animations[name] = animation;
@@ -3891,6 +4530,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     @function up.motion.when
     @param promises...
     @return A new promise.
+    @experimental
      */
     resolvableWhen = u.resolvableWhen;
 
@@ -3901,6 +4541,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     @function up.motion.none
     @return {Promise}
       A resolved promise
+    @stable
      */
     none = u.resolvedDeferred;
     animation('none', none);
@@ -4167,8 +4808,15 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     });
 
     /**
-    @protected
+    Returns a cached response for the given request.
+    
+    Returns `undefined` if the given request is not currently cached.
+    
     @function up.proxy.get
+    @return {Promise}
+      A promise for the response that is API-compatible with the
+      promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+    @experimental
      */
     get = function(request) {
       var candidate, candidates, i, len, requestForBody, requestForHtml, response;
@@ -4195,21 +4843,41 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     };
 
     /**
-    @protected
+    Manually stores a promise for the response to the given request.
+    
     @function up.proxy.set
+    @param {String} request.url
+    @param {String} [request.method='GET']
+    @param {String} [request.selector='body']
+    @param {Promise} response
+      A promise for the response that is API-compatible with the
+      promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+    @experimental
      */
     set = cache.set;
 
     /**
-    @protected
+    Manually removes the given request from the cache.
+    
+    You can also [configure](/up.proxy.config) when the proxy
+    automatically removes cache entries.
+    
     @function up.proxy.remove
+    @param {String} request.url
+    @param {String} [request.method='GET']
+    @param {String} [request.selector='body']
+    @experimental
      */
     remove = cache.remove;
 
     /**
     Removes all cache entries.
     
+    Up.js also automatically clears the cache whenever it processes
+    a request with a non-GET HTTP method.
+    
     @function up.proxy.clear
+    @stable
      */
     clear = cache.clear;
     cancelPreloadDelay = function() {
@@ -4260,13 +4928,17 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     @function up.proxy.ajax
     @param {String} request.url
     @param {String} [request.method='GET']
-    @param {String} [request.selector]
+    @param {String} [request.selector='body']
     @param {Boolean} [request.cache]
       Whether to use a cached response, if available.
       If set to `false` a network connection will always be attempted.
     @param {Object} [request.headers={}]
       An object of additional header key/value pairs to send along
       with the request.
+    @return
+      A promise for the response that is API-compatible with the
+      promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+    @stable
      */
     ajax = function(options) {
       var forceCache, ignoreCache, pending, promise, request;
@@ -4302,7 +4974,9 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     used to busy, but is now idle.
     
     @function up.proxy.idle
-    @return {Boolean} Whether the proxy is idle
+    @return {Boolean}
+      Whether the proxy is idle
+    @experimental
      */
     idle = function() {
       return pendingCount === 0;
@@ -4316,7 +4990,9 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     used to be idle, but is now busy.
     
     @function up.proxy.busy
-    @return {Boolean} Whether the proxy is busy
+    @return {Boolean}
+      Whether the proxy is busy
+    @experimental
      */
     busy = function() {
       return pendingCount > 0;
@@ -4356,6 +5032,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     waiting, **no** additional `up:proxy:busy` events will be triggered.
     
     @event up:proxy:busy
+    @stable
      */
     loadEnded = function() {
       pendingCount -= 1;
@@ -4370,6 +5047,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     have [taken long to finish](/up:proxy:busy), but have finished now.
     
     @event up:proxy:idle
+    @stable
      */
     load = function(request) {
       var promise;
@@ -4387,10 +5065,10 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     is starting to load.
     
     @event up:proxy:load
-    @protected
     @param event.url
     @param event.method
     @param event.selector
+    @experimental
      */
 
     /**
@@ -4398,10 +5076,10 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     has been received.
     
     @event up:proxy:received
-    @protected
     @param event.url
     @param event.method
     @param event.selector
+    @experimental
      */
     isIdempotent = function(request) {
       normalizeRequest(request);
@@ -4425,12 +5103,12 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     };
 
     /**
-    @protected
     @function up.proxy.preload
     @param {String|Element|jQuery}
       The element whose destination should be preloaded.
     @return
       A promise that will be resolved when the request was loaded and cached
+    @stable
      */
     preload = function(linkOrSelector, options) {
       var $link, method;
@@ -4461,6 +5139,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
       The number of milliseconds to wait between hovering
       and preloading. Increasing this will lower the load in your server,
       but will also make the interaction feel less instant.
+    @stable
      */
     up.on('mouseover mousedown touchstart', '[up-preload]', function(event, $element) {
       if (!up.link.childClicked(event, $element)) {
@@ -4591,6 +5270,7 @@ Read on
       The selector to replace.
     @param {Object} options
       See options for [`up.replace`](/up.replace)
+    @stable
      */
     visit = function(url, options) {
       var selector;
@@ -4640,6 +5320,10 @@ Read on
     @param {Object} [options.headers={}]
       An object of additional header key/value pairs to send along
       with the request.
+    @return {Promise}
+      A promise that will be resolved when the link destination
+      has been loaded and rendered.
+    @stable
      */
     follow = function(linkOrSelector, options) {
       var $link, selector, url;
@@ -4662,12 +5346,12 @@ Read on
     Returns the HTTP method that should be used when following the given link.
     
     Looks at the link's `up-method` or `data-method` attribute.
-    Defaults to `get`.
+    Defaults to `"get"`.
     
-    @protected
     @function up.link.followMethod
     @param linkOrSelector
     @param options.method {String}
+    @internal
      */
     followMethod = function(linkOrSelector, options) {
       var $link;
@@ -4738,6 +5422,7 @@ Read on
       Whether to force the use of a cached response (`true`)
       or never use the cache (`false`)
       or make an educated guess (`undefined`).
+    @stable
      */
     up.on('click', 'a[up-target], [up-href][up-target]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
@@ -4767,6 +5452,7 @@ Read on
     systems switch tabs on `mousedown` instead of `click`.
     
     @selector a[up-instant]
+    @stable
      */
     up.on('mousedown', 'a[up-instant], [up-href][up-instant]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
@@ -4777,7 +5463,7 @@ Read on
 
     /**
     @function up.link.childClicked
-    @private
+    @internal
      */
     childClicked = function(event, $link) {
       var $target, $targetLink;
@@ -4793,10 +5479,10 @@ Read on
     Makes sure that the given link is handled by Up.js.
     
     This is done by giving the link an `up-follow` attribute
-    if it doesn't already have it an `up-target` or `up-follow` attribute.
+    unless it already have it an `up-target` or `up-follow` attribute.
     
     @function up.link.makeFollowable
-    @protected
+    @internal
      */
     makeFollowable = function(link) {
       var $link;
@@ -4814,8 +5500,7 @@ Read on
     
         <a href="/users" up-follow>User list</a>
     
-    To only update a fragment instead of the entire page,
-    see [`up-target`](/up-target).
+    To only update a fragment instead of the entire page, see [`up-target`](/up-target).
     
     \#\#\#\# Turn any element into a link
     
@@ -4834,6 +5519,7 @@ Read on
     @param [up-restore-scroll='false']
       Whether to restore the scroll position of all viewports
       within the response.
+    @stable
      */
     up.on('click', 'a[up-follow], [up-href][up-follow]', function(event, $link) {
       if (shouldProcessLinkEvent(event, $link)) {
@@ -4862,6 +5548,7 @@ Read on
     (`up-target`, `up-instant`, `up-preload`, etc.).
     
     @selector [up-expand]
+    @stable
      */
     up.compiler('[up-expand]', function($area) {
       var attribute, i, len, link, name, newAttrs, ref, upAttributePattern;
@@ -4900,6 +5587,7 @@ Read on
         <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
     
     @selector [up-dash]
+    @stable
      */
     up.compiler('[up-dash]', function($element) {
       var newAttrs, target;
@@ -5035,6 +5723,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       with the request.
     @return {Promise}
       A promise for the successful form submission.
+    @stable
      */
     submit = function(formOrSelector, options) {
       var $form, failureSelector, failureTransition, hasFileInputs, headers, historyOption, httpMethod, implantOptions, request, successSelector, successTransition, successUrl, url, useCache;
@@ -5042,7 +5731,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       options = u.options(options);
       successSelector = up.flow.resolveSelector(u.option(options.target, $form.attr('up-target'), 'body'), options);
       failureSelector = up.flow.resolveSelector(u.option(options.failTarget, $form.attr('up-fail-target'), function() {
-        return u.createSelectorFromElement($form);
+        return u.selectorForElement($form);
       }), options);
       historyOption = u.option(options.history, u.castedAttr($form, 'up-history'), true);
       successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'));
@@ -5157,6 +5846,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       The number of miliseconds to wait before executing the callback
       after the input value changes. Use this to limit how often the callback
       will be invoked for a fast typist.
+    @stable
      */
     observe = function(fieldOrSelector, options) {
       var $field, callback, callbackPromise, callbackTimer, changeEvents, check, clearTimer, codeOnChange, delay, knownValue, nextCallback, runNextCallback;
@@ -5233,7 +5923,7 @@ open dialogs with sub-forms, etc. all without losing form state.
         error('Could not find default validation target for %o (tried ancestors %o)', $field, config.validateTargets);
       }
       if (!u.isString(target)) {
-        target = u.createSelectorFromElement(target);
+        target = u.selectorForElement(target);
       }
       return target;
     };
@@ -5260,6 +5950,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @return {Promise}
       A promise that is resolved when the server-side
       validation is received and the form was updated.
+    @stable
      */
     validate = function(fieldOrSelector, options) {
       var $field, $form, promise;
@@ -5372,6 +6063,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       or make an educated guess (`undefined`).
     
       By default only responses to `GET` requests are cached for a few minutes.
+    @stable
      */
     up.on('submit', 'form[up-target]', function(event, $form) {
       event.preventDefault();
@@ -5519,6 +6211,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       The CSS selector to update with the server response.
     
       This defaults to a fieldset or form group around the validating field.
+    @stable
      */
     up.on('change', '[up-validate]', function(event, $field) {
       return validate($field);
@@ -5551,6 +6244,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @selector [up-observe]
     @param {String} up-observe
       The code to run when the field's value changes.
+    @stable
      */
     up.compiler('[up-observe]', function($field) {
       return observe($field);
@@ -5631,6 +6325,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @function up.popup.url
     @return {String}
       the source URL
+    @stable
      */
     currentUrl = void 0;
 
@@ -5639,7 +6334,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     
     @function up.popup.coveredUrl
     @return {String}
-    @protected
+    @experimental
      */
     coveredUrl = function() {
       var $popup;
@@ -5788,6 +6483,9 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       If set to `true`, the popup remains
       open even if the page changes in the background.
     @param {Object} [options.history=false]
+    @return {Promise}
+      A promise that will be resolved when the popup has been loaded and rendered.
+    @stable
      */
     attach = function(linkOrSelector, options) {
       var $link, $popup, animateOptions, animation, history, position, selector, sticky, url;
@@ -5817,6 +6515,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @function up.popup.close
     @param {Object} options
       See options for [`up.animate`](/up.animate).
+    @stable
      */
     close = function(options) {
       var $popup;
@@ -5846,7 +6545,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     
     @methods up.popup.contains
     @param {String} elementOrSelector
-    @protected
+    @stable
      */
     contains = function(elementOrSelector) {
       var $element;
@@ -5868,6 +6567,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @selector a[up-popup]
     @param [up-sticky]
     @param [up-position]
+    @stable
      */
     up.on('click', 'a[up-popup]', function(event, $link) {
       event.preventDefault();
@@ -5903,6 +6603,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     a currently open popup is closed. 
     
     @selector [up-close]
+    @stable
      */
     up.on('click', '[up-close]', function(event, $element) {
       if ($element.closest('.up-popup').length) {
@@ -6052,6 +6753,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @function up.modal.url
     @return {String}
       the source URL
+    @stable
      */
     currentUrl = void 0;
 
@@ -6060,7 +6762,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     
     @function up.modal.coveredUrl
     @return {String}
-    @protected
+    @experimental
      */
     coveredUrl = function() {
       var $modal;
@@ -6186,7 +6888,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param {String} [options.easing]
       The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
     @return {Promise}
-      A promise that will be resolved when the modal has finished loading.
+      A promise that will be resolved when the popup has been loaded and rendered.
+    @stable
      */
     follow = function(linkOrSelector, options) {
       options = u.options(options);
@@ -6214,6 +6917,9 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       The extracted content will be placed into the dialog window.
     @param {Object} options
       See options for [previous `up.modal.open` variant](/up.modal.open).
+    @return {Promise}
+      A promise that will be resolved when the popup has been loaded and rendered.
+    @stable
      */
     visit = function(url, options) {
       options = u.options(options);
@@ -6222,13 +6928,13 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     };
 
     /**
-    @function up.modal.open
-    @private
+    @function open
+    @internal
      */
     open = function(options) {
       var $link, $modal, animateOptions, animation, height, history, maxWidth, selector, sticky, url, width;
       options = u.options(options);
-      $link = u.option(options.$link, u.nullJquery());
+      $link = u.option(options.$link, u.nullJQuery());
       url = u.option(options.url, $link.attr('up-href'), $link.attr('href'));
       selector = u.option(options.target, $link.attr('up-modal'), 'body');
       width = u.option(options.width, $link.attr('up-width'), config.width);
@@ -6266,12 +6972,14 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @event up:modal:open
     @param event.preventDefault()
       Event listeners may call this method to prevent the modal from opening.
+    @stable
      */
 
     /**
     This event is [emitted](/up.emit) when a modal dialog has finished opening.
     
     @event up:modal:opened
+    @stable
      */
 
     /**
@@ -6283,6 +6991,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @function up.modal.close
     @param {Object} options
       See options for [`up.animate`](/up.animate)
+    @stable
      */
     close = function(options) {
       var $modal, deferred;
@@ -6321,6 +7030,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @event up:modal:close
     @param event.preventDefault()
       Event listeners may call this method to prevent the modal from closing.
+    @stable
      */
 
     /**
@@ -6328,6 +7038,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     is done [closing](/up.modal.close).
     
     @event up:modal:closed
+    @stable
      */
     autoclose = function() {
       if (!$('.up-modal').is('[up-sticky]')) {
@@ -6342,7 +7053,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     
     @function up.modal.contains
     @param {String} elementOrSelector
-    @protected
+    @stable
      */
     contains = function(elementOrSelector) {
       var $element;
@@ -6369,6 +7080,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param [up-height]
     @param [up-width]
     @param [up-history]
+    @stable
      */
     up.on('click', 'a[up-modal]', function(event, $link) {
       event.preventDefault();
@@ -6401,9 +7113,16 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
     /**
     When this element is clicked, closes a currently open dialog.
+    
     Does nothing if no modal is currently open.
     
+    To make a link that closes the current modal, but follows to
+    a fallback destination if no modal is open:
+    
+        <a href="/fallback" up-close>Okay</a>
+    
     @selector [up-close]
+    @stable
      */
     up.on('click', '[up-close]', function(event, $element) {
       if ($element.closest('.up-modal').length) {
@@ -6544,6 +7263,9 @@ The tooltip element is appended to the end of `<body>`.
       The position of the tooltip. Known values are `top` and `bottom`.
     @param {String} [options.animation]
       The animation to use when opening the tooltip.
+    @return {Promise}
+      A promise that will be resolved when the tooltip's opening animation has finished.
+    @stable
      */
     attach = function(linkOrSelector, options) {
       var $link, $tooltip, animateOptions, animation, html, position, text;
@@ -6572,6 +7294,7 @@ The tooltip element is appended to the end of `<body>`.
     @function up.tooltip.close
     @param {Object} options
       See options for [`up.animate`](/up.animate).
+    @stable
      */
     close = function(options) {
       var $tooltip;
@@ -6603,6 +7326,7 @@ The tooltip element is appended to the end of `<body>`.
       The default position of tooltips relative to the element.
       Can be either `"top"` or `"bottom"`.
       Defaults to [`up.tooltip.config.position`](/up.tooltip.config).
+    @stable
      */
 
     /**
@@ -6611,6 +7335,7 @@ The tooltip element is appended to the end of `<body>`.
         <a href="/decks" up-tooltip="Show &lt;b&gt;all&lt;/b&gt; decks">Decks</a>
     
     @selector [up-tooltip-html]
+    @stable
      */
     up.compiler('[up-tooltip], [up-tooltip-html]', function($link) {
       $link.on('mouseover', function() {
@@ -6784,6 +7509,7 @@ by providing instant feedback for user interactions.
         <a href="/foo" up-follow up-current>Foo</a>
     
     @selector [up-active]
+    @stable
      */
     sectionClicked = function($section) {
       unmarkActive();
@@ -6849,6 +7575,7 @@ by providing instant feedback for user interactions.
         <a href="/reports" up-alias="/reports/*">Reports</a>
     
     @selector [up-current]
+    @stable
      */
     up.on('up:fragment:inserted', function() {
       unmarkActive();

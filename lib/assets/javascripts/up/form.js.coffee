@@ -98,6 +98,7 @@ up.form = (($) ->
     with the request.
   @return {Promise}
     A promise for the successful form submission.
+  @stable
   ###
   submit = (formOrSelector, options) ->
     
@@ -105,7 +106,7 @@ up.form = (($) ->
 
     options = u.options(options)
     successSelector = up.flow.resolveSelector(u.option(options.target, $form.attr('up-target'), 'body'), options)
-    failureSelector = up.flow.resolveSelector(u.option(options.failTarget, $form.attr('up-fail-target'), -> u.createSelectorFromElement($form)), options)
+    failureSelector = up.flow.resolveSelector(u.option(options.failTarget, $form.attr('up-fail-target'), -> u.selectorForElement($form)), options)
     historyOption = u.option(options.history, u.castedAttr($form, 'up-history'), true)
     successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'))
     failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition)
@@ -218,6 +219,7 @@ up.form = (($) ->
     The number of miliseconds to wait before executing the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
+  @stable
   ###
   observe = (fieldOrSelector, options) ->
 
@@ -305,7 +307,7 @@ up.form = (($) ->
     if u.isBlank(target)
       error('Could not find default validation target for %o (tried ancestors %o)', $field, config.validateTargets)
     unless u.isString(target)
-      target = u.createSelectorFromElement(target)
+      target = u.selectorForElement(target)
     target
 
   ###*
@@ -330,6 +332,7 @@ up.form = (($) ->
   @return {Promise}
     A promise that is resolved when the server-side
     validation is received and the form was updated.
+  @stable
   ###
   validate = (fieldOrSelector, options) ->
     $field = $(fieldOrSelector)
@@ -442,6 +445,7 @@ up.form = (($) ->
     or make an educated guess (`undefined`).
 
     By default only responses to `GET` requests are cached for a few minutes.
+  @stable
   ###
   up.on 'submit', 'form[up-target]', (event, $form) ->
     event.preventDefault()
@@ -588,6 +592,7 @@ up.form = (($) ->
     The CSS selector to update with the server response.
 
     This defaults to a fieldset or form group around the validating field.
+  @stable
   ###
   up.on 'change', '[up-validate]', (event, $field) ->
     validate($field)
@@ -619,6 +624,7 @@ up.form = (($) ->
   @selector [up-observe]
   @param {String} up-observe
     The code to run when the field's value changes.
+  @stable
   ###
   up.compiler '[up-observe]', ($field) ->
     return observe($field)

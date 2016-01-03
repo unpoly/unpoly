@@ -2,16 +2,17 @@
 Utility functions
 =================
   
-All methods in this module are for internal use by the Up.js framework
-and will frequently change between releases.
-  
-If you use them in your own code, you will get hurt.  
-  
-@protected
+Up.js comes with a number of utility functions
+that might save you from loading something like [Underscore.js](http://underscorejs.org/).
+
 @class up.util
 ###
 up.util = (($) ->
 
+  ###*
+  @function up.util.memoize
+  @internal
+  ###
   memoize = (func) ->
     cache = undefined
     cached = false
@@ -22,6 +23,10 @@ up.util = (($) ->
         cached = true
         cache = func(args...)
 
+  ###*
+  @function up.util.ajax
+  @internal
+  ###
   ajax = (request) ->
     request = copy(request)
     if request.selector
@@ -31,15 +36,18 @@ up.util = (($) ->
     $.ajax(request)
 
   ###*
+  Returns if the given port is the default port for the given protocol.
+
   @function up.util.isStandardPort
-  @private
+  @internal
   ###  
   isStandardPort = (protocol, port) ->
+    port = port.toString()
     ((port == "" || port == "80") && protocol == 'http:') || (port == "443" && protocol == 'https:')
 
   ###*
-  Normalizes URLs, relative paths and absolute paths to a full URL
-  that can be checked for equality with other normalized URL.
+  Normalizes relative paths and absolute paths to a full URL
+  that can be checked for equality with other normalized URLs.
   
   By default hashes are ignored, search queries are included.
   
@@ -50,7 +58,7 @@ up.util = (($) ->
     Whether to include a `?query` string in the normalized URL
   @param {Boolean} [options.stripTrailingSlash=false]
     Whether to strip a trailing slash from the pathname
-  @protected
+  @internal
   ###
   normalizeUrl = (urlOrAnchor, options) ->
     anchor = parseUrl(urlOrAnchor)
@@ -68,8 +76,17 @@ up.util = (($) ->
     normalized
 
   ###*
+  Parses the given URL into components such as hostname and path.
+
+  If the given URL is not fully qualified, it is assumed to be relative
+  to the current page.
+
   @function up.util.parseUrl
-  @private
+  @return {Object}
+    The parsed URL as an object with
+    `protocol`, `hostname`, `port`, `pathname`, `search` and `hash`
+    properties.
+  @experimental
   ###
   parseUrl = (urlOrAnchor) ->
     anchor = null
@@ -81,12 +98,12 @@ up.util = (($) ->
       # https://gist.github.com/jlong/2428561#comment-1461205
       anchor.href = anchor.href if isBlank(anchor.hostname)
     else
-      anchor = unJquery(urlOrAnchor)
+      anchor = unJQuery(urlOrAnchor)
     anchor
 
   ###*
   @function up.util.normalizeMethod
-  @protected
+  @internal
   ###
   normalizeMethod = (method) ->
     if method
@@ -94,6 +111,10 @@ up.util = (($) ->
     else
       'GET'
 
+  ###*
+  @function $createElementFromSelector
+  @internal
+  ###
   $createElementFromSelector = (selector) ->
     path = selector.split(/[ >]/)
     $root = null
@@ -126,8 +147,12 @@ up.util = (($) ->
     element
 
   ###*
+  Prints a debugging message to the browser console.
+
   @function up.debug
-  @protected
+  @param {String} message
+  @param {Array} args...
+  @internal
   ###
   debug = (message, args...) ->
     message = "[UP] #{message}"
@@ -135,7 +160,7 @@ up.util = (($) ->
 
   ###*
   @function up.warn
-  @protected
+  @internal
   ###
   warn = (message, args...) ->
     message = "[UP] #{message}"
@@ -154,6 +179,7 @@ up.util = (($) ->
       up.error('Unexpected result %o', result)
 
   @function up.error
+  @internal
   ###
   error = (args...) ->
     args[0] = "[UP] #{args[0]}"
@@ -193,7 +219,23 @@ up.util = (($) ->
           arg += " }"
       arg
 
-  createSelectorFromElement = (element) ->
+  ###*
+  Returns a CSS selector that matches the given element as good as possible.
+
+  This uses, in decreasing order of priority:
+
+  - The element's `up-id` attribute
+  - The element's ID
+  - The element's name
+  - The element's classes
+  - The element's tag names
+
+  @function up.util.selectorForElement
+  @param {String|Element|jQuery}
+    The element for which to create a selector.
+  @experimental
+  ###
+  selectorForElement = (element) ->
     $element = $(element)
     selector = undefined
 
@@ -259,99 +301,359 @@ up.util = (($) ->
       # we possibly received a layout-less fragment
       createElement('div', html)
 
-  extend = $.extend
-  
-  trim = $.trim
-  
-  each = (collection, block) ->
-    block(item, index) for item, index in collection
+  ###*
+  Merge the contents of two or more objects together into the first object.
 
+  @function up.util.extend
+  @param {Object} target
+  @param {Array<Object>} sources...
+  @stable
+  ###
+  extend = $.extend
+
+  ###*
+  Returns a new string with whitespace removed from the beginning
+  and end of the given string.
+
+  @param {String}
+    A string that might have whitespace at the beginning and end.
+  @return {String}
+    The trimmed string.
+  @stable
+  ###
+  trim = $.trim
+
+  ###*
+  Calls the given function for each element (and, optional, index)
+  of the given array.
+
+  @function up.util.each
+  @param {Array} array
+  @param {Function<Object, Number>} block
+    A function that will be called with each element and (optional) iteration index.
+  @stable
+  ###
+  each = (array, block) ->
+    block(item, index) for item, index in array
+
+  ###*
+  Translate all items in an array to new array of items.
+
+  @function up.util.map
+  @param {Array} array
+  @param {Function<Object, Number>} block
+    A function that will be called with each element and (optional) iteration index.
+  @return {Array}
+    A new array containing the result of each function call.
+  @stable
+  ###
   map = each
 
-  identity = (x) -> x
+  ###*
+  Calls the given function for the given number of times.
 
+  @function up.util.times
+  @param {Number} count
+  @param {Function} block
+  @stable
+  ###
   times = (count, block) ->
     block(iteration) for iteration in [0..(count - 1)]
 
+  ###*
+  Returns whether the given argument is `null`.
+
+  @function up.util.isNull
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isNull = (object) ->
     object == null
 
+  ###*
+  Returns whether the given argument is `undefined`.
+
+  @function up.util.isUndefined
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isUndefined = (object) ->
     object == `void(0)`
-    
+
+  ###*
+  Returns whether the given argument is not `undefined`.
+
+  @function up.util.isDefined
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isDefined = (object) ->
     !isUndefined(object)
-    
+
+  ###*
+  Returns whether the given argument is either `undefined` or `null`.
+
+  Note that empty strings or zero are *not* considered to be "missing".
+
+  For the opposite of `up.util.isMissing` see [`up.util.isGiven`](/up.util.isGiven).
+
+  @function up.util.isMissing
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isMissing = (object) ->
     isUndefined(object) || isNull(object)
 
+  ###*
+  Returns whether the given argument is neither `undefined` nor `null`.
+
+  Note that empty strings or zero *are* considered to be "given".
+
+  For the opposite of `up.util.isGiven` see [`up.util.isMissing`](/up.util.isMissing).
+
+  @function up.util.isGiven
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isGiven = (object) ->
     !isMissing(object)
-    
+
+  ###*
+  Return whether the given argument is considered to be blank.
+
+  This returns `true` for:
+
+  - `undefined`
+  - `null`
+  - Empty strings
+  - Empty arrays
+  - An object without own enumerable properties
+
+  All other arguments return `false`.
+
+  @function up.util.isBlank
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isBlank = (object) ->
     isMissing(object) ||                  # null or undefined
     (isObject(object) && Object.keys(object).length == 0) ||
     (object.length == 0)                  # String, Array, jQuery
-  
-  presence = (object, checker = isPresent) ->
-    if checker(object) then object else null
-  
+
+  ###*
+  Returns the given argument if the argument is [present](/up.util.isPresent),
+  otherwise returns `undefined`.
+
+  @function up.util.presence
+  @param object
+  @param {Function<T>} [tester=up.util.isPresent]
+    The function that will be used to test whether the argument is present.
+  @return {T|Undefined}
+  @stable
+  ###
+  presence = (object, tester = isPresent) ->
+    if tester(object) then object else undefined
+
+  ###*
+  Returns whether the given argument is not [blank](/up.util.isBlank).
+
+  @function up.util.isPresent
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isPresent = (object) ->
     !isBlank(object)
 
+  ###*
+  Returns whether the given argument is a function.
+
+  @function up.util.isFunction
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isFunction = (object) ->
     typeof(object) == 'function'
 
+  ###*
+  Returns whether the given argument is a string.
+
+  @function up.util.isString
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isString = (object) ->
     typeof(object) == 'string'
 
+  ###*
+  Returns whether the given argument is a number.
+
+  Note that this will check the argument's *type*.
+  It will return `false` for a string like `"123"`.
+
+  @function up.util.isNumber
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isNumber = (object) ->
     typeof(object) == 'number'
 
+  ###*
+  Returns whether the given argument is an object, but not a function.
+
+  @function up.util.isHash
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isHash = (object) ->
     typeof(object) == 'object' && !!object
 
+  ###*
+  Returns whether the given argument is an object.
+
+  This also returns `true` for functions, which may behave like objects in Javascript.
+  For an alternative that returns `false` for functions, see [`up.util.isHash`](/up.util.isHash).
+
+  @function up.util.isObject
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isObject = (object) ->
     isHash(object) || (typeof object == 'function')
 
+  ###*
+  Returns whether the given argument is a DOM element.
+
+  @function up.util.isElement
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isElement = (object) ->
     !!(object && object.nodeType == 1)
 
+  ###*
+  Returns whether the given argument is a jQuery collection.
+
+  @function up.util.isJQuery
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isJQuery = (object) ->
     object instanceof jQuery
 
+  ###*
+  Returns whether the given argument is an object with a `then` method.
+
+  @function up.util.isPromise
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isPromise = (object) ->
     isObject(object) && isFunction(object.then)
 
+  ###*
+  Returns whether the given argument is an object with `then` and `resolve` methods.
+
+  @function up.util.isDeferred
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   isDeferred = (object) ->
     isPromise(object) && isFunction(object.resolve)
 
-  ifGiven = (object) ->
-    object if isGiven(object)
+  ###*
+  Returns whether the given argument is an array.
 
+  @function up.util.isArray
+  @param object
+  @return {Boolean}
+  @stable
+  ###
   # https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
   isArray = Array.isArray || 
       (object) -> Object.prototype.toString.call(object) == '[object Array]'
-        
+
+  ###*
+  Converts the given array-like argument into an array.
+
+  Returns the array.
+
+  @function up.util.isDeferred
+  @param object
+  @return {Array}
+  @stable
+  ###
   toArray = (object) ->
     Array.prototype.slice.call(object)
 
+  ###*
+  Shallow-copies the given array or object into a new array or object.
+
+  Returns the new array or object.
+
+  @function up.util.copy
+  @param {Object|Array} object
+  @return {Object|Array}
+  @stable
+  ###
   copy = (object)  ->
     if isArray(object)
       object.slice()
     else
       extend({}, object)
 
-  unJquery = (object) ->
+  ###*
+  If given a jQuery collection, returns the underlying array of DOM element.
+  If given any other argument, returns the argument unchanged.
+
+  @function up.util.unJQuery
+  @param object
+  @internal
+  ###
+  unJQuery = (object) ->
     if isJQuery(object)
       object.get(0)
     else
       object
 
-  # Non-destructive extend
-  merge = (object, otherObject) ->
-    extend(copy(object), otherObject)
+  ###*
+  Creates a new object by merging together the properties from the given objects.
 
+  @function up.util.merge
+  @param {Array<Object>} sources...
+  @return Object
+  @stable
+  ###
+  merge = (sources...) ->
+    extend({}, sources...)
+
+  ###*
+  Creates an options hash from the given argument and some defaults.
+
+  The semantics of this function are confusing.
+  We want to get rid of this in the future.
+
+  @function up.util.options
+  @param {Object} object
+  @param {Object} [defaults]
+  @return {Object}
+  @internal
+  ###
   options = (object, defaults) ->
     merged = if object then copy(object) else {}
     if defaults
@@ -373,6 +675,7 @@ up.util = (($) ->
   
   @function up.util.option
   @param {Array} args...
+  @internal
   ###
   option = (args...) ->
     # This behavior is subtly different from detect!
@@ -385,6 +688,18 @@ up.util = (($) ->
         break
     match    
 
+  ###*
+  Passes each element in the given array to the given function.
+  Returns the first element for which the function returns a truthy value.
+
+  If no object matches, returns `undefined`.
+
+  @function up.util.detect
+  @param {Array<T>} array
+  @param {Function<T>} tester
+  @return {T|Undefined}
+  @stable
+  ###
   detect = (array, tester) ->
     match = undefined
     for element in array
@@ -393,13 +708,44 @@ up.util = (($) ->
         break
     match
 
-  any = (array, tester) ->
-    match = detect(array, tester)
-    isDefined(match)
+  ###*
+  Returns whether the given function returns a truthy value
+  for any element in the given array.
 
+  @function up.util.any
+  @param {Array<T>} array
+  @param {Function<T>} tester
+  @return {Boolean}
+  @experimental
+  ###
+  any = (array, tester) ->
+    match = false
+    for element in array
+      if tester(element)
+        match = true
+        break
+    match
+
+  ###*
+  Returns all elements from the given array that are
+  neither `null` or `undefined`.
+
+  @function up.util.compact
+  @param {Array<T>} array
+  @return {Array<T>}
+  @stable
+  ###
   compact = (array) ->
     select array, isGiven
 
+  ###*
+  Returns the given array without duplicates.
+
+  @function up.util.uniq
+  @param {Array<T>} array
+  @return {Array<T>}
+  @stable
+  ###
   uniq = (array) ->
     seen = {}
     select array, (element) ->
@@ -408,6 +754,15 @@ up.util = (($) ->
       else
         seen[element] = true
 
+  ###*
+  Returns all elements from the given array that return
+  a truthy value when passed to the given function.
+
+  @function up.util.select
+  @param {Array<T>} array
+  @return {Array<T>}
+  @stable
+  ###
   select = (array, tester) ->
     matches = []
     each array, (element) ->
@@ -415,24 +770,60 @@ up.util = (($) ->
         matches.push(element)
     matches
 
+  ###*
+  Returns the first [present](/up.util.isPresent) element attribute
+  among the given list of attribute names.
+
+  @function up.util.presentAttr
+  @internal
+  ###
   presentAttr = ($element, attrNames...) ->
     values = ($element.attr(attrName) for attrName in attrNames)
     detect(values, isPresent)
-    
+
+  ###*
+  Schedules the given function to be called in the
+  next Javascript execution frame.
+
+  @function up.util.nextFrame
+  @param {Function} block
+  @stable
+  ###
   nextFrame = (block) ->
     setTimeout(block, 0)
-    
+
+  ###*
+  Returns the last element of the given array.
+
+  @function up.util.last
+  @param {Array<T>} array
+  @return {T}
+  ###
   last = (array) ->
     array[array.length - 1]
-    
+
+  ###*
+  Measures the drawable area of the document.
+
+  @function up.util.clientSize
+  @internal
+  ###
   clientSize = ->
     element = document.documentElement
     width: element.clientWidth
     height: element.clientHeight
 
-  # This is how Bootstrap does it also:
-  # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
+  ###*
+  Returns the width of a scrollbar.
+
+  This only runs once per page load.
+
+  @function up.util.scrollbarWidth
+  @internal
+  ###
   scrollbarWidth = memoize ->
+    # This is how Bootstrap does it also:
+    # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
     $outer = $('<div>').css
       position:  'absolute'
       top:       '0'
@@ -446,31 +837,33 @@ up.util = (($) ->
     $outer.remove()
     width
 
-
   ###*
   Modifies the given function so it only runs once.
   Subsequent calls will return the previous return value.
 
   @function up.util.once
-  @private
+  @param {Function} fun
+  @experimental
   ###
   once = (fun) ->
     result = undefined
-    ->
-      result = fun() if fun?
+    (args...) ->
+      result = fun(args...) if fun?
       fun = undefined
       result
 
   ###*
-  # Temporarily sets the CSS for the given element.
-  #
-  # @function up.util.temporaryCss
-  # @param {jQuery} $element
-  # @param {Object} css
-  # @param {Function} [block]
-  #   If given, the CSS is set, the block is called and
-  #   the old CSS is restored.
-  # @private
+  Temporarily sets the CSS for the given element.
+
+  @function up.util.temporaryCss
+  @param {jQuery} $element
+  @param {Object} css
+  @param {Function} [block]
+    If given, the CSS is set, the block is called and
+    the old CSS is restored.
+  @return {Function}
+    A function that restores the original CSS when called.
+  @internal
   ###
   temporaryCss = ($element, css, block) ->
     oldCss = $element.css(Object.keys(css))
@@ -481,7 +874,13 @@ up.util = (($) ->
       memo()
     else
       once(memo)
-      
+
+  ###*
+  Forces the given jQuery element into an accelerated compositing layer.
+
+  @function up.util.forceCompositing
+  @internal
+  ###
   forceCompositing = ($element) ->
     oldTransforms = $element.css(['transform', '-webkit-transform'])
     if isBlank(oldTransforms) || oldTransforms['transform'] == 'none'
@@ -494,8 +893,7 @@ up.util = (($) ->
       # drawn using compositing. Do nothing.
       memo = ->
     memo
-      
-      
+
   ###*
   Animates the given element's CSS properties using CSS transitions.
   
@@ -520,7 +918,7 @@ up.util = (($) ->
     for a list of pre-defined timing functions.
   @return
     A promise for the animation's end.
-
+  @internal
   ###
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
     $element = $(elementOrSelector)
@@ -567,14 +965,20 @@ up.util = (($) ->
   Also see [`up.motion.finish`](/up.motion.finish).
   
   @function up.util.finishCssAnimate
-  @protected
   @param {Element|jQuery|String} elementOrSelector
+  @internal
   ###
   finishCssAnimate = (elementOrSelector) ->
     $(elementOrSelector).each ->
       if existingAnimation = $(this).data(ANIMATION_PROMISE_KEY)
         existingAnimation.resolve()
 
+  ###*
+  Measures the given element.
+
+  @function up.util.measure
+  @internal
+  ###
   measure = ($element, opts) ->
     opts = options(opts, relative: false, inner: false, full: false)
 
@@ -611,27 +1015,51 @@ up.util = (($) ->
       box.right = viewport.width - (box.left + box.width)
       box.bottom = viewport.height - (box.top + box.height)
     box
-    
+
+  ###*
+  Copies all attributes from the source element to the target element.
+
+  @function up.util.copyAttributes
+  @internal
+  ###
   copyAttributes = ($source, $target) ->
     for attr in $source.get(0).attributes
       if attr.specified
         $target.attr(attr.name, attr.value)
 
+  ###*
+  Looks for the given selector in the element and its descendants.
+
+  @function up.util.findWithSelf
+  @internal
+  ###
   findWithSelf = ($element, selector) ->
     $element.find(selector).addBack(selector)
 
+  ###*
+  Returns whether the given keyboard event involved the ESC key.
+
+  @function up.util.escapePressed
+  @internal
+  ###
   escapePressed = (event) ->
     event.keyCode == 27
 
-  startsWith = (string, element) ->
-    string.indexOf(element) == 0
+  ###*
+  Returns whether the given array or string contains the given element or substring.
 
-  endsWith = (string, element) ->
-    string.indexOf(element) == string.length - element.length
+  @function up.util.contains
+  @param {Array|String} arrayOrString
+  @param elementOrSubstring
+  @stable
+  ###
+  contains = (arrayOrString, elementOrSubstring) ->
+    arrayOrString.indexOf(elementOrSubstring) >= 0
 
-  contains = (stringOrArray, element) ->
-    stringOrArray.indexOf(element) >= 0
-
+  ###*
+  @function up.util.castedAttr
+  @internal
+  ###
   castedAttr = ($element, attrName) ->
     value = $element.attr(attrName)
     switch value
@@ -645,69 +1073,147 @@ up.util = (($) ->
 #
 #  castsToFalse = (object) ->
 #    String(object) == "false"
-    
+
+  ###*
+  @function up.util.locationFromXhr
+  @internal
+  ###
   locationFromXhr = (xhr) ->
     xhr.getResponseHeader('X-Up-Location')
 
+  ###*
+  @function up.util.titleFromXhr
+  @internal
+  ###
   titleFromXhr = (xhr) ->
     xhr.getResponseHeader('X-Up-Title')
 
+  ###*
+  @function up.util.methodFromXhr
+  @internal
+  ###
   methodFromXhr = (xhr) ->
     xhr.getResponseHeader('X-Up-Method')
-    
-#  willChangeHistory = (historyOption) ->
-#    isPresent(historyOption) && !castsToFalse(historyOption)
-    
-  only = (object, keys...) ->
+
+  ###*
+  Returns a copy of the given object that only contains
+  the given properties.
+
+  @function up.util.only
+  @param {Object} object
+  @param {Array} keys...
+  @stable
+  ###
+  only = (object, properties...) ->
     filtered = {}
-    for key in keys
-      if object.hasOwnProperty(key)
-        filtered[key] = object[key]
+    for property in properties
+      if object.hasOwnProperty(property)
+        filtered[property] = object[property]
     filtered
 
+  ###*
+  @function up.util.isUnmodifiedKeyEvent
+  @internal
+  ###
   isUnmodifiedKeyEvent = (event) ->
     not (event.metaKey or event.shiftKey or event.ctrlKey)
 
+  ###*
+  @function up.util.isUnmodifiedMouseEvent
+  @internal
+  ###
   isUnmodifiedMouseEvent = (event) ->
     isLeftButton = isUndefined(event.button) || event.button == 0
     isLeftButton && isUnmodifiedKeyEvent(event)
 
+  ###*
+  Returns a [Deferred object](https://api.jquery.com/category/deferred-object/) that is
+  already resolved.
+
+  @function up.util.resolvedDeferred
+  @return {Deferred}
+  @stable
+  ###
   resolvedDeferred = ->
     deferred = $.Deferred()
     deferred.resolve()
     deferred
 
+  ###*
+  Returns a promise that is already resolved.
+
+  @function up.util.resolvedPromise
+  @return {Promise}
+  @stable
+  ###
   resolvedPromise = ->
     resolvedDeferred().promise()
 
+  ###*
+  Returns a promise that will never be resolved.
+
+  @function up.util.unresolvablePromise
+  @experimental
+  ###
   unresolvablePromise = ->
     $.Deferred().promise()
 
-  nullJquery = ->
-    is: -> false
-    attr: ->
-    find: -> []
+  ###*
+  Returns an empty jQuery collection.
 
+  @function up.util.nullJQuery
+  @internal
+  ###
+  nullJQuery = ->
+    $()
+
+  ###*
+  Returns a new promise that resolves once all promises in arguments resolve.
+
+  Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
+  the combined promise will have a `resolve` method. This `resolve` method
+  will resolve all the wrapped promises.
+
+  @function up.util.resolvableWhen
+  @internal
+  ###
   resolvableWhen = (deferreds...) ->
     joined = $.when(deferreds...)
     joined.resolve = ->
       each deferreds, (deferred) -> deferred.resolve?()
     joined
     
+  ###*
+  On the given element, set attributes that are still missing.
+
+  @function up.util.setMissingAttrs
+  @internal
+  ###
   setMissingAttrs = ($element, attrs) ->
     for key, value of attrs
       if isMissing($element.attr(key))
         $element.attr(key, value)
 
+  ###*
+  Removes the given element from the given array.
+
+  This changes the given array.
+
+  @function up.util.remove
+  @param {Array<T>} array
+  @param {T} element
+  @stable
+  ###
   remove = (array, element) ->
     index = array.indexOf(element)
     if index >= 0
       array.splice(index, 1)
       element
 
-  emptyJQuery = ->
-    $([])
-
+  ###*
+  @function up.util.multiSelector
+  @internal
+  ###
   multiSelector = (parts) ->
 
     obj = {}
@@ -733,7 +1239,7 @@ up.util = (($) ->
       obj.find(undefined)
 
     obj.find = ($root) ->
-      $result = emptyJQuery()
+      $result = nullJQuery()
       for selector in obj.parsed
         $matches = if $root then $root.find(selector) else $(selector)
         $result = $result.add($matches)
@@ -757,7 +1263,7 @@ up.util = (($) ->
           $result = $element
           break
         $element = $element.parent()
-      $result || emptyJQuery()
+      $result || nullJQuery()
 
     obj
 
@@ -774,6 +1280,7 @@ up.util = (($) ->
   @param {Function<Object>} [config.key]
     A function that takes an argument and returns a `String` key
     for storage. If omitted, `toString()` is called on the argument.
+  @internal
   ###
   cache = (config = {}) ->
 
@@ -879,6 +1386,10 @@ up.util = (($) ->
     clear: clear
     keys: keys
 
+  ###*
+  @function up.util.config
+  @internal
+  ###
   config = (factoryOptions = {}) ->
     hash = {}
     hash.reset = -> extend(hash, factoryOptions)
@@ -886,14 +1397,22 @@ up.util = (($) ->
     Object.preventExtensions(hash)
     hash
 
+  ###*
+  @function up.util.unwrapElement
+  @internal
+  ###
   unwrapElement = (wrapper) ->
-    wrapper = unJquery(wrapper)
+    wrapper = unJQuery(wrapper)
     parent = wrapper.parentNode;
     wrappedNodes = toArray(wrapper.childNodes)
     each wrappedNodes, (wrappedNode) ->
       parent.insertBefore(wrappedNode, wrapper)
     parent.removeChild(wrapper)
 
+  ###*
+  @function up.util.offsetParent
+  @internal
+  ###
   offsetParent = ($element) ->
     $match = undefined
     while ($element = $element.parent()) && $element.length
@@ -903,6 +1422,10 @@ up.util = (($) ->
         break
     $match
 
+  ###*
+  @function up.util.fixedToAbsolute
+  @internal
+  ###
   fixedToAbsolute = (element, $viewport) ->
     $element = $(element)
     $futureOffsetParent = offsetParent($element)
@@ -935,7 +1458,7 @@ up.util = (($) ->
   normalizeMethod: normalizeMethod
   createElementFromHtml: createElementFromHtml
   $createElementFromSelector: $createElementFromSelector
-  createSelectorFromElement: createSelectorFromElement
+  selectorForElement: selectorForElement
   ajax: ajax
   extend: extend
   copy: copy
@@ -947,7 +1470,6 @@ up.util = (($) ->
   warn: warn
   each: each
   map: map
-  identity: identity
   times: times
   any: any
   detect: detect
@@ -971,11 +1493,10 @@ up.util = (($) ->
   isPromise: isPromise
   isDeferred: isDeferred
   isHash: isHash
-  ifGiven: ifGiven
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
-  nullJquery: nullJquery
-  unJquery: unJquery
+  nullJQuery: nullJQuery
+  unJQuery: unJQuery
   nextFrame: nextFrame
   measure: measure
   temporaryCss: temporaryCss
@@ -986,8 +1507,6 @@ up.util = (($) ->
   copyAttributes: copyAttributes
   findWithSelf: findWithSelf
   contains: contains
-  startsWith: startsWith
-  endsWith: endsWith
   isArray: isArray
   toArray: toArray
 #  castsToTrue: castsToTrue
@@ -1011,7 +1530,6 @@ up.util = (($) ->
   cache: cache
   unwrapElement: unwrapElement
   multiSelector: multiSelector
-  emptyJQuery: emptyJQuery
   evalConsoleTemplate: evalConsoleTemplate
 
 )($)

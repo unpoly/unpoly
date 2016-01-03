@@ -119,6 +119,7 @@ up.modal = (($) ->
   @function up.modal.url
   @return {String}
     the source URL
+  @stable
   ###
   currentUrl = undefined
 
@@ -127,7 +128,7 @@ up.modal = (($) ->
 
   @function up.modal.coveredUrl
   @return {String}
-  @protected
+  @experimental
   ###
   coveredUrl = ->
     $modal = $('.up-modal')
@@ -238,7 +239,8 @@ up.modal = (($) ->
   @param {String} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
   @return {Promise}
-    A promise that will be resolved when the modal has finished loading.
+    A promise that will be resolved when the popup has been loaded and rendered.
+  @stable
   ###
   follow = (linkOrSelector, options) ->
     options = u.options(options)
@@ -265,6 +267,9 @@ up.modal = (($) ->
     The extracted content will be placed into the dialog window.
   @param {Object} options
     See options for [previous `up.modal.open` variant](/up.modal.open).
+  @return {Promise}
+    A promise that will be resolved when the popup has been loaded and rendered.
+  @stable
   ###
   visit = (url, options) ->
     options = u.options(options)
@@ -272,12 +277,12 @@ up.modal = (($) ->
     open(options)
 
   ###*
-  @function up.modal.open
-  @private
+  @function open
+  @internal
   ###
   open = (options) ->
     options = u.options(options)
-    $link = u.option(options.$link, u.nullJquery())
+    $link = u.option(options.$link, u.nullJQuery())
     url = u.option(options.url, $link.attr('up-href'), $link.attr('href'))
     selector = u.option(options.target, $link.attr('up-modal'), 'body')
     width = u.option(options.width, $link.attr('up-width'), config.width)
@@ -314,12 +319,14 @@ up.modal = (($) ->
   @event up:modal:open
   @param event.preventDefault()
     Event listeners may call this method to prevent the modal from opening.
+  @stable
   ###
 
   ###*
   This event is [emitted](/up.emit) when a modal dialog has finished opening.
 
   @event up:modal:opened
+  @stable
   ###
 
   ###*
@@ -331,6 +338,7 @@ up.modal = (($) ->
   @function up.modal.close
   @param {Object} options
     See options for [`up.animate`](/up.animate)
+  @stable
   ###
   close = (options) ->
     $modal = $('.up-modal')
@@ -361,6 +369,7 @@ up.modal = (($) ->
   @event up:modal:close
   @param event.preventDefault()
     Event listeners may call this method to prevent the modal from closing.
+  @stable
   ###
 
   ###*
@@ -368,6 +377,7 @@ up.modal = (($) ->
   is done [closing](/up.modal.close).
 
   @event up:modal:closed
+  @stable
   ###
 
   autoclose = ->
@@ -381,7 +391,7 @@ up.modal = (($) ->
 
   @function up.modal.contains
   @param {String} elementOrSelector
-  @protected
+  @stable
   ###
   contains = (elementOrSelector) ->
     $element = $(elementOrSelector)
@@ -406,6 +416,7 @@ up.modal = (($) ->
   @param [up-height]
   @param [up-width]
   @param [up-history]
+  @stable
   ###
   up.on('click', 'a[up-modal]', (event, $link) ->
     event.preventDefault()
@@ -436,9 +447,16 @@ up.modal = (($) ->
 
   ###*
   When this element is clicked, closes a currently open dialog.
+
   Does nothing if no modal is currently open.
 
+  To make a link that closes the current modal, but follows to
+  a fallback destination if no modal is open:
+
+      <a href="/fallback" up-close>Okay</a>
+
   @selector [up-close]
+  @stable
   ###
   up.on('click', '[up-close]', (event, $element) ->
     if $element.closest('.up-modal').length

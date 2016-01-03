@@ -100,8 +100,15 @@ up.proxy = (($) ->
 
 
   ###*
-  @protected
+  Returns a cached response for the given request.
+
+  Returns `undefined` if the given request is not currently cached.
+
   @function up.proxy.get
+  @return {Promise}
+    A promise for the response that is API-compatible with the
+    promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+  @experimental
   ###
   get = (request) ->
     request = normalizeRequest(request)
@@ -117,21 +124,41 @@ up.proxy = (($) ->
         return response
 
   ###*
-  @protected
+  Manually stores a promise for the response to the given request.
+
   @function up.proxy.set
+  @param {String} request.url
+  @param {String} [request.method='GET']
+  @param {String} [request.selector='body']
+  @param {Promise} response
+    A promise for the response that is API-compatible with the
+    promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+  @experimental
   ###
   set = cache.set
 
   ###*
-  @protected
+  Manually removes the given request from the cache.
+
+  You can also [configure](/up.proxy.config) when the proxy
+  automatically removes cache entries.
+
   @function up.proxy.remove
+  @param {String} request.url
+  @param {String} [request.method='GET']
+  @param {String} [request.selector='body']
+  @experimental
   ###
   remove = cache.remove
 
   ###*
   Removes all cache entries.
 
+  Up.js also automatically clears the cache whenever it processes
+  a request with a non-GET HTTP method.
+
   @function up.proxy.clear
+  @stable
   ###
   clear = cache.clear
 
@@ -181,13 +208,17 @@ up.proxy = (($) ->
   @function up.proxy.ajax
   @param {String} request.url
   @param {String} [request.method='GET']
-  @param {String} [request.selector]
+  @param {String} [request.selector='body']
   @param {Boolean} [request.cache]
     Whether to use a cached response, if available.
     If set to `false` a network connection will always be attempted.
   @param {Object} [request.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
+  @return
+    A promise for the response that is API-compatible with the
+    promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+  @stable
   ###
   ajax = (options) ->
 
@@ -239,7 +270,9 @@ up.proxy = (($) ->
   used to busy, but is now idle.
 
   @function up.proxy.idle
-  @return {Boolean} Whether the proxy is idle
+  @return {Boolean}
+    Whether the proxy is idle
+  @experimental
   ###
   idle = ->
     pendingCount == 0
@@ -252,7 +285,9 @@ up.proxy = (($) ->
   used to be idle, but is now busy.
 
   @function up.proxy.busy
-  @return {Boolean} Whether the proxy is busy
+  @return {Boolean}
+    Whether the proxy is busy
+  @experimental
   ###
   busy = ->
     pendingCount > 0
@@ -288,6 +323,7 @@ up.proxy = (($) ->
   waiting, **no** additional `up:proxy:busy` events will be triggered.
 
   @event up:proxy:busy
+  @stable
   ###
 
   loadEnded = ->
@@ -301,6 +337,7 @@ up.proxy = (($) ->
   have [taken long to finish](/up:proxy:busy), but have finished now.
 
   @event up:proxy:idle
+  @stable
   ###
 
   load = (request) ->
@@ -315,10 +352,10 @@ up.proxy = (($) ->
   is starting to load.
 
   @event up:proxy:load
-  @protected
   @param event.url
   @param event.method
   @param event.selector
+  @experimental
   ###
 
   ###*
@@ -326,10 +363,10 @@ up.proxy = (($) ->
   has been received.
 
   @event up:proxy:received
-  @protected
   @param event.url
   @param event.method
   @param event.selector
+  @experimental
   ###
 
   isIdempotent = (request) ->
@@ -350,12 +387,12 @@ up.proxy = (($) ->
     preloadDelayTimer = setTimeout(block, delay)
 
   ###*
-  @protected
   @function up.proxy.preload
   @param {String|Element|jQuery}
     The element whose destination should be preloaded.
   @return
     A promise that will be resolved when the request was loaded and cached
+  @stable
   ###
   preload = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
@@ -382,6 +419,7 @@ up.proxy = (($) ->
     The number of milliseconds to wait between hovering
     and preloading. Increasing this will lower the load in your server,
     but will also make the interaction feel less instant.
+  @stable
   ###
   up.on 'mouseover mousedown touchstart', '[up-preload]', (event, $element) ->
     # Don't do anything if we are hovering over the child

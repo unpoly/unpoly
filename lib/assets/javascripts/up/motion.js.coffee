@@ -122,6 +122,7 @@ up.motion = (($) ->
     for a list of pre-defined timing functions.
   @return {Promise}
     A promise for the animation's end.
+  @stable
   ###
   animate = (elementOrSelector, animation, options) ->
     $element = $(elementOrSelector)
@@ -143,8 +144,8 @@ up.motion = (($) ->
   If `$element` is given, also inspects the element for animation-related
   attributes like `up-easing` or `up-duration`.
 
-  @protected
   @function up.motion.animateOptions
+  @internal
   ###
   animateOptions = (allOptions, $element = null) ->
     allOptions = u.options(allOptions)
@@ -227,6 +228,7 @@ up.motion = (($) ->
   
   @function up.motion.finish
   @param {Element|jQuery|String} elementOrSelector
+  @stable
   ###
   finish = (elementOrSelector) ->
     $(elementOrSelector).each ->
@@ -306,6 +308,7 @@ up.motion = (($) ->
     Whether to reveal the new element by scrolling its parent viewport.
   @return {Promise}
     A promise for the transition's end.
+  @stable
   ###  
   morph = (source, target, transitionOrName, options) ->
 
@@ -347,7 +350,7 @@ up.motion = (($) ->
   We use this to skip morphing for old browsers, or when the developer
   decides to only animate the new element (i.e. no real ghosting or transition)   .
 
-  @private
+  @internal
   ###
   skipMorph = ($old, $new, options) ->
     # Simply hide the old element, which would be the side effect of withGhosts(...) below.
@@ -357,7 +360,7 @@ up.motion = (($) ->
     up.layout.revealOrRestoreScroll($new, options)
 
   ###*
-  @private
+  @internal
   ###
   prependCopy = ($element, $viewport) ->
     elementDims = u.measure($element, relative: true, inner: true)
@@ -437,6 +440,7 @@ up.motion = (($) ->
   @function up.transition
   @param {String} name
   @param {Function} transition
+  @stable
   ###
   transition = (name, transition) ->
     transitions[name] = transition
@@ -470,6 +474,7 @@ up.motion = (($) ->
   @function up.animation
   @param {String} name
   @param {Function} animation
+  @stable
   ###
   animation = (name, animation) ->
     animations[name] = animation
@@ -488,6 +493,7 @@ up.motion = (($) ->
   @function up.motion.when
   @param promises...
   @return A new promise.
+  @experimental
   ###
   resolvableWhen = u.resolvableWhen
 
@@ -498,6 +504,7 @@ up.motion = (($) ->
   @function up.motion.none
   @return {Promise}
     A resolved promise
+  @stable
   ###
   none = u.resolvedDeferred
 

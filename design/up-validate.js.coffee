@@ -108,7 +108,7 @@ Das wäre vielleicht auch eine Lösung für das Selects-Visibility-For Problem:
 Implementierung
 ---------------
 
-    createSelectorFromElement = ($element) ->
+    selectorForElement = ($element) ->
       id = $element.attr("id")
       upId = $element.attr("up-id")
       name = $element.attr("name")
@@ -140,7 +140,7 @@ Implementierung
       $validateFlag = $('<input type="hidden" name="up-validate" value="1" >')
       $validateFlag.appendTo($form)
 
-      groupSelector = u.createSelectorFromElement($group)
+      groupSelector = u.selectorForElement($group)
       groupSelector = enhanceSelector(groupSelector)
       
       up.submit($form, target: groupSelector, failTarget: groupSelector)
@@ -207,7 +207,7 @@ Implementierung
       $form = $formGroup.closest('form')
       $validateFlag = $('<input type="hidden" name="up-validate" value="1" >')
       $validateFlag.appendTo($form)
-      groupSelector = u.createSelectorFromElement($group)
+      groupSelector = u.selectorForElement($group)
       up.submit($form, target: groupSelector, failTarget: groupSelector, origin: )
 
     up.on 'change', '[up-validate!="input"]', (event) -> validate(event.target)
@@ -248,7 +248,7 @@ Implementierung
       $form = $formGroup.closest('form')
       $validateFlag = $('<input type="hidden" name="up-validate" value="1" >')
       $validateFlag.appendTo($form)
-      groupSelector = u.createSelectorFromElement($formGroup)
+      groupSelector = u.selectorForElement($formGroup)
       up.submit($form, target: groupSelector, failTarget: groupSelector)
 
     up.on 'change', '[up-validate!="input"]', (event) -> validate(this)

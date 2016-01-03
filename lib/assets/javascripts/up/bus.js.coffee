@@ -121,6 +121,7 @@ up.bus = (($) ->
     and passed as a second argument.
   @return {Function}
     A function that unbinds the event listeners when called.
+  @stable
   ###
   live = (args...) ->
     # Silently discard any event handlers that are registered on unsupported
@@ -165,7 +166,7 @@ up.bus = (($) ->
     or `stopPropagation()`.
   @param {jQuery} [eventProps.$element=$(document)]
     The element on which the event is trigered.
-  @protected
+  @experimental
   ###
   emit = (eventName, eventProps = {}) ->
     event = $.Event(eventName, eventProps)
@@ -181,7 +182,7 @@ up.bus = (($) ->
   @function up.bus.nobodyPrevents
   @param {String} eventName
   @param {Object} eventProps
-  @protected
+  @experimental
   ###
   nobodyPrevents = (args...) ->
     event = emit(args...)
@@ -196,7 +197,7 @@ up.bus = (($) ->
     The listener function to register.
   @return {Function}
     A function that unbinds the event listeners when called.
-  @protected
+  @experimental
   ###
   onEscape = (listener) ->
     live('keydown', 'body', (event) ->
@@ -208,7 +209,7 @@ up.bus = (($) ->
   Makes a snapshot of the currently registered event listeners,
   to later be restored through [`up.bus.reset`](/up.bus.reset).
 
-  @private
+  @internal
   ###
   snapshot = ->
     defaultLiveDescriptions = u.copy(liveDescriptions)
@@ -217,7 +218,7 @@ up.bus = (($) ->
   Resets the list of registered event listeners to the
   moment when the framework was booted.
 
-  @private
+  @internal
   ###
   restoreSnapshot = ->
     for description in liveDescriptions
@@ -233,8 +234,8 @@ up.bus = (($) ->
   This is an internal method for to enable unit testing.
   Don't use this in production.
 
-  @protected
   @function up.reset
+  @experimental
   ###
   emitReset = ->
     up.emit('up:framework:reset')
@@ -242,8 +243,8 @@ up.bus = (($) ->
   ###*
   This event is [emitted](/up.emit) when Up.js is [reset](/up.reset) during unit tests.
 
-  @protected
   @event up:framework:reset
+  @experimental
   ###
 
   ###*
@@ -254,8 +255,8 @@ up.bus = (($) ->
 
   Emits the [`up:framework:boot`](/up:framework:boot) event.
 
-  @protected
   @function up.boot
+  @experimental
   ###
   boot = ->
     if up.browser.isSupported()
@@ -265,7 +266,7 @@ up.bus = (($) ->
   This event is [emitted](/up.emit) when Up.js [boots](/up.boot).
 
   @event up:framework:boot
-  @protected
+  @experimental
   ###
 
   live 'up:framework:boot', snapshot

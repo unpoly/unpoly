@@ -192,6 +192,7 @@ up.syntax = (($) ->
     clear global state such as time-outs and event handlers bound to the document.
     The destructor is *not* expected to remove the element from the DOM, which
     is already handled by [`up.destroy`](/up.destroy).
+  @stable
   ###
   compilers = []
   defaultCompilers = null
@@ -235,16 +236,13 @@ up.syntax = (($) ->
 
   Returns an empty object if the element has no `up-data` attribute.
 
-  The API of this method is likely to change in the future, so
-  we can support getting or setting individual keys.
-
-  @protected
   @function up.syntax.data
   @param {String|Element|jQuery} elementOrSelector
   @return
     The JSON-decoded value of the `up-data` attribute.
 
     Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
+  @experimental
   ###
 
   ###
@@ -259,6 +257,7 @@ up.syntax = (($) ->
   @selector [up-data]
   @param {JSON} up-data
     A serialized JSON string
+  @stable
   ###
   data = (elementOrSelector) ->
     $element = $(elementOrSelector)
@@ -272,7 +271,7 @@ up.syntax = (($) ->
   Makes a snapshot of the currently registered event listeners,
   to later be restored through `reset`.
   
-  @private
+  @internal
   ###
   snapshot = ->
     defaultCompilers = u.copy(compilers)
@@ -281,7 +280,7 @@ up.syntax = (($) ->
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
   
-  @private
+  @internal
   ###
   reset = ->
     compilers = u.copy(defaultCompilers)
@@ -305,6 +304,7 @@ up.syntax = (($) ->
 
   @function up.hello
   @param {String|Element|jQuery} selectorOrElement
+  @stable
   ###
   hello = (selectorOrElement) ->
     $element = $(selectorOrElement)
@@ -324,6 +324,7 @@ up.syntax = (($) ->
   @event up:fragment:inserted
   @param {jQuery} event.$element
     The fragment that has been inserted or updated.
+  @stable
   ###
 
   up.on 'ready', (-> hello(document.body))

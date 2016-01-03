@@ -25,19 +25,19 @@ up.flow = (($) ->
 
   ###*
   @function up.flow.resolveSelector
-  @private
+  @internal
   ###
   resolveSelector = (selectorOrElement, options) ->
     if u.isString(selectorOrElement)
       selector = selectorOrElement
       if u.contains(selector, '&')
         if origin = u.presence(options.origin)
-          originSelector = u.createSelectorFromElement(origin)
+          originSelector = u.selectorForElement(origin)
           selector = selector.replace(/\&/, originSelector)
         else
           u.error("Found origin reference %o in selector %o, but options.origin is missing", '&', selector)
     else
-      selector = u.createSelectorFromElement(selectorOrElement)
+      selector = u.selectorForElement(selectorOrElement)
     selector
 
   ###*
@@ -145,6 +145,7 @@ up.flow = (($) ->
     with the request.
   @return {Promise}
     A promise that will be resolved when the page has been updated.
+  @stable
   ###
   replace = (selectorOrElement, url, options) ->
 
@@ -218,12 +219,12 @@ up.flow = (($) ->
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
-  @function up.flow.implant
-  @protected
+  @function up.implant
   @param {String|Element|jQuery} selectorOrElement
   @param {String} html
   @param {Object} [options]
     See options for [`up.replace`](/up.replace).
+  @experimental
   ###
   implant = (selectorOrElement, html, options) ->
     selector = resolveSelector(selectorOrElement, options)
@@ -370,12 +371,12 @@ up.flow = (($) ->
 
   Returns `undefined` if no element matches these conditions.
 
-  @protected
   @function up.first
-  @param {String|Element|jQuery} selectorOrElement
+  @param {String|Element|jQuery|Array<Element>} selectorOrElement
   @return {jQuery}
     The first element that is neither a ghost or being destroyed,
     or `undefined` if no such element was given.
+  @experimental
   ###
   first = (selectorOrElement) ->
     elements = undefined
@@ -416,6 +417,7 @@ up.flow = (($) ->
     The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
   @return {Deferred}
     A promise that will be resolved once the element has been removed from the DOM.
+  @stable
   ###
   destroy = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
@@ -453,6 +455,7 @@ up.flow = (($) ->
     The page fragment that is about to be destroyed.
   @param event.preventDefault()
     Event listeners may call this method to prevent the fragment from being destroyed.
+  @stable
   ###
 
   ###*
@@ -465,6 +468,7 @@ up.flow = (($) ->
   @event up:fragment:destroyed
   @param {jQuery} event.$element
     The page fragment that is about to be removed from the DOM.
+  @stable
   ###
 
   ###*
@@ -486,6 +490,7 @@ up.flow = (($) ->
   @param {String} [options.url]
     The URL from which to reload the fragment.
     This defaults to the URL from which the fragment was originally loaded.
+  @stable
   ###
   reload = (selectorOrElement, options) ->
     options = u.options(options, cache: false)
@@ -506,6 +511,7 @@ up.flow = (($) ->
 )(jQuery)
 
 up.replace = up.flow.replace
+up.implant = up.flow.implant
 up.reload = up.flow.reload
 up.destroy = up.flow.destroy
 up.first = up.flow.first

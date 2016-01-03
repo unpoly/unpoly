@@ -92,6 +92,9 @@ up.tooltip = (($) ->
     The position of the tooltip. Known values are `top` and `bottom`.
   @param {String} [options.animation]
     The animation to use when opening the tooltip.
+  @return {Promise}
+    A promise that will be resolved when the tooltip's opening animation has finished.
+  @stable
   ###
   attach = (linkOrSelector, options = {}) ->
     $link = $(linkOrSelector)
@@ -112,6 +115,7 @@ up.tooltip = (($) ->
   @function up.tooltip.close
   @param {Object} options
     See options for [`up.animate`](/up.animate).
+  @stable
   ###
   close = (options) ->
     $tooltip = $('.up-tooltip')
@@ -138,6 +142,7 @@ up.tooltip = (($) ->
     The default position of tooltips relative to the element.
     Can be either `"top"` or `"bottom"`.
     Defaults to [`up.tooltip.config.position`](/up.tooltip.config).
+  @stable
   ###
 
   ###*
@@ -146,6 +151,7 @@ up.tooltip = (($) ->
       <a href="/decks" up-tooltip="Show &lt;b&gt;all&lt;/b&gt; decks">Decks</a>
 
   @selector [up-tooltip-html]
+  @stable
   ###
   up.compiler('[up-tooltip], [up-tooltip-html]', ($link) ->
     # Don't register these events on document since *every*
