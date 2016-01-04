@@ -1150,13 +1150,23 @@ up.util = (($) ->
     resolvedDeferred().promise()
 
   ###*
+  Returns a [Deferred object](https://api.jquery.com/category/deferred-object/) that will never be resolved.
+
+  @function up.util.unresolvableDeferred
+  @return {Deferred}
+  @experimental
+  ###
+  unresolvableDeferred = ->
+    $.Deferred()
+
+  ###*
   Returns a promise that will never be resolved.
 
   @function up.util.unresolvablePromise
   @experimental
   ###
   unresolvablePromise = ->
-    $.Deferred().promise()
+    unresolvableDeferred().promise()
 
   ###*
   Returns an empty jQuery collection.
@@ -1518,6 +1528,7 @@ up.util = (($) ->
   clientSize: clientSize
   only: only
   trim: trim
+  unresolvableDeferred: unresolvableDeferred
   unresolvablePromise: unresolvablePromise
   resolvedPromise: resolvedPromise
   resolvedDeferred: resolvedDeferred

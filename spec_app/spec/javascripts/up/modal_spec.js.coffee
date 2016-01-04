@@ -100,13 +100,39 @@ describe 'up.modal', ->
         expect(followSpy).toHaveBeenCalledWith($link)
 
     describe '[up-close]', ->
+
+      describe 'when clicked inside a modal', ->
       
-      it 'closes the modal when clicked', ->
-        closeSpy = up.modal.knife.mock('close')
-        $link = affix('a[up-close]')
-        up.hello($link)
-        $link.click()
-        expect(closeSpy).toHaveBeenCalled()
+        it 'closes the open modal and prevents the default action', ->
+          $modal = affix('.up-modal')
+          $link = $modal.affix('a[up-close]') # link is within the modal
+          up.hello($link)
+          wasDefaultPrevented = false
+          wasClosed = false
+          up.on 'click', 'a[up-close]', (event) ->
+            wasDefaultPrevented = event.isDefaultPrevented()
+            true # the line above might return false and cancel propagation / prevent default
+          up.on 'up:modal:close', ->
+            wasClosed = true
+          $link.click()
+          expect(wasClosed).toBe(true)
+          expect(wasDefaultPrevented).toBe(true)
+
+      describe 'when no modal is open', ->
+
+        it 'does neither close the modal nor prevent the default action', ->
+          $link = affix('a[up-close]') # link is outside the modal
+          up.hello($link)
+          wasDefaultPrevented = false
+          wasClosed = false
+          up.on 'click', 'a[up-close]', (event) ->
+            wasDefaultPrevented = event.isDefaultPrevented()
+            true # the line above might return false and cancel propagation / prevent default
+          up.on 'up:modal:close', ->
+            wasClosed = true
+          $link.click()
+          expect(wasClosed).toBe(false)
+          expect(wasDefaultPrevented).toBe(false)
 
     describe 'when following links inside a modal', ->
 

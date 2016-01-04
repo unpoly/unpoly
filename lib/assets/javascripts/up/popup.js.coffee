@@ -211,26 +211,58 @@ up.popup = (($) ->
     
   ###*
   Closes a currently opened popup overlay.
+
   Does nothing if no popup is currently open.
-  
+
+  Emits events [`up:popup:close`](/up:popup:close) and [`up:popup:closed`](/up:popup:closed).
+
   @function up.popup.close
   @param {Object} options
     See options for [`up.animate`](/up.animate).
+  @return {Deferred}
+    A promise that will be resolved once the modal's close
+    animation has finished.
   @stable
   ###
   close = (options) ->
     $popup = $('.up-popup')
     if $popup.length
-      options = u.options(options,
-        animation: config.closeAnimation,
-        url: $popup.attr('up-covered-url'),
-        title: $popup.attr('up-covered-title')
-      )
-      currentUrl = undefined
-      up.destroy($popup, options)
+      if up.bus.nobodyPrevents('up:popup:close', $element: $popup)
+        options = u.options(options,
+          animation: config.closeAnimation,
+          url: $popup.attr('up-covered-url'),
+          title: $popup.attr('up-covered-title')
+        )
+        currentUrl = undefined
+        deferred = up.destroy($popup, options)
+        deferred.then -> up.emit('up:popup:closed')
+        deferred
+      else
+        # Although someone prevented the destruction,
+        # keep a uniform API for callers by returning
+        # a Deferred that will never be resolved.
+        u.unresolvableDeferred()
     else
-      u.resolvedPromise()
-    
+      u.resolvedDeferred()
+
+  ###*
+  This event is [emitted](/up.emit) when a popup dialog
+  is starting to [close](/up.popup.close).
+
+  @event up:popup:close
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the popup from closing.
+  @stable
+  ###
+
+  ###*
+  This event is [emitted](/up.emit) when a popup dialog
+  is done [closing](/up.popup.close).
+
+  @event up:popup:closed
+  @stable
+  ###
+      
   autoclose = ->
     unless $('.up-popup').is('[up-sticky]')
       discardHistory()

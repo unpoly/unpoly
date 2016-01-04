@@ -340,6 +340,9 @@ up.modal = (($) ->
   @function up.modal.close
   @param {Object} options
     See options for [`up.animate`](/up.animate)
+  @return {Deferred}
+    A promise that will be resolved once the modal's close
+    animation has finished.
   @stable
   ###
   close = (options) ->
@@ -358,9 +361,10 @@ up.modal = (($) ->
           up.emit('up:modal:closed')
         deferred
       else
-        # Although someone prevented the destruction, keep a uniform API for
-        # callers by returning a Deferred that will never be resolved.
-        $.Deferred()
+        # Although someone prevented the destruction,
+        # keep a uniform API for callers by returning
+        # a Deferred that will never be resolved.
+        u.unresolvableDeferred()
     else
       u.resolvedDeferred()
 

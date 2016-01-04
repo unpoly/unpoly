@@ -76,19 +76,21 @@ describe 'up.bus', ->
 
         expect(emittedEvent.customField).toEqual('custom-value')
 
-      it 'triggers an event on an element given as .$element event property', ->
-        emittedEvent = undefined
-        emitted$Target = undefined
+      describe 'with .$element option', ->
 
-        $element = affix('.element').text('foo')
+        it 'triggers an event on the given element', ->
+          emittedEvent = undefined
+          $emittedTarget = undefined
 
-        up.on 'foo', (event, $target) ->
-          emittedEvent = event
-          emitted$Target = $target
+          $element = affix('.element').text('foo')
 
-        up.emit('foo', $element: $element)
+          up.on 'foo', (event, $target) ->
+            emittedEvent = event
+            $emittedTarget = $target
 
-        expect(emittedEvent).toBeDefined()
-        expect(emitted$Target).toEqual($element)
+          up.emit('foo', $element: $element)
 
-        expect(emittedEvent.$element).toEqual($element)
+          expect(emittedEvent).toBeDefined()
+          expect($emittedTarget).toEqual($element)
+
+          expect(emittedEvent.$element).toEqual($element)
