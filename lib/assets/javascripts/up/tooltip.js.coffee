@@ -44,6 +44,7 @@ up.tooltip = (($) ->
     The animation used to open a tooltip.
   @param {String} [config.closeAnimation='fade-out']
     The animation used to close a tooltip.
+  @stable
   ###
   config = u.config
     position: 'top'

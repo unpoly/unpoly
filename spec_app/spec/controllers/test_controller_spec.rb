@@ -52,6 +52,15 @@ describe TestController do
 
     end
 
+    describe '#title=' do
+
+      it 'sets an X-Up-Title header to push a document title to the client' do
+        get :set_up_title
+        expect(response.headers['X-Up-Title']).to eq('Pushed document title')
+      end
+
+    end
+
   end
 
 

@@ -83,6 +83,7 @@ up.popup = (($) ->
     Defines where the popup is attached to the opening element.
 
     Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+  @stable
   ###
   config = u.config
     openAnimation: 'fade-in'

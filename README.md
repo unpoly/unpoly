@@ -1,39 +1,58 @@
-# Up.js: Snappy UI for server-side web applications
+Up.js + Rails bindings
+======================
 
-Up.js gives your traditional web application fast-responding views with minimal changes to your code and development style. If you require modern UX but don't want to pay the Javascript MVC complexity tax, Up.js can be a solution for you.
+Up.js gives your traditional web application fast-responding views with minimal changes to your code and development style. If you require modern UX but don't want to pay the Javascript complexity tax, Up.js can be a solution for you.
 
-See [upjs.io](http://upjs.io) for more information and API documentation.
-
-See [`CHANGELOG.md`](https://github.com/makandra/upjs/blob/master/CHANGELOG.md) for notable changes.
+This repository is home both to the Up.js javascript code and its (optional) bindings for Ruby on Rails (`upjs-rails` gem).
 
 
-## Running tests
+Getting started
+---------------
+
+- See [upjs.io](http://upjs.io) for more information and Javascript API documentation.
+- See [`CHANGELOG.md`](https://github.com/makandra/upjs/blob/master/CHANGELOG.md) for notable changes.
+- See [`README_RAILS.md`](https://github.com/makandra/upjs/blob/master/README_RAILS.md) documentation of the Rails bindings.
+
+
+Running tests
+-------------
 
 Overview:
 
 - This currently requires Ruby
 - There's a Rails app in `spec_app`
-- Jasmine tests live in `spec_app/spec/javascripts`
-- There are also some Cucumber integration tests left in `spec_app/features`, but this is legacy code.
-  Testing with Jasmine works so well that we want the entire test suite to become pure-JS Jasmine specs.
- 
-To run Jasmine tests:
- 
+- Jasmine tests for Up.js live in `spec_app/spec/javascripts`
+- RSpec tests for the `upjs-rails` gem live in `spec_app/spec/controllers`
+
+Install dependencies for tests:
+
 - Install Ruby 2.1.2
+- Install Bundler by running `gem install bundler`
 - `cd` into `spec_app`
 - Install dependencies by running `bundle install`
-- Migrate
-- Start the Rails server
-- Access `http://localhost:3000/specs`
+
+To run Jasmine tests for Up.js:
+
+- `cd` into `spec_app`
+- Start the Rails server by running `rails server`
+- Access `http://localhost:3000/specs` to see the Jasmine test runner
+
+To run RSpec tests for the `upjs-rails` gem:
+
+- `cd` into `spec_app`
+- Run `rspec`
 
 
-## Making a new release
+Making a new release
+--------------------
 
 We are currently feeding three release channels:
 
 - Manual download from Github
-- Bower
+- Bower (this also fetches from Github)
 - Rubygems (as the `upjs-rails` gem)
+
+We always release to all channel simultaneously.
 
 To make a new release:
 
@@ -41,7 +60,7 @@ To make a new release:
 - Add an entry to `CHANGELOG.md`
 - Commit and push the version bump and `CHANGELOG.md`
 - From the project root, type `rake assets:compile`. This will output minified JS and CSS files to the `dist` folder.
-- Commit and push the generated files
+- Commit and push the generated files in `dist`
 - From the project root, type `rake release`. This will publish a new gem version to Rubygems.org.
   It will also push a tag for this version, which Bower requires for its own versioning scheme.
 

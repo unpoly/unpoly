@@ -106,6 +106,9 @@ up.flow = (($) ->
   that is being updated. The request's `X-Up-Selector` header will contain
   the CSS selector for the updating fragment.
 
+  If you are using the `upjs-rails` gem you can also access the selector via
+  `up.selector` in all controllers, views and helpers.
+
   \#\#\#\# Events
 
   Up.js will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element

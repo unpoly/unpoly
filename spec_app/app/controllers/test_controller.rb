@@ -16,6 +16,11 @@ class TestController < ActionController::Base
     render :text => up.validate_name
   end
 
+  def set_up_title
+    up.title = 'Pushed document title'
+    render :text => 'text'
+  end
+
   def text
     render :text => 'text from controller'
   end

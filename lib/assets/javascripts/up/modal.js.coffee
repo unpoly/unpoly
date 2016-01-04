@@ -93,6 +93,7 @@ up.modal = (($) ->
   @param {String} [config.closeAnimation='fade-out']
     The animation used to close the modal. The animation will be applied
     to both the dialog box and the overlay dimming the page.
+  @stable
   ###
   config = u.config
     maxWidth: null

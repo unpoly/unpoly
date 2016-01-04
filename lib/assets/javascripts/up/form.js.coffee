@@ -24,6 +24,7 @@ up.form = (($) ->
     By default this looks for a `<fieldset>`, `<label>` or `<form>`
     around the validating input field, or any element with an
     `up-fieldset` attribute.
+  @stable
   ###
   config = u.config
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
@@ -363,13 +364,13 @@ up.form = (($) ->
 
   The programmatic variant of this is the [`up.submit`](/up.submit) function.
 
-  \#\#\#\# Validation errors
+  \#\#\#\# Failed submission
 
   When the server was unable to save the form due to invalid data,
   it will usually re-render an updated copy of the form with
   validation messages.
 
-  For Up.js to be able to pick up a validation failure,
+  For Up.js to be able to detect a failed form submission,,
   the form must be re-rendered with a non-200 HTTP status code.
   We recommend to use either 400 (bad request) or
   422 (unprocessable entity).

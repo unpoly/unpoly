@@ -24,6 +24,7 @@ up.history = (($) ->
   @param {Boolean} [config.restoreScroll=true]
     Whether to restore the known scroll positions
     when the user goes back or forward in history.
+  @stable
   ###
   config = u.config
     popTargets: ['body']

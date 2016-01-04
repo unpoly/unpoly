@@ -38,6 +38,7 @@ up.layout = (($) ->
     to the top when the revealed element is closer to the top than `config.snap`.
   @param {Number} [config.substance]
     A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
+  @stable
   ###
   config = u.config
     duration: 0

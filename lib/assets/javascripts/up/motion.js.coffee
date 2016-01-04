@@ -45,6 +45,7 @@ up.motion = (($) ->
   @param {Number} [config.duration=300]
   @param {Number} [config.delay=0]
   @param {String} [config.easing='ease']
+  @stable
   ###
   config = u.config
     duration: 300

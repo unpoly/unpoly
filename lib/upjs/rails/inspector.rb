@@ -40,12 +40,21 @@ module Upjs
         validate_name.present?
       end
 
-      ###
+      ##
       # If the current form submission is a [validation](http://upjs.io/up-validate),
       # this returns the name attribute of the form field that has triggered
       # the validation.
       def validate_name
         request.headers['X-Up-Validate']
+      end
+
+      ##
+      # Forces Up.js to use the given string as the document title when processing
+      # this response.
+      #
+      # This is useful when you skip rendering the `<head>` in an Up.js request.
+      def title=(new_title)
+        response.headers['X-Up-Title'] = new_title
       end
 
       private
@@ -56,6 +65,10 @@ module Upjs
 
       def params
         @controller.params
+      end
+
+      def response
+        @controller.response
       end
 
     end

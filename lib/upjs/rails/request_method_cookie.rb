@@ -15,7 +15,7 @@ module Upjs
 
       COOKIE_NAME = '_up_request_method'
 
-      def self.included(base) # :nodoc:
+      def self.included(base)
         base.before_filter :set_up_request_method_cookie
       end
 

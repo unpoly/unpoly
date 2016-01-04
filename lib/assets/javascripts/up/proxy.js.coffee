@@ -77,6 +77,7 @@ up.proxy = (($) ->
   @param {Number} [config.busyDelay=300]
     How long the proxy waits until emitting the [`up:proxy:busy` event](/up:proxy:busy).
     Use this to prevent flickering of spinners.
+  @stable
   ###
   config = u.config
     busyDelay: 300

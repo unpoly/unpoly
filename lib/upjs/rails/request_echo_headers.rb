@@ -1,7 +1,7 @@
 module Upjs
   module Rails
     ##
-    # Installs a before_filter into all controllers which echoes the
+    # Installs a `before_filter` into all controllers which echoes the
     # request's URL as a response header `X-Up-Location` and the request's
     # HTTP method as `X-Up-Method`.
     #

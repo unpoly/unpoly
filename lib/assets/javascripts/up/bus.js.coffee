@@ -254,9 +254,11 @@ up.bus = (($) ->
 
   ###*
   Boots the Up.js framework.
+
   This is done automatically by including the Up.js Javascript.
 
-  Does nothing if the current browser is [not supported](/up.browser.isSupported).
+  Up.js will not boot if the current browser is [not supported](/up.browser.isSupported).
+  This leaves you with a classic server-side application on legacy browsers.
 
   Emits the [`up:framework:boot`](/up:framework:boot) event.
 

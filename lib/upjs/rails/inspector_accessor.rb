@@ -6,7 +6,7 @@ module Upjs
     # for Up.js-related concerns such as "is this a page fragment update?".
     module InspectorAccessor
 
-      def self.included(base) # :nodoc:
+      def self.included(base)
         base.helper_method :up, :up?
       end
 
