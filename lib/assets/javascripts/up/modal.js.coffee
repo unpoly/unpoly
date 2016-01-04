@@ -331,6 +331,7 @@ up.modal = (($) ->
 
   ###*
   Closes a currently opened modal overlay.
+
   Does nothing if no modal is currently open.
 
   Emits events [`up:modal:close`](/up:modal:close) and [`up:modal:closed`](/up:modal:closed).

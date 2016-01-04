@@ -100,7 +100,7 @@ up.link = (($) ->
     The URL to visit.
   @param {String} [options.target='body']
     The selector to replace.
-  @param {Object} options
+  @param {Object} [options]
     See options for [`up.replace`](/up.replace)
   @stable
   ###
@@ -121,6 +121,8 @@ up.link = (($) ->
 
       var $link = $('a:first'); // select link with jQuery
       up.follow($link);
+
+  The UJS variant of this are the [`a[up-target]`](/a-up-target) and [`a[up-follow]`](/a-up-follow) selectors.
 
   @function up.follow
   @param {Element|jQuery|String} linkOrSelector
@@ -316,11 +318,12 @@ up.link = (($) ->
   If applied on a link, Follows this link via AJAX and replaces the
   current `<body>` element with the response's `<body>` element.
 
-  Example:
+  To only update a fragment instead of the entire page, see
+  [`a[up-target]`](/a-up-target).
+
+  \#\#\#\# Example
 
       <a href="/users" up-follow>User list</a>
-
-  To only update a fragment instead of the entire page, see [`up-target`](/up-target).
 
   \#\#\#\# Turn any element into a link
 
@@ -353,7 +356,12 @@ up.link = (($) ->
 
   ###*
   Add an `up-expand` class to any element that contains a link
-  in order to enlarge the link's click area:
+  in order to enlarge the link's click area.
+
+  `up-expand` honors all the UJS behavior in expanded links
+  ([`up-target`](/up-target), [`up-instant`](/up-instant), [`up-preload`](/up-preload), etc.).
+
+  \#\#\#\# Example
 
       <div class="notification" up-expand>
         Record was saved!
@@ -362,9 +370,6 @@ up.link = (($) ->
 
   In the example above, clicking anywhere within `.notification` element
   would [follow](/up.follow) the *Close* link.
-
-  `up-expand` honors all the UJS behavior in expanded links
-  (`up-target`, `up-instant`, `up-preload`, etc.).
 
   @selector [up-expand]
   @stable

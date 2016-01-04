@@ -360,13 +360,11 @@ up.flow = (($) ->
     $element.closest(unreal).length == 0
 
   ###*
-  Returns the first element matching the given selector.
-
-  Excludes elements that also match `.up-ghost` or `.up-destroying`
-  or that are children of elements with these selectors.
+  Returns the first element matching the given selector, but
+  ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
 
   If the given argument is already a jQuery collection (or an array
-  of DOM elements), the first element  matching these conditions
+  of DOM elements), the first element matching these conditions
   is returned.
 
   Returns `undefined` if no element matches these conditions.

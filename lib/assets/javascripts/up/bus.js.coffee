@@ -145,7 +145,12 @@ up.bus = (($) ->
 
 
   ###*
-  Emits an event with the given name and properties.
+  Emits a event with the given name and properties.
+
+  The event will be triggered as a jQuery event on `document`.
+
+  Other code can subscribe to events with that name using
+  [`up.on`](/up.on) or by [binding a jQuery event listener](http://api.jquery.com/on/) to `document`.
 
   \#\#\#\# Example
 

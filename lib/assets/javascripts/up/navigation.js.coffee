@@ -120,8 +120,8 @@ up.navigation = (($) ->
 
       <a href="/foo" up-follow up-active>Foo</a>
 
-  Once the fragment is loaded the browser's location bar is updated
-  to `http://yourhost/foo` via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries):
+  Once the link destination has loaded and rendered, the `up-active` class
+  is removed and the [`up-current`](/up-current) class is added:
 
       <a href="/foo" up-follow up-current>Foo</a>
 

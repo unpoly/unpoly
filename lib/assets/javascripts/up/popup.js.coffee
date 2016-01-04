@@ -292,8 +292,15 @@ up.popup = (($) ->
 
   ###*
   When an element with this attribute is clicked,
-  a currently open popup is closed. 
-  
+  a currently open popup is closed.
+
+  Does nothing if no popup is currently open.
+
+  To make a link that closes the current popup, but follows to
+  a fallback destination if no popup is open:
+
+      <a href="/fallback" up-close>Okay</a>
+
   @selector [up-close]
   @stable
   ###

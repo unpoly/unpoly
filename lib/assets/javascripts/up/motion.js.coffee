@@ -57,7 +57,9 @@ up.motion = (($) ->
     config.reset()
 
   ###*
-  Applies the given animation to the given element:
+  Applies the given animation to the given element.
+
+  \#\#\#\# Example
 
       up.animate('.warning', 'fade-in');
 
@@ -109,6 +111,7 @@ up.motion = (($) ->
     The element to animate.
   @param {String|Function|Object} animation
     Can either be:
+
     - The animation's name
     - A function performing the animation
     - An object of CSS attributes describing the last frame of the animation
@@ -220,9 +223,10 @@ up.motion = (($) ->
     promise
       
   ###*
-  Completes all animations and transitions for the given element
-  by jumping to the last animation frame instantly. All callbacks chained to
-  the original animation's promise will be called.
+  Completes all [animations](/up.animate) and [transitions](/up.morph)
+  for the given element by jumping to the last animation frame instantly.
+
+  All callbacks chained to the original animation's promise will be called.
 
   Does nothing if the given element is not currently animating.
   

@@ -191,7 +191,9 @@ up.layout = (($) ->
   Many applications have a navigation bar fixed to the top or bottom,
   obstructing the view on an element.
 
-  To make `up.aware` of these fixed elements you can either:
+  You can make `up.reveal` aware of these fixed elements
+  so it can scroll the viewport far enough so the revealed element is fully visible.
+  To make `up.reveal` aware fixed elements you can either:
 
   - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
   - [configure default options](/up.layout.config) for `fixedTop` or `fixedBottom`
@@ -480,7 +482,7 @@ up.layout = (($) ->
   [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
   the viewport far enough so the revealed element is fully visible.
 
-  Example:
+  \#\#\#\# Example
 
       <div class="top-nav" up-fixed="top">...</div>
 
@@ -495,7 +497,7 @@ up.layout = (($) ->
   [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
   the viewport far enough so the revealed element is fully visible.
 
-  Example:
+  \#\#\#\# Example
 
       <div class="bottom-nav" up-fixed="bottom">...</div>
 
