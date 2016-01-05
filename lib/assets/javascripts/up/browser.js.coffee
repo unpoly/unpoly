@@ -74,7 +74,7 @@ up.browser = (($) ->
   fall back to a full page load.
 
   @function up.browser.canPushState
-  @return boolean
+  @return {Boolean}
   @experimental
   ###
   canPushState = u.memoize ->
@@ -105,7 +105,7 @@ up.browser = (($) ->
   animation by instantly jumping to the last frame.
 
   @function up.browser.canCssTransition
-  @return boolean
+  @return {Boolean}
   @experimental
   ###
   canCssTransition = u.memoize ->
@@ -115,7 +115,7 @@ up.browser = (($) ->
   Returns whether this browser supports the DOM event [`input`](https://developer.mozilla.org/de/docs/Web/Events/input).
 
   @function up.browser.canInputEvent
-  @return boolean
+  @return {Boolean}
   @experimental
   ###
   canInputEvent = u.memoize ->

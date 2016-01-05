@@ -1,8 +1,8 @@
 ###*
 Fast interaction feedback
 =========================
-  
-This module marks up link elements with classes indicating that
+
+Up.js automatically marks up link elements with classes indicating that
 they are currently loading (class `up-active`) or linking
 to the current location (class `up-current`).
 

@@ -3,13 +3,12 @@ Pop-up overlays
 ===============
 
 Instead of [linking to a page fragment](/up.link), you can choose
-to show a fragment in a popup overlay.
+to show a fragment in a popup overlay that rolls down from an anchoring element.
 
 To open a popup, add an [`up-popup` attribute](/a-up-popup) to a link,
 or call the Javascript function [`up.popup.attach`](/up.popup.attach).
 
 For modal dialogs see [up.modal](/up.modal) instead.
-
 
 \#\#\#\# Customizing the popup design
 
@@ -27,7 +26,6 @@ By default the popup uses the following DOM structure:
       ...
     </div>
 
-
 \#\#\#\# Closing behavior
 
 The popup closes when the user clicks anywhere outside the popup area.
@@ -42,7 +40,6 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
     <a href="/settings" up-popup=".options" up-sticky>Settings</a>
 
-  
 @class up.popup
 ###
 up.popup = (($) ->

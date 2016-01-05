@@ -2,7 +2,7 @@
 Animation
 =========
   
-Whenever you change a page fragment (through methods like
+Whenever you update a page fragment (through methods like
 [`up.replace`](/up.replace) or UJS attributes like [`up-target`](/up-target))
 you can animate the change.
 
@@ -26,7 +26,6 @@ and [transitions](/up.morph#named-animation).
 You can also easily [define your own animations](/up.animation)
 or [transitions](/up.transition) using Javascript or CSS.
 
-  
 @class up.motion
 ###
 up.motion = (($) ->

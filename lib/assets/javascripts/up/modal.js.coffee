@@ -3,7 +3,8 @@ Modal dialogs
 =============
 
 Instead of [linking to a page fragment](/up.link), you can choose
-to show a fragment in a modal dialog.
+to show a fragment in a modal dialog. The existing page will remain
+open in the background and reappear once the modal is closed.
 
 To open a modal, add an [`up-modal` attribute](/a-up-modal) to a link,
 or call the Javascript functions [`up.modal.follow`](/up.modal.follow)

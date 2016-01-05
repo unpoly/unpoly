@@ -99,7 +99,6 @@ up.proxy = (($) ->
     key: cacheKey
     log: 'up.proxy'
 
-
   ###*
   Returns a cached response for the given request.
 
