@@ -313,7 +313,7 @@ up.modal = (($) ->
     else
       # Although someone prevented the destruction, keep a uniform API for
       # callers by returning a Deferred that will never be resolved.
-      $.Deferred()
+      u.unresolvableDeferred()
 
   ###*
   This event is [emitted](/up.emit) when a modal dialog is starting to open.

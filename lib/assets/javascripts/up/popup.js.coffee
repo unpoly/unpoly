@@ -161,10 +161,14 @@ up.popup = (($) ->
   updated = ($link, $popup, position, animation, animateOptions) ->
     $popup.show()
     setPosition($link, $popup, position)
-    up.animate($popup, animation, animateOptions)
+    deferred = up.animate($popup, animation, animateOptions)
+    deferred.then -> up.emit('up:popup:opened')
+    deferred
     
   ###*
   Attaches a popup overlay to the given element or selector.
+
+  Emits events [`up:popup:open`](/up:popup:open) and [`up:popup:opened`](/up:popup:opened).
   
   @function up.popup.attach
   @param {Element|jQuery|String} elementOrSelector
@@ -199,13 +203,35 @@ up.popup = (($) ->
     animateOptions = up.motion.animateOptions(options, $link)
 
     close()
-    $popup = createHiddenPopup($link, selector, sticky)
-    
-    up.replace(selector, url,
-      history: history
-      insert: -> updated($link, $popup, position, animation, animateOptions)
-    )
-    
+
+    if up.bus.nobodyPrevents('up:popup:open', url: url)
+      $popup = createHiddenPopup($link, selector, sticky)
+
+      up.replace(selector, url,
+        history: history
+        insert: -> updated($link, $popup, position, animation, animateOptions)
+      )
+    else
+      # Although someone prevented the destruction, keep a uniform API for
+      # callers by returning a Deferred that will never be resolved.
+      u.unresolvableDeferred()
+
+  ###*
+  This event is [emitted](/up.emit) when a popup is starting to open.
+
+  @event up:popup:open
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the popup from opening.
+  @stable
+  ###
+
+  ###*
+  This event is [emitted](/up.emit) when a popup has finished opening.
+
+  @event up:popup:opened
+  @stable
+  ###
+      
   ###*
   Closes a currently opened popup overlay.
 

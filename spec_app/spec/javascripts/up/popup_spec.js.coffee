@@ -32,7 +32,19 @@ describe 'up.popup', ->
 
     describe 'a[up-popup]', ->
 
-      it 'should have tests'
+      it "loads this link's destination in a popup when clicked", ->
+        $link = affix('a[href="/path/to"][up-popup=".middle"]').text('link')
+        $link.click()
+        expect(@lastRequest().url).toMatch /\/path\/to$/
+        @respondWith """
+          <div class="before">new-before</div>
+          <div class="middle">new-middle</div>
+          <div class="after">new-after</div>
+          """
+        expect($('.up-popup')).toExist()
+        expect($('.up-popup .middle')).toHaveText('new-middle')
+        expect($('.up-popup .before')).not.toExist()
+        expect($('.up-popup .after')).not.toExist()
 
     describe '[up-close]', ->
 
