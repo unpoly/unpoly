@@ -28,10 +28,13 @@ up.form = (($) ->
     By default this looks for a `<fieldset>`, `<label>` or `<form>`
     around the validating input field, or any element with an
     `up-fieldset` attribute.
+  @param {String} [config.fields]
+    An array of CSS selectors that represent form fields, such as `input` or `select`.
   @stable
   ###
   config = u.config
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
+    fields: [':input']
     observeDelay: 0
 
   reset = ->
@@ -182,7 +185,8 @@ up.form = (($) ->
         up.flow.implant(failureSelector, html, failureOptions)
 
   ###*
-  Observes a form field and runs a callback when its value changes.
+  Observes a field or form and runs a callback when a value changes.
+
   This is useful for observing text fields while the user is typing.
 
   The UJS variant of this is the [`up-observe`](/up-observe) attribute.
@@ -231,35 +235,37 @@ up.form = (($) ->
     A destructor function that removes the observe watch when called.
   @stable
   ###
-  observe = (fieldOrSelector, args...) ->
+  observe = (selectorOrElement, args...) ->
 
     options = {}
     callbackArg = undefined
-
     if args.length == 1
       callbackArg = args[0]
     if args.length > 1
       options = u.options(args[0])
       callbackArg = args[1]
 
-    $field = $(fieldOrSelector)
+    $element = $(selectorOrElement)
     options = u.options(options)
-    delay = u.option($field.attr('up-delay'), options.delay, config.observeDelay)
+    delay = u.option($element.attr('up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
 
-    knownValue = null
     callback = null
-    callbackTimer = null
 
     if u.isGiven(options.change)
       up.error('up.observe now takes the change callback as the last argument')
 
-    rawCallback = u.option(u.presentAttr($field, 'op-observe'), callbackArg)
+    rawCallback = u.option(u.presentAttr($element, 'op-observe'), callbackArg)
     if u.isString(rawCallback)
       callback = (value, $field) -> eval(rawCallback)
     else
       callback = rawCallback or u.error('up.observe: No change callback given')
 
+    if $element.is('form')
+      return observeForm($element, options, callback)
+
+    knownValue = null
+    callbackTimer = null
     callbackPromise = u.resolvedPromise()
 
     # This holds the next callback function, curried with `value` and `$field`.
@@ -275,14 +281,14 @@ up.form = (($) ->
         returnValue
 
     check = ->
-      value = $field.val()
+      value = $element.val()
       # don't run the callback for the check during initialization
       skipCallback = u.isNull(knownValue)
       if knownValue != value
         knownValue = value
         unless skipCallback
           clearTimer()
-          nextCallback = -> callback.apply($field.get(0), [value, $field])
+          nextCallback = -> callback.apply($element.get(0), [value, $element])
           callbackTimer = setTimeout(
             ->
               # Only run the callback once the previous callback's
@@ -310,36 +316,46 @@ up.form = (($) ->
       # but we want to notice if another script manually triggers `input`
       # on the element.
       'input change keypress paste cut click propertychange'
-    $field.on(changeEvents, check)
+    $element.on(changeEvents, check)
 
     check()
 
     # return destructor
     return ->
-      $field.off(changeEvents, check)
+      $element.off(changeEvents, check)
       clearTimer()
 
   ###*
-  [Observes](/up.observe) the given field and submits the form
-  when the field's value changes.
+  @function observeForm
+  @internal
+  ###
+  observeForm = ($form, options, callback) ->
+    $fields = u.multiSelector(config.fields).find($form)
+    destructors = u.map $fields, ($field) ->
+      observe($field, callback)
+    ->
+      destructor() for destructor in destructors
 
-  The form field will be assigned a CSS class [`up-active`](/up-active)
+  ###*
+  [Observes](/up.observe) a field or form and submits the form when a value changes.
+
+  The changed form field will be assigned a CSS class [`up-active`](/up-active)
   while the autosubmitted form is processing.
 
   The UJS variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
 
-  @function up.form.autosubmit
-  @param {String|Element|jQuery}
+  @function up.autosubmit
+  @param {String|Element|jQuery} selectorOrElement
     The form field to observe.
-  @param {Object} options
+  @param {Object} [options]
     See options for [`up.observe`](/up.observe)
   @return {Function}
     A destructor function that removes the observe watch when called.
   @stable
   ###
-  autosubmit = (selectorOrField, options) ->
-    console.log("autosubmit %o", selectorOrField)
-    observe(selectorOrField, options, (value, $field) ->
+  autosubmit = (selectorOrElement, options) ->
+    console.log("autosubmit %o", selectorOrElement)
+    observe(selectorOrElement, options, (value, $field) ->
       $form = $field.closest('form')
       $field.addClass('up-active')
       submit($form).always -> $field.removeClass('up-active')
@@ -611,7 +627,6 @@ up.form = (($) ->
       <input type="text" name="email" up-validate=".email-errors">
       <span class="email-errors"></span>
 
-
   \#\#\#\# Updating dependent fields
 
   The `[up-validate]` behavior is also a great way to partially update a form
@@ -646,20 +661,22 @@ up.form = (($) ->
     validate($field)
 
   ###*
-  Observes this form field and runs the given script
-  when its value changes. This is useful for observing text fields
-  while the user is typing.
+  Observes this field or form and runs a callback when a value changes.
+
+  This is useful for observing text fields while the user is typing.
 
   The programmatic variant of this is the [`up.observe`](/up.observe) function.
 
   \#\#\#\# Example
 
-  For instance, the following would submit the form whenever the
-  text field value changes:
+  The following would run a global `showSuggestions(value)` function
+  whenever the `<input>` changes:
 
-      <form method="GET" action="/search">
-        <input type="query" up-observe="up.form.submit(this)">
+      <form>
+        <input type="query" up-observe="showSuggestions(value)">
       </form>
+
+  \#\#\#\# Callback context
 
   The script given to `up-observe` runs with the following context:
 
@@ -676,23 +693,31 @@ up.form = (($) ->
     The number of miliseconds to wait after a change before the code is run.
   @stable
   ###
-  up.compiler '[up-observe]', ($field) -> observe($field)
+  up.compiler '[up-observe]', ($formOrField) -> observe($formOrField)
 
   ###*
-  [Observes](/up.observe) this form field and submits the form
-  when the field's value changes.
+  [Observes](/up.observe) this field or form and submits the form when a value changes.
 
   The form field will be assigned a CSS class [`up-active`](/up-active)
   while the autosubmitted form is processing.
 
   The programmatic variant of this is the [`up.autosubmit`](/up.autosubmit) function.
 
-  @function [up-autosubmit]
+  \#\#\#\# Example
+
+  The following would submit the form whenever the
+  text field value changes:
+
+      <form method="GET" action="/search" up-autosubmit>
+        <input type="query">
+      </form>
+
+  @selector [up-autosubmit]
   @param {String} up-delay
     The number of miliseconds to wait after the change before the form is submitted.
   @stable
   ###
-  up.compiler '[up-autosubmit]', ($field) -> autosubmit($field)
+  up.compiler '[up-autosubmit]', ($formOrField) -> autosubmit($formOrField)
 
   up.on 'up:framework:reset', reset
 
@@ -705,5 +730,5 @@ up.form = (($) ->
 
 up.submit = up.form.submit
 up.observe = up.form.observe
+up.autosubmit = up.form.autosubmit
 up.validate = up.form.validate
-
