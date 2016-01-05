@@ -101,7 +101,20 @@ describe 'up.form', ->
 
       it 'rigs the form to use up.submit instead of a standard submit'
 
-    describe 'input[up-observe]', ->
+    describe '[up-autosubmit]', ->
+
+      it 'submits the form when a change is observed in the given form field', (done) ->
+        $form = affix('form')
+        $field = $form.affix('input[up-autosubmit][val="old-value"]')
+        up.hello($field)
+        submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
+        $field.val('new-value')
+        $field.trigger('change')
+        u.nextFrame ->
+          expect(submitSpy).toHaveBeenCalled()
+          done()
+
+    describe '[up-observe]', ->
 
       changeEvents = if up.browser.canInputEvent()
         # Actually we only need `input`, but we want to notice

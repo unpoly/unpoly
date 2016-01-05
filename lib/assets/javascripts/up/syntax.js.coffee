@@ -304,6 +304,8 @@ up.syntax = (($) ->
 
   @function up.hello
   @param {String|Element|jQuery} selectorOrElement
+  @return {jQuery}
+    The compiled element
   @stable
   ###
   hello = (selectorOrElement) ->

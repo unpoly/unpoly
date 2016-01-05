@@ -227,6 +227,8 @@ up.form = (($) ->
     If given as a function, it must take two arguments (`value`, `$field`).
     If given as a string, it will be evaled as Javascript code in a context where
     (`value`, `$field`) are set.
+  @return {Function}
+    A destructor function that removes the observe watch when called.
   @stable
   ###
   observe = (fieldOrSelector, args...) ->
@@ -237,7 +239,7 @@ up.form = (($) ->
     if args.length == 1
       callbackArg = args[0]
     if args.length > 1
-      options = args[0]
+      options = u.options(args[0])
       callbackArg = args[1]
 
     $field = $(fieldOrSelector)
@@ -316,6 +318,32 @@ up.form = (($) ->
     return ->
       $field.off(changeEvents, check)
       clearTimer()
+
+  ###*
+  [Observes](/up.observe) the given field and submits the form
+  when the field's value changes.
+
+  The form field will be assigned a CSS class [`up-active`](/up-active)
+  while the autosubmitted form is processing.
+
+  The UJS variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
+
+  @function up.form.autosubmit
+  @param {String|Element|jQuery}
+    The form field to observe.
+  @param {Object} options
+    See options for [`up.observe`](/up.observe)
+  @return {Function}
+    A destructor function that removes the observe watch when called.
+  @stable
+  ###
+  autosubmit = (selectorOrField, options) ->
+    console.log("autosubmit %o", selectorOrField)
+    observe(selectorOrField, options, (value, $field) ->
+      $form = $field.closest('form')
+      $field.addClass('up-active')
+      submit($form).always -> $field.removeClass('up-active')
+    )
 
   resolveValidateTarget = ($field, options) ->
     target = u.option(options.target, $field.attr('up-validate'))
@@ -644,21 +672,31 @@ up.form = (($) ->
   @selector [up-observe]
   @param {String} up-observe
     The code to run when the field's value changes.
+  @param {String} up-delay
+    The number of miliseconds to wait after a change before the code is run.
   @stable
   ###
-  up.compiler '[up-observe]', ($field) ->
-    return observe($field)
+  up.compiler '[up-observe]', ($field) -> observe($field)
 
-#  up.compiler '[up-autosubmit]', ($field) ->
-#    return observe($field, ->
-#      $form = $field.closest('form')
-#      $field.addClass('up-active')
-#      up.submit($form).always ->
-#        $field.removeClass('up-active')
-#    )
+  ###*
+  [Observes](/up.observe) this form field and submits the form
+  when the field's value changes.
+
+  The form field will be assigned a CSS class [`up-active`](/up-active)
+  while the autosubmitted form is processing.
+
+  The programmatic variant of this is the [`up.autosubmit`](/up.autosubmit) function.
+
+  @function [up-autosubmit]
+  @param {String} up-delay
+    The number of miliseconds to wait after the change before the form is submitted.
+  @stable
+  ###
+  up.compiler '[up-autosubmit]', ($field) -> autosubmit($field)
 
   up.on 'up:framework:reset', reset
 
+  knife: eval(Knife?.point)
   submit: submit
   observe: observe
   validate: validate
