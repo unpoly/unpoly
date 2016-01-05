@@ -111,8 +111,11 @@ up.form = (($) ->
     $form = $(formOrSelector).closest('form')
 
     options = u.options(options)
-    successSelector = up.flow.resolveSelector(u.option(options.target, $form.attr('up-target'), 'body'), options)
-    failureSelector = up.flow.resolveSelector(u.option(options.failTarget, $form.attr('up-fail-target'), -> u.selectorForElement($form)), options)
+    successSelector = u.option(options.target, $form.attr('up-target'), 'body')
+    successSelector = up.flow.resolveSelector(successSelector, options)
+    failureSelector = u.option(options.failTarget, $form.attr('up-fail-target')) || u.selectorForElement($form)
+    failureSelector = up.flow.resolveSelector(failureSelector, options)
+
     historyOption = u.option(options.history, u.castedAttr($form, 'up-history'), true)
     successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'))
     failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition)
@@ -189,9 +192,9 @@ up.form = (($) ->
   The following would submit the form whenever the
   text field value changes:
 
-      up.observe('input[name=query]', { change: function(value, $input) {
+      up.observe('input[name=query]', function(value, $input) {
         up.submit($input)
-      } });
+      });
 
   \#\#\#\# Preventing concurrency
 
@@ -209,25 +212,33 @@ up.form = (($) ->
   load on your server, you can use a `delay` option to wait
   a few miliseconds before executing the callback:
 
-      up.observe('input', {
-        delay: 100,
-        change: function(value, $input) { up.submit($input) }
+      up.observe('input', { delay: 100 }, function(value, $input) {
+        up.submit($input)
       });
 
   @function up.observe
   @param {Element|jQuery|String} fieldOrSelector
-  @param {Function(value, $field)|String} options.change
-    The callback to execute when the field's value changes.
-    If given as a function, it must take two arguments (`value`, `$field`).
-    If given as a string, it will be evaled as Javascript code in a context where
-    (`value`, `$field`) are set.
   @param {Number} [options.delay=up.form.config.observeDelay]
     The number of miliseconds to wait before executing the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
+  @param {Function(value, $field)|String} onChange
+    The callback to execute when the field's value changes.
+    If given as a function, it must take two arguments (`value`, `$field`).
+    If given as a string, it will be evaled as Javascript code in a context where
+    (`value`, `$field`) are set.
   @stable
   ###
-  observe = (fieldOrSelector, options) ->
+  observe = (fieldOrSelector, args...) ->
+
+    options = {}
+    callbackArg = undefined
+
+    if args.length == 1
+      callbackArg = args[0]
+    if args.length > 1
+      options = args[0]
+      callbackArg = args[1]
 
     $field = $(fieldOrSelector)
     options = u.options(options)
@@ -238,13 +249,14 @@ up.form = (($) ->
     callback = null
     callbackTimer = null
 
-    if codeOnChange = $field.attr('up-observe')
-      callback = (value, $field) ->
-        eval(codeOnChange)
-    else if options.change
-      callback = options.change
+    if u.isGiven(options.change)
+      up.error('up.observe now takes the change callback as the last argument')
+
+    rawCallback = u.option(u.presentAttr($field, 'op-observe'), callbackArg)
+    if u.isString(rawCallback)
+      callback = (value, $field) -> eval(rawCallback)
     else
-      u.error('up.observe: No change callback given')
+      callback = rawCallback or u.error('up.observe: No change callback given')
 
     callbackPromise = u.resolvedPromise()
 
@@ -293,15 +305,17 @@ up.form = (($) ->
       'input change'
     else
       # Actually we won't ever get `input` from the user in this browser,
-      # but we want to notice if another script  manually triggers `input`
+      # but we want to notice if another script manually triggers `input`
       # on the element.
       'input change keypress paste cut click propertychange'
-    $field.on changeEvents, check
+    $field.on(changeEvents, check)
 
     check()
 
     # return destructor
-    return clearTimer
+    return ->
+      $field.off(changeEvents, check)
+      clearTimer()
 
   resolveValidateTarget = ($field, options) ->
     target = u.option(options.target, $field.attr('up-validate'))
@@ -636,7 +650,7 @@ up.form = (($) ->
     return observe($field)
 
 #  up.compiler '[up-autosubmit]', ($field) ->
-#    return observe($field, change: ->
+#    return observe($field, ->
 #      $form = $field.closest('form')
 #      $field.addClass('up-active')
 #      up.submit($form).always ->

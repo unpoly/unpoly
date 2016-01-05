@@ -667,8 +667,7 @@ up.util = (($) ->
 
   ###*
   Returns the first argument that is considered present.
-  If an argument is a function, it is called and the value is checked for presence.
-  
+
   This function is useful when you have multiple option sources and the value can be boolean.
   In that case you cannot change the sources with a `||` operator
   (since that doesn't short-circuit at `false`).
@@ -678,15 +677,7 @@ up.util = (($) ->
   @internal
   ###
   option = (args...) ->
-    # This behavior is subtly different from detect!
-    match = undefined
-    for arg in args
-      value = arg
-      value = value() if isFunction(value)
-      if isGiven(value)
-        match = value
-        break
-    match    
+    detect(args, isGiven)
 
   ###*
   Passes each element in the given array to the given function.

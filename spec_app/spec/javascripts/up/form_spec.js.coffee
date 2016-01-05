@@ -1,5 +1,7 @@
 describe 'up.form', ->
-  
+
+  u = up.util
+
   describe 'Javascript functions', ->
     
     describe 'up.observe', ->
@@ -101,7 +103,37 @@ describe 'up.form', ->
 
     describe 'input[up-observe]', ->
 
-      it 'should have tests'
+      changeEvents = if up.browser.canInputEvent()
+        # Actually we only need `input`, but we want to notice
+        # if another script manually triggers `change` on the element.
+        ['input', 'change']
+      else
+        # Actually we won't ever get `input` from the user in this browser,
+        # but we want to notice if another script manually triggers `input`
+        # on the element.
+        ['input', 'change', 'keypress', 'paste', 'cut', 'click', 'propertychange']
+
+      u.each changeEvents, (eventName) ->
+
+        it "does not run the callback when the input receives a '#{eventName}' event, but the value didn't change", (done) ->
+          $input = affix('input[up-observe][value="old-value"]')
+          callback = jasmine.createSpy('change callback')
+          up.observe($input, callback)
+          $input.trigger(eventName)
+          u.nextFrame ->
+            expect(callback).not.toHaveBeenCalled()
+            done()
+
+        it "runs the callback when the input receives a '#{eventName}' event and the value changed", (done) ->
+          $input = affix('input[up-observe][value="old-value"]')
+          callback = jasmine.createSpy('change callback')
+          up.observe($input, callback)
+          $input.val('new-value')
+          u.times 2, -> $input.trigger(eventName)
+          u.nextFrame ->
+            expect(callback).toHaveBeenCalledWith('new-value', $input)
+            expect(callback.calls.count()).toEqual(1)
+            done()
 
     describe 'input[up-validate]', ->
 
