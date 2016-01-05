@@ -16,6 +16,10 @@ up.form = (($) ->
   Sets default options for form submission and validation.
 
   @property up.form.config
+  @param {Number} [config.observeDelay=0]
+    The number of miliseconds to wait before [`up.observe`](/up.observe) runs the callback
+    after the input value changes. Use this to limit how often the callback
+    will be invoked for a fast typist.
   @param {Array} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
     An array of CSS selectors that are searched around a form field
     that wants to [validate](/up.validate). The first matching selector
@@ -28,6 +32,7 @@ up.form = (($) ->
   ###
   config = u.config
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
+    observeDelay: 0
 
   reset = ->
     config.reset()
@@ -216,7 +221,7 @@ up.form = (($) ->
     If given as a function, it must take two arguments (`value`, `$field`).
     If given as a string, it will be evaled as Javascript code in a context where
     (`value`, `$field`) are set.
-  @param {Number} [options.delay=0]
+  @param {Number} [options.delay=up.form.config.observeDelay]
     The number of miliseconds to wait before executing the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
@@ -226,7 +231,7 @@ up.form = (($) ->
 
     $field = $(fieldOrSelector)
     options = u.options(options)
-    delay = u.option($field.attr('up-delay'), options.delay, 0)
+    delay = u.option($field.attr('up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
 
     knownValue = null
