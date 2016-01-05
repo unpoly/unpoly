@@ -27,7 +27,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.memoize
     @internal
      */
-    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, debug, detect, each, error, escapePressed, evalConsoleTemplate, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, warn;
+    var $createElementFromSelector, ANIMATION_PROMISE_KEY, CONSOLE_PLACEHOLDERS, ajax, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, debug, detect, each, error, escapePressed, evalConsoleTemplate, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, presence, presentAttr, remove, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, warn;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -774,7 +774,6 @@ that might save you from loading something like [Underscore.js](http://underscor
 
     /**
     Returns the first argument that is considered present.
-    If an argument is a function, it is called and the value is checked for presence.
     
     This function is useful when you have multiple option sources and the value can be boolean.
     In that case you cannot change the sources with a `||` operator
@@ -785,21 +784,9 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     option = function() {
-      var arg, args, j, len, match, value;
+      var args;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      match = void 0;
-      for (j = 0, len = args.length; j < len; j++) {
-        arg = args[j];
-        value = arg;
-        if (isFunction(value)) {
-          value = value();
-        }
-        if (isGiven(value)) {
-          match = value;
-          break;
-        }
-      }
-      return match;
+      return detect(args, isGiven);
     };
 
     /**
@@ -1090,7 +1077,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     cssAnimate = function(elementOrSelector, lastFrame, opts) {
       var $element, deferred, endTimeout, transition, withoutCompositing, withoutTransition;
       $element = $(elementOrSelector);
-      if (up.browser.canCssAnimation()) {
+      if (up.browser.canCssTransition()) {
         opts = options(opts, {
           duration: 300,
           delay: 0,
@@ -1362,13 +1349,24 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
+    Returns a [Deferred object](https://api.jquery.com/category/deferred-object/) that will never be resolved.
+    
+    @function up.util.unresolvableDeferred
+    @return {Deferred}
+    @experimental
+     */
+    unresolvableDeferred = function() {
+      return $.Deferred();
+    };
+
+    /**
     Returns a promise that will never be resolved.
     
     @function up.util.unresolvablePromise
     @experimental
      */
     unresolvablePromise = function() {
-      return $.Deferred().promise();
+      return unresolvableDeferred().promise();
     };
 
     /**
@@ -1795,6 +1793,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       clientSize: clientSize,
       only: only,
       trim: trim,
+      unresolvableDeferred: unresolvableDeferred,
       unresolvablePromise: unresolvablePromise,
       resolvedPromise: resolvedPromise,
       resolvedDeferred: resolvedDeferred,
@@ -1833,7 +1832,7 @@ we can't currently get rid off.
   var slice = [].slice;
 
   up.browser = (function($) {
-    var canCssAnimation, canInputEvent, canLogSubstitution, canPushState, initialRequestMethod, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, u, url;
+    var canCssTransition, canInputEvent, canLogSubstitution, canPushState, initialRequestMethod, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, u, url;
     u = up.util;
     loadPage = function(url, options) {
       var $form, csrfParam, csrfToken, metadataInput, method, target;
@@ -1891,21 +1890,69 @@ we can't currently get rid off.
     url = function() {
       return location.href;
     };
-    canPushState = u.memoize(function() {
-      return u.isDefined(history.pushState) && initialRequestMethod() === 'get';
-    });
     isIE8OrWorse = u.memoize(function() {
       return u.isUndefined(document.addEventListener);
     });
     isIE9OrWorse = u.memoize(function() {
       return isIE8OrWorse() || navigator.appVersion.indexOf('MSIE 9.') !== -1;
     });
-    canCssAnimation = u.memoize(function() {
+
+    /**
+    Returns whether this browser supports manipulation of the current URL
+    via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
+    
+    When Up.js is asked to change history on a browser that doesn't support
+    `pushState` (e.g. through [`up.follow`](/up.follow)), it will gracefully
+    fall back to a full page load.
+    
+    @function up.browser.canPushState
+    @return {Boolean}
+    @experimental
+     */
+    canPushState = u.memoize(function() {
+      return u.isDefined(history.pushState) && initialRequestMethod() === 'get';
+    });
+
+    /**
+    Returns whether this browser supports animation using
+    [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions).
+    
+    When Up.js is asked to animate history on a browser that doesn't support
+    CSS transitions (e.g. through [`up.animate`](/up.animate)), it will skip the
+    animation by instantly jumping to the last frame.
+    
+    @function up.browser.canCssTransition
+    @return {Boolean}
+    @experimental
+     */
+    canCssTransition = u.memoize(function() {
       return 'transition' in document.documentElement.style;
     });
+
+    /**
+    Returns whether this browser supports the DOM event [`input`](https://developer.mozilla.org/de/docs/Web/Events/input).
+    
+    @function up.browser.canInputEvent
+    @return {Boolean}
+    @experimental
+     */
     canInputEvent = u.memoize(function() {
       return 'oninput' in document.createElement('input');
     });
+
+    /**
+    Returns whether this browser supports
+    [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
+    in `console` functions.
+    
+    \#\#\#\# Example for string substition
+    
+        console.log("Hello %o!", "Judy");
+    
+    @function up.browser.canLogSubstitution
+    @return boolean
+    @internal
+     */
     canLogSubstitution = u.memoize(function() {
       return !isIE9OrWorse();
     });
@@ -1932,6 +1979,11 @@ we can't currently get rid off.
     /**
     Returns whether Up.js supports the current browser.
     
+    This also returns `true` if Up.js only support some features, but falls back
+    gracefully for other features. E.g. IE9 is almost fully supported, but due to
+    its lack of [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
+    Up.js falls back to a full page load when asked to manipulate history.
+    
     Currently Up.js supports IE9 with jQuery 1.9+.
     On older browsers Up.js will prevent itself from [booting](/up.boot)
     and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
@@ -1947,7 +1999,7 @@ we can't currently get rid off.
       url: url,
       loadPage: loadPage,
       canPushState: canPushState,
-      canCssAnimation: canCssAnimation,
+      canCssTransition: canCssTransition,
       canInputEvent: canInputEvent,
       canLogSubstitution: canLogSubstitution,
       isSupported: isSupported,
@@ -2107,7 +2159,12 @@ and call `preventDefault()` on the `event` object:
     };
 
     /**
-    Emits an event with the given name and properties.
+    Emits a event with the given name and properties.
+    
+    The event will be triggered as a jQuery event on `document`.
+    
+    Other code can subscribe to events with that name using
+    [`up.on`](/up.on) or by [binding a jQuery event listener](http://api.jquery.com/on/) to `document`.
     
     \#\#\#\# Example
     
@@ -2228,9 +2285,11 @@ and call `preventDefault()` on the `event` object:
 
     /**
     Boots the Up.js framework.
+    
     This is done automatically by including the Up.js Javascript.
     
-    Does nothing if the current browser is [not supported](/up.browser.isSupported).
+    Up.js will not boot if the current browser is [not supported](/up.browser.isSupported).
+    This leaves you with a classic server-side application on legacy browsers.
     
     Emits the [`up:framework:boot`](/up:framework:boot) event.
     
@@ -2605,6 +2664,8 @@ later.
     
     @function up.hello
     @param {String|Element|jQuery} selectorOrElement
+    @return {jQuery}
+      The compiled element
     @stable
      */
     hello = function(selectorOrElement) {
@@ -2691,6 +2752,7 @@ We need to work on this page:
     @param {Boolean} [config.restoreScroll=true]
       Whether to restore the known scroll positions
       when the user goes back or forward in history.
+    @stable
      */
     config = u.config({
       popTargets: ['body'],
@@ -2938,6 +3000,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       to the top when the revealed element is closer to the top than `config.snap`.
     @param {Number} [config.substance]
       A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
+    @stable
      */
     config = u.config({
       duration: 0,
@@ -3113,7 +3176,9 @@ This modules contains functions to scroll the viewport and reveal contained elem
     Many applications have a navigation bar fixed to the top or bottom,
     obstructing the view on an element.
     
-    To make `up.aware` of these fixed elements you can either:
+    You can make `up.reveal` aware of these fixed elements
+    so it can scroll the viewport far enough so the revealed element is fully visible.
+    To make `up.reveal` aware fixed elements you can either:
     
     - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
     - [configure default options](/up.layout.config) for `fixedTop` or `fixedBottom`
@@ -3434,7 +3499,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
     [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
     the viewport far enough so the revealed element is fully visible.
     
-    Example:
+    \#\#\#\# Example
     
         <div class="top-nav" up-fixed="top">...</div>
     
@@ -3449,7 +3514,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
     [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
     the viewport far enough so the revealed element is fully visible.
     
-    Example:
+    \#\#\#\# Example
     
         <div class="bottom-nav" up-fixed="bottom">...</div>
     
@@ -3602,6 +3667,9 @@ are based on this module.
     The server is free to optimize Up.js requests by only rendering the HTML fragment
     that is being updated. The request's `X-Up-Selector` header will contain
     the CSS selector for the updating fragment.
+    
+    If you are using the `upjs-rails` gem you can also access the selector via
+    `up.selector` in all controllers, views and helpers.
     
     \#\#\#\# Events
     
@@ -3862,13 +3930,11 @@ are based on this module.
     };
 
     /**
-    Returns the first element matching the given selector.
-    
-    Excludes elements that also match `.up-ghost` or `.up-destroying`
-    or that are children of elements with these selectors.
+    Returns the first element matching the given selector, but
+    ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
     
     If the given argument is already a jQuery collection (or an array
-    of DOM elements), the first element  matching these conditions
+    of DOM elements), the first element matching these conditions
     is returned.
     
     Returns `undefined` if no element matches these conditions.
@@ -4043,7 +4109,7 @@ are based on this module.
 Animation
 =========
   
-Whenever you change a page fragment (through methods like
+Whenever you update a page fragment (through methods like
 [`up.replace`](/up.replace) or UJS attributes like [`up-target`](/up-target))
 you can animate the change.
 
@@ -4067,7 +4133,6 @@ and [transitions](/up.morph#named-animation).
 You can also easily [define your own animations](/up.animation)
 or [transitions](/up.transition) using Javascript or CSS.
 
-  
 @class up.motion
  */
 
@@ -4087,6 +4152,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     @param {Number} [config.duration=300]
     @param {Number} [config.delay=0]
     @param {String} [config.easing='ease']
+    @stable
      */
     config = u.config({
       duration: 300,
@@ -4100,7 +4166,9 @@ or [transitions](/up.transition) using Javascript or CSS.
     };
 
     /**
-    Applies the given animation to the given element:
+    Applies the given animation to the given element.
+    
+    \#\#\#\# Example
     
         up.animate('.warning', 'fade-in');
     
@@ -4152,6 +4220,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       The element to animate.
     @param {String|Function|Object} animation
       Can either be:
+    
       - The animation's name
       - A function performing the animation
       - An object of CSS attributes describing the last frame of the animation
@@ -4251,9 +4320,10 @@ or [transitions](/up.transition) using Javascript or CSS.
     };
 
     /**
-    Completes all animations and transitions for the given element
-    by jumping to the last animation frame instantly. All callbacks chained to
-    the original animation's promise will be called.
+    Completes all [animations](/up.animate) and [transitions](/up.morph)
+    for the given element by jumping to the last animation frame instantly.
+    
+    All callbacks chained to the original animation's promise will be called.
     
     Does nothing if the given element is not currently animating.
     
@@ -4354,7 +4424,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       $new = $(target);
       parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source');
       parsedOptions = u.extend(parsedOptions, animateOptions(options));
-      if (up.browser.canCssAnimation()) {
+      if (up.browser.canCssTransition()) {
         finish($old);
         finish($new);
         if (transitionOrName === 'none' || transitionOrName === false || (animation = animations[transitionOrName])) {
@@ -4785,6 +4855,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     @param {Number} [config.busyDelay=300]
       How long the proxy waits until emitting the [`up:proxy:busy` event](/up:proxy:busy).
       Use this to prevent flickering of spinners.
+    @stable
      */
     config = u.config({
       busyDelay: 300,
@@ -5108,7 +5179,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
       The element whose destination should be preloaded.
     @return
       A promise that will be resolved when the request was loaded and cached
-    @stable
+    @experimental
      */
     preload = function(linkOrSelector, options) {
       var $link, method;
@@ -5268,7 +5339,7 @@ Read on
       The URL to visit.
     @param {String} [options.target='body']
       The selector to replace.
-    @param {Object} options
+    @param {Object} [options]
       See options for [`up.replace`](/up.replace)
     @stable
      */
@@ -5291,6 +5362,8 @@ Read on
     
         var $link = $('a:first'); // select link with jQuery
         up.follow($link);
+    
+    The UJS variant of this are the [`a[up-target]`](/a-up-target) and [`a[up-follow]`](/a-up-follow) selectors.
     
     @function up.follow
     @param {Element|jQuery|String} linkOrSelector
@@ -5496,11 +5569,12 @@ Read on
     If applied on a link, Follows this link via AJAX and replaces the
     current `<body>` element with the response's `<body>` element.
     
-    Example:
+    To only update a fragment instead of the entire page, see
+    [`a[up-target]`](/a-up-target).
+    
+    \#\#\#\# Example
     
         <a href="/users" up-follow>User list</a>
-    
-    To only update a fragment instead of the entire page, see [`up-target`](/up-target).
     
     \#\#\#\# Turn any element into a link
     
@@ -5534,7 +5608,12 @@ Read on
 
     /**
     Add an `up-expand` class to any element that contains a link
-    in order to enlarge the link's click area:
+    in order to enlarge the link's click area.
+    
+    `up-expand` honors all the UJS behavior in expanded links
+    ([`up-target`](/up-target), [`up-instant`](/up-instant), [`up-preload`](/up-preload), etc.).
+    
+    \#\#\#\# Example
     
         <div class="notification" up-expand>
           Record was saved!
@@ -5543,9 +5622,6 @@ Read on
     
     In the example above, clicking anywhere within `.notification` element
     would [follow](/up.follow) the *Close* link.
-    
-    `up-expand` honors all the UJS behavior in expanded links
-    (`up-target`, `up-instant`, `up-preload`, etc.).
     
     @selector [up-expand]
     @stable
@@ -5632,14 +5708,20 @@ open dialogs with sub-forms, etc. all without losing form state.
  */
 
 (function() {
+  var slice = [].slice;
+
   up.form = (function($) {
-    var config, observe, reset, resolveValidateTarget, submit, u, validate;
+    var autosubmit, config, observe, observeForm, reset, resolveValidateTarget, submit, u, validate;
     u = up.util;
 
     /**
     Sets default options for form submission and validation.
     
     @property up.form.config
+    @param {Number} [config.observeDelay=0]
+      The number of miliseconds to wait before [`up.observe`](/up.observe) runs the callback
+      after the input value changes. Use this to limit how often the callback
+      will be invoked for a fast typist.
     @param {Array} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
       An array of CSS selectors that are searched around a form field
       that wants to [validate](/up.validate). The first matching selector
@@ -5648,9 +5730,14 @@ open dialogs with sub-forms, etc. all without losing form state.
       By default this looks for a `<fieldset>`, `<label>` or `<form>`
       around the validating input field, or any element with an
       `up-fieldset` attribute.
+    @param {String} [config.fields]
+      An array of CSS selectors that represent form fields, such as `input` or `select`.
+    @stable
      */
     config = u.config({
-      validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
+      validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)'],
+      fields: [':input'],
+      observeDelay: 0
     });
     reset = function() {
       return config.reset();
@@ -5729,10 +5816,10 @@ open dialogs with sub-forms, etc. all without losing form state.
       var $form, failureSelector, failureTransition, hasFileInputs, headers, historyOption, httpMethod, implantOptions, request, successSelector, successTransition, successUrl, url, useCache;
       $form = $(formOrSelector).closest('form');
       options = u.options(options);
-      successSelector = up.flow.resolveSelector(u.option(options.target, $form.attr('up-target'), 'body'), options);
-      failureSelector = up.flow.resolveSelector(u.option(options.failTarget, $form.attr('up-fail-target'), function() {
-        return u.selectorForElement($form);
-      }), options);
+      successSelector = u.option(options.target, $form.attr('up-target'), 'body');
+      successSelector = up.flow.resolveSelector(successSelector, options);
+      failureSelector = u.option(options.failTarget, $form.attr('up-fail-target')) || u.selectorForElement($form);
+      failureSelector = up.flow.resolveSelector(failureSelector, options);
       historyOption = u.option(options.history, u.castedAttr($form, 'up-history'), true);
       successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'));
       failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition);
@@ -5800,7 +5887,8 @@ open dialogs with sub-forms, etc. all without losing form state.
     };
 
     /**
-    Observes a form field and runs a callback when its value changes.
+    Observes a field or form and runs a callback when a value changes.
+    
     This is useful for observing text fields while the user is typing.
     
     The UJS variant of this is the [`up-observe`](/up-observe) attribute.
@@ -5810,9 +5898,9 @@ open dialogs with sub-forms, etc. all without losing form state.
     The following would submit the form whenever the
     text field value changes:
     
-        up.observe('input[name=query]', { change: function(value, $input) {
+        up.observe('input[name=query]', function(value, $input) {
           up.submit($input)
-        } });
+        });
     
     \#\#\#\# Preventing concurrency
     
@@ -5830,42 +5918,58 @@ open dialogs with sub-forms, etc. all without losing form state.
     load on your server, you can use a `delay` option to wait
     a few miliseconds before executing the callback:
     
-        up.observe('input', {
-          delay: 100,
-          change: function(value, $input) { up.submit($input) }
+        up.observe('input', { delay: 100 }, function(value, $input) {
+          up.submit($input)
         });
     
     @function up.observe
     @param {Element|jQuery|String} fieldOrSelector
-    @param {Function(value, $field)|String} options.change
+    @param {Number} [options.delay=up.form.config.observeDelay]
+      The number of miliseconds to wait before executing the callback
+      after the input value changes. Use this to limit how often the callback
+      will be invoked for a fast typist.
+    @param {Function(value, $field)|String} onChange
       The callback to execute when the field's value changes.
       If given as a function, it must take two arguments (`value`, `$field`).
       If given as a string, it will be evaled as Javascript code in a context where
       (`value`, `$field`) are set.
-    @param {Number} [options.delay=0]
-      The number of miliseconds to wait before executing the callback
-      after the input value changes. Use this to limit how often the callback
-      will be invoked for a fast typist.
+    @return {Function}
+      A destructor function that removes the observe watch when called.
     @stable
      */
-    observe = function(fieldOrSelector, options) {
-      var $field, callback, callbackPromise, callbackTimer, changeEvents, check, clearTimer, codeOnChange, delay, knownValue, nextCallback, runNextCallback;
-      $field = $(fieldOrSelector);
-      options = u.options(options);
-      delay = u.option($field.attr('up-delay'), options.delay, 0);
-      delay = parseInt(delay);
-      knownValue = null;
-      callback = null;
-      callbackTimer = null;
-      if (codeOnChange = $field.attr('up-observe')) {
-        callback = function(value, $field) {
-          return eval(codeOnChange);
-        };
-      } else if (options.change) {
-        callback = options.change;
-      } else {
-        u.error('up.observe: No change callback given');
+    observe = function() {
+      var $element, args, callback, callbackArg, callbackPromise, callbackTimer, changeEvents, check, clearTimer, delay, knownValue, nextCallback, options, rawCallback, runNextCallback, selectorOrElement;
+      selectorOrElement = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      options = {};
+      callbackArg = void 0;
+      if (args.length === 1) {
+        callbackArg = args[0];
       }
+      if (args.length > 1) {
+        options = u.options(args[0]);
+        callbackArg = args[1];
+      }
+      $element = $(selectorOrElement);
+      options = u.options(options);
+      delay = u.option($element.attr('up-delay'), options.delay, config.observeDelay);
+      delay = parseInt(delay);
+      callback = null;
+      if (u.isGiven(options.change)) {
+        up.error('up.observe now takes the change callback as the last argument');
+      }
+      rawCallback = u.option(u.presentAttr($element, 'op-observe'), callbackArg);
+      if (u.isString(rawCallback)) {
+        callback = function(value, $field) {
+          return eval(rawCallback);
+        };
+      } else {
+        callback = rawCallback || u.error('up.observe: No change callback given');
+      }
+      if ($element.is('form')) {
+        return observeForm($element, options, callback);
+      }
+      knownValue = null;
+      callbackTimer = null;
       callbackPromise = u.resolvedPromise();
       nextCallback = null;
       runNextCallback = function() {
@@ -5878,14 +5982,14 @@ open dialogs with sub-forms, etc. all without losing form state.
       };
       check = function() {
         var skipCallback, value;
-        value = $field.val();
+        value = $element.val();
         skipCallback = u.isNull(knownValue);
         if (knownValue !== value) {
           knownValue = value;
           if (!skipCallback) {
             clearTimer();
             nextCallback = function() {
-              return callback.apply($field.get(0), [value, $field]);
+              return callback.apply($element.get(0), [value, $element]);
             };
             return callbackTimer = setTimeout(function() {
               return callbackPromise.then(function() {
@@ -5905,9 +6009,62 @@ open dialogs with sub-forms, etc. all without losing form state.
         return clearTimeout(callbackTimer);
       };
       changeEvents = up.browser.canInputEvent() ? 'input change' : 'input change keypress paste cut click propertychange';
-      $field.on(changeEvents, check);
+      $element.on(changeEvents, check);
       check();
-      return clearTimer;
+      return function() {
+        $element.off(changeEvents, check);
+        return clearTimer();
+      };
+    };
+
+    /**
+    @function observeForm
+    @internal
+     */
+    observeForm = function($form, options, callback) {
+      var $fields, destructors;
+      $fields = u.multiSelector(config.fields).find($form);
+      destructors = u.map($fields, function($field) {
+        return observe($field, callback);
+      });
+      return function() {
+        var destructor, i, len, results;
+        results = [];
+        for (i = 0, len = destructors.length; i < len; i++) {
+          destructor = destructors[i];
+          results.push(destructor());
+        }
+        return results;
+      };
+    };
+
+    /**
+    [Observes](/up.observe) a field or form and submits the form when a value changes.
+    
+    The changed form field will be assigned a CSS class [`up-active`](/up-active)
+    while the autosubmitted form is processing.
+    
+    The UJS variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
+    
+    @function up.autosubmit
+    @param {String|Element|jQuery} selectorOrElement
+      The form field to observe.
+    @param {Object} [options]
+      See options for [`up.observe`](/up.observe)
+    @return {Function}
+      A destructor function that removes the observe watch when called.
+    @stable
+     */
+    autosubmit = function(selectorOrElement, options) {
+      console.log("autosubmit %o", selectorOrElement);
+      return observe(selectorOrElement, options, function(value, $field) {
+        var $form;
+        $form = $field.closest('form');
+        $field.addClass('up-active');
+        return submit($form).always(function() {
+          return $field.removeClass('up-active');
+        });
+      });
     };
     resolveValidateTarget = function($field, options) {
       var target;
@@ -5981,13 +6138,13 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     The programmatic variant of this is the [`up.submit`](/up.submit) function.
     
-    \#\#\#\# Validation errors
+    \#\#\#\# Failed submission
     
     When the server was unable to save the form due to invalid data,
     it will usually re-render an updated copy of the form with
     validation messages.
     
-    For Up.js to be able to pick up a validation failure,
+    For Up.js to be able to detect a failed form submission,,
     the form must be re-rendered with a non-200 HTTP status code.
     We recommend to use either 400 (bad request) or
     422 (unprocessable entity).
@@ -6182,7 +6339,6 @@ open dialogs with sub-forms, etc. all without losing form state.
         <input type="text" name="email" up-validate=".email-errors">
         <span class="email-errors"></span>
     
-    
     \#\#\#\# Updating dependent fields
     
     The `[up-validate]` behavior is also a great way to partially update a form
@@ -6218,20 +6374,22 @@ open dialogs with sub-forms, etc. all without losing form state.
     });
 
     /**
-    Observes this form field and runs the given script
-    when its value changes. This is useful for observing text fields
-    while the user is typing.
+    Observes this field or form and runs a callback when a value changes.
+    
+    This is useful for observing text fields while the user is typing.
     
     The programmatic variant of this is the [`up.observe`](/up.observe) function.
     
     \#\#\#\# Example
     
-    For instance, the following would submit the form whenever the
-    text field value changes:
+    The following would run a global `showSuggestions(value)` function
+    whenever the `<input>` changes:
     
-        <form method="GET" action="/search">
-          <input type="query" up-observe="up.form.submit(this)">
+        <form>
+          <input type="query" up-observe="showSuggestions(value)">
         </form>
+    
+    \#\#\#\# Callback context
     
     The script given to `up-observe` runs with the following context:
     
@@ -6244,13 +6402,42 @@ open dialogs with sub-forms, etc. all without losing form state.
     @selector [up-observe]
     @param {String} up-observe
       The code to run when the field's value changes.
+    @param {String} up-delay
+      The number of miliseconds to wait after a change before the code is run.
     @stable
      */
-    up.compiler('[up-observe]', function($field) {
-      return observe($field);
+    up.compiler('[up-observe]', function($formOrField) {
+      return observe($formOrField);
+    });
+
+    /**
+    [Observes](/up.observe) this field or form and submits the form when a value changes.
+    
+    The form field will be assigned a CSS class [`up-active`](/up-active)
+    while the autosubmitted form is processing.
+    
+    The programmatic variant of this is the [`up.autosubmit`](/up.autosubmit) function.
+    
+    \#\#\#\# Example
+    
+    The following would submit the form whenever the
+    text field value changes:
+    
+        <form method="GET" action="/search" up-autosubmit>
+          <input type="query">
+        </form>
+    
+    @selector [up-autosubmit]
+    @param {String} up-delay
+      The number of miliseconds to wait after the change before the form is submitted.
+    @stable
+     */
+    up.compiler('[up-autosubmit]', function($formOrField) {
+      return autosubmit($formOrField);
     });
     up.on('up:framework:reset', reset);
     return {
+      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       submit: submit,
       observe: observe,
       validate: validate
@@ -6261,6 +6448,8 @@ open dialogs with sub-forms, etc. all without losing form state.
 
   up.observe = up.form.observe;
 
+  up.autosubmit = up.form.autosubmit;
+
   up.validate = up.form.validate;
 
 }).call(this);
@@ -6270,13 +6459,12 @@ Pop-up overlays
 ===============
 
 Instead of [linking to a page fragment](/up.link), you can choose
-to show a fragment in a popup overlay.
+to show a fragment in a popup overlay that rolls down from an anchoring element.
 
 To open a popup, add an [`up-popup` attribute](/a-up-popup) to a link,
 or call the Javascript function [`up.popup.attach`](/up.popup.attach).
 
 For modal dialogs see [up.modal](/up.modal) instead.
-
 
 \#\#\#\# Customizing the popup design
 
@@ -6294,7 +6482,6 @@ By default the popup uses the following DOM structure:
       ...
     </div>
 
-
 \#\#\#\# Closing behavior
 
 The popup closes when the user clicks anywhere outside the popup area.
@@ -6309,7 +6496,6 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
     <a href="/settings" up-popup=".options" up-sticky>Settings</a>
 
-  
 @class up.popup
  */
 
@@ -6354,6 +6540,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       Defines where the popup is attached to the opening element.
     
       Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+    @stable
      */
     config = u.config({
       openAnimation: 'fade-in',
@@ -6459,13 +6646,20 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       return $popup;
     };
     updated = function($link, $popup, position, animation, animateOptions) {
+      var deferred;
       $popup.show();
       setPosition($link, $popup, position);
-      return up.animate($popup, animation, animateOptions);
+      deferred = up.animate($popup, animation, animateOptions);
+      deferred.then(function() {
+        return up.emit('up:popup:opened');
+      });
+      return deferred;
     };
 
     /**
     Attaches a popup overlay to the given element or selector.
+    
+    Emits events [`up:popup:open`](/up:popup:open) and [`up:popup:opened`](/up:popup:opened).
     
     @function up.popup.attach
     @param {Element|jQuery|String} elementOrSelector
@@ -6499,39 +6693,95 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($link, 'up-history'), false) : false;
       animateOptions = up.motion.animateOptions(options, $link);
       close();
-      $popup = createHiddenPopup($link, selector, sticky);
-      return up.replace(selector, url, {
-        history: history,
-        insert: function() {
-          return updated($link, $popup, position, animation, animateOptions);
-        }
-      });
+      if (up.bus.nobodyPrevents('up:popup:open', {
+        url: url
+      })) {
+        $popup = createHiddenPopup($link, selector, sticky);
+        return up.replace(selector, url, {
+          history: history,
+          insert: function() {
+            return updated($link, $popup, position, animation, animateOptions);
+          }
+        });
+      } else {
+        return u.unresolvableDeferred();
+      }
     };
 
     /**
+    This event is [emitted](/up.emit) when a popup is starting to open.
+    
+    @event up:popup:open
+    @param event.preventDefault()
+      Event listeners may call this method to prevent the popup from opening.
+    @stable
+     */
+
+    /**
+    This event is [emitted](/up.emit) when a popup has finished opening.
+    
+    @event up:popup:opened
+    @stable
+     */
+
+    /**
     Closes a currently opened popup overlay.
+    
     Does nothing if no popup is currently open.
+    
+    Emits events [`up:popup:close`](/up:popup:close) and [`up:popup:closed`](/up:popup:closed).
     
     @function up.popup.close
     @param {Object} options
       See options for [`up.animate`](/up.animate).
+    @return {Deferred}
+      A promise that will be resolved once the modal's close
+      animation has finished.
     @stable
      */
     close = function(options) {
-      var $popup;
+      var $popup, deferred;
       $popup = $('.up-popup');
       if ($popup.length) {
-        options = u.options(options, {
-          animation: config.closeAnimation,
-          url: $popup.attr('up-covered-url'),
-          title: $popup.attr('up-covered-title')
-        });
-        currentUrl = void 0;
-        return up.destroy($popup, options);
+        if (up.bus.nobodyPrevents('up:popup:close', {
+          $element: $popup
+        })) {
+          options = u.options(options, {
+            animation: config.closeAnimation,
+            url: $popup.attr('up-covered-url'),
+            title: $popup.attr('up-covered-title')
+          });
+          currentUrl = void 0;
+          deferred = up.destroy($popup, options);
+          deferred.then(function() {
+            return up.emit('up:popup:closed');
+          });
+          return deferred;
+        } else {
+          return u.unresolvableDeferred();
+        }
       } else {
-        return u.resolvedPromise();
+        return u.resolvedDeferred();
       }
     };
+
+    /**
+    This event is [emitted](/up.emit) when a popup dialog
+    is starting to [close](/up.popup.close).
+    
+    @event up:popup:close
+    @param event.preventDefault()
+      Event listeners may call this method to prevent the popup from closing.
+    @stable
+     */
+
+    /**
+    This event is [emitted](/up.emit) when a popup dialog
+    is done [closing](/up.popup.close).
+    
+    @event up:popup:closed
+    @stable
+     */
     autoclose = function() {
       if (!$('.up-popup').is('[up-sticky]')) {
         discardHistory();
@@ -6600,7 +6850,14 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
     /**
     When an element with this attribute is clicked,
-    a currently open popup is closed. 
+    a currently open popup is closed.
+    
+    Does nothing if no popup is currently open.
+    
+    To make a link that closes the current popup, but follows to
+    a fallback destination if no popup is open:
+    
+        <a href="/fallback" up-close>Okay</a>
     
     @selector [up-close]
     @stable
@@ -6640,7 +6897,8 @@ Modal dialogs
 =============
 
 Instead of [linking to a page fragment](/up.link), you can choose
-to show a fragment in a modal dialog.
+to show a fragment in a modal dialog. The existing page will remain
+open in the background and reappear once the modal is closed.
 
 To open a modal, add an [`up-modal` attribute](/a-up-modal) to a link,
 or call the Javascript functions [`up.modal.follow`](/up.modal.follow)
@@ -6732,6 +6990,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param {String} [config.closeAnimation='fade-out']
       The animation used to close the modal. The animation will be applied
       to both the dialog box and the overlay dimming the page.
+    @stable
      */
     config = u.config({
       maxWidth: null,
@@ -6962,7 +7221,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           }
         });
       } else {
-        return $.Deferred();
+        return u.unresolvableDeferred();
       }
     };
 
@@ -6984,6 +7243,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
     /**
     Closes a currently opened modal overlay.
+    
     Does nothing if no modal is currently open.
     
     Emits events [`up:modal:close`](/up:modal:close) and [`up:modal:closed`](/up:modal:closed).
@@ -6991,6 +7251,9 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @function up.modal.close
     @param {Object} options
       See options for [`up.animate`](/up.animate)
+    @return {Deferred}
+      A promise that will be resolved once the modal's close
+      animation has finished.
     @stable
      */
     close = function(options) {
@@ -7016,7 +7279,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           });
           return deferred;
         } else {
-          return $.Deferred();
+          return u.unresolvableDeferred();
         }
       } else {
         return u.resolvedDeferred();
@@ -7204,6 +7467,7 @@ The tooltip element is appended to the end of `<body>`.
       The animation used to open a tooltip.
     @param {String} [config.closeAnimation='fade-out']
       The animation used to close a tooltip.
+    @stable
      */
     config = u.config({
       position: 'top',
@@ -7367,8 +7631,8 @@ The tooltip element is appended to the end of `<body>`.
 /**
 Fast interaction feedback
 =========================
-  
-This module marks up link elements with classes indicating that
+
+Up.js automatically marks up link elements with classes indicating that
 they are currently loading (class `up-active`) or linking
 to the current location (class `up-current`).
 
@@ -7389,6 +7653,7 @@ by providing instant feedback for user interactions.
     @property up.navigation.config
     @param {Number} [config.currentClasses]
       An array of classes to set on [links that point the current location](/up-current).
+    @stable
      */
     config = u.config({
       currentClasses: ['up-current']
@@ -7503,8 +7768,8 @@ by providing instant feedback for user interactions.
     
         <a href="/foo" up-follow up-active>Foo</a>
     
-    Once the fragment is loaded the browser's location bar is updated
-    to `http://yourhost/foo` via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries):
+    Once the link destination has loaded and rendered, the `up-active` class
+    is removed and the [`up-current`](/up-current) class is added:
     
         <a href="/foo" up-follow up-current>Foo</a>
     

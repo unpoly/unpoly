@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.15.0
+------
+
+### Compatible changes
+
+- New function [`up.autosubmit`](/up.autosubmit) and select [`[up-autosubmit]`] to
+  observe a form or field and submit the form when a value changes.
+- [`up.observe`](/up.observe) and [`[up-observe]`](/up-observe) can now be applied
+  to `<form>` tags. The callback is run when any field in the form changes.
+- New function [`up.browser.canPushState`](/up.browser.canPushState) to detect
+  if the browser supports `history.pushState`.
+- New function [`up.browser.canCssTransition`](/up.browser.canCssTransition) to
+  detect if the browser supports animation with CSS transitions.
+- New function [`up.browser.canInputEvent`](/up.browser.canInputEvent) to
+  detect if the browser supports the `input` event.
+- Allow to [configure a default delay](/up.form.config) for [`up.observe`](/up.observe).
+- [Popups](/up.popup) now have events [`up:popup:open`](/up:popup:open),
+  [`up:popup:opened`](/up:popup:opened), [`up:popup:close`](/up:popup:close)
+  and [`up:popup:closed`](/up:popup:closed).
+- The destructor returned by [`up.observe`](/up.observe) now properly unregisters
+  event listeners.
+
+### Breaking changes
+
+- [`up.observe`](/up.observe) now takes the callback function as a last argument.
+  The callback can now longer be passed as a `.change` option.
+
+
 0.14.0
 ------
 
@@ -363,3 +391,55 @@ Refactored internals. No API changes.
 ### Compatible changes
 
 - Bugfix: Don't consider forms with an `up-target` attribute to be a link.
+
+
+0.7.0
+-----
+
+### Compatible changes
+
+- New selector [`[up-expand]`](/up-expand) to enlarge click areas
+
+
+0.6.5
+-----
+
+### Compatible changes
+
+- Animation options for `up.tooltip.open`
+- Consider the left mouse button clicked when `event.button` is undefined (as happens with `.click()``)
+
+### Breaking changes
+
+- Rename option `.origin` to `.position` in `up.popup` and `up.tooltip`
+
+
+0.6.4
+-----
+
+### Compatible changes
+
+- Don't follow links while CTRL, Meta or Shift keys are pressed
+
+
+0.6.3
+-----
+
+### Compatible changes
+
+- Show backtraces for Up.js errors
+
+### Breaking changes
+
+- Rename method `up.awaken` to `up.compiler`
+
+
+0.6.2
+-----
+
+### Compatible changes
+
+- Option to have a custom HTTP method for `up.follow`
+- No longer preloads links with unsafe HTTP methods
+
+
