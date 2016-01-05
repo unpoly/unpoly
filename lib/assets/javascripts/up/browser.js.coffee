@@ -57,6 +57,26 @@ up.browser = (($) ->
   url = ->
     location.href
 
+  isIE8OrWorse = u.memoize ->
+    # This is the most concise way to exclude IE8 and lower
+    # while keeping all relevant desktop and mobile browsers.
+    u.isUndefined(document.addEventListener)
+
+  isIE9OrWorse = u.memoize ->
+    isIE8OrWorse() || navigator.appVersion.indexOf('MSIE 9.') != -1
+
+  ###*
+  Returns whether this browser supports manipulation of the current URL
+  via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
+
+  When Up.js is asked to change history on a browser that doesn't support
+  `pushState` (e.g. through [`up.follow`](/up.follow)), it will gracefully
+  fall back to a full page load.
+
+  @function up.browser.canPushState
+  @return boolean
+  @experimental
+  ###
   canPushState = u.memoize ->
     # We cannot use pushState if the initial request method is a POST for two reasons:
     #
@@ -76,20 +96,44 @@ up.browser = (($) ->
     # the framework was booted from a GET request.
     u.isDefined(history.pushState) && initialRequestMethod() == 'get'
 
-  isIE8OrWorse = u.memoize ->
-    # This is the most concise way to exclude IE8 and lower
-    # while keeping all relevant desktop and mobile browsers.
-    u.isUndefined(document.addEventListener)
+  ###*
+  Returns whether this browser supports animation using
+  [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions).
 
-  isIE9OrWorse = u.memoize ->
-    isIE8OrWorse() || navigator.appVersion.indexOf('MSIE 9.') != -1
+  When Up.js is asked to animate history on a browser that doesn't support
+  CSS transitions (e.g. through [`up.animate`](/up.animate)), it will skip the
+  animation by instantly jumping to the last frame.
 
-  canCssAnimation = u.memoize ->
+  @function up.browser.canCssTransition
+  @return boolean
+  @experimental
+  ###
+  canCssTransition = u.memoize ->
     'transition' of document.documentElement.style
 
+  ###*
+  Returns whether this browser supports the DOM event [`input`](https://developer.mozilla.org/de/docs/Web/Events/input).
+
+  @function up.browser.canInputEvent
+  @return boolean
+  @experimental
+  ###
   canInputEvent = u.memoize ->
     'oninput' of document.createElement('input')
 
+  ###*
+  Returns whether this browser supports
+  [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
+  in `console` functions.
+
+  \#\#\#\# Example for string substition
+
+      console.log("Hello %o!", "Judy");
+
+  @function up.browser.canLogSubstitution
+  @return boolean
+  @internal
+  ###
   canLogSubstitution = u.memoize ->
     !isIE9OrWorse()
 
@@ -117,6 +161,11 @@ up.browser = (($) ->
   ###*
   Returns whether Up.js supports the current browser.
 
+  This also returns `true` if Up.js only support some features, but falls back
+  gracefully for other features. E.g. IE9 is almost fully supported, but due to
+  its lack of [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
+  Up.js falls back to a full page load when asked to manipulate history.
+
   Currently Up.js supports IE9 with jQuery 1.9+.
   On older browsers Up.js will prevent itself from [booting](/up.boot)
   and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
@@ -131,7 +180,7 @@ up.browser = (($) ->
   url: url
   loadPage: loadPage
   canPushState: canPushState
-  canCssAnimation: canCssAnimation
+  canCssTransition: canCssTransition
   canInputEvent: canInputEvent
   canLogSubstitution: canLogSubstitution
   isSupported: isSupported

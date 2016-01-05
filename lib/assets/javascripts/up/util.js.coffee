@@ -922,7 +922,7 @@ up.util = (($) ->
   ###
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
     $element = $(elementOrSelector)
-    if up.browser.canCssAnimation()
+    if up.browser.canCssTransition()
       opts = options(opts, 
         duration: 300, 
         delay: 0, 

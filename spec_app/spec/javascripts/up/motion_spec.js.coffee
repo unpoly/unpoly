@@ -4,7 +4,7 @@ describe 'up.motion', ->
   
     describe 'up.animate', ->
 
-      if up.browser.canCssAnimation()
+      if up.browser.canCssTransition()
 
         it 'animates the given element', (done) ->
           $element = affix('.element').text('content')
@@ -35,7 +35,7 @@ describe 'up.motion', ->
 
     describe 'up.morph', ->
 
-      if up.browser.canCssAnimation()
+      if up.browser.canCssTransition()
 
         it 'transitions between two element by animating two copies while keeping the originals in the background', (done) ->
 
