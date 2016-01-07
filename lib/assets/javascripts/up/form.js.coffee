@@ -722,6 +722,7 @@ up.form = (($) ->
   up.on 'up:framework:reset', reset
 
   knife: eval(Knife?.point)
+  config: config
   submit: submit
   observe: observe
   validate: validate

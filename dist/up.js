@@ -6438,6 +6438,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     up.on('up:framework:reset', reset);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
+      config: config,
       submit: submit,
       observe: observe,
       validate: validate

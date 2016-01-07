@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.15.1
+------
+
+### Compatible changes
+
+- Fix an error where `up.form.config` was not published. This caused `up-bootstrap.js` to throw an error.
+
+
 0.15.0
 ------
 
