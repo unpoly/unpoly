@@ -80,12 +80,15 @@ up.popup = (($) ->
     Defines where the popup is attached to the opening element.
 
     Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+  @param {String} [config.history=false]
+    Whether opening a popup will add a browser history entry.
   @stable
   ###
   config = u.config
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
     position: 'bottom-right'
+    history: false
 
   reset = ->
     close()
@@ -199,7 +202,7 @@ up.popup = (($) ->
     position = u.option(options.position, $link.attr('up-position'), config.position)
     animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
     sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
-    history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), false) else false
+    history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
     animateOptions = up.motion.animateOptions(options, $link)
 
     close()

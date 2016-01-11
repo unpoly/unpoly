@@ -94,6 +94,8 @@ up.modal = (($) ->
   @param {String} [config.closeAnimation='fade-out']
     The animation used to close the modal. The animation will be applied
     to both the dialog box and the overlay dimming the page.
+  @param {String} [config.history=true]
+    Whether opening a modal will add a browser history entry.
   @stable
   ###
   config = u.config
@@ -101,6 +103,7 @@ up.modal = (($) ->
     minWidth: null
     width: null
     height: null
+    history: true
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
     closeLabel: '×'
@@ -268,7 +271,7 @@ up.modal = (($) ->
     The CSS selector to extract from the response.
     The extracted content will be placed into the dialog window.
   @param {Object} options
-    See options for [previous `up.modal.open` variant](/up.modal.open).
+    See options for [`up.modal.follow`](/up.modal.follow).
   @return {Promise}
     A promise that will be resolved when the popup has been loaded and rendered.
   @stable
@@ -295,7 +298,7 @@ up.modal = (($) ->
     # Although we usually fall back to full page loads if a browser doesn't support pushState,
     # in the case of modals we assume that the developer would rather see a dialog
     # without an URL update.
-    history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), true) else false
+    history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
     animateOptions = up.motion.animateOptions(options, $link)
 
     close()

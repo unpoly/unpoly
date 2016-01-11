@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+-----------
+
+### Compatible changes
+
+- New options `up.modal.config.history` (defaults to `true`) and `up.modal.popup.history` (defaults to `false`).
+
+
 0.15.1
 ------
 
