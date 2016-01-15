@@ -274,9 +274,6 @@ up.flow = (($) ->
       # jQuery.find is the Sizzle function (https://github.com/jquery/sizzle/wiki#public-api)
       # which gives us non-standard CSS selectors such as `:has`.
       # It returns an array of DOM elements, NOT a jQuery collection.
-
-      console.log("options.requireMatch is %o", options.requireMatch)
-
       if child = $.find(selector, htmlElement)[0]
         $(child)
       else if options.requireMatch
