@@ -246,7 +246,7 @@ up.flow = (($) ->
 
     for step in parseImplantSteps(selector, options)
       $old = findOldFragment(step.selector, options)
-      $new = response.find(step.selector).first()
+      $new = response.find(step.selector)?.first()
       if $old && $new
         swapElements($old, $new, step.pseudoClass, step.transition, options)
 
