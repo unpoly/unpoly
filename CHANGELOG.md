@@ -10,7 +10,28 @@ Unreleased
 
 ### Compatible changes
 
-- New options `up.modal.config.history` (defaults to `true`) and `up.modal.popup.history` (defaults to `false`).
+- You can now configure [`up.proxy.config.maxRequests`](/up.proxy.config) to limit
+  the maximum number of concurrent requests. Additional
+  requests are queued. This currently ignores preloading requests.
+
+  You might find it useful to set this to `1` in full-stack integration
+  tests (e.g. Selenium).
+- Allow to disable animations globally with `up.motion.enabled = false`.
+  This can be useful in full-stack integration tests like a Selenium test suite.
+- New function [`up.motion.isEnabled`](/up.motion.isEnabled) to check if animations will be performed.
+- [`up.popup.attach`](/up.popup.attach) now throws a helpful error when trying to attach a popup to a non-existing element
+- New option [`up.modal.config.history`](/up.modal.config) to configure if modals change the browser URL (defaults to `true`)
+- New option [`up.popup.config.history`](/up.popup.config) to configure if popup change the browser URL (defaults to `false`).
+- Fix CSS for popups with a position of `"bottom-left"`.
+
+### Breaking changes
+
+- Popups and modals used to close automatically whenever an element behind the overlay was replaced.
+  This behavior is still in effect, but only if the replacement was triggered by a link or element from
+  within the popup or modal.
+- Popups and modals no longer raise an error if their (hidden) overlay was closed before the
+  response was received.
+- Popups and modals are now compiled before they are animated.
 
 
 0.15.1
