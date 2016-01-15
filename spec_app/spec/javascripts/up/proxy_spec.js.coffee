@@ -88,7 +88,7 @@ describe 'up.proxy', ->
           u.times 2, -> up.proxy.ajax(url: '/foo', method: method, cache: true)
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-      it 'does not responses with a non-200 status code', ->
+      it 'does not cache responses with a non-200 status code', ->
         # Send the same request for the same path, 3 minutes apart
         up.proxy.ajax(url: '/foo')
 
@@ -101,6 +101,17 @@ describe 'up.proxy', ->
 
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
+      it 'limits the number of concurrent requests to config.maxRequests', ->
+        up.proxy.config.maxRequests = 1
+        responses = []
+        up.proxy.ajax(url: '/foo').then (html) -> responses.push(html)
+        up.proxy.ajax(url: '/bar').then (html) -> responses.push(html)
+        expect(jasmine.Ajax.requests.count()).toEqual(1) # only one request was made
+        @respondWith('first response', request: jasmine.Ajax.requests.at(0))
+        expect(responses).toEqual ['first response']
+        expect(jasmine.Ajax.requests.count()).toEqual(2) # a second request was made
+        @respondWith('second response', request: jasmine.Ajax.requests.at(1))
+        expect(responses).toEqual ['first response', 'second response']
 
       describe 'events', ->
         

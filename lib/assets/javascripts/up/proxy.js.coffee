@@ -63,6 +63,8 @@ up.proxy = (($) ->
   pendingCount = undefined
   busyEventEmitted = undefined
 
+  queuedRequests = []
+
   ###*
   @property up.proxy.config
   @param {Number} [config.preloadDelay=75]
@@ -77,6 +79,15 @@ up.proxy = (($) ->
   @param {Number} [config.busyDelay=300]
     How long the proxy waits until emitting the [`up:proxy:busy` event](/up:proxy:busy).
     Use this to prevent flickering of spinners.
+  @param {Number} [config.maxRequests=4]
+    The maximum number of concurrent requests to allow before additional
+    requests are queued.
+
+    You might find it useful to set this to `1` in full-stack integration
+    tests (e.g. Selenium).
+
+    Note that your browser might [impose its own request limit](http://www.browserscope.org/?category=network)
+    regardless of what you configure here.
   @stable
   ###
   config = u.config
@@ -84,6 +95,7 @@ up.proxy = (($) ->
     preloadDelay: 75
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
+    maxRequests: 4
 
   cacheKey = (request) ->
     normalizeRequest(request)
@@ -178,6 +190,7 @@ up.proxy = (($) ->
     config.reset()
     busyEventEmitted = false
     cache.clear()
+    queuedRequests = []
 
   reset()
 
@@ -229,23 +242,26 @@ up.proxy = (($) ->
 
     pending = true
 
-    # We don't cache non-GET responses unless `options.cache`
-    # is explicitly set to `true`.
+    # Non-GET requests always touch the network
+    # unless `options.cache` is explicitly set to `true`.
+    # These requests are never cached.
     if !isIdempotent(request) && !forceCache
       clear()
-      promise = load(request)
-    # If a cached response is available, we use it unless
-    # `options.cache` is explicitly set to `false`.
+      promise = loadOrQueue(request)
+    # If we have an existing promise matching this new request,
+    # we use it unless `options.cache` is explicitly set to `false`.
+    # The promise might still be pending.
     else if (promise = get(request)) && !ignoreCache
       pending = (promise.state() == 'pending')
+    # If no existing promise is available, we make a network request.
     else
-      promise = load(request)
+      promise = loadOrQueue(request)
       set(request, promise)
       # Don't cache failed requests
       promise.fail -> remove(request)
 
     if pending && !options.preload
-      # This will actually make `pendingCount` higher than the actual
+      # This might actually make `pendingCount` higher than the actual
       # number of outstanding requests. However, we need to cover the
       # following case:
       #
@@ -340,12 +356,35 @@ up.proxy = (($) ->
   @stable
   ###
 
+  loadOrQueue = (request) ->
+    if pendingCount < config.maxRequests
+      load(request)
+    else
+      queue(request)
+
+  queue = (request) ->
+    u.debug('Queuing URL %o', request.url)
+    deferred = $.Deferred()
+    entry =
+      deferred: deferred
+      request: request
+    queuedRequests.push(entry)
+    deferred.promise()
+
   load = (request) ->
     u.debug('Loading URL %o', request.url)
     up.emit('up:proxy:load', request)
     promise = u.ajax(request)
-    promise.always -> up.emit('up:proxy:received', request)
+    promise.always ->
+      up.emit('up:proxy:received', request)
+      pokeQueue()
     promise
+
+  pokeQueue = ->
+    if entry = queuedRequests.shift()
+      promise = load(entry.request)
+      promise.done (args...) -> entry.deferred.resolve(args...)
+      promise.fail (args...) -> entry.deferred.reject(args...)
 
   ###*
   This event is [emitted]/(up.emit) before an [AJAX request](/up.proxy.ajax)
