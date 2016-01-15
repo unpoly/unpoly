@@ -310,9 +310,9 @@ up.modal = (($) ->
         maxWidth: maxWidth
         height: height
         sticky: sticky
-      up.replace selector, url,
-        history: history
-        insert: -> updated($modal, animation, animateOptions)
+      promise = up.replace(selector, url, history: history)
+      promise.then -> updated($modal, animation, animateOptions)
+      promise
     else
       # Although someone prevented the destruction, keep a uniform API for
       # callers by returning a Deferred that will never be resolved.

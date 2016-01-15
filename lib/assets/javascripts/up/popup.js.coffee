@@ -210,10 +210,9 @@ up.popup = (($) ->
     if up.bus.nobodyPrevents('up:popup:open', url: url)
       $popup = createHiddenPopup($link, selector, sticky)
 
-      up.replace(selector, url,
-        history: history
-        insert: -> updated($link, $popup, position, animation, animateOptions)
-      )
+      promise = up.replace(selector, url, history: history)
+      promise.then -> updated($link, $popup, position, animation, animateOptions)
+      promise
     else
       # Although someone prevented the destruction, keep a uniform API for
       # callers by returning a Deferred that will never be resolved.

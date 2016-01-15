@@ -274,7 +274,6 @@ up.flow = (($) ->
         u.error("Could not find selector %o in response %o", selector, html)
 
   elementsInserted = ($new, options) ->
-    options.insert?($new)
     if options.history
       document.title = options.title if options.title
       up.history[options.historyMethod](options.history)
