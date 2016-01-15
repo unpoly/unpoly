@@ -101,17 +101,26 @@ describe 'up.proxy', ->
 
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-      it 'limits the number of concurrent requests to config.maxRequests', ->
-        up.proxy.config.maxRequests = 1
-        responses = []
-        up.proxy.ajax(url: '/foo').then (html) -> responses.push(html)
-        up.proxy.ajax(url: '/bar').then (html) -> responses.push(html)
-        expect(jasmine.Ajax.requests.count()).toEqual(1) # only one request was made
-        @respondWith('first response', request: jasmine.Ajax.requests.at(0))
-        expect(responses).toEqual ['first response']
-        expect(jasmine.Ajax.requests.count()).toEqual(2) # a second request was made
-        @respondWith('second response', request: jasmine.Ajax.requests.at(1))
-        expect(responses).toEqual ['first response', 'second response']
+      describe 'with config.maxRequests set', ->
+
+        beforeEach ->
+          up.proxy.config.maxRequests = 1
+
+        it 'limits the number of concurrent requests', ->
+          responses = []
+          up.proxy.ajax(url: '/foo').then (html) -> responses.push(html)
+          up.proxy.ajax(url: '/bar').then (html) -> responses.push(html)
+          expect(jasmine.Ajax.requests.count()).toEqual(1) # only one request was made
+          @respondWith('first response', request: jasmine.Ajax.requests.at(0))
+          expect(responses).toEqual ['first response']
+          expect(jasmine.Ajax.requests.count()).toEqual(2) # a second request was made
+          @respondWith('second response', request: jasmine.Ajax.requests.at(1))
+          expect(responses).toEqual ['first response', 'second response']
+
+#        it 'considers preloading links for the request limit', ->
+#          up.proxy.ajax(url: '/foo', preload: true)
+#          up.proxy.ajax(url: '/bar')
+#          expect(jasmine.Ajax.requests.count()).toEqual(1)
 
       describe 'events', ->
         

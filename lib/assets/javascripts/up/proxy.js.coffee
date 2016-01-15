@@ -81,7 +81,7 @@ up.proxy = (($) ->
     Use this to prevent flickering of spinners.
   @param {Number} [config.maxRequests=4]
     The maximum number of concurrent requests to allow before additional
-    requests are queued.
+    requests are queued. This currently ignores preloading requests.
 
     You might find it useful to set this to `1` in full-stack integration
     tests (e.g. Selenium).
