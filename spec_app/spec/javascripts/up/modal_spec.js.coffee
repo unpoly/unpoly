@@ -1,4 +1,6 @@
 describe 'up.modal', ->
+
+  u = up.util
   
   describe 'Javascript functions', ->
 
@@ -140,15 +142,66 @@ describe 'up.modal', ->
           expect(wasClosed).toBe(false)
           expect(wasDefaultPrevented).toBe(false)
 
-    describe 'when following links inside a modal', ->
+    describe 'when replacing content', ->
+
+      beforeEach ->
+        up.modal.config.openAnimation = 'none'
+        up.modal.config.closeAnimation = 'none'
+        up.popup.config.openAnimation = 'none'
+        up.popup.config.closeAnimation = 'none'
 
       it 'prefers to replace a selector within the modal', ->
         $outside = affix('.foo').text('old outside')
         up.modal.visit('/path', target: '.foo')
         @respondWith("<div class='foo'>old inside</div>")
         up.flow.implant('.foo', "<div class='foo'>new text</div>")
+        expect($outside).toBeInDOM()
         expect($outside).toHaveText('old outside')
         expect($('.up-modal-content')).toHaveText('new text')
+
+      it 'auto-closes the modal when a replacement from inside the modal affects a selector behind the modal', ->
+        affix('.outside').text('old outside')
+        up.modal.visit('/path', target: '.inside')
+        @respondWith("<div class='inside'>old inside</div>")
+        up.flow.implant('.outside', "<div class='outside'>new outside</div>", origin: $('.inside'))
+        expect($('.outside')).toHaveText('new outside')
+        expect($('.up-modal')).not.toExist()
+
+      it 'does not auto-close the modal when a replacement from inside the modal affects a selector inside the modal', ->
+        affix('.outside').text('old outside')
+        up.modal.visit('/path', target: '.inside')
+        @respondWith("<div class='inside'>old inside</div>")
+        up.flow.implant('.inside', "<div class='inside'>new inside</div>", origin: $('.inside'))
+        expect($('.inside')).toHaveText('new inside')
+        expect($('.up-modal')).toExist()
+
+      it 'does not auto-close the modal when a replacement from outside the modal affects a selector outside the modal', ->
+        affix('.outside').text('old outside')
+        up.modal.visit('/path', target: '.inside')
+        @respondWith("<div class='inside'>old inside</div>")
+        up.flow.implant('.outside', "<div class='outside'>new outside</div>", origin: $('.outside'))
+        expect($('.outside')).toHaveText('new outside')
+        expect($('.up-modal')).toExist()
+
+      it 'does not auto-close the modal when a replacement from outside the modal affects a selector inside the modal', ->
+        affix('.outside').text('old outside')
+        up.modal.visit('/path', target: '.inside')
+        @respondWith("<div class='inside'>old inside</div>")
+        up.flow.implant('.inside', "<div class='inside'>new inside</div>", origin: $('.outside'))
+        expect($('.inside')).toHaveText('new inside')
+        expect($('.up-modal')).toExist()
+
+      it 'does not auto-close the modal when the new fragment is within a popup', ->
+        up.modal.visit('/modal', target: '.modal-content')
+        @respondWith("<div class='modal-content'></div>")
+        up.popup.attach('.modal-content', url: '/popup', target: '.popup-content')
+        @respondWith("<div class='popup-content'></div>")
+        expect($('.up-modal')).toExist()
+        expect($('.up-popup')).toExist()
+
+    describe 'when following links inside a modal', ->
+
+      it 'prefers to replace a selector within the modal', ->
 
       it 'auto-closes the modal if a selector behind the modal gets replaced'
 

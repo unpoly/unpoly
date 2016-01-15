@@ -349,7 +349,7 @@ up.popup = (($) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
         currentUrl = newSource
-    else
+    else if contains(event.origin)
       autoclose()
   )
   

@@ -304,13 +304,15 @@ up.syntax = (($) ->
 
   @function up.hello
   @param {String|Element|jQuery} selectorOrElement
+  @param {String|Element|jQuery} [options.origin]
   @return {jQuery}
     The compiled element
   @stable
   ###
-  hello = (selectorOrElement) ->
+  hello = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
-    up.emit('up:fragment:inserted', $element: $element)
+    eventAttrs = u.options(options, $element: $element)
+    up.emit('up:fragment:inserted', eventAttrs)
     $element
 
   ###*

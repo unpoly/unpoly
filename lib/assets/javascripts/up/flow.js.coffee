@@ -288,9 +288,9 @@ up.flow = (($) ->
     unless options.source is false
       setSource($new, options.source)
     autofocus($new)
-    # The fragment should be readiet before animating,
+    # The fragment should be compiled before animating,
     # so transitions see .up-current classes
-    up.hello($new)
+    up.hello($new, origin: options.origin)
 
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'
