@@ -102,7 +102,7 @@ up.popup = (($) ->
         top: linkBox.top + linkBox.height
       when "bottom-left"
         left: linkBox.left
-        top: linkBox.bottom + linkBox.height
+        top: linkBox.top + linkBox.height
       when "top-right"
         right: linkBox.right
         bottom: linkBox.top
@@ -177,6 +177,9 @@ up.popup = (($) ->
   @param {Element|jQuery|String} elementOrSelector
   @param {String} [options.url]
   @param {String} [options.position='bottom-right']
+    Defines where the popup is attached to the opening element.
+
+    Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
   @param {String} [options.animation]
     The animation to use when opening the popup.
   @param {Number} [options.duration]
@@ -317,8 +320,13 @@ up.popup = (($) ->
       <a href="/settings" up-popup=".options" up-sticky>Settings</a>
 
   @selector a[up-popup]
-  @param [up-sticky]
   @param [up-position]
+    Defines where the popup is attached to the opening element.
+
+    Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+  @param [up-sticky]
+    If set to `true`, the popup remains
+    open even if the page changes in the background.
   @stable
   ###
   up.on('click', 'a[up-popup]', (event, $link) ->
