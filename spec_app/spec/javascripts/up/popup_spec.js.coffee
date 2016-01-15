@@ -1,5 +1,7 @@
 describe 'up.popup', ->
 
+  u = up.util
+
   describe 'Javascript functions', ->
 
     describe 'up.popup.attach', ->
@@ -34,6 +36,10 @@ describe 'up.popup', ->
 
       it "loads this link's destination in a popup when clicked", ->
         $link = affix('a[href="/path/to"][up-popup=".middle"]').text('link')
+        $link.css
+          position: 'fixed'
+          left: '100px'
+          top: '50px'
         $link.click()
         expect(@lastRequest().url).toMatch /\/path\/to$/
         @respondWith """
@@ -41,10 +47,19 @@ describe 'up.popup', ->
           <div class="middle">new-middle</div>
           <div class="after">new-after</div>
           """
-        expect($('.up-popup')).toExist()
-        expect($('.up-popup .middle')).toHaveText('new-middle')
-        expect($('.up-popup .before')).not.toExist()
-        expect($('.up-popup .after')).not.toExist()
+
+        $popup = $('.up-popup')
+
+        expect($popup).toExist()
+        expect($popup.find('.middle')).toHaveText('new-middle')
+        expect($popup.find('.before')).not.toExist()
+        expect($popup.find('.after')).not.toExist()
+
+        popupDims = u.measure($popup, full: true)
+        linkDims = u.measure($link, full: true)
+
+        expect(popupDims.right).toBeAround(linkDims.right, 1)
+        expect(popupDims.top).toBeAround(linkDims.top + linkDims.height, 1)
 
     describe '[up-close]', ->
 
