@@ -149,7 +149,7 @@ up.tooltip = (($) ->
   ###*
   Displays a tooltip with HTML content when hovering the mouse over this element:
 
-      <a href="/decks" up-tooltip="Show &lt;b&gt;all&lt;/b&gt; decks">Decks</a>
+      <a href="/decks" up-tooltip-html="Show &lt;b&gt;all&lt;/b&gt; decks">Decks</a>
 
   @selector [up-tooltip-html]
   @stable

@@ -619,7 +619,7 @@ up.form = (($) ->
   You can change this default behavior by setting `up.config.validateTargets`:
 
       // Always update the entire form containing the current field ("&")
-      up.config.validateTargets = ['form &']
+      up.form.config.validateTargets = ['form &']
 
   You can also individually override what to update by setting the `up-validate`
   attribute to a CSS selector:
