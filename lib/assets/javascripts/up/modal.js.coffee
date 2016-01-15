@@ -43,7 +43,7 @@ configure Up.js to [use a different HTML structure](/up.modal.config).
 \#\#\#\# Closing behavior
 
 By default the dialog automatically closes
-*whenever a page fragment below the dialog is updated*.
+*whenever a page fragment behind the dialog is updated*.
 This is useful to have the dialog interact with the page that
 opened it, e.g. by updating parts of a larger form or by signing in a user
 and revealing additional information.
@@ -129,7 +129,7 @@ up.modal = (($) ->
   currentUrl = undefined
 
   ###*
-  Returns the URL of the page below the modal overlay.
+  Returns the URL of the page behind the modal overlay.
 
   @function up.modal.coveredUrl
   @return {String}

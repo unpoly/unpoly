@@ -31,7 +31,7 @@ By default the popup uses the following DOM structure:
 The popup closes when the user clicks anywhere outside the popup area.
 
 By default the popup also closes
-*whenever a page fragment below the popup is updated*.
+*whenever a page fragment behind the popup is updated*.
 This is useful to have the popup interact with the page that
 opened it, e.g. by updating parts of a larger form or by signing in a user
 and revealing additional information.
@@ -58,7 +58,7 @@ up.popup = (($) ->
   currentUrl = undefined
 
   ###*
-  Returns the URL of the page or modal below the popup.
+  Returns the URL of the page or modal behind the popup.
 
   @function up.popup.coveredUrl
   @return {String}
@@ -314,7 +314,7 @@ up.popup = (($) ->
       <a href="/decks" up-popup=".deck_list">Switch deck</a>
 
   If the `up-sticky` attribute is set, the dialog does not auto-close
-  if a page fragment below the popup overlay updates:
+  if a page fragment behind the popup overlay updates:
 
       <a href="/decks" up-popup=".deck_list">Switch deck</a>
       <a href="/settings" up-popup=".options" up-sticky>Settings</a>
