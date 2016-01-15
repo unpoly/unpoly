@@ -199,6 +199,7 @@ up.popup = (($) ->
   ###
   attach = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
+    $link.length or u.error('Cannot attach popup to non-existing element %o', linkOrSelector)
     
     options = u.options(options)
     url = u.option(options.url, $link.attr('href'))
