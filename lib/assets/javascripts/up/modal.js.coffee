@@ -203,11 +203,13 @@ up.modal = (($) ->
       unshiftElement = u.temporaryCss($element, 'right': elementRightShift)
       unshiftElements.push(unshiftElement)
 
-  updated = ($modal, animation, animateOptions) ->
-    shiftElements()
-    $modal.show()
-    deferred = up.animate($modal, animation, animateOptions)
-    deferred.then -> up.emit('up:modal:opened')
+  updated = (animation, animateOptions) ->
+    $modal = $('.up-modal')
+    if $modal.is(':hidden')
+      shiftElements()
+      $modal.show()
+      deferred = up.animate($modal, animation, animateOptions)
+      deferred.then -> up.emit('up:modal:opened')
 
   ###*
   Opens the given link's destination in a modal overlay:
@@ -304,14 +306,14 @@ up.modal = (($) ->
     close()
 
     if up.bus.nobodyPrevents('up:modal:open', url: url)
-      $modal = createHiddenModal
+      createHiddenModal
         selector: selector
         width: width
         maxWidth: maxWidth
         height: height
         sticky: sticky
-      promise = up.replace(selector, url, history: history)
-      promise.then -> updated($modal, animation, animateOptions)
+      promise = up.replace(selector, url, history: history, requireMatch: false)
+      promise.then -> updated(animation, animateOptions)
       promise
     else
       # Although someone prevented the destruction, keep a uniform API for

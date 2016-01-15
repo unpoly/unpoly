@@ -6,7 +6,13 @@ describe 'up.popup', ->
 
     describe 'up.popup.attach', ->
 
-      it 'should have tests'
+      it 'does not explode if the popup was closed before the response was received', ->
+        $span = affix('span')
+        up.popup.attach($span, url: '/foo', target: '.container')
+        up.popup.close()
+        respond = => @respondWith('<div class="container">text</div>')
+        expect(respond).not.toThrowError()
+        expect($('.up-error')).not.toExist()
 
     describe 'up.popup.coveredUrl', ->
 

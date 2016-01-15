@@ -64,6 +64,12 @@ describe 'up.modal', ->
             expect(parseInt($anchoredElement.css('right'))).toBeAround(30 , 10)
             done()
 
+      it 'does not explode if the modal was closed before the response was received', ->
+        up.modal.visit('/foo', target: '.container')
+        up.modal.close()
+        respond = => @respondWith('<div class="container">text</div>')
+        expect(respond).not.toThrowError()
+        expect($('.up-error')).not.toExist()
 
     describe 'up.modal.coveredUrl', ->
 

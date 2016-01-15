@@ -161,13 +161,14 @@ up.popup = (($) ->
     $popup.hide()
     $popup
     
-  updated = ($link, $popup, position, animation, animateOptions) ->
-    $popup.show()
-    setPosition($link, $popup, position)
-    deferred = up.animate($popup, animation, animateOptions)
-    deferred.then -> up.emit('up:popup:opened')
-    deferred
-    
+  updated = ($link, position, animation, animateOptions) ->
+    $popup = $('.up-popup')
+    if $popup.is(':hidden')
+      $popup.show()
+      setPosition($link, $popup, position)
+      deferred = up.animate($popup, animation, animateOptions)
+      deferred.then -> up.emit('up:popup:opened')
+
   ###*
   Attaches a popup overlay to the given element or selector.
 
@@ -211,10 +212,9 @@ up.popup = (($) ->
     close()
 
     if up.bus.nobodyPrevents('up:popup:open', url: url)
-      $popup = createHiddenPopup($link, selector, sticky)
-
-      promise = up.replace(selector, url, history: history)
-      promise.then -> updated($link, $popup, position, animation, animateOptions)
+      createHiddenPopup($link, selector, sticky)
+      promise = up.replace(selector, url, history: history, requireMatch: false)
+      promise.then -> updated($link, position, animation, animateOptions)
       promise
     else
       # Although someone prevented the destruction, keep a uniform API for

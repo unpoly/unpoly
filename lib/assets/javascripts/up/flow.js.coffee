@@ -146,6 +146,9 @@ up.flow = (($) ->
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
+  @param {Boolean} [options.requireMatch=true]
+    Whether to raise an error if the given selector is missing in
+    either the current page or in the response.
   @return {Promise}
     A promise that will be resolved when the page has been updated.
   @stable
@@ -232,33 +235,36 @@ up.flow = (($) ->
   implant = (selectorOrElement, html, options) ->
     selector = resolveSelector(selectorOrElement, options)
     options = u.options(options,
-      historyMethod: 'push'
+      historyMethod: 'push',
+      requireMatch: true
     )
     options.source = u.option(options.source, options.history)
-    response = parseResponse(html)
+    response = parseResponse(html, options)
     options.title ||= response.title()
 
     up.layout.saveScroll() unless options.saveScroll == false
 
     for step in parseImplantSteps(selector, options)
-      $old = findOldFragment(step.selector)
+      $old = findOldFragment(step.selector, options)
       $new = response.find(step.selector).first()
-      swapElements($old, $new, step.pseudoClass, step.transition, options)
+      if $old && $new
+        swapElements($old, $new, step.pseudoClass, step.transition, options)
 
-  findOldFragment = (selector) ->
+  findOldFragment = (selector, options) ->
     # Prefer to replace fragments in an open popup or modal
     first(".up-popup #{selector}") ||
       first(".up-modal #{selector}") ||
       first(selector) ||
-      fragmentNotFound(selector)
+      oldFragmentNotFound(selector, options)
 
-  fragmentNotFound = (selector) ->
-    message = 'Could not find selector %o in current body HTML'
-    if message[0] == '#'
-      message += ' (avoid using IDs)'
-    u.error(message, selector)
+  oldFragmentNotFound = (selector, options) ->
+    if options.requireMatch
+      message = 'Could not find selector %o in current body HTML'
+      if message[0] == '#'
+        message += ' (avoid using IDs)'
+      u.error(message, selector)
 
-  parseResponse = (html) ->
+  parseResponse = (html, options) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags
     htmlElement = u.createElementFromHtml(html)
     title: -> htmlElement.querySelector("title")?.textContent
@@ -268,9 +274,12 @@ up.flow = (($) ->
       # jQuery.find is the Sizzle function (https://github.com/jquery/sizzle/wiki#public-api)
       # which gives us non-standard CSS selectors such as `:has`.
       # It returns an array of DOM elements, NOT a jQuery collection.
+
+      console.log("options.requireMatch is %o", options.requireMatch)
+
       if child = $.find(selector, htmlElement)[0]
         $(child)
-      else
+      else if options.requireMatch
         u.error("Could not find selector %o in response %o", selector, html)
 
   elementsInserted = ($new, options) ->
