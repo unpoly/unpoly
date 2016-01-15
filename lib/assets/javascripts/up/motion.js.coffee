@@ -44,17 +44,40 @@ up.motion = (($) ->
   @param {Number} [config.duration=300]
   @param {Number} [config.delay=0]
   @param {String} [config.easing='ease']
+  @param {Boolean} [config.enabled=true]
+    Whether animation is enabled.
+
+    Set this to `false` to disable animation globally.
+    This can be useful in full-stack integration tests like a Selenium test suite.
+
+    Regardless of this setting, all animations will be skipped on browsers
+    that do not support [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions).
   @stable
   ###
   config = u.config
     duration: 300
     delay: 0
     easing: 'ease'
+    enabled: true
 
   reset = ->
     animations = u.copy(defaultAnimations)
     transitions = u.copy(defaultTransitions)
     config.reset()
+
+  ###*
+  Returns whether Up.js will perform animations.
+
+  Animations will be performed if the browser supports
+  [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions)
+  and if [`up.motion.config.enabled`](/up.motion.config) is set to `true` (which is the default).
+
+  @function up.motion.isEnabled
+  @return {Boolean}
+  @stable
+  ###
+  isEnabled = ->
+    config.enabled && up.browser.canCssTransition()
 
   ###*
   Applies the given animation to the given element.
@@ -138,7 +161,12 @@ up.motion = (($) ->
     else if u.isString(animation)
       animate($element, findAnimation(animation), options)
     else if u.isHash(animation)
-      u.cssAnimate($element, animation, options)
+      if isEnabled()
+        u.cssAnimate($element, animation, options)
+      else
+        # Directly set the last frame
+        $element.css(animation)
+        u.resolvedDeferred()
     else
       u.error("Unknown animation type %o", animation)
 
@@ -324,7 +352,7 @@ up.motion = (($) ->
     parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source')
     parsedOptions = u.extend(parsedOptions, animateOptions(options))
 
-    if up.browser.canCssTransition()
+    if isEnabled()
       finish($old)
       finish($new)
 
@@ -636,6 +664,7 @@ up.motion = (($) ->
   transition: transition
   animation: animation
   config: config
+  isEnabled: isEnabled
   defaults: -> u.error('up.motion.defaults(...) no longer exists. Set values on he up.motion.config property instead.')
   none: none
   when: resolvableWhen

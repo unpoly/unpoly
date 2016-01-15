@@ -105,8 +105,7 @@ describe 'up.popup', ->
     describe 'when replacing content', ->
 
       beforeEach ->
-        up.popup.config.openAnimation = 'none'
-        up.popup.config.closeAnimation = 'none'
+        up.motion.config.enabled = false
 
       it 'prefers to replace a selector within the popup', ->
         $outside = affix('.foo').text('old outside')

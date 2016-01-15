@@ -913,37 +913,33 @@ up.util = (($) ->
   ###
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
     $element = $(elementOrSelector)
-    if up.browser.canCssTransition()
-      opts = options(opts, 
-        duration: 300, 
-        delay: 0, 
-        easing: 'ease'
-      )
-      # We don't finish an existing animation here, since
-      # the public API `up.motion.animate` already does this.
-      deferred = $.Deferred()
-      transition =
-        'transition-property': Object.keys(lastFrame).join(', ')
-        'transition-duration': "#{opts.duration}ms"
-        'transition-delay': "#{opts.delay}ms"
-        'transition-timing-function': opts.easing
-      withoutCompositing = forceCompositing($element)
-      withoutTransition = temporaryCss($element, transition)
-      $element.css(lastFrame)
-      deferred.then(withoutCompositing)
-      deferred.then(withoutTransition)
-      $element.data(ANIMATION_PROMISE_KEY, deferred)
-      deferred.then(-> $element.removeData(ANIMATION_PROMISE_KEY))
-      endTimeout = setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
-      deferred.then(-> clearTimeout(endTimeout)) # clean up in case we're canceled
-      # Return the whole deferred and not just return a thenable.
-      # Other code will need the possibility to cancel the animation
-      # by resolving the deferred.
-      deferred
-    else
-      $element.css(lastFrame)
-      resolvedDeferred()
-      
+    opts = options(opts,
+      duration: 300,
+      delay: 0,
+      easing: 'ease'
+    )
+    # We don't finish an existing animation here, since
+    # the public API `up.motion.animate` already does this.
+    deferred = $.Deferred()
+    transition =
+      'transition-property': Object.keys(lastFrame).join(', ')
+      'transition-duration': "#{opts.duration}ms"
+      'transition-delay': "#{opts.delay}ms"
+      'transition-timing-function': opts.easing
+    withoutCompositing = forceCompositing($element)
+    withoutTransition = temporaryCss($element, transition)
+    $element.css(lastFrame)
+    deferred.then(withoutCompositing)
+    deferred.then(withoutTransition)
+    $element.data(ANIMATION_PROMISE_KEY, deferred)
+    deferred.then(-> $element.removeData(ANIMATION_PROMISE_KEY))
+    endTimeout = setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
+    deferred.then(-> clearTimeout(endTimeout)) # clean up in case we're canceled
+    # Return the whole deferred and not just return a thenable.
+    # Other code will need the possibility to cancel the animation
+    # by resolving the deferred.
+    deferred
+
   ANIMATION_PROMISE_KEY = 'up-animation-promise'
 
   ###*

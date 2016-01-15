@@ -145,10 +145,7 @@ describe 'up.modal', ->
     describe 'when replacing content', ->
 
       beforeEach ->
-        up.modal.config.openAnimation = 'none'
-        up.modal.config.closeAnimation = 'none'
-        up.popup.config.openAnimation = 'none'
-        up.popup.config.closeAnimation = 'none'
+        up.motion.config.enabled = false
 
       it 'prefers to replace a selector within the modal', ->
         $outside = affix('.foo').text('old outside')

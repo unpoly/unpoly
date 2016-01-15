@@ -25,6 +25,16 @@ describe 'up.motion', ->
           up.animate($element, { 'fade-in' }, duration: 100, easing: 'linear')
           expect($element.css('font-size')).toEqual('40px')
 
+        describe 'with animations disabled globally', ->
+
+          beforeEach ->
+            up.motion.config.enabled = false
+
+          it "doesn't animate and directly sets the last frame instead", ->
+            $element = affix('.element').text('content')
+            up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
+            expect($element.css('font-size')).toEqual('40px')
+
       else
 
         it "doesn't animate and directly sets the last frame instead", ->
@@ -185,6 +195,20 @@ describe 'up.motion', ->
             # was at the scroll position before we revealed $new.
             expect($oldGhost.offset().top).toEqual(-300)
 
+
+        describe 'with animations disabled globally', ->
+
+          beforeEach ->
+            up.motion.config.enabled = false
+
+          it "doesn't animate and hides the old element instead", ->
+            $old = affix('.old').text('old content')
+            $new = affix('.new').text('new content')
+            up.morph($old, $new, 'cross-fade', duration: 1000)
+            expect($old).toBeHidden()
+            expect($new).toBeVisible()
+            expect($new.css('opacity')).toEqual('1')
+
       else
 
         it "doesn't animate and hides the old element instead", ->
@@ -193,6 +217,7 @@ describe 'up.motion', ->
           up.morph($old, $new, 'cross-fade', duration: 1000)
           expect($old).toBeHidden()
           expect($new).toBeVisible()
+          expect($new.css('opacity')).toEqual('1')
 
     describe 'up.transition', ->
 
