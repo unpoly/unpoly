@@ -289,20 +289,21 @@ up.form = (($) ->
         unless skipCallback
           clearTimer()
           nextCallback = -> callback.apply($element.get(0), [value, $element])
-          callbackTimer = setTimeout(
-            ->
-              # Only run the callback once the previous callback's
-              # promise resolves.
-              callbackPromise.then ->
-                returnValue = runNextCallback()
-                # If the callback returns a promise, we will remember it
-                # and chain additional callback invocations to it.
-                if u.isPromise(returnValue)
-                  callbackPromise = returnValue
-                else
-                  callbackPromise = u.resolvedPromise()
-          , delay
-          )
+          runAndChain = ->
+            # Only run the callback once the previous callback's
+            # promise resolves.
+            callbackPromise.then ->
+              returnValue = runNextCallback()
+              # If the callback returns a promise, we will remember it
+              # and chain additional callback invocations to it.
+              if u.isPromise(returnValue)
+                callbackPromise = returnValue
+              else
+                callbackPromise = u.resolvedPromise()
+          if delay == 0
+            runAndChain()
+          else
+            setTimeout(runAndChain, delay)
 
     clearTimer = ->
       clearTimeout(callbackTimer)

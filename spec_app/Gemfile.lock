@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    upjs-rails (0.15.1)
+    upjs-rails (0.16.0)
       rails (>= 3)
 
 GEM
@@ -212,4 +212,4 @@ DEPENDENCIES
   web-console (~> 2.0)
 
 BUNDLED WITH
-   1.10.6
+   1.11.2

@@ -32,6 +32,8 @@ Unreleased
 - Popups and modals no longer raise an error if their (hidden) overlay was closed before the
   response was received.
 - Popups and modals are now compiled before they are animated.
+- When [`up.observe`](/up.observe) is used with a delay of zero, the callback is invoked instantly (instead of
+  being invoked in the next animation frame).
 
 
 0.15.1
