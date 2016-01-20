@@ -1,0 +1,2 @@
+afterEach ->
+  Knife.reset()
