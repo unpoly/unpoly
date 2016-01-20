@@ -191,6 +191,64 @@ up.link = (($) ->
     u.option(options.method, $link.attr('up-method'), $link.attr('data-method'), 'get').toUpperCase()
 
   ###*
+  @function up.link.childClicked
+  @internal
+  ###
+  childClicked = (event, $link) ->
+    $target = $(event.target)
+    $targetLink = $target.closest('a, [up-href]')
+    $targetLink.length && $link.find($targetLink).length
+    
+  shouldProcessLinkEvent = (event, $link) ->
+    u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link)
+
+  followVariantSelectors = []
+
+  ###*
+  No-op that is called when we allow a browser's default action to go through,
+  so we can spy on it in unit tests. See `link_spec.js`.
+
+  @function allowDefault
+  @internal
+  ###
+  allowDefault = (event) ->
+
+  registerFollowVariant = (selector, handler) ->
+    followVariantSelectors.push(selector)
+    up.on 'click', "a#{selector}, [up-href]#{selector}", (event, $link) ->
+      if shouldProcessLinkEvent(event, $link)
+        if $link.is('[up-instant]')
+          # If the link was already processed on mousedown, we still need
+          # to prevent the later click event's default behavior.
+          event.preventDefault()
+        else
+          event.preventDefault()
+          handler($link)
+      else
+        allowDefault(event)
+
+    up.on 'mousedown', "a#{selector}[up-instant], [up-href]#{selector}[up-instant]", (event, $link) ->
+      if shouldProcessLinkEvent(event, $link)
+        event.preventDefault()
+        handler($link)
+
+  isFollowable = ($link) ->
+    u.any followVariantSelectors, (selector) -> $link.is(selector)
+
+  ###*
+  Makes sure that the given link is handled by Up.js.
+
+  This is done by giving the link an `up-follow` attribute
+  unless it already have it an `up-target` or `up-follow` attribute.
+
+  @function up.link.makeFollowable
+  @internal
+  ###
+  makeFollowable = (link) ->
+    $link = $(link)
+    $link.attr('up-follow', '') unless isFollowable($link)
+
+  ###*
   Follows this link via AJAX and replaces a CSS selector in the current page
   with corresponding elements from a new page fetched from the server:
 
@@ -256,15 +314,8 @@ up.link = (($) ->
     Set this to `'false'` to prevent the current URL from being updated.
   @stable
   ###
-  up.on 'click', 'a[up-target], [up-href][up-target]', (event, $link) ->
-    if shouldProcessLinkEvent(event, $link)
-      if $link.is('[up-instant]')
-        # If the link was already processed on mousedown, we still need
-        # to prevent the later click event's default behavior.
-        event.preventDefault()
-      else
-        event.preventDefault()
-        follow($link)
+  registerFollowVariant '[up-target]', ($link) ->
+    follow($link)
 
   ###*
   By adding an `up-instant` attribute to a link, the destination will be
@@ -285,45 +336,6 @@ up.link = (($) ->
   @selector a[up-instant]
   @stable
   ###
-  up.on 'mousedown', 'a[up-instant], [up-href][up-instant]', (event, $link) ->
-    if shouldProcessLinkEvent(event, $link)
-      event.preventDefault()
-      follow($link)
-
-  ###*
-  @function up.link.childClicked
-  @internal
-  ###
-  childClicked = (event, $link) ->
-    $target = $(event.target)
-    $targetLink = $target.closest('a, [up-href]')
-    $targetLink.length && $link.find($targetLink).length
-    
-  shouldProcessLinkEvent = (event, $link) ->
-    u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link)
-
-  ###*
-  Makes sure that the given link is handled by Up.js.
-
-  This is done by giving the link an `up-follow` attribute
-  unless it already have it an `up-target` or `up-follow` attribute.
-
-  @function up.link.makeFollowable
-  @internal
-  ###
-  makeFollowable = (link) ->
-    $link = $(link)
-    if u.isMissing($link.attr('up-target')) && u.isMissing($link.attr('up-follow'))
-      $link.attr('up-follow', '')
-
-  ###*
-  No-op that is called when we allow a browser's default action to go through,
-  so we can spy on it in unit tests. See `link_spec.js`.
-
-  @function allowDefault
-  @internal
-  ###
-  allowDefault = (event) ->
 
   ###*
   If applied on a link, Follows this link via AJAX and replaces the
@@ -357,17 +369,8 @@ up.link = (($) ->
     within the response.
   @stable
   ###
-  up.on 'click', 'a[up-follow], [up-href][up-follow]', (event, $link) ->
-    if shouldProcessLinkEvent(event, $link)
-      if $link.is('[up-instant]')
-        # If the link was already processed on mousedown, we still need
-        # to prevent the later click event's default behavior.
-        event.preventDefault()
-      else
-        event.preventDefault()
-        follow($link)
-    else
-      allowDefault(event)
+  registerFollowVariant '[up-follow]', ($link) ->
+    follow($link)
 
   ###*
   Add an `up-expand` class to any element that contains a link
@@ -437,23 +440,6 @@ up.link = (($) ->
     u.setMissingAttrs($element, newAttrs)
     $element.removeAttr('up-dash')
 
-  registerFollowVariant = (selector, handler) ->
-    up.on 'click', "a#{selector}, [up-href]#{selector}", (event, $link) ->
-      if shouldProcessLinkEvent(event, $link)
-        if $link.is('[up-instant]')
-        # If the link was already processed on mousedown, we still need
-        # to prevent the later click event's default behavior.
-          event.preventDefault()
-        else
-          event.preventDefault()
-          handler($link)
-      else
-        allowDefault(event)
-
-    up.on 'mousedown', "a#{selector}[up-instant], [up-href]#{selector}[up-instant]", (event, $link) ->
-      if shouldProcessLinkEvent(event, $link)
-        event.preventDefault()
-        handler($link)
 
   knife: eval(Knife?.point)
   visit: visit
