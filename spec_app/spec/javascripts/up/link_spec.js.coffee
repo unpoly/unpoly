@@ -203,12 +203,63 @@ describe 'up.link', ->
 
     describe 'a[up-follow]', ->
 
+      beforeEach ->
+        @$link = affix('a[href="/path"][up-follow]')
+        @followSpy = up.link.knife.mock('follow')
+        @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
+
       it "calls up.follow with the clicked link", ->
-        followSpy = up.link.knife.mock('follow')
-        $link = affix('a[href="/path"][up-follow]')
-        up.hello($link)
-        $link.click()
-        expect(followSpy).toHaveBeenCalledWith($link)
+        Trigger.click(@$link)
+        expect(@followSpy).toHaveBeenCalledWith(@$link)
+
+      it 'does nothing if the right mouse button is used', ->
+        Trigger.click(@$link, button: 2)
+        expect(@followSpy).not.toHaveBeenCalled()
+
+      it 'does nothing if shift is pressed during the click', ->
+        Trigger.click(@$link, shiftKey: true)
+        expect(@followSpy).not.toHaveBeenCalled()
+
+      it 'does nothing if ctrl is pressed during the click', ->
+        Trigger.click(@$link, ctrlKey: true)
+        expect(@followSpy).not.toHaveBeenCalled()
+
+#      it 'does nothing if meta is pressed during the click', ->
+#        Trigger.click(@$link, metaKey: true)
+#        expect(@followSpy).not.toHaveBeenCalled()
+
+      describe 'with [up-instant] modifier', ->
+
+        beforeEach ->
+          @$link.attr('up-instant', '')
+
+        it 'follows a link on mousedown (instead of on click)', ->
+          Trigger.mousedown(@$link)
+          expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link)
+
+        it 'does nothing on mouseup', ->
+          Trigger.mouseup(@$link)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing on click', ->
+          Trigger.click(@$link)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if the right mouse button is pressed down', ->
+          Trigger.mousedown(@$link, button: 2)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if shift is pressed during mousedown', ->
+          Trigger.mousedown(@$link, shiftKey: true)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if ctrl is pressed during mousedown', ->
+          Trigger.mousedown(@$link, ctrlKey: true)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if meta is pressed during mousedown', ->
+          Trigger.mousedown(@$link, metaKey: true)
+          expect(@followSpy).not.toHaveBeenCalled()
 
     describe '[up-expand]', ->
 
@@ -234,40 +285,3 @@ describe 'up.link', ->
         up.hello($area)
         expect($area.attr('up-follow')).toEqual('')
 
-    describe '[up-instant]', ->
-
-      beforeEach ->
-        @$link = affix('a[href="/path"][up-follow][up-instant]')
-        @followSpy = up.link.knife.mock('follow')
-
-      afterEach ->
-        Knife.reset()
-
-      it 'follows a link on mousedown (instead of on click)', ->
-        Trigger.mousedown(@$link)
-        expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link)
-
-      it 'does nothing on mouseup', ->
-        Trigger.mouseup(@$link)
-        expect(@followSpy).not.toHaveBeenCalled()
-      
-      it 'does nothing on click', ->
-        Trigger.click(@$link)
-        expect(@followSpy).not.toHaveBeenCalled()
-              
-      it 'does nothing if the right mouse button is pressed down', ->
-        Trigger.mousedown(@$link, button: 2)
-        expect(@followSpy).not.toHaveBeenCalled()
-      
-      it 'does nothing if shift is pressed during mousedown', ->
-        Trigger.mousedown(@$link, shiftKey: true)
-        expect(@followSpy).not.toHaveBeenCalled()
-      
-      it 'does nothing if ctrl is pressed during mousedown', ->
-        Trigger.mousedown(@$link, ctrlKey: true)
-        expect(@followSpy).not.toHaveBeenCalled()
-      
-      it 'does nothing if meta is pressed during mousedown', ->
-        Trigger.mousedown(@$link, metaKey: true)
-        expect(@followSpy).not.toHaveBeenCalled()
-      

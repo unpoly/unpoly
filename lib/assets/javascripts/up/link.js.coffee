@@ -317,6 +317,15 @@ up.link = (($) ->
       $link.attr('up-follow', '')
 
   ###*
+  No-op that is called when we allow a browser's default action to go through,
+  so we can spy on it in unit tests. See `link_spec.js`.
+
+  @function allowDefault
+  @internal
+  ###
+  allowDefault = ->
+
+  ###*
   If applied on a link, Follows this link via AJAX and replaces the
   current `<body>` element with the response's `<body>` element.
 
@@ -357,6 +366,8 @@ up.link = (($) ->
       else
         event.preventDefault()
         follow($link)
+    else
+      allowDefault()
 
   ###*
   Add an `up-expand` class to any element that contains a link
