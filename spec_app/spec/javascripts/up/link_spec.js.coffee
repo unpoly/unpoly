@@ -172,6 +172,23 @@ describe 'up.link', ->
         $form.click()
         expect(followSpy).not.toHaveBeenCalled()
 
+      it 'adds a history entry', ->
+        affix('.target')
+        $link = affix('a[href="/path"][up-target=".target"]')
+        $link.click()
+        @respondWith('<div class="target">new text</div>')
+        expect($('.target')).toHaveText('new text')
+        expect(location.pathname).toEqual('/path')
+
+      it 'does not add a history entry when an up-history attribute is set to "false"', ->
+        oldPathname = location.pathname
+        affix('.target')
+        $link = affix('a[href="/path"][up-target=".target"][up-history="false"]')
+        $link.click()
+        @respondWith('<div class="target">new text</div>')
+        expect($('.target')).toHaveText('new text')
+        expect(location.pathname).toEqual(oldPathname)
+
     describe 'a[up-follow]', ->
 
       it "calls up.follow with the clicked link", ->
