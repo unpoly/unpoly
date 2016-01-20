@@ -10,8 +10,8 @@ Unreleased
 
 ### Compatible changes
 
-- [`[up-instant]`] now works with modals and popups
-- [`[up-expand]`] now works with modals and popups
+- [`[up-instant]`](/up-instant) now works with modals and popups
+- [`[up-expand]`](/up-expand) now works with modals and popups
 - You can now configure [`up.proxy.config.maxRequests`](/up.proxy.config) to limit
   the maximum number of concurrent requests. Additional
   requests are queued. This currently ignores preloading requests.

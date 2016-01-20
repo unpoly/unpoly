@@ -333,7 +333,9 @@ up.link = (($) ->
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown` instead of `click`.
 
-  @selector a[up-instant]
+  `up-instant` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
+
+  @selector [up-instant]
   @stable
   ###
 
@@ -388,6 +390,8 @@ up.link = (($) ->
 
   In the example above, clicking anywhere within `.notification` element
   would [follow](/up.follow) the *Close* link.
+
+  `up-expand` also expands links that open [modals](/up.modal) or [popups](/up.popup).
 
   @selector [up-expand]
   @stable
