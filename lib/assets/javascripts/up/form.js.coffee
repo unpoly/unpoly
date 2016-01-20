@@ -493,7 +493,8 @@ up.form = (($) ->
     The animation to use when the form is replaced after a successful submission.
   @param {String} [up-fail-transition]
     The animation to use when the form is replaced after a failed submission.
-  @param {String} [up-history='true']
+  @param [up-history]
+    Set this to `'false'` to prevent the current URL from being updated.
   @param {String} [up-method]
     The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
     Alternately you can use an attribute `data-method`

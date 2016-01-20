@@ -252,6 +252,8 @@ up.link = (($) ->
     Whether to force the use of a cached response (`true`)
     or never use the cache (`false`)
     or make an educated guess (`undefined`).
+  @param [up-history]
+    Set this to `'false'` to prevent the current URL from being updated.
   @stable
   ###
   up.on 'click', 'a[up-target], [up-href][up-target]', (event, $link) ->
@@ -339,6 +341,8 @@ up.link = (($) ->
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
+  @param [up-history]
+    Set this to `'false'` to prevent the current URL from being updated.
   @param [up-restore-scroll='false']
     Whether to restore the scroll position of all viewports
     within the response.
