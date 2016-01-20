@@ -323,7 +323,7 @@ up.link = (($) ->
   @function allowDefault
   @internal
   ###
-  allowDefault = ->
+  allowDefault = (event) ->
 
   ###*
   If applied on a link, Follows this link via AJAX and replaces the
@@ -367,7 +367,7 @@ up.link = (($) ->
         event.preventDefault()
         follow($link)
     else
-      allowDefault()
+      allowDefault(event)
 
   ###*
   Add an `up-expand` class to any element that contains a link
@@ -437,12 +437,32 @@ up.link = (($) ->
     u.setMissingAttrs($element, newAttrs)
     $element.removeAttr('up-dash')
 
+  registerFollowVariant = (selector, handler) ->
+    up.on 'click', "a#{selector}, [up-href]#{selector}", (event, $link) ->
+      if shouldProcessLinkEvent(event, $link)
+        if $link.is('[up-instant]')
+        # If the link was already processed on mousedown, we still need
+        # to prevent the later click event's default behavior.
+          event.preventDefault()
+        else
+          event.preventDefault()
+          handler($link)
+      else
+        allowDefault(event)
+
+    up.on 'mousedown', "a#{selector}[up-instant], [up-href]#{selector}[up-instant]", (event, $link) ->
+      if shouldProcessLinkEvent(event, $link)
+        event.preventDefault()
+        handler($link)
+
   knife: eval(Knife?.point)
   visit: visit
   follow: follow
   makeFollowable: makeFollowable
+  shouldProcessLinkEvent: shouldProcessLinkEvent
   childClicked: childClicked
   followMethod: followMethod
+  registerFollowVariant: registerFollowVariant
 
 )(jQuery)
 

@@ -70,7 +70,7 @@ describe 'up.navigation', ->
         $modalLink = affix('a[href="/bar"][up-modal=".main"]')
         $unrelatedLink = affix('a[href="/baz]')
 
-        $modalLink.click()
+        Trigger.click($modalLink)
         @respondWith('<div class="main">new-text</div>')
         expect($backgroundLink).toHaveClass('up-current')
         expect($modalLink).toHaveClass('up-current')

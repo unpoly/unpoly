@@ -100,12 +100,65 @@ describe 'up.modal', ->
     
     describe 'a[up-modal]', ->
       
+      beforeEach ->
+        @$link = affix('a[href="/path"][up-modal=".target"]')
+        @followSpy = up.modal.knife.mock('follow')
+        @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
+
       it 'opens the clicked link in a modal', ->
         followSpy = up.modal.knife.mock('follow')
-        $link = affix('a[href="/path"][up-modal=".foo"]')
-        up.hello($link)
-        $link.click()
-        expect(followSpy).toHaveBeenCalledWith($link)
+        Trigger.click(@$link)
+        expect(followSpy).toHaveBeenCalledWith(@$link)
+
+      it 'does nothing if the right mouse button is used', ->
+        Trigger.click(@$link, button: 2)
+        expect(@followSpy).not.toHaveBeenCalled()
+
+      it 'does nothing if shift is pressed during the click', ->
+        Trigger.click(@$link, shiftKey: true)
+        expect(@followSpy).not.toHaveBeenCalled()
+
+      it 'does nothing if ctrl is pressed during the click', ->
+        Trigger.click(@$link, ctrlKey: true)
+        expect(@followSpy).not.toHaveBeenCalled()
+
+#      it 'does nothing if meta is pressed during the click', ->
+#        Trigger.click(@$link, metaKey: true)
+#        expect(@followSpy).not.toHaveBeenCalled()
+
+      describe 'with [up-instant] modifier', ->
+
+        beforeEach ->
+          @$link.attr('up-instant', '')
+
+        it 'opens the modal on mousedown (instead of on click)', ->
+          Trigger.mousedown(@$link)
+          expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link)
+
+        it 'does nothing on mouseup', ->
+          Trigger.mouseup(@$link)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing on click', ->
+          Trigger.click(@$link)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if the right mouse button is pressed down', ->
+          Trigger.mousedown(@$link, button: 2)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if shift is pressed during mousedown', ->
+          Trigger.mousedown(@$link, shiftKey: true)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if ctrl is pressed during mousedown', ->
+          Trigger.mousedown(@$link, ctrlKey: true)
+          expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if meta is pressed during mousedown', ->
+          Trigger.mousedown(@$link, metaKey: true)
+          expect(@followSpy).not.toHaveBeenCalled()
+
 
     describe '[up-close]', ->
 
