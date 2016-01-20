@@ -106,9 +106,8 @@ describe 'up.modal', ->
         @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
       it 'opens the clicked link in a modal', ->
-        followSpy = up.modal.knife.mock('follow')
         Trigger.click(@$link)
-        expect(followSpy).toHaveBeenCalledWith(@$link)
+        expect(@followSpy).toHaveBeenCalledWith(@$link)
 
       it 'does nothing if the right mouse button is used', ->
         Trigger.click(@$link, button: 2)

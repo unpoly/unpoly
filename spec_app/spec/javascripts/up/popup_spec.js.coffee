@@ -6,6 +6,35 @@ describe 'up.popup', ->
 
     describe 'up.popup.attach', ->
 
+      it "loads this link's destination in a popup when clicked", ->
+        $link = affix('a[href="/path/to"][up-popup=".middle"]').text('link')
+        $link.css
+          position: 'fixed'
+          left: '100px'
+          top: '50px'
+
+        up.popup.attach($link)
+
+        expect(@lastRequest().url).toMatch /\/path\/to$/
+        @respondWith """
+          <div class="before">new-before</div>
+          <div class="middle">new-middle</div>
+          <div class="after">new-after</div>
+          """
+
+        $popup = $('.up-popup')
+
+        expect($popup).toExist()
+        expect($popup.find('.middle')).toHaveText('new-middle')
+        expect($popup.find('.before')).not.toExist()
+        expect($popup.find('.after')).not.toExist()
+
+        popupDims = u.measure($popup, full: true)
+        linkDims = u.measure($link, full: true)
+
+        expect(popupDims.right).toBeAround(linkDims.right, 1)
+        expect(popupDims.top).toBeAround(linkDims.top + linkDims.height, 1)
+
       it 'does not explode if the popup was closed before the response was received', ->
         $span = affix('span')
         up.popup.attach($span, url: '/foo', target: '.container')
@@ -40,32 +69,59 @@ describe 'up.popup', ->
 
     describe 'a[up-popup]', ->
 
-      it "loads this link's destination in a popup when clicked", ->
-        $link = affix('a[href="/path/to"][up-popup=".middle"]').text('link')
-        $link.css
-          position: 'fixed'
-          left: '100px'
-          top: '50px'
-        $link.click()
-        expect(@lastRequest().url).toMatch /\/path\/to$/
-        @respondWith """
-          <div class="before">new-before</div>
-          <div class="middle">new-middle</div>
-          <div class="after">new-after</div>
-          """
+      beforeEach ->
+        @$link = affix('a[href="/path"][up-popup=".target"]')
+        @attachSpy = up.popup.knife.mock('attach')
+        @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
-        $popup = $('.up-popup')
+      it 'opens the clicked link in a popup', ->
+        Trigger.click(@$link)
+        expect(@attachSpy).toHaveBeenCalledWith(@$link)
 
-        expect($popup).toExist()
-        expect($popup.find('.middle')).toHaveText('new-middle')
-        expect($popup.find('.before')).not.toExist()
-        expect($popup.find('.after')).not.toExist()
+      it 'does nothing if the right mouse button is used', ->
+        Trigger.click(@$link, button: 2)
+        expect(@attachSpy).not.toHaveBeenCalled()
 
-        popupDims = u.measure($popup, full: true)
-        linkDims = u.measure($link, full: true)
+      it 'does nothing if shift is pressed during the click', ->
+        Trigger.click(@$link, shiftKey: true)
+        expect(@attachSpy).not.toHaveBeenCalled()
 
-        expect(popupDims.right).toBeAround(linkDims.right, 1)
-        expect(popupDims.top).toBeAround(linkDims.top + linkDims.height, 1)
+      it 'does nothing if ctrl is pressed during the click', ->
+        Trigger.click(@$link, ctrlKey: true)
+        expect(@attachSpy).not.toHaveBeenCalled()
+
+      describe 'with [up-instant] modifier', ->
+
+        beforeEach ->
+          @$link.attr('up-instant', '')
+
+        it 'opens the modal on mousedown (instead of on click)', ->
+          Trigger.mousedown(@$link)
+          expect(@attachSpy.calls.mostRecent().args[0]).toEqual(@$link)
+
+        it 'does nothing on mouseup', ->
+          Trigger.mouseup(@$link)
+          expect(@attachSpy).not.toHaveBeenCalled()
+
+        it 'does nothing on click', ->
+          Trigger.click(@$link)
+          expect(@attachSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if the right mouse button is pressed down', ->
+          Trigger.mousedown(@$link, button: 2)
+          expect(@attachSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if shift is pressed during mousedown', ->
+          Trigger.mousedown(@$link, shiftKey: true)
+          expect(@attachSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if ctrl is pressed during mousedown', ->
+          Trigger.mousedown(@$link, ctrlKey: true)
+          expect(@attachSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if meta is pressed during mousedown', ->
+          Trigger.mousedown(@$link, metaKey: true)
+          expect(@attachSpy).not.toHaveBeenCalled()
 
     describe '[up-close]', ->
 

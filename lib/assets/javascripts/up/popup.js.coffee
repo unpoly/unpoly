@@ -330,8 +330,7 @@ up.popup = (($) ->
     open even if the page changes in the background.
   @stable
   ###
-  up.on('click', 'a[up-popup]', (event, $link) ->
-    event.preventDefault()
+  up.link.registerFollowVariant('[up-popup]', ($link) ->
     if $link.is('.up-current')
       close()
     else
@@ -383,6 +382,7 @@ up.popup = (($) ->
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
 
+  knife: eval(Knife?.point)
   attach: attach
   close: close
   url: -> currentUrl
