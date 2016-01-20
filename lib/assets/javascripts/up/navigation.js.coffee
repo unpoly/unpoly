@@ -119,14 +119,14 @@ up.navigation = (($) ->
   The user clicks on the link. While the request is loading,
   the link has the `up-active` class:
 
-      <a href="/foo" up-follow up-active>Foo</a>
+      <a href="/foo" up-follow class="up-active">Foo</a>
 
   Once the link destination has loaded and rendered, the `up-active` class
   is removed and the [`up-current`](/up-current) class is added:
 
-      <a href="/foo" up-follow up-current>Foo</a>
+      <a href="/foo" up-follow class="up-current">Foo</a>
 
-  @selector [up-active]
+  @selector .up-active
   @stable
   ###
   sectionClicked = ($section) ->
@@ -162,7 +162,7 @@ up.navigation = (($) ->
   If the browser location changes to `/foo`, the markup changes to this:
 
       <nav>
-        <a href="/foo" up-current>Foo</a>
+        <a href="/foo" class="up-current">Foo</a>
         <a href="/bar">Bar</a>
       </nav>
 
@@ -189,7 +189,7 @@ up.navigation = (($) ->
 
       <a href="/reports" up-alias="/reports/*">Reports</a>
 
-  @selector [up-current]
+  @selector .up-current
   @stable
   ###
   up.on 'up:fragment:inserted', ->
