@@ -5407,7 +5407,7 @@ Read on
 
 (function() {
   up.link = (function($) {
-    var childClicked, follow, followMethod, makeFollowable, shouldProcessLinkEvent, u, visit;
+    var allowDefault, childClicked, follow, followMethod, followVariantSelectors, isFollowable, makeFollowable, registerFollowVariant, shouldProcessLinkEvent, u, visit;
     u = up.util;
 
     /**
@@ -5519,6 +5519,73 @@ Read on
     };
 
     /**
+    @function up.link.childClicked
+    @internal
+     */
+    childClicked = function(event, $link) {
+      var $target, $targetLink;
+      $target = $(event.target);
+      $targetLink = $target.closest('a, [up-href]');
+      return $targetLink.length && $link.find($targetLink).length;
+    };
+    shouldProcessLinkEvent = function(event, $link) {
+      return u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link);
+    };
+    followVariantSelectors = [];
+
+    /**
+    No-op that is called when we allow a browser's default action to go through,
+    so we can spy on it in unit tests. See `link_spec.js`.
+    
+    @function allowDefault
+    @internal
+     */
+    allowDefault = function(event) {};
+    registerFollowVariant = function(selector, handler) {
+      followVariantSelectors.push(selector);
+      up.on('click', "a" + selector + ", [up-href]" + selector, function(event, $link) {
+        if (shouldProcessLinkEvent(event, $link)) {
+          if ($link.is('[up-instant]')) {
+            return event.preventDefault();
+          } else {
+            event.preventDefault();
+            return handler($link);
+          }
+        } else {
+          return allowDefault(event);
+        }
+      });
+      return up.on('mousedown', "a" + selector + "[up-instant], [up-href]" + selector + "[up-instant]", function(event, $link) {
+        if (shouldProcessLinkEvent(event, $link)) {
+          event.preventDefault();
+          return handler($link);
+        }
+      });
+    };
+    isFollowable = function($link) {
+      return u.any(followVariantSelectors, function(selector) {
+        return $link.is(selector);
+      });
+    };
+
+    /**
+    Makes sure that the given link is handled by Up.js.
+    
+    This is done by giving the link an `up-follow` attribute
+    unless it already have it an `up-target` or `up-follow` attribute.
+    
+    @function up.link.makeFollowable
+    @internal
+     */
+    makeFollowable = function(link) {
+      var $link;
+      $link = $(link);
+      if (!isFollowable($link)) {
+        return $link.attr('up-follow', '');
+      }
+    };
+
+    /**
     Follows this link via AJAX and replaces a CSS selector in the current page
     with corresponding elements from a new page fetched from the server:
     
@@ -5580,17 +5647,12 @@ Read on
       Whether to force the use of a cached response (`true`)
       or never use the cache (`false`)
       or make an educated guess (`undefined`).
+    @param [up-history]
+      Set this to `'false'` to prevent the current URL from being updated.
     @stable
      */
-    up.on('click', 'a[up-target], [up-href][up-target]', function(event, $link) {
-      if (shouldProcessLinkEvent(event, $link)) {
-        if ($link.is('[up-instant]')) {
-          return event.preventDefault();
-        } else {
-          event.preventDefault();
-          return follow($link);
-        }
-      }
+    registerFollowVariant('[up-target]', function($link) {
+      return follow($link);
     });
 
     /**
@@ -5609,46 +5671,11 @@ Read on
     navigation actions this isn't needed. E.g. popular operation
     systems switch tabs on `mousedown` instead of `click`.
     
-    @selector a[up-instant]
+    `up-instant` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
+    
+    @selector [up-instant]
     @stable
      */
-    up.on('mousedown', 'a[up-instant], [up-href][up-instant]', function(event, $link) {
-      if (shouldProcessLinkEvent(event, $link)) {
-        event.preventDefault();
-        return follow($link);
-      }
-    });
-
-    /**
-    @function up.link.childClicked
-    @internal
-     */
-    childClicked = function(event, $link) {
-      var $target, $targetLink;
-      $target = $(event.target);
-      $targetLink = $target.closest('a, [up-href]');
-      return $targetLink.length && $link.find($targetLink).length;
-    };
-    shouldProcessLinkEvent = function(event, $link) {
-      return u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link);
-    };
-
-    /**
-    Makes sure that the given link is handled by Up.js.
-    
-    This is done by giving the link an `up-follow` attribute
-    unless it already have it an `up-target` or `up-follow` attribute.
-    
-    @function up.link.makeFollowable
-    @internal
-     */
-    makeFollowable = function(link) {
-      var $link;
-      $link = $(link);
-      if (u.isMissing($link.attr('up-target')) && u.isMissing($link.attr('up-follow'))) {
-        return $link.attr('up-follow', '');
-      }
-    };
 
     /**
     If applied on a link, Follows this link via AJAX and replaces the
@@ -5675,20 +5702,15 @@ Read on
     @param [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
+    @param [up-history]
+      Set this to `'false'` to prevent the current URL from being updated.
     @param [up-restore-scroll='false']
       Whether to restore the scroll position of all viewports
       within the response.
     @stable
      */
-    up.on('click', 'a[up-follow], [up-href][up-follow]', function(event, $link) {
-      if (shouldProcessLinkEvent(event, $link)) {
-        if ($link.is('[up-instant]')) {
-          return event.preventDefault();
-        } else {
-          event.preventDefault();
-          return follow($link);
-        }
-      }
+    registerFollowVariant('[up-follow]', function($link) {
+      return follow($link);
     });
 
     /**
@@ -5707,6 +5729,8 @@ Read on
     
     In the example above, clicking anywhere within `.notification` element
     would [follow](/up.follow) the *Close* link.
+    
+    `up-expand` also expands links that open [modals](/up.modal) or [popups](/up.popup).
     
     @selector [up-expand]
     @stable
@@ -5770,8 +5794,10 @@ Read on
       visit: visit,
       follow: follow,
       makeFollowable: makeFollowable,
+      shouldProcessLinkEvent: shouldProcessLinkEvent,
       childClicked: childClicked,
-      followMethod: followMethod
+      followMethod: followMethod,
+      registerFollowVariant: registerFollowVariant
     };
   })(jQuery);
 
@@ -6066,7 +6092,7 @@ open dialogs with sub-forms, etc. all without losing form state.
         }
       };
       check = function() {
-        var skipCallback, value;
+        var runAndChain, skipCallback, value;
         value = $element.val();
         skipCallback = u.isNull(knownValue);
         if (knownValue !== value) {
@@ -6076,7 +6102,7 @@ open dialogs with sub-forms, etc. all without losing form state.
             nextCallback = function() {
               return callback.apply($element.get(0), [value, $element]);
             };
-            return callbackTimer = setTimeout(function() {
+            runAndChain = function() {
               return callbackPromise.then(function() {
                 var returnValue;
                 returnValue = runNextCallback();
@@ -6086,7 +6112,12 @@ open dialogs with sub-forms, etc. all without losing form state.
                   return callbackPromise = u.resolvedPromise();
                 }
               });
-            }, delay);
+            };
+            if (delay === 0) {
+              return runAndChain();
+            } else {
+              return setTimeout(runAndChain, delay);
+            }
           }
         }
       };
@@ -6288,7 +6319,8 @@ open dialogs with sub-forms, etc. all without losing form state.
       The animation to use when the form is replaced after a successful submission.
     @param {String} [up-fail-transition]
       The animation to use when the form is replaced after a failed submission.
-    @param {String} [up-history='true']
+    @param [up-history]
+      Set this to `'false'` to prevent the current URL from being updated.
     @param {String} [up-method]
       The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
       Alternately you can use an attribute `data-method`
@@ -6921,8 +6953,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       open even if the page changes in the background.
     @stable
      */
-    up.on('click', 'a[up-popup]', function(event, $link) {
-      event.preventDefault();
+    up.link.registerFollowVariant('[up-popup]', function($link) {
       if ($link.is('.up-current')) {
         return close();
       } else {
@@ -6972,6 +7003,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     });
     up.on('up:framework:reset', reset);
     return {
+      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       attach: attach,
       close: close,
       url: function() {
@@ -7455,7 +7487,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param [up-history]
     @stable
      */
-    up.on('click', 'a[up-modal]', function(event, $link) {
+    up.link.registerFollowVariant('[up-modal]', function($link) {
       event.preventDefault();
       if ($link.is('.up-current')) {
         return close();
@@ -7876,14 +7908,14 @@ by providing instant feedback for user interactions.
     The user clicks on the link. While the request is loading,
     the link has the `up-active` class:
     
-        <a href="/foo" up-follow up-active>Foo</a>
+        <a href="/foo" up-follow class="up-active">Foo</a>
     
     Once the link destination has loaded and rendered, the `up-active` class
     is removed and the [`up-current`](/up-current) class is added:
     
-        <a href="/foo" up-follow up-current>Foo</a>
+        <a href="/foo" up-follow class="up-current">Foo</a>
     
-    @selector [up-active]
+    @selector .up-active
     @stable
      */
     sectionClicked = function($section) {
@@ -7922,7 +7954,7 @@ by providing instant feedback for user interactions.
     If the browser location changes to `/foo`, the markup changes to this:
     
         <nav>
-          <a href="/foo" up-current>Foo</a>
+          <a href="/foo" class="up-current">Foo</a>
           <a href="/bar">Bar</a>
         </nav>
     
@@ -7949,7 +7981,7 @@ by providing instant feedback for user interactions.
     
         <a href="/reports" up-alias="/reports/*">Reports</a>
     
-    @selector [up-current]
+    @selector .up-current
     @stable
      */
     up.on('up:fragment:inserted', function() {
@@ -7968,6 +8000,30 @@ by providing instant feedback for user interactions.
         return u.error('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.');
       }
     };
+  })(jQuery);
+
+}).call(this);
+
+/**
+Play nice with Rails UJS
+========================
+ */
+
+(function() {
+  up.rails = (function($) {
+    var u, willHandle;
+    u = up.util;
+    willHandle = function($element) {
+      return $element.is('[up-follow], [up-target], [up-modal], [up-popup]');
+    };
+    return up.compiler('[data-method]', function($element) {
+      if ($.rails && willHandle($element)) {
+        u.setMissingAttrs($element, {
+          'up-method': $element.attr('data-method')
+        });
+        return $element.removeAttr('data-method');
+      }
+    });
   })(jQuery);
 
 }).call(this);

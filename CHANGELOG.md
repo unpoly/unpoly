@@ -6,12 +6,30 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
 Unreleased
------------
+----------
+
+
+0.17.0
+------
 
 ### Compatible changes
 
+- When used with the [Ruby on Rails unobtrusive scripting adapter](https://github.com/rails/jquery-ujs) (`rails_ujs.js`),
+  now prevents duplicate form submission when Up.js attributes are mixed with `data-method` attributes.
 - [`[up-instant]`](/up-instant) now works with modals and popups
 - [`[up-expand]`](/up-expand) now works with modals and popups
+
+### Breaking changes
+
+- When [`up.observe`](/up.observe) is used with a delay of zero, the callback is invoked instantly (instead of
+  being invoked in the next animation frame).
+
+
+0.16.0
+------
+
+### Compatible changes
+
 - You can now configure [`up.proxy.config.maxRequests`](/up.proxy.config) to limit
   the maximum number of concurrent requests. Additional
   requests are queued. This currently ignores preloading requests.
@@ -25,10 +43,6 @@ Unreleased
 - New option [`up.modal.config.history`](/up.modal.config) to configure if modals change the browser URL (defaults to `true`)
 - New option [`up.popup.config.history`](/up.popup.config) to configure if popup change the browser URL (defaults to `false`).
 - Fix CSS for popups with a position of `"bottom-left"`.
-- When used with the [Ruby on Rails unobtrusive scripting adapter](https://github.com/rails/jquery-ujs) (`rails_ujs.js`),
-  now prevents duplicate form submission when Up.js attributes are mixed with `data-method` attributes.
-
-
 
 ### Breaking changes
 
@@ -38,8 +52,6 @@ Unreleased
 - Popups and modals no longer raise an error if their (hidden) overlay was closed before the
   response was received.
 - Popups and modals are now compiled before they are animated.
-- When [`up.observe`](/up.observe) is used with a delay of zero, the callback is invoked instantly (instead of
-  being invoked in the next animation frame).
 
 
 0.15.1
