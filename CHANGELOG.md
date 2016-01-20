@@ -23,6 +23,10 @@ Unreleased
 - New option [`up.modal.config.history`](/up.modal.config) to configure if modals change the browser URL (defaults to `true`)
 - New option [`up.popup.config.history`](/up.popup.config) to configure if popup change the browser URL (defaults to `false`).
 - Fix CSS for popups with a position of `"bottom-left"`.
+- When used with the [Ruby on Rails unobtrusive scripting adapter](https://github.com/rails/jquery-ujs) (`rails_ujs.js`),
+  now prevents duplicate form submission when Up.js attributes are mixed with `data-method` attributes.
+
+
 
 ### Breaking changes
 

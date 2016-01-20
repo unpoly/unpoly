@@ -14,6 +14,7 @@
 #= require up/modal
 #= require up/tooltip
 #= require up/navigation
+#= require up/rails
 
 up.boot()
 
