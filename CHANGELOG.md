@@ -67,7 +67,7 @@ Unreleased
 
 ### Compatible changes
 
-- New function [`up.autosubmit`](/up.autosubmit) and select [`[up-autosubmit]`] to
+- New function [`up.autosubmit`](/up.autosubmit) and selector [`[up-autosubmit]`](/up-autosubmit) to
   observe a form or field and submit the form when a value changes.
 - [`up.observe`](/up.observe) and [`[up-observe]`](/up-observe) can now be applied
   to `<form>` tags. The callback is run when any field in the form changes.
