@@ -180,12 +180,24 @@ describe 'up.link', ->
         expect($('.target')).toHaveText('new text')
         expect(location.pathname).toEqual('/path')
 
+      it 'respects a X-Up-Location header that the server sends in case of a redirect', ->
+        affix('.target')
+        $link = affix('a[href="/path"][up-target=".target"]')
+        $link.click()
+        @respondWith
+          responseText: '<div class="target">new text</div>'
+          responseHeaders: { 'X-Up-Location': '/other/path' }
+        expect($('.target')).toHaveText('new text')
+        expect(location.pathname).toEqual('/other/path')
+
       it 'does not add a history entry when an up-history attribute is set to "false"', ->
         oldPathname = location.pathname
         affix('.target')
         $link = affix('a[href="/path"][up-target=".target"][up-history="false"]')
         $link.click()
-        @respondWith('<div class="target">new text</div>')
+        @respondWith
+          responseText: '<div class="target">new text</div>'
+          responseHeaders: { 'X-Up-Location': '/other/path' }
         expect($('.target')).toHaveText('new text')
         expect(location.pathname).toEqual(oldPathname)
 
