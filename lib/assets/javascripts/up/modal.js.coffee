@@ -431,11 +431,7 @@ up.modal = (($) ->
   @stable
   ###
   up.link.registerFollowVariant '[up-modal]', ($link) ->
-    event.preventDefault()
-    if $link.is('.up-current')
-      close()
-    else
-      follow($link)
+    follow($link)
 
   # Close the modal when someone clicks outside the dialog
   # (but not on a modal opener).
