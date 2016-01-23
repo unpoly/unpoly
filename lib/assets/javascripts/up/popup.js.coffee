@@ -65,8 +65,7 @@ up.popup = (($) ->
   @experimental
   ###
   coveredUrl = ->
-    $popup = $('.up-popup')
-    $popup.attr('up-covered-url')
+    $('.up-popup').attr('up-covered-url')
 
   ###*
   Sets default options for future popups.
@@ -91,10 +90,10 @@ up.popup = (($) ->
     history: false
 
   reset = ->
-    close()
+    close(animation: false)
     config.reset()
 
-  setPosition = ($link, $popup, position) ->
+  setPosition = ($link, position) ->
     linkBox = u.measure($link, full: true)
     css = switch position
       when "bottom-right"
@@ -111,6 +110,7 @@ up.popup = (($) ->
         bottom: linkBox.top
       else
         u.error("Unknown position %o", position)
+    $popup = $('.up-popup')
     $popup.attr('up-position', position)
     $popup.css(css)
     ensureInViewport($popup)
@@ -141,33 +141,31 @@ up.popup = (($) ->
       else if bottom = parseInt($popup.css('bottom'))
         $popup.css('bottom', bottom + errorY)
           
-  rememberHistory = ->
-    $popup = $('.up-popup')
-    $popup.attr('up-covered-url', up.browser.url())
-    $popup.attr('up-covered-title', document.title)
-          
   discardHistory = ->
     $popup = $('.up-popup')
     $popup.removeAttr('up-covered-url')
     $popup.removeAttr('up-covered-title')
     
-  createHiddenPopup = ($link, selector, sticky) ->
+  createFrame = (target, options) ->
     $popup = u.$createElementFromSelector('.up-popup')
-    $popup.attr('up-sticky', '') if sticky
-    $placeholder = u.$createElementFromSelector(selector)
+    $popup.attr('up-sticky', '') if options.sticky
+    $popup.attr('up-covered-url', up.browser.url())
+    $popup.attr('up-covered-title', document.title)
+    # Create an empty element that will match the
+    # selector that is being replaced.
+    $placeholder = u.$createElementFromSelector(target)
     $placeholder.appendTo($popup)
     $popup.appendTo(document.body)
-    rememberHistory()
-    $popup.hide()
     $popup
-    
-  updated = ($link, position, animation, animateOptions) ->
-    $popup = $('.up-popup')
-    if $popup.is(':hidden')
-      $popup.show()
-      setPosition($link, $popup, position)
-      deferred = up.animate($popup, animation, animateOptions)
-      deferred.then -> up.emit('up:popup:opened')
+
+  ###*
+  Returns whether popup modal is currently open.
+
+  @function up.popup.isOpen
+  @stable
+  ###
+  isOpen = ->
+    $('.up-popup').length > 0
 
   ###*
   Attaches a popup overlay to the given element or selector.
@@ -194,7 +192,8 @@ up.popup = (($) ->
     open even if the page changes in the background.
   @param {Object} [options.history=false]
   @return {Promise}
-    A promise that will be resolved when the popup has been loaded and rendered.
+    A promise that will be resolved when the popup has been loaded and
+    the opening animation has completed.
   @stable
   ###
   attach = (linkOrSelector, options) ->
@@ -203,19 +202,27 @@ up.popup = (($) ->
     
     options = u.options(options)
     url = u.option(options.url, $link.attr('href'))
-    selector = u.option(options.target, $link.attr('up-popup'), 'body')
-    position = u.option(options.position, $link.attr('up-position'), config.position)
-    animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
-    sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
-    history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
+    target = u.option(options.target, $link.attr('up-popup'), 'body')
+
+    options.position = u.option(options.position, $link.attr('up-position'), config.position)
+    options.animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
+
+    options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
+    options.history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
     animateOptions = up.motion.animateOptions(options, $link)
 
-    close()
-
     if up.bus.nobodyPrevents('up:popup:open', url: url)
-      createHiddenPopup($link, selector, sticky)
-      promise = up.replace(selector, url, history: history, requireMatch: false)
-      promise.then -> updated($link, position, animation, animateOptions)
+      wasOpen = isOpen()
+      close(animation: false) if wasOpen
+      options.beforeSwap = -> createFrame(target, options)
+      promise = up.replace(target, url, u.merge(options, animation: false))
+      promise = promise.then ->
+        setPosition($link, options.position)
+      unless wasOpen
+        promise = promise.then ->
+          up.animate($('.up-popup'), options.animation, animateOptions)
+      promise = promise.then ->
+        up.emit('up:popup:opened')
       promise
     else
       # Although someone prevented the destruction, keep a uniform API for
@@ -392,5 +399,6 @@ up.popup = (($) ->
   contains: contains
   open: -> up.error('up.popup.open no longer exists. Please use up.popup.attach instead.')
   source: -> up.error('up.popup.source no longer exists. Please use up.popup.url instead.')
+  isOpen: isOpen
 
 )(jQuery)

@@ -41,26 +41,26 @@ describe 'up.proxy', ->
         expect(responses).toEqual(['foo', 'foo', 'bar'])
 
       it "doesn't reuse responses when asked for the same path, but different selectors", ->
-        up.proxy.ajax(url: '/path', selector: '.a')
-        up.proxy.ajax(url: '/path', selector: '.b')
+        up.proxy.ajax(url: '/path', target: '.a')
+        up.proxy.ajax(url: '/path', target: '.b')
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       it "reuses a response for an 'html' selector when asked for the same path and any other selector", ->
-        up.proxy.ajax(url: '/path', selector: 'html')
-        up.proxy.ajax(url: '/path', selector: 'body')
-        up.proxy.ajax(url: '/path', selector: 'p')
-        up.proxy.ajax(url: '/path', selector: '.klass')
+        up.proxy.ajax(url: '/path', target: 'html')
+        up.proxy.ajax(url: '/path', target: 'body')
+        up.proxy.ajax(url: '/path', target: 'p')
+        up.proxy.ajax(url: '/path', target: '.klass')
         expect(jasmine.Ajax.requests.count()).toEqual(1)
 
       it "reuses a response for a 'body' selector when asked for the same path and any other selector other than 'html'", ->
-        up.proxy.ajax(url: '/path', selector: 'body')
-        up.proxy.ajax(url: '/path', selector: 'p')
-        up.proxy.ajax(url: '/path', selector: '.klass')
+        up.proxy.ajax(url: '/path', target: 'body')
+        up.proxy.ajax(url: '/path', target: 'p')
+        up.proxy.ajax(url: '/path', target: '.klass')
         expect(jasmine.Ajax.requests.count()).toEqual(1)
 
       it "doesn't reuse a response for a 'body' selector when asked for the same path but an 'html' selector", ->
-        up.proxy.ajax(url: '/path', selector: 'body')
-        up.proxy.ajax(url: '/path', selector: 'html')
+        up.proxy.ajax(url: '/path', target: 'body')
+        up.proxy.ajax(url: '/path', target: 'html')
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       it "doesn't reuse responses for different paths", ->

@@ -19,6 +19,13 @@ up.flow = (($) ->
     sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
     $element.attr("up-source", sourceUrl)
 
+  ###*
+  Returns the URL the given element was retrieved from.
+
+  @method up.flow.source
+  @param {String|Element|jQuery} selectorOrElement
+  @experimental
+  ###
   source = (selectorOrElement) ->
     $element = $(selectorOrElement).closest('[up-source]')
     u.presence($element.attr("up-source")) || up.browser.url()
@@ -103,7 +110,7 @@ up.flow = (($) ->
   \#\#\#\# Optimizing response rendering
 
   The server is free to optimize Up.js requests by only rendering the HTML fragment
-  that is being updated. The request's `X-Up-Selector` header will contain
+  that is being updated. The request's `X-Up-Target` header will contain
   the CSS selector for the updating fragment.
 
   If you are using the `upjs-rails` gem you can also access the selector via
@@ -121,8 +128,10 @@ up.flow = (($) ->
     here, in which case a selector will be inferred from the element's class and ID.
   @param {String} url
     The URL to fetch from the server.
-  @param {String} [options.method='get']
   @param {String} [options.title]
+  @param {String} [options.method='get']
+  @param {Object} [options.data]
+    An object of request parameters.
   @param {String} [options.transition='none']
   @param {String|Boolean} [options.history=true]
     If a `String` is given, it is used as the URL the browser's location bar and history.
@@ -159,43 +168,80 @@ up.flow = (($) ->
 
     options = u.options(options)
     
-    selector = resolveSelector(selectorOrElement, options)
-      
+    target = resolveSelector(selectorOrElement, options)
+    failTarget = u.option(options.failTarget, 'body')
+    failTarget = resolveSelector(failTarget, options)
+
     if !up.browser.canPushState() && options.history != false
-      up.browser.loadPage(url, u.only(options, 'method')) unless options.preload
+      unless options.preload
+        up.browser.loadPage(url, u.only(options, 'method', 'data'))
       return u.unresolvablePromise()
 
     request =
       url: url
       method: options.method
-      selector: selector
+      data: options.data
+      target: target
+      failTarget: failTarget
       cache: options.cache
       preload: options.preload
       headers: options.headers
 
     promise = up.proxy.ajax(request)
-    
-    promise.done (html, textStatus, xhr) ->
-      # The server can send us the current path using a header value.
-      # This way we know the actual URL if the server has redirected.
-      if currentLocation = u.locationFromXhr(xhr)
-        u.debug('Location from server: %o', currentLocation)
-        newRequest =
-          url: currentLocation
-          method: u.methodFromXhr(xhr)
-          selector: selector
-        up.proxy.alias(request, newRequest)
-        url = currentLocation
-      unless options.history is false
-        options.history = url
-      unless options.source is false
-        options.source = url
-      options.title ||= u.titleFromXhr(xhr)
-      implant(selector, html, options) unless options.preload
 
-    promise.fail(u.error)
-      
+    promise.done (html, textStatus, xhr) ->
+      processResponse(true, target, url, request, xhr, options)
+
+    promise.fail (xhr, textStatus, errorThrown) ->
+      processResponse(false, failTarget, url, request, xhr, options)
+
     promise
+
+  ###*
+  @internal
+  ###
+  processResponse = (isSuccess, selector, url, request, xhr, options) ->
+
+    options.method = u.normalizeMethod(u.option(u.methodFromXhr(xhr), options.method))
+    options.title = u.option(u.titleFromXhr(xhr), options.title)
+    isReloadable = (options.method == 'GET')
+
+    # The server can send us the current path using a header value.
+    # This way we know the actual URL if the server has redirected.
+    if urlFromServer = u.locationFromXhr(xhr)
+      url = urlFromServer
+      if isSuccess
+        newRequest =
+          url: url
+          method: u.methodFromXhr(xhr)
+          target: selector
+        up.proxy.alias(request, newRequest)
+    else if isReloadable
+      url = url + u.requestDataAsQueryString(options.data)
+
+    if isSuccess
+      if isReloadable # e.g. GET returns 200 OK
+        options.history = url unless options.history is false || u.isString(options.history)
+        options.source  = url unless options.source  is false || u.isString(options.source)
+      else # e.g. POST returns 200 OK
+        options.history = false  unless u.isString(options.history)
+        options.source  = 'keep' unless u.isString(options.source)
+    else
+      options.transition = options.failTransition
+      options.failTransition = undefined
+      if isReloadable # e.g. GET returns 500 Internal Server Error
+        options.history = url unless options.history is false
+        options.source  = url unless options.source  is false
+      else # e.g. POST returns 500 Internal Server Error
+        options.source  = 'keep'
+        options.history = false
+
+    if options.preload
+      u.resolvedPromise()
+    else
+      implant(selector, xhr.responseText, options)
+
+
 
   ###*
   Updates a selector on the current page with the
@@ -225,11 +271,14 @@ up.flow = (($) ->
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
-  @function up.implant
+  @function up.implant'
   @param {String|Element|jQuery} selectorOrElement
   @param {String} html
   @param {Object} [options]
     See options for [`up.replace`](/up.replace).
+  @return {Promise}
+    A promise that will be resolved then the selector was updated
+    and all animation has finished.
   @experimental
   ###
   implant = (selectorOrElement, html, options) ->
@@ -238,17 +287,24 @@ up.flow = (($) ->
       historyMethod: 'push',
       requireMatch: true
     )
-    options.source = u.option(options.source, options.history)
+    # options.source = u.option(options.source, options.history)
     response = parseResponse(html, options)
     options.title ||= response.title()
 
     up.layout.saveScroll() unless options.saveScroll == false
 
+    options.beforeSwap?($old, $new)
+    deferreds = []
+
     for step in parseImplantSteps(selector, options)
       $old = findOldFragment(step.selector, options)
       $new = response.find(step.selector)?.first()
       if $old && $new
-        swapElements($old, $new, step.pseudoClass, step.transition, options)
+        deferred = swapElements($old, $new, step.pseudoClass, step.transition, options)
+        deferreds.push(deferred)
+
+    options.afterSwap?($old, $new)
+    return up.motion.when(deferreds...)
 
   findOldFragment = (selector, options) ->
     # Prefer to replace fragments in an open popup or modal
@@ -295,6 +351,9 @@ up.flow = (($) ->
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'
 
+    if options.source == 'keep'
+      options = u.merge(options, source: source($old))
+
     # Ensure that all transitions and animations have completed.
     up.motion.finish($old)
 
@@ -314,18 +373,18 @@ up.flow = (($) ->
       elementsInserted($wrapper.children(), options)
 
       # Reveal element that was being prepended/appended.
-      up.layout.revealOrRestoreScroll($wrapper, options)
+      return up.layout.revealOrRestoreScroll($wrapper, options)
         .then ->
           # Since we're adding content instead of replacing, we'll only
           # animate $new instead of morphing between $old and $new
-          return up.animate($wrapper, transition, options)
+          up.animate($wrapper, transition, options)
         .then ->
           u.unwrapElement($wrapper)
-          return
+
     else
       # Wrap the replacement as a destroy animation, so $old will
       # get marked as .up-destroying right away.
-      destroy $old, animation: ->
+      return destroy $old, animation: ->
         # Don't insert the new element after the old element.
         # For some reason this will make the browser scroll to the
         # bottom of the new element.
@@ -344,6 +403,7 @@ up.flow = (($) ->
     for selectorAtom, i in disjunction
       # Splitting the atom
       selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/)
+      selectorParts or u.error('Could not parse selector atom %o', selectorAtom)
       selector = selectorParts[1]
       if selector == 'html'
         # If someone really asked us to replace the <html> root, the best
@@ -428,7 +488,7 @@ up.flow = (($) ->
   destroy = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
     if up.bus.nobodyPrevents('up:fragment:destroy', $element: $element)
-      options = u.options(options, animation: 'none')
+      options = u.options(options, animation: false)
       animateOptions = up.motion.animateOptions(options)
       $element.addClass('up-destroying')
       # If e.g. a modal or popup asks us to restore a URL, do this
@@ -507,11 +567,13 @@ up.flow = (($) ->
     setSource(document.body, up.browser.url())
   )
 
+  knife: eval(Knife?.point)
   replace: replace
   reload: reload
   destroy: destroy
   implant: implant
   first: first
+  source: source
   resolveSelector: resolveSelector
 
 )(jQuery)

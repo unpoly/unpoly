@@ -2,13 +2,13 @@ describe TestController do
 
   describe '#up?' do
 
-    it 'returns true if the request has an X-Up-Selector header' do
-      request.headers['X-Up-Selector'] = 'body'
+    it 'returns true if the request has an X-Up-Target header' do
+      request.headers['X-Up-Target'] = 'body'
       get :is_up
       expect(response.body).to eq('true')
     end
 
-    it 'returns false if the request has no X-Up-Selector header' do
+    it 'returns false if the request has no X-Up-Target header' do
       get :is_up
       expect(response.body).to eq('false')
     end
@@ -20,8 +20,8 @@ describe TestController do
     describe '#selector' do
 
       it 'returns the CSS selector that is requested via Up.js' do
-        request.headers['X-Up-Selector'] = '.foo'
-        get :up_selector
+        request.headers['X-Up-Target'] = '.foo'
+        get :up_target
         expect(response.body).to eq('.foo')
       end
 

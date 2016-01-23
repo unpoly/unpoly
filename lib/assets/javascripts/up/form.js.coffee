@@ -114,31 +114,26 @@ up.form = (($) ->
     $form = $(formOrSelector).closest('form')
 
     options = u.options(options)
-    successSelector = u.option(options.target, $form.attr('up-target'), 'body')
-    successSelector = up.flow.resolveSelector(successSelector, options)
-    failureSelector = u.option(options.failTarget, $form.attr('up-fail-target')) || u.selectorForElement($form)
-    failureSelector = up.flow.resolveSelector(failureSelector, options)
-
-    historyOption = u.option(options.history, u.castedAttr($form, 'up-history'), true)
-    successTransition = u.option(options.transition, u.castedAttr($form, 'up-transition'))
-    failureTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), successTransition)
-    httpMethod = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase()
-    headers = u.option(options.headers, {})
-
-    implantOptions = {}
-    implantOptions.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true)
-    implantOptions.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
-    implantOptions.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
-    implantOptions.origin = u.option(options.origin, $form)
-    implantOptions = u.extend(implantOptions, up.motion.animateOptions(options, $form))
-
-    useCache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
+    target = u.option(options.target, $form.attr('up-target'), 'body')
     url = u.option(options.url, $form.attr('action'), up.browser.url())
+    options.failTarget = u.option(options.failTarget, $form.attr('up-fail-target')) || u.selectorForElement($form)
+    options.history = u.option(options.history, u.castedAttr($form, 'up-history'), true)
+    options.transition = u.option(options.transition, u.castedAttr($form, 'up-transition'), 'none')
+    options.failTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), 'none')
+    options.method = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase()
+    options.headers = u.option(options.headers, {})
+    options.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true)
+    options.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
+    options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
+    options.origin = u.option(options.origin, $form)
+    options.data = $form.serializeArray()
+    options = u.merge(options, up.motion.animateOptions(options, $form))
 
     hasFileInputs = $form.find('input[type=file]').length
 
     if options.validate
-      headers['X-Up-Validate'] = options.validate
+      options.headers ||= {}
+      options.headers['X-Up-Validate'] = options.validate
       # Since we cannot (yet) submit file inputs via AJAX, we cannot
       # offer inline validation for such forms.
       if hasFileInputs
@@ -146,43 +141,13 @@ up.form = (($) ->
 
     $form.addClass('up-active')
 
-    if hasFileInputs || (!up.browser.canPushState() && historyOption != false)
+    if hasFileInputs || (!up.browser.canPushState() && options.history != false)
       $form.get(0).submit()
       return u.unresolvablePromise()
 
-    request = {
-      url: url
-      method: httpMethod
-      data: $form.serializeArray()
-      selector: successSelector
-      cache: useCache
-      headers: headers
-    }
-
-    successUrl = (xhr) ->
-      url = undefined
-      if u.isGiven(historyOption)
-        if historyOption == false || u.isString(historyOption)
-          url = historyOption
-        else if currentLocation = u.locationFromXhr(xhr)
-          url = currentLocation
-        else if request.type == 'GET'
-          url = request.url + '?' + request.data
-      u.option(url, false)
-
-    up.proxy.ajax(request)
-      .always ->
-        $form.removeClass('up-active')
-      .done (html, textStatus, xhr) ->
-        successOptions = u.merge(implantOptions,
-          history: successUrl(xhr),
-          transition: successTransition
-        )
-        up.flow.implant(successSelector, html, successOptions)
-      .fail (xhr, textStatus, errorThrown) ->
-        html = xhr.responseText
-        failureOptions = u.merge(implantOptions, transition: failureTransition)
-        up.flow.implant(failureSelector, html, failureOptions)
+    promise = up.replace(target, url, options)
+    promise.always -> $form.removeClass('up-active')
+    return promise
 
   ###*
   Observes a field or form and runs a callback when a value changes.
@@ -355,7 +320,6 @@ up.form = (($) ->
   @stable
   ###
   autosubmit = (selectorOrElement, options) ->
-    console.log("autosubmit %o", selectorOrElement)
     observe(selectorOrElement, options, (value, $field) ->
       $form = $field.closest('form')
       $field.addClass('up-active')
@@ -468,7 +432,7 @@ up.form = (($) ->
 
   When the form's action performs a redirect, the server should echo
   the new request's URL as a response header `X-Up-Location`
-  and the request's HTTP method as `X-Up-Method`.
+  and the request's HTTP method as `X-Up-Method: GET`.
 
   If you are using Up.js via the `upjs-rails` gem, these headers
   are set automatically for every request.

@@ -156,7 +156,7 @@ up.motion = (($) ->
     options = animateOptions(options)
     if animation == 'none' || animation == false
       none()
-    if u.isFunction(animation)
+    else if u.isFunction(animation)
       assertIsDeferred(animation($element, options), animation)
     else if u.isString(animation)
       animate($element, findAnimation(animation), options)
@@ -168,7 +168,7 @@ up.motion = (($) ->
         $element.css(animation)
         u.resolvedDeferred()
     else
-      u.error("Unknown animation type %o", animation)
+      u.error("Unknown animation type for %o", animation)
 
   ###*
   Extracts animation-related options from the given options hash.
@@ -356,12 +356,13 @@ up.motion = (($) ->
       finish($old)
       finish($new)
 
-      if transitionOrName == 'none' || transitionOrName == false || animation = animations[transitionOrName]
-        deferred = skipMorph($old, $new, parsedOptions)
-        deferred.then -> animate($new, animation || 'none', options)
-        deferred
+      if transitionOrName == 'none' || transitionOrName == false
+        return skipMorph($old, $new, parsedOptions)
+      else if animation = animations[transitionOrName]
+        skipMorph($old, $new, parsedOptions)
+        return animate($new, animation, parsedOptions)
       else if transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
-        withGhosts $old, $new, parsedOptions, ($oldGhost, $newGhost) ->
+        return withGhosts $old, $new, parsedOptions, ($oldGhost, $newGhost) ->
           transitionPromise = transition($oldGhost, $newGhost, parsedOptions)
           assertIsDeferred(transitionPromise, transitionOrName)
       else if u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0
@@ -371,11 +372,11 @@ up.motion = (($) ->
             animate($old, parts[0], options),
             animate($new, parts[1], options)
           )
-        morph($old, $new, transition, parsedOptions)
+        return morph($old, $new, transition, parsedOptions)
       else
         u.error("Unknown transition %o", transitionOrName)
     else
-      skipMorph($old, $new, parsedOptions)
+      return skipMorph($old, $new, parsedOptions)
 
   ###*
   This causes the side effects of a successful transition, but instantly.

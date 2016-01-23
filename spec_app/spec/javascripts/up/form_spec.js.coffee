@@ -87,19 +87,19 @@ describe 'up.form', ->
       if up.browser.canPushState()
       
         beforeEach ->
-          $form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
-          $form.append('<input name="field1" value="value1">')
-          $form.append('<input name="field2" value="value2">')
+          @$form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
+          @$form.append('<input name="field1" value="value1">')
+          @$form.append('<input name="field2" value="value2">')
           affix('.response').text('old-text')
-          @promise = up.submit($form)
+          @promise = up.submit(@$form)
           @request = @lastRequest()
 
-        it 'submits the given form and replaces the target with the response', (done) ->
-
+        it 'submits the given form and replaces the target with the response', ->
           expect(@request.url).toMatch /\/path\/to$/
           expect(@request).toHaveRequestMethod('PUT')
           expect(@request.data()['field1']).toEqual(['value1'])
           expect(@request.data()['field2']).toEqual(['value2'])
+          expect(@request.requestHeaders['X-Up-Target']).toEqual('.response')
 
           @respondWith """
             text-before
@@ -111,14 +111,9 @@ describe 'up.form', ->
             text-after
             """
 
-          @promise.then ->
-            expect($('.response')).toHaveText('new-text')
-            expect($('body')).not.toHaveText('text-before')
-            expect($('body')).not.toHaveText('text-after')
-            done()
-        
-        it 'places the response into the form if the submission returns a 5xx status code', (done) ->
-          @request.respondWith
+        it "places the response into the form and doesn't update the browser URL if the submission returns a 5xx status code", ->
+          up.submit(@$form)
+          @respondWith
             status: 500
             contentType: 'text/html'
             responseText:
@@ -131,31 +126,46 @@ describe 'up.form', ->
     
               text-after
               """
-    
-          @promise.always ->
-            expect($('.response')).toHaveText('old-text')
-            expect($('form')).toHaveText('error-messages')
-            expect($('body')).not.toHaveText('text-before')
-            expect($('body')).not.toHaveText('text-after')
-            done()
-        
-        it 'respects a X-Up-Location header that the server sends in case of a redirect', (done) ->
-    
-          @request.respondWith
+          expect(up.browser.url()).toEqual(@hrefBeforeExample)
+          expect($('.response')).toHaveText('old-text')
+          expect($('form')).toHaveText('error-messages')
+          expect($('body')).not.toHaveText('text-before')
+          expect($('body')).not.toHaveText('text-after')
+
+        it 'respects X-Up-Method and X-Up-Location response headers so the server can show that it redirected to a GET URL', ->
+          up.submit(@$form)
+          @respondWith
             status: 200
             contentType: 'text/html'
-            responseHeaders: { 'X-Up-Location': '/other/path' }
+            responseHeaders:
+              'X-Up-Location': '/other-path'
+              'X-Up-Method': 'GET'
             responseText:
               """
               <div class="response">
                 new-text
               </div>
               """
-    
-          @promise.then ->
-            expect(up.browser.url()).toMatch(/\/other\/path$/)
-            done()
-            
+
+          expect(up.browser.url()).toEndWith('/other-path')
+
+        describe 'with { history } option', ->
+
+          it 'uses the given URL as the new browser location if the request succeeded', ->
+            up.submit(@$form, history: '/given-path')
+            @respondWith('<div class="response">new-text</div>')
+            expect(up.browser.url()).toEndWith('/given-path')
+
+          it 'keeps the current browser location if the request failed', ->
+            up.submit(@$form, history: '/given-path', failTarget: '.response')
+            @respondWith('<div class="response">new-text</div>', status: 500)
+            expect(up.browser.url()).toEqual(@hrefBeforeExample)
+
+          it 'keeps the current browser location if the option is set to false', ->
+            up.submit(@$form, history: false)
+            @respondWith('<div class="response">new-text</div>')
+            expect(up.browser.url()).toEqual(@hrefBeforeExample)
+
       else
         
         it 'submits the given form', ->
@@ -218,7 +228,7 @@ describe 'up.form', ->
 
           request = @lastRequest()
           expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
-          expect(request.requestHeaders['X-Up-Selector']).toEqual(".field-group:has([name='user'])")
+          expect(request.requestHeaders['X-Up-Target']).toEqual(".field-group:has([name='user'])")
 
           @respondWith """
             <div class="field-group has-error">

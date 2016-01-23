@@ -116,7 +116,7 @@ up.proxy = (($) ->
     [ request.url,
       request.method,
       request.data,
-      request.selector
+      request.target
     ].join('|')
 
   cache = u.cache
@@ -139,11 +139,11 @@ up.proxy = (($) ->
   get = (request) ->
     request = normalizeRequest(request)
     candidates = [request]
-    unless request.selector is 'html'
-      requestForHtml = u.merge(request, selector: 'html')
+    unless request.target is 'html'
+      requestForHtml = u.merge(request, target: 'html')
       candidates.push(requestForHtml)
-      unless request.selector is 'body'
-        requestForBody = u.merge(request, selector: 'body')
+      unless request.target is 'body'
+        requestForBody = u.merge(request, target: 'body')
         candidates.push(requestForBody)
     for candidate in candidates
       if response = cache.get(candidate)
@@ -155,7 +155,7 @@ up.proxy = (($) ->
   @function up.proxy.set
   @param {String} request.url
   @param {String} [request.method='GET']
-  @param {String} [request.selector='body']
+  @param {String} [request.target='body']
   @param {Promise} response
     A promise for the response that is API-compatible with the
     promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
@@ -172,7 +172,7 @@ up.proxy = (($) ->
   @function up.proxy.remove
   @param {String} request.url
   @param {String} [request.method='GET']
-  @param {String} [request.selector='body']
+  @param {String} [request.target='body']
   @experimental
   ###
   remove = cache.remove
@@ -214,7 +214,7 @@ up.proxy = (($) ->
     unless request._normalized
       request.method = u.normalizeMethod(request.method)
       request.url = u.normalizeUrl(request.url) if request.url
-      request.selector ||= 'body'
+      request.target ||= 'body'
       request._normalized = true
     request
 
@@ -235,13 +235,15 @@ up.proxy = (($) ->
   @function up.proxy.ajax
   @param {String} request.url
   @param {String} [request.method='GET']
-  @param {String} [request.selector='body']
+  @param {String} [request.target='body']
   @param {Boolean} [request.cache]
     Whether to use a cached response, if available.
     If set to `false` a network connection will always be attempted.
   @param {Object} [request.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
+  @param {Object} [request.data={}]
+    An object of request parameters.
   @return
     A promise for the response that is API-compatible with the
     promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
@@ -252,7 +254,7 @@ up.proxy = (($) ->
     forceCache = (options.cache == true)
     ignoreCache = (options.cache == false)
 
-    request = u.only(options, 'url', 'method', 'data', 'selector', 'headers', '_normalized')
+    request = u.only(options, 'url', 'method', 'data', 'target', 'headers', '_normalized')
 
     pending = true
 
@@ -393,14 +395,13 @@ up.proxy = (($) ->
     request = u.copy(request)
 
     request.headers ||= {}
-    request.headers['X-Up-Selector'] = request.selector
+    request.headers['X-Up-Target'] = request.target
     request.data = u.requestDataAsArray(request.data)
 
     if u.contains(config.wrapMethods, request.method)
       request.data.push
         name: config.wrapMethodParam
         value: request.method
-      console.log("wrapped request is %o", request)
       request.method = 'POST'
 
     promise = $.ajax(request)
@@ -422,7 +423,7 @@ up.proxy = (($) ->
   @event up:proxy:load
   @param event.url
   @param event.method
-  @param event.selector
+  @param event.target
   @experimental
   ###
 
@@ -433,7 +434,7 @@ up.proxy = (($) ->
   @event up:proxy:received
   @param event.url
   @param event.method
-  @param event.selector
+  @param event.target
   @experimental
   ###
 

@@ -4,8 +4,8 @@ class TestController < ActionController::Base
     render :text => up?.to_s
   end
 
-  def up_selector
-    render :text => up.selector
+  def up_target
+    render :text => up.target
   end
 
   def is_up_validate

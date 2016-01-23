@@ -51,7 +51,6 @@
     mock: mock
 
   reset = ->
-    console.log("Reset with cleaners %o", Knife.cleaners)
     cleaner() while cleaner = Knife.cleaners.pop()
 
   me = {}

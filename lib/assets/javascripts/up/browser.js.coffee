@@ -11,24 +11,29 @@ up.browser = (($) ->
 
   u = up.util
 
+  ###*
+  @method up.browser.loadPage
+  @param {String} url
+  @param {String} [options.method='get']
+  @param {Object|Array} [options.data]
+  @internal
+  ###
   loadPage = (url, options = {}) ->
     method = u.option(options.method, 'get').toLowerCase()
     if method == 'get'
-      location.href = url
-    else if $.rails
-      target = options.target
-      csrfToken = $.rails.csrfToken()
-      csrfParam = $.rails.csrfParam()
-      $form = $("<form method='post' action='#{url}'></form>")
-      metadataInput = "<input name='_method' value='#{method}' type='hidden' />"
-      if u.isDefined(csrfParam) && u.isDefined(csrfToken)
-        metadataInput += "<input name='#{csrfParam}' value='#{csrfToken}' type='hidden' />"
-      if target
-        $form.attr('target', target)
-      $form.hide().append(metadataInput).appendTo('body')
-      $form.submit()
+      location.href = url + u.requestDataAsQueryString(options.data)
     else
-      error("Can't fake a #{method.toUpperCase()} request without Rails UJS")
+      $form = $("<form method='post' action='#{url}'></form>")
+      addField = (field) ->
+        if u.isGiven(field.name)
+          $field = $('<input type="hidden">')
+          $field.attr(field.name, field.value)
+          $field.appendTo($form)
+      addField(name: '_method', value: method)
+      addField(up.rails.csrfField())
+      u.requestDataAsArray(options.data, addField)
+      $form.hide().appendTo('body')
+      $form.submit()
 
   ###*
   A cross-browser way to interact with `console.log`, `console.error`, etc.

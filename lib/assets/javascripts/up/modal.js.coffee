@@ -136,11 +136,10 @@ up.modal = (($) ->
   @experimental
   ###
   coveredUrl = ->
-    $modal = $('.up-modal')
-    $modal.attr('up-covered-url')
+    $('.up-modal').attr('up-covered-url')
 
   reset = ->
-    close()
+    close(animation: false)
     currentUrl = undefined
     config.reset()
 
@@ -151,17 +150,13 @@ up.modal = (($) ->
     else
       template
 
-  rememberHistory = ->
-    $modal = $('.up-modal')
-    $modal.attr('up-covered-url', up.browser.url())
-    $modal.attr('up-covered-title', document.title)
-
   discardHistory = ->
     $modal = $('.up-modal')
     $modal.removeAttr('up-covered-url')
     $modal.removeAttr('up-covered-title')
 
-  createHiddenModal = (options) ->
+  createFrame = (target, options) ->
+    shiftElements()
     $modal = $(templateHtml())
     $modal.attr('up-sticky', '') if options.sticky
     $modal.attr('up-covered-url', up.browser.url())
@@ -171,14 +166,14 @@ up.modal = (($) ->
     $dialog.css('max-width', options.maxWidth) if u.isPresent(options.maxWidth)
     $dialog.css('height', options.height) if u.isPresent(options.height)
     $content = $modal.find('.up-modal-content')
-    $placeholder = u.$createElementFromSelector(options.selector)
+    # Create an empty element that will match the
+    # selector that is being replaced.
+    $placeholder = u.$createElementFromSelector(target)
     $placeholder.appendTo($content)
     $modal.appendTo(document.body)
-    rememberHistory()
-    $modal.hide()
     $modal
 
-  unshiftElements = []
+  unshifters = []
 
   # Gives `<body>` a right padding in the width of a scrollbar.
   # Also gives elements anchored to the right side of the screen
@@ -195,21 +190,26 @@ up.modal = (($) ->
       'padding-right': "#{bodyRightShift}px",
       'overflow-y': 'hidden'
     )
-    unshiftElements.push(unshiftBody)
+    unshifters.push(unshiftBody)
     up.layout.anchoredRight().each ->
       $element = $(this)
       elementRight = parseInt($element.css('right'))
       elementRightShift = scrollbarWidth + elementRight
-      unshiftElement = u.temporaryCss($element, 'right': elementRightShift)
-      unshiftElements.push(unshiftElement)
+      unshifter = u.temporaryCss($element, 'right': elementRightShift)
+      unshifters.push(unshifter)
 
-  updated = (animation, animateOptions) ->
-    $modal = $('.up-modal')
-    if $modal.is(':hidden')
-      shiftElements()
-      $modal.show()
-      deferred = up.animate($modal, animation, animateOptions)
-      deferred.then -> up.emit('up:modal:opened')
+  # Reverts the effects of `shiftElements`.
+  unshiftElements = ->
+    unshifter() while unshifter = unshifters.pop()
+
+  ###*
+  Returns whether a modal is currently open.
+
+  @function up.modal.isOpen
+  @stable
+  ###
+  isOpen = ->
+    $('.up-modal').length > 0
 
   ###*
   Opens the given link's destination in a modal overlay:
@@ -246,7 +246,8 @@ up.modal = (($) ->
   @param {String} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
   @return {Promise}
-    A promise that will be resolved when the popup has been loaded and rendered.
+    A promise that will be resolved when the modal has been loaded and
+    the opening animation has completed.
   @stable
   ###
   follow = (linkOrSelector, options) ->
@@ -275,7 +276,8 @@ up.modal = (($) ->
   @param {Object} options
     See options for [`up.modal.follow`](/up.modal.follow).
   @return {Promise}
-    A promise that will be resolved when the popup has been loaded and rendered.
+    A promise that will be resolved when the modal has been loaded and the opening
+    animation has completed.
   @stable
   ###
   visit = (url, options) ->
@@ -291,34 +293,33 @@ up.modal = (($) ->
     options = u.options(options)
     $link = u.option(options.$link, u.nullJQuery())
     url = u.option(options.url, $link.attr('up-href'), $link.attr('href'))
-    selector = u.option(options.target, $link.attr('up-modal'), 'body')
-    width = u.option(options.width, $link.attr('up-width'), config.width)
-    maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), config.maxWidth)
-    height = u.option(options.height, $link.attr('up-height'), config.height)
-    animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
-    sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
+    target = u.option(options.target, $link.attr('up-modal'), 'body')
+    options.width = u.option(options.width, $link.attr('up-width'), config.width)
+    options.maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), config.maxWidth)
+    options.height = u.option(options.height, $link.attr('up-height'), config.height)
+    options.animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
+    options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
     # Although we usually fall back to full page loads if a browser doesn't support pushState,
     # in the case of modals we assume that the developer would rather see a dialog
     # without an URL update.
-    history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
+    options.history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
     animateOptions = up.motion.animateOptions(options, $link)
 
-    close()
-
     if up.bus.nobodyPrevents('up:modal:open', url: url)
-      createHiddenModal
-        selector: selector
-        width: width
-        maxWidth: maxWidth
-        height: height
-        sticky: sticky
-      promise = up.replace(selector, url, history: history, requireMatch: false)
-      promise.then -> updated(animation, animateOptions)
+      wasOpen = isOpen()
+      close(animation: false) if wasOpen
+      options.beforeSwap = -> createFrame(target, options)
+      promise =  up.replace(target, url, u.merge(options, animation: false))
+      unless wasOpen
+        promise = promise.then ->
+          up.animate($('.up-modal'), options.animation, animateOptions)
+      promise = promise.then ->
+        up.emit('up:modal:opened')
       promise
     else
-      # Although someone prevented the destruction, keep a uniform API for
+      # Although someone prevented opening the modal, keep a uniform API for
       # callers by returning a Deferred that will never be resolved.
-      u.unresolvableDeferred()
+      u.unresolvablePromise()
 
   ###*
   This event is [emitted](/up.emit) when a modal dialog is starting to open.
@@ -361,11 +362,11 @@ up.modal = (($) ->
           title: $modal.attr('up-covered-title')
         )
         currentUrl = undefined
-        deferred = up.destroy($modal, options)
-        deferred.then ->
-          unshifter() while unshifter = unshiftElements.pop()
+        promise = up.destroy($modal, options)
+        promise = promise.then ->
+          unshiftElements()
           up.emit('up:modal:closed')
-        deferred
+        promise
       else
         # Although someone prevented the destruction,
         # keep a uniform API for callers by returning
@@ -487,6 +488,7 @@ up.modal = (($) ->
   config: config
   defaults: -> u.error('up.modal.defaults(...) no longer exists. Set values on he up.modal.config property instead.')
   contains: contains
-  source: -> up.error('up.popup.source no longer exists. Please use up.popup.url instead.')
+  source: -> up.error('up.modal.source no longer exists. Please use up.popup.url instead.')
+  isOpen: isOpen
 
 )(jQuery)

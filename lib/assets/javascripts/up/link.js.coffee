@@ -130,8 +130,10 @@ up.link = (($) ->
     or any element that is marked up with an `up-href` attribute.
   @param {String} [options.target]
     The selector to replace.
-    Defaults to the `up-target` attribute on `link`,
-    or to `body` if such an attribute does not exist.
+    Defaults to the `up-target` attribute on `link`, or to `body` if such an attribute does not exist.
+  @param {String} [options.failTarget]
+    The selector to replace if the server responds with a non-200 status code.
+    Defaults to the `up-fail-target` attribute on `link`, or to `body` if such an attribute does not exist.
   @param {Function|String} [options.transition]
     A transition function or name.
   @param {Number} [options.duration]
@@ -162,8 +164,10 @@ up.link = (($) ->
 
     options = u.options(options)
     url = u.option($link.attr('up-href'), $link.attr('href'))
-    selector = u.option(options.target, $link.attr('up-target'), 'body')
-    options.transition = u.option(options.transition, u.castedAttr($link, 'up-transition'), u.castedAttr($link, 'up-animation'))
+    target = u.option(options.target, $link.attr('up-target'), 'body')
+    options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'), 'body')
+    options.transition = u.option(options.transition, u.castedAttr($link, 'up-transition'), 'none')
+    options.failTransition = u.option(options.failTransition, u.castedAttr($link, 'up-fail-transition'), 'none')
     options.history = u.option(options.history, u.castedAttr($link, 'up-history'))
     options.reveal = u.option(options.reveal, u.castedAttr($link, 'up-reveal'), true)
     options.cache = u.option(options.cache, u.castedAttr($link, 'up-cache'))
@@ -172,7 +176,7 @@ up.link = (($) ->
     options.origin = u.option(options.origin, $link)
     options = u.merge(options, up.motion.animateOptions(options, $link))
 
-    up.replace(selector, url, options)
+    up.replace(target, url, options)
 
   ###*
   Returns the HTTP method that should be used when following the given link.

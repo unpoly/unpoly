@@ -235,14 +235,19 @@ up.util = (($) ->
       selector = "##{id}"
     else if name = presence($element.attr("name"))
       selector = "[name='#{name}']"
-    else if classString = presence($element.attr("class"))
-      classes = classString.split(' ')
+    else if classes = presence(nonUpClasses($element))
+      console.log("using klass!", classes)
       selector = ''
       for klass in classes
         selector += ".#{klass}"
     else
       selector = $element.prop('tagName').toLowerCase()
     selector
+
+  nonUpClasses = ($element) ->
+    classString = $element.attr('class') || ''
+    classes = classString.split(' ')
+    select classes, (klass) -> isPresent(klass) && !klass.match(/^up-/)
 
   # jQuery's implementation of $(...) cannot create elements that have
   # an <html> or <body> tag. So we're using native elements.
@@ -750,6 +755,18 @@ up.util = (($) ->
     matches
 
   ###*
+  Returns all elements from the given array that do not return
+  a truthy value when passed to the given function.
+
+  @function up.util.reject
+  @param {Array<T>} array
+  @return {Array<T>}
+  @stable
+  ###
+  reject = (array, tester) ->
+    select(array, (element) -> !tester(element))
+
+  ###*
   Returns the first [present](/up.util.isPresent) element attribute
   among the given list of attribute names.
 
@@ -1182,7 +1199,20 @@ up.util = (($) ->
     joined.resolve = ->
       each deferreds, (deferred) -> deferred.resolve?()
     joined
-    
+
+#  resolvableSequence = (first, callbacks...) ->
+#    sequence = $.Deferred().promise()
+#    values = [first]
+#    current = first
+#    for callback in callbacks
+#      current = current.then ->
+#        value = callback()
+#        values.push(value) if u.isPromise(value)
+#        value
+#    sequence.resolve = ->
+#      each values, (deferred) -> deferred.resolve?()
+#    sequence
+
   ###*
   On the given element, set attributes that are still missing.
 
@@ -1486,7 +1516,6 @@ up.util = (($) ->
 
   requestDataAsArray: requestDataAsArray
   requestDataAsQueryString: requestDataAsQueryString
-
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   presentAttr: presentAttr
@@ -1511,6 +1540,7 @@ up.util = (($) ->
   any: any
   detect: detect
   select: select
+  reject: reject
   compact: compact
   uniq: uniq
   last: last

@@ -1,9 +1,8 @@
 beforeEach ->
-  @previousHref = location.href
-  @previousTitle = document.title
+  @hrefBeforeExample = location.href
+  @titleBeforeExample = document.title
   
 afterEach ->
   if up.browser.canPushState()
-    history.replaceState?({}, @previousTitle, @previousHref)
-    document.title = @previousTitle
-
+    history.replaceState?({}, @titleBeforeExample, @hrefBeforeExample)
+    document.title = @titleBeforeExample

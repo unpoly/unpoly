@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    upjs-rails (0.16.0)
+    upjs-rails (0.17.0)
       rails (>= 3)
 
 GEM
@@ -210,6 +210,3 @@ DEPENDENCIES
   uglifier (>= 1.3.0)
   upjs-rails!
   web-console (~> 2.0)
-
-BUNDLED WITH
-   1.11.2

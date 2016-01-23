@@ -16,7 +16,7 @@ module Upjs
       # [page fragment update](http://upjs.io/up.replace) triggered by an
       # Up.js frontend.
       def up?
-        selector.present?
+        target.present?
       end
 
       ##
@@ -29,8 +29,8 @@ module Upjs
       #
       # Server-side code is free to optimize its response by only returning HTML
       # that matches this selector.
-      def selector
-        request.headers['X-Up-Selector']
+      def target
+        request.headers['X-Up-Target']
       end
 
       ##
