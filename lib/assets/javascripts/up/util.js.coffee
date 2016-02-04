@@ -163,7 +163,7 @@ up.util = (($) ->
     $element = $(element)
     selector = undefined
 
-    # up.puts("Creating selector from element %o", $element.get(0))
+    up.puts("Creating selector from element %o", $element.get(0))
 
     if upId = presence($element.attr("up-id"))
       selector = "[up-id='#{upId}']"
@@ -172,7 +172,6 @@ up.util = (($) ->
     else if name = presence($element.attr("name"))
       selector = "[name='#{name}']"
     else if classes = presence(nonUpClasses($element))
-      console.log("using klass!", classes)
       selector = ''
       for klass in classes
         selector += ".#{klass}"
@@ -643,6 +642,24 @@ up.util = (($) ->
     for element in array
       if tester(element)
         match = true
+        break
+    match
+
+  ###*
+  Returns whether the given function returns a truthy value
+  for all elements in the given array.
+
+  @function up.util.all
+  @param {Array<T>} array
+  @param {Function<T>} tester
+  @return {Boolean}
+  @experimental
+  ###
+  all = (array, tester) ->
+    match = true
+    for element in array
+      unless tester(element)
+        match = false
         break
     match
 
@@ -1506,6 +1523,7 @@ up.util = (($) ->
   map: map
   times: times
   any: any
+  all: all
   detect: detect
   select: select
   reject: reject

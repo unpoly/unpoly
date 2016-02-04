@@ -58,7 +58,9 @@ up.flow = (($) ->
   Replaces elements on the current page with corresponding elements
   from a new page fetched from the server.
 
-  The current and new elements must have the same CSS selector.
+  The current and new elements must both match the given CSS selector.
+
+  The UJS variant of this is the [`a[up-target]`](/a-up-target) selector.
 
   \#\#\#\# Example
 
@@ -251,8 +253,6 @@ up.flow = (($) ->
     else
       extract(selector, xhr.responseText, options)
 
-
-
   ###*
   Updates a selector on the current page with the
   same selector from the given HTML string.
@@ -295,7 +295,8 @@ up.flow = (($) ->
     up.log.group 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length, ->
       options = u.options(options,
         historyMethod: 'push',
-        requireMatch: true
+        requireMatch: true,
+        keep: true
       )
       selector = resolveSelector(selectorOrElement, options.origin)
       response = parseResponse(html, options)
@@ -305,6 +306,8 @@ up.flow = (($) ->
 
       options.beforeSwap?()
       deferreds = []
+
+      updateHistory(options)
 
       for step in parseImplantSteps(selector, options)
         up.log.group 'Updating %s', step.selector, ->
@@ -346,18 +349,10 @@ up.flow = (($) ->
       else if options.requireMatch
         u.error("Could not find selector %s in response %o", selector, html)
 
-  elementsInserted = ($new, options) ->
+  updateHistory = (options) ->
     if options.history
       document.title = options.title if options.title
       up.history[options.historyMethod](options.history)
-    # Remember where the element came from so we can
-    # offer reload functionality.
-    unless options.source is false
-      setSource($new, options.source)
-    autofocus($new)
-    # The fragment should be compiled before animating,
-    # so transitions see .up-current classes
-    up.hello($new, origin: options.origin)
 
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'
@@ -369,8 +364,6 @@ up.flow = (($) ->
     up.motion.finish($old)
 
     if pseudoClass
-      insertionMethod = if pseudoClass == 'before' then 'prepend' else 'append'
-
       # Text nodes are wrapped in a .up-insertion container so we can
       # animate them and measure their position/size for scrolling.
       # This is not possible for container-less text nodes.
@@ -378,42 +371,189 @@ up.flow = (($) ->
 
       # Note that since we're prepending/appending instead of replacing,
       # `$new` will not actually be inserted into the DOM, only its children.
-      $old[insertionMethod]($wrapper)
+      if pseudoClass == 'before'
+        $old.prepend($wrapper)
+      else
+        $old.append($wrapper)
 
-      u.copyAttributes($new, $old)
-      elementsInserted($wrapper.children(), options)
+      hello($wrapper.children(), options)
 
       # Reveal element that was being prepended/appended.
       promise = up.layout.revealOrRestoreScroll($wrapper, options)
-      promise = promise.then ->
-        # Since we're adding content instead of replacing, we'll only
-        # animate $new instead of morphing between $old and $new
-        up.animate($wrapper, transition, options)
-      promise = promise.then ->
-        u.unwrapElement($wrapper)
-      promise
+
+      # Since we're adding content instead of replacing, we'll only
+      # animate $new instead of morphing between $old and $new
+      promise = promise.then -> up.animate($wrapper, transition, options)
+
+      # Remove the wrapper now that is has served it purpose
+      promise = promise.then -> u.unwrapElement($wrapper)
+
+    else if keepPlan = findKeepPlan($old, $new, options)
+      emitFragmentKept(keepPlan)
+      promise = u.resolvedPromise()
 
     else
       replacement = ->
-        # Don't insert the new element after the old element.
-        # For some reason this will make the browser scroll to the
-        # bottom of the new element.
+
+        options.keepPlans = transferKeepableElements($old, $new, options)
+
+        # Don't insert the new element after the old element. For some reason
+        # this will make the browser scroll to the bottom of the new element.
         $new.insertBefore($old)
-        elementsInserted($new, options)
-        if $old.is('body') && transition != 'none'
-          u.error('Cannot apply transitions to body-elements')
+
+        # Remember where the element came from so we can
+        # offer reload functionality.
+        setSource($new, options.source) unless options.source is false
+
+        autofocus($new)
+
+        # The fragment should be compiled before animating,
+        # so transitions see .up-current classes
+        hello($new, options)
+
         # Morphing will also process options.reveal
         up.morph($old, $new, transition, options)
 
       # Wrap the replacement as a destroy animation, so $old will
       # get marked as .up-destroying right away.
-      destroy $old, animation: replacement
+      promise = destroy($old, animation: replacement)
+
+    promise
+
+  transferKeepableElements = ($old, $new, options) ->
+    keepPlans = []
+    if options.keep
+      for keepable in $old.find('[up-keep]')
+        $keepable = $(keepable)
+        if plan = findKeepPlan($keepable, $new, u.merge(options, descendantsOnly: true))
+          # Replace $keepable with its clone so it looks good in a transition between
+          # $old and $new. Note that $keepable will still point to the same element
+          # after the replacement, which is now detached.
+          $keepableClone = $keepable.clone()
+          $keepable.replaceWith($keepableClone)
+          # Since we're going to swap the entire $old and $new containers afterwards,
+          # replace the matching element with $keepable so it will eventually return to the DOM.
+          plan.$newElement.replaceWith($keepable)
+          keepPlans.push(plan)
+    keepPlans
+
+  findKeepPlan = ($element, $new, options) ->
+    if options.keep
+      $keepable = $element
+      if partnerSelector = u.castedAttr($keepable, 'up-keep')
+        u.isString(partnerSelector) or partnerSelector = '&'
+        partnerSelector = resolveSelector(partnerSelector, $keepable)
+        if options.descendantsOnly
+          $partner = $new.find(partnerSelector)
+        else
+          $partner = u.findWithSelf($new, partnerSelector)
+        $partner = $partner.first()
+        if $partner.length && $partner.is('[up-keep]')
+          description =
+            $element: $keepable               # the element that should be kept
+            $newElement: $partner             # the element that would have replaced it but now does not
+            newData: up.syntax.data($partner) # the parsed up-data attribute of the element we will discard
+          keepEventArgs = u.merge(description, message: ['Keeping element %o', $keepable.get(0)])
+          if up.bus.nobodyPrevents('up:fragment:keep', keepEventArgs)
+            description
+
+  ###*
+  Elements with an `up-keep` attribute will be persisted during
+  [fragment updates](/a-up-target).
+
+  For example:
+
+      <audio up-keep src="song.mp3"></audio>
+
+  The element you're keeping should have an umambiguous class name, ID or `up-id`
+  attribute so Up.js can find its new position within the page update.
+
+  Emits events [`up:fragment:keep`](/up:fragment:keep) and [`up:fragment:kept`](/up:fragment:kept).
+
+  \#\#\#\# Controlling if an element will be kept
+
+  Up.js will **only** keep an existing element if:
+
+  - The existing element has an `up-keep` attribute
+  - The response contains an element matching the CSS selector of the existing element
+  - The matching element *also* has an `up-keep` attribute
+  - The [`up:fragment:keep`](/up:fragment:keep) event that is [emitted](/up.emit) on the existing element
+    is not prevented by a event listener.
+
+  Let's say we want only keep an `<audio>` element as long as it plays
+  the same song (as identified by the tag's `src` attribute).
+
+  On the client we can achieve this by listening to an `up:keep:fragment` event
+  and preventing it if the `src` attribute of the old and new element differ:
+
+      up.compiler('audio', function($element) {
+        $element.on('up:fragment:keep', function(event) {
+          if $element.attr('src') !== event.$newElement.attr('src') {
+            event.preventDefault();
+          }
+        });
+      });
+
+  If we don't want to solve this on the client, we can achieve the same effect
+  on the server. By setting the value of the `up-keep` attribute we can
+  define the CSS selector used for matching elements.
+
+      <audio up-keep="audio[src='song.mp3']" src="song.mp3"></audio>
+
+  Now, if a response no longer contains an `<audio src="song.mp3">` tag, the existing
+  element will be destroyed and replaced by a fragment from the response.
+
+  @selector [up-keep]
+  @stable
+  ###
+
+  ###*
+  This event is [emitted](/up.emit) before an existing element is [kept](/up-keep) during
+  a page update.
+
+  Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
+  to prevent the element from being persisted. If the event is prevented, the element
+  will be replaced by a fragment from the response.
+
+  @event up:fragment:keep
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the element from being preserved.
+  @param {jQuery} event.$element
+    The fragment that will be kept.
+  @param {jqQuery} event.$newElement
+    The discarded element.
+  @param {jQuery} event.newData
+    The value of the [`up-data`](/up-data) attribute of the discarded element,
+    parsed as a JSON object.
+  @stable
+  ###
+
+  ###*
+  This event is [emitted](/up.emit) when an existing element has been [kept](/up-keep)
+  during a page update.
+
+  Event listeners can inspect the discarded update through `event.$newElement`
+  and `event.newData` and then modify the preserved element when necessary.
+
+  @event up:fragment:kept
+  @param {jQuery} event.$element
+    The fragment that has been kept.
+  @param {jqQuery} event.$newElement
+    The discarded element.
+  @param {jQuery} event.newData
+    The value of the [`up-data`](/up-data) attribute of the discarded element,
+    parsed as a JSON object.
+  @stable
+  ###
 
   parseImplantSteps = (selector, options) ->
-    transitionString = options.transition || options.animation || 'none'
+    transitionArg = options.transition || options.animation || 'none'
     comma = /\ *,\ */
     disjunction = selector.split(comma)
-    transitions = transitionString.split(comma) if u.isPresent(transitionString)    
+    if u.isString(transitions)
+      transitions = transitionArg.split(comma)
+    else
+      transitions = [transitionArg]
     for selectorAtom, i in disjunction
       # Splitting the atom
       selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/)
@@ -428,6 +568,68 @@ up.flow = (($) ->
       selector: selector
       pseudoClass: pseudoClass
       transition: transition
+
+  ###*
+  Compiles a page fragment that has been inserted into the DOM
+  without Up.js.
+
+  **As long as you manipulate the DOM using Up.js, you will never
+  need to call this method.** You only need to use `up.hello` if the
+  DOM is manipulated without Up.js' involvement, e.g. by setting
+  the `innerHTML` property or calling jQuery methods like
+  `html`, `insertAfter` or `appendTo`:
+
+      $element = $('.element');
+      $element.html('<div>...</div>');
+      up.hello($element);
+
+  This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
+  event.
+
+  @function up.hello
+  @param {String|Element|jQuery} selectorOrElement
+  @param {String|Element|jQuery} [options.origin]
+  @param {String|Element|jQuery} [options.kept]
+  @return {jQuery}
+    The compiled element
+  @stable
+  ###
+  hello = (selectorOrElement, options) ->
+    $element = $(selectorOrElement)
+    options = u.options(options, keepPlans: [])
+    keptElements = []
+    for plan in options.keepPlans
+      emitFragmentKept(plan)
+      keptElements.push(plan.$element)
+    up.syntax.compile($element, skip: keptElements)
+    emitFragmentInserted($element, options)
+    $element
+
+  ###*
+  When a page fragment has been [inserted or updated](/up.replace),
+  this event is [emitted](/up.emit) on the fragment.
+
+  \#\#\#\# Example
+
+      up.on('up:fragment:inserted', function(event, $fragment) {
+        console.log("Looks like we have a new %o!", $fragment);
+      });
+
+  @event up:fragment:inserted
+  @param {jQuery} event.$element
+    The fragment that has been inserted or updated.
+  @stable
+  ###
+  emitFragmentInserted = (fragment, options) ->
+    $fragment = $(fragment)
+    up.emit 'up:fragment:inserted',
+      $element: $fragment
+      message: ['Inserted fragment %o', $fragment.get(0)]
+      origin: options.origin
+
+  emitFragmentKept = (keepPlan) ->
+    eventAttrs = u.merge(keepPlan, message: ['Kept fragment %o', keepPlan.$element.get(0)])
+    up.emit('up:fragment:kept', eventAttrs)
 
   autofocus = ($element) ->
     selector = '[autofocus]:last'
@@ -516,6 +718,7 @@ up.flow = (($) ->
       animationDeferred = u.presence(options.animation, u.isDeferred) ||
         up.motion.animate($element, options.animation, animateOptions)
       animationDeferred.then ->
+        up.syntax.clean($element)
         # Emit this while $element is still part of the DOM, so event
         # listeners bound to the document will receive the event.
         up.emit 'up:fragment:destroyed', $element: $element, message: destroyedMessage
@@ -580,9 +783,10 @@ up.flow = (($) ->
     sourceUrl = options.url || source(selectorOrElement)
     replace(selectorOrElement, sourceUrl, options)
 
-  up.on('ready', ->
-    setSource(document.body, up.browser.url())
-  )
+  up.on 'ready', ->
+    $body = $(document.body)
+    setSource($body, up.browser.url())
+    hello($body)
 
   knife: eval(Knife?.point)
   replace: replace
@@ -592,6 +796,7 @@ up.flow = (($) ->
   first: first
   source: source
   resolveSelector: resolveSelector
+  hello: hello
 
 )(jQuery)
 
@@ -600,3 +805,5 @@ up.extract = up.flow.extract
 up.reload = up.flow.reload
 up.destroy = up.flow.destroy
 up.first = up.flow.first
+up.hello = up.flow.hello
+

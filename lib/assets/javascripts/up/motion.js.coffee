@@ -346,10 +346,13 @@ up.motion = (($) ->
     if transitionOrName == 'none'
       transitionOrName = false
 
-    up.log.group ('Morphing %o to %o (using %o)' if transitionOrName), source, target, transitionOrName, ->
+    $old = $(source)
+    $new = $(target)
 
-      $old = $(source)
-      $new = $(target)
+    ensureMorphable($old, transitionOrName)
+    ensureMorphable($new, transitionOrName)
+
+    up.log.group ('Morphing %o to %o (using %o)' if transitionOrName), source, target, transitionOrName, ->
 
       parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source')
       parsedOptions = u.extend(parsedOptions, animateOptions(options))
@@ -379,6 +382,12 @@ up.motion = (($) ->
           u.error("Unknown transition %o", transitionOrName)
       else
         return skipMorph($old, $new, parsedOptions)
+
+  ensureMorphable = ($element, transition) ->
+    if transition && $element.parents('body').length == 0
+      element = $element.get(0)
+      u.error("Can't morph a <%s> element (%o)", element.tagName, element)
+
 
   ###*
   This causes the side effects of a successful transition, but instantly.

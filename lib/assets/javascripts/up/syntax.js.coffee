@@ -181,6 +181,11 @@ up.syntax = (($) ->
     If set to `true` and a fragment insertion contains multiple
     elements matching the selector, `compiler` is only called once
     with a jQuery collection containing all matching elements. 
+  @param {Boolean} [options.keep=false]
+    If set to `true` compiled fragment will be [persisted](/up-keep) during
+    [page updates](/a-up-target).
+
+    This has the same effect as setting an `up-keep` attribute on the element.
   @param {Function($element, data)} compiler
     The function to call when a matching element is inserted.
     The function takes the new element as the first argument (as a jQuery object).
@@ -200,23 +205,45 @@ up.syntax = (($) ->
     # Silently discard any compilers that are registered on unsupported browsers
     return unless up.browser.isSupported()
     compiler = args.pop()
-    options = u.options(args[0], batch: false)
+    options = u.options(args[0])
     compilers.push
       selector: selector
       callback: compiler
       batch: options.batch
-  
+      keep: options.keep
+
   applyCompiler = (compiler, $jqueryElement, nativeElement) ->
     up.puts ("Compiling '%s' on %o" unless compiler.isDefault), compiler.selector, nativeElement
+    if compiler.keep
+      value = if u.isString(compiler.keep) then compiler.keep else ''
+      $jqueryElement.attr('up-keep', value)
     destroyer = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
     if u.isFunction(destroyer)
       $jqueryElement.addClass(DESTROYABLE_CLASS)
       $jqueryElement.data(DESTROYER_KEY, destroyer)
 
-  compile = ($fragment) ->
+  ###*
+  Applies all compilers on the given element and its descendants.
+  Unlike [`up.hello`](/up.hello), this doesn't emit any events.
+
+  @function up.syntax.compile
+  @param {Array<Element>} [options.skip]
+    A list of elements whose subtrees should not be compiled.
+  @internal
+  ###
+  compile = ($fragment, options) ->
+    options = u.options(options)
+    $skipSubtrees = $(options.skip)
+
     up.log.group "Compiling fragment %o", $fragment.get(0), ->
       for compiler in compilers
         $matches = u.findWithSelf($fragment, compiler.selector)
+
+        $matches = $matches.filter ->
+          $match = $(this)
+          u.all $skipSubtrees, (element) ->
+            $match.closest(element).length == 0
+
         if $matches.length
           up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isDefault), compiler.selector, $matches.length, ->
             if compiler.batch
@@ -224,7 +251,15 @@ up.syntax = (($) ->
             else
               $matches.each -> applyCompiler(compiler, $(this), this)
 
-  runDestroyers = ($fragment) ->
+  ###*
+  Runs any destroyers on the given fragment and its descendants.
+  Unlike [`up.destroy`](/up.destroy), this doesn't emit any events
+  and does not remove the element from the DOM.
+
+  @function up.syntax.clean
+  @internal
+  ###
+  clean = ($fragment) ->
     u.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
       $element = $(this)
       destroyer = $element.data(DESTROYER_KEY)
@@ -286,68 +321,17 @@ up.syntax = (($) ->
   reset = ->
     compilers = u.select compilers, (compiler) -> compiler.isDefault
 
-  ###*
-  Compiles a page fragment that has been inserted into the DOM
-  without Up.js.
-
-  **As long as you manipulate the DOM using Up.js, you will never
-  need to call this method.** You only need to use `up.hello` if the
-  DOM is manipulated without Up.js' involvement, e.g. by setting
-  the `innerHTML` property or calling jQuery methods like
-  `html`, `insertAfter` or `appendTo`:
-
-      $element = $('.element');
-      $element.html('<div>...</div>');
-      up.hello($element);
-
-  This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
-  event.
-
-  @function up.hello
-  @param {String|Element|jQuery} selectorOrElement
-  @param {String|Element|jQuery} [options.origin]
-  @return {jQuery}
-    The compiled element
-  @stable
-  ###
-  hello = (selectorOrElement, options) ->
-    $element = $(selectorOrElement)
-    eventAttrs = u.options options,
-      $element: $element
-      message: ['Inserted fragment %o', $element.get(0)]
-    up.emit('up:fragment:inserted', eventAttrs)
-    $element
-
-  ###*
-  When a page fragment has been [inserted or updated](/up.replace),
-  this event is [emitted](/up.emit) on the fragment.
-
-  \#\#\#\# Example
-
-      up.on('up:fragment:inserted', function(event, $fragment) {
-        console.log("Looks like we have a new %o!", $fragment);
-      });
-
-  @event up:fragment:inserted
-  @param {jQuery} event.$element
-    The fragment that has been inserted or updated.
-  @stable
-  ###
-
-  up.on 'ready', (-> hello(document.body))
-  up.on 'up:fragment:inserted', (event, $element) -> compile($element)
-  up.on 'up:fragment:destroy', (event, $element) -> runDestroyers($element)
   up.on 'up:framework:boot', snapshot
   up.on 'up:framework:reset', reset
 
   compiler: compiler
-  hello: hello
+  compile: compile
+  clean: clean
   data: data
 
 )(jQuery)
 
 up.compiler = up.syntax.compiler
-up.hello = up.syntax.hello
 
 up.ready = -> up.util.error('up.ready no longer exists. Please use up.hello instead.')
 up.awaken = -> up.util.error('up.awaken no longer exists. Please use up.compiler instead.')

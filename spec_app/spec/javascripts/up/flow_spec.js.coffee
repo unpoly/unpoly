@@ -457,6 +457,256 @@ describe 'up.flow', ->
         expect($(elements.get(0)).text()).toEqual('text')
         expect($(elements.get(1)).text()).toEqual('')
 
+      describe 'handling of [up-keep] elements', ->
+
+        squish = (string) ->
+          if u.isString(string)
+            string = string.replace(/^\s+/g, '')
+            string = string.replace(/\s+$/g, '')
+            string = string.replace(/\s+/g, ' ')
+          string
+
+        beforeEach ->
+# Need to refactor this spec file so examples don't all share one example
+          $('.before, .middle, .after').remove()
+
+        it 'keeps an [up-keep] element, but does replace other elements around it', ->
+          $container = affix('.container')
+          $container.affix('.before').text('old-before')
+          $container.affix('.middle[up-keep]').text('old-middle')
+          $container.affix('.after').text('old-after')
+          up.extract '.container', """
+            <div class='container'>
+              <div class='before'>new-before</div>
+              <div class='middle' up-keep>new-middle</div>
+              <div class='after'>new-after</div>
+            </div>
+            """
+          expect($('.before')).toHaveText('new-before')
+          expect($('.middle')).toHaveText('old-middle')
+          expect($('.after')).toHaveText('new-after')
+
+        it 'keeps an [up-keep] element, but does replace text nodes around it', ->
+          $container = affix('.container')
+          $container.html """
+            old-before
+            <div class='element' up-keep>old-inside</div>
+            old-after
+            """
+          up.extract '.container', """
+            <div class='container'>
+              new-before
+              <div class='element' up-keep>new-inside</div>
+              new-after
+            </div>
+            """
+          expect(squish($('.container').text())).toEqual('new-before old-inside new-after')
+
+        describe 'if an [up-keep] element is itself a direct replacement target', ->
+
+          it "keeps that element", ->
+            affix('.keeper[up-keep]').text('old-inside')
+            up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
+            expect($('.keeper')).toHaveText('old-inside')
+
+          it "does not compile the kept element a second time"
+
+          it "only emits an event up:fragment:kept, but not an event up:fragment:inserted", ->
+            insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')
+            up.on('up:fragment:inserted', insertedListener)
+            keptListener = jasmine.createSpy('subscriber to up:fragment:kept')
+            up.on('up:fragment:kept', keptListener)
+            up.on 'up:fragment:inserted', insertedListener
+            $keeper = affix('.keeper[up-keep]').text('old-inside')
+            up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
+            expect(insertedListener).not.toHaveBeenCalled()
+            expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.keeper'), jasmine.anything())
+
+        it "removes an [up-keep] element if no matching element is found in the response", ->
+          $container = affix('.container')
+          $container.html """
+            <div class='foo'>old-foo</div>
+            <div class='bar' up-keep>old-bar</div>
+            """
+          up.extract '.container', """
+            <div class='container'>
+              <div class='foo'>new-foo</div>
+            </div>
+            """
+          expect($('.container .foo')).toExist()
+          expect($('.container .bar')).not.toExist()
+
+        it "updates an element if a matching element is found in the response, but that other element is no longer [up-keep]", ->
+          $container = affix('.container')
+          $container.html """
+            <div class='foo'>old-foo</div>
+            <div class='bar' up-keep>old-bar</div>
+            """
+          up.extract '.container', """
+            <div class='container'>
+              <div class='foo'>new-foo</div>
+              <div class='bar'>new-bar</div>
+            </div>
+            """
+          expect($('.container .foo')).toHaveText('new-foo')
+          expect($('.container .bar')).toHaveText('new-bar')
+
+        it 'moves a kept element to the ancestry position of the matching element in the response', ->
+          $container = affix('.container')
+          $container.html """
+            <div class="parent1">
+              <div class="keeper" up-keep>old-inside</div>
+            </div>
+            <div class="parent2">
+            </div>
+            """
+          up.extract '.container', """
+            <div class='container'>
+              <div class="parent1">
+              </div>
+              <div class="parent2">
+                <div class="keeper" up-keep>old-inside</div>
+              </div>
+            </div>
+            """
+          expect($('.keeper')).toHaveText('old-inside')
+          expect($('.keeper').parent()).toEqual($('.parent2'))
+
+        it 'lets developers choose a selector to match against as the value of the up-keep attribute', ->
+          $container = affix('.container')
+          $container.html """
+            <div class="keeper" up-keep=".stayer"></div>
+            """
+          up.extract '.container', """
+            <div class='container'>
+              <div up-keep class="stayer"></div>
+            </div>
+            """
+          expect('.keeper').toExist()
+
+        it 'does not compile a kept element a second time', ->
+          compiler = jasmine.createSpy('compiler')
+          up.compiler('.keeper', compiler)
+          $container = affix('.container')
+          $container.html """
+            <div class="keeper" up-keep>old-text</div>
+            """
+
+          console.log '*** before hello ***'
+          up.hello($container)
+          console.log '*** after hello ***'
+          expect(compiler.calls.count()).toEqual(1)
+
+          up.extract '.container', """
+            <div class='container'>
+              <div class="keeper" up-keep>new-text</div>
+            </div>
+            """
+          expect(compiler.calls.count()).toEqual(1)
+          expect('.keeper').toExist()
+
+        it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', ->
+          $keeper = affix('.keeper[up-keep]').text('old-inside')
+          $keeper.on 'up:fragment:keep', (event) -> event.preventDefault()
+          up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
+          expect($('.keeper')).toHaveText('new-inside')
+
+        it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', ->
+          $keeper = affix('.keeper[up-keep]').text('version 1')
+          $keeper.on 'up:fragment:keep', (event) ->
+            event.preventDefault() if event.$newElement.text() == 'version 3'
+          up.extract '.keeper', "<div class='keeper' up-keep>version 2</div>"
+          expect($('.keeper')).toHaveText('version 1')
+          up.extract '.keeper', "<div class='keeper' up-keep>version 3</div>"
+          expect($('.keeper')).toHaveText('version 3')
+
+        it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on an updated parent', ->
+          insertedListener = jasmine.createSpy()
+          up.on('up:fragment:inserted', insertedListener)
+          keptListener = jasmine.createSpy()
+          up.on('up:fragment:kept', keptListener)
+
+          $container = affix('.container')
+          $container.html """
+            <div class="keeper" up-keep></div>
+            """
+          up.extract '.container', """
+            <div class='container'>
+              <div class="keeper" up-keep></div>
+            </div>
+            """
+          expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container'), jasmine.anything())
+          expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper'), jasmine.anything())
+
+        it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', ->
+          keptListener = jasmine.createSpy()
+          up.on 'up:fragment:kept', (event) -> keptListener(event.$element, event.newData)
+          $container = affix('.container')
+          $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
+          up.extract '.container', """
+            <div class='container'>
+              <div class='keeper' up-keep up-data='{ "foo": "bar" }'>new-inside</div>
+            </div>
+          """
+          expect($('.keeper')).toHaveText('old-inside')
+          expect(keptListener).toHaveBeenCalledWith($keeper, { 'foo': 'bar' })
+
+        it 'emits an up:fragment:kept with { newData: {} } if the discarded element had no up-data value', ->
+          keptListener = jasmine.createSpy()
+          up.on('up:fragment:kept', keptListener)
+          $container = affix('.container')
+          $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
+          up.extract '.keeper', """
+            <div class='container'>
+              <div class='keeper' up-keep>new-inside</div>
+            </div>
+          """
+          expect($('.keeper')).toHaveText('old-inside')
+          expect(keptListener).toEqual(jasmine.anything(), $('.keeper'), {})
+
+        it 'reuses the same element and emits up:fragment:kept during multiple extractions', ->
+          keptListener = jasmine.createSpy()
+          up.on 'up:fragment:kept', (event) -> keptListener(event.$element, event.newData)
+          $container = affix('.container')
+          $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
+          up.extract '.keeper', """
+            <div class='container'>
+              <div class='keeper' up-keep up-data='{ \"key\": \"value1\" }'>new-inside</div>
+            </div>
+          """
+          up.extract '.keeper', """
+            <div class='container'>
+              <div class='keeper' up-keep up-data='{ \"key\": \"value2\" }'>new-inside</div>
+          """
+          $keeper = $('.keeper')
+          expect($keeper).toHaveText('old-inside')
+          expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value1' })
+          expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value2' })
+
+        it "doesn't let the discarded element appear in a transition", (done) ->
+          oldTextDuringTransition = undefined
+          newTextDuringTransition = undefined
+          transition = ($old, $new) ->
+            oldTextDuringTransition = squish($old.text())
+            newTextDuringTransition = squish($new.text())
+            u.resolvedDeferred()
+          $container = affix('.container')
+          $container.html """
+            <div class='foo'>old-foo</div>
+            <div class='bar' up-keep>old-bar</div>
+            """
+          newHtml = """
+            <div class='container'>
+              <div class='foo'>new-foo</div>
+              <div class='bar' up-keep>new-bar</div>
+            </div>
+            """
+          promise = up.extract('.container', newHtml, transition: transition)
+          promise.then ->
+            expect(oldTextDuringTransition).toEqual('old-foo old-bar')
+            expect(newTextDuringTransition).toEqual('new-foo old-bar')
+            done()
+
     describe 'up.destroy', ->
       
       it 'removes the element with the given selector', ->
@@ -502,3 +752,4 @@ describe 'up.flow', ->
     describe 'up.reset', ->
   
       it 'should have tests'
+

@@ -87,6 +87,40 @@ describe 'up.util', ->
         $element = affix('div').attr('foo', 'some text')
         expect(up.util.castedAttr($element, 'foo')).toBe('some text')
 
+    describe 'up.util.any', ->
+
+      it 'returns true if an element in the array returns true for the given function', ->
+        result = up.util.any [null, undefined, 'foo', ''], up.util.isPresent
+        expect(result).toBe(true)
+
+      it 'returns false if no element in the array returns true for the given function', ->
+        result = up.util.any [null, undefined, ''], up.util.isPresent
+        expect(result).toBe(false)
+
+      it 'short-circuits once an element returns true', ->
+        count = 0
+        up.util.any [null, undefined, 'foo', ''], (element) ->
+          count += 1
+          up.util.isPresent(element)
+        expect(count).toBe(3)
+
+    describe 'up.util.all', ->
+
+      it 'returns true if all element in the array returns true for the given function', ->
+        result = up.util.all ['foo', 'bar', 'baz'], up.util.isPresent
+        expect(result).toBe(true)
+
+      it 'returns false if an element in the array returns false for the given function', ->
+        result = up.util.all ['foo', 'bar', null, 'baz'], up.util.isPresent
+        expect(result).toBe(false)
+
+      it 'short-circuits once an element returns false', ->
+        count = 0
+        up.util.all ['foo', 'bar', '', 'baz'], (element) ->
+          count += 1
+          up.util.isPresent(element)
+        expect(count).toBe(3)
+
     describe 'up.util.isBlank', ->
   
       it 'returns false for false', ->
