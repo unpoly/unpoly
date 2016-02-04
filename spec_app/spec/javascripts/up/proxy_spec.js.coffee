@@ -101,10 +101,42 @@ describe 'up.proxy', ->
 
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
+      describe 'with config.wrapMethods set', ->
+
+        it 'should be set by default', ->
+          expect(up.proxy.config.wrapMethods).toBePresent()
+
+#        beforeEach ->
+#          @oldWrapMethod = up.proxy.config.wrapMethod
+#          up.proxy.config.wrapMethod = true
+#
+#        afterEach ->
+#          up.proxy.config.wrapMethod = @oldWrapMetod
+
+        u.each ['GET', 'POST', 'HEAD', 'OPTIONS'], (method) ->
+
+          it "does not change the method of a #{method} request", ->
+            up.proxy.ajax(url: '/foo', method: method)
+            request = @lastRequest()
+            expect(request.method).toEqual(method)
+            expect(request.data()['_method']).toBeUndefined()
+
+        u.each ['PUT', 'PATCH', 'DELETE'], (method) ->
+
+          it "turns a #{method} request into a POST request and sends the actual method as a { _method } param", ->
+            up.proxy.ajax(url: '/foo', method: method)
+            request = @lastRequest()
+            expect(request.method).toEqual('POST')
+            expect(request.data()['_method']).toEqual([method])
+
       describe 'with config.maxRequests set', ->
 
         beforeEach ->
+          @oldMaxRequests = up.proxy.config.maxRequests
           up.proxy.config.maxRequests = 1
+
+        afterEach ->
+          up.proxy.config.maxRequests = @oldMaxRequests
 
         it 'limits the number of concurrent requests', ->
           responses = []

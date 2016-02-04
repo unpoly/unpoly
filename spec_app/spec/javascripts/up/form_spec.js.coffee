@@ -7,13 +7,13 @@ describe 'up.form', ->
     describe 'up.observe', ->
 
       changeEvents = if up.browser.canInputEvent()
-# Actually we only need `input`, but we want to notice
-# if another script manually triggers `change` on the element.
+        # Actually we only need `input`, but we want to notice
+        # if another script manually triggers `change` on the element.
         ['input', 'change']
       else
-# Actually we won't ever get `input` from the user in this browser,
-# but we want to notice if another script manually triggers `input`
-# on the element.
+        # Actually we won't ever get `input` from the user in this browser,
+        # but we want to notice if another script manually triggers `input`
+        # on the element.
         ['input', 'change', 'keypress', 'paste', 'cut', 'click', 'propertychange']
 
       u.each changeEvents, (eventName) ->
@@ -90,20 +90,17 @@ describe 'up.form', ->
           $form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
           $form.append('<input name="field1" value="value1">')
           $form.append('<input name="field2" value="value2">')
-    
           affix('.response').text('old-text')
-    
           @promise = up.submit($form)
-    
           @request = @lastRequest()
-          expect(@request.url).toMatch /\/path\/to$/
-          expect(@request.method).toBe 'PUT'
-          expect(@request.data()).toEqual
-            field1: ['value1']
-            field2: ['value2']
-        
+
         it 'submits the given form and replaces the target with the response', (done) ->
-    
+
+          expect(@request.url).toMatch /\/path\/to$/
+          expect(@request).toHaveRequestMethod('PUT')
+          expect(@request.data()['field1']).toEqual(['value1'])
+          expect(@request.data()['field2']).toEqual(['value2'])
+
           @respondWith """
             text-before
 
@@ -113,7 +110,7 @@ describe 'up.form', ->
 
             text-after
             """
-    
+
           @promise.then ->
             expect($('.response')).toHaveText('new-text')
             expect($('body')).not.toHaveText('text-before')

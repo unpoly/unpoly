@@ -24,18 +24,6 @@ up.util = (($) ->
         cache = func(args...)
 
   ###*
-  @function up.util.ajax
-  @internal
-  ###
-  ajax = (request) ->
-    request = copy(request)
-    if request.selector
-      request.headers ||= {}
-      request.headers['X-Up-Selector'] = request.selector
-    # Delegate to jQuery
-    $.ajax(request)
-
-  ###*
   Returns if the given port is the default port for the given protocol.
 
   @function up.util.isStandardPort
@@ -1446,6 +1434,44 @@ up.util = (($) ->
 #    else
 #      error('Could not parse argument names of %o', fun)
 
+  ###*
+  Normalizes the given params object to the form returned by
+  [`jQuery.serializeArray`](https://api.jquery.com/serializeArray/).
+
+  @function up.util.requestDataAsArray
+  @param {Object|Array|Undefined|Null} data
+  @internal
+  ###
+  requestDataAsArray = (data) ->
+    if isMissing(data)
+      []
+    else if isArray(data)
+      data
+    else if isObject(data)
+      { name: name, value: value } for name, value of data
+    else
+      error('Unknown options.data type for %o', data)
+
+  ###*
+  Returns an URL-encoded query string for the given params object.
+
+  @function up.util.requestDataAsQueryString
+  @param {Object|Array|Undefined|Null} data
+  @internal
+  ###
+  requestDataAsQueryString = (data) ->
+    array = requestDataAsArray(data)
+    query = ''
+    if isPresent(array)
+      query += '?'
+      each array, (field, index) ->
+        query += '&' unless index == 0
+        query += encodeURIComponent(field.name) + '=' + encodeURIComponent(field.value)
+    query
+
+  requestDataAsArray: requestDataAsArray
+  requestDataAsQueryString: requestDataAsQueryString
+
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   presentAttr: presentAttr
@@ -1456,7 +1482,6 @@ up.util = (($) ->
   createElementFromHtml: createElementFromHtml
   $createElementFromSelector: $createElementFromSelector
   selectorForElement: selectorForElement
-  ajax: ajax
   extend: extend
   copy: copy
   merge: merge

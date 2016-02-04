@@ -131,3 +131,13 @@ describe 'up.util', ->
           object.b = 2
           object.reset()
           expect(object.reset).toBeDefined()
+
+    describe 'up.util.requestDataAsQueryString', ->
+
+      it 'returns the query section for the given object, including the question mark', ->
+        string = up.util.requestDataAsQueryString('foo-key': 'foo value', 'bar-key': 'bar value')
+        expect(string).toEqual('?foo-key=foo%20value&bar-key=bar%20value')
+
+      it 'returns an empty string', ->
+        string = up.util.requestDataAsQueryString({})
+        expect(string).toEqual('')

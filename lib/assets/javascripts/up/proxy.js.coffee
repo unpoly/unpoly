@@ -88,6 +88,16 @@ up.proxy = (($) ->
 
     Note that your browser might [impose its own request limit](http://www.browserscope.org/?category=network)
     regardless of what you configure here.
+  @param {Array<String>} [config.wrapMethods]
+    An array of uppercase HTTP method names. AJAX requests with one of these methods
+    will be converted into a `POST` request and carry their original method as a `_method`
+    parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
+  @param {String} [config.wrapMethodParam]
+    The name of the POST parameter when wrapping HTTP methods in a `POST` request.
+  @param {Array<String>} [config.safeMethods]
+    An array of uppercase HTTP method names that are considered idempotent.
+    The proxy cache will only cache idempotent requests and will clear the entire
+    cache after a non-idempotent request.
   @stable
   ###
   config = u.config
@@ -96,6 +106,10 @@ up.proxy = (($) ->
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
     maxRequests: 4
+    wrapMethods: ['PATCH', 'PUT', 'DELETE']
+    wrapMethodParam: '_method'
+    safeMethods: ['GET', 'OPTIONS', 'HEAD']
+
 
   cacheKey = (request) ->
     normalizeRequest(request)
@@ -276,8 +290,6 @@ up.proxy = (($) ->
 
     promise
 
-  SAFE_HTTP_METHODS = ['GET', 'OPTIONS', 'HEAD']
-
   ###*
   Returns `true` if the proxy is not currently waiting
   for a request to finish. Returns `false` otherwise.
@@ -372,9 +384,26 @@ up.proxy = (($) ->
     deferred.promise()
 
   load = (request) ->
-    u.debug('Loading URL %o', request.url)
+    u.debug('Fetching %o via %o', request.url, request.method)
     up.emit('up:proxy:load', request)
-    promise = u.ajax(request)
+
+    # We will modify the request below for features like method wrapping.
+    # Let's not change the original request which would confuse API clients
+    # and cache key logic.
+    request = u.copy(request)
+
+    request.headers ||= {}
+    request.headers['X-Up-Selector'] = request.selector
+    request.data = u.requestDataAsArray(request.data)
+
+    if u.contains(config.wrapMethods, request.method)
+      request.data.push
+        name: config.wrapMethodParam
+        value: request.method
+      console.log("wrapped request is %o", request)
+      request.method = 'POST'
+
+    promise = $.ajax(request)
     promise.always ->
       up.emit('up:proxy:received', request)
       pokeQueue()
@@ -410,7 +439,7 @@ up.proxy = (($) ->
 
   isIdempotent = (request) ->
     normalizeRequest(request)
-    u.contains(SAFE_HTTP_METHODS, request.method)
+    u.contains(config.safeMethods, request.method)
 
   checkPreload = ($link) ->
     delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay 

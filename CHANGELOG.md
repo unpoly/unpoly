@@ -8,6 +8,25 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+### Compatible changes
+
+- You can now configure a list of idempotent HTTP methods in [`up.proxy.config.safeMethods`](/up.proxy.config).
+  The proxy cache will only cache idempotent requests and will clear the entire
+  cache after a non-idempotent request.
+
+
+### Breaking changes
+
+- By default Up.js now converts `PUT`, `PATCH` and `DELETE` requests to `POST` requests
+  that carry their original method in a form parameter named `_method`.
+  This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
+
+  Web frameworks like Ruby on Rails or Sinatra are aware of the `_method` parameter and use
+  its value as the method for routing.
+
+  You can configure this behavior in [`up.proxy.config.wrapMethods`](/up.proxy.config)
+  and [`up.proxy.config.wrapMethodParam`](/up.proxy.config).
+
 
 0.17.0
 ------

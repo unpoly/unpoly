@@ -32,7 +32,7 @@ describe 'up.link', ->
           $link = affix('a[href="/path"][data-method="PUT"]')
           up.follow($link)
           request = @lastRequest()
-          expect(request.method).toBe('PUT')
+          expect(request).toHaveRequestMethod('PUT')
 
         it 'allows to refer to the link itself as "&" in the CSS selector', ->
           $container = affix('div')
