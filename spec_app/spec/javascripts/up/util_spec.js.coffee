@@ -8,6 +8,44 @@ describe 'up.util', ->
 #        fun = ($element, data) ->
 #        expect(up.util.argNames(fun)).toEqual(['$element', 'data'])
 
+    describe 'up.util.only', ->
+
+      it 'returns a copy of the given object with only the given whitelisted properties', ->
+        original =
+          foo: 'foo-value'
+          bar: 'bar-value'
+          baz: 'baz-value'
+          bam: 'bam-value'
+        whitelisted = up.util.only(original, 'bar', 'bam')
+        expect(whitelisted).toEqual
+          bar: 'bar-value'
+          bam: 'bam-value'
+        # Show that original did not change
+        expect(original).toEqual
+          foo: 'foo-value'
+          bar: 'bar-value'
+          baz: 'baz-value'
+          bam: 'bam-value'
+
+    describe 'up.util.except', ->
+
+      it 'returns a copy of the given object but omits the given blacklisted properties', ->
+        original =
+          foo: 'foo-value'
+          bar: 'bar-value'
+          baz: 'baz-value'
+          bam: 'bam-value'
+        whitelisted = up.util.except(original, 'foo', 'baz')
+        expect(whitelisted).toEqual
+          bar: 'bar-value'
+          bam: 'bam-value'
+        # Show that original did not change
+        expect(original).toEqual
+          foo: 'foo-value'
+          bar: 'bar-value'
+          baz: 'baz-value'
+          bam: 'bam-value'
+
     describe 'up.util.selectorForElement', ->
 
       it "prefers using the element's 'up-id' attribute to using the element's ID", ->
