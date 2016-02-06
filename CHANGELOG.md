@@ -13,6 +13,16 @@ Unreleased
 - You can now configure a list of idempotent HTTP methods in [`up.proxy.config.safeMethods`](/up.proxy.config).
   The proxy cache will only cache idempotent requests and will clear the entire
   cache after a non-idempotent request.
+- Loading modals and popups will now open if there is a fragment update between the modal/popup's
+  request and response.
+- [`up.follow`](/up.follow) and [`up.replace`](/up.replace) now have an option `{ failTarget }`.
+  Use it to define the selector to replace if the server responds with a non-200 status code.
+- [`[up-target]`](/up-target) and [`up-follow`](/up.replace) now have a modifying attribute `up-fail-target`.
+  Use it to define the selector to replace if the server responds with a non-200 status code.
+- New utility method [`up.util.reject`](/up.util.reject)
+- New utility method [`up.util.only`](/up.util.only)
+- New utility method [`up.util.except`](/up.util.except)
+- Fix a bug where modals could no longer be opened on some browsers
 
 
 ### Breaking changes
@@ -26,6 +36,9 @@ Unreleased
 
   You can configure this behavior in [`up.proxy.config.wrapMethods`](/up.proxy.config)
   and [`up.proxy.config.wrapMethodParam`](/up.proxy.config).
+- The requested selector is now sent to the server as a request header `X-Up-Target`
+  (this used to be `X-Up-Selector`). If you are using `upjs-rails`, you can access it
+  through `up.target` (this used to be `up.selector`).
 
 
 0.17.0

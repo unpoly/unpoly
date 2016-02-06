@@ -128,6 +128,8 @@ up.flow = (($) ->
     here, in which case a selector will be inferred from the element's class and ID.
   @param {String} url
     The URL to fetch from the server.
+  @param {String} [options.failTarget='body']
+    The CSS selector to update if the server sends a non-200 status code.
   @param {String} [options.title]
   @param {String} [options.method='get']
   @param {Object} [options.data]

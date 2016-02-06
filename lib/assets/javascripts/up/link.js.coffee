@@ -302,6 +302,8 @@ up.link = (($) ->
   @selector a[up-target]
   @param {String} up-target
     The CSS selector to replace
+  @param [up-fail-target='body']
+    The selector to replace if the server responds with a non-200 status code.
   @param {String} [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
@@ -365,6 +367,8 @@ up.link = (($) ->
   opening the destination in a new tab.
 
   @selector a[up-follow]
+  @param [up-fail-target='body']
+    The selector to replace if the server responds with a non-200 status code.
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
