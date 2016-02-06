@@ -271,7 +271,7 @@ up.flow = (($) ->
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
-  @function up.implant'
+  @function up.implant
   @param {String|Element|jQuery} selectorOrElement
   @param {String} html
   @param {Object} [options]
@@ -287,7 +287,6 @@ up.flow = (($) ->
       historyMethod: 'push',
       requireMatch: true
     )
-    # options.source = u.option(options.source, options.history)
     response = parseResponse(html, options)
     options.title ||= response.title()
 

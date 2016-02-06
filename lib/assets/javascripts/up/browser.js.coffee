@@ -25,13 +25,13 @@ up.browser = (($) ->
     else
       $form = $("<form method='post' action='#{url}'></form>")
       addField = (field) ->
-        if u.isGiven(field.name)
-          $field = $('<input type="hidden">')
-          $field.attr(field.name, field.value)
-          $field.appendTo($form)
+        $field = $('<input type="hidden">')
+        $field.attr(field.name, field.value)
+        $field.appendTo($form)
       addField(name: '_method', value: method)
-      addField(up.rails.csrfField())
-      u.requestDataAsArray(options.data, addField)
+      if csrfField = up.rails.csrfField()
+        addField(csrfField)
+      u.each u.requestDataAsArray(options.data), addField
       $form.hide().appendTo('body')
       $form.submit()
 
