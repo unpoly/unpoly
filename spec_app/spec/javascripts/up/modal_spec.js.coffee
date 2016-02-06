@@ -75,15 +75,16 @@ describe 'up.modal', ->
 
     describe 'up.modal.coveredUrl', ->
 
-      it 'returns the URL behind the modal overlay', (done) ->
-        up.history.replace('/foo')
-        expect(up.modal.coveredUrl()).toBeUndefined()
-        up.modal.visit('/bar', target: '.container')
-        @respondWith('<div class="container">text</div>')
-        expect(up.modal.coveredUrl()).toEndWith('/foo')
-        up.modal.close().then ->
+      if up.browser.canPushState()
+        it 'returns the URL behind the modal overlay', (done) ->
+          up.history.replace('/foo')
           expect(up.modal.coveredUrl()).toBeUndefined()
-          done()
+          up.modal.visit('/bar', target: '.container')
+          @respondWith('<div class="container">text</div>')
+          expect(up.modal.coveredUrl()).toEndWith('/foo')
+          up.modal.close().then ->
+            expect(up.modal.coveredUrl()).toBeUndefined()
+            done()
 
 
     describe 'up.modal.close', ->
@@ -109,9 +110,11 @@ describe 'up.modal', ->
         Trigger.click(@$link)
         expect(@followSpy).toHaveBeenCalledWith(@$link)
 
-      it 'does nothing if the right mouse button is used', ->
-        Trigger.click(@$link, button: 2)
-        expect(@followSpy).not.toHaveBeenCalled()
+      # IE does not call Javascript and always performs the default action on right clicks
+      unless navigator.userAgent.match(/Trident/)
+        it 'does nothing if the right mouse button is used', ->
+          Trigger.click(@$link, button: 2)
+          expect(@followSpy).not.toHaveBeenCalled()
 
       it 'does nothing if shift is pressed during the click', ->
         Trigger.click(@$link, shiftKey: true)
@@ -121,9 +124,9 @@ describe 'up.modal', ->
         Trigger.click(@$link, ctrlKey: true)
         expect(@followSpy).not.toHaveBeenCalled()
 
-#      it 'does nothing if meta is pressed during the click', ->
-#        Trigger.click(@$link, metaKey: true)
-#        expect(@followSpy).not.toHaveBeenCalled()
+      it 'does nothing if meta is pressed during the click', ->
+        Trigger.click(@$link, metaKey: true)
+        expect(@followSpy).not.toHaveBeenCalled()
 
       describe 'with [up-instant] modifier', ->
 
@@ -142,9 +145,11 @@ describe 'up.modal', ->
           Trigger.click(@$link)
           expect(@followSpy).not.toHaveBeenCalled()
 
-        it 'does nothing if the right mouse button is pressed down', ->
-          Trigger.mousedown(@$link, button: 2)
-          expect(@followSpy).not.toHaveBeenCalled()
+        # IE does not call Javascript and always performs the default action on right clicks
+        unless navigator.userAgent.match(/Trident/)
+          it 'does nothing if the right mouse button is pressed down', ->
+            Trigger.mousedown(@$link, button: 2)
+            expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing if shift is pressed during mousedown', ->
           Trigger.mousedown(@$link, shiftKey: true)

@@ -172,23 +172,25 @@ describe 'up.link', ->
         $form.click()
         expect(followSpy).not.toHaveBeenCalled()
 
-      it 'adds a history entry', ->
-        affix('.target')
-        $link = affix('a[href="/path"][up-target=".target"]')
-        $link.click()
-        @respondWith('<div class="target">new text</div>')
-        expect($('.target')).toHaveText('new text')
-        expect(location.pathname).toEqual('/path')
+      if up.browser.canPushState()
 
-      it 'respects a X-Up-Location header that the server sends in case of a redirect', ->
-        affix('.target')
-        $link = affix('a[href="/path"][up-target=".target"]')
-        $link.click()
-        @respondWith
-          responseText: '<div class="target">new text</div>'
-          responseHeaders: { 'X-Up-Location': '/other/path' }
-        expect($('.target')).toHaveText('new text')
-        expect(location.pathname).toEqual('/other/path')
+        it 'adds a history entry', ->
+          affix('.target')
+          $link = affix('a[href="/path"][up-target=".target"]')
+          $link.click()
+          @respondWith('<div class="target">new text</div>')
+          expect($('.target')).toHaveText('new text')
+          expect(location.pathname).toEqual('/path')
+
+        it 'respects a X-Up-Location header that the server sends in case of a redirect', ->
+          affix('.target')
+          $link = affix('a[href="/path"][up-target=".target"]')
+          $link.click()
+          @respondWith
+            responseText: '<div class="target">new text</div>'
+            responseHeaders: { 'X-Up-Location': '/other/path' }
+          expect($('.target')).toHaveText('new text')
+          expect(location.pathname).toEqual('/other/path')
 
       it 'does not add a history entry when an up-history attribute is set to "false"', ->
         oldPathname = location.pathname
@@ -212,9 +214,11 @@ describe 'up.link', ->
         Trigger.click(@$link)
         expect(@followSpy).toHaveBeenCalledWith(@$link)
 
-      it 'does nothing if the right mouse button is used', ->
-        Trigger.click(@$link, button: 2)
-        expect(@followSpy).not.toHaveBeenCalled()
+      # IE does not call Javascript and always performs the default action on right clicks
+      unless navigator.userAgent.match(/Trident/)
+        it 'does nothing if the right mouse button is used', ->
+          Trigger.click(@$link, button: 2)
+          expect(@followSpy).not.toHaveBeenCalled()
 
       it 'does nothing if shift is pressed during the click', ->
         Trigger.click(@$link, shiftKey: true)
@@ -224,9 +228,9 @@ describe 'up.link', ->
         Trigger.click(@$link, ctrlKey: true)
         expect(@followSpy).not.toHaveBeenCalled()
 
-#      it 'does nothing if meta is pressed during the click', ->
-#        Trigger.click(@$link, metaKey: true)
-#        expect(@followSpy).not.toHaveBeenCalled()
+      it 'does nothing if meta is pressed during the click', ->
+        Trigger.click(@$link, metaKey: true)
+        expect(@followSpy).not.toHaveBeenCalled()
 
       describe 'with [up-instant] modifier', ->
 
@@ -245,9 +249,11 @@ describe 'up.link', ->
           Trigger.click(@$link)
           expect(@followSpy).not.toHaveBeenCalled()
 
-        it 'does nothing if the right mouse button is pressed down', ->
-          Trigger.mousedown(@$link, button: 2)
-          expect(@followSpy).not.toHaveBeenCalled()
+        # IE does not call Javascript and always performs the default action on right clicks
+        unless navigator.userAgent.match(/Trident/)
+          it 'does nothing if the right mouse button is pressed down', ->
+            Trigger.mousedown(@$link, button: 2)
+            expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing if shift is pressed during mousedown', ->
           Trigger.mousedown(@$link, shiftKey: true)
