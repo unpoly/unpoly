@@ -36,16 +36,16 @@ up.flow = (($) ->
 
   @function up.flow.resolveSelector
   @param {String|Element|jQuery} selectorOrElement
-  @param {String|Element|jQuery} [options.origin]
+  @param {String|Element|jQuery} origin
     The element that this selector resolution is relative to.
     That element's selector will be substituted for `&`.
   @internal
   ###
-  resolveSelector = (selectorOrElement, options) ->
+  resolveSelector = (selectorOrElement, origin) ->
     if u.isString(selectorOrElement)
       selector = selectorOrElement
       if u.contains(selector, '&')
-        if origin = u.presence(options.origin)
+        if origin
           originSelector = u.selectorForElement(origin)
           selector = selector.replace(/\&/, originSelector)
         else
@@ -180,9 +180,9 @@ up.flow = (($) ->
     u.debug("Replace %o with %o (options %o)", selectorOrElement, url, options)
 
     options = u.options(options)
-    target = resolveSelector(selectorOrElement, options)
+    target = resolveSelector(selectorOrElement, options.origin)
     failTarget = u.option(options.failTarget, 'body')
-    failTarget = resolveSelector(failTarget, options)
+    failTarget = resolveSelector(failTarget, options.origin)
 
     if !up.browser.canPushState() && options.history != false
       unless options.preload
@@ -294,11 +294,11 @@ up.flow = (($) ->
   @experimental
   ###
   implant = (selectorOrElement, html, options) ->
-    selector = resolveSelector(selectorOrElement, options)
     options = u.options(options,
       historyMethod: 'push',
       requireMatch: true
     )
+    selector = resolveSelector(selectorOrElement, options.origin)
     response = parseResponse(html, options)
     options.title ||= response.title()
 

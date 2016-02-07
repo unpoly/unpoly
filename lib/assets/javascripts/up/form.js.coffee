@@ -330,7 +330,7 @@ up.form = (($) ->
     target = u.option(options.target, $field.attr('up-validate'))
     if u.isBlank(target)
       target ||= u.detect(config.validateTargets, (defaultTarget) ->
-        resolvedDefault = up.flow.resolveSelector(defaultTarget, options)
+        resolvedDefault = up.flow.resolveSelector(defaultTarget, options.origin)
         $field.closest(resolvedDefault).length
       )
     if u.isBlank(target)
