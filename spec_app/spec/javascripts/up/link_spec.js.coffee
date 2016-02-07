@@ -281,6 +281,13 @@ describe 'up.link', ->
         up.hello($area)
         expect($area.attr('up-href')).toEqual('/path')
 
+      it 'copies attributes from the first link if there are multiple links', ->
+        $area = affix('div[up-expand]')
+        $link1 = $area.affix('a[href="/path1"]')
+        $link2 = $area.affix('a[href="/path2"]')
+        up.hello($area)
+        expect($area.attr('up-href')).toEqual('/path1')
+
       it "copies an contained non-link element with up-href attribute", ->
         $area = affix('div[up-expand] span[up-follow][up-href="/path"]')
         up.hello($area)
@@ -290,4 +297,29 @@ describe 'up.link', ->
         $area = affix('div[up-expand] a[href="/path"]')
         up.hello($area)
         expect($area.attr('up-follow')).toEqual('')
+
+      describe 'with a CSS selector in the property value', ->
+
+        it "expands the contained link that matches the selector", ->
+          $area = affix('div[up-expand=".second"]')
+          $link1 = $area.affix('a.first[href="/path1"]')
+          $link2 = $area.affix('a.second[href="/path2"]')
+          up.hello($area)
+          expect($area.attr('up-href')).toEqual('/path2')
+
+        it 'does nothing if no contained link matches the selector', ->
+          $area = affix('div[up-expand=".foo"]')
+          $link = $area.affix('a[href="/path1"]')
+          up.hello($area)
+          expect($area.attr('up-href')).toBeUndefined()
+
+        it 'does not match an element that is not a descendant', ->
+          $area = affix('div[up-expand=".second"]')
+          $link1 = $area.affix('a.first[href="/path1"]')
+          $link2 = affix('a.second[href="/path2"]') # not a child of $area
+          up.hello($area)
+          expect($area.attr('up-href')).toBeUndefined()
+
+
+
 

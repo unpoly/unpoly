@@ -10,6 +10,8 @@ Unreleased
 
 ### Compatible changes
 
+- If a container contains more than one link, you can now set the value of the [`up-expand`](/up-expand)
+  attribute to a CSS selector to define which link should be expanded.
 - You can now configure a list of idempotent HTTP methods in [`up.proxy.config.safeMethods`](/up.proxy.config).
   The proxy cache will only cache idempotent requests and will clear the entire
   cache after a non-idempotent request.

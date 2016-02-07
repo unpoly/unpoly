@@ -401,22 +401,39 @@ up.link = (($) ->
 
   `up-expand` also expands links that open [modals](/up.modal) or [popups](/up.popup).
 
+  \#\#\#\# Elements with multiple contained links
+
+  If a container contains more than one link, you can set the value of the
+  `up-expand` attribute to a CSS selector to define which link should be expanded:
+
+      <div class="notification" up-expand=".close">
+        Record was saved!
+        <a class="details" href="/records/5">Details</a>
+        <a class="close" href="/records">Close</a>
+      </div>
+
   @selector [up-expand]
+  @param {String} [up-expand]
+    A CSS selector that defines which containing link should be expanded.
+
+    If omitted, the first contained link will be expanded.
   @stable
   ###
   up.compiler '[up-expand]', ($area) ->
-    link = $area.find('a, [up-href]').get(0)
-    link or u.error('No link to expand within %o', $area)
-    upAttributePattern = /^up-/
-    newAttrs = {}
-    newAttrs['up-href'] = $(link).attr('href')
-    for attribute in link.attributes
-      name = attribute.name
-      if name.match(upAttributePattern)
-        newAttrs[name] = attribute.value
-    u.setMissingAttrs($area, newAttrs)
-    $area.removeAttr('up-expand')
-    makeFollowable($area)
+    $childLinks = $area.find('a, [up-href]')
+    if selector = $area.attr('up-expand')
+      $childLinks = $childLinks.filter(selector)
+    if link = $childLinks.get(0)
+      upAttributePattern = /^up-/
+      newAttrs = {}
+      newAttrs['up-href'] = $(link).attr('href')
+      for attribute in link.attributes
+        name = attribute.name
+        if name.match(upAttributePattern)
+          newAttrs[name] = attribute.value
+      u.setMissingAttrs($area, newAttrs)
+      $area.removeAttr('up-expand')
+      makeFollowable($area)
 
   ###*
   Marks up the current link to be followed *as fast as possible*.
