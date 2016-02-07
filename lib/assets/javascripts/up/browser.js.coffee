@@ -28,7 +28,7 @@ up.browser = (($) ->
         $field = $('<input type="hidden">')
         $field.attr(field.name, field.value)
         $field.appendTo($form)
-      addField(name: '_method', value: method)
+      addField(name: up.proxy.config.wrapMethodParam, value: method)
       if csrfField = up.rails.csrfField()
         addField(csrfField)
       u.each u.requestDataAsArray(options.data), addField
