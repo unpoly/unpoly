@@ -337,7 +337,7 @@ up.popup = (($) ->
     open even if the page changes in the background.
   @stable
   ###
-  up.link.registerFollowVariant('[up-popup]', ($link) ->
+  up.link.onAction('[up-popup]', ($link) ->
     if $link.is('.up-current')
       close()
     else

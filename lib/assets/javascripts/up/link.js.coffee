@@ -217,7 +217,7 @@ up.link = (($) ->
   ###
   allowDefault = (event) ->
 
-  registerFollowVariant = (selector, handler) ->
+  onAction = (selector, handler) ->
     followVariantSelectors.push(selector)
     up.on 'click', "a#{selector}, [up-href]#{selector}", (event, $link) ->
       if shouldProcessLinkEvent(event, $link)
@@ -320,7 +320,7 @@ up.link = (($) ->
     Set this to `'false'` to prevent the current URL from being updated.
   @stable
   ###
-  registerFollowVariant '[up-target]', ($link) ->
+  onAction '[up-target]', ($link) ->
     follow($link)
 
   ###*
@@ -379,7 +379,7 @@ up.link = (($) ->
     within the response.
   @stable
   ###
-  registerFollowVariant '[up-follow]', ($link) ->
+  onAction '[up-follow]', ($link) ->
     follow($link)
 
   ###*
@@ -460,7 +460,7 @@ up.link = (($) ->
   shouldProcessLinkEvent: shouldProcessLinkEvent
   childClicked: childClicked
   followMethod: followMethod
-  registerFollowVariant: registerFollowVariant
+  onAction: onAction
 
 )(jQuery)
 

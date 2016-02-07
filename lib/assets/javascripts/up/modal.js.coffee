@@ -431,7 +431,7 @@ up.modal = (($) ->
   @param [up-history]
   @stable
   ###
-  up.link.registerFollowVariant '[up-modal]', ($link) ->
+  up.link.onAction '[up-modal]', ($link) ->
     follow($link)
 
   # Close the modal when someone clicks outside the dialog
