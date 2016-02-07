@@ -110,7 +110,6 @@ up.proxy = (($) ->
     wrapMethodParam: '_method'
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
 
-
   cacheKey = (request) ->
     normalizeRequest(request)
     [ request.url,

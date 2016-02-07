@@ -31,7 +31,14 @@ up.flow = (($) ->
     u.presence($element.attr("up-source")) || up.browser.url()
 
   ###*
+  Resolves the given selector (which might contain `&` references)
+  to an absolute selector.
+
   @function up.flow.resolveSelector
+  @param {String|Element|jQuery} selectorOrElement
+  @param {String|Element|jQuery} [options.origin]
+    The element that this selector resolution is relative to.
+    That element's selector will be substituted for `&`.
   @internal
   ###
   resolveSelector = (selectorOrElement, options) ->
@@ -132,8 +139,13 @@ up.flow = (($) ->
     The CSS selector to update if the server sends a non-200 status code.
   @param {String} [options.title]
   @param {String} [options.method='get']
-  @param {Object} [options.data]
-    An object of request parameters.
+  @param {Object|Array} [options.data]
+    Parameters that should be sent as the request's payload.
+
+    Parameters can either be passed as an object (where the property names become
+    the param names and the property values become the param values) or as
+    an array of `{ name: 'param-name', value: 'param-value' }` objects
+    (compare to jQuery's [`serializeArray`](https://api.jquery.com/serializeArray/)).
   @param {String} [options.transition='none']
   @param {String|Boolean} [options.history=true]
     If a `String` is given, it is used as the URL the browser's location bar and history.
@@ -165,11 +177,9 @@ up.flow = (($) ->
   @stable
   ###
   replace = (selectorOrElement, url, options) ->
-
     u.debug("Replace %o with %o (options %o)", selectorOrElement, url, options)
 
     options = u.options(options)
-    
     target = resolveSelector(selectorOrElement, options)
     failTarget = u.option(options.failTarget, 'body')
     failTarget = resolveSelector(failTarget, options)
@@ -374,18 +384,17 @@ up.flow = (($) ->
       elementsInserted($wrapper.children(), options)
 
       # Reveal element that was being prepended/appended.
-      return up.layout.revealOrRestoreScroll($wrapper, options)
-        .then ->
-          # Since we're adding content instead of replacing, we'll only
-          # animate $new instead of morphing between $old and $new
-          up.animate($wrapper, transition, options)
-        .then ->
-          u.unwrapElement($wrapper)
+      promise = up.layout.revealOrRestoreScroll($wrapper, options)
+      promise = promise.then ->
+        # Since we're adding content instead of replacing, we'll only
+        # animate $new instead of morphing between $old and $new
+        up.animate($wrapper, transition, options)
+      promise = promise.then ->
+        u.unwrapElement($wrapper)
+      promise
 
     else
-      # Wrap the replacement as a destroy animation, so $old will
-      # get marked as .up-destroying right away.
-      return destroy $old, animation: ->
+      replacement = ->
         # Don't insert the new element after the old element.
         # For some reason this will make the browser scroll to the
         # bottom of the new element.
@@ -395,6 +404,10 @@ up.flow = (($) ->
           u.error('Cannot apply transitions to body-elements (%o)', transition)
         # Morphing will also process options.reveal
         up.morph($old, $new, transition, options)
+
+      # Wrap the replacement as a destroy animation, so $old will
+      # get marked as .up-destroying right away.
+      destroy $old, animation: replacement
 
   parseImplantSteps = (selector, options) ->
     transitionString = options.transition || options.animation || 'none'

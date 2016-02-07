@@ -128,10 +128,10 @@ up.layout = (($) ->
         easing: easing,
         complete: -> deferred.resolve()
 
-      return deferred
+      deferred
     else
       $viewport.scrollTop(scrollTop)
-      return u.resolvedDeferred()
+      u.resolvedDeferred()
 
   ###*
   @function up.layout.finishScrolling
