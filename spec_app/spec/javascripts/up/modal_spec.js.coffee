@@ -75,7 +75,8 @@ describe 'up.modal', ->
 
     describe 'up.modal.coveredUrl', ->
 
-      if up.browser.canPushState()
+      describeCapability 'canPushState', ->
+
         it 'returns the URL behind the modal overlay', (done) ->
           up.history.replace('/foo')
           expect(up.modal.coveredUrl()).toBeUndefined()

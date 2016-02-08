@@ -5,8 +5,8 @@ describe 'up.link', ->
   describe 'Javascript functions', ->
   
     describe 'up.follow', ->
-      
-      if up.browser.canPushState()
+
+      describeCapability 'canPushState', ->
 
         it 'loads the given link via AJAX and replaces the response in the given target', (done) ->
           affix('.before').text('old-before')
@@ -142,7 +142,7 @@ describe 'up.link', ->
 #
 #          it "doesn't make a request and reveals the target of a #hash in the URL"
 
-      else
+      describeFallback 'canPushState', ->
         
         it 'follows the given link', ->
           $link = affix('a[href="/path"]')
@@ -172,7 +172,7 @@ describe 'up.link', ->
         $form.click()
         expect(followSpy).not.toHaveBeenCalled()
 
-      if up.browser.canPushState()
+      describeCapability 'canPushState', ->
 
         it 'adds a history entry', ->
           affix('.target')

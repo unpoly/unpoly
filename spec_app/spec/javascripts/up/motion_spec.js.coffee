@@ -4,7 +4,7 @@ describe 'up.motion', ->
   
     describe 'up.animate', ->
 
-      if up.browser.canCssTransition()
+      describeCapability 'canCssTransition', ->
 
         it 'animates the given element', (done) ->
           $element = affix('.element').text('content')
@@ -35,7 +35,7 @@ describe 'up.motion', ->
             up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
             expect($element.css('font-size')).toEqual('40px')
 
-      else
+      describeFallback 'canCssTransition', ->
 
         it "doesn't animate and directly sets the last frame instead", ->
           $element = affix('.element').text('content')
@@ -45,7 +45,7 @@ describe 'up.motion', ->
 
     describe 'up.morph', ->
 
-      if up.browser.canCssTransition()
+      describeCapability 'canCssTransition', ->
 
         it 'transitions between two element by animating two copies while keeping the originals in the background', (done) ->
 
@@ -209,7 +209,7 @@ describe 'up.motion', ->
             expect($new).toBeVisible()
             expect($new.css('opacity')).toEqual('1')
 
-      else
+      describeFallback 'canCssTransition', ->
 
         it "doesn't animate and hides the old element instead", ->
           $old = affix('.old').text('old content')

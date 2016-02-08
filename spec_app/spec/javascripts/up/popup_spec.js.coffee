@@ -45,7 +45,8 @@ describe 'up.popup', ->
 
     describe 'up.popup.coveredUrl', ->
 
-      if up.browser.canPushState()
+      describeCapability 'canPushState', ->
+
         it 'returns the URL behind the popup', (done) ->
           up.history.replace('/foo')
           expect(up.popup.coveredUrl()).toBeUndefined()

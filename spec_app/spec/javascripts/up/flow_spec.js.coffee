@@ -6,7 +6,7 @@ describe 'up.flow', ->
 
     describe 'up.replace', ->
 
-      if up.browser.canPushState()
+      describeCapability 'canPushState', ->
 
         beforeEach ->
 
@@ -384,7 +384,7 @@ describe 'up.flow', ->
 
         it 'uses a { failTransition } option if the request failed'
 
-      else
+      describeFallback 'canPushState', ->
         
         it 'makes a full page load', ->
           spyOn(up.browser, 'loadPage')
@@ -472,8 +472,8 @@ describe 'up.flow', ->
         expect(destructor).toHaveBeenCalled()
         
     describe 'up.reload', ->
-      
-      if up.browser.canPushState()
+
+      describeCapability 'canPushState', ->
       
         it 'reloads the given selector from the closest known source URL', (done) ->
           affix('.container[up-source="/source"] .element').find('.element').text('old text')
@@ -489,8 +489,8 @@ describe 'up.flow', ->
               <div class="element">new text</div>
             </div>
             """
-            
-      else
+
+      describeFallback 'canPushState', ->
         
         it 'makes a page load from the closest known source URL', ->
           affix('.container[up-source="/source"] .element').find('.element').text('old text')

@@ -83,8 +83,8 @@ describe 'up.form', ->
               done()
 
     describe 'up.submit', ->
-      
-      if up.browser.canPushState()
+
+      describeCapability 'canPushState', ->
       
         beforeEach ->
           @$form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
@@ -166,7 +166,7 @@ describe 'up.form', ->
             @respondWith('<div class="response">new-text</div>')
             expect(up.browser.url()).toEqual(@hrefBeforeExample)
 
-      else
+      describeFallback 'canPushState', ->
         
         it 'submits the given form', ->
           $form = affix('form[action="/path/to"][method="put"][up-target=".response"]')

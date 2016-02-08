@@ -315,7 +315,7 @@ describe 'up.proxy', ->
 
     describe 'up.proxy.preload', ->
 
-      if up.browser.canPushState()
+      describeCapability 'canPushState', ->
 
         it "loads and caches the given link's destination", ->
           $link = affix('a[href="/path"]')
@@ -327,7 +327,7 @@ describe 'up.proxy', ->
           up.proxy.preload($link)
           expect(up.proxy.get(url: '/path')).toBeUndefined()
 
-      else
+      describeFallback 'canPushState', ->
 
         it "does nothing", ->
           $link = affix('a[href="/path"]')

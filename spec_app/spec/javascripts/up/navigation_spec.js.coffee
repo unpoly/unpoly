@@ -44,7 +44,7 @@ describe 'up.navigation', ->
       $currentLink = up.hello(affix('a[href="/foo"]'))
       expect($currentLink).toHaveClass('highlight up-current')
 
-    if up.browser.canPushState()
+    describeCapability 'canPushState', ->
       
       it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', ->
         $link = affix('a[href="/foo"][up-target=".main"]')

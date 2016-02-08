@@ -14,7 +14,7 @@ describe 'up.history', ->
 
     describe '[up-back]', ->
 
-      if up.browser.canPushState()
+      describeCapability 'canPushState', ->
 
         it 'sets an [up-href] attribute to the previous URL and sets the up-restore-scroll attribute to "true"', ->
           up.history.push('/one')
@@ -29,9 +29,15 @@ describe 'up.history', ->
 
       it 'does not set an up-href attribute if there is no previous URL'
 
+    describeFallback 'canPushState', ->
+
+      it 'does not change the element', ->
+        $element = up.hello(affix('a[href="/three"][up-back]').text('text'))
+        expect($element.attr('up-href')).toBeUndefined()
+
     describe 'scroll restauration', ->
 
-      if up.browser.canPushState()
+      describeCapability 'canPushState', ->
 
         afterEach ->
           $('.viewport').remove()
