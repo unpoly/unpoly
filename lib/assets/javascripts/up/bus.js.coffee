@@ -42,17 +42,44 @@ up.bus = (($) ->
   
   u = up.util
 
-  liveDescriptions = []
-  defaultLiveDescriptions = null
+  # We remember which argument lists have been passed to `up.on`
+  # so we can clean out the listener registry between tests.
+  liveUpDescriptions = {}
+  nextUpDescriptionNumber = 0
 
   ###*
-  # Convert an Up.js style listener (second argument is the event target
-  # as a jQuery collection) to a vanilla jQuery listener
+  Convert an Up.js style listener (second argument is the event target
+  as a jQuery collection) to a vanilla jQuery listener
+
+  @function upListenerToJqueryListener
+  @internal
   ###
   upListenerToJqueryListener = (upListener) ->
     (event) ->
       $me = event.$element || $(this)
       upListener.apply($me.get(0), [event, $me, up.syntax.data($me)])
+
+  ###*
+  Converts an argument list for `up.on` to an argument list for `jQuery.on`.
+  This involves rewriting the listener signature in the last argument slot.
+
+  @function upDescriptionToJqueryDescription
+  @internal
+  ###
+  upDescriptionToJqueryDescription = (upDescription, isNew) ->
+    jqueryDescription = u.copy(upDescription)
+    upListener = jqueryDescription.pop()
+    jqueryListener = undefined
+    if isNew
+      jqueryListener = upListenerToJqueryListener(upListener)
+      upListener._asJqueryListener = jqueryListener
+      upListener._descriptionNumber = ++nextUpDescriptionNumber
+    else
+      jqueryListener = upListener._asJqueryListener
+      jqueryListener or u.error('up.off: The event listener %o was never registered through up.on')
+    jqueryDescription.push(jqueryListener)
+    jqueryDescription
+
 
   ###*
   Listens to an event on `document`.
@@ -73,7 +100,6 @@ up.bus = (($) ->
   Other than jQuery, Up.js will silently discard event listeners
   on [unsupported browsers](/up.browser.isSupported).
 
-
   \#\#\#\# Attaching structured data
 
   In case you want to attach structured data to the event you're observing,
@@ -87,7 +113,6 @@ up.bus = (($) ->
       up.on('click', '.person', function(event, $element, data) {
         console.log("This is %o who is %o years old", data.name, data.age);
       });
-
 
   \#\#\#\# Migrating jQuery event handlers to `up.on`
 
@@ -107,6 +132,12 @@ up.bus = (($) ->
         $(this).something();
       });
 
+  \#\#\#\# Stopping to listen
+
+  `up.on` returns a function that unbinds the event listeners when called.
+
+  There is also a function [`up.off`](/up.off) which you can use for the same purpose.
+
   @function up.on
   @param {String} events
     A space-separated list of event names to bind.
@@ -123,26 +154,58 @@ up.bus = (($) ->
     A function that unbinds the event listeners when called.
   @stable
   ###
-  live = (args...) ->
+  live = (upDescription...) ->
     # Silently discard any event handlers that are registered on unsupported
     # browsers and return a no-op destructor
     return (->) unless up.browser.isSupported()
 
-    description = u.copy(args)
-    lastIndex = description.length - 1
-    behavior = description[lastIndex]
-    description[lastIndex] = upListenerToJqueryListener(behavior)
+    # Convert the args for up.on to an argument list as expected by jQuery.on.
+    jqueryDescription = upDescriptionToJqueryDescription(upDescription, true)
 
     # Remember the descriptions we registered, so we can
-    # clean up after ourselves during a reset
-    liveDescriptions.push(description)
+    # clean up after ourselves during a `reset`
+    rememberUpDescription(upDescription)
 
-    $document = $(document)
-    $document.on(description...)
+    $(document).on(jqueryDescription...)
 
     # Return destructor
-    -> $document.off(description...)
+    -> unbind(upDescription...)
 
+  ###*
+  Unregisters an event listener previously bound with [`up.on`](/up.on).
+
+  \#\#\#\# Example
+
+  Let's say you are listing to clicks on `.button` elements:
+
+      var listener = function() { };
+      up.on('click', '.button', listener);
+
+  You can stop listening to these events like this:
+
+      up.off('click', '.button', listener);
+
+  Note that you need to pass `up.off` a reference to the same listener function
+  that was passed to `up.on` earlier.
+
+  @function up.off
+  @stable
+  ###
+  unbind = (upDescription...) ->
+    jqueryDescription = upDescriptionToJqueryDescription(upDescription, false)
+    forgetUpDescription(upDescription)
+    $(document).off(jqueryDescription...)
+
+  rememberUpDescription = (upDescription) ->
+    number = upDescriptionNumber(upDescription)
+    liveUpDescriptions[number] = upDescription
+
+  forgetUpDescription = (upDescription) ->
+    number = upDescriptionNumber(upDescription)
+    delete liveUpDescriptions[number]
+
+  upDescriptionNumber = (upDescription) ->
+    u.last(upDescription)._descriptionNumber
 
   ###*
   Emits a event with the given name and properties.
@@ -170,7 +233,7 @@ up.bus = (($) ->
     will by default include properties like `preventDefault()`
     or `stopPropagation()`.
   @param {jQuery} [eventProps.$element=$(document)]
-    The element on which the event is trigered.
+    The element on which the event is triggered.
   @experimental
   ###
   emit = (eventName, eventProps = {}) ->
@@ -217,7 +280,8 @@ up.bus = (($) ->
   @internal
   ###
   snapshot = ->
-    defaultLiveDescriptions = u.copy(liveDescriptions)
+    for description in liveUpDescriptions
+      description._isDefault = true
 
   ###*
   Resets the list of registered event listeners to the
@@ -226,10 +290,8 @@ up.bus = (($) ->
   @internal
   ###
   restoreSnapshot = ->
-    for description in liveDescriptions
-      unless u.contains(defaultLiveDescriptions, description)
-        $(document).off(description...)
-    liveDescriptions = u.copy(defaultLiveDescriptions)
+    doomedDescriptions = u.reject(liveUpDescriptions, (description) -> description._isDefault)
+    unbind(description...) for description in doomedDescriptions
 
   ###*
   Resets Up.js to the state when it was booted.
@@ -279,7 +341,9 @@ up.bus = (($) ->
   live 'up:framework:boot', snapshot
   live 'up:framework:reset', restoreSnapshot
 
+  knife: eval(Knife?.point)
   on: live # can't name symbols `on` in Coffeescript
+  off: unbind # can't name symbols `off` in Coffeescript
   emit: emit
   nobodyPrevents: nobodyPrevents
   onEscape: onEscape
@@ -289,6 +353,7 @@ up.bus = (($) ->
 )(jQuery)
 
 up.on = up.bus.on
+up.off = up.bus.off
 up.emit = up.bus.emit
 up.reset = up.bus.emitReset
 up.boot = up.bus.boot

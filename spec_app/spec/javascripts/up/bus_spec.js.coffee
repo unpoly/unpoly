@@ -47,6 +47,32 @@ describe 'up.bus', ->
         $('.child').click()
         expect(observeArgs).toHaveBeenCalledWith('child', {})
 
+    describe 'up.off', ->
+
+      it 'unregisters an event listener previously registered through up.on', ->
+        $child = affix('.child')
+        clickSpy = jasmine.createSpy()
+        up.on 'click', '.child', clickSpy
+        $('.child').click()
+        up.off 'click', '.child', clickSpy
+        $('.child').click()
+        expect(clickSpy.calls.count()).toEqual(1)
+
+      it 'throws an error if the given event listener was not registered through up.on', ->
+        someFunction = ->
+        offing = -> up.off 'click', '.child', someFunction
+        expect(offing).toThrowError(/(not|never) registered/i)
+
+      it 'reduces the internally tracked list of event listeners (bugfix for memory leak)', ->
+        getCount = -> up.bus.knife.get('Object.keys(liveUpDescriptions).length')
+        oldCount = getCount()
+        expect(oldCount).toBeGreaterThan(0)
+        clickSpy = jasmine.createSpy()
+        up.on 'click', '.child', clickSpy
+        expect(getCount()).toBe(oldCount + 1)
+        up.off 'click', '.child', clickSpy
+        expect(getCount()).toBe(oldCount)
+
     describe 'up.emit', ->
 
       it 'triggers an event on the document', ->

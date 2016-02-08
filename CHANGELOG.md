@@ -10,6 +10,7 @@ Unreleased
 
 ### Compatible changes
 
+- New function [`up.off`](/up.off). This unregisters an event listener previously bound with [`up.on`](/up.on).
 - If a container contains more than one link, you can now set the value of the [`up-expand`](/up-expand)
   attribute to a CSS selector to define which link should be expanded.
 - You can now configure a list of idempotent HTTP methods in [`up.proxy.config.safeMethods`](/up.proxy.config).
