@@ -281,3 +281,191 @@ describe 'up.form', ->
           $labels = $('#registration label')
           expect($labels[0]).not.toHaveText('Validation message')
           expect($labels[1]).toHaveText('Validation message')
+
+    describe '[up-toggle]', ->
+
+      describe 'on a select', ->
+
+        beforeEach ->
+          @$select = affix('select[up-toggle=".target"]')
+          @$blankOption = @$select.affix('option').text('<Please select something>').val('')
+          @$fooOption = @$select.affix('option[value="foo"]').text('Foo')
+          @$barOption = @$select.affix('option[value="bar"]').text('Bar')
+          @$bazOption = @$select.affix('option[value="baz"]').text('Baz')
+
+        it "shows the target element iff its up-show-for attribute contains the select value", ->
+          $target = affix('.target[up-show-for="something bar other"]')
+          up.hello(@$select)
+          expect($target).toBeHidden()
+          @$select.val('bar').change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-hide-for attribute doesn't contain the select value", ->
+          $target = affix('.target[up-hide-for="something bar other"]')
+          up.hello(@$select)
+          expect($target).toBeVisible()
+          @$select.val('bar').change()
+          expect($target).toBeHidden()
+
+        it "shows the target element iff it has neither up-show-for nor up-hide-for and the select value is present", ->
+          $target = affix('.target')
+          up.hello(@$select)
+          expect($target).toBeHidden()
+          @$select.val('bar').change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':present' and the select value is present", ->
+          $target = affix('.target[up-show-for=":present"]')
+          up.hello(@$select)
+          expect($target).toBeHidden()
+          @$select.val('bar').change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':blank' and the select value is blank", ->
+          $target = affix('.target[up-show-for=":blank"]')
+          up.hello(@$select)
+          expect($target).toBeVisible()
+          @$select.val('bar').change()
+          expect($target).toBeHidden()
+
+      describe 'on a checkbox', ->
+
+        beforeEach ->
+          @$checkbox = affix('input[type="checkbox"][value="1"][up-toggle=".target"]')
+
+        it "shows the target element iff its up-show-for attribute is :checked and the checkbox is checked", ->
+          $target = affix('.target[up-show-for=":checked"]')
+          up.hello(@$checkbox)
+          expect($target).toBeHidden()
+          @$checkbox.prop('checked', true).change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute is :unchecked and the checkbox is unchecked", ->
+          $target = affix('.target[up-show-for=":unchecked"]')
+          up.hello(@$checkbox)
+          expect($target).toBeVisible()
+          @$checkbox.prop('checked', true).change()
+          expect($target).toBeHidden()
+
+        it "shows the target element iff its up-hide-for attribute is :checked and the checkbox is unchecked", ->
+          $target = affix('.target[up-hide-for=":checked"]')
+          up.hello(@$checkbox)
+          expect($target).toBeVisible()
+          @$checkbox.prop('checked', true).change()
+          expect($target).toBeHidden()
+
+        it "shows the target element iff its up-hide-for attribute is :unchecked and the checkbox is checked", ->
+          $target = affix('.target[up-hide-for=":unchecked"]')
+          up.hello(@$checkbox)
+          expect($target).toBeHidden()
+          @$checkbox.prop('checked', true).change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff it has neither up-show-for nor up-hide-for and the checkbox is checked", ->
+          $target = affix('.target')
+          up.hello(@$checkbox)
+          expect($target).toBeHidden()
+          @$checkbox.prop('checked', true).change()
+          expect($target).toBeVisible()
+
+      describe 'on a group of radio buttons', ->
+
+        beforeEach ->
+          @$buttons     = affix('.radio-buttons')
+          @$blankButton = @$buttons.affix('input[type="radio"][name="group"][up-toggle=".target"]').val('')
+          @$fooButton   = @$buttons.affix('input[type="radio"][name="group"][up-toggle=".target"]').val('foo')
+          @$barButton   = @$buttons.affix('input[type="radio"][name="group"][up-toggle=".target"]').val('bar')
+          @$bazkButton  = @$buttons.affix('input[type="radio"][name="group"][up-toggle=".target"]').val('baz')
+
+        it "shows the target element iff its up-show-for attribute contains the selected button value", ->
+          $target = affix('.target[up-show-for="something bar other"]')
+          up.hello(@$buttons)
+          expect($target).toBeHidden()
+          @$barButton.prop('checked', true).change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-hide-for attribute doesn't contain the selected button value", ->
+          $target = affix('.target[up-hide-for="something bar other"]')
+          up.hello(@$buttons)
+          expect($target).toBeVisible()
+          @$barButton.prop('checked', true).change()
+          expect($target).toBeHidden()
+
+        it "shows the target element iff it has neither up-show-for nor up-hide-for and the selected button value is present", ->
+          $target = affix('.target')
+          up.hello(@$buttons)
+          expect($target).toBeHidden()
+          @$barButton.prop('checked', true).change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':present' and the selected button value is present", ->
+          $target = affix('.target[up-show-for=":present"]')
+          up.hello(@$buttons)
+          expect($target).toBeHidden()
+          @$blankButton.prop('checked', true).change()
+          expect($target).toBeHidden()
+          @$barButton.prop('checked', true).change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':blank' and the selected button value is blank", ->
+          $target = affix('.target[up-show-for=":blank"]')
+          up.hello(@$buttons)
+          expect($target).toBeVisible()
+          @$blankButton.prop('checked', true).change()
+          expect($target).toBeVisible()
+          @$barButton.prop('checked', true).change()
+          expect($target).toBeHidden()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':checked' and any button is checked", ->
+          $target = affix('.target[up-show-for=":checked"]')
+          up.hello(@$buttons)
+          expect($target).toBeHidden()
+          @$blankButton.prop('checked', true).change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':unchecked' and no button is checked", ->
+          $target = affix('.target[up-show-for=":unchecked"]')
+          up.hello(@$buttons)
+          expect($target).toBeVisible()
+          @$blankButton.prop('checked', true).change()
+          expect($target).toBeHidden()
+
+      describe 'on a text input', ->
+
+        beforeEach ->
+          @$textInput = affix('input[type="text"][up-toggle=".target"]')
+
+        it "shows the target element iff its up-show-for attribute contains the input value", ->
+          $target = affix('.target[up-show-for="something bar other"]')
+          up.hello(@$textInput)
+          expect($target).toBeHidden()
+          @$textInput.val('bar').change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-hide-for attribute doesn't contain the input value", ->
+          $target = affix('.target[up-hide-for="something bar other"]')
+          up.hello(@$textInput)
+          expect($target).toBeVisible()
+          @$textInput.val('bar').change()
+          expect($target).toBeHidden()
+
+        it "shows the target element iff it has neither up-show-for nor up-hide-for and the input value is present", ->
+          $target = affix('.target')
+          up.hello(@$textInput)
+          expect($target).toBeHidden()
+          @$textInput.val('bar').change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':present' and the input value is present", ->
+          $target = affix('.target[up-show-for=":present"]')
+          up.hello(@$textInput)
+          expect($target).toBeHidden()
+          @$textInput.val('bar').change()
+          expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':blank' and the input value is blank", ->
+          $target = affix('.target[up-show-for=":blank"]')
+          up.hello(@$textInput)
+          expect($target).toBeVisible()
+          @$textInput.val('bar').change()
+          expect($target).toBeHidden()

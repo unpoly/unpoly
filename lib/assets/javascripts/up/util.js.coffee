@@ -767,6 +767,18 @@ up.util = (($) ->
     select(array, (element) -> !tester(element))
 
   ###*
+  Returns the intersection of the given two arrays.
+
+  Implementation is not optimized. Don't use it for large arrays.
+
+  @function up.util.intersect
+  @internal
+  ###
+  intersect = (array1, array2) ->
+    select array1, (element) ->
+      contains(array2, element)
+
+  ###*
   Returns the first [present](/up.util.isPresent) element attribute
   among the given list of attribute names.
 
@@ -1541,6 +1553,7 @@ up.util = (($) ->
   detect: detect
   select: select
   reject: reject
+  intersect: intersect
   compact: compact
   uniq: uniq
   last: last

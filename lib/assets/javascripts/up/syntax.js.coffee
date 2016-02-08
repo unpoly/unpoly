@@ -332,8 +332,8 @@ up.syntax = (($) ->
   ###
 
   up.on 'ready', (-> hello(document.body))
-  up.on 'up:fragment:inserted', (event) -> compile(event.$element)
-  up.on 'up:fragment:destroy', (event) -> runDestroyers(event.$element)
+  up.on 'up:fragment:inserted', (event, $element) -> compile($element)
+  up.on 'up:fragment:destroy', (event, $element) -> runDestroyers($element)
   up.on 'up:framework:boot', snapshot
   up.on 'up:framework:reset', reset
 

@@ -379,6 +379,95 @@ up.form = (($) ->
     promise = up.submit($form, options)
     promise
 
+  currentValuesForToggle = ($field) ->
+    values = undefined
+    if $field.is('input[type=checkbox]')
+      if $field.is(':checked')
+        values = [':checked', ':present', $field.val()]
+      else
+        values = [':unchecked', ':blank']
+    else if $field.is('input[type=radio]')
+      console.log('-- it is a radio button --')
+      $checkedButton = $field.closest('form, body').find("input[type='radio'][name='#{$field.attr('name')}']:checked")
+      console.log('checked button is %o', $checkedButton)
+      console.log('checked button val is %o', $checkedButton.val())
+      if $checkedButton.length
+        values = [':checked', ':present', $checkedButton.val()]
+      else
+        values = [':unchecked', ':blank']
+    else
+      console.log('-- else -- for %o', $field)
+      value = $field.val()
+      if u.isPresent(value)
+        values = [':present', value]
+      else
+        values = [':blank']
+    values
+
+  currentValuesForToggle = ($field) ->
+    if $field.is('input[type=checkbox]')
+      if $field.is(':checked')
+        value = $field.val()
+        meta = ':checked'
+      else
+        meta = ':unchecked'
+    else if $field.is('input[type=radio]')
+      $checkedButton = $field.closest('form, body').find("input[type='radio'][name='#{$field.attr('name')}']:checked")
+      if $checkedButton.length
+        meta = ':checked'
+        value = $checkedButton.val()
+      else
+        meta = ':unchecked'
+    else
+      value = $field.val()
+    values = []
+    if u.isPresent(value)
+      values.push(value)
+      values.push(':present')
+    else
+      values.push(':blank')
+    if u.isPresent(meta)
+      values.push(meta)
+    values
+
+  ###*
+  Shows or hides a target selector depending on the value.
+
+  See [`[up-toggle]`](/up-toggle) for more documentation and examples.
+
+  This function does not currently have a very useful API outside
+  of our use for `up-toggle`'s UJS behavior, that's why it's currently
+  still marked `@internal`.
+
+  @function up.form.toggle
+  @param {String|Element|jQuery} fieldOrSelector
+  @param {String} [options.target]
+    The target selectors to toggle.
+    Defaults to an `up-toggle` attribute on the given field.
+  @internal
+  ###
+  toggleTargets = (fieldOrSelector, options) ->
+    $field = $(fieldOrSelector)
+    options = u.options(options)
+    targets = u.option(options.target, $field.attr('up-toggle'))
+    u.isPresent(targets) or u.error("No toggle target given for %o", $field)
+    fieldValues = currentValuesForToggle($field)
+    $(targets).each ->
+      $target = $(this)
+      if hideValues = $target.attr('up-hide-for')
+        hideValues = hideValues.split(' ')
+        show = u.intersect(fieldValues, hideValues).length == 0
+      else
+        if showValues = $target.attr('up-show-for')
+          showValues = showValues.split(' ')
+        else
+          # If the target has neither up-show-for or up-hide-for attributes,
+          # assume the user wants the target to be visible whenever anything
+          # is checked or entered.
+          showValues = [':present', ':checked']
+        show = u.intersect(fieldValues, showValues).length > 0
+      $target.toggle(show)
+
   ###*
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
   instead of triggering a full page reload.
@@ -627,6 +716,83 @@ up.form = (($) ->
     validate($field)
 
   ###*
+  Show or hide part of a form if certain options are selected or boxes are checked.
+
+  \#\#\#\# Example
+
+  The triggering input gets an `up-toggle` attribute with a selector for the elements to show or hide:
+
+      <select name="advancedness" up-toggle=".target">
+        <option value="basic">Basic parts</option>
+        <option value="advanced">Advanced parts</option>
+        <option value="very-advanced">Very advanced parts</option>
+      </select>
+
+  The elements get a space-separated list of select values for which they are shown or hidden:
+
+      <div class="target" up-show-for="basic">
+        only shown for advancedness = basic
+      </div>
+
+      <div class="target" up-hide-for="basic">
+        hidden for advancedness = basic
+      </div>
+
+      <div class="target" up-show-for="advanced very-advanced">
+        shown for advancedness = advanced or very-advanced
+      </div>
+
+  For checkboxes you can also use the pseudo-values `:checked` or `:unchecked` like so:
+
+      <input type="checkbox" name="flag" up-toggle=".target">
+
+      <div class="target" up-show-for=":checked">
+        only shown when checkbox is checked
+      </div>
+
+  You can also use the pseudo-values `:blank` to match an empty input value,
+  or `:present` to match a non-empty input value:
+
+      <input type="text" name="email" up-toggle=".target">
+
+      <div class="target" up-show-for=":blank">
+        please enter an email address
+      </div>
+
+  @selector [up-toggle]
+  @stable
+  ###
+
+  ###*
+  Show this element only if a form field has a given value.
+
+  See [`[up-toggle]`](/up-toggle) for more documentation and examples.
+
+  @selector [up-show-for]
+  @param up-show-for
+    A space-separated list of values for which to show this element.
+  @stable
+  ###
+
+  ###*
+  Hide this element if a form field has a given value.
+
+  See [`[up-toggle]`](/up-toggle) for more documentation and examples.
+
+  @selector [up-hide-for]
+  @param up-hide-for
+    A space-separated list of values for which to show this element.
+  @stable
+  ###
+
+  up.on 'change', '[up-toggle]', (event, $field) ->
+    console.log("CHANGE EVENT")
+    toggleTargets($field)
+
+  up.compiler '[up-toggle]', ($field) ->
+    toggleTargets($field)
+
+  ###*
   Observes this field or form and runs a callback when a value changes.
 
   This is useful for observing text fields while the user is typing.
@@ -692,6 +858,7 @@ up.form = (($) ->
   submit: submit
   observe: observe
   validate: validate
+  toggleTargets: toggleTargets
 
 )(jQuery)
 
