@@ -142,6 +142,25 @@ describe 'up.link', ->
 #
 #          it "doesn't make a request and reveals the target of a #hash in the URL"
 
+        describe 'with { confirm } option', ->
+
+          it 'follows the link after the user OKs a confirmation dialog', ->
+            deferred = $.Deferred()
+            spyOn(up.browser, 'confirm').and.returnValue(deferred)
+            spyOn(up, 'replace')
+            $link = affix('a[href="/danger"][up-target=".middle"]')
+            up.follow($link, confirm: 'Do you really want to go there?')
+            expect(up.browser.confirm).toHaveBeenCalledWith('Do you really want to go there?')
+            expect(up.replace).not.toHaveBeenCalled()
+            deferred.resolve()
+            expect(up.replace).toHaveBeenCalled()
+
+          it 'does not show a confirmation dialog if the option is not a present string', ->
+            spyOn(up, 'replace')
+            $link = affix('a[href="/danger"][up-target=".middle"]')
+            up.follow($link, confirm: '')
+            expect(up.replace).toHaveBeenCalled()
+
       describeFallback 'canPushState', ->
         
         it 'follows the given link', ->
@@ -319,7 +338,3 @@ describe 'up.link', ->
           $link2 = affix('a.second[href="/path2"]') # not a child of $area
           up.hello($area)
           expect($area.attr('up-href')).toBeUndefined()
-
-
-
-

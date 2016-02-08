@@ -134,6 +134,9 @@ up.link = (($) ->
   @param {String} [options.failTarget]
     The selector to replace if the server responds with a non-200 status code.
     Defaults to the `up-fail-target` attribute on `link`, or to `body` if such an attribute does not exist.
+  @param {String} [options.confirm]
+    A message that will be displayed in a cancelable confirmation dialog
+    before the link is followed.
   @param {Function|String} [options.transition]
     A transition function or name.
   @param {Number} [options.duration]
@@ -174,9 +177,11 @@ up.link = (($) ->
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'))
     options.method = followMethod($link, options)
     options.origin = u.option(options.origin, $link)
+    options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     options = u.merge(options, up.motion.animateOptions(options, $link))
 
-    up.replace(target, url, options)
+    up.browser.confirm(options.confirm).then ->
+      up.replace(target, url, options)
 
   ###*
   Returns the HTTP method that should be used when following the given link.
@@ -307,6 +312,9 @@ up.link = (($) ->
   @param {String} [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
+  @param {String} [up-confirm]
+    A message that will be displayed in a cancelable confirmation dialog
+    before the link is followed.
   @param {String} [up-reveal='true']
     Whether to reveal the target element within its viewport before updating.
   @param {String} [up-restore-scroll='false']
@@ -372,6 +380,9 @@ up.link = (($) ->
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
+  @param {String} [up-confirm]
+    A message that will be displayed in a cancelable confirmation dialog
+    before the link is followed.
   @param [up-history]
     Set this to `'false'` to prevent the current URL from being updated.
   @param [up-restore-scroll='false']

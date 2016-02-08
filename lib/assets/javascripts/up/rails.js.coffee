@@ -13,10 +13,17 @@ up.rails = (($) ->
   isRails = ->
     u.isGiven($.rails)
 
-  up.compiler '[data-method]', ($element) ->
-    if isRails() && willHandle($element)
-      u.setMissingAttrs($element, 'up-method': $element.attr('data-method'))
-      $element.removeAttr('data-method')
+  u.each ['method', 'confirm'], (feature) ->
+
+    dataAttribute = "data-#{feature}"
+    upAttribute = "up-#{feature}"
+
+    up.compiler "[#{dataAttribute}]", ($element) ->
+      if isRails() && willHandle($element)
+        replacement = {}
+        replacement[upAttribute] = $element.attr(dataAttribute)
+        u.setMissingAttrs($element, replacement)
+        $element.removeAttr(dataAttribute)
 
   csrfField = ->
     if isRails()

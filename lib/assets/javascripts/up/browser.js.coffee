@@ -136,7 +136,7 @@ up.browser = (($) ->
       console.log("Hello %o!", "Judy");
 
   @function up.browser.canLogSubstitution
-  @return boolean
+  @return {Boolean}
   @internal
   ###
   canLogSubstitution = u.memoize ->
@@ -156,6 +156,17 @@ up.browser = (($) ->
     if u.isPresent(value)
       document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
     value
+
+  ###*
+  @function up,browser.confirm
+  @return {Promise}
+  @internal
+  ###
+  confirm = (message) ->
+    if u.isBlank(message) || confirm(message)
+      u.resolvedPromise()
+    else
+      u.unresolvablePromise()
 
   # Server-side companion libraries like upjs-rails set this cookie so we
   # have a way to detect the request method of the initial page load.
@@ -184,6 +195,7 @@ up.browser = (($) ->
 
   url: url
   loadPage: loadPage
+  confirm: confirm
   canPushState: canPushState
   canCssTransition: canCssTransition
   canInputEvent: canInputEvent

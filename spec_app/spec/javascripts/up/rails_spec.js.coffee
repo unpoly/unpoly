@@ -51,3 +51,51 @@ describe 'up.rails', ->
             $element = affix("span[#{upAttribute}][data-method=\"put\"]")
             up.hello($element)
             expect($element.attr('data-method')).toEqual('put')
+
+  describe '[data-confirm]', ->
+
+    beforeEach ->
+      @oldRails = $.rails
+
+    afterEach ->
+      $.rails = @oldRails
+
+    describe 'when Rails UJS is loaded', ->
+
+      beforeEach ->
+        $.rails = {}
+
+      u.each upAttributes, (upAttribute) ->
+        describe "on an [#{upAttribute}] element", ->
+
+          it "is transformed to an up-confirm attribute so the element isn't handled a second time by Rails UJS", ->
+            $element = affix("span[#{upAttribute}][data-confirm=\"Really?\"]")
+            up.hello($element)
+            expect($element.attr('data-confirm')).toBeUndefined()
+            expect($element.attr('up-confirm')).toEqual('Really?')
+
+          it "does not overwrite an existing up-confirm attribute, but gets deleted", ->
+            $element = affix("span[#{upAttribute}][up-confirm=\"Seriously?\"][data-confirm=\"Really?\"]")
+            up.hello($element)
+            expect($element.attr('data-confirm')).toBeUndefined()
+            expect($element.attr('up-confirm')).toEqual('Seriously?')
+
+      describe 'on an element without Up.js attributes', ->
+
+        it "is not changed", ->
+          $element = affix("span[data-confirm=\"Really?\"]")
+          up.hello($element)
+          expect($element.attr('data-confirm')).toEqual('Really?')
+
+    describe 'when Rails UJS is not loaded', ->
+
+      beforeEach ->
+        $.rails = undefined
+
+      u.each upAttributes, (upAttribute) ->
+        describe "on an [#{upAttribute}] element", ->
+
+          it "is not changed", ->
+            $element = affix("span[#{upAttribute}][data-confirm=\"Really?\"]")
+            up.hello($element)
+            expect($element.attr('data-confirm')).toEqual('Really?')

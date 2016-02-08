@@ -235,6 +235,9 @@ up.modal = (($) ->
   @param {Boolean} [options.sticky=false]
     If set to `true`, the modal remains
     open even if the page changes in the background.
+  @param {String} [options.confirm]
+    A message that will be displayed in a cancelable confirmation dialog
+    before the modal is being opened.
   @param {Object} [options.history=true]
     Whether to add a browser history entry for the modal's source URL.
   @param {String} [options.animation]
@@ -303,23 +306,25 @@ up.modal = (($) ->
     # in the case of modals we assume that the developer would rather see a dialog
     # without an URL update.
     options.history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
+    options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     animateOptions = up.motion.animateOptions(options, $link)
 
-    if up.bus.nobodyPrevents('up:modal:open', url: url)
-      wasOpen = isOpen()
-      close(animation: false) if wasOpen
-      options.beforeSwap = -> createFrame(target, options)
-      promise =  up.replace(target, url, u.merge(options, animation: false))
-      unless wasOpen
+    up.browser.confirm(options.confirm).then ->
+      if up.bus.nobodyPrevents('up:modal:open', url: url)
+        wasOpen = isOpen()
+        close(animation: false) if wasOpen
+        options.beforeSwap = -> createFrame(target, options)
+        promise =  up.replace(target, url, u.merge(options, animation: false))
+        unless wasOpen
+          promise = promise.then ->
+            up.animate($('.up-modal'), options.animation, animateOptions)
         promise = promise.then ->
-          up.animate($('.up-modal'), options.animation, animateOptions)
-      promise = promise.then ->
-        up.emit('up:modal:opened')
-      promise
-    else
-      # Although someone prevented opening the modal, keep a uniform API for
-      # callers by returning a Deferred that will never be resolved.
-      u.unresolvablePromise()
+          up.emit('up:modal:opened')
+        promise
+      else
+        # Although someone prevented opening the modal, keep a uniform API for
+        # callers by returning a Deferred that will never be resolved.
+        u.unresolvablePromise()
 
   ###*
   This event is [emitted](/up.emit) when a modal dialog is starting to open.
@@ -424,11 +429,22 @@ up.modal = (($) ->
   a modal dialog.
 
   @selector a[up-modal]
-  @param [up-sticky]
-  @param [up-animation]
-  @param [up-height]
+  @param {String} [up-confirm]
+    A message that will be displayed in a cancelable confirmation dialog
+    before the modal is opened.
+  @param {String} [up-sticky]
+    If set to `"true"`, the modal remains
+    open even if the page changes in the background.
+  @param {String} [up-animation]
+    The animation to use when opening the modal.
+  @param {String} [up-height]
+    The width of the dialog in pixels.
+    By [default](/up.modal.config) the dialog will grow to fit its contents.
   @param [up-width]
-  @param [up-history]
+    The width of the dialog in pixels.
+    By [default](/up.modal.config) the dialog will grow to fit its contents.
+  @param [up-history="true"]
+    Whether to add a browser history entry for the modal's source URL.
   @stable
   ###
   up.link.onAction '[up-modal]', ($link) ->
