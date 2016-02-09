@@ -10,6 +10,14 @@ Unreleased
 
 ### Compatible changes
 
+### Breaking changes
+
+
+0.18.0
+------
+
+### Compatible changes
+
 - New UJS attribute [`[up-toggle]`](/up-toggle) to show or hide part of a form if certain options are selected or boxes are checked.
 - Links can now have an optional `up-confirm` attribute. This opens a confirmation dialog with the given message
   before the link is followed or the modal/popup is opened.
@@ -29,7 +37,6 @@ Unreleased
 - New utility method [`up.util.only`](/up.util.only)
 - New utility method [`up.util.except`](/up.util.except)
 - Fix a bug where modals could no longer be opened on some browsers
-
 
 ### Breaking changes
 
