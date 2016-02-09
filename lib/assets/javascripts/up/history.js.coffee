@@ -106,6 +106,7 @@ up.history = (($) ->
   @experimental
   ###
   push = (url, options) ->
+    up.puts("Current location is now %s", url)
     manipulate('push', url, options)
 
   manipulate = (method, url, options) ->
@@ -114,9 +115,6 @@ up.history = (($) ->
       if up.browser.canPushState()
         fullMethod = "#{method}State" # resulting in either pushState or replaceState
         state = buildState()
-        # console.log("[#{method}] URL %o with state %o", url, state)
-        u.debug("Changing history to URL %o (%o)", url, method)
-        # previousUrl = url
         window.history[fullMethod](state, '', url)
         observeNewUrl(currentUrl())
       else
@@ -126,25 +124,25 @@ up.history = (($) ->
     fromUp: true
 
   restoreStateOnPop = (state) ->
-    url = currentUrl()
-    u.debug "Restoring state %o (now on #{url})", state
-    popSelector = config.popTargets.join(', ')
-    up.replace popSelector, url,
-      history: false,
-      reveal: false,
-      transition: 'none',
-      saveScroll: false # since the URL was already changed by the browser, don't save scroll state
-      restoreScroll: config.restoreScroll
+    if state?.fromUp
+      url = currentUrl()
+      up.log.group "Restoring URL %s", url, ->
+        popSelector = config.popTargets.join(', ')
+        up.replace popSelector, url,
+          history: false,
+          reveal: false,
+          transition: 'none',
+          saveScroll: false # since the URL was already changed by the browser, don't save scroll state
+          restoreScroll: config.restoreScroll
+    else
+      up.puts 'Ignoring a state not pushed by Up.js (%o)', state
 
   pop = (event) ->
-    u.debug("History state popped to URL %o", currentUrl())
-    observeNewUrl(currentUrl())
-    up.layout.saveScroll(url: previousUrl)
-    state = event.originalEvent.state
-    if state?.fromUp
+    up.log.group "History state popped to URL %s", currentUrl(), ->
+      observeNewUrl(currentUrl())
+      up.layout.saveScroll(url: previousUrl)
+      state = event.originalEvent.state
       restoreStateOnPop(state)
-    else
-      u.debug 'Discarding unknown state %o', state
 
   # up.on 'framework:ready', ->
   if up.browser.canPushState()

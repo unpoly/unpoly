@@ -218,7 +218,7 @@ up.form = (($) ->
     callback = null
 
     if u.isGiven(options.change)
-      up.error('up.observe now takes the change callback as the last argument')
+      u.error('up.observe now takes the change callback as the last argument')
 
     rawCallback = u.option(u.presentAttr($element, 'op-observe'), callbackArg)
     if u.isString(rawCallback)
@@ -334,7 +334,7 @@ up.form = (($) ->
         $field.closest(resolvedDefault).length
       )
     if u.isBlank(target)
-      error('Could not find default validation target for %o (tried ancestors %o)', $field, config.validateTargets)
+      u.error('Could not find default validation target for %o (tried ancestors %o)', $field.get(0), config.validateTargets)
     unless u.isString(target)
       target = u.selectorForElement(target)
     target
@@ -387,16 +387,12 @@ up.form = (($) ->
       else
         values = [':unchecked', ':blank']
     else if $field.is('input[type=radio]')
-      console.log('-- it is a radio button --')
       $checkedButton = $field.closest('form, body').find("input[type='radio'][name='#{$field.attr('name')}']:checked")
-      console.log('checked button is %o', $checkedButton)
-      console.log('checked button val is %o', $checkedButton.val())
       if $checkedButton.length
         values = [':checked', ':present', $checkedButton.val()]
       else
         values = [':unchecked', ':blank']
     else
-      console.log('-- else -- for %o', $field)
       value = $field.val()
       if u.isPresent(value)
         values = [':present', value]
@@ -450,7 +446,7 @@ up.form = (($) ->
     $field = $(fieldOrSelector)
     options = u.options(options)
     targets = u.option(options.target, $field.attr('up-toggle'))
-    u.isPresent(targets) or u.error("No toggle target given for %o", $field)
+    u.isPresent(targets) or u.error("No toggle target given for %o", $field.get(0))
     fieldValues = currentValuesForToggle($field)
     $(targets).each ->
       $target = $(this)
@@ -781,7 +777,7 @@ up.form = (($) ->
 
   @selector [up-hide-for]
   @param up-hide-for
-    A space-separated list of values for which to show this element.
+    A space-separated list of values for which to hide this element.
   @stable
   ###
 

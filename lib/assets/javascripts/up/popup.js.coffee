@@ -109,7 +109,7 @@ up.popup = (($) ->
         left: linkBox.left
         bottom: linkBox.top
       else
-        u.error("Unknown position %o", position)
+        u.error("Unknown position option '%s'", position)
     $popup = $('.up-popup')
     $popup.attr('up-position', position)
     $popup.css(css)
@@ -153,8 +153,7 @@ up.popup = (($) ->
     $popup.attr('up-covered-title', document.title)
     # Create an empty element that will match the
     # selector that is being replaced.
-    $placeholder = u.$createElementFromSelector(target)
-    $placeholder.appendTo($popup)
+    u.$createPlaceholder(target, $popup)
     $popup.appendTo(document.body)
     $popup
 
@@ -214,7 +213,7 @@ up.popup = (($) ->
     animateOptions = up.motion.animateOptions(options, $link)
 
     up.browser.confirm(options.confirm).then ->
-      if up.bus.nobodyPrevents('up:popup:open', url: url)
+      if up.bus.nobodyPrevents('up:popup:open', url: url, message: 'Opening popup')
         wasOpen = isOpen()
         close(animation: false) if wasOpen
         options.beforeSwap = -> createFrame(target, options)
@@ -225,7 +224,7 @@ up.popup = (($) ->
           promise = promise.then ->
             up.animate($('.up-popup'), options.animation, animateOptions)
         promise = promise.then ->
-          up.emit('up:popup:opened')
+          up.emit('up:popup:opened', message: 'Popup opened')
         promise
       else
         # Although someone prevented the destruction, keep a uniform API for
@@ -274,7 +273,7 @@ up.popup = (($) ->
         )
         currentUrl = undefined
         deferred = up.destroy($popup, options)
-        deferred.then -> up.emit('up:popup:closed')
+        deferred.then -> up.emit('up:popup:closed', message: 'Popup closed')
         deferred
       else
         # Although someone prevented the destruction,

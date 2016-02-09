@@ -157,7 +157,7 @@ up.layout = (($) ->
       $obstructor = $(obstructor)
       anchorPosition = $obstructor.css(cssAttr)
       unless u.isPresent(anchorPosition)
-        u.error("Fixed element %o must have a CSS attribute %o", $obstructor, cssAttr)
+        u.error("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr)
       parseInt(anchorPosition) + $obstructor.height()
 
     fixedTopBottoms = for obstructor in $(config.fixedTop.join(', '))
@@ -213,9 +213,9 @@ up.layout = (($) ->
   @stable
   ###
   reveal = (elementOrSelector, options) ->
-    u.debug('Revealing %o', elementOrSelector)
-    options = u.options(options)
     $element = $(elementOrSelector)
+    up.puts 'Revealing fragment %o', elementOrSelector.get(0)
+    options = u.options(options)
     $viewport = if options.viewport then $(options.viewport) else viewportOf($element)
 
     snap = u.option(options.snap, config.snap)
@@ -359,7 +359,7 @@ up.layout = (($) ->
   saveScroll = (options = {}) ->
     url = u.option(options.url, up.history.url())
     tops = u.option(options.tops, scrollTops())
-    u.debug('Saving scroll positions for URL %o: %o', url, tops)
+    up.puts('Saving scroll positions for URL %s (%o)', url, tops)
     lastScrollTops.set(url, tops)
 
   ###*
@@ -390,16 +390,15 @@ up.layout = (($) ->
 
     tops = lastScrollTops.get(url)
 
-    u.debug('Restoring scroll positions for URL %o (viewports are %o, saved tops are %o)', url, $viewports, tops)
+    up.log.group 'Restoring scroll positions for URL %s to %o', url, tops, ->
+      for key, scrollTop of tops
+        right = if key == 'document' then document else key
+        $matchingViewport = $viewports.filter(right)
+        scroll($matchingViewport, scrollTop, duration: 0)
 
-    for key, scrollTop of tops
-      right = if key == 'document' then document else key
-      $matchingViewport = $viewports.filter(right)
-      scroll($matchingViewport, scrollTop, duration: 0)
-
-    # Since scrolling happens without animation, we don't need to
-    # join promises from the up.scroll call above
-    u.resolvedDeferred()
+      # Since scrolling happens without animation, we don't need to
+      # join promises from the up.scroll call above
+      u.resolvedDeferred()
 
   ###*
   @function up.layout.revealOrRestoreScroll

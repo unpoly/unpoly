@@ -56,8 +56,42 @@ up.browser = (($) ->
       console[stream](args...)
     else
       # IE <= 9 cannot pass varargs to console.log using Function#apply because IE
-      message = u.evalConsoleTemplate(args...)
+      message = sprintf(args...)
       console[stream](message)
+
+  CONSOLE_PLACEHOLDERS = /\%[odisf]/g
+
+  ###*
+  See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
+
+  @function up.browser.sprintf
+  @internal
+  ###
+  sprintf = (message, args...) ->
+    i = 0
+    maxLength = 80
+    message.replace CONSOLE_PLACEHOLDERS, ->
+      arg = args[i]
+      argType = (typeof arg)
+      if argType == 'string'
+        arg = arg.replace(/\s+/g, ' ')
+        arg = "#{arg.substr(0, maxLength)}…" if arg.length > maxLength
+        arg = "\"#{arg}\""
+      else if argType == 'undefined'
+        # JSON.stringify(undefined) is actually undefined
+        arg = 'undefined'
+      else if argType == 'number' || argType == 'function'
+        arg = arg.toString()
+      else
+        arg = JSON.stringify(arg)
+      if arg.length > maxLength
+        arg = "#{arg.substr(0, maxLength)} …"
+        # For truncated objects or functions, add a trailing brace so
+        # long log lines are easier to parse visually
+        if argType == 'object' || argType == 'function'
+          arg += " }"
+      i += 1
+      arg
 
   url = ->
     location.href
@@ -193,6 +227,14 @@ up.browser = (($) ->
   isSupported = ->
     (!isIE8OrWorse()) && isRecentJQuery()
 
+  ###*
+  @internal
+  ###
+  installPolyfills = ->
+    console.group ||= (args...) -> puts('group', args...)
+    console.groupCollapsed ||= (args...) -> puts('groupCollapsed', args...)
+    console.groupEnd ||= (args...) -> puts('groupEnd', args...)
+
   url: url
   loadPage: loadPage
   confirm: confirm
@@ -201,6 +243,8 @@ up.browser = (($) ->
   canInputEvent: canInputEvent
   canLogSubstitution: canLogSubstitution
   isSupported: isSupported
+  installPolyfills: installPolyfills
   puts: puts
+  sprintf: sprintf
 
 )(jQuery)

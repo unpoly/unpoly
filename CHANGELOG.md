@@ -10,6 +10,9 @@ Unreleased
 
 ### Compatible changes
 
+- The logging output to the developer console is now much quieter and more useful
+
+
 ### Breaking changes
 
 

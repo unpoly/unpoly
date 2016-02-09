@@ -195,7 +195,6 @@ up.syntax = (($) ->
   @stable
   ###
   compilers = []
-  defaultCompilers = null
 
   compiler = (selector, args...) ->
     # Silently discard any compilers that are registered on unsupported browsers
@@ -208,21 +207,22 @@ up.syntax = (($) ->
       batch: options.batch
   
   applyCompiler = (compiler, $jqueryElement, nativeElement) ->
-    u.debug "Applying compiler %o on %o", compiler.selector, nativeElement
+    up.puts ("Compiling '%s' on %o" unless compiler.isDefault), compiler.selector, nativeElement
     destroyer = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
     if u.isFunction(destroyer)
       $jqueryElement.addClass(DESTROYABLE_CLASS)
       $jqueryElement.data(DESTROYER_KEY, destroyer)
 
   compile = ($fragment) ->
-    u.debug "Compiling fragment %o", $fragment
-    for compiler in compilers
-      $matches = u.findWithSelf($fragment, compiler.selector)
-      if $matches.length
-        if compiler.batch
-          applyCompiler(compiler, $matches, $matches.get())
-        else
-          $matches.each -> applyCompiler(compiler, $(this), this)
+    up.log.group "Compiling fragment %o", $fragment.get(0), ->
+      for compiler in compilers
+        $matches = u.findWithSelf($fragment, compiler.selector)
+        if $matches.length
+          up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isDefault), compiler.selector, $matches.length, ->
+            if compiler.batch
+              applyCompiler(compiler, $matches, $matches.get())
+            else
+              $matches.each -> applyCompiler(compiler, $(this), this)
 
   runDestroyers = ($fragment) ->
     u.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
@@ -274,7 +274,8 @@ up.syntax = (($) ->
   @internal
   ###
   snapshot = ->
-    defaultCompilers = u.copy(compilers)
+    for compiler in compilers
+      compiler.isDefault = true
 
   ###*
   Resets the list of registered compiler directives to the
@@ -283,7 +284,7 @@ up.syntax = (($) ->
   @internal
   ###
   reset = ->
-    compilers = u.copy(defaultCompilers)
+    compilers = u.select compilers, (compiler) -> compiler.isDefault
 
   ###*
   Compiles a page fragment that has been inserted into the DOM
@@ -311,7 +312,9 @@ up.syntax = (($) ->
   ###
   hello = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
-    eventAttrs = u.options(options, $element: $element)
+    eventAttrs = u.options options,
+      $element: $element
+      message: ['Inserted fragment %o', $element.get(0)]
     up.emit('up:fragment:inserted', eventAttrs)
     $element
 

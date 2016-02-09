@@ -234,14 +234,40 @@ up.bus = (($) ->
     or `stopPropagation()`.
   @param {jQuery} [eventProps.$element=$(document)]
     The element on which the event is triggered.
+  @param {String|Array} [eventProps.message]
+    A message to print to the console when the event is emitted.
+    If omitted, a default message is printed.
+    Set this to `false` to prevent any console output.
   @experimental
   ###
   emit = (eventName, eventProps = {}) ->
     event = $.Event(eventName, eventProps)
-    $target = eventProps.$element || $(document)
-    u.debug("Emitting %o on %o with props %o", eventName, $target, eventProps)
+    if $target = eventProps.$element
+      delete eventProps.$element
+    else
+      $target = $(document)
+    logEmission(eventName, eventProps)
     $target.trigger(event)
     event
+
+  logEmission = (eventName, eventProps) ->
+    if eventProps.hasOwnProperty('message')
+      niceMessage = eventProps.message
+      delete eventProps.message
+      if u.isArray(niceMessage)
+        [niceMessage, niceMessageArgs...] = niceMessage
+      else
+        niceMessageArgs = []
+      if niceMessage
+        if u.isPresent(eventProps)
+          up.puts "#{niceMessage} (%s (%o))", niceMessageArgs..., eventName, eventProps
+        else
+          up.puts "#{niceMessage} (%s)", niceMessageArgs..., eventName
+    else
+      if u.isPresent(eventProps)
+        up.puts 'Emitted event %s (%o)', eventName, eventProps
+      else
+        up.puts 'Emitted event %s', eventName
 
   ###*
   [Emits an event](/up.emit) and returns whether any listener
@@ -250,11 +276,16 @@ up.bus = (($) ->
   @function up.bus.nobodyPrevents
   @param {String} eventName
   @param {Object} eventProps
+  @param {String|Array} [eventProps.message]
   @experimental
   ###
   nobodyPrevents = (args...) ->
     event = emit(args...)
-    not event.isDefaultPrevented()
+    if event.isDefaultPrevented()
+      up.puts "An observer prevented the event %s", args[0]
+      false
+    else
+      true
 
   ###*
   Registers an event listener to be called when the user
@@ -281,7 +312,7 @@ up.bus = (($) ->
   ###
   snapshot = ->
     for description in liveUpDescriptions
-      description._isDefault = true
+      description.isDefault = true
 
   ###*
   Resets the list of registered event listeners to the
@@ -290,7 +321,7 @@ up.bus = (($) ->
   @internal
   ###
   restoreSnapshot = ->
-    doomedDescriptions = u.reject(liveUpDescriptions, (description) -> description._isDefault)
+    doomedDescriptions = u.reject(liveUpDescriptions, (description) -> description.isDefault)
     unbind(description...) for description in doomedDescriptions
 
   ###*
@@ -305,7 +336,7 @@ up.bus = (($) ->
   @experimental
   ###
   emitReset = ->
-    up.emit('up:framework:reset')
+    up.emit('up:framework:reset', message: 'Resetting framework')
 
   ###*
   This event is [emitted](/up.emit) when Up.js is [reset](/up.reset) during unit tests.
@@ -329,7 +360,10 @@ up.bus = (($) ->
   ###
   boot = ->
     if up.browser.isSupported()
-      up.emit('up:framework:boot')
+      # Can't decouple this via the event bus, since up.bus would require
+      # up.browser.isSupported() and up.browser would require up.on()
+      up.browser.installPolyfills()
+      up.emit('up:framework:boot', message: 'Booting framework')
 
   ###*
   This event is [emitted](/up.emit) when Up.js [boots](/up.boot).

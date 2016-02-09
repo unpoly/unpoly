@@ -168,8 +168,7 @@ up.modal = (($) ->
     $content = $modal.find('.up-modal-content')
     # Create an empty element that will match the
     # selector that is being replaced.
-    $placeholder = u.$createElementFromSelector(target)
-    $placeholder.appendTo($content)
+    u.$createPlaceholder(target, $content)
     $modal.appendTo(document.body)
     $modal
 
@@ -310,7 +309,7 @@ up.modal = (($) ->
     animateOptions = up.motion.animateOptions(options, $link)
 
     up.browser.confirm(options.confirm).then ->
-      if up.bus.nobodyPrevents('up:modal:open', url: url)
+      if up.bus.nobodyPrevents('up:modal:open', url: url, message: 'Opening modal')
         wasOpen = isOpen()
         close(animation: false) if wasOpen
         options.beforeSwap = -> createFrame(target, options)
@@ -319,7 +318,7 @@ up.modal = (($) ->
           promise = promise.then ->
             up.animate($('.up-modal'), options.animation, animateOptions)
         promise = promise.then ->
-          up.emit('up:modal:opened')
+          up.emit('up:modal:opened', message: 'Modal opened')
         promise
       else
         # Although someone prevented opening the modal, keep a uniform API for
@@ -360,7 +359,7 @@ up.modal = (($) ->
   close = (options) ->
     $modal = $('.up-modal')
     if $modal.length
-      if up.bus.nobodyPrevents('up:modal:close', $element: $modal)
+      if up.bus.nobodyPrevents('up:modal:close', $element: $modal, message: 'Closing modal')
         options = u.options(options,
           animation: config.closeAnimation,
           url: $modal.attr('up-covered-url')
@@ -370,7 +369,7 @@ up.modal = (($) ->
         promise = up.destroy($modal, options)
         promise = promise.then ->
           unshiftElements()
-          up.emit('up:modal:closed')
+          up.emit('up:modal:closed', message: 'Modal closed')
         promise
       else
         # Although someone prevented the destruction,

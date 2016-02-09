@@ -135,77 +135,13 @@ up.util = (($) ->
     element
 
   ###*
-  Prints a debugging message to the browser console.
-
-  @function up.debug
-  @param {String} message
-  @param {Array} args...
-  @internal
+  @function $create
   ###
-  debug = (message, args...) ->
-    message = "[UP] #{message}"
-    up.browser.puts('debug', message, args...)
-
-  ###*
-  @function up.warn
-  @internal
-  ###
-  warn = (message, args...) ->
-    message = "[UP] #{message}"
-    up.browser.puts('warn', message, args...)
-
-  ###*
-  Throws a fatal error with the given message.
-
-  - The error will be printed to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/Console/error)
-  - An [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) (exception) will be thrown, unwinding the current call stack
-  - The error message will be printed in a corner of the screen
-
-  \#\#\#\# Examples
-
-      up.error('Division by zero')
-      up.error('Unexpected result %o', result)
-
-  @function up.error
-  @internal
-  ###
-  error = (args...) ->
-    args[0] = "[UP] #{args[0]}"
-    up.browser.puts('error', args...)
-    asString = evalConsoleTemplate(args...)
-    $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body')
-    $error.addClass('up-error')
-    $error.text(asString)
-    throw new Error(asString)
-
-  CONSOLE_PLACEHOLDERS = /\%[odisf]/g
-    
-  evalConsoleTemplate = (args...) ->
-    message = args[0]
-    i = 0
-    maxLength = 80
-    message.replace CONSOLE_PLACEHOLDERS, ->
-      i += 1
-      arg = args[i]
-      argType = (typeof arg)
-      if argType == 'string'
-        arg = arg.replace(/\s+/g, ' ')
-        arg = "#{arg.substr(0, maxLength)}…" if arg.length > maxLength
-        arg = "\"#{arg}\""
-      else if argType == 'undefined'
-        # JSON.stringify(undefined) is actually undefined
-        arg = 'undefined'
-      else if argType == 'number' || argType == 'function'
-        arg = arg.toString()
-      else
-        arg = JSON.stringify(arg)
-      if arg.length > maxLength
-        arg = "#{arg.substr(0, maxLength)} …"
-        # For truncated objects or functions, add a trailing brace so
-        # long log lines are easier to parse visually
-        if argType == 'object' || argType == 'function'
-          arg += " }"
-      arg
+  $createPlaceholder = (selector, container = document.body) ->
+    $placeholder = $createElementFromSelector(selector)
+    $placeholder.addClass('up-placeholder')
+    $placeholder.appendTo(container)
+    $placeholder
 
   ###*
   Returns a CSS selector that matches the given element as good as possible.
@@ -227,7 +163,7 @@ up.util = (($) ->
     $element = $(element)
     selector = undefined
 
-    debug("Creating selector from element %o", $element.get(0))
+    # up.puts("Creating selector from element %o", $element.get(0))
 
     if upId = presence($element.attr("up-id"))
       selector = "[up-id='#{upId}']"
@@ -1336,7 +1272,7 @@ up.util = (($) ->
     log = (args...) ->
       if config.log
         args[0] = "[#{config.log}] #{args[0]}"
-        debug(args...)
+        up.puts(args...)
 
     keys = ->
       Object.keys(store)
@@ -1382,7 +1318,7 @@ up.util = (($) ->
         delete store[oldestKey] if oldestKey
 
     alias = (oldKey, newKey) ->
-      value = get(oldKey)
+      value = get(oldKey, silent: true)
       if isDefined(value)
         set(newKey, value)
 
@@ -1407,19 +1343,19 @@ up.util = (($) ->
       else
         true
 
-    get = (key, fallback = undefined) ->
+    get = (key, options = {}) ->
       storeKey = normalizeStoreKey(key)
       if entry = store[storeKey]
         if isFresh(entry)
-          log("Cache hit for %o", key)
+          log("Cache hit for '%s'", key) unless options.silent
           entry.value
         else
-          log("Discarding stale cache entry for %o", key)
+          log("Discarding stale cache entry for '%s'", key) unless options.silent
           remove(key)
-          fallback
+          undefined
       else
-        log("Cache miss for %o", key)
-        fallback
+        log("Cache miss for '%s'", key) unless options.silent
+        undefined
 
     alias: alias
     get: get
@@ -1526,6 +1462,28 @@ up.util = (($) ->
         query += encodeURIComponent(field.name) + '=' + encodeURIComponent(field.value)
     query
 
+  ###*
+  Throws a fatal error with the given message.
+
+  - The error will be printed to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/Console/error)
+  - An [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) (exception) will be thrown, unwinding the current call stack
+  - The error message will be printed in a corner of the screen
+
+  \#\#\#\# Examples
+
+      up.error('Division by zero')
+      up.error('Unexpected result %o', result)
+
+  @experimental
+  ###
+  error = (args...) ->
+    up.log.error(args...)
+    asString = up.browser.sprintf(args...)
+    $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body')
+    $error.addClass('up-error')
+    $error.text(asString)
+    throw new Error(asString)
+
   requestDataAsArray: requestDataAsArray
   requestDataAsQueryString: requestDataAsQueryString
   offsetParent: offsetParent
@@ -1537,6 +1495,7 @@ up.util = (($) ->
   normalizeMethod: normalizeMethod
   createElementFromHtml: createElementFromHtml
   $createElementFromSelector: $createElementFromSelector
+  $createPlaceholder: $createPlaceholder
   selectorForElement: selectorForElement
   extend: extend
   copy: copy
@@ -1544,8 +1503,6 @@ up.util = (($) ->
   options: options
   option: option
   error: error
-  debug: debug
-  warn: warn
   each: each
   map: map
   times: times
@@ -1612,10 +1569,8 @@ up.util = (($) ->
   cache: cache
   unwrapElement: unwrapElement
   multiSelector: multiSelector
-  evalConsoleTemplate: evalConsoleTemplate
+  error: error
 
 )($)
 
 up.error = up.util.error
-up.warn = up.util.warn
-up.debug = up.util.debug

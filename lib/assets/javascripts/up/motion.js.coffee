@@ -270,7 +270,7 @@ up.motion = (($) ->
   
   finishGhosting = ($element) ->
     if existingGhosting = $element.data(GHOSTING_PROMISE_KEY)
-      u.debug('Canceling existing ghosting on %o', $element)
+      up.puts('Canceling existing ghosting on %o', $element)
       existingGhosting.resolve?()
       
   assertIsDeferred = (object, source) ->
@@ -343,40 +343,42 @@ up.motion = (($) ->
   @stable
   ###  
   morph = (source, target, transitionOrName, options) ->
+    if transitionOrName == 'none'
+      transitionOrName = false
 
-    u.debug('Morphing %o to %o (using %o)', source, target, transitionOrName)
+    up.log.group ('Morphing %o to %o (using %o)' if transitionOrName), source, target, transitionOrName, ->
 
-    $old = $(source)
-    $new = $(target)
+      $old = $(source)
+      $new = $(target)
 
-    parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source')
-    parsedOptions = u.extend(parsedOptions, animateOptions(options))
+      parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source')
+      parsedOptions = u.extend(parsedOptions, animateOptions(options))
 
-    if isEnabled()
-      finish($old)
-      finish($new)
+      if isEnabled()
+        finish($old)
+        finish($new)
 
-      if transitionOrName == 'none' || transitionOrName == false
-        return skipMorph($old, $new, parsedOptions)
-      else if animation = animations[transitionOrName]
-        skipMorph($old, $new, parsedOptions)
-        return animate($new, animation, parsedOptions)
-      else if transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
-        return withGhosts $old, $new, parsedOptions, ($oldGhost, $newGhost) ->
-          transitionPromise = transition($oldGhost, $newGhost, parsedOptions)
-          assertIsDeferred(transitionPromise, transitionOrName)
-      else if u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0
-        parts = transitionOrName.split('/')
-        transition = ($old, $new, options) ->
-          resolvableWhen(
-            animate($old, parts[0], options),
-            animate($new, parts[1], options)
-          )
-        return morph($old, $new, transition, parsedOptions)
+        if !transitionOrName
+          return skipMorph($old, $new, parsedOptions)
+        else if animation = animations[transitionOrName]
+          skipMorph($old, $new, parsedOptions)
+          return animate($new, animation, parsedOptions)
+        else if transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
+          return withGhosts $old, $new, parsedOptions, ($oldGhost, $newGhost) ->
+            transitionPromise = transition($oldGhost, $newGhost, parsedOptions)
+            assertIsDeferred(transitionPromise, transitionOrName)
+        else if u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0
+          parts = transitionOrName.split('/')
+          transition = ($old, $new, options) ->
+            resolvableWhen(
+              animate($old, parts[0], options),
+              animate($new, parts[1], options)
+            )
+          return morph($old, $new, transition, parsedOptions)
+        else
+          u.error("Unknown transition %o", transitionOrName)
       else
-        u.error("Unknown transition %o", transitionOrName)
-    else
-      return skipMorph($old, $new, parsedOptions)
+        return skipMorph($old, $new, parsedOptions)
 
   ###*
   This causes the side effects of a successful transition, but instantly.
