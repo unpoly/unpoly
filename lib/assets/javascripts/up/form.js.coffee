@@ -728,7 +728,7 @@ up.form = (($) ->
         <option value="very-advanced">Very advanced parts</option>
       </select>
 
-  The elements get a space-separated list of select values for which they are shown or hidden:
+  The target elements get a space-separated list of select values for which they are shown or hidden:
 
       <div class="target" up-show-for="basic">
         only shown for advancedness = basic

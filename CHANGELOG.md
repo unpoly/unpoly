@@ -10,6 +10,7 @@ Unreleased
 
 ### Compatible changes
 
+- New UJS attribute [`[up-toggle]`](/up-toggle) to show or hide part of a form if certain options are selected or boxes are checked.
 - Links can now have an optional `up-confirm` attribute. This opens a confirmation dialog with the given message
   before the link is followed or the modal/popup is opened.
 - New function [`up.off`](/up.off). This unregisters an event listener previously bound with [`up.on`](/up.on).
