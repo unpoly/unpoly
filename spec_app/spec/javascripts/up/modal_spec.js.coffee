@@ -209,7 +209,7 @@ describe 'up.modal', ->
         $outside = affix('.foo').text('old outside')
         up.modal.visit('/path', target: '.foo')
         @respondWith("<div class='foo'>old inside</div>")
-        up.flow.implant('.foo', "<div class='foo'>new text</div>")
+        up.extract('.foo', "<div class='foo'>new text</div>")
         expect($outside).toBeInDOM()
         expect($outside).toHaveText('old outside')
         expect($('.up-modal-content')).toHaveText('new text')
@@ -218,7 +218,7 @@ describe 'up.modal', ->
         affix('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
-        up.flow.implant('.outside', "<div class='outside'>new outside</div>", origin: $('.inside'))
+        up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.inside'))
         expect($('.outside')).toHaveText('new outside')
         expect($('.up-modal')).not.toExist()
 
@@ -226,7 +226,7 @@ describe 'up.modal', ->
         affix('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
-        up.flow.implant('.inside', "<div class='inside'>new inside</div>", origin: $('.inside'))
+        up.extract('.inside', "<div class='inside'>new inside</div>", origin: $('.inside'))
         expect($('.inside')).toHaveText('new inside')
         expect($('.up-modal')).toExist()
 
@@ -234,7 +234,7 @@ describe 'up.modal', ->
         affix('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
-        up.flow.implant('.outside', "<div class='outside'>new outside</div>", origin: $('.outside'))
+        up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.outside'))
         expect($('.outside')).toHaveText('new outside')
         expect($('.up-modal')).toExist()
 
@@ -242,7 +242,7 @@ describe 'up.modal', ->
         affix('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
-        up.flow.implant('.inside', "<div class='inside'>new inside</div>", origin: $('.outside'))
+        up.extract('.inside', "<div class='inside'>new inside</div>", origin: $('.outside'))
         expect($('.inside')).toHaveText('new inside')
         expect($('.up-modal')).toExist()
 

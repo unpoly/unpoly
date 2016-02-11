@@ -178,7 +178,7 @@ describe 'up.popup', ->
         $link = affix('.link')
         up.popup.attach($link, href: '/path', target: '.foo')
         @respondWith("<div class='foo'>old inside</div>")
-        up.flow.implant('.foo', "<div class='foo'>new text</div>")
+        up.extract('.foo', "<div class='foo'>new text</div>")
         expect($outside).toBeInDOM()
         expect($outside).toHaveText('old outside')
         expect($('.up-popup')).toHaveText('new text')
@@ -188,7 +188,7 @@ describe 'up.popup', ->
         $link = affix('.link')
         up.popup.attach($link, href: '/path', target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
-        up.flow.implant('.outside', "<div class='outside'>new outside</div>", origin: $('.inside'))
+        up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.inside'))
         expect($('.outside')).toHaveText('new outside')
         expect($('.up-popup')).not.toExist()
 
@@ -197,7 +197,7 @@ describe 'up.popup', ->
         $link = affix('.link')
         up.popup.attach($link, href: '/path', target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
-        up.flow.implant('.inside', "<div class='inside'>new inside</div>", origin: $('.inside'))
+        up.extract('.inside', "<div class='inside'>new inside</div>", origin: $('.inside'))
         expect($('.inside')).toHaveText('new inside')
         expect($('.up-popup')).toExist()
 
@@ -206,7 +206,7 @@ describe 'up.popup', ->
         $link = affix('.link')
         up.popup.attach($link, href: '/path', target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
-        up.flow.implant('.outside', "<div class='outside'>new outside</div>", origin: $('.outside'))
+        up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.outside'))
         expect($('.outside')).toHaveText('new outside')
         expect($('.up-popup')).toExist()
 
@@ -215,6 +215,6 @@ describe 'up.popup', ->
         $link = affix('.link')
         up.popup.attach($link, href: '/path', target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
-        up.flow.implant('.inside', "<div class='inside'>new inside</div>", origin: $('.outside'))
+        up.extract('.inside', "<div class='inside'>new inside</div>", origin: $('.outside'))
         expect($('.inside')).toHaveText('new inside')
         expect($('.up-popup')).toExist()

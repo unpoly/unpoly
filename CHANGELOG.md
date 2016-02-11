@@ -13,6 +13,8 @@ Unreleased
 
 ### Breaking changes
 
+- `up.implant` has been renamed to [`up.extract`](/up.extract).
+
 
 0.18.1
 ------

@@ -58,7 +58,7 @@ describe 'up.flow', ->
         describe 'if the server responds with a non-200 status code', ->
 
           it 'replaces the <body> instead of the given selector', ->
-            implantSpy = up.flow.knife.mock('implant') # can't have the example replace the Jasmine test runner UI
+            implantSpy = up.flow.knife.mock('extract') # can't have the example replace the Jasmine test runner UI
             up.replace('.middle', '/path')
             @respond(status: 500)
             expect(implantSpy).toHaveBeenCalledWith('body', jasmine.any(String), jasmine.any(Object))
@@ -391,7 +391,7 @@ describe 'up.flow', ->
           up.replace('.selector', '/path')
           expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
           
-    describe 'up.flow.implant', ->
+    describe 'up.extract', ->
       
       it 'Updates a selector on the current page with the same selector from the given HTML string', ->
 
@@ -406,7 +406,7 @@ describe 'up.flow', ->
           <div class="after">new-after</div>
           """
 
-        up.flow.implant('.middle', html)
+        up.extract('.middle', html)
 
         expect($('.before')).toHaveText('old-before')
         expect($('.middle')).toHaveText('new-middle')
@@ -414,45 +414,45 @@ describe 'up.flow', ->
 
       it "throws an error if the selector can't be found on the current page", ->
         html = '<div class="foo-bar">text</div>'
-        implant = -> up.flow.implant('.foo-bar', html)
-        expect(implant).toThrowError(/Could not find selector ".foo-bar" in current body/i)
+        extract = -> up.extract('.foo-bar', html)
+        expect(extract).toThrowError(/Could not find selector ".foo-bar" in current body/i)
 
       it "throws an error if the selector can't be found in the given HTML string", ->
         affix('.foo-bar')
-        implant = -> up.flow.implant('.foo-bar', '')
-        expect(implant).toThrowError(/Could not find selector ".foo-bar" in response/i)
+        extract = -> up.extract('.foo-bar', '')
+        expect(extract).toThrowError(/Could not find selector ".foo-bar" in response/i)
 
       it "ignores an element that matches the selector but also matches .up-destroying", ->
         html = '<div class="foo-bar">text</div>'
         affix('.foo-bar.up-destroying')
-        implant = -> up.flow.implant('.foo-bar', html)
-        expect(implant).toThrowError(/Could not find selector/i)
+        extract = -> up.extract('.foo-bar', html)
+        expect(extract).toThrowError(/Could not find selector/i)
 
       it "ignores an element that matches the selector but also matches .up-ghost", ->
         html = '<div class="foo-bar">text</div>'
         affix('.foo-bar.up-ghost')
-        implant = -> up.flow.implant('.foo-bar', html)
-        expect(implant).toThrowError(/Could not find selector/i)
+        extract = -> up.extract('.foo-bar', html)
+        expect(extract).toThrowError(/Could not find selector/i)
 
       it "ignores an element that matches the selector but also has a parent matching .up-destroying", ->
         html = '<div class="foo-bar">text</div>'
         $parent = affix('.up-destroying')
         $child = affix('.foo-bar').appendTo($parent)
-        implant = -> up.flow.implant('.foo-bar', html)
-        expect(implant).toThrowError(/Could not find selector/i)
+        extract = -> up.extract('.foo-bar', html)
+        expect(extract).toThrowError(/Could not find selector/i)
 
       it "ignores an element that matches the selector but also has a parent matching .up-ghost", ->
         html = '<div class="foo-bar">text</div>'
         $parent = affix('.up-ghost')
         $child = affix('.foo-bar').appendTo($parent)
-        implant = -> up.flow.implant('.foo-bar', html)
-        expect(implant).toThrowError(/Could not find selector/i)
+        extract = -> up.extract('.foo-bar', html)
+        expect(extract).toThrowError(/Could not find selector/i)
 
       it 'only replaces the first element matching the selector', ->
         html = '<div class="foo-bar">text</div>'
         affix('.foo-bar')
         affix('.foo-bar')
-        up.flow.implant('.foo-bar', html)
+        up.extract('.foo-bar', html)
         elements = $('.foo-bar')
         expect($(elements.get(0)).text()).toEqual('text')
         expect($(elements.get(1)).text()).toEqual('')

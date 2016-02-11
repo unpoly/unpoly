@@ -76,7 +76,7 @@ up.flow = (($) ->
       <div class="one">new one</div>
       <div class="two">new two</div>
 
-  Up.js looks for the selector `.two` in the response and [implants](/up.implant) it into
+  Up.js looks for the selector `.two` in the response and [implants](/up.extract) it into
   the current page. The current page now looks like this:
 
       <div class="one">old one</div>
@@ -248,7 +248,7 @@ up.flow = (($) ->
     if options.preload
       u.resolvedPromise()
     else
-      implant(selector, xhr.responseText, options)
+      extract(selector, xhr.responseText, options)
 
 
 
@@ -269,7 +269,7 @@ up.flow = (($) ->
       html = '<div class="one">new one</div>' +
              '<div class="two">new two</div>';
 
-      up.flow.implant('.two', html);
+      up.extract('.two', html);
 
   Up.js looks for the selector `.two` in the strings and updates its
   contents in the current page. The current page now looks like this:
@@ -280,7 +280,7 @@ up.flow = (($) ->
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
-  @function up.implant
+  @function up.extract
   @param {String|Element|jQuery} selectorOrElement
   @param {String} html
   @param {Object} [options]
@@ -290,29 +290,31 @@ up.flow = (($) ->
     and all animation has finished.
   @experimental
   ###
-  implant = (selectorOrElement, html, options) ->
-    options = u.options(options,
-      historyMethod: 'push',
-      requireMatch: true
-    )
-    selector = resolveSelector(selectorOrElement, options.origin)
-    response = parseResponse(html, options)
-    options.title ||= response.title()
+  extract = (selectorOrElement, html, options) ->
+    up.log.group 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length, ->
+      options = u.options(options,
+        historyMethod: 'push',
+        requireMatch: true
+      )
+      selector = resolveSelector(selectorOrElement, options.origin)
+      response = parseResponse(html, options)
+      options.title ||= response.title()
 
-    up.layout.saveScroll() unless options.saveScroll == false
+      up.layout.saveScroll() unless options.saveScroll == false
 
-    options.beforeSwap?($old, $new)
-    deferreds = []
+      options.beforeSwap?()
+      deferreds = []
 
-    for step in parseImplantSteps(selector, options)
-      $old = findOldFragment(step.selector, options)
-      $new = response.find(step.selector)?.first()
-      if $old && $new
-        deferred = swapElements($old, $new, step.pseudoClass, step.transition, options)
-        deferreds.push(deferred)
+      for step in parseImplantSteps(selector, options)
+        up.log.group 'Updating %s', step.selector, ->
+          $old = findOldFragment(step.selector, options)
+          $new = response.find(step.selector)?.first()
+          if $old && $new
+            deferred = swapElements($old, $new, step.pseudoClass, step.transition, options)
+            deferreds.push(deferred)
 
-    options.afterSwap?($old, $new)
-    return up.motion.when(deferreds...)
+      options.afterSwap?()
+      up.motion.when(deferreds...)
 
   findOldFragment = (selector, options) ->
     # Prefer to replace fragments in an open popup or modal
@@ -585,7 +587,7 @@ up.flow = (($) ->
   replace: replace
   reload: reload
   destroy: destroy
-  implant: implant
+  extract: extract
   first: first
   source: source
   resolveSelector: resolveSelector
@@ -593,7 +595,7 @@ up.flow = (($) ->
 )(jQuery)
 
 up.replace = up.flow.replace
-up.implant = up.flow.implant
+up.extract = up.flow.extract
 up.reload = up.flow.reload
 up.destroy = up.flow.destroy
 up.first = up.flow.first
