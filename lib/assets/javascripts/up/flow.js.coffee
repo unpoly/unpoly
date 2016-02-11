@@ -198,7 +198,7 @@ up.flow = (($) ->
       preload: options.preload
       headers: options.headers
 
-    promise = up.proxy.ajax(request)
+    promise = up.ajax(request)
 
     promise.done (html, textStatus, xhr) ->
       processResponse(true, target, url, request, xhr, options)

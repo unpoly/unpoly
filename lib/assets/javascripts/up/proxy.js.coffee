@@ -231,7 +231,7 @@ up.proxy = (($) ->
   Once the response is received, a `up:proxy:receive` event will
   be emitted.
   
-  @function up.proxy.ajax
+  @function up.ajax
   @param {String} request.url
   @param {String} [request.method='GET']
   @param {String} [request.target='body']
@@ -341,7 +341,7 @@ up.proxy = (($) ->
         emission()
 
   ###*
-  This event is [emitted]/(up.emit) when [AJAX requests](/up.proxy.ajax)
+  This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
   are taking long to finish.
 
   By default Up.js will wait 300 ms for an AJAX request to finish
@@ -366,7 +366,7 @@ up.proxy = (($) ->
       busyEventEmitted = false
 
   ###*
-  This event is [emitted]/(up.emit) when [AJAX requests](/up.proxy.ajax)
+  This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
   have [taken long to finish](/up:proxy:busy), but have finished now.
 
   @event up:proxy:idle
@@ -423,7 +423,7 @@ up.proxy = (($) ->
       promise.fail (args...) -> entry.deferred.reject(args...)
 
   ###*
-  This event is [emitted]/(up.emit) before an [AJAX request](/up.proxy.ajax)
+  This event is [emitted]/(up.emit) before an [AJAX request](/up.ajax)
   is starting to load.
 
   @event up:proxy:load
@@ -434,7 +434,7 @@ up.proxy = (($) ->
   ###
 
   ###*
-  This event is [emitted]/(up.emit) when the response to an [AJAX request](/up.proxy.ajax)
+  This event is [emitted]/(up.emit) when the response to an [AJAX request](/up.ajax)
   has been received.
 
   @event up:proxy:received
@@ -517,3 +517,5 @@ up.proxy = (($) ->
   defaults: -> u.error('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.')
   
 )(jQuery)
+
+up.ajax = up.proxy.ajax

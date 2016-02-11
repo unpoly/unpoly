@@ -8,15 +8,15 @@ describe 'up.proxy', ->
       jasmine.clock().install()
       jasmine.clock().mockDate()
 
-    describe 'up.proxy.ajax', ->
+    describe 'up.ajax', ->
 
       it 'caches server responses for 5 minutes', ->
         responses = []
 
         # Send the same request for the same path, 3 minutes apart
-        up.proxy.ajax(url: '/foo').then (data) -> responses.push(data)
+        up.ajax(url: '/foo').then (data) -> responses.push(data)
         jasmine.clock().tick(3 * 60 * 1000)
-        up.proxy.ajax(url: '/foo').then (data) -> responses.push(data)
+        up.ajax(url: '/foo').then (data) -> responses.push(data)
 
         # See that only a single network request was triggered
         expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -31,7 +31,7 @@ describe 'up.proxy', ->
         # The clock is now a total of 6 minutes after the first request,
         # exceeding the cache's retention time of 5 minutes.
         jasmine.clock().tick(3 * 60 * 1000)
-        up.proxy.ajax(url: '/foo').then (data) -> responses.push(data)
+        up.ajax(url: '/foo').then (data) -> responses.push(data)
 
         # See that we have triggered a second request
         expect(jasmine.Ajax.requests.count()).toEqual(2)
@@ -41,63 +41,63 @@ describe 'up.proxy', ->
         expect(responses).toEqual(['foo', 'foo', 'bar'])
 
       it "doesn't reuse responses when asked for the same path, but different selectors", ->
-        up.proxy.ajax(url: '/path', target: '.a')
-        up.proxy.ajax(url: '/path', target: '.b')
+        up.ajax(url: '/path', target: '.a')
+        up.ajax(url: '/path', target: '.b')
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       it "reuses a response for an 'html' selector when asked for the same path and any other selector", ->
-        up.proxy.ajax(url: '/path', target: 'html')
-        up.proxy.ajax(url: '/path', target: 'body')
-        up.proxy.ajax(url: '/path', target: 'p')
-        up.proxy.ajax(url: '/path', target: '.klass')
+        up.ajax(url: '/path', target: 'html')
+        up.ajax(url: '/path', target: 'body')
+        up.ajax(url: '/path', target: 'p')
+        up.ajax(url: '/path', target: '.klass')
         expect(jasmine.Ajax.requests.count()).toEqual(1)
 
       it "reuses a response for a 'body' selector when asked for the same path and any other selector other than 'html'", ->
-        up.proxy.ajax(url: '/path', target: 'body')
-        up.proxy.ajax(url: '/path', target: 'p')
-        up.proxy.ajax(url: '/path', target: '.klass')
+        up.ajax(url: '/path', target: 'body')
+        up.ajax(url: '/path', target: 'p')
+        up.ajax(url: '/path', target: '.klass')
         expect(jasmine.Ajax.requests.count()).toEqual(1)
 
       it "doesn't reuse a response for a 'body' selector when asked for the same path but an 'html' selector", ->
-        up.proxy.ajax(url: '/path', target: 'body')
-        up.proxy.ajax(url: '/path', target: 'html')
+        up.ajax(url: '/path', target: 'body')
+        up.ajax(url: '/path', target: 'html')
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       it "doesn't reuse responses for different paths", ->
-        up.proxy.ajax(url: '/foo')
-        up.proxy.ajax(url: '/bar')
+        up.ajax(url: '/foo')
+        up.ajax(url: '/bar')
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       u.each ['GET', 'HEAD', 'OPTIONS'], (method) ->
 
         it "caches #{method} requests", ->
-          u.times 2, -> up.proxy.ajax(url: '/foo', method: method)
+          u.times 2, -> up.ajax(url: '/foo', method: method)
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
         it "does not cache #{method} requests with cache: false option", ->
-          u.times 2, -> up.proxy.ajax(url: '/foo', method: method, cache: false)
+          u.times 2, -> up.ajax(url: '/foo', method: method, cache: false)
           expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       u.each ['POST', 'PUT', 'DELETE'], (method) ->
 
         it "does not cache #{method} requests", ->
-          u.times 2, -> up.proxy.ajax(url: '/foo', method: method)
+          u.times 2, -> up.ajax(url: '/foo', method: method)
           expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "caches #{method} requests with cache: true option", ->
-          u.times 2, -> up.proxy.ajax(url: '/foo', method: method, cache: true)
+          u.times 2, -> up.ajax(url: '/foo', method: method, cache: true)
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
       it 'does not cache responses with a non-200 status code', ->
         # Send the same request for the same path, 3 minutes apart
-        up.proxy.ajax(url: '/foo')
+        up.ajax(url: '/foo')
 
         @respondWith
           status: 500
           contentType: 'text/html'
           responseText: 'foo'
 
-        up.proxy.ajax(url: '/foo')
+        up.ajax(url: '/foo')
 
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
@@ -116,7 +116,7 @@ describe 'up.proxy', ->
         u.each ['GET', 'POST', 'HEAD', 'OPTIONS'], (method) ->
 
           it "does not change the method of a #{method} request", ->
-            up.proxy.ajax(url: '/foo', method: method)
+            up.ajax(url: '/foo', method: method)
             request = @lastRequest()
             expect(request.method).toEqual(method)
             expect(request.data()['_method']).toBeUndefined()
@@ -124,7 +124,7 @@ describe 'up.proxy', ->
         u.each ['PUT', 'PATCH', 'DELETE'], (method) ->
 
           it "turns a #{method} request into a POST request and sends the actual method as a { _method } param", ->
-            up.proxy.ajax(url: '/foo', method: method)
+            up.ajax(url: '/foo', method: method)
             request = @lastRequest()
             expect(request.method).toEqual('POST')
             expect(request.data()['_method']).toEqual([method])
@@ -140,8 +140,8 @@ describe 'up.proxy', ->
 
         it 'limits the number of concurrent requests', ->
           responses = []
-          up.proxy.ajax(url: '/foo').then (html) -> responses.push(html)
-          up.proxy.ajax(url: '/bar').then (html) -> responses.push(html)
+          up.ajax(url: '/foo').then (html) -> responses.push(html)
+          up.ajax(url: '/bar').then (html) -> responses.push(html)
           expect(jasmine.Ajax.requests.count()).toEqual(1) # only one request was made
           @respondWith('first response', request: jasmine.Ajax.requests.at(0))
           expect(responses).toEqual ['first response']
@@ -150,8 +150,8 @@ describe 'up.proxy', ->
           expect(responses).toEqual ['first response', 'second response']
 
 #        it 'considers preloading links for the request limit', ->
-#          up.proxy.ajax(url: '/foo', preload: true)
-#          up.proxy.ajax(url: '/bar')
+#          up.ajax(url: '/foo', preload: true)
+#          up.ajax(url: '/bar')
 #          expect(jasmine.Ajax.requests.count()).toEqual(1)
 
       describe 'events', ->
@@ -165,14 +165,14 @@ describe 'up.proxy', ->
 
         it 'emits an up:proxy:busy event once the proxy started loading, and up:proxy:idle if it is done loading', ->
   
-          up.proxy.ajax(url: '/foo')
+          up.ajax(url: '/foo')
   
           expect(@events).toEqual([
             'up:proxy:load',
             'up:proxy:busy'
           ])
   
-          up.proxy.ajax(url: '/bar')
+          up.ajax(url: '/bar')
   
           expect(@events).toEqual([
             'up:proxy:load',
@@ -210,14 +210,14 @@ describe 'up.proxy', ->
 
           # A request for preloading preloading purposes
           # doesn't make us busy.
-          up.proxy.ajax(url: '/foo', preload: true)
+          up.ajax(url: '/foo', preload: true)
           expect(@events).toEqual([
             'up:proxy:load'
           ])
           expect(up.proxy.busy()).toBe(false)
 
           # The same request with preloading does make us busy.
-          up.proxy.ajax(url: '/foo')
+          up.ajax(url: '/foo')
           expect(@events).toEqual([
             'up:proxy:load',
             'up:proxy:busy'
@@ -241,7 +241,7 @@ describe 'up.proxy', ->
         it 'can delay the up:proxy:busy event to prevent flickering of spinners', ->
           up.proxy.config.busyDelay = 100
 
-          up.proxy.ajax(url: '/foo')
+          up.ajax(url: '/foo')
           expect(@events).toEqual([
             'up:proxy:load'
           ])
@@ -272,7 +272,7 @@ describe 'up.proxy', ->
         it 'does not emit up:proxy:idle if a delayed up:proxy:busy was never emitted due to a fast response', ->
           up.proxy.config.busyDelay = 100
 
-          up.proxy.ajax(url: '/foo')
+          up.ajax(url: '/foo')
           expect(@events).toEqual([
             'up:proxy:load'
           ])
@@ -293,7 +293,7 @@ describe 'up.proxy', ->
 
         it 'emits up:proxy:idle if a request returned but failed', ->
 
-          up.proxy.ajax(url: '/foo')
+          up.ajax(url: '/foo')
 
           expect(@events).toEqual([
             'up:proxy:load',

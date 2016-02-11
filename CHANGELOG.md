@@ -10,6 +10,9 @@ Unreleased
 
 ### Compatible changes
 
+- `up.proxy.ajax` is now available as [`up.ajax`](/up.ajax).
+- `up.ajax` can now handle nested objects as `{ data }` option (used to pass form parameters).
+
 
 ### Breaking changes
 
