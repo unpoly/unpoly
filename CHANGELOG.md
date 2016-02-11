@@ -10,10 +10,16 @@ Unreleased
 
 ### Compatible changes
 
-- The logging output to the developer console is now much quieter and more useful
-
 
 ### Breaking changes
+
+
+0.18.1
+------
+
+### Compatible changes
+
+- The logging output to the developer console is now much quieter and more useful
 
 
 0.18.0
