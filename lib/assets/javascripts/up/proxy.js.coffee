@@ -398,6 +398,7 @@ up.proxy = (($) ->
 
     request.headers ||= {}
     request.headers['X-Up-Target'] = request.target
+
     request.data = u.requestDataAsArray(request.data)
 
     if u.contains(config.wrapMethods, request.method)

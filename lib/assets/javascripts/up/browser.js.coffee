@@ -21,7 +21,9 @@ up.browser = (($) ->
   loadPage = (url, options = {}) ->
     method = u.option(options.method, 'get').toLowerCase()
     if method == 'get'
-      location.href = url + u.requestDataAsQueryString(options.data)
+      query = u.requestDataAsQuery(options.data)
+      url = "#{url}?#{query}" if query
+      location.href = url
     else
       $form = $("<form method='post' action='#{url}'></form>")
       addField = (field) ->

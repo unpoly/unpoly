@@ -226,7 +226,8 @@ up.flow = (($) ->
           target: selector
         up.proxy.alias(request, newRequest)
     else if isReloadable
-      url = url + u.requestDataAsQueryString(options.data)
+      if query = u.requestDataAsQuery(options.data)
+        url = "#{url}?#{query}"
 
     if isSuccess
       if isReloadable # e.g. GET returns 200 OK

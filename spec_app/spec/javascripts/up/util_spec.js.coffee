@@ -170,12 +170,122 @@ describe 'up.util', ->
           object.reset()
           expect(object.reset).toBeDefined()
 
-    describe 'up.util.requestDataAsQueryString', ->
+    describe 'up.util.requestDataAsQuery', ->
 
-      it 'returns the query section for the given object, including the question mark', ->
-        string = up.util.requestDataAsQueryString('foo-key': 'foo value', 'bar-key': 'bar value')
-        expect(string).toEqual('?foo-key=foo%20value&bar-key=bar%20value')
+      encodedOpeningBracket = '%5B'
+      encodedClosingBracket = '%5D'
+      encodedSpace = '%20'
 
-      it 'returns an empty string', ->
-        string = up.util.requestDataAsQueryString({})
+      it 'returns the query section for the given object', ->
+        string = up.util.requestDataAsQuery('foo-key': 'foo value', 'bar-key': 'bar value')
+        expect(string).toEqual("foo-key=foo#{encodedSpace}value&bar-key=bar#{encodedSpace}value")
+
+      it 'returns the query section for the given nested object', ->
+        string = up.util.requestDataAsQuery('foo-key': { 'bar-key': 'bar-value' }, 'bam-key': 'bam-value')
+        expect(string).toEqual("foo-key#{encodedOpeningBracket}bar-key#{encodedClosingBracket}=bar-value&bam-key=bam-value")
+
+      it 'returns the query section for the given array with { name } and { value } keys', ->
+        string = up.util.requestDataAsQuery([
+          { name: 'foo-key', value: 'foo value' },
+          { name: 'bar-key', value: 'bar value' }
+        ])
+        expect(string).toEqual("foo-key=foo#{encodedSpace}value&bar-key=bar#{encodedSpace}value")
+
+      it 'returns an empty string for an empty object', ->
+        string = up.util.requestDataAsQuery({})
         expect(string).toEqual('')
+
+      it 'returns an empty string for an empty string', ->
+        string = up.util.requestDataAsQuery('')
+        expect(string).toEqual('')
+
+      it 'returns an empty string for undefined', ->
+        string = up.util.requestDataAsQuery(undefined)
+        expect(string).toEqual('')
+
+      it 'URL-encodes characters in the key and value', ->
+        string = up.util.requestDataAsQuery({ 'äpfel': 'bäume' })
+        expect(string).toEqual('%C3%A4pfel=b%C3%A4ume')
+
+      it 'URL-encodes plus characters', ->
+        string = up.util.requestDataAsQuery({ 'my+key': 'my+value' })
+        expect(string).toEqual('my%2Bkey=my%2Bvalue')
+
+
+    describe 'up.util.requestDataAsArray', ->
+
+      it 'normalized null to an empty array', ->
+        array = up.util.requestDataAsArray(null)
+        expect(array).toEqual([])
+
+      it 'normalized undefined to an empty array', ->
+        array = up.util.requestDataAsArray(undefined)
+        expect(array).toEqual([])
+
+      it 'normalizes an object hash to an array of objects with { name } and { value } keys', ->
+        array = up.util.requestDataAsArray(
+          'foo-key': 'foo-value'
+          'bar-key': 'bar-value'
+        )
+        expect(array).toEqual([
+          { name: 'foo-key', value: 'foo-value' },
+          { name: 'bar-key', value: 'bar-value' },
+        ])
+
+      it 'normalizes a nested object hash to a flat array using param naming conventions', ->
+        array = up.util.requestDataAsArray(
+          'foo-key': 'foo-value'
+          'bar-key': {
+            'bam-key': 'bam-value'
+            'baz-key': {
+              'qux-key': 'qux-value'
+            }
+          }
+        )
+        expect(array).toEqual([
+          { name: 'foo-key', value: 'foo-value' },
+          { name: 'bar-key[bam-key]', value: 'bam-value' },
+          { name: 'bar-key[baz-key][qux-key]', value: 'qux-value' },
+        ])
+
+      it 'returns a given array without modification', ->
+        array = up.util.requestDataAsArray([
+          { name: 'foo-key', value: 'foo-value' },
+          { name: 'bar-key', value: 'bar-value' },
+        ])
+        expect(array).toEqual([
+          { name: 'foo-key', value: 'foo-value' },
+          { name: 'bar-key', value: 'bar-value' },
+        ])
+
+      it 'does not URL-encode special characters keys or values', ->
+        array = up.util.requestDataAsArray(
+          'äpfel': { 'bäume': 'börse' }
+        )
+        expect(array).toEqual([
+          { name: 'äpfel[bäume]', value: 'börse' },
+        ])
+
+      it 'does not URL-encode spaces in keys or values', ->
+        array = up.util.requestDataAsArray(
+          'my key': 'my value'
+        )
+        expect(array).toEqual([
+          { name: 'my key', value: 'my value' },
+        ])
+
+      it 'does not URL-encode ampersands in keys or values', ->
+        array = up.util.requestDataAsArray(
+          'my&key': 'my&value'
+        )
+        expect(array).toEqual([
+          { name: 'my&key', value: 'my&value' },
+        ])
+
+      it 'does not URL-encode equal signs in keys or values', ->
+        array = up.util.requestDataAsArray(
+          'my=key': 'my=value'
+        )
+        expect(array).toEqual([
+          { name: 'my=key', value: 'my=value' },
+        ])

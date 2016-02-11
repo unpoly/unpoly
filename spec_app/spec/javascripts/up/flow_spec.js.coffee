@@ -47,9 +47,9 @@ describe 'up.flow', ->
             expect(@lastRequest().data()['bar-key']).toEqual(['bar-value'])
 
           it "encodes the given params into the URL of a GET request", ->
-            givenParams = { 'foo-key': 'foo value', 'bar-key': 'bar value' }
+            givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
             up.replace('.middle', '/path', method: 'get', data: givenParams)
-            expect(@lastRequest().url).toEndWith('/path?foo-key=foo+value&bar-key=bar+value')
+            expect(@lastRequest().url).toEndWith('/path?foo-key=foo-value&bar-key=bar-value')
 
         it 'uses a HTTP method given as { method } option', ->
           up.replace('.middle', '/path', method: 'put')

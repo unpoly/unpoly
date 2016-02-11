@@ -1436,31 +1436,30 @@ up.util = (($) ->
   @internal
   ###
   requestDataAsArray = (data) ->
-    if isMissing(data)
-      []
-    else if isArray(data)
-      data
-    else if isObject(data)
-      { name: name, value: value } for name, value of data
-    else
-      error('Unknown options.data type for %o', data)
+    query = requestDataAsQuery(data)
+    array = []
+    for part in query.split('&')
+      if isPresent(part)
+        pair = part.split('=')
+        array.push
+          name: decodeURIComponent(pair[0])
+          value: decodeURIComponent(pair[1])
+    array
 
   ###*
   Returns an URL-encoded query string for the given params object.
 
-  @function up.util.requestDataAsQueryString
+  @function up.util.requestDataAsQuery
   @param {Object|Array|Undefined|Null} data
   @internal
   ###
-  requestDataAsQueryString = (data) ->
-    array = requestDataAsArray(data)
-    query = ''
-    if isPresent(array)
-      query += '?'
-      each array, (field, index) ->
-        query += '&' unless index == 0
-        query += encodeURIComponent(field.name) + '=' + encodeURIComponent(field.value)
-    query
+  requestDataAsQuery = (data) ->
+    if data
+      query = $.param(data)
+      query = query.replace(/\+/g, '%20')
+      query
+    else
+      ""
 
   ###*
   Throws a fatal error with the given message.
@@ -1485,7 +1484,7 @@ up.util = (($) ->
     throw new Error(asString)
 
   requestDataAsArray: requestDataAsArray
-  requestDataAsQueryString: requestDataAsQueryString
+  requestDataAsQuery: requestDataAsQuery
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   presentAttr: presentAttr
