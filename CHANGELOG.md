@@ -10,6 +10,14 @@ Unreleased
 
 ### Compatible changes
 
+### Breaking changes
+
+
+0.19.0
+------
+
+### Compatible changes
+
 - Elements can now be persisted during page updates using the [`up-keep`](/up-keep) attribute.
 - `up.proxy.ajax` is now available as [`up.ajax`](/up.ajax).
 - `up.ajax` can now handle nested objects as `{ data }` option (used to pass form parameters).
