@@ -2,10 +2,10 @@
 Changing page fragments programmatically
 ========================================
   
-This module contains Up.js's core functions to [change](/up.replace) or [destroy](/up.destroy)
+This module contains Unpoly's core functions to [change](/up.replace) or [destroy](/up.destroy)
   page fragments via Javascript.
 
-All the other Up.js modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
+All the other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
 are based on this module.
   
 @class up.flow
@@ -78,7 +78,7 @@ up.flow = (($) ->
       <div class="one">new one</div>
       <div class="two">new two</div>
 
-  Up.js looks for the selector `.two` in the response and [implants](/up.extract) it into
+  Unpoly looks for the selector `.two` in the response and [implants](/up.extract) it into
   the current page. The current page now looks like this:
 
       <div class="one">old one</div>
@@ -89,7 +89,7 @@ up.flow = (($) ->
 
   \#\#\#\# Appending or prepending instead of replacing
 
-  By default Up.js will replace the given selector with the same
+  By default Unpoly will replace the given selector with the same
   selector from a freshly fetched page. Instead of replacing you
   can *append* the loaded content to the existing content by using the
   `:after` pseudo selector. In the same fashion, you can use `:before`
@@ -118,7 +118,7 @@ up.flow = (($) ->
 
   \#\#\#\# Optimizing response rendering
 
-  The server is free to optimize Up.js requests by only rendering the HTML fragment
+  The server is free to optimize Unpoly requests by only rendering the HTML fragment
   that is being updated. The request's `X-Up-Target` header will contain
   the CSS selector for the updating fragment.
 
@@ -127,7 +127,7 @@ up.flow = (($) ->
 
   \#\#\#\# Events
 
-  Up.js will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
+  Unpoly will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
   that was replaced and [`up:fragment:inserted`](/up:fragment:inserted) on the new
   element that replaces it.
 
@@ -158,7 +158,7 @@ up.flow = (($) ->
     Whether to [reveal](/up.reveal) the element being updated, by
     scrolling its containing viewport.
   @param {Boolean} [options.restoreScroll=false]
-    If set to true, Up.js will try to restore the scroll position
+    If set to true, Unpoly will try to restore the scroll position
     of all the viewports around or below the updated element. The position
     will be reset to the last known top position before a previous
     history change for the current URL.
@@ -272,7 +272,7 @@ up.flow = (($) ->
 
       up.extract('.two', html);
 
-  Up.js looks for the selector `.two` in the strings and updates its
+  Unpoly looks for the selector `.two` in the strings and updates its
   contents in the current page. The current page now looks like this:
 
       <div class="one">old one</div>
@@ -466,13 +466,13 @@ up.flow = (($) ->
       <audio up-keep src="song.mp3"></audio>
 
   The element you're keeping should have an umambiguous class name, ID or `up-id`
-  attribute so Up.js can find its new position within the page update.
+  attribute so Unpoly can find its new position within the page update.
 
   Emits events [`up:fragment:keep`](/up:fragment:keep) and [`up:fragment:kept`](/up:fragment:kept).
 
   \#\#\#\# Controlling if an element will be kept
 
-  Up.js will **only** keep an existing element if:
+  Unpoly will **only** keep an existing element if:
 
   - The existing element has an `up-keep` attribute
   - The response contains an element matching the CSS selector of the existing element
@@ -571,11 +571,11 @@ up.flow = (($) ->
 
   ###*
   Compiles a page fragment that has been inserted into the DOM
-  without Up.js.
+  without Unpoly.
 
-  **As long as you manipulate the DOM using Up.js, you will never
+  **As long as you manipulate the DOM using Unpoly, you will never
   need to call this method.** You only need to use `up.hello` if the
-  DOM is manipulated without Up.js' involvement, e.g. by setting
+  DOM is manipulated without Unpoly' involvement, e.g. by setting
   the `innerHTML` property or calling jQuery methods like
   `html`, `insertAfter` or `appendTo`:
 
@@ -766,7 +766,7 @@ up.flow = (($) ->
         up.reload('.inbox');
       });
 
-  Up.js remembers the URL from which a fragment was loaded, so you
+  Unpoly remembers the URL from which a fragment was loaded, so you
   don't usually need to give an URL when reloading.
 
   @function up.reload

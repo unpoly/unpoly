@@ -62,7 +62,7 @@ Unreleased
 
 ### Breaking changes
 
-- By default Up.js now converts `PUT`, `PATCH` and `DELETE` requests to `POST` requests
+- By default Unpoly now converts `PUT`, `PATCH` and `DELETE` requests to `POST` requests
   that carry their original method in a form parameter named `_method`.
   This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
 
@@ -82,7 +82,7 @@ Unreleased
 ### Compatible changes
 
 - When used with the [Ruby on Rails unobtrusive scripting adapter](https://github.com/rails/jquery-ujs) (`rails_ujs.js`),
-  now prevents duplicate form submission when Up.js attributes are mixed with `data-method` attributes.
+  now prevents duplicate form submission when Unpoly attributes are mixed with `data-method` attributes.
 - [`[up-instant]`](/up-instant) now works with modals and popups
 - [`[up-expand]`](/up-expand) now works with modals and popups
 
@@ -222,7 +222,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- `up.bus.emit` is now [`up.emit`](http://upjs.io/up.emit/)
+- `up.bus.emit` is now [`up.emit`](http://unpoly.com/up.emit/)
 - When `up.first` finds no match, return `undefined` instead of `null`.
 
 
@@ -242,7 +242,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- Up.js can now be used with [`jQuery.noConflict()`](https://api.jquery.com/jquery.noconflict/).
+- Unpoly can now be used with [`jQuery.noConflict()`](https://api.jquery.com/jquery.noconflict/).
 
 
 ### Breaking changes
@@ -321,10 +321,10 @@ Refactored internals. No API changes.
 ### Breaking changes
 
 - Interactions that would result in an URL change ("pushState") now fall back to a full page load
-  if Up.js was booted from a non-GET request. [More information about the reasons for this](https://github.com/makandra/upjs/commit/d81d9007aa3bfae0fca8c55a71d180d1044acae5).
+  if Unpoly was booted from a non-GET request. [More information about the reasons for this](https://github.com/makandra/upjs/commit/d81d9007aa3bfae0fca8c55a71d180d1044acae5).
 
-  This currently works out of the box if you're using Up.js via the `upjs-rails` Rubygem.
-  If you're integrating Up.js with Bower or manually, you need to have your server app
+  This currently works out of the box if you're using Unpoly via the `upjs-rails` Rubygem.
+  If you're integrating Unpoly with Bower or manually, you need to have your server app
   set an `_up_request_method` cookie with the current request method on every request.
 
 
@@ -414,7 +414,7 @@ Refactored internals. No API changes.
 
 - Elements are now being [revealed](/up.reveal) within their viewport before they are updated
 - Elements that are prepended or appended using `:before` or `:after` pseudo-selectors are now scrolled into view after insertion.
-- New option `up.layout.defaults('snap')` lets you define a number of pixels under which Up.js will snap to the top edge of the viewport when revealing an element
+- New option `up.layout.defaults('snap')` lets you define a number of pixels under which Unpoly will snap to the top edge of the viewport when revealing an element
 - You can now make [`up.reveal`](/up.reveal) aware of fixed navigation bars blocking the viewport by setting new options `up.layout.defaults('fixedTop')` and `up.layout.defaults('fixedBottom')`.
 
 
@@ -424,7 +424,7 @@ Refactored internals. No API changes.
 ### Compatible changes
 
 - [`up.reveal`](/up.reveal) can now reveal content in modals and containers with `overflow-y: scroll`.
-- Changing the default configuration of an Up.js module now raises an error if a config key is unknown.
+- Changing the default configuration of an Unpoly module now raises an error if a config key is unknown.
 - Links linking to `"#"` are now never marked as `.up-current`.
 
 
@@ -433,12 +433,12 @@ Refactored internals. No API changes.
 
 ### Compatible chanes
 
-- You can now include `up-bootstrap.js` and `up-bootstrap.css` to configure Up.js to play nice with Bootstrap 3.
+- You can now include `up-bootstrap.js` and `up-bootstrap.css` to configure Unpoly to play nice with Bootstrap 3.
 
 
 ### Breaking changes
 
-- Like Bootstrap, the Up.js modal will now scroll the main document viewport instead of the modal dialog box.
+- Like Bootstrap, the Unpoly modal will now scroll the main document viewport instead of the modal dialog box.
 
 
 
@@ -447,7 +447,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- Up.js will now emit [events](http://upjs.io/up.bus) `proxy:busy` and `proxy:idle` whenever it is loading or is done loading content over HTTP.
+- Unpoly will now emit [events](http://unpoly.com/up.bus) `proxy:busy` and `proxy:idle` whenever it is loading or is done loading content over HTTP.
 - Add an option `up.proxy.defaults('busyDelay')` to delay the `proxy:busy` event in order to prevent flickering of loading spinners.
 
 
@@ -472,7 +472,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- Fix what Up.js considers the current URL of a modal or popup if multiple updates change different parts of the modal or popup.
+- Fix what Unpoly considers the current URL of a modal or popup if multiple updates change different parts of the modal or popup.
 - Don't replace elements within a container that matches `.up-destroying` or `.up-ghost` (which are cloned elements for animation purposes).
 
 
@@ -498,7 +498,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- Use [up.proxy](http://upjs.io/up.proxy) when submitting a form.
+- Use [up.proxy](http://unpoly.com/up.proxy) when submitting a form.
 
 
 0.7.2
@@ -551,7 +551,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- Show backtraces for Up.js errors
+- Show backtraces for Unpoly errors
 
 ### Breaking changes
 

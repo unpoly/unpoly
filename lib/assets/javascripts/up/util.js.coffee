@@ -2,7 +2,7 @@
 Utility functions
 =================
   
-Up.js comes with a number of utility functions
+Unpoly comes with a number of utility functions
 that might save you from loading something like [Underscore.js](http://underscorejs.org/).
 
 @class up.util

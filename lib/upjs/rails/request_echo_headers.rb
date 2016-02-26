@@ -5,7 +5,7 @@ module Upjs
     # request's URL as a response header `X-Up-Location` and the request's
     # HTTP method as `X-Up-Method`.
     #
-    # The Up.js frontend requires these headers to detect redirects,
+    # The Unpoly frontend requires these headers to detect redirects,
     # which are otherwise undetectable for an AJAX client.
     module RequestEchoHeaders
 

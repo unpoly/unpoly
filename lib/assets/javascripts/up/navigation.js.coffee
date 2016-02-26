@@ -2,7 +2,7 @@
 Fast interaction feedback
 =========================
 
-Up.js automatically marks up link elements with classes indicating that
+Unpoly automatically marks up link elements with classes indicating that
 they are currently loading (class `up-active`) or linking
 to the current location (class `up-current`).
 
@@ -108,7 +108,7 @@ up.navigation = (($) ->
   perceived responsiveness of your user interface.
 
   The `up-active` class will be removed as soon as another
-  page fragment is added or updated through Up.js.
+  page fragment is added or updated through Unpoly.
 
   \#\#\#\# Example
 

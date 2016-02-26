@@ -15,7 +15,7 @@ For smaller popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
 
 \#\#\#\# Customizing the dialog design
 
-Loading the Up.js stylesheet will give you a minimal dialog design:
+Loading the Unpoly stylesheet will give you a minimal dialog design:
 
 - Dialog contents are displayed in a white box that is centered vertically and horizontally.
 - There is a a subtle box shadow around the dialog
@@ -37,7 +37,7 @@ By default the dialog uses the following DOM structure:
     </div>
 
 If you want to change the design beyond CSS, you can
-configure Up.js to [use a different HTML structure](/up.modal.config).
+configure Unpoly to [use a different HTML structure](/up.modal.config).
 
 
 \#\#\#\# Closing behavior
@@ -423,7 +423,7 @@ up.modal = (($) ->
       <a href="/blogs" up-modal=".blog-list">Switch blog</a>
 
   Clicking would request the path `/blog` and select `.blog-list` from
-  the HTML response. Up.js will dim the page with an overlay
+  the HTML response. Unpoly will dim the page with an overlay
   and place the matching `.blog-list` tag will be placed in
   a modal dialog.
 

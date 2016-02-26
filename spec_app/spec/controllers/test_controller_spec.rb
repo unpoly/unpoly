@@ -19,7 +19,7 @@ describe TestController do
 
     describe '#selector' do
 
-      it 'returns the CSS selector that is requested via Up.js' do
+      it 'returns the CSS selector that is requested via Unpoly' do
         request.headers['X-Up-Target'] = '.foo'
         get :up_target
         expect(response.body).to eq('.foo')
@@ -29,13 +29,13 @@ describe TestController do
 
     describe '#validate?' do
 
-      it 'returns true the request is an Up.js validation call' do
+      it 'returns true the request is an Unpoly validation call' do
         request.headers['X-Up-Validate'] = 'user[email]'
         get :is_up_validate
         expect(response.body).to eq('true')
       end
 
-      it 'returns false if the request is not an Up.js validation call' do
+      it 'returns false if the request is not an Unpoly validation call' do
         get :is_up_validate
         expect(response.body).to eq('false')
       end

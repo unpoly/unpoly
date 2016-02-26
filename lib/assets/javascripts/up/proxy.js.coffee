@@ -2,7 +2,7 @@
 Caching and preloading
 ======================
 
-All HTTP requests go through the Up.js proxy.
+All HTTP requests go through the Unpoly proxy.
 It caches a [limited](/up.proxy.config) number of server responses
 for a [limited](/up.proxy.config) amount of time,
 making requests to these URLs return insantly.
@@ -179,7 +179,7 @@ up.proxy = (($) ->
   ###*
   Removes all cache entries.
 
-  Up.js also automatically clears the cache whenever it processes
+  Unpoly also automatically clears the cache whenever it processes
   a request with a non-GET HTTP method.
 
   @function up.proxy.clear
@@ -344,7 +344,7 @@ up.proxy = (($) ->
   This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
   are taking long to finish.
 
-  By default Up.js will wait 300 ms for an AJAX request to finish
+  By default Unpoly will wait 300 ms for an AJAX request to finish
   before emitting `up:proxy:busy`. You can configure this time like this:
 
       up.proxy.config.busyDelay = 150;
@@ -352,7 +352,7 @@ up.proxy = (($) ->
   Once all responses have been received, an [`up:proxy:idle`](/up:proxy:idle)
   will be emitted.
 
-  Note that if additional requests are made while Up.js is already busy
+  Note that if additional requests are made while Unpoly is already busy
   waiting, **no** additional `up:proxy:busy` events will be triggered.
 
   @event up:proxy:busy

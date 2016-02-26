@@ -32,7 +32,7 @@ describe 'up.rails', ->
             expect($element.attr('data-method')).toBeUndefined()
             expect($element.attr('up-method')).toEqual('patch')
 
-      describe 'on an element without Up.js attributes', ->
+      describe 'on an element without Unpoly attributes', ->
 
         it "is not changed", ->
           $element = affix("span[data-method=\"put\"]")
@@ -80,7 +80,7 @@ describe 'up.rails', ->
             expect($element.attr('data-confirm')).toBeUndefined()
             expect($element.attr('up-confirm')).toEqual('Seriously?')
 
-      describe 'on an element without Up.js attributes', ->
+      describe 'on an element without Unpoly attributes', ->
 
         it "is not changed", ->
           $element = affix("span[data-confirm=\"Really?\"]")

@@ -12,7 +12,7 @@ For modal dialogs see [up.modal](/up.modal) instead.
 
 \#\#\#\# Customizing the popup design
 
-Loading the Up.js stylesheet will give you a minimal popup design:
+Loading the Unpoly stylesheet will give you a minimal popup design:
 
 - Popup contents are displayed in a white box
 - There is a a subtle box shadow around the popup

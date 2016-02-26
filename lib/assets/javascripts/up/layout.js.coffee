@@ -34,7 +34,7 @@ up.layout = (($) ->
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
   @param {Number} [config.snap]
-    When [revealing](/up.reveal) elements, Up.js will scroll an viewport
+    When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
     to the top when the revealed element is closer to the top than `config.snap`.
   @param {Number} [config.substance]
     A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
@@ -173,11 +173,11 @@ up.layout = (($) ->
   Scroll's the given element's viewport so the first rows of the
   element are visible for the user.
 
-  By default Up.js will always reveal an element before
+  By default Unpoly will always reveal an element before
   updating it with Javascript functions like [`up.replace`](/up.replace)
   or UJS behavior like [`[up-target]`](/up-target).
 
-  \#\#\#\# How Up.js finds the viewport
+  \#\#\#\# How Unpoly finds the viewport
 
   The viewport (the container that is going to be scrolled)
   is the closest parent of the element that is either:
@@ -349,7 +349,7 @@ up.layout = (($) ->
   They can later be restored by calling [`up.layout.restoreScroll()`](/up.layout.restoreScroll)
   at the same URL.
 
-  Up.js automatically saves scroll positions whenever a fragment was updated on the page.
+  Unpoly automatically saves scroll positions whenever a fragment was updated on the page.
 
   @function up.layout.saveScroll
   @param {String} [options.url]
@@ -366,7 +366,7 @@ up.layout = (($) ->
   Restores [previously saved](/up.layout.saveScroll) scroll positions of viewports
   viewports configured in [`up.layout.config.viewports`](/up.layout.config).
 
-  Up.js automatically restores scroll positions when the user presses the back button.
+  Unpoly automatically restores scroll positions when the user presses the back button.
   You can disable this behavior by setting [`up.history.config.restoreScroll = false`](/up.history.config).
 
   @function up.layout.restoreScroll

@@ -74,7 +74,7 @@ up.history = (($) ->
   browser's location bar with the given URL.
 
   When the user navigates to the replaced history entry at a later time,
-  Up.js will [`replace`](/up.replace) the document body with
+  Unpoly will [`replace`](/up.replace) the document body with
   the body from that URL.
 
   Note that functions like [`up.replace`](/up.replace) or
@@ -94,7 +94,7 @@ up.history = (($) ->
   address bar with the given URL.
 
   When the user navigates to the added  history entry at a later time,
-  Up.js will [`replace`](/up.replace) the document body with
+  Unpoly will [`replace`](/up.replace) the document body with
   the body from that URL.
 
   Note that functions like [`up.replace`](/up.replace) or
@@ -135,7 +135,7 @@ up.history = (($) ->
           saveScroll: false # since the URL was already changed by the browser, don't save scroll state
           restoreScroll: config.restoreScroll
     else
-      up.puts 'Ignoring a state not pushed by Up.js (%o)', state
+      up.puts 'Ignoring a state not pushed by Unpoly (%o)', state
 
   pop = (event) ->
     up.log.group "History state popped to URL %s", currentUrl(), ->

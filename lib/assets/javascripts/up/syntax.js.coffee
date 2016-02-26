@@ -2,7 +2,7 @@
 Enhancing elements
 ==================
 
-Up.js keeps a persistent Javascript environment during page transitions.
+Unpoly keeps a persistent Javascript environment during page transitions.
 If you wire Javascript to run on `ready` or `onload` events, those scripts will
 only run during the initial page load. Subsequently [inserted](/up.replace)
 page fragments will not be compiled.
@@ -27,7 +27,7 @@ Instead you should register a [`compiler`](/up.compiler) for the `a.lightbox` se
     });
 
 The compiler function will be called on matching elements when
-the page loads, or whenever a matching fragment is [updated through Up.js](/up.replace)
+the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
 later.
 
 @class up.syntax
@@ -49,7 +49,7 @@ up.syntax = (($) ->
       });
 
   Compiler functions will be called on matching elements when
-  the page loads, or whenever a matching fragment is [updated through Up.js](/up.replace)
+  the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
   later.
 
   If you have used Angular.js before, this resembles
@@ -89,8 +89,8 @@ up.syntax = (($) ->
 
   \#\#\#\# Cleaning up after yourself
 
-  If your compiler returns a function, Up.js will use this as a *destructor* to
-  clean up if the element leaves the DOM. Note that in Up.js the same DOM ad Javascript environment
+  If your compiler returns a function, Unpoly will use this as a *destructor* to
+  clean up if the element leaves the DOM. Note that in Unpoly the same DOM ad Javascript environment
   will persist through many page loads, so it's important to not create
   [memory leaks](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
 
@@ -153,7 +153,7 @@ up.syntax = (($) ->
 
   \#\#\#\# Migrating jQuery event handlers to `up.compiler`
 
-  Within the compiler, Up.js will bind `this` to the
+  Within the compiler, Unpoly will bind `this` to the
   native DOM element to help you migrate your existing jQuery code to
   this new syntax.
 

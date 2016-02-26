@@ -2,7 +2,7 @@
 Tooltips
 ========
 
-Up.js comes with a basic tooltip implementation.
+Unpoly comes with a basic tooltip implementation.
 
 You can an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a tooltip whenever
   the user hovers over the element:

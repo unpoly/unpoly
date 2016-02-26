@@ -3,7 +3,7 @@ module Upjs
     ##
     # This adds two methods `#up` and `#up?` to all controllers,
     # helpers and views, allowing the server to inspect the current request
-    # for Up.js-related concerns such as "is this a page fragment update?".
+    # for Unpoly-related concerns such as "is this a page fragment update?".
     module InspectorAccessor
 
       def self.included(base)
@@ -17,8 +17,8 @@ module Upjs
       ##
       # :method: up?
       # Returns whether the current request is an
-      # [page fragment update](http://upjs.io/up.replace) triggered by an
-      # Up.js frontend.
+      # [page fragment update](http://unpoly.com/up.replace) triggered by an
+      # Unpoly frontend.
       delegate :up?, :to => :up
 
       ActionController::Base.send(:include, self)

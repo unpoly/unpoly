@@ -1,15 +1,15 @@
-Up.js + Rails bindings
+Unpoly + Rails bindings
 ======================
 
-Up.js gives your traditional web application fast-responding views with minimal changes to your code and development style. If you require modern UX but don't want to pay the Javascript complexity tax, Up.js can be a solution for you.
+Unpoly gives your traditional web application fast-responding views with minimal changes to your code and development style. If you require modern UX but don't want to pay the Javascript complexity tax, Unpoly can be a solution for you.
 
-This repository is home both to the Up.js javascript code and its (optional) bindings for Ruby on Rails (`upjs-rails` gem).
+This repository is home both to the Unpoly javascript code and its (optional) bindings for Ruby on Rails (`upjs-rails` gem).
 
 
 Getting started
 ---------------
 
-- See [upjs.io](http://upjs.io) for more information and Javascript API documentation.
+- See [unpoly.com](http://unpoly.com) for more information and Javascript API documentation.
 - See [`CHANGELOG.md`](https://github.com/makandra/upjs/blob/master/CHANGELOG.md) for notable changes.
 - See [`README_RAILS.md`](https://github.com/makandra/upjs/blob/master/README_RAILS.md) documentation of the Rails bindings.
 
@@ -21,7 +21,7 @@ Overview:
 
 - This currently requires Ruby
 - There's a Rails app in `spec_app`
-- Jasmine tests for Up.js live in `spec_app/spec/javascripts`
+- Jasmine tests for Unpoly live in `spec_app/spec/javascripts`
 - RSpec tests for the `upjs-rails` gem live in `spec_app/spec/controllers`
 
 Install dependencies for tests:
@@ -31,7 +31,7 @@ Install dependencies for tests:
 - `cd` into `spec_app`
 - Install dependencies by running `bundle install`
 
-To run Jasmine tests for Up.js:
+To run Jasmine tests for Unpoly:
 
 - `cd` into `spec_app`
 - Start the Rails server by running `rails server`

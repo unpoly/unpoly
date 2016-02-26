@@ -38,11 +38,11 @@
   
   Plays nice with existing JS code
 
-    You can wire your existing JS code into the Up.js page flow.
+    You can wire your existing JS code into the Unpoly page flow.
 
   URLs are important
   
-    In Up.js every page or screen state has a URL which you can
+    In Unpoly every page or screen state has a URL which you can
     bookmark and share. This also means you get all the SEO love from Google.
 
   Server-side code should stay the same
@@ -51,12 +51,12 @@
 
   Lightweight
   
-    Up.js is 13 KB gzipped. 
+    Unpoly is 13 KB gzipped.
     The only dependency is jQuery.
 
   Both UJS and programmatic interfaces
     
-    All Up.js functionality is available as both unobtrusive behavior
+    All Unpoly functionality is available as both unobtrusive behavior
     (through HTML attributes like up-target) and Javascript functions
     for programmatic access and integration with your code.  
   

@@ -21,7 +21,7 @@ using the `up-animation` attribute:
 
     <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
 
-Up.js ships with a number of predefined [animations](/up.animate#named-animation)
+Unpoly ships with a number of predefined [animations](/up.animate#named-animation)
 and [transitions](/up.morph#named-animation).
 You can also easily [define your own animations](/up.animation)
 or [transitions](/up.transition) using Javascript or CSS.
@@ -66,7 +66,7 @@ up.motion = (($) ->
     config.reset()
 
   ###*
-  Returns whether Up.js will perform animations.
+  Returns whether Unpoly will perform animations.
 
   Animations will be performed if the browser supports
   [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions)
@@ -123,7 +123,7 @@ up.motion = (($) ->
 
   \#\#\#\# Multiple animations on the same element
 
-  Up.js doesn't allow more than one concurrent animation on the same element.
+  Unpoly doesn't allow more than one concurrent animation on the same element.
 
   If you attempt to animate an element that is already being animated,
   the previous animation will instantly jump to its last frame before
@@ -312,7 +312,7 @@ up.motion = (($) ->
   the same position on the screen.
 
   Since the CSS layout flow will usually not allow two elements to
-  overlay the same space, Up.js:
+  overlay the same space, Unpoly:
 
   - The old and new elements are cloned
   - The old element is removed from the layout flow using `display: hidden`

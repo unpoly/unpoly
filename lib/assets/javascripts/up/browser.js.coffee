@@ -110,7 +110,7 @@ up.browser = (($) ->
   Returns whether this browser supports manipulation of the current URL
   via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
 
-  When Up.js is asked to change history on a browser that doesn't support
+  When Unpoly is asked to change history on a browser that doesn't support
   `pushState` (e.g. through [`up.follow`](/up.follow)), it will gracefully
   fall back to a full page load.
 
@@ -121,9 +121,9 @@ up.browser = (($) ->
   canPushState = u.memoize ->
     # We cannot use pushState if the initial request method is a POST for two reasons:
     #
-    # 1. Up.js replaces the initial state so it can handle the pop event when the
+    # 1. Unpoly replaces the initial state so it can handle the pop event when the
     #    user goes back to the initial URL later. If the initial request was a POST,
-    #    Up.js will wrongly assumed that it can restore the state by reloading with GET.
+    #    Unpoly will wrongly assumed that it can restore the state by reloading with GET.
     #
     # 2. Some browsers have a bug where the initial request method is used for all
     #    subsequently pushed states. That means if the user reloads the page on a later
@@ -133,7 +133,7 @@ up.browser = (($) ->
     #
     # The way that we work around this is that we don't support pushState if the
     # initial request method was anything other than GET (but allow the rest of the
-    # Up.js framework to work). This way Up.js will fall back to full page loads until
+    # Unpoly framework to work). This way Unpoly will fall back to full page loads until
     # the framework was booted from a GET request.
     u.isDefined(history.pushState) && initialRequestMethod() == 'get'
 
@@ -141,7 +141,7 @@ up.browser = (($) ->
   Returns whether this browser supports animation using
   [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions).
 
-  When Up.js is asked to animate history on a browser that doesn't support
+  When Unpoly is asked to animate history on a browser that doesn't support
   CSS transitions (e.g. through [`up.animate`](/up.animate)), it will skip the
   animation by instantly jumping to the last frame.
 
@@ -211,15 +211,15 @@ up.browser = (($) ->
     (popCookie('_up_request_method') || 'get').toLowerCase()
 
   ###*
-  Returns whether Up.js supports the current browser.
+  Returns whether Unpoly supports the current browser.
 
-  This also returns `true` if Up.js only support some features, but falls back
+  This also returns `true` if Unpoly only support some features, but falls back
   gracefully for other features. E.g. IE9 is almost fully supported, but due to
   its lack of [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
-  Up.js falls back to a full page load when asked to manipulate history.
+  Unpoly falls back to a full page load when asked to manipulate history.
 
-  Currently Up.js supports IE9 with jQuery 1.9+.
-  On older browsers Up.js will prevent itself from [booting](/up.boot)
+  Currently Unpoly supports IE9 with jQuery 1.9+.
+  On older browsers Unpoly will prevent itself from [booting](/up.boot)
   and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
   This leaves you with a classic server-side application.
 

@@ -2,7 +2,7 @@
 Linking to page fragments
 =========================
 
-Just like in a classical web application, an Up.js app renders a series of *full HTML pages* on the server.
+Just like in a classical web application, an Unpoly app renders a series of *full HTML pages* on the server.
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
 
@@ -47,7 +47,7 @@ is not a good fit for modern applications, for a multitude of reasons:
 Smoother flow by updating fragments
 -----------------------------------
 
-In Up.js you annotate navigation links with an `up-target` attribute.
+In Unpoly you annotate navigation links with an `up-target` attribute.
 The value of this attribute is a CSS selector that indicates which page
 fragment to update.
 
@@ -64,7 +64,7 @@ Since we only want to update the `<article>` tag, we will use `up-target="articl
 
 Instead of `article` you can use any other CSS selector (e. g.  `#main .article`).
 
-With these `up-target` annotations Up.js only updates the targeted part of the screen.
+With these `up-target` annotations Unpoly only updates the targeted part of the screen.
 Javascript will not be reloaded, no white flash during a full page reload.
 
 
@@ -72,10 +72,10 @@ Read on
 -------
 - You can [animate page transitions](/up.motion) by definining animations for fragments as they enter or leave the screen.
 - The `up-target` mechanism also works with [forms](/up.form).
-- As you switch through pages, Up.js will [update your browser's location bar and history](/up.history)
+- As you switch through pages, Unpoly will [update your browser's location bar and history](/up.history)
 - You can [open fragments in popups or modal dialogs](/up.modal).
 - You can give users [immediate feedback](/up.navigation) when a link is clicked or becomes current, without waiting for the server.
-- [Controlling Up.js pragmatically through Javascript](/up.flow)
+- [Controlling Unpoly pragmatically through Javascript](/up.flow)
 - [Defining custom tags](/up.syntax)
 
   
@@ -113,7 +113,7 @@ up.link = (($) ->
   Follows the given link via AJAX and [replaces](/up.replace) a CSS selector in the current page
   with corresponding elements from a new page fetched from the server.
 
-  Any Up.js UJS attributes on the given link will be honored. E. g. you have this link:
+  Any Unpoly UJS attributes on the given link will be honored. E. g. you have this link:
 
       <a href="/users" up-target=".main">Users</a>
 
@@ -245,7 +245,7 @@ up.link = (($) ->
     u.any followVariantSelectors, (selector) -> $link.is(selector)
 
   ###*
-  Makes sure that the given link is handled by Up.js.
+  Makes sure that the given link is handled by Unpoly.
 
   This is done by giving the link an `up-follow` attribute
   unless it already have it an `up-target` or `up-follow` attribute.
@@ -274,7 +274,7 @@ up.link = (($) ->
 
   \#\#\#\# Appending or prepending instead of replacing
 
-  By default Up.js will replace the given selector with the same
+  By default Unpoly will replace the given selector with the same
   selector from a freshly fetched page. Instead of replacing you
   can *append* the loaded content to the existing content by using the
   `:after` pseudo selector. In the same fashion, you can use `:before`

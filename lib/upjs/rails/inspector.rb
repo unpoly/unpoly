@@ -2,7 +2,7 @@ module Upjs
   module Rails
     ##
     # This object allows the server to inspect the current request
-    # for Up.js-related concerns such as "is this a page fragment update?".
+    # for Unpoly-related concerns such as "is this a page fragment update?".
     #
     # Available through the `#up` method in all controllers, helpers and views.
     class Inspector
@@ -13,17 +13,17 @@ module Upjs
 
       ##
       # Returns whether the current request is an
-      # [page fragment update](http://upjs.io/up.replace) triggered by an
-      # Up.js frontend.
+      # [page fragment update](http://unpoly.com/up.replace) triggered by an
+      # Unpoly frontend.
       def up?
         target.present?
       end
 
       ##
-      # If the current request is a [fragment update](http://upjs.io/up.replace),
+      # If the current request is a [fragment update](http://unpoly.com/up.replace),
       # this returns the CSS selector of the page fragment that should be updated.
       #
-      # The Up.js frontend will expect an HTML response containing an element
+      # The Unpoly frontend will expect an HTML response containing an element
       # that matches this selector. If no such element is found, an error is shown
       # to the user.
       #
@@ -35,13 +35,13 @@ module Upjs
 
       ##
       # Returns whether the current form submission should be
-      # [validated](http://upjs.io/up-validate) (and not be saved to the database).
+      # [validated](http://unpoly.com/up-validate) (and not be saved to the database).
       def validate?
         validate_name.present?
       end
 
       ##
-      # If the current form submission is a [validation](http://upjs.io/up-validate),
+      # If the current form submission is a [validation](http://unpoly.com/up-validate),
       # this returns the name attribute of the form field that has triggered
       # the validation.
       def validate_name
@@ -49,10 +49,10 @@ module Upjs
       end
 
       ##
-      # Forces Up.js to use the given string as the document title when processing
+      # Forces Unpoly to use the given string as the document title when processing
       # this response.
       #
-      # This is useful when you skip rendering the `<head>` in an Up.js request.
+      # This is useful when you skip rendering the `<head>` in an Unpoly request.
       def title=(new_title)
         response.headers['X-Up-Title'] = new_title
       end

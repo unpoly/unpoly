@@ -2,7 +2,7 @@
 Events
 ======
 
-Up.js has a convenient way to [listen to DOM events](/up.on):
+Unpoly has a convenient way to [listen to DOM events](/up.on):
 
     up.on('click', 'button', function(event, $button) {
       // $button is a jQuery collection containing
@@ -19,7 +19,7 @@ using jQuery's [`on`](http://api.jquery.com/on/).
 - You can [attach structured data](/up.on#attaching-structured-data) to observed elements.
 - The call is shorter.
 
-Many Up.js interactions also emit DOM events that are prefixed with `up:`.
+Many Unpoly interactions also emit DOM events that are prefixed with `up:`.
 
     up.on('up:modal:opened', function(event) {
       console.log('A new modal has just opened!');
@@ -48,7 +48,7 @@ up.bus = (($) ->
   nextUpDescriptionNumber = 0
 
   ###*
-  Convert an Up.js style listener (second argument is the event target
+  Convert an Unpoly style listener (second argument is the event target
   as a jQuery collection) to a vanilla jQuery listener
 
   @function upListenerToJqueryListener
@@ -97,7 +97,7 @@ up.bus = (($) ->
         console.log("Someone clicked the button %o", $(this));
       });
 
-  Other than jQuery, Up.js will silently discard event listeners
+  Other than jQuery, Unpoly will silently discard event listeners
   on [unsupported browsers](/up.browser.isSupported).
 
   \#\#\#\# Attaching structured data
@@ -116,7 +116,7 @@ up.bus = (($) ->
 
   \#\#\#\# Migrating jQuery event handlers to `up.on`
 
-  Within the event handler, Up.js will bind `this` to the
+  Within the event handler, Unpoly will bind `this` to the
   native DOM element to help you migrate your existing jQuery code to
   this new syntax.
 
@@ -325,7 +325,7 @@ up.bus = (($) ->
     unbind(description...) for description in doomedDescriptions
 
   ###*
-  Resets Up.js to the state when it was booted.
+  Resets Unpoly to the state when it was booted.
   All custom event handlers, animations, etc. that have been registered
   will be discarded.
 
@@ -339,18 +339,18 @@ up.bus = (($) ->
     up.emit('up:framework:reset', message: 'Resetting framework')
 
   ###*
-  This event is [emitted](/up.emit) when Up.js is [reset](/up.reset) during unit tests.
+  This event is [emitted](/up.emit) when Unpoly is [reset](/up.reset) during unit tests.
 
   @event up:framework:reset
   @experimental
   ###
 
   ###*
-  Boots the Up.js framework.
+  Boots the Unpoly framework.
 
-  This is done automatically by including the Up.js Javascript.
+  This is done automatically by including the Unpoly Javascript.
 
-  Up.js will not boot if the current browser is [not supported](/up.browser.isSupported).
+  Unpoly will not boot if the current browser is [not supported](/up.browser.isSupported).
   This leaves you with a classic server-side application on legacy browsers.
 
   Emits the [`up:framework:boot`](/up:framework:boot) event.
@@ -366,7 +366,7 @@ up.bus = (($) ->
       up.emit('up:framework:boot', message: 'Booting framework')
 
   ###*
-  This event is [emitted](/up.emit) when Up.js [boots](/up.boot).
+  This event is [emitted](/up.emit) when Unpoly [boots](/up.boot).
 
   @event up:framework:boot
   @experimental

@@ -2,8 +2,8 @@
 # Installs a before_filter into all controllers which echoes the
 # request's method as a cookie named `_up_request_method`.
 #
-# The Up.js requires this cookie to detect whether the initial page
-# load was requested using a non-GET method. In this case the Up.js
+# The Unpoly requires this cookie to detect whether the initial page
+# load was requested using a non-GET method. In this case the Unpoly
 # framework will prevent itself from booting until it was loaded
 # from a GET request. For the terrible reasons behind this see:
 

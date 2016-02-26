@@ -2,7 +2,7 @@
 Forms
 =====
   
-Up.js comes with functionality to [submit](/form-up-target) and [validate](/up-validate)
+Unpoly comes with functionality to [submit](/form-up-target) and [validate](/up-validate)
 forms without leaving the current page. This means you can replace page fragments,
 open dialogs with sub-forms, etc. all without losing form state.
 
@@ -51,13 +51,13 @@ up.form = (($) ->
 
   The UJS variant of this is the [`form[up-target]`](/form-up-target) selector.
   See the documentation for [`form[up-target]`](/form-up-target) for more
-  information on how AJAX form submissions work in Up.js.
+  information on how AJAX form submissions work in Unpoly.
 
   @function up.submit
   @param {Element|jQuery|String} formOrSelector
     A reference or selector for the form to submit.
     If the argument points to an element that is not a form,
-    Up.js will search its ancestors for the closest form.
+    Unpoly will search its ancestors for the closest form.
   @param {String} [options.url]
     The URL where to submit the form.
     Defaults to the form's `action` attribute, or to the current URL of the browser window.
@@ -173,7 +173,7 @@ up.form = (($) ->
   To mitigate this, `up.observe` will try to never run a callback
   before the previous callback has completed.
   To take advantage of this, your callback code must return a promise.
-  Note that all asynchronous Up.js functions return promises.
+  Note that all asynchronous Unpoly functions return promises.
 
   \#\#\#\# Throttling
 
@@ -349,7 +349,7 @@ up.form = (($) ->
 
   The UJS variant of this is the [`[up-validate]`](/up-validate) selector.
   See the documentation for [`[up-validate]`](/up-validate) for more information
-  on how server-side validation works in Up.js.
+  on how server-side validation works in Unpoly.
 
   \#\#\#\# Example
 
@@ -483,7 +483,7 @@ up.form = (($) ->
   it will usually re-render an updated copy of the form with
   validation messages.
 
-  For Up.js to be able to detect a failed form submission,,
+  For Unpoly to be able to detect a failed form submission,,
   the form must be re-rendered with a non-200 HTTP status code.
   We recommend to use either 400 (bad request) or
   422 (unprocessable entity).
@@ -512,14 +512,14 @@ up.form = (($) ->
 
   \#\#\#\# Redirects
 
-  Up.js requires two additional response headers to detect redirects,
+  Unpoly requires two additional response headers to detect redirects,
   which are otherwise undetectable for an AJAX client.
 
   When the form's action performs a redirect, the server should echo
   the new request's URL as a response header `X-Up-Location`
   and the request's HTTP method as `X-Up-Method: GET`.
 
-  If you are using Up.js via the `upjs-rails` gem, these headers
+  If you are using Unpoly via the `upjs-rails` gem, these headers
   are set automatically for every request.
 
   \#\#\#\# Giving feedback while the form is processing
@@ -536,7 +536,7 @@ up.form = (($) ->
     The selector to [replace](/up.replace) if the form submission is successful (200 status code).
   @param {String} [up-fail-target]
     The selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
-    If omitted, Up.js will replace the `<form>` tag itself, assuming that the
+    If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
     server has echoed the form with validation errors.
   @param {String} [up-transition]
     The animation to use when the form is replaced after a successful submission.
@@ -657,14 +657,14 @@ up.form = (($) ->
   \#\#\#\# How validation results are displayed
 
   Although the server will usually respond to a validation with a complete,
-  fresh copy of the form, Up.js will by default not update the entire form.
+  fresh copy of the form, Unpoly will by default not update the entire form.
   This is done in order to preserve volatile state such as the scroll position
   of `<textarea>` elements.
 
-  By default Up.js looks for a `<fieldset>`, `<label>` or `<form>`
+  By default Unpoly looks for a `<fieldset>`, `<label>` or `<form>`
   around the validating input field, or any element with an
   `up-fieldset` attribute.
-  With the Bootstrap bindings, Up.js will also look
+  With the Bootstrap bindings, Unpoly will also look
   for a container with the `form-group` class.
 
   You can change this default behavior by setting `up.config.validateTargets`:
