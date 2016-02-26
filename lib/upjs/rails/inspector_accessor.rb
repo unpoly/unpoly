@@ -7,7 +7,7 @@ module Upjs
     module InspectorAccessor
 
       def self.included(base)
-        base.helper_method :up, :up?
+        base.helper_method :unpoly, :up?
       end
 
       def up
@@ -19,7 +19,7 @@ module Upjs
       # Returns whether the current request is an
       # [page fragment update](http://unpoly.com/up.replace) triggered by an
       # Unpoly frontend.
-      delegate :up?, :to => :up
+      delegate :up?, :to => :unpoly
 
       ActionController::Base.send(:include, self)
 

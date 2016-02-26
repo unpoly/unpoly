@@ -12,7 +12,7 @@
 Utility functions
 =================
   
-Up.js comes with a number of utility functions
+Unpoly comes with a number of utility functions
 that might save you from loading something like [Underscore.js](http://underscorejs.org/).
 
 @class up.util
@@ -2121,7 +2121,7 @@ we can't currently get rid off.
     Returns whether this browser supports manipulation of the current URL
     via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
     
-    When Up.js is asked to change history on a browser that doesn't support
+    When Unpoly is asked to change history on a browser that doesn't support
     `pushState` (e.g. through [`up.follow`](/up.follow)), it will gracefully
     fall back to a full page load.
     
@@ -2137,7 +2137,7 @@ we can't currently get rid off.
     Returns whether this browser supports animation using
     [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions).
     
-    When Up.js is asked to animate history on a browser that doesn't support
+    When Unpoly is asked to animate history on a browser that doesn't support
     CSS transitions (e.g. through [`up.animate`](/up.animate)), it will skip the
     animation by instantly jumping to the last frame.
     
@@ -2210,15 +2210,15 @@ we can't currently get rid off.
     });
 
     /**
-    Returns whether Up.js supports the current browser.
+    Returns whether Unpoly supports the current browser.
     
-    This also returns `true` if Up.js only support some features, but falls back
+    This also returns `true` if Unpoly only support some features, but falls back
     gracefully for other features. E.g. IE9 is almost fully supported, but due to
     its lack of [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
-    Up.js falls back to a full page load when asked to manipulate history.
+    Unpoly falls back to a full page load when asked to manipulate history.
     
-    Currently Up.js supports IE9 with jQuery 1.9+.
-    On older browsers Up.js will prevent itself from [booting](/up.boot)
+    Currently Unpoly supports IE9 with jQuery 1.9+.
+    On older browsers Unpoly will prevent itself from [booting](/up.boot)
     and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
     This leaves you with a classic server-side application.
     
@@ -2270,7 +2270,7 @@ we can't currently get rid off.
 Events
 ======
 
-Up.js has a convenient way to [listen to DOM events](/up.on):
+Unpoly has a convenient way to [listen to DOM events](/up.on):
 
     up.on('click', 'button', function(event, $button) {
       // $button is a jQuery collection containing
@@ -2287,7 +2287,7 @@ using jQuery's [`on`](http://api.jquery.com/on/).
 - You can [attach structured data](/up.on#attaching-structured-data) to observed elements.
 - The call is shorter.
 
-Many Up.js interactions also emit DOM events that are prefixed with `up:`.
+Many Unpoly interactions also emit DOM events that are prefixed with `up:`.
 
     up.on('up:modal:opened', function(event) {
       console.log('A new modal has just opened!');
@@ -2317,7 +2317,7 @@ and call `preventDefault()` on the `event` object:
     nextUpDescriptionNumber = 0;
 
     /**
-    Convert an Up.js style listener (second argument is the event target
+    Convert an Unpoly style listener (second argument is the event target
     as a jQuery collection) to a vanilla jQuery listener
     
     @function upListenerToJqueryListener
@@ -2371,7 +2371,7 @@ and call `preventDefault()` on the `event` object:
           console.log("Someone clicked the button %o", $(this));
         });
     
-    Other than jQuery, Up.js will silently discard event listeners
+    Other than jQuery, Unpoly will silently discard event listeners
     on [unsupported browsers](/up.browser.isSupported).
     
     \#\#\#\# Attaching structured data
@@ -2390,7 +2390,7 @@ and call `preventDefault()` on the `event` object:
     
     \#\#\#\# Migrating jQuery event handlers to `up.on`
     
-    Within the event handler, Up.js will bind `this` to the
+    Within the event handler, Unpoly will bind `this` to the
     native DOM element to help you migrate your existing jQuery code to
     this new syntax.
     
@@ -2634,7 +2634,7 @@ and call `preventDefault()` on the `event` object:
     };
 
     /**
-    Resets Up.js to the state when it was booted.
+    Resets Unpoly to the state when it was booted.
     All custom event handlers, animations, etc. that have been registered
     will be discarded.
     
@@ -2651,18 +2651,18 @@ and call `preventDefault()` on the `event` object:
     };
 
     /**
-    This event is [emitted](/up.emit) when Up.js is [reset](/up.reset) during unit tests.
+    This event is [emitted](/up.emit) when Unpoly is [reset](/up.reset) during unit tests.
     
     @event up:framework:reset
     @experimental
      */
 
     /**
-    Boots the Up.js framework.
+    Boots the Unpoly framework.
     
-    This is done automatically by including the Up.js Javascript.
+    This is done automatically by including the Unpoly Javascript.
     
-    Up.js will not boot if the current browser is [not supported](/up.browser.isSupported).
+    Unpoly will not boot if the current browser is [not supported](/up.browser.isSupported).
     This leaves you with a classic server-side application on legacy browsers.
     
     Emits the [`up:framework:boot`](/up:framework:boot) event.
@@ -2680,7 +2680,7 @@ and call `preventDefault()` on the `event` object:
     };
 
     /**
-    This event is [emitted](/up.emit) when Up.js [boots](/up.boot).
+    This event is [emitted](/up.emit) when Unpoly [boots](/up.boot).
     
     @event up:framework:boot
     @experimental
@@ -2715,7 +2715,7 @@ and call `preventDefault()` on the `event` object:
 Enhancing elements
 ==================
 
-Up.js keeps a persistent Javascript environment during page transitions.
+Unpoly keeps a persistent Javascript environment during page transitions.
 If you wire Javascript to run on `ready` or `onload` events, those scripts will
 only run during the initial page load. Subsequently [inserted](/up.replace)
 page fragments will not be compiled.
@@ -2740,7 +2740,7 @@ Instead you should register a [`compiler`](/up.compiler) for the `a.lightbox` se
     });
 
 The compiler function will be called on matching elements when
-the page loads, or whenever a matching fragment is [updated through Up.js](/up.replace)
+the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
 later.
 
 @class up.syntax
@@ -2764,7 +2764,7 @@ later.
         });
     
     Compiler functions will be called on matching elements when
-    the page loads, or whenever a matching fragment is [updated through Up.js](/up.replace)
+    the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
     later.
     
     If you have used Angular.js before, this resembles
@@ -2804,8 +2804,8 @@ later.
     
     \#\#\#\# Cleaning up after yourself
     
-    If your compiler returns a function, Up.js will use this as a *destructor* to
-    clean up if the element leaves the DOM. Note that in Up.js the same DOM ad Javascript environment
+    If your compiler returns a function, Unpoly will use this as a *destructor* to
+    clean up if the element leaves the DOM. Note that in Unpoly the same DOM ad Javascript environment
     will persist through many page loads, so it's important to not create
     [memory leaks](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
     
@@ -2868,7 +2868,7 @@ later.
     
     \#\#\#\# Migrating jQuery event handlers to `up.compiler`
     
-    Within the compiler, Up.js will bind `this` to the
+    Within the compiler, Unpoly will bind `this` to the
     native DOM element to help you migrate your existing jQuery code to
     this new syntax.
     
@@ -3177,7 +3177,7 @@ We need to work on this page:
     browser's location bar with the given URL.
     
     When the user navigates to the replaced history entry at a later time,
-    Up.js will [`replace`](/up.replace) the document body with
+    Unpoly will [`replace`](/up.replace) the document body with
     the body from that URL.
     
     Note that functions like [`up.replace`](/up.replace) or
@@ -3198,7 +3198,7 @@ We need to work on this page:
     address bar with the given URL.
     
     When the user navigates to the added  history entry at a later time,
-    Up.js will [`replace`](/up.replace) the document body with
+    Unpoly will [`replace`](/up.replace) the document body with
     the body from that URL.
     
     Note that functions like [`up.replace`](/up.replace) or
@@ -3250,7 +3250,7 @@ We need to work on this page:
           });
         });
       } else {
-        return up.puts('Ignoring a state not pushed by Up.js (%o)', state);
+        return up.puts('Ignoring a state not pushed by Unpoly (%o)', state);
       }
     };
     pop = function(event) {
@@ -3369,7 +3369,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
     @param {Number} [config.snap]
-      When [revealing](/up.reveal) elements, Up.js will scroll an viewport
+      When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
       to the top when the revealed element is closer to the top than `config.snap`.
     @param {Number} [config.substance]
       A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
@@ -3530,11 +3530,11 @@ This modules contains functions to scroll the viewport and reveal contained elem
     Scroll's the given element's viewport so the first rows of the
     element are visible for the user.
     
-    By default Up.js will always reveal an element before
+    By default Unpoly will always reveal an element before
     updating it with Javascript functions like [`up.replace`](/up.replace)
     or UJS behavior like [`[up-target]`](/up-target).
     
-    \#\#\#\# How Up.js finds the viewport
+    \#\#\#\# How Unpoly finds the viewport
     
     The viewport (the container that is going to be scrolled)
     is the closest parent of the element that is either:
@@ -3724,7 +3724,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
     They can later be restored by calling [`up.layout.restoreScroll()`](/up.layout.restoreScroll)
     at the same URL.
     
-    Up.js automatically saves scroll positions whenever a fragment was updated on the page.
+    Unpoly automatically saves scroll positions whenever a fragment was updated on the page.
     
     @function up.layout.saveScroll
     @param {String} [options.url]
@@ -3746,7 +3746,7 @@ This modules contains functions to scroll the viewport and reveal contained elem
     Restores [previously saved](/up.layout.saveScroll) scroll positions of viewports
     viewports configured in [`up.layout.config.viewports`](/up.layout.config).
     
-    Up.js automatically restores scroll positions when the user presses the back button.
+    Unpoly automatically restores scroll positions when the user presses the back button.
     You can disable this behavior by setting [`up.history.config.restoreScroll = false`](/up.history.config).
     
     @function up.layout.restoreScroll
@@ -3928,10 +3928,10 @@ This modules contains functions to scroll the viewport and reveal contained elem
 Changing page fragments programmatically
 ========================================
   
-This module contains Up.js's core functions to [change](/up.replace) or [destroy](/up.destroy)
+This module contains Unpoly's core functions to [change](/up.replace) or [destroy](/up.destroy)
   page fragments via Javascript.
 
-All the other Up.js modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
+All the other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
 are based on this module.
   
 @class up.flow
@@ -4016,7 +4016,7 @@ are based on this module.
         <div class="one">new one</div>
         <div class="two">new two</div>
     
-    Up.js looks for the selector `.two` in the response and [implants](/up.extract) it into
+    Unpoly looks for the selector `.two` in the response and [implants](/up.extract) it into
     the current page. The current page now looks like this:
     
         <div class="one">old one</div>
@@ -4027,7 +4027,7 @@ are based on this module.
     
     \#\#\#\# Appending or prepending instead of replacing
     
-    By default Up.js will replace the given selector with the same
+    By default Unpoly will replace the given selector with the same
     selector from a freshly fetched page. Instead of replacing you
     can *append* the loaded content to the existing content by using the
     `:after` pseudo selector. In the same fashion, you can use `:before`
@@ -4056,7 +4056,7 @@ are based on this module.
     
     \#\#\#\# Optimizing response rendering
     
-    The server is free to optimize Up.js requests by only rendering the HTML fragment
+    The server is free to optimize Unpoly requests by only rendering the HTML fragment
     that is being updated. The request's `X-Up-Target` header will contain
     the CSS selector for the updating fragment.
     
@@ -4065,7 +4065,7 @@ are based on this module.
     
     \#\#\#\# Events
     
-    Up.js will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
+    Unpoly will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
     that was replaced and [`up:fragment:inserted`](/up:fragment:inserted) on the new
     element that replaces it.
     
@@ -4096,7 +4096,7 @@ are based on this module.
       Whether to [reveal](/up.reveal) the element being updated, by
       scrolling its containing viewport.
     @param {Boolean} [options.restoreScroll=false]
-      If set to true, Up.js will try to restore the scroll position
+      If set to true, Unpoly will try to restore the scroll position
       of all the viewports around or below the updated element. The position
       will be reset to the last known top position before a previous
       history change for the current URL.
@@ -4229,7 +4229,7 @@ are based on this module.
     
         up.extract('.two', html);
     
-    Up.js looks for the selector `.two` in the strings and updates its
+    Unpoly looks for the selector `.two` in the strings and updates its
     contents in the current page. The current page now looks like this:
     
         <div class="one">old one</div>
@@ -4428,13 +4428,13 @@ are based on this module.
         <audio up-keep src="song.mp3"></audio>
     
     The element you're keeping should have an umambiguous class name, ID or `up-id`
-    attribute so Up.js can find its new position within the page update.
+    attribute so Unpoly can find its new position within the page update.
     
     Emits events [`up:fragment:keep`](/up:fragment:keep) and [`up:fragment:kept`](/up:fragment:kept).
     
     \#\#\#\# Controlling if an element will be kept
     
-    Up.js will **only** keep an existing element if:
+    Unpoly will **only** keep an existing element if:
     
     - The existing element has an `up-keep` attribute
     - The response contains an element matching the CSS selector of the existing element
@@ -4539,11 +4539,11 @@ are based on this module.
 
     /**
     Compiles a page fragment that has been inserted into the DOM
-    without Up.js.
+    without Unpoly.
     
-    **As long as you manipulate the DOM using Up.js, you will never
+    **As long as you manipulate the DOM using Unpoly, you will never
     need to call this method.** You only need to use `up.hello` if the
-    DOM is manipulated without Up.js' involvement, e.g. by setting
+    DOM is manipulated without Unpoly' involvement, e.g. by setting
     the `innerHTML` property or calling jQuery methods like
     `html`, `insertAfter` or `appendTo`:
     
@@ -4765,7 +4765,7 @@ are based on this module.
           up.reload('.inbox');
         });
     
-    Up.js remembers the URL from which a fragment was loaded, so you
+    Unpoly remembers the URL from which a fragment was loaded, so you
     don't usually need to give an URL when reloading.
     
     @function up.reload
@@ -4841,7 +4841,7 @@ using the `up-animation` attribute:
 
     <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
 
-Up.js ships with a number of predefined [animations](/up.animate#named-animation)
+Unpoly ships with a number of predefined [animations](/up.animate#named-animation)
 and [transitions](/up.morph#named-animation).
 You can also easily [define your own animations](/up.animation)
 or [transitions](/up.transition) using Javascript or CSS.
@@ -4888,7 +4888,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     };
 
     /**
-    Returns whether Up.js will perform animations.
+    Returns whether Unpoly will perform animations.
     
     Animations will be performed if the browser supports
     [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions)
@@ -4946,7 +4946,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     
     \#\#\#\# Multiple animations on the same element
     
-    Up.js doesn't allow more than one concurrent animation on the same element.
+    Unpoly doesn't allow more than one concurrent animation on the same element.
     
     If you attempt to animate an element that is already being animated,
     the previous animation will instantly jump to its last frame before
@@ -5128,7 +5128,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     the same position on the screen.
     
     Since the CSS layout flow will usually not allow two elements to
-    overlay the same space, Up.js:
+    overlay the same space, Unpoly:
     
     - The old and new elements are cloned
     - The old element is removed from the layout flow using `display: hidden`
@@ -5534,7 +5534,7 @@ or [transitions](/up.transition) using Javascript or CSS.
 Caching and preloading
 ======================
 
-All HTTP requests go through the Up.js proxy.
+All HTTP requests go through the Unpoly proxy.
 It caches a [limited](/up.proxy.config) number of server responses
 for a [limited](/up.proxy.config) amount of time,
 making requests to these URLs return insantly.
@@ -5724,7 +5724,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     /**
     Removes all cache entries.
     
-    Up.js also automatically clears the cache whenever it processes
+    Unpoly also automatically clears the cache whenever it processes
     a request with a non-GET HTTP method.
     
     @function up.proxy.clear
@@ -5878,7 +5878,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
     are taking long to finish.
     
-    By default Up.js will wait 300 ms for an AJAX request to finish
+    By default Unpoly will wait 300 ms for an AJAX request to finish
     before emitting `up:proxy:busy`. You can configure this time like this:
     
         up.proxy.config.busyDelay = 150;
@@ -5886,7 +5886,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     Once all responses have been received, an [`up:proxy:idle`](/up:proxy:idle)
     will be emitted.
     
-    Note that if additional requests are made while Up.js is already busy
+    Note that if additional requests are made while Unpoly is already busy
     waiting, **no** additional `up:proxy:busy` events will be triggered.
     
     @event up:proxy:busy
@@ -6088,7 +6088,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
 Linking to page fragments
 =========================
 
-Just like in a classical web application, an Up.js app renders a series of *full HTML pages* on the server.
+Just like in a classical web application, an Unpoly app renders a series of *full HTML pages* on the server.
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
 
@@ -6133,7 +6133,7 @@ is not a good fit for modern applications, for a multitude of reasons:
 Smoother flow by updating fragments
 -----------------------------------
 
-In Up.js you annotate navigation links with an `up-target` attribute.
+In Unpoly you annotate navigation links with an `up-target` attribute.
 The value of this attribute is a CSS selector that indicates which page
 fragment to update.
 
@@ -6150,7 +6150,7 @@ Since we only want to update the `<article>` tag, we will use `up-target="articl
 
 Instead of `article` you can use any other CSS selector (e. g.  `#main .article`).
 
-With these `up-target` annotations Up.js only updates the targeted part of the screen.
+With these `up-target` annotations Unpoly only updates the targeted part of the screen.
 Javascript will not be reloaded, no white flash during a full page reload.
 
 
@@ -6158,10 +6158,10 @@ Read on
 -------
 - You can [animate page transitions](/up.motion) by definining animations for fragments as they enter or leave the screen.
 - The `up-target` mechanism also works with [forms](/up.form).
-- As you switch through pages, Up.js will [update your browser's location bar and history](/up.history)
+- As you switch through pages, Unpoly will [update your browser's location bar and history](/up.history)
 - You can [open fragments in popups or modal dialogs](/up.modal).
 - You can give users [immediate feedback](/up.navigation) when a link is clicked or becomes current, without waiting for the server.
-- [Controlling Up.js pragmatically through Javascript](/up.flow)
+- [Controlling Unpoly pragmatically through Javascript](/up.flow)
 - [Defining custom tags](/up.syntax)
 
   
@@ -6202,7 +6202,7 @@ Read on
     Follows the given link via AJAX and [replaces](/up.replace) a CSS selector in the current page
     with corresponding elements from a new page fetched from the server.
     
-    Any Up.js UJS attributes on the given link will be honored. E. g. you have this link:
+    Any Unpoly UJS attributes on the given link will be honored. E. g. you have this link:
     
         <a href="/users" up-target=".main">Users</a>
     
@@ -6342,7 +6342,7 @@ Read on
     };
 
     /**
-    Makes sure that the given link is handled by Up.js.
+    Makes sure that the given link is handled by Unpoly.
     
     This is done by giving the link an `up-follow` attribute
     unless it already have it an `up-target` or `up-follow` attribute.
@@ -6375,7 +6375,7 @@ Read on
     
     \#\#\#\# Appending or prepending instead of replacing
     
-    By default Up.js will replace the given selector with the same
+    By default Unpoly will replace the given selector with the same
     selector from a freshly fetched page. Instead of replacing you
     can *append* the loaded content to the existing content by using the
     `:after` pseudo selector. In the same fashion, you can use `:before`
@@ -6613,7 +6613,7 @@ Read on
 Forms
 =====
   
-Up.js comes with functionality to [submit](/form-up-target) and [validate](/up-validate)
+Unpoly comes with functionality to [submit](/form-up-target) and [validate](/up-validate)
 forms without leaving the current page. This means you can replace page fragments,
 open dialogs with sub-forms, etc. all without losing form state.
 
@@ -6667,13 +6667,13 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     The UJS variant of this is the [`form[up-target]`](/form-up-target) selector.
     See the documentation for [`form[up-target]`](/form-up-target) for more
-    information on how AJAX form submissions work in Up.js.
+    information on how AJAX form submissions work in Unpoly.
     
     @function up.submit
     @param {Element|jQuery|String} formOrSelector
       A reference or selector for the form to submit.
       If the argument points to an element that is not a form,
-      Up.js will search its ancestors for the closest form.
+      Unpoly will search its ancestors for the closest form.
     @param {String} [options.url]
       The URL where to submit the form.
       Defaults to the form's `action` attribute, or to the current URL of the browser window.
@@ -6787,7 +6787,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     To mitigate this, `up.observe` will try to never run a callback
     before the previous callback has completed.
     To take advantage of this, your callback code must return a promise.
-    Note that all asynchronous Up.js functions return promises.
+    Note that all asynchronous Unpoly functions return promises.
     
     \#\#\#\# Throttling
     
@@ -6976,7 +6976,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     The UJS variant of this is the [`[up-validate]`](/up-validate) selector.
     See the documentation for [`[up-validate]`](/up-validate) for more information
-    on how server-side validation works in Up.js.
+    on how server-side validation works in Unpoly.
     
     \#\#\#\# Example
     
@@ -7124,7 +7124,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     it will usually re-render an updated copy of the form with
     validation messages.
     
-    For Up.js to be able to detect a failed form submission,,
+    For Unpoly to be able to detect a failed form submission,,
     the form must be re-rendered with a non-200 HTTP status code.
     We recommend to use either 400 (bad request) or
     422 (unprocessable entity).
@@ -7153,14 +7153,14 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     \#\#\#\# Redirects
     
-    Up.js requires two additional response headers to detect redirects,
+    Unpoly requires two additional response headers to detect redirects,
     which are otherwise undetectable for an AJAX client.
     
     When the form's action performs a redirect, the server should echo
     the new request's URL as a response header `X-Up-Location`
     and the request's HTTP method as `X-Up-Method: GET`.
     
-    If you are using Up.js via the `upjs-rails` gem, these headers
+    If you are using Unpoly via the `upjs-rails` gem, these headers
     are set automatically for every request.
     
     \#\#\#\# Giving feedback while the form is processing
@@ -7177,7 +7177,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       The selector to [replace](/up.replace) if the form submission is successful (200 status code).
     @param {String} [up-fail-target]
       The selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
-      If omitted, Up.js will replace the `<form>` tag itself, assuming that the
+      If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
       server has echoed the form with validation errors.
     @param {String} [up-transition]
       The animation to use when the form is replaced after a successful submission.
@@ -7299,14 +7299,14 @@ open dialogs with sub-forms, etc. all without losing form state.
     \#\#\#\# How validation results are displayed
     
     Although the server will usually respond to a validation with a complete,
-    fresh copy of the form, Up.js will by default not update the entire form.
+    fresh copy of the form, Unpoly will by default not update the entire form.
     This is done in order to preserve volatile state such as the scroll position
     of `<textarea>` elements.
     
-    By default Up.js looks for a `<fieldset>`, `<label>` or `<form>`
+    By default Unpoly looks for a `<fieldset>`, `<label>` or `<form>`
     around the validating input field, or any element with an
     `up-fieldset` attribute.
-    With the Bootstrap bindings, Up.js will also look
+    With the Bootstrap bindings, Unpoly will also look
     for a container with the `form-group` class.
     
     You can change this default behavior by setting `up.config.validateTargets`:
@@ -7528,7 +7528,7 @@ For modal dialogs see [up.modal](/up.modal) instead.
 
 \#\#\#\# Customizing the popup design
 
-Loading the Up.js stylesheet will give you a minimal popup design:
+Loading the Unpoly stylesheet will give you a minimal popup design:
 
 - Popup contents are displayed in a white box
 - There is a a subtle box shadow around the popup
@@ -8008,7 +8008,7 @@ For smaller popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
 
 \#\#\#\# Customizing the dialog design
 
-Loading the Up.js stylesheet will give you a minimal dialog design:
+Loading the Unpoly stylesheet will give you a minimal dialog design:
 
 - Dialog contents are displayed in a white box that is centered vertically and horizontally.
 - There is a a subtle box shadow around the dialog
@@ -8030,7 +8030,7 @@ By default the dialog uses the following DOM structure:
     </div>
 
 If you want to change the design beyond CSS, you can
-configure Up.js to [use a different HTML structure](/up.modal.config).
+configure Unpoly to [use a different HTML structure](/up.modal.config).
 
 
 \#\#\#\# Closing behavior
@@ -8455,7 +8455,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
         <a href="/blogs" up-modal=".blog-list">Switch blog</a>
     
     Clicking would request the path `/blog` and select `.blog-list` from
-    the HTML response. Up.js will dim the page with an overlay
+    the HTML response. Unpoly will dim the page with an overlay
     and place the matching `.blog-list` tag will be placed in
     a modal dialog.
     
@@ -8552,7 +8552,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 Tooltips
 ========
 
-Up.js comes with a basic tooltip implementation.
+Unpoly comes with a basic tooltip implementation.
 
 You can an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a tooltip whenever
   the user hovers over the element:
@@ -8761,7 +8761,7 @@ The tooltip element is appended to the end of `<body>`.
 Fast interaction feedback
 =========================
 
-Up.js automatically marks up link elements with classes indicating that
+Unpoly automatically marks up link elements with classes indicating that
 they are currently loading (class `up-active`) or linking
 to the current location (class `up-current`).
 
@@ -8884,7 +8884,7 @@ by providing instant feedback for user interactions.
     perceived responsiveness of your user interface.
     
     The `up-active` class will be removed as soon as another
-    page fragment is added or updated through Up.js.
+    page fragment is added or updated through Unpoly.
     
     \#\#\#\# Example
     

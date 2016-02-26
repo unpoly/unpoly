@@ -16,5 +16,5 @@
 //= require jasmine-fixture
 //= require jasmine-ajax
 //= require helpers/knife
-//= require up
+//= require unpoly
 //= require_tree .
