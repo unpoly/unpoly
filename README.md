@@ -71,5 +71,5 @@ Always run `rake assets:compile` before `rake release` so the git tag points to 
 Credits
 -------
 
-- [Henning Koch](mailto:henning.koch@makandra.de) from ([makandra](http://www.makandra.com) ([@triskweline](https://twitter.com/triskweline) on Twitter)
+- [Henning Koch](mailto:henning.koch@makandra.de) from [makandra](http://www.makandra.com) ([@triskweline](https://twitter.com/triskweline) on Twitter)
 
