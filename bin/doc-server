@@ -1,3 +1,0 @@
-#!/bin/sh
-
-yuidoc -c doc/yuidoc.json --server 3001
