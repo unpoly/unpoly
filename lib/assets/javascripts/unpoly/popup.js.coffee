@@ -18,7 +18,7 @@ Loading the Unpoly stylesheet will give you a minimal popup design:
 - There is a a subtle box shadow around the popup
 - The box will grow to fit the popup contents
 
-The easiest way to change how the popup looks is by overriding the [default CSS styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/popup.css.sass).
+The easiest way to change how the popup looks is by overriding the [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/popup.css.sass).
 
 By default the popup uses the following DOM structure:
 

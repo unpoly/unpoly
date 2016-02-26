@@ -12,7 +12,7 @@ You can an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a toolt
 
 \#\#\#\# Styling
 
-The [default styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/tooltip.css.sass)
+The [default styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/tooltip.css.sass)
 show a simple tooltip with white text on a gray background.
 A gray triangle points to the element.
 

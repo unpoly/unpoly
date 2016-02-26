@@ -1,4 +1,4 @@
-module Upjs
+module Unpoly
   module Rails
     ##
     # This adds two methods `#up` and `#up?` to all controllers,
@@ -7,19 +7,21 @@ module Upjs
     module InspectorAccessor
 
       def self.included(base)
-        base.helper_method :unpoly, :up?
+        base.helper_method :up, :up?
       end
 
       def up
         @up_inspector ||= Inspector.new(self)
       end
 
+      alias_method :unpoly, :up
+
       ##
       # :method: up?
       # Returns whether the current request is an
       # [page fragment update](http://unpoly.com/up.replace) triggered by an
       # Unpoly frontend.
-      delegate :up?, :to => :unpoly
+      delegate :up?, :unpoly?, :to => :up
 
       ActionController::Base.send(:include, self)
 

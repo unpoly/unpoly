@@ -9,7 +9,7 @@ gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.1.0'
 gem 'therubyracer', platforms: :ruby
 gem 'jquery-rails'
-gem 'upjs-rails', path: '..'
+gem 'unpoly-rails', path: '..'
 gem 'bower-rails'
 
 # Jasmine spec runner won't boot with a more modern version of sprockets.

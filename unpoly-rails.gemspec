@@ -1,14 +1,14 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'upjs/rails/version'
+require 'unpoly/rails/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "upjs-rails"
-  spec.version       = Upjs::Rails::VERSION
+  spec.name          = "unpoly-rails"
+  spec.version       = Unpoly::Rails::VERSION
   spec.authors       = ["Henning Koch"]
   spec.email         = ["henning.koch@makandra.de"]
-  spec.description   = 'Snappy UI for server-side web applications'
+  spec.description   = 'Rails bindings for Unpoly, the progressive enhancement Javascript framework'
   spec.summary       = spec.description
   spec.homepage      = ""
   spec.license       = "MIT"

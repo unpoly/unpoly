@@ -122,7 +122,7 @@ up.flow = (($) ->
   that is being updated. The request's `X-Up-Target` header will contain
   the CSS selector for the updating fragment.
 
-  If you are using the `upjs-rails` gem you can also access the selector via
+  If you are using the `unpoly-rails` gem you can also access the selector via
   `up.selector` in all controllers, views and helpers.
 
   \#\#\#\# Events

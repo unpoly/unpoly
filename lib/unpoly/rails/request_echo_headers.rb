@@ -1,4 +1,4 @@
-module Upjs
+module Unpoly
   module Rails
     ##
     # Installs a `before_filter` into all controllers which echoes the

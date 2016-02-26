@@ -1,4 +1,4 @@
-module Upjs
+module Unpoly
   module Rails
     ##
     # This object allows the server to inspect the current request
@@ -18,6 +18,8 @@ module Upjs
       def up?
         target.present?
       end
+
+      alias_method :unpoly?, :up?
 
       ##
       # If the current request is a [fragment update](http://unpoly.com/up.replace),

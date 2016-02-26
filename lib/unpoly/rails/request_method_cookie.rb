@@ -9,7 +9,7 @@
 
 # - <https://github.com/rails/turbolinks/search?q=request_method&ref=cmdform>
 # - <https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/README.md#initialization>
-module Upjs
+module Unpoly
   module Rails
     module RequestMethod
 

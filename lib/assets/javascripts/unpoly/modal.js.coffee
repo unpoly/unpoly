@@ -23,7 +23,7 @@ Loading the Unpoly stylesheet will give you a minimal dialog design:
 - The box is placed over a semi-transparent background to dim the rest of the page
 - There is a button to close the dialog in the top-right corner
 
-The easiest way to change how the dialog looks is by overriding the [default CSS styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/modal.css.sass).
+The easiest way to change how the dialog looks is by overriding the [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/modal.css.sass).
 
 By default the dialog uses the following DOM structure:
 

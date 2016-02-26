@@ -1,17 +1,17 @@
 Unpoly + Rails bindings
-======================
+=======================
 
 Unpoly gives your traditional web application fast-responding views with minimal changes to your code and development style. If you require modern UX but don't want to pay the Javascript complexity tax, Unpoly can be a solution for you.
 
-This repository is home both to the Unpoly javascript code and its (optional) bindings for Ruby on Rails (`upjs-rails` gem).
+This repository is home both to the Unpoly javascript code and its (optional) bindings for Ruby on Rails (`unpoly-rails` gem).
 
 
 Getting started
 ---------------
 
 - See [unpoly.com](http://unpoly.com) for more information and Javascript API documentation.
-- See [`CHANGELOG.md`](https://github.com/makandra/upjs/blob/master/CHANGELOG.md) for notable changes.
-- See [`README_RAILS.md`](https://github.com/makandra/upjs/blob/master/README_RAILS.md) documentation of the Rails bindings.
+- See [`CHANGELOG.md`](https://github.com/unpoly/unpoly/blob/master/CHANGELOG.md) for notable changes.
+- See [`README_RAILS.md`](https://github.com/unpoly/unpoly/blob/master/README_RAILS.md) documentation of the Rails bindings.
 
 
 Running tests
@@ -22,7 +22,7 @@ Overview:
 - This currently requires Ruby
 - There's a Rails app in `spec_app`
 - Jasmine tests for Unpoly live in `spec_app/spec/javascripts`
-- RSpec tests for the `upjs-rails` gem live in `spec_app/spec/controllers`
+- RSpec tests for the `unpoly-rails` gem live in `spec_app/spec/controllers`
 
 Install dependencies for tests:
 
@@ -37,7 +37,7 @@ To run Jasmine tests for Unpoly:
 - Start the Rails server by running `rails server`
 - Access `http://localhost:3000/specs` to see the Jasmine test runner
 
-To run RSpec tests for the `upjs-rails` gem:
+To run RSpec tests for the `unpoly-rails` gem:
 
 - `cd` into `spec_app`
 - Run `rspec`
@@ -50,13 +50,13 @@ We are currently feeding three release channels:
 
 - Manual download from Github
 - Bower (this also fetches from Github)
-- Rubygems (as the `upjs-rails` gem)
+- Rubygems (as the `unpoly-rails` gem)
 
 We always release to all channel simultaneously.
 
 To make a new release:
 
-- Edit `lib/upjs/rails/version.rb` and bump the version number. Use [semantic versioning](http://semver.org/).
+- Edit `lib/unpoly/rails/version.rb` and bump the version number. Use [semantic versioning](http://semver.org/).
 - Add an entry to `CHANGELOG.md`
 - Commit and push the version bump and `CHANGELOG.md`
 - From the project root, type `rake assets:compile`. This will output minified JS and CSS files to the `dist` folder.

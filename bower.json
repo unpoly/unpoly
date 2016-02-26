@@ -1,11 +1,11 @@
 {
-  "name": "upjs",
-  "homepage": "https://github.com/makanda/upjs",
+  "name": "unpoly",
+  "homepage": "https://github.com/makanda/unpoly",
   "authors": [
     "Henning Koch <henning.koch@makandra.de>"
   ],
-  "description": "Snappy UI for server-side web applications",
-  "main": ["dist/up.js", "dist/up.css"],
+  "description": "Progressive enhancement Javascript framework",
+  "main": ["dist/unpoly.js", "dist/unpoly.css"],
   "license": "MIT",
   "ignore": [
     "bin",
@@ -18,7 +18,7 @@
     "Gemfile.lock",
     "Rakefile",
     ".ruby-version",
-    "upjs-rails.gemspec"
+    "unpoly-rails.gemspec"
   ],
   "dependencies": {
     "jquery": ">= 1.9.1"

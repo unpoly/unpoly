@@ -72,7 +72,7 @@ Unreleased
   You can configure this behavior in [`up.proxy.config.wrapMethods`](/up.proxy.config)
   and [`up.proxy.config.wrapMethodParam`](/up.proxy.config).
 - The requested selector is now sent to the server as a request header `X-Up-Target`
-  (this used to be `X-Up-Selector`). If you are using `upjs-rails`, you can access it
+  (this used to be `X-Up-Selector`). If you are using `unpoly-rails`, you can access it
   through `up.target` (this used to be `up.selector`).
 
 
@@ -314,16 +314,16 @@ Refactored internals. No API changes.
 - New `up.layout` setting `fixedRight` that contains selectors for elements that are anchored to
   the right edge of the screen. When opening a modal, these elements will be prevented from jumping
   around. If you're using `up-bootstrap.js`, this will default to `['.navbar-fixed-top', '.navbar-fixed-bottom', '.footer']`.
-- Fix a bug in `upjs-rails` where the gem would fail to `include` itself in some versions
+- Fix a bug in `unpoly-rails` where the gem would fail to `include` itself in some versions
   of Ruby and Rails.
 
 
 ### Breaking changes
 
 - Interactions that would result in an URL change ("pushState") now fall back to a full page load
-  if Unpoly was booted from a non-GET request. [More information about the reasons for this](https://github.com/makandra/upjs/commit/d81d9007aa3bfae0fca8c55a71d180d1044acae5).
+  if Unpoly was booted from a non-GET request. [More information about the reasons for this](https://github.com/unpoly/unpoly/commit/d81d9007aa3bfae0fca8c55a71d180d1044acae5).
 
-  This currently works out of the box if you're using Unpoly via the `upjs-rails` Rubygem.
+  This currently works out of the box if you're using Unpoly via the `unpoly-rails` Rubygem.
   If you're integrating Unpoly with Bower or manually, you need to have your server app
   set an `_up_request_method` cookie with the current request method on every request.
 

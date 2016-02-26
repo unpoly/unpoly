@@ -4060,7 +4060,7 @@ are based on this module.
     that is being updated. The request's `X-Up-Target` header will contain
     the CSS selector for the updating fragment.
     
-    If you are using the `upjs-rails` gem you can also access the selector via
+    If you are using the `unpoly-rails` gem you can also access the selector via
     `up.selector` in all controllers, views and helpers.
     
     \#\#\#\# Events
@@ -6691,7 +6691,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @param {Boolean|String} [options.history=true]
       Successful form submissions will add a history entry and change the browser's
       location bar if the form either uses the `GET` method or the response redirected
-      to another page (this requires the `upjs-rails` gem).
+      to another page (this requires the `unpoly-rails` gem).
       If want to prevent history changes in any case, set this to `false`.
       If you pass a `String`, it is used as the URL for the browser history.
     @param {String} [options.transition='none']
@@ -7160,7 +7160,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     the new request's URL as a response header `X-Up-Location`
     and the request's HTTP method as `X-Up-Method: GET`.
     
-    If you are using Unpoly via the `upjs-rails` gem, these headers
+    If you are using Unpoly via the `unpoly-rails` gem, these headers
     are set automatically for every request.
     
     \#\#\#\# Giving feedback while the form is processing
@@ -7277,7 +7277,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
         end
     
-    Note that if you're using the `upjs-rails` gem you can simply say `up.validate?`
+    Note that if you're using the `unpoly-rails` gem you can simply say `up.validate?`
     instead of manually checking for `request.headers['X-Up-Validate']`.
     
     The server now renders an updated copy of the form with eventual validation errors:
@@ -7534,7 +7534,7 @@ Loading the Unpoly stylesheet will give you a minimal popup design:
 - There is a a subtle box shadow around the popup
 - The box will grow to fit the popup contents
 
-The easiest way to change how the popup looks is by overriding the [default CSS styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/popup.css.sass).
+The easiest way to change how the popup looks is by overriding the [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/popup.css.sass).
 
 By default the popup uses the following DOM structure:
 
@@ -8016,7 +8016,7 @@ Loading the Unpoly stylesheet will give you a minimal dialog design:
 - The box is placed over a semi-transparent background to dim the rest of the page
 - There is a button to close the dialog in the top-right corner
 
-The easiest way to change how the dialog looks is by overriding the [default CSS styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/modal.css.sass).
+The easiest way to change how the dialog looks is by overriding the [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/modal.css.sass).
 
 By default the dialog uses the following DOM structure:
 
@@ -8562,7 +8562,7 @@ You can an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a toolt
 
 \#\#\#\# Styling
 
-The [default styles](https://github.com/makandra/upjs/blob/master/lib/assets/stylesheets/up/tooltip.css.sass)
+The [default styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/tooltip.css.sass)
 show a simple tooltip with white text on a gray background.
 A gray triangle points to the element.
 

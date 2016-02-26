@@ -1,7 +1,7 @@
-upjs-rails: Ruby on Rails bindings for Unpoly
-============================================
+unpoly-rails: Ruby on Rails bindings for Unpoly
+===============================================
 
-[Unpoly](http://unpoly.com) is a backend-agnostic progressive enhancement framework. `upjs-rails` gives your [Ruby on Rails](http://rubyonrails.org/) application some convenience candy when you are using Unpoly in your frontend.
+[Unpoly](http://unpoly.com) is a backend-agnostic progressive enhancement framework. `unpoly-rails` gives your [Ruby on Rails](http://rubyonrails.org/) application some convenience candy when you are using Unpoly in your frontend.
 
 
 Features
@@ -56,14 +56,14 @@ When detecting a validation request, the server is expected to validate (but not
 
 ### Automatic redirect detection
 
-`upjs-rails` installs a `before_filter` into all controllers which echoes the request's URL as a response header `X-Up-Location` and the request's
+`unpoly-rails` installs a `before_filter` into all controllers which echoes the request's URL as a response header `X-Up-Location` and the request's
 HTTP method as `X-Up-Method`.
 
 The Unpoly frontend [requires these headers to detect redirects](http://unpoly.com/form-up-target#redirects), which are otherwise undetectable for an AJAX client.
 
 ### Automatic method detection for initial page load
 
-`upjs-rails` sets an `_up_request_method` cookie that Unpoly needs to detect the request method for the initial page load.
+`unpoly-rails` sets an `_up_request_method` cookie that Unpoly needs to detect the request method for the initial page load.
 
 If the initial page was loaded with a non-`GET` HTTP method, Unpoly will fall back to full page loads for all actions that require `pushState`.
 
@@ -101,7 +101,7 @@ Development
 
 ### Before you make a PR
 
-Before you make a PR, please have some discussion about the proposed change by [opening an issue on Github](https://github.com/makandra/upjs/issues/new).
+Before you make a PR, please have some discussion about the proposed change by [opening an issue on Github](https://github.com/unpoly/unpoly/issues/new).
 
 ### Running tests
 
@@ -113,4 +113,4 @@ Before you make a PR, please have some discussion about the proposed change by [
 
 ### Making a new release
 
-New versions of `upjs-rails` are released as part of the [Unpoly release process](https://github.com/makandra/upjs/blob/master/README.md#making-a-new-release).
+New versions of `unpoly-rails` are released as part of the [Unpoly release process](https://github.com/unpoly/unpoly/blob/master/README.md#making-a-new-release).

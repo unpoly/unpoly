@@ -75,7 +75,7 @@ up.form = (($) ->
   @param {Boolean|String} [options.history=true]
     Successful form submissions will add a history entry and change the browser's
     location bar if the form either uses the `GET` method or the response redirected
-    to another page (this requires the `upjs-rails` gem).
+    to another page (this requires the `unpoly-rails` gem).
     If want to prevent history changes in any case, set this to `false`.
     If you pass a `String`, it is used as the URL for the browser history.
   @param {String} [options.transition='none']
@@ -519,7 +519,7 @@ up.form = (($) ->
   the new request's URL as a response header `X-Up-Location`
   and the request's HTTP method as `X-Up-Method: GET`.
 
-  If you are using Unpoly via the `upjs-rails` gem, these headers
+  If you are using Unpoly via the `unpoly-rails` gem, these headers
   are set automatically for every request.
 
   \#\#\#\# Giving feedback while the form is processing
@@ -635,7 +635,7 @@ up.form = (($) ->
 
       end
 
-  Note that if you're using the `upjs-rails` gem you can simply say `up.validate?`
+  Note that if you're using the `unpoly-rails` gem you can simply say `up.validate?`
   instead of manually checking for `request.headers['X-Up-Validate']`.
 
   The server now renders an updated copy of the form with eventual validation errors:

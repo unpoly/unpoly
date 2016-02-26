@@ -204,7 +204,7 @@ up.browser = (($) ->
     else
       u.unresolvablePromise()
 
-  # Server-side companion libraries like upjs-rails set this cookie so we
+  # Server-side companion libraries like unpoly-rails set this cookie so we
   # have a way to detect the request method of the initial page load.
   # There is no Javascript API for this.
   initialRequestMethod = u.memoize ->
