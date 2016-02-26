@@ -126,7 +126,7 @@ Unreleased
 
 ### Compatible changes
 
-- Fix an error where `up.form.config` was not published. This caused `up-bootstrap.js` to throw an error.
+- Fix an error where `up.form.config` was not published. This caused `unpoly-bootstrap3.js` to throw an error.
 
 
 0.15.0
@@ -313,7 +313,7 @@ Refactored internals. No API changes.
 - Allow to animate scrolling when the `document` is the viewport.
 - New `up.layout` setting `fixedRight` that contains selectors for elements that are anchored to
   the right edge of the screen. When opening a modal, these elements will be prevented from jumping
-  around. If you're using `up-bootstrap.js`, this will default to `['.navbar-fixed-top', '.navbar-fixed-bottom', '.footer']`.
+  around. If you're using `unpoly-bootstrap3.js`, this will default to `['.navbar-fixed-top', '.navbar-fixed-bottom', '.footer']`.
 - Fix a bug in `unpoly-rails` where the gem would fail to `include` itself in some versions
   of Ruby and Rails.
 
@@ -433,7 +433,7 @@ Refactored internals. No API changes.
 
 ### Compatible chanes
 
-- You can now include `up-bootstrap.js` and `up-bootstrap.css` to configure Unpoly to play nice with Bootstrap 3.
+- You can now include `unpoly-bootstrap3.js` and `unpoly-bootstrap3.css` to configure Unpoly to play nice with Bootstrap 3.
 
 
 ### Breaking changes
