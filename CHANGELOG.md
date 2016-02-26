@@ -13,6 +13,14 @@ Unreleased
 ### Breaking changes
 
 
+0.20.0
+------
+
+- The project has been renamed to *Unpoly*.
+- The Bower package has been renamed to `unpoly`.
+- The Ruby gem for the Rails bindings has been renamed to `unpoly-rails`.
+
+
 0.19.0
 ------
 
