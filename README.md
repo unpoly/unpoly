@@ -14,8 +14,10 @@ Getting started
 - See [`README_RAILS.md`](https://github.com/unpoly/unpoly/blob/master/README_RAILS.md) documentation of the Rails bindings.
 
 
-Running tests
--------------
+Development
+-----------
+
+### Running tests
 
 Overview:
 
@@ -43,8 +45,7 @@ To run RSpec tests for the `unpoly-rails` gem:
 - Run `rspec`
 
 
-Making a new release
---------------------
+### Making a new release
 
 We are currently feeding three release channels:
 
@@ -65,3 +66,10 @@ To make a new release:
   It will also push a tag for this version, which Bower requires for its own versioning scheme.
 
 Always run `rake assets:compile` before `rake release` so the git tag points to the correct commit (required for Bower versioning).
+
+
+Credits
+-------
+
+- [Henning Koch](mailto:henning.koch@makandra.de) from ([makandra](http://www.makandra.com) ([@triskweline](https://twitter.com/triskweline) on Twitter)
+
