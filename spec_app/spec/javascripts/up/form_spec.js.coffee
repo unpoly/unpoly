@@ -282,12 +282,12 @@ describe 'up.form', ->
           expect($labels[0]).not.toHaveText('Validation message')
           expect($labels[1]).toHaveText('Validation message')
 
-    describe '[up-toggle]', ->
+    describe '[up-switch]', ->
 
       describe 'on a select', ->
 
         beforeEach ->
-          @$select = affix('select[up-toggle=".target"]')
+          @$select = affix('select[up-switch=".target"]')
           @$blankOption = @$select.affix('option').text('<Please select something>').val('')
           @$fooOption = @$select.affix('option[value="foo"]').text('Foo')
           @$barOption = @$select.affix('option[value="bar"]').text('Bar')
@@ -331,7 +331,7 @@ describe 'up.form', ->
       describe 'on a checkbox', ->
 
         beforeEach ->
-          @$checkbox = affix('input[type="checkbox"][value="1"][up-toggle=".target"]')
+          @$checkbox = affix('input[type="checkbox"][value="1"][up-switch=".target"]')
 
         it "shows the target element iff its up-show-for attribute is :checked and the checkbox is checked", ->
           $target = affix('.target[up-show-for=":checked"]')
@@ -372,10 +372,10 @@ describe 'up.form', ->
 
         beforeEach ->
           @$buttons     = affix('.radio-buttons')
-          @$blankButton = @$buttons.affix('input[type="radio"][name="group"][up-toggle=".target"]').val('')
-          @$fooButton   = @$buttons.affix('input[type="radio"][name="group"][up-toggle=".target"]').val('foo')
-          @$barButton   = @$buttons.affix('input[type="radio"][name="group"][up-toggle=".target"]').val('bar')
-          @$bazkButton  = @$buttons.affix('input[type="radio"][name="group"][up-toggle=".target"]').val('baz')
+          @$blankButton = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('')
+          @$fooButton   = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('foo')
+          @$barButton   = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('bar')
+          @$bazkButton  = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('baz')
 
         it "shows the target element iff its up-show-for attribute contains the selected button value", ->
           $target = affix('.target[up-show-for="something bar other"]')
@@ -433,7 +433,7 @@ describe 'up.form', ->
       describe 'on a text input', ->
 
         beforeEach ->
-          @$textInput = affix('input[type="text"][up-toggle=".target"]')
+          @$textInput = affix('input[type="text"][up-switch=".target"]')
 
         it "shows the target element iff its up-show-for attribute contains the input value", ->
           $target = affix('.target[up-show-for="something bar other"]')

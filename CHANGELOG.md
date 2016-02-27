@@ -12,6 +12,8 @@ Unreleased
 
 ### Breaking changes
 
+- `up-toggle` has been renamed to `up-switch`
+
 
 0.20.0
 ------

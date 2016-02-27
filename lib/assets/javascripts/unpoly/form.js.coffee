@@ -379,7 +379,7 @@ up.form = (($) ->
     promise = up.submit($form, options)
     promise
 
-  currentValuesForToggle = ($field) ->
+  currentValuesForSwitch = ($field) ->
     values = undefined
     if $field.is('input[type=checkbox]')
       if $field.is(':checked')
@@ -400,7 +400,7 @@ up.form = (($) ->
         values = [':blank']
     values
 
-  currentValuesForToggle = ($field) ->
+  currentValuesForSwitch = ($field) ->
     if $field.is('input[type=checkbox]')
       if $field.is(':checked')
         value = $field.val()
@@ -429,25 +429,25 @@ up.form = (($) ->
   ###*
   Shows or hides a target selector depending on the value.
 
-  See [`[up-toggle]`](/up-toggle) for more documentation and examples.
+  See [`[up-switch]`](/up-switch) for more documentation and examples.
 
   This function does not currently have a very useful API outside
-  of our use for `up-toggle`'s UJS behavior, that's why it's currently
+  of our use for `up-switch`'s UJS behavior, that's why it's currently
   still marked `@internal`.
 
-  @function up.form.toggle
+  @function up.form.switchTargets
   @param {String|Element|jQuery} fieldOrSelector
   @param {String} [options.target]
-    The target selectors to toggle.
-    Defaults to an `up-toggle` attribute on the given field.
+    The target selectors to switch.
+    Defaults to an `up-switch` attribute on the given field.
   @internal
   ###
-  toggleTargets = (fieldOrSelector, options) ->
+  switchTargets = (fieldOrSelector, options) ->
     $field = $(fieldOrSelector)
     options = u.options(options)
-    targets = u.option(options.target, $field.attr('up-toggle'))
-    u.isPresent(targets) or u.error("No toggle target given for %o", $field.get(0))
-    fieldValues = currentValuesForToggle($field)
+    targets = u.option(options.target, $field.attr('up-switch'))
+    u.isPresent(targets) or u.error("No switch target given for %o", $field.get(0))
+    fieldValues = currentValuesForSwitch($field)
     $(targets).each ->
       $target = $(this)
       if hideValues = $target.attr('up-hide-for')
@@ -716,9 +716,9 @@ up.form = (($) ->
 
   \#\#\#\# Example
 
-  The triggering input gets an `up-toggle` attribute with a selector for the elements to show or hide:
+  The triggering input gets an `up-switch` attribute with a selector for the elements to show or hide:
 
-      <select name="advancedness" up-toggle=".target">
+      <select name="advancedness" up-switch=".target">
         <option value="basic">Basic parts</option>
         <option value="advanced">Advanced parts</option>
         <option value="very-advanced">Very advanced parts</option>
@@ -740,7 +740,7 @@ up.form = (($) ->
 
   For checkboxes you can also use the pseudo-values `:checked` or `:unchecked` like so:
 
-      <input type="checkbox" name="flag" up-toggle=".target">
+      <input type="checkbox" name="flag" up-switch=".target">
 
       <div class="target" up-show-for=":checked">
         only shown when checkbox is checked
@@ -749,20 +749,20 @@ up.form = (($) ->
   You can also use the pseudo-values `:blank` to match an empty input value,
   or `:present` to match a non-empty input value:
 
-      <input type="text" name="email" up-toggle=".target">
+      <input type="text" name="email" up-switch=".target">
 
       <div class="target" up-show-for=":blank">
         please enter an email address
       </div>
 
-  @selector [up-toggle]
+  @selector [up-switch]
   @stable
   ###
 
   ###*
   Show this element only if a form field has a given value.
 
-  See [`[up-toggle]`](/up-toggle) for more documentation and examples.
+  See [`[up-switch]`](/up-switch) for more documentation and examples.
 
   @selector [up-show-for]
   @param up-show-for
@@ -773,7 +773,7 @@ up.form = (($) ->
   ###*
   Hide this element if a form field has a given value.
 
-  See [`[up-toggle]`](/up-toggle) for more documentation and examples.
+  See [`[up-switch]`](/up-switch) for more documentation and examples.
 
   @selector [up-hide-for]
   @param up-hide-for
@@ -781,11 +781,11 @@ up.form = (($) ->
   @stable
   ###
 
-  up.on 'change', '[up-toggle]', (event, $field) ->
-    toggleTargets($field)
+  up.on 'change', '[up-switch]', (event, $field) ->
+    switchTargets($field)
 
-  up.compiler '[up-toggle]', ($field) ->
-    toggleTargets($field)
+  up.compiler '[up-switch]', ($field) ->
+    switchTargets($field)
 
   ###*
   Observes this field or form and runs a callback when a value changes.
@@ -853,7 +853,7 @@ up.form = (($) ->
   submit: submit
   observe: observe
   validate: validate
-  toggleTargets: toggleTargets
+  switchTargets: switchTargets
 
 )(jQuery)
 
