@@ -17,8 +17,20 @@ Unreleased
 ------
 
 - The project has been renamed to *Unpoly*.
+- All functions remain in the `up` namespace, so e.g. `up.replace` is still called `up.replace`.
+- All UJS functionality remains unchanged, so e.g. `up-target` is still called `up-target`.
 - The Bower package has been renamed to `unpoly`.
 - The Ruby gem for the Rails bindings has been renamed to `unpoly-rails`.
+- The new Javascript and stylesheet assets are:
+  - [`unpoly.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.js)
+  - [`unpoly.min.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.min.js)
+  - [`unpoly.css`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.css)
+  - [`unpoly.min.css`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.min.css)
+- If you're using the Bootstrap integration the new assets are:
+  - [`unpoly-bootstrap3.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly-bootstrap3.js)
+  - [`unpoly-bootstrap3.min.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly-bootstrap3.min.js)
+  - [`unpoly-bootstrap3.css`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly-bootstrap3.css)
+  - [`unpoly-bootstrap3.min.css`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly-bootstrap3.min.css)
 
 
 0.19.0
