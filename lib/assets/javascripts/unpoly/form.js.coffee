@@ -782,7 +782,6 @@ up.form = (($) ->
   ###
 
   up.on 'change', '[up-toggle]', (event, $field) ->
-    console.log("CHANGE EVENT")
     toggleTargets($field)
 
   up.compiler '[up-toggle]', ($field) ->
