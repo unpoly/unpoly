@@ -39,6 +39,8 @@ up.syntax = (($) ->
   DESTROYABLE_CLASS = 'up-destroyable'
   DESTROYER_KEY = 'up-destroyer'
 
+  compilers = []
+  macros = []
 
   ###*
   Registers a function to be called whenever an element with
@@ -177,6 +179,10 @@ up.syntax = (($) ->
   @function up.compiler
   @param {String} selector
     The selector to match.
+  @param {Number} [options.priority=0]
+    The priority of this compilers.
+    Compilers with a higher priority are run first.
+    Two compilers with the same priority are run in the order they were registered.
   @param {Boolean} [options.batch=false]
     If set to `true` and a fragment insertion contains multiple
     elements matching the selector, `compiler` is only called once
@@ -199,18 +205,69 @@ up.syntax = (($) ->
     is already handled by [`up.destroy`](/up.destroy).
   @stable
   ###
-  compilers = []
+  compiler = (args...) ->
+    insertCompiler(compilers, args...)
 
-  compiler = (selector, args...) ->
+  ###*
+  Registers a [compiler](/up.compiler) that is run before all other compilers.
+
+  You can use `up.macro` to register a compiler that sets other UJS attributes.
+
+  \#\#\#\# Example
+
+  You will sometimes find yourself setting the same combination of UJS attributes again and again:
+
+      <a href="/page1" up-target=".content" up-transition="cross-fade" up-duration="300">Page 1</a>
+      <a href="/page2" up-target=".content" up-transition="cross-fade" up-duration="300">Page 2</a>
+      <a href="/page3" up-target=".content" up-transition="cross-fade" up-duration="300">Page 3</a>
+
+  We would much rather define a new `content-link` attribute that let's us
+  write the same links like this:
+
+      <a href="/page1" content-link>Page 1</a>
+      <a href="/page2" content-link>Page 2</a>
+      <a href="/page3" content-link>Page 3</a>
+
+  We can define the `content-link` attribute by registering a macro that
+  sets the `up-target`, `up-transition` and `up-duration` attributes for us:
+
+      up.macro('[content-link]', function($link) {
+        $link.attr('up-target', '.content');
+        $link.attr('up-transition', 'cross-fade');
+        $link.attr('up-duration', '300');
+      });
+
+  Examples for built-in macros are [`up-dash`](/up-dash) and [`up-expand`](/up-expand).
+
+  @param {String} selector
+    The selector to match.
+  @param {Object} options
+    See options for [`up.compiler`](/up.compiler).
+  @param {Function($element, data)} compiler
+    The function to call when a matching element is inserted.
+    See [`up.compiler`](/up.compiler) for details.
+  @stable
+  ###
+  macro = (args...) ->
+    insertCompiler(macros, args...)
+
+  buildCompiler = (selector, args...) ->
+    callback = args.pop()
+    options = u.options(args[0], priority: 0)
+    selector: selector
+    callback: callback
+    priority: options.priority
+    batch: options.batch
+    keep: options.keep
+
+  insertCompiler = (queue, args...) ->
     # Silently discard any compilers that are registered on unsupported browsers
     return unless up.browser.isSupported()
-    compiler = args.pop()
-    options = u.options(args[0])
-    compilers.push
-      selector: selector
-      callback: compiler
-      batch: options.batch
-      keep: options.keep
+    newCompiler = buildCompiler(args...)
+    index = 0
+    while (oldCompiler = queue[index]) && (oldCompiler.priority <= newCompiler.priority)
+      index += 1
+    queue.splice(index, 0, newCompiler)
 
   applyCompiler = (compiler, $jqueryElement, nativeElement) ->
     up.puts ("Compiling '%s' on %o" unless compiler.isDefault), compiler.selector, nativeElement
@@ -236,20 +293,21 @@ up.syntax = (($) ->
     $skipSubtrees = $(options.skip)
 
     up.log.group "Compiling fragment %o", $fragment.get(0), ->
-      for compiler in compilers
-        $matches = u.findWithSelf($fragment, compiler.selector)
+      for queue in [macros, compilers]
+        for compiler in queue
+          $matches = u.findWithSelf($fragment, compiler.selector)
 
-        $matches = $matches.filter ->
-          $match = $(this)
-          u.all $skipSubtrees, (element) ->
-            $match.closest(element).length == 0
+          $matches = $matches.filter ->
+            $match = $(this)
+            u.all $skipSubtrees, (element) ->
+              $match.closest(element).length == 0
 
-        if $matches.length
-          up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isDefault), compiler.selector, $matches.length, ->
-            if compiler.batch
-              applyCompiler(compiler, $matches, $matches.get())
-            else
-              $matches.each -> applyCompiler(compiler, $(this), this)
+          if $matches.length
+            up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isDefault), compiler.selector, $matches.length, ->
+              if compiler.batch
+                applyCompiler(compiler, $matches, $matches.get())
+              else
+                $matches.each -> applyCompiler(compiler, $(this), this)
 
   ###*
   Runs any destroyers on the given fragment and its descendants.
@@ -325,6 +383,7 @@ up.syntax = (($) ->
   up.on 'up:framework:reset', reset
 
   compiler: compiler
+  macro: macro
   compile: compile
   clean: clean
   data: data
@@ -332,6 +391,7 @@ up.syntax = (($) ->
 )(jQuery)
 
 up.compiler = up.syntax.compiler
+up.macro = up.syntax.macro
 
 up.ready = -> up.util.error('up.ready no longer exists. Please use up.hello instead.')
 up.awaken = -> up.util.error('up.awaken no longer exists. Please use up.compiler instead.')

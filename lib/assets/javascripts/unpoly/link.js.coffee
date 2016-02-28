@@ -430,7 +430,7 @@ up.link = (($) ->
     If omitted, the first contained link will be expanded.
   @stable
   ###
-  up.compiler '[up-expand]', ($area) ->
+  up.macro '[up-expand]', ($area) ->
     $childLinks = $area.find('a, [up-href]')
     if selector = $area.attr('up-expand')
       $childLinks = $childLinks.filter(selector)
@@ -465,7 +465,7 @@ up.link = (($) ->
   @selector [up-dash]
   @stable
   ###
-  up.compiler '[up-dash]', ($element) ->
+  up.macro '[up-dash]', ($element) ->
     target = u.castedAttr($element, 'up-dash')
     newAttrs = {
       'up-preload': 'true',

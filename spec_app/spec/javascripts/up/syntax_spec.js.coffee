@@ -92,6 +92,53 @@ describe 'up.syntax', ->
           expect($baz.attr('up-keep')).toBeMissing()
           expect($bam.attr('up-keep')).toEqual('.partner')
 
+      describe 'with { priority } option', ->
+
+        it 'runs compilers with higher priority first', ->
+          traces = []
+          up.compiler '.element', { priority: 1 }, -> traces.push('foo')
+          up.compiler '.element', { priority: 2 }, -> traces.push('bar')
+          up.compiler '.element', { priority: 0 }, -> traces.push('baz')
+          up.compiler '.element', { priority: 3 }, -> traces.push('bam')
+          up.compiler '.element', { priority: -1 }, -> traces.push('qux')
+          up.hello(affix('.element'))
+          expect(traces).toEqual ['qux', 'baz', 'foo', 'bar', 'bam']
+
+        it 'considers priority-less compilers to be priority zero', ->
+          traces = []
+          up.compiler '.element', { priority: 1 }, -> traces.push('foo')
+          up.compiler '.element', -> traces.push('bar')
+          up.compiler '.element', { priority: -1 }, -> traces.push('baz')
+          up.hello(affix('.element'))
+          expect(traces).toEqual ['baz', 'bar', 'foo']
+
+        it 'runs two compilers with the same priority in the order in which they were registered', ->
+          traces = []
+          up.compiler '.element', { priority: 1 }, -> traces.push('foo')
+          up.compiler '.element', { priority: 1 }, -> traces.push('bar')
+          up.hello(affix('.element'))
+          expect(traces).toEqual ['foo', 'bar']
+
+    describe 'up.macro', ->
+
+      it 'registers compilers that are run before other compilers', ->
+        traces = []
+        up.compiler '.element', { priority: 10 }, -> traces.push('foo')
+        up.compiler '.element', { priority: -1000 }, -> traces.push('bar')
+        up.macro '.element', -> traces.push('baz')
+        up.hello(affix('.element'))
+        expect(traces).toEqual ['baz', 'bar' , 'foo']
+
+      it 'allows to macros to have priorities of their own', ->
+        traces = []
+        up.macro '.element', { priority: 1 }, -> traces.push('foo')
+        up.macro '.element', { priority: 2 }, -> traces.push('bar')
+        up.macro '.element', { priority: 0 }, -> traces.push('baz')
+        up.macro '.element', { priority: 3 }, -> traces.push('bam')
+        up.macro '.element', { priority: -1 }, -> traces.push('qux')
+        up.hello(affix('.element'))
+        expect(traces).toEqual ['qux', 'baz', 'foo', 'bar', 'bam']
+
     describe 'up.hello', ->
 
       it 'should have tests'

@@ -10,6 +10,9 @@ Unreleased
 
 ### Compatible changes
 
+- New function `up.macro`. This registers a [compiler](/up.compiler) that is run before all other compilers.
+- [`up.compiler`](/up.compiler) has a new options `{ priority }`. Compilers with higher priorities are run first.
+
 ### Breaking changes
 
 - `up-toggle` has been renamed to `up-switch`
