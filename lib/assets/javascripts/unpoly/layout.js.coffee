@@ -505,6 +505,22 @@ up.layout = (($) ->
   @stable
   ###
 
+
+  ###*
+  Marks this element as a navigation anchored to the right edge of the screen
+  using `position: fixed` or `position:absolute`.
+
+  [`up.modal`](/up.modal) will move anchored elements to the left so they
+  don't appear to move when a modal dialog is opened or closed.
+
+  \#\#\#\# Example
+
+      <div class="bottom-nav" up-fixed="bottom">...</div>
+
+  @selector [up-anchored=right]
+  @stable
+  ###
+
   up.on 'up:framework:reset', reset
 
   knife: eval(Knife?.point)
