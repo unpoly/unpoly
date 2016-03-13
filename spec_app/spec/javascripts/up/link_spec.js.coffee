@@ -145,20 +145,35 @@ describe 'up.link', ->
         describe 'with { confirm } option', ->
 
           it 'follows the link after the user OKs a confirmation dialog', ->
-            deferred = $.Deferred()
-            spyOn(up.browser, 'confirm').and.returnValue(deferred)
             spyOn(up, 'replace')
+            spyOn(window, 'confirm').and.returnValue(true)
             $link = affix('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Do you really want to go there?')
-            expect(up.browser.confirm).toHaveBeenCalledWith('Do you really want to go there?')
-            expect(up.replace).not.toHaveBeenCalled()
-            deferred.resolve()
+            expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
             expect(up.replace).toHaveBeenCalled()
+
+          it 'does not follow the link if the user cancels the confirmation dialog', ->
+            spyOn(up, 'replace')
+            spyOn(window, 'confirm').and.returnValue(false)
+            $link = affix('a[href="/danger"][up-target=".middle"]')
+            up.follow($link, confirm: 'Do you really want to go there?')
+            expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
+            expect(up.replace).not.toHaveBeenCalled()
 
           it 'does not show a confirmation dialog if the option is not a present string', ->
             spyOn(up, 'replace')
+            spyOn(window, 'confirm')
             $link = affix('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: '')
+            expect(window.confirm).not.toHaveBeenCalled()
+            expect(up.replace).toHaveBeenCalled()
+
+          it 'does not show a confirmation dialog when preloading', ->
+            spyOn(up, 'replace')
+            spyOn(window, 'confirm')
+            $link = affix('a[href="/danger"][up-target=".middle"]')
+            up.follow($link, confirm: 'Are you sure?', preload: true)
+            expect(window.confirm).not.toHaveBeenCalled()
             expect(up.replace).toHaveBeenCalled()
 
       describeFallback 'canPushState', ->

@@ -196,10 +196,12 @@ up.browser = (($) ->
   ###*
   @function up,browser.confirm
   @return {Promise}
+  @param {String} options.confirm
+  @param {Boolean} options.preload
   @internal
   ###
-  confirm = (message) ->
-    if u.isBlank(message) || confirm(message)
+  confirm = (options) ->
+    if options.preload || u.isBlank(options.confirm) || window.confirm(options.confirm)
       u.resolvedPromise()
     else
       u.unresolvablePromise()

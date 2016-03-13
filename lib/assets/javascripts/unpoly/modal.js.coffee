@@ -308,7 +308,7 @@ up.modal = (($) ->
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     animateOptions = up.motion.animateOptions(options, $link)
 
-    up.browser.confirm(options.confirm).then ->
+    up.browser.confirm(options).then ->
       if up.bus.nobodyPrevents('up:modal:open', url: url, message: 'Opening modal')
         wasOpen = isOpen()
         close(animation: false) if wasOpen

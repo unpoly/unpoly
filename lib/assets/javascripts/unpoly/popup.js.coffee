@@ -212,7 +212,7 @@ up.popup = (($) ->
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     animateOptions = up.motion.animateOptions(options, $link)
 
-    up.browser.confirm(options.confirm).then ->
+    up.browser.confirm(options).then ->
       if up.bus.nobodyPrevents('up:popup:open', url: url, message: 'Opening popup')
         wasOpen = isOpen()
         close(animation: false) if wasOpen
