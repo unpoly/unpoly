@@ -27,7 +27,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.memoize
     @internal
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_PROMISE_KEY, all, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, each, error, escapePressed, except, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, intersect, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, all, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, each, error, escapePressed, except, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, intersect, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, pluckData, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -1067,9 +1067,9 @@ that might save you from loading something like [Underscore.js](http://underscor
       $element.css(lastFrame);
       deferred.then(withoutCompositing);
       deferred.then(withoutTransition);
-      $element.data(ANIMATION_PROMISE_KEY, deferred);
+      $element.data(ANIMATION_DEFERRED_KEY, deferred);
       deferred.then(function() {
-        return $element.removeData(ANIMATION_PROMISE_KEY);
+        return $element.removeData(ANIMATION_DEFERRED_KEY);
       });
       endTimeout = setTimeout((function() {
         return deferred.resolve();
@@ -1079,7 +1079,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       });
       return deferred;
     };
-    ANIMATION_PROMISE_KEY = 'up-animation-promise';
+    ANIMATION_DEFERRED_KEY = 'up-animation-deferred';
 
     /**
     Completes the animation for  the given element by jumping
@@ -1097,7 +1097,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     finishCssAnimate = function(elementOrSelector) {
       return $(elementOrSelector).each(function() {
         var existingAnimation;
-        if (existingAnimation = $(this).data(ANIMATION_PROMISE_KEY)) {
+        if (existingAnimation = pluckData(this, ANIMATION_DEFERRED_KEY)) {
           return existingAnimation.resolve();
         }
       });
@@ -1380,12 +1380,12 @@ that might save you from loading something like [Underscore.js](http://underscor
     resolvableWhen = function() {
       var deferreds, joined;
       deferreds = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      joined = $.when.apply($, deferreds);
-      joined.resolve = function() {
+      joined = $.when.apply($, [resolvedDeferred()].concat(slice.call(deferreds)));
+      joined.resolve = memoize(function() {
         return each(deferreds, function(deferred) {
-          return typeof deferred.resolve === "function" ? deferred.resolve() : void 0;
+          return deferred.resolve();
         });
-      };
+      });
       return joined;
     };
 
@@ -1790,6 +1790,13 @@ that might save you from loading something like [Underscore.js](http://underscor
       $error.text(asString);
       throw new Error(asString);
     };
+    pluckData = function(elementOrSelector, key) {
+      var $element, value;
+      $element = $(elementOrSelector);
+      value = $element.data(key);
+      $element.removeData(key);
+      return value;
+    };
     return {
       requestDataAsArray: requestDataAsArray,
       requestDataAsQuery: requestDataAsQuery,
@@ -1875,7 +1882,8 @@ that might save you from loading something like [Underscore.js](http://underscor
       cache: cache,
       unwrapElement: unwrapElement,
       multiSelector: multiSelector,
-      error: error
+      error: error,
+      pluckData: pluckData
     };
   })($);
 
@@ -2750,10 +2758,12 @@ later.
   var slice = [].slice;
 
   up.syntax = (function($) {
-    var DESTROYABLE_CLASS, DESTROYER_KEY, applyCompiler, clean, compile, compiler, compilers, data, reset, snapshot, u;
+    var DESTROYABLE_CLASS, DESTROYER_KEY, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, insertCompiler, macro, macros, reset, snapshot, u;
     u = up.util;
     DESTROYABLE_CLASS = 'up-destroyable';
     DESTROYER_KEY = 'up-destroyer';
+    compilers = [];
+    macros = [];
 
     /**
     Registers a function to be called whenever an element with
@@ -2892,6 +2902,10 @@ later.
     @function up.compiler
     @param {String} selector
       The selector to match.
+    @param {Number} [options.priority=0]
+      The priority of this compilers.
+      Compilers with a higher priority are run first.
+      Two compilers with the same priority are run in the order they were registered.
     @param {Boolean} [options.batch=false]
       If set to `true` and a fragment insertion contains multiple
       elements matching the selector, `compiler` is only called once
@@ -2914,21 +2928,84 @@ later.
       is already handled by [`up.destroy`](/up.destroy).
     @stable
      */
-    compilers = [];
     compiler = function() {
-      var args, options, selector;
+      var args;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      return insertCompiler.apply(null, [compilers].concat(slice.call(args)));
+    };
+
+    /**
+    Registers a [compiler](/up.compiler) that is run before all other compilers.
+    
+    You can use `up.macro` to register a compiler that sets other UJS attributes.
+    
+    \#\#\#\# Example
+    
+    You will sometimes find yourself setting the same combination of UJS attributes again and again:
+    
+        <a href="/page1" up-target=".content" up-transition="cross-fade" up-duration="300">Page 1</a>
+        <a href="/page2" up-target=".content" up-transition="cross-fade" up-duration="300">Page 2</a>
+        <a href="/page3" up-target=".content" up-transition="cross-fade" up-duration="300">Page 3</a>
+    
+    We would much rather define a new `content-link` attribute that let's us
+    write the same links like this:
+    
+        <a href="/page1" content-link>Page 1</a>
+        <a href="/page2" content-link>Page 2</a>
+        <a href="/page3" content-link>Page 3</a>
+    
+    We can define the `content-link` attribute by registering a macro that
+    sets the `up-target`, `up-transition` and `up-duration` attributes for us:
+    
+        up.macro('[content-link]', function($link) {
+          $link.attr('up-target', '.content');
+          $link.attr('up-transition', 'cross-fade');
+          $link.attr('up-duration', '300');
+        });
+    
+    Examples for built-in macros are [`up-dash`](/up-dash) and [`up-expand`](/up-expand).
+    
+    @param {String} selector
+      The selector to match.
+    @param {Object} options
+      See options for [`up.compiler`](/up.compiler).
+    @param {Function($element, data)} compiler
+      The function to call when a matching element is inserted.
+      See [`up.compiler`](/up.compiler) for details.
+    @stable
+     */
+    macro = function() {
+      var args;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      return insertCompiler.apply(null, [macros].concat(slice.call(args)));
+    };
+    buildCompiler = function() {
+      var args, callback, options, selector;
       selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      callback = args.pop();
+      options = u.options(args[0], {
+        priority: 0
+      });
+      return {
+        selector: selector,
+        callback: callback,
+        priority: options.priority,
+        batch: options.batch,
+        keep: options.keep
+      };
+    };
+    insertCompiler = function() {
+      var args, index, newCompiler, oldCompiler, queue;
+      queue = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (!up.browser.isSupported()) {
         return;
       }
-      compiler = args.pop();
-      options = u.options(args[0]);
-      return compilers.push({
-        selector: selector,
-        callback: compiler,
-        batch: options.batch,
-        keep: options.keep
-      });
+      newCompiler = buildCompiler.apply(null, args);
+      index = 0;
+      while ((oldCompiler = queue[index]) && (oldCompiler.priority <= newCompiler.priority)) {
+        index += 1;
+      }
+      return queue.splice(index, 0, newCompiler);
     };
     applyCompiler = function(compiler, $jqueryElement, nativeElement) {
       var destroyer, value;
@@ -2958,31 +3035,40 @@ later.
       options = u.options(options);
       $skipSubtrees = $(options.skip);
       return up.log.group("Compiling fragment %o", $fragment.get(0), function() {
-        var $matches, i, len, results;
+        var $matches, i, len, queue, ref, results;
+        ref = [macros, compilers];
         results = [];
-        for (i = 0, len = compilers.length; i < len; i++) {
-          compiler = compilers[i];
-          $matches = u.findWithSelf($fragment, compiler.selector);
-          $matches = $matches.filter(function() {
-            var $match;
-            $match = $(this);
-            return u.all($skipSubtrees, function(element) {
-              return $match.closest(element).length === 0;
-            });
-          });
-          if ($matches.length) {
-            results.push(up.log.group((!compiler.isDefault ? "Compiling '%s' on %d element(s)" : void 0), compiler.selector, $matches.length, function() {
-              if (compiler.batch) {
-                return applyCompiler(compiler, $matches, $matches.get());
-              } else {
-                return $matches.each(function() {
-                  return applyCompiler(compiler, $(this), this);
+        for (i = 0, len = ref.length; i < len; i++) {
+          queue = ref[i];
+          results.push((function() {
+            var j, len1, results1;
+            results1 = [];
+            for (j = 0, len1 = queue.length; j < len1; j++) {
+              compiler = queue[j];
+              $matches = u.findWithSelf($fragment, compiler.selector);
+              $matches = $matches.filter(function() {
+                var $match;
+                $match = $(this);
+                return u.all($skipSubtrees, function(element) {
+                  return $match.closest(element).length === 0;
                 });
+              });
+              if ($matches.length) {
+                results1.push(up.log.group((!compiler.isDefault ? "Compiling '%s' on %d element(s)" : void 0), compiler.selector, $matches.length, function() {
+                  if (compiler.batch) {
+                    return applyCompiler(compiler, $matches, $matches.get());
+                  } else {
+                    return $matches.each(function() {
+                      return applyCompiler(compiler, $(this), this);
+                    });
+                  }
+                }));
+              } else {
+                results1.push(void 0);
               }
-            }));
-          } else {
-            results.push(void 0);
-          }
+            }
+            return results1;
+          })());
         }
         return results;
       });
@@ -3076,6 +3162,7 @@ later.
     up.on('up:framework:reset', reset);
     return {
       compiler: compiler,
+      macro: macro,
       compile: compile,
       clean: clean,
       data: data
@@ -3083,6 +3170,8 @@ later.
   })(jQuery);
 
   up.compiler = up.syntax.compiler;
+
+  up.macro = up.syntax.macro;
 
   up.ready = function() {
     return up.util.error('up.ready no longer exists. Please use up.hello instead.');
@@ -3894,6 +3983,21 @@ This modules contains functions to scroll the viewport and reveal contained elem
         <div class="bottom-nav" up-fixed="bottom">...</div>
     
     @selector [up-fixed=bottom]
+    @stable
+     */
+
+    /**
+    Marks this element as a navigation anchored to the right edge of the screen
+    using `position: fixed` or `position:absolute`.
+    
+    [`up.modal`](/up.modal) will move anchored elements to the left so they
+    don't appear to move when a modal dialog is opened or closed.
+    
+    \#\#\#\# Example
+    
+        <div class="bottom-nav" up-fixed="bottom">...</div>
+    
+    @selector [up-anchored=right]
     @stable
      */
     up.on('up:framework:reset', reset);
@@ -4851,7 +4955,7 @@ or [transitions](/up.transition) using Javascript or CSS.
 
 (function() {
   up.motion = (function($) {
-    var GHOSTING_PROMISE_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, ensureMorphable, findAnimation, finish, finishGhosting, isEnabled, morph, none, prependCopy, reset, resolvableWhen, skipMorph, snapshot, transition, transitions, u, withGhosts;
+    var GHOSTING_DEFERRED_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, ensureMorphable, findAnimation, finish, finishGhosting, isEnabled, morph, none, prependCopy, reset, resolvableWhen, skipMorph, snapshot, transition, transitions, u, withGhosts;
     u = up.util;
     animations = {};
     defaultAnimations = {};
@@ -5019,9 +5123,9 @@ or [transitions](/up.transition) using Javascript or CSS.
     findAnimation = function(name) {
       return animations[name] || u.error("Unknown animation %o", name);
     };
-    GHOSTING_PROMISE_KEY = 'up-ghosting-promise';
+    GHOSTING_DEFERRED_KEY = 'up-ghosting-deferred';
     withGhosts = function($old, $new, options, block) {
-      var $viewport, newCopy, newScrollTop, oldCopy, oldScrollTop, promise, showNew;
+      var $viewport, deferred, newCopy, newScrollTop, oldCopy, oldScrollTop, showNew;
       oldCopy = void 0;
       newCopy = void 0;
       oldScrollTop = void 0;
@@ -5031,8 +5135,6 @@ or [transitions](/up.transition) using Javascript or CSS.
         display: 'none'
       }, function() {
         oldCopy = prependCopy($old, $viewport);
-        oldCopy.$ghost.addClass('up-destroying');
-        oldCopy.$bounds.addClass('up-destroying');
         return oldScrollTop = $viewport.scrollTop();
       });
       u.temporaryCss($old, {
@@ -5047,17 +5149,17 @@ or [transitions](/up.transition) using Javascript or CSS.
       showNew = u.temporaryCss($new, {
         opacity: '0'
       });
-      promise = block(oldCopy.$ghost, newCopy.$ghost);
-      $old.data(GHOSTING_PROMISE_KEY, promise);
-      $new.data(GHOSTING_PROMISE_KEY, promise);
-      promise.then(function() {
-        $old.removeData(GHOSTING_PROMISE_KEY);
-        $new.removeData(GHOSTING_PROMISE_KEY);
+      deferred = block(oldCopy.$ghost, newCopy.$ghost);
+      $old.data(GHOSTING_DEFERRED_KEY, deferred);
+      $new.data(GHOSTING_DEFERRED_KEY, deferred);
+      deferred.then(function() {
+        $old.removeData(GHOSTING_DEFERRED_KEY);
+        $new.removeData(GHOSTING_DEFERRED_KEY);
         showNew();
         oldCopy.$bounds.remove();
         return newCopy.$bounds.remove();
       });
-      return promise;
+      return deferred;
     };
 
     /**
@@ -5073,19 +5175,19 @@ or [transitions](/up.transition) using Javascript or CSS.
     @stable
      */
     finish = function(elementOrSelector) {
-      return $(elementOrSelector).each(function() {
-        var $element;
-        $element = $(this);
-        u.finishCssAnimate($element);
-        return finishGhosting($element);
-      });
+      var $element;
+      $element = $(elementOrSelector);
+      u.finishCssAnimate($element);
+      return finishGhosting($element);
     };
-    finishGhosting = function($element) {
-      var existingGhosting;
-      if (existingGhosting = $element.data(GHOSTING_PROMISE_KEY)) {
-        up.puts('Canceling existing ghosting on %o', $element);
-        return typeof existingGhosting.resolve === "function" ? existingGhosting.resolve() : void 0;
-      }
+    finishGhosting = function($collection) {
+      return $collection.each(function() {
+        var $element, existingGhosting;
+        $element = $(this);
+        if (existingGhosting = u.pluckData($element, GHOSTING_DEFERRED_KEY)) {
+          return existingGhosting.resolve();
+        }
+      });
     };
     assertIsDeferred = function(object, source) {
       if (u.isDeferred(object)) {
@@ -5167,7 +5269,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       $new = $(target);
       ensureMorphable($old, transitionOrName);
       ensureMorphable($new, transitionOrName);
-      return up.log.group((transitionOrName ? 'Morphing %o to %o (using %o)' : void 0), source, target, transitionOrName, function() {
+      return up.log.group((transitionOrName ? 'Morphing %o to %o (using %s)' : void 0), $old.get(0), $new.get(0), transitionOrName, function() {
         var animation, parsedOptions, parts, transition;
         parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source');
         parsedOptions = u.extend(parsedOptions, animateOptions(options));
@@ -6533,7 +6635,7 @@ Read on
       If omitted, the first contained link will be expanded.
     @stable
      */
-    up.compiler('[up-expand]', function($area) {
+    up.macro('[up-expand]', function($area) {
       var $childLinks, attribute, i, len, link, name, newAttrs, ref, selector, upAttributePattern;
       $childLinks = $area.find('a, [up-href]');
       if (selector = $area.attr('up-expand')) {
@@ -6576,7 +6678,7 @@ Read on
     @selector [up-dash]
     @stable
      */
-    up.compiler('[up-dash]', function($element) {
+    up.macro('[up-dash]', function($element) {
       var newAttrs, target;
       target = u.castedAttr($element, 'up-dash');
       newAttrs = {
@@ -6624,7 +6726,7 @@ open dialogs with sub-forms, etc. all without losing form state.
   var slice = [].slice;
 
   up.form = (function($) {
-    var autosubmit, config, currentValuesForToggle, observe, observeForm, reset, resolveValidateTarget, submit, toggleTargets, u, validate;
+    var autosubmit, config, currentValuesForSwitch, observe, observeForm, reset, resolveValidateTarget, submit, switchTargets, u, validate;
     u = up.util;
 
     /**
@@ -7005,7 +7107,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       promise = up.submit($form, options);
       return promise;
     };
-    currentValuesForToggle = function($field) {
+    currentValuesForSwitch = function($field) {
       var $checkedButton, value, values;
       values = void 0;
       if ($field.is('input[type=checkbox]')) {
@@ -7031,7 +7133,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       }
       return values;
     };
-    currentValuesForToggle = function($field) {
+    currentValuesForSwitch = function($field) {
       var $checkedButton, meta, value, values;
       if ($field.is('input[type=checkbox]')) {
         if ($field.is(':checked')) {
@@ -7067,26 +7169,26 @@ open dialogs with sub-forms, etc. all without losing form state.
     /**
     Shows or hides a target selector depending on the value.
     
-    See [`[up-toggle]`](/up-toggle) for more documentation and examples.
+    See [`[up-switch]`](/up-switch) for more documentation and examples.
     
     This function does not currently have a very useful API outside
-    of our use for `up-toggle`'s UJS behavior, that's why it's currently
+    of our use for `up-switch`'s UJS behavior, that's why it's currently
     still marked `@internal`.
     
-    @function up.form.toggle
+    @function up.form.switchTargets
     @param {String|Element|jQuery} fieldOrSelector
     @param {String} [options.target]
-      The target selectors to toggle.
-      Defaults to an `up-toggle` attribute on the given field.
+      The target selectors to switch.
+      Defaults to an `up-switch` attribute on the given field.
     @internal
      */
-    toggleTargets = function(fieldOrSelector, options) {
+    switchTargets = function(fieldOrSelector, options) {
       var $field, fieldValues, targets;
       $field = $(fieldOrSelector);
       options = u.options(options);
-      targets = u.option(options.target, $field.attr('up-toggle'));
-      u.isPresent(targets) || u.error("No toggle target given for %o", $field.get(0));
-      fieldValues = currentValuesForToggle($field);
+      targets = u.option(options.target, $field.attr('up-switch'));
+      u.isPresent(targets) || u.error("No switch target given for %o", $field.get(0));
+      fieldValues = currentValuesForSwitch($field);
       return $(targets).each(function() {
         var $target, hideValues, show, showValues;
         $target = $(this);
@@ -7359,9 +7461,9 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     \#\#\#\# Example
     
-    The triggering input gets an `up-toggle` attribute with a selector for the elements to show or hide:
+    The triggering input gets an `up-switch` attribute with a selector for the elements to show or hide:
     
-        <select name="advancedness" up-toggle=".target">
+        <select name="advancedness" up-switch=".target">
           <option value="basic">Basic parts</option>
           <option value="advanced">Advanced parts</option>
           <option value="very-advanced">Very advanced parts</option>
@@ -7383,7 +7485,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     For checkboxes you can also use the pseudo-values `:checked` or `:unchecked` like so:
     
-        <input type="checkbox" name="flag" up-toggle=".target">
+        <input type="checkbox" name="flag" up-switch=".target">
     
         <div class="target" up-show-for=":checked">
           only shown when checkbox is checked
@@ -7392,20 +7494,20 @@ open dialogs with sub-forms, etc. all without losing form state.
     You can also use the pseudo-values `:blank` to match an empty input value,
     or `:present` to match a non-empty input value:
     
-        <input type="text" name="email" up-toggle=".target">
+        <input type="text" name="email" up-switch=".target">
     
         <div class="target" up-show-for=":blank">
           please enter an email address
         </div>
     
-    @selector [up-toggle]
+    @selector [up-switch]
     @stable
      */
 
     /**
     Show this element only if a form field has a given value.
     
-    See [`[up-toggle]`](/up-toggle) for more documentation and examples.
+    See [`[up-switch]`](/up-switch) for more documentation and examples.
     
     @selector [up-show-for]
     @param up-show-for
@@ -7416,19 +7518,18 @@ open dialogs with sub-forms, etc. all without losing form state.
     /**
     Hide this element if a form field has a given value.
     
-    See [`[up-toggle]`](/up-toggle) for more documentation and examples.
+    See [`[up-switch]`](/up-switch) for more documentation and examples.
     
     @selector [up-hide-for]
     @param up-hide-for
       A space-separated list of values for which to hide this element.
     @stable
      */
-    up.on('change', '[up-toggle]', function(event, $field) {
-      console.log("CHANGE EVENT");
-      return toggleTargets($field);
+    up.on('change', '[up-switch]', function(event, $field) {
+      return switchTargets($field);
     });
-    up.compiler('[up-toggle]', function($field) {
-      return toggleTargets($field);
+    up.compiler('[up-switch]', function($field) {
+      return switchTargets($field);
     });
 
     /**
@@ -7500,7 +7601,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       submit: submit,
       observe: observe,
       validate: validate,
-      toggleTargets: toggleTargets
+      switchTargets: switchTargets
     };
   })(jQuery);
 

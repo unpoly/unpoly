@@ -10,6 +10,15 @@ Unreleased
 
 ### Compatible changes
 
+
+### Breaking changes
+
+
+0.21.0
+------
+
+### Compatible changes
+
 - New function `up.macro`. This registers a [compiler](/up.compiler) that is run before all other compilers.
 - [`up.compiler`](/up.compiler) has a new options `{ priority }`. Compilers with higher priorities are run first.
 - Fix a bug where trying to apply another transition on an element could throw a *Maximum call stack exceeded*
