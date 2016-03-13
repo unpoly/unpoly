@@ -166,6 +166,7 @@ up.link = (($) ->
     $link = $(linkOrSelector)
 
     options = u.options(options)
+
     url = u.option($link.attr('up-href'), $link.attr('href'))
     target = u.option(options.target, $link.attr('up-target'), 'body')
     options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'), 'body')

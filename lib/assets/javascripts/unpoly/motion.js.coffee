@@ -189,7 +189,7 @@ up.motion = (($) ->
   findAnimation = (name) ->
     animations[name] or u.error("Unknown animation %o", name)
     
-  GHOSTING_PROMISE_KEY = 'up-ghosting-promise'
+  GHOSTING_DEFERRED_KEY = 'up-ghosting-deferred'
 
   withGhosts = ($old, $new, options, block) ->
 
@@ -203,8 +203,6 @@ up.motion = (($) ->
     u.temporaryCss $new, display: 'none', ->
       # Within this block, $new is hidden but $old is visible
       oldCopy = prependCopy($old, $viewport)
-      oldCopy.$ghost.addClass('up-destroying')
-      oldCopy.$bounds.addClass('up-destroying')
       # Remember the previous scroll position in case we will reveal $new below.
       oldScrollTop = $viewport.scrollTop()
       # $viewport.scrollTop(oldScrollTop + 1)
@@ -231,24 +229,24 @@ up.motion = (($) ->
     # shown again, causing a flicker while the browser is painting.
     showNew = u.temporaryCss($new, opacity: '0')
 
-    promise = block(oldCopy.$ghost, newCopy.$ghost)
+    deferred = block(oldCopy.$ghost, newCopy.$ghost)
 
     # Make a way to look at $old and $new and see if an animation is
     # already in progress. If someone attempted a new animation on the
     # same elements, the stored promises would be resolved by the second
     # animation call, making the transition jump to the last frame instantly.
-    $old.data(GHOSTING_PROMISE_KEY, promise)
-    $new.data(GHOSTING_PROMISE_KEY, promise)
+    $old.data(GHOSTING_DEFERRED_KEY, deferred)
+    $new.data(GHOSTING_DEFERRED_KEY, deferred)
     
-    promise.then ->
-      $old.removeData(GHOSTING_PROMISE_KEY)
-      $new.removeData(GHOSTING_PROMISE_KEY)
+    deferred.then ->
+      $old.removeData(GHOSTING_DEFERRED_KEY)
+      $new.removeData(GHOSTING_DEFERRED_KEY)
       # Now that the transition is over we show $new again.
       showNew()
       oldCopy.$bounds.remove()
       newCopy.$bounds.remove()
 
-    promise
+    deferred
       
   ###*
   Completes all [animations](/up.animate) and [transitions](/up.morph)
@@ -263,15 +261,15 @@ up.motion = (($) ->
   @stable
   ###
   finish = (elementOrSelector) ->
-    $(elementOrSelector).each ->
+    $element = $(elementOrSelector)
+    u.finishCssAnimate($element)
+    finishGhosting($element)
+
+  finishGhosting = ($collection) ->
+    $collection.each ->
       $element = $(this)
-      u.finishCssAnimate($element)
-      finishGhosting($element)
-  
-  finishGhosting = ($element) ->
-    if existingGhosting = $element.data(GHOSTING_PROMISE_KEY)
-      up.puts('Canceling existing ghosting on %o', $element)
-      existingGhosting.resolve?()
+      if existingGhosting = u.pluckData($element, GHOSTING_DEFERRED_KEY)
+        existingGhosting.resolve()
       
   assertIsDeferred = (object, source) ->
     if u.isDeferred(object)
@@ -352,7 +350,7 @@ up.motion = (($) ->
     ensureMorphable($old, transitionOrName)
     ensureMorphable($new, transitionOrName)
 
-    up.log.group ('Morphing %o to %o (using %o)' if transitionOrName), source, target, transitionOrName, ->
+    up.log.group ('Morphing %o to %o (using %s)' if transitionOrName), $old.get(0), $new.get(0), transitionOrName, ->
 
       parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source')
       parsedOptions = u.extend(parsedOptions, animateOptions(options))

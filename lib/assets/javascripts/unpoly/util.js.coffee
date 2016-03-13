@@ -901,8 +901,8 @@ up.util = (($) ->
     $element.css(lastFrame)
     deferred.then(withoutCompositing)
     deferred.then(withoutTransition)
-    $element.data(ANIMATION_PROMISE_KEY, deferred)
-    deferred.then(-> $element.removeData(ANIMATION_PROMISE_KEY))
+    $element.data(ANIMATION_DEFERRED_KEY, deferred)
+    deferred.then(-> $element.removeData(ANIMATION_DEFERRED_KEY))
     endTimeout = setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
     deferred.then(-> clearTimeout(endTimeout)) # clean up in case we're canceled
     # Return the whole deferred and not just return a thenable.
@@ -910,7 +910,7 @@ up.util = (($) ->
     # by resolving the deferred.
     deferred
 
-  ANIMATION_PROMISE_KEY = 'up-animation-promise'
+  ANIMATION_DEFERRED_KEY = 'up-animation-deferred'
 
   ###*
   Completes the animation for  the given element by jumping
@@ -927,7 +927,7 @@ up.util = (($) ->
   ###
   finishCssAnimate = (elementOrSelector) ->
     $(elementOrSelector).each ->
-      if existingAnimation = $(this).data(ANIMATION_PROMISE_KEY)
+      if existingAnimation = pluckData(this, ANIMATION_DEFERRED_KEY)
         existingAnimation.resolve()
 
   ###*
@@ -1160,9 +1160,13 @@ up.util = (($) ->
   @internal
   ###
   resolvableWhen = (deferreds...) ->
-    joined = $.when(deferreds...)
-    joined.resolve = ->
-      each deferreds, (deferred) -> deferred.resolve?()
+    # Pass an additional resolved deferred to $.when so $.when  will
+    # not return the given deferred if only one deferred is passed.
+    joined = $.when(resolvedDeferred(), deferreds...)
+    joined.resolve = memoize(->
+      each deferreds, (deferred) ->
+        deferred.resolve()
+    )
     joined
 
 #  resolvableSequence = (first, callbacks...) ->
@@ -1500,6 +1504,12 @@ up.util = (($) ->
     $error.text(asString)
     throw new Error(asString)
 
+  pluckData = (elementOrSelector, key) ->
+    $element = $(elementOrSelector)
+    value = $element.data(key)
+    $element.removeData(key)
+    value
+
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
   offsetParent: offsetParent
@@ -1587,6 +1597,7 @@ up.util = (($) ->
   unwrapElement: unwrapElement
   multiSelector: multiSelector
   error: error
+  pluckData: pluckData
 
 )($)
 

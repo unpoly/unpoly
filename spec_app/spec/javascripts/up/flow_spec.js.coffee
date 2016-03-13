@@ -32,11 +32,20 @@ describe 'up.flow', ->
             expect($('.after')).toHaveText('old-after')
             done()
 
-        it 'sends an X-Up-Target HTTP headers along with the request', ->
+        it 'sends an X-Up-Target HTTP header along with the request', ->
           up.replace('.middle', '/path')
           request = @lastRequest()
-          console.log(request.requestHeaders)
           expect(request.requestHeaders['X-Up-Target']).toEqual('.middle')
+
+        it 'returns a promise that will be resolved once the server response was received and the fragments were swapped', ->
+          resolution = jasmine.createSpy()
+          promise = up.replace('.middle', '/path')
+          promise.then(resolution)
+          expect(resolution).not.toHaveBeenCalled()
+          expect($('.middle')).toHaveText('old-middle')
+          @respond()
+          expect(resolution).toHaveBeenCalled()
+          expect($('.middle')).toHaveText('new-middle')
 
         describe 'with { data } option', ->
 
@@ -457,6 +466,78 @@ describe 'up.flow', ->
         expect($(elements.get(0)).text()).toEqual('text')
         expect($(elements.get(1)).text()).toEqual('')
 
+      describe 'with { transition } option', ->
+
+        it 'morphs between the old and new element', (done) ->
+          affix('.element').text('version 1')
+          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 50)
+
+          $ghost1 = $('.element.up-ghost:contains("version 1")')
+          expect($ghost1).toHaveLength(1)
+          expect($ghost1.css('opacity')).toBeAround(1.0, 0.1)
+
+          $ghost2 = $('.element.up-ghost:contains("version 2")')
+          expect($ghost2).toHaveLength(1)
+          expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
+
+          @setTimer 40, ->
+            expect($ghost1.css('opacity')).toBeAround(0.0, 0.2)
+            expect($ghost2.css('opacity')).toBeAround(1.0, 0.2)
+            done()
+
+        it 'marks the old fragment and its ghost as .up-destroying during the transition', ->
+          affix('.element').text('version 1')
+          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
+
+          $version1 = $('.element:not(.up-ghost):contains("version 1")')
+          $version1Ghost = $('.element.up-ghost:contains("version 1")')
+          expect($version1).toHaveLength(1)
+          expect($version1Ghost).toHaveLength(1)
+          expect($version1).toHaveClass('up-destroying')
+          expect($version1Ghost).toHaveClass('up-destroying')
+
+          $version2 = $('.element:not(.up-ghost):contains("version 2")')
+          $version2Ghost = $('.element.up-ghost:contains("version 2")')
+          expect($version2).toHaveLength(1)
+          expect($version2Ghost).toHaveLength(1)
+          expect($version2).not.toHaveClass('up-destroying')
+          expect($version2Ghost).not.toHaveClass('up-destroying')
+
+        it 'cancels an existing transition by instantly jumping to the last frame', ->
+          affix('.element').text('version 1')
+          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
+
+          $ghost1 = $('.element.up-ghost:contains("version 1")')
+          expect($ghost1).toHaveLength(1)
+          expect($ghost1.css('opacity')).toBeAround(1.0, 0.1)
+
+          $ghost2 = $('.element.up-ghost:contains("version 2")')
+          expect($ghost2).toHaveLength(1)
+          expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
+
+          up.extract('.element', '<div class="element">version 3</div>', transition: 'cross-fade', duration: 200)
+
+          $ghost1 = $('.element.up-ghost:contains("version 1")')
+          expect($ghost1).toHaveLength(0)
+
+          $ghost2 = $('.element.up-ghost:contains("version 2")')
+          expect($ghost2).toHaveLength(1)
+          expect($ghost2.css('opacity')).toBeAround(1.0, 0.1)
+
+          $ghost3 = $('.element.up-ghost:contains("version 3")')
+          expect($ghost3).toHaveLength(1)
+          expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
+
+        it 'delays the resolution of the returned promise until the transition is over', (done) ->
+          affix('.element').text('version 1')
+          resolution = jasmine.createSpy()
+          promise = up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 30)
+          promise.then(resolution)
+          expect(resolution).not.toHaveBeenCalled()
+          @setTimer 50, ->
+            expect(resolution).toHaveBeenCalled()
+            done()
+
       describe 'handling of [up-keep] elements', ->
 
         squish = (string) ->
@@ -508,8 +589,6 @@ describe 'up.flow', ->
             affix('.keeper[up-keep]').text('old-inside')
             up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
             expect($('.keeper')).toHaveText('old-inside')
-
-          it "does not compile the kept element a second time"
 
           it "only emits an event up:fragment:kept, but not an event up:fragment:inserted", ->
             insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')

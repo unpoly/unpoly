@@ -245,6 +245,82 @@ describe 'up.util', ->
         string = up.util.requestDataAsQuery({ 'my+key': 'my+value' })
         expect(string).toEqual('my%2Bkey=my%2Bvalue')
 
+    describe 'up.util.resolvableWhen', ->
+
+      it 'returns a promise that is resolved when all the given deferreds are resolved', ->
+        one = jasmine.createSpy()
+        two = jasmine.createSpy()
+        both = jasmine.createSpy()
+        oneDeferred = $.Deferred()
+        oneDeferred.then(one)
+        twoDeferred = $.Deferred()
+        twoDeferred.then(two)
+
+        bothDeferred = up.util.resolvableWhen(oneDeferred, twoDeferred)
+        bothDeferred.then(both)
+
+        expect(one).not.toHaveBeenCalled()
+        expect(two).not.toHaveBeenCalled()
+        expect(both).not.toHaveBeenCalled()
+
+        oneDeferred.resolve()
+        expect(one).toHaveBeenCalled()
+        expect(two).not.toHaveBeenCalled()
+        expect(both).not.toHaveBeenCalled()
+
+        twoDeferred.resolve()
+        expect(one).toHaveBeenCalled()
+        expect(two).toHaveBeenCalled()
+        expect(both).toHaveBeenCalled()
+
+      it 'returns a promise with a .resolve method that resolves the given deferreds', ->
+        one = jasmine.createSpy()
+        two = jasmine.createSpy()
+        both = jasmine.createSpy()
+        oneDeferred = $.Deferred()
+        oneDeferred.then(one)
+        twoDeferred = $.Deferred()
+        twoDeferred.then(two)
+
+        bothDeferred = up.util.resolvableWhen(oneDeferred, twoDeferred)
+        bothDeferred.then(both)
+
+        expect(one).not.toHaveBeenCalled()
+        expect(two).not.toHaveBeenCalled()
+        expect(both).not.toHaveBeenCalled()
+
+        bothDeferred.resolve()
+        expect(one).toHaveBeenCalled()
+        expect(two).toHaveBeenCalled()
+        expect(both).toHaveBeenCalled()
+
+      it 'does not resolve the given deferreds more than once', ->
+        oneDeferred = $.Deferred()
+        spyOn(oneDeferred, 'resolve')
+        bothDeferred = up.util.resolvableWhen(oneDeferred)
+
+        bothDeferred.resolve()
+        bothDeferred.resolve()
+
+        expect(oneDeferred.resolve.calls.count()).toEqual(1)
+
+      describe 'bugfix against troublesome jQuery optimization if only one deferred is given', ->
+
+        it 'does not simply return the given deferred', ->
+          oneDeferred = $.Deferred()
+          whenDeferred = up.util.resolvableWhen(oneDeferred)
+          # This is what $.when returns if only passed a single argument
+          expect(whenDeferred).not.toBe(oneDeferred.promise())
+          # Cover eventual implementations
+          expect(whenDeferred).not.toBe(oneDeferred)
+          expect(whenDeferred.promise()).not.toBe(oneDeferred.promise())
+          expect(whenDeferred.promise()).not.toBe(oneDeferred)
+
+        it 'does not create an infinite loop if the given deferred is nested twice and the first nesting is resolved', ->
+          oneDeferred = $.Deferred()
+          firstNesting = up.util.resolvableWhen(oneDeferred)
+          secondNesting = up.util.resolvableWhen(firstNesting)
+          expect(-> firstNesting.resolve()).not.toThrowError()
 
     describe 'up.util.requestDataAsArray', ->
 
