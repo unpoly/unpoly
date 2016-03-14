@@ -21,7 +21,7 @@ Unreleased
 
 - Fix a bug where using the `up-confirm` attribute would result in an infinite loop
 - Unpoly no longer displays confirmation dialogs when [preloading](/up-preload) a link that
-  has both [`up-preload`](/up-preload)` and `up-confirm` attributes.
+  has both [`up-preload`](/up-preload) and `up-confirm` attributes.
 
 
 ### Breaking changes
