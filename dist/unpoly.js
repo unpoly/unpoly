@@ -2204,10 +2204,12 @@ we can't currently get rid off.
     /**
     @function up,browser.confirm
     @return {Promise}
+    @param {String} options.confirm
+    @param {Boolean} options.preload
     @internal
      */
-    confirm = function(message) {
-      if (u.isBlank(message) || confirm(message)) {
+    confirm = function(options) {
+      if (options.preload || u.isBlank(options.confirm) || window.confirm(options.confirm)) {
         return u.resolvedPromise();
       } else {
         return u.unresolvablePromise();
@@ -5652,8 +5654,8 @@ the user performs the click.
 Spinners
 --------
 
-You can [listen](/up.on) to the [`up:proxy:busy`](/up:proxy:busy)
-and [`up:proxy:idle`](/up:proxy:idle) events  to implement a spinner
+You can [listen](/up.on) to the [`up:proxy:slow`](/up:proxy:slow)
+and [`up:proxy:recover`](/up:proxy:recover) events  to implement a spinner
 that appears during a long-running request,
 and disappears once the response has been received:
 
@@ -5666,8 +5668,8 @@ Here is the Javascript to make it alive:
       show = function() { $element.show() };
       hide = function() { $element.hide() };
 
-      showOff = up.on('up:proxy:busy', show);
-      hideOff = up.on('up:proxy:idle', hide);
+      showOff = up.on('up:proxy:slow', show);
+      hideOff = up.on('up:proxy:recover', hide);
 
       hide();
 
@@ -5679,11 +5681,11 @@ Here is the Javascript to make it alive:
 
     });
 
-The `up:proxy:busy` event will be emitted after a delay of 300 ms
+The `up:proxy:slow` event will be emitted after a delay of 300 ms
 to prevent the spinner from flickering on and off.
 You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.config) like this:
 
-    up.proxy.config.busyDelay = 150;
+    up.proxy.config.slowDelay = 150;
 
 @class up.proxy
  */
@@ -5692,13 +5694,13 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
   var slice = [].slice;
 
   up.proxy = (function($) {
-    var $waitingLink, ajax, alias, busy, busyDelayTimer, busyEventEmitted, cache, cacheKey, cancelBusyDelay, cancelPreloadDelay, checkPreload, clear, config, get, idle, isIdempotent, load, loadEnded, loadOrQueue, loadStarted, normalizeRequest, pendingCount, pokeQueue, preload, preloadDelayTimer, queue, queuedRequests, remove, reset, responseReceived, set, startPreloadDelay, u;
+    var $waitingLink, ajax, alias, cache, cacheKey, cancelBusyDelay, cancelPreloadDelay, checkPreload, clear, config, get, isBusy, isIdempotent, isIdle, load, loadEnded, loadOrQueue, loadStarted, normalizeRequest, pendingCount, pokeQueue, preload, preloadDelayTimer, queue, queuedRequests, remove, reset, responseReceived, set, slowDelayTimer, slowEventEmitted, startPreloadDelay, u;
     u = up.util;
     $waitingLink = void 0;
     preloadDelayTimer = void 0;
-    busyDelayTimer = void 0;
+    slowDelayTimer = void 0;
     pendingCount = void 0;
-    busyEventEmitted = void 0;
+    slowEventEmitted = void 0;
     queuedRequests = [];
 
     /**
@@ -5712,8 +5714,8 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     @param {Number} [config.cacheExpiry=300000]
       The number of milliseconds until a cache entry expires.
       Defaults to 5 minutes.
-    @param {Number} [config.busyDelay=300]
-      How long the proxy waits until emitting the [`up:proxy:busy` event](/up:proxy:busy).
+    @param {Number} [config.slowDelay=300]
+      How long the proxy waits until emitting the [`up:proxy:slow` event](/up:proxy:slow).
       Use this to prevent flickering of spinners.
     @param {Number} [config.maxRequests=4]
       The maximum number of concurrent requests to allow before additional
@@ -5737,7 +5739,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     @stable
      */
     config = u.config({
-      busyDelay: 300,
+      slowDelay: 300,
       preloadDelay: 75,
       cacheSize: 70,
       cacheExpiry: 1000 * 60 * 5,
@@ -5838,8 +5840,8 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
       return preloadDelayTimer = null;
     };
     cancelBusyDelay = function() {
-      clearTimeout(busyDelayTimer);
-      return busyDelayTimer = null;
+      clearTimeout(slowDelayTimer);
+      return slowDelayTimer = null;
     };
     reset = function() {
       $waitingLink = null;
@@ -5847,7 +5849,7 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
       cancelBusyDelay();
       pendingCount = 0;
       config.reset();
-      busyEventEmitted = false;
+      slowEventEmitted = false;
       cache.clear();
       return queuedRequests = [];
     };
@@ -5928,15 +5930,12 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     Returns `true` if the proxy is not currently waiting
     for a request to finish. Returns `false` otherwise.
     
-    The proxy will also emit an [`up:proxy:idle` event](/up:proxy:idle) if it
-    used to busy, but is now idle.
-    
-    @function up.proxy.idle
+    @function up.proxy.isIdle
     @return {Boolean}
       Whether the proxy is idle
     @experimental
      */
-    idle = function() {
+    isIdle = function() {
       return pendingCount === 0;
     };
 
@@ -5944,32 +5943,29 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     Returns `true` if the proxy is currently waiting
     for a request to finish. Returns `false` otherwise.
     
-    The proxy will also emit an [`up:proxy:busy` event](/up:proxy:busy) if it
-    used to be idle, but is now busy.
-    
-    @function up.proxy.busy
+    @function up.proxy.isBusy
     @return {Boolean}
       Whether the proxy is busy
     @experimental
      */
-    busy = function() {
+    isBusy = function() {
       return pendingCount > 0;
     };
     loadStarted = function() {
       var emission, wasIdle;
-      wasIdle = idle();
+      wasIdle = isIdle();
       pendingCount += 1;
       if (wasIdle) {
         emission = function() {
-          if (busy()) {
-            up.emit('up:proxy:busy', {
+          if (isBusy()) {
+            up.emit('up:proxy:slow', {
               message: 'Proxy is busy'
             });
-            return busyEventEmitted = true;
+            return slowEventEmitted = true;
           }
         };
-        if (config.busyDelay > 0) {
-          return busyDelayTimer = setTimeout(emission, config.busyDelay);
+        if (config.slowDelay > 0) {
+          return slowDelayTimer = setTimeout(emission, config.slowDelay);
         } else {
           return emission();
         }
@@ -5981,34 +5977,34 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     are taking long to finish.
     
     By default Unpoly will wait 300 ms for an AJAX request to finish
-    before emitting `up:proxy:busy`. You can configure this time like this:
+    before emitting `up:proxy:slow`. You can configure this time like this:
     
-        up.proxy.config.busyDelay = 150;
+        up.proxy.config.slowDelay = 150;
     
-    Once all responses have been received, an [`up:proxy:idle`](/up:proxy:idle)
+    Once all responses have been received, an [`up:proxy:recover`](/up:proxy:recover)
     will be emitted.
     
     Note that if additional requests are made while Unpoly is already busy
-    waiting, **no** additional `up:proxy:busy` events will be triggered.
+    waiting, **no** additional `up:proxy:slow` events will be triggered.
     
-    @event up:proxy:busy
+    @event up:proxy:slow
     @stable
      */
     loadEnded = function() {
       pendingCount -= 1;
-      if (idle() && busyEventEmitted) {
-        up.emit('up:proxy:idle', {
+      if (isIdle() && slowEventEmitted) {
+        up.emit('up:proxy:recover', {
           message: 'Proxy is idle'
         });
-        return busyEventEmitted = false;
+        return slowEventEmitted = false;
       }
     };
 
     /**
     This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
-    have [taken long to finish](/up:proxy:busy), but have finished now.
+    have [taken long to finish](/up:proxy:slow), but have finished now.
     
-    @event up:proxy:idle
+    @event up:proxy:recover
     @stable
      */
     loadOrQueue = function(request) {
@@ -6173,8 +6169,8 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
       alias: alias,
       clear: clear,
       remove: remove,
-      idle: idle,
-      busy: busy,
+      isIdle: isIdle,
+      isBusy: isBusy,
       config: config,
       defaults: function() {
         return u.error('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.');
@@ -6370,7 +6366,7 @@ Read on
       options.origin = u.option(options.origin, $link);
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       options = u.merge(options, up.motion.animateOptions(options, $link));
-      return up.browser.confirm(options.confirm).then(function() {
+      return up.browser.confirm(options).then(function() {
         return up.replace(target, url, options);
       });
     };
@@ -7271,8 +7267,8 @@ open dialogs with sub-forms, etc. all without losing form state.
     the submission is loading.
     
     You can also [implement a spinner](/up.proxy/#spinners)
-    by [listening](/up.on) to the [`up:proxy:busy`](/up:proxy:busy)
-    and [`up:proxy:idle`](/up:proxy:idle) events.
+    by [listening](/up.on) to the [`up:proxy:slow`](/up:proxy:slow)
+    and [`up:proxy:recover`](/up:proxy:recover) events.
     
     @selector form[up-target]
     @param {String} up-target
@@ -7859,7 +7855,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       options.history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($link, 'up-history'), config.history) : false;
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       animateOptions = up.motion.animateOptions(options, $link);
-      return up.browser.confirm(options.confirm).then(function() {
+      return up.browser.confirm(options).then(function() {
         var promise, wasOpen;
         if (up.bus.nobodyPrevents('up:popup:open', {
           url: url,
@@ -8413,7 +8409,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       options.history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($link, 'up-history'), config.history) : false;
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       animateOptions = up.motion.animateOptions(options, $link);
-      return up.browser.confirm(options.confirm).then(function() {
+      return up.browser.confirm(options).then(function() {
         var promise, wasOpen;
         if (up.bus.nobodyPrevents('up:modal:open', {
           url: url,
