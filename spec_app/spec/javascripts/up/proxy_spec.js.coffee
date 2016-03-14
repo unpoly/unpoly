@@ -157,26 +157,26 @@ describe 'up.proxy', ->
       describe 'events', ->
         
         beforeEach ->
-          up.proxy.config.busyDelay = 0
+          up.proxy.config.slowDelay = 0
           @events = []
-          u.each ['up:proxy:load', 'up:proxy:received', 'up:proxy:busy', 'up:proxy:idle'], (eventName) =>
+          u.each ['up:proxy:load', 'up:proxy:received', 'up:proxy:slow', 'up:proxy:recover'], (eventName) =>
             up.on eventName, =>
               @events.push eventName
 
-        it 'emits an up:proxy:busy event once the proxy started loading, and up:proxy:idle if it is done loading', ->
+        it 'emits an up:proxy:slow event once the proxy started loading, and up:proxy:recover if it is done loading', ->
   
           up.ajax(url: '/foo')
   
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy'
+            'up:proxy:slow'
           ])
   
           up.ajax(url: '/bar')
   
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy',
+            'up:proxy:slow',
             'up:proxy:load'
           ])
   
@@ -187,7 +187,7 @@ describe 'up.proxy', ->
   
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy',
+            'up:proxy:slow',
             'up:proxy:load',
             'up:proxy:received'
           ])
@@ -199,14 +199,14 @@ describe 'up.proxy', ->
   
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy',
+            'up:proxy:slow',
             'up:proxy:load',
             'up:proxy:received',
             'up:proxy:received',
-            'up:proxy:idle'
+            'up:proxy:recover'
           ])
   
-        it 'does not emit an up:proxy:busy event if preloading', ->
+        it 'does not emit an up:proxy:slow event if preloading', ->
 
           # A request for preloading preloading purposes
           # doesn't make us busy.
@@ -214,15 +214,15 @@ describe 'up.proxy', ->
           expect(@events).toEqual([
             'up:proxy:load'
           ])
-          expect(up.proxy.busy()).toBe(false)
+          expect(up.proxy.isBusy()).toBe(false)
 
           # The same request with preloading does make us busy.
           up.ajax(url: '/foo')
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy'
+            'up:proxy:slow'
           ])
-          expect(up.proxy.busy()).toBe(true)
+          expect(up.proxy.isBusy()).toBe(true)
 
           # The response resolves both promises and makes
           # the proxy idle again.
@@ -232,14 +232,14 @@ describe 'up.proxy', ->
             responseText: 'foo'
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy',
+            'up:proxy:slow',
             'up:proxy:received',
-            'up:proxy:idle'
+            'up:proxy:recover'
           ])
-          expect(up.proxy.busy()).toBe(false)
+          expect(up.proxy.isBusy()).toBe(false)
 
-        it 'can delay the up:proxy:busy event to prevent flickering of spinners', ->
-          up.proxy.config.busyDelay = 100
+        it 'can delay the up:proxy:slow event to prevent flickering of spinners', ->
+          up.proxy.config.slowDelay = 100
 
           up.ajax(url: '/foo')
           expect(@events).toEqual([
@@ -254,7 +254,7 @@ describe 'up.proxy', ->
           jasmine.clock().tick(50)
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy'
+            'up:proxy:slow'
           ])
 
           jasmine.Ajax.requests.at(0).respondWith
@@ -264,13 +264,13 @@ describe 'up.proxy', ->
 
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy',
+            'up:proxy:slow',
             'up:proxy:received',
-            'up:proxy:idle'
+            'up:proxy:recover'
           ])
 
-        it 'does not emit up:proxy:idle if a delayed up:proxy:busy was never emitted due to a fast response', ->
-          up.proxy.config.busyDelay = 100
+        it 'does not emit up:proxy:recover if a delayed up:proxy:slow was never emitted due to a fast response', ->
+          up.proxy.config.slowDelay = 100
 
           up.ajax(url: '/foo')
           expect(@events).toEqual([
@@ -291,13 +291,13 @@ describe 'up.proxy', ->
             'up:proxy:received'
           ])
 
-        it 'emits up:proxy:idle if a request returned but failed', ->
+        it 'emits up:proxy:recover if a request returned but failed', ->
 
           up.ajax(url: '/foo')
 
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy'
+            'up:proxy:slow'
           ])
 
           jasmine.Ajax.requests.at(0).respondWith
@@ -307,9 +307,9 @@ describe 'up.proxy', ->
 
           expect(@events).toEqual([
             'up:proxy:load',
-            'up:proxy:busy',
+            'up:proxy:slow',
             'up:proxy:received',
-            'up:proxy:idle'
+            'up:proxy:recover'
           ])
 
 

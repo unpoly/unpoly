@@ -18,8 +18,8 @@ the user performs the click.
 Spinners
 --------
 
-You can [listen](/up.on) to the [`up:proxy:busy`](/up:proxy:busy)
-and [`up:proxy:idle`](/up:proxy:idle) events  to implement a spinner
+You can [listen](/up.on) to the [`up:proxy:slow`](/up:proxy:slow)
+and [`up:proxy:recover`](/up:proxy:recover) events  to implement a spinner
 that appears during a long-running request,
 and disappears once the response has been received:
 
@@ -32,8 +32,8 @@ Here is the Javascript to make it alive:
       show = function() { $element.show() };
       hide = function() { $element.hide() };
 
-      showOff = up.on('up:proxy:busy', show);
-      hideOff = up.on('up:proxy:idle', hide);
+      showOff = up.on('up:proxy:slow', show);
+      hideOff = up.on('up:proxy:recover', hide);
 
       hide();
 
@@ -45,11 +45,11 @@ Here is the Javascript to make it alive:
 
     });
 
-The `up:proxy:busy` event will be emitted after a delay of 300 ms
+The `up:proxy:slow` event will be emitted after a delay of 300 ms
 to prevent the spinner from flickering on and off.
 You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.config) like this:
 
-    up.proxy.config.busyDelay = 150;
+    up.proxy.config.slowDelay = 150;
 
 @class up.proxy  
 ###
@@ -59,9 +59,9 @@ up.proxy = (($) ->
 
   $waitingLink = undefined
   preloadDelayTimer = undefined
-  busyDelayTimer = undefined
+  slowDelayTimer = undefined
   pendingCount = undefined
-  busyEventEmitted = undefined
+  slowEventEmitted = undefined
 
   queuedRequests = []
 
@@ -76,8 +76,8 @@ up.proxy = (($) ->
   @param {Number} [config.cacheExpiry=300000]
     The number of milliseconds until a cache entry expires.
     Defaults to 5 minutes.
-  @param {Number} [config.busyDelay=300]
-    How long the proxy waits until emitting the [`up:proxy:busy` event](/up:proxy:busy).
+  @param {Number} [config.slowDelay=300]
+    How long the proxy waits until emitting the [`up:proxy:slow` event](/up:proxy:slow).
     Use this to prevent flickering of spinners.
   @param {Number} [config.maxRequests=4]
     The maximum number of concurrent requests to allow before additional
@@ -101,7 +101,7 @@ up.proxy = (($) ->
   @stable
   ###
   config = u.config
-    busyDelay: 300
+    slowDelay: 300
     preloadDelay: 75
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
@@ -192,8 +192,8 @@ up.proxy = (($) ->
     preloadDelayTimer = null
 
   cancelBusyDelay = ->
-    clearTimeout(busyDelayTimer)
-    busyDelayTimer = null
+    clearTimeout(slowDelayTimer)
+    slowDelayTimer = null
 
   reset = ->
     $waitingLink = null
@@ -201,7 +201,7 @@ up.proxy = (($) ->
     cancelBusyDelay()
     pendingCount = 0
     config.reset()
-    busyEventEmitted = false
+    slowEventEmitted = false
     cache.clear()
     queuedRequests = []
 
@@ -283,11 +283,11 @@ up.proxy = (($) ->
       # following case:
       #
       # - User starts preloading a request.
-      #   This triggers *no* `up:proxy:busy`.
+      #   This triggers *no* `up:proxy:slow`.
       # - User starts loading the request (without preloading).
-      #   This triggers `up:proxy:busy`.
+      #   This triggers `up:proxy:slow`.
       # - The request finishes.
-      #   This triggers `up:proxy:idle`.
+      #   This triggers `up:proxy:recover`.
       loadStarted()
       promise.always(loadEnded)
 
@@ -299,44 +299,38 @@ up.proxy = (($) ->
   Returns `true` if the proxy is not currently waiting
   for a request to finish. Returns `false` otherwise.
 
-  The proxy will also emit an [`up:proxy:idle` event](/up:proxy:idle) if it
-  used to busy, but is now idle.
-
-  @function up.proxy.idle
+  @function up.proxy.isIdle
   @return {Boolean}
     Whether the proxy is idle
   @experimental
   ###
-  idle = ->
+  isIdle = ->
     pendingCount == 0
 
   ###*
   Returns `true` if the proxy is currently waiting
   for a request to finish. Returns `false` otherwise.
 
-  The proxy will also emit an [`up:proxy:busy` event](/up:proxy:busy) if it
-  used to be idle, but is now busy.
-
-  @function up.proxy.busy
+  @function up.proxy.isBusy
   @return {Boolean}
     Whether the proxy is busy
   @experimental
   ###
-  busy = ->
+  isBusy = ->
     pendingCount > 0
 
   loadStarted = ->
-    wasIdle = idle()
+    wasIdle = isIdle()
     pendingCount += 1
     if wasIdle
-      # Since the emission of up:proxy:busy might be delayed by config.busyDelay,
+      # Since the emission of up:proxy:slow might be delayed by config.slowDelay,
       # we wrap the mission in a function for scheduling below.
       emission = ->
-        if busy() # a fast response might have beaten the delay
-          up.emit('up:proxy:busy', message: 'Proxy is busy')
-          busyEventEmitted = true
-      if config.busyDelay > 0
-        busyDelayTimer = setTimeout(emission, config.busyDelay)
+        if isBusy() # a fast response might have beaten the delay
+          up.emit('up:proxy:slow', message: 'Proxy is busy')
+          slowEventEmitted = true
+      if config.slowDelay > 0
+        slowDelayTimer = setTimeout(emission, config.slowDelay)
       else
         emission()
 
@@ -345,31 +339,31 @@ up.proxy = (($) ->
   are taking long to finish.
 
   By default Unpoly will wait 300 ms for an AJAX request to finish
-  before emitting `up:proxy:busy`. You can configure this time like this:
+  before emitting `up:proxy:slow`. You can configure this time like this:
 
-      up.proxy.config.busyDelay = 150;
+      up.proxy.config.slowDelay = 150;
 
-  Once all responses have been received, an [`up:proxy:idle`](/up:proxy:idle)
+  Once all responses have been received, an [`up:proxy:recover`](/up:proxy:recover)
   will be emitted.
 
   Note that if additional requests are made while Unpoly is already busy
-  waiting, **no** additional `up:proxy:busy` events will be triggered.
+  waiting, **no** additional `up:proxy:slow` events will be triggered.
 
-  @event up:proxy:busy
+  @event up:proxy:slow
   @stable
   ###
 
   loadEnded = ->
     pendingCount -= 1
-    if idle() && busyEventEmitted
-      up.emit('up:proxy:idle', message: 'Proxy is idle')
-      busyEventEmitted = false
+    if isIdle() && slowEventEmitted
+      up.emit('up:proxy:recover', message: 'Proxy is idle')
+      slowEventEmitted = false
 
   ###*
   This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
-  have [taken long to finish](/up:proxy:busy), but have finished now.
+  have [taken long to finish](/up:proxy:slow), but have finished now.
 
-  @event up:proxy:idle
+  @event up:proxy:recover
   @stable
   ###
 
@@ -511,8 +505,8 @@ up.proxy = (($) ->
   alias: alias
   clear: clear
   remove: remove
-  idle: idle
-  busy: busy
+  isIdle: isIdle
+  isBusy: isBusy
   config: config
   defaults: -> u.error('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.')
   

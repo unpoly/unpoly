@@ -528,8 +528,8 @@ up.form = (($) ->
   the submission is loading.
 
   You can also [implement a spinner](/up.proxy/#spinners)
-  by [listening](/up.on) to the [`up:proxy:busy`](/up:proxy:busy)
-  and [`up:proxy:idle`](/up:proxy:idle) events.
+  by [listening](/up.on) to the [`up:proxy:slow`](/up:proxy:slow)
+  and [`up:proxy:recover`](/up:proxy:recover) events.
 
   @selector form[up-target]
   @param {String} up-target

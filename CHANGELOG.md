@@ -17,6 +17,11 @@ Unreleased
 
 ### Breaking changes
 
+- `up.proxy.idle()` is now [`up.proxy.isIdle()`](/up.proxy.isIdle)
+- `up.proxy.busy()` is now [`up.proxy.isBusy()`](/up.proxy.isBusy)
+- Event `up:proxy:busy` is now [`up:proxy:slow`](/up:proxy:slow)
+- Event `up:proxy:idle` is now [`up:proxy:idle`](/up:proxy:recover)
+
 
 0.21.0
 ------
