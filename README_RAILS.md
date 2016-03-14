@@ -17,7 +17,7 @@ To test whether the current request is a [fragment update](http://unpoly.com/up.
 
 To retrieve the CSS selector that is being [updated](http://unpoly.com/up.replace):
 
-    up.selector
+    up.target
 
 The Unpoly frontend will expect an HTML response containing an element that matches this selector. If no such element is found, an error is shown to the user. Server-side code is free to optimize its response by only returning HTML that matches this selector.
 
