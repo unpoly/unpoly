@@ -312,7 +312,7 @@ up.form = (($) ->
 
   @function up.autosubmit
   @param {String|Element|jQuery} selectorOrElement
-    The form field to observe.
+    The field or form to observe.
   @param {Object} [options]
     See options for [`up.observe`](/up.observe)
   @return {Function}
@@ -836,7 +836,15 @@ up.form = (($) ->
   text field value changes:
 
       <form method="GET" action="/search" up-autosubmit>
-        <input type="query">
+        <input type="search" name="query">
+      </form>
+
+  The following would submit the form only if the query was changed,
+  but not if the checkbox was changed:
+
+      <form method="GET" action="/search">
+        <input type="search" name="query" autosubmit>
+        <input type="checkbox"> Include archive
       </form>
 
   @selector [up-autosubmit]
