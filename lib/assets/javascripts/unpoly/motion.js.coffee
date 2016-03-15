@@ -12,6 +12,9 @@ to smoothly fade out the old `.list` while fading in the new `.list`:
 
     <a href="/users" up-target=".list" up-transition="cross-fade">Show users</a>
 
+Transitions vs. animations
+--------------------------
+
 When we morph between an old an new element, we call it a *transition*.
 In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
@@ -20,6 +23,9 @@ An example for an animation is opening a new dialog, which we can animate
 using the `up-animation` attribute:
 
     <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
+
+Predefined animations and transitions
+-------------------------------------
 
 Unpoly ships with a number of predefined [animations](/up.animate#named-animation)
 and [transitions](/up.morph#named-animation).
@@ -470,7 +476,7 @@ up.motion = (($) ->
   If you choose to *not* use `up.animate` and roll your own
   logic instead, your code must honor the following contract:
 
-  1. It must honor the passed options.
+  1. It must honor the passed options `{ delay, duration, easing }` if present
   2. It must *not* remove any of the given elements from the DOM.
   3. It returns a promise that is resolved when the transition ends
   4. The returned promise responds to a `resolve()` function that
@@ -492,8 +498,8 @@ up.motion = (($) ->
 
   Here is the definition of the pre-defined `fade-in` animation:
 
-      up.animation('fade-in', function($ghost, options) {
-        $ghost.css(opacity: 0);
+      up.animation('fade-in', function($element, options) {
+        $element.css(opacity: 0);
         up.animate($ghost, { opacity: 1 }, options);
       })
 
@@ -504,7 +510,7 @@ up.motion = (($) ->
   If you choose to *not* use `up.animate` and roll your own
   animation code instead, your code must honor the following contract:
 
-  1. It must honor the passed options.
+  1. It must honor the passed options `{ delay, duration, easing }` if present
   2. It must *not* remove the passed element from the DOM.
   3. It returns a promise that is resolved when the animation ends
   4. The returned promise responds to a `resolve()` function that
@@ -526,15 +532,20 @@ up.motion = (($) ->
     defaultTransitions = u.copy(transitions)
 
   ###*
-  Returns a new promise that resolves once all promises in arguments resolve.
+  Returns a new deferred that resolves once all given deferreds have resolved.
 
   Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
-  the combined promise will have a `resolve` method. This `resolve` method
-  will resolve all the wrapped promises.
+  the combined deferred will have a `resolve` method. This `resolve` method
+  will resolve all the wrapped deferreds.
+
+  This is important when composing multiple existing animations into
+  a [custom transition](/up.transition), since the transition function
+  must return a deferred with a `resolve` function that fast-forwards
+  the animation to its last frame.
 
   @function up.motion.when
-  @param promises...
-  @return A new promise.
+  @param {Array<Deferred>} deferreds...
+  @return {Deferred} A new deferred
   @experimental
   ###
   resolvableWhen = u.resolvableWhen

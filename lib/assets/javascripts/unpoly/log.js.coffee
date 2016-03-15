@@ -1,3 +1,11 @@
+###*
+Logging
+=======
+
+Elaborate wrappers around `window.console`.
+Should only used internally since they prefix `ᴜᴘ` to each
+printed message.
+###
 up.log = (($) ->
 
   prefix = (message) ->

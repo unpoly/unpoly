@@ -2,7 +2,19 @@
 Application layout
 ==================
 
-This modules contains functions to scroll the viewport and reveal contained elements.
+You can [make Unpoly aware](/up.layout.config) of fixed elements in your
+layout, such as navigation bars or headers. Unpoly will respect these sticky
+elements when [revealing elements](/up.reveal) or [opening a modal dialog](/up-modal).
+
+This modules also contains functions to programmatically [scroll a viewport](/up.scroll)
+or [reveal an element within its viewport](/up.reveal).
+
+Bootstrap integration
+---------------------
+
+When using Bootstrap integration (`unpoly-bootstrap3.js` and `unpoly-bootstrap3.css`)
+Unpoly will automatically be aware of sticky Bootstrap components such as
+[fixed navbar](https://getbootstrap.com/examples/navbar-fixed-top/).
 
 @class up.layout
 ###
@@ -26,17 +38,17 @@ up.layout = (($) ->
   @param {Array} [config.anchoredRight]
     An array of CSS selectors that find elements anchored to the
     right edge of the screen (using `position: fixed` or `position: absolute`).
-  @param {Number} [config.duration]
+  @param {Number} [config.duration=0]
     The duration of the scrolling animation in milliseconds.
     Setting this to `0` will disable scrolling animations.
-  @param {String} [config.easing]
+  @param {String} [config.easing='swing']
     The timing function that controls the animation's acceleration.
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
-  @param {Number} [config.snap]
+  @param {Number} [config.snap=50]
     When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
     to the top when the revealed element is closer to the top than `config.snap`.
-  @param {Number} [config.substance]
+  @param {Number} [config.substance=150]
     A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
   @stable
   ###
