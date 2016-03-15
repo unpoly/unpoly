@@ -135,7 +135,7 @@ up.syntax = (($) ->
         { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
       ]"></div>
 
-  The JSON will parsed and handed to your event handler as a second argument:
+  The JSON will parsed and handed to your compiler as a second argument:
 
       up.compiler('.google-map', function($element, pins) {
 
@@ -195,7 +195,7 @@ up.syntax = (($) ->
   @param {Function($element, data)} compiler
     The function to call when a matching element is inserted.
     The function takes the new element as the first argument (as a jQuery object).
-    If the element has an `up-data` attribute, its value is parsed as JSON
+    If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
     and passed as a second argument.
 
     The function may return a destructor function that destroys the compiled
@@ -324,10 +324,20 @@ up.syntax = (($) ->
       destroyer()
 
   ###*
-  Checks if the given element has an `up-data` attribute.
+  Checks if the given element has an [`up-data`](/up-data) attribute.
   If yes, parses the attribute value as JSON and returns the parsed object.
 
   Returns an empty object if the element has no `up-data` attribute.
+
+  \#\#\#\# Example
+
+  You have an element with JSON data serialized into an `up-data` attribute:
+
+      <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
+
+  Calling `up.syntax.data` will deserialize the JSON string into a Javascript object:
+
+      up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
 
   @function up.syntax.data
   @param {String|Element|jQuery} elementOrSelector
@@ -338,14 +348,43 @@ up.syntax = (($) ->
   @experimental
   ###
 
-  ###
+  ###*
   If an element annotated with [`up-data`] is inserted into the DOM,
   Up will parse the JSON and pass the resulting object to any matching
-  [`up.compiler`](/up.syntax.compiler) handlers.
+  [`up.compiler`](/up.compiler) handlers.
+
+  For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
+  might attach the location and names of its marker pins:
+
+      <div class="google-map" up-data="[
+        { lat: 48.36, lng: 10.99, title: 'Friedberg' },
+        { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
+      ]"></div>
+
+  The JSON will parsed and handed to your compiler as a second argument:
+
+      up.compiler('.google-map', function($element, pins) {
+
+        var map = new google.maps.Map($element);
+
+        pins.forEach(function(pin) {
+          var position = new google.maps.LatLng(pin.lat, pin.lng);
+          new google.maps.Marker({
+            position: position,
+            map: map,
+            title: pin.title
+          });
+        });
+
+      });
 
   Similarly, when an event is triggered on an element annotated with
   [`up-data`], the parsed object will be passed to any matching
   [`up.on`](/up.on) handlers.
+
+      up.on('click', '.google-map', function(event, $element, pins) {
+        console.log("There are %d pins on the clicked map", pins.length);
+      });
 
   @selector [up-data]
   @param {JSON} up-data

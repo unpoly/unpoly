@@ -2,8 +2,8 @@
 Changing page fragments programmatically
 ========================================
   
-This module contains Unpoly's core functions to [change](/up.replace) or [destroy](/up.destroy)
-  page fragments via Javascript.
+This module contains Unpoly's core functions to [change](/up.replace) or
+[destroy](/up.destroy) page fragments via Javascript.
 
 All the other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
 are based on this module.
@@ -123,7 +123,7 @@ up.flow = (($) ->
   the CSS selector for the updating fragment.
 
   If you are using the `unpoly-rails` gem you can also access the selector via
-  `up.selector` in all controllers, views and helpers.
+  `up.target` in all controllers, views and helpers.
 
   \#\#\#\# Events
 
@@ -571,7 +571,7 @@ up.flow = (($) ->
 
   ###*
   Compiles a page fragment that has been inserted into the DOM
-  without Unpoly.
+  by external code.
 
   **As long as you manipulate the DOM using Unpoly, you will never
   need to call this method.** You only need to use `up.hello` if the

@@ -2,7 +2,31 @@
 Events
 ======
 
-Unpoly has a convenient way to [listen to DOM events](/up.on):
+Most Unpoly interactions emit DOM events that are prefixed with `up:`.
+
+    $(document).on('up:modal:opened', function(event) {
+      console.log('A new modal has just opened!');
+    });
+
+Events often have both present ([`up:modal:open`](/up:modal:open))
+and past forms ([`up:modal:opened`](/up:modal:opened)).
+
+You can usually prevent an action by listening to the present form
+and call `preventDefault()` on the `event` object:
+
+    $(document).on('up:modal:open', function(event) {
+      if (event.url == '/evil') {
+        // Prevent the modal from opening
+        event.preventDefault();
+      }
+    });
+
+
+A better way to bind event listeners
+------------------------------------
+
+Instead of using jQuery to bind  an event handler to `document`, you can also
+use the more convenient [`up.on`](/up.on):
 
     up.on('click', 'button', function(event, $button) {
       // $button is a jQuery collection containing
@@ -15,26 +39,10 @@ using jQuery's [`on`](http://api.jquery.com/on/).
 - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
   leaving you with an application without Javascript. This is typically preferable to
   a soup of randomly broken Javascript in ancient browsers.
-- A jQuery object with the target element is automatically passed to the event handler.
-- You can [attach structured data](/up.on#attaching-structured-data) to observed elements.
-- The call is shorter.
-
-Many Unpoly interactions also emit DOM events that are prefixed with `up:`.
-
-    up.on('up:modal:opened', function(event) {
-      console.log('A new modal has just opened!');
-    });
-
-Events often have both present (`up:modal:open`) and past forms (`up:modal:opened`).
-You can usually prevent an action by listening to the present form
-and call `preventDefault()` on the `event` object:
-
-    up.on('up:modal:open', function(event) {
-      if (event.url == '/evil') {
-        // Prevent the modal from opening
-        event.preventDefault();
-      }
-    });
+- A jQuery object with the target element is automatically passed to the event handler
+  as a second argument.
+- You use an [`up-data`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
+  to observed elements.
 
 @class up.bus
 ###
@@ -134,9 +142,27 @@ up.bus = (($) ->
 
   \#\#\#\# Stopping to listen
 
-  `up.on` returns a function that unbinds the event listeners when called.
+  `up.on` returns a function that unbinds the event listeners when called:
 
-  There is also a function [`up.off`](/up.off) which you can use for the same purpose.
+      // Define the listener
+      var listener =  function() { ... };
+
+      // Binding the listener returns an unbind function
+      unbind = up.on('click', listener);
+
+      // Unbind the listener
+      unbind()
+
+  There is also a function [`up.off`](/up.off) which you can use for the same purpose:
+
+      // Define the listener
+      var listener =  function() { ... };
+
+      // Bind the listener
+      up.on('click', listener);
+
+      // Unbind the listener
+      up.off('click', listener)
 
   @function up.on
   @param {String} events
@@ -148,7 +174,7 @@ up.bus = (($) ->
   @param {Function(event, $element, data)} behavior
     The handler that should be called.
     The function takes the affected element as the first argument (as a jQuery object).
-    If the element has an `up-data` attribute, its value is parsed as JSON
+    If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
     and passed as a second argument.
   @return {Function}
     A function that unbinds the event listeners when called.
@@ -172,13 +198,13 @@ up.bus = (($) ->
     -> unbind(upDescription...)
 
   ###*
-  Unregisters an event listener previously bound with [`up.on`](/up.on).
+  Unbinds an event listener previously bound with [`up.on`](/up.on).
 
   \#\#\#\# Example
 
   Let's say you are listing to clicks on `.button` elements:
 
-      var listener = function() { };
+      var listener = function() { ... };
       up.on('click', '.button', listener);
 
   You can stop listening to these events like this:
