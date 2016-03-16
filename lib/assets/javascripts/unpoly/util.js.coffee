@@ -943,6 +943,7 @@ up.util = (($) ->
       if opts.relative == true
         coordinates = $element.position()
       else
+        # A relative context element is given
         $context = $(opts.relative)
         elementCoords = $element.offset()
         if $context.is(document)
@@ -968,9 +969,9 @@ up.util = (($) ->
       box.height = $element.outerHeight()
       
     if opts.full
-      viewport = clientSize()
-      box.right = viewport.width - (box.left + box.width)
-      box.bottom = viewport.height - (box.top + box.height)
+      $viewport = up.layout.viewportOf($element)
+      box.right = $viewport.width() - (box.left + box.width)
+      box.bottom = $viewport.height() - (box.top + box.height)
     box
 
   ###*
