@@ -10,6 +10,8 @@ Unreleased
 
 ### Compatible changes
 
+- Fix a bug where the document title wasn't restored when using the back
+  and forward buttons
 - Fix a bug where links would be followed multiple times if the link
   had an [`up-dash`](/up-dash) attribute without a value and also an `up-target` attribute.
 - Fix a bug where a link would be followed multiple times if the link's

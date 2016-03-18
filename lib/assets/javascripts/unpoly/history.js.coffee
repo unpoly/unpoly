@@ -130,6 +130,7 @@ up.history = (($) ->
         popSelector = config.popTargets.join(', ')
         up.replace popSelector, url,
           history: false,
+          title: true,
           reveal: false,
           transition: 'none',
           saveScroll: false # since the URL was already changed by the browser, don't save scroll state

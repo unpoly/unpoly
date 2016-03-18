@@ -49,15 +49,16 @@ describe 'up.link', ->
           # so we don't lose the Jasmine runner interface.
           up.history.config.popTargets = ['.container']
 
-          respondWith = (html) =>
+          respondWith = (html, title) =>
             @lastRequest().respondWith
               status: 200
               contentType: 'text/html'
               responseText: "<div class='container'><div class='target'>#{html}</div></div>"
+              responseHeaders: { 'X-Up-Title': title }
 
-          followAndRespond = ($link, html) ->
+          followAndRespond = ($link, html, title) ->
             promise = up.follow($link)
-            respondWith(html)
+            respondWith(html, title)
             promise
 
           $link1 = affix('a[href="/one"][up-target=".target"]')
@@ -66,35 +67,41 @@ describe 'up.link', ->
           $container = affix('.container')
           $target = affix('.target').appendTo($container).text('original text')
 
-          followAndRespond($link1, 'text from one').then =>
+          followAndRespond($link1, 'text from one', 'title from one').then =>
             expect($('.target')).toHaveText('text from one')
             expect(location.pathname).toEqual('/one')
+            expect(document.title).toEqual('title from one')
 
-            followAndRespond($link2, 'text from two').then =>
+            followAndRespond($link2, 'text from two', 'title from two').then =>
               expect($('.target')).toHaveText('text from two')
               expect(location.pathname).toEqual('/two')
+              expect(document.title).toEqual('title from two')
 
-              followAndRespond($link3, 'text from three').then =>
+              followAndRespond($link3, 'text from three', 'title from three').then =>
                 expect($('.target')).toHaveText('text from three')
                 expect(location.pathname).toEqual('/three')
+                expect(document.title).toEqual('title from three')
 
                 history.back()
                 @setTimer 50, =>
-                  respondWith('restored text from two')
+                  respondWith('restored text from two', 'restored title from two')
                   expect($('.target')).toHaveText('restored text from two')
                   expect(location.pathname).toEqual('/two')
+                  expect(document.title).toEqual('restored title from two')
 
                   history.back()
                   @setTimer 50, =>
-                    respondWith('restored text from one')
+                    respondWith('restored text from one', 'restored title from one')
                     expect($('.target')).toHaveText('restored text from one')
                     expect(location.pathname).toEqual('/one')
+                    expect(document.title).toEqual('restored title from one')
 
                     history.forward()
                     @setTimer 50, =>
                       # Since the response is cached, we don't have to respond
-                      expect($('.target')).toHaveText('restored text from two')
+                      expect($('.target')).toHaveText('restored text from two', 'restored title from two')
                       expect(location.pathname).toEqual('/two')
+                      expect(document.title).toEqual('restored title from two')
 
                       done()
 

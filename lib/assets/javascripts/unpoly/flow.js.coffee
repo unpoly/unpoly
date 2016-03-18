@@ -215,6 +215,10 @@ up.flow = (($) ->
   processResponse = (isSuccess, selector, url, request, xhr, options) ->
     options.method = u.normalizeMethod(u.option(u.methodFromXhr(xhr), options.method))
     options.title = u.option(u.titleFromXhr(xhr), options.title)
+
+    unless options.title is false || u.isString(options.title) || (options.history is false && options.title isnt true)
+      options.title = u.titleFromXhr(xhr)
+
     isReloadable = (options.method == 'GET')
 
     # The server can send us the current path using a header value.
@@ -350,8 +354,9 @@ up.flow = (($) ->
         u.error("Could not find selector %s in response %o", selector, html)
 
   updateHistory = (options) ->
+    if options.title
+      document.title = options.title
     if options.history
-      document.title = options.title if options.title
       up.history[options.historyMethod](options.history)
 
   swapElements = ($old, $new, pseudoClass, transition, options) ->
