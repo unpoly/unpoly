@@ -2,9 +2,26 @@
 Linking to page fragments
 =========================
 
-Just like in a classical web application, an Unpoly app renders a series of *full HTML pages* on the server.
+Standard HTML links are a poor fit for modern applications:
+
+- State changes caused by AJAX updates get lost during the page transition.
+- Unsaved form changes get lost during the page transition.
+- The Javascript VM is reset during the page transition.
+- If the page layout is composed from multiple srollable containers
+  (e.g. a pane view), the scroll positions get lost during the page transition.
+- The user sees a "flash" as the browser loads and renders the new page,
+  even if large portions of the old and new page are the same (navigation, layout, etc.).
+
+Unpoly fixes this by letting you annotate  links with an [`up-target`](/up-target)
+attribute. The value of this attribute is a CSS selector that indicates which page
+fragment to update. The rest of the page will remain unchanged.
+
+
+Exammple
+--------
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
+
 
 ```
   /pages/a                /pages/b                /pages/c
@@ -32,27 +49,8 @@ Your HTML could look like this:
 </article>
 ```
 
-Using this document-oriented way of navigating between pages
-is not a good fit for modern applications, for a multitude of reasons:
-
-- State changes caused by AJAX updates get lost during the page transition.
-- Unsaved form changes get lost during the page transition.
-- The Javascript VM is reset during the page transition.
-- If the page layout is composed from multiple srollable containers
-  (e.g. a pane view), the scroll positions get lost during the page transition.
-- The user sees a "flash" as the browser loads and renders the new page,
-  even if large portions of the old and new page are the same (navigation, layout, etc.).
-
-
-Smoother flow by updating fragments
------------------------------------
-
-In Unpoly you annotate navigation links with an `up-target` attribute.
-The value of this attribute is a CSS selector that indicates which page
-fragment to update.
-
-Since we only want to update the `<article>` tag, we will use `up-target="article"`:
-
+Since we only want to update the `<article>` tag, we annotate the links
+with an `up-target` attribute:
 
 ```
 <nav>
@@ -62,10 +60,11 @@ Since we only want to update the `<article>` tag, we will use `up-target="articl
 </nav>
 ```
 
-Instead of `article` you can use any other CSS selector (e. g.  `#main .article`).
+Note that instead of `article` you can use any other CSS selector like `#main .article`.
 
-With these `up-target` annotations Unpoly only updates the targeted part of the screen.
-Javascript will not be reloaded, no white flash during a full page reload.
+With these [`up-target`](/up-target) annotations Unpoly only updates the targeted part of the screen.
+The Javascript environment will persist and the user will not see a white flash while the
+new page is loading.
 
 
 Read on
