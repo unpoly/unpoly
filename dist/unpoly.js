@@ -1110,7 +1110,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     measure = function($element, opts) {
-      var $context, box, contextCoords, coordinates, elementCoords, viewport;
+      var $context, $viewport, box, contextCoords, coordinates, elementCoords;
       opts = options(opts, {
         relative: false,
         inner: false,
@@ -1147,9 +1147,9 @@ that might save you from loading something like [Underscore.js](http://underscor
         box.height = $element.outerHeight();
       }
       if (opts.full) {
-        viewport = clientSize();
-        box.right = viewport.width - (box.left + box.width);
-        box.bottom = viewport.height - (box.top + box.height);
+        $viewport = up.layout.viewportOf($element);
+        box.right = $viewport.width() - (box.left + box.width);
+        box.bottom = $viewport.height() - (box.top + box.height);
       }
       return box;
     };
@@ -1890,6 +1890,16 @@ that might save you from loading something like [Underscore.js](http://underscor
   up.error = up.util.error;
 
 }).call(this);
+
+/**
+Logging
+=======
+
+Elaborate wrappers around `window.console`.
+Should only used internally since they prefix `ᴜᴘ` to each
+printed message.
+ */
+
 (function() {
   var slice = [].slice;
 
@@ -2280,7 +2290,31 @@ we can't currently get rid off.
 Events
 ======
 
-Unpoly has a convenient way to [listen to DOM events](/up.on):
+Most Unpoly interactions emit DOM events that are prefixed with `up:`.
+
+    $(document).on('up:modal:opened', function(event) {
+      console.log('A new modal has just opened!');
+    });
+
+Events often have both present ([`up:modal:open`](/up:modal:open))
+and past forms ([`up:modal:opened`](/up:modal:opened)).
+
+You can usually prevent an action by listening to the present form
+and call `preventDefault()` on the `event` object:
+
+    $(document).on('up:modal:open', function(event) {
+      if (event.url == '/evil') {
+        // Prevent the modal from opening
+        event.preventDefault();
+      }
+    });
+
+
+A better way to bind event listeners
+------------------------------------
+
+Instead of using jQuery to bind  an event handler to `document`, you can also
+use the more convenient [`up.on`](/up.on):
 
     up.on('click', 'button', function(event, $button) {
       // $button is a jQuery collection containing
@@ -2293,26 +2327,10 @@ using jQuery's [`on`](http://api.jquery.com/on/).
 - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
   leaving you with an application without Javascript. This is typically preferable to
   a soup of randomly broken Javascript in ancient browsers.
-- A jQuery object with the target element is automatically passed to the event handler.
-- You can [attach structured data](/up.on#attaching-structured-data) to observed elements.
-- The call is shorter.
-
-Many Unpoly interactions also emit DOM events that are prefixed with `up:`.
-
-    up.on('up:modal:opened', function(event) {
-      console.log('A new modal has just opened!');
-    });
-
-Events often have both present (`up:modal:open`) and past forms (`up:modal:opened`).
-You can usually prevent an action by listening to the present form
-and call `preventDefault()` on the `event` object:
-
-    up.on('up:modal:open', function(event) {
-      if (event.url == '/evil') {
-        // Prevent the modal from opening
-        event.preventDefault();
-      }
-    });
+- A jQuery object with the target element is automatically passed to the event handler
+  as a second argument.
+- You use an [`up-data`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
+  to observed elements.
 
 @class up.bus
  */
@@ -2418,9 +2436,27 @@ and call `preventDefault()` on the `event` object:
     
     \#\#\#\# Stopping to listen
     
-    `up.on` returns a function that unbinds the event listeners when called.
+    `up.on` returns a function that unbinds the event listeners when called:
     
-    There is also a function [`up.off`](/up.off) which you can use for the same purpose.
+        // Define the listener
+        var listener =  function() { ... };
+    
+        // Binding the listener returns an unbind function
+        unbind = up.on('click', listener);
+    
+        // Unbind the listener
+        unbind()
+    
+    There is also a function [`up.off`](/up.off) which you can use for the same purpose:
+    
+        // Define the listener
+        var listener =  function() { ... };
+    
+        // Bind the listener
+        up.on('click', listener);
+    
+        // Unbind the listener
+        up.off('click', listener)
     
     @function up.on
     @param {String} events
@@ -2432,7 +2468,7 @@ and call `preventDefault()` on the `event` object:
     @param {Function(event, $element, data)} behavior
       The handler that should be called.
       The function takes the affected element as the first argument (as a jQuery object).
-      If the element has an `up-data` attribute, its value is parsed as JSON
+      If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
       and passed as a second argument.
     @return {Function}
       A function that unbinds the event listeners when called.
@@ -2453,13 +2489,13 @@ and call `preventDefault()` on the `event` object:
     };
 
     /**
-    Unregisters an event listener previously bound with [`up.on`](/up.on).
+    Unbinds an event listener previously bound with [`up.on`](/up.on).
     
     \#\#\#\# Example
     
     Let's say you are listing to clicks on `.button` elements:
     
-        var listener = function() { };
+        var listener = function() { ... };
         up.on('click', '.button', listener);
     
     You can stop listening to these events like this:
@@ -2771,11 +2807,11 @@ later.
     Registers a function to be called whenever an element with
     the given selector is inserted into the DOM.
     
-        $('.action').compiler(function($element) {
+        up.compiler('.action', function($element) {
           // your code here
         });
     
-    Compiler functions will be called on matching elements when
+    The functions will be called on elements maching `.action` when
     the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
     later.
     
@@ -2860,7 +2896,7 @@ later.
           { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
         ]"></div>
     
-    The JSON will parsed and handed to your event handler as a second argument:
+    The JSON will parsed and handed to your compiler as a second argument:
     
         up.compiler('.google-map', function($element, pins) {
     
@@ -2920,7 +2956,7 @@ later.
     @param {Function($element, data)} compiler
       The function to call when a matching element is inserted.
       The function takes the new element as the first argument (as a jQuery object).
-      If the element has an `up-data` attribute, its value is parsed as JSON
+      If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
       and passed as a second argument.
     
       The function may return a destructor function that destroys the compiled
@@ -3094,10 +3130,20 @@ later.
     };
 
     /**
-    Checks if the given element has an `up-data` attribute.
+    Checks if the given element has an [`up-data`](/up-data) attribute.
     If yes, parses the attribute value as JSON and returns the parsed object.
     
     Returns an empty object if the element has no `up-data` attribute.
+    
+    \#\#\#\# Example
+    
+    You have an element with JSON data serialized into an `up-data` attribute:
+    
+        <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
+    
+    Calling `up.syntax.data` will deserialize the JSON string into a Javascript object:
+    
+        up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
     
     @function up.syntax.data
     @param {String|Element|jQuery} elementOrSelector
@@ -3108,14 +3154,43 @@ later.
     @experimental
      */
 
-    /*
+    /**
     If an element annotated with [`up-data`] is inserted into the DOM,
     Up will parse the JSON and pass the resulting object to any matching
-    [`up.compiler`](/up.syntax.compiler) handlers.
+    [`up.compiler`](/up.compiler) handlers.
+    
+    For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
+    might attach the location and names of its marker pins:
+    
+        <div class="google-map" up-data="[
+          { lat: 48.36, lng: 10.99, title: 'Friedberg' },
+          { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
+        ]"></div>
+    
+    The JSON will parsed and handed to your compiler as a second argument:
+    
+        up.compiler('.google-map', function($element, pins) {
+    
+          var map = new google.maps.Map($element);
+    
+          pins.forEach(function(pin) {
+            var position = new google.maps.LatLng(pin.lat, pin.lng);
+            new google.maps.Marker({
+              position: position,
+              map: map,
+              title: pin.title
+            });
+          });
+    
+        });
     
     Similarly, when an event is triggered on an element annotated with
     [`up-data`], the parsed object will be passed to any matching
     [`up.on`](/up.on) handlers.
+    
+        up.on('click', '.google-map', function(event, $element, pins) {
+          console.log("There are %d pins on the clicked map", pins.length);
+        });
     
     @selector [up-data]
     @param {JSON} up-data
@@ -3334,6 +3409,7 @@ We need to work on this page:
           popSelector = config.popTargets.join(', ');
           return up.replace(popSelector, url, {
             history: false,
+            title: true,
             reveal: false,
             transition: 'none',
             saveScroll: false,
@@ -3424,7 +3500,19 @@ We need to work on this page:
 Application layout
 ==================
 
-This modules contains functions to scroll the viewport and reveal contained elements.
+You can [make Unpoly aware](/up.layout.config) of fixed elements in your
+layout, such as navigation bars or headers. Unpoly will respect these sticky
+elements when [revealing elements](/up.reveal) or [opening a modal dialog](/up-modal).
+
+This modules also contains functions to programmatically [scroll a viewport](/up.scroll)
+or [reveal an element within its viewport](/up.reveal).
+
+Bootstrap integration
+---------------------
+
+When using Bootstrap integration (`unpoly-bootstrap3.js` and `unpoly-bootstrap3.css`)
+Unpoly will automatically be aware of sticky Bootstrap components such as
+[fixed navbar](https://getbootstrap.com/examples/navbar-fixed-top/).
 
 @class up.layout
  */
@@ -3452,17 +3540,17 @@ This modules contains functions to scroll the viewport and reveal contained elem
     @param {Array} [config.anchoredRight]
       An array of CSS selectors that find elements anchored to the
       right edge of the screen (using `position: fixed` or `position: absolute`).
-    @param {Number} [config.duration]
+    @param {Number} [config.duration=0]
       The duration of the scrolling animation in milliseconds.
       Setting this to `0` will disable scrolling animations.
-    @param {String} [config.easing]
+    @param {String} [config.easing='swing']
       The timing function that controls the animation's acceleration.
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
-    @param {Number} [config.snap]
+    @param {Number} [config.snap=50]
       When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
       to the top when the revealed element is closer to the top than `config.snap`.
-    @param {Number} [config.substance]
+    @param {Number} [config.substance=150]
       A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
     @stable
      */
@@ -4034,8 +4122,8 @@ This modules contains functions to scroll the viewport and reveal contained elem
 Changing page fragments programmatically
 ========================================
   
-This module contains Unpoly's core functions to [change](/up.replace) or [destroy](/up.destroy)
-  page fragments via Javascript.
+This module contains Unpoly's core functions to [change](/up.replace) or
+[destroy](/up.destroy) page fragments via Javascript.
 
 All the other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
 are based on this module.
@@ -4167,7 +4255,7 @@ are based on this module.
     the CSS selector for the updating fragment.
     
     If you are using the `unpoly-rails` gem you can also access the selector via
-    `up.selector` in all controllers, views and helpers.
+    `up.target` in all controllers, views and helpers.
     
     \#\#\#\# Events
     
@@ -4262,6 +4350,9 @@ are based on this module.
       var isReloadable, newRequest, query, urlFromServer;
       options.method = u.normalizeMethod(u.option(u.methodFromXhr(xhr), options.method));
       options.title = u.option(u.titleFromXhr(xhr), options.title);
+      if (!(options.title === false || u.isString(options.title) || (options.history === false && options.title !== true))) {
+        options.title = u.titleFromXhr(xhr);
+      }
       isReloadable = options.method === 'GET';
       if (urlFromServer = u.locationFromXhr(xhr)) {
         url = urlFromServer;
@@ -4424,10 +4515,10 @@ are based on this module.
       };
     };
     updateHistory = function(options) {
+      if (options.title) {
+        document.title = options.title;
+      }
       if (options.history) {
-        if (options.title) {
-          document.title = options.title;
-        }
         return up.history[options.historyMethod](options.history);
       }
     };
@@ -4645,7 +4736,7 @@ are based on this module.
 
     /**
     Compiles a page fragment that has been inserted into the DOM
-    without Unpoly.
+    by external code.
     
     **As long as you manipulate the DOM using Unpoly, you will never
     need to call this method.** You only need to use `up.hello` if the
@@ -4938,6 +5029,9 @@ to smoothly fade out the old `.list` while fading in the new `.list`:
 
     <a href="/users" up-target=".list" up-transition="cross-fade">Show users</a>
 
+Transitions vs. animations
+--------------------------
+
 When we morph between an old an new element, we call it a *transition*.
 In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
@@ -4946,6 +5040,9 @@ An example for an animation is opening a new dialog, which we can animate
 using the `up-animation` attribute:
 
     <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
+
+Predefined animations and transitions
+-------------------------------------
 
 Unpoly ships with a number of predefined [animations](/up.animate#named-animation)
 and [transitions](/up.morph#named-animation).
@@ -5391,7 +5488,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     If you choose to *not* use `up.animate` and roll your own
     logic instead, your code must honor the following contract:
     
-    1. It must honor the passed options.
+    1. It must honor the passed options `{ delay, duration, easing }` if present
     2. It must *not* remove any of the given elements from the DOM.
     3. It returns a promise that is resolved when the transition ends
     4. The returned promise responds to a `resolve()` function that
@@ -5414,8 +5511,8 @@ or [transitions](/up.transition) using Javascript or CSS.
     
     Here is the definition of the pre-defined `fade-in` animation:
     
-        up.animation('fade-in', function($ghost, options) {
-          $ghost.css(opacity: 0);
+        up.animation('fade-in', function($element, options) {
+          $element.css(opacity: 0);
           up.animate($ghost, { opacity: 1 }, options);
         })
     
@@ -5426,7 +5523,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     If you choose to *not* use `up.animate` and roll your own
     animation code instead, your code must honor the following contract:
     
-    1. It must honor the passed options.
+    1. It must honor the passed options `{ delay, duration, easing }` if present
     2. It must *not* remove the passed element from the DOM.
     3. It returns a promise that is resolved when the animation ends
     4. The returned promise responds to a `resolve()` function that
@@ -5449,15 +5546,20 @@ or [transitions](/up.transition) using Javascript or CSS.
     };
 
     /**
-    Returns a new promise that resolves once all promises in arguments resolve.
+    Returns a new deferred that resolves once all given deferreds have resolved.
     
     Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
-    the combined promise will have a `resolve` method. This `resolve` method
-    will resolve all the wrapped promises.
+    the combined deferred will have a `resolve` method. This `resolve` method
+    will resolve all the wrapped deferreds.
+    
+    This is important when composing multiple existing animations into
+    a [custom transition](/up.transition), since the transition function
+    must return a deferred with a `resolve` function that fast-forwards
+    the animation to its last frame.
     
     @function up.motion.when
-    @param promises...
-    @return A new promise.
+    @param {Array<Deferred>} deferreds...
+    @return {Deferred} A new deferred
     @experimental
      */
     resolvableWhen = u.resolvableWhen;
@@ -5641,7 +5743,7 @@ Caching and preloading
 All HTTP requests go through the Unpoly proxy.
 It caches a [limited](/up.proxy.config) number of server responses
 for a [limited](/up.proxy.config) amount of time,
-making requests to these URLs return insantly.
+making requests to these URLs return instantly.
   
 The cache is cleared whenever the user makes a non-`GET` request
 (like `POST`, `PUT` or `DELETE`).
@@ -5650,42 +5752,6 @@ The proxy can also used to speed up reaction times by [preloading
 links when the user hovers over the click area](/up-preload) (or puts the mouse/finger
 down before releasing). This way the response will already be cached when
 the user performs the click.
-
-Spinners
---------
-
-You can [listen](/up.on) to the [`up:proxy:slow`](/up:proxy:slow)
-and [`up:proxy:recover`](/up:proxy:recover) events  to implement a spinner
-that appears during a long-running request,
-and disappears once the response has been received:
-
-    <div class="spinner">Please wait!</div>
-
-Here is the Javascript to make it alive:
-
-    up.compiler('.spinner', function($element) {
-
-      show = function() { $element.show() };
-      hide = function() { $element.hide() };
-
-      showOff = up.on('up:proxy:slow', show);
-      hideOff = up.on('up:proxy:recover', hide);
-
-      hide();
-
-      // Clean up when the element is removed from the DOM
-      return function() {
-        showOff();
-        hideOff();
-      };
-
-    });
-
-The `up:proxy:slow` event will be emitted after a delay of 300 ms
-to prevent the spinner from flickering on and off.
-You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.config) like this:
-
-    up.proxy.config.slowDelay = 150;
 
 @class up.proxy
  */
@@ -5987,6 +6053,43 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     Note that if additional requests are made while Unpoly is already busy
     waiting, **no** additional `up:proxy:slow` events will be triggered.
     
+    
+    \#\#\#\# Spinners
+    
+    You can [listen](/up.on) to the `up:proxy:slow`
+    and [`up:proxy:recover`](/up:proxy:recover) events to implement a spinner
+    that appears during a long-running request,
+    and disappears once the response has been received:
+    
+        <div class="spinner">Please wait!</div>
+    
+    Here is the Javascript to make it alive:
+    
+        up.compiler('.spinner', function($element) {
+    
+          show = function() { $element.show() };
+          hide = function() { $element.hide() };
+    
+          showOff = up.on('up:proxy:slow', show);
+          hideOff = up.on('up:proxy:recover', hide);
+    
+          hide();
+    
+          // Clean up when the element is removed from the DOM
+          return function() {
+            showOff();
+            hideOff();
+          };
+    
+        });
+    
+    The `up:proxy:slow` event will be emitted after a delay of 300 ms
+    to prevent the spinner from flickering on and off.
+    You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.config) like this:
+    
+        up.proxy.config.slowDelay = 150;
+    
+    
     @event up:proxy:slow
     @stable
      */
@@ -6003,6 +6106,10 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
     /**
     This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
     have [taken long to finish](/up:proxy:slow), but have finished now.
+    
+    See [`up:proxy:slow`](/up:proxy:slow) for more documentation on
+    how to use this event for implementing a spinner that shows during
+    long-running requests.
     
     @event up:proxy:recover
     @stable
@@ -6186,9 +6293,26 @@ You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.conf
 Linking to page fragments
 =========================
 
-Just like in a classical web application, an Unpoly app renders a series of *full HTML pages* on the server.
+Standard HTML links are a poor fit for modern applications:
+
+- State changes caused by AJAX updates get lost during the page transition.
+- Unsaved form changes get lost during the page transition.
+- The Javascript VM is reset during the page transition.
+- If the page layout is composed from multiple srollable containers
+  (e.g. a pane view), the scroll positions get lost during the page transition.
+- The user sees a "flash" as the browser loads and renders the new page,
+  even if large portions of the old and new page are the same (navigation, layout, etc.).
+
+Unpoly fixes this by letting you annotate  links with an [`up-target`](/up-target)
+attribute. The value of this attribute is a CSS selector that indicates which page
+fragment to update. The rest of the page will remain unchanged.
+
+
+Exammple
+--------
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
+
 
 ```
   /pages/a                /pages/b                /pages/c
@@ -6216,27 +6340,8 @@ Your HTML could look like this:
 </article>
 ```
 
-Using this document-oriented way of navigating between pages
-is not a good fit for modern applications, for a multitude of reasons:
-
-- State changes caused by AJAX updates get lost during the page transition.
-- Unsaved form changes get lost during the page transition.
-- The Javascript VM is reset during the page transition.
-- If the page layout is composed from multiple srollable containers
-  (e.g. a pane view), the scroll positions get lost during the page transition.
-- The user sees a "flash" as the browser loads and renders the new page,
-  even if large portions of the old and new page are the same (navigation, layout, etc.).
-
-
-Smoother flow by updating fragments
------------------------------------
-
-In Unpoly you annotate navigation links with an `up-target` attribute.
-The value of this attribute is a CSS selector that indicates which page
-fragment to update.
-
-Since we only want to update the `<article>` tag, we will use `up-target="article"`:
-
+Since we only want to update the `<article>` tag, we annotate the links
+with an `up-target` attribute:
 
 ```
 <nav>
@@ -6246,10 +6351,11 @@ Since we only want to update the `<article>` tag, we will use `up-target="articl
 </nav>
 ```
 
-Instead of `article` you can use any other CSS selector (e. g.  `#main .article`).
+Note that instead of `article` you can use any other CSS selector like `#main .article`.
 
-With these `up-target` annotations Unpoly only updates the targeted part of the screen.
-Javascript will not be reloaded, no white flash during a full page reload.
+With these [`up-target`](/up-target) annotations Unpoly only updates the targeted part of the screen.
+The Javascript environment will persist and the user will not see a white flash while the
+new page is loading.
 
 
 Read on
@@ -6595,6 +6701,41 @@ Read on
     });
 
     /**
+    Marks up the current link to be followed *as fast as possible*.
+    This is done by:
+    
+    - [Following the link through AJAX](/up-target) instead of a full page load
+    - [Preloading the link's destination URL](/up-preload)
+    - [Triggering the link on `mousedown`](/up-instant) instead of on `click`
+    
+    Use `up-dash` like this:
+    
+        <a href="/users" up-dash=".main">User list</a>
+    
+    Note that this is shorthand for:
+    
+        <a href="/users" up-target=".main" up-instant up-preload>User list</a>
+    
+    @selector [up-dash]
+    @stable
+     */
+    up.macro('[up-dash]', function($element) {
+      var newAttrs, target;
+      target = u.castedAttr($element, 'up-dash');
+      $element.removeAttr('up-dash');
+      newAttrs = {
+        'up-preload': '',
+        'up-instant': ''
+      };
+      if (target === true) {
+        makeFollowable($element);
+      } else {
+        newAttrs['up-target'] = target;
+      }
+      return u.setMissingAttrs($element, newAttrs);
+    });
+
+    /**
     Add an `up-expand` class to any element that contains a link
     in order to enlarge the link's click area.
     
@@ -6653,41 +6794,6 @@ Read on
         $area.removeAttr('up-expand');
         return makeFollowable($area);
       }
-    });
-
-    /**
-    Marks up the current link to be followed *as fast as possible*.
-    This is done by:
-    
-    - [Following the link through AJAX](/up-target) instead of a full page load
-    - [Preloading the link's destination URL](/up-preload)
-    - [Triggering the link on `mousedown`](/up-instant) instead of on `click`
-    
-    Use `up-dash` like this:
-    
-        <a href="/users" up-dash=".main">User list</a>
-    
-    Note that this is shorthand for:
-    
-        <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
-    
-    @selector [up-dash]
-    @stable
-     */
-    up.macro('[up-dash]', function($element) {
-      var newAttrs, target;
-      target = u.castedAttr($element, 'up-dash');
-      newAttrs = {
-        'up-preload': 'true',
-        'up-instant': 'true'
-      };
-      if (target === true) {
-        newAttrs['up-follow'] = '';
-      } else {
-        newAttrs['up-target'] = target;
-      }
-      u.setMissingAttrs($element, newAttrs);
-      return $element.removeAttr('up-dash');
     });
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
@@ -7028,7 +7134,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     @function up.autosubmit
     @param {String|Element|jQuery} selectorOrElement
-      The form field to observe.
+      The field or form to observe.
     @param {Object} [options]
       See options for [`up.observe`](/up.observe)
     @return {Function}
@@ -7579,7 +7685,15 @@ open dialogs with sub-forms, etc. all without losing form state.
     text field value changes:
     
         <form method="GET" action="/search" up-autosubmit>
-          <input type="query">
+          <input type="search" name="query">
+        </form>
+    
+    The following would submit the form only if the query was changed,
+    but not if the checkbox was changed:
+    
+        <form method="GET" action="/search">
+          <input type="search" name="query" autosubmit>
+          <input type="checkbox"> Include archive
         </form>
     
     @selector [up-autosubmit]

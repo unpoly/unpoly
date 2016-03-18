@@ -10,6 +10,15 @@ Unreleased
 
 ### Compatible changes
 
+
+### Breaking changes
+
+
+0.22.1
+------
+
+### Compatible changes
+
 - Fix a bug where the document title wasn't restored when using the back
   and forward buttons
 - Fix a bug where links would be followed multiple times if the link
@@ -17,8 +26,6 @@ Unreleased
 - Fix a bug where a link would be followed multiple times if the link's
   click area was expanded using [`[up-expand]`](/up-expand) and if the
   link also had an [`up-dash`](/up-dash) attribute.
-
-### Breaking changes
 
 
 0.22.0
