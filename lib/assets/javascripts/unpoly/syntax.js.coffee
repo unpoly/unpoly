@@ -46,11 +46,11 @@ up.syntax = (($) ->
   Registers a function to be called whenever an element with
   the given selector is inserted into the DOM.
 
-      $('.action').compiler(function($element) {
+      up.compiler('.action', function($element) {
         // your code here
       });
 
-  Compiler functions will be called on matching elements when
+  The functions will be called on elements maching `.action` when
   the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
   later.
 
