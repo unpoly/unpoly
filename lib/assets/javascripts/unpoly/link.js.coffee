@@ -255,7 +255,8 @@ up.link = (($) ->
   ###
   makeFollowable = (link) ->
     $link = $(link)
-    $link.attr('up-follow', '') unless isFollowable($link)
+    unless isFollowable($link)
+      $link.attr('up-follow', '')
 
   ###*
   Follows this link via AJAX and replaces a CSS selector in the current page
@@ -394,6 +395,40 @@ up.link = (($) ->
     follow($link)
 
   ###*
+  Marks up the current link to be followed *as fast as possible*.
+  This is done by:
+
+  - [Following the link through AJAX](/up-target) instead of a full page load
+  - [Preloading the link's destination URL](/up-preload)
+  - [Triggering the link on `mousedown`](/up-instant) instead of on `click`
+
+  Use `up-dash` like this:
+
+      <a href="/users" up-dash=".main">User list</a>
+
+  Note that this is shorthand for:
+
+      <a href="/users" up-target=".main" up-instant up-preload>User list</a>
+
+  @selector [up-dash]
+  @stable
+  ###
+  up.macro '[up-dash]', ($element) ->
+    target = u.castedAttr($element, 'up-dash')
+    $element.removeAttr('up-dash')
+    newAttrs = {
+      'up-preload': '',
+      'up-instant': ''
+    }
+    if target is true
+      # If it's literally `true` then we don't have a target selector.
+      # Just follow the link by replacing `<body>`.
+      makeFollowable($element)
+    else
+      newAttrs['up-target'] = target
+    u.setMissingAttrs($element, newAttrs)
+
+  ###*
   Add an `up-expand` class to any element that contains a link
   in order to enlarge the link's click area.
 
@@ -445,40 +480,6 @@ up.link = (($) ->
       u.setMissingAttrs($area, newAttrs)
       $area.removeAttr('up-expand')
       makeFollowable($area)
-
-  ###*
-  Marks up the current link to be followed *as fast as possible*.
-  This is done by:
-  
-  - [Following the link through AJAX](/up-target) instead of a full page load
-  - [Preloading the link's destination URL](/up-preload)
-  - [Triggering the link on `mousedown`](/up-instant) instead of on `click`
-  
-  Use `up-dash` like this:
-  
-      <a href="/users" up-dash=".main">User list</a>
-  
-  Note that this is shorthand for:
-  
-      <a href="/users" up-target=".main" up-instant up-preload>User list</a>  
-
-  @selector [up-dash]
-  @stable
-  ###
-  up.macro '[up-dash]', ($element) ->
-    target = u.castedAttr($element, 'up-dash')
-    $element.removeAttr('up-dash')
-    newAttrs = {
-      'up-preload': '',
-      'up-instant': ''
-    }
-    if target is true
-      # If it's literally `true` then we don't have a target selector.
-      # Just follow the link by replacing `<body>`.
-      makeFollowable($element)
-    else
-      newAttrs['up-target'] = target
-    u.setMissingAttrs($element, newAttrs)
 
   knife: eval(Knife?.point)
   visit: visit

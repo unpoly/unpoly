@@ -410,6 +410,16 @@ describe 'up.link', ->
         Trigger.click($area)
         expect(up.replace.calls.count()).toEqual(1)
 
+      it 'does not add an up-follow attribute if the expanded link is [up-dash] with a selector (bugfix)', ->
+        $area = affix('div[up-expand] a[href="/path"][up-dash=".element"]')
+        up.hello($area)
+        expect($area.attr('up-follow')).toBeMissing()
+
+      it 'does not an up-follow attribute if the expanded link is [up-dash] without a selector (bugfix)', ->
+        $area = affix('div[up-expand] a[href="/path"][up-dash]')
+        up.hello($area)
+        expect($area.attr('up-follow')).toEqual('')
+
       describe 'with a CSS selector in the property value', ->
 
         it "expands the contained link that matches the selector", ->

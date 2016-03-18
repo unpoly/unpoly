@@ -11,7 +11,10 @@ Unreleased
 ### Compatible changes
 
 - Fix a bug where links would be followed multiple times if the link
-  had an `up-dash` attribute without a value and also an `up-target` attribute.
+  had an [`up-dash`](/up-dash) attribute without a value and also an `up-target` attribute.
+- Fix a bug where a link would be followed multiple times if the link's
+  click area was expanded using [`[up-expand]`](/up-expand) and if the
+  link also had an [`up-dash`](/up-dash) attribute.
 
 ### Breaking changes
 
