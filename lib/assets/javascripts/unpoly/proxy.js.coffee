@@ -5,7 +5,7 @@ Caching and preloading
 All HTTP requests go through the Unpoly proxy.
 It caches a [limited](/up.proxy.config) number of server responses
 for a [limited](/up.proxy.config) amount of time,
-making requests to these URLs return insantly.
+making requests to these URLs return instantly.
   
 The cache is cleared whenever the user makes a non-`GET` request
 (like `POST`, `PUT` or `DELETE`).
@@ -14,42 +14,6 @@ The proxy can also used to speed up reaction times by [preloading
 links when the user hovers over the click area](/up-preload) (or puts the mouse/finger
 down before releasing). This way the response will already be cached when
 the user performs the click.
-
-Spinners
---------
-
-You can [listen](/up.on) to the [`up:proxy:slow`](/up:proxy:slow)
-and [`up:proxy:recover`](/up:proxy:recover) events  to implement a spinner
-that appears during a long-running request,
-and disappears once the response has been received:
-
-    <div class="spinner">Please wait!</div>
-
-Here is the Javascript to make it alive:
-
-    up.compiler('.spinner', function($element) {
-
-      show = function() { $element.show() };
-      hide = function() { $element.hide() };
-
-      showOff = up.on('up:proxy:slow', show);
-      hideOff = up.on('up:proxy:recover', hide);
-
-      hide();
-
-      // Clean up when the element is removed from the DOM
-      return function() {
-        showOff();
-        hideOff();
-      };
-
-    });
-
-The `up:proxy:slow` event will be emitted after a delay of 300 ms
-to prevent the spinner from flickering on and off.
-You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.config) like this:
-
-    up.proxy.config.slowDelay = 150;
 
 @class up.proxy  
 ###
@@ -349,6 +313,43 @@ up.proxy = (($) ->
   Note that if additional requests are made while Unpoly is already busy
   waiting, **no** additional `up:proxy:slow` events will be triggered.
 
+
+  \#\#\#\# Spinners
+
+  You can [listen](/up.on) to the `up:proxy:slow`
+  and [`up:proxy:recover`](/up:proxy:recover) events to implement a spinner
+  that appears during a long-running request,
+  and disappears once the response has been received:
+
+      <div class="spinner">Please wait!</div>
+
+  Here is the Javascript to make it alive:
+
+      up.compiler('.spinner', function($element) {
+
+        show = function() { $element.show() };
+        hide = function() { $element.hide() };
+
+        showOff = up.on('up:proxy:slow', show);
+        hideOff = up.on('up:proxy:recover', hide);
+
+        hide();
+
+        // Clean up when the element is removed from the DOM
+        return function() {
+          showOff();
+          hideOff();
+        };
+
+      });
+
+  The `up:proxy:slow` event will be emitted after a delay of 300 ms
+  to prevent the spinner from flickering on and off.
+  You can change (or remove) this delay by [configuring `up.proxy`](/up.proxy.config) like this:
+
+      up.proxy.config.slowDelay = 150;
+
+
   @event up:proxy:slow
   @stable
   ###
@@ -362,6 +363,10 @@ up.proxy = (($) ->
   ###*
   This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
   have [taken long to finish](/up:proxy:slow), but have finished now.
+
+  See [`up:proxy:slow`](/up:proxy:slow) for more documentation on
+  how to use this event for implementing a spinner that shows during
+  long-running requests.
 
   @event up:proxy:recover
   @stable
