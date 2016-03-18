@@ -468,19 +468,18 @@ up.link = (($) ->
   ###
   up.macro '[up-dash]', ($element) ->
     target = u.castedAttr($element, 'up-dash')
+    $element.removeAttr('up-dash')
     newAttrs = {
-      'up-preload': 'true',
-      'up-instant': 'true'
+      'up-preload': '',
+      'up-instant': ''
     }
     if target is true
       # If it's literally `true` then we don't have a target selector.
       # Just follow the link by replacing `<body>`.
-      newAttrs['up-follow'] = ''
+      makeFollowable($element)
     else
       newAttrs['up-target'] = target
     u.setMissingAttrs($element, newAttrs)
-    $element.removeAttr('up-dash')
-
 
   knife: eval(Knife?.point)
   visit: visit

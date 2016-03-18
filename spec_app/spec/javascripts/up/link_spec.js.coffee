@@ -190,6 +190,27 @@ describe 'up.link', ->
           up.follow($link)
           expect(up.browser.loadPage).toHaveBeenCalledWith('/path', { method: 'PUT' })
 
+    describe 'up.link.makeFollowable', ->
+
+      it "adds [up-follow] to a link that wouldn't otherwise be handled by Unpoly", ->
+        $link = affix('a[href="/path"]').text('label')
+        up.link.makeFollowable($link)
+        expect($link.attr('up-follow')).toEqual('')
+
+      it "does not add [up-follow] to a link that is already [up-target]", ->
+        $link = affix('a[href="/path"][up-target=".target"]').text('label')
+        up.link.makeFollowable($link)
+        expect($link.attr('up-follow')).toBeMissing()
+
+      it "does not add [up-follow] to a link that is already [up-modal]", ->
+        $link = affix('a[href="/path"][up-modal=".target"]').text('label')
+        up.link.makeFollowable($link)
+        expect($link.attr('up-follow')).toBeMissing()
+
+      it "does not add [up-follow] to a link that is already [up-popup]", ->
+        $link = affix('a[href="/path"][up-popup=".target"]').text('label')
+        up.link.makeFollowable($link)
+        expect($link.attr('up-follow')).toBeMissing()
 
     describe 'up.visit', ->
       
@@ -301,6 +322,48 @@ describe 'up.link', ->
           Trigger.mousedown(@$link, metaKey: true)
           expect(@followSpy).not.toHaveBeenCalled()
 
+    describe '[up-dash]', ->
+
+      it "is a shortcut for [up-preload], [up-instant] and [up-target], using [up-dash]'s value as [up-target]", ->
+        $link = affix('a[href="/path"][up-dash=".target"]').text('label')
+        up.hello($link)
+        expect($link.attr('up-preload')).toEqual('')
+        expect($link.attr('up-instant')).toEqual('')
+        expect($link.attr('up-target')).toEqual('.target')
+
+      it "adds [up-follow] attribute if [up-dash]'s value is 'true'", ->
+        $link = affix('a[href="/path"][up-dash="true"]').text('label')
+        up.hello($link)
+        expect($link.attr('up-follow')).toEqual('')
+
+      it "adds [up-follow] attribute if [up-dash] is present, but has no value", ->
+        $link = affix('a[href="/path"][up-dash]').text('label')
+        up.hello($link)
+        expect($link.attr('up-follow')).toEqual('')
+
+      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-target] is present", ->
+        $link = affix('a[href="/path"][up-dash="true"][up-target=".target"]').text('label')
+        up.hello($link)
+        expect($link.attr('up-follow')).toBeMissing()
+        expect($link.attr('up-target')).toEqual('.target')
+
+      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-modal] is present", ->
+        $link = affix('a[href="/path"][up-dash="true"][up-modal=".target"]').text('label')
+        up.hello($link)
+        expect($link.attr('up-follow')).toBeMissing()
+        expect($link.attr('up-modal')).toEqual('.target')
+
+      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-popup] is present", ->
+        $link = affix('a[href="/path"][up-dash="true"][up-popup=".target"]').text('label')
+        up.hello($link)
+        expect($link.attr('up-follow')).toBeMissing()
+        expect($link.attr('up-popup')).toEqual('.target')
+
+      it "removes the [up-dash] attribute when it's done", ->
+        $link = affix('a[href="/path"]').text('label')
+        up.hello($link)
+        expect($link.attr('up-dash')).toBeMissing()
+
     describe '[up-expand]', ->
 
       it 'copies up-related attributes of a contained link', ->
@@ -331,6 +394,21 @@ describe 'up.link', ->
         $area = affix('div[up-expand] a[href="/path"]')
         up.hello($area)
         expect($area.attr('up-follow')).toEqual('')
+
+      it 'can be used to enlarge the click area of a link', ->
+        $area = affix('div[up-expand] a[href="/path"]')
+        up.hello($area)
+        spyOn(up, 'replace')
+        $area.get(0).click()
+        expect(up.replace).toHaveBeenCalled()
+
+      it 'does not trigger multiple replaces when the user clicks on the expanded area of an up-instant link (bugfix)', ->
+        $area = affix('div[up-expand] a[href="/path"][up-instant]')
+        up.hello($area)
+        spyOn(up, 'replace')
+        Trigger.mousedown($area)
+        Trigger.click($area)
+        expect(up.replace.calls.count()).toEqual(1)
 
       describe 'with a CSS selector in the property value', ->
 

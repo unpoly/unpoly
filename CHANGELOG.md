@@ -10,6 +10,8 @@ Unreleased
 
 ### Compatible changes
 
+- Fix a bug where links would be followed multiple times if the link
+  had an `up-dash` attribute without a value and also an `up-target` attribute.
 
 ### Breaking changes
 
