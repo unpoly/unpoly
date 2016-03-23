@@ -1,4 +1,4 @@
-class TestController < ActionController::Base
+class BindingTestController < ActionController::Base
 
   def is_up
     render :text => up?.to_s

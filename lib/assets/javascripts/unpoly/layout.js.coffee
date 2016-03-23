@@ -290,10 +290,11 @@ up.layout = (($) ->
   @param {String|Element|jQuery} selectorOrElement
   @internal
   ###
-  viewportOf = (selectorOrElement) ->
+  viewportOf = (selectorOrElement, options = {}) ->
     $element = $(selectorOrElement)
     $viewport = viewportSelector().seekUp($element)
-    $viewport.length or u.error("Could not find viewport for %o", $element)
+    if $viewport.length == 0 && options.strict isnt false
+      u.error("Could not find viewport for %o", $element)
     $viewport
 
   ###*

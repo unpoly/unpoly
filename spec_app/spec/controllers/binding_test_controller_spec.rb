@@ -1,4 +1,4 @@
-describe TestController do
+describe BindingTestController do
 
   describe '#up?' do
 
