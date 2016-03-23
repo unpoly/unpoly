@@ -39,7 +39,7 @@ up.tooltip = (($) ->
   @property up.tooltip.config
   @param {String} [config.position]
     The default position of tooltips relative to the element.
-    Can be either `"top"` or `"bottom"`.
+    Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
   @param {String} [config.openAnimation='fade-in']
     The animation used to open a tooltip.
   @param {String} [config.closeAnimation='fade-out']
@@ -61,6 +61,12 @@ up.tooltip = (($) ->
       when "top"
         left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
         top: linkBox.top - tooltipBox.height
+      when "left"
+        left: linkBox.left - tooltipBox.width
+        top: linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
+      when "right"
+        left: linkBox.left + linkBox.width
+        top: linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
       when "bottom"
         left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
         top: linkBox.top + linkBox.height
@@ -90,7 +96,8 @@ up.tooltip = (($) ->
   @param {String} [options.html]
     The HTML to display in the tooltip.
   @param {String} [options.position='top']
-    The position of the tooltip. Known values are `top` and `bottom`.
+    The position of the tooltip.
+    Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
   @param {String} [options.animation]
     The animation to use when opening the tooltip.
   @return {Promise}

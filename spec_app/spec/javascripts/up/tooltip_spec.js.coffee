@@ -44,6 +44,15 @@ describe 'up.tooltip', ->
             expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height, 15)
             expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
 
+        describe 'with { position: "right" }', ->
+
+          it 'centers the tooltip at the right side of the given element', ->
+            up.tooltip.attach(@$link, html: 'tooltip text', position: 'right')
+            $tooltip = $('.up-tooltip')
+            tooltipBox = up.util.measure($tooltip, relative: true)
+            expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 15)
+            expect(tooltipBox.left).toBeAround(@linkBox.left + @linkBox.width, 15)
+
         describe 'with { position: "bottom" }', ->
 
           it 'centers the tooltip below the given element', ->
@@ -52,6 +61,15 @@ describe 'up.tooltip', ->
             tooltipBox = up.util.measure($tooltip, relative: true)
             expect(tooltipBox.top).toBeAround(@linkBox.top + @linkBox.height, 15)
             expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
+
+        describe 'with { position: "left" }', ->
+
+          it 'centers the tooltip at the left side of the given element', ->
+            up.tooltip.attach(@$link, html: 'tooltip text', position: 'left')
+            $tooltip = $('.up-tooltip')
+            tooltipBox = up.util.measure($tooltip, relative: true)
+            expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 15)
+            expect(tooltipBox.left).toBeAround(@linkBox.left - tooltipBox.width, 15)
 
       it 'closes an existing tooltip'
       

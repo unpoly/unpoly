@@ -10,8 +10,13 @@ Unreleased
 
 ### Compatible changes
 
+- You can now position [tooltips](/up-tooltip) on the left or right side of an element.
+- The tooltip CSS is now easier to override.
+
 
 ### Breaking changes
+
+- Tooltips have a darker background color.
 
 
 0.22.1
