@@ -17,8 +17,8 @@ attribute. The value of this attribute is a CSS selector that indicates which pa
 fragment to update. The rest of the page will remain unchanged.
 
 
-Exammple
---------
+Example
+-------
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
 
@@ -396,6 +396,7 @@ up.link = (($) ->
 
   ###*
   Marks up the current link to be followed *as fast as possible*.
+
   This is done by:
 
   - [Following the link through AJAX](/up-target) instead of a full page load

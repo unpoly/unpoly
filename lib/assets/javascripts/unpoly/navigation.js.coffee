@@ -1,6 +1,6 @@
 ###*
-Fast interaction feedback
-=========================
+Navigation bars
+===============
 
 Unpoly automatically marks up link elements with classes indicating that
 they are currently loading (class `up-active`) or linking
