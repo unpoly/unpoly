@@ -33,14 +33,13 @@ use the more convenient [`up.on`](/up.on):
       // the clicked <button> element
     });
 
-This is roughly equivalent to binding an event listener to `document`
-using jQuery's [`on`](http://api.jquery.com/on/).
+This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 
 - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
   leaving you with an application without Javascript. This is typically preferable to
   a soup of randomly broken Javascript in ancient browsers.
 - A jQuery object with the target element is automatically passed to the event handler
-  as a second argument.
+  as a second argument. You no longer need to write `$(this)` in the handler function.
 - You use an [`up-data`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
   to observed elements.
 
@@ -122,25 +121,7 @@ up.bus = (($) ->
         console.log("This is %o who is %o years old", data.name, data.age);
       });
 
-  \#\#\#\# Migrating jQuery event handlers to `up.on`
-
-  Within the event handler, Unpoly will bind `this` to the
-  native DOM element to help you migrate your existing jQuery code to
-  this new syntax.
-
-  So if you had this before:
-
-      $(document).on('click', '.button', function() {
-        $(this).something();
-      });
-
-  ... you can simply copy the event handler to `up.on`:
-
-      up.on('click', '.button', function() {
-        $(this).something();
-      });
-
-  \#\#\#\# Stopping to listen
+  \#\#\#\# Unbinding an event listener
 
   `up.on` returns a function that unbinds the event listeners when called:
 
@@ -163,6 +144,24 @@ up.bus = (($) ->
 
       // Unbind the listener
       up.off('click', listener)
+
+  \#\#\#\# Migrating jQuery event handlers to `up.on`
+
+  Within the event handler, Unpoly will bind `this` to the
+  native DOM element to help you migrate your existing jQuery code to
+  this new syntax.
+
+  So if you had this before:
+
+      $(document).on('click', '.button', function() {
+        $(this).something();
+      });
+
+  ... you can simply copy the event handler to `up.on`:
+
+      up.on('click', '.button', function() {
+        $(this).something();
+      });
 
   @function up.on
   @param {String} events

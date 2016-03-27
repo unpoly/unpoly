@@ -330,15 +330,15 @@ up.proxy = (($) ->
         show = function() { $element.show() };
         hide = function() { $element.hide() };
 
-        showOff = up.on('up:proxy:slow', show);
-        hideOff = up.on('up:proxy:recover', hide);
+        up.on('up:proxy:slow', show);
+        up.on('up:proxy:recover', hide);
 
         hide();
 
         // Clean up when the element is removed from the DOM
         return function() {
-          showOff();
-          hideOff();
+          up.off('up:proxy:slow', show);
+          up.off('up:proxy:recover', hide);
         };
 
       });
