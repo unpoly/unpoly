@@ -398,13 +398,15 @@ up.proxy = (($) ->
     request.headers ||= {}
     request.headers['X-Up-Target'] = request.target
 
-    request.data = u.requestDataAsArray(request.data)
-
     if u.contains(config.wrapMethods, request.method)
-      request.data.push
-        name: config.wrapMethodParam
-        value: request.method
+      request.data = u.appendRequestData(request.data, config.wrapMethodParam, request.method)
       request.method = 'POST'
+
+    if u.isFormData(request.data)
+      # Disable jQuery's request data processing so we can pass
+      # a FormData object (http://stackoverflow.com/a/5976031)
+      request.contentType = false
+      request.processData = false
 
     promise = $.ajax(request)
     promise.done (data, textStatus, xhr) -> responseReceived(request, xhr)

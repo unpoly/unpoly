@@ -517,6 +517,19 @@ up.util = (($) ->
       (object) -> Object.prototype.toString.call(object) == '[object Array]'
 
   ###*
+  Returns whether the given argument is a `FormData` instance.
+
+  Always returns `false` in browsers that don't support `FormData`.
+
+  @function up.util.isFormData
+  @param object
+  @return {Boolean}
+  @internal
+  ###
+  isFormData = (object) ->
+    up.browser.canFormData() && object instanceof FormData
+
+  ###*
   Converts the given array-like argument into an array.
 
   Returns the array.
@@ -1458,15 +1471,20 @@ up.util = (($) ->
   @internal
   ###
   requestDataAsArray = (data) ->
-    query = requestDataAsQuery(data)
-    array = []
-    for part in query.split('&')
-      if isPresent(part)
-        pair = part.split('=')
-        array.push
-          name: decodeURIComponent(pair[0])
-          value: decodeURIComponent(pair[1])
-    array
+    if isFormData(data)
+      # Until FormData#entries is implemented in all major browsers
+      # we must give up here
+      up.error('Cannot convert FormData into an array')
+    else
+      query = requestDataAsQuery(data)
+      array = []
+      for part in query.split('&')
+        if isPresent(part)
+          pair = part.split('=')
+          array.push
+            name: decodeURIComponent(pair[0])
+            value: decodeURIComponent(pair[1])
+      array
 
   ###*
   Returns an URL-encoded query string for the given params object.
@@ -1476,12 +1494,59 @@ up.util = (($) ->
   @internal
   ###
   requestDataAsQuery = (data) ->
-    if data
+    if isFormData(data)
+      # Until FormData#entries is implemented in all major browsers
+      # we must give up here
+      up.error('Cannot convert FormData into a query string')
+    else if isPresent(data)
       query = $.param(data)
       query = query.replace(/\+/g, '%20')
       query
     else
       ""
+
+  ###*
+  Serializes the given form into a request data representation.
+
+  @function up.util.requestDataFromForm
+  @return {Array|FormData}
+  @internal
+  ###
+  requestDataFromForm = (form) ->
+    $form = $(form)
+    hasFileInputs = $form.find('input[type=file]').length
+    if hasFileInputs && up.browser.canFormData()
+      new FormData($form.get(0))
+    else
+      $form.serializeArray()
+
+  ###*
+  Adds a key/value pair to the given request data representation.
+
+  This mutates the given `data` if `data` is a `FormData`, an object
+  or an array. When `data` is `String` a new string with the appended key/value
+  pair is returned.
+
+  @function up.util.appendRequestData
+  @param {FormData|Object|Array|Undefined|Null} data
+  @param {String} key
+  @param {String|Blob|File} value
+  @internal
+  ###
+  appendRequestData = (data, name, value) ->
+    if isFormData(data)
+      data.append(name, value)
+    else if isArray(data)
+      data.push(name: name, value: value)
+    else if isObject(data)
+      data[name] = value
+    else if isString(data) || isMissing(data)
+      newPair = requestDataAsQuery([ name: name, value: value ])
+      if isPresent(data)
+        data = [data, newPair].join('&')
+      else
+        data = newPair
+    data
 
   ###*
   Throws a fatal error with the given message.
@@ -1513,6 +1578,8 @@ up.util = (($) ->
 
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
+  appendRequestData: appendRequestData
+  requestDataFromForm: requestDataFromForm
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   presentAttr: presentAttr
@@ -1558,6 +1625,8 @@ up.util = (($) ->
   isPromise: isPromise
   isDeferred: isDeferred
   isHash: isHash
+  isArray: isArray
+  isFormData: isFormData
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   nullJQuery: nullJQuery
@@ -1572,7 +1641,6 @@ up.util = (($) ->
   copyAttributes: copyAttributes
   findWithSelf: findWithSelf
   contains: contains
-  isArray: isArray
   toArray: toArray
 #  castsToTrue: castsToTrue
 #  castsToFalse: castsToFalse

@@ -126,22 +126,26 @@ up.form = (($) ->
     options.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
     options.origin = u.option(options.origin, $form)
-    options.data = $form.serializeArray()
+    options.data = up.util.requestDataFromForm($form)
     options = u.merge(options, up.motion.animateOptions(options, $form))
 
     hasFileInputs = $form.find('input[type=file]').length
+    canAjaxSubmit = !hasFileInputs || u.isFormData(options.data)
+    canHistoryOption = up.browser.canPushState() || options.history == false
 
     if options.validate
       options.headers ||= {}
       options.headers['X-Up-Validate'] = options.validate
-      # Since we cannot (yet) submit file inputs via AJAX, we cannot
-      # offer inline validation for such forms.
-      if hasFileInputs
+      # If a form has file inputs and the browser does not support FormData,
+      # we cannot offer inline validations.
+      unless canAjaxSubmit
         return u.unresolvablePromise()
 
     $form.addClass('up-active')
 
-    if hasFileInputs || (!up.browser.canPushState() && options.history != false)
+    # If we can't submit this form via AJAX or if we wouldn't be able to change
+    # the location URL as the result, fall back to a vanilla form submission.
+    unless canAjaxSubmit && canHistoryOption
       $form.get(0).submit()
       return u.unresolvablePromise()
 

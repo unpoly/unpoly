@@ -163,6 +163,17 @@ up.browser = (($) ->
     'oninput' of document.createElement('input')
 
   ###*
+  Returns whether this browser supports the [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+  interface.
+
+  @function up.browser.canFormData
+  @return {Boolean}
+  @experimental
+  ###
+  canFormData = u.memoize ->
+    !!window.FormData
+
+  ###*
   Returns whether this browser supports
   [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
   in `console` functions.
@@ -245,6 +256,7 @@ up.browser = (($) ->
   canPushState: canPushState
   canCssTransition: canCssTransition
   canInputEvent: canInputEvent
+  canFormData: canFormData
   canLogSubstitution: canLogSubstitution
   isSupported: isSupported
   installPolyfills: installPolyfills
