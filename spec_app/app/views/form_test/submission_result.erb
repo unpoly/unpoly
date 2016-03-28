@@ -1,0 +1,14 @@
+<div class="result">
+
+  <p>
+    Submitted <code>params</code> were:
+  </p>
+
+  <dl>
+    <% params.each do |key, value| %>
+      <dt><%= key.inspect %></dt>
+      <dd><%= value.inspect %></dd>
+    <% end %>
+  </dl>
+
+</div>

@@ -1,0 +1,27 @@
+<div class="example">
+
+  <h2>Form with file uploads</h2>
+
+  <%= form_tag "/form_test/upload", method: :post, multipart: true, 'up-target' => '.result' do %>
+
+    <p>
+      <input type="text" name="text-param" value="text-value" />
+    </p>
+
+    <p>
+      <input type="file" name="file-param" />
+    </p>
+
+    <p>
+      <button type="submit">Submit</button>
+    </p>
+
+  <% end %>
+
+  <h3>Submission result</h3>
+
+  <div class="result">
+    Results of the form submission will be shown here.
+  </div>
+
+</div>
