@@ -166,9 +166,29 @@ describe 'up.form', ->
             @respondWith('<div class="response">new-text</div>')
             expect(up.browser.url()).toEqual(@hrefBeforeExample)
 
+        describe 'in a form with file inputs', ->
+
+          beforeEach ->
+            @$form.affix('input[name="file-field"][type="file"]')
+
+          describeCapability 'canFormData', ->
+
+            it 'transfers the form fields via FormData', ->
+              up.submit(@$form)
+              data = @lastRequest().data()
+              expect(u.isFormData(data)).toBe(true)
+
+          describeFallback 'canFormData', ->
+
+            it 'falls back to a vanilla form submission', ->
+              form = @$form.get(0)
+              spyOn(form, 'submit')
+              up.submit(@$form)
+              expect(form.submit).toHaveBeenCalled()
+
       describeFallback 'canPushState', ->
         
-        it 'submits the given form', ->
+        it 'falls back to a vanilla form submission', ->
           $form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
           form = $form.get(0)
           spyOn(form, 'submit')
