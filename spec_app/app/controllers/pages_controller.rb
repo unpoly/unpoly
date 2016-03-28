@@ -1,5 +1,5 @@
 class PagesController < ApplicationController
 
-  layout 'css_test'
+  layout 'integration_test'
 
 end

@@ -1,3 +1,5 @@
+<% require "base64" %>
+
 <div class="result">
 
   <p>
@@ -6,8 +8,22 @@
 
   <dl>
     <% params.each do |key, value| %>
-      <dt><%= key.inspect %></dt>
-      <dd><%= value.inspect %></dd>
+      <dt><code><%= key %></code></dt>
+      <dd>
+        <% if value.is_a?(String) %>
+          <pre><code><%= value %></code></pre>
+        <% elsif value.is_a?(ActionDispatch::Http::UploadedFile) %>
+          <% if value.original_filename.ends_with?('.jpg') %>
+            <img src="data:image/jpeg;base64,<%= Base64.encode64(value.read) %>">
+          <% elsif value.original_filename.ends_with?('.png') %>
+            <img src="data:image/png;base64,<%= Base64.encode64(value.read) %>">
+          <% else %>
+            <%= value.original_filename %> (<%= value.size %> bytes)
+          <% end %>
+        <% else %>
+          <%= value.inspect %>
+        <% end %>
+      </dd>
     <% end %>
   </dl>
 

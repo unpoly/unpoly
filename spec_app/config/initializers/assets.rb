@@ -11,4 +11,4 @@ Rails.application.config.assets.version = '1.0'
 
 
 Rails.application.config.assets.precompile += %w( application.js application.css )
-Rails.application.config.assets.precompile += %w( jasmine_specs.js jasmine_specs.css css_test.js css_test.css )
+Rails.application.config.assets.precompile += %w( jasmine_specs.js jasmine_specs.css integration_test.js integration_test.css )

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Integration test - Unpoly</title>
+    <%= stylesheet_link_tag 'integration_test', media: 'all' %>
+    <%= javascript_include_tag 'integration_test' %>
+    <%= csrf_meta_tags %>
+  </head>
+  <body>
+    <div class="page">
+      <%= yield %>
+    </div>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 module FormTest
   class UploadsController < ApplicationController
 
-    layout 'css_test'
+    layout 'integration_test'
 
     def new
 
