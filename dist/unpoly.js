@@ -27,7 +27,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.memoize
     @internal
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, all, any, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, each, error, escapePressed, except, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, intersect, isArray, isBlank, isDeferred, isDefined, isElement, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, pluckData, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, each, error, escapePressed, except, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, intersect, isArray, isBlank, isDeferred, isDefined, isElement, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, pluckData, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -600,6 +600,20 @@ that might save you from loading something like [Underscore.js](http://underscor
      */
     isArray = Array.isArray || function(object) {
       return Object.prototype.toString.call(object) === '[object Array]';
+    };
+
+    /**
+    Returns whether the given argument is a `FormData` instance.
+    
+    Always returns `false` in browsers that don't support `FormData`.
+    
+    @function up.util.isFormData
+    @param object
+    @return {Boolean}
+    @internal
+     */
+    isFormData = function(object) {
+      return up.browser.canFormData() && object instanceof FormData;
     };
 
     /**
@@ -1732,20 +1746,24 @@ that might save you from loading something like [Underscore.js](http://underscor
      */
     requestDataAsArray = function(data) {
       var array, i, len, pair, part, query, ref;
-      query = requestDataAsQuery(data);
-      array = [];
-      ref = query.split('&');
-      for (i = 0, len = ref.length; i < len; i++) {
-        part = ref[i];
-        if (isPresent(part)) {
-          pair = part.split('=');
-          array.push({
-            name: decodeURIComponent(pair[0]),
-            value: decodeURIComponent(pair[1])
-          });
+      if (isFormData(data)) {
+        return up.error('Cannot convert FormData into an array');
+      } else {
+        query = requestDataAsQuery(data);
+        array = [];
+        ref = query.split('&');
+        for (i = 0, len = ref.length; i < len; i++) {
+          part = ref[i];
+          if (isPresent(part)) {
+            pair = part.split('=');
+            array.push({
+              name: decodeURIComponent(pair[0]),
+              value: decodeURIComponent(pair[1])
+            });
+          }
         }
+        return array;
       }
-      return array;
     };
 
     /**
@@ -1757,13 +1775,73 @@ that might save you from loading something like [Underscore.js](http://underscor
      */
     requestDataAsQuery = function(data) {
       var query;
-      if (data) {
+      if (isFormData(data)) {
+        return up.error('Cannot convert FormData into a query string');
+      } else if (isPresent(data)) {
         query = $.param(data);
         query = query.replace(/\+/g, '%20');
         return query;
       } else {
         return "";
       }
+    };
+
+    /**
+    Serializes the given form into a request data representation.
+    
+    @function up.util.requestDataFromForm
+    @return {Array|FormData}
+    @internal
+     */
+    requestDataFromForm = function(form) {
+      var $form, hasFileInputs;
+      $form = $(form);
+      hasFileInputs = $form.find('input[type=file]').length;
+      if (hasFileInputs && up.browser.canFormData()) {
+        return new FormData($form.get(0));
+      } else {
+        return $form.serializeArray();
+      }
+    };
+
+    /**
+    Adds a key/value pair to the given request data representation.
+    
+    This mutates the given `data` if `data` is a `FormData`, an object
+    or an array. When `data` is `String` a new string with the appended key/value
+    pair is returned.
+    
+    @function up.util.appendRequestData
+    @param {FormData|Object|Array|Undefined|Null} data
+    @param {String} key
+    @param {String|Blob|File} value
+    @internal
+     */
+    appendRequestData = function(data, name, value) {
+      var newPair;
+      if (isFormData(data)) {
+        data.append(name, value);
+      } else if (isArray(data)) {
+        data.push({
+          name: name,
+          value: value
+        });
+      } else if (isObject(data)) {
+        data[name] = value;
+      } else if (isString(data) || isMissing(data)) {
+        newPair = requestDataAsQuery([
+          {
+            name: name,
+            value: value
+          }
+        ]);
+        if (isPresent(data)) {
+          data = [data, newPair].join('&');
+        } else {
+          data = newPair;
+        }
+      }
+      return data;
     };
 
     /**
@@ -1800,6 +1878,8 @@ that might save you from loading something like [Underscore.js](http://underscor
     return {
       requestDataAsArray: requestDataAsArray,
       requestDataAsQuery: requestDataAsQuery,
+      appendRequestData: appendRequestData,
+      requestDataFromForm: requestDataFromForm,
       offsetParent: offsetParent,
       fixedToAbsolute: fixedToAbsolute,
       presentAttr: presentAttr,
@@ -1845,6 +1925,8 @@ that might save you from loading something like [Underscore.js](http://underscor
       isPromise: isPromise,
       isDeferred: isDeferred,
       isHash: isHash,
+      isArray: isArray,
+      isFormData: isFormData,
       isUnmodifiedKeyEvent: isUnmodifiedKeyEvent,
       isUnmodifiedMouseEvent: isUnmodifiedMouseEvent,
       nullJQuery: nullJQuery,
@@ -1859,7 +1941,6 @@ that might save you from loading something like [Underscore.js](http://underscor
       copyAttributes: copyAttributes,
       findWithSelf: findWithSelf,
       contains: contains,
-      isArray: isArray,
       toArray: toArray,
       castedAttr: castedAttr,
       locationFromXhr: locationFromXhr,
@@ -2016,7 +2097,7 @@ we can't currently get rid off.
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canCssTransition, canInputEvent, canLogSubstitution, canPushState, confirm, initialRequestMethod, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sprintf, u, url;
+    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, confirm, initialRequestMethod, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sprintf, u, url;
     u = up.util;
 
     /**
@@ -2179,6 +2260,18 @@ we can't currently get rid off.
     });
 
     /**
+    Returns whether this browser supports the [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+    interface.
+    
+    @function up.browser.canFormData
+    @return {Boolean}
+    @experimental
+     */
+    canFormData = u.memoize(function() {
+      return !!window.FormData;
+    });
+
+    /**
     Returns whether this browser supports
     [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
     in `console` functions.
@@ -2276,6 +2369,7 @@ we can't currently get rid off.
       canPushState: canPushState,
       canCssTransition: canCssTransition,
       canInputEvent: canInputEvent,
+      canFormData: canFormData,
       canLogSubstitution: canLogSubstitution,
       isSupported: isSupported,
       installPolyfills: installPolyfills,
@@ -2321,14 +2415,13 @@ use the more convenient [`up.on`](/up.on):
       // the clicked <button> element
     });
 
-This is roughly equivalent to binding an event listener to `document`
-using jQuery's [`on`](http://api.jquery.com/on/).
+This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 
 - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
   leaving you with an application without Javascript. This is typically preferable to
   a soup of randomly broken Javascript in ancient browsers.
 - A jQuery object with the target element is automatically passed to the event handler
-  as a second argument.
+  as a second argument. You no longer need to write `$(this)` in the handler function.
 - You use an [`up-data`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
   to observed elements.
 
@@ -2416,25 +2509,7 @@ using jQuery's [`on`](http://api.jquery.com/on/).
           console.log("This is %o who is %o years old", data.name, data.age);
         });
     
-    \#\#\#\# Migrating jQuery event handlers to `up.on`
-    
-    Within the event handler, Unpoly will bind `this` to the
-    native DOM element to help you migrate your existing jQuery code to
-    this new syntax.
-    
-    So if you had this before:
-    
-        $(document).on('click', '.button', function() {
-          $(this).something();
-        });
-    
-    ... you can simply copy the event handler to `up.on`:
-    
-        up.on('click', '.button', function() {
-          $(this).something();
-        });
-    
-    \#\#\#\# Stopping to listen
+    \#\#\#\# Unbinding an event listener
     
     `up.on` returns a function that unbinds the event listeners when called:
     
@@ -2457,6 +2532,24 @@ using jQuery's [`on`](http://api.jquery.com/on/).
     
         // Unbind the listener
         up.off('click', listener)
+    
+    \#\#\#\# Migrating jQuery event handlers to `up.on`
+    
+    Within the event handler, Unpoly will bind `this` to the
+    native DOM element to help you migrate your existing jQuery code to
+    this new syntax.
+    
+    So if you had this before:
+    
+        $(document).on('click', '.button', function() {
+          $(this).something();
+        });
+    
+    ... you can simply copy the event handler to `up.on`:
+    
+        up.on('click', '.button', function() {
+          $(this).something();
+        });
     
     @function up.on
     @param {String} events
@@ -3810,11 +3903,16 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @param {String|Element|jQuery} selectorOrElement
     @internal
      */
-    viewportOf = function(selectorOrElement) {
+    viewportOf = function(selectorOrElement, options) {
       var $element, $viewport;
+      if (options == null) {
+        options = {};
+      }
       $element = $(selectorOrElement);
       $viewport = viewportSelector().seekUp($element);
-      $viewport.length || u.error("Could not find viewport for %o", $element);
+      if ($viewport.length === 0 && options.strict !== false) {
+        u.error("Could not find viewport for %o", $element);
+      }
       return $viewport;
     };
 
@@ -6070,15 +6168,15 @@ the user performs the click.
           show = function() { $element.show() };
           hide = function() { $element.hide() };
     
-          showOff = up.on('up:proxy:slow', show);
-          hideOff = up.on('up:proxy:recover', hide);
+          up.on('up:proxy:slow', show);
+          up.on('up:proxy:recover', hide);
     
           hide();
     
           // Clean up when the element is removed from the DOM
           return function() {
-            showOff();
-            hideOff();
+            up.off('up:proxy:slow', show);
+            up.off('up:proxy:recover', hide);
           };
     
         });
@@ -6140,13 +6238,13 @@ the user performs the click.
       request = u.copy(request);
       request.headers || (request.headers = {});
       request.headers['X-Up-Target'] = request.target;
-      request.data = u.requestDataAsArray(request.data);
       if (u.contains(config.wrapMethods, request.method)) {
-        request.data.push({
-          name: config.wrapMethodParam,
-          value: request.method
-        });
+        request.data = u.appendRequestData(request.data, config.wrapMethodParam, request.method);
         request.method = 'POST';
+      }
+      if (u.isFormData(request.data)) {
+        request.contentType = false;
+        request.processData = false;
       }
       promise = $.ajax(request);
       promise.done(function(data, textStatus, xhr) {
@@ -6308,8 +6406,8 @@ attribute. The value of this attribute is a CSS selector that indicates which pa
 fragment to update. The rest of the page will remain unchanged.
 
 
-Exammple
---------
+Example
+-------
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
 
@@ -6702,6 +6800,7 @@ Read on
 
     /**
     Marks up the current link to be followed *as fast as possible*.
+    
     This is done by:
     
     - [Following the link through AJAX](/up-target) instead of a full page load
@@ -6930,7 +7029,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
     submit = function(formOrSelector, options) {
-      var $form, hasFileInputs, promise, target, url;
+      var $form, canAjaxSubmit, canHistoryOption, hasFileInputs, promise, target, url;
       $form = $(formOrSelector).closest('form');
       options = u.options(options);
       target = u.option(options.target, $form.attr('up-target'), 'body');
@@ -6945,18 +7044,20 @@ open dialogs with sub-forms, etc. all without losing form state.
       options.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'));
       options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'));
       options.origin = u.option(options.origin, $form);
-      options.data = $form.serializeArray();
+      options.data = up.util.requestDataFromForm($form);
       options = u.merge(options, up.motion.animateOptions(options, $form));
       hasFileInputs = $form.find('input[type=file]').length;
+      canAjaxSubmit = !hasFileInputs || u.isFormData(options.data);
+      canHistoryOption = up.browser.canPushState() || options.history === false;
       if (options.validate) {
         options.headers || (options.headers = {});
         options.headers['X-Up-Validate'] = options.validate;
-        if (hasFileInputs) {
+        if (!canAjaxSubmit) {
           return u.unresolvablePromise();
         }
       }
       $form.addClass('up-active');
-      if (hasFileInputs || (!up.browser.canPushState() && options.history !== false)) {
+      if (!(canAjaxSubmit && canHistoryOption)) {
         $form.get(0).submit();
         return u.unresolvablePromise();
       }
@@ -8802,7 +8903,7 @@ The tooltip element is appended to the end of `<body>`.
     @property up.tooltip.config
     @param {String} [config.position]
       The default position of tooltips relative to the element.
-      Can be either `"top"` or `"bottom"`.
+      Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
     @param {String} [config.openAnimation='fade-in']
       The animation used to open a tooltip.
     @param {String} [config.closeAnimation='fade-out']
@@ -8827,6 +8928,16 @@ The tooltip element is appended to the end of `<body>`.
             return {
               left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width),
               top: linkBox.top - tooltipBox.height
+            };
+          case "left":
+            return {
+              left: linkBox.left - tooltipBox.width,
+              top: linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
+            };
+          case "right":
+            return {
+              left: linkBox.left + linkBox.width,
+              top: linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
             };
           case "bottom":
             return {
@@ -8864,7 +8975,8 @@ The tooltip element is appended to the end of `<body>`.
     @param {String} [options.html]
       The HTML to display in the tooltip.
     @param {String} [options.position='top']
-      The position of the tooltip. Known values are `top` and `bottom`.
+      The position of the tooltip.
+      Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
     @param {String} [options.animation]
       The animation to use when opening the tooltip.
     @return {Promise}
@@ -8969,8 +9081,8 @@ The tooltip element is appended to the end of `<body>`.
 }).call(this);
 
 /**
-Fast interaction feedback
-=========================
+Navigation bars
+===============
 
 Unpoly automatically marks up link elements with classes indicating that
 they are currently loading (class `up-active`) or linking

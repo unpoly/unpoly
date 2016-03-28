@@ -10,13 +10,23 @@ Unreleased
 
 ### Compatible changes
 
+
+### Breaking changes
+
+
+0.23.0
+------
+
+### Compatible changes
+
+- Unpoly forms can now [submit](/up.submit) file uploads via AJAX.
 - You can now position [tooltips](/up-tooltip) on the left or right side of an element.
-- The tooltip CSS is now easier to override.
 
 
 ### Breaking changes
 
 - Tooltips have a darker background color.
+- The tooltip CSS has been changed to be easier to override.
 
 
 0.22.1
