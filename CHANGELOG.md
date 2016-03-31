@@ -10,6 +10,8 @@ Unreleased
 
 ### Compatible changes
 
+- [Animations](/up.motion) `move-to-*` and `move-from-*` now use CSS transforms instead of manipulating the
+  bounding box margins.
 - Fix [`up.util.trim`](/up.util.trim) not working properly.
 - [`up.morph`](/up.morph) no longer throws an error if called without an `options` object
 - Custom transitions can now call [`up.morph`](/up.morph) to refer to other transitions

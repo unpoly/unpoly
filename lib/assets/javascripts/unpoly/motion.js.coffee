@@ -578,60 +578,63 @@ up.motion = (($) ->
     animate($ghost, { opacity: 0 }, options)
   )
 
+  translateCss = (x, y) ->
+    { transform: "translate(#{x}px, #{y}px)" }
+
   animation('move-to-top', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = box.top + box.height
-    $ghost.css('margin-top': '0px')
-    animate($ghost, { 'margin-top': "-#{travelDistance}px" }, options)
+    $ghost.css(translateCss(0, 0))
+    animate($ghost, translateCss(0, -travelDistance), options)
   )
 
   animation('move-from-top', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = box.top + box.height
-    $ghost.css('margin-top': "-#{travelDistance}px")
-    animate($ghost, { 'margin-top': '0px' }, options)
+    $ghost.css(translateCss(0, -travelDistance))
+    animate($ghost, translateCss(0, 0), options)
   )
 
   animation('move-to-bottom', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = u.clientSize().height - box.top
-    $ghost.css('margin-top': '0px')
-    animate($ghost, { 'margin-top': "#{travelDistance}px" }, options)
+    $ghost.css(translateCss(0, 0))
+    animate($ghost, translateCss(0, travelDistance), options)
   )
 
   animation('move-from-bottom', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = u.clientSize().height - box.top
-    $ghost.css('margin-top': "#{travelDistance}px")
-    animate($ghost, { 'margin-top': '0px' }, options)
+    $ghost.css(translateCss(0, travelDistance))
+    animate($ghost, translateCss(0, 0), options)
   )
 
   animation('move-to-left', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = box.left + box.width
-    $ghost.css('margin-left': '0px')
-    animate($ghost, { 'margin-left': "-#{travelDistance}px" }, options)
+    $ghost.css(translateCss(0, 0))
+    animate($ghost, translateCss(-travelDistance, 0), options)
   )
 
   animation('move-from-left', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = box.left + box.width
-    $ghost.css('margin-left': "-#{travelDistance}px")
-    animate($ghost, { 'margin-left': '0px' }, options)
+    $ghost.css(translateCss(-travelDistance, 0))
+    animate($ghost, translateCss(0, 0), options)
   )
 
   animation('move-to-right', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = u.clientSize().width - box.left
-    $ghost.css('margin-left': '0px')
-    animate($ghost, { 'margin-left': "#{travelDistance}px" }, options)
+    $ghost.css(translateCss(0, 0))
+    animate($ghost, translateCss(travelDistance, 0), options)
   )
 
   animation('move-from-right', ($ghost, options) ->
     box = u.measure($ghost)
     travelDistance = u.clientSize().width - box.left
-    $ghost.css('margin-left': "#{travelDistance}px")
-    animate($ghost, { 'margin-left': '0px' }, options)
+    $ghost.css(translateCss(travelDistance, 0))
+    animate($ghost, translateCss(0, 0), options)
   )
 
   animation('roll-down', ($ghost, options) ->
