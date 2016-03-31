@@ -10,6 +10,14 @@ that might save you from loading something like [Underscore.js](http://underscor
 up.util = (($) ->
 
   ###*
+  A function that does nothing.
+
+  @function up.util.noop
+  @experimental
+  ###
+  noop = $.noop
+
+  ###*
   @function up.util.memoize
   @internal
   ###
@@ -1299,38 +1307,19 @@ up.util = (($) ->
 
     store = undefined
 
-    clear = ->
-      store = {}
+    optionEvaluator = (name) ->
+      ->
+        value = config[name]
+        if isNumber(value)
+          value
+        else if isFunction(value)
+          value()
+        else
+          undefined
 
-    clear()
+    maxKeys = optionEvaluator('size')
 
-    log = (args...) ->
-      if config.log
-        args[0] = "[#{config.log}] #{args[0]}"
-        up.puts(args...)
-
-    keys = ->
-      Object.keys(store)
-
-    maxSize = ->
-      if isMissing(config.size)
-        undefined
-      else if isFunction(config.size)
-        config.size()
-      else if isNumber(config.size)
-        config.size
-      else
-        error("Invalid size config: %o", config.size)
-
-    expiryMilis = ->
-      if isMissing(config.expiry)
-        undefined
-      else if isFunction(config.expiry)
-        config.expiry()
-      else if isNumber(config.expiry)
-        config.expiry
-      else
-        error("Invalid expiry config: %o", config.expiry)
+    expiryMillis = optionEvaluator('expiry')
 
     normalizeStoreKey = (key) ->
       if config.key
@@ -1338,10 +1327,29 @@ up.util = (($) ->
       else
         key.toString()
 
-    trim = ->
+    isEnabled = ->
+      maxKeys() isnt 0 && expiryMillis() isnt 0
+
+    console.log("isEnabled is %o, maxKeys is %o, expiryMillis is %o, cacheKey is %o", isEnabled(), maxKeys(), expiryMillis(), config.key)
+
+    clear = ->
+      store = {}
+
+    clear()
+
+    log = (args...) ->
+      if config.logPrefix
+        args[0] = "[#{config.logPrefix}] #{args[0]}"
+        up.puts(args...)
+
+    keys = ->
+      Object.keys(store)
+
+    makeRoomForAnotherKey = ->
       storeKeys = copy(keys())
-      size = maxSize()
-      if size && storeKeys.length > size
+      console.debug("Cache has %o storeKeys, %o are allowed", storeKeys.length, maxKeys())
+      max = maxKeys()
+      if max && storeKeys.length >= max
         oldestKey = null
         oldestTimestamp = null
         each storeKeys, (key) ->
@@ -1361,20 +1369,23 @@ up.util = (($) ->
       (new Date()).valueOf()
 
     set = (key, value) ->
-      storeKey = normalizeStoreKey(key)
-      store[storeKey] =
-        timestamp: timestamp()
-        value: value
+      console.debug("set for %o", isEnabled())
+      if isEnabled()
+        makeRoomForAnotherKey()
+        storeKey = normalizeStoreKey(key)
+        store[storeKey] =
+          timestamp: timestamp()
+          value: value
 
     remove = (key) ->
       storeKey = normalizeStoreKey(key)
       delete store[storeKey]
 
     isFresh = (entry) ->
-      expiry = expiryMilis()
-      if expiry
+      millis = expiryMillis()
+      if millis
         timeSinceTouch = timestamp() - entry.timestamp
-        timeSinceTouch < expiryMilis()
+        timeSinceTouch < millis
       else
         true
 
@@ -1667,6 +1678,7 @@ up.util = (($) ->
   multiSelector: multiSelector
   error: error
   pluckData: pluckData
+  noop: noop
 
 )($)
 

@@ -112,45 +112,6 @@ up.proxy = (($) ->
       if response = cache.get(candidate)
         return response
 
-  ###*
-  Manually stores a promise for the response to the given request.
-
-  @function up.proxy.set
-  @param {String} request.url
-  @param {String} [request.method='GET']
-  @param {String} [request.target='body']
-  @param {Promise} response
-    A promise for the response that is API-compatible with the
-    promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
-  @experimental
-  ###
-  set = cache.set
-
-  ###*
-  Manually removes the given request from the cache.
-
-  You can also [configure](/up.proxy.config) when the proxy
-  automatically removes cache entries.
-
-  @function up.proxy.remove
-  @param {String} request.url
-  @param {String} [request.method='GET']
-  @param {String} [request.target='body']
-  @experimental
-  ###
-  remove = cache.remove
-
-  ###*
-  Removes all cache entries.
-
-  Unpoly also automatically clears the cache whenever it processes
-  a request with a non-GET HTTP method.
-
-  @function up.proxy.clear
-  @stable
-  ###
-  clear = cache.clear
-
   cancelPreloadDelay = ->
     clearTimeout(preloadDelayTimer)
     preloadDelayTimer = null
@@ -165,13 +126,11 @@ up.proxy = (($) ->
     cancelBusyDelay()
     pendingCount = 0
     config.reset()
-    slowEventEmitted = false
     cache.clear()
+    slowEventEmitted = false
     queuedRequests = []
 
   reset()
-
-  alias = cache.alias
 
   normalizeRequest = (request) ->
     unless request._normalized
@@ -422,6 +381,59 @@ up.proxy = (($) ->
       promise = load(entry.request)
       promise.done (args...) -> entry.deferred.resolve(args...)
       promise.fail (args...) -> entry.deferred.reject(args...)
+
+  ###*
+  Makes the proxy assume that `newRequest` has the same response as the
+  already cached `oldRequest`.
+
+  Unpoly uses this internally when the user redirects from `/old` to `/new`.
+  In that case, both `/old` and `/new` will cache the same response from `/new`.
+
+  @function up.proxy.alias
+  @param {Object} oldRequest
+  @param {Object} newRequest
+  @experimental
+  ###
+  alias = cache.alias
+
+  ###*
+  Manually stores a promise for the response to the given request.
+
+  @function up.proxy.set
+  @param {String} request.url
+  @param {String} [request.method='GET']
+  @param {String} [request.target='body']
+  @param {Promise} response
+    A promise for the response that is API-compatible with the
+    promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+  @experimental
+  ###
+  set = cache.set
+
+  ###*
+  Manually removes the given request from the cache.
+
+  You can also [configure](/up.proxy.config) when the proxy
+  automatically removes cache entries.
+
+  @function up.proxy.remove
+  @param {String} request.url
+  @param {String} [request.method='GET']
+  @param {String} [request.target='body']
+  @experimental
+  ###
+  remove = cache.remove
+
+  ###*
+  Removes all cache entries.
+
+  Unpoly also automatically clears the cache whenever it processes
+  a request with a non-GET HTTP method.
+
+  @function up.proxy.clear
+  @stable
+  ###
+  clear = cache.clear
 
   ###*
   This event is [emitted]/(up.emit) before an [AJAX request](/up.ajax)

@@ -10,6 +10,8 @@ Unreleased
 
 ### Compatible changes
 
+- Fix [`up.util.trim`](/up.util.trim) not working properly.
+
 
 ### Breaking changes
 

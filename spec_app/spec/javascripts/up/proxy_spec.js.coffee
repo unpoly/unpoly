@@ -40,6 +40,30 @@ describe 'up.proxy', ->
 
         expect(responses).toEqual(['foo', 'foo', 'bar'])
 
+      it "does not cache responses if config.cacheExpiry is 0", ->
+        up.proxy.config.cacheExpiry = 0
+        up.ajax(url: '/foo')
+        up.ajax(url: '/foo')
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+      it "does not cache responses if config.cacheSize is 0", ->
+        up.proxy.config.cacheSize = 0
+        up.ajax(url: '/foo')
+        up.ajax(url: '/foo')
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+      it 'does not limit the number of cache entries if config.cacheSize is undefined'
+
+      it 'never discards old cache entries if config.cacheExpiry is undefined'
+
+      it 'respects a config.cacheSize setting', ->
+        up.proxy.config.cacheSize = 2
+        up.ajax(url: '/foo')
+        up.ajax(url: '/bar')
+        up.ajax(url: '/baz')
+        up.ajax(url: '/foo')
+        expect(jasmine.Ajax.requests.count()).toEqual(4)
+
       it "doesn't reuse responses when asked for the same path, but different selectors", ->
         up.ajax(url: '/path', target: '.a')
         up.ajax(url: '/path', target: '.b')

@@ -253,13 +253,3 @@ describe 'up.modal', ->
         @respondWith("<div class='popup-content'></div>")
         expect($('.up-modal')).toExist()
         expect($('.up-popup')).toExist()
-
-    describe 'when following links inside a modal', ->
-
-      it 'prefers to replace a selector within the modal', ->
-
-      it 'auto-closes the modal if a selector behind the modal gets replaced'
-
-      it "doesn't auto-close the modal if a selector behind the modal if the modal is sticky"
-
-      it "doesn't auto-close the modal if the new fragment is a popup"

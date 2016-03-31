@@ -105,6 +105,115 @@ describe 'up.link', ->
 
                       done()
 
+        it 'does not add additional history entries when linking to the current URL', (done) ->
+
+          # By default, up.history will replace the <body> tag when
+          # the user presses the back-button. We reconfigure this
+          # so we don't lose the Jasmine runner interface.
+          up.history.config.popTargets = ['.container']
+
+          up.proxy.config.cacheExpiry = 0
+
+          respondWith = (text) =>
+            @respondWith """
+              <div class="container">
+                <div class='target'>#{text}</div>
+              </div>
+            """
+
+          followAndRespond = ($link, text) =>
+            promise = up.follow($link)
+            respondWith(text)
+            promise
+
+          $link1 = affix('a[href="/one"][up-target=".target"]')
+          $link2 = affix('a[href="/two"][up-target=".target"]')
+          $container = affix('.container')
+          $target = affix('.target').appendTo($container).text('original text')
+
+          followAndRespond($link1, 'text from one').then =>
+            expect($('.target')).toHaveText('text from one')
+            expect(location.pathname).toEqual('/one')
+
+            followAndRespond($link2, 'text from two').then =>
+              expect($('.target')).toHaveText('text from two')
+              expect(location.pathname).toEqual('/two')
+
+              followAndRespond($link2, 'text from two').then =>
+                expect($('.target')).toHaveText('text from two')
+                expect(location.pathname).toEqual('/two')
+
+                history.back()
+                @setTimer 50, =>
+                  respondWith('restored text from one')
+                  expect($('.target')).toHaveText('restored text from one')
+                  expect(location.pathname).toEqual('/one')
+
+                  history.forward()
+                  @setTimer 50, =>
+                    respondWith('restored text from two')
+                    expect($('.target')).toHaveText('restored text from two')
+                    expect(location.pathname).toEqual('/two')
+
+                    done()
+
+        it 'does adds additional history entries when linking to the current URL, but with a different hash', (done) ->
+
+          # By default, up.history will replace the <body> tag when
+          # the user presses the back-button. We reconfigure this
+          # so we don't lose the Jasmine runner interface.
+          up.history.config.popTargets = ['.container']
+
+          up.proxy.config.cacheExpiry = 0
+
+          respondWith = (text) =>
+            @respondWith """
+              <div class="container">
+                <div class='target'>#{text}</div>
+              </div>
+            """
+
+          followAndRespond = ($link, text) =>
+            promise = up.follow($link)
+            respondWith(text)
+            promise
+
+          $link1 = affix('a[href="/one"][up-target=".target"]')
+          $link2 = affix('a[href="/two"][up-target=".target"]')
+          $link2WithHash = affix('a[href="/two#hash"][up-target=".target"]')
+          $container = affix('.container')
+          $target = affix('.target').appendTo($container).text('original text')
+
+          followAndRespond($link1, 'text from one').then =>
+            expect($('.target')).toHaveText('text from one')
+            expect(location.pathname).toEqual('/one')
+            expect(location.hash).toEqual('')
+
+            followAndRespond($link2, 'text from two').then =>
+              expect($('.target')).toHaveText('text from two')
+              expect(location.pathname).toEqual('/two')
+              expect(location.hash).toEqual('')
+
+              followAndRespond($link2WithHash, 'text from two with hash').then =>
+                expect($('.target')).toHaveText('text from two with hash')
+                expect(location.pathname).toEqual('/two')
+                expect(location.hash).toEqual('#hash')
+
+                history.back()
+                @setTimer 50, =>
+                  respondWith('restored text from two')
+                  expect($('.target')).toHaveText('restored text from two')
+                  expect(location.pathname).toEqual('/two')
+                  expect(location.hash).toEqual('')
+
+                  history.forward()
+                  @setTimer 50, =>
+                    respondWith('restored text from two with hash')
+                    expect($('.target')).toHaveText('restored text from two with hash')
+                    expect(location.pathname).toEqual('/two')
+                    expect(location.hash).toEqual('#hash')
+                    done()
+
         describe 'with { restoreScroll: true } option', ->
 
           it 'does not reveal, but instead restores the scroll positions of all viewports around the target', ->
