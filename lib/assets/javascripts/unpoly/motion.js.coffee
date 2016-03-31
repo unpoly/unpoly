@@ -392,7 +392,6 @@ up.motion = (($) ->
       element = $element.get(0)
       u.error("Can't morph a <%s> element (%o)", element.tagName, element)
 
-
   ###*
   This causes the side effects of a successful transition, but instantly.
   We use this to skip morphing for old browsers, or when the developer

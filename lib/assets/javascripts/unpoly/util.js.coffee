@@ -1330,8 +1330,6 @@ up.util = (($) ->
     isEnabled = ->
       maxKeys() isnt 0 && expiryMillis() isnt 0
 
-    console.log("isEnabled is %o, maxKeys is %o, expiryMillis is %o, cacheKey is %o", isEnabled(), maxKeys(), expiryMillis(), config.key)
-
     clear = ->
       store = {}
 
@@ -1369,7 +1367,6 @@ up.util = (($) ->
       (new Date()).valueOf()
 
     set = (key, value) ->
-      console.debug("set for %o", isEnabled())
       if isEnabled()
         makeRoomForAnotherKey()
         storeKey = normalizeStoreKey(key)
