@@ -199,6 +199,10 @@ up.motion = (($) ->
 
   withGhosts = ($old, $new, options, block) ->
 
+    # Don't create ghosts of ghosts in case a transition function is itself calling `morph`
+    if options.copy == false || $old.is('.up-ghost') || $new.is('.up-ghost')
+      return block($old, $new)
+
     oldCopy = undefined
     newCopy = undefined
     oldScrollTop = undefined
@@ -349,6 +353,8 @@ up.motion = (($) ->
   morph = (source, target, transitionOrName, options) ->
     if transitionOrName == 'none'
       transitionOrName = false
+
+    options = u.options(options)
 
     $old = $(source)
     $new = $(target)
