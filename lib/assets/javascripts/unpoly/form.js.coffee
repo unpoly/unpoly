@@ -269,10 +269,7 @@ up.form = (($) ->
                 callbackPromise = returnValue
               else
                 callbackPromise = u.resolvedPromise()
-          if delay == 0
-            runAndChain()
-          else
-            setTimeout(runAndChain, delay)
+          u.setTimer(delay, runAndChain)
 
     clearTimer = ->
       clearTimeout(callbackTimer)

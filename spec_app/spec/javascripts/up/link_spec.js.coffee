@@ -83,21 +83,21 @@ describe 'up.link', ->
                 expect(document.title).toEqual('title from three')
 
                 history.back()
-                @setTimer 50, =>
+                u.setTimer 50, ->
                   respondWith('restored text from two', 'restored title from two')
                   expect($('.target')).toHaveText('restored text from two')
                   expect(location.pathname).toEqual('/two')
                   expect(document.title).toEqual('restored title from two')
 
                   history.back()
-                  @setTimer 50, =>
+                  u.setTimer 50, ->
                     respondWith('restored text from one', 'restored title from one')
                     expect($('.target')).toHaveText('restored text from one')
                     expect(location.pathname).toEqual('/one')
                     expect(document.title).toEqual('restored title from one')
 
                     history.forward()
-                    @setTimer 50, =>
+                    u.setTimer 50, ->
                       # Since the response is cached, we don't have to respond
                       expect($('.target')).toHaveText('restored text from two', 'restored title from two')
                       expect(location.pathname).toEqual('/two')
@@ -144,13 +144,13 @@ describe 'up.link', ->
                 expect(location.pathname).toEqual('/two')
 
                 history.back()
-                @setTimer 50, =>
+                u.setTimer 50, ->
                   respondWith('restored text from one')
                   expect($('.target')).toHaveText('restored text from one')
                   expect(location.pathname).toEqual('/one')
 
                   history.forward()
-                  @setTimer 50, =>
+                  u.setTimer 50, ->
                     respondWith('restored text from two')
                     expect($('.target')).toHaveText('restored text from two')
                     expect(location.pathname).toEqual('/two')
@@ -200,14 +200,14 @@ describe 'up.link', ->
                 expect(location.hash).toEqual('#hash')
 
                 history.back()
-                @setTimer 50, =>
+                u.setTimer 50, ->
                   respondWith('restored text from two')
                   expect($('.target')).toHaveText('restored text from two')
                   expect(location.pathname).toEqual('/two')
                   expect(location.hash).toEqual('')
 
                   history.forward()
-                  @setTimer 50, =>
+                  u.setTimer 50, ->
                     respondWith('restored text from two with hash')
                     expect($('.target')).toHaveText('restored text from two with hash')
                     expect(location.pathname).toEqual('/two')

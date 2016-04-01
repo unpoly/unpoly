@@ -1,4 +1,6 @@
 describe 'up.history', ->
+
+  u = up.util
   
   describe 'Javascript functions', ->
     
@@ -74,23 +76,23 @@ describe 'up.history', ->
           $('.viewport').scrollTop(250)
 
           history.back()
-          @setTimer 50, =>
+          u.setTimer 50, ->
             respond() # we need to respond since we've never requested /two with the popTarget
             expect($('.viewport').scrollTop()).toBe(150)
 
             history.back()
-            @setTimer 50, =>
+            u.setTimer 50, ->
               respond() # we need to respond since we've never requested /one with the popTarget
               expect($('.viewport').scrollTop()).toBe(50)
 
               history.forward()
-              @setTimer 50, =>
+              u.setTimer 50, ->
                 # No need to respond since we requested /two with the popTarget
                 # when we went backwards
                 expect($('.viewport').scrollTop()).toBe(150)
 
                 history.forward()
-                @setTimer 50, =>
+                u.setTimer 50, ->
                   respond() # we need to respond since we've never requested /three with the popTarget
                   expect($('.viewport').scrollTop()).toBe(250)
                   done()

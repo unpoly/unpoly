@@ -2,13 +2,32 @@ describe 'up.util', ->
   
   describe 'Javascript functions', ->
 
-#    describe 'up.util.argNames', ->
+    describe 'up.util.setTimer', ->
+
+      it 'calls the given function after waiting the given milliseconds', ->
+        jasmine.clock().install()
+        jasmine.clock().mockDate()
+        callback = jasmine.createSpy()
+        up.util.setTimer(2000, callback)
+        expect(callback).not.toHaveBeenCalled()
+        jasmine.clock().tick(1500)
+        expect(callback).not.toHaveBeenCalled()
+        jasmine.clock().tick(1500)
+        expect(callback).toHaveBeenCalled()
+
+      it 'calls the given function in the current execution frame if the delay is zero', ->
+        callback = jasmine.createSpy()
+        up.util.setTimer(0, callback)
+        expect(callback).toHaveBeenCalled()
+
+    #    describe 'up.util.argNames', ->
 #
 #      it 'returns an array of argument names for the given function', ->
 #        fun = ($element, data) ->
 #        expect(up.util.argNames(fun)).toEqual(['$element', 'data'])
 
     describe 'up.util.trim', ->
+
       it 'removes leading and trailing whitespace from the given string', ->
         string = "\t\n\r abc \r\n\t"
         expect(up.util.trim(string)).toEqual('abc')

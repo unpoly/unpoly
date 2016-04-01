@@ -116,14 +116,14 @@ up.proxy = (($) ->
     clearTimeout(preloadDelayTimer)
     preloadDelayTimer = null
 
-  cancelBusyDelay = ->
+  cancelSlowDelay = ->
     clearTimeout(slowDelayTimer)
     slowDelayTimer = null
 
   reset = ->
     $waitingLink = null
     cancelPreloadDelay()
-    cancelBusyDelay()
+    cancelSlowDelay()
     pendingCount = 0
     config.reset()
     cache.clear()
@@ -252,10 +252,7 @@ up.proxy = (($) ->
         if isBusy() # a fast response might have beaten the delay
           up.emit('up:proxy:slow', message: 'Proxy is busy')
           slowEventEmitted = true
-      if config.slowDelay > 0
-        slowDelayTimer = setTimeout(emission, config.slowDelay)
-      else
-        emission()
+      slowDelayTimer = u.setTimer(config.slowDelay, emission)
 
   ###*
   This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)

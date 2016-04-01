@@ -386,10 +386,10 @@ describe 'up.proxy', ->
         spyOn(up, 'follow')
         $element = affix('a[href="/foo"][up-preload]')
         Trigger.mouseover($element)
-        @setTimer 1, =>
+        u.setTimer 1, =>
           expect(up.follow.calls.count()).toBe(1)
-          @setTimer 16, =>
+          u.setTimer 16, =>
             Trigger.mouseover($element)
-            @setTimer 1, =>
+            u.setTimer 1, =>
               expect(up.follow.calls.count()).toBe(2)
               done()

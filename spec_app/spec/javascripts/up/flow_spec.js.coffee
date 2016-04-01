@@ -480,7 +480,7 @@ describe 'up.flow', ->
           expect($ghost2).toHaveLength(1)
           expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
 
-          @setTimer 40, ->
+          u.setTimer 40, ->
             expect($ghost1.css('opacity')).toBeAround(0.0, 0.2)
             expect($ghost2.css('opacity')).toBeAround(1.0, 0.2)
             done()
@@ -534,7 +534,7 @@ describe 'up.flow', ->
           promise = up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 30)
           promise.then(resolution)
           expect(resolution).not.toHaveBeenCalled()
-          @setTimer 50, ->
+          u.setTimer 50, ->
             expect(resolution).toHaveBeenCalled()
             done()
 
