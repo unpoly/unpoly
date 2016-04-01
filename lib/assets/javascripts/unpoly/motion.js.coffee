@@ -643,7 +643,9 @@ up.motion = (($) ->
       height: '0px'
       overflow: 'hidden'
     )
-    animate($ghost, { height: "#{fullHeight}px" }, options).then(styleMemo)
+    deferred = animate($ghost, { height: "#{fullHeight}px" }, options)
+    deferred.then(styleMemo)
+    deferred
   )
 
   transition('none', none)
