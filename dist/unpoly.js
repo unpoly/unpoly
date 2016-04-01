@@ -24,10 +24,18 @@ that might save you from loading something like [Underscore.js](http://underscor
   up.util = (function($) {
 
     /**
+    A function that does nothing.
+    
+    @function up.util.noop
+    @experimental
+     */
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, each, error, escapePressed, except, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, intersect, isArray, isBlank, isDeferred, isDefined, isElement, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, pluckData, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, setTimer, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement;
+    noop = $.noop;
+
+    /**
     @function up.util.memoize
     @internal
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, each, error, escapePressed, except, extend, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, intersect, isArray, isBlank, isDeferred, isDefined, isElement, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, pluckData, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement;
     memoize = function(func) {
       var cache, cached;
       cache = void 0;
@@ -900,6 +908,25 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
+    Waits for the given number of milliseconds, the nruns the given callback.
+    
+    If the number of milliseconds is zero, the callback is run in the current execution frame.
+    See [`up.util.nextFrame`] for running a function in the next executation frame.
+    
+    @function up.util.setTimer
+    @param {Number} millis
+    @param {Function} callback
+    @experimental
+     */
+    setTimer = function(millis, callback) {
+      if (millis > 0) {
+        return setTimeout(callback, millis);
+      } else {
+        return callback();
+      }
+    };
+
+    /**
     Schedules the given function to be called in the
     next Javascript execution frame.
     
@@ -1526,48 +1553,26 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     cache = function(config) {
-      var alias, clear, expiryMilis, get, isFresh, keys, log, maxSize, normalizeStoreKey, set, store, timestamp;
+      var alias, clear, expiryMillis, get, isEnabled, isFresh, keys, log, makeRoomForAnotherKey, maxKeys, normalizeStoreKey, optionEvaluator, set, store, timestamp;
       if (config == null) {
         config = {};
       }
       store = void 0;
-      clear = function() {
-        return store = {};
+      optionEvaluator = function(name) {
+        return function() {
+          var value;
+          value = config[name];
+          if (isNumber(value)) {
+            return value;
+          } else if (isFunction(value)) {
+            return value();
+          } else {
+            return void 0;
+          }
+        };
       };
-      clear();
-      log = function() {
-        var args;
-        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-        if (config.log) {
-          args[0] = "[" + config.log + "] " + args[0];
-          return up.puts.apply(up, args);
-        }
-      };
-      keys = function() {
-        return Object.keys(store);
-      };
-      maxSize = function() {
-        if (isMissing(config.size)) {
-          return void 0;
-        } else if (isFunction(config.size)) {
-          return config.size();
-        } else if (isNumber(config.size)) {
-          return config.size;
-        } else {
-          return error("Invalid size config: %o", config.size);
-        }
-      };
-      expiryMilis = function() {
-        if (isMissing(config.expiry)) {
-          return void 0;
-        } else if (isFunction(config.expiry)) {
-          return config.expiry();
-        } else if (isNumber(config.expiry)) {
-          return config.expiry;
-        } else {
-          return error("Invalid expiry config: %o", config.expiry);
-        }
-      };
+      maxKeys = optionEvaluator('size');
+      expiryMillis = optionEvaluator('expiry');
       normalizeStoreKey = function(key) {
         if (config.key) {
           return config.key(key);
@@ -1575,11 +1580,30 @@ that might save you from loading something like [Underscore.js](http://underscor
           return key.toString();
         }
       };
-      trim = function() {
-        var oldestKey, oldestTimestamp, size, storeKeys;
+      isEnabled = function() {
+        return maxKeys() !== 0 && expiryMillis() !== 0;
+      };
+      clear = function() {
+        return store = {};
+      };
+      clear();
+      log = function() {
+        var args;
+        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        if (config.logPrefix) {
+          args[0] = "[" + config.logPrefix + "] " + args[0];
+          return up.puts.apply(up, args);
+        }
+      };
+      keys = function() {
+        return Object.keys(store);
+      };
+      makeRoomForAnotherKey = function() {
+        var max, oldestKey, oldestTimestamp, storeKeys;
         storeKeys = copy(keys());
-        size = maxSize();
-        if (size && storeKeys.length > size) {
+        console.debug("Cache has %o storeKeys, %o are allowed", storeKeys.length, maxKeys());
+        max = maxKeys();
+        if (max && storeKeys.length >= max) {
           oldestKey = null;
           oldestTimestamp = null;
           each(storeKeys, function(key) {
@@ -1610,11 +1634,14 @@ that might save you from loading something like [Underscore.js](http://underscor
       };
       set = function(key, value) {
         var storeKey;
-        storeKey = normalizeStoreKey(key);
-        return store[storeKey] = {
-          timestamp: timestamp(),
-          value: value
-        };
+        if (isEnabled()) {
+          makeRoomForAnotherKey();
+          storeKey = normalizeStoreKey(key);
+          return store[storeKey] = {
+            timestamp: timestamp(),
+            value: value
+          };
+        }
       };
       remove = function(key) {
         var storeKey;
@@ -1622,11 +1649,11 @@ that might save you from loading something like [Underscore.js](http://underscor
         return delete store[storeKey];
       };
       isFresh = function(entry) {
-        var expiry, timeSinceTouch;
-        expiry = expiryMilis();
-        if (expiry) {
+        var millis, timeSinceTouch;
+        millis = expiryMillis();
+        if (millis) {
           timeSinceTouch = timestamp() - entry.timestamp;
-          return timeSinceTouch < expiryMilis();
+          return timeSinceTouch < millis;
         } else {
           return true;
         }
@@ -1931,6 +1958,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       isUnmodifiedMouseEvent: isUnmodifiedMouseEvent,
       nullJQuery: nullJQuery,
       unJQuery: unJQuery,
+      setTimer: setTimer,
       nextFrame: nextFrame,
       measure: measure,
       temporaryCss: temporaryCss,
@@ -1964,7 +1992,8 @@ that might save you from loading something like [Underscore.js](http://underscor
       unwrapElement: unwrapElement,
       multiSelector: multiSelector,
       error: error,
-      pluckData: pluckData
+      pluckData: pluckData,
+      noop: noop
     };
   })($);
 
@@ -5152,7 +5181,7 @@ or [transitions](/up.transition) using Javascript or CSS.
 
 (function() {
   up.motion = (function($) {
-    var GHOSTING_DEFERRED_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, ensureMorphable, findAnimation, finish, finishGhosting, isEnabled, morph, none, prependCopy, reset, resolvableWhen, skipMorph, snapshot, transition, transitions, u, withGhosts;
+    var GHOSTING_DEFERRED_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, ensureMorphable, findAnimation, finish, finishGhosting, isEnabled, morph, none, prependCopy, reset, resolvableWhen, skipMorph, snapshot, transition, transitions, translateCss, u, withGhosts;
     u = up.util;
     animations = {};
     defaultAnimations = {};
@@ -5323,6 +5352,9 @@ or [transitions](/up.transition) using Javascript or CSS.
     GHOSTING_DEFERRED_KEY = 'up-ghosting-deferred';
     withGhosts = function($old, $new, options, block) {
       var $viewport, deferred, newCopy, newScrollTop, oldCopy, oldScrollTop, showNew;
+      if (options.copy === false || $old.is('.up-ghost') || $new.is('.up-ghost')) {
+        return block($old, $new);
+      }
       oldCopy = void 0;
       newCopy = void 0;
       oldScrollTop = void 0;
@@ -5462,6 +5494,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       if (transitionOrName === 'none') {
         transitionOrName = false;
       }
+      options = u.options(options);
       $old = $(source);
       $new = $(target);
       ensureMorphable($old, transitionOrName);
@@ -5689,93 +5722,66 @@ or [transitions](/up.transition) using Javascript or CSS.
         opacity: 0
       }, options);
     });
+    translateCss = function(x, y) {
+      return {
+        transform: "translate(" + x + "px, " + y + "px)"
+      };
+    };
     animation('move-to-top', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = box.top + box.height;
-      $ghost.css({
-        'margin-top': '0px'
-      });
-      return animate($ghost, {
-        'margin-top': "-" + travelDistance + "px"
-      }, options);
+      $ghost.css(translateCss(0, 0));
+      return animate($ghost, translateCss(0, -travelDistance), options);
     });
     animation('move-from-top', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = box.top + box.height;
-      $ghost.css({
-        'margin-top': "-" + travelDistance + "px"
-      });
-      return animate($ghost, {
-        'margin-top': '0px'
-      }, options);
+      $ghost.css(translateCss(0, -travelDistance));
+      return animate($ghost, translateCss(0, 0), options);
     });
     animation('move-to-bottom', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = u.clientSize().height - box.top;
-      $ghost.css({
-        'margin-top': '0px'
-      });
-      return animate($ghost, {
-        'margin-top': travelDistance + "px"
-      }, options);
+      $ghost.css(translateCss(0, 0));
+      return animate($ghost, translateCss(0, travelDistance), options);
     });
     animation('move-from-bottom', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = u.clientSize().height - box.top;
-      $ghost.css({
-        'margin-top': travelDistance + "px"
-      });
-      return animate($ghost, {
-        'margin-top': '0px'
-      }, options);
+      $ghost.css(translateCss(0, travelDistance));
+      return animate($ghost, translateCss(0, 0), options);
     });
     animation('move-to-left', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = box.left + box.width;
-      $ghost.css({
-        'margin-left': '0px'
-      });
-      return animate($ghost, {
-        'margin-left': "-" + travelDistance + "px"
-      }, options);
+      $ghost.css(translateCss(0, 0));
+      return animate($ghost, translateCss(-travelDistance, 0), options);
     });
     animation('move-from-left', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = box.left + box.width;
-      $ghost.css({
-        'margin-left': "-" + travelDistance + "px"
-      });
-      return animate($ghost, {
-        'margin-left': '0px'
-      }, options);
+      $ghost.css(translateCss(-travelDistance, 0));
+      return animate($ghost, translateCss(0, 0), options);
     });
     animation('move-to-right', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = u.clientSize().width - box.left;
-      $ghost.css({
-        'margin-left': '0px'
-      });
-      return animate($ghost, {
-        'margin-left': travelDistance + "px"
-      }, options);
+      $ghost.css(translateCss(0, 0));
+      return animate($ghost, translateCss(travelDistance, 0), options);
     });
     animation('move-from-right', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = u.clientSize().width - box.left;
-      $ghost.css({
-        'margin-left': travelDistance + "px"
-      });
-      return animate($ghost, {
-        'margin-left': '0px'
-      }, options);
+      $ghost.css(translateCss(travelDistance, 0));
+      return animate($ghost, translateCss(0, 0), options);
     });
     animation('roll-down', function($ghost, options) {
       var fullHeight, styleMemo;
@@ -5858,7 +5864,7 @@ the user performs the click.
   var slice = [].slice;
 
   up.proxy = (function($) {
-    var $waitingLink, ajax, alias, cache, cacheKey, cancelBusyDelay, cancelPreloadDelay, checkPreload, clear, config, get, isBusy, isIdempotent, isIdle, load, loadEnded, loadOrQueue, loadStarted, normalizeRequest, pendingCount, pokeQueue, preload, preloadDelayTimer, queue, queuedRequests, remove, reset, responseReceived, set, slowDelayTimer, slowEventEmitted, startPreloadDelay, u;
+    var $waitingLink, ajax, alias, cache, cacheKey, cancelPreloadDelay, cancelSlowDelay, checkPreload, clear, config, get, isBusy, isIdempotent, isIdle, load, loadEnded, loadOrQueue, loadStarted, normalizeRequest, pendingCount, pokeQueue, preload, preloadDelayTimer, queue, queuedRequests, remove, reset, responseReceived, set, slowDelayTimer, slowEventEmitted, startPreloadDelay, u;
     u = up.util;
     $waitingLink = void 0;
     preloadDelayTimer = void 0;
@@ -5960,65 +5966,25 @@ the user performs the click.
         }
       }
     };
-
-    /**
-    Manually stores a promise for the response to the given request.
-    
-    @function up.proxy.set
-    @param {String} request.url
-    @param {String} [request.method='GET']
-    @param {String} [request.target='body']
-    @param {Promise} response
-      A promise for the response that is API-compatible with the
-      promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
-    @experimental
-     */
-    set = cache.set;
-
-    /**
-    Manually removes the given request from the cache.
-    
-    You can also [configure](/up.proxy.config) when the proxy
-    automatically removes cache entries.
-    
-    @function up.proxy.remove
-    @param {String} request.url
-    @param {String} [request.method='GET']
-    @param {String} [request.target='body']
-    @experimental
-     */
-    remove = cache.remove;
-
-    /**
-    Removes all cache entries.
-    
-    Unpoly also automatically clears the cache whenever it processes
-    a request with a non-GET HTTP method.
-    
-    @function up.proxy.clear
-    @stable
-     */
-    clear = cache.clear;
     cancelPreloadDelay = function() {
       clearTimeout(preloadDelayTimer);
       return preloadDelayTimer = null;
     };
-    cancelBusyDelay = function() {
+    cancelSlowDelay = function() {
       clearTimeout(slowDelayTimer);
       return slowDelayTimer = null;
     };
     reset = function() {
       $waitingLink = null;
       cancelPreloadDelay();
-      cancelBusyDelay();
+      cancelSlowDelay();
       pendingCount = 0;
       config.reset();
-      slowEventEmitted = false;
       cache.clear();
+      slowEventEmitted = false;
       return queuedRequests = [];
     };
     reset();
-    alias = cache.alias;
     normalizeRequest = function(request) {
       if (!request._normalized) {
         request.method = u.normalizeMethod(request.method);
@@ -6128,11 +6094,7 @@ the user performs the click.
             return slowEventEmitted = true;
           }
         };
-        if (config.slowDelay > 0) {
-          return slowDelayTimer = setTimeout(emission, config.slowDelay);
-        } else {
-          return emission();
-        }
+        return slowDelayTimer = u.setTimer(config.slowDelay, emission);
       }
     };
 
@@ -6278,6 +6240,59 @@ the user performs the click.
         });
       }
     };
+
+    /**
+    Makes the proxy assume that `newRequest` has the same response as the
+    already cached `oldRequest`.
+    
+    Unpoly uses this internally when the user redirects from `/old` to `/new`.
+    In that case, both `/old` and `/new` will cache the same response from `/new`.
+    
+    @function up.proxy.alias
+    @param {Object} oldRequest
+    @param {Object} newRequest
+    @experimental
+     */
+    alias = cache.alias;
+
+    /**
+    Manually stores a promise for the response to the given request.
+    
+    @function up.proxy.set
+    @param {String} request.url
+    @param {String} [request.method='GET']
+    @param {String} [request.target='body']
+    @param {Promise} response
+      A promise for the response that is API-compatible with the
+      promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+    @experimental
+     */
+    set = cache.set;
+
+    /**
+    Manually removes the given request from the cache.
+    
+    You can also [configure](/up.proxy.config) when the proxy
+    automatically removes cache entries.
+    
+    @function up.proxy.remove
+    @param {String} request.url
+    @param {String} [request.method='GET']
+    @param {String} [request.target='body']
+    @experimental
+     */
+    remove = cache.remove;
+
+    /**
+    Removes all cache entries.
+    
+    Unpoly also automatically clears the cache whenever it processes
+    a request with a non-GET HTTP method.
+    
+    @function up.proxy.clear
+    @stable
+     */
+    clear = cache.clear;
 
     /**
     This event is [emitted]/(up.emit) before an [AJAX request](/up.ajax)
@@ -7184,11 +7199,7 @@ open dialogs with sub-forms, etc. all without losing form state.
                 }
               });
             };
-            if (delay === 0) {
-              return runAndChain();
-            } else {
-              return setTimeout(runAndChain, delay);
-            }
+            return u.setTimer(delay, runAndChain);
           }
         }
       };
