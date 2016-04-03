@@ -262,7 +262,7 @@ up.modal = (($) ->
 
   Example:
 
-      up.modal.visit('/foo', { target: '.list' })
+      up.modal.visit('/foo', { target: '.list' });
 
   This will request `/foo`, extract the `.list` selector from the response
   and open the selected container in a modal dialog.
@@ -288,32 +288,71 @@ up.modal = (($) ->
     open(options)
 
   ###*
+  [Extracts](/up.extract) the given CSS selector from the given HTML string and
+  opens the results in a modal.
+
+  Example:
+
+      var html = 'before <div class="content">inner</div> after';
+      up.modal.extract('/foo', '.content', html);
+
+  The would open a modal with the following contents:
+
+      <div class="content">inner</div>
+
+  Emits events [`up:modal:open`](/up:modal:open) and [`up:modal:opened`](/up:modal:opened).
+
+  @function up.modal.extract
+  @param {String} url
+    The URL to load.
+  @param {Object} options
+    See options for [`up.modal.follow`](/up.modal.follow).
+  @return {Promise}
+    A promise that will be resolved when the modal has been opened and the opening
+    animation has completed.
+  @stable
+  ###
+  extract = (selector, html, options) ->
+    options = u.options(options)
+    options.html = html
+    options.history = u.option(options.history, false)
+    options.target = selector
+    open(options)
+
+  ###*
   @function open
   @internal
   ###
   open = (options) ->
     options = u.options(options)
-    $link = u.option(options.$link, u.nullJQuery())
-    url = u.option(options.url, $link.attr('up-href'), $link.attr('href'))
-    target = u.option(options.target, $link.attr('up-modal'), 'body')
+    $link = u.option(u.pluckKey(options, '$link'), u.nullJQuery())
+    url = u.option(u.pluckKey(options, 'url'), $link.attr('up-href'), $link.attr('href'))
+    html = u.pluckKey(options, 'html')
+    target = u.option(u.pluckKey(options, 'target'), $link.attr('up-modal'), 'body')
     options.width = u.option(options.width, $link.attr('up-width'), config.width)
     options.maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), config.maxWidth)
     options.height = u.option(options.height, $link.attr('up-height'), config.height)
     options.animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
     options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
+    options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
+    animateOptions = up.motion.animateOptions(options, $link)
+
     # Although we usually fall back to full page loads if a browser doesn't support pushState,
     # in the case of modals we assume that the developer would rather see a dialog
     # without an URL update.
-    options.history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
-    options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
-    animateOptions = up.motion.animateOptions(options, $link)
+    options.history = u.option(options.history, u.castedAttr($link, 'up-history'), config.history)
+    options.history = false unless up.browser.canPushState()
 
     up.browser.confirm(options).then ->
       if up.bus.nobodyPrevents('up:modal:open', url: url, message: 'Opening modal')
         wasOpen = isOpen()
         close(animation: false) if wasOpen
         options.beforeSwap = -> createFrame(target, options)
-        promise =  up.replace(target, url, u.merge(options, animation: false))
+        extractOptions = u.merge(options, animation: false)
+        if url
+          promise =  up.replace(target, url, extractOptions)
+        else
+          promise = up.extract(target, html, extractOptions)
         unless wasOpen
           promise = promise.then ->
             up.animate($('.up-modal'), options.animation, animateOptions)
@@ -496,6 +535,7 @@ up.modal = (($) ->
   knife: eval(Knife?.point)
   visit: visit
   follow: follow
+  extract: extract
   open: -> up.error('up.modal.open no longer exists. Please use either up.modal.follow or up.modal.visit.')
   close: close
   url: -> currentUrl

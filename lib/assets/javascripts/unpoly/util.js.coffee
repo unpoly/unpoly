@@ -1596,6 +1596,11 @@ up.util = (($) ->
     $error.text(asString)
     throw new Error(asString)
 
+  pluckKey = (object, key) ->
+    value = object[key]
+    delete object[key]
+    value
+
   pluckData = (elementOrSelector, key) ->
     $element = $(elementOrSelector)
     value = $element.data(key)
@@ -1694,6 +1699,7 @@ up.util = (($) ->
   multiSelector: multiSelector
   error: error
   pluckData: pluckData
+  pluckKey: pluckKey
   noop: noop
 
 )($)

@@ -26,6 +26,25 @@ describe 'up.modal', ->
           expect($('.up-modal-dialog .after')).not.toExist()
           done()
 
+    describe 'up.modal.extract', ->
+
+      it 'opens a modal by extracting the given selector from the given HTML string', ->
+        oldHref = location.href
+        up.modal.extract '.middle', """
+          <div class="before">new-before</div>
+          <div class="middle">new-middle</div>
+          <div class="after">new-after</div>
+        """
+        expect($('.up-modal')).toExist()
+        expect($('.up-modal-dialog')).toExist()
+        expect($('.up-modal-dialog .middle')).toExist()
+        expect($('.up-modal-dialog .middle')).toHaveText('new-middle')
+        expect($('.up-modal-dialog .before')).not.toExist()
+        expect($('.up-modal-dialog .after')).not.toExist()
+
+        # Can't change URLs
+        expect(location.href).toEqual(oldHref)
+
     describe 'up.modal.visit', ->
 
       it "brings its own scrollbar, padding the body on the right in order to prevent jumping", (done) ->

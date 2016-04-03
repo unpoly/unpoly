@@ -10,6 +10,8 @@ Unreleased
 
 ### Compatible changes
 
+- New function [`up.modal.extract`](/up.modal.extract) to open a modal from an
+  existing HTML string.
 
 
 ### Breaking changes
