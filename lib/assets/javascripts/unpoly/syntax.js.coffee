@@ -239,6 +239,7 @@ up.syntax = (($) ->
 
   Examples for built-in macros are [`up-dash`](/up-dash) and [`up-expand`](/up-expand).
 
+  @function up.macro
   @param {String} selector
     The selector to match.
   @param {Object} options
