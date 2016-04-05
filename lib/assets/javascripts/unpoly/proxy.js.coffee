@@ -149,13 +149,23 @@ up.proxy = (($) ->
   Only requests with a method of `GET`, `OPTIONS` and `HEAD`
   are considered to be read-only.
 
+  \#\#\#\# Example
+
+      up.ajax('/search', data: { query: 'sunshine' }).then(function(data, status, xhr) {
+        console.log('The response body is %o', data);
+      }).fail(function(xhr, status, error) {
+        console.error('The request failed');
+      });
+
+  \#\#\#\# Events
+
   If a network connection is attempted, the proxy will emit
-  a `up:proxy:load` event with the `request` as its argument.
-  Once the response is received, a `up:proxy:receive` event will
+  a [`up:proxy:load`](/up:proxy:load) event with the `request` as its argument.
+  Once the response is received, a [`up:proxy:receive`](/up:proxy:receive) event will
   be emitted.
   
   @function up.ajax
-  @param {String} request.url
+  @param {String} url
   @param {String} [request.method='GET']
   @param {String} [request.target='body']
   @param {Boolean} [request.cache]
@@ -166,12 +176,18 @@ up.proxy = (($) ->
     with the request.
   @param {Object} [request.data={}]
     An object of request parameters.
+  @param {String} [request.url]
+    You can omit the first string argument and pass the URL as
+    a `request` property instead.
   @return
     A promise for the response that is API-compatible with the
     promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
   @stable
   ###
-  ajax = (options) ->
+  ajax = (args...) ->
+
+    options = u.extractOptions(args)
+    options.url = args[0] if u.isGiven(args[0])
 
     forceCache = (options.cache == true)
     ignoreCache = (options.cache == false)

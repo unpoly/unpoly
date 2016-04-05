@@ -1607,6 +1607,13 @@ up.util = (($) ->
     $element.removeData(key)
     value
 
+  extractOptions = (args) ->
+    lastArg = last(args)
+    if isObject(lastArg)
+      args.pop()
+    else
+      {}
+
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
   appendRequestData: appendRequestData
@@ -1700,6 +1707,7 @@ up.util = (($) ->
   error: error
   pluckData: pluckData
   pluckKey: pluckKey
+  extractOptions: extractOptions
   noop: noop
 
 )($)

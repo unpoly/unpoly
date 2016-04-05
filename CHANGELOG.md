@@ -12,7 +12,7 @@ Unreleased
 
 - New function [`up.modal.extract`](/up.modal.extract) to open a modal from an
   existing HTML string.
-
+- [`up.ajax`](/up.ajax) now also accepts the URL as a first string argument.
 
 ### Breaking changes
 
