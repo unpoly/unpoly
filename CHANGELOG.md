@@ -13,6 +13,7 @@ Unreleased
 - New function [`up.modal.extract`](/up.modal.extract) to open a modal from an
   existing HTML string.
 - [`up.ajax`](/up.ajax) now also accepts the URL as a first string argument.
+- [Expanded](/up.expand) links to modals or popups now get a pointer cursor via CSS
 
 ### Breaking changes
 
