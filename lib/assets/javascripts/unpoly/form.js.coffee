@@ -141,7 +141,7 @@ up.form = (($) ->
       unless canAjaxSubmit
         return u.unresolvablePromise()
 
-    $form.addClass('up-active')
+    up.navigation.markActive($form)
 
     # If we can't submit this form via AJAX or if we wouldn't be able to change
     # the location URL as the result, fall back to a vanilla form submission.
@@ -150,7 +150,7 @@ up.form = (($) ->
       return u.unresolvablePromise()
 
     promise = up.replace(target, url, options)
-    promise.always -> $form.removeClass('up-active')
+    promise.always -> up.navigation.unmarkActive($form)
     return promise
 
   ###*

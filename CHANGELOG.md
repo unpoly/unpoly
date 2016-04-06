@@ -29,6 +29,8 @@ Unreleased
 - Fix [`up.util.trim`](/up.util.trim) not working properly.
 - [`up.morph`](/up.morph) no longer throws an error if called without an `options` object
 - Custom transitions can now call [`up.morph`](/up.morph) to refer to other transitions
+- Fix a bug where following a link to a [preloaded](/up-preload) destination would keep the
+  link marked with a [up-active](/up-active) class forever.
 
 
 0.23.0

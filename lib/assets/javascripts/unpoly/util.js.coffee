@@ -1363,7 +1363,6 @@ up.util = (($) ->
 
     makeRoomForAnotherKey = ->
       storeKeys = copy(keys())
-      console.debug("Cache has %o storeKeys, %o are allowed", storeKeys.length, maxKeys())
       max = maxKeys()
       if max && storeKeys.length >= max
         oldestKey = null

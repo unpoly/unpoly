@@ -1,5 +1,11 @@
 describe 'up.navigation', ->
-  
+
+  u = up.util
+
+  beforeEach ->
+    up.modal.config.openAnimation = 'none'
+    up.modal.config.closeAnimation = 'none'
+
   describe 'unobtrusive behavior', ->
 
     describe '.up-current', ->
@@ -20,8 +26,8 @@ describe 'up.navigation', ->
 
       it 'marks any link as .up-current if any of its space-separated up-alias values matches the current URL', ->
         spyOn(up.browser, 'url').and.returnValue('/foo')
-        $currentLink = up.hello(affix('span[up-alias="/aaa /foo /bbb"]'))
-        $otherLink = up.hello(affix('span[up-alias="/bar"]'))
+        $currentLink = up.hello(affix('a[href="/x"][up-alias="/aaa /foo /bbb"]'))
+        $otherLink = up.hello(affix('a[href="/y"][up-alias="/bar"]'))
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
@@ -35,8 +41,8 @@ describe 'up.navigation', ->
 
       it 'marks URL prefixes as .up-current if an up-alias value ends in *', ->
         spyOn(up.browser, 'url').and.returnValue('/foo/123')
-        $currentLink = up.hello(affix('span[up-alias="/aaa /foo/* /bbb"]'))
-        $otherLink = up.hello(affix('span[up-alias="/bar"]'))
+        $currentLink = up.hello(affix('a[href="/x"][up-alias="/aaa /foo/* /bbb"]'))
+        $otherLink = up.hello(affix('a[href="/y"][up-alias="/bar"]'))
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
@@ -115,7 +121,6 @@ describe 'up.navigation', ->
           expect($link).toHaveClass('up-active')
           @respondWith('<div class="main">new-text</div>')
           expect($link).not.toHaveClass('up-active')
-          expect($link).toHaveClass('up-current')
 
         it 'marks links with [up-instant] on mousedown as .up-active until the request finishes', ->
           $link = affix('a[href="/foo"][up-instant][up-target=".main"]')
@@ -124,7 +129,6 @@ describe 'up.navigation', ->
           expect($link).toHaveClass('up-active')
           @respondWith('<div class="main">new-text</div>')
           expect($link).not.toHaveClass('up-active')
-          expect($link).toHaveClass('up-current')
 
         it 'prefers to mark an enclosing [up-expand] click area', ->
           $area = affix('div[up-expand] a[href="/foo"][up-target=".main"]')
@@ -132,7 +136,33 @@ describe 'up.navigation', ->
           $link = $area.find('a')
           affix('.main')
           $link.click()
+          expect($link).not.toHaveClass('up-active')
           expect($area).toHaveClass('up-active')
           @respondWith('<div class="main">new-text</div>')
-          expect($area).toHaveClass('up-current')
+          expect($area).not.toHaveClass('up-active')
+
+        it 'marks clicked modal openers as .up-active while the modal is loading', ->
+          $link = affix('a[href="/foo"][up-modal=".main"]')
+          affix('.main')
+          $link.click()
+          expect($link).toHaveClass('up-active')
+          @respondWith('<div class="main">new-text</div>')
+          expect($link).not.toHaveClass('up-active')
+
+        it 'removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', ->
+          $link = affix('a[href="/foo"][up-modal=".main"]')
+          up.proxy.preload($link)
+          @respondWith('<div class="main">new-text</div>')
+          $link.click()
+          expect('.up-modal .main').toHaveText('new-text')
+          expect($link).not.toHaveClass('up-active')
+
+        it 'removes .up-active from a clicked link if the target is already preloaded (bugfix)', ->
+          $link = affix('a[href="/foo"][up-target=".main"]')
+          affix('.main')
+          up.proxy.preload($link)
+          @respondWith('<div class="main">new-text</div>')
+          $link.click()
+          expect('.main').toHaveText('new-text')
+          expect($link).not.toHaveClass('up-active')
 

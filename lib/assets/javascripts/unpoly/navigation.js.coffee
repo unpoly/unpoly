@@ -36,11 +36,8 @@ up.navigation = (($) ->
     classes.join(' ')
 
   CLASS_ACTIVE = 'up-active'
-  SELECTORS_SECTION = ['a', '[up-href]', '[up-alias]']
-  SELECTOR_SECTION = SELECTORS_SECTION.join(', ')
-  SELECTOR_SECTION_INSTANT = ("#{selector}[up-instant]" for selector in SELECTORS_SECTION).join(', ')
-  SELECTOR_ACTIVE = ".#{CLASS_ACTIVE}"
-  
+  SELECTOR_SECTION = 'a, [up-href]'
+
   normalizeUrl = (url) ->
     if u.isPresent(url)
       u.normalizeUrl(url,
@@ -103,6 +100,22 @@ up.navigation = (($) ->
         $section.removeClass(klass)
 
   ###*
+  @function findClickArea
+  @param {String|Element|jQuery} elementOrSelector
+  @param {Boolean} options.enlarge
+    If `true`, tries to find a containing link that has expanded the link's click area.
+    If we find one, we prefer to mark the larger area as active.
+  @internal
+  ###
+  findClickArea = (elementOrSelector, options) ->
+    $area = $(elementOrSelector)
+    options = u.options(options, enlarge: false)
+    if options.enlarge
+      u.presence($area.parent(SELECTOR_SECTION)) || $area
+    else
+      $area
+
+  ###*
   Links that are currently loading are assigned the `up-active`
   class automatically. Style `.up-active` in your CSS to improve the
   perceived responsiveness of your user interface.
@@ -129,24 +142,21 @@ up.navigation = (($) ->
   @selector .up-active
   @stable
   ###
-  sectionClicked = ($section) ->
-    unmarkActive()
-    $section = enlargeClickArea($section)
-    $section.addClass(CLASS_ACTIVE)
-    
-  enlargeClickArea = ($section) ->
-    u.presence($section.parents(SELECTOR_SECTION)) || $section
-    
-  unmarkActive = ->
-    $(SELECTOR_ACTIVE).removeClass(CLASS_ACTIVE)
+  markActive = (elementOrSelector, options) ->
+    $element = findClickArea(elementOrSelector, options)
+    $element.addClass(CLASS_ACTIVE)
 
-  up.on 'click', SELECTOR_SECTION, (event, $section) ->
-    if u.isUnmodifiedMouseEvent(event) && !$section.is('[up-instant]')
-      sectionClicked($section)
-  
-  up.on 'mousedown', SELECTOR_SECTION_INSTANT, (event, $section) ->
-    if u.isUnmodifiedMouseEvent(event)
-      sectionClicked($section)
+  unmarkActive = (elementOrSelector, options) ->
+    $element = findClickArea(elementOrSelector, options)
+    $element.removeClass(CLASS_ACTIVE)
+
+  withActiveMark = (elementOrSelector, options, block) ->
+    $element = $(elementOrSelector)
+    markActive($element, options)
+    promise = block()
+    promise.always ->
+      unmarkActive($element, options)
+    promise
 
   ###*
   Links that point to the current location are assigned
@@ -193,9 +203,6 @@ up.navigation = (($) ->
   @stable
   ###
   up.on 'up:fragment:inserted', ->
-    # If a new fragment is inserted, it's likely to be the result
-    # of the active action. So we can remove the active marker.
-    unmarkActive()
     # When a fragment is inserted it might either have brought a location change
     # with it, or it might have opened a modal / popup which we consider
     # to be secondary location sources (the primary being the browser's
@@ -215,5 +222,8 @@ up.navigation = (($) ->
 
   config: config
   defaults: -> u.error('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.')
+  markActive: markActive
+  unmarkActive: unmarkActive
+  withActiveMark: withActiveMark
 
 )(jQuery)
