@@ -174,6 +174,8 @@ up.popup = (($) ->
   @function up.popup.attach
   @param {Element|jQuery|String} elementOrSelector
   @param {String} [options.url]
+  @param {String} [options.target]
+    A CSS selector that will be extracted from the response and placed into the popup.
   @param {String} [options.position='bottom-right']
     Defines where the popup is attached to the opening element.
 
