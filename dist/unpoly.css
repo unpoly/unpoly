@@ -14,22 +14,32 @@
   max-width: 100%;
   box-sizing: border-box;
   z-index: 99999999; }
-[up-href][up-follow], [up-href][up-target] {
+[up-href] {
   cursor: pointer; }
-.up-modal {
+.up-modal-backdrop {
+  z-index: 10000;
+  background-color: rgba(90, 90, 90, 0.4);
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0; }
+
+.up-modal-viewport {
+  z-index: 11000;
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
-  z-index: 10000;
-  background-color: rgba(90, 90, 90, 0.4);
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: hidden;
   text-align: center; }
+  .up-modal.up-modal-ready .up-modal-viewport {
+    overflow-y: scroll; }
 
 .up-modal-dialog {
-  z-index: 1000;
+  z-index: 12000;
   position: relative;
   box-sizing: border-box;
   margin: 30px 10px;
@@ -38,13 +48,13 @@
   text-align: left; }
 
 .up-modal-content {
-  z-index: 2000;
+  z-index: 13000;
   padding: 20px;
   background-color: #fff;
   box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.3); }
 
 .up-modal-close {
-  z-index: 3000;
+  z-index: 14000;
   position: absolute;
   right: 0;
   top: 0;

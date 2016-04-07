@@ -10,6 +10,15 @@ Unreleased
 
 ### Compatible changes
 
+
+### Breaking changes
+
+
+0.24.0
+------
+
+### Compatible changes
+
 - New function [`up.modal.extract`](/up.modal.extract) to open a modal from an
   existing HTML string.
 - [`up.ajax`](/up.ajax) now also accepts the URL as a first string argument.

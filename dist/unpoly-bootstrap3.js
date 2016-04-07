@@ -15,7 +15,7 @@
 
 }).call(this);
 (function() {
-  up.modal.config.template = "<div class=\"up-modal\">\n  <div class=\"up-modal-dialog modal-dialog\">\n    <div class=\"up-modal-content modal-content\"></div>\n  </div>\n</div>";
+  up.modal.config.template = "<div class=\"up-modal\">\n  <div class=\"up-modal-backdrop\"></div>\n  <div class=\"up-modal-viewport\">\n    <div class=\"up-modal-dialog modal-dialog\">\n      <div class=\"up-modal-content modal-content\"></div>\n    </div>\n  </div>\n</div>";
 
 }).call(this);
 (function() {
