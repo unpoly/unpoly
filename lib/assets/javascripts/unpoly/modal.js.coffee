@@ -87,7 +87,7 @@ up.modal = (($) ->
     A string containing the HTML structure of the modal.
     You can supply an alternative template string, but make sure that it
     defines tag with the classes `up-modal`, `up-modal-dialog` and  `up-modal-content`.
-yy
+
     You can also supply a function that returns a HTML string.
     The function will be called with the modal options (merged from these defaults
     and any per-open overrides) whenever a modal opens.
