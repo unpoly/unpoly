@@ -342,7 +342,7 @@ up.util = (($) ->
   @stable
   ###
   isMissing = (object) ->
-    isUndefined(object) || isNull(object)
+    isUndefined(object) || isNull(object) # || isNaN(object)
 
   ###*
   Returns whether the given argument is neither `undefined` nor `null`.
@@ -358,6 +358,9 @@ up.util = (($) ->
   ###
   isGiven = (object) ->
     !isMissing(object)
+
+  # isNan = (object) ->
+  #   isNumber(value) && value != +value
 
   ###*
   Return whether the given argument is considered to be blank.
@@ -1644,7 +1647,7 @@ up.util = (($) ->
 
   extractOptions = (args) ->
     lastArg = last(args)
-    if isObject(lastArg)
+    if isHash(lastArg) && !isJQuery(lastArg)
       args.pop()
     else
       {}

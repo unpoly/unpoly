@@ -191,15 +191,15 @@ up.motion = (($) ->
   @function up.motion.animateOptions
   @internal
   ###
-  animateOptions = (userOptions, args...) ->
-    userOptions = u.options(userOptions)
-    moduleDefaults = u.extractOptions(args)
-    $element = if args.length > 1 then args[1] else undefined
-    options = {}
-    options.easing = u.option(userOptions.easing, $element?.attr('up-easing'), moduleDefaults.easing, config.easing)
-    options.duration = Number(u.option(userOptions.duration, $element?.attr('up-duration'), moduleDefaults.duration, config.duration))
-    options.delay = Number(u.option(userOptions.delay, $element?.attr('up-delay'), moduleDefaults.delay, config.delay))
-    options
+  animateOptions = (args...) ->
+    userOptions = args.shift() || {}
+    $element = if u.isJQuery(args[0]) then args.shift() else u.nullJQuery()
+    moduleDefaults = if u.isObject(args[0]) then args.shift() else {}
+    consolidatedOptions = {}
+    consolidatedOptions.easing = u.option(userOptions.easing, u.presentAttr($element, 'up-easing'), moduleDefaults.easing, config.easing)
+    consolidatedOptions.duration = Number(u.option(userOptions.duration, u.presentAttr($element, 'up-duration'), moduleDefaults.duration, config.duration))
+    consolidatedOptions.delay = Number(u.option(userOptions.delay, u.presentAttr($element, 'up-delay'), moduleDefaults.delay, config.delay))
+    consolidatedOptions
       
   findAnimation = (name) ->
     animations[name] or u.error("Unknown animation %o", name)
@@ -379,7 +379,7 @@ up.motion = (($) ->
     ensureMorphable($old, transitionOrName)
     ensureMorphable($new, transitionOrName)
 
-    up.log.group ('Morphing %o to %o (using %s)' if transitionOrName), $old.get(0), $new.get(0), transitionOrName, ->
+    up.log.group ('Morphing %o to %o (using %s, %o)' if transitionOrName), $old.get(0), $new.get(0), transitionOrName, options, ->
 
       parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source')
       parsedOptions = u.extend(parsedOptions, animateOptions(options))
