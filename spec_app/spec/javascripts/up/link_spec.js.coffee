@@ -339,7 +339,7 @@ describe 'up.link', ->
       it 'does not follow a form with up-target attribute (bugfix)', ->
         $form = affix('form[up-target]')
         up.hello($form)
-        followSpy = up.link.knife.mock('follow')
+        followSpy = up.link.knife.mock('follow').and.returnValue(u.resolvedPromise())
         $form.click()
         expect(followSpy).not.toHaveBeenCalled()
 
@@ -378,7 +378,7 @@ describe 'up.link', ->
 
       beforeEach ->
         @$link = affix('a[href="/path"][up-follow]')
-        @followSpy = up.link.knife.mock('follow')
+        @followSpy = up.link.knife.mock('follow').and.returnValue(u.resolvedPromise())
         @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
       it "calls up.follow with the clicked link", ->

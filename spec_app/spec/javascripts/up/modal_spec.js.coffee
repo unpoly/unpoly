@@ -53,11 +53,11 @@ describe 'up.modal', ->
         @respondWith('<div class="container">text</div>')
 
         promise.then ->
-
           $modal = $('.up-modal')
+          $viewport = $modal.find('.up-modal-viewport')
           $body = $('body')
           expect($modal).toExist()
-          expect($modal.css('overflow-y')).toEqual('scroll')
+          expect($viewport.css('overflow-y')).toEqual('scroll')
           expect($body.css('overflow-y')).toEqual('hidden')
           expect(parseInt($body.css('padding-right'))).toBeAround(assumedScrollbarWidth, 10)
 
@@ -99,12 +99,13 @@ describe 'up.modal', ->
         it 'returns the URL behind the modal overlay', (done) ->
           up.history.replace('/foo')
           expect(up.modal.coveredUrl()).toBeUndefined()
-          up.modal.visit('/bar', target: '.container')
+          visitPromise = up.modal.visit('/bar', target: '.container')
           @respondWith('<div class="container">text</div>')
-          expect(up.modal.coveredUrl()).toEndWith('/foo')
-          up.modal.close().then ->
-            expect(up.modal.coveredUrl()).toBeUndefined()
-            done()
+          visitPromise.then ->
+            expect(up.modal.coveredUrl()).toEndWith('/foo')
+            up.modal.close().then ->
+              expect(up.modal.coveredUrl()).toBeUndefined()
+              done()
 
 
     describe 'up.modal.close', ->
@@ -123,7 +124,7 @@ describe 'up.modal', ->
       
       beforeEach ->
         @$link = affix('a[href="/path"][up-modal=".target"]')
-        @followSpy = up.modal.knife.mock('follow')
+        @followSpy = up.modal.knife.mock('follow').and.returnValue(u.resolvedPromise())
         @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
       it 'opens the clicked link in a modal', ->

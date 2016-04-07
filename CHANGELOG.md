@@ -14,9 +14,48 @@ Unreleased
   existing HTML string.
 - [`up.ajax`](/up.ajax) now also accepts the URL as a first string argument.
 - [Expanded](/up.expand) links to modals or popups now get a pointer cursor via CSS
+- New options for [up.modal.config](/up.modal.config):
+  - `up.modal.config.openDuration`
+  - `up.modal.config.closeDuration`
+  - `up.modal.config.openEasing`
+  - `up.modal.config.closeEasing`
+  - `up.modal.config.backdropOpenAnimation`
+  - `up.modal.config.backdropCloseAnimation`
+  - Also see the breaking changes regarding modal structure below.
+- Calling [`up.motion.finish`](/up.motion.finish) without arguments will now
+  complete all animations and transitions on the screen.
+- Fix a bug where [`up.motion.finish`](/up.motion.finish) would not cancel CSS transitions that were still in progress.
+- Fix a bug where [`up-active`](/up-active) classes where not removed from links when the destination
+  was already [preloaded](/up.preload).
+
 
 ### Breaking changes
 
+- Animations when opening or closing a [modal](/up.modal) now only affect the viewport around the dialog.
+  The backdrop is animated separately. This allows animations like "zoom in", which would look strange if
+  the backdrop would zoom in together with the dialog.
+- The modal's HTML structure has been changed to include a `.up-modal-backdrop` element:
+
+  ```
+  <div class="up-modal">
+  <div class="up-modal-backdrop">
+  <div class="up-modal-viewport">
+    <div class="up-modal-dialog">
+      <div class="up-modal-content">
+        ...
+      </div>
+      <div class="up-modal-close" up-close>X</div>
+    </div>
+  </div>
+  </div>
+  ```
+
+- The `z-index` properties for modal elements have been [changed](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/modal.css.sass).
+  They might change again in the future.
+- The modal will now take over the document's scrollbars after the open animation has finished.
+  In earlier versions the modal took over as soon as the animation had started.
+- Calling [`up.motion.finish`](/up.motion.finish) with an element will now also
+  complete animations/transitions on children of the given element.
 
 
 0.23.1
@@ -60,6 +99,7 @@ Unreleased
 - Fix a bug where a link would be followed multiple times if the link's
   click area was expanded using [`[up-expand]`](/up-expand) and if the
   link also had an [`up-dash`](/up-dash) attribute.
+- [`up.destroy`](/up.destroy) now returns a resolved deferred if the given selector or jQuery collection does not exist
 
 
 0.22.0

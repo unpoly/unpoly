@@ -4,8 +4,11 @@
 up.modal.config.template =
   """
   <div class="up-modal">
-    <div class="up-modal-dialog modal-dialog">
-      <div class="up-modal-content modal-content"></div>
+    <div class="up-modal-backdrop"></div>
+    <div class="up-modal-viewport">
+      <div class="up-modal-dialog modal-dialog">
+        <div class="up-modal-content modal-content"></div>
+      </div>
     </div>
   </div>
   """

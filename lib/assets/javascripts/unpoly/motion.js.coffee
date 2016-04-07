@@ -48,8 +48,14 @@ up.motion = (($) ->
 
   @property up.motion.config
   @param {Number} [config.duration=300]
+    The default duration for all animations and transitions (in milliseconds).
   @param {Number} [config.delay=0]
+    The default delay for all animations and transitions (in milliseconds).
   @param {String} [config.easing='ease']
+    The default timing function that controls the acceleration of animations and transitions.
+
+    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    for a list of pre-defined timing functions.
   @param {Boolean} [config.enabled=true]
     Whether animation is enabled.
 
@@ -150,6 +156,7 @@ up.motion = (($) ->
     The delay before the animation starts, in milliseconds.
   @param {String} [options.easing='ease']
     The timing function that controls the animation's acceleration.
+
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
   @return {Promise}
@@ -184,18 +191,21 @@ up.motion = (($) ->
   @function up.motion.animateOptions
   @internal
   ###
-  animateOptions = (allOptions, $element = null) ->
-    allOptions = u.options(allOptions)
+  animateOptions = (userOptions, args...) ->
+    userOptions = u.options(userOptions)
+    moduleDefaults = u.extractOptions(args)
+    $element = if args.length > 1 then args[1] else undefined
     options = {}
-    options.easing = u.option(allOptions.easing, $element?.attr('up-easing'), config.easing)
-    options.duration = Number(u.option(allOptions.duration, $element?.attr('up-duration'), config.duration))
-    options.delay = Number(u.option(allOptions.delay, $element?.attr('up-delay'), config.delay))
+    options.easing = u.option(userOptions.easing, $element?.attr('up-easing'), moduleDefaults.easing, config.easing)
+    options.duration = Number(u.option(userOptions.duration, $element?.attr('up-duration'), moduleDefaults.duration, config.duration))
+    options.delay = Number(u.option(userOptions.delay, $element?.attr('up-delay'), moduleDefaults.delay, config.delay))
     options
       
   findAnimation = (name) ->
     animations[name] or u.error("Unknown animation %o", name)
-    
+
   GHOSTING_DEFERRED_KEY = 'up-ghosting-deferred'
+  GHOSTING_CLASS = 'up-ghosting'
 
   withGhosts = ($old, $new, options, block) ->
 
@@ -209,6 +219,7 @@ up.motion = (($) ->
     newScrollTop = undefined
 
     $viewport = up.layout.viewportOf($old)
+    $both = $old.add($new)
 
     u.temporaryCss $new, display: 'none', ->
       # Within this block, $new is hidden but $old is visible
@@ -245,12 +256,12 @@ up.motion = (($) ->
     # already in progress. If someone attempted a new animation on the
     # same elements, the stored promises would be resolved by the second
     # animation call, making the transition jump to the last frame instantly.
-    $old.data(GHOSTING_DEFERRED_KEY, deferred)
-    $new.data(GHOSTING_DEFERRED_KEY, deferred)
-    
+    $both.data(GHOSTING_DEFERRED_KEY, deferred)
+    $both.addClass(GHOSTING_CLASS)
+
     deferred.then ->
-      $old.removeData(GHOSTING_DEFERRED_KEY)
-      $new.removeData(GHOSTING_DEFERRED_KEY)
+      $both.removeData(GHOSTING_DEFERRED_KEY)
+      $both.removeClass(GHOSTING_CLASS)
       # Now that the transition is over we show $new again.
       showNew()
       oldCopy.$bounds.remove()
@@ -259,21 +270,26 @@ up.motion = (($) ->
     deferred
       
   ###*
-  Completes all [animations](/up.animate) and [transitions](/up.morph)
-  for the given element by jumping to the last animation frame instantly.
+  Completes [animations](/up.animate) and [transitions](/up.morph).
 
-  All callbacks chained to the original animation's promise will be called.
+  If called without arguments, all animations on the screen are completed.
+  If given an element (or selector), animations on that element and its children
+  are completed.
 
-  Does nothing if the given element is not currently animating.
+  Animations are completed by jumping to the last animation frame instantly.
+
+  Does nothing if there are no animation to complete.
   
   @function up.motion.finish
-  @param {Element|jQuery|String} elementOrSelector
+  @param {Element|jQuery|String} [elementOrSelector]
   @stable
   ###
-  finish = (elementOrSelector) ->
+  finish = (elementOrSelector = '.up-animating') ->
     $element = $(elementOrSelector)
-    u.finishCssAnimate($element)
-    finishGhosting($element)
+    $animatingSubtree = u.findWithSelf($element, '.up-animating')
+    u.finishCssAnimate($animatingSubtree)
+    $ghostingSubtree = u.findWithSelf($element, ".#{GHOSTING_CLASS}")
+    finishGhosting($ghostingSubtree)
 
   finishGhosting = ($collection) ->
     $collection.each ->
@@ -342,6 +358,7 @@ up.motion = (($) ->
     The delay before the animation starts, in milliseconds.
   @param {String} [options.easing='ease']
     The timing function that controls the transition's acceleration.
+
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
   @param {Boolean} [options.reveal=false]
@@ -566,6 +583,16 @@ up.motion = (($) ->
   ###
   none = u.resolvedDeferred
 
+  ###*
+  Returns whether the given animation option will cause the animation
+  to be skipped.
+
+  @function up.motion.isNone
+  @internal
+  ###
+  isNone = (animation) ->
+    animation is false || animation is 'none' || animation is none
+
   animation('none', none)
 
   animation('fade-in', ($ghost, options) ->
@@ -700,6 +727,7 @@ up.motion = (($) ->
   none: none
   when: resolvableWhen
   prependCopy: prependCopy
+  isNone: isNone
 
 )(jQuery)
 

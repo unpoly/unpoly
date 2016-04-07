@@ -14,9 +14,8 @@ describe 'up.syntax', ->
    
         expect(observeClass).not.toHaveBeenCalledWith('container')
         expect(observeClass).toHaveBeenCalledWith('child')           
-  
 
-        destructor = jasmine.createSpy()
+        destructor = jasmine.createSpy('destructor')
         up.compiler '.child', ($element) ->
           destructor
   

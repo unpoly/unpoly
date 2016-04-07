@@ -1,35 +1,50 @@
-$stratum: 10000
-$substratum-dialog:  1000
-$substratum-content: 2000
-$substratum-close:   3000
+$stratum-backdrop:   10000
+$stratum-elements:   11000
+
+// These could actually be 1000, 2000, 3000 and 4000 since the `fixed` position of some elements defines
+// a stacking context for all contained z-indexes.
+//
+// However, let's keep the option open that these elements will one day not have its stacking context.
+//
+// Also let's not do 1, 2, 3 and 4 so other elements have a chance to move themselves between the layers.
+$substratum-dialog:  12000
+$substratum-content: 13000
+$substratum-close:   14000
 
 $close-height: 36px
 $close-width: 36px
 $close-font-size: 34px
 
-=transform($transform)
-  transform: $transform
-  -ms-transform: $transform // IE9
-  -webkit-transform: $transform // Safari, Some Android
-
 .up-modal
+
+.up-modal-backdrop
+  z-index: $stratum-backdrop
+  background-color: rgba(90, 90, 90, 0.4)
+  position: fixed
+  top: 0
+  right: 0
+  bottom: 0
+  left: 0
+
+.up-modal-viewport
+  z-index: $stratum-elements
   position: fixed
   top: 0
   left: 0
   bottom: 0
   right: 0
-  z-index: $stratum
-  background-color: rgba(90, 90, 90, 0.4)
   overflow-x: hidden
-  overflow-y: scroll
+  overflow-y: hidden
   // We prefer centering the dialog as an `inline-block`
   // to giving it a horizontal margin of `auto`. This way
   // the width of `.up-modal-dialog` is controlled by the
   // contents of `.up-modal-content`.
   text-align: center
 
+  .up-modal.up-modal-ready &
+    overflow-y: scroll
+
 .up-modal-dialog
-  // The z-index lives in the stacking context of .up-modal
   z-index: $substratum-dialog
   // Make sure .up-modal-close is relative to the dialog
   position: relative
@@ -47,14 +62,12 @@ $close-font-size: 34px
   text-align: left
 
 .up-modal-content
-  // The z-index lives in the stacking context of .up-modal
   z-index: $substratum-content
   padding: 20px
   background-color: #fff
   box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.3)
 
 .up-modal-close
-  // The z-index lives in the stacking context of .up-modal
   z-index: $substratum-close
   position: absolute
   right: 0

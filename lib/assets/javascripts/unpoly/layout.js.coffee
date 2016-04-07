@@ -54,7 +54,7 @@ up.layout = (($) ->
   ###
   config = u.config
     duration: 0
-    viewports: [document, '.up-modal', '[up-viewport]']
+    viewports: [document, '.up-modal-viewport', '[up-viewport]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']

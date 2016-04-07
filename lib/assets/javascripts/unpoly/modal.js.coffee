@@ -28,10 +28,13 @@ The easiest way to change how the dialog looks is by overriding the [default CSS
 By default the dialog uses the following DOM structure:
 
     <div class="up-modal">
-      <div class="up-modal-dialog">
-        <div class="up-modal-close" up-close>X</div>
-        <div class="up-modal-content">
-          ...
+      <div class="up-modal-backdrop">
+      <div class="up-modal-viewport">
+        <div class="up-modal-dialog">
+          <div class="up-modal-content">
+            ...
+          </div>
+          <div class="up-modal-close" up-close>X</div>
         </div>
       </div>
     </div>
@@ -63,6 +66,8 @@ up.modal = (($) ->
   Sets default options for future modals.
 
   @property up.modal.config
+  @param {String} [config.history=true]
+    Whether opening a modal will add a browser history entry.
   @param {Number} [config.width]
     The width of the dialog as a CSS value like `'400px'` or `50%`.
 
@@ -82,20 +87,28 @@ up.modal = (($) ->
     A string containing the HTML structure of the modal.
     You can supply an alternative template string, but make sure that it
     defines tag with the classes `up-modal`, `up-modal-dialog` and  `up-modal-content`.
-
+yy
     You can also supply a function that returns a HTML string.
     The function will be called with the modal options (merged from these defaults
     and any per-open overrides) whenever a modal opens.
   @param {String} [config.closeLabel='X']
     The label of the button that closes the dialog.
   @param {String} [config.openAnimation='fade-in']
-    The animation used to open the modal. The animation will be applied
-    to both the dialog box and the overlay dimming the page.
+    The animation used to open the viewport around the dialog.
   @param {String} [config.closeAnimation='fade-out']
-    The animation used to close the modal. The animation will be applied
-    to both the dialog box and the overlay dimming the page.
-  @param {String} [config.history=true]
-    Whether opening a modal will add a browser history entry.
+    The animation used to close the viewport the dialog.
+  @param {String} [config.backdropOpenAnimation='fade-in']
+    The animation used to open the backdrop that dims the page below the dialog.
+  @param {String} [config.backdropCloseAnimation='fade-out']
+    The animation used to close the backdrop that dims the page below the dialog.
+  @param {String} [config.openDuration]
+    The duration of the open animation (in milliseconds).
+  @param {String} [config.closeDuration]
+    The duration of the close animation (in milliseconds).
+  @param {String} [config.openEasing]
+    The timing function controlling the acceleration of the opening animation.
+  @param {String} [config.closeEasing]
+    The timing function controlling the acceleration of the closing animation.
   @stable
   ###
   config = u.config
@@ -106,13 +119,23 @@ up.modal = (($) ->
     history: true
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
+    closeDuration: null
+    closeEasing: null
+    openDuration: null
+    openEasing: null
+    backdropOpenAnimation: 'fade-in'
+    backdropCloseAnimation: 'fade-out'
     closeLabel: '×'
+
     template: (config) ->
       """
       <div class="up-modal">
-        <div class="up-modal-dialog">
-          <div class="up-modal-close" up-close>#{config.closeLabel}</div>
-          <div class="up-modal-content"></div>
+        <div class="up-modal-backdrop"></div>
+        <div class="up-modal-viewport">
+          <div class="up-modal-dialog">
+            <div class="up-modal-close" up-close>#{config.closeLabel}</div>
+            <div class="up-modal-content"></div>
+          </div>
         </div>
       </div>
       """
@@ -139,6 +162,7 @@ up.modal = (($) ->
     $('.up-modal').attr('up-covered-url')
 
   reset = ->
+    # Destroy the modal container regardless whether it's currently in a closing animation
     close(animation: false)
     currentUrl = undefined
     config.reset()
@@ -156,7 +180,6 @@ up.modal = (($) ->
     $modal.removeAttr('up-covered-title')
 
   createFrame = (target, options) ->
-    shiftElements()
     $modal = $(templateHtml())
     $modal.attr('up-sticky', '') if options.sticky
     $modal.attr('up-covered-url', up.browser.url())
@@ -171,7 +194,6 @@ up.modal = (($) ->
     u.$createPlaceholder(target, $content)
     $modal.appendTo(document.body)
     $modal
-
   unshifters = []
 
   # Gives `<body>` a right padding in the width of a scrollbar.
@@ -182,6 +204,9 @@ up.modal = (($) ->
   # modal overlay, which has its own scroll bar.
   # This is screwed up, but Bootstrap does the same.
   shiftElements = ->
+    if unshifters.length
+      u.error('Tried to call shiftElements multiple times %o', unshifters.length)
+    $('.up-modal').addClass('up-modal-ready')
     scrollbarWidth = u.scrollbarWidth()
     bodyRightPadding = parseInt($('body').css('padding-right'))
     bodyRightShift = scrollbarWidth + bodyRightPadding
@@ -199,6 +224,7 @@ up.modal = (($) ->
 
   # Reverts the effects of `shiftElements`.
   unshiftElements = ->
+    $('.up-modal').removeClass('up-modal-ready')
     unshifter() while unshifter = unshifters.pop()
 
   ###*
@@ -333,9 +359,10 @@ up.modal = (($) ->
     options.maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), config.maxWidth)
     options.height = u.option(options.height, $link.attr('up-height'), config.height)
     options.animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
+    options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), config.backdropOpenAnimation)
     options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
-    animateOptions = up.motion.animateOptions(options, $link)
+    animateOptions = up.motion.animateOptions(options, $link, { duration: config.openDuration, easing: config.openEasing })
 
     # Although we usually fall back to full page loads if a browser doesn't support pushState,
     # in the case of modals we assume that the developer would rather see a dialog
@@ -350,13 +377,18 @@ up.modal = (($) ->
         options.beforeSwap = -> createFrame(target, options)
         extractOptions = u.merge(options, animation: false)
         if url
-          promise =  up.replace(target, url, extractOptions)
+          promise = up.replace(target, url, extractOptions)
         else
           promise = up.extract(target, html, extractOptions)
-        unless wasOpen
+        # If we're not animating the dialog, don't animate the backdrop either
+        unless wasOpen || up.motion.isNone(options.animation)
           promise = promise.then ->
-            up.animate($('.up-modal'), options.animation, animateOptions)
+            $.when(
+              up.animate($('.up-modal-backdrop'), options.backdropAnimation, animateOptions),
+              up.animate($('.up-modal-viewport'), options.animation, animateOptions)
+            )
         promise = promise.then ->
+          shiftElements()
           up.emit('up:modal:opened', message: 'Modal opened')
         promise
       else
@@ -390,24 +422,39 @@ up.modal = (($) ->
   @function up.modal.close
   @param {Object} options
     See options for [`up.animate`](/up.animate)
-  @return {Deferred}
+  @return {Promise}
     A promise that will be resolved once the modal's close
     animation has finished.
   @stable
   ###
   close = (options) ->
+    options = u.options(options)
     $modal = $('.up-modal')
     if $modal.length
       if up.bus.nobodyPrevents('up:modal:close', $element: $modal, message: 'Closing modal')
-        options = u.options(options,
-          animation: config.closeAnimation,
-          url: $modal.attr('up-covered-url')
-          title: $modal.attr('up-covered-title')
-        )
-        currentUrl = undefined
-        promise = up.destroy($modal, options)
+        unshiftElements()
+        viewportCloseAnimation = u.option(options.animation, config.closeAnimation)
+        backdropCloseAnimation = u.option(options.backdropAnimation, config.backdropCloseAnimation)
+        animateOptions = up.motion.animateOptions(options, { duration: config.closeDuration, easing: config.closeEasing })
+        if up.motion.isNone(viewportCloseAnimation)
+          # If we're not animating the dialog, don't animate the backdrop either
+          promise = u.resolvedPromise()
+        else
+          promise = $.when(
+            up.animate($('.up-modal-viewport'), viewportCloseAnimation, animateOptions),
+            up.animate($('.up-modal-backdrop'), backdropCloseAnimation, animateOptions)
+          )
         promise = promise.then ->
-          unshiftElements()
+          destroyOptions = u.options(
+            u.except(options, 'animation', 'duration', 'easing', 'delay'),
+            url: $modal.attr('up-covered-url')
+            title: $modal.attr('up-covered-title')
+          )
+          # currentUrl must be deleted *before* calling up.destroy,
+          # since up.navigation listens to up:fragment:destroyed and then
+          # re-assigns .up-current classes.
+          currentUrl = undefined
+          up.destroy($modal, destroyOptions)
           up.emit('up:modal:closed', message: 'Modal closed')
         promise
       else
@@ -474,7 +521,9 @@ up.modal = (($) ->
     If set to `"true"`, the modal remains
     open even if the page changes in the background.
   @param {String} [up-animation]
-    The animation to use when opening the modal.
+    The animation to use when opening the viewport containing the dialog.
+  @param {String} [up-backdrop-animation]
+    The animation to use when opening the backdrop that dims the page below the dialog.
   @param {String} [up-height]
     The width of the dialog in pixels.
     By [default](/up.modal.config) the dialog will grow to fit its contents.

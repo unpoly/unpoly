@@ -711,7 +711,9 @@ up.flow = (($) ->
     unless $element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')
       destroyMessage = ['Destroying fragment %o', $element.get(0)]
       destroyedMessage = ['Destroyed fragment %o', $element.get(0)]
-    if up.bus.nobodyPrevents('up:fragment:destroy', $element: $element, message: destroyMessage)
+    if $element.length == 0
+      u.resolvedDeferred()
+    else if up.bus.nobodyPrevents('up:fragment:destroy', $element: $element, message: destroyMessage)
       options = u.options(options, animation: false)
       animateOptions = up.motion.animateOptions(options)
       $element.addClass('up-destroying')

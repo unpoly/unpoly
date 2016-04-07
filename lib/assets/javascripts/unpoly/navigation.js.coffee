@@ -154,8 +154,10 @@ up.navigation = (($) ->
     $element = $(elementOrSelector)
     markActive($element, options)
     promise = block()
-    promise.always ->
-      unmarkActive($element, options)
+    if u.isPromise(promise)
+      promise.always -> unmarkActive($element, options)
+    else
+      up.warn('Expected block to return a promise, but got %o', promise)
     promise
 
   ###*

@@ -52,6 +52,8 @@ up.tooltip = (($) ->
     closeAnimation: 'fade-out'
 
   reset = ->
+    # Destroy the tooltip container regardless whether it's currently in a closing animation
+    close(animation: false)
     config.reset()
 
   setPosition = ($link, $tooltip, position) ->

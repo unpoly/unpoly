@@ -895,6 +895,16 @@ up.util = (($) ->
     memo
 
   ###*
+  Forces a repaint of the given element.
+
+  @function up.util.forceRepaint
+  @internal
+  ###
+  forceRepaint = (element) ->
+    element = unJQuery(element)
+    element.offsetHeight
+
+  ###*
   Animates the given element's CSS properties using CSS transitions.
   
   If the element is already being animated, the previous animation
@@ -927,23 +937,49 @@ up.util = (($) ->
       delay: 0,
       easing: 'ease'
     )
-    # We don't finish an existing animation here, since
-    # the public API `up.motion.animate` already does this.
+
+    # We don't finish an existing animation here, since the public API
+    # we expose as `up.motion.animate` already does this.
     deferred = $.Deferred()
     transition =
       'transition-property': Object.keys(lastFrame).join(', ')
       'transition-duration': "#{opts.duration}ms"
       'transition-delay': "#{opts.delay}ms"
       'transition-timing-function': opts.easing
+    oldTransition = $element.css(Object.keys(transition))
+
+    $element.addClass('up-animating')
     withoutCompositing = forceCompositing($element)
-    withoutTransition = temporaryCss($element, transition)
+    $element.css(transition)
     $element.css(lastFrame)
-    deferred.then(withoutCompositing)
-    deferred.then(withoutTransition)
     $element.data(ANIMATION_DEFERRED_KEY, deferred)
-    deferred.then(-> $element.removeData(ANIMATION_DEFERRED_KEY))
-    endTimeout = setTimeout((-> deferred.resolve()), opts.duration + opts.delay)
-    deferred.then(-> clearTimeout(endTimeout)) # clean up in case we're canceled
+
+    deferred.then ->
+      $element.removeData(ANIMATION_DEFERRED_KEY)
+      withoutCompositing()
+
+      # To interrupt the running transition we *must* set it to 'none' exactly.
+      # We cannot simply restore the old transition properties because browsers
+      # would simply keep transitioning the old properties.
+      $element.css('transition': 'none')
+
+      # Restoring a previous transition involves some work, so we only do it if
+      # we know the element was transitioning before.
+      hadTransitionBefore = !(oldTransition['transition-property'] == 'none' || (oldTransition['transition-property'] == 'all' && oldTransition['transition-duration'][0] == '0'))
+      if hadTransitionBefore
+        forceRepaint($element) # :(
+        $element.css(oldTransition)
+
+    # Since listening to transitionEnd events is painful, we wait for a timeout
+    # and then resolve our deferred. Maybe revisit that decision some day.
+    animationEnd = opts.duration + opts.delay
+    endTimeout = setTimer animationEnd, ->
+      $element.removeClass('up-animating')
+      deferred.resolve() unless isDetached($element)
+    # Clean up in case we're canceled through some other code that
+    # resolves our deferred.
+    deferred.then(-> clearTimeout(endTimeout))
+
     # Return the whole deferred and not just return a thenable.
     # Other code will need the possibility to cancel the animation
     # by resolving the deferred.
@@ -1613,6 +1649,19 @@ up.util = (($) ->
     else
       {}
 
+  ###*
+  Returns whether the given element has been detached from the DOM
+  (or whether it was never attached).
+
+  @function up.util.isDetached
+  @internal
+  ###
+  isDetached = (element) ->
+    element = unJQuery(element)
+    # This is by far the fastest way to do this
+    not jQuery.contains(document.documentElement, element)
+
+  isDetached: isDetached
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
   appendRequestData: appendRequestData
@@ -1675,6 +1724,7 @@ up.util = (($) ->
   cssAnimate: cssAnimate
   finishCssAnimate: finishCssAnimate
   forceCompositing: forceCompositing
+  forceRepaint: forceRepaint
   escapePressed: escapePressed
   copyAttributes: copyAttributes
   findWithSelf: findWithSelf
@@ -1707,6 +1757,7 @@ up.util = (($) ->
   pluckData: pluckData
   pluckKey: pluckKey
   extractOptions: extractOptions
+  isDetached: isDetached
   noop: noop
 
 )($)
