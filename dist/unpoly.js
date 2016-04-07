@@ -1935,7 +1935,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     extractOptions = function(args) {
       var lastArg;
       lastArg = last(args);
-      if (isObject(lastArg)) {
+      if (isHash(lastArg) && !isJQuery(lastArg)) {
         return args.pop();
       } else {
         return {};
@@ -5403,16 +5403,16 @@ or [transitions](/up.transition) using Javascript or CSS.
     @internal
      */
     animateOptions = function() {
-      var $element, args, moduleDefaults, options, userOptions;
-      userOptions = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      userOptions = u.options(userOptions);
-      moduleDefaults = u.extractOptions(args);
-      $element = args.length > 1 ? args[1] : void 0;
-      options = {};
-      options.easing = u.option(userOptions.easing, $element != null ? $element.attr('up-easing') : void 0, moduleDefaults.easing, config.easing);
-      options.duration = Number(u.option(userOptions.duration, $element != null ? $element.attr('up-duration') : void 0, moduleDefaults.duration, config.duration));
-      options.delay = Number(u.option(userOptions.delay, $element != null ? $element.attr('up-delay') : void 0, moduleDefaults.delay, config.delay));
-      return options;
+      var $element, args, consolidatedOptions, moduleDefaults, userOptions;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      userOptions = args.shift() || {};
+      $element = u.isJQuery(args[0]) ? args.shift() : u.nullJQuery();
+      moduleDefaults = u.isObject(args[0]) ? args.shift() : {};
+      consolidatedOptions = {};
+      consolidatedOptions.easing = u.option(userOptions.easing, u.presentAttr($element, 'up-easing'), moduleDefaults.easing, config.easing);
+      consolidatedOptions.duration = Number(u.option(userOptions.duration, u.presentAttr($element, 'up-duration'), moduleDefaults.duration, config.duration));
+      consolidatedOptions.delay = Number(u.option(userOptions.delay, u.presentAttr($element, 'up-delay'), moduleDefaults.delay, config.delay));
+      return consolidatedOptions;
     };
     findAnimation = function(name) {
       return animations[name] || u.error("Unknown animation %o", name);
@@ -5578,7 +5578,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       $new = $(target);
       ensureMorphable($old, transitionOrName);
       ensureMorphable($new, transitionOrName);
-      return up.log.group((transitionOrName ? 'Morphing %o to %o (using %s)' : void 0), $old.get(0), $new.get(0), transitionOrName, function() {
+      return up.log.group((transitionOrName ? 'Morphing %o to %o (using %s, %o)' : void 0), $old.get(0), $new.get(0), transitionOrName, options, function() {
         var animation, parsedOptions, parts, transition;
         parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source');
         parsedOptions = u.extend(parsedOptions, animateOptions(options));
@@ -8524,7 +8524,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       A string containing the HTML structure of the modal.
       You can supply an alternative template string, but make sure that it
       defines tag with the classes `up-modal`, `up-modal-dialog` and  `up-modal-content`.
-    yy
+    
       You can also supply a function that returns a HTML string.
       The function will be called with the modal options (merged from these defaults
       and any per-open overrides) whenever a modal opens.

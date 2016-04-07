@@ -14,6 +14,14 @@ Unreleased
 ### Breaking changes
 
 
+0.24.1
+------
+
+### Compatible changes
+
+- Fix a bug that would stop transitions from working.
+
+
 0.24.0
 ------
 
