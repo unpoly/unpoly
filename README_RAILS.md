@@ -19,7 +19,14 @@ To retrieve the CSS selector that is being [updated](http://unpoly.com/up.replac
 
     up.target
 
-The Unpoly frontend will expect an HTML response containing an element that matches this selector. If no such element is found, an error is shown to the user. Server-side code is free to optimize its response by only returning HTML that matches this selector.
+The Unpoly frontend will expect an HTML response containing an element that matches this selector. If no such element is found, an error is shown to the user.
+
+Server-side code is free to optimize its response by only returning HTML that matches this selector:
+
+    if up.target?('.sidebar')
+      = render 'expensive_sidebar_partial'
+    end
+
 
 ### Pushing a document title to the client
 

@@ -36,6 +36,32 @@ module Unpoly
       end
 
       ##
+      # Tests whether the given CSS selector is targeted by the current fragment update.
+      #
+      # Note that the matching logic is very simplistic and does not actually know
+      # how your page layout is structured. It will return `true` if
+      # the tested selector and the requested CSS selector matches exactly, or if the
+      # requested selector is `body` or `html`.
+      #
+      # Always returns `true` if the current request is not an Unpoly fragment update.
+      def target?(tested_target)
+        if up?
+          actual_target = target
+          if actual_target == tested_target
+            true
+          elsif actual_target == 'html'
+            true
+          elsif actual_target == 'body'
+            not ['head', 'title', 'meta'].include?(tested_target)
+          else
+            false
+          end
+        else
+          true
+        end
+      end
+
+      ##
       # Returns whether the current form submission should be
       # [validated](http://unpoly.com/up-validate) (and not be saved to the database).
       def validate?

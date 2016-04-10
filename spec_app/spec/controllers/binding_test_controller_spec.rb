@@ -17,12 +17,93 @@ describe BindingTestController do
 
   describe '#up' do
 
-    describe '#selector' do
+    describe '#target' do
 
       it 'returns the CSS selector that is requested via Unpoly' do
         request.headers['X-Up-Target'] = '.foo'
         get :up_target
         expect(response.body).to eq('.foo')
+      end
+
+    end
+
+    describe '#target?' do
+
+      it 'returns true if the tested CSS selector is requested via Unpoly' do
+        request.headers['X-Up-Target'] = '.foo'
+        get :up_is_target, tested_target: '.foo'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns false if Unpoly is requesting another CSS selector' do
+        request.headers['X-Up-Target'] = '.bar'
+        get :up_is_target, tested_target: '.foo'
+        expect(response.body).to eq('false')
+      end
+
+      it 'returns true if the request is not an Unpoly request' do
+        get :up_is_target, tested_target: '.foo'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns true if testing a custom selector, and Unpoly requests "body"' do
+        request.headers['X-Up-Target'] = 'body'
+        get :up_is_target, tested_target: '.foo'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns true if testing a custom selector, and Unpoly requests "html"' do
+        request.headers['X-Up-Target'] = 'html'
+        get :up_is_target, tested_target: '.foo'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns true if testing "body", and Unpoly requests "html"' do
+        request.headers['X-Up-Target'] = 'html'
+        get :up_is_target, tested_target: 'body'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns true if testing "head", and Unpoly requests "html"' do
+        request.headers['X-Up-Target'] = 'html'
+        get :up_is_target, tested_target: 'head'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns false if the tested CSS selector is "head" but Unpoly requests "body"' do
+        request.headers['X-Up-Target'] = 'body'
+        get :up_is_target, tested_target: 'head'
+        expect(response.body).to eq('false')
+      end
+
+      it 'returns false if the tested CSS selector is "title" but Unpoly requests "body"' do
+        request.headers['X-Up-Target'] = 'body'
+        get :up_is_target, tested_target: 'title'
+        expect(response.body).to eq('false')
+      end
+
+      it 'returns false if the tested CSS selector is "meta" but Unpoly requests "body"' do
+        request.headers['X-Up-Target'] = 'body'
+        get :up_is_target, tested_target: 'meta'
+        expect(response.body).to eq('false')
+      end
+
+      it 'returns true if the tested CSS selector is "head", and Unpoly requests "html"' do
+        request.headers['X-Up-Target'] = 'html'
+        get :up_is_target, tested_target: 'head'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns true if the tested CSS selector is "title", Unpoly requests "html"' do
+        request.headers['X-Up-Target'] = 'html'
+        get :up_is_target, tested_target: 'title'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns true if the tested CSS selector is "meta", and Unpoly requests "html"' do
+        request.headers['X-Up-Target'] = 'html'
+        get :up_is_target, tested_target: 'meta'
+        expect(response.body).to eq('true')
       end
 
     end
@@ -62,15 +143,5 @@ describe BindingTestController do
     end
 
   end
-
-
-  # describe '#test' do
-  #
-  #   it 'does stuff' do
-  #     get :test
-  #     expect(response.body).to eq('foo')
-  #   end
-  #
-  # end
 
 end
