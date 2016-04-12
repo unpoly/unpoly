@@ -10,6 +10,9 @@ Unreleased
 
 ### Compatible changes
 
+- New modal default [`up.modal.config.sticky`](/up.modal.config)
+- New experimental function [`up.modal.flavor`](/up.modal.flavor) to register modal variants (like drawers).
+
 
 ### Breaking changes
 

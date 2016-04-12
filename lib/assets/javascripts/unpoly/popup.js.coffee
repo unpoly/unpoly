@@ -31,7 +31,7 @@ By default the popup uses the following DOM structure:
 The popup closes when the user clicks anywhere outside the popup area.
 
 By default the popup also closes
-*whenever a page fragment behind the popup is updated*.
+*when a link within the popup changes a fragment behind the popup*.
 This is useful to have the popup interact with the page that
 opened it, e.g. by updating parts of a larger form or by signing in a user
 and revealing additional information.
@@ -81,6 +81,9 @@ up.popup = (($) ->
     Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
   @param {String} [config.history=false]
     Whether opening a popup will add a browser history entry.
+  @param {Boolean} [options.sticky=false]
+    If set to `true`, the popup remains
+    open even it changes the page in the background.
   @stable
   ###
   config = u.config
@@ -209,7 +212,7 @@ up.popup = (($) ->
     target = u.option(options.target, $link.attr('up-popup'), 'body')
     options.position = u.option(options.position, $link.attr('up-position'), config.position)
     options.animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation)
-    options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'))
+    options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), config.sticky)
     options.history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     animateOptions = up.motion.animateOptions(options, $link)

@@ -107,6 +107,28 @@ describe 'up.modal', ->
               expect(up.modal.coveredUrl()).toBeUndefined()
               done()
 
+    describe 'up.modal.flavor', ->
+
+      it 'registers a new modal variant with its own default configuration', ->
+        up.modal.flavor('variant', { maxWidth: 200 })
+        $link = affix('a[href="/path"][up-modal=".target"][up-flavor="variant"]')
+        Trigger.click($link)
+        @respondWith('<div class="target">new text</div>')
+        $modal = $('.up-modal')
+        $dialog = $modal.find('.up-modal-dialog')
+        expect($modal).toBeInDOM()
+        expect($modal.attr('up-flavor')).toEqual('variant')
+        expect($dialog.attr('style')).toContain('max-width: 200px')
+
+      it 'does not change the configuration of non-flavored modals', ->
+        up.modal.flavor('variant', { maxWidth: 200 })
+        $link = affix('a[href="/path"][up-modal=".target"]')
+        Trigger.click($link)
+        @respondWith('<div class="target">new text</div>')
+        $modal = $('.up-modal')
+        $dialog = $modal.find('.up-modal-dialog')
+        expect($modal).toBeInDOM()
+        expect($dialog.attr('style')).toBeBlank()
 
     describe 'up.modal.close', ->
 
