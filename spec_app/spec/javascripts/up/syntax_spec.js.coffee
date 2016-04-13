@@ -152,6 +152,30 @@ describe 'up.syntax', ->
         up.hello(affix('.element'))
         expect(traces).toEqual ['bam', 'bar', 'foo', 'baz', 'qux', 'ccc']
 
+      it 'runs two macros with the same priority in the order in which they were registered', ->
+        traces = []
+        up.macro '.element', { priority: 1 }, -> traces.push('foo')
+        up.macro '.element', { priority: 1 }, -> traces.push('bar')
+        up.hello(affix('.element'))
+        expect(traces).toEqual ['foo', 'bar']
+
+      it 'allows users to use the built-in [up-expand] from their own macros', ->
+        up.macro '.element', ($element) ->
+          $element.attr('up-expand', '')
+        $element = affix('.element a[href="/foo"][up-target=".target"]')
+        up.hello($element)
+        expect($element.attr('up-target')).toEqual('.target')
+        expect($element.attr('up-href')).toEqual('/foo')
+
+      it 'allows users to use the built-in [up-dash] from their own macros', ->
+        up.macro '.element', ($element) ->
+          $element.attr('up-dash', '.target')
+        $element = affix('a.element[href="/foo"]')
+        up.hello($element)
+        expect($element.attr('up-target')).toEqual('.target')
+        expect($element.attr('up-preload')).toEqual('')
+        expect($element.attr('up-instant')).toEqual('')
+
     describe 'up.hello', ->
 
       it 'should have tests'

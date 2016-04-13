@@ -19,6 +19,9 @@ Unreleased
 
 ### Breaking changes
 
+- User-defined macros are now always run *before* built-in macros.
+  This way you can set [`[up-dash]`](/up-dash) and [`[up-expand]`](/up-expand) from your own macros.
+
 
 0.24.1
 ------

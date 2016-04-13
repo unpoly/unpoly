@@ -255,6 +255,10 @@ up.syntax = (($) ->
   buildCompiler = (selector, args...) ->
     callback = args.pop()
     options = u.options(args[0], priority: 0)
+    if options.priority == 'first'
+      options.priority = Number.POSITIVE_INFINITY
+    else if options.priority == 'last'
+      options.priority = Number.NEGATIVE_INFINITY
     selector: selector
     callback: callback
     priority: options.priority
@@ -408,8 +412,9 @@ up.syntax = (($) ->
   @internal
   ###
   snapshot = ->
-    for compiler in compilers
-      compiler.isDefault = true
+    setDefault = (compiler) -> compiler.isDefault = true
+    u.each(compilers, setDefault)
+    u.each(macros, setDefault)
 
   ###*
   Resets the list of registered compiler directives to the
@@ -418,7 +423,9 @@ up.syntax = (($) ->
   @internal
   ###
   reset = ->
-    compilers = u.select compilers, (compiler) -> compiler.isDefault
+    isDefault = (compiler) -> compiler.isDefault
+    compilers = u.select(compilers, isDefault)
+    macros = u.select(macros, isDefault)
 
   up.on 'up:framework:boot', snapshot
   up.on 'up:framework:reset', reset
