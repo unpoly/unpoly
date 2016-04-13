@@ -101,7 +101,7 @@ describe 'up.syntax', ->
           up.compiler '.element', { priority: 3 }, -> traces.push('bam')
           up.compiler '.element', { priority: -1 }, -> traces.push('qux')
           up.hello(affix('.element'))
-          expect(traces).toEqual ['qux', 'baz', 'foo', 'bar', 'bam']
+          expect(traces).toEqual ['bam', 'bar', 'foo', 'baz', 'qux']
 
         it 'considers priority-less compilers to be priority zero', ->
           traces = []
@@ -109,7 +109,7 @@ describe 'up.syntax', ->
           up.compiler '.element', -> traces.push('bar')
           up.compiler '.element', { priority: -1 }, -> traces.push('baz')
           up.hello(affix('.element'))
-          expect(traces).toEqual ['baz', 'bar', 'foo']
+          expect(traces).toEqual ['foo', 'bar', 'baz']
 
         it 'runs two compilers with the same priority in the order in which they were registered', ->
           traces = []
@@ -126,7 +126,7 @@ describe 'up.syntax', ->
         up.compiler '.element', { priority: -1000 }, -> traces.push('bar')
         up.macro '.element', -> traces.push('baz')
         up.hello(affix('.element'))
-        expect(traces).toEqual ['baz', 'bar' , 'foo']
+        expect(traces).toEqual ['baz', 'foo' , 'bar']
 
       it 'allows to macros to have priorities of their own', ->
         traces = []
@@ -135,8 +135,9 @@ describe 'up.syntax', ->
         up.macro '.element', { priority: 0 }, -> traces.push('baz')
         up.macro '.element', { priority: 3 }, -> traces.push('bam')
         up.macro '.element', { priority: -1 }, -> traces.push('qux')
+        up.compiler '.element', { priority: 999 }, -> traces.push('ccc')
         up.hello(affix('.element'))
-        expect(traces).toEqual ['qux', 'baz', 'foo', 'bar', 'bam']
+        expect(traces).toEqual ['bam', 'bar', 'foo', 'baz', 'qux', 'ccc']
 
     describe 'up.hello', ->
 

@@ -266,7 +266,7 @@ up.syntax = (($) ->
     return unless up.browser.isSupported()
     newCompiler = buildCompiler(args...)
     index = 0
-    while (oldCompiler = queue[index]) && (oldCompiler.priority <= newCompiler.priority)
+    while (oldCompiler = queue[index]) && (oldCompiler.priority >= newCompiler.priority)
       index += 1
     queue.splice(index, 0, newCompiler)
 
