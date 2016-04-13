@@ -402,9 +402,18 @@ up.flow = (($) ->
 
         options.keepPlans = transferKeepableElements($old, $new, options)
 
-        # Don't insert the new element after the old element. For some reason
-        # this will make the browser scroll to the bottom of the new element.
-        $new.insertBefore($old)
+        if $old.is('body')
+          # We would prefer to delay cleaning until the destroy transition ends, but a
+          # swap of <body> cannot be animated. Also the replaceWith call below will clean the
+          # destroyer's data property from $old, making the up.syntax.clean call in `destroy` blow up.
+          up.syntax.clean($old)
+          # jQuery will actually let us .insertBefore the new <body> tag,
+          # but that's probably bad Karma.
+          $old.replaceWith($new)
+        else
+          # Don't insert the new element after the old element. For some reason
+          # this will make the browser scroll to the bottom of the new element.
+          $new.insertBefore($old)
 
         # Remember where the element came from so we can
         # offer reload functionality.
@@ -707,6 +716,7 @@ up.flow = (($) ->
   @stable
   ###
   destroy = (selectorOrElement, options) ->
+
     $element = $(selectorOrElement)
     unless $element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')
       destroyMessage = ['Destroying fragment %o', $element.get(0)]
@@ -722,8 +732,10 @@ up.flow = (($) ->
       # new URL and can assign/remove .up-current classes accordingly.
       up.history.push(options.url) if u.isPresent(options.url)
       document.title = options.title if u.isPresent(options.title)
+
       animationDeferred = u.presence(options.animation, u.isDeferred) ||
         up.motion.animate($element, options.animation, animateOptions)
+
       animationDeferred.then ->
         up.syntax.clean($element)
         # Emit this while $element is still part of the DOM, so event

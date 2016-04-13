@@ -15,15 +15,28 @@ describe 'up.syntax', ->
         expect(observeClass).not.toHaveBeenCalledWith('container')
         expect(observeClass).toHaveBeenCalledWith('child')           
 
-        destructor = jasmine.createSpy('destructor')
-        up.compiler '.child', ($element) ->
-          destructor
-  
-        up.hello(affix('.container .child'))
-        expect(destructor).not.toHaveBeenCalled()
-        
-        up.destroy('.container')
-        expect(destructor).toHaveBeenCalled()
+      describe 'destructors', ->
+
+        it 'allows initializers to return a function that is called when the compiled element is removed', ->
+          destructor = jasmine.createSpy('destructor')
+          up.compiler '.child', ($element) ->
+            destructor
+
+          up.hello(affix('.container .child'))
+          expect(destructor).not.toHaveBeenCalled()
+
+          up.destroy('.container')
+          expect(destructor).toHaveBeenCalled()
+
+        it 'does not throw an error if both container and child have a destructor, and the container gets destroyed', ->
+          up.compiler '.container', ($element) ->
+            return (->)
+
+          up.compiler '.child', ($element) ->
+            return (->)
+
+          destruction = -> up.destroy('.container')
+          expect(destruction).not.toThrowError()
 
       it 'parses an up-data attribute as JSON and passes the parsed object as a second argument to the initializer', ->
 

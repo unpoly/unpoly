@@ -322,6 +322,7 @@ up.syntax = (($) ->
     u.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
       $element = $(this)
       destroyer = $element.data(DESTROYER_KEY)
+      $element.removeClass(DESTROYABLE_CLASS)
       destroyer()
 
   ###*
