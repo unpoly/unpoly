@@ -18,7 +18,11 @@ Unreleased
 - The promise returned by [`up.replace`](/up.replace) now waits for transitions to complete before resolving
 - Fix a bug where an error would be shown when opening a modal while another modal was still loading
 - Fix a bug where two popups would be shown when opening a popup while another popup was still loading
-
+- New options for [up.popup.config](/up.popup.config):
+  - `up.popup.config.openDuration`
+  - `up.popup.config.closeDuration`
+  - `up.popup.config.openEasing`
+  - `up.popup.config.closeEasing`
 
 ### Breaking changes
 

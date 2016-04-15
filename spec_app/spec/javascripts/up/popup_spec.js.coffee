@@ -43,6 +43,78 @@ describe 'up.popup', ->
         expect(respond).not.toThrowError()
         expect($('.up-error')).not.toExist()
 
+      describe 'with { html } option', ->
+
+        it 'extracts the selector from the given HTML string', ->
+          $span = affix('span')
+          up.popup.attach($span, target: '.container', html: "<div class='container'>container contents</div>")
+          expect($('.up-popup')).toHaveText('container contents')
+
+      describe 'opening a popup while another modal is open', ->
+
+        it 'does not open multiple popups or pad the body twice if the user starts loading a second popup before the first was done loading', (done) ->
+          $span = affix('span')
+          up.popup.config.closeDuration = 10
+          promise1 = up.popup.attach($span, url: '/path1', target: '.container', animation: 'fade-in', duration: 100)
+          promise2 = up.popup.attach($span, url: '/path2', target: '.container', animation: 'fade-in', duration: 100)
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          request1 = jasmine.Ajax.requests.at(0)
+          request2 = jasmine.Ajax.requests.at(1)
+
+          u.setTimer 10, =>
+            @respondWith('<div class="container">response1</div>', request: request1)
+            u.setTimer 10, =>
+              @respondWith('<div class="container">response2</div>', request: request2)
+              u.setTimer 30, =>
+                expect($('.up-popup').length).toBe(1)
+                expect($('.container')).toHaveText('response2')
+                done()
+
+        it 'closes the current popup and wait for its close animation to finish before starting the open animation of a second popup', (done) ->
+          $span = affix('span')
+          up.popup.config.openAnimation = 'fade-in'
+          up.popup.config.openDuration = 5
+          up.popup.config.closeAnimation = 'fade-out'
+          up.popup.config.closeDuration = 50
+
+          events = []
+          u.each ['up:popup:open', 'up:popup:opened', 'up:popup:close', 'up:popup:closed'], (event) ->
+            up.on event, ->
+              events.push(event)
+
+          up.popup.attach($span, { target: '.target', html: '<div class="target">response1</div>' })
+
+          # First popup is starting opening animation
+          expect(events).toEqual ['up:popup:open']
+          expect($('.target')).toHaveText('response1')
+
+          u.setTimer 15, ->
+            # First popup has completed opening animation
+            expect(events).toEqual ['up:popup:open', 'up:popup:opened']
+            expect($('.target')).toHaveText('response1')
+
+            up.popup.attach($span, { target: '.target', html: '<div class="target">response2</div>' })
+
+            # First popup is starting close animation. Second popup waits for that.
+            expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close']
+            expect($('.target')).toHaveText('response1')
+
+            u.setTimer 15, ->
+
+              # Second popup is still waiting for first popup's closing animaton to finish.
+              expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close']
+              expect($('.target')).toHaveText('response1')
+
+              u.setTimer 60, ->
+
+                # First popup has finished closing, second popup has finished opening.
+                expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close', 'up:popup:closed', 'up:popup:opened']
+                expect($('.target')).toHaveText('response2')
+
+                done()
+
+
+
     describe 'up.popup.coveredUrl', ->
 
       describeCapability 'canPushState', ->
