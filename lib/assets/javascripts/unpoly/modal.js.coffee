@@ -220,20 +220,24 @@ up.modal = (($) ->
   shiftElements = ->
     return if unshifters.length > 0
     $('.up-modal').addClass('up-modal-ready')
-    scrollbarWidth = u.scrollbarWidth()
-    bodyRightPadding = parseInt($('body').css('padding-right'))
-    bodyRightShift = scrollbarWidth + bodyRightPadding
-    unshiftBody = u.temporaryCss($('body'),
-      'padding-right': "#{bodyRightShift}px",
-      'overflow-y': 'hidden'
-    )
-    unshifters.push(unshiftBody)
-    up.layout.anchoredRight().each ->
-      $element = $(this)
-      elementRight = parseInt($element.css('right'))
-      elementRightShift = scrollbarWidth + elementRight
-      unshifter = u.temporaryCss($element, 'right': elementRightShift)
-      unshifters.push(unshifter)
+
+    $body = $('body')
+
+    if u.documentHasVerticalScrollbar($body)
+      scrollbarWidth = u.scrollbarWidth()
+      bodyRightPadding = parseInt($body.css('padding-right'))
+      bodyRightShift = scrollbarWidth + bodyRightPadding
+      unshiftBody = u.temporaryCss($body,
+        'padding-right': "#{bodyRightShift}px",
+        'overflow-y': 'hidden'
+      )
+      unshifters.push(unshiftBody)
+      up.layout.anchoredRight().each ->
+        $element = $(this)
+        elementRight = parseInt($element.css('right'))
+        elementRightShift = scrollbarWidth + elementRight
+        unshifter = u.temporaryCss($element, 'right': elementRightShift)
+        unshifters.push(unshifter)
 
   # Reverts the effects of `shiftElements`.
   unshiftElements = ->

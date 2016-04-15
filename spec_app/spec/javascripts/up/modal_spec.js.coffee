@@ -64,7 +64,34 @@ describe 'up.modal', ->
           up.modal.close().then ->
             expect($body.css('overflow-y')).toEqual('scroll')
             expect(parseInt($body.css('padding-right'))).toBe(0)
+            done()
 
+      it 'does not add right padding to the body if the <body> has overflow-y: hidden', (done) ->
+        restoreBody = u.temporaryCss($('body'), 'overflow-y': 'hidden')
+
+        up.modal.extract('.container', '<div class="container">text</div>').then ->
+          $body = $('body')
+          expect($('.up-modal')).toExist()
+          expect(parseInt($body.css('padding-right'))).toBe(0)
+
+          up.modal.close().then ->
+            expect(parseInt($body.css('padding-right'))).toBe(0)
+            restoreBody()
+            done()
+
+      it 'does not add right padding to the body if the body has overflow-y: auto, but does not currently have scrollbars', (done) ->
+        restoreBody = u.temporaryCss($('body'), 'overflow-y': 'auto')
+        restoreReporter = u.temporaryCss($('.jasmine_html-reporter'), 'height': '100px', 'overflow-y': 'hidden')
+
+        up.modal.extract('.container', '<div class="container">text</div>').then ->
+          $body = $('body')
+          expect($('.up-modal')).toExist()
+          expect(parseInt($body.css('padding-right'))).toBe(0)
+
+          up.modal.close().then ->
+            expect(parseInt($body.css('padding-right'))).toBe(0)
+            restoreReporter()
+            restoreBody()
             done()
 
       it 'pushes right-anchored elements away from the edge of the screen in order to prevent jumping', (done) ->

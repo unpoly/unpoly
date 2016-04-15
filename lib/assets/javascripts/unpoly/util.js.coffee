@@ -841,6 +841,24 @@ up.util = (($) ->
     width
 
   ###*
+  Returns whether the given element is currently showing a vertical scrollbar.
+
+  @function up.util.documentHasVerticalScrollbar
+  @internal
+  ###
+  documentHasVerticalScrollbar = ->
+    body = document.body
+    $body = $(body)
+    html = document.documentElement
+
+    bodyOverflow = $body.css('overflow-y')
+
+    forcedScroll = (bodyOverflow == 'scroll')
+    forcedHidden = (bodyOverflow == 'hidden')
+
+    forcedScroll || (!forcedHidden && html.scrollHeight > html.clientHeight)
+
+  ###*
   Modifies the given function so it only runs once.
   Subsequent calls will return the previous return value.
 
@@ -1752,6 +1770,7 @@ up.util = (($) ->
   remove: remove
   memoize: memoize
   scrollbarWidth: scrollbarWidth
+  documentHasVerticalScrollbar: documentHasVerticalScrollbar
   config: config
   cache: cache
   unwrapElement: unwrapElement
