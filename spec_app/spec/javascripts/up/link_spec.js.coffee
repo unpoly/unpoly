@@ -44,6 +44,8 @@ describe 'up.link', ->
 
         it 'adds history entries and allows the user to use the back- and forward-buttons', (done) ->
 
+          waitForBrowser = 70
+
           # By default, up.history will replace the <body> tag when
           # the user presses the back-button. We reconfigure this
           # so we don't lose the Jasmine runner interface.
@@ -83,21 +85,21 @@ describe 'up.link', ->
                 expect(document.title).toEqual('title from three')
 
                 history.back()
-                u.setTimer 50, ->
+                u.setTimer waitForBrowser, ->
                   respondWith('restored text from two', 'restored title from two')
                   expect($('.target')).toHaveText('restored text from two')
                   expect(location.pathname).toEqual('/two')
                   expect(document.title).toEqual('restored title from two')
 
                   history.back()
-                  u.setTimer 50, ->
+                  u.setTimer waitForBrowser, ->
                     respondWith('restored text from one', 'restored title from one')
                     expect($('.target')).toHaveText('restored text from one')
                     expect(location.pathname).toEqual('/one')
                     expect(document.title).toEqual('restored title from one')
 
                     history.forward()
-                    u.setTimer 50, ->
+                    u.setTimer waitForBrowser, ->
                       # Since the response is cached, we don't have to respond
                       expect($('.target')).toHaveText('restored text from two', 'restored title from two')
                       expect(location.pathname).toEqual('/two')
