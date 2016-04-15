@@ -1670,6 +1670,13 @@ up.util = (($) ->
     else
       {}
 
+  opacity = (element) ->
+    rawOpacity = $(element).css('opacity')
+    if isGiven(rawOpacity)
+      parseFloat(rawOpacity)
+    else
+      undefined
+
   ###*
   Returns whether the given element has been detached from the DOM
   (or whether it was never attached).
@@ -1781,6 +1788,7 @@ up.util = (($) ->
   extractOptions: extractOptions
   isDetached: isDetached
   noop: noop
+  opacity: opacity
 
 )($)
 

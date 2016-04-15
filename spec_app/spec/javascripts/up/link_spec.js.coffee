@@ -377,12 +377,11 @@ describe 'up.link', ->
             $newGhost = $('.target.new.up-ghost')
             expect($oldGhost).toExist()
             expect($newGhost).toExist()
-            opacity = ($element) -> Number($element.css('opacity'))
-            expect(opacity($oldGhost)).toBeAround(1, 0.15)
-            expect(opacity($newGhost)).toBeAround(0, 0.15)
+            expect(u.opacity($oldGhost)).toBeAround(1, 0.15)
+            expect(u.opacity($newGhost)).toBeAround(0, 0.15)
             u.setTimer 100, ->
-              expect(opacity($oldGhost)).toBeAround(0.5, 0.15)
-              expect(opacity($newGhost)).toBeAround(0.5, 0.15)
+              expect(u.opacity($oldGhost)).toBeAround(0.5, 0.15)
+              expect(u.opacity($newGhost)).toBeAround(0.5, 0.15)
               done()
 
       it 'does not add a history entry when an up-history attribute is set to "false"', ->

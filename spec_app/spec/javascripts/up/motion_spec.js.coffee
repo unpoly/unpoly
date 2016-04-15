@@ -10,15 +10,14 @@ describe 'up.motion', ->
 
         it 'animates the given element', (done) ->
           $element = affix('.element').text('content')
-          opacity = -> Number($element.css('opacity'))
           up.animate($element, 'fade-in', duration: 200, easing: 'linear')
 
           u.setTimer 0, ->
-            expect(opacity()).toBeAround(0.0, 0.25)
+            expect(u.opacity($element)).toBeAround(0.0, 0.25)
           u.setTimer 100, ->
-            expect(opacity()).toBeAround(0.5, 0.25)
+            expect(u.opacity($element)).toBeAround(0.5, 0.25)
           u.setTimer 200, ->
-            expect(opacity()).toBeAround(1.0, 0.25)
+            expect(u.opacity($element)).toBeAround(1.0, 0.25)
             done()
 
         it 'cancels an existing animation on the element by instantly jumping to the last frame', ->
@@ -74,17 +73,15 @@ describe 'up.motion', ->
         it 'restores existing transitions on the element', ->
           $element = affix('.element').text('content')
           $element.css('transition': 'font-size 3s ease')
-          oldTransition = $element.css('transition')
-          expect(oldTransition).toContain('font-size') # be paranoid
+          oldTransitionProperty = $element.css('transition-property')
+          expect(oldTransitionProperty).toContain('font-size') # be paranoid
           up.animate($element, 'fade-in', duration: 10000)
           up.motion.finish($element)
-          expect(Number($element.css('opacity'))).toEqual(1)
-          currentTransition = $element.css('transition')
-          expect(currentTransition).toEqual(oldTransition)
-          expect(currentTransition).toContain('font-size')
-          expect(currentTransition).not.toContain('opacity')
-          expect(currentTransition).not.toContain('none')
-          expect(currentTransition).not.toContain('all')
+          expect(u.opacity($element)).toEqual(1)
+          currentTransitionProperty = $element.css('transition-property')
+          expect(currentTransitionProperty).toEqual(oldTransitionProperty)
+          expect(currentTransitionProperty).toContain('font-size')
+          expect(currentTransitionProperty).not.toContain('opacity')
 
         it 'cancels an existing transition on the element by instantly jumping to the last frame', ->
           $old = affix('.old').text('old content')
@@ -136,17 +133,15 @@ describe 'up.motion', ->
           up.animate($element1, 'fade-in', duration: 3000)
           up.animate($element2, 'fade-in', duration: 3000)
 
-          opacity = ($element) -> Number($element.css('opacity'))
-
-          expect(opacity($element1)).toBeAround(0.0, 0.1)
-          expect(opacity($element2)).toBeAround(0.0, 0.1)
+          expect(u.opacity($element1)).toBeAround(0.0, 0.1)
+          expect(u.opacity($element2)).toBeAround(0.0, 0.1)
 
           up.motion.finish()
 
           $element1 = $('.element1')
           $element2 = $('.element2')
-          expect(opacity($element1)).toBe(1.0)
-          expect(opacity($element2)).toBe(1.0)
+          expect(u.opacity($element1)).toBe(1.0)
+          expect(u.opacity($element2)).toBe(1.0)
 
     describe 'up.morph', ->
 
@@ -222,19 +217,17 @@ describe 'up.motion', ->
             height:   '23px'
           )
 
-          opacity = ($element) -> Number($element.css('opacity'))
-
           u.setTimer 0, ->
-            expect(opacity($newGhost)).toBeAround(0.0, 0.25)
-            expect(opacity($oldGhost)).toBeAround(1.0, 0.25)
+            expect(u.opacity($newGhost)).toBeAround(0.0, 0.25)
+            expect(u.opacity($oldGhost)).toBeAround(1.0, 0.25)
 
           u.setTimer 80, ->
-            expect(opacity($newGhost)).toBeAround(0.4, 0.25)
-            expect(opacity($oldGhost)).toBeAround(0.6, 0.25)
+            expect(u.opacity($newGhost)).toBeAround(0.4, 0.25)
+            expect(u.opacity($oldGhost)).toBeAround(0.6, 0.25)
 
           u.setTimer 140, ->
-            expect(opacity($newGhost)).toBeAround(0.7, 0.25)
-            expect(opacity($oldGhost)).toBeAround(0.3, 0.25)
+            expect(u.opacity($newGhost)).toBeAround(0.7, 0.25)
+            expect(u.opacity($oldGhost)).toBeAround(0.3, 0.25)
 
           u.setTimer 250, ->
             # Once our two ghosts have rendered their visual effect,

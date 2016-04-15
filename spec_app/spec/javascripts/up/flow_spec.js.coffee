@@ -484,19 +484,19 @@ describe 'up.flow', ->
 
         it 'morphs between the old and new element', (done) ->
           affix('.element').text('version 1')
-          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 50)
+          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 100)
 
           $ghost1 = $('.element.up-ghost:contains("version 1")')
           expect($ghost1).toHaveLength(1)
-          expect($ghost1.css('opacity')).toBeAround(1.0, 0.1)
+          expect(u.opacity($ghost1)).toBeAround(1.0, 0.1)
 
           $ghost2 = $('.element.up-ghost:contains("version 2")')
           expect($ghost2).toHaveLength(1)
-          expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
+          expect(u.opacity($ghost2)).toBeAround(0.0, 0.1)
 
-          u.setTimer 40, ->
-            expect($ghost1.css('opacity')).toBeAround(0.0, 0.2)
-            expect($ghost2.css('opacity')).toBeAround(1.0, 0.2)
+          u.setTimer 100, ->
+            expect(u.opacity($ghost1)).toBeAround(0.0, 0.2)
+            expect(u.opacity($ghost2)).toBeAround(1.0, 0.2)
             done()
 
         it 'marks the old fragment and its ghost as .up-destroying during the transition', ->
