@@ -16,10 +16,14 @@ Unreleased
 - Fix a bug that would occur if two compiled elements, that were nested within each other, would raise an error if the outer element was destroyed and both compilers have destructor functions.
 - Fix a bug where replacing the `body` tag would raise an error if any element in the old `<body>` had a destructor function.
 - The promise returned by [`up.replace`](/up.replace) now waits for transitions to complete before resolving
+- Fix a bug where an error would be shown when opening a modal while another modal was still loading
+- Fix a bug where two popups would be shown when opening a popup while another popup was still loading
 
 
 ### Breaking changes
 
+- When opening a modal while another modal is open, the first modal will be closed (with animation) before the second modal opens (with animation)
+- When opening a popup while another popup is open, the first popup will be closed (with animation) before the second popup opens (with animation)
 - User-defined macros are now always run *before* built-in macros.
   This way you can set [`[up-dash]`](/up-dash) and [`[up-expand]`](/up-expand) from your own macros.
 
