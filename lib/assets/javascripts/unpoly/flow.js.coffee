@@ -202,11 +202,14 @@ up.flow = (($) ->
 
     promise = up.ajax(request)
 
-    promise.done (html, textStatus, xhr) ->
+    onSuccess = (html, textStatus, xhr) ->
       processResponse(true, target, url, request, xhr, options)
 
-    promise.fail (xhr, textStatus, errorThrown) ->
+    onFailure = (xhr, textStatus, errorThrown) ->
       processResponse(false, failTarget, url, request, xhr, options)
+
+    promise = promise.then(onSuccess, onFailure)
+
     promise
 
   ###*

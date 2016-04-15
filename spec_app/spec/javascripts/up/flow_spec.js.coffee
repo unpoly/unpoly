@@ -47,6 +47,20 @@ describe 'up.flow', ->
           expect(resolution).toHaveBeenCalled()
           expect($('.middle')).toHaveText('new-middle')
 
+        it 'returns a promise that will be resolved once the server response was received and the swap animations have completed', (done) ->
+          resolution = jasmine.createSpy()
+          promise = up.replace('.middle', '/path', transition: 'cross-fade', duration: 50)
+          promise.then(resolution)
+          expect(resolution).not.toHaveBeenCalled()
+          expect($('.middle')).toHaveText('old-middle')
+          @respond()
+          expect(resolution).not.toHaveBeenCalled()
+          u.setTimer 20, ->
+            expect(resolution).not.toHaveBeenCalled()
+            u.setTimer 50, ->
+              expect(resolution).toHaveBeenCalled()
+              done()
+
         describe 'with { data } option', ->
 
           it "uses the given params as a non-GET request's payload", ->

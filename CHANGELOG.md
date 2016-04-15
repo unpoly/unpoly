@@ -15,6 +15,7 @@ Unreleased
 - Fix a bug where [compilers](/up.compiler) and [macros](/up.macro) with higher priorities were executed last (instead of first like it says in the docs).
 - Fix a bug that would occur if two compiled elements, that were nested within each other, would raise an error if the outer element was destroyed and both compilers have destructor functions.
 - Fix a bug where replacing the `body` tag would raise an error if any element in the old `<body>` had a destructor function.
+- The promise returned by [`up.replace`](/up.replace) now waits for transitions to complete before resolving
 
 
 ### Breaking changes
