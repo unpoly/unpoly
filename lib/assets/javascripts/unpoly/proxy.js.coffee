@@ -394,6 +394,7 @@ up.proxy = (($) ->
       promise = load(entry.request)
       promise.done (args...) -> entry.deferred.resolve(args...)
       promise.fail (args...) -> entry.deferred.reject(args...)
+      return
 
   ###*
   Makes the proxy assume that `newRequest` has the same response as the
