@@ -311,21 +311,23 @@ up.flow = (($) ->
 
       up.layout.saveScroll() unless options.saveScroll == false
 
-      options.beforeSwap?()
-      deferreds = []
+      promise = u.resolvedPromise()
+      promise = promise.then(options.beforeSwap) if options.beforeSwap
+      promise = promise.then -> updateHistory(options)
+      promise = promise.then ->
+        swapPromises = []
+        for step in parseImplantSteps(selector, options)
+          up.log.group 'Updating %s', step.selector, ->
+            $old = findOldFragment(step.selector, options)
+            $new = response.find(step.selector)?.first()
+            if $old && $new
+              swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options)
+              swapPromises.push(swapPromise)
+        # Delay all further links in the promise chain until all fragments have been swapped
+        return $.when(swapPromises...)
+      promise = promise.then(options.afterSwap) if options.afterSwap
+      promise
 
-      updateHistory(options)
-
-      for step in parseImplantSteps(selector, options)
-        up.log.group 'Updating %s', step.selector, ->
-          $old = findOldFragment(step.selector, options)
-          $new = response.find(step.selector)?.first()
-          if $old && $new
-            deferred = swapElements($old, $new, step.pseudoClass, step.transition, options)
-            deferreds.push(deferred)
-
-      options.afterSwap?()
-      up.motion.when(deferreds...)
 
   findOldFragment = (selector, options) ->
     # Prefer to replace fragments in an open popup or modal
