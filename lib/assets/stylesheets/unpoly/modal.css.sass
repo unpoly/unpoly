@@ -1,48 +1,64 @@
-$stratum-backdrop:   10000
-$stratum-elements:   11000
+$stratum: 10000
 
-// These could actually be 1000, 2000, 3000 and 4000 since the `fixed` position of some elements defines
+// These could actually be 1000, 2000, 3000 and 4000 since the `fixed` position of an element defines
 // a stacking context for all contained z-indexes.
 //
 // However, let's keep the option open that these elements will one day not have its stacking context.
 //
 // Also let's not do 1, 2, 3 and 4 so other elements have a chance to move themselves between the layers.
-$substratum-dialog:  12000
-$substratum-content: 13000
-$substratum-close:   14000
+$substratum-backdrop: 11000
+$substratum-elements: 12000
+$substratum-dialog:   13000
+$substratum-content:  14000
+$substratum-close:    15000
 
 $close-height: 36px
 $close-width: 36px
 $close-font-size: 34px
 
 .up-modal
+  position: fixed
+  top: 0
+  left: 0
+  bottom: 0
+  right: 0
+  z-index: $stratum
+  overflow-x: hidden
 
 .up-modal-backdrop
-  z-index: $stratum-backdrop
+  z-index: $substratum-backdrop
   background-color: rgba(90, 90, 90, 0.4)
-  position: fixed
+  position: absolute
   top: 0
   right: 0
   bottom: 0
   left: 0
 
 .up-modal-viewport
-  z-index: $stratum-elements
-  position: fixed
+  position: absolute
   top: 0
   left: 0
   bottom: 0
   right: 0
+  z-index: $substratum-elements
   overflow-x: hidden
-  overflow-y: hidden
+  // The viewport always has a scrollbar, except when we're animating (see below)
+  overflow-y: scroll
   // We prefer centering the dialog as an `inline-block`
   // to giving it a horizontal margin of `auto`. This way
   // the width of `.up-modal-dialog` is controlled by the
   // contents of `.up-modal-content`.
   text-align: center
 
-  .up-modal.up-modal-ready &
+.up-modal.up-modal-animating
+  // During opening/closing animations we let the .up-modal container take over
+  // the scrollbars that would usually be owned by .up-modal-viewport.
+  // If .up-modal-viewport had a scrollbar while animating with
+  // "zoom-in" it would look strange that the scrollbar is scaled.
+  &
     overflow-y: scroll
+  .up-modal-viewport
+    overflow-y: hidden
 
 .up-modal-dialog
   z-index: $substratum-dialog

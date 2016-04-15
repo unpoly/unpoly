@@ -47,70 +47,87 @@ describe 'up.modal', ->
 
     describe 'up.modal.visit', ->
 
-      it "brings its own scrollbar, padding the body on the right in order to prevent jumping", (done) ->
-        promise = up.modal.visit('/foo', target: '.container')
+      describe 'preventing elements from jumping as scrollbars change', ->
 
-        @respondWith('<div class="container">text</div>')
+        it "brings its own scrollbar, padding the body on the right", (done) ->
+          promise = up.modal.visit('/foo', target: '.container')
 
-        promise.then ->
+          @respondWith('<div class="container">text</div>')
+
+          promise.then ->
+            $modal = $('.up-modal')
+            $viewport = $modal.find('.up-modal-viewport')
+            $body = $('body')
+            expect($modal).toExist()
+            expect($viewport.css('overflow-y')).toEqual('scroll')
+            expect($body.css('overflow-y')).toEqual('hidden')
+            expect(parseInt($body.css('padding-right'))).toBeAround(assumedScrollbarWidth, 5)
+
+            up.modal.close().then ->
+              expect($body.css('overflow-y')).toEqual('scroll')
+              expect(parseInt($body.css('padding-right'))).toBe(0)
+              done()
+
+        it "gives the scrollbar to .up-modal instead of .up-modal-viewport while animating, so we don't see scaled scrollbars in a zoom-in animation", (done) ->
+          openPromise = up.modal.extract('.container', '<div class="container">text</div>', animation: 'fade-in', duration: 100)
           $modal = $('.up-modal')
           $viewport = $modal.find('.up-modal-viewport')
-          $body = $('body')
-          expect($modal).toExist()
-          expect($viewport.css('overflow-y')).toEqual('scroll')
-          expect($body.css('overflow-y')).toEqual('hidden')
-          expect(parseInt($body.css('padding-right'))).toBeAround(assumedScrollbarWidth, 5)
+          expect($modal.css('overflow-y')).toEqual('scroll')
+          expect($viewport.css('overflow-y')).toEqual('hidden')
+          openPromise.then ->
+            expect($modal.css('overflow-y')).toEqual('auto')
+            expect($viewport.css('overflow-y')).toEqual('scroll')
+            closePromise = up.modal.close(animation: 'fade-out', duration: 100)
+            expect($modal.css('overflow-y')).toEqual('scroll')
+            expect($viewport.css('overflow-y')).toEqual('hidden')
+            done()
 
-          up.modal.close().then ->
-            expect($body.css('overflow-y')).toEqual('scroll')
+
+        it 'does not add right padding to the body if the body has overflow-y: hidden', (done) ->
+          restoreBody = u.temporaryCss($('body'), 'overflow-y': 'hidden')
+
+          up.modal.extract('.container', '<div class="container">text</div>').then ->
+            $body = $('body')
+            expect($('.up-modal')).toExist()
             expect(parseInt($body.css('padding-right'))).toBe(0)
-            done()
 
-      it 'does not add right padding to the body if the <body> has overflow-y: hidden', (done) ->
-        restoreBody = u.temporaryCss($('body'), 'overflow-y': 'hidden')
+            up.modal.close().then ->
+              expect(parseInt($body.css('padding-right'))).toBe(0)
+              restoreBody()
+              done()
 
-        up.modal.extract('.container', '<div class="container">text</div>').then ->
-          $body = $('body')
-          expect($('.up-modal')).toExist()
-          expect(parseInt($body.css('padding-right'))).toBe(0)
+        it 'does not add right padding to the body if the body has overflow-y: auto, but does not currently have scrollbars', (done) ->
+          restoreBody = u.temporaryCss($('body'), 'overflow-y': 'auto')
+          restoreReporter = u.temporaryCss($('.jasmine_html-reporter'), 'height': '100px', 'overflow-y': 'hidden')
 
-          up.modal.close().then ->
+          up.modal.extract('.container', '<div class="container">text</div>').then ->
+            $body = $('body')
+            expect($('.up-modal')).toExist()
             expect(parseInt($body.css('padding-right'))).toBe(0)
-            restoreBody()
-            done()
 
-      it 'does not add right padding to the body if the body has overflow-y: auto, but does not currently have scrollbars', (done) ->
-        restoreBody = u.temporaryCss($('body'), 'overflow-y': 'auto')
-        restoreReporter = u.temporaryCss($('.jasmine_html-reporter'), 'height': '100px', 'overflow-y': 'hidden')
+            up.modal.close().then ->
+              expect(parseInt($body.css('padding-right'))).toBe(0)
+              restoreReporter()
+              restoreBody()
+              done()
 
-        up.modal.extract('.container', '<div class="container">text</div>').then ->
-          $body = $('body')
-          expect($('.up-modal')).toExist()
-          expect(parseInt($body.css('padding-right'))).toBe(0)
+        it 'pushes right-anchored elements away from the edge of the screen', (done) ->
 
-          up.modal.close().then ->
-            expect(parseInt($body.css('padding-right'))).toBe(0)
-            restoreReporter()
-            restoreBody()
-            done()
+          $anchoredElement = affix('div[up-anchored=right]').css
+            position: 'absolute'
+            top: '0'
+            right: '30px'
 
-      it 'pushes right-anchored elements away from the edge of the screen in order to prevent jumping', (done) ->
+          promise = up.modal.visit('/foo', target: '.container')
 
-        $anchoredElement = affix('div[up-anchored=right]').css
-          position: 'absolute'
-          top: '0'
-          right: '30px'
+          @respondWith('<div class="container">text</div>')
 
-        promise = up.modal.visit('/foo', target: '.container')
+          promise.then ->
+            expect(parseInt($anchoredElement.css('right'))).toBeAround(30 + assumedScrollbarWidth, 10)
 
-        @respondWith('<div class="container">text</div>')
-
-        promise.then ->
-          expect(parseInt($anchoredElement.css('right'))).toBeAround(30 + assumedScrollbarWidth, 10)
-
-          up.modal.close().then ->
-            expect(parseInt($anchoredElement.css('right'))).toBeAround(30 , 10)
-            done()
+            up.modal.close().then ->
+              expect(parseInt($anchoredElement.css('right'))).toBeAround(30 , 10)
+              done()
 
       describe 'opening a modal while another modal is open', ->
 
