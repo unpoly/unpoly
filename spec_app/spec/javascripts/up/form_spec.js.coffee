@@ -215,6 +215,21 @@ describe 'up.form', ->
           expect(submitSpy).toHaveBeenCalled()
           done()
 
+      it 'marks the field with an .up-active class while the form is submitting', (done) ->
+        $form = affix('form')
+        $field = $form.affix('input[up-autosubmit][val="old-value"]')
+        up.hello($field)
+        submission = $.Deferred()
+        submitSpy = up.form.knife.mock('submit').and.returnValue(submission)
+        $field.val('new-value')
+        $field.trigger('change')
+        u.nextFrame ->
+          expect(submitSpy).toHaveBeenCalled()
+          expect($field).toHaveClass('up-active')
+          submission.resolve()
+          expect($field).not.toHaveClass('up-active')
+          done()
+
     describe 'form[up-autosubmit]', ->
 
       it 'submits the form when a change is observed in any of its fields', (done) ->

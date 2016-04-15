@@ -150,7 +150,9 @@ up.navigation = (($) ->
     $element = findClickArea(elementOrSelector, options)
     $element.removeClass(CLASS_ACTIVE)
 
-  withActiveMark = (elementOrSelector, options, block) ->
+  withActiveMark = (elementOrSelector, args...) ->
+    block = args.pop()
+    options = u.options(args.pop())
     $element = $(elementOrSelector)
     markActive($element, options)
     promise = block()

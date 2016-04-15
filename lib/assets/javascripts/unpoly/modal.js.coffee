@@ -122,10 +122,10 @@ up.modal = (($) ->
     history: true
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
-    closeDuration: null
-    closeEasing: null
     openDuration: null
+    closeDuration: null
     openEasing: null
+    closeEasing: null
     backdropOpenAnimation: 'fade-in'
     backdropCloseAnimation: 'fade-out'
     closeLabel: '×'

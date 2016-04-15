@@ -323,8 +323,7 @@ up.form = (($) ->
   autosubmit = (selectorOrElement, options) ->
     observe(selectorOrElement, options, (value, $field) ->
       $form = $field.closest('form')
-      $field.addClass('up-active')
-      submit($form).always -> $field.removeClass('up-active')
+      up.navigation.withActiveMark $field, -> submit($form)
     )
 
   resolveValidateTarget = ($field, options) ->
