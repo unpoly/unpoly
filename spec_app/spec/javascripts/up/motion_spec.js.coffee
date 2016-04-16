@@ -20,6 +20,19 @@ describe 'up.motion', ->
             expect(u.opacity($element)).toBeAround(1.0, 0.25)
             done()
 
+        it 'returns a promise that is resolved when the animation completed', (done) ->
+          $element = affix('.element').text('content')
+          resolveSpy = jasmine.createSpy('resolve')
+
+          promise = up.animate($element, 'fade-in', duration: 100, easing: 'linear')
+          promise.then(resolveSpy)
+
+          u.setTimer 50, ->
+            expect(resolveSpy).not.toHaveBeenCalled()
+            u.setTimer 70, ->
+              expect(resolveSpy).toHaveBeenCalled()
+              done()
+
         it 'cancels an existing animation on the element by instantly jumping to the last frame', ->
           $element = affix('.element').text('content')
           up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
