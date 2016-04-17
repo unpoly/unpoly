@@ -24,6 +24,9 @@ Unreleased
   - `up.popup.config.openEasing`
   - `up.popup.config.closeEasing`
 - Modals now longer addsa right padding to the `<body>` if the document has no vertical scroll bars
+- Animations now wait until the browser signals completion of the CSS transition. Previously
+  animations were canceled after its duration, which might or might not have matched to the actual
+  last animation frame.
 
 ### Breaking changes
 

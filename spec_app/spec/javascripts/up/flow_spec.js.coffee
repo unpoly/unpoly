@@ -57,7 +57,7 @@ describe 'up.flow', ->
           expect(resolution).not.toHaveBeenCalled()
           u.setTimer 20, ->
             expect(resolution).not.toHaveBeenCalled()
-            u.setTimer 50, ->
+            u.setTimer 80, ->
               expect(resolution).toHaveBeenCalled()
               done()
 
@@ -484,7 +484,7 @@ describe 'up.flow', ->
 
         it 'morphs between the old and new element', (done) ->
           affix('.element').text('version 1')
-          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 100)
+          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
 
           $ghost1 = $('.element.up-ghost:contains("version 1")')
           expect($ghost1).toHaveLength(1)
@@ -494,9 +494,9 @@ describe 'up.flow', ->
           expect($ghost2).toHaveLength(1)
           expect(u.opacity($ghost2)).toBeAround(0.0, 0.1)
 
-          u.setTimer 100, ->
-            expect(u.opacity($ghost1)).toBeAround(0.0, 0.2)
-            expect(u.opacity($ghost2)).toBeAround(1.0, 0.2)
+          u.setTimer 190, ->
+            expect(u.opacity($ghost1)).toBeAround(0.0, 0.3)
+            expect(u.opacity($ghost2)).toBeAround(1.0, 0.3)
             done()
 
         it 'marks the old fragment and its ghost as .up-destroying during the transition', ->
@@ -548,7 +548,7 @@ describe 'up.flow', ->
           promise = up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 30)
           promise.then(resolution)
           expect(resolution).not.toHaveBeenCalled()
-          u.setTimer 50, ->
+          u.setTimer 70, ->
             expect(resolution).toHaveBeenCalled()
             done()
 

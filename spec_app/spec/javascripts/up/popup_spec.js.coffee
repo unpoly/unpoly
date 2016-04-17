@@ -88,7 +88,7 @@ describe 'up.popup', ->
           expect(events).toEqual ['up:popup:open']
           expect($('.target')).toHaveText('response1')
 
-          u.setTimer 15, ->
+          u.setTimer 30, ->
             # First popup has completed opening animation
             expect(events).toEqual ['up:popup:open', 'up:popup:opened']
             expect($('.target')).toHaveText('response1')
@@ -105,7 +105,7 @@ describe 'up.popup', ->
               expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close']
               expect($('.target')).toHaveText('response1')
 
-              u.setTimer 60, ->
+              u.setTimer 100, ->
 
                 # First popup has finished closing, second popup has finished opening.
                 expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close', 'up:popup:closed', 'up:popup:opened']

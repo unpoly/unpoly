@@ -953,6 +953,9 @@ up.util = (($) ->
   ###
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
     $element = $(elementOrSelector)
+
+    # Don't name the local variable `options` since that would override
+    # the `options` function in our scope. We really need `let` :(
     opts = options(opts,
       duration: 300,
       delay: 0,
@@ -962,14 +965,32 @@ up.util = (($) ->
     # We don't finish an existing animation here, since the public API
     # we expose as `up.motion.animate` already does this.
     deferred = $.Deferred()
+
+    transitionProperties = Object.keys(lastFrame)
     transition =
-      'transition-property': Object.keys(lastFrame).join(', ')
+      'transition-property': transitionProperties.join(', ')
       'transition-duration': "#{opts.duration}ms"
       'transition-delay': "#{opts.delay}ms"
       'transition-timing-function': opts.easing
     oldTransition = $element.css(Object.keys(transition))
 
     $element.addClass('up-animating')
+
+    transitionFinished = ->
+      $element.removeClass('up-animating')
+      $element.off('transitionend', onTransitionEnd)
+
+    onTransitionEnd = (event) ->
+      completedProperty = event.originalEvent.propertyName
+      if contains(transitionProperties, completedProperty)
+        deferred.resolve() # unless isDetached($element)
+        transitionFinished()
+
+    $element.on('transitionend', onTransitionEnd)
+
+    # Clean up in case we're canceled through some other code that resolves our deferred.
+    deferred.then(transitionFinished)
+
     withoutCompositing = forceCompositing($element)
     $element.css(transition)
     $element.css(lastFrame)
@@ -981,25 +1002,19 @@ up.util = (($) ->
 
       # To interrupt the running transition we *must* set it to 'none' exactly.
       # We cannot simply restore the old transition properties because browsers
-      # would simply keep transitioning the old properties.
+      # would simply keep transitioning.
       $element.css('transition': 'none')
 
-      # Restoring a previous transition involves some work, so we only do it if
+      # Restoring a previous transition involves forcing a repaint, so we only do it if
       # we know the element was transitioning before.
+      # Note that the default transition for elements is actually "all 0s ease 0s"
+      # instead of "none", although that has the same effect as "none".
       hadTransitionBefore = !(oldTransition['transition-property'] == 'none' || (oldTransition['transition-property'] == 'all' && oldTransition['transition-duration'][0] == '0'))
       if hadTransitionBefore
+        # If there is no repaint between the "none" transition and restoring
+        # the previous transition, the browser will simply keep transitioning.
         forceRepaint($element) # :(
         $element.css(oldTransition)
-
-    # Since listening to transitionEnd events is painful, we wait for a timeout
-    # and then resolve our deferred. Maybe revisit that decision some day.
-    animationEnd = opts.duration + opts.delay
-    endTimeout = setTimer animationEnd, ->
-      $element.removeClass('up-animating')
-      deferred.resolve() unless isDetached($element)
-    # Clean up in case we're canceled through some other code that
-    # resolves our deferred.
-    deferred.then(-> clearTimeout(endTimeout))
 
     # Return the whole deferred and not just return a thenable.
     # Other code will need the possibility to cancel the animation

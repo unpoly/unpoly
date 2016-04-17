@@ -143,7 +143,7 @@ describe 'up.modal', ->
             @respondWith('<div class="container">response1</div>', request: request1)
             u.setTimer 10, =>
               @respondWith('<div class="container">response2</div>', request: request2)
-              u.setTimer 30, =>
+              u.setTimer 50, =>
                 expect($('.up-modal').length).toBe(1)
                 expect($('.up-modal-dialog').length).toBe(1)
                 expect($('.container')).toHaveText('response2')
@@ -169,7 +169,7 @@ describe 'up.modal', ->
           expect(events).toEqual ['up:modal:open']
           expect($('.target')).toHaveText('response1')
 
-          u.setTimer 15, ->
+          u.setTimer 40, ->
             # First modal has completed opening animation
             expect(events).toEqual ['up:modal:open', 'up:modal:opened']
             expect($('.target')).toHaveText('response1')
@@ -180,13 +180,13 @@ describe 'up.modal', ->
             expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:open', 'up:modal:close']
             expect($('.target')).toHaveText('response1')
 
-            u.setTimer 15, ->
+            u.setTimer 40, ->
 
               # Second modal is still waiting for first modal's closing animaton to finish.
               expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:open', 'up:modal:close']
               expect($('.target')).toHaveText('response1')
 
-              u.setTimer 60, ->
+              u.setTimer 100, ->
 
                 # First modal has finished closing, second modal has finished opening.
                 expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:open', 'up:modal:close', 'up:modal:closed', 'up:modal:opened']
@@ -215,7 +215,7 @@ describe 'up.modal', ->
               # Second modal is still waiting for first modal's closing animaton to finish.
               expect($('.target')).toHaveText('response1')
 
-              u.setTimer 60, ->
+              u.setTimer 90, ->
                 # First modal has finished closing, second modal has finished opening.
                 expect($('.target')).toHaveText('response2')
 
