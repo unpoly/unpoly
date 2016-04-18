@@ -29,7 +29,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, each, error, escapePressed, except, extend, extractOptions, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, setTimer, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, error, escapePressed, except, extend, extractOptions, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, setTimer, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement;
     noop = $.noop;
 
     /**
@@ -990,6 +990,23 @@ that might save you from loading something like [Underscore.js](http://underscor
     });
 
     /**
+    Returns whether the given element is currently showing a vertical scrollbar.
+    
+    @function up.util.documentHasVerticalScrollbar
+    @internal
+     */
+    documentHasVerticalScrollbar = function() {
+      var $body, body, bodyOverflow, forcedHidden, forcedScroll, html;
+      body = document.body;
+      $body = $(body);
+      html = document.documentElement;
+      bodyOverflow = $body.css('overflow-y');
+      forcedScroll = bodyOverflow === 'scroll';
+      forcedHidden = bodyOverflow === 'hidden';
+      return forcedScroll || (!forcedHidden && html.scrollHeight > html.clientHeight);
+    };
+
+    /**
     Modifies the given function so it only runs once.
     Subsequent calls will return the previous return value.
     
@@ -1100,7 +1117,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     cssAnimate = function(elementOrSelector, lastFrame, opts) {
-      var $element, animationEnd, deferred, endTimeout, oldTransition, transition, withoutCompositing;
+      var $element, deferred, oldTransition, onTransitionEnd, transition, transitionFinished, transitionProperties, withoutCompositing;
       $element = $(elementOrSelector);
       opts = options(opts, {
         duration: 300,
@@ -1108,14 +1125,29 @@ that might save you from loading something like [Underscore.js](http://underscor
         easing: 'ease'
       });
       deferred = $.Deferred();
+      transitionProperties = Object.keys(lastFrame);
       transition = {
-        'transition-property': Object.keys(lastFrame).join(', '),
+        'transition-property': transitionProperties.join(', '),
         'transition-duration': opts.duration + "ms",
         'transition-delay': opts.delay + "ms",
         'transition-timing-function': opts.easing
       };
       oldTransition = $element.css(Object.keys(transition));
       $element.addClass('up-animating');
+      transitionFinished = function() {
+        $element.removeClass('up-animating');
+        return $element.off('transitionend', onTransitionEnd);
+      };
+      onTransitionEnd = function(event) {
+        var completedProperty;
+        completedProperty = event.originalEvent.propertyName;
+        if (contains(transitionProperties, completedProperty)) {
+          deferred.resolve();
+          return transitionFinished();
+        }
+      };
+      $element.on('transitionend', onTransitionEnd);
+      deferred.then(transitionFinished);
       withoutCompositing = forceCompositing($element);
       $element.css(transition);
       $element.css(lastFrame);
@@ -1132,16 +1164,6 @@ that might save you from loading something like [Underscore.js](http://underscor
           forceRepaint($element);
           return $element.css(oldTransition);
         }
-      });
-      animationEnd = opts.duration + opts.delay;
-      endTimeout = setTimer(animationEnd, function() {
-        $element.removeClass('up-animating');
-        if (!isDetached($element)) {
-          return deferred.resolve();
-        }
-      });
-      deferred.then(function() {
-        return clearTimeout(endTimeout);
       });
       return deferred;
     };
@@ -1941,6 +1963,15 @@ that might save you from loading something like [Underscore.js](http://underscor
         return {};
       }
     };
+    opacity = function(element) {
+      var rawOpacity;
+      rawOpacity = $(element).css('opacity');
+      if (isGiven(rawOpacity)) {
+        return parseFloat(rawOpacity);
+      } else {
+        return void 0;
+      }
+    };
 
     /**
     Returns whether the given element has been detached from the DOM
@@ -2040,6 +2071,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       remove: remove,
       memoize: memoize,
       scrollbarWidth: scrollbarWidth,
+      documentHasVerticalScrollbar: documentHasVerticalScrollbar,
       config: config,
       cache: cache,
       unwrapElement: unwrapElement,
@@ -2049,7 +2081,8 @@ that might save you from loading something like [Underscore.js](http://underscor
       pluckKey: pluckKey,
       extractOptions: extractOptions,
       isDetached: isDetached,
-      noop: noop
+      noop: noop,
+      opacity: opacity
     };
   })($);
 
@@ -3203,6 +3236,11 @@ later.
       options = u.options(args[0], {
         priority: 0
       });
+      if (options.priority === 'first') {
+        options.priority = Number.POSITIVE_INFINITY;
+      } else if (options.priority === 'last') {
+        options.priority = Number.NEGATIVE_INFINITY;
+      }
       return {
         selector: selector,
         callback: callback,
@@ -3219,7 +3257,7 @@ later.
       }
       newCompiler = buildCompiler.apply(null, args);
       index = 0;
-      while ((oldCompiler = queue[index]) && (oldCompiler.priority <= newCompiler.priority)) {
+      while ((oldCompiler = queue[index]) && (oldCompiler.priority >= newCompiler.priority)) {
         index += 1;
       }
       return queue.splice(index, 0, newCompiler);
@@ -3304,6 +3342,7 @@ later.
         var $element, destroyer;
         $element = $(this);
         destroyer = $element.data(DESTROYER_KEY);
+        $element.removeClass(DESTROYABLE_CLASS);
         return destroyer();
       });
     };
@@ -3394,13 +3433,12 @@ later.
     @internal
      */
     snapshot = function() {
-      var i, len, results;
-      results = [];
-      for (i = 0, len = compilers.length; i < len; i++) {
-        compiler = compilers[i];
-        results.push(compiler.isDefault = true);
-      }
-      return results;
+      var setDefault;
+      setDefault = function(compiler) {
+        return compiler.isDefault = true;
+      };
+      u.each(compilers, setDefault);
+      return u.each(macros, setDefault);
     };
 
     /**
@@ -3410,9 +3448,12 @@ later.
     @internal
      */
     reset = function() {
-      return compilers = u.select(compilers, function(compiler) {
+      var isDefault;
+      isDefault = function(compiler) {
         return compiler.isDefault;
-      });
+      };
+      compilers = u.select(compilers, isDefault);
+      return macros = u.select(macros, isDefault);
     };
     up.on('up:framework:boot', snapshot);
     up.on('up:framework:reset', reset);
@@ -4495,7 +4536,7 @@ are based on this module.
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var failTarget, promise, request, target;
+      var failTarget, onFailure, onSuccess, promise, request, target;
       up.puts("Replacing %s from %s (%o)", selectorOrElement, url, options);
       options = u.options(options);
       target = resolveSelector(selectorOrElement, options.origin);
@@ -4518,12 +4559,13 @@ are based on this module.
         headers: options.headers
       };
       promise = up.ajax(request);
-      promise.done(function(html, textStatus, xhr) {
+      onSuccess = function(html, textStatus, xhr) {
         return processResponse(true, target, url, request, xhr, options);
-      });
-      promise.fail(function(xhr, textStatus, errorThrown) {
+      };
+      onFailure = function(xhr, textStatus, errorThrown) {
         return processResponse(false, failTarget, url, request, xhr, options);
-      });
+      };
+      promise = promise.then(onSuccess, onFailure);
       return promise;
     };
 
@@ -4631,7 +4673,7 @@ are based on this module.
      */
     extract = function(selectorOrElement, html, options) {
       return up.log.group('Extracting %s from %d bytes of HTML', selectorOrElement, html != null ? html.length : void 0, function() {
-        var deferreds, j, len, ref, ref1, response, selector, step;
+        var promise, response, selector;
         options = u.options(options, {
           historyMethod: 'push',
           requireMatch: true,
@@ -4643,28 +4685,35 @@ are based on this module.
         if (options.saveScroll !== false) {
           up.layout.saveScroll();
         }
-        if (typeof options.beforeSwap === "function") {
-          options.beforeSwap();
+        promise = u.resolvedPromise();
+        if (options.beforeSwap) {
+          promise = promise.then(options.beforeSwap);
         }
-        deferreds = [];
-        updateHistory(options);
-        ref = parseImplantSteps(selector, options);
-        for (j = 0, len = ref.length; j < len; j++) {
-          step = ref[j];
-          up.log.group('Updating %s', step.selector, function() {
-            var $new, $old, deferred, ref1;
-            $old = findOldFragment(step.selector, options);
-            $new = (ref1 = response.find(step.selector)) != null ? ref1.first() : void 0;
-            if ($old && $new) {
-              deferred = swapElements($old, $new, step.pseudoClass, step.transition, options);
-              return deferreds.push(deferred);
-            }
-          });
+        promise = promise.then(function() {
+          return updateHistory(options);
+        });
+        promise = promise.then(function() {
+          var j, len, ref, step, swapPromises;
+          swapPromises = [];
+          ref = parseImplantSteps(selector, options);
+          for (j = 0, len = ref.length; j < len; j++) {
+            step = ref[j];
+            up.log.group('Updating %s', step.selector, function() {
+              var $new, $old, ref1, swapPromise;
+              $old = findOldFragment(step.selector, options);
+              $new = (ref1 = response.find(step.selector)) != null ? ref1.first() : void 0;
+              if ($old && $new) {
+                swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options);
+                return swapPromises.push(swapPromise);
+              }
+            });
+          }
+          return $.when.apply($, swapPromises);
+        });
+        if (options.afterSwap) {
+          promise = promise.then(options.afterSwap);
         }
-        if (typeof options.afterSwap === "function") {
-          options.afterSwap();
-        }
-        return (ref1 = up.motion).when.apply(ref1, deferreds);
+        return promise;
       });
     };
     findOldFragment = function(selector, options) {
@@ -4736,7 +4785,12 @@ are based on this module.
       } else {
         replacement = function() {
           options.keepPlans = transferKeepableElements($old, $new, options);
-          $new.insertBefore($old);
+          if ($old.is('body')) {
+            up.syntax.clean($old);
+            $old.replaceWith($new);
+          } else {
+            $new.insertBefore($old);
+          }
           if (options.source !== false) {
             setSource($new, options.source);
           }
@@ -6344,7 +6398,7 @@ the user performs the click.
           args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
           return (ref = entry.deferred).resolve.apply(ref, args);
         });
-        return promise.fail(function() {
+        promise.fail(function() {
           var args, ref;
           args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
           return (ref = entry.deferred).reject.apply(ref, args);
@@ -6952,7 +7006,9 @@ Read on
     @selector [up-dash]
     @stable
      */
-    up.macro('[up-dash]', function($element) {
+    up.macro('[up-dash]', {
+      priority: 'last'
+    }, function($element) {
       var newAttrs, target;
       target = u.castedAttr($element, 'up-dash');
       $element.removeAttr('up-dash');
@@ -7005,7 +7061,9 @@ Read on
       If omitted, the first contained link will be expanded.
     @stable
      */
-    up.macro('[up-expand]', function($area) {
+    up.macro('[up-expand]', {
+      priority: 'last'
+    }, function($area) {
       var $childLinks, attribute, i, len, link, name, newAttrs, ref, selector, upAttributePattern;
       $childLinks = $area.find('a, [up-href]');
       if (selector = $area.attr('up-expand')) {
@@ -7376,9 +7434,8 @@ open dialogs with sub-forms, etc. all without losing form state.
       return observe(selectorOrElement, options, function(value, $field) {
         var $form;
         $form = $field.closest('form');
-        $field.addClass('up-active');
-        return submit($form).always(function() {
-          return $field.removeClass('up-active');
+        return up.navigation.withActiveMark($field, function() {
+          return submit($form);
         });
       });
     };
@@ -7963,7 +8020,7 @@ Pop-up overlays
 Instead of [linking to a page fragment](/up.link), you can choose
 to show a fragment in a popup overlay that rolls down from an anchoring element.
 
-To open a popup, add an [`up-popup` attribute](/a-up-popup) to a link,
+To open a popup, add an [`up-popup` attribute](/up-popup) to a link,
 or call the Javascript function [`up.popup.attach`](/up.popup.attach).
 
 For modal dialogs see [up.modal](/up.modal) instead.
@@ -7989,7 +8046,7 @@ By default the popup uses the following DOM structure:
 The popup closes when the user clicks anywhere outside the popup area.
 
 By default the popup also closes
-*whenever a page fragment behind the popup is updated*.
+*when a link within the popup changes a fragment behind the popup*.
 This is useful to have the popup interact with the page that
 opened it, e.g. by updating parts of a larger form or by signing in a user
 and revealing additional information.
@@ -8032,21 +8089,36 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     Sets default options for future popups.
     
     @property up.popup.config
-    @param {String} [config.openAnimation='fade-in']
-      The animation used to open a popup.
-    @param {String} [config.closeAnimation='fade-out']
-      The animation used to close a popup.
     @param {String} [config.position='bottom-right']
       Defines where the popup is attached to the opening element.
     
       Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
     @param {String} [config.history=false]
       Whether opening a popup will add a browser history entry.
+    @param {String} [config.openAnimation='fade-in']
+      The animation used to open a popup.
+    @param {String} [config.closeAnimation='fade-out']
+      The animation used to close a popup.
+    @param {String} [config.openDuration]
+      The duration of the open animation (in milliseconds).
+    @param {String} [config.closeDuration]
+      The duration of the close animation (in milliseconds).
+    @param {String} [config.openEasing]
+      The timing function controlling the acceleration of the opening animation.
+    @param {String} [config.closeEasing]
+      The timing function controlling the acceleration of the closing animation.
+    @param {Boolean} [options.sticky=false]
+      If set to `true`, the popup remains
+      open even it changes the page in the background.
     @stable
      */
     config = u.config({
       openAnimation: 'fade-in',
       closeAnimation: 'fade-out',
+      openDuration: null,
+      closeDuration: null,
+      openEasing: null,
+      closeEasing: null,
       position: 'bottom-right',
       history: false
     });
@@ -8133,16 +8205,26 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       return $popup.removeAttr('up-covered-title');
     };
     createFrame = function(target, options) {
-      var $popup;
-      $popup = u.$createElementFromSelector('.up-popup');
-      if (options.sticky) {
-        $popup.attr('up-sticky', '');
+      var promise;
+      promise = u.resolvedPromise();
+      if (isOpen()) {
+        promise = promise.then(function() {
+          return close();
+        });
       }
-      $popup.attr('up-covered-url', up.browser.url());
-      $popup.attr('up-covered-title', document.title);
-      u.$createPlaceholder(target, $popup);
-      $popup.appendTo(document.body);
-      return $popup;
+      promise = promise.then(function() {
+        var $popup;
+        $popup = u.$createElementFromSelector('.up-popup');
+        if (options.sticky) {
+          $popup.attr('up-sticky', '');
+        }
+        $popup.attr('up-covered-url', up.browser.url());
+        $popup.attr('up-covered-title', document.title);
+        u.$createPlaceholder(target, $popup);
+        $popup.appendTo(document.body);
+        return $popup;
+      });
+      return promise;
     };
 
     /**
@@ -8163,6 +8245,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @function up.popup.attach
     @param {Element|jQuery|String} elementOrSelector
     @param {String} [options.url]
+    @param {String} [options.target]
+      A CSS selector that will be extracted from the response and placed into the popup.
     @param {String} [options.position='bottom-right']
       Defines where the popup is attached to the opening element.
     
@@ -8188,44 +8272,45 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @stable
      */
     attach = function(linkOrSelector, options) {
-      var $link, animateOptions, target, url;
+      var $link, animateOptions, html, target, url;
       $link = $(linkOrSelector);
       $link.length || u.error('Cannot attach popup to non-existing element %o', linkOrSelector);
       options = u.options(options);
-      url = u.option(options.url, $link.attr('href'));
-      target = u.option(options.target, $link.attr('up-popup'), 'body');
+      url = u.option(u.pluckKey(options, 'url'), $link.attr('up-href'), $link.attr('href'));
+      html = u.option(u.pluckKey(options, 'html'));
+      target = u.option(u.pluckKey(options, 'target'), $link.attr('up-popup'), 'body');
       options.position = u.option(options.position, $link.attr('up-position'), config.position);
       options.animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
-      options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'));
+      options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), config.sticky);
       options.history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($link, 'up-history'), config.history) : false;
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
-      animateOptions = up.motion.animateOptions(options, $link);
+      animateOptions = up.motion.animateOptions(options, $link, {
+        duration: config.openDuration,
+        easing: config.openEasing
+      });
       return up.browser.confirm(options).then(function() {
-        var promise, wasOpen;
+        var extractOptions, promise;
         if (up.bus.nobodyPrevents('up:popup:open', {
           url: url,
           message: 'Opening popup'
         })) {
-          wasOpen = isOpen();
-          if (wasOpen) {
-            close({
-              animation: false
-            });
-          }
           options.beforeSwap = function() {
             return createFrame(target, options);
           };
-          promise = up.replace(target, url, u.merge(options, {
+          extractOptions = u.merge(options, {
             animation: false
-          }));
+          });
+          if (html) {
+            promise = up.extract(target, html, extractOptions);
+          } else {
+            promise = up.replace(target, url, extractOptions);
+          }
           promise = promise.then(function() {
             return setPosition($link, options.position);
           });
-          if (!wasOpen) {
-            promise = promise.then(function() {
-              return up.animate($('.up-popup'), options.animation, animateOptions);
-            });
-          }
+          promise = promise.then(function() {
+            return up.animate($('.up-popup'), options.animation, animateOptions);
+          });
           promise = promise.then(function() {
             return up.emit('up:popup:opened', {
               message: 'Popup opened'
@@ -8233,7 +8318,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           });
           return promise;
         } else {
-          return u.unresolvableDeferred();
+          return u.unresolvablePromise();
         }
       });
     };
@@ -8264,13 +8349,13 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @function up.popup.close
     @param {Object} options
       See options for [`up.animate`](/up.animate).
-    @return {Deferred}
+    @return {Promise}
       A promise that will be resolved once the modal's close
       animation has finished.
     @stable
      */
     close = function(options) {
-      var $popup, deferred;
+      var $popup, animateOptions, promise;
       $popup = $('.up-popup');
       if ($popup.length) {
         if (up.bus.nobodyPrevents('up:popup:close', {
@@ -8281,19 +8366,24 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
             url: $popup.attr('up-covered-url'),
             title: $popup.attr('up-covered-title')
           });
+          animateOptions = up.motion.animateOptions(options, {
+            duration: config.closeDuration,
+            easing: config.closeEasing
+          });
+          u.extend(options, animateOptions);
           currentUrl = void 0;
-          deferred = up.destroy($popup, options);
-          deferred.then(function() {
+          promise = up.destroy($popup, options);
+          promise = promise.then(function() {
             return up.emit('up:popup:closed', {
               message: 'Popup closed'
             });
           });
-          return deferred;
+          return promise;
         } else {
-          return u.unresolvableDeferred();
+          return u.unresolvablePromise();
         }
       } else {
-        return u.resolvedDeferred();
+        return u.resolvedPromise();
       }
     };
 
@@ -8346,7 +8436,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
         <a href="/decks" up-popup=".deck_list">Switch deck</a>
         <a href="/settings" up-popup=".options" up-sticky>Settings</a>
     
-    @selector a[up-popup]
+    @selector [up-popup]
     @param [up-position]
       Defines where the popup is attached to the opening element.
     
@@ -8441,7 +8531,7 @@ Instead of [linking to a page fragment](/up.link), you can choose
 to show a fragment in a modal dialog. The existing page will remain
 open in the background and reappear once the modal is closed.
 
-To open a modal, add an [`up-modal` attribute](/a-up-modal) to a link,
+To open a modal, add an [`up-modal` attribute](/up-modal) to a link,
 or call the Javascript functions [`up.modal.follow`](/up.modal.follow)
 and [`up.modal.visit`](/up.modal.visit).
   
@@ -8481,7 +8571,7 @@ configure Unpoly to [use a different HTML structure](/up.modal.config).
 \#\#\#\# Closing behavior
 
 By default the dialog automatically closes
-*whenever a page fragment behind the dialog is updated*.
+*when a link inside a modal changes a fragment behind the modal*.
 This is useful to have the dialog interact with the page that
 opened it, e.g. by updating parts of a larger form or by signing in a user
 and revealing additional information.
@@ -8496,7 +8586,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
 (function() {
   up.modal = (function($) {
-    var autoclose, close, config, contains, coveredUrl, createFrame, currentUrl, discardHistory, extract, follow, isOpen, open, reset, shiftElements, templateHtml, u, unshiftElements, unshifters, visit;
+    var animate, autoclose, close, config, contains, coveredUrl, createFrame, currentFlavor, currentUrl, discardHistory, extract, flavor, flavorDefault, flavorOverrides, follow, isOpen, markAsAnimating, open, reset, shiftElements, templateHtml, u, unshiftElements, unshifters, visit;
     u = up.util;
 
     /**
@@ -8546,6 +8636,9 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       The timing function controlling the acceleration of the opening animation.
     @param {String} [config.closeEasing]
       The timing function controlling the acceleration of the closing animation.
+    @param {Boolean} [options.sticky=false]
+      If set to `true`, the modal remains
+      open even it changes the page in the background.
     @stable
      */
     config = u.config({
@@ -8556,15 +8649,18 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       history: true,
       openAnimation: 'fade-in',
       closeAnimation: 'fade-out',
-      closeDuration: null,
-      closeEasing: null,
       openDuration: null,
+      closeDuration: null,
       openEasing: null,
+      closeEasing: null,
       backdropOpenAnimation: 'fade-in',
       backdropCloseAnimation: 'fade-out',
       closeLabel: '×',
+      flavors: {
+        "default": {}
+      },
       template: function(config) {
-        return "<div class=\"up-modal\">\n  <div class=\"up-modal-backdrop\"></div>\n  <div class=\"up-modal-viewport\">\n    <div class=\"up-modal-dialog\">\n      <div class=\"up-modal-close\" up-close>" + config.closeLabel + "</div>\n      <div class=\"up-modal-content\"></div>\n    </div>\n  </div>\n</div>";
+        return "<div class=\"up-modal\">\n  <div class=\"up-modal-backdrop\"></div>\n  <div class=\"up-modal-viewport\">\n    <div class=\"up-modal-dialog\">\n      <div class=\"up-modal-content\"></div>\n      <div class=\"up-modal-close\" up-close>" + (flavorDefault('closeLabel')) + "</div>\n    </div>\n  </div>\n</div>";
       }
     });
 
@@ -8578,6 +8674,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @stable
      */
     currentUrl = void 0;
+    currentFlavor = void 0;
 
     /**
     Returns the URL of the page behind the modal overlay.
@@ -8594,11 +8691,12 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
         animation: false
       });
       currentUrl = void 0;
+      currentFlavor = void 0;
       return config.reset();
     };
     templateHtml = function() {
       var template;
-      template = config.template;
+      template = flavorDefault('template');
       if (u.isFunction(template)) {
         return template(config);
       } else {
@@ -8612,57 +8710,69 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       return $modal.removeAttr('up-covered-title');
     };
     createFrame = function(target, options) {
-      var $content, $dialog, $modal;
-      $modal = $(templateHtml());
-      if (options.sticky) {
-        $modal.attr('up-sticky', '');
+      var promise;
+      promise = u.resolvedPromise();
+      if (isOpen()) {
+        promise = promise.then(function() {
+          return close();
+        });
       }
-      $modal.attr('up-covered-url', up.browser.url());
-      $modal.attr('up-covered-title', document.title);
-      $dialog = $modal.find('.up-modal-dialog');
-      if (u.isPresent(options.width)) {
-        $dialog.css('width', options.width);
-      }
-      if (u.isPresent(options.maxWidth)) {
-        $dialog.css('max-width', options.maxWidth);
-      }
-      if (u.isPresent(options.height)) {
-        $dialog.css('height', options.height);
-      }
-      $content = $modal.find('.up-modal-content');
-      u.$createPlaceholder(target, $content);
-      $modal.appendTo(document.body);
-      return $modal;
+      promise = promise.then(function() {
+        var $content, $dialog, $modal;
+        currentFlavor = options.flavor;
+        $modal = $(templateHtml());
+        $modal.attr('up-flavor', currentFlavor);
+        if (options.sticky) {
+          $modal.attr('up-sticky', '');
+        }
+        $modal.attr('up-covered-url', up.browser.url());
+        $modal.attr('up-covered-title', document.title);
+        $dialog = $modal.find('.up-modal-dialog');
+        if (u.isPresent(options.width)) {
+          $dialog.css('width', options.width);
+        }
+        if (u.isPresent(options.maxWidth)) {
+          $dialog.css('max-width', options.maxWidth);
+        }
+        if (u.isPresent(options.height)) {
+          $dialog.css('height', options.height);
+        }
+        $content = $modal.find('.up-modal-content');
+        u.$createPlaceholder(target, $content);
+        return $modal.appendTo(document.body);
+      });
+      return promise;
     };
     unshifters = [];
     shiftElements = function() {
-      var bodyRightPadding, bodyRightShift, scrollbarWidth, unshiftBody;
-      if (unshifters.length) {
-        u.error('Tried to call shiftElements multiple times %o', unshifters.length);
+      var $body, bodyRightPadding, bodyRightShift, scrollbarWidth, unshiftBody;
+      if (unshifters.length > 0) {
+        return;
       }
-      $('.up-modal').addClass('up-modal-ready');
-      scrollbarWidth = u.scrollbarWidth();
-      bodyRightPadding = parseInt($('body').css('padding-right'));
-      bodyRightShift = scrollbarWidth + bodyRightPadding;
-      unshiftBody = u.temporaryCss($('body'), {
-        'padding-right': bodyRightShift + "px",
-        'overflow-y': 'hidden'
-      });
-      unshifters.push(unshiftBody);
-      return up.layout.anchoredRight().each(function() {
-        var $element, elementRight, elementRightShift, unshifter;
-        $element = $(this);
-        elementRight = parseInt($element.css('right'));
-        elementRightShift = scrollbarWidth + elementRight;
-        unshifter = u.temporaryCss($element, {
-          'right': elementRightShift
+      if (u.documentHasVerticalScrollbar()) {
+        $body = $('body');
+        scrollbarWidth = u.scrollbarWidth();
+        bodyRightPadding = parseInt($body.css('padding-right'));
+        bodyRightShift = scrollbarWidth + bodyRightPadding;
+        unshiftBody = u.temporaryCss($body, {
+          'padding-right': bodyRightShift + "px",
+          'overflow-y': 'hidden'
         });
-        return unshifters.push(unshifter);
-      });
+        unshifters.push(unshiftBody);
+        return up.layout.anchoredRight().each(function() {
+          var $element, elementRight, elementRightShift, unshifter;
+          $element = $(this);
+          elementRight = parseInt($element.css('right'));
+          elementRightShift = scrollbarWidth + elementRight;
+          unshifter = u.temporaryCss($element, {
+            'right': elementRightShift
+          });
+          return unshifters.push(unshifter);
+        });
+      }
     };
     unshiftElements = function() {
       var results, unshifter;
-      $('.up-modal').removeClass('up-modal-ready');
       results = [];
       while (unshifter = unshifters.pop()) {
         results.push(unshifter());
@@ -8672,6 +8782,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
     /**
     Returns whether a modal is currently open.
+    
+    This also returns `true` if the modal is in an opening or closing animation.
     
     @function up.modal.isOpen
     @stable
@@ -8703,7 +8815,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       By [default](/up.modal.config) the dialog will grow to fit its contents.
     @param {Boolean} [options.sticky=false]
       If set to `true`, the modal remains
-      open even if the page changes in the background.
+      open even it changes the page in the background.
     @param {String} [options.confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the modal is being opened.
@@ -8801,53 +8913,48 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       options = u.options(options);
       $link = u.option(u.pluckKey(options, '$link'), u.nullJQuery());
       url = u.option(u.pluckKey(options, 'url'), $link.attr('up-href'), $link.attr('href'));
-      html = u.pluckKey(options, 'html');
+      html = u.option(u.pluckKey(options, 'html'));
       target = u.option(u.pluckKey(options, 'target'), $link.attr('up-modal'), 'body');
-      options.width = u.option(options.width, $link.attr('up-width'), config.width);
-      options.maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), config.maxWidth);
-      options.height = u.option(options.height, $link.attr('up-height'), config.height);
-      options.animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
-      options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), config.backdropOpenAnimation);
-      options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'));
+      options.flavor = u.option(options.flavor, $link.attr('up-flavor'));
+      options.width = u.option(options.width, $link.attr('up-width'), flavorDefault('width', options.flavor));
+      options.maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), flavorDefault('maxWidth', options.flavor));
+      options.height = u.option(options.height, $link.attr('up-height'), flavorDefault('height'));
+      options.animation = u.option(options.animation, $link.attr('up-animation'), flavorDefault('openAnimation', options.flavor));
+      options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), flavorDefault('backdropOpenAnimation', options.flavor));
+      options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor));
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       animateOptions = up.motion.animateOptions(options, $link, {
-        duration: config.openDuration,
-        easing: config.openEasing
+        duration: flavorDefault('openDuration', options.flavor),
+        easing: flavorDefault('openEasing', options.flavor)
       });
-      options.history = u.option(options.history, u.castedAttr($link, 'up-history'), config.history);
+      options.history = u.option(options.history, u.castedAttr($link, 'up-history'), flavorDefault('history', options.flavor));
       if (!up.browser.canPushState()) {
         options.history = false;
       }
       return up.browser.confirm(options).then(function() {
-        var extractOptions, promise, wasOpen;
+        var extractOptions, promise;
         if (up.bus.nobodyPrevents('up:modal:open', {
           url: url,
           message: 'Opening modal'
         })) {
-          wasOpen = isOpen();
-          if (wasOpen) {
-            close({
-              animation: false
-            });
-          }
           options.beforeSwap = function() {
             return createFrame(target, options);
           };
           extractOptions = u.merge(options, {
             animation: false
           });
-          if (url) {
-            promise = up.replace(target, url, extractOptions);
-          } else {
+          if (html) {
             promise = up.extract(target, html, extractOptions);
-          }
-          if (!(wasOpen || up.motion.isNone(options.animation))) {
-            promise = promise.then(function() {
-              return $.when(up.animate($('.up-modal-backdrop'), options.backdropAnimation, animateOptions), up.animate($('.up-modal-viewport'), options.animation, animateOptions));
-            });
+          } else {
+            promise = up.replace(target, url, extractOptions);
           }
           promise = promise.then(function() {
-            shiftElements();
+            return shiftElements();
+          });
+          promise = promise.then(function() {
+            return animate(options.animation, options.backdropAnimation, animateOptions);
+          });
+          promise = promise.then(function() {
             return up.emit('up:modal:opened', {
               message: 'Modal opened'
             });
@@ -8899,18 +9006,16 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           $element: $modal,
           message: 'Closing modal'
         })) {
-          unshiftElements();
-          viewportCloseAnimation = u.option(options.animation, config.closeAnimation);
-          backdropCloseAnimation = u.option(options.backdropAnimation, config.backdropCloseAnimation);
+          viewportCloseAnimation = u.option(options.animation, flavorDefault('closeAnimation'));
+          backdropCloseAnimation = u.option(options.backdropAnimation, flavorDefault('backdropCloseAnimation'));
           animateOptions = up.motion.animateOptions(options, {
-            duration: config.closeDuration,
-            easing: config.closeEasing
+            duration: flavorDefault('closeDuration'),
+            easing: flavorDefault('closeEasing')
           });
-          if (up.motion.isNone(viewportCloseAnimation)) {
-            promise = u.resolvedPromise();
-          } else {
-            promise = $.when(up.animate($('.up-modal-viewport'), viewportCloseAnimation, animateOptions), up.animate($('.up-modal-backdrop'), backdropCloseAnimation, animateOptions));
-          }
+          promise = u.resolvedPromise();
+          promise = promise.then(function() {
+            return animate(viewportCloseAnimation, backdropCloseAnimation, animateOptions);
+          });
           promise = promise.then(function() {
             var destroyOptions;
             destroyOptions = u.options(u.except(options, 'animation', 'duration', 'easing', 'delay'), {
@@ -8918,17 +9023,40 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
               title: $modal.attr('up-covered-title')
             });
             currentUrl = void 0;
-            up.destroy($modal, destroyOptions);
+            return up.destroy($modal, destroyOptions);
+          });
+          promise = promise.then(function() {
+            unshiftElements();
+            currentFlavor = void 0;
             return up.emit('up:modal:closed', {
               message: 'Modal closed'
             });
           });
           return promise;
         } else {
-          return u.unresolvableDeferred();
+          return u.unresolvablePromise();
         }
       } else {
-        return u.resolvedDeferred();
+        return u.resolvedPromise();
+      }
+    };
+    markAsAnimating = function(state) {
+      if (state == null) {
+        state = true;
+      }
+      return $('.up-modal').toggleClass('up-modal-animating', state);
+    };
+    animate = function(viewportAnimation, backdropAnimation, animateOptions) {
+      var promise;
+      if (up.motion.isNone(viewportAnimation)) {
+        return u.resolvedPromise();
+      } else {
+        markAsAnimating();
+        promise = $.when(up.animate($('.up-modal-viewport'), viewportAnimation, animateOptions), up.animate($('.up-modal-backdrop'), backdropAnimation, animateOptions));
+        promise = promise.then(function() {
+          return markAsAnimating(false);
+        });
+        return promise;
       }
     };
 
@@ -8971,6 +9099,81 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     };
 
     /**
+    Register a new modal variant with its own default configuration, CSS or HTML template.
+    
+    \#\#\#\# Example
+    
+    Let's implement a drawer that slides in from the right:
+    
+        up.modal.flavor('drawer', {
+          openAnimation: 'move-from-right',
+          closeAnimation: 'move-to-right',
+          maxWidth: 400
+        }
+    
+    Modals with that flavor will have a container `<div class='up-modal' up-flavor='drawer'>...</div>`.
+    We can target the `up-flavor` attribute override the default dialog styles:
+    
+        .up-modal[up-flavor='drawer'] {
+    
+          // Align drawer on the right
+          .up-modal-viewport { text-align: right; }
+    
+          // Remove margin so the drawer starts at the screen edge
+          .up-modal-dialog { margin: 0; }
+    
+          // Stretch drawer background to full window height
+          .up-modal-content { min-height: 100vh; }
+        }
+    
+    @function up.modal.flavor
+    @param {String} name
+      The name of the new flavor.
+    @param {Object} [overrideConfig]
+      An object whose properties override the defaults in [`/up.modal.config`](/up.modal.config).
+    @experimental
+     */
+    flavor = function(name, overrideConfig) {
+      if (overrideConfig == null) {
+        overrideConfig = {};
+      }
+      return u.extend(flavorOverrides(name), overrideConfig);
+    };
+
+    /**
+    Returns a config object for the given flavor.
+    Properties in that config should be preferred to the defaults in
+    [`/up.modal.config`](/up.modal.config).
+    
+    @function flavorOverrides
+    @internal
+     */
+    flavorOverrides = function(flavor) {
+      var base;
+      return (base = config.flavors)[flavor] || (base[flavor] = {});
+    };
+
+    /**
+    Returns the config option for the current flavor.
+    
+    @function flavorDefault
+    @internal
+     */
+    flavorDefault = function(key, flavorName) {
+      var value;
+      if (flavorName == null) {
+        flavorName = currentFlavor;
+      }
+      if (flavorName) {
+        value = flavorOverrides(flavorName)[key];
+      }
+      if (u.isMissing(value)) {
+        value = config[key];
+      }
+      return value;
+    };
+
+    /**
     Clicking this link will load the destination via AJAX and open
     the given selector in a modal dialog.
     
@@ -8983,7 +9186,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     and place the matching `.blog-list` tag will be placed in
     a modal dialog.
     
-    @selector a[up-modal]
+    @selector [up-modal]
     @param {String} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the modal is opened.
@@ -8997,11 +9200,12 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param {String} [up-height]
       The width of the dialog in pixels.
       By [default](/up.modal.config) the dialog will grow to fit its contents.
-    @param [up-width]
+    @param {String} [up-width]
       The width of the dialog in pixels.
       By [default](/up.modal.config) the dialog will grow to fit its contents.
-    @param [up-history="true"]
+    @param {String} [up-history="true"]
       Whether to add a browser history entry for the modal's source URL.
+    
     @stable
      */
     up.link.onAction('[up-modal]', function($link) {
@@ -9069,7 +9273,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       source: function() {
         return up.error('up.modal.source no longer exists. Please use up.popup.url instead.');
       },
-      isOpen: isOpen
+      isOpen: isOpen,
+      flavor: flavor
     };
   })(jQuery);
 
@@ -9313,6 +9518,8 @@ by providing instant feedback for user interactions.
  */
 
 (function() {
+  var slice = [].slice;
+
   up.navigation = (function($) {
     var CLASS_ACTIVE, SELECTOR_SECTION, config, currentClass, findClickArea, locationChanged, markActive, normalizeUrl, reset, sectionUrls, u, unmarkActive, urlSet, withActiveMark;
     u = up.util;
@@ -9466,8 +9673,11 @@ by providing instant feedback for user interactions.
       $element = findClickArea(elementOrSelector, options);
       return $element.removeClass(CLASS_ACTIVE);
     };
-    withActiveMark = function(elementOrSelector, options, block) {
-      var $element, promise;
+    withActiveMark = function() {
+      var $element, args, block, elementOrSelector, options, promise;
+      elementOrSelector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      block = args.pop();
+      options = u.options(args.pop());
       $element = $(elementOrSelector);
       markActive($element, options);
       promise = block();

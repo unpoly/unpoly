@@ -10,6 +10,15 @@ Unreleased
 
 ### Compatible changes
 
+
+### Breaking changes
+
+
+0.25.0
+------
+
+### Compatible changes
+
 - New modal default [`up.modal.config.sticky`](/up.modal.config)
 - New experimental function [`up.modal.flavor`](/up.modal.flavor) to register modal variants (like drawers).
 - Fix a bug where [compilers](/up.compiler) and [macros](/up.macro) with higher priorities were executed last (instead of first like it says in the docs).
