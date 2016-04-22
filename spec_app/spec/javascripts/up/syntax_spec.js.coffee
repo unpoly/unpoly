@@ -28,6 +28,21 @@ describe 'up.syntax', ->
           up.destroy('.container')
           expect(destructor).toHaveBeenCalled()
 
+        it 'runs all destructors if multiple compilers are applied to the same element', ->
+          destructor1 = jasmine.createSpy('destructor1')
+          up.compiler '.one', ($element) -> destructor1
+          destructor2 = jasmine.createSpy('destructor2')
+          up.compiler '.two', ($element) -> destructor2
+
+          $element = affix('.one.two')
+          up.hello($element)
+          expect(destructor1).not.toHaveBeenCalled()
+          expect(destructor2).not.toHaveBeenCalled()
+
+          up.destroy($element)
+          expect(destructor1).toHaveBeenCalled()
+          expect(destructor2).toHaveBeenCalled()
+
         it 'does not throw an error if both container and child have a destructor, and the container gets destroyed', ->
           up.compiler '.container', ($element) ->
             return (->)

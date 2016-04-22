@@ -36,8 +36,8 @@ up.syntax = (($) ->
   
   u = up.util
 
-  DESTROYABLE_CLASS = 'up-destroyable'
-  DESTROYER_KEY = 'up-destroyer'
+  DESTRUCTABLE_CLASS = 'up-destructable'
+  DESTRUCTORS_KEY = 'up-destructors'
 
   compilers = []
   macros = []
@@ -279,10 +279,15 @@ up.syntax = (($) ->
     if compiler.keep
       value = if u.isString(compiler.keep) then compiler.keep else ''
       $jqueryElement.attr('up-keep', value)
-    destroyer = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
-    if u.isFunction(destroyer)
-      $jqueryElement.addClass(DESTROYABLE_CLASS)
-      $jqueryElement.data(DESTROYER_KEY, destroyer)
+    destructor = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
+    if u.isFunction(destructor)
+      addDestructor($jqueryElement, destructor)
+
+  addDestructor = ($jqueryElement, destructor) ->
+    $jqueryElement.addClass(DESTRUCTABLE_CLASS)
+    destructors = $jqueryElement.data(DESTRUCTORS_KEY) || []
+    destructors.push(destructor)
+    $jqueryElement.data(DESTRUCTORS_KEY, destructors)
 
   ###*
   Applies all compilers on the given element and its descendants.
@@ -323,11 +328,12 @@ up.syntax = (($) ->
   @internal
   ###
   clean = ($fragment) ->
-    u.findWithSelf($fragment, ".#{DESTROYABLE_CLASS}").each ->
+    u.findWithSelf($fragment, ".#{DESTRUCTABLE_CLASS}").each ->
       $element = $(this)
-      destroyer = $element.data(DESTROYER_KEY)
-      $element.removeClass(DESTROYABLE_CLASS)
-      destroyer()
+      destructors = $element.data(DESTRUCTORS_KEY)
+      destructor() for destructor in destructors
+      $element.removeData(DESTRUCTORS_KEY)
+      $element.removeClass(DESTRUCTABLE_CLASS)
 
   ###*
   Checks if the given element has an [`up-data`](/up-data) attribute.
