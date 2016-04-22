@@ -133,6 +133,8 @@ up.link = (($) ->
   @param {String} [options.failTarget]
     The selector to replace if the server responds with a non-200 status code.
     Defaults to the `up-fail-target` attribute on `link`, or to `body` if such an attribute does not exist.
+  @param {String} [options.method='get']
+    The HTTP method to use for the request.
   @param {String} [options.confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the link is followed.
@@ -315,6 +317,8 @@ up.link = (($) ->
   @param {String} [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
+  @param {String} [up-method='get']
+    The HTTP method to use for the request.
   @param {String} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the link is followed.
@@ -383,6 +387,8 @@ up.link = (($) ->
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
+  @param {String} [up-method='get']
+    The HTTP method to use for the request.
   @param {String} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the link is followed.

@@ -61,7 +61,7 @@ up.form = (($) ->
   @param {String} [options.url]
     The URL where to submit the form.
     Defaults to the form's `action` attribute, or to the current URL of the browser window.
-  @param {String} [options.method]
+  @param {String} [options.method='post']
     The HTTP method used for the form submission.
     Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
     if none of these attributes are given.

@@ -141,6 +141,7 @@ up.flow = (($) ->
     The CSS selector to update if the server sends a non-200 status code.
   @param {String} [options.title]
   @param {String} [options.method='get']
+    The HTTP method to use for the request.
   @param {Object|Array} [options.data]
     Parameters that should be sent as the request's payload.
 
