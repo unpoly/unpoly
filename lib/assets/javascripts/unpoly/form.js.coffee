@@ -224,7 +224,7 @@ up.form = (($) ->
     if u.isGiven(options.change)
       u.error('up.observe now takes the change callback as the last argument')
 
-    rawCallback = u.option(u.presentAttr($element, 'op-observe'), callbackArg)
+    rawCallback = u.option(u.presentAttr($element, 'up-observe'), callbackArg)
     if u.isString(rawCallback)
       callback = (value, $field) -> eval(rawCallback)
     else

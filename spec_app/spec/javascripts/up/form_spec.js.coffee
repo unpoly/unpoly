@@ -245,7 +245,17 @@ describe 'up.form', ->
 
     describe '[up-observe]', ->
 
-      it 'should have tests'
+      it 'runs the Javascript code in the attribute value when a change is observed in the field', ->
+        $form = affix('form')
+        window.observeCallbackSpy = jasmine.createSpy('observe callback')
+        $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
+        up.hello($form)
+        $field.val('new-value')
+        $field.trigger('change')
+        u.nextFrame ->
+          expect(window.observeCallbackSpy).toHaveBeenCalledWith('new-value', $field.get(0))
+          done()
+
 
     describe 'input[up-validate]', ->
 
