@@ -10,6 +10,7 @@ Unreleased
 
 ### Compatible changes
 
+- Fix a bug where [`up.ajax`](/up.ajax) would incorrectly re-use form responses even if the form data differed
 - Fix a bug where if multiple compilers with [destructors](/up.compiler#cleaning-up-after-yourself)
   are applied to the same element and the element is removed, only the last destructor was called.
 

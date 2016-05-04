@@ -78,7 +78,7 @@ up.proxy = (($) ->
     normalizeRequest(request)
     [ request.url,
       request.method,
-      request.data,
+      u.requestDataAsQuery(request.data),
       request.target
     ].join('|')
 

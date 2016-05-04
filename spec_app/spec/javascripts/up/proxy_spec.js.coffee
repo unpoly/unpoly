@@ -83,6 +83,11 @@ describe 'up.proxy', ->
         up.ajax(url: '/path', target: '.b')
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
+      it "doesn't reuse responses when asked for the same path, but different params", ->
+        up.ajax(url: '/path', data: { query: 'foo' })
+        up.ajax(url: '/path', data: { query: 'bar' })
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+
       it "reuses a response for an 'html' selector when asked for the same path and any other selector", ->
         up.ajax(url: '/path', target: 'html')
         up.ajax(url: '/path', target: 'body')
