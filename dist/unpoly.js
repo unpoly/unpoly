@@ -3007,10 +3007,10 @@ later.
   var slice = [].slice;
 
   up.syntax = (function($) {
-    var DESTROYABLE_CLASS, DESTROYER_KEY, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, insertCompiler, macro, macros, reset, snapshot, u;
+    var DESTRUCTABLE_CLASS, DESTRUCTORS_KEY, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, insertCompiler, macro, macros, reset, snapshot, u;
     u = up.util;
-    DESTROYABLE_CLASS = 'up-destroyable';
-    DESTROYER_KEY = 'up-destroyer';
+    DESTRUCTABLE_CLASS = 'up-destructable';
+    DESTRUCTORS_KEY = 'up-destructors';
     compilers = [];
     macros = [];
 
@@ -3263,17 +3263,23 @@ later.
       return queue.splice(index, 0, newCompiler);
     };
     applyCompiler = function(compiler, $jqueryElement, nativeElement) {
-      var destroyer, value;
+      var destructor, value;
       up.puts((!compiler.isDefault ? "Compiling '%s' on %o" : void 0), compiler.selector, nativeElement);
       if (compiler.keep) {
         value = u.isString(compiler.keep) ? compiler.keep : '';
         $jqueryElement.attr('up-keep', value);
       }
-      destroyer = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)]);
-      if (u.isFunction(destroyer)) {
-        $jqueryElement.addClass(DESTROYABLE_CLASS);
-        return $jqueryElement.data(DESTROYER_KEY, destroyer);
+      destructor = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)]);
+      if (u.isFunction(destructor)) {
+        return addDestructor($jqueryElement, destructor);
       }
+    };
+    addDestructor = function($jqueryElement, destructor) {
+      var destructors;
+      $jqueryElement.addClass(DESTRUCTABLE_CLASS);
+      destructors = $jqueryElement.data(DESTRUCTORS_KEY) || [];
+      destructors.push(destructor);
+      return $jqueryElement.data(DESTRUCTORS_KEY, destructors);
     };
 
     /**
@@ -3338,12 +3344,16 @@ later.
     @internal
      */
     clean = function($fragment) {
-      return u.findWithSelf($fragment, "." + DESTROYABLE_CLASS).each(function() {
-        var $element, destroyer;
+      return u.findWithSelf($fragment, "." + DESTRUCTABLE_CLASS).each(function() {
+        var $element, destructor, destructors, i, len;
         $element = $(this);
-        destroyer = $element.data(DESTROYER_KEY);
-        $element.removeClass(DESTROYABLE_CLASS);
-        return destroyer();
+        destructors = $element.data(DESTRUCTORS_KEY);
+        for (i = 0, len = destructors.length; i < len; i++) {
+          destructor = destructors[i];
+          destructor();
+        }
+        $element.removeData(DESTRUCTORS_KEY);
+        return $element.removeClass(DESTRUCTABLE_CLASS);
       });
     };
 
@@ -4498,6 +4508,7 @@ are based on this module.
       The CSS selector to update if the server sends a non-200 status code.
     @param {String} [options.title]
     @param {String} [options.method='get']
+      The HTTP method to use for the request.
     @param {Object|Array} [options.data]
       Parameters that should be sent as the request's payload.
     
@@ -6067,7 +6078,7 @@ the user performs the click.
     });
     cacheKey = function(request) {
       normalizeRequest(request);
-      return [request.url, request.method, request.data, request.target].join('|');
+      return [request.url, request.method, u.requestDataAsQuery(request.data), request.target].join('|');
     };
     cache = u.cache({
       size: function() {
@@ -6705,6 +6716,8 @@ Read on
     @param {String} [options.failTarget]
       The selector to replace if the server responds with a non-200 status code.
       Defaults to the `up-fail-target` attribute on `link`, or to `body` if such an attribute does not exist.
+    @param {String} [options.method='get']
+      The HTTP method to use for the request.
     @param {String} [options.confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the link is followed.
@@ -6903,6 +6916,8 @@ Read on
     @param {String} [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
+    @param {String} [up-method='get']
+      The HTTP method to use for the request.
     @param {String} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the link is followed.
@@ -6972,6 +6987,8 @@ Read on
     @param [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
+    @param {String} [up-method='get']
+      The HTTP method to use for the request.
     @param {String} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the link is followed.
@@ -7172,7 +7189,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @param {String} [options.url]
       The URL where to submit the form.
       Defaults to the form's `action` attribute, or to the current URL of the browser window.
-    @param {String} [options.method]
+    @param {String} [options.method='post']
       The HTTP method used for the form submission.
       Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
       if none of these attributes are given.
@@ -7331,7 +7348,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       if (u.isGiven(options.change)) {
         u.error('up.observe now takes the change callback as the last argument');
       }
-      rawCallback = u.option(u.presentAttr($element, 'op-observe'), callbackArg);
+      rawCallback = u.option(u.presentAttr($element, 'up-observe'), callbackArg);
       if (u.isString(rawCallback)) {
         callback = function(value, $field) {
           return eval(rawCallback);
