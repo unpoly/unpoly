@@ -4593,7 +4593,7 @@ are based on this module.
       isReloadable = options.method === 'GET';
       if (urlFromServer = u.locationFromXhr(xhr)) {
         url = urlFromServer;
-        if (isSuccess) {
+        if (isSuccess && up.proxy.isCachable(request)) {
           newRequest = {
             url: url,
             method: u.methodFromXhr(xhr),
@@ -6022,7 +6022,7 @@ the user performs the click.
   var slice = [].slice;
 
   up.proxy = (function($) {
-    var $waitingLink, ajax, alias, cache, cacheKey, cancelPreloadDelay, cancelSlowDelay, checkPreload, clear, config, get, isBusy, isIdempotent, isIdle, load, loadEnded, loadOrQueue, loadStarted, normalizeRequest, pendingCount, pokeQueue, preload, preloadDelayTimer, queue, queuedRequests, remove, reset, responseReceived, set, slowDelayTimer, slowEventEmitted, startPreloadDelay, u;
+    var $waitingLink, ajax, alias, cache, cacheKey, cancelPreloadDelay, cancelSlowDelay, checkPreload, clear, config, get, isBusy, isCachable, isIdempotent, isIdle, load, loadEnded, loadOrQueue, loadStarted, normalizeRequest, pendingCount, pokeQueue, preload, preloadDelayTimer, queue, queuedRequests, remove, reset, responseReceived, set, slowDelayTimer, slowEventEmitted, startPreloadDelay, u;
     u = up.util;
     $waitingLink = void 0;
     preloadDelayTimer = void 0;
@@ -6104,23 +6104,25 @@ the user performs the click.
     get = function(request) {
       var candidate, candidates, i, len, requestForBody, requestForHtml, response;
       request = normalizeRequest(request);
-      candidates = [request];
-      if (request.target !== 'html') {
-        requestForHtml = u.merge(request, {
-          target: 'html'
-        });
-        candidates.push(requestForHtml);
-        if (request.target !== 'body') {
-          requestForBody = u.merge(request, {
-            target: 'body'
+      if (isCachable(request)) {
+        candidates = [request];
+        if (request.target !== 'html') {
+          requestForHtml = u.merge(request, {
+            target: 'html'
           });
-          candidates.push(requestForBody);
+          candidates.push(requestForHtml);
+          if (request.target !== 'body') {
+            requestForBody = u.merge(request, {
+              target: 'body'
+            });
+            candidates.push(requestForBody);
+          }
         }
-      }
-      for (i = 0, len = candidates.length; i < len; i++) {
-        candidate = candidates[i];
-        if (response = cache.get(candidate)) {
-          return response;
+        for (i = 0, len = candidates.length; i < len; i++) {
+          candidate = candidates[i];
+          if (response = cache.get(candidate)) {
+            return response;
+          }
         }
       }
     };
@@ -6230,6 +6232,18 @@ the user performs the click.
       }
       console.groupEnd();
       return promise;
+    };
+
+    /**
+    Returns whether the proxy is capable of caching the given request.
+    Even if this returns `true`, only idempodent requests will be
+    cached by default.
+    
+    @function up.proxy.isCachable
+    @internal
+     */
+    isCachable = function(request) {
+      return !u.isFormData(request.data);
     };
 
     /**
@@ -6567,6 +6581,7 @@ the user performs the click.
       remove: remove,
       isIdle: isIdle,
       isBusy: isBusy,
+      isCachable: isCachable,
       config: config,
       defaults: function() {
         return u.error('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.');

@@ -14,6 +14,15 @@ Unreleased
 
 
 
+0.25.2
+------
+
+### Compatible changes
+
+- Fix a bug where [submitting a form](/form-up-target) with file uploads would throw an error `"Cannot convert FormData into a query string"`
+
+
+
 0.25.1
 ------
 

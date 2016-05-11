@@ -101,16 +101,17 @@ up.proxy = (($) ->
   ###
   get = (request) ->
     request = normalizeRequest(request)
-    candidates = [request]
-    unless request.target is 'html'
-      requestForHtml = u.merge(request, target: 'html')
-      candidates.push(requestForHtml)
-      unless request.target is 'body'
-        requestForBody = u.merge(request, target: 'body')
-        candidates.push(requestForBody)
-    for candidate in candidates
-      if response = cache.get(candidate)
-        return response
+    if isCachable(request)
+      candidates = [request]
+      unless request.target is 'html'
+        requestForHtml = u.merge(request, target: 'html')
+        candidates.push(requestForHtml)
+        unless request.target is 'body'
+          requestForBody = u.merge(request, target: 'body')
+          candidates.push(requestForBody)
+      for candidate in candidates
+        if response = cache.get(candidate)
+          return response
 
   cancelPreloadDelay = ->
     clearTimeout(preloadDelayTimer)
@@ -233,6 +234,17 @@ up.proxy = (($) ->
     console.groupEnd()
 
     promise
+
+  ###*
+  Returns whether the proxy is capable of caching the given request.
+  Even if this returns `true`, only idempodent requests will be
+  cached by default.
+
+  @function up.proxy.isCachable
+  @internal
+  ###
+  isCachable = (request) ->
+    not u.isFormData(request.data)
 
   ###*
   Returns `true` if the proxy is not currently waiting
@@ -540,6 +552,7 @@ up.proxy = (($) ->
   remove: remove
   isIdle: isIdle
   isBusy: isBusy
+  isCachable: isCachable
   config: config
   defaults: -> u.error('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.')
   

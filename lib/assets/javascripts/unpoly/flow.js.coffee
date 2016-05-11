@@ -227,12 +227,13 @@ up.flow = (($) ->
 
     # The server can send us the current path using a header value.
     # This way we know the actual URL if the server has redirected.
+    # TODO: This logic should be moved to up.proxy.
     if urlFromServer = u.locationFromXhr(xhr)
       url = urlFromServer
-      if isSuccess
+      if isSuccess && up.proxy.isCachable(request)
         newRequest =
           url: url
-          method: u.methodFromXhr(xhr)
+          method: u.methodFromXhr(xhr) # If the server redirects, we must use the signaled method (should be GET)
           target: selector
         up.proxy.alias(request, newRequest)
     else if isReloadable

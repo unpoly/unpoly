@@ -61,6 +61,38 @@ describe 'up.flow', ->
               expect(resolution).toHaveBeenCalled()
               done()
 
+        describe 'when the server signals a redirect with X-Up-Location header (bugfix, logic should be moved to up.proxy)', ->
+
+          it 'considers a redirection URL an alias for the requested URL', ->
+            up.replace('.middle', '/foo')
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' })
+            up.replace('.middle', '/bar')
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', ->
+            up.replace('.middle', '/foo', method: 'post') # POST requests are not cached
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' })
+            up.replace('.middle', '/bar')
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+          it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', ->
+            up.replace('.middle', '/foo', failTarget: '.middle')
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' }, status: '500')
+            up.replace('.middle', '/bar')
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+          describeCapability 'canFormData', ->
+
+            it "does not explode if the original request's { data } is a FormData object", ->
+              up.replace('.middle', '/foo', method: 'post', data: new FormData()) # POST requests are not cached
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+              @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' })
+              secondReplace = -> up.replace('.middle', '/bar')
+              expect(secondReplace).not.toThrowError()
+
         describe 'with { data } option', ->
 
           it "uses the given params as a non-GET request's payload", ->
@@ -108,7 +140,7 @@ describe 'up.flow', ->
 
           it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', ->
             promise = up.replace('.middle', '/path', method: 'post')
-            @respond(responseHeaders: { 'X-Up-Method': 'get' })
+            @respond(responseHeaders: { 'X-Up-Method': 'GET' })
             expect(location.href).toEndWith('/path')
 
           it 'does not a history entry after a failed GET-request', ->

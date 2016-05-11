@@ -144,7 +144,6 @@ describe 'up.proxy', ->
 
         expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-
       describe 'with config.wrapMethods set', ->
 
         it 'should be set by default', ->
@@ -380,7 +379,20 @@ describe 'up.proxy', ->
 
     describe 'up.proxy.get', ->
 
-      it 'should have tests'
+      it 'returns an existing cache entry for the given request', ->
+        promise1 = up.ajax(url: '/foo', data: { key: 'value' })
+        promise2 = up.proxy.get(url: '/foo', data: { key: 'value' })
+        expect(promise1).toBe(promise2)
+
+      it 'returns undefined if the given request is not cached', ->
+        promise = up.proxy.get(url: '/foo', data: { key: 'value' })
+        expect(promise).toBeUndefined()
+
+      describeCapability 'canFormData', ->
+
+        it "returns undefined if the given request's { data } is a FormData object", ->
+          promise = up.proxy.get(url: '/foo', data: new FormData())
+          expect(promise).toBeUndefined()
 
     describe 'up.proxy.set', ->
 
