@@ -10,6 +10,9 @@ Unreleased
 
 ### Compatible changes
 
+- Tooltips now longer flicker if an [`[up-tooltip]`](/up-tooltip) elements has children
+
+
 ### Breaking changes
 
 
