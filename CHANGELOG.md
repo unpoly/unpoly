@@ -17,6 +17,7 @@ Unreleased
   `up.log.config.prefix`.
 - Improve formatting of error messages.
 - New experimental utility function [`up.util.escapeHtml`](/up.util.escapeHtml).
+- If an error is thrown before the document is ready, Unpoly now waits until the document is ready before showing the red error box.
 
 ### Breaking changes
 
