@@ -1661,11 +1661,31 @@ up.util = (($) ->
   ###
   error = (args...) ->
     up.log.error(args...)
+    whenReady().then ->
+      $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body')
+      formatter = (arg) ->
+        "<span class='up-error-variable'>#{escapeHtml(arg)}</span>"
+      asHtml = up.browser.sprintfWithFormattedArgs(formatter, args...)
+      $error.html(asHtml)
     asString = up.browser.sprintf(args...)
-    $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body')
-    $error.addClass('up-error')
-    $error.text(asString)
     throw new Error(asString)
+
+  ESCAPE_HTML_ENTITY_MAP =
+    "&": "&amp;"
+    "<": "&lt;"
+    ">": "&gt;"
+    '"': '&quot;'
+
+  ###*
+  Escapes the given string of HTML by replacing control chars with their HTML entities.
+
+  @function up.util.escapeHtml
+  @param {String} string
+    The text that should be escaped
+  @experimental
+  ###
+  escapeHtml = (string) ->
+    string.replace /[&<>"]/g, (char) -> ESCAPE_HTML_ENTITY_MAP[char]
 
   pluckKey = (object, key) ->
     value = object[key]
@@ -1691,6 +1711,16 @@ up.util = (($) ->
       parseFloat(rawOpacity)
     else
       undefined
+
+  whenReady = memoize ->
+    if $.isReady
+      resolvedPromise()
+    else
+      deferred = $.Deferred()
+      $ -> deferred.resolved()
+      deferred.promise()
+
+  identity = (arg) -> arg
 
   ###*
   Returns whether the given element has been detached from the DOM
@@ -1749,6 +1779,7 @@ up.util = (($) ->
   isObject: isObject
   isFunction: isFunction
   isString: isString
+  isNumber: isNumber
   isElement: isElement
   isJQuery: isJQuery
   isPromise: isPromise
@@ -1804,6 +1835,9 @@ up.util = (($) ->
   isDetached: isDetached
   noop: noop
   opacity: opacity
+  whenReady: whenReady
+  identity: identity
+  escapeHtml: escapeHtml
 
 )($)
 

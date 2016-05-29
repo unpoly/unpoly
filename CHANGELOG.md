@@ -15,6 +15,8 @@ Unreleased
 - Debugging messages in the developer console are now disabled by default. Call [`up.log.enable()`](/up.log.enable) to get them back.
 - New configuration options in [`up.log.config`](/up.log.config): `up.log.config.enabled`, `up.log.config.collapse` and
   `up.log.config.prefix`.
+- Improve formatting of error messages.
+- New experimental utility function [`up.util.escapeHtml`](/up.util.escapeHtml).
 
 ### Breaking changes
 

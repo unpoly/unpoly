@@ -393,7 +393,7 @@ up.bus = (($) ->
       # User-provided compiler definitions will be registered once this function terminates.
       u.nextFrame ->
         # At this point all user-provided compilers have been registered.
-        $ ->
+        u.whenReady().then ->
           # The following event will cause Unpoly to compile the <body>
           emit('up:app:boot', message: 'Booting user application')
           emit('up:app:booted', message: 'User application booted')

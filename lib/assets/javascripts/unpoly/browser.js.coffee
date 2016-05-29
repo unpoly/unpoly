@@ -63,6 +63,42 @@ up.browser = (($) ->
 
   CONSOLE_PLACEHOLDERS = /\%[odisf]/g
 
+  stringifyArg = (arg) ->
+    maxLength = 100
+    closer = ''
+
+    if u.isString(arg)
+      string = arg.replace(/[\n\r\t ]+/g, ' ')
+      string = string.replace(/^[\n\r\t ]+/, '')
+      string = string.replace(/[\n\r\t ]$/, '')
+      string = "\"#{string}\""
+      closer = '"'
+    else if u.isUndefined(arg)
+      # JSON.stringify(undefined) is actually undefined
+      string = 'undefined'
+    else if u.isNumber(arg) || u.isFunction(arg)
+      string = arg.toString()
+    else if u.isArray(arg)
+      string = "[#{u.map(arg, stringifyArg).join(', ')}]"
+      closer = ']'
+    else if u.isJQuery(arg)
+      string = "$(#{u.map(arg, stringifyArg).join(', ')})"
+      closer = ')'
+    else if u.isElement(arg)
+      $arg = $(arg)
+      string = "<#{arg.tagName.toLowerCase()}"
+      for attr in ['id', 'name', 'class']
+        if value = $arg.attr(attr)
+          string += " #{attr}=\"#{value}\""
+      string += ">"
+      closer = '>'
+    else # object
+      string = JSON.stringify(arg)
+    if string.length > maxLength
+      string = "#{string.substr(0, maxLength)} …"
+      string += closer
+    string
+
   ###*
   See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
 
@@ -70,28 +106,17 @@ up.browser = (($) ->
   @internal
   ###
   sprintf = (message, args...) ->
+    sprintfWithFormattedArgs(u.identity, message, args...)
+
+  ###*
+  @function up.browser.sprintfWithBounds
+  @internal
+  ###
+  sprintfWithFormattedArgs = (formatter, message, args...) ->
     i = 0
-    maxLength = 80
     message.replace CONSOLE_PLACEHOLDERS, ->
       arg = args[i]
-      argType = (typeof arg)
-      if argType == 'string'
-        arg = arg.replace(/\s+/g, ' ')
-        arg = "#{arg.substr(0, maxLength)}…" if arg.length > maxLength
-        arg = "\"#{arg}\""
-      else if argType == 'undefined'
-        # JSON.stringify(undefined) is actually undefined
-        arg = 'undefined'
-      else if argType == 'number' || argType == 'function'
-        arg = arg.toString()
-      else
-        arg = JSON.stringify(arg)
-      if arg.length > maxLength
-        arg = "#{arg.substr(0, maxLength)} …"
-        # For truncated objects or functions, add a trailing brace so
-        # long log lines are easier to parse visually
-        if argType == 'object' || argType == 'function'
-          arg += " }"
+      arg = formatter(stringifyArg(arg))
       i += 1
       arg
 
@@ -262,5 +287,6 @@ up.browser = (($) ->
   installPolyfills: installPolyfills
   puts: puts
   sprintf: sprintf
+  sprintfWithFormattedArgs: sprintfWithFormattedArgs
 
 )(jQuery)
