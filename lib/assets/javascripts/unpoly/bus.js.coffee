@@ -361,7 +361,7 @@ up.bus = (($) ->
   @experimental
   ###
   emitReset = ->
-    up.emit('up:framework:reset', message: 'Resetting framework')
+    emit('up:framework:reset', message: 'Resetting framework')
 
   ###*
   This event is [emitted](/up.emit) when Unpoly is [reset](/up.reset) during unit tests.
@@ -373,7 +373,7 @@ up.bus = (($) ->
   ###*
   Boots the Unpoly framework.
 
-  This is done automatically by including the Unpoly Javascript.
+  **This is called automatically** by including the Unpoly Javascript files.
 
   Unpoly will not boot if the current browser is [not supported](/up.browser.isSupported).
   This leaves you with a classic server-side application on legacy browsers.
@@ -381,23 +381,31 @@ up.bus = (($) ->
   Emits the [`up:framework:boot`](/up:framework:boot) event.
 
   @function up.boot
-  @experimental
+  @internal
   ###
   boot = ->
     if up.browser.isSupported()
       # Can't decouple this via the event bus, since up.bus would require
       # up.browser.isSupported() and up.browser would require up.on()
       up.browser.installPolyfills()
-      up.emit('up:framework:boot', message: 'Booting framework')
+      emit('up:framework:boot', message: 'Booting framework')
+      emit('up:framework:booted', message: 'Framework booted')
+      # User-provided compiler definitions will be registered once this function terminates.
+      u.nextFrame ->
+        # At this point all user-provided compilers have been registered.
+        $ ->
+          # The following event will cause Unpoly to compile the <body>
+          emit('up:app:boot', message: 'Booting user application')
+          emit('up:app:booted', message: 'User application booted')
 
   ###*
-  This event is [emitted](/up.emit) when Unpoly [boots](/up.boot).
+  This event is [emitted](/up.emit) when Unpoly [starts to boot](/up.boot).
 
   @event up:framework:boot
-  @experimental
+  @internal
   ###
 
-  live 'up:framework:boot', snapshot
+  live 'up:framework:booted', snapshot
   live 'up:framework:reset', restoreSnapshot
 
   knife: eval(Knife?.point)

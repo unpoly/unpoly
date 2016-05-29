@@ -55,11 +55,11 @@ up.browser = (($) ->
   puts = (stream, args...) ->
     u.isDefined(console[stream]) or stream = 'log'
     if canLogSubstitution()
-      console[stream](args...)
+      console[stream]?(args...)
     else
       # IE <= 9 cannot pass varargs to console.log using Function#apply because IE
       message = sprintf(args...)
-      console[stream](message)
+      console[stream]?(message)
 
   CONSOLE_PLACEHOLDERS = /\%[odisf]/g
 

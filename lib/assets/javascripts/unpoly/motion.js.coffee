@@ -711,8 +711,8 @@ up.motion = (($) ->
       animate($new, 'fade-in', options)
     )
   )
-  
-  up.on 'up:framework:boot', snapshot
+
+  up.on 'up:framework:booted', snapshot
   up.on 'up:framework:reset', reset
     
   morph: morph
