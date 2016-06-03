@@ -12,6 +12,7 @@ Unreleased
 
 - [Popups](/up.popup) no longer scroll with the document if they are attached to an element with `position: fixed`
 - [Tooltips](/up.tooltip) no longer flicker if an [`[up-tooltip]`](/up-tooltip) elements has children
+- [Tooltips](/up.tooltip) no longer flicker if the user moves the mouse too close to the tooltip triangle
 - Before [compiling](/up.compile) the body, Unpoly now explicitly waits until user-provided compiles have been registered and the DOM is ready.
 - Debugging messages in the developer console are now disabled by default. Call [`up.log.enable()`](/up.log.enable) to get them back.
 - New configuration options in [`up.log.config`](/up.log.config): `up.log.config.enabled`, `up.log.config.collapse` and
