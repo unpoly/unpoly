@@ -1734,7 +1734,7 @@ up.util = (($) ->
       resolvedPromise()
     else
       deferred = $.Deferred()
-      $ -> deferred.resolved()
+      $ -> deferred.resolve()
       deferred.promise()
 
   identity = (arg) -> arg
