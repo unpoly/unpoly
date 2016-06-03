@@ -283,7 +283,7 @@ up.proxy = (($) ->
       slowDelayTimer = u.setTimer(config.slowDelay, emission)
 
   ###*
-  This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
+  This event is [emitted](/up.emit) when [AJAX requests](/up.ajax)
   are taking long to finish.
 
   By default Unpoly will wait 300 ms for an AJAX request to finish

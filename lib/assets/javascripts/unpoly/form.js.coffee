@@ -76,7 +76,7 @@ up.form = (($) ->
     Successful form submissions will add a history entry and change the browser's
     location bar if the form either uses the `GET` method or the response redirected
     to another page (this requires the `unpoly-rails` gem).
-    If want to prevent history changes in any case, set this to `false`.
+    If you want to prevent history changes in any case, set this to `false`.
     If you pass a `String`, it is used as the URL for the browser history.
   @param {String} [options.transition='none']
     The transition to use when a successful form submission updates the `options.target` selector.
