@@ -6,12 +6,24 @@ describe 'up.popup', ->
 
     describe 'up.popup.attach', ->
 
-      it "loads this link's destination in a popup when clicked", ->
-        $link = affix('a[href="/path/to"][up-popup=".middle"]').text('link')
-        $link.css
-          position: 'fixed'
+      beforeEach ->
+        jasmine.addMatchers
+          toSitBelow: (util, customEqualityTesters) ->
+            compare: ($popup, $link) ->
+              pass: ->
+                popupDims = u.measure($popup, full: true)
+                linkDims = u.measure($link, full: true)
+                expect(popupDims.right).toBeAround(linkDims.right, 1)
+                expect(popupDims.top).toBeAround(linkDims.top + linkDims.height, 1)
+
+      it "loads this link's destination in a popup positioned under the given link", ->
+        $container = affix('.container')
+        $container.css
+          position: 'absolute'
           left: '100px'
           top: '50px'
+
+        $link = $container.affix('a[href="/path/to"][up-popup=".middle"]').text('link')
 
         up.popup.attach($link)
 
@@ -29,11 +41,21 @@ describe 'up.popup', ->
         expect($popup.find('.before')).not.toExist()
         expect($popup.find('.after')).not.toExist()
 
-        popupDims = u.measure($popup, full: true)
-        linkDims = u.measure($link, full: true)
+        expect($popup.css('position')).toEqual('absolute')
+        expect($popup).toSitBelow($link)
 
-        expect(popupDims.right).toBeAround(linkDims.right, 1)
-        expect(popupDims.top).toBeAround(linkDims.top + linkDims.height, 1)
+      it 'gives the popup { position: "fixed" } if the given link is fixed', ->
+        $container = affix('.container')
+        $container.css
+          position: 'fixed'
+          left: '100px'
+          top: '50px'
+        $link = $container.affix('a[href="/path/to"][up-popup=".content"]').text('link')
+        up.popup.attach($link)
+        @respondWith('<div class="content">popup-content</div>')
+        $popup = $('.up-popup')
+        expect($popup.css('position')).toEqual('fixed')
+        expect($popup).toSitBelow($link)
 
       it 'does not explode if the popup was closed before the response was received', ->
         $span = affix('span')

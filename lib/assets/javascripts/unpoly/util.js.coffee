@@ -1533,6 +1533,23 @@ up.util = (($) ->
     $match
 
   ###*
+  Returns if the given element has a `fixed` position.
+
+  @function up.util.isFixed
+  @internal
+  ###
+  isFixed = (element) ->
+    $element = $(element)
+    loop
+      position = $element.css('position')
+      if position == 'fixed'
+        return true
+      else
+        $element = $element.parent()
+        if $element.length == 0 || $element.is(document)
+          return false
+
+  ###*
   @function up.util.fixedToAbsolute
   @internal
   ###
@@ -1711,6 +1728,7 @@ up.util = (($) ->
   requestDataFromForm: requestDataFromForm
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
+  isFixed: isFixed
   presentAttr: presentAttr
   createElement: createElement
   parseUrl: parseUrl

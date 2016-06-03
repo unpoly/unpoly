@@ -2,6 +2,23 @@ describe 'up.util', ->
   
   describe 'Javascript functions', ->
 
+    describe 'up.util.isFixed', ->
+
+      it 'returns true if the given element or one of its ancestors has a "fixed" CSS position', ->
+        $grandGrandParent = affix('.grand-parent')
+        $grandParent = $grandGrandParent.affix('.grand-parent')
+        $parent = $grandParent.affix('.parent')
+        $child = $parent.affix('.child')
+        $grandParent.css(position: 'fixed')
+        expect(up.util.isFixed($child)).toBe(true)
+        expect(up.util.isFixed($parent)).toBe(true)
+        expect(up.util.isFixed($grandParent)).toBe(true)
+        expect(up.util.isFixed($grandGrandParent)).toBe(false)
+
+      it 'returns false if the given element and its ancestors all have a non-"fixed" CSS position', ->
+        $element = affix('.element')
+        expect(up.util.isFixed($element)).toBe(false)
+
     describe 'up.util.setTimer', ->
 
       it 'calls the given function after waiting the given milliseconds', ->
@@ -20,7 +37,7 @@ describe 'up.util', ->
         up.util.setTimer(0, callback)
         expect(callback).toHaveBeenCalled()
 
-    #    describe 'up.util.argNames', ->
+#    describe 'up.util.argNames', ->
 #
 #      it 'returns an array of argument names for the given function', ->
 #        fun = ($element, data) ->

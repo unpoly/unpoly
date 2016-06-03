@@ -125,6 +125,8 @@ up.popup = (($) ->
         bottom: linkBox.top
       else
         u.error("Unknown position option '%s'", position)
+    if u.isFixed($link)
+      css['position'] = 'fixed'
     $popup = $('.up-popup')
     $popup.attr('up-position', position)
     $popup.css(css)

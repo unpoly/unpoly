@@ -10,7 +10,8 @@ Unreleased
 
 ### Compatible changes
 
-- Tooltips now longer flicker if an [`[up-tooltip]`](/up-tooltip) elements has children
+- [Popups](/up.popup) no longer scroll with the document if they are attached to an element with `position: fixed`
+- [Tooltips](/up.tooltip) no longer flicker if an [`[up-tooltip]`](/up-tooltip) elements has children
 
 
 ### Breaking changes
