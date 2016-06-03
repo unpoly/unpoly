@@ -1,0 +1,2 @@
+beforeEach ->
+  up.log.enable()

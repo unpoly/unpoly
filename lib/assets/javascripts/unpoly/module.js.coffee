@@ -1,4 +1,0 @@
-###*
-@module up
-###
-window.up = {}

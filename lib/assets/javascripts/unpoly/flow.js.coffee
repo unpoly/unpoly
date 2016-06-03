@@ -809,7 +809,7 @@ up.flow = (($) ->
     sourceUrl = options.url || source(selectorOrElement)
     replace(selectorOrElement, sourceUrl, options)
 
-  up.on 'ready', ->
+  up.on 'up:app:boot', ->
     $body = $(document.body)
     setSource($body, up.browser.url())
     hello($body)

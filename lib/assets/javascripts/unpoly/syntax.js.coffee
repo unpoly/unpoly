@@ -433,7 +433,7 @@ up.syntax = (($) ->
     compilers = u.select(compilers, isDefault)
     macros = u.select(macros, isDefault)
 
-  up.on 'up:framework:boot', snapshot
+  up.on 'up:framework:booted', snapshot
   up.on 'up:framework:reset', reset
 
   compiler: compiler
