@@ -10,6 +10,16 @@ Unreleased
 
 ### Compatible changes
 
+
+### Breaking changes
+
+
+
+0.26.0
+------
+
+### Compatible changes
+
 - [Popups](/up.popup) no longer scroll with the document if they are attached to an element with `position: fixed`
 - [Tooltips](/up.tooltip) no longer flicker if an [`[up-tooltip]`](/up-tooltip) elements has children
 - [Tooltips](/up.tooltip) no longer flicker if the user moves the mouse too close to the tooltip triangle
@@ -20,8 +30,6 @@ Unreleased
 - Improve formatting of error messages.
 - New experimental utility function [`up.util.escapeHtml`](/up.util.escapeHtml).
 - If an error is thrown before the document is ready, Unpoly now waits until the document is ready before showing the red error box.
-
-### Breaking changes
 
 
 

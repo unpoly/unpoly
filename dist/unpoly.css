@@ -1,19 +1,26 @@
 [up-close] {
   cursor: pointer; }
 .up-error {
-  background-color: #e10;
+  background-color: #c30;
   color: white;
-  padding: 5px;
+  padding: 10px;
   font-family: arial, helvetica, sans-serif;
-  font-weight: bold;
   font-size: 14px;
   line-height: 18px;
   position: fixed;
   left: 0;
-  top: 0;
+  bottom: 0;
   max-width: 100%;
   box-sizing: border-box;
   z-index: 99999999; }
+
+.up-error-variable {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-weight: normal;
+  max-width: 100px;
+  overflow: hidden; }
 [up-href] {
   cursor: pointer; }
 .up-modal {
@@ -89,7 +96,8 @@
   background-color: #111;
   color: white;
   padding: 6px 9px;
-  white-space: nowrap; }
+  white-space: nowrap;
+  pointer-events: none; }
   .up-tooltip:after {
     content: "";
     position: absolute;
@@ -101,27 +109,31 @@
     margin-top: -6px; }
     .up-tooltip[up-position=top]:after {
       border-top-color: #111;
-      bottom: -16px;
+      border-bottom-width: 0;
+      bottom: -8px;
       left: 50%;
       margin-left: -8px; }
   .up-tooltip[up-position=left] {
     margin-left: -6px; }
     .up-tooltip[up-position=left]:after {
       border-left-color: #111;
-      right: -16px;
+      border-right-width: 0;
+      right: -8px;
       top: 50%;
       margin-top: -8px; }
   .up-tooltip[up-position=right] {
     margin-left: 6px; }
     .up-tooltip[up-position=right]:after {
       border-right-color: #111;
-      left: -16px;
+      border-left-width: 0;
+      left: -8px;
       top: 50%;
       margin-top: -8px; }
   .up-tooltip[up-position=bottom] {
     margin-top: 6px; }
     .up-tooltip[up-position=bottom]:after {
       border-bottom-color: #111;
-      top: -16px;
+      border-top-width: 0;
+      top: -8px;
       left: 50%;
       margin-left: -8px; }

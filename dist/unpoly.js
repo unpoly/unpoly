@@ -4,7 +4,9 @@
  */
 
 (function() {
-  window.up = {};
+  window.up = {
+    version: "0.26.0"
+  };
 
 }).call(this);
 
@@ -29,7 +31,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, error, escapePressed, except, extend, extractOptions, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, setTimer, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, error, escapeHtml, escapePressed, except, extend, extractOptions, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, setTimer, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -1791,6 +1793,28 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
+    Returns if the given element has a `fixed` position.
+    
+    @function up.util.isFixed
+    @internal
+     */
+    isFixed = function(element) {
+      var $element, position;
+      $element = $(element);
+      while (true) {
+        position = $element.css('position');
+        if (position === 'fixed') {
+          return true;
+        } else {
+          $element = $element.parent();
+          if ($element.length === 0 || $element.is(document)) {
+            return false;
+          }
+        }
+      }
+    };
+
+    /**
     @function up.util.fixedToAbsolute
     @internal
      */
@@ -1932,14 +1956,40 @@ that might save you from loading something like [Underscore.js](http://underscor
     @experimental
      */
     error = function() {
-      var $error, args, asString, ref, ref1;
+      var args, asString, ref, ref1;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       (ref = up.log).error.apply(ref, args);
+      whenReady().then(function() {
+        var $error, asHtml, formatter, ref1;
+        $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body');
+        formatter = function(arg) {
+          return "<span class='up-error-variable'>" + (escapeHtml(arg)) + "</span>";
+        };
+        asHtml = (ref1 = up.browser).sprintfWithFormattedArgs.apply(ref1, [formatter].concat(slice.call(args)));
+        return $error.html(asHtml);
+      });
       asString = (ref1 = up.browser).sprintf.apply(ref1, args);
-      $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body');
-      $error.addClass('up-error');
-      $error.text(asString);
       throw new Error(asString);
+    };
+    ESCAPE_HTML_ENTITY_MAP = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': '&quot;'
+    };
+
+    /**
+    Escapes the given string of HTML by replacing control chars with their HTML entities.
+    
+    @function up.util.escapeHtml
+    @param {String} string
+      The text that should be escaped
+    @experimental
+     */
+    escapeHtml = function(string) {
+      return string.replace(/[&<>"]/g, function(char) {
+        return ESCAPE_HTML_ENTITY_MAP[char];
+      });
     };
     pluckKey = function(object, key) {
       var value;
@@ -1972,6 +2022,21 @@ that might save you from loading something like [Underscore.js](http://underscor
         return void 0;
       }
     };
+    whenReady = memoize(function() {
+      var deferred;
+      if ($.isReady) {
+        return resolvedPromise();
+      } else {
+        deferred = $.Deferred();
+        $(function() {
+          return deferred.resolve();
+        });
+        return deferred.promise();
+      }
+    });
+    identity = function(arg) {
+      return arg;
+    };
 
     /**
     Returns whether the given element has been detached from the DOM
@@ -1992,6 +2057,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       requestDataFromForm: requestDataFromForm,
       offsetParent: offsetParent,
       fixedToAbsolute: fixedToAbsolute,
+      isFixed: isFixed,
       presentAttr: presentAttr,
       createElement: createElement,
       parseUrl: parseUrl,
@@ -2030,6 +2096,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       isObject: isObject,
       isFunction: isFunction,
       isString: isString,
+      isNumber: isNumber,
       isElement: isElement,
       isJQuery: isJQuery,
       isPromise: isPromise,
@@ -2082,122 +2149,14 @@ that might save you from loading something like [Underscore.js](http://underscor
       extractOptions: extractOptions,
       isDetached: isDetached,
       noop: noop,
-      opacity: opacity
+      opacity: opacity,
+      whenReady: whenReady,
+      identity: identity,
+      escapeHtml: escapeHtml
     };
   })($);
 
   up.error = up.util.error;
-
-}).call(this);
-
-/**
-Logging
-=======
-
-Elaborate wrappers around `window.console`.
-Should only used internally since they prefix `ᴜᴘ` to each
-printed message.
- */
-
-(function() {
-  var slice = [].slice;
-
-  up.log = (function($) {
-    var debug, error, group, prefix, puts, warn;
-    prefix = function(message) {
-      return "ᴜᴘ " + message;
-    };
-
-    /**
-    Prints a debugging message to the browser console.
-    
-    @function up.debug
-    @param {String} message
-    @param {Array} args...
-    @internal
-     */
-    debug = function() {
-      var args, message, ref;
-      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      if (message) {
-        return (ref = up.browser).puts.apply(ref, ['debug', prefix(message)].concat(slice.call(args)));
-      }
-    };
-
-    /**
-    Prints a logging message to the browser console.
-    
-    @function up.puts
-    @param {String} message
-    @param {Array} args...
-    @internal
-     */
-    puts = function() {
-      var args, message, ref;
-      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      if (message) {
-        return (ref = up.browser).puts.apply(ref, ['log', prefix(message)].concat(slice.call(args)));
-      }
-    };
-
-    /**
-    @function up.log.warn
-    @internal
-     */
-    warn = function() {
-      var args, message, ref;
-      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      if (message) {
-        return (ref = up.browser).puts.apply(ref, ['warn', prefix(message)].concat(slice.call(args)));
-      }
-    };
-
-    /**
-    - Makes sure the group always closes
-    - Does not make a group if the message is nil
-    
-    @function up.log.group
-    @internal
-     */
-    group = function() {
-      var args, block, message, ref;
-      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      block = args.pop();
-      if (message) {
-        (ref = up.browser).puts.apply(ref, ['group', prefix(message)].concat(slice.call(args)));
-        try {
-          return block();
-        } finally {
-          if (message) {
-            console.groupEnd();
-          }
-        }
-      } else {
-        return block();
-      }
-    };
-
-    /**
-    @function up.log.error
-    @internal
-     */
-    error = function() {
-      var args, message, ref;
-      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      if (message) {
-        return (ref = up.browser).puts.apply(ref, ['error', prefix(message)].concat(slice.call(args)));
-      }
-    };
-    return {
-      puts: puts,
-      debug: debug,
-      error: error,
-      warn: warn,
-      group: group
-    };
-  })(jQuery);
-
-  up.puts = up.log.puts;
 
 }).call(this);
 
@@ -2215,7 +2174,7 @@ we can't currently get rid off.
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, confirm, initialRequestMethod, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sprintf, u, url;
+    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, confirm, initialRequestMethod, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sprintf, sprintfWithFormattedArgs, stringifyArg, u, url;
     u = up.util;
 
     /**
@@ -2278,13 +2237,54 @@ we can't currently get rid off.
       stream = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       u.isDefined(console[stream]) || (stream = 'log');
       if (canLogSubstitution()) {
-        return console[stream].apply(console, args);
+        return typeof console[stream] === "function" ? console[stream].apply(console, args) : void 0;
       } else {
         message = sprintf.apply(null, args);
-        return console[stream](message);
+        return typeof console[stream] === "function" ? console[stream](message) : void 0;
       }
     };
     CONSOLE_PLACEHOLDERS = /\%[odisf]/g;
+    stringifyArg = function(arg) {
+      var $arg, attr, closer, j, len, maxLength, ref, string, value;
+      maxLength = 100;
+      closer = '';
+      if (u.isString(arg)) {
+        string = arg.replace(/[\n\r\t ]+/g, ' ');
+        string = string.replace(/^[\n\r\t ]+/, '');
+        string = string.replace(/[\n\r\t ]$/, '');
+        string = "\"" + string + "\"";
+        closer = '"';
+      } else if (u.isUndefined(arg)) {
+        string = 'undefined';
+      } else if (u.isNumber(arg) || u.isFunction(arg)) {
+        string = arg.toString();
+      } else if (u.isArray(arg)) {
+        string = "[" + (u.map(arg, stringifyArg).join(', ')) + "]";
+        closer = ']';
+      } else if (u.isJQuery(arg)) {
+        string = "$(" + (u.map(arg, stringifyArg).join(', ')) + ")";
+        closer = ')';
+      } else if (u.isElement(arg)) {
+        $arg = $(arg);
+        string = "<" + (arg.tagName.toLowerCase());
+        ref = ['id', 'name', 'class'];
+        for (j = 0, len = ref.length; j < len; j++) {
+          attr = ref[j];
+          if (value = $arg.attr(attr)) {
+            string += " " + attr + "=\"" + value + "\"";
+          }
+        }
+        string += ">";
+        closer = '>';
+      } else {
+        string = JSON.stringify(arg);
+      }
+      if (string.length > maxLength) {
+        string = (string.substr(0, maxLength)) + " …";
+        string += closer;
+      }
+      return string;
+    };
 
     /**
     See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
@@ -2293,33 +2293,23 @@ we can't currently get rid off.
     @internal
      */
     sprintf = function() {
-      var args, i, maxLength, message;
+      var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      return sprintfWithFormattedArgs.apply(null, [u.identity, message].concat(slice.call(args)));
+    };
+
+    /**
+    @function up.browser.sprintfWithBounds
+    @internal
+     */
+    sprintfWithFormattedArgs = function() {
+      var args, formatter, i, message;
+      formatter = arguments[0], message = arguments[1], args = 3 <= arguments.length ? slice.call(arguments, 2) : [];
       i = 0;
-      maxLength = 80;
       return message.replace(CONSOLE_PLACEHOLDERS, function() {
-        var arg, argType;
+        var arg;
         arg = args[i];
-        argType = typeof arg;
-        if (argType === 'string') {
-          arg = arg.replace(/\s+/g, ' ');
-          if (arg.length > maxLength) {
-            arg = (arg.substr(0, maxLength)) + "…";
-          }
-          arg = "\"" + arg + "\"";
-        } else if (argType === 'undefined') {
-          arg = 'undefined';
-        } else if (argType === 'number' || argType === 'function') {
-          arg = arg.toString();
-        } else {
-          arg = JSON.stringify(arg);
-        }
-        if (arg.length > maxLength) {
-          arg = (arg.substr(0, maxLength)) + " …";
-          if (argType === 'object' || argType === 'function') {
-            arg += " }";
-          }
-        }
+        arg = formatter(stringifyArg(arg));
         i += 1;
         return arg;
       });
@@ -2492,7 +2482,8 @@ we can't currently get rid off.
       isSupported: isSupported,
       installPolyfills: installPolyfills,
       puts: puts,
-      sprintf: sprintf
+      sprintf: sprintf,
+      sprintfWithFormattedArgs: sprintfWithFormattedArgs
     };
   })(jQuery);
 
@@ -2902,7 +2893,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     @experimental
      */
     emitReset = function() {
-      return up.emit('up:framework:reset', {
+      return emit('up:framework:reset', {
         message: 'Resetting framework'
       });
     };
@@ -2917,7 +2908,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     /**
     Boots the Unpoly framework.
     
-    This is done automatically by including the Unpoly Javascript.
+    **This is called automatically** by including the Unpoly Javascript files.
     
     Unpoly will not boot if the current browser is [not supported](/up.browser.isSupported).
     This leaves you with a classic server-side application on legacy browsers.
@@ -2925,24 +2916,37 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     Emits the [`up:framework:boot`](/up:framework:boot) event.
     
     @function up.boot
-    @experimental
+    @internal
      */
     boot = function() {
       if (up.browser.isSupported()) {
         up.browser.installPolyfills();
-        return up.emit('up:framework:boot', {
+        emit('up:framework:boot', {
           message: 'Booting framework'
+        });
+        emit('up:framework:booted', {
+          message: 'Framework booted'
+        });
+        return u.nextFrame(function() {
+          return u.whenReady().then(function() {
+            emit('up:app:boot', {
+              message: 'Booting user application'
+            });
+            return emit('up:app:booted', {
+              message: 'User application booted'
+            });
+          });
         });
       }
     };
 
     /**
-    This event is [emitted](/up.emit) when Unpoly [boots](/up.boot).
+    This event is [emitted](/up.emit) when Unpoly [starts to boot](/up.boot).
     
     @event up:framework:boot
-    @experimental
+    @internal
      */
-    live('up:framework:boot', snapshot);
+    live('up:framework:booted', snapshot);
     live('up:framework:reset', restoreSnapshot);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
@@ -2965,6 +2969,187 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
   up.reset = up.bus.emitReset;
 
   up.boot = up.bus.boot;
+
+}).call(this);
+
+/**
+Logging
+=======
+
+Elaborate wrappers around `window.console`.
+Should only used internally since they prefix `ᴜᴘ` to each
+printed message.
+ */
+
+(function() {
+  var slice = [].slice;
+
+  up.log = (function($) {
+    var config, debug, disable, enable, error, group, prefix, printBanner, puts, reset, u, warn;
+    u = up.util;
+
+    /**
+    Configures the logging output on the developer console.
+    
+    @property up.log.config
+    @param {Boolean} [options.enabled=false]
+      Whether Unpoly will print debugging information to the developer console.
+    
+      Debugging information includes which elements are being [compiled](/up.syntax)
+      and which [events](/up.bus) are being emitted.
+      Note that errors will always be printed, regardless of this setting.
+    @param {Boolean} [options.collapse=false]
+      Whether debugging information is printed as a collapsed tree.
+    
+      Set this to `true` if you are overwhelmed by the debugging information Unpoly
+      prints to the developer console.
+    @param {String} [options.prefix='[UP] ']
+      A string to prepend to Unpoly's logging messages so you can distinguish it from your own messages.
+    @stable
+     */
+    config = u.config({
+      prefix: '[UP] ',
+      enabled: false,
+      collapse: false
+    });
+    reset = function() {
+      return config.reset();
+    };
+    prefix = function(message) {
+      return "" + config.prefix + message;
+    };
+
+    /**
+    Prints a debugging message to the browser console.
+    
+    @function up.debug
+    @param {String} message
+    @param {Array} args...
+    @internal
+     */
+    debug = function() {
+      var args, message, ref;
+      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      if (config.enabled && message) {
+        return (ref = up.browser).puts.apply(ref, ['debug', prefix(message)].concat(slice.call(args)));
+      }
+    };
+
+    /**
+    Prints a logging message to the browser console.
+    
+    @function up.puts
+    @param {String} message
+    @param {Array} args...
+    @internal
+     */
+    puts = function() {
+      var args, message, ref;
+      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      if (config.enabled && message) {
+        return (ref = up.browser).puts.apply(ref, ['log', prefix(message)].concat(slice.call(args)));
+      }
+    };
+
+    /**
+    @function up.log.warn
+    @internal
+     */
+    warn = function() {
+      var args, message, ref;
+      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      if (config.enabled && message) {
+        return (ref = up.browser).puts.apply(ref, ['warn', prefix(message)].concat(slice.call(args)));
+      }
+    };
+
+    /**
+    - Makes sure the group always closes
+    - Does not make a group if the message is nil
+    
+    @function up.log.group
+    @internal
+     */
+    group = function() {
+      var args, block, message, ref, stream;
+      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      block = args.pop();
+      if (config.enabled && message) {
+        stream = config.collapse ? 'groupCollapsed' : 'group';
+        (ref = up.browser).puts.apply(ref, [stream, prefix(message)].concat(slice.call(args)));
+        try {
+          return block();
+        } finally {
+          if (message) {
+            console.groupEnd();
+          }
+        }
+      } else {
+        return block();
+      }
+    };
+
+    /**
+    @function up.log.error
+    @internal
+     */
+    error = function() {
+      var args, message, ref;
+      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      if (message) {
+        return (ref = up.browser).puts.apply(ref, ['error', prefix(message)].concat(slice.call(args)));
+      }
+    };
+    printBanner = function() {
+      var banner;
+      banner = " __ _____  ___  ___  / /_ __\n" + ("/ // / _ \\/ _ \\/ _ \\/ / // /  " + up.version + "\n") + "\\___/_//_/ .__/\\___/_/\\_. / \n" + "        / /            / /\n" + "\n";
+      if (config.enabled) {
+        banner += "Call `up.log.disable()` to disable debugging output.";
+      } else {
+        banner += "Call `up.log.enable()` to enable debugging output.";
+      }
+      return up.browser.puts('log', banner);
+    };
+    up.on('up:framework:boot', printBanner);
+    up.on('up:framework:reset', reset);
+
+    /**
+    Makes future Unpoly events print vast amounts of debugging information to the developer console.
+    
+    Debugging information includes which elements are being [compiled](/up.syntax)
+    and which [events](/up.bus) are being emitted.
+    
+    @function up.log.enable
+    @stable
+     */
+    enable = function() {
+      return config.enabled = true;
+    };
+
+    /**
+    Prevents future Unpoly events from printing vast amounts of debugging information to the developer console.
+    
+    Errors will still be printed.
+    
+    @function up.log.enable
+    @stable
+     */
+    disable = function() {
+      return config.enabled = false;
+    };
+    return {
+      puts: puts,
+      debug: debug,
+      error: error,
+      warn: warn,
+      group: group,
+      config: config,
+      enable: enable,
+      disable: disable
+    };
+  })(jQuery);
+
+  up.puts = up.log.puts;
 
 }).call(this);
 
@@ -3465,7 +3650,7 @@ later.
       compilers = u.select(compilers, isDefault);
       return macros = u.select(macros, isDefault);
     };
-    up.on('up:framework:boot', snapshot);
+    up.on('up:framework:booted', snapshot);
     up.on('up:framework:reset', reset);
     return {
       compiler: compiler,
@@ -5233,7 +5418,7 @@ are based on this module.
       sourceUrl = options.url || source(selectorOrElement);
       return replace(selectorOrElement, sourceUrl, options);
     };
-    up.on('ready', function() {
+    up.on('up:app:boot', function() {
       var $body;
       $body = $(document.body);
       setSource($body, up.browser.url());
@@ -5967,7 +6152,7 @@ or [transitions](/up.transition) using Javascript or CSS.
     transition('cross-fade', function($old, $new, options) {
       return resolvableWhen(animate($old, 'fade-out', options), animate($new, 'fade-in', options));
     });
-    up.on('up:framework:boot', snapshot);
+    up.on('up:framework:booted', snapshot);
     up.on('up:framework:reset', reset);
     return {
       morph: morph,
@@ -8191,6 +8376,9 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
             return u.error("Unknown position option '%s'", position);
         }
       })();
+      if (u.isFixed($link)) {
+        css['position'] = 'fixed';
+      }
       $popup = $('.up-popup');
       $popup.attr('up-position', position);
       $popup.css(css);
@@ -9509,10 +9697,10 @@ The tooltip element is appended to the end of `<body>`.
     @stable
      */
     up.compiler('[up-tooltip], [up-tooltip-html]', function($link) {
-      $link.on('mouseover', function() {
+      $link.on('mouseenter', function() {
         return attach($link);
       });
-      return $link.on('mouseout', function() {
+      return $link.on('mouseleave', function() {
         return close();
       });
     });
