@@ -31,11 +31,11 @@ describe 'up.history', ->
 
       it 'does not set an up-href attribute if there is no previous URL'
 
-    describeFallback 'canPushState', ->
+      describeFallback 'canPushState', ->
 
-      it 'does not change the element', ->
-        $element = up.hello(affix('a[href="/three"][up-back]').text('text'))
-        expect($element.attr('up-href')).toBeUndefined()
+        it 'does not change the element', ->
+          $element = up.hello(affix('a[href="/three"][up-back]').text('text'))
+          expect($element.attr('up-href')).toBeUndefined()
 
     describe 'scroll restauration', ->
 
