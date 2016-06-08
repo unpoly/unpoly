@@ -332,7 +332,10 @@ up.link = (($) ->
     or never use the cache (`false`)
     or make an educated guess (`undefined`).
   @param [up-history]
-    Set this to `'false'` to prevent the current URL from being updated.
+    Whether to push an entry to the browser history when following the link.
+
+    Set this to `'false'` to prevent the URL bar from being updated.
+    Set this to a URL string to update the history with the given URL.
   @stable
   ###
   onAction '[up-target]', ($link) ->
@@ -392,8 +395,11 @@ up.link = (($) ->
   @param {String} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the link is followed.
-  @param [up-history]
-    Set this to `'false'` to prevent the current URL from being updated.
+  @param {String} [up-history]
+    Whether to push an entry to the browser history when following the link.
+
+    Set this to `'false'` to prevent the URL bar from being updated.
+    Set this to a URL string to update the history with the given URL.
   @param [up-restore-scroll='false']
     Whether to restore the scroll position of all viewports
     within the response.

@@ -543,7 +543,13 @@ up.form = (($) ->
   @param {String} [up-fail-transition]
     The animation to use when the form is replaced after a failed submission.
   @param [up-history]
-    Set this to `'false'` to prevent the current URL from being updated.
+    Whether to push a browser history entry after a successful form submission.
+
+    By default the form's target URL is used. If the form redirects to another URL,
+    the redirect target will be used.
+
+    Set this to `'false'` to prevent the URL bar from being updated.
+    Set this to a URL string to update the history with the given URL.
   @param {String} [up-method]
     The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
     Alternately you can use an attribute `data-method`

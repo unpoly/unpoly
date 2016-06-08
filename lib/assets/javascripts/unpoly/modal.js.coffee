@@ -621,8 +621,11 @@ up.modal = (($) ->
   @param {String} [up-width]
     The width of the dialog in pixels.
     By [default](/up.modal.config) the dialog will grow to fit its contents.
-  @param {String} [up-history="true"]
-    Whether to add a browser history entry for the modal's source URL.
+  @param {String} [up-history]
+    Whether to push an entry to the browser history for the modal's source URL.
+
+    Set this to `'false'` to prevent the URL bar from being updated.
+    Set this to a URL string to update the history with the given URL.
 
   @stable
   ###

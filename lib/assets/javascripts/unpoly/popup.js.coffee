@@ -367,6 +367,12 @@ up.popup = (($) ->
   @param [up-sticky]
     If set to `true`, the popup remains
     open even if the page changes in the background.
+  @param {String} [up-history='false']
+    Whether to push an entry to the browser history for the popup's source URL.
+
+    Set this to `'false'` to prevent the URL bar from being updated.
+    Set this to a URL string to update the history with the given URL.
+
   @stable
   ###
   up.link.onAction('[up-popup]', ($link) ->
