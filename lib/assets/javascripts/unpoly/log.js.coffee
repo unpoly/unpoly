@@ -2,9 +2,16 @@
 Logging
 =======
 
-Elaborate wrappers around `window.console`.
-Should only used internally since they prefix `ᴜᴘ` to each
-printed message.
+Unpoly can print debugging information to the developer console, e.g.:
+
+- Which [events](/up.bus) are called
+- When we're [making requests to the network](/up.proxy)
+- Which [compilers](/up.syntax) are applied to which elements
+
+You can activate logging by calling [`up.log.enable()`](/up.log.enable).
+The output can be configured using the [`up.log.config`](/up.log.config) property.
+
+@class up.log
 ###
 up.log = (($) ->
 
@@ -130,9 +137,9 @@ up.log = (($) ->
   ###*
   Prevents future Unpoly events from printing vast amounts of debugging information to the developer console.
 
-  Errors will still be printed.
+  Errors will still be printed, even with logging disabled.
 
-  @function up.log.enable
+  @function up.log.disable
   @stable
   ###
   disable = ->

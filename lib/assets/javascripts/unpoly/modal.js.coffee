@@ -56,7 +56,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     <a href="/settings" up-modal=".options" up-sticky>Settings</a>
 
 
-@class up.modal 
+@class up.modal
 ###
 up.modal = (($) ->
 
