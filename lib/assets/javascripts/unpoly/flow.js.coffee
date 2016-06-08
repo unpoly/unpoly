@@ -14,6 +14,24 @@ up.flow = (($) ->
   
   u = up.util
 
+  ###*
+  Configures defaults for fragment insertion.
+
+  @property up.flow.config
+  @param {Boolean} [options.runInlineScripts=true]
+    Whether inline `<script>` tags inside inserted HTML fragments will be executed.
+  @param {Boolean} [options.runLinkedScripts=false]
+    Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
+    the linked Javascript file.
+  @stable
+  ###
+  config = u.config
+    runInlineScripts: true
+    runLinkedScripts: false
+
+  reset = ->
+    config.reset()
+
   setSource = (element, sourceUrl) ->
     $element = $(element)
     sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
@@ -323,13 +341,13 @@ up.flow = (($) ->
             $old = findOldFragment(step.selector, options)
             $new = response.find(step.selector)?.first()
             if $old && $new
+              filterScripts($new, options)
               swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options)
               swapPromises.push(swapPromise)
         # Delay all further links in the promise chain until all fragments have been swapped
         return $.when(swapPromises...)
       promise = promise.then(options.afterSwap) if options.afterSwap
       promise
-
 
   findOldFragment = (selector, options) ->
     # Prefer to replace fragments in an open popup or modal
@@ -344,6 +362,17 @@ up.flow = (($) ->
       if message[0] == '#'
         message += ' (avoid using IDs)'
       u.error(message, selector)
+
+  filterScripts = ($element, options) ->
+    runInlineScripts = u.option(options.runInlineScripts, config.runInlineScripts)
+    runLinkedScripts = u.option(options.runLinkedScripts, config.runLinkedScripts)
+    $scripts = u.findWithSelf($element, 'script')
+    for script in $scripts
+      $script = $(script)
+      isLinked = u.isPresent($script.attr('src'))
+      isInline = not isLinked
+      unless (isLinked && runLinkedScripts) || (isInline && runInlineScripts)
+        $script.remove()
 
   parseResponse = (html, options) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags
@@ -814,6 +843,8 @@ up.flow = (($) ->
     setSource($body, up.browser.url())
     hello($body)
 
+  up.on 'up:framework:reset', reset
+
   knife: eval(Knife?.point)
   replace: replace
   reload: reload
@@ -823,6 +854,7 @@ up.flow = (($) ->
   source: source
   resolveSelector: resolveSelector
   hello: hello
+  config: config
 
 )(jQuery)
 

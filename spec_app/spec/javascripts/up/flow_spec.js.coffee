@@ -306,32 +306,117 @@ describe 'up.flow', ->
               expect($('.after')).toHaveText('old-afternew-after')
               done()
 
-        it 'executes only those script-tags in the response that get inserted into the DOM', (done) ->
-          window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
+        describe 'execution of script tags', ->
 
-          @responseText =
-            """
-            <div class="before">
-              new-before
-              <script type="text/javascript">
-                window.scriptTagExecuted('before')
-              </script>
-            </div>
-            <div class="middle">
-              new-middle
-              <script type="text/javascript">
-                window.scriptTagExecuted('middle')
-              </script>
-            </div>
-            """
+          beforeEach ->
+            window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
 
-          promise = up.replace('.middle', '/path')
-          @respond()
+          describe 'inline scripts', ->
 
-          promise.then ->
-            expect(window.scriptTagExecuted).not.toHaveBeenCalledWith('before')
-            expect(window.scriptTagExecuted).toHaveBeenCalledWith('middle')
-            done()
+            it 'executes only those script-tags in the response that get inserted into the DOM', (done) ->
+              @responseText =
+                """
+                <div class="before">
+                  new-before
+                  <script type="text/javascript">
+                    window.scriptTagExecuted('before')
+                  </script>
+                </div>
+                <div class="middle">
+                  new-middle
+                  <script type="text/javascript">
+                    window.scriptTagExecuted('middle')
+                  </script>
+                </div>
+                """
+
+              promise = up.replace('.middle', '/path')
+              @respond()
+
+              promise.then ->
+                expect(window.scriptTagExecuted).not.toHaveBeenCalledWith('before')
+                expect(window.scriptTagExecuted).toHaveBeenCalledWith('middle')
+                done()
+
+            it 'does not execute script-tags if up.flow.config.runInlineScripts is set to false', (done) ->
+              up.flow.config.runInlineScripts = false
+
+              @responseText = """
+                <div class="middle">
+                  new-middle
+                  <script type="text/javascript">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+                """
+
+              promise = up.replace('.middle', '/path')
+              @respond()
+
+              promise.then ->
+                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+                done()
+
+          describe 'linked scripts', ->
+
+            beforeEach ->
+              # Add a cache-buster to each path so the browser cache is guaranteed to be irrelevant
+              @linkedScriptPath = "/assets/fixtures/linked_script.js?cache-buster=#{Math.random().toString()}"
+
+            it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', (done) ->
+              @responseText = """
+                <div class="middle">
+                  new-middle
+                  <script type="text/javascript" src="#{@linkedScriptPath}">
+                    alert("inside")
+                  </script>
+                </div>
+                """
+
+              promise = up.replace('.middle', '/path')
+              @respond()
+
+              promise.then =>
+
+                # Must respond to this request, since jQuery makes them async: false
+                if u.contains(@lastRequest().url, 'linked_script')
+                  @respondWith('window.scriptTagExecuted()')
+
+                # Now wait for jQuery to parse out <script> tags and fetch the linked scripts.
+                # This actually happens with jasmine_ajax's fake XHR object.
+                u.nextFrame =>
+                  expect(jasmine.Ajax.requests.count()).toEqual(1)
+                  expect(@lastRequest().url).not.toContain('linked_script')
+                  expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+                  done()
+
+            it 'does execute linked scripts if up.flow.config.runLinkedScripts is set to true', (done) ->
+              up.flow.config.runLinkedScripts = true
+
+              @responseText = """
+                <div class="middle">
+                  new-middle
+                  <script type="text/javascript" src='#{@linkedScriptPath}'>
+                  </script>
+                </div>
+                """
+
+              promise = up.replace('.middle', '/path')
+              @respond()
+
+              promise.then =>
+
+                # Must respond to this request, since jQuery makes them async: false
+                if u.contains(@lastRequest().url, 'linked_script')
+                  @respondWith('window.scriptTagExecuted()')
+
+                # Now wait for jQuery to parse out <script> tags and fetch the linked scripts.
+                # This actually happens with jasmine_ajax's fake XHR object.
+                u.nextFrame =>
+                  expect(jasmine.Ajax.requests.count()).toEqual(2)
+                  expect(@lastRequest().url).toContain('linked_script')
+                  done()
+
 
         describe 'with { restoreScroll: true } option', ->
 

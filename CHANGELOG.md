@@ -13,6 +13,8 @@ Unreleased
 
 ### Breaking changes
 
+- When inserting a page fragment with a `<script src="...">` tag, the linked Javascript is no longer loaded and executed. Inline scripts will still be executed. You can configure this behavior using the new [`up.flow.config`](/up.flow.config) property.
+
 
 
 0.26.0
