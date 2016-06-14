@@ -166,35 +166,42 @@ describe 'up.popup', ->
     describe 'a[up-popup]', ->
 
       beforeEach ->
-        @$link = affix('a[href="/path"][up-popup=".target"]')
-        @attachSpy = up.popup.knife.mock('attach').and.returnValue(u.resolvedPromise())
-        @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
+        @stubAttach = =>
+          @$link = affix('a[href="/path"][up-popup=".target"]')
+          @attachSpy = up.popup.knife.mock('attach').and.returnValue(u.resolvedPromise())
+          @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
       it 'opens the clicked link in a popup', ->
+        @stubAttach()
         Trigger.click(@$link)
         expect(@attachSpy).toHaveBeenCalledWith(@$link)
 
       # IE does not call Javascript and always performs the default action on right clicks
       unless navigator.userAgent.match(/Trident/)
         it 'does nothing if the right mouse button is used', ->
+          @stubAttach()
           Trigger.click(@$link, button: 2)
           expect(@attachSpy).not.toHaveBeenCalled()
 
       it 'does nothing if shift is pressed during the click', ->
+        @stubAttach()
         Trigger.click(@$link, shiftKey: true)
         expect(@attachSpy).not.toHaveBeenCalled()
 
       it 'does nothing if ctrl is pressed during the click', ->
+        @stubAttach()
         Trigger.click(@$link, ctrlKey: true)
         expect(@attachSpy).not.toHaveBeenCalled()
 
       it 'does nothing if meta is pressed during the click', ->
+        @stubAttach()
         Trigger.click(@$link, metaKey: true)
         expect(@attachSpy).not.toHaveBeenCalled()
 
       describe 'with [up-instant] modifier', ->
 
         beforeEach ->
+          @stubAttach()
           @$link.attr('up-instant', '')
 
         it 'opens the modal on mousedown (instead of on click)', ->
@@ -226,6 +233,13 @@ describe 'up.popup', ->
         it 'does nothing if meta is pressed during mousedown', ->
           Trigger.mousedown(@$link, metaKey: true)
           expect(@attachSpy).not.toHaveBeenCalled()
+
+      describe 'with [up-method] modifier', ->
+
+        it 'honours the given method', ->
+          $link = affix('a[href="/path"][up-popup=".target"][up-method="post"]')
+          Trigger.click($link)
+          expect(@lastRequest().method).toEqual 'POST'
 
     describe '[up-close]', ->
 
