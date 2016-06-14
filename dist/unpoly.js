@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.26.0"
+    version: "0.26.1"
   };
 
 }).call(this);
@@ -2976,9 +2976,16 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 Logging
 =======
 
-Elaborate wrappers around `window.console`.
-Should only used internally since they prefix `ᴜᴘ` to each
-printed message.
+Unpoly can print debugging information to the developer console, e.g.:
+
+- Which [events](/up.bus) are called
+- When we're [making requests to the network](/up.proxy)
+- Which [compilers](/up.syntax) are applied to which elements
+
+You can activate logging by calling [`up.log.enable()`](/up.log.enable).
+The output can be configured using the [`up.log.config`](/up.log.config) property.
+
+@class up.log
  */
 
 (function() {
@@ -3129,9 +3136,9 @@ printed message.
     /**
     Prevents future Unpoly events from printing vast amounts of debugging information to the developer console.
     
-    Errors will still be printed.
+    Errors will still be printed, even with logging disabled.
     
-    @function up.log.enable
+    @function up.log.disable
     @stable
      */
     disable = function() {
@@ -4553,8 +4560,27 @@ are based on this module.
 
 (function() {
   up.flow = (function($) {
-    var autofocus, destroy, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, findOldFragment, first, hello, isRealElement, oldFragmentNotFound, parseImplantSteps, parseResponse, processResponse, reload, replace, resolveSelector, setSource, source, swapElements, transferKeepableElements, u, updateHistory;
+    var autofocus, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, findOldFragment, first, hello, isRealElement, oldFragmentNotFound, parseImplantSteps, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, source, swapElements, transferKeepableElements, u, updateHistory;
     u = up.util;
+
+    /**
+    Configures defaults for fragment insertion.
+    
+    @property up.flow.config
+    @param {Boolean} [options.runInlineScripts=true]
+      Whether inline `<script>` tags inside inserted HTML fragments will be executed.
+    @param {Boolean} [options.runLinkedScripts=false]
+      Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
+      the linked Javascript file.
+    @stable
+     */
+    config = u.config({
+      runInlineScripts: true,
+      runLinkedScripts: false
+    });
+    reset = function() {
+      return config.reset();
+    };
     setSource = function(element, sourceUrl) {
       var $element;
       $element = $(element);
@@ -4899,6 +4925,7 @@ are based on this module.
               $old = findOldFragment(step.selector, options);
               $new = (ref1 = response.find(step.selector)) != null ? ref1.first() : void 0;
               if ($old && $new) {
+                filterScripts($new, options);
                 swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options);
                 return swapPromises.push(swapPromise);
               }
@@ -4924,6 +4951,25 @@ are based on this module.
         }
         return u.error(message, selector);
       }
+    };
+    filterScripts = function($element, options) {
+      var $script, $scripts, isInline, isLinked, j, len, results, runInlineScripts, runLinkedScripts, script;
+      runInlineScripts = u.option(options.runInlineScripts, config.runInlineScripts);
+      runLinkedScripts = u.option(options.runLinkedScripts, config.runLinkedScripts);
+      $scripts = u.findWithSelf($element, 'script');
+      results = [];
+      for (j = 0, len = $scripts.length; j < len; j++) {
+        script = $scripts[j];
+        $script = $(script);
+        isLinked = u.isPresent($script.attr('src'));
+        isInline = !isLinked;
+        if (!((isLinked && runLinkedScripts) || (isInline && runInlineScripts))) {
+          results.push($script.remove());
+        } else {
+          results.push(void 0);
+        }
+      }
+      return results;
     };
     parseResponse = function(html, options) {
       var htmlElement;
@@ -5424,6 +5470,7 @@ are based on this module.
       setSource($body, up.browser.url());
       return hello($body);
     });
+    up.on('up:framework:reset', reset);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       replace: replace,
@@ -5433,7 +5480,8 @@ are based on this module.
       first: first,
       source: source,
       resolveSelector: resolveSelector,
-      hello: hello
+      hello: hello,
+      config: config
     };
   })(jQuery);
 
@@ -6474,7 +6522,7 @@ the user performs the click.
     };
 
     /**
-    This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
+    This event is [emitted](/up.emit) when [AJAX requests](/up.ajax)
     are taking long to finish.
     
     By default Unpoly will wait 300 ms for an AJAX request to finish
@@ -7131,7 +7179,10 @@ Read on
       or never use the cache (`false`)
       or make an educated guess (`undefined`).
     @param [up-history]
-      Set this to `'false'` to prevent the current URL from being updated.
+      Whether to push an entry to the browser history when following the link.
+    
+      Set this to `'false'` to prevent the URL bar from being updated.
+      Set this to a URL string to update the history with the given URL.
     @stable
      */
     onAction('[up-target]', function($link) {
@@ -7192,8 +7243,11 @@ Read on
     @param {String} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the link is followed.
-    @param [up-history]
-      Set this to `'false'` to prevent the current URL from being updated.
+    @param {String} [up-history]
+      Whether to push an entry to the browser history when following the link.
+    
+      Set this to `'false'` to prevent the URL bar from being updated.
+      Set this to a URL string to update the history with the given URL.
     @param [up-restore-scroll='false']
       Whether to restore the scroll position of all viewports
       within the response.
@@ -7404,7 +7458,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       Successful form submissions will add a history entry and change the browser's
       location bar if the form either uses the `GET` method or the response redirected
       to another page (this requires the `unpoly-rails` gem).
-      If want to prevent history changes in any case, set this to `false`.
+      If you want to prevent history changes in any case, set this to `false`.
       If you pass a `String`, it is used as the URL for the browser history.
     @param {String} [options.transition='none']
       The transition to use when a successful form submission updates the `options.target` selector.
@@ -7893,7 +7947,13 @@ open dialogs with sub-forms, etc. all without losing form state.
     @param {String} [up-fail-transition]
       The animation to use when the form is replaced after a failed submission.
     @param [up-history]
-      Set this to `'false'` to prevent the current URL from being updated.
+      Whether to push a browser history entry after a successful form submission.
+    
+      By default the form's target URL is used. If the form redirects to another URL,
+      the redirect target will be used.
+    
+      Set this to `'false'` to prevent the URL bar from being updated.
+      Set this to a URL string to update the history with the given URL.
     @param {String} [up-method]
       The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
       Alternately you can use an attribute `data-method`
@@ -8667,6 +8727,12 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param [up-sticky]
       If set to `true`, the popup remains
       open even if the page changes in the background.
+    @param {String} [up-history='false']
+      Whether to push an entry to the browser history for the popup's source URL.
+    
+      Set this to `'false'` to prevent the URL bar from being updated.
+      Set this to a URL string to update the history with the given URL.
+    
     @stable
      */
     up.link.onAction('[up-popup]', function($link) {
@@ -9423,8 +9489,11 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param {String} [up-width]
       The width of the dialog in pixels.
       By [default](/up.modal.config) the dialog will grow to fit its contents.
-    @param {String} [up-history="true"]
-      Whether to add a browser history entry for the modal's source URL.
+    @param {String} [up-history]
+      Whether to push an entry to the browser history for the modal's source URL.
+    
+      Set this to `'false'` to prevent the URL bar from being updated.
+      Set this to a URL string to update the history with the given URL.
     
     @stable
      */
