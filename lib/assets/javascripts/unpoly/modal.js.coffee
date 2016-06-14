@@ -280,6 +280,8 @@ up.modal = (($) ->
   @param {String} [options.confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the modal is being opened.
+  @params {String} [options.method="GET"]
+    Override the request method.
   @param {Object} [options.history=true]
     Whether to add a browser history entry for the modal's source URL.
   @param {String} [options.animation]
@@ -380,6 +382,7 @@ up.modal = (($) ->
     options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), flavorDefault('backdropOpenAnimation', options.flavor))
     options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor))
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
+    options.method = up.link.followMethod($link, options)
     animateOptions = up.motion.animateOptions(options, $link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
 
     # Although we usually fall back to full page loads if a browser doesn't support pushState,
@@ -608,6 +611,8 @@ up.modal = (($) ->
   @param {String} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the modal is opened.
+  @params {String} [up-method='GET']
+    Override the request method.
   @param {String} [up-sticky]
     If set to `"true"`, the modal remains
     open even if the page changes in the background.

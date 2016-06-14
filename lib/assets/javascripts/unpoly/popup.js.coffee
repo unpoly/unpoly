@@ -213,6 +213,8 @@ up.popup = (($) ->
     The delay before the animation starts. See [`up.animate`](/up.animate).
   @param {String} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
+  @params {String} [options.method="GET"]
+    Override the request method.
   @param {Boolean} [options.sticky=false]
     If set to `true`, the popup remains
     open even if the page changes in the background.
@@ -235,6 +237,7 @@ up.popup = (($) ->
     options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), config.sticky)
     options.history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($link, 'up-history'), config.history) else false
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
+    options.method = up.link.followMethod($link, options)
     animateOptions = up.motion.animateOptions(options, $link, duration: config.openDuration, easing: config.openEasing)
 
     up.browser.confirm(options).then ->
@@ -364,6 +367,8 @@ up.popup = (($) ->
   @param {String} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the popup is opened.
+  @params {String} [up-method='GET']
+    Override the request method.
   @param [up-sticky]
     If set to `true`, the popup remains
     open even if the page changes in the background.
