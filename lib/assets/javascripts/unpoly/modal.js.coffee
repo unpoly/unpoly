@@ -337,7 +337,7 @@ up.modal = (($) ->
   Example:
 
       var html = 'before <div class="content">inner</div> after';
-      up.modal.extract('/foo', '.content', html);
+      up.modal.extract('.content', html);
 
   The would open a modal with the following contents:
 
@@ -346,8 +346,10 @@ up.modal = (($) ->
   Emits events [`up:modal:open`](/up:modal:open) and [`up:modal:opened`](/up:modal:opened).
 
   @function up.modal.extract
-  @param {String} url
-    The URL to load.
+  @param {String} selector
+    The CSS selector to extract from the HTML.
+  @param {String} html
+    The HTML containing the modal content.
   @param {Object} options
     See options for [`up.modal.follow`](/up.modal.follow).
   @return {Promise}
