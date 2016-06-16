@@ -11,6 +11,9 @@ Unreleased
 
 ### Compatible changes
 
+- Popups anchored to fixed elements are now positioned correctly if the document is scrolled
+- Tooltips can now be anchored to fixed elements
+
 
 ### Breaking changes
 

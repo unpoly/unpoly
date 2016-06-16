@@ -886,7 +886,8 @@ up.util = (($) ->
     A function that restores the original CSS when called.
   @internal
   ###
-  temporaryCss = ($element, css, block) ->
+  temporaryCss = (elementOrSelector, css, block) ->
+    $element = $(elementOrSelector)
     oldCss = $element.css(Object.keys(css))
     $element.css(css)
     memo = -> $element.css(oldCss)
@@ -1048,7 +1049,7 @@ up.util = (($) ->
   @internal
   ###
   measure = ($element, opts) ->
-    opts = options(opts, relative: false, inner: false, full: false)
+    opts = options(opts, relative: false, inner: false)
 
     if opts.relative
       if opts.relative == true
@@ -1078,11 +1079,7 @@ up.util = (($) ->
     else
       box.width = $element.outerWidth()
       box.height = $element.outerHeight()
-      
-    if opts.full
-      $viewport = up.layout.viewportOf($element)
-      box.right = $viewport.width() - (box.left + box.width)
-      box.bottom = $viewport.height() - (box.top + box.height)
+
     box
 
   ###*

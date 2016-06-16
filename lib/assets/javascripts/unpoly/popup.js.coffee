@@ -109,55 +109,36 @@ up.popup = (($) ->
     config.reset()
 
   setPosition = ($link, position) ->
-    linkBox = u.measure($link, full: true)
-    css = switch position
-      when "bottom-right"
-        right: linkBox.right
-        top: linkBox.top + linkBox.height
-      when "bottom-left"
-        left: linkBox.left
-        top: linkBox.top + linkBox.height
-      when "top-right"
-        right: linkBox.right
-        bottom: linkBox.top
-      when "top-left"
-        left: linkBox.left
-        bottom: linkBox.top
+    css = {}
+
+    $popup = $('.up-popup')
+    popupBox = u.measure($popup)
+
+    if u.isFixed($link)
+      linkBox = $link.get(0).getBoundingClientRect()
+      css['position'] = 'fixed'
+    else
+      linkBox = u.measure($link)
+
+    switch position
+      when "bottom-right" # anchored to bottom-right of link, opens towards bottom-left
+        css['top'] = linkBox.top + linkBox.height
+        css['left'] = linkBox.left + linkBox.width - popupBox.width
+      when "bottom-left" # anchored to bottom-left of link, opens towards bottom-right
+        css['top'] = linkBox.top + linkBox.height
+        css['left'] = linkBox.left
+      when "top-right" # anchored to top-right of link, opens to top-left
+        css['top'] = linkBox.top - popupBox.height
+        css['left'] = linkBox.left + linkBox.width - popupBox.width
+      when "top-left" # anchored to top-left of link, opens to top-right
+        css['top'] = linkBox.top - popupBox.height
+        css['left'] = linkBox.left
       else
         u.error("Unknown position option '%s'", position)
-    if u.isFixed($link)
-      css['position'] = 'fixed'
-    $popup = $('.up-popup')
+
     $popup.attr('up-position', position)
     $popup.css(css)
-    ensureInViewport($popup)
 
-  ensureInViewport = ($popup) ->
-    box = u.measure($popup, full: true)
-    errorX = null
-    errorY = null
-    if box.right < 0
-      errorX = -box.right  # errorX is positive
-    if box.bottom < 0
-      errorY = -box.bottom # errorY is positive
-    if box.left < 0
-      errorX = box.left # errorX is negative
-    if box.top < 0
-      errorY = box.top # errorY is negative
-    if errorX
-      # We use parseInt to:
-      # 1) convert "50px" to 50
-      # 2) convert "auto" to NaN
-      if left = parseInt($popup.css('left'))
-        $popup.css('left', left - errorX)
-      else if right = parseInt($popup.css('right'))
-        $popup.css('right', right + errorX)
-    if errorY
-      if top = parseInt($popup.css('top'))
-        $popup.css('top', top - errorY)
-      else if bottom = parseInt($popup.css('bottom'))
-        $popup.css('bottom', bottom + errorY)
-          
   discardHistory = ->
     $popup = $('.up-popup')
     $popup.removeAttr('up-covered-url')

@@ -143,7 +143,7 @@ describe 'up.modal', ->
             @respondWith('<div class="container">response1</div>', request: request1)
             u.setTimer 10, =>
               @respondWith('<div class="container">response2</div>', request: request2)
-              u.setTimer 50, =>
+              u.setTimer 110, =>
                 expect($('.up-modal').length).toBe(1)
                 expect($('.up-modal-dialog').length).toBe(1)
                 expect($('.container')).toHaveText('response2')

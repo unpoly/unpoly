@@ -10,11 +10,16 @@ describe 'up.popup', ->
         jasmine.addMatchers
           toSitBelow: (util, customEqualityTesters) ->
             compare: ($popup, $link) ->
-              pass: ->
-                popupDims = u.measure($popup, full: true)
-                linkDims = u.measure($link, full: true)
-                expect(popupDims.right).toBeAround(linkDims.right, 1)
-                expect(popupDims.top).toBeAround(linkDims.top + linkDims.height, 1)
+              popupDims = $popup.get(0).getBoundingClientRect()
+              linkDims = $link.get(0).getBoundingClientRect()
+              pass:
+                Math.abs(popupDims.right - linkDims.right) < 1.0 && Math.abs(popupDims.top - linkDims.bottom) < 1.0
+
+      beforeEach ->
+        @restoreBodyHeight = u.temporaryCss('body', 'min-height': '3000px')
+
+      afterEach ->
+        @restoreBodyHeight()
 
       it "loads this link's destination in a popup positioned under the given link", ->
         $container = affix('.container')
@@ -42,19 +47,24 @@ describe 'up.popup', ->
         expect($popup.find('.after')).not.toExist()
 
         expect($popup.css('position')).toEqual('absolute')
+
         expect($popup).toSitBelow($link)
 
       it 'gives the popup { position: "fixed" } if the given link is fixed', ->
+        # Let's test the harder case where the document is scrolled
+        up.layout.scroll(document, 50)
         $container = affix('.container')
         $container.css
           position: 'fixed'
           left: '100px'
           top: '50px'
         $link = $container.affix('a[href="/path/to"][up-popup=".content"]').text('link')
+
         up.popup.attach($link)
         @respondWith('<div class="content">popup-content</div>')
         $popup = $('.up-popup')
         expect($popup.css('position')).toEqual('fixed')
+
         expect($popup).toSitBelow($link)
 
       it 'does not explode if the popup was closed before the response was received', ->

@@ -57,23 +57,31 @@ up.tooltip = (($) ->
     config.reset()
 
   setPosition = ($link, $tooltip, position) ->
-    linkBox = u.measure($link)
+    css = {}
     tooltipBox = u.measure($tooltip)
-    css = switch position
+
+    if u.isFixed($link)
+      linkBox = $link.get(0).getBoundingClientRect()
+      css['position'] = 'fixed'
+    else
+      linkBox = u.measure($link)
+
+    switch position
       when "top"
-        left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
-        top: linkBox.top - tooltipBox.height
+        css['top'] = linkBox.top - tooltipBox.height
+        css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
       when "left"
-        left: linkBox.left - tooltipBox.width
-        top: linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
+        css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
+        css['left'] = linkBox.left - tooltipBox.width
       when "right"
-        left: linkBox.left + linkBox.width
-        top: linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
+        css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
+        css['left'] = linkBox.left + linkBox.width
       when "bottom"
-        left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
-        top: linkBox.top + linkBox.height
+        css['top'] = linkBox.top + linkBox.height
+        css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
       else
         u.error("Unknown position option '%s'", position)
+
     $tooltip.attr('up-position', position)
     $tooltip.css(css)
 
