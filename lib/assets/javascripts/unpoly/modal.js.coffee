@@ -280,7 +280,7 @@ up.modal = (($) ->
   @param {String} [options.confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the modal is being opened.
-  @params {String} [options.method="GET"]
+  @param {String} [options.method="GET"]
     Override the request method.
   @param {Object} [options.history=true]
     Whether to add a browser history entry for the modal's source URL.
@@ -613,7 +613,7 @@ up.modal = (($) ->
   @param {String} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the modal is opened.
-  @params {String} [up-method='GET']
+  @param {String} [up-method='GET']
     Override the request method.
   @param {String} [up-sticky]
     If set to `"true"`, the modal remains

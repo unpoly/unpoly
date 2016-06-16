@@ -194,7 +194,7 @@ up.popup = (($) ->
     The delay before the animation starts. See [`up.animate`](/up.animate).
   @param {String} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
-  @params {String} [options.method="GET"]
+  @param {String} [options.method="GET"]
     Override the request method.
   @param {Boolean} [options.sticky=false]
     If set to `true`, the popup remains
@@ -348,7 +348,7 @@ up.popup = (($) ->
   @param {String} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the popup is opened.
-  @params {String} [up-method='GET']
+  @param {String} [up-method='GET']
     Override the request method.
   @param [up-sticky]
     If set to `true`, the popup remains
