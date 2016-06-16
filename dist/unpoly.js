@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.26.1"
+    version: "0.26.2"
   };
 
 }).call(this);
@@ -1043,8 +1043,9 @@ that might save you from loading something like [Underscore.js](http://underscor
       A function that restores the original CSS when called.
     @internal
      */
-    temporaryCss = function($element, css, block) {
-      var memo, oldCss;
+    temporaryCss = function(elementOrSelector, css, block) {
+      var $element, memo, oldCss;
+      $element = $(elementOrSelector);
       oldCss = $element.css(Object.keys(css));
       $element.css(css);
       memo = function() {
@@ -1200,11 +1201,10 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     measure = function($element, opts) {
-      var $context, $viewport, box, contextCoords, coordinates, elementCoords;
+      var $context, box, contextCoords, coordinates, elementCoords;
       opts = options(opts, {
         relative: false,
-        inner: false,
-        full: false
+        inner: false
       });
       if (opts.relative) {
         if (opts.relative === true) {
@@ -1235,11 +1235,6 @@ that might save you from loading something like [Underscore.js](http://underscor
       } else {
         box.width = $element.outerWidth();
         box.height = $element.outerHeight();
-      }
-      if (opts.full) {
-        $viewport = up.layout.viewportOf($element);
-        box.right = $viewport.width() - (box.left + box.width);
-        box.bottom = $viewport.height() - (box.top + box.height);
       }
       return box;
     };
@@ -8337,7 +8332,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
 (function() {
   up.popup = (function($) {
-    var attach, autoclose, close, config, contains, coveredUrl, createFrame, currentUrl, discardHistory, ensureInViewport, isOpen, reset, setPosition, u;
+    var attach, autoclose, close, config, contains, coveredUrl, createFrame, currentUrl, discardHistory, isOpen, reset, setPosition, u;
     u = up.util;
 
     /**
@@ -8406,77 +8401,38 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       return config.reset();
     };
     setPosition = function($link, position) {
-      var $popup, css, linkBox;
-      linkBox = u.measure($link, {
-        full: true
-      });
-      css = (function() {
-        switch (position) {
-          case "bottom-right":
-            return {
-              right: linkBox.right,
-              top: linkBox.top + linkBox.height
-            };
-          case "bottom-left":
-            return {
-              left: linkBox.left,
-              top: linkBox.top + linkBox.height
-            };
-          case "top-right":
-            return {
-              right: linkBox.right,
-              bottom: linkBox.top
-            };
-          case "top-left":
-            return {
-              left: linkBox.left,
-              bottom: linkBox.top
-            };
-          default:
-            return u.error("Unknown position option '%s'", position);
-        }
-      })();
-      if (u.isFixed($link)) {
-        css['position'] = 'fixed';
-      }
+      var $popup, css, linkBox, popupBox;
+      css = {};
       $popup = $('.up-popup');
+      popupBox = u.measure($popup);
+      if (u.isFixed($link)) {
+        linkBox = $link.get(0).getBoundingClientRect();
+        css['position'] = 'fixed';
+      } else {
+        linkBox = u.measure($link);
+      }
+      switch (position) {
+        case "bottom-right":
+          css['top'] = linkBox.top + linkBox.height;
+          css['left'] = linkBox.left + linkBox.width - popupBox.width;
+          break;
+        case "bottom-left":
+          css['top'] = linkBox.top + linkBox.height;
+          css['left'] = linkBox.left;
+          break;
+        case "top-right":
+          css['top'] = linkBox.top - popupBox.height;
+          css['left'] = linkBox.left + linkBox.width - popupBox.width;
+          break;
+        case "top-left":
+          css['top'] = linkBox.top - popupBox.height;
+          css['left'] = linkBox.left;
+          break;
+        default:
+          u.error("Unknown position option '%s'", position);
+      }
       $popup.attr('up-position', position);
-      $popup.css(css);
-      return ensureInViewport($popup);
-    };
-    ensureInViewport = function($popup) {
-      var bottom, box, errorX, errorY, left, right, top;
-      box = u.measure($popup, {
-        full: true
-      });
-      errorX = null;
-      errorY = null;
-      if (box.right < 0) {
-        errorX = -box.right;
-      }
-      if (box.bottom < 0) {
-        errorY = -box.bottom;
-      }
-      if (box.left < 0) {
-        errorX = box.left;
-      }
-      if (box.top < 0) {
-        errorY = box.top;
-      }
-      if (errorX) {
-        if (left = parseInt($popup.css('left'))) {
-          $popup.css('left', left - errorX);
-        } else if (right = parseInt($popup.css('right'))) {
-          $popup.css('right', right + errorX);
-        }
-      }
-      if (errorY) {
-        if (top = parseInt($popup.css('top'))) {
-          return $popup.css('top', top - errorY);
-        } else if (bottom = parseInt($popup.css('bottom'))) {
-          return $popup.css('bottom', bottom + errorY);
-        }
-      }
+      return $popup.css(css);
     };
     discardHistory = function() {
       var $popup;
@@ -8542,6 +8498,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       The delay before the animation starts. See [`up.animate`](/up.animate).
     @param {String} [options.easing]
       The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
+    @param {String} [options.method="GET"]
+      Override the request method.
     @param {Boolean} [options.sticky=false]
       If set to `true`, the popup remains
       open even if the page changes in the background.
@@ -8564,6 +8522,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), config.sticky);
       options.history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($link, 'up-history'), config.history) : false;
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
+      options.method = up.link.followMethod($link, options);
       animateOptions = up.motion.animateOptions(options, $link, {
         duration: config.openDuration,
         easing: config.openEasing
@@ -8724,6 +8683,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param {String} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the popup is opened.
+    @param {String} [up-method='GET']
+      Override the request method.
     @param [up-sticky]
       If set to `true`, the popup remains
       open even if the page changes in the background.
@@ -9105,6 +9066,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param {String} [options.confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the modal is being opened.
+    @param {String} [options.method="GET"]
+      Override the request method.
     @param {Object} [options.history=true]
       Whether to add a browser history entry for the modal's source URL.
     @param {String} [options.animation]
@@ -9164,7 +9127,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     Example:
     
         var html = 'before <div class="content">inner</div> after';
-        up.modal.extract('/foo', '.content', html);
+        up.modal.extract('.content', html);
     
     The would open a modal with the following contents:
     
@@ -9173,8 +9136,10 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     Emits events [`up:modal:open`](/up:modal:open) and [`up:modal:opened`](/up:modal:opened).
     
     @function up.modal.extract
-    @param {String} url
-      The URL to load.
+    @param {String} selector
+      The CSS selector to extract from the HTML.
+    @param {String} html
+      The HTML containing the modal content.
     @param {Object} options
       See options for [`up.modal.follow`](/up.modal.follow).
     @return {Promise}
@@ -9209,6 +9174,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), flavorDefault('backdropOpenAnimation', options.flavor));
       options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor));
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
+      options.method = up.link.followMethod($link, options);
       animateOptions = up.motion.animateOptions(options, $link, {
         duration: flavorDefault('openDuration', options.flavor),
         easing: flavorDefault('openEasing', options.flavor)
@@ -9476,6 +9442,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param {String} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the modal is opened.
+    @param {String} [up-method='GET']
+      Override the request method.
     @param {String} [up-sticky]
       If set to `"true"`, the modal remains
       open even if the page changes in the background.
@@ -9632,34 +9600,34 @@ The tooltip element is appended to the end of `<body>`.
     };
     setPosition = function($link, $tooltip, position) {
       var css, linkBox, tooltipBox;
-      linkBox = u.measure($link);
+      css = {};
       tooltipBox = u.measure($tooltip);
-      css = (function() {
-        switch (position) {
-          case "top":
-            return {
-              left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width),
-              top: linkBox.top - tooltipBox.height
-            };
-          case "left":
-            return {
-              left: linkBox.left - tooltipBox.width,
-              top: linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
-            };
-          case "right":
-            return {
-              left: linkBox.left + linkBox.width,
-              top: linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
-            };
-          case "bottom":
-            return {
-              left: linkBox.left + 0.5 * (linkBox.width - tooltipBox.width),
-              top: linkBox.top + linkBox.height
-            };
-          default:
-            return u.error("Unknown position option '%s'", position);
-        }
-      })();
+      if (u.isFixed($link)) {
+        linkBox = $link.get(0).getBoundingClientRect();
+        css['position'] = 'fixed';
+      } else {
+        linkBox = u.measure($link);
+      }
+      switch (position) {
+        case "top":
+          css['top'] = linkBox.top - tooltipBox.height;
+          css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width);
+          break;
+        case "left":
+          css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height);
+          css['left'] = linkBox.left - tooltipBox.width;
+          break;
+        case "right":
+          css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height);
+          css['left'] = linkBox.left + linkBox.width;
+          break;
+        case "bottom":
+          css['top'] = linkBox.top + linkBox.height;
+          css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width);
+          break;
+        default:
+          u.error("Unknown position option '%s'", position);
+      }
       $tooltip.attr('up-position', position);
       return $tooltip.css(css);
     };

@@ -4,6 +4,6 @@ module Unpoly
     # The current version of the unpoly-rails gem.
     # This version number is also used for releases of the Unpoly
     # frontend code.
-    VERSION = '0.26.1'
+    VERSION = '0.26.2'
   end
 end
