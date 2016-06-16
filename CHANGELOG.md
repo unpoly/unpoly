@@ -13,6 +13,7 @@ Unreleased
 
 - Popups anchored to fixed elements are now positioned correctly if the document is scrolled
 - Tooltips can now be anchored to fixed elements
+- [`up-modal`](/up-modal) and [`up-popup`](/up-popup) now support an `up-method` modifier.
 
 
 ### Breaking changes
