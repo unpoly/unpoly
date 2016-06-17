@@ -11,6 +11,8 @@ Unreleased
 
 ### Compatible changes
 
+- Calling [`up.log.enable`](/up.log.enable) will now keep logging enabled for the remainder of this
+  browser session (and persist through page reloads).
 - Fix a bug where prepending or appending multiple elements with `:before` / `:after` pseudo-classes
   would not work correctly in tables.
 - Fix a bug where calling [`up.animate`](/up.animate) with `{ duration: 0 }` would return a promise

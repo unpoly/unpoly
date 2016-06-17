@@ -16,6 +16,9 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
 up.log = (($) ->
 
   u = up.util
+  b = up.browser
+
+  SESSION_KEY_ENABLED = 'up.log.enabled'
 
   ###*
   Configures the logging output on the developer console.
@@ -38,7 +41,7 @@ up.log = (($) ->
   ###
   config = u.config
     prefix: '[UP] '
-    enabled: false
+    enabled: u.option(b.sessionStorage().getItem(SESSION_KEY_ENABLED), false)
     collapse: false
 
   reset = ->
@@ -57,7 +60,7 @@ up.log = (($) ->
   ###
   debug = (message, args...) ->
     if config.enabled && message
-      up.browser.puts('debug', prefix(message), args...)
+      b.puts('debug', prefix(message), args...)
 
   ###*
   Prints a logging message to the browser console.
@@ -69,7 +72,7 @@ up.log = (($) ->
   ###
   puts = (message, args...) ->
     if config.enabled && message
-      up.browser.puts('log', prefix(message), args...)
+      b.puts('log', prefix(message), args...)
 
   ###*
   @function up.log.warn
@@ -77,7 +80,7 @@ up.log = (($) ->
   ###
   warn = (message, args...) ->
     if config.enabled && message
-      up.browser.puts('warn', prefix(message), args...)
+      b.puts('warn', prefix(message), args...)
 
   ###*
   - Makes sure the group always closes
@@ -90,7 +93,7 @@ up.log = (($) ->
     block = args.pop() # Coffeescript copies the arguments array
     if config.enabled && message
       stream = if config.collapse then 'groupCollapsed' else 'group'
-      up.browser.puts(stream, prefix(message), args...)
+      b.puts(stream, prefix(message), args...)
       try
         block()
       finally
@@ -104,7 +107,7 @@ up.log = (($) ->
   ###
   error = (message, args...) ->
     if message
-      up.browser.puts('error', prefix(message), args...)
+      b.puts('error', prefix(message), args...)
 
   printBanner = ->
     # The ASCII art looks broken in code since we need to escape backslashes
@@ -114,13 +117,17 @@ up.log = (($) ->
              "        / /            / /\n" +
              "\n"
     if config.enabled
-      banner += "Call `up.log.disable()` to disable debugging output."
+      banner += "Call `up.log.disable()` to disable logging for this session."
     else
-      banner += "Call `up.log.enable()` to enable debugging output."
-    up.browser.puts('log', banner)
+      banner += "Call `up.log.enable()` to enable logging for this session."
+    b.puts('log', banner)
 
   up.on 'up:framework:boot', printBanner
   up.on 'up:framework:reset', reset
+
+  setEnabled = (value) ->
+    b.sessionStorage().setItem(SESSION_KEY_ENABLED, value)
+    config.enabled = value
 
   ###*
   Makes future Unpoly events print vast amounts of debugging information to the developer console.
@@ -132,7 +139,7 @@ up.log = (($) ->
   @stable
   ###
   enable = ->
-    config.enabled = true
+    setEnabled(true)
 
   ###*
   Prevents future Unpoly events from printing vast amounts of debugging information to the developer console.
@@ -143,7 +150,7 @@ up.log = (($) ->
   @stable
   ###
   disable = ->
-    config.enabled = false
+    setEnabled(false)
 
   puts: puts
   debug: debug
