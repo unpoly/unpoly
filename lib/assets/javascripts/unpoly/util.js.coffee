@@ -963,6 +963,13 @@ up.util = (($) ->
       easing: 'ease'
     )
 
+    if opts.duration == 0
+      # In case the duration is zero we 1) spare ourselves all the trouble below,
+      # and 2) return a deferred that actually resolve, since a CSS transition with
+      # a zero duration never fires a transitionEnd event.
+      $element.css(lastFrame)
+      return resolvedDeferred()
+
     # We don't finish an existing animation here, since the public API
     # we expose as `up.motion.animate` already does this.
     deferred = $.Deferred()

@@ -13,6 +13,8 @@ Unreleased
 
 - Fix a bug where prepending or appending multiple elements with `:before` / `:after` pseudo-classes
   would not work correctly in tables.
+- Fix a bug where calling [`up.animate`](/up.animate) with `{ duration: 0 }` would return a promise
+  that never resolved.
 
 
 ### Breaking changes
