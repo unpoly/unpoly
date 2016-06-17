@@ -948,7 +948,7 @@ up.util = (($) ->
     The timing function that controls the animation's acceleration.
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
-  @return
+  @return {Deferred}
     A promise for the animation's end.
   @internal
   ###
