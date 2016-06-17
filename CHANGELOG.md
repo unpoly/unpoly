@@ -11,6 +11,9 @@ Unreleased
 
 ### Compatible changes
 
+- Fix a bug where prepending or appending multiple elements with `:before` / `:after` pseudo-classes
+  would not work correctly in tables.
+
 
 ### Breaking changes
 
