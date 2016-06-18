@@ -37,7 +37,7 @@ describe 'up.history', ->
           $element = up.hello(affix('a[href="/three"][up-back]').text('text'))
           expect($element.attr('up-href')).toBeUndefined()
 
-    describe 'scroll restauration', ->
+    describe 'scroll restoration', ->
 
       describeCapability 'canPushState', ->
 
@@ -95,4 +95,103 @@ describe 'up.history', ->
                 u.setTimer 50, ->
                   respond() # we need to respond since we've never requested /three with the popTarget
                   expect($('.viewport').scrollTop()).toBe(250)
+                  done()
+
+    describe 'events', ->
+
+      describeCapability 'canPushState', ->
+
+        it 'emits up:history:* events as the user goes forwards and backwards through history', (done) ->
+          up.proxy.config.cacheSize = 0
+          up.history.config.popTargets = ['.viewport']
+
+          affix('.viewport .content')
+          respond = =>
+            @respondWith """
+              <div class="viewport">
+                <div class="content">content</div>
+              </div>
+              """
+
+          events = []
+          u.each ['up:history:pushed', 'up:history:restored'], (eventName) ->
+            up.on eventName, (event) ->
+              events.push [eventName, event.url]
+
+          normalize = up.history.normalizeUrl
+
+          up.replace('.content', '/one')
+          respond()
+
+          expect(events).toEqual [
+            ['up:history:pushed', normalize('/one')]
+          ]
+
+          up.replace('.content', '/two')
+          respond()
+
+          expect(events).toEqual [
+            ['up:history:pushed', normalize('/one')]
+            ['up:history:pushed', normalize('/two')]
+          ]
+
+          up.replace('.content', '/three')
+          respond()
+
+          expect(events).toEqual [
+            ['up:history:pushed', normalize('/one')]
+            ['up:history:pushed', normalize('/two')]
+            ['up:history:pushed', normalize('/three')]
+          ]
+
+          history.back()
+          u.setTimer 50, ->
+            respond()
+
+            expect(events).toEqual [
+              ['up:history:pushed', normalize('/one')]
+              ['up:history:pushed', normalize('/two')]
+              ['up:history:pushed', normalize('/three')]
+              ['up:history:restored', normalize('/two')]
+            ]
+
+            history.back()
+            u.setTimer 50, ->
+              respond()
+
+              expect(events).toEqual [
+                ['up:history:pushed', normalize('/one')]
+                ['up:history:pushed', normalize('/two')]
+                ['up:history:pushed', normalize('/three')]
+                ['up:history:restored', normalize('/two')]
+                ['up:history:restored', normalize('/one')]
+              ]
+
+              history.forward()
+              u.setTimer 50, ->
+                respond()
+
+                expect(events).toEqual [
+                  ['up:history:pushed', normalize('/one')]
+                  ['up:history:pushed', normalize('/two')]
+                  ['up:history:pushed', normalize('/three')]
+                  ['up:history:restored', normalize('/two')]
+                  ['up:history:restored', normalize('/one')]
+                  ['up:history:restored', normalize('/two')]
+                ]
+
+                history.forward()
+                u.setTimer 50, ->
+                  respond() # we need to respond since we've never requested /three with the popTarget
+
+                  expect(events).toEqual [
+                    ['up:history:pushed', normalize('/one')]
+                    ['up:history:pushed', normalize('/two')]
+                    ['up:history:pushed', normalize('/three')]
+                    ['up:history:restored', normalize('/two')]
+                    ['up:history:restored', normalize('/one')]
+                    ['up:history:restored', normalize('/two')]
+                    ['up:history:restored', normalize('/three')]
+                  ]
+
                   done()

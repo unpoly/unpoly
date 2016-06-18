@@ -83,11 +83,10 @@ up.history = (($) ->
 
   @function up.history.replace
   @param {String} url
-  @param {Boolean} [options.force=false]
   @experimental
   ###
-  replace = (url, options) ->
-    manipulate('replace', url, options)
+  replace = (url) ->
+    manipulate('replaceState', url)
 
   ###*
   Adds a new history entry and updates the browser's
@@ -101,24 +100,47 @@ up.history = (($) ->
   [`up.submit`](/up.submit) will automatically update the
   browser's location bar for you.
 
+  Emits events [`up:history:push`](/up:history:push) and [`up:history:pushed`](/up:history:pushed).
+
   @function up.history.push
   @param {String} url
+    The URL for the history entry to be added.
   @experimental
   ###
   push = (url, options) ->
-    up.puts("Current location is now %s", url)
-    manipulate('push', url, options)
-
-  manipulate = (method, url, options) ->
     options = u.options(options, force: false)
-    if options.force || !isCurrentUrl(url)
-      if up.browser.canPushState()
-        fullMethod = "#{method}State" # resulting in either pushState or replaceState
-        state = buildState()
-        window.history[fullMethod](state, '', url)
-        observeNewUrl(currentUrl())
-      else
-        u.error "This browser doesn't support history.pushState"
+    url = normalizeUrl(url)
+    if (options.force || !isCurrentUrl(url)) && up.bus.nobodyPrevents('up:history:push', url: url, message: "Adding history entry for #{url}")
+      manipulate('pushState', url)
+      up.emit('up:history:pushed', url: url, message: "Advanced to location #{url}")
+
+  ###*
+  This event is [emitted](/up.emit) before a new history entry is added.
+
+  @event up:history:push
+  @param {String} event.url
+    The URL for the history entry that is going to be added.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the history entry from being added.
+  @experimental
+  ###
+
+  ###*
+  This event is [emitted](/up.emit) after a new history entry has been added.
+
+  @event up:history:pushed
+  @param {String} event.url
+    The URL for the history entry that has been added.
+  @experimental
+  ###
+
+  manipulate = (method, url) ->
+    if up.browser.canPushState()
+      state = buildState()
+      window.history[method](state, '', url)
+      observeNewUrl(currentUrl())
+    else
+      u.error "This browser doesn't support history.#{method}"
 
   buildState = ->
     fromUp: true
@@ -139,13 +161,24 @@ up.history = (($) ->
       up.puts 'Ignoring a state not pushed by Unpoly (%o)', state
 
   pop = (event) ->
-    up.log.group "History state popped to URL %s", currentUrl(), ->
-      observeNewUrl(currentUrl())
-      up.layout.saveScroll(url: previousUrl)
-      state = event.originalEvent.state
-      restoreStateOnPop(state)
+    observeNewUrl(currentUrl())
+    up.layout.saveScroll(url: previousUrl)
+    state = event.originalEvent.state
+    restoreStateOnPop(state)
+    url = currentUrl()
+    up.emit('up:history:restored', url: url, message: "Restored location #{url}")
 
-  # up.on 'framework:ready', ->
+  ###*
+  This event is [emitted](/up.emit) after a history entry has been restored.
+
+  History entries are restored when the user uses the *Back* or *Forward* button.
+
+  @event up:history:restored
+  @param {String} event.url
+    The URL for the history entry that has been restored.
+  @experimental
+  ###
+
   if up.browser.canPushState()
     register = ->
       $(window).on "popstate", pop
@@ -159,7 +192,6 @@ up.history = (($) ->
       # on pageload (Safari, Chrome < 34).
       # We should check in 2023 if we can remove this.
       setTimeout register, 100
-
 
   ###*
   Changes the link's destination so it points to the previous URL.
