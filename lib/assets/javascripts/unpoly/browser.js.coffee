@@ -275,6 +275,12 @@ up.browser = (($) ->
     console.groupCollapsed ||= (args...) -> puts('groupCollapsed', args...)
     console.groupEnd ||= (args...) -> puts('groupEnd', args...)
 
+  ###*
+  @internal
+  ###
+  sessionStorage = u.memoize ->
+    window.sessionStorage || { getItem: u.noop, setItem: u.noop, removeItem: u.noop }
+
   url: url
   loadPage: loadPage
   confirm: confirm
@@ -288,5 +294,6 @@ up.browser = (($) ->
   puts: puts
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
+  sessionStorage: sessionStorage
 
 )(jQuery)
