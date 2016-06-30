@@ -827,7 +827,9 @@ up.util = (($) ->
   scrollbarWidth = memoize ->
     # This is how Bootstrap does it also:
     # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
-    $outer = $('<div>').css
+    $outer = $('<div>')
+    $outer.attr('up-viewport', '')
+    $outer.css
       position:  'absolute'
       top:       '0'
       left:      '0'

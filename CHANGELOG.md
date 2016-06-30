@@ -20,6 +20,8 @@ Unreleased
   that never resolved.
 - A click on the page body now closes the popup on `mousedown` instead of `click`.
   This fixes the case where an `[up-instant]` link removes its parent and thus a `click` event never bubbles up to the body.
+- When opening a modal, elements behind the dialog can now be moved correctly when scrollbars have custom styles on `::-webkit-scrollbar`.
+  To take advantage of this, make sure to also style scrollbars on elements with an [`[up-viewport]`](/up-viewport) attribute.
 
 
 ### Breaking changes
