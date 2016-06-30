@@ -60,101 +60,115 @@ describe 'up.motion', ->
 
       describe 'when called with an element or selector', ->
 
-        it 'cancels an existing animation on the given element by instantly jumping to the last frame', ->
-          $element = affix('.element').text('content')
-          up.animate($element, { 'font-size': '40px', 'opacity': '0.33' }, duration: 10000)
-          up.motion.finish($element)
-          expect($element.css('font-size')).toEqual('40px')
-          expect($element.css('opacity')).toEqual('0.33')
+        describeCapability 'canCssTransition', ->
 
-        it 'cancels animations on children of the given element', ->
-          $parent = affix('.element')
-          $child = $parent.affix('.child')
-          up.animate($child, { 'font-size': '40px' }, duration: 10000)
-          up.motion.finish($parent)
-          expect($child.css('font-size')).toEqual('40px')
+          it 'cancels an existing animation on the given element by instantly jumping to the last frame', ->
+            $element = affix('.element').text('content')
+            up.animate($element, { 'font-size': '40px', 'opacity': '0.33' }, duration: 10000)
+            up.motion.finish($element)
+            expect($element.css('font-size')).toEqual('40px')
+            expect($element.css('opacity')).toEqual('0.33')
 
-        it 'does not cancel animations on other elements', ->
-          $element1 = affix('.element1').text('content1')
-          $element2 = affix('.element2').text('content2')
-          up.animate($element1, 'fade-in', duration: 10000)
-          up.animate($element2, 'fade-in', duration: 10000)
-          up.motion.finish($element1)
-          expect(Number($element1.css('opacity'))).toEqual(1)
-          expect(Number($element2.css('opacity'))).toEqual(0, 0.1)
+          it 'cancels animations on children of the given element', ->
+            $parent = affix('.element')
+            $child = $parent.affix('.child')
+            up.animate($child, { 'font-size': '40px' }, duration: 10000)
+            up.motion.finish($parent)
+            expect($child.css('font-size')).toEqual('40px')
 
-        it 'restores existing transitions on the element', ->
-          $element = affix('.element').text('content')
-          $element.css('transition': 'font-size 3s ease')
-          oldTransitionProperty = $element.css('transition-property')
-          expect(oldTransitionProperty).toContain('font-size') # be paranoid
-          up.animate($element, 'fade-in', duration: 10000)
-          up.motion.finish($element)
-          expect(u.opacity($element)).toEqual(1)
-          currentTransitionProperty = $element.css('transition-property')
-          expect(currentTransitionProperty).toEqual(oldTransitionProperty)
-          expect(currentTransitionProperty).toContain('font-size')
-          expect(currentTransitionProperty).not.toContain('opacity')
+          it 'does not cancel animations on other elements', ->
+            $element1 = affix('.element1').text('content1')
+            $element2 = affix('.element2').text('content2')
+            up.animate($element1, 'fade-in', duration: 10000)
+            up.animate($element2, 'fade-in', duration: 10000)
+            up.motion.finish($element1)
+            expect(Number($element1.css('opacity'))).toEqual(1)
+            expect(Number($element2.css('opacity'))).toEqual(0, 0.1)
 
-        it 'cancels an existing transition on the element by instantly jumping to the last frame', ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content')
+          it 'restores existing transitions on the element', ->
+            $element = affix('.element').text('content')
+            $element.css('transition': 'font-size 3s ease')
+            oldTransitionProperty = $element.css('transition-property')
+            expect(oldTransitionProperty).toBeDefined()
+            expect(oldTransitionProperty).toContain('font-size') # be paranoid
+            up.animate($element, 'fade-in', duration: 10000)
+            up.motion.finish($element)
+            expect(u.opacity($element)).toEqual(1)
+            currentTransitionProperty = $element.css('transition-property')
+            expect(currentTransitionProperty).toEqual(oldTransitionProperty)
+            expect(currentTransitionProperty).toContain('font-size')
+            expect(currentTransitionProperty).not.toContain('opacity')
 
-          up.morph($old, $new, 'cross-fade', duration: 2000)
-          expect($('.up-ghost').length).toBe(2)
+          it 'cancels an existing transition on the element by instantly jumping to the last frame', ->
+            $old = affix('.old').text('old content')
+            $new = affix('.new').text('new content')
 
-          up.motion.finish($old)
+            up.morph($old, $new, 'cross-fade', duration: 2000)
+            expect($('.up-ghost').length).toBe(2)
 
-          expect($('.up-ghost').length).toBe(0)
-          expect($old.css('display')).toEqual('none')
-          expect($new.css('display')).toEqual('block')
+            up.motion.finish($old)
 
-        it 'can be called on either element involved in a transition', ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content')
+            expect($('.up-ghost').length).toBe(0)
+            expect($old.css('display')).toEqual('none')
+            expect($new.css('display')).toEqual('block')
 
-          up.morph($old, $new, 'cross-fade', duration: 2000)
-          expect($('.up-ghost').length).toBe(2)
+          it 'can be called on either element involved in a transition', ->
+            $old = affix('.old').text('old content')
+            $new = affix('.new').text('new content')
 
-          up.motion.finish($new)
+            up.morph($old, $new, 'cross-fade', duration: 2000)
+            expect($('.up-ghost').length).toBe(2)
 
-          expect($('.up-ghost').length).toBe(0)
-          expect($old.css('display')).toEqual('none')
-          expect($new.css('display')).toEqual('block')
+            up.motion.finish($new)
+
+            expect($('.up-ghost').length).toBe(0)
+            expect($old.css('display')).toEqual('none')
+            expect($new.css('display')).toEqual('block')
 
 
-        it 'cancels transitions on children of the given element', ->
-          $parent = affix('.parent')
-          $old = $parent.affix('.old').text('old content')
-          $new = $parent.affix('.new').text('new content')
+          it 'cancels transitions on children of the given element', ->
+            $parent = affix('.parent')
+            $old = $parent.affix('.old').text('old content')
+            $new = $parent.affix('.new').text('new content')
 
-          up.morph($old, $new, 'cross-fade', duration: 2000)
-          expect($('.up-ghost').length).toBe(2)
+            up.morph($old, $new, 'cross-fade', duration: 2000)
+            expect($('.up-ghost').length).toBe(2)
 
-          up.motion.finish($parent)
+            up.motion.finish($parent)
 
-          expect($('.up-ghost').length).toBe(0)
-          expect($old.css('display')).toEqual('none')
-          expect($new.css('display')).toEqual('block')
+            expect($('.up-ghost').length).toBe(0)
+            expect($old.css('display')).toEqual('none')
+            expect($new.css('display')).toEqual('block')
+
+        describeFallback 'canCssTransition', ->
+
+          it 'does nothing'
 
       describe 'when called without arguments', ->
 
-        it 'cancels all animations on the screen', ->
-          $element1 = affix('.element1').text('content1')
-          $element2 = affix('.element2').text('content2')
+        describeCapability 'canCssTransition', ->
 
-          up.animate($element1, 'fade-in', duration: 3000)
-          up.animate($element2, 'fade-in', duration: 3000)
+          it 'cancels all animations on the screen', ->
+            $element1 = affix('.element1').text('content1')
+            $element2 = affix('.element2').text('content2')
 
-          expect(u.opacity($element1)).toBeAround(0.0, 0.1)
-          expect(u.opacity($element2)).toBeAround(0.0, 0.1)
+            up.animate($element1, 'fade-in', duration: 3000)
+            up.animate($element2, 'fade-in', duration: 3000)
 
-          up.motion.finish()
+            expect(u.opacity($element1)).toBeAround(0.0, 0.1)
+            expect(u.opacity($element2)).toBeAround(0.0, 0.1)
 
-          $element1 = $('.element1')
-          $element2 = $('.element2')
-          expect(u.opacity($element1)).toBe(1.0)
-          expect(u.opacity($element2)).toBe(1.0)
+            up.motion.finish()
+
+            $element1 = $('.element1')
+            $element2 = $('.element2')
+            expect(u.opacity($element1)).toBe(1.0)
+            expect(u.opacity($element2)).toBe(1.0)
+
+        describeFallback 'canCssTransition', ->
+
+          it 'does nothing'
+
 
     describe 'up.morph', ->
 

@@ -25,6 +25,7 @@ Unreleased
 - Fix a bug where [`up.tooltip.config`](/up.tooltip.config) was not publicly acccessible.
 - New [tooltip configuration options](/up.tooltip.config): `config.openDuration`, `config.closeDuration`, `config.openEasing`, `config.closeEasing`
 - Improve determinism and performance when many tooltips are opened and closed concurrently.
+- IE9 fixes: Polyfill `window.console` and several properties (`log`, `debug`, `info`, `warn`, `error`, `group`, `groupCollapsed`, `groupEnd`)
 
 
 ### Breaking changes

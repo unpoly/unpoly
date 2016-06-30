@@ -102,50 +102,50 @@ describe 'up.popup', ->
                 expect($('.container')).toHaveText('response2')
                 done()
 
-        it 'closes the current popup and wait for its close animation to finish before starting the open animation of a second popup', (done) ->
-          $span = affix('span')
-          up.popup.config.openAnimation = 'fade-in'
-          up.popup.config.openDuration = 5
-          up.popup.config.closeAnimation = 'fade-out'
-          up.popup.config.closeDuration = 50
+        describeCapability 'canCssTransition', ->
 
-          events = []
-          u.each ['up:popup:open', 'up:popup:opened', 'up:popup:close', 'up:popup:closed'], (event) ->
-            up.on event, ->
-              events.push(event)
+          it 'closes the current popup and wait for its close animation to finish before starting the open animation of a second popup', (done) ->
+            $span = affix('span')
+            up.popup.config.openAnimation = 'fade-in'
+            up.popup.config.openDuration = 5
+            up.popup.config.closeAnimation = 'fade-out'
+            up.popup.config.closeDuration = 50
 
-          up.popup.attach($span, { target: '.target', html: '<div class="target">response1</div>' })
+            events = []
+            u.each ['up:popup:open', 'up:popup:opened', 'up:popup:close', 'up:popup:closed'], (event) ->
+              up.on event, ->
+                events.push(event)
 
-          # First popup is starting opening animation
-          expect(events).toEqual ['up:popup:open']
-          expect($('.target')).toHaveText('response1')
+            up.popup.attach($span, { target: '.target', html: '<div class="target">response1</div>' })
 
-          u.setTimer 30, ->
-            # First popup has completed opening animation
-            expect(events).toEqual ['up:popup:open', 'up:popup:opened']
+            # First popup is starting opening animation
+            expect(events).toEqual ['up:popup:open']
             expect($('.target')).toHaveText('response1')
 
-            up.popup.attach($span, { target: '.target', html: '<div class="target">response2</div>' })
+            u.setTimer 30, ->
+              # First popup has completed opening animation
+              expect(events).toEqual ['up:popup:open', 'up:popup:opened']
+              expect($('.target')).toHaveText('response1')
 
-            # First popup is starting close animation. Second popup waits for that.
-            expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close']
-            expect($('.target')).toHaveText('response1')
+              up.popup.attach($span, { target: '.target', html: '<div class="target">response2</div>' })
 
-            u.setTimer 15, ->
-
-              # Second popup is still waiting for first popup's closing animaton to finish.
+              # First popup is starting close animation. Second popup waits for that.
               expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close']
               expect($('.target')).toHaveText('response1')
 
-              u.setTimer 100, ->
+              u.setTimer 15, ->
 
-                # First popup has finished closing, second popup has finished opening.
-                expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close', 'up:popup:closed', 'up:popup:opened']
-                expect($('.target')).toHaveText('response2')
+                # Second popup is still waiting for first popup's closing animaton to finish.
+                expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close']
+                expect($('.target')).toHaveText('response1')
 
-                done()
+                u.setTimer 100, ->
 
+                  # First popup has finished closing, second popup has finished opening.
+                  expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:open', 'up:popup:close', 'up:popup:closed', 'up:popup:opened']
+                  expect($('.target')).toHaveText('response2')
 
+                  done()
 
     describe 'up.popup.coveredUrl', ->
 
