@@ -24,6 +24,8 @@ Unreleased
   To take advantage of this, make sure to also style scrollbars on elements with an [`[up-viewport]`](/up-viewport) attribute.
 - Polyfill `window.console` and several properties (`log`, `debug`, `info`,
   `warn`, `error`, `group`, `groupCollapsed`, `groupEnd`)
+- Fix tests for IE9 and IE10 by marking more specs as "only with CSS transitions
+  enabled"
 
 
 ### Breaking changes
