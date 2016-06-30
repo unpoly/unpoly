@@ -1,22 +1,30 @@
-<div class="example">
-  <a class="button" href="#" up-tooltip="Tooltip text" up-position="top">Top tooltip</a>
-</div>
-
-<div class="example">
-  <a class="button" href="#" up-tooltip="Tooltip text" up-position="bottom">Bottom tooltip</a>
-</div>
-
-<div class="example">
-  <a class="button" href="#" up-tooltip="Tooltip text" up-position="left">Left tooltip</a>
-</div>
-
-<div class="example">
-  <a class="button" href="#" up-tooltip="Tooltip text" up-position="right">Right tooltip</a>
-</div>
-
 <div class="fixed-top-bar">
   <a class="button" href="#" up-tooltip="Tooltip text" up-position="top">Top tooltip</a>
   <a class="button" href="#" up-tooltip="Tooltip text" up-position="bottom">Bottom tooltip</a>
   <a class="button" href="#" up-tooltip="Tooltip text" up-position="left">Left tooltip</a>
   <a class="button" href="#" up-tooltip="Tooltip text" up-position="right">Right tooltip</a>
 </div>
+
+<div class="spacer">
+</div>
+
+<div class="example">
+  <a class="button" href="#" up-tooltip="Tooltip text" up-position="top">Top tooltip</a>
+</div>
+
+<div class="example">
+  <a class="button" href="#" up-tooltip="Tooltip text" up-position="bottom">Bottom tooltip</a>
+</div>
+
+<div class="example">
+  <a class="button" href="#" up-tooltip="Tooltip text" up-position="left">Left tooltip</a>
+</div>
+
+<div class="example">
+  <a class="button" href="#" up-tooltip="Tooltip text" up-position="right">Right tooltip</a>
+</div>
+
+<div class="example">
+  <% 1.upto(100) do |i| %><a class="button" href="#" up-tooltip="Tooltip <%= i %>"><%= i %></a><% end %>
+</div>
+
