@@ -53,13 +53,12 @@ up.browser = (($) ->
   @internal
   ###
   puts = (stream, args...) ->
-    u.isDefined(console[stream]) or stream = 'log'
     if canLogSubstitution()
-      console[stream]?(args...)
+      console[stream](args...)
     else
       # IE <= 9 cannot pass varargs to console.log using Function#apply because IE
       message = sprintf(args...)
-      console[stream]?(message)
+      console[stream](message)
 
   CONSOLE_PLACEHOLDERS = /\%[odisf]/g
 
@@ -113,6 +112,8 @@ up.browser = (($) ->
   @internal
   ###
   sprintfWithFormattedArgs = (formatter, message, args...) ->
+    return '' if u.isBlank(message)
+
     i = 0
     message.replace CONSOLE_PLACEHOLDERS, ->
       arg = args[i]
@@ -271,9 +272,10 @@ up.browser = (($) ->
   @internal
   ###
   installPolyfills = ->
-    console.group ||= (args...) -> puts('group', args...)
-    console.groupCollapsed ||= (args...) -> puts('groupCollapsed', args...)
-    console.groupEnd ||= (args...) -> puts('groupEnd', args...)
+    window.console ?= {} # Missing in IE9 with DevTools closed
+    for method in ['debug', 'info', 'warn', 'error', 'group', 'groupCollapsed', 'groupEnd']
+      console[method] ?= (args...) -> puts('log', args...)
+    console.log ?= u.noop # Cannot be faked
 
   ###*
   @internal
