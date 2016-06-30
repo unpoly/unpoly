@@ -161,7 +161,6 @@ describe 'up.flow', ->
           it 'adds params from a { data } option to the URL of a GET request', ->
             promise = up.replace('.middle', '/path', data: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
             @respond()
-            console.log("EXPECTATION COMING UP AGAINST %o", location.pathname)
             expect(location.href).toEndWith('/path?foo-key=foo%20value&bar-key=bar%20value')
 
           describe 'if a URL is given as { history } option', ->
@@ -802,9 +801,7 @@ describe 'up.flow', ->
             <div class="keeper" up-keep>old-text</div>
             """
 
-          console.log '*** before hello ***'
           up.hello($container)
-          console.log '*** after hello ***'
           expect(compiler.calls.count()).toEqual(1)
 
           up.extract '.container', """

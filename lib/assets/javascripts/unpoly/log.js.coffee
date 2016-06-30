@@ -97,7 +97,7 @@ up.log = (($) ->
       try
         block()
       finally
-        console.groupEnd() if message
+        b.puts('groupEnd') if message
     else
       block()
 

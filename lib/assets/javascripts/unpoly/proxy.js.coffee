@@ -231,8 +231,6 @@ up.proxy = (($) ->
       loadStarted()
       promise.always(loadEnded)
 
-    console.groupEnd()
-
     promise
 
   ###*
