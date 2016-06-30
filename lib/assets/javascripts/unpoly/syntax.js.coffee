@@ -50,7 +50,7 @@ up.syntax = (($) ->
         // your code here
       });
 
-  The functions will be called on elements maching `.action` when
+  The functions will be called on elements matching `.action` when
   the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
   later.
 
