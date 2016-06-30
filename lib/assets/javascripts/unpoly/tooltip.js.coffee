@@ -63,18 +63,19 @@ up.tooltip = (($) ->
     openEasing: null
     closeEasing: null
 
-  state =
-    phase: 'closed'           # can be 'opening', 'opened', 'closing' and 'closed'
-    $anchor: undefined        # the element to which the tooltip is anchored
-    $tooltip: undefined       # the tooltiop element
-    position: undefined       # the position of the tooltip element relative to its anchor
-    whenActionDone: undefined # a promise for the current opening/closing animation's end
-    nextAction: undefined     # a function that will be called when the current action completes
+  state = u.config
+    phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
+    $anchor: null        # the element to which the tooltip is anchored
+    $tooltip: null       # the tooltiop element
+    position: null       # the position of the tooltip element relative to its anchor
+    whenActionDone: null # a promise for the current opening/closing animation's end
+    nextAction: null     # a function that will be called when the current action completes
 
   reset = ->
     # Destroy the tooltip container regardless whether it's currently in a closing animation
-    close(animation: false)
-    config.reset()
+    close(animation: false).then ->
+      state.reset()
+      config.reset()
 
   align = ->
     css = {}
@@ -190,7 +191,7 @@ up.tooltip = (($) ->
   doNextAction = ->
     if state.nextAction
       action = state.nextAction # give it another name before we set it to undefined
-      state.nextAction = undefined
+      state.nextAction = null
       action()
 
   ###*
@@ -217,8 +218,8 @@ up.tooltip = (($) ->
       state.whenActionDone = up.destroy(state.$tooltip, options)
       state.whenActionDone.then ->
         state.phase = 'closed'
-        state.$tooltip = undefined
-        state.$anchor = undefined
+        state.$tooltip = null
+        state.$anchor = null
         whenDestroyed.resolve()
         doNextAction()
         return
@@ -244,7 +245,6 @@ up.tooltip = (($) ->
         whenClosed = whenDestroyed.promise()
 
     whenClosed
-
 
   ###*
   Displays a tooltip with text content when hovering the mouse over this element:
@@ -289,13 +289,11 @@ up.tooltip = (($) ->
 
   # The framework is reset between tests, so also close
   # a currently open tooltip.
-  up.on 'up:framework:reset', close
+  up.on 'up:framework:reset', reset
 
   # Close the tooltip when the user presses ESC.
   up.bus.onEscape(-> close())
 
-  # The framework is reset between tests
-  up.on 'up:framework:reset', reset
 
   config: config
   attach: attach
