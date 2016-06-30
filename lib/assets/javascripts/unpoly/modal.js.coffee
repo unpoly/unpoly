@@ -101,9 +101,9 @@ up.modal = (($) ->
     The animation used to open the backdrop that dims the page below the dialog.
   @param {String} [config.backdropCloseAnimation='fade-out']
     The animation used to close the backdrop that dims the page below the dialog.
-  @param {String} [config.openDuration]
+  @param {Number} [config.openDuration]
     The duration of the open animation (in milliseconds).
-  @param {String} [config.closeDuration]
+  @param {Number} [config.closeDuration]
     The duration of the close animation (in milliseconds).
   @param {String} [config.openEasing]
     The timing function controlling the acceleration of the opening animation.

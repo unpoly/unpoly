@@ -44,12 +44,24 @@ up.tooltip = (($) ->
     The animation used to open a tooltip.
   @param {String} [config.closeAnimation='fade-out']
     The animation used to close a tooltip.
+  @param {Number} [config.openDuration]
+    The duration of the open animation (in milliseconds).
+  @param {Number} [config.closeDuration]
+    The duration of the close animation (in milliseconds).
+  @param {String} [config.openEasing]
+    The timing function controlling the acceleration of the opening animation.
+  @param {String} [config.closeEasing]
+    The timing function controlling the acceleration of the closing animation.
   @stable
   ###
   config = u.config
     position: 'top'
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
+    openDuration: null
+    closeDuration: null
+    openEasing: null
+    closeEasing: null
 
   reset = ->
     # Destroy the tooltip container regardless whether it's currently in a closing animation
@@ -120,7 +132,7 @@ up.tooltip = (($) ->
     text = u.option(options.text, $link.attr('up-tooltip'))
     position = u.option(options.position, $link.attr('up-position'), config.position)
     animation = u.option(options.animation, u.castedAttr($link, 'up-animation'), config.openAnimation)
-    animateOptions = up.motion.animateOptions(options, $link)
+    animateOptions = up.motion.animateOptions(options, $link, duration: config.openDuration, easing: config.openEasing)
     close()
     $tooltip = createElement(text: text, html: html)
     setPosition($link, $tooltip, position)
@@ -139,7 +151,8 @@ up.tooltip = (($) ->
     $tooltip = $('.up-tooltip')
     if $tooltip.length
       options = u.options(options, animation: config.closeAnimation)
-      options = u.merge(options, up.motion.animateOptions(options))
+      animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
+      options = u.merge(options, animateOptions)
       up.destroy($tooltip, options)
 
   ###*
@@ -193,6 +206,7 @@ up.tooltip = (($) ->
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
 
+  config: config
   attach: attach
   close: close
   open: -> u.error('up.tooltip.open no longer exists. Use up.tooltip.attach instead.')
