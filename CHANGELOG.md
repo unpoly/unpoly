@@ -11,6 +11,9 @@ Unreleased
 
 ### Compatible changes
 
+- A click on the page body now closes the popup on `mousedown` instead of `click`.
+  This fixes the case where an `[up-instant]` link removes its parent and thus a `click` event never bubbles up to the body.
+
 
 ### Breaking changes
 

@@ -370,7 +370,7 @@ up.popup = (($) ->
 
   # Close the popup when someone clicks outside the popup
   # (but not on a popup opener).
-  up.on('click', 'body', (event, $body) ->
+  up.on('mousedown', 'body', (event, $body) ->
     $target = $(event.target)
     unless $target.closest('.up-popup').length || $target.closest('[up-popup]').length
       close()

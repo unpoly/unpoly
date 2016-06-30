@@ -336,3 +336,16 @@ describe 'up.popup', ->
         up.extract('.inside', "<div class='inside'>new inside</div>", origin: $('.outside'))
         expect($('.inside')).toHaveText('new inside')
         expect($('.up-popup')).toExist()
+
+    describe 'when clicking on the body', ->
+
+      beforeEach ->
+        up.motion.config.enabled = false
+
+      it 'closes a popup on mousedown (in case an [up-instant] link removes its parent and thus a click event never fires)', ->
+        affix('.outside').text('old outside')
+        $link = affix('.link')
+        up.popup.attach($link, href: '/path', target: '.inside')
+        @respondWith("<div class='inside'>inside</div>")
+        Trigger.mousedown($('body'))
+        expect($('.up-popup')).not.toExist()
