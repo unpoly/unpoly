@@ -231,13 +231,13 @@ up.browser = (($) ->
     value
 
   ###*
-  @function up,browser.confirm
+  @function up,browser.whenConfirmed
   @return {Promise}
   @param {String} options.confirm
   @param {Boolean} options.preload
   @internal
   ###
-  confirm = (options) ->
+  whenConfirmed = (options) ->
     if options.preload || u.isBlank(options.confirm) || window.confirm(options.confirm)
       u.resolvedPromise()
     else
@@ -285,7 +285,7 @@ up.browser = (($) ->
 
   url: url
   loadPage: loadPage
-  confirm: confirm
+  whenConfirmed: whenConfirmed
   canPushState: canPushState
   canCssTransition: canCssTransition
   canInputEvent: canInputEvent

@@ -295,6 +295,20 @@ describe 'up.util', ->
         string = up.util.requestDataAsQuery({ 'my+key': 'my+value' })
         expect(string).toEqual('my%2Bkey=my%2Bvalue')
 
+    describe 'up.util.unresolvableDeferred', ->
+      
+      it 'returns a different object every time (to prevent memory leaks)', ->
+        one = up.util.unresolvableDeferred()
+        two = up.util.unresolvableDeferred()
+        expect(one).not.toBe(two)
+
+    describe 'up.util.unresolvablePromise', ->
+      
+      it 'returns a different object every time (to prevent memory leaks)', ->
+        one = up.util.unresolvablePromise()
+        two = up.util.unresolvablePromise()
+        expect(one).not.toBe(two)
+
     describe 'up.util.resolvableWhen', ->
 
       it 'returns a promise that is resolved when all the given deferreds are resolved', ->

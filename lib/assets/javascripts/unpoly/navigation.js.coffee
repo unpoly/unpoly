@@ -39,12 +39,8 @@ up.navigation = (($) ->
   SELECTOR_SECTION = 'a, [up-href]'
 
   normalizeUrl = (url) ->
-    if u.isPresent(url)
-      u.normalizeUrl(url,
-        search: false
-        stripTrailingSlash: true
-      )
-    
+    u.normalizeUrl(url) if u.isPresent(url)
+
   sectionUrls = ($section) ->
     urls = []
     for attr in ['href', 'up-href', 'up-alias']

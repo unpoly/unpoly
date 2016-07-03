@@ -268,6 +268,8 @@ up.bus = (($) ->
   emit = (eventName, eventProps = {}) ->
     event = $.Event(eventName, eventProps)
     if $target = eventProps.$element
+      # If a `.$element` option is given, we trigger the event
+      # on that element instead of the document.
       delete eventProps.$element
     else
       $target = $(document)
@@ -295,13 +297,15 @@ up.bus = (($) ->
         up.puts 'Emitted event %s', eventName
 
   ###*
-  [Emits an event](/up.emit) and returns whether any listener
+  [Emits an event](/up.emit) and returns whether no listener
   has prevented the default action.
 
   @function up.bus.nobodyPrevents
   @param {String} eventName
   @param {Object} eventProps
   @param {String|Array} [eventProps.message]
+  @return {Boolean}
+    whether no listener has prevented the default action
   @experimental
   ###
   nobodyPrevents = (args...) ->
@@ -311,6 +315,26 @@ up.bus = (($) ->
       false
     else
       true
+
+  ###*
+  [Emits](/up.emit) the given event and returns a promise
+  that will be resolved if no listener has prevented the default action.
+
+  If any listener prevented the default listener
+  the returned promise will never be resolved.
+
+  @function up.bus.whenEmitted
+  @param {String} eventName
+  @param {Object} eventProps
+  @param {String|Array} [eventProps.message]
+  @return {Promise}
+  @experimental
+  ###
+  whenEmitted = (args...) ->
+    deferred = $.Deferred()
+    if nobodyPrevents(args...)
+      deferred.resolve()
+    deferred.promise()
 
   ###*
   Registers an event listener to be called when the user
@@ -356,6 +380,8 @@ up.bus = (($) ->
 
   This is an internal method for to enable unit testing.
   Don't use this in production.
+
+  Emits event [`up:framework:reset`](/up:framework:reset).
 
   @function up.reset
   @experimental
@@ -413,6 +439,7 @@ up.bus = (($) ->
   off: unbind # can't name symbols `off` in Coffeescript
   emit: emit
   nobodyPrevents: nobodyPrevents
+  whenEmitted: whenEmitted
   onEscape: onEscape
   emitReset: emitReset
   boot: boot

@@ -52,7 +52,7 @@ up.util = (($) ->
     Whether to include an `#hash` anchor in the normalized URL
   @param {Boolean} [options.search=true]
     Whether to include a `?query` string in the normalized URL
-  @param {Boolean} [options.stripTrailingSlash=false]
+  @param {Boolean} [options.stripTrailingSlash=true]
     Whether to strip a trailing slash from the pathname
   @internal
   ###
@@ -65,7 +65,7 @@ up.util = (($) ->
     # We have seen this in IE11 and W3Schools claims it happens in IE9 or earlier
     # http://www.w3schools.com/jsref/prop_anchor_pathname.asp
     pathname = "/#{pathname}" unless pathname[0] == '/'
-    pathname = pathname.replace(/\/$/, '') if options?.stripTrailingSlash == true
+    pathname = pathname.replace(/\/$/, '') unless options?.stripTrailingSlash == false
     normalized += pathname
     normalized += anchor.hash if options?.hash == true
     normalized += anchor.search unless options?.search == false
@@ -566,7 +566,7 @@ up.util = (($) ->
   copy = (object)  ->
     if isArray(object)
       object.slice()
-    else
+    else if isHash(object)
       extend({}, object)
 
   ###*
@@ -1506,9 +1506,12 @@ up.util = (($) ->
   @function up.util.config
   @internal
   ###
-  config = (factoryOptions = {}) ->
+  config = (blueprint = {}) ->
     hash = {}
-    hash.reset = -> extend(hash, factoryOptions)
+    hash.reset = ->
+      newOptions = blueprint
+      newOptions = newOptions() if isFunction(newOptions)
+      extend(hash, newOptions)
     hash.reset()
     Object.preventExtensions(hash)
     hash
@@ -1757,6 +1760,62 @@ up.util = (($) ->
     # This is by far the fastest way to do this
     not jQuery.contains(document.documentElement, element)
 
+  ###*
+  Given a function that will return a promise, returns a proxy function
+  with an additional `.promise` attribute.
+
+  When the proxy is called, the inner function is called.
+  The proxy's `.promise` attribute is available even before the function is called
+  and will resolve when the inner function's returned promise resolves.
+
+  @function up.util.previewable
+  @internal
+  ###
+  previewable = (fun) ->
+    deferred = $.Deferred()
+    preview = (args...) ->
+      fun(args...).then ->
+        deferred.resolve()
+    preview.promise = deferred.promise()
+    preview
+
+  ###*
+  A linear task queue whose (2..n)th tasks can be changed at any time.
+
+  @function up.util.DivertibleChain
+  @internal
+  ###
+  class DivertibleChain
+
+    constructor: ->
+      @reset()
+
+    reset: =>
+      @queue = []
+      @currentTask = undefined
+
+    promise: =>
+      promises = map @allTasks(), (task) -> task.promise
+      $.when(promises...)
+
+    allTasks: =>
+      tasks = []
+      tasks.push(@currentTask) if @currentTask
+      tasks = tasks.concat(@queue)
+      tasks
+
+    poke: =>
+      unless @currentTask # don't start a new task while we're still running one
+        if @currentTask = @queue.shift()
+          promise = @currentTask()
+          promise.always =>
+            @currentTask = undefined
+            @poke()
+
+    asap: (newTasks...) =>
+      @queue = map(newTasks, previewable)
+      @poke()
+
   isDetached: isDetached
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
@@ -1862,6 +1921,7 @@ up.util = (($) ->
   whenReady: whenReady
   identity: identity
   escapeHtml: escapeHtml
+  DivertibleChain: DivertibleChain
 
 )($)
 

@@ -134,24 +134,20 @@ describe 'up.modal', ->
 
         it 'does not open multiple modals or pad the body twice if the user starts loading a second modal before the first was done loading', (done) ->
           up.modal.config.closeDuration = 10
-          promise1 = up.modal.visit('/path1', target: '.container', animation: 'fade-in', duration: 100)
-          promise2 = up.modal.visit('/path2', target: '.container', animation: 'fade-in', duration: 100)
-          expect(jasmine.Ajax.requests.count()).toBe(2)
-          request1 = jasmine.Ajax.requests.at(0)
-          request2 = jasmine.Ajax.requests.at(1)
+          promise1 = up.modal.visit('/path1', target: '.container', animation: 'fade-in', duration: 50)
+          promise2 = up.modal.visit('/path2', target: '.container', animation: 'fade-in', duration: 50)
+          @respondWith('<div class="container">response1</div>')
 
-          u.setTimer 10, =>
-            @respondWith('<div class="container">response1</div>', request: request1)
-            u.setTimer 10, =>
-              @respondWith('<div class="container">response2</div>', request: request2)
-              u.setTimer 110, =>
-                expect($('.up-modal').length).toBe(1)
-                expect($('.up-modal-dialog').length).toBe(1)
-                expect($('.container')).toHaveText('response2')
-                bodyPadding = parseInt($('body').css('padding-right'))
-                expect(bodyPadding).toBeAround(assumedScrollbarWidth, 10)
-                expect(bodyPadding).not.toBeAround(2 * assumedScrollbarWidth, 2 * 5)
-                done()
+          u.setTimer 80, =>
+            @respondWith('<div class="container">response2</div>')
+            $.when(promise1, promise2).then ->
+              expect($('.up-modal').length).toBe(1)
+              expect($('.up-modal-dialog').length).toBe(1)
+              expect($('.container')).toHaveText('response2')
+              bodyPadding = parseInt($('body').css('padding-right'))
+              expect(bodyPadding).toBeAround(assumedScrollbarWidth, 10)
+              expect(bodyPadding).not.toBeAround(2 * assumedScrollbarWidth, 2 * 5)
+              done()
 
         describeCapability 'canCssTransition', ->
 
@@ -179,20 +175,18 @@ describe 'up.modal', ->
 
               up.modal.extract('.target', '<div class="target">response2</div>')
 
-              # First modal is starting close animation. Second modal waits for that.
-              expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:open', 'up:modal:close']
               expect($('.target')).toHaveText('response1')
 
               u.setTimer 40, ->
 
                 # Second modal is still waiting for first modal's closing animaton to finish.
-                expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:open', 'up:modal:close']
+                expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close']
                 expect($('.target')).toHaveText('response1')
 
                 u.setTimer 100, ->
 
                   # First modal has finished closing, second modal has finished opening.
-                  expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:open', 'up:modal:close', 'up:modal:closed', 'up:modal:opened']
+                  expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed', 'up:modal:open', 'up:modal:opened']
                   expect($('.target')).toHaveText('response2')
 
                   done()
@@ -226,9 +220,9 @@ describe 'up.modal', ->
 
         it 'uses the correct flavor config for the first and second modal', (done) ->
           up.modal.config.openAnimation = 'fade-in'
-          up.modal.config.openDuration = 10
+          up.modal.config.openDuration = 20
           up.modal.config.closeAnimation = 'fade-out'
-          up.modal.config.closeDuration = 10
+          up.modal.config.closeDuration = 20
           up.modal.flavor 'drawer',
             openAnimation: 'move-from-right'
             closeAnimation: 'move-to-right'
@@ -248,24 +242,31 @@ describe 'up.modal', ->
             { animation: 'fade-in', text: 'response1' }
           ]
 
-          up.modal.extract('.target', '<div class="target">response2</div>', flavor: 'drawer')
+          u.setTimer 30, ->
 
-          expect(animations).toEqual [
-            { animation: 'fade-in', text: 'response1' },
-            { animation: 'fade-out', text: 'response1' }
-          ]
+            # first modal is now done animating
+            expect(animations).toEqual [
+              { animation: 'fade-in', text: 'response1' }
+            ]
 
-          u.setTimer 20, ->
 
+            up.modal.extract('.target', '<div class="target">response2</div>', flavor: 'drawer')
             expect(animations).toEqual [
               { animation: 'fade-in', text: 'response1' },
               { animation: 'fade-out', text: 'response1' },
-              { animation: 'move-from-right', text: 'response2' }
             ]
 
-            expect($('.up-modal').attr('up-flavor')).toEqual('drawer')
+            u.setTimer 30, ->
 
-            done()
+              expect(animations).toEqual [
+                { animation: 'fade-in', text: 'response1' },
+                { animation: 'fade-out', text: 'response1' },
+                { animation: 'move-from-right', text: 'response2' }
+              ]
+
+              expect($('.up-modal').attr('up-flavor')).toEqual('drawer')
+
+              done()
 
 
         it 'does not explode if up.modal.close() was called before the response was received', ->
@@ -281,13 +282,13 @@ describe 'up.modal', ->
 
         it 'returns the URL behind the modal overlay', (done) ->
           up.history.replace('/foo')
-          expect(up.modal.coveredUrl()).toBeUndefined()
+          expect(up.modal.coveredUrl()).toBeMissing()
           visitPromise = up.modal.visit('/bar', target: '.container')
           @respondWith('<div class="container">text</div>')
           visitPromise.then ->
             expect(up.modal.coveredUrl()).toEndWith('/foo')
             up.modal.close().then ->
-              expect(up.modal.coveredUrl()).toBeUndefined()
+              expect(up.modal.coveredUrl()).toBeMissing()
               done()
 
     describe 'up.modal.flavor', ->
@@ -330,7 +331,7 @@ describe 'up.modal', ->
       beforeEach ->
         @stubFollow = =>
           @$link = affix('a[href="/path"][up-modal=".target"]')
-          @followSpy = up.modal.knife.mock('follow').and.returnValue(u.resolvedPromise())
+          @followSpy = up.modal.knife.mock('followAsap').and.returnValue(u.resolvedPromise())
           @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
       it 'opens the clicked link in a modal', ->
@@ -408,10 +409,9 @@ describe 'up.modal', ->
 
       describe 'when clicked inside a modal', ->
       
-        it 'closes the open modal and prevents the default action', ->
-          $modal = affix('.up-modal')
-          $link = $modal.affix('a[up-close]') # link is within the modal
-          up.hello($link)
+        it 'closes the open modal and prevents the default action', (done) ->
+          up.modal.extract('.target', '<div class="target"><a up-close>text</a></div>', animation: false)
+          $link = $('.up-modal a[up-close]') # link is within the modal
           wasDefaultPrevented = false
           wasClosed = false
           up.on 'click', 'a[up-close]', (event) ->
@@ -420,8 +420,10 @@ describe 'up.modal', ->
           up.on 'up:modal:close', ->
             wasClosed = true
           $link.click()
-          expect(wasClosed).toBe(true)
-          expect(wasDefaultPrevented).toBe(true)
+          u.nextFrame ->
+            expect(wasClosed).toBe(true)
+            expect(wasDefaultPrevented).toBe(true)
+            done()
 
       describe 'when no modal is open', ->
 

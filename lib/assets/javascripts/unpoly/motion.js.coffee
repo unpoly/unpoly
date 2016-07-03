@@ -73,6 +73,7 @@ up.motion = (($) ->
     enabled: true
 
   reset = ->
+    finish()
     animations = u.copy(defaultAnimations)
     transitions = u.copy(defaultTransitions)
     config.reset()

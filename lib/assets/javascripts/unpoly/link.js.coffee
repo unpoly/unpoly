@@ -182,7 +182,7 @@ up.link = (($) ->
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     options = u.merge(options, up.motion.animateOptions(options, $link))
 
-    up.browser.confirm(options).then ->
+    up.browser.whenConfirmed(options).then ->
       up.replace(target, url, options)
 
   ###*
