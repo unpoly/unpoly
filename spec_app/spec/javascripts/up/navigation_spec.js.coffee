@@ -112,13 +112,11 @@ describe 'up.navigation', ->
           expect($popupLink).toHaveClass('up-current')
           expect($unrelatedLink).not.toHaveClass('up-current')
 
-          done()
-
-#          up.popup.close().then ->
-#            expect($backgroundLink).toHaveClass('up-current')
-#            expect($popupLink).not.toHaveClass('up-current')
-#            expect($unrelatedLink).not.toHaveClass('up-current')
-#            done()
+          up.popup.close().then ->
+            expect($backgroundLink).toHaveClass('up-current')
+            expect($popupLink).not.toHaveClass('up-current')
+            expect($unrelatedLink).not.toHaveClass('up-current')
+            done()
 
         it 'changes .up-current marks as the URL changes'
 
