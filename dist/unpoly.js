@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.26.2"
+    version: "0.27.0"
   };
 
 }).call(this);
@@ -21,7 +21,8 @@ that might save you from loading something like [Underscore.js](http://underscor
  */
 
 (function() {
-  var slice = [].slice;
+  var slice = [].slice,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   up.util = (function($) {
 
@@ -31,7 +32,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, error, escapeHtml, escapePressed, except, extend, extractOptions, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, setTimer, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, error, escapeHtml, escapePressed, except, extend, extractOptions, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, setTimer, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -76,7 +77,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       Whether to include an `#hash` anchor in the normalized URL
     @param {Boolean} [options.search=true]
       Whether to include a `?query` string in the normalized URL
-    @param {Boolean} [options.stripTrailingSlash=false]
+    @param {Boolean} [options.stripTrailingSlash=true]
       Whether to strip a trailing slash from the pathname
     @internal
      */
@@ -91,7 +92,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       if (pathname[0] !== '/') {
         pathname = "/" + pathname;
       }
-      if ((options != null ? options.stripTrailingSlash : void 0) === true) {
+      if ((options != null ? options.stripTrailingSlash : void 0) !== false) {
         pathname = pathname.replace(/\/$/, '');
       }
       normalized += pathname;
@@ -653,7 +654,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     copy = function(object) {
       if (isArray(object)) {
         return object.slice();
-      } else {
+      } else if (isHash(object)) {
         return extend({}, object);
       }
     };
@@ -976,7 +977,9 @@ that might save you from loading something like [Underscore.js](http://underscor
      */
     scrollbarWidth = memoize(function() {
       var $outer, outer, width;
-      $outer = $('<div>').css({
+      $outer = $('<div>');
+      $outer.attr('up-viewport', '');
+      $outer.css({
         position: 'absolute',
         top: '0',
         left: '0',
@@ -1115,7 +1118,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       The timing function that controls the animation's acceleration.
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
-    @return
+    @return {Deferred}
       A promise for the animation's end.
     @internal
      */
@@ -1127,6 +1130,10 @@ that might save you from loading something like [Underscore.js](http://underscor
         delay: 0,
         easing: 'ease'
       });
+      if (opts.duration === 0) {
+        $element.css(lastFrame);
+        return resolvedDeferred();
+      }
       deferred = $.Deferred();
       transitionProperties = Object.keys(lastFrame);
       transition = {
@@ -1741,14 +1748,19 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.config
     @internal
      */
-    config = function(factoryOptions) {
+    config = function(blueprint) {
       var hash;
-      if (factoryOptions == null) {
-        factoryOptions = {};
+      if (blueprint == null) {
+        blueprint = {};
       }
       hash = {};
       hash.reset = function() {
-        return extend(hash, factoryOptions);
+        var newOptions;
+        newOptions = blueprint;
+        if (isFunction(newOptions)) {
+          newOptions = newOptions();
+        }
+        return extend(hash, newOptions);
       };
       hash.reset();
       Object.preventExtensions(hash);
@@ -2044,6 +2056,96 @@ that might save you from loading something like [Underscore.js](http://underscor
       element = unJQuery(element);
       return !jQuery.contains(document.documentElement, element);
     };
+
+    /**
+    Given a function that will return a promise, returns a proxy function
+    with an additional `.promise` attribute.
+    
+    When the proxy is called, the inner function is called.
+    The proxy's `.promise` attribute is available even before the function is called
+    and will resolve when the inner function's returned promise resolves.
+    
+    @function up.util.previewable
+    @internal
+     */
+    previewable = function(fun) {
+      var deferred, preview;
+      deferred = $.Deferred();
+      preview = function() {
+        var args;
+        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        return fun.apply(null, args).then(function() {
+          return deferred.resolve();
+        });
+      };
+      preview.promise = deferred.promise();
+      return preview;
+    };
+
+    /**
+    A linear task queue whose (2..n)th tasks can be changed at any time.
+    
+    @function up.util.DivertibleChain
+    @internal
+     */
+    DivertibleChain = (function() {
+      function DivertibleChain() {
+        this.asap = bind(this.asap, this);
+        this.poke = bind(this.poke, this);
+        this.allTasks = bind(this.allTasks, this);
+        this.promise = bind(this.promise, this);
+        this.reset = bind(this.reset, this);
+        this.reset();
+      }
+
+      DivertibleChain.prototype.reset = function() {
+        this.queue = [];
+        return this.currentTask = void 0;
+      };
+
+      DivertibleChain.prototype.promise = function() {
+        var promises;
+        promises = map(this.allTasks(), function(task) {
+          return task.promise;
+        });
+        return $.when.apply($, promises);
+      };
+
+      DivertibleChain.prototype.allTasks = function() {
+        var tasks;
+        tasks = [];
+        if (this.currentTask) {
+          tasks.push(this.currentTask);
+        }
+        tasks = tasks.concat(this.queue);
+        return tasks;
+      };
+
+      DivertibleChain.prototype.poke = function() {
+        var promise;
+        if (!this.currentTask) {
+          if (this.currentTask = this.queue.shift()) {
+            promise = this.currentTask();
+            return promise.always((function(_this) {
+              return function() {
+                _this.currentTask = void 0;
+                return _this.poke();
+              };
+            })(this));
+          }
+        }
+      };
+
+      DivertibleChain.prototype.asap = function() {
+        var newTasks;
+        newTasks = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        this.queue = map(newTasks, previewable);
+        return this.poke();
+      };
+
+      return DivertibleChain;
+
+    })();
     return {
       isDetached: isDetached,
       requestDataAsArray: requestDataAsArray,
@@ -2147,7 +2249,8 @@ that might save you from loading something like [Underscore.js](http://underscor
       opacity: opacity,
       whenReady: whenReady,
       identity: identity,
-      escapeHtml: escapeHtml
+      escapeHtml: escapeHtml,
+      DivertibleChain: DivertibleChain
     };
   })($);
 
@@ -2169,7 +2272,7 @@ we can't currently get rid off.
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, confirm, initialRequestMethod, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sprintf, sprintfWithFormattedArgs, stringifyArg, u, url;
+    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, initialRequestMethod, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sessionStorage, sprintf, sprintfWithFormattedArgs, stringifyArg, u, url, whenConfirmed;
     u = up.util;
 
     /**
@@ -2230,12 +2333,11 @@ we can't currently get rid off.
     puts = function() {
       var args, message, stream;
       stream = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      u.isDefined(console[stream]) || (stream = 'log');
       if (canLogSubstitution()) {
-        return typeof console[stream] === "function" ? console[stream].apply(console, args) : void 0;
+        return console[stream].apply(console, args);
       } else {
         message = sprintf.apply(null, args);
-        return typeof console[stream] === "function" ? console[stream](message) : void 0;
+        return console[stream](message);
       }
     };
     CONSOLE_PLACEHOLDERS = /\%[odisf]/g;
@@ -2300,6 +2402,9 @@ we can't currently get rid off.
     sprintfWithFormattedArgs = function() {
       var args, formatter, i, message;
       formatter = arguments[0], message = arguments[1], args = 3 <= arguments.length ? slice.call(arguments, 2) : [];
+      if (u.isBlank(message)) {
+        return '';
+      }
       i = 0;
       return message.replace(CONSOLE_PLACEHOLDERS, function() {
         var arg;
@@ -2408,13 +2513,13 @@ we can't currently get rid off.
     };
 
     /**
-    @function up,browser.confirm
+    @function up,browser.whenConfirmed
     @return {Promise}
     @param {String} options.confirm
     @param {Boolean} options.preload
     @internal
      */
-    confirm = function(options) {
+    whenConfirmed = function(options) {
       if (options.preload || u.isBlank(options.confirm) || window.confirm(options.confirm)) {
         return u.resolvedPromise();
       } else {
@@ -2449,26 +2554,38 @@ we can't currently get rid off.
     @internal
      */
     installPolyfills = function() {
-      console.group || (console.group = function() {
-        var args;
-        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-        return puts.apply(null, ['group'].concat(slice.call(args)));
-      });
-      console.groupCollapsed || (console.groupCollapsed = function() {
-        var args;
-        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-        return puts.apply(null, ['groupCollapsed'].concat(slice.call(args)));
-      });
-      return console.groupEnd || (console.groupEnd = function() {
-        var args;
-        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-        return puts.apply(null, ['groupEnd'].concat(slice.call(args)));
-      });
+      var j, len, method, ref;
+      if (window.console == null) {
+        window.console = {};
+      }
+      ref = ['debug', 'info', 'warn', 'error', 'group', 'groupCollapsed', 'groupEnd'];
+      for (j = 0, len = ref.length; j < len; j++) {
+        method = ref[j];
+        if (console[method] == null) {
+          console[method] = function() {
+            var args;
+            args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+            return puts.apply(null, ['log'].concat(slice.call(args)));
+          };
+        }
+      }
+      return console.log != null ? console.log : console.log = u.noop;
     };
+
+    /**
+    @internal
+     */
+    sessionStorage = u.memoize(function() {
+      return window.sessionStorage || {
+        getItem: u.noop,
+        setItem: u.noop,
+        removeItem: u.noop
+      };
+    });
     return {
       url: url,
       loadPage: loadPage,
-      confirm: confirm,
+      whenConfirmed: whenConfirmed,
       canPushState: canPushState,
       canCssTransition: canCssTransition,
       canInputEvent: canInputEvent,
@@ -2478,7 +2595,8 @@ we can't currently get rid off.
       installPolyfills: installPolyfills,
       puts: puts,
       sprintf: sprintf,
-      sprintfWithFormattedArgs: sprintfWithFormattedArgs
+      sprintfWithFormattedArgs: sprintfWithFormattedArgs,
+      sessionStorage: sessionStorage
     };
   })(jQuery);
 
@@ -2536,7 +2654,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
   var slice = [].slice;
 
   up.bus = (function($) {
-    var boot, emit, emitReset, forgetUpDescription, live, liveUpDescriptions, logEmission, nextUpDescriptionNumber, nobodyPrevents, onEscape, rememberUpDescription, restoreSnapshot, snapshot, u, unbind, upDescriptionNumber, upDescriptionToJqueryDescription, upListenerToJqueryListener;
+    var boot, emit, emitReset, forgetUpDescription, live, liveUpDescriptions, logEmission, nextUpDescriptionNumber, nobodyPrevents, onEscape, rememberUpDescription, restoreSnapshot, snapshot, u, unbind, upDescriptionNumber, upDescriptionToJqueryDescription, upListenerToJqueryListener, whenEmitted;
     u = up.util;
     liveUpDescriptions = {};
     nextUpDescriptionNumber = 0;
@@ -2801,13 +2919,15 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     };
 
     /**
-    [Emits an event](/up.emit) and returns whether any listener
+    [Emits an event](/up.emit) and returns whether no listener
     has prevented the default action.
     
     @function up.bus.nobodyPrevents
     @param {String} eventName
     @param {Object} eventProps
     @param {String|Array} [eventProps.message]
+    @return {Boolean}
+      whether no listener has prevented the default action
     @experimental
      */
     nobodyPrevents = function() {
@@ -2820,6 +2940,30 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       } else {
         return true;
       }
+    };
+
+    /**
+    [Emits](/up.emit) the given event and returns a promise
+    that will be resolved if no listener has prevented the default action.
+    
+    If any listener prevented the default listener
+    the returned promise will never be resolved.
+    
+    @function up.bus.whenEmitted
+    @param {String} eventName
+    @param {Object} eventProps
+    @param {String|Array} [eventProps.message]
+    @return {Promise}
+    @experimental
+     */
+    whenEmitted = function() {
+      var args, deferred;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      deferred = $.Deferred();
+      if (nobodyPrevents.apply(null, args)) {
+        deferred.resolve();
+      }
+      return deferred.promise();
     };
 
     /**
@@ -2883,6 +3027,8 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     
     This is an internal method for to enable unit testing.
     Don't use this in production.
+    
+    Emits event [`up:framework:reset`](/up:framework:reset).
     
     @function up.reset
     @experimental
@@ -2949,6 +3095,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       off: unbind,
       emit: emit,
       nobodyPrevents: nobodyPrevents,
+      whenEmitted: whenEmitted,
       onEscape: onEscape,
       emitReset: emitReset,
       boot: boot
@@ -2987,8 +3134,10 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
   var slice = [].slice;
 
   up.log = (function($) {
-    var config, debug, disable, enable, error, group, prefix, printBanner, puts, reset, u, warn;
+    var SESSION_KEY_ENABLED, b, config, debug, disable, enable, error, group, prefix, printBanner, puts, reset, setEnabled, u, warn;
     u = up.util;
+    b = up.browser;
+    SESSION_KEY_ENABLED = 'up.log.enabled';
 
     /**
     Configures the logging output on the developer console.
@@ -3011,7 +3160,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
      */
     config = u.config({
       prefix: '[UP] ',
-      enabled: false,
+      enabled: u.option(b.sessionStorage().getItem(SESSION_KEY_ENABLED), false),
       collapse: false
     });
     reset = function() {
@@ -3030,10 +3179,10 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     @internal
      */
     debug = function() {
-      var args, message, ref;
+      var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (config.enabled && message) {
-        return (ref = up.browser).puts.apply(ref, ['debug', prefix(message)].concat(slice.call(args)));
+        return b.puts.apply(b, ['debug', prefix(message)].concat(slice.call(args)));
       }
     };
 
@@ -3046,10 +3195,10 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     @internal
      */
     puts = function() {
-      var args, message, ref;
+      var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (config.enabled && message) {
-        return (ref = up.browser).puts.apply(ref, ['log', prefix(message)].concat(slice.call(args)));
+        return b.puts.apply(b, ['log', prefix(message)].concat(slice.call(args)));
       }
     };
 
@@ -3058,10 +3207,10 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     @internal
      */
     warn = function() {
-      var args, message, ref;
+      var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (config.enabled && message) {
-        return (ref = up.browser).puts.apply(ref, ['warn', prefix(message)].concat(slice.call(args)));
+        return b.puts.apply(b, ['warn', prefix(message)].concat(slice.call(args)));
       }
     };
 
@@ -3073,17 +3222,17 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     @internal
      */
     group = function() {
-      var args, block, message, ref, stream;
+      var args, block, message, stream;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       block = args.pop();
       if (config.enabled && message) {
         stream = config.collapse ? 'groupCollapsed' : 'group';
-        (ref = up.browser).puts.apply(ref, [stream, prefix(message)].concat(slice.call(args)));
+        b.puts.apply(b, [stream, prefix(message)].concat(slice.call(args)));
         try {
           return block();
         } finally {
           if (message) {
-            console.groupEnd();
+            b.puts('groupEnd');
           }
         }
       } else {
@@ -3096,24 +3245,28 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     @internal
      */
     error = function() {
-      var args, message, ref;
+      var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (message) {
-        return (ref = up.browser).puts.apply(ref, ['error', prefix(message)].concat(slice.call(args)));
+        return b.puts.apply(b, ['error', prefix(message)].concat(slice.call(args)));
       }
     };
     printBanner = function() {
       var banner;
       banner = " __ _____  ___  ___  / /_ __\n" + ("/ // / _ \\/ _ \\/ _ \\/ / // /  " + up.version + "\n") + "\\___/_//_/ .__/\\___/_/\\_. / \n" + "        / /            / /\n" + "\n";
       if (config.enabled) {
-        banner += "Call `up.log.disable()` to disable debugging output.";
+        banner += "Call `up.log.disable()` to disable logging for this session.";
       } else {
-        banner += "Call `up.log.enable()` to enable debugging output.";
+        banner += "Call `up.log.enable()` to enable logging for this session.";
       }
-      return up.browser.puts('log', banner);
+      return b.puts('log', banner);
     };
     up.on('up:framework:boot', printBanner);
     up.on('up:framework:reset', reset);
+    setEnabled = function(value) {
+      b.sessionStorage().setItem(SESSION_KEY_ENABLED, value);
+      return config.enabled = value;
+    };
 
     /**
     Makes future Unpoly events print vast amounts of debugging information to the developer console.
@@ -3125,7 +3278,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     @stable
      */
     enable = function() {
-      return config.enabled = true;
+      return setEnabled(true);
     };
 
     /**
@@ -3137,7 +3290,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     @stable
      */
     disable = function() {
-      return config.enabled = false;
+      return setEnabled(false);
     };
     return {
       puts: puts,
@@ -3209,7 +3362,7 @@ later.
           // your code here
         });
     
-    The functions will be called on elements maching `.action` when
+    The functions will be called on elements matching `.action` when
     the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
     later.
     
@@ -3769,11 +3922,10 @@ We need to work on this page:
     
     @function up.history.replace
     @param {String} url
-    @param {Boolean} [options.force=false]
     @experimental
      */
-    replace = function(url, options) {
-      return manipulate('replace', url, options);
+    replace = function(url) {
+      return manipulate('replaceState', url);
     };
 
     /**
@@ -3788,28 +3940,57 @@ We need to work on this page:
     [`up.submit`](/up.submit) will automatically update the
     browser's location bar for you.
     
+    Emits events [`up:history:push`](/up:history:push) and [`up:history:pushed`](/up:history:pushed).
+    
     @function up.history.push
     @param {String} url
+      The URL for the history entry to be added.
     @experimental
      */
     push = function(url, options) {
-      up.puts("Current location is now %s", url);
-      return manipulate('push', url, options);
-    };
-    manipulate = function(method, url, options) {
-      var fullMethod, state;
       options = u.options(options, {
         force: false
       });
-      if (options.force || !isCurrentUrl(url)) {
-        if (up.browser.canPushState()) {
-          fullMethod = method + "State";
-          state = buildState();
-          window.history[fullMethod](state, '', url);
-          return observeNewUrl(currentUrl());
-        } else {
-          return u.error("This browser doesn't support history.pushState");
-        }
+      url = normalizeUrl(url);
+      if ((options.force || !isCurrentUrl(url)) && up.bus.nobodyPrevents('up:history:push', {
+        url: url,
+        message: "Adding history entry for " + url
+      })) {
+        manipulate('pushState', url);
+        return up.emit('up:history:pushed', {
+          url: url,
+          message: "Advanced to location " + url
+        });
+      }
+    };
+
+    /**
+    This event is [emitted](/up.emit) before a new history entry is added.
+    
+    @event up:history:push
+    @param {String} event.url
+      The URL for the history entry that is going to be added.
+    @param event.preventDefault()
+      Event listeners may call this method to prevent the history entry from being added.
+    @experimental
+     */
+
+    /**
+    This event is [emitted](/up.emit) after a new history entry has been added.
+    
+    @event up:history:pushed
+    @param {String} event.url
+      The URL for the history entry that has been added.
+    @experimental
+     */
+    manipulate = function(method, url) {
+      var state;
+      if (up.browser.canPushState()) {
+        state = buildState();
+        window.history[method](state, '', url);
+        return observeNewUrl(currentUrl());
+      } else {
+        return u.error("This browser doesn't support history." + method);
       }
     };
     buildState = function() {
@@ -3838,16 +4019,30 @@ We need to work on this page:
       }
     };
     pop = function(event) {
-      return up.log.group("History state popped to URL %s", currentUrl(), function() {
-        var state;
-        observeNewUrl(currentUrl());
-        up.layout.saveScroll({
-          url: previousUrl
-        });
-        state = event.originalEvent.state;
-        return restoreStateOnPop(state);
+      var state, url;
+      observeNewUrl(currentUrl());
+      up.layout.saveScroll({
+        url: previousUrl
+      });
+      state = event.originalEvent.state;
+      restoreStateOnPop(state);
+      url = currentUrl();
+      return up.emit('up:history:restored', {
+        url: url,
+        message: "Restored location " + url
       });
     };
+
+    /**
+    This event is [emitted](/up.emit) after a history entry has been restored.
+    
+    History entries are restored when the user uses the *Back* or *Forward* button.
+    
+    @event up:history:restored
+    @param {String} event.url
+      The URL for the history entry that has been restored.
+    @experimental
+     */
     if (up.browser.canPushState()) {
       register = function() {
         $(window).on("popstate", pop);
@@ -5002,7 +5197,7 @@ are based on this module.
       }
       up.motion.finish($old);
       if (pseudoClass) {
-        $wrapper = $new.contents().wrap('<span class="up-insertion"></span>').parent();
+        $wrapper = $new.contents().wrapAll('<span class="up-insertion"></span>').parent();
         if (pseudoClass === 'before') {
           $old.prepend($wrapper);
         } else {
@@ -5572,6 +5767,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       enabled: true
     });
     reset = function() {
+      finish();
       animations = u.copy(defaultAnimations);
       transitions = u.copy(defaultTransitions);
       return config.reset();
@@ -6458,7 +6654,6 @@ the user performs the click.
         loadStarted();
         promise.always(loadEnded);
       }
-      console.groupEnd();
       return promise;
     };
 
@@ -7006,7 +7201,7 @@ Read on
       options.origin = u.option(options.origin, $link);
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       options = u.merge(options, up.motion.animateOptions(options, $link));
-      return up.browser.confirm(options).then(function() {
+      return up.browser.whenConfirmed(options).then(function() {
         return up.replace(target, url, options);
       });
     };
@@ -8332,30 +8527,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
 (function() {
   up.popup = (function($) {
-    var attach, autoclose, close, config, contains, coveredUrl, createFrame, currentUrl, discardHistory, isOpen, reset, setPosition, u;
+    var align, attachAsap, attachNow, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, isOpen, reset, state, u;
     u = up.util;
-
-    /**
-    Returns the source URL for the fragment displayed
-    in the current popup, or `undefined` if no  popup is open.
-    
-    @function up.popup.url
-    @return {String}
-      the source URL
-    @stable
-     */
-    currentUrl = void 0;
-
-    /**
-    Returns the URL of the page or modal behind the popup.
-    
-    @function up.popup.coveredUrl
-    @return {String}
-    @experimental
-     */
-    coveredUrl = function() {
-      return $('.up-popup').attr('up-covered-url');
-    };
 
     /**
     Sets default options for future popups.
@@ -8387,80 +8560,90 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     config = u.config({
       openAnimation: 'fade-in',
       closeAnimation: 'fade-out',
-      openDuration: null,
-      closeDuration: null,
+      openDuration: 150,
+      closeDuration: 100,
       openEasing: null,
       closeEasing: null,
       position: 'bottom-right',
       history: false
     });
+
+    /**
+    Returns the source URL for the fragment displayed
+    in the current popup, or `undefined` if no  popup is open.
+    
+    @function up.popup.url
+    @return {String}
+      the source URL
+    @stable
+     */
+
+    /**
+    Returns the URL of the page or modal behind the popup.
+    
+    @function up.popup.coveredUrl
+    @return {String}
+    @experimental
+     */
+    state = u.config({
+      phase: 'closed',
+      $anchor: null,
+      $popup: null,
+      position: null,
+      sticky: null,
+      url: null,
+      coveredUrl: null,
+      coveredTitle: null
+    });
+    chain = new u.DivertibleChain();
     reset = function() {
-      close({
-        animation: false
-      });
+      var ref;
+      if ((ref = state.$popup) != null) {
+        ref.remove();
+      }
+      state.reset();
+      chain.reset();
       return config.reset();
     };
-    setPosition = function($link, position) {
-      var $popup, css, linkBox, popupBox;
+    align = function() {
+      var css, linkBox, popupBox;
       css = {};
-      $popup = $('.up-popup');
-      popupBox = u.measure($popup);
-      if (u.isFixed($link)) {
-        linkBox = $link.get(0).getBoundingClientRect();
+      popupBox = u.measure(state.$popup);
+      if (u.isFixed(state.$anchor)) {
+        linkBox = state.$anchor.get(0).getBoundingClientRect();
         css['position'] = 'fixed';
       } else {
-        linkBox = u.measure($link);
+        linkBox = u.measure(state.$anchor);
       }
-      switch (position) {
-        case "bottom-right":
+      switch (state.position) {
+        case 'bottom-right':
           css['top'] = linkBox.top + linkBox.height;
           css['left'] = linkBox.left + linkBox.width - popupBox.width;
           break;
-        case "bottom-left":
+        case 'bottom-left':
           css['top'] = linkBox.top + linkBox.height;
           css['left'] = linkBox.left;
           break;
-        case "top-right":
+        case 'top-right':
           css['top'] = linkBox.top - popupBox.height;
           css['left'] = linkBox.left + linkBox.width - popupBox.width;
           break;
-        case "top-left":
+        case 'top-left':
           css['top'] = linkBox.top - popupBox.height;
           css['left'] = linkBox.left;
           break;
         default:
-          u.error("Unknown position option '%s'", position);
+          u.error("Unknown position option '%s'", state.position);
       }
-      $popup.attr('up-position', position);
-      return $popup.css(css);
+      state.$popup.attr('up-position', state.position);
+      return state.$popup.css(css);
     };
-    discardHistory = function() {
+    createFrame = function(target) {
       var $popup;
-      $popup = $('.up-popup');
-      $popup.removeAttr('up-covered-url');
-      return $popup.removeAttr('up-covered-title');
-    };
-    createFrame = function(target, options) {
-      var promise;
-      promise = u.resolvedPromise();
-      if (isOpen()) {
-        promise = promise.then(function() {
-          return close();
-        });
-      }
-      promise = promise.then(function() {
-        var $popup;
-        $popup = u.$createElementFromSelector('.up-popup');
-        if (options.sticky) {
-          $popup.attr('up-sticky', '');
-        }
-        $popup.attr('up-covered-url', up.browser.url());
-        $popup.attr('up-covered-title', document.title);
-        u.$createPlaceholder(target, $popup);
-        $popup.appendTo(document.body);
-        return $popup;
-      });
-      return promise;
+      $popup = u.$createElementFromSelector('.up-popup');
+      u.$createPlaceholder(target, $popup);
+      $popup.appendTo(document.body);
+      return state.$popup = $popup;
     };
 
     /**
@@ -8470,7 +8653,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @stable
      */
     isOpen = function() {
-      return $('.up-popup').length > 0;
+      return state.phase === 'opened' || state.phase === 'opening';
     };
 
     /**
@@ -8509,32 +8692,50 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       the opening animation has completed.
     @stable
      */
-    attach = function(linkOrSelector, options) {
-      var $link, animateOptions, html, target, url;
-      $link = $(linkOrSelector);
-      $link.length || u.error('Cannot attach popup to non-existing element %o', linkOrSelector);
+    attachAsap = function(elementOrSelector, options) {
+      var curriedAttachNow;
+      curriedAttachNow = function() {
+        return attachNow(elementOrSelector, options);
+      };
+      if (isOpen()) {
+        chain.asap(closeNow, curriedAttachNow);
+      } else {
+        chain.asap(curriedAttachNow);
+      }
+      return chain.promise();
+    };
+    attachNow = function(elementOrSelector, options) {
+      var $anchor, animateOptions, html, position, target, url;
+      $anchor = $(elementOrSelector);
+      $anchor.length || u.error('Cannot attach popup to non-existing element %o', elementOrSelector);
       options = u.options(options);
-      url = u.option(u.pluckKey(options, 'url'), $link.attr('up-href'), $link.attr('href'));
+      url = u.option(u.pluckKey(options, 'url'), $anchor.attr('up-href'), $anchor.attr('href'));
       html = u.option(u.pluckKey(options, 'html'));
-      target = u.option(u.pluckKey(options, 'target'), $link.attr('up-popup'), 'body');
-      options.position = u.option(options.position, $link.attr('up-position'), config.position);
-      options.animation = u.option(options.animation, $link.attr('up-animation'), config.openAnimation);
-      options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), config.sticky);
-      options.history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($link, 'up-history'), config.history) : false;
-      options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
-      options.method = up.link.followMethod($link, options);
-      animateOptions = up.motion.animateOptions(options, $link, {
+      target = u.option(u.pluckKey(options, 'target'), $anchor.attr('up-popup'), 'body');
+      position = u.option(options.position, $anchor.attr('up-position'), config.position);
+      options.animation = u.option(options.animation, $anchor.attr('up-animation'), config.openAnimation);
+      options.sticky = u.option(options.sticky, u.castedAttr($anchor, 'up-sticky'), config.sticky);
+      options.history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($anchor, 'up-history'), config.history) : false;
+      options.confirm = u.option(options.confirm, $anchor.attr('up-confirm'));
+      options.method = up.link.followMethod($anchor, options);
+      animateOptions = up.motion.animateOptions(options, $anchor, {
         duration: config.openDuration,
         easing: config.openEasing
       });
-      return up.browser.confirm(options).then(function() {
-        var extractOptions, promise;
-        if (up.bus.nobodyPrevents('up:popup:open', {
+      return up.browser.whenConfirmed(options).then(function() {
+        return up.bus.whenEmitted('up:popup:open', {
           url: url,
           message: 'Opening popup'
-        })) {
+        }).then(function() {
+          var extractOptions, promise;
+          state.phase = 'opening';
+          state.$anchor = $anchor;
+          state.position = position;
+          state.coveredUrl = up.browser.url();
+          state.coveredTitle = document.title;
+          state.sticky = options.sticky;
           options.beforeSwap = function() {
-            return createFrame(target, options);
+            return createFrame(target);
           };
           extractOptions = u.merge(options, {
             animation: false
@@ -8545,20 +8746,17 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
             promise = up.replace(target, url, extractOptions);
           }
           promise = promise.then(function() {
-            return setPosition($link, options.position);
+            align();
+            return up.animate(state.$popup, options.animation, animateOptions);
           });
           promise = promise.then(function() {
-            return up.animate($('.up-popup'), options.animation, animateOptions);
-          });
-          promise = promise.then(function() {
+            state.phase = 'opened';
             return up.emit('up:popup:opened', {
               message: 'Popup opened'
             });
           });
           return promise;
-        } else {
-          return u.unresolvablePromise();
-        }
+        });
       });
     };
 
@@ -8593,37 +8791,47 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       animation has finished.
     @stable
      */
-    close = function(options) {
-      var $popup, animateOptions, promise;
-      $popup = $('.up-popup');
-      if ($popup.length) {
-        if (up.bus.nobodyPrevents('up:popup:close', {
-          $element: $popup
-        })) {
-          options = u.options(options, {
-            animation: config.closeAnimation,
-            url: $popup.attr('up-covered-url'),
-            title: $popup.attr('up-covered-title')
-          });
-          animateOptions = up.motion.animateOptions(options, {
-            duration: config.closeDuration,
-            easing: config.closeEasing
-          });
-          u.extend(options, animateOptions);
-          currentUrl = void 0;
-          promise = up.destroy($popup, options);
-          promise = promise.then(function() {
-            return up.emit('up:popup:closed', {
-              message: 'Popup closed'
-            });
-          });
-          return promise;
-        } else {
-          return u.unresolvablePromise();
-        }
-      } else {
+    closeAsap = function(options) {
+      if (isOpen()) {
+        chain.asap(function() {
+          return closeNow(options);
+        });
+      }
+      return chain.promise();
+    };
+    closeNow = function(options) {
+      var animateOptions;
+      if (!isOpen()) {
         return u.resolvedPromise();
       }
+      options = u.options(options, {
+        animation: config.closeAnimation,
+        url: state.coveredUrl,
+        title: state.coveredTitle
+      });
+      animateOptions = up.motion.animateOptions(options, {
+        duration: config.closeDuration,
+        easing: config.closeEasing
+      });
+      u.extend(options, animateOptions);
+      return up.bus.whenEmitted('up:popup:close', {
+        message: 'Closing popup',
+        $element: state.$popup
+      }).then(function() {
+        state.phase = 'closing';
+        state.url = null;
+        state.coveredUrl = null;
+        state.coveredTitle = null;
+        return up.destroy(state.$popup, options).then(function() {
+          state.phase = 'closed';
+          state.$popup = null;
+          state.$anchor = null;
+          state.sticky = null;
+          return up.emit('up:popup:closed', {
+            message: 'Popup closed'
+          });
+        });
+      });
     };
 
     /**
@@ -8644,9 +8852,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @stable
      */
     autoclose = function() {
-      if (!$('.up-popup').is('[up-sticky]')) {
-        discardHistory();
-        return close();
+      if (!state.sticky) {
+        return closeAsap();
       }
     };
 
@@ -8698,31 +8905,29 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
      */
     up.link.onAction('[up-popup]', function($link) {
       if ($link.is('.up-current')) {
-        return close();
+        return closeAsap();
       } else {
-        return attach($link);
+        return attachAsap($link);
       }
     });
-    up.on('click', 'body', function(event, $body) {
+    up.on('mousedown', 'body', function(event, $body) {
       var $target;
       $target = $(event.target);
-      if (!($target.closest('.up-popup').length || $target.closest('[up-popup]').length)) {
-        return close();
+      if (!$target.closest('.up-popup, [up-popup]').length) {
+        return closeAsap();
       }
     });
     up.on('up:fragment:inserted', function(event, $fragment) {
       var newSource;
       if (contains($fragment)) {
         if (newSource = $fragment.attr('up-source')) {
-          return currentUrl = newSource;
+          return state.url = newSource;
         }
       } else if (contains(event.origin)) {
         return autoclose();
       }
     });
-    up.bus.onEscape(function() {
-      return close();
-    });
+    up.bus.onEscape(closeAsap);
 
     /**
     When an element with this attribute is clicked,
@@ -8739,31 +8944,24 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @stable
      */
     up.on('click', '[up-close]', function(event, $element) {
-      if ($element.closest('.up-popup').length) {
-        close();
+      if (contains($element)) {
+        closeAsap();
         return event.preventDefault();
       }
     });
     up.on('up:framework:reset', reset);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
-      attach: attach,
-      close: close,
+      attach: attachAsap,
+      close: closeAsap,
       url: function() {
-        return currentUrl;
+        return state.url;
       },
-      coveredUrl: coveredUrl,
+      coveredUrl: function() {
+        return state.coveredUrl;
+      },
       config: config,
-      defaults: function() {
-        return u.error('up.popup.defaults(...) no longer exists. Set values on he up.popup.config property instead.');
-      },
       contains: contains,
-      open: function() {
-        return up.error('up.popup.open no longer exists. Please use up.popup.attach instead.');
-      },
-      source: function() {
-        return up.error('up.popup.source no longer exists. Please use up.popup.url instead.');
-      },
       isOpen: isOpen
     };
   })(jQuery);
@@ -8833,7 +9031,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
 (function() {
   up.modal = (function($) {
-    var animate, autoclose, close, config, contains, coveredUrl, createFrame, currentFlavor, currentUrl, discardHistory, extract, flavor, flavorDefault, flavorOverrides, follow, isOpen, markAsAnimating, open, reset, shiftElements, templateHtml, u, unshiftElements, unshifters, visit;
+    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, extractAsap, flavor, flavorDefault, flavorOverrides, followAsap, isOpen, markAsAnimating, openAsap, openNow, reset, shiftElements, state, templateHtml, u, unshiftElements, visitAsap;
     u = up.util;
 
     /**
@@ -8875,9 +9073,9 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       The animation used to open the backdrop that dims the page below the dialog.
     @param {String} [config.backdropCloseAnimation='fade-out']
       The animation used to close the backdrop that dims the page below the dialog.
-    @param {String} [config.openDuration]
+    @param {Number} [config.openDuration]
       The duration of the open animation (in milliseconds).
-    @param {String} [config.closeDuration]
+    @param {Number} [config.closeDuration]
       The duration of the close animation (in milliseconds).
     @param {String} [config.openEasing]
       The timing function controlling the acceleration of the opening animation.
@@ -8920,8 +9118,6 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       the source URL
     @stable
      */
-    currentUrl = void 0;
-    currentFlavor = void 0;
 
     /**
     Returns the URL of the page behind the modal overlay.
@@ -8930,15 +9126,28 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @return {String}
     @experimental
      */
-    coveredUrl = function() {
-      return $('.up-modal').attr('up-covered-url');
-    };
+    state = u.config(function() {
+      return {
+        phase: 'closed',
+        $anchor: null,
+        $modal: null,
+        sticky: null,
+        flavor: null,
+        url: null,
+        coveredUrl: null,
+        coveredTitle: null,
+        unshifters: []
+      };
+    });
+    chain = new u.DivertibleChain();
     reset = function() {
-      close({
-        animation: false
-      });
-      currentUrl = void 0;
-      currentFlavor = void 0;
+      var ref;
+      if ((ref = state.$modal) != null) {
+        ref.remove();
+      }
+      unshiftElements();
+      state.reset();
+      chain.reset();
       return config.reset();
     };
     templateHtml = function() {
@@ -8950,52 +9159,27 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
         return template;
       }
     };
-    discardHistory = function() {
-      var $modal;
-      $modal = $('.up-modal');
-      $modal.removeAttr('up-covered-url');
-      return $modal.removeAttr('up-covered-title');
-    };
     createFrame = function(target, options) {
-      var promise;
-      promise = u.resolvedPromise();
-      if (isOpen()) {
-        promise = promise.then(function() {
-          return close();
-        });
+      var $content, $dialog, $modal;
+      $modal = $(templateHtml());
+      $modal.attr('up-flavor', state.flavor);
+      $dialog = $modal.find('.up-modal-dialog');
+      if (u.isPresent(options.width)) {
+        $dialog.css('width', options.width);
       }
-      promise = promise.then(function() {
-        var $content, $dialog, $modal;
-        currentFlavor = options.flavor;
-        $modal = $(templateHtml());
-        $modal.attr('up-flavor', currentFlavor);
-        if (options.sticky) {
-          $modal.attr('up-sticky', '');
-        }
-        $modal.attr('up-covered-url', up.browser.url());
-        $modal.attr('up-covered-title', document.title);
-        $dialog = $modal.find('.up-modal-dialog');
-        if (u.isPresent(options.width)) {
-          $dialog.css('width', options.width);
-        }
-        if (u.isPresent(options.maxWidth)) {
-          $dialog.css('max-width', options.maxWidth);
-        }
-        if (u.isPresent(options.height)) {
-          $dialog.css('height', options.height);
-        }
-        $content = $modal.find('.up-modal-content');
-        u.$createPlaceholder(target, $content);
-        return $modal.appendTo(document.body);
-      });
-      return promise;
+      if (u.isPresent(options.maxWidth)) {
+        $dialog.css('max-width', options.maxWidth);
+      }
+      if (u.isPresent(options.height)) {
+        $dialog.css('height', options.height);
+      }
+      $content = $modal.find('.up-modal-content');
+      u.$createPlaceholder(target, $content);
+      $modal.appendTo(document.body);
+      return state.$modal = $modal;
     };
-    unshifters = [];
     shiftElements = function() {
       var $body, bodyRightPadding, bodyRightShift, scrollbarWidth, unshiftBody;
-      if (unshifters.length > 0) {
-        return;
-      }
       if (u.documentHasVerticalScrollbar()) {
         $body = $('body');
         scrollbarWidth = u.scrollbarWidth();
@@ -9005,7 +9189,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           'padding-right': bodyRightShift + "px",
           'overflow-y': 'hidden'
         });
-        unshifters.push(unshiftBody);
+        state.unshifters.push(unshiftBody);
         return up.layout.anchoredRight().each(function() {
           var $element, elementRight, elementRightShift, unshifter;
           $element = $(this);
@@ -9014,14 +9198,14 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           unshifter = u.temporaryCss($element, {
             'right': elementRightShift
           });
-          return unshifters.push(unshifter);
+          return state.unshifters.push(unshifter);
         });
       }
     };
     unshiftElements = function() {
       var results, unshifter;
       results = [];
-      while (unshifter = unshifters.pop()) {
+      while (unshifter = state.unshifters.pop()) {
         results.push(unshifter());
       }
       return results;
@@ -9036,7 +9220,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @stable
      */
     isOpen = function() {
-      return $('.up-modal').length > 0;
+      return state.phase === 'opened' || state.phase === 'opening';
     };
 
     /**
@@ -9083,10 +9267,10 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       the opening animation has completed.
     @stable
      */
-    follow = function(linkOrSelector, options) {
+    followAsap = function(linkOrSelector, options) {
       options = u.options(options);
       options.$link = $(linkOrSelector);
-      return open(options);
+      return openAsap(options);
     };
 
     /**
@@ -9114,10 +9298,10 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       animation has completed.
     @stable
      */
-    visit = function(url, options) {
+    visitAsap = function(url, options) {
       options = u.options(options);
       options.url = url;
-      return open(options);
+      return openAsap(options);
     };
 
     /**
@@ -9147,19 +9331,26 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       animation has completed.
     @stable
      */
-    extract = function(selector, html, options) {
+    extractAsap = function(selector, html, options) {
       options = u.options(options);
       options.html = html;
       options.history = u.option(options.history, false);
       options.target = selector;
-      return open(options);
+      return openAsap(options);
     };
-
-    /**
-    @function open
-    @internal
-     */
-    open = function(options) {
+    openAsap = function(options) {
+      var curriedOpenNow;
+      curriedOpenNow = function() {
+        return openNow(options);
+      };
+      if (isOpen()) {
+        chain.asap(closeNow, curriedOpenNow);
+      } else {
+        chain.asap(curriedOpenNow);
+      }
+      return chain.promise();
+    };
+    openNow = function(options) {
       var $link, animateOptions, html, target, url;
       options = u.options(options);
       $link = u.option(u.pluckKey(options, '$link'), u.nullJQuery());
@@ -9183,12 +9374,17 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       if (!up.browser.canPushState()) {
         options.history = false;
       }
-      return up.browser.confirm(options).then(function() {
-        var extractOptions, promise;
-        if (up.bus.nobodyPrevents('up:modal:open', {
+      return up.browser.whenConfirmed(options).then(function() {
+        return up.bus.whenEmitted('up:modal:open', {
           url: url,
           message: 'Opening modal'
-        })) {
+        }).then(function() {
+          var extractOptions, promise;
+          state.phase = 'opening';
+          state.flavor = options.flavor;
+          state.sticky = options.sticky;
+          state.coveredUrl = up.browser.url();
+          state.coveredTitle = document.title;
           options.beforeSwap = function() {
             return createFrame(target, options);
           };
@@ -9201,20 +9397,17 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
             promise = up.replace(target, url, extractOptions);
           }
           promise = promise.then(function() {
-            return shiftElements();
-          });
-          promise = promise.then(function() {
+            shiftElements();
             return animate(options.animation, options.backdropAnimation, animateOptions);
           });
           promise = promise.then(function() {
+            state.phase = 'opened';
             return up.emit('up:modal:opened', {
               message: 'Modal opened'
             });
           });
           return promise;
-        } else {
-          return u.unresolvablePromise();
-        }
+        });
       });
     };
 
@@ -9249,54 +9442,63 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       animation has finished.
     @stable
      */
-    close = function(options) {
-      var $modal, animateOptions, backdropCloseAnimation, promise, viewportCloseAnimation;
-      options = u.options(options);
-      $modal = $('.up-modal');
-      if ($modal.length) {
-        if (up.bus.nobodyPrevents('up:modal:close', {
-          $element: $modal,
-          message: 'Closing modal'
-        })) {
-          viewportCloseAnimation = u.option(options.animation, flavorDefault('closeAnimation'));
-          backdropCloseAnimation = u.option(options.backdropAnimation, flavorDefault('backdropCloseAnimation'));
-          animateOptions = up.motion.animateOptions(options, {
-            duration: flavorDefault('closeDuration'),
-            easing: flavorDefault('closeEasing')
-          });
-          promise = u.resolvedPromise();
-          promise = promise.then(function() {
-            return animate(viewportCloseAnimation, backdropCloseAnimation, animateOptions);
-          });
-          promise = promise.then(function() {
-            var destroyOptions;
-            destroyOptions = u.options(u.except(options, 'animation', 'duration', 'easing', 'delay'), {
-              url: $modal.attr('up-covered-url'),
-              title: $modal.attr('up-covered-title')
-            });
-            currentUrl = void 0;
-            return up.destroy($modal, destroyOptions);
-          });
-          promise = promise.then(function() {
-            unshiftElements();
-            currentFlavor = void 0;
-            return up.emit('up:modal:closed', {
-              message: 'Modal closed'
-            });
-          });
-          return promise;
-        } else {
-          return u.unresolvablePromise();
-        }
-      } else {
+    closeAsap = function(options) {
+      if (isOpen()) {
+        chain.asap(function() {
+          return closeNow(options);
+        });
+      }
+      return chain.promise();
+    };
+    closeNow = function(options) {
+      var animateOptions, backdropCloseAnimation, destroyOptions, viewportCloseAnimation;
+      if (!isOpen()) {
         return u.resolvedPromise();
       }
+      options = u.options(options);
+      viewportCloseAnimation = u.option(options.animation, flavorDefault('closeAnimation'));
+      backdropCloseAnimation = u.option(options.backdropAnimation, flavorDefault('backdropCloseAnimation'));
+      animateOptions = up.motion.animateOptions(options, {
+        duration: flavorDefault('closeDuration'),
+        easing: flavorDefault('closeEasing')
+      });
+      destroyOptions = u.options(u.except(options, 'animation', 'duration', 'easing', 'delay'), {
+        url: state.coveredUrl,
+        title: state.coveredTitle
+      });
+      return up.bus.whenEmitted('up:modal:close', {
+        $element: state.$modal,
+        message: 'Closing modal'
+      }).then(function() {
+        var promise;
+        state.phase = 'closing';
+        state.url = null;
+        state.coveredUrl = null;
+        state.coveredTitle = null;
+        promise = animate(viewportCloseAnimation, backdropCloseAnimation, animateOptions);
+        promise = promise.then(function() {
+          state.url = null;
+          console.debug("destroying!");
+          return up.destroy(state.$modal, destroyOptions);
+        });
+        promise = promise.then(function() {
+          unshiftElements();
+          state.phase = 'closed';
+          state.$modal = null;
+          state.flavor = null;
+          state.sticky = null;
+          return up.emit('up:modal:closed', {
+            message: 'Modal closed'
+          });
+        });
+        return promise;
+      });
     };
-    markAsAnimating = function(state) {
-      if (state == null) {
-        state = true;
+    markAsAnimating = function(isAnimating) {
+      if (isAnimating == null) {
+        isAnimating = true;
       }
-      return $('.up-modal').toggleClass('up-modal-animating', state);
+      return state.$modal.toggleClass('up-modal-animating', isAnimating);
     };
     animate = function(viewportAnimation, backdropAnimation, animateOptions) {
       var promise;
@@ -9304,7 +9506,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
         return u.resolvedPromise();
       } else {
         markAsAnimating();
-        promise = $.when(up.animate($('.up-modal-viewport'), viewportAnimation, animateOptions), up.animate($('.up-modal-backdrop'), backdropAnimation, animateOptions));
+        promise = $.when(up.animate(state.$modal.find('.up-modal-viewport'), viewportAnimation, animateOptions), up.animate(state.$modal.find('.up-modal-backdrop'), backdropAnimation, animateOptions));
         promise = promise.then(function() {
           return markAsAnimating(false);
         });
@@ -9330,9 +9532,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @stable
      */
     autoclose = function() {
-      if (!$('.up-modal').is('[up-sticky]')) {
-        discardHistory();
-        return close();
+      if (!state.sticky) {
+        return closeAsap();
       }
     };
 
@@ -9414,7 +9615,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     flavorDefault = function(key, flavorName) {
       var value;
       if (flavorName == null) {
-        flavorName = currentFlavor;
+        flavorName = state.flavor;
       }
       if (flavorName) {
         value = flavorOverrides(flavorName)[key];
@@ -9466,28 +9667,26 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @stable
      */
     up.link.onAction('[up-modal]', function($link) {
-      return follow($link);
+      return followAsap($link);
     });
     up.on('click', 'body', function(event, $body) {
       var $target;
       $target = $(event.target);
       if (!($target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length)) {
-        return close();
+        return closeAsap();
       }
     });
     up.on('up:fragment:inserted', function(event, $fragment) {
       var newSource;
       if (contains($fragment)) {
         if (newSource = $fragment.attr('up-source')) {
-          return currentUrl = newSource;
+          return state.url = newSource;
         }
-      } else if (!up.popup.contains($fragment) && contains(event.origin)) {
+      } else if (contains(event.origin) && !up.popup.contains($fragment)) {
         return autoclose();
       }
     });
-    up.bus.onEscape(function() {
-      return close();
-    });
+    up.bus.onEscape(closeAsap);
 
     /**
     When this element is clicked, closes a currently open dialog.
@@ -9503,33 +9702,26 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @stable
      */
     up.on('click', '[up-close]', function(event, $element) {
-      if ($element.closest('.up-modal').length) {
-        close();
+      if (contains($element)) {
+        closeAsap();
         return event.preventDefault();
       }
     });
     up.on('up:framework:reset', reset);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
-      visit: visit,
-      follow: follow,
-      extract: extract,
-      open: function() {
-        return up.error('up.modal.open no longer exists. Please use either up.modal.follow or up.modal.visit.');
-      },
-      close: close,
+      visit: visitAsap,
+      follow: followAsap,
+      extract: extractAsap,
+      close: closeAsap,
       url: function() {
-        return currentUrl;
+        return state.url;
       },
-      coveredUrl: coveredUrl,
+      coveredUrl: function() {
+        return state.coveredUrl;
+      },
       config: config,
-      defaults: function() {
-        return u.error('up.modal.defaults(...) no longer exists. Set values on he up.modal.config property instead.');
-      },
       contains: contains,
-      source: function() {
-        return up.error('up.modal.source no longer exists. Please use up.popup.url instead.');
-      },
       isOpen: isOpen,
       flavor: flavor
     };
@@ -9571,7 +9763,7 @@ The tooltip element is appended to the end of `<body>`.
 
 (function() {
   up.tooltip = (function($) {
-    var attach, close, config, createElement, reset, setPosition, u;
+    var align, attachAsap, attachNow, chain, closeAsap, closeNow, config, createElement, isOpen, reset, state, u;
     u = up.util;
 
     /**
@@ -9585,51 +9777,73 @@ The tooltip element is appended to the end of `<body>`.
       The animation used to open a tooltip.
     @param {String} [config.closeAnimation='fade-out']
       The animation used to close a tooltip.
+    @param {Number} [config.openDuration]
+      The duration of the open animation (in milliseconds).
+    @param {Number} [config.closeDuration]
+      The duration of the close animation (in milliseconds).
+    @param {String} [config.openEasing]
+      The timing function controlling the acceleration of the opening animation.
+    @param {String} [config.closeEasing]
+      The timing function controlling the acceleration of the closing animation.
     @stable
      */
     config = u.config({
       position: 'top',
       openAnimation: 'fade-in',
-      closeAnimation: 'fade-out'
+      closeAnimation: 'fade-out',
+      openDuration: 100,
+      closeDuration: 50,
+      openEasing: null,
+      closeEasing: null
     });
+    state = u.config({
+      phase: 'closed',
+      $anchor: null,
+      $tooltip: null,
+      position: null
+    });
+    chain = new u.DivertibleChain();
     reset = function() {
-      close({
-        animation: false
-      });
+      var ref;
+      if ((ref = state.$tooltip) != null) {
+        ref.remove();
+      }
+      state.reset();
+      chain.reset();
       return config.reset();
     };
-    setPosition = function($link, $tooltip, position) {
+    align = function() {
       var css, linkBox, tooltipBox;
       css = {};
-      tooltipBox = u.measure($tooltip);
-      if (u.isFixed($link)) {
-        linkBox = $link.get(0).getBoundingClientRect();
+      tooltipBox = u.measure(state.$tooltip);
+      if (u.isFixed(state.$anchor)) {
+        linkBox = state.$anchor.get(0).getBoundingClientRect();
         css['position'] = 'fixed';
       } else {
-        linkBox = u.measure($link);
+        linkBox = u.measure(state.$anchor);
       }
-      switch (position) {
-        case "top":
+      switch (state.position) {
+        case 'top':
           css['top'] = linkBox.top - tooltipBox.height;
           css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width);
           break;
-        case "left":
+        case 'left':
           css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height);
           css['left'] = linkBox.left - tooltipBox.width;
           break;
-        case "right":
+        case 'right':
           css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height);
           css['left'] = linkBox.left + linkBox.width;
           break;
-        case "bottom":
+        case 'bottom':
           css['top'] = linkBox.top + linkBox.height;
           css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width);
           break;
         default:
-          u.error("Unknown position option '%s'", position);
+          u.error("Unknown position option '%s'", state.position);
       }
-      $tooltip.attr('up-position', position);
-      return $tooltip.css(css);
+      state.$tooltip.attr('up-position', state.position);
+      return state.$tooltip.css(css);
     };
     createElement = function(options) {
       var $element;
@@ -9640,7 +9854,7 @@ The tooltip element is appended to the end of `<body>`.
         $element.html(options.html);
       }
       $element.appendTo(document.body);
-      return $element;
+      return state.$tooltip = $element;
     };
 
     /**
@@ -9663,24 +9877,44 @@ The tooltip element is appended to the end of `<body>`.
       A promise that will be resolved when the tooltip's opening animation has finished.
     @stable
      */
-    attach = function(linkOrSelector, options) {
-      var $link, $tooltip, animateOptions, animation, html, position, text;
+    attachAsap = function(elementOrSelector, options) {
+      var curriedAttachNow;
       if (options == null) {
         options = {};
       }
-      $link = $(linkOrSelector);
-      html = u.option(options.html, $link.attr('up-tooltip-html'));
-      text = u.option(options.text, $link.attr('up-tooltip'));
-      position = u.option(options.position, $link.attr('up-position'), config.position);
-      animation = u.option(options.animation, u.castedAttr($link, 'up-animation'), config.openAnimation);
-      animateOptions = up.motion.animateOptions(options, $link);
-      close();
-      $tooltip = createElement({
+      curriedAttachNow = function() {
+        return attachNow(elementOrSelector, options);
+      };
+      if (isOpen()) {
+        chain.asap(closeNow, curriedAttachNow);
+      } else {
+        chain.asap(curriedAttachNow);
+      }
+      return chain.promise();
+    };
+    attachNow = function(elementOrSelector, options) {
+      var $anchor, animateOptions, animation, html, position, text;
+      $anchor = $(elementOrSelector);
+      options = u.options(options);
+      html = u.option(options.html, $anchor.attr('up-tooltip-html'));
+      text = u.option(options.text, $anchor.attr('up-tooltip'));
+      position = u.option(options.position, $anchor.attr('up-position'), config.position);
+      animation = u.option(options.animation, u.castedAttr($anchor, 'up-animation'), config.openAnimation);
+      animateOptions = up.motion.animateOptions(options, $anchor, {
+        duration: config.openDuration,
+        easing: config.openEasing
+      });
+      state.phase = 'opening';
+      state.$anchor = $anchor;
+      createElement({
         text: text,
         html: html
       });
-      setPosition($link, $tooltip, position);
-      return up.animate($tooltip, animation, animateOptions);
+      state.position = position;
+      align();
+      return up.animate(state.$tooltip, animation, animateOptions).then(function() {
+        return state.phase = 'opened';
+      });
     };
 
     /**
@@ -9690,18 +9924,47 @@ The tooltip element is appended to the end of `<body>`.
     @function up.tooltip.close
     @param {Object} options
       See options for [`up.animate`](/up.animate).
+    @return {Promise}
+      A promise for the end of the closing animation.
     @stable
      */
-    close = function(options) {
-      var $tooltip;
-      $tooltip = $('.up-tooltip');
-      if ($tooltip.length) {
-        options = u.options(options, {
-          animation: config.closeAnimation
+    closeAsap = function(options) {
+      if (isOpen()) {
+        chain.asap(function() {
+          return closeNow(options);
         });
-        options = u.merge(options, up.motion.animateOptions(options));
-        return up.destroy($tooltip, options);
       }
+      return chain.promise();
+    };
+    closeNow = function(options) {
+      var animateOptions;
+      if (!isOpen()) {
+        return u.resolvedPromise();
+      }
+      options = u.options(options, {
+        animation: config.closeAnimation
+      });
+      animateOptions = up.motion.animateOptions(options, {
+        duration: config.closeDuration,
+        easing: config.closeEasing
+      });
+      u.extend(options, animateOptions);
+      state.phase = 'closing';
+      return up.destroy(state.$tooltip, options).then(function() {
+        state.phase = 'closed';
+        state.$tooltip = null;
+        return state.$anchor = null;
+      });
+    };
+
+    /**
+    Returns whether a tooltip is currently showing.
+    
+    @function up.tooltip.isOpen
+    @stable
+     */
+    isOpen = function() {
+      return state.phase === 'opening' || state.phase === 'opened';
     };
 
     /**
@@ -9733,28 +9996,26 @@ The tooltip element is appended to the end of `<body>`.
     @selector [up-tooltip-html]
     @stable
      */
-    up.compiler('[up-tooltip], [up-tooltip-html]', function($link) {
-      $link.on('mouseenter', function() {
-        return attach($link);
+    up.compiler('[up-tooltip], [up-tooltip-html]', function($opener) {
+      $opener.on('mouseenter', function() {
+        return attachAsap($opener);
       });
-      return $link.on('mouseleave', function() {
-        return close();
+      return $opener.on('mouseleave', function() {
+        return closeAsap();
       });
     });
     up.on('click', 'body', function(event, $body) {
-      return close();
-    });
-    up.on('up:framework:reset', close);
-    up.bus.onEscape(function() {
-      return close();
+      return closeAsap();
     });
     up.on('up:framework:reset', reset);
+    up.bus.onEscape(function() {
+      return closeAsap();
+    });
     return {
-      attach: attach,
-      close: close,
-      open: function() {
-        return u.error('up.tooltip.open no longer exists. Use up.tooltip.attach instead.');
-      }
+      config: config,
+      attach: attachAsap,
+      isOpen: isOpen,
+      close: closeAsap
     };
   })(jQuery);
 
@@ -9806,10 +10067,7 @@ by providing instant feedback for user interactions.
     SELECTOR_SECTION = 'a, [up-href]';
     normalizeUrl = function(url) {
       if (u.isPresent(url)) {
-        return u.normalizeUrl(url, {
-          search: false,
-          stripTrailingSlash: true
-        });
+        return u.normalizeUrl(url);
       }
     };
     sectionUrls = function($section) {
