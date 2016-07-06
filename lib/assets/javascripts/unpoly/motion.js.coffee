@@ -442,10 +442,10 @@ up.motion = (($) ->
       # If the element had a layout context before, make sure the
       # ghost will have layout context as well (and vice versa).
       position: if $element.css('position') == 'static' then 'static' else 'relative'
-      top:    ''
-      right:  ''
-      bottom: ''
-      left:   ''
+      top:    'auto'
+      right:  'auto'
+      bottom: 'auto'
+      left:   'auto'
       width:  '100%'
       height: '100%'
     $ghost.addClass('up-ghost')
