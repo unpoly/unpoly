@@ -15,6 +15,7 @@ Unreleased
 
 ### Breaking changes
 
+- When [replacing](/up.replace) multiple page fragments at once, only the first fragment is revealed within its viewport
 
 
 0.27.0

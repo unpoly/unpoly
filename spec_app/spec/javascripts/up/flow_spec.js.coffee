@@ -451,10 +451,12 @@ describe 'up.flow', ->
         describe 'with { reveal: true } option', ->
 
           beforeEach ->
-            @revealedHTML = ''
+            @revealedHTML = []
+            @revealedText = []
 
             @revealMock = up.layout.knife.mock('reveal').and.callFake ($revealedElement) =>
-              @revealedHTML = $revealedElement.get(0).outerHTML
+              @revealedHTML.push $revealedElement.get(0).outerHTML
+              @revealedText.push $revealedElement.text().trim()
               u.resolvedDeferred()
 
           it 'reveals a new element before it is being replaced', (done) ->
@@ -462,8 +464,18 @@ describe 'up.flow', ->
             @respond()
             promise.then =>
               expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
-              expect(@revealedHTML).toContain('new-middle')
+              expect(@revealedText).toEqual ['new-middle']
               done()
+
+          describe 'when more than one fragment is replaced', ->
+
+            it 'only reveals the first fragment', (done) ->
+              promise = up.replace('.middle, .after', '/path', reveal: true)
+              @respond()
+              promise.then =>
+                expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
+                expect(@revealedText).toEqual ['new-middle']
+                done()
 
           describe 'when there is an anchor #hash in the URL', ->
 
@@ -479,7 +491,7 @@ describe 'up.flow', ->
                 """
               @respond()
               promise.then =>
-                expect(@revealedHTML).toEqual('<div id="three">three</div>')
+                expect(@revealedHTML).toEqual ['<div id="three">three</div>']
                 done()
 
             it "reveals the entire element if it has no child with the ID of that #hash", (done) ->
@@ -492,7 +504,7 @@ describe 'up.flow', ->
                 """
               @respond()
               promise.then =>
-                expect(@revealedHTML).toContain('new-middle')
+                expect(@revealedText).toEqual ['new-middle']
                 done()
 
           it 'reveals a new element that is being appended', (done) ->
@@ -503,7 +515,7 @@ describe 'up.flow', ->
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
-              expect(@revealedHTML).toEqual('<span class="up-insertion">new-middle</span>')
+              expect(@revealedHTML).toEqual ['<span class="up-insertion">new-middle</span>']
               # Show that the wrapper is done after the insertion.
               expect($('.up-insertion')).not.toExist()
               done()
@@ -516,7 +528,7 @@ describe 'up.flow', ->
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
-              expect(@revealedHTML).toEqual('<span class="up-insertion">new-middle</span>')
+              expect(@revealedHTML).toEqual ['<span class="up-insertion">new-middle</span>']
               # Show that the wrapper is done after the insertion.
               expect($('.up-insertion')).not.toExist()
               done()

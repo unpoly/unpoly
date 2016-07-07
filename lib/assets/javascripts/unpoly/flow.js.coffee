@@ -344,6 +344,7 @@ up.flow = (($) ->
               filterScripts($new, options)
               swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options)
               swapPromises.push(swapPromise)
+              options.reveal = false
         # Delay all further links in the promise chain until all fragments have been swapped
         return $.when(swapPromises...)
       promise = promise.then(options.afterSwap) if options.afterSwap
