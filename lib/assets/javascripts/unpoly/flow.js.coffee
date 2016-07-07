@@ -409,7 +409,7 @@ up.flow = (($) ->
       # Text nodes are wrapped in a .up-insertion container so we can
       # animate them and measure their position/size for scrolling.
       # This is not possible for container-less text nodes.
-      $wrapper = $new.contents().wrapAll('<span class="up-insertion"></span>').parent()
+      $wrapper = $new.contents().wrapAll('<div class="up-insertion"></div>').parent()
 
       # Note that since we're prepending/appending instead of replacing,
       # `$new` will not actually be inserted into the DOM, only its children.

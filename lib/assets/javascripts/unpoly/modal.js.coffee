@@ -472,7 +472,6 @@ up.modal = (($) ->
         # since up.navigation listens to up:fragment:destroyed and then
         # re-assigns .up-current classes.
         state.url = null
-        console.debug("destroying!")
         up.destroy(state.$modal, destroyOptions)
 
       promise = promise.then ->

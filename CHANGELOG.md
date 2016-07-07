@@ -11,6 +11,7 @@ Unreleased
 ### Compatible changes
 
 - Fix a bug where absolutely positioned elements would be offset incorrectly during transitions
+- Fix a bug where inserted elements were not revealed within their viewport
 
 
 ### Breaking changes

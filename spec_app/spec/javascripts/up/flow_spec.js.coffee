@@ -515,7 +515,7 @@ describe 'up.flow', ->
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
-              expect(@revealedHTML).toEqual ['<span class="up-insertion">new-middle</span>']
+              expect(@revealedHTML).toEqual ['<div class="up-insertion">new-middle</div>']
               # Show that the wrapper is done after the insertion.
               expect($('.up-insertion')).not.toExist()
               done()
@@ -528,7 +528,7 @@ describe 'up.flow', ->
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
-              expect(@revealedHTML).toEqual ['<span class="up-insertion">new-middle</span>']
+              expect(@revealedHTML).toEqual ['<div class="up-insertion">new-middle</div>']
               # Show that the wrapper is done after the insertion.
               expect($('.up-insertion')).not.toExist()
               done()
