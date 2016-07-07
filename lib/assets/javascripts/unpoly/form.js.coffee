@@ -135,6 +135,8 @@ up.form = (($) ->
 
     if options.validate
       options.headers ||= {}
+      options.transition = false
+      options.failTransition = false
       options.headers['X-Up-Validate'] = options.validate
       # If a form has file inputs and the browser does not support FormData,
       # we cannot offer inline validations.

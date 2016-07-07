@@ -12,6 +12,7 @@ Unreleased
 
 - Fix a bug where absolutely positioned elements would be offset incorrectly during transitions
 - Fix a bug where inserted elements were not revealed within their viewport
+- When [validating](/up-validate) a form with transitions, transitions are no longer applied
 
 
 ### Breaking changes
