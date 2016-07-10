@@ -13,6 +13,10 @@ Unreleased
 
 ### Breaking changes
 
+- Links with [`up-target`](/up.target) now prefer to update elements within their own layer (page, modal, or popup).
+  Only when the target element doesn't exist within the link's layer, Unpoly will look through all layers
+  from top to bottom.
+
 
 
 0.27.1

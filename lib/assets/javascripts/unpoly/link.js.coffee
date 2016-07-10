@@ -158,6 +158,13 @@ up.link = (($) ->
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
+  @param {String} [options.layer='auto']
+    The name of the layer that ought to be updated. Valid values are
+    `auto`, `page`, `modal` and `popup`.
+
+    If set to `auto` (default), Unpoly will try to find a match in the
+    same layer as the given link. If no match was found in that layer,
+    Unpoly will search in other layers, starting from the topmost layer.
   @return {Promise}
     A promise that will be resolved when the link destination
     has been loaded and rendered.
@@ -179,6 +186,7 @@ up.link = (($) ->
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'))
     options.method = followMethod($link, options)
     options.origin = u.option(options.origin, $link)
+    options.layer = u.option(options.layer, $link.attr('up-layer'), 'auto')
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     options = u.merge(options, up.motion.animateOptions(options, $link))
 
@@ -330,7 +338,14 @@ up.link = (($) ->
   @param {String} [up-cache]
     Whether to force the use of a cached response (`true`)
     or never use the cache (`false`)
-    or make an educated guess (`undefined`).
+    or make an educated guess (default).
+  @param {String} [up-layer='auto']
+    The name of the layer that ought to be updated. Valid values are
+    `auto`, `page`, `modal` and `popup`.
+
+    If set to `auto` (default), Unpoly will try to find a match in the
+    same layer as the given link. If no match was found in that layer,
+    Unpoly will search in other layers, starting from the topmost layer.
   @param [up-history]
     Whether to push an entry to the browser history when following the link.
 

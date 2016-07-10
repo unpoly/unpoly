@@ -197,6 +197,12 @@ describe 'up.util', ->
       it 'returns false for an array with at least one element', ->
         expect(up.util.isBlank(['element'])).toBe(false)
 
+      it 'returns true for an empty jQuery collection', ->
+        expect(up.util.isBlank($([]))).toBe(true)
+
+      it 'returns false for a jQuery collection with at least one element', ->
+        expect(up.util.isBlank($('body'))).toBe(false)
+
       it 'returns true for an empty object', ->
         expect(up.util.isBlank({})).toBe(true)
 
@@ -253,6 +259,22 @@ describe 'up.util', ->
           object.b = 2
           object.reset()
           expect(object.reset).toBeDefined()
+
+    describe 'up.util.remove', ->
+
+      it 'removes the given string from the given array', ->
+        array = ['a', 'b', 'c']
+        up.util.remove(array, 'b')
+        expect(array).toEqual ['a', 'c']
+
+      it 'removes the given object from the given array', ->
+        obj1 = { 'key': 1 }
+        obj2 = { 'key': 2 }
+        obj3 = { 'key': 3 }
+        array = [obj1, obj2, obj3]
+        up.util.remove(array, obj2)
+        expect(array).toEqual [obj1, obj3]
+
 
     describe 'up.util.requestDataAsQuery', ->
 

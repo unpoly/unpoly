@@ -618,7 +618,7 @@ up.util = (($) ->
     merged
 
   ###*
-  Returns the first argument that is considered present.
+  Returns the first argument that is considered [given](/up.util.isGiven).
 
   This function is useful when you have multiple option sources and the value can be boolean.
   In that case you cannot change the sources with a `||` operator

@@ -380,6 +380,7 @@ up.modal = (($) ->
     options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor))
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     options.method = up.link.followMethod($link, options)
+    options.layer = 'modal'
     animateOptions = up.motion.animateOptions(options, $link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
 
     # Although we usually fall back to full page loads if a browser doesn't support pushState,

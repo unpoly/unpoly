@@ -126,6 +126,7 @@ up.form = (($) ->
     options.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
     options.origin = u.option(options.origin, $form)
+    options.layer = u.option(options.layer, $form.attr('up-layer'), 'auto')
     options.data = up.util.requestDataFromForm($form)
     options = u.merge(options, up.motion.animateOptions(options, $form))
 

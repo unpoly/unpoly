@@ -365,6 +365,30 @@ describe 'up.link', ->
           expect($('.target')).toHaveText('new text')
           expect(location.pathname).toEqual('/other/path')
 
+        it 'prefers to update a container in the same layer as the clicked link', ->
+          up.motion.config.enabled = false
+
+          $popupOpener = affix('a[href="/popup"]')
+          up.popup.attach($popupOpener, html: "<div class='target'>old popup text</div>", target: '.target')
+
+          affix('.document').affix('.target').text('old document text')
+          $linkInDocument = affix('a[href="/foo"][up-target=".target"]')
+          $linkInDocument.click()
+
+          @respondWith '<div class="target">new text from document link</div>'
+
+          expect($('.document .target')).toHaveText('new text from document link')
+          expect($('.up-popup .target')).toHaveText('old popup text')
+
+          $linkInPopup = $('.up-popup').affix('a[href="/bar"][up-target=".target"]')
+          $linkInPopup.click()
+
+          @respondWith '<div class="target">new text from popup link</div>'
+
+          expect($('.document .target')).toHaveText('new text from document link')
+          expect($('.up-popup .target')).toHaveText('new text from popup link')
+
+
         describe 'with [up-transition] modifier', ->
 
           describeCapability 'canCssTransition', ->

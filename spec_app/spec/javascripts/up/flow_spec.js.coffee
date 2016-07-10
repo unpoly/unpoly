@@ -566,7 +566,7 @@ describe 'up.flow', ->
       it "throws an error if the selector can't be found on the current page", ->
         html = '<div class="foo-bar">text</div>'
         extract = -> up.extract('.foo-bar', html)
-        expect(extract).toThrowError(/Could not find selector ".foo-bar" in current body/i)
+        expect(extract).toThrowError(/Could not find selector ".foo-bar"/i)
 
       it "throws an error if the selector can't be found in the given HTML string", ->
         affix('.foo-bar')

@@ -224,6 +224,7 @@ up.popup = (($) ->
     options.history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($anchor, 'up-history'), config.history) else false
     options.confirm = u.option(options.confirm, $anchor.attr('up-confirm'))
     options.method = up.link.followMethod($anchor, options)
+    options.layer = 'popup'
     animateOptions = up.motion.animateOptions(options, $anchor, duration: config.openDuration, easing: config.openEasing)
 
     up.browser.whenConfirmed(options).then ->
