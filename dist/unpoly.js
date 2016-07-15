@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.27.0"
+    version: "0.27.1"
   };
 
 }).call(this);
@@ -5117,7 +5117,8 @@ are based on this module.
               if ($old && $new) {
                 filterScripts($new, options);
                 swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options);
-                return swapPromises.push(swapPromise);
+                swapPromises.push(swapPromise);
+                return options.reveal = false;
               }
             });
           }
@@ -5197,7 +5198,7 @@ are based on this module.
       }
       up.motion.finish($old);
       if (pseudoClass) {
-        $wrapper = $new.contents().wrapAll('<span class="up-insertion"></span>').parent();
+        $wrapper = $new.contents().wrapAll('<div class="up-insertion"></div>').parent();
         if (pseudoClass === 'before') {
           $old.prepend($wrapper);
         } else {
@@ -6132,10 +6133,10 @@ or [transitions](/up.transition) using Javascript or CSS.
       $ghost.find('script').remove();
       $ghost.css({
         position: $element.css('position') === 'static' ? 'static' : 'relative',
-        top: '',
-        right: '',
-        bottom: '',
-        left: '',
+        top: 'auto',
+        right: 'auto',
+        bottom: 'auto',
+        left: 'auto',
         width: '100%',
         height: '100%'
       });
@@ -7704,6 +7705,8 @@ open dialogs with sub-forms, etc. all without losing form state.
       canHistoryOption = up.browser.canPushState() || options.history === false;
       if (options.validate) {
         options.headers || (options.headers = {});
+        options.transition = false;
+        options.failTransition = false;
         options.headers['X-Up-Validate'] = options.validate;
         if (!canAjaxSubmit) {
           return u.unresolvablePromise();
@@ -9477,8 +9480,6 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
         state.coveredTitle = null;
         promise = animate(viewportCloseAnimation, backdropCloseAnimation, animateOptions);
         promise = promise.then(function() {
-          state.url = null;
-          console.debug("destroying!");
           return up.destroy(state.$modal, destroyOptions);
         });
         promise = promise.then(function() {

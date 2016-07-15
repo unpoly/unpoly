@@ -21,6 +21,8 @@
   font-weight: normal;
   max-width: 100px;
   overflow: hidden; }
+.up-insertion {
+  display: inline-block; }
 [up-href] {
   cursor: pointer; }
 .up-modal {
