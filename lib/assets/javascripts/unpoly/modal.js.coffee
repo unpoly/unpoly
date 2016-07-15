@@ -462,16 +462,15 @@ up.modal = (($) ->
 
     up.bus.whenEmitted('up:modal:close', $element: state.$modal, message: 'Closing modal').then ->
       state.phase = 'closing'
+      # the current URL must be deleted *before* calling up.destroy,
+      # since up.navigation listens to up:fragment:destroyed and then
+      # re-assigns .up-current classes.
       state.url = null
       state.coveredUrl = null
       state.coveredTitle = null
       promise = animate(viewportCloseAnimation, backdropCloseAnimation, animateOptions)
 
       promise = promise.then ->
-        # currentUrl must be deleted *before* calling up.destroy,
-        # since up.navigation listens to up:fragment:destroyed and then
-        # re-assigns .up-current classes.
-        state.url = null
         up.destroy(state.$modal, destroyOptions)
 
       promise = promise.then ->
