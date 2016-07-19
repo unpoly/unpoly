@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.27.1"
+    version: "0.27.2"
   };
 
 }).call(this);
@@ -269,7 +269,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       closeTag = function(tag) {
         return "</" + tag + ">";
       };
-      anything = '(?:.|\\n)*?';
+      anything = '(?:.|\\s)*?';
       capture = function(pattern) {
         return "(" + pattern + ")";
       };
@@ -719,7 +719,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
-    Returns the first argument that is considered present.
+    Returns the first argument that is considered [given](/up.util.isGiven).
     
     This function is useful when you have multiple option sources and the value can be boolean.
     In that case you cannot change the sources with a `||` operator
@@ -4750,7 +4750,7 @@ are based on this module.
 
 (function() {
   up.flow = (function($) {
-    var autofocus, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, findOldFragment, first, hello, isRealElement, oldFragmentNotFound, parseImplantSteps, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, source, swapElements, transferKeepableElements, u, updateHistory;
+    var autofocus, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, findOldFragment, first, firstInLayer, firstInPriority, hello, isRealElement, layerOf, matchesLayer, oldFragmentNotFound, parseImplantSteps, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, source, swapElements, transferKeepableElements, u, updateHistory;
     u = up.util;
 
     /**
@@ -4933,9 +4933,6 @@ are based on this module.
       history change for the current URL.
     @param {Boolean} [options.cache]
       Whether to use a [cached response](/up.proxy) if available.
-    @param {Element|jQuery} [options.origin]
-      The element that triggered the replacement. The element's selector will
-      be substituted for the `&` shorthand in the target selector.
     @param {String} [options.historyMethod='push']
     @param {Object} [options.headers={}]
       An object of additional header key/value pairs to send along
@@ -4943,6 +4940,18 @@ are based on this module.
     @param {Boolean} [options.requireMatch=true]
       Whether to raise an error if the given selector is missing in
       either the current page or in the response.
+    @param {Element|jQuery} [options.origin]
+      The element that triggered the replacement.
+    
+      The element's selector will be substituted for the `&` shorthand in the target selector.
+    @param {String} [options.layer='auto']
+      The name of the layer that ought to be updated. Valid values are
+      `auto`, `page`, `modal` and `popup`.
+    
+      If set to `auto` (default), Unpoly will try to find a match in the
+      same layer as the element that triggered the replacement (see `options.origin`).
+      If that element is not known, or no match was found in that layer,
+      Unpoly will search in other layers, starting from the topmost layer.
     @return {Promise}
       A promise that will be resolved when the page has been updated.
     @stable
@@ -5089,7 +5098,8 @@ are based on this module.
         options = u.options(options, {
           historyMethod: 'push',
           requireMatch: true,
-          keep: true
+          keep: true,
+          layer: 'auto'
         });
         selector = resolveSelector(selectorOrElement, options.origin);
         response = parseResponse(html, options);
@@ -5131,12 +5141,16 @@ are based on this module.
       });
     };
     findOldFragment = function(selector, options) {
-      return first(".up-popup " + selector) || first(".up-modal " + selector) || first(selector) || oldFragmentNotFound(selector, options);
+      return first(selector, options) || oldFragmentNotFound(selector, options);
     };
     oldFragmentNotFound = function(selector, options) {
-      var message;
+      var layerProse, message;
       if (options.requireMatch) {
-        message = 'Could not find selector %s in current body HTML';
+        layerProse = options.layer;
+        if (layerProse === 'auto') {
+          layerProse = 'page, modal or popup';
+        }
+        message = "Could not find selector %s in the current " + layerProse;
         if (message[0] === '#') {
           message += ' (avoid using IDs)';
         }
@@ -5507,29 +5521,69 @@ are based on this module.
     
     @function up.first
     @param {String|Element|jQuery|Array<Element>} selectorOrElement
-    @return {jQuery}
+    @param {String} options.layer
+      The name of the layer in which to find the element. Valid values are
+      `auto`, `page`, `modal` and `popup`.
+    @param {}
+    @return {jQuery|Undefined}
       The first element that is neither a ghost or being destroyed,
       or `undefined` if no such element was given.
     @experimental
      */
-    first = function(selectorOrElement) {
-      var $element, $match, element, elements, j, len;
-      elements = void 0;
-      if (u.isString(selectorOrElement)) {
-        elements = $(selectorOrElement).get();
+    first = function(selectorOrElement, options) {
+      options = u.options(options, {
+        layer: 'auto'
+      });
+      if (options.layer === 'auto') {
+        return firstInPriority(selectorOrElement, options.origin);
       } else {
-        elements = selectorOrElement;
+        return firstInLayer(selectorOrElement, options.layer);
       }
+    };
+    firstInPriority = function(selectorOrElement, origin) {
+      var $match, j, layer, layers, len, originLayer;
+      layers = ['popup', 'modal', 'page'];
       $match = void 0;
-      for (j = 0, len = elements.length; j < len; j++) {
-        element = elements[j];
+      if (u.isPresent(origin)) {
+        originLayer = layerOf(origin);
+        u.remove(layers, originLayer);
+        layers.unshift(originLayer);
+      }
+      for (j = 0, len = layers.length; j < len; j++) {
+        layer = layers[j];
+        if ($match = firstInLayer(selectorOrElement, layer)) {
+          break;
+        }
+      }
+      return $match;
+    };
+    firstInLayer = function(selectorOrElement, layer) {
+      var $element, $elements, $match, element, j, len;
+      $elements = $(selectorOrElement);
+      $match = void 0;
+      for (j = 0, len = $elements.length; j < len; j++) {
+        element = $elements[j];
         $element = $(element);
-        if (isRealElement($element)) {
+        if (isRealElement($element) && matchesLayer($element, layer)) {
           $match = $element;
           break;
         }
       }
       return $match;
+    };
+    layerOf = function(selectorOrElement) {
+      var $element;
+      $element = $(selectorOrElement);
+      if (up.popup.contains($element)) {
+        return 'popup';
+      } else if (up.modal.contains($element)) {
+        return 'modal';
+      } else {
+        return 'page';
+      }
+    };
+    matchesLayer = function(selectorOrElement, layer) {
+      return layerOf(selectorOrElement) === layer;
     };
 
     /**
@@ -7180,6 +7234,13 @@ Read on
     @param {Object} [options.headers={}]
       An object of additional header key/value pairs to send along
       with the request.
+    @param {String} [options.layer='auto']
+      The name of the layer that ought to be updated. Valid values are
+      `auto`, `page`, `modal` and `popup`.
+    
+      If set to `auto` (default), Unpoly will try to find a match in the
+      same layer as the given link. If no match was found in that layer,
+      Unpoly will search in other layers, starting from the topmost layer.
     @return {Promise}
       A promise that will be resolved when the link destination
       has been loaded and rendered.
@@ -7200,6 +7261,7 @@ Read on
       options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'));
       options.method = followMethod($link, options);
       options.origin = u.option(options.origin, $link);
+      options.layer = u.option(options.layer, $link.attr('up-layer'), 'auto');
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       options = u.merge(options, up.motion.animateOptions(options, $link));
       return up.browser.whenConfirmed(options).then(function() {
@@ -7368,7 +7430,14 @@ Read on
     @param {String} [up-cache]
       Whether to force the use of a cached response (`true`)
       or never use the cache (`false`)
-      or make an educated guess (`undefined`).
+      or make an educated guess (default).
+    @param {String} [up-layer='auto']
+      The name of the layer that ought to be updated. Valid values are
+      `auto`, `page`, `modal` and `popup`.
+    
+      If set to `auto` (default), Unpoly will try to find a match in the
+      same layer as the given link. If no match was found in that layer,
+      Unpoly will search in other layers, starting from the topmost layer.
     @param [up-history]
       Whether to push an entry to the browser history when following the link.
     
@@ -7698,6 +7767,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       options.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'));
       options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'));
       options.origin = u.option(options.origin, $form);
+      options.layer = u.option(options.layer, $form.attr('up-layer'), 'auto');
       options.data = up.util.requestDataFromForm($form);
       options = u.merge(options, up.motion.animateOptions(options, $form));
       hasFileInputs = $form.find('input[type=file]').length;
@@ -8530,7 +8600,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
 (function() {
   up.popup = (function($) {
-    var align, attachAsap, attachNow, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, isOpen, reset, state, u;
+    var align, attachAsap, attachNow, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, discardHistory, isOpen, reset, state, u;
     u = up.util;
 
     /**
@@ -8641,6 +8711,10 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       state.$popup.attr('up-position', state.position);
       return state.$popup.css(css);
     };
+    discardHistory = function() {
+      state.coveredTitle = null;
+      return state.coveredUrl = null;
+    };
     createFrame = function(target) {
       var $popup;
       $popup = u.$createElementFromSelector('.up-popup');
@@ -8721,6 +8795,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       options.history = up.browser.canPushState() ? u.option(options.history, u.castedAttr($anchor, 'up-history'), config.history) : false;
       options.confirm = u.option(options.confirm, $anchor.attr('up-confirm'));
       options.method = up.link.followMethod($anchor, options);
+      options.layer = 'popup';
       animateOptions = up.motion.animateOptions(options, $anchor, {
         duration: config.openDuration,
         easing: config.openEasing
@@ -8856,6 +8931,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
      */
     autoclose = function() {
       if (!state.sticky) {
+        discardHistory();
         return closeAsap();
       }
     };
@@ -9034,7 +9110,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
 
 (function() {
   up.modal = (function($) {
-    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, extractAsap, flavor, flavorDefault, flavorOverrides, followAsap, isOpen, markAsAnimating, openAsap, openNow, reset, shiftElements, state, templateHtml, u, unshiftElements, visitAsap;
+    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, followAsap, isOpen, markAsAnimating, openAsap, openNow, reset, shiftElements, state, templateHtml, u, unshiftElements, visitAsap;
     u = up.util;
 
     /**
@@ -9161,6 +9237,10 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       } else {
         return template;
       }
+    };
+    discardHistory = function() {
+      state.coveredTitle = null;
+      return state.coveredUrl = null;
     };
     createFrame = function(target, options) {
       var $content, $dialog, $modal;
@@ -9369,6 +9449,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor));
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       options.method = up.link.followMethod($link, options);
+      options.layer = 'modal';
       animateOptions = up.motion.animateOptions(options, $link, {
         duration: flavorDefault('openDuration', options.flavor),
         easing: flavorDefault('openEasing', options.flavor)
@@ -9534,6 +9615,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
      */
     autoclose = function() {
       if (!state.sticky) {
+        discardHistory();
         return closeAsap();
       }
     };
