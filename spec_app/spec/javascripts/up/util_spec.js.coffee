@@ -2,6 +2,42 @@ describe 'up.util', ->
   
   describe 'Javascript functions', ->
 
+    describe 'up.util.createElementFromHtml', ->
+
+      it 'parses a string that contains a serialized HTML document', ->
+        string = """
+          <html lang="foo">
+            <head>
+              <title>document title</title>
+            </head>
+            <body data-env='production'>
+              <div>line 1</div>
+              <div>line 2</div>
+            </body>
+          </html>
+          """
+
+        element = up.util.createElementFromHtml(string)
+
+        expect(element.querySelector('head title').textContent).toEqual('document title')
+        expect(element.querySelectorAll('body div').length).toBe(2)
+        expect(element.querySelectorAll('body div')[0].textContent).toEqual('line 1')
+        expect(element.querySelectorAll('body div')[1].textContent).toEqual('line 2')
+
+      it 'parses a string that contains carriage returns (bugfix)', ->
+        string = """
+          <html>\r
+            <body>\r
+              <div>line</div>\r
+            </body>\r
+          </html>\r
+          """
+
+        $element = up.util.createElementFromHtml(string)
+        expect($element.querySelector('body')).toBeGiven()
+        expect($element.querySelector('body div').textContent).toEqual('line')
+
+
     describe 'up.util.cssAnimate', ->
 
       it 'returns a deferred that eventually resolves if called with a duration of 0 (bugfix)', (done) ->

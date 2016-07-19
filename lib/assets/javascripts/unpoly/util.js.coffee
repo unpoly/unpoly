@@ -199,7 +199,7 @@ up.util = (($) ->
 
     openTag = (tag) -> "<#{tag}(?: [^>]*)?>"
     closeTag = (tag) -> "</#{tag}>"
-    anything = '(?:.|\\n)*?'
+    anything = '(?:.|\\s)*?'
     capture = (pattern) -> "(#{pattern})"
     
     titlePattern = new RegExp(

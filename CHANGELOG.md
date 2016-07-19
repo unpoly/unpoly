@@ -10,6 +10,8 @@ Unreleased
 
 ### Compatible changes
 
+- Fix a bug where the back button would not work if the document contained carriage returns (`\r`).
+
 
 ### Breaking changes
 
