@@ -11,6 +11,8 @@ Unreleased
 ### Compatible changes
 
 - Fix a bug where the back button would not work if the document contained carriage returns (`\r`).
+- Fix a bug where auto-closed modals and popups would overwrite a changed
+  browser location with their cached "covered URL"
 
 
 ### Breaking changes

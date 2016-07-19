@@ -300,7 +300,7 @@ describe 'up.popup', ->
       it 'prefers to replace a selector within the popup', ->
         $outside = affix('.foo').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, href: '/path', target: '.foo')
+        up.popup.attach($link, target: '.foo')
         @respondWith("<div class='foo'>old inside</div>")
         up.extract('.foo', "<div class='foo'>new text</div>")
         expect($outside).toBeInDOM()
@@ -310,16 +310,35 @@ describe 'up.popup', ->
       it 'auto-closes the popup when a replacement from inside the popup affects a selector behind the popup', ->
         affix('.outside').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, href: '/path', target: '.inside')
+        up.popup.attach($link, target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
         up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.inside'))
         expect($('.outside')).toHaveText('new outside')
         expect($('.up-popup')).not.toExist()
 
+      it 'does not restore the covered URL when auto-closing', (done) ->
+        up.motion.config.enabled = true
+        up.popup.config.openDuration = 0
+        up.popup.config.closeDuration = 20
+        up.popup.config.history = true
+
+        affix('.outside').text('old outside')
+        $link = affix('.link')
+        whenPopupOpen = up.popup.attach($link, url: '/path', target: '.inside')
+        @respondWith("<div class='inside'>old inside</div>") # Populate popup
+
+        whenPopupOpen.then ->
+          up.extract('.outside', "<div class='outside'>new outside</div>",
+            origin: $('.inside'), history: '/new-location') # Provoke auto-close
+
+          u.setTimer 50, ->
+            expect(location.href).toEndWith '/new-location'
+            done()
+
       it 'does not auto-close the popup when a replacement from inside the popup affects a selector inside the popup', ->
         affix('.outside').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, href: '/path', target: '.inside')
+        up.popup.attach($link, target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
         up.extract('.inside', "<div class='inside'>new inside</div>", origin: $('.inside'))
         expect($('.inside')).toHaveText('new inside')
@@ -328,7 +347,7 @@ describe 'up.popup', ->
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector outside the popup', ->
         affix('.outside').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, href: '/path', target: '.inside')
+        up.popup.attach($link, target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
         up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.outside'))
         expect($('.outside')).toHaveText('new outside')
@@ -337,7 +356,7 @@ describe 'up.popup', ->
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector inside the popup', ->
         affix('.outside').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, href: '/path', target: '.inside')
+        up.popup.attach($link, target: '.inside')
         @respondWith("<div class='inside'>old inside</div>")
         up.extract('.inside', "<div class='inside'>new inside</div>", origin: $('.outside'))
         expect($('.inside')).toHaveText('new inside')
@@ -351,7 +370,7 @@ describe 'up.popup', ->
       it 'closes a popup on mousedown (in case an [up-instant] link removes its parent and thus a click event never fires)', ->
         affix('.outside').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, href: '/path', target: '.inside')
+        up.popup.attach($link, target: '.inside')
         @respondWith("<div class='inside'>inside</div>")
         Trigger.mousedown($('body'))
         expect($('.up-popup')).not.toExist()

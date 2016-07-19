@@ -149,6 +149,10 @@ up.popup = (($) ->
     state.$popup.attr('up-position', state.position)
     state.$popup.css(css)
 
+  discardHistory = ->
+    state.coveredTitle = null
+    state.coveredUrl = null
+
   createFrame = (target) ->
     $popup = u.$createElementFromSelector('.up-popup')
     # Create an empty element that will match the
@@ -329,7 +333,9 @@ up.popup = (($) ->
   ###
       
   autoclose = ->
-    closeAsap() unless state.sticky
+    unless state.sticky
+      discardHistory()
+      closeAsap()
 
   ###*
   Returns whether the given element or selector is contained
