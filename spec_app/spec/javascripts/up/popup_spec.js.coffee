@@ -316,6 +316,25 @@ describe 'up.popup', ->
         expect($('.outside')).toHaveText('new outside')
         expect($('.up-popup')).not.toExist()
 
+      it 'does not restore the covered URL when auto-closing', (done) ->
+        up.motion.config.enabled = true
+        up.popup.config.openDuration = 0
+        up.popup.config.closeDuration = 20
+        up.popup.config.history = true
+
+        affix('.outside').text('old outside')
+        $link = affix('.link')
+        whenPopupOpen = up.popup.attach($link, url: '/path', target: '.inside')
+        @respondWith("<div class='inside'>old inside</div>") # Populate popup
+
+        whenPopupOpen.then ->
+          up.extract('.outside', "<div class='outside'>new outside</div>",
+            origin: $('.inside'), history: '/new-location') # Provoke auto-close
+
+          u.setTimer 50, ->
+            expect(location.href).toEndWith '/new-location'
+            done()
+
       it 'does not auto-close the popup when a replacement from inside the popup affects a selector inside the popup', ->
         affix('.outside').text('old outside')
         $link = affix('.link')

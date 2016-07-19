@@ -189,6 +189,10 @@ up.modal = (($) ->
     else
       template
 
+  discardHistory = ->
+    state.coveredTitle = null
+    state.coveredUrl = null
+
   createFrame = (target, options) ->
     $modal = $(templateHtml())
     $modal.attr('up-flavor', state.flavor)
@@ -519,7 +523,9 @@ up.modal = (($) ->
   ###
 
   autoclose = ->
-    closeAsap() unless state.sticky
+    unless state.sticky
+      discardHistory()
+      closeAsap()
 
   ###*
   Returns whether the given element or selector is contained
