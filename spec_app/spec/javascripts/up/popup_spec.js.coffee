@@ -133,7 +133,7 @@ describe 'up.popup', ->
           up.history.replace('/foo')
           expect(up.popup.coveredUrl()).toBeMissing()
 
-          $popupLink = affix('a[href="/bar"][up-popup=".container"]')
+          $popupLink = affix('a[href="/bar"][up-popup=".container"][up-history="true"]')
           $popupLink.click()
           @respondWith('<div class="container">text</div>')
           expect(up.popup.coveredUrl()).toEndWith('/foo')

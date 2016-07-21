@@ -29,7 +29,7 @@ describe 'up.motion', ->
 
           u.setTimer 50, ->
             expect(resolveSpy).not.toHaveBeenCalled()
-            u.setTimer 70, ->
+            u.setTimer 100, ->
               expect(resolveSpy).toHaveBeenCalled()
               done()
 

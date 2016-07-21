@@ -5,4 +5,4 @@ beforeEach ->
 afterEach ->
   if up.browser.canPushState()
     history.replaceState?({}, @titleBeforeExample, @hrefBeforeExample)
-    document.title = @titleBeforeExample
+  document.title = @titleBeforeExample

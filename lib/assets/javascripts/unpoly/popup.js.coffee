@@ -236,8 +236,9 @@ up.popup = (($) ->
         state.phase = 'opening'
         state.$anchor = $anchor
         state.position = position
-        state.coveredUrl = up.browser.url()
-        state.coveredTitle = document.title
+        if options.history
+          state.coveredUrl = up.browser.url()
+          state.coveredTitle = document.title
         state.sticky = options.sticky
         options.beforeSwap = -> createFrame(target)
         extractOptions = u.merge(options, animation: false)
@@ -295,7 +296,7 @@ up.popup = (($) ->
     
     options = u.options(options,
       animation: config.closeAnimation
-      url: state.coveredUrl,
+      history: state.coveredUrl,
       title: state.coveredTitle
     )
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)

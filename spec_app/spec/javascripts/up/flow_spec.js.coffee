@@ -208,10 +208,11 @@ describe 'up.flow', ->
               @respond()
               expect(up.flow.source('.middle')).toEndWith('/given-path')
 
-            it 'still reuses the previous URL after a failed non-GET request', ->
+            it 'ignores the option and reuses the previous source after a failed non-GET request', ->
+              @oldMiddle.attr('up-source', '/previous-source')
               promise = up.replace('.middle', '/path', method: 'post', source: '/given-path', failTarget: '.middle')
               @respond(status: 500)
-              expect(up.flow.source('.middle')).toEndWith(@hrefBeforeExample)
+              expect(up.flow.source('.middle')).toEndWith('/previous-source')
 
         it 'understands non-standard CSS selector extensions such as :has(...)', (done) ->
           $first = affix('.boxx#first')
@@ -264,6 +265,45 @@ describe 'up.flow', ->
                 """
             expect($('.container')).toHaveText('new container text')
             expect(document.title).toBe('Title from header')
+
+          it "does not extract the title from the response or HTTP header if history isn't updated", ->
+            affix('.container').text('old container text')
+            document.title = 'old document title'
+            up.replace('.container', '/path', history: false)
+            @respondWith
+              responseHeaders:
+                'X-Up-Title': 'Title from header'
+              responseText: """
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+            expect(document.title).toBe('old document title')
+
+          it 'allows to pass an explicit title as { title } option', ->
+            affix('.container').text('old container text')
+            up.replace('.container', '/path', title: 'Title from options')
+            @respondWith """
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe('Title from options')
 
         describe 'selector processing', ->
 
@@ -952,6 +992,17 @@ describe 'up.flow', ->
         up.destroy('.element')
         expect(destructor).toHaveBeenCalled()
         
+      it 'allows to pass a new history entry as { history } option', ->
+        affix('.element')
+        up.destroy('.element', history: '/new-path')
+        expect(location.href).toEndWith('/new-path')
+
+      it 'allows to pass a new document title as { title } option', ->
+        affix('.element')
+        up.destroy('.element', history: '/new-path', title: 'Title from options')
+        expect(document.title).toEqual('Title from options')
+
+
     describe 'up.reload', ->
 
       describeCapability 'canPushState', ->

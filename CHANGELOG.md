@@ -10,9 +10,16 @@ Unreleased
 
 ### Compatible changes
 
+- [Popups](/up.popup) and [modals](/up.modal) will no longer try to restore a covered document title
+  and URL if they were opened without pushing a history entry.
+- When fragments are [replaced](/up.replace) without pushing a new history entry,
+  the document title will no longer by changed by default.
+
 
 ### Breaking changes
 
+- The `{ url }` option for [`up.destroy`](/up.destroy) has been renamed to `{ history }` to be more
+  in line with [`up.replace`](/up.replace).
 
 
 0.27.2

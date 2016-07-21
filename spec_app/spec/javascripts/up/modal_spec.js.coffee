@@ -197,12 +197,14 @@ describe 'up.modal', ->
             up.modal.config.closeAnimation = 'fade-out'
             up.modal.config.closeDuration = 50
 
+            # Open the first modal
             up.modal.extract('.target', '<div class="target">response1</div>')
 
             u.setTimer 10, ->
               # First modal is still in its opening animation
               expect($('.target')).toHaveText('response1')
 
+              # Open a second modal
               up.modal.extract('.target', '<div class="target">response2</div>')
 
               # First modal is starting close animation. Second modal waits for that.
@@ -212,7 +214,7 @@ describe 'up.modal', ->
                 # Second modal is still waiting for first modal's closing animaton to finish.
                 expect($('.target')).toHaveText('response1')
 
-                u.setTimer 90, ->
+                u.setTimer 150, ->
                   # First modal has finished closing, second modal has finished opening.
                   expect($('.target')).toHaveText('response2')
 

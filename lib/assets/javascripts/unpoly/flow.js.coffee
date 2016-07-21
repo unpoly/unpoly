@@ -158,6 +158,10 @@ up.flow = (($) ->
   @param {String} [options.failTarget='body']
     The CSS selector to update if the server sends a non-200 status code.
   @param {String} [options.title]
+    The document title after the replacement.
+
+    If the call pushes an history entry and this option is missing, the title is extracted from the response's `<title>` tag.
+    You can also pass `false` to explicitly prevent the title from being updated.
   @param {String} [options.method='get']
     The HTTP method to use for the request.
   @param {Object|Array} [options.data]
@@ -245,10 +249,6 @@ up.flow = (($) ->
   ###
   processResponse = (isSuccess, selector, url, request, xhr, options) ->
     options.method = u.normalizeMethod(u.option(u.methodFromXhr(xhr), options.method))
-    options.title = u.option(u.titleFromXhr(xhr), options.title)
-
-    unless options.title is false || u.isString(options.title) || (options.history is false && options.title isnt true)
-      options.title = u.titleFromXhr(xhr)
 
     isReloadable = (options.method == 'GET')
 
@@ -284,10 +284,15 @@ up.flow = (($) ->
         options.source  = 'keep'
         options.history = false
 
+    options.title = u.titleFromXhr(xhr) if shouldExtractTitle(options)
+
     if options.preload
       u.resolvedPromise()
     else
       extract(selector, xhr.responseText, options)
+
+  shouldExtractTitle = (options) ->
+    not (options.title is false || u.isString(options.title) || (options.history is false && options.title isnt true))
 
   ###*
   Updates a selector on the current page with the
@@ -337,7 +342,7 @@ up.flow = (($) ->
       )
       selector = resolveSelector(selectorOrElement, options.origin)
       response = parseResponse(html, options)
-      options.title ||= response.title()
+      options.title = response.title() if shouldExtractTitle(options)
 
       up.layout.saveScroll() unless options.saveScroll == false
 
@@ -399,10 +404,11 @@ up.flow = (($) ->
         u.error("Could not find selector %s in response %o", selector, html)
 
   updateHistory = (options) ->
-    if options.title
-      document.title = options.title
+    options = u.options(options, historyMethod: 'push')
     if options.history
       up.history[options.historyMethod](options.history)
+    if options.title
+      document.title = options.title
 
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'
@@ -777,8 +783,10 @@ up.flow = (($) ->
   
   @function up.destroy
   @param {String|Element|jQuery} selectorOrElement 
-  @param {String} [options.url]
+  @param {String} [options.history]
+    A URL that will be pushed as a new history entry when the element begins destruction.
   @param {String} [options.title]
+    The document title to set when the element begins destruction.
   @param {String|Function} [options.animation='none']
     The animation to use before the element is removed from the DOM.
   @param {Number} [options.duration]
@@ -806,8 +814,7 @@ up.flow = (($) ->
       # If e.g. a modal or popup asks us to restore a URL, do this
       # before emitting `fragment:destroy`. This way up.navigate sees the
       # new URL and can assign/remove .up-current classes accordingly.
-      up.history.push(options.url) if u.isPresent(options.url)
-      document.title = options.title if u.isPresent(options.title)
+      updateHistory(options)
 
       animationDeferred = u.presence(options.animation, u.isDeferred) ||
         up.motion.animate($element, options.animation, animateOptions)

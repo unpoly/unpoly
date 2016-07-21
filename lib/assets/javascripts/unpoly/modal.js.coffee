@@ -398,8 +398,9 @@ up.modal = (($) ->
         state.phase = 'opening'
         state.flavor = options.flavor
         state.sticky = options.sticky
-        state.coveredUrl = up.browser.url()
-        state.coveredTitle = document.title
+        if options.history
+          state.coveredUrl = up.browser.url()
+          state.coveredTitle = document.title
         options.beforeSwap = -> createFrame(target, options)
         extractOptions = u.merge(options, animation: false)
         if html
@@ -461,7 +462,7 @@ up.modal = (($) ->
 
     destroyOptions = u.options(
       u.except(options, 'animation', 'duration', 'easing', 'delay'),
-      url: state.coveredUrl,
+      history: state.coveredUrl,
       title: state.coveredTitle
     )
 
