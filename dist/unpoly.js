@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.27.2"
+    version: "0.27.3"
   };
 
 }).call(this);
@@ -4750,7 +4750,7 @@ are based on this module.
 
 (function() {
   up.flow = (function($) {
-    var autofocus, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, findOldFragment, first, firstInLayer, firstInPriority, hello, isRealElement, layerOf, matchesLayer, oldFragmentNotFound, parseImplantSteps, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, source, swapElements, transferKeepableElements, u, updateHistory;
+    var autofocus, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, findOldFragment, first, firstInLayer, firstInPriority, hello, isRealElement, layerOf, matchesLayer, oldFragmentNotFound, parseImplantSteps, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, source, swapElements, transferKeepableElements, u, updateHistory;
     u = up.util;
 
     /**
@@ -4908,6 +4908,10 @@ are based on this module.
     @param {String} [options.failTarget='body']
       The CSS selector to update if the server sends a non-200 status code.
     @param {String} [options.title]
+      The document title after the replacement.
+    
+      If the call pushes an history entry and this option is missing, the title is extracted from the response's `<title>` tag.
+      You can also pass `false` to explicitly prevent the title from being updated.
     @param {String} [options.method='get']
       The HTTP method to use for the request.
     @param {Object|Array} [options.data]
@@ -4996,10 +5000,6 @@ are based on this module.
     processResponse = function(isSuccess, selector, url, request, xhr, options) {
       var isReloadable, newRequest, query, urlFromServer;
       options.method = u.normalizeMethod(u.option(u.methodFromXhr(xhr), options.method));
-      options.title = u.option(u.titleFromXhr(xhr), options.title);
-      if (!(options.title === false || u.isString(options.title) || (options.history === false && options.title !== true))) {
-        options.title = u.titleFromXhr(xhr);
-      }
       isReloadable = options.method === 'GET';
       if (urlFromServer = u.locationFromXhr(xhr)) {
         url = urlFromServer;
@@ -5047,11 +5047,17 @@ are based on this module.
           options.history = false;
         }
       }
+      if (shouldExtractTitle(options)) {
+        options.title = u.titleFromXhr(xhr);
+      }
       if (options.preload) {
         return u.resolvedPromise();
       } else {
         return extract(selector, xhr.responseText, options);
       }
+    };
+    shouldExtractTitle = function(options) {
+      return !(options.title === false || u.isString(options.title) || (options.history === false && options.title !== true));
     };
 
     /**
@@ -5103,7 +5109,9 @@ are based on this module.
         });
         selector = resolveSelector(selectorOrElement, options.origin);
         response = parseResponse(html, options);
-        options.title || (options.title = response.title());
+        if (shouldExtractTitle(options)) {
+          options.title = response.title();
+        }
         if (options.saveScroll !== false) {
           up.layout.saveScroll();
         }
@@ -5195,11 +5203,14 @@ are based on this module.
       };
     };
     updateHistory = function(options) {
-      if (options.title) {
-        document.title = options.title;
-      }
+      options = u.options(options, {
+        historyMethod: 'push'
+      });
       if (options.history) {
-        return up.history[options.historyMethod](options.history);
+        up.history[options.historyMethod](options.history);
+      }
+      if (options.title) {
+        return document.title = options.title;
       }
     };
     swapElements = function($old, $new, pseudoClass, transition, options) {
@@ -5599,8 +5610,10 @@ are based on this module.
     
     @function up.destroy
     @param {String|Element|jQuery} selectorOrElement 
-    @param {String} [options.url]
+    @param {String} [options.history]
+      A URL that will be pushed as a new history entry when the element begins destruction.
     @param {String} [options.title]
+      The document title to set when the element begins destruction.
     @param {String|Function} [options.animation='none']
       The animation to use before the element is removed from the DOM.
     @param {Number} [options.duration]
@@ -5631,12 +5644,7 @@ are based on this module.
         });
         animateOptions = up.motion.animateOptions(options);
         $element.addClass('up-destroying');
-        if (u.isPresent(options.url)) {
-          up.history.push(options.url);
-        }
-        if (u.isPresent(options.title)) {
-          document.title = options.title;
-        }
+        updateHistory(options);
         animationDeferred = u.presence(options.animation, u.isDeferred) || up.motion.animate($element, options.animation, animateOptions);
         animationDeferred.then(function() {
           up.syntax.clean($element);
@@ -8809,8 +8817,10 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           state.phase = 'opening';
           state.$anchor = $anchor;
           state.position = position;
-          state.coveredUrl = up.browser.url();
-          state.coveredTitle = document.title;
+          if (options.history) {
+            state.coveredUrl = up.browser.url();
+            state.coveredTitle = document.title;
+          }
           state.sticky = options.sticky;
           options.beforeSwap = function() {
             return createFrame(target);
@@ -8884,7 +8894,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       }
       options = u.options(options, {
         animation: config.closeAnimation,
-        url: state.coveredUrl,
+        history: state.coveredUrl,
         title: state.coveredTitle
       });
       animateOptions = up.motion.animateOptions(options, {
@@ -9467,8 +9477,10 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           state.phase = 'opening';
           state.flavor = options.flavor;
           state.sticky = options.sticky;
-          state.coveredUrl = up.browser.url();
-          state.coveredTitle = document.title;
+          if (options.history) {
+            state.coveredUrl = up.browser.url();
+            state.coveredTitle = document.title;
+          }
           options.beforeSwap = function() {
             return createFrame(target, options);
           };
@@ -9547,7 +9559,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
         easing: flavorDefault('closeEasing')
       });
       destroyOptions = u.options(u.except(options, 'animation', 'duration', 'easing', 'delay'), {
-        url: state.coveredUrl,
+        history: state.coveredUrl,
         title: state.coveredTitle
       });
       return up.bus.whenEmitted('up:modal:close', {

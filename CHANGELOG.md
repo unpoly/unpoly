@@ -10,6 +10,15 @@ Unreleased
 
 ### Compatible changes
 
+
+### Breaking changes
+
+
+0.27.3
+------
+
+### Compatible changes
+
 - [Popups](/up.popup) and [modals](/up.modal) will no longer try to restore a covered document title
   and URL if they were opened without pushing a history entry.
 - When fragments are [replaced](/up.replace) without pushing a new history entry,
