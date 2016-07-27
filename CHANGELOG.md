@@ -10,6 +10,9 @@ Unreleased
 
 ### Compatible changes
 
+- New config option `[up.modal.config](/up.modal.config).closable` (default
+  `true` leaves original behavior unchanged).
+
 
 ### Breaking changes
 
