@@ -318,13 +318,24 @@ describe 'up.modal', ->
 
     describe 'up.modal.close', ->
 
-      it 'closes a currently open modal'
+      it 'closes a currently open modal', (done) ->
+        up.modal.extract('.modal', '<div class="modal">Modal content</div>')
 
-      it 'does nothing if no modal is open'
+        modalContent = $('.modal')
+        expect(modalContent).toBeInDOM()
 
-    describe 'up.modal.source', ->
+        up.modal.close().then ->
+          expect(modalContent).not.toBeInDOM()
+          done()
 
-      it 'should have tests'
+      it 'does nothing if no modal is open', (done) ->
+        wasClosed = false
+        up.on 'up:modal:close', ->
+          wasClosed = true
+
+        up.modal.close().then ->
+          expect(wasClosed).toBe(false)
+          done()
 
   describe 'unobtrusive behavior', ->
     
@@ -442,6 +453,58 @@ describe 'up.modal', ->
           $link.click()
           expect(wasClosed).toBe(false)
           expect(wasDefaultPrevented).toBe(false)
+
+    describe 'template behavior', ->
+
+      it 'closes the modal on close icon click', (done) ->
+        wasClosed = false
+        up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+
+        closeIcon = $('.up-modal-close')
+        up.on 'up:modal:close', ->
+          wasClosed = true
+
+        closeIcon.click()
+        u.nextFrame ->
+          expect(wasClosed).toBe(true)
+          done()
+
+      it 'closes the modal on backdrop click', (done) ->
+        wasClosed = false
+        up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+
+        backdrop = $('.up-modal-backdrop')
+        up.on 'up:modal:close', ->
+          wasClosed = true
+
+        backdrop.click()
+        u.nextFrame ->
+          expect(wasClosed).toBe(true)
+          done()
+
+      describe 'with config.closable = false', ->
+
+        beforeEach ->
+          up.modal.config.closable = false
+
+        it 'does not render a close icon', ->
+          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+
+          modal = $('.up-modal')
+          expect(modal).not.toContainElement('.up-modal-close')
+
+        it 'does not close the modal on backdrop click', (done) ->
+          wasClosed = false
+          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+
+          backdrop = $('.up-modal-backdrop')
+          up.on 'up:modal:close', ->
+            wasClosed = true
+
+          backdrop.click()
+          u.nextFrame ->
+            expect(wasClosed).toBe(false)
+            done()
 
     describe 'when replacing content', ->
 
