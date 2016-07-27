@@ -91,7 +91,7 @@ up.modal = (($) ->
     You can also supply a function that returns a HTML string.
     The function will be called with the modal options (merged from these defaults
     and any per-open overrides) whenever a modal opens.
-  @param {String} [config.closeLabel='X']
+  @param {String} [config.closeLabel='×']
     The label of the button that closes the dialog.
   @param {Booleam} [config.closable=true]
     When `true`, the modal will render a close icon and close when the user
@@ -135,6 +135,7 @@ up.modal = (($) ->
     backdropCloseAnimation: 'fade-out'
     closeLabel: '×'
     closable: true
+    sticky: false
     flavors: { default: {} }
 
     template: (config) ->
