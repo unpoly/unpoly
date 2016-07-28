@@ -482,6 +482,18 @@ describe 'up.modal', ->
           expect(wasClosed).toBe(true)
           done()
 
+      it 'closes the modal when the user presses the escape key', (done) ->
+        wasClosed = false
+        up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+        up.on 'up:modal:close', ->
+          wasClosed = true
+
+        escapeEvent = $.Event('keydown', keyCode: 27)
+        $('body').trigger(escapeEvent)
+        u.nextFrame ->
+          expect(wasClosed).toBe(true)
+          done()
+
       describe 'with config.closable = false', ->
 
         beforeEach ->
@@ -502,6 +514,18 @@ describe 'up.modal', ->
             wasClosed = true
 
           backdrop.click()
+          u.nextFrame ->
+            expect(wasClosed).toBe(false)
+            done()
+
+        it 'does not close the modal when the user presses the escape key', (done) ->
+          wasClosed = false
+          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+          up.on 'up:modal:close', ->
+            wasClosed = true
+
+          escapeEvent = $.Event('keydown', keyCode: 27)
+          $('body').trigger(escapeEvent)
           u.nextFrame ->
             expect(wasClosed).toBe(false)
             done()

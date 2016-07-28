@@ -655,7 +655,7 @@ up.modal = (($) ->
   # Close the modal when someone clicks outside the dialog
   # (but not on a modal opener).
   up.on('click', 'body', (event, $body) ->
-    return unless config.closable
+    return unless flavorDefault('closable')
 
     $target = $(event.target)
     unless $target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length
@@ -671,7 +671,8 @@ up.modal = (($) ->
   )
 
   # Close the pop-up overlay when the user presses ESC.
-  up.bus.onEscape(closeAsap)
+  up.bus.onEscape ->
+    closeAsap() if flavorDefault('closable')
 
   ###*
   When this element is clicked, closes a currently open dialog.
