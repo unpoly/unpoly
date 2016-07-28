@@ -545,7 +545,7 @@ up.util = (($) ->
 
   Returns the array.
 
-  @function up.util.isDeferred
+  @function up.util.toArray
   @param object
   @return {Array}
   @stable
