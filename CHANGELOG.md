@@ -10,6 +10,9 @@ Unreleased
 
 ### Compatible changes
 
+- New config option `[up.modal.config](/up.modal.config).closable` (default
+  `true` leaves original behavior unchanged).
+
 
 ### Breaking changes
 
@@ -22,7 +25,7 @@ Unreleased
 - [Popups](/up.popup) and [modals](/up.modal) will no longer try to restore a covered document title
   and URL if they were opened without pushing a history entry.
 - When fragments are [replaced](/up.replace) without pushing a new history entry,
-  the document title will no longer by changed by default.
+  the document title will no longer be changed by default.
 
 
 ### Breaking changes

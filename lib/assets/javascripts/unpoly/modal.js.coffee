@@ -91,8 +91,13 @@ up.modal = (($) ->
     You can also supply a function that returns a HTML string.
     The function will be called with the modal options (merged from these defaults
     and any per-open overrides) whenever a modal opens.
-  @param {String} [config.closeLabel='X']
+  @param {String} [config.closeLabel='×']
     The label of the button that closes the dialog.
+  @param {Booleam} [config.closable=true]
+    When `true`, the modal will render a close icon and close when the user
+    clicks outside of it.
+    When `false`, you need to either supply an element with `[up-close]` or
+    close the modal manually with `up.modal.close()`.
   @param {String} [config.openAnimation='fade-in']
     The animation used to open the viewport around the dialog.
   @param {String} [config.closeAnimation='fade-out']
@@ -129,6 +134,8 @@ up.modal = (($) ->
     backdropOpenAnimation: 'fade-in'
     backdropCloseAnimation: 'fade-out'
     closeLabel: '×'
+    closable: true
+    sticky: false
     flavors: { default: {} }
 
     template: (config) ->
@@ -200,6 +207,7 @@ up.modal = (($) ->
     $dialog.css('width', options.width) if u.isPresent(options.width)
     $dialog.css('max-width', options.maxWidth) if u.isPresent(options.maxWidth)
     $dialog.css('height', options.height) if u.isPresent(options.height)
+    $modal.find('.up-modal-close').remove() unless options.closable
     $content = $modal.find('.up-modal-content')
     # Create an empty element that will match the
     # selector that is being replaced.
@@ -384,6 +392,7 @@ up.modal = (($) ->
     options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor))
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     options.method = up.link.followMethod($link, options)
+    options.closable = flavorDefault('closable', options.flavor)
     options.layer = 'modal'
     animateOptions = up.motion.animateOptions(options, $link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
 
@@ -646,6 +655,8 @@ up.modal = (($) ->
   # Close the modal when someone clicks outside the dialog
   # (but not on a modal opener).
   up.on('click', 'body', (event, $body) ->
+    return unless flavorDefault('closable')
+
     $target = $(event.target)
     unless $target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length
       closeAsap()
@@ -660,7 +671,8 @@ up.modal = (($) ->
   )
 
   # Close the pop-up overlay when the user presses ESC.
-  up.bus.onEscape(closeAsap)
+  up.bus.onEscape ->
+    closeAsap() if flavorDefault('closable')
 
   ###*
   When this element is clicked, closes a currently open dialog.
