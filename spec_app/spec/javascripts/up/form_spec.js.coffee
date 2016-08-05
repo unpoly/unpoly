@@ -6,6 +6,9 @@ describe 'up.form', ->
     
     describe 'up.observe', ->
 
+      beforeEach ->
+        up.form.config.observeDelay = 0
+
       changeEvents = if up.browser.canInputEvent()
         # Actually we only need `input`, but we want to notice
         # if another script manually triggers `change` on the element.
@@ -16,9 +19,9 @@ describe 'up.form', ->
         # on the element.
         ['input', 'change', 'keypress', 'paste', 'cut', 'click', 'propertychange']
 
-      u.each changeEvents, (eventName) ->
+      describe 'when the first argument is a form field', ->
 
-        describe 'when the first argument is a form field', ->
+        u.each changeEvents, (eventName) ->
 
           it "runs the callback when the input receives a '#{eventName}' event and the value changed", (done) ->
             $input = affix('input[value="old-value"]')
@@ -58,7 +61,104 @@ describe 'up.form', ->
             $input.trigger(eventName)
             expect(callback.calls.count()).toEqual(2)
 
-        describe 'when the first argument is a form', ->
+        describe 'when the first argument is a checkbox', ->
+
+          it 'runs the callback when the checkbox changes its checked state', (done) ->
+            $form = affix('form')
+            $checkbox = $form.affix('input[type="checkbox"]')
+            callback = jasmine.createSpy('change callback')
+            up.observe($checkbox, callback)
+            expect($checkbox.is(':checked')).toBe(false)
+            $checkbox.get(0).click()
+            u.nextFrame ->
+              expect($checkbox.is(':checked')).toBe(true)
+              expect(callback.calls.count()).toEqual(1)
+              $checkbox.get(0).click()
+              u.nextFrame ->
+                expect($checkbox.is(':checked')).toBe(false)
+                expect(callback.calls.count()).toEqual(2)
+                done()
+
+          it 'runs the callback when the checkbox is toggled by clicking its label', (done) ->
+            $form = affix('form')
+            $checkbox = $form.affix('input#tick[type="checkbox"]')
+            $label = $form.affix('label[for="tick"]').text('tick label')
+            callback = jasmine.createSpy('change callback')
+            up.observe($checkbox, callback)
+            expect($checkbox.is(':checked')).toBe(false)
+            $label.get(0).click()
+            u.nextFrame ->
+              expect($checkbox.is(':checked')).toBe(true)
+              expect(callback.calls.count()).toEqual(1)
+              $label.get(0).click()
+              u.nextFrame ->
+                expect($checkbox.is(':checked')).toBe(false)
+                expect(callback.calls.count()).toEqual(2)
+                done()
+
+        describe 'when the first argument is a radio button', ->
+
+          it 'runs the callback when the radio button is selected or deselected', (done) ->
+            $form = affix('form')
+            $radio1 = $form.affix('input[type="radio"][name="group"][value="1"]')
+            $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
+            callback = jasmine.createSpy('change callback')
+            up.observe($radio1, callback)
+            expect($radio1.is(':checked')).toBe(false)
+            $radio1.get(0).click()
+            u.nextFrame ->
+              expect($radio1.is(':checked')).toBe(true)
+              expect(callback.calls.count()).toEqual(1)
+              $radio2.get(0).click()
+              u.nextFrame ->
+                expect($radio1.is(':checked')).toBe(false)
+                expect(callback.calls.count()).toEqual(2)
+                done()
+
+          it "runs the callbacks when the radio button is selected or deselected by clicking a label in the group", (done) ->
+            $form = affix('form')
+            $radio1 = $form.affix('input#radio1[type="radio"][name="group"][value="1"]')
+            $radio1Label = $form.affix('label[for="radio1"]').text('label 1')
+            $radio2 = $form.affix('input#radio2[type="radio"][name="group"][value="2"]')
+            $radio2Label = $form.affix('label[for="radio2"]').text('label 2')
+            callback = jasmine.createSpy('change callback')
+            up.observe($radio1, callback)
+            expect($radio1.is(':checked')).toBe(false)
+            $radio1Label.get(0).click()
+            u.nextFrame ->
+              expect($radio1.is(':checked')).toBe(true)
+              expect(callback.calls.count()).toEqual(1)
+              $radio2Label.get(0).click()
+              u.nextFrame ->
+                expect($radio1.is(':checked')).toBe(false)
+                expect(callback.calls.count()).toEqual(2)
+                done()
+
+          it "takes the radio button's initial selected value into account", (done) ->
+            $form = affix('form')
+            $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
+            $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
+            callback = jasmine.createSpy('change callback')
+            up.observe($radio1, callback)
+            expect($radio1.is(':checked')).toBe(true)
+            expect($radio2.is(':checked')).toBe(false)
+            $radio1.get(0).click()
+            u.nextFrame ->
+              # Since the radio button was already checked, the click doesn't do anything
+              expect($radio1.is(':checked')).toBe(true)
+              expect($radio2.is(':checked')).toBe(false)
+              # Since the radio button was already checked, clicking it again won't trigger the callback
+              expect(callback.calls.count()).toEqual(0)
+              $radio2.get(0).click()
+              u.nextFrame ->
+                expect($radio1.is(':checked')).toBe(false)
+                expect($radio2.is(':checked')).toBe(true)
+                expect(callback.calls.count()).toEqual(1)
+                done()
+
+      describe 'when the first argument is a form', ->
+
+        u.each changeEvents, (eventName) ->
 
           it "runs the callback when any of the form's inputs receives a '#{eventName}' event and the value changed", (done) ->
             $form = affix('form')
@@ -81,6 +181,16 @@ describe 'up.form', ->
             u.nextFrame ->
               expect(callback).not.toHaveBeenCalled()
               done()
+
+        it 'runs the callback only once when a radio button group changes its selection', ->
+          $form = affix('form')
+          $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
+          $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
+          callback = jasmine.createSpy('change callback')
+          up.observe($form, callback)
+          $radio2.get(0).click()
+          u.nextFrame ->
+            expect(callback.calls.count()).toEqual(1)
 
     describe 'up.submit', ->
 

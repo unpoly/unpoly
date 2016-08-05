@@ -1816,6 +1816,13 @@ up.util = (($) ->
       @queue = map(newTasks, previewable)
       @poke()
 
+  submittedValue = (fieldOrSelector) ->
+    $field = $(fieldOrSelector)
+    if $field.is('[type=checkbox], [type=radio]') && !$field.is(':checked')
+      undefined
+    else
+      $field.val()
+
   isDetached: isDetached
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
@@ -1922,6 +1929,7 @@ up.util = (($) ->
   identity: identity
   escapeHtml: escapeHtml
   DivertibleChain: DivertibleChain
+  submittedValue: submittedValue
 
 )($)
 

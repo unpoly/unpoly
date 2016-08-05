@@ -253,7 +253,7 @@ up.form = (($) ->
         returnValue
 
     check = ->
-      value = $element.val()
+      value = u.submittedValue($element)
       # don't run the callback for the check during initialization
       skipCallback = u.isNull(knownValue)
       if knownValue != value
@@ -277,15 +277,20 @@ up.form = (($) ->
     clearTimer = ->
       clearTimeout(callbackTimer)
 
-    changeEvents = if up.browser.canInputEvent()
-      # Actually we only need `input`, but we want to notice
-      # if another script manually triggers `change` on the element.
-      'input change'
-    else
-      # Actually we won't ever get `input` from the user in this browser,
-      # but we want to notice if another script manually triggers `input`
-      # on the element.
-      'input change keypress paste cut click propertychange'
+    # Although (depending on the browser) we only need/receive either input or change,
+    # we always bind to both events in case another script manually triggers it.
+    changeEvents = 'input change'
+
+    unless up.browser.canInputEvent()
+      # In case this browser doesn't support input, we listen
+      # to all sorts of events that might change form controls.
+      changeEvents += ' keypress paste cut click propertychange'
+
+    unless options.formContext
+      # Prevent the callback from being run multiple times if a radio
+      # button group changes its selection.
+      changeEvents += ' up:radio:unchecked'
+
     $element.on(changeEvents, check)
 
     check()
@@ -300,9 +305,10 @@ up.form = (($) ->
   @internal
   ###
   observeForm = ($form, options, callback) ->
+    options = u.merge(options, formContext: true)
     $fields = u.multiSelector(config.fields).find($form)
     destructors = u.map $fields, ($field) ->
-      observe($field, callback)
+      observe($field, options, callback)
     ->
       destructor() for destructor in destructors
 
@@ -862,6 +868,19 @@ up.form = (($) ->
   @stable
   ###
   up.compiler '[up-autosubmit]', ($formOrField) -> autosubmit($formOrField)
+
+  ###*
+  This event is triggered when a radio button is unchecked
+  (due to another radio button in the group being checked).
+
+  @event up:radio:unchecked
+  @private
+  ###
+  up.on 'change', 'input[type=radio]', (event, $radio) ->
+    groupName = $radio.attr('name')
+    $group = $radio.closest('form').find("input[type=radio][name='#{groupName}']")
+    $others = $group.not($radio)
+    $others.trigger('up:radio:unchecked')
 
   up.on 'up:framework:reset', reset
 

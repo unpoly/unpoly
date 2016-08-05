@@ -10,9 +10,10 @@ Unreleased
 
 ### Compatible changes
 
+- [`up.observe`](/up.observe) now works on checkboxes and radio buttons.
 - New config option `[up.modal.config](/up.modal.config).closable` (default
   `true` leaves original behavior unchanged).
-
+- Fix a bug where [`up.observe(form, options)`](/up.observe) would not respect options.
 
 ### Breaking changes
 
