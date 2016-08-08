@@ -354,7 +354,7 @@ up.flow = (($) ->
         for step in parseImplantSteps(selector, options)
           up.log.group 'Updating %s', step.selector, ->
             $old = findOldFragment(step.selector, options)
-            $new = response.find(step.selector)?.first()
+            $new = response.first(step.selector)
             if $old && $new
               filterScripts($new, options)
               swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options)
@@ -392,7 +392,7 @@ up.flow = (($) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags
     htmlElement = u.createElementFromHtml(html)
     title: -> htmlElement.querySelector("title")?.textContent
-    find: (selector) ->
+    first: (selector) ->
       # Although we cannot have a jQuery collection from an entire HTML document,
       # we can use jQuery's Sizzle engine to grep through a DOM tree.
       # jQuery.find is the Sizzle function (https://github.com/jquery/sizzle/wiki#public-api)

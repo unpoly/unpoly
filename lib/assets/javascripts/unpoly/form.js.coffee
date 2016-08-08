@@ -239,8 +239,8 @@ up.form = (($) ->
 
     destructors = u.map $fields, (field) ->
       observeField($(field), options, callback)
-    ->
-      destructor() for destructor in destructors
+
+    u.sequence(destructors...)
 
   observeField = ($field, delay, callback) ->
     knownValue = null

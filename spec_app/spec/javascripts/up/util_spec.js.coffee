@@ -10,7 +10,7 @@ describe 'up.util', ->
         two = -> values.push('two')
         three = -> values.push('three')
         sequence = up.util.sequence(one, two, three)
-        expect(values).toBeEmpty()
+        expect(values).toEqual([])
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])
 
