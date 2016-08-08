@@ -1816,12 +1816,24 @@ up.util = (($) ->
       @queue = map(newTasks, previewable)
       @poke()
 
+  ###*
+  @function up.util.submittedValue
+  @internal
+  ###
   submittedValue = (fieldOrSelector) ->
     $field = $(fieldOrSelector)
     if $field.is('[type=checkbox], [type=radio]') && !$field.is(':checked')
       undefined
     else
       $field.val()
+
+  ###*
+  @function up.util.sequence
+  @internal
+  ###
+  sequence: (functions...) ->
+    ->
+      map functions, (f) -> f()
 
   isDetached: isDetached
   requestDataAsArray: requestDataAsArray

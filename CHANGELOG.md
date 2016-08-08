@@ -10,6 +10,7 @@ Unreleased
 
 ### Compatible changes
 
+- [Compilers](/up.compiler) can now return an array of functions that will *all* be called when the element is destroyed.
 - [`up.observe`](/up.observe) now works on checkboxes and radio buttons.
 - [`up.observe`](/up.observe) can now be called with multiple form fields, or any container that contains form fields.
 - New config option [`up.modal.config.closable`](/up.modal.config). This lets you disable the default

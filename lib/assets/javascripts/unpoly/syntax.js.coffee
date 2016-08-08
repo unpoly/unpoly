@@ -101,7 +101,8 @@ up.syntax = (($) ->
   or event handlers bound to the document root.
 
   Here is a version of `<clock>` that updates
-  the time every second, and cleans up once it's done:
+  the time every second, and cleans up once it's done. Note how it returns
+  a function that calls `clearInterval`:
 
       up.compiler('clock', function($element) {
 
@@ -279,9 +280,15 @@ up.syntax = (($) ->
     if compiler.keep
       value = if u.isString(compiler.keep) then compiler.keep else ''
       $jqueryElement.attr('up-keep', value)
-    destructor = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
-    if u.isFunction(destructor)
+    returnValue = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
+    if destructor = discoverDestructor(returnValue)
       addDestructor($jqueryElement, destructor)
+
+  discoverDestructor = (returnValue) ->
+    if u.isFunction(returnValue)
+      returnValue
+    else if u.isArray(returnValue) && u.all(returnValue, u.isFunction)
+      u.sequence(returnValue...)
 
   addDestructor = ($jqueryElement, destructor) ->
     $jqueryElement.addClass(DESTRUCTABLE_CLASS)

@@ -17,7 +17,7 @@ describe 'up.syntax', ->
 
       describe 'destructors', ->
 
-        it 'allows initializers to return a function that is called when the compiled element is removed', ->
+        it 'allows compilers to return a function to call when the compiled element is destroyed', ->
           destructor = jasmine.createSpy('destructor')
           up.compiler '.child', ($element) ->
             destructor
@@ -27,6 +27,32 @@ describe 'up.syntax', ->
 
           up.destroy('.container')
           expect(destructor).toHaveBeenCalled()
+
+        it 'allows compilers to return an array of functions to clal when the compiled element is destroyed', ->
+          destructor1 = jasmine.createSpy('destructor1')
+          destructor2 = jasmine.createSpy('destructor2')
+          up.compiler '.child', ($element) ->
+            [ destructor1, destructor2 ]
+
+          up.hello(affix('.container .child'))
+          expect(destructor1).not.toHaveBeenCalled()
+          expect(destructor2).not.toHaveBeenCalled()
+
+          up.destroy('.container')
+          expect(destructor1).toHaveBeenCalled()
+          expect(destructor2).toHaveBeenCalled()
+
+        it "does not consider a returned array to be a destructor unless it's comprised entirely of functions", ->
+          value1 = jasmine.createSpy('non-destructor')
+          value2 = 'two'
+          up.compiler '.child', ($element) ->
+            [ value1, value2 ]
+
+          up.hello(affix('.container .child'))
+          expect(value1).not.toHaveBeenCalled()
+
+          up.destroy('.container')
+          expect(value1).not.toHaveBeenCalled()
 
         it 'runs all destructors if multiple compilers are applied to the same element', ->
           destructor1 = jasmine.createSpy('destructor1')

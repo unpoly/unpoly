@@ -2,6 +2,18 @@ describe 'up.util', ->
   
   describe 'Javascript functions', ->
 
+    describe 'up.util.sequence', ->
+
+      it 'combines the given functions into a single function', ->
+        values = []
+        one = -> values.push('one')
+        two = -> values.push('two')
+        three = -> values.push('three')
+        sequence = up.util.sequence(one, two, three)
+        expect(values).toBeEmpty()
+        sequence()
+        expect(values).toEqual(['one', 'two', 'three'])
+
     describe 'up.util.createElementFromHtml', ->
 
       it 'parses a string that contains a serialized HTML document', ->
