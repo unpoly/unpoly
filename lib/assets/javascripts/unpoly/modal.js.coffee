@@ -93,9 +93,10 @@ up.modal = (($) ->
     and any per-open overrides) whenever a modal opens.
   @param {String} [config.closeLabel='×']
     The label of the button that closes the dialog.
-  @param {Booleam} [config.closable=true]
+  @param {Boolean} [config.closable=true]
     When `true`, the modal will render a close icon and close when the user
-    clicks outside of it.
+    clicks on the backdrop or presses Escape.
+
     When `false`, you need to either supply an element with `[up-close]` or
     close the modal manually with `up.modal.close()`.
   @param {String} [config.openAnimation='fade-in']
@@ -174,6 +175,7 @@ up.modal = (($) ->
     $anchor: null        # the element to which the tooltip is anchored
     $modal: null         # the modal container
     sticky: null
+    closable: null
     flavor: null
     url: null
     coveredUrl: null
@@ -207,7 +209,7 @@ up.modal = (($) ->
     $dialog.css('width', options.width) if u.isPresent(options.width)
     $dialog.css('max-width', options.maxWidth) if u.isPresent(options.maxWidth)
     $dialog.css('height', options.height) if u.isPresent(options.height)
-    $modal.find('.up-modal-close').remove() unless options.closable
+    $modal.find('.up-modal-close').remove() unless state.closable
     $content = $modal.find('.up-modal-content')
     # Create an empty element that will match the
     # selector that is being replaced.
@@ -280,6 +282,12 @@ up.modal = (($) ->
   @param {Boolean} [options.sticky=false]
     If set to `true`, the modal remains
     open even it changes the page in the background.
+  @param {Boolean} [config.closable=true]
+    When `true`, the modal will render a close icon and close when the user
+    clicks on the backdrop or presses Escape.
+
+    When `false`, you need to either supply an element with `[up-close]` or
+    close the modal manually with `up.modal.close()`.
   @param {String} [options.confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the modal is being opened.
@@ -390,9 +398,9 @@ up.modal = (($) ->
     options.animation = u.option(options.animation, $link.attr('up-animation'), flavorDefault('openAnimation', options.flavor))
     options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), flavorDefault('backdropOpenAnimation', options.flavor))
     options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor))
+    options.closable = u.option(options.closable, u.castedAttr($link, 'up-closable'), flavorDefault('closable', options.flavor))
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     options.method = up.link.followMethod($link, options)
-    options.closable = flavorDefault('closable', options.flavor)
     options.layer = 'modal'
     animateOptions = up.motion.animateOptions(options, $link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
 
@@ -407,6 +415,7 @@ up.modal = (($) ->
         state.phase = 'opening'
         state.flavor = options.flavor
         state.sticky = options.sticky
+        state.closable = options.closable
         if options.history
           state.coveredUrl = up.browser.url()
           state.coveredTitle = document.title
@@ -494,6 +503,7 @@ up.modal = (($) ->
         state.$modal = null
         state.flavor = null
         state.sticky = null
+        state.closable = null
         up.emit('up:modal:closed', message: 'Modal closed')
 
       promise
@@ -631,6 +641,12 @@ up.modal = (($) ->
   @param {String} [up-sticky]
     If set to `"true"`, the modal remains
     open even if the page changes in the background.
+  @param {Boolean} [up-closable]
+    When `true`, the modal will render a close icon and close when the user
+    clicks on the backdrop or presses Escape.
+
+    When `false`, you need to either supply an element with `[up-close]` or
+    close the modal manually with `up.modal.close()`.
   @param {String} [up-animation]
     The animation to use when opening the viewport containing the dialog.
   @param {String} [up-backdrop-animation]
@@ -655,7 +671,7 @@ up.modal = (($) ->
   # Close the modal when someone clicks outside the dialog
   # (but not on a modal opener).
   up.on('click', 'body', (event, $body) ->
-    return unless flavorDefault('closable')
+    return unless state.closable
 
     $target = $(event.target)
     unless $target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length
@@ -672,7 +688,7 @@ up.modal = (($) ->
 
   # Close the pop-up overlay when the user presses ESC.
   up.bus.onEscape ->
-    closeAsap() if flavorDefault('closable')
+    closeAsap() if state.closable
 
   ###*
   When this element is clicked, closes a currently open dialog.

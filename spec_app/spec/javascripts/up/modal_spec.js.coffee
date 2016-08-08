@@ -494,20 +494,17 @@ describe 'up.modal', ->
           expect(wasClosed).toBe(true)
           done()
 
-      describe 'with config.closable = false', ->
-
-        beforeEach ->
-          up.modal.config.closable = false
+      describe 'when opened with { closable: false }', ->
 
         it 'does not render a close icon', ->
-          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
 
           modal = $('.up-modal')
           expect(modal).not.toContainElement('.up-modal-close')
 
         it 'does not close the modal on backdrop click', (done) ->
           wasClosed = false
-          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
 
           backdrop = $('.up-modal-backdrop')
           up.on 'up:modal:close', ->
@@ -520,7 +517,7 @@ describe 'up.modal', ->
 
         it 'does not close the modal when the user presses the escape key', (done) ->
           wasClosed = false
-          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
           up.on 'up:modal:close', ->
             wasClosed = true
 

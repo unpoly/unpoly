@@ -13,8 +13,9 @@ Unreleased
 - [Compilers](/up.compiler) can now return an array of functions that will *all* be called when the element is destroyed.
 - [`up.observe`](/up.observe) now works on checkboxes and radio buttons.
 - [`up.observe`](/up.observe) can now be called with multiple form fields, or any container that contains form fields.
-- New config option [`up.modal.config.closable`](/up.modal.config). This lets you disable the default
-  methods to close a modal (close button, clicking on the backdrop, pressing ESC).
+- When opening a [modal](/up.modal) you can now pass an option `{ closable: false }` or set an `up-closable='false'` attribute
+  This lets you disable the default methods to close a modal (close button, clicking on the backdrop, pressing ESC).
+  You can also configure this globally by setting [`up.modal.config.closable`](/up.modal.config).
 - Fix a bug where [`up.observe(form, options)`](/up.observe) would not respect options.
 - Fix a bug where [`up.autosubmit(form)`](/up.autosubmit) was not published.
 
