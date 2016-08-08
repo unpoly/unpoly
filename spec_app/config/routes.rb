@@ -5,6 +5,8 @@ Rails.application.routes.draw do
 
   get 'binding_test/:action', controller: 'binding_test'
   get 'css_test/:action', controller: 'css_test'
+  get 'error_test/:action', controller: 'error_test'
+  post 'error_test/:action', controller: 'error_test'
 
   namespace :form_test do
     resource :basic, only: [:new, :create]

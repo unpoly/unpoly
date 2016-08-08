@@ -1686,14 +1686,18 @@ up.util = (($) ->
   @experimental
   ###
   error = (args...) ->
-    up.log.error(args...)
-    whenReady().then ->
-      $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body')
-      formatter = (arg) ->
-        "<span class='up-error-variable'>#{escapeHtml(arg)}</span>"
-      asHtml = up.browser.sprintfWithFormattedArgs(formatter, args...)
-      $error.html(asHtml)
-    asString = up.browser.sprintf(args...)
+    if isArray(args[0])
+      messageArgs = args[0]
+      toastOptions = args[1] || {}
+    else
+      messageArgs = args
+      toastOptions = {}
+
+    up.log.error(messageArgs...)
+
+    whenReady().then -> up.toast.open(messageArgs, toastOptions)
+
+    asString = up.browser.sprintf(messageArgs...)
     throw new Error(asString)
 
   ESCAPE_HTML_ENTITY_MAP =

@@ -18,6 +18,7 @@ Unreleased
   You can also configure this globally by setting [`up.modal.config.closable`](/up.modal.config).
 - Fix a bug where [`up.observe(form, options)`](/up.observe) would not respect options.
 - Fix a bug where [`up.autosubmit(form)`](/up.autosubmit) was not published.
+- Fix a bug where falling back to non-AJAX page loads on old browsers would not work
 
 ### Breaking changes
 

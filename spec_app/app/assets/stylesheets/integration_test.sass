@@ -1,9 +1,18 @@
 //= require unpoly
 
+$block-spacing: 25px
+
+=block-spacing
+  margin-top: $block-spacing
+  margin-bottom: $block-spacing
+
 body
   margin: 0
   background: image-url('grid.png') repeat
   font-family: arial, sans-serif
+
+h1, h2, h3, h4, p
+  +block-spacing
 
 .page
   min-height: 3000px
@@ -23,6 +32,11 @@ body
 
 .example
   margin: 50px
+
+.area
+  +block-spacing
+  padding: 25px
+  border: 1px dashed #666
 
 .button
   display: inline-block

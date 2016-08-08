@@ -3,6 +3,7 @@
 #= require unpoly/browser
 #= require unpoly/bus
 #= require unpoly/log
+#= require unpoly/toast
 #= require unpoly/syntax
 #= require unpoly/history
 #= require unpoly/layout

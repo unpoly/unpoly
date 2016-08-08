@@ -28,7 +28,7 @@ up.browser = (($) ->
       $form = $("<form method='post' action='#{url}'></form>")
       addField = (field) ->
         $field = $('<input type="hidden">')
-        $field.attr(field.name, field.value)
+        $field.attr(field)
         $field.appendTo($form)
       addField(name: up.proxy.config.wrapMethodParam, value: method)
       if csrfField = up.rails.csrfField()
@@ -63,7 +63,7 @@ up.browser = (($) ->
   CONSOLE_PLACEHOLDERS = /\%[odisf]/g
 
   stringifyArg = (arg) ->
-    maxLength = 100
+    maxLength = 200
     closer = ''
 
     if u.isString(arg)

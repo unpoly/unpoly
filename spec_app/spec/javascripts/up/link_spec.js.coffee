@@ -395,7 +395,7 @@ describe 'up.link', ->
 
             it 'morphs between the old and new target element', (done) ->
               affix('.target.old')
-              $link = affix('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="300"][up-easing="linear"]')
+              $link = affix('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="500"][up-easing="linear"]')
               $link.click()
               @respondWith '<div class="target new">new text</div>'
 
@@ -405,7 +405,7 @@ describe 'up.link', ->
               expect($newGhost).toExist()
               expect(u.opacity($oldGhost)).toBeAround(1, 0.15)
               expect(u.opacity($newGhost)).toBeAround(0, 0.15)
-              u.setTimer 150, ->
+              u.setTimer 250, ->
                 expect(u.opacity($oldGhost)).toBeAround(0.5, 0.15)
                 expect(u.opacity($newGhost)).toBeAround(0.5, 0.15)
                 done()
