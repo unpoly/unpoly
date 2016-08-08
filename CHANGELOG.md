@@ -11,9 +11,11 @@ Unreleased
 ### Compatible changes
 
 - [`up.observe`](/up.observe) now works on checkboxes and radio buttons.
-- New config option `[up.modal.config](/up.modal.config).closable` (default
-  `true` leaves original behavior unchanged).
+- [`up.observe`](/up.observe) can now be called with multiple form fields, or any container that contains form fields.
+- New config option [`up.modal.config.closable`](/up.modal.config). This lets you disable the default
+  methods to close a modal (close button, clicking on the backdrop, pressing ESC).
 - Fix a bug where [`up.observe(form, options)`](/up.observe) would not respect options.
+- Fix a bug where [`up.autosubmit(form)`](/up.autosubmit) was not published.
 
 ### Breaking changes
 

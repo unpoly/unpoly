@@ -28,7 +28,7 @@ up.form = (($) ->
     By default this looks for a `<fieldset>`, `<label>` or `<form>`
     around the validating input field, or any element with an
     `up-fieldset` attribute.
-  @param {String} [config.fields]
+  @param {String} [config.fields=[':input']]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
   @stable
   ###
@@ -157,7 +157,7 @@ up.form = (($) ->
     return promise
 
   ###*
-  Observes a field or form and runs a callback when a value changes.
+  Observes form fields and runs a callback when a value changes.
 
   This is useful for observing text fields while the user is typing.
 
@@ -169,8 +169,12 @@ up.form = (($) ->
   text field value changes:
 
       up.observe('input[name=query]', function(value, $input) {
-        up.submit($input)
+        console.log('Query is now ' + value);
       });
+
+  Instead of a single form field, you can also
+  pass, a `<form>` or any container that contains form fields.
+  The callback will be run if any of the given fields change.
 
   \#\#\#\# Preventing concurrency
 
@@ -193,13 +197,17 @@ up.form = (($) ->
       });
 
   @function up.observe
-  @param {Element|jQuery|String} fieldOrSelector
+  @param {Element|jQuery|String} selectorOrElement
+    The form fields that wiill be observed.
+
+    You can pass one or more fields, a `<form>` or any container that contains form fields.
+    The callback will be run if any of the given fields change.
   @param {Number} [options.delay=up.form.config.observeDelay]
     The number of miliseconds to wait before executing the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
   @param {Function(value, $field)|String} onChange
-    The callback to execute when the field's value changes.
+    The callback to run when the field's value changes.
     If given as a function, it must take two arguments (`value`, `$field`).
     If given as a string, it will be evaled as Javascript code in a context where
     (`value`, `$field`) are set.
@@ -207,35 +215,34 @@ up.form = (($) ->
     A destructor function that removes the observe watch when called.
   @stable
   ###
-  observe = (selectorOrElement, args...) ->
-
+  observe = (selectorOrElement, extraArgs...) ->
     options = {}
     callbackArg = undefined
-    if args.length == 1
-      callbackArg = args[0]
-    if args.length > 1
-      options = u.options(args[0])
-      callbackArg = args[1]
+    if extraArgs.length == 1
+      callbackArg = extraArgs[0]
+    else if extraArgs.length > 1
+      options = u.options(extraArgs[0])
+      callbackArg = extraArgs[1]
 
     $element = $(selectorOrElement)
-    options = u.options(options)
-    delay = u.option($element.attr('up-delay'), options.delay, config.observeDelay)
-    delay = parseInt(delay)
+    $fields = u.multiSelector(config.fields).findWithSelf($element)
 
     callback = null
-
-    if u.isGiven(options.change)
-      u.error('up.observe now takes the change callback as the last argument')
-
-    rawCallback = u.option(u.presentAttr($element, 'up-observe'), callbackArg)
+    rawCallback = u.option(callbackArg, u.presentAttr($fields, 'up-observe'))
     if u.isString(rawCallback)
       callback = (value, $field) -> eval(rawCallback)
     else
       callback = rawCallback or u.error('up.observe: No change callback given')
 
-    if $element.is('form')
-      return observeForm($element, options, callback)
+    delay = u.option($fields.attr('up-delay'), options.delay, config.observeDelay)
+    delay = parseInt(delay)
 
+    destructors = u.map $fields, (field) ->
+      observeField($(field), options, callback)
+    ->
+      destructor() for destructor in destructors
+
+  observeField = ($field, delay, callback) ->
     knownValue = null
     callbackTimer = null
     callbackPromise = u.resolvedPromise()
@@ -253,14 +260,14 @@ up.form = (($) ->
         returnValue
 
     check = ->
-      value = u.submittedValue($element)
+      value = u.submittedValue($field)
       # don't run the callback for the check during initialization
       skipCallback = u.isNull(knownValue)
       if knownValue != value
         knownValue = value
         unless skipCallback
           clearTimer()
-          nextCallback = -> callback.apply($element.get(0), [value, $element])
+          nextCallback = -> callback.apply($field.get(0), [value, $field])
           runAndChain = ->
             # Only run the callback once the previous callback's
             # promise resolves.
@@ -286,31 +293,14 @@ up.form = (($) ->
       # to all sorts of events that might change form controls.
       changeEvents += ' keypress paste cut click propertychange'
 
-    unless options.formContext
-      # Prevent the callback from being run multiple times if a radio
-      # button group changes its selection.
-      changeEvents += ' up:radio:unchecked'
-
-    $element.on(changeEvents, check)
+    $field.on(changeEvents, check)
 
     check()
 
     # return destructor
     return ->
-      $element.off(changeEvents, check)
+      $field.off(changeEvents, check)
       clearTimer()
-
-  ###*
-  @function observeForm
-  @internal
-  ###
-  observeForm = ($form, options, callback) ->
-    options = u.merge(options, formContext: true)
-    $fields = u.multiSelector(config.fields).find($form)
-    destructors = u.map $fields, ($field) ->
-      observe($field, options, callback)
-    ->
-      destructor() for destructor in destructors
 
   ###*
   [Observes](/up.observe) a field or form and submits the form when a value changes.
@@ -869,19 +859,6 @@ up.form = (($) ->
   ###
   up.compiler '[up-autosubmit]', ($formOrField) -> autosubmit($formOrField)
 
-  ###*
-  This event is triggered when a radio button is unchecked
-  (due to another radio button in the group being checked).
-
-  @event up:radio:unchecked
-  @private
-  ###
-  up.on 'change', 'input[type=radio]', (event, $radio) ->
-    groupName = $radio.attr('name')
-    $group = $radio.closest('form').find("input[type=radio][name='#{groupName}']")
-    $others = $group.not($radio)
-    $others.trigger('up:radio:unchecked')
-
   up.on 'up:framework:reset', reset
 
   knife: eval(Knife?.point)
@@ -890,6 +867,7 @@ up.form = (($) ->
   observe: observe
   validate: validate
   switchTargets: switchTargets
+  autosubmit: autosubmit
 
 )(jQuery)
 
