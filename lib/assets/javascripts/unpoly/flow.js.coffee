@@ -67,7 +67,7 @@ up.flow = (($) ->
           originSelector = u.selectorForElement(origin)
           selector = selector.replace(/\&/, originSelector)
         else
-          u.error("Found origin reference (%s) in selector %s, but options.origin is missing", '&', selector)
+          up.fail("Found origin reference (%s) in selector %s, but options.origin is missing", '&', selector)
     else
       selector = u.selectorForElement(selectorOrElement)
     selector
@@ -377,7 +377,7 @@ up.flow = (($) ->
       message = "Could not find selector %s in the current #{layerProse}"
       if message[0] == '#'
         message += ' (avoid using IDs)'
-      u.error(message, selector)
+      up.fail(message, selector)
 
   filterScripts = ($element, options) ->
     runInlineScripts = u.option(options.runInlineScripts, config.runInlineScripts)
@@ -404,7 +404,7 @@ up.flow = (($) ->
         $(child)
       else if options.requireMatch
         inspectAction = { label: 'Open response', callback: options.inspectResponse }
-        u.error(["Could not find selector %s in response %o", selector, html], action: inspectAction)
+        up.fail(["Could not find selector %s in response %o", selector, html], action: inspectAction)
 
   updateHistory = (options) ->
     options = u.options(options, historyMethod: 'push')
@@ -625,7 +625,7 @@ up.flow = (($) ->
     for selectorAtom, i in disjunction
       # Splitting the atom
       selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/)
-      selectorParts or u.error('Could not parse selector atom "%s"', selectorAtom)
+      selectorParts or up.fail('Could not parse selector atom "%s"', selectorAtom)
       selector = selectorParts[1]
       if selector == 'html'
         # If someone really asked us to replace the <html> root, the best

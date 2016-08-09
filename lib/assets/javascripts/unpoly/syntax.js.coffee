@@ -453,6 +453,3 @@ up.syntax = (($) ->
 
 up.compiler = up.syntax.compiler
 up.macro = up.syntax.macro
-
-up.ready = -> up.util.error('up.ready no longer exists. Please use up.hello instead.')
-up.awaken = -> up.util.error('up.awaken no longer exists. Please use up.compiler instead.')

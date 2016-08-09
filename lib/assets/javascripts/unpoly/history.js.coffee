@@ -140,7 +140,7 @@ up.history = (($) ->
       window.history[method](state, '', url)
       observeNewUrl(currentUrl())
     else
-      u.error "This browser doesn't support history.#{method}"
+      up.fail "This browser doesn't support history.#{method}"
 
   buildState = ->
     fromUp: true
@@ -227,7 +227,7 @@ up.history = (($) ->
   up.on 'up:framework:reset', reset
 
   config: config
-  defaults: -> u.error('up.history.defaults(...) no longer exists. Set values on he up.history.config property instead.')
+  defaults: -> up.fail('up.history.defaults(...) no longer exists. Set values on he up.history.config property instead.')
   push: push
   replace: replace
   url: currentUrl

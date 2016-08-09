@@ -169,7 +169,7 @@ up.layout = (($) ->
       $obstructor = $(obstructor)
       anchorPosition = $obstructor.css(cssAttr)
       unless u.isPresent(anchorPosition)
-        u.error("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr)
+        up.fail("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr)
       parseInt(anchorPosition) + $obstructor.height()
 
     fixedTopBottoms = for obstructor in $(config.fixedTop.join(', '))
@@ -294,7 +294,7 @@ up.layout = (($) ->
     $element = $(selectorOrElement)
     $viewport = viewportSelector().seekUp($element)
     if $viewport.length == 0 && options.strict isnt false
-      u.error("Could not find viewport for %o", $element)
+      up.fail("Could not find viewport for %o", $element)
     $viewport
 
   ###*
@@ -541,7 +541,7 @@ up.layout = (($) ->
   scroll: scroll
   finishScrolling: finishScrolling
   config: config
-  defaults: -> u.error('up.layout.defaults(...) no longer exists. Set values on he up.layout.config property instead.')
+  defaults: -> up.fail('up.layout.defaults(...) no longer exists. Set values on he up.layout.config property instead.')
   viewportOf: viewportOf
   viewportsWithin: viewportsWithin
   viewports: viewports

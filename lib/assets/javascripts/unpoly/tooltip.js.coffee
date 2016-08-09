@@ -102,7 +102,7 @@ up.tooltip = (($) ->
         css['top'] = linkBox.top + linkBox.height
         css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
       else
-        u.error("Unknown position option '%s'", state.position)
+        up.fail("Unknown position option '%s'", state.position)
 
     state.$tooltip.attr('up-position', state.position)
     state.$tooltip.css(css)

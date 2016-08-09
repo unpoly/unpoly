@@ -182,7 +182,7 @@ up.motion = (($) ->
         $element.css(animation)
         u.resolvedDeferred()
     else
-      u.error("Unknown animation type for %o", animation)
+      up.fail("Unknown animation type for %o", animation)
 
   ###*
   Extracts animation-related options from the given options hash.
@@ -203,7 +203,7 @@ up.motion = (($) ->
     consolidatedOptions
       
   findAnimation = (name) ->
-    animations[name] or u.error("Unknown animation %o", name)
+    animations[name] or up.fail("Unknown animation %o", name)
 
   GHOSTING_DEFERRED_KEY = 'up-ghosting-deferred'
   GHOSTING_CLASS = 'up-ghosting'
@@ -302,7 +302,7 @@ up.motion = (($) ->
     if u.isDeferred(object)
       object
     else
-      u.error("Did not return a promise with .then and .resolve methods: %o", source)
+      up.fail("Did not return a promise with .then and .resolve methods: %o", source)
 
   ###*
   Performs an animated transition between two elements.
@@ -407,14 +407,14 @@ up.motion = (($) ->
             )
           return morph($old, $new, transition, parsedOptions)
         else
-          u.error("Unknown transition %o", transitionOrName)
+          up.fail("Unknown transition %o", transitionOrName)
       else
         return skipMorph($old, $new, parsedOptions)
 
   ensureMorphable = ($element, transition) ->
     if transition && $element.parents('body').length == 0
       element = $element.get(0)
-      u.error("Can't morph a <%s> element (%o)", element.tagName, element)
+      up.fail("Can't morph a <%s> element (%o)", element.tagName, element)
 
   ###*
   This causes the side effects of a successful transition, but instantly.
@@ -724,7 +724,7 @@ up.motion = (($) ->
   animation: animation
   config: config
   isEnabled: isEnabled
-  defaults: -> u.error('up.motion.defaults(...) no longer exists. Set values on he up.motion.config property instead.')
+  defaults: -> up.fail('up.motion.defaults(...) no longer exists. Set values on he up.motion.config property instead.')
   none: none
   when: resolvableWhen
   prependCopy: prependCopy

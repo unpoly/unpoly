@@ -10,9 +10,8 @@ Unreleased
 
 ### Compatible changes
 
-- The error notification is now much easier to read
-- The error notification can now be closed
-- When a target selector was not found in the response, the error notification now offers a link to re-request the response for inspection
+- The error notification is now easier to read and can be closed.
+- When a target selector was not found in the response, the error notification now offers a link to re-request the response for inspection.
 - [Compilers](/up.compiler) can now return an array of functions that will *all* be called when the element is destroyed.
 - [`up.observe`](/up.observe) now works on checkboxes and radio buttons.
 - [`up.observe`](/up.observe) can now be called with multiple form fields, or any container that contains form fields.
@@ -24,6 +23,8 @@ Unreleased
 - Fix a bug where falling back to non-AJAX page loads on old browsers would not work
 
 ### Breaking changes
+
+- `up.error` has been renamed to [`up.fail`](/up.fail) in order to prevent confusion with [`up.log.error`](/up.log.error).
 
 
 0.27.3

@@ -232,7 +232,7 @@ up.form = (($) ->
     if u.isString(rawCallback)
       callback = (value, $field) -> eval(rawCallback)
     else
-      callback = rawCallback or u.error('up.observe: No change callback given')
+      callback = rawCallback or up.fail('up.observe: No change callback given')
 
     delay = u.option($fields.attr('up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
@@ -333,7 +333,7 @@ up.form = (($) ->
         $field.closest(resolvedDefault).length
       )
     if u.isBlank(target)
-      u.error('Could not find default validation target for %o (tried ancestors %o)', $field.get(0), config.validateTargets)
+      up.fail('Could not find default validation target for %o (tried ancestors %o)', $field.get(0), config.validateTargets)
     unless u.isString(target)
       target = u.selectorForElement(target)
     target
@@ -445,7 +445,7 @@ up.form = (($) ->
     $field = $(fieldOrSelector)
     options = u.options(options)
     targets = u.option(options.target, $field.attr('up-switch'))
-    u.isPresent(targets) or u.error("No switch target given for %o", $field.get(0))
+    u.isPresent(targets) or up.fail("No switch target given for %o", $field.get(0))
     fieldValues = currentValuesForSwitch($field)
     $(targets).each ->
       $target = $(this)

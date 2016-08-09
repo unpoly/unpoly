@@ -1597,7 +1597,7 @@ up.util = (($) ->
     if isFormData(data)
       # Until FormData#entries is implemented in all major browsers
       # we must give up here
-      up.error('Cannot convert FormData into an array')
+      up.fail('Cannot convert FormData into an array')
     else
       query = requestDataAsQuery(data)
       array = []
@@ -1620,7 +1620,7 @@ up.util = (($) ->
     if isFormData(data)
       # Until FormData#entries is implemented in all major browsers
       # we must give up here
-      up.error('Cannot convert FormData into a query string')
+      up.fail('Cannot convert FormData into a query string')
     else if isPresent(data)
       query = $.param(data)
       query = query.replace(/\+/g, '%20')
@@ -1672,20 +1672,22 @@ up.util = (($) ->
     data
 
   ###*
-  Throws a fatal error with the given message.
+  Throws an [exception](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+  with the given message.
 
-  - The error will be printed to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/Console/error)
-  - An [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) (exception) will be thrown, unwinding the current call stack
-  - The error message will be printed in a corner of the screen
+  The message will also be printed to the [error log](/up.log.error).
+
+  Also a notification will be shown at the bottom of the screen.
 
   \#\#\#\# Examples
 
-      up.error('Division by zero')
-      up.error('Unexpected result %o', result)
+      up.fail('Division by zero')
+      up.fail('Unexpected result %o', result)
 
+  @function up.fail
   @experimental
   ###
-  error = (args...) ->
+  fail = (args...) ->
     if isArray(args[0])
       messageArgs = args[0]
       toastOptions = args[1] || {}
@@ -1861,7 +1863,7 @@ up.util = (($) ->
   merge: merge
   options: options
   option: option
-  error: error
+  fail: fail
   each: each
   map: map
   times: times
@@ -1934,7 +1936,7 @@ up.util = (($) ->
   cache: cache
   unwrapElement: unwrapElement
   multiSelector: multiSelector
-  error: error
+  error: fail
   pluckData: pluckData
   pluckKey: pluckKey
   extractOptions: extractOptions
@@ -1949,4 +1951,4 @@ up.util = (($) ->
 
 )($)
 
-up.error = up.util.error
+up.fail = up.util.fail

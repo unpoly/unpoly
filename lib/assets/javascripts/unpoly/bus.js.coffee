@@ -83,7 +83,7 @@ up.bus = (($) ->
       upListener._descriptionNumber = ++nextUpDescriptionNumber
     else
       jqueryListener = upListener._asJqueryListener
-      jqueryListener or u.error('up.off: The event listener %o was never registered through up.on')
+      jqueryListener or up.fail('up.off: The event listener %o was never registered through up.on')
     jqueryDescription.push(jqueryListener)
     jqueryDescription
 

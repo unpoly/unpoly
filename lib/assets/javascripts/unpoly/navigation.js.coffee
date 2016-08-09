@@ -221,7 +221,7 @@ up.navigation = (($) ->
   up.on 'up:framework:reset', reset
 
   config: config
-  defaults: -> u.error('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.')
+  defaults: -> up.fail('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.')
   markActive: markActive
   unmarkActive: unmarkActive
   withActiveMark: withActiveMark

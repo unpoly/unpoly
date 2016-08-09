@@ -58,7 +58,7 @@
 
     var selector = '.linx-target';
 
-    up.error(['Could not find selector %s in response %s', selector, html], {
+    up.fail(['Could not find selector %s in response %s', selector, html], {
       inspect: {
         label: 'Open response',
         callback: function () {

@@ -144,7 +144,7 @@ up.popup = (($) ->
         css['top'] = linkBox.top - popupBox.height
         css['left'] = linkBox.left
       else
-        u.error("Unknown position option '%s'", state.position)
+        up.fail("Unknown position option '%s'", state.position)
 
     state.$popup.attr('up-position', state.position)
     state.$popup.css(css)
@@ -216,7 +216,7 @@ up.popup = (($) ->
 
   attachNow = (elementOrSelector, options) ->
     $anchor = $(elementOrSelector)
-    $anchor.length or u.error('Cannot attach popup to non-existing element %o', elementOrSelector)
+    $anchor.length or up.fail('Cannot attach popup to non-existing element %o', elementOrSelector)
 
     options = u.options(options)
     url = u.option(u.pluckKey(options, 'url'), $anchor.attr('up-href'), $anchor.attr('href'))
