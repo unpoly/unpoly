@@ -23,9 +23,9 @@ up.browser = (($) ->
     if method == 'get'
       query = u.requestDataAsQuery(options.data)
       url = "#{url}?#{query}" if query
-      location.href = url
+      setLocationHref(url)
     else
-      $form = $("<form method='post' action='#{url}'></form>")
+      $form = $("<form method='post' action='#{url}' class='up-page-loader'></form>")
       addField = (field) ->
         $field = $('<input type="hidden">')
         $field.attr(field)
@@ -35,7 +35,23 @@ up.browser = (($) ->
         addField(csrfField)
       u.each u.requestDataAsArray(options.data), addField
       $form.hide().appendTo('body')
-      $form.submit()
+      submitForm($form)
+
+  ###*
+  For mocking in specs.
+
+  @method submitForm
+  ###
+  submitForm = ($form) ->
+    $form.submit()
+
+  ###*
+  For mocking in specs.
+
+  @method setLocationHref
+  ###
+  setLocationHref = (url) ->
+    location.href = url
 
   ###*
   A cross-browser way to interact with `console.log`, `console.error`, etc.
@@ -283,6 +299,7 @@ up.browser = (($) ->
   sessionStorage = u.memoize ->
     window.sessionStorage || { getItem: u.noop, setItem: u.noop, removeItem: u.noop }
 
+  knife: eval(Knife?.point)
   url: url
   loadPage: loadPage
   whenConfirmed: whenConfirmed
