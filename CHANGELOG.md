@@ -10,6 +10,14 @@ Unreleased
 
 ### Compatible changes
 
+### Breaking changes
+
+
+0.28.0
+------
+
+### Compatible changes
+
 - The error notification is now easier to read and can be closed.
 - When a target selector was not found in the response, the error notification now offers a link to re-request the response for inspection.
 - [Compilers](/up.compiler) can now return an array of functions that will *all* be called when the element is destroyed.

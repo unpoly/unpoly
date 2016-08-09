@@ -1,26 +1,5 @@
 [up-close] {
   cursor: pointer; }
-.up-error {
-  background-color: #c30;
-  color: white;
-  padding: 10px;
-  font-family: arial, helvetica, sans-serif;
-  font-size: 14px;
-  line-height: 18px;
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-  z-index: 99999999; }
-
-.up-error-variable {
-  background-color: rgba(0, 0, 0, 0.3);
-  padding: 1px 3px;
-  border-radius: 2px;
-  font-weight: normal;
-  max-width: 100px;
-  overflow: hidden; }
 .up-insertion {
   display: inline-block; }
 [up-href] {
@@ -92,6 +71,35 @@
   background-color: #fff;
   padding: 15px;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3); }
+.up-toast {
+  border-top: 3px solid #28b;
+  background-color: white;
+  color: #333;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 15px;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 99999999; }
+
+.up-toast-variable {
+  font-weight: normal;
+  color: #838383; }
+
+.up-toast-actions {
+  margin-top: 7px; }
+
+.up-toast-action {
+  display: inline-block;
+  word-spacing: -4px;
+  text-decoration: underline;
+  color: #28b;
+  cursor: pointer; }
+  .up-toast-action + .up-toast-action {
+    margin-left: 12px; }
 .up-tooltip {
   position: absolute;
   z-index: 30000;

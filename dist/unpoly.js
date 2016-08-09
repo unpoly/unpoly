@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.27.3"
+    version: "0.28.0"
   };
 
 }).call(this);
@@ -32,7 +32,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, error, escapeHtml, escapePressed, except, extend, extractOptions, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, setTimer, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, except, extend, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -632,7 +632,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     Returns the array.
     
-    @function up.util.isDeferred
+    @function up.util.toArray
     @param object
     @return {Array}
     @stable
@@ -1851,7 +1851,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     requestDataAsArray = function(data) {
       var array, i, len, pair, part, query, ref;
       if (isFormData(data)) {
-        return up.error('Cannot convert FormData into an array');
+        return up.fail('Cannot convert FormData into an array');
       } else {
         query = requestDataAsQuery(data);
         array = [];
@@ -1880,7 +1880,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     requestDataAsQuery = function(data) {
       var query;
       if (isFormData(data)) {
-        return up.error('Cannot convert FormData into a query string');
+        return up.fail('Cannot convert FormData into a query string');
       } else if (isPresent(data)) {
         query = $.param(data);
         query = query.replace(/\+/g, '%20');
@@ -1949,33 +1949,36 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
-    Throws a fatal error with the given message.
+    Throws an [exception](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+    with the given message.
     
-    - The error will be printed to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/Console/error)
-    - An [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) (exception) will be thrown, unwinding the current call stack
-    - The error message will be printed in a corner of the screen
+    The message will also be printed to the [error log](/up.log.error).
+    
+    Also a notification will be shown at the bottom of the screen.
     
     \#\#\#\# Examples
     
-        up.error('Division by zero')
-        up.error('Unexpected result %o', result)
+        up.fail('Division by zero')
+        up.fail('Unexpected result %o', result)
     
+    @function up.fail
     @experimental
      */
-    error = function() {
-      var args, asString, ref, ref1;
+    fail = function() {
+      var args, asString, messageArgs, ref, ref1, toastOptions;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      (ref = up.log).error.apply(ref, args);
+      if (isArray(args[0])) {
+        messageArgs = args[0];
+        toastOptions = args[1] || {};
+      } else {
+        messageArgs = args;
+        toastOptions = {};
+      }
+      (ref = up.log).error.apply(ref, messageArgs);
       whenReady().then(function() {
-        var $error, asHtml, formatter, ref1;
-        $error = presence($('.up-error')) || $('<div class="up-error"></div>').prependTo('body');
-        formatter = function(arg) {
-          return "<span class='up-error-variable'>" + (escapeHtml(arg)) + "</span>";
-        };
-        asHtml = (ref1 = up.browser).sprintfWithFormattedArgs.apply(ref1, [formatter].concat(slice.call(args)));
-        return $error.html(asHtml);
+        return up.toast.open(messageArgs, toastOptions);
       });
-      asString = (ref1 = up.browser).sprintf.apply(ref1, args);
+      asString = (ref1 = up.browser).sprintf.apply(ref1, messageArgs);
       throw new Error(asString);
     };
     ESCAPE_HTML_ENTITY_MAP = {
@@ -2146,7 +2149,35 @@ that might save you from loading something like [Underscore.js](http://underscor
       return DivertibleChain;
 
     })();
+
+    /**
+    @function up.util.submittedValue
+    @internal
+     */
+    submittedValue = function(fieldOrSelector) {
+      var $field;
+      $field = $(fieldOrSelector);
+      if ($field.is('[type=checkbox], [type=radio]') && !$field.is(':checked')) {
+        return void 0;
+      } else {
+        return $field.val();
+      }
+    };
     return {
+
+      /**
+      @function up.util.sequence
+      @internal
+       */
+      sequence: function() {
+        var functions;
+        functions = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+        return function() {
+          return map(functions, function(f) {
+            return f();
+          });
+        };
+      },
       isDetached: isDetached,
       requestDataAsArray: requestDataAsArray,
       requestDataAsQuery: requestDataAsQuery,
@@ -2169,7 +2200,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       merge: merge,
       options: options,
       option: option,
-      error: error,
+      fail: fail,
       each: each,
       map: map,
       times: times,
@@ -2240,7 +2271,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       cache: cache,
       unwrapElement: unwrapElement,
       multiSelector: multiSelector,
-      error: error,
+      error: fail,
       pluckData: pluckData,
       pluckKey: pluckKey,
       extractOptions: extractOptions,
@@ -2250,11 +2281,12 @@ that might save you from loading something like [Underscore.js](http://underscor
       whenReady: whenReady,
       identity: identity,
       escapeHtml: escapeHtml,
-      DivertibleChain: DivertibleChain
+      DivertibleChain: DivertibleChain,
+      submittedValue: submittedValue
     };
   })($);
 
-  up.error = up.util.error;
+  up.fail = up.util.fail;
 
 }).call(this);
 
@@ -2272,7 +2304,7 @@ we can't currently get rid off.
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, initialRequestMethod, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sessionStorage, sprintf, sprintfWithFormattedArgs, stringifyArg, u, url, whenConfirmed;
+    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, initialRequestMethod, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sessionStorage, setLocationHref, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /**
@@ -2293,13 +2325,13 @@ we can't currently get rid off.
         if (query) {
           url = url + "?" + query;
         }
-        return location.href = url;
+        return setLocationHref(url);
       } else {
-        $form = $("<form method='post' action='" + url + "'></form>");
+        $form = $("<form method='post' action='" + url + "' class='up-page-loader'></form>");
         addField = function(field) {
           var $field;
           $field = $('<input type="hidden">');
-          $field.attr(field.name, field.value);
+          $field.attr(field);
           return $field.appendTo($form);
         };
         addField({
@@ -2311,8 +2343,26 @@ we can't currently get rid off.
         }
         u.each(u.requestDataAsArray(options.data), addField);
         $form.hide().appendTo('body');
-        return $form.submit();
+        return submitForm($form);
       }
+    };
+
+    /**
+    For mocking in specs.
+    
+    @method submitForm
+     */
+    submitForm = function($form) {
+      return $form.submit();
+    };
+
+    /**
+    For mocking in specs.
+    
+    @method setLocationHref
+     */
+    setLocationHref = function(url) {
+      return location.href = url;
     };
 
     /**
@@ -2343,7 +2393,7 @@ we can't currently get rid off.
     CONSOLE_PLACEHOLDERS = /\%[odisf]/g;
     stringifyArg = function(arg) {
       var $arg, attr, closer, j, len, maxLength, ref, string, value;
-      maxLength = 100;
+      maxLength = 200;
       closer = '';
       if (u.isString(arg)) {
         string = arg.replace(/[\n\r\t ]+/g, ' ');
@@ -2583,6 +2633,7 @@ we can't currently get rid off.
       };
     });
     return {
+      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       url: url,
       loadPage: loadPage,
       whenConfirmed: whenConfirmed,
@@ -2692,7 +2743,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
         upListener._descriptionNumber = ++nextUpDescriptionNumber;
       } else {
         jqueryListener = upListener._asJqueryListener;
-        jqueryListener || u.error('up.off: The event listener %o was never registered through up.on');
+        jqueryListener || up.fail('up.off: The event listener %o was never registered through up.on');
       }
       jqueryDescription.push(jqueryListener);
       return jqueryDescription;
@@ -3309,6 +3360,82 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
 }).call(this);
 
 /**
+Toast alerts
+============
+
+@class up.toast
+ */
+
+(function() {
+  var slice = [].slice;
+
+  up.toast = (function($) {
+    var VARIABLE_FORMATTER, addAction, b, close, isOpen, messageToHtml, open, reset, state, u;
+    u = up.util;
+    b = up.browser;
+    VARIABLE_FORMATTER = function(arg) {
+      return "<span class='up-toast-variable'>" + (u.escapeHtml(arg)) + "</span>";
+    };
+    state = u.config({
+      $toast: null
+    });
+    reset = function() {
+      close();
+      return state.reset();
+    };
+    messageToHtml = function(message) {
+      if (u.isArray(message)) {
+        message[0] = u.escapeHtml(message[0]);
+        message = b.sprintfWithFormattedArgs.apply(b, [VARIABLE_FORMATTER].concat(slice.call(message)));
+      } else {
+        message = u.escapeHtml(message);
+      }
+      return message;
+    };
+    isOpen = function() {
+      return !!state.$toast;
+    };
+    addAction = function($actions, label, callback) {
+      var $action;
+      $action = $('<span class="up-toast-action"></span>').text(label);
+      $action.on('click', callback);
+      return $action.appendTo($actions);
+    };
+    open = function(message, options) {
+      var $actions, $message, $toast, action;
+      if (options == null) {
+        options = {};
+      }
+      close();
+      $toast = $('<div class="up-toast"></div>').prependTo('body');
+      $message = $('<div class="up-toast-message"></div>').appendTo($toast);
+      $actions = $('<div class="up-toast-actions"></div>').appendTo($toast);
+      message = messageToHtml(message);
+      $message.html(message);
+      if (action = options.action || options.inspect) {
+        addAction($actions, action.label, action.callback);
+      }
+      addAction($actions, 'Close', close);
+      return state.$toast = $toast;
+    };
+    close = function() {
+      if (isOpen()) {
+        state.$toast.remove();
+        return state.$toast = null;
+      }
+    };
+    up.on('up:framework:reset', reset);
+    return {
+      open: open,
+      close: close,
+      reset: reset,
+      isOpen: isOpen
+    };
+  })(jQuery);
+
+}).call(this);
+
+/**
 Enhancing elements
 ==================
 
@@ -3347,7 +3474,7 @@ later.
   var slice = [].slice;
 
   up.syntax = (function($) {
-    var DESTRUCTABLE_CLASS, DESTRUCTORS_KEY, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, insertCompiler, macro, macros, reset, snapshot, u;
+    var DESTRUCTABLE_CLASS, DESTRUCTORS_KEY, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, discoverDestructor, insertCompiler, macro, macros, reset, snapshot, u;
     u = up.util;
     DESTRUCTABLE_CLASS = 'up-destructable';
     DESTRUCTORS_KEY = 'up-destructors';
@@ -3413,7 +3540,8 @@ later.
     or event handlers bound to the document root.
     
     Here is a version of `<clock>` that updates
-    the time every second, and cleans up once it's done:
+    the time every second, and cleans up once it's done. Note how it returns
+    a function that calls `clearInterval`:
     
         up.compiler('clock', function($element) {
     
@@ -3603,15 +3731,22 @@ later.
       return queue.splice(index, 0, newCompiler);
     };
     applyCompiler = function(compiler, $jqueryElement, nativeElement) {
-      var destructor, value;
+      var destructor, returnValue, value;
       up.puts((!compiler.isDefault ? "Compiling '%s' on %o" : void 0), compiler.selector, nativeElement);
       if (compiler.keep) {
         value = u.isString(compiler.keep) ? compiler.keep : '';
         $jqueryElement.attr('up-keep', value);
       }
-      destructor = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)]);
-      if (u.isFunction(destructor)) {
+      returnValue = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)]);
+      if (destructor = discoverDestructor(returnValue)) {
         return addDestructor($jqueryElement, destructor);
+      }
+    };
+    discoverDestructor = function(returnValue) {
+      if (u.isFunction(returnValue)) {
+        return returnValue;
+      } else if (u.isArray(returnValue) && u.all(returnValue, u.isFunction)) {
+        return u.sequence.apply(u, returnValue);
       }
     };
     addDestructor = function($jqueryElement, destructor) {
@@ -3820,14 +3955,6 @@ later.
 
   up.macro = up.syntax.macro;
 
-  up.ready = function() {
-    return up.util.error('up.ready no longer exists. Please use up.hello instead.');
-  };
-
-  up.awaken = function() {
-    return up.util.error('up.awaken no longer exists. Please use up.compiler instead.');
-  };
-
 }).call(this);
 
 /**
@@ -3990,7 +4117,7 @@ We need to work on this page:
         window.history[method](state, '', url);
         return observeNewUrl(currentUrl());
       } else {
-        return u.error("This browser doesn't support history." + method);
+        return up.fail("This browser doesn't support history." + method);
       }
     };
     buildState = function() {
@@ -4094,7 +4221,7 @@ We need to work on this page:
     return {
       config: config,
       defaults: function() {
-        return u.error('up.history.defaults(...) no longer exists. Set values on he up.history.config property instead.');
+        return up.fail('up.history.defaults(...) no longer exists. Set values on he up.history.config property instead.');
       },
       push: push,
       replace: replace,
@@ -4287,7 +4414,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         $obstructor = $(obstructor);
         anchorPosition = $obstructor.css(cssAttr);
         if (!u.isPresent(anchorPosition)) {
-          u.error("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr);
+          up.fail("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr);
         }
         return parseInt(anchorPosition) + $obstructor.height();
       };
@@ -4430,7 +4557,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       $element = $(selectorOrElement);
       $viewport = viewportSelector().seekUp($element);
       if ($viewport.length === 0 && options.strict !== false) {
-        u.error("Could not find viewport for %o", $element);
+        up.fail("Could not find viewport for %o", $element);
       }
       return $viewport;
     };
@@ -4715,7 +4842,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       finishScrolling: finishScrolling,
       config: config,
       defaults: function() {
-        return u.error('up.layout.defaults(...) no longer exists. Set values on he up.layout.config property instead.');
+        return up.fail('up.layout.defaults(...) no longer exists. Set values on he up.layout.config property instead.');
       },
       viewportOf: viewportOf,
       viewportsWithin: viewportsWithin,
@@ -4813,7 +4940,7 @@ are based on this module.
             originSelector = u.selectorForElement(origin);
             selector = selector.replace(/\&/, originSelector);
           } else {
-            u.error("Found origin reference (%s) in selector %s, but options.origin is missing", '&', selector);
+            up.fail("Found origin reference (%s) in selector %s, but options.origin is missing", '&', selector);
           }
         }
       } else {
@@ -4983,6 +5110,9 @@ are based on this module.
         preload: options.preload,
         headers: options.headers
       };
+      options.inspectResponse = function() {
+        return up.browser.loadPage(url, u.only(options, 'method', 'data'));
+      };
       promise = up.ajax(request);
       onSuccess = function(html, textStatus, xhr) {
         return processResponse(true, target, url, request, xhr, options);
@@ -5129,9 +5259,9 @@ are based on this module.
           for (j = 0, len = ref.length; j < len; j++) {
             step = ref[j];
             up.log.group('Updating %s', step.selector, function() {
-              var $new, $old, ref1, swapPromise;
+              var $new, $old, swapPromise;
               $old = findOldFragment(step.selector, options);
-              $new = (ref1 = response.find(step.selector)) != null ? ref1.first() : void 0;
+              $new = response.first(step.selector);
               if ($old && $new) {
                 filterScripts($new, options);
                 swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options);
@@ -5162,7 +5292,7 @@ are based on this module.
         if (message[0] === '#') {
           message += ' (avoid using IDs)';
         }
-        return u.error(message, selector);
+        return up.fail(message, selector);
       }
     };
     filterScripts = function($element, options) {
@@ -5192,12 +5322,18 @@ are based on this module.
           var ref;
           return (ref = htmlElement.querySelector("title")) != null ? ref.textContent : void 0;
         },
-        find: function(selector) {
-          var child;
+        first: function(selector) {
+          var child, inspectAction;
           if (child = $.find(selector, htmlElement)[0]) {
             return $(child);
           } else if (options.requireMatch) {
-            return u.error("Could not find selector %s in response %o", selector, html);
+            inspectAction = {
+              label: 'Open response',
+              callback: options.inspectResponse
+            };
+            return up.fail(["Could not find selector %s in response %o", selector, html], {
+              action: inspectAction
+            });
           }
         }
       };
@@ -5414,7 +5550,7 @@ are based on this module.
       for (i = j = 0, len = disjunction.length; j < len; i = ++j) {
         selectorAtom = disjunction[i];
         selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/);
-        selectorParts || u.error('Could not parse selector atom "%s"', selectorAtom);
+        selectorParts || up.fail('Could not parse selector atom "%s"', selectorAtom);
         selector = selectorParts[1];
         if (selector === 'html') {
           selector = 'body';
@@ -5942,7 +6078,7 @@ or [transitions](/up.transition) using Javascript or CSS.
           return u.resolvedDeferred();
         }
       } else {
-        return u.error("Unknown animation type for %o", animation);
+        return up.fail("Unknown animation type for %o", animation);
       }
     };
 
@@ -5967,7 +6103,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       return consolidatedOptions;
     };
     findAnimation = function(name) {
-      return animations[name] || u.error("Unknown animation %o", name);
+      return animations[name] || up.fail("Unknown animation %o", name);
     };
     GHOSTING_DEFERRED_KEY = 'up-ghosting-deferred';
     GHOSTING_CLASS = 'up-ghosting';
@@ -6052,7 +6188,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       if (u.isDeferred(object)) {
         return object;
       } else {
-        return u.error("Did not return a promise with .then and .resolve methods: %o", source);
+        return up.fail("Did not return a promise with .then and .resolve methods: %o", source);
       }
     };
 
@@ -6155,7 +6291,7 @@ or [transitions](/up.transition) using Javascript or CSS.
             };
             return morph($old, $new, transition, parsedOptions);
           } else {
-            return u.error("Unknown transition %o", transitionOrName);
+            return up.fail("Unknown transition %o", transitionOrName);
           }
         } else {
           return skipMorph($old, $new, parsedOptions);
@@ -6166,7 +6302,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       var element;
       if (transition && $element.parents('body').length === 0) {
         element = $element.get(0);
-        return u.error("Can't morph a <%s> element (%o)", element.tagName, element);
+        return up.fail("Can't morph a <%s> element (%o)", element.tagName, element);
       }
     };
 
@@ -6466,7 +6602,7 @@ or [transitions](/up.transition) using Javascript or CSS.
       config: config,
       isEnabled: isEnabled,
       defaults: function() {
-        return u.error('up.motion.defaults(...) no longer exists. Set values on he up.motion.config property instead.');
+        return up.fail('up.motion.defaults(...) no longer exists. Set values on he up.motion.config property instead.');
       },
       none: none,
       when: resolvableWhen,
@@ -6806,16 +6942,12 @@ the user performs the click.
           show = function() { $element.show() };
           hide = function() { $element.hide() };
     
-          up.on('up:proxy:slow', show);
-          up.on('up:proxy:recover', hide);
-    
           hide();
     
-          // Clean up when the element is removed from the DOM
-          return function() {
-            up.off('up:proxy:slow', show);
-            up.off('up:proxy:recover', hide);
-          };
+          return [
+            up.on('up:proxy:slow', show),
+            up.on('up:proxy:recover', hide)
+          ];
     
         });
     
@@ -7070,7 +7202,7 @@ the user performs the click.
       isCachable: isCachable,
       config: config,
       defaults: function() {
-        return u.error('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.');
+        return up.fail('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.');
       }
     };
   })(jQuery);
@@ -7658,7 +7790,7 @@ open dialogs with sub-forms, etc. all without losing form state.
   var slice = [].slice;
 
   up.form = (function($) {
-    var autosubmit, config, currentValuesForSwitch, observe, observeForm, reset, resolveValidateTarget, submit, switchTargets, u, validate;
+    var autosubmit, config, currentValuesForSwitch, observe, observeField, reset, resolveValidateTarget, submit, switchTargets, u, validate;
     u = up.util;
 
     /**
@@ -7677,7 +7809,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       By default this looks for a `<fieldset>`, `<label>` or `<form>`
       around the validating input field, or any element with an
       `up-fieldset` attribute.
-    @param {String} [config.fields]
+    @param {String} [config.fields=[':input']]
       An array of CSS selectors that represent form fields, such as `input` or `select`.
     @stable
      */
@@ -7803,7 +7935,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     };
 
     /**
-    Observes a field or form and runs a callback when a value changes.
+    Observes form fields and runs a callback when a value changes.
     
     This is useful for observing text fields while the user is typing.
     
@@ -7815,8 +7947,12 @@ open dialogs with sub-forms, etc. all without losing form state.
     text field value changes:
     
         up.observe('input[name=query]', function(value, $input) {
-          up.submit($input)
+          console.log('Query is now ' + value);
         });
+    
+    Instead of a single form field, you can also
+    pass, a `<form>` or any container that contains form fields.
+    The callback will be run if any of the given fields change.
     
     \#\#\#\# Preventing concurrency
     
@@ -7839,13 +7975,17 @@ open dialogs with sub-forms, etc. all without losing form state.
         });
     
     @function up.observe
-    @param {Element|jQuery|String} fieldOrSelector
+    @param {Element|jQuery|String} selectorOrElement
+      The form fields that wiill be observed.
+    
+      You can pass one or more fields, a `<form>` or any container that contains form fields.
+      The callback will be run if any of the given fields change.
     @param {Number} [options.delay=up.form.config.observeDelay]
       The number of miliseconds to wait before executing the callback
       after the input value changes. Use this to limit how often the callback
       will be invoked for a fast typist.
     @param {Function(value, $field)|String} onChange
-      The callback to execute when the field's value changes.
+      The callback to run when the field's value changes.
       If given as a function, it must take two arguments (`value`, `$field`).
       If given as a string, it will be evaled as Javascript code in a context where
       (`value`, `$field`) are set.
@@ -7854,36 +7994,36 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
     observe = function() {
-      var $element, args, callback, callbackArg, callbackPromise, callbackTimer, changeEvents, check, clearTimer, delay, knownValue, nextCallback, options, rawCallback, runNextCallback, selectorOrElement;
-      selectorOrElement = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      var $element, $fields, callback, callbackArg, delay, destructors, extraArgs, options, rawCallback, selectorOrElement;
+      selectorOrElement = arguments[0], extraArgs = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       options = {};
       callbackArg = void 0;
-      if (args.length === 1) {
-        callbackArg = args[0];
-      }
-      if (args.length > 1) {
-        options = u.options(args[0]);
-        callbackArg = args[1];
+      if (extraArgs.length === 1) {
+        callbackArg = extraArgs[0];
+      } else if (extraArgs.length > 1) {
+        options = u.options(extraArgs[0]);
+        callbackArg = extraArgs[1];
       }
       $element = $(selectorOrElement);
-      options = u.options(options);
-      delay = u.option($element.attr('up-delay'), options.delay, config.observeDelay);
-      delay = parseInt(delay);
+      $fields = u.multiSelector(config.fields).findWithSelf($element);
       callback = null;
-      if (u.isGiven(options.change)) {
-        u.error('up.observe now takes the change callback as the last argument');
-      }
-      rawCallback = u.option(u.presentAttr($element, 'up-observe'), callbackArg);
+      rawCallback = u.option(callbackArg, u.presentAttr($fields, 'up-observe'));
       if (u.isString(rawCallback)) {
         callback = function(value, $field) {
           return eval(rawCallback);
         };
       } else {
-        callback = rawCallback || u.error('up.observe: No change callback given');
+        callback = rawCallback || up.fail('up.observe: No change callback given');
       }
-      if ($element.is('form')) {
-        return observeForm($element, options, callback);
-      }
+      delay = u.option($fields.attr('up-delay'), options.delay, config.observeDelay);
+      delay = parseInt(delay);
+      destructors = u.map($fields, function(field) {
+        return observeField($(field), options, callback);
+      });
+      return u.sequence.apply(u, destructors);
+    };
+    observeField = function($field, delay, callback) {
+      var callbackPromise, callbackTimer, changeEvents, check, clearTimer, knownValue, nextCallback, runNextCallback;
       knownValue = null;
       callbackTimer = null;
       callbackPromise = u.resolvedPromise();
@@ -7898,14 +8038,14 @@ open dialogs with sub-forms, etc. all without losing form state.
       };
       check = function() {
         var runAndChain, skipCallback, value;
-        value = $element.val();
+        value = u.submittedValue($field);
         skipCallback = u.isNull(knownValue);
         if (knownValue !== value) {
           knownValue = value;
           if (!skipCallback) {
             clearTimer();
             nextCallback = function() {
-              return callback.apply($element.get(0), [value, $element]);
+              return callback.apply($field.get(0), [value, $field]);
             };
             runAndChain = function() {
               return callbackPromise.then(function() {
@@ -7925,33 +8065,15 @@ open dialogs with sub-forms, etc. all without losing form state.
       clearTimer = function() {
         return clearTimeout(callbackTimer);
       };
-      changeEvents = up.browser.canInputEvent() ? 'input change' : 'input change keypress paste cut click propertychange';
-      $element.on(changeEvents, check);
+      changeEvents = 'input change';
+      if (!up.browser.canInputEvent()) {
+        changeEvents += ' keypress paste cut click propertychange';
+      }
+      $field.on(changeEvents, check);
       check();
       return function() {
-        $element.off(changeEvents, check);
+        $field.off(changeEvents, check);
         return clearTimer();
-      };
-    };
-
-    /**
-    @function observeForm
-    @internal
-     */
-    observeForm = function($form, options, callback) {
-      var $fields, destructors;
-      $fields = u.multiSelector(config.fields).find($form);
-      destructors = u.map($fields, function($field) {
-        return observe($field, callback);
-      });
-      return function() {
-        var destructor, i, len, results;
-        results = [];
-        for (i = 0, len = destructors.length; i < len; i++) {
-          destructor = destructors[i];
-          results.push(destructor());
-        }
-        return results;
       };
     };
 
@@ -7992,7 +8114,7 @@ open dialogs with sub-forms, etc. all without losing form state.
         }));
       }
       if (u.isBlank(target)) {
-        u.error('Could not find default validation target for %o (tried ancestors %o)', $field.get(0), config.validateTargets);
+        up.fail('Could not find default validation target for %o (tried ancestors %o)', $field.get(0), config.validateTargets);
       }
       if (!u.isString(target)) {
         target = u.selectorForElement(target);
@@ -8119,7 +8241,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       $field = $(fieldOrSelector);
       options = u.options(options);
       targets = u.option(options.target, $field.attr('up-switch'));
-      u.isPresent(targets) || u.error("No switch target given for %o", $field.get(0));
+      u.isPresent(targets) || up.fail("No switch target given for %o", $field.get(0));
       fieldValues = currentValuesForSwitch($field);
       return $(targets).each(function() {
         var $target, hideValues, show, showValues;
@@ -8547,7 +8669,8 @@ open dialogs with sub-forms, etc. all without losing form state.
       submit: submit,
       observe: observe,
       validate: validate,
-      switchTargets: switchTargets
+      switchTargets: switchTargets,
+      autosubmit: autosubmit
     };
   })(jQuery);
 
@@ -8714,7 +8837,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           css['left'] = linkBox.left;
           break;
         default:
-          u.error("Unknown position option '%s'", state.position);
+          up.fail("Unknown position option '%s'", state.position);
       }
       state.$popup.attr('up-position', state.position);
       return state.$popup.css(css);
@@ -8792,7 +8915,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     attachNow = function(elementOrSelector, options) {
       var $anchor, animateOptions, html, position, target, url;
       $anchor = $(elementOrSelector);
-      $anchor.length || u.error('Cannot attach popup to non-existing element %o', elementOrSelector);
+      $anchor.length || up.fail('Cannot attach popup to non-existing element %o', elementOrSelector);
       options = u.options(options);
       url = u.option(u.pluckKey(options, 'url'), $anchor.attr('up-href'), $anchor.attr('href'));
       html = u.option(u.pluckKey(options, 'html'));
@@ -9152,8 +9275,14 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       You can also supply a function that returns a HTML string.
       The function will be called with the modal options (merged from these defaults
       and any per-open overrides) whenever a modal opens.
-    @param {String} [config.closeLabel='X']
+    @param {String} [config.closeLabel='×']
       The label of the button that closes the dialog.
+    @param {Boolean} [config.closable=true]
+      When `true`, the modal will render a close icon and close when the user
+      clicks on the backdrop or presses Escape.
+    
+      When `false`, you need to either supply an element with `[up-close]` or
+      close the modal manually with `up.modal.close()`.
     @param {String} [config.openAnimation='fade-in']
       The animation used to open the viewport around the dialog.
     @param {String} [config.closeAnimation='fade-out']
@@ -9190,6 +9319,8 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       backdropOpenAnimation: 'fade-in',
       backdropCloseAnimation: 'fade-out',
       closeLabel: '×',
+      closable: true,
+      sticky: false,
       flavors: {
         "default": {}
       },
@@ -9221,6 +9352,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
         $anchor: null,
         $modal: null,
         sticky: null,
+        closable: null,
         flavor: null,
         url: null,
         coveredUrl: null,
@@ -9265,6 +9397,9 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       }
       if (u.isPresent(options.height)) {
         $dialog.css('height', options.height);
+      }
+      if (!state.closable) {
+        $modal.find('.up-modal-close').remove();
       }
       $content = $modal.find('.up-modal-content');
       u.$createPlaceholder(target, $content);
@@ -9340,6 +9475,12 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param {Boolean} [options.sticky=false]
       If set to `true`, the modal remains
       open even it changes the page in the background.
+    @param {Boolean} [config.closable=true]
+      When `true`, the modal will render a close icon and close when the user
+      clicks on the backdrop or presses Escape.
+    
+      When `false`, you need to either supply an element with `[up-close]` or
+      close the modal manually with `up.modal.close()`.
     @param {String} [options.confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the modal is being opened.
@@ -9457,6 +9598,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
       options.animation = u.option(options.animation, $link.attr('up-animation'), flavorDefault('openAnimation', options.flavor));
       options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), flavorDefault('backdropOpenAnimation', options.flavor));
       options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor));
+      options.closable = u.option(options.closable, u.castedAttr($link, 'up-closable'), flavorDefault('closable', options.flavor));
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       options.method = up.link.followMethod($link, options);
       options.layer = 'modal';
@@ -9477,6 +9619,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           state.phase = 'opening';
           state.flavor = options.flavor;
           state.sticky = options.sticky;
+          state.closable = options.closable;
           if (options.history) {
             state.coveredUrl = up.browser.url();
             state.coveredTitle = document.title;
@@ -9581,6 +9724,7 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
           state.$modal = null;
           state.flavor = null;
           state.sticky = null;
+          state.closable = null;
           return up.emit('up:modal:closed', {
             message: 'Modal closed'
           });
@@ -9743,6 +9887,12 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     @param {String} [up-sticky]
       If set to `"true"`, the modal remains
       open even if the page changes in the background.
+    @param {Boolean} [up-closable]
+      When `true`, the modal will render a close icon and close when the user
+      clicks on the backdrop or presses Escape.
+    
+      When `false`, you need to either supply an element with `[up-close]` or
+      close the modal manually with `up.modal.close()`.
     @param {String} [up-animation]
       The animation to use when opening the viewport containing the dialog.
     @param {String} [up-backdrop-animation]
@@ -9766,6 +9916,9 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
     });
     up.on('click', 'body', function(event, $body) {
       var $target;
+      if (!state.closable) {
+        return;
+      }
       $target = $(event.target);
       if (!($target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length)) {
         return closeAsap();
@@ -9781,7 +9934,11 @@ To disable this behavior, give the opening link an `up-sticky` attribute:
         return autoclose();
       }
     });
-    up.bus.onEscape(closeAsap);
+    up.bus.onEscape(function() {
+      if (state.closable) {
+        return closeAsap();
+      }
+    });
 
     /**
     When this element is clicked, closes a currently open dialog.
@@ -9935,7 +10092,7 @@ The tooltip element is appended to the end of `<body>`.
           css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width);
           break;
         default:
-          u.error("Unknown position option '%s'", state.position);
+          up.fail("Unknown position option '%s'", state.position);
       }
       state.$tooltip.attr('up-position', state.position);
       return state.$tooltip.css(css);
@@ -10357,7 +10514,7 @@ by providing instant feedback for user interactions.
     return {
       config: config,
       defaults: function() {
-        return u.error('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.');
+        return up.fail('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.');
       },
       markActive: markActive,
       unmarkActive: unmarkActive,
