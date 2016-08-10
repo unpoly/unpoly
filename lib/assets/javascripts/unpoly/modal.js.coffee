@@ -670,11 +670,12 @@ up.modal = (($) ->
 
   # Close the modal when someone clicks outside the dialog
   # (but not on a modal opener).
-  up.on('click', 'body', (event, $body) ->
+  up.on('click', (event) ->
     return unless state.closable
 
     $target = $(event.target)
     unless $target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length
+      u.haltEvent(event)
       closeAsap()
   )
 
@@ -706,10 +707,11 @@ up.modal = (($) ->
   up.on('click', '[up-close]', (event, $element) ->
     if contains($element)
       closeAsap()
-      # Only prevent the default when we actually closed a modal.
-      # This way we can have buttons that close a modal when within a modal,
-      # but link to a destination if not.
-      event.preventDefault()
+      # If the user closes the modal by clicking on the background, we want to halt the event chain here.
+      # The event should not trigger anything else. The user needs to click again for another interaction.
+      # Also only prevent the default when we actually closed a modal.
+      # This way we can have buttons that close a modal when within a modal, but link to a destination if not.
+      u.haltEvent(event)
   )
 
   # The framework is reset between tests

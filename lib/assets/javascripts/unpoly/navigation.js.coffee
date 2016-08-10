@@ -96,20 +96,37 @@ up.navigation = (($) ->
         $section.removeClass(klass)
 
   ###*
-  @function findClickArea
+  @function findActionableArea
   @param {String|Element|jQuery} elementOrSelector
-  @param {Boolean} options.enlarge
-    If `true`, tries to find a containing link that has expanded the link's click area.
-    If we find one, we prefer to mark the larger area as active.
   @internal
   ###
-  findClickArea = (elementOrSelector, options) ->
+  findActionableArea = (elementOrSelector) ->
     $area = $(elementOrSelector)
-    options = u.options(options, enlarge: false)
-    if options.enlarge
-      u.presence($area.parent(SELECTOR_SECTION)) || $area
-    else
-      $area
+    if $area.is(SELECTOR_SECTION)
+      # Try to enlarge links that are expanded with [up-expand] on a surrounding container.
+      $area = u.presence($area.parent(SELECTOR_SECTION)) || $area
+    $area
+
+  ###*
+  Marks the given element as currently loading, by assigning the CSS class [`up-active`](/up-active).
+
+  This happens automatically when following links or submitting forms through the Unpoly API.
+  Use this function if you make custom network calls from your own Javascript code.
+
+  If the given element is a link within an [expanded click area](/up-expand),
+  the class will be assigned to the expanded area.
+
+  Emits the [`up:navigation:activate`](/up:navigation:activate) event.
+
+  @method up.navigation.activate
+  @param {Element|jQuery|String} elementOrSelector
+    The element to mark as active
+  @experimental
+  ###
+  activate = (elementOrSelector) ->
+    $element = findActionableArea(elementOrSelector)
+    up.emit('up:navigation:activate', $element: $element, message: ['Navigating via %o', $element.get(0)])
+    $element.addClass(CLASS_ACTIVE)
 
   ###*
   Links that are currently loading are assigned the `up-active`
@@ -138,22 +155,61 @@ up.navigation = (($) ->
   @selector .up-active
   @stable
   ###
-  markActive = (elementOrSelector, options) ->
-    $element = findClickArea(elementOrSelector, options)
-    $element.addClass(CLASS_ACTIVE)
 
-  unmarkActive = (elementOrSelector, options) ->
-    $element = findClickArea(elementOrSelector, options)
+  ###*
+  This event is emitted when a link or form is [starting to load](/up.navigation.activate).
+
+  @event up:navigation:activate
+  @param {jQuery} event.$element
+    The link or form that is starting to load.
+  @experimental
+  ###
+
+  ###*
+  Marks the given element as no longer loading, by removing the CSS class [`up-active`](/up-active).
+
+  This happens automatically when network requests initiated by the Unpoly API have completed.
+  Use this function if you make custom network calls from your own Javascript code.
+
+  Emits the [`up:navigation:deactivate`](/up:navigation:deactivate) event.
+
+  @function up.navigation.deactivate
+  @param {jQuery} event.$element
+    The link or form that has finished loading.
+  @experimental
+  ###
+  deactivate = (elementOrSelector) ->
+    $element = findActionableArea(elementOrSelector)
+    up.emit('up:navigation:deactivate', $element: $element, message: false)
     $element.removeClass(CLASS_ACTIVE)
 
-  withActiveMark = (elementOrSelector, args...) ->
-    block = args.pop()
-    options = u.options(args.pop())
+  ###*
+  This event is emitted when a link or form is [has finished loading](/up.navigation.deactivate).
+
+  @event up:navigation:deactivate
+  @experimental
+  ###
+
+  ###*
+  [Marks the given element as currently loading](/up.navigation.activate) and runs the given function.
+  When the promise returned by that function resolves, the element is [marked as no longer loading](/up.navigation.deactivate).
+
+  This happens automatically when following links or submitting forms through the Unpoly API.
+  Use this function if you make custom network calls from your own Javascript code.
+
+  @function up.navigation.whileActive
+  @param {String|Element|jQuery} elementOrSelector
+  @param {Function} action
+    The function to run while the element is marked as loading.
+    The function must return a promise.
+  @experimental
+  ###
+  whileActive = (elementOrSelector, action) ->
     $element = $(elementOrSelector)
-    markActive($element, options)
-    promise = block()
+    activate($element)
+    promise = action()
     if u.isPromise(promise)
-      promise.always -> unmarkActive($element, options)
+      promise.always -> deactivate($element)
     else
       up.warn('Expected block to return a promise, but got %o', promise)
     promise
@@ -222,8 +278,8 @@ up.navigation = (($) ->
 
   config: config
   defaults: -> up.fail('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.')
-  markActive: markActive
-  unmarkActive: unmarkActive
-  withActiveMark: withActiveMark
+  activate: activate
+  deactivate: deactivate
+  whileActive: whileActive
 
 )(jQuery)

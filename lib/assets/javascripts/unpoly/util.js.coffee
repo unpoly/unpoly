@@ -1833,9 +1833,14 @@ up.util = (($) ->
   @function up.util.sequence
   @internal
   ###
-  sequence: (functions...) ->
+  sequence = (functions...) ->
     ->
       map functions, (f) -> f()
+
+  haltEvent = (event) ->
+    event.stopImmediatePropagation()
+    event.stopPropagation()
+    event.preventDefault()
 
   isDetached: isDetached
   requestDataAsArray: requestDataAsArray
@@ -1944,6 +1949,8 @@ up.util = (($) ->
   escapeHtml: escapeHtml
   DivertibleChain: DivertibleChain
   submittedValue: submittedValue
+  sequence: sequence
+  haltEvent: haltEvent
 
 )($)
 

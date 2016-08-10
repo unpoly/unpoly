@@ -69,11 +69,11 @@ describe 'up.form', ->
             callback = jasmine.createSpy('change callback')
             up.observe($checkbox, callback)
             expect($checkbox.is(':checked')).toBe(false)
-            $checkbox.get(0).click()
+            Trigger.clickSequence($checkbox)
             u.nextFrame ->
               expect($checkbox.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
-              $checkbox.get(0).click()
+              Trigger.clickSequence($checkbox)
               u.nextFrame ->
                 expect($checkbox.is(':checked')).toBe(false)
                 expect(callback.calls.count()).toEqual(2)
@@ -86,11 +86,11 @@ describe 'up.form', ->
             callback = jasmine.createSpy('change callback')
             up.observe($checkbox, callback)
             expect($checkbox.is(':checked')).toBe(false)
-            $label.get(0).click()
+            Trigger.clickSequence($label)
             u.nextFrame ->
               expect($checkbox.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
-              $label.get(0).click()
+              Trigger.clickSequence($label)
               u.nextFrame ->
                 expect($checkbox.is(':checked')).toBe(false)
                 expect(callback.calls.count()).toEqual(2)
@@ -106,11 +106,11 @@ describe 'up.form', ->
             callback = jasmine.createSpy('change callback')
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(false)
-            $radio1.get(0).click()
+            Trigger.clickSequence($radio1)
             u.nextFrame ->
               expect($radio1.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
-              $radio2.get(0).click()
+              Trigger.clickSequence($radio2)
               u.nextFrame ->
                 expect($radio1.is(':checked')).toBe(false)
                 expect(callback.calls.count()).toEqual(2)
@@ -126,11 +126,11 @@ describe 'up.form', ->
             callback = jasmine.createSpy('change callback')
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(false)
-            $radio1Label.get(0).click()
+            Trigger.clickSequence($radio1Label)
             u.nextFrame ->
               expect($radio1.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
-              $radio2Label.get(0).click()
+              Trigger.clickSequence($radio2Label)
               u.nextFrame ->
                 expect($radio1.is(':checked')).toBe(false)
                 expect(callback.calls.count()).toEqual(2)
@@ -145,14 +145,14 @@ describe 'up.form', ->
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(true)
             expect($radio2.is(':checked')).toBe(false)
-            $radio1.get(0).click()
+            Trigger.clickSequence($radio1)
             u.nextFrame ->
               # Since the radio button was already checked, the click doesn't do anything
               expect($radio1.is(':checked')).toBe(true)
               expect($radio2.is(':checked')).toBe(false)
               # Since the radio button was already checked, clicking it again won't trigger the callback
               expect(callback.calls.count()).toEqual(0)
-              $radio2.get(0).click()
+              Trigger.clickSequence($radio2)
               u.nextFrame ->
                 expect($radio1.is(':checked')).toBe(false)
                 expect($radio2.is(':checked')).toBe(true)

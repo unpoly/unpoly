@@ -67,7 +67,7 @@ describe 'up.navigation', ->
         it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', ->
           $link = affix('a[href="/foo"][up-target=".main"]')
           affix('.main')
-          $link.click()
+          Trigger.clickSequence($link)
           @respondWith
             responseHeaders: { 'X-Up-Location': '/foo/' }
             responseText: '<div class="main">new-text</div>'
@@ -76,7 +76,7 @@ describe 'up.navigation', ->
         it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', ->
           $link = affix('a[href="/foo/"][up-target=".main"]')
           affix('.main')
-          $link.click()
+          Trigger.clickSequence($link)
           @respondWith
             responseHeaders: { 'X-Up-Location': '/foo' }
             responseText: '<div class="main">new-text</div>'
@@ -106,7 +106,7 @@ describe 'up.navigation', ->
           $popupLink = affix('a[href="/bar"][up-popup=".main"]')
           $unrelatedLink = affix('a[href="/baz]')
 
-          $popupLink.click()
+          Trigger.clickSequence($popupLink)
           @respondWith('<div class="main">new-text</div>')
           expect($backgroundLink).toHaveClass('up-current')
           expect($popupLink).toHaveClass('up-current')
@@ -127,7 +127,7 @@ describe 'up.navigation', ->
         it 'marks clicked links as .up-active until the request finishes', ->
           $link = affix('a[href="/foo"][up-target=".main"]')
           affix('.main')
-          $link.click()
+          Trigger.clickSequence($link)
           expect($link).toHaveClass('up-active')
           @respondWith('<div class="main">new-text</div>')
           expect($link).not.toHaveClass('up-active')
@@ -145,7 +145,7 @@ describe 'up.navigation', ->
           up.hello($area)
           $link = $area.find('a')
           affix('.main')
-          $link.click()
+          Trigger.clickSequence($link)
           expect($link).not.toHaveClass('up-active')
           expect($area).toHaveClass('up-active')
           @respondWith('<div class="main">new-text</div>')
@@ -154,7 +154,7 @@ describe 'up.navigation', ->
         it 'marks clicked modal openers as .up-active while the modal is loading', ->
           $link = affix('a[href="/foo"][up-modal=".main"]')
           affix('.main')
-          $link.click()
+          Trigger.clickSequence($link)
           expect($link).toHaveClass('up-active')
           @respondWith('<div class="main">new-text</div>')
           expect($link).not.toHaveClass('up-active')
@@ -163,7 +163,7 @@ describe 'up.navigation', ->
           $link = affix('a[href="/foo"][up-modal=".main"]')
           up.proxy.preload($link)
           @respondWith('<div class="main">new-text</div>')
-          $link.click()
+          Trigger.clickSequence($link)
           expect('.up-modal .main').toHaveText('new-text')
           expect($link).not.toHaveClass('up-active')
 
@@ -172,7 +172,7 @@ describe 'up.navigation', ->
           affix('.main')
           up.proxy.preload($link)
           @respondWith('<div class="main">new-text</div>')
-          $link.click()
+          Trigger.clickSequence($link)
           expect('.main').toHaveText('new-text')
           expect($link).not.toHaveClass('up-active')
 

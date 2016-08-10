@@ -420,66 +420,54 @@ describe 'up.modal', ->
 
     describe '[up-close]', ->
 
+      backgroundClicked = undefined
+
+      beforeEach ->
+        up.motion.config.enabled = false
+        backgroundClicked = jasmine.createSpy('background clicked')
+        up.on 'click', backgroundClicked
+
       describe 'when clicked inside a modal', ->
       
-        it 'closes the open modal and prevents the default action', (done) ->
+        it 'closes the open modal and halts the event chain', (done) ->
           up.modal.extract('.target', '<div class="target"><a up-close>text</a></div>', animation: false)
           $link = $('.up-modal a[up-close]') # link is within the modal
-          wasDefaultPrevented = false
-          wasClosed = false
-          up.on 'click', 'a[up-close]', (event) ->
-            wasDefaultPrevented = event.isDefaultPrevented()
-            true # the line above might return false and cancel propagation / prevent default
-          up.on 'up:modal:close', ->
-            wasClosed = true
-          $link.click()
+          Trigger.clickSequence($link)
           u.nextFrame ->
-            expect(wasClosed).toBe(true)
-            expect(wasDefaultPrevented).toBe(true)
+            expect(up.modal.isOpen()).toBe(false)
+            expect(backgroundClicked).not.toHaveBeenCalled()
             done()
 
       describe 'when no modal is open', ->
 
-        it 'does neither close the modal nor prevent the default action', ->
+        it 'does nothing and allows the event chain to continue', (done) ->
           $link = affix('a[up-close]') # link is outside the modal
           up.hello($link)
-          wasDefaultPrevented = false
-          wasClosed = false
-          up.on 'click', 'a[up-close]', (event) ->
-            wasDefaultPrevented = event.isDefaultPrevented()
-            true # the line above might return false and cancel propagation / prevent default
-          up.on 'up:modal:close', ->
-            wasClosed = true
-          $link.click()
-          expect(wasClosed).toBe(false)
-          expect(wasDefaultPrevented).toBe(false)
+          Trigger.clickSequence($link)
+          u.nextFrame ->
+            expect(backgroundClicked).toHaveBeenCalled()
+            done()
 
     describe 'template behavior', ->
 
       it 'closes the modal on close icon click', (done) ->
-        wasClosed = false
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
 
-        closeIcon = $('.up-modal-close')
-        up.on 'up:modal:close', ->
-          wasClosed = true
+        $closeIcon = $('.up-modal-close')
 
-        closeIcon.click()
+        Trigger.clickSequence($closeIcon)
         u.nextFrame ->
-          expect(wasClosed).toBe(true)
+          expect(up.modal.isOpen()).toBe(false)
           done()
 
       it 'closes the modal on backdrop click', (done) ->
-        wasClosed = false
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
 
-        backdrop = $('.up-modal-backdrop')
-        up.on 'up:modal:close', ->
-          wasClosed = true
+        $backdrop = $('.up-modal-backdrop')
 
-        backdrop.click()
+        Trigger.clickSequence($backdrop)
         u.nextFrame ->
-          expect(wasClosed).toBe(true)
+          expect(up.modal.isOpen()).toBe(false)
           done()
 
       it 'closes the modal when the user presses the escape key', (done) ->
@@ -503,28 +491,22 @@ describe 'up.modal', ->
           expect(modal).not.toContainElement('.up-modal-close')
 
         it 'does not close the modal on backdrop click', (done) ->
-          wasClosed = false
           up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
 
-          backdrop = $('.up-modal-backdrop')
-          up.on 'up:modal:close', ->
-            wasClosed = true
+          $backdrop = $('.up-modal-backdrop')
 
-          backdrop.click()
+          Trigger.clickSequence($backdrop)
           u.nextFrame ->
-            expect(wasClosed).toBe(false)
+            expect(up.modal.isOpen()).toBe(true)
             done()
 
         it 'does not close the modal when the user presses the escape key', (done) ->
-          wasClosed = false
           up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
-          up.on 'up:modal:close', ->
-            wasClosed = true
 
           escapeEvent = $.Event('keydown', keyCode: 27)
           $('body').trigger(escapeEvent)
           u.nextFrame ->
-            expect(wasClosed).toBe(false)
+            expect(up.modal.isOpen()).toBe(true)
             done()
 
     describe 'when replacing content', ->
@@ -597,3 +579,30 @@ describe 'up.modal', ->
         @respondWith("<div class='popup-content'></div>")
         expect($('.up-modal')).toExist()
         expect($('.up-popup')).toExist()
+
+      it 'does not close the modal when a clicked [up-target] link within the modal links to cached content (bugfix)', (done) ->
+
+        up.modal.extract '.content', """
+          <div class="content">
+            <a href="/foo" up-target=".content">link</a>
+          </div>
+          """
+        $link = $('.up-modal .content a')
+        expect($link).toExist()
+        whenPreloaded = up.proxy.preload($link)
+
+        @respondWith """
+          <div class="content">
+            new text
+          </div>
+        """
+
+        whenPreloaded.then ->
+
+          Trigger.clickSequence($link)
+
+          u.nextFrame ->
+            expect($('.up-modal')).toExist()
+            expect($('.up-modal .content')).toHaveText('new text')
+
+            done()

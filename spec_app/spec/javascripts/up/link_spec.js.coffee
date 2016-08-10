@@ -342,7 +342,7 @@ describe 'up.link', ->
         $form = affix('form[up-target]')
         up.hello($form)
         followSpy = up.link.knife.mock('follow').and.returnValue(u.resolvedPromise())
-        $form.click()
+        Trigger.clickSequence($form)
         expect(followSpy).not.toHaveBeenCalled()
 
       describeCapability 'canPushState', ->
@@ -350,7 +350,7 @@ describe 'up.link', ->
         it 'adds a history entry', ->
           affix('.target')
           $link = affix('a[href="/path"][up-target=".target"]')
-          $link.click()
+          Trigger.clickSequence($link)
           @respondWith('<div class="target">new text</div>')
           expect($('.target')).toHaveText('new text')
           expect(location.pathname).toEqual('/path')
@@ -358,35 +358,38 @@ describe 'up.link', ->
         it 'respects a X-Up-Location header that the server sends in case of a redirect', ->
           affix('.target')
           $link = affix('a[href="/path"][up-target=".target"]')
-          $link.click()
+          Trigger.clickSequence($link)
           @respondWith
             responseText: '<div class="target">new text</div>'
             responseHeaders: { 'X-Up-Location': '/other/path' }
           expect($('.target')).toHaveText('new text')
           expect(location.pathname).toEqual('/other/path')
 
-        it 'prefers to update a container in the same layer as the clicked link', ->
+        it 'prefers to update a container in the same layer as the clicked link', (done) ->
           up.motion.config.enabled = false
 
           $popupOpener = affix('a[href="/popup"]')
           up.popup.attach($popupOpener, html: "<div class='target'>old popup text</div>", target: '.target')
-
           affix('.document').affix('.target').text('old document text')
+
           $linkInDocument = affix('a[href="/foo"][up-target=".target"]')
-          $linkInDocument.click()
+          $linkInPopup = $('.up-popup').affix('a[href="/bar"][up-target=".target"]')
 
-          @respondWith '<div class="target">new text from document link</div>'
-
-          expect($('.document .target')).toHaveText('new text from document link')
+          expect($('.document .target')).toHaveText('old document text')
           expect($('.up-popup .target')).toHaveText('old popup text')
 
-          $linkInPopup = $('.up-popup').affix('a[href="/bar"][up-target=".target"]')
-          $linkInPopup.click()
+          Trigger.clickSequence($linkInPopup)
 
-          @respondWith '<div class="target">new text from popup link</div>'
+          u.nextFrame =>
+            @respondWith '<div class="target">new text from popup link</div>'
+            expect($('.document .target')).toHaveText('old document text')
+            expect($('.up-popup .target')).toHaveText('new text from popup link')
+            Trigger.clickSequence($linkInDocument)
 
-          expect($('.document .target')).toHaveText('new text from document link')
-          expect($('.up-popup .target')).toHaveText('new text from popup link')
+            u.nextFrame =>
+              @respondWith '<div class="target">new text from document link</div>'
+              expect($('.document .target')).toHaveText('new text from document link')
+              done()
 
 
         describe 'with [up-transition] modifier', ->
@@ -396,7 +399,7 @@ describe 'up.link', ->
             it 'morphs between the old and new target element', (done) ->
               affix('.target.old')
               $link = affix('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="500"][up-easing="linear"]')
-              $link.click()
+              Trigger.clickSequence($link)
               @respondWith '<div class="target new">new text</div>'
 
               $oldGhost = $('.target.old.up-ghost')
@@ -414,7 +417,7 @@ describe 'up.link', ->
         oldPathname = location.pathname
         affix('.target')
         $link = affix('a[href="/path"][up-target=".target"][up-history="false"]')
-        $link.click()
+        Trigger.clickSequence($link)
         @respondWith
           responseText: '<div class="target">new text</div>'
           responseHeaders: { 'X-Up-Location': '/other/path' }
@@ -562,15 +565,14 @@ describe 'up.link', ->
         $area = affix('div[up-expand] a[href="/path"]')
         up.hello($area)
         spyOn(up, 'replace')
-        $area.get(0).click()
+        Trigger.clickSequence($area)
         expect(up.replace).toHaveBeenCalled()
 
       it 'does not trigger multiple replaces when the user clicks on the expanded area of an up-instant link (bugfix)', ->
-        $area = affix('div[up-expand] a[href="/path"][up-instant]')
+        $area = affix('div[up-expand] a[href="/path"][up-follow][up-instant]')
         up.hello($area)
         spyOn(up, 'replace')
-        Trigger.mousedown($area)
-        Trigger.click($area)
+        Trigger.clickSequence($area)
         expect(up.replace.calls.count()).toEqual(1)
 
       it 'does not add an up-follow attribute if the expanded link is [up-dash] with a selector (bugfix)', ->

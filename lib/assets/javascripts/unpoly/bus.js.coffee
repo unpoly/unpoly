@@ -281,15 +281,16 @@ up.bus = (($) ->
     if eventProps.hasOwnProperty('message')
       niceMessage = eventProps.message
       delete eventProps.message
-      if u.isArray(niceMessage)
-        [niceMessage, niceMessageArgs...] = niceMessage
-      else
-        niceMessageArgs = []
-      if niceMessage
-        if u.isPresent(eventProps)
-          up.puts "#{niceMessage} (%s (%o))", niceMessageArgs..., eventName, eventProps
+      if niceMessage != false
+        if u.isArray(niceMessage)
+          [niceMessage, niceMessageArgs...] = niceMessage
         else
-          up.puts "#{niceMessage} (%s)", niceMessageArgs..., eventName
+          niceMessageArgs = []
+        if niceMessage
+          if u.isPresent(eventProps)
+            up.puts "#{niceMessage} (%s (%o))", niceMessageArgs..., eventName, eventProps
+          else
+            up.puts "#{niceMessage} (%s)", niceMessageArgs..., eventName
     else
       if u.isPresent(eventProps)
         up.puts 'Emitted event %s (%o)', eventName, eventProps

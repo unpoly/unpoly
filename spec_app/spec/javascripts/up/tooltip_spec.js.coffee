@@ -117,7 +117,49 @@ describe 'up.tooltip', ->
 
       it 'should have tests'
 
-    describe 'body', ->
-      
-      it 'closes a tooltip when clicked'
-      
+    describe 'when clicking on the body', ->
+
+      beforeEach ->
+        up.motion.config.enabled = false
+
+      it 'closes the tooltip', (done) ->
+        $link = affix('.link')
+        up.tooltip.attach($link, text: 'Tooltip text')
+        expect(up.tooltip.isOpen()).toBe(true)
+        Trigger.clickSequence($('body'))
+        u.nextFrame ->
+          expect(up.tooltip.isOpen()).toBe(false)
+          done()
+
+      it 'closes the tooltip when a an [up-instant] link removes its parent (and thus a click event never bubbles up to the document)', (done) ->
+        $parent = affix('.parent')
+        $parentReplacingLink = $parent.affix('a[href="/foo"][up-target=".parent"][up-instant]')
+        $tooltipOpener = affix('.link')
+        up.tooltip.attach($tooltipOpener, text: 'Tooltip text')
+        expect(up.tooltip.isOpen()).toBe(true)
+        Trigger.clickSequence($parentReplacingLink)
+        u.nextFrame ->
+          expect(up.tooltip.isOpen()).toBe(false)
+          done()
+
+      it 'closes a tooltip when the user clicks on an [up-target] link outside the tooltip', (done) ->
+        $target = affix('.target')
+        $outsideLink = affix('a[href="/foo"][up-target=".target"]')
+        $tooltipOpener = affix('.link')
+        up.tooltip.attach($tooltipOpener, text: 'Tooltip text')
+        expect(up.tooltip.isOpen()).toBe(true)
+        Trigger.clickSequence($outsideLink)
+        u.nextFrame ->
+          expect(up.tooltip.isOpen()).toBe(false)
+          done()
+
+      it 'closes a tooltip when the user clicks on an [up-instant] link outside the tooltip', (done) ->
+        $target = affix('.target')
+        $outsideLink = affix('a[href="/foo"][up-target=".target"][up-instant]')
+        $tooltipOpener = affix('.link')
+        up.tooltip.attach($tooltipOpener, text: 'Tooltip text')
+        expect(up.tooltip.isOpen()).toBe(true)
+        Trigger.clickSequence($outsideLink)
+        u.nextFrame ->
+          expect(up.tooltip.isOpen()).toBe(false)
+          done()

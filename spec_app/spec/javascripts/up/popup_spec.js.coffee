@@ -134,7 +134,7 @@ describe 'up.popup', ->
           expect(up.popup.coveredUrl()).toBeMissing()
 
           $popupLink = affix('a[href="/bar"][up-popup=".container"][up-history="true"]')
-          $popupLink.click()
+          Trigger.clickSequence($popupLink)
           @respondWith('<div class="container">text</div>')
           expect(up.popup.coveredUrl()).toEndWith('/foo')
           up.popup.close().then ->
@@ -255,42 +255,37 @@ describe 'up.popup', ->
 
     describe '[up-close]', ->
 
+      backgroundClicked = undefined
+
+      beforeEach ->
+        up.motion.config.enabled = false
+        backgroundClicked = jasmine.createSpy('background clicked')
+        up.on 'click', backgroundClicked
+
       describe 'when clicked inside a popup', ->
 
-        it 'closes the open popup and prevents the default action', (done) ->
-          $link = affix('a')
-          up.popup.attach($link, html: '<div class="target">text</div>', target: '.target').then ->
-            $popup = affix('.up-popup')
-            $link = $popup.affix('a[up-close]') # link is within the popup
-            up.hello($link)
-            wasDefaultPrevented = false
-            wasClosed = false
-            up.on 'click', 'a[up-close]', (event) ->
-              wasDefaultPrevented = event.isDefaultPrevented()
-              true # the line above might return false and cancel propagation / prevent default
-            up.on 'up:popup:close', ->
-              wasClosed = true
-            $link.click()
-            u.nextFrame ->
-              expect(wasClosed).toBe(true)
-              expect(wasDefaultPrevented).toBe(true)
-              done()
+        it 'closes the open popup and halts the event chain', (done) ->
+          $opener = affix('a')
+          up.popup.attach($opener, html: '<div class="target">text</div>', target: '.target')
+          $popup = affix('.up-popup')
+          $closer = $popup.affix('a[up-close]') # link is within the popup
+          up.hello($closer)
+          Trigger.clickSequence($closer)
+          u.nextFrame ->
+            expect(up.popup.isOpen()).toBe(false)
+            expect(backgroundClicked).not.toHaveBeenCalled()
+            done()
 
       describe 'when no popup is open', ->
 
-        it 'does neither close the popup nor prevent the default action', ->
+        it 'does nothing and allows the event chain to continue', (done) ->
           $link = affix('a[up-close]') # link is outside the popup
           up.hello($link)
-          wasDefaultPrevented = false
-          wasClosed = false
-          up.on 'click', 'a[up-close]', (event) ->
-            wasDefaultPrevented = event.isDefaultPrevented()
-            true # the line above might return false and cancel propagation / prevent default
-          up.on 'up:popup:close', ->
-            wasClosed = true
-          $link.click()
-          expect(wasClosed).toBe(false)
-          expect(wasDefaultPrevented).toBe(false)
+          Trigger.clickSequence($link)
+          u.nextFrame ->
+            expect(up.popup.isOpen()).toBe(false)
+            expect(backgroundClicked).toHaveBeenCalled()
+            done()
 
     describe 'when replacing content', ->
 
@@ -367,10 +362,49 @@ describe 'up.popup', ->
       beforeEach ->
         up.motion.config.enabled = false
 
-      it 'closes a popup on mousedown (in case an [up-instant] link removes its parent and thus a click event never fires)', ->
+      it 'closes the popup', (done) ->
         affix('.outside').text('old outside')
         $link = affix('.link')
         up.popup.attach($link, target: '.inside')
         @respondWith("<div class='inside'>inside</div>")
-        Trigger.mousedown($('body'))
-        expect($('.up-popup')).not.toExist()
+        expect(up.popup.isOpen()).toBe(true)
+        Trigger.clickSequence($('body'))
+        u.nextFrame ->
+          expect(up.popup.isOpen()).toBe(false)
+          done()
+
+      it 'closes the popup when a an [up-instant] link removes its parent (and thus a click event never bubbles up to the document)', (done) ->
+        $parent = affix('.parent')
+        $parentReplacingLink = $parent.affix('a[href="/foo"][up-target=".parent"][up-instant]')
+        $popupOpener = affix('.link')
+        up.popup.attach($popupOpener, target: '.inside')
+        @respondWith("<div class='inside'>inside</div>")
+        expect(up.popup.isOpen()).toBe(true)
+        Trigger.clickSequence($parentReplacingLink)
+        u.nextFrame ->
+          expect(up.popup.isOpen()).toBe(false)
+          done()
+
+      it 'closes the popup when the user clicks on an [up-target] link outside the popup', (done) ->
+        $target = affix('.target')
+        $outsideLink = affix('a[href="/foo"][up-target=".target"]')
+        $popupOpener = affix('.link')
+        up.popup.attach($popupOpener, target: '.inside')
+        @respondWith("<div class='inside'>inside</div>")
+        expect(up.popup.isOpen()).toBe(true)
+        Trigger.clickSequence($outsideLink)
+        u.nextFrame ->
+          expect(up.popup.isOpen()).toBe(false)
+          done()
+
+      it 'closes the popup when the user clicks on an [up-instant] link outside the popup', (done) ->
+        $target = affix('.target')
+        $outsideLink = affix('a[href="/foo"][up-target=".target"][up-instant]')
+        $popupOpener = affix('.link')
+        up.popup.attach($popupOpener, target: '.inside')
+        @respondWith("<div class='inside'>inside</div>")
+        expect(up.popup.isOpen()).toBe(true)
+        Trigger.clickSequence($outsideLink)
+        u.nextFrame ->
+          expect(up.popup.isOpen()).toBe(false)
+          done()

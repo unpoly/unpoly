@@ -18,6 +18,11 @@
     event = createMouseEvent('click', options)
     dispatch($element, event)
 
+  clickSequence = ($element, options) ->
+    mousedown($element, options)
+    mouseup($element, options)
+    click($element, options)
+
   # Can't use the new MouseEvent constructor in IE11 because computer.
   # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
   createMouseEvent = (type, options) ->
@@ -64,5 +69,6 @@
   mousedown: mousedown
   mouseup: mouseup
   click: click
+  clickSequence: clickSequence
   
 )()

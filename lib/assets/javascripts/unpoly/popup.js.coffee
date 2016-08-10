@@ -382,29 +382,30 @@ up.popup = (($) ->
 
   @stable
   ###
-  up.link.onAction('[up-popup]', ($link) ->
+  up.link.onAction '[up-popup]', ($link) ->
     if $link.is('.up-current')
       closeAsap()
     else
       attachAsap($link)
-  )
 
-  # Close the popup when someone clicks outside the popup
-  # (but not on a popup opener).
-  up.on('mousedown', 'body', (event, $body) ->
+  # We close the popup when someone clicks on the document.
+  # We also need to listen to up:navigation:activate in case an [up-instant] link
+  # was followed on mousedown.
+  up.on 'click up:navigation:activate', (event) ->
     $target = $(event.target)
+    # Don't close when the user clicked on a popup opener.
     unless $target.closest('.up-popup, [up-popup]').length
       closeAsap()
-  )
-  
-  up.on('up:fragment:inserted', (event, $fragment) ->
+      # Do not halt the event chain here. The user is allowed to directly activate
+      # a link in the background, even with a (now closing) popup open.
+
+  up.on 'up:fragment:inserted', (event, $fragment) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
         state.url = newSource
     else if contains(event.origin)
       autoclose()
-  )
-  
+
   # Close the pop-up overlay when the user presses ESC.
   up.bus.onEscape(closeAsap)
 
@@ -422,14 +423,13 @@ up.popup = (($) ->
   @selector [up-close]
   @stable
   ###
-  up.on('click', '[up-close]', (event, $element) ->
+  up.on 'click', '[up-close]', (event, $element) ->
     if contains($element)
       closeAsap()
       # Only prevent the default when we actually closed a popup.
       # This way we can have buttons that close a popup when within a popup,
       # but link to a destination if not.
-      event.preventDefault()
-  )
+      u.haltEvent(event)
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset

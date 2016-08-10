@@ -235,22 +235,22 @@ up.link = (($) ->
   onAction = (selector, handler) ->
     followVariantSelectors.push(selector)
     handlerWithActiveMark = ($link) ->
-      up.navigation.withActiveMark $link, { enlarge: true }, -> handler($link)
+      up.navigation.whileActive $link, -> handler($link)
     up.on 'click', "a#{selector}, [up-href]#{selector}", (event, $link) ->
       if shouldProcessLinkEvent(event, $link)
         if $link.is('[up-instant]')
           # If the link was already processed on mousedown, we still need
-          # to prevent the later click event's default behavior.
-          event.preventDefault()
+          # to prevent this later click event's chain.
+          u.haltEvent(event)
         else
-          event.preventDefault()
+          u.haltEvent(event)
           handlerWithActiveMark($link)
       else
         allowDefault(event)
 
     up.on 'mousedown', "a#{selector}[up-instant], [up-href]#{selector}[up-instant]", (event, $link) ->
       if shouldProcessLinkEvent(event, $link)
-        event.preventDefault()
+        u.haltEvent(event)
         handlerWithActiveMark($link)
 
   isFollowable = ($link) ->

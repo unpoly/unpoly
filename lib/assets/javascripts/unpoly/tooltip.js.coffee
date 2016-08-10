@@ -236,20 +236,21 @@ up.tooltip = (($) ->
   @selector [up-tooltip-html]
   @stable
   ###
-  up.compiler('[up-tooltip], [up-tooltip-html]', ($opener) ->
+  up.compiler '[up-tooltip], [up-tooltip-html]', ($opener) ->
     # Don't register these events on document since *every*
     # mouse move interaction  bubbles up to the document. 
     $opener.on('mouseenter', -> attachAsap($opener))
     $opener.on('mouseleave', -> closeAsap())
-  )
 
-  # Close the tooltip when someone clicks anywhere.
-  up.on('click', 'body', (event, $body) ->
+  # We close the tooltip when someone clicks on the document.
+  # We also need to listen to up:navigation:activate in case an [up-instant] link
+  # was followed on mousedown.
+  up.on 'click up:navigation:activate', (event) ->
     closeAsap()
-  )
+    # Do not halt the event chain here. The user is allowed to directly activate
+    # a link in the background, even with a (now closing) tooltip open.
 
-  # The framework is reset between tests, so also close
-  # a currently open tooltip.
+  # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
   # Close the tooltip when the user presses ESC.
