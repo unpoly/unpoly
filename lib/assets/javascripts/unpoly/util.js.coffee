@@ -203,13 +203,9 @@ up.util = (($) ->
     capture = (pattern) -> "(#{pattern})"
     
     titlePattern = new RegExp(
-      openTag('head') + 
-        anything + 
-        openTag('title') + 
-          capture(anything) + 
-        closeTag('title') + 
-        anything + 
-      closeTag('body'), 
+      openTag('title') +
+        capture(anything) +
+      closeTag('title'),
     'i')
     
     bodyPattern = new RegExp(

@@ -342,6 +342,7 @@ up.flow = (($) ->
         keep: true
         layer: 'auto'
       )
+
       selector = resolveSelector(selectorOrElement, options.origin)
       response = parseResponse(html, options)
       options.title = response.title() if shouldExtractTitle(options)
