@@ -10,10 +10,16 @@ Unreleased
 
 ### Compatible changes
 
+### Breaking changes
+
+
+0.28.1
+------
+
+### Compatible changes
+
 - [`up.tooltip.attach`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
 - Fix a bug where Unpoly would hang when parsing a page with a `<head>` but without a `<title>`
-
-### Breaking changes
 
 
 0.28.0

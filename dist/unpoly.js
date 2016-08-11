@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.28.0"
+    version: "0.28.1"
   };
 
 }).call(this);
@@ -273,7 +273,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       capture = function(pattern) {
         return "(" + pattern + ")";
       };
-      titlePattern = new RegExp(openTag('head') + anything + openTag('title') + capture(anything) + closeTag('title') + anything + closeTag('body'), 'i');
+      titlePattern = new RegExp(openTag('title') + capture(anything) + closeTag('title'), 'i');
       bodyPattern = new RegExp(openTag('body') + capture(anything) + closeTag('body'), 'i');
       if (bodyMatch = html.match(bodyPattern)) {
         htmlElement = document.createElement('html');
