@@ -10,6 +10,8 @@ Unreleased
 
 ### Compatible changes
 
+- [`up.tooltip.attach`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
+
 ### Breaking changes
 
 

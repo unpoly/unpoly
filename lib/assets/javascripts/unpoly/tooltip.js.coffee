@@ -125,8 +125,16 @@ up.tooltip = (($) ->
 
   @function up.tooltip.attach
   @param {Element|jQuery|String} elementOrSelector
+  @param {String} [options.text]
+    The text to display in the tooltip.
+
+    Any HTML control characters will be escaped.
+    If you need to use HTML formatting in the tooltip, use `options.html` instead.
   @param {String} [options.html]
-    The HTML to display in the tooltip.
+    The HTML to display in the tooltip unescaped.
+
+    Make sure to escape any user-provided text before passing it as this option,
+    or use `options.text` (which automatically escapes).
   @param {String} [options.position='top']
     The position of the tooltip.
     Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
