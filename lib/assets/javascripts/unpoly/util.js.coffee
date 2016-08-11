@@ -829,8 +829,8 @@ up.util = (($) ->
       position:  'absolute'
       top:       '0'
       left:      '0'
-      width:     '50px'
-      height:    '50px'
+      width:     '100px'
+      height:    '100px' # Firefox needs at least 100px to show a scrollbar
       overflowY: 'scroll'
     $outer.appendTo(document.body)
     outer = $outer.get(0)

@@ -10,6 +10,7 @@ Unreleased
 
 ### Compatible changes
 
+- Fix a bug on Firefox where the page width would jump by the scrollbar width when opening a modal.
 - Fix a bug where modals would close when following a link to a cached destination.
 - New experimental event [`up:navigate`](/up:navigate). It is fired when a link is followed or when a form is submitted.
 - [`up.tooltip.attach`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
