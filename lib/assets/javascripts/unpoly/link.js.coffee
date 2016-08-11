@@ -235,7 +235,7 @@ up.link = (($) ->
   onAction = (selector, handler) ->
     followVariantSelectors.push(selector)
     handlerWithActiveMark = ($link) ->
-      up.navigation.whileActive $link, -> handler($link)
+      up.navigation.start $link, -> handler($link)
     up.on 'click', "a#{selector}, [up-href]#{selector}", (event, $link) ->
       if shouldProcessLinkEvent(event, $link)
         if $link.is('[up-instant]')

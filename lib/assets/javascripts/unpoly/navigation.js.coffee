@@ -116,17 +116,47 @@ up.navigation = (($) ->
   If the given element is a link within an [expanded click area](/up-expand),
   the class will be assigned to the expanded area.
 
-  Emits the [`up:navigation:activate`](/up:navigation:activate) event.
+  Emits the [`up:navigate`](/up:navigate) event.
 
-  @method up.navigation.activate
+  \#\#\#\# Example
+
+      var $button = $('button');
+      $button.on('click', function() {
+        up.navigation.start($button);
+        up.ajax(...).always(function() {
+          up.navigation.stop($button);
+        });
+      });
+
+  Or shorter:
+
+      var $button = $('button');
+      $button.on('click', function() {
+        up.navigation.start($button, function() {
+          up.ajax(...);
+        });
+      });
+
+  @method up.navigation.start
   @param {Element|jQuery|String} elementOrSelector
     The element to mark as active
-  @experimental
+  @param {Function} [action]
+    An optional function to run while the element is marked as loading.
+    The function must return a promise.
+    Once the promise resolves, the element will be [marked as no longer loading](/up.navigation.stop).
+  @internal
   ###
-  activate = (elementOrSelector) ->
+  start = (elementOrSelector, action) ->
     $element = findActionableArea(elementOrSelector)
-    up.emit('up:navigation:activate', $element: $element, message: ['Navigating via %o', $element.get(0)])
+    up.emit('up:navigate', $element: $element, message: ['Navigating via %o', $element.get(0)])
     $element.addClass(CLASS_ACTIVE)
+    if action
+      promise = action()
+      if u.isPromise(promise)
+        promise.always -> stop($element)
+      else
+        up.warn('Expected block to return a promise, but got %o', promise)
+      promise
 
   ###*
   Links that are currently loading are assigned the `up-active`
@@ -157,9 +187,9 @@ up.navigation = (($) ->
   ###
 
   ###*
-  This event is emitted when a link or form is [starting to load](/up.navigation.activate).
+  This event is emitted when a link or form is starting to load.
 
-  @event up:navigation:activate
+  @event up:navigate
   @param {jQuery} event.$element
     The link or form that is starting to load.
   @experimental
@@ -171,48 +201,24 @@ up.navigation = (($) ->
   This happens automatically when network requests initiated by the Unpoly API have completed.
   Use this function if you make custom network calls from your own Javascript code.
 
-  Emits the [`up:navigation:deactivate`](/up:navigation:deactivate) event.
+  Emits the [`up:navigated`](/up:navigated) event.
 
-  @function up.navigation.deactivate
+  @function up.navigation.stop
   @param {jQuery} event.$element
     The link or form that has finished loading.
-  @experimental
+  @internal
   ###
-  deactivate = (elementOrSelector) ->
+  stop = (elementOrSelector) ->
     $element = findActionableArea(elementOrSelector)
-    up.emit('up:navigation:deactivate', $element: $element, message: false)
+    up.emit('up:navigated', $element: $element, message: false)
     $element.removeClass(CLASS_ACTIVE)
 
   ###*
-  This event is emitted when a link or form is [has finished loading](/up.navigation.deactivate).
+  This event is emitted when a link or form is [has finished loading](/up.navigation.stop).
 
-  @event up:navigation:deactivate
-  @experimental
+  @event up:navigated
+  @internal
   ###
-
-  ###*
-  [Marks the given element as currently loading](/up.navigation.activate) and runs the given function.
-  When the promise returned by that function resolves, the element is [marked as no longer loading](/up.navigation.deactivate).
-
-  This happens automatically when following links or submitting forms through the Unpoly API.
-  Use this function if you make custom network calls from your own Javascript code.
-
-  @function up.navigation.whileActive
-  @param {String|Element|jQuery} elementOrSelector
-  @param {Function} action
-    The function to run while the element is marked as loading.
-    The function must return a promise.
-  @experimental
-  ###
-  whileActive = (elementOrSelector, action) ->
-    $element = $(elementOrSelector)
-    activate($element)
-    promise = action()
-    if u.isPromise(promise)
-      promise.always -> deactivate($element)
-    else
-      up.warn('Expected block to return a promise, but got %o', promise)
-    promise
 
   ###*
   Links that point to the current location are assigned
@@ -278,8 +284,7 @@ up.navigation = (($) ->
 
   config: config
   defaults: -> up.fail('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.')
-  activate: activate
-  deactivate: deactivate
-  whileActive: whileActive
+  start: start
+  stop: stop
 
 )(jQuery)

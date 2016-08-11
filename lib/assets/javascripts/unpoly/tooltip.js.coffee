@@ -243,9 +243,9 @@ up.tooltip = (($) ->
     $opener.on('mouseleave', -> closeAsap())
 
   # We close the tooltip when someone clicks on the document.
-  # We also need to listen to up:navigation:activate in case an [up-instant] link
+  # We also need to listen to up:navigate in case an [up-instant] link
   # was followed on mousedown.
-  up.on 'click up:navigation:activate', (event) ->
+  up.on 'click up:navigate', (event) ->
     closeAsap()
     # Do not halt the event chain here. The user is allowed to directly activate
     # a link in the background, even with a (now closing) tooltip open.

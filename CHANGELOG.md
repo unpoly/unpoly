@@ -10,9 +10,13 @@ Unreleased
 
 ### Compatible changes
 
+- Fix a bug where modals would close when following a link to a cached destination.
+- New experimental event [`up:navigate`](/up:navigate). It is fired when a link is followed or when a form is submitted.
 - [`up.tooltip.attach`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
 
 ### Breaking changes
+
+- `click` and `mousedown` events handled by Unpoly will now longer bubble up.
 
 
 0.28.1

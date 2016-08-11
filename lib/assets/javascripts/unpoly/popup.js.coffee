@@ -389,9 +389,9 @@ up.popup = (($) ->
       attachAsap($link)
 
   # We close the popup when someone clicks on the document.
-  # We also need to listen to up:navigation:activate in case an [up-instant] link
+  # We also need to listen to up:navigate in case an [up-instant] link
   # was followed on mousedown.
-  up.on 'click up:navigation:activate', (event) ->
+  up.on 'click up:navigate', (event) ->
     $target = $(event.target)
     # Don't close when the user clicked on a popup opener.
     unless $target.closest('.up-popup, [up-popup]').length
