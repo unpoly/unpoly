@@ -3,7 +3,7 @@ Animation
 =========
   
 Whenever you update a page fragment (through methods like
-[`up.replace`](/up.replace) or UJS attributes like [`up-target`](/up-target))
+[`up.replace`](/up.replace) or UJS attributes like [`up-target`](/a-up-target))
 you can animate the change.
 
 For instance, when you replace a selector `.list` with a new `.list`

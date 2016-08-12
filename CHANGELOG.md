@@ -421,7 +421,7 @@ Unreleased
   request and response.
 - [`up.follow`](/up.follow) and [`up.replace`](/up.replace) now have an option `{ failTarget }`.
   Use it to define the selector to replace if the server responds with a non-200 status code.
-- [`[up-target]`](/up-target) and [`up-follow`](/up.replace) now have a modifying attribute `up-fail-target`.
+- [`[up-target]`](/a-up-target) and [`up-follow`](/a-up-follow) now have a modifying attribute `up-fail-target`.
   Use it to define the selector to replace if the server responds with a non-200 status code.
 - New utility method [`up.util.reject`](/up.util.reject)
 - New utility method [`up.util.only`](/up.util.only)
