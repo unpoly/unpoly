@@ -204,6 +204,8 @@ up.syntax = (($) ->
     clear global state such as time-outs and event handlers bound to the document.
     The destructor is *not* expected to remove the element from the DOM, which
     is already handled by [`up.destroy`](/up.destroy).
+
+
   @stable
   ###
   compiler = (args...) ->
@@ -281,14 +283,16 @@ up.syntax = (($) ->
       value = if u.isString(compiler.keep) then compiler.keep else ''
       $jqueryElement.attr('up-keep', value)
     returnValue = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
-    if destructor = discoverDestructor(returnValue)
+    for destructor in discoverDestructors(returnValue)
       addDestructor($jqueryElement, destructor)
 
-  discoverDestructor = (returnValue) ->
+  discoverDestructors = (returnValue) ->
     if u.isFunction(returnValue)
-      returnValue
+      [returnValue]
     else if u.isArray(returnValue) && u.all(returnValue, u.isFunction)
-      u.sequence(returnValue...)
+      returnValue
+    else
+      []
 
   addDestructor = ($jqueryElement, destructor) ->
     $jqueryElement.addClass(DESTRUCTABLE_CLASS)
