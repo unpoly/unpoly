@@ -2,35 +2,32 @@
 Animation
 =========
   
-Whenever you update a page fragment (through methods like
-[`up.replace`](/up.replace) or UJS attributes like [`up-target`](/a-up-target))
-you can animate the change.
+Whenever you [update a page fragment](/up-link) you can animate the change.
 
-For instance, when you replace a selector `.list` with a new `.list`
-from the server, you can add an `up-transition="cross-fade"` attribute
-to smoothly fade out the old `.list` while fading in the new `.list`:
+Let's say you are using an [`up-target`](/a-up-target) link to update an element
+with content from the server. You can add an attribute [`up-transition`](/a-up-target#up-transition)
+to smoothly fade out the old element while fading in the new element:
 
     <a href="/users" up-target=".list" up-transition="cross-fade">Show users</a>
 
-Transitions vs. animations
---------------------------
+\#\#\# Transitions vs. animations
 
-When we morph between an old an new element, we call it a *transition*.
+When we morph between an old and a new element, we call it a *transition*.
 In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
 
-An example for an animation is opening a new dialog, which we can animate
-using the `up-animation` attribute:
+An example for an animation is opening a new dialog. We can animate the appearance
+of the dialog by adding an [`up-animation`](/up-modal#up-animation) attribute to the opening link:
 
     <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
 
-Predefined animations and transitions
--------------------------------------
+\#\#\# Which animations are available?
 
-Unpoly ships with a number of predefined [animations](/up.animate#named-animation)
-and [transitions](/up.morph#named-animation).
-You can also easily [define your own animations](/up.animation)
-or [transitions](/up.transition) using Javascript or CSS.
+Unpoly ships with a number of [predefined transitions](/up.morph#named-transitions)
+and [predefined animations](/up.animate#named-animations).
+
+You can define custom animations using [`up.transition`](/up.transition) and
+[`up.animation`](/up.animation).
 
 @class up.motion
 ###
