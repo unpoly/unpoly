@@ -60,7 +60,7 @@ up.browser = (($) ->
   It also prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`)
   as a single string if the browser console does not support substitution strings.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       up.browser.puts('log', 'Hi world');
       up.browser.puts('error', 'There was an error in %o', obj);
@@ -220,7 +220,7 @@ up.browser = (($) ->
   [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
   in `console` functions.
 
-  \#\#\#\# Example for string substition
+  \#\#\# Example for string substition
 
       console.log("Hello %o!", "Judy");
 

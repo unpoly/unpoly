@@ -199,7 +199,7 @@ up.history = (($) ->
   Note that this will *not* call `location.back()`, but will set
   the link's `up-href` attribute to the actual, previous URL.
 
-  \#\#\#\# Under the hood
+  \#\#\# Under the hood
 
   This link ...
 

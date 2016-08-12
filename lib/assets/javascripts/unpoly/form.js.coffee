@@ -163,7 +163,7 @@ up.form = (($) ->
 
   The UJS variant of this is the [`up-observe`](/up-observe) attribute.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   The following would submit the form whenever the
   text field value changes:
@@ -176,7 +176,7 @@ up.form = (($) ->
   pass, a `<form>` or any container that contains form fields.
   The callback will be run if any of the given fields change.
 
-  \#\#\#\# Preventing concurrency
+  \#\#\# Preventing concurrency
 
   Firing asynchronous code after a form field can cause
   [concurrency issues](https://makandracards.com/makandra/961-concurrency-issues-with-find-as-you-type-boxes).
@@ -186,7 +186,7 @@ up.form = (($) ->
   To take advantage of this, your callback code must return a promise.
   Note that all asynchronous Unpoly functions return promises.
 
-  \#\#\#\# Throttling
+  \#\#\# Throttling
 
   If you are concerned about fast typists causing too much
   load on your server, you can use a `delay` option to wait
@@ -350,7 +350,7 @@ up.form = (($) ->
   See the documentation for [`[up-validate]`](/up-validate) for more information
   on how server-side validation works in Unpoly.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       up.validate('input[name=email]', { target: '.email-errors' })
 
@@ -476,7 +476,7 @@ up.form = (($) ->
 
   The programmatic variant of this is the [`up.submit`](/up.submit) function.
 
-  \#\#\#\# Failed submission
+  \#\#\# Failed submission
 
   When the server was unable to save the form due to invalid data,
   it will usually re-render an updated copy of the form with
@@ -509,7 +509,7 @@ up.form = (($) ->
   [`up-validate`](/up-validate) attribute to perform server-side
   validations while the user is completing fields.
 
-  \#\#\#\# Redirects
+  \#\#\# Redirects
 
   Unpoly requires two additional response headers to detect redirects,
   which are otherwise undetectable for an AJAX client.
@@ -521,7 +521,7 @@ up.form = (($) ->
   If you are using Unpoly via the `unpoly-rails` gem, these headers
   are set automatically for every request.
 
-  \#\#\#\# Giving feedback while the form is processing
+  \#\#\# Giving feedback while the form is processing
 
   The `<form>` element will be assigned a CSS class `up-active` while
   the submission is loading.
@@ -578,7 +578,7 @@ up.form = (($) ->
 
   The programmatic variant of this is the [`up.validate`](/up.validate) function.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   Let's look at a standard registration form that asks for an e-mail and password:
 
@@ -659,7 +659,7 @@ up.form = (($) ->
   The `<label>` around the e-mail field is now updated to have the `has-error`
   class and display the validation message.
 
-  \#\#\#\# How validation results are displayed
+  \#\#\# How validation results are displayed
 
   Although the server will usually respond to a validation with a complete,
   fresh copy of the form, Unpoly will by default not update the entire form.
@@ -683,7 +683,7 @@ up.form = (($) ->
       <input type="text" name="email" up-validate=".email-errors">
       <span class="email-errors"></span>
 
-  \#\#\#\# Updating dependent fields
+  \#\#\# Updating dependent fields
 
   The `[up-validate]` behavior is also a great way to partially update a form
   when one fields depends on the value of another field.
@@ -719,7 +719,7 @@ up.form = (($) ->
   ###*
   Show or hide part of a form if certain options are selected or boxes are checked.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   The triggering input gets an `up-switch` attribute with a selector for the elements to show or hide:
 
@@ -799,7 +799,7 @@ up.form = (($) ->
 
   The programmatic variant of this is the [`up.observe`](/up.observe) function.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   The following would run a global `showSuggestions(value)` function
   whenever the `<input>` changes:
@@ -808,7 +808,7 @@ up.form = (($) ->
         <input type="query" up-observe="showSuggestions(value)">
       </form>
 
-  \#\#\#\# Callback context
+  \#\#\# Callback context
 
   The script given to `up-observe` runs with the following context:
 
@@ -835,7 +835,7 @@ up.form = (($) ->
 
   The programmatic variant of this is the [`up.autosubmit`](/up.autosubmit) function.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   The following would submit the form whenever the
   text field value changes:

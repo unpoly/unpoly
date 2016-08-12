@@ -10,7 +10,7 @@ or call the Javascript function [`up.popup.attach`](/up.popup.attach).
 
 For modal dialogs see [up.modal](/up.modal) instead.
 
-\#\#\#\# Customizing the popup design
+\#\#\# Customizing the popup design
 
 Loading the Unpoly stylesheet will give you a minimal popup design:
 
@@ -26,7 +26,7 @@ By default the popup uses the following DOM structure:
       ...
     </div>
 
-\#\#\#\# Closing behavior
+\#\#\# Closing behavior
 
 The popup closes when the user clicks anywhere outside the popup area.
 

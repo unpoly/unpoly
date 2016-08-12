@@ -150,7 +150,7 @@ up.proxy = (($) ->
   Only requests with a method of `GET`, `OPTIONS` and `HEAD`
   are considered to be read-only.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       up.ajax('/search', data: { query: 'sunshine' }).then(function(data, status, xhr) {
         console.log('The response body is %o', data);
@@ -158,7 +158,7 @@ up.proxy = (($) ->
         console.error('The request failed');
       });
 
-  \#\#\#\# Events
+  \#\#\# Events
 
   If a network connection is attempted, the proxy will emit
   a [`up:proxy:load`](/up:proxy:load) event with the `request` as its argument.
@@ -296,7 +296,7 @@ up.proxy = (($) ->
   waiting, **no** additional `up:proxy:slow` events will be triggered.
 
 
-  \#\#\#\# Spinners
+  \#\#\# Spinners
 
   You can [listen](/up.on) to the `up:proxy:slow`
   and [`up:proxy:recover`](/up:proxy:recover) events to implement a spinner

@@ -78,13 +78,13 @@ up.layout = (($) ->
   A "viewport" is an element that has scrollbars, e.g. `<body>` or
   a container with `overflow-x: scroll`.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
 
       up.scroll('.main', 100);
 
-  \#\#\#\# Animating the scrolling motion
+  \#\#\# Animating the scrolling motion
 
   The scrolling can (optionally) be animated.
 
@@ -189,7 +189,7 @@ up.layout = (($) ->
   updating it with Javascript functions like [`up.replace`](/up.replace)
   or UJS behavior like [`[up-target]`](/a-up-target).
 
-  \#\#\#\# How Unpoly finds the viewport
+  \#\#\# How Unpoly finds the viewport
 
   The viewport (the container that is going to be scrolled)
   is the closest parent of the element that is either:
@@ -199,7 +199,7 @@ up.layout = (($) ->
   - the `<body>` element
   - an element matching the selector you have configured using `up.layout.config.viewports.push('my-custom-selector')`
 
-  \#\#\#\# Fixed elements obstruction the viewport
+  \#\#\# Fixed elements obstruction the viewport
 
   Many applications have a navigation bar fixed to the top or bottom,
   obstructing the view on an element.
@@ -445,7 +445,7 @@ up.layout = (($) ->
   [`up.reveal`](/up.reveal) will always try to scroll the viewport closest
   to the element that is being revealed. By default this is the `<body>` element.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   Here is an example for a layout for an e-mail client, showing a list of e-mails
   on the left side and the e-mail text on the right side:
@@ -495,7 +495,7 @@ up.layout = (($) ->
   [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
   the viewport far enough so the revealed element is fully visible.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       <div class="top-nav" up-fixed="top">...</div>
 
@@ -510,7 +510,7 @@ up.layout = (($) ->
   [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
   the viewport far enough so the revealed element is fully visible.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       <div class="bottom-nav" up-fixed="bottom">...</div>
 
@@ -526,7 +526,7 @@ up.layout = (($) ->
   [`up.modal`](/up.modal) will move anchored elements to the left so they
   don't appear to move when a modal dialog is opened or closed.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       <div class="bottom-nav" up-fixed="bottom">...</div>
 

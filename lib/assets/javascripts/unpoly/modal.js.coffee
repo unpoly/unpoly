@@ -561,7 +561,7 @@ up.modal = (($) ->
   ###*
   Register a new modal variant with its own default configuration, CSS or HTML template.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   Let's implement a drawer that slides in from the right:
 

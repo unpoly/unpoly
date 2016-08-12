@@ -141,7 +141,7 @@ up.navigation = (($) ->
 
   Emits the [`up:navigate`](/up:navigate) event.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       var $button = $('button');
       $button.on('click', function() {
@@ -189,7 +189,7 @@ up.navigation = (($) ->
   The `up-active` class will be removed as soon as another
   page fragment is added or updated through Unpoly.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   We have a link:
 
@@ -261,7 +261,7 @@ up.navigation = (($) ->
         <a href="/bar">Bar</a>
       </nav>
 
-  \#\#\#\# What's considered to be "current"?
+  \#\#\# What's considered to be "current"?
 
   The current location is considered to be either:
 
@@ -275,7 +275,7 @@ up.navigation = (($) ->
   - the link's [`up-href`](#turn-any-element-into-a-link) attribute
   - a space-separated list of URLs in the link's `up-alias` attribute
 
-  \#\#\#\# Matching URL by prefix
+  \#\#\# Matching URL by prefix
 
   You can mark a link as `.up-current` whenever the current URL matches a prefix.
   To do so, end the `up-alias` attribute in an asterisk (`*`).

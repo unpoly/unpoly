@@ -58,7 +58,7 @@ up.syntax = (($) ->
   [Angular directives](https://docs.angularjs.org/guide/directive).
 
 
-  \#\#\#\# Integrating jQuery plugins
+  \#\#\# Integrating jQuery plugins
 
   `up.compiler` is a great way to integrate jQuery plugins.
   Let's say your Javascript plugin wants you to call `lightboxify()`
@@ -75,7 +75,7 @@ up.syntax = (($) ->
       });
 
 
-  \#\#\#\# Custom elements
+  \#\#\# Custom elements
 
   You can use `up.compiler` to implement custom elements like this:
 
@@ -89,7 +89,7 @@ up.syntax = (($) ->
       });
 
 
-  \#\#\#\# Cleaning up after yourself
+  \#\#\# Cleaning up after yourself
 
   If your compiler returns a function, Unpoly will use this as a *destructor* to
   clean up if the element leaves the DOM. Note that in Unpoly the same DOM ad Javascript environment
@@ -124,7 +124,7 @@ up.syntax = (($) ->
   of `<clock>` elements.
 
 
-  \#\#\#\# Attaching structured data
+  \#\#\# Attaching structured data
 
   In case you want to attach structured data to the event you're observing,
   you can serialize the data to JSON and put it into an `[up-data]` attribute.
@@ -154,7 +154,7 @@ up.syntax = (($) ->
       });
 
 
-  \#\#\#\# Migrating jQuery event handlers to `up.compiler`
+  \#\#\# Migrating jQuery event handlers to `up.compiler`
 
   Within the compiler, Unpoly will bind `this` to the
   native DOM element to help you migrate your existing jQuery code to
@@ -217,7 +217,7 @@ up.syntax = (($) ->
 
   You can use `up.macro` to register a compiler that sets other UJS attributes.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   You will sometimes find yourself setting the same combination of UJS attributes again and again:
 
@@ -353,7 +353,7 @@ up.syntax = (($) ->
 
   Returns an empty object if the element has no `up-data` attribute.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   You have an element with JSON data serialized into an `up-data` attribute:
 

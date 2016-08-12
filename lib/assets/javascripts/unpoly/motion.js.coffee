@@ -92,7 +92,7 @@ up.motion = (($) ->
   ###*
   Applies the given animation to the given element.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       up.animate('.warning', 'fade-in');
 
@@ -104,7 +104,7 @@ up.motion = (($) ->
         easing: 'linear'
       });
 
-  \#\#\#\# Named animations
+  \#\#\# Named animations
 
   The following animations are pre-defined:
 
@@ -122,7 +122,7 @@ up.motion = (($) ->
 
   You can define additional named animations using [`up.animation`](/up.animation).
 
-  \#\#\#\# Animating CSS properties directly
+  \#\#\# Animating CSS properties directly
 
   By passing an object instead of an animation name, you can animate
   the CSS properties of the given element:
@@ -131,7 +131,7 @@ up.motion = (($) ->
       $warning.css({ opacity: 0 });
       up.animate($warning, { opacity: 1 });
 
-  \#\#\#\# Multiple animations on the same element
+  \#\#\# Multiple animations on the same element
 
   Unpoly doesn't allow more than one concurrent animation on the same element.
 
@@ -309,7 +309,7 @@ up.motion = (($) ->
   Note that the transition does not remove any elements from the DOM.
   The first element will remain in the DOM, albeit hidden using `display: none`.
 
-  \#\#\#\# Named transitions
+  \#\#\# Named transitions
 
   The following transitions are pre-defined:
 
@@ -328,7 +328,7 @@ up.motion = (($) ->
   - `move-to-bottom/fade-in`
   - `move-to-left/move-from-top`
 
-  \#\#\#\# Implementation details
+  \#\#\# Implementation details
 
   During a transition both the old and new element occupy
   the same position on the screen.

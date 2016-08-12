@@ -80,7 +80,7 @@ up.flow = (($) ->
 
   The UJS variant of this is the [`a[up-target]`](/a-up-target) selector.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   Let's say your curent HTML looks like this:
 
@@ -105,7 +105,7 @@ up.flow = (($) ->
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
-  \#\#\#\# Appending or prepending instead of replacing
+  \#\#\# Appending or prepending instead of replacing
 
   By default Unpoly will replace the given selector with the same
   selector from a freshly fetched page. Instead of replacing you
@@ -126,7 +126,7 @@ up.flow = (($) ->
 
       up.replace('.tasks:after', '/page/2')
 
-  \#\#\#\# Setting the window title from the server
+  \#\#\# Setting the window title from the server
 
   If the `replace` call changes history, the document title will be set
   to the contents of a `<title>` tag in the response.
@@ -134,7 +134,7 @@ up.flow = (($) ->
   The server can also change the document title by setting
   an `X-Up-Title` header in the response.
 
-  \#\#\#\# Optimizing response rendering
+  \#\#\# Optimizing response rendering
 
   The server is free to optimize Unpoly requests by only rendering the HTML fragment
   that is being updated. The request's `X-Up-Target` header will contain
@@ -143,7 +143,7 @@ up.flow = (($) ->
   If you are using the `unpoly-rails` gem you can also access the selector via
   `up.target` in all controllers, views and helpers.
 
-  \#\#\#\# Events
+  \#\#\# Events
 
   Unpoly will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
   that was replaced and [`up:fragment:inserted`](/up:fragment:inserted) on the new
@@ -300,7 +300,7 @@ up.flow = (($) ->
   Updates a selector on the current page with the
   same selector from the given HTML string.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   Let's say your curent HTML looks like this:
 
@@ -539,7 +539,7 @@ up.flow = (($) ->
 
   Emits events [`up:fragment:keep`](/up:fragment:keep) and [`up:fragment:kept`](/up:fragment:kept).
 
-  \#\#\#\# Controlling if an element will be kept
+  \#\#\# Controlling if an element will be kept
 
   Unpoly will **only** keep an existing element if:
 
@@ -678,7 +678,7 @@ up.flow = (($) ->
   When a page fragment has been [inserted or updated](/up.replace),
   this event is [emitted](/up.emit) on the fragment.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       up.on('up:fragment:inserted', function(event, $fragment) {
         console.log("Looks like we have a new %o!", $fragment);
@@ -866,7 +866,7 @@ up.flow = (($) ->
   ###*
   Replaces the given element with a fresh copy fetched from the server.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       up.on('new-mail', function() {
         up.reload('.inbox');

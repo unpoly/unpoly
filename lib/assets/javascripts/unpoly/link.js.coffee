@@ -275,7 +275,7 @@ up.link = (($) ->
 
       <a href="/posts/5" up-target=".main">Read post</a>
 
-  \#\#\#\# Updating multiple fragments
+  \#\#\# Updating multiple fragments
 
   You can update multiple fragments from a single request by separating
   separators with a comma (like in CSS). E.g. if opening a post should
@@ -284,7 +284,7 @@ up.link = (($) ->
 
       <a href="/posts/5" up-target=".main, .unread-count">Read post</a>
 
-  \#\#\#\# Appending or prepending instead of replacing
+  \#\#\# Appending or prepending instead of replacing
 
   By default Unpoly will replace the given selector with the same
   selector from a freshly fetched page. Instead of replacing you
@@ -306,7 +306,7 @@ up.link = (($) ->
         Load more tasks
       </a>
 
-  \#\#\#\# Following elements that are no links
+  \#\#\# Following elements that are no links
 
   You can also use `[up-target]` to turn an arbitrary element into a link.
   In this case, put the link's destination into the `up-href` attribute:
@@ -389,11 +389,11 @@ up.link = (($) ->
   To only update a fragment instead of the entire page, see
   [`a[up-target]`](/a-up-target).
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       <a href="/users" up-follow>User list</a>
 
-  \#\#\#\# Turn any element into a link
+  \#\#\# Turn any element into a link
 
   You can also use `[up-follow]` to turn an arbitrary element into a link.
   In this case, put the link's destination into the `up-href` attribute:
@@ -475,7 +475,7 @@ up.link = (($) ->
   `up-expand` honors all the UJS behavior in expanded links
   ([`up-target`](/a-up-target), [`up-instant`](/up-instant), [`up-preload`](/up-preload), etc.).
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       <div class="notification" up-expand>
         Record was saved!
@@ -487,7 +487,7 @@ up.link = (($) ->
 
   `up-expand` also expands links that open [modals](/up.modal) or [popups](/up.popup).
 
-  \#\#\#\# Elements with multiple contained links
+  \#\#\# Elements with multiple contained links
 
   If a container contains more than one link, you can set the value of the
   `up-expand` attribute to a CSS selector to define which link should be expanded:

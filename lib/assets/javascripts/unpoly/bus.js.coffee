@@ -107,7 +107,7 @@ up.bus = (($) ->
   Other than jQuery, Unpoly will silently discard event listeners
   on [unsupported browsers](/up.browser.isSupported).
 
-  \#\#\#\# Attaching structured data
+  \#\#\# Attaching structured data
 
   In case you want to attach structured data to the event you're observing,
   you can serialize the data to JSON and put it into an `[up-data]` attribute:
@@ -121,7 +121,7 @@ up.bus = (($) ->
         console.log("This is %o who is %o years old", data.name, data.age);
       });
 
-  \#\#\#\# Unbinding an event listener
+  \#\#\# Unbinding an event listener
 
   `up.on` returns a function that unbinds the event listeners when called:
 
@@ -145,7 +145,7 @@ up.bus = (($) ->
       // Unbind the listener
       up.off('click', listener)
 
-  \#\#\#\# Migrating jQuery event handlers to `up.on`
+  \#\#\# Migrating jQuery event handlers to `up.on`
 
   Within the event handler, Unpoly will bind `this` to the
   native DOM element to help you migrate your existing jQuery code to
@@ -199,7 +199,7 @@ up.bus = (($) ->
   ###*
   Unbinds an event listener previously bound with [`up.on`](/up.on).
 
-  \#\#\#\# Example
+  \#\#\# Example
 
   Let's say you are listing to clicks on `.button` elements:
 
@@ -240,7 +240,7 @@ up.bus = (($) ->
   Other code can subscribe to events with that name using
   [`up.on`](/up.on) or by [binding a jQuery event listener](http://api.jquery.com/on/) to `document`.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       up.on('my:event', function(event) {
         console.log(event.foo);
