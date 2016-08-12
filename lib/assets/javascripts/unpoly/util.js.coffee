@@ -1668,12 +1668,12 @@ up.util = (($) ->
     data
 
   ###*
-  Throws an [exception](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+  Throws a [Javascript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
 
-  The message will also be printed to the [error log](/up.log.error).
+  The message will also be printed to the [error log](/up.log.error). Also a notification will be shown at the bottom of the screen.
 
-  Also a notification will be shown at the bottom of the screen.
+  The message may contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions).
 
   \#\#\#\# Examples
 
@@ -1681,6 +1681,13 @@ up.util = (($) ->
       up.fail('Unexpected result %o', result)
 
   @function up.fail
+  @param {String} message
+    A message with details about the error.
+
+    The message can contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
+    like `%s` or `%o`.
+  @param {Array<String>} vars...
+    A list of variables to replace any substitution marks in the error message.
   @experimental
   ###
   fail = (args...) ->

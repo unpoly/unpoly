@@ -98,7 +98,7 @@ up.syntax = (($) ->
 
   You should clean up after yourself whenever your compilers have global
   side effects, like a [`setInterval`](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setInterval)
-  or event handlers bound to the document root.
+  or [event handlers bound to the document root](/up.on).
 
   Here is a version of `<clock>` that updates
   the time every second, and cleans up once it's done. Note how it returns
@@ -201,11 +201,12 @@ up.syntax = (($) ->
 
     The function may return a destructor function that destroys the compiled
     object before it is removed from the DOM. The destructor is supposed to
-    clear global state such as time-outs and event handlers bound to the document.
+    [clear global state](/up.compiler#cleaning-up-after-yourself)
+    such as timeouts and event handlers bound to the document.
     The destructor is *not* expected to remove the element from the DOM, which
     is already handled by [`up.destroy`](/up.destroy).
 
-
+    The function may also return an array of destructor functions.
   @stable
   ###
   compiler = (args...) ->

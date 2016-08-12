@@ -2,28 +2,40 @@
 Modal dialogs
 =============
 
-Instead of [linking to a page fragment](/up.link), you can choose
-to show a fragment in a modal dialog. The existing page will remain
-open in the background and reappear once the modal is closed.
+Instead of [linking to a page fragment](/up.link), you can choose to show a fragment
+in a modal dialog. The existing page will remain open in the background.
 
-To open a modal, add an [`up-modal` attribute](/up-modal) to a link,
-or call the Javascript functions [`up.modal.follow`](/up.modal.follow)
-and [`up.modal.visit`](/up.modal.visit).
-  
-For smaller popup overlays ("dropdowns") see [up.popup](/up.popup) instead.
+To open a modal, add an [`up-modal`](/up-modal) attribute to a link:
+
+    <a href="/blogs" up-modal=".blog-list">Switch blog</a>
+
+When this link is clicked, Unpoly will request the path `/blogs` and extract
+an element matching the selector `.blog-list` from the response. The matching element
+will then be placed in a modal dialog.
 
 
-\#\#\#\# Customizing the dialog design
+\#\#\# Closing behavior
 
-Loading the Unpoly stylesheet will give you a minimal dialog design:
+By default the dialog automatically closes
+*when a link inside a modal changes a fragment behind the modal*.
+This is useful to have the dialog interact with the page that
+opened it, e.g. by updating parts of a larger form or by signing in a user
+and revealing additional information.
 
-- Dialog contents are displayed in a white box that is centered vertically and horizontally.
-- There is a a subtle box shadow around the dialog
+To disable this behavior, give the opening link an [`up-sticky`](/up-modal#up-sticky) attribute:
+
+
+\#\#\# Customizing the dialog design
+
+Dialogs have a minimal default design:
+
+- Contents are displayed in a white box with a subtle box shadow
 - The box will grow to fit the dialog contents, but never grow larger than the screen
-- The box is placed over a semi-transparent background to dim the rest of the page
+- The box is placed over a semi-transparent backdrop to dim the rest of the page
 - There is a button to close the dialog in the top-right corner
 
-The easiest way to change how the dialog looks is by overriding the [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/modal.css.sass).
+The easiest way to change how the dialog looks is by overriding the
+[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/modal.css.sass).
 
 By default the dialog uses the following DOM structure:
 
@@ -32,28 +44,15 @@ By default the dialog uses the following DOM structure:
       <div class="up-modal-viewport">
         <div class="up-modal-dialog">
           <div class="up-modal-content">
-            ...
+            <!-- the matching element will be placed here -->
           </div>
           <div class="up-modal-close" up-close>X</div>
         </div>
       </div>
     </div>
 
-If you want to change the design beyond CSS, you can
-configure Unpoly to [use a different HTML structure](/up.modal.config).
-
-
-\#\#\#\# Closing behavior
-
-By default the dialog automatically closes
-*when a link inside a modal changes a fragment behind the modal*.
-This is useful to have the dialog interact with the page that
-opened it, e.g. by updating parts of a larger form or by signing in a user
-and revealing additional information.
-
-To disable this behavior, give the opening link an `up-sticky` attribute:
-
-    <a href="/settings" up-modal=".options" up-sticky>Settings</a>
+You can change this structure by setting [`up.modal.config.template`](/up.modal.config#config.template) to a new template string
+or function.
 
 
 @class up.modal
@@ -69,7 +68,7 @@ up.modal = (($) ->
   @param {String} [config.history=true]
     Whether opening a modal will add a browser history entry.
   @param {Number} [config.width]
-    The width of the dialog as a CSS value like `'400px'` or `50%`.
+    The width of the dialog as a CSS value like `'400px'` or `'50%'`.
 
     Defaults to `undefined`, meaning that the dialog will grow to fit its contents
     until it reaches `config.maxWidth`. Leaving this as `undefined` will

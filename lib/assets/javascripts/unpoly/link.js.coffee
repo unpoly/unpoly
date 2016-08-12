@@ -17,8 +17,7 @@ attribute. The value of this attribute is a CSS selector that indicates which pa
 fragment to update. The rest of the page will remain unchanged.
 
 
-Example
--------
+\#\#\# Example
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
 
@@ -67,8 +66,8 @@ The Javascript environment will persist and the user will not see a white flash 
 new page is loading.
 
 
-Read on
--------
+\#\#\# Read on
+
 - You can [animate page transitions](/up.motion) by definining animations for fragments as they enter or leave the screen.
 - The `up-target` mechanism also works with [forms](/up.form).
 - As you switch through pages, Unpoly will [update your browser's location bar and history](/up.history)
