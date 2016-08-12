@@ -2,12 +2,35 @@
 Navigation bars
 ===============
 
-Unpoly automatically marks up link elements with classes indicating that
-they are currently loading (class `up-active`) or linking
-to the current location (class `up-current`).
+Unpoly automatically adds CSS classes to links that are
+currently loading ([`.up-active`](/up-active)) or
+pointing to the current location ([`.up-current`](/up-current)).
 
-This dramatically improves the perceived speed of your user interface
-by providing instant feedback for user interactions.
+By styling these classes with CSS you can provide instant feedback to user interactions.
+This improves the perceived speed of your interface.
+
+\#\#\# Example
+
+Let's say we have an navigation bar with two links, pointing to `/foo` and `/bar` respectively:
+
+    <a href="/foo" up-follow>Foo</a>
+    <a href="/bar" up-follow>Bar</a>
+
+When the browser location changes to `/foo`, the first link is marked with an [`up-current`](/up-current) class:
+
+    <a href="/foo" up-follow class="up-current">Foo</a>
+    <a href="/bar" up-follow>Bar</a>
+
+When the user clicks on the `/bar` link, the link will receive the [`up-active`](/up-active) class while it is waiting
+for the server to respond:
+
+    <a href="/foo" up-follow class="up-current">Foo</a>
+    <a href="/bar" up-follow class="up-active">Bar</a>
+
+Once the response is received the URL will change to `/bar` and the `up-active` class is removed:
+
+    <a href="/foo" up-follow>Foo</a>
+    <a href="/bar" up-follow class="up-current">Bar</a>
 
 @class up.navigation
 ###
