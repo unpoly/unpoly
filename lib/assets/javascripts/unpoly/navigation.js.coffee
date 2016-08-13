@@ -2,7 +2,7 @@
 Navigation bars
 ===============
 
-Unpoly automatically adds CSS classes to links that are
+Unpoly automatically adds CSS classes to links while they are
 currently loading ([`.up-active`](/up-active)) or
 pointing to the current location ([`.up-current`](/up-current)).
 
@@ -16,7 +16,7 @@ Let's say we have an navigation bar with two links, pointing to `/foo` and `/bar
     <a href="/foo" up-follow>Foo</a>
     <a href="/bar" up-follow>Bar</a>
 
-When the browser location changes to `/foo`, the first link is marked with an [`up-current`](/up-current) class:
+If the current URL is `/foo`, the first link is automatically marked with an [`up-current`](/up-current) class:
 
     <a href="/foo" up-follow class="up-current">Foo</a>
     <a href="/bar" up-follow>Bar</a>
@@ -31,6 +31,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
 
     <a href="/foo" up-follow>Foo</a>
     <a href="/bar" up-follow class="up-current">Bar</a>
+
 
 @class up.navigation
 ###
@@ -275,7 +276,7 @@ up.navigation = (($) ->
   - the link's [`up-href`](#turn-any-element-into-a-link) attribute
   - a space-separated list of URLs in the link's `up-alias` attribute
 
-  \#\#\# Matching URL by prefix
+  \#\#\#\# Matching URL by prefix
 
   You can mark a link as `.up-current` whenever the current URL matches a prefix.
   To do so, end the `up-alias` attribute in an asterisk (`*`).

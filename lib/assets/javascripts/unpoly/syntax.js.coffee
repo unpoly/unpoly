@@ -1,34 +1,21 @@
 ###*
-Enhancing elements
-==================
+Custom Javascript
+=================
 
-Unpoly keeps a persistent Javascript environment during page transitions.
-If you wire Javascript to run on `ready` or `onload` events, those scripts will
-only run during the initial page load. Subsequently [inserted](/up.replace)
-page fragments will not be compiled.
+Every app needs a way to pair Javascript snippets with certain HTML elements,
+in order to integrate libraries or implement custom behavior.
 
-Let's say your Javascript plugin wants you to call `lightboxify()`
-on links that should open a lightbox. You decide to
-do this for all links with an `lightbox` class:
+Unpoly lets you organize your Javascript snippets using [compilers](/up.compiler).
 
-    <a href="river.png" class="lightbox">River</a>
-    <a href="ocean.png" class="lightbox">Ocean</a>
+For instance, to activate the [Masonry](http://masonry.desandro.com/) jQuery plugin for every element
+with a `grid` class, use this compiler:
 
-You should **avoid** doing this on page load:
-
-    $(document).on('ready', function() {
-      $('a.lightbox').lightboxify();
+    up.compiler('.grid', function($element) {
+      $element.masonry();
     });
 
-Instead you should register a [`compiler`](/up.compiler) for the `a.lightbox` selector:
-
-    up.compiler('a.lightbox', function($element) {
-      $element.lightboxify();
-    });
-
-The compiler function will be called on matching elements when
-the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
-later.
+The compiler function will be called on matching elements when the page loads
+or when a matching fragment is [inserted via AJAX](/up.link) later.
 
 @class up.syntax
 ###
