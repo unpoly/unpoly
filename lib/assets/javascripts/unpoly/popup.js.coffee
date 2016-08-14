@@ -176,14 +176,22 @@ up.popup = (($) ->
   Emits events [`up:popup:open`](/up:popup:open) and [`up:popup:opened`](/up:popup:opened).
 
   @function up.popup.attach
-  @param {Element|jQuery|String} elementOrSelector
+  @param {Element|jQuery|String} anchor
+    The element to which the popup will be attached.
   @param {String} [options.url]
+    The URL from which to fetch the popup contents.
+
+    If omitted, the `href` or `up-href` attribute of the anchor element will be used.
+
+    Will be ignored if `options.html` is given.
   @param {String} [options.target]
     A CSS selector that will be extracted from the response and placed into the popup.
   @param {String} [options.position='bottom-right']
     Defines where the popup is attached to the opening element.
 
     Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+  @param {String} [options.html]
+    A string of HTML from which to extract the popup contents. No network request will be made.
   @param {String} [options.confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the modal is being opened.

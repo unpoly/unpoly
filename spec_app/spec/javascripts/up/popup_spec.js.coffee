@@ -295,8 +295,7 @@ describe 'up.popup', ->
       it 'prefers to replace a selector within the popup', ->
         $outside = affix('.foo').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, target: '.foo')
-        @respondWith("<div class='foo'>old inside</div>")
+        up.popup.attach($link, target: '.foo', html: "<div class='foo'>old inside</div>")
         up.extract('.foo', "<div class='foo'>new text</div>")
         expect($outside).toBeInDOM()
         expect($outside).toHaveText('old outside')
@@ -305,8 +304,7 @@ describe 'up.popup', ->
       it 'auto-closes the popup when a replacement from inside the popup affects a selector behind the popup', ->
         affix('.outside').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, target: '.inside')
-        @respondWith("<div class='inside'>old inside</div>")
+        up.popup.attach($link, target: '.inside', html: "<div class='inside'>old inside</div>")
         up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.inside'))
         expect($('.outside')).toHaveText('new outside')
         expect($('.up-popup')).not.toExist()
@@ -320,7 +318,7 @@ describe 'up.popup', ->
         affix('.outside').text('old outside')
         $link = affix('.link')
         whenPopupOpen = up.popup.attach($link, url: '/path', target: '.inside')
-        @respondWith("<div class='inside'>old inside</div>") # Populate popup
+        @respondWith("<div class='inside'>old inside</div>")
 
         whenPopupOpen.then ->
           up.extract('.outside', "<div class='outside'>new outside</div>",
@@ -342,8 +340,7 @@ describe 'up.popup', ->
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector outside the popup', ->
         affix('.outside').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, target: '.inside')
-        @respondWith("<div class='inside'>old inside</div>")
+        up.popup.attach($link, target: '.inside', html: "<div class='inside'>old inside</div>")
         up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.outside'))
         expect($('.outside')).toHaveText('new outside')
         expect($('.up-popup')).toExist()
@@ -351,8 +348,7 @@ describe 'up.popup', ->
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector inside the popup', ->
         affix('.outside').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, target: '.inside')
-        @respondWith("<div class='inside'>old inside</div>")
+        up.popup.attach($link, target: '.inside', html: "<div class='inside'>old inside</div>")
         up.extract('.inside', "<div class='inside'>new inside</div>", origin: $('.outside'))
         expect($('.inside')).toHaveText('new inside')
         expect($('.up-popup')).toExist()
@@ -365,8 +361,7 @@ describe 'up.popup', ->
       it 'closes the popup', (done) ->
         affix('.outside').text('old outside')
         $link = affix('.link')
-        up.popup.attach($link, target: '.inside')
-        @respondWith("<div class='inside'>inside</div>")
+        up.popup.attach($link, target: '.inside', html: "<div class='inside'>inside</div>")
         expect(up.popup.isOpen()).toBe(true)
         Trigger.clickSequence($('body'))
         u.nextFrame ->
@@ -377,8 +372,7 @@ describe 'up.popup', ->
         $parent = affix('.parent')
         $parentReplacingLink = $parent.affix('a[href="/foo"][up-target=".parent"][up-instant]')
         $popupOpener = affix('.link')
-        up.popup.attach($popupOpener, target: '.inside')
-        @respondWith("<div class='inside'>inside</div>")
+        up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
         expect(up.popup.isOpen()).toBe(true)
         Trigger.clickSequence($parentReplacingLink)
         u.nextFrame ->
@@ -389,8 +383,7 @@ describe 'up.popup', ->
         $target = affix('.target')
         $outsideLink = affix('a[href="/foo"][up-target=".target"]')
         $popupOpener = affix('.link')
-        up.popup.attach($popupOpener, target: '.inside')
-        @respondWith("<div class='inside'>inside</div>")
+        up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
         expect(up.popup.isOpen()).toBe(true)
         Trigger.clickSequence($outsideLink)
         u.nextFrame ->

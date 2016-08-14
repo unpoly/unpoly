@@ -10,6 +10,8 @@ Unreleased
 
 ### Compatible changes
 
+- [`up.popup.attach`](/up.popup.attach) gets a `{ html }` option. This allows you to extract popup contents
+  from a HTML string without making a network request.
 - Fix a bug on Firefox where the page width would jump by the scrollbar width when opening a modal.
 - Fix a bug where modals would close when following a link to a cached destination.
 - New experimental event [`up:navigate`](/up:navigate). It is fired when a link is followed or when a form is submitted.
