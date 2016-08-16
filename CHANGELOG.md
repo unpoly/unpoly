@@ -10,15 +10,25 @@ Unreleased
 
 ### Compatible changes
 
-- [`up.popup.attach`](/up.popup.attach) gets a `{ html }` option. This allows you to extract popup contents
-  from a HTML string without making a network request.
-- Fix a bug on Firefox where the page width would jump by the scrollbar width when opening a modal.
-- Fix a bug where modals would close when following a link to a cached destination.
-- [`up.tooltip.attach`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
 
 ### Breaking changes
 
-- `click` and `mousedown` events handled by Unpoly will now longer bubble up.
+
+
+0.29.0
+------
+
+### Compatible changes
+
+- [`up.popup.attach`](/up.popup.attach) now has a `{ html }` option. This allows you to extract popup contents
+  from a HTML string without making a network request.
+- [`up.tooltip.attach`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
+- Fix a bug on Firefox where the page width would jump by the scrollbar width when opening a modal.
+- Fix a bug where modals would close when following a link to a cached destination.
+
+### Breaking changes
+
+- Events handled by Unpoly selectors will now longer bubble up the DOM.
 
 
 0.28.1
