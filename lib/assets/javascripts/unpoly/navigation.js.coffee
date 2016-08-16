@@ -140,8 +140,6 @@ up.navigation = (($) ->
   If the given element is a link within an [expanded click area](/up-expand),
   the class will be assigned to the expanded area.
 
-  Emits the [`up:navigate`](/up:navigate) event.
-
   \#\#\# Example
 
       var $button = $('button');
@@ -172,7 +170,6 @@ up.navigation = (($) ->
   ###
   start = (elementOrSelector, action) ->
     $element = findActionableArea(elementOrSelector)
-    up.emit('up:navigate', $element: $element, message: ['Navigating via %o', $element.get(0)])
     $element.addClass(CLASS_ACTIVE)
     if action
       promise = action()
@@ -211,21 +208,10 @@ up.navigation = (($) ->
   ###
 
   ###*
-  This event is emitted when a link or form is starting to load.
-
-  @event up:navigate
-  @param {jQuery} event.$element
-    The link or form that is starting to load.
-  @experimental
-  ###
-
-  ###*
   Marks the given element as no longer loading, by removing the CSS class [`up-active`](/up-active).
 
   This happens automatically when network requests initiated by the Unpoly API have completed.
   Use this function if you make custom network calls from your own Javascript code.
-
-  Emits the [`up:navigated`](/up:navigated) event.
 
   @function up.navigation.stop
   @param {jQuery} event.$element
@@ -236,13 +222,6 @@ up.navigation = (($) ->
     $element = findActionableArea(elementOrSelector)
     up.emit('up:navigated', $element: $element, message: false)
     $element.removeClass(CLASS_ACTIVE)
-
-  ###*
-  This event is emitted when a link or form is [has finished loading](/up.navigation.stop).
-
-  @event up:navigated
-  @internal
-  ###
 
   ###*
   Links that point to the current location are assigned

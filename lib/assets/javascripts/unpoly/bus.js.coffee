@@ -355,6 +355,30 @@ up.bus = (($) ->
     )
 
   ###*
+  Stops the given event from propagating and prevents the default action.
+
+  @function up.bus.haltEvent
+  @internal
+  ###
+  haltEvent = (event) ->
+    event.stopImmediatePropagation()
+    event.stopPropagation()
+    event.preventDefault()
+
+  ###*
+  @function up.bus.consumeAction
+  @internal
+  ###
+  consumeAction = (event) ->
+    # Halt the event chain to stop duplicate processing of this user interaction.
+    haltEvent(event)
+    unless event.type == 'up:action:consumed'
+      # Although we have consumed this action and halted the event chain,
+      # other components might still need to react. E.g. a popup needs to close when
+      # an outside link consumes the user click. So we emit another event for that.
+      emit('up:action:consumed', $element: $(event.target), message: false)
+
+  ###*
   Makes a snapshot of the currently registered event listeners,
   to later be restored through [`up.bus.reset`](/up.bus.reset).
 
@@ -443,6 +467,8 @@ up.bus = (($) ->
   whenEmitted: whenEmitted
   onEscape: onEscape
   emitReset: emitReset
+  haltEvent: haltEvent
+  consumeAction: consumeAction
   boot: boot
 
 )(jQuery)

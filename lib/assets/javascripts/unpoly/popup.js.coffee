@@ -397,9 +397,9 @@ up.popup = (($) ->
       attachAsap($link)
 
   # We close the popup when someone clicks on the document.
-  # We also need to listen to up:navigate in case an [up-instant] link
+  # We also need to listen to up:action:consumed in case an [up-instant] link
   # was followed on mousedown.
-  up.on 'click up:navigate', (event) ->
+  up.on 'click up:action:consumed', (event) ->
     $target = $(event.target)
     # Don't close when the user clicked on a popup opener.
     unless $target.closest('.up-popup, [up-popup]').length
@@ -437,7 +437,7 @@ up.popup = (($) ->
       # Only prevent the default when we actually closed a popup.
       # This way we can have buttons that close a popup when within a popup,
       # but link to a destination if not.
-      u.haltEvent(event)
+      up.bus.consumeAction(event)
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset

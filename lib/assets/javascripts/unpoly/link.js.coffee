@@ -240,16 +240,16 @@ up.link = (($) ->
         if $link.is('[up-instant]')
           # If the link was already processed on mousedown, we still need
           # to prevent this later click event's chain.
-          u.haltEvent(event)
+          up.bus.haltEvent(event)
         else
-          u.haltEvent(event)
+          up.bus.consumeAction(event)
           handlerWithActiveMark($link)
       else
         allowDefault(event)
 
     up.on 'mousedown', "a#{selector}[up-instant], [up-href]#{selector}[up-instant]", (event, $link) ->
       if shouldProcessLinkEvent(event, $link)
-        u.haltEvent(event)
+        up.bus.consumeAction(event)
         handlerWithActiveMark($link)
 
   isFollowable = ($link) ->

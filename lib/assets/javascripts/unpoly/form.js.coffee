@@ -568,7 +568,7 @@ up.form = (($) ->
   @stable
   ###
   up.on 'submit', 'form[up-target]', (event, $form) ->
-    u.haltEvent(event)
+    up.bus.consumeAction(event)
     submit($form)
 
   ###*

@@ -1844,11 +1844,6 @@ up.util = (($) ->
     ->
       map functions, (f) -> f()
 
-  haltEvent = (event) ->
-    event.stopImmediatePropagation()
-    event.stopPropagation()
-    event.preventDefault()
-
   isDetached: isDetached
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
@@ -1957,7 +1952,6 @@ up.util = (($) ->
   DivertibleChain: DivertibleChain
   submittedValue: submittedValue
   sequence: sequence
-  haltEvent: haltEvent
 
 )($)
 

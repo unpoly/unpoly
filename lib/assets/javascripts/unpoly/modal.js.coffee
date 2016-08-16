@@ -674,7 +674,7 @@ up.modal = (($) ->
 
     $target = $(event.target)
     unless $target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length
-      u.haltEvent(event)
+      up.bus.consumeAction(event)
       closeAsap()
   )
 
@@ -710,7 +710,7 @@ up.modal = (($) ->
       # The event should not trigger anything else. The user needs to click again for another interaction.
       # Also only prevent the default when we actually closed a modal.
       # This way we can have buttons that close a modal when within a modal, but link to a destination if not.
-      u.haltEvent(event)
+      up.bus.consumeAction(event)
   )
 
   # The framework is reset between tests

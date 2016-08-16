@@ -378,18 +378,21 @@ describe 'up.link', ->
           expect($('.document .target')).toHaveText('old document text')
           expect($('.up-popup .target')).toHaveText('old popup text')
 
-          Trigger.clickSequence($linkInPopup)
-
           u.nextFrame =>
-            @respondWith '<div class="target">new text from popup link</div>'
-            expect($('.document .target')).toHaveText('old document text')
-            expect($('.up-popup .target')).toHaveText('new text from popup link')
-            Trigger.clickSequence($linkInDocument)
+
+            Trigger.clickSequence($linkInPopup)
 
             u.nextFrame =>
-              @respondWith '<div class="target">new text from document link</div>'
-              expect($('.document .target')).toHaveText('new text from document link')
-              done()
+              @respondWith '<div class="target">new text from popup link</div>'
+
+              expect($('.document .target')).toHaveText('old document text')
+              expect($('.up-popup .target')).toHaveText('new text from popup link')
+              Trigger.clickSequence($linkInDocument)
+
+              u.nextFrame =>
+                @respondWith '<div class="target">new text from document link</div>'
+                expect($('.document .target')).toHaveText('new text from document link')
+                done()
 
 
         describe 'with [up-transition] modifier', ->

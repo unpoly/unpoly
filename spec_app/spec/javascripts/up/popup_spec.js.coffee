@@ -394,10 +394,31 @@ describe 'up.popup', ->
         $target = affix('.target')
         $outsideLink = affix('a[href="/foo"][up-target=".target"][up-instant]')
         $popupOpener = affix('.link')
-        up.popup.attach($popupOpener, target: '.inside')
-        @respondWith("<div class='inside'>inside</div>")
+        up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
         expect(up.popup.isOpen()).toBe(true)
         Trigger.clickSequence($outsideLink)
         u.nextFrame ->
           expect(up.popup.isOpen()).toBe(false)
+          done()
+
+      it 'does not close the popup if a link outside the popup is followed with the up.follow function (bugfix)', (done) ->
+        $target = affix('.target')
+        $outsideLink = affix('a[href="/foo"][up-target=".target"]')
+        $popupOpener = affix('.link')
+        up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
+        expect(up.popup.isOpen()).toBe(true)
+        up.follow($outsideLink)
+        u.nextFrame ->
+          expect(up.popup.isOpen()).toBe(true)
+          done()
+
+      it 'does not close the popup if a form outside the popup is followed with the up.submit function (bugfix)', (done) ->
+        $target = affix('.target')
+        $outsideForm = affix('form[action="/foo"][up-target=".target"]')
+        $popupOpener = affix('.link')
+        up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
+        expect(up.popup.isOpen()).toBe(true)
+        up.submit($outsideForm)
+        u.nextFrame ->
+          expect(up.popup.isOpen()).toBe(true)
           done()
