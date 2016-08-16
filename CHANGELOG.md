@@ -28,7 +28,7 @@ Unreleased
 
 ### Breaking changes
 
-- Events handled by Unpoly selectors will now longer bubble up the DOM.
+- Events handled by Unpoly selectors will no longer bubble up the DOM.
 
 
 0.28.1
