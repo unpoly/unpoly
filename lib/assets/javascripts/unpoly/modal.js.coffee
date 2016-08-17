@@ -19,8 +19,7 @@ will then be placed in a modal dialog.
 By default the dialog automatically closes
 *when a link inside a modal changes a fragment behind the modal*.
 This is useful to have the dialog interact with the page that
-opened it, e.g. by updating parts of a larger form or by signing in a user
-and revealing additional information.
+opened it, e.g. by updating parts of a larger form.
 
 To disable this behavior, give the opening link an [`up-sticky`](/up-modal#up-sticky) attribute:
 
@@ -34,7 +33,7 @@ Dialogs have a minimal default design:
 - The box is placed over a semi-transparent backdrop to dim the rest of the page
 - There is a button to close the dialog in the top-right corner
 
-The easiest way to change how the dialog looks is by overriding the
+The easiest way to change how the dialog looks is to override the
 [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/modal.css.sass).
 
 By default the dialog uses the following DOM structure:

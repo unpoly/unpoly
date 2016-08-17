@@ -5,40 +5,43 @@ Pop-up overlays
 Instead of [linking to a page fragment](/up.link), you can choose
 to show a fragment in a popup overlay that rolls down from an anchoring element.
 
-To open a popup, add an [`up-popup` attribute](/up-popup) to a link,
-or call the Javascript function [`up.popup.attach`](/up.popup.attach).
+To open a popup, add an [`up-popup` attribute](/up-popup) to a link:
 
-For modal dialogs see [up.modal](/up.modal) instead.
+    <a href="/options" up-modal=".menu">Show options</a>
 
-\#\#\# Customizing the popup design
+When this link is clicked, Unpoly will request the path `/options` and extract
+an element matching the selector `.menu` from the response. The matching element
+will then be placed in the popup overlay.
 
-Loading the Unpoly stylesheet will give you a minimal popup design:
-
-- Popup contents are displayed in a white box
-- There is a a subtle box shadow around the popup
-- The box will grow to fit the popup contents
-
-The easiest way to change how the popup looks is by overriding the [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/popup.css.sass).
-
-By default the popup uses the following DOM structure:
-
-    <div class="up-popup">
-      ...
-    </div>
 
 \#\#\# Closing behavior
 
 The popup closes when the user clicks anywhere outside the popup area.
 
-By default the popup also closes
-*when a link within the popup changes a fragment behind the popup*.
+The popup also closes *when a link within the popup changes a fragment behind the popup*.
 This is useful to have the popup interact with the page that
-opened it, e.g. by updating parts of a larger form or by signing in a user
-and revealing additional information.
+opened it, e.g. by updating parts of a larger form.
 
-To disable this behavior, give the opening link an `up-sticky` attribute:
+To disable this behavior, give the opening link an [`up-sticky`](/up-popup#up-sticky) attribute.
 
-    <a href="/settings" up-popup=".options" up-sticky>Settings</a>
+
+\#\#\# Customizing the popup design
+
+Popups have a minimal default design:
+
+- Popup contents are displayed in a white box
+- There is a a subtle box shadow around the popup
+- The box will grow to fit the popup contents
+
+The easiest way to change how the popup looks is to override the
+[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/popup.css.sass).
+
+The HTML of a popup element is simply this:
+
+    <div class="up-popup">
+      ...
+    </div>
+
 
 @class up.popup
 ###
