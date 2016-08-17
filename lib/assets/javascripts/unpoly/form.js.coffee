@@ -165,28 +165,40 @@ up.form = (($) ->
 
   \#\#\# Example
 
-  The following would submit the form whenever the
-  text field value changes:
+  The following would print to the console whenever an input field changes:
 
-      up.observe('input[name=query]', function(value, $input) {
+      up.observe('input.query', function(value, $input) {
         console.log('Query is now ' + value);
       });
 
-  Instead of a single form field, you can also
-  pass, a `<form>` or any container that contains form fields.
+  Instead of a single form field, you can also pass multiple fields,
+  a `<form>` or any container that contains form fields.
   The callback will be run if any of the given fields change.
 
   \#\#\# Preventing concurrency
 
-  Firing asynchronous code after a form field can cause
+  Making network requests whenever a form field changes can cause
   [concurrency issues](https://makandracards.com/makandra/961-concurrency-issues-with-find-as-you-type-boxes).
+  Since `up.observe` can trigger many requests in a short period of time,
+  the responses might not arrive in the same order.
 
   To mitigate this, `up.observe` will try to never run a callback
   before the previous callback has completed.
-  To take advantage of this, your callback code must return a promise.
-  Note that all asynchronous Unpoly functions return promises.
+  For this your callback code must return a promise that resolves
+  when your request completes.
+  
+  The following would submit a form whenever an input field changes,
+  but never make more than one request at a time:
 
-  \#\#\# Throttling
+      up.observe('input.query', function(value, $input) {
+        var submitDone = up.submit($input);
+        return submitDone;
+      });
+  
+  Note that many Unpoly functions like [`up.submit`](/up.submit) or
+  [`up.replace`](/up.replace) return promises.
+
+  \#\#\# Debouncing
 
   If you are concerned about fast typists causing too much
   load on your server, you can use a `delay` option to wait
