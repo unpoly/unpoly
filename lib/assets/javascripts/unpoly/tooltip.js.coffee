@@ -4,20 +4,20 @@ Tooltips
 
 Unpoly comes with a basic tooltip implementation.
 
-You can an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a tooltip whenever
-  the user hovers over the element:
+Add an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a tooltip whenever
+the user hovers over the element:
 
       <a href="/decks" up-tooltip="Show all decks">Decks</a>
 
 
 \#\#\# Styling
 
-The [default styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/tooltip.css.sass)
-show a simple tooltip with white text on a gray background.
+The default styles
+render a tooltip with white text on a gray background.
 A gray triangle points to the element.
 
-To change the styling, simply override CSS rules for the `.up-tooltip` selector and its `:after`
-selector that is used the triangle.
+To change the styling, simply override the [CSS rules](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/tooltip.css.sass) for the `.up-tooltip` selector and its `:after`
+selector that is used for the triangle.
 
 The HTML of a tooltip element is simply this:
 
