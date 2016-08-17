@@ -2,18 +2,31 @@
 Caching and preloading
 ======================
 
-All HTTP requests go through the Unpoly proxy.
-It caches a [limited](/up.proxy.config) number of server responses
-for a [limited](/up.proxy.config) amount of time,
+Unpoly caches server responses for a few minutes,
 making requests to these URLs return instantly.
-  
-The cache is cleared whenever the user makes a non-`GET` request
-(like `POST`, `PUT` or `DELETE`).
 
-The proxy can also used to speed up reaction times by [preloading
-links when the user hovers over the click area](/up-preload) (or puts the mouse/finger
-down before releasing). This way the response will already be cached when
-the user performs the click.
+All Unpoly functions and selectors go through this cache.
+If you need to make cache-aware requests from your [custom Javascript](/up.syntax),
+use [`up.ajax`](/up.ajax).
+
+\#\#\# How the cache is cleared
+
+The cache holds up to 70 responses for 5 minutes. You can configure the cache size and expiry using
+[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.proxy.clear`](/up.proxy.clear).
+
+Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
+
+\#\#\# Preloading
+
+Unpoly also lets you speed up reaction times by [preloading
+links](/up-preload) when the user hovers over the click area (or puts the mouse/finger
+down). This way the response will already be cached when
+the user releases the mouse/finger.
+
+\#\#\# Spinners
+
+You can listen to the [`up:proxy:slow`](/up:proxy:slow) event to implement a spinner
+that appears during a long-running request.
 
 @class up.proxy  
 ###
@@ -339,7 +352,7 @@ up.proxy = (($) ->
       slowEventEmitted = false
 
   ###*
-  This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
+  This event is [emitted](/up.emit) when [AJAX requests](/up.ajax)
   have [taken long to finish](/up:proxy:slow), but have finished now.
 
   See [`up:proxy:slow`](/up:proxy:slow) for more documentation on
@@ -456,7 +469,7 @@ up.proxy = (($) ->
   clear = cache.clear
 
   ###*
-  This event is [emitted]/(up.emit) before an [AJAX request](/up.ajax)
+  This event is [emitted](/up.emit) before an [AJAX request](/up.ajax)
   is starting to load.
 
   @event up:proxy:load
@@ -467,7 +480,7 @@ up.proxy = (($) ->
   ###
 
   ###*
-  This event is [emitted]/(up.emit) when the response to an [AJAX request](/up.ajax)
+  This event is [emitted](/up.emit) when the response to an [AJAX request](/up.ajax)
   has been received.
 
   @event up:proxy:received
