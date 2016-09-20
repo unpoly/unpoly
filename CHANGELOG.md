@@ -15,6 +15,16 @@ Unreleased
 
 
 
+0.30.0
+------
+
+### Breaking changes
+
+- If you are using Unpoly's Boostrap integration, you now need to include `unpoly-bootstrap3.js` *after* you include the Bootstrap CSS.
+- Fix some issues when using Unpoly together with Bootstrap modals.
+
+
+
 0.29.0
 ------
 

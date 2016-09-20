@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.29.0"
+    version: "0.30.0"
   };
 
 }).call(this);
@@ -6656,18 +6656,31 @@ You can define custom animations using [`up.transition`](/up.transition) and
 Caching and preloading
 ======================
 
-All HTTP requests go through the Unpoly proxy.
-It caches a [limited](/up.proxy.config) number of server responses
-for a [limited](/up.proxy.config) amount of time,
+Unpoly caches server responses for a few minutes,
 making requests to these URLs return instantly.
-  
-The cache is cleared whenever the user makes a non-`GET` request
-(like `POST`, `PUT` or `DELETE`).
 
-The proxy can also used to speed up reaction times by [preloading
-links when the user hovers over the click area](/up-preload) (or puts the mouse/finger
-down before releasing). This way the response will already be cached when
-the user performs the click.
+All Unpoly functions and selectors go through this cache.
+If you need to make cache-aware requests from your [custom Javascript](/up.syntax),
+use [`up.ajax`](/up.ajax).
+
+\#\#\# How the cache is cleared
+
+The cache holds up to 70 responses for 5 minutes. You can configure the cache size and expiry using
+[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.proxy.clear`](/up.proxy.clear).
+
+Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
+
+\#\#\# Preloading
+
+Unpoly also lets you speed up reaction times by [preloading
+links](/up-preload) when the user hovers over the click area (or puts the mouse/finger
+down). This way the response will already be cached when
+the user releases the mouse/finger.
+
+\#\#\# Spinners
+
+You can listen to the [`up:proxy:slow`](/up:proxy:slow) event to implement a spinner
+that appears during a long-running request.
 
 @class up.proxy
  */
@@ -7003,7 +7016,7 @@ the user performs the click.
     };
 
     /**
-    This event is [emitted]/(up.emit) when [AJAX requests](/up.ajax)
+    This event is [emitted](/up.emit) when [AJAX requests](/up.ajax)
     have [taken long to finish](/up:proxy:slow), but have finished now.
     
     See [`up:proxy:slow`](/up:proxy:slow) for more documentation on
@@ -7134,7 +7147,7 @@ the user performs the click.
     clear = cache.clear;
 
     /**
-    This event is [emitted]/(up.emit) before an [AJAX request](/up.ajax)
+    This event is [emitted](/up.emit) before an [AJAX request](/up.ajax)
     is starting to load.
     
     @event up:proxy:load
@@ -7145,7 +7158,7 @@ the user performs the click.
      */
 
     /**
-    This event is [emitted]/(up.emit) when the response to an [AJAX request](/up.ajax)
+    This event is [emitted](/up.emit) when the response to an [AJAX request](/up.ajax)
     has been received.
     
     @event up:proxy:received
@@ -7982,28 +7995,40 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     \#\#\# Example
     
-    The following would submit the form whenever the
-    text field value changes:
+    The following would print to the console whenever an input field changes:
     
-        up.observe('input[name=query]', function(value, $input) {
+        up.observe('input.query', function(value, $input) {
           console.log('Query is now ' + value);
         });
     
-    Instead of a single form field, you can also
-    pass, a `<form>` or any container that contains form fields.
+    Instead of a single form field, you can also pass multiple fields,
+    a `<form>` or any container that contains form fields.
     The callback will be run if any of the given fields change.
     
     \#\#\# Preventing concurrency
     
-    Firing asynchronous code after a form field can cause
+    Making network requests whenever a form field changes can cause
     [concurrency issues](https://makandracards.com/makandra/961-concurrency-issues-with-find-as-you-type-boxes).
+    Since `up.observe` can trigger many requests in a short period of time,
+    the responses might not arrive in the same order.
     
     To mitigate this, `up.observe` will try to never run a callback
     before the previous callback has completed.
-    To take advantage of this, your callback code must return a promise.
-    Note that all asynchronous Unpoly functions return promises.
+    For this your callback code must return a promise that resolves
+    when your request completes.
     
-    \#\#\# Throttling
+    The following would submit a form whenever an input field changes,
+    but never make more than one request at a time:
+    
+        up.observe('input.query', function(value, $input) {
+          var submitDone = up.submit($input);
+          return submitDone;
+        });
+    
+    Note that many Unpoly functions like [`up.submit`](/up.submit) or
+    [`up.replace`](/up.replace) return promises.
+    
+    \#\#\# Debouncing
     
     If you are concerned about fast typists causing too much
     load on your server, you can use a `delay` option to wait
@@ -8730,40 +8755,43 @@ Pop-up overlays
 Instead of [linking to a page fragment](/up.link), you can choose
 to show a fragment in a popup overlay that rolls down from an anchoring element.
 
-To open a popup, add an [`up-popup` attribute](/up-popup) to a link,
-or call the Javascript function [`up.popup.attach`](/up.popup.attach).
+To open a popup, add an [`up-popup` attribute](/up-popup) to a link:
 
-For modal dialogs see [up.modal](/up.modal) instead.
+    <a href="/options" up-modal=".menu">Show options</a>
 
-\#\#\# Customizing the popup design
+When this link is clicked, Unpoly will request the path `/options` and extract
+an element matching the selector `.menu` from the response. The matching element
+will then be placed in the popup overlay.
 
-Loading the Unpoly stylesheet will give you a minimal popup design:
-
-- Popup contents are displayed in a white box
-- There is a a subtle box shadow around the popup
-- The box will grow to fit the popup contents
-
-The easiest way to change how the popup looks is by overriding the [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/popup.css.sass).
-
-By default the popup uses the following DOM structure:
-
-    <div class="up-popup">
-      ...
-    </div>
 
 \#\#\# Closing behavior
 
 The popup closes when the user clicks anywhere outside the popup area.
 
-By default the popup also closes
-*when a link within the popup changes a fragment behind the popup*.
+The popup also closes *when a link within the popup changes a fragment behind the popup*.
 This is useful to have the popup interact with the page that
-opened it, e.g. by updating parts of a larger form or by signing in a user
-and revealing additional information.
+opened it, e.g. by updating parts of a larger form.
 
-To disable this behavior, give the opening link an `up-sticky` attribute:
+To disable this behavior, give the opening link an [`up-sticky`](/up-popup#up-sticky) attribute.
 
-    <a href="/settings" up-popup=".options" up-sticky>Settings</a>
+
+\#\#\# Customizing the popup design
+
+Popups have a minimal default design:
+
+- Popup contents are displayed in a white box
+- There is a a subtle box shadow around the popup
+- The box will grow to fit the popup contents
+
+The easiest way to change how the popup looks is to override the
+[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/popup.css.sass).
+
+The HTML of a popup element is simply this:
+
+    <div class="up-popup">
+      ...
+    </div>
+
 
 @class up.popup
  */
@@ -9248,8 +9276,7 @@ will then be placed in a modal dialog.
 By default the dialog automatically closes
 *when a link inside a modal changes a fragment behind the modal*.
 This is useful to have the dialog interact with the page that
-opened it, e.g. by updating parts of a larger form or by signing in a user
-and revealing additional information.
+opened it, e.g. by updating parts of a larger form.
 
 To disable this behavior, give the opening link an [`up-sticky`](/up-modal#up-sticky) attribute:
 
@@ -9263,7 +9290,7 @@ Dialogs have a minimal default design:
 - The box is placed over a semi-transparent backdrop to dim the rest of the page
 - There is a button to close the dialog in the top-right corner
 
-The easiest way to change how the dialog looks is by overriding the
+The easiest way to change how the dialog looks is to override the
 [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/modal.css.sass).
 
 By default the dialog uses the following DOM structure:
@@ -10034,20 +10061,20 @@ Tooltips
 
 Unpoly comes with a basic tooltip implementation.
 
-You can an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a tooltip whenever
-  the user hovers over the element:
+Add an [`up-tooltip`](/up-tooltip) attribute to any HTML tag to show a tooltip whenever
+the user hovers over the element:
 
       <a href="/decks" up-tooltip="Show all decks">Decks</a>
 
 
 \#\#\# Styling
 
-The [default styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/tooltip.css.sass)
-show a simple tooltip with white text on a gray background.
+The default styles
+render a tooltip with white text on a gray background.
 A gray triangle points to the element.
 
-To change the styling, simply override CSS rules for the `.up-tooltip` selector and its `:after`
-selector that is used the triangle.
+To change the styling, simply override the [CSS rules](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/tooltip.css.sass) for the `.up-tooltip` selector and its `:after`
+selector that is used for the triangle.
 
 The HTML of a tooltip element is simply this:
 
