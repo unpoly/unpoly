@@ -3,7 +3,7 @@ describe 'up.form', ->
   u = up.util
 
   describe 'Javascript functions', ->
-    
+
     describe 'up.observe', ->
 
       beforeEach ->
@@ -23,43 +23,100 @@ describe 'up.form', ->
 
         u.each changeEvents, (eventName) ->
 
-          it "runs the callback when the input receives a '#{eventName}' event and the value changed", (done) ->
-            $input = affix('input[value="old-value"]')
-            callback = jasmine.createSpy('change callback')
-            up.observe($input, callback)
-            $input.val('new-value')
-            u.times 2, -> $input.trigger(eventName)
-            u.nextFrame ->
-              expect(callback).toHaveBeenCalledWith('new-value', $input)
+          describe "when the input receives a #{eventName} event", ->
+
+            it "runs the callback if the value changed", (done) ->
+              $input = affix('input[value="old-value"]')
+              callback = jasmine.createSpy('change callback')
+              up.observe($input, callback)
+              $input.val('new-value')
+              u.times 2, -> $input.trigger(eventName)
+              u.nextFrame ->
+                expect(callback).toHaveBeenCalledWith('new-value', $input)
+                expect(callback.calls.count()).toEqual(1)
+                done()
+
+            it "does not run the callback if the value didn't change", (done) ->
+              $input = affix('input[value="old-value"]')
+              callback = jasmine.createSpy('change callback')
+              up.observe($input, callback)
+              $input.trigger(eventName)
+              u.nextFrame ->
+                expect(callback).not.toHaveBeenCalled()
+                done()
+
+            it 'debounces the callback when the { delay } option is given', (done) ->
+              $input = affix('input[value="old-value"]')
+              callback = jasmine.createSpy('change callback')
+              up.observe($input, { delay: 100 }, callback)
+              $input.val('new-value-1')
+              $input.trigger(eventName)
+              u.setTimer 50, ->
+                # 50 ms after change 1: We're still waiting for the 100ms delay to expire
+                expect(callback.calls.count()).toEqual(0)
+                u.setTimer 100, ->
+                  # 150 ms after change 1: The 100ms delay has expired
+                  expect(callback.calls.count()).toEqual(1)
+                  expect(callback.calls.mostRecent().args[0]).toEqual('new-value-1')
+                  $input.val('new-value-2')
+                  $input.trigger(eventName)
+                  u.setTimer 40, ->
+                    # 40 ms after change 2: We change again, resetting the delay
+                    expect(callback.calls.count()).toEqual(1)
+                    $input.val('new-value-3')
+                    $input.trigger(eventName)
+                    u.setTimer 85, ->
+                      # 125 ms after change 2, which was superseded by change 3
+                      # 85 ms after change 3
+                      expect(callback.calls.count()).toEqual(1)
+                      u.setTimer 65, ->
+                        # 190 ms after change 2, which was superseded by change 3
+                        # 150 ms after change 3
+                        expect(callback.calls.count()).toEqual(2)
+                        expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
+                        done()
+
+            it 'delays a callback if a previous async callback is taking long to execute', (done) ->
+              $input = affix('input[value="old-value"]')
+              callbackCount = 0
+              callback = ->
+                callbackCount += 1
+                u.promiseTimer(100)
+              up.observe($input, { delay: 1 }, callback)
+              $input.val('new-value-1')
+              $input.trigger(eventName)
+              u.setTimer 30, ->
+                # Callback has been called and takes 100 ms to complete
+                expect(callbackCount).toEqual(1)
+                $input.val('new-value-2')
+                $input.trigger(eventName)
+                u.setTimer 30, ->
+                  # Second callback is triggerd, but waits for first callback to complete
+                  expect(callbackCount).toEqual(1)
+                  u.setTimer 100, ->
+                    expect(callbackCount).toEqual(2)
+                    done()
+
+            it 'does not run multiple callbacks if a long-running callback has been blocking multiple subsequent callbacks'
+
+            it "runs a callback in the same frame if the delay is 0", ->
+              console.debug('*** next example')
+              $input = affix('input[value="old-value"]')
+              callback = jasmine.createSpy('change callback')
+              up.observe($input, { delay: 0 }, callback)
+              $input.val('new-value')
+              $input.trigger(eventName)
               expect(callback.calls.count()).toEqual(1)
-              done()
 
-          it "does not run the callback when the input receives a '#{eventName}' event, but the value didn't change", (done) ->
-            $input = affix('input[value="old-value"]')
-            callback = jasmine.createSpy('change callback')
-            up.observe($input, callback)
-            $input.trigger(eventName)
-            u.nextFrame ->
-              expect(callback).not.toHaveBeenCalled()
-              done()
-
-          it "runs a callback in the same frame if the delay is 0 and it receives a '#{eventName}' event", ->
-            $input = affix('input[value="old-value"]')
-            callback = jasmine.createSpy('change callback')
-            up.observe($input, { delay: 0 }, callback)
-            $input.val('new-value')
-            $input.trigger(eventName)
-            expect(callback.calls.count()).toEqual(1)
-
-          it "runs multiple callbacks in the same frame if the delay is 0 and it receives a '#{eventName}' event", ->
-            $input = affix('input[value="old-value"]')
-            callback = jasmine.createSpy('change callback')
-            up.observe($input, { delay: 0 }, callback)
-            $input.val('new-value')
-            $input.trigger(eventName)
-            $input.val('yet-another-value')
-            $input.trigger(eventName)
-            expect(callback.calls.count()).toEqual(2)
+            it "runs multiple callbacks in the same frame if the delay is 0", ->
+              $input = affix('input[value="old-value"]')
+              callback = jasmine.createSpy('change callback')
+              up.observe($input, { delay: 0 }, callback)
+              $input.val('new-value')
+              $input.trigger(eventName)
+              $input.val('yet-another-value')
+              $input.trigger(eventName)
+              expect(callback.calls.count()).toEqual(2)
 
         describe 'when the first argument is a checkbox', ->
 
@@ -163,42 +220,44 @@ describe 'up.form', ->
 
         u.each changeEvents, (eventName) ->
 
-          it "runs the callback when any of the form's inputs receives a '#{eventName}' event and the value changed", (done) ->
-            $form = affix('form')
-            $input = $form.affix('input[value="old-value"]')
-            callback = jasmine.createSpy('change callback')
-            up.observe($form, callback)
-            $input.val('new-value')
-            u.times 2, -> $input.trigger(eventName)
-            u.nextFrame ->
-              expect(callback).toHaveBeenCalledWith('new-value', $input)
-              expect(callback.calls.count()).toEqual(1)
-              done()
+          describe "when any of the form's inputs receives a #{eventName} event", ->
 
-          it "does not run the callback when any of the form's inputs receives a '#{eventName}' event, but the value didn't change", (done) ->
-            $form = affix('form')
-            $input = $form.affix('input[value="old-value"]')
-            callback = jasmine.createSpy('change callback')
-            up.observe($form, callback)
-            $input.trigger(eventName)
-            u.nextFrame ->
-              expect(callback).not.toHaveBeenCalled()
-              done()
+            it "runs the callback if the value changed", (done) ->
+              $form = affix('form')
+              $input = $form.affix('input[value="old-value"]')
+              callback = jasmine.createSpy('change callback')
+              up.observe($form, callback)
+              $input.val('new-value')
+              u.times 2, -> $input.trigger(eventName)
+              u.nextFrame ->
+                expect(callback).toHaveBeenCalledWith('new-value', $input)
+                expect(callback.calls.count()).toEqual(1)
+                done()
 
-#        it 'runs the callback only once when a radio button group changes its selection', ->
-#          $form = affix('form')
-#          $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
-#          $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
-#          callback = jasmine.createSpy('change callback')
-#          up.observe($form, callback)
-#          $radio2.get(0).click()
-#          u.nextFrame ->
-#            expect(callback.calls.count()).toEqual(1)
+            it "does not run the callback if the value didn't change", (done) ->
+              $form = affix('form')
+              $input = $form.affix('input[value="old-value"]')
+              callback = jasmine.createSpy('change callback')
+              up.observe($form, callback)
+              $input.trigger(eventName)
+              u.nextFrame ->
+                expect(callback).not.toHaveBeenCalled()
+                done()
+
+  #        it 'runs the callback only once when a radio button group changes its selection', ->
+  #          $form = affix('form')
+  #          $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
+  #          $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
+  #          callback = jasmine.createSpy('change callback')
+  #          up.observe($form, callback)
+  #          $radio2.get(0).click()
+  #          u.nextFrame ->
+  #            expect(callback.calls.count()).toEqual(1)
 
     describe 'up.submit', ->
 
       describeCapability 'canPushState', ->
-      
+
         beforeEach ->
           @$form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
           @$form.append('<input name="field1" value="value1">')
@@ -232,11 +291,11 @@ describe 'up.form', ->
             responseText:
               """
               text-before
-    
+
               <form>
                 error-messages
               </form>
-    
+
               text-after
               """
           expect(up.browser.url()).toEqual(@hrefBeforeExample)
@@ -300,12 +359,12 @@ describe 'up.form', ->
               expect(form.submit).toHaveBeenCalled()
 
       describeFallback 'canPushState', ->
-        
+
         it 'falls back to a vanilla form submission', ->
           $form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
           form = $form.get(0)
           spyOn(form, 'submit')
-          
+
           up.submit($form)
           expect(form.submit).toHaveBeenCalled()
 
@@ -358,7 +417,7 @@ describe 'up.form', ->
 
     describe '[up-observe]', ->
 
-      it 'runs the Javascript code in the attribute value when a change is observed in the field', ->
+      it 'runs the Javascript code in the attribute value when a change is observed in the field', (done) ->
         $form = affix('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
         $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')

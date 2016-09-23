@@ -778,6 +778,7 @@ up.util = (($) ->
       setTimeout(callback, millis)
     else
       callback()
+      undefined
 
 
   ###*
@@ -1777,13 +1778,19 @@ up.util = (($) ->
   The proxy's `.promise` attribute is available even before the function is called
   and will resolve when the inner function's returned promise resolves.
 
+  If the inner function does not return a promise, the proxy's `.promise` attribute
+  will resolve as soon as the inner function returns.
+
   @function up.util.previewable
   @internal
   ###
   previewable = (fun) ->
     deferred = $.Deferred()
     preview = (args...) ->
-      fun(args...).then ->
+      funValue = fun(args...)
+      if isPromise(funValue)
+        funValue.then -> deferred.resolve()
+      else
         deferred.resolve()
     preview.promise = deferred.promise()
     preview
@@ -1843,6 +1850,27 @@ up.util = (($) ->
   sequence = (functions...) ->
     ->
       map functions, (f) -> f()
+
+#  ###*
+#  @function up.util.race
+#  @internal
+#  ###
+#  race = (promises...) ->
+#    raceDone = $.Deferred()
+#    each promises, (promise) ->
+#      promise.then -> raceDone.resolve()
+#    raceDone.promise()
+
+  ###*
+  @function up.util.promiseTimer
+  @internal
+  ###
+  promiseTimer = (ms) ->
+    deferred = $.Deferred()
+    timeout = setTimer ms, ->
+      deferred.resolve()
+    deferred.cancel = -> clearTimeout(timeout)
+    deferred
 
   isDetached: isDetached
   requestDataAsArray: requestDataAsArray
@@ -1952,6 +1980,7 @@ up.util = (($) ->
   DivertibleChain: DivertibleChain
   submittedValue: submittedValue
   sequence: sequence
+  promiseTimer: promiseTimer
 
 )($)
 

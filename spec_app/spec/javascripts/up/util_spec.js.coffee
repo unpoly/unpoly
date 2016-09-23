@@ -2,6 +2,18 @@ describe 'up.util', ->
   
   describe 'Javascript functions', ->
 
+    describe 'up.util.previewable', ->
+
+      it 'wraps a function into a proxy function with an additional .promise attribute'
+
+      it "resolve's the proxy's .promise when the inner function returns"
+
+      it "delays resolution of the proxy's .promise if the inner function returns a promise"
+
+    describe 'up.util.DivertibleChain', ->
+
+      it "instantiates a task queue whose (2..n)th tasks can be changed by calling '.asap'"
+
     describe 'up.util.sequence', ->
 
       it 'combines the given functions into a single function', ->
@@ -144,10 +156,17 @@ describe 'up.util', ->
         jasmine.clock().tick(1500)
         expect(callback).toHaveBeenCalled()
 
-      it 'calls the given function in the current execution frame if the delay is zero', ->
-        callback = jasmine.createSpy()
-        up.util.setTimer(0, callback)
-        expect(callback).toHaveBeenCalled()
+      describe 'if the delay is zero', ->
+
+        it 'calls the given function in the current execution frame', ->
+          callback = jasmine.createSpy()
+          up.util.setTimer(0, callback)
+          expect(callback).toHaveBeenCalled()
+
+        it "returns undefined so the return value won't be mistaken with a Javascript timer ID", ->
+          callback = -> 'function return value'
+          timerReturnValue = up.util.setTimer(0, callback)
+          expect(timerReturnValue).toBeUndefined()
 
 #    describe 'up.util.argNames', ->
 #

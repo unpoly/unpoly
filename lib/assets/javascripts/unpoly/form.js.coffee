@@ -249,52 +249,35 @@ up.form = (($) ->
     delay = u.option($fields.attr('up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
 
+    console.debug("Observing with delay %o", delay)
+
     destructors = u.map $fields, (field) ->
-      observeField($(field), options, callback)
+      observeField($(field), delay, callback)
 
     u.sequence(destructors...)
 
   observeField = ($field, delay, callback) ->
-    knownValue = null
-    callbackTimer = null
-    callbackPromise = u.resolvedPromise()
+    processedValue = u.submittedValue($field)
+    timer = undefined
+    lastCallbackDone = u.resolvedPromise()
 
-    # This holds the next callback function, curried with `value` and `$field`.
-    # Since we're waiting for callback promises to resolve before running
-    # another callback, this might be overwritten while we're waiting for a
-    # previous callback to finish.
-    nextCallback = null
-
-    runNextCallback = ->
-      if nextCallback
-        returnValue = nextCallback()
-        nextCallback = null
-        returnValue
+    runCallback = (value) ->
+      processedValue = value
+      callbackReturnValue = callback.apply($field.get(0), [value, $field])
+      if u.isPromise(callbackReturnValue)
+        lastCallbackDone = callbackReturnValue
+      else
+        lastCallbackDone = callbackReturnValue
 
     check = ->
       value = u.submittedValue($field)
       # don't run the callback for the check during initialization
-      skipCallback = u.isNull(knownValue)
-      if knownValue != value
-        knownValue = value
-        unless skipCallback
-          clearTimer()
-          nextCallback = -> callback.apply($field.get(0), [value, $field])
-          runAndChain = ->
-            # Only run the callback once the previous callback's
-            # promise resolves.
-            callbackPromise.then ->
-              returnValue = runNextCallback()
-              # If the callback returns a promise, we will remember it
-              # and chain additional callback invocations to it.
-              if u.isPromise(returnValue)
-                callbackPromise = returnValue
-              else
-                callbackPromise = u.resolvedPromise()
-          u.setTimer(delay, runAndChain)
-
-    clearTimer = ->
-      clearTimeout(callbackTimer)
+      if processedValue != value
+        nextCallback = -> runCallback(value)
+        timer?.cancel()
+        timer = u.promiseTimer(delay)
+        # We wait until both the delay has passed and a previous callback is done executing
+        $.when(timer, lastCallbackDone).then(nextCallback)
 
     # Although (depending on the browser) we only need/receive either input or change,
     # we always bind to both events in case another script manually triggers it.
@@ -307,12 +290,10 @@ up.form = (($) ->
 
     $field.on(changeEvents, check)
 
-    check()
-
     # return destructor
     return ->
       $field.off(changeEvents, check)
-      clearTimer()
+      timer?.cancel()
 
   ###*
   [Observes](/up.observe) a field or form and submits the form when a value changes.
