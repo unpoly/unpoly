@@ -860,7 +860,7 @@ up.form = (($) ->
   but not if the checkbox was changed:
 
       <form method="GET" action="/search">
-        <input type="search" name="query" autosubmit>
+        <input type="search" name="query" up-autosubmit>
         <input type="checkbox"> Include archive
       </form>
 
