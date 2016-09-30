@@ -417,6 +417,9 @@ describe 'up.form', ->
 
     describe '[up-observe]', ->
 
+      afterEach ->
+        window.observeCallbackSpy = undefined
+
       it 'runs the Javascript code in the attribute value when a change is observed in the field', (done) ->
         $form = affix('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
@@ -428,6 +431,20 @@ describe 'up.form', ->
           expect(window.observeCallbackSpy).toHaveBeenCalledWith('new-value', $field.get(0))
           done()
 
+      describe 'with [up-delay] modifier', ->
+
+        it 'debounces the callback', (done) ->
+          $form = affix('form')
+          window.observeCallbackSpy = jasmine.createSpy('observe callback')
+          $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="50"]')
+          up.hello($form)
+          $field.val('new-value')
+          $field.trigger('change')
+          u.nextFrame ->
+            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+            u.setTimer 80, ->
+              expect(window.observeCallbackSpy).toHaveBeenCalled()
+              done()
 
     describe 'input[up-validate]', ->
 
