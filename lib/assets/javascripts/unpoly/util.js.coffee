@@ -1789,9 +1789,10 @@ up.util = (($) ->
     preview = (args...) ->
       funValue = fun(args...)
       if isPromise(funValue)
-        funValue.then -> deferred.resolve()
+        funValue.then -> deferred.resolve(funValue)
       else
-        deferred.resolve()
+        deferred.resolve(funValue)
+      funValue
     preview.promise = deferred.promise()
     preview
 
@@ -1981,6 +1982,7 @@ up.util = (($) ->
   submittedValue: submittedValue
   sequence: sequence
   promiseTimer: promiseTimer
+  previewable: previewable
 
 )($)
 

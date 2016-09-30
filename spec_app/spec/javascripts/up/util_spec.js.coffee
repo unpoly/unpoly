@@ -1,14 +1,43 @@
 describe 'up.util', ->
-  
+
+  u = up.util
+
   describe 'Javascript functions', ->
 
     describe 'up.util.previewable', ->
 
-      it 'wraps a function into a proxy function with an additional .promise attribute'
+      it 'wraps a function into a proxy function with an additional .promise attribute', ->
+        fun = -> 'return value'
+        proxy = up.util.previewable(fun)
+        expect(u.isFunction(proxy)).toBe(true)
+        expect(u.isPromise(proxy.promise)).toBe(true)
+        expect(proxy()).toEqual('return value')
 
-      it "resolve's the proxy's .promise when the inner function returns"
+      it "resolves the proxy's .promise when the inner function returns", (done) ->
+        fun = -> 'return value'
+        proxy = up.util.previewable(fun)
+        callback = jasmine.createSpy('promise callback')
+        proxy.promise.then(callback)
+        u.nextFrame ->
+          expect(callback).not.toHaveBeenCalled()
+          proxy()
+          u.nextFrame ->
+            expect(callback).toHaveBeenCalledWith('return value')
+            done()
 
-      it "delays resolution of the proxy's .promise if the inner function returns a promise"
+      it "delays resolution of the proxy's .promise if the inner function returns a promise", (done) ->
+        funDeferred = $.Deferred()
+        fun = -> funDeferred
+        proxy = up.util.previewable(fun)
+        callback = jasmine.createSpy('promise callback')
+        proxy.promise.then(callback)
+        proxy()
+        u.nextFrame ->
+          expect(callback).not.toHaveBeenCalled()
+          funDeferred.resolve()
+          u.nextFrame ->
+            expect(callback).toHaveBeenCalled()
+            done()
 
     describe 'up.util.DivertibleChain', ->
 
