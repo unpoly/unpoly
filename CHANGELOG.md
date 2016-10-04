@@ -14,6 +14,16 @@ Unreleased
 ### Breaking changes
 
 
+0.30.1
+------
+
+### Compatible changes
+
+- Fix [`up.observe`](/up.observe) not honoring `{ delay }` option
+- Fix [`[up-observe]`](/up-observe) not honoring `[up-delay]` modifier
+- Fix many issues with concurrency and slow server responses for [`up.observe`](/up.observe) and [`[up-observe]`](/up-observe)
+
+
 
 0.30.0
 ------
