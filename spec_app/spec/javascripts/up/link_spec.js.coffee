@@ -394,6 +394,30 @@ describe 'up.link', ->
                 expect($('.document .target')).toHaveText('new text from document link')
                 done()
 
+        describe 'with [up-fail-target] modifier', ->
+
+          beforeEach ->
+            affix('.success-target').text('old success text')
+            affix('.failure-target').text('old failure text')
+            @$link = affix('a[href="/path"][up-target=".success-target"][up-fail-target=".failure-target"]')
+
+          it 'uses the [up-fail-target] selector for a failed response', (done) ->
+            Trigger.clickSequence(@$link)
+            u.nextFrame =>
+              @respondWith('<div class="failure-target">new failure text</div>', status: 500)
+              u.nextFrame =>
+                expect($('.success-target')).toHaveText('old success text')
+                expect($('.failure-target')).toHaveText('new failure text')
+                done()
+
+          it 'uses the [up-target] selector for a successful response', (done) ->
+            Trigger.clickSequence(@$link)
+            u.nextFrame =>
+              @respondWith('<div class="success-target">new success text</div>', status: 200)
+              u.nextFrame =>
+                expect($('.success-target')).toHaveText('new success text')
+                expect($('.failure-target')).toHaveText('old failure text')
+                done()
 
         describe 'with [up-transition] modifier', ->
 
