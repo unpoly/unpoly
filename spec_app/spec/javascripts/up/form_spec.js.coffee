@@ -100,7 +100,6 @@ describe 'up.form', ->
             it 'does not run multiple callbacks if a long-running callback has been blocking multiple subsequent callbacks'
 
             it "runs a callback in the same frame if the delay is 0", ->
-              console.debug('*** next example')
               $input = affix('input[value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, { delay: 0 }, callback)

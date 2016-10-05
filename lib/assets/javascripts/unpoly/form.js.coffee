@@ -249,8 +249,6 @@ up.form = (($) ->
     delay = u.option($fields.attr('up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
 
-    console.debug("Observing with delay %o", delay)
-
     destructors = u.map $fields, (field) ->
       observeField($(field), delay, callback)
 
