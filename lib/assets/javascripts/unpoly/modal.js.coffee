@@ -116,6 +116,8 @@ up.modal = (($) ->
   @param {Boolean} [options.sticky=false]
     If set to `true`, the modal remains
     open even it changes the page in the background.
+  @param {String} [options.flavor='default']
+    The default [flavor](/up.modal.flavors).
   @stable
   ###
   config = u.config
@@ -135,20 +137,61 @@ up.modal = (($) ->
     closeLabel: '×'
     closable: true
     sticky: false
-    flavors: { default: {} }
-
-    template: (config) ->
+    flavor: 'default'
+    position: null
+    template: (options) ->
       """
       <div class="up-modal">
         <div class="up-modal-backdrop"></div>
         <div class="up-modal-viewport">
           <div class="up-modal-dialog">
             <div class="up-modal-content"></div>
-            <div class="up-modal-close" up-close>#{flavorDefault('closeLabel')}</div>
+            <div class="up-modal-close" up-close>#{options.closeLabel}</div>
           </div>
         </div>
       </div>
       """
+
+  ###*
+  Define modal variants with their own default configuration, CSS or HTML template.
+
+  \#\#\# Example
+
+  Unpoly's [`[up-drawer]`](/up-drawer) is implemented as a modal flavor:
+
+      up.modal.flavors.drawer = {
+        openAnimation: 'move-from-right',
+        closeAnimation: 'move-to-right'
+      }
+
+  Modals with that flavor will have a container with an `up-flavor` attribute:
+
+      <div class='up-modal' up-flavor='drawer'>
+        ...
+      </div>
+
+  We can target the `up-flavor` attribute to override the default dialog styles:
+
+      .up-modal[up-flavor='drawer'] {
+
+        .up-modal-dialog {
+          margin: 0;         // Remove margin so drawer starts at the screen edge
+          max-width: 350px;  // Set drawer size
+        }
+
+        .up-modal-content {
+          min-height: 100vh; // Stretch background to full window height
+        }
+      }
+
+  @property up.modal.flavors
+  @param {Object} flavors
+    An object where the keys are flavor names (e.g. `'drawer') and
+    the values are the respective default configurations.
+  @experimental
+  ###
+  flavors = u.openConfig
+    default: {}
 
   ###*
   Returns the source URL for the fragment displayed in the current modal overlay,
@@ -178,6 +221,7 @@ up.modal = (($) ->
     url: null
     coveredUrl: null
     coveredTitle: null
+    position: null
     unshifters: []
 
   chain = new u.DivertibleChain()
@@ -188,13 +232,11 @@ up.modal = (($) ->
     state.reset()
     chain.reset()
     config.reset()
+    flavors.reset()
 
   templateHtml = ->
     template = flavorDefault('template')
-    if u.isFunction(template)
-      template(config)
-    else
-      template
+    u.evalOption(template, closeLabel: flavorDefault('closeLabel'))
 
   discardHistory = ->
     state.coveredTitle = null
@@ -203,6 +245,7 @@ up.modal = (($) ->
   createFrame = (target, options) ->
     $modal = $(templateHtml())
     $modal.attr('up-flavor', state.flavor)
+    $modal.attr('up-position', state.position) if u.isPresent(state.position)
     $dialog = $modal.find('.up-modal-dialog')
     $dialog.css('width', options.width) if u.isPresent(options.width)
     $dialog.css('max-width', options.maxWidth) if u.isPresent(options.maxWidth)
@@ -389,12 +432,16 @@ up.modal = (($) ->
     url = u.option(u.pluckKey(options, 'url'), $link.attr('up-href'), $link.attr('href'))
     html = u.option(u.pluckKey(options, 'html'))
     target = u.option(u.pluckKey(options, 'target'), $link.attr('up-modal'), 'body')
-    options.flavor = u.option(options.flavor, $link.attr('up-flavor'))
+    options.flavor = u.option(options.flavor, $link.attr('up-flavor'), config.flavor)
+    options.position = u.option(options.position, $link.attr('up-position'), flavorDefault('position', options.flavor))
+    options.position = u.evalOption(options.position, $link: $link)
     options.width = u.option(options.width, $link.attr('up-width'), flavorDefault('width', options.flavor))
     options.maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), flavorDefault('maxWidth', options.flavor))
     options.height = u.option(options.height, $link.attr('up-height'), flavorDefault('height'))
     options.animation = u.option(options.animation, $link.attr('up-animation'), flavorDefault('openAnimation', options.flavor))
+    options.animation = u.evalOption(options.animation, position: options.position)
     options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), flavorDefault('backdropOpenAnimation', options.flavor))
+    options.backdropAnimation = u.evalOption(options.backdropAnimation, position: options.position)
     options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor))
     options.closable = u.option(options.closable, u.castedAttr($link, 'up-closable'), flavorDefault('closable', options.flavor))
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
@@ -414,6 +461,7 @@ up.modal = (($) ->
         state.flavor = options.flavor
         state.sticky = options.sticky
         state.closable = options.closable
+        state.position = options.position
         if options.history
           state.coveredUrl = up.browser.url()
           state.coveredTitle = document.title
@@ -473,7 +521,9 @@ up.modal = (($) ->
 
     options = u.options(options)
     viewportCloseAnimation = u.option(options.animation, flavorDefault('closeAnimation'))
+    viewportCloseAnimation = u.evalOption(viewportCloseAnimation, position: state.position)
     backdropCloseAnimation = u.option(options.backdropAnimation, flavorDefault('backdropCloseAnimation'))
+    backdropCloseAnimation = u.evalOption(backdropCloseAnimation, position: state.position)
     animateOptions = up.motion.animateOptions(options, duration: flavorDefault('closeDuration'), easing: flavorDefault('closeEasing'))
 
     destroyOptions = u.options(
@@ -502,6 +552,7 @@ up.modal = (($) ->
         state.flavor = null
         state.sticky = null
         state.closable = null
+        state.position = null
         up.emit('up:modal:closed', message: 'Modal closed')
 
       promise
@@ -557,42 +608,8 @@ up.modal = (($) ->
     $element = $(elementOrSelector)
     $element.closest('.up-modal').length > 0
 
-  ###*
-  Register a new modal variant with its own default configuration, CSS or HTML template.
-
-  \#\#\# Example
-
-  Let's implement a drawer that slides in from the right:
-
-      up.modal.flavor('drawer', {
-        openAnimation: 'move-from-right',
-        closeAnimation: 'move-to-right',
-        maxWidth: 400
-      }
-
-  Modals with that flavor will have a container `<div class='up-modal' up-flavor='drawer'>...</div>`.
-  We can target the `up-flavor` attribute override the default dialog styles:
-
-      .up-modal[up-flavor='drawer'] {
-
-        // Align drawer on the right
-        .up-modal-viewport { text-align: right; }
-
-        // Remove margin so the drawer starts at the screen edge
-        .up-modal-dialog { margin: 0; }
-
-        // Stretch drawer background to full window height
-        .up-modal-content { min-height: 100vh; }
-      }
-
-  @function up.modal.flavor
-  @param {String} name
-    The name of the new flavor.
-  @param {Object} [overrideConfig]
-    An object whose properties override the defaults in [`/up.modal.config`](/up.modal.config).
-  @experimental
-  ###
   flavor = (name, overrideConfig = {}) ->
+    up.log.warn 'The up.modal.flavor function is deprecated. Use the up.modal.flavors property instead.'
     u.extend(flavorOverrides(name), overrideConfig)
 
   ###*
@@ -604,7 +621,7 @@ up.modal = (($) ->
   @internal
   ###
   flavorOverrides = (flavor) ->
-    config.flavors[flavor] ||= {}
+    flavors[flavor] ||= {}
 
   ###*
   Returns the config option for the current flavor.
@@ -621,16 +638,18 @@ up.modal = (($) ->
   Clicking this link will load the destination via AJAX and open
   the given selector in a modal dialog.
 
-  Example:
+  \#\#\#\# Example
 
       <a href="/blogs" up-modal=".blog-list">Switch blog</a>
 
   Clicking would request the path `/blog` and select `.blog-list` from
-  the HTML response. Unpoly will dim the page with an overlay
+  the HTML response. Unpoly will dim the page
   and place the matching `.blog-list` tag will be placed in
   a modal dialog.
 
   @selector [up-modal]
+  @param {String} up-modal
+    The CSS selector that will be extracted from the response and displayed in a modal dialog.
   @param {String} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the modal is opened.
@@ -712,6 +731,65 @@ up.modal = (($) ->
       up.bus.consumeAction(event)
   )
 
+  ###*
+  Clicking this link will load the destination via AJAX and open
+  the given selector in a modal drawer that slides in from the edge of the screen.
+
+  You can configure drawers using the [`up.modal.flavors.drawer`](/up.modal.flavors.drawer) property.
+
+  \#\#\#\# Example
+
+      <a href="/blogs" up-drawer=".blog-list">Switch blog</a>
+
+  Clicking would request the path `/blog` and select `.blog-list` from
+  the HTML response. Unpoly will dim the page
+  and place the matching `.blog-list` tag will be placed in
+  a modal drawer.
+
+  @selector [up-drawer]
+  @param {String} up-drawer
+    The CSS selector to extract from the response and open in the drawer.
+  @param {String} [up-position='auto']
+    The side from which the drawer slides in.
+
+    Valid values are `'left'`, `'right'` and `'auto'`. If set to `'auto'`, the
+    drawer will slide in from left if the opening link is on the left half of the screen.
+    Otherwise it will slide in from the right.
+  @experimental
+  ###
+  up.macro '[up-drawer]', ($link) ->
+    target = $link.attr('up-drawer')
+    $link.attr
+      'up-modal': target
+      'up-flavor': 'drawer'
+
+  ###*
+  Sets default options for future drawers.
+
+  @property up.modal.flavors.drawer
+  @param {Object} config
+    Default options for future drawers.
+
+    See [`up.modal.config`] for available options.
+  @experimental
+  ###
+  flavors.drawer =
+    openAnimation: (options) ->
+      switch options.position
+        when 'left' then 'move-from-left'
+        when 'right' then 'move-from-right'
+    closeAnimation: (options) ->
+      switch options.position
+        when 'left' then 'move-to-left'
+        when 'right' then 'move-to-right'
+    position: (options) ->
+      if u.isPresent(options.$link)
+        u.horizontalScreenHalf(options.$link)
+      else
+        # In case the drawer was opened programmatically through `up.modal.open`,
+        # we might now know the link that was clicked on.
+        'left'
+
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
 
@@ -723,8 +801,9 @@ up.modal = (($) ->
   url: -> state.url
   coveredUrl: -> state.coveredUrl
   config: config
+  flavors: flavors
   contains: contains
   isOpen: isOpen
-  flavor: flavor
+  flavor: flavor # deprecated
 
 )(jQuery)

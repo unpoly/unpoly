@@ -373,6 +373,9 @@ up.popup = (($) ->
       <a href="/settings" up-popup=".options" up-sticky>Settings</a>
 
   @selector [up-popup]
+  @param {String} up-popup
+    The CSS selector that will be extracted from the response and
+    displayed in a popup overlay.
   @param [up-position]
     Defines where the popup is attached to the opening element.
 

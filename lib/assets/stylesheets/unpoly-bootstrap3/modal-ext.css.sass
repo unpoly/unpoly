@@ -2,3 +2,21 @@
   // Unpoly: Gives some default padding
   // BS: Expects content to set the padding
   padding: 0
+
+.up-modal[up-flavor='drawer']
+
+  .up-modal-content
+    // Bootstrap gives its modals round corners, which looks wrong with a
+    // drawer that sits at the end of the screen.
+    border-radius: 0
+
+    // Bootstrap gives its modals a border, which looks wrong
+    // when touching the edge of the screen.
+    border-top: none
+    border-bottom: none
+
+  &[up-position='left'] .up-modal-content
+    border-left: none
+
+  &[up-position='right'] .up-modal-content
+    border-right: none

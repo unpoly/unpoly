@@ -10,8 +10,16 @@ Unreleased
 
 ### Compatible changes
 
+- Drawers are now a built-in modal flavor! Use the `[up-drawer]` attribute to open page fragements
+  in a modal drawer that slides in from the edge of the screen.
+
 
 ### Breaking changes
+
+- The [`up.modal.flavor`](/up.modal.flavor) function was deprecated. Set values on the
+  [`up.modal.flavors`](/up.modal.flavors) property instead.
+
+
 
 
 0.30.1

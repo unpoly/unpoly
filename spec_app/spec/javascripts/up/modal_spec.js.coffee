@@ -225,7 +225,7 @@ describe 'up.modal', ->
           up.modal.config.openDuration = 20
           up.modal.config.closeAnimation = 'fade-out'
           up.modal.config.closeDuration = 20
-          up.modal.flavor 'drawer',
+          up.modal.flavor 'custom-drawer',
             openAnimation: 'move-from-right'
             closeAnimation: 'move-to-right'
 
@@ -252,7 +252,7 @@ describe 'up.modal', ->
             ]
 
 
-            up.modal.extract('.target', '<div class="target">response2</div>', flavor: 'drawer')
+            up.modal.extract('.target', '<div class="target">response2</div>', flavor: 'custom-drawer')
             expect(animations).toEqual [
               { animation: 'fade-in', text: 'response1' },
               { animation: 'fade-out', text: 'response1' },
@@ -266,7 +266,7 @@ describe 'up.modal', ->
                 { animation: 'move-from-right', text: 'response2' }
               ]
 
-              expect($('.up-modal').attr('up-flavor')).toEqual('drawer')
+              expect($('.up-modal').attr('up-flavor')).toEqual('custom-drawer')
 
               done()
 
@@ -293,10 +293,10 @@ describe 'up.modal', ->
               expect(up.modal.coveredUrl()).toBeMissing()
               done()
 
-    describe 'up.modal.flavor', ->
+    describe 'up.modal.flavors', ->
 
-      it 'registers a new modal variant with its own default configuration', ->
-        up.modal.flavor('variant', { maxWidth: 200 })
+      it 'allows to register new modal variants with its own default configuration', ->
+        up.modal.flavors.variant = { maxWidth: 200 }
         $link = affix('a[href="/path"][up-modal=".target"][up-flavor="variant"]')
         Trigger.click($link)
         @respondWith('<div class="target">new text</div>')
@@ -307,7 +307,7 @@ describe 'up.modal', ->
         expect($dialog.attr('style')).toContain('max-width: 200px')
 
       it 'does not change the configuration of non-flavored modals', ->
-        up.modal.flavor('variant', { maxWidth: 200 })
+        up.modal.flavors.variant = { maxWidth: 200 }
         $link = affix('a[href="/path"][up-modal=".target"]')
         Trigger.click($link)
         @respondWith('<div class="target">new text</div>')
@@ -417,6 +417,40 @@ describe 'up.modal', ->
           Trigger.click($link)
           expect(@lastRequest().method).toEqual 'POST'
 
+    describe '[up-drawer]', ->
+
+      beforeEach ->
+        up.motion.config.enabled = false
+
+      it 'slides in a drawer that covers the full height of the screen', (done) ->
+        $link = affix('a[href="/foo"][up-drawer=".target"]').text('label')
+        up.hello($link)
+        Trigger.clickSequence($link)
+        u.nextFrame =>
+          @respondWith '<div class="target">new text</div>'
+          expect(up.modal.isOpen()).toBe(true)
+          expect($('.up-modal').attr('up-flavor')).toEqual('drawer')
+          windowHeight = u.clientSize().height
+          modalHeight = $('.up-modal-content').outerHeight()
+          expect(modalHeight).toEqual(windowHeight)
+          expect($('.up-modal-content').offset()).toEqual(top: 0, left: 0)
+          done()
+
+      it 'puts the drawer on the right if the opening link sits in the right 50% of the screen', (done) ->
+        $link = affix('a[href="/foo"][up-drawer=".target"]').text('label')
+        $link.css
+          position: 'absolute'
+          right: '0'
+        up.hello($link)
+        Trigger.clickSequence($link)
+        u.nextFrame =>
+          @respondWith '<div class="target">new text</div>'
+          expect(up.modal.isOpen()).toBe(true)
+          windowWidth = u.clientSize().width
+          modalWidth = $('.up-modal-content').outerWidth()
+          scrollbarWidth = u.scrollbarWidth()
+          expect($('.up-modal-content').offset().left).toBeAround(windowWidth - modalWidth - scrollbarWidth, 1.0)
+          done()
 
     describe '[up-close]', ->
 

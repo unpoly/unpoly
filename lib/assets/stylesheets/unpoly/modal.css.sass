@@ -96,3 +96,16 @@ $close-font-size: 34px
   color: #666
   cursor: pointer
 
+.up-modal[up-flavor='drawer']
+  .up-modal-viewport
+    text-align: left
+  &[up-position='right'] .up-modal-viewport
+    text-align: right
+  .up-modal-dialog
+    margin: 0
+    max-width: 350px
+  .up-modal-content
+    min-height: 100vh
+    box-sizing: border-box // since we're setting min-height on an element with padding
+
+

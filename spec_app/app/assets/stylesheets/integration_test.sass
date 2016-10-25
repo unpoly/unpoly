@@ -1,5 +1,7 @@
 //= require unpoly
 
+@import helpers
+
 $block-spacing: 25px
 
 =block-spacing
@@ -13,6 +15,11 @@ body
 
 h1, h2, h3, h4, p
   +block-spacing
+
+a
+  color: #169
+  &:hover
+    color: #e81
 
 .page
   min-height: 3000px
@@ -32,6 +39,7 @@ h1, h2, h3, h4, p
 
 .example
   margin: 50px
+  +clear-after
 
 .area
   +block-spacing
@@ -44,13 +52,14 @@ h1, h2, h3, h4, p
   line-height: 50px
   padding-left: 25px
   padding-right: 25px
-  background-color: #e21
+  background-color: #37b
   color: white
   text-decoration: none
   &.up-current
-    background-color: #921
+    background-color: #e21
   &:hover
     background-color: #fa1
+    color: white
   &.up-active
     background-color: #ff0
 

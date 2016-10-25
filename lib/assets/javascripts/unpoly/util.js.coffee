@@ -1382,6 +1382,19 @@ up.util = (($) ->
     obj
 
   ###*
+  If the given `value` is a function, calls the function with the given `args`.
+  Otherwise it just returns `value`.
+
+  @function up.util.evalOption
+  @internal
+  ###
+  evalOption = (value, args...) ->
+    if isFunction(value)
+      value(args...)
+    else
+      value
+
+  ###*
   @function up.util.cache
   @param {Number|Function} [config.size]
     Maximum number of cache entries.
@@ -1400,19 +1413,8 @@ up.util = (($) ->
 
     store = undefined
 
-    optionEvaluator = (name) ->
-      ->
-        value = config[name]
-        if isNumber(value)
-          value
-        else if isFunction(value)
-          value()
-        else
-          undefined
-
-    maxKeys = optionEvaluator('size')
-
-    expiryMillis = optionEvaluator('expiry')
+    maxKeys = -> evalOption(config.size)
+    expiryMillis = -> evalOption(config.expiry)
 
     normalizeStoreKey = (key) ->
       if config.key
@@ -1501,16 +1503,29 @@ up.util = (($) ->
 
   ###*
   @function up.util.config
+  @param {Object|Function} blueprint
+    Default configuration options.
+    Will be restored by calling `reset` on the returned object.
+  @return {Object}
+    An object with a `reset` function.
   @internal
   ###
-  config = (blueprint = {}) ->
+  config = (blueprint) ->
+    hash = openConfig(blueprint)
+    Object.preventExtensions(hash)
+    hash
+
+  ###*
+  @function up.util.openConfig
+  @internal
+  ###
+  openConfig = (blueprint = {}) ->
     hash = {}
     hash.reset = ->
       newOptions = blueprint
       newOptions = newOptions() if isFunction(newOptions)
       extend(hash, newOptions)
     hash.reset()
-    Object.preventExtensions(hash)
     hash
 
   ###*
@@ -1873,6 +1888,23 @@ up.util = (($) ->
     deferred.cancel = -> clearTimeout(timeout)
     deferred
 
+  ###*
+  Returns `'left'` if the center of the given element is in the left 50% of the screen.
+  Otherwise returns `'right'`.
+
+  @function up.util.horizontalScreenHalf
+  @internal
+  ###
+  horizontalScreenHalf = ($element) ->
+    elementDims = measure($element)
+    screenDims = clientSize()
+    elementMid = elementDims.left + 0.5 * elementDims.width
+    screenMid = 0.5 * screenDims.width
+    if elementMid < screenMid
+      'left'
+    else
+      'right'
+
   isDetached: isDetached
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
@@ -1965,6 +1997,7 @@ up.util = (($) ->
   scrollbarWidth: scrollbarWidth
   documentHasVerticalScrollbar: documentHasVerticalScrollbar
   config: config
+  openConfig: openConfig
   cache: cache
   unwrapElement: unwrapElement
   multiSelector: multiSelector
@@ -1983,6 +2016,8 @@ up.util = (($) ->
   sequence: sequence
   promiseTimer: promiseTimer
   previewable: previewable
+  evalOption: evalOption
+  horizontalScreenHalf: horizontalScreenHalf
 
 )($)
 

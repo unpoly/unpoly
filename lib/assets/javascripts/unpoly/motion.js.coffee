@@ -165,7 +165,7 @@ up.motion = (($) ->
     $element = $(elementOrSelector)
     finish($element)
     options = animateOptions(options)
-    if animation == 'none' || animation == false
+    if animation == 'none' || animation == false || u.isMissing(animation)
       none()
     else if u.isFunction(animation)
       assertIsDeferred(animation($element, options), animation)
