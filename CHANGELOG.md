@@ -10,7 +10,7 @@ Unreleased
 
 ### Compatible changes
 
-- Drawers are now a built-in modal flavor! Use the `[up-drawer]` attribute to open page fragements
+- Drawers are now a built-in modal flavor! Use the [`[up-drawer]`](/up-drawer] attribute to open page fragements
   in a modal drawer that slides in from the edge of the screen.
 
 
