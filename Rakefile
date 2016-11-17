@@ -88,7 +88,7 @@ namespace :npm do
   end
 
   task :publish do
-    system('npm publish') or raise 'Could not publish NPM module'
+    system('npm publish') or raise 'Could not publish npm module'
   end
 
 end
