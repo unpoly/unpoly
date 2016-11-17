@@ -1,11 +1,15 @@
-
-/**
-@module up
- */
-
 (function() {
-  window.up = {
-    version: "0.30.0"
+  var world;
+
+  world = typeof global !== 'undefined' ? global : this;
+
+
+  /**
+  @module up
+   */
+
+  world.up = {
+    version: "0.31.1"
   };
 
 }).call(this);
@@ -32,7 +36,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, except, extend, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extend, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -925,7 +929,8 @@ that might save you from loading something like [Underscore.js](http://underscor
       if (millis > 0) {
         return setTimeout(callback, millis);
       } else {
-        return callback();
+        callback();
+        return void 0;
       }
     };
 
@@ -1589,6 +1594,23 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
+    If the given `value` is a function, calls the function with the given `args`.
+    Otherwise it just returns `value`.
+    
+    @function up.util.evalOption
+    @internal
+     */
+    evalOption = function() {
+      var args, value;
+      value = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      if (isFunction(value)) {
+        return value.apply(null, args);
+      } else {
+        return value;
+      }
+    };
+
+    /**
     @function up.util.cache
     @param {Number|Function} [config.size]
       Maximum number of cache entries.
@@ -1604,26 +1626,17 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     cache = function(config) {
-      var alias, clear, expiryMillis, get, isEnabled, isFresh, keys, log, makeRoomForAnotherKey, maxKeys, normalizeStoreKey, optionEvaluator, set, store, timestamp;
+      var alias, clear, expiryMillis, get, isEnabled, isFresh, keys, log, makeRoomForAnotherKey, maxKeys, normalizeStoreKey, set, store, timestamp;
       if (config == null) {
         config = {};
       }
       store = void 0;
-      optionEvaluator = function(name) {
-        return function() {
-          var value;
-          value = config[name];
-          if (isNumber(value)) {
-            return value;
-          } else if (isFunction(value)) {
-            return value();
-          } else {
-            return void 0;
-          }
-        };
+      maxKeys = function() {
+        return evalOption(config.size);
       };
-      maxKeys = optionEvaluator('size');
-      expiryMillis = optionEvaluator('expiry');
+      expiryMillis = function() {
+        return evalOption(config.expiry);
+      };
       normalizeStoreKey = function(key) {
         if (config.key) {
           return config.key(key);
@@ -1746,9 +1759,25 @@ that might save you from loading something like [Underscore.js](http://underscor
 
     /**
     @function up.util.config
+    @param {Object|Function} blueprint
+      Default configuration options.
+      Will be restored by calling `reset` on the returned object.
+    @return {Object}
+      An object with a `reset` function.
     @internal
      */
     config = function(blueprint) {
+      var hash;
+      hash = openConfig(blueprint);
+      Object.preventExtensions(hash);
+      return hash;
+    };
+
+    /**
+    @function up.util.openConfig
+    @internal
+     */
+    openConfig = function(blueprint) {
       var hash;
       if (blueprint == null) {
         blueprint = {};
@@ -1763,7 +1792,6 @@ that might save you from loading something like [Underscore.js](http://underscor
         return extend(hash, newOptions);
       };
       hash.reset();
-      Object.preventExtensions(hash);
       return hash;
     };
 
@@ -2075,6 +2103,9 @@ that might save you from loading something like [Underscore.js](http://underscor
     The proxy's `.promise` attribute is available even before the function is called
     and will resolve when the inner function's returned promise resolves.
     
+    If the inner function does not return a promise, the proxy's `.promise` attribute
+    will resolve as soon as the inner function returns.
+    
     @function up.util.previewable
     @internal
      */
@@ -2082,11 +2113,17 @@ that might save you from loading something like [Underscore.js](http://underscor
       var deferred, preview;
       deferred = $.Deferred();
       preview = function() {
-        var args;
+        var args, funValue;
         args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-        return fun.apply(null, args).then(function() {
-          return deferred.resolve();
-        });
+        funValue = fun.apply(null, args);
+        if (isPromise(funValue)) {
+          funValue.then(function() {
+            return deferred.resolve(funValue);
+          });
+        } else {
+          deferred.resolve(funValue);
+        }
+        return funValue;
       };
       preview.promise = deferred.promise();
       return preview;
@@ -2184,6 +2221,42 @@ that might save you from loading something like [Underscore.js](http://underscor
         });
       };
     };
+
+    /**
+    @function up.util.promiseTimer
+    @internal
+     */
+    promiseTimer = function(ms) {
+      var deferred, timeout;
+      deferred = $.Deferred();
+      timeout = setTimer(ms, function() {
+        return deferred.resolve();
+      });
+      deferred.cancel = function() {
+        return clearTimeout(timeout);
+      };
+      return deferred;
+    };
+
+    /**
+    Returns `'left'` if the center of the given element is in the left 50% of the screen.
+    Otherwise returns `'right'`.
+    
+    @function up.util.horizontalScreenHalf
+    @internal
+     */
+    horizontalScreenHalf = function($element) {
+      var elementDims, elementMid, screenDims, screenMid;
+      elementDims = measure($element);
+      screenDims = clientSize();
+      elementMid = elementDims.left + 0.5 * elementDims.width;
+      screenMid = 0.5 * screenDims.width;
+      if (elementMid < screenMid) {
+        return 'left';
+      } else {
+        return 'right';
+      }
+    };
     return {
       isDetached: isDetached,
       requestDataAsArray: requestDataAsArray,
@@ -2275,6 +2348,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       scrollbarWidth: scrollbarWidth,
       documentHasVerticalScrollbar: documentHasVerticalScrollbar,
       config: config,
+      openConfig: openConfig,
       cache: cache,
       unwrapElement: unwrapElement,
       multiSelector: multiSelector,
@@ -2290,7 +2364,11 @@ that might save you from loading something like [Underscore.js](http://underscor
       escapeHtml: escapeHtml,
       DivertibleChain: DivertibleChain,
       submittedValue: submittedValue,
-      sequence: sequence
+      sequence: sequence,
+      promiseTimer: promiseTimer,
+      previewable: previewable,
+      evalOption: evalOption,
+      horizontalScreenHalf: horizontalScreenHalf
     };
   })($);
 
@@ -6095,7 +6173,7 @@ You can define custom animations using [`up.transition`](/up.transition) and
       $element = $(elementOrSelector);
       finish($element);
       options = animateOptions(options);
-      if (animation === 'none' || animation === false) {
+      if (animation === 'none' || animation === false || u.isMissing(animation)) {
         return none();
       } else if (u.isFunction(animation)) {
         return assertIsDeferred(animation($element, options), animation);
@@ -8082,62 +8160,47 @@ open dialogs with sub-forms, etc. all without losing form state.
       delay = u.option($fields.attr('up-delay'), options.delay, config.observeDelay);
       delay = parseInt(delay);
       destructors = u.map($fields, function(field) {
-        return observeField($(field), options, callback);
+        return observeField($(field), delay, callback);
       });
       return u.sequence.apply(u, destructors);
     };
     observeField = function($field, delay, callback) {
-      var callbackPromise, callbackTimer, changeEvents, check, clearTimer, knownValue, nextCallback, runNextCallback;
-      knownValue = null;
-      callbackTimer = null;
-      callbackPromise = u.resolvedPromise();
-      nextCallback = null;
-      runNextCallback = function() {
-        var returnValue;
-        if (nextCallback) {
-          returnValue = nextCallback();
-          nextCallback = null;
-          return returnValue;
+      var changeEvents, check, lastCallbackDone, processedValue, runCallback, timer;
+      processedValue = u.submittedValue($field);
+      timer = void 0;
+      lastCallbackDone = u.resolvedPromise();
+      runCallback = function(value) {
+        var callbackReturnValue;
+        processedValue = value;
+        callbackReturnValue = callback.apply($field.get(0), [value, $field]);
+        if (u.isPromise(callbackReturnValue)) {
+          return lastCallbackDone = callbackReturnValue;
+        } else {
+          return lastCallbackDone = callbackReturnValue;
         }
       };
       check = function() {
-        var runAndChain, skipCallback, value;
+        var nextCallback, value;
         value = u.submittedValue($field);
-        skipCallback = u.isNull(knownValue);
-        if (knownValue !== value) {
-          knownValue = value;
-          if (!skipCallback) {
-            clearTimer();
-            nextCallback = function() {
-              return callback.apply($field.get(0), [value, $field]);
-            };
-            runAndChain = function() {
-              return callbackPromise.then(function() {
-                var returnValue;
-                returnValue = runNextCallback();
-                if (u.isPromise(returnValue)) {
-                  return callbackPromise = returnValue;
-                } else {
-                  return callbackPromise = u.resolvedPromise();
-                }
-              });
-            };
-            return u.setTimer(delay, runAndChain);
+        if (processedValue !== value) {
+          nextCallback = function() {
+            return runCallback(value);
+          };
+          if (timer != null) {
+            timer.cancel();
           }
+          timer = u.promiseTimer(delay);
+          return $.when(timer, lastCallbackDone).then(nextCallback);
         }
-      };
-      clearTimer = function() {
-        return clearTimeout(callbackTimer);
       };
       changeEvents = 'input change';
       if (!up.browser.canInputEvent()) {
         changeEvents += ' keypress paste cut click propertychange';
       }
       $field.on(changeEvents, check);
-      check();
       return function() {
         $field.off(changeEvents, check);
-        return clearTimer();
+        return timer != null ? timer.cancel() : void 0;
       };
     };
 
@@ -8714,7 +8777,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     but not if the checkbox was changed:
     
         <form method="GET" action="/search">
-          <input type="search" name="query" autosubmit>
+          <input type="search" name="query" up-autosubmit>
           <input type="checkbox"> Include archive
         </form>
     
@@ -9170,6 +9233,9 @@ The HTML of a popup element is simply this:
         <a href="/settings" up-popup=".options" up-sticky>Settings</a>
     
     @selector [up-popup]
+    @param {String} up-popup
+      The CSS selector that will be extracted from the response and
+      displayed in a popup overlay.
     @param [up-position]
       Defines where the popup is attached to the opening element.
     
@@ -9316,7 +9382,7 @@ or function.
 
 (function() {
   up.modal = (function($) {
-    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, followAsap, isOpen, markAsAnimating, openAsap, openNow, reset, shiftElements, state, templateHtml, u, unshiftElements, visitAsap;
+    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, flavors, followAsap, isOpen, markAsAnimating, openAsap, openNow, reset, shiftElements, state, templateHtml, u, unshiftElements, visitAsap;
     u = up.util;
 
     /**
@@ -9375,6 +9441,8 @@ or function.
     @param {Boolean} [options.sticky=false]
       If set to `true`, the modal remains
       open even it changes the page in the background.
+    @param {String} [options.flavor='default']
+      The default [flavor](/up.modal.flavors).
     @stable
      */
     config = u.config({
@@ -9394,12 +9462,53 @@ or function.
       closeLabel: '×',
       closable: true,
       sticky: false,
-      flavors: {
-        "default": {}
-      },
-      template: function(config) {
-        return "<div class=\"up-modal\">\n  <div class=\"up-modal-backdrop\"></div>\n  <div class=\"up-modal-viewport\">\n    <div class=\"up-modal-dialog\">\n      <div class=\"up-modal-content\"></div>\n      <div class=\"up-modal-close\" up-close>" + (flavorDefault('closeLabel')) + "</div>\n    </div>\n  </div>\n</div>";
+      flavor: 'default',
+      position: null,
+      template: function(options) {
+        return "<div class=\"up-modal\">\n  <div class=\"up-modal-backdrop\"></div>\n  <div class=\"up-modal-viewport\">\n    <div class=\"up-modal-dialog\">\n      <div class=\"up-modal-content\"></div>\n      <div class=\"up-modal-close\" up-close>" + options.closeLabel + "</div>\n    </div>\n  </div>\n</div>";
       }
+    });
+
+    /**
+    Define modal variants with their own default configuration, CSS or HTML template.
+    
+    \#\#\# Example
+    
+    Unpoly's [`[up-drawer]`](/up-drawer) is implemented as a modal flavor:
+    
+        up.modal.flavors.drawer = {
+          openAnimation: 'move-from-right',
+          closeAnimation: 'move-to-right'
+        }
+    
+    Modals with that flavor will have a container with an `up-flavor` attribute:
+    
+        <div class='up-modal' up-flavor='drawer'>
+          ...
+        </div>
+    
+    We can target the `up-flavor` attribute to override the default dialog styles:
+    
+        .up-modal[up-flavor='drawer'] {
+    
+          .up-modal-dialog {
+            margin: 0;         // Remove margin so drawer starts at the screen edge
+            max-width: 350px;  // Set drawer size
+          }
+    
+          .up-modal-content {
+            min-height: 100vh; // Stretch background to full window height
+          }
+        }
+    
+    @property up.modal.flavors
+    @param {Object} flavors
+      An object where the keys are flavor names (e.g. `'drawer') and
+      the values are the respective default configurations.
+    @experimental
+     */
+    flavors = u.openConfig({
+      "default": {}
     });
 
     /**
@@ -9430,6 +9539,7 @@ or function.
         url: null,
         coveredUrl: null,
         coveredTitle: null,
+        position: null,
         unshifters: []
       };
     });
@@ -9442,16 +9552,15 @@ or function.
       unshiftElements();
       state.reset();
       chain.reset();
-      return config.reset();
+      config.reset();
+      return flavors.reset();
     };
     templateHtml = function() {
       var template;
       template = flavorDefault('template');
-      if (u.isFunction(template)) {
-        return template(config);
-      } else {
-        return template;
-      }
+      return u.evalOption(template, {
+        closeLabel: flavorDefault('closeLabel')
+      });
     };
     discardHistory = function() {
       state.coveredTitle = null;
@@ -9461,6 +9570,9 @@ or function.
       var $content, $dialog, $modal;
       $modal = $(templateHtml());
       $modal.attr('up-flavor', state.flavor);
+      if (u.isPresent(state.position)) {
+        $modal.attr('up-position', state.position);
+      }
       $dialog = $modal.find('.up-modal-dialog');
       if (u.isPresent(options.width)) {
         $dialog.css('width', options.width);
@@ -9664,12 +9776,22 @@ or function.
       url = u.option(u.pluckKey(options, 'url'), $link.attr('up-href'), $link.attr('href'));
       html = u.option(u.pluckKey(options, 'html'));
       target = u.option(u.pluckKey(options, 'target'), $link.attr('up-modal'), 'body');
-      options.flavor = u.option(options.flavor, $link.attr('up-flavor'));
+      options.flavor = u.option(options.flavor, $link.attr('up-flavor'), config.flavor);
+      options.position = u.option(options.position, $link.attr('up-position'), flavorDefault('position', options.flavor));
+      options.position = u.evalOption(options.position, {
+        $link: $link
+      });
       options.width = u.option(options.width, $link.attr('up-width'), flavorDefault('width', options.flavor));
       options.maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), flavorDefault('maxWidth', options.flavor));
       options.height = u.option(options.height, $link.attr('up-height'), flavorDefault('height'));
       options.animation = u.option(options.animation, $link.attr('up-animation'), flavorDefault('openAnimation', options.flavor));
+      options.animation = u.evalOption(options.animation, {
+        position: options.position
+      });
       options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), flavorDefault('backdropOpenAnimation', options.flavor));
+      options.backdropAnimation = u.evalOption(options.backdropAnimation, {
+        position: options.position
+      });
       options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor));
       options.closable = u.option(options.closable, u.castedAttr($link, 'up-closable'), flavorDefault('closable', options.flavor));
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
@@ -9693,6 +9815,7 @@ or function.
           state.flavor = options.flavor;
           state.sticky = options.sticky;
           state.closable = options.closable;
+          state.position = options.position;
           if (options.history) {
             state.coveredUrl = up.browser.url();
             state.coveredTitle = document.title;
@@ -9769,7 +9892,13 @@ or function.
       }
       options = u.options(options);
       viewportCloseAnimation = u.option(options.animation, flavorDefault('closeAnimation'));
+      viewportCloseAnimation = u.evalOption(viewportCloseAnimation, {
+        position: state.position
+      });
       backdropCloseAnimation = u.option(options.backdropAnimation, flavorDefault('backdropCloseAnimation'));
+      backdropCloseAnimation = u.evalOption(backdropCloseAnimation, {
+        position: state.position
+      });
       animateOptions = up.motion.animateOptions(options, {
         duration: flavorDefault('closeDuration'),
         easing: flavorDefault('closeEasing')
@@ -9798,6 +9927,7 @@ or function.
           state.flavor = null;
           state.sticky = null;
           state.closable = null;
+          state.position = null;
           return up.emit('up:modal:closed', {
             message: 'Modal closed'
           });
@@ -9862,46 +9992,11 @@ or function.
       $element = $(elementOrSelector);
       return $element.closest('.up-modal').length > 0;
     };
-
-    /**
-    Register a new modal variant with its own default configuration, CSS or HTML template.
-    
-    \#\#\# Example
-    
-    Let's implement a drawer that slides in from the right:
-    
-        up.modal.flavor('drawer', {
-          openAnimation: 'move-from-right',
-          closeAnimation: 'move-to-right',
-          maxWidth: 400
-        }
-    
-    Modals with that flavor will have a container `<div class='up-modal' up-flavor='drawer'>...</div>`.
-    We can target the `up-flavor` attribute override the default dialog styles:
-    
-        .up-modal[up-flavor='drawer'] {
-    
-          // Align drawer on the right
-          .up-modal-viewport { text-align: right; }
-    
-          // Remove margin so the drawer starts at the screen edge
-          .up-modal-dialog { margin: 0; }
-    
-          // Stretch drawer background to full window height
-          .up-modal-content { min-height: 100vh; }
-        }
-    
-    @function up.modal.flavor
-    @param {String} name
-      The name of the new flavor.
-    @param {Object} [overrideConfig]
-      An object whose properties override the defaults in [`/up.modal.config`](/up.modal.config).
-    @experimental
-     */
     flavor = function(name, overrideConfig) {
       if (overrideConfig == null) {
         overrideConfig = {};
       }
+      up.log.warn('The up.modal.flavor function is deprecated. Use the up.modal.flavors property instead.');
       return u.extend(flavorOverrides(name), overrideConfig);
     };
 
@@ -9914,8 +10009,7 @@ or function.
     @internal
      */
     flavorOverrides = function(flavor) {
-      var base;
-      return (base = config.flavors)[flavor] || (base[flavor] = {});
+      return flavors[flavor] || (flavors[flavor] = {});
     };
 
     /**
@@ -9942,16 +10036,18 @@ or function.
     Clicking this link will load the destination via AJAX and open
     the given selector in a modal dialog.
     
-    Example:
+    \#\#\#\# Example
     
         <a href="/blogs" up-modal=".blog-list">Switch blog</a>
     
     Clicking would request the path `/blog` and select `.blog-list` from
-    the HTML response. Unpoly will dim the page with an overlay
+    the HTML response. Unpoly will dim the page
     and place the matching `.blog-list` tag will be placed in
     a modal dialog.
     
     @selector [up-modal]
+    @param {String} up-modal
+      The CSS selector that will be extracted from the response and displayed in a modal dialog.
     @param {String} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the modal is opened.
@@ -10033,6 +10129,77 @@ or function.
         return up.bus.consumeAction(event);
       }
     });
+
+    /**
+    Clicking this link will load the destination via AJAX and open
+    the given selector in a modal drawer that slides in from the edge of the screen.
+    
+    You can configure drawers using the [`up.modal.flavors.drawer`](/up.modal.flavors.drawer) property.
+    
+    \#\#\#\# Example
+    
+        <a href="/blogs" up-drawer=".blog-list">Switch blog</a>
+    
+    Clicking would request the path `/blog` and select `.blog-list` from
+    the HTML response. Unpoly will dim the page
+    and place the matching `.blog-list` tag will be placed in
+    a modal drawer.
+    
+    @selector [up-drawer]
+    @param {String} up-drawer
+      The CSS selector to extract from the response and open in the drawer.
+    @param {String} [up-position='auto']
+      The side from which the drawer slides in.
+    
+      Valid values are `'left'`, `'right'` and `'auto'`. If set to `'auto'`, the
+      drawer will slide in from left if the opening link is on the left half of the screen.
+      Otherwise it will slide in from the right.
+    @experimental
+     */
+    up.macro('[up-drawer]', function($link) {
+      var target;
+      target = $link.attr('up-drawer');
+      return $link.attr({
+        'up-modal': target,
+        'up-flavor': 'drawer'
+      });
+    });
+
+    /**
+    Sets default options for future drawers.
+    
+    @property up.modal.flavors.drawer
+    @param {Object} config
+      Default options for future drawers.
+    
+      See [`up.modal.config`] for available options.
+    @experimental
+     */
+    flavors.drawer = {
+      openAnimation: function(options) {
+        switch (options.position) {
+          case 'left':
+            return 'move-from-left';
+          case 'right':
+            return 'move-from-right';
+        }
+      },
+      closeAnimation: function(options) {
+        switch (options.position) {
+          case 'left':
+            return 'move-to-left';
+          case 'right':
+            return 'move-to-right';
+        }
+      },
+      position: function(options) {
+        if (u.isPresent(options.$link)) {
+          return u.horizontalScreenHalf(options.$link);
+        } else {
+          return 'left';
+        }
+      }
+    };
     up.on('up:framework:reset', reset);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
@@ -10047,6 +10214,7 @@ or function.
         return state.coveredUrl;
       },
       config: config,
+      flavors: flavors,
       contains: contains,
       isOpen: isOpen,
       flavor: flavor

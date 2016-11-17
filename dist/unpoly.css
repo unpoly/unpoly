@@ -65,6 +65,17 @@
   font-size: 34px;
   color: #666;
   cursor: pointer; }
+
+.up-modal[up-flavor='drawer'] .up-modal-viewport {
+  text-align: left; }
+.up-modal[up-flavor='drawer'][up-position='right'] .up-modal-viewport {
+  text-align: right; }
+.up-modal[up-flavor='drawer'] .up-modal-dialog {
+  margin: 0;
+  max-width: 350px; }
+.up-modal[up-flavor='drawer'] .up-modal-content {
+  min-height: 100vh;
+  box-sizing: border-box; }
 .up-popup {
   z-index: 20000;
   position: absolute;
