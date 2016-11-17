@@ -1,0 +1,32 @@
+{
+  "name": "unpoly",
+  "version": "0.0.1",
+  "description": "Progressive enhancement Javascript framework",
+  "main": "./dist/unpoly.js",
+  "files": [
+    "./dist/unpoly.js",
+    "./dist/unpoly.css",
+    "./dist/unpoly-bootstrap3.js",
+    "./dist/unpoly-bootstrap3.css"
+  ]
+  "scripts": {
+    "test": "echo \"See https://github.com/unpoly/unpoly for test instructions\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unpoly/unpoly.git"
+  },
+  "keywords": [
+    "progressive enhancement",
+    "unobtrusive javascript",
+    "ujs",
+    "server-side",
+    "ssr"
+  ],
+  "author": "Henning Koch <henning@triskweline.de> (https://makandra.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/unpoly/unpoly/issues"
+  },
+  "homepage": "https://github.com/unpoly/unpoly#readme"
+}
