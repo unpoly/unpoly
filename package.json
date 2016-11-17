@@ -8,7 +8,7 @@
     "./dist/unpoly.css",
     "./dist/unpoly-bootstrap3.js",
     "./dist/unpoly-bootstrap3.css"
-  ]
+  ],
   "scripts": {
     "test": "echo \"See https://github.com/unpoly/unpoly for test instructions\" && exit 1"
   },
