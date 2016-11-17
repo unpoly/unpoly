@@ -718,17 +718,16 @@ up.modal = (($) ->
 
       <a href="/fallback" up-close>Okay</a>
 
-  @selector [up-close]
+  @selector .up-modal [up-close]
   @stable
   ###
-  up.on('click', '[up-close]', (event, $element) ->
-    if contains($element)
-      closeAsap()
-      # If the user closes the modal by clicking on the background, we want to halt the event chain here.
-      # The event should not trigger anything else. The user needs to click again for another interaction.
-      # Also only prevent the default when we actually closed a modal.
-      # This way we can have buttons that close a modal when within a modal, but link to a destination if not.
-      up.bus.consumeAction(event)
+  up.on('click', '.up-modal [up-close]', (event, $element) ->
+    closeAsap()
+    # If the user closes the modal by clicking on the background, we want to halt the event chain here.
+    # The event should not trigger anything else. The user needs to click again for another interaction.
+    # Also only prevent the default when we actually closed a modal.
+    # This way we can have buttons that close a modal when within a modal, but link to a destination if not.
+    up.bus.consumeAction(event)
   )
 
   ###*

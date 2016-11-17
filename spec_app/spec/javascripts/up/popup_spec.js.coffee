@@ -276,6 +276,24 @@ describe 'up.popup', ->
             expect(backgroundClicked).not.toHaveBeenCalled()
             done()
 
+      describe 'when clicked inside a popup when a modal is open', ->
+
+        it 'closes the popup, but not the modal', (done) ->
+
+          up.modal.extract '.modalee', '<div class="modalee"></div>'
+          $modalee = $('.up-modal .modalee')
+          $opener = $modalee.affix('a')
+          up.popup.attach($opener, html: '<div class="popupee">text</div>', target: '.popupee')
+          $popupee = $('.up-popup .popupee')
+          $closer = $popupee.affix('a[up-close]') # link is within the popup
+          up.hello($closer)
+          Trigger.clickSequence($closer)
+          u.nextFrame ->
+            expect(up.popup.isOpen()).toBe(false)
+            expect(up.modal.isOpen()).toBe(true)
+            expect(backgroundClicked).not.toHaveBeenCalled()
+            done()
+
       describe 'when no popup is open', ->
 
         it 'does nothing and allows the event chain to continue', (done) ->

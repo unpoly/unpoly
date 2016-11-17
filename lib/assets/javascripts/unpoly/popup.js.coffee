@@ -434,16 +434,15 @@ up.popup = (($) ->
 
       <a href="/fallback" up-close>Okay</a>
 
-  @selector [up-close]
+  @selector .up-popup [up-close]
   @stable
   ###
-  up.on 'click', '[up-close]', (event, $element) ->
-    if contains($element)
-      closeAsap()
-      # Only prevent the default when we actually closed a popup.
-      # This way we can have buttons that close a popup when within a popup,
-      # but link to a destination if not.
-      up.bus.consumeAction(event)
+  up.on 'click', '.up-popup [up-close]', (event, $element) ->
+    closeAsap()
+    # Only prevent the default when we actually closed a popup.
+    # This way we can have buttons that close a popup when within a popup,
+    # but link to a destination if not.
+    up.bus.consumeAction(event)
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
