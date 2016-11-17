@@ -53,7 +53,7 @@ namespace :publish do
     commands = [
       "git add #{Unpoly::Tasks::SPROCKETS_OUTPUT_FOLDER}",
       "git add #{Unpoly::Tasks::NPM_MANIFEST}",
-      "git commit",
+      "git commit -m 'Release artifacts for version #{Unpoly::Rails::VERSION}'",
       "git push"
     ]
     commands.each do |command|
