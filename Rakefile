@@ -67,6 +67,10 @@ namespace :publish do
     Rake::Task['npm:publish'].invoke
   end
 
+  desc 'Build artifacts, push to git and release to package managers'
+  task :all => [:build, :commit, :release] do
+  end
+
 end
 
 namespace :npm do
@@ -89,34 +93,9 @@ namespace :npm do
 
 end
 
-
-
-# Rake::Task["assets:compile"].clear_comments
-
+# Clean up task list in `rake -T`
 Rake::Task.tasks.each do |task|
   unless Unpoly::Tasks::VISIBLE_TASKS.include?(task.name)
     task.clear_comments
   end
 end
-
-
-
-# namespace :publish do
-#
-#   task :rubygems_and_bower do
-#     # This pushes a tag for the current version (Bower),
-#     # then builds a .gem and pushes it to Rubygems
-#     Rake::Task['release'].invoke
-#   end
-#
-#   task :npm do
-#
-#   end
-#
-#   desc ''
-#   task :all do
-#     Rake::Task['publish:rubygems_and_bower'].invoke
-#     Rake::Task['publish:npm'].invoke
-#   end
-#
-# end
