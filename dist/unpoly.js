@@ -1,7 +1,7 @@
 (function() {
   var world;
 
-  world = typeof global !== 'undefined' ? global : self;
+  world = typeof global !== 'undefined' ? global : this;
 
 
   /**
