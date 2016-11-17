@@ -2,7 +2,7 @@
   "name": "unpoly",
   "version": "0.31.1",
   "description": "Progressive enhancement Javascript framework",
-  "main": "./dist/unpoly.js",
+  "main": "dist/unpoly.js",
   "files": [
     "dist/unpoly.js",
     "dist/unpoly.css",
