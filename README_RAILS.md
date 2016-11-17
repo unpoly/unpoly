@@ -120,4 +120,4 @@ Before you make a PR, please have some discussion about the proposed change by [
 
 ### Making a new release
 
-New versions of `unpoly-rails` are released as part of the [Unpoly release process](https://github.com/unpoly/unpoly/blob/master/README.md#making-a-new-release).
+New versions of `unpoly-rails` are released as part of the [Unpoly release process](https://github.com/unpoly/unpoly/blob/master/README.md#making-a-new-release), which also feeds other package managers like Bower or NPM.

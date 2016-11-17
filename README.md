@@ -47,25 +47,28 @@ To run RSpec tests for the `unpoly-rails` gem:
 
 ### Making a new release
 
-We are currently feeding three release channels:
+We are currently feeding fourrelease channels:
 
 - Manual download from Github
-- Bower (this also fetches from Github)
+  NPM
+- Bower (which is based on Git and version tags)
 - Rubygems (as the `unpoly-rails` gem)
 
 We always release to all channel simultaneously.
 
 To make a new release:
 
-- Edit `lib/unpoly/rails/version.rb` and bump the version number. Use [semantic versioning](http://semver.org/).
-- Add an entry to `CHANGELOG.md`
-- Commit and push the version bump and `CHANGELOG.md`
-- From the project root, type `rake assets:compile`. This will output minified JS and CSS files to the `dist` folder.
-- Commit and push the generated files in `dist`
-- From the project root, type `rake release`. This will publish a new gem version to Rubygems.org.
-  It will also push a tag for this version, which Bower requires for its own versioning scheme.
+1. Edit `lib/unpoly/rails/version.rb` and bump the version number. Use [semantic versioning](http://semver.org/).
+2. Add an entry to `CHANGELOG.md`
+3. Commit and push the version bump and `CHANGELOG.md`
+4. From the project root, type `rake publish:build`. This will output minified JS and CSS files to the `dist` folder. It also updates the `package.json` for NPM.
+5. Commit and push the generated files. There is a rake task `rake publish:commit` that helps with this.
+6. From the project root, type `rake publish:release`. This will publish a new gem version to Rubygems.org.
+7. It will also push a tag for this version, which Bower requires for its own versioning scheme. Finally it publishes to NPM.
 
-Always run `rake assets:compile` before `rake release` so the git tag points to the correct commit (required for Bower versioning).
+Always remember to build, commit and push build artifacts before calling `rake publish:release` so the Git tag points to the correct commit.
+
+If you have done this process a few times and know what you're doing, you can call `rake publish:all` to run all these steps in sequence. 
 
 
 Credits
