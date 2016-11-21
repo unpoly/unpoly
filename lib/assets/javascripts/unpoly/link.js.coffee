@@ -252,17 +252,31 @@ up.link = (($) ->
         up.bus.consumeAction(event)
         handlerWithActiveMark($link)
 
-  isFollowable = ($link) ->
+  ###*
+  Returns whether the given link will be handled by Unpoly instead of making a full page load.
+
+  A link will be handled by Unpoly if it has an attribute
+  like `up-target` or `up-modal`.
+
+  @function up.link.isFollowable
+  @param {Element|jQuery|String} linkOrSelector
+    The link to check.
+  @experimental
+  ###
+  isFollowable = (link) ->
+    $link = $(link)
     u.any followVariantSelectors, (selector) -> $link.is(selector)
 
   ###*
-  Makes sure that the given link is handled by Unpoly.
+  Makes sure that the given link will be handled by Unpoly instead of making a full page load.
 
   This is done by giving the link an `up-follow` attribute
-  unless it already have it an `up-target` or `up-follow` attribute.
+  unless it already have it an attribute like `up-target` or `up-modal`.
 
   @function up.link.makeFollowable
-  @internal
+  @param {Element|jQuery|String} linkOrSelector
+    The link to process.
+  @experimental
   ###
   makeFollowable = (link) ->
     $link = $(link)
@@ -525,6 +539,7 @@ up.link = (($) ->
   visit: visit
   follow: follow
   makeFollowable: makeFollowable
+  isFollowable: isFollowable
   shouldProcessLinkEvent: shouldProcessLinkEvent
   childClicked: childClicked
   followMethod: followMethod
