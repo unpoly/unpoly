@@ -7,7 +7,7 @@ to show a fragment in a popup overlay that rolls down from an anchoring element.
 
 To open a popup, add an [`up-popup` attribute](/up-popup) to a link:
 
-    <a href="/options" up-modal=".menu">Show options</a>
+    <a href="/options" up-popup=".menu">Show options</a>
 
 When this link is clicked, Unpoly will request the path `/options` and extract
 an element matching the selector `.menu` from the response. The matching element
