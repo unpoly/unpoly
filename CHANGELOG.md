@@ -5,12 +5,20 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.31.2
+------
 
 ### Compatible changes
 
-- Drawers are now a built-in modal flavor! Use the [`[up-drawer]`](/up-drawer] attribute to open page fragements
+- Unpoly can now be installed as an npm module called `unpoly`.
+
+
+0.31.0
+------
+
+### Compatible changes
+
+- Drawers are now a built-in modal flavor! Use the [`[up-drawer]`](/up-drawer) attribute to open page fragements
   in a modal drawer that slides in from the edge of the screen.
 
 
