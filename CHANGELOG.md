@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Compatible changes
+
+- Fix a bug where morphing an element with a destructor would throw an error.
+
+
+### Breaking changes
+
+
 0.31.2
 ------
 
@@ -26,8 +37,6 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 - The [`up.modal.flavor`](/up.modal.flavor) function was deprecated. Set values on the
   [`up.modal.flavors`](/up.modal.flavors) property instead.
-
-
 
 
 0.30.1

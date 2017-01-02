@@ -23,7 +23,7 @@ up.syntax = (($) ->
   
   u = up.util
 
-  DESTRUCTABLE_CLASS = 'up-destructable'
+  DESTRUCTIBLE_CLASS = 'up-destructible'
   DESTRUCTORS_KEY = 'up-destructors'
 
   compilers = []
@@ -283,7 +283,7 @@ up.syntax = (($) ->
       []
 
   addDestructor = ($jqueryElement, destructor) ->
-    $jqueryElement.addClass(DESTRUCTABLE_CLASS)
+    $jqueryElement.addClass(DESTRUCTIBLE_CLASS)
     destructors = $jqueryElement.data(DESTRUCTORS_KEY) || []
     destructors.push(destructor)
     $jqueryElement.data(DESTRUCTORS_KEY, destructors)
@@ -327,12 +327,16 @@ up.syntax = (($) ->
   @internal
   ###
   clean = ($fragment) ->
-    u.findWithSelf($fragment, ".#{DESTRUCTABLE_CLASS}").each ->
+    u.findWithSelf($fragment, ".#{DESTRUCTIBLE_CLASS}").each ->
       $element = $(this)
       destructors = $element.data(DESTRUCTORS_KEY)
-      destructor() for destructor in destructors
-      $element.removeData(DESTRUCTORS_KEY)
-      $element.removeClass(DESTRUCTABLE_CLASS)
+      # Although destructible elements should always have an array of destructors, we might be
+      # destroying a clone of such an element. E.g. Unpoly creates a clone when keeping an
+      # [up-keep] element, and that clone still has the .up-destructible class.
+      if destructors
+        destructor() for destructor in destructors
+        $element.removeData(DESTRUCTORS_KEY)
+        $element.removeClass(DESTRUCTIBLE_CLASS)
 
   ###*
   Checks if the given element has an [`up-data`](/up-data) attribute.
