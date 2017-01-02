@@ -1,11 +1,11 @@
 ###*
-Custom Javascript
+Custom JavaScript
 =================
 
-Every app needs a way to pair Javascript snippets with certain HTML elements,
+Every app needs a way to pair JavaScript snippets with certain HTML elements,
 in order to integrate libraries or implement custom behavior.
 
-Unpoly lets you organize your Javascript snippets using [compilers](/up.compiler).
+Unpoly lets you organize your JavaScript snippets using [compilers](/up.compiler).
 
 For instance, to activate the [Masonry](http://masonry.desandro.com/) jQuery plugin for every element
 with a `grid` class, use this compiler:
@@ -48,14 +48,14 @@ up.syntax = (($) ->
   \#\#\# Integrating jQuery plugins
 
   `up.compiler` is a great way to integrate jQuery plugins.
-  Let's say your Javascript plugin wants you to call `lightboxify()`
+  Let's say your JavaScript plugin wants you to call `lightboxify()`
   on links that should open a lightbox. You decide to
   do this for all links with an `lightbox` class:
 
       <a href="river.png" class="lightbox">River</a>
       <a href="ocean.png" class="lightbox">Ocean</a>
 
-  This Javascript will do exactly that:
+  This JavaScript will do exactly that:
 
       up.compiler('a.lightbox', function($element) {
         $element.lightboxify();
@@ -68,7 +68,7 @@ up.syntax = (($) ->
 
       <clock></clock>
 
-  Here is the Javascript that inserts the current time into to these elements:
+  Here is the JavaScript that inserts the current time into to these elements:
 
       up.compiler('clock', function($element) {
         var now = new Date();
@@ -79,7 +79,7 @@ up.syntax = (($) ->
   \#\#\# Cleaning up after yourself
 
   If your compiler returns a function, Unpoly will use this as a *destructor* to
-  clean up if the element leaves the DOM. Note that in Unpoly the same DOM ad Javascript environment
+  clean up if the element leaves the DOM. Note that in Unpoly the same DOM ad JavaScript environment
   will persist through many page loads, so it's important to not create
   [memory leaks](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
 
@@ -350,7 +350,7 @@ up.syntax = (($) ->
 
       <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
 
-  Calling `up.syntax.data` will deserialize the JSON string into a Javascript object:
+  Calling `up.syntax.data` will deserialize the JSON string into a JavaScript object:
 
       up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
 

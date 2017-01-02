@@ -276,7 +276,7 @@ By default, fixtures are loaded from `spec/javascripts/fixtures/json`. You can c
 
 Your fixture data is loaded into an object stashed by the JSONFixtures structure.  You fetch the data using the filename as the key.  This allows you to load multiple chunks of test data in a spec.
 
-Because a deep copy of Javascript objects can be a little tricky, this module will refetch data each time you call `load`.  If you modify the data within a spec, you must call `load` or `loadJSONFixtures` again to repopulate the data.
+Because a deep copy of JavaScript objects can be a little tricky, this module will refetch data each time you call `load`.  If you modify the data within a spec, you must call `load` or `loadJSONFixtures` again to repopulate the data.
 
 To invoke fixture related methods, obtain Fixtures singleton through a factory and invoke a method on it:
 
@@ -356,7 +356,7 @@ Under Windows 7, you have to launch `C:\Users\[UserName]\AppData\Local\Google\Ch
 
 [jasmine-ajax](https://github.com/jasmine/jasmine-ajax) library doesn't let user to manually start / stop XMLHttpRequest mocking, but instead it overrides XMLHttpRequest automatically when loaded. This breaks jasmine-jquery fixtures as fixture loading mechanism uses jQuery.ajax, that stops to function the very moment jasmine-ajax is loaded. A workaround for this may be to invoke jasmine-jquery `preloadFixtures` function (specifying all required fixtures) before jasmine-ajax is loaded. This way subsequent calls to `loadFixtures` or `readFixtures` methods will get fixtures content from cache, without need to use jQuery.ajax and thus will work correctly even after jasmine-ajax is loaded.
 
-## Testing with Javascript Test Driver
+## Testing with JavaScript Test Driver
 
 When using [jstd](http://code.google.com/p/js-test-driver/) and the jasmine adapter you will need to include jasmine-jquery.js after your jasmine-jstd-adapter files, otherwise jasmine-jquery matchers will not be available when tests are executed. Check out [this issue](https://github.com/velesin/jasmine-jquery/issues/95#issuecomment-9293180) for a thorough configuration example too.
 

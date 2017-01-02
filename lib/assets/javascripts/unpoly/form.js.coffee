@@ -221,7 +221,7 @@ up.form = (($) ->
   @param {Function(value, $field)|String} onChange
     The callback to run when the field's value changes.
     If given as a function, it must take two arguments (`value`, `$field`).
-    If given as a string, it will be evaled as Javascript code in a context where
+    If given as a string, it will be evaled as JavaScript code in a context where
     (`value`, `$field`) are set.
   @return {Function}
     A destructor function that removes the observe watch when called.

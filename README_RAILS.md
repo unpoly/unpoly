@@ -1,7 +1,7 @@
 unpoly-rails: Ruby on Rails bindings for Unpoly
 ===============================================
 
-[Unpoly](http://unpoly.com) is a backend-agnostic [unobtrusive Javascript](https://en.wikipedia.org/wiki/Unobtrusive_JavaScript) framework. `unpoly-rails` gives your [Ruby on Rails](http://rubyonrails.org/) application some convenience candy when you are using Unpoly in your frontend.
+[Unpoly](http://unpoly.com) is a backend-agnostic [unobtrusive JavaScript](https://en.wikipedia.org/wiki/Unobtrusive_JavaScript) framework. `unpoly-rails` gives your [Ruby on Rails](http://rubyonrails.org/) application some convenience candy when you are using Unpoly in your frontend.
 
 
 Features

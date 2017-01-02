@@ -186,7 +186,7 @@ up.layout = (($) ->
   element are visible for the user.
 
   By default Unpoly will always reveal an element before
-  updating it with Javascript functions like [`up.replace`](/up.replace)
+  updating it with JavaScript functions like [`up.replace`](/up.replace)
   or UJS behavior like [`[up-target]`](/a-up-target).
 
   \#\#\# How Unpoly finds the viewport

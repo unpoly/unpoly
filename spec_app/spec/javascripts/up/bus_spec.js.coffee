@@ -1,6 +1,6 @@
 describe 'up.bus', ->
   
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
 
     describe 'up.on', ->
 

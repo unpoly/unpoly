@@ -2,7 +2,7 @@ describe 'up.tooltip', ->
 
   u = up.util
 
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
     
     describe 'up.tooltip.attach', ->
       

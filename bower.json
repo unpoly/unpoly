@@ -4,7 +4,7 @@
   "authors": [
     "Henning Koch <henning@triskweline.de>"
   ],
-  "description": "Unobtrusive Javascript framework",
+  "description": "Unobtrusive JavaScript framework",
   "main": ["dist/unpoly.js", "dist/unpoly.css"],
   "license": "MIT",
   "ignore": [

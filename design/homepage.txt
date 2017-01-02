@@ -27,7 +27,7 @@
     UI patterns like navigation bars, infinite scrolling,
     drop-down menus, modals dialogs, etc.
     
-  Plays nice with existing Javascript
+  Plays nice with existing JavaScript
   
     Convert to up.compiler directives.
   
@@ -57,7 +57,7 @@
   Both UJS and programmatic interfaces
     
     All Unpoly functionality is available as both unobtrusive behavior
-    (through HTML attributes like up-target) and Javascript functions
+    (through HTML attributes like up-target) and JavaScript functions
     for programmatic access and integration with your code.  
   
   

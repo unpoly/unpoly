@@ -1,7 +1,7 @@
 [Unpoly](http://unpoly.com)
 ======
 
-Unobtrusive Javascript framework for server-side applications
+Unobtrusive JavaScript framework for server-side applications
 -------------------------------------------------------------
 
 [Unpoly](http://unpoly.com) enables fast and flexible frontends with minimal changes to your server-side code.
@@ -12,7 +12,7 @@ This repository is home to both the Unpoly javascript code and its (optional) bi
 Getting started
 ---------------
 
-- See [unpoly.com](http://unpoly.com) for more information and Javascript API documentation.
+- See [unpoly.com](http://unpoly.com) for more information and JavaScript API documentation.
 - See [`CHANGELOG.md`](https://github.com/unpoly/unpoly/blob/master/CHANGELOG.md) for notable changes.
 - See [`README_RAILS.md`](https://github.com/unpoly/unpoly/blob/master/README_RAILS.md) documentation of the Rails bindings.
 

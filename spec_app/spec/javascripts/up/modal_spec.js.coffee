@@ -2,7 +2,7 @@ describe 'up.modal', ->
 
   u = up.util
   
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
 
     assumedScrollbarWidth = 15
 
@@ -352,7 +352,7 @@ describe 'up.modal', ->
         Trigger.click(@$link)
         expect(@followSpy).toHaveBeenCalledWith(@$link)
 
-      # IE does not call Javascript and always performs the default action on right clicks
+      # IE does not call JavaScript and always performs the default action on right clicks
       unless navigator.userAgent.match(/Trident/)
         it 'does nothing if the right mouse button is used', ->
           @stubFollow()
@@ -392,7 +392,7 @@ describe 'up.modal', ->
           Trigger.click(@$link)
           expect(@followSpy).not.toHaveBeenCalled()
 
-        # IE does not call Javascript and always performs the default action on right clicks
+        # IE does not call JavaScript and always performs the default action on right clicks
         unless navigator.userAgent.match(/Trident/)
           it 'does nothing if the right mouse button is pressed down', ->
             Trigger.mousedown(@$link, button: 2)

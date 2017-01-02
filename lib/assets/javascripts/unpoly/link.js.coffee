@@ -6,7 +6,7 @@ Standard HTML links are a poor fit for modern applications:
 
 - State changes caused by AJAX updates get lost during the page transition.
 - Unsaved form changes get lost during the page transition.
-- The Javascript VM is reset during the page transition.
+- The JavaScript VM is reset during the page transition.
 - If the page layout is composed from multiple srollable containers
   (e.g. a pane view), the scroll positions get lost during the page transition.
 - The user sees a "flash" as the browser loads and renders the new page,
@@ -62,7 +62,7 @@ with an `up-target` attribute:
 Note that instead of `article` you can use any other CSS selector like `#main .article`.
 
 With these [`up-target`](/a-up-target) annotations Unpoly only updates the targeted part of the screen.
-The Javascript environment will persist and the user will not see a white flash while the
+The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
 
@@ -73,7 +73,7 @@ new page is loading.
 - As you switch through pages, Unpoly will [update your browser's location bar and history](/up.history)
 - You can [open fragments in popups or modal dialogs](/up.modal).
 - You can give users [immediate feedback](/up.navigation) when a link is clicked or becomes current, without waiting for the server.
-- [Controlling Unpoly pragmatically through Javascript](/up.flow)
+- [Controlling Unpoly pragmatically through JavaScript](/up.flow)
 - [Defining custom tags](/up.syntax)
 
   

@@ -2,7 +2,7 @@ describe 'up.util', ->
 
   u = up.util
 
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
 
     describe 'up.util.previewable', ->
 
@@ -229,7 +229,7 @@ describe 'up.util', ->
           up.util.setTimer(0, callback)
           expect(callback).toHaveBeenCalled()
 
-        it "returns undefined so the return value won't be mistaken with a Javascript timer ID", ->
+        it "returns undefined so the return value won't be mistaken with a JavaScript timer ID", ->
           callback = -> 'function return value'
           timerReturnValue = up.util.setTimer(0, callback)
           expect(timerReturnValue).toBeUndefined()

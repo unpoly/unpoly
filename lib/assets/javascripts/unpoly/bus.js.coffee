@@ -36,8 +36,8 @@ use the more convenient [`up.on`](/up.on):
 This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 
 - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
-  leaving you with an application without Javascript. This is typically preferable to
-  a soup of randomly broken Javascript in ancient browsers.
+  leaving you with an application without JavaScript. This is typically preferable to
+  a soup of randomly broken JavaScript in ancient browsers.
 - A jQuery object with the target element is automatically passed to the event handler
   as a second argument. You no longer need to write `$(this)` in the handler function.
 - You use an [`up-data`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
@@ -424,7 +424,7 @@ up.bus = (($) ->
   ###*
   Boots the Unpoly framework.
 
-  **This is called automatically** by including the Unpoly Javascript files.
+  **This is called automatically** by including the Unpoly JavaScript files.
 
   Unpoly will not boot if the current browser is [not supported](/up.browser.isSupported).
   This leaves you with a classic server-side application on legacy browsers.

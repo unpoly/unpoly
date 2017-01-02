@@ -208,7 +208,7 @@ Unreleased
 
 ### Breaking changes
 
-- When inserting a page fragment with a `<script src="...">` tag, the linked Javascript is no longer loaded and executed. Inline scripts will still be executed. You can configure this behavior using the new [`up.flow.config`](/up.flow.config) property.
+- When inserting a page fragment with a `<script src="...">` tag, the linked JavaScript is no longer loaded and executed. Inline scripts will still be executed. You can configure this behavior using the new [`up.flow.config`](/up.flow.config) property.
 
 
 
@@ -427,7 +427,7 @@ Unreleased
 - All UJS functionality remains unchanged, so e.g. `up-target` is still called `up-target`.
 - The Bower package has been renamed to `unpoly`.
 - The Ruby gem for the Rails bindings has been renamed to `unpoly-rails`.
-- The new Javascript and stylesheet assets are:
+- The new JavaScript and stylesheet assets are:
   - [`unpoly.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.js)
   - [`unpoly.min.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.min.js)
   - [`unpoly.css`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.css)

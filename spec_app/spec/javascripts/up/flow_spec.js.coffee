@@ -2,7 +2,7 @@ describe 'up.flow', ->
 
   u = up.util
   
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
 
     describe 'up.replace', ->
 

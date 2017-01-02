@@ -2,7 +2,7 @@ describe 'up.layout', ->
 
   u = up.util
 
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
 
     describe 'up.reveal', ->
 

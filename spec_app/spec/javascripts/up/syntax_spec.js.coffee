@@ -1,6 +1,6 @@
 describe 'up.syntax', ->
   
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
   
     describe 'up.compiler', ->
       

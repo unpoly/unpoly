@@ -261,7 +261,7 @@ up.browser = (($) ->
 
   # Server-side companion libraries like unpoly-rails set this cookie so we
   # have a way to detect the request method of the initial page load.
-  # There is no Javascript API for this.
+  # There is no JavaScript API for this.
   initialRequestMethod = u.memoize ->
     (popCookie('_up_request_method') || 'get').toLowerCase()
 

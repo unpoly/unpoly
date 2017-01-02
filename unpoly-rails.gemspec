@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Unpoly::Rails::VERSION
   spec.authors       = ["Henning Koch"]
   spec.email         = ["henning.koch@makandra.de"]
-  spec.description   = 'Rails bindings for Unpoly, the unobtrusive Javascript framework'
+  spec.description   = 'Rails bindings for Unpoly, the unobtrusive JavaScript framework'
   spec.summary       = spec.description
   spec.homepage      = ""
   spec.license       = "MIT"

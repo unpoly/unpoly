@@ -6,7 +6,7 @@ Unpoly caches server responses for a few minutes,
 making requests to these URLs return instantly.
 
 All Unpoly functions and selectors go through this cache.
-If you need to make cache-aware requests from your [custom Javascript](/up.syntax),
+If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
 use [`up.ajax`](/up.ajax).
 
 \#\#\# How the cache is cleared
@@ -318,7 +318,7 @@ up.proxy = (($) ->
 
       <div class="spinner">Please wait!</div>
 
-  Here is the Javascript to make it alive:
+  Here is the JavaScript to make it alive:
 
       up.compiler('.spinner', function($element) {
 

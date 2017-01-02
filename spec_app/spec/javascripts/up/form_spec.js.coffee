@@ -2,7 +2,7 @@ describe 'up.form', ->
 
   u = up.util
 
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
 
     describe 'up.observe', ->
 
@@ -419,7 +419,7 @@ describe 'up.form', ->
       afterEach ->
         window.observeCallbackSpy = undefined
 
-      it 'runs the Javascript code in the attribute value when a change is observed in the field', (done) ->
+      it 'runs the JavaScript code in the attribute value when a change is observed in the field', (done) ->
         $form = affix('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
         $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')

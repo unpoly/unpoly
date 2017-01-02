@@ -1,5 +1,5 @@
 ##
-# Knife: Get, set or mock inaccessible variables in a Javascript closure
+# Knife: Get, set or mock inaccessible variables in a JavaScript closure
 # ======================================================================
 #
 # Requires [Jasmine](http://jasmine.github.io/) 2+.

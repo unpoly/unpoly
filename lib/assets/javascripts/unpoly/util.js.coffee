@@ -456,7 +456,7 @@ up.util = (($) ->
   ###*
   Returns whether the given argument is an object.
 
-  This also returns `true` for functions, which may behave like objects in Javascript.
+  This also returns `true` for functions, which may behave like objects in JavaScript.
   For an alternative that returns `false` for functions, see [`up.util.isHash`](/up.util.isHash).
 
   @function up.util.isObject
@@ -783,7 +783,7 @@ up.util = (($) ->
 
   ###*
   Schedules the given function to be called in the
-  next Javascript execution frame.
+  next JavaScript execution frame.
 
   @function up.util.nextFrame
   @param {Function} block
@@ -1684,7 +1684,7 @@ up.util = (($) ->
     data
 
   ###*
-  Throws a [Javascript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+  Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
 
   The message will also be printed to the [error log](/up.log.error). Also a notification will be shown at the bottom of the screen.

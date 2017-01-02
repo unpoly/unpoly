@@ -1,9 +1,9 @@
 ###*
-Updating fragments from Javascript
+Updating fragments from JavaScript
 ==================================
   
 This module contains Unpoly's core functions to [change](/up.replace) or
-[destroy](/up.destroy) page fragments via Javascript.
+[destroy](/up.destroy) page fragments via JavaScript.
 
 All the other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
 are based on this module.
@@ -22,7 +22,7 @@ up.flow = (($) ->
     Whether inline `<script>` tags inside inserted HTML fragments will be executed.
   @param {Boolean} [options.runLinkedScripts=false]
     Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
-    the linked Javascript file.
+    the linked JavaScript file.
   @stable
   ###
   config = u.config

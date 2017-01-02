@@ -2,7 +2,7 @@ describe 'up.proxy', ->
 
   u = up.util
 
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
 
     beforeEach ->
       jasmine.clock().install()

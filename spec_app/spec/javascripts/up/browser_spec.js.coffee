@@ -2,7 +2,7 @@ describe 'up.browser', ->
 
   u = up.util
 
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
 
     describe 'up.browser.loadPage', ->
 

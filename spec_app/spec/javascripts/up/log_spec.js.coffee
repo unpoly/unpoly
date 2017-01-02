@@ -1,6 +1,6 @@
 describe 'up.log', ->
 
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
 
     describe 'up.log.puts', ->
 

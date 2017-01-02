@@ -2,7 +2,7 @@ describe 'up.history', ->
 
   u = up.util
   
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
     
     describe 'up.history.replace', ->
 

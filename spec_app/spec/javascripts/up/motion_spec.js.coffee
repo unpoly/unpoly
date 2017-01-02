@@ -2,7 +2,7 @@ describe 'up.motion', ->
 
   u = up.util
   
-  describe 'Javascript functions', ->
+  describe 'JavaScript functions', ->
   
     describe 'up.animate', ->
 

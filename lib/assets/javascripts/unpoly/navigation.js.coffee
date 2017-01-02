@@ -135,7 +135,7 @@ up.navigation = (($) ->
   Marks the given element as currently loading, by assigning the CSS class [`up-active`](/up-active).
 
   This happens automatically when following links or submitting forms through the Unpoly API.
-  Use this function if you make custom network calls from your own Javascript code.
+  Use this function if you make custom network calls from your own JavaScript code.
 
   If the given element is a link within an [expanded click area](/up-expand),
   the class will be assigned to the expanded area.
@@ -211,7 +211,7 @@ up.navigation = (($) ->
   Marks the given element as no longer loading, by removing the CSS class [`up-active`](/up-active).
 
   This happens automatically when network requests initiated by the Unpoly API have completed.
-  Use this function if you make custom network calls from your own Javascript code.
+  Use this function if you make custom network calls from your own JavaScript code.
 
   @function up.navigation.stop
   @param {jQuery} event.$element
