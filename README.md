@@ -1,9 +1,12 @@
-Unpoly + Rails bindings
-=======================
+[Unpoly](http://unpoly.com)
+======
 
-Unpoly gives your traditional web application fast-responding views with minimal changes to your code and development style. If you require modern UX but don't want to pay the Javascript complexity tax, Unpoly can be a solution for you.
+Unobtrusive Javascript framework for server-side applications
+-------------------------------------------------------------
 
-This repository is home both to the Unpoly javascript code and its (optional) bindings for Ruby on Rails (`unpoly-rails` gem).
+[Unpoly](http://unpoly.com) enables fast and flexible frontends with minimal changes to your server-side code.
+
+This repository is home to both the Unpoly javascript code and its (optional) bindings for Ruby on Rails (`unpoly-rails` gem).
 
 
 Getting started
