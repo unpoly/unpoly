@@ -11,6 +11,7 @@ Unreleased
 ### Compatible changes
 
 - Fix a bug where morphing an element with a destructor would throw an error.
+- Fix a bug where [`up.log.disable()`](/up.log.disable) did not persist through page reloads.
 
 
 ### Breaking changes

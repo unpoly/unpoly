@@ -41,7 +41,7 @@ up.log = (($) ->
   ###
   config = u.config
     prefix: '[UP] '
-    enabled: u.option(b.sessionStorage().getItem(SESSION_KEY_ENABLED), false)
+    enabled: (b.sessionStorage().getItem(SESSION_KEY_ENABLED) == 'true')
     collapse: false
 
   reset = ->
@@ -126,7 +126,8 @@ up.log = (($) ->
   up.on 'up:framework:reset', reset
 
   setEnabled = (value) ->
-    b.sessionStorage().setItem(SESSION_KEY_ENABLED, value)
+    # Session storage can only store string values
+    b.sessionStorage().setItem(SESSION_KEY_ENABLED, value.toString())
     config.enabled = value
 
   ###*
