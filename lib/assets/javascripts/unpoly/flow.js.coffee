@@ -449,6 +449,8 @@ up.flow = (($) ->
       promise = promise.then -> u.unwrapElement($wrapper)
 
     else if keepPlan = findKeepPlan($old, $new, options)
+      # Since we're keeping the element that was requested to be swapped,
+      # there is nothing left to do here.
       emitFragmentKept(keepPlan)
       promise = u.resolvedPromise()
 
@@ -499,7 +501,9 @@ up.flow = (($) ->
           # $old and $new. Note that $keepable will still point to the same element
           # after the replacement, which is now detached.
           $keepableClone = $keepable.clone()
-          $keepable.replaceWith($keepableClone)
+          up.util.detachWith($keepable, $keepableClone)
+
+          # $keepable.replaceWith($keepableClone)
           # Since we're going to swap the entire $old and $new containers afterwards,
           # replace the matching element with $keepable so it will eventually return to the DOM.
           plan.$newElement.replaceWith($keepable)
@@ -518,13 +522,13 @@ up.flow = (($) ->
           $partner = u.findWithSelf($new, partnerSelector)
         $partner = $partner.first()
         if $partner.length && $partner.is('[up-keep]')
-          description =
+          plan =
             $element: $keepable               # the element that should be kept
             $newElement: $partner             # the element that would have replaced it but now does not
             newData: up.syntax.data($partner) # the parsed up-data attribute of the element we will discard
-          keepEventArgs = u.merge(description, message: ['Keeping element %o', $keepable.get(0)])
+          keepEventArgs = u.merge(plan, message: ['Keeping element %o', $keepable.get(0)])
           if up.bus.nobodyPrevents('up:fragment:keep', keepEventArgs)
-            description
+            plan
 
   ###*
   Elements with an `up-keep` attribute will be persisted during

@@ -907,6 +907,28 @@ describe 'up.flow', ->
           expect(compiler.calls.count()).toEqual(1)
           expect('.keeper').toExist()
 
+        it 'does not lose jQuery event handlers on a kept element (bugfix)', ->
+          handler = jasmine.createSpy('event handler')
+          up.compiler '.keeper', ($keeper) ->
+            $keeper.on 'click', handler
+
+          $container = affix('.container')
+          $container.html """
+            <div class="keeper" up-keep>old-text</div>
+            """
+          up.hello($container)
+
+          up.extract '.container', """
+            <div class='container'>
+              <div class="keeper" up-keep>new-text</div>
+            </div>
+            """
+
+          $keeper = $('.keeper')
+          expect($keeper).toHaveText('old-text')
+          Trigger.click($keeper)
+          expect(handler).toHaveBeenCalled()
+
         it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', ->
           $keeper = affix('.keeper[up-keep]').text('old-inside')
           $keeper.on 'up:fragment:keep', (event) -> event.preventDefault()

@@ -1905,6 +1905,21 @@ up.util = (($) ->
     else
       'right'
 
+  ###*
+  Like `$old.replaceWith($new)`, but keeps event handlers bound to `$old`.
+
+  Note that this is a memory leak unless you re-attach `$new` to the DOM aferwards.
+
+  @function up.util.detachWith
+  @internal
+  ###
+  detachWith = ($old, $new) ->
+    $insertion = $('<div></div>')
+    $insertion.insertAfter($old)
+    $old.detach()
+    $insertion.replaceWith($new)
+    $old
+
   isDetached: isDetached
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
@@ -2018,6 +2033,7 @@ up.util = (($) ->
   previewable: previewable
   evalOption: evalOption
   horizontalScreenHalf: horizontalScreenHalf
+  detachWith: detachWith
 
 )($)
 
