@@ -794,33 +794,66 @@ describe 'up.flow', ->
             expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.keeper'), jasmine.anything())
 
         it "removes an [up-keep] element if no matching element is found in the response", ->
+          barCompiler = jasmine.createSpy()
+          barDestructor = jasmine.createSpy()
+          up.compiler '.bar', ($bar) ->
+            text = $bar.text()
+            barCompiler(text)
+            return -> barDestructor(text)
+
           $container = affix('.container')
           $container.html """
             <div class='foo'>old-foo</div>
             <div class='bar' up-keep>old-bar</div>
             """
+          up.hello($container)
+
+          expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
+          expect(barDestructor.calls.allArgs()).toEqual []
+
           up.extract '.container', """
             <div class='container'>
               <div class='foo'>new-foo</div>
             </div>
             """
+
           expect($('.container .foo')).toExist()
           expect($('.container .bar')).not.toExist()
 
+          expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
+          expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
+
         it "updates an element if a matching element is found in the response, but that other element is no longer [up-keep]", ->
+          barCompiler = jasmine.createSpy()
+          barDestructor = jasmine.createSpy()
+          up.compiler '.bar', ($bar) ->
+            text = $bar.text()
+            console.info('Compiling %o', text)
+            barCompiler(text)
+            return -> barDestructor(text)
+
           $container = affix('.container')
           $container.html """
             <div class='foo'>old-foo</div>
             <div class='bar' up-keep>old-bar</div>
             """
+          up.hello($container)
+
+          expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
+          expect(barDestructor.calls.allArgs()).toEqual []
+
           up.extract '.container', """
             <div class='container'>
               <div class='foo'>new-foo</div>
               <div class='bar'>new-bar</div>
             </div>
             """
+
           expect($('.container .foo')).toHaveText('new-foo')
           expect($('.container .bar')).toHaveText('new-bar')
+
+          expect(barCompiler.calls.allArgs()).toEqual [['old-bar'], ['new-bar']]
+          expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
 
         it 'moves a kept element to the ancestry position of the matching element in the response', ->
           $container = affix('.container')
