@@ -1,6 +1,6 @@
 ###*
-Changing page fragments programmatically
-========================================
+Updating fragments from Javascript
+==================================
   
 This module contains Unpoly's core functions to [change](/up.replace) or
 [destroy](/up.destroy) page fragments via Javascript.
