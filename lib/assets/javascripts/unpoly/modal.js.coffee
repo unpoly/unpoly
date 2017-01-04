@@ -638,7 +638,7 @@ up.modal = (($) ->
   Clicking this link will load the destination via AJAX and open
   the given selector in a modal dialog.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       <a href="/blogs" up-modal=".blog-list">Switch blog</a>
 
@@ -736,7 +736,7 @@ up.modal = (($) ->
 
   You can configure drawers using the [`up.modal.flavors.drawer`](/up.modal.flavors.drawer) property.
 
-  \#\#\#\# Example
+  \#\#\# Example
 
       <a href="/blogs" up-drawer=".blog-list">Switch blog</a>
 

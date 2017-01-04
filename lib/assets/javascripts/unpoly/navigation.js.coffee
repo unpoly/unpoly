@@ -255,7 +255,7 @@ up.navigation = (($) ->
   - the link's [`up-href`](#turn-any-element-into-a-link) attribute
   - a space-separated list of URLs in the link's `up-alias` attribute
 
-  \#\#\#\# Matching URL by prefix
+  \#\#\# Matching URL by prefix
 
   You can mark a link as `.up-current` whenever the current URL matches a prefix.
   To do so, end the `up-alias` attribute in an asterisk (`*`).
