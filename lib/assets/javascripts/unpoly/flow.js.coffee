@@ -332,7 +332,7 @@ up.flow = (($) ->
   @return {Promise}
     A promise that will be resolved then the selector was updated
     and all animation has finished.
-  @experimental
+  @stable
   ###
   extract = (selectorOrElement, html, options) ->
     up.log.group 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length, ->

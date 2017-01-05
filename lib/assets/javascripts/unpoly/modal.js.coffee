@@ -753,7 +753,7 @@ up.modal = (($) ->
     Valid values are `'left'`, `'right'` and `'auto'`. If set to `'auto'`, the
     drawer will slide in from left if the opening link is on the left half of the screen.
     Otherwise it will slide in from the right.
-  @experimental
+  @stable
   ###
   up.macro '[up-drawer]', ($link) ->
     target = $link.attr('up-drawer')

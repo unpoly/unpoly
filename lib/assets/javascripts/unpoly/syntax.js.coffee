@@ -360,7 +360,7 @@ up.syntax = (($) ->
     The JSON-decoded value of the `up-data` attribute.
 
     Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
-  @experimental
+  @stable
   ###
 
   ###*

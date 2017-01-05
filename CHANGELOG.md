@@ -16,6 +16,10 @@ Unreleased
 - Fix a bug where [`up.reveal`](/up.reveal) would scroll too far if the viewport has a `padding-top`.
 - Fix a bug where [`up.reveal`](/up.reveal) would not scroll to an element at the bottom edge of the visible area
   if [`up.layout.config.snap`](/up.layout.config) is set.
+- Several features have been promoted from experimental API to stable API:
+  - [`[up-drawer]`](/up-drawer)
+  - [`up.syntax.data`](/up.syntax.data)
+  - [`up.extract`](/up.extract)
 
 
 ### Breaking changes
