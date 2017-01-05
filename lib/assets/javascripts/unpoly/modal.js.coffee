@@ -122,7 +122,6 @@ up.modal = (($) ->
   ###
   config = u.config
     maxWidth: null
-    minWidth: null
     width: null
     height: null
     history: true
