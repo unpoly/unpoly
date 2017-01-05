@@ -1,7 +1,12 @@
 .up-modal-content
   // Unpoly: Gives some default padding
-  // BS: Expects content to set the padding
+  // Bootstrap: Expects content to set the padding
   padding: 0
+
+.up-modal-dialog
+  // Unpoly: Dialog margin is a padding of .up-modal-viewport so we can give .up-modal-dialog a max-width of 100%
+  // Bootstrap: Dialog margin is a margin of .modal-dialog
+  margin: 0
 
 .up-modal[up-flavor='drawer']
 

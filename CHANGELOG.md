@@ -17,6 +17,13 @@ Unreleased
 
 ### Breaking changes
 
+- [Modals](/up.modal) can no longer grow wider than the screen
+- The spacing around a modal dialog is longer implemented as a `margin` of `.up-modal-dialog`.
+  It is now a padding of `.up-modal-viewport`. This makes it easier to set the `width` or `max-width` of the dialog box.
+
+  If your project has custom Unpoly styles, you should grep your CSS files for changes to the `margin`
+  of `.up-modal-dialog` and set it as a `padding` on `.up-modal-viewport[flavor=default]` instead.
+  
 
 0.31.2
 ------

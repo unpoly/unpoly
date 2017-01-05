@@ -50,6 +50,12 @@ $close-font-size: 34px
   // contents of `.up-modal-content`.
   text-align: center
 
+  // Implement the margin around the dialog box with a padding of the viewport.
+  // This way we can give .up-modal-dialog a max-width of 100%, (1) preventing people
+  // from setting withs larger than the viewport, and (2) sizing approproately
+  // if the modal contents are very wide and cannot wrap (e.g. code blocks).
+  padding: 30px 10px
+
 .up-modal.up-modal-animating
   // During opening/closing animations we let the .up-modal container take over
   // the scrollbars that would usually be owned by .up-modal-viewport.
@@ -68,7 +74,6 @@ $close-font-size: 34px
   // the width and height attributes set by up.modal
   // should be honored exactly.
   box-sizing: border-box
-  margin: 30px 10px
 
   // In case someone sets a huge width on the dialog.
   max-width: 100%
@@ -99,10 +104,10 @@ $close-font-size: 34px
 .up-modal[up-flavor='drawer']
   .up-modal-viewport
     text-align: left
+    padding: 0
   &[up-position='right'] .up-modal-viewport
     text-align: right
   .up-modal-dialog
-    margin: 0
     max-width: 350px
   .up-modal-content
     min-height: 100vh
