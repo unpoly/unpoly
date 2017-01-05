@@ -78,6 +78,18 @@ describe 'up.layout', ->
           # [2] 70 ......... 5069
           expect($(document).scrollTop()).toBe(0)
 
+        it 'does not snap to the top if it would un-reveal an element at the bottom edge of the screen (bugfix)', ->
+          up.layout.config.snap = 100
+
+          up.reveal(@$elements[1])
+          # ---------------------
+          # [0] 0 .......... ch-1
+          # [1] ch+0 ...... ch+49
+          # ---------------------
+          # [2] ch+50 ... ch+5049
+          expect($(document).scrollTop()).toBe(50)
+
+
         it 'scrolls far enough so the element is not obstructed by an element fixed to the top', ->
           $topNav = affix('[up-fixed=top]').css(
             position: 'fixed',

@@ -13,6 +13,9 @@ Unreleased
 - Fix a bug where morphing an [`[up-keep]`](/up-keep) element with a destructor would throw an error.
 - Fix a bug where an [`[up-keep]`](/up-keep) element would lose its jQuery event handlers when it was kept.
 - Fix a bug where [`up.log.disable()`](/up.log.disable) did not persist through page reloads.
+- Fix a bug where [`up.reveal`](/up.reveal) would scroll too far if the viewport has a `padding-top`.
+- Fix a bug where [`up.reveal`](/up.reveal) would not scroll to an element at the bottom edge of the visible area
+  if [`up.layout.config.snap`](/up.layout.config) is set.
 
 
 ### Breaking changes

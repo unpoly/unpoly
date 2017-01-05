@@ -233,7 +233,7 @@ up.layout = (($) ->
     snap = u.option(options.snap, config.snap)
 
     viewportIsDocument = $viewport.is(document)
-    viewportHeight = if viewportIsDocument then u.clientSize().height else $viewport.height()
+    viewportHeight = if viewportIsDocument then u.clientSize().height else $viewport.outerHeight()
     originalScrollPos = $viewport.scrollTop()
     newScrollPos = originalScrollPos
 
@@ -249,8 +249,9 @@ up.layout = (($) ->
     else
       obstruction = { top: 0, bottom: 0 }
       # When the scrolled element is not <body> but instead a container
-      # with overflow-y: scroll, $.position returns the position the
-      # viewport's top edge instead of the first row of  the canvas buffer.
+      # with overflow-y: scroll, $.position returns the distance to the
+      # viewport's currently visible top edge (instead of the distance to
+      # the first row of the viewport's entire canvas buffer).
       # http://codepen.io/anon/pen/jPojGE
       offsetShift = originalScrollPos
 
@@ -259,7 +260,6 @@ up.layout = (($) ->
 
     elementDims = u.measure($element, relative: $viewport)
     firstElementRow = elementDims.top + offsetShift
-
     lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1
 
     if lastElementRow > predictLastVisibleRow()
@@ -270,7 +270,7 @@ up.layout = (($) ->
       # If the full element does not fit, scroll to the first row
       newScrollPos = firstElementRow - obstruction.top
 
-    if newScrollPos < snap
+    if newScrollPos < snap && elementDims.top < (0.5 * viewportHeight)
       newScrollPos = 0
 
     if newScrollPos != originalScrollPos
