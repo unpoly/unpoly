@@ -416,7 +416,7 @@ up.layout = (($) ->
   ###*
   @function up.layout.revealOrRestoreScroll
   @return {Deferred}
-    A promise for when the revealing or scroll restauration ends
+    A promise for when the revealing or scroll restoration ends
   @internal
   ###
   revealOrRestoreScroll = (selectorOrElement, options) ->

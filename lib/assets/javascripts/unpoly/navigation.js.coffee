@@ -1,6 +1,6 @@
 ###*
-Navigation bars
-===============
+Navigation feedback
+===================
 
 Unpoly automatically adds CSS classes to links while they are
 currently loading ([`.up-active`](/up-active)) or
