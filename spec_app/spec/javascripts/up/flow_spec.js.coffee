@@ -493,10 +493,12 @@ describe 'up.flow', ->
           beforeEach ->
             @revealedHTML = []
             @revealedText = []
+            @revealOptions = {}
 
-            @revealMock = up.layout.knife.mock('reveal').and.callFake ($revealedElement) =>
-              @revealedHTML.push $revealedElement.get(0).outerHTML
-              @revealedText.push $revealedElement.text().trim()
+            @revealMock = up.layout.knife.mock('reveal').and.callFake ($element, options) =>
+              @revealedHTML.push $element.get(0).outerHTML
+              @revealedText.push $element.text().trim()
+              @revealOptions = options
               u.resolvedDeferred()
 
           it 'reveals a new element before it is being replaced', (done) ->
@@ -519,7 +521,7 @@ describe 'up.flow', ->
 
           describe 'when there is an anchor #hash in the URL', ->
 
-            it 'reveals a child with the ID of that #hash', (done) ->
+            it 'scrolls to the top of a child with the ID of that #hash', (done) ->
               promise = up.replace('.middle', '/path#three', reveal: true)
               @responseText =
                 """
@@ -532,6 +534,7 @@ describe 'up.flow', ->
               @respond()
               promise.then =>
                 expect(@revealedHTML).toEqual ['<div id="three">three</div>']
+                expect(@revealOptions).toEqual { top: true }
                 done()
 
             it "reveals the entire element if it has no child with the ID of that #hash", (done) ->

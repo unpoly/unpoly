@@ -173,6 +173,20 @@ describe 'up.layout', ->
           # [F] 0 ............ 99
           expect($(document).scrollTop()).toBe(@clientHeight + 50)
 
+        describe 'with { top: true } option', ->
+
+          it 'scrolls the viewport to the first row of the element, even if that element is already fully revealed', ->
+
+            @$elements[0].css(height: '20px')
+
+            up.reveal(@$elements[1], { top: true })
+            # [0] 0 ............ 19
+            # [1] 20 ........... 69
+            # ---------------------
+            # [2] 70 ......... 5069
+            # ---------------------
+            expect($(document).scrollTop()).toBe(20)
+
 
       describe 'when the viewport is a container with overflow-y: scroll', ->
 

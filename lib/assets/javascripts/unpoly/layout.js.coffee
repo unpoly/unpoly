@@ -424,13 +424,16 @@ up.layout = (($) ->
     if options.restoreScroll
       restoreScroll(around: $element)
     else if options.reveal
+      revealOptions = {}
       if options.source
         parsed = u.parseUrl(options.source)
         if parsed.hash && parsed.hash != '#'
           id = parsed.hash.substr(1)
           $target = u.findWithSelf($element, "##{id}, a[name='#{id}']")
-          $element = $target if $target.length
-      reveal($element)
+          if $target.length
+            $element = $target
+            revealOptions.top = true
+      reveal($element, revealOptions)
     else
       u.resolvedDeferred()
 

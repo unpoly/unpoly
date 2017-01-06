@@ -20,6 +20,8 @@ Unreleased
   - [`[up-drawer]`](/up-drawer)
   - [`up.syntax.data`](/up.syntax.data)
   - [`up.extract`](/up.extract)
+- When [targeting](/up-target) an URL with a #hash, the viewport will now scroll to the first row of an element
+  with that ID, rather than scrolling as little as possible.
 
 
 ### Breaking changes
