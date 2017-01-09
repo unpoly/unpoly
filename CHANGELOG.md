@@ -10,6 +10,15 @@ Unreleased
 
 ### Compatible changes
 
+
+### Breaking changes
+
+
+Unreleased
+----------
+
+### Compatible changes
+
 - Fix a bug where morphing an [`[up-keep]`](/up-keep) element with a destructor would throw an error.
 - Fix a bug where an [`[up-keep]`](/up-keep) element would lose its jQuery event handlers when it was kept.
 - Fix a bug where [`up.log.disable()`](/up.log.disable) did not persist through page reloads.
@@ -32,7 +41,7 @@ Unreleased
 
   If your project has custom Unpoly styles, you should grep your CSS files for changes to the `margin`
   of `.up-modal-dialog` and set it as a `padding` on `.up-modal-viewport[flavor=default]` instead.
-  
+
 
 0.31.2
 ------
