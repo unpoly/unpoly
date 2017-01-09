@@ -14,8 +14,8 @@ Unreleased
 ### Breaking changes
 
 
-Unreleased
-----------
+0.32.0
+------
 
 ### Compatible changes
 
