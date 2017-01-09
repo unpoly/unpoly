@@ -50,7 +50,7 @@ To run RSpec tests for the `unpoly-rails` gem:
 
 ### Making a new release
 
-We are currently feeding fourrelease channels:
+We are currently feeding four release channels:
 
 - Manual download from Github
   npm
