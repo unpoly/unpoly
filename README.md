@@ -59,15 +59,18 @@ We are currently feeding four release channels:
 
 We always release to all channel simultaneously.
 
-To make a new release:
+To prepare a new version:
 
 1. Edit `lib/unpoly/rails/version.rb` and bump the version number. Use [semantic versioning](http://semver.org/).
 2. Add an entry to `CHANGELOG.md`
 3. Commit and push the version bump and `CHANGELOG.md`
-4. From the project root, type `rake publish:build`. This will output minified JS and CSS files to the `dist` folder. It also updates the `package.json` for npm.
-5. Commit and push the generated files. There is a rake task `rake publish:commit` that helps with this.
-6. From the project root, type `rake publish:release`. This will publish a new gem version to Rubygems.org.
-7. It will also push a tag for this version, which Bower requires for its own versioning scheme. Finally it publishes to npm.
+
+Now we can release a new version. **This requires your to be logged into Rubygems and npm**:
+
+1. From the project root, type `rake publish:build`. This will output minified JS and CSS files to the `dist` folder. It also updates the `package.json` for npm.
+2. Commit and push the generated files. There is a rake task `rake publish:commit` that helps with this.
+3. From the project root, type `rake publish:release`. This will publish a new gem version to Rubygems.org.
+4. It will also push a tag for this version, which Bower requires for its own versioning scheme. Finally it publishes to npm.
 
 Always remember to build, commit and push build artifacts before calling `rake publish:release` so the Git tag points to the correct commit.
 
