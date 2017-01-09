@@ -9,7 +9,7 @@
    */
 
   world.up = {
-    version: "0.31.2"
+    version: "0.32.0"
   };
 
 }).call(this);
@@ -36,7 +36,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extend, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extend, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -545,7 +545,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     /**
     Returns whether the given argument is an object.
     
-    This also returns `true` for functions, which may behave like objects in Javascript.
+    This also returns `true` for functions, which may behave like objects in JavaScript.
     For an alternative that returns `false` for functions, see [`up.util.isHash`](/up.util.isHash).
     
     @function up.util.isObject
@@ -936,7 +936,7 @@ that might save you from loading something like [Underscore.js](http://underscor
 
     /**
     Schedules the given function to be called in the
-    next Javascript execution frame.
+    next JavaScript execution frame.
     
     @function up.util.nextFrame
     @param {Function} block
@@ -1977,7 +1977,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
-    Throws a [Javascript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+    Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
     with the given message.
     
     The message will also be printed to the [error log](/up.log.error). Also a notification will be shown at the bottom of the screen.
@@ -2257,6 +2257,23 @@ that might save you from loading something like [Underscore.js](http://underscor
         return 'right';
       }
     };
+
+    /**
+    Like `$old.replaceWith($new)`, but keeps event handlers bound to `$old`.
+    
+    Note that this is a memory leak unless you re-attach `$new` to the DOM aferwards.
+    
+    @function up.util.detachWith
+    @internal
+     */
+    detachWith = function($old, $new) {
+      var $insertion;
+      $insertion = $('<div></div>');
+      $insertion.insertAfter($old);
+      $old.detach();
+      $insertion.replaceWith($new);
+      return $old;
+    };
     return {
       isDetached: isDetached,
       requestDataAsArray: requestDataAsArray,
@@ -2368,7 +2385,8 @@ that might save you from loading something like [Underscore.js](http://underscor
       promiseTimer: promiseTimer,
       previewable: previewable,
       evalOption: evalOption,
-      horizontalScreenHalf: horizontalScreenHalf
+      horizontalScreenHalf: horizontalScreenHalf,
+      detachWith: detachWith
     };
   })($);
 
@@ -2777,8 +2795,8 @@ use the more convenient [`up.on`](/up.on):
 This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 
 - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
-  leaving you with an application without Javascript. This is typically preferable to
-  a soup of randomly broken Javascript in ancient browsers.
+  leaving you with an application without JavaScript. This is typically preferable to
+  a soup of randomly broken JavaScript in ancient browsers.
 - A jQuery object with the target element is automatically passed to the event handler
   as a second argument. You no longer need to write `$(this)` in the handler function.
 - You use an [`up-data`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
@@ -3214,7 +3232,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     /**
     Boots the Unpoly framework.
     
-    **This is called automatically** by including the Unpoly Javascript files.
+    **This is called automatically** by including the Unpoly JavaScript files.
     
     Unpoly will not boot if the current browser is [not supported](/up.browser.isSupported).
     This leaves you with a classic server-side application on legacy browsers.
@@ -3327,7 +3345,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
      */
     config = u.config({
       prefix: '[UP] ',
-      enabled: u.option(b.sessionStorage().getItem(SESSION_KEY_ENABLED), false),
+      enabled: b.sessionStorage().getItem(SESSION_KEY_ENABLED) === 'true',
       collapse: false
     });
     reset = function() {
@@ -3431,7 +3449,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     up.on('up:framework:boot', printBanner);
     up.on('up:framework:reset', reset);
     setEnabled = function(value) {
-      b.sessionStorage().setItem(SESSION_KEY_ENABLED, value);
+      b.sessionStorage().setItem(SESSION_KEY_ENABLED, value.toString());
       return config.enabled = value;
     };
 
@@ -3552,13 +3570,13 @@ Toast alerts
 }).call(this);
 
 /**
-Custom Javascript
+Custom JavaScript
 =================
 
-Every app needs a way to pair Javascript snippets with certain HTML elements,
+Every app needs a way to pair JavaScript snippets with certain HTML elements,
 in order to integrate libraries or implement custom behavior.
 
-Unpoly lets you organize your Javascript snippets using [compilers](/up.compiler).
+Unpoly lets you organize your JavaScript snippets using [compilers](/up.compiler).
 
 For instance, to activate the [Masonry](http://masonry.desandro.com/) jQuery plugin for every element
 with a `grid` class, use this compiler:
@@ -3577,9 +3595,9 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
   var slice = [].slice;
 
   up.syntax = (function($) {
-    var DESTRUCTABLE_CLASS, DESTRUCTORS_KEY, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, discoverDestructors, insertCompiler, macro, macros, reset, snapshot, u;
+    var DESTRUCTIBLE_CLASS, DESTRUCTORS_KEY, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, discoverDestructors, insertCompiler, macro, macros, reset, snapshot, u;
     u = up.util;
-    DESTRUCTABLE_CLASS = 'up-destructable';
+    DESTRUCTIBLE_CLASS = 'up-destructible';
     DESTRUCTORS_KEY = 'up-destructors';
     compilers = [];
     macros = [];
@@ -3603,14 +3621,14 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     \#\#\# Integrating jQuery plugins
     
     `up.compiler` is a great way to integrate jQuery plugins.
-    Let's say your Javascript plugin wants you to call `lightboxify()`
+    Let's say your JavaScript plugin wants you to call `lightboxify()`
     on links that should open a lightbox. You decide to
     do this for all links with an `lightbox` class:
     
         <a href="river.png" class="lightbox">River</a>
         <a href="ocean.png" class="lightbox">Ocean</a>
     
-    This Javascript will do exactly that:
+    This JavaScript will do exactly that:
     
         up.compiler('a.lightbox', function($element) {
           $element.lightboxify();
@@ -3623,7 +3641,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
         <clock></clock>
     
-    Here is the Javascript that inserts the current time into to these elements:
+    Here is the JavaScript that inserts the current time into to these elements:
     
         up.compiler('clock', function($element) {
           var now = new Date();
@@ -3634,7 +3652,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     \#\#\# Cleaning up after yourself
     
     If your compiler returns a function, Unpoly will use this as a *destructor* to
-    clean up if the element leaves the DOM. Note that in Unpoly the same DOM ad Javascript environment
+    clean up if the element leaves the DOM. Note that in Unpoly the same DOM ad JavaScript environment
     will persist through many page loads, so it's important to not create
     [memory leaks](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
     
@@ -3863,7 +3881,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     };
     addDestructor = function($jqueryElement, destructor) {
       var destructors;
-      $jqueryElement.addClass(DESTRUCTABLE_CLASS);
+      $jqueryElement.addClass(DESTRUCTIBLE_CLASS);
       destructors = $jqueryElement.data(DESTRUCTORS_KEY) || [];
       destructors.push(destructor);
       return $jqueryElement.data(DESTRUCTORS_KEY, destructors);
@@ -3931,16 +3949,18 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @internal
      */
     clean = function($fragment) {
-      return u.findWithSelf($fragment, "." + DESTRUCTABLE_CLASS).each(function() {
+      return u.findWithSelf($fragment, "." + DESTRUCTIBLE_CLASS).each(function() {
         var $element, destructor, destructors, i, len;
         $element = $(this);
         destructors = $element.data(DESTRUCTORS_KEY);
-        for (i = 0, len = destructors.length; i < len; i++) {
-          destructor = destructors[i];
-          destructor();
+        if (destructors) {
+          for (i = 0, len = destructors.length; i < len; i++) {
+            destructor = destructors[i];
+            destructor();
+          }
+          $element.removeData(DESTRUCTORS_KEY);
+          return $element.removeClass(DESTRUCTIBLE_CLASS);
         }
-        $element.removeData(DESTRUCTORS_KEY);
-        return $element.removeClass(DESTRUCTABLE_CLASS);
       });
     };
 
@@ -3956,7 +3976,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
         <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
     
-    Calling `up.syntax.data` will deserialize the JSON string into a Javascript object:
+    Calling `up.syntax.data` will deserialize the JSON string into a JavaScript object:
     
         up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
     
@@ -3966,7 +3986,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       The JSON-decoded value of the `up-data` attribute.
     
       Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
-    @experimental
+    @stable
      */
 
     /**
@@ -4561,7 +4581,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     element are visible for the user.
     
     By default Unpoly will always reveal an element before
-    updating it with Javascript functions like [`up.replace`](/up.replace)
+    updating it with JavaScript functions like [`up.replace`](/up.replace)
     or UJS behavior like [`[up-target]`](/a-up-target).
     
     \#\#\# How Unpoly finds the viewport
@@ -4607,7 +4627,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       $viewport = options.viewport ? $(options.viewport) : viewportOf($element);
       snap = u.option(options.snap, config.snap);
       viewportIsDocument = $viewport.is(document);
-      viewportHeight = viewportIsDocument ? u.clientSize().height : $viewport.height();
+      viewportHeight = viewportIsDocument ? u.clientSize().height : $viewport.outerHeight();
       originalScrollPos = $viewport.scrollTop();
       newScrollPos = originalScrollPos;
       offsetShift = void 0;
@@ -4639,7 +4659,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       if (firstElementRow < predictFirstVisibleRow() || options.top) {
         newScrollPos = firstElementRow - obstruction.top;
       }
-      if (newScrollPos < snap) {
+      if (newScrollPos < snap && elementDims.top < (0.5 * viewportHeight)) {
         newScrollPos = 0;
       }
       if (newScrollPos !== originalScrollPos) {
@@ -4822,17 +4842,18 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     /**
     @function up.layout.revealOrRestoreScroll
     @return {Deferred}
-      A promise for when the revealing or scroll restauration ends
+      A promise for when the revealing or scroll restoration ends
     @internal
      */
     revealOrRestoreScroll = function(selectorOrElement, options) {
-      var $element, $target, id, parsed;
+      var $element, $target, id, parsed, revealOptions;
       $element = $(selectorOrElement);
       if (options.restoreScroll) {
         return restoreScroll({
           around: $element
         });
       } else if (options.reveal) {
+        revealOptions = {};
         if (options.source) {
           parsed = u.parseUrl(options.source);
           if (parsed.hash && parsed.hash !== '#') {
@@ -4840,10 +4861,11 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
             $target = u.findWithSelf($element, "#" + id + ", a[name='" + id + "']");
             if ($target.length) {
               $element = $target;
+              revealOptions.top = true;
             }
           }
         }
-        return reveal($element);
+        return reveal($element, revealOptions);
       } else {
         return u.resolvedDeferred();
       }
@@ -4975,14 +4997,14 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
 }).call(this);
 
 /**
-Changing page fragments programmatically
-========================================
+Fragment update API
+===================
   
 This module contains Unpoly's core functions to [change](/up.replace) or
-[destroy](/up.destroy) page fragments via Javascript.
+[destroy](/up.destroy) page fragments via JavaScript.
 
-All the other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
-are based on this module.
+Other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
+build upon this module to offer higher level API functions.
   
 @class up.flow
  */
@@ -5000,7 +5022,7 @@ are based on this module.
       Whether inline `<script>` tags inside inserted HTML fragments will be executed.
     @param {Boolean} [options.runLinkedScripts=false]
       Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
-      the linked Javascript file.
+      the linked JavaScript file.
     @stable
      */
     config = u.config({
@@ -5338,7 +5360,7 @@ are based on this module.
     @return {Promise}
       A promise that will be resolved then the selector was updated
       and all animation has finished.
-    @experimental
+    @stable
      */
     extract = function(selectorOrElement, html, options) {
       return up.log.group('Extracting %s from %d bytes of HTML', selectorOrElement, html != null ? html.length : void 0, function() {
@@ -5522,7 +5544,7 @@ are based on this module.
             descendantsOnly: true
           }))) {
             $keepableClone = $keepable.clone();
-            $keepable.replaceWith($keepableClone);
+            up.util.detachWith($keepable, $keepableClone);
             plan.$newElement.replaceWith($keepable);
             keepPlans.push(plan);
           }
@@ -5531,7 +5553,7 @@ are based on this module.
       return keepPlans;
     };
     findKeepPlan = function($element, $new, options) {
-      var $keepable, $partner, description, keepEventArgs, partnerSelector;
+      var $keepable, $partner, keepEventArgs, partnerSelector, plan;
       if (options.keep) {
         $keepable = $element;
         if (partnerSelector = u.castedAttr($keepable, 'up-keep')) {
@@ -5544,16 +5566,16 @@ are based on this module.
           }
           $partner = $partner.first();
           if ($partner.length && $partner.is('[up-keep]')) {
-            description = {
+            plan = {
               $element: $keepable,
               $newElement: $partner,
               newData: up.syntax.data($partner)
             };
-            keepEventArgs = u.merge(description, {
+            keepEventArgs = u.merge(plan, {
               message: ['Keeping element %o', $keepable.get(0)]
             });
             if (up.bus.nobodyPrevents('up:fragment:keep', keepEventArgs)) {
-              return description;
+              return plan;
             }
           }
         }
@@ -6004,7 +6026,7 @@ are based on this module.
 Animation
 =========
   
-Whenever you [update a page fragment](/up-link) you can animate the change.
+Whenever you [update a page fragment](/up.link) you can animate the change.
 
 Let's say you are using an [`up-target`](/a-up-target) link to update an element
 with content from the server. You can add an attribute [`up-transition`](/a-up-target#up-transition)
@@ -6738,7 +6760,7 @@ Unpoly caches server responses for a few minutes,
 making requests to these URLs return instantly.
 
 All Unpoly functions and selectors go through this cache.
-If you need to make cache-aware requests from your [custom Javascript](/up.syntax),
+If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
 use [`up.ajax`](/up.ajax).
 
 \#\#\# How the cache is cleared
@@ -7057,7 +7079,7 @@ that appears during a long-running request.
     
         <div class="spinner">Please wait!</div>
     
-    Here is the Javascript to make it alive:
+    Here is the JavaScript to make it alive:
     
         up.compiler('.spinner', function($element) {
     
@@ -7341,7 +7363,7 @@ Standard HTML links are a poor fit for modern applications:
 
 - State changes caused by AJAX updates get lost during the page transition.
 - Unsaved form changes get lost during the page transition.
-- The Javascript VM is reset during the page transition.
+- The JavaScript VM is reset during the page transition.
 - If the page layout is composed from multiple srollable containers
   (e.g. a pane view), the scroll positions get lost during the page transition.
 - The user sees a "flash" as the browser loads and renders the new page,
@@ -7397,7 +7419,7 @@ with an `up-target` attribute:
 Note that instead of `article` you can use any other CSS selector like `#main .article`.
 
 With these [`up-target`](/a-up-target) annotations Unpoly only updates the targeted part of the screen.
-The Javascript environment will persist and the user will not see a white flash while the
+The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
 
@@ -7408,7 +7430,7 @@ new page is loading.
 - As you switch through pages, Unpoly will [update your browser's location bar and history](/up.history)
 - You can [open fragments in popups or modal dialogs](/up.modal).
 - You can give users [immediate feedback](/up.navigation) when a link is clicked or becomes current, without waiting for the server.
-- [Controlling Unpoly pragmatically through Javascript](/up.flow)
+- [Controlling Unpoly pragmatically through JavaScript](/up.flow)
 - [Defining custom tags](/up.syntax)
 
   
@@ -7598,20 +7620,36 @@ new page is loading.
         }
       });
     };
-    isFollowable = function($link) {
+
+    /**
+    Returns whether the given link will be handled by Unpoly instead of making a full page load.
+    
+    A link will be handled by Unpoly if it has an attribute
+    like `up-target` or `up-modal`.
+    
+    @function up.link.isFollowable
+    @param {Element|jQuery|String} linkOrSelector
+      The link to check.
+    @experimental
+     */
+    isFollowable = function(link) {
+      var $link;
+      $link = $(link);
       return u.any(followVariantSelectors, function(selector) {
         return $link.is(selector);
       });
     };
 
     /**
-    Makes sure that the given link is handled by Unpoly.
+    Makes sure that the given link will be handled by Unpoly instead of making a full page load.
     
     This is done by giving the link an `up-follow` attribute
-    unless it already have it an `up-target` or `up-follow` attribute.
+    unless it already have it an attribute like `up-target` or `up-modal`.
     
     @function up.link.makeFollowable
-    @internal
+    @param {Element|jQuery|String} linkOrSelector
+      The link to process.
+    @experimental
      */
     makeFollowable = function(link) {
       var $link;
@@ -7892,6 +7930,7 @@ new page is loading.
       visit: visit,
       follow: follow,
       makeFollowable: makeFollowable,
+      isFollowable: isFollowable,
       shouldProcessLinkEvent: shouldProcessLinkEvent,
       childClicked: childClicked,
       followMethod: followMethod,
@@ -8129,7 +8168,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @param {Function(value, $field)|String} onChange
       The callback to run when the field's value changes.
       If given as a function, it must take two arguments (`value`, `$field`).
-      If given as a string, it will be evaled as Javascript code in a context where
+      If given as a string, it will be evaled as JavaScript code in a context where
       (`value`, `$field`) are set.
     @return {Function}
       A destructor function that removes the observe watch when called.
@@ -8820,7 +8859,7 @@ to show a fragment in a popup overlay that rolls down from an anchoring element.
 
 To open a popup, add an [`up-popup` attribute](/up-popup) to a link:
 
-    <a href="/options" up-modal=".menu">Show options</a>
+    <a href="/options" up-popup=".menu">Show options</a>
 
 When this link is clicked, Unpoly will request the path `/options` and extract
 an element matching the selector `.menu` from the response. The matching element
@@ -9293,14 +9332,12 @@ The HTML of a popup element is simply this:
     
         <a href="/fallback" up-close>Okay</a>
     
-    @selector [up-close]
+    @selector .up-popup [up-close]
     @stable
      */
-    up.on('click', '[up-close]', function(event, $element) {
-      if (contains($element)) {
-        closeAsap();
-        return up.bus.consumeAction(event);
-      }
+    up.on('click', '.up-popup [up-close]', function(event, $element) {
+      closeAsap();
+      return up.bus.consumeAction(event);
     });
     up.on('up:framework:reset', reset);
     return {
@@ -9447,7 +9484,6 @@ or function.
      */
     config = u.config({
       maxWidth: null,
-      minWidth: null,
       width: null,
       height: null,
       history: true,
@@ -10036,7 +10072,7 @@ or function.
     Clicking this link will load the destination via AJAX and open
     the given selector in a modal dialog.
     
-    \#\#\#\# Example
+    \#\#\# Example
     
         <a href="/blogs" up-modal=".blog-list">Switch blog</a>
     
@@ -10120,14 +10156,12 @@ or function.
     
         <a href="/fallback" up-close>Okay</a>
     
-    @selector [up-close]
+    @selector .up-modal [up-close]
     @stable
      */
-    up.on('click', '[up-close]', function(event, $element) {
-      if (contains($element)) {
-        closeAsap();
-        return up.bus.consumeAction(event);
-      }
+    up.on('click', '.up-modal [up-close]', function(event, $element) {
+      closeAsap();
+      return up.bus.consumeAction(event);
     });
 
     /**
@@ -10136,7 +10170,7 @@ or function.
     
     You can configure drawers using the [`up.modal.flavors.drawer`](/up.modal.flavors.drawer) property.
     
-    \#\#\#\# Example
+    \#\#\# Example
     
         <a href="/blogs" up-drawer=".blog-list">Switch blog</a>
     
@@ -10154,7 +10188,7 @@ or function.
       Valid values are `'left'`, `'right'` and `'auto'`. If set to `'auto'`, the
       drawer will slide in from left if the opening link is on the left half of the screen.
       Otherwise it will slide in from the right.
-    @experimental
+    @stable
      */
     up.macro('[up-drawer]', function($link) {
       var target;
@@ -10524,8 +10558,8 @@ The tooltip element is appended to the end of `<body>`.
 }).call(this);
 
 /**
-Navigation bars
-===============
+Navigation feedback
+===================
 
 Unpoly automatically adds CSS classes to links while they are
 currently loading ([`.up-active`](/up-active)) or
@@ -10672,7 +10706,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     Marks the given element as currently loading, by assigning the CSS class [`up-active`](/up-active).
     
     This happens automatically when following links or submitting forms through the Unpoly API.
-    Use this function if you make custom network calls from your own Javascript code.
+    Use this function if you make custom network calls from your own JavaScript code.
     
     If the given element is a link within an [expanded click area](/up-expand),
     the class will be assigned to the expanded area.
@@ -10754,7 +10788,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     Marks the given element as no longer loading, by removing the CSS class [`up-active`](/up-active).
     
     This happens automatically when network requests initiated by the Unpoly API have completed.
-    Use this function if you make custom network calls from your own Javascript code.
+    Use this function if you make custom network calls from your own JavaScript code.
     
     @function up.navigation.stop
     @param {jQuery} event.$element
@@ -10803,7 +10837,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     - the link's [`up-href`](#turn-any-element-into-a-link) attribute
     - a space-separated list of URLs in the link's `up-alias` attribute
     
-    \#\#\#\# Matching URL by prefix
+    \#\#\# Matching URL by prefix
     
     You can mark a link as `.up-current` whenever the current URL matches a prefix.
     To do so, end the `up-alias` attribute in an asterisk (`*`).

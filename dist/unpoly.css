@@ -31,7 +31,8 @@
   z-index: 12000;
   overflow-x: hidden;
   overflow-y: scroll;
-  text-align: center; }
+  text-align: center;
+  padding: 30px 10px; }
 
 .up-modal.up-modal-animating {
   overflow-y: scroll; }
@@ -42,7 +43,6 @@
   z-index: 13000;
   position: relative;
   box-sizing: border-box;
-  margin: 30px 10px;
   max-width: 100%;
   display: inline-block;
   text-align: left; }
@@ -67,11 +67,11 @@
   cursor: pointer; }
 
 .up-modal[up-flavor='drawer'] .up-modal-viewport {
-  text-align: left; }
+  text-align: left;
+  padding: 0; }
 .up-modal[up-flavor='drawer'][up-position='right'] .up-modal-viewport {
   text-align: right; }
 .up-modal[up-flavor='drawer'] .up-modal-dialog {
-  margin: 0;
   max-width: 350px; }
 .up-modal[up-flavor='drawer'] .up-modal-content {
   min-height: 100vh;

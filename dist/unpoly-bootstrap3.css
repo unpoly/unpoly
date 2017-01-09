@@ -1,6 +1,9 @@
 .up-modal-content {
   padding: 0; }
 
+.up-modal-dialog {
+  margin: 0; }
+
 .up-modal[up-flavor='drawer'] .up-modal-content {
   border-radius: 0;
   border-top: none;
