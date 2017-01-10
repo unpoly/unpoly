@@ -138,7 +138,9 @@ describe 'up.modal', ->
           promise2 = up.modal.visit('/path2', target: '.container', animation: 'fade-in', duration: 50)
           @respondWith('<div class="container">response1</div>')
 
-          u.setTimer 80, =>
+          u.setTimer 120, =>
+            # up.modal.visit (visitAsap) will start the request only after the last modal
+            # has finished opening and closing: 50 + 10 ms
             @respondWith('<div class="container">response2</div>')
             $.when(promise1, promise2).then ->
               expect($('.up-modal').length).toBe(1)
@@ -155,7 +157,7 @@ describe 'up.modal', ->
             up.modal.config.openAnimation = 'fade-in'
             up.modal.config.openDuration = 5
             up.modal.config.closeAnimation = 'fade-out'
-            up.modal.config.closeDuration = 50
+            up.modal.config.closeDuration = 60
 
             events = []
             u.each ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed'], (event) ->
@@ -168,22 +170,23 @@ describe 'up.modal', ->
             expect(events).toEqual ['up:modal:open']
             expect($('.target')).toHaveText('response1')
 
-            u.setTimer 40, ->
+            u.setTimer 80, ->
               # First modal has completed opening animation
               expect(events).toEqual ['up:modal:open', 'up:modal:opened']
               expect($('.target')).toHaveText('response1')
 
+              # We open another modal, which will cause the first modal to start closing
               up.modal.extract('.target', '<div class="target">response2</div>')
 
               expect($('.target')).toHaveText('response1')
 
-              u.setTimer 40, ->
+              u.setTimer 20, ->
 
                 # Second modal is still waiting for first modal's closing animaton to finish.
                 expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close']
                 expect($('.target')).toHaveText('response1')
 
-                u.setTimer 100, ->
+                u.setTimer 200, ->
 
                   # First modal has finished closing, second modal has finished opening.
                   expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed', 'up:modal:open', 'up:modal:opened']

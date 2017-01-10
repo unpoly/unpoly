@@ -92,7 +92,7 @@ describe 'up.popup', ->
             up.popup.config.openAnimation = 'fade-in'
             up.popup.config.openDuration = 5
             up.popup.config.closeAnimation = 'fade-out'
-            up.popup.config.closeDuration = 50
+            up.popup.config.closeDuration = 60
 
             events = []
             u.each ['up:popup:open', 'up:popup:opened', 'up:popup:close', 'up:popup:closed'], (event) ->
@@ -104,20 +104,21 @@ describe 'up.popup', ->
             expect(events).toEqual ['up:popup:open']
             expect($('.target')).toHaveText('response1')
 
-            u.setTimer 30, ->
+            u.setTimer 80, ->
               # First popup has completed opening animation
               expect(events).toEqual ['up:popup:open', 'up:popup:opened']
               expect($('.target')).toHaveText('response1')
 
+              # We open another popup, which will cause the first modal to start closing
               up.popup.attach($span, { target: '.target', html: '<div class="target">response2</div>' })
 
-              u.setTimer 15, ->
+              u.setTimer 20, ->
 
                 # Second popup is still waiting for first popup's closing animation to finish.
                 expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:close']
                 expect($('.target')).toHaveText('response1')
 
-                u.setTimer 100, ->
+                u.setTimer 200, ->
 
                   # First popup has finished closing, second popup has finished opening.
                   expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:close', 'up:popup:closed', 'up:popup:open', 'up:popup:opened']

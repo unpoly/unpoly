@@ -981,29 +981,19 @@ up.util = (($) ->
       'transition-timing-function': opts.easing
     oldTransition = $element.css(Object.keys(transition))
 
-    $element.addClass('up-animating')
-
-    transitionFinished = ->
-      $element.removeClass('up-animating')
-      $element.off('transitionend', onTransitionEnd)
-
     onTransitionEnd = (event) ->
       completedProperty = event.originalEvent.propertyName
+      # Check if the transitionend event was caused by our own transition,
+      # and not by some other transition that happens to live on the same element.
       if contains(transitionProperties, completedProperty)
         deferred.resolve() # unless isDetached($element)
-        transitionFinished()
 
     $element.on('transitionend', onTransitionEnd)
 
-    # Clean up in case we're canceled through some other code that resolves our deferred.
-    deferred.then(transitionFinished)
-
-    withoutCompositing = forceCompositing($element)
-    $element.css(transition)
-    $element.css(lastFrame)
-    $element.data(ANIMATION_DEFERRED_KEY, deferred)
-
     deferred.then ->
+      $element.removeClass('up-animating')
+      $element.off('transitionend', onTransitionEnd)
+
       $element.removeData(ANIMATION_DEFERRED_KEY)
       withoutCompositing()
 
@@ -1022,6 +1012,12 @@ up.util = (($) ->
         # the previous transition, the browser will simply keep transitioning.
         forceRepaint($element) # :(
         $element.css(oldTransition)
+
+    $element.addClass('up-animating')
+    withoutCompositing = forceCompositing($element)
+    $element.css(transition)
+    $element.data(ANIMATION_DEFERRED_KEY, deferred)
+    $element.css(lastFrame)
 
     # Return the whole deferred and not just return a thenable.
     # Other code will need the possibility to cancel the animation
