@@ -18,6 +18,12 @@ up.util = (($) ->
   noop = $.noop
 
   ###*
+  Ensures that the given function can only be called a single time.
+  Subsequent calls will return the return value of the first call.
+
+  Note that this is a simple implementation that
+  doesn't distinguish between argument lists.
+
   @function up.util.memoize
   @internal
   ###
@@ -233,15 +239,21 @@ up.util = (($) ->
       # we possibly received a layout-less fragment
       createElement('div', html)
 
-  ###*
-  Merge the contents of two or more objects together into the first object.
+  assignPolyfill = (target, sources...) ->
+    for source in sources
+      for own key, value of source
+        target[key] = value
+    target
 
-  @function up.util.extend
+  ###*
+  Merge the own properties of one or more `sources` into the `target` object.
+
+  @function up.util.assign
   @param {Object} target
   @param {Array<Object>} sources...
   @stable
   ###
-  extend = $.extend
+  assign = Object.assign || assignPolyfill
 
   ###*
   Returns a new string with whitespace removed from the beginning
@@ -563,7 +575,7 @@ up.util = (($) ->
     if isArray(object)
       object.slice()
     else if isHash(object)
-      extend({}, object)
+      assign({}, object)
 
   ###*
   If given a jQuery collection, returns the underlying array of DOM element.
@@ -588,7 +600,7 @@ up.util = (($) ->
   @stable
   ###
   merge = (sources...) ->
-    extend({}, sources...)
+    assign({}, sources...)
 
   ###*
   Creates an options hash from the given argument and some defaults.
@@ -1214,23 +1226,50 @@ up.util = (($) ->
   already resolved.
 
   @function up.util.resolvedDeferred
+  @param {Array<Object>} [args...]
+    The resolution values that will be passed to callbacks
   @return {Deferred}
   @stable
   ###
-  resolvedDeferred = ->
+  resolvedDeferred = (args...) ->
     deferred = $.Deferred()
-    deferred.resolve()
+    deferred.resolve(args...)
     deferred
 
   ###*
   Returns a promise that is already resolved.
 
   @function up.util.resolvedPromise
+  @param {Array<Object>} [args...]
+    The resolution values that will be passed to callbacks
   @return {Promise}
   @stable
   ###
-  resolvedPromise = ->
-    resolvedDeferred().promise()
+  resolvedPromise = (args...) ->
+    resolvedDeferred(args...).promise()
+
+  ###*
+  Returns a promise that is already rejected.
+
+  @function up.util.rejectedPromise
+  @param {Array<Object>} [args...]
+    The rejection values that will be passed to callbacks
+  @return {Promise}
+  @stable
+  ###
+  rejectedPromise = (args...) ->
+    deferred = $.Deferred()
+    deferred.reject(args...)
+    deferred.promise()
+
+  ###*
+  Returns whether the given argument is a resolved jQuery promise.
+
+  @return {Boolean}
+  @internal
+  ###
+  isResolvedPromise = (promise) ->
+    isPromise(promise) && promise.state?() == 'resolved'
 
   ###*
   Returns whether the given argument is a resolved jQuery promise.
@@ -1529,7 +1568,7 @@ up.util = (($) ->
     hash.reset = ->
       newOptions = blueprint
       newOptions = newOptions() if isFunction(newOptions)
-      extend(hash, newOptions)
+      assign(hash, newOptions)
     hash.reset()
     hash
 
@@ -1925,6 +1964,28 @@ up.util = (($) ->
     $insertion.replaceWith($new)
     $old
 
+  ###*
+  Flattens the given `array` a single level deep.
+
+  @function up.util.flatten
+  @param {Array} array
+    An array which might contain other arrays
+  @return {Array}
+    The flattened array
+  @internal
+  ###
+  flatten = (array) ->
+    flattened = []
+    for object in array
+      if isArray(object)
+        flattened = flattened.concat(object)
+      else
+        flattened.push(object)
+    flattened
+
+  isTruthy = (object) ->
+    !!object
+
   isDetached: isDetached
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
@@ -1942,7 +2003,8 @@ up.util = (($) ->
   $createElementFromSelector: $createElementFromSelector
   $createPlaceholder: $createPlaceholder
   selectorForElement: selectorForElement
-  extend: extend
+  assign: assign
+  assignPolyfill: assignPolyfill
   copy: copy
   merge: merge
   options: options
@@ -1997,8 +2059,6 @@ up.util = (($) ->
   findWithSelf: findWithSelf
   contains: contains
   toArray: toArray
-#  castsToTrue: castsToTrue
-#  castsToFalse: castsToFalse
   castedAttr: castedAttr
   locationFromXhr: locationFromXhr
   titleFromXhr: titleFromXhr
@@ -2010,6 +2070,7 @@ up.util = (($) ->
   unresolvableDeferred: unresolvableDeferred
   unresolvablePromise: unresolvablePromise
   resolvedPromise: resolvedPromise
+  rejectedPromise: rejectedPromise
   resolvedDeferred: resolvedDeferred
   resolvableWhen: resolvableWhen
   setMissingAttrs: setMissingAttrs
@@ -2040,6 +2101,8 @@ up.util = (($) ->
   evalOption: evalOption
   horizontalScreenHalf: horizontalScreenHalf
   detachWith: detachWith
+  flatten: flatten
+  isTruthy: isTruthy
 
 )($)
 

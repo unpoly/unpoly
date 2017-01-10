@@ -464,7 +464,7 @@ up.modal = (($) ->
         if options.history
           state.coveredUrl = up.browser.url()
           state.coveredTitle = document.title
-        options.beforeSwap = -> createFrame(target, options)
+        options.provideTarget = -> createFrame(target, options)
         extractOptions = u.merge(options, animation: false)
         if html
           promise = up.extract(target, html, extractOptions)
@@ -609,7 +609,7 @@ up.modal = (($) ->
 
   flavor = (name, overrideConfig = {}) ->
     up.log.warn 'The up.modal.flavor function is deprecated. Use the up.modal.flavors property instead.'
-    u.extend(flavorOverrides(name), overrideConfig)
+    u.assign(flavorOverrides(name), overrideConfig)
 
   ###*
   Returns a config object for the given flavor.

@@ -1,0 +1,5 @@
+      it "returns a rejected promise if the selector can't be found on the current page", (done) ->
+        html = '<div class="foo-bar">text</div>'
+        up.extract('.foo-bar', html).fail (error) ->
+          expect(error).toEqual(/Could not find selector ".foo-bar"/i)
+          done()

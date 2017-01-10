@@ -67,11 +67,14 @@ up.form = (($) ->
     if none of these attributes are given.
   @param {String} [options.target]
     The selector to update when the form submission succeeds (server responds with status 200).
-    Defaults to the form's `up-target` attribute, or to `'body'`.
+    Defaults to the form's `up-target` attribute.
   @param {String} [options.failTarget]
     The selector to update when the form submission fails (server responds with non-200 status).
     Defaults to the form's `up-fail-target` attribute, or to an auto-generated
     selector that matches the form itself.
+  @param {String} [options.fallback]
+    The selector to update when the original target was not found in the page.
+    Defaults to the form's `up-fallback` attribute.
   @param {Boolean|String} [options.history=true]
     Successful form submissions will add a history entry and change the browser's
     location bar if the form either uses the `GET` method or the response redirected
@@ -117,6 +120,7 @@ up.form = (($) ->
     target = u.option(options.target, $form.attr('up-target'), 'body')
     url = u.option(options.url, $form.attr('action'), up.browser.url())
     options.failTarget = u.option(options.failTarget, $form.attr('up-fail-target')) || u.selectorForElement($form)
+    options.fallback = u.option(options.fallback, $form.attr('up-fallback'))
     options.history = u.option(options.history, u.castedAttr($form, 'up-history'), true)
     options.transition = u.option(options.transition, u.castedAttr($form, 'up-transition'), 'none')
     options.failTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), 'none')
@@ -528,6 +532,8 @@ up.form = (($) ->
     The selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
     If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
     server has echoed the form with validation errors.
+  @param [up-fallback]
+    The selector to replace if the server responds with a non-200 status code.
   @param {String} [up-transition]
     The animation to use when the form is replaced after a successful submission.
   @param {String} [up-fail-transition]

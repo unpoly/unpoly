@@ -23,9 +23,16 @@ up.flow = (($) ->
   @param {Boolean} [options.runLinkedScripts=false]
     Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
     the linked JavaScript file.
+  @param {String} [options.fallbacks=['body']]
+    When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
+    The first selector that matches an element in the current page (or response) will be used.
+  @param {String} [options.fallbackTransition='none']
+    The transition to use when using a fallback target.
   @stable
   ###
   config = u.config
+    fallbacks: ['body']
+    fallbackTransition: 'none'
     runInlineScripts: true
     runLinkedScripts: false
 
@@ -63,11 +70,11 @@ up.flow = (($) ->
     if u.isString(selectorOrElement)
       selector = selectorOrElement
       if u.contains(selector, '&')
-        if origin
+        if u.isPresent(origin) # isPresent returns false for empty jQuery collection
           originSelector = u.selectorForElement(origin)
           selector = selector.replace(/\&/, originSelector)
         else
-          up.fail("Found origin reference (%s) in selector %s, but options.origin is missing", '&', selector)
+          up.fail("Found origin reference (%s) in selector %s, but no origin was given", '&', selector)
     else
       selector = u.selectorForElement(selectorOrElement)
     selector
@@ -157,6 +164,8 @@ up.flow = (($) ->
     The URL to fetch from the server.
   @param {String} [options.failTarget='body']
     The CSS selector to update if the server sends a non-200 status code.
+  @param {String} [options.fallback]
+    The selector to update when the original target was not found in the page.
   @param {String} [options.title]
     The document title after the replacement.
 
@@ -206,21 +215,30 @@ up.flow = (($) ->
     same layer as the element that triggered the replacement (see `options.origin`).
     If that element is not known, or no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
+
   @return {Promise}
     A promise that will be resolved when the page has been updated.
   @stable
   ###
   replace = (selectorOrElement, url, options) ->
-    up.puts "Replacing %s from %s (%o)", selectorOrElement, url, options
     options = u.options(options)
-    target = resolveSelector(selectorOrElement, options.origin)
-    failTarget = u.option(options.failTarget, 'body')
-    failTarget = resolveSelector(failTarget, options.origin)
 
     if !up.browser.canPushState() && options.history != false
       unless options.preload
         up.browser.loadPage(url, u.only(options, 'method', 'data'))
       return u.unresolvablePromise()
+
+    options.inspectResponse = -> up.browser.loadPage(url, u.only(options, 'method', 'data'))
+
+    successOptions = u.merge options,
+      humanizedTarget: 'target'
+
+    failureOptions = u.merge options,
+      humanizedTarget: 'failure target'
+      provideTarget: undefined # don't provide a target if we're targeting the failTarget
+
+    target = bestPreflightSelector(selectorOrElement, successOptions)
+    failTarget = bestPreflightSelector(options.failTarget, failureOptions)
 
     request =
       url: url
@@ -231,19 +249,17 @@ up.flow = (($) ->
       cache: options.cache
       preload: options.preload
       headers: options.headers
-      
-    options.inspectResponse = -> up.browser.loadPage(url, u.only(options, 'method', 'data'))
-
-    promise = up.ajax(request)
 
     onSuccess = (html, textStatus, xhr) ->
-      processResponse(true, target, url, request, xhr, options)
+      processResponse(true, target, url, request, xhr, successOptions)
 
     onFailure = (xhr, textStatus, errorThrown) ->
-      processResponse(false, failTarget, url, request, xhr, options)
+      rejection = -> u.rejectedPromise(xhr, textStatus, errorThrown)
+      promise = processResponse(false, failTarget, url, request, xhr, failureOptions)
+      promise.then(rejection, rejection)
 
+    promise = up.ajax(request)
     promise = promise.then(onSuccess, onFailure)
-
     promise
 
   ###*
@@ -336,49 +352,41 @@ up.flow = (($) ->
   ###
   extract = (selectorOrElement, html, options) ->
     up.log.group 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length, ->
-      options = u.options(options,
+      options = u.options options,
         historyMethod: 'push'
         requireMatch: true
         keep: true
         layer: 'auto'
-      )
-
-      selector = resolveSelector(selectorOrElement, options.origin)
-      response = parseResponse(html, options)
-      options.title = response.title() if shouldExtractTitle(options)
 
       up.layout.saveScroll() unless options.saveScroll == false
 
-      promise = u.resolvedPromise()
-      promise = promise.then(options.beforeSwap) if options.beforeSwap
-      promise = promise.then -> updateHistory(options)
-      promise = promise.then ->
-        swapPromises = []
-        for step in parseImplantSteps(selector, options)
-          up.log.group 'Updating %s', step.selector, ->
-            $old = findOldFragment(step.selector, options)
-            $new = response.first(step.selector)
-            if $old && $new
-              filterScripts($new, options)
-              swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options)
-              swapPromises.push(swapPromise)
-              options.reveal = false
-        # Delay all further links in the promise chain until all fragments have been swapped
-        return $.when(swapPromises...)
-      promise = promise.then(options.afterSwap) if options.afterSwap
-      promise
+      # Allow callers to create the targeted element right before we swap.
+      options.provideTarget?()
+      response = parseResponse(html)
+      implantSteps = bestMatchingSteps(selectorOrElement, response, options)
 
-  findOldFragment = (selector, options) ->
-    first(selector, options) || oldFragmentNotFound(selector, options)
+      options.title = response.title() if shouldExtractTitle(options)
+      updateHistory(options)
 
-  oldFragmentNotFound = (selector, options) ->
-    if options.requireMatch
-      layerProse = options.layer
-      layerProse = 'page, modal or popup' if layerProse == 'auto'
-      message = "Could not find selector %s in the current #{layerProse}"
-      if message[0] == '#'
-        message += ' (avoid using IDs)'
-      up.fail(message, selector)
+      swapPromises = []
+      for step in implantSteps
+        up.log.group 'Updating %s', step.selector, ->
+          filterScripts(step.$new, options)
+          swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options)
+          swapPromises.push(swapPromise)
+          options.reveal = false # only reveal the first selector atom in the union
+
+      # Delay all further links in the promise chain until all fragments have been swapped
+      $.when(swapPromises...)
+
+  bestPreflightSelector = (selector, options) ->
+    cascade = new up.flow.ExtractCascade(selector, options)
+    cascade.bestPreflightSelector()
+
+  bestMatchingSteps = (selector, response, options) ->
+    options = u.merge(options, response: response)
+    cascade = new up.flow.ExtractCascade(selector, options)
+    cascade.bestMatchingSteps()
 
   filterScripts = ($element, options) ->
     runInlineScripts = u.option(options.runInlineScripts, config.runInlineScripts)
@@ -391,7 +399,7 @@ up.flow = (($) ->
       unless (isLinked && runLinkedScripts) || (isInline && runInlineScripts)
         $script.remove()
 
-  parseResponse = (html, options) ->
+  parseResponse = (html) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags
     htmlElement = u.createElementFromHtml(html)
     title: -> htmlElement.querySelector("title")?.textContent
@@ -403,16 +411,11 @@ up.flow = (($) ->
       # It returns an array of DOM elements, NOT a jQuery collection.
       if child = $.find(selector, htmlElement)[0]
         $(child)
-      else if options.requireMatch
-        inspectAction = { label: 'Open response', callback: options.inspectResponse }
-        up.fail(["Could not find selector %s in response %o", selector, html], action: inspectAction)
 
   updateHistory = (options) ->
     options = u.options(options, historyMethod: 'push')
-    if options.history
-      up.history[options.historyMethod](options.history)
-    if options.title
-      document.title = options.title
+    up.history[options.historyMethod](options.history) if options.history
+    document.title = options.title if options.title
 
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'
@@ -621,29 +624,6 @@ up.flow = (($) ->
   @stable
   ###
 
-  parseImplantSteps = (selector, options) ->
-    transitionArg = options.transition || options.animation || 'none'
-    comma = /\ *,\ */
-    disjunction = selector.split(comma)
-    if u.isString(transitions)
-      transitions = transitionArg.split(comma)
-    else
-      transitions = [transitionArg]
-    for selectorAtom, i in disjunction
-      # Splitting the atom
-      selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/)
-      selectorParts or up.fail('Could not parse selector atom "%s"', selectorAtom)
-      selector = selectorParts[1]
-      if selector == 'html'
-        # If someone really asked us to replace the <html> root, the best
-        # we can do is replace the <body>.
-        selector = 'body'
-      pseudoClass = selectorParts[2]
-      transition = transitions[i] || u.last(transitions)
-      selector: selector
-      pseudoClass: pseudoClass
-      transition: transition
-
   ###*
   Compiles a page fragment that has been inserted into the DOM
   by external code.
@@ -733,7 +713,11 @@ up.flow = (($) ->
   @param {String} options.layer
     The name of the layer in which to find the element. Valid values are
     `auto`, `page`, `modal` and `popup`.
-  @param {}
+  @param {String|Element|jQuery} [options.origin]
+    An second element or selector that can be referenced as `&` in the first selector:
+
+        $input = $('input.email');
+        up.first('.field:has(&)', $input); // returns the .field containing $input
   @return {jQuery|Undefined}
     The first element that is neither a ghost or being destroyed,
     or `undefined` if no such element was given.
@@ -741,10 +725,11 @@ up.flow = (($) ->
   ###
   first = (selectorOrElement, options) ->
     options = u.options(options, layer: 'auto')
+    resolved = resolveSelector(selectorOrElement, options.origin)
     if options.layer == 'auto'
-      firstInPriority(selectorOrElement, options.origin)
+      firstInPriority(resolved, options.origin)
     else
-      firstInLayer(selectorOrElement, options.layer)
+      firstInLayer(resolved, options.layer)
 
   firstInPriority = (selectorOrElement, origin) ->
     layers = ['popup', 'modal', 'page']

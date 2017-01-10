@@ -191,7 +191,7 @@ up.tooltip = (($) ->
 
     options = u.options(options, animation: config.closeAnimation)
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
-    u.extend(options, animateOptions)
+    u.assign(options, animateOptions)
     state.phase = 'closing'
     up.destroy(state.$tooltip, options).then ->
       state.phase = 'closed'

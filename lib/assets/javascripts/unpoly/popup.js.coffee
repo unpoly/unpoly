@@ -251,7 +251,7 @@ up.popup = (($) ->
           state.coveredUrl = up.browser.url()
           state.coveredTitle = document.title
         state.sticky = options.sticky
-        options.beforeSwap = -> createFrame(target)
+        options.provideTarget = -> createFrame(target)
         extractOptions = u.merge(options, animation: false)
         if html
           promise = up.extract(target, html, extractOptions)
@@ -311,7 +311,7 @@ up.popup = (($) ->
       title: state.coveredTitle
     )
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
-    u.extend(options, animateOptions)
+    u.assign(options, animateOptions)
 
     up.bus.whenEmitted('up:popup:close', message: 'Closing popup', $element: state.$popup).then ->
       state.phase = 'closing'

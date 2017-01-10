@@ -10,11 +10,30 @@ Unreleased
 
 ### Compatible changes
 
+- When a fragment updates cannot find the requested element, you can now define a fallback selector to use instead.
+
+  A `{ fallback }` option has been added to all Javascript functions that update fragments, like [`up.replace`](/up.replace).
+
+  Also an `[up-fallback]` attribute has been added to all CSS selectors that update fragments, like for [`a[up-target]`](/a-up-target).
+
+  You can also define fallbacks globally using the [`up.flow.config`](/up.flow.config) property.
+- [Modals](/up.modal) no longer create an `.up-modal` element when the server returns a non-200 status and the `{ failTarget }` is replaced instead
+- [Popups](/up.popup) no longer create an `.up-popup` element when the server returns a non-200 status and the `{ failTarget }` is replaced instead
 - Improve performance when updating fragments without transitions
 - When updating the `body` element with a transition, that transition is now silently ignored instead of throwing an error.
+- [`up.util.resolvedPromise`](/up.util.resolvedPromise) now accepts arguments which will become the resolution values.
+- [`up.util.resolvedDeferred`](/up.util.resolvedDeferred) now accepts arguments which will become the resolution values.
+- New utility method [`up.util.rejectedPromise`](/up.util.rejectedPromise).
+- [`up.first`](/up.first) has new option `{ origin }`. You can use it provide a second element or selector that can be referenced as `&` in the first selector:
+
+      $input = $('input.email');
+      up.first('.field:has(&)', $input); // returns the .field containing $input
 
 
 ### Breaking changes
+
+- [`up.replace`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
+- `up.util.merge` has been replaced by [`up.util.assign`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
 
 
 0.32.0

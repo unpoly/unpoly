@@ -132,6 +132,8 @@ up.link = (($) ->
   @param {String} [options.failTarget]
     The selector to replace if the server responds with a non-200 status code.
     Defaults to the `up-fail-target` attribute on `link`, or to `body` if such an attribute does not exist.
+  @param {String} [options.fallback]
+    The selector to update when the original target was not found in the page.
   @param {String} [options.method='get']
     The HTTP method to use for the request.
   @param {String} [options.confirm]
@@ -139,6 +141,8 @@ up.link = (($) ->
     before the link is followed.
   @param {Function|String} [options.transition]
     A transition function or name.
+  @param {Function|String} [options.failTransition]
+    The transition to use if the server responds with a non-200 status code.
   @param {Number} [options.duration]
     The duration of the transition. See [`up.morph`](/up.morph).
   @param {Number} [options.delay]
@@ -175,8 +179,9 @@ up.link = (($) ->
     options = u.options(options)
 
     url = u.option($link.attr('up-href'), $link.attr('href'))
-    target = u.option(options.target, $link.attr('up-target'), 'body')
-    options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'), 'body')
+    target = u.option(options.target, $link.attr('up-target'))
+    options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'))
+    options.fallback = u.option(options.fallback, $link.attr('up-fallback'))
     options.transition = u.option(options.transition, u.castedAttr($link, 'up-transition'), 'none')
     options.failTransition = u.option(options.failTransition, u.castedAttr($link, 'up-fail-transition'), 'none')
     options.history = u.option(options.history, u.castedAttr($link, 'up-history'))
@@ -342,6 +347,8 @@ up.link = (($) ->
   @param {String} [up-fail-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements
     when the server responds with a non-200 status code.
+  @param {String} [up-fallback]
+    The selector to update when the original target was not found in the page.
   @param {String} [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
@@ -421,10 +428,12 @@ up.link = (($) ->
 
   @param {String} [up-method='get']
     The HTTP method to use for the request.
-  @param {String} [up-transition='none']
-    The [transition](/up.motion) to use for morphing between the old and new elements.
   @param [up-fail-target='body']
     The selector to replace if the server responds with a non-200 status code.
+  @param {String} [up-fallback]
+    The selector to update when the original target was not found in the page.
+  @param {String} [up-transition='none']
+    The [transition](/up.motion) to use for morphing between the old and new elements.
   @param {String} [up-fail-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements
     when the server responds with a non-200 status code.

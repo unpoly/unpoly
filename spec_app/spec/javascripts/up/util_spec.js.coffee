@@ -674,3 +674,78 @@ describe 'up.util', ->
           { name: 'my=key', value: 'my=value' },
         ])
 
+  describe 'up.util.flatten', ->
+
+    it 'flattens the given array', ->
+      array = [1, [2, 3], 4]
+      expect(u.flatten(array)).toEqual([1, 2, 3, 4])
+
+    it 'only flattens one level deep for performance reasons', ->
+      array = [1, [2, [3,4]], 5]
+      expect(u.flatten(array)).toEqual([1, 2, [3, 4], 5])
+
+  describe 'up.util.memoize', ->
+
+    it 'returns a function that calls the memoized function', ->
+      fun = (a, b) -> a + b
+      memoized = u.memoize(fun)
+      expect(memoized(2, 3)).toEqual(5)
+
+    it 'returns the cached return value of the first call when called again', ->
+      spy = jasmine.createSpy().and.returnValue(5)
+      memoized = u.memoize(spy)
+      expect(memoized(2, 3)).toEqual(5)
+      expect(memoized(2, 3)).toEqual(5)
+      expect(spy.calls.count()).toEqual(1)
+
+  ['assign', 'assignPolyfill'].forEach (assignVariant) ->
+
+    describe "up.util.#{assignVariant}", ->
+
+      assign = up.util[assignVariant]
+
+      it 'copies the second object into the first object', ->
+        target = { a: 1 }
+        source = { b: 2, c: 3 }
+
+        assign(target, source)
+
+        expect(target).toEqual { a: 1, b: 2, c: 3 }
+
+        # Source is unchanged
+        expect(source).toEqual { b: 2, c: 3 }
+
+      it 'copies null property values', ->
+        target = { a: 1, b: 2 }
+        source = { b: null }
+
+        assign(target, source)
+
+        expect(target).toEqual { a: 1, b: null }
+
+      it 'copies undefined property values', ->
+        target = { a: 1, b: 2 }
+        source = { b: undefined }
+
+        assign(target, source)
+
+        expect(target).toEqual { a: 1, b: undefined }
+
+      it 'returns the first object', ->
+        target = { a: 1 }
+        source = { b: 2 }
+
+        result = assign(target, source)
+
+        expect(result).toBe(target)
+
+      it 'takes multiple sources to copy from', ->
+        target = { a: 1 }
+        source1 = { b: 2, c: 3 }
+        source2 = { d: 4, e: 5 }
+
+        assign(target, source1, source2)
+
+        expect(target).toEqual { a: 1, b: 2, c: 3, d: 4, e: 5 }
+
+

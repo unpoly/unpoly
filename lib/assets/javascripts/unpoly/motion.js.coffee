@@ -377,7 +377,7 @@ up.motion = (($) ->
 
     up.log.group ('Morphing %o to %o (using %s, %o)' if willMorph), $old.get(0), $new.get(0), transitionOrName, options, ->
       parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source')
-      parsedOptions = u.extend(parsedOptions, animateOptions(options))
+      parsedOptions = u.assign(parsedOptions, animateOptions(options))
 
       finish($old)
       finish($new)
