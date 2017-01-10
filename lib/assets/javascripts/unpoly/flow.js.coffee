@@ -460,13 +460,11 @@ up.flow = (($) ->
         options.keepPlans = transferKeepableElements($old, $new, options)
 
         if $old.is('body')
-          # We would prefer to delay cleaning until the destroy transition ends, but a
-          # swap of <body> cannot be animated. Also the replaceWith call below will clean the
-          # destroyer's data property from $old, making the up.syntax.clean call in `destroy` blow up.
-          up.syntax.clean($old)
           # jQuery will actually let us .insertBefore the new <body> tag,
           # but that's probably bad Karma.
-          $old.replaceWith($new)
+          swapBody($old, $new)
+          # We cannot morph the <body> tag
+          transition = false
         else
           # Don't insert the new element after the old element. For some reason
           # this will make the browser scroll to the bottom of the new element.
@@ -490,6 +488,10 @@ up.flow = (($) ->
       promise = destroy($old, animation: replacement)
 
     promise
+
+  # This is a separate method so we can mock it in specs
+  swapBody = ($oldBody, $newBody) ->
+    $oldBody.replaceWith($newBody)
 
   transferKeepableElements = ($old, $new, options) ->
     keepPlans = []

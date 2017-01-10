@@ -10,6 +10,9 @@ Unreleased
 
 ### Compatible changes
 
+- Improve performance when updating fragments without transitions
+- When updating the `body` element with a transition, that transition is now silently ignored instead of throwing an error.
+
 
 ### Breaking changes
 

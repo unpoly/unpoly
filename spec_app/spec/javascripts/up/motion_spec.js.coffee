@@ -44,10 +44,28 @@ describe 'up.motion', ->
           beforeEach ->
             up.motion.config.enabled = false
 
-          it "doesn't animate and directly sets the last frame instead", ->
+          it "doesn't animate and directly sets the last frame instead", (done) ->
             $element = affix('.element').text('content')
-            up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
+            callback = jasmine.createSpy('animation done callback')
+            animateDone = up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
+            animateDone.then(callback)
             expect($element.css('font-size')).toEqual('40px')
+            u.nextFrame ->
+              expect(callback).toHaveBeenCalled()
+              done()
+
+        [false, null, undefined, 'none', up.motion.none()].forEach (noneAnimation) ->
+
+          describe "when called with a `#{noneAnimation}` animation", ->
+
+            it "doesn't animate and resolves instantly", (done) ->
+              $element = affix('.element').text('content')
+              callback = jasmine.createSpy('animation done callback')
+              animateDone = up.animate($element, noneAnimation, duration: 10000, easing: 'linear')
+              animateDone.then(callback)
+              u.nextFrame ->
+                expect(callback).toHaveBeenCalled()
+                done()
 
       describeFallback 'canCssTransition', ->
 
@@ -343,6 +361,18 @@ describe 'up.motion', ->
           expect($old).toBeHidden()
           expect($new).toBeVisible()
           expect($new.css('opacity')).toEqual('1')
+
+        [false, null, undefined, 'none', up.motion.none()].forEach (noneTransition) ->
+
+          describe "when called with a `#{noneTransition}` transition", ->
+
+            it "doesn't animate and hides the old element instead", ->
+              $old = affix('.old').text('old content')
+              $new = affix('.new').text('new content')
+              up.morph($old, $new, noneTransition, duration: 1000)
+              expect($old).toBeHidden()
+              expect($new).toBeVisible()
+              expect($new.css('opacity')).toEqual('1')
 
     describe 'up.transition', ->
 

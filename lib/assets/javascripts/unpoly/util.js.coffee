@@ -1233,6 +1233,15 @@ up.util = (($) ->
     resolvedDeferred().promise()
 
   ###*
+  Returns whether the given argument is a resolved jQuery promise.
+
+  @return {Boolean}
+  @internal
+  ###
+  isResolvedPromise = (promise) ->
+    isPromise(promise) && promise.state?() == 'resolved'
+
+  ###*
   Returns a [Deferred object](https://api.jquery.com/category/deferred-object/) that will never be resolved.
 
   @function up.util.unresolvableDeferred
@@ -1966,6 +1975,7 @@ up.util = (($) ->
   isElement: isElement
   isJQuery: isJQuery
   isPromise: isPromise
+  isResolvedPromise: isResolvedPromise
   isDeferred: isDeferred
   isHash: isHash
   isArray: isArray

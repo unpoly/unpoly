@@ -165,7 +165,7 @@ up.motion = (($) ->
     $element = $(elementOrSelector)
     finish($element)
     options = animateOptions(options)
-    if animation == 'none' || animation == false || u.isMissing(animation)
+    if isNone(animation)
       none()
     else if u.isFunction(animation)
       assertIsDeferred(animation($element, options), animation)
@@ -283,6 +283,9 @@ up.motion = (($) ->
   @stable
   ###
   finish = (elementOrSelector = '.up-animating') ->
+    # We don't need to crawl through the DOM if we aren't animating anyway
+    return unless isEnabled()
+
     $element = $(elementOrSelector)
     $animatingSubtree = u.findWithSelf($element, '.up-animating')
     u.finishCssAnimate($animatingSubtree)
@@ -366,32 +369,27 @@ up.motion = (($) ->
   @stable
   ###  
   morph = (source, target, transitionOrName, options) ->
-    if transitionOrName == 'none'
-      transitionOrName = false
-
     options = u.options(options)
 
+    willMorph = isEnabled() && !isNone(transitionOrName)
     $old = $(source)
     $new = $(target)
 
-    ensureMorphable($old, transitionOrName)
-    ensureMorphable($new, transitionOrName)
-
-    up.log.group ('Morphing %o to %o (using %s, %o)' if transitionOrName), $old.get(0), $new.get(0), transitionOrName, options, ->
-
+    up.log.group ('Morphing %o to %o (using %s, %o)' if willMorph), $old.get(0), $new.get(0), transitionOrName, options, ->
       parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source')
       parsedOptions = u.extend(parsedOptions, animateOptions(options))
 
-      if isEnabled()
-        finish($old)
-        finish($new)
+      finish($old)
+      finish($new)
 
-        if !transitionOrName
-          return skipMorph($old, $new, parsedOptions)
-        else if animation = animations[transitionOrName]
+      if willMorph
+        ensureMorphable($old)
+        ensureMorphable($new)
+
+        if animation = animations[transitionOrName]
           skipMorph($old, $new, parsedOptions)
           return animate($new, animation, parsedOptions)
-        else if transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]
+        else if transition = (u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName])
           return withGhosts $old, $new, parsedOptions, ($oldGhost, $newGhost) ->
             transitionPromise = transition($oldGhost, $newGhost, parsedOptions)
             assertIsDeferred(transitionPromise, transitionOrName)
@@ -408,8 +406,8 @@ up.motion = (($) ->
       else
         return skipMorph($old, $new, parsedOptions)
 
-  ensureMorphable = ($element, transition) ->
-    if transition && $element.parents('body').length == 0
+  ensureMorphable = ($element) ->
+    if $element.parents('body').length == 0
       element = $element.get(0)
       up.fail("Can't morph a <%s> element (%o)", element.tagName, element)
 
@@ -589,7 +587,7 @@ up.motion = (($) ->
   @internal
   ###
   isNone = (animation) ->
-    animation is false || animation is 'none' || animation is none
+    animation is false || animation is 'none' || u.isMissing(animation) || u.isResolvedPromise(animation)
 
   animation('none', none)
 

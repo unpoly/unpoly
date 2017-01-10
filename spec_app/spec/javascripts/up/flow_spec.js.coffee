@@ -47,18 +47,33 @@ describe 'up.flow', ->
           expect(resolution).toHaveBeenCalled()
           expect($('.middle')).toHaveText('new-middle')
 
-        it 'returns a promise that will be resolved once the server response was received and the swap animations have completed', (done) ->
-          resolution = jasmine.createSpy()
-          promise = up.replace('.middle', '/path', transition: 'cross-fade', duration: 50)
-          promise.then(resolution)
-          expect(resolution).not.toHaveBeenCalled()
-          expect($('.middle')).toHaveText('old-middle')
-          @respond()
-          expect(resolution).not.toHaveBeenCalled()
-          u.setTimer 20, ->
+        describe 'transitions', ->
+
+          it 'returns a promise that will be resolved once the server response was received and the swap transition has completed', (done) ->
+            resolution = jasmine.createSpy()
+            promise = up.replace('.middle', '/path', transition: 'cross-fade', duration: 50)
+            promise.then(resolution)
             expect(resolution).not.toHaveBeenCalled()
-            u.setTimer 80, ->
-              expect(resolution).toHaveBeenCalled()
+            expect($('.middle')).toHaveText('old-middle')
+            @respond()
+            expect(resolution).not.toHaveBeenCalled()
+            u.setTimer 20, ->
+              expect(resolution).not.toHaveBeenCalled()
+              u.setTimer 80, ->
+                expect(resolution).toHaveBeenCalled()
+                done()
+
+          it 'ignores a { transition } option when replacing the body element', (done) ->
+            up.flow.knife.mock('swapBody') # can't have the example replace the Jasmine test runner UI
+            up.flow.knife.mock('destroy')  # if we don't swap the body, up.flow will destroy it
+            replaceCallback = jasmine.createSpy()
+            promise = up.replace('body', '/path', transition: 'cross-fade', duration: 50)
+            promise.then(replaceCallback)
+            expect(replaceCallback).not.toHaveBeenCalled()
+            @responseText = '<body>new text</body>'
+            @respond()
+            u.nextFrame ->
+              expect(replaceCallback).toHaveBeenCalled()
               done()
 
         describe 'when the server signals a redirect with X-Up-Location header (bugfix, logic should be moved to up.proxy)', ->
