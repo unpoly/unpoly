@@ -220,7 +220,6 @@ up.navigation = (($) ->
   ###
   stop = (elementOrSelector) ->
     $element = findActionableArea(elementOrSelector)
-    up.emit('up:navigated', $element: $element, message: false)
     $element.removeClass(CLASS_ACTIVE)
 
   ###*
