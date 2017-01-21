@@ -574,7 +574,6 @@ up.proxy = (($) ->
   isBusy: isBusy
   isCachable: isCachable
   config: config
-  defaults: -> up.fail('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.')
   
 )(jQuery)
 

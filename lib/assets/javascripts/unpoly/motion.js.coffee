@@ -719,7 +719,6 @@ up.motion = (($) ->
   animation: animation
   config: config
   isEnabled: isEnabled
-  defaults: -> up.fail('up.motion.defaults(...) no longer exists. Set values on he up.motion.config property instead.')
   none: none
   when: resolvableWhen
   prependCopy: prependCopy

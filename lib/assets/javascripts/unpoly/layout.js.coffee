@@ -544,7 +544,6 @@ up.layout = (($) ->
   scroll: scroll
   finishScrolling: finishScrolling
   config: config
-  defaults: -> up.fail('up.layout.defaults(...) no longer exists. Set values on he up.layout.config property instead.')
   viewportOf: viewportOf
   viewportsWithin: viewportsWithin
   viewports: viewports

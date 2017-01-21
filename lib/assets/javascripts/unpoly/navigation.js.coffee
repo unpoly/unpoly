@@ -286,7 +286,6 @@ up.navigation = (($) ->
   up.on 'up:framework:reset', reset
 
   config: config
-  defaults: -> up.fail('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.')
   start: start
   stop: stop
 

@@ -227,7 +227,6 @@ up.history = (($) ->
   up.on 'up:framework:reset', reset
 
   config: config
-  defaults: -> up.fail('up.history.defaults(...) no longer exists. Set values on he up.history.config property instead.')
   push: push
   replace: replace
   url: currentUrl
