@@ -329,7 +329,7 @@ up.bus = (($) ->
   @param {Object} eventProps
   @param {String|Array} [eventProps.message]
   @return {Promise}
-  @experimental
+  @internal
   ###
   whenEmitted = (args...) ->
     deferred = $.Deferred()
