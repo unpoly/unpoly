@@ -249,14 +249,18 @@ up.flow = (($) ->
       cache: options.cache
       preload: options.preload
       headers: options.headers
+      timeout: options.timeout
 
     onSuccess = (html, textStatus, xhr) ->
       processResponse(true, target, url, request, xhr, successOptions)
 
     onFailure = (xhr, textStatus, errorThrown) ->
       rejection = -> u.rejectedPromise(xhr, textStatus, errorThrown)
-      promise = processResponse(false, failTarget, url, request, xhr, failureOptions)
-      promise.then(rejection, rejection)
+      if xhr.responseText
+        promise = processResponse(false, failTarget, url, request, xhr, failureOptions)
+        promise.then(rejection, rejection)
+      else
+        rejection()
 
     promise = up.ajax(request)
     promise = promise.then(onSuccess, onFailure)

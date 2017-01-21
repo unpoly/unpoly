@@ -161,6 +161,8 @@ up.link = (($) ->
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
+  @param {Object} [options.timeout={}]
+    A timeout in milliseconds for the request.
   @param {String} [options.layer='auto']
     The name of the layer that ought to be updated. Valid values are
     `auto`, `page`, `modal` and `popup`.

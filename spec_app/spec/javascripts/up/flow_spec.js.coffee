@@ -147,6 +147,27 @@ describe 'up.flow', ->
             @respond(status: 500)
             expect(promise.state()).toEqual('rejected')
 
+        describe 'when the request times out', ->
+
+          it "doesn't crash and rejects the returned promise", (done) ->
+            jasmine.clock().install() # required by responseTimeout()
+            affix('.target')
+            promise = up.replace('.middle', '/path', timeout: 10 * 1000)
+            expect(promise.state()).toEqual('pending')
+            jasmine.clock().tick(11 * 1000)
+            expect(promise.state()).toEqual('rejected')
+            done()
+
+        describe 'when there is a network issue', ->
+
+          it "doesn't crash and rejects the returned promise", (done) ->
+            affix('.target')
+            promise = up.replace('.middle', '/path')
+            @lastRequest().responseError()
+            u.nextFrame ->
+              expect(promise.state()).toEqual('rejected')
+              done()
+
         describe 'history', ->
 
           it 'should set the browser location to the given URL', (done) ->

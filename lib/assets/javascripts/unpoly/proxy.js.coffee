@@ -193,6 +193,11 @@ up.proxy = (($) ->
   @param {String} [request.url]
     You can omit the first string argument and pass the URL as
     a `request` property instead.
+  @param {String} [request.timeout]
+    A timeout in milliseconds for the request.
+
+    If [`up.proxy.config.maxRequests`](/up.proxy.config#maxRequests) is set, the timeout
+    will not include the time spent waiting in the queue.
   @return
     A promise for the response that is API-compatible with the
     promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
@@ -206,7 +211,15 @@ up.proxy = (($) ->
     forceCache = (options.cache == true)
     ignoreCache = (options.cache == false)
 
-    request = u.only(options, 'url', 'method', 'data', 'target', 'headers', '_normalized')
+    request = u.only options,
+      'url',
+      'method',
+      'data',
+      'target',
+      'headers',
+      'timeout',
+      '_normalized'
+
     request = normalizeRequest(request)
 
     pending = true
