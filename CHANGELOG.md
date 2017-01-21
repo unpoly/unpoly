@@ -35,6 +35,7 @@ Unreleased
 ### Breaking changes
 
 - The `up.flow` module has been renamed to [`up.dom`](/up.dom).
+- The `up.navigation` module has been renamed to [`up.feedback`](/up.feedback).
 - [`up.replace`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
 - `up.util.merge` has been replaced by [`up.util.assign`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
 

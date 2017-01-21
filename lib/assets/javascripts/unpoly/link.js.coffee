@@ -72,7 +72,7 @@ new page is loading.
 - The `up-target` mechanism also works with [forms](/up.form).
 - As you switch through pages, Unpoly will [update your browser's location bar and history](/up.history)
 - You can [open fragments in popups or modal dialogs](/up.modal).
-- You can give users [immediate feedback](/up.navigation) when a link is clicked or becomes current, without waiting for the server.
+- You can give users [immediate feedback](/up.feedback) when a link is clicked or becomes current, without waiting for the server.
 - [Controlling Unpoly pragmatically through JavaScript](/up.dom)
 - [Defining custom tags](/up.syntax)
 
@@ -241,7 +241,7 @@ up.link = (($) ->
   onAction = (selector, handler) ->
     followVariantSelectors.push(selector)
     handlerWithActiveMark = ($link) ->
-      up.navigation.start $link, -> handler($link)
+      up.feedback.start $link, -> handler($link)
     up.on 'click', "a#{selector}, [up-href]#{selector}", (event, $link) ->
       if shouldProcessLinkEvent(event, $link)
         if $link.is('[up-instant]')

@@ -33,16 +33,16 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     <a href="/bar" up-follow class="up-current">Bar</a>
 
 
-@class up.navigation
+@class up.feedback
 ###
-up.navigation = (($) ->
+up.feedback = (($) ->
 
   u = up.util
 
   ###*
   Sets default options for this module.
 
-  @property up.navigation.config
+  @property up.feedback.config
   @param {Number} [config.currentClasses]
     An array of classes to set on [links that point the current location](/up-current).
   @stable
@@ -144,9 +144,9 @@ up.navigation = (($) ->
 
       var $button = $('button');
       $button.on('click', function() {
-        up.navigation.start($button);
+        up.feedback.start($button);
         up.ajax(...).always(function() {
-          up.navigation.stop($button);
+          up.feedback.stop($button);
         });
       });
 
@@ -154,18 +154,18 @@ up.navigation = (($) ->
 
       var $button = $('button');
       $button.on('click', function() {
-        up.navigation.start($button, function() {
+        up.feedback.start($button, function() {
           up.ajax(...);
         });
       });
 
-  @method up.navigation.start
+  @method up.feedback.start
   @param {Element|jQuery|String} elementOrSelector
     The element to mark as active
   @param {Function} [action]
     An optional function to run while the element is marked as loading.
     The function must return a promise.
-    Once the promise resolves, the element will be [marked as no longer loading](/up.navigation.stop).
+    Once the promise resolves, the element will be [marked as no longer loading](/up.feedback.stop).
   @internal
   ###
   start = (elementOrSelector, action) ->
@@ -213,7 +213,7 @@ up.navigation = (($) ->
   This happens automatically when network requests initiated by the Unpoly API have completed.
   Use this function if you make custom network calls from your own JavaScript code.
 
-  @function up.navigation.stop
+  @function up.feedback.stop
   @param {jQuery} event.$element
     The link or form that has finished loading.
   @internal
@@ -289,3 +289,5 @@ up.navigation = (($) ->
   stop: stop
 
 )(jQuery)
+
+up.renamedModule 'navigation', 'feedback'

@@ -16,7 +16,7 @@
 #= require ./unpoly/popup
 #= require ./unpoly/modal
 #= require ./unpoly/tooltip
-#= require ./unpoly/navigation
+#= require ./unpoly/feedback
 #= require ./unpoly/rails
 
 up.boot()

@@ -148,7 +148,7 @@ up.form = (($) ->
       unless canAjaxSubmit
         return u.unresolvablePromise()
 
-    up.navigation.start($form)
+    up.feedback.start($form)
 
     # If we can't submit this form via AJAX or if we wouldn't be able to change
     # the location URL as the result, fall back to a vanilla form submission.
@@ -157,7 +157,7 @@ up.form = (($) ->
       return u.unresolvablePromise()
 
     promise = up.replace(target, url, options)
-    promise.always -> up.navigation.stop($form)
+    promise.always -> up.feedback.stop($form)
     return promise
 
   ###*
@@ -319,7 +319,7 @@ up.form = (($) ->
   autosubmit = (selectorOrElement, options) ->
     observe(selectorOrElement, options, (value, $field) ->
       $form = $field.closest('form')
-      up.navigation.start $field, -> submit($form)
+      up.feedback.start $field, -> submit($form)
     )
 
   resolveValidateTarget = ($field, options) ->
