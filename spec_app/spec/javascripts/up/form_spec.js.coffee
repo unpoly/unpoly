@@ -422,6 +422,7 @@ describe 'up.form', ->
       it 'runs the JavaScript code in the attribute value when a change is observed in the field', (done) ->
         $form = affix('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
+        console.debug("*** Setting attribute: %o", 'window.observeCallbackSpy(value, $field.get(0))')
         $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
         up.hello($form)
         $field.val('new-value')

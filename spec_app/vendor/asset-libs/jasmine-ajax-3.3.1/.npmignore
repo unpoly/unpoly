@@ -1,0 +1,10 @@
+**/.*
+Gemfile
+Gemfile.lock
+Gruntfile.js
+Rakefile
+bower_components
+node_modules
+spec
+src
+travis-script.sh

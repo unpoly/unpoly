@@ -1,0 +1,56 @@
+script: bash travis-script.sh
+language: ruby
+cache: bundler
+rvm: 1.9.3
+before_install: npm install
+addons:
+  sauce_connect: true
+env:
+  global:
+  - USE_SAUCE=true
+  - JASMINE_BROWSER="firefox"
+  - SAUCE_OS="Linux"
+  - SAUCE_BROWSER_VERSION=''
+  - secure: PmIDShYXuBaZHlEz0nvcAUinsGUgP6MFlWVS33X9FO3pU1fDLqtV7Zsda25joQDJEmCf9hbfGAsmOHpZdHb54cZnxWjB5Heo/4fr4JcI/0C5wphS6SQTWlBOrLnLN68iYH5Uc+QS7ogFm6+OeiQZbYxl0u0Q2Llu5TwLYDbQHzU=
+  - secure: Y6Rlr+C2G4/3S0R54LdJx7DYBjZoiOJkg+uD3o6dVsUNnK5cKnJqqMm837nFOEYlbyecNtmwkFfrt28EQ52XJAkjE0RFbcC0u4OpPi7AA8P+IiHEaqpEOg14pH/XkeqcDQrQDzuoP8y2Ijm9GnDFaIW/BALUGLsFo9GnATww8kI=
+matrix:
+  include:
+  - env:
+    - JASMINE_BROWSER="safari"
+    - SAUCE_OS="OS X 10.11"
+    - SAUCE_BROWSER_VERSION=9
+  - env:
+    - JASMINE_BROWSER="safari"
+    - SAUCE_OS="OS X 10.10"
+    - SAUCE_BROWSER_VERSION=8
+  - env:
+    - JASMINE_BROWSER="safari"
+    - SAUCE_OS="OS X 10.9"
+    - SAUCE_BROWSER_VERSION=7
+  - env:
+    - JASMINE_BROWSER="safari"
+    - SAUCE_OS="OS X 10.8"
+    - SAUCE_BROWSER_VERSION=6
+  - env:
+    - JASMINE_BROWSER="internet explorer"
+    - SAUCE_OS="Windows 8.1"
+    - SAUCE_BROWSER_VERSION=11
+  - env:
+    - JASMINE_BROWSER="internet explorer"
+    - SAUCE_OS="Windows 8"
+    - SAUCE_BROWSER_VERSION=10
+  - env:
+    - JASMINE_BROWSER="internet explorer"
+    - SAUCE_OS="Windows 7"
+    - SAUCE_BROWSER_VERSION=9
+  - env:
+    - JASMINE_BROWSER="internet explorer"
+    - SAUCE_OS="Windows 7"
+    - SAUCE_BROWSER_VERSION=8
+  - env:
+    - JASMINE_BROWSER="chrome"
+    - SAUCE_OS="Linux"
+    - SAUCE_BROWSER_VERSION=''
+  - env:
+    - JASMINE_BROWSER="phantomjs"
+    - USE_SAUCE=false
