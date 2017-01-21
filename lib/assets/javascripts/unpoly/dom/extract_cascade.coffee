@@ -1,6 +1,6 @@
 u = up.util
 
-class up.flow.ExtractCascade
+class up.dom.ExtractCascade
 
   constructor: (selector, options) ->
     @options = u.options(options, humanizedTarget: 'selector', layer: 'auto')
@@ -10,11 +10,11 @@ class up.flow.ExtractCascade
       if i > 0
         # If we're using a fallback (any candidate that's not the first),
         # the original transition might no longer be appropriate.
-        planOptions.transition = up.flow.config.fallbackTransition
-      new up.flow.ExtractPlan(candidate, planOptions)
+        planOptions.transition = up.dom.config.fallbackTransition
+      new up.dom.ExtractPlan(candidate, planOptions)
 
   buildCandidates: (selector) ->
-    candidates = [selector, @options.fallback, up.flow.config.fallbacks]
+    candidates = [selector, @options.fallback, up.dom.config.fallbacks]
     candidates = u.flatten(candidates)
     # Remove undefined, null and false from the list
     candidates = u.select candidates, u.isTruthy

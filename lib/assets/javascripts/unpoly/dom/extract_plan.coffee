@@ -1,17 +1,17 @@
 u = up.util
 
-class up.flow.ExtractPlan
+class up.dom.ExtractPlan
 
   constructor: (selector, options) ->
     @origin = options.origin
-    @selector = up.flow.resolveSelector(selector, options.origin)
+    @selector = up.dom.resolveSelector(selector, options.origin)
     @transition = options.transition || options.animation || 'none'
     @response = options.response
     @steps = @parseSteps()
 
   findOld: =>
     u.each @steps, (step) ->
-      step.$old = up.flow.first(step.selector, @options)
+      step.$old = up.dom.first(step.selector, @options)
 
   findNew: =>
     u.each @steps, (step) =>

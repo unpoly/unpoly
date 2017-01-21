@@ -73,7 +73,7 @@ new page is loading.
 - As you switch through pages, Unpoly will [update your browser's location bar and history](/up.history)
 - You can [open fragments in popups or modal dialogs](/up.modal).
 - You can give users [immediate feedback](/up.navigation) when a link is clicked or becomes current, without waiting for the server.
-- [Controlling Unpoly pragmatically through JavaScript](/up.flow)
+- [Controlling Unpoly pragmatically through JavaScript](/up.dom)
 - [Defining custom tags](/up.syntax)
 
   

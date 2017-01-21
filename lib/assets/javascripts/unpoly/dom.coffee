@@ -8,16 +8,16 @@ This module contains Unpoly's core functions to [change](/up.replace) or
 Other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
 build upon this module to offer higher level API functions.
   
-@class up.flow
+@class up.dom
 ###
-up.flow = (($) ->
+up.dom = (($) ->
   
   u = up.util
 
   ###*
   Configures defaults for fragment insertion.
 
-  @property up.flow.config
+  @property up.dom.config
   @param {Boolean} [options.runInlineScripts=true]
     Whether inline `<script>` tags inside inserted HTML fragments will be executed.
   @param {Boolean} [options.runLinkedScripts=false]
@@ -47,7 +47,7 @@ up.flow = (($) ->
   ###*
   Returns the URL the given element was retrieved from.
 
-  @method up.flow.source
+  @method up.dom.source
   @param {String|Element|jQuery} selectorOrElement
   @experimental
   ###
@@ -59,7 +59,7 @@ up.flow = (($) ->
   Resolves the given selector (which might contain `&` references)
   to an absolute selector.
 
-  @function up.flow.resolveSelector
+  @function up.dom.resolveSelector
   @param {String|Element|jQuery} selectorOrElement
   @param {String|Element|jQuery} origin
     The element that this selector resolution is relative to.
@@ -384,12 +384,12 @@ up.flow = (($) ->
       $.when(swapPromises...)
 
   bestPreflightSelector = (selector, options) ->
-    cascade = new up.flow.ExtractCascade(selector, options)
+    cascade = new up.dom.ExtractCascade(selector, options)
     cascade.bestPreflightSelector()
 
   bestMatchingSteps = (selector, response, options) ->
     options = u.merge(options, response: response)
-    cascade = new up.flow.ExtractCascade(selector, options)
+    cascade = new up.dom.ExtractCascade(selector, options)
     cascade.bestMatchingSteps()
 
   filterScripts = ($element, options) ->
@@ -904,10 +904,11 @@ up.flow = (($) ->
 
 )(jQuery)
 
-up.replace = up.flow.replace
-up.extract = up.flow.extract
-up.reload = up.flow.reload
-up.destroy = up.flow.destroy
-up.first = up.flow.first
-up.hello = up.flow.hello
+up.replace = up.dom.replace
+up.extract = up.dom.extract
+up.reload = up.dom.reload
+up.destroy = up.dom.destroy
+up.first = up.dom.first
+up.hello = up.dom.hello
 
+up.renamedModule 'flow', 'dom'

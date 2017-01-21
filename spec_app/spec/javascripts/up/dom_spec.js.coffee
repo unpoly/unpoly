@@ -1,4 +1,4 @@
-describe 'up.flow', ->
+describe 'up.dom', ->
 
   u = up.util
   
@@ -64,8 +64,8 @@ describe 'up.flow', ->
                 done()
 
           it 'ignores a { transition } option when replacing the body element', (done) ->
-            up.flow.knife.mock('swapBody') # can't have the example replace the Jasmine test runner UI
-            up.flow.knife.mock('destroy')  # if we don't swap the body, up.flow will destroy it
+            up.dom.knife.mock('swapBody') # can't have the example replace the Jasmine test runner UI
+            up.dom.knife.mock('destroy')  # if we don't swap the body, up.dom will destroy it
             replaceCallback = jasmine.createSpy()
             promise = up.replace('body', '/path', transition: 'cross-fade', duration: 50)
             promise.then(replaceCallback)
@@ -129,7 +129,7 @@ describe 'up.flow', ->
 
           it 'replaces the <body> instead of the given selector', ->
             # can't have the example replace the Jasmine test runner UI
-            extractSpy = up.flow.knife.mock('extract').and.returnValue(u.resolvedPromise())
+            extractSpy = up.dom.knife.mock('extract').and.returnValue(u.resolvedPromise())
             up.replace('.middle', '/path')
             @respond(status: 500)
             expect(extractSpy).toHaveBeenCalledWith('body', jasmine.any(String), jasmine.any(Object))
@@ -238,25 +238,25 @@ describe 'up.flow', ->
             up.replace('.middle', '/path', method: 'post')
             @respond()
             expect($('.middle')).toHaveText('new-middle')
-            expect(up.flow.source('.middle')).toEndWith('/previous-source')
+            expect(up.dom.source('.middle')).toEndWith('/previous-source')
 
           describe 'if a URL is given as { source } option', ->
 
             it 'uses that URL as the source for a GET request', ->
               promise = up.replace('.middle', '/path', source: '/given-path')
               @respond()
-              expect(up.flow.source('.middle')).toEndWith('/given-path')
+              expect(up.dom.source('.middle')).toEndWith('/given-path')
 
             it 'uses that URL as the source after a non-GET request', ->
               promise = up.replace('.middle', '/path', method: 'post', source: '/given-path')
               @respond()
-              expect(up.flow.source('.middle')).toEndWith('/given-path')
+              expect(up.dom.source('.middle')).toEndWith('/given-path')
 
             it 'ignores the option and reuses the previous source after a failed non-GET request', ->
               @oldMiddle.attr('up-source', '/previous-source')
               promise = up.replace('.middle', '/path', method: 'post', source: '/given-path', failTarget: '.middle')
               @respond(status: 500)
-              expect(up.flow.source('.middle')).toEndWith('/previous-source')
+              expect(up.dom.source('.middle')).toEndWith('/previous-source')
 
         describe 'document title', ->
 
@@ -392,7 +392,7 @@ describe 'up.flow', ->
           describe 'when selectors are missing on the page before the request was made', ->
 
             beforeEach ->
-              up.flow.config.fallbacks = []
+              up.dom.config.fallbacks = []
 
             it 'tries selectors from options.fallback before making a request', ->
               affix('.box').text('old box')
@@ -415,15 +415,15 @@ describe 'up.flow', ->
               expect('.target').toHaveText('old target')
               expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.flow.config.fallbacks if options.fallback is missing', ->
-              up.flow.config.fallbacks = ['.existing']
+            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', ->
+              up.dom.config.fallbacks = ['.existing']
               affix('.existing').text('old existing')
               up.replace('.unknown', '/path')
               @respondWith '<div class="existing">new existing</div>'
               expect('.existing').toHaveText('new existing')
 
-            it 'does not try a selector from up.flow.config.fallbacks if options.fallback is false', ->
-              up.flow.config.fallbacks = ['.existing']
+            it 'does not try a selector from up.dom.config.fallbacks if options.fallback is false', ->
+              up.dom.config.fallbacks = ['.existing']
               affix('.existing').text('old existing')
               replacement = -> up.replace('.unknown', '/path', fallback: false)
               expect(replacement).toThrowError(/Could not find target in current page/i)
@@ -431,7 +431,7 @@ describe 'up.flow', ->
           describe 'when selectors are missing on the page after the request was made', ->
 
             beforeEach ->
-              up.flow.config.fallbacks = []
+              up.dom.config.fallbacks = []
 
             it 'tries selectors from options.fallback before swapping elements', ->
               $target = affix('.target').text('old target')
@@ -471,8 +471,8 @@ describe 'up.flow', ->
               expect('.target').toHaveText('old target')
               expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.flow.config.fallbacks if options.fallback is missing', ->
-              up.flow.config.fallbacks = ['.fallback']
+            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', ->
+              up.dom.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path')
@@ -483,8 +483,8 @@ describe 'up.flow', ->
               """
               expect('.fallback').toHaveText('new fallback')
 
-            it 'does not try a selector from up.flow.config.fallbacks if options.fallback is false', ->
-              up.flow.config.fallbacks = ['.fallback']
+            it 'does not try a selector from up.dom.config.fallbacks if options.fallback is false', ->
+              up.dom.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path', fallback: false)
@@ -499,7 +499,7 @@ describe 'up.flow', ->
           describe 'when selectors are missing in the response', ->
 
             beforeEach ->
-              up.flow.config.fallbacks = []
+              up.dom.config.fallbacks = []
 
             it 'tries selectors from options.fallback before swapping elements', ->
               $target = affix('.target').text('old target')
@@ -534,8 +534,8 @@ describe 'up.flow', ->
               expect('.target2').toHaveText('old target2')
               expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.flow.config.fallbacks if options.fallback is missing', ->
-              up.flow.config.fallbacks = ['.fallback']
+            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', ->
+              up.dom.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path')
@@ -545,8 +545,8 @@ describe 'up.flow', ->
               expect('.target').toHaveText('old target')
               expect('.fallback').toHaveText('new fallback')
 
-            it 'does not try a selector from up.flow.config.fallbacks if options.fallback is false', ->
-              up.flow.config.fallbacks = ['.fallback']
+            it 'does not try a selector from up.dom.config.fallbacks if options.fallback is false', ->
+              up.dom.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path', fallback: false)
@@ -588,8 +588,8 @@ describe 'up.flow', ->
                 expect(window.scriptTagExecuted).toHaveBeenCalledWith('middle')
                 done()
 
-            it 'does not execute script-tags if up.flow.config.runInlineScripts is set to false', (done) ->
-              up.flow.config.runInlineScripts = false
+            it 'does not execute script-tags if up.dom.config.runInlineScripts is set to false', (done) ->
+              up.dom.config.runInlineScripts = false
 
               @responseText = """
                 <div class="middle">
@@ -640,8 +640,8 @@ describe 'up.flow', ->
                   expect(window.scriptTagExecuted).not.toHaveBeenCalled()
                   done()
 
-            it 'does execute linked scripts if up.flow.config.runLinkedScripts is set to true', (done) ->
-              up.flow.config.runLinkedScripts = true
+            it 'does execute linked scripts if up.dom.config.runLinkedScripts is set to true', (done) ->
+              up.dom.config.runLinkedScripts = true
 
               @responseText = """
                 <div class="middle">

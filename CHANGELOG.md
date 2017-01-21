@@ -16,7 +16,7 @@ Unreleased
 
   Also an `[up-fallback]` attribute has been added to all CSS selectors that update fragments, like for [`a[up-target]`](/a-up-target).
 
-  You can also define fallbacks globally using the [`up.flow.config`](/up.flow.config) property.
+  You can also define fallbacks globally using the [`up.dom.config`](/up.dom.config) property.
 - Unpoly no longer crashes when a request fails due to a timeout or network problem. In such cases, async functions (like [`up.replace`](/up.replace)) will leave the page unchanged and  reject the returned promise.
 - Functions that make a request (like [`up.replace`](/up.replace) or like [`up.ajax`](/up.ajax)) now accept a new option `{ timeout }`.
 - [Modals](/up.modal) no longer create an `.up-modal` element when the server returns a non-200 status and the `{ failTarget }` is replaced instead
@@ -34,6 +34,7 @@ Unreleased
 
 ### Breaking changes
 
+- The `up.flow` module has been renamed to [`up.dom`](/up.dom).
 - [`up.replace`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
 - `up.util.merge` has been replaced by [`up.util.assign`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
 

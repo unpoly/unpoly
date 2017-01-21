@@ -1,4 +1,4 @@
-#= require ./unpoly/module
+#= require ./unpoly/namespace
 #= require ./unpoly/util
 #= require ./unpoly/browser
 #= require ./unpoly/bus
@@ -7,8 +7,8 @@
 #= require ./unpoly/syntax
 #= require ./unpoly/history
 #= require ./unpoly/layout
-#= require ./unpoly/flow
-#= require_tree ./unpoly/flow
+#= require ./unpoly/dom
+#= require_tree ./unpoly/dom
 #= require ./unpoly/motion
 #= require ./unpoly/proxy
 #= require ./unpoly/link
