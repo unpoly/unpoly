@@ -1,9 +1,18 @@
 ###*
-Browser interface
-=================
+Browser support
+===============
 
-Some browser-interfacing methods and switches that
-we can't currently get rid off.
+Unpoly supports all modern browsers. It degrades gracefully with old versions of Internet Explorer:
+
+IE 10, IE11, Edge
+: Full support
+
+IE 9
+: Page updates that change browser history fall back to a classic page load.
+
+IE 8
+: Unpoly prevents itself from booting itself, leaving you with a classic server-side application.
+
 
 @class up.browser
 ###
