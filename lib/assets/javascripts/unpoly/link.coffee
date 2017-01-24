@@ -1,6 +1,6 @@
 ###*
-Linking to page fragments
-=========================
+Linking to fragments
+====================
 
 Standard HTML links are a poor fit for modern applications:
 

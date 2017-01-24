@@ -1,6 +1,6 @@
 ###*
-Caching and preloading
-======================
+AJAX acceleration
+=================
 
 Unpoly caches server responses for a few minutes,
 making requests to these URLs return instantly.
