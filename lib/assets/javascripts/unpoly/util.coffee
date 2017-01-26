@@ -1057,13 +1057,24 @@ up.util = (($) ->
         existingAnimation.resolve()
 
   ###*
+  @internal
+  ###
+  margins = (selectorOrElement) ->
+    $element = $(selectorOrElement)
+    withUnits = $element.css(['margin-top', 'margin-right', 'margin-bottom', 'margin-left'])
+    top:    parseFloat(withUnits['margin-top'])
+    right:  parseFloat(withUnits['margin-right'])
+    bottom: parseFloat(withUnits['margin-bottom'])
+    left:   parseFloat(withUnits['margin-left'])
+
+  ###*
   Measures the given element.
 
   @function up.util.measure
   @internal
   ###
   measure = ($element, opts) ->
-    opts = options(opts, relative: false, inner: false)
+    opts = options(opts, relative: false, inner: false, includeMargin: false)
 
     if opts.relative
       if opts.relative == true
@@ -1093,6 +1104,13 @@ up.util = (($) ->
     else
       box.width = $element.outerWidth()
       box.height = $element.outerHeight()
+
+    if opts.includeMargin
+      mgs = margins($element)
+      box.left -= mgs.left
+      box.top -= mgs.top
+      box.height += mgs.top + mgs.bottom
+      box.width += mgs.left + mgs.right
 
     box
 

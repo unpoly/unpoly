@@ -2,6 +2,7 @@ Changelog
 =========
 
 All notable changes to this project will be documented in this file.
+
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
@@ -31,6 +32,7 @@ Unreleased
       $input = $('input.email');
       up.first('.field:has(&)', $input); // returns the .field containing $input
 - Fix a bug where the document title wasn't restored when the user uses the back button
+- When [revealing a page fragment](/up.reveal), Unpoly will include the element's top and bottom margin in the area that should be revealed.
 
 ### Breaking changes
 

@@ -261,7 +261,7 @@ up.layout = (($) ->
     predictFirstVisibleRow = -> newScrollPos + obstruction.top
     predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom - 1
 
-    elementDims = u.measure($element, relative: $viewport)
+    elementDims = u.measure($element, relative: $viewport, includeMargin: true)
     firstElementRow = elementDims.top + offsetShift
     lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1
 

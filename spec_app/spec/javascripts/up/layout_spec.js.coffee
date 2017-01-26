@@ -54,6 +54,16 @@ describe 'up.layout', ->
           # ---------------------
           expect($(document).scrollTop()).toBe(@clientHeight + 50)
 
+        it "includes the element's top margin in the revealed area", ->
+          @$elements[1].css('margin-top': '20px')
+          up.reveal(@$elements[1])
+          expect($(document).scrollTop()).toBe(50 + 20)
+
+        it "includes the element's bottom margin in the revealed area", ->
+          @$elements[1].css('margin-bottom': '20px')
+          up.reveal(@$elements[2])
+          expect($(document).scrollTop()).toBe(@clientHeight + 50 + 20)
+
         it 'snaps to the top if the space above the future-visible area is smaller than the value of config.snap', ->
 
           up.layout.config.snap = 30
