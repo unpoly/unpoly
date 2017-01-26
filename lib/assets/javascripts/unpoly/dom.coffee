@@ -2,12 +2,13 @@
 Fragment update API
 ===================
   
-This module contains Unpoly's core functions to [change](/up.replace) or
-[destroy](/up.destroy) page fragments via JavaScript.
+This module exposes a low-level Javascript API to [change](/up.replace) or
+[destroy](/up.destroy) page fragments.
 
-Other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
-build upon this module to offer higher level API functions.
-  
+Most of Unpoly's functionality (like [fragment links](/up.link) or [modals](/up.modal))
+is built from these functions. You can use them to extend Unpoly from your
+[custom Javascript](/up.syntax).
+
 @class up.dom
 ###
 up.dom = (($) ->

@@ -32,12 +32,15 @@ up.layout = (($) ->
   @param {Array} [config.fixedTop]
     An array of CSS selectors that find elements fixed to the
     top edge of the screen (using `position: fixed`).
+    See [`[up-fixed="top"]`](/up-fixed-top) for details.
   @param {Array} [config.fixedBottom]
     An array of CSS selectors that find elements fixed to the
     bottom edge of the screen (using `position: fixed`).
+    See [`[up-fixed="bottom"]`](/up-fixed-bottom) for details.
   @param {Array} [config.anchoredRight]
     An array of CSS selectors that find elements anchored to the
-    right edge of the screen (using `position: fixed` or `position: absolute`).
+    right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
+    See [`[up-anchored="right"]`](/up-anchored-right) for details.
   @param {Number} [config.duration=0]
     The duration of the scrolling animation in milliseconds.
     Setting this to `0` will disable scrolling animations.
@@ -492,11 +495,16 @@ up.layout = (($) ->
   ###
 
   ###*
-  Marks this element as a navigation fixed to the top edge of the screen
+  Marks this element as being fixed to the top edge of the screen
   using `position: fixed`.
 
-  [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
-  the viewport far enough so the revealed element is fully visible.
+  When [following a fragment link](/a-up-target), the viewport is scrolled
+  so the targeted element becomes visible. By using this attribute you can make
+  Unpoly aware of fixed elements that are obstructing the viewport contents.
+  Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
+
+  Instead of using this attribute,
+  you can also configure a selector in [`up.layout.config.fixedTop`](/up.layout.config#fixedTop).
 
   \#\#\# Example
 
@@ -507,11 +515,16 @@ up.layout = (($) ->
   ###
 
   ###*
-  Marks this element as a navigation fixed to the bottom edge of the screen
+  Marks this element as being fixed to the bottom edge of the screen
   using `position: fixed`.
 
-  [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
-  the viewport far enough so the revealed element is fully visible.
+  When [following a fragment link](/a-up-target), the viewport is scrolled
+  so the targeted element becomes visible. By using this attribute you can make
+  Unpoly aware of fixed elements that are obstructing the viewport contents.
+  Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
+
+  Instead of using this attribute,
+  you can also configure a selector in [`up.layout.config.fixedBottom`](/up.layout.config#fixedBottom).
 
   \#\#\# Example
 
@@ -523,15 +536,35 @@ up.layout = (($) ->
 
 
   ###*
-  Marks this element as a navigation anchored to the right edge of the screen
-  using `position: fixed` or `position:absolute`.
+  Marks this element as being anchored to the right edge of the screen,
+  typically fixed navigation bars.
 
-  [`up.modal`](/up.modal) will move anchored elements to the left so they
-  don't appear to move when a modal dialog is opened or closed.
+  Since [modal dialogs](/up.modal) hide the document scroll bar,
+  elements anchored to the right appear to jump when the dialog opens or
+  closes. Applying this attribute to anchored elements will make Unpoly
+  aware of the issue and adjust the `right` property accordingly.
+
+  You should give this attribute to layout elements
+  with a CSS of `right: 0` with `position: fixed` or `position:absolute`.
+
+  Instead of giving this attribute to any affected element,
+  you can also configure a selector in [`up.layout.config.anchoredRight`](/up.layout.config#anchoredRight).
 
   \#\#\# Example
 
-      <div class="bottom-nav" up-fixed="bottom">...</div>
+  Here is the CSS for a navigation bar that is anchored to the top edge of the screen:
+
+      .top-nav {
+         position: fixed;
+         top: 0;
+         left: 0;
+         right: 0;
+       }
+
+  By adding an `up-anchored="right"` attribute to the element, we can prevent the
+  `right` edge from jumping when a [modal dialog](/up.modal) opens or closes:
+
+      <div class="top-nav" up-anchored="right">...</div>
 
   @selector [up-anchored=right]
   @stable

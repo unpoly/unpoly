@@ -155,9 +155,9 @@ up.syntax = (($) ->
         });
       });
 
-  ... you can reuse the event handler like this:
+  ... you can reuse the callback function like this:
 
-      $('.action').compiler(function($element) {
+      up.compiler('.action', function($element) {
         $element.on('click', function() {
           $(this).something();
         });

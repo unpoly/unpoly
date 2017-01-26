@@ -2,21 +2,24 @@
 AJAX acceleration
 =================
 
+Unpoly comes with a number of tricks to shorten the latency between browser and server.
+
+\#\#\# Server responses are cached by default
+
 Unpoly caches server responses for a few minutes,
 making requests to these URLs return instantly.
-
-All Unpoly functions and selectors go through this cache.
-If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
-use [`up.ajax`](/up.ajax).
-
-\#\#\# How the cache is cleared
+All Unpoly functions and selectors go through this cache, unless
+you explicitly pass a `{ cache: false }` option or set an `up-cache="false"` attribute.
 
 The cache holds up to 70 responses for 5 minutes. You can configure the cache size and expiry using
-[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.proxy.clear`](/up.proxy.clear).
+[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.proxy.clear()`](/up.proxy.clear).
 
 Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
 
-\#\#\# Preloading
+If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
+use [`up.ajax()`](/up.ajax).
+
+\#\#\# Preloading links
 
 Unpoly also lets you speed up reaction times by [preloading
 links](/up-preload) when the user hovers over the click area (or puts the mouse/finger
