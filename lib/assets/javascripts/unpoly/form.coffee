@@ -17,7 +17,7 @@ up.form = (($) ->
 
   @property up.form.config
   @param {Number} [config.observeDelay=0]
-    The number of miliseconds to wait before [`up.observe`](/up.observe) runs the callback
+    The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
   @param {Array} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
@@ -88,11 +88,11 @@ up.form = (($) ->
     The transition to use when a failed form submission updates the `options.failTarget` selector.
     Defaults to the form's `up-fail-transition` attribute, or to `options.transition`, or to `'none'`.
   @param {Number} [options.duration]
-    The duration of the transition. See [`up.morph`](/up.morph).
+    The duration of the transition. See [`up.morph()`](/up.morph).
   @param {Number} [options.delay]
-    The delay before the transition starts. See [`up.morph`](/up.morph).
+    The delay before the transition starts. See [`up.morph()`](/up.morph).
   @param {String} [options.easing]
-    The timing function that controls the transition's acceleration. [`up.morph`](/up.morph).
+    The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
   @param {Element|jQuery|String} [options.reveal]
     Whether to reveal the target element within its viewport.
   @param {Boolean} [options.restoreScroll]
@@ -183,10 +183,10 @@ up.form = (($) ->
 
   Making network requests whenever a form field changes can cause
   [concurrency issues](https://makandracards.com/makandra/961-concurrency-issues-with-find-as-you-type-boxes).
-  Since `up.observe` can trigger many requests in a short period of time,
+  Since `up.observe()` can trigger many requests in a short period of time,
   the responses might not arrive in the same order.
 
-  To mitigate this, `up.observe` will try to never run a callback
+  To mitigate this, `up.observe()` will try to never run a callback
   before the previous callback has completed.
   For this your callback code must return a promise that resolves
   when your request completes.
@@ -199,8 +199,8 @@ up.form = (($) ->
         return submitDone;
       });
   
-  Note that many Unpoly functions like [`up.submit`](/up.submit) or
-  [`up.replace`](/up.replace) return promises.
+  Note that many Unpoly functions like [`up.submit()`](/up.submit) or
+  [`up.replace()`](/up.replace) return promises.
 
   \#\#\# Debouncing
 
@@ -311,7 +311,7 @@ up.form = (($) ->
   @param {String|Element|jQuery} selectorOrElement
     The field or form to observe.
   @param {Object} [options]
-    See options for [`up.observe`](/up.observe)
+    See options for [`up.observe()`](/up.observe)
   @return {Function}
     A destructor function that removes the observe watch when called.
   @stable
@@ -339,7 +339,7 @@ up.form = (($) ->
   Performs a server-side validation of a form and update the form
   with validation messages.
 
-  `up.validate` submits the given field's form with an additional `X-Up-Validate`
+  `up.validate()` submits the given field's form with an additional `X-Up-Validate`
   HTTP header. Upon seeing this header, the server is expected to validate (but not save)
   the form submission and render a new copy of the form with validation errors.
 
@@ -471,7 +471,7 @@ up.form = (($) ->
   The server response is searched for the selector given in `up-target`.
   The selector content is then [replaced](/up.replace) in the current page.
 
-  The programmatic variant of this is the [`up.submit`](/up.submit) function.
+  The programmatic variant of this is the [`up.submit()`](/up.submit) function.
 
   \#\#\# Failed submission
 
@@ -575,7 +575,7 @@ up.form = (($) ->
   the form is validated on the server and is updated with
   validation messages.
 
-  The programmatic variant of this is the [`up.validate`](/up.validate) function.
+  The programmatic variant of this is the [`up.validate()`](/up.validate) function.
 
   \#\#\# Example
 
@@ -671,7 +671,7 @@ up.form = (($) ->
   With the Bootstrap bindings, Unpoly will also look
   for a container with the `form-group` class.
 
-  You can change this default behavior by setting `up.config.validateTargets`:
+  You can change this default behavior by setting [`up.form.config.validateTargets`](/up.form.config#validateTargets):
 
       // Always update the entire form containing the current field ("&")
       up.form.config.validateTargets = ['form &']
@@ -796,7 +796,7 @@ up.form = (($) ->
 
   This is useful for observing text fields while the user is typing.
 
-  The programmatic variant of this is the [`up.observe`](/up.observe) function.
+  The programmatic variant of this is the [`up.observe()`](/up.observe) function.
 
   \#\#\# Example
 
@@ -832,7 +832,7 @@ up.form = (($) ->
   The form field will be assigned a CSS class [`up-active`](/up-active)
   while the autosubmitted form is processing.
 
-  The programmatic variant of this is the [`up.autosubmit`](/up.autosubmit) function.
+  The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
 
   \#\#\# Example
 

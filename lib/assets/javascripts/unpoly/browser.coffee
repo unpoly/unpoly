@@ -162,7 +162,7 @@ up.browser = (($) ->
   via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
 
   When Unpoly is asked to change history on a browser that doesn't support
-  `pushState` (e.g. through [`up.follow`](/up.follow)), it will gracefully
+  `pushState` (e.g. through [`up.follow()`](/up.follow)), it will gracefully
   fall back to a full page load.
 
   @function up.browser.canPushState
@@ -193,7 +193,7 @@ up.browser = (($) ->
   [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions).
 
   When Unpoly is asked to animate history on a browser that doesn't support
-  CSS transitions (e.g. through [`up.animate`](/up.animate)), it will skip the
+  CSS transitions (e.g. through [`up.animate()`](/up.animate)), it will skip the
   animation by instantly jumping to the last frame.
 
   @function up.browser.canCssTransition

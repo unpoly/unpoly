@@ -34,8 +34,8 @@ up.history = (($) ->
   Returns the previous URL in the browser history.
 
   Note that this will only work reliably for history changes that
-  were applied by [`up.history.push`](/up.history.replace) or
-  [`up.history.replace`](/up.history.replace).
+  were applied by [`up.history.push()`](/up.history.replace) or
+  [`up.history.replace()`](/up.history.replace).
 
   @function up.history.previousUrl
   @internal
@@ -77,8 +77,8 @@ up.history = (($) ->
   Unpoly will [`replace`](/up.replace) the document body with
   the body from that URL.
 
-  Note that functions like [`up.replace`](/up.replace) or
-  [`up.submit`](/up.submit) will automatically update the
+  Note that functions like [`up.replace()`](/up.replace) or
+  [`up.submit()`](/up.submit) will automatically update the
   browser's location bar for you.
 
   @function up.history.replace
@@ -96,8 +96,8 @@ up.history = (($) ->
   Unpoly will [`replace`](/up.replace) the document body with
   the body from that URL.
 
-  Note that functions like [`up.replace`](/up.replace) or
-  [`up.submit`](/up.submit) will automatically update the
+  Note that functions like [`up.replace()`](/up.replace) or
+  [`up.submit()`](/up.submit) will automatically update the
   browser's location bar for you.
 
   Emits events [`up:history:push`](/up:history:push) and [`up:history:pushed`](/up:history:pushed).

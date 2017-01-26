@@ -82,7 +82,7 @@ What you still need to do manually
 
 ### Failed form submissions must return a non-200 status code
 
-Unpoly lets you submit forms via AJAX by using the [`form[up-target]`](http://unpoly.com/form-up-target) selector or [`up.submit`](http://unpoly.com/up.submit) function.
+Unpoly lets you submit forms via AJAX by using the [`form[up-target]`](http://unpoly.com/form-up-target) selector or [`up.submit()`](http://unpoly.com/up.submit) function.
 
 For Unpoly to be able to detect a failed form submission, the form must be re-rendered with a non-200 HTTP status code. We recommend to use either 400 (bad request) or 422 (unprocessable entity).
 

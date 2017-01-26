@@ -175,7 +175,7 @@ up.tooltip = (($) ->
 
   @function up.tooltip.close
   @param {Object} options
-    See options for [`up.animate`](/up.animate).
+    See options for [`up.animate()`](/up.animate).
   @return {Promise}
     A promise for the end of the closing animation.
   @stable

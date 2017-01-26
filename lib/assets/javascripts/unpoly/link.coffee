@@ -99,7 +99,7 @@ up.link = (($) ->
   @param {String} [options.target='body']
     The selector to replace.
   @param {Object} [options]
-    See options for [`up.replace`](/up.replace)
+    See options for [`up.replace()`](/up.replace)
   @stable
   ###
   visit = (url, options) ->
@@ -144,11 +144,11 @@ up.link = (($) ->
   @param {Function|String} [options.failTransition]
     The transition to use if the server responds with a non-200 status code.
   @param {Number} [options.duration]
-    The duration of the transition. See [`up.morph`](/up.morph).
+    The duration of the transition. See [`up.morph()`](/up.morph).
   @param {Number} [options.delay]
-    The delay before the transition starts. See [`up.morph`](/up.morph).
+    The delay before the transition starts. See [`up.morph()`](/up.morph).
   @param {String} [options.easing]
-    The timing function that controls the transition's acceleration. [`up.morph`](/up.morph).
+    The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
   @param {Element|jQuery|String} [options.reveal]
     Whether to reveal the target  element within its viewport before updating.
   @param {Boolean} [options.restoreScroll]

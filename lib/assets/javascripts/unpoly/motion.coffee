@@ -26,8 +26,8 @@ of the dialog by adding an [`up-animation`](/up-modal#up-animation) attribute to
 Unpoly ships with a number of [predefined transitions](/up.morph#named-transitions)
 and [predefined animations](/up.animate#named-animations).
 
-You can define custom animations using [`up.transition`](/up.transition) and
-[`up.animation`](/up.animation).
+You can define custom animations using [`up.transition()`](/up.transition) and
+[`up.animation()`](/up.animation).
 
 @class up.motion
 ###
@@ -120,7 +120,7 @@ up.motion = (($) ->
   | `move-from-right`  | Moves the element leftwards from beyond the right  edge of the screen until it reaches its current position |
   | `none`             | An animation that has no visible effect. Sounds useless at first, but can save you a lot of `if` statements. |
 
-  You can define additional named animations using [`up.animation`](/up.animation).
+  You can define additional named animations using [`up.animation()`](/up.animation).
 
   \#\#\# Animating CSS properties directly
 
@@ -323,7 +323,7 @@ up.motion = (($) ->
   | `move-right` | Moves the first element rightwards until it exists the screen at the right edge. Simultaneously moves the second element rightwards from beyond the left edge of the screen until it reaches its current position. |
   | `none`       | A transition that has no visible effect. Sounds useless at first, but can save you a lot of `if` statements. |
 
-  You can define additional named transitions using [`up.transition`](/up.transition).
+  You can define additional named transitions using [`up.transition()`](/up.transition).
   
   You can also compose a transition from two [named animations](/named-animations).
   separated by a slash character (`/`):
@@ -488,10 +488,10 @@ up.motion = (($) ->
         )
       )
 
-  It is recommended that your transitions use [`up.animate`](/up.animate),
+  It is recommended that your transitions use [`up.animate()`](/up.animate),
   passing along the `options` that were passed to you.
 
-  If you choose to *not* use `up.animate` and roll your own
+  If you choose to *not* use `up.animate()` and roll your own
   logic instead, your code must honor the following contract:
 
   1. It must honor the passed options `{ delay, duration, easing }` if present
@@ -500,7 +500,7 @@ up.motion = (($) ->
   4. The returned promise responds to a `resolve()` function that
      instantly jumps to the last transition frame and resolves the promise.
 
-  Calling [`up.animate`](/up.animate) with an object argument
+  Calling [`up.animate()`](/up.animate) with an object argument
   will take care of all these points.
 
   @function up.transition
@@ -522,10 +522,10 @@ up.motion = (($) ->
       })
 
   It is recommended that your definitions always end by calling
-  calling [`up.animate`](/up.animate) with an object argument, passing along
+  calling [`up.animate()`](/up.animate) with an object argument, passing along
   the `options` that were passed to you.
 
-  If you choose to *not* use `up.animate` and roll your own
+  If you choose to *not* use `up.animate()` and roll your own
   animation code instead, your code must honor the following contract:
 
   1. It must honor the passed options `{ delay, duration, easing }` if present
@@ -534,7 +534,7 @@ up.motion = (($) ->
   4. The returned promise responds to a `resolve()` function that
      instantly jumps to the last animation frame and resolves the promise.
 
-  Calling [`up.animate`](/up.animate) with an object argument
+  Calling [`up.animate()`](/up.animate) with an object argument
   will take care of all these points.
 
   @function up.animation

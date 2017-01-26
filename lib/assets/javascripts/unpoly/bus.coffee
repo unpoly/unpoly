@@ -26,7 +26,7 @@ A better way to bind event listeners
 ------------------------------------
 
 Instead of using jQuery to bind  an event handler to `document`, you can also
-use the more convenient [`up.on`](/up.on):
+use the more convenient [`up.on()`](/up.on):
 
     up.on('click', 'button', function(event, $button) {
       // $button is a jQuery collection containing
@@ -49,7 +49,7 @@ up.bus = (($) ->
   
   u = up.util
 
-  # We remember which argument lists have been passed to `up.on`
+  # We remember which argument lists have been passed to `up.on()`
   # so we can clean out the listener registry between tests.
   liveUpDescriptions = {}
   nextUpDescriptionNumber = 0
@@ -67,7 +67,7 @@ up.bus = (($) ->
       upListener.apply($me.get(0), [event, $me, up.syntax.data($me)])
 
   ###*
-  Converts an argument list for `up.on` to an argument list for `jQuery.on`.
+  Converts an argument list for `up.on()` to an argument list for `jQuery.on`.
   This involves rewriting the listener signature in the last argument slot.
 
   @function upDescriptionToJqueryDescription
@@ -123,7 +123,7 @@ up.bus = (($) ->
 
   \#\#\# Unbinding an event listener
 
-  `up.on` returns a function that unbinds the event listeners when called:
+  `up.on()` returns a function that unbinds the event listeners when called:
 
       // Define the listener
       var listener =  function() { ... };
@@ -134,7 +134,7 @@ up.bus = (($) ->
       // Unbind the listener
       unbind()
 
-  There is also a function [`up.off`](/up.off) which you can use for the same purpose:
+  There is also a function [`up.off()`](/up.off) which you can use for the same purpose:
 
       // Define the listener
       var listener =  function() { ... };
@@ -145,7 +145,7 @@ up.bus = (($) ->
       // Unbind the listener
       up.off('click', listener)
 
-  \#\#\# Migrating jQuery event handlers to `up.on`
+  \#\#\# Migrating jQuery event handlers to `up.on()`
 
   Within the event handler, Unpoly will bind `this` to the
   native DOM element to help you migrate your existing jQuery code to
@@ -157,7 +157,7 @@ up.bus = (($) ->
         $(this).something();
       });
 
-  ... you can simply copy the event handler to `up.on`:
+  ... you can simply copy the event handler to `up.on()`:
 
       up.on('click', '.button', function() {
         $(this).something();
@@ -197,7 +197,7 @@ up.bus = (($) ->
     -> unbind(upDescription...)
 
   ###*
-  Unbinds an event listener previously bound with [`up.on`](/up.on).
+  Unbinds an event listener previously bound with [`up.on()`](/up.on).
 
   \#\#\# Example
 
@@ -210,8 +210,8 @@ up.bus = (($) ->
 
       up.off('click', '.button', listener);
 
-  Note that you need to pass `up.off` a reference to the same listener function
-  that was passed to `up.on` earlier.
+  Note that you need to pass `up.off()` a reference to the same listener function
+  that was passed to `up.on()` earlier.
 
   @function up.off
   @stable
@@ -238,7 +238,7 @@ up.bus = (($) ->
   The event will be triggered as a jQuery event on `document`.
 
   Other code can subscribe to events with that name using
-  [`up.on`](/up.on) or by [binding a jQuery event listener](http://api.jquery.com/on/) to `document`.
+  [`up.on()`](/up.on) or by [binding a jQuery event listener](http://api.jquery.com/on/) to `document`.
 
   \#\#\# Example
 
@@ -380,7 +380,7 @@ up.bus = (($) ->
 
   ###*
   Makes a snapshot of the currently registered event listeners,
-  to later be restored through [`up.bus.reset`](/up.bus.reset).
+  to later be restored through [`up.bus.reset()`](/up.bus.reset).
 
   @internal
   ###

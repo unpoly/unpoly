@@ -96,7 +96,7 @@ up.layout = (($) ->
         duration: 250
       });
 
-  If the given viewport is already in a scroll animation when `up.scroll`
+  If the given viewport is already in a scroll animation when `up.scroll()`
   is called a second time, the previous animation will instantly jump to the
   last frame before the next animation is started.
 
@@ -189,7 +189,7 @@ up.layout = (($) ->
   element are visible for the user.
 
   By default Unpoly will always reveal an element before
-  updating it with JavaScript functions like [`up.replace`](/up.replace)
+  updating it with JavaScript functions like [`up.replace()`](/up.replace)
   or UJS behavior like [`[up-target]`](/a-up-target).
 
   \#\#\# How Unpoly finds the viewport
@@ -207,9 +207,9 @@ up.layout = (($) ->
   Many applications have a navigation bar fixed to the top or bottom,
   obstructing the view on an element.
 
-  You can make `up.reveal` aware of these fixed elements
+  You can make `up.reveal()` aware of these fixed elements
   so it can scroll the viewport far enough so the revealed element is fully visible.
-  To make `up.reveal` aware fixed elements you can either:
+  To make `up.reveal()` aware fixed elements you can either:
 
   - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
   - [configure default options](/up.layout.config) for `fixedTop` or `fixedBottom`
@@ -448,7 +448,7 @@ up.layout = (($) ->
   instead of scrolling `<body>`. As an alternative you can also push a selector
   matching your custom viewport to the [`up.layout.config.viewports`](/up.layout.config) array.
 
-  [`up.reveal`](/up.reveal) will always try to scroll the viewport closest
+  [`up.reveal()`](/up.reveal) will always try to scroll the viewport closest
   to the element that is being revealed. By default this is the `<body>` element.
 
   \#\#\# Example

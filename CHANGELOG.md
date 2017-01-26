@@ -12,21 +12,21 @@ Unreleased
 
 - When a fragment updates cannot find the requested element, you can now define a fallback selector to use instead.
 
-  A `{ fallback }` option has been added to all Javascript functions that update fragments, like [`up.replace`](/up.replace).
+  A `{ fallback }` option has been added to all Javascript functions that update fragments, like [`up.replace()`](/up.replace).
 
   Also an `[up-fallback]` attribute has been added to all CSS selectors that update fragments, like for [`a[up-target]`](/a-up-target).
 
   You can also define fallbacks globally using the [`up.dom.config`](/up.dom.config) property.
-- Unpoly no longer crashes when a request fails due to a timeout or network problem. In such cases, async functions (like [`up.replace`](/up.replace)) will leave the page unchanged and  reject the returned promise.
-- Functions that make a request (like [`up.replace`](/up.replace) or like [`up.ajax`](/up.ajax)) now accept a new option `{ timeout }`.
+- Unpoly no longer crashes when a request fails due to a timeout or network problem. In such cases, async functions (like [`up.replace()`](/up.replace)) will leave the page unchanged and  reject the returned promise.
+- Functions that make a request (like [`up.replace()`](/up.replace) or like [`up.ajax()`](/up.ajax)) now accept a new option `{ timeout }`.
 - [Modals](/up.modal) no longer create an `.up-modal` element when the server returns a non-200 status and the `{ failTarget }` is replaced instead
 - [Popups](/up.popup) no longer create an `.up-popup` element when the server returns a non-200 status and the `{ failTarget }` is replaced instead
 - Improve performance when updating fragments without transitions
 - When updating the `body` element with a transition, that transition is now silently ignored instead of throwing an error.
-- [`up.util.resolvedPromise`](/up.util.resolvedPromise) now accepts arguments which will become the resolution values.
-- [`up.util.resolvedDeferred`](/up.util.resolvedDeferred) now accepts arguments which will become the resolution values.
-- New utility method [`up.util.rejectedPromise`](/up.util.rejectedPromise).
-- [`up.first`](/up.first) has new option `{ origin }`. You can use it provide a second element or selector that can be referenced as `&` in the first selector:
+- [`up.util.resolvedPromise()`](/up.util.resolvedPromise) now accepts arguments which will become the resolution values.
+- [`up.util.resolvedDeferred()`](/up.util.resolvedDeferred) now accepts arguments which will become the resolution values.
+- New utility method [`up.util.rejectedPromise()`](/up.util.rejectedPromise).
+- [`up.first()`](/up.first) has new option `{ origin }`. You can use it provide a second element or selector that can be referenced as `&` in the first selector:
 
       $input = $('input.email');
       up.first('.field:has(&)', $input); // returns the .field containing $input
@@ -34,8 +34,8 @@ Unreleased
 
 ### Breaking changes
 
-- [`up.replace`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
-- `up.util.merge` has been replaced by [`up.util.assign`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
+- [`up.replace()`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
+- `up.util.merge()` has been replaced by [`up.util.assign()`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
 - The `up.flow` module has been renamed to [`up.dom`](/up.dom).
 - The `up.navigation` module has been renamed to [`up.feedback`](/up.feedback).
 
@@ -48,13 +48,13 @@ Unreleased
 - Fix a bug where morphing an [`[up-keep]`](/up-keep) element with a destructor would throw an error.
 - Fix a bug where an [`[up-keep]`](/up-keep) element would lose its jQuery event handlers when it was kept.
 - Fix a bug where [`up.log.disable()`](/up.log.disable) did not persist through page reloads.
-- Fix a bug where [`up.reveal`](/up.reveal) would scroll too far if the viewport has a `padding-top`.
-- Fix a bug where [`up.reveal`](/up.reveal) would not scroll to an element at the bottom edge of the visible area
+- Fix a bug where [`up.reveal()`](/up.reveal) would scroll too far if the viewport has a `padding-top`.
+- Fix a bug where [`up.reveal()`](/up.reveal) would not scroll to an element at the bottom edge of the visible area
   if [`up.layout.config.snap`](/up.layout.config) is set.
 - Several features have been promoted from experimental API to stable API:
   - [`[up-drawer]`](/up-drawer)
-  - [`up.syntax.data`](/up.syntax.data)
-  - [`up.extract`](/up.extract)
+  - [`up.syntax.data()`](/up.syntax.data)
+  - [`up.extract()`](/up.extract)
 - When [targeting](/up-target) an URL with a #hash, the viewport will now scroll to the first row of an element
   with that ID, rather than scrolling as little as possible.
 
@@ -88,7 +88,7 @@ Unreleased
 
 ### Breaking changes
 
-- The [`up.modal.flavor`](/up.modal.flavor) function was deprecated. Set values on the
+- The [`up.modal.flavor()`](/up.modal.flavor) function was deprecated. Set values on the
   [`up.modal.flavors`](/up.modal.flavors) property instead.
 
 
@@ -97,9 +97,9 @@ Unreleased
 
 ### Compatible changes
 
-- Fix [`up.observe`](/up.observe) not honoring `{ delay }` option
+- Fix [`up.observe()`](/up.observe) not honoring `{ delay }` option
 - Fix [`[up-observe]`](/up-observe) not honoring `[up-delay]` modifier
-- Fix many issues with concurrency and slow server responses for [`up.observe`](/up.observe) and [`[up-observe]`](/up-observe)
+- Fix many issues with concurrency and slow server responses for [`up.observe()`](/up.observe) and [`[up-observe]`](/up-observe)
 
 
 
@@ -118,9 +118,9 @@ Unreleased
 
 ### Compatible changes
 
-- [`up.popup.attach`](/up.popup.attach) now has a `{ html }` option. This allows you to extract popup contents
+- [`up.popup.attach()`](/up.popup.attach) now has a `{ html }` option. This allows you to extract popup contents
   from a HTML string without making a network request.
-- [`up.tooltip.attach`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
+- [`up.tooltip.attach()`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
 - Fix a bug on Firefox where the page width would jump by the scrollbar width when opening a modal.
 - Fix a bug where modals would close when following a link to a cached destination.
 
@@ -134,7 +134,7 @@ Unreleased
 
 ### Compatible changes
 
-- [`up.tooltip.attach`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
+- [`up.tooltip.attach()`](/up.tooltip.attach) now has a `{ text }` option which automatically escapes the given string.
 - Fix a bug where Unpoly would hang when parsing a page with a `<head>` but without a `<title>`
 
 
@@ -146,8 +146,8 @@ Unreleased
 - The error notification is now easier to read and can be closed.
 - When a target selector was not found in the response, the error notification now offers a link to re-request the response for inspection.
 - [Compilers](/up.compiler) can now return an array of functions that will *all* be called when the element is destroyed.
-- [`up.observe`](/up.observe) now works on checkboxes and radio buttons.
-- [`up.observe`](/up.observe) can now be called with multiple form fields, or any container that contains form fields.
+- [`up.observe()`](/up.observe) now works on checkboxes and radio buttons.
+- [`up.observe()`](/up.observe) can now be called with multiple form fields, or any container that contains form fields.
 - When opening a [modal](/up.modal) you can now pass an option `{ closable: false }` or set an `up-closable='false'` attribute
   This lets you disable the default methods to close a modal (close button, clicking on the backdrop, pressing ESC).
   You can also configure this globally by setting [`up.modal.config.closable`](/up.modal.config).
@@ -157,7 +157,7 @@ Unreleased
 
 ### Breaking changes
 
-- `up.error` has been renamed to [`up.fail`](/up.fail) in order to prevent confusion with [`up.log.error`](/up.log.error).
+- `up.error()` has been renamed to [`up.fail()`](/up.fail) in order to prevent confusion with [`up.log.error()`](/up.log.error).
 
 
 0.27.3
@@ -173,8 +173,8 @@ Unreleased
 
 ### Breaking changes
 
-- The `{ url }` option for [`up.destroy`](/up.destroy) has been renamed to `{ history }` to be more
-  in line with [`up.replace`](/up.replace).
+- The `{ url }` option for [`up.destroy()`](/up.destroy) has been renamed to `{ history }` to be more
+  in line with [`up.replace()`](/up.replace).
 
 
 0.27.2
@@ -215,19 +215,19 @@ Unreleased
 
 ### Compatible changes
 
-- Calling [`up.log.enable`](/up.log.enable) will now keep logging enabled for the remainder of this
+- Calling [`up.log.enable()`](/up.log.enable) will now keep logging enabled for the remainder of this
   browser session (and persist through page reloads).
 - Added experimental events to observe history changes: [`up:history:push`](/up:history:push) (preventable), [`up:history:pushed`](/up:history:pushed) and [`up:history:restored`](/up:history:restored)
 - Fix a bug where prepending or appending multiple elements with `:before` / `:after` pseudo-classes
   would not work correctly in tables.
-- Fix a bug where calling [`up.animate`](/up.animate) with `{ duration: 0 }` would return a promise
+- Fix a bug where calling [`up.animate()`](/up.animate) with `{ duration: 0 }` would return a promise
   that never resolved.
 - A click on the page body now closes the popup on `mousedown` instead of `click`.
   This fixes the case where an `[up-instant]` link removes its parent and thus a `click` event never bubbles up to the body.
 - When opening a modal, elements behind the dialog can now be moved correctly when scrollbars have custom styles on `::-webkit-scrollbar`.
   To take advantage of this, make sure to also style scrollbars on elements with an [`[up-viewport]`](/up-viewport) attribute.
 - Fix a bug where [`up.tooltip.config`](/up.tooltip.config) was not publicly acccessible.
-- Fix a bug where [`up.tooltip.isOpen`](/up.tooltip.isOpen) was not publicly acccessible.
+- Fix a bug where [`up.tooltip.isOpen()`](/up.tooltip.isOpen) was not publicly acccessible.
 - New [tooltip configuration options](/up.tooltip.config): `config.openDuration`, `config.closeDuration`, `config.openEasing`, `config.closeEasing`
 - Opening/closing many tooltips concurrently now behaves deterministically.
 - Opening/closing many popups concurrently now behaves deterministically.
@@ -276,7 +276,7 @@ Unreleased
 - New configuration options in [`up.log.config`](/up.log.config): `up.log.config.enabled`, `up.log.config.collapse` and
   `up.log.config.prefix`.
 - Improve formatting of error messages.
-- New experimental utility function [`up.util.escapeHtml`](/up.util.escapeHtml).
+- New experimental utility function [`up.util.escapeHtml()`](/up.util.escapeHtml).
 - If an error is thrown before the document is ready, Unpoly now waits until the document is ready before showing the red error box.
 
 
@@ -295,7 +295,7 @@ Unreleased
 
 ### Compatible changes
 
-- Fix a bug where [`up.ajax`](/up.ajax) would incorrectly re-use form responses even if the form data differed
+- Fix a bug where [`up.ajax()`](/up.ajax) would incorrectly re-use form responses even if the form data differed
 - Fix a bug with the [`up-observe`](/up-observe) UJS attribute throwing an error when used
 - Fix a bug where if multiple compilers with [destructors](/up.compiler#cleaning-up-after-yourself)
   are applied to the same element and the element is removed, only the last destructor was called.
@@ -307,11 +307,11 @@ Unreleased
 ### Compatible changes
 
 - New modal default [`up.modal.config.sticky`](/up.modal.config)
-- New experimental function [`up.modal.flavor`](/up.modal.flavor) to register modal variants (like drawers).
+- New experimental function [`up.modal.flavor()`](/up.modal.flavor) to register modal variants (like drawers).
 - Fix a bug where [compilers](/up.compiler) and [macros](/up.macro) with higher priorities were executed last (instead of first like it says in the docs).
 - Fix a bug that would occur if two compiled elements, that were nested within each other, would raise an error if the outer element was destroyed and both compilers have destructor functions.
 - Fix a bug where replacing the `body` tag would raise an error if any element in the old `<body>` had a destructor function.
-- The promise returned by [`up.replace`](/up.replace) now waits for transitions to complete before resolving
+- The promise returned by [`up.replace()`](/up.replace) now waits for transitions to complete before resolving
 - Fix a bug where an error would be shown when opening a modal while another modal was still loading
 - Fix a bug where two popups would be shown when opening a popup while another popup was still loading
 - New options for [up.popup.config](/up.popup.config):
@@ -345,9 +345,9 @@ Unreleased
 
 ### Compatible changes
 
-- New function [`up.modal.extract`](/up.modal.extract) to open a modal from an
+- New function [`up.modal.extract()`](/up.modal.extract) to open a modal from an
   existing HTML string.
-- [`up.ajax`](/up.ajax) now also accepts the URL as a first string argument.
+- [`up.ajax()`](/up.ajax) now also accepts the URL as a first string argument.
 - [Expanded](/up.expand) links to modals or popups now get a pointer cursor via CSS
 - New options for [up.modal.config](/up.modal.config):
   - `up.modal.config.openDuration`
@@ -357,9 +357,9 @@ Unreleased
   - `up.modal.config.backdropOpenAnimation`
   - `up.modal.config.backdropCloseAnimation`
   - Also see the breaking changes regarding modal structure below.
-- Calling [`up.motion.finish`](/up.motion.finish) without arguments will now
+- Calling [`up.motion.finish()`](/up.motion.finish) without arguments will now
   complete all animations and transitions on the screen.
-- Fix a bug where [`up.motion.finish`](/up.motion.finish) would not cancel CSS transitions that were still in progress.
+- Fix a bug where [`up.motion.finish()`](/up.motion.finish) would not cancel CSS transitions that were still in progress.
 - Fix a bug where [`up-active`](/up-active) classes where not removed from links when the destination
   was already [preloaded](/up.preload).
 
@@ -389,7 +389,7 @@ Unreleased
   They might change again in the future.
 - The modal will now take over the document's scrollbars after the open animation has finished.
   In earlier versions the modal took over as soon as the animation had started.
-- Calling [`up.motion.finish`](/up.motion.finish) with an element will now also
+- Calling [`up.motion.finish()`](/up.motion.finish) with an element will now also
   complete animations/transitions on children of the given element.
 
 
@@ -400,9 +400,9 @@ Unreleased
 
 - [Animations](/up.motion) `move-to-*` and `move-from-*` now use CSS transforms instead of manipulating the
   bounding box margins.
-- Fix [`up.util.trim`](/up.util.trim) not working properly.
-- [`up.morph`](/up.morph) no longer throws an error if called without an `options` object
-- Custom transitions can now call [`up.morph`](/up.morph) to refer to other transitions
+- Fix [`up.util.trim()`](/up.util.trim) not working properly.
+- [`up.morph()`](/up.morph) no longer throws an error if called without an `options` object
+- Custom transitions can now call [`up.morph()`](/up.morph) to refer to other transitions
 - Fix a bug where following a link to a [preloaded](/up-preload) destination would keep the
   link marked with a [up-active](/up-active) class forever.
 
@@ -434,7 +434,7 @@ Unreleased
 - Fix a bug where a link would be followed multiple times if the link's
   click area was expanded using [`[up-expand]`](/up-expand) and if the
   link also had an [`up-dash`](/up-dash) attribute.
-- [`up.destroy`](/up.destroy) now returns a resolved deferred if the given selector or jQuery collection does not exist
+- [`up.destroy()`](/up.destroy) now returns a resolved deferred if the given selector or jQuery collection does not exist
 
 
 0.22.0
@@ -460,8 +460,8 @@ Unreleased
 
 ### Compatible changes
 
-- New function `up.macro`. This registers a [compiler](/up.compiler) that is run before all other compilers.
-- [`up.compiler`](/up.compiler) has a new options `{ priority }`. Compilers with higher priorities are run first.
+- New function `up.macro()`. This registers a [compiler](/up.compiler) that is run before all other compilers.
+- [`up.compiler()`](/up.compiler) has a new options `{ priority }`. Compilers with higher priorities are run first.
 - Fix a bug where trying to apply another transition on an element could throw a *Maximum call stack exceeded*
     error if the element was already transitioning.
 
@@ -474,7 +474,7 @@ Unreleased
 ------
 
 - The project has been renamed to *Unpoly*.
-- All functions remain in the `up` namespace, so e.g. `up.replace` is still called `up.replace`.
+- All functions remain in the `up` namespace, so e.g. `up.replace()` is still called `up.replace()`.
 - All UJS functionality remains unchanged, so e.g. `up-target` is still called `up-target`.
 - The Bower package has been renamed to `unpoly`.
 - The Ruby gem for the Rails bindings has been renamed to `unpoly-rails`.
@@ -496,12 +496,12 @@ Unreleased
 ### Compatible changes
 
 - Elements can now be persisted during page updates using the [`up-keep`](/up-keep) attribute.
-- `up.proxy.ajax` is now available as [`up.ajax`](/up.ajax).
-- `up.ajax` can now handle nested objects as `{ data }` option (used to pass form parameters).
+- `up.proxy.ajax()` is now available as [`up.ajax()`](/up.ajax).
+- `up.ajax()` can now handle nested objects as `{ data }` option (used to pass form parameters).
 
 ### Breaking changes
 
-- `up.implant` has been renamed to [`up.extract`](/up.extract).
+- `up.implant()` has been renamed to [`up.extract()`](/up.extract).
 
 
 0.18.1
@@ -520,7 +520,7 @@ Unreleased
 - New UJS attribute [`[up-toggle]`](/up-toggle) to show or hide part of a form if certain options are selected or boxes are checked.
 - Links can now have an optional `up-confirm` attribute. This opens a confirmation dialog with the given message
   before the link is followed or the modal/popup is opened.
-- New function [`up.off`](/up.off). This unregisters an event listener previously bound with [`up.on`](/up.on).
+- New function [`up.off()`](/up.off). This unregisters an event listener previously bound with [`up.on()`](/up.on).
 - If a container contains more than one link, you can now set the value of the [`up-expand`](/up-expand)
   attribute to a CSS selector to define which link should be expanded.
 - You can now configure a list of idempotent HTTP methods in [`up.proxy.config.safeMethods`](/up.proxy.config).
@@ -528,13 +528,13 @@ Unreleased
   cache after a non-idempotent request.
 - Loading modals and popups will now open if there is a fragment update between the modal/popup's
   request and response.
-- [`up.follow`](/up.follow) and [`up.replace`](/up.replace) now have an option `{ failTarget }`.
+- [`up.follow()`](/up.follow) and [`up.replace()`](/up.replace) now have an option `{ failTarget }`.
   Use it to define the selector to replace if the server responds with a non-200 status code.
 - [`[up-target]`](/a-up-target) and [`up-follow`](/a-up-follow) now have a modifying attribute `up-fail-target`.
   Use it to define the selector to replace if the server responds with a non-200 status code.
-- New utility method [`up.util.reject`](/up.util.reject)
-- New utility method [`up.util.only`](/up.util.only)
-- New utility method [`up.util.except`](/up.util.except)
+- New utility method [`up.util.reject()`](/up.util.reject)
+- New utility method [`up.util.only()`](/up.util.only)
+- New utility method [`up.util.except()`](/up.util.except)
 - Fix a bug where modals could no longer be opened on some browsers
 
 ### Breaking changes
@@ -565,7 +565,7 @@ Unreleased
 
 ### Breaking changes
 
-- When [`up.observe`](/up.observe) is used with a delay of zero, the callback is invoked instantly (instead of
+- When [`up.observe()`](/up.observe) is used with a delay of zero, the callback is invoked instantly (instead of
   being invoked in the next animation frame).
 
 
@@ -583,7 +583,7 @@ Unreleased
 - Allow to disable animations globally with `up.motion.enabled = false`.
   This can be useful in full-stack integration tests like a Selenium test suite.
 - New function [`up.motion.isEnabled`](/up.motion.isEnabled) to check if animations will be performed.
-- [`up.popup.attach`](/up.popup.attach) now throws a helpful error when trying to attach a popup to a non-existing element
+- [`up.popup.attach()`](/up.popup.attach) now throws a helpful error when trying to attach a popup to a non-existing element
 - New option [`up.modal.config.history`](/up.modal.config) to configure if modals change the browser URL (defaults to `true`)
 - New option [`up.popup.config.history`](/up.popup.config) to configure if popup change the browser URL (defaults to `false`).
 - Fix CSS for popups with a position of `"bottom-left"`.
@@ -611,26 +611,26 @@ Unreleased
 
 ### Compatible changes
 
-- New function [`up.autosubmit`](/up.autosubmit) and selector [`[up-autosubmit]`](/up-autosubmit) to
+- New function [`up.autosubmit()`](/up.autosubmit) and selector [`[up-autosubmit]`](/up-autosubmit) to
   observe a form or field and submit the form when a value changes.
-- [`up.observe`](/up.observe) and [`[up-observe]`](/up-observe) can now be applied
+- [`up.observe()`](/up.observe) and [`[up-observe]`](/up-observe) can now be applied
   to `<form>` tags. The callback is run when any field in the form changes.
-- New function [`up.browser.canPushState`](/up.browser.canPushState) to detect
+- New function [`up.browser.canPushState()`](/up.browser.canPushState) to detect
   if the browser supports `history.pushState`.
-- New function [`up.browser.canCssTransition`](/up.browser.canCssTransition) to
+- New function [`up.browser.canCssTransition()`](/up.browser.canCssTransition) to
   detect if the browser supports animation with CSS transitions.
-- New function [`up.browser.canInputEvent`](/up.browser.canInputEvent) to
+- New function [`up.browser.canInputEvent()`](/up.browser.canInputEvent) to
   detect if the browser supports the `input` event.
-- Allow to [configure a default delay](/up.form.config) for [`up.observe`](/up.observe).
+- Allow to [configure a default delay](/up.form.config) for [`up.observe()`](/up.observe).
 - [Popups](/up.popup) now have events [`up:popup:open`](/up:popup:open),
   [`up:popup:opened`](/up:popup:opened), [`up:popup:close`](/up:popup:close)
   and [`up:popup:closed`](/up:popup:closed).
-- The destructor returned by [`up.observe`](/up.observe) now properly unregisters
+- The destructor returned by [`up.observe()`](/up.observe) now properly unregisters
   event listeners.
 
 ### Breaking changes
 
-- [`up.observe`](/up.observe) now takes the callback function as a last argument.
+- [`up.observe()`](/up.observe) now takes the callback function as a last argument.
   The callback can now longer be passed as a `.change` option.
 
 
@@ -699,8 +699,8 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- `up.bus.emit` is now [`up.emit`](http://unpoly.com/up.emit/)
-- When `up.first` finds no match, return `undefined` instead of `null`.
+- `up.bus.emit()` is now [`up.emit()`](http://unpoly.com/up.emit/)
+- When `up.first()` finds no match, return `undefined` instead of `null`.
 
 
 0.12.1
@@ -708,7 +708,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- `up.on` now returns a function that unbinds the events when called
+- `up.on()` now returns a function that unbinds the events when called
 - Fixed a bug where restoring previous scroll positions was not worked
   in situations where the same operation would also reveal the replaced element.
 - Various bugfixes
@@ -747,11 +747,11 @@ Refactored internals. No API changes.
       up.on('up:fragment:inserted', function(event, $fragment) {
          ...
       };
-- Renamed `up.ready` to `up.hello`. This will emit an `up:event:inserted` event for the given element,
+- Renamed `up.ready()` to `up.hello()`. This will emit an `up:event:inserted` event for the given element,
   causing it to be compiled etc.
-- `up.popup.open` has been renamed to `up.popup.attach`.
-- `up.modal.open` has been split into two methods `up.modal.visit(url)` and `up.modal.follow($link)`.
-- `up.tooltip.open` has been renamed to `up.tooltip.attach`.
+- `up.popup.open()` has been renamed to `up.popup.attach()`.
+- `up.modal.open()` has been split into two methods `up.modal.visit(url)` and `up.modal.follow($link)`.
+- `up.tooltip.open()` has been renamed to `up.tooltip.attach()`.
 - Tooltips now escape HTML by default; To use HTML content, use an `[up-tooltip-html]` attribute instead.
 - Module configurations are now simple properties like `up.layout.config` instead of methods like `up.layout.defaults(...)`.
 
@@ -770,7 +770,7 @@ Refactored internals. No API changes.
 ### Compatible changes
 
 - Fix a bug where browsers without CSS animation support would crash after an animation call
-- Expose `up.error` as public API. This prints an error message to the error console and throws a new `Error` with that message.
+- Expose `up.error()` as public API. This prints an error message to the error console and throws a new `Error` with that message.
 - Fix a million bugs related to compatibility with IE9 and IE10
 
 
@@ -780,13 +780,13 @@ Refactored internals. No API changes.
 ### Compatible changes
 
 - Rework the scrolling implementation so we don't need to scroll elements to the top before replacing them.
-- `up.ajax` now only caches responses with a status code of `200 OK`
+- `up.ajax()` now only caches responses with a status code of `200 OK`
 - When a link with an `[up-close]` attribute is clicked, the link's default action will only be prevented
   if the link was actually within a modal or popup.
 - When revealing an element, Up will now compute the correct element position if there are
   additional positioning contexts between the viewport and the element
-- New option "top" for `up.reveal`: Whether to scroll the viewport so that the first element row aligns with
-  the top edge of the viewport. Without this option, `up.reveal` scrolls as little as possible.
+- New option "top" for `up.reveal()`: Whether to scroll the viewport so that the first element row aligns with
+  the top edge of the viewport. Without this option, `up.reveal()` scrolls as little as possible.
 - Allow to animate scrolling when the `document` is the viewport.
 - New `up.layout` setting `fixedRight` that contains selectors for elements that are anchored to
   the right edge of the screen. When opening a modal, these elements will be prevented from jumping
@@ -836,15 +836,15 @@ Refactored internals. No API changes.
 ### Breaking changes
 
 - While following links and submitting forms will still reveal elements by default,
-  direct calls of [`up.replace`](/up.replace) no longer do.
+  direct calls of [`up.replace()`](/up.replace) no longer do.
   This behavior can be activated using the `{ reveal: true }` option.
 
 ### Compatible changes
 
 - Options to control scrolling and cache use for
-  [`up.submit`](/up.submit),
-  [`up.follow`](/up.follow),
-  [`up.visit`](/up.visit),
+  [`up.submit()`](/up.submit),
+  [`up.follow()`](/up.follow),
+  [`up.visit()`](/up.visit),
   [`form[up-target]`](/form-up-target) and
   [`a[up-target]`](/a-up-target).
 
@@ -854,7 +854,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- [`up.reveal`](/up.reveal) now only reveals the first 150 pixels of an element.
+- [`up.reveal()`](/up.reveal) now only reveals the first 150 pixels of an element.
 
 
 0.10.0
@@ -892,7 +892,7 @@ Refactored internals. No API changes.
 - Elements are now being [revealed](/up.reveal) within their viewport before they are updated
 - Elements that are prepended or appended using `:before` or `:after` pseudo-selectors are now scrolled into view after insertion.
 - New option `up.layout.defaults('snap')` lets you define a number of pixels under which Unpoly will snap to the top edge of the viewport when revealing an element
-- You can now make [`up.reveal`](/up.reveal) aware of fixed navigation bars blocking the viewport by setting new options `up.layout.defaults('fixedTop')` and `up.layout.defaults('fixedBottom')`.
+- You can now make [`up.reveal()`](/up.reveal) aware of fixed navigation bars blocking the viewport by setting new options `up.layout.defaults('fixedTop')` and `up.layout.defaults('fixedBottom')`.
 
 
 0.8.2
@@ -900,7 +900,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- [`up.reveal`](/up.reveal) can now reveal content in modals and containers with `overflow-y: scroll`.
+- [`up.reveal()`](/up.reveal) can now reveal content in modals and containers with `overflow-y: scroll`.
 - Changing the default configuration of an Unpoly module now raises an error if a config key is unknown.
 - Links linking to `"#"` are now never marked as `.up-current`.
 
@@ -1032,7 +1032,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- Rename method `up.awaken` to `up.compiler`
+- Rename method `up.awaken()` to `up.compiler()`
 
 
 0.6.2
@@ -1040,7 +1040,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- Option to have a custom HTTP method for `up.follow`
+- Option to have a custom HTTP method for `up.follow()`
 - No longer preloads links with unsafe HTTP methods
 
 

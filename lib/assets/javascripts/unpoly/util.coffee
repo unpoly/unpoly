@@ -342,7 +342,7 @@ up.util = (($) ->
 
   Note that empty strings or zero are *not* considered to be "missing".
 
-  For the opposite of `up.util.isMissing` see [`up.util.isGiven`](/up.util.isGiven).
+  For the opposite of `up.util.isMissing()` see [`up.util.isGiven()`](/up.util.isGiven).
 
   @function up.util.isMissing
   @param object
@@ -357,7 +357,7 @@ up.util = (($) ->
 
   Note that empty strings or zero *are* considered to be "given".
 
-  For the opposite of `up.util.isGiven` see [`up.util.isMissing`](/up.util.isMissing).
+  For the opposite of `up.util.isGiven()` see [`up.util.isMissing()`](/up.util.isMissing).
 
   @function up.util.isGiven
   @param object
@@ -469,7 +469,7 @@ up.util = (($) ->
   Returns whether the given argument is an object.
 
   This also returns `true` for functions, which may behave like objects in JavaScript.
-  For an alternative that returns `false` for functions, see [`up.util.isHash`](/up.util.isHash).
+  For an alternative that returns `false` for functions, see [`up.util.isHash()`](/up.util.isHash).
 
   @function up.util.isObject
   @param object
@@ -778,7 +778,7 @@ up.util = (($) ->
   Waits for the given number of milliseconds, the nruns the given callback.
 
   If the number of milliseconds is zero, the callback is run in the current execution frame.
-  See [`up.util.nextFrame`] for running a function in the next executation frame.
+  See [`up.util.nextFrame()`] for running a function in the next executation frame.
 
   @function up.util.setTimer
   @param {Number} millis
@@ -982,7 +982,7 @@ up.util = (($) ->
       return resolvedDeferred()
 
     # We don't finish an existing animation here, since the public API
-    # we expose as `up.motion.animate` already does this.
+    # we expose as `up.motion.animate()` already does this.
     deferred = $.Deferred()
 
     transitionProperties = Object.keys(lastFrame)
@@ -1045,7 +1045,7 @@ up.util = (($) ->
   
   Does nothing if the given element is not currently animating.
   
-  Also see [`up.motion.finish`](/up.motion.finish).
+  Also see [`up.motion.finish()`](/up.motion.finish).
   
   @function up.util.finishCssAnimate
   @param {Element|jQuery|String} elementOrSelector

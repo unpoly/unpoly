@@ -350,7 +350,7 @@ up.dom = (($) ->
   @param {String|Element|jQuery} selectorOrElement
   @param {String} html
   @param {Object} [options]
-    See options for [`up.replace`](/up.replace).
+    See options for [`up.replace()`](/up.replace).
   @return {Promise}
     A promise that will be resolved then the selector was updated
     and all animation has finished.
@@ -636,7 +636,7 @@ up.dom = (($) ->
   by external code.
 
   **As long as you manipulate the DOM using Unpoly, you will never
-  need to call this method.** You only need to use `up.hello` if the
+  need to call this method.** You only need to use `up.hello()` if the
   DOM is manipulated without Unpoly' involvement, e.g. by setting
   the `innerHTML` property or calling jQuery methods like
   `html`, `insertAfter` or `appendTo`:
@@ -775,7 +775,7 @@ up.dom = (($) ->
   ###*
   Destroys the given element or selector.
 
-  Takes care that all [`up.compiler`](/up.compiler) destructors, if any, are called.
+  Takes care that all [`up.compiler()`](/up.compiler) destructors, if any, are called.
 
   The element is removed from the DOM.
   Note that if you choose to animate the element removal using `options.animate`,
@@ -792,11 +792,11 @@ up.dom = (($) ->
   @param {String|Function} [options.animation='none']
     The animation to use before the element is removed from the DOM.
   @param {Number} [options.duration]
-    The duration of the animation. See [`up.animate`](/up.animate).
+    The duration of the animation. See [`up.animate()`](/up.animate).
   @param {Number} [options.delay]
-    The delay before the animation starts. See [`up.animate`](/up.animate).
+    The delay before the animation starts. See [`up.animate()`](/up.animate).
   @param {String} [options.easing]
-    The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
+    The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
   @return {Deferred}
     A promise that will be resolved once the element has been removed from the DOM.
   @stable
@@ -876,7 +876,7 @@ up.dom = (($) ->
   @function up.reload
   @param {String|Element|jQuery} selectorOrElement
   @param {Object} [options]
-    See options for [`up.replace`](/up.replace)
+    See options for [`up.replace()`](/up.replace)
   @param {String} [options.url]
     The URL from which to reload the fragment.
     This defaults to the URL from which the fragment was originally loaded.

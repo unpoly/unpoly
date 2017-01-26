@@ -201,11 +201,11 @@ up.popup = (($) ->
   @param {String} [options.animation]
     The animation to use when opening the popup.
   @param {Number} [options.duration]
-    The duration of the animation. See [`up.animate`](/up.animate).
+    The duration of the animation. See [`up.animate()`](/up.animate).
   @param {Number} [options.delay]
-    The delay before the animation starts. See [`up.animate`](/up.animate).
+    The delay before the animation starts. See [`up.animate()`](/up.animate).
   @param {String} [options.easing]
-    The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
+    The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
   @param {String} [options.method="GET"]
     Override the request method.
   @param {Boolean} [options.sticky=false]
@@ -290,7 +290,7 @@ up.popup = (($) ->
 
   @function up.popup.close
   @param {Object} options
-    See options for [`up.animate`](/up.animate).
+    See options for [`up.animate()`](/up.animate).
   @return {Promise}
     A promise that will be resolved once the modal's close
     animation has finished.

@@ -47,7 +47,7 @@ up.syntax = (($) ->
 
   \#\#\# Integrating jQuery plugins
 
-  `up.compiler` is a great way to integrate jQuery plugins.
+  `up.compiler()` is a great way to integrate jQuery plugins.
   Let's say your JavaScript plugin wants you to call `lightboxify()`
   on links that should open a lightbox. You decide to
   do this for all links with an `lightbox` class:
@@ -64,7 +64,7 @@ up.syntax = (($) ->
 
   \#\#\# Custom elements
 
-  You can use `up.compiler` to implement custom elements like this:
+  You can use `up.compiler()` to implement custom elements like this:
 
       <clock></clock>
 
@@ -141,7 +141,7 @@ up.syntax = (($) ->
       });
 
 
-  \#\#\# Migrating jQuery event handlers to `up.compiler`
+  \#\#\# Migrating jQuery event handlers to `up.compiler()`
 
   Within the compiler, Unpoly will bind `this` to the
   native DOM element to help you migrate your existing jQuery code to
@@ -191,7 +191,7 @@ up.syntax = (($) ->
     [clear global state](/up.compiler#cleaning-up-after-yourself)
     such as timeouts and event handlers bound to the document.
     The destructor is *not* expected to remove the element from the DOM, which
-    is already handled by [`up.destroy`](/up.destroy).
+    is already handled by [`up.destroy()`](/up.destroy).
 
     The function may also return an array of destructor functions.
   @stable
@@ -202,7 +202,7 @@ up.syntax = (($) ->
   ###*
   Registers a [compiler](/up.compiler) that is run before all other compilers.
 
-  You can use `up.macro` to register a compiler that sets other UJS attributes.
+  You can use `up.macro()` to register a compiler that sets other UJS attributes.
 
   \#\#\# Example
 
@@ -234,10 +234,10 @@ up.syntax = (($) ->
   @param {String} selector
     The selector to match.
   @param {Object} options
-    See options for [`up.compiler`](/up.compiler).
+    See options for [`up.compiler()`](/up.compiler).
   @param {Function($element, data)} compiler
     The function to call when a matching element is inserted.
-    See [`up.compiler`](/up.compiler) for details.
+    See [`up.compiler()`](/up.compiler) for details.
   @stable
   ###
   macro = (args...) ->
@@ -290,7 +290,7 @@ up.syntax = (($) ->
 
   ###*
   Applies all compilers on the given element and its descendants.
-  Unlike [`up.hello`](/up.hello), this doesn't emit any events.
+  Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
 
   @function up.syntax.compile
   @param {Array<Element>} [options.skip]
@@ -320,7 +320,7 @@ up.syntax = (($) ->
 
   ###*
   Runs any destroyers on the given fragment and its descendants.
-  Unlike [`up.destroy`](/up.destroy), this doesn't emit any events
+  Unlike [`up.destroy()`](/up.destroy), this doesn't emit any events
   and does not remove the element from the DOM.
 
   @function up.syntax.clean
@@ -350,7 +350,7 @@ up.syntax = (($) ->
 
       <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
 
-  Calling `up.syntax.data` will deserialize the JSON string into a JavaScript object:
+  Calling `up.syntax.data()` will deserialize the JSON string into a JavaScript object:
 
       up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
 
@@ -366,7 +366,7 @@ up.syntax = (($) ->
   ###*
   If an element annotated with [`up-data`] is inserted into the DOM,
   Up will parse the JSON and pass the resulting object to any matching
-  [`up.compiler`](/up.compiler) handlers.
+  [`up.compiler()`](/up.compiler) handlers.
 
   For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
   might attach the location and names of its marker pins:
@@ -395,7 +395,7 @@ up.syntax = (($) ->
 
   Similarly, when an event is triggered on an element annotated with
   [`up-data`], the parsed object will be passed to any matching
-  [`up.on`](/up.on) handlers.
+  [`up.on()`](/up.on) handlers.
 
       up.on('click', '.google-map', function(event, $element, pins) {
         console.log("There are %d pins on the clicked map", pins.length);
