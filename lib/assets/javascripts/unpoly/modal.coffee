@@ -268,7 +268,7 @@ up.modal = (($) ->
     if u.documentHasVerticalScrollbar()
       $body = $('body')
       scrollbarWidth = u.scrollbarWidth()
-      bodyRightPadding = parseInt($body.css('padding-right'))
+      bodyRightPadding = parseFloat($body.css('padding-right'))
       bodyRightShift = scrollbarWidth + bodyRightPadding
       unshiftBody = u.temporaryCss($body,
         'padding-right': "#{bodyRightShift}px",
@@ -277,7 +277,7 @@ up.modal = (($) ->
       state.unshifters.push(unshiftBody)
       up.layout.anchoredRight().each ->
         $element = $(this)
-        elementRight = parseInt($element.css('right'))
+        elementRight = parseFloat($element.css('right'))
         elementRightShift = scrollbarWidth + elementRight
         unshifter = u.temporaryCss($element, 'right': elementRightShift)
         state.unshifters.push(unshifter)

@@ -34,12 +34,14 @@ Unreleased
 - Fix a bug where the document title wasn't restored when the user uses the back button
 - When [revealing a page fragment](/up.reveal), Unpoly will include the element's top and bottom margin in the area that should be revealed.
 
+
 ### Breaking changes
 
 - [`up.replace()`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
 - `up.util.merge()` has been replaced by [`up.util.assign()`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
 - The `up.flow` module has been renamed to [`up.dom`](/up.dom).
 - The `up.navigation` module has been renamed to [`up.feedback`](/up.feedback).
+- Functions that measure position, dimensions or margin now return floats instead of rounded integers.
 
 
 0.32.0

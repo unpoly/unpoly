@@ -173,11 +173,11 @@ up.layout = (($) ->
       anchorPosition = $obstructor.css(cssAttr)
       unless u.isPresent(anchorPosition)
         up.fail("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr)
-      parseInt(anchorPosition) + $obstructor.height()
+      parseFloat(anchorPosition) + $obstructor.height()
 
     fixedTopBottoms = for obstructor in $(config.fixedTop.join(', '))
       measurePosition(obstructor, 'top')
-
+  
     fixedBottomTops = for obstructor in $(config.fixedBottom.join(', '))
       measurePosition(obstructor, 'bottom')
 
