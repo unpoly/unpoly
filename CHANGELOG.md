@@ -30,7 +30,7 @@ Unreleased
 
       $input = $('input.email');
       up.first('.field:has(&)', $input); // returns the .field containing $input
-
+- Fix a bug where the document title wasn't restored when the user uses the back button
 
 ### Breaking changes
 

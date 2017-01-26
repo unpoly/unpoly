@@ -151,11 +151,11 @@ up.history = (($) ->
       up.log.group "Restoring URL %s", url, ->
         popSelector = config.popTargets.join(', ')
         up.replace popSelector, url,
-          history: false,
-          title: true,
+          history: false,     # don't push a new state
+          title: true,        # do extract the title from the response
           reveal: false,
           transition: 'none',
-          saveScroll: false # since the URL was already changed by the browser, don't save scroll state
+          saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
           restoreScroll: config.restoreScroll
     else
       up.puts 'Ignoring a state not pushed by Unpoly (%o)', state

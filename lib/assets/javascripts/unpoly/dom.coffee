@@ -306,7 +306,8 @@ up.dom = (($) ->
         options.source  = 'keep'
         options.history = false
 
-    options.title = u.titleFromXhr(xhr) if shouldExtractTitle(options)
+    if shouldExtractTitle(options) && titleFromXhr = u.titleFromXhr(xhr)
+      options.title = titleFromXhr
 
     if options.preload
       u.resolvedPromise()
@@ -369,8 +370,9 @@ up.dom = (($) ->
       response = parseResponse(html)
       implantSteps = bestMatchingSteps(selectorOrElement, response, options)
 
-      options.title = response.title() if shouldExtractTitle(options)
-      updateHistory(options)
+      if shouldExtractTitle(options) && responseTitle = response.title()
+        options.title = responseTitle
+      updateHistoryAndTitle(options)
 
       swapPromises = []
       for step in implantSteps
@@ -416,10 +418,10 @@ up.dom = (($) ->
       if child = $.find(selector, htmlElement)[0]
         $(child)
 
-  updateHistory = (options) ->
+  updateHistoryAndTitle = (options) ->
     options = u.options(options, historyMethod: 'push')
     up.history[options.historyMethod](options.history) if options.history
-    document.title = options.title if options.title
+    document.title = options.title if u.isString(options.title)
 
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'
@@ -813,7 +815,7 @@ up.dom = (($) ->
       # If e.g. a modal or popup asks us to restore a URL, do this
       # before emitting `fragment:destroy`. This way up.navigate sees the
       # new URL and can assign/remove .up-current classes accordingly.
-      updateHistory(options)
+      updateHistoryAndTitle(options)
 
       animationDeferred = u.presence(options.animation, u.isDeferred) ||
         up.motion.animate($element, options.animation, animateOptions)

@@ -260,7 +260,7 @@ describe 'up.dom', ->
 
         describe 'document title', ->
 
-          it "sets the document title to a 'title' tag in the response", ->
+          it "sets the document title to the response <title>", ->
             affix('.container').text('old container text')
             up.replace('.container', '/path')
             @respondWith """
@@ -291,6 +291,45 @@ describe 'up.dom', ->
                 """
             expect($('.container')).toHaveText('new container text')
             expect(document.title).toBe('Title from header')
+
+          it "prefers the X-Up-Title header to the response <title>", ->
+            affix('.container').text('old container text')
+            up.replace('.container', '/path')
+            @respondWith
+              responseHeaders:
+                'X-Up-Title': 'Title from header'
+              responseText: """
+                <html>
+                  <head>
+                    <title>Title from HTML</title>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              """
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe('Title from header')
+
+          it "sets the document title to the response <title> with { history: false, title: true } options (bugfix)", ->
+            affix('.container').text('old container text')
+            up.replace('.container', '/path', history: false, title: true)
+            @respondWith """
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe('Title from HTML')
 
           it "does not extract the title from the response or HTTP header if history isn't updated", ->
             affix('.container').text('old container text')
