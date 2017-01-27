@@ -2,7 +2,12 @@
 Linking to fragments
 ====================
 
-Standard HTML links are a poor fit for modern applications:
+In a traditional web application, the entire page is destroyed and re-created when the
+user follows a link:
+
+![Traditional page flow](/images/tutorial/fragment_flow_vanilla.svg){:width="620px" class="picture has_border is_sepia has_padding"}
+
+This makes for an unfriendly experience:
 
 - State changes caused by AJAX updates get lost during the page transition.
 - Unsaved form changes get lost during the page transition.
@@ -12,27 +17,21 @@ Standard HTML links are a poor fit for modern applications:
 - The user sees a "flash" as the browser loads and renders the new page,
   even if large portions of the old and new page are the same (navigation, layout, etc.).
 
-Unpoly fixes this by letting you annotate  links with an [`up-target`](/a-up-target)
+Unpoly fixes this by letting you annotate links with an [`up-target`](/a-up-target)
 attribute. The value of this attribute is a CSS selector that indicates which page
-fragment to update. The rest of the page will remain unchanged.
+fragment to update. The server **still renders full HTML pages**, but we only use
+the targeted ragments and discard the rest:
+
+![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620px" class="picture has_border is_sepia has_padding"}
+
+With this model, following links feel smooth. All transient DOM changes outside the updated fragment are preserved.
+Pages also load much faster since the DOM, CSS and Javascript environments do not need to be
+destroyed and recreated for every request.
 
 
-\#\#\# Example
+## Example
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
-
-
-```
-  /pages/a                /pages/b                /pages/c
-
-+---+---+---+           +---+---+---+           +---+---+---+
-| A | B | C |           | A | B | C |           | A | B | C |
-|   +--------  (click)  +---+   +----  (click)  +---+---+   |
-|           |  ======>  |           |  ======>  |           |
-|  Page A   |           |  Page B   |           |  Page C   |
-|           |           |           |           |           |
-+-----------|           +-----------|           +-----------|
-```
 
 Your HTML could look like this:
 
@@ -65,18 +64,6 @@ With these [`up-target`](/a-up-target) annotations Unpoly only updates the targe
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
-
-\#\#\# Read on
-
-- You can [animate page transitions](/up.motion) by definining animations for fragments as they enter or leave the screen.
-- The `up-target` mechanism also works with [forms](/up.form).
-- As you switch through pages, Unpoly will [update your browser's location bar and history](/up.history)
-- You can [open fragments in popups or modal dialogs](/up.modal).
-- You can give users [immediate feedback](/up.feedback) when a link is clicked or becomes current, without waiting for the server.
-- [Controlling Unpoly pragmatically through JavaScript](/up.dom)
-- [Defining custom tags](/up.syntax)
-
-  
 @class up.link
 ###
 
@@ -305,7 +292,7 @@ up.link = (($) ->
 
       <a href="/posts/5" up-target=".main, .unread-count">Read post</a>
 
-  \#\#\# Appending or prepending instead of replacing
+  \#\#\# Appending or prepending content
 
   By default Unpoly will replace the given selector with the same
   selector from a freshly fetched page. Instead of replacing you
@@ -522,6 +509,14 @@ up.link = (($) ->
         <a class="details" href="/records/5">Details</a>
         <a class="close" href="/records">Close</a>
       </div>
+
+  \#\#\# Limitations
+
+  Users will not be able to use the expanded area to open a context menu by right clicking,
+  or to open the link in a new tab.
+  To enable this, make the entire clickable area an actual `<a>` tag.
+  [It's OK to put block elements inside an anchor tag](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
+
 
   @selector [up-expand]
   @param {String} [up-expand]

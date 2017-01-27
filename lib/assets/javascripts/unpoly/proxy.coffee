@@ -31,6 +31,13 @@ the user releases the mouse/finger.
 You can listen to the [`up:proxy:slow`](/up:proxy:slow) event to implement a spinner
 that appears during a long-running request.
 
+\#\#\# More acceleration
+
+Other Unpoly modules contain even more tricks to outsmart network latency:
+
+- [Instantaneous feedback for links that are currently loading](/up-active)
+- [Follow links on `mousedown` instead of `click`](/up-instant)
+
 @class up.proxy  
 ###
 up.proxy = (($) ->

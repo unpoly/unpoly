@@ -87,8 +87,9 @@ up.popup = (($) ->
     history: false
 
   ###*
-  Returns the source URL for the fragment displayed
-  in the current popup, or `undefined` if no  popup is open.
+  Returns the URL from which the current popup's contents were loaded.
+
+  Returns `undefined` if no  popup is open.
 
   @function up.popup.url
   @return {String}
@@ -168,6 +169,7 @@ up.popup = (($) ->
   Returns whether popup modal is currently open.
 
   @function up.popup.isOpen
+  @return {Boolean}
   @stable
   ###
   isOpen = ->
@@ -355,6 +357,8 @@ up.popup = (($) ->
 
   @methods up.popup.contains
   @param {String} elementOrSelector
+    The element to test
+  @return {Boolean}
   @stable
   ###
   contains = (elementOrSelector) ->
@@ -424,10 +428,18 @@ up.popup = (($) ->
   up.bus.onEscape(closeAsap)
 
   ###*
-  When an element with this attribute is clicked,
-  a currently open popup is closed.
+  When this element is clicked, a currently open [popup](/up.popup) is closed.
 
   Does nothing if no popup is currently open.
+
+  \#\#\# Example
+
+  Clickin on this `<span>` will close a currently open popup:
+
+      <span class='up-close'>Close this popup</span>
+
+  When a popup changes the current URL, you might need to deal with content being displayed
+  as either a popup or a full page.
 
   To make a link that closes the current popup, but follows to
   a fallback destination if no popup is open:

@@ -33,16 +33,27 @@ up.syntax = (($) ->
   Registers a function to be called whenever an element with
   the given selector is inserted into the DOM.
 
+  Use compilers to activate your custom Javascript behavior on matching
+  elements.
+
+  You should migrate your [jQuery ready callbacks](https://api.jquery.com/ready/)
+  to compilers.
+
+
+  \#\#\# Example
+
+  Let's say that any element with the `action` class should alert a message when clicked.
+  We can implement this behavior as a compiler function that is called on all elements matching
+  the `.action` selector:
+
       up.compiler('.action', function($element) {
-        // your code here
+        $element.on('click', function() {
+          alert('Action was clicked!');
+        });
       });
 
-  The functions will be called on elements matching `.action` when
-  the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
-  later.
-
-  If you have used Angular.js before, this resembles
-  [Angular directives](https://docs.angularjs.org/guide/directive).
+  The compiler function will be called once for each matching element when
+  the page loads, or when a matching fragment is [inserted](/up.replace) later.
 
 
   \#\#\# Integrating jQuery plugins

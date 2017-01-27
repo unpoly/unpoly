@@ -293,6 +293,7 @@ up.modal = (($) ->
   This also returns `true` if the modal is in an opening or closing animation.
 
   @function up.modal.isOpen
+  @return {Boolean}
   @stable
   ###
   isOpen = ->
@@ -356,7 +357,7 @@ up.modal = (($) ->
   ###*
   Opens a modal for the given URL.
 
-  Example:
+  \#\#\# Example
 
       up.modal.visit('/foo', { target: '.list' });
 
@@ -387,7 +388,7 @@ up.modal = (($) ->
   [Extracts](/up.extract) the given CSS selector from the given HTML string and
   opens the results in a modal.
 
-  Example:
+  \#\#\# Example
 
       var html = 'before <div class="content">inner</div> after';
       up.modal.extract('.content', html);
@@ -601,6 +602,8 @@ up.modal = (($) ->
 
   @function up.modal.contains
   @param {String} elementOrSelector
+    The element to test
+  @return {Boolean}
   @stable
   ###
   contains = (elementOrSelector) ->

@@ -571,9 +571,12 @@ up.form = (($) ->
     submit($form)
 
   ###*
-  When a form field with this attribute is changed,
-  the form is validated on the server and is updated with
-  validation messages.
+  When a form field with this attribute is changed, the form is validated on the server
+  and is updated with validation messages.
+
+  To validate the form, Unpoly will submit the form with an additional `X-Up-Validate` HTTP header.
+  When seeing this header, the server is expected to validate (but not save)
+  the form submission and render a new copy of the form with validation errors.
 
   The programmatic variant of this is the [`up.validate()`](/up.validate) function.
 
@@ -616,7 +619,7 @@ up.form = (($) ->
 
   Whenever a field with `up-validate` changes, the form is POSTed to
   `/users` with an additional `X-Up-Validate` HTTP header.
-  Upon seeing this header, the server is expected to validate (but not save)
+  When seeing this header, the server is expected to validate (but not save)
   the form submission and render a new copy of the form with validation errors.
 
   In Ruby on Rails the processing action should behave like this:
