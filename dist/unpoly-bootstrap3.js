@@ -19,7 +19,7 @@
 
 }).call(this);
 (function() {
-  up.navigation.config.currentClasses.push('active');
+  up.feedback.config.currentClasses.push('active');
 
 }).call(this);
 (function() {

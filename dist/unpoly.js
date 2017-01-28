@@ -1,15 +1,19 @@
+
+/**
+@module up
+ */
+
 (function() {
-  var world;
-
-  world = typeof global !== 'undefined' ? global : this;
-
-
-  /**
-  @module up
-   */
-
-  world.up = {
-    version: "0.32.0"
+  this.up = {
+    version: "0.33.0",
+    renamedModule: function(oldName, newName) {
+      return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
+        get: function() {
+          up.log.warn("up." + oldName + " has been renamed to up." + newName);
+          return up[newName];
+        }
+      }) : void 0;
+    }
   };
 
 }).call(this);
@@ -26,6 +30,7 @@ that might save you from loading something like [Underscore.js](http://underscor
 
 (function() {
   var slice = [].slice,
+    hasProp = {}.hasOwnProperty,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   up.util = (function($) {
@@ -36,10 +41,16 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extend, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isStandardPort, isString, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, margins, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
+    Ensures that the given function can only be called a single time.
+    Subsequent calls will return the return value of the first call.
+    
+    Note that this is a simple implementation that
+    doesn't distinguish between argument lists.
+    
     @function up.util.memoize
     @internal
      */
@@ -294,16 +305,29 @@ that might save you from loading something like [Underscore.js](http://underscor
         return createElement('div', html);
       }
     };
+    assignPolyfill = function() {
+      var i, key, len, source, sources, target, value;
+      target = arguments[0], sources = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      for (i = 0, len = sources.length; i < len; i++) {
+        source = sources[i];
+        for (key in source) {
+          if (!hasProp.call(source, key)) continue;
+          value = source[key];
+          target[key] = value;
+        }
+      }
+      return target;
+    };
 
     /**
-    Merge the contents of two or more objects together into the first object.
+    Merge the own properties of one or more `sources` into the `target` object.
     
-    @function up.util.extend
+    @function up.util.assign
     @param {Object} target
     @param {Array<Object>} sources...
     @stable
      */
-    extend = $.extend;
+    assign = Object.assign || assignPolyfill;
 
     /**
     Returns a new string with whitespace removed from the beginning
@@ -408,7 +432,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     Note that empty strings or zero are *not* considered to be "missing".
     
-    For the opposite of `up.util.isMissing` see [`up.util.isGiven`](/up.util.isGiven).
+    For the opposite of `up.util.isMissing()` see [`up.util.isGiven()`](/up.util.isGiven).
     
     @function up.util.isMissing
     @param object
@@ -424,7 +448,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     Note that empty strings or zero *are* considered to be "given".
     
-    For the opposite of `up.util.isGiven` see [`up.util.isMissing`](/up.util.isMissing).
+    For the opposite of `up.util.isGiven()` see [`up.util.isMissing()`](/up.util.isMissing).
     
     @function up.util.isGiven
     @param object
@@ -546,7 +570,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     Returns whether the given argument is an object.
     
     This also returns `true` for functions, which may behave like objects in JavaScript.
-    For an alternative that returns `false` for functions, see [`up.util.isHash`](/up.util.isHash).
+    For an alternative that returns `false` for functions, see [`up.util.isHash()`](/up.util.isHash).
     
     @function up.util.isObject
     @param object
@@ -659,7 +683,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       if (isArray(object)) {
         return object.slice();
       } else if (isHash(object)) {
-        return extend({}, object);
+        return assign({}, object);
       }
     };
 
@@ -690,7 +714,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     merge = function() {
       var sources;
       sources = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      return extend.apply(null, [{}].concat(slice.call(sources)));
+      return assign.apply(null, [{}].concat(slice.call(sources)));
     };
 
     /**
@@ -918,7 +942,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     Waits for the given number of milliseconds, the nruns the given callback.
     
     If the number of milliseconds is zero, the callback is run in the current execution frame.
-    See [`up.util.nextFrame`] for running a function in the next executation frame.
+    See [`up.util.nextFrame()`] for running a function in the next executation frame.
     
     @function up.util.setTimer
     @param {Number} millis
@@ -1128,7 +1152,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     cssAnimate = function(elementOrSelector, lastFrame, opts) {
-      var $element, deferred, oldTransition, onTransitionEnd, transition, transitionFinished, transitionProperties, withoutCompositing;
+      var $element, deferred, oldTransition, onTransitionEnd, transition, transitionProperties, withoutCompositing;
       $element = $(elementOrSelector);
       opts = options(opts, {
         duration: 300,
@@ -1148,27 +1172,18 @@ that might save you from loading something like [Underscore.js](http://underscor
         'transition-timing-function': opts.easing
       };
       oldTransition = $element.css(Object.keys(transition));
-      $element.addClass('up-animating');
-      transitionFinished = function() {
-        $element.removeClass('up-animating');
-        return $element.off('transitionend', onTransitionEnd);
-      };
       onTransitionEnd = function(event) {
         var completedProperty;
         completedProperty = event.originalEvent.propertyName;
         if (contains(transitionProperties, completedProperty)) {
-          deferred.resolve();
-          return transitionFinished();
+          return deferred.resolve();
         }
       };
       $element.on('transitionend', onTransitionEnd);
-      deferred.then(transitionFinished);
-      withoutCompositing = forceCompositing($element);
-      $element.css(transition);
-      $element.css(lastFrame);
-      $element.data(ANIMATION_DEFERRED_KEY, deferred);
       deferred.then(function() {
         var hadTransitionBefore;
+        $element.removeClass('up-animating');
+        $element.off('transitionend', onTransitionEnd);
         $element.removeData(ANIMATION_DEFERRED_KEY);
         withoutCompositing();
         $element.css({
@@ -1180,6 +1195,11 @@ that might save you from loading something like [Underscore.js](http://underscor
           return $element.css(oldTransition);
         }
       });
+      $element.addClass('up-animating');
+      withoutCompositing = forceCompositing($element);
+      $element.css(transition);
+      $element.data(ANIMATION_DEFERRED_KEY, deferred);
+      $element.css(lastFrame);
       return deferred;
     };
     ANIMATION_DEFERRED_KEY = 'up-animation-deferred';
@@ -1191,7 +1211,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     Does nothing if the given element is not currently animating.
     
-    Also see [`up.motion.finish`](/up.motion.finish).
+    Also see [`up.motion.finish()`](/up.motion.finish).
     
     @function up.util.finishCssAnimate
     @param {Element|jQuery|String} elementOrSelector
@@ -1207,16 +1227,32 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
+    @internal
+     */
+    margins = function(selectorOrElement) {
+      var $element, withUnits;
+      $element = $(selectorOrElement);
+      withUnits = $element.css(['margin-top', 'margin-right', 'margin-bottom', 'margin-left']);
+      return {
+        top: parseFloat(withUnits['margin-top']),
+        right: parseFloat(withUnits['margin-right']),
+        bottom: parseFloat(withUnits['margin-bottom']),
+        left: parseFloat(withUnits['margin-left'])
+      };
+    };
+
+    /**
     Measures the given element.
     
     @function up.util.measure
     @internal
      */
     measure = function($element, opts) {
-      var $context, box, contextCoords, coordinates, elementCoords;
+      var $context, box, contextCoords, coordinates, elementCoords, mgs;
       opts = options(opts, {
         relative: false,
-        inner: false
+        inner: false,
+        includeMargin: false
       });
       if (opts.relative) {
         if (opts.relative === true) {
@@ -1247,6 +1283,13 @@ that might save you from loading something like [Underscore.js](http://underscor
       } else {
         box.width = $element.outerWidth();
         box.height = $element.outerHeight();
+      }
+      if (opts.includeMargin) {
+        mgs = margins($element);
+        box.left -= mgs.left;
+        box.top -= mgs.top;
+        box.height += mgs.top + mgs.bottom;
+        box.width += mgs.left + mgs.right;
       }
       return box;
     };
@@ -1412,13 +1455,16 @@ that might save you from loading something like [Underscore.js](http://underscor
     already resolved.
     
     @function up.util.resolvedDeferred
+    @param {Array<Object>} [args...]
+      The resolution values that will be passed to callbacks
     @return {Deferred}
     @stable
      */
     resolvedDeferred = function() {
-      var deferred;
+      var args, deferred;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       deferred = $.Deferred();
-      deferred.resolve();
+      deferred.resolve.apply(deferred, args);
       return deferred;
     };
 
@@ -1426,11 +1472,52 @@ that might save you from loading something like [Underscore.js](http://underscor
     Returns a promise that is already resolved.
     
     @function up.util.resolvedPromise
+    @param {Array<Object>} [args...]
+      The resolution values that will be passed to callbacks
     @return {Promise}
     @stable
      */
     resolvedPromise = function() {
-      return resolvedDeferred().promise();
+      var args;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      return resolvedDeferred.apply(null, args).promise();
+    };
+
+    /**
+    Returns a promise that is already rejected.
+    
+    @function up.util.rejectedPromise
+    @param {Array<Object>} [args...]
+      The rejection values that will be passed to callbacks
+    @return {Promise}
+    @stable
+     */
+    rejectedPromise = function() {
+      var args, deferred;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      deferred = $.Deferred();
+      deferred.reject.apply(deferred, args);
+      return deferred.promise();
+    };
+
+    /**
+    Returns whether the given argument is a resolved jQuery promise.
+    
+    @return {Boolean}
+    @internal
+     */
+    isResolvedPromise = function(promise) {
+      return isPromise(promise) && (typeof promise.state === "function" ? promise.state() : void 0) === 'resolved';
+    };
+
+    /**
+    Returns whether the given argument is a resolved jQuery promise.
+    
+    @return {Boolean}
+    @internal
+     */
+    isResolvedPromise = function(promise) {
+      return isPromise(promise) && (typeof promise.state === "function" ? promise.state() : void 0) === 'resolved';
     };
 
     /**
@@ -1789,7 +1876,7 @@ that might save you from loading something like [Underscore.js](http://underscor
         if (isFunction(newOptions)) {
           newOptions = newOptions();
         }
-        return extend(hash, newOptions);
+        return assign(hash, newOptions);
       };
       hash.reset();
       return hash;
@@ -2274,6 +2361,33 @@ that might save you from loading something like [Underscore.js](http://underscor
       $insertion.replaceWith($new);
       return $old;
     };
+
+    /**
+    Flattens the given `array` a single level deep.
+    
+    @function up.util.flatten
+    @param {Array} array
+      An array which might contain other arrays
+    @return {Array}
+      The flattened array
+    @internal
+     */
+    flatten = function(array) {
+      var flattened, i, len, object;
+      flattened = [];
+      for (i = 0, len = array.length; i < len; i++) {
+        object = array[i];
+        if (isArray(object)) {
+          flattened = flattened.concat(object);
+        } else {
+          flattened.push(object);
+        }
+      }
+      return flattened;
+    };
+    isTruthy = function(object) {
+      return !!object;
+    };
     return {
       isDetached: isDetached,
       requestDataAsArray: requestDataAsArray,
@@ -2292,7 +2406,8 @@ that might save you from loading something like [Underscore.js](http://underscor
       $createElementFromSelector: $createElementFromSelector,
       $createPlaceholder: $createPlaceholder,
       selectorForElement: selectorForElement,
-      extend: extend,
+      assign: assign,
+      assignPolyfill: assignPolyfill,
       copy: copy,
       merge: merge,
       options: options,
@@ -2325,6 +2440,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       isElement: isElement,
       isJQuery: isJQuery,
       isPromise: isPromise,
+      isResolvedPromise: isResolvedPromise,
       isDeferred: isDeferred,
       isHash: isHash,
       isArray: isArray,
@@ -2357,6 +2473,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       unresolvableDeferred: unresolvableDeferred,
       unresolvablePromise: unresolvablePromise,
       resolvedPromise: resolvedPromise,
+      rejectedPromise: rejectedPromise,
       resolvedDeferred: resolvedDeferred,
       resolvableWhen: resolvableWhen,
       setMissingAttrs: setMissingAttrs,
@@ -2386,7 +2503,9 @@ that might save you from loading something like [Underscore.js](http://underscor
       previewable: previewable,
       evalOption: evalOption,
       horizontalScreenHalf: horizontalScreenHalf,
-      detachWith: detachWith
+      detachWith: detachWith,
+      flatten: flatten,
+      isTruthy: isTruthy
     };
   })($);
 
@@ -2395,11 +2514,20 @@ that might save you from loading something like [Underscore.js](http://underscor
 }).call(this);
 
 /**
-Browser interface
-=================
+Browser support
+===============
 
-Some browser-interfacing methods and switches that
-we can't currently get rid off.
+Unpoly supports all modern browsers. It degrades gracefully with old versions of Internet Explorer:
+
+IE 10, IE11, Edge
+: Full support
+
+IE 9
+: Page updates that change browser history fall back to a classic page load.
+
+IE 8
+: Unpoly prevents itself from booting itself, leaving you with a classic server-side application.
+
 
 @class up.browser
  */
@@ -2583,7 +2711,7 @@ we can't currently get rid off.
     via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
     
     When Unpoly is asked to change history on a browser that doesn't support
-    `pushState` (e.g. through [`up.follow`](/up.follow)), it will gracefully
+    `pushState` (e.g. through [`up.follow()`](/up.follow)), it will gracefully
     fall back to a full page load.
     
     @function up.browser.canPushState
@@ -2599,7 +2727,7 @@ we can't currently get rid off.
     [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions).
     
     When Unpoly is asked to animate history on a browser that doesn't support
-    CSS transitions (e.g. through [`up.animate`](/up.animate)), it will skip the
+    CSS transitions (e.g. through [`up.animate()`](/up.animate)), it will skip the
     animation by instantly jumping to the last frame.
     
     @function up.browser.canCssTransition
@@ -2785,7 +2913,7 @@ A better way to bind event listeners
 ------------------------------------
 
 Instead of using jQuery to bind  an event handler to `document`, you can also
-use the more convenient [`up.on`](/up.on):
+use the more convenient [`up.on()`](/up.on):
 
     up.on('click', 'button', function(event, $button) {
       // $button is a jQuery collection containing
@@ -2830,7 +2958,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     };
 
     /**
-    Converts an argument list for `up.on` to an argument list for `jQuery.on`.
+    Converts an argument list for `up.on()` to an argument list for `jQuery.on`.
     This involves rewriting the listener signature in the last argument slot.
     
     @function upDescriptionToJqueryDescription
@@ -2888,7 +3016,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     
     \#\#\# Unbinding an event listener
     
-    `up.on` returns a function that unbinds the event listeners when called:
+    `up.on()` returns a function that unbinds the event listeners when called:
     
         // Define the listener
         var listener =  function() { ... };
@@ -2899,7 +3027,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
         // Unbind the listener
         unbind()
     
-    There is also a function [`up.off`](/up.off) which you can use for the same purpose:
+    There is also a function [`up.off()`](/up.off) which you can use for the same purpose:
     
         // Define the listener
         var listener =  function() { ... };
@@ -2910,7 +3038,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
         // Unbind the listener
         up.off('click', listener)
     
-    \#\#\# Migrating jQuery event handlers to `up.on`
+    \#\#\# Migrating jQuery event handlers to `up.on()`
     
     Within the event handler, Unpoly will bind `this` to the
     native DOM element to help you migrate your existing jQuery code to
@@ -2922,7 +3050,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
           $(this).something();
         });
     
-    ... you can simply copy the event handler to `up.on`:
+    ... you can simply copy the event handler to `up.on()`:
     
         up.on('click', '.button', function() {
           $(this).something();
@@ -2959,7 +3087,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     };
 
     /**
-    Unbinds an event listener previously bound with [`up.on`](/up.on).
+    Unbinds an event listener previously bound with [`up.on()`](/up.on).
     
     \#\#\# Example
     
@@ -2972,8 +3100,8 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     
         up.off('click', '.button', listener);
     
-    Note that you need to pass `up.off` a reference to the same listener function
-    that was passed to `up.on` earlier.
+    Note that you need to pass `up.off()` a reference to the same listener function
+    that was passed to `up.on()` earlier.
     
     @function up.off
     @stable
@@ -3005,7 +3133,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     The event will be triggered as a jQuery event on `document`.
     
     Other code can subscribe to events with that name using
-    [`up.on`](/up.on) or by [binding a jQuery event listener](http://api.jquery.com/on/) to `document`.
+    [`up.on()`](/up.on) or by [binding a jQuery event listener](http://api.jquery.com/on/) to `document`.
     
     \#\#\# Example
     
@@ -3111,7 +3239,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     @param {Object} eventProps
     @param {String|Array} [eventProps.message]
     @return {Promise}
-    @experimental
+    @internal
      */
     whenEmitted = function() {
       var args, deferred;
@@ -3170,7 +3298,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 
     /**
     Makes a snapshot of the currently registered event listeners,
-    to later be restored through [`up.bus.reset`](/up.bus.reset).
+    to later be restored through [`up.bus.reset()`](/up.bus.reset).
     
     @internal
      */
@@ -3358,7 +3486,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     /**
     Prints a debugging message to the browser console.
     
-    @function up.debug
+    @function up.log.debug
     @param {String} message
     @param {Array} args...
     @internal
@@ -3394,7 +3522,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     warn = function() {
       var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      if (config.enabled && message) {
+      if (message) {
         return b.puts.apply(b, ['warn', prefix(message)].concat(slice.call(args)));
       }
     };
@@ -3606,21 +3734,32 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     Registers a function to be called whenever an element with
     the given selector is inserted into the DOM.
     
+    Use compilers to activate your custom Javascript behavior on matching
+    elements.
+    
+    You should migrate your [jQuery ready callbacks](https://api.jquery.com/ready/)
+    to compilers.
+    
+    
+    \#\#\# Example
+    
+    Let's say that any element with the `action` class should alert a message when clicked.
+    We can implement this behavior as a compiler function that is called on all elements matching
+    the `.action` selector:
+    
         up.compiler('.action', function($element) {
-          // your code here
+          $element.on('click', function() {
+            alert('Action was clicked!');
+          });
         });
     
-    The functions will be called on elements matching `.action` when
-    the page loads, or whenever a matching fragment is [updated through Unpoly](/up.replace)
-    later.
-    
-    If you have used Angular.js before, this resembles
-    [Angular directives](https://docs.angularjs.org/guide/directive).
+    The compiler function will be called once for each matching element when
+    the page loads, or when a matching fragment is [inserted](/up.replace) later.
     
     
     \#\#\# Integrating jQuery plugins
     
-    `up.compiler` is a great way to integrate jQuery plugins.
+    `up.compiler()` is a great way to integrate jQuery plugins.
     Let's say your JavaScript plugin wants you to call `lightboxify()`
     on links that should open a lightbox. You decide to
     do this for all links with an `lightbox` class:
@@ -3637,7 +3776,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
     \#\#\# Custom elements
     
-    You can use `up.compiler` to implement custom elements like this:
+    You can use `up.compiler()` to implement custom elements like this:
     
         <clock></clock>
     
@@ -3714,7 +3853,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
         });
     
     
-    \#\#\# Migrating jQuery event handlers to `up.compiler`
+    \#\#\# Migrating jQuery event handlers to `up.compiler()`
     
     Within the compiler, Unpoly will bind `this` to the
     native DOM element to help you migrate your existing jQuery code to
@@ -3728,9 +3867,9 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
           });
         });
     
-    ... you can reuse the event handler like this:
+    ... you can reuse the callback function like this:
     
-        $('.action').compiler(function($element) {
+        up.compiler('.action', function($element) {
           $element.on('click', function() {
             $(this).something();
           });
@@ -3764,7 +3903,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       [clear global state](/up.compiler#cleaning-up-after-yourself)
       such as timeouts and event handlers bound to the document.
       The destructor is *not* expected to remove the element from the DOM, which
-      is already handled by [`up.destroy`](/up.destroy).
+      is already handled by [`up.destroy()`](/up.destroy).
     
       The function may also return an array of destructor functions.
     @stable
@@ -3778,7 +3917,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     /**
     Registers a [compiler](/up.compiler) that is run before all other compilers.
     
-    You can use `up.macro` to register a compiler that sets other UJS attributes.
+    You can use `up.macro()` to register a compiler that sets other UJS attributes.
     
     \#\#\# Example
     
@@ -3810,10 +3949,10 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @param {String} selector
       The selector to match.
     @param {Object} options
-      See options for [`up.compiler`](/up.compiler).
+      See options for [`up.compiler()`](/up.compiler).
     @param {Function($element, data)} compiler
       The function to call when a matching element is inserted.
-      See [`up.compiler`](/up.compiler) for details.
+      See [`up.compiler()`](/up.compiler) for details.
     @stable
      */
     macro = function() {
@@ -3889,7 +4028,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
 
     /**
     Applies all compilers on the given element and its descendants.
-    Unlike [`up.hello`](/up.hello), this doesn't emit any events.
+    Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
     
     @function up.syntax.compile
     @param {Array<Element>} [options.skip]
@@ -3942,7 +4081,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
 
     /**
     Runs any destroyers on the given fragment and its descendants.
-    Unlike [`up.destroy`](/up.destroy), this doesn't emit any events
+    Unlike [`up.destroy()`](/up.destroy), this doesn't emit any events
     and does not remove the element from the DOM.
     
     @function up.syntax.clean
@@ -3976,7 +4115,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
         <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
     
-    Calling `up.syntax.data` will deserialize the JSON string into a JavaScript object:
+    Calling `up.syntax.data()` will deserialize the JSON string into a JavaScript object:
     
         up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
     
@@ -3992,7 +4131,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     /**
     If an element annotated with [`up-data`] is inserted into the DOM,
     Up will parse the JSON and pass the resulting object to any matching
-    [`up.compiler`](/up.compiler) handlers.
+    [`up.compiler()`](/up.compiler) handlers.
     
     For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
     might attach the location and names of its marker pins:
@@ -4021,7 +4160,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
     Similarly, when an event is triggered on an element annotated with
     [`up-data`], the parsed object will be passed to any matching
-    [`up.on`](/up.on) handlers.
+    [`up.on()`](/up.on) handlers.
     
         up.on('click', '.google-map', function(event, $element, pins) {
           console.log("There are %d pins on the clicked map", pins.length);
@@ -4128,8 +4267,8 @@ We need to work on this page:
     Returns the previous URL in the browser history.
     
     Note that this will only work reliably for history changes that
-    were applied by [`up.history.push`](/up.history.replace) or
-    [`up.history.replace`](/up.history.replace).
+    were applied by [`up.history.push()`](/up.history.replace) or
+    [`up.history.replace()`](/up.history.replace).
     
     @function up.history.previousUrl
     @internal
@@ -4175,8 +4314,8 @@ We need to work on this page:
     Unpoly will [`replace`](/up.replace) the document body with
     the body from that URL.
     
-    Note that functions like [`up.replace`](/up.replace) or
-    [`up.submit`](/up.submit) will automatically update the
+    Note that functions like [`up.replace()`](/up.replace) or
+    [`up.submit()`](/up.submit) will automatically update the
     browser's location bar for you.
     
     @function up.history.replace
@@ -4195,8 +4334,8 @@ We need to work on this page:
     Unpoly will [`replace`](/up.replace) the document body with
     the body from that URL.
     
-    Note that functions like [`up.replace`](/up.replace) or
-    [`up.submit`](/up.submit) will automatically update the
+    Note that functions like [`up.replace()`](/up.replace) or
+    [`up.submit()`](/up.submit) will automatically update the
     browser's location bar for you.
     
     Emits events [`up:history:push`](/up:history:push) and [`up:history:pushed`](/up:history:pushed).
@@ -4352,9 +4491,6 @@ We need to work on this page:
     up.on('up:framework:reset', reset);
     return {
       config: config,
-      defaults: function() {
-        return up.fail('up.history.defaults(...) no longer exists. Set values on he up.history.config property instead.');
-      },
       push: push,
       replace: replace,
       url: currentUrl,
@@ -4405,12 +4541,15 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @param {Array} [config.fixedTop]
       An array of CSS selectors that find elements fixed to the
       top edge of the screen (using `position: fixed`).
+      See [`[up-fixed="top"]`](/up-fixed-top) for details.
     @param {Array} [config.fixedBottom]
       An array of CSS selectors that find elements fixed to the
       bottom edge of the screen (using `position: fixed`).
+      See [`[up-fixed="bottom"]`](/up-fixed-bottom) for details.
     @param {Array} [config.anchoredRight]
       An array of CSS selectors that find elements anchored to the
-      right edge of the screen (using `position: fixed` or `position: absolute`).
+      right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
+      See [`[up-anchored="right"]`](/up-anchored-right) for details.
     @param {Number} [config.duration=0]
       The duration of the scrolling animation in milliseconds.
       Setting this to `0` will disable scrolling animations.
@@ -4466,7 +4605,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
           duration: 250
         });
     
-    If the given viewport is already in a scroll animation when `up.scroll`
+    If the given viewport is already in a scroll animation when `up.scroll()`
     is called a second time, the previous animation will instantly jump to the
     last frame before the next animation is started.
     
@@ -4548,7 +4687,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         if (!u.isPresent(anchorPosition)) {
           up.fail("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr);
         }
-        return parseInt(anchorPosition) + $obstructor.height();
+        return parseFloat(anchorPosition) + $obstructor.height();
       };
       fixedTopBottoms = (function() {
         var i, len, ref, results;
@@ -4581,7 +4720,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     element are visible for the user.
     
     By default Unpoly will always reveal an element before
-    updating it with JavaScript functions like [`up.replace`](/up.replace)
+    updating it with JavaScript functions like [`up.replace()`](/up.replace)
     or UJS behavior like [`[up-target]`](/a-up-target).
     
     \#\#\# How Unpoly finds the viewport
@@ -4599,9 +4738,9 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     Many applications have a navigation bar fixed to the top or bottom,
     obstructing the view on an element.
     
-    You can make `up.reveal` aware of these fixed elements
+    You can make `up.reveal()` aware of these fixed elements
     so it can scroll the viewport far enough so the revealed element is fully visible.
-    To make `up.reveal` aware fixed elements you can either:
+    To make `up.reveal()` aware fixed elements you can either:
     
     - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
     - [configure default options](/up.layout.config) for `fixedTop` or `fixedBottom`
@@ -4649,7 +4788,8 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         return newScrollPos + viewportHeight - obstruction.bottom - 1;
       };
       elementDims = u.measure($element, {
-        relative: $viewport
+        relative: $viewport,
+        includeMargin: true
       });
       firstElementRow = elementDims.top + offsetShift;
       lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1;
@@ -4878,7 +5018,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     instead of scrolling `<body>`. As an alternative you can also push a selector
     matching your custom viewport to the [`up.layout.config.viewports`](/up.layout.config) array.
     
-    [`up.reveal`](/up.reveal) will always try to scroll the viewport closest
+    [`up.reveal()`](/up.reveal) will always try to scroll the viewport closest
     to the element that is being revealed. By default this is the `<body>` element.
     
     \#\#\# Example
@@ -4925,11 +5065,16 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
      */
 
     /**
-    Marks this element as a navigation fixed to the top edge of the screen
+    Marks this element as being fixed to the top edge of the screen
     using `position: fixed`.
     
-    [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
-    the viewport far enough so the revealed element is fully visible.
+    When [following a fragment link](/a-up-target), the viewport is scrolled
+    so the targeted element becomes visible. By using this attribute you can make
+    Unpoly aware of fixed elements that are obstructing the viewport contents.
+    Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
+    
+    Instead of using this attribute,
+    you can also configure a selector in [`up.layout.config.fixedTop`](/up.layout.config#fixedTop).
     
     \#\#\# Example
     
@@ -4940,11 +5085,16 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
      */
 
     /**
-    Marks this element as a navigation fixed to the bottom edge of the screen
+    Marks this element as being fixed to the bottom edge of the screen
     using `position: fixed`.
     
-    [`up.reveal`](/up.reveal) is aware of fixed elements and will scroll
-    the viewport far enough so the revealed element is fully visible.
+    When [following a fragment link](/a-up-target), the viewport is scrolled
+    so the targeted element becomes visible. By using this attribute you can make
+    Unpoly aware of fixed elements that are obstructing the viewport contents.
+    Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
+    
+    Instead of using this attribute,
+    you can also configure a selector in [`up.layout.config.fixedBottom`](/up.layout.config#fixedBottom).
     
     \#\#\# Example
     
@@ -4955,15 +5105,35 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
      */
 
     /**
-    Marks this element as a navigation anchored to the right edge of the screen
-    using `position: fixed` or `position:absolute`.
+    Marks this element as being anchored to the right edge of the screen,
+    typically fixed navigation bars.
     
-    [`up.modal`](/up.modal) will move anchored elements to the left so they
-    don't appear to move when a modal dialog is opened or closed.
+    Since [modal dialogs](/up.modal) hide the document scroll bar,
+    elements anchored to the right appear to jump when the dialog opens or
+    closes. Applying this attribute to anchored elements will make Unpoly
+    aware of the issue and adjust the `right` property accordingly.
+    
+    You should give this attribute to layout elements
+    with a CSS of `right: 0` with `position: fixed` or `position:absolute`.
+    
+    Instead of giving this attribute to any affected element,
+    you can also configure a selector in [`up.layout.config.anchoredRight`](/up.layout.config#anchoredRight).
     
     \#\#\# Example
     
-        <div class="bottom-nav" up-fixed="bottom">...</div>
+    Here is the CSS for a navigation bar that is anchored to the top edge of the screen:
+    
+        .top-nav {
+           position: fixed;
+           top: 0;
+           left: 0;
+           right: 0;
+         }
+    
+    By adding an `up-anchored="right"` attribute to the element, we can prevent the
+    `right` edge from jumping when a [modal dialog](/up.modal) opens or closes:
+    
+        <div class="top-nav" up-anchored="right">...</div>
     
     @selector [up-anchored=right]
     @stable
@@ -4975,9 +5145,6 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       scroll: scroll,
       finishScrolling: finishScrolling,
       config: config,
-      defaults: function() {
-        return up.fail('up.layout.defaults(...) no longer exists. Set values on he up.layout.config property instead.');
-      },
       viewportOf: viewportOf,
       viewportsWithin: viewportsWithin,
       viewports: viewports,
@@ -5000,32 +5167,40 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
 Fragment update API
 ===================
   
-This module contains Unpoly's core functions to [change](/up.replace) or
-[destroy](/up.destroy) page fragments via JavaScript.
+This module exposes a low-level Javascript API to [change](/up.replace) or
+[destroy](/up.destroy) page fragments.
 
-Other Unpoly modules (like [`up.link`](/up.link) or [`up.modal`](/up.modal))
-build upon this module to offer higher level API functions.
-  
-@class up.flow
+Most of Unpoly's functionality (like [fragment links](/up.link) or [modals](/up.modal))
+is built from these functions. You can use them to extend Unpoly from your
+[custom Javascript](/up.syntax).
+
+@class up.dom
  */
 
 (function() {
-  up.flow = (function($) {
-    var autofocus, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, findOldFragment, first, firstInLayer, firstInPriority, hello, isRealElement, layerOf, matchesLayer, oldFragmentNotFound, parseImplantSteps, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, source, swapElements, transferKeepableElements, u, updateHistory;
+  up.dom = (function($) {
+    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, first, firstInLayer, firstInPriority, hello, isRealElement, layerOf, matchesLayer, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, source, swapBody, swapElements, transferKeepableElements, u, updateHistoryAndTitle;
     u = up.util;
 
     /**
     Configures defaults for fragment insertion.
     
-    @property up.flow.config
+    @property up.dom.config
     @param {Boolean} [options.runInlineScripts=true]
       Whether inline `<script>` tags inside inserted HTML fragments will be executed.
     @param {Boolean} [options.runLinkedScripts=false]
       Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
       the linked JavaScript file.
+    @param {String} [options.fallbacks=['body']]
+      When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
+      The first selector that matches an element in the current page (or response) will be used.
+    @param {String} [options.fallbackTransition='none']
+      The transition to use when using a fallback target.
     @stable
      */
     config = u.config({
+      fallbacks: ['body'],
+      fallbackTransition: 'none',
       runInlineScripts: true,
       runLinkedScripts: false
     });
@@ -5044,7 +5219,7 @@ build upon this module to offer higher level API functions.
     /**
     Returns the URL the given element was retrieved from.
     
-    @method up.flow.source
+    @method up.dom.source
     @param {String|Element|jQuery} selectorOrElement
     @experimental
      */
@@ -5058,7 +5233,7 @@ build upon this module to offer higher level API functions.
     Resolves the given selector (which might contain `&` references)
     to an absolute selector.
     
-    @function up.flow.resolveSelector
+    @function up.dom.resolveSelector
     @param {String|Element|jQuery} selectorOrElement
     @param {String|Element|jQuery} origin
       The element that this selector resolution is relative to.
@@ -5070,11 +5245,11 @@ build upon this module to offer higher level API functions.
       if (u.isString(selectorOrElement)) {
         selector = selectorOrElement;
         if (u.contains(selector, '&')) {
-          if (origin) {
+          if (u.isPresent(origin)) {
             originSelector = u.selectorForElement(origin);
             selector = selector.replace(/\&/, originSelector);
           } else {
-            up.fail("Found origin reference (%s) in selector %s, but options.origin is missing", '&', selector);
+            up.fail("Found origin reference (%s) in selector %s, but no origin was given", '&', selector);
           }
         }
       } else {
@@ -5168,6 +5343,8 @@ build upon this module to offer higher level API functions.
       The URL to fetch from the server.
     @param {String} [options.failTarget='body']
       The CSS selector to update if the server sends a non-200 status code.
+    @param {String} [options.fallback]
+      The selector to update when the original target was not found in the page.
     @param {String} [options.title]
       The document title after the replacement.
     
@@ -5217,23 +5394,32 @@ build upon this module to offer higher level API functions.
       same layer as the element that triggered the replacement (see `options.origin`).
       If that element is not known, or no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
+    
     @return {Promise}
       A promise that will be resolved when the page has been updated.
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var failTarget, onFailure, onSuccess, promise, request, target;
-      up.puts("Replacing %s from %s (%o)", selectorOrElement, url, options);
+      var failTarget, failureOptions, onFailure, onSuccess, promise, request, successOptions, target;
       options = u.options(options);
-      target = resolveSelector(selectorOrElement, options.origin);
-      failTarget = u.option(options.failTarget, 'body');
-      failTarget = resolveSelector(failTarget, options.origin);
       if (!up.browser.canPushState() && options.history !== false) {
         if (!options.preload) {
           up.browser.loadPage(url, u.only(options, 'method', 'data'));
         }
         return u.unresolvablePromise();
       }
+      options.inspectResponse = function() {
+        return up.browser.loadPage(url, u.only(options, 'method', 'data'));
+      };
+      successOptions = u.merge(options, {
+        humanizedTarget: 'target'
+      });
+      failureOptions = u.merge(options, {
+        humanizedTarget: 'failure target',
+        provideTarget: void 0
+      });
+      target = bestPreflightSelector(selectorOrElement, successOptions);
+      failTarget = bestPreflightSelector(options.failTarget, failureOptions);
       request = {
         url: url,
         method: options.method,
@@ -5242,18 +5428,25 @@ build upon this module to offer higher level API functions.
         failTarget: failTarget,
         cache: options.cache,
         preload: options.preload,
-        headers: options.headers
+        headers: options.headers,
+        timeout: options.timeout
       };
-      options.inspectResponse = function() {
-        return up.browser.loadPage(url, u.only(options, 'method', 'data'));
-      };
-      promise = up.ajax(request);
       onSuccess = function(html, textStatus, xhr) {
-        return processResponse(true, target, url, request, xhr, options);
+        return processResponse(true, target, url, request, xhr, successOptions);
       };
       onFailure = function(xhr, textStatus, errorThrown) {
-        return processResponse(false, failTarget, url, request, xhr, options);
+        var promise, rejection;
+        rejection = function() {
+          return u.rejectedPromise(xhr, textStatus, errorThrown);
+        };
+        if (xhr.responseText) {
+          promise = processResponse(false, failTarget, url, request, xhr, failureOptions);
+          return promise.then(rejection, rejection);
+        } else {
+          return rejection();
+        }
       };
+      promise = up.ajax(request);
       promise = promise.then(onSuccess, onFailure);
       return promise;
     };
@@ -5262,7 +5455,7 @@ build upon this module to offer higher level API functions.
     @internal
      */
     processResponse = function(isSuccess, selector, url, request, xhr, options) {
-      var isReloadable, newRequest, query, urlFromServer;
+      var isReloadable, newRequest, query, titleFromXhr, urlFromServer;
       options.method = u.normalizeMethod(u.option(u.methodFromXhr(xhr), options.method));
       isReloadable = options.method === 'GET';
       if (urlFromServer = u.locationFromXhr(xhr)) {
@@ -5311,8 +5504,8 @@ build upon this module to offer higher level API functions.
           options.history = false;
         }
       }
-      if (shouldExtractTitle(options)) {
-        options.title = u.titleFromXhr(xhr);
+      if (shouldExtractTitle(options) && (titleFromXhr = u.titleFromXhr(xhr))) {
+        options.title = titleFromXhr;
       }
       if (options.preload) {
         return u.resolvedPromise();
@@ -5356,7 +5549,7 @@ build upon this module to offer higher level API functions.
     @param {String|Element|jQuery} selectorOrElement
     @param {String} html
     @param {Object} [options]
-      See options for [`up.replace`](/up.replace).
+      See options for [`up.replace()`](/up.replace).
     @return {Promise}
       A promise that will be resolved then the selector was updated
       and all animation has finished.
@@ -5364,79 +5557,60 @@ build upon this module to offer higher level API functions.
      */
     extract = function(selectorOrElement, html, options) {
       return up.log.group('Extracting %s from %d bytes of HTML', selectorOrElement, html != null ? html.length : void 0, function() {
-        var promise, response, selector;
+        var i, implantSteps, len, response, responseTitle, step, swapPromises;
         options = u.options(options, {
           historyMethod: 'push',
           requireMatch: true,
           keep: true,
           layer: 'auto'
         });
-        selector = resolveSelector(selectorOrElement, options.origin);
-        response = parseResponse(html, options);
-        if (shouldExtractTitle(options)) {
-          options.title = response.title();
-        }
         if (options.saveScroll !== false) {
           up.layout.saveScroll();
         }
-        promise = u.resolvedPromise();
-        if (options.beforeSwap) {
-          promise = promise.then(options.beforeSwap);
+        if (typeof options.provideTarget === "function") {
+          options.provideTarget();
         }
-        promise = promise.then(function() {
-          return updateHistory(options);
-        });
-        promise = promise.then(function() {
-          var j, len, ref, step, swapPromises;
-          swapPromises = [];
-          ref = parseImplantSteps(selector, options);
-          for (j = 0, len = ref.length; j < len; j++) {
-            step = ref[j];
-            up.log.group('Updating %s', step.selector, function() {
-              var $new, $old, swapPromise;
-              $old = findOldFragment(step.selector, options);
-              $new = response.first(step.selector);
-              if ($old && $new) {
-                filterScripts($new, options);
-                swapPromise = swapElements($old, $new, step.pseudoClass, step.transition, options);
-                swapPromises.push(swapPromise);
-                return options.reveal = false;
-              }
-            });
-          }
-          return $.when.apply($, swapPromises);
-        });
-        if (options.afterSwap) {
-          promise = promise.then(options.afterSwap);
+        response = parseResponse(html);
+        implantSteps = bestMatchingSteps(selectorOrElement, response, options);
+        if (shouldExtractTitle(options) && (responseTitle = response.title())) {
+          options.title = responseTitle;
         }
-        return promise;
+        updateHistoryAndTitle(options);
+        swapPromises = [];
+        for (i = 0, len = implantSteps.length; i < len; i++) {
+          step = implantSteps[i];
+          up.log.group('Updating %s', step.selector, function() {
+            var swapPromise;
+            filterScripts(step.$new, options);
+            swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options);
+            swapPromises.push(swapPromise);
+            return options.reveal = false;
+          });
+        }
+        return $.when.apply($, swapPromises);
       });
     };
-    findOldFragment = function(selector, options) {
-      return first(selector, options) || oldFragmentNotFound(selector, options);
+    bestPreflightSelector = function(selector, options) {
+      var cascade;
+      cascade = new up.dom.ExtractCascade(selector, options);
+      return cascade.bestPreflightSelector();
     };
-    oldFragmentNotFound = function(selector, options) {
-      var layerProse, message;
-      if (options.requireMatch) {
-        layerProse = options.layer;
-        if (layerProse === 'auto') {
-          layerProse = 'page, modal or popup';
-        }
-        message = "Could not find selector %s in the current " + layerProse;
-        if (message[0] === '#') {
-          message += ' (avoid using IDs)';
-        }
-        return up.fail(message, selector);
-      }
+    bestMatchingSteps = function(selector, response, options) {
+      var cascade;
+      options = u.merge(options, {
+        response: response
+      });
+      cascade = new up.dom.ExtractCascade(selector, options);
+      return cascade.bestMatchingSteps();
     };
     filterScripts = function($element, options) {
-      var $script, $scripts, isInline, isLinked, j, len, results, runInlineScripts, runLinkedScripts, script;
+      var $script, $scripts, i, isInline, isLinked, len, results, runInlineScripts, runLinkedScripts, script;
       runInlineScripts = u.option(options.runInlineScripts, config.runInlineScripts);
       runLinkedScripts = u.option(options.runLinkedScripts, config.runLinkedScripts);
       $scripts = u.findWithSelf($element, 'script');
       results = [];
-      for (j = 0, len = $scripts.length; j < len; j++) {
-        script = $scripts[j];
+      for (i = 0, len = $scripts.length; i < len; i++) {
+        script = $scripts[i];
         $script = $(script);
         isLinked = u.isPresent($script.attr('src'));
         isInline = !isLinked;
@@ -5448,7 +5622,7 @@ build upon this module to offer higher level API functions.
       }
       return results;
     };
-    parseResponse = function(html, options) {
+    parseResponse = function(html) {
       var htmlElement;
       htmlElement = u.createElementFromHtml(html);
       return {
@@ -5457,29 +5631,21 @@ build upon this module to offer higher level API functions.
           return (ref = htmlElement.querySelector("title")) != null ? ref.textContent : void 0;
         },
         first: function(selector) {
-          var child, inspectAction;
+          var child;
           if (child = $.find(selector, htmlElement)[0]) {
             return $(child);
-          } else if (options.requireMatch) {
-            inspectAction = {
-              label: 'Open response',
-              callback: options.inspectResponse
-            };
-            return up.fail(["Could not find selector %s in response %o", selector, html], {
-              action: inspectAction
-            });
           }
         }
       };
     };
-    updateHistory = function(options) {
+    updateHistoryAndTitle = function(options) {
       options = u.options(options, {
         historyMethod: 'push'
       });
       if (options.history) {
         up.history[options.historyMethod](options.history);
       }
-      if (options.title) {
+      if (u.isString(options.title)) {
         return document.title = options.title;
       }
     };
@@ -5514,8 +5680,8 @@ build upon this module to offer higher level API functions.
         replacement = function() {
           options.keepPlans = transferKeepableElements($old, $new, options);
           if ($old.is('body')) {
-            up.syntax.clean($old);
-            $old.replaceWith($new);
+            swapBody($old, $new);
+            transition = false;
           } else {
             $new.insertBefore($old);
           }
@@ -5532,13 +5698,16 @@ build upon this module to offer higher level API functions.
       }
       return promise;
     };
+    swapBody = function($oldBody, $newBody) {
+      return $oldBody.replaceWith($newBody);
+    };
     transferKeepableElements = function($old, $new, options) {
-      var $keepable, $keepableClone, j, keepPlans, keepable, len, plan, ref;
+      var $keepable, $keepableClone, i, keepPlans, keepable, len, plan, ref;
       keepPlans = [];
       if (options.keep) {
         ref = $old.find('[up-keep]');
-        for (j = 0, len = ref.length; j < len; j++) {
-          keepable = ref[j];
+        for (i = 0, len = ref.length; i < len; i++) {
+          keepable = ref[i];
           $keepable = $(keepable);
           if (plan = findKeepPlan($keepable, $new, u.merge(options, {
             descendantsOnly: true
@@ -5670,42 +5839,13 @@ build upon this module to offer higher level API functions.
       parsed as a JSON object.
     @stable
      */
-    parseImplantSteps = function(selector, options) {
-      var comma, disjunction, i, j, len, pseudoClass, results, selectorAtom, selectorParts, transition, transitionArg, transitions;
-      transitionArg = options.transition || options.animation || 'none';
-      comma = /\ *,\ */;
-      disjunction = selector.split(comma);
-      if (u.isString(transitions)) {
-        transitions = transitionArg.split(comma);
-      } else {
-        transitions = [transitionArg];
-      }
-      results = [];
-      for (i = j = 0, len = disjunction.length; j < len; i = ++j) {
-        selectorAtom = disjunction[i];
-        selectorParts = selectorAtom.match(/^(.+?)(?:\:(before|after))?$/);
-        selectorParts || up.fail('Could not parse selector atom "%s"', selectorAtom);
-        selector = selectorParts[1];
-        if (selector === 'html') {
-          selector = 'body';
-        }
-        pseudoClass = selectorParts[2];
-        transition = transitions[i] || u.last(transitions);
-        results.push({
-          selector: selector,
-          pseudoClass: pseudoClass,
-          transition: transition
-        });
-      }
-      return results;
-    };
 
     /**
     Compiles a page fragment that has been inserted into the DOM
     by external code.
     
     **As long as you manipulate the DOM using Unpoly, you will never
-    need to call this method.** You only need to use `up.hello` if the
+    need to call this method.** You only need to use `up.hello()` if the
     DOM is manipulated without Unpoly' involvement, e.g. by setting
     the `innerHTML` property or calling jQuery methods like
     `html`, `insertAfter` or `appendTo`:
@@ -5726,15 +5866,15 @@ build upon this module to offer higher level API functions.
     @stable
      */
     hello = function(selectorOrElement, options) {
-      var $element, j, keptElements, len, plan, ref;
+      var $element, i, keptElements, len, plan, ref;
       $element = $(selectorOrElement);
       options = u.options(options, {
         keepPlans: []
       });
       keptElements = [];
       ref = options.keepPlans;
-      for (j = 0, len = ref.length; j < len; j++) {
-        plan = ref[j];
+      for (i = 0, len = ref.length; i < len; i++) {
+        plan = ref[i];
         emitFragmentKept(plan);
         keptElements.push(plan.$element);
       }
@@ -5805,24 +5945,30 @@ build upon this module to offer higher level API functions.
     @param {String} options.layer
       The name of the layer in which to find the element. Valid values are
       `auto`, `page`, `modal` and `popup`.
-    @param {}
+    @param {String|Element|jQuery} [options.origin]
+      An second element or selector that can be referenced as `&` in the first selector:
+    
+          $input = $('input.email');
+          up.first('.field:has(&)', $input); // returns the .field containing $input
     @return {jQuery|Undefined}
       The first element that is neither a ghost or being destroyed,
       or `undefined` if no such element was given.
     @experimental
      */
     first = function(selectorOrElement, options) {
+      var resolved;
       options = u.options(options, {
         layer: 'auto'
       });
+      resolved = resolveSelector(selectorOrElement, options.origin);
       if (options.layer === 'auto') {
-        return firstInPriority(selectorOrElement, options.origin);
+        return firstInPriority(resolved, options.origin);
       } else {
-        return firstInLayer(selectorOrElement, options.layer);
+        return firstInLayer(resolved, options.layer);
       }
     };
     firstInPriority = function(selectorOrElement, origin) {
-      var $match, j, layer, layers, len, originLayer;
+      var $match, i, layer, layers, len, originLayer;
       layers = ['popup', 'modal', 'page'];
       $match = void 0;
       if (u.isPresent(origin)) {
@@ -5830,8 +5976,8 @@ build upon this module to offer higher level API functions.
         u.remove(layers, originLayer);
         layers.unshift(originLayer);
       }
-      for (j = 0, len = layers.length; j < len; j++) {
-        layer = layers[j];
+      for (i = 0, len = layers.length; i < len; i++) {
+        layer = layers[i];
         if ($match = firstInLayer(selectorOrElement, layer)) {
           break;
         }
@@ -5839,11 +5985,11 @@ build upon this module to offer higher level API functions.
       return $match;
     };
     firstInLayer = function(selectorOrElement, layer) {
-      var $element, $elements, $match, element, j, len;
+      var $element, $elements, $match, element, i, len;
       $elements = $(selectorOrElement);
       $match = void 0;
-      for (j = 0, len = $elements.length; j < len; j++) {
-        element = $elements[j];
+      for (i = 0, len = $elements.length; i < len; i++) {
+        element = $elements[i];
         $element = $(element);
         if (isRealElement($element) && matchesLayer($element, layer)) {
           $match = $element;
@@ -5870,7 +6016,7 @@ build upon this module to offer higher level API functions.
     /**
     Destroys the given element or selector.
     
-    Takes care that all [`up.compiler`](/up.compiler) destructors, if any, are called.
+    Takes care that all [`up.compiler()`](/up.compiler) destructors, if any, are called.
     
     The element is removed from the DOM.
     Note that if you choose to animate the element removal using `options.animate`,
@@ -5887,11 +6033,11 @@ build upon this module to offer higher level API functions.
     @param {String|Function} [options.animation='none']
       The animation to use before the element is removed from the DOM.
     @param {Number} [options.duration]
-      The duration of the animation. See [`up.animate`](/up.animate).
+      The duration of the animation. See [`up.animate()`](/up.animate).
     @param {Number} [options.delay]
-      The delay before the animation starts. See [`up.animate`](/up.animate).
+      The delay before the animation starts. See [`up.animate()`](/up.animate).
     @param {String} [options.easing]
-      The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
+      The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
     @return {Deferred}
       A promise that will be resolved once the element has been removed from the DOM.
     @stable
@@ -5914,7 +6060,7 @@ build upon this module to offer higher level API functions.
         });
         animateOptions = up.motion.animateOptions(options);
         $element.addClass('up-destroying');
-        updateHistory(options);
+        updateHistoryAndTitle(options);
         animationDeferred = u.presence(options.animation, u.isDeferred) || up.motion.animate($element, options.animation, animateOptions);
         animationDeferred.then(function() {
           up.syntax.clean($element);
@@ -5973,7 +6119,7 @@ build upon this module to offer higher level API functions.
     @function up.reload
     @param {String|Element|jQuery} selectorOrElement
     @param {Object} [options]
-      See options for [`up.replace`](/up.replace)
+      See options for [`up.replace()`](/up.replace)
     @param {String} [options.url]
       The URL from which to reload the fragment.
       This defaults to the URL from which the fragment was originally loaded.
@@ -6008,17 +6154,234 @@ build upon this module to offer higher level API functions.
     };
   })(jQuery);
 
-  up.replace = up.flow.replace;
+  up.replace = up.dom.replace;
 
-  up.extract = up.flow.extract;
+  up.extract = up.dom.extract;
 
-  up.reload = up.flow.reload;
+  up.reload = up.dom.reload;
 
-  up.destroy = up.flow.destroy;
+  up.destroy = up.dom.destroy;
 
-  up.first = up.flow.first;
+  up.first = up.dom.first;
 
-  up.hello = up.flow.hello;
+  up.hello = up.dom.hello;
+
+  up.renamedModule('flow', 'dom');
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  u = up.util;
+
+  up.dom.ExtractCascade = (function() {
+    function ExtractCascade(selector, options) {
+      this.oldPlanNotFound = bind(this.oldPlanNotFound, this);
+      this.matchingPlanNotFound = bind(this.matchingPlanNotFound, this);
+      this.bestMatchingSteps = bind(this.bestMatchingSteps, this);
+      this.bestPreflightSelector = bind(this.bestPreflightSelector, this);
+      this.detectPlan = bind(this.detectPlan, this);
+      this.matchingPlan = bind(this.matchingPlan, this);
+      this.newPlan = bind(this.newPlan, this);
+      this.oldPlan = bind(this.oldPlan, this);
+      this.options = u.options(options, {
+        humanizedTarget: 'selector',
+        layer: 'auto'
+      });
+      this.candidates = this.buildCandidates(selector);
+      this.plans = u.map(this.candidates, (function(_this) {
+        return function(candidate, i) {
+          var planOptions;
+          planOptions = u.copy(_this.options);
+          if (i > 0) {
+            planOptions.transition = up.dom.config.fallbackTransition;
+          }
+          return new up.dom.ExtractPlan(candidate, planOptions);
+        };
+      })(this));
+    }
+
+    ExtractCascade.prototype.buildCandidates = function(selector) {
+      var candidates;
+      candidates = [selector, this.options.fallback, up.dom.config.fallbacks];
+      candidates = u.flatten(candidates);
+      candidates = u.select(candidates, u.isTruthy);
+      if (this.options.fallback === false || this.options.provideTarget) {
+        candidates = [candidates[0]];
+      }
+      return candidates;
+    };
+
+    ExtractCascade.prototype.oldPlan = function() {
+      return this.detectPlan('oldExists');
+    };
+
+    ExtractCascade.prototype.newPlan = function() {
+      return this.detectPlan('newExists');
+    };
+
+    ExtractCascade.prototype.matchingPlan = function() {
+      return this.detectPlan('matchExists');
+    };
+
+    ExtractCascade.prototype.detectPlan = function(checker) {
+      return u.detect(this.plans, function(plan) {
+        return plan[checker]();
+      });
+    };
+
+    ExtractCascade.prototype.bestPreflightSelector = function() {
+      var plan;
+      if (this.options.provideTarget) {
+        return this.plans[0].selector;
+      } else if (plan = this.oldPlan()) {
+        return plan.selector;
+      } else {
+        return this.oldPlanNotFound();
+      }
+    };
+
+    ExtractCascade.prototype.bestMatchingSteps = function() {
+      var plan;
+      if (plan = this.matchingPlan()) {
+        return plan.steps;
+      } else {
+        return this.matchingPlanNotFound();
+      }
+    };
+
+    ExtractCascade.prototype.matchingPlanNotFound = function() {
+      var inspectAction, message;
+      if (this.newPlan()) {
+        return this.oldPlanNotFound();
+      } else {
+        if (this.oldPlan()) {
+          message = "Could not find " + this.options.humanizedTarget + " in response";
+        } else {
+          message = "Could not match " + this.options.humanizedTarget + " in current page and response";
+        }
+        if (this.response && this.options.inspectResponse) {
+          inspectAction = {
+            label: 'Open response',
+            callback: this.options.inspectResponse
+          };
+        }
+        return up.fail([message + " (tried %o)", this.candidates], {
+          action: inspectAction
+        });
+      }
+    };
+
+    ExtractCascade.prototype.oldPlanNotFound = function() {
+      var layerProse;
+      layerProse = this.options.layer;
+      if (layerProse === 'auto') {
+        layerProse = 'page, modal or popup';
+      }
+      return up.fail("Could not find " + this.options.humanizedTarget + " in current " + layerProse + " (tried %o)", this.candidates);
+    };
+
+    return ExtractCascade;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  u = up.util;
+
+  up.dom.ExtractPlan = (function() {
+    function ExtractPlan(selector, options) {
+      this.parseSteps = bind(this.parseSteps, this);
+      this.matchExists = bind(this.matchExists, this);
+      this.newExists = bind(this.newExists, this);
+      this.oldExists = bind(this.oldExists, this);
+      this.findNew = bind(this.findNew, this);
+      this.findOld = bind(this.findOld, this);
+      this.origin = options.origin;
+      this.selector = up.dom.resolveSelector(selector, options.origin);
+      this.transition = options.transition || options.animation || 'none';
+      this.response = options.response;
+      this.steps = this.parseSteps();
+    }
+
+    ExtractPlan.prototype.findOld = function() {
+      return u.each(this.steps, function(step) {
+        return step.$old = up.dom.first(step.selector, this.options);
+      });
+    };
+
+    ExtractPlan.prototype.findNew = function() {
+      return u.each(this.steps, (function(_this) {
+        return function(step) {
+          return step.$new = _this.response.first(step.selector);
+        };
+      })(this));
+    };
+
+    ExtractPlan.prototype.oldExists = function() {
+      this.findOld();
+      return u.all(this.steps, function(step) {
+        return step.$old;
+      });
+    };
+
+    ExtractPlan.prototype.newExists = function() {
+      this.findNew();
+      return u.all(this.steps, function(step) {
+        return step.$new;
+      });
+    };
+
+    ExtractPlan.prototype.matchExists = function() {
+      return this.oldExists() && this.newExists();
+    };
+
+
+    /**
+    Example:
+    
+        parseSelector('foo, bar:before', transition: 'cross-fade')
+    
+        [
+          { selector: 'foo', pseudoClass: undefined, transition: 'cross-fade' },
+          { selector: 'bar', pseudoClass: 'before', transition: 'cross-fade' }
+        ]
+     */
+
+    ExtractPlan.prototype.parseSteps = function() {
+      var comma, disjunction, transitions;
+      if (u.isString(this.transition)) {
+        transitions = this.transition.split(comma);
+      } else {
+        transitions = [this.transition];
+      }
+      comma = /\ *,\ */;
+      disjunction = this.selector.split(comma);
+      return u.map(disjunction, function(literal, i) {
+        var literalParts, pseudoClass, selector, transition;
+        literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/);
+        literalParts || up.fail('Could not parse selector literal "%s"', literal);
+        selector = literalParts[1];
+        if (selector === 'html') {
+          selector = 'body';
+        }
+        pseudoClass = literalParts[2];
+        transition = transitions[i] || u.last(transitions);
+        return {
+          selector: selector,
+          pseudoClass: pseudoClass,
+          transition: transition
+        };
+      });
+    };
+
+    return ExtractPlan;
+
+  })();
 
 }).call(this);
 
@@ -6050,8 +6413,8 @@ of the dialog by adding an [`up-animation`](/up-modal#up-animation) attribute to
 Unpoly ships with a number of [predefined transitions](/up.morph#named-transitions)
 and [predefined animations](/up.animate#named-animations).
 
-You can define custom animations using [`up.transition`](/up.transition) and
-[`up.animation`](/up.animation).
+You can define custom animations using [`up.transition()`](/up.transition) and
+[`up.animation()`](/up.animation).
 
 @class up.motion
  */
@@ -6149,7 +6512,7 @@ You can define custom animations using [`up.transition`](/up.transition) and
     | `move-from-right`  | Moves the element leftwards from beyond the right  edge of the screen until it reaches its current position |
     | `none`             | An animation that has no visible effect. Sounds useless at first, but can save you a lot of `if` statements. |
     
-    You can define additional named animations using [`up.animation`](/up.animation).
+    You can define additional named animations using [`up.animation()`](/up.animation).
     
     \#\#\# Animating CSS properties directly
     
@@ -6195,7 +6558,7 @@ You can define custom animations using [`up.transition`](/up.transition) and
       $element = $(elementOrSelector);
       finish($element);
       options = animateOptions(options);
-      if (animation === 'none' || animation === false || u.isMissing(animation)) {
+      if (isNone(animation)) {
         return none();
       } else if (u.isFunction(animation)) {
         return assertIsDeferred(animation($element, options), animation);
@@ -6300,6 +6663,9 @@ You can define custom animations using [`up.transition`](/up.transition) and
       if (elementOrSelector == null) {
         elementOrSelector = '.up-animating';
       }
+      if (!isEnabled()) {
+        return;
+      }
       $element = $(elementOrSelector);
       $animatingSubtree = u.findWithSelf($element, '.up-animating');
       u.finishCssAnimate($animatingSubtree);
@@ -6342,7 +6708,7 @@ You can define custom animations using [`up.transition`](/up.transition) and
     | `move-right` | Moves the first element rightwards until it exists the screen at the right edge. Simultaneously moves the second element rightwards from beyond the left edge of the screen until it reaches its current position. |
     | `none`       | A transition that has no visible effect. Sounds useless at first, but can save you a lot of `if` statements. |
     
-    You can define additional named transitions using [`up.transition`](/up.transition).
+    You can define additional named transitions using [`up.transition()`](/up.transition).
     
     You can also compose a transition from two [named animations](/named-animations).
     separated by a slash character (`/`):
@@ -6388,25 +6754,21 @@ You can define custom animations using [`up.transition`](/up.transition) and
     @stable
      */
     morph = function(source, target, transitionOrName, options) {
-      var $new, $old;
-      if (transitionOrName === 'none') {
-        transitionOrName = false;
-      }
+      var $new, $old, willMorph;
       options = u.options(options);
+      willMorph = isEnabled() && !isNone(transitionOrName);
       $old = $(source);
       $new = $(target);
-      ensureMorphable($old, transitionOrName);
-      ensureMorphable($new, transitionOrName);
-      return up.log.group((transitionOrName ? 'Morphing %o to %o (using %s, %o)' : void 0), $old.get(0), $new.get(0), transitionOrName, options, function() {
+      return up.log.group((willMorph ? 'Morphing %o to %o (using %s, %o)' : void 0), $old.get(0), $new.get(0), transitionOrName, options, function() {
         var animation, parsedOptions, parts, transition;
         parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source');
-        parsedOptions = u.extend(parsedOptions, animateOptions(options));
-        if (isEnabled()) {
-          finish($old);
-          finish($new);
-          if (!transitionOrName) {
-            return skipMorph($old, $new, parsedOptions);
-          } else if (animation = animations[transitionOrName]) {
+        parsedOptions = u.assign(parsedOptions, animateOptions(options));
+        finish($old);
+        finish($new);
+        if (willMorph) {
+          ensureMorphable($old);
+          ensureMorphable($new);
+          if (animation = animations[transitionOrName]) {
             skipMorph($old, $new, parsedOptions);
             return animate($new, animation, parsedOptions);
           } else if (transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]) {
@@ -6429,9 +6791,9 @@ You can define custom animations using [`up.transition`](/up.transition) and
         }
       });
     };
-    ensureMorphable = function($element, transition) {
+    ensureMorphable = function($element) {
       var element;
-      if (transition && $element.parents('body').length === 0) {
+      if ($element.parents('body').length === 0) {
         element = $element.get(0);
         return up.fail("Can't morph a <%s> element (%o)", element.tagName, element);
       }
@@ -6511,10 +6873,10 @@ You can define custom animations using [`up.transition`](/up.transition) and
           )
         )
     
-    It is recommended that your transitions use [`up.animate`](/up.animate),
+    It is recommended that your transitions use [`up.animate()`](/up.animate),
     passing along the `options` that were passed to you.
     
-    If you choose to *not* use `up.animate` and roll your own
+    If you choose to *not* use `up.animate()` and roll your own
     logic instead, your code must honor the following contract:
     
     1. It must honor the passed options `{ delay, duration, easing }` if present
@@ -6523,7 +6885,7 @@ You can define custom animations using [`up.transition`](/up.transition) and
     4. The returned promise responds to a `resolve()` function that
        instantly jumps to the last transition frame and resolves the promise.
     
-    Calling [`up.animate`](/up.animate) with an object argument
+    Calling [`up.animate()`](/up.animate) with an object argument
     will take care of all these points.
     
     @function up.transition
@@ -6546,10 +6908,10 @@ You can define custom animations using [`up.transition`](/up.transition) and
         })
     
     It is recommended that your definitions always end by calling
-    calling [`up.animate`](/up.animate) with an object argument, passing along
+    calling [`up.animate()`](/up.animate) with an object argument, passing along
     the `options` that were passed to you.
     
-    If you choose to *not* use `up.animate` and roll your own
+    If you choose to *not* use `up.animate()` and roll your own
     animation code instead, your code must honor the following contract:
     
     1. It must honor the passed options `{ delay, duration, easing }` if present
@@ -6558,7 +6920,7 @@ You can define custom animations using [`up.transition`](/up.transition) and
     4. The returned promise responds to a `resolve()` function that
        instantly jumps to the last animation frame and resolves the promise.
     
-    Calling [`up.animate`](/up.animate) with an object argument
+    Calling [`up.animate()`](/up.animate) with an object argument
     will take care of all these points.
     
     @function up.animation
@@ -6612,7 +6974,7 @@ You can define custom animations using [`up.transition`](/up.transition) and
     @internal
      */
     isNone = function(animation) {
-      return animation === false || animation === 'none' || animation === none;
+      return animation === false || animation === 'none' || u.isMissing(animation) || u.isResolvedPromise(animation);
     };
     animation('none', none);
     animation('fade-in', function($ghost, options) {
@@ -6732,9 +7094,6 @@ You can define custom animations using [`up.transition`](/up.transition) and
       animation: animation,
       config: config,
       isEnabled: isEnabled,
-      defaults: function() {
-        return up.fail('up.motion.defaults(...) no longer exists. Set values on he up.motion.config property instead.');
-      },
       none: none,
       when: resolvableWhen,
       prependCopy: prependCopy,
@@ -6753,24 +7112,27 @@ You can define custom animations using [`up.transition`](/up.transition) and
 }).call(this);
 
 /**
-Caching and preloading
-======================
+AJAX acceleration
+=================
+
+Unpoly comes with a number of tricks to shorten the latency between browser and server.
+
+\#\#\# Server responses are cached by default
 
 Unpoly caches server responses for a few minutes,
 making requests to these URLs return instantly.
-
-All Unpoly functions and selectors go through this cache.
-If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
-use [`up.ajax`](/up.ajax).
-
-\#\#\# How the cache is cleared
+All Unpoly functions and selectors go through this cache, unless
+you explicitly pass a `{ cache: false }` option or set an `up-cache="false"` attribute.
 
 The cache holds up to 70 responses for 5 minutes. You can configure the cache size and expiry using
-[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.proxy.clear`](/up.proxy.clear).
+[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.proxy.clear()`](/up.proxy.clear).
 
 Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
 
-\#\#\# Preloading
+If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
+use [`up.ajax()`](/up.ajax).
+
+\#\#\# Preloading links
 
 Unpoly also lets you speed up reaction times by [preloading
 links](/up-preload) when the user hovers over the click area (or puts the mouse/finger
@@ -6781,6 +7143,13 @@ the user releases the mouse/finger.
 
 You can listen to the [`up:proxy:slow`](/up:proxy:slow) event to implement a spinner
 that appears during a long-running request.
+
+\#\#\# More acceleration
+
+Other Unpoly modules contain even more tricks to outsmart network latency:
+
+- [Instantaneous feedback for links that are currently loading](/up-active)
+- [Follow links on `mousedown` instead of `click`](/up-instant)
 
 @class up.proxy
  */
@@ -6963,6 +7332,11 @@ that appears during a long-running request.
     @param {String} [request.url]
       You can omit the first string argument and pass the URL as
       a `request` property instead.
+    @param {String} [request.timeout]
+      A timeout in milliseconds for the request.
+    
+      If [`up.proxy.config.maxRequests`](/up.proxy.config#maxRequests) is set, the timeout
+      will not include the time spent waiting in the queue.
     @return
       A promise for the response that is API-compatible with the
       promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
@@ -6977,7 +7351,7 @@ that appears during a long-running request.
       }
       forceCache = options.cache === true;
       ignoreCache = options.cache === false;
-      request = u.only(options, 'url', 'method', 'data', 'target', 'headers', '_normalized');
+      request = u.only(options, 'url', 'method', 'data', 'target', 'headers', 'timeout', '_normalized');
       request = normalizeRequest(request);
       pending = true;
       if (!isIdempotent(request) && !forceCache) {
@@ -7344,10 +7718,7 @@ that appears during a long-running request.
       isIdle: isIdle,
       isBusy: isBusy,
       isCachable: isCachable,
-      config: config,
-      defaults: function() {
-        return up.fail('up.proxy.defaults(...) no longer exists. Set values on he up.proxy.config property instead.');
-      }
+      config: config
     };
   })(jQuery);
 
@@ -7356,10 +7727,15 @@ that appears during a long-running request.
 }).call(this);
 
 /**
-Linking to page fragments
-=========================
+Linking to fragments
+====================
 
-Standard HTML links are a poor fit for modern applications:
+In a traditional web application, the entire page is destroyed and re-created when the
+user follows a link:
+
+![Traditional page flow](/images/tutorial/fragment_flow_vanilla.svg){:width="620px" class="picture has_border is_sepia has_padding"}
+
+This makes for an unfriendly experience:
 
 - State changes caused by AJAX updates get lost during the page transition.
 - Unsaved form changes get lost during the page transition.
@@ -7369,27 +7745,21 @@ Standard HTML links are a poor fit for modern applications:
 - The user sees a "flash" as the browser loads and renders the new page,
   even if large portions of the old and new page are the same (navigation, layout, etc.).
 
-Unpoly fixes this by letting you annotate  links with an [`up-target`](/a-up-target)
+Unpoly fixes this by letting you annotate links with an [`up-target`](/a-up-target)
 attribute. The value of this attribute is a CSS selector that indicates which page
-fragment to update. The rest of the page will remain unchanged.
+fragment to update. The server **still renders full HTML pages**, but we only use
+the targeted ragments and discard the rest:
+
+![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620px" class="picture has_border is_sepia has_padding"}
+
+With this model, following links feel smooth. All transient DOM changes outside the updated fragment are preserved.
+Pages also load much faster since the DOM, CSS and Javascript environments do not need to be
+destroyed and recreated for every request.
 
 
-\#\#\# Example
+## Example
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
-
-
-```
-  /pages/a                /pages/b                /pages/c
-
-+---+---+---+           +---+---+---+           +---+---+---+
-| A | B | C |           | A | B | C |           | A | B | C |
-|   +--------  (click)  +---+   +----  (click)  +---+---+   |
-|           |  ======>  |           |  ======>  |           |
-|  Page A   |           |  Page B   |           |  Page C   |
-|           |           |           |           |           |
-+-----------|           +-----------|           +-----------|
-```
 
 Your HTML could look like this:
 
@@ -7422,18 +7792,6 @@ With these [`up-target`](/a-up-target) annotations Unpoly only updates the targe
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
-
-\#\#\# Read on
-
-- You can [animate page transitions](/up.motion) by definining animations for fragments as they enter or leave the screen.
-- The `up-target` mechanism also works with [forms](/up.form).
-- As you switch through pages, Unpoly will [update your browser's location bar and history](/up.history)
-- You can [open fragments in popups or modal dialogs](/up.modal).
-- You can give users [immediate feedback](/up.navigation) when a link is clicked or becomes current, without waiting for the server.
-- [Controlling Unpoly pragmatically through JavaScript](/up.flow)
-- [Defining custom tags](/up.syntax)
-
-  
 @class up.link
  */
 
@@ -7457,7 +7815,7 @@ new page is loading.
     @param {String} [options.target='body']
       The selector to replace.
     @param {Object} [options]
-      See options for [`up.replace`](/up.replace)
+      See options for [`up.replace()`](/up.replace)
     @stable
      */
     visit = function(url, options) {
@@ -7492,6 +7850,8 @@ new page is loading.
     @param {String} [options.failTarget]
       The selector to replace if the server responds with a non-200 status code.
       Defaults to the `up-fail-target` attribute on `link`, or to `body` if such an attribute does not exist.
+    @param {String} [options.fallback]
+      The selector to update when the original target was not found in the page.
     @param {String} [options.method='get']
       The HTTP method to use for the request.
     @param {String} [options.confirm]
@@ -7499,12 +7859,14 @@ new page is loading.
       before the link is followed.
     @param {Function|String} [options.transition]
       A transition function or name.
+    @param {Function|String} [options.failTransition]
+      The transition to use if the server responds with a non-200 status code.
     @param {Number} [options.duration]
-      The duration of the transition. See [`up.morph`](/up.morph).
+      The duration of the transition. See [`up.morph()`](/up.morph).
     @param {Number} [options.delay]
-      The delay before the transition starts. See [`up.morph`](/up.morph).
+      The delay before the transition starts. See [`up.morph()`](/up.morph).
     @param {String} [options.easing]
-      The timing function that controls the transition's acceleration. [`up.morph`](/up.morph).
+      The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
     @param {Element|jQuery|String} [options.reveal]
       Whether to reveal the target  element within its viewport before updating.
     @param {Boolean} [options.restoreScroll]
@@ -7517,6 +7879,8 @@ new page is loading.
     @param {Object} [options.headers={}]
       An object of additional header key/value pairs to send along
       with the request.
+    @param {Object} [options.timeout={}]
+      A timeout in milliseconds for the request.
     @param {String} [options.layer='auto']
       The name of the layer that ought to be updated. Valid values are
       `auto`, `page`, `modal` and `popup`.
@@ -7534,8 +7898,9 @@ new page is loading.
       $link = $(linkOrSelector);
       options = u.options(options);
       url = u.option($link.attr('up-href'), $link.attr('href'));
-      target = u.option(options.target, $link.attr('up-target'), 'body');
-      options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'), 'body');
+      target = u.option(options.target, $link.attr('up-target'));
+      options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'));
+      options.fallback = u.option(options.fallback, $link.attr('up-fallback'));
       options.transition = u.option(options.transition, u.castedAttr($link, 'up-transition'), 'none');
       options.failTransition = u.option(options.failTransition, u.castedAttr($link, 'up-fail-transition'), 'none');
       options.history = u.option(options.history, u.castedAttr($link, 'up-history'));
@@ -7597,7 +7962,7 @@ new page is loading.
       var handlerWithActiveMark;
       followVariantSelectors.push(selector);
       handlerWithActiveMark = function($link) {
-        return up.navigation.start($link, function() {
+        return up.feedback.start($link, function() {
           return handler($link);
         });
       };
@@ -7674,7 +8039,7 @@ new page is loading.
     
         <a href="/posts/5" up-target=".main, .unread-count">Read post</a>
     
-    \#\#\# Appending or prepending instead of replacing
+    \#\#\# Appending or prepending content
     
     By default Unpoly will replace the given selector with the same
     selector from a freshly fetched page. Instead of replacing you
@@ -7718,6 +8083,8 @@ new page is loading.
     @param {String} [up-fail-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements
       when the server responds with a non-200 status code.
+    @param {String} [up-fallback]
+      The selector to update when the original target was not found in the page.
     @param {String} [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
@@ -7798,10 +8165,12 @@ new page is loading.
     
     @param {String} [up-method='get']
       The HTTP method to use for the request.
-    @param {String} [up-transition='none']
-      The [transition](/up.motion) to use for morphing between the old and new elements.
     @param [up-fail-target='body']
       The selector to replace if the server responds with a non-200 status code.
+    @param {String} [up-fallback]
+      The selector to update when the original target was not found in the page.
+    @param {String} [up-transition='none']
+      The [transition](/up.motion) to use for morphing between the old and new elements.
     @param {String} [up-fail-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements
       when the server responds with a non-200 status code.
@@ -7893,6 +8262,14 @@ new page is loading.
           <a class="close" href="/records">Close</a>
         </div>
     
+    \#\#\# Limitations
+    
+    Users will not be able to use the expanded area to open a context menu by right clicking,
+    or to open the link in a new tab.
+    To enable this, make the entire clickable area an actual `<a>` tag.
+    [It's OK to put block elements inside an anchor tag](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
+    
+    
     @selector [up-expand]
     @param {String} [up-expand]
       A CSS selector that defines which containing link should be expanded.
@@ -7967,7 +8344,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     @property up.form.config
     @param {Number} [config.observeDelay=0]
-      The number of miliseconds to wait before [`up.observe`](/up.observe) runs the callback
+      The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
       after the input value changes. Use this to limit how often the callback
       will be invoked for a fast typist.
     @param {Array} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
@@ -8018,11 +8395,14 @@ open dialogs with sub-forms, etc. all without losing form state.
       if none of these attributes are given.
     @param {String} [options.target]
       The selector to update when the form submission succeeds (server responds with status 200).
-      Defaults to the form's `up-target` attribute, or to `'body'`.
+      Defaults to the form's `up-target` attribute.
     @param {String} [options.failTarget]
       The selector to update when the form submission fails (server responds with non-200 status).
       Defaults to the form's `up-fail-target` attribute, or to an auto-generated
       selector that matches the form itself.
+    @param {String} [options.fallback]
+      The selector to update when the original target was not found in the page.
+      Defaults to the form's `up-fallback` attribute.
     @param {Boolean|String} [options.history=true]
       Successful form submissions will add a history entry and change the browser's
       location bar if the form either uses the `GET` method or the response redirected
@@ -8036,11 +8416,11 @@ open dialogs with sub-forms, etc. all without losing form state.
       The transition to use when a failed form submission updates the `options.failTarget` selector.
       Defaults to the form's `up-fail-transition` attribute, or to `options.transition`, or to `'none'`.
     @param {Number} [options.duration]
-      The duration of the transition. See [`up.morph`](/up.morph).
+      The duration of the transition. See [`up.morph()`](/up.morph).
     @param {Number} [options.delay]
-      The delay before the transition starts. See [`up.morph`](/up.morph).
+      The delay before the transition starts. See [`up.morph()`](/up.morph).
     @param {String} [options.easing]
-      The timing function that controls the transition's acceleration. [`up.morph`](/up.morph).
+      The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
     @param {Element|jQuery|String} [options.reveal]
       Whether to reveal the target element within its viewport.
     @param {Boolean} [options.restoreScroll]
@@ -8067,6 +8447,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       target = u.option(options.target, $form.attr('up-target'), 'body');
       url = u.option(options.url, $form.attr('action'), up.browser.url());
       options.failTarget = u.option(options.failTarget, $form.attr('up-fail-target')) || u.selectorForElement($form);
+      options.fallback = u.option(options.fallback, $form.attr('up-fallback'));
       options.history = u.option(options.history, u.castedAttr($form, 'up-history'), true);
       options.transition = u.option(options.transition, u.castedAttr($form, 'up-transition'), 'none');
       options.failTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), 'none');
@@ -8091,14 +8472,14 @@ open dialogs with sub-forms, etc. all without losing form state.
           return u.unresolvablePromise();
         }
       }
-      up.navigation.start($form);
+      up.feedback.start($form);
       if (!(canAjaxSubmit && canHistoryOption)) {
         $form.get(0).submit();
         return u.unresolvablePromise();
       }
       promise = up.replace(target, url, options);
       promise.always(function() {
-        return up.navigation.stop($form);
+        return up.feedback.stop($form);
       });
       return promise;
     };
@@ -8126,10 +8507,10 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     Making network requests whenever a form field changes can cause
     [concurrency issues](https://makandracards.com/makandra/961-concurrency-issues-with-find-as-you-type-boxes).
-    Since `up.observe` can trigger many requests in a short period of time,
+    Since `up.observe()` can trigger many requests in a short period of time,
     the responses might not arrive in the same order.
     
-    To mitigate this, `up.observe` will try to never run a callback
+    To mitigate this, `up.observe()` will try to never run a callback
     before the previous callback has completed.
     For this your callback code must return a promise that resolves
     when your request completes.
@@ -8142,8 +8523,8 @@ open dialogs with sub-forms, etc. all without losing form state.
           return submitDone;
         });
     
-    Note that many Unpoly functions like [`up.submit`](/up.submit) or
-    [`up.replace`](/up.replace) return promises.
+    Note that many Unpoly functions like [`up.submit()`](/up.submit) or
+    [`up.replace()`](/up.replace) return promises.
     
     \#\#\# Debouncing
     
@@ -8190,6 +8571,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       callback = null;
       rawCallback = u.option(callbackArg, u.presentAttr($fields, 'up-observe'));
       if (u.isString(rawCallback)) {
+        console.debug("**** RAW CALLBACK IS %o", rawCallback);
         callback = function(value, $field) {
           return eval(rawCallback);
         };
@@ -8255,7 +8637,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @param {String|Element|jQuery} selectorOrElement
       The field or form to observe.
     @param {Object} [options]
-      See options for [`up.observe`](/up.observe)
+      See options for [`up.observe()`](/up.observe)
     @return {Function}
       A destructor function that removes the observe watch when called.
     @stable
@@ -8264,7 +8646,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return observe(selectorOrElement, options, function(value, $field) {
         var $form;
         $form = $field.closest('form');
-        return up.navigation.start($field, function() {
+        return up.feedback.start($field, function() {
           return submit($form);
         });
       });
@@ -8275,7 +8657,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       if (u.isBlank(target)) {
         target || (target = u.detect(config.validateTargets, function(defaultTarget) {
           var resolvedDefault;
-          resolvedDefault = up.flow.resolveSelector(defaultTarget, options.origin);
+          resolvedDefault = up.dom.resolveSelector(defaultTarget, options.origin);
           return $field.closest(resolvedDefault).length;
         }));
       }
@@ -8292,7 +8674,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     Performs a server-side validation of a form and update the form
     with validation messages.
     
-    `up.validate` submits the given field's form with an additional `X-Up-Validate`
+    `up.validate()` submits the given field's form with an additional `X-Up-Validate`
     HTTP header. Upon seeing this header, the server is expected to validate (but not save)
     the form submission and render a new copy of the form with validation errors.
     
@@ -8438,7 +8820,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     The server response is searched for the selector given in `up-target`.
     The selector content is then [replaced](/up.replace) in the current page.
     
-    The programmatic variant of this is the [`up.submit`](/up.submit) function.
+    The programmatic variant of this is the [`up.submit()`](/up.submit) function.
     
     \#\#\# Failed submission
     
@@ -8501,6 +8883,8 @@ open dialogs with sub-forms, etc. all without losing form state.
       The selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
       If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
       server has echoed the form with validation errors.
+    @param [up-fallback]
+      The selector to replace if the server responds with a non-200 status code.
     @param {String} [up-transition]
       The animation to use when the form is replaced after a successful submission.
     @param {String} [up-fail-transition]
@@ -8537,11 +8921,14 @@ open dialogs with sub-forms, etc. all without losing form state.
     });
 
     /**
-    When a form field with this attribute is changed,
-    the form is validated on the server and is updated with
-    validation messages.
+    When a form field with this attribute is changed, the form is validated on the server
+    and is updated with validation messages.
     
-    The programmatic variant of this is the [`up.validate`](/up.validate) function.
+    To validate the form, Unpoly will submit the form with an additional `X-Up-Validate` HTTP header.
+    When seeing this header, the server is expected to validate (but not save)
+    the form submission and render a new copy of the form with validation errors.
+    
+    The programmatic variant of this is the [`up.validate()`](/up.validate) function.
     
     \#\#\# Example
     
@@ -8582,7 +8969,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     Whenever a field with `up-validate` changes, the form is POSTed to
     `/users` with an additional `X-Up-Validate` HTTP header.
-    Upon seeing this header, the server is expected to validate (but not save)
+    When seeing this header, the server is expected to validate (but not save)
     the form submission and render a new copy of the form with validation errors.
     
     In Ruby on Rails the processing action should behave like this:
@@ -8637,7 +9024,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     With the Bootstrap bindings, Unpoly will also look
     for a container with the `form-group` class.
     
-    You can change this default behavior by setting `up.config.validateTargets`:
+    You can change this default behavior by setting [`up.form.config.validateTargets`](/up.form.config#validateTargets):
     
         // Always update the entire form containing the current field ("&")
         up.form.config.validateTargets = ['form &']
@@ -8763,7 +9150,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     This is useful for observing text fields while the user is typing.
     
-    The programmatic variant of this is the [`up.observe`](/up.observe) function.
+    The programmatic variant of this is the [`up.observe()`](/up.observe) function.
     
     \#\#\# Example
     
@@ -8801,7 +9188,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     The form field will be assigned a CSS class [`up-active`](/up-active)
     while the autosubmitted form is processing.
     
-    The programmatic variant of this is the [`up.autosubmit`](/up.autosubmit) function.
+    The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
     
     \#\#\# Example
     
@@ -8942,8 +9329,9 @@ The HTML of a popup element is simply this:
     });
 
     /**
-    Returns the source URL for the fragment displayed
-    in the current popup, or `undefined` if no  popup is open.
+    Returns the URL from which the current popup's contents were loaded.
+    
+    Returns `undefined` if no  popup is open.
     
     @function up.popup.url
     @return {String}
@@ -9027,6 +9415,7 @@ The HTML of a popup element is simply this:
     Returns whether popup modal is currently open.
     
     @function up.popup.isOpen
+    @return {Boolean}
     @stable
      */
     isOpen = function() {
@@ -9061,11 +9450,11 @@ The HTML of a popup element is simply this:
     @param {String} [options.animation]
       The animation to use when opening the popup.
     @param {Number} [options.duration]
-      The duration of the animation. See [`up.animate`](/up.animate).
+      The duration of the animation. See [`up.animate()`](/up.animate).
     @param {Number} [options.delay]
-      The delay before the animation starts. See [`up.animate`](/up.animate).
+      The delay before the animation starts. See [`up.animate()`](/up.animate).
     @param {String} [options.easing]
-      The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
+      The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
     @param {String} [options.method="GET"]
       Override the request method.
     @param {Boolean} [options.sticky=false]
@@ -9122,7 +9511,7 @@ The HTML of a popup element is simply this:
             state.coveredTitle = document.title;
           }
           state.sticky = options.sticky;
-          options.beforeSwap = function() {
+          options.provideTarget = function() {
             return createFrame(target);
           };
           extractOptions = u.merge(options, {
@@ -9173,7 +9562,7 @@ The HTML of a popup element is simply this:
     
     @function up.popup.close
     @param {Object} options
-      See options for [`up.animate`](/up.animate).
+      See options for [`up.animate()`](/up.animate).
     @return {Promise}
       A promise that will be resolved once the modal's close
       animation has finished.
@@ -9201,7 +9590,7 @@ The HTML of a popup element is simply this:
         duration: config.closeDuration,
         easing: config.closeEasing
       });
-      u.extend(options, animateOptions);
+      u.assign(options, animateOptions);
       return up.bus.whenEmitted('up:popup:close', {
         message: 'Closing popup',
         $element: state.$popup
@@ -9252,6 +9641,8 @@ The HTML of a popup element is simply this:
     
     @methods up.popup.contains
     @param {String} elementOrSelector
+      The element to test
+    @return {Boolean}
     @stable
      */
     contains = function(elementOrSelector) {
@@ -9322,10 +9713,18 @@ The HTML of a popup element is simply this:
     up.bus.onEscape(closeAsap);
 
     /**
-    When an element with this attribute is clicked,
-    a currently open popup is closed.
+    When this element is clicked, a currently open [popup](/up.popup) is closed.
     
     Does nothing if no popup is currently open.
+    
+    \#\#\# Example
+    
+    Clickin on this `<span>` will close a currently open popup:
+    
+        <span class='up-close'>Close this popup</span>
+    
+    When a popup changes the current URL, you might need to deal with content being displayed
+    as either a popup or a full page.
     
     To make a link that closes the current popup, but follows to
     a fallback destination if no popup is open:
@@ -9632,7 +10031,7 @@ or function.
       if (u.documentHasVerticalScrollbar()) {
         $body = $('body');
         scrollbarWidth = u.scrollbarWidth();
-        bodyRightPadding = parseInt($body.css('padding-right'));
+        bodyRightPadding = parseFloat($body.css('padding-right'));
         bodyRightShift = scrollbarWidth + bodyRightPadding;
         unshiftBody = u.temporaryCss($body, {
           'padding-right': bodyRightShift + "px",
@@ -9642,7 +10041,7 @@ or function.
         return up.layout.anchoredRight().each(function() {
           var $element, elementRight, elementRightShift, unshifter;
           $element = $(this);
-          elementRight = parseInt($element.css('right'));
+          elementRight = parseFloat($element.css('right'));
           elementRightShift = scrollbarWidth + elementRight;
           unshifter = u.temporaryCss($element, {
             'right': elementRightShift
@@ -9666,6 +10065,7 @@ or function.
     This also returns `true` if the modal is in an opening or closing animation.
     
     @function up.modal.isOpen
+    @return {Boolean}
     @stable
      */
     isOpen = function() {
@@ -9712,11 +10112,11 @@ or function.
     @param {String} [options.animation]
       The animation to use when opening the modal.
     @param {Number} [options.duration]
-      The duration of the animation. See [`up.animate`](/up.animate).
+      The duration of the animation. See [`up.animate()`](/up.animate).
     @param {Number} [options.delay]
-      The delay before the animation starts. See [`up.animate`](/up.animate).
+      The delay before the animation starts. See [`up.animate()`](/up.animate).
     @param {String} [options.easing]
-      The timing function that controls the animation's acceleration. [`up.animate`](/up.animate).
+      The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
     @return {Promise}
       A promise that will be resolved when the modal has been loaded and
       the opening animation has completed.
@@ -9731,7 +10131,7 @@ or function.
     /**
     Opens a modal for the given URL.
     
-    Example:
+    \#\#\# Example
     
         up.modal.visit('/foo', { target: '.list' });
     
@@ -9747,7 +10147,7 @@ or function.
       The CSS selector to extract from the response.
       The extracted content will be placed into the dialog window.
     @param {Object} options
-      See options for [`up.modal.follow`](/up.modal.follow).
+      See options for [`up.modal.follow()`](/up.modal.follow).
     @return {Promise}
       A promise that will be resolved when the modal has been loaded and the opening
       animation has completed.
@@ -9763,7 +10163,7 @@ or function.
     [Extracts](/up.extract) the given CSS selector from the given HTML string and
     opens the results in a modal.
     
-    Example:
+    \#\#\# Example
     
         var html = 'before <div class="content">inner</div> after';
         up.modal.extract('.content', html);
@@ -9780,7 +10180,7 @@ or function.
     @param {String} html
       The HTML containing the modal content.
     @param {Object} options
-      See options for [`up.modal.follow`](/up.modal.follow).
+      See options for [`up.modal.follow()`](/up.modal.follow).
     @return {Promise}
       A promise that will be resolved when the modal has been opened and the opening
       animation has completed.
@@ -9856,7 +10256,7 @@ or function.
             state.coveredUrl = up.browser.url();
             state.coveredTitle = document.title;
           }
-          options.beforeSwap = function() {
+          options.provideTarget = function() {
             return createFrame(target, options);
           };
           extractOptions = u.merge(options, {
@@ -9907,7 +10307,7 @@ or function.
     
     @function up.modal.close
     @param {Object} options
-      See options for [`up.animate`](/up.animate)
+      See options for [`up.animate()`](/up.animate)
     @return {Promise}
       A promise that will be resolved once the modal's close
       animation has finished.
@@ -10021,6 +10421,8 @@ or function.
     
     @function up.modal.contains
     @param {String} elementOrSelector
+      The element to test
+    @return {Boolean}
     @stable
      */
     contains = function(elementOrSelector) {
@@ -10033,7 +10435,7 @@ or function.
         overrideConfig = {};
       }
       up.log.warn('The up.modal.flavor function is deprecated. Use the up.modal.flavors property instead.');
-      return u.extend(flavorOverrides(name), overrideConfig);
+      return u.assign(flavorOverrides(name), overrideConfig);
     };
 
     /**
@@ -10459,7 +10861,7 @@ The tooltip element is appended to the end of `<body>`.
     
     @function up.tooltip.close
     @param {Object} options
-      See options for [`up.animate`](/up.animate).
+      See options for [`up.animate()`](/up.animate).
     @return {Promise}
       A promise for the end of the closing animation.
     @stable
@@ -10484,7 +10886,7 @@ The tooltip element is appended to the end of `<body>`.
         duration: config.closeDuration,
         easing: config.closeEasing
       });
-      u.extend(options, animateOptions);
+      u.assign(options, animateOptions);
       state.phase = 'closing';
       return up.destroy(state.$tooltip, options).then(function() {
         state.phase = 'closed';
@@ -10592,18 +10994,18 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     <a href="/bar" up-follow class="up-current">Bar</a>
 
 
-@class up.navigation
+@class up.feedback
  */
 
 (function() {
-  up.navigation = (function($) {
+  up.feedback = (function($) {
     var CLASS_ACTIVE, SELECTOR_SECTION, config, currentClass, findActionableArea, locationChanged, normalizeUrl, reset, sectionUrls, start, stop, u, urlSet;
     u = up.util;
 
     /**
     Sets default options for this module.
     
-    @property up.navigation.config
+    @property up.feedback.config
     @param {Number} [config.currentClasses]
       An array of classes to set on [links that point the current location](/up-current).
     @stable
@@ -10715,9 +11117,9 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     
         var $button = $('button');
         $button.on('click', function() {
-          up.navigation.start($button);
+          up.feedback.start($button);
           up.ajax(...).always(function() {
-            up.navigation.stop($button);
+            up.feedback.stop($button);
           });
         });
     
@@ -10725,18 +11127,18 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     
         var $button = $('button');
         $button.on('click', function() {
-          up.navigation.start($button, function() {
+          up.feedback.start($button, function() {
             up.ajax(...);
           });
         });
     
-    @method up.navigation.start
+    @method up.feedback.start
     @param {Element|jQuery|String} elementOrSelector
       The element to mark as active
     @param {Function} [action]
       An optional function to run while the element is marked as loading.
       The function must return a promise.
-      Once the promise resolves, the element will be [marked as no longer loading](/up.navigation.stop).
+      Once the promise resolves, the element will be [marked as no longer loading](/up.feedback.stop).
     @internal
      */
     start = function(elementOrSelector, action) {
@@ -10790,7 +11192,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     This happens automatically when network requests initiated by the Unpoly API have completed.
     Use this function if you make custom network calls from your own JavaScript code.
     
-    @function up.navigation.stop
+    @function up.feedback.stop
     @param {jQuery} event.$element
       The link or form that has finished loading.
     @internal
@@ -10798,10 +11200,6 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     stop = function(elementOrSelector) {
       var $element;
       $element = findActionableArea(elementOrSelector);
-      up.emit('up:navigated', {
-        $element: $element,
-        message: false
-      });
       return $element.removeClass(CLASS_ACTIVE);
     };
 
@@ -10860,13 +11258,12 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     up.on('up:framework:reset', reset);
     return {
       config: config,
-      defaults: function() {
-        return up.fail('up.navigation.defaults(...) no longer exists. Set values on he up.navigation.config property instead.');
-      },
       start: start,
       stop: stop
     };
   })(jQuery);
+
+  up.renamedModule('navigation', 'feedback');
 
 }).call(this);
 
