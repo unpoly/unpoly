@@ -733,7 +733,7 @@ up.dom = (($) ->
         up.first('.field:has(&)', $input); // returns the .field containing $input
   @return {jQuery|Undefined}
     The first element that is neither a ghost or being destroyed,
-    or `undefined` if no such element was given.
+    or `undefined` if no such element was found.
   @experimental
   ###
   first = (selectorOrElement, options) ->

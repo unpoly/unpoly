@@ -430,8 +430,6 @@ up.bus = (($) ->
   Unpoly will not boot if the current browser is [not supported](/up.browser.isSupported).
   This leaves you with a classic server-side application on legacy browsers.
 
-  Emits the [`up:framework:boot`](/up:framework:boot) event.
-
   @function up.boot
   @internal
   ###

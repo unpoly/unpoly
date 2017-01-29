@@ -203,7 +203,7 @@ up.proxy = (($) ->
   @param {String} [request.timeout]
     A timeout in milliseconds for the request.
 
-    If [`up.proxy.config.maxRequests`](/up.proxy.config#maxRequests) is set, the timeout
+    If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set, the timeout
     will not include the time spent waiting in the queue.
   @return
     A promise for the response that is API-compatible with the

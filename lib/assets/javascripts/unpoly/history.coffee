@@ -64,6 +64,12 @@ up.history = (($) ->
   isCurrentUrl = (url) ->
     normalizeUrl(url) == currentUrl()
 
+  ###*
+  Remembers the given URL so we can offer `up.history.previousUrl()`.
+
+  @function observeNewUrl
+  @internal
+  ###
   observeNewUrl = (url) ->
     if nextPreviousUrl
       previousUrl = nextPreviousUrl
@@ -151,13 +157,16 @@ up.history = (($) ->
       url = currentUrl()
       up.log.group "Restoring URL %s", url, ->
         popSelector = config.popTargets.join(', ')
-        up.replace popSelector, url,
+        replaced = up.replace popSelector, url,
           history: false,     # don't push a new state
           title: true,        # do extract the title from the response
           reveal: false,
           transition: 'none',
           saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
           restoreScroll: config.restoreScroll
+        replaced.then ->
+          url = currentUrl()
+          up.emit('up:history:restored', url: url, message: "Restored location #{url}")
     else
       up.puts 'Ignoring a state not pushed by Unpoly (%o)', state
 
@@ -166,8 +175,6 @@ up.history = (($) ->
     up.layout.saveScroll(url: previousUrl)
     state = event.originalEvent.state
     restoreStateOnPop(state)
-    url = currentUrl()
-    up.emit('up:history:restored', url: url, message: "Restored location #{url}")
 
   ###*
   This event is [emitted](/up.emit) after a history entry has been restored.

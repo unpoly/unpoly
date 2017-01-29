@@ -205,7 +205,7 @@ up.protocol = (($) ->
   @param [config.methodHeader='X-Up-Method']
   @param [config.methodCookie='_up_method']
   @param [config.methodParam='_method']
-    The name of the POST parameter when [wrapping HTTP methods](/up.form.config#wrapMethods)
+    The name of the POST parameter when [wrapping HTTP methods](/up.form.config#config.wrapMethods)
     in a `POST` request.
   @experimental
   ###

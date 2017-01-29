@@ -522,7 +522,7 @@ up.layout = (($) ->
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
 
   Instead of using this attribute,
-  you can also configure a selector in [`up.layout.config.fixedTop`](/up.layout.config#fixedTop).
+  you can also configure a selector in [`up.layout.config.fixedTop`](/up.layout.config#config.fixedTop).
 
   \#\#\# Example
 
@@ -542,7 +542,7 @@ up.layout = (($) ->
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
 
   Instead of using this attribute,
-  you can also configure a selector in [`up.layout.config.fixedBottom`](/up.layout.config#fixedBottom).
+  you can also configure a selector in [`up.layout.config.fixedBottom`](/up.layout.config#config.fixedBottom).
 
   \#\#\# Example
 
@@ -566,7 +566,7 @@ up.layout = (($) ->
   with a CSS of `right: 0` with `position: fixed` or `position:absolute`.
 
   Instead of giving this attribute to any affected element,
-  you can also configure a selector in [`up.layout.config.anchoredRight`](/up.layout.config#anchoredRight).
+  you can also configure a selector in [`up.layout.config.anchoredRight`](/up.layout.config#config.anchoredRight).
 
   \#\#\# Example
 

@@ -26,7 +26,9 @@ Unreleased
 
 ### Breaking changes
 
-- `up.proxy.config.wrapMethodParam` is now `up.protocol.config.methodParam`
+- `up.proxy.config.wrapMethodParam` is now [`up.protocol.config.methodParam`](/up.protocol.config#config.methodParam).
+- The event [`up:history:restored`](/up:history:restored) is no longer emitted when a history state
+  was not created by Unpoly.
 
 
 0.33.0

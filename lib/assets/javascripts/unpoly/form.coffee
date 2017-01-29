@@ -673,7 +673,7 @@ up.form = (($) ->
   With the Bootstrap bindings, Unpoly will also look
   for a container with the `form-group` class.
 
-  You can change this default behavior by setting [`up.form.config.validateTargets`](/up.form.config#validateTargets):
+  You can change this default behavior by setting [`up.form.config.validateTargets`](/up.form.config#config.validateTargets):
 
       // Always update the entire form containing the current field ("&")
       up.form.config.validateTargets = ['form &']
