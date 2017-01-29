@@ -375,8 +375,8 @@ up.syntax = (($) ->
   ###
 
   ###*
-  If an element annotated with [`up-data`] is inserted into the DOM,
-  Up will parse the JSON and pass the resulting object to any matching
+  If an element with an `up-data` attribute enters the DOM,
+  Unpoly will parse the JSON and pass the resulting object to any matching
   [`up.compiler()`](/up.compiler) handlers.
 
   For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)

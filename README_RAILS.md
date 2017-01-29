@@ -11,11 +11,11 @@ The methods documented below are available in all controllers, views and helpers
 
 ### Detecting a fragment update
 
-To test whether the current request is a [fragment update](http://unpoly.com/up.replace):
+To test whether the current request is a [fragment update](http://unpoly.com/up.link):
 
     up?
 
-To retrieve the CSS selector that is being [updated](http://unpoly.com/up.replace):
+To retrieve the CSS selector that is being [updated](http://unpoly.com/up.link):
 
     up.target
 

@@ -11,8 +11,10 @@ Most Unpoly interactions emit DOM events that are prefixed with `up:`.
 Events often have both present ([`up:modal:open`](/up:modal:open))
 and past forms ([`up:modal:opened`](/up:modal:opened)).
 
-You can usually prevent an action by listening to the present form
-and call `preventDefault()` on the `event` object:
+
+\#\#\# Preventing events
+
+You can prevent most present form events by calling `preventDefault()`:
 
     $(document).on('up:modal:open', function(event) {
       if (event.url == '/evil') {
@@ -22,8 +24,7 @@ and call `preventDefault()` on the `event` object:
     });
 
 
-A better way to bind event listeners
-------------------------------------
+\#\#\# A better way to bind event listeners
 
 Instead of using jQuery to bind  an event handler to `document`, you can also
 use the more convenient [`up.on()`](/up.on):

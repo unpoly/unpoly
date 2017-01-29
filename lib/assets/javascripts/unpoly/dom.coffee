@@ -26,7 +26,13 @@ up.dom = (($) ->
     the linked JavaScript file.
   @param {String} [options.fallbacks=['body']]
     When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
+
     The first selector that matches an element in the current page (or response) will be used.
+    If the response contains none of the selectors, an error message will be shown.
+
+    It is recommend to always keep `'body'` as the last selector in the last in the case
+    your server or load balancer renders an error message that does not contain your
+    application layout.
   @param {String} [options.fallbackTransition='none']
     The transition to use when using a fallback target.
   @stable

@@ -2,13 +2,12 @@
 Browser history
 ===============
   
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
+In an Unpoly app, every page has an URL.
 
-- Explain how the other modules manipulate history
-- Decide whether we want to expose these methods as public API
-- Document methods and parameters
+[Fragment updates](/up.link) automatically update the URL.
+
+
+Going back behavior .... configure.
 
 @class up.history
 ###
@@ -17,6 +16,8 @@ up.history = (($) ->
   u = up.util
 
   ###*
+  Configures behavior when the user goes back or forward in browser history.
+
   @property up.history.config
   @param {Array} [config.popTargets=['body']]
     An array of CSS selectors to replace when the user goes
@@ -199,7 +200,7 @@ up.history = (($) ->
   Note that this will *not* call `location.back()`, but will set
   the link's `up-href` attribute to the actual, previous URL.
 
-  \#\#\# Under the hood
+  \#\#\# Example
 
   This link ...
 

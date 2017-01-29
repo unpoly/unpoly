@@ -508,12 +508,11 @@ up.form = (($) ->
 
   \#\#\# Redirects
 
-  Unpoly requires two additional response headers to detect redirects,
+  Unpoly requires an additional response headers to detect redirects,
   which are otherwise undetectable for an AJAX client.
 
-  When the form's action performs a redirect, the server should echo
-  the new request's URL as a response header `X-Up-Location`
-  and the request's HTTP method as `X-Up-Method: GET`.
+  After the form's action performs a redirect, the next response should echo
+  the new request's URL as a response header `X-Up-Location`.
 
   If you are using Unpoly via the `unpoly-rails` gem, these headers
   are set automatically for every request.

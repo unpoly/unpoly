@@ -276,15 +276,18 @@ up.browser = (($) ->
   ###*
   Returns whether Unpoly supports the current browser.
 
-  This also returns `true` if Unpoly only support some features, but falls back
-  gracefully for other features. E.g. IE9 is almost fully supported, but due to
-  its lack of [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
-  Unpoly falls back to a full page load when asked to manipulate history.
-
-  Currently Unpoly supports IE9 with jQuery 1.9+.
-  On older browsers Unpoly will prevent itself from [booting](/up.boot)
+  If this returns `false` Unpoly will prevent itself from [booting](/up.boot)
   and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
   This leaves you with a classic server-side application.
+  This is usually a better fallback than loading incompatible Javascript and causing
+  many errors on load.
+
+  \#\#\# Graceful degradation
+
+  This function also returns `true` if Unpoly only support some features, but can degrade
+  gracefully for other features. E.g. Internet Explorer 9 is almost fully supported, but due to
+  its lack of [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
+  Unpoly falls back to a full page load when asked to manipulate history.
 
   @function up.browser.isSupported
   @experimental
