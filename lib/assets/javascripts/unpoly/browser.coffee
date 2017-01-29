@@ -290,7 +290,7 @@ up.browser = (($) ->
   Unpoly falls back to a full page load when asked to manipulate history.
 
   @function up.browser.isSupported
-  @experimental
+  @stable
   ###
   isSupported = ->
     (!isIE8OrWorse()) && isRecentJQuery()
