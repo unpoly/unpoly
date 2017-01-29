@@ -11,6 +11,13 @@ Unreleased
 
 ### Compatible changes
 
+- During the initial page load Unpoly now [reveals](/up.reveal) an element matching the
+  `#hash` in the current URL.
+
+  Other than the default behavior found in browsers, `up.revealHash` works with
+  [multiple viewports](/up-viewport) and honors [fixed elements](/up-fixed-top) obstructing the user's
+  view of the viewport.
+- New experimental function [`up.layout.revealHash()`](/up.layout.revealHash).
 - The optional server protocol is now [documented](/up.protocol).
   The protocol is already implemented by the [`unpoly-rails`](https://rubygems.org/gems/unpoly-rails) Ruby gem.
 - New experimental property [`up.protocol.config`](/up.protocol.config)

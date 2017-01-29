@@ -281,6 +281,27 @@ up.layout = (($) ->
     else
       u.resolvedDeferred()
 
+  ###*
+  [Reveals](/up.reveal) an element matching the `#hash` in the current URL.
+
+  Other than the default behavior found in browsers, `up.revealHash` works with
+  [multiple viewports](/up-viewport) and honors [fixed elements](/up-fixed-top) obstructing the user's
+  view of the viewport.
+
+  This is called automatically when the page loads initially.
+
+  @function up.layout.revealHash
+  @experimental
+  ###
+  revealHash = ->
+    if hash = up.browser.hash()
+      if $match = firstHashTarget(hash)
+        reveal($match)
+      else
+        u.rejectedPromise()
+    else
+      u.resolvedPromise()
+
   viewportSelector = ->
     u.multiSelector(config.viewports)
 
@@ -430,12 +451,9 @@ up.layout = (($) ->
       revealOptions = {}
       if options.source
         parsed = u.parseUrl(options.source)
-        if parsed.hash && parsed.hash != '#'
-          id = parsed.hash.substr(1)
-          $target = u.findWithSelf($element, "##{id}, a[name='#{id}']")
-          if $target.length
-            $element = $target
-            revealOptions.top = true
+        if $target = firstHashTarget(parsed.hash)
+          $element = $target
+          revealOptions.top = true
       reveal($element, revealOptions)
     else
       u.resolvedDeferred()
@@ -570,10 +588,22 @@ up.layout = (($) ->
   @stable
   ###
 
+  ###*
+  @function up.layout.firstHashTarget
+  @internal
+  ###
+  firstHashTarget = (hash) ->
+    if hash = up.browser.hash(hash)
+      up.first("[id='#{hash}'], a[name='#{hash}']")
+
+  up.on 'up:app:booted', revealHash
+
   up.on 'up:framework:reset', reset
 
   knife: eval(Knife?.point)
   reveal: reveal
+  revealHash: revealHash
+  firstHashTarget: firstHashTarget
   scroll: scroll
   finishScrolling: finishScrolling
   config: config
@@ -591,3 +621,4 @@ up.layout = (($) ->
 
 up.scroll = up.layout.scroll
 up.reveal = up.layout.reveal
+up.revealHash = up.layout.revealHash

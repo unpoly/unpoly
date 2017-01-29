@@ -310,6 +310,21 @@ up.browser = (($) ->
   sessionStorage = u.memoize ->
     window.sessionStorage || { getItem: u.noop, setItem: u.noop, removeItem: u.noop }
 
+  ###*
+  Returns `'foo'` if the hash is `'#foo'`.
+
+  Returns undefined if the hash is `'#'`, `''` or `undefined`.
+
+  @function up.browser.hash
+  @internal
+  ###
+  hash = (value) ->
+    value ||= location.hash
+    value ||= ''
+    value = value.substr(1) if value[0] == '#'
+    u.presence(value)
+
+
   knife: eval(Knife?.point)
   url: url
   loadPage: loadPage
@@ -326,5 +341,6 @@ up.browser = (($) ->
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   sessionStorage: sessionStorage
   popCookie: popCookie
+  hash: hash
 
 )(jQuery)

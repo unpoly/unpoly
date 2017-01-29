@@ -318,6 +318,36 @@ describe 'up.layout', ->
         # Viewing 100 to 199
         expect($viewport.scrollTop()).toBe(100)
 
+    describe 'revealHash', ->
+
+      it 'reveals an element with an ID matching the hash in the location', ->
+        revealSpy = up.layout.knife.mock('reveal')
+        $match = affix('div#hash')
+        location.hash = '#hash'
+        up.layout.revealHash()
+        expect(revealSpy).toHaveBeenCalledWith($match)
+
+      it 'reveals a named anchor matching the hash in the location', ->
+        revealSpy = up.layout.knife.mock('reveal')
+        $match = affix('a[name="hash"]')
+        location.hash = '#hash'
+        up.layout.revealHash()
+        expect(revealSpy).toHaveBeenCalledWith($match)
+
+      it 'does nothing and returns a rejected promise if no element or anchor matches the hash in the location', ->
+        revealSpy = up.layout.knife.mock('reveal')
+        location.hash = '#hash'
+        promise = up.layout.revealHash()
+        expect(revealSpy).not.toHaveBeenCalled()
+        expect(promise.state()).toEqual('rejected')
+
+      it 'does nothing and returns a resolved promise if the location has no hash', ->
+        revealSpy = up.layout.knife.mock('reveal')
+        location.hash = ''
+        promise = up.layout.revealHash()
+        expect(revealSpy).not.toHaveBeenCalled()
+        expect(promise.state()).toEqual('resolved')
+
     describe 'up.layout.viewportsWithin', ->
 
       it 'should have tests'
