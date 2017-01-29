@@ -5,7 +5,7 @@
 
 (function() {
   this.up = {
-    version: "0.33.0",
+    version: "0.34.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,7 +41,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, locationFromXhr, map, margins, measure, memoize, merge, methodFromXhr, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, titleFromXhr, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -1367,30 +1367,6 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
-    @function up.util.locationFromXhr
-    @internal
-     */
-    locationFromXhr = function(xhr) {
-      return xhr.getResponseHeader('X-Up-Location');
-    };
-
-    /**
-    @function up.util.titleFromXhr
-    @internal
-     */
-    titleFromXhr = function(xhr) {
-      return xhr.getResponseHeader('X-Up-Title');
-    };
-
-    /**
-    @function up.util.methodFromXhr
-    @internal
-     */
-    methodFromXhr = function(xhr) {
-      return xhr.getResponseHeader('X-Up-Method');
-    };
-
-    /**
     Returns a copy of the given object that only contains
     the given properties.
     
@@ -2463,9 +2439,6 @@ that might save you from loading something like [Underscore.js](http://underscor
       contains: contains,
       toArray: toArray,
       castedAttr: castedAttr,
-      locationFromXhr: locationFromXhr,
-      titleFromXhr: titleFromXhr,
-      methodFromXhr: methodFromXhr,
       clientSize: clientSize,
       only: only,
       except: except,
@@ -2514,6 +2487,244 @@ that might save you from loading something like [Underscore.js](http://underscor
 }).call(this);
 
 /**
+Server protocol
+===============
+
+You rarely need to change server-side code
+in order to use Unpoly. There is no need to provide a JSON API, or add
+extra routes for AJAX requests. The server simply renders a series
+of full HTML pages, just like it would without Unpoly.
+
+That said, there is an **optional** protocol your server can use to
+exchange additional information when Unpoly is [updating fragments](/up.link).
+
+While the protocol can help you optimize performance and handle some
+edge cases, implementing it is entirely optional. For instance,
+`unpoly.com` itself is a static site that uses Unpoly on the frontend
+and doesn't even have a server component.
+
+If you have [installed Unpoly as a Rails gem](/install/rails), the protocol
+is already implemented and you will get some
+[Ruby bindings](https://github.com/unpoly/unpoly/blob/master/README_RAILS.md)
+in your controllers and views. If your server-side app uses another language
+or framework, you should be able to implement the protocol in a very short time.
+
+
+\#\#\# Redirect detection
+
+Unpoly requires an additional response header to detect redirects, which are
+otherwise undetectable for any AJAX client.
+
+After the form's action performs a redirect, the next response should include the new
+URL in this HTTP header:
+
+```http
+X-Up-Location: /current-url
+```
+
+The **simplest implementation** is to set this header for every request.
+
+
+\#\#\# Optimizing responses
+
+When [updating a fragment](http://unpoly.com/up.link), Unpoly will send
+an additional HTTP header containing the CSS selector that is being replaced:
+
+```http
+X-Up-Target: .user-list
+```
+
+Server-side code is free to **optimize its response** by only returning HTML
+that matches the selector. For example, you might prefer to not render an
+expensive sidebar if the sidebar is not targeted.
+
+
+\#\#\# Pushing a document title to the client
+
+When [updating a fragment](http://unpoly.com/up.link), Unpoly will by default
+extract the `<title>` from the server response and update the document title accordingly.
+
+The server can also force Unpoly to set a document title by passing a HTTP header:
+
+```http
+X-Up-Title: My server-pushed title
+```
+
+This is useful when you [optimize your response](#optimizing-responses) and not render
+the application layout unless it is targeted. Since your optimized response
+no longer includes a `<title>`, you can instead use the HTTP header to pass the document title.
+
+
+\#\#\# Signaling failed form submissions
+
+When [submitting a form via AJAX](http://unpoly.com/form-up-target)
+Unpoly needs to know whether the form submission has failed (to update the form with
+validation errors) or succeeded (to update the `up-target` selector).
+
+For Unpoly to be able to detect a failed form submission, the response must be
+return a non-200 HTTP status code. We recommend to use either
+400 (bad request) or 422 (unprocessable entity).
+
+To do so in [Ruby on Rails](http://rubyonrails.org/), pass a [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option):
+
+    class UsersController < ApplicationController
+
+      def create
+        user_params = params[:user].permit(:email, :password)
+        @user = User.new(user_params)
+        if @user.save?
+          sign_in @user
+        else
+          render 'form', status: :bad_request
+        end
+      end
+
+    end
+
+
+\#\#\# Detecting live form validations
+
+When [validating a form](http://unpoly.com/up-validate), Unpoly will
+send an additional HTTP header containing a CSS selector for the form that is
+being updated:
+
+```http
+X-Up-Validate: .user-form
+```
+
+When detecting a validation request, the server is expected to **validate (but not save)**
+the form submission and render a new copy of the form with validation errors.
+
+Below you will an example for a writing route that is aware of Unpoly's live form
+validations. The code is for [Ruby on Rails](http://rubyonrails.org/),
+but you can adapt it for other languages:
+
+    class UsersController < ApplicationController
+
+      def create
+        user_params = params[:user].permit(:email, :password)
+        @user = User.new(user_params)
+        if request.headers['X-Up-Validate']
+          @user.valid?  # run validations, but don't save to the database
+          render 'form' # render form with error messages
+        elsif @user.save?
+          sign_in @user
+        else
+          render 'form', status: :bad_request
+        end
+      end
+
+    end
+
+
+\#\#\# Signaling the initial request method
+
+This is a edge case you might or might not care about:
+If the initial page was loaded  with a non-`GET` HTTP method, Unpoly prefers to make a full
+page load when you try to update a fragment. Once a page was loaded with a `GET` method,
+Unpoly will restore its standard behavior.
+
+The reason for this is that some browsers remember the method of the initial page load and don't let
+the application change it, even with `pushState`. Thus, when the user reloads the page much later,
+an affected browser might request a `POST`, `PUT`, etc. instead of the correct method.
+
+In order to allow Unpoly to detect the HTTP method of the initial page load,
+the server must set a cookie:
+
+```http
+Set-Cookie: _up_method=POST
+```
+
+When Unpoly boots, it will look for this cookie and configure its behavior accordingly.
+The cookie is then deleted in order to not affect following requests.
+
+The **simplest implementation** is to set this cookie for every request that is neither
+`GET` nor contains an [`X-Up-Target` header](/#optimizing-responses). For all other requests
+an existing cookie should be deleted.
+
+
+@class up.protocol
+ */
+
+(function() {
+  up.protocol = (function($) {
+    var config, initialRequestMethod, locationFromXhr, methodFromXhr, titleFromXhr, u;
+    u = up.util;
+
+    /**
+    @function up.protocol.locationFromXhr
+    @internal
+     */
+    locationFromXhr = function(xhr) {
+      return xhr.getResponseHeader(config.locationHeader);
+    };
+
+    /**
+    @function up.protocol.titleFromXhr
+    @internal
+     */
+    titleFromXhr = function(xhr) {
+      return xhr.getResponseHeader(config.titleHeader);
+    };
+
+    /**
+    @function up.protocol.methodFromXhr
+    @internal
+     */
+    methodFromXhr = function(xhr) {
+      return xhr.getResponseHeader(config.methodHeader);
+    };
+
+    /**
+    Server-side companion libraries like unpoly-rails set this cookie so we
+    have a way to detect the request method of the initial page load.
+    There is no JavaScript API for this.
+    
+    @function up.protocol.initialRequestMethod
+    @internal
+     */
+    initialRequestMethod = u.memoize(function() {
+      var methodFromServer;
+      methodFromServer = up.browser.popCookie(config.methodCookie);
+      return (methodFromServer || 'get').toLowerCase();
+    });
+
+    /**
+    Configures strings used in the optional [server protocol](/up.protocol).
+    
+    @property up.protocol.config
+    @param [config.targetHeader='X-Up-Target']
+    @param [config.locationHeader='X-Up-Location']
+    @param [config.titleHeader='X-Up-Title']
+    @param [config.validateHeader='X-Up-Validate']
+    @param [config.methodHeader='X-Up-Method']
+    @param [config.methodCookie='_up_method']
+    @param [config.methodParam='_method']
+      The name of the POST parameter when [wrapping HTTP methods](/up.form.config#config.wrapMethods)
+      in a `POST` request.
+    @experimental
+     */
+    config = u.config({
+      targetHeader: 'X-Up-Target',
+      locationHeader: 'X-Up-Location',
+      validateHeader: 'X-Up-Validate',
+      titleHeader: 'X-Up-Title',
+      methodHeader: 'X-Up-Method',
+      methodCookie: '_up_method',
+      methodParam: '_method'
+    });
+    return {
+      config: config,
+      locationFromXhr: locationFromXhr,
+      titleFromXhr: titleFromXhr,
+      methodFromXhr: methodFromXhr,
+      initialRequestMethod: initialRequestMethod
+    };
+  })(jQuery);
+
+}).call(this);
+
+/**
 Browser support
 ===============
 
@@ -2536,7 +2747,7 @@ IE 8
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, initialRequestMethod, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sessionStorage, setLocationHref, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
+    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, hash, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sessionStorage, setLocationHref, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /**
@@ -2567,7 +2778,7 @@ IE 8
           return $field.appendTo($form);
         };
         addField({
-          name: up.proxy.config.wrapMethodParam,
+          name: up.protocol.config.methodParam,
           value: method
         });
         if (csrfField = up.rails.csrfField()) {
@@ -2719,7 +2930,7 @@ IE 8
     @experimental
      */
     canPushState = u.memoize(function() {
-      return u.isDefined(history.pushState) && initialRequestMethod() === 'get';
+      return u.isDefined(history.pushState) && up.protocol.initialRequestMethod() === 'get';
     });
 
     /**
@@ -2785,6 +2996,14 @@ IE 8
       minor = parseInt(parts[1]);
       return major >= 2 || (major === 1 && minor >= 9);
     });
+
+    /**
+    Returns and deletes a cookie with the given name
+    Inspired by Turbolinks: https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/lib/assets/javascripts/turbolinks.coffee#L292
+    
+    @function up.browser.popCookie
+    @internal
+     */
     popCookie = function(name) {
       var ref, value;
       value = (ref = document.cookie.match(new RegExp(name + "=(\\w+)"))) != null ? ref[1] : void 0;
@@ -2808,25 +3027,25 @@ IE 8
         return u.unresolvablePromise();
       }
     };
-    initialRequestMethod = u.memoize(function() {
-      return (popCookie('_up_request_method') || 'get').toLowerCase();
-    });
 
     /**
     Returns whether Unpoly supports the current browser.
     
-    This also returns `true` if Unpoly only support some features, but falls back
-    gracefully for other features. E.g. IE9 is almost fully supported, but due to
+    If this returns `false` Unpoly will prevent itself from [booting](/up.boot)
+    and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
+    This leaves you with a classic server-side application.
+    This is usually a better fallback than loading incompatible Javascript and causing
+    many errors on load.
+    
+    \#\#\# Graceful degradation
+    
+    This function also returns `true` if Unpoly only support some features, but can degrade
+    gracefully for other features. E.g. Internet Explorer 9 is almost fully supported, but due to
     its lack of [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
     Unpoly falls back to a full page load when asked to manipulate history.
     
-    Currently Unpoly supports IE9 with jQuery 1.9+.
-    On older browsers Unpoly will prevent itself from [booting](/up.boot)
-    and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
-    This leaves you with a classic server-side application.
-    
     @function up.browser.isSupported
-    @experimental
+    @stable
      */
     isSupported = function() {
       return (!isIE8OrWorse()) && isRecentJQuery();
@@ -2864,6 +3083,23 @@ IE 8
         removeItem: u.noop
       };
     });
+
+    /**
+    Returns `'foo'` if the hash is `'#foo'`.
+    
+    Returns undefined if the hash is `'#'`, `''` or `undefined`.
+    
+    @function up.browser.hash
+    @internal
+     */
+    hash = function(value) {
+      value || (value = location.hash);
+      value || (value = '');
+      if (value[0] === '#') {
+        value = value.substr(1);
+      }
+      return u.presence(value);
+    };
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       url: url,
@@ -2879,7 +3115,9 @@ IE 8
       puts: puts,
       sprintf: sprintf,
       sprintfWithFormattedArgs: sprintfWithFormattedArgs,
-      sessionStorage: sessionStorage
+      sessionStorage: sessionStorage,
+      popCookie: popCookie,
+      hash: hash
     };
   })(jQuery);
 
@@ -2898,8 +3136,10 @@ Most Unpoly interactions emit DOM events that are prefixed with `up:`.
 Events often have both present ([`up:modal:open`](/up:modal:open))
 and past forms ([`up:modal:opened`](/up:modal:opened)).
 
-You can usually prevent an action by listening to the present form
-and call `preventDefault()` on the `event` object:
+
+\#\#\# Preventing events
+
+You can prevent most present form events by calling `preventDefault()`:
 
     $(document).on('up:modal:open', function(event) {
       if (event.url == '/evil') {
@@ -2909,8 +3149,7 @@ and call `preventDefault()` on the `event` object:
     });
 
 
-A better way to bind event listeners
-------------------------------------
+\#\#\# A better way to bind event listeners
 
 Instead of using jQuery to bind  an event handler to `document`, you can also
 use the more convenient [`up.on()`](/up.on):
@@ -3364,8 +3603,6 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     
     Unpoly will not boot if the current browser is [not supported](/up.browser.isSupported).
     This leaves you with a classic server-side application on legacy browsers.
-    
-    Emits the [`up:framework:boot`](/up:framework:boot) event.
     
     @function up.boot
     @internal
@@ -4129,8 +4366,8 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
      */
 
     /**
-    If an element annotated with [`up-data`] is inserted into the DOM,
-    Up will parse the JSON and pass the resulting object to any matching
+    If an element with an `up-data` attribute enters the DOM,
+    Unpoly will parse the JSON and pass the resulting object to any matching
     [`up.compiler()`](/up.compiler) handlers.
     
     For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
@@ -4232,13 +4469,12 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
 Browser history
 ===============
   
-\#\#\# Incomplete documentation!
-  
-We need to work on this page:
+In an Unpoly app, every page has an URL.
 
-- Explain how the other modules manipulate history
-- Decide whether we want to expose these methods as public API
-- Document methods and parameters
+[Fragment updates](/up.link) automatically update the URL.
+
+
+Going back behavior .... configure.
 
 @class up.history
  */
@@ -4249,6 +4485,8 @@ We need to work on this page:
     u = up.util;
 
     /**
+    Configures behavior when the user goes back or forward in browser history.
+    
     @property up.history.config
     @param {Array} [config.popTargets=['body']]
       An array of CSS selectors to replace when the user goes
@@ -4298,6 +4536,13 @@ We need to work on this page:
     isCurrentUrl = function(url) {
       return normalizeUrl(url) === currentUrl();
     };
+
+    /**
+    Remembers the given URL so we can offer `up.history.previousUrl()`.
+    
+    @function observeNewUrl
+    @internal
+     */
     observeNewUrl = function(url) {
       if (nextPreviousUrl) {
         previousUrl = nextPreviousUrl;
@@ -4401,9 +4646,9 @@ We need to work on this page:
       if (state != null ? state.fromUp : void 0) {
         url = currentUrl();
         return up.log.group("Restoring URL %s", url, function() {
-          var popSelector;
+          var popSelector, replaced;
           popSelector = config.popTargets.join(', ');
-          return up.replace(popSelector, url, {
+          replaced = up.replace(popSelector, url, {
             history: false,
             title: true,
             reveal: false,
@@ -4411,24 +4656,26 @@ We need to work on this page:
             saveScroll: false,
             restoreScroll: config.restoreScroll
           });
+          return replaced.then(function() {
+            url = currentUrl();
+            return up.emit('up:history:restored', {
+              url: url,
+              message: "Restored location " + url
+            });
+          });
         });
       } else {
         return up.puts('Ignoring a state not pushed by Unpoly (%o)', state);
       }
     };
     pop = function(event) {
-      var state, url;
+      var state;
       observeNewUrl(currentUrl());
       up.layout.saveScroll({
         url: previousUrl
       });
       state = event.originalEvent.state;
-      restoreStateOnPop(state);
-      url = currentUrl();
-      return up.emit('up:history:restored', {
-        url: url,
-        message: "Restored location " + url
-      });
+      return restoreStateOnPop(state);
     };
 
     /**
@@ -4461,7 +4708,7 @@ We need to work on this page:
     Note that this will *not* call `location.back()`, but will set
     the link's `up-href` attribute to the actual, previous URL.
     
-    \#\#\# Under the hood
+    \#\#\# Example
     
     This link ...
     
@@ -4528,7 +4775,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
   var slice = [].slice;
 
   up.layout = (function($) {
-    var SCROLL_PROMISE_KEY, anchoredRight, config, finishScrolling, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealOrRestoreScroll, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
+    var SCROLL_PROMISE_KEY, anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealHash, revealOrRestoreScroll, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
     u = up.util;
 
     /**
@@ -4808,6 +5055,31 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         return u.resolvedDeferred();
       }
     };
+
+    /**
+    [Reveals](/up.reveal) an element matching the `#hash` in the current URL.
+    
+    Other than the default behavior found in browsers, `up.revealHash` works with
+    [multiple viewports](/up-viewport) and honors [fixed elements](/up-fixed-top) obstructing the user's
+    view of the viewport.
+    
+    This is called automatically when the page loads initially.
+    
+    @function up.layout.revealHash
+    @experimental
+     */
+    revealHash = function() {
+      var $match, hash;
+      if (hash = up.browser.hash()) {
+        if ($match = firstHashTarget(hash)) {
+          return reveal($match);
+        } else {
+          return u.rejectedPromise();
+        }
+      } else {
+        return u.resolvedPromise();
+      }
+    };
     viewportSelector = function() {
       return u.multiSelector(config.viewports);
     };
@@ -4986,7 +5258,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @internal
      */
     revealOrRestoreScroll = function(selectorOrElement, options) {
-      var $element, $target, id, parsed, revealOptions;
+      var $element, $target, parsed, revealOptions;
       $element = $(selectorOrElement);
       if (options.restoreScroll) {
         return restoreScroll({
@@ -4996,13 +5268,9 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         revealOptions = {};
         if (options.source) {
           parsed = u.parseUrl(options.source);
-          if (parsed.hash && parsed.hash !== '#') {
-            id = parsed.hash.substr(1);
-            $target = u.findWithSelf($element, "#" + id + ", a[name='" + id + "']");
-            if ($target.length) {
-              $element = $target;
-              revealOptions.top = true;
-            }
+          if ($target = firstHashTarget(parsed.hash)) {
+            $element = $target;
+            revealOptions.top = true;
           }
         }
         return reveal($element, revealOptions);
@@ -5074,7 +5342,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
     
     Instead of using this attribute,
-    you can also configure a selector in [`up.layout.config.fixedTop`](/up.layout.config#fixedTop).
+    you can also configure a selector in [`up.layout.config.fixedTop`](/up.layout.config#config.fixedTop).
     
     \#\#\# Example
     
@@ -5094,7 +5362,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
     
     Instead of using this attribute,
-    you can also configure a selector in [`up.layout.config.fixedBottom`](/up.layout.config#fixedBottom).
+    you can also configure a selector in [`up.layout.config.fixedBottom`](/up.layout.config#config.fixedBottom).
     
     \#\#\# Example
     
@@ -5117,7 +5385,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     with a CSS of `right: 0` with `position: fixed` or `position:absolute`.
     
     Instead of giving this attribute to any affected element,
-    you can also configure a selector in [`up.layout.config.anchoredRight`](/up.layout.config#anchoredRight).
+    you can also configure a selector in [`up.layout.config.anchoredRight`](/up.layout.config#config.anchoredRight).
     
     \#\#\# Example
     
@@ -5138,10 +5406,23 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @selector [up-anchored=right]
     @stable
      */
+
+    /**
+    @function up.layout.firstHashTarget
+    @internal
+     */
+    firstHashTarget = function(hash) {
+      if (hash = up.browser.hash(hash)) {
+        return up.first("[id='" + hash + "'], a[name='" + hash + "']");
+      }
+    };
+    up.on('up:app:booted', revealHash);
     up.on('up:framework:reset', reset);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       reveal: reveal,
+      revealHash: revealHash,
+      firstHashTarget: firstHashTarget,
       scroll: scroll,
       finishScrolling: finishScrolling,
       config: config,
@@ -5160,6 +5441,8 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
   up.scroll = up.layout.scroll;
 
   up.reveal = up.layout.reveal;
+
+  up.revealHash = up.layout.revealHash;
 
 }).call(this);
 
@@ -5193,7 +5476,13 @@ is built from these functions. You can use them to extend Unpoly from your
       the linked JavaScript file.
     @param {String} [options.fallbacks=['body']]
       When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
+    
       The first selector that matches an element in the current page (or response) will be used.
+      If the response contains none of the selectors, an error message will be shown.
+    
+      It is recommend to always keep `'body'` as the last selector in the last in the case
+      your server or load balancer renders an error message that does not contain your
+      application layout.
     @param {String} [options.fallbackTransition='none']
       The transition to use when using a fallback target.
     @stable
@@ -5456,14 +5745,14 @@ is built from these functions. You can use them to extend Unpoly from your
      */
     processResponse = function(isSuccess, selector, url, request, xhr, options) {
       var isReloadable, newRequest, query, titleFromXhr, urlFromServer;
-      options.method = u.normalizeMethod(u.option(u.methodFromXhr(xhr), options.method));
+      options.method = u.normalizeMethod(u.option(up.protocol.methodFromXhr(xhr), options.method));
       isReloadable = options.method === 'GET';
-      if (urlFromServer = u.locationFromXhr(xhr)) {
+      if (urlFromServer = up.protocol.locationFromXhr(xhr)) {
         url = urlFromServer;
         if (isSuccess && up.proxy.isCachable(request)) {
           newRequest = {
             url: url,
-            method: u.methodFromXhr(xhr),
+            method: up.protocol.methodFromXhr(xhr),
             target: selector
           };
           up.proxy.alias(request, newRequest);
@@ -5504,7 +5793,7 @@ is built from these functions. You can use them to extend Unpoly from your
           options.history = false;
         }
       }
-      if (shouldExtractTitle(options) && (titleFromXhr = u.titleFromXhr(xhr))) {
+      if (shouldExtractTitle(options) && (titleFromXhr = up.protocol.titleFromXhr(xhr))) {
         options.title = titleFromXhr;
       }
       if (options.preload) {
@@ -5952,7 +6241,7 @@ is built from these functions. You can use them to extend Unpoly from your
           up.first('.field:has(&)', $input); // returns the .field containing $input
     @return {jQuery|Undefined}
       The first element that is neither a ghost or being destroyed,
-      or `undefined` if no such element was given.
+      or `undefined` if no such element was found.
     @experimental
      */
     first = function(selectorOrElement, options) {
@@ -7194,8 +7483,6 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       An array of uppercase HTTP method names. AJAX requests with one of these methods
       will be converted into a `POST` request and carry their original method as a `_method`
       parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-    @param {String} [config.wrapMethodParam]
-      The name of the POST parameter when wrapping HTTP methods in a `POST` request.
     @param {Array<String>} [config.safeMethods]
       An array of uppercase HTTP method names that are considered idempotent.
       The proxy cache will only cache idempotent requests and will clear the entire
@@ -7209,7 +7496,6 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       cacheExpiry: 1000 * 60 * 5,
       maxRequests: 4,
       wrapMethods: ['PATCH', 'PUT', 'DELETE'],
-      wrapMethodParam: '_method',
       safeMethods: ['GET', 'OPTIONS', 'HEAD']
     });
     cacheKey = function(request) {
@@ -7335,7 +7621,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     @param {String} [request.timeout]
       A timeout in milliseconds for the request.
     
-      If [`up.proxy.config.maxRequests`](/up.proxy.config#maxRequests) is set, the timeout
+      If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set, the timeout
       will not include the time spent waiting in the queue.
     @return
       A promise for the response that is API-compatible with the
@@ -7525,9 +7811,9 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       }));
       request = u.copy(request);
       request.headers || (request.headers = {});
-      request.headers['X-Up-Target'] = request.target;
+      request.headers[up.protocol.config.targetHeader] = request.target;
       if (u.contains(config.wrapMethods, request.method)) {
-        request.data = u.appendRequestData(request.data, config.wrapMethodParam, request.method);
+        request.data = u.appendRequestData(request.data, up.protocol.config.methodParam, request.method);
         request.method = 'POST';
       }
       if (u.isFormData(request.data)) {
@@ -8467,7 +8753,7 @@ open dialogs with sub-forms, etc. all without losing form state.
         options.headers || (options.headers = {});
         options.transition = false;
         options.failTransition = false;
-        options.headers['X-Up-Validate'] = options.validate;
+        options.headers[up.protocol.config.validateHeader] = options.validate;
         if (!canAjaxSubmit) {
           return u.unresolvablePromise();
         }
@@ -8857,12 +9143,11 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     \#\#\# Redirects
     
-    Unpoly requires two additional response headers to detect redirects,
+    Unpoly requires an additional response headers to detect redirects,
     which are otherwise undetectable for an AJAX client.
     
-    When the form's action performs a redirect, the server should echo
-    the new request's URL as a response header `X-Up-Location`
-    and the request's HTTP method as `X-Up-Method: GET`.
+    After the form's action performs a redirect, the next response should echo
+    the new request's URL as a response header `X-Up-Location`.
     
     If you are using Unpoly via the `unpoly-rails` gem, these headers
     are set automatically for every request.
@@ -9024,7 +9309,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     With the Bootstrap bindings, Unpoly will also look
     for a container with the `form-group` class.
     
-    You can change this default behavior by setting [`up.form.config.validateTargets`](/up.form.config#validateTargets):
+    You can change this default behavior by setting [`up.form.config.validateTargets`](/up.form.config#config.validateTargets):
     
         // Always update the entire form containing the current field ("&")
         up.form.config.validateTargets = ['form &']
