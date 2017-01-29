@@ -39,7 +39,7 @@ up.browser = (($) ->
         $field = $('<input type="hidden">')
         $field.attr(field)
         $field.appendTo($form)
-      addField(name: up.proxy.config.wrapMethodParam, value: method)
+      addField(name: up.protocol.config.methodParam, value: method)
       if csrfField = up.rails.csrfField()
         addField(csrfField)
       u.each u.requestDataAsArray(options.data), addField
@@ -186,7 +186,7 @@ up.browser = (($) ->
     # initial request method was anything other than GET (but allow the rest of the
     # Unpoly framework to work). This way Unpoly will fall back to full page loads until
     # the framework was booted from a GET request.
-    u.isDefined(history.pushState) && initialRequestMethod() == 'get'
+    u.isDefined(history.pushState) && up.protocol.initialRequestMethod() == 'get'
 
   ###*
   Returns whether this browser supports animation using
@@ -247,8 +247,13 @@ up.browser = (($) ->
     minor = parseInt(parts[1])
     major >= 2 || (major == 1 && minor >= 9)
 
-  # Returns and deletes a cookie with the given name
-  # Inspired by Turbolinks: https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/lib/assets/javascripts/turbolinks.coffee#L292
+  ###*
+  Returns and deletes a cookie with the given name
+  Inspired by Turbolinks: https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/lib/assets/javascripts/turbolinks.coffee#L292
+
+  @function up.browser.popCookie
+  @internal
+  ###
   popCookie = (name) ->
     value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
     if u.isPresent(value)
@@ -267,12 +272,6 @@ up.browser = (($) ->
       u.resolvedPromise()
     else
       u.unresolvablePromise()
-
-  # Server-side companion libraries like unpoly-rails set this cookie so we
-  # have a way to detect the request method of the initial page load.
-  # There is no JavaScript API for this.
-  initialRequestMethod = u.memoize ->
-    (popCookie('_up_request_method') || 'get').toLowerCase()
 
   ###*
   Returns whether Unpoly supports the current browser.
@@ -323,5 +322,6 @@ up.browser = (($) ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   sessionStorage: sessionStorage
+  popCookie: popCookie
 
 )(jQuery)

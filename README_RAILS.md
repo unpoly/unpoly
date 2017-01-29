@@ -70,7 +70,7 @@ The Unpoly frontend [requires these headers to detect redirects](http://unpoly.c
 
 ### Automatic method detection for initial page load
 
-`unpoly-rails` sets an `_up_request_method` cookie that Unpoly needs to detect the request method for the initial page load.
+`unpoly-rails` sets an `_up_method` cookie that Unpoly needs to detect the request method for the initial page load.
 
 If the initial page was loaded with a non-`GET` HTTP method, Unpoly will fall back to full page loads for all actions that require `pushState`.
 

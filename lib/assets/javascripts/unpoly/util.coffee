@@ -1173,27 +1173,6 @@ up.util = (($) ->
 #    String(object) == "false"
 
   ###*
-  @function up.util.locationFromXhr
-  @internal
-  ###
-  locationFromXhr = (xhr) ->
-    xhr.getResponseHeader('X-Up-Location')
-
-  ###*
-  @function up.util.titleFromXhr
-  @internal
-  ###
-  titleFromXhr = (xhr) ->
-    xhr.getResponseHeader('X-Up-Title')
-
-  ###*
-  @function up.util.methodFromXhr
-  @internal
-  ###
-  methodFromXhr = (xhr) ->
-    xhr.getResponseHeader('X-Up-Method')
-
-  ###*
   Returns a copy of the given object that only contains
   the given properties.
 
@@ -2078,9 +2057,6 @@ up.util = (($) ->
   contains: contains
   toArray: toArray
   castedAttr: castedAttr
-  locationFromXhr: locationFromXhr
-  titleFromXhr: titleFromXhr
-  methodFromXhr: methodFromXhr
   clientSize: clientSize
   only: only
   except: except

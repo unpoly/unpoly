@@ -13,7 +13,7 @@ module Unpoly
   module Rails
     module RequestMethod
 
-      COOKIE_NAME = '_up_request_method'
+      COOKIE_NAME = '_up_method'
 
       def self.included(base)
         base.before_filter :set_up_request_method_cookie
@@ -22,10 +22,10 @@ module Unpoly
       private
 
       def set_up_request_method_cookie
-        if request.get?
-          cookies.delete(COOKIE_NAME)
-        else
+        if !request.get? && !up?
           cookies[COOKIE_NAME] = request.request_method
+        else
+          cookies.delete(COOKIE_NAME)
         end
       end
 

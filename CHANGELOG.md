@@ -6,6 +6,21 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Compatible changes
+
+- The optional server protocol is now [documented](/up.protocol).
+  The protocol is already implemented by the [`unpoly-rails`](https://rubygems.org/gems/unpoly-rails) Ruby gem.
+- New experimental property [`up.protocol.config`](/up.protocol.config)
+
+
+### Breaking changes
+
+- `up.proxy.config.wrapMethodParam` is now `up.protocol.config.methodParam`
+
+
 0.33.0
 ------
 

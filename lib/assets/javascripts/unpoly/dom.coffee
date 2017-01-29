@@ -271,19 +271,19 @@ up.dom = (($) ->
   @internal
   ###
   processResponse = (isSuccess, selector, url, request, xhr, options) ->
-    options.method = u.normalizeMethod(u.option(u.methodFromXhr(xhr), options.method))
+    options.method = u.normalizeMethod(u.option(up.protocol.methodFromXhr(xhr), options.method))
 
     isReloadable = (options.method == 'GET')
 
     # The server can send us the current path using a header value.
     # This way we know the actual URL if the server has redirected.
     # TODO: This logic should be moved to up.proxy.
-    if urlFromServer = u.locationFromXhr(xhr)
+    if urlFromServer = up.protocol.locationFromXhr(xhr)
       url = urlFromServer
       if isSuccess && up.proxy.isCachable(request)
         newRequest =
           url: url
-          method: u.methodFromXhr(xhr) # If the server redirects, we must use the signaled method (should be GET)
+          method: up.protocol.methodFromXhr(xhr) # If the server redirects, we must use the signaled method (should be GET)
           target: selector
         up.proxy.alias(request, newRequest)
     else if isReloadable
@@ -307,7 +307,7 @@ up.dom = (($) ->
         options.source  = 'keep'
         options.history = false
 
-    if shouldExtractTitle(options) && titleFromXhr = u.titleFromXhr(xhr)
+    if shouldExtractTitle(options) && titleFromXhr = up.protocol.titleFromXhr(xhr)
       options.title = titleFromXhr
 
     if options.preload

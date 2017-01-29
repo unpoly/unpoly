@@ -144,4 +144,50 @@ describe BindingTestController do
 
   end
 
+  describe 'request method cookie' do
+
+    describe 'if the request is both non-GET and not a fragment update' do
+
+      it 'echoes the request method in an _up_method cookie ' do
+        put :text
+        expect(response.cookies['_up_method']).to eq('PUT')
+      end
+
+    end
+
+    describe 'if the request is not a fragment update, but GET' do
+
+      it 'does not set the cookie' do
+        get :text
+        expect(response.cookies['_up_method']).to be_nil
+      end
+
+      it 'deletes an existing cookie' do
+        request.cookies['_up_method'] = 'PUT'
+        get :text
+        expect(response.cookies['_up_method']).to be_nil
+      end
+
+    end
+
+    describe 'if the request is non-GET but a fragment update' do
+
+      it 'does not set the cookie' do
+        request.headers['X-Up-Target'] = '.target'
+        put :text
+        expect(response.cookies['_up_method']).to be_nil
+      end
+
+      it 'deletes an existing cookie' do
+        request.cookies['_up_method'] = 'PUT'
+        request.headers['X-Up-Target'] = '.target'
+        put :text
+        expect(response.cookies['_up_method']).to be_nil
+      end
+
+    end
+
+
+  end
+
 end

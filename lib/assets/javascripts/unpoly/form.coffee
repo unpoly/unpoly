@@ -142,7 +142,7 @@ up.form = (($) ->
       options.headers ||= {}
       options.transition = false
       options.failTransition = false
-      options.headers['X-Up-Validate'] = options.validate
+      options.headers[up.protocol.config.validateHeader] = options.validate
       # If a form has file inputs and the browser does not support FormData,
       # we cannot offer inline validations.
       unless canAjaxSubmit

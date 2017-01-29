@@ -1,5 +1,6 @@
 #= require ./unpoly/namespace
 #= require ./unpoly/util
+#= require ./unpoly/protocol
 #= require ./unpoly/browser
 #= require ./unpoly/bus
 #= require ./unpoly/log

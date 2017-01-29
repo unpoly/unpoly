@@ -79,8 +79,6 @@ up.proxy = (($) ->
     An array of uppercase HTTP method names. AJAX requests with one of these methods
     will be converted into a `POST` request and carry their original method as a `_method`
     parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-  @param {String} [config.wrapMethodParam]
-    The name of the POST parameter when wrapping HTTP methods in a `POST` request.
   @param {Array<String>} [config.safeMethods]
     An array of uppercase HTTP method names that are considered idempotent.
     The proxy cache will only cache idempotent requests and will clear the entire
@@ -94,7 +92,6 @@ up.proxy = (($) ->
     cacheExpiry: 1000 * 60 * 5
     maxRequests: 4
     wrapMethods: ['PATCH', 'PUT', 'DELETE']
-    wrapMethodParam: '_method'
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
 
   cacheKey = (request) ->
@@ -410,10 +407,10 @@ up.proxy = (($) ->
     request = u.copy(request)
 
     request.headers ||= {}
-    request.headers['X-Up-Target'] = request.target
+    request.headers[up.protocol.config.targetHeader] = request.target
 
     if u.contains(config.wrapMethods, request.method)
-      request.data = u.appendRequestData(request.data, config.wrapMethodParam, request.method)
+      request.data = u.appendRequestData(request.data, up.protocol.config.methodParam, request.method)
       request.method = 'POST'
 
     if u.isFormData(request.data)
