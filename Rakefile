@@ -11,7 +11,7 @@ module Unpoly
     SPROCKETS_SOURCES = %w(lib/assets/javascripts lib/assets/stylesheets)
     SPROCKETS_OUTPUT_FOLDER = 'dist'
     NPM_MANIFEST = 'package.json'
-    VISIBLE_TASKS = %w(publish:build publish:commit publish:release)
+    VISIBLE_TASKS = %w(publish:build publish:commit publish:release publish:all)
   end
 end
 
