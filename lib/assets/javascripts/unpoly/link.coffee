@@ -5,7 +5,7 @@ Linking to fragments
 In a traditional web application, the entire page is destroyed and re-created when the
 user follows a link:
 
-![Traditional page flow](/images/tutorial/fragment_flow_vanilla.svg){:width="620px" class="picture has_border is_sepia has_padding"}
+![Traditional page flow](/images/tutorial/fragment_flow_vanilla.svg){:width="620" class="picture has_border is_sepia has_padding"}
 
 This makes for an unfriendly experience:
 
@@ -22,7 +22,7 @@ attribute. The value of this attribute is a CSS selector that indicates which pa
 fragment to update. The server **still renders full HTML pages**, but we only use
 the targeted ragments and discard the rest:
 
-![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620px" class="picture has_border is_sepia has_padding"}
+![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620" class="picture has_border is_sepia has_padding"}
 
 With this model, following links feel smooth. All transient DOM changes outside the updated fragment are preserved.
 Pages also load much faster since the DOM, CSS and Javascript environments do not need to be
