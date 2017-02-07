@@ -34,7 +34,7 @@ up.tooltip = (($) ->
   u = up.util
 
   ###*
-  Sets default options for future tooltips.
+  Configures defaults for future tooltips.
 
   @property up.tooltip.config
   @param {String} [config.position]
@@ -119,8 +119,14 @@ up.tooltip = (($) ->
   ###*
   Opens a tooltip over the given element.
 
+  The unobtrusive variant of this is the [`[up-tooltip]`](/up-tooltip) selector.
+
+  \#\#\# Examples
+
+  In order to attach a tooltip to a `<span class="help">?</span>`:
+
       up.tooltip.attach('.help', {
-        html: 'Enter multiple words or phrases'
+        text: 'Enter multiple words or phrases'
       });
 
   @function up.tooltip.attach
@@ -139,7 +145,7 @@ up.tooltip = (($) ->
     The position of the tooltip.
     Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
   @param {String} [options.animation]
-    The animation to use when opening the tooltip.
+    The [animation](/up.motion) to use when opening the tooltip.
   @return {Promise}
     A promise that will be resolved when the tooltip's opening animation has finished.
   @stable
@@ -171,6 +177,7 @@ up.tooltip = (($) ->
 
   ###*
   Closes a currently shown tooltip.
+
   Does nothing if no tooltip is currently shown.
 
   @function up.tooltip.close
@@ -208,7 +215,9 @@ up.tooltip = (($) ->
     state.phase == 'opening' || state.phase == 'opened'
 
   ###*
-  Displays a tooltip with text content when hovering the mouse over this element:
+  Displays a tooltip with text content when hovering the mouse over this element.
+
+  \#\#\# Example
 
       <a href="/decks" up-tooltip="Show all decks">Decks</a>
 

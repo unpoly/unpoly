@@ -20,7 +20,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 - New experimental function [`up.layout.revealHash()`](/up.layout.revealHash).
 - The optional server protocol is now [documented](/up.protocol).
   The protocol is already implemented by the [`unpoly-rails`](https://rubygems.org/gems/unpoly-rails) Ruby gem.
-- New experimental property [`up.protocol.config`](/up.protocol.config)
+- New experimental property [`up.protocol.config`](/up.protocol.config).
 - [`up.browser.isSupported()`](/up.browser.isSupported) has been promoted from experimental to stable API
 
 

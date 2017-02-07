@@ -92,7 +92,7 @@ up.dom = (($) ->
 
   The current and new elements must both match the given CSS selector.
 
-  The UJS variant of this is the [`a[up-target]`](/a-up-target) selector.
+  The unobtrusive variant of this is the [`a[up-target]`](/a-up-target) selector.
 
   \#\#\# Example
 

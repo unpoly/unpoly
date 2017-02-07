@@ -107,7 +107,7 @@ up.link = (($) ->
       var $link = $('a:first'); // select link with jQuery
       up.follow($link);
 
-  The UJS variant of this are the [`a[up-target]`](/a-up-target) and [`a[up-follow]`](/a-up-follow) selectors.
+  The unobtrusive variant of this are the [`a[up-target]`](/a-up-target) and [`a[up-follow]`](/a-up-follow) selectors.
 
   @function up.follow
   @param {Element|jQuery|String} linkOrSelector

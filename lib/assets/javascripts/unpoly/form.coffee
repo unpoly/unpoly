@@ -49,7 +49,7 @@ up.form = (($) ->
   The response is parsed for a CSS selector and the matching elements will
   replace corresponding elements on the current page.
 
-  The UJS variant of this is the [`form[up-target]`](/form-up-target) selector.
+  The unobtrusive variant of this is the [`form[up-target]`](/form-up-target) selector.
   See the documentation for [`form[up-target]`](/form-up-target) for more
   information on how AJAX form submissions work in Unpoly.
 
@@ -165,7 +165,7 @@ up.form = (($) ->
 
   This is useful for observing text fields while the user is typing.
 
-  The UJS variant of this is the [`up-observe`](/up-observe) attribute.
+  The unobtrusive variant of this is the [`up-observe`](/up-observe) attribute.
 
   \#\#\# Example
 
@@ -305,7 +305,7 @@ up.form = (($) ->
   The changed form field will be assigned a CSS class [`up-active`](/up-active)
   while the autosubmitted form is processing.
 
-  The UJS variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
+  The unobtrusive variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
 
   @function up.autosubmit
   @param {String|Element|jQuery} selectorOrElement
@@ -343,7 +343,7 @@ up.form = (($) ->
   HTTP header. Upon seeing this header, the server is expected to validate (but not save)
   the form submission and render a new copy of the form with validation errors.
 
-  The UJS variant of this is the [`[up-validate]`](/up-validate) selector.
+  The unobtrusive variant of this is the [`[up-validate]`](/up-validate) selector.
   See the documentation for [`[up-validate]`](/up-validate) for more information
   on how server-side validation works in Unpoly.
 
