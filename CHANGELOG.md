@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Compatible changes
+
+- Elements with [`up-show-for`](/up-show-for) and [`up-hide-for`](/up-hide-for) attributes
+  can now be inserted dynamically after its controlling [`up-switch`](/up-switch) field has been
+  compiled.
+
+
 0.34.0
 ------
 

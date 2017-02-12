@@ -40,7 +40,7 @@
 
     mock = (symbol) ->
       oldImpl = get(symbol)
-      spy = jasmine.createSpy(symbol)
+      spy = jasmine.createSpy(symbol, oldImpl)
       set(symbol, spy)
       cleaner = -> set(symbol, oldImpl)
       Knife.cleaners.push(cleaner)

@@ -246,8 +246,6 @@ up.form = (($) ->
     callback = null
     rawCallback = u.option(callbackArg, u.presentAttr($fields, 'up-observe'))
     if u.isString(rawCallback)
-      console.debug("**** RAW CALLBACK IS %o", rawCallback)
-      # rawCallback = 'true'
       callback = (value, $field) -> eval(rawCallback)
     else
       callback = rawCallback or up.fail('up.observe: No change callback given')
@@ -375,28 +373,7 @@ up.form = (($) ->
     promise = up.submit($form, options)
     promise
 
-  currentValuesForSwitch = ($field) ->
-    values = undefined
-    if $field.is('input[type=checkbox]')
-      if $field.is(':checked')
-        values = [':checked', ':present', $field.val()]
-      else
-        values = [':unchecked', ':blank']
-    else if $field.is('input[type=radio]')
-      $checkedButton = $field.closest('form, body').find("input[type='radio'][name='#{$field.attr('name')}']:checked")
-      if $checkedButton.length
-        values = [':checked', ':present', $checkedButton.val()]
-      else
-        values = [':unchecked', ':blank']
-    else
-      value = $field.val()
-      if u.isPresent(value)
-        values = [':present', value]
-      else
-        values = [':blank']
-    values
-
-  currentValuesForSwitch = ($field) ->
+  switcherValues = ($field) ->
     if $field.is('input[type=checkbox]')
       if $field.is(':checked')
         value = $field.val()
@@ -439,26 +416,47 @@ up.form = (($) ->
   @internal
   ###
   switchTargets = (fieldOrSelector, options) ->
-    $field = $(fieldOrSelector)
+    $switcher = $(fieldOrSelector)
     options = u.options(options)
-    targets = u.option(options.target, $field.attr('up-switch'))
-    u.isPresent(targets) or up.fail("No switch target given for %o", $field.get(0))
-    fieldValues = currentValuesForSwitch($field)
-    $(targets).each ->
-      $target = $(this)
-      if hideValues = $target.attr('up-hide-for')
-        hideValues = hideValues.split(' ')
-        show = u.intersect(fieldValues, hideValues).length == 0
+    targetSelector = u.option(options.target, $switcher.attr('up-switch'))
+    u.isPresent(targetSelector) or up.fail("No switch target given for %o", $switcher.get(0))
+    fieldValues = switcherValues($switcher)
+    $(targetSelector).each ->
+      switchTarget($(this), fieldValues)
+
+  ###*
+  @internal
+  ###
+  switchTarget = (target, fieldValues) ->
+    $target = $(target)
+    fieldValues ||= switcherValues(findSwitcherForTarget($target))
+    if hideValues = $target.attr('up-hide-for')
+      hideValues = hideValues.split(' ')
+      show = u.intersect(fieldValues, hideValues).length == 0
+    else
+      if showValues = $target.attr('up-show-for')
+        showValues = showValues.split(' ')
       else
-        if showValues = $target.attr('up-show-for')
-          showValues = showValues.split(' ')
-        else
-          # If the target has neither up-show-for or up-hide-for attributes,
-          # assume the user wants the target to be visible whenever anything
-          # is checked or entered.
-          showValues = [':present', ':checked']
-        show = u.intersect(fieldValues, showValues).length > 0
-      $target.toggle(show)
+        # If the target has neither up-show-for or up-hide-for attributes,
+        # assume the user wants the target to be visible whenever anything
+        # is checked or entered.
+        showValues = [':present', ':checked']
+      show = u.intersect(fieldValues, showValues).length > 0
+    $target.toggle(show)
+    $target.addClass('up-switched')
+
+  ###*
+  @internal
+  ###
+  findSwitcherForTarget = ($target) ->
+    $switchers = $('[up-switch]')
+    switcher = u.detect $switchers, (switcher) ->
+      target = $(switcher).attr('up-switch')
+      $target.is(target)
+    if switcher
+      $(switcher)
+    else
+      u.fail('Could not find [up-switch] field for %o', $element.get(0))
 
   ###*
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
@@ -792,6 +790,10 @@ up.form = (($) ->
 
   up.compiler '[up-switch]', ($field) ->
     switchTargets($field)
+
+  up.compiler '[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', ($element) ->
+    switchTarget($element)
+
 
   ###*
   Observes this field or form and runs a callback when a value changes.

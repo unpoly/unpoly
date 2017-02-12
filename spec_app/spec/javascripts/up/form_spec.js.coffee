@@ -703,3 +703,43 @@ describe 'up.form', ->
           expect($target).toBeVisible()
           @$textInput.val('bar').change()
           expect($target).toBeHidden()
+
+      describe 'when an [up-show-for] element is dynamically inserted later', ->
+
+        it "shows the element iff it matches the [up-switch] control's value", ->
+          $select = affix('select[up-switch=".target"]')
+          $select.affix('option[value="foo"]').text('Foo')
+          $select.affix('option[value="bar"]').text('Bar')
+          $select.val('foo')
+          up.hello($select)
+
+          # New target enters the DOM after [up-switch] has been compiled
+          $target = affix('.target[up-show-for="bar"]')
+          up.hello($target)
+
+          expect($target).toBeHidden()
+
+          # Check that the new element will notify subsequent changes
+          $select.val('bar').change()
+          expect($target).toBeVisible()
+
+        it "doesn't re-switch targets that were part of the original compile run", ->
+          $container = affix('.container')
+
+          $select = $container.affix('select[up-switch=".target"]')
+          $select.affix('option[value="foo"]').text('Foo')
+          $select.affix('option[value="bar"]').text('Bar')
+          $select.val('foo')
+          $existingTarget = $container.affix('.target.existing[up-show-for="bar"]')
+
+          switchTargetSpy = up.form.knife.mock('switchTarget').and.callThrough()
+
+          up.hello($container)
+
+          # New target enters the DOM after [up-switch] has been compiled
+          $lateTarget = $container.affix('.target.late[up-show-for="bar"]')
+          up.hello($lateTarget)
+
+          expect(switchTargetSpy.calls.count()).toBe(2)
+          expect(switchTargetSpy.calls.argsFor(0)[0]).toEqual($existingTarget)
+          expect(switchTargetSpy.calls.argsFor(1)[0]).toEqual($lateTarget)
