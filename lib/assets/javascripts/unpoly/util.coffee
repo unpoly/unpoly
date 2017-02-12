@@ -778,7 +778,7 @@ up.util = (($) ->
   Waits for the given number of milliseconds, the nruns the given callback.
 
   If the number of milliseconds is zero, the callback is run in the current execution frame.
-  See [`up.util.nextFrame()`] for running a function in the next executation frame.
+  See [`up.util.nextFrame()`](/up.util.nextFrame) for running a function in the next executation frame.
 
   @function up.util.setTimer
   @param {Number} millis
