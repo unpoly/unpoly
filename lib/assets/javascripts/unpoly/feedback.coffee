@@ -63,7 +63,8 @@ up.feedback = (($) ->
   SELECTOR_SECTION = 'a, [up-href]'
 
   normalizeUrl = (url) ->
-    u.normalizeUrl(url) if u.isPresent(url)
+    if u.isPresent(url)
+      u.normalizeUrl(url, stripTrailingSlash: true)
 
   sectionUrls = ($section) ->
     urls = []

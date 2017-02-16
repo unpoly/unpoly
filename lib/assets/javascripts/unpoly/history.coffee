@@ -49,8 +49,10 @@ up.history = (($) ->
     previousUrl = undefined
     nextPreviousUrl = undefined
 
-  normalizeUrl = (url) ->
-    u.normalizeUrl(url, hash: true)
+  normalizeUrl = (url, normalizeOptions) ->
+    normalizeOptions ||= {}
+    normalizeOptions.hash = true
+    u.normalizeUrl(url, normalizeOptions)
 
   ###*
   Returns a normalized URL for the current history entry.
@@ -58,11 +60,12 @@ up.history = (($) ->
   @function up.history.url
   @experimental
   ###
-  currentUrl = ->
-    normalizeUrl(up.browser.url())
+  currentUrl = (normalizeOptions) ->
+    normalizeUrl(up.browser.url(), normalizeOptions)
   
   isCurrentUrl = (url) ->
-    normalizeUrl(url) == currentUrl()
+    normalizeOptions = { stripTrailingSlash: true }
+    normalizeUrl(url, normalizeOptions) == currentUrl(normalizeOptions)
 
   ###*
   Remembers the given URL so we can offer `up.history.previousUrl()`.
@@ -238,6 +241,7 @@ up.history = (($) ->
   push: push
   replace: replace
   url: currentUrl
+  isUrl: isCurrentUrl
   previousUrl: -> previousUrl
   normalizeUrl: normalizeUrl
 

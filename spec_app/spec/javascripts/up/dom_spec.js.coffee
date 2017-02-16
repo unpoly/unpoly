@@ -971,7 +971,7 @@ describe 'up.dom', ->
             promise = up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 30)
             promise.then(resolution)
             expect(resolution).not.toHaveBeenCalled()
-            u.setTimer 70, ->
+            u.setTimer 80, ->
               expect(resolution).toHaveBeenCalled()
               done()
 
