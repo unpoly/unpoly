@@ -5,7 +5,7 @@
 
 (function() {
   this.up = {
-    version: "0.34.0",
+    version: "0.34.1",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -107,7 +107,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       if (pathname[0] !== '/') {
         pathname = "/" + pathname;
       }
-      if ((options != null ? options.stripTrailingSlash : void 0) !== false) {
+      if ((options != null ? options.stripTrailingSlash : void 0) === true) {
         pathname = pathname.replace(/\/$/, '');
       }
       normalized += pathname;
@@ -4518,10 +4518,10 @@ Going back behavior .... configure.
       previousUrl = void 0;
       return nextPreviousUrl = void 0;
     };
-    normalizeUrl = function(url) {
-      return u.normalizeUrl(url, {
-        hash: true
-      });
+    normalizeUrl = function(url, normalizeOptions) {
+      normalizeOptions || (normalizeOptions = {});
+      normalizeOptions.hash = true;
+      return u.normalizeUrl(url, normalizeOptions);
     };
 
     /**
@@ -4530,11 +4530,15 @@ Going back behavior .... configure.
     @function up.history.url
     @experimental
      */
-    currentUrl = function() {
-      return normalizeUrl(up.browser.url());
+    currentUrl = function(normalizeOptions) {
+      return normalizeUrl(up.browser.url(), normalizeOptions);
     };
     isCurrentUrl = function(url) {
-      return normalizeUrl(url) === currentUrl();
+      var normalizeOptions;
+      normalizeOptions = {
+        stripTrailingSlash: true
+      };
+      return normalizeUrl(url, normalizeOptions) === currentUrl(normalizeOptions);
     };
 
     /**
@@ -4741,6 +4745,7 @@ Going back behavior .... configure.
       push: push,
       replace: replace,
       url: currentUrl,
+      isUrl: isCurrentUrl,
       previousUrl: function() {
         return previousUrl;
       },
@@ -5553,7 +5558,7 @@ is built from these functions. You can use them to extend Unpoly from your
     
     The current and new elements must both match the given CSS selector.
     
-    The UJS variant of this is the [`a[up-target]`](/a-up-target) selector.
+    The unobtrusive variant of this is the [`a[up-target]`](/a-up-target) selector.
     
     \#\#\# Example
     
@@ -8019,7 +8024,7 @@ Linking to fragments
 In a traditional web application, the entire page is destroyed and re-created when the
 user follows a link:
 
-![Traditional page flow](/images/tutorial/fragment_flow_vanilla.svg){:width="620px" class="picture has_border is_sepia has_padding"}
+![Traditional page flow](/images/tutorial/fragment_flow_vanilla.svg){:width="620" class="picture has_border is_sepia has_padding"}
 
 This makes for an unfriendly experience:
 
@@ -8036,7 +8041,7 @@ attribute. The value of this attribute is a CSS selector that indicates which pa
 fragment to update. The server **still renders full HTML pages**, but we only use
 the targeted ragments and discard the rest:
 
-![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620px" class="picture has_border is_sepia has_padding"}
+![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620" class="picture has_border is_sepia has_padding"}
 
 With this model, following links feel smooth. All transient DOM changes outside the updated fragment are preserved.
 Pages also load much faster since the DOM, CSS and Javascript environments do not need to be
@@ -8124,7 +8129,7 @@ new page is loading.
         var $link = $('a:first'); // select link with jQuery
         up.follow($link);
     
-    The UJS variant of this are the [`a[up-target]`](/a-up-target) and [`a[up-follow]`](/a-up-follow) selectors.
+    The unobtrusive variant of this are the [`a[up-target]`](/a-up-target) and [`a[up-follow]`](/a-up-follow) selectors.
     
     @function up.follow
     @param {Element|jQuery|String} linkOrSelector
@@ -8622,7 +8627,7 @@ open dialogs with sub-forms, etc. all without losing form state.
   var slice = [].slice;
 
   up.form = (function($) {
-    var autosubmit, config, currentValuesForSwitch, observe, observeField, reset, resolveValidateTarget, submit, switchTargets, u, validate;
+    var autosubmit, config, findSwitcherForTarget, observe, observeField, reset, resolveValidateTarget, submit, switchTarget, switchTargets, switcherValues, u, validate;
     u = up.util;
 
     /**
@@ -8663,7 +8668,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     The response is parsed for a CSS selector and the matching elements will
     replace corresponding elements on the current page.
     
-    The UJS variant of this is the [`form[up-target]`](/form-up-target) selector.
+    The unobtrusive variant of this is the [`form[up-target]`](/form-up-target) selector.
     See the documentation for [`form[up-target]`](/form-up-target) for more
     information on how AJAX form submissions work in Unpoly.
     
@@ -8775,7 +8780,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     This is useful for observing text fields while the user is typing.
     
-    The UJS variant of this is the [`up-observe`](/up-observe) attribute.
+    The unobtrusive variant of this is the [`up-observe`](/up-observe) attribute.
     
     \#\#\# Example
     
@@ -8857,7 +8862,6 @@ open dialogs with sub-forms, etc. all without losing form state.
       callback = null;
       rawCallback = u.option(callbackArg, u.presentAttr($fields, 'up-observe'));
       if (u.isString(rawCallback)) {
-        console.debug("**** RAW CALLBACK IS %o", rawCallback);
         callback = function(value, $field) {
           return eval(rawCallback);
         };
@@ -8917,7 +8921,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     The changed form field will be assigned a CSS class [`up-active`](/up-active)
     while the autosubmitted form is processing.
     
-    The UJS variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
+    The unobtrusive variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
     
     @function up.autosubmit
     @param {String|Element|jQuery} selectorOrElement
@@ -8964,7 +8968,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     HTTP header. Upon seeing this header, the server is expected to validate (but not save)
     the form submission and render a new copy of the form with validation errors.
     
-    The UJS variant of this is the [`[up-validate]`](/up-validate) selector.
+    The unobtrusive variant of this is the [`[up-validate]`](/up-validate) selector.
     See the documentation for [`[up-validate]`](/up-validate) for more information
     on how server-side validation works in Unpoly.
     
@@ -8995,33 +8999,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       promise = up.submit($form, options);
       return promise;
     };
-    currentValuesForSwitch = function($field) {
-      var $checkedButton, value, values;
-      values = void 0;
-      if ($field.is('input[type=checkbox]')) {
-        if ($field.is(':checked')) {
-          values = [':checked', ':present', $field.val()];
-        } else {
-          values = [':unchecked', ':blank'];
-        }
-      } else if ($field.is('input[type=radio]')) {
-        $checkedButton = $field.closest('form, body').find("input[type='radio'][name='" + ($field.attr('name')) + "']:checked");
-        if ($checkedButton.length) {
-          values = [':checked', ':present', $checkedButton.val()];
-        } else {
-          values = [':unchecked', ':blank'];
-        }
-      } else {
-        value = $field.val();
-        if (u.isPresent(value)) {
-          values = [':present', value];
-        } else {
-          values = [':blank'];
-        }
-      }
-      return values;
-    };
-    currentValuesForSwitch = function($field) {
+    switcherValues = function($field) {
       var $checkedButton, meta, value, values;
       if ($field.is('input[type=checkbox]')) {
         if ($field.is(':checked')) {
@@ -9071,28 +9049,55 @@ open dialogs with sub-forms, etc. all without losing form state.
     @internal
      */
     switchTargets = function(fieldOrSelector, options) {
-      var $field, fieldValues, targets;
-      $field = $(fieldOrSelector);
+      var $switcher, fieldValues, targetSelector;
+      $switcher = $(fieldOrSelector);
       options = u.options(options);
-      targets = u.option(options.target, $field.attr('up-switch'));
-      u.isPresent(targets) || up.fail("No switch target given for %o", $field.get(0));
-      fieldValues = currentValuesForSwitch($field);
-      return $(targets).each(function() {
-        var $target, hideValues, show, showValues;
-        $target = $(this);
-        if (hideValues = $target.attr('up-hide-for')) {
-          hideValues = hideValues.split(' ');
-          show = u.intersect(fieldValues, hideValues).length === 0;
-        } else {
-          if (showValues = $target.attr('up-show-for')) {
-            showValues = showValues.split(' ');
-          } else {
-            showValues = [':present', ':checked'];
-          }
-          show = u.intersect(fieldValues, showValues).length > 0;
-        }
-        return $target.toggle(show);
+      targetSelector = u.option(options.target, $switcher.attr('up-switch'));
+      u.isPresent(targetSelector) || up.fail("No switch target given for %o", $switcher.get(0));
+      fieldValues = switcherValues($switcher);
+      return $(targetSelector).each(function() {
+        return switchTarget($(this), fieldValues);
       });
+    };
+
+    /**
+    @internal
+     */
+    switchTarget = function(target, fieldValues) {
+      var $target, hideValues, show, showValues;
+      $target = $(target);
+      fieldValues || (fieldValues = switcherValues(findSwitcherForTarget($target)));
+      if (hideValues = $target.attr('up-hide-for')) {
+        hideValues = hideValues.split(' ');
+        show = u.intersect(fieldValues, hideValues).length === 0;
+      } else {
+        if (showValues = $target.attr('up-show-for')) {
+          showValues = showValues.split(' ');
+        } else {
+          showValues = [':present', ':checked'];
+        }
+        show = u.intersect(fieldValues, showValues).length > 0;
+      }
+      $target.toggle(show);
+      return $target.addClass('up-switched');
+    };
+
+    /**
+    @internal
+     */
+    findSwitcherForTarget = function($target) {
+      var $switchers, switcher;
+      $switchers = $('[up-switch]');
+      switcher = u.detect($switchers, function(switcher) {
+        var target;
+        target = $(switcher).attr('up-switch');
+        return $target.is(target);
+      });
+      if (switcher) {
+        return $(switcher);
+      } else {
+        return u.fail('Could not find [up-switch] field for %o', $element.get(0));
+      }
     };
 
     /**
@@ -9428,6 +9433,9 @@ open dialogs with sub-forms, etc. all without losing form state.
     });
     up.compiler('[up-switch]', function($field) {
       return switchTargets($field);
+    });
+    up.compiler('[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', function($element) {
+      return switchTarget($element);
     });
 
     /**
@@ -10982,7 +10990,7 @@ The tooltip element is appended to the end of `<body>`.
     u = up.util;
 
     /**
-    Sets default options for future tooltips.
+    Configures defaults for future tooltips.
     
     @property up.tooltip.config
     @param {String} [config.position]
@@ -11075,8 +11083,14 @@ The tooltip element is appended to the end of `<body>`.
     /**
     Opens a tooltip over the given element.
     
+    The unobtrusive variant of this is the [`[up-tooltip]`](/up-tooltip) selector.
+    
+    \#\#\# Examples
+    
+    In order to attach a tooltip to a `<span class="help">?</span>`:
+    
         up.tooltip.attach('.help', {
-          html: 'Enter multiple words or phrases'
+          text: 'Enter multiple words or phrases'
         });
     
     @function up.tooltip.attach
@@ -11095,7 +11109,7 @@ The tooltip element is appended to the end of `<body>`.
       The position of the tooltip.
       Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
     @param {String} [options.animation]
-      The animation to use when opening the tooltip.
+      The [animation](/up.motion) to use when opening the tooltip.
     @return {Promise}
       A promise that will be resolved when the tooltip's opening animation has finished.
     @stable
@@ -11142,6 +11156,7 @@ The tooltip element is appended to the end of `<body>`.
 
     /**
     Closes a currently shown tooltip.
+    
     Does nothing if no tooltip is currently shown.
     
     @function up.tooltip.close
@@ -11191,7 +11206,9 @@ The tooltip element is appended to the end of `<body>`.
     };
 
     /**
-    Displays a tooltip with text content when hovering the mouse over this element:
+    Displays a tooltip with text content when hovering the mouse over this element.
+    
+    \#\#\# Example
     
         <a href="/decks" up-tooltip="Show all decks">Decks</a>
     
@@ -11312,7 +11329,9 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     SELECTOR_SECTION = 'a, [up-href]';
     normalizeUrl = function(url) {
       if (u.isPresent(url)) {
-        return u.normalizeUrl(url);
+        return u.normalizeUrl(url, {
+          stripTrailingSlash: true
+        });
       }
     };
     sectionUrls = function($section) {

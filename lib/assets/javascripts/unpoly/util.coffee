@@ -71,7 +71,7 @@ up.util = (($) ->
     # We have seen this in IE11 and W3Schools claims it happens in IE9 or earlier
     # http://www.w3schools.com/jsref/prop_anchor_pathname.asp
     pathname = "/#{pathname}" unless pathname[0] == '/'
-    pathname = pathname.replace(/\/$/, '') unless options?.stripTrailingSlash == false
+    pathname = pathname.replace(/\/$/, '') if options?.stripTrailingSlash == true
     normalized += pathname
     normalized += anchor.hash if options?.hash == true
     normalized += anchor.search unless options?.search == false

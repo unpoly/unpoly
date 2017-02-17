@@ -6,14 +6,15 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.34.1
+------
 
 ### Compatible changes
 
 - Elements with [`up-show-for`](/up-show-for) and [`up-hide-for`](/up-hide-for) attributes
   can now be inserted dynamically after its controlling [`up-switch`](/up-switch) field has been
   compiled.
+- Unpoly no longer strips a trailing slash in the current URL during startup
 
 
 0.34.0
