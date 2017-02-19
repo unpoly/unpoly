@@ -4,5 +4,5 @@ beforeEach ->
   
 afterEach ->
   if up.browser.canPushState()
-    history.replaceState?({}, @titleBeforeExample, @hrefBeforeExample)
+    history.replaceState?({ fromResetPathHelper: true }, @titleBeforeExample, @hrefBeforeExample)
   document.title = @titleBeforeExample

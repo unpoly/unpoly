@@ -343,6 +343,13 @@ up.layout = (($) ->
   viewports = ->
     viewportSelector().select()
 
+  scrollTopKey = (viewport) ->
+    $viewport = $(viewport)
+    if $viewport.is(document)
+      'document'
+    else
+      u.selectorForElement($viewport)
+
   ###*
   Returns a hash with scroll positions.
 
@@ -358,12 +365,12 @@ up.layout = (($) ->
   ###
   scrollTops = ->
     topsBySelector = {}
-    for viewport in config.viewports
-      $viewport = $(viewport)
-      if $viewport.length
-        key = viewport
-        key = 'document' if viewport == document
-        topsBySelector[key] = $viewport.scrollTop()
+    for group in config.viewports
+      $(group).each ->
+        $viewport = $(this)
+        key = scrollTopKey($viewport)
+        top = $viewport.scrollTop()
+        topsBySelector[key] = top
     topsBySelector
 
   ###*
@@ -425,13 +432,14 @@ up.layout = (($) ->
     else
       $viewports = viewports()
 
-    tops = lastScrollTops.get(url)
+    scrollTopsForUrl = lastScrollTops.get(url)
 
-    up.log.group 'Restoring scroll positions for URL %s to %o', url, tops, ->
-      for key, scrollTop of tops
-        right = if key == 'document' then document else key
-        $matchingViewport = $viewports.filter(right)
-        scroll($matchingViewport, scrollTop, duration: 0)
+    up.log.group 'Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, ->
+      $viewports.each ->
+        $viewport = $(this)
+        key = scrollTopKey($viewport)
+        scrollTop = scrollTopsForUrl[key] || 0
+        scroll($viewport, scrollTop, duration: 0)
 
       # Since scrolling happens without animation, we don't need to
       # join promises from the up.scroll call above

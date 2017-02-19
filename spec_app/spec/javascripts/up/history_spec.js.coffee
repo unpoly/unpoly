@@ -87,8 +87,6 @@ describe 'up.history', ->
           up.layout.config.viewports = ['.viewport']
           up.history.config.popTargets = ['.viewport']
 
-          $viewport.append(longContentHtml)
-
           up.replace('.content', '/one')
           respond()
 
@@ -124,6 +122,53 @@ describe 'up.history', ->
                   respond() # we need to respond since we've never requested /three with the popTarget
                   expect($('.viewport').scrollTop()).toBe(250)
                   done()
+
+        it 'restores the scroll position of two viewports marked with [up-viewport], but not configured in up.layout.config (bugfix)', (done) ->
+          up.history.config.popTargets = ['.container']
+
+          html = """
+            <div class="container">
+              <div class="viewport1" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
+                <div class="content1" style="height: 5000px">content1</div>
+              </div>
+              <div class="viewport2" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
+                <div class="content2" style="height: 5000px">content2</div>
+              </div>
+            </div>
+          """
+
+          respond = => @respondWith(html)
+
+          $screen = affix('.screen')
+          $screen.html(html)
+
+          up.replace('.content1, .content2', '/one', reveal: false)
+          respond()
+
+          $('.viewport1').scrollTop(3000)
+          $('.viewport2').scrollTop(3050)
+
+          expect('.viewport1').toBeScrolledTo(3000)
+          expect('.viewport2').toBeScrolledTo(3050)
+
+          up.replace('.content1, .content2', '/two', reveal: false)
+          respond()
+
+          u.setTimer 50, ->
+
+            expect(location.href).toEndWith('/two')
+
+            history.back()
+
+            u.setTimer 50, ->
+              # we need to respond since we've never requested the original URL with the popTarget
+              respond()
+
+              u.nextFrame ->
+                expect('.viewport1').toBeScrolledTo(3000)
+                expect('.viewport2').toBeScrolledTo(3050)
+                done()
+
 
     describe 'events', ->
 

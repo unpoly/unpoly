@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+## Compatible changes
+
+- The scroll positions of two [viewports](/up-viewport) with the same selector is now restored
+  correctly when going back in history.
+
+
+
 0.34.1
 ------
 

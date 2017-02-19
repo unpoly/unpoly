@@ -221,7 +221,7 @@ up.history = (($) ->
   ... will be transformed to:
 
       <a href="/default" up-href="/previous-page" up-restore-scroll up-follow>
-        Goback
+        Go back
       </a>
 
   @selector [up-back]
