@@ -5,7 +5,7 @@
 
 (function() {
   this.up = {
-    version: "0.34.1",
+    version: "0.34.2",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -250,7 +250,6 @@ that might save you from loading something like [Underscore.js](http://underscor
       var $element, classes, i, id, klass, len, name, selector, upId;
       $element = $(element);
       selector = void 0;
-      up.puts("Creating selector from element %o", $element.get(0));
       if (upId = presence($element.attr("up-id"))) {
         selector = "[up-id='" + upId + "']";
       } else if (id = presence($element.attr("id"))) {
@@ -942,7 +941,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     Waits for the given number of milliseconds, the nruns the given callback.
     
     If the number of milliseconds is zero, the callback is run in the current execution frame.
-    See [`up.util.nextFrame()`] for running a function in the next executation frame.
+    See [`up.util.nextFrame()`](/up.util.nextFrame) for running a function in the next executation frame.
     
     @function up.util.setTimer
     @param {Number} millis
@@ -4723,7 +4722,7 @@ Going back behavior .... configure.
     ... will be transformed to:
     
         <a href="/default" up-href="/previous-page" up-restore-scroll up-follow>
-          Goback
+          Go back
         </a>
     
     @selector [up-back]
@@ -4780,7 +4779,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
   var slice = [].slice;
 
   up.layout = (function($) {
-    var SCROLL_PROMISE_KEY, anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealHash, revealOrRestoreScroll, saveScroll, scroll, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
+    var SCROLL_PROMISE_KEY, anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealHash, revealOrRestoreScroll, saveScroll, scroll, scrollTopKey, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
     u = up.util;
 
     /**
@@ -5135,6 +5134,15 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     viewports = function() {
       return viewportSelector().select();
     };
+    scrollTopKey = function(viewport) {
+      var $viewport;
+      $viewport = $(viewport);
+      if ($viewport.is(document)) {
+        return 'document';
+      } else {
+        return u.selectorForElement($viewport);
+      }
+    };
 
     /**
     Returns a hash with scroll positions.
@@ -5150,19 +5158,18 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @internal
      */
     scrollTops = function() {
-      var $viewport, i, key, len, ref, topsBySelector, viewport;
+      var group, i, len, ref, topsBySelector;
       topsBySelector = {};
       ref = config.viewports;
       for (i = 0, len = ref.length; i < len; i++) {
-        viewport = ref[i];
-        $viewport = $(viewport);
-        if ($viewport.length) {
-          key = viewport;
-          if (viewport === document) {
-            key = 'document';
-          }
-          topsBySelector[key] = $viewport.scrollTop();
-        }
+        group = ref[i];
+        $(group).each(function() {
+          var $viewport, key, top;
+          $viewport = $(this);
+          key = scrollTopKey($viewport);
+          top = $viewport.scrollTop();
+          return topsBySelector[key] = top;
+        });
       }
       return topsBySelector;
     };
@@ -5228,7 +5235,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @experimental
      */
     restoreScroll = function(options) {
-      var $ancestorViewports, $descendantViewports, $viewports, tops, url;
+      var $ancestorViewports, $descendantViewports, $viewports, scrollTopsForUrl, url;
       if (options == null) {
         options = {};
       }
@@ -5241,17 +5248,17 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       } else {
         $viewports = viewports();
       }
-      tops = lastScrollTops.get(url);
-      return up.log.group('Restoring scroll positions for URL %s to %o', url, tops, function() {
-        var $matchingViewport, key, right, scrollTop;
-        for (key in tops) {
-          scrollTop = tops[key];
-          right = key === 'document' ? document : key;
-          $matchingViewport = $viewports.filter(right);
-          scroll($matchingViewport, scrollTop, {
+      scrollTopsForUrl = lastScrollTops.get(url);
+      return up.log.group('Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, function() {
+        $viewports.each(function() {
+          var $viewport, key, scrollTop;
+          $viewport = $(this);
+          key = scrollTopKey($viewport);
+          scrollTop = scrollTopsForUrl[key] || 0;
+          return scroll($viewport, scrollTop, {
             duration: 0
           });
-        }
+        });
         return u.resolvedDeferred();
       });
     };
@@ -9580,7 +9587,7 @@ The HTML of a popup element is simply this:
 
 (function() {
   up.popup = (function($) {
-    var align, attachAsap, attachNow, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, discardHistory, isOpen, reset, state, u;
+    var align, attachAsap, attachNow, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, isOpen, reset, state, u, unveilFrame;
     u = up.util;
 
     /**
@@ -9696,12 +9703,16 @@ The HTML of a popup element is simply this:
       state.coveredTitle = null;
       return state.coveredUrl = null;
     };
-    createFrame = function(target) {
+    createHiddenFrame = function(target) {
       var $popup;
       $popup = u.$createElementFromSelector('.up-popup');
       u.$createPlaceholder(target, $popup);
+      $popup.hide();
       $popup.appendTo(document.body);
       return state.$popup = $popup;
+    };
+    unveilFrame = function() {
+      return state.$popup.show();
     };
 
     /**
@@ -9805,7 +9816,7 @@ The HTML of a popup element is simply this:
           }
           state.sticky = options.sticky;
           options.provideTarget = function() {
-            return createFrame(target);
+            return createHiddenFrame(target);
           };
           extractOptions = u.merge(options, {
             animation: false
@@ -9817,6 +9828,7 @@ The HTML of a popup element is simply this:
           }
           promise = promise.then(function() {
             align();
+            unveilFrame();
             return up.animate(state.$popup, options.animation, animateOptions);
           });
           promise = promise.then(function() {
@@ -10111,7 +10123,7 @@ or function.
 
 (function() {
   up.modal = (function($) {
-    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, flavors, followAsap, isOpen, markAsAnimating, openAsap, openNow, reset, shiftElements, state, templateHtml, u, unshiftElements, visitAsap;
+    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, flavors, followAsap, isOpen, markAsAnimating, openAsap, openNow, reset, shiftElements, state, templateHtml, u, unshiftElements, unveilFrame, visitAsap;
     u = up.util;
 
     /**
@@ -10294,7 +10306,7 @@ or function.
       state.coveredTitle = null;
       return state.coveredUrl = null;
     };
-    createFrame = function(target, options) {
+    createHiddenFrame = function(target, options) {
       var $content, $dialog, $modal;
       $modal = $(templateHtml());
       $modal.attr('up-flavor', state.flavor);
@@ -10316,8 +10328,12 @@ or function.
       }
       $content = $modal.find('.up-modal-content');
       u.$createPlaceholder(target, $content);
+      $modal.hide();
       $modal.appendTo(document.body);
       return state.$modal = $modal;
+    };
+    unveilFrame = function() {
+      return state.$modal.show();
     };
     shiftElements = function() {
       var $body, bodyRightPadding, bodyRightShift, scrollbarWidth, unshiftBody;
@@ -10550,7 +10566,7 @@ or function.
             state.coveredTitle = document.title;
           }
           options.provideTarget = function() {
-            return createFrame(target, options);
+            return createHiddenFrame(target, options);
           };
           extractOptions = u.merge(options, {
             animation: false
@@ -10562,6 +10578,7 @@ or function.
           }
           promise = promise.then(function() {
             shiftElements();
+            unveilFrame();
             return animate(options.animation, options.backdropAnimation, animateOptions);
           });
           promise = promise.then(function() {
