@@ -9,7 +9,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 0.34.2
 ------
 
-## Compatible changes
+### Compatible changes
 
 - The scroll positions of two [viewports](/up-viewport) with the same selector is now restored correctly when going back in history.
 - Fix a bug where new modals and popups would sometime flash at full opacity before starting their opening animation.
