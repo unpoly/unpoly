@@ -241,7 +241,7 @@ up.modal = (($) ->
     state.coveredTitle = null
     state.coveredUrl = null
 
-  createFrame = (target, options) ->
+  createHiddenFrame = (target, options) ->
     $modal = $(templateHtml())
     $modal.attr('up-flavor', state.flavor)
     $modal.attr('up-position', state.position) if u.isPresent(state.position)
@@ -254,8 +254,12 @@ up.modal = (($) ->
     # Create an empty element that will match the
     # selector that is being replaced.
     u.$createPlaceholder(target, $content)
+    $modal.hide()
     $modal.appendTo(document.body)
     state.$modal = $modal
+
+  unveilFrame = ->
+    state.$modal.show()
 
   # Gives `<body>` a right padding in the width of a scrollbar.
   # Also gives elements anchored to the right side of the screen
@@ -465,7 +469,7 @@ up.modal = (($) ->
         if options.history
           state.coveredUrl = up.browser.url()
           state.coveredTitle = document.title
-        options.provideTarget = -> createFrame(target, options)
+        options.provideTarget = -> createHiddenFrame(target, options)
         extractOptions = u.merge(options, animation: false)
         if html
           promise = up.extract(target, html, extractOptions)
@@ -473,6 +477,7 @@ up.modal = (($) ->
           promise = up.replace(target, url, extractOptions)
         promise = promise.then ->
           shiftElements()
+          unveilFrame()
           animate(options.animation, options.backdropAnimation, animateOptions)
         promise = promise.then ->
           state.phase = 'opened'

@@ -157,13 +157,17 @@ up.popup = (($) ->
     state.coveredTitle = null
     state.coveredUrl = null
 
-  createFrame = (target) ->
+  createHiddenFrame = (target) ->
     $popup = u.$createElementFromSelector('.up-popup')
     # Create an empty element that will match the
     # selector that is being replaced.
     u.$createPlaceholder(target, $popup)
+    $popup.hide()
     $popup.appendTo(document.body)
     state.$popup = $popup
+
+  unveilFrame = ->
+    state.$popup.show()
 
   ###*
   Returns whether popup modal is currently open.
@@ -253,7 +257,7 @@ up.popup = (($) ->
           state.coveredUrl = up.browser.url()
           state.coveredTitle = document.title
         state.sticky = options.sticky
-        options.provideTarget = -> createFrame(target)
+        options.provideTarget = -> createHiddenFrame(target)
         extractOptions = u.merge(options, animation: false)
         if html
           promise = up.extract(target, html, extractOptions)
@@ -261,6 +265,7 @@ up.popup = (($) ->
           promise = up.replace(target, url, extractOptions)
         promise = promise.then ->
           align()
+          unveilFrame()
           up.animate(state.$popup, options.animation, animateOptions)
         promise = promise.then ->
           state.phase = 'opened'

@@ -1,3 +1,29 @@
+<script>
+  var u = up.util;
+  up.compiler('.clamped-open', function($link) {
+    $link.on('click', function(event) {
+      event.preventDefault();
+      u.nextFrame(function() {
+        u.nextFrame(function() {
+          u.nextFrame(function() {
+            u.nextFrame(function() {
+              u.nextFrame(function() {
+                u.nextFrame(function() {
+                  up.popup.attach($link, {
+                    target: '.contents',
+                    duration: 1000
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+</script>
+
+
 <div class="fixed-top-bar">
   <a class="button" href="/css_test/popup_contents?1" up-popup=".contents" up-position="top-left">Top-left popup</a>
   <a class="button" href="/css_test/popup_contents?2" up-popup=".contents" up-position="top-right">Top-right popup</a>
@@ -22,4 +48,8 @@
 
 <div class="example">
   <a class="button" href="/css_test/popup_contents?8" up-popup=".contents" up-position="bottom-left">Bottom-left popup</a>
+</div>
+
+<div class="example">
+  <a class="button clamped-open" href="/css_test/popup_contents">Clamped open</a>
 </div>

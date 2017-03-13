@@ -1,3 +1,29 @@
+<script>
+  var u = up.util;
+  up.compiler('.clamped-open', function($link) {
+    $link.on('click', function(event) {
+      event.preventDefault();
+      u.nextFrame(function() {
+        u.nextFrame(function() {
+          u.nextFrame(function() {
+            u.nextFrame(function() {
+              u.nextFrame(function() {
+                u.nextFrame(function() {
+                  up.modal.follow($link, {
+                    target: '.contents',
+                    duration: 1000
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+</script>
+
+
 <div class="example">
   <a class="button" href="/css_test/modal_contents" up-modal=".contents">Modal</a>
 </div>
@@ -14,4 +40,8 @@
 <div class="example">
   <a class="button" href="/css_test/modal_contents" up-drawer=".contents" up-position="left">Drawer (left)</a>
   <a class="button" href="/css_test/modal_contents" up-drawer=".contents" up-position="right">Drawer (right)</a>
+</div>
+
+<div class="example">
+  <a class="button clamped-open" href="/css_test/modal_contents">Clamped open</a>
 </div>

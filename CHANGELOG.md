@@ -11,8 +11,8 @@ Unreleased
 
 ## Compatible changes
 
-- The scroll positions of two [viewports](/up-viewport) with the same selector is now restored
-  correctly when going back in history.
+- The scroll positions of two [viewports](/up-viewport) with the same selector is now restored correctly when going back in history.
+- Fix a bug where new modals and popups would sometime flash at full opacity before starting their opening animation.
 
 
 
