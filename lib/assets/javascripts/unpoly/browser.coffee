@@ -4,13 +4,10 @@ Browser support
 
 Unpoly supports all modern browsers. It degrades gracefully with old versions of Internet Explorer:
 
-IE 10, IE11, Edge
+IE11, Edge
 : Full support
 
-IE 9
-: Page updates that change browser history fall back to a classic page load.
-
-IE 8
+IE 10 or lower
 : Unpoly prevents itself from booting itself, leaving you with a classic server-side application.
 
 
@@ -225,6 +222,17 @@ up.browser = (($) ->
     !!window.FormData
 
   ###*
+  Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
+  interface.
+
+  @function up.browser.canDomParser
+  @return {Boolean}
+  @experimental
+  ###
+  canDomParser = u.memoize ->
+    !!window.DOMParser
+
+  ###*
   Returns whether this browser supports
   [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
   in `console` functions.
@@ -293,7 +301,7 @@ up.browser = (($) ->
   @stable
   ###
   isSupported = ->
-    (!isIE8OrWorse()) && isRecentJQuery()
+    canDomParser() && isRecentJQuery()
 
   ###*
   @internal
@@ -333,6 +341,7 @@ up.browser = (($) ->
   canCssTransition: canCssTransition
   canInputEvent: canInputEvent
   canFormData: canFormData
+  canDomParser: canDomParser
   canLogSubstitution: canLogSubstitution
   isSupported: isSupported
   installPolyfills: installPolyfills

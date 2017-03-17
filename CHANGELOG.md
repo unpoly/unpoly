@@ -9,7 +9,16 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+### Compatible changes
+
 - Remove a use of global `$` that prevented Unpoly from being used with with [`jQuery.noConflict()`](https://api.jquery.com/jquery.noconflict/).
+- Fix a bug where replacing the `<body>` element would lose the body class and other attributes
+
+
+### Incompatible changes
+
+- Drop support for IE 9, which will no longer supported in April 2017.
+- Drop support for IE 10, which hasn't been supported since January 2016.
 
 
 0.34.2
@@ -19,7 +28,6 @@ Unreleased
 
 - The scroll positions of two [viewports](/up-viewport) with the same selector is now restored correctly when going back in history.
 - Fix a bug where new modals and popups would sometime flash at full opacity before starting their opening animation.
-
 
 
 0.34.1

@@ -110,6 +110,7 @@ describe 'up.util', ->
         element = up.util.createElementFromHtml(string)
 
         expect(element.querySelector('head title').textContent).toEqual('document title')
+        expect(element.querySelector('body').getAttribute('data-env')).toEqual('production')
         expect(element.querySelectorAll('body div').length).toBe(2)
         expect(element.querySelectorAll('body div')[0].textContent).toEqual('line 1')
         expect(element.querySelectorAll('body div')[1].textContent).toEqual('line 2')
