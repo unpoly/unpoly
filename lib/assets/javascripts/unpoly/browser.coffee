@@ -75,12 +75,7 @@ up.browser = (($) ->
   @internal
   ###
   puts = (stream, args...) ->
-    if canLogSubstitution()
-      console[stream](args...)
-    else
-      # IE <= 9 cannot pass varargs to console.log using Function#apply because IE
-      message = sprintf(args...)
-      console[stream](message)
+    console[stream](args...)
 
   CONSOLE_PLACEHOLDERS = /\%[odisf]/g
 
@@ -146,21 +141,18 @@ up.browser = (($) ->
   url = ->
     location.href
 
-  isIE8OrWorse = u.memoize ->
-    # This is the most concise way to exclude IE8 and lower
-    # while keeping all relevant desktop and mobile browsers.
-    u.isUndefined(document.addEventListener)
-
-  isIE9OrWorse = u.memoize ->
-    isIE8OrWorse() || navigator.appVersion.indexOf('MSIE 9.') != -1
+  isIE10OrWorse = u.memoize ->
+    !window.atob
 
   ###*
   Returns whether this browser supports manipulation of the current URL
   via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
 
-  When Unpoly is asked to change history on a browser that doesn't support
-  `pushState` (e.g. through [`up.follow()`](/up.follow)), it will gracefully
+  When `pushState`  (e.g. through [`up.follow()`](/up.follow)), it will gracefully
   fall back to a full page load.
+
+  Note that Unpoly will not use `pushState` if the initial page was loaded with
+  a request method other than GET.
 
   @function up.browser.canPushState
   @return {Boolean}
@@ -176,8 +168,7 @@ up.browser = (($) ->
     # 2. Some browsers have a bug where the initial request method is used for all
     #    subsequently pushed states. That means if the user reloads the page on a later
     #    GET state, the browser will wrongly attempt a POST request.
-    #    Modern Firefoxes, Chromes and IE10+ don't seem to be affected by this,
-    #    but we saw this behavior with Safari 8 and IE9 (IE9 can't do pushState anyway).
+    #    Modern Firefoxes, Chromes and IE10+ don't seem to be affected by this.
     #
     # The way that we work around this is that we don't support pushState if the
     # initial request method was anything other than GET (but allow the rest of the
@@ -195,7 +186,7 @@ up.browser = (($) ->
 
   @function up.browser.canCssTransition
   @return {Boolean}
-  @experimental
+  @internal
   ###
   canCssTransition = u.memoize ->
     'transition' of document.documentElement.style
@@ -205,7 +196,7 @@ up.browser = (($) ->
 
   @function up.browser.canInputEvent
   @return {Boolean}
-  @experimental
+  @internal
   ###
   canInputEvent = u.memoize ->
     'oninput' of document.createElement('input')
@@ -227,26 +218,27 @@ up.browser = (($) ->
 
   @function up.browser.canDomParser
   @return {Boolean}
-  @experimental
+  @internal
   ###
   canDomParser = u.memoize ->
     !!window.DOMParser
 
   ###*
-  Returns whether this browser supports
-  [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
-  in `console` functions.
+  Returns whether this browser supports the [`debugging console`](https://developer.mozilla.org/en-US/docs/Web/API/Console).
 
-  \#\#\# Example for string substition
-
-      console.log("Hello %o!", "Judy");
-
-  @function up.browser.canLogSubstitution
+  @function up.browser.canConsole
   @return {Boolean}
   @internal
   ###
-  canLogSubstitution = u.memoize ->
-    !isIE9OrWorse()
+  canConsole = u.memoize ->
+    window.console &&
+      console.debug &&
+      console.info &&
+      console.warn &&
+      console.error &&
+      console.group &&
+      console.groupCollapsed &&
+      console.groupEnd
 
   isRecentJQuery = u.memoize ->
     version = $.fn.jquery
@@ -301,16 +293,14 @@ up.browser = (($) ->
   @stable
   ###
   isSupported = ->
-    canDomParser() && isRecentJQuery()
-
-  ###*
-  @internal
-  ###
-  installPolyfills = ->
-    window.console ?= {} # Missing in IE9 with DevTools closed
-    for method in ['debug', 'info', 'warn', 'error', 'group', 'groupCollapsed', 'groupEnd']
-      console[method] ?= (args...) -> puts('log', args...)
-    console.log ?= u.noop # Cannot be faked
+    !isIE10OrWorse() &&
+      isRecentJQuery() &&
+      canConsole() &&
+      canPushState() &&
+      canDomParser() &&
+      canFormData() &&
+      canCssTransition() &&
+      canInputEvent()
 
   ###*
   @internal
@@ -336,15 +326,9 @@ up.browser = (($) ->
   knife: eval(Knife?.point)
   url: url
   loadPage: loadPage
-  whenConfirmed: whenConfirmed
   canPushState: canPushState
-  canCssTransition: canCssTransition
-  canInputEvent: canInputEvent
-  canFormData: canFormData
-  canDomParser: canDomParser
-  canLogSubstitution: canLogSubstitution
+  whenConfirmed: whenConfirmed
   isSupported: isSupported
-  installPolyfills: installPolyfills
   puts: puts
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs

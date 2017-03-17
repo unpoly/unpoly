@@ -101,22 +101,20 @@ describe 'up.modal', ->
               expect(parseInt($body.css('padding-right'))).toBe(0)
               done()
 
-        describeCapability 'canCssTransition', ->
-
-          it "gives the scrollbar to .up-modal instead of .up-modal-viewport while animating, so we don't see scaled scrollbars in a zoom-in animation", (done) ->
-            openPromise = up.modal.extract('.container', '<div class="container">text</div>', animation: 'fade-in', duration: 100)
-            $modal = $('.up-modal')
-            $viewport = $modal.find('.up-modal-viewport')
-            expect($modal.css('overflow-y')).toEqual('scroll')
-            expect($viewport.css('overflow-y')).toEqual('hidden')
-            openPromise.then ->
-              expect($modal.css('overflow-y')).not.toEqual('scroll')
-              expect($viewport.css('overflow-y')).toEqual('scroll')
-              closePromise = up.modal.close(animation: 'fade-out', duration: 200)
-              u.nextFrame ->
-                expect($modal.css('overflow-y')).toEqual('scroll')
-                expect($viewport.css('overflow-y')).toEqual('hidden')
-                done()
+        it "gives the scrollbar to .up-modal instead of .up-modal-viewport while animating, so we don't see scaled scrollbars in a zoom-in animation", (done) ->
+          openPromise = up.modal.extract('.container', '<div class="container">text</div>', animation: 'fade-in', duration: 100)
+          $modal = $('.up-modal')
+          $viewport = $modal.find('.up-modal-viewport')
+          expect($modal.css('overflow-y')).toEqual('scroll')
+          expect($viewport.css('overflow-y')).toEqual('hidden')
+          openPromise.then ->
+            expect($modal.css('overflow-y')).not.toEqual('scroll')
+            expect($viewport.css('overflow-y')).toEqual('scroll')
+            closePromise = up.modal.close(animation: 'fade-out', duration: 200)
+            u.nextFrame ->
+              expect($modal.css('overflow-y')).toEqual('scroll')
+              expect($viewport.css('overflow-y')).toEqual('hidden')
+              done()
 
         it 'does not add right padding to the body if the body has overflow-y: hidden', (done) ->
           restoreBody = u.temporaryCss($('body'), 'overflow-y': 'hidden')
@@ -185,48 +183,46 @@ describe 'up.modal', ->
               expect(bodyPadding).not.toBeAround(2 * assumedScrollbarWidth, 2 * 5)
               done()
 
-        describeCapability 'canCssTransition', ->
+        it 'closes the current modal and wait for its close animation to finish before starting the open animation of a second modal', (done) ->
+          up.modal.config.openAnimation = 'fade-in'
+          up.modal.config.openDuration = 5
+          up.modal.config.closeAnimation = 'fade-out'
+          up.modal.config.closeDuration = 60
 
-          it 'closes the current modal and wait for its close animation to finish before starting the open animation of a second modal', (done) ->
-            up.modal.config.openAnimation = 'fade-in'
-            up.modal.config.openDuration = 5
-            up.modal.config.closeAnimation = 'fade-out'
-            up.modal.config.closeDuration = 60
+          events = []
+          u.each ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed'], (event) ->
+            up.on event, ->
+              events.push(event)
 
-            events = []
-            u.each ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed'], (event) ->
-              up.on event, ->
-                events.push(event)
+          up.modal.extract('.target', '<div class="target">response1</div>')
 
-            up.modal.extract('.target', '<div class="target">response1</div>')
+          # First modal is starting opening animation
+          expect(events).toEqual ['up:modal:open']
+          expect($('.target')).toHaveText('response1')
 
-            # First modal is starting opening animation
-            expect(events).toEqual ['up:modal:open']
+          u.setTimer 80, ->
+            # First modal has completed opening animation
+            expect(events).toEqual ['up:modal:open', 'up:modal:opened']
             expect($('.target')).toHaveText('response1')
 
-            u.setTimer 80, ->
-              # First modal has completed opening animation
-              expect(events).toEqual ['up:modal:open', 'up:modal:opened']
+            # We open another modal, which will cause the first modal to start closing
+            up.modal.extract('.target', '<div class="target">response2</div>')
+
+            expect($('.target')).toHaveText('response1')
+
+            u.setTimer 20, ->
+
+              # Second modal is still waiting for first modal's closing animaton to finish.
+              expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close']
               expect($('.target')).toHaveText('response1')
 
-              # We open another modal, which will cause the first modal to start closing
-              up.modal.extract('.target', '<div class="target">response2</div>')
+              u.setTimer 200, ->
 
-              expect($('.target')).toHaveText('response1')
+                # First modal has finished closing, second modal has finished opening.
+                expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed', 'up:modal:open', 'up:modal:opened']
+                expect($('.target')).toHaveText('response2')
 
-              u.setTimer 20, ->
-
-                # Second modal is still waiting for first modal's closing animaton to finish.
-                expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close']
-                expect($('.target')).toHaveText('response1')
-
-                u.setTimer 200, ->
-
-                  # First modal has finished closing, second modal has finished opening.
-                  expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed', 'up:modal:open', 'up:modal:opened']
-                  expect($('.target')).toHaveText('response2')
-
-                  done()
+                done()
 
           it 'closes an opening modal if a second modal starts opening before the first modal has finished its open animation', (done) ->
             up.modal.config.openAnimation = 'fade-in'

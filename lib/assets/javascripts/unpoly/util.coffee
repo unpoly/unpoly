@@ -518,7 +518,7 @@ up.util = (($) ->
   @internal
   ###
   isFormData = (object) ->
-    up.browser.canFormData() && object instanceof FormData
+    object instanceof FormData
 
   ###*
   Converts the given array-like argument into an array.
@@ -1620,8 +1620,9 @@ up.util = (($) ->
   ###
   requestDataAsArray = (data) ->
     if isFormData(data)
-      # Until FormData#entries is implemented in all major browsers
-      # we must give up here
+      # Until FormData#entries is implemented in all major browsers we must give up here.
+      # However, up.form will prefer to serialize forms as arrays, so we should be good
+      # in most cases. We only use FormData for forms with file inputs.
       up.fail('Cannot convert FormData into an array')
     else
       query = requestDataAsQuery(data)
@@ -1643,8 +1644,9 @@ up.util = (($) ->
   ###
   requestDataAsQuery = (data) ->
     if isFormData(data)
-      # Until FormData#entries is implemented in all major browsers
-      # we must give up here
+      # Until FormData#entries is implemented in all major browsers we must give up here.
+      # However, up.form will prefer to serialize forms as arrays, so we should be good
+      # in most cases. We only use FormData for forms with file inputs.
       up.fail('Cannot convert FormData into a query string')
     else if isPresent(data)
       query = $.param(data)
@@ -1663,10 +1665,15 @@ up.util = (($) ->
   requestDataFromForm = (form) ->
     $form = $(form)
     hasFileInputs = $form.find('input[type=file]').length
-    if hasFileInputs && up.browser.canFormData()
+    # We try to stick with an array representation, whose contents we can inspect.
+    # We cannot inspect FormData on IE11 because it has no support for `FormData.entries`.
+    # Inspection is needed to generate a cache key (see `up.proxy`) and to make
+    # vanilla requests when `pushState` is unavailable (see `up.browser.loadPage`).
+    if hasFileInputs
       new FormData($form.get(0))
     else
       $form.serializeArray()
+
 
   ###*
   Adds a key/value pair to the given request data representation.

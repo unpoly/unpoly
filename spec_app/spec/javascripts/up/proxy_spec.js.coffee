@@ -388,11 +388,9 @@ describe 'up.proxy', ->
         promise = up.proxy.get(url: '/foo', data: { key: 'value' })
         expect(promise).toBeUndefined()
 
-      describeCapability 'canFormData', ->
-
-        it "returns undefined if the given request's { data } is a FormData object", ->
-          promise = up.proxy.get(url: '/foo', data: new FormData())
-          expect(promise).toBeUndefined()
+      it "returns undefined if the given request's { data } is a FormData object", ->
+        promise = up.proxy.get(url: '/foo', data: new FormData())
+        expect(promise).toBeUndefined()
 
     describe 'up.proxy.set', ->
 

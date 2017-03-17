@@ -421,24 +421,22 @@ describe 'up.link', ->
 
         describe 'with [up-transition] modifier', ->
 
-          describeCapability 'canCssTransition', ->
+          it 'morphs between the old and new target element', (done) ->
+            affix('.target.old')
+            $link = affix('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="500"][up-easing="linear"]')
+            Trigger.clickSequence($link)
+            @respondWith '<div class="target new">new text</div>'
 
-            it 'morphs between the old and new target element', (done) ->
-              affix('.target.old')
-              $link = affix('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="500"][up-easing="linear"]')
-              Trigger.clickSequence($link)
-              @respondWith '<div class="target new">new text</div>'
-
-              $oldGhost = $('.target.old.up-ghost')
-              $newGhost = $('.target.new.up-ghost')
-              expect($oldGhost).toExist()
-              expect($newGhost).toExist()
-              expect(u.opacity($oldGhost)).toBeAround(1, 0.15)
-              expect(u.opacity($newGhost)).toBeAround(0, 0.15)
-              u.setTimer 250, ->
-                expect(u.opacity($oldGhost)).toBeAround(0.5, 0.15)
-                expect(u.opacity($newGhost)).toBeAround(0.5, 0.15)
-                done()
+            $oldGhost = $('.target.old.up-ghost')
+            $newGhost = $('.target.new.up-ghost')
+            expect($oldGhost).toExist()
+            expect($newGhost).toExist()
+            expect(u.opacity($oldGhost)).toBeAround(1, 0.15)
+            expect(u.opacity($newGhost)).toBeAround(0, 0.15)
+            u.setTimer 250, ->
+              expect(u.opacity($oldGhost)).toBeAround(0.5, 0.15)
+              expect(u.opacity($newGhost)).toBeAround(0.5, 0.15)
+              done()
 
         describe 'wih a CSS selector in the [up-fallback] attribute', ->
 

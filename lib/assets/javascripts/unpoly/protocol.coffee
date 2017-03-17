@@ -132,14 +132,19 @@ but you can adapt it for other languages:
 
 \#\#\# Signaling the initial request method
 
-This is a edge case you might or might not care about:
 If the initial page was loaded  with a non-`GET` HTTP method, Unpoly prefers to make a full
-page load when you try to update a fragment. Once a page was loaded with a `GET` method,
+page load when you try to update a fragment. Once the next page was loaded with a `GET` method,
 Unpoly will restore its standard behavior.
 
-The reason for this is that some browsers remember the method of the initial page load and don't let
-the application change it, even with `pushState`. Thus, when the user reloads the page much later,
-an affected browser might request a `POST`, `PUT`, etc. instead of the correct method.
+This fixes two edge cases you might or might not care about:
+
+1. Unpoly replaces the initial page state so it can later restore it when the user
+   goes back to that initial URL. However, if the initial request was a POST,
+   Unpoly will wrongly assume that it can restore the state by reloading with GET.
+2. Some browsers have a bug where the initial request method is used for all
+   subsequently pushed states. That means if the user reloads the page on a later
+   GET state, the browser will wrongly attempt a POST request.
+   Modern Firefoxes, Chromes and IE10+ don't seem to be affected by this.
 
 In order to allow Unpoly to detect the HTTP method of the initial page load,
 the server must set a cookie:

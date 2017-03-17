@@ -17,8 +17,9 @@ Unreleased
 
 ### Incompatible changes
 
-- Drop support for IE 9, which will no longer supported in April 2017.
-- Drop support for IE 10, which hasn't been supported since January 2016.
+- Drop support for IE 9, which hasn't been supported on any platform since January 2016.
+- Drop support for IE 10, which hasn't been supported since January 2016 on any platform except
+  Windows Vista, and Vista is end-of-life in April 2017.
 
 
 0.34.2

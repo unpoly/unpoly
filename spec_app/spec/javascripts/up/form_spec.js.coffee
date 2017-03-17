@@ -9,15 +9,9 @@ describe 'up.form', ->
       beforeEach ->
         up.form.config.observeDelay = 0
 
-      changeEvents = if up.browser.canInputEvent()
-        # Actually we only need `input`, but we want to notice
-        # if another script manually triggers `change` on the element.
-        ['input', 'change']
-      else
-        # Actually we won't ever get `input` from the user in this browser,
-        # but we want to notice if another script manually triggers `input`
-        # on the element.
-        ['input', 'change', 'keypress', 'paste', 'cut', 'click', 'propertychange']
+      # Actually we only need `input`, but we want to notice
+      # if another script manually triggers `change` on the element.
+      changeEvents = ['input', 'change']
 
       describe 'when the first argument is a form field', ->
 
@@ -342,20 +336,10 @@ describe 'up.form', ->
           beforeEach ->
             @$form.affix('input[name="file-field"][type="file"]')
 
-          describeCapability 'canFormData', ->
-
-            it 'transfers the form fields via FormData', ->
-              up.submit(@$form)
-              data = @lastRequest().data()
-              expect(u.isFormData(data)).toBe(true)
-
-          describeFallback 'canFormData', ->
-
-            it 'falls back to a vanilla form submission', ->
-              form = @$form.get(0)
-              spyOn(form, 'submit')
-              up.submit(@$form)
-              expect(form.submit).toHaveBeenCalled()
+          it 'transfers the form fields via FormData', ->
+            up.submit(@$form)
+            data = @lastRequest().data()
+            expect(u.isFormData(data)).toBe(true)
 
       describeFallback 'canPushState', ->
 

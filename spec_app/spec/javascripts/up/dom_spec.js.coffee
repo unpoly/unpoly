@@ -99,14 +99,12 @@ describe 'up.dom', ->
             up.replace('.middle', '/bar')
             expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-          describeCapability 'canFormData', ->
-
-            it "does not explode if the original request's { data } is a FormData object", ->
-              up.replace('.middle', '/foo', method: 'post', data: new FormData()) # POST requests are not cached
-              expect(jasmine.Ajax.requests.count()).toEqual(1)
-              @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' })
-              secondReplace = -> up.replace('.middle', '/bar')
-              expect(secondReplace).not.toThrowError()
+          it "does not explode if the original request's { data } is a FormData object", ->
+            up.replace('.middle', '/foo', method: 'post', data: new FormData()) # POST requests are not cached
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' })
+            secondReplace = -> up.replace('.middle', '/bar')
+            expect(secondReplace).not.toThrowError()
 
         describe 'with { data } option', ->
 
@@ -903,79 +901,80 @@ describe 'up.dom', ->
 
       describe 'with { transition } option', ->
 
-        describeCapability 'canCssTransition', ->
+        it 'morphs between the old and new element', (done) ->
+          affix('.element').text('version 1')
+          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
 
-          it 'morphs between the old and new element', (done) ->
-            affix('.element').text('version 1')
-            up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
+          $ghost1 = $('.element.up-ghost:contains("version 1")')
+          expect($ghost1).toHaveLength(1)
+          expect(u.opacity($ghost1)).toBeAround(1.0, 0.1)
 
-            $ghost1 = $('.element.up-ghost:contains("version 1")')
-            expect($ghost1).toHaveLength(1)
-            expect(u.opacity($ghost1)).toBeAround(1.0, 0.1)
+          $ghost2 = $('.element.up-ghost:contains("version 2")')
+          expect($ghost2).toHaveLength(1)
+          expect(u.opacity($ghost2)).toBeAround(0.0, 0.1)
 
-            $ghost2 = $('.element.up-ghost:contains("version 2")')
-            expect($ghost2).toHaveLength(1)
-            expect(u.opacity($ghost2)).toBeAround(0.0, 0.1)
+          u.setTimer 190, ->
+            expect(u.opacity($ghost1)).toBeAround(0.0, 0.3)
+            expect(u.opacity($ghost2)).toBeAround(1.0, 0.3)
+            done()
 
-            u.setTimer 190, ->
-              expect(u.opacity($ghost1)).toBeAround(0.0, 0.3)
-              expect(u.opacity($ghost2)).toBeAround(1.0, 0.3)
-              done()
+        it 'marks the old fragment and its ghost as .up-destroying during the transition', ->
+          affix('.element').text('version 1')
+          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
 
-          it 'marks the old fragment and its ghost as .up-destroying during the transition', ->
-            affix('.element').text('version 1')
-            up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
+          $version1 = $('.element:not(.up-ghost):contains("version 1")')
+          $version1Ghost = $('.element.up-ghost:contains("version 1")')
+          expect($version1).toHaveLength(1)
+          expect($version1Ghost).toHaveLength(1)
+          expect($version1).toHaveClass('up-destroying')
+          expect($version1Ghost).toHaveClass('up-destroying')
 
-            $version1 = $('.element:not(.up-ghost):contains("version 1")')
-            $version1Ghost = $('.element.up-ghost:contains("version 1")')
-            expect($version1).toHaveLength(1)
-            expect($version1Ghost).toHaveLength(1)
-            expect($version1).toHaveClass('up-destroying')
-            expect($version1Ghost).toHaveClass('up-destroying')
+          $version2 = $('.element:not(.up-ghost):contains("version 2")')
+          $version2Ghost = $('.element.up-ghost:contains("version 2")')
+          expect($version2).toHaveLength(1)
+          expect($version2Ghost).toHaveLength(1)
+          expect($version2).not.toHaveClass('up-destroying')
+          expect($version2Ghost).not.toHaveClass('up-destroying')
 
-            $version2 = $('.element:not(.up-ghost):contains("version 2")')
-            $version2Ghost = $('.element.up-ghost:contains("version 2")')
-            expect($version2).toHaveLength(1)
-            expect($version2Ghost).toHaveLength(1)
-            expect($version2).not.toHaveClass('up-destroying')
-            expect($version2Ghost).not.toHaveClass('up-destroying')
+        it 'cancels an existing transition by instantly jumping to the last frame', ->
+          affix('.element').text('version 1')
+          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
 
-          it 'cancels an existing transition by instantly jumping to the last frame', ->
-            affix('.element').text('version 1')
-            up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
+          $ghost1 = $('.element.up-ghost:contains("version 1")')
+          expect($ghost1).toHaveLength(1)
+          expect($ghost1.css('opacity')).toBeAround(1.0, 0.1)
 
-            $ghost1 = $('.element.up-ghost:contains("version 1")')
-            expect($ghost1).toHaveLength(1)
-            expect($ghost1.css('opacity')).toBeAround(1.0, 0.1)
+          $ghost2 = $('.element.up-ghost:contains("version 2")')
+          expect($ghost2).toHaveLength(1)
+          expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
 
-            $ghost2 = $('.element.up-ghost:contains("version 2")')
-            expect($ghost2).toHaveLength(1)
-            expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
+          up.extract('.element', '<div class="element">version 3</div>', transition: 'cross-fade', duration: 200)
 
-            up.extract('.element', '<div class="element">version 3</div>', transition: 'cross-fade', duration: 200)
+          $ghost1 = $('.element.up-ghost:contains("version 1")')
+          expect($ghost1).toHaveLength(0)
 
-            $ghost1 = $('.element.up-ghost:contains("version 1")')
-            expect($ghost1).toHaveLength(0)
+          $ghost2 = $('.element.up-ghost:contains("version 2")')
+          expect($ghost2).toHaveLength(1)
+          expect($ghost2.css('opacity')).toBeAround(1.0, 0.1)
 
-            $ghost2 = $('.element.up-ghost:contains("version 2")')
-            expect($ghost2).toHaveLength(1)
-            expect($ghost2.css('opacity')).toBeAround(1.0, 0.1)
+          $ghost3 = $('.element.up-ghost:contains("version 3")')
+          expect($ghost3).toHaveLength(1)
+          expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
 
-            $ghost3 = $('.element.up-ghost:contains("version 3")')
-            expect($ghost3).toHaveLength(1)
-            expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
+        it 'delays the resolution of the returned promise until the transition is over', (done) ->
+          affix('.element').text('version 1')
+          resolution = jasmine.createSpy()
+          promise = up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 30)
+          promise.then(resolution)
+          expect(resolution).not.toHaveBeenCalled()
+          u.setTimer 80, ->
+            expect(resolution).toHaveBeenCalled()
+            done()
 
-          it 'delays the resolution of the returned promise until the transition is over', (done) ->
-            affix('.element').text('version 1')
-            resolution = jasmine.createSpy()
-            promise = up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 30)
-            promise.then(resolution)
-            expect(resolution).not.toHaveBeenCalled()
-            u.setTimer 80, ->
-              expect(resolution).toHaveBeenCalled()
-              done()
+        describe 'when animation is disabled', ->
 
-        describeFallback 'canCssTransition', ->
+          beforeEach ->
+            up.motion.config.enabled = false
 
           it 'immediately swaps the old and new elements', ->
             affix('.element').text('version 1')
@@ -1260,31 +1259,29 @@ describe 'up.dom', ->
           expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value1' })
           expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value2' })
 
-        describeCapability 'canCssTransition', ->
-
-          it "doesn't let the discarded element appear in a transition", (done) ->
-            oldTextDuringTransition = undefined
-            newTextDuringTransition = undefined
-            transition = ($old, $new) ->
-              oldTextDuringTransition = squish($old.text())
-              newTextDuringTransition = squish($new.text())
-              u.resolvedDeferred()
-            $container = affix('.container')
-            $container.html """
-              <div class='foo'>old-foo</div>
-              <div class='bar' up-keep>old-bar</div>
-              """
-            newHtml = """
-              <div class='container'>
-                <div class='foo'>new-foo</div>
-                <div class='bar' up-keep>new-bar</div>
-              </div>
-              """
-            promise = up.extract('.container', newHtml, transition: transition)
-            promise.then ->
-              expect(oldTextDuringTransition).toEqual('old-foo old-bar')
-              expect(newTextDuringTransition).toEqual('new-foo old-bar')
-              done()
+        it "doesn't let the discarded element appear in a transition", (done) ->
+          oldTextDuringTransition = undefined
+          newTextDuringTransition = undefined
+          transition = ($old, $new) ->
+            oldTextDuringTransition = squish($old.text())
+            newTextDuringTransition = squish($new.text())
+            u.resolvedDeferred()
+          $container = affix('.container')
+          $container.html """
+            <div class='foo'>old-foo</div>
+            <div class='bar' up-keep>old-bar</div>
+            """
+          newHtml = """
+            <div class='container'>
+              <div class='foo'>new-foo</div>
+              <div class='bar' up-keep>new-bar</div>
+            </div>
+            """
+          promise = up.extract('.container', newHtml, transition: transition)
+          promise.then ->
+            expect(oldTextDuringTransition).toEqual('old-foo old-bar')
+            expect(newTextDuringTransition).toEqual('new-foo old-bar')
+            done()
 
     describe 'up.destroy', ->
       

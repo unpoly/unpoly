@@ -78,16 +78,14 @@ up.motion = (($) ->
   ###*
   Returns whether Unpoly will perform animations.
 
-  Animations will be performed if the browser supports
-  [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions)
-  and if [`up.motion.config.enabled`](/up.motion.config) is set to `true` (which is the default).
+  Set [`up.motion.config.enabled`](/up.motion.config) `false` in order to disable animations globally.
 
   @function up.motion.isEnabled
   @return {Boolean}
   @stable
   ###
   isEnabled = ->
-    config.enabled && up.browser.canCssTransition()
+    config.enabled
 
   ###*
   Applies the given animation to the given element.

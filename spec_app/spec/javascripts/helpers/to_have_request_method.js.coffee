@@ -1,7 +1,15 @@
+u = up.util
+
 beforeEach ->
   jasmine.addMatchers
     toHaveRequestMethod: (util, customEqualityTesters) ->
       compare: (request, expectedMethod) ->
         realMethodMatches = (request.method == expectedMethod)
-        wrappedMethodMatches = util.equals(request.data()['_method'], [expectedMethod], customEqualityTesters)
+        formData = request.data()
+        if u.isFormData(formData)
+          wrappedMethod = formData.get('_method')
+          wrappedMethodMatches = (wrappedMethod == expectedMethod)
+        else
+          wrappedMethod = formData['_method']
+          wrappedMethodMatches = util.equals(wrappedMethod, [expectedMethod], customEqualityTesters)
         pass: realMethodMatches || wrappedMethodMatches

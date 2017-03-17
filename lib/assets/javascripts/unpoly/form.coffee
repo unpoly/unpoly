@@ -131,34 +131,25 @@ up.form = (($) ->
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
     options.origin = u.option(options.origin, $form)
     options.layer = u.option(options.layer, $form.attr('up-layer'), 'auto')
-    options.data = up.util.requestDataFromForm($form)
+    options.data = u.requestDataFromForm($form)
     options = u.merge(options, up.motion.animateOptions(options, $form))
-
-    hasFileInputs = $form.find('input[type=file]').length
-    canAjaxSubmit = !hasFileInputs || u.isFormData(options.data)
-    canHistoryOption = up.browser.canPushState() || options.history == false
 
     if options.validate
       options.headers ||= {}
       options.transition = false
       options.failTransition = false
       options.headers[up.protocol.config.validateHeader] = options.validate
-      # If a form has file inputs and the browser does not support FormData,
-      # we cannot offer inline validations.
-      unless canAjaxSubmit
-        return u.unresolvablePromise()
 
     up.feedback.start($form)
 
-    # If we can't submit this form via AJAX or if we wouldn't be able to change
-    # the location URL as the result, fall back to a vanilla form submission.
-    unless canAjaxSubmit && canHistoryOption
+    # If we can't update the location URL, fall back to a vanilla form submission.
+    unless up.browser.canPushState() || options.history == false
       $form.get(0).submit()
       return u.unresolvablePromise()
 
     promise = up.replace(target, url, options)
     promise.always -> up.feedback.stop($form)
-    return promise
+    promise
 
   ###*
   Observes form fields and runs a callback when a value changes.
@@ -284,11 +275,6 @@ up.form = (($) ->
     # Although (depending on the browser) we only need/receive either input or change,
     # we always bind to both events in case another script manually triggers it.
     changeEvents = 'input change'
-
-    unless up.browser.canInputEvent()
-      # In case this browser doesn't support input, we listen
-      # to all sorts of events that might change form controls.
-      changeEvents += ' keypress paste cut click propertychange'
 
     $field.on(changeEvents, check)
 

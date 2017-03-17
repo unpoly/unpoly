@@ -437,7 +437,6 @@ up.bus = (($) ->
     if up.browser.isSupported()
       # Can't decouple this via the event bus, since up.bus would require
       # up.browser.isSupported() and up.browser would require up.on()
-      up.browser.installPolyfills()
       emit('up:framework:boot', message: 'Booting framework')
       emit('up:framework:booted', message: 'Framework booted')
       # User-provided compiler definitions will be registered once this function terminates.
@@ -447,6 +446,8 @@ up.bus = (($) ->
           # The following event will cause Unpoly to compile the <body>
           emit('up:app:boot', message: 'Booting user application')
           emit('up:app:booted', message: 'User application booted')
+    else
+      console.log?("Unpoly doesn't support this browser. Framework was not booted.")
 
   ###*
   This event is [emitted](/up.emit) when Unpoly [starts to boot](/up.boot).
