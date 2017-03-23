@@ -2096,6 +2096,6 @@ up.util = (($) ->
   flatten: flatten
   isTruthy: isTruthy
 
-)($)
+)(jQuery)
 
 up.fail = up.util.fail
