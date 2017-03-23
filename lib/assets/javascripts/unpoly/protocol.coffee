@@ -28,13 +28,14 @@ Unpoly requires an additional response header to detect redirects, which are
 otherwise undetectable for any AJAX client.
 
 After the form's action performs a redirect, the next response should include the new
-URL in this HTTP header:
+URL in the HTTP headers:
 
 ```http
+X-Up-Method: GET
 X-Up-Location: /current-url
 ```
 
-The **simplest implementation** is to set this header for every request.
+The **simplest implementation** is to set these headers for every request.
 
 
 \#\#\# Optimizing responses
