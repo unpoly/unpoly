@@ -181,7 +181,8 @@ up.protocol = (($) ->
   @internal
   ###
   methodFromXhr = (xhr) ->
-    xhr.getResponseHeader(config.methodHeader)
+    if method = xhr.getResponseHeader(config.methodHeader)
+      u.normalizeMethod(method)
 
   ###*
   Server-side companion libraries like unpoly-rails set this cookie so we
