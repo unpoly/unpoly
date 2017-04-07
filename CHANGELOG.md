@@ -6,8 +6,8 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.35.0
+------
 
 ### Compatible changes
 
