@@ -415,7 +415,8 @@ up.dom = (($) ->
   parseResponse = (html) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags
     htmlElement = u.createElementFromHtml(html)
-    title: -> htmlElement.querySelector("title")?.textContent
+    title: ->
+      htmlElement.querySelector("head title")?.textContent
     first: (selector) ->
       # Although we cannot have a jQuery collection from an entire HTML document,
       # we can use jQuery's Sizzle engine to grep through a DOM tree.

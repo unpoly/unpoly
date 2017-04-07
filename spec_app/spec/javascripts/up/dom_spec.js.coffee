@@ -329,6 +329,26 @@ describe 'up.dom', ->
             expect($('.container')).toHaveText('new container text')
             expect(document.title).toBe('Title from HTML')
 
+          it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', ->
+            affix('.container').text('old container text')
+            document.title = 'old document title'
+            up.replace('.container', '/path', history: false, title: true)
+
+            @respondWith """
+              <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+                <g>
+                  <title>SVG Title Demo example</title>
+                  <rect x="10" y="10" width="200" height="50" style="fill:none; stroke:blue; stroke-width:1px"/>
+                </g>
+              </svg>
+
+              <div class='container'>
+                new container text
+              </div>
+            """
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe('old document title')
+
           it "does not extract the title from the response or HTTP header if history isn't updated", ->
             affix('.container').text('old container text')
             document.title = 'old document title'

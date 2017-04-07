@@ -13,6 +13,7 @@ Unreleased
 
 - Remove a use of global `$` that prevented Unpoly from being used with with [`jQuery.noConflict()`](https://api.jquery.com/jquery.noconflict/).
 - Fix a bug where replacing the `<body>` element would lose the body class and other attributes
+- Fix a bug where Unpoly would set the document title to a `<title>` tag of an inline SVG image.
 
 
 ### Incompatible changes
