@@ -5,7 +5,7 @@
 
 (function() {
   this.up = {
-    version: "0.34.2",
+    version: "0.35.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,7 +41,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, openTagPattern, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -275,31 +275,15 @@ that might save you from loading something like [Underscore.js](http://underscor
         return isPresent(klass) && !klass.match(/^up-/);
       });
     };
+    openTagPattern = function(tag) {
+      return new RegExp("<" + tag + "(?: [^>]*)?>", 'i');
+    };
     createElementFromHtml = function(html) {
-      var anything, bodyElement, bodyMatch, bodyPattern, capture, closeTag, headElement, htmlElement, openTag, titleElement, titleMatch, titlePattern;
-      openTag = function(tag) {
-        return "<" + tag + "(?: [^>]*)?>";
-      };
-      closeTag = function(tag) {
-        return "</" + tag + ">";
-      };
-      anything = '(?:.|\\s)*?';
-      capture = function(pattern) {
-        return "(" + pattern + ")";
-      };
-      titlePattern = new RegExp(openTag('title') + capture(anything) + closeTag('title'), 'i');
-      bodyPattern = new RegExp(openTag('body') + capture(anything) + closeTag('body'), 'i');
-      if (bodyMatch = html.match(bodyPattern)) {
-        htmlElement = document.createElement('html');
-        bodyElement = createElement('body', bodyMatch[1]);
-        htmlElement.appendChild(bodyElement);
-        if (titleMatch = html.match(titlePattern)) {
-          headElement = createElement('head');
-          htmlElement.appendChild(headElement);
-          titleElement = createElement('title', titleMatch[1]);
-          headElement.appendChild(titleElement);
-        }
-        return htmlElement;
+      var bodyPattern, parser;
+      bodyPattern = openTagPattern('body');
+      if (html.match(bodyPattern)) {
+        parser = new DOMParser();
+        return parser.parseFromString(html, 'text/html');
       } else {
         return createElement('div', html);
       }
@@ -651,7 +635,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     isFormData = function(object) {
-      return up.browser.canFormData() && object instanceof FormData;
+      return object instanceof FormData;
     };
 
     /**
@@ -1991,7 +1975,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       var $form, hasFileInputs;
       $form = $(form);
       hasFileInputs = $form.find('input[type=file]').length;
-      if (hasFileInputs && up.browser.canFormData()) {
+      if (hasFileInputs) {
         return new FormData($form.get(0));
       } else {
         return $form.serializeArray();
@@ -2479,7 +2463,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       flatten: flatten,
       isTruthy: isTruthy
     };
-  })($);
+  })(jQuery);
 
   up.fail = up.util.fail;
 
@@ -2515,13 +2499,14 @@ Unpoly requires an additional response header to detect redirects, which are
 otherwise undetectable for any AJAX client.
 
 After the form's action performs a redirect, the next response should include the new
-URL in this HTTP header:
+URL in the HTTP headers:
 
 ```http
+X-Up-Method: GET
 X-Up-Location: /current-url
 ```
 
-The **simplest implementation** is to set this header for every request.
+The **simplest implementation** is to set these headers for every request.
 
 
 \#\#\# Optimizing responses
@@ -2618,14 +2603,19 @@ but you can adapt it for other languages:
 
 \#\#\# Signaling the initial request method
 
-This is a edge case you might or might not care about:
 If the initial page was loaded  with a non-`GET` HTTP method, Unpoly prefers to make a full
-page load when you try to update a fragment. Once a page was loaded with a `GET` method,
+page load when you try to update a fragment. Once the next page was loaded with a `GET` method,
 Unpoly will restore its standard behavior.
 
-The reason for this is that some browsers remember the method of the initial page load and don't let
-the application change it, even with `pushState`. Thus, when the user reloads the page much later,
-an affected browser might request a `POST`, `PUT`, etc. instead of the correct method.
+This fixes two edge cases you might or might not care about:
+
+1. Unpoly replaces the initial page state so it can later restore it when the user
+   goes back to that initial URL. However, if the initial request was a POST,
+   Unpoly will wrongly assume that it can restore the state by reloading with GET.
+2. Some browsers have a bug where the initial request method is used for all
+   subsequently pushed states. That means if the user reloads the page on a later
+   GET state, the browser will wrongly attempt a POST request.
+   Modern Firefoxes, Chromes and IE10+ don't seem to be affected by this.
 
 In order to allow Unpoly to detect the HTTP method of the initial page load,
 the server must set a cookie:
@@ -2671,7 +2661,10 @@ an existing cookie should be deleted.
     @internal
      */
     methodFromXhr = function(xhr) {
-      return xhr.getResponseHeader(config.methodHeader);
+      var method;
+      if (method = xhr.getResponseHeader(config.methodHeader)) {
+        return u.normalizeMethod(method);
+      }
     };
 
     /**
@@ -2729,13 +2722,10 @@ Browser support
 
 Unpoly supports all modern browsers. It degrades gracefully with old versions of Internet Explorer:
 
-IE 10, IE11, Edge
+IE11, Edge
 : Full support
 
-IE 9
-: Page updates that change browser history fall back to a classic page load.
-
-IE 8
+IE 10 or lower
 : Unpoly prevents itself from booting itself, leaving you with a classic server-side application.
 
 
@@ -2746,7 +2736,7 @@ IE 8
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canCssTransition, canFormData, canInputEvent, canLogSubstitution, canPushState, hash, installPolyfills, isIE8OrWorse, isIE9OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sessionStorage, setLocationHref, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
+    var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canDomParser, canFormData, canInputEvent, canPushState, hash, isIE10OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sessionStorage, setLocationHref, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /**
@@ -2823,14 +2813,9 @@ IE 8
     @internal
      */
     puts = function() {
-      var args, message, stream;
+      var args, stream;
       stream = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      if (canLogSubstitution()) {
-        return console[stream].apply(console, args);
-      } else {
-        message = sprintf.apply(null, args);
-        return console[stream](message);
-      }
+      return console[stream].apply(console, args);
     };
     CONSOLE_PLACEHOLDERS = /\%[odisf]/g;
     stringifyArg = function(arg) {
@@ -2909,20 +2894,19 @@ IE 8
     url = function() {
       return location.href;
     };
-    isIE8OrWorse = u.memoize(function() {
-      return u.isUndefined(document.addEventListener);
-    });
-    isIE9OrWorse = u.memoize(function() {
-      return isIE8OrWorse() || navigator.appVersion.indexOf('MSIE 9.') !== -1;
+    isIE10OrWorse = u.memoize(function() {
+      return !window.atob;
     });
 
     /**
     Returns whether this browser supports manipulation of the current URL
     via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
     
-    When Unpoly is asked to change history on a browser that doesn't support
-    `pushState` (e.g. through [`up.follow()`](/up.follow)), it will gracefully
+    When `pushState`  (e.g. through [`up.follow()`](/up.follow)), it will gracefully
     fall back to a full page load.
+    
+    Note that Unpoly will not use `pushState` if the initial page was loaded with
+    a request method other than GET.
     
     @function up.browser.canPushState
     @return {Boolean}
@@ -2942,7 +2926,7 @@ IE 8
     
     @function up.browser.canCssTransition
     @return {Boolean}
-    @experimental
+    @internal
      */
     canCssTransition = u.memoize(function() {
       return 'transition' in document.documentElement.style;
@@ -2953,7 +2937,7 @@ IE 8
     
     @function up.browser.canInputEvent
     @return {Boolean}
-    @experimental
+    @internal
      */
     canInputEvent = u.memoize(function() {
       return 'oninput' in document.createElement('input');
@@ -2972,20 +2956,26 @@ IE 8
     });
 
     /**
-    Returns whether this browser supports
-    [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
-    in `console` functions.
+    Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
+    interface.
     
-    \#\#\# Example for string substition
-    
-        console.log("Hello %o!", "Judy");
-    
-    @function up.browser.canLogSubstitution
+    @function up.browser.canDomParser
     @return {Boolean}
     @internal
      */
-    canLogSubstitution = u.memoize(function() {
-      return !isIE9OrWorse();
+    canDomParser = u.memoize(function() {
+      return !!window.DOMParser;
+    });
+
+    /**
+    Returns whether this browser supports the [`debugging console`](https://developer.mozilla.org/en-US/docs/Web/API/Console).
+    
+    @function up.browser.canConsole
+    @return {Boolean}
+    @internal
+     */
+    canConsole = u.memoize(function() {
+      return window.console && console.debug && console.info && console.warn && console.error && console.group && console.groupCollapsed && console.groupEnd;
     });
     isRecentJQuery = u.memoize(function() {
       var major, minor, parts, version;
@@ -3047,29 +3037,7 @@ IE 8
     @stable
      */
     isSupported = function() {
-      return (!isIE8OrWorse()) && isRecentJQuery();
-    };
-
-    /**
-    @internal
-     */
-    installPolyfills = function() {
-      var j, len, method, ref;
-      if (window.console == null) {
-        window.console = {};
-      }
-      ref = ['debug', 'info', 'warn', 'error', 'group', 'groupCollapsed', 'groupEnd'];
-      for (j = 0, len = ref.length; j < len; j++) {
-        method = ref[j];
-        if (console[method] == null) {
-          console[method] = function() {
-            var args;
-            args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-            return puts.apply(null, ['log'].concat(slice.call(args)));
-          };
-        }
-      }
-      return console.log != null ? console.log : console.log = u.noop;
+      return !isIE10OrWorse() && isRecentJQuery() && canConsole() && canPushState() && canDomParser() && canFormData() && canCssTransition() && canInputEvent();
     };
 
     /**
@@ -3103,14 +3071,9 @@ IE 8
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       url: url,
       loadPage: loadPage,
-      whenConfirmed: whenConfirmed,
       canPushState: canPushState,
-      canCssTransition: canCssTransition,
-      canInputEvent: canInputEvent,
-      canFormData: canFormData,
-      canLogSubstitution: canLogSubstitution,
+      whenConfirmed: whenConfirmed,
       isSupported: isSupported,
-      installPolyfills: installPolyfills,
       puts: puts,
       sprintf: sprintf,
       sprintfWithFormattedArgs: sprintfWithFormattedArgs,
@@ -3608,7 +3571,6 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
      */
     boot = function() {
       if (up.browser.isSupported()) {
-        up.browser.installPolyfills();
         emit('up:framework:boot', {
           message: 'Booting framework'
         });
@@ -3625,6 +3587,8 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
             });
           });
         });
+      } else {
+        return typeof console.log === "function" ? console.log("Unpoly doesn't support this browser. Framework was not booted.") : void 0;
       }
     };
 
@@ -5929,7 +5893,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return {
         title: function() {
           var ref;
-          return (ref = htmlElement.querySelector("title")) != null ? ref.textContent : void 0;
+          return (ref = htmlElement.querySelector("head title")) != null ? ref.textContent : void 0;
         },
         first: function(selector) {
           var child;
@@ -6770,16 +6734,14 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     /**
     Returns whether Unpoly will perform animations.
     
-    Animations will be performed if the browser supports
-    [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions)
-    and if [`up.motion.config.enabled`](/up.motion.config) is set to `true` (which is the default).
+    Set [`up.motion.config.enabled`](/up.motion.config) `false` in order to disable animations globally.
     
     @function up.motion.isEnabled
     @return {Boolean}
     @stable
      */
     isEnabled = function() {
-      return config.enabled && up.browser.canCssTransition();
+      return config.enabled;
     };
 
     /**
@@ -8739,7 +8701,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
     submit = function(formOrSelector, options) {
-      var $form, canAjaxSubmit, canHistoryOption, hasFileInputs, promise, target, url;
+      var $form, promise, target, url;
       $form = $(formOrSelector).closest('form');
       options = u.options(options);
       target = u.option(options.target, $form.attr('up-target'), 'body');
@@ -8756,22 +8718,16 @@ open dialogs with sub-forms, etc. all without losing form state.
       options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'));
       options.origin = u.option(options.origin, $form);
       options.layer = u.option(options.layer, $form.attr('up-layer'), 'auto');
-      options.data = up.util.requestDataFromForm($form);
+      options.data = u.requestDataFromForm($form);
       options = u.merge(options, up.motion.animateOptions(options, $form));
-      hasFileInputs = $form.find('input[type=file]').length;
-      canAjaxSubmit = !hasFileInputs || u.isFormData(options.data);
-      canHistoryOption = up.browser.canPushState() || options.history === false;
       if (options.validate) {
         options.headers || (options.headers = {});
         options.transition = false;
         options.failTransition = false;
         options.headers[up.protocol.config.validateHeader] = options.validate;
-        if (!canAjaxSubmit) {
-          return u.unresolvablePromise();
-        }
       }
       up.feedback.start($form);
-      if (!(canAjaxSubmit && canHistoryOption)) {
+      if (!(up.browser.canPushState() || options.history === false)) {
         $form.get(0).submit();
         return u.unresolvablePromise();
       }
@@ -8912,9 +8868,6 @@ open dialogs with sub-forms, etc. all without losing form state.
         }
       };
       changeEvents = 'input change';
-      if (!up.browser.canInputEvent()) {
-        changeEvents += ' keypress paste cut click propertychange';
-      }
       $field.on(changeEvents, check);
       return function() {
         $field.off(changeEvents, check);
