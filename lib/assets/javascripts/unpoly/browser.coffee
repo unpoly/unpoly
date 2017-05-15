@@ -306,7 +306,23 @@ up.browser = (($) ->
   @internal
   ###
   sessionStorage = u.memoize ->
-    window.sessionStorage || { getItem: u.noop, setItem: u.noop, removeItem: u.noop }
+    try
+      # All supported browsers have sessionStorage, so we do not support
+      # the case where window.sessionStorage is undefined.
+      window.sessionStorage
+    catch
+      # Unfortunately Chrome explodes upon access of window.sessionStorage when
+      # user blocks third-party cookies and site data and this page is embedded
+      # as an <iframe>. See https://bugs.chromium.org/p/chromium/issues/detail?id=357625
+      polyfilledSessionStorage()
+
+  ###*
+  @internal
+  ###
+  polyfilledSessionStorage = ->
+    data = {}
+    getItem: (prop) -> data[prop]
+    setItem: (prop, value) -> data[prop] = value
 
   ###*
   Returns `'foo'` if the hash is `'#foo'`.

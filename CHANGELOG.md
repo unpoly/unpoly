@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Compatible changes
+
+- Fix a bug where an Unpoly app would crash when embedded as an `<iframe>` if the user blocks third-party cookies and site data`
+
+
 0.35.0
 ------
 
