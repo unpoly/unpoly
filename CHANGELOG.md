@@ -11,7 +11,7 @@ Unreleased
 
 ### Compatible changes
 
-- Fix a bug where an Unpoly app would crash when embedded as an `<iframe>` if the user blocks third-party cookies and site data`
+- Fix a bug where an Unpoly app would crash when embedded as an `<iframe>` if the user blocks third-party cookies and site data
 
 
 0.35.0
