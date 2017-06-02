@@ -4,8 +4,8 @@
  */
 
 (function() {
-  this.up = {
-    version: "0.35.0",
+  window.up = {
+    version: "0.35.1",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -2736,7 +2736,7 @@ IE 10 or lower
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canDomParser, canFormData, canInputEvent, canPushState, hash, isIE10OrWorse, isRecentJQuery, isSupported, loadPage, popCookie, puts, sessionStorage, setLocationHref, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
+    var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canDomParser, canFormData, canInputEvent, canPushState, hash, isIE10OrWorse, isRecentJQuery, isSupported, loadPage, polyfilledSessionStorage, popCookie, puts, sessionStorage, setLocationHref, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /**
@@ -3044,12 +3044,28 @@ IE 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
-      return window.sessionStorage || {
-        getItem: u.noop,
-        setItem: u.noop,
-        removeItem: u.noop
-      };
+      try {
+        return window.sessionStorage;
+      } catch (error) {
+        return polyfilledSessionStorage();
+      }
     });
+
+    /**
+    @internal
+     */
+    polyfilledSessionStorage = function() {
+      var data;
+      data = {};
+      return {
+        getItem: function(prop) {
+          return data[prop];
+        },
+        setItem: function(prop, value) {
+          return data[prop] = value;
+        }
+      };
+    };
 
     /**
     Returns `'foo'` if the hash is `'#foo'`.
