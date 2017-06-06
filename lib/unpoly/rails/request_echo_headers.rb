@@ -1,7 +1,7 @@
 module Unpoly
   module Rails
     ##
-    # Installs a `before_filter` into all controllers which echoes the
+    # Installs a `before_action` into all controllers which echoes the
     # request's URL as a response header `X-Up-Location` and the request's
     # HTTP method as `X-Up-Method`.
     #
@@ -10,7 +10,11 @@ module Unpoly
     module RequestEchoHeaders
 
       def self.included(base)
-        base.before_filter :set_up_request_echo_headers
+        if base.respond_to?(:before_action)
+          base.before_action :set_up_request_echo_headers
+        else
+          base.before_filter :set_up_request_echo_headers
+        end
       end
 
       private

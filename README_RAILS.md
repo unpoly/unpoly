@@ -63,7 +63,7 @@ When detecting a validation request, the server is expected to validate (but not
 
 ### Automatic redirect detection
 
-`unpoly-rails` installs a `before_filter` into all controllers which echoes the request's URL as a response header `X-Up-Location` and the request's
+`unpoly-rails` installs a `before_action` into all controllers which echoes the request's URL as a response header `X-Up-Location` and the request's
 HTTP method as `X-Up-Method`.
 
 The Unpoly frontend [requires these headers to detect redirects](http://unpoly.com/form-up-target#redirects), which are otherwise undetectable for an AJAX client.
