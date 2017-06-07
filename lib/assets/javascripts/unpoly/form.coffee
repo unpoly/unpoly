@@ -232,17 +232,18 @@ up.form = (($) ->
       callbackArg = extraArgs[1]
 
     $element = $(selectorOrElement)
-    $fields = u.multiSelector(config.fields).findWithSelf($element)
 
     callback = null
-    rawCallback = u.option(callbackArg, u.presentAttr($fields, 'up-observe'))
+    rawCallback = u.option(callbackArg, u.presentAttr($element, 'up-observe'))
     if u.isString(rawCallback)
       callback = (value, $field) -> eval(rawCallback)
     else
       callback = rawCallback or up.fail('up.observe: No change callback given')
 
-    delay = u.option($fields.attr('up-delay'), options.delay, config.observeDelay)
+    delay = u.option(u.presentAttr($element, 'up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
+
+    $fields = u.multiSelector(config.fields).findWithSelf($element)
 
     destructors = u.map $fields, (field) ->
       observeField($(field), delay, callback)
@@ -788,13 +789,21 @@ up.form = (($) ->
 
   The programmatic variant of this is the [`up.observe()`](/up.observe) function.
 
-  \#\#\# Example
+  \#\#\# Examples
 
   The following would run a global `showSuggestions(value)` function
   whenever the `<input>` changes:
 
       <form>
-        <input type="query" up-observe="showSuggestions(value)">
+        <input name="query" up-observe="showSuggestions(value)">
+      </form>
+
+  The following would run a global `somethingChanged(value)` function
+  when any `<input>` within the `<form>` changes:
+
+      <form up-observe="somethingChanged(value)">
+        <input name="foo">
+        <input name="bar">
       </form>
 
   \#\#\# Callback context
@@ -826,11 +835,11 @@ up.form = (($) ->
 
   \#\#\# Example
 
-  The following would submit the form whenever the
-  text field value changes:
+  The following would submit the form when either query or checkbox was changed:
 
       <form method="GET" action="/search" up-autosubmit>
         <input type="search" name="query">
+        <input type="checkbox" name="archive"> Include archive
       </form>
 
   The following would submit the form only if the query was changed,
@@ -838,7 +847,7 @@ up.form = (($) ->
 
       <form method="GET" action="/search">
         <input type="search" name="query" up-autosubmit>
-        <input type="checkbox"> Include archive
+        <input type="checkbox" name="archive"> Include archive
       </form>
 
   @selector [up-autosubmit]

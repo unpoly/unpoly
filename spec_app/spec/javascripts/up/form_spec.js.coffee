@@ -398,7 +398,7 @@ describe 'up.form', ->
           expect(submitSpy).toHaveBeenCalled()
           done()
 
-    describe '[up-observe]', ->
+    describe 'input[up-observe]', ->
 
       afterEach ->
         window.observeCallbackSpy = undefined
@@ -406,7 +406,6 @@ describe 'up.form', ->
       it 'runs the JavaScript code in the attribute value when a change is observed in the field', (done) ->
         $form = affix('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        console.debug("*** Setting attribute: %o", 'window.observeCallbackSpy(value, $field.get(0))')
         $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
         up.hello($form)
         $field.val('new-value')
@@ -429,6 +428,29 @@ describe 'up.form', ->
             u.setTimer 80, ->
               expect(window.observeCallbackSpy).toHaveBeenCalled()
               done()
+
+    describe 'form[up-observe]', ->
+
+      afterEach ->
+        window.observeCallbackSpy = undefined
+
+      it 'runs the JavaScript code in the attribute value when a change is observed in any contained field', (done) ->
+        window.observeCallbackSpy = jasmine.createSpy('observe callback')
+        $form = affix('form[up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
+        $field1 = $form.affix('input[val="field1-old-value"]')
+        $field2 = $form.affix('input[val="field2-old-value"]')
+        up.hello($form)
+        $field1.val('field1-new-value')
+        $field1.trigger('change')
+        u.nextFrame ->
+          expect(window.observeCallbackSpy.calls.allArgs()).toEqual [['field1-new-value', $field1.get(0)]]
+
+          $field2.val('field2-new-value')
+          $field2.trigger('change')
+
+          u.nextFrame ->
+            expect(window.observeCallbackSpy.calls.allArgs()).toEqual [['field1-new-value', $field1.get(0)], ['field2-new-value', $field2.get(0)]]
+            done()
 
     describe 'input[up-validate]', ->
 

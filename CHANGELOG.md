@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Compatible changes
+
+- The [`[up-observe]`](/up-observe) attribute can now be set on a `<form>` to run a function if any
+  contained input field changes.
+
+
 0.35.2
 ------
 
