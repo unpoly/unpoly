@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.35.2
+------
+
+### Compatible changes
+
+- `unpoly-rails` now supports Rails 5
+
+
 0.35.1
 ------
 
