@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.35.1",
+    version: "0.35.2",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
