@@ -398,6 +398,24 @@ describe 'up.form', ->
           expect(submitSpy).toHaveBeenCalled()
           done()
 
+      describe 'with [up-delay] modifier', ->
+
+        it 'debounces the form submission', (done) ->
+          $form = affix('form[up-autosubmit][up-delay="50"]')
+          $field = $form.affix('input[val="old-value"]')
+          up.hello($form)
+          submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
+          $field.val('new-value-1')
+          $field.trigger('change')
+          $field.val('new-value-2')
+          $field.trigger('change')
+
+          u.nextFrame ->
+            expect(submitSpy.calls.count()).toBe(0)
+            u.setTimer 80, ->
+              expect(submitSpy.calls.count()).toBe(1)
+              done()
+
     describe 'input[up-observe]', ->
 
       afterEach ->

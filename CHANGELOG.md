@@ -13,6 +13,8 @@ Unreleased
 
 - The [`[up-observe]`](/up-observe) attribute can now be set on a `<form>` to run a function if any
   contained input field changes.
+- Fix a bug where [`[up-autosubmit]`](/up-autosubmit) didn't honor an `[up-delay]` attribute if
+  used on a form.
 
 
 0.35.2
