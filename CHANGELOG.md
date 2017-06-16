@@ -15,6 +15,7 @@ Unreleased
   contained input field changes.
 - Fix a bug where [`[up-autosubmit]`](/up-autosubmit) didn't honor an `[up-delay]` attribute if
   used on a form.
+- When [submitting a form](/form-up-target), the `name` and `value` of the submit button is now included with the form parameters.
 
 
 0.35.2

@@ -13,13 +13,17 @@
   mouseup = ($element, options) ->
     event = createMouseEvent('mouseup', options)
     dispatch($element, event)
-    
+
   click = ($element, options) ->
     event = createMouseEvent('click', options)
     dispatch($element, event)
 
+  focus = ($element, options) ->
+    $element.focus()
+
   clickSequence = ($element, options) ->
     mousedown($element, options)
+    focus($element, options)
     mouseup($element, options)
     click($element, options)
 
@@ -70,5 +74,6 @@
   mouseup: mouseup
   click: click
   clickSequence: clickSequence
+
   
 )()

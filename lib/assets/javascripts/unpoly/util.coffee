@@ -1655,6 +1655,14 @@ up.util = (($) ->
     else
       ""
 
+  $submittingButton = ($form) ->
+    submitButtonSelector = 'input[type=submit], button[type=submit], button:not([type])'
+    $activeElement = $(document.activeElement)
+    if $activeElement.is(submitButtonSelector) && $form.has($activeElement)
+      $activeElement
+    else
+      $form.find(submitButtonSelector).first()
+
   ###*
   Serializes the given form into a request data representation.
 
@@ -1665,14 +1673,18 @@ up.util = (($) ->
   requestDataFromForm = (form) ->
     $form = $(form)
     hasFileInputs = $form.find('input[type=file]').length
+
+    $button = $submittingButton($form)
+    buttonName = $button.attr('name')
+    buttonValue = $button.val()
+
     # We try to stick with an array representation, whose contents we can inspect.
     # We cannot inspect FormData on IE11 because it has no support for `FormData.entries`.
     # Inspection is needed to generate a cache key (see `up.proxy`) and to make
     # vanilla requests when `pushState` is unavailable (see `up.browser.loadPage`).
-    if hasFileInputs
-      new FormData($form.get(0))
-    else
-      $form.serializeArray()
+    data = if hasFileInputs then new FormData($form.get(0)) else $form.serializeArray()
+    appendRequestData(data, buttonName, buttonValue) if isPresent(buttonName)
+    data
 
 
   ###*

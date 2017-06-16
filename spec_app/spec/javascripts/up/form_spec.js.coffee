@@ -357,6 +357,59 @@ describe 'up.form', ->
 
       it 'rigs the form to use up.submit instead of a standard submit'
 
+      describe 'submit buttons', ->
+
+        it 'includes the clicked submit button in the params', (done) ->
+          $form = affix('form[action="/action"][up-target=".target"]')
+          $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
+          $submitButton = $form.affix('input[type="submit"][name="submit-button"][value="submit-button-value"]')
+          up.hello($form)
+          Trigger.clickSequence($submitButton)
+          u.nextFrame =>
+            params = @lastRequest().data()
+            expect(params['text-field']).toEqual(['text-field-value'])
+            expect(params['submit-button']).toEqual(['submit-button-value'])
+            done()
+
+        it 'excludes an unused submit button in the params', (done) ->
+          $form = affix('form[action="/action"][up-target=".target"]')
+          $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
+          $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
+          $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
+          up.hello($form)
+          Trigger.clickSequence($submitButton2)
+          u.nextFrame =>
+            params = @lastRequest().data()
+            expect(params['text-field']).toEqual(['text-field-value'])
+            expect(params['submit-button-1']).toBeUndefined()
+            expect(params['submit-button-2']).toEqual(['submit-button-2-value'])
+            done()
+
+        it 'includes the first submit button if the form was submitted with enter', (done) ->
+          $form = affix('form[action="/action"][up-target=".target"]')
+          $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
+          $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
+          $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
+          up.hello($form)
+          $form.submit() # sorry
+          u.nextFrame =>
+            params = @lastRequest().data()
+            expect(params['text-field']).toEqual(['text-field-value'])
+            expect(params['submit-button-1']).toEqual(['submit-button-1-value'])
+            expect(params['submit-button-2']).toBeUndefined()
+            done()
+
+        it 'does not explode if the form has no submit buttons', (done) ->
+          $form = affix('form[action="/action"][up-target=".target"]')
+          $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
+          up.hello($form)
+          $form.submit() # sorry
+          u.nextFrame =>
+            params = @lastRequest().data()
+            keys = Object.keys(params)
+            expect(keys).toEqual(['text-field'])
+            done()
+
     describe 'input[up-autosubmit]', ->
 
       it 'submits the form when a change is observed in the given form field', (done) ->
