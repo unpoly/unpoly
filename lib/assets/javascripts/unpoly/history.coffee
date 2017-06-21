@@ -158,18 +158,22 @@ up.history = (($) ->
   restoreStateOnPop = (state) ->
     if state?.fromUp
       url = currentUrl()
-      up.log.group "Restoring URL %s", url, ->
-        popSelector = config.popTargets.join(', ')
-        replaced = up.replace popSelector, url,
-          history: false,     # don't push a new state
-          title: true,        # do extract the title from the response
-          reveal: false,
-          transition: 'none',
-          saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
-          restoreScroll: config.restoreScroll
-        replaced.then ->
-          url = currentUrl()
-          up.emit('up:history:restored', url: url, message: "Restored location #{url}")
+
+      # We can't let people prevent this event, since `popstate` is also unpreventable.
+      up.emit('up:history:restore', url: url, message: "Restoring location #{url}")
+
+      popSelector = config.popTargets.join(', ')
+      replaced = up.replace popSelector, url,
+        history: false,     # don't push a new state
+        title: true,        # do extract the title from the response
+        reveal: false,
+        transition: 'none',
+        saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
+        restoreScroll: config.restoreScroll
+        layer: 'page'       # Don't replace elements in a modal that might still be open
+      replaced.then ->
+        url = currentUrl()
+        up.emit('up:history:restored', url: url, message: "Restored location #{url}")
     else
       up.puts 'Ignoring a state not pushed by Unpoly (%o)', state
 
@@ -178,6 +182,17 @@ up.history = (($) ->
     up.layout.saveScroll(url: previousUrl)
     state = event.originalEvent.state
     restoreStateOnPop(state)
+
+  ###*
+  This event is [emitted](/up.emit) before a history entry will be restored.
+
+  History entries are restored when the user uses the *Back* or *Forward* button.
+
+  @event up:history:restore
+  @param {String} event.url
+    The URL for the history entry that has been restored.
+  @internal
+  ###
 
   ###*
   This event is [emitted](/up.emit) after a history entry has been restored.

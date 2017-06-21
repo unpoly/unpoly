@@ -796,6 +796,10 @@ up.modal = (($) ->
         # we might now know the link that was clicked on.
         'left'
 
+  # When the user uses the back button we will usually restore <body> or a base container.
+  # We close any open modal because it probably won't match the restored state.
+  up.on 'up:history:restore', closeAsap
+
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
 

@@ -450,6 +450,33 @@ describe 'up.modal', ->
           Trigger.click($link)
           expect(@lastRequest().method).toEqual 'POST'
 
+      it 'adds a history entry and allows the user to use the back button', (done) ->
+        up.motion.config.enabled = false
+        up.history.push('/original-path')
+
+        up.history.config.popTargets = ['.container']
+        $container = affix('.container').text('old container content')
+        $link = $container.affix('a[href="/new-path"][up-modal=".target"]')
+
+        expect(location.pathname).toEqual('/original-path')
+
+        Trigger.clickSequence($link)
+
+        u.nextFrame =>
+          @respondWith('<div class="target">modal content</div>')
+          expect(location.pathname).toEqual('/new-path')
+          expect('.up-modal .target').toHaveText('modal content')
+
+          history.back()
+          u.setTimer (waitForBrowser = 70), =>
+            @respondWith('<div class="container">restored container content</div>')
+            u.nextFrame =>
+              expect(location.pathname).toEqual('/original-path')
+              expect('.container').toHaveText('restored container content')
+              expect('.up-modal').not.toExist()
+              done()
+
+
     describe '[up-drawer]', ->
 
       beforeEach ->
