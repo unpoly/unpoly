@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.35.2",
+    version: "0.36.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,7 +41,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, openTagPattern, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, $submittingButton, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, openTagPattern, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -1963,6 +1963,16 @@ that might save you from loading something like [Underscore.js](http://underscor
         return "";
       }
     };
+    $submittingButton = function($form) {
+      var $activeElement, submitButtonSelector;
+      submitButtonSelector = 'input[type=submit], button[type=submit], button:not([type])';
+      $activeElement = $(document.activeElement);
+      if ($activeElement.is(submitButtonSelector) && $form.has($activeElement)) {
+        return $activeElement;
+      } else {
+        return $form.find(submitButtonSelector).first();
+      }
+    };
 
     /**
     Serializes the given form into a request data representation.
@@ -1972,14 +1982,17 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     requestDataFromForm = function(form) {
-      var $form, hasFileInputs;
+      var $button, $form, buttonName, buttonValue, data, hasFileInputs;
       $form = $(form);
       hasFileInputs = $form.find('input[type=file]').length;
-      if (hasFileInputs) {
-        return new FormData($form.get(0));
-      } else {
-        return $form.serializeArray();
+      $button = $submittingButton($form);
+      buttonName = $button.attr('name');
+      buttonValue = $button.val();
+      data = hasFileInputs ? new FormData($form.get(0)) : $form.serializeArray();
+      if (isPresent(buttonName)) {
+        appendRequestData(data, buttonName, buttonValue);
       }
+      return data;
     };
 
     /**
@@ -3044,6 +3057,7 @@ IE 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
+      var error;
       try {
         return window.sessionStorage;
       } catch (error) {
@@ -4625,26 +4639,28 @@ Going back behavior .... configure.
       };
     };
     restoreStateOnPop = function(state) {
-      var url;
+      var popSelector, replaced, url;
       if (state != null ? state.fromUp : void 0) {
         url = currentUrl();
-        return up.log.group("Restoring URL %s", url, function() {
-          var popSelector, replaced;
-          popSelector = config.popTargets.join(', ');
-          replaced = up.replace(popSelector, url, {
-            history: false,
-            title: true,
-            reveal: false,
-            transition: 'none',
-            saveScroll: false,
-            restoreScroll: config.restoreScroll
-          });
-          return replaced.then(function() {
-            url = currentUrl();
-            return up.emit('up:history:restored', {
-              url: url,
-              message: "Restored location " + url
-            });
+        up.emit('up:history:restore', {
+          url: url,
+          message: "Restoring location " + url
+        });
+        popSelector = config.popTargets.join(', ');
+        replaced = up.replace(popSelector, url, {
+          history: false,
+          title: true,
+          reveal: false,
+          transition: 'none',
+          saveScroll: false,
+          restoreScroll: config.restoreScroll,
+          layer: 'page'
+        });
+        return replaced.then(function() {
+          url = currentUrl();
+          return up.emit('up:history:restored', {
+            url: url,
+            message: "Restored location " + url
           });
         });
       } else {
@@ -4660,6 +4676,17 @@ Going back behavior .... configure.
       state = event.originalEvent.state;
       return restoreStateOnPop(state);
     };
+
+    /**
+    This event is [emitted](/up.emit) before a history entry will be restored.
+    
+    History entries are restored when the user uses the *Back* or *Forward* button.
+    
+    @event up:history:restore
+    @param {String} event.url
+      The URL for the history entry that has been restored.
+    @internal
+     */
 
     /**
     This event is [emitted](/up.emit) after a history entry has been restored.
@@ -8837,9 +8864,8 @@ open dialogs with sub-forms, etc. all without losing form state.
         callbackArg = extraArgs[1];
       }
       $element = $(selectorOrElement);
-      $fields = u.multiSelector(config.fields).findWithSelf($element);
       callback = null;
-      rawCallback = u.option(callbackArg, u.presentAttr($fields, 'up-observe'));
+      rawCallback = u.option(callbackArg, u.presentAttr($element, 'up-observe'));
       if (u.isString(rawCallback)) {
         callback = function(value, $field) {
           return eval(rawCallback);
@@ -8847,8 +8873,9 @@ open dialogs with sub-forms, etc. all without losing form state.
       } else {
         callback = rawCallback || up.fail('up.observe: No change callback given');
       }
-      delay = u.option($fields.attr('up-delay'), options.delay, config.observeDelay);
+      delay = u.option(u.presentAttr($element, 'up-delay'), options.delay, config.observeDelay);
       delay = parseInt(delay);
+      $fields = u.multiSelector(config.fields).findWithSelf($element);
       destructors = u.map($fields, function(field) {
         return observeField($(field), delay, callback);
       });
@@ -9421,13 +9448,21 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     The programmatic variant of this is the [`up.observe()`](/up.observe) function.
     
-    \#\#\# Example
+    \#\#\# Examples
     
     The following would run a global `showSuggestions(value)` function
     whenever the `<input>` changes:
     
         <form>
-          <input type="query" up-observe="showSuggestions(value)">
+          <input name="query" up-observe="showSuggestions(value)">
+        </form>
+    
+    The following would run a global `somethingChanged(value)` function
+    when any `<input>` within the `<form>` changes:
+    
+        <form up-observe="somethingChanged(value)">
+          <input name="foo">
+          <input name="bar">
         </form>
     
     \#\#\# Callback context
@@ -9461,11 +9496,11 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     \#\#\# Example
     
-    The following would submit the form whenever the
-    text field value changes:
+    The following would submit the form when either query or checkbox was changed:
     
         <form method="GET" action="/search" up-autosubmit>
           <input type="search" name="query">
+          <input type="checkbox" name="archive"> Include archive
         </form>
     
     The following would submit the form only if the query was changed,
@@ -9473,7 +9508,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
         <form method="GET" action="/search">
           <input type="search" name="query" up-autosubmit>
-          <input type="checkbox"> Include archive
+          <input type="checkbox" name="archive"> Include archive
         </form>
     
     @selector [up-autosubmit]
@@ -10012,6 +10047,7 @@ The HTML of a popup element is simply this:
       closeAsap();
       return up.bus.consumeAction(event);
     });
+    up.on('up:history:restore', closeAsap);
     up.on('up:framework:reset', reset);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
@@ -10915,6 +10951,7 @@ or function.
         }
       }
     };
+    up.on('up:history:restore', closeAsap);
     up.on('up:framework:reset', reset);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
