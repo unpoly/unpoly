@@ -6,8 +6,8 @@ All notable changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.36.0
+------
 
 ### Compatible changes
 
@@ -18,6 +18,7 @@ Unreleased
 - When [submitting a form](/form-up-target), the `name` and `value` of the submit button is now included with the form parameters.
 - [Going back in history](/up.history) after a [fragment update](/up.link) now always restores elements the page layer, never a selector in [modals](/up.modal) or [popups](/up.popup).
 - [Going back in history](/up.history) now always closes a [modal](/up.modal) or [popup](/up.popup).
+- Switch to [unpkg](https://unpkg.com) as our CDN.
 
 
 0.35.2
