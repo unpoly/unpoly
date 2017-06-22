@@ -74,7 +74,9 @@ Now we can release a new version. **This requires your to be logged into Rubygem
 
 Always remember to build, commit and push build artifacts before calling `rake publish:release` so the Git tag points to the correct commit.
 
-If you have done this process a few times and know what you're doing, you can call `rake publish:all` to run all these steps in sequence. 
+If you have done this process a few times and know what you're doing, you can call `rake publish:all` to run all these steps in sequence.
+
+After you have published all release channels, remember to update [unpoly.com](http://unpoly.com/) so users see the new version, CDN link and CHANGELOG.
 
 
 Credits
