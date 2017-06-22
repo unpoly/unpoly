@@ -67,8 +67,13 @@ namespace :publish do
     Rake::Task['npm:publish'].invoke
   end
 
+  desc 'Remind user to update unpoly.com'
+  task :remind_to_update_site do
+    puts "Now remember to update unpoly.com so user see the updated CHANGELOG and CDN link!"
+  end
+
   desc 'Build artifacts, push to git and release to package managers'
-  task :all => [:build, :commit, :release] do
+  task :all => [:build, :commit, :release, :remind_to_update_site] do
   end
 
 end
