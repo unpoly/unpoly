@@ -5,9 +5,13 @@
   "main": "dist/unpoly.js",
   "files": [
     "dist/unpoly.js",
+    "dist/unpoly.min.js",
     "dist/unpoly.css",
+    "dist/unpoly.min.css",
     "dist/unpoly-bootstrap3.js",
-    "dist/unpoly-bootstrap3.css"
+    "dist/unpoly-bootstrap3.min.js",
+    "dist/unpoly-bootstrap3.css",
+    "dist/unpoly-bootstrap3.min.css"
   ],
   "scripts": {
     "test": "echo \"See https://github.com/unpoly/unpoly for test instructions\" && exit 1"
