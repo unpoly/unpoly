@@ -694,7 +694,7 @@ up.modal = (($) ->
 
   # Close the modal when someone clicks outside the dialog
   # (but not on a modal opener).
-  up.on('click', (event) ->
+  up.on('click', '.up-modal-backdrop', (event) ->
     return unless state.closable
 
     $target = $(event.target)

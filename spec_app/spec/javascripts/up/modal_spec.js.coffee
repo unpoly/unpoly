@@ -554,7 +554,7 @@ describe 'up.modal', ->
             expect(backgroundClicked).toHaveBeenCalled()
             done()
 
-    describe 'template behavior', ->
+    describe 'closing', ->
 
       it 'closes the modal on close icon click', (done) ->
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
@@ -574,6 +574,15 @@ describe 'up.modal', ->
         Trigger.clickSequence($backdrop)
         u.nextFrame ->
           expect(up.modal.isOpen()).toBe(false)
+          done()
+
+      it "does not close the modal when clicking on an element outside the modal's DOM hierarchy", (done) ->
+        $container = affix('.container')
+        up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
+
+        Trigger.clickSequence($container)
+        u.nextFrame ->
+          expect(up.modal.isOpen()).toBe(true)
           done()
 
       it 'closes the modal when the user presses the escape key', (done) ->

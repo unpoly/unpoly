@@ -12,6 +12,7 @@ Unreleased
 ### Compatible changes
 
 - [npm package](/install/npm) now expresses Unpoly's dependency on `jquery`.
+- [Modals](/up.modal) no longer close when clicking an element that exists outside the modal's DOM hierarchy.
 
 
 0.36.0
