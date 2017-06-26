@@ -32,7 +32,7 @@
   "bugs": {
     "url": "https://github.com/unpoly/unpoly/issues"
   },
-  "homepage": "http://unpoly.com",
+  "homepage": "https://unpoly.com",
   "dependencies": {
     "jquery": ">=1.9"
   }

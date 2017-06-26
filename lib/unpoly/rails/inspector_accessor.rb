@@ -19,7 +19,7 @@ module Unpoly
       ##
       # :method: up?
       # Returns whether the current request is an
-      # [page fragment update](http://unpoly.com/up.replace) triggered by an
+      # [page fragment update](https://unpoly.com/up.replace) triggered by an
       # Unpoly frontend.
       delegate :up?, :unpoly?, :to => :up
 

@@ -1,7 +1,7 @@
 unpoly-rails: Ruby on Rails bindings for Unpoly
 ===============================================
 
-[Unpoly](http://unpoly.com) is a backend-agnostic [unobtrusive JavaScript](https://en.wikipedia.org/wiki/Unobtrusive_JavaScript) framework. `unpoly-rails` gives your [Ruby on Rails](http://rubyonrails.org/) application some convenience candy when you are using Unpoly in your frontend.
+[Unpoly](https://unpoly.com) is a backend-agnostic [unobtrusive JavaScript](https://en.wikipedia.org/wiki/Unobtrusive_JavaScript) framework. `unpoly-rails` gives your [Ruby on Rails](http://rubyonrails.org/) application some convenience candy when you are using Unpoly in your frontend.
 
 
 Features
@@ -11,11 +11,11 @@ The methods documented below are available in all controllers, views and helpers
 
 ### Detecting a fragment update
 
-To test whether the current request is a [fragment update](http://unpoly.com/up.link):
+To test whether the current request is a [fragment update](https://unpoly.com/up.link):
 
     up?
 
-To retrieve the CSS selector that is being [updated](http://unpoly.com/up.link):
+To retrieve the CSS selector that is being [updated](https://unpoly.com/up.link):
 
     up.target
 
@@ -38,7 +38,7 @@ This is useful when you skip rendering the `<head>` in an Unpoly request.
 
 ### Detecting an Unpoly form validation
 
-To test whether the current request is a [form validation](http://unpoly.com/up-validate):
+To test whether the current request is a [form validation](https://unpoly.com/up-validate):
 
     up.validate?
 
@@ -66,7 +66,7 @@ When detecting a validation request, the server is expected to validate (but not
 `unpoly-rails` installs a `before_action` into all controllers which echoes the request's URL as a response header `X-Up-Location` and the request's
 HTTP method as `X-Up-Method`.
 
-The Unpoly frontend [requires these headers to detect redirects](http://unpoly.com/form-up-target#redirects), which are otherwise undetectable for an AJAX client.
+The Unpoly frontend [requires these headers to detect redirects](https://unpoly.com/form-up-target#redirects), which are otherwise undetectable for an AJAX client.
 
 ### Automatic method detection for initial page load
 
@@ -82,7 +82,7 @@ What you still need to do manually
 
 ### Failed form submissions must return a non-200 status code
 
-Unpoly lets you submit forms via AJAX by using the [`form[up-target]`](http://unpoly.com/form-up-target) selector or [`up.submit()`](http://unpoly.com/up.submit) function.
+Unpoly lets you submit forms via AJAX by using the [`form[up-target]`](https://unpoly.com/form-up-target) selector or [`up.submit()`](https://unpoly.com/up.submit) function.
 
 For Unpoly to be able to detect a failed form submission, the form must be re-rendered with a non-200 HTTP status code. We recommend to use either 400 (bad request) or 422 (unprocessable entity).
 

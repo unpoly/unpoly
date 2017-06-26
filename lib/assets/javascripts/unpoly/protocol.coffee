@@ -40,7 +40,7 @@ The **simplest implementation** is to set these headers for every request.
 
 \#\#\# Optimizing responses
 
-When [updating a fragment](http://unpoly.com/up.link), Unpoly will send
+When [updating a fragment](/up.link), Unpoly will send
 an additional HTTP header containing the CSS selector that is being replaced:
 
 ```http
@@ -54,7 +54,7 @@ expensive sidebar if the sidebar is not targeted.
 
 \#\#\# Pushing a document title to the client
 
-When [updating a fragment](http://unpoly.com/up.link), Unpoly will by default
+When [updating a fragment](/up.link), Unpoly will by default
 extract the `<title>` from the server response and update the document title accordingly.
 
 The server can also force Unpoly to set a document title by passing a HTTP header:
@@ -70,7 +70,7 @@ no longer includes a `<title>`, you can instead use the HTTP header to pass the 
 
 \#\#\# Signaling failed form submissions
 
-When [submitting a form via AJAX](http://unpoly.com/form-up-target)
+When [submitting a form via AJAX](/form-up-target)
 Unpoly needs to know whether the form submission has failed (to update the form with
 validation errors) or succeeded (to update the `up-target` selector).
 
@@ -97,7 +97,7 @@ To do so in [Ruby on Rails](http://rubyonrails.org/), pass a [`:status` option t
 
 \#\#\# Detecting live form validations
 
-When [validating a form](http://unpoly.com/up-validate), Unpoly will
+When [validating a form](/up-validate), Unpoly will
 send an additional HTTP header containing a CSS selector for the form that is
 being updated:
 

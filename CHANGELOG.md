@@ -805,7 +805,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- `up.bus.emit()` is now [`up.emit()`](http://unpoly.com/up.emit/)
+- `up.bus.emit()` is now [`up.emit()`](/up.emit)
 - When `up.first()` finds no match, return `undefined` instead of `null`.
 
 
@@ -1030,7 +1030,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- Unpoly will now emit [events](http://unpoly.com/up.bus) `proxy:busy` and `proxy:idle` whenever it is loading or is done loading content over HTTP.
+- Unpoly will now emit [events](/up.bus) `proxy:busy` and `proxy:idle` whenever it is loading or is done loading content over HTTP.
 - Add an option `up.proxy.defaults('busyDelay')` to delay the `proxy:busy` event in order to prevent flickering of loading spinners.
 
 
@@ -1081,7 +1081,7 @@ Refactored internals. No API changes.
 
 ### Compatible changes
 
-- Use [up.proxy](http://unpoly.com/up.proxy) when submitting a form.
+- Use [up.proxy](/up.proxy) when submitting a form.
 
 
 0.7.2
