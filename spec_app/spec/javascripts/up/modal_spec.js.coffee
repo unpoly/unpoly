@@ -488,6 +488,34 @@ describe 'up.modal', ->
               expect('.up-modal').not.toExist()
               done()
 
+      it 'allows to open a modal after closing a previous modul with the escape key (bugfix)', (done) ->
+        up.motion.config.enabled = false
+
+        $link1 = affix('a[href="/path1"][up-modal=".target"]')
+        $link2 = affix('a[href="/path2"][up-modal=".target"]')
+        Trigger.clickSequence($link1)
+
+        u.nextFrame =>
+          @respondWith('<div class="target">content 1</div>')
+
+          u.nextFrame =>
+            expect(up.modal.isOpen()).toBe(true)
+
+            escapeEvent = $.Event('keydown', keyCode: 27)
+            $('body').trigger(escapeEvent)
+
+            u.nextFrame =>
+              expect(up.modal.isOpen()).toBe(false)
+
+              Trigger.clickSequence($link2)
+
+              u.nextFrame =>
+                @respondWith('<div class="target">content 1</div>')
+
+                u.nextFrame =>
+                  expect(up.modal.isOpen()).toBe(true)
+                  done()
+
 
     describe '[up-drawer]', ->
 
