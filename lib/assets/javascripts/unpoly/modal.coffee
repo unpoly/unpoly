@@ -692,9 +692,11 @@ up.modal = (($) ->
   up.link.onAction '[up-modal]', ($link) ->
     followAsap($link)
 
-  # Close the modal when someone clicks outside the dialog
-  # (but not on a modal opener).
-  up.on('click', '.up-modal-backdrop', (event) ->
+  # Close the modal when someone clicks outside the dialog (but not on a modal opener).
+  # Note that we cannot listen to clicks on .up-modal-backdrop, which is a sister element
+  # of .up-modal-viewport. Since the user will effectively click on the viewport, not
+  # the backdrop, backdrop will not receive a bubbling event.
+  up.on('click', '.up-modal', (event) ->
     return unless state.closable
 
     $target = $(event.target)
