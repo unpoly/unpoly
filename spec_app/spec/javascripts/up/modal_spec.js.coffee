@@ -63,7 +63,7 @@ describe 'up.modal', ->
         expect('.up-modal-dialog .before').not.toExist()
         expect('.up-modal-dialog .after').not.toExist()
 
-        expect(location.pathname).toEndWith('/foo')
+        expect(location.pathname).toEqualUrl('/foo')
 
       it "doesn't create an .up-modal frame and replaces { failTarget } if the server returns a non-200 response", ->
         affix('.error').text('old error')
@@ -321,7 +321,7 @@ describe 'up.modal', ->
           visitPromise = up.modal.visit('/bar', target: '.container')
           @respondWith('<div class="container">text</div>')
           visitPromise.then ->
-            expect(up.modal.coveredUrl()).toEndWith('/foo')
+            expect(up.modal.coveredUrl()).toEqualUrl('/foo')
             up.modal.close().then ->
               expect(up.modal.coveredUrl()).toBeMissing()
               done()
@@ -651,7 +651,7 @@ describe 'up.modal', ->
             origin: $('.inside'), history: '/new-location') # Provoke auto-close
 
           u.setTimer 50, ->
-            expect(location.href).toEndWith '/new-location'
+            expect(location.href).toEqualUrl '/new-location'
             done()
 
       it 'does not auto-close the modal when a replacement from inside the modal affects a selector inside the modal', ->

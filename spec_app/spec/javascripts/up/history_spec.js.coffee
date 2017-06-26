@@ -14,7 +14,7 @@ describe 'up.history', ->
 
         it 'does not strip a trailing slash from the current URL', ->
           history.replaceState?({}, 'title', '/host/path/')
-          expect(up.history.url()).toEndWith('/host/path/')
+          expect(up.history.url()).toEqualUrl('/host/path/')
 
     describe 'up.history.isUrl', ->
 
@@ -50,8 +50,8 @@ describe 'up.history', ->
           up.history.push('/one')
           up.history.push('/two')
           $element = up.hello(affix('a[href="/three"][up-back]').text('text'))
-          expect($element.attr('href')).toEndWith('/three')
-          expect($element.attr('up-href')).toEndWith('/one')
+          expect($element.attr('href')).toEqualUrl('/three')
+          expect($element.attr('up-href')).toEqualUrl('/one')
           expect($element.attr('up-restore-scroll')).toBe('')
           expect($element.attr('up-follow')).toBe('')
 
@@ -156,7 +156,7 @@ describe 'up.history', ->
 
           u.setTimer 50, ->
 
-            expect(location.href).toEndWith('/two')
+            expect(location.href).toEqualUrl('/two')
 
             history.back()
 

@@ -135,7 +135,7 @@ describe 'up.popup', ->
           $popupLink = affix('a[href="/bar"][up-popup=".container"][up-history="true"]')
           Trigger.clickSequence($popupLink)
           @respondWith('<div class="container">text</div>')
-          expect(up.popup.coveredUrl()).toEndWith('/foo')
+          expect(up.popup.coveredUrl()).toEqualUrl('/foo')
           up.popup.close().then ->
             expect(up.popup.coveredUrl()).toBeMissing()
             done()
@@ -342,7 +342,7 @@ describe 'up.popup', ->
             origin: $('.inside'), history: '/new-location') # Provoke auto-close
 
           u.setTimer 50, ->
-            expect(location.href).toEndWith '/new-location'
+            expect(location.href).toEqualUrl '/new-location'
             done()
 
       it 'does not auto-close the popup when a replacement from inside the popup affects a selector inside the popup', ->

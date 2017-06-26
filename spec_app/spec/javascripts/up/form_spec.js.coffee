@@ -312,14 +312,14 @@ describe 'up.form', ->
               </div>
               """
 
-          expect(up.browser.url()).toEndWith('/other-path')
+          expect(up.browser.url()).toEqualUrl('/other-path')
 
         describe 'with { history } option', ->
 
           it 'uses the given URL as the new browser location if the request succeeded', ->
             up.submit(@$form, history: '/given-path')
             @respondWith('<div class="response">new-text</div>')
-            expect(up.browser.url()).toEndWith('/given-path')
+            expect(up.browser.url()).toEqualUrl('/given-path')
 
           it 'keeps the current browser location if the request failed', ->
             up.submit(@$form, history: '/given-path', failTarget: '.response')

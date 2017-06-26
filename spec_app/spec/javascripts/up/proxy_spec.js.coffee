@@ -13,14 +13,14 @@ describe 'up.proxy', ->
       it 'makes a request with the given URL and params', ->
         up.ajax('/foo', data: { key: 'value' }, method: 'post')
         request = @lastRequest()
-        expect(request.url).toEndWith('/foo')
+        expect(request.url).toEqualUrl('/foo')
         expect(request.data()).toEqual(key: ['value'])
         expect(request.method).toEqual('POST')
 
       it 'also allows to pass the URL as a { url } option instead', ->
         up.ajax(url: '/foo', data: { key: 'value' }, method: 'post')
         request = @lastRequest()
-        expect(request.url).toEndWith('/foo')
+        expect(request.url).toEqualUrl('/foo')
         expect(request.data()).toEqual(key: ['value'])
         expect(request.method).toEqual('POST')
 
