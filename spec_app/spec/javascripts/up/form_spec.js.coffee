@@ -553,6 +553,29 @@ describe 'up.form', ->
           expect($group).toHaveClass('has-error')
           expect($group).toHaveText('Username has already been taken')
 
+        it 'does not reveal the updated fragment (bugfix)', ->
+          revealSpy = up.layout.knife.mock('reveal').and.returnValue(u.resolvedDeferred())
+
+          $form = affix('form[action="/path/to"]')
+          $group = $("""
+            <div class="field-group">
+              <input name="user" value="judy" up-validate=".field-group:has(&)">
+            </div>
+          """).appendTo($form)
+          $group.find('input').trigger('change')
+
+          request = @lastRequest()
+
+          @respondWith """
+            <div class="field-group has-error">
+              <div class='error'>Username has already been taken</div>
+              <input name="user" value="judy" up-validate=".field-group:has(&)">
+            </div>
+          """
+
+          expect(revealSpy).not.toHaveBeenCalled()
+
+
       describe 'when no selector is given', ->
 
         it 'automatically finds a form group around the input field and only updates that', ->

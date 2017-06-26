@@ -6,6 +6,14 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Compatible changes
+
+- [Validating forms](https://unpoly.com/up-validate) will no longer change the scroll position.
+
+
 0.36.1
 ------
 

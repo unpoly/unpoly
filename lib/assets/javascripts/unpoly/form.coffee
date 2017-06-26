@@ -338,6 +338,7 @@ up.form = (($) ->
 
   @function up.validate
   @param {String|Element|jQuery} fieldOrSelector
+
   @param {String|Element|jQuery} [options.target]
   @return {Promise}
     A promise that is resolved when the server-side
@@ -350,6 +351,7 @@ up.form = (($) ->
     options.origin = $field
     options.target = resolveValidateTarget($field, options)
     options.failTarget = options.target
+    options.reveal = u.option(options.reveal, u.castedAttr($field, 'up-reveal'), false)
     options.history = false
     options.headers = u.option(options.headers, {})
     # Make sure the X-Up-Validate header is present, so the server-side
