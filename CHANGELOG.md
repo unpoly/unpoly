@@ -6,6 +6,14 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Compatible changes
+
+- [npm package](/install/npm) now expresses Unpoly's dependency on `jquery`.
+
+
 0.36.0
 ------
 

@@ -245,6 +245,7 @@ up.browser = (($) ->
     parts = version.split('.')
     major = parseInt(parts[0])
     minor = parseInt(parts[1])
+    # When updating minimum jQuery, also update the dependency in package.json.
     major >= 2 || (major == 1 && minor >= 9)
 
   ###*
