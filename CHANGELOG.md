@@ -13,6 +13,7 @@ Unreleased
 
 - [npm package](/install/npm) now expresses Unpoly's dependency on `jquery`.
 - [Modals](/up.modal) no longer close when clicking an element that exists outside the modal's DOM hierarchy.
+- Fix a bug on IE11 where modals would immediately close after opening if the opening link had an [`[up-instant]`](/up-instant) attribute and the destination page was already cached.
 
 
 0.36.0
