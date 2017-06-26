@@ -375,37 +375,49 @@ describe 'up.modal', ->
     describe 'a[up-modal]', ->
 
       beforeEach ->
+        up.motion.config.enabled = false
+
+        # Some examples only want to check if follow() has been called, without
+        # actually making a request.
         @stubFollow = =>
           @$link = affix('a[href="/path"][up-modal=".target"]')
           @followSpy = up.modal.knife.mock('followAsap').and.returnValue(u.resolvedPromise())
           @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
-      it 'opens the clicked link in a modal', ->
-        @stubFollow()
+      it 'opens the clicked link in a modal', (done) ->
+        @$link = affix('a[href="/path"][up-modal=".target"]')
         Trigger.click(@$link)
-        expect(@followSpy).toHaveBeenCalledWith(@$link)
+        lastRequest = @lastRequest()
+        expect(lastRequest.url).toEqualUrl('/path')
+        @respondWith '<div class="target">new content</div>'
+        u.nextFrame =>
+          expect('.up-modal').toExist()
+          expect('.up-modal-content').toHaveText('new content')
+          done()
 
-      # IE does not call JavaScript and always performs the default action on right clicks
-      unless navigator.userAgent.match(/Trident/)
-        it 'does nothing if the right mouse button is used', ->
+      describe 'when modifier keys are held', ->
+
+        # IE does not call JavaScript and always performs the default action on right clicks
+        unless navigator.userAgent.match(/Trident/)
+          it 'does nothing if the right mouse button is used', ->
+            @stubFollow()
+            Trigger.click(@$link, button: 2)
+            expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if shift is pressed during the click', ->
           @stubFollow()
-          Trigger.click(@$link, button: 2)
+          Trigger.click(@$link, shiftKey: true)
           expect(@followSpy).not.toHaveBeenCalled()
 
-      it 'does nothing if shift is pressed during the click', ->
-        @stubFollow()
-        Trigger.click(@$link, shiftKey: true)
-        expect(@followSpy).not.toHaveBeenCalled()
+        it 'does nothing if ctrl is pressed during the click', ->
+          @stubFollow()
+          Trigger.click(@$link, ctrlKey: true)
+          expect(@followSpy).not.toHaveBeenCalled()
 
-      it 'does nothing if ctrl is pressed during the click', ->
-        @stubFollow()
-        Trigger.click(@$link, ctrlKey: true)
-        expect(@followSpy).not.toHaveBeenCalled()
-
-      it 'does nothing if meta is pressed during the click', ->
-        @stubFollow()
-        Trigger.click(@$link, metaKey: true)
-        expect(@followSpy).not.toHaveBeenCalled()
+        it 'does nothing if meta is pressed during the click', ->
+          @stubFollow()
+          Trigger.click(@$link, metaKey: true)
+          expect(@followSpy).not.toHaveBeenCalled()
 
       describe 'with [up-instant] modifier', ->
 
