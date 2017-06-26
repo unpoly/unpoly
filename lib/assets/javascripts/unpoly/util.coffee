@@ -58,7 +58,7 @@ up.util = (($) ->
     Whether to include an `#hash` anchor in the normalized URL
   @param {Boolean} [options.search=true]
     Whether to include a `?query` string in the normalized URL
-  @param {Boolean} [options.stripTrailingSlash=true]
+  @param {Boolean} [options.stripTrailingSlash=false]
     Whether to strip a trailing slash from the pathname
   @internal
   ###

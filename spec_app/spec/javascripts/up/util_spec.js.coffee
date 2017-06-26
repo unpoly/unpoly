@@ -409,6 +409,9 @@ describe 'up.util', ->
       it 'normalizes a full URL', ->
         expect(up.util.normalizeUrl('http://example.com/foo/bar')).toBe('http://example.com/foo/bar')
 
+      it 'does not strip a trailing slash by default', ->
+        expect(up.util.normalizeUrl('/foo/')).toEqual("http://#{location.hostname}:#{location.port}/foo/")
+
     describe 'up.util.detect', ->
 
       it 'finds the first element in the given array that matches the given tester', ->
