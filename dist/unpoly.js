@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.36.1",
+    version: "0.36.2",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -3057,7 +3057,6 @@ IE 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
-      var error;
       try {
         return window.sessionStorage;
       } catch (error) {
@@ -8981,6 +8980,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     @function up.validate
     @param {String|Element|jQuery} fieldOrSelector
+    
     @param {String|Element|jQuery} [options.target]
     @return {Promise}
       A promise that is resolved when the server-side
@@ -8994,6 +8994,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       options.origin = $field;
       options.target = resolveValidateTarget($field, options);
       options.failTarget = options.target;
+      options.reveal = u.option(options.reveal, u.castedAttr($field, 'up-reveal'), false);
       options.history = false;
       options.headers = u.option(options.headers, {});
       options.validate = $field.attr('name') || '__none__';
