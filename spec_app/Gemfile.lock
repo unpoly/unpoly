@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    unpoly-rails (0.36.1)
+    unpoly-rails (0.36.2)
       rails (>= 3)
 
 GEM

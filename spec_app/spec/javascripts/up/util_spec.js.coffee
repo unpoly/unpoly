@@ -688,6 +688,15 @@ describe 'up.util', ->
       array = [1, [2, [3,4]], 5]
       expect(u.flatten(array)).toEqual([1, 2, [3, 4], 5])
 
+  describe 'up.util.renameKey', ->
+
+    it 'renames a key in the given property', ->
+      object = { a: 'a value', b: 'b value'}
+      u.renameKey(object, 'a', 'c')
+      expect(object.a).toBeUndefined()
+      expect(object.b).toBe('b value')
+      expect(object.c).toBe('a value')
+
   describe 'up.util.memoize', ->
 
     it 'returns a function that calls the memoized function', ->

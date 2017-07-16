@@ -451,6 +451,7 @@ up.modal = (($) ->
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     options.method = up.link.followMethod($link, options)
     options.layer = 'modal'
+    options.failLayer = u.option(options.failLayer, $link.attr('up-fail-layer'), 'auto')
     animateOptions = up.motion.animateOptions(options, $link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
 
     # Although we usually fall back to full page loads if a browser doesn't support pushState,

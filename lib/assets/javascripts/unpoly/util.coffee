@@ -1775,6 +1775,9 @@ up.util = (($) ->
     delete object[key]
     value
 
+  renameKey = (object, oldKey, newKey) ->
+    object[newKey] = pluckKey(object, oldKey)
+
   pluckData = (elementOrSelector, key) ->
     $element = $(elementOrSelector)
     value = $element.data(key)
@@ -2070,6 +2073,7 @@ up.util = (($) ->
   error: fail
   pluckData: pluckData
   pluckKey: pluckKey
+  renameKey: renameKey
   extractOptions: extractOptions
   isDetached: isDetached
   noop: noop

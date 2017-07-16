@@ -7,14 +7,16 @@ class up.dom.ExtractPlan
     @selector = up.dom.resolveSelector(selector, options.origin)
     @transition = options.transition || options.animation || 'none'
     @response = options.response
+    @oldLayer = options.layer
     @steps = @parseSteps()
 
   findOld: =>
-    u.each @steps, (step) ->
-      step.$old = up.dom.first(step.selector, @options)
+    u.each @steps, (step) =>
+      step.$old = up.dom.first(step.selector, layer: @oldLayer)
 
   findNew: =>
     u.each @steps, (step) =>
+      # The response has no layers. It's always just the page.
       step.$new = @response.first(step.selector)
 
   oldExists: =>

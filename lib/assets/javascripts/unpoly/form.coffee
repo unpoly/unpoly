@@ -108,6 +108,13 @@ up.form = (($) ->
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
+  @param {String} [options.layer='auto']
+    The name of the layer that ought to be updated. Valid values are
+    `auto`, `page`, `modal` and `popup`.
+
+    If set to `auto` (default), Unpoly will try to find a match in the form's layer.
+  @param {String} [options.failLayer='auto']
+    The name of the layer that ought to be updated if the server sends a non-200 status code.
   @return {Promise}
     A promise for the successful form submission.
   @stable
@@ -131,6 +138,7 @@ up.form = (($) ->
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
     options.origin = u.option(options.origin, $form)
     options.layer = u.option(options.layer, $form.attr('up-layer'), 'auto')
+    options.failLayer = u.option(options.failLayer, $form.attr('up-fail-layer'), 'auto')
     options.data = u.requestDataFromForm($form)
     options = u.merge(options, up.motion.animateOptions(options, $form))
 
@@ -539,6 +547,16 @@ up.form = (($) ->
     Alternately you can use an attribute `data-method`
     ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
     or `method` (vanilla HTML) for the same purpose.
+  @param {String} [up-layer='auto']
+    The name of the layer that ought to be updated. Valid values are
+    `auto`, `page`, `modal` and `popup`.
+
+    If set to `auto` (default), Unpoly will try to find a match in the form's layer.
+    If no match was found in that layer,
+    Unpoly will search in other layers, starting from the topmost layer.
+  @param {String} [up-fail-layer='auto']
+    The name of the layer that ought to be updated if the server sends a
+    non-200 status code.
   @param {String} [up-reveal='true']
     Whether to reveal the target element within its viewport before updating.
   @param {String} [up-restore-scroll='false']

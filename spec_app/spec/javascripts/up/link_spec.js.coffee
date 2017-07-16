@@ -365,34 +365,92 @@ describe 'up.link', ->
           expect($('.target')).toHaveText('new text')
           expect(location.pathname).toEqual('/other/path')
 
-        it 'prefers to update a container in the same layer as the clicked link', (done) ->
-          up.motion.config.enabled = false
+        describe 'choice of target layer', ->
 
-          $popupOpener = affix('a[href="/popup"]')
-          up.popup.attach($popupOpener, html: "<div class='target'>old popup text</div>", target: '.target')
-          affix('.document').affix('.target').text('old document text')
+          beforeEach ->
+            up.motion.config.enabled = false
 
-          $linkInDocument = affix('a[href="/foo"][up-target=".target"]')
-          $linkInPopup = $('.up-popup').affix('a[href="/bar"][up-target=".target"]')
-
-          expect($('.document .target')).toHaveText('old document text')
-          expect($('.up-popup .target')).toHaveText('old popup text')
-
-          u.nextFrame =>
-
-            Trigger.clickSequence($linkInPopup)
+          it 'prefers to update a container in the same layer as the clicked link', (done) ->
+            affix('.document').affix('.target').text('old document text')
+            up.modal.extract('.target', "<div class='target'>old modal text</div>")
 
             u.nextFrame =>
-              @respondWith '<div class="target">new text from popup link</div>'
-
               expect($('.document .target')).toHaveText('old document text')
-              expect($('.up-popup .target')).toHaveText('new text from popup link')
-              Trigger.clickSequence($linkInDocument)
+              expect($('.up-modal .target')).toHaveText('old modal text')
+
+              $linkInModal = $('.up-modal').affix('a[href="/bar"][up-target=".target"]')
+              Trigger.clickSequence($linkInModal)
 
               u.nextFrame =>
-                @respondWith '<div class="target">new text from document link</div>'
-                expect($('.document .target')).toHaveText('new text from document link')
+                @respondWith '<div class="target">new text from modal link</div>'
+
+                expect($('.document .target')).toHaveText('old document text')
+                expect($('.up-modal .target')).toHaveText('new text from modal link')
+
                 done()
+
+          describe 'with [up-layer] modifier', ->
+
+            it 'allows to name a layer for the update', (done) ->
+              affix('.document').affix('.target').text('old document text')
+              up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
+
+              u.nextFrame =>
+                expect($('.document .target')).toHaveText('old document text')
+                expect($('.up-modal .target')).toHaveText('old modal text')
+
+                $linkInModal = $('.up-modal').affix('a[href="/bar"][up-target=".target"][up-layer="page"]')
+                Trigger.clickSequence($linkInModal)
+
+                u.nextFrame =>
+                  @respondWith '<div class="target">new text from modal link</div>'
+
+                  expect($('.document .target')).toHaveText('new text from modal link')
+                  expect($('.up-modal .target')).toHaveText('old modal text')
+
+                  done()
+
+            it 'ignores [up-layer] if the server responds with a non-200 status code', (done) ->
+              affix('.document').affix('.target').text('old document text')
+              up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
+
+              u.nextFrame =>
+                expect($('.document .target')).toHaveText('old document text')
+                expect($('.up-modal .target')).toHaveText('old modal text')
+
+                $linkInModal = $('.up-modal').affix('a[href="/bar"][up-target=".target"][up-fail-target=".target"][up-layer="page"]')
+                Trigger.clickSequence($linkInModal)
+
+                u.nextFrame =>
+                  @respondWith
+                    responseText: '<div class="target">new failure text from modal link</div>'
+                    status: 500
+
+                  expect($('.document .target')).toHaveText('old document text')
+                  expect($('.up-modal .target')).toHaveText('new failure text from modal link')
+
+                  done()
+
+            it 'allows to name a layer for a non-200 response using an [up-fail-layer] modifier', (done) ->
+              affix('.document').affix('.target').text('old document text')
+              up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
+
+              u.nextFrame =>
+                expect($('.document .target')).toHaveText('old document text')
+                expect($('.up-modal .target')).toHaveText('old modal text')
+
+                $linkInModal = $('.up-modal').affix('a[href="/bar"][up-target=".target"][up-fail-target=".target"][up-fail-layer="page"]')
+                Trigger.clickSequence($linkInModal)
+
+                u.nextFrame =>
+                  @respondWith
+                    responseText: '<div class="target">new failure text from modal link</div>'
+                    status: 500
+
+                  expect($('.document .target')).toHaveText('new failure text from modal link')
+                  expect($('.up-modal .target')).toHaveText('old modal text')
+
+                  done()
 
         describe 'with [up-fail-target] modifier', ->
 

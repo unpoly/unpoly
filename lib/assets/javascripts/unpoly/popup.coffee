@@ -246,6 +246,7 @@ up.popup = (($) ->
     options.confirm = u.option(options.confirm, $anchor.attr('up-confirm'))
     options.method = up.link.followMethod($anchor, options)
     options.layer = 'popup'
+    options.failLayer = u.option(options.failLayer, $anchor.attr('up-fail-layer'), 'auto')
     animateOptions = up.motion.animateOptions(options, $anchor, duration: config.openDuration, easing: config.openEasing)
 
     up.browser.whenConfirmed(options).then ->

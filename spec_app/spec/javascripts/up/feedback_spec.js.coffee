@@ -151,13 +151,16 @@ describe 'up.feedback', ->
           @respondWith('<div class="main">new-text</div>')
           expect($area).not.toHaveClass('up-active')
 
-        it 'marks clicked modal openers as .up-active while the modal is loading', ->
+        it 'marks clicked modal openers as .up-active while the modal is loading', (done) ->
           $link = affix('a[href="/foo"][up-modal=".main"]')
           affix('.main')
           Trigger.clickSequence($link)
           expect($link).toHaveClass('up-active')
-          @respondWith('<div class="main">new-text</div>')
-          expect($link).not.toHaveClass('up-active')
+          u.nextFrame =>
+            debugger
+            @respondWith('<div class="main">new-text</div>')
+            expect($link).not.toHaveClass('up-active')
+            done()
 
         it 'removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', ->
           $link = affix('a[href="/foo"][up-modal=".main"]')

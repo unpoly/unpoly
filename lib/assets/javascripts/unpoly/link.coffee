@@ -157,6 +157,9 @@ up.link = (($) ->
     If set to `auto` (default), Unpoly will try to find a match in the
     same layer as the given link. If no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
+  @param {String} [options.failLayer='auto']
+    The name of the layer that ought to be updated if the server sends a non-200 status code.
+
   @return {Promise}
     A promise that will be resolved when the link destination
     has been loaded and rendered.
@@ -180,6 +183,7 @@ up.link = (($) ->
     options.method = followMethod($link, options)
     options.origin = u.option(options.origin, $link)
     options.layer = u.option(options.layer, $link.attr('up-layer'), 'auto')
+    options.failLayer = u.option(options.failLayer, $link.attr('up-fail-layer'), 'auto')
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     options = u.merge(options, up.motion.animateOptions(options, $link))
 
@@ -357,9 +361,12 @@ up.link = (($) ->
     The name of the layer that ought to be updated. Valid values are
     `auto`, `page`, `modal` and `popup`.
 
-    If set to `auto` (default), Unpoly will try to find a match in the
-    same layer as the given link. If no match was found in that layer,
+    If set to `auto` (default), Unpoly will try to find a match in the link's layer.
+    If no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
+  @param {String} [up-fail-layer='auto']
+    The name of the layer that ought to be updated if the server sends a
+    non-200 status code.
   @param [up-history]
     Whether to push an entry to the browser history when following the link.
 
