@@ -1974,7 +1974,6 @@ up.util = (($) ->
   isTruthy = (object) ->
     !!object
 
-  isDetached: isDetached
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
   appendRequestData: appendRequestData
