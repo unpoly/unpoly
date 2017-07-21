@@ -445,7 +445,7 @@ up.form = (($) ->
     if switcher
       $(switcher)
     else
-      u.fail('Could not find [up-switch] field for %o', $element.get(0))
+      u.fail('Could not find [up-switch] field for %o', $target.get(0))
 
   ###*
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
