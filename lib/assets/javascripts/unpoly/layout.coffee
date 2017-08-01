@@ -432,7 +432,7 @@ up.layout = (($) ->
     else
       $viewports = viewports()
 
-    scrollTopsForUrl = lastScrollTops.get(url)
+    scrollTopsForUrl = lastScrollTops.get(url) || {}
 
     up.log.group 'Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, ->
       $viewports.each ->
