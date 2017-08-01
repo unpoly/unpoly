@@ -28,14 +28,14 @@ up.util = (($) ->
   @internal
   ###
   memoize = (func) ->
-    cache = undefined
+    cachedValue = undefined
     cached = false
     (args...) ->
       if cached
-        cache
+        cachedValue
       else
         cached = true
-        cache = func(args...)
+        cachedValue = func(args...)
 
   ###*
   Returns if the given port is the default port for the given protocol.
