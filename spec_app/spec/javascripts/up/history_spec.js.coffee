@@ -38,6 +38,43 @@ describe 'up.history', ->
 
   describe 'unobtrusive behavior', ->
 
+    describe 'back button', ->
+
+      it 'calls destructor functions when destroying compiled elements (bugfix)', (done) ->
+        waitForBrowser = 70
+
+        # By default, up.history will replace the <body> tag when
+        # the user presses the back-button. We reconfigure this
+        # so we don't lose the Jasmine runner interface.
+        up.history.config.popTargets = ['.container']
+
+        constructorSpy = jasmine.createSpy('constructor')
+        destructorSpy = jasmine.createSpy('destructor')
+
+        up.compiler '.example', ($example) ->
+          constructorSpy()
+          return destructorSpy
+
+        up.history.push('/one')
+        up.history.push('/two')
+
+        $container = affix('.container')
+        $example = $container.affix('.example')
+        up.hello($example)
+
+        expect(constructorSpy).toHaveBeenCalled()
+
+        history.back()
+        u.setTimer waitForBrowser, =>
+          expect(location.pathname).toEqual('/one')
+
+          @respondWith "<div class='container'>restored container text</div>"
+
+          u.nextFrame ->
+            expect(destructorSpy).toHaveBeenCalled()
+            done()
+
+
     describe '[up-back]', ->
 
       it 'sets an [up-href] attribute to the previous URL and sets the up-restore-scroll attribute to "true"', ->
