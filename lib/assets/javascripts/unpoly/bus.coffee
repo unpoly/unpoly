@@ -113,8 +113,8 @@ up.bus = (($) ->
   In case you want to attach structured data to the event you're observing,
   you can serialize the data to JSON and put it into an `[up-data]` attribute:
 
-      <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
-      <span class="person" up-data="{ age: 22, name: 'Jim' }">Jim</span>
+      <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
+      <span class='person' up-data='{ "age": 22, "name": "Jim" }'>Jim</span>
 
   The JSON will parsed and handed to your event handler as a third argument:
 

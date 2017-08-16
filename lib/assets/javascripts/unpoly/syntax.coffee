@@ -129,10 +129,10 @@ up.syntax = (($) ->
   For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
   might attach the location and names of its marker pins:
 
-      <div class="google-map" up-data="[
-        { lat: 48.36, lng: 10.99, title: 'Friedberg' },
-        { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
-      ]"></div>
+      <div class='google-map' up-data='[
+        { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
+        { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
+      ]'></div>
 
   The JSON will parsed and handed to your compiler as a second argument:
 
@@ -359,7 +359,7 @@ up.syntax = (($) ->
 
   You have an element with JSON data serialized into an `up-data` attribute:
 
-      <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
+      <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
 
   Calling `up.syntax.data()` will deserialize the JSON string into a JavaScript object:
 
@@ -382,10 +382,10 @@ up.syntax = (($) ->
   For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
   might attach the location and names of its marker pins:
 
-      <div class="google-map" up-data="[
-        { lat: 48.36, lng: 10.99, title: 'Friedberg' },
-        { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
-      ]"></div>
+      <div class='google-map' up-data='[
+        { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
+        { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
+      ]'></div>
 
   The JSON will parsed and handed to your compiler as a second argument:
 
