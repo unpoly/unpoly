@@ -11,6 +11,7 @@ Unreleased
 
 ### Compatible changes
 
+- Fix a bug where [replacing](/up.replace) the `<body>` element would not trigger [destructor functions](/up.compiler#cleaning-up-after-yourself) in the old `<body>`.
 - Fix a bug where [`[up-layer]`](/up-layer) attributes or `{ layer }` options were ignored.
 - [`a[up-target]`](/a-up-target) and [`form[up-target]`] get a new modifying attribute `[up-fail-layer]`.
   Use it to set the layer to update if the server sends a non-200 status code. Valid values are `auto`, `page`, `modal` and `popup`.
