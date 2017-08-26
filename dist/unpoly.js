@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.36.2",
+    version: "0.37.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,7 +41,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, $submittingButton, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, openTagPattern, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, $submittingButton, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, openTagPattern, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -55,17 +55,17 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     memoize = function(func) {
-      var cache, cached;
-      cache = void 0;
+      var cached, cachedValue;
+      cachedValue = void 0;
       cached = false;
       return function() {
         var args;
         args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
         if (cached) {
-          return cache;
+          return cachedValue;
         } else {
           cached = true;
-          return cache = func.apply(null, args);
+          return cachedValue = func.apply(null, args);
         }
       };
     };
@@ -2101,6 +2101,9 @@ that might save you from loading something like [Underscore.js](http://underscor
       delete object[key];
       return value;
     };
+    renameKey = function(object, oldKey, newKey) {
+      return object[newKey] = pluckKey(object, oldKey);
+    };
     pluckData = function(elementOrSelector, key) {
       var $element, value;
       $element = $(elementOrSelector);
@@ -2269,6 +2272,10 @@ that might save you from loading something like [Underscore.js](http://underscor
 
     /**
     @function up.util.sequence
+    @param {Array<Function>} functions...
+    @return {Function}
+      A function that will call all `functions` if called.
+    
     @internal
      */
     sequence = function() {
@@ -2320,7 +2327,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     /**
     Like `$old.replaceWith($new)`, but keeps event handlers bound to `$old`.
     
-    Note that this is a memory leak unless you re-attach `$new` to the DOM aferwards.
+    Note that this is a memory leak unless you re-attach `$old` to the DOM aferwards.
     
     @function up.util.detachWith
     @internal
@@ -2361,7 +2368,6 @@ that might save you from loading something like [Underscore.js](http://underscor
       return !!object;
     };
     return {
-      isDetached: isDetached,
       requestDataAsArray: requestDataAsArray,
       requestDataAsQuery: requestDataAsQuery,
       appendRequestData: appendRequestData,
@@ -2458,6 +2464,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       error: fail,
       pluckData: pluckData,
       pluckKey: pluckKey,
+      renameKey: renameKey,
       extractOptions: extractOptions,
       isDetached: isDetached,
       noop: noop,
@@ -3235,8 +3242,8 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     In case you want to attach structured data to the event you're observing,
     you can serialize the data to JSON and put it into an `[up-data]` attribute:
     
-        <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
-        <span class="person" up-data="{ age: 22, name: 'Jim' }">Jim</span>
+        <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
+        <span class='person' up-data='{ "age": 22, "name": "Jim" }'>Jim</span>
     
     The JSON will parsed and handed to your event handler as a third argument:
     
@@ -3952,7 +3959,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
   var slice = [].slice;
 
   up.syntax = (function($) {
-    var DESTRUCTIBLE_CLASS, DESTRUCTORS_KEY, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, discoverDestructors, insertCompiler, macro, macros, reset, snapshot, u;
+    var DESTRUCTIBLE_CLASS, DESTRUCTORS_KEY, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, insertCompiler, macro, macros, normalizeDestructor, prepareClean, removeDestructors, reset, snapshot, u;
     u = up.util;
     DESTRUCTIBLE_CLASS = 'up-destructible';
     DESTRUCTORS_KEY = 'up-destructors';
@@ -4059,10 +4066,10 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
     might attach the location and names of its marker pins:
     
-        <div class="google-map" up-data="[
-          { lat: 48.36, lng: 10.99, title: 'Friedberg' },
-          { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
-        ]"></div>
+        <div class='google-map' up-data='[
+          { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
+          { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
+        ]'></div>
     
     The JSON will parsed and handed to your compiler as a second argument:
     
@@ -4223,36 +4230,44 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       return queue.splice(index, 0, newCompiler);
     };
     applyCompiler = function(compiler, $jqueryElement, nativeElement) {
-      var destructor, i, len, ref, results, returnValue, value;
+      var returnValue, value;
       up.puts((!compiler.isDefault ? "Compiling '%s' on %o" : void 0), compiler.selector, nativeElement);
       if (compiler.keep) {
         value = u.isString(compiler.keep) ? compiler.keep : '';
         $jqueryElement.attr('up-keep', value);
       }
       returnValue = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)]);
-      ref = discoverDestructors(returnValue);
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        destructor = ref[i];
-        results.push(addDestructor($jqueryElement, destructor));
-      }
-      return results;
+      return addDestructor($jqueryElement, returnValue);
     };
-    discoverDestructors = function(returnValue) {
+
+    /**
+    Tries to find a list of destructors in a compiler's return value.
+    
+    @param {Object} returnValue
+    @return {Function|undefined}
+    @internal
+     */
+    normalizeDestructor = function(returnValue) {
       if (u.isFunction(returnValue)) {
-        return [returnValue];
-      } else if (u.isArray(returnValue) && u.all(returnValue, u.isFunction)) {
         return returnValue;
-      } else {
-        return [];
+      } else if (u.isArray(returnValue) && u.all(returnValue, u.isFunction)) {
+        return u.sequence.apply(u, returnValue);
       }
     };
-    addDestructor = function($jqueryElement, destructor) {
-      var destructors;
-      $jqueryElement.addClass(DESTRUCTIBLE_CLASS);
-      destructors = $jqueryElement.data(DESTRUCTORS_KEY) || [];
-      destructors.push(destructor);
-      return $jqueryElement.data(DESTRUCTORS_KEY, destructors);
+    addDestructor = function($element, newDestructor) {
+      var elementDestructor;
+      if (newDestructor = normalizeDestructor(newDestructor)) {
+        $element.addClass(DESTRUCTIBLE_CLASS);
+        elementDestructor = $element.data(DESTRUCTORS_KEY) || function() {
+          return removeDestructors($element);
+        };
+        elementDestructor = u.sequence(elementDestructor, newDestructor);
+        return $element.data(DESTRUCTORS_KEY, elementDestructor);
+      }
+    };
+    removeDestructors = function($element) {
+      $element.removeData(DESTRUCTORS_KEY);
+      return $element.removeClass(DESTRUCTIBLE_CLASS);
     };
 
     /**
@@ -4283,8 +4298,8 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
               $matches = $matches.filter(function() {
                 var $match;
                 $match = $(this);
-                return u.all($skipSubtrees, function(element) {
-                  return $match.closest(element).length === 0;
+                return u.all($skipSubtrees, function(skipSubtree) {
+                  return $match.closest(skipSubtree).length === 0;
                 });
               });
               if ($matches.length) {
@@ -4317,19 +4332,25 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @internal
      */
     clean = function($fragment) {
-      return u.findWithSelf($fragment, "." + DESTRUCTIBLE_CLASS).each(function() {
-        var $element, destructor, destructors, i, len;
-        $element = $(this);
-        destructors = $element.data(DESTRUCTORS_KEY);
-        if (destructors) {
-          for (i = 0, len = destructors.length; i < len; i++) {
-            destructor = destructors[i];
-            destructor();
-          }
-          $element.removeData(DESTRUCTORS_KEY);
-          return $element.removeClass(DESTRUCTIBLE_CLASS);
+      return prepareClean($fragment)();
+    };
+
+    /**
+    @function up.syntax.prepareClean
+    @param {jQuery} $fragment
+    @return {Function}
+    @internal
+     */
+    prepareClean = function($fragment) {
+      var destructors;
+      destructors = [];
+      u.findWithSelf($fragment, "." + DESTRUCTIBLE_CLASS).each(function() {
+        var destructor;
+        if (destructor = $(this).data(DESTRUCTORS_KEY)) {
+          return destructors.push(destructor);
         }
       });
+      return u.sequence.apply(u, destructors);
     };
 
     /**
@@ -4342,7 +4363,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
     You have an element with JSON data serialized into an `up-data` attribute:
     
-        <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
+        <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
     
     Calling `up.syntax.data()` will deserialize the JSON string into a JavaScript object:
     
@@ -4365,10 +4386,10 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
     might attach the location and names of its marker pins:
     
-        <div class="google-map" up-data="[
-          { lat: 48.36, lng: 10.99, title: 'Friedberg' },
-          { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
-        ]"></div>
+        <div class='google-map' up-data='[
+          { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
+          { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
+        ]'></div>
     
     The JSON will parsed and handed to your compiler as a second argument:
     
@@ -4447,6 +4468,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       macro: macro,
       compile: compile,
       clean: clean,
+      prepareClean: prepareClean,
       data: data
     };
   })(jQuery);
@@ -5254,7 +5276,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       } else {
         $viewports = viewports();
       }
-      scrollTopsForUrl = lastScrollTops.get(url);
+      scrollTopsForUrl = lastScrollTops.get(url) || {};
       return up.log.group('Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, function() {
         $viewports.each(function() {
           var $viewport, key, scrollTop;
@@ -5480,7 +5502,7 @@ is built from these functions. You can use them to extend Unpoly from your
 
 (function() {
   up.dom = (function($) {
-    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, first, firstInLayer, firstInPriority, hello, isRealElement, layerOf, matchesLayer, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, source, swapBody, swapElements, transferKeepableElements, u, updateHistoryAndTitle;
+    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, first, firstInLayer, firstInPriority, hello, isRealElement, isSingletonElement, layerOf, matchesLayer, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, source, swapElements, swapSingletonElement, transferKeepableElements, u, updateHistoryAndTitle;
     u = up.util;
 
     /**
@@ -5701,6 +5723,8 @@ is built from these functions. You can use them to extend Unpoly from your
       same layer as the element that triggered the replacement (see `options.origin`).
       If that element is not known, or no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
+    @param {String} [options.failLayer='auto']
+      The name of the layer that ought to be updated if the server sends a non-200 status code.
     
     @return {Promise}
       A promise that will be resolved when the page has been updated.
@@ -5725,6 +5749,8 @@ is built from these functions. You can use them to extend Unpoly from your
         humanizedTarget: 'failure target',
         provideTarget: void 0
       });
+      u.renameKey(failureOptions, 'failTransition', 'transition');
+      u.renameKey(failureOptions, 'failLayer', 'layer');
       target = bestPreflightSelector(selectorOrElement, successOptions);
       failTarget = bestPreflightSelector(options.failTarget, failureOptions);
       request = {
@@ -5797,8 +5823,6 @@ is built from these functions. You can use them to extend Unpoly from your
           }
         }
       } else {
-        options.transition = options.failTransition;
-        options.failTransition = void 0;
         if (isReloadable) {
           if (options.history !== false) {
             options.history = url;
@@ -5957,7 +5981,7 @@ is built from these functions. You can use them to extend Unpoly from your
       }
     };
     swapElements = function($old, $new, pseudoClass, transition, options) {
-      var $wrapper, keepPlan, promise, replacement;
+      var $wrapper, clean, keepPlan, promise, replacement;
       transition || (transition = 'none');
       if (options.source === 'keep') {
         options = u.merge(options, {
@@ -5984,10 +6008,11 @@ is built from these functions. You can use them to extend Unpoly from your
         emitFragmentKept(keepPlan);
         promise = u.resolvedPromise();
       } else {
+        options.keepPlans = transferKeepableElements($old, $new, options);
+        clean = up.syntax.prepareClean($old);
         replacement = function() {
-          options.keepPlans = transferKeepableElements($old, $new, options);
-          if ($old.is('body')) {
-            swapBody($old, $new);
+          if (isSingletonElement($old)) {
+            swapSingletonElement($old, $new);
             transition = false;
           } else {
             $new.insertBefore($old);
@@ -6000,13 +6025,17 @@ is built from these functions. You can use them to extend Unpoly from your
           return up.morph($old, $new, transition, options);
         };
         promise = destroy($old, {
+          clean: clean,
           animation: replacement
         });
       }
       return promise;
     };
-    swapBody = function($oldBody, $newBody) {
-      return $oldBody.replaceWith($newBody);
+    isSingletonElement = function($element) {
+      return $element.is('body');
+    };
+    swapSingletonElement = function($old, $new) {
+      return $old.replaceWith($new);
     };
     transferKeepableElements = function($old, $new, options) {
       var $keepable, $keepableClone, i, keepPlans, keepable, len, plan, ref;
@@ -6351,6 +6380,9 @@ is built from these functions. You can use them to extend Unpoly from your
      */
     destroy = function(selectorOrElement, options) {
       var $element, animateOptions, animationDeferred, destroyMessage, destroyedMessage;
+      options = u.options(options, {
+        animation: false
+      });
       $element = $(selectorOrElement);
       if (!$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')) {
         destroyMessage = ['Destroying fragment %o', $element.get(0)];
@@ -6362,15 +6394,15 @@ is built from these functions. You can use them to extend Unpoly from your
         $element: $element,
         message: destroyMessage
       })) {
-        options = u.options(options, {
-          animation: false
-        });
         animateOptions = up.motion.animateOptions(options);
         $element.addClass('up-destroying');
         updateHistoryAndTitle(options);
         animationDeferred = u.presence(options.animation, u.isDeferred) || up.motion.animate($element, options.animation, animateOptions);
         animationDeferred.then(function() {
-          up.syntax.clean($element);
+          options.clean || (options.clean = function() {
+            return up.syntax.clean($element);
+          });
+          options.clean();
           up.emit('up:fragment:destroyed', {
             $element: $element,
             message: destroyedMessage
@@ -6379,7 +6411,7 @@ is built from these functions. You can use them to extend Unpoly from your
         });
         return animationDeferred;
       } else {
-        return $.Deferred();
+        return u.unresolvableDeferred();
       }
     };
 
@@ -6612,13 +6644,18 @@ is built from these functions. You can use them to extend Unpoly from your
       this.selector = up.dom.resolveSelector(selector, options.origin);
       this.transition = options.transition || options.animation || 'none';
       this.response = options.response;
+      this.oldLayer = options.layer;
       this.steps = this.parseSteps();
     }
 
     ExtractPlan.prototype.findOld = function() {
-      return u.each(this.steps, function(step) {
-        return step.$old = up.dom.first(step.selector, this.options);
-      });
+      return u.each(this.steps, (function(_this) {
+        return function(step) {
+          return step.$old = up.dom.first(step.selector, {
+            layer: _this.oldLayer
+          });
+        };
+      })(this));
     };
 
     ExtractPlan.prototype.findNew = function() {
@@ -8190,6 +8227,9 @@ new page is loading.
       If set to `auto` (default), Unpoly will try to find a match in the
       same layer as the given link. If no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
+    @param {String} [options.failLayer='auto']
+      The name of the layer that ought to be updated if the server sends a non-200 status code.
+    
     @return {Promise}
       A promise that will be resolved when the link destination
       has been loaded and rendered.
@@ -8212,6 +8252,7 @@ new page is loading.
       options.method = followMethod($link, options);
       options.origin = u.option(options.origin, $link);
       options.layer = u.option(options.layer, $link.attr('up-layer'), 'auto');
+      options.failLayer = u.option(options.failLayer, $link.attr('up-fail-layer'), 'auto');
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       options = u.merge(options, up.motion.animateOptions(options, $link));
       return up.browser.whenConfirmed(options).then(function() {
@@ -8406,9 +8447,12 @@ new page is loading.
       The name of the layer that ought to be updated. Valid values are
       `auto`, `page`, `modal` and `popup`.
     
-      If set to `auto` (default), Unpoly will try to find a match in the
-      same layer as the given link. If no match was found in that layer,
+      If set to `auto` (default), Unpoly will try to find a match in the link's layer.
+      If no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
+    @param {String} [up-fail-layer='auto']
+      The name of the layer that ought to be updated if the server sends a
+      non-200 status code.
     @param [up-history]
       Whether to push an entry to the browser history when following the link.
     
@@ -8738,6 +8782,13 @@ open dialogs with sub-forms, etc. all without losing form state.
     @param {Object} [options.headers={}]
       An object of additional header key/value pairs to send along
       with the request.
+    @param {String} [options.layer='auto']
+      The name of the layer that ought to be updated. Valid values are
+      `auto`, `page`, `modal` and `popup`.
+    
+      If set to `auto` (default), Unpoly will try to find a match in the form's layer.
+    @param {String} [options.failLayer='auto']
+      The name of the layer that ought to be updated if the server sends a non-200 status code.
     @return {Promise}
       A promise for the successful form submission.
     @stable
@@ -8760,6 +8811,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'));
       options.origin = u.option(options.origin, $form);
       options.layer = u.option(options.layer, $form.attr('up-layer'), 'auto');
+      options.failLayer = u.option(options.failLayer, $form.attr('up-fail-layer'), 'auto');
       options.data = u.requestDataFromForm($form);
       options = u.merge(options, up.motion.animateOptions(options, $form));
       if (options.validate) {
@@ -9100,7 +9152,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       if (switcher) {
         return $(switcher);
       } else {
-        return u.fail('Could not find [up-switch] field for %o', $element.get(0));
+        return u.fail('Could not find [up-switch] field for %o', $target.get(0));
       }
     };
 
@@ -9196,6 +9248,16 @@ open dialogs with sub-forms, etc. all without losing form state.
       Alternately you can use an attribute `data-method`
       ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
       or `method` (vanilla HTML) for the same purpose.
+    @param {String} [up-layer='auto']
+      The name of the layer that ought to be updated. Valid values are
+      `auto`, `page`, `modal` and `popup`.
+    
+      If set to `auto` (default), Unpoly will try to find a match in the form's layer.
+      If no match was found in that layer,
+      Unpoly will search in other layers, starting from the topmost layer.
+    @param {String} [up-fail-layer='auto']
+      The name of the layer that ought to be updated if the server sends a
+      non-200 status code.
     @param {String} [up-reveal='true']
       Whether to reveal the target element within its viewport before updating.
     @param {String} [up-restore-scroll='false']
@@ -9802,6 +9864,7 @@ The HTML of a popup element is simply this:
       options.confirm = u.option(options.confirm, $anchor.attr('up-confirm'));
       options.method = up.link.followMethod($anchor, options);
       options.layer = 'popup';
+      options.failLayer = u.option(options.failLayer, $anchor.attr('up-fail-layer'), 'auto');
       animateOptions = up.motion.animateOptions(options, $anchor, {
         duration: config.openDuration,
         easing: config.openEasing
@@ -10548,6 +10611,7 @@ or function.
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       options.method = up.link.followMethod($link, options);
       options.layer = 'modal';
+      options.failLayer = u.option(options.failLayer, $link.attr('up-fail-layer'), 'auto');
       animateOptions = up.motion.animateOptions(options, $link, {
         duration: flavorDefault('openDuration', options.flavor),
         easing: flavorDefault('openEasing', options.flavor)
