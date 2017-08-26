@@ -157,7 +157,6 @@ describe 'up.feedback', ->
           Trigger.clickSequence($link)
           expect($link).toHaveClass('up-active')
           u.nextFrame =>
-            debugger
             @respondWith('<div class="main">new-text</div>')
             expect($link).not.toHaveClass('up-active')
             done()

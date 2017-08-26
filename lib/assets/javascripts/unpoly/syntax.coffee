@@ -327,10 +327,11 @@ up.syntax = (($) ->
         for compiler in queue
           $matches = u.findWithSelf($fragment, compiler.selector)
 
+          # Exclude all elements that are descendants of the subtrees we want to keep.
           $matches = $matches.filter ->
             $match = $(this)
-            u.all $skipSubtrees, (element) ->
-              $match.closest(element).length == 0
+            u.all $skipSubtrees, (skipSubtree) ->
+              $match.closest(skipSubtree).length == 0
 
           if $matches.length
             up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isDefault), compiler.selector, $matches.length, ->

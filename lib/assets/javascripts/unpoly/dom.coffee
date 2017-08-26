@@ -852,7 +852,7 @@ up.dom = (($) ->
     else
       # Although someone prevented the destruction, keep a uniform API for
       # callers by returning a Deferred that will never be resolved.
-      $.Deferred()
+      u.unresolvableDeferred()
 
   ###*
   Before a page fragment is being [destroyed](/up.destroy), this

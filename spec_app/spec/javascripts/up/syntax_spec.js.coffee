@@ -28,7 +28,7 @@ describe 'up.syntax', ->
           up.destroy('.container')
           expect(destructor).toHaveBeenCalled()
 
-        it 'allows compilers to return an array of functions to clal when the compiled element is destroyed', ->
+        it 'allows compilers to return an array of functions to all when the compiled element is destroyed', ->
           destructor1 = jasmine.createSpy('destructor1')
           destructor2 = jasmine.createSpy('destructor2')
           up.compiler '.child', ($element) ->
