@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   get 'css_test/:action', controller: 'css_test'
   get 'error_test/:action', controller: 'error_test'
   post 'error_test/:action', controller: 'error_test'
+  get 'replace_test/:action', controller: 'replace_test'
 
   namespace :form_test do
     resource :basic, only: [:new, :create]
