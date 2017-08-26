@@ -697,6 +697,31 @@ describe 'up.util', ->
       expect(object.b).toBe('b value')
       expect(object.c).toBe('a value')
 
+  describe 'up.util.findWithSelf', ->
+
+    it 'finds the selector in descendants of the given element', ->
+      $container = affix('div')
+      $child1 = $container.affix('div.match')
+      $child2 = $container.affix('div')
+      $child2Child1 = $child2.affix('div.match')
+      matches = u.findWithSelf($container, '.match')
+      expect(matches).toEqual [$child1.get(0), $child2Child1.get(0)]
+
+    it 'finds the element itself if the element matches the given selector', ->
+      $container = affix('div.match')
+      $child1 = $container.affix('div')
+      $child1Child1 = $child1.affix('div.match')
+      matches = u.findWithSelf($container, '.match')
+      expect(matches).toEqual [$container.get(0), $child1Child1.get(0)]
+
+    it 'returns multiple matches in the same subtree', ->
+      $container = affix('div.match')
+      $child1 = $container.affix('div')
+      $child2 = $container.affix('div.match')
+      $child2Child1 = $child2.affix('div.match')
+      matches = u.findWithSelf($container, '.match')
+      expect(matches).toEqual [$container.get(0), $child2.get(0), $child2Child1.get(0)]
+
   describe 'up.util.memoize', ->
 
     it 'returns a function that calls the memoized function', ->
