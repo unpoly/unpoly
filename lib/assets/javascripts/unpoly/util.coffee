@@ -754,24 +754,16 @@ up.util = (($) ->
     detect(values, isPresent)
 
   ###*
-  Waits for the given number of milliseconds, the nruns the given callback.
+  Waits for the given number of milliseconds, the runs the given callback.
 
-  If the number of milliseconds is zero, the callback is run in the current execution frame.
-  See [`up.util.nextFrame()`](/up.util.nextFrame) for running a function in the next execution frame.
+  Instead of `up.util.setTimer(0, fn)` you can also use [`up.util.nextFrame(fn)`](/up.util.nextFrame).
 
   @function up.util.setTimer
   @param {number} millis
   @param {Function} callback
-  @experimental
+  @stable
   ###
   setTimer = (millis, callback) ->
-    if millis > 0
-      setTimeout(callback, millis)
-    else
-      callback()
-      undefined
-
-  setTimer2 = (millis, callback) ->
     setTimeout(callback, millis)
 
   ###*
@@ -1914,7 +1906,6 @@ up.util = (($) ->
   nullJQuery: nullJQuery
   unJQuery: unJQuery
   setTimer: setTimer
-  setTimer2: setTimer2
   nextFrame: nextFrame
   measure: measure
   temporaryCss: temporaryCss

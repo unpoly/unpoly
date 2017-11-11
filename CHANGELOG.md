@@ -41,6 +41,7 @@ Unreleased
 - up.util.rejectedPromise() has been removed without replacement. Use Promise.reject() instead.
 - up.util.unresolvableDeferred() has been removed without replacement. Use new Promise(function() {}) instead.
 - up.motion.when() has been removed without replacement. Use Promise.all() instead.
+- up.util.setTimer() is now always async, even when called with a 0 (zero) delay. The function is now stable.
 
 
 0.37.0

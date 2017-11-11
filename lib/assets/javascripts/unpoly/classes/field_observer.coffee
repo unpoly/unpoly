@@ -27,7 +27,7 @@ class up.FieldObserver
     @currentTimer = undefined
 
   scheduleTimer: =>
-    @currentTimer = u.setTimer2 @delay, =>
+    @currentTimer = u.setTimer @delay, =>
       @currentTimer = undefined
       @requestCallback()
 

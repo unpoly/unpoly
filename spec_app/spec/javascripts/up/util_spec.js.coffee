@@ -217,15 +217,12 @@ describe 'up.util', ->
 
       describe 'if the delay is zero', ->
 
-        it 'calls the given function in the current execution frame', ->
+        it 'calls the given function in the next execution frame', ->
           callback = jasmine.createSpy()
           up.util.setTimer(0, callback)
-          expect(callback).toHaveBeenCalled()
+          expect(callback).not.toHaveBeenCalled()
 
-        it "returns undefined so the return value won't be mistaken with a JavaScript timer ID", ->
-          callback = -> 'function return value'
-          timerReturnValue = up.util.setTimer(0, callback)
-          expect(timerReturnValue).toBeUndefined()
+          setTimeout((-> expect(callback).toHaveBeenCalled()), 0)
 
 #    describe 'up.util.argNames', ->
 #
