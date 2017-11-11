@@ -35,7 +35,7 @@ class up.FollowVariant
     u.isUnmodifiedMouseEvent(event) && !up.link.childClicked(event, $link)
 
   followLink: ($link, options = {}) =>
-    up.feedback.start $link, =>
+    up.feedback.start $link, options, =>
       @followNow($link, options)
 
   matchesLink: ($link) =>

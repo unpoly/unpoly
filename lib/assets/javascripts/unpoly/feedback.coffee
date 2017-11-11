@@ -154,15 +154,21 @@ up.feedback = (($) ->
   @method up.feedback.start
   @param {Element|jQuery|string} elementOrSelector
     The element to mark as active
+  @param {Object} [options.preload]
+    If set to `false`, the element will not be marked as loading.
   @param {Function} [action]
     An optional function to run while the element is marked as loading.
     The function must return a promise.
     Once the promise resolves, the element will be [marked as no longer loading](/up.feedback.stop).
   @internal
   ###
-  start = (elementOrSelector, action) ->
+  start = (args...) ->
+    elementOrSelector = args.shift()
+    action = args.pop()
+    options = u.options(args[0])
     $element = findActionableArea(elementOrSelector)
-    $element.addClass(CLASS_ACTIVE)
+    unless options.preload
+      $element.addClass(CLASS_ACTIVE)
     if action
       promise = action()
       if u.isPromise(promise)

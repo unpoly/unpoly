@@ -159,6 +159,16 @@ describe 'up.feedback', ->
           next =>
             expect($link).not.toHaveClass('up-active')
 
+        it 'does not mark a link as .up-active while it is preloading', asyncSpec (next) ->
+          $link = affix('a[href="/foo"][up-target=".main"]')
+          affix('.main')
+
+          up.proxy.preload($link)
+
+          next =>
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect($link).not.toHaveClass('up-active')
+
         it 'marks links with [up-instant] on mousedown as .up-active until the request finishes', asyncSpec (next) ->
           $link = affix('a[href="/foo"][up-instant][up-target=".main"]')
           affix('.main')
