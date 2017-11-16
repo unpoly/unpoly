@@ -2,11 +2,91 @@
 
 u = up.util
 
+###*
+@class up.Request
+@stable
+###
 class up.Request extends up.Record
 
-  fields: ->
-    ['method', 'url', 'data', 'target', 'failTarget', 'headers', 'timeout']
+  ###*
+  The HTTP method for the request.
 
+  @property up.Request.prototype.method
+  @param {string} method='GET'
+  @stable
+  ###
+
+  ###*
+  The URL for the request.
+
+  @property up.Request.prototype.url
+  @param {string} url
+  @stable
+  ###
+
+  ###*
+  Parameters that should be sent as the request's payload.
+
+  Parameters may be passed as one of the following forms:
+
+  1. An object where keys are param names and the values are param values
+  2. An array of `{ name: 'param-name', value: 'param-value' }` objects
+  3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+
+  @property up.Request.prototype.data
+  @param {String} [data]
+  @stable
+  ###
+
+  ###*
+  The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
+
+  @property up.Request.prototype.target
+  @param {string} [target]
+  @stable
+  ###
+
+  ###*
+  The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
+
+  @property up.Request.prototype.failTarget
+  @param {string} [failTarget]
+  @stable
+  ###
+
+  ###*
+  An object of additional HTTP headers.
+
+  @property up.Request.prototype.headers
+  @param {object} [headers]
+  @stable
+  ###
+
+  ###*
+  A timeout in milliseconds.
+
+  If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set,
+  the timeout will not include the time spent waiting in the queue.
+
+  @property up.Request.prototype.timeout
+  @param {object} [timeout]
+  @stable
+  ###
+  fields: ->
+    [
+      'method',
+      'url',
+      'data',
+      'target',
+      'failTarget',
+      'headers',
+      'timeout'
+    ]
+
+  ###*
+  @constructor up.Request
+  @param {string} [attributes]
+  ###
   constructor: (options) ->
     super(options)
     @method = u.normalizeMethod(options.method)

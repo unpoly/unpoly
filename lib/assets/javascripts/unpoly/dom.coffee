@@ -180,13 +180,13 @@ up.dom = (($) ->
     You can also pass `false` to explicitly prevent the title from being updated.
   @param {string} [options.method='get']
     The HTTP method to use for the request.
-  @param {Object|Array} [options.data]
+  @param {Object|Array|FormData} [options.data]
     Parameters that should be sent as the request's payload.
 
     Parameters can either be passed as an object (where the property names become
     the param names and the property values become the param values) or as
     an array of `{ name: 'param-name', value: 'param-value' }` objects
-    (compare to jQuery's [`serializeArray`](https://api.jquery.com/serializeArray/)).
+
   @param {string} [options.transition='none']
   @param {string|boolean} [options.history=true]
     If a string is given, it is used as the URL the browser's location bar and history.

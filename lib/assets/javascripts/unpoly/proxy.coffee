@@ -187,12 +187,17 @@ up.proxy = (($) ->
     Whether to use a cached response for idempotent requests, if available.
     If set to `false` a network connection will always be attempted.
   @param {Object} [request.headers={}]
-    An object of additional header key/value pairs to send along
-    with the request.
+    An object of additional HTTP headers.
   @param {Object} [request.data={}]
-    An object of request parameters.
+    Parameters that should be sent as the request's payload.
+
+    Parameters may be passed as one of the following forms:
+
+    1. An object where keys are param names and the values are param values
+    2. An array of `{ name: 'param-name', value: 'param-value' }` objects
+    3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
   @param {string} [request.timeout]
-    A timeout in milliseconds for the request.
+    A timeout in milliseconds.
 
     If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set, the timeout
     will not include the time spent waiting in the queue.
@@ -276,8 +281,14 @@ up.proxy = (($) ->
   @param {Object} [request.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
-  @param {Object} [request.data={}]
-    An object of request parameters.
+  @param {Object|Array|FormData} [options.data]
+    Parameters that should be sent as the request's payload.
+
+    Parameters may be passed as one of the following forms:
+
+    1. An object where keys are param names and the values are param values
+    2. An array of `{ name: 'param-name', value: 'param-value' }` objects
+    3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
   @param {string} [request.timeout]
     A timeout in milliseconds for the request.
 
