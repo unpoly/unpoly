@@ -437,7 +437,7 @@ describe 'up.proxy', ->
             up.on eventName, =>
               @events.push eventName
 
-        it 'does not emit an up:proxy:slow event if preloading', (next) ->
+        it 'does not emit an up:proxy:slow event if preloading', asyncSpec (next) ->
           next =>
             # A request for preloading preloading purposes
             # doesn't make us busy.
