@@ -4,7 +4,6 @@ u = up.util
 
 ###*
 @class up.Response
-@stable
 ###
 class up.Response extends up.Record
 

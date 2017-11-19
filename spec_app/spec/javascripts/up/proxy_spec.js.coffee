@@ -576,6 +576,9 @@ describe 'up.proxy', ->
 
       describeCapability 'canPushState', ->
 
+        beforeEach ->
+          @requestTarget = => @lastRequest().requestHeaders['X-Up-Target']
+
         it "loads and caches the given link's destination", asyncSpec (next) ->
           affix('.target')
           $link = affix('a[href="/path"][up-target=".target"]')
@@ -592,33 +595,166 @@ describe 'up.proxy', ->
 
           next => expect(up.proxy.get(url: '/path')).toBeUndefined()
 
-        describe 'X-Up-Target header', ->
+        describe 'for an [up-target] link', ->
 
-          beforeEach ->
-            @requestTarget = => @lastRequest().requestHeaders['X-Up-Target']
-
-          it 'includes the [up-target] selector', asyncSpec (next) ->
+          it 'includes the [up-target] selector as an X-Up-Target header if the targeted element is currently on the page', asyncSpec (next) ->
             affix('.target')
             $link = affix('a[href="/path"][up-target=".target"]')
             up.proxy.preload($link)
             next => expect(@requestTarget()).toEqual('.target')
 
-          it 'replaces the [up-target] selector with a fallback if the targeted element is not currently on the page', asyncSpec (next) ->
+          it 'replaces the [up-target] selector as with a fallback and uses that as an X-Up-Target header if the targeted element is not currently on the page', asyncSpec (next) ->
             $link = affix('a[href="/path"][up-target=".target"]')
             up.proxy.preload($link)
             # The default fallback would usually be `body`, but in Jasmine specs we change
             # it to protect the test runner during failures.
             next => expect(@requestTarget()).toEqual('.default-fallback')
 
-          it 'includes the [up-modal] selector and does not replace it with a fallback', asyncSpec (next) ->
+          it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
+            requestSpy = spyOn(up, 'request')
+
+            $link = affix('a[href="/path"][up-target=".target"]')
+            up.proxy.preload($link)
+
+            next =>
+              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path', preload: true))
+
+        describe 'for an [up-modal] link', ->
+
+          beforeEach ->
+            up.motion.config.enabled = false
+
+          it 'includes the [up-modal] selector as an X-Up-Target header and does not replace it with a fallback, since the modal frame always exists', asyncSpec (next) ->
             $link = affix('a[href="/path"][up-modal=".target"]')
             up.proxy.preload($link)
             next => expect(@requestTarget()).toEqual('.target')
 
-          it 'includes the [up-popup] selector and does not replace it with a fallback', asyncSpec (next) ->
+          it 'does not create a modal frame', asyncSpec (next) ->
+            $link = affix('a[href="/path"][up-modal=".target"]')
+            up.proxy.preload($link)
+            next =>
+              expect('.up-modal').not.toExist()
+
+          it 'does not emit an up:modal:open event', asyncSpec (next) ->
+            $link = affix('a[href="/path"][up-modal=".target"]')
+            openListener = jasmine.createSpy('listener')
+            up.on('up:modal:open', openListener)
+            up.proxy.preload($link)
+            next =>
+              expect(openListener).not.toHaveBeenCalled()
+
+          it 'does not close a currently open modal', asyncSpec (next) ->
+            $link = affix('a[href="/path"][up-modal=".target"]')
+            closeListener = jasmine.createSpy('listener')
+            up.on('up:modal:close', closeListener)
+
+            up.modal.extract('.content', '<div class="content">Modal content</div>')
+
+            next =>
+              expect('.up-modal .content').toBeInDOM()
+
+            next =>
+              up.proxy.preload($link)
+
+            next =>
+              expect('.up-modal .content').toBeInDOM()
+              expect(closeListener).not.toHaveBeenCalled()
+
+            next =>
+              up.modal.close()
+
+            next =>
+              expect('.up-modal .content').not.toBeInDOM()
+              expect(closeListener).toHaveBeenCalled()
+
+          it 'does not prevent the opening of other modals while the request is still pending', asyncSpec (next) ->
+            $link = affix('a[href="/path"][up-modal=".target"]')
+            up.proxy.preload($link)
+
+            next =>
+              up.modal.extract('.content', '<div class="content">Modal content</div>')
+
+            next =>
+              expect('.up-modal .content').toBeInDOM()
+
+          it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
+            requestSpy = spyOn(up, 'request')
+
+            $link = affix('a[href="/path"][up-modal=".target"]')
+            up.proxy.preload($link)
+
+            next =>
+              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path', preload: true))
+
+        describe 'for an [up-popup] link', ->
+
+          beforeEach ->
+            up.motion.config.enabled = false
+          
+          it 'includes the [up-popup] selector as an X-Up-Target header and does not replace it with a fallback, since the popup frame always exists', asyncSpec (next) ->
             $link = affix('a[href="/path"][up-popup=".target"]')
             up.proxy.preload($link)
             next => expect(@requestTarget()).toEqual('.target')
+
+
+          it 'does not create a popup frame', asyncSpec (next) ->
+            $link = affix('a[href="/path"][up-popup=".target"]')
+            up.proxy.preload($link)
+            next =>
+              expect('.up-popup').not.toExist()
+
+          it 'does not emit an up:popup:open event', asyncSpec (next) ->
+            $link = affix('a[href="/path"][up-popup=".target"]')
+            openListener = jasmine.createSpy('listener')
+            up.on('up:popup:open', openListener)
+            up.proxy.preload($link)
+            next =>
+              expect(openListener).not.toHaveBeenCalled()
+
+          it 'does not close a currently open popup', asyncSpec (next) ->
+            $link = affix('a[href="/path"][up-popup=".target"]')
+            closeListener = jasmine.createSpy('listener')
+            up.on('up:popup:close', closeListener)
+
+            $existingAnchor = affix('.existing-anchor')
+            up.popup.attach($existingAnchor, target: '.content', html: '<div class="content">popup content</div>')
+
+            next =>
+              expect('.up-popup .content').toBeInDOM()
+
+            next =>
+              up.proxy.preload($link)
+
+            next =>
+              expect('.up-popup .content').toBeInDOM()
+              expect(closeListener).not.toHaveBeenCalled()
+
+            next =>
+              up.popup.close()
+
+            next =>
+              expect('.up-popup .content').not.toBeInDOM()
+              expect(closeListener).toHaveBeenCalled()
+
+          it 'does not prevent the opening of other popups while the request is still pending', asyncSpec (next) ->
+            $link = affix('a[href="/path"][up-popup=".target"]')
+            up.proxy.preload($link)
+
+            next =>
+              $anchor = affix('.existing-anchor')
+              up.popup.attach($anchor, target: '.content', html: '<div class="content">popup content</div>')
+
+            next =>
+              expect('.up-popup .content').toBeInDOM()
+
+          it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
+            requestSpy = spyOn(up, 'request')
+
+            $link = affix('a[href="/path"][up-popup=".target"]')
+            up.proxy.preload($link)
+
+            next =>
+              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path', preload: true))
 
       describeFallback 'canPushState', ->
 

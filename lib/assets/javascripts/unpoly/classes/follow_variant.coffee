@@ -2,7 +2,10 @@ u = up.util
 
 class up.FollowVariant
 
-  constructor: (@selector, @followNow) ->
+  constructor: (selector, options) ->
+    @followNow = options.follow
+    @preloadNow = options.preload
+    @selectors = selector.split(/\s*,\s*/)
 
   onClick: (event, $link) =>
     if @shouldProcessLinkEvent(event, $link)
@@ -23,7 +26,11 @@ class up.FollowVariant
       @followLink($link)
 
   fullSelector: (additionalClause = '') =>
-    "a#{@selector}#{additionalClause}, [up-href]#{@selector}#{additionalClause}"
+    parts = []
+    @selectors.forEach (variantSelector) ->
+      ['a', '[up-href]'].forEach (tagSelector) ->
+        parts.push "#{tagSelector}#{variantSelector}#{additionalClause}"
+    parts.join(', ')
 
   registerEvents: ->
     up.on 'click', @fullSelector(), (args...) =>
@@ -37,6 +44,9 @@ class up.FollowVariant
   followLink: ($link, options = {}) =>
     up.feedback.start $link, options, =>
       @followNow($link, options)
+
+  preloadLink: ($link, options = {}) =>
+    @preloadNow($link, options)
 
   matchesLink: ($link) =>
     $link.is(@fullSelector())

@@ -438,10 +438,10 @@ describe 'up.modal', ->
         up.modal.extract('.content', '<div class="content">Modal content</div>')
 
         u.nextFrame =>
-          expect('.content').toBeInDOM()
+          expect('.up-modal .content').toBeInDOM()
 
           up.modal.close().then ->
-            expect('.content').not.toBeInDOM()
+            expect('.up-modal .content').not.toBeInDOM()
             done()
 
       it 'does nothing if no modal is open', (done) ->

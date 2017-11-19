@@ -4,7 +4,6 @@ u = up.util
 
 ###*
 @class up.Request
-@stable
 ###
 class up.Request extends up.Record
 
@@ -12,7 +11,7 @@ class up.Request extends up.Record
   The HTTP method for the request.
 
   @property up.Request.prototype.method
-  @param {string} method='GET'
+  @param {string} method
   @stable
   ###
 
@@ -34,7 +33,7 @@ class up.Request extends up.Record
   3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
 
   @property up.Request.prototype.data
-  @param {String} [data]
+  @param {String} data
   @stable
   ###
 
@@ -42,7 +41,7 @@ class up.Request extends up.Record
   The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
 
   @property up.Request.prototype.target
-  @param {string} [target]
+  @param {string} target
   @stable
   ###
 
@@ -50,7 +49,7 @@ class up.Request extends up.Record
   The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
 
   @property up.Request.prototype.failTarget
-  @param {string} [failTarget]
+  @param {string} failTarget
   @stable
   ###
 
@@ -58,7 +57,7 @@ class up.Request extends up.Record
   An object of additional HTTP headers.
 
   @property up.Request.prototype.headers
-  @param {object} [headers]
+  @param {object} headers
   @stable
   ###
 
@@ -69,7 +68,7 @@ class up.Request extends up.Record
   the timeout will not include the time spent waiting in the queue.
 
   @property up.Request.prototype.timeout
-  @param {object} [timeout]
+  @param {object|undefined} timeout
   @stable
   ###
   fields: ->
@@ -110,8 +109,8 @@ class up.Request extends up.Record
     # Now that we have transfered the params into the URL, we delete them from the { data } option.
     @data = undefined
 
-  isIdempotent: =>
-    up.proxy.isIdempotentMethod(@method)
+  isSafe: =>
+    up.proxy.isSafeMethod(@method)
 
   send: =>
     # We will modify this request below.
@@ -188,7 +187,7 @@ class up.Request extends up.Record
 
   # Returns a csrfToken if this request requires it
   csrfToken: =>
-    if !@isIdempotent() && !u.isCrossDomain(@url)
+    if !@isSafe() && !u.isCrossDomain(@url)
       up.protocol.csrfToken()
 
   buildResponse: (xhr) =>
@@ -210,7 +209,7 @@ class up.Request extends up.Record
     new up.Response(responseAttrs)
 
   isCachable: =>
-    @isIdempotent() && !u.isFormData(@data)
+    @isSafe() && !u.isFormData(@data)
 
   cacheKey: =>
     [@url, @method, u.requestDataAsQuery(@data), @target].join('|')

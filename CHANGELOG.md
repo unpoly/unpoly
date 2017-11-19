@@ -26,8 +26,9 @@ Unreleased
 - up.motion.none has been removed without replacement. Just path `false` or `'none'` to indicate a no-op animation or transition which has no visual effects and completes instantly.
 - [`up.motion.finish()`](/up.motion.finish) is now async. It returns a promise that is fulfulled when all animations are finished.
 - [`up.motion.finish()`](/up.motion.finish) now also finishes animations in ancestors of the given element.
-- [`up.follow()`](/up.follow) will now open modals or popup if the given link has [`[up-modal]`](/up-modal) or [`[up-popup]`](/up-popup) attribute.
-- Clicking a link with `[up-restore-scroll]` will no longer crash if the previous scroll position for the new URL is unknown ([#25](https://github.com/unpoly/unpoly/issues/25)) 
+- [`up.follow()`](/up.follow) will now open a modal if the given link has [`[up-modal]`](/up-modal) attribute
+- [`up.follow()`](/up.follow) will now open a popup if the given link has [`[up-popup]`](/up-popup) attribute
+- Clicking a link with `[up-restore-scroll]` will no longer crash if the previous scroll position for the new URL is unknown ([#25](https://github.com/unpoly/unpoly/issues/25))
 - Unpoly will often update a different selector in case the request fails. This second selector is now sent to the server as a `X-Up-Fail-Target` header.
 - You can now [configure how CSRF tokens are sent your server-side framework](/up.protocol.config).
 - up.popup.attach() now throws an error if neither { url } nor { html } options are given.
@@ -42,6 +43,10 @@ Unreleased
 - up.util.unresolvableDeferred() has been removed without replacement. Use new Promise(function() {}) instead.
 - up.motion.when() has been removed without replacement. Use Promise.all() instead.
 - up.util.setTimer() is now always async, even when called with a 0 (zero) delay. The function is now stable.
+- up-modal links can now have an up-fail-target attribute to indicate which selector to replace for an non-200 response
+- up-popup links can now have an up-fail-target attribute to indicate which selector to replace for an non-200 response
+- Fix a bug where preloading an up-modal link would create an invisible .up-modal container in the DOM.
+- Fix a bug where preloading an up-popup link would create an invisible .up-popup container in the DOM.
 
 
 0.37.0
@@ -689,9 +694,9 @@ Unreleased
 - New function [`up.off()`](/up.off). This unregisters an event listener previously bound with [`up.on()`](/up.on).
 - If a container contains more than one link, you can now set the value of the [`up-expand`](/up-expand)
   attribute to a CSS selector to define which link should be expanded.
-- You can now configure a list of idempotent HTTP methods in [`up.proxy.config.safeMethods`](/up.proxy.config).
-  The proxy cache will only cache idempotent requests and will clear the entire
-  cache after a non-idempotent request.
+- You can now configure a list of safe HTTP methods in [`up.proxy.config.safeMethods`](/up.proxy.config).
+  The proxy cache will only cache safe requests and will clear the entire
+  cache after a unsafe request.
 - Loading modals and popups will now open if there is a fragment update between the modal/popup's
   request and response.
 - [`up.follow()`](/up.follow) and [`up.replace()`](/up.replace) now have an option `{ failTarget }`.

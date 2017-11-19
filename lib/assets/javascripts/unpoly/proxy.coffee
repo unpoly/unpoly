@@ -79,10 +79,10 @@ up.proxy = (($) ->
     An array of uppercase HTTP method names. AJAX requests with one of these methods
     will be converted into a `POST` request and carry their original method as a `_method`
     parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-  @param {Array<string>} [config.idempotentMethods]
-    An array of uppercase HTTP method names that are considered idempotent.
-    The proxy cache will only cache idempotent requests and will clear the entire
-    cache after a non-idempotent request.
+  @param {Array<string>} [config.safeMethods]
+    An array of uppercase HTTP method names that are considered [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1).
+    The proxy cache will only cache safe requests and will clear the entire
+    cache after an unsafe request.
   @stable
   ###
   config = u.config
@@ -92,7 +92,7 @@ up.proxy = (($) ->
     cacheExpiry: 1000 * 60 * 5
     maxRequests: 4
     wrapMethods: ['PATCH', 'PUT', 'DELETE']
-    idempotentMethods: ['GET', 'OPTIONS', 'HEAD']
+    safeMethods: ['GET', 'OPTIONS', 'HEAD']
 
   cache = u.newCache
     size: -> config.cacheSize
@@ -177,18 +177,18 @@ up.proxy = (($) ->
   @param {string} [url]
     The URL for the request.
 
-    Instead of passing the URL as a string argument, you can also pass it as an { url } option.
-  @param {string} [request.url]
+    Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
+  @param {string} [options.url]
     You can omit the first string argument and pass the URL as
     a `request` property instead.
-  @param {string} [request.method='GET']
-    The HTTP method for the request.
-  @param {boolean} [request.cache]
-    Whether to use a cached response for idempotent requests, if available.
-    If set to `false` a network connection will always be attempted.
-  @param {Object} [request.headers={}]
+  @param {string} [options.method='GET']
+    The HTTP method for the options.
+  @param {boolean} [options.cache]
+    Whether to use a cached response for [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+    requests, if available. If set to `false` a network connection will always be attempted.
+  @param {Object} [options.headers={}]
     An object of additional HTTP headers.
-  @param {Object} [request.data={}]
+  @param {Object} [options.data={}]
     Parameters that should be sent as the request's payload.
 
     Parameters may be passed as one of the following forms:
@@ -196,15 +196,15 @@ up.proxy = (($) ->
     1. An object where keys are param names and the values are param values
     2. An array of `{ name: 'param-name', value: 'param-value' }` objects
     3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
-  @param {string} [request.timeout]
+  @param {string} [options.timeout]
     A timeout in milliseconds.
 
     If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set, the timeout
     will not include the time spent waiting in the queue.
-  @param {string} [request.target='body']
+  @param {string} [options.target='body']
     The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
-  @param {string} [request.failTarget='body']
-    The CSS selector that will be sent as an [`X-Up-Fail-Target` header]((/up.protocol#optimizing-responses).
+  @param {string} [options.failTarget='body']
+    The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
   @return {Promise<up.Response>}
     A promise for the response.
   @stable
@@ -220,8 +220,8 @@ up.proxy = (($) ->
     # Non-GET requests always touch the network
     # unless `options.cache` is explicitly set to `true`.
     # These requests are never cached.
-    if !request.isIdempotent()
-      # We clear the entire cache before a non-idempotent request, since we
+    if !request.isSafe()
+      # We clear the entire cache before an unsafe request, since we
       # assume the user is writing a change.
       clear()
 
@@ -269,15 +269,15 @@ up.proxy = (($) ->
   @param {string} [url]
     The URL for the request.
 
-    Instead of passing the URL as a string argument, you can also pass it as an { url } option.
+    Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
   @param {string} [request.url]
     You can omit the first string argument and pass the URL as
     a `request` property instead.
   @param {string} [request.method='GET']
     The HTTP method for the request.
   @param {boolean} [request.cache]
-    Whether to use a cached response for idempotent requests, if available.
-    If set to `false` a network connection will always be attempted.
+    Whether to use a cached response for [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+    requests, if available. If set to `false` a network connection will always be attempted.
   @param {Object} [request.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
@@ -534,7 +534,7 @@ up.proxy = (($) ->
   up.bus.renamedEvent('up:proxy:received', 'up:proxy:loaded')
 
   checkPreload = ($link) ->
-    delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay 
+    delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay
     unless $link.is($waitingLink)
       $waitingLink = $link
       cancelPreloadDelay()
@@ -547,6 +547,11 @@ up.proxy = (($) ->
     preloadDelayTimer = setTimeout(block, delay)
 
   ###*
+  Preloads the given link.
+
+  When the link is clicked later, the response will already be cached,
+  making the interaction feel instant.
+
   @function up.proxy.preload
   @param {string|Element|jQuery}
     The element whose destination should be preloaded.
@@ -554,24 +559,21 @@ up.proxy = (($) ->
     A promise that will be fulfilled when the request was loaded and cached
   @experimental
   ###
-  preload = (linkOrSelector, options) ->
+  preload = (linkOrSelector) ->
     $link = $(linkOrSelector)
-    options = u.options(options)
 
-    method = up.link.followMethod($link, options)
-    if isIdempotentMethod(method)
+    if up.link.isSafe($link)
       up.log.group "Preloading link %o", $link.get(0), ->
-        options.preload = true
-        up.link.follow($link, options)
+        variant = up.link.followVariantForLink($link)
+        variant.preloadLink($link)
     else
-      up.puts("Won't preload %o due to unsafe method %s", $link.get(0), method)
-      Promise.resolve()
+      Promise.reject("Won't preload unsafe link")
 
   ###*
   @internal
   ###
-  isIdempotentMethod = (method) ->
-    u.contains(config.idempotentMethods, method)
+  isSafeMethod = (method) ->
+    u.contains(config.safeMethods, method)
 
   ###*
   @internal
@@ -585,8 +587,9 @@ up.proxy = (($) ->
   ###*
   Links with an `up-preload` attribute will silently fetch their target
   when the user hovers over the click area, or when the user puts her
-  mouse/finger down (before releasing). This way the
-  response will already be cached when the user performs the click,
+  mouse/finger down (before releasing).
+
+  When the link is clicked later, the response will already be cached,
   making the interaction feel instant.   
 
   @selector [up-preload]
@@ -597,10 +600,9 @@ up.proxy = (($) ->
   @stable
   ###
   up.on 'mouseover mousedown touchstart', '[up-preload]', (event, $element) ->
-    # Don't do anything if we are hovering over the child
-    # of a link. The actual link will receive the event
-    # and bubble in a second.
-    unless up.link.childClicked(event, $element)
+    # Don't do anything if we are hovering over the child of a link.
+    # The actual link will receive the event and bubble in a second.
+    if !up.link.childClicked(event, $element) && up.link.isSafe($element)
       checkPreload($element)
 
   up.on 'up:framework:reset', reset
@@ -614,7 +616,7 @@ up.proxy = (($) ->
   remove: remove
   isIdle: isIdle
   isBusy: isBusy
-  isIdempotentMethod: isIdempotentMethod
+  isSafeMethod: isSafeMethod
   wrapMethod: wrapMethod
   config: config
   

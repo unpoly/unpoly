@@ -277,10 +277,12 @@ up.dom = (($) ->
         rejection()
       else
         promise = processResponse(false, improvedFailTarget, response, failureOptions)
+        # Although processResponse() we will perform a successful replacement of options.failTarget,
+        # we still want to reject the promise that's returned to our API client.
         u.always(promise, rejection)
 
     promise = up.request(request)
-    promise = promise.then(onSuccess, onFailure)
+    promise = promise.then(onSuccess, onFailure) unless options.preload
     promise
 
   ###*
@@ -318,10 +320,7 @@ up.dom = (($) ->
     if shouldExtractTitle(options) && response.title
       options.title = response.title
 
-    if options.preload
-      Promise.resolve()
-    else
-      extract(selector, response.text, options)
+    extract(selector, response.text, options)
 
   shouldExtractTitle = (options) ->
     not (options.title is false || u.isString(options.title) || (options.history is false && options.title isnt true))

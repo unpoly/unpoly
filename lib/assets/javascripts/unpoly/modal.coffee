@@ -358,6 +358,14 @@ up.modal = (($) ->
     options.$link = $(linkOrSelector)
     openAsap(options)
 
+  preloadNow = ($link, options) ->
+    options = u.options(options)
+    options.$link = $link
+    options.preload = true
+    # Use openNow() and not openAsap() so (1) we don't close a currently open modal
+    # and (2) our pending AJAX request does not prevent other modals from opening
+    openNow(options)
+
   ###*
   Opens a modal for the given URL.
 
@@ -446,6 +454,7 @@ up.modal = (($) ->
     options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
     options.method = up.link.followMethod($link, options)
     options.layer = 'modal'
+    options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'))
     options.failLayer = u.option(options.failLayer, $link.attr('up-fail-layer'), 'auto')
     animateOptions = up.motion.animateOptions(options, $link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
 
@@ -454,6 +463,13 @@ up.modal = (($) ->
     # without an URL update.
     options.history = u.option(options.history, u.castedAttr($link, 'up-history'), flavorDefault('history', options.flavor))
     options.history = false unless up.browser.canPushState()
+
+    # This will prevent up.replace() from looking for fallbacks, since
+    # it knows the target will always exist.
+    options.provideTarget = -> createHiddenFrame(target, options)
+
+    if options.preload
+      return up.replace(target, url, options)
 
     up.browser.whenConfirmed(options).then ->
       up.bus.whenEmitted('up:modal:open', url: url, message: 'Opening modal').then ->
@@ -465,7 +481,6 @@ up.modal = (($) ->
         if options.history
           state.coveredUrl = up.browser.url()
           state.coveredTitle = document.title
-        options.provideTarget = -> createHiddenFrame(target, options)
         extractOptions = u.merge(options, animation: false)
         if html
           promise = up.extract(target, html, extractOptions)
@@ -515,10 +530,11 @@ up.modal = (($) ->
     chain.asap -> closeNow(options)
 
   closeNow = (options) ->
-    unless isOpen() # this can happen when a request fails and the chain proceeds to the next task
+    options = u.options(options)
+
+    unless isOpen()
       return Promise.resolve()
 
-    options = u.options(options)
     viewportCloseAnimation = u.option(options.animation, flavorDefault('closeAnimation'))
     viewportCloseAnimation = u.evalOption(viewportCloseAnimation, position: state.position)
     backdropCloseAnimation = u.option(options.backdropAnimation, flavorDefault('backdropCloseAnimation'))
@@ -684,9 +700,10 @@ up.modal = (($) ->
 
   @stable
   ###
-  up.link.onAction '[up-modal]',
+  up.link.addFollowVariant '[up-modal]',
     # Don't just pass the `follow` function reference so we can stub it in tests
-    ($link, options) -> followAsap($link, options)
+    follow: ($link, options) -> followAsap($link, options)
+    preload: ($link, options) -> preloadNow($link, options)
 
   # Close the modal when someone clicks outside the dialog (but not on a modal opener).
   # Note that we cannot listen to clicks on .up-modal-backdrop, which is a sister element
@@ -774,7 +791,7 @@ up.modal = (($) ->
   @param {Object} config
     Default options for future drawers.
 
-    See [`up.modal.config`] for available options.
+    See [`up.modal.config`](/up.modal.config) for available options.
   @experimental
   ###
   flavors.drawer =

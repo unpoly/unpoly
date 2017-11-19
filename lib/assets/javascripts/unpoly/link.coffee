@@ -162,6 +162,11 @@ up.link = (($) ->
     up.browser.whenConfirmed(options).then ->
       up.replace(target, url, options)
 
+  defaultPreload = ($link, options) ->
+    options = u.options(options)
+    options.preload = true
+    defaultFollow($link, options)
+
   ###*
   Returns the HTTP method that should be used when following the given link.
 
@@ -189,8 +194,8 @@ up.link = (($) ->
 
   followVariants = []
 
-  onAction = (simplifiedSelector, handler) ->
-    variant = new up.FollowVariant(simplifiedSelector, handler)
+  addFollowVariant = (simplifiedSelector, options) ->
+    variant = new up.FollowVariant(simplifiedSelector, options)
     followVariants.push(variant)
     variant.registerEvents()
     variant
@@ -245,6 +250,10 @@ up.link = (($) ->
     $target = $(event.target)
     $targetLink = $target.closest('a, [up-href]')
     $targetLink.length && $link.find($targetLink).length
+
+  isSafe = ($link, options) ->
+    method = followMethod($link, options)
+    up.proxy.isSafeMethod(method)
 
   ###*
   Follows this link via AJAX and replaces a CSS selector in the current page
@@ -339,31 +348,10 @@ up.link = (($) ->
     Set this to a URL string to update the history with the given URL.
   @stable
   ###
-  onAction '[up-target]',
-    # Don't just pass the `follow` function reference so we can stub it in tests
-    ($element, options) -> defaultFollow($element, options)
-
-  ###*
-  By adding an `up-instant` attribute to a link, the destination will be
-  fetched on `mousedown` instead of `click` (`mouseup`).
-
-      <a href="/users" up-target=".main" up-instant>User list</a>
-
-  This will save precious milliseconds that otherwise spent
-  on waiting for the user to release the mouse button. Since an
-  AJAX request will be triggered right way, the interaction will
-  appear faster.
-
-  Note that using `[up-instant]` will prevent a user from canceling a link
-  click by moving the mouse away from the interaction area. However, for
-  navigation actions this isn't needed. E.g. popular operation
-  systems switch tabs on `mousedown` instead of `click`.
-
-  `up-instant` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
-
-  @selector [up-instant]
-  @stable
-  ###
+  DEFAULT_FOLLOW_VARIANT = addFollowVariant '[up-target], [up-follow]',
+    # Don't just pass the `defaultFollow` function reference so we can stub it in tests
+    follow: ($link, options) -> defaultFollow($link, options)
+    preload: ($link, options) -> defaultPreload($link, options)
 
   ###*
   If applied on a link, Follows this link via AJAX and replaces the
@@ -415,9 +403,28 @@ up.link = (($) ->
     within the response.
   @stable
   ###
-  DEFAULT_FOLLOW_VARIANT = onAction '[up-follow]',
-    # Don't just pass the `follow` function so we can stub it in tests
-    ($link, options) -> defaultFollow($link, options)
+
+  ###*
+  By adding an `up-instant` attribute to a link, the destination will be
+  fetched on `mousedown` instead of `click` (`mouseup`).
+
+      <a href="/users" up-target=".main" up-instant>User list</a>
+
+  This will save precious milliseconds that otherwise spent
+  on waiting for the user to release the mouse button. Since an
+  AJAX request will be triggered right way, the interaction will
+  appear faster.
+
+  Note that using `[up-instant]` will prevent a user from canceling a link
+  click by moving the mouse away from the interaction area. However, for
+  navigation actions this isn't needed. E.g. popular operation
+  systems switch tabs on `mousedown` instead of `click`.
+
+  `up-instant` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
+
+  @selector [up-instant]
+  @stable
+  ###
 
   ###*
   Marks up the current link to be followed *as fast as possible*.
@@ -519,10 +526,12 @@ up.link = (($) ->
   visit: visit
   follow: follow
   makeFollowable: makeFollowable
+  isSafe: isSafe
   isFollowable: isFollowable
   childClicked: childClicked
   followMethod: followMethod
-  onAction: onAction
+  addFollowVariant: addFollowVariant
+  followVariantForLink: followVariantForLink
   allowDefault: allowDefault
 
 )(jQuery)

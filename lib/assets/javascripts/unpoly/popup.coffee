@@ -242,8 +242,18 @@ up.popup = (($) ->
     options.confirm = u.option(options.confirm, $anchor.attr('up-confirm'))
     options.method = up.link.followMethod($anchor, options)
     options.layer = 'popup'
+    options.failTarget = u.option(options.failTarget, $anchor.attr('up-fail-target'))
     options.failLayer = u.option(options.failLayer, $anchor.attr('up-fail-layer'), 'auto')
+
+    # This will prevent up.replace() from looking for fallbacks, since
+    # it knows the target will always exist.
+    options.provideTarget = -> createHiddenFrame(target)
+
     animateOptions = up.motion.animateOptions(options, $anchor, duration: config.openDuration, easing: config.openEasing)
+    extractOptions = u.merge(options, animation: false)
+
+    if options.preload && url
+      return up.replace(target, url, options)
 
     up.browser.whenConfirmed(options).then ->
       up.bus.whenEmitted('up:popup:open', url: url, message: 'Opening popup').then ->
@@ -254,8 +264,6 @@ up.popup = (($) ->
           state.coveredUrl = up.browser.url()
           state.coveredTitle = document.title
         state.sticky = options.sticky
-        options.provideTarget = -> createHiddenFrame(target)
-        extractOptions = u.merge(options, animation: false)
         if html
           promise = up.extract(target, html, extractOptions)
         else
@@ -327,6 +335,19 @@ up.popup = (($) ->
         state.$anchor = null
         state.sticky = null
         up.emit('up:popup:closed', message: 'Popup closed')
+
+  preloadNow = ($link, options) ->
+    options = u.options(options)
+    options.preload = true
+    # Use attachNow() and not attachAsap() so (1) we don't close a currently open popup
+    # and (2) our pending AJAX request does not prevent other popups from opening
+    attachNow($link, options)
+
+  toggleAsap = ($link, options) ->
+    if $link.is('.up-current')
+      closeAsap()
+    else
+      attachAsap($link, options)
 
   ###*
   This event is [emitted](/up.emit) when a popup dialog
@@ -400,11 +421,10 @@ up.popup = (($) ->
 
   @stable
   ###
-  up.link.onAction '[up-popup]', ($link, options) ->
-    if $link.is('.up-current')
-      closeAsap()
-    else
-      attachAsap($link, options)
+  up.link.addFollowVariant '[up-popup]',
+    # Don't just pass the `toggleAsap` function reference so we can stub it in tests
+    follow: ($link, options) -> toggleAsap($link, options)
+    preload: ($link, options) -> preloadNow($link, options)
 
   # We close the popup when someone clicks on the document.
   # We also need to listen to up:action:consumed in case an [up-instant] link

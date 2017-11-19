@@ -242,7 +242,7 @@ up.protocol = (($) ->
 
   @param {String|Function} [config.csrfToken]
     The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
-    to send for non-idempotent requests. The token will be sent as either a HTTP header (for AJAX requests)
+    to send for unsafe requests. The token will be sent as either a HTTP header (for AJAX requests)
     or hidden form `<input>` (for default, non-AJAX form submissions).
 
     The token can either be configured as a string or as function that returns the token.
