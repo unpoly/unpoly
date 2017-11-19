@@ -28,6 +28,7 @@
 
   clickSequence = (element, options) ->
     $element = $(element)
+    mouseover($element, options)
     mousedown($element, options)
     focus($element, options)
     mouseup($element, options)
