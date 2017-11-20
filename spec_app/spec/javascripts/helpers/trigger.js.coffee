@@ -2,26 +2,32 @@
   
   u = up.util
   
-  mouseover = ($element, options) ->
+  mouseover = (element, options) ->
+    $element = $(element)
     event = createMouseEvent('mouseover', options)
     dispatch($element, event)
 
-  mousedown = ($element, options) ->
+  mousedown = (element, options) ->
+    $element = $(element)
     event = createMouseEvent('mousedown', options)
     dispatch($element, event)
 
-  mouseup = ($element, options) ->
+  mouseup = (element, options) ->
+    $element = $(element)
     event = createMouseEvent('mouseup', options)
     dispatch($element, event)
 
-  click = ($element, options) ->
+  click = (element, options) ->
+    $element = $(element)
     event = createMouseEvent('click', options)
     dispatch($element, event)
 
-  focus = ($element, options) ->
+  focus = (element, options) ->
+    $element = $(element)
     $element.focus()
 
-  clickSequence = ($element, options) ->
+  clickSequence = (element, options) ->
+    $element = $(element)
     mousedown($element, options)
     focus($element, options)
     mouseup($element, options)

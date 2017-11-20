@@ -1,5 +1,6 @@
 #= require ./unpoly/namespace
 #= require ./unpoly/util
+#= require_tree ./unpoly/classes
 #= require ./unpoly/protocol
 #= require ./unpoly/browser
 #= require ./unpoly/bus
@@ -9,7 +10,6 @@
 #= require ./unpoly/history
 #= require ./unpoly/layout
 #= require ./unpoly/dom
-#= require_tree ./unpoly/dom
 #= require ./unpoly/motion
 #= require ./unpoly/proxy
 #= require ./unpoly/link

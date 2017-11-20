@@ -4,8 +4,7 @@ describe 'up.bus', ->
 
     describe 'up.on', ->
 
-      it 'registers a delagating event listener to the document body, which passes the $element as a second argument to the listener', ->
-
+      it 'registers a delagating event listener to the document body, which passes the $element as a second argument to the listener', asyncSpec (next) ->
         affix('.container .child')
         observeClass = jasmine.createSpy()
         up.on 'click', '.child', (event, $element) ->
@@ -14,20 +13,25 @@ describe 'up.bus', ->
         Trigger.click($('.container'))
         Trigger.click($('.child'))
 
-        expect(observeClass).not.toHaveBeenCalledWith('container')
-        expect(observeClass).toHaveBeenCalledWith('child')
+        next =>
+          expect(observeClass).not.toHaveBeenCalledWith('container')
+          expect(observeClass).toHaveBeenCalledWith('child')
 
-      it 'returns a method that unregisters the event listener when called', ->
+      it 'returns a method that unregisters the event listener when called', asyncSpec (next) ->
         $child = affix('.child')
         clickSpy = jasmine.createSpy()
         unsubscribe = up.on 'click', '.child', clickSpy
         Trigger.click($('.child'))
-        expect(clickSpy.calls.count()).toEqual(1)
-        unsubscribe()
-        Trigger.click($('.child'))
-        expect(clickSpy.calls.count()).toEqual(1)
 
-      it 'parses an up-data attribute as JSON and passes the parsed object as a third argument to the initializer', ->
+        next =>
+          expect(clickSpy.calls.count()).toEqual(1)
+          unsubscribe()
+          Trigger.click($('.child'))
+
+        next =>
+          expect(clickSpy.calls.count()).toEqual(1)
+
+      it 'parses an up-data attribute as JSON and passes the parsed object as a third argument to the initializer', asyncSpec (next) ->
         $child = affix('.child')
         observeArgs = jasmine.createSpy()
         up.on 'click', '.child', (event, $element, data) ->
@@ -37,27 +41,33 @@ describe 'up.bus', ->
         $tag = affix(".child").attr('up-data', JSON.stringify(data))
 
         Trigger.click($('.child'))
-        expect(observeArgs).toHaveBeenCalledWith('child', data)
 
-      it 'passes an empty object as a second argument to the listener if there is no up-data attribute', ->
+        next =>
+          expect(observeArgs).toHaveBeenCalledWith('child', data)
+
+      it 'passes an empty object as a second argument to the listener if there is no up-data attribute', asyncSpec (next) ->
         $child = affix('.child')
         observeArgs = jasmine.createSpy()
         up.on 'click', '.child', (event, $element, data) ->
           observeArgs($element.attr('class'), data)
 
         Trigger.click($('.child'))
-        expect(observeArgs).toHaveBeenCalledWith('child', {})
+
+        next =>
+          expect(observeArgs).toHaveBeenCalledWith('child', {})
 
     describe 'up.off', ->
 
-      it 'unregisters an event listener previously registered through up.on', ->
+      it 'unregisters an event listener previously registered through up.on', asyncSpec (next) ->
         $child = affix('.child')
         clickSpy = jasmine.createSpy()
         up.on 'click', '.child', clickSpy
         Trigger.click($('.child'))
         up.off 'click', '.child', clickSpy
         Trigger.click($('.child'))
-        expect(clickSpy.calls.count()).toEqual(1)
+
+        next =>
+          expect(clickSpy.calls.count()).toEqual(1)
 
       it 'throws an error if the given event listener was not registered through up.on', ->
         someFunction = ->
@@ -121,3 +131,23 @@ describe 'up.bus', ->
           expect($emittedTarget).toEqual($element)
 
           expect(emittedEvent.$element).toEqual($element)
+
+    describe 'up.bus.renamedEvent', ->
+
+      it 'prints a warning and registers the event listener for the new event name', ->
+        warnSpy = spyOn(up.log, 'warn')
+        listener = jasmine.createSpy('listener')
+
+        # Reister listener for the old event name
+        up.on('up:proxy:received', listener)
+        expect(warnSpy).toHaveBeenCalled()
+
+        # Emit event with new name and see that it invokes the legacy listener
+        up.emit('up:proxy:loaded')
+        expect(listener.calls.count()).toBe(1)
+
+        # Check that up.off works with the old event name
+        up.off('up:proxy:received', listener)
+
+        up.emit('up:proxy:loaded')
+        expect(listener.calls.count()).toBe(1)

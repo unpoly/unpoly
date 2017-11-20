@@ -37,20 +37,20 @@ up.tooltip = (($) ->
   Configures defaults for future tooltips.
 
   @property up.tooltip.config
-  @param {String} [config.position]
+  @param {string} [config.position]
     The default position of tooltips relative to the element.
     Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
-  @param {String} [config.openAnimation='fade-in']
+  @param {string} [config.openAnimation='fade-in']
     The animation used to open a tooltip.
-  @param {String} [config.closeAnimation='fade-out']
+  @param {string} [config.closeAnimation='fade-out']
     The animation used to close a tooltip.
-  @param {Number} [config.openDuration]
+  @param {number} [config.openDuration]
     The duration of the open animation (in milliseconds).
-  @param {Number} [config.closeDuration]
+  @param {number} [config.closeDuration]
     The duration of the close animation (in milliseconds).
-  @param {String} [config.openEasing]
+  @param {string} [config.openEasing]
     The timing function controlling the acceleration of the opening animation.
-  @param {String} [config.closeEasing]
+  @param {string} [config.closeEasing]
     The timing function controlling the acceleration of the closing animation.
   @stable
   ###
@@ -130,33 +130,28 @@ up.tooltip = (($) ->
       });
 
   @function up.tooltip.attach
-  @param {Element|jQuery|String} elementOrSelector
-  @param {String} [options.text]
+  @param {Element|jQuery|string} elementOrSelector
+  @param {string} [options.text]
     The text to display in the tooltip.
 
     Any HTML control characters will be escaped.
     If you need to use HTML formatting in the tooltip, use `options.html` instead.
-  @param {String} [options.html]
+  @param {string} [options.html]
     The HTML to display in the tooltip unescaped.
 
     Make sure to escape any user-provided text before passing it as this option,
     or use `options.text` (which automatically escapes).
-  @param {String} [options.position='top']
+  @param {string} [options.position='top']
     The position of the tooltip.
     Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
-  @param {String} [options.animation]
+  @param {string} [options.animation]
     The [animation](/up.motion) to use when opening the tooltip.
   @return {Promise}
-    A promise that will be resolved when the tooltip's opening animation has finished.
+    A promise that will be fulfilled when the tooltip's opening animation has finished.
   @stable
   ###
   attachAsap = (elementOrSelector, options = {}) ->
-    curriedAttachNow = -> attachNow(elementOrSelector, options)
-    if isOpen()
-      chain.asap(closeNow, curriedAttachNow)
-    else
-      chain.asap(curriedAttachNow)
-    chain.promise()
+    chain.asap closeNow, (-> attachNow(elementOrSelector, options))
 
   attachNow = (elementOrSelector, options) ->
     $anchor = $(elementOrSelector)
@@ -188,13 +183,11 @@ up.tooltip = (($) ->
   @stable
   ###
   closeAsap = (options) ->
-    if isOpen()
-      chain.asap -> closeNow(options)
-    chain.promise()
+    chain.asap -> closeNow(options)
 
   closeNow = (options) ->
     unless isOpen() # this can happen when a request fails and the chain proceeds to the next task
-      return u.resolvedPromise()
+      return Promise.resolve()
 
     options = u.options(options, animation: config.closeAnimation)
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
@@ -227,10 +220,10 @@ up.tooltip = (($) ->
       <a href="/decks" up-tooltip="Show all decks" up-position="bottom">Decks</a>
 
   @selector [up-tooltip]
-  @param {String} [up-animation]
+  @param {string} [up-animation]
     The animation used to open the tooltip.
     Defaults to [`up.tooltip.config.openAnimation`](/up.tooltip.config).
-  @param {String} [up-position]
+  @param {string} [up-position]
     The default position of tooltips relative to the element.
     Can be either `"top"` or `"bottom"`.
     Defaults to [`up.tooltip.config.position`](/up.tooltip.config).

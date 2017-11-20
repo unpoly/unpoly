@@ -19,136 +19,148 @@ describe 'up.form', ->
 
           describe "when the input receives a #{eventName} event", ->
 
-            it "runs the callback if the value changed", (done) ->
+            it "runs the callback if the value changed", asyncSpec (next) ->
               $input = affix('input[value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               $input.val('new-value')
               u.times 2, -> $input.trigger(eventName)
-              u.nextFrame ->
+              next =>
                 expect(callback).toHaveBeenCalledWith('new-value', $input)
                 expect(callback.calls.count()).toEqual(1)
-                done()
 
-            it "does not run the callback if the value didn't change", (done) ->
+            it "does not run the callback if the value didn't change", asyncSpec (next) ->
               $input = affix('input[value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               $input.trigger(eventName)
-              u.nextFrame ->
+              next =>
                 expect(callback).not.toHaveBeenCalled()
-                done()
 
-            it 'debounces the callback when the { delay } option is given', (done) ->
+            it 'debounces the callback when the { delay } option is given', asyncSpec (next) ->
               $input = affix('input[value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, { delay: 100 }, callback)
               $input.val('new-value-1')
               $input.trigger(eventName)
-              u.setTimer 50, ->
+
+              next.after 50, ->
                 # 50 ms after change 1: We're still waiting for the 100ms delay to expire
                 expect(callback.calls.count()).toEqual(0)
-                u.setTimer 100, ->
-                  # 150 ms after change 1: The 100ms delay has expired
-                  expect(callback.calls.count()).toEqual(1)
-                  expect(callback.calls.mostRecent().args[0]).toEqual('new-value-1')
-                  $input.val('new-value-2')
-                  $input.trigger(eventName)
-                  u.setTimer 40, ->
-                    # 40 ms after change 2: We change again, resetting the delay
-                    expect(callback.calls.count()).toEqual(1)
-                    $input.val('new-value-3')
-                    $input.trigger(eventName)
-                    u.setTimer 85, ->
-                      # 125 ms after change 2, which was superseded by change 3
-                      # 85 ms after change 3
-                      expect(callback.calls.count()).toEqual(1)
-                      u.setTimer 65, ->
-                        # 190 ms after change 2, which was superseded by change 3
-                        # 150 ms after change 3
-                        expect(callback.calls.count()).toEqual(2)
-                        expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
-                        done()
 
-            it 'delays a callback if a previous async callback is taking long to execute', (done) ->
+              next.after 100, ->
+                # 150 ms after change 1: The 100ms delay has expired
+                expect(callback.calls.count()).toEqual(1)
+                expect(callback.calls.mostRecent().args[0]).toEqual('new-value-1')
+                $input.val('new-value-2')
+                $input.trigger(eventName)
+
+              next.after 40, ->
+                # 40 ms after change 2: We change again, resetting the delay
+                expect(callback.calls.count()).toEqual(1)
+                $input.val('new-value-3')
+                $input.trigger(eventName)
+
+              next.after 85, ->
+                # 125 ms after change 2, which was superseded by change 3
+                # 85 ms after change 3
+                expect(callback.calls.count()).toEqual(1)
+
+              next.after 65, ->
+                # 190 ms after change 2, which was superseded by change 3
+                # 150 ms after change 3
+                expect(callback.calls.count()).toEqual(2)
+                expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
+
+            it 'delays a callback if a previous async callback is taking long to execute', asyncSpec (next) ->
               $input = affix('input[value="old-value"]')
               callbackCount = 0
               callback = ->
                 callbackCount += 1
-                u.promiseTimer(100)
+                return u.promiseTimer(100)
               up.observe($input, { delay: 1 }, callback)
               $input.val('new-value-1')
               $input.trigger(eventName)
-              u.setTimer 30, ->
+
+              next.after 30, ->
                 # Callback has been called and takes 100 ms to complete
                 expect(callbackCount).toEqual(1)
                 $input.val('new-value-2')
                 $input.trigger(eventName)
-                u.setTimer 30, ->
-                  # Second callback is triggerd, but waits for first callback to complete
-                  expect(callbackCount).toEqual(1)
-                  u.setTimer 100, ->
-                    expect(callbackCount).toEqual(2)
-                    done()
 
-            it 'does not run multiple callbacks if a long-running callback has been blocking multiple subsequent callbacks'
+              next.after 30, ->
+                # Second callback is triggerd, but waits for first callback to complete
+                expect(callbackCount).toEqual(1)
 
-            it "runs a callback in the same frame if the delay is 0", ->
+              next.after 50, ->
+                expect(callbackCount).toEqual(2)
+
+            it 'only runs the last callback when a previous long-running callback has been delaying multiple callbacks', asyncSpec (next) ->
               $input = affix('input[value="old-value"]')
-              callback = jasmine.createSpy('change callback')
-              up.observe($input, { delay: 0 }, callback)
-              $input.val('new-value')
-              $input.trigger(eventName)
-              expect(callback.calls.count()).toEqual(1)
 
-            it "runs multiple callbacks in the same frame if the delay is 0", ->
-              $input = affix('input[value="old-value"]')
-              callback = jasmine.createSpy('change callback')
-              up.observe($input, { delay: 0 }, callback)
-              $input.val('new-value')
+              callbackArgs = []
+              callback = (value, field) ->
+                callbackArgs.push(value)
+                return u.promiseTimer(100)
+
+              up.observe($input, { delay: 1 }, callback)
+              $input.val('new-value-1')
               $input.trigger(eventName)
-              $input.val('yet-another-value')
-              $input.trigger(eventName)
-              expect(callback.calls.count()).toEqual(2)
+
+              next.after 10, ->
+                # Callback has been called and takes 100 ms to complete
+                expect(callbackArgs).toEqual ['new-value-1']
+                $input.val('new-value-2')
+                $input.trigger(eventName)
+
+              next.after 10, ->
+                expect(callbackArgs).toEqual ['new-value-1']
+                $input.val('new-value-3')
+                $input.trigger(eventName)
+
+              next.after 100, ->
+                expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
 
         describe 'when the first argument is a checkbox', ->
 
-          it 'runs the callback when the checkbox changes its checked state', (done) ->
+          it 'runs the callback when the checkbox changes its checked state', asyncSpec (next) ->
             $form = affix('form')
-            $checkbox = $form.affix('input[type="checkbox"]')
+            $checkbox = $form.affix('input[type="checkbox"][value="checkbox-value"]')
             callback = jasmine.createSpy('change callback')
             up.observe($checkbox, callback)
             expect($checkbox.is(':checked')).toBe(false)
             Trigger.clickSequence($checkbox)
-            u.nextFrame ->
+
+            next =>
               expect($checkbox.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
               Trigger.clickSequence($checkbox)
-              u.nextFrame ->
-                expect($checkbox.is(':checked')).toBe(false)
-                expect(callback.calls.count()).toEqual(2)
-                done()
 
-          it 'runs the callback when the checkbox is toggled by clicking its label', (done) ->
+            next =>
+              expect($checkbox.is(':checked')).toBe(false)
+              expect(callback.calls.count()).toEqual(2)
+
+          it 'runs the callback when the checkbox is toggled by clicking its label', asyncSpec (next) ->
             $form = affix('form')
-            $checkbox = $form.affix('input#tick[type="checkbox"]')
+            $checkbox = $form.affix('input#tick[type="checkbox"][value="checkbox-value"]')
             $label = $form.affix('label[for="tick"]').text('tick label')
             callback = jasmine.createSpy('change callback')
             up.observe($checkbox, callback)
             expect($checkbox.is(':checked')).toBe(false)
             Trigger.clickSequence($label)
-            u.nextFrame ->
+
+            next =>
               expect($checkbox.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
               Trigger.clickSequence($label)
-              u.nextFrame ->
-                expect($checkbox.is(':checked')).toBe(false)
-                expect(callback.calls.count()).toEqual(2)
-                done()
+
+            next =>
+              expect($checkbox.is(':checked')).toBe(false)
+              expect(callback.calls.count()).toEqual(2)
 
         describe 'when the first argument is a radio button group', ->
 
-          it 'runs the callback when the group changes its selection', (done) ->
+          it 'runs the callback when the group changes its selection', asyncSpec (next) ->
             $form = affix('form')
             $radio1 = $form.affix('input[type="radio"][name="group"][value="1"]')
             $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
@@ -157,16 +169,17 @@ describe 'up.form', ->
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(false)
             Trigger.clickSequence($radio1)
-            u.nextFrame ->
+
+            next =>
               expect($radio1.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
               Trigger.clickSequence($radio2)
-              u.nextFrame ->
-                expect($radio1.is(':checked')).toBe(false)
-                expect(callback.calls.count()).toEqual(2)
-                done()
 
-          it "runs the callbacks when a radio button is selected or deselected by clicking a label in the group", (done) ->
+            next =>
+              expect($radio1.is(':checked')).toBe(false)
+              expect(callback.calls.count()).toEqual(2)
+
+          it "runs the callbacks when a radio button is selected or deselected by clicking a label in the group", asyncSpec (next) ->
             $form = affix('form')
             $radio1 = $form.affix('input#radio1[type="radio"][name="group"][value="1"]')
             $radio1Label = $form.affix('label[for="radio1"]').text('label 1')
@@ -177,16 +190,17 @@ describe 'up.form', ->
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(false)
             Trigger.clickSequence($radio1Label)
-            u.nextFrame ->
+
+            next =>
               expect($radio1.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
               Trigger.clickSequence($radio2Label)
-              u.nextFrame ->
-                expect($radio1.is(':checked')).toBe(false)
-                expect(callback.calls.count()).toEqual(2)
-                done()
 
-          it "takes the group's initial selected value into account", (done) ->
+            next =>
+              expect($radio1.is(':checked')).toBe(false)
+              expect(callback.calls.count()).toEqual(2)
+
+          it "takes the group's initial selected value into account", asyncSpec (next) ->
             $form = affix('form')
             $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
             $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
@@ -196,18 +210,19 @@ describe 'up.form', ->
             expect($radio1.is(':checked')).toBe(true)
             expect($radio2.is(':checked')).toBe(false)
             Trigger.clickSequence($radio1)
-            u.nextFrame ->
+
+            next =>
               # Since the radio button was already checked, the click doesn't do anything
               expect($radio1.is(':checked')).toBe(true)
               expect($radio2.is(':checked')).toBe(false)
               # Since the radio button was already checked, clicking it again won't trigger the callback
               expect(callback.calls.count()).toEqual(0)
               Trigger.clickSequence($radio2)
-              u.nextFrame ->
-                expect($radio1.is(':checked')).toBe(false)
-                expect($radio2.is(':checked')).toBe(true)
-                expect(callback.calls.count()).toEqual(1)
-                done()
+
+            next =>
+              expect($radio1.is(':checked')).toBe(false)
+              expect($radio2.is(':checked')).toBe(true)
+              expect(callback.calls.count()).toEqual(1)
 
       describe 'when the first argument is a form', ->
 
@@ -215,27 +230,25 @@ describe 'up.form', ->
 
           describe "when any of the form's inputs receives a #{eventName} event", ->
 
-            it "runs the callback if the value changed", (done) ->
+            it "runs the callback if the value changed", asyncSpec (next) ->
               $form = affix('form')
               $input = $form.affix('input[value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
               $input.val('new-value')
               u.times 2, -> $input.trigger(eventName)
-              u.nextFrame ->
+              next =>
                 expect(callback).toHaveBeenCalledWith('new-value', $input)
                 expect(callback.calls.count()).toEqual(1)
-                done()
 
-            it "does not run the callback if the value didn't change", (done) ->
+            it "does not run the callback if the value didn't change", asyncSpec (next) ->
               $form = affix('form')
               $input = $form.affix('input[value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
               $input.trigger(eventName)
-              u.nextFrame ->
+              next =>
                 expect(callback).not.toHaveBeenCalled()
-                done()
 
   #        it 'runs the callback only once when a radio button group changes its selection', ->
   #          $form = affix('form')
@@ -252,104 +265,136 @@ describe 'up.form', ->
       describeCapability 'canPushState', ->
 
         beforeEach ->
-          @$form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
+          up.history.config.enabled = true
+          @$form = affix('form[action="/form-target"][method="put"][up-target=".response"]')
           @$form.append('<input name="field1" value="value1">')
           @$form.append('<input name="field2" value="value2">')
           affix('.response').text('old-text')
-          @promise = up.submit(@$form)
-          @request = @lastRequest()
 
-        it 'submits the given form and replaces the target with the response', ->
-          expect(@request.url).toMatch /\/path\/to$/
-          expect(@request).toHaveRequestMethod('PUT')
-          expect(@request.data()['field1']).toEqual(['value1'])
-          expect(@request.data()['field2']).toEqual(['value2'])
-          expect(@request.requestHeaders['X-Up-Target']).toEqual('.response')
-
-          @respondWith """
-            text-before
-
-            <div class="response">
-              new-text
-            </div>
-
-            text-after
-            """
-
-        it "places the response into the form and doesn't update the browser URL if the submission returns a 5xx status code", ->
+        it 'submits the given form and replaces the target with the response', asyncSpec (next) ->
           up.submit(@$form)
-          @respondWith
-            status: 500
-            contentType: 'text/html'
-            responseText:
-              """
-              text-before
 
-              <form>
-                error-messages
-              </form>
+          next =>
+            expect(@lastRequest().url).toMatchUrl('/form-target')
+            expect(@lastRequest()).toHaveRequestMethod('PUT')
+            expect(@lastRequest().data()['field1']).toEqual(['value1'])
+            expect(@lastRequest().data()['field2']).toEqual(['value2'])
+            expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.response')
 
-              text-after
-              """
-          expect(up.browser.url()).toEqual(@hrefBeforeExample)
-          expect($('.response')).toHaveText('old-text')
-          expect($('form')).toHaveText('error-messages')
-          expect($('body')).not.toHaveText('text-before')
-          expect($('body')).not.toHaveText('text-after')
+            @respondWith
+              responseHeaders:
+                'X-Up-Location': '/redirect-target'
+                'X-Up-Method': 'GET'
+              responseText: """
+                <div class='before'>
+                  new-before
+                </div>
 
-        it 'respects X-Up-Method and X-Up-Location response headers so the server can show that it redirected to a GET URL', ->
+                <div class="response">
+                  new-text
+                </div>
+
+                <div class='after'>
+                  new-after
+                </div>
+                """
+
+          next =>
+            expect(up.browser.url()).toMatchUrl('/redirect-target')
+            expect('.response').toHaveText('new-text')
+            # See that containers outside the form have not changed
+            expect('.before').not.toHaveText('old-before')
+            expect('.after').not.toHaveText('old-after')
+
+        it "places the response into the form and doesn't update the browser URL if the submission returns a 5xx status code", asyncSpec (next) ->
           up.submit(@$form)
-          @respondWith
-            status: 200
-            contentType: 'text/html'
-            responseHeaders:
-              'X-Up-Location': '/other-path'
-              'X-Up-Method': 'GET'
-            responseText:
-              """
-              <div class="response">
-                new-text
-              </div>
-              """
 
-          expect(up.browser.url()).toEqualUrl('/other-path')
+          next =>
+            @respondWith
+              status: 500
+              contentType: 'text/html'
+              responseText:
+                """
+                <div class='before'>
+                  new-before
+                </div>
+
+                <form>
+                  error-messages
+                </form>
+
+                <div class='after'>
+                  new-after
+                </div>
+                """
+
+          next =>
+            expect(up.browser.url()).toEqual(@hrefBeforeExample)
+            expect('.response').toHaveText('old-text')
+            expect('form').toHaveText('error-messages')
+            # See that containers outside the form have not changed
+            expect('.before').not.toHaveText('old-before')
+            expect('.after').not.toHaveText('old-after')
+
+        it 'respects X-Up-Method and X-Up-Location response headers so the server can show that it redirected to a GET URL', asyncSpec (next) ->
+          up.submit(@$form)
+
+          next =>
+            @respondWith
+              status: 200
+              contentType: 'text/html'
+              responseHeaders:
+                'X-Up-Location': '/other-path'
+                'X-Up-Method': 'GET'
+              responseText:
+                """
+                <div class="response">
+                  new-text
+                </div>
+                """
+
+          next =>
+            expect(up.browser.url()).toMatchUrl('/other-path')
 
         describe 'with { history } option', ->
 
-          it 'uses the given URL as the new browser location if the request succeeded', ->
+          it 'uses the given URL as the new browser location if the request succeeded', asyncSpec (next) ->
             up.submit(@$form, history: '/given-path')
-            @respondWith('<div class="response">new-text</div>')
-            expect(up.browser.url()).toEqualUrl('/given-path')
+            next => @respondWith('<div class="response">new-text</div>')
+            next => expect(up.browser.url()).toMatchUrl('/given-path')
 
-          it 'keeps the current browser location if the request failed', ->
+          it 'keeps the current browser location if the request failed', asyncSpec (next) ->
             up.submit(@$form, history: '/given-path', failTarget: '.response')
-            @respondWith('<div class="response">new-text</div>', status: 500)
-            expect(up.browser.url()).toEqual(@hrefBeforeExample)
+            next => @respondWith('<div class="response">new-text</div>', status: 500)
+            next => expect(up.browser.url()).toEqual(@hrefBeforeExample)
 
-          it 'keeps the current browser location if the option is set to false', ->
+          it 'keeps the current browser location if the option is set to false', asyncSpec (next) ->
             up.submit(@$form, history: false)
-            @respondWith('<div class="response">new-text</div>')
-            expect(up.browser.url()).toEqual(@hrefBeforeExample)
+            next => @respondWith('<div class="response">new-text</div>')
+            next =>expect(up.browser.url()).toEqual(@hrefBeforeExample)
 
         describe 'in a form with file inputs', ->
 
           beforeEach ->
+            @$form.affix('input[name="text-field"][type="text"]').val("value")
             @$form.affix('input[name="file-field"][type="file"]')
 
-          it 'transfers the form fields via FormData', ->
+          it 'transfers the form fields via FormData', asyncSpec (next) ->
             up.submit(@$form)
-            data = @lastRequest().data()
-            expect(u.isFormData(data)).toBe(true)
+            next =>
+              data = @lastRequest().data()
+              expect(u.isFormData(data)).toBe(true)
 
       describeFallback 'canPushState', ->
 
-        it 'falls back to a vanilla form submission', ->
+        it 'falls back to a vanilla form submission', asyncSpec (next) ->
           $form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
           form = $form.get(0)
           spyOn(form, 'submit')
 
           up.submit($form)
-          expect(form.submit).toHaveBeenCalled()
+
+          next => expect(form.submit).toHaveBeenCalled()
 
   describe 'unobtrusive behavior', ->
 
@@ -359,101 +404,98 @@ describe 'up.form', ->
 
       describe 'submit buttons', ->
 
-        it 'includes the clicked submit button in the params', (done) ->
+        it 'includes the clicked submit button in the params', asyncSpec (next) ->
           $form = affix('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton = $form.affix('input[type="submit"][name="submit-button"][value="submit-button-value"]')
           up.hello($form)
           Trigger.clickSequence($submitButton)
-          u.nextFrame =>
+
+          next =>
             params = @lastRequest().data()
             expect(params['text-field']).toEqual(['text-field-value'])
             expect(params['submit-button']).toEqual(['submit-button-value'])
-            done()
 
-        it 'excludes an unused submit button in the params', (done) ->
+        it 'excludes an unused submit button in the params', asyncSpec (next) ->
           $form = affix('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
           $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
           up.hello($form)
           Trigger.clickSequence($submitButton2)
-          u.nextFrame =>
+
+          next =>
             params = @lastRequest().data()
             expect(params['text-field']).toEqual(['text-field-value'])
             expect(params['submit-button-1']).toBeUndefined()
             expect(params['submit-button-2']).toEqual(['submit-button-2-value'])
-            done()
 
-        it 'includes the first submit button if the form was submitted with enter', (done) ->
+        it 'includes the first submit button if the form was submitted with enter', asyncSpec (next) ->
           $form = affix('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
           $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
           up.hello($form)
           $form.submit() # sorry
-          u.nextFrame =>
+
+          next =>
             params = @lastRequest().data()
             expect(params['text-field']).toEqual(['text-field-value'])
             expect(params['submit-button-1']).toEqual(['submit-button-1-value'])
             expect(params['submit-button-2']).toBeUndefined()
-            done()
 
-        it 'does not explode if the form has no submit buttons', (done) ->
+        it 'does not explode if the form has no submit buttons', asyncSpec (next) ->
           $form = affix('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           up.hello($form)
           $form.submit() # sorry
-          u.nextFrame =>
+
+          next =>
             params = @lastRequest().data()
             keys = Object.keys(params)
             expect(keys).toEqual(['text-field'])
-            done()
 
     describe 'input[up-autosubmit]', ->
 
-      it 'submits the form when a change is observed in the given form field', (done) ->
+      it 'submits the form when a change is observed in the given form field', asyncSpec (next) ->
         $form = affix('form')
         $field = $form.affix('input[up-autosubmit][val="old-value"]')
         up.hello($field)
         submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
         $field.val('new-value')
         $field.trigger('change')
-        u.nextFrame ->
-          expect(submitSpy).toHaveBeenCalled()
-          done()
+        next => expect(submitSpy).toHaveBeenCalled()
 
-      it 'marks the field with an .up-active class while the form is submitting', (done) ->
+      it 'marks the field with an .up-active class while the form is submitting', asyncSpec (next) ->
         $form = affix('form')
         $field = $form.affix('input[up-autosubmit][val="old-value"]')
         up.hello($field)
-        submission = $.Deferred()
+        submission = u.newDeferred()
         submitSpy = up.form.knife.mock('submit').and.returnValue(submission)
         $field.val('new-value')
         $field.trigger('change')
-        u.nextFrame ->
+        next =>
           expect(submitSpy).toHaveBeenCalled()
           expect($field).toHaveClass('up-active')
           submission.resolve()
+
+        next =>
           expect($field).not.toHaveClass('up-active')
-          done()
 
     describe 'form[up-autosubmit]', ->
 
-      it 'submits the form when a change is observed in any of its fields', (done) ->
+      it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
         $form = affix('form[up-autosubmit]')
         $field = $form.affix('input[val="old-value"]')
         up.hello($form)
         submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
         $field.val('new-value')
         $field.trigger('change')
-        u.nextFrame ->
-          expect(submitSpy).toHaveBeenCalled()
-          done()
+        next => expect(submitSpy).toHaveBeenCalled()
 
       describe 'with [up-delay] modifier', ->
 
-        it 'debounces the form submission', (done) ->
+        it 'debounces the form submission', asyncSpec (next) ->
           $form = affix('form[up-autosubmit][up-delay="50"]')
           $field = $form.affix('input[val="old-value"]')
           up.hello($form)
@@ -463,49 +505,47 @@ describe 'up.form', ->
           $field.val('new-value-2')
           $field.trigger('change')
 
-          u.nextFrame ->
+          next =>
             expect(submitSpy.calls.count()).toBe(0)
-            u.setTimer 80, ->
-              expect(submitSpy.calls.count()).toBe(1)
-              done()
+
+          next.after 80, =>
+            expect(submitSpy.calls.count()).toBe(1)
 
     describe 'input[up-observe]', ->
 
       afterEach ->
         window.observeCallbackSpy = undefined
 
-      it 'runs the JavaScript code in the attribute value when a change is observed in the field', (done) ->
+      it 'runs the JavaScript code in the attribute value when a change is observed in the field', asyncSpec (next) ->
         $form = affix('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
         $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
         up.hello($form)
         $field.val('new-value')
         $field.trigger('change')
-        u.nextFrame ->
+
+        next =>
           expect(window.observeCallbackSpy).toHaveBeenCalledWith('new-value', $field.get(0))
-          done()
 
       describe 'with [up-delay] modifier', ->
 
-        it 'debounces the callback', (done) ->
+        it 'debounces the callback', asyncSpec (next) ->
           $form = affix('form')
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
           $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="50"]')
           up.hello($form)
           $field.val('new-value')
           $field.trigger('change')
-          u.nextFrame ->
-            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
-            u.setTimer 80, ->
-              expect(window.observeCallbackSpy).toHaveBeenCalled()
-              done()
+
+          next => expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+          next.after 80, => expect(window.observeCallbackSpy).toHaveBeenCalled()
 
     describe 'form[up-observe]', ->
 
       afterEach ->
         window.observeCallbackSpy = undefined
 
-      it 'runs the JavaScript code in the attribute value when a change is observed in any contained field', (done) ->
+      it 'runs the JavaScript code in the attribute value when a change is observed in any contained field', asyncSpec (next) ->
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
         $form = affix('form[up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
         $field1 = $form.affix('input[val="field1-old-value"]')
@@ -513,21 +553,21 @@ describe 'up.form', ->
         up.hello($form)
         $field1.val('field1-new-value')
         $field1.trigger('change')
-        u.nextFrame ->
+
+        next =>
           expect(window.observeCallbackSpy.calls.allArgs()).toEqual [['field1-new-value', $field1.get(0)]]
 
           $field2.val('field2-new-value')
           $field2.trigger('change')
 
-          u.nextFrame ->
-            expect(window.observeCallbackSpy.calls.allArgs()).toEqual [['field1-new-value', $field1.get(0)], ['field2-new-value', $field2.get(0)]]
-            done()
+        next =>
+          expect(window.observeCallbackSpy.calls.allArgs()).toEqual [['field1-new-value', $field1.get(0)], ['field2-new-value', $field2.get(0)]]
 
     describe 'input[up-validate]', ->
 
       describe 'when a selector is given', ->
 
-        it "submits the input's form with an 'X-Up-Validate' header and replaces the selector with the response", ->
+        it "submits the input's form with an 'X-Up-Validate' header and replaces the selector with the response", asyncSpec (next) ->
 
           $form = affix('form[action="/path/to"]')
           $group = $("""
@@ -537,24 +577,26 @@ describe 'up.form', ->
           """).appendTo($form)
           $group.find('input').trigger('change')
 
-          request = @lastRequest()
-          expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
-          expect(request.requestHeaders['X-Up-Target']).toEqual(".field-group:has([name='user'])")
+          next =>
+            request = @lastRequest()
+            expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
+            expect(request.requestHeaders['X-Up-Target']).toEqual(".field-group:has([name='user'])")
 
-          @respondWith """
-            <div class="field-group has-error">
-              <div class='error'>Username has already been taken</div>
-              <input name="user" value="judy" up-validate=".field-group:has(&)">
-            </div>
-          """
+            @respondWith """
+              <div class="field-group has-error">
+                <div class='error'>Username has already been taken</div>
+                <input name="user" value="judy" up-validate=".field-group:has(&)">
+              </div>
+            """
 
-          $group = $('.field-group')
-          expect($group.length).toBe(1)
-          expect($group).toHaveClass('has-error')
-          expect($group).toHaveText('Username has already been taken')
+          next =>
+            $group = $('.field-group')
+            expect($group.length).toBe(1)
+            expect($group).toHaveClass('has-error')
+            expect($group).toHaveText('Username has already been taken')
 
-        it 'does not reveal the updated fragment (bugfix)', ->
-          revealSpy = up.layout.knife.mock('reveal').and.returnValue(u.resolvedDeferred())
+        it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
+          revealSpy = up.layout.knife.mock('reveal').and.returnValue(Promise.resolve())
 
           $form = affix('form[action="/path/to"]')
           $group = $("""
@@ -564,21 +606,21 @@ describe 'up.form', ->
           """).appendTo($form)
           $group.find('input').trigger('change')
 
-          request = @lastRequest()
+          next =>
+            @respondWith """
+              <div class="field-group has-error">
+                <div class='error'>Username has already been taken</div>
+                <input name="user" value="judy" up-validate=".field-group:has(&)">
+              </div>
+            """
 
-          @respondWith """
-            <div class="field-group has-error">
-              <div class='error'>Username has already been taken</div>
-              <input name="user" value="judy" up-validate=".field-group:has(&)">
-            </div>
-          """
-
-          expect(revealSpy).not.toHaveBeenCalled()
+          next =>
+            expect(revealSpy).not.toHaveBeenCalled()
 
 
       describe 'when no selector is given', ->
 
-        it 'automatically finds a form group around the input field and only updates that', ->
+        it 'automatically finds a form group around the input field and only updates that', asyncSpec (next) ->
 
           @appendFixture """
             <form action="/users" id="registration">
@@ -596,25 +638,27 @@ describe 'up.form', ->
 
           $('#registration input[name=password]').trigger('change')
 
-          @respondWith """
-            <form action="/users" id="registration">
+          next =>
+            @respondWith """
+              <form action="/users" id="registration">
 
-              <label>
-                Validation message
-                <input type="text" name="email" up-validate />
-              </label>
+                <label>
+                  Validation message
+                  <input type="text" name="email" up-validate />
+                </label>
 
-              <label>
-                Validation message
-                <input type="password" name="password" up-validate />
-              </label>
+                <label>
+                  Validation message
+                  <input type="password" name="password" up-validate />
+                </label>
 
-            </form>
-          """
+              </form>
+            """
 
-          $labels = $('#registration label')
-          expect($labels[0]).not.toHaveText('Validation message')
-          expect($labels[1]).toHaveText('Validation message')
+          next =>
+            $labels = $('#registration label')
+            expect($labels[0]).not.toHaveText('Validation message')
+            expect($labels[1]).toHaveText('Validation message')
 
     describe '[up-switch]', ->
 
@@ -627,80 +671,120 @@ describe 'up.form', ->
           @$barOption = @$select.affix('option[value="bar"]').text('Bar')
           @$bazOption = @$select.affix('option[value="baz"]').text('Baz')
 
-        it "shows the target element iff its up-show-for attribute contains the select value", ->
+        it "shows the target element iff its up-show-for attribute contains the select value", asyncSpec (next) ->
           $target = affix('.target[up-show-for="something bar other"]')
           up.hello(@$select)
-          expect($target).toBeHidden()
-          @$select.val('bar').change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-hide-for attribute doesn't contain the select value", ->
+          next =>
+            expect($target).toBeHidden()
+            @$select.val('bar').change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-hide-for attribute doesn't contain the select value", asyncSpec (next) ->
           $target = affix('.target[up-hide-for="something bar other"]')
           up.hello(@$select)
-          expect($target).toBeVisible()
-          @$select.val('bar').change()
-          expect($target).toBeHidden()
 
-        it "shows the target element iff it has neither up-show-for nor up-hide-for and the select value is present", ->
+          next =>
+            expect($target).toBeVisible()
+            @$select.val('bar').change()
+
+          next =>
+            expect($target).toBeHidden()
+
+        it "shows the target element iff it has neither up-show-for nor up-hide-for and the select value is present", asyncSpec (next) ->
           $target = affix('.target')
           up.hello(@$select)
-          expect($target).toBeHidden()
-          @$select.val('bar').change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-show-for attribute contains a value ':present' and the select value is present", ->
+          next =>
+            expect($target).toBeHidden()
+            @$select.val('bar').change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':present' and the select value is present", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":present"]')
           up.hello(@$select)
-          expect($target).toBeHidden()
-          @$select.val('bar').change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-show-for attribute contains a value ':blank' and the select value is blank", ->
+          next =>
+            expect($target).toBeHidden()
+            @$select.val('bar').change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':blank' and the select value is blank", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":blank"]')
           up.hello(@$select)
-          expect($target).toBeVisible()
-          @$select.val('bar').change()
-          expect($target).toBeHidden()
+
+          next =>
+            expect($target).toBeVisible()
+            @$select.val('bar').change()
+
+          next =>
+            expect($target).toBeHidden()
 
       describe 'on a checkbox', ->
 
         beforeEach ->
           @$checkbox = affix('input[type="checkbox"][value="1"][up-switch=".target"]')
 
-        it "shows the target element iff its up-show-for attribute is :checked and the checkbox is checked", ->
+        it "shows the target element iff its up-show-for attribute is :checked and the checkbox is checked", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":checked"]')
           up.hello(@$checkbox)
-          expect($target).toBeHidden()
-          @$checkbox.prop('checked', true).change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-show-for attribute is :unchecked and the checkbox is unchecked", ->
+          next =>
+            expect($target).toBeHidden()
+            @$checkbox.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute is :unchecked and the checkbox is unchecked", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":unchecked"]')
           up.hello(@$checkbox)
-          expect($target).toBeVisible()
-          @$checkbox.prop('checked', true).change()
-          expect($target).toBeHidden()
 
-        it "shows the target element iff its up-hide-for attribute is :checked and the checkbox is unchecked", ->
+          next =>
+            expect($target).toBeVisible()
+            @$checkbox.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeHidden()
+
+        it "shows the target element iff its up-hide-for attribute is :checked and the checkbox is unchecked", asyncSpec (next) ->
           $target = affix('.target[up-hide-for=":checked"]')
           up.hello(@$checkbox)
-          expect($target).toBeVisible()
-          @$checkbox.prop('checked', true).change()
-          expect($target).toBeHidden()
 
-        it "shows the target element iff its up-hide-for attribute is :unchecked and the checkbox is checked", ->
+          next =>
+            expect($target).toBeVisible()
+            @$checkbox.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeHidden()
+
+        it "shows the target element iff its up-hide-for attribute is :unchecked and the checkbox is checked", asyncSpec (next) ->
           $target = affix('.target[up-hide-for=":unchecked"]')
           up.hello(@$checkbox)
-          expect($target).toBeHidden()
-          @$checkbox.prop('checked', true).change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff it has neither up-show-for nor up-hide-for and the checkbox is checked", ->
+          next =>
+            expect($target).toBeHidden()
+            @$checkbox.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff it has neither up-show-for nor up-hide-for and the checkbox is checked", asyncSpec (next) ->
           $target = affix('.target')
           up.hello(@$checkbox)
-          expect($target).toBeHidden()
-          @$checkbox.prop('checked', true).change()
-          expect($target).toBeVisible()
+
+          next =>
+            expect($target).toBeHidden()
+            @$checkbox.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeVisible()
 
       describe 'on a group of radio buttons', ->
 
@@ -711,119 +795,174 @@ describe 'up.form', ->
           @$barButton   = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('bar')
           @$bazkButton  = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('baz')
 
-        it "shows the target element iff its up-show-for attribute contains the selected button value", ->
+        it "shows the target element iff its up-show-for attribute contains the selected button value", asyncSpec (next) ->
           $target = affix('.target[up-show-for="something bar other"]')
           up.hello(@$buttons)
-          expect($target).toBeHidden()
-          @$barButton.prop('checked', true).change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-hide-for attribute doesn't contain the selected button value", ->
+          next =>
+            expect($target).toBeHidden()
+            @$barButton.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-hide-for attribute doesn't contain the selected button value", asyncSpec (next) ->
           $target = affix('.target[up-hide-for="something bar other"]')
           up.hello(@$buttons)
-          expect($target).toBeVisible()
-          @$barButton.prop('checked', true).change()
-          expect($target).toBeHidden()
 
-        it "shows the target element iff it has neither up-show-for nor up-hide-for and the selected button value is present", ->
+          next =>
+            expect($target).toBeVisible()
+            @$barButton.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeHidden()
+
+        it "shows the target element iff it has neither up-show-for nor up-hide-for and the selected button value is present", asyncSpec (next) ->
           $target = affix('.target')
           up.hello(@$buttons)
-          expect($target).toBeHidden()
-          @$barButton.prop('checked', true).change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-show-for attribute contains a value ':present' and the selected button value is present", ->
+          next =>
+            expect($target).toBeHidden()
+            @$barButton.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':present' and the selected button value is present", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":present"]')
           up.hello(@$buttons)
-          expect($target).toBeHidden()
-          @$blankButton.prop('checked', true).change()
-          expect($target).toBeHidden()
-          @$barButton.prop('checked', true).change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-show-for attribute contains a value ':blank' and the selected button value is blank", ->
+          next =>
+            expect($target).toBeHidden()
+            @$blankButton.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeHidden()
+            @$barButton.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':blank' and the selected button value is blank", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":blank"]')
           up.hello(@$buttons)
-          expect($target).toBeVisible()
-          @$blankButton.prop('checked', true).change()
-          expect($target).toBeVisible()
-          @$barButton.prop('checked', true).change()
-          expect($target).toBeHidden()
 
-        it "shows the target element iff its up-show-for attribute contains a value ':checked' and any button is checked", ->
+          next =>
+            expect($target).toBeVisible()
+            @$blankButton.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeVisible()
+            @$barButton.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeHidden()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':checked' and any button is checked", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":checked"]')
           up.hello(@$buttons)
-          expect($target).toBeHidden()
-          @$blankButton.prop('checked', true).change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-show-for attribute contains a value ':unchecked' and no button is checked", ->
+          next =>
+            expect($target).toBeHidden()
+            @$blankButton.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':unchecked' and no button is checked", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":unchecked"]')
           up.hello(@$buttons)
-          expect($target).toBeVisible()
-          @$blankButton.prop('checked', true).change()
-          expect($target).toBeHidden()
+
+          next =>
+            expect($target).toBeVisible()
+            @$blankButton.prop('checked', true).change()
+
+          next =>
+            expect($target).toBeHidden()
 
       describe 'on a text input', ->
 
         beforeEach ->
           @$textInput = affix('input[type="text"][up-switch=".target"]')
 
-        it "shows the target element iff its up-show-for attribute contains the input value", ->
+        it "shows the target element iff its up-show-for attribute contains the input value", asyncSpec (next) ->
           $target = affix('.target[up-show-for="something bar other"]')
           up.hello(@$textInput)
-          expect($target).toBeHidden()
-          @$textInput.val('bar').change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-hide-for attribute doesn't contain the input value", ->
+          next =>
+            expect($target).toBeHidden()
+            @$textInput.val('bar').change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-hide-for attribute doesn't contain the input value", asyncSpec (next) ->
           $target = affix('.target[up-hide-for="something bar other"]')
           up.hello(@$textInput)
-          expect($target).toBeVisible()
-          @$textInput.val('bar').change()
-          expect($target).toBeHidden()
 
-        it "shows the target element iff it has neither up-show-for nor up-hide-for and the input value is present", ->
+          next =>
+            expect($target).toBeVisible()
+            @$textInput.val('bar').change()
+
+          next =>
+            expect($target).toBeHidden()
+
+        it "shows the target element iff it has neither up-show-for nor up-hide-for and the input value is present", asyncSpec (next) ->
           $target = affix('.target')
           up.hello(@$textInput)
-          expect($target).toBeHidden()
-          @$textInput.val('bar').change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-show-for attribute contains a value ':present' and the input value is present", ->
+          next =>
+            expect($target).toBeHidden()
+            @$textInput.val('bar').change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':present' and the input value is present", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":present"]')
           up.hello(@$textInput)
-          expect($target).toBeHidden()
-          @$textInput.val('bar').change()
-          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-show-for attribute contains a value ':blank' and the input value is blank", ->
+          next =>
+            expect($target).toBeHidden()
+            @$textInput.val('bar').change()
+
+          next =>
+            expect($target).toBeVisible()
+
+        it "shows the target element iff its up-show-for attribute contains a value ':blank' and the input value is blank", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":blank"]')
           up.hello(@$textInput)
-          expect($target).toBeVisible()
-          @$textInput.val('bar').change()
-          expect($target).toBeHidden()
+
+          next =>
+            expect($target).toBeVisible()
+            @$textInput.val('bar').change()
+
+          next =>
+            expect($target).toBeHidden()
 
       describe 'when an [up-show-for] element is dynamically inserted later', ->
 
-        it "shows the element iff it matches the [up-switch] control's value", ->
+        it "shows the element iff it matches the [up-switch] control's value", asyncSpec (next) ->
           $select = affix('select[up-switch=".target"]')
           $select.affix('option[value="foo"]').text('Foo')
           $select.affix('option[value="bar"]').text('Bar')
           $select.val('foo')
           up.hello($select)
 
-          # New target enters the DOM after [up-switch] has been compiled
-          $target = affix('.target[up-show-for="bar"]')
-          up.hello($target)
+          next =>
+            # New target enters the DOM after [up-switch] has been compiled
+            @$target = affix('.target[up-show-for="bar"]')
+            up.hello(@$target)
 
-          expect($target).toBeHidden()
+          next =>
+            expect(@$target).toBeHidden()
 
-          # Check that the new element will notify subsequent changes
-          $select.val('bar').change()
-          expect($target).toBeVisible()
+          next =>
+            # Check that the new element will notify subsequent changes
+            $select.val('bar').change()
+            expect(@$target).toBeVisible()
 
-        it "doesn't re-switch targets that were part of the original compile run", ->
+        it "doesn't re-switch targets that were part of the original compile run", asyncSpec (next) ->
           $container = affix('.container')
 
           $select = $container.affix('select[up-switch=".target"]')
@@ -836,10 +975,12 @@ describe 'up.form', ->
 
           up.hello($container)
 
-          # New target enters the DOM after [up-switch] has been compiled
-          $lateTarget = $container.affix('.target.late[up-show-for="bar"]')
-          up.hello($lateTarget)
+          next =>
+            # New target enters the DOM after [up-switch] has been compiled
+            @$lateTarget = $container.affix('.target.late[up-show-for="bar"]')
+            up.hello(@$lateTarget)
 
-          expect(switchTargetSpy.calls.count()).toBe(2)
-          expect(switchTargetSpy.calls.argsFor(0)[0]).toEqual($existingTarget)
-          expect(switchTargetSpy.calls.argsFor(1)[0]).toEqual($lateTarget)
+          next =>
+            expect(switchTargetSpy.calls.count()).toBe(2)
+            expect(switchTargetSpy.calls.argsFor(0)[0]).toEqual($existingTarget)
+            expect(switchTargetSpy.calls.argsFor(1)[0]).toEqual(@$lateTarget)

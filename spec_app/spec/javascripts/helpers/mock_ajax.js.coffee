@@ -1,5 +1,8 @@
 beforeEach ->
   jasmine.Ajax.install()
 
-afterEach ->
-  jasmine.Ajax.uninstall()
+afterEach (done) ->
+  up.util.nextFrame ->
+    jasmine.Ajax.uninstall()
+    done()
+

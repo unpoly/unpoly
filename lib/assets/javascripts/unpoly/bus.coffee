@@ -55,6 +55,9 @@ up.bus = (($) ->
   liveUpDescriptions = {}
   nextUpDescriptionNumber = 0
 
+  # A hash mapping oldEventName => newEventName
+  renamedEvents = {}
+
   ###*
   Convert an Unpoly style listener (second argument is the event target
   as a jQuery collection) to a vanilla jQuery listener
@@ -76,6 +79,13 @@ up.bus = (($) ->
   ###
   upDescriptionToJqueryDescription = (upDescription, isNew) ->
     jqueryDescription = u.copy(upDescription)
+
+    # Prefer to rename events in the copied jQuery description instead of
+    # changing the original up description.
+    fixRenamedEvents(jqueryDescription)
+
+    # We remove the listener function from the end of the description.
+    # We will re-push it to the description at the end.
     upListener = jqueryDescription.pop()
     jqueryListener = undefined
     if isNew
@@ -84,10 +94,19 @@ up.bus = (($) ->
       upListener._descriptionNumber = ++nextUpDescriptionNumber
     else
       jqueryListener = upListener._asJqueryListener
-      jqueryListener or up.fail('up.off: The event listener %o was never registered through up.on')
+      jqueryListener or up.fail('up.off(): The callback %o was never registered through up.on()', upListener)
     jqueryDescription.push(jqueryListener)
     jqueryDescription
 
+  fixRenamedEvents = (description) ->
+    events = description[0].split(/\s+/)
+    events = u.map events, (event) ->
+      if newEvent = renamedEvents[event]
+        up.log.warn("#{event} has been renamed to #{newEvent}")
+        newEvent
+      else
+        event
+    description[0] = events.join(' ')
 
   ###*
   Listens to an event on `document`.
@@ -165,9 +184,9 @@ up.bus = (($) ->
       });
 
   @function up.on
-  @param {String} events
+  @param {string} events
     A space-separated list of event names to bind.
-  @param {String} [selector]
+  @param {string} [selector]
     The selector of an element on which the event must be triggered.
     Omit the selector to listen to all events with that name, regardless
     of the event target.
@@ -251,7 +270,7 @@ up.bus = (($) ->
       # Prints "bar" to the console
 
   @function up.emit
-  @param {String} eventName
+  @param {string} eventName
     The name of the event.
   @param {Object} [eventProps={}]
     A list of properties to become part of the event object
@@ -260,7 +279,7 @@ up.bus = (($) ->
     or `stopPropagation()`.
   @param {jQuery} [eventProps.$element=$(document)]
     The element on which the event is triggered.
-  @param {String|Array} [eventProps.message]
+  @param {string|Array} [eventProps.message]
     A message to print to the console when the event is emitted.
     If omitted, a default message is printed.
     Set this to `false` to prevent any console output.
@@ -303,10 +322,10 @@ up.bus = (($) ->
   has prevented the default action.
 
   @function up.bus.nobodyPrevents
-  @param {String} eventName
+  @param {string} eventName
   @param {Object} eventProps
-  @param {String|Array} [eventProps.message]
-  @return {Boolean}
+  @param {string|Array} [eventProps.message]
+  @return {boolean}
     whether no listener has prevented the default action
   @experimental
   ###
@@ -320,23 +339,21 @@ up.bus = (($) ->
 
   ###*
   [Emits](/up.emit) the given event and returns a promise
-  that will be resolved if no listener has prevented the default action.
+  that will be fulfilled if no listener has prevented the default action.
 
   If any listener prevented the default listener
   the returned promise will never be resolved.
 
   @function up.bus.whenEmitted
-  @param {String} eventName
+  @param {string} eventName
   @param {Object} eventProps
-  @param {String|Array} [eventProps.message]
+  @param {string|Array} [eventProps.message]
   @return {Promise}
   @internal
   ###
   whenEmitted = (args...) ->
-    deferred = $.Deferred()
-    if nobodyPrevents(args...)
-      deferred.resolve()
-    deferred.promise()
+    new Promise (resolve) ->
+      resolve() if nobodyPrevents(args...)
 
   ###*
   Registers an event listener to be called when the user
@@ -389,13 +406,9 @@ up.bus = (($) ->
     for description in liveUpDescriptions
       description.isDefault = true
 
-  ###*
-  Resets the list of registered event listeners to the
-  moment when the framework was booted.
-
-  @internal
-  ###
-  restoreSnapshot = ->
+  resetBus = ->
+    # Resets the list of registered event listeners to the
+    # moment when the framework was booted.
     doomedDescriptions = u.reject(liveUpDescriptions, (description) -> description.isDefault)
     unbind(description...) for description in doomedDescriptions
 
@@ -422,6 +435,9 @@ up.bus = (($) ->
   @experimental
   ###
 
+  renamedEvent = (oldEvent, newEvent) ->
+    renamedEvents[oldEvent] = newEvent
+
   ###*
   Boots the Unpoly framework.
 
@@ -435,11 +451,9 @@ up.bus = (($) ->
   ###
   boot = ->
     if up.browser.isSupported()
-      # Can't decouple this via the event bus, since up.bus would require
-      # up.browser.isSupported() and up.browser would require up.on()
       emit('up:framework:boot', message: 'Booting framework')
+      # Unpoly modules now snapshot themselves to suppot reset()
       emit('up:framework:booted', message: 'Framework booted')
-      # User-provided compiler definitions will be registered once this function terminates.
       u.nextFrame ->
         # At this point all user-provided compilers have been registered.
         u.whenReady().then ->
@@ -457,7 +471,7 @@ up.bus = (($) ->
   ###
 
   live 'up:framework:booted', snapshot
-  live 'up:framework:reset', restoreSnapshot
+  live 'up:framework:reset', resetBus
 
   knife: eval(Knife?.point)
   on: live # can't name symbols `on` in Coffeescript
@@ -469,6 +483,7 @@ up.bus = (($) ->
   emitReset: emitReset
   haltEvent: haltEvent
   consumeAction: consumeAction
+  renamedEvent: renamedEvent
   boot: boot
 
 )(jQuery)

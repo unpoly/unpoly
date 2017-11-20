@@ -3,7 +3,7 @@ Utility functions
 =================
   
 Unpoly comes with a number of utility functions
-that might save you from loading something like [Underscore.js](http://underscorejs.org/).
+that might save you from loading something like [Lodash](https://lodash.com/).
 
 @class up.util
 ###
@@ -54,28 +54,33 @@ up.util = (($) ->
   By default hashes are ignored, search queries are included.
   
   @function up.util.normalizeUrl
-  @param {Boolean} [options.hash=false]
+  @param {boolean} [options.hash=false]
     Whether to include an `#hash` anchor in the normalized URL
-  @param {Boolean} [options.search=true]
+  @param {boolean} [options.search=true]
     Whether to include a `?query` string in the normalized URL
-  @param {Boolean} [options.stripTrailingSlash=false]
+  @param {boolean} [options.stripTrailingSlash=false]
     Whether to strip a trailing slash from the pathname
   @internal
   ###
   normalizeUrl = (urlOrAnchor, options) ->
-    anchor = parseUrl(urlOrAnchor)
-    normalized = anchor.protocol + "//" + anchor.hostname
-    normalized += ":#{anchor.port}" unless isStandardPort(anchor.protocol, anchor.port)
-    pathname = anchor.pathname
+    parts = parseUrl(urlOrAnchor)
+    normalized = parts.protocol + "//" + parts.hostname
+    normalized += ":#{parts.port}" unless isStandardPort(parts.protocol, parts.port)
+    pathname = parts.pathname
     # Some IEs don't include a leading slash in the #pathname property.
     # We have seen this in IE11 and W3Schools claims it happens in IE9 or earlier
     # http://www.w3schools.com/jsref/prop_anchor_pathname.asp
     pathname = "/#{pathname}" unless pathname[0] == '/'
     pathname = pathname.replace(/\/$/, '') if options?.stripTrailingSlash == true
     normalized += pathname
-    normalized += anchor.hash if options?.hash == true
-    normalized += anchor.search unless options?.search == false
+    normalized += parts.hash if options?.hash == true
+    normalized += parts.search unless options?.search == false
     normalized
+
+  isCrossDomain = (targetUrl) ->
+    currentUrl = parseUrl(location.href)
+    targetUrl = parseUrl(targetUrl)
+    currentUrl.protocol != targetUrl.protocol || currentUrl.host != targetUrl.host
 
   ###*
   Parses the given URL into components such as hostname and path.
@@ -91,16 +96,19 @@ up.util = (($) ->
   @experimental
   ###
   parseUrl = (urlOrAnchor) ->
-    anchor = null
-    if isString(urlOrAnchor)
-      anchor = $('<a>').attr(href: urlOrAnchor).get(0)
-      # In IE11 the #hostname and #port properties of such a link are empty
-      # strings. However, we can fix this by assigning the anchor its own
-      # href because computer:
-      # https://gist.github.com/jlong/2428561#comment-1461205
-      anchor.href = anchor.href if isBlank(anchor.hostname)
-    else
-      anchor = unJQuery(urlOrAnchor)
+    # In case someone passed us a $link, unwrap it
+    urlOrAnchor = unJQuery(urlOrAnchor)
+
+    # If we are handed a parsed URL, just return it
+    if urlOrAnchor.pathname
+      return urlOrAnchor
+
+    anchor = $('<a>').attr(href: urlOrAnchor).get(0)
+    # In IE11 the #hostname and #port properties of such a link are empty
+    # strings. However, we can fix this by assigning the anchor its own
+    # href because computer:
+    # https://gist.github.com/jlong/2428561#comment-1461205
+    anchor.href = anchor.href if isBlank(anchor.hostname)
     anchor
 
   ###*
@@ -112,6 +120,13 @@ up.util = (($) ->
       method.toUpperCase()
     else
       'GET'
+
+  ###*
+  @function up.util.methodAllowsPayload
+  @internal
+  ###
+  methodAllowsPayload = (method) ->
+    method != 'GET' && method != 'HEAD'
 
   ###*
   @function $createElementFromSelector
@@ -169,7 +184,7 @@ up.util = (($) ->
   - The element's tag names
 
   @function up.util.selectorForElement
-  @param {String|Element|jQuery}
+  @param {string|Element|jQuery}
     The element for which to create a selector.
   @experimental
   ###
@@ -231,9 +246,9 @@ up.util = (($) ->
   Returns a new string with whitespace removed from the beginning
   and end of the given string.
 
-  @param {String}
+  @param {string}
     A string that might have whitespace at the beginning and end.
-  @return {String}
+  @return {string}
     The trimmed string.
   @stable
   ###
@@ -244,8 +259,8 @@ up.util = (($) ->
   of the given array.
 
   @function up.util.each
-  @param {Array} array
-  @param {Function<Object, Number>} block
+  @param {Array<T>} array
+  @param {Function(T, number)} block
     A function that will be called with each element and (optional) iteration index.
   @stable
   ###
@@ -256,8 +271,8 @@ up.util = (($) ->
   Translate all items in an array to new array of items.
 
   @function up.util.map
-  @param {Array} array
-  @param {Function<Object, Number>} block
+  @param {Array<T>} array
+  @param {Function(T, number): any} block
     A function that will be called with each element and (optional) iteration index.
   @return {Array}
     A new array containing the result of each function call.
@@ -269,7 +284,7 @@ up.util = (($) ->
   Calls the given function for the given number of times.
 
   @function up.util.times
-  @param {Number} count
+  @param {number} count
   @param {Function} block
   @stable
   ###
@@ -281,7 +296,7 @@ up.util = (($) ->
 
   @function up.util.isNull
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isNull = (object) ->
@@ -292,18 +307,18 @@ up.util = (($) ->
 
   @function up.util.isUndefined
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isUndefined = (object) ->
-    object == `void(0)`
+    object == undefined
 
   ###*
   Returns whether the given argument is not `undefined`.
 
   @function up.util.isDefined
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isDefined = (object) ->
@@ -318,7 +333,7 @@ up.util = (($) ->
 
   @function up.util.isMissing
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isMissing = (object) ->
@@ -333,7 +348,7 @@ up.util = (($) ->
 
   @function up.util.isGiven
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isGiven = (object) ->
@@ -357,13 +372,13 @@ up.util = (($) ->
 
   @function up.util.isBlank
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isBlank = (object) ->
     isMissing(object) ||                  # null or undefined
     (isObject(object) && Object.keys(object).length == 0) ||
-    (object.length == 0)                  # String, Array, jQuery
+    (object.length == 0)                  # string, Array, jQuery
 
   ###*
   Returns the given argument if the argument is [present](/up.util.isPresent),
@@ -371,9 +386,9 @@ up.util = (($) ->
 
   @function up.util.presence
   @param object
-  @param {Function<T>} [tester=up.util.isPresent]
+  @param {Function(T): boolean} [tester=up.util.isPresent]
     The function that will be used to test whether the argument is present.
-  @return {T|Undefined}
+  @return {T|undefined}
   @stable
   ###
   presence = (object, tester = isPresent) ->
@@ -384,7 +399,7 @@ up.util = (($) ->
 
   @function up.util.isPresent
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isPresent = (object) ->
@@ -395,7 +410,7 @@ up.util = (($) ->
 
   @function up.util.isFunction
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isFunction = (object) ->
@@ -406,11 +421,11 @@ up.util = (($) ->
 
   @function up.util.isString
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isString = (object) ->
-    typeof(object) == 'string'
+    typeof(object) == 'string' || object instanceof String
 
   ###*
   Returns whether the given argument is a number.
@@ -420,43 +435,46 @@ up.util = (($) ->
 
   @function up.util.isNumber
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isNumber = (object) ->
-    typeof(object) == 'number'
+    typeof(object) == 'number' || object instanceof Number
 
   ###*
-  Returns whether the given argument is an object, but not a function.
+  Returns whether the given argument is an options hash,
 
-  @function up.util.isHash
+  Differently from [`up.util.isObject()`], this returns false for
+  functions, jQuery collections, promises, `FormData` instances and arrays.
+
+  @function up.util.isOptions
   @param object
-  @return {Boolean}
-  @stable
+  @return {boolean}
+  @internal
   ###
-  isHash = (object) ->
-    typeof(object) == 'object' && !!object
+  isOptions = (object) ->
+    typeof(object) == 'object' && !isNull(object) && !isJQuery(object) && !isPromise(object) && !isFormData(object) && !isArray(object)
 
   ###*
   Returns whether the given argument is an object.
 
   This also returns `true` for functions, which may behave like objects in JavaScript.
-  For an alternative that returns `false` for functions, see [`up.util.isHash()`](/up.util.isHash).
 
   @function up.util.isObject
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isObject = (object) ->
-    isHash(object) || (typeof object == 'function')
+    typeOfResult = typeof(object)
+    (typeOfResult == 'object' && !isNull(object)) || typeOfResult == 'function'
 
   ###*
   Returns whether the given argument is a DOM element.
 
   @function up.util.isElement
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isElement = (object) ->
@@ -467,7 +485,7 @@ up.util = (($) ->
 
   @function up.util.isJQuery
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isJQuery = (object) ->
@@ -478,34 +496,22 @@ up.util = (($) ->
 
   @function up.util.isPromise
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   isPromise = (object) ->
     isObject(object) && isFunction(object.then)
 
   ###*
-  Returns whether the given argument is an object with `then` and `resolve` methods.
-
-  @function up.util.isDeferred
-  @param object
-  @return {Boolean}
-  @stable
-  ###
-  isDeferred = (object) ->
-    isPromise(object) && isFunction(object.resolve)
-
-  ###*
   Returns whether the given argument is an array.
 
   @function up.util.isArray
   @param object
-  @return {Boolean}
+  @return {boolean}
   @stable
   ###
   # https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
-  isArray = Array.isArray || 
-      (object) -> Object.prototype.toString.call(object) == '[object Array]'
+  isArray = Array.isArray
 
   ###*
   Returns whether the given argument is a `FormData` instance.
@@ -514,7 +520,7 @@ up.util = (($) ->
 
   @function up.util.isFormData
   @param object
-  @return {Boolean}
+  @return {boolean}
   @internal
   ###
   isFormData = (object) ->
@@ -534,9 +540,7 @@ up.util = (($) ->
     Array.prototype.slice.call(object)
 
   ###*
-  Shallow-copies the given array or object into a new array or object.
-
-  Returns the new array or object.
+  Returns a shallow copy of the given array or object.
 
   @function up.util.copy
   @param {Object|Array} object
@@ -545,9 +549,12 @@ up.util = (($) ->
   ###
   copy = (object)  ->
     if isArray(object)
-      object.slice()
-    else if isHash(object)
-      assign({}, object)
+      object = object.slice()
+    else if isObject(object) && !isFunction(object)
+      object = assign({}, object)
+    else
+      up.fail('Cannot copy %o', object)
+    object
 
   ###*
   If given a jQuery collection, returns the underlying array of DOM element.
@@ -619,8 +626,8 @@ up.util = (($) ->
 
   @function up.util.detect
   @param {Array<T>} array
-  @param {Function<T>} tester
-  @return {T|Undefined}
+  @param {Function(T): boolean} tester
+  @return {T|undefined}
   @stable
   ###
   detect = (array, tester) ->
@@ -637,8 +644,8 @@ up.util = (($) ->
 
   @function up.util.any
   @param {Array<T>} array
-  @param {Function<T>} tester
-  @return {Boolean}
+  @param {Function(T): boolean} tester
+  @return {boolean}
   @experimental
   ###
   any = (array, tester) ->
@@ -655,8 +662,8 @@ up.util = (($) ->
 
   @function up.util.all
   @param {Array<T>} array
-  @param {Function<T>} tester
-  @return {Boolean}
+  @param {Function(T): boolean} tester
+  @return {boolean}
   @experimental
   ###
   all = (array, tester) ->
@@ -750,10 +757,10 @@ up.util = (($) ->
   Waits for the given number of milliseconds, the nruns the given callback.
 
   If the number of milliseconds is zero, the callback is run in the current execution frame.
-  See [`up.util.nextFrame()`](/up.util.nextFrame) for running a function in the next executation frame.
+  See [`up.util.nextFrame()`](/up.util.nextFrame) for running a function in the next execution frame.
 
   @function up.util.setTimer
-  @param {Number} millis
+  @param {number} millis
   @param {Function} callback
   @experimental
   ###
@@ -764,6 +771,8 @@ up.util = (($) ->
       callback()
       undefined
 
+  setTimer2 = (millis, callback) ->
+    setTimeout(callback, millis)
 
   ###*
   Schedules the given function to be called in the
@@ -909,124 +918,7 @@ up.util = (($) ->
     element = unJQuery(element)
     element.offsetHeight
 
-  ###*
-  Animates the given element's CSS properties using CSS transitions.
-  
-  If the element is already being animated, the previous animation
-  will instantly jump to its last frame before the new animation begins. 
-  
-  To improve performance, the element will be forced into compositing for
-  the duration of the animation.
-
-  @function up.util.cssAnimate
-  @param {Element|jQuery|String} elementOrSelector
-    The element to animate.
-  @param {Object} lastFrame
-    The CSS properties that should be transitioned to.
-  @param {Number} [options.duration=300]
-    The duration of the animation, in milliseconds.
-  @param {Number} [options.delay=0]
-    The delay before the animation starts, in milliseconds.
-  @param {String} [options.easing='ease']
-    The timing function that controls the animation's acceleration.
-    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
-    for a list of pre-defined timing functions.
-  @return {Deferred}
-    A promise for the animation's end.
-  @internal
-  ###
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
-    $element = $(elementOrSelector)
-
-    # Don't name the local variable `options` since that would override
-    # the `options` function in our scope. We really need `let` :(
-    opts = options(opts,
-      duration: 300,
-      delay: 0,
-      easing: 'ease'
-    )
-
-    if opts.duration == 0
-      # In case the duration is zero we 1) spare ourselves all the trouble below,
-      # and 2) return a deferred that actually resolve, since a CSS transition with
-      # a zero duration never fires a transitionEnd event.
-      $element.css(lastFrame)
-      return resolvedDeferred()
-
-    # We don't finish an existing animation here, since the public API
-    # we expose as `up.motion.animate()` already does this.
-    deferred = $.Deferred()
-
-    transitionProperties = Object.keys(lastFrame)
-    transition =
-      'transition-property': transitionProperties.join(', ')
-      'transition-duration': "#{opts.duration}ms"
-      'transition-delay': "#{opts.delay}ms"
-      'transition-timing-function': opts.easing
-    oldTransition = $element.css(Object.keys(transition))
-
-    onTransitionEnd = (event) ->
-      completedProperty = event.originalEvent.propertyName
-      # Check if the transitionend event was caused by our own transition,
-      # and not by some other transition that happens to live on the same element.
-      if contains(transitionProperties, completedProperty)
-        deferred.resolve() # unless isDetached($element)
-
-    $element.on('transitionend', onTransitionEnd)
-
-    deferred.then ->
-      $element.removeClass('up-animating')
-      $element.off('transitionend', onTransitionEnd)
-
-      $element.removeData(ANIMATION_DEFERRED_KEY)
-      withoutCompositing()
-
-      # To interrupt the running transition we *must* set it to 'none' exactly.
-      # We cannot simply restore the old transition properties because browsers
-      # would simply keep transitioning.
-      $element.css('transition': 'none')
-
-      # Restoring a previous transition involves forcing a repaint, so we only do it if
-      # we know the element was transitioning before.
-      # Note that the default transition for elements is actually "all 0s ease 0s"
-      # instead of "none", although that has the same effect as "none".
-      hadTransitionBefore = !(oldTransition['transition-property'] == 'none' || (oldTransition['transition-property'] == 'all' && oldTransition['transition-duration'][0] == '0'))
-      if hadTransitionBefore
-        # If there is no repaint between the "none" transition and restoring
-        # the previous transition, the browser will simply keep transitioning.
-        forceRepaint($element) # :(
-        $element.css(oldTransition)
-
-    $element.addClass('up-animating')
-    withoutCompositing = forceCompositing($element)
-    $element.css(transition)
-    $element.data(ANIMATION_DEFERRED_KEY, deferred)
-    $element.css(lastFrame)
-
-    # Return the whole deferred and not just return a thenable.
-    # Other code will need the possibility to cancel the animation
-    # by resolving the deferred.
-    deferred
-
-  ANIMATION_DEFERRED_KEY = 'up-animation-deferred'
-
-  ###*
-  Completes the animation for  the given element by jumping
-  to the last frame instantly. All callbacks chained to
-  the original animation's promise will be called.
-  
-  Does nothing if the given element is not currently animating.
-  
-  Also see [`up.motion.finish()`](/up.motion.finish).
-  
-  @function up.util.finishCssAnimate
-  @param {Element|jQuery|String} elementOrSelector
-  @internal
-  ###
-  finishCssAnimate = (elementOrSelector) ->
-    $(elementOrSelector).each ->
-      if existingAnimation = pluckData(this, ANIMATION_DEFERRED_KEY)
-        existingAnimation.resolve()
 
   ###*
   @internal
@@ -1100,11 +992,22 @@ up.util = (($) ->
   ###*
   Looks for the given selector in the element and its descendants.
 
-  @function up.util.findWithSelf
+  @function up.util.selectInSubtree
   @internal
   ###
-  findWithSelf = ($element, selector) ->
+  selectInSubtree = ($element, selector) ->
     $element.find(selector).addBack(selector)
+
+  ###*
+  Looks for the given selector in the element, its descendants and its ancestors.
+
+  @function up.util.selectInDynasty
+  @internal
+  ###
+  selectInDynasty = ($element, selector) ->
+    $subtree = selectInSubtree($element, selector)
+    $ancestors = $element.parents(selector)
+    $subtree.add($ancestors)
 
   ###*
   Returns whether the given keyboard event involved the ESC key.
@@ -1119,7 +1022,7 @@ up.util = (($) ->
   Returns whether the given array or string contains the given element or substring.
 
   @function up.util.contains
-  @param {Array|String} arrayOrString
+  @param {Array|string} arrayOrString
   @param elementOrSubstring
   @stable
   ###
@@ -1191,82 +1094,13 @@ up.util = (($) ->
     isLeftButton && isUnmodifiedKeyEvent(event)
 
   ###*
-  Returns a [Deferred object](https://api.jquery.com/category/deferred-object/) that is
-  already resolved.
-
-  @function up.util.resolvedDeferred
-  @param {Array<Object>} [args...]
-    The resolution values that will be passed to callbacks
-  @return {Deferred}
-  @stable
-  ###
-  resolvedDeferred = (args...) ->
-    deferred = $.Deferred()
-    deferred.resolve(args...)
-    deferred
-
-  ###*
-  Returns a promise that is already resolved.
-
-  @function up.util.resolvedPromise
-  @param {Array<Object>} [args...]
-    The resolution values that will be passed to callbacks
-  @return {Promise}
-  @stable
-  ###
-  resolvedPromise = (args...) ->
-    resolvedDeferred(args...).promise()
-
-  ###*
-  Returns a promise that is already rejected.
-
-  @function up.util.rejectedPromise
-  @param {Array<Object>} [args...]
-    The rejection values that will be passed to callbacks
-  @return {Promise}
-  @stable
-  ###
-  rejectedPromise = (args...) ->
-    deferred = $.Deferred()
-    deferred.reject(args...)
-    deferred.promise()
-
-  ###*
-  Returns whether the given argument is a resolved jQuery promise.
-
-  @return {Boolean}
-  @internal
-  ###
-  isResolvedPromise = (promise) ->
-    isPromise(promise) && promise.state?() == 'resolved'
-
-  ###*
-  Returns whether the given argument is a resolved jQuery promise.
-
-  @return {Boolean}
-  @internal
-  ###
-  isResolvedPromise = (promise) ->
-    isPromise(promise) && promise.state?() == 'resolved'
-
-  ###*
-  Returns a [Deferred object](https://api.jquery.com/category/deferred-object/) that will never be resolved.
-
-  @function up.util.unresolvableDeferred
-  @return {Deferred}
-  @experimental
-  ###
-  unresolvableDeferred = ->
-    $.Deferred()
-
-  ###*
   Returns a promise that will never be resolved.
 
   @function up.util.unresolvablePromise
   @experimental
   ###
   unresolvablePromise = ->
-    unresolvableDeferred().promise()
+    new Promise(noop)
 
   ###*
   Returns an empty jQuery collection.
@@ -1276,39 +1110,6 @@ up.util = (($) ->
   ###
   nullJQuery = ->
     $()
-
-  ###*
-  Returns a new promise that resolves once all promises in arguments resolve.
-
-  Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
-  the combined promise will have a `resolve` method. This `resolve` method
-  will resolve all the wrapped promises.
-
-  @function up.util.resolvableWhen
-  @internal
-  ###
-  resolvableWhen = (deferreds...) ->
-    # Pass an additional resolved deferred to $.when so $.when  will
-    # not return the given deferred if only one deferred is passed.
-    joined = $.when(resolvedDeferred(), deferreds...)
-    joined.resolve = memoize(->
-      each deferreds, (deferred) ->
-        deferred.resolve()
-    )
-    joined
-
-#  resolvableSequence = (first, callbacks...) ->
-#    sequence = $.Deferred().promise()
-#    values = [first]
-#    current = first
-#    for callback in callbacks
-#      current = current.then ->
-#        value = callback()
-#        values.push(value) if u.isPromise(value)
-#        value
-#    sequence.resolve = ->
-#      each values, (deferred) -> deferred.resolve?()
-#    sequence
 
   ###*
   On the given element, set attributes that are still missing.
@@ -1372,7 +1173,7 @@ up.util = (($) ->
         $result = $result.add($matches)
       $result
 
-    obj.findWithSelf = ($start) ->
+    obj.selectInSubtree = ($start) ->
       $matches = obj.find($start)
       $matches = $matches.add($start) if obj.doesMatch($start)
       $matches
@@ -1409,20 +1210,24 @@ up.util = (($) ->
 
   ###*
   @function up.util.cache
-  @param {Number|Function} [config.size]
+  @param {number|Function() :number} [config.size]
     Maximum number of cache entries.
     Set to `undefined` to not limit the cache size.
-  @param {Number|Function} [config.expiry]
+  @param {number|Function(): number} [config.expiry]
     The number of milliseconds after which a cache entry
     will be discarded.
-  @param {String} [config.log]
+  @param {string} [config.log]
     A prefix for log entries printed by this cache object.
-  @param {Function<Object>} [config.key]
-    A function that takes an argument and returns a `String` key
+  @param {Function(any): string} [config.key]
+    A function that takes an argument and returns a string key
     for storage. If omitted, `toString()` is called on the argument.
+  @param {Function(any): boolean} [config.cachable]
+    A function that takes a potential cache entry and returns whether
+    this entry  can be stored in the hash. If omitted, all entries are considered
+    cachable.
   @internal
   ###
-  cache = (config = {}) ->
+  newCache = (config = {}) ->
 
     store = undefined
 
@@ -1437,6 +1242,12 @@ up.util = (($) ->
 
     isEnabled = ->
       maxKeys() isnt 0 && expiryMillis() isnt 0
+
+    isCachable = (key) ->
+      if config.cachable
+        config.cachable(key)
+      else
+        true
 
     clear = ->
       store = {}
@@ -1474,9 +1285,10 @@ up.util = (($) ->
       (new Date()).valueOf()
 
     set = (key, value) ->
-      if isEnabled()
+      if isEnabled() && isCachable(key)
         makeRoomForAnotherKey()
         storeKey = normalizeStoreKey(key)
+        log("Setting entry %o to %o", storeKey, value)
         store[storeKey] =
           timestamp: timestamp()
           value: value
@@ -1494,8 +1306,7 @@ up.util = (($) ->
         true
 
     get = (key, options = {}) ->
-      storeKey = normalizeStoreKey(key)
-      if entry = store[storeKey]
+      if isCachable(key) && (entry = store[normalizeStoreKey(key)])
         if isFresh(entry)
           log("Cache hit for '%s'", key) unless options.silent
           entry.value
@@ -1615,10 +1426,12 @@ up.util = (($) ->
   [`jQuery.serializeArray`](https://api.jquery.com/serializeArray/).
 
   @function up.util.requestDataAsArray
-  @param {Object|Array|Undefined|Null} data
+  @param {Object|Array|undefined|null} data
   @internal
   ###
   requestDataAsArray = (data) ->
+    if isArray(data)
+      data
     if isFormData(data)
       # Until FormData#entries is implemented in all major browsers we must give up here.
       # However, up.form will prefer to serialize forms as arrays, so we should be good
@@ -1638,11 +1451,16 @@ up.util = (($) ->
   ###*
   Returns an URL-encoded query string for the given params object.
 
+  The returned string does **not** include a leading `?` character.
+
   @function up.util.requestDataAsQuery
-  @param {Object|Array|Undefined|Null} data
+  @param {Object|Array|undefined|null} data
   @internal
   ###
-  requestDataAsQuery = (data) ->
+  requestDataAsQuery = (data, opts) ->
+    opts = options(opts, purpose: 'url')
+    if isString(data)
+      data
     if isFormData(data)
       # Until FormData#entries is implemented in all major browsers we must give up here.
       # However, up.form will prefer to serialize forms as arrays, so we should be good
@@ -1650,7 +1468,13 @@ up.util = (($) ->
       up.fail('Cannot convert FormData into a query string')
     else if isPresent(data)
       query = $.param(data)
-      query = query.replace(/\+/g, '%20')
+      switch opts.purpose
+        when 'url'
+          query = query.replace(/\+/g, '%20')
+        when 'form'
+          query = query.replace(/\%20/g, '+')
+        else
+          up.fail('Unknown purpose %o', opts.purpose)
       query
     else
       ""
@@ -1681,7 +1505,7 @@ up.util = (($) ->
     # We try to stick with an array representation, whose contents we can inspect.
     # We cannot inspect FormData on IE11 because it has no support for `FormData.entries`.
     # Inspection is needed to generate a cache key (see `up.proxy`) and to make
-    # vanilla requests when `pushState` is unavailable (see `up.browser.loadPage`).
+    # vanilla requests when `pushState` is unavailable (see `up.browser.navigate`).
     data = if hasFileInputs then new FormData($form.get(0)) else $form.serializeArray()
     appendRequestData(data, buttonName, buttonValue) if isPresent(buttonName)
     data
@@ -1691,28 +1515,27 @@ up.util = (($) ->
   Adds a key/value pair to the given request data representation.
 
   This mutates the given `data` if `data` is a `FormData`, an object
-  or an array. When `data` is `String` a new string with the appended key/value
+  or an array. When `data` is a string a new string with the appended key/value
   pair is returned.
 
   @function up.util.appendRequestData
-  @param {FormData|Object|Array|Undefined|Null} data
-  @param {String} key
-  @param {String|Blob|File} value
+  @param {FormData|Object|Array|undefined|null} data
+  @param {string} key
+  @param {string|Blob|File} value
   @internal
   ###
-  appendRequestData = (data, name, value) ->
-    if isFormData(data)
-      data.append(name, value)
-    else if isArray(data)
+  appendRequestData = (data, name, value, opts) ->
+    data ||= []
+
+    if isArray(data)
       data.push(name: name, value: value)
+    else if isFormData(data)
+      data.append(name, value)
     else if isObject(data)
       data[name] = value
-    else if isString(data) || isMissing(data)
-      newPair = requestDataAsQuery([ name: name, value: value ])
-      if isPresent(data)
-        data = [data, newPair].join('&')
-      else
-        data = newPair
+    else if isString(data)
+      newPair = requestDataAsQuery([ name: name, value: value ], opts)
+      data = [data, newPair].join('&')
     data
 
   ###*
@@ -1729,12 +1552,12 @@ up.util = (($) ->
       up.fail('Unexpected result %o', result)
 
   @function up.fail
-  @param {String} message
+  @param {string} message
     A message with details about the error.
 
     The message can contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
     like `%s` or `%o`.
-  @param {Array<String>} vars...
+  @param {Array<string>} vars...
     A list of variables to replace any substitution marks in the error message.
   @experimental
   ###
@@ -1763,7 +1586,7 @@ up.util = (($) ->
   Escapes the given string of HTML by replacing control chars with their HTML entities.
 
   @function up.util.escapeHtml
-  @param {String} string
+  @param {string} string
     The text that should be escaped
   @experimental
   ###
@@ -1786,7 +1609,7 @@ up.util = (($) ->
 
   extractOptions = (args) ->
     lastArg = last(args)
-    if isHash(lastArg) && !isJQuery(lastArg)
+    if isOptions(lastArg)
       args.pop()
     else
       {}
@@ -1800,11 +1623,9 @@ up.util = (($) ->
 
   whenReady = memoize ->
     if $.isReady
-      resolvedPromise()
+      Promise.resolve()
     else
-      deferred = $.Deferred()
-      $ -> deferred.resolve()
-      deferred.promise()
+      new Promise (resolve) -> $(resolve)
 
   identity = (arg) -> arg
 
@@ -1835,13 +1656,12 @@ up.util = (($) ->
   @internal
   ###
   previewable = (fun) ->
-    deferred = $.Deferred()
+    deferred = newDeferred()
     preview = (args...) ->
       funValue = fun(args...)
-      if isPromise(funValue)
-        funValue.then -> deferred.resolve(funValue)
-      else
-        deferred.resolve(funValue)
+      # If funValue is again a Promise, it will defer resolution of `deferred`
+      # until `funValue` is resolved.
+      deferred.resolve(funValue)
       funValue
     preview.promise = deferred.promise()
     preview
@@ -1862,8 +1682,8 @@ up.util = (($) ->
       @currentTask = undefined
 
     promise: =>
-      promises = map @allTasks(), (task) -> task.promise
-      $.when(promises...)
+      lastTask = last(@allTasks())
+      lastTask?.promise || Promise.resolve()
 
     allTasks: =>
       tasks = []
@@ -1874,14 +1694,16 @@ up.util = (($) ->
     poke: =>
       unless @currentTask # don't start a new task while we're still running one
         if @currentTask = @queue.shift()
+          # console.debug('[DivertibleChain.poke] currentTask is now %o', @currentTask)
           promise = @currentTask()
-          promise.always =>
+          always promise, =>
             @currentTask = undefined
             @poke()
 
     asap: (newTasks...) =>
       @queue = map(newTasks, previewable)
       @poke()
+      @promise()
 
   ###*
   @function up.util.submittedValue
@@ -1911,7 +1733,7 @@ up.util = (($) ->
 #  @internal
 #  ###
 #  race = (promises...) ->
-#    raceDone = $.Deferred()
+#    raceDone = newDeferred()
 #    each promises, (promise) ->
 #      promise.then -> raceDone.resolve()
 #    raceDone.promise()
@@ -1921,11 +1743,11 @@ up.util = (($) ->
   @internal
   ###
   promiseTimer = (ms) ->
-    deferred = $.Deferred()
-    timeout = setTimer ms, ->
-      deferred.resolve()
-    deferred.cancel = -> clearTimeout(timeout)
-    deferred
+    timeout = undefined
+    promise = new Promise (resolve, reject) ->
+      timeout = setTimer(ms, resolve)
+    promise.cancel = -> clearTimeout(timeout)
+    promise
 
   ###*
   Returns `'left'` if the center of the given element is in the left 50% of the screen.
@@ -1978,8 +1800,60 @@ up.util = (($) ->
         flattened.push(object)
     flattened
 
+  ###*
+  Returns whether the given value is truthy.
+
+  @function up.util.isTruthy
+  @internal
+  ###
   isTruthy = (object) ->
     !!object
+
+  ###*
+  Sets the given callback as both fulfillment and rejection handler for the given promise.
+
+  @function up.util.always
+  @internal
+  ###
+  always = (promise, callback) ->
+    promise.then(callback, callback)
+
+  ###*
+  @function up.util.newDeferred
+  @internal
+  ###
+  newDeferred = ->
+    resolve = undefined
+    reject = undefined
+    nativePromise = new Promise (givenResolve, givenReject) ->
+      resolve = givenResolve
+      reject = givenReject
+    nativePromise.resolve = resolve
+    nativePromise.reject = reject
+    nativePromise.promise = -> nativePromise # just return self
+    nativePromise
+
+  ###*
+  Calls the given block. If the block throws an exception,
+  a rejected promise is returned instead.
+
+  @function up.util.rejectOnError
+  @internal
+  ###
+  rejectOnError = (block) ->
+    try
+      block()
+    catch error
+      Promise.reject(error)
+
+  ###*
+  Returns whether the given element is a descendant of the `<body>` element.
+
+  @function up.util.isBodyDescendant
+  @internal
+  ###
+  isBodyDescendant = (element) ->
+    $(element).parents('body').length > 0
 
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
@@ -1993,6 +1867,7 @@ up.util = (($) ->
   parseUrl: parseUrl
   normalizeUrl: normalizeUrl
   normalizeMethod: normalizeMethod
+  methodAllowsPayload: methodAllowsPayload
   createElementFromHtml: createElementFromHtml
   $createElementFromSelector: $createElementFromSelector
   $createPlaceholder: $createPlaceholder
@@ -2031,9 +1906,7 @@ up.util = (($) ->
   isElement: isElement
   isJQuery: isJQuery
   isPromise: isPromise
-  isResolvedPromise: isResolvedPromise
-  isDeferred: isDeferred
-  isHash: isHash
+  isOptions: isOptions
   isArray: isArray
   isFormData: isFormData
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
@@ -2041,16 +1914,17 @@ up.util = (($) ->
   nullJQuery: nullJQuery
   unJQuery: unJQuery
   setTimer: setTimer
+  setTimer2: setTimer2
   nextFrame: nextFrame
   measure: measure
   temporaryCss: temporaryCss
   cssAnimate: cssAnimate
-  finishCssAnimate: finishCssAnimate
   forceCompositing: forceCompositing
   forceRepaint: forceRepaint
   escapePressed: escapePressed
   copyAttributes: copyAttributes
-  findWithSelf: findWithSelf
+  selectInSubtree: selectInSubtree
+  selectInDynasty: selectInDynasty
   contains: contains
   toArray: toArray
   castedAttr: castedAttr
@@ -2058,12 +1932,7 @@ up.util = (($) ->
   only: only
   except: except
   trim: trim
-  unresolvableDeferred: unresolvableDeferred
   unresolvablePromise: unresolvablePromise
-  resolvedPromise: resolvedPromise
-  rejectedPromise: rejectedPromise
-  resolvedDeferred: resolvedDeferred
-  resolvableWhen: resolvableWhen
   setMissingAttrs: setMissingAttrs
   remove: remove
   memoize: memoize
@@ -2071,7 +1940,7 @@ up.util = (($) ->
   documentHasVerticalScrollbar: documentHasVerticalScrollbar
   config: config
   openConfig: openConfig
-  cache: cache
+  newCache: newCache
   unwrapElement: unwrapElement
   multiSelector: multiSelector
   error: fail
@@ -2095,6 +1964,12 @@ up.util = (($) ->
   detachWith: detachWith
   flatten: flatten
   isTruthy: isTruthy
+  newDeferred: newDeferred
+  always: always
+  rejectOnError: rejectOnError
+  isBodyDescendant: isBodyDescendant
+  isCrossDomain: isCrossDomain
+
 
 )(jQuery)
 

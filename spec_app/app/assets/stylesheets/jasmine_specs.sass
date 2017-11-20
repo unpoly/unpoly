@@ -4,3 +4,13 @@
 .up-modal-backdrop
   background-color: rgba(90, 90, 90, 0.05)
 
+.default-fallback
+  position: fixed
+  top: 0
+  left: 0
+  width: 500px
+  height: 300px
+  background-color: rgba(255, 255, 255, 0.7)
+
+  &:empty
+    display: none

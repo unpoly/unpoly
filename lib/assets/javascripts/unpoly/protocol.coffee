@@ -31,7 +31,6 @@ After the form's action performs a redirect, the next response should include th
 URL in the HTTP headers:
 
 ```http
-X-Up-Method: GET
 X-Up-Location: /current-url
 ```
 
@@ -40,8 +39,8 @@ The **simplest implementation** is to set these headers for every request.
 
 \#\#\# Optimizing responses
 
-When [updating a fragment](/up.link), Unpoly will send
-an additional HTTP header containing the CSS selector that is being replaced:
+When [updating a fragment](/up.link), Unpoly will send an
+additional HTTP header containing the CSS selector that is being replaced:
 
 ```http
 X-Up-Target: .user-list
@@ -50,6 +49,13 @@ X-Up-Target: .user-list
 Server-side code is free to **optimize its response** by only returning HTML
 that matches the selector. For example, you might prefer to not render an
 expensive sidebar if the sidebar is not targeted.
+
+Unpoly will often update a different selector in case the request fails.
+This selector is also included as a HTTP header:
+
+```
+X-Up-Fail-Target: body
+```
 
 
 \#\#\# Pushing a document title to the client
@@ -144,7 +150,8 @@ This fixes two edge cases you might or might not care about:
 2. Some browsers have a bug where the initial request method is used for all
    subsequently pushed states. That means if the user reloads the page on a later
    GET state, the browser will wrongly attempt a POST request.
-   Modern Firefoxes, Chromes and IE10+ don't seem to be affected by this.
+   This issue affects Safari 9 and 10 (last tested in 2017-08).
+   Modern Firefoxes, Chromes and IE10+ don't have this behavior.
 
 In order to allow Unpoly to detect the HTTP method of the initial page load,
 the server must set a cookie:
@@ -205,25 +212,66 @@ up.protocol = (($) ->
   Configures strings used in the optional [server protocol](/up.protocol).
 
   @property up.protocol.config
-  @param [config.targetHeader='X-Up-Target']
-  @param [config.locationHeader='X-Up-Location']
-  @param [config.titleHeader='X-Up-Title']
-  @param [config.validateHeader='X-Up-Validate']
-  @param [config.methodHeader='X-Up-Method']
-  @param [config.methodCookie='_up_method']
-  @param [config.methodParam='_method']
+  @param {String} [config.targetHeader='X-Up-Target']
+  @param {String} [config.failTargetHeader='X-Up-Fail-Target']
+  @param {String} [config.locationHeader='X-Up-Location']
+  @param {String} [config.titleHeader='X-Up-Title']
+  @param {String} [config.validateHeader='X-Up-Validate']
+  @param {String} [config.methodHeader='X-Up-Method']
+  @param {String} [config.methodCookie='_up_method']
+    The name of the optional cookie the server can send to
+    [signal the initial request method](/up.protocol#signaling-the-initial-request-method).
+  @param {String} [config.methodParam='_method']
     The name of the POST parameter when [wrapping HTTP methods](/up.form.config#config.wrapMethods)
     in a `POST` request.
+  @param {String} [config.csrfHeader='X-CSRF-Token']
+    The name of the HTTP header that will include the
+    [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
+    for AJAX requests.
+  @param {String|Function} [config.csrfParam]
+    The `name` of the hidden `<input>` used for sending a
+    [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
+    submitting a default, non-AJAX form. For AJAX request the token is sent as an HTTP header instead.
+
+    The parameter name can be configured as a string or as function that returns the parameter name.
+    If no name is set, no token will be sent.
+
+    Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
+
+        <meta name="csrf-param" content="authenticity_token" />
+
+  @param {String|Function} [config.csrfToken]
+    The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
+    to send for non-idempotent requests. The token will be sent as either a HTTP header (for AJAX requests)
+    or hidden form `<input>` (for default, non-AJAX form submissions).
+
+    The token can either be configured as a string or as function that returns the token.
+    If no token is set, no token will be sent.
+
+    Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
+
+        <meta name='csrf-token' content='secret12345'>
+
   @experimental
   ###
   config = u.config
     targetHeader: 'X-Up-Target'
+    failTargetHeader: 'X-Up-Fail-Target'
     locationHeader: 'X-Up-Location'
     validateHeader: 'X-Up-Validate'
     titleHeader: 'X-Up-Title'
     methodHeader: 'X-Up-Method'
     methodCookie: '_up_method'
     methodParam: '_method'
+    csrfParam: -> $('meta[name="csrf-param"]').val('content')
+    csrfToken: -> $('meta[name="csrf-token"]').val('content')
+    csrfHeader: 'X-CSRF-Token'
+
+  csrfParam = ->
+    u.evalOption(config.csrfParam)
+
+  csrfToken = ->
+    u.evalOption(config.csrfToken)
 
   ## Unfortunately we cannot offer reset without introducing cycles
   ## in the asset load order
@@ -237,6 +285,8 @@ up.protocol = (($) ->
   locationFromXhr: locationFromXhr
   titleFromXhr: titleFromXhr
   methodFromXhr: methodFromXhr
+  csrfParam :csrfParam
+  csrfToken: csrfToken
   initialRequestMethod: initialRequestMethod
 
 )(jQuery)

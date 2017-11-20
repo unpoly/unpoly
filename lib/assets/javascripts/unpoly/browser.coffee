@@ -10,7 +10,6 @@ IE11, Edge
 IE 10 or lower
 : Unpoly prevents itself from booting itself, leaving you with a classic server-side application.
 
-
 @class up.browser
 ###
 up.browser = (($) ->
@@ -18,30 +17,15 @@ up.browser = (($) ->
   u = up.util
 
   ###*
-  @method up.browser.loadPage
-  @param {String} url
-  @param {String} [options.method='get']
+  @method up.browser.navigate
+  @param {string} url
+  @param {string} [options.method='get']
   @param {Object|Array} [options.data]
   @internal
   ###
-  loadPage = (url, options = {}) ->
-    method = u.option(options.method, 'get').toLowerCase()
-    if method == 'get'
-      query = u.requestDataAsQuery(options.data)
-      url = "#{url}?#{query}" if query
-      setLocationHref(url)
-    else
-      $form = $("<form method='post' action='#{url}' class='up-page-loader'></form>")
-      addField = (field) ->
-        $field = $('<input type="hidden">')
-        $field.attr(field)
-        $field.appendTo($form)
-      addField(name: up.protocol.config.methodParam, value: method)
-      if csrfField = up.rails.csrfField()
-        addField(csrfField)
-      u.each u.requestDataAsArray(options.data), addField
-      $form.hide().appendTo('body')
-      submitForm($form)
+  navigate = (url, options = {}) ->
+    request = new up.Request(u.merge(options, { url }))
+    request.navigate()
 
   ###*
   For mocking in specs.
@@ -50,14 +34,6 @@ up.browser = (($) ->
   ###
   submitForm = ($form) ->
     $form.submit()
-
-  ###*
-  For mocking in specs.
-
-  @method setLocationHref
-  ###
-  setLocationHref = (url) ->
-    location.href = url
 
   ###*
   A cross-browser way to interact with `console.log`, `console.error`, etc.
@@ -155,10 +131,10 @@ up.browser = (($) ->
   a request method other than GET.
 
   @function up.browser.canPushState
-  @return {Boolean}
+  @return {boolean}
   @experimental
   ###
-  canPushState = u.memoize ->
+  canPushState = ->
     # We cannot use pushState if the initial request method is a POST for two reasons:
     #
     # 1. Unpoly replaces the initial state so it can handle the pop event when the
@@ -168,7 +144,8 @@ up.browser = (($) ->
     # 2. Some browsers have a bug where the initial request method is used for all
     #    subsequently pushed states. That means if the user reloads the page on a later
     #    GET state, the browser will wrongly attempt a POST request.
-    #    Modern Firefoxes, Chromes and IE10+ don't seem to be affected by this.
+    #    This issue affects Safari 9 and 10 (last tested in 2017-08).
+    #    Modern Firefoxes, Chromes and IE10+ don't have this behavior.
     #
     # The way that we work around this is that we don't support pushState if the
     # initial request method was anything other than GET (but allow the rest of the
@@ -185,52 +162,62 @@ up.browser = (($) ->
   animation by instantly jumping to the last frame.
 
   @function up.browser.canCssTransition
-  @return {Boolean}
+  @return {boolean}
   @internal
   ###
-  canCssTransition = u.memoize ->
+  canCssTransition = ->
     'transition' of document.documentElement.style
 
   ###*
   Returns whether this browser supports the DOM event [`input`](https://developer.mozilla.org/de/docs/Web/Events/input).
 
   @function up.browser.canInputEvent
-  @return {Boolean}
+  @return {boolean}
   @internal
   ###
-  canInputEvent = u.memoize ->
+  canInputEvent = ->
     'oninput' of document.createElement('input')
+
+  ###*
+  Returns whether this browser supports promises.
+
+  @function up.browser.canPromise
+  @return {boolean}
+  @internal
+  ###
+  canPromise = ->
+    !!window.Promise
 
   ###*
   Returns whether this browser supports the [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
   interface.
 
   @function up.browser.canFormData
-  @return {Boolean}
+  @return {boolean}
   @experimental
   ###
-  canFormData = u.memoize ->
+  canFormData = ->
     !!window.FormData
 
   ###*
   Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
   interface.
 
-  @function up.browser.canDomParser
-  @return {Boolean}
+  @function up.browser.canDOMParser
+  @return {boolean}
   @internal
   ###
-  canDomParser = u.memoize ->
+  canDOMParser = ->
     !!window.DOMParser
 
   ###*
   Returns whether this browser supports the [`debugging console`](https://developer.mozilla.org/en-US/docs/Web/API/Console).
 
   @function up.browser.canConsole
-  @return {Boolean}
+  @return {boolean}
   @internal
   ###
-  canConsole = u.memoize ->
+  canConsole = ->
     window.console &&
       console.debug &&
       console.info &&
@@ -240,7 +227,7 @@ up.browser = (($) ->
       console.groupCollapsed &&
       console.groupEnd
 
-  isRecentJQuery = u.memoize ->
+  isRecentJQuery = ->
     version = $.fn.jquery
     parts = version.split('.')
     major = parseInt(parts[0])
@@ -264,13 +251,13 @@ up.browser = (($) ->
   ###*
   @function up,browser.whenConfirmed
   @return {Promise}
-  @param {String} options.confirm
-  @param {Boolean} options.preload
+  @param {string} options.confirm
+  @param {boolean} options.preload
   @internal
   ###
   whenConfirmed = (options) ->
     if options.preload || u.isBlank(options.confirm) || window.confirm(options.confirm)
-      u.resolvedPromise()
+      Promise.resolve()
     else
       u.unresolvablePromise()
 
@@ -283,13 +270,6 @@ up.browser = (($) ->
   This is usually a better fallback than loading incompatible Javascript and causing
   many errors on load.
 
-  \#\#\# Graceful degradation
-
-  This function also returns `true` if Unpoly only support some features, but can degrade
-  gracefully for other features. E.g. Internet Explorer 9 is almost fully supported, but due to
-  its lack of [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
-  Unpoly falls back to a full page load when asked to manipulate history.
-
   @function up.browser.isSupported
   @stable
   ###
@@ -297,11 +277,13 @@ up.browser = (($) ->
     !isIE10OrWorse() &&
       isRecentJQuery() &&
       canConsole() &&
-      canPushState() &&
-      canDomParser() &&
+      # We don't require pushState in order to cater for Safari booting Unpoly with a non-GET method.
+      # canPushState() &&
+      canDOMParser() &&
       canFormData() &&
       canCssTransition() &&
-      canInputEvent()
+      canInputEvent() &&
+      canPromise()
 
   ###*
   @internal
@@ -342,7 +324,8 @@ up.browser = (($) ->
 
   knife: eval(Knife?.point)
   url: url
-  loadPage: loadPage
+  navigate: navigate
+  submitForm: submitForm
   canPushState: canPushState
   whenConfirmed: whenConfirmed
   isSupported: isSupported
@@ -352,5 +335,7 @@ up.browser = (($) ->
   sessionStorage: sessionStorage
   popCookie: popCookie
   hash: hash
+  canPushState: canPushState
 
 )(jQuery)
+

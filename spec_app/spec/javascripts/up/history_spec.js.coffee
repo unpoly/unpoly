@@ -1,6 +1,9 @@
 describe 'up.history', ->
 
   u = up.util
+
+  beforeEach ->
+    up.history.config.enabled = true
   
   describe 'JavaScript functions', ->
     
@@ -10,37 +13,41 @@ describe 'up.history', ->
 
     describe 'up.history.url', ->
 
-      it 'does not strip a trailing slash from the current URL', ->
-        history.replaceState?({}, 'title', '/host/path/')
-        expect(up.history.url()).toEqualUrl('/host/path/')
+      describeCapability 'canPushState', ->
+
+        it 'does not strip a trailing slash from the current URL', ->
+          history.replaceState?({}, 'title', '/host/path/')
+          expect(up.history.url()).toMatchUrl('/host/path/')
 
     describe 'up.history.isUrl', ->
 
-      it 'returns true if the given path is the current URL', ->
-        history.replaceState?({}, 'title', '/host/path/')
-        expect(up.history.isUrl('/host/path/')).toBe(true)
+      describeCapability 'canPushState', ->
 
-      it 'returns false if the given path is not the current URL', ->
-        history.replaceState?({}, 'title', '/host/path/')
-        expect(up.history.isUrl('/host/other-path/')).toBe(false)
+        it 'returns true if the given path is the current URL', ->
+          history.replaceState?({}, 'title', '/host/path/')
+          expect(up.history.isUrl('/host/path/')).toBe(true)
 
-      it 'returns true if the given full URL is the current URL', ->
-        history.replaceState?({}, 'title', '/host/path/')
-        expect(up.history.isUrl("http://#{location.host}/host/path/")).toBe(true)
+        it 'returns false if the given path is not the current URL', ->
+          history.replaceState?({}, 'title', '/host/path/')
+          expect(up.history.isUrl('/host/other-path/')).toBe(false)
 
-      it 'returns true if the given path is the current URL, but without a trailing slash', ->
-        history.replaceState?({}, 'title', '/host/path/')
-        expect(up.history.isUrl('/host/path')).toBe(true)
+        it 'returns true if the given full URL is the current URL', ->
+          history.replaceState?({}, 'title', '/host/path/')
+          expect(up.history.isUrl("http://#{location.host}/host/path/")).toBe(true)
 
-      it 'returns true if the given path is the current URL, but with a trailing slash', ->
-        history.replaceState?({}, 'title', '/host/path')
-        expect(up.history.isUrl('/host/path/')).toBe(true)
+        it 'returns true if the given path is the current URL, but without a trailing slash', ->
+          history.replaceState?({}, 'title', '/host/path/')
+          expect(up.history.isUrl('/host/path')).toBe(true)
+
+        it 'returns true if the given path is the current URL, but with a trailing slash', ->
+          history.replaceState?({}, 'title', '/host/path')
+          expect(up.history.isUrl('/host/path/')).toBe(true)
 
   describe 'unobtrusive behavior', ->
 
     describe 'back button', ->
 
-      it 'calls destructor functions when destroying compiled elements (bugfix)', (done) ->
+      it 'calls destructor functions when destroying compiled elements (bugfix)', asyncSpec (next) ->
         waitForBrowser = 70
 
         # By default, up.history will replace the <body> tag when
@@ -65,227 +72,267 @@ describe 'up.history', ->
         expect(constructorSpy).toHaveBeenCalled()
 
         history.back()
-        u.setTimer waitForBrowser, =>
-          expect(location.pathname).toEqual('/one')
 
+        next.after waitForBrowser, =>
+          expect(location.pathname).toEqual('/one')
           @respondWith "<div class='container'>restored container text</div>"
 
-          u.nextFrame ->
-            expect(destructorSpy).toHaveBeenCalled()
-            done()
+        next =>
+          expect(destructorSpy).toHaveBeenCalled()
 
 
     describe '[up-back]', ->
 
-      it 'sets an [up-href] attribute to the previous URL and sets the up-restore-scroll attribute to "true"', ->
-        up.history.push('/one')
-        up.history.push('/two')
-        $element = up.hello(affix('a[href="/three"][up-back]').text('text'))
-        expect($element.attr('href')).toEqualUrl('/three')
-        expect($element.attr('up-href')).toEqualUrl('/one')
-        expect($element.attr('up-restore-scroll')).toBe('')
-        expect($element.attr('up-follow')).toBe('')
+      describeCapability 'canPushState', ->
+
+        it 'sets an [up-href] attribute to the previous URL and sets the up-restore-scroll attribute to "true"', ->
+          up.history.push('/path1')
+          up.history.push('/path2')
+          $element = up.hello(affix('a[href="/path3"][up-back]').text('text'))
+          expect($element.attr('href')).toMatchUrl('/path3')
+          expect($element.attr('up-href')).toMatchUrl('/path1')
+          expect($element.attr('up-restore-scroll')).toBe('')
+          expect($element.attr('up-follow')).toBe('')
 
       it 'does not overwrite an existing up-href or up-restore-scroll attribute'
 
       it 'does not set an up-href attribute if there is no previous URL'
 
+      describeFallback 'canPushState', ->
+
+        it 'does not change the element', ->
+          $element = up.hello(affix('a[href="/three"][up-back]').text('text'))
+          expect($element.attr('up-href')).toBeUndefined()
+
     describe 'scroll restoration', ->
 
-      afterEach ->
-        $('.viewport').remove()
+      describeCapability 'canPushState', ->
 
-      it 'restores the scroll position of viewports when the user hits the back button', (done) ->
+        afterEach ->
+          $('.viewport').remove()
 
-        longContentHtml = """
-          <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
-            <div class="content" style="height: 1000px"></div>
-          </div>
-        """
+        it 'restores the scroll position of viewports when the user hits the back button', asyncSpec (next) ->
 
-        respond = => @respondWith(longContentHtml)
+          longContentHtml = """
+            <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
+              <div class="content" style="height: 1000px"></div>
+            </div>
+          """
 
-        $viewport = $(longContentHtml).appendTo(document.body)
+          respond = => @respondWith(longContentHtml)
 
-        up.layout.config.viewports = ['.viewport']
-        up.history.config.popTargets = ['.viewport']
+          $viewport = $(longContentHtml).appendTo(document.body)
 
-        up.replace('.content', '/one')
-        respond()
+          up.layout.config.viewports = ['.viewport']
+          up.history.config.popTargets = ['.viewport']
 
-        $viewport.scrollTop(50)
+          up.replace('.content', '/one')
 
-        up.replace('.content', '/two')
-        respond()
+          next =>
+            respond()
 
-        $('.viewport').scrollTop(150)
+          next =>
+            $viewport.scrollTop(50)
+            up.replace('.content', '/two')
 
-        up.replace('.content', '/three')
-        respond()
-        $('.viewport').scrollTop(250)
+          next =>
+            respond()
 
-        history.back()
-        u.setTimer 50, ->
-          respond() # we need to respond since we've never requested /two with the popTarget
-          expect($('.viewport').scrollTop()).toBe(150)
+          next =>
+            $('.viewport').scrollTop(150)
+            up.replace('.content', '/three')
 
-          history.back()
-          u.setTimer 50, ->
+          next =>
+            respond()
+
+          next =>
+            $('.viewport').scrollTop(250)
+            history.back()
+
+          next.after 50, =>
+            respond() # we need to respond since we've never requested /two with the popTarget
+
+          next =>
+            expect($('.viewport').scrollTop()).toBe(150)
+            history.back()
+
+          next.after 50, =>
             respond() # we need to respond since we've never requested /one with the popTarget
+
+          next =>
             expect($('.viewport').scrollTop()).toBe(50)
-
             history.forward()
-            u.setTimer 50, ->
-              # No need to respond since we requested /two with the popTarget
-              # when we went backwards
-              expect($('.viewport').scrollTop()).toBe(150)
 
-              history.forward()
-              u.setTimer 50, ->
-                respond() # we need to respond since we've never requested /three with the popTarget
-                expect($('.viewport').scrollTop()).toBe(250)
-                done()
+          next.after 50, =>
+            # No need to respond since we requested /two with the popTarget
+            # when we went backwards
+            expect($('.viewport').scrollTop()).toBe(150)
+            history.forward()
 
-      it 'restores the scroll position of two viewports marked with [up-viewport], but not configured in up.layout.config (bugfix)', (done) ->
-        up.history.config.popTargets = ['.container']
+          next.after 50, =>
+            respond() # we need to respond since we've never requested /three with the popTarget
 
-        html = """
-          <div class="container">
-            <div class="viewport1" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
-              <div class="content1" style="height: 5000px">content1</div>
+          next =>
+            expect($('.viewport').scrollTop()).toBe(250)
+
+        it 'restores the scroll position of two viewports marked with [up-viewport], but not configured in up.layout.config (bugfix)', asyncSpec (next) ->
+          up.history.config.popTargets = ['.container']
+
+          html = """
+            <div class="container">
+              <div class="viewport1" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
+                <div class="content1" style="height: 5000px">content1</div>
+              </div>
+              <div class="viewport2" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
+                <div class="content2" style="height: 5000px">content2</div>
+              </div>
             </div>
-            <div class="viewport2" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
-              <div class="content2" style="height: 5000px">content2</div>
-            </div>
-          </div>
-        """
+          """
 
-        respond = => @respondWith(html)
+          respond = => @respondWith(html)
 
-        $screen = affix('.screen')
-        $screen.html(html)
+          $screen = affix('.screen')
+          $screen.html(html)
 
-        up.replace('.content1, .content2', '/one', reveal: false)
-        respond()
+          up.replace('.content1, .content2', '/one', reveal: false)
 
-        $('.viewport1').scrollTop(3000)
-        $('.viewport2').scrollTop(3050)
+          next =>
+            respond()
 
-        expect('.viewport1').toBeScrolledTo(3000)
-        expect('.viewport2').toBeScrolledTo(3050)
+          next =>
+            $('.viewport1').scrollTop(3000)
+            $('.viewport2').scrollTop(3050)
+            expect('.viewport1').toBeScrolledTo(3000)
+            expect('.viewport2').toBeScrolledTo(3050)
 
-        up.replace('.content1, .content2', '/two', reveal: false)
-        respond()
+            up.replace('.content1, .content2', '/two', reveal: false)
 
-        u.setTimer 50, ->
+          next =>
+            respond()
 
-          expect(location.href).toEqualUrl('/two')
+          next.after 50, =>
+            expect(location.href).toMatchUrl('/two')
+            history.back()
 
-          history.back()
-
-          u.setTimer 50, ->
+          next.after 50, =>
             # we need to respond since we've never requested the original URL with the popTarget
             respond()
 
-            u.nextFrame ->
-              expect('.viewport1').toBeScrolledTo(3000)
-              expect('.viewport2').toBeScrolledTo(3050)
-              done()
+          next =>
+            expect('.viewport1').toBeScrolledTo(3000)
+            expect('.viewport2').toBeScrolledTo(3050)
 
 
     describe 'events', ->
 
-      it 'emits up:history:* events as the user goes forwards and backwards through history', (done) ->
-        up.proxy.config.cacheSize = 0
-        up.history.config.popTargets = ['.viewport']
+      describeCapability 'canPushState', ->
 
-        affix('.viewport .content')
-        respond = =>
-          @respondWith """
-            <div class="viewport">
-              <div class="content">content</div>
-            </div>
-            """
+        it 'emits up:history:* events as the user goes forwards and backwards through history', asyncSpec (next) ->
+          up.proxy.config.cacheSize = 0
+          up.history.config.popTargets = ['.viewport']
 
-        events = []
-        u.each ['up:history:pushed', 'up:history:restored'], (eventName) ->
-          up.on eventName, (event) ->
-            events.push [eventName, event.url]
+          affix('.viewport .content')
+          respond = =>
+            @respondWith """
+              <div class="viewport">
+                <div class="content">content</div>
+              </div>
+              """
 
-        normalize = up.history.normalizeUrl
+          events = []
+          u.each ['up:history:pushed', 'up:history:restored'], (eventName) ->
+            up.on eventName, (event) ->
+              events.push [eventName, event.url]
 
-        up.replace('.content', '/one')
-        respond()
+          normalize = up.history.normalizeUrl
 
-        expect(events).toEqual [
-          ['up:history:pushed', normalize('/one')]
-        ]
+          up.replace('.content', '/foo')
 
-        up.replace('.content', '/two')
-        respond()
-
-        expect(events).toEqual [
-          ['up:history:pushed', normalize('/one')]
-          ['up:history:pushed', normalize('/two')]
-        ]
-
-        up.replace('.content', '/three')
-        respond()
-
-        expect(events).toEqual [
-          ['up:history:pushed', normalize('/one')]
-          ['up:history:pushed', normalize('/two')]
-          ['up:history:pushed', normalize('/three')]
-        ]
-
-        history.back()
-        u.setTimer 50, ->
-          respond()
-
-          expect(events).toEqual [
-            ['up:history:pushed', normalize('/one')]
-            ['up:history:pushed', normalize('/two')]
-            ['up:history:pushed', normalize('/three')]
-            ['up:history:restored', normalize('/two')]
-          ]
-
-          history.back()
-          u.setTimer 50, ->
+          next =>
             respond()
 
+          next =>
             expect(events).toEqual [
-              ['up:history:pushed', normalize('/one')]
-              ['up:history:pushed', normalize('/two')]
-              ['up:history:pushed', normalize('/three')]
-              ['up:history:restored', normalize('/two')]
-              ['up:history:restored', normalize('/one')]
+              ['up:history:pushed', normalize('/foo')]
+            ]
+
+            up.replace('.content', '/bar')
+
+          next =>
+            respond()
+
+          next =>
+            expect(events).toEqual [
+              ['up:history:pushed', normalize('/foo')]
+              ['up:history:pushed', normalize('/bar')]
+            ]
+
+            up.replace('.content', '/baz')
+
+          next =>
+            respond()
+
+          next =>
+            expect(events).toEqual [
+              ['up:history:pushed', normalize('/foo')]
+              ['up:history:pushed', normalize('/bar')]
+              ['up:history:pushed', normalize('/baz')]
+            ]
+
+            history.back()
+
+          next.after 50, =>
+            respond()
+
+          next =>
+            expect(events).toEqual [
+              ['up:history:pushed', normalize('/foo')]
+              ['up:history:pushed', normalize('/bar')]
+              ['up:history:pushed', normalize('/baz')]
+              ['up:history:restored', normalize('/bar')]
+            ]
+
+            history.back()
+
+          next.after 50, =>
+            respond()
+
+          next =>
+            expect(events).toEqual [
+              ['up:history:pushed', normalize('/foo')]
+              ['up:history:pushed', normalize('/bar')]
+              ['up:history:pushed', normalize('/baz')]
+              ['up:history:restored', normalize('/bar')]
+              ['up:history:restored', normalize('/foo')]
             ]
 
             history.forward()
-            u.setTimer 50, ->
-              respond()
 
-              expect(events).toEqual [
-                ['up:history:pushed', normalize('/one')]
-                ['up:history:pushed', normalize('/two')]
-                ['up:history:pushed', normalize('/three')]
-                ['up:history:restored', normalize('/two')]
-                ['up:history:restored', normalize('/one')]
-                ['up:history:restored', normalize('/two')]
-              ]
+          next.after 50, =>
+            respond()
 
-              history.forward()
-              u.setTimer 50, ->
-                respond() # we need to respond since we've never requested /three with the popTarget
+          next =>
+            expect(events).toEqual [
+              ['up:history:pushed', normalize('/foo')]
+              ['up:history:pushed', normalize('/bar')]
+              ['up:history:pushed', normalize('/baz')]
+              ['up:history:restored', normalize('/bar')]
+              ['up:history:restored', normalize('/foo')]
+              ['up:history:restored', normalize('/bar')]
+            ]
 
-                expect(events).toEqual [
-                  ['up:history:pushed', normalize('/one')]
-                  ['up:history:pushed', normalize('/two')]
-                  ['up:history:pushed', normalize('/three')]
-                  ['up:history:restored', normalize('/two')]
-                  ['up:history:restored', normalize('/one')]
-                  ['up:history:restored', normalize('/two')]
-                  ['up:history:restored', normalize('/three')]
-                ]
+            history.forward()
 
-                done()
+          next.after 50, =>
+            respond() # we need to respond since we've never requested /baz with the popTarget
+
+          next =>
+            expect(events).toEqual [
+              ['up:history:pushed', normalize('/foo')]
+              ['up:history:pushed', normalize('/bar')]
+              ['up:history:pushed', normalize('/baz')]
+              ['up:history:restored', normalize('/bar')]
+              ['up:history:restored', normalize('/foo')]
+              ['up:history:restored', normalize('/bar')]
+              ['up:history:restored', normalize('/baz')]
+            ]

@@ -17,44 +17,55 @@ describe 'up.syntax', ->
 
       describe 'destructors', ->
 
-        it 'allows compilers to return a function to call when the compiled element is destroyed', ->
+        it 'allows compilers to return a function to call when the compiled element is destroyed', asyncSpec (next) ->
           destructor = jasmine.createSpy('destructor')
           up.compiler '.child', ($element) ->
             destructor
 
           up.hello(affix('.container .child'))
-          expect(destructor).not.toHaveBeenCalled()
 
-          up.destroy('.container')
-          expect(destructor).toHaveBeenCalled()
+          next =>
+            expect(destructor).not.toHaveBeenCalled()
+            up.destroy('.container')
 
-        it 'allows compilers to return an array of functions to all when the compiled element is destroyed', ->
+          next =>
+            expect(destructor).toHaveBeenCalled()
+
+        it 'allows compilers to return an array of functions to call when the compiled element is destroyed', asyncSpec (next) ->
           destructor1 = jasmine.createSpy('destructor1')
           destructor2 = jasmine.createSpy('destructor2')
           up.compiler '.child', ($element) ->
             [ destructor1, destructor2 ]
 
           up.hello(affix('.container .child'))
-          expect(destructor1).not.toHaveBeenCalled()
-          expect(destructor2).not.toHaveBeenCalled()
 
-          up.destroy('.container')
-          expect(destructor1).toHaveBeenCalled()
-          expect(destructor2).toHaveBeenCalled()
+          next =>
+            expect(destructor1).not.toHaveBeenCalled()
+            expect(destructor2).not.toHaveBeenCalled()
 
-        it "does not consider a returned array to be a destructor unless it's comprised entirely of functions", ->
+            up.destroy('.container')
+
+          next =>
+            expect(destructor1).toHaveBeenCalled()
+            expect(destructor2).toHaveBeenCalled()
+
+        it "does not consider a returned array to be a destructor unless it's comprised entirely of functions", asyncSpec (next) ->
           value1 = jasmine.createSpy('non-destructor')
           value2 = 'two'
           up.compiler '.child', ($element) ->
             [ value1, value2 ]
 
           up.hello(affix('.container .child'))
-          expect(value1).not.toHaveBeenCalled()
 
-          up.destroy('.container')
-          expect(value1).not.toHaveBeenCalled()
+          next =>
+            expect(value1).not.toHaveBeenCalled()
 
-        it 'runs all destructors if multiple compilers are applied to the same element', ->
+            up.destroy('.container')
+
+          next =>
+            expect(value1).not.toHaveBeenCalled()
+
+        it 'runs all destructors if multiple compilers are applied to the same element', asyncSpec (next) ->
           destructor1 = jasmine.createSpy('destructor1')
           up.compiler '.one', ($element) -> destructor1
           destructor2 = jasmine.createSpy('destructor2')
@@ -62,22 +73,28 @@ describe 'up.syntax', ->
 
           $element = affix('.one.two')
           up.hello($element)
-          expect(destructor1).not.toHaveBeenCalled()
-          expect(destructor2).not.toHaveBeenCalled()
 
-          up.destroy($element)
-          expect(destructor1).toHaveBeenCalled()
-          expect(destructor2).toHaveBeenCalled()
+          next =>
+            expect(destructor1).not.toHaveBeenCalled()
+            expect(destructor2).not.toHaveBeenCalled()
 
-        it 'does not throw an error if both container and child have a destructor, and the container gets destroyed', ->
+            up.destroy($element)
+
+          next =>
+            expect(destructor1).toHaveBeenCalled()
+            expect(destructor2).toHaveBeenCalled()
+
+        it 'does not throw an error if both container and child have a destructor, and the container gets destroyed', asyncSpec (next) ->
           up.compiler '.container', ($element) ->
             return (->)
 
           up.compiler '.child', ($element) ->
             return (->)
 
-          destruction = -> up.destroy('.container')
-          expect(destruction).not.toThrowError()
+          promise = up.destroy('.container')
+
+          promiseState2(promise).then (result) ->
+            expect(result.state).toEqual('fulfilled')
 
       it 'parses an up-data attribute as JSON and passes the parsed object as a second argument to the initializer', ->
 

@@ -19,12 +19,12 @@ up.dom = (($) ->
   Configures defaults for fragment insertion.
 
   @property up.dom.config
-  @param {Boolean} [options.runInlineScripts=true]
+  @param {boolean} [options.runInlineScripts=true]
     Whether inline `<script>` tags inside inserted HTML fragments will be executed.
-  @param {Boolean} [options.runLinkedScripts=false]
+  @param {boolean} [options.runLinkedScripts=false]
     Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
     the linked JavaScript file.
-  @param {String} [options.fallbacks=['body']]
+  @param {string} [options.fallbacks=['body']]
     When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
 
     The first selector that matches an element in the current page (or response) will be used.
@@ -33,7 +33,7 @@ up.dom = (($) ->
     It is recommend to always keep `'body'` as the last selector in the last in the case
     your server or load balancer renders an error message that does not contain your
     application layout.
-  @param {String} [options.fallbackTransition='none']
+  @param {string} [options.fallbackTransition='none']
     The transition to use when using a fallback target.
   @stable
   ###
@@ -55,7 +55,7 @@ up.dom = (($) ->
   Returns the URL the given element was retrieved from.
 
   @method up.dom.source
-  @param {String|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} selectorOrElement
   @experimental
   ###
   source = (selectorOrElement) ->
@@ -67,8 +67,8 @@ up.dom = (($) ->
   to an absolute selector.
 
   @function up.dom.resolveSelector
-  @param {String|Element|jQuery} selectorOrElement
-  @param {String|Element|jQuery} origin
+  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} origin
     The element that this selector resolution is relative to.
     That element's selector will be substituted for `&`.
   @internal
@@ -164,21 +164,21 @@ up.dom = (($) ->
   element that replaces it.
 
   @function up.replace
-  @param {String|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} selectorOrElement
     The CSS selector to update. You can also pass a DOM element or jQuery element
     here, in which case a selector will be inferred from the element's class and ID.
-  @param {String} url
+  @param {string} url
     The URL to fetch from the server.
-  @param {String} [options.failTarget='body']
+  @param {string} [options.failTarget='body']
     The CSS selector to update if the server sends a non-200 status code.
-  @param {String} [options.fallback]
+  @param {string} [options.fallback]
     The selector to update when the original target was not found in the page.
-  @param {String} [options.title]
+  @param {string} [options.title]
     The document title after the replacement.
 
     If the call pushes an history entry and this option is missing, the title is extracted from the response's `<title>` tag.
     You can also pass `false` to explicitly prevent the title from being updated.
-  @param {String} [options.method='get']
+  @param {string} [options.method='get']
     The HTTP method to use for the request.
   @param {Object|Array} [options.data]
     Parameters that should be sent as the request's payload.
@@ -187,34 +187,36 @@ up.dom = (($) ->
     the param names and the property values become the param values) or as
     an array of `{ name: 'param-name', value: 'param-value' }` objects
     (compare to jQuery's [`serializeArray`](https://api.jquery.com/serializeArray/)).
-  @param {String} [options.transition='none']
-  @param {String|Boolean} [options.history=true]
-    If a `String` is given, it is used as the URL the browser's location bar and history.
+  @param {string} [options.transition='none']
+  @param {string|boolean} [options.history=true]
+    If a string is given, it is used as the URL the browser's location bar and history.
     If omitted or true, the `url` argument will be used.
     If set to `false`, the history will remain unchanged.
-  @param {String|Boolean} [options.source=true]
-  @param {String} [options.reveal=false]
+  @param {boolean|string} [options.source=true]
+  @param {boolean|string} [options.reveal=false]
     Whether to [reveal](/up.reveal) the element being updated, by
     scrolling its containing viewport.
-  @param {Boolean} [options.restoreScroll=false]
+
+    You can also pass a CSS selector for the element to reveal.
+  @param {boolean} [options.restoreScroll=false]
     If set to true, Unpoly will try to restore the scroll position
     of all the viewports around or below the updated element. The position
     will be reset to the last known top position before a previous
     history change for the current URL.
-  @param {Boolean} [options.cache]
+  @param {boolean} [options.cache]
     Whether to use a [cached response](/up.proxy) if available.
-  @param {String} [options.historyMethod='push']
+  @param {string} [options.historyMethod='push']
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
-  @param {Boolean} [options.requireMatch=true]
+  @param {boolean} [options.requireMatch=true]
     Whether to raise an error if the given selector is missing in
     either the current page or in the response.
   @param {Element|jQuery} [options.origin]
     The element that triggered the replacement.
 
     The element's selector will be substituted for the `&` shorthand in the target selector.
-  @param {String} [options.layer='auto']
+  @param {string} [options.layer='auto']
     The name of the layer that ought to be updated. Valid values are
     `auto`, `page`, `modal` and `popup`.
 
@@ -222,22 +224,21 @@ up.dom = (($) ->
     same layer as the element that triggered the replacement (see `options.origin`).
     If that element is not known, or no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
-  @param {String} [options.failLayer='auto']
+  @param {string} [options.failLayer='auto']
     The name of the layer that ought to be updated if the server sends a non-200 status code.
 
   @return {Promise}
-    A promise that will be resolved when the page has been updated.
+    A promise that will be fulfilled when the page has been updated.
   @stable
   ###
   replace = (selectorOrElement, url, options) ->
     options = u.options(options)
 
-    if !up.browser.canPushState() && options.history != false
-      unless options.preload
-        up.browser.loadPage(url, u.only(options, 'method', 'data'))
-      return u.unresolvablePromise()
+    options.inspectResponse = fullLoad = -> up.browser.navigate(url, u.only(options, 'method', 'data'))
 
-    options.inspectResponse = -> up.browser.loadPage(url, u.only(options, 'method', 'data'))
+    if !up.browser.canPushState() && options.history != false
+      fullLoad() unless options.preload
+      return u.unresolvablePromise()
 
     successOptions = u.merge options,
       humanizedTarget: 'target'
@@ -248,80 +249,79 @@ up.dom = (($) ->
     u.renameKey(failureOptions, 'failTransition', 'transition')
     u.renameKey(failureOptions, 'failLayer', 'layer')
 
-    target = bestPreflightSelector(selectorOrElement, successOptions)
-    failTarget = bestPreflightSelector(options.failTarget, failureOptions)
+    try
+      improvedTarget = bestPreflightSelector(selectorOrElement, successOptions)
+      improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions)
+    catch e
+      # Since we're an async function, we should not throw exceptions but return a rejected promise.
+      # http://2ality.com/2016/03/promise-rejections-vs-exceptions.html
+      return Promise.reject(e)
 
     request =
       url: url
       method: options.method
       data: options.data
-      target: target
-      failTarget: failTarget
+      target: improvedTarget
+      failTarget: improvedFailTarget
       cache: options.cache
       preload: options.preload
       headers: options.headers
       timeout: options.timeout
 
-    onSuccess = (html, textStatus, xhr) ->
-      processResponse(true, target, url, request, xhr, successOptions)
+    onSuccess = (response) ->
+      processResponse(true, improvedTarget, response, successOptions)
 
-    onFailure = (xhr, textStatus, errorThrown) ->
-      rejection = -> u.rejectedPromise(xhr, textStatus, errorThrown)
-      if xhr.responseText
-        promise = processResponse(false, failTarget, url, request, xhr, failureOptions)
-        promise.then(rejection, rejection)
-      else
+    onFailure = (response) ->
+      rejection = -> Promise.reject(response)
+      if response.isMaterialError()
         rejection()
+      else
+        promise = processResponse(false, improvedFailTarget, response, failureOptions)
+        u.always(promise, rejection)
 
-    promise = up.ajax(request)
+    promise = up.request(request)
     promise = promise.then(onSuccess, onFailure)
     promise
 
   ###*
   @internal
   ###
-  processResponse = (isSuccess, selector, url, request, xhr, options) ->
-    options.method = u.normalizeMethod(u.option(up.protocol.methodFromXhr(xhr), options.method))
+  processResponse = (isSuccess, selector, response, options) ->
+    request = response.request
+    sourceUrl = response.url
+    historyUrl = sourceUrl
+    hash = request.hash
 
-    isReloadable = (options.method == 'GET')
+    if options.reveal == true && hash
+      # If the request URL had a #hash and options.reveal is not given, we reveal that #hash.
+      options.reveal = hash
+      historyUrl += hash
 
-    # The server can send us the current path using a header value.
-    # This way we know the actual URL if the server has redirected.
-    # TODO: This logic should be moved to up.proxy.
-    if urlFromServer = up.protocol.locationFromXhr(xhr)
-      url = urlFromServer
-      if isSuccess && up.proxy.isCachable(request)
-        newRequest =
-          url: url
-          method: up.protocol.methodFromXhr(xhr) # If the server redirects, we must use the signaled method (should be GET)
-          target: selector
-        up.proxy.alias(request, newRequest)
-    else if isReloadable
-      if query = u.requestDataAsQuery(options.data)
-        url = "#{url}?#{query}"
+    isReloadable = (response.method == 'GET')
 
     if isSuccess
       if isReloadable # e.g. GET returns 200 OK
-        options.history = url unless options.history is false || u.isString(options.history)
-        options.source  = url unless options.source  is false || u.isString(options.source)
+        options.history = historyUrl unless options.history is false || u.isString(options.history)
+        options.source  = sourceUrl unless options.source is false || u.isString(options.source)
       else # e.g. POST returns 200 OK
-        options.history = false  unless u.isString(options.history)
+        # We allow the developer to pass GETable URLs as { history } and { source } options.
+        options.history = false unless u.isString(options.history)
         options.source  = 'keep' unless u.isString(options.source)
     else
       if isReloadable # e.g. GET returns 500 Internal Server Error
-        options.history = url unless options.history is false
-        options.source  = url unless options.source  is false
+        options.history = historyUrl unless options.history is false
+        options.source  = sourceUrl unless options.source is false
       else # e.g. POST returns 500 Internal Server Error
-        options.source  = 'keep'
         options.history = false
+        options.source  = 'keep'
 
-    if shouldExtractTitle(options) && titleFromXhr = up.protocol.titleFromXhr(xhr)
-      options.title = titleFromXhr
+    if shouldExtractTitle(options) && response.title
+      options.title = response.title
 
     if options.preload
-      u.resolvedPromise()
+      Promise.resolve()
     else
-      extract(selector, xhr.responseText, options)
+      extract(selector, response.text, options)
 
   shouldExtractTitle = (options) ->
     not (options.title is false || u.isString(options.title) || (options.history is false && options.title isnt true))
@@ -355,12 +355,12 @@ up.dom = (($) ->
   discarded, since it didn't match the selector.
 
   @function up.extract
-  @param {String|Element|jQuery} selectorOrElement
-  @param {String} html
+  @param {string|Element|jQuery} selectorOrElement
+  @param {string} html
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace).
   @return {Promise}
-    A promise that will be resolved then the selector was updated
+    A promise that will be fulfilled then the selector was updated
     and all animation has finished.
   @stable
   ###
@@ -374,39 +374,50 @@ up.dom = (($) ->
 
       up.layout.saveScroll() unless options.saveScroll == false
 
-      # Allow callers to create the targeted element right before we swap.
-      options.provideTarget?()
-      response = parseResponse(html)
-      implantSteps = bestMatchingSteps(selectorOrElement, response, options)
+      try
+        # Allow callers to create the targeted element right before we swap.
+        options.provideTarget?()
+        responseDoc = parseResponseDoc(html)
+        extractSteps = bestMatchingSteps(selectorOrElement, responseDoc, options)
 
-      if shouldExtractTitle(options) && responseTitle = response.title()
-        options.title = responseTitle
-      updateHistoryAndTitle(options)
+        if shouldExtractTitle(options) && responseTitle = responseDoc.title()
+          options.title = responseTitle
+        updateHistoryAndTitle(options)
 
-      swapPromises = []
-      for step in implantSteps
-        up.log.group 'Updating %s', step.selector, ->
-          filterScripts(step.$new, options)
-          swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options)
-          swapPromises.push(swapPromise)
-          options.reveal = false # only reveal the first selector atom in the union
+        swapPromises = []
+        for step in extractSteps
+          up.log.group 'Updating %s', step.selector, ->
+            filterScripts(step.$new, options)
+            swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options)
+            swapPromises.push(swapPromise)
+            # When extracting multiple selectors, we only want to reveal the first element.
+            # So we set the { reveal } option to false for the next iteration.
+            # Note that we must copy the options hash instead of changing it in-place,  since the
+            # async swapElements() is scheduled for the next microtask and we must not change the options
+            # for the previous iteration.
+            options = u.merge(options, reveal: false)
 
-      # Delay all further links in the promise chain until all fragments have been swapped
-      $.when(swapPromises...)
+        # Delay all further links in the promise chain until all fragments have been swapped
+        Promise.all(swapPromises)
+
+      catch e
+        # Since we're an async function, we should not throw exceptions but return a rejected promise.
+        # See http://2ality.com/2016/03/promise-rejections-vs-exceptions.html
+        return Promise.reject(e)
 
   bestPreflightSelector = (selector, options) ->
-    cascade = new up.dom.ExtractCascade(selector, options)
+    cascade = new up.ExtractCascade(selector, options)
     cascade.bestPreflightSelector()
 
   bestMatchingSteps = (selector, response, options) ->
     options = u.merge(options, response: response)
-    cascade = new up.dom.ExtractCascade(selector, options)
+    cascade = new up.ExtractCascade(selector, options)
     cascade.bestMatchingSteps()
 
   filterScripts = ($element, options) ->
     runInlineScripts = u.option(options.runInlineScripts, config.runInlineScripts)
     runLinkedScripts = u.option(options.runLinkedScripts, config.runLinkedScripts)
-    $scripts = u.findWithSelf($element, 'script')
+    $scripts = u.selectInSubtree($element, 'script')
     for script in $scripts
       $script = $(script)
       isLinked = u.isPresent($script.attr('src'))
@@ -414,7 +425,7 @@ up.dom = (($) ->
       unless (isLinked && runLinkedScripts) || (isInline && runInlineScripts)
         $script.remove()
 
-  parseResponse = (html) ->
+  parseResponseDoc = (html) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags
     htmlElement = u.createElementFromHtml(html)
     title: ->
@@ -471,7 +482,7 @@ up.dom = (($) ->
       # Since we're keeping the element that was requested to be swapped,
       # there is nothing left to do here.
       emitFragmentKept(keepPlan)
-      promise = u.resolvedPromise()
+      promise = Promise.resolve()
 
     else
       # This needs to happen before prepareClean() below.
@@ -509,7 +520,7 @@ up.dom = (($) ->
 
       # Wrap the replacement as a destroy animation, so $old will
       # get marked as .up-destroying right away.
-      promise = destroy($old, { clean, animation: replacement })
+      promise = destroy($old, { clean, beforeWipe: replacement, log: false })
 
     promise
 
@@ -550,7 +561,7 @@ up.dom = (($) ->
         if options.descendantsOnly
           $partner = $new.find(partnerSelector)
         else
-          $partner = u.findWithSelf($new, partnerSelector)
+          $partner = u.selectInSubtree($new, partnerSelector)
         $partner = $partner.first()
         if $partner.length && $partner.is('[up-keep]')
           plan =
@@ -624,9 +635,9 @@ up.dom = (($) ->
     Event listeners may call this method to prevent the element from being preserved.
   @param {jQuery} event.$element
     The fragment that will be kept.
-  @param {jqQuery} event.$newElement
+  @param {jQuery} event.$newElement
     The discarded element.
-  @param {jQuery} event.newData
+  @param {Object} event.newData
     The value of the [`up-data`](/up-data) attribute of the discarded element,
     parsed as a JSON object.
   @stable
@@ -642,9 +653,9 @@ up.dom = (($) ->
   @event up:fragment:kept
   @param {jQuery} event.$element
     The fragment that has been kept.
-  @param {jqQuery} event.$newElement
+  @param {jQuery} event.$newElement
     The discarded element.
-  @param {jQuery} event.newData
+  @param {Object} event.newData
     The value of the [`up-data`](/up-data) attribute of the discarded element,
     parsed as a JSON object.
   @stable
@@ -668,9 +679,9 @@ up.dom = (($) ->
   event.
 
   @function up.hello
-  @param {String|Element|jQuery} selectorOrElement
-  @param {String|Element|jQuery} [options.origin]
-  @param {String|Element|jQuery} [options.kept]
+  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} [options.origin]
+  @param {string|Element|jQuery} [options.kept]
   @return {jQuery}
     The compiled element
   @stable
@@ -714,7 +725,7 @@ up.dom = (($) ->
 
   autofocus = ($element) ->
     selector = '[autofocus]:last'
-    $control = u.findWithSelf($element, selector)
+    $control = u.selectInSubtree($element, selector)
     if $control.length && $control.get(0) != document.activeElement
       $control.focus()
 
@@ -735,16 +746,16 @@ up.dom = (($) ->
   Returns `undefined` if no element matches these conditions.
 
   @function up.first
-  @param {String|Element|jQuery|Array<Element>} selectorOrElement
-  @param {String} options.layer
+  @param {string|Element|jQuery|Array<Element>} selectorOrElement
+  @param {string} options.layer
     The name of the layer in which to find the element. Valid values are
     `auto`, `page`, `modal` and `popup`.
-  @param {String|Element|jQuery} [options.origin]
+  @param {string|Element|jQuery} [options.origin]
     An second element or selector that can be referenced as `&` in the first selector:
 
         $input = $('input.email');
         up.first('.field:has(&)', $input); // returns the .field containing $input
-  @return {jQuery|Undefined}
+  @return {jQuery|undefined}
     The first element that is neither a ghost or being destroyed,
     or `undefined` if no such element was found.
   @experimental
@@ -804,55 +815,61 @@ up.dom = (($) ->
   Emits events [`up:fragment:destroy`](/up:fragment:destroy) and [`up:fragment:destroyed`](/up:fragment:destroyed).
   
   @function up.destroy
-  @param {String|Element|jQuery} selectorOrElement 
-  @param {String} [options.history]
+  @param {string|Element|jQuery} selectorOrElement
+  @param {string} [options.history]
     A URL that will be pushed as a new history entry when the element begins destruction.
-  @param {String} [options.title]
+  @param {string} [options.title]
     The document title to set when the element begins destruction.
-  @param {String|Function} [options.animation='none']
+  @param {string|Function} [options.animation='none']
     The animation to use before the element is removed from the DOM.
-  @param {Number} [options.duration]
+  @param {number} [options.duration]
     The duration of the animation. See [`up.animate()`](/up.animate).
-  @param {Number} [options.delay]
+  @param {number} [options.delay]
     The delay before the animation starts. See [`up.animate()`](/up.animate).
-  @param {String} [options.easing]
+  @param {string} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
-  @return {Deferred}
-    A promise that will be resolved once the element has been removed from the DOM.
+  @return {Promise}
+    A promise that will be fulfilled once the element has been removed from the DOM.
   @stable
   ###
   destroy = (selectorOrElement, options) ->
+    $element = $(selectorOrElement)
     options = u.options(options, animation: false)
 
-    $element = $(selectorOrElement)
-    unless $element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')
+    if shouldLogDestruction($element, options)
       destroyMessage = ['Destroying fragment %o', $element.get(0)]
       destroyedMessage = ['Destroyed fragment %o', $element.get(0)]
+
     if $element.length == 0
-      u.resolvedDeferred()
-    else if up.bus.nobodyPrevents('up:fragment:destroy', $element: $element, message: destroyMessage)
-      animateOptions = up.motion.animateOptions(options)
+      Promise.resolve()
+    else
+      up.emit 'up:fragment:destroy', $element: $element, message: destroyMessage
       $element.addClass('up-destroying')
       # If e.g. a modal or popup asks us to restore a URL, do this
       # before emitting `fragment:destroy`. This way up.navigate sees the
       # new URL and can assign/remove .up-current classes accordingly.
       updateHistoryAndTitle(options)
 
-      animationDeferred = u.presence(options.animation, u.isDeferred) ||
+      animate = ->
+        animateOptions = up.motion.animateOptions(options)
         up.motion.animate($element, options.animation, animateOptions)
 
-      animationDeferred.then ->
+      beforeWipe = options.beforeWipe || Promise.resolve()
+
+      wipe = ->
         options.clean ||= -> up.syntax.clean($element)
         options.clean()
+        up.syntax.clean($element)
         # Emit this while $element is still part of the DOM, so event
         # listeners bound to the document will receive the event.
         up.emit 'up:fragment:destroyed', $element: $element, message: destroyedMessage
         $element.remove()
-      animationDeferred
-    else
-      # Although someone prevented the destruction, keep a uniform API for
-      # callers by returning a Deferred that will never be resolved.
-      u.unresolvableDeferred()
+
+      animate().then(beforeWipe).then(wipe)
+
+  shouldLogDestruction = ($element, options) ->
+    # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
+    options.log != false && !$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')
 
   ###*
   Before a page fragment is being [destroyed](/up.destroy), this
@@ -864,8 +881,6 @@ up.dom = (($) ->
   @event up:fragment:destroy
   @param {jQuery} event.$element
     The page fragment that is about to be destroyed.
-  @param event.preventDefault()
-    Event listeners may call this method to prevent the fragment from being destroyed.
   @stable
   ###
 
@@ -895,10 +910,10 @@ up.dom = (($) ->
   don't usually need to give an URL when reloading.
 
   @function up.reload
-  @param {String|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} selectorOrElement
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace)
-  @param {String} [options.url]
+  @param {string} [options.url]
     The URL from which to reload the fragment.
     This defaults to the URL from which the fragment was originally loaded.
   @stable

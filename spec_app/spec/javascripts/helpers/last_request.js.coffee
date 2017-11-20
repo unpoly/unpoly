@@ -13,7 +13,7 @@ beforeEach ->
       options = args[0] || {}
     else
       options = firstArg
-      responseText = options.responseText
+      responseText = options.responseText || 'response-text'
     request = options.request || @lastRequest()
     request.respondWith
       status: options.status || 200

@@ -24,18 +24,18 @@ up.log = (($) ->
   Configures the logging output on the developer console.
 
   @property up.log.config
-  @param {Boolean} [options.enabled=false]
+  @param {boolean} [options.enabled=false]
     Whether Unpoly will print debugging information to the developer console.
 
     Debugging information includes which elements are being [compiled](/up.syntax)
     and which [events](/up.bus) are being emitted.
     Note that errors will always be printed, regardless of this setting.
-  @param {Boolean} [options.collapse=false]
+  @param {boolean} [options.collapse=false]
     Whether debugging information is printed as a collapsed tree.
 
     Set this to `true` if you are overwhelmed by the debugging information Unpoly
     prints to the developer console.
-  @param {String} [options.prefix='[UP] ']
+  @param {string} [options.prefix='[UP] ']
     A string to prepend to Unpoly's logging messages so you can distinguish it from your own messages.
   @stable
   ###
@@ -54,7 +54,7 @@ up.log = (($) ->
   Prints a debugging message to the browser console.
 
   @function up.log.debug
-  @param {String} message
+  @param {string} message
   @param {Array} args...
   @internal
   ###
@@ -66,7 +66,7 @@ up.log = (($) ->
   Prints a logging message to the browser console.
 
   @function up.puts
-  @param {String} message
+  @param {string} message
   @param {Array} args...
   @internal
   ###

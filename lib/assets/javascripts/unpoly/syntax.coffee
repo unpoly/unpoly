@@ -176,17 +176,17 @@ up.syntax = (($) ->
 
   
   @function up.compiler
-  @param {String} selector
+  @param {string} selector
     The selector to match.
-  @param {Number} [options.priority=0]
+  @param {number} [options.priority=0]
     The priority of this compilers.
     Compilers with a higher priority are run first.
     Two compilers with the same priority are run in the order they were registered.
-  @param {Boolean} [options.batch=false]
+  @param {boolean} [options.batch=false]
     If set to `true` and a fragment insertion contains multiple
     elements matching the selector, `compiler` is only called once
     with a jQuery collection containing all matching elements. 
-  @param {Boolean} [options.keep=false]
+  @param {boolean} [options.keep=false]
     If set to `true` compiled fragment will be [persisted](/up-keep) during
     [page updates](/a-up-target).
 
@@ -242,7 +242,7 @@ up.syntax = (($) ->
   Examples for built-in macros are [`up-dash`](/up-dash) and [`up-expand`](/up-expand).
 
   @function up.macro
-  @param {String} selector
+  @param {string} selector
     The selector to match.
   @param {Object} options
     See options for [`up.compiler()`](/up.compiler).
@@ -325,7 +325,7 @@ up.syntax = (($) ->
     up.log.group "Compiling fragment %o", $fragment.get(0), ->
       for queue in [macros, compilers]
         for compiler in queue
-          $matches = u.findWithSelf($fragment, compiler.selector)
+          $matches = u.selectInSubtree($fragment, compiler.selector)
 
           # Exclude all elements that are descendants of the subtrees we want to keep.
           $matches = $matches.filter ->
@@ -358,13 +358,12 @@ up.syntax = (($) ->
   @internal
   ###
   prepareClean = ($fragment) ->
-    destructors = []
-    u.findWithSelf($fragment, ".#{DESTRUCTIBLE_CLASS}").each ->
-      # Although destructible elements should always have an array of destructors, we might be
-      # destroying a clone of such an element. E.g. Unpoly creates a clone when keeping an
-      # [up-keep] element, and that clone still has the .up-destructible class.
-      if destructor = $(this).data(DESTRUCTORS_KEY)
-        destructors.push(destructor)
+    $candidates = u.selectInSubtree($fragment, ".#{DESTRUCTIBLE_CLASS}")
+    destructors = u.map $candidates, (candidate) -> $(candidate).data(DESTRUCTORS_KEY)
+    # Although destructible elements should always have an destructor function, we might be
+    # destroying a clone of such an element. E.g. Unpoly creates a clone when keeping an
+    # [up-keep] element, and that clone still has the .up-destructible class.
+    destructors = u.compact destructors
     u.sequence(destructors...)
 
   ###*
@@ -384,7 +383,7 @@ up.syntax = (($) ->
       up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
 
   @function up.syntax.data
-  @param {String|Element|jQuery} elementOrSelector
+  @param {string|Element|jQuery} elementOrSelector
   @return
     The JSON-decoded value of the `up-data` attribute.
 

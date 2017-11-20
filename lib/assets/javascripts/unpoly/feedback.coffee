@@ -43,7 +43,7 @@ up.feedback = (($) ->
   Sets default options for this module.
 
   @property up.feedback.config
-  @param {Number} [config.currentClasses]
+  @param {Array<string>} [config.currentClasses]
     An array of classes to set on [links that point the current location](/up-current).
   @stable
   ###
@@ -122,7 +122,7 @@ up.feedback = (($) ->
 
   ###*
   @function findActionableArea
-  @param {String|Element|jQuery} elementOrSelector
+  @param {string|Element|jQuery} elementOrSelector
   @internal
   ###
   findActionableArea = (elementOrSelector) ->
@@ -145,23 +145,14 @@ up.feedback = (($) ->
 
       var $button = $('button');
       $button.on('click', function() {
-        up.feedback.start($button);
-        up.ajax(...).always(function() {
-          up.feedback.stop($button);
-        });
-      });
-
-  Or shorter:
-
-      var $button = $('button');
-      $button.on('click', function() {
         up.feedback.start($button, function() {
-          up.ajax(...);
+          // the .up-active class will be removed when this promise resolves:
+          return up.request(...);
         });
       });
 
   @method up.feedback.start
-  @param {Element|jQuery|String} elementOrSelector
+  @param {Element|jQuery|string} elementOrSelector
     The element to mark as active
   @param {Function} [action]
     An optional function to run while the element is marked as loading.
@@ -175,7 +166,7 @@ up.feedback = (($) ->
     if action
       promise = action()
       if u.isPromise(promise)
-        promise.always -> stop($element)
+        u.always promise, -> stop($element)
       else
         up.warn('Expected block to return a promise, but got %o', promise)
       promise

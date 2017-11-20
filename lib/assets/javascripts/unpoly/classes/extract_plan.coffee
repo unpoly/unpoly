@@ -1,6 +1,6 @@
 u = up.util
 
-class up.dom.ExtractPlan
+class up.ExtractPlan
 
   constructor: (selector, options) ->
     @origin = options.origin

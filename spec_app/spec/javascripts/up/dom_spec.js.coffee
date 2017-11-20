@@ -23,43 +23,48 @@ describe 'up.dom', ->
 
           @respond = (options = {}) -> @respondWith(@responseText, options)
 
-        it 'replaces the given selector with the same selector from a freshly fetched page', (done) ->
-          promise = up.replace('.middle', '/path')
-          @respond()
-          promise.then ->
+        it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
+          up.replace('.middle', '/path')
+
+          next =>
+            @respond()
+
+          next.after 10, =>
             expect($('.before')).toHaveText('old-before')
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('old-after')
-            done()
 
-        it 'sends an X-Up-Target HTTP header along with the request', ->
-          up.replace('.middle', '/path')
-          request = @lastRequest()
-          expect(request.requestHeaders['X-Up-Target']).toEqual('.middle')
-
-        it 'returns a promise that will be resolved once the server response was received and the fragments were swapped', ->
+        it 'returns a promise that will be fulfilled once the server response was received and the fragments were swapped', asyncSpec (next) ->
           resolution = jasmine.createSpy()
           promise = up.replace('.middle', '/path')
           promise.then(resolution)
           expect(resolution).not.toHaveBeenCalled()
           expect($('.middle')).toHaveText('old-middle')
-          @respond()
-          expect(resolution).toHaveBeenCalled()
-          expect($('.middle')).toHaveText('new-middle')
+
+          next =>
+            @respond()
+
+          next =>
+            expect(resolution).toHaveBeenCalled()
+            expect($('.middle')).toHaveText('new-middle')
 
         describe 'cleaning up', ->
 
-          it 'calls destructors on the replaced element', ->
+          it 'calls destructors on the replaced element', asyncSpec (next) ->
             destructor = jasmine.createSpy('destructor')
             up.compiler '.container', -> destructor
             $container = affix('.container')
             up.hello($container)
             up.replace('.container', '/path')
-            @respondWith '<div class="container">new text</div>'
-            expect('.container').toHaveText('new text')
-            expect(destructor).toHaveBeenCalled()
 
-          it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', ->
+            next =>
+              @respondWith '<div class="container">new text</div>'
+
+            next =>
+              expect('.container').toHaveText('new text')
+              expect(destructor).toHaveBeenCalled()
+
+          it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec (next) ->
             # isSingletonElement() is true for body, but can't have the example replace the Jasmine test runner UI
             up.dom.knife.mock('isSingletonElement').and.callFake ($element) -> $element.is('.container')
             destructor = jasmine.createSpy('destructor')
@@ -67,184 +72,203 @@ describe 'up.dom', ->
             $container = affix('.container')
             up.hello($container)
             up.replace('.container', '/path')
-            @respondWith '<div class="container">new text</div>'
-            expect('.container').toHaveText('new text')
-            expect(destructor).toHaveBeenCalled()
+
+            next =>
+              @respondWith '<div class="container">new text</div>'
+
+            next =>
+              expect('.container').toHaveText('new text')
+              expect(destructor).toHaveBeenCalled()
 
         describe 'transitions', ->
 
-          it 'returns a promise that will be resolved once the server response was received and the swap transition has completed', (done) ->
+          it 'returns a promise that will be fulfilled once the server response was received and the swap transition has completed', asyncSpec (next) ->
             resolution = jasmine.createSpy()
             promise = up.replace('.middle', '/path', transition: 'cross-fade', duration: 50)
             promise.then(resolution)
             expect(resolution).not.toHaveBeenCalled()
             expect($('.middle')).toHaveText('old-middle')
-            @respond()
-            expect(resolution).not.toHaveBeenCalled()
-            u.setTimer 20, ->
-              expect(resolution).not.toHaveBeenCalled()
-              u.setTimer 80, ->
-                expect(resolution).toHaveBeenCalled()
-                done()
 
-          it 'ignores a { transition } option when replacing the body element', (done) ->
+            next =>
+              @respond()
+              expect(resolution).not.toHaveBeenCalled()
+
+            next.after 20, =>
+              expect(resolution).not.toHaveBeenCalled()
+
+            next.after 80, =>
+              expect(resolution).toHaveBeenCalled()
+
+          it 'ignores a { transition } option when replacing the body element', asyncSpec (next) ->
             up.dom.knife.mock('swapSingletonElement') # can't have the example replace the Jasmine test runner UI
             up.dom.knife.mock('destroy')  # if we don't swap the body, up.dom will destroy it
             replaceCallback = jasmine.createSpy()
             promise = up.replace('body', '/path', transition: 'cross-fade', duration: 50)
             promise.then(replaceCallback)
             expect(replaceCallback).not.toHaveBeenCalled()
-            @responseText = '<body>new text</body>'
-            @respond()
-            u.nextFrame ->
+
+            next =>
+              @responseText = '<body>new text</body>'
+              @respond()
+
+            next =>
               expect(replaceCallback).toHaveBeenCalled()
-              done()
-
-        describe 'when the server signals a redirect with X-Up-Location header (bugfix, logic should be moved to up.proxy)', ->
-
-          it 'considers a redirection URL an alias for the requested URL', ->
-            up.replace('.middle', '/foo')
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' })
-            up.replace('.middle', '/bar')
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-          it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', ->
-            up.replace('.middle', '/foo', method: 'post') # POST requests are not cached
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' })
-            up.replace('.middle', '/bar')
-            expect(jasmine.Ajax.requests.count()).toEqual(2)
-
-          it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', ->
-            up.replace('.middle', '/foo', failTarget: '.middle')
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' }, status: '500')
-            up.replace('.middle', '/bar')
-            expect(jasmine.Ajax.requests.count()).toEqual(2)
-
-          it "does not explode if the original request's { data } is a FormData object", ->
-            up.replace('.middle', '/foo', method: 'post', data: new FormData()) # POST requests are not cached
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respond(responseHeaders: { 'X-Up-Location': '/bar', 'X-Up-Method': 'GET' })
-            secondReplace = -> up.replace('.middle', '/bar')
-            expect(secondReplace).not.toThrowError()
 
         describe 'with { data } option', ->
 
-          it "uses the given params as a non-GET request's payload", ->
+          it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
             up.replace('.middle', '/path', method: 'put', data: givenParams)
-            expect(@lastRequest().data()['foo-key']).toEqual(['foo-value'])
-            expect(@lastRequest().data()['bar-key']).toEqual(['bar-value'])
 
-          it "encodes the given params into the URL of a GET request", ->
+            next =>
+              expect(@lastRequest().data()['foo-key']).toEqual(['foo-value'])
+              expect(@lastRequest().data()['bar-key']).toEqual(['bar-value'])
+
+          it "encodes the given params into the URL of a GET request", asyncSpec (next) ->
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
             up.replace('.middle', '/path', method: 'get', data: givenParams)
-            expect(@lastRequest().url).toEqualUrl('/path?foo-key=foo-value&bar-key=bar-value')
+            next => expect(@lastRequest().url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
 
-        it 'uses a HTTP method given as { method } option', ->
+        it 'uses a HTTP method given as { method } option', asyncSpec (next) ->
           up.replace('.middle', '/path', method: 'put')
-          expect(@lastRequest()).toHaveRequestMethod('PUT')
+          next => expect(@lastRequest()).toHaveRequestMethod('PUT')
 
         describe 'when the server responds with a non-200 status code', ->
 
-          it 'replaces the <body> instead of the given selector', ->
+          it 'replaces the first fallback instead of the given selector', asyncSpec (next) ->
+            up.dom.config.fallbacks = ['.fallback']
+            affix('.fallback')
+
             # can't have the example replace the Jasmine test runner UI
-            extractSpy = up.dom.knife.mock('extract').and.returnValue(u.resolvedPromise())
-            up.replace('.middle', '/path')
-            @respond(status: 500)
-            expect(extractSpy).toHaveBeenCalledWith('body', jasmine.any(String), jasmine.any(Object))
+            extractSpy = up.dom.knife.mock('extract').and.returnValue(Promise.resolve())
 
-          it 'uses a target selector given as { failTarget } option', ->
-            up.replace('.middle', '/path', failTarget: '.after')
-            @respond(status: 500)
-            expect($('.middle')).toHaveText('old-middle')
-            expect($('.after')).toHaveText('new-after')
+            next => up.replace('.middle', '/path')
+            next => @respond(status: 500)
+            next => expect(extractSpy).toHaveBeenCalledWith('.fallback', jasmine.any(String), jasmine.any(Object))
 
-          it 'rejects the returned promise', ->
+          it 'uses a target selector given as { failTarget } option', asyncSpec (next) ->
+            next =>
+              up.replace('.middle', '/path', failTarget: '.after')
+
+            next =>
+              @respond(status: 500)
+
+            next =>
+              expect($('.middle')).toHaveText('old-middle')
+              expect($('.after')).toHaveText('new-after')
+
+          it 'rejects the returned promise', (done) ->
             affix('.after')
             promise = up.replace('.middle', '/path', failTarget: '.after')
-            expect(promise.state()).toEqual('pending')
-            @respond(status: 500)
-            expect(promise.state()).toEqual('rejected')
+
+            u.nextFrame =>
+              promiseState promise, (state) =>
+                expect(state).toEqual('pending')
+
+                @respond(status: 500)
+
+                u.nextFrame =>
+                  promiseState promise, (state) =>
+                    expect(state).toEqual('rejected')
+                    done()
 
         describe 'when the request times out', ->
 
-          it "doesn't crash and rejects the returned promise", (done) ->
+          it "doesn't crash and rejects the returned promise", asyncSpec (next) ->
             jasmine.clock().install() # required by responseTimeout()
             affix('.target')
-            promise = up.replace('.middle', '/path', timeout: 10 * 1000)
-            expect(promise.state()).toEqual('pending')
-            jasmine.clock().tick(11 * 1000)
-            expect(promise.state()).toEqual('rejected')
-            done()
+            promise = up.replace('.middle', '/path', timeout: 50)
+
+            next =>
+              # See that the correct timeout value has been set on the XHR instance
+              expect(@lastRequest().timeout).toEqual(50)
+
+            next.await =>
+              # See that the promise is still pending before the timeout
+              promiseState2(promise).then (result) -> expect(result.state).toEqual('pending')
+
+            next =>
+              @lastRequest().responseTimeout()
+
+            next.await =>
+              promiseState2(promise).then (result) -> expect(result.state).toEqual('rejected')
 
         describe 'when there is a network issue', ->
 
           it "doesn't crash and rejects the returned promise", (done) ->
             affix('.target')
             promise = up.replace('.middle', '/path')
-            @lastRequest().responseError()
-            u.nextFrame ->
-              expect(promise.state()).toEqual('rejected')
-              done()
+
+            u.nextFrame =>
+              promiseState promise, (state) =>
+                expect(state).toEqual('pending')
+                @lastRequest().responseError()
+                u.nextFrame =>
+                  promiseState promise, (state) =>
+                    expect(state).toEqual('rejected')
+                    done()
 
         describe 'history', ->
+
+          beforeEach ->
+            up.history.config.enabled = true
 
           it 'should set the browser location to the given URL', (done) ->
             promise = up.replace('.middle', '/path')
             @respond()
             promise.then ->
-              expect(location.href).toEqualUrl('/path')
+              expect(location.href).toMatchUrl('/path')
               done()
 
-          it 'does not add a history entry after non-GET requests', ->
-            promise = up.replace('.middle', '/path', method: 'post')
-            @respond()
-            expect(location.href).toEqualUrl(@hrefBeforeExample)
+          it 'does not add a history entry after non-GET requests', asyncSpec (next) ->
+            up.replace('.middle', '/path', method: 'post')
+            next => @respond()
+            next => expect(location.href).toMatchUrl(@hrefBeforeExample)
 
-          it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', ->
-            promise = up.replace('.middle', '/path', method: 'post')
-            @respond(responseHeaders: { 'X-Up-Method': 'GET' })
-            expect(location.href).toEqualUrl('/path')
+          it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', asyncSpec (next) ->
+            up.replace('.middle', '/requested-path', method: 'post')
+            next => @respond(responseHeaders:
+              'X-Up-Method': 'GET'
+              'X-Up-Location': '/signaled-path'
+            )
+            next => expect(location.href).toMatchUrl('/signaled-path')
 
-          it 'does not a history entry after a failed GET-request', ->
-            promise = up.replace('.middle', '/path', method: 'post', failTarget: '.middle')
-            @respond(status: 500)
-            expect(location.href).toEqualUrl(@hrefBeforeExample)
+          it 'does not a history entry after a failed GET-request', asyncSpec (next) ->
+            up.replace('.middle', '/path', method: 'post', failTarget: '.middle')
+            next => @respond(status: 500)
+            next => expect(location.href).toMatchUrl(@hrefBeforeExample)
 
-          it 'does not add a history entry with { history: false } option', ->
-            promise = up.replace('.middle', '/path', history: false)
-            @respond()
-            expect(location.href).toEqualUrl(@hrefBeforeExample)
+          it 'does not add a history entry with { history: false } option', asyncSpec (next) ->
+            up.replace('.middle', '/path', history: false)
+            next => @respond()
+            next => expect(location.href).toMatchUrl(@hrefBeforeExample)
 
-          it "detects a redirect's new URL when the server sets an X-Up-Location header", ->
-            promise = up.replace('.middle', '/path')
-            @respond(responseHeaders: { 'X-Up-Location': '/other-path' })
-            expect(location.href).toEqualUrl('/other-path')
+          it "detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec (next) ->
+            up.replace('.middle', '/path')
+            next => @respond(responseHeaders: { 'X-Up-Location': '/other-path' })
+            next => expect(location.href).toMatchUrl('/other-path')
 
-          it 'adds params from a { data } option to the URL of a GET request', ->
-            promise = up.replace('.middle', '/path', data: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
-            @respond()
-            expect(location.href).toEqualUrl('/path?foo-key=foo%20value&bar-key=bar%20value')
+          it 'adds params from a { data } option to the URL of a GET request', asyncSpec (next) ->
+            up.replace('.middle', '/path', data: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
+            next => @respond()
+            next => expect(location.href).toMatchUrl('/path?foo-key=foo%20value&bar-key=bar%20value')
 
           describe 'if a URL is given as { history } option', ->
 
-            it 'uses that URL as the new location after a GET request', ->
-              promise = up.replace('.middle', '/path', history: '/given-path')
-              @respond(failTarget: '.middle')
-              expect(location.href).toEqualUrl('/given-path')
+            it 'uses that URL as the new location after a GET request', asyncSpec (next) ->
+              up.replace('.middle', '/path', history: '/given-path')
+              next => @respond(failTarget: '.middle')
+              next => expect(location.href).toMatchUrl('/given-path')
 
-            it 'adds a history entry after a non-GET request', ->
-              promise = up.replace('.middle', '/path', method: 'post', history: '/given-path')
-              @respond(failTarget: '.middle')
-              expect(location.href).toEqualUrl('/given-path')
+            it 'adds a history entry after a non-GET request', asyncSpec (next) ->
+              up.replace('.middle', '/path', method: 'post', history: '/given-path')
+              next => @respond(failTarget: '.middle')
+              next => expect(location.href).toMatchUrl('/given-path')
 
-            it 'does not add a history entry after a failed non-GET request', ->
-              promise = up.replace('.middle', '/path', method: 'post', history: '/given-path', failTarget: '.middle')
-              @respond(failTarget: '.middle', status: 500)
-              expect(location.href).toEqualUrl(@hrefBeforeExample)
+            it 'does not add a history entry after a failed non-GET request', asyncSpec (next) ->
+              up.replace('.middle', '/path', method: 'post', history: '/given-path', failTarget: '.middle')
+              next => @respond(failTarget: '.middle', status: 500)
+              next => expect(location.href).toMatchUrl(@hrefBeforeExample)
 
         describe 'source', ->
 
@@ -255,72 +279,44 @@ describe 'up.dom', ->
               expect($('.middle').attr('up-source')).toMatch(/\/path$/)
               done()
 
-          it 'reuses the previous source for a non-GET request (since that is reloadable)', ->
+          it 'reuses the previous source for a non-GET request (since that is reloadable)', asyncSpec (next) ->
             @oldMiddle.attr('up-source', '/previous-source')
             up.replace('.middle', '/path', method: 'post')
-            @respond()
-            expect($('.middle')).toHaveText('new-middle')
-            expect(up.dom.source('.middle')).toEqualUrl('/previous-source')
+            next =>
+              @respond()
+            next =>
+              expect($('.middle')).toHaveText('new-middle')
+              expect(up.dom.source('.middle')).toMatchUrl('/previous-source')
 
           describe 'if a URL is given as { source } option', ->
 
-            it 'uses that URL as the source for a GET request', ->
-              promise = up.replace('.middle', '/path', source: '/given-path')
-              @respond()
-              expect(up.dom.source('.middle')).toEqualUrl('/given-path')
+            it 'uses that URL as the source for a GET request', asyncSpec (next) ->
+              up.replace('.middle', '/path', source: '/given-path')
+              next => @respond()
+              next => expect(up.dom.source('.middle')).toMatchUrl('/given-path')
 
-            it 'uses that URL as the source after a non-GET request', ->
-              promise = up.replace('.middle', '/path', method: 'post', source: '/given-path')
-              @respond()
-              expect(up.dom.source('.middle')).toEqualUrl('/given-path')
+            it 'uses that URL as the source after a non-GET request', asyncSpec (next) ->
+              up.replace('.middle', '/path', method: 'post', source: '/given-path')
+              next => @respond()
+              next => expect(up.dom.source('.middle')).toMatchUrl('/given-path')
 
-            it 'ignores the option and reuses the previous source after a failed non-GET request', ->
+            it 'ignores the option and reuses the previous source after a failed non-GET request', asyncSpec (next) ->
               @oldMiddle.attr('up-source', '/previous-source')
-              promise = up.replace('.middle', '/path', method: 'post', source: '/given-path', failTarget: '.middle')
-              @respond(status: 500)
-              expect(up.dom.source('.middle')).toEqualUrl('/previous-source')
+              up.replace('.middle', '/path', method: 'post', source: '/given-path', failTarget: '.middle')
+              next => @respond(status: 500)
+              next => expect(up.dom.source('.middle')).toMatchUrl('/previous-source')
 
         describe 'document title', ->
 
-          it "sets the document title to the response <title>", ->
-            affix('.container').text('old container text')
-            up.replace('.container', '/path')
-            @respondWith """
-              <html>
-                <head>
-                  <title>Title from HTML</title>
-                </head>
-                <body>
-                  <div class='container'>
-                    new container text
-                  </div>
-                </body>
-              </html>
-            """
-            expect($('.container')).toHaveText('new container text')
-            expect(document.title).toBe('Title from HTML')
+          beforeEach ->
+            up.history.config.enabled = true
 
-          it "sets the document title to an 'X-Up-Title' header in the response", ->
+          it "sets the document title to the response <title>", asyncSpec (next) ->
             affix('.container').text('old container text')
             up.replace('.container', '/path')
-            @respondWith
-              responseHeaders:
-                'X-Up-Title': 'Title from header'
-              responseText: """
-                <div class='container'>
-                  new container text
-                </div>
-                """
-            expect($('.container')).toHaveText('new container text')
-            expect(document.title).toBe('Title from header')
 
-          it "prefers the X-Up-Title header to the response <title>", ->
-            affix('.container').text('old container text')
-            up.replace('.container', '/path')
-            @respondWith
-              responseHeaders:
-                'X-Up-Title': 'Title from header'
-              responseText: """
+            next =>
+              @respondWith """
                 <html>
                   <head>
                     <title>Title from HTML</title>
@@ -332,85 +328,145 @@ describe 'up.dom', ->
                   </body>
                 </html>
               """
-            expect($('.container')).toHaveText('new container text')
-            expect(document.title).toBe('Title from header')
 
-          it "sets the document title to the response <title> with { history: false, title: true } options (bugfix)", ->
+            next =>
+              expect($('.container')).toHaveText('new container text')
+              expect(document.title).toBe('Title from HTML')
+
+          it "sets the document title to an 'X-Up-Title' header in the response", asyncSpec (next) ->
             affix('.container').text('old container text')
-            up.replace('.container', '/path', history: false, title: true)
-            @respondWith """
-              <html>
-                <head>
-                  <title>Title from HTML</title>
-                </head>
-                <body>
+            up.replace('.container', '/path')
+
+            next =>
+              @respondWith
+                responseHeaders:
+                  'X-Up-Title': 'Title from header'
+                responseText: """
                   <div class='container'>
                     new container text
                   </div>
-                </body>
-              </html>
-            """
-            expect($('.container')).toHaveText('new container text')
-            expect(document.title).toBe('Title from HTML')
+                  """
 
-          it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', ->
+            next =>
+              expect($('.container')).toHaveText('new container text')
+              expect(document.title).toBe('Title from header')
+
+          it "prefers the X-Up-Title header to the response <title>", asyncSpec (next) ->
+            affix('.container').text('old container text')
+            up.replace('.container', '/path')
+
+            next =>
+              @respondWith
+                responseHeaders:
+                  'X-Up-Title': 'Title from header'
+                responseText: """
+                  <html>
+                    <head>
+                      <title>Title from HTML</title>
+                    </head>
+                    <body>
+                      <div class='container'>
+                        new container text
+                      </div>
+                    </body>
+                  </html>
+                """
+
+            next =>
+              expect($('.container')).toHaveText('new container text')
+              expect(document.title).toBe('Title from header')
+
+          it "sets the document title to the response <title> with { history: false, title: true } options (bugfix)", asyncSpec (next) ->
+            affix('.container').text('old container text')
+            up.replace('.container', '/path', history: false, title: true)
+
+            next =>
+              @respondWith """
+                <html>
+                  <head>
+                    <title>Title from HTML</title>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              """
+
+            next =>
+              expect($('.container')).toHaveText('new container text')
+              expect(document.title).toBe('Title from HTML')
+
+          it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec (next) ->
             affix('.container').text('old container text')
             document.title = 'old document title'
             up.replace('.container', '/path', history: false, title: true)
 
-            @respondWith """
-              <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
-                <g>
-                  <title>SVG Title Demo example</title>
-                  <rect x="10" y="10" width="200" height="50" style="fill:none; stroke:blue; stroke-width:1px"/>
-                </g>
-              </svg>
+            next =>
+              @respondWith """
+                <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+                  <g>
+                    <title>SVG Title Demo example</title>
+                    <rect x="10" y="10" width="200" height="50" style="fill:none; stroke:blue; stroke-width:1px"/>
+                  </g>
+                </svg>
 
-              <div class='container'>
-                new container text
-              </div>
-            """
-            expect($('.container')).toHaveText('new container text')
-            expect(document.title).toBe('old document title')
+                <div class='container'>
+                  new container text
+                </div>
+              """
 
-          it "does not extract the title from the response or HTTP header if history isn't updated", ->
+            next =>
+              expect($('.container')).toHaveText('new container text')
+              expect(document.title).toBe('old document title')
+
+          it "does not extract the title from the response or HTTP header if history isn't updated", asyncSpec (next) ->
             affix('.container').text('old container text')
             document.title = 'old document title'
             up.replace('.container', '/path', history: false)
-            @respondWith
-              responseHeaders:
-                'X-Up-Title': 'Title from header'
-              responseText: """
-              <html>
-                <head>
-                  <title>Title from HTML</title>
-                </head>
-                <body>
-                  <div class='container'>
-                    new container text
-                  </div>
-                </body>
-              </html>
-            """
-            expect(document.title).toBe('old document title')
 
-          it 'allows to pass an explicit title as { title } option', ->
+            next =>
+              @respondWith
+                responseHeaders:
+                  'X-Up-Title': 'Title from header'
+                responseText: """
+                <html>
+                  <head>
+                    <title>Title from HTML</title>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              """
+
+            next =>
+              expect(document.title).toBe('old document title')
+
+          it 'allows to pass an explicit title as { title } option', asyncSpec (next) ->
             affix('.container').text('old container text')
             up.replace('.container', '/path', title: 'Title from options')
-            @respondWith """
-              <html>
-                <head>
-                  <title>Title from HTML</title>
-                </head>
-                <body>
-                  <div class='container'>
-                    new container text
-                  </div>
-                </body>
-              </html>
-            """
-            expect($('.container')).toHaveText('new container text')
-            expect(document.title).toBe('Title from options')
+
+            next =>
+              @respondWith """
+                <html>
+                  <head>
+                    <title>Title from HTML</title>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              """
+
+            next =>
+              expect($('.container')).toHaveText('new container text')
+              expect(document.title).toBe('Title from options')
 
         describe 'selector processing', ->
 
@@ -475,167 +531,234 @@ describe 'up.dom', ->
             beforeEach ->
               up.dom.config.fallbacks = []
 
-            it 'tries selectors from options.fallback before making a request', ->
+            it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
               affix('.box').text('old box')
               up.replace('.unknown', '/path', fallback: '.box')
-              @respondWith '<div class="box">new box</div>'
-              expect('.box').toHaveText('new box')
 
-            it 'throws an error if all alternatives are exhausted', ->
-              replacement = -> up.replace('.unknown', '/path', fallback: '.more-unknown')
-              expect(replacement).toThrowError(/Could not find target in current page/i)
+              next => @respondWith '<div class="box">new box</div>'
+              next => expect('.box').toHaveText('new box')
 
-            it 'considers a union selector to be missing if one of its selector-atoms are missing', ->
+            it 'rejects the promise if all alternatives are exhausted', (done) ->
+              promise = up.replace('.unknown', '/path', fallback: '.more-unknown')
+              promise.catch (e) ->
+                expect(e).toBeError(/Could not find target in current page/i)
+                done()
+
+            it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
               affix('.target').text('old target')
               affix('.fallback').text('old fallback')
               up.replace('.target, .unknown', '/path', fallback: '.fallback')
-              @respondWith """
-                <div class="target">new target</div>
-                <div class="fallback">new fallback</div>
-              """
-              expect('.target').toHaveText('old target')
-              expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', ->
+              next =>
+                @respondWith """
+                  <div class="target">new target</div>
+                  <div class="fallback">new fallback</div>
+                """
+
+              next =>
+                expect('.target').toHaveText('old target')
+                expect('.fallback').toHaveText('new fallback')
+
+            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
               up.dom.config.fallbacks = ['.existing']
               affix('.existing').text('old existing')
               up.replace('.unknown', '/path')
-              @respondWith '<div class="existing">new existing</div>'
-              expect('.existing').toHaveText('new existing')
+              next => @respondWith '<div class="existing">new existing</div>'
+              next => expect('.existing').toHaveText('new existing')
 
-            it 'does not try a selector from up.dom.config.fallbacks if options.fallback is false', ->
+            it 'does not try a selector from up.dom.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
               up.dom.config.fallbacks = ['.existing']
               affix('.existing').text('old existing')
-              replacement = -> up.replace('.unknown', '/path', fallback: false)
-              expect(replacement).toThrowError(/Could not find target in current page/i)
+              up.replace('.unknown', '/path', fallback: false).catch (e) ->
+                expect(e).toBeError(/Could not find target in current page/i)
+                done()
 
           describe 'when selectors are missing on the page after the request was made', ->
 
             beforeEach ->
               up.dom.config.fallbacks = []
 
-            it 'tries selectors from options.fallback before swapping elements', ->
+            it 'tries selectors from options.fallback before swapping elements', asyncSpec (next) ->
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path', fallback: '.fallback')
               $target.remove()
-              @respondWith """
-                <div class="target">new target</div>
-                <div class="fallback">new fallback</div>
-              """
-              expect('.fallback').toHaveText('new fallback')
 
-            it 'throws an error if all alternatives are exhausted', ->
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
-              up.replace('.target', '/path', fallback: '.fallback')
-              $target.remove()
-              $fallback.remove()
-              respond = =>
+              next =>
                 @respondWith """
                   <div class="target">new target</div>
                   <div class="fallback">new fallback</div>
                 """
-              expect(respond).toThrowError(/Could not find target in current page/i)
 
-            it 'considers a union selector to be missing if one of its selector-atoms are missing', ->
+              next =>
+                expect('.fallback').toHaveText('new fallback')
+
+            it 'rejects the promise if all alternatives are exhausted', (done) ->
+              $target = affix('.target').text('old target')
+              $fallback = affix('.fallback').text('old fallback')
+              promise = up.replace('.target', '/path', fallback: '.fallback')
+              $target.remove()
+              $fallback.remove()
+
+              u.nextFrame =>
+                @respondWith """
+                  <div class="target">new target</div>
+                  <div class="fallback">new fallback</div>
+                """
+
+                u.nextFrame =>
+                  promiseState promise, (state, value) ->
+                    expect(state).toEqual('rejected')
+                    expect(value).toBeError(/Could not find target in current page/i)
+                    done()
+
+            it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
               $target = affix('.target').text('old target')
               $target2 = affix('.target2').text('old target2')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target, .target2', '/path', fallback: '.fallback')
               $target2.remove()
-              @respondWith """
-                <div class="target">new target</div>
-                <div class="target2">new target2</div>
-                <div class="fallback">new fallback</div>
-              """
-              expect('.target').toHaveText('old target')
-              expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', ->
+              next =>
+                @respondWith """
+                  <div class="target">new target</div>
+                  <div class="target2">new target2</div>
+                  <div class="fallback">new fallback</div>
+                """
+              next =>
+                expect('.target').toHaveText('old target')
+                expect('.fallback').toHaveText('new fallback')
+
+            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
               up.dom.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path')
               $target.remove()
-              @respondWith """
-                <div class="target">new target</div>
-                <div class="fallback">new fallback</div>
-              """
-              expect('.fallback').toHaveText('new fallback')
 
-            it 'does not try a selector from up.dom.config.fallbacks if options.fallback is false', ->
-              up.dom.config.fallbacks = ['.fallback']
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
-              up.replace('.target', '/path', fallback: false)
-              $target.remove()
-              respond = =>
+              next =>
                 @respondWith """
                   <div class="target">new target</div>
                   <div class="fallback">new fallback</div>
                 """
-              expect(respond).toThrowError(/Could not find target in current page/i)
+
+              next =>
+                expect('.fallback').toHaveText('new fallback')
+
+            it 'does not try a selector from up.dom.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
+              up.dom.config.fallbacks = ['.fallback']
+              $target = affix('.target').text('old target')
+              $fallback = affix('.fallback').text('old fallback')
+              promise = up.replace('.target', '/path', fallback: false)
+              $target.remove()
+
+              u.nextFrame =>
+                @respondWith """
+                  <div class="target">new target</div>
+                  <div class="fallback">new fallback</div>
+                """
+
+                promise.catch (e) ->
+                  expect(e).toBeError(/Could not find target in current page/i)
+                  done()
 
           describe 'when selectors are missing in the response', ->
 
             beforeEach ->
               up.dom.config.fallbacks = []
 
-            it 'tries selectors from options.fallback before swapping elements', ->
+            it 'tries selectors from options.fallback before swapping elements', asyncSpec (next) ->
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path', fallback: '.fallback')
-              @respondWith """
-                <div class="fallback">new fallback</div>
-              """
-              expect('.target').toHaveText('old target')
-              expect('.fallback').toHaveText('new fallback')
 
-            it 'throws an error if all alternatives are exhausted', ->
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
-              up.replace('.target', '/path', fallback: '.fallback')
-              respond = =>
+              next =>
                 @respondWith """
-                  <div class="unexpected">new unexpected</div>
+                  <div class="fallback">new fallback</div>
                 """
-              expect(respond).toThrowError(/Could not find target in response/i)
 
-            it 'considers a union selector to be missing if one of its selector-atoms are missing', ->
+              next =>
+                expect('.target').toHaveText('old target')
+                expect('.fallback').toHaveText('new fallback')
+
+            describe 'if all alternatives are exhausted', ->
+
+              it 'rejects the promise', (done) ->
+                $target = affix('.target').text('old target')
+                $fallback = affix('.fallback').text('old fallback')
+                promise = up.replace('.target', '/path', fallback: '.fallback')
+
+                u.nextFrame =>
+                  @respondWith '<div class="unexpected">new unexpected</div>'
+
+                promise.catch (e) ->
+                  expect(e).toBeError(/Could not find target in response/i)
+                  done()
+
+              it 'shows a link to open the unexpected response', (done) ->
+                $target = affix('.target').text('old target')
+                $fallback = affix('.fallback').text('old fallback')
+                promise = up.replace('.target', '/path', fallback: '.fallback')
+                navigate = spyOn(up.browser, 'navigate')
+
+                u.nextFrame =>
+                  @respondWith '<div class="unexpected">new unexpected</div>'
+
+                promise.catch (e) ->
+                  $toast = $('.up-toast')
+                  expect($toast).toExist()
+                  $inspectLink = $toast.find(".up-toast-action:contains('Open response')")
+                  expect($inspectLink).toExist()
+                  expect(navigate).not.toHaveBeenCalled()
+
+                  Trigger.clickSequence($inspectLink)
+
+                  u.nextFrame =>
+                    expect(navigate).toHaveBeenCalledWith('/path', {})
+                    done()
+
+            it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
               $target = affix('.target').text('old target')
               $target2 = affix('.target2').text('old target2')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target, .target2', '/path', fallback: '.fallback')
-              @respondWith """
-                <div class="target">new target</div>
-                <div class="fallback">new fallback</div>
-              """
-              expect('.target').toHaveText('old target')
-              expect('.target2').toHaveText('old target2')
-              expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', ->
+              next =>
+                @respondWith """
+                  <div class="target">new target</div>
+                  <div class="fallback">new fallback</div>
+                """
+
+              next =>
+                expect('.target').toHaveText('old target')
+                expect('.target2').toHaveText('old target2')
+                expect('.fallback').toHaveText('new fallback')
+
+            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
               up.dom.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path')
-              @respondWith """
-                <div class="fallback">new fallback</div>
-              """
-              expect('.target').toHaveText('old target')
-              expect('.fallback').toHaveText('new fallback')
 
-            it 'does not try a selector from up.dom.config.fallbacks if options.fallback is false', ->
+              next =>
+                @respondWith '<div class="fallback">new fallback</div>'
+
+              next =>
+                expect('.target').toHaveText('old target')
+                expect('.fallback').toHaveText('new fallback')
+
+            it 'does not try a selector from up.dom.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
               up.dom.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
-              up.replace('.target', '/path', fallback: false)
-              respond = =>
-                @respondWith """
-                  <div class="fallback">new fallback</div>
-                """
-              expect(respond).toThrowError(/Could not find target in response/i)
+              promise = up.replace('.target', '/path', fallback: false)
+
+              u.nextFrame =>
+                @respondWith '<div class="fallback">new fallback</div>'
+
+              promise.catch (e) ->
+                expect(e).toBeError(/Could not find target in response/i)
+                done()
 
         describe 'execution of script tags', ->
 
@@ -751,7 +874,10 @@ describe 'up.dom', ->
 
         describe 'with { restoreScroll: true } option', ->
 
-          it 'restores the scroll positions of all viewports around the target', ->
+          beforeEach ->
+            up.history.config.enabled = true
+
+          it 'restores the scroll positions of all viewports around the target', asyncSpec (next) ->
 
             $viewport = affix('div[up-viewport] .element').css
               'height': '100px'
@@ -765,19 +891,15 @@ describe 'up.dom', ->
                 responseText: '<div class="element" style="height: 300px"></div>'
 
             up.replace('.element', '/foo')
-            respond()
 
-            $viewport.scrollTop(65)
-
-            up.replace('.element', '/bar')
-            respond()
-
-            $viewport.scrollTop(0)
-
-            up.replace('.element', '/foo', restoreScroll: true)
+            next => respond()
+            next => $viewport.scrollTop(65)
+            next => up.replace('.element', '/bar')
+            next => respond()
+            next => $viewport.scrollTop(0)
+            next.await => up.replace('.element', '/foo', restoreScroll: true)
             # No need to respond because /foo has been cached before
-
-            expect($viewport.scrollTop()).toEqual(65)
+            next => expect($viewport.scrollTop()).toEqual(65)
 
 
         describe 'with { reveal: true } option', ->
@@ -791,30 +913,34 @@ describe 'up.dom', ->
               @revealedHTML.push $element.get(0).outerHTML
               @revealedText.push $element.text().trim()
               @revealOptions = options
-              u.resolvedDeferred()
+              Promise.resolve()
 
-          it 'reveals a new element before it is being replaced', (done) ->
-            promise = up.replace('.middle', '/path', reveal: true)
-            @respond()
-            promise.then =>
+          it 'reveals a new element before it is being replaced', asyncSpec (next) ->
+            up.replace('.middle', '/path', reveal: true)
+
+            next =>
+              @respond()
+
+            next =>
               expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
               expect(@revealedText).toEqual ['new-middle']
-              done()
 
           describe 'when more than one fragment is replaced', ->
 
-            it 'only reveals the first fragment', (done) ->
-              promise = up.replace('.middle, .after', '/path', reveal: true)
-              @respond()
-              promise.then =>
+            it 'only reveals the first fragment', asyncSpec (next) ->
+              up.replace('.middle, .after', '/path', reveal: true)
+
+              next =>
+                @respond()
+
+              next =>
                 expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
                 expect(@revealedText).toEqual ['new-middle']
-                done()
 
           describe 'when there is an anchor #hash in the URL', ->
 
-            it 'scrolls to the top of a child with the ID of that #hash', (done) ->
-              promise = up.replace('.middle', '/path#three', reveal: true)
+            it 'scrolls to the top of a child with the ID of that #hash', asyncSpec (next) ->
+              up.replace('.middle', '/path#three', reveal: true)
               @responseText =
                 """
                 <div class="middle">
@@ -823,24 +949,28 @@ describe 'up.dom', ->
                   <div id="three">three</div>
                 </div>
                 """
-              @respond()
-              promise.then =>
+
+              next =>
+                @respond()
+
+              next =>
                 expect(@revealedHTML).toEqual ['<div id="three">three</div>']
                 expect(@revealOptions).toEqual { top: true }
-                done()
 
-            it "reveals the entire element if it has no child with the ID of that #hash", (done) ->
-              promise = up.replace('.middle', '/path#four', reveal: true)
-              @responseText =
-                """
-                <div class="middle">
-                  new-middle
-                </div>
-                """
-              @respond()
-              promise.then =>
+            it "reveals the entire element if it has no child with the ID of that #hash", asyncSpec (next) ->
+              up.replace('.middle', '/path#four', reveal: true)
+
+              next =>
+                @responseText =
+                  """
+                  <div class="middle">
+                    new-middle
+                  </div>
+                  """
+                @respond()
+
+              next =>
                 expect(@revealedText).toEqual ['new-middle']
-                done()
 
           it 'reveals a new element that is being appended', (done) ->
             promise = up.replace('.middle:after', '/path', reveal: true)
@@ -871,15 +1001,17 @@ describe 'up.dom', ->
         it 'uses a { failTransition } option if the request failed'
 
       describeFallback 'canPushState', ->
-        
-        it 'makes a full page load', ->
-          spyOn(up.browser, 'loadPage')
+
+        it 'makes a full page load', asyncSpec (next) ->
+          spyOn(up.browser, 'navigate')
           up.replace('.selector', '/path')
-          expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
-          
+
+          next =>
+            expect(up.browser.navigate).toHaveBeenCalledWith('/path', jasmine.anything())
+
     describe 'up.extract', ->
-      
-      it 'Updates a selector on the current page with the same selector from the given HTML string', ->
+
+      it 'Updates a selector on the current page with the same selector from the given HTML string', asyncSpec (next) ->
 
         affix('.before').text('old-before')
         affix('.middle').text('old-middle')
@@ -894,116 +1026,141 @@ describe 'up.dom', ->
 
         up.extract('.middle', html)
 
-        expect($('.before')).toHaveText('old-before')
-        expect($('.middle')).toHaveText('new-middle')
-        expect($('.after')).toHaveText('old-after')
+        next ->
+          expect($('.before')).toHaveText('old-before')
+          expect($('.middle')).toHaveText('new-middle')
+          expect($('.after')).toHaveText('old-after')
 
-      it "throws an error if the selector can't be found on the current page", ->
+      it "throws an error if the selector can't be found on the current page", (done) ->
         html = '<div class="foo-bar">text</div>'
-        extract = -> up.extract('.foo-bar', html)
-        expect(extract).toThrowError(/Could not find selector in current page, modal or popup/i)
+        promise = up.extract('.foo-bar', html)
+        promiseState2(promise).then (result) =>
+          expect(result.state).toEqual('rejected')
+          expect(result.value).toMatch(/Could not find selector in current page, modal or popup/i)
+          done()
 
-      it "throws an error if the selector can't be found in the given HTML string", ->
+      it "throws an error if the selector can't be found in the given HTML string", (done) ->
         affix('.foo-bar')
-        extract = -> up.extract('.foo-bar', '')
-        expect(extract).toThrowError(/Could not find selector in response/i)
+        promise = up.extract('.foo-bar', '')
+        promiseState2(promise).then (result) =>
+          expect(result.state).toEqual('rejected')
+          expect(result.value).toMatch(/Could not find selector in response/i)
+          done()
 
-      it "ignores an element that matches the selector but also matches .up-destroying", ->
+      it "ignores an element that matches the selector but also matches .up-destroying", (done) ->
         html = '<div class="foo-bar">text</div>'
         affix('.foo-bar.up-destroying')
-        extract = -> up.extract('.foo-bar', html)
-        expect(extract).toThrowError(/Could not find selector/i)
+        promise = up.extract('.foo-bar', html)
+        promiseState2(promise).then (result) =>
+          expect(result.state).toEqual('rejected')
+          expect(result.value).toMatch(/Could not find selector/i)
+          done()
 
-      it "ignores an element that matches the selector but also matches .up-ghost", ->
+      it "ignores an element that matches the selector but also matches .up-ghost", (done) ->
         html = '<div class="foo-bar">text</div>'
         affix('.foo-bar.up-ghost')
-        extract = -> up.extract('.foo-bar', html)
-        expect(extract).toThrowError(/Could not find selector/i)
+        promise = up.extract('.foo-bar', html)
+        promiseState2(promise).then (result) =>
+          expect(result.state).toEqual('rejected')
+          expect(result.value).toMatch(/Could not find selector/i)
+          done()
 
-      it "ignores an element that matches the selector but also has a parent matching .up-destroying", ->
+      it "ignores an element that matches the selector but also has a parent matching .up-destroying", (done) ->
         html = '<div class="foo-bar">text</div>'
         $parent = affix('.up-destroying')
         $child = affix('.foo-bar').appendTo($parent)
-        extract = -> up.extract('.foo-bar', html)
-        expect(extract).toThrowError(/Could not find selector/i)
+        promise = up.extract('.foo-bar', html)
+        promiseState2(promise).then (result) =>
+          expect(result.state).toEqual('rejected')
+          expect(result.value).toMatch(/Could not find selector/i)
+          done()
 
-      it "ignores an element that matches the selector but also has a parent matching .up-ghost", ->
+      it "ignores an element that matches the selector but also has a parent matching .up-ghost", (done) ->
         html = '<div class="foo-bar">text</div>'
         $parent = affix('.up-ghost')
         $child = affix('.foo-bar').appendTo($parent)
-        extract = -> up.extract('.foo-bar', html)
-        expect(extract).toThrowError(/Could not find selector/i)
+        promise = up.extract('.foo-bar', html)
+        promiseState2(promise).then (result) =>
+          expect(result.state).toEqual('rejected')
+          expect(result.value).toMatch(/Could not find selector/i)
+          done()
 
-      it 'only replaces the first element matching the selector', ->
+      it 'only replaces the first element matching the selector', asyncSpec (next) ->
         html = '<div class="foo-bar">text</div>'
         affix('.foo-bar')
         affix('.foo-bar')
         up.extract('.foo-bar', html)
-        elements = $('.foo-bar')
-        expect($(elements.get(0)).text()).toEqual('text')
-        expect($(elements.get(1)).text()).toEqual('')
+
+        next =>
+          elements = $('.foo-bar')
+          expect($(elements.get(0)).text()).toEqual('text')
+          expect($(elements.get(1)).text()).toEqual('')
 
       describe 'with { transition } option', ->
 
-        it 'morphs between the old and new element', (done) ->
+        it 'morphs between the old and new element', asyncSpec (next) ->
           affix('.element').text('version 1')
           up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
 
-          $ghost1 = $('.element.up-ghost:contains("version 1")')
-          expect($ghost1).toHaveLength(1)
-          expect(u.opacity($ghost1)).toBeAround(1.0, 0.1)
+          next =>
+            @$ghost1 = $('.element.up-ghost:contains("version 1")')
+            expect(@$ghost1).toHaveLength(1)
+            expect(u.opacity(@$ghost1)).toBeAround(1.0, 0.1)
 
-          $ghost2 = $('.element.up-ghost:contains("version 2")')
-          expect($ghost2).toHaveLength(1)
-          expect(u.opacity($ghost2)).toBeAround(0.0, 0.1)
+            @$ghost2 = $('.element.up-ghost:contains("version 2")')
+            expect(@$ghost2).toHaveLength(1)
+            expect(u.opacity(@$ghost2)).toBeAround(0.0, 0.1)
 
-          u.setTimer 190, ->
-            expect(u.opacity($ghost1)).toBeAround(0.0, 0.3)
-            expect(u.opacity($ghost2)).toBeAround(1.0, 0.3)
-            done()
+          next.after 190, =>
+            expect(u.opacity(@$ghost1)).toBeAround(0.0, 0.3)
+            expect(u.opacity(@$ghost2)).toBeAround(1.0, 0.3)
 
-        it 'marks the old fragment and its ghost as .up-destroying during the transition', ->
+        it 'marks the old fragment and its ghost as .up-destroying during the transition', asyncSpec (next) ->
           affix('.element').text('version 1')
           up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
 
-          $version1 = $('.element:not(.up-ghost):contains("version 1")')
-          $version1Ghost = $('.element.up-ghost:contains("version 1")')
-          expect($version1).toHaveLength(1)
-          expect($version1Ghost).toHaveLength(1)
-          expect($version1).toHaveClass('up-destroying')
-          expect($version1Ghost).toHaveClass('up-destroying')
+          next =>
+            $version1 = $('.element:not(.up-ghost):contains("version 1")')
+            $version1Ghost = $('.element.up-ghost:contains("version 1")')
+            expect($version1).toHaveLength(1)
+            expect($version1Ghost).toHaveLength(1)
+            expect($version1).toHaveClass('up-destroying')
+            expect($version1Ghost).toHaveClass('up-destroying')
 
-          $version2 = $('.element:not(.up-ghost):contains("version 2")')
-          $version2Ghost = $('.element.up-ghost:contains("version 2")')
-          expect($version2).toHaveLength(1)
-          expect($version2Ghost).toHaveLength(1)
-          expect($version2).not.toHaveClass('up-destroying')
-          expect($version2Ghost).not.toHaveClass('up-destroying')
+            $version2 = $('.element:not(.up-ghost):contains("version 2")')
+            $version2Ghost = $('.element.up-ghost:contains("version 2")')
+            expect($version2).toHaveLength(1)
+            expect($version2Ghost).toHaveLength(1)
+            expect($version2).not.toHaveClass('up-destroying')
+            expect($version2Ghost).not.toHaveClass('up-destroying')
 
-        it 'cancels an existing transition by instantly jumping to the last frame', ->
+        it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
           affix('.element').text('version 1')
           up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
 
-          $ghost1 = $('.element.up-ghost:contains("version 1")')
-          expect($ghost1).toHaveLength(1)
-          expect($ghost1.css('opacity')).toBeAround(1.0, 0.1)
+          next =>
+            $ghost1 = $('.element.up-ghost:contains("version 1")')
+            expect($ghost1).toHaveLength(1)
+            expect($ghost1.css('opacity')).toBeAround(1.0, 0.1)
 
-          $ghost2 = $('.element.up-ghost:contains("version 2")')
-          expect($ghost2).toHaveLength(1)
-          expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
+            $ghost2 = $('.element.up-ghost:contains("version 2")')
+            expect($ghost2).toHaveLength(1)
+            expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
 
-          up.extract('.element', '<div class="element">version 3</div>', transition: 'cross-fade', duration: 200)
+          next =>
+            up.extract('.element', '<div class="element">version 3</div>', transition: 'cross-fade', duration: 200)
 
-          $ghost1 = $('.element.up-ghost:contains("version 1")')
-          expect($ghost1).toHaveLength(0)
+          next =>
+            $ghost1 = $('.element.up-ghost:contains("version 1")')
+            expect($ghost1).toHaveLength(0)
 
-          $ghost2 = $('.element.up-ghost:contains("version 2")')
-          expect($ghost2).toHaveLength(1)
-          expect($ghost2.css('opacity')).toBeAround(1.0, 0.1)
+            $ghost2 = $('.element.up-ghost:contains("version 2")')
+            expect($ghost2).toHaveLength(1)
+            expect($ghost2.css('opacity')).toBeAround(1.0, 0.1)
 
-          $ghost3 = $('.element.up-ghost:contains("version 3")')
-          expect($ghost3).toHaveLength(1)
-          expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
+            $ghost3 = $('.element.up-ghost:contains("version 3")')
+            expect($ghost3).toHaveLength(1)
+            expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
 
         it 'delays the resolution of the returned promise until the transition is over', (done) ->
           affix('.element').text('version 1')
@@ -1020,11 +1177,12 @@ describe 'up.dom', ->
           beforeEach ->
             up.motion.config.enabled = false
 
-          it 'immediately swaps the old and new elements', ->
+          it 'immediately swaps the old and new elements without creating unnecessary ghosts', asyncSpec (next) ->
             affix('.element').text('version 1')
             up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
-            expect($('.element')).toHaveText('version 2')
-            expect($('.up-ghost')).toHaveLength(0)
+            next =>
+              expect($('.element')).toHaveText('version 2')
+              expect($('.up-ghost')).toHaveLength(0)
 
       describe 'handling of [up-keep] elements', ->
 
@@ -1039,11 +1197,12 @@ describe 'up.dom', ->
 # Need to refactor this spec file so examples don't all share one example
           $('.before, .middle, .after').remove()
 
-        it 'keeps an [up-keep] element, but does replace other elements around it', ->
+        it 'keeps an [up-keep] element, but does replace other elements around it', asyncSpec (next) ->
           $container = affix('.container')
           $container.affix('.before').text('old-before')
           $container.affix('.middle[up-keep]').text('old-middle')
           $container.affix('.after').text('old-after')
+
           up.extract '.container', """
             <div class='container'>
               <div class='before'>new-before</div>
@@ -1051,17 +1210,20 @@ describe 'up.dom', ->
               <div class='after'>new-after</div>
             </div>
             """
-          expect($('.before')).toHaveText('new-before')
-          expect($('.middle')).toHaveText('old-middle')
-          expect($('.after')).toHaveText('new-after')
 
-        it 'keeps an [up-keep] element, but does replace text nodes around it', ->
+          next =>
+            expect($('.before')).toHaveText('new-before')
+            expect($('.middle')).toHaveText('old-middle')
+            expect($('.after')).toHaveText('new-after')
+
+        it 'keeps an [up-keep] element, but does replace text nodes around it', asyncSpec (next) ->
           $container = affix('.container')
           $container.html """
             old-before
             <div class='element' up-keep>old-inside</div>
             old-after
             """
+
           up.extract '.container', """
             <div class='container'>
               new-before
@@ -1069,16 +1231,20 @@ describe 'up.dom', ->
               new-after
             </div>
             """
-          expect(squish($('.container').text())).toEqual('new-before old-inside new-after')
+
+          next =>
+            expect(squish($('.container').text())).toEqual('new-before old-inside new-after')
 
         describe 'if an [up-keep] element is itself a direct replacement target', ->
 
-          it "keeps that element", ->
+          it "keeps that element", asyncSpec (next) ->
             affix('.keeper[up-keep]').text('old-inside')
             up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
-            expect($('.keeper')).toHaveText('old-inside')
 
-          it "only emits an event up:fragment:kept, but not an event up:fragment:inserted", ->
+            next =>
+              expect($('.keeper')).toHaveText('old-inside')
+
+          it "only emits an event up:fragment:kept, but not an event up:fragment:inserted", asyncSpec (next) ->
             insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')
             up.on('up:fragment:inserted', insertedListener)
             keptListener = jasmine.createSpy('subscriber to up:fragment:kept')
@@ -1086,10 +1252,12 @@ describe 'up.dom', ->
             up.on 'up:fragment:inserted', insertedListener
             $keeper = affix('.keeper[up-keep]').text('old-inside')
             up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
-            expect(insertedListener).not.toHaveBeenCalled()
-            expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.keeper'), jasmine.anything())
 
-        it "removes an [up-keep] element if no matching element is found in the response", ->
+            next =>
+              expect(insertedListener).not.toHaveBeenCalled()
+              expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.keeper'), jasmine.anything())
+
+        it "removes an [up-keep] element if no matching element is found in the response", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
           barDestructor = jasmine.createSpy()
           up.compiler '.bar', ($bar) ->
@@ -1113,13 +1281,14 @@ describe 'up.dom', ->
             </div>
             """
 
-          expect($('.container .foo')).toExist()
-          expect($('.container .bar')).not.toExist()
+          next =>
+            expect($('.container .foo')).toExist()
+            expect($('.container .bar')).not.toExist()
 
-          expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
-          expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
+            expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
+            expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
 
-        it "updates an element if a matching element is found in the response, but that other element is no longer [up-keep]", ->
+        it "updates an element if a matching element is found in the response, but that other element is no longer [up-keep]", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
           barDestructor = jasmine.createSpy()
           up.compiler '.bar', ($bar) ->
@@ -1145,13 +1314,14 @@ describe 'up.dom', ->
             </div>
             """
 
-          expect($('.container .foo')).toHaveText('new-foo')
-          expect($('.container .bar')).toHaveText('new-bar')
+          next =>
+            expect($('.container .foo')).toHaveText('new-foo')
+            expect($('.container .bar')).toHaveText('new-bar')
 
-          expect(barCompiler.calls.allArgs()).toEqual [['old-bar'], ['new-bar']]
-          expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
+            expect(barCompiler.calls.allArgs()).toEqual [['old-bar'], ['new-bar']]
+            expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
 
-        it 'moves a kept element to the ancestry position of the matching element in the response', ->
+        it 'moves a kept element to the ancestry position of the matching element in the response', asyncSpec (next) ->
           $container = affix('.container')
           $container.html """
             <div class="parent1">
@@ -1169,10 +1339,12 @@ describe 'up.dom', ->
               </div>
             </div>
             """
-          expect($('.keeper')).toHaveText('old-inside')
-          expect($('.keeper').parent()).toEqual($('.parent2'))
 
-        it 'lets developers choose a selector to match against as the value of the up-keep attribute', ->
+          next =>
+            expect($('.keeper')).toHaveText('old-inside')
+            expect($('.keeper').parent()).toEqual($('.parent2'))
+
+        it 'lets developers choose a selector to match against as the value of the up-keep attribute', asyncSpec (next) ->
           $container = affix('.container')
           $container.html """
             <div class="keeper" up-keep=".stayer"></div>
@@ -1182,9 +1354,11 @@ describe 'up.dom', ->
               <div up-keep class="stayer"></div>
             </div>
             """
-          expect('.keeper').toExist()
 
-        it 'does not compile a kept element a second time', ->
+          next =>
+            expect('.keeper').toExist()
+
+        it 'does not compile a kept element a second time', asyncSpec (next) ->
           compiler = jasmine.createSpy('compiler')
           up.compiler('.keeper', compiler)
           $container = affix('.container')
@@ -1200,10 +1374,12 @@ describe 'up.dom', ->
               <div class="keeper" up-keep>new-text</div>
             </div>
             """
-          expect(compiler.calls.count()).toEqual(1)
-          expect('.keeper').toExist()
 
-        it 'does not lose jQuery event handlers on a kept element (bugfix)', ->
+          next =>
+            expect(compiler.calls.count()).toEqual(1)
+            expect('.keeper').toExist()
+
+        it 'does not lose jQuery event handlers on a kept element (bugfix)', asyncSpec (next) ->
           handler = jasmine.createSpy('event handler')
           up.compiler '.keeper', ($keeper) ->
             $keeper.on 'click', handler
@@ -1220,13 +1396,16 @@ describe 'up.dom', ->
             </div>
             """
 
-          $keeper = $('.keeper')
-          expect($keeper).toHaveText('old-text')
-          Trigger.click($keeper)
-          expect(handler).toHaveBeenCalled()
+          next =>
+            expect('.keeper').toHaveText('old-text')
 
-        it 'does not call destructors on a kept alement', ->
-          handler = jasmine.createSpy('event handler')
+          next =>
+            Trigger.click('.keeper')
+
+          next =>
+            expect(handler).toHaveBeenCalled()
+
+        it 'does not call destructors on a kept alement', asyncSpec (next) ->
           destructor = jasmine.createSpy('destructor')
           up.compiler '.keeper', ($keeper) ->
             return destructor
@@ -1243,11 +1422,12 @@ describe 'up.dom', ->
             </div>
             """
 
-          $keeper = $('.keeper')
-          expect($keeper).toHaveText('old-text')
-          expect(destructor).not.toHaveBeenCalled()
+          next =>
+            $keeper = $('.keeper')
+            expect($keeper).toHaveText('old-text')
+            expect(destructor).not.toHaveBeenCalled()
 
-        it 'calls destructors when a kept element is eventually removed from the DOM', ->
+        it 'calls destructors when a kept element is eventually removed from the DOM', asyncSpec (next) ->
           handler = jasmine.createSpy('event handler')
           destructor = jasmine.createSpy('destructor')
           up.compiler '.keeper', ($keeper) ->
@@ -1265,26 +1445,28 @@ describe 'up.dom', ->
             </div>
             """
 
-          $keeper = $('.keeper')
-          expect($keeper).toHaveText('new-text')
-          expect(destructor).toHaveBeenCalled()
+          next =>
+            $keeper = $('.keeper')
+            expect($keeper).toHaveText('new-text')
+            expect(destructor).toHaveBeenCalled()
 
-        it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', ->
+        it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', asyncSpec (next) ->
           $keeper = affix('.keeper[up-keep]').text('old-inside')
           $keeper.on 'up:fragment:keep', (event) -> event.preventDefault()
           up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
-          expect($('.keeper')).toHaveText('new-inside')
+          next => expect($('.keeper')).toHaveText('new-inside')
 
-        it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', ->
+        it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
           $keeper = affix('.keeper[up-keep]').text('version 1')
           $keeper.on 'up:fragment:keep', (event) ->
             event.preventDefault() if event.$newElement.text() == 'version 3'
-          up.extract '.keeper', "<div class='keeper' up-keep>version 2</div>"
-          expect($('.keeper')).toHaveText('version 1')
-          up.extract '.keeper', "<div class='keeper' up-keep>version 3</div>"
-          expect($('.keeper')).toHaveText('version 3')
 
-        it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on an updated parent', ->
+          next => up.extract '.keeper', "<div class='keeper' up-keep>version 2</div>"
+          next => expect($('.keeper')).toHaveText('version 1')
+          next => up.extract '.keeper', "<div class='keeper' up-keep>version 3</div>"
+          next => expect($('.keeper')).toHaveText('version 3')
+
+        it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on an updated parent', asyncSpec (next) ->
           insertedListener = jasmine.createSpy()
           up.on('up:fragment:inserted', insertedListener)
           keptListener = jasmine.createSpy()
@@ -1294,28 +1476,34 @@ describe 'up.dom', ->
           $container.html """
             <div class="keeper" up-keep></div>
             """
+
           up.extract '.container', """
             <div class='container'>
               <div class="keeper" up-keep></div>
             </div>
             """
-          expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container'), jasmine.anything())
-          expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper'), jasmine.anything())
 
-        it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', ->
+          next =>
+            expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container'), jasmine.anything())
+            expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper'), jasmine.anything())
+
+        it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', (next) ->
           keptListener = jasmine.createSpy()
           up.on 'up:fragment:kept', (event) -> keptListener(event.$element, event.newData)
           $container = affix('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
+
           up.extract '.container', """
             <div class='container'>
               <div class='keeper' up-keep up-data='{ "foo": "bar" }'>new-inside</div>
             </div>
           """
-          expect($('.keeper')).toHaveText('old-inside')
-          expect(keptListener).toHaveBeenCalledWith($keeper, { 'foo': 'bar' })
 
-        it 'emits an up:fragment:kept with { newData: {} } if the discarded element had no up-data value', ->
+          next =>
+            expect($('.keeper')).toHaveText('old-inside')
+            expect(keptListener).toHaveBeenCalledWith($keeper, { 'foo': 'bar' })
+
+        it 'emits an up:fragment:kept with { newData: {} } if the discarded element had no up-data value', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
           up.on('up:fragment:kept', keptListener)
           $container = affix('.container')
@@ -1325,27 +1513,35 @@ describe 'up.dom', ->
               <div class='keeper' up-keep>new-inside</div>
             </div>
           """
-          expect($('.keeper')).toHaveText('old-inside')
-          expect(keptListener).toEqual(jasmine.anything(), $('.keeper'), {})
 
-        it 'reuses the same element and emits up:fragment:kept during multiple extractions', ->
+          next =>
+            expect($('.keeper')).toHaveText('old-inside')
+            expect(keptListener).toEqual(jasmine.anything(), $('.keeper'), {})
+
+        it 'reuses the same element and emits up:fragment:kept during multiple extractions', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
           up.on 'up:fragment:kept', (event) -> keptListener(event.$element, event.newData)
           $container = affix('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
-          up.extract '.keeper', """
-            <div class='container'>
-              <div class='keeper' up-keep up-data='{ \"key\": \"value1\" }'>new-inside</div>
-            </div>
-          """
-          up.extract '.keeper', """
-            <div class='container'>
-              <div class='keeper' up-keep up-data='{ \"key\": \"value2\" }'>new-inside</div>
-          """
-          $keeper = $('.keeper')
-          expect($keeper).toHaveText('old-inside')
-          expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value1' })
-          expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value2' })
+
+          next =>
+            up.extract '.keeper', """
+              <div class='container'>
+                <div class='keeper' up-keep up-data='{ \"key\": \"value1\" }'>new-inside</div>
+              </div>
+            """
+
+          next =>
+            up.extract '.keeper', """
+              <div class='container'>
+                <div class='keeper' up-keep up-data='{ \"key\": \"value2\" }'>new-inside</div>
+            """
+
+          next =>
+            $keeper = $('.keeper')
+            expect($keeper).toHaveText('old-inside')
+            expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value1' })
+            expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value2' })
 
         it "doesn't let the discarded element appear in a transition", (done) ->
           oldTextDuringTransition = undefined
@@ -1353,7 +1549,7 @@ describe 'up.dom', ->
           transition = ($old, $new) ->
             oldTextDuringTransition = squish($old.text())
             newTextDuringTransition = squish($new.text())
-            u.resolvedDeferred()
+            Promise.resolve()
           $container = affix('.container')
           $container.html """
             <div class='foo'>old-foo</div>
@@ -1372,59 +1568,71 @@ describe 'up.dom', ->
             done()
 
     describe 'up.destroy', ->
-      
-      it 'removes the element with the given selector', ->
+
+      it 'removes the element with the given selector', (done) ->
         affix('.element')
-        up.destroy('.element')
-        expect($('.element')).not.toExist()
-        
-      it 'calls destructors for custom elements', ->
+        up.destroy('.element').then ->
+          expect($('.element')).not.toExist()
+          done()
+
+      it 'calls destructors for custom elements', (done) ->
         up.compiler('.element', ($element) -> destructor)
         destructor = jasmine.createSpy('destructor')
         up.hello(affix('.element'))
-        up.destroy('.element')
-        expect(destructor).toHaveBeenCalled()
-        
-      it 'allows to pass a new history entry as { history } option', ->
-        affix('.element')
-        up.destroy('.element', history: '/new-path')
-        expect(location.href).toEqualUrl('/new-path')
+        up.destroy('.element').then ->
+          expect(destructor).toHaveBeenCalled()
+          done()
 
-      it 'allows to pass a new document title as { title } option', ->
+      it 'allows to pass a new history entry as { history } option', (done) ->
+        up.history.config.enabled = true
         affix('.element')
-        up.destroy('.element', history: '/new-path', title: 'Title from options')
-        expect(document.title).toEqual('Title from options')
+        up.destroy('.element', history: '/new-path').then ->
+          u.setTimer 100, ->
+            expect(location.href).toMatchUrl('/new-path')
+            done()
+
+      it 'allows to pass a new document title as { title } option', (done) ->
+        up.history.config.enabled = true
+        affix('.element')
+        up.destroy('.element', history: '/new-path', title: 'Title from options').then ->
+          expect(document.title).toEqual('Title from options')
+          done()
 
 
     describe 'up.reload', ->
 
       describeCapability 'canPushState', ->
-      
-        it 'reloads the given selector from the closest known source URL', (done) ->
+
+        it 'reloads the given selector from the closest known source URL', asyncSpec (next) ->
           affix('.container[up-source="/source"] .element').find('.element').text('old text')
-    
-          up.reload('.element').then ->
+
+          next =>
+            up.reload('.element')
+
+          next =>
+            expect(@lastRequest().url).toMatch(/\/source$/)
+            @respondWith """
+              <div class="container">
+                <div class="element">new text</div>
+              </div>
+              """
+
+          next =>
             expect($('.element')).toHaveText('new text')
-            done()
-            
-          expect(@lastRequest().url).toMatch(/\/source$/)
-    
-          @respondWith """
-            <div class="container">
-              <div class="element">new text</div>
-            </div>
-            """
+
 
       describeFallback 'canPushState', ->
-        
-        it 'makes a page load from the closest known source URL', ->
+
+        it 'makes a page load from the closest known source URL', asyncSpec (next) ->
           affix('.container[up-source="/source"] .element').find('.element').text('old text')
-          spyOn(up.browser, 'loadPage')
+          spyOn(up.browser, 'navigate')
           up.reload('.element')
-          expect(up.browser.loadPage).toHaveBeenCalledWith('/source', jasmine.anything())
-          
-  
+
+          next =>
+            expect(up.browser.navigate).toHaveBeenCalledWith('/source', jasmine.anything())
+
+
     describe 'up.reset', ->
-  
+
       it 'should have tests'
 

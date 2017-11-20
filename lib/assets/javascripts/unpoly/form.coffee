@@ -16,7 +16,7 @@ up.form = (($) ->
   Sets default options for form submission and validation.
 
   @property up.form.config
-  @param {Number} [config.observeDelay=0]
+  @param {number} [config.observeDelay=0]
     The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
@@ -28,7 +28,7 @@ up.form = (($) ->
     By default this looks for a `<fieldset>`, `<label>` or `<form>`
     around the validating input field, or any element with an
     `up-fieldset` attribute.
-  @param {String} [config.fields=[':input']]
+  @param {string} [config.fields=[':input']]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
   @stable
   ###
@@ -54,51 +54,51 @@ up.form = (($) ->
   information on how AJAX form submissions work in Unpoly.
 
   @function up.submit
-  @param {Element|jQuery|String} formOrSelector
+  @param {Element|jQuery|string} formOrSelector
     A reference or selector for the form to submit.
     If the argument points to an element that is not a form,
     Unpoly will search its ancestors for the closest form.
-  @param {String} [options.url]
+  @param {string} [options.url]
     The URL where to submit the form.
     Defaults to the form's `action` attribute, or to the current URL of the browser window.
-  @param {String} [options.method='post']
+  @param {string} [options.method='post']
     The HTTP method used for the form submission.
     Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
     if none of these attributes are given.
-  @param {String} [options.target]
+  @param {string} [options.target]
     The selector to update when the form submission succeeds (server responds with status 200).
     Defaults to the form's `up-target` attribute.
-  @param {String} [options.failTarget]
+  @param {string} [options.failTarget]
     The selector to update when the form submission fails (server responds with non-200 status).
     Defaults to the form's `up-fail-target` attribute, or to an auto-generated
     selector that matches the form itself.
-  @param {String} [options.fallback]
+  @param {string} [options.fallback]
     The selector to update when the original target was not found in the page.
     Defaults to the form's `up-fallback` attribute.
-  @param {Boolean|String} [options.history=true]
+  @param {boolean|string} [options.history=true]
     Successful form submissions will add a history entry and change the browser's
     location bar if the form either uses the `GET` method or the response redirected
     to another page (this requires the `unpoly-rails` gem).
     If you want to prevent history changes in any case, set this to `false`.
-    If you pass a `String`, it is used as the URL for the browser history.
-  @param {String} [options.transition='none']
+    If you pass a string, it is used as the URL for the browser history.
+  @param {string} [options.transition='none']
     The transition to use when a successful form submission updates the `options.target` selector.
     Defaults to the form's `up-transition` attribute, or to `'none'`.
-  @param {String} [options.failTransition='none']
+  @param {string} [options.failTransition='none']
     The transition to use when a failed form submission updates the `options.failTarget` selector.
     Defaults to the form's `up-fail-transition` attribute, or to `options.transition`, or to `'none'`.
-  @param {Number} [options.duration]
+  @param {number} [options.duration]
     The duration of the transition. See [`up.morph()`](/up.morph).
-  @param {Number} [options.delay]
+  @param {number} [options.delay]
     The delay before the transition starts. See [`up.morph()`](/up.morph).
-  @param {String} [options.easing]
+  @param {string} [options.easing]
     The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
-  @param {Element|jQuery|String} [options.reveal]
+  @param {Element|jQuery|string} [options.reveal=true]
     Whether to reveal the target element within its viewport.
-  @param {Boolean} [options.restoreScroll]
+  @param {boolean} [options.restoreScroll]
     If set to `true`, this will attempt to [`restore scroll positions`](/up.restoreScroll)
     previously seen on the destination URL.
-  @param {Boolean} [options.cache]
+  @param {boolean} [options.cache]
     Whether to force the use of a cached response (`true`)
     or never use the cache (`false`)
     or make an educated guess (`undefined`).
@@ -108,19 +108,18 @@ up.form = (($) ->
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
-  @param {String} [options.layer='auto']
+  @param {string} [options.layer='auto']
     The name of the layer that ought to be updated. Valid values are
     `auto`, `page`, `modal` and `popup`.
 
     If set to `auto` (default), Unpoly will try to find a match in the form's layer.
-  @param {String} [options.failLayer='auto']
+  @param {string} [options.failLayer='auto']
     The name of the layer that ought to be updated if the server sends a non-200 status code.
   @return {Promise}
     A promise for the successful form submission.
   @stable
   ###
   submit = (formOrSelector, options) ->
-    
     $form = $(formOrSelector).closest('form')
 
     options = u.options(options)
@@ -152,11 +151,12 @@ up.form = (($) ->
 
     # If we can't update the location URL, fall back to a vanilla form submission.
     unless up.browser.canPushState() || options.history == false
+      # Don't use up.browser.navigate(); It cannot deal with file inputs.
       $form.get(0).submit()
       return u.unresolvablePromise()
 
     promise = up.replace(target, url, options)
-    promise.always -> up.feedback.stop($form)
+    u.always promise, -> up.feedback.stop($form)
     promise
 
   ###*
@@ -212,16 +212,16 @@ up.form = (($) ->
       });
 
   @function up.observe
-  @param {Element|jQuery|String} selectorOrElement
+  @param {Element|jQuery|string} selectorOrElement
     The form fields that wiill be observed.
 
     You can pass one or more fields, a `<form>` or any container that contains form fields.
     The callback will be run if any of the given fields change.
-  @param {Number} [options.delay=up.form.config.observeDelay]
+  @param {number} [options.delay=up.form.config.observeDelay]
     The number of miliseconds to wait before executing the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
-  @param {Function(value, $field)|String} onChange
+  @param {Function(value, $field)|string} onChange
     The callback to run when the field's value changes.
     If given as a function, it must take two arguments (`value`, `$field`).
     If given as a string, it will be evaled as JavaScript code in a context where
@@ -251,7 +251,7 @@ up.form = (($) ->
     delay = u.option(u.presentAttr($element, 'up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
 
-    $fields = u.multiSelector(config.fields).findWithSelf($element)
+    $fields = u.multiSelector(config.fields).selectInSubtree($element)
 
     destructors = u.map $fields, (field) ->
       observeField($(field), delay, callback)
@@ -259,38 +259,9 @@ up.form = (($) ->
     u.sequence(destructors...)
 
   observeField = ($field, delay, callback) ->
-    processedValue = u.submittedValue($field)
-    timer = undefined
-    lastCallbackDone = u.resolvedPromise()
-
-    runCallback = (value) ->
-      processedValue = value
-      callbackReturnValue = callback.apply($field.get(0), [value, $field])
-      if u.isPromise(callbackReturnValue)
-        lastCallbackDone = callbackReturnValue
-      else
-        lastCallbackDone = callbackReturnValue
-
-    check = ->
-      value = u.submittedValue($field)
-      # don't run the callback for the check during initialization
-      if processedValue != value
-        nextCallback = -> runCallback(value)
-        timer?.cancel()
-        timer = u.promiseTimer(delay)
-        # We wait until both the delay has passed and a previous callback is done executing
-        $.when(timer, lastCallbackDone).then(nextCallback)
-
-    # Although (depending on the browser) we only need/receive either input or change,
-    # we always bind to both events in case another script manually triggers it.
-    changeEvents = 'input change'
-
-    $field.on(changeEvents, check)
-
-    # return destructor
-    return ->
-      $field.off(changeEvents, check)
-      timer?.cancel()
+    observer = new up.FieldObserver($field, { delay, callback })
+    observer.start()
+    return observer.stop
 
   ###*
   [Observes](/up.observe) a field or form and submits the form when a value changes.
@@ -301,7 +272,7 @@ up.form = (($) ->
   The unobtrusive variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
 
   @function up.autosubmit
-  @param {String|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} selectorOrElement
     The field or form to observe.
   @param {Object} [options]
     See options for [`up.observe()`](/up.observe)
@@ -345,9 +316,9 @@ up.form = (($) ->
       up.validate('input[name=email]', { target: '.email-errors' })
 
   @function up.validate
-  @param {String|Element|jQuery} fieldOrSelector
+  @param {string|Element|jQuery} fieldOrSelector
 
-  @param {String|Element|jQuery} [options.target]
+  @param {string|Element|jQuery} [options.target]
   @return {Promise}
     A promise that is resolved when the server-side
     validation is received and the form was updated.
@@ -406,8 +377,8 @@ up.form = (($) ->
   still marked `@internal`.
 
   @function up.form.switchTargets
-  @param {String|Element|jQuery} fieldOrSelector
-  @param {String} [options.target]
+  @param {string|Element|jQuery} fieldOrSelector
+  @param {string} [options.target]
     The target selectors to switch.
     Defaults to an `up-switch` attribute on the given field.
   @internal
@@ -522,17 +493,17 @@ up.form = (($) ->
   and [`up:proxy:recover`](/up:proxy:recover) events.
 
   @selector form[up-target]
-  @param {String} up-target
+  @param {string} up-target
     The selector to [replace](/up.replace) if the form submission is successful (200 status code).
-  @param {String} [up-fail-target]
+  @param {string} [up-fail-target]
     The selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
     If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
     server has echoed the form with validation errors.
   @param [up-fallback]
     The selector to replace if the server responds with a non-200 status code.
-  @param {String} [up-transition]
+  @param {string} [up-transition]
     The animation to use when the form is replaced after a successful submission.
-  @param {String} [up-fail-transition]
+  @param {string} [up-fail-transition]
     The animation to use when the form is replaced after a failed submission.
   @param [up-history]
     Whether to push a browser history entry after a successful form submission.
@@ -542,27 +513,27 @@ up.form = (($) ->
 
     Set this to `'false'` to prevent the URL bar from being updated.
     Set this to a URL string to update the history with the given URL.
-  @param {String} [up-method]
+  @param {string} [up-method]
     The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
     Alternately you can use an attribute `data-method`
     ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
     or `method` (vanilla HTML) for the same purpose.
-  @param {String} [up-layer='auto']
+  @param {string} [up-layer='auto']
     The name of the layer that ought to be updated. Valid values are
     `auto`, `page`, `modal` and `popup`.
 
     If set to `auto` (default), Unpoly will try to find a match in the form's layer.
     If no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
-  @param {String} [up-fail-layer='auto']
+  @param {string} [up-fail-layer='auto']
     The name of the layer that ought to be updated if the server sends a
     non-200 status code.
-  @param {String} [up-reveal='true']
+  @param {string} [up-reveal='true']
     Whether to reveal the target element within its viewport before updating.
-  @param {String} [up-restore-scroll='false']
+  @param {string} [up-restore-scroll='false']
     Whether to restore previously known scroll position of all viewports
     within the target selector.
-  @param {String} [up-cache]
+  @param {string} [up-cache]
     Whether to force the use of a cached response (`true`)
     or never use the cache (`false`)
     or make an educated guess (`undefined`).
@@ -713,7 +684,7 @@ up.form = (($) ->
   `up-validate="&, [name=employee]"`, or simply `up-validate="form"` to update the entire form.
 
   @selector [up-validate]
-  @param {String} up-validate
+  @param {string} up-validate
     The CSS selector to update with the server response.
 
     This defaults to a fieldset or form group around the validating field.
@@ -832,14 +803,14 @@ up.form = (($) ->
 
   | Name     | Type      | Description                           |
   | -------- | --------- | ------------------------------------- |
-  | `value`  | `String`  | The current value of the field        |
+  | `value`  | `string`  | The current value of the field        |
   | `this`   | `Element` | The form field                        |
   | `$field` | `jQuery`  | The form field as a jQuery collection |
 
   @selector [up-observe]
-  @param {String} up-observe
+  @param {string} up-observe
     The code to run when the field's value changes.
-  @param {String} up-delay
+  @param {string} up-delay
     The number of miliseconds to wait after a change before the code is run.
   @stable
   ###
@@ -871,7 +842,7 @@ up.form = (($) ->
       </form>
 
   @selector [up-autosubmit]
-  @param {String} up-delay
+  @param {string} up-delay
     The number of miliseconds to wait after the change before the form is submitted.
   @stable
   ###

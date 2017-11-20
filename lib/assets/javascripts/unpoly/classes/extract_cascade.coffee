@@ -1,6 +1,6 @@
 u = up.util
 
-class up.dom.ExtractCascade
+class up.ExtractCascade
 
   constructor: (selector, options) ->
     @options = u.options(options, humanizedTarget: 'selector', layer: 'auto')
@@ -11,7 +11,7 @@ class up.dom.ExtractCascade
         # If we're using a fallback (any candidate that's not the first),
         # the original transition might no longer be appropriate.
         planOptions.transition = up.dom.config.fallbackTransition
-      new up.dom.ExtractPlan(candidate, planOptions)
+      new up.ExtractPlan(candidate, planOptions)
 
   buildCandidates: (selector) ->
     candidates = [selector, @options.fallback, up.dom.config.fallbacks]
@@ -63,7 +63,7 @@ class up.dom.ExtractCascade
         message = "Could not find #{@options.humanizedTarget} in response"
       else
         message = "Could not match #{@options.humanizedTarget} in current page and response"
-      if @response && @options.inspectResponse
+      if @options.inspectResponse
         inspectAction = { label: 'Open response', callback: @options.inspectResponse }
       up.fail(["#{message} (tried %o)", @candidates], action: inspectAction)
 

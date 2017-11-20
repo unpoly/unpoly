@@ -17,7 +17,7 @@ The cache holds up to 70 responses for 5 minutes. You can configure the cache si
 Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
 
 If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
-use [`up.ajax()`](/up.ajax).
+use [`up.request()`](/up.request).
 
 \#\#\# Preloading links
 
@@ -50,23 +50,23 @@ up.proxy = (($) ->
   pendingCount = undefined
   slowEventEmitted = undefined
 
-  queuedRequests = []
+  queuedLoaders = []
 
   ###*
   @property up.proxy.config
-  @param {Number} [config.preloadDelay=75]
+  @param {number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](/up-preload)
     starts preloading.
-  @param {Number} [config.cacheSize=70]
+  @param {number} [config.cacheSize=70]
     The maximum number of responses to cache.
     If the size is exceeded, the oldest items will be dropped from the cache.
-  @param {Number} [config.cacheExpiry=300000]
+  @param {number} [config.cacheExpiry=300000]
     The number of milliseconds until a cache entry expires.
     Defaults to 5 minutes.
-  @param {Number} [config.slowDelay=300]
+  @param {number} [config.slowDelay=300]
     How long the proxy waits until emitting the [`up:proxy:slow` event](/up:proxy:slow).
     Use this to prevent flickering of spinners.
-  @param {Number} [config.maxRequests=4]
+  @param {number} [config.maxRequests=4]
     The maximum number of concurrent requests to allow before additional
     requests are queued. This currently ignores preloading requests.
 
@@ -75,11 +75,11 @@ up.proxy = (($) ->
 
     Note that your browser might [impose its own request limit](http://www.browserscope.org/?category=network)
     regardless of what you configure here.
-  @param {Array<String>} [config.wrapMethods]
+  @param {Array<string>} [config.wrapMethods]
     An array of uppercase HTTP method names. AJAX requests with one of these methods
     will be converted into a `POST` request and carry their original method as a `_method`
     parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-  @param {Array<String>} [config.safeMethods]
+  @param {Array<string>} [config.idempotentMethods]
     An array of uppercase HTTP method names that are considered idempotent.
     The proxy cache will only cache idempotent requests and will clear the entire
     cache after a non-idempotent request.
@@ -92,21 +92,14 @@ up.proxy = (($) ->
     cacheExpiry: 1000 * 60 * 5
     maxRequests: 4
     wrapMethods: ['PATCH', 'PUT', 'DELETE']
-    safeMethods: ['GET', 'OPTIONS', 'HEAD']
+    idempotentMethods: ['GET', 'OPTIONS', 'HEAD']
 
-  cacheKey = (request) ->
-    normalizeRequest(request)
-    [ request.url,
-      request.method,
-      u.requestDataAsQuery(request.data),
-      request.target
-    ].join('|')
-
-  cache = u.cache
+  cache = u.newCache
     size: -> config.cacheSize
     expiry: -> config.cacheExpiry
-    key: cacheKey
-    # log: 'up.proxy'
+    key: (request) -> up.Request.normalize(request).cacheKey()
+    cachable: (request) -> up.Request.normalize(request).isCachable()
+    # logPrefix: 'up.proxy'
 
   ###*
   Returns a cached response for the given request.
@@ -114,24 +107,30 @@ up.proxy = (($) ->
   Returns `undefined` if the given request is not currently cached.
 
   @function up.proxy.get
-  @return {Promise}
-    A promise for the response that is API-compatible with the
-    promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+  @return {Promise<up.Response>}
+    A promise for the response.
   @experimental
   ###
   get = (request) ->
-    request = normalizeRequest(request)
-    if isCachable(request)
-      candidates = [request]
-      unless request.target is 'html'
-        requestForHtml = u.merge(request, target: 'html')
-        candidates.push(requestForHtml)
-        unless request.target is 'body'
-          requestForBody = u.merge(request, target: 'body')
-          candidates.push(requestForBody)
-      for candidate in candidates
-        if response = cache.get(candidate)
-          return response
+    request = up.Request.normalize(request)
+    candidates = [request]
+
+    if request.target != 'html'
+      # Since <html> is the root tag, a request for the `html` selector
+      # will contain all other selectors.
+      requestForHtml = request.copy(target: 'html')
+      candidates.push(requestForHtml)
+
+      # Although <body> is not the root tag, we consider it the selector developers
+      # will use when they want to replace the entire page. Hence we consider it
+      # a suitable match for all other selectors, including `html`.
+      if request.target != 'body'
+        requestForBody = request.copy(target: 'body')
+        candidates.push(requestForBody)
+
+    for candidate in candidates
+      if response = cache.get(candidate)
+        return response
 
   cancelPreloadDelay = ->
     clearTimeout(preloadDelayTimer)
@@ -149,32 +148,21 @@ up.proxy = (($) ->
     config.reset()
     cache.clear()
     slowEventEmitted = false
-    queuedRequests = []
+    queuedLoaders = []
 
   reset()
 
-  normalizeRequest = (request) ->
-    unless request._normalized
-      request.method = u.normalizeMethod(request.method)
-      request.url = u.normalizeUrl(request.url) if request.url
-      request.target ||= 'body'
-      request._normalized = true
-    request
-
   ###*
-  Makes a request to the given URL and caches the response.
-  If the response was already cached, returns the HTML instantly.
-  
-  If requesting a URL that is not read-only, the response will
+  Makes an AJAX request to the given URL and caches the response.
+
+  If requesting a URL with a non-`GET` method, the response will
   not be cached and the entire cache will be cleared.
-  Only requests with a method of `GET`, `OPTIONS` and `HEAD`
-  are considered to be read-only.
 
   \#\#\# Example
 
-      up.ajax('/search', data: { query: 'sunshine' }).then(function(data, status, xhr) {
-        console.log('The response body is %o', data);
-      }).fail(function(xhr, status, error) {
+      up.request('/search', data: { query: 'sunshine' }).then(function(response) {
+        console.log('The response text is %o', response.text);
+      }).fail(function() {
         console.error('The request failed');
       });
 
@@ -182,75 +170,68 @@ up.proxy = (($) ->
 
   If a network connection is attempted, the proxy will emit
   a [`up:proxy:load`](/up:proxy:load) event with the `request` as its argument.
-  Once the response is received, a [`up:proxy:receive`](/up:proxy:receive) event will
+  Once the response is received, a [`up:proxy:loaded`](/up:proxy:loaded) event will
   be emitted.
   
-  @function up.ajax
-  @param {String} url
-  @param {String} [request.method='GET']
-  @param {String} [request.target='body']
-  @param {Boolean} [request.cache]
-    Whether to use a cached response, if available.
+  @function up.request
+  @param {string} [url]
+    The URL for the request.
+
+    Instead of passing the URL as a string argument, you can also pass it as an { url } option.
+  @param {string} [request.url]
+    You can omit the first string argument and pass the URL as
+    a `request` property instead.
+  @param {string} [request.method='GET']
+    The HTTP method for the request.
+  @param {boolean} [request.cache]
+    Whether to use a cached response for idempotent requests, if available.
     If set to `false` a network connection will always be attempted.
   @param {Object} [request.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
   @param {Object} [request.data={}]
     An object of request parameters.
-  @param {String} [request.url]
-    You can omit the first string argument and pass the URL as
-    a `request` property instead.
-  @param {String} [request.timeout]
+  @param {string} [request.timeout]
     A timeout in milliseconds for the request.
 
     If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set, the timeout
     will not include the time spent waiting in the queue.
-  @return
-    A promise for the response that is API-compatible with the
-    promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+  @param {string} [request.target='body']
+    The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
+  @param {string} [request.failTarget='body']
+    The CSS selector that will be sent as an [`X-Up-Fail-Target` header]((/up.protocol#optimizing-responses).
+  @return {Promise<up.Response>}
+    A promise for the response.
   @stable
   ###
-  ajax = (args...) ->
-
+  makeRequest = (args...) ->
     options = u.extractOptions(args)
     options.url = args[0] if u.isGiven(args[0])
 
-    forceCache = (options.cache == true)
     ignoreCache = (options.cache == false)
 
-    request = u.only options,
-      'url',
-      'method',
-      'data',
-      'target',
-      'headers',
-      'timeout',
-      '_normalized'
-
-    request = normalizeRequest(request)
-
-    pending = true
+    request = up.Request.normalize(options)
 
     # Non-GET requests always touch the network
     # unless `options.cache` is explicitly set to `true`.
     # These requests are never cached.
-    if !isIdempotent(request) && !forceCache
+    if !request.isIdempotent()
+      # We clear the entire cache before a non-idempotent request, since we
+      # assume the user is writing a change.
       clear()
-      promise = loadOrQueue(request)
+
     # If we have an existing promise matching this new request,
     # we use it unless `options.cache` is explicitly set to `false`.
-    # The promise might still be pending.
-    else if (promise = get(request)) && !ignoreCache
+    if !ignoreCache && (promise = get(request))
       up.puts 'Re-using cached response for %s %s', request.method, request.url
-      pending = (promise.state() == 'pending')
-    # If no existing promise is available, we make a network request.
     else
+      # If no existing promise is available, we make a network request.
       promise = loadOrQueue(request)
       set(request, promise)
       # Don't cache failed requests
-      promise.fail -> remove(request)
+      promise.catch -> remove(request)
 
-    if pending && !options.preload
+    if !options.preload
       # This might actually make `pendingCount` higher than the actual
       # number of outstanding requests. However, we need to cover the
       # following case:
@@ -262,27 +243,64 @@ up.proxy = (($) ->
       # - The request finishes.
       #   This triggers `up:proxy:recover`.
       loadStarted()
-      promise.always(loadEnded)
+      u.always promise, loadEnded
 
     promise
 
   ###*
-  Returns whether the proxy is capable of caching the given request.
-  Even if this returns `true`, only idempodent requests will be
-  cached by default.
+  Makes an AJAX request to the given URL and caches the response.
 
-  @function up.proxy.isCachable
-  @internal
+  The function returns a promise that fulfills with the response text.
+
+  \#\#\# Example
+
+      up.request('/search', data: { query: 'sunshine' }).then(function(text) {
+        console.log('The response text is %o', text);
+      }).fail(function() {
+        console.error('The request failed');
+      });
+
+  @method up.ajax
+  @param {string} [url]
+    The URL for the request.
+
+    Instead of passing the URL as a string argument, you can also pass it as an { url } option.
+  @param {string} [request.url]
+    You can omit the first string argument and pass the URL as
+    a `request` property instead.
+  @param {string} [request.method='GET']
+    The HTTP method for the request.
+  @param {boolean} [request.cache]
+    Whether to use a cached response for idempotent requests, if available.
+    If set to `false` a network connection will always be attempted.
+  @param {Object} [request.headers={}]
+    An object of additional header key/value pairs to send along
+    with the request.
+  @param {Object} [request.data={}]
+    An object of request parameters.
+  @param {string} [request.timeout]
+    A timeout in milliseconds for the request.
+
+    If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set, the timeout
+    will not include the time spent waiting in the queue.
+  @return {Promise<string>}
+    A promise for the response text.
+  @deprecated
+    Please use [`up.request()`](/up.request) instead,
+    whose promise fulfills with an [`up.Response`](/up.Response) object.
   ###
-  isCachable = (request) ->
-    not u.isFormData(request.data)
+  ajax = (args...) ->
+    up.log.warn('up.ajax() has been deprecated. Use up.request() instead.')
+    new Promise (resolve, reject) ->
+      pickResponseText = (response) -> resolve(response.text)
+      makeRequest(args...).then(pickResponseText, reject)
 
   ###*
   Returns `true` if the proxy is not currently waiting
   for a request to finish. Returns `false` otherwise.
 
   @function up.proxy.isIdle
-  @return {Boolean}
+  @return {boolean}
     Whether the proxy is idle
   @experimental
   ###
@@ -294,7 +312,7 @@ up.proxy = (($) ->
   for a request to finish. Returns `false` otherwise.
 
   @function up.proxy.isBusy
-  @return {Boolean}
+  @return {boolean}
     Whether the proxy is busy
   @experimental
   ###
@@ -302,19 +320,19 @@ up.proxy = (($) ->
     pendingCount > 0
 
   loadStarted = ->
-    wasIdle = isIdle()
     pendingCount += 1
-    if wasIdle
+    unless slowDelayTimer
       # Since the emission of up:proxy:slow might be delayed by config.slowDelay,
       # we wrap the mission in a function for scheduling below.
       emission = ->
         if isBusy() # a fast response might have beaten the delay
-          up.emit('up:proxy:slow', message: 'Proxy is busy')
+          up.emit('up:proxy:slow', message: 'Proxy is slow to respond')
           slowEventEmitted = true
       slowDelayTimer = u.setTimer(config.slowDelay, emission)
 
+
   ###*
-  This event is [emitted](/up.emit) when [AJAX requests](/up.ajax)
+  This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   are taking long to finish.
 
   By default Unpoly will wait 300 ms for an AJAX request to finish
@@ -367,12 +385,15 @@ up.proxy = (($) ->
 
   loadEnded = ->
     pendingCount -= 1
-    if isIdle() && slowEventEmitted
-      up.emit('up:proxy:recover', message: 'Proxy is idle')
-      slowEventEmitted = false
+
+    if isIdle()
+      cancelSlowDelay()
+      if slowEventEmitted
+        up.emit('up:proxy:recover', message: 'Proxy has recovered from slow response')
+        slowEventEmitted = false
 
   ###*
-  This event is [emitted](/up.emit) when [AJAX requests](/up.ajax)
+  This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   have [taken long to finish](/up:proxy:slow), but have finished now.
 
   See [`up:proxy:slow`](/up:proxy:slow) for more documentation on
@@ -391,49 +412,39 @@ up.proxy = (($) ->
 
   queue = (request) ->
     up.puts('Queuing request for %s %s', request.method, request.url)
-    deferred = $.Deferred()
-    entry =
-      deferred: deferred
-      request: request
-    queuedRequests.push(entry)
-    deferred.promise()
+    loader = -> load(request)
+    loader = u.previewable(loader)
+    queuedLoaders.push(loader)
+    loader.promise
 
   load = (request) ->
     up.emit('up:proxy:load', u.merge(request, message: ['Loading %s %s', request.method, request.url]))
+    responsePromise = request.send()
+    responsePromise.then(registerAliasForRedirect)
+    u.always(responsePromise, responseReceived)
+    responsePromise
 
-    # We will modify the request below for features like method wrapping.
-    # Let's not change the original request which would confuse API clients
-    # and cache key logic.
-    request = u.copy(request)
+  registerAliasForRedirect = (response) ->
+    request = response.request
+    if request.url != response.url
+      newRequest = request.copy(
+        method: response.method
+        url: response.url
+      )
+      up.proxy.alias(request, newRequest)
 
-    request.headers ||= {}
-    request.headers[up.protocol.config.targetHeader] = request.target
+  responseReceived = (response) ->
+    if response.isMaterialError()
+      eventProps = u.merge(response, message: 'Error during request')
+      up.emit('up:proxy:error', eventProps)
+    else
+      emitMessage = ['Server responded with HTTP %d (%d bytes)', response.status, response.text.length]
+      eventProps = u.merge(response, message: emitMessage)
+      up.emit('up:proxy:loaded', eventProps)
 
-    if u.contains(config.wrapMethods, request.method)
-      request.data = u.appendRequestData(request.data, up.protocol.config.methodParam, request.method)
-      request.method = 'POST'
-
-    if u.isFormData(request.data)
-      # Disable jQuery's request data processing so we can pass
-      # a FormData object (http://stackoverflow.com/a/5976031)
-      request.contentType = false
-      request.processData = false
-
-    promise = $.ajax(request)
-    promise.done (data, textStatus, xhr) -> responseReceived(request, xhr)
-    promise.fail (xhr, textStatus, errorThrown) -> responseReceived(request, xhr)
-    promise
-
-  responseReceived = (request, xhr) ->
-    up.emit('up:proxy:received', u.merge(request, message: ['Server responded with %s %s (%d bytes)', xhr.status, xhr.statusText, xhr.responseText?.length]))
-    pokeQueue()
-
-  pokeQueue = ->
-    if entry = queuedRequests.shift()
-      promise = load(entry.request)
-      promise.done (args...) -> entry.deferred.resolve(args...)
-      promise.fail (args...) -> entry.deferred.reject(args...)
-      return
+    # Since we have just completed a request, we now have the worker to load the next request.
+    if loader = queuedLoaders.shift()
+      loader()
 
   ###*
   Makes the proxy assume that `newRequest` has the same response as the
@@ -453,12 +464,11 @@ up.proxy = (($) ->
   Manually stores a promise for the response to the given request.
 
   @function up.proxy.set
-  @param {String} request.url
-  @param {String} [request.method='GET']
-  @param {String} [request.target='body']
-  @param {Promise} response
-    A promise for the response that is API-compatible with the
-    promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+  @param {string} request.url
+  @param {string} [request.method='GET']
+  @param {string} [request.target='body']
+  @param {Promise<up.Response>} response
+    A promise for the response.
   @experimental
   ###
   set = cache.set
@@ -470,9 +480,9 @@ up.proxy = (($) ->
   automatically removes cache entries.
 
   @function up.proxy.remove
-  @param {String} request.url
-  @param {String} [request.method='GET']
-  @param {String} [request.target='body']
+  @param {string} request.url
+  @param {string} [request.method='GET']
+  @param {string} [request.target='body']
   @experimental
   ###
   remove = cache.remove
@@ -489,7 +499,7 @@ up.proxy = (($) ->
   clear = cache.clear
 
   ###*
-  This event is [emitted](/up.emit) before an [AJAX request](/up.ajax)
+  This event is [emitted](/up.emit) before an [AJAX request](/up.request)
   is starting to load.
 
   @event up:proxy:load
@@ -500,19 +510,17 @@ up.proxy = (($) ->
   ###
 
   ###*
-  This event is [emitted](/up.emit) when the response to an [AJAX request](/up.ajax)
+  This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
   has been received.
 
-  @event up:proxy:received
+  @event up:proxy:loaded
   @param event.url
   @param event.method
   @param event.target
   @experimental
   ###
 
-  isIdempotent = (request) ->
-    normalizeRequest(request)
-    u.contains(config.safeMethods, request.method)
+  up.bus.renamedEvent('up:proxy:received', 'up:proxy:loaded')
 
   checkPreload = ($link) ->
     delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay 
@@ -529,10 +537,10 @@ up.proxy = (($) ->
 
   ###*
   @function up.proxy.preload
-  @param {String|Element|jQuery}
+  @param {string|Element|jQuery}
     The element whose destination should be preloaded.
   @return
-    A promise that will be resolved when the request was loaded and cached
+    A promise that will be fulfilled when the request was loaded and cached
   @experimental
   ###
   preload = (linkOrSelector, options) ->
@@ -540,13 +548,28 @@ up.proxy = (($) ->
     options = u.options(options)
 
     method = up.link.followMethod($link, options)
-    if isIdempotent(method: method)
-      up.log.group "Preloading link %o", $link, ->
+    if isIdempotentMethod(method)
+      up.log.group "Preloading link %o", $link.get(0), ->
         options.preload = true
-        up.follow($link, options)
+        up.link.follow($link, options)
     else
-      up.puts("Won't preload %o due to unsafe method %s", $link, method)
-      u.resolvedPromise()
+      up.puts("Won't preload %o due to unsafe method %s", $link.get(0), method)
+      Promise.resolve()
+
+  ###*
+  @internal
+  ###
+  isIdempotentMethod = (method) ->
+    u.contains(config.idempotentMethods, method)
+
+  ###*
+  @internal
+  ###
+  wrapMethod = (method, data, appendOpts) ->
+    if u.contains(config.wrapMethods, method)
+      data = u.appendRequestData(data, up.protocol.config.methodParam, method, appendOpts)
+      method = 'POST'
+    [method, data]
 
   ###*
   Links with an `up-preload` attribute will silently fetch their target
@@ -573,15 +596,18 @@ up.proxy = (($) ->
 
   preload: preload
   ajax: ajax
+  request: makeRequest
   get: get
   alias: alias
   clear: clear
   remove: remove
   isIdle: isIdle
   isBusy: isBusy
-  isCachable: isCachable
+  isIdempotentMethod: isIdempotentMethod
+  wrapMethod: wrapMethod
   config: config
   
 )(jQuery)
 
 up.ajax = up.proxy.ajax
+up.request = up.proxy.request

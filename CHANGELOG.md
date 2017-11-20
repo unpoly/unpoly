@@ -6,6 +6,43 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+- jQuery 3 is now supported ...
+- Native promise, more speed ...
+- Native AJAX, more speed ...
+- Fix bug with back button ...
+- up.ajax is deprecated. Please use [`up.request()`](/up.request) instead, whose promise fulfills with an [`up.Response`](/up.Response) object.
+- up:proxy:received event has been renamed to up:proxy:loaded  
+- up:proxy:receive => up:proxy:loaded
+- Internet Explorer 11 needs a Polyfill for `Promise`. We recommend [ES6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).
+- [`up.observe()`](/up.observe) no longer sends multiple callbacks when a previous callback was slow to respond.
+
+- Fix a bug where Unpoly would not boot on Safari 9 and 10 if the initial page was loaded with a POST method.
+- When a selector was not found in the response, the error notification now offers a link to show the unexpected response.
+- When the server [signals a redirect with a `X-Up-Location` header](/up.protocol#redirect-detection), sending a `X-Up-Method` header is now optional. If it is missing, `GET` is assumed.
+- The event [`up:fragment:destroy](/up:fragment:destroy) can no longer be prevented.
+- up.motion.none has been removed without replacement. Just path `false` or `'none'` to indicate a no-op animation or transition which has no visual effects and completes instantly.
+- [`up.motion.finish()`](/up.motion.finish) is now async. It returns a promise that is fulfulled when all animations are finished.
+- [`up.motion.finish()`](/up.motion.finish) now also finishes animations in ancestors of the given element.
+- [`up.follow()`](/up.follow) will now open modals or popup if the given link has [`[up-modal]`](/up-modal) or [`[up-popup]`](/up-popup) attribute.
+- Clicking a link with `[up-restore-scroll]` will no longer crash if the previous scroll position for the new URL is unknown ([#25](https://github.com/unpoly/unpoly/issues/25)) 
+- Unpoly will often update a different selector in case the request fails. This second selector is now sent to the server as a `X-Up-Fail-Target` header.
+- You can now [configure how CSRF tokens are sent your server-side framework](/up.protocol.config).
+- up.popup.attach() now throws an error if neither { url } nor { html } options are given.
+- Fix a bug where tooltips would sometimes stay open when many tooltips are opened and closed concurrently.
+- CSRF tokens are no longer sent for cross-domain requests.
+- up.util.isString() now also returns true for `String` instances (in addition to string literals)
+- up.util.isNumber() now also returns true for `Number` instances (in addition to number literals)
+- up.util.isHash() has been removed without replacement. In your code you can replace `up.util.isHash(x)` with `up.util.isObject(x) && !up.util.isFunction(x)`.
+- up.util.resolvedDeferred() has been removed without replacement. Use Promise.resolve() instead.
+- up.util.resolvedPromise() has been removed without replacement. Use Promise.resolve() instead.
+- up.util.rejectedPromise() has been removed without replacement. Use Promise.reject() instead.
+- up.util.unresolvableDeferred() has been removed without replacement. Use new Promise(function() {}) instead.
+- up.motion.when() has been removed without replacement. Use Promise.all() instead.
+
+
 0.37.0
 ------
 
@@ -15,7 +52,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 - Fix a bug where [`[up-layer]`](/up-layer) attributes or `{ layer }` options were ignored.
 - [`a[up-target]`](/a-up-target) and [`form[up-target]`] get a new modifying attribute `[up-fail-layer]`.
   Use it to set the layer to update if the server sends a non-200 status code. Valid values are `auto`, `page`, `modal` and `popup`.
-- JavaScript functions like [`up.replace()`](/up.replace) or [`up.submit()`](/up.submit) now have a `{ failLayer }` option. 
+- JavaScript functions like [`up.replace()`](/up.replace) or [`up.submit()`](/up.submit) now have a `{ failLayer }` option.
 
 
 0.36.2

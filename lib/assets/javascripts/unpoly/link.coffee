@@ -74,16 +74,16 @@ up.link = (($) ->
   ###*
   Visits the given URL without a full page load.
   This is done by fetching `url` through an AJAX request
-  and replacing the current `<body>` element with the response's `<body>` element.
+  and [replacing](/up.replace) the current `<body>` element with the response's `<body>` element.
 
   For example, this would fetch the `/users` URL:
 
       up.visit('/users')
 
   @function up.visit
-  @param {String} url
+  @param {string} url
     The URL to visit.
-  @param {String} [options.target='body']
+  @param {string} [options.target='body']
     The selector to replace.
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace)
@@ -95,77 +95,49 @@ up.link = (($) ->
     up.replace(selector, url, options)
 
   ###*
-  Follows the given link via AJAX and [replaces](/up.replace) a CSS selector in the current page
-  with corresponding elements from a new page fetched from the server.
+  Follows the given link via AJAX and [replaces](/up.replace) the current page
+  with HTML from the response.
 
-  Any Unpoly UJS attributes on the given link will be honored. E. g. you have this link:
+  By default the page's `<body>` element will be replaced.
+  If the link has an attribute like [`[up-target]`](/up-target)
+  or [`[up-modal]`](/up-modal), the corresponding UJS behavior will be activated
+  just as if the user had clicked on the link.
+
+  \#\#\# Examples
+
+  Let's say you have a link with an [`a[up-target]`](/a-up-target) attribute:
 
       <a href="/users" up-target=".main">Users</a>
 
-  You can update the page's `.main` selector with the `.main` from `/users` like this:
+  Calling `up.follow()` with this link will replace the page's `.main` fragment
+  as if the user had clicked on the link:
 
-      var $link = $('a:first'); // select link with jQuery
+      var $link = $('a:first');
       up.follow($link);
 
-  The unobtrusive variant of this are the [`a[up-target]`](/a-up-target) and [`a[up-follow]`](/a-up-follow) selectors.
-
   @function up.follow
-  @param {Element|jQuery|String} linkOrSelector
-    An element or selector which resolves to an `<a>` tag
-    or any element that is marked up with an `up-href` attribute.
-  @param {String} [options.target]
+  @param {Element|jQuery|string} linkOrSelector
+    An element or selector which is either an `<a>` tag or any element with an `up-href` attribute.
+  @param {string} [options.target]
     The selector to replace.
-    Defaults to the `up-target` attribute on `link`, or to `body` if such an attribute does not exist.
-  @param {String} [options.failTarget]
-    The selector to replace if the server responds with a non-200 status code.
-    Defaults to the `up-fail-target` attribute on `link`, or to `body` if such an attribute does not exist.
-  @param {String} [options.fallback]
-    The selector to update when the original target was not found in the page.
-  @param {String} [options.method='get']
-    The HTTP method to use for the request.
-  @param {String} [options.confirm]
-    A message that will be displayed in a cancelable confirmation dialog
-    before the link is followed.
-  @param {Function|String} [options.transition]
-    A transition function or name.
-  @param {Function|String} [options.failTransition]
-    The transition to use if the server responds with a non-200 status code.
-  @param {Number} [options.duration]
-    The duration of the transition. See [`up.morph()`](/up.morph).
-  @param {Number} [options.delay]
-    The delay before the transition starts. See [`up.morph()`](/up.morph).
-  @param {String} [options.easing]
-    The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
-  @param {Element|jQuery|String} [options.reveal]
-    Whether to reveal the target  element within its viewport before updating.
-  @param {Boolean} [options.restoreScroll]
-    If set to `true`, this will attempt to [restore scroll positions](/up.restoreScroll)
-    previously seen on the destination URL.
-  @param {Boolean} [options.cache]
-    Whether to force the use of a cached response (`true`)
-    or never use the cache (`false`)
-    or make an educated guess (`undefined`).
-  @param {Object} [options.headers={}]
-    An object of additional header key/value pairs to send along
-    with the request.
-  @param {Object} [options.timeout={}]
-    A timeout in milliseconds for the request.
-  @param {String} [options.layer='auto']
-    The name of the layer that ought to be updated. Valid values are
-    `auto`, `page`, `modal` and `popup`.
-
-    If set to `auto` (default), Unpoly will try to find a match in the
-    same layer as the given link. If no match was found in that layer,
-    Unpoly will search in other layers, starting from the topmost layer.
-  @param {String} [options.failLayer='auto']
-    The name of the layer that ought to be updated if the server sends a non-200 status code.
+    Defaults to the `[up-target]`, `[up-modal]` or `[up-popup]` attribute on `link`.
+    If no target is given, the `<body>` element will be replaced.
 
   @return {Promise}
-    A promise that will be resolved when the link destination
+    A promise that will be fulfilled when the link destination
     has been loaded and rendered.
   @stable
   ###
   follow = (linkOrSelector, options) ->
+    $link = $(linkOrSelector)
+    variant = followVariantForLink($link)
+    variant.followLink($link, options)
+
+  ###*
+  @function defaultFollow
+  @internal
+  ###
+  defaultFollow = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
 
     options = u.options(options)
@@ -198,27 +170,13 @@ up.link = (($) ->
 
   @function up.link.followMethod
   @param linkOrSelector
-  @param options.method {String}
+  @param options.method {string}
   @internal
   ###
   followMethod = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
     options = u.options(options)
     u.option(options.method, $link.attr('up-method'), $link.attr('data-method'), 'get').toUpperCase()
-
-  ###*
-  @function up.link.childClicked
-  @internal
-  ###
-  childClicked = (event, $link) ->
-    $target = $(event.target)
-    $targetLink = $target.closest('a, [up-href]')
-    $targetLink.length && $link.find($targetLink).length
-    
-  shouldProcessLinkEvent = (event, $link) ->
-    u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link)
-
-  followVariantSelectors = []
 
   ###*
   No-op that is called when we allow a browser's default action to go through,
@@ -229,26 +187,13 @@ up.link = (($) ->
   ###
   allowDefault = (event) ->
 
-  onAction = (selector, handler) ->
-    followVariantSelectors.push(selector)
-    handlerWithActiveMark = ($link) ->
-      up.feedback.start $link, -> handler($link)
-    up.on 'click', "a#{selector}, [up-href]#{selector}", (event, $link) ->
-      if shouldProcessLinkEvent(event, $link)
-        if $link.is('[up-instant]')
-          # If the link was already processed on mousedown, we still need
-          # to prevent this later click event's chain.
-          up.bus.haltEvent(event)
-        else
-          up.bus.consumeAction(event)
-          handlerWithActiveMark($link)
-      else
-        allowDefault(event)
+  followVariants = []
 
-    up.on 'mousedown', "a#{selector}[up-instant], [up-href]#{selector}[up-instant]", (event, $link) ->
-      if shouldProcessLinkEvent(event, $link)
-        up.bus.consumeAction(event)
-        handlerWithActiveMark($link)
+  onAction = (simplifiedSelector, handler) ->
+    variant = new up.FollowVariant(simplifiedSelector, handler)
+    followVariants.push(variant)
+    variant.registerEvents()
+    variant
 
   ###*
   Returns whether the given link will be handled by Unpoly instead of making a full page load.
@@ -257,13 +202,28 @@ up.link = (($) ->
   like `up-target` or `up-modal`.
 
   @function up.link.isFollowable
-  @param {Element|jQuery|String} linkOrSelector
+  @param {Element|jQuery|string} linkOrSelector
     The link to check.
   @experimental
   ###
   isFollowable = (link) ->
-    $link = $(link)
-    u.any followVariantSelectors, (selector) -> $link.is(selector)
+    !!followVariantForLink(link, default: false)
+
+  ###*
+  Returns the handler function that can be used to follow the given link.
+  E.g. it wil return a handler calling `up.modal.follow` if the link is a `[up-modal]`,
+  but a handler calling `up.link.follow` if the links is `[up-target]`.
+
+  @param {Element|jQuery|string}
+  @return {Function(jQuery)}
+  @internal
+  ###
+  followVariantForLink = (linkOrSelector, options) ->
+    options = u.options(options)
+    $link = $(linkOrSelector)
+    variant = u.detect followVariants, (variant) -> variant.matchesLink($link)
+    variant ||= DEFAULT_FOLLOW_VARIANT unless options.default is false
+    variant
 
   ###*
   Makes sure that the given link will be handled by Unpoly instead of making a full page load.
@@ -272,7 +232,7 @@ up.link = (($) ->
   unless it already have it an attribute like `up-target` or `up-modal`.
 
   @function up.link.makeFollowable
-  @param {Element|jQuery|String} linkOrSelector
+  @param {Element|jQuery|string} linkOrSelector
     The link to process.
   @experimental
   ###
@@ -280,6 +240,11 @@ up.link = (($) ->
     $link = $(link)
     unless isFollowable($link)
       $link.attr('up-follow', '')
+
+  childClicked = (event, $link) ->
+    $target = $(event.target)
+    $targetLink = $target.closest('a, [up-href]')
+    $targetLink.length && $link.find($targetLink).length
 
   ###*
   Follows this link via AJAX and replaces a CSS selector in the current page
@@ -329,42 +294,42 @@ up.link = (($) ->
   opening the destination in a new tab.
 
   @selector a[up-target]
-  @param {String} up-target
+  @param {string} up-target
     The CSS selector to replace
-  @param {String} [up-method='get']
+  @param {string} [up-method='get']
     The HTTP method to use for the request.
-  @param {String} [up-transition='none']
+  @param {string} [up-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements.
   @param [up-fail-target='body']
     The selector to replace if the server responds with a non-200 status code.
-  @param {String} [up-fail-transition='none']
+  @param {string} [up-fail-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements
     when the server responds with a non-200 status code.
-  @param {String} [up-fallback]
+  @param {string} [up-fallback]
     The selector to update when the original target was not found in the page.
-  @param {String} [up-href]
+  @param {string} [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
-  @param {String} [up-confirm]
+  @param {string} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the link is followed.
-  @param {String} [up-reveal='true']
+  @param {string} [up-reveal='true']
     Whether to reveal the target element within its viewport before updating.
-  @param {String} [up-restore-scroll='false']
+  @param {string} [up-restore-scroll='false']
     Whether to restore previously known scroll position of all viewports
     within the target selector.
-  @param {String} [up-cache]
+  @param {string} [up-cache]
     Whether to force the use of a cached response (`true`)
     or never use the cache (`false`)
     or make an educated guess (default).
-  @param {String} [up-layer='auto']
+  @param {string} [up-layer='auto']
     The name of the layer that ought to be updated. Valid values are
     `auto`, `page`, `modal` and `popup`.
 
     If set to `auto` (default), Unpoly will try to find a match in the link's layer.
     If no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
-  @param {String} [up-fail-layer='auto']
+  @param {string} [up-fail-layer='auto']
     The name of the layer that ought to be updated if the server sends a
     non-200 status code.
   @param [up-history]
@@ -374,8 +339,9 @@ up.link = (($) ->
     Set this to a URL string to update the history with the given URL.
   @stable
   ###
-  onAction '[up-target]', ($link) ->
-    follow($link)
+  onAction '[up-target]',
+    # Don't just pass the `follow` function reference so we can stub it in tests
+    ($element, options) -> defaultFollow($element, options)
 
   ###*
   By adding an `up-instant` attribute to a link, the destination will be
@@ -422,24 +388,24 @@ up.link = (($) ->
 
   @selector a[up-follow]
 
-  @param {String} [up-method='get']
+  @param {string} [up-method='get']
     The HTTP method to use for the request.
   @param [up-fail-target='body']
     The selector to replace if the server responds with a non-200 status code.
-  @param {String} [up-fallback]
+  @param {string} [up-fallback]
     The selector to update when the original target was not found in the page.
-  @param {String} [up-transition='none']
+  @param {string} [up-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements.
-  @param {String} [up-fail-transition='none']
+  @param {string} [up-fail-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements
     when the server responds with a non-200 status code.
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.
-  @param {String} [up-confirm]
+  @param {string} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the link is followed.
-  @param {String} [up-history]
+  @param {string} [up-history]
     Whether to push an entry to the browser history when following the link.
 
     Set this to `'false'` to prevent the URL bar from being updated.
@@ -449,8 +415,9 @@ up.link = (($) ->
     within the response.
   @stable
   ###
-  onAction '[up-follow]', ($link) ->
-    follow($link)
+  DEFAULT_FOLLOW_VARIANT = onAction '[up-follow]',
+    # Don't just pass the `follow` function so we can stub it in tests
+    ($link, options) -> defaultFollow($link, options)
 
   ###*
   Marks up the current link to be followed *as fast as possible*.
@@ -526,7 +493,7 @@ up.link = (($) ->
 
 
   @selector [up-expand]
-  @param {String} [up-expand]
+  @param {string} [up-expand]
     A CSS selector that defines which containing link should be expanded.
 
     If omitted, the first contained link will be expanded.
@@ -553,10 +520,10 @@ up.link = (($) ->
   follow: follow
   makeFollowable: makeFollowable
   isFollowable: isFollowable
-  shouldProcessLinkEvent: shouldProcessLinkEvent
   childClicked: childClicked
   followMethod: followMethod
   onAction: onAction
+  allowDefault: allowDefault
 
 )(jQuery)
 

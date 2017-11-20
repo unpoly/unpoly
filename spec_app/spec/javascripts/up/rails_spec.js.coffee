@@ -21,13 +21,13 @@ describe 'up.rails', ->
         describe "on an [#{upAttribute}] element", ->
 
           it "is transformed to an up-method attribute so the element isn't handled a second time by Rails UJS", ->
-            $element = affix("span[#{upAttribute}][data-method=\"put\"]")
+            $element = affix("a[href=\"/foo\"][#{upAttribute}][data-method=\"put\"]")
             up.hello($element)
             expect($element.attr('data-method')).toBeUndefined()
             expect($element.attr('up-method')).toEqual('put')
 
           it "does not overwrite an existing up-method attribute, but gets deleted", ->
-            $element = affix("span[#{upAttribute}][up-method=\"patch\"][data-method=\"put\"]")
+            $element = affix("a[href=\"/foo\"][#{upAttribute}][up-method=\"patch\"][data-method=\"put\"]")
             up.hello($element)
             expect($element.attr('data-method')).toBeUndefined()
             expect($element.attr('up-method')).toEqual('patch')
@@ -35,7 +35,7 @@ describe 'up.rails', ->
       describe 'on an element without Unpoly attributes', ->
 
         it "is not changed", ->
-          $element = affix("span[data-method=\"put\"]")
+          $element = affix("a[href=\"/foo\"][data-method=\"put\"]")
           up.hello($element)
           expect($element.attr('data-method')).toEqual('put')
 
@@ -48,7 +48,7 @@ describe 'up.rails', ->
         describe "on an [#{upAttribute}] element", ->
 
           it "is not changed", ->
-            $element = affix("span[#{upAttribute}][data-method=\"put\"]")
+            $element = affix("a[href=\"/foo\"][#{upAttribute}][data-method=\"put\"]")
             up.hello($element)
             expect($element.attr('data-method')).toEqual('put')
 
@@ -69,13 +69,13 @@ describe 'up.rails', ->
         describe "on an [#{upAttribute}] element", ->
 
           it "is transformed to an up-confirm attribute so the element isn't handled a second time by Rails UJS", ->
-            $element = affix("span[#{upAttribute}][data-confirm=\"Really?\"]")
+            $element = affix("a[href=\"/foo\"][#{upAttribute}][data-confirm=\"Really?\"]")
             up.hello($element)
             expect($element.attr('data-confirm')).toBeUndefined()
             expect($element.attr('up-confirm')).toEqual('Really?')
 
           it "does not overwrite an existing up-confirm attribute, but gets deleted", ->
-            $element = affix("span[#{upAttribute}][up-confirm=\"Seriously?\"][data-confirm=\"Really?\"]")
+            $element = affix("a[href=\"/foo\"][#{upAttribute}][up-confirm=\"Seriously?\"][data-confirm=\"Really?\"]")
             up.hello($element)
             expect($element.attr('data-confirm')).toBeUndefined()
             expect($element.attr('up-confirm')).toEqual('Seriously?')
@@ -83,7 +83,7 @@ describe 'up.rails', ->
       describe 'on an element without Unpoly attributes', ->
 
         it "is not changed", ->
-          $element = affix("span[data-confirm=\"Really?\"]")
+          $element = affix("a[href=\"/foo\"][data-confirm=\"Really?\"]")
           up.hello($element)
           expect($element.attr('data-confirm')).toEqual('Really?')
 
@@ -96,6 +96,6 @@ describe 'up.rails', ->
         describe "on an [#{upAttribute}] element", ->
 
           it "is not changed", ->
-            $element = affix("span[#{upAttribute}][data-confirm=\"Really?\"]")
+            $element = affix("a[href=\"/foo\"][#{upAttribute}][data-confirm=\"Really?\"]")
             up.hello($element)
             expect($element.attr('data-confirm')).toEqual('Really?')

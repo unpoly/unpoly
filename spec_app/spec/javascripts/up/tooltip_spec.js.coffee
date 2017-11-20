@@ -6,23 +6,26 @@ describe 'up.tooltip', ->
     
     describe 'up.tooltip.attach', ->
       
-      it 'opens a tooltip with the given text', ->
+      it 'opens a tooltip with the given text', (done) ->
         $link = affix('span')
-        up.tooltip.attach($link, html: 'tooltip text')
-        $tooltip = $('.up-tooltip')
-        expect($tooltip).toHaveText('tooltip text')
+        up.tooltip.attach($link, html: 'tooltip text').then ->
+          $tooltip = $('.up-tooltip')
+          expect($tooltip).toHaveText('tooltip text')
+          done()
 
-      it 'allows HTML for the tooltip text when contents are given as { html } option', ->
+      it 'allows HTML for the tooltip text when contents are given as { html } option', (done) ->
         $link = affix('span')
-        up.tooltip.attach($link, html: '<b>text</b>')
-        $tooltip = $('.up-tooltip')
-        expect($tooltip.html()).toEqual('<b>text</b>')
+        up.tooltip.attach($link, html: '<b>text</b>').then ->
+          $tooltip = $('.up-tooltip')
+          expect($tooltip.html()).toEqual('<b>text</b>')
+          done()
 
-      it 'escapes HTML for the tooltip text when contents given as { text } option', ->
+      it 'escapes HTML for the tooltip text when contents given as { text } option', (done) ->
         $link = affix('span')
-        up.tooltip.attach($link, text: '<b>text</b>')
-        $tooltip = $('.up-tooltip')
-        expect($tooltip.html()).toEqual('&lt;b&gt;text&lt;/b&gt;')
+        up.tooltip.attach($link, text: '<b>text</b>').then ->
+          $tooltip = $('.up-tooltip')
+          expect($tooltip.html()).toEqual('&lt;b&gt;text&lt;/b&gt;')
+          done()
 
       describe 'positioning', ->
 
@@ -44,58 +47,61 @@ describe 'up.tooltip', ->
 
         describe 'with { position: "top" }', ->
 
-          it 'centers the tooltip above the given element', ->
+          it 'centers the tooltip above the given element', (done) ->
             @linkBox = @$link.get(0).getBoundingClientRect()
-            up.tooltip.attach(@$link, html: 'tooltip text', position: 'top')
-            $tooltip = $('.up-tooltip')
-            tooltipBox = $tooltip.get(0).getBoundingClientRect()
-            expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height, 15)
-            expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
+            up.tooltip.attach(@$link, html: 'tooltip text', position: 'top').then =>
+              $tooltip = $('.up-tooltip')
+              tooltipBox = $tooltip.get(0).getBoundingClientRect()
+              expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height, 15)
+              expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
+              done()
 
         describe 'with { position: "right" }', ->
 
-          it 'centers the tooltip at the right side of the given element', ->
+          it 'centers the tooltip at the right side of the given element', (done) ->
             @linkBox = @$link.get(0).getBoundingClientRect()
-            up.tooltip.attach(@$link, html: 'tooltip text', position: 'right')
-            $tooltip = $('.up-tooltip')
-            tooltipBox = $tooltip.get(0).getBoundingClientRect()
-            expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 15)
-            expect(tooltipBox.left).toBeAround(@linkBox.left + @linkBox.width, 15)
+            up.tooltip.attach(@$link, html: 'tooltip text', position: 'right').then =>
+              $tooltip = $('.up-tooltip')
+              tooltipBox = $tooltip.get(0).getBoundingClientRect()
+              expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 15)
+              expect(tooltipBox.left).toBeAround(@linkBox.left + @linkBox.width, 15)
+              done()
 
         describe 'with { position: "bottom" }', ->
 
-          it 'centers the tooltip below the given element', ->
+          it 'centers the tooltip below the given element', (done) ->
             @linkBox = @$link.get(0).getBoundingClientRect()
-            up.tooltip.attach(@$link, html: 'tooltip text', position: 'bottom')
-            $tooltip = $('.up-tooltip')
-            tooltipBox = $tooltip.get(0).getBoundingClientRect()
-            expect(tooltipBox.top).toBeAround(@linkBox.top + @linkBox.height, 15)
-            expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
+            up.tooltip.attach(@$link, html: 'tooltip text', position: 'bottom').then =>
+              $tooltip = $('.up-tooltip')
+              tooltipBox = $tooltip.get(0).getBoundingClientRect()
+              expect(tooltipBox.top).toBeAround(@linkBox.top + @linkBox.height, 15)
+              expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
+              done()
 
         describe 'with { position: "left" }', ->
 
-          it 'centers the tooltip at the left side of the given element', ->
+          it 'centers the tooltip at the left side of the given element', (done) ->
             @linkBox = @$link.get(0).getBoundingClientRect()
-            up.tooltip.attach(@$link, html: 'tooltip text', position: 'left')
-            $tooltip = $('.up-tooltip')
-            tooltipBox = $tooltip.get(0).getBoundingClientRect()
-            expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 15)
-            expect(tooltipBox.left).toBeAround(@linkBox.left - tooltipBox.width, 15)
+            up.tooltip.attach(@$link, html: 'tooltip text', position: 'left').then =>
+              $tooltip = $('.up-tooltip')
+              tooltipBox = $tooltip.get(0).getBoundingClientRect()
+              expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 15)
+              expect(tooltipBox.left).toBeAround(@linkBox.left - tooltipBox.width, 15)
+              done()
 
-        it 'gives the tooltip { position: "fixed" } if the given link is fixed', ->
+        it 'gives the tooltip { position: "fixed" } if the given link is fixed', (done) ->
           # Let's test the harder case where the document is scrolled
           up.layout.scroll(document, 50)
           @$link.css(position: 'fixed')
           @linkBox = @$link.get(0).getBoundingClientRect()
 
-          up.tooltip.attach(@$link, html: 'tooltip text', position: 'top')
-          $tooltip = $('.up-tooltip')
-          tooltipBox = $tooltip.get(0).getBoundingClientRect()
-
-          expect($tooltip.css('position')).toEqual('fixed')
-          expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height, 15)
-          expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
-
+          up.tooltip.attach(@$link, html: 'tooltip text', position: 'top').then =>
+            $tooltip = $('.up-tooltip')
+            tooltipBox = $tooltip.get(0).getBoundingClientRect()
+            expect($tooltip.css('position')).toEqual('fixed')
+            expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height, 15)
+            expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
+            done()
 
       it 'closes an existing tooltip'
       
@@ -122,44 +128,52 @@ describe 'up.tooltip', ->
       beforeEach ->
         up.motion.config.enabled = false
 
-      it 'closes the tooltip', (done) ->
+      it 'closes the tooltip', asyncSpec (next) ->
         $link = affix('.link')
         up.tooltip.attach($link, text: 'Tooltip text')
-        expect(up.tooltip.isOpen()).toBe(true)
-        Trigger.clickSequence($('body'))
-        u.nextFrame ->
-          expect(up.tooltip.isOpen()).toBe(false)
-          done()
 
-      it 'closes the tooltip when a an [up-instant] link removes its parent (and thus a click event never bubbles up to the document)', (done) ->
+        next =>
+          expect(up.tooltip.isOpen()).toBe(true)
+          Trigger.clickSequence($('body'))
+
+        next =>
+          expect(up.tooltip.isOpen()).toBe(false)
+
+      it 'closes the tooltip when a an [up-instant] link removes its parent (and thus a click event never bubbles up to the document)', asyncSpec (next) ->
         $parent = affix('.parent')
         $parentReplacingLink = $parent.affix('a[href="/foo"][up-target=".parent"][up-instant]')
         $tooltipOpener = affix('.link')
         up.tooltip.attach($tooltipOpener, text: 'Tooltip text')
-        expect(up.tooltip.isOpen()).toBe(true)
-        Trigger.clickSequence($parentReplacingLink)
-        u.nextFrame ->
-          expect(up.tooltip.isOpen()).toBe(false)
-          done()
 
-      it 'closes a tooltip when the user clicks on an [up-target] link outside the tooltip', (done) ->
+        next =>
+          expect(up.tooltip.isOpen()).toBe(true)
+          Trigger.clickSequence($parentReplacingLink)
+
+        next =>
+          expect(up.tooltip.isOpen()).toBe(false)
+
+      it 'closes a tooltip when the user clicks on an [up-target] link outside the tooltip', asyncSpec (next) ->
         $target = affix('.target')
         $outsideLink = affix('a[href="/foo"][up-target=".target"]')
         $tooltipOpener = affix('.link')
         up.tooltip.attach($tooltipOpener, text: 'Tooltip text')
-        expect(up.tooltip.isOpen()).toBe(true)
-        Trigger.clickSequence($outsideLink)
-        u.nextFrame ->
-          expect(up.tooltip.isOpen()).toBe(false)
-          done()
 
-      it 'closes a tooltip when the user clicks on an [up-instant] link outside the tooltip', (done) ->
+        next =>
+          expect(up.tooltip.isOpen()).toBe(true)
+          Trigger.clickSequence($outsideLink)
+
+        next =>
+          expect(up.tooltip.isOpen()).toBe(false)
+
+      it 'closes a tooltip when the user clicks on an [up-instant] link outside the tooltip', asyncSpec (next) ->
         $target = affix('.target')
         $outsideLink = affix('a[href="/foo"][up-target=".target"][up-instant]')
         $tooltipOpener = affix('.link')
         up.tooltip.attach($tooltipOpener, text: 'Tooltip text')
-        expect(up.tooltip.isOpen()).toBe(true)
-        Trigger.clickSequence($outsideLink)
-        u.nextFrame ->
+
+        next =>
+          expect(up.tooltip.isOpen()).toBe(true)
+          Trigger.clickSequence($outsideLink)
+
+        next =>
           expect(up.tooltip.isOpen()).toBe(false)
-          done()

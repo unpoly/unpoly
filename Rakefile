@@ -7,7 +7,12 @@ require 'json'
 
 module Unpoly
   module Tasks
-    SPROCKETS_MANIFESTS = %w(unpoly.js unpoly-bootstrap3.js unpoly.css unpoly-bootstrap3.css)
+    SPROCKETS_MANIFESTS = %w(
+      unpoly.js
+      unpoly.css
+      unpoly-bootstrap3.js
+      unpoly-bootstrap3.css
+    )
     SPROCKETS_SOURCES = %w(lib/assets/javascripts lib/assets/stylesheets)
     SPROCKETS_OUTPUT_FOLDER = 'dist'
     NPM_MANIFEST = 'package.json'

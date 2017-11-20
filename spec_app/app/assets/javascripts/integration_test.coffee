@@ -1,5 +1,6 @@
 #= require jquery
 #= require jquery_ujs
+#= require es6-promise.auto
 #= require unpoly
 
 up.compiler '.compiler', ($element) ->

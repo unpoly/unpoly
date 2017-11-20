@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=UTF-8" http-equiv="Content-Type"/>
+    <title>Unpoly Specs</title>
+
+    <%= stylesheet_link_tag *jasmine_css_files %>
+    <%=
+      jquery_suffix = params[:jquery].presence || '3'
+      jquery_asset = "jquery#{jquery_suffix}"
+      jquery_asset = "jquery" if jquery_asset == "jquery1"
+      javascript_include_tag jquery_asset
+    %>
+    <%= javascript_include_tag *jasmine_js_files %>
+  </head>
+  <body>
+    <div id="jasmine_content"></div>
+    <%= yield %>
+  </body>
+</html>

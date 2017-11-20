@@ -41,17 +41,17 @@ up.layout = (($) ->
     An array of CSS selectors that find elements anchored to the
     right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
     See [`[up-anchored="right"]`](/up-anchored-right) for details.
-  @param {Number} [config.duration=0]
+  @param {number} [config.duration=0]
     The duration of the scrolling animation in milliseconds.
     Setting this to `0` will disable scrolling animations.
-  @param {String} [config.easing='swing']
+  @param {string} [config.easing='swing']
     The timing function that controls the animation's acceleration.
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
-  @param {Number} [config.snap=50]
+  @param {number} [config.snap=50]
     When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
     to the top when the revealed element is closer to the top than `config.snap`.
-  @param {Number} [config.substance=150]
+  @param {number} [config.substance=150]
     A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
   @stable
   ###
@@ -65,15 +65,16 @@ up.layout = (($) ->
     substance: 150
     easing: 'swing'
 
-  lastScrollTops = u.cache
+  lastScrollTops = u.newCache
     size: 30,
     key: up.history.normalizeUrl
+
+  scrollingTracker = new up.MotionTracker('scrolling')
 
   reset = ->
     config.reset()
     lastScrollTops.clear()
-
-  SCROLL_PROMISE_KEY = 'up-scroll-promise'
+    scrollingTracker.finish()
 
   ###*
   Scrolls the given viewport to the given Y-position.
@@ -101,63 +102,67 @@ up.layout = (($) ->
   last frame before the next animation is started.
 
   @function up.scroll
-  @param {String|Element|jQuery} viewport
+  @param {string|Element|jQuery} viewport
     The container element to scroll.
-  @param {Number} scrollPos
+  @param {number} scrollPos
     The absolute number of pixels to set the scroll position to.
-  @param {Number}[options.duration]
+  @param {number}[options.duration]
     The number of miliseconds for the scrolling's animation.
-  @param {String}[options.easing]
+  @param {string}[options.easing]
     The timing function that controls the acceleration for the scrolling's animation.
-  @return {Deferred}
-    A promise that will be resolved when the scrolling ends.
+  @return {Promise}
+    A promise that will be fulfilled when the scrolling ends.
   @experimental
   ###
   scroll = (viewport, scrollTop, options) ->
-    $viewport = $(viewport)
+    $scrollable = scrollableElementForViewport(viewport)
     options = u.options(options)
-    duration = u.option(options.duration, config.duration)
-    easing = u.option(options.easing, config.easing)
+    options.duration = u.option(options.duration, config.duration)
+    options.easing = u.option(options.easing, config.easing)
 
-    finishScrolling($viewport)
+    finishScrolling($scrollable).then ->
+      if up.motion.isEnabled() && options.duration > 0
+        scrollWithAnimateNow($scrollable, scrollTop, options)
+      else
+        scrollAbruptlyNow($scrollable, scrollTop)
 
-    if duration > 0
-      deferred = $.Deferred()
-
-      $viewport.data(SCROLL_PROMISE_KEY, deferred)
-      deferred.then ->
-        $viewport.removeData(SCROLL_PROMISE_KEY)
-        # Since we're scrolling using #animate, #finish can be
-        # used to jump to the last frame:
-        # https://api.jquery.com/finish/
-        $viewport.finish()
-
-      targetProps =
-        scrollTop: scrollTop
-
-      if $viewport.get(0) == document
-        $viewport = $('html, body') # FML
-
-      $viewport.animate targetProps,
-        duration: duration,
-        easing: easing,
-        complete: -> deferred.resolve()
-
-      deferred
+  scrollableElementForViewport = (viewport) ->
+    $viewport = $(viewport)
+    if $viewport.get(0) == document
+      $('html, body') # FML
     else
-      $viewport.scrollTop(scrollTop)
-      u.resolvedDeferred()
+      $viewport
+
+  scrollWithAnimateNow = ($scrollable, scrollTop, animateOptions) ->
+    start = ->
+      finish = ->
+        # jQuery exposes a finish() method that completes all animations orchestrated through jQuery.
+        # This will also resolve the promise returned by $element.animate(..).promise().
+        $scrollable.finish()
+
+      $scrollable.on(scrollingTracker.eventName, finish)
+      scrollDone = $scrollable.animate({ scrollTop }, animateOptions).promise()
+      scrollDone.then -> $scrollable.off(scrollingTracker.eventName)
+      scrollDone
+
+    # Tracker will either finish or wait for previous scrolling animations before starting the next
+    scrollingTracker.claim($scrollable, start)
+
+  scrollAbruptlyNow = ($scrollable, scrollTop) ->
+    $scrollable.scrollTop(scrollTop)
+    Promise.resolve()
 
   ###*
+  Finishes scrolling animations in the given element, its ancestors or its descendants.
+
   @function up.layout.finishScrolling
-  @param {String|Element|jQuery}
-    The element that might currently be scrolling.
+  @param {string|Element|jQuery}
+  @return {Promise}
   @internal
   ###
-  finishScrolling = (elementOrSelector) ->
-    $(elementOrSelector).each ->
-      if existingScrolling = $(this).data(SCROLL_PROMISE_KEY)
-        existingScrolling.resolve()
+  finishScrolling = (element) ->
+    $scrollable = scrollableElementForViewport(element)
+    scrollingTracker.finish($scrollable)
 
   ###*
   @function up.layout.anchoredRight
@@ -166,8 +171,12 @@ up.layout = (($) ->
   anchoredRight = ->
     u.multiSelector(config.anchoredRight).select()
 
+  ###*
+  @function measureObstruction
+  @return {Object}
+  @internal
+  ###
   measureObstruction = ->
-
     measurePosition = (obstructor, cssAttr) ->
       $obstructor = $(obstructor)
       anchorPosition = $obstructor.css(cssAttr)
@@ -215,16 +224,16 @@ up.layout = (($) ->
   - [configure default options](/up.layout.config) for `fixedTop` or `fixedBottom`
 
   @function up.reveal
-  @param {String|Element|jQuery} element
-  @param {Number} [options.duration]
-  @param {String} [options.easing]
-  @param {String} [options.snap]
-  @param {String|Element|jQuery} [options.viewport]
-  @param {Boolean} [options.top=false]
+  @param {string|Element|jQuery} element
+  @param {number} [options.duration]
+  @param {string} [options.easing]
+  @param {string} [options.snap]
+  @param {string|Element|jQuery} [options.viewport]
+  @param {boolean} [options.top=false]
     Whether to scroll the viewport so that the first element row aligns
     with the top edge of the viewport.
-  @return {Deferred}
-    A promise that will be resolved when the element is revealed.
+  @return {Promise}
+    A promise that fulfills when the element is revealed.
   @stable
   ###
   reveal = (elementOrSelector, options) ->
@@ -279,7 +288,7 @@ up.layout = (($) ->
     if newScrollPos != originalScrollPos
       scroll($viewport, newScrollPos, options)
     else
-      u.resolvedDeferred()
+      Promise.resolve()
 
   ###*
   [Reveals](/up.reveal) an element matching the `#hash` in the current URL.
@@ -298,9 +307,9 @@ up.layout = (($) ->
       if $match = firstHashTarget(hash)
         reveal($match)
       else
-        u.rejectedPromise()
+        Promise.reject()
     else
-      u.resolvedPromise()
+      Promise.resolve()
 
   viewportSelector = ->
     u.multiSelector(config.viewports)
@@ -311,7 +320,7 @@ up.layout = (($) ->
   Throws an error if no viewport could be found.
 
   @function up.layout.viewportOf
-  @param {String|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} selectorOrElement
   @internal
   ###
   viewportOf = (selectorOrElement, options = {}) ->
@@ -326,13 +335,13 @@ up.layout = (($) ->
   given selector or element.
 
   @function up.layout.viewportsWithin
-  @param {String|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} selectorOrElement
   @return jQuery
   @internal
   ###
   viewportsWithin = (selectorOrElement) ->
     $element = $(selectorOrElement)
-    viewportSelector().findWithSelf($element)
+    viewportSelector().selectInSubtree($element)
 
   ###*
   Returns a jQuery collection of all the viewports on the screen.
@@ -360,7 +369,7 @@ up.layout = (($) ->
       => { '.main': 0, '.sidebar': 73 }
 
   @function up.layout.scrollTops
-  @return Object<String, Number>
+  @return Object<string, number>
   @internal
   ###
   scrollTops = ->
@@ -396,14 +405,13 @@ up.layout = (($) ->
   Unpoly automatically saves scroll positions whenever a fragment was updated on the page.
 
   @function up.layout.saveScroll
-  @param {String} [options.url]
-  @param {Object<String, Number>} [options.tops]
+  @param {string} [options.url]
+  @param {Object<string, number>} [options.tops]
   @experimental
   ###
   saveScroll = (options = {}) ->
     url = u.option(options.url, up.history.url())
     tops = u.option(options.tops, scrollTops())
-    up.puts('Saving scroll positions for URL %s (%o)', url, tops)
     lastScrollTops.set(url, tops)
 
   ###*
@@ -417,10 +425,11 @@ up.layout = (($) ->
   @param {jQuery} [options.around]
     If set, only restores viewports that are either an ancestor
     or descendant of the given element.
+  @return {Promise}
+    A promise that will be fulfilled once scroll positions have been restored.
   @experimental
   ###
   restoreScroll = (options = {}) ->
-
     url = up.history.url()
 
     $viewports = undefined
@@ -435,37 +444,48 @@ up.layout = (($) ->
     scrollTopsForUrl = lastScrollTops.get(url) || {}
 
     up.log.group 'Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, ->
-      $viewports.each ->
-        $viewport = $(this)
-        key = scrollTopKey($viewport)
+      allScrollPromises = u.map $viewports, (viewport) ->
+        key = scrollTopKey(viewport)
         scrollTop = scrollTopsForUrl[key] || 0
-        scroll($viewport, scrollTop, duration: 0)
+        scroll(viewport, scrollTop, duration: 0)
 
-      # Since scrolling happens without animation, we don't need to
-      # join promises from the up.scroll call above
-      u.resolvedDeferred()
+      Promise.all(allScrollPromises)
 
   ###*
   @function up.layout.revealOrRestoreScroll
-  @return {Deferred}
-    A promise for when the revealing or scroll restoration ends
+  @param {boolean} [options.restoreScroll]
+  @param {boolean|string} [options.reveal]
+  @return {Promise}
+    A promise that is fulfilled when the element is revealed or
+    the scroll position is restored.
   @internal
   ###
   revealOrRestoreScroll = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
-    if options.restoreScroll
-      restoreScroll(around: $element)
-    else if options.reveal
-      revealOptions = {}
-      if options.source
-        parsed = u.parseUrl(options.source)
-        if $target = firstHashTarget(parsed.hash)
-          $element = $target
-          revealOptions.top = true
-      reveal($element, revealOptions)
-    else
-      u.resolvedDeferred()
 
+    if options.restoreScroll
+      return restoreScroll(around: $element)
+
+    if options.reveal
+      revealOptions = {}
+      if u.isString(options.reveal)
+        selector = revealSelector(options.reveal)
+        $element = up.first(selector) || $element
+        revealOptions.top = true
+      return reveal($element, revealOptions)
+
+    # If we didn't need to scroll above, just return a resolved promise
+    # to fulfill this function's signature.
+    return Promise.resolve()
+
+  ###*
+  @internal
+  ###
+  revealSelector = (selector, options) ->
+    selector = up.dom.resolveSelector(selector, options)
+    if selector[0] == '#'
+      selector += ", a[name='#{selector}']"
+    selector
 
   ###*
   Marks this element as a scrolling container ("viewport").
@@ -613,7 +633,6 @@ up.layout = (($) ->
   revealHash: revealHash
   firstHashTarget: firstHashTarget
   scroll: scroll
-  finishScrolling: finishScrolling
   config: config
   viewportOf: viewportOf
   viewportsWithin: viewportsWithin

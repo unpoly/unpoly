@@ -4,62 +4,87 @@ describe 'up.browser', ->
 
   describe 'JavaScript functions', ->
 
-    describe 'up.browser.loadPage', ->
+    describe 'up.browser.navigate', ->
 
       afterEach ->
         # We're preventing the form to be submitted during tests,
         # so we need to remove it manually after each example.
         $('form.up-page-loader').remove()
 
-      describe 'for GET requests', ->
+      describe "for GET requests", ->
 
-        it 'sets location.href to the given URL', ->
-          hrefSetter = up.browser.knife.mock('setLocationHref')
-          up.browser.loadPage('/foo')
-          expect(hrefSetter).toHaveBeenCalledWith('/foo')
-
-        it 'encodes { data } params into the URL', ->
-          hrefSetter = up.browser.knife.mock('setLocationHref')
-          up.browser.loadPage('/foo', data: { param1: 'param1 value', param2: 'param2 value' })
-          expect(hrefSetter).toHaveBeenCalledWith('/foo?param1=param1%20value&param2=param2%20value')
-
-      describe 'for POST requests', ->
-
-        it 'creates a form, adds all { data } params a hidden fields and submits the form', ->
-          submitForm = up.browser.knife.mock('submitForm')
-          up.browser.loadPage('/foo', method: 'post', data: { param1: 'param1 value', param2: 'param2 value' })
+        it "creates a GET form, adds all { data } params to the form action and submits the form", ->
+          submitForm = spyOn(up.browser, 'submitForm')
+          up.browser.navigate('/foo', method: 'GET', data: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           expect($form).toExist()
-          expect($form.attr('action')).toEqual('/foo')
-          expect($form.attr('method')).toEqual('post')
-          expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
-          expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
+          expect($form.attr('action')).toMatchUrl('/foo?param1=param1%20value&param2=param2%20value')
+          # No params should be left in the form
+          expect($form.find('input')).not.toExist()
 
-        it 'submits the Rails CSRF token as another hidden field', ->
-          submitForm = up.browser.knife.mock('submitForm')
-          spyOn(up.rails, 'csrfField').and.returnValue
-            name: 'authenticity-param-name',
-            value: 'authenticity-token'
-          up.browser.loadPage('/foo', method: 'post')
+      describe "for POST requests", ->
+
+        it "creates a POST form, adds all { data } params a hidden fields and submits the form", ->
+          submitForm = spyOn(up.browser, 'submitForm')
+          up.browser.navigate('/foo', method: 'POST', data: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
-          $tokenInput = $form.find('input[name="authenticity-param-name"]')
-          expect($tokenInput).toExist()
-          expect($tokenInput.val()).toEqual('authenticity-token')
+          expect($form).toExist()
+          expect($form.attr('action')).toMatchUrl('/foo')
+          expect($form.attr('method')).toEqual('POST')
+          expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
 
       u.each ['PUT', 'PATCH', 'DELETE'], (method) ->
 
         describe "for #{method} requests", ->
 
           it "uses a POST form and sends the actual method as a { _method } param", ->
-            submitForm = up.browser.knife.mock('submitForm')
-            up.browser.loadPage('/foo', method: method)
+            submitForm = spyOn(up.browser, 'submitForm')
+            up.browser.navigate('/foo', method: method)
             expect(submitForm).toHaveBeenCalled()
             $form = $('form.up-page-loader')
             expect($form).toExist()
-            expect($form.attr('method')).toEqual('post')
-            expect($form.find('input[name="_method"]').val()).toEqual(method.toLowerCase())
+            expect($form.attr('method')).toEqual('POST')
+            expect($form.find('input[name="_method"]').val()).toEqual(method)
+
+      describe 'CSRF', ->
+
+        beforeEach ->
+          up.protocol.config.csrfToken = -> 'csrf-token'
+          up.protocol.config.csrfParam = -> 'csrf-param'
+          @submitForm = spyOn(up.browser, 'submitForm')
+
+        it 'submits an CSRF token as another hidden field', ->
+          up.browser.navigate('/foo', method: 'post')
+          expect(@submitForm).toHaveBeenCalled()
+          $form = $('form.up-page-loader')
+          $tokenInput = $form.find('input[name="csrf-param"]')
+          expect($tokenInput).toExist()
+          expect($tokenInput.val()).toEqual('csrf-token')
+
+        it 'does not add a CSRF token if there is none', ->
+          up.protocol.config.csrfToken = -> ''
+          up.browser.navigate('/foo', method: 'post')
+          expect(@submitForm).toHaveBeenCalled()
+          $form = $('form.up-page-loader')
+          $tokenInput = $form.find('input[name="csrf-param"]')
+          expect($tokenInput).not.toExist()
+
+        it 'does not add a CSRF token for GET requests', ->
+          up.browser.navigate('/foo', method: 'get')
+          expect(@submitForm).toHaveBeenCalled()
+          $form = $('form.up-page-loader')
+          $tokenInput = $form.find('input[name="csrf-param"]')
+          expect($tokenInput).not.toExist()
+
+        it 'does not add a CSRF token when loading content from another domain', ->
+          up.browser.navigate('http://other-domain.tld/foo', method: 'get')
+          expect(@submitForm).toHaveBeenCalled()
+          $form = $('form.up-page-loader')
+          $tokenInput = $form.find('input[name="csrf-param"]')
+          expect($tokenInput).not.toExist()
 
     describe 'up.browser.sprintf', ->
 

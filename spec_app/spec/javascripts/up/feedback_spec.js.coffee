@@ -64,117 +64,165 @@ describe 'up.feedback', ->
 
       describeCapability 'canPushState', ->
 
-        it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', ->
-          $link = affix('a[href="/foo"][up-target=".main"]')
-          affix('.main')
-          Trigger.clickSequence($link)
-          @respondWith
-            responseHeaders: { 'X-Up-Location': '/foo/' }
-            responseText: '<div class="main">new-text</div>'
-          expect($link).toHaveClass('up-current')
+        describe 'updating .up-current marks wen the URL changes', ->
 
-        it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', ->
-          $link = affix('a[href="/foo/"][up-target=".main"]')
-          affix('.main')
-          Trigger.clickSequence($link)
-          @respondWith
-            responseHeaders: { 'X-Up-Location': '/foo' }
-            responseText: '<div class="main">new-text</div>'
-          expect($link).toHaveClass('up-current')
+          beforeEach ->
+            up.history.config.enabled = true
 
-        it 'marks a link as .up-current if it links to an URL currently shown either within or below the modal', (done) ->
-          up.history.replace('/foo')
-          $backgroundLink = affix('a[href="/foo"]')
-          $modalLink = affix('a[href="/bar"][up-modal=".main"]')
-          $unrelatedLink = affix('a[href="/baz]')
+          it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec (next) ->
+            $link = affix('a[href="/foo"][up-target=".main"]')
+            affix('.main')
+            Trigger.clickSequence($link)
 
-          Trigger.click($modalLink)
-          @respondWith('<div class="main">new-text</div>')
-          expect($backgroundLink).toHaveClass('up-current')
-          expect($modalLink).toHaveClass('up-current')
-          expect($unrelatedLink).not.toHaveClass('up-current')
+            next =>
+              @respondWith
+                responseHeaders: { 'X-Up-Location': '/foo/' }
+                responseText: '<div class="main">new-text</div>'
 
-          up.modal.close().then ->
-            expect($backgroundLink).toHaveClass('up-current')
-            expect($modalLink).not.toHaveClass('up-current')
-            expect($unrelatedLink).not.toHaveClass('up-current')
-            done()
+            next =>
+              expect($link).toHaveClass('up-current')
 
-        it 'marks a link as .up-current if it links to the URL currently either within or below the popup', (done) ->
-          up.history.replace('/foo')
-          $backgroundLink = affix('a[href="/foo"]')
-          $popupLink = affix('a[href="/bar"][up-popup=".main"]')
-          $unrelatedLink = affix('a[href="/baz]')
+          it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', asyncSpec (next) ->
+            $link = affix('a[href="/foo/"][up-target=".main"]')
+            affix('.main')
+            Trigger.clickSequence($link)
 
-          Trigger.clickSequence($popupLink)
-          @respondWith('<div class="main">new-text</div>')
-          expect($backgroundLink).toHaveClass('up-current')
-          expect($popupLink).toHaveClass('up-current')
-          expect($unrelatedLink).not.toHaveClass('up-current')
+            next =>
+              @respondWith
+                responseHeaders: { 'X-Up-Location': '/foo' }
+                responseText: '<div class="main">new-text</div>'
 
-          up.popup.close().then ->
-            expect($backgroundLink).toHaveClass('up-current')
-            expect($popupLink).not.toHaveClass('up-current')
-            expect($unrelatedLink).not.toHaveClass('up-current')
-            done()
+            next =>
+              expect($link).toHaveClass('up-current')
 
-        it 'changes .up-current marks as the URL changes'
+          it 'marks a link as .up-current if it links to an URL currently shown either within or below the modal', asyncSpec (next) ->
+            up.history.replace('/foo')
+
+            $backgroundLink = affix('a[href="/foo"]')
+            $modalLink = affix('a[href="/bar"][up-modal=".main"]')
+            $unrelatedLink = affix('a[href="/baz]')
+
+            Trigger.clickSequence($modalLink)
+
+            next =>
+              @respondWith('<div class="main">new-text</div>')
+
+            next =>
+              expect($backgroundLink).toHaveClass('up-current')
+              expect($modalLink).toHaveClass('up-current')
+              expect($unrelatedLink).not.toHaveClass('up-current')
+              next.await up.modal.close()
+
+            next =>
+              expect($backgroundLink).toHaveClass('up-current')
+              expect($modalLink).not.toHaveClass('up-current')
+              expect($unrelatedLink).not.toHaveClass('up-current')
+
+          it 'marks a link as .up-current if it links to the URL currently either within or below the popup', asyncSpec (next) ->
+            up.history.replace('/foo')
+
+            $backgroundLink = affix('a[href="/foo"]')
+            $popupLink = affix('a[href="/bar"][up-popup=".main"]')
+            $unrelatedLink = affix('a[href="/baz]')
+
+            next =>
+              Trigger.clickSequence($popupLink)
+
+            next =>
+              @respondWith('<div class="main">new-text</div>')
+
+            next =>
+              expect($backgroundLink).toHaveClass('up-current')
+              expect($popupLink).toHaveClass('up-current')
+              expect($unrelatedLink).not.toHaveClass('up-current')
+
+              next.await up.popup.close()
+
+            next =>
+              expect($backgroundLink).toHaveClass('up-current')
+              expect($popupLink).not.toHaveClass('up-current')
+              expect($unrelatedLink).not.toHaveClass('up-current')
 
     describe '.up-active', ->
 
       describeCapability 'canPushState', ->
 
-        it 'marks clicked links as .up-active until the request finishes', ->
+        it 'marks clicked links as .up-active until the request finishes', asyncSpec (next) ->
           $link = affix('a[href="/foo"][up-target=".main"]')
           affix('.main')
           Trigger.clickSequence($link)
-          expect($link).toHaveClass('up-active')
-          @respondWith('<div class="main">new-text</div>')
-          expect($link).not.toHaveClass('up-active')
 
-        it 'marks links with [up-instant] on mousedown as .up-active until the request finishes', ->
+          next =>
+            expect($link).toHaveClass('up-active')
+            @respondWith('<div class="main">new-text</div>')
+
+          next =>
+            expect($link).not.toHaveClass('up-active')
+
+        it 'marks links with [up-instant] on mousedown as .up-active until the request finishes', asyncSpec (next) ->
           $link = affix('a[href="/foo"][up-instant][up-target=".main"]')
           affix('.main')
           Trigger.mousedown($link)
-          expect($link).toHaveClass('up-active')
-          @respondWith('<div class="main">new-text</div>')
-          expect($link).not.toHaveClass('up-active')
 
-        it 'prefers to mark an enclosing [up-expand] click area', ->
+          next => expect($link).toHaveClass('up-active')
+          next => @respondWith('<div class="main">new-text</div>')
+          next => expect($link).not.toHaveClass('up-active')
+
+        it 'prefers to mark an enclosing [up-expand] click area', asyncSpec (next) ->
           $area = affix('div[up-expand] a[href="/foo"][up-target=".main"]')
           up.hello($area)
           $link = $area.find('a')
           affix('.main')
           Trigger.clickSequence($link)
-          expect($link).not.toHaveClass('up-active')
-          expect($area).toHaveClass('up-active')
-          @respondWith('<div class="main">new-text</div>')
-          expect($area).not.toHaveClass('up-active')
 
-        it 'marks clicked modal openers as .up-active while the modal is loading', (done) ->
+          next =>
+            expect($link).not.toHaveClass('up-active')
+            expect($area).toHaveClass('up-active')
+          next =>
+            @respondWith('<div class="main">new-text</div>')
+          next =>
+            expect($area).not.toHaveClass('up-active')
+
+        it 'marks clicked modal openers as .up-active while the modal is loading', asyncSpec (next) ->
           $link = affix('a[href="/foo"][up-modal=".main"]')
           affix('.main')
           Trigger.clickSequence($link)
-          expect($link).toHaveClass('up-active')
-          u.nextFrame =>
-            @respondWith('<div class="main">new-text</div>')
-            expect($link).not.toHaveClass('up-active')
-            done()
 
-        it 'removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', ->
+          next => expect($link).toHaveClass('up-active')
+          next => @respondWith('<div class="main">new-text</div>')
+          next => expect($link).not.toHaveClass('up-active')
+
+        it 'removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', asyncSpec (next) ->
           $link = affix('a[href="/foo"][up-modal=".main"]')
           up.proxy.preload($link)
-          @respondWith('<div class="main">new-text</div>')
-          Trigger.clickSequence($link)
-          expect('.up-modal .main').toHaveText('new-text')
-          expect($link).not.toHaveClass('up-active')
 
-        it 'removes .up-active from a clicked link if the target is already preloaded (bugfix)', ->
+          next => @respondWith('<div class="main">new-text</div>')
+          next => Trigger.clickSequence($link)
+          next =>
+            expect('.up-modal .main').toHaveText('new-text')
+            expect($link).not.toHaveClass('up-active')
+
+        it 'removes .up-active from a clicked link if the target is already preloaded (bugfix)', asyncSpec (next) ->
           $link = affix('a[href="/foo"][up-target=".main"]')
           affix('.main')
           up.proxy.preload($link)
-          @respondWith('<div class="main">new-text</div>')
-          Trigger.clickSequence($link)
-          expect('.main').toHaveText('new-text')
-          expect($link).not.toHaveClass('up-active')
 
+          next => @respondWith('<div class="main">new-text</div>')
+          next => Trigger.clickSequence($link)
+          next =>
+            expect('.main').toHaveText('new-text')
+            expect($link).not.toHaveClass('up-active')
+
+        it 'removes .up-active from a clicked link if the request fails (bugfix)', asyncSpec (next) ->
+          $link = affix('a[href="/foo"][up-target=".main"]')
+          affix('.main')
+          Trigger.clickSequence($link)
+
+          next =>
+            expect($link).toHaveClass('up-active')
+            @respondWith
+              responseText: '<div class="main">failed</div>'
+              status: 400
+
+          next =>
+            expect($link).not.toHaveClass('up-active')

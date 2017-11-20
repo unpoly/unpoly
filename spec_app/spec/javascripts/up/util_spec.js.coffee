@@ -26,7 +26,7 @@ describe 'up.util', ->
             done()
 
       it "delays resolution of the proxy's .promise if the inner function returns a promise", (done) ->
-        funDeferred = $.Deferred()
+        funDeferred = u.newDeferred()
         fun = -> funDeferred
         proxy = up.util.previewable(fun)
         callback = jasmine.createSpy('promise callback')
@@ -34,31 +34,31 @@ describe 'up.util', ->
         proxy()
         u.nextFrame ->
           expect(callback).not.toHaveBeenCalled()
-          funDeferred.resolve()
+          funDeferred.resolve('return value')
           u.nextFrame ->
-            expect(callback).toHaveBeenCalled()
+            expect(callback).toHaveBeenCalledWith('return value')
             done()
 
     describe 'up.util.DivertibleChain', ->
 
       it "instantiates a task queue whose (2..n)th tasks can be changed by calling '.asap'", (done) ->
         chain = new up.util.DivertibleChain()
-        
+
         timer1Spy = jasmine.createSpy('timer1 has been called')
         timer1 = ->
           timer1Spy()
           u.promiseTimer(50)
-        
+
         timer2Spy = jasmine.createSpy('timer2 has been called')
         timer2 = ->
           timer2Spy()
           u.promiseTimer(50)
-        
+
         timer3Spy = jasmine.createSpy('timer3 has been called')
         timer3 = ->
           timer3Spy()
           u.promiseTimer(50)
-        
+
         timer4Spy = jasmine.createSpy('timer4 has been called')
         timer4 = ->
           timer4Spy()
@@ -184,15 +184,6 @@ describe 'up.util', ->
         expect(element.querySelector("title")).toBeMissing()
         expect(element.querySelector("h1").textContent).toEqual('Full story')
 
-    describe 'up.util.cssAnimate', ->
-
-      it 'returns a deferred that eventually resolves if called with a duration of 0 (bugfix)', (done) ->
-        $element = affix('.element')
-        promise = up.util.cssAnimate($element, { 'font-size': '90px' }, { duration: 0 })
-        promise.then ->
-          expect('done').toEqual('done') # need an expectation of Jasmine will complain
-          done()
-
     describe 'up.util.isFixed', ->
 
       it 'returns true if the given element or one of its ancestors has a "fixed" CSS position', ->
@@ -212,16 +203,17 @@ describe 'up.util', ->
 
     describe 'up.util.setTimer', ->
 
-      it 'calls the given function after waiting the given milliseconds', ->
-        jasmine.clock().install()
-        jasmine.clock().mockDate()
+      it 'calls the given function after waiting the given milliseconds', (done) ->
         callback = jasmine.createSpy()
-        up.util.setTimer(2000, callback)
-        expect(callback).not.toHaveBeenCalled()
-        jasmine.clock().tick(1500)
-        expect(callback).not.toHaveBeenCalled()
-        jasmine.clock().tick(1500)
-        expect(callback).toHaveBeenCalled()
+        expectNotCalled = -> expect(callback).not.toHaveBeenCalled()
+        expectCalled = -> expect(callback).toHaveBeenCalled()
+
+        up.util.setTimer(100, callback)
+
+        expectNotCalled()
+        setTimeout(expectNotCalled, 50)
+        setTimeout(expectCalled, 50 + 75)
+        setTimeout(done, 50 + 75)
 
       describe 'if the delay is zero', ->
 
@@ -361,28 +353,28 @@ describe 'up.util', ->
         expect(count).toBe(3)
 
     describe 'up.util.isBlank', ->
-  
+
       it 'returns false for false', ->
         expect(up.util.isBlank(false)).toBe(false)
-        
+
       it 'returns false for true', ->
         expect(up.util.isBlank(true)).toBe(false)
-  
+
       it 'returns true for null', ->
         expect(up.util.isBlank(null)).toBe(true)
-        
+
       it 'returns true for undefined', ->
         expect(up.util.isBlank(undefined)).toBe(true)
-        
+
       it 'returns true for an empty String', ->
         expect(up.util.isBlank('')).toBe(true)
-        
+
       it 'returns false for a String with at least one character', ->
         expect(up.util.isBlank('string')).toBe(false)
-        
+
       it 'returns true for an empty array', ->
         expect(up.util.isBlank([])).toBe(true)
-        
+
       it 'returns false for an array with at least one element', ->
         expect(up.util.isBlank(['element'])).toBe(false)
 
@@ -411,6 +403,9 @@ describe 'up.util', ->
 
       it 'does not strip a trailing slash by default', ->
         expect(up.util.normalizeUrl('/foo/')).toEqual("http://#{location.hostname}:#{location.port}/foo/")
+
+      it 'normalizes redundant segments', ->
+        expect(up.util.normalizeUrl('/foo/../foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
 
     describe 'up.util.detect', ->
 
@@ -509,96 +504,18 @@ describe 'up.util', ->
         string = up.util.requestDataAsQuery({ 'my+key': 'my+value' })
         expect(string).toEqual('my%2Bkey=my%2Bvalue')
 
-    describe 'up.util.unresolvableDeferred', ->
-      
-      it 'returns a different object every time (to prevent memory leaks)', ->
-        one = up.util.unresolvableDeferred()
-        two = up.util.unresolvableDeferred()
-        expect(one).not.toBe(two)
-
     describe 'up.util.unresolvablePromise', ->
-      
+
+      it 'return a pending promise', (done) ->
+        promise = up.util.unresolvablePromise()
+        promiseState2(promise).then (result) ->
+          expect(result.state).toEqual('pending')
+          done()
+
       it 'returns a different object every time (to prevent memory leaks)', ->
         one = up.util.unresolvablePromise()
         two = up.util.unresolvablePromise()
         expect(one).not.toBe(two)
-
-    describe 'up.util.resolvableWhen', ->
-
-      it 'returns a promise that is resolved when all the given deferreds are resolved', ->
-        one = jasmine.createSpy()
-        two = jasmine.createSpy()
-        both = jasmine.createSpy()
-        oneDeferred = $.Deferred()
-        oneDeferred.then(one)
-        twoDeferred = $.Deferred()
-        twoDeferred.then(two)
-
-        bothDeferred = up.util.resolvableWhen(oneDeferred, twoDeferred)
-        bothDeferred.then(both)
-
-        expect(one).not.toHaveBeenCalled()
-        expect(two).not.toHaveBeenCalled()
-        expect(both).not.toHaveBeenCalled()
-
-        oneDeferred.resolve()
-        expect(one).toHaveBeenCalled()
-        expect(two).not.toHaveBeenCalled()
-        expect(both).not.toHaveBeenCalled()
-
-        twoDeferred.resolve()
-        expect(one).toHaveBeenCalled()
-        expect(two).toHaveBeenCalled()
-        expect(both).toHaveBeenCalled()
-
-      it 'returns a promise with a .resolve method that resolves the given deferreds', ->
-        one = jasmine.createSpy()
-        two = jasmine.createSpy()
-        both = jasmine.createSpy()
-        oneDeferred = $.Deferred()
-        oneDeferred.then(one)
-        twoDeferred = $.Deferred()
-        twoDeferred.then(two)
-
-        bothDeferred = up.util.resolvableWhen(oneDeferred, twoDeferred)
-        bothDeferred.then(both)
-
-        expect(one).not.toHaveBeenCalled()
-        expect(two).not.toHaveBeenCalled()
-        expect(both).not.toHaveBeenCalled()
-
-        bothDeferred.resolve()
-        expect(one).toHaveBeenCalled()
-        expect(two).toHaveBeenCalled()
-        expect(both).toHaveBeenCalled()
-
-      it 'does not resolve the given deferreds more than once', ->
-        oneDeferred = $.Deferred()
-        spyOn(oneDeferred, 'resolve')
-        bothDeferred = up.util.resolvableWhen(oneDeferred)
-
-        bothDeferred.resolve()
-        bothDeferred.resolve()
-
-        expect(oneDeferred.resolve.calls.count()).toEqual(1)
-
-      describe 'bugfix against troublesome jQuery optimization if only one deferred is given', ->
-
-        it 'does not simply return the given deferred', ->
-          oneDeferred = $.Deferred()
-          whenDeferred = up.util.resolvableWhen(oneDeferred)
-          # This is what $.when returns if only passed a single argument
-          expect(whenDeferred).not.toBe(oneDeferred.promise())
-          # Cover eventual implementations
-          expect(whenDeferred).not.toBe(oneDeferred)
-          expect(whenDeferred.promise()).not.toBe(oneDeferred.promise())
-          expect(whenDeferred.promise()).not.toBe(oneDeferred)
-
-        it 'does not create an infinite loop if the given deferred is nested twice and the first nesting is resolved', ->
-          oneDeferred = $.Deferred()
-          firstNesting = up.util.resolvableWhen(oneDeferred)
-          secondNesting = up.util.resolvableWhen(firstNesting)
-          expect(-> firstNesting.resolve()).not.toThrowError()
 
     describe 'up.util.requestDataAsArray', ->
 
@@ -678,112 +595,224 @@ describe 'up.util', ->
           { name: 'my=key', value: 'my=value' },
         ])
 
-  describe 'up.util.flatten', ->
+    describe 'up.util.flatten', ->
 
-    it 'flattens the given array', ->
-      array = [1, [2, 3], 4]
-      expect(u.flatten(array)).toEqual([1, 2, 3, 4])
+      it 'flattens the given array', ->
+        array = [1, [2, 3], 4]
+        expect(u.flatten(array)).toEqual([1, 2, 3, 4])
 
-    it 'only flattens one level deep for performance reasons', ->
-      array = [1, [2, [3,4]], 5]
-      expect(u.flatten(array)).toEqual([1, 2, [3, 4], 5])
+      it 'only flattens one level deep for performance reasons', ->
+        array = [1, [2, [3,4]], 5]
+        expect(u.flatten(array)).toEqual([1, 2, [3, 4], 5])
 
-  describe 'up.util.renameKey', ->
+    describe 'up.util.renameKey', ->
 
-    it 'renames a key in the given property', ->
-      object = { a: 'a value', b: 'b value'}
-      u.renameKey(object, 'a', 'c')
-      expect(object.a).toBeUndefined()
-      expect(object.b).toBe('b value')
-      expect(object.c).toBe('a value')
+      it 'renames a key in the given property', ->
+        object = { a: 'a value', b: 'b value'}
+        u.renameKey(object, 'a', 'c')
+        expect(object.a).toBeUndefined()
+        expect(object.b).toBe('b value')
+        expect(object.c).toBe('a value')
 
-  describe 'up.util.findWithSelf', ->
+    describe 'up.util.selectInSubtree', ->
 
-    it 'finds the selector in descendants of the given element', ->
-      $container = affix('div')
-      $child1 = $container.affix('div.match')
-      $child2 = $container.affix('div')
-      $child2Child1 = $child2.affix('div.match')
-      matches = u.findWithSelf($container, '.match')
-      expect(matches).toEqual [$child1.get(0), $child2Child1.get(0)]
+      it 'finds the selector in ancestors and descendants of the given element', ->
+        $grandMother = affix('.grand-mother.match')
+        $mother = $grandMother.affix('.mother')
+        $element = $mother.affix('.element')
+        $child = $element.affix('.child.match')
+        $grandChild = $child.affix('.grand-child.match')
 
-    it 'finds the element itself if the element matches the given selector', ->
-      $container = affix('div.match')
-      $child1 = $container.affix('div')
-      $child1Child1 = $child1.affix('div.match')
-      matches = u.findWithSelf($container, '.match')
-      expect(matches).toEqual [$container.get(0), $child1Child1.get(0)]
+        $matches = up.util.selectInSubtree($element, '.match')
+        $expected = $child.add($grandChild)
+        expect($matches).toEqual $expected
 
-    it 'returns multiple matches in the same subtree', ->
-      $container = affix('div.match')
-      $child1 = $container.affix('div')
-      $child2 = $container.affix('div.match')
-      $child2Child1 = $child2.affix('div.match')
-      matches = u.findWithSelf($container, '.match')
-      expect(matches).toEqual [$container.get(0), $child2.get(0), $child2Child1.get(0)]
+      it 'finds the element itself if it matches the selector', ->
+        $element = affix('.element.match')
+        $matches = up.util.selectInSubtree($element, '.match')
+        expect($matches).toEqual $element
 
-  describe 'up.util.memoize', ->
+      describe 'when given a jQuery collection with multiple elements', ->
 
-    it 'returns a function that calls the memoized function', ->
-      fun = (a, b) -> a + b
-      memoized = u.memoize(fun)
-      expect(memoized(2, 3)).toEqual(5)
+        it 'searches in a all subtrees of the given elements', ->
+          $a_grandMother = affix('.grand-mother.match')
+          $a_mother = $a_grandMother.affix('.mother')
+          $a_element = $a_mother.affix('.element')
+          $a_child = $a_element.affix('.child.match')
+          $a_grandChild = $a_child.affix('.grand-child.match')
 
-    it 'returns the cached return value of the first call when called again', ->
-      spy = jasmine.createSpy().and.returnValue(5)
-      memoized = u.memoize(spy)
-      expect(memoized(2, 3)).toEqual(5)
-      expect(memoized(2, 3)).toEqual(5)
-      expect(spy.calls.count()).toEqual(1)
+          $b_grandMother = affix('.grand-mother.match')
+          $b_mother = $b_grandMother.affix('.mother')
+          $b_element = $b_mother.affix('.element')
+          $b_child = $b_element.affix('.child.match')
+          $b_grandChild = $b_child.affix('.grand-child.match')
 
-  ['assign', 'assignPolyfill'].forEach (assignVariant) ->
+          $matches = up.util.selectInSubtree($a_element.add($b_element), '.match')
+          expect($matches).toEqual $a_child.add($a_grandChild).add($b_child).add($b_grandChild)
 
-    describe "up.util.#{assignVariant}", ->
 
-      assign = up.util[assignVariant]
+    describe 'up.util.selectInDynasty', ->
 
-      it 'copies the second object into the first object', ->
-        target = { a: 1 }
-        source = { b: 2, c: 3 }
+      it 'finds the selector in both ancestors and descendants of the given element', ->
+        $grandMother = affix('.grand-mother.match')
+        $mother = $grandMother.affix('.mother')
+        $element = $mother.affix('.element')
+        $child = $element.affix('.child.match')
+        $grandChild = $child.affix('.grand-child.match')
 
-        assign(target, source)
+        $matches = up.util.selectInDynasty($element, '.match')
+        $expected = $grandMother.add($child).add($grandChild)
+        expect($matches).toEqual $expected
 
-        expect(target).toEqual { a: 1, b: 2, c: 3 }
+      it 'finds the element itself if it matches the selector', ->
+        $element = affix('.element.match')
+        $matches = up.util.selectInDynasty($element, '.match')
+        expect($matches).toEqual $element
 
-        # Source is unchanged
-        expect(source).toEqual { b: 2, c: 3 }
+    describe 'up.util.isCrossDomain', ->
 
-      it 'copies null property values', ->
-        target = { a: 1, b: 2 }
-        source = { b: null }
+      it 'returns false for an absolute path', ->
+        expect(up.util.isCrossDomain('/foo')).toBe(false)
 
-        assign(target, source)
+      it 'returns false for an relative path', ->
+        expect(up.util.isCrossDomain('foo')).toBe(false)
 
-        expect(target).toEqual { a: 1, b: null }
+      it 'returns false for a fully qualified URL with the same protocol and hostname as the current location', ->
+        fullUrl = "#{location.protocol}//#{location.host}/foo"
+        expect(up.util.isCrossDomain(fullUrl)).toBe(false)
 
-      it 'copies undefined property values', ->
-        target = { a: 1, b: 2 }
-        source = { b: undefined }
+      it 'returns true for a fully qualified URL with a different protocol than the current location', ->
+        fullUrl = "otherprotocol://#{location.host}/foo"
+        expect(up.util.isCrossDomain(fullUrl)).toBe(true)
 
-        assign(target, source)
+      it 'returns false for a fully qualified URL with a different hostname than the current location', ->
+        fullUrl = "#{location.protocol}//other-host.tld/foo"
+        expect(up.util.isCrossDomain(fullUrl)).toBe(true)
 
-        expect(target).toEqual { a: 1, b: undefined }
+    describe 'up.util.isOptions', ->
 
-      it 'returns the first object', ->
-        target = { a: 1 }
-        source = { b: 2 }
+      it 'returns true for an Object instance', ->
+        expect(up.util.isOptions(new Object())).toBe(true)
 
-        result = assign(target, source)
+      it 'returns true for an object literal', ->
+        expect(up.util.isOptions({ foo: 'bar'})).toBe(true)
 
-        expect(result).toBe(target)
+      it 'returns false for undefined', ->
+        expect(up.util.isOptions(undefined)).toBe(false)
 
-      it 'takes multiple sources to copy from', ->
-        target = { a: 1 }
-        source1 = { b: 2, c: 3 }
-        source2 = { d: 4, e: 5 }
+      it 'returns false for null', ->
+        expect(up.util.isOptions(null)).toBe(false)
 
-        assign(target, source1, source2)
+      it 'returns false for a function (which is technically an object)', ->
+        fn = -> 'foo'
+        fn.key = 'value'
+        expect(up.util.isOptions(fn)).toBe(false)
 
-        expect(target).toEqual { a: 1, b: 2, c: 3, d: 4, e: 5 }
+      it 'returns false for an array', ->
+        expect(up.util.isOptions(['foo'])).toBe(false)
+
+      it 'returns false for a jQuery collection', ->
+        expect(up.util.isOptions($('body'))).toBe(false)
+
+      it 'returns false for a promise', ->
+        expect(up.util.isOptions(Promise.resolve())).toBe(false)
+
+      it 'returns false for a FormData object', ->
+        expect(up.util.isOptions(new FormData())).toBe(false)
+
+    describe 'up.util.isObject', ->
+
+      it 'returns true for an Object instance', ->
+        expect(up.util.isObject(new Object())).toBe(true)
+
+      it 'returns true for an object literal', ->
+        expect(up.util.isObject({ foo: 'bar'})).toBe(true)
+
+      it 'returns false for undefined', ->
+        expect(up.util.isObject(undefined)).toBe(false)
+
+      it 'returns false for null', ->
+        expect(up.util.isObject(null)).toBe(false)
+
+      it 'returns true for a function (which is technically an object)', ->
+        fn = -> 'foo'
+        fn.key = 'value'
+        expect(up.util.isObject(fn)).toBe(true)
+
+      it 'returns true for an array', ->
+        expect(up.util.isObject(['foo'])).toBe(true)
+
+      it 'returns true for a jQuery collection', ->
+        expect(up.util.isObject($('body'))).toBe(true)
+
+      it 'returns true for a promise', ->
+        expect(up.util.isObject(Promise.resolve())).toBe(true)
+
+      it 'returns true for a FormData object', ->
+        expect(up.util.isObject(new FormData())).toBe(true)
+
+    describe 'up.util.memoize', ->
+
+      it 'returns a function that calls the memoized function', ->
+        fun = (a, b) -> a + b
+        memoized = u.memoize(fun)
+        expect(memoized(2, 3)).toEqual(5)
+
+      it 'returns the cached return value of the first call when called again', ->
+        spy = jasmine.createSpy().and.returnValue(5)
+        memoized = u.memoize(spy)
+        expect(memoized(2, 3)).toEqual(5)
+        expect(memoized(2, 3)).toEqual(5)
+        expect(spy.calls.count()).toEqual(1)
+
+    ['assign', 'assignPolyfill'].forEach (assignVariant) ->
+
+      describe "up.util.#{assignVariant}", ->
+
+        assign = up.util[assignVariant]
+
+        it 'copies the second object into the first object', ->
+          target = { a: 1 }
+          source = { b: 2, c: 3 }
+
+          assign(target, source)
+
+          expect(target).toEqual { a: 1, b: 2, c: 3 }
+
+          # Source is unchanged
+          expect(source).toEqual { b: 2, c: 3 }
+
+        it 'copies null property values', ->
+          target = { a: 1, b: 2 }
+          source = { b: null }
+
+          assign(target, source)
+
+          expect(target).toEqual { a: 1, b: null }
+
+        it 'copies undefined property values', ->
+          target = { a: 1, b: 2 }
+          source = { b: undefined }
+
+          assign(target, source)
+
+          expect(target).toEqual { a: 1, b: undefined }
+
+        it 'returns the first object', ->
+          target = { a: 1 }
+          source = { b: 2 }
+
+          result = assign(target, source)
+
+          expect(result).toBe(target)
+
+        it 'takes multiple sources to copy from', ->
+          target = { a: 1 }
+          source1 = { b: 2, c: 3 }
+          source2 = { d: 4, e: 5 }
+
+          assign(target, source1, source2)
+
+          expect(target).toEqual { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
 
