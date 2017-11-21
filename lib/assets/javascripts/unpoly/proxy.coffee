@@ -188,7 +188,7 @@ up.proxy = (($) ->
     requests, if available. If set to `false` a network connection will always be attempted.
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
-  @param {Object} [options.data={}]
+  @param {Object|Array|FormData} [options.data={}]
     Parameters that should be sent as the request's payload.
 
     Parameters may be passed as one of the following forms:
