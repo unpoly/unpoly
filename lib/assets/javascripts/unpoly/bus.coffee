@@ -331,11 +331,7 @@ up.bus = (($) ->
   ###
   nobodyPrevents = (args...) ->
     event = emit(args...)
-    if event.isDefaultPrevented()
-      up.puts "An observer prevented the event %s", args[0]
-      false
-    else
-      true
+    not event.isDefaultPrevented()
 
   ###*
   [Emits](/up.emit) the given event and returns a promise

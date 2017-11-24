@@ -88,7 +88,10 @@ class up.Request extends up.Record
   ###
   constructor: (options) ->
     super(options)
-    @method = u.normalizeMethod(options.method)
+    @normalize()
+
+  normalize: =>
+    @method = u.normalizeMethod(@method)
     @headers ||= {}
     @extractHashFromUrl()
     if @data && !u.methodAllowsPayload(@method) && !u.isFormData(@data)
@@ -214,7 +217,7 @@ class up.Request extends up.Record
   cacheKey: =>
     [@url, @method, u.requestDataAsQuery(@data), @target].join('|')
 
-  @normalize: (object) ->
+  @wrap: (object) ->
     if object instanceof @
       # This object has gone through instantiation and normalization before.
       object

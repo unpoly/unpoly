@@ -778,6 +778,16 @@ up.util = (($) ->
     setTimeout(block, 0)
 
   ###*
+  Queue a function to be executed in the next microtask.
+
+  @function up.util.queueMicrotask
+  @param {Function} task
+  @internal
+  ###
+  microtask = (task) ->
+    Promise.resolve().then(task)
+
+  ###*
   Returns the last element of the given array.
 
   @function up.util.last
@@ -1960,6 +1970,7 @@ up.util = (($) ->
   rejectOnError: rejectOnError
   isBodyDescendant: isBodyDescendant
   isCrossDomain: isCrossDomain
+  microtask: microtask
 
 
 )(jQuery)

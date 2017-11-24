@@ -47,6 +47,9 @@ Unreleased
 - up-popup links can now have an up-fail-target attribute to indicate which selector to replace for an non-200 response
 - Fix a bug where preloading an up-modal link would create an invisible .up-modal container in the DOM.
 - Fix a bug where preloading an up-popup link would create an invisible .up-popup container in the DOM.
+- up:proxy:load event now has the request in a sub-key { request }
+- up:proxy:load event can now be prevented
+- up:proxy:load event allows listeners to manipulate headers
 
 
 0.37.0

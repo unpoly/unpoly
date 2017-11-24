@@ -97,8 +97,8 @@ up.proxy = (($) ->
   cache = u.newCache
     size: -> config.cacheSize
     expiry: -> config.cacheExpiry
-    key: (request) -> up.Request.normalize(request).cacheKey()
-    cachable: (request) -> up.Request.normalize(request).isCachable()
+    key: (request) -> up.Request.wrap(request).cacheKey()
+    cachable: (request) -> up.Request.wrap(request).isCachable()
     # logPrefix: 'up.proxy'
 
   ###*
@@ -112,7 +112,7 @@ up.proxy = (($) ->
   @experimental
   ###
   get = (request) ->
-    request = up.Request.normalize(request)
+    request = up.Request.wrap(request)
     candidates = [request]
 
     if request.target != 'html'
@@ -210,12 +210,14 @@ up.proxy = (($) ->
   @stable
   ###
   makeRequest = (args...) ->
+    console.debug("!!! up.request(%o)", args)
+
     options = u.extractOptions(args)
     options.url = args[0] if u.isGiven(args[0])
 
     ignoreCache = (options.cache == false)
 
-    request = up.Request.normalize(options)
+    request = up.Request.wrap(options)
 
     # Non-GET requests always touch the network
     # unless `options.cache` is explicitly set to `true`.
@@ -233,8 +235,10 @@ up.proxy = (($) ->
       # If no existing promise is available, we make a network request.
       promise = loadOrQueue(request)
       set(request, promise)
-      # Don't cache failed requests
-      promise.catch -> remove(request)
+      # Uncache failed requests
+      promise.catch (e) ->
+        console.debug("!!! caught rejection %o; removing request", e)
+        remove(request)
 
     if !options.preload
       # This might actually make `pendingCount` higher than the actual
@@ -395,6 +399,7 @@ up.proxy = (($) ->
   ###
 
   loadEnded = ->
+    console.debug("!!! load ended!")
     pendingCount -= 1
 
     if isIdle()
@@ -429,11 +434,18 @@ up.proxy = (($) ->
     loader.promise
 
   load = (request) ->
-    up.emit('up:proxy:load', u.merge(request, message: ['Loading %s %s', request.method, request.url]))
-    responsePromise = request.send()
-    responsePromise.then(registerAliasForRedirect)
-    u.always(responsePromise, responseReceived)
-    responsePromise
+    eventProps =
+      request: request
+      message: ['Loading %s %s', request.method, request.url]
+
+    if up.bus.nobodyPrevents('up:proxy:load', eventProps)
+      responsePromise = request.send()
+      u.always responsePromise, responseReceived
+      u.always responsePromise, pokeQueue
+      responsePromise
+    else
+      u.microtask(pokeQueue)
+      Promise.reject(new Error('Event up:proxy:load was prevented'))
 
   registerAliasForRedirect = (response) ->
     request = response.request
@@ -445,17 +457,21 @@ up.proxy = (($) ->
       up.proxy.alias(request, newRequest)
 
   responseReceived = (response) ->
+    console.info('!!! responseReceived')
     if response.isMaterialError()
-      eventProps = u.merge(response, message: 'Error during request')
-      up.emit('up:proxy:error', eventProps)
+      up.emit 'up:proxy:error',
+        message: 'Material error during request'
+        response: response
     else
-      emitMessage = ['Server responded with HTTP %d (%d bytes)', response.status, response.text.length]
-      eventProps = u.merge(response, message: emitMessage)
-      up.emit('up:proxy:loaded', eventProps)
+      registerAliasForRedirect(response) unless response.isError()
+      up.emit 'up:proxy:loaded',
+        message: ['Server responded with HTTP %d (%d bytes)', response.status, response.text.length]
+        response: response
 
-    # Since we have just completed a request, we now have the worker to load the next request.
-    if loader = queuedLoaders.shift()
-      loader()
+  pokeQueue = ->
+    queuedLoaders.shift()?()
+    # Don't return the promise from the loader above
+    return undefined
 
   ###*
   Makes the proxy assume that `newRequest` has the same response as the

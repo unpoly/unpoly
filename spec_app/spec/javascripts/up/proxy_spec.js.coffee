@@ -428,7 +428,74 @@ describe 'up.proxy', ->
           next => up.request(url: '/bar')
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-      describe 'events', ->
+      describe 'up:proxy:load event', ->
+
+        it 'emits an up:proxy:load event before the request touches the network', asyncSpec (next) ->
+          listener = jasmine.createSpy('listener')
+          up.on 'up:proxy:load', listener
+          up.request('/bar')
+
+          next =>
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+            partialRequest = jasmine.objectContaining(
+              method: 'GET',
+              url: jasmine.stringMatching('/bar')
+            )
+            partialEvent = jasmine.objectContaining(request: partialRequest)
+
+            expect(listener).toHaveBeenCalledWith(partialEvent, jasmine.anything(), jasmine.anything())
+
+        it 'allows up:proxy:load listeners to prevent the request (useful to cancel all requests when stopping a test scenario)', (done) ->
+          listener = jasmine.createSpy('listener').and.callFake (event) ->
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+            event.preventDefault()
+
+          up.on 'up:proxy:load', listener
+
+          promise = up.request('/bar')
+
+          u.nextFrame ->
+            expect(listener).toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            promiseState2(promise).then (result) ->
+              expect(result.state).toEqual('rejected')
+              expect(result.value).toBeError(/prevented/i)
+              done()
+
+        it 'does not block the queue when a request was prevented', (done) ->
+          up.proxy.config.maxRequests = 1
+
+          listener = jasmine.createSpy('listener').and.callFake (event) ->
+            # only prevent the first request
+            if event.request.url.indexOf('/path1') >= 0
+              event.preventDefault()
+
+          up.on 'up:proxy:load', listener
+
+          promise1 = up.request('/path1')
+          promise2 = up.request('/path2')
+
+          u.nextFrame =>
+            expect(listener.calls.count()).toBe(2)
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(@lastRequest().url).toMatchUrl('/path2')
+            done()
+
+        it 'allows up:proxy:load listeners to manipulate the request headers', (done) ->
+          listener = (event) ->
+            event.request.headers['X-From-Listener'] = 'foo'
+
+          up.on 'up:proxy:load', listener
+
+          up.request('/path1')
+
+          u.nextFrame =>
+            expect(@lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
+            done()
+
+      describe 'up:proxy:slow and up:proxy:recover events', ->
 
         beforeEach ->
           up.proxy.config.slowDelay = 0
@@ -436,6 +503,8 @@ describe 'up.proxy', ->
           u.each ['up:proxy:load', 'up:proxy:loaded', 'up:proxy:slow', 'up:proxy:recover'], (eventName) =>
             up.on eventName, =>
               @events.push eventName
+
+        it 'emits an up:proxy:slow event if the server takes too long to respond'
 
         it 'does not emit an up:proxy:slow event if preloading', asyncSpec (next) ->
           next =>
