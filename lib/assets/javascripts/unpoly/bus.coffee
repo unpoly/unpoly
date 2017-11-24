@@ -406,14 +406,22 @@ up.bus = (($) ->
   @internal
   ###
   snapshot = ->
-    for description in liveUpDescriptions
+    for number, description of liveUpDescriptions
       description.isDefault = true
 
   resetBus = ->
     # Resets the list of registered event listeners to the
     # moment when the framework was booted.
-    doomedDescriptions = u.reject(liveUpDescriptions, (description) -> description.isDefault)
-    unbind(description...) for description in doomedDescriptions
+
+    # Copy a list of the descriptions we're going to unbind and iterate over
+    # them a second time below. This way we avoid manipulate the object we're
+    # iterating over.
+    doomedDescriptions = []
+    for number, description of liveUpDescriptions
+      doomedDescriptions.push(description) unless description.isDefault
+
+    for description in doomedDescriptions
+      unbind(description...)
 
   ###*
   Resets Unpoly to the state when it was booted.
