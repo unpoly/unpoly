@@ -373,7 +373,7 @@ up.dom = (($) ->
 
       up.layout.saveScroll() unless options.saveScroll == false
 
-      try
+      u.rejectOnError ->
         # Allow callers to create the targeted element right before we swap.
         options.provideTarget?()
         responseDoc = parseResponseDoc(html)
@@ -398,11 +398,6 @@ up.dom = (($) ->
 
         # Delay all further links in the promise chain until all fragments have been swapped
         Promise.all(swapPromises)
-
-      catch e
-        # Since we're an async function, we should not throw exceptions but return a rejected promise.
-        # See http://2ality.com/2016/03/promise-rejections-vs-exceptions.html
-        return Promise.reject(e)
 
   bestPreflightSelector = (selector, options) ->
     cascade = new up.ExtractCascade(selector, options)

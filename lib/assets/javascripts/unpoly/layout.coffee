@@ -300,14 +300,13 @@ up.layout = (($) ->
   This is called automatically when the page loads initially.
 
   @function up.layout.revealHash
+  @return {Promise}
+    A promise that is fulfilled when scroll position has changed to match the location hash.
   @experimental
   ###
   revealHash = ->
-    if hash = up.browser.hash()
-      if $match = firstHashTarget(hash)
-        reveal($match)
-      else
-        Promise.reject()
+    if (hash = up.browser.hash()) && ($match = firstHashTarget(hash))
+      reveal($match)
     else
       Promise.resolve()
 

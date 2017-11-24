@@ -707,6 +707,8 @@ Unreleased
 - New utility method [`up.util.only()`](/up.util.only)
 - New utility method [`up.util.except()`](/up.util.except)
 - Fix a bug where modals could no longer be opened on some browsers
+- When preventing an event emitted by an async function, that function now rejects its promise.
+- Async functions that encounter an error now prefer to reject promises with an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) object (instead of a string with the error message)
 
 ### Breaking changes
 

@@ -151,3 +151,22 @@ describe 'up.bus', ->
 
         up.emit('up:proxy:loaded')
         expect(listener.calls.count()).toBe(1)
+
+    describe 'up.bus.whenEmitted', ->
+
+      it 'emits the event and fulfills the returned promise when no listener calls event.preventDefault()', (done) ->
+        eventListener = jasmine.createSpy('event listener')
+        up.on('my:event', eventListener)
+        promise = up.bus.whenEmitted('my:event', key: 'value')
+        promiseState2(promise).then (result) ->
+          expect(eventListener).toHaveBeenCalledWith(jasmine.objectContaining(key: 'value'), jasmine.anything(), jasmine.anything())
+          expect(result.state).toEqual('fulfilled')
+          done()
+
+      it 'emits the event and rejects the returned promise when any listener calls event.preventDefault()', (done) ->
+        eventListener = (event) -> event.preventDefault()
+        up.on('my:event', eventListener)
+        promise = up.bus.whenEmitted('my:event', key: 'value')
+        promiseState2(promise).then (result) ->
+          expect(result.state).toEqual('rejected')
+          done()

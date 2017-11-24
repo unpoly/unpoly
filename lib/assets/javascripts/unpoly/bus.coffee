@@ -352,8 +352,11 @@ up.bus = (($) ->
   @internal
   ###
   whenEmitted = (args...) ->
-    new Promise (resolve) ->
-      resolve() if nobodyPrevents(args...)
+    new Promise (resolve, reject) ->
+      if nobodyPrevents(args...)
+        resolve()
+      else
+        reject(new Error("Event #{args[0]} was prevented"))
 
   ###*
   Registers an event listener to be called when the user

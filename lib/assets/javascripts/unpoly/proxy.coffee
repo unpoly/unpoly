@@ -567,7 +567,7 @@ up.proxy = (($) ->
         variant = up.link.followVariantForLink($link)
         variant.preloadLink($link)
     else
-      Promise.reject("Won't preload unsafe link")
+      Promise.reject(new Error("Won't preload unsafe link"))
 
   ###*
   @internal
