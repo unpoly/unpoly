@@ -527,12 +527,12 @@ up.proxy = (($) ->
 
   ###*
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
-  is starting to load.
+  is sent over the network.
 
   @event up:proxy:load
-  @param event.url
-  @param event.method
-  @param event.target
+  @param {up.Request} event.request
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the request from being sent.
   @experimental
   ###
 
@@ -541,9 +541,7 @@ up.proxy = (($) ->
   has been received.
 
   @event up:proxy:loaded
-  @param event.url
-  @param event.method
-  @param event.target
+  @param {up.Response} event.response
   @experimental
   ###
 
