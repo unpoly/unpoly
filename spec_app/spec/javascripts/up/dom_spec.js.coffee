@@ -162,14 +162,14 @@ describe 'up.dom', ->
             promise = up.replace('.middle', '/path', failTarget: '.after')
 
             u.nextFrame =>
-              promiseState promise, (state) =>
-                expect(state).toEqual('pending')
+              promiseState(promise).then (result) =>
+                expect(result.state).toEqual('pending')
 
                 @respond(status: 500)
 
                 u.nextFrame =>
-                  promiseState promise, (state) =>
-                    expect(state).toEqual('rejected')
+                  promiseState(promise).then (result) =>
+                    expect(result.state).toEqual('rejected')
                     done()
 
         describe 'when the request times out', ->
@@ -185,13 +185,13 @@ describe 'up.dom', ->
 
             next.await =>
               # See that the promise is still pending before the timeout
-              promiseState2(promise).then (result) -> expect(result.state).toEqual('pending')
+              promiseState(promise).then (result) -> expect(result.state).toEqual('pending')
 
             next =>
               @lastRequest().responseTimeout()
 
             next.await =>
-              promiseState2(promise).then (result) -> expect(result.state).toEqual('rejected')
+              promiseState(promise).then (result) -> expect(result.state).toEqual('rejected')
 
         describe 'when there is a network issue', ->
 
@@ -200,12 +200,12 @@ describe 'up.dom', ->
             promise = up.replace('.middle', '/path')
 
             u.nextFrame =>
-              promiseState promise, (state) =>
-                expect(state).toEqual('pending')
+              promiseState(promise).then (result) =>
+                expect(result.state).toEqual('pending')
                 @lastRequest().responseError()
                 u.nextFrame =>
-                  promiseState promise, (state) =>
-                    expect(state).toEqual('rejected')
+                  promiseState(promise).then (result) =>
+                    expect(result.state).toEqual('rejected')
                     done()
 
         describe 'history', ->
@@ -607,9 +607,9 @@ describe 'up.dom', ->
                 """
 
                 u.nextFrame =>
-                  promiseState promise, (state, value) ->
-                    expect(state).toEqual('rejected')
-                    expect(value).toBeError(/Could not find target in current page/i)
+                  promiseState(promise).then (result) ->
+                    expect(result.state).toEqual('rejected')
+                    expect(result.value).toBeError(/Could not find target in current page/i)
                     done()
 
             it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
@@ -1034,7 +1034,7 @@ describe 'up.dom', ->
       it "throws an error if the selector can't be found on the current page", (done) ->
         html = '<div class="foo-bar">text</div>'
         promise = up.extract('.foo-bar', html)
-        promiseState2(promise).then (result) =>
+        promiseState(promise).then (result) =>
           expect(result.state).toEqual('rejected')
           expect(result.value).toMatch(/Could not find selector in current page, modal or popup/i)
           done()
@@ -1042,7 +1042,7 @@ describe 'up.dom', ->
       it "throws an error if the selector can't be found in the given HTML string", (done) ->
         affix('.foo-bar')
         promise = up.extract('.foo-bar', '')
-        promiseState2(promise).then (result) =>
+        promiseState(promise).then (result) =>
           expect(result.state).toEqual('rejected')
           expect(result.value).toMatch(/Could not find selector in response/i)
           done()
@@ -1051,7 +1051,7 @@ describe 'up.dom', ->
         html = '<div class="foo-bar">text</div>'
         affix('.foo-bar.up-destroying')
         promise = up.extract('.foo-bar', html)
-        promiseState2(promise).then (result) =>
+        promiseState(promise).then (result) =>
           expect(result.state).toEqual('rejected')
           expect(result.value).toMatch(/Could not find selector/i)
           done()
@@ -1060,7 +1060,7 @@ describe 'up.dom', ->
         html = '<div class="foo-bar">text</div>'
         affix('.foo-bar.up-ghost')
         promise = up.extract('.foo-bar', html)
-        promiseState2(promise).then (result) =>
+        promiseState(promise).then (result) =>
           expect(result.state).toEqual('rejected')
           expect(result.value).toMatch(/Could not find selector/i)
           done()
@@ -1070,7 +1070,7 @@ describe 'up.dom', ->
         $parent = affix('.up-destroying')
         $child = affix('.foo-bar').appendTo($parent)
         promise = up.extract('.foo-bar', html)
-        promiseState2(promise).then (result) =>
+        promiseState(promise).then (result) =>
           expect(result.state).toEqual('rejected')
           expect(result.value).toMatch(/Could not find selector/i)
           done()
@@ -1080,7 +1080,7 @@ describe 'up.dom', ->
         $parent = affix('.up-ghost')
         $child = affix('.foo-bar').appendTo($parent)
         promise = up.extract('.foo-bar', html)
-        promiseState2(promise).then (result) =>
+        promiseState(promise).then (result) =>
           expect(result.state).toEqual('rejected')
           expect(result.value).toMatch(/Could not find selector/i)
           done()

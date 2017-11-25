@@ -93,7 +93,7 @@ describe 'up.syntax', ->
 
           promise = up.destroy('.container')
 
-          promiseState2(promise).then (result) ->
+          promiseState(promise).then (result) ->
             expect(result.state).toEqual('fulfilled')
 
       it 'parses an up-data attribute as JSON and passes the parsed object as a second argument to the initializer', ->

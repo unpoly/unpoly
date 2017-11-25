@@ -380,7 +380,7 @@ describe 'up.layout', ->
         location.hash = '#hash'
         promise = up.layout.revealHash()
         expect(revealSpy).not.toHaveBeenCalled()
-        promiseState2(promise).then (result) ->
+        promiseState(promise).then (result) ->
           expect(result.state).toEqual('fulfilled')
           done()
 
@@ -389,7 +389,7 @@ describe 'up.layout', ->
         location.hash = ''
         promise = up.layout.revealHash()
         expect(revealSpy).not.toHaveBeenCalled()
-        promiseState2(promise).then (result) ->
+        promiseState(promise).then (result) ->
           expect(result.state).toEqual('fulfilled')
           done()
 

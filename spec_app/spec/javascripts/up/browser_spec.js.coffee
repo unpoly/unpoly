@@ -162,7 +162,7 @@ describe 'up.browser', ->
       it 'shows a confirmation dialog with the given message and fulfills when the user presses OK', (done) ->
         spyOn(window, 'confirm').and.returnValue(true)
         promise = up.browser.whenConfirmed(confirm: 'Do action?')
-        promiseState2(promise).then (result) ->
+        promiseState(promise).then (result) ->
           expect(window.confirm).toHaveBeenCalledWith('Do action?')
           expect(result.state).toEqual('fulfilled')
           done()
@@ -170,7 +170,7 @@ describe 'up.browser', ->
       it 'emits the event and rejects the returned promise when any listener calls event.preventDefault()', (done) ->
         spyOn(window, 'confirm').and.returnValue(false)
         promise = up.browser.whenConfirmed(confirm: 'Do action?')
-        promiseState2(promise).then (result) ->
+        promiseState(promise).then (result) ->
           expect(window.confirm).toHaveBeenCalledWith('Do action?')
           expect(result.state).toEqual('rejected')
           done()
@@ -178,7 +178,7 @@ describe 'up.browser', ->
       it 'does now show a conformation dialog and fulfills if no { confirm } option is given', (done) ->
         spyOn(window, 'confirm')
         promise = up.browser.whenConfirmed({})
-        promiseState2(promise).then (result) ->
+        promiseState(promise).then (result) ->
           expect(window.confirm).not.toHaveBeenCalled()
           expect(result.state).toEqual('fulfilled')
           done()
@@ -186,7 +186,7 @@ describe 'up.browser', ->
       it "does now show a conformation dialog and fulfills if a { confirm } option is given but we're also preloading", (done) ->
         spyOn(window, 'confirm')
         promise = up.browser.whenConfirmed(confirm: 'Do action?', preload: true)
-        promiseState2(promise).then (result) ->
+        promiseState(promise).then (result) ->
           expect(window.confirm).not.toHaveBeenCalled()
           expect(result.state).toEqual('fulfilled')
           done()

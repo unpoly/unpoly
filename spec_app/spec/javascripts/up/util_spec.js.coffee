@@ -505,7 +505,7 @@ describe 'up.util', ->
 
       it 'return a pending promise', (done) ->
         promise = up.util.unresolvablePromise()
-        promiseState2(promise).then (result) ->
+        promiseState(promise).then (result) ->
           expect(result.state).toEqual('pending')
           done()
 

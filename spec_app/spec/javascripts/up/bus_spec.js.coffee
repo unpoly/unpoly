@@ -158,7 +158,7 @@ describe 'up.bus', ->
         eventListener = jasmine.createSpy('event listener')
         up.on('my:event', eventListener)
         promise = up.bus.whenEmitted('my:event', key: 'value')
-        promiseState2(promise).then (result) ->
+        promiseState(promise).then (result) ->
           expect(eventListener).toHaveBeenCalledWith(jasmine.objectContaining(key: 'value'), jasmine.anything(), jasmine.anything())
           expect(result.state).toEqual('fulfilled')
           done()
@@ -167,6 +167,6 @@ describe 'up.bus', ->
         eventListener = (event) -> event.preventDefault()
         up.on('my:event', eventListener)
         promise = up.bus.whenEmitted('my:event', key: 'value')
-        promiseState2(promise).then (result) ->
+        promiseState(promise).then (result) ->
           expect(result.state).toEqual('rejected')
           done()

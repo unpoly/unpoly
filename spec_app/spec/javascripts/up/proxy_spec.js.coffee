@@ -178,7 +178,7 @@ describe 'up.proxy', ->
             @secondAjaxPromise = up.request('/bar')
 
           next.await =>
-            promiseState2(@secondAjaxPromise).then (result) ->
+            promiseState(@secondAjaxPromise).then (result) ->
               # See that the promise was not rejected due to an internal error.
               expect(result.state).toEqual('pending')
 
@@ -459,7 +459,7 @@ describe 'up.proxy', ->
             expect(listener).toHaveBeenCalled()
             expect(jasmine.Ajax.requests.count()).toEqual(0)
 
-            promiseState2(promise).then (result) ->
+            promiseState(promise).then (result) ->
               expect(result.state).toEqual('rejected')
               expect(result.value).toBeError(/prevented/i)
               done()

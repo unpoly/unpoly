@@ -91,7 +91,7 @@ describe 'up.popup', ->
 
         next.await =>
           expect($('.up-toast')).not.toExist()
-          promise = promiseState2(openPromise)
+          promise = promiseState(openPromise)
           promise.then (result) => expect(result.state).toEqual('pending')
 
       describe 'with { html } option', ->
