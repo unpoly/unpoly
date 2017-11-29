@@ -2,12 +2,15 @@
 Browser support
 ===============
 
-Unpoly supports all modern browsers. It degrades gracefully with old versions of Internet Explorer:
+Unpoly supports all modern browsers.
 
-IE11, Edge
+Chrome, Firefox, Edge, Safari
 : Full support
 
-IE 10 or lower
+Internet Explorer 11
+: Full support with a `Promise` polyfill like [es6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).
+
+Internet Explorer 10 or lower
 : Unpoly prevents itself from booting itself, leaving you with a classic server-side application.
 
 @class up.browser

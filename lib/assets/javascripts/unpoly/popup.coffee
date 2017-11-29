@@ -5,7 +5,7 @@ Pop-up overlays
 Instead of [linking to a page fragment](/up.link), you can choose
 to show a fragment in a popup overlay that rolls down from an anchoring element.
 
-To open a popup, add an [`up-popup` attribute](/up-popup) to a link:
+To open a popup, add an [`up-popup` attribute](/a-up-popup) to a link:
 
     <a href="/options" up-popup=".menu">Show options</a>
 
@@ -22,7 +22,7 @@ The popup also closes *when a link within the popup changes a fragment behind th
 This is useful to have the popup interact with the page that
 opened it, e.g. by updating parts of a larger form.
 
-To disable this behavior, give the opening link an [`up-sticky`](/up-popup#up-sticky) attribute.
+To disable this behavior, give the opening link an [`up-sticky`](/a-up-popup#up-sticky) attribute.
 
 
 \#\#\# Customizing the popup design
@@ -397,7 +397,7 @@ up.popup = (($) ->
       <a href="/decks" up-popup=".deck_list">Switch deck</a>
       <a href="/settings" up-popup=".options" up-sticky>Settings</a>
 
-  @selector [up-popup]
+  @selector a[up-popup]
   @param {string} up-popup
     The CSS selector that will be extracted from the response and
     displayed in a popup overlay.

@@ -207,9 +207,6 @@ describe 'up.modal', ->
           up.modal.visit('/path2', target: '.container', animation: 'fade-in', duration: 50)
 
           u.nextFrame =>
-
-            console.debug('-- nextFrame --')
-
             # The second modal has survived
             expect(jasmine.Ajax.requests.count()).toEqual(1)
             expect(@lastRequest().url).toMatchUrl('/path2')
@@ -218,22 +215,15 @@ describe 'up.modal', ->
             @respondWith('<div class="container">response2</div>')
 
             u.setTimer 10, =>
-
-              console.debug('-- after 10 --')
-
               # The second modal is now opening
               up.modal.visit('/path3', target: '.container', animation: 'fade-in', duration: 50)
 
               # Load a third modal before the second was done opening
               u.nextFrame =>
-                console.debug('-- nextFrame2 --')
-
                 # Since we're still opening the second modal, no request has been made.
                 expect(jasmine.Ajax.requests.count()).toEqual(1)
 
                 u.setTimer 180, =>
-                  console.debug('-- setTimer 70 --')
-
                   # Now that the second modal has opened, we make the request to /path3
                   expect(jasmine.Ajax.requests.count()).toEqual(2)
                   expect(@lastRequest().url).toMatchUrl('/path3')
@@ -241,7 +231,6 @@ describe 'up.modal', ->
                   @respondWith('<div class="container">response3</div>')
 
                   u.setTimer 180, =>
-                    console.debug('-- setTimer 70 II --')
                     expect(jasmine.Ajax.requests.count()).toEqual(2)
                     expect($('.up-modal').length).toBe(1)
                     expect($('.up-modal-dialog').length).toBe(1)
@@ -287,7 +276,6 @@ describe 'up.modal', ->
           # We need to add 100ms to make it pass all of the time.
           next.after (25 + 50 + 100), =>
             # First modal has finished closing, second modal has finished opening.
-            console.debug('[spec] checking event list 1: %o', u.copy(events))
             expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed', 'up:modal:open', 'up:modal:opened']
             expect($('.target')).toHaveText('response2')
 

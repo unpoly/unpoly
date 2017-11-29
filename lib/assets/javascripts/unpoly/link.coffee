@@ -100,7 +100,7 @@ up.link = (($) ->
 
   By default the page's `<body>` element will be replaced.
   If the link has an attribute like [`[up-target]`](/up-target)
-  or [`[up-modal]`](/up-modal), the corresponding UJS behavior will be activated
+  or [`[up-modal]`](/a-up-modal), the corresponding UJS behavior will be activated
   just as if the user had clicked on the link.
 
   \#\#\# Examples

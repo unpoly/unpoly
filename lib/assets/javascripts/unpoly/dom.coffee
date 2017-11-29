@@ -273,7 +273,7 @@ up.dom = (($) ->
 
     onFailure = (response) ->
       rejection = -> Promise.reject(response)
-      if response.isMaterialError()
+      if response.isFatalError()
         rejection()
       else
         promise = processResponse(false, improvedFailTarget, response, failureOptions)

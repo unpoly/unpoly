@@ -239,7 +239,7 @@ up.syntax = (($) ->
         $link.attr('up-duration', '300');
       });
 
-  Examples for built-in macros are [`up-dash`](/up-dash) and [`up-expand`](/up-expand).
+  Examples for built-in macros are [`a[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand).
 
   @function up.macro
   @param {string} selector

@@ -4,7 +4,7 @@ Application layout
 
 You can [make Unpoly aware](/up.layout.config) of fixed elements in your
 layout, such as navigation bars or headers. Unpoly will respect these sticky
-elements when [revealing elements](/up.reveal) or [opening a modal dialog](/up-modal).
+elements when [revealing elements](/up.reveal) or [opening a modal dialog](/a-up-modal).
 
 This modules also contains functions to programmatically [scroll a viewport](/up.scroll)
 or [reveal an element within its viewport](/up.reveal).

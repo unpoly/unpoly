@@ -97,5 +97,5 @@ class up.Response extends up.Record
   isError: =>
     !@isSuccess()
 
-  isMaterialError: =>
+  isFatalError: =>
     @isError() && u.isBlank(@text)

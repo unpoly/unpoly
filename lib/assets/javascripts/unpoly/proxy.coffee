@@ -153,10 +153,7 @@ up.proxy = (($) ->
   reset()
 
   ###*
-  Makes an AJAX request to the given URL and caches the response.
-
-  If requesting a URL with a non-`GET` method, the response will
-  not be cached and the entire cache will be cleared.
+  Makes an AJAX request to the given URL.
 
   \#\#\# Example
 
@@ -165,6 +162,13 @@ up.proxy = (($) ->
       }).fail(function() {
         console.error('The request failed');
       });
+
+  \#\#\# Caching
+
+  All responses are cached by default. If requesting a URL with a non-`GET` method, the response will
+  not be cached and the entire cache will be cleared.
+
+  You can configure caching with the [`up.proxy.config`](/up.proxy.config) property.
 
   \#\#\# Events
 
@@ -210,8 +214,6 @@ up.proxy = (($) ->
   @stable
   ###
   makeRequest = (args...) ->
-    console.debug("!!! up.request(%o)", args)
-
     options = u.extractOptions(args)
     options.url = args[0] if u.isGiven(args[0])
 
@@ -237,7 +239,6 @@ up.proxy = (($) ->
       set(request, promise)
       # Uncache failed requests
       promise.catch (e) ->
-        console.debug("!!! caught rejection %o; removing request", e)
         remove(request)
 
     if !options.preload
@@ -269,7 +270,7 @@ up.proxy = (($) ->
         console.error('The request failed');
       });
 
-  @method up.ajax
+  @function up.ajax
   @param {string} [url]
     The URL for the request.
 
@@ -301,8 +302,7 @@ up.proxy = (($) ->
   @return {Promise<string>}
     A promise for the response text.
   @deprecated
-    Please use [`up.request()`](/up.request) instead,
-    whose promise fulfills with an [`up.Response`](/up.Response) object.
+    Use [`up.request()`](/up.request) instead.
   ###
   ajax = (args...) ->
     up.log.warn('up.ajax() has been deprecated. Use up.request() instead.')
@@ -399,7 +399,6 @@ up.proxy = (($) ->
   ###
 
   loadEnded = ->
-    console.debug("!!! load ended!")
     pendingCount -= 1
 
     if isIdle()
@@ -447,6 +446,17 @@ up.proxy = (($) ->
       u.microtask(pokeQueue)
       Promise.reject(new Error('Event up:proxy:load was prevented'))
 
+  ###*
+  This event is [emitted](/up.emit) before an [AJAX request](/up.request)
+  is sent over the network.
+
+  @event up:proxy:load
+  @param {up.Request} event.request
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the request from being sent.
+  @experimental
+  ###
+
   registerAliasForRedirect = (response) ->
     request = response.request
     if request.url != response.url
@@ -457,16 +467,43 @@ up.proxy = (($) ->
       up.proxy.alias(request, newRequest)
 
   responseReceived = (response) ->
-    console.info('!!! responseReceived')
-    if response.isMaterialError()
-      up.emit 'up:proxy:error',
-        message: 'Material error during request'
+    if response.isFatalError()
+      up.emit 'up:proxy:fatal',
+        message: 'Fatal error during request'
+        request: response.request
         response: response
     else
       registerAliasForRedirect(response) unless response.isError()
       up.emit 'up:proxy:loaded',
         message: ['Server responded with HTTP %d (%d bytes)', response.status, response.text.length]
+        request: response.request
         response: response
+
+  ###*
+  This event is [emitted](/up.emit) when the response to an
+  [AJAX request](/up.request) has been received.
+
+  Note that this event will also be emitted when the server signals an
+  error with an HTTP status like `500`. Only if the request
+  encounters a fatal error (like a loss of network connectivity),
+  [`up:proxy:fatal`](/up:proxy:fatal) is emitted instead.
+
+  @event up:proxy:loaded
+  @param {up.Request} event.request
+  @param {up.Response} event.response
+  @experimental
+  ###
+
+  ###*
+  This event is [emitted](/up.emit) when an [AJAX request](/up.request)
+  encounters fatal error like a timeout or loss of network connectivity.
+
+  Note that this event will *not* be emitted when the server signals an error
+  with an HTTP status like `500`. When the server can produce any response,
+  [`up:proxy:loaded`](/up:proxy:loaded) is emitted instead.
+
+  @event up:proxy:fatal
+  ###
 
   pokeQueue = ->
     queuedLoaders.shift()?()
@@ -518,32 +555,13 @@ up.proxy = (($) ->
   Removes all cache entries.
 
   Unpoly also automatically clears the cache whenever it processes
-  a request with a non-GET HTTP method.
+  a request with an [unsafe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+  HTTP method like `POST`.
 
   @function up.proxy.clear
   @stable
   ###
   clear = cache.clear
-
-  ###*
-  This event is [emitted](/up.emit) before an [AJAX request](/up.request)
-  is sent over the network.
-
-  @event up:proxy:load
-  @param {up.Request} event.request
-  @param event.preventDefault()
-    Event listeners may call this method to prevent the request from being sent.
-  @experimental
-  ###
-
-  ###*
-  This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
-  has been received.
-
-  @event up:proxy:loaded
-  @param {up.Response} event.response
-  @experimental
-  ###
 
   up.bus.renamedEvent('up:proxy:received', 'up:proxy:loaded')
 

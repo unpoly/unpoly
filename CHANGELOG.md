@@ -9,47 +9,80 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
-- jQuery 3 is now supported ...
-- Native promise, more speed ...
-- Native AJAX, more speed ...
-- Fix bug with back button ...
-- up.ajax is deprecated. Please use [`up.request()`](/up.request) instead, whose promise fulfills with an [`up.Response`](/up.Response) object.
-- up:proxy:received event has been renamed to up:proxy:loaded  
-- up:proxy:receive => up:proxy:loaded
-- Internet Explorer 11 needs a Polyfill for `Promise`. We recommend [ES6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).
-- [`up.observe()`](/up.observe) no longer sends multiple callbacks when a previous callback was slow to respond.
+This is a major update with some breaking changes.
 
-- Fix a bug where Unpoly would not boot on Safari 9 and 10 if the initial page was loaded with a POST method.
+### General
+
+- jQuery 3 is now supported in addition to jQuery 1.9+ and jQuery 2.
+- Unpoly now uses [native Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) instead of jQuery deferreds.
+- To enable support for Internet Explorer 11 you need to install a Polyfill for `Promise`. We recommend [ES6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB gzipped).
+
+
+### Fragment updates
+
 - When a selector was not found in the response, the error notification now offers a link to show the unexpected response.
+- The event [`up:fragment:destroy`](/up:fragment:destroy) can no longer be prevented.
+
+
+### AJAX
+
+- Unpoly now uses [native XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) instead of jQuery's `$.ajax()`.
+- [`up.ajax()`](/up.ajax) has been deprecated since its signature is incompatible with native promises. Please use [`up.request()`](/up.request) instead, whose promise fulfills with an [`up.Response`](/up.Response) object.
+- The `up:proxy:received` event has been renamed to [`up:proxy:loaded`](/up:proxy:loaded)
+- The [`up:proxy:load`](/up:proxy:load) event properties have changed. You can now access request properties through a key `{ request }`, e.g. `event.request.url`.
+- The [`up:proxy:load`](/up:proxy:load) event can now be prevented to prevent a request from being sent to the network.
+-  The [`up:proxy:load`](/up:proxy:load) event now allows listeners to change request headers by manipulating the `event.request.headers` object.
+- New event [`up:proxy:fatal`] will be [emitted](/up.emit) when an [AJAX request](/up.request) encounters fatal error like a timeout or loss of network connectivity.
+
+
+### Bugfixes
+
+- Clicking a link with an [`[up-restore-scroll]`](/a-up-target#up-restore-scroll) attribute will no longer crash if no previous scroll position for given URL is known (#25)
+- Fix a bug where going back in history would sometimes not call destructors (#24)
+- [`up.observe()`](/up.observe) no longer sends multiple callbacks when a previous callback was slow to respond.
+- Fix a bug where Unpoly would not boot on Safari 9 and 10 if the initial page was loaded with a `POST` method.
+- Fix a bug where tooltips would sometimes stay open when many tooltips are opened and closed concurrently.
+
+### Server protocol
+
 - When the server [signals a redirect with a `X-Up-Location` header](/up.protocol#redirect-detection), sending a `X-Up-Method` header is now optional. If it is missing, `GET` is assumed.
-- The event [`up:fragment:destroy](/up:fragment:destroy) can no longer be prevented.
-- up.motion.none has been removed without replacement. Just path `false` or `'none'` to indicate a no-op animation or transition which has no visual effects and completes instantly.
-- [`up.motion.finish()`](/up.motion.finish) is now async. It returns a promise that is fulfulled when all animations are finished.
-- [`up.motion.finish()`](/up.motion.finish) now also finishes animations in ancestors of the given element.
-- [`up.follow()`](/up.follow) will now open a modal if the given link has [`[up-modal]`](/up-modal) attribute
-- [`up.follow()`](/up.follow) will now open a popup if the given link has [`[up-popup]`](/up-popup) attribute
-- Clicking a link with `[up-restore-scroll]` will no longer crash if the previous scroll position for the new URL is unknown ([#25](https://github.com/unpoly/unpoly/issues/25))
 - Unpoly will often update a different selector in case the request fails. This second selector is now sent to the server as a `X-Up-Fail-Target` header.
 - You can now [configure how CSRF tokens are sent your server-side framework](/up.protocol.config).
-- up.popup.attach() now throws an error if neither { url } nor { html } options are given.
-- Fix a bug where tooltips would sometimes stay open when many tooltips are opened and closed concurrently.
 - CSRF tokens are no longer sent for cross-domain requests.
-- up.util.isString() now also returns true for `String` instances (in addition to string literals)
-- up.util.isNumber() now also returns true for `Number` instances (in addition to number literals)
+
+
+### Animation
+
+- `up.motion.none()` has been removed without replacement. Just pass `false` or the string `'none'` to indicate a animation or transition which has no visual effects and completes instantly.
+- [`up.motion.finish()`](/up.motion.finish) is now async. It returns a promise that fulfills when all animations are finished.
+- [`up.motion.finish()`](/up.motion.finish) now also finishes animations in ancestors of the given element.
+
+### Modals
+
+- [`up.follow()`](/up.follow) will now open a modal if the given link has an [`[up-modal]`](/up-modal) attribute
+- [`a[up-modal]`](/a-up-modal) links can now have an `[up-fail-target]` attribute to indicate which selector to replace for an non-200 response
+- Fix a bug where preloading an up-modal link would create an invisible .up-modal container in the DOM.
+
+### Popups
+
+- [`up.follow()`](/up.follow) will now open a popup if the given link has [`[up-popup]`](/up-popup) attribute
+- up-popup links can now have an up-fail-target attribute to indicate which selector to replace for an non-200 response
+- Fix a bug where preloading an up-popup link would create an invisible .up-popup container in the DOM.
+- [`up.popup.attach()`](/up.popup.attach) now throws an error if neither `{ url }` nor `{ html }` options are given.
+
+
+### Utility functions
+
+- up.util.setTimer() is now always async, even when called with a 0 (zero) delay. The function is now stable.
 - up.util.isHash() has been removed without replacement. In your code you can replace `up.util.isHash(x)` with `up.util.isObject(x) && !up.util.isFunction(x)`.
 - up.util.resolvedDeferred() has been removed without replacement. Use Promise.resolve() instead.
 - up.util.resolvedPromise() has been removed without replacement. Use Promise.resolve() instead.
 - up.util.rejectedPromise() has been removed without replacement. Use Promise.reject() instead.
 - up.util.unresolvableDeferred() has been removed without replacement. Use new Promise(function() {}) instead.
 - up.motion.when() has been removed without replacement. Use Promise.all() instead.
-- up.util.setTimer() is now always async, even when called with a 0 (zero) delay. The function is now stable.
-- up-modal links can now have an up-fail-target attribute to indicate which selector to replace for an non-200 response
-- up-popup links can now have an up-fail-target attribute to indicate which selector to replace for an non-200 response
-- Fix a bug where preloading an up-modal link would create an invisible .up-modal container in the DOM.
-- Fix a bug where preloading an up-popup link would create an invisible .up-popup container in the DOM.
-- up:proxy:load event now has the request in a sub-key { request }
-- up:proxy:load event can now be prevented
-- up:proxy:load event allows listeners to manipulate headers by accessing the `event.request.headers` object
+- up.util.isString() now also returns true for `String` instances (in addition to string literals)
+- up.util.isNumber() now also returns true for `Number` instances (in addition to number literals)
+
 
 
 0.37.0
@@ -503,7 +536,7 @@ Unreleased
 - When opening a modal while another modal is open, the first modal will be closed (with animation) before the second modal opens (with animation)
 - When opening a popup while another popup is open, the first popup will be closed (with animation) before the second popup opens (with animation)
 - User-defined macros are now always run *before* built-in macros.
-  This way you can set [`[up-dash]`](/up-dash) and [`[up-expand]`](/up-expand) from your own macros.
+  This way you can set [`[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand) from your own macros.
 
 
 0.24.1
@@ -604,10 +637,10 @@ Unreleased
 - Fix a bug where the document title wasn't restored when using the back
   and forward buttons
 - Fix a bug where links would be followed multiple times if the link
-  had an [`up-dash`](/up-dash) attribute without a value and also an `up-target` attribute.
+  had an [`up-dash`](/a-up-dash) attribute without a value and also an `up-target` attribute.
 - Fix a bug where a link would be followed multiple times if the link's
   click area was expanded using [`[up-expand]`](/up-expand) and if the
-  link also had an [`up-dash`](/up-dash) attribute.
+  link also had an [`up-dash`](/a-up-dash) attribute.
 - [`up.destroy()`](/up.destroy) now returns a resolved deferred if the given selector or jQuery collection does not exist
 
 

@@ -17,7 +17,7 @@ In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
 
 An example for an animation is opening a new dialog. We can animate the appearance
-of the dialog by adding an [`up-animation`](/up-modal#up-animation) attribute to the opening link:
+of the dialog by adding an [`[up-animation]`](/a-up-modal#up-animation) attribute to the opening link:
 
     <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
 
