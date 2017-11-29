@@ -17,12 +17,10 @@ This is a major update with some breaking changes.
 - Unpoly now uses [native Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) instead of jQuery deferreds.
 - To enable support for Internet Explorer 11 you need to install a Polyfill for `Promise`. We recommend [ES6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB gzipped).
 
-
 ### Fragment updates
 
 - When a selector was not found in the response, the error notification now offers a link to show the unexpected response.
 - The event [`up:fragment:destroy`](/up:fragment:destroy) can no longer be prevented.
-
 
 ### AJAX
 
@@ -33,7 +31,6 @@ This is a major update with some breaking changes.
 - The [`up:proxy:load`](/up:proxy:load) event can now be prevented to prevent a request from being sent to the network.
 -  The [`up:proxy:load`](/up:proxy:load) event now allows listeners to change request headers by manipulating the `event.request.headers` object.
 - New event [`up:proxy:fatal`] will be [emitted](/up.emit) when an [AJAX request](/up.request) encounters fatal error like a timeout or loss of network connectivity.
-
 
 ### Bugfixes
 
@@ -49,7 +46,6 @@ This is a major update with some breaking changes.
 - Unpoly will often update a different selector in case the request fails. This second selector is now sent to the server as a `X-Up-Fail-Target` header.
 - You can now [configure how CSRF tokens are sent your server-side framework](/up.protocol.config).
 - CSRF tokens are no longer sent for cross-domain requests.
-
 
 ### Animation
 
@@ -70,6 +66,10 @@ This is a major update with some breaking changes.
 - Fix a bug where preloading an up-popup link would create an invisible .up-popup container in the DOM.
 - [`up.popup.attach()`](/up.popup.attach) now throws an error if neither `{ url }` nor `{ html }` options are given.
 
+### Events
+
+- When async functions emit an event and that event is prevented, the async function now rejects with an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
+- When async functions are called wth `{ confirm: true }` and the user denies confirmation, the async function now rejects with an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
 
 ### Utility functions
 

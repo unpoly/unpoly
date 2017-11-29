@@ -18,7 +18,7 @@ describe 'up.motion', ->
           expect(u.opacity($element)).toBeAround(1.0, 0.25)
           done()
 
-      it 'returns a promise that is resolved when the animation completed', (done) ->
+      it 'returns a promise that is fulfilled when the animation has completed', (done) ->
         $element = affix('.element').text('content')
         resolveSpy = jasmine.createSpy('resolve')
 

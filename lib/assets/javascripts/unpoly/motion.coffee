@@ -595,11 +595,12 @@ up.motion = (($) ->
   If you choose to *not* use `up.animate()` and roll your own
   logic instead, your code must honor the following contract:
 
-  1. It must honor the passed options `{ delay, duration, easing }` if present
+  1. It must honor the options `{ delay, duration, easing }` if given
   2. It must *not* remove any of the given elements from the DOM.
-  3. It returns a promise that is resolved when the transition ends
-  4. The returned promise responds to a `resolve()` function that
-     instantly jumps to the last transition frame and resolves the promise.
+  3. It returns a promise that is fulfilled when the transition has ended
+  4. If during the animation an event `up:motion:finish` is emitted on
+     the given element, the transition instantly jumps to the last frame
+     and resolves the returned promise.
 
   Calling [`up.animate()`](/up.animate) with an object argument
   will take care of all these points.
@@ -629,11 +630,12 @@ up.motion = (($) ->
   If you choose to *not* use `up.animate()` and roll your own
   animation code instead, your code must honor the following contract:
 
-  1. It must honor the passed options `{ delay, duration, easing }` if present
-  2. It must *not* remove the passed element from the DOM.
-  3. It returns a promise that is resolved when the animation ends
-  4. The returned promise responds to a `resolve()` function that
-     instantly jumps to the last animation frame and resolves the promise.
+  1. It must honor the options `{ delay, duration, easing }` if given
+  2. It must *not* remove any of the given elements from the DOM.
+  3. It returns a promise that is fulfilled when the transition has ended
+  4. If during the animation an event `up:motion:finish` is emitted on
+     the given element, the transition instantly jumps to the last frame
+     and resolves the returned promise.
 
   Calling [`up.animate()`](/up.animate) with an object argument
   will take care of all these points.

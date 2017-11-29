@@ -320,7 +320,7 @@ up.form = (($) ->
 
   @param {string|Element|jQuery} [options.target]
   @return {Promise}
-    A promise that is resolved when the server-side
+    A promise that is fulfilled when the server-side
     validation is received and the form was updated.
   @stable
   ###
