@@ -266,7 +266,15 @@ up.link = (($) ->
     $targetLink = $target.closest('a, [up-href]')
     $targetLink.length && $link.find($targetLink).length
 
-  isSafe = ($link, options) ->
+  ###*
+  Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+  HTTP method like `GET`.
+
+  @function up.link.isSafe
+  @experimental
+  ###
+  isSafe = (selectorOrLink, options) ->
+    $link = $(selectorOrLink)
     method = followMethod($link, options)
     up.proxy.isSafeMethod(method)
 

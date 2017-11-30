@@ -35,6 +35,7 @@ This is a major update with some breaking changes.
 ### Links
 
 - Links with unsafe HTTP methods like `POST` are no longer marked as [`.up-current`](/up-current), even if their `[href]` matches the current URL.
+- New experimental function [`up.link.isSafe()`](/up.link.isSafe). It returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1) HTTP method like `GET`.
 
 ### Fragment updates
 
