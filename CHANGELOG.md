@@ -9,13 +9,13 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
-This is a major update with some breaking changes.
+This is a major update with some breaking changes. Expect a few more updates like this as we move closer to our 1.0 release in 2018.
 
 ### General
 
 - jQuery 3 is now supported in addition to jQuery 1.9+ and jQuery 2.
 - Unpoly now uses [native Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) instead of jQuery deferreds.
-- You can now help improve Unpoly's documentation by clicking an *Edit this page* link on any [unpoly.com](https://unpoly.com/) subpage (like [`a[up-target]`](/a-up-target).
+- You can now help improve Unpoly's documentation by clicking an *Edit this page* link on any [unpoly.com](https://unpoly.com/) subpage (like [`a[up-target]`](/a-up-target)).
 
 ### Browser support
 
@@ -24,13 +24,13 @@ This is a major update with some breaking changes.
 
 ### AJAX
 
-- Unpoly now uses [native XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) instead of jQuery's `$.ajax()`.
+- Unpoly now uses [native XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) instead of `jQuery.ajax()`. If you have been hacking into Unpoly's networking through `jQuery.ajaxPrefilter()`, you must now use the [`up:proxy:load`](/up:proxy:load) event.
 - [`up.ajax()`](/up.ajax) has been deprecated since its signature is incompatible with native promises. Please use [`up.request()`](/up.request) instead, whose promise fulfills with an [`up.Response`](/up.Response) object.
-- The `up:proxy:received` event has been renamed to [`up:proxy:loaded`](/up:proxy:loaded)
+- The `up:proxy:received` event has been renamed to [`up:proxy:loaded`](/up:proxy:loaded).
 - The [`up:proxy:load`](/up:proxy:load) event properties have changed. You can now access request properties through a key `{ request }`, e.g. `event.request.url`.
 - The [`up:proxy:load`](/up:proxy:load) event can now be prevented to prevent a request from being sent to the network.
 -  The [`up:proxy:load`](/up:proxy:load) event now allows listeners to change request headers by manipulating the `event.request.headers` object.
-- New event [`up:proxy:fatal`] will be [emitted](/up.emit) when an [AJAX request](/up.request) encounters fatal error like a timeout or loss of network connectivity.
+- A new event [`up:proxy:fatal`](/up:proxy:fatal) will be [emitted](/up.emit) when an [AJAX request](/up.request) encounters fatal error like a timeout or loss of network connectivity.
 
 ### Links
 
@@ -44,8 +44,8 @@ This is a major update with some breaking changes.
 
 ### History
 
-- Clicking a link with an [`[up-restore-scroll]`](/a-up-target#up-restore-scroll) attribute will no longer crash if no previous scroll position for given URL is known (#25)
-- Fix a bug where going back in history would sometimes not call destructors (#24)
+- Clicking a link with an [`[up-restore-scroll]`](/a-up-target#up-restore-scroll) attribute will no longer crash if no previous scroll position for given URL is known ([#25](https://github.com/unpoly/unpoly/issues/25))
+- Fix a bug where going back in history would sometimes not call destructors ([#24](https://github.com/unpoly/unpoly/issues/24))
 
 ### Forms
 
@@ -88,16 +88,15 @@ This is a major update with some breaking changes.
 
 ### Utility functions
 
-- up.util.setTimer() is now always async, even when called with a 0 (zero) delay. The function is now stable.
-- up.util.isHash() has been removed without replacement. In your code you can replace `up.util.isHash(x)` with `up.util.isObject(x) && !up.util.isFunction(x)`.
-- up.util.resolvedDeferred() has been removed without replacement. Use Promise.resolve() instead.
-- up.util.resolvedPromise() has been removed without replacement. Use Promise.resolve() instead.
-- up.util.rejectedPromise() has been removed without replacement. Use Promise.reject() instead.
-- up.util.unresolvableDeferred() has been removed without replacement. Use new Promise(function() {}) instead.
-- up.motion.when() has been removed without replacement. Use Promise.all() instead.
-- up.util.isString() now also returns true for `String` instances (in addition to string literals)
-- up.util.isNumber() now also returns true for `Number` instances (in addition to number literals)
-
+- [`up.util.setTimer()`](/up.util.setTimer) is now always async, even when called with a delay of `0` (zero). The function is now stable.
+- `up.util.isHash()` has been removed without replacement. In your code you can replace `up.util.isHash(x)` with `up.util.isObject(x) && !up.util.isFunction(x)`.
+- `up.util.resolvedDeferred()` has been removed without replacement. Use `Promise.resolve()` instead.
+- `up.util.resolvedPromise()` has been removed without replacement. Use `Promise.resolve(`) instead.
+- `up.util.rejectedPromise()` has been removed without replacement. Use `Promise.reject()` instead.
+- `up.util.unresolvableDeferred()` has been removed without replacement. Use `new Promise(function() {})` instead.
+- `up.motion.when()` has been removed without replacement. Use `Promise.all()` instead.
+- [`up.util.isString()`](/up.util.isString) now also returns true for `String` instances (in addition to string literals)
+- [`up.util.isNumber()`](/up.util.isNumber()) now also returns true for `Number` instances (in addition to number literals)
 
 
 0.37.0
