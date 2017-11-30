@@ -194,6 +194,21 @@ up.link = (($) ->
 
   followVariants = []
 
+  ###*
+  Registers the given handler for links with the given selector.
+
+  This does more than a simple `click` handler:
+
+  - It also handles `[up-instant]`
+  - It also handles `[up-href]`
+
+  @function up.link.addFollowVariant
+  @param {string} simplifiedSelector
+    A selector without `a` or `[up-href]`, e.g. `[up-target]`
+  @param {Function<jQuery, Object>} options.follow
+  @param {Function<jQuery, Object>} options.preload
+  @internal
+  ###
   addFollowVariant = (simplifiedSelector, options) ->
     variant = new up.FollowVariant(simplifiedSelector, options)
     followVariants.push(variant)
@@ -493,11 +508,13 @@ up.link = (($) ->
 
   \#\#\# Limitations
 
-  Users will not be able to use the expanded area to open a context menu by right clicking,
-  or to open the link in a new tab.
-  To enable this, make the entire clickable area an actual `<a>` tag.
-  [It's OK to put block elements inside an anchor tag](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
+  `[up-expand]` has some limitations for advanced browser users:
 
+  - Users won't be able to right-click the expanded area to open a context menu
+  - Users won't be able to CTRL+click the expanded area to open a new tab
+
+  To overcome these limitations, consider nesting the entire clickable area in an actual `<a>` tag.
+  [It's OK to put block elements inside an anchor tag](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
 
   @selector [up-expand]
   @param {string} [up-expand]

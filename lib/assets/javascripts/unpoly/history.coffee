@@ -1,13 +1,10 @@
 ###*
-Browser history
-===============
+History
+========
   
 In an Unpoly app, every page has an URL.
 
 [Fragment updates](/up.link) automatically update the URL.
-
-
-Going back behavior .... configure.
 
 @class up.history
 ###

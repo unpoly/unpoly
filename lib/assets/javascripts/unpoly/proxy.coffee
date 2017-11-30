@@ -498,9 +498,9 @@ up.proxy = (($) ->
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   encounters fatal error like a timeout or loss of network connectivity.
 
-  Note that this event will *not* be emitted when the server signals an error
-  with an HTTP status like `500`. When the server can produce any response,
-  [`up:proxy:loaded`](/up:proxy:loaded) is emitted instead.
+  Note that this event will *not* be emitted when the server produces an
+  error message with an HTTP status like `500`. When the server can produce
+  any response, [`up:proxy:loaded`](/up:proxy:loaded) is emitted instead.
 
   @event up:proxy:fatal
   ###

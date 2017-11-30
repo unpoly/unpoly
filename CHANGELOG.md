@@ -15,12 +15,12 @@ This is a major update with some breaking changes.
 
 - jQuery 3 is now supported in addition to jQuery 1.9+ and jQuery 2.
 - Unpoly now uses [native Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) instead of jQuery deferreds.
+- You can now help improve Unpoly's documentation by clicking an *Edit this page* link on any [unpoly.com](https://unpoly.com/) subpage (like [`a[up-target]`](/a-up-target).
+
+### Browser support
+
 - To enable support for Internet Explorer 11 you need to install a Polyfill for `Promise`. We recommend [ES6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB gzipped).
-
-### Fragment updates
-
-- When a selector was not found in the response, the error notification now offers a link to show the unexpected response.
-- The event [`up:fragment:destroy`](/up:fragment:destroy) can no longer be prevented.
+- Fix a bug where Unpoly would not boot on Safari 9 and 10 if the initial page was loaded with a `POST` method.
 
 ### AJAX
 
@@ -32,12 +32,26 @@ This is a major update with some breaking changes.
 -  The [`up:proxy:load`](/up:proxy:load) event now allows listeners to change request headers by manipulating the `event.request.headers` object.
 - New event [`up:proxy:fatal`] will be [emitted](/up.emit) when an [AJAX request](/up.request) encounters fatal error like a timeout or loss of network connectivity.
 
-### Bugfixes
+### Links
+
+- Links with unsafe HTTP methods like `POST` are no longer marked as [`.up-current`](/up-current), even if their `[href]` matches the current URL.
+
+### Fragment updates
+
+- When a selector was not found in the response, the error notification now offers a link to show the unexpected response.
+- The event [`up:fragment:destroy`](/up:fragment:destroy) can no longer be prevented.
+
+### History
 
 - Clicking a link with an [`[up-restore-scroll]`](/a-up-target#up-restore-scroll) attribute will no longer crash if no previous scroll position for given URL is known (#25)
 - Fix a bug where going back in history would sometimes not call destructors (#24)
+
+### Forms
+
 - [`up.observe()`](/up.observe) no longer sends multiple callbacks when a previous callback was slow to respond.
-- Fix a bug where Unpoly would not boot on Safari 9 and 10 if the initial page was loaded with a `POST` method.
+
+### Tooltips
+
 - Fix a bug where tooltips would sometimes stay open when many tooltips are opened and closed concurrently.
 
 ### Server protocol
