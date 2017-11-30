@@ -3,6 +3,15 @@
 u = up.util
 
 ###*
+The `up.Response` type describes the server response to an [`AJAX request`](/up.request).
+
+\#\#\# Example
+
+    up.request('/foo').then(function(response) {
+      console.log(response.status); // 200
+      console.log(response.text);   // "<html><body>..."
+    });
+
 @class up.Response
 ###
 class up.Response extends up.Record
@@ -91,11 +100,39 @@ class up.Response extends up.Record
   constructor: (options) ->
     super(options)
 
+  ###*
+  Returns whether the server responded with a 2xx HTTP status.
+
+  @function up.Response.prototype.isSuccess
+  @return {boolean}
+  @experimental
+  ###
   isSuccess: =>
     @status && (@status >= 200 && @status <= 299)
 
+  ###*
+  Returns whether the response was not [successful](/up.Request.prototype.isSuccess).
+
+  This also returns `true` when the request encountered a [fatal error](/up.Request.prototype.isFatalError)
+  like a timeout or loss of network connectivity.
+
+  @function up.Response.prototype.isSuccess
+  @return {boolean}
+  @experimental
+  ###
   isError: =>
     !@isSuccess()
 
+  ###*
+  Returns whether the request encountered a [fatal error](/up.Request.prototype.isFatalError)
+  like a timeout or loss of network connectivity.
+
+  When the server produces an error message with an HTTP status like `500`,
+  this is not considered a fatal error and `false` is returned.
+
+  @function up.Response.prototype.isSuccess
+  @return {boolean}
+  @experimental
+  ###
   isFatalError: =>
     @isError() && u.isBlank(@text)
