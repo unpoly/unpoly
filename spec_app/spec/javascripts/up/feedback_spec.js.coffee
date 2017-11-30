@@ -49,6 +49,21 @@ describe 'up.feedback', ->
         $link = up.hello(affix('a[href="#"]'))
         expect($link).not.toHaveClass('up-current')
 
+      it 'does not highlight links with unsafe methods', ->
+        spyOn(up.browser, 'url').and.returnValue('/foo')
+        $defaultLink = up.hello(affix('a[href="/foo"]'))
+        $getLink = up.hello(affix('a[href="/foo"][up-method="get"]'))
+        $putLink = up.hello(affix('a[href="/foo"][up-method="put"]'))
+        $patchLink = up.hello(affix('a[href="/foo"][up-method="patch"]'))
+        $postLink = up.hello(affix('a[href="/foo"][up-method="post"]'))
+        $deleteLink = up.hello(affix('a[href="/foo"][up-method="delete"]'))
+        expect($defaultLink).toHaveClass('up-current')
+        expect($getLink).toHaveClass('up-current')
+        expect($putLink).not.toHaveClass('up-current')
+        expect($patchLink).not.toHaveClass('up-current')
+        expect($postLink).not.toHaveClass('up-current')
+        expect($deleteLink).not.toHaveClass('up-current')
+
       it 'marks URL prefixes as .up-current if an up-alias value ends in *', ->
         spyOn(up.browser, 'url').and.returnValue('/foo/123')
         $currentLink = up.hello(affix('a[href="/x"][up-alias="/aaa /foo/* /bbb"]'))

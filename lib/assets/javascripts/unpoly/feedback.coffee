@@ -78,6 +78,7 @@ up.feedback = (($) ->
     urls
 
   urlSet = (urls) ->
+    urls = u.map(urls, normalizeUrl)
     urls = u.compact(urls)
 
     matches = (testUrl) ->
@@ -100,11 +101,11 @@ up.feedback = (($) ->
 
   locationChanged = ->
     currentUrls = urlSet([
-      normalizeUrl(up.browser.url()),
-      normalizeUrl(up.modal.url()),
-      normalizeUrl(up.modal.coveredUrl()),
-      normalizeUrl(up.popup.url()),
-      normalizeUrl(up.popup.coveredUrl())
+      up.browser.url(),
+      up.modal.url(),
+      up.modal.coveredUrl(),
+      up.popup.url(),
+      up.popup.coveredUrl()
     ])
 
     klass = currentClass()
@@ -115,7 +116,7 @@ up.feedback = (($) ->
       # the actual link might be a child element.
       urls = sectionUrls($section)
 
-      if currentUrls.matchesAny(urls)
+      if up.link.isSafe($section) && currentUrls.matchesAny(urls)
         $section.addClass(klass)
       else if $section.hasClass(klass) && $section.closest('.up-destroying').length == 0
         $section.removeClass(klass)
