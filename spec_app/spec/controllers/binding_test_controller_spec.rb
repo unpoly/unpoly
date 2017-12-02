@@ -19,7 +19,7 @@ describe BindingTestController do
 
     describe '#target' do
 
-      it 'returns the CSS selector that is requested via Unpoly' do
+      it 'returns the CSS selector that Unpoly requested for a sucessful response' do
         request.headers['X-Up-Target'] = '.foo'
         get :up_target
         expect(response.body).to eq('.foo')
@@ -27,83 +27,138 @@ describe BindingTestController do
 
     end
 
-    describe '#target?' do
+    describe '#fail_target' do
+
+      it 'returns the CSS selector that Unpoly requested for an error response' do
+        request.headers['X-Up-Target'] = '.foo'
+        request.headers['X-Up-Fail-Target'] = '.bar'
+        get :up_fail_target
+        expect(response.body).to eq('.bar')
+      end
+
+    end
+
+    shared_examples_for 'target query' do |opts|
+
+      let(:header) { opts.fetch(:header) }
+
+      let (:action) { opts.fetch(:action)}
+
+      def set_header(value)
+        request.headers[header] = value
+        if header != 'X-Up-Target'
+          # Make sure that it's considered a fragment update
+          request.headers['X-Up-Target'] = '.other-selector'
+        end
+      end
 
       it 'returns true if the tested CSS selector is requested via Unpoly' do
-        request.headers['X-Up-Target'] = '.foo'
-        get :up_is_target, tested_target: '.foo'
+        set_header '.foo'
+        get action, tested_target: '.foo'
         expect(response.body).to eq('true')
       end
 
       it 'returns false if Unpoly is requesting another CSS selector' do
-        request.headers['X-Up-Target'] = '.bar'
-        get :up_is_target, tested_target: '.foo'
+        set_header '.bar'
+        get action, tested_target: '.foo'
         expect(response.body).to eq('false')
       end
 
       it 'returns true if the request is not an Unpoly request' do
-        get :up_is_target, tested_target: '.foo'
+        get action, tested_target: '.foo'
         expect(response.body).to eq('true')
       end
 
       it 'returns true if testing a custom selector, and Unpoly requests "body"' do
-        request.headers['X-Up-Target'] = 'body'
-        get :up_is_target, tested_target: '.foo'
+        set_header 'body'
+        get action, tested_target: '.foo'
         expect(response.body).to eq('true')
       end
 
       it 'returns true if testing a custom selector, and Unpoly requests "html"' do
-        request.headers['X-Up-Target'] = 'html'
-        get :up_is_target, tested_target: '.foo'
+        set_header 'html'
+        get action, tested_target: '.foo'
         expect(response.body).to eq('true')
       end
 
       it 'returns true if testing "body", and Unpoly requests "html"' do
-        request.headers['X-Up-Target'] = 'html'
-        get :up_is_target, tested_target: 'body'
+        set_header 'html'
+        get action, tested_target: 'body'
         expect(response.body).to eq('true')
       end
 
       it 'returns true if testing "head", and Unpoly requests "html"' do
-        request.headers['X-Up-Target'] = 'html'
-        get :up_is_target, tested_target: 'head'
+        set_header 'html'
+        get action, tested_target: 'head'
         expect(response.body).to eq('true')
       end
 
       it 'returns false if the tested CSS selector is "head" but Unpoly requests "body"' do
-        request.headers['X-Up-Target'] = 'body'
-        get :up_is_target, tested_target: 'head'
+        set_header 'body'
+        get action, tested_target: 'head'
         expect(response.body).to eq('false')
       end
 
       it 'returns false if the tested CSS selector is "title" but Unpoly requests "body"' do
-        request.headers['X-Up-Target'] = 'body'
-        get :up_is_target, tested_target: 'title'
+        set_header 'body'
+        get action, tested_target: 'title'
         expect(response.body).to eq('false')
       end
 
       it 'returns false if the tested CSS selector is "meta" but Unpoly requests "body"' do
-        request.headers['X-Up-Target'] = 'body'
-        get :up_is_target, tested_target: 'meta'
+        set_header 'body'
+        get action, tested_target: 'meta'
         expect(response.body).to eq('false')
       end
 
       it 'returns true if the tested CSS selector is "head", and Unpoly requests "html"' do
-        request.headers['X-Up-Target'] = 'html'
-        get :up_is_target, tested_target: 'head'
+        set_header 'html'
+        get action, tested_target: 'head'
         expect(response.body).to eq('true')
       end
 
       it 'returns true if the tested CSS selector is "title", Unpoly requests "html"' do
-        request.headers['X-Up-Target'] = 'html'
-        get :up_is_target, tested_target: 'title'
+        set_header 'html'
+        get action, tested_target: 'title'
         expect(response.body).to eq('true')
       end
 
       it 'returns true if the tested CSS selector is "meta", and Unpoly requests "html"' do
-        request.headers['X-Up-Target'] = 'html'
-        get :up_is_target, tested_target: 'meta'
+        set_header 'html'
+        get action, tested_target: 'meta'
         expect(response.body).to eq('true')
+      end
+
+    end
+
+    describe '#target?' do
+      it_behaves_like 'target query', action: :up_is_target, header: 'X-Up-Target'
+    end
+
+    describe '#fail_target?' do
+      it_behaves_like 'target query', action: :up_is_fail_target, header: 'X-Up-Fail-Target'
+    end
+
+    describe '#any_target?' do
+
+      before :each do
+        request.headers['X-Up-Target'] = '.success'
+        request.headers['X-Up-Fail-Target'] = '.failure'
+      end
+
+      it 'returns true if the tested CSS selector is the target for a successful response' do
+        get :up_is_any_target, tested_target: '.success'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns true if the tested CSS selector is the target for a failed response' do
+        get :up_is_any_target, tested_target: '.failure'
+        expect(response.body).to eq('true')
+      end
+
+      it 'returns false if the tested CSS selector is a target for neither successful nor failed response' do
+        get :up_is_any_target, tested_target: '.other'
+        expect(response.body).to eq('false')
       end
 
     end

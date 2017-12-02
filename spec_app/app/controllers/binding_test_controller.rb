@@ -8,10 +8,20 @@ class BindingTestController < ActionController::Base
     render :text => up.target
   end
 
+  def up_fail_target
+    render :text => up.fail_target
+  end
+
   def up_is_target
-    tested_target = params[:tested_target].presence
-    tested_target or raise "No target given"
     render :text => up.target?(tested_target).to_s
+  end
+
+  def up_is_fail_target
+    render :text => up.fail_target?(tested_target).to_s
+  end
+
+  def up_is_any_target
+    render :text => up.any_target?(tested_target).to_s
   end
 
   def is_up_validate
@@ -29,6 +39,13 @@ class BindingTestController < ActionController::Base
 
   def text
     render :text => 'text from controller'
+  end
+
+  private
+
+  def tested_target
+    tested_target = params[:tested_target].presence
+    tested_target or raise "No target given"
   end
 
 end

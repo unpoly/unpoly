@@ -98,6 +98,13 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - [`up.util.isString()`](/up.util.isString) now also returns true for `String` instances (in addition to string literals)
 - [`up.util.isNumber()`](/up.util.isNumber()) now also returns true for `Number` instances (in addition to number literals)
 
+### Ruby on Rails bindings
+
+- New method `up.fail_target` available in controllers, helpers and views. It returns the selector targeted for a failed response.
+- New method `up.fail_target?(target)` available in controllers, helpers and views. It returns whether the given selector is targeted for a failed response.
+- New method `up.any_target?(target)` available in controllers, helpers and views. It returns whether the given selector is targeted for a either a successful or failed response.
+
+
 
 0.37.0
 ------

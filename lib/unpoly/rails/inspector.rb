@@ -22,21 +22,35 @@ module Unpoly
       alias_method :unpoly?, :up?
 
       ##
-      # If the current request is a [fragment update](https://unpoly.com/up.replace),
-      # this returns the CSS selector of the page fragment that should be updated.
+      # Returns the CSS selector for a fragment that Unpoly will update in
+      # case of a successful response (200 status code).
       #
       # The Unpoly frontend will expect an HTML response containing an element
-      # that matches this selector. If no such element is found, an error is shown
-      # to the user.
+      # that matches this selector.
       #
-      # Server-side code is free to optimize its response by only returning HTML
+      # Server-side code is free to optimize its successful response by only returning HTML
       # that matches this selector.
       def target
         request.headers['X-Up-Target']
       end
 
       ##
-      # Tests whether the given CSS selector is targeted by the current fragment update.
+      # Returns the CSS selector for a fragment that Unpoly will update in
+      # case of an failed response. Server errors or validation failures are
+      # all examples for a failed response (non-200 status code).
+      #
+      # The Unpoly frontend will expect an HTML response containing an element
+      # that matches this selector.
+      #
+      # Server-side code is free to optimize its response by only returning HTML
+      # that matches this selector.
+      def fail_target
+        request.headers['X-Up-Fail-Target']
+      end
+
+      ##
+      # Returns whether the given CSS selector is targeted by the current fragment
+      # update in case of a successful response (200 status code).
       #
       # Note that the matching logic is very simplistic and does not actually know
       # how your page layout is structured. It will return `true` if
@@ -45,20 +59,35 @@ module Unpoly
       #
       # Always returns `true` if the current request is not an Unpoly fragment update.
       def target?(tested_target)
-        if up?
-          actual_target = target
-          if actual_target == tested_target
-            true
-          elsif actual_target == 'html'
-            true
-          elsif actual_target == 'body'
-            not ['head', 'title', 'meta'].include?(tested_target)
-          else
-            false
-          end
-        else
-          true
-        end
+        query_target(target, tested_target)
+      end
+
+      ##
+      # Returns whether the given CSS selector is targeted by the current fragment
+      # update in case of a failed response (non-200 status code).
+      #
+      # Note that the matching logic is very simplistic and does not actually know
+      # how your page layout is structured. It will return `true` if
+      # the tested selector and the requested CSS selector matches exactly, or if the
+      # requested selector is `body` or `html`.
+      #
+      # Always returns `true` if the current request is not an Unpoly fragment update.
+      def fail_target?(tested_target)
+        query_target(fail_target, tested_target)
+      end
+
+      ##
+      # Returns whether the given CSS selector is targeted by the current fragment
+      # update for either a success or a failed response.
+      #
+      # Note that the matching logic is very simplistic and does not actually know
+      # how your page layout is structured. It will return `true` if
+      # the tested selector and the requested CSS selector matches exactly, or if the
+      # requested selector is `body` or `html`.
+      #
+      # Always returns `true` if the current request is not an Unpoly fragment update.
+      def any_target?(tested_target)
+        target?(tested_target) || fail_target?(tested_target)
       end
 
       ##
@@ -97,6 +126,22 @@ module Unpoly
 
       def response
         @controller.response
+      end
+
+      def query_target(actual_target, tested_target)
+        if up?
+          if actual_target == tested_target
+            true
+          elsif actual_target == 'html'
+            true
+          elsif actual_target == 'body'
+            not ['head', 'title', 'meta'].include?(tested_target)
+          else
+            false
+          end
+        else
+          true
+        end
       end
 
     end
