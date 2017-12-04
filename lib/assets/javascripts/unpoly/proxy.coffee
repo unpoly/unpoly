@@ -94,7 +94,7 @@ up.proxy = (($) ->
     wrapMethods: ['PATCH', 'PUT', 'DELETE']
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
 
-  cache = u.newCache
+  cache = new up.Cache
     size: -> config.cacheSize
     expiry: -> config.cacheExpiry
     key: (request) -> up.Request.wrap(request).cacheKey()
