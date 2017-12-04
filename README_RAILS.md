@@ -38,7 +38,7 @@ This is useful when you skip rendering the `<head>` in an Unpoly request.
 
 ### Detecting an Unpoly form validation
 
-To test whether the current request is a [form validation](https://unpoly.com/up-validate):
+To test whether the current request is a [form validation](https://unpoly.com/input-up-validate):
 
     up.validate?
 
@@ -84,7 +84,9 @@ What you still need to do manually
 
 Unpoly lets you submit forms via AJAX by using the [`form[up-target]`](https://unpoly.com/form-up-target) selector or [`up.submit()`](https://unpoly.com/up.submit) function.
 
-For Unpoly to be able to detect a failed form submission, the form must be re-rendered with a non-200 HTTP status code. We recommend to use either 400 (bad request) or 422 (unprocessable entity).
+For Unpoly to be able to detect a failed form submission,
+the form must be re-rendered with a non-200 HTTP status code.
+We recommend to use either 400 (bad request) or 422 (unprocessable entity).
 
 To do so in Rails, pass a [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option):
 

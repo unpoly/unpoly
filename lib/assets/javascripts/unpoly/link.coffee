@@ -377,7 +377,7 @@ up.link = (($) ->
     preload: ($link, options) -> defaultPreload($link, options)
 
   ###*
-  If applied on a link, Follows this link via AJAX and replaces the
+  If applied on a link, follows this link via AJAX and replaces the
   current `<body>` element with the response's `<body>` element.
 
   To only update a fragment instead of the entire page, see
@@ -445,7 +445,7 @@ up.link = (($) ->
 
   `up-instant` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
 
-  @selector [up-instant]
+  @selector a[up-instant]
   @stable
   ###
 
@@ -455,8 +455,8 @@ up.link = (($) ->
   This is done by:
 
   - [Following the link through AJAX](/a-up-target) instead of a full page load
-  - [Preloading the link's destination URL](/up-preload)
-  - [Triggering the link on `mousedown`](/up-instant) instead of on `click`
+  - [Preloading the link's destination URL](/a-up-preload)
+  - [Triggering the link on `mousedown`](/a-up-instant) instead of on `click`
 
   Use `up-dash` like this:
 
@@ -466,7 +466,7 @@ up.link = (($) ->
 
       <a href="/users" up-target=".main" up-instant up-preload>User list</a>
 
-  @selector [up-dash]
+  @selector a[up-dash]
   @stable
   ###
   up.macro '[up-dash]', { priority: 'last' }, ($element) ->
@@ -485,11 +485,11 @@ up.link = (($) ->
     u.setMissingAttrs($element, newAttrs)
 
   ###*
-  Add an `up-expand` class to any element that contains a link
+  Add an `[up-expand]` attribute to any element that contains a link
   in order to enlarge the link's click area.
 
-  `up-expand` honors all the UJS behavior in expanded links
-  ([`up-target`](/a-up-target), [`up-instant`](/up-instant), [`up-preload`](/up-preload), etc.).
+  `[up-expand]` honors all the UJS behavior in expanded links
+  ([`a[up-target]`](/a-up-target), [`a[up-instant]`](/a-up-instant), [`a[up-preload]`](/a-up-preload), etc.).
 
   \#\#\# Example
 

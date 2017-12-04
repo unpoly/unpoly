@@ -92,13 +92,13 @@ module Unpoly
 
       ##
       # Returns whether the current form submission should be
-      # [validated](https://unpoly.com/up-validate) (and not be saved to the database).
+      # [validated](https://unpoly.com/input-up-validate) (and not be saved to the database).
       def validate?
         validate_name.present?
       end
 
       ##
-      # If the current form submission is a [validation](https://unpoly.com/up-validate),
+      # If the current form submission is a [validation](https://unpoly.com/input-up-validate),
       # this returns the name attribute of the form field that has triggered
       # the validation.
       def validate_name

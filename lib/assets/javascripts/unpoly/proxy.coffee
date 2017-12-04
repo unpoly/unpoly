@@ -22,7 +22,7 @@ use [`up.request()`](/up.request).
 \#\#\# Preloading links
 
 Unpoly also lets you speed up reaction times by [preloading
-links](/up-preload) when the user hovers over the click area (or puts the mouse/finger
+links](/a-up-preload) when the user hovers over the click area (or puts the mouse/finger
 down). This way the response will already be cached when
 the user releases the mouse/finger.
 
@@ -35,8 +35,8 @@ that appears during a long-running request.
 
 Other Unpoly modules contain even more tricks to outsmart network latency:
 
-- [Instantaneous feedback for links that are currently loading](/up-active)
-- [Follow links on `mousedown` instead of `click`](/up-instant)
+- [Instantaneous feedback for links that are currently loading](/a.up-active)
+- [Follow links on `mousedown` instead of `click`](/a-up-instant)
 
 @class up.proxy  
 ###
@@ -55,7 +55,7 @@ up.proxy = (($) ->
   ###*
   @property up.proxy.config
   @param {number} [config.preloadDelay=75]
-    The number of milliseconds to wait before [`[up-preload]`](/up-preload)
+    The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
     starts preloading.
   @param {number} [config.cacheSize=70]
     The maximum number of responses to cache.
@@ -624,14 +624,14 @@ up.proxy = (($) ->
   When the link is clicked later, the response will already be cached,
   making the interaction feel instant.   
 
-  @selector [up-preload]
+  @selector a[up-preload]
   @param [up-delay=75]
     The number of milliseconds to wait between hovering
     and preloading. Increasing this will lower the load in your server,
     but will also make the interaction feel less instant.
   @stable
   ###
-  up.on 'mouseover mousedown touchstart', '[up-preload]', (event, $element) ->
+  up.on 'mouseover mousedown touchstart', 'a[up-preload], [up-href][up-preload]', (event, $element) ->
     # Don't do anything if we are hovering over the child of a link.
     # The actual link will receive the event and bubble in a second.
     if !up.link.childClicked(event, $element) && up.link.isSafe($element)

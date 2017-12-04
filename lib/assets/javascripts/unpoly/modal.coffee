@@ -21,7 +21,7 @@ By default the dialog automatically closes
 This is useful to have the dialog interact with the page that
 opened it, e.g. by updating parts of a larger form.
 
-To disable this behavior, give the opening link an [`up-sticky`](/up-modal#up-sticky) attribute:
+To disable this behavior, give the opening link an [`up-sticky`](/a-up-modal#up-sticky) attribute:
 
 
 \#\#\# Customizing the dialog design
@@ -156,7 +156,7 @@ up.modal = (($) ->
 
   \#\#\# Example
 
-  Unpoly's [`[up-drawer]`](/up-drawer) is implemented as a modal flavor:
+  Unpoly's [`[up-drawer]`](/a-up-drawer) is implemented as a modal flavor:
 
       up.modal.flavors.drawer = {
         openAnimation: 'move-from-right',
@@ -665,7 +665,7 @@ up.modal = (($) ->
   and place the matching `.blog-list` tag will be placed in
   a modal dialog.
 
-  @selector [up-modal]
+  @selector a[up-modal]
   @param {string} up-modal
     The CSS selector that will be extracted from the response and displayed in a modal dialog.
   @param {string} [up-confirm]
@@ -767,7 +767,7 @@ up.modal = (($) ->
   and place the matching `.blog-list` tag will be placed in
   a modal drawer.
 
-  @selector [up-drawer]
+  @selector a[up-drawer]
   @param {string} up-drawer
     The CSS selector to extract from the response and open in the drawer.
   @param {string} [up-position='auto']
@@ -778,6 +778,8 @@ up.modal = (($) ->
     Otherwise it will slide in from the right.
   @stable
   ###
+  # Don't bind to 'a[up-drawer], [up-href][up-drawer]' since the [up-href] might
+  # be added later by an [up-expand].
   up.macro '[up-drawer]', ($link) ->
     target = $link.attr('up-drawer')
     $link.attr

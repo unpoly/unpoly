@@ -2,7 +2,7 @@
 Forms
 =====
   
-Unpoly comes with functionality to [submit](/form-up-target) and [validate](/up-validate)
+Unpoly comes with functionality to [submit](/form-up-target) and [validate](/input-up-validate)
 forms without leaving the current page. This means you can replace page fragments,
 open dialogs with sub-forms, etc. all without losing form state.
 
@@ -266,10 +266,10 @@ up.form = (($) ->
   ###*
   [Observes](/up.observe) a field or form and submits the form when a value changes.
 
-  The changed form field will be assigned a CSS class [`up-active`](/up-active)
+  Both the form and the changed field will be assigned a CSS class [`form-up-active`](/form-up-active)
   while the autosubmitted form is processing.
 
-  The unobtrusive variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
+  The unobtrusive variant of this is the [`up-autosubmit`](/form-up-autosubmit) attribute.
 
   @function up.autosubmit
   @param {string|Element|jQuery} selectorOrElement
@@ -300,15 +300,14 @@ up.form = (($) ->
     target
 
   ###*
-  Performs a server-side validation of a form and update the form
-  with validation messages.
+  Performs a server-side validation of a form field.
 
   `up.validate()` submits the given field's form with an additional `X-Up-Validate`
   HTTP header. Upon seeing this header, the server is expected to validate (but not save)
   the form submission and render a new copy of the form with validation errors.
 
-  The unobtrusive variant of this is the [`[up-validate]`](/up-validate) selector.
-  See the documentation for [`[up-validate]`](/up-validate) for more information
+  The unobtrusive variant of this is the [`input[up-validate]`](/input-up-validate) selector.
+  See the documentation for [`input[up-validate]`](/input-up-validate) for more information
   on how server-side validation works in Unpoly.
 
   \#\#\# Example
@@ -370,7 +369,7 @@ up.form = (($) ->
   ###*
   Shows or hides a target selector depending on the value.
 
-  See [`[up-switch]`](/up-switch) for more documentation and examples.
+  See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
 
   This function does not currently have a very useful API outside
   of our use for `up-switch`'s UJS behavior, that's why it's currently
@@ -445,7 +444,7 @@ up.form = (($) ->
   it will usually re-render an updated copy of the form with
   validation messages.
 
-  For Unpoly to be able to detect a failed form submission,,
+  For Unpoly to be able to detect a failed form submission,
   the form must be re-rendered with a non-200 HTTP status code.
   We recommend to use either 400 (bad request) or
   422 (unprocessable entity).
@@ -468,8 +467,8 @@ up.form = (($) ->
 
       end
 
-  Note that you can also use the
-  [`up-validate`](/up-validate) attribute to perform server-side
+  Note that you can also use
+  [`input[up-validate]`](/input-up-validate) to perform server-side
   validations while the user is completing fields.
 
   \#\#\# Redirects
@@ -485,7 +484,7 @@ up.form = (($) ->
 
   \#\#\# Giving feedback while the form is processing
 
-  The `<form>` element will be assigned a CSS class `up-active` while
+  The `<form>` element will be assigned a CSS class [`up-active`](/form.up-active) while
   the submission is loading.
 
   You can also [implement a spinner](/up.proxy/#spinners)
@@ -683,7 +682,7 @@ up.form = (($) ->
   In order to update the `department` field in addition to the `employee` field, you could say
   `up-validate="&, [name=employee]"`, or simply `up-validate="form"` to update the entire form.
 
-  @selector [up-validate]
+  @selector input[up-validate]
   @param {string} up-validate
     The CSS selector to update with the server response.
 
@@ -694,11 +693,11 @@ up.form = (($) ->
     validate($field)
 
   ###*
-  Show or hide part of a form if certain options are selected or boxes are checked.
+  Show or hide elements when a `<select>` or `<input>` has a given value.
 
-  \#\#\# Example
+  \#\#\# Example: Select options
 
-  The triggering input gets an `up-switch` attribute with a selector for the elements to show or hide:
+  The controlling form field gets an `up-switch` attribute with a selector for the elements to show or hide:
 
       <select name="advancedness" up-switch=".target">
         <option value="basic">Basic parts</option>
@@ -706,7 +705,8 @@ up.form = (($) ->
         <option value="very-advanced">Very advanced parts</option>
       </select>
 
-  The target elements get a space-separated list of select values for which they are shown or hidden:
+  The target elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`](/up-hide-for)
+  attributes to indicate for which values they should be shown or hidden:
 
       <div class="target" up-show-for="basic">
         only shown for advancedness = basic
@@ -720,7 +720,28 @@ up.form = (($) ->
         shown for advancedness = advanced or very-advanced
       </div>
 
-  For checkboxes you can also use the pseudo-values `:checked` or `:unchecked` like so:
+  \#\#\# Example: Text field
+
+  The controlling `<input>` gets an `up-switch` attribute with a selector for the elements to show or hide:
+
+      <input type="text" name="user" up-switch=".target">
+
+      <div class="target" up-show-for="alice">
+        only shown for user alice
+      </div>
+
+  You can also use the pseudo-values `:blank` to match an empty input value,
+  or `:present` to match a non-empty input value:
+
+      <input type="text" name="user" up-switch=".target">
+
+      <div class="target" up-show-for=":blank">
+        please enter a username
+      </div>
+
+  \#\#\# Example: Checkbox
+
+  For checkboxes you can match against the pseudo-values `:checked` or `:unchecked`:
 
       <input type="checkbox" name="flag" up-switch=".target">
 
@@ -728,55 +749,37 @@ up.form = (($) ->
         only shown when checkbox is checked
       </div>
 
-  You can also use the pseudo-values `:blank` to match an empty input value,
-  or `:present` to match a non-empty input value:
-
-      <input type="text" name="email" up-switch=".target">
-
-      <div class="target" up-show-for=":blank">
-        please enter an email address
+      <div class="target" up-show-for=":cunhecked">
+        only shown when checkbox is unchecked
       </div>
 
-  @selector [up-switch]
+  Of course you can also match against the `value` property of the checkbox element:
+
+      <input type="checkbox" name="flag" value="active" up-switch=".target">
+
+      <div class="target" up-show-for="active">
+        only shown when checkbox is checked
+      </div>
+
+  @selector input[up-switch]
+  @param {string} up-switch
+    A CSS selector for elements whose visibility depends on this field's value.
   @stable
   ###
-
-  ###*
-  Show this element only if a form field has a given value.
-
-  See [`[up-switch]`](/up-switch) for more documentation and examples.
-
-  @selector [up-show-for]
-  @param up-show-for
-    A space-separated list of values for which to show this element.
-  @stable
-  ###
-
-  ###*
-  Hide this element if a form field has a given value.
-
-  See [`[up-switch]`](/up-switch) for more documentation and examples.
-
-  @selector [up-hide-for]
-  @param up-hide-for
-    A space-separated list of values for which to hide this element.
-  @stable
-  ###
-
-  up.on 'change', '[up-switch]', (event, $field) ->
+  up.compiler '[up-switch]', ($field) ->
     switchTargets($field)
 
-  up.compiler '[up-switch]', ($field) ->
+  up.on 'change', '[up-switch]', (event, $field) ->
     switchTargets($field)
 
   up.compiler '[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', ($element) ->
     switchTarget($element)
 
-
   ###*
-  Observes this field or form and runs a callback when a value changes.
+  Observes this field and runs a callback when a value changes.
 
   This is useful for observing text fields while the user is typing.
+  If you want to submit the form after a change see [`input[up-autosubmit]`](/input-up-autosubmit).
 
   The programmatic variant of this is the [`up.observe()`](/up.observe) function.
 
@@ -789,7 +792,35 @@ up.form = (($) ->
         <input name="query" up-observe="showSuggestions(value)">
       </form>
 
-  The following would run a global `somethingChanged(value)` function
+  \#\#\# Callback context
+
+  The script given to `up-observe` runs with the following context:
+
+  | Name     | Type      | Description                           |
+  | -------- | --------- | ------------------------------------- |
+  | `value`  | `string`  | The current value of the field        |
+  | `this`   | `Element` | The form field                        |
+  | `$field` | `jQuery`  | The form field as a jQuery collection |
+
+  @selector input[up-observe]
+  @param {string} up-observe
+    The code to run when the field's value changes.
+  @param {string} up-delay
+    The number of miliseconds to wait after a change before the code is run.
+  @stable
+  ###
+
+  ###*
+  Observes this form and runs a callback when any field changes.
+
+  This is useful for observing text fields while the user is typing.
+  If you want to submit the form after a change see [`input[up-autosubmit]`](/input-up-autosubmit).
+
+  The programmatic variant of this is the [`up.observe()`](/up.observe) function.
+
+  \#\#\# Example
+
+  The would call a function `somethingChanged(value)`
   when any `<input>` within the `<form>` changes:
 
       <form up-observe="somethingChanged(value)">
@@ -807,9 +838,9 @@ up.form = (($) ->
   | `this`   | `Element` | The form field                        |
   | `$field` | `jQuery`  | The form field as a jQuery collection |
 
-  @selector [up-observe]
+  @selector form[up-observe]
   @param {string} up-observe
-    The code to run when the field's value changes.
+    The code to run when any field's value changes.
   @param {string} up-delay
     The number of miliseconds to wait after a change before the code is run.
   @stable
@@ -817,33 +848,48 @@ up.form = (($) ->
   up.compiler '[up-observe]', ($formOrField) -> observe($formOrField)
 
   ###*
-  [Observes](/up.observe) this field or form and submits the form when a value changes.
+  [Observes](/up.observe) this form field and submits the form when its value changes.
 
-  The form field will be assigned a CSS class [`up-active`](/up-active)
-  while the autosubmitted form is processing.
+  Both the form and the changed field will be assigned a CSS class [`up-active`](/form-up-active)
+  while the autosubmitted form is loading.
 
   The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
 
   \#\#\# Example
 
-  The following would submit the form when either query or checkbox was changed:
-
-      <form method="GET" action="/search" up-autosubmit>
-        <input type="search" name="query">
-        <input type="checkbox" name="archive"> Include archive
-      </form>
-
-  The following would submit the form only if the query was changed,
-  but not if the checkbox was changed:
+  The following would automatically submit the form when the query is changed:
 
       <form method="GET" action="/search">
         <input type="search" name="query" up-autosubmit>
         <input type="checkbox" name="archive"> Include archive
       </form>
 
-  @selector [up-autosubmit]
+  @selector input[up-autosubmit]
   @param {string} up-delay
-    The number of miliseconds to wait after the change before the form is submitted.
+    The number of miliseconds to wait after a change before the form is submitted.
+  @stable
+  ###
+
+  ###*
+  [Observes](/up.observe) this form and submits the form when *any* field changes.
+
+  Both the form and the field will be assigned a CSS class [`up-active`](/form-up-active)
+  while the autosubmitted form is loading.
+
+  The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
+
+  \#\#\# Example
+
+  This will submit the form when either query or checkbox was changed:
+
+      <form method="GET" action="/search" up-autosubmit>
+        <input type="search" name="query">
+        <input type="checkbox" name="archive"> Include archive
+      </form>
+
+  @selector form[up-autosubmit]
+  @param {string} up-delay
+    The number of miliseconds to wait after a change before the form is submitted.
   @stable
   ###
   up.compiler '[up-autosubmit]', ($formOrField) -> autosubmit($formOrField)

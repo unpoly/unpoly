@@ -103,7 +103,7 @@ To do so in [Ruby on Rails](http://rubyonrails.org/), pass a [`:status` option t
 
 \#\#\# Detecting live form validations
 
-When [validating a form](/up-validate), Unpoly will
+When [validating a form](/input-up-validate), Unpoly will
 send an additional HTTP header containing a CSS selector for the form that is
 being updated:
 

@@ -3,8 +3,8 @@ Navigation feedback
 ===================
 
 Unpoly automatically adds CSS classes to links while they are
-currently loading ([`.up-active`](/up-active)) or
-pointing to the current location ([`.up-current`](/up-current)).
+currently loading ([`.up-active`](/a.up-active)) or
+pointing to the current location ([`.up-current`](/a.up-current)).
 
 By styling these classes with CSS you can provide instant feedback to user interactions.
 This improves the perceived speed of your interface.
@@ -16,12 +16,12 @@ Let's say we have an navigation bar with two links, pointing to `/foo` and `/bar
     <a href="/foo" up-follow>Foo</a>
     <a href="/bar" up-follow>Bar</a>
 
-If the current URL is `/foo`, the first link is automatically marked with an [`up-current`](/up-current) class:
+If the current URL is `/foo`, the first link is automatically marked with an [`up-current`](/a.up-current) class:
 
     <a href="/foo" up-follow class="up-current">Foo</a>
     <a href="/bar" up-follow>Bar</a>
 
-When the user clicks on the `/bar` link, the link will receive the [`up-active`](/up-active) class while it is waiting
+When the user clicks on the `/bar` link, the link will receive the [`up-active`](/a.up-active) class while it is waiting
 for the server to respond:
 
     <a href="/foo" up-follow class="up-current">Foo</a>
@@ -44,7 +44,7 @@ up.feedback = (($) ->
 
   @property up.feedback.config
   @param {Array<string>} [config.currentClasses]
-    An array of classes to set on [links that point the current location](/up-current).
+    An array of classes to set on [links that point the current location](/a.up-current).
   @stable
   ###
   config = u.config
@@ -134,7 +134,7 @@ up.feedback = (($) ->
     $area
 
   ###*
-  Marks the given element as currently loading, by assigning the CSS class [`up-active`](/up-active).
+  Marks the given element as currently loading, by assigning the CSS class [`up-active`](/a.up-active).
 
   This happens automatically when following links or submitting forms through the Unpoly API.
   Use this function if you make custom network calls from your own JavaScript code.
@@ -179,12 +179,12 @@ up.feedback = (($) ->
       promise
 
   ###*
-  Links that are currently loading are assigned the `up-active`
-  class automatically. Style `.up-active` in your CSS to improve the
-  perceived responsiveness of your user interface.
+  Links that are currently [loading through Unpoly](/form-up-target)
+  are assigned the `up-active` class automatically.
+  Style `.up-active` in your CSS to improve the perceived responsiveness
+  of your user interface.
 
-  The `up-active` class will be removed as soon as another
-  page fragment is added or updated through Unpoly.
+  The `up-active` class will be removed when the link is done loading.
 
   \#\#\# Example
 
@@ -198,16 +198,47 @@ up.feedback = (($) ->
       <a href="/foo" up-follow class="up-active">Foo</a>
 
   Once the link destination has loaded and rendered, the `up-active` class
-  is removed and the [`up-current`](/up-current) class is added:
+  is removed and the [`up-current`](/a.up-current) class is added:
 
       <a href="/foo" up-follow class="up-current">Foo</a>
 
-  @selector .up-active
+  @selector a.up-active
   @stable
   ###
 
   ###*
-  Marks the given element as no longer loading, by removing the CSS class [`up-active`](/up-active).
+  Forms that are currently [loading through Unpoly](/a-up-target)
+  are assigned the `up-active` class automatically.
+  Style `.up-active` in your CSS to improve the perceived responsiveness
+  of your user interface.
+
+  The `up-active` class will be removed as soon as the response to the
+  form submission has been received.
+
+  \#\#\# Example
+
+  We have a form:
+
+      <form up-target=".foo">
+        <button type="submit">Submit</button>
+      </form>
+
+  The user clicks on the submit button. While the form is being submitted
+  and waiting for the server to respond, the form has the `up-active` class:
+
+      <form up-target=".foo" class="up-active">
+        <button type="submit">Submit</button>
+      </form>
+
+  Once the link destination has loaded and rendered, the `up-active` class
+  is removed.
+
+  @selector form.up-active
+  @stable
+  ###
+
+  ###*
+  Marks the given element as no longer loading, by removing the CSS class [`up-active`](/a.up-active).
 
   This happens automatically when network requests initiated by the Unpoly API have completed.
   Use this function if you make custom network calls from your own JavaScript code.
@@ -262,7 +293,7 @@ up.feedback = (($) ->
 
       <a href="/reports" up-alias="/reports/*">Reports</a>
 
-  @selector .up-current
+  @selector a.up-current
   @stable
   ###
   up.on 'up:fragment:inserted', ->

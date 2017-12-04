@@ -34,7 +34,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Links
 
-- Links with unsafe HTTP methods like `POST` are no longer marked as [`.up-current`](/up-current), even if their `[href]` matches the current URL.
+- Links with unsafe HTTP methods like `POST` are no longer marked as [`.up-current`](/a.up-current), even if their `[href]` matches the current URL.
 - New experimental function [`up.link.isSafe()`](/up.link.isSafe). It returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1) HTTP method like `GET`.
 
 ### Fragment updates
@@ -70,13 +70,13 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Modals
 
-- [`up.follow()`](/up.follow) will now open a modal if the given link has an [`[up-modal]`](/up-modal) attribute
+- [`up.follow()`](/up.follow) will now open a modal if the given link has an [`[up-modal]`](/a-up-modal) attribute
 - [`a[up-modal]`](/a-up-modal) links can now have an `[up-fail-target]` attribute to indicate which selector to replace for an non-200 response
 - Fix a bug where preloading an up-modal link would create an invisible .up-modal container in the DOM.
 
 ### Popups
 
-- [`up.follow()`](/up.follow) will now open a popup if the given link has [`[up-popup]`](/up-popup) attribute
+- [`up.follow()`](/up.follow) will now open a popup if the given link has [`[up-popup]`](/a-up-popup) attribute
 - up-popup links can now have an up-fail-target attribute to indicate which selector to replace for an non-200 response
 - Fix a bug where preloading an up-popup link would create an invisible .up-popup container in the DOM.
 - [`up.popup.attach()`](/up.popup.attach) now throws an error if neither `{ url }` nor `{ html }` options are given.
@@ -123,7 +123,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- [Validating forms](https://unpoly.com/up-validate) will no longer change the scroll position.
+- [Validating forms](https://unpoly.com/input-up-validate) will no longer change the scroll position.
 
 
 0.36.1
@@ -133,7 +133,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - [npm package](/install/npm) now expresses Unpoly's dependency on `jquery`.
 - [Modals](/up.modal) no longer close when clicking an element that exists outside the modal's DOM hierarchy.
-- Fix a bug on IE11 where modals would immediately close after opening if the opening link had an [`[up-instant]`](/up-instant) attribute and the destination page was already cached.
+- Fix a bug on IE11 where modals would immediately close after opening if the opening link had an [`[up-instant]`](/a-up-instant) attribute and the destination page was already cached.
 
 
 0.36.0
@@ -143,7 +143,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - The [`[up-observe]`](/up-observe) attribute can now be set on a `<form>` to run a function if any
   contained input field changes.
-- Fix a bug where [`[up-autosubmit]`](/up-autosubmit) didn't honor an `[up-delay]` attribute if
+- Fix a bug where [`[up-autosubmit]`](/form-up-autosubmit) didn't honor an `[up-delay]` attribute if
   used on a form.
 - When [submitting a form](/form-up-target), the `name` and `value` of the submit button is now included with the form parameters.
 - [Going back in history](/up.history) after a [fragment update](/up.link) now always restores elements the page layer, never a selector in [modals](/up.modal) or [popups](/up.popup).
@@ -200,7 +200,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 ### Compatible changes
 
 - Elements with [`up-show-for`](/up-show-for) and [`up-hide-for`](/up-hide-for) attributes
-  can now be inserted dynamically after its controlling [`up-switch`](/up-switch) field has been
+  can now be inserted dynamically after its controlling [`up-switch`](/input-up-switch) field has been
   compiled.
 - Unpoly no longer strips a trailing slash in the current URL during startup
 
@@ -280,7 +280,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - Fix a bug where [`up.reveal()`](/up.reveal) would not scroll to an element at the bottom edge of the visible area
   if [`up.layout.config.snap`](/up.layout.config) is set.
 - Several features have been promoted from experimental API to stable API:
-  - [`[up-drawer]`](/up-drawer)
+  - [`[up-drawer]`](/a-up-drawer)
   - [`up.syntax.data()`](/up.syntax.data)
   - [`up.extract()`](/up.extract)
 - When [targeting](/up-target) an URL with a #hash, the viewport will now scroll to the first row of an element
@@ -310,7 +310,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- Drawers are now a built-in modal flavor! Use the [`[up-drawer]`](/up-drawer) attribute to open page fragements
+- Drawers are now a built-in modal flavor! Use the [`[up-drawer]`](/a-up-drawer) attribute to open page fragements
   in a modal drawer that slides in from the edge of the screen.
 
 
@@ -430,7 +430,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - Fix a bug where absolutely positioned elements would be offset incorrectly during transitions
 - Fix a bug where inserted elements were not revealed within their viewport
-- When [validating](/up-validate) a form with transitions, transitions are no longer applied
+- When [validating](/input-up-validate) a form with transitions, transitions are no longer applied
 
 
 ### Breaking changes
@@ -467,7 +467,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - Tooltips now open and close much quicker.
 - Popups now open and close much quicker.
-- [`.up-current`](/up-current) now considers two URLs different if they have different query strings.
+- [`.up-current`](/a.up-current) now considers two URLs different if they have different query strings.
 
 
 
@@ -478,7 +478,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - Popups anchored to fixed elements are now positioned correctly if the document is scrolled
 - Tooltips can now be anchored to fixed elements
-- [`up-modal`](/up-modal) and [`up-popup`](/up-popup) now support an `up-method` modifier.
+- [`up-modal`](/a-up-modal) and [`up-popup`](/a-up-popup) now support an `up-method` modifier.
 
 
 
@@ -557,7 +557,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - When opening a modal while another modal is open, the first modal will be closed (with animation) before the second modal opens (with animation)
 - When opening a popup while another popup is open, the first popup will be closed (with animation) before the second popup opens (with animation)
 - User-defined macros are now always run *before* built-in macros.
-  This way you can set [`[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand) from your own macros.
+  This way you can set [`a[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand) from your own macros.
 
 
 0.24.1
@@ -588,7 +588,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - Calling [`up.motion.finish()`](/up.motion.finish) without arguments will now
   complete all animations and transitions on the screen.
 - Fix a bug where [`up.motion.finish()`](/up.motion.finish) would not cancel CSS transitions that were still in progress.
-- Fix a bug where [`up-active`](/up-active) classes where not removed from links when the destination
+- Fix a bug where [`up-active`](/a.up-active) classes where not removed from links when the destination
   was already [preloaded](/up.preload).
 
 
@@ -631,8 +631,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - Fix [`up.util.trim()`](/up.util.trim) not working properly.
 - [`up.morph()`](/up.morph) no longer throws an error if called without an `options` object
 - Custom transitions can now call [`up.morph()`](/up.morph) to refer to other transitions
-- Fix a bug where following a link to a [preloaded](/up-preload) destination would keep the
-  link marked with a [up-active](/up-active) class forever.
+- Fix a bug where following a link to a [preloaded](/a-up-preload) destination would keep the
+  link marked with a [up-active](/a.up-active) class forever.
 
 
 0.23.0
@@ -671,8 +671,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 ### Compatible changes
 
 - Fix a bug where using the `up-confirm` attribute would result in an infinite loop
-- Unpoly no longer displays confirmation dialogs when [preloading](/up-preload) a link that
-  has both [`up-preload`](/up-preload) and `up-confirm` attributes.
+- Unpoly no longer displays confirmation dialogs when [preloading](/a-up-preload) a link that
+  has both [`up-preload`](/a-up-preload) and `up-confirm` attributes.
 
 
 ### Breaking changes
@@ -790,7 +790,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - When used with the [Ruby on Rails unobtrusive scripting adapter](https://github.com/rails/jquery-ujs) (`rails_ujs.js`),
   now prevents duplicate form submission when Unpoly attributes are mixed with `data-method` attributes.
-- [`[up-instant]`](/up-instant) now works with modals and popups
+- [`a[up-instant]`](/a-up-instant) now works with modals and popups
 - [`[up-expand]`](/up-expand) now works with modals and popups
 
 ### Breaking changes
@@ -841,7 +841,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- New function [`up.autosubmit()`](/up.autosubmit) and selector [`[up-autosubmit]`](/up-autosubmit) to
+- New function [`up.autosubmit()`](/up.autosubmit) and selector [`[up-autosubmit]`](/form-up-autosubmit) to
   observe a form or field and submit the form when a value changes.
 - [`up.observe()`](/up.observe) and [`[up-observe]`](/up-observe) can now be applied
   to `<form>` tags. The callback is run when any field in the form changes.
@@ -879,7 +879,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 ### Compatible changes
 
 - Support for server-side live validation of forms
-  using the [`[up-validate]`](/up-validate) selector.
+  using the [`[up-validate]`](/input-up-validate) selector.
 - Support for [non-standard CSS selectors from jQuery](https://api.jquery.com/category/selectors/),
   such as [`:has`](http://api.jquery.com/has-selector/) or [`:visible`](http://api.jquery.com/visible-selector/).
 - Allow to refer to the current element as `&` in target selectors. This is useful
@@ -1093,7 +1093,7 @@ Refactored internals. No API changes.
 ### Compatible changes
 
 - Viewport scroll positions are saved when the URL changes and restored when the user hits the back/forward button
-- Allow to link to the previous page using [`[up-back]`](/up-back)
+- Allow to link to the previous page using [`[up-back]`](/a-up-back)
 - Allow to restore previous scroll state using [`[up-restore-scroll]`](/a-up-target)
 - Instead of saying `<tag up-something="true">` you can now simply say `<tag up-something>`.
 - Create this Changelog.
