@@ -857,6 +857,16 @@ describe 'up.proxy', ->
 
       it 'uses an existing cache entry for another request (used in case of redirects)'
 
+    describe 'up.proxy.remove', ->
+
+      it 'removes the cache entry for the given request'
+
+      it 'does nothing if the given request is not cached'
+
+      it 'does not crash when passed a request with FormData (bugfix)', ->
+        removal = -> up.proxy.remove(url: '/path', data: new FormData())
+        expect(removal).not.toThrowError()
+
     describe 'up.proxy.clear', ->
 
       it 'removes all cache entries'

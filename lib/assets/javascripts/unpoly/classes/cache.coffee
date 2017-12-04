@@ -91,8 +91,9 @@ class up.Cache
         value: value
 
   remove: (key) =>
-    storeKey = @normalizeStoreKey(key)
-    delete @store[storeKey]
+    if @isCachable(key)
+      storeKey = @normalizeStoreKey(key)
+      delete @store[storeKey]
 
   isFresh: (entry) =>
     millis = @expiryMillis()
