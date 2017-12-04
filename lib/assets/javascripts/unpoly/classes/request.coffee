@@ -3,6 +3,9 @@
 u = up.util
 
 ###*
+Instances of `up.Request` normalizes properties of an [`AJAX request`](/up.request)
+such as the requested URL, form parameters and HTTP method.
+
 @class up.Request
 ###
 class up.Request extends up.Record
@@ -10,7 +13,7 @@ class up.Request extends up.Record
   ###*
   The HTTP method for the request.
 
-  @property up.Request.prototype.method
+  @property up.Request#method
   @param {string} method
   @stable
   ###
@@ -18,7 +21,7 @@ class up.Request extends up.Record
   ###*
   The URL for the request.
 
-  @property up.Request.prototype.url
+  @property up.Request#url
   @param {string} url
   @stable
   ###
@@ -32,7 +35,7 @@ class up.Request extends up.Record
   2. An array of `{ name: 'param-name', value: 'param-value' }` objects
   3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
 
-  @property up.Request.prototype.data
+  @property up.Request#data
   @param {String} data
   @stable
   ###
@@ -40,7 +43,7 @@ class up.Request extends up.Record
   ###*
   The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
 
-  @property up.Request.prototype.target
+  @property up.Request#target
   @param {string} target
   @stable
   ###
@@ -48,7 +51,7 @@ class up.Request extends up.Record
   ###*
   The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
 
-  @property up.Request.prototype.failTarget
+  @property up.Request#failTarget
   @param {string} failTarget
   @stable
   ###
@@ -56,7 +59,7 @@ class up.Request extends up.Record
   ###*
   An object of additional HTTP headers.
 
-  @property up.Request.prototype.headers
+  @property up.Request#headers
   @param {object} headers
   @stable
   ###
@@ -67,7 +70,7 @@ class up.Request extends up.Record
   If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set,
   the timeout will not include the time spent waiting in the queue.
 
-  @property up.Request.prototype.timeout
+  @property up.Request#timeout
   @param {object|undefined} timeout
   @stable
   ###

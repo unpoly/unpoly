@@ -3,7 +3,7 @@
 u = up.util
 
 ###*
-The `up.Response` type describes the server response to an [`AJAX request`](/up.request).
+Instances of `up.Response` describe the server response to an [`AJAX request`](/up.request).
 
 \#\#\# Example
 
@@ -23,7 +23,7 @@ class up.Response extends up.Record
   However, after a redirect the server should signal a `GET` method using
   an [`X-Up-Method: GET` header](/up.protocol#redirect-detection).
 
-  @property up.Response.prototype.method
+  @property up.Response#method
   @param {string} method
   @stable
   ###
@@ -35,7 +35,7 @@ class up.Response extends up.Record
   However, after a redirect the server should signal a the new URL
   using an [`X-Up-Location: /new-url` header](/up.protocol#redirect-detection).
 
-  @property up.Response.prototype.url
+  @property up.Response#url
   @param {string} method
   @stable
   ###
@@ -43,7 +43,7 @@ class up.Response extends up.Record
   ###*
   The response body as a `string`.
 
-  @property up.Response.prototype.text
+  @property up.Response#text
   @param {string} text
   @stable
   ###
@@ -55,7 +55,7 @@ class up.Response extends up.Record
 
   A successful response will usually have a `200` or `201' status code.
 
-  @property up.Response.prototype.status
+  @property up.Response#status
   @param {number} status
   @stable
   ###
@@ -63,7 +63,7 @@ class up.Response extends up.Record
   ###*
   The [request](/up.Request) that triggered this response.
 
-  @property up.Response.prototype.request
+  @property up.Response#request
   @param {up.Request} request
   @experimental
   ###
@@ -72,7 +72,7 @@ class up.Response extends up.Record
   The [`XMLHttpRequest`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
   object that was used to create this response.
 
-  @property up.Response.prototype.xhr
+  @property up.Response#xhr
   @param {XMLHttpRequest} xhr
   @experimental
   ###
@@ -82,7 +82,7 @@ class up.Response extends up.Record
 
   If the server pushed no title via HTTP header, this will be `undefined`.
 
-  @property up.Response.prototype.title
+  @property up.Response#title
   @param {string} [title]
   @stable
   ###
@@ -103,7 +103,7 @@ class up.Response extends up.Record
   ###*
   Returns whether the server responded with a 2xx HTTP status.
 
-  @function up.Response.prototype.isSuccess
+  @function up.Response#isSuccess
   @return {boolean}
   @experimental
   ###
@@ -116,7 +116,7 @@ class up.Response extends up.Record
   This also returns `true` when the request encountered a [fatal error](/up.Request.prototype.isFatalError)
   like a timeout or loss of network connectivity.
 
-  @function up.Response.prototype.isSuccess
+  @function up.Response#isError
   @return {boolean}
   @experimental
   ###
@@ -130,7 +130,7 @@ class up.Response extends up.Record
   When the server produces an error message with an HTTP status like `500`,
   this is not considered a fatal error and `false` is returned.
 
-  @function up.Response.prototype.isSuccess
+  @function up.Response#isFatalError
   @return {boolean}
   @experimental
   ###
