@@ -263,8 +263,8 @@ up.protocol = (($) ->
     methodHeader: 'X-Up-Method'
     methodCookie: '_up_method'
     methodParam: '_method'
-    csrfParam: -> $('meta[name="csrf-param"]').val('content')
-    csrfToken: -> $('meta[name="csrf-token"]').val('content')
+    csrfParam: -> $('meta[name="csrf-param"]').attr('content')
+    csrfToken: -> $('meta[name="csrf-token"]').attr('content')
     csrfHeader: 'X-CSRF-Token'
 
   csrfParam = ->
