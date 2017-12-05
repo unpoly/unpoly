@@ -434,6 +434,9 @@ up.bus = (($) ->
   ###
   emitReset = ->
     emit('up:framework:reset', message: 'Resetting framework')
+    # Unfortunately we cannot reset up.protocol via event
+    # without introducing cycles in the asset load order
+    up.protocol.reset()
 
   ###*
   This event is [emitted](/up.emit) when Unpoly is [reset](/up.reset) during unit tests.

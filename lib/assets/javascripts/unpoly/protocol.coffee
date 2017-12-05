@@ -273,15 +273,16 @@ up.protocol = (($) ->
   csrfToken = ->
     u.evalOption(config.csrfToken)
 
-  ## Unfortunately we cannot offer reset without introducing cycles
+  ## Unfortunately we cannot offer reset via event without introducing cycles
   ## in the asset load order
-  #
-  # reset = ->
-  #   config.reset()
   #
   # up.on 'up:framework:reset', reset
 
+  reset = ->
+    config.reset()
+
   config: config
+  reset: reset
   locationFromXhr: locationFromXhr
   titleFromXhr: titleFromXhr
   methodFromXhr: methodFromXhr
