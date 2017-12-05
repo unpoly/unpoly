@@ -469,7 +469,7 @@ up.link = (($) ->
   @selector a[up-dash]
   @stable
   ###
-  up.macro '[up-dash]', { priority: 'last' }, ($element) ->
+  up.macro '[up-dash]', ($element) ->
     target = u.castedAttr($element, 'up-dash')
     $element.removeAttr('up-dash')
     newAttrs = {
@@ -531,7 +531,7 @@ up.link = (($) ->
     If omitted, the first contained link will be expanded.
   @stable
   ###
-  up.macro '[up-expand]', { priority: 'last' }, ($area) ->
+  up.macro '[up-expand]', ($area) ->
     $childLinks = $area.find('a, [up-href]')
     if selector = $area.attr('up-expand')
       $childLinks = $childLinks.filter(selector)

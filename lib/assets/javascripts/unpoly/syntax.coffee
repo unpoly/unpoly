@@ -20,12 +20,22 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
 @class up.syntax
 ###
 up.syntax = (($) ->
-  
+
   u = up.util
 
   DESTRUCTIBLE_CLASS = 'up-destructible'
   DESTRUCTORS_KEY = 'up-destructors'
 
+  SYSTEM_MACRO_PRIORITIES = {
+    '[up-back]': -100        # sets [up-href] to previous URL
+    '[up-drawer]': -200      # sets [up-modal] and makes link followable
+    '[up-dash]': -200        # sets [up-href] unless already set, also other [up-*] attributes
+    '[up-expand]': -300      # distributes [up-*] attributes to parents
+    '[data-method]': -400,   # converts [data-method] to [up-method] only if link has followable [up-*] attributes
+    '[data-confirm]': -400,  # converts [data-conform] to [up-confirm] only if link has followable [up-*] attributes
+  }
+
+  isBooting = true
   compilers = []
   macros = []
 
@@ -179,7 +189,7 @@ up.syntax = (($) ->
   @param {string} selector
     The selector to match.
   @param {number} [options.priority=0]
-    The priority of this compilers.
+    The priority of this compiler.
     Compilers with a higher priority are run first.
     Two compilers with the same priority are run in the order they were registered.
   @param {boolean} [options.batch=false]
@@ -207,8 +217,10 @@ up.syntax = (($) ->
     The function may also return an array of destructor functions.
   @stable
   ###
-  compiler = (args...) ->
-    insertCompiler(compilers, args...)
+  compiler = (selector, args...) ->
+    callback = args.pop()
+    options = u.options(args[0])
+    insertCompiler(compilers, selector, options, callback)
 
   ###*
   Registers a [compiler](/up.compiler) that is run before all other compilers.
@@ -246,38 +258,43 @@ up.syntax = (($) ->
     The selector to match.
   @param {Object} options
     See options for [`up.compiler()`](/up.compiler).
-  @param {Function($element, data)} compiler
+  @param {Function($element, data)} macro
     The function to call when a matching element is inserted.
     See [`up.compiler()`](/up.compiler) for details.
   @stable
   ###
-  macro = (args...) ->
-    insertCompiler(macros, args...)
-
-  buildCompiler = (selector, args...) ->
+  macro = (selector, args...) ->
     callback = args.pop()
-    options = u.options(args[0], priority: 0)
-    if options.priority == 'first'
-      options.priority = Number.POSITIVE_INFINITY
-    else if options.priority == 'last'
-      options.priority = Number.NEGATIVE_INFINITY
+    options = u.options(args[0])
+    if isBooting
+      options.priority = detectSystemMacroPriority(selector) ||
+        up.fail('Unregistered priority for system macro %o', selector)
+    insertCompiler(macros, selector, options, callback)
+
+  detectSystemMacroPriority = (fullMacroSelector) ->
+    for substr, priority of SYSTEM_MACRO_PRIORITIES
+      if fullMacroSelector.indexOf(substr) >= 0
+        return priority
+
+  buildCompiler = (selector, options, callback) ->
     selector: selector
     callback: callback
-    priority: options.priority
+    isSystem: isBooting
+    priority: options.priority || 0
     batch: options.batch
     keep: options.keep
 
-  insertCompiler = (queue, args...) ->
+  insertCompiler = (queue, selector, options, callback) ->
     # Silently discard any compilers that are registered on unsupported browsers
     return unless up.browser.isSupported()
-    newCompiler = buildCompiler(args...)
+    newCompiler = buildCompiler(selector, options, callback)
     index = 0
     while (oldCompiler = queue[index]) && (oldCompiler.priority >= newCompiler.priority)
       index += 1
     queue.splice(index, 0, newCompiler)
 
   applyCompiler = (compiler, $jqueryElement, nativeElement) ->
-    up.puts ("Compiling '%s' on %o" unless compiler.isDefault), compiler.selector, nativeElement
+    up.puts ("Compiling '%s' on %o" unless compiler.isSystem), compiler.selector, nativeElement
     if compiler.keep
       value = if u.isString(compiler.keep) then compiler.keep else ''
       $jqueryElement.attr('up-keep', value)
@@ -334,7 +351,7 @@ up.syntax = (($) ->
               $match.closest(skipSubtree).length == 0
 
           if $matches.length
-            up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isDefault), compiler.selector, $matches.length, ->
+            up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isSystem), compiler.selector, $matches.length, ->
               if compiler.batch
                 applyCompiler(compiler, $matches, $matches.get())
               else
@@ -443,28 +460,17 @@ up.syntax = (($) ->
       {}
 
   ###*
-  Makes a snapshot of the currently registered event listeners,
-  to later be restored through `reset`.
-  
-  @internal
-  ###
-  snapshot = ->
-    setDefault = (compiler) -> compiler.isDefault = true
-    u.each(compilers, setDefault)
-    u.each(macros, setDefault)
-
-  ###*
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
   
   @internal
   ###
   reset = ->
-    isDefault = (compiler) -> compiler.isDefault
-    compilers = u.select(compilers, isDefault)
-    macros = u.select(macros, isDefault)
+    isSystem = (compiler) -> compiler.isSystem
+    compilers = u.select(compilers, isSystem)
+    macros = u.select(macros, isSystem)
 
-  up.on 'up:framework:booted', snapshot
+  up.on 'up:framework:booted', -> isBooting = false
   up.on 'up:framework:reset', reset
 
   compiler: compiler
