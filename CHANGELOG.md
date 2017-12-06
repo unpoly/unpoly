@@ -6,8 +6,8 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.50.0
+------
 
 This is a major update with some breaking changes. Expect a few more updates like this as we move closer to our 1.0 release in 2018.
 
