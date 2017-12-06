@@ -778,9 +778,7 @@ up.modal = (($) ->
     Otherwise it will slide in from the right.
   @stable
   ###
-  # Don't bind to 'a[up-drawer], [up-href][up-drawer]' since the [up-href] might
-  # be added later by an [up-expand].
-  up.macro '[up-drawer]', ($link) ->
+  up.macro 'a[up-drawer], [up-href][up-drawer]', ($link) ->
     target = $link.attr('up-drawer')
     $link.attr
       'up-modal': target

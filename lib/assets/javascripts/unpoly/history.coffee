@@ -245,9 +245,7 @@ up.history = (($) ->
   @selector a[up-back]
   @stable
   ###
-  # Don't bind to 'a[up-back], [up-href][up-back]' since the [up-href] might
-  # be added later by an [up-expand].
-  up.macro '[up-back]', ($link) ->
+  up.macro 'a[up-back], [up-href][up-back]', ($link) ->
     if u.isPresent(previousUrl)
       u.setMissingAttrs $link,
         'up-href': previousUrl,
