@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.37.0",
+    version: "0.50.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -23,7 +23,7 @@ Utility functions
 =================
   
 Unpoly comes with a number of utility functions
-that might save you from loading something like [Underscore.js](http://underscorejs.org/).
+that might save you from loading something like [Lodash](https://lodash.com/).
 
 @class up.util
  */
@@ -41,7 +41,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, $submittingButton, ANIMATION_DEFERRED_KEY, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, any, appendRequestData, assign, assignPolyfill, cache, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, findWithSelf, finishCssAnimate, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isDeferred, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isHash, isJQuery, isMissing, isNull, isNumber, isObject, isPresent, isPromise, isResolvedPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, multiSelector, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, openTagPattern, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectedPromise, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, resolvableWhen, resolvedDeferred, resolvedPromise, scrollbarWidth, select, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvableDeferred, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, methodAllowsPayload, microtask, multiSelector, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, openTagPattern, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -88,22 +88,22 @@ that might save you from loading something like [Underscore.js](http://underscor
     By default hashes are ignored, search queries are included.
     
     @function up.util.normalizeUrl
-    @param {Boolean} [options.hash=false]
+    @param {boolean} [options.hash=false]
       Whether to include an `#hash` anchor in the normalized URL
-    @param {Boolean} [options.search=true]
+    @param {boolean} [options.search=true]
       Whether to include a `?query` string in the normalized URL
-    @param {Boolean} [options.stripTrailingSlash=false]
+    @param {boolean} [options.stripTrailingSlash=false]
       Whether to strip a trailing slash from the pathname
     @internal
      */
     normalizeUrl = function(urlOrAnchor, options) {
-      var anchor, normalized, pathname;
-      anchor = parseUrl(urlOrAnchor);
-      normalized = anchor.protocol + "//" + anchor.hostname;
-      if (!isStandardPort(anchor.protocol, anchor.port)) {
-        normalized += ":" + anchor.port;
+      var normalized, parts, pathname;
+      parts = parseUrl(urlOrAnchor);
+      normalized = parts.protocol + "//" + parts.hostname;
+      if (!isStandardPort(parts.protocol, parts.port)) {
+        normalized += ":" + parts.port;
       }
-      pathname = anchor.pathname;
+      pathname = parts.pathname;
       if (pathname[0] !== '/') {
         pathname = "/" + pathname;
       }
@@ -112,12 +112,18 @@ that might save you from loading something like [Underscore.js](http://underscor
       }
       normalized += pathname;
       if ((options != null ? options.hash : void 0) === true) {
-        normalized += anchor.hash;
+        normalized += parts.hash;
       }
       if ((options != null ? options.search : void 0) !== false) {
-        normalized += anchor.search;
+        normalized += parts.search;
       }
       return normalized;
+    };
+    isCrossDomain = function(targetUrl) {
+      var currentUrl;
+      currentUrl = parseUrl(location.href);
+      targetUrl = parseUrl(targetUrl);
+      return currentUrl.protocol !== targetUrl.protocol || currentUrl.host !== targetUrl.host;
     };
 
     /**
@@ -135,16 +141,15 @@ that might save you from loading something like [Underscore.js](http://underscor
      */
     parseUrl = function(urlOrAnchor) {
       var anchor;
-      anchor = null;
-      if (isString(urlOrAnchor)) {
-        anchor = $('<a>').attr({
-          href: urlOrAnchor
-        }).get(0);
-        if (isBlank(anchor.hostname)) {
-          anchor.href = anchor.href;
-        }
-      } else {
-        anchor = unJQuery(urlOrAnchor);
+      urlOrAnchor = unJQuery(urlOrAnchor);
+      if (urlOrAnchor.pathname) {
+        return urlOrAnchor;
+      }
+      anchor = $('<a>').attr({
+        href: urlOrAnchor
+      }).get(0);
+      if (isBlank(anchor.hostname)) {
+        anchor.href = anchor.href;
       }
       return anchor;
     };
@@ -159,6 +164,14 @@ that might save you from loading something like [Underscore.js](http://underscor
       } else {
         return 'GET';
       }
+    };
+
+    /**
+    @function up.util.methodAllowsPayload
+    @internal
+     */
+    methodAllowsPayload = function(method) {
+      return method !== 'GET' && method !== 'HEAD';
     };
 
     /**
@@ -242,7 +255,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     - The element's tag names
     
     @function up.util.selectorForElement
-    @param {String|Element|jQuery}
+    @param {string|Element|jQuery}
       The element for which to create a selector.
     @experimental
      */
@@ -316,9 +329,9 @@ that might save you from loading something like [Underscore.js](http://underscor
     Returns a new string with whitespace removed from the beginning
     and end of the given string.
     
-    @param {String}
+    @param {string}
       A string that might have whitespace at the beginning and end.
-    @return {String}
+    @return {string}
       The trimmed string.
     @stable
      */
@@ -329,8 +342,8 @@ that might save you from loading something like [Underscore.js](http://underscor
     of the given array.
     
     @function up.util.each
-    @param {Array} array
-    @param {Function<Object, Number>} block
+    @param {Array<T>} array
+    @param {Function(T, number)} block
       A function that will be called with each element and (optional) iteration index.
     @stable
      */
@@ -348,8 +361,8 @@ that might save you from loading something like [Underscore.js](http://underscor
     Translate all items in an array to new array of items.
     
     @function up.util.map
-    @param {Array} array
-    @param {Function<Object, Number>} block
+    @param {Array<T>} array
+    @param {Function(T, number): any} block
       A function that will be called with each element and (optional) iteration index.
     @return {Array}
       A new array containing the result of each function call.
@@ -361,7 +374,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     Calls the given function for the given number of times.
     
     @function up.util.times
-    @param {Number} count
+    @param {number} count
     @param {Function} block
     @stable
      */
@@ -379,7 +392,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isNull
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isNull = function(object) {
@@ -391,11 +404,11 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isUndefined
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isUndefined = function(object) {
-      return object === void(0);
+      return object === void 0;
     };
 
     /**
@@ -403,7 +416,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isDefined
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isDefined = function(object) {
@@ -419,7 +432,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isMissing
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isMissing = function(object) {
@@ -435,7 +448,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isGiven
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isGiven = function(object) {
@@ -457,7 +470,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isBlank
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isBlank = function(object) {
@@ -470,9 +483,9 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.presence
     @param object
-    @param {Function<T>} [tester=up.util.isPresent]
+    @param {Function(T): boolean} [tester=up.util.isPresent]
       The function that will be used to test whether the argument is present.
-    @return {T|Undefined}
+    @return {T|undefined}
     @stable
      */
     presence = function(object, tester) {
@@ -491,7 +504,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isPresent
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isPresent = function(object) {
@@ -503,7 +516,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isFunction
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isFunction = function(object) {
@@ -515,11 +528,11 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isString
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isString = function(object) {
-      return typeof object === 'string';
+      return typeof object === 'string' || object instanceof String;
     };
 
     /**
@@ -530,38 +543,42 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isNumber
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isNumber = function(object) {
-      return typeof object === 'number';
+      return typeof object === 'number' || object instanceof Number;
     };
 
     /**
-    Returns whether the given argument is an object, but not a function.
+    Returns whether the given argument is an options hash,
     
-    @function up.util.isHash
+    Differently from [`up.util.isObject()`], this returns false for
+    functions, jQuery collections, promises, `FormData` instances and arrays.
+    
+    @function up.util.isOptions
     @param object
-    @return {Boolean}
-    @stable
+    @return {boolean}
+    @internal
      */
-    isHash = function(object) {
-      return typeof object === 'object' && !!object;
+    isOptions = function(object) {
+      return typeof object === 'object' && !isNull(object) && !isJQuery(object) && !isPromise(object) && !isFormData(object) && !isArray(object);
     };
 
     /**
     Returns whether the given argument is an object.
     
     This also returns `true` for functions, which may behave like objects in JavaScript.
-    For an alternative that returns `false` for functions, see [`up.util.isHash()`](/up.util.isHash).
     
     @function up.util.isObject
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isObject = function(object) {
-      return isHash(object) || (typeof object === 'function');
+      var typeOfResult;
+      typeOfResult = typeof object;
+      return (typeOfResult === 'object' && !isNull(object)) || typeOfResult === 'function';
     };
 
     /**
@@ -569,7 +586,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isElement
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isElement = function(object) {
@@ -581,7 +598,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isJQuery
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isJQuery = function(object) {
@@ -593,7 +610,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isPromise
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isPromise = function(object) {
@@ -601,28 +618,14 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
-    Returns whether the given argument is an object with `then` and `resolve` methods.
-    
-    @function up.util.isDeferred
-    @param object
-    @return {Boolean}
-    @stable
-     */
-    isDeferred = function(object) {
-      return isPromise(object) && isFunction(object.resolve);
-    };
-
-    /**
     Returns whether the given argument is an array.
     
     @function up.util.isArray
     @param object
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
-    isArray = Array.isArray || function(object) {
-      return Object.prototype.toString.call(object) === '[object Array]';
-    };
+    isArray = Array.isArray;
 
     /**
     Returns whether the given argument is a `FormData` instance.
@@ -631,7 +634,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.isFormData
     @param object
-    @return {Boolean}
+    @return {boolean}
     @internal
      */
     isFormData = function(object) {
@@ -653,9 +656,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
-    Shallow-copies the given array or object into a new array or object.
-    
-    Returns the new array or object.
+    Returns a shallow copy of the given array or object.
     
     @function up.util.copy
     @param {Object|Array} object
@@ -664,10 +665,13 @@ that might save you from loading something like [Underscore.js](http://underscor
      */
     copy = function(object) {
       if (isArray(object)) {
-        return object.slice();
-      } else if (isHash(object)) {
-        return assign({}, object);
+        object = object.slice();
+      } else if (isObject(object) && !isFunction(object)) {
+        object = assign({}, object);
+      } else {
+        up.fail('Cannot copy %o', object);
       }
+      return object;
     };
 
     /**
@@ -754,8 +758,8 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.detect
     @param {Array<T>} array
-    @param {Function<T>} tester
-    @return {T|Undefined}
+    @param {Function(T): boolean} tester
+    @return {T|undefined}
     @stable
      */
     detect = function(array, tester) {
@@ -777,8 +781,8 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.any
     @param {Array<T>} array
-    @param {Function<T>} tester
-    @return {Boolean}
+    @param {Function(T): boolean} tester
+    @return {boolean}
     @experimental
      */
     any = function(array, tester) {
@@ -800,8 +804,8 @@ that might save you from loading something like [Underscore.js](http://underscor
     
     @function up.util.all
     @param {Array<T>} array
-    @param {Function<T>} tester
-    @return {Boolean}
+    @param {Function(T): boolean} tester
+    @return {boolean}
     @experimental
      */
     all = function(array, tester) {
@@ -922,23 +926,17 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
-    Waits for the given number of milliseconds, the nruns the given callback.
+    Waits for the given number of milliseconds, the runs the given callback.
     
-    If the number of milliseconds is zero, the callback is run in the current execution frame.
-    See [`up.util.nextFrame()`](/up.util.nextFrame) for running a function in the next executation frame.
+    Instead of `up.util.setTimer(0, fn)` you can also use [`up.util.nextFrame(fn)`](/up.util.nextFrame).
     
     @function up.util.setTimer
-    @param {Number} millis
+    @param {number} millis
     @param {Function} callback
-    @experimental
+    @stable
      */
     setTimer = function(millis, callback) {
-      if (millis > 0) {
-        return setTimeout(callback, millis);
-      } else {
-        callback();
-        return void 0;
-      }
+      return setTimeout(callback, millis);
     };
 
     /**
@@ -951,6 +949,17 @@ that might save you from loading something like [Underscore.js](http://underscor
      */
     nextFrame = function(block) {
       return setTimeout(block, 0);
+    };
+
+    /**
+    Queue a function to be executed in the next microtask.
+    
+    @function up.util.queueMicrotask
+    @param {Function} task
+    @internal
+     */
+    microtask = function(task) {
+      return Promise.resolve().then(task);
     };
 
     /**
@@ -1107,107 +1116,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       element = unJQuery(element);
       return element.offsetHeight;
     };
-
-    /**
-    Animates the given element's CSS properties using CSS transitions.
-    
-    If the element is already being animated, the previous animation
-    will instantly jump to its last frame before the new animation begins. 
-    
-    To improve performance, the element will be forced into compositing for
-    the duration of the animation.
-    
-    @function up.util.cssAnimate
-    @param {Element|jQuery|String} elementOrSelector
-      The element to animate.
-    @param {Object} lastFrame
-      The CSS properties that should be transitioned to.
-    @param {Number} [options.duration=300]
-      The duration of the animation, in milliseconds.
-    @param {Number} [options.delay=0]
-      The delay before the animation starts, in milliseconds.
-    @param {String} [options.easing='ease']
-      The timing function that controls the animation's acceleration.
-      See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
-      for a list of pre-defined timing functions.
-    @return {Deferred}
-      A promise for the animation's end.
-    @internal
-     */
-    cssAnimate = function(elementOrSelector, lastFrame, opts) {
-      var $element, deferred, oldTransition, onTransitionEnd, transition, transitionProperties, withoutCompositing;
-      $element = $(elementOrSelector);
-      opts = options(opts, {
-        duration: 300,
-        delay: 0,
-        easing: 'ease'
-      });
-      if (opts.duration === 0) {
-        $element.css(lastFrame);
-        return resolvedDeferred();
-      }
-      deferred = $.Deferred();
-      transitionProperties = Object.keys(lastFrame);
-      transition = {
-        'transition-property': transitionProperties.join(', '),
-        'transition-duration': opts.duration + "ms",
-        'transition-delay': opts.delay + "ms",
-        'transition-timing-function': opts.easing
-      };
-      oldTransition = $element.css(Object.keys(transition));
-      onTransitionEnd = function(event) {
-        var completedProperty;
-        completedProperty = event.originalEvent.propertyName;
-        if (contains(transitionProperties, completedProperty)) {
-          return deferred.resolve();
-        }
-      };
-      $element.on('transitionend', onTransitionEnd);
-      deferred.then(function() {
-        var hadTransitionBefore;
-        $element.removeClass('up-animating');
-        $element.off('transitionend', onTransitionEnd);
-        $element.removeData(ANIMATION_DEFERRED_KEY);
-        withoutCompositing();
-        $element.css({
-          'transition': 'none'
-        });
-        hadTransitionBefore = !(oldTransition['transition-property'] === 'none' || (oldTransition['transition-property'] === 'all' && oldTransition['transition-duration'][0] === '0'));
-        if (hadTransitionBefore) {
-          forceRepaint($element);
-          return $element.css(oldTransition);
-        }
-      });
-      $element.addClass('up-animating');
-      withoutCompositing = forceCompositing($element);
-      $element.css(transition);
-      $element.data(ANIMATION_DEFERRED_KEY, deferred);
-      $element.css(lastFrame);
-      return deferred;
-    };
-    ANIMATION_DEFERRED_KEY = 'up-animation-deferred';
-
-    /**
-    Completes the animation for  the given element by jumping
-    to the last frame instantly. All callbacks chained to
-    the original animation's promise will be called.
-    
-    Does nothing if the given element is not currently animating.
-    
-    Also see [`up.motion.finish()`](/up.motion.finish).
-    
-    @function up.util.finishCssAnimate
-    @param {Element|jQuery|String} elementOrSelector
-    @internal
-     */
-    finishCssAnimate = function(elementOrSelector) {
-      return $(elementOrSelector).each(function() {
-        var existingAnimation;
-        if (existingAnimation = pluckData(this, ANIMATION_DEFERRED_KEY)) {
-          return existingAnimation.resolve();
-        }
-      });
-    };
+    cssAnimate = function(elementOrSelector, lastFrame, opts) {};
 
     /**
     @internal
@@ -1301,11 +1210,24 @@ that might save you from loading something like [Underscore.js](http://underscor
     /**
     Looks for the given selector in the element and its descendants.
     
-    @function up.util.findWithSelf
+    @function up.util.selectInSubtree
     @internal
      */
-    findWithSelf = function($element, selector) {
+    selectInSubtree = function($element, selector) {
       return $element.find(selector).addBack(selector);
+    };
+
+    /**
+    Looks for the given selector in the element, its descendants and its ancestors.
+    
+    @function up.util.selectInDynasty
+    @internal
+     */
+    selectInDynasty = function($element, selector) {
+      var $ancestors, $subtree;
+      $subtree = selectInSubtree($element, selector);
+      $ancestors = $element.parents(selector);
+      return $subtree.add($ancestors);
     };
 
     /**
@@ -1322,7 +1244,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     Returns whether the given array or string contains the given element or substring.
     
     @function up.util.contains
-    @param {Array|String} arrayOrString
+    @param {Array|string} arrayOrString
     @param elementOrSubstring
     @stable
      */
@@ -1410,94 +1332,13 @@ that might save you from loading something like [Underscore.js](http://underscor
     };
 
     /**
-    Returns a [Deferred object](https://api.jquery.com/category/deferred-object/) that is
-    already resolved.
-    
-    @function up.util.resolvedDeferred
-    @param {Array<Object>} [args...]
-      The resolution values that will be passed to callbacks
-    @return {Deferred}
-    @stable
-     */
-    resolvedDeferred = function() {
-      var args, deferred;
-      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      deferred = $.Deferred();
-      deferred.resolve.apply(deferred, args);
-      return deferred;
-    };
-
-    /**
-    Returns a promise that is already resolved.
-    
-    @function up.util.resolvedPromise
-    @param {Array<Object>} [args...]
-      The resolution values that will be passed to callbacks
-    @return {Promise}
-    @stable
-     */
-    resolvedPromise = function() {
-      var args;
-      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      return resolvedDeferred.apply(null, args).promise();
-    };
-
-    /**
-    Returns a promise that is already rejected.
-    
-    @function up.util.rejectedPromise
-    @param {Array<Object>} [args...]
-      The rejection values that will be passed to callbacks
-    @return {Promise}
-    @stable
-     */
-    rejectedPromise = function() {
-      var args, deferred;
-      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      deferred = $.Deferred();
-      deferred.reject.apply(deferred, args);
-      return deferred.promise();
-    };
-
-    /**
-    Returns whether the given argument is a resolved jQuery promise.
-    
-    @return {Boolean}
-    @internal
-     */
-    isResolvedPromise = function(promise) {
-      return isPromise(promise) && (typeof promise.state === "function" ? promise.state() : void 0) === 'resolved';
-    };
-
-    /**
-    Returns whether the given argument is a resolved jQuery promise.
-    
-    @return {Boolean}
-    @internal
-     */
-    isResolvedPromise = function(promise) {
-      return isPromise(promise) && (typeof promise.state === "function" ? promise.state() : void 0) === 'resolved';
-    };
-
-    /**
-    Returns a [Deferred object](https://api.jquery.com/category/deferred-object/) that will never be resolved.
-    
-    @function up.util.unresolvableDeferred
-    @return {Deferred}
-    @experimental
-     */
-    unresolvableDeferred = function() {
-      return $.Deferred();
-    };
-
-    /**
     Returns a promise that will never be resolved.
     
     @function up.util.unresolvablePromise
     @experimental
      */
     unresolvablePromise = function() {
-      return unresolvableDeferred().promise();
+      return new Promise(noop);
     };
 
     /**
@@ -1508,28 +1349,6 @@ that might save you from loading something like [Underscore.js](http://underscor
      */
     nullJQuery = function() {
       return $();
-    };
-
-    /**
-    Returns a new promise that resolves once all promises in arguments resolve.
-    
-    Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
-    the combined promise will have a `resolve` method. This `resolve` method
-    will resolve all the wrapped promises.
-    
-    @function up.util.resolvableWhen
-    @internal
-     */
-    resolvableWhen = function() {
-      var deferreds, joined;
-      deferreds = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      joined = $.when.apply($, [resolvedDeferred()].concat(slice.call(deferreds)));
-      joined.resolve = memoize(function() {
-        return each(deferreds, function(deferred) {
-          return deferred.resolve();
-        });
-      });
-      return joined;
     };
 
     /**
@@ -1607,7 +1426,7 @@ that might save you from loading something like [Underscore.js](http://underscor
         }
         return $result;
       };
-      obj.findWithSelf = function($start) {
+      obj.selectInSubtree = function($start) {
         var $matches;
         $matches = obj.find($start);
         if (obj.doesMatch($start)) {
@@ -1654,153 +1473,6 @@ that might save you from loading something like [Underscore.js](http://underscor
       } else {
         return value;
       }
-    };
-
-    /**
-    @function up.util.cache
-    @param {Number|Function} [config.size]
-      Maximum number of cache entries.
-      Set to `undefined` to not limit the cache size.
-    @param {Number|Function} [config.expiry]
-      The number of milliseconds after which a cache entry
-      will be discarded.
-    @param {String} [config.log]
-      A prefix for log entries printed by this cache object.
-    @param {Function<Object>} [config.key]
-      A function that takes an argument and returns a `String` key
-      for storage. If omitted, `toString()` is called on the argument.
-    @internal
-     */
-    cache = function(config) {
-      var alias, clear, expiryMillis, get, isEnabled, isFresh, keys, log, makeRoomForAnotherKey, maxKeys, normalizeStoreKey, set, store, timestamp;
-      if (config == null) {
-        config = {};
-      }
-      store = void 0;
-      maxKeys = function() {
-        return evalOption(config.size);
-      };
-      expiryMillis = function() {
-        return evalOption(config.expiry);
-      };
-      normalizeStoreKey = function(key) {
-        if (config.key) {
-          return config.key(key);
-        } else {
-          return key.toString();
-        }
-      };
-      isEnabled = function() {
-        return maxKeys() !== 0 && expiryMillis() !== 0;
-      };
-      clear = function() {
-        return store = {};
-      };
-      clear();
-      log = function() {
-        var args;
-        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-        if (config.logPrefix) {
-          args[0] = "[" + config.logPrefix + "] " + args[0];
-          return up.puts.apply(up, args);
-        }
-      };
-      keys = function() {
-        return Object.keys(store);
-      };
-      makeRoomForAnotherKey = function() {
-        var max, oldestKey, oldestTimestamp, storeKeys;
-        storeKeys = copy(keys());
-        max = maxKeys();
-        if (max && storeKeys.length >= max) {
-          oldestKey = null;
-          oldestTimestamp = null;
-          each(storeKeys, function(key) {
-            var promise, timestamp;
-            promise = store[key];
-            timestamp = promise.timestamp;
-            if (!oldestTimestamp || oldestTimestamp > timestamp) {
-              oldestKey = key;
-              return oldestTimestamp = timestamp;
-            }
-          });
-          if (oldestKey) {
-            return delete store[oldestKey];
-          }
-        }
-      };
-      alias = function(oldKey, newKey) {
-        var value;
-        value = get(oldKey, {
-          silent: true
-        });
-        if (isDefined(value)) {
-          return set(newKey, value);
-        }
-      };
-      timestamp = function() {
-        return (new Date()).valueOf();
-      };
-      set = function(key, value) {
-        var storeKey;
-        if (isEnabled()) {
-          makeRoomForAnotherKey();
-          storeKey = normalizeStoreKey(key);
-          return store[storeKey] = {
-            timestamp: timestamp(),
-            value: value
-          };
-        }
-      };
-      remove = function(key) {
-        var storeKey;
-        storeKey = normalizeStoreKey(key);
-        return delete store[storeKey];
-      };
-      isFresh = function(entry) {
-        var millis, timeSinceTouch;
-        millis = expiryMillis();
-        if (millis) {
-          timeSinceTouch = timestamp() - entry.timestamp;
-          return timeSinceTouch < millis;
-        } else {
-          return true;
-        }
-      };
-      get = function(key, options) {
-        var entry, storeKey;
-        if (options == null) {
-          options = {};
-        }
-        storeKey = normalizeStoreKey(key);
-        if (entry = store[storeKey]) {
-          if (isFresh(entry)) {
-            if (!options.silent) {
-              log("Cache hit for '%s'", key);
-            }
-            return entry.value;
-          } else {
-            if (!options.silent) {
-              log("Discarding stale cache entry for '%s'", key);
-            }
-            remove(key);
-            return void 0;
-          }
-        } else {
-          if (!options.silent) {
-            log("Cache miss for '%s'", key);
-          }
-          return void 0;
-        }
-      };
-      return {
-        alias: alias,
-        get: get,
-        set: set,
-        remove: remove,
-        clear: clear,
-        keys: keys
-      };
     };
 
     /**
@@ -1919,11 +1591,14 @@ that might save you from loading something like [Underscore.js](http://underscor
     [`jQuery.serializeArray`](https://api.jquery.com/serializeArray/).
     
     @function up.util.requestDataAsArray
-    @param {Object|Array|Undefined|Null} data
+    @param {Object|Array|undefined|null} data
     @internal
      */
     requestDataAsArray = function(data) {
       var array, i, len, pair, part, query, ref;
+      if (isArray(data)) {
+        data;
+      }
       if (isFormData(data)) {
         return up.fail('Cannot convert FormData into an array');
       } else {
@@ -1947,17 +1622,34 @@ that might save you from loading something like [Underscore.js](http://underscor
     /**
     Returns an URL-encoded query string for the given params object.
     
+    The returned string does **not** include a leading `?` character.
+    
     @function up.util.requestDataAsQuery
-    @param {Object|Array|Undefined|Null} data
+    @param {Object|Array|undefined|null} data
     @internal
      */
-    requestDataAsQuery = function(data) {
+    requestDataAsQuery = function(data, opts) {
       var query;
+      opts = options(opts, {
+        purpose: 'url'
+      });
+      if (isString(data)) {
+        data;
+      }
       if (isFormData(data)) {
         return up.fail('Cannot convert FormData into a query string');
       } else if (isPresent(data)) {
         query = $.param(data);
-        query = query.replace(/\+/g, '%20');
+        switch (opts.purpose) {
+          case 'url':
+            query = query.replace(/\+/g, '%20');
+            break;
+          case 'form':
+            query = query.replace(/\%20/g, '+');
+            break;
+          default:
+            up.fail('Unknown purpose %o', opts.purpose);
+        }
         return query;
       } else {
         return "";
@@ -1999,38 +1691,35 @@ that might save you from loading something like [Underscore.js](http://underscor
     Adds a key/value pair to the given request data representation.
     
     This mutates the given `data` if `data` is a `FormData`, an object
-    or an array. When `data` is `String` a new string with the appended key/value
+    or an array. When `data` is a string a new string with the appended key/value
     pair is returned.
     
     @function up.util.appendRequestData
-    @param {FormData|Object|Array|Undefined|Null} data
-    @param {String} key
-    @param {String|Blob|File} value
+    @param {FormData|Object|Array|undefined|null} data
+    @param {string} key
+    @param {string|Blob|File} value
     @internal
      */
-    appendRequestData = function(data, name, value) {
+    appendRequestData = function(data, name, value, opts) {
       var newPair;
-      if (isFormData(data)) {
-        data.append(name, value);
-      } else if (isArray(data)) {
+      data || (data = []);
+      if (isArray(data)) {
         data.push({
           name: name,
           value: value
         });
+      } else if (isFormData(data)) {
+        data.append(name, value);
       } else if (isObject(data)) {
         data[name] = value;
-      } else if (isString(data) || isMissing(data)) {
+      } else if (isString(data)) {
         newPair = requestDataAsQuery([
           {
             name: name,
             value: value
           }
-        ]);
-        if (isPresent(data)) {
-          data = [data, newPair].join('&');
-        } else {
-          data = newPair;
-        }
+        ], opts);
+        data = [data, newPair].join('&');
       }
       return data;
     };
@@ -2049,12 +1738,12 @@ that might save you from loading something like [Underscore.js](http://underscor
         up.fail('Unexpected result %o', result)
     
     @function up.fail
-    @param {String} message
+    @param {string} message
       A message with details about the error.
     
       The message can contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
       like `%s` or `%o`.
-    @param {Array<String>} vars...
+    @param {Array<string>} vars...
       A list of variables to replace any substitution marks in the error message.
     @experimental
      */
@@ -2086,7 +1775,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     Escapes the given string of HTML by replacing control chars with their HTML entities.
     
     @function up.util.escapeHtml
-    @param {String} string
+    @param {string} string
       The text that should be escaped
     @experimental
      */
@@ -2114,7 +1803,7 @@ that might save you from loading something like [Underscore.js](http://underscor
     extractOptions = function(args) {
       var lastArg;
       lastArg = last(args);
-      if (isHash(lastArg) && !isJQuery(lastArg)) {
+      if (isOptions(lastArg)) {
         return args.pop();
       } else {
         return {};
@@ -2130,15 +1819,12 @@ that might save you from loading something like [Underscore.js](http://underscor
       }
     };
     whenReady = memoize(function() {
-      var deferred;
       if ($.isReady) {
-        return resolvedPromise();
+        return Promise.resolve();
       } else {
-        deferred = $.Deferred();
-        $(function() {
-          return deferred.resolve();
+        return new Promise(function(resolve) {
+          return $(resolve);
         });
-        return deferred.promise();
       }
     });
     identity = function(arg) {
@@ -2173,18 +1859,12 @@ that might save you from loading something like [Underscore.js](http://underscor
      */
     previewable = function(fun) {
       var deferred, preview;
-      deferred = $.Deferred();
+      deferred = newDeferred();
       preview = function() {
         var args, funValue;
         args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
         funValue = fun.apply(null, args);
-        if (isPromise(funValue)) {
-          funValue.then(function() {
-            return deferred.resolve(funValue);
-          });
-        } else {
-          deferred.resolve(funValue);
-        }
+        deferred.resolve(funValue);
         return funValue;
       };
       preview.promise = deferred.promise();
@@ -2213,11 +1893,9 @@ that might save you from loading something like [Underscore.js](http://underscor
       };
 
       DivertibleChain.prototype.promise = function() {
-        var promises;
-        promises = map(this.allTasks(), function(task) {
-          return task.promise;
-        });
-        return $.when.apply($, promises);
+        var lastTask;
+        lastTask = last(this.allTasks());
+        return (lastTask != null ? lastTask.promise : void 0) || Promise.resolve();
       };
 
       DivertibleChain.prototype.allTasks = function() {
@@ -2235,7 +1913,7 @@ that might save you from loading something like [Underscore.js](http://underscor
         if (!this.currentTask) {
           if (this.currentTask = this.queue.shift()) {
             promise = this.currentTask();
-            return promise.always((function(_this) {
+            return always(promise, (function(_this) {
               return function() {
                 _this.currentTask = void 0;
                 return _this.poke();
@@ -2249,7 +1927,8 @@ that might save you from loading something like [Underscore.js](http://underscor
         var newTasks;
         newTasks = 1 <= arguments.length ? slice.call(arguments, 0) : [];
         this.queue = map(newTasks, previewable);
-        return this.poke();
+        this.poke();
+        return this.promise();
       };
 
       return DivertibleChain;
@@ -2293,15 +1972,15 @@ that might save you from loading something like [Underscore.js](http://underscor
     @internal
      */
     promiseTimer = function(ms) {
-      var deferred, timeout;
-      deferred = $.Deferred();
-      timeout = setTimer(ms, function() {
-        return deferred.resolve();
+      var promise, timeout;
+      timeout = void 0;
+      promise = new Promise(function(resolve, reject) {
+        return timeout = setTimer(ms, resolve);
       });
-      deferred.cancel = function() {
+      promise.cancel = function() {
         return clearTimeout(timeout);
       };
-      return deferred;
+      return promise;
     };
 
     /**
@@ -2364,8 +2043,72 @@ that might save you from loading something like [Underscore.js](http://underscor
       }
       return flattened;
     };
+
+    /**
+    Returns whether the given value is truthy.
+    
+    @function up.util.isTruthy
+    @internal
+     */
     isTruthy = function(object) {
       return !!object;
+    };
+
+    /**
+    Sets the given callback as both fulfillment and rejection handler for the given promise.
+    
+    @function up.util.always
+    @internal
+     */
+    always = function(promise, callback) {
+      return promise.then(callback, callback);
+    };
+
+    /**
+    @function up.util.newDeferred
+    @internal
+     */
+    newDeferred = function() {
+      var nativePromise, resolve;
+      resolve = void 0;
+      reject = void 0;
+      nativePromise = new Promise(function(givenResolve, givenReject) {
+        resolve = givenResolve;
+        return reject = givenReject;
+      });
+      nativePromise.resolve = resolve;
+      nativePromise.reject = reject;
+      nativePromise.promise = function() {
+        return nativePromise;
+      };
+      return nativePromise;
+    };
+
+    /**
+    Calls the given block. If the block throws an exception,
+    a rejected promise is returned instead.
+    
+    @function up.util.rejectOnError
+    @internal
+     */
+    rejectOnError = function(block) {
+      var error;
+      try {
+        return block();
+      } catch (error1) {
+        error = error1;
+        return Promise.reject(error);
+      }
+    };
+
+    /**
+    Returns whether the given element is a descendant of the `<body>` element.
+    
+    @function up.util.isBodyDescendant
+    @internal
+     */
+    isBodyDescendant = function(element) {
+      return $(element).parents('body').length > 0;
     };
     return {
       requestDataAsArray: requestDataAsArray,
@@ -2380,6 +2123,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       parseUrl: parseUrl,
       normalizeUrl: normalizeUrl,
       normalizeMethod: normalizeMethod,
+      methodAllowsPayload: methodAllowsPayload,
       createElementFromHtml: createElementFromHtml,
       $createElementFromSelector: $createElementFromSelector,
       $createPlaceholder: $createPlaceholder,
@@ -2418,9 +2162,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       isElement: isElement,
       isJQuery: isJQuery,
       isPromise: isPromise,
-      isResolvedPromise: isResolvedPromise,
-      isDeferred: isDeferred,
-      isHash: isHash,
+      isOptions: isOptions,
       isArray: isArray,
       isFormData: isFormData,
       isUnmodifiedKeyEvent: isUnmodifiedKeyEvent,
@@ -2432,12 +2174,12 @@ that might save you from loading something like [Underscore.js](http://underscor
       measure: measure,
       temporaryCss: temporaryCss,
       cssAnimate: cssAnimate,
-      finishCssAnimate: finishCssAnimate,
       forceCompositing: forceCompositing,
       forceRepaint: forceRepaint,
       escapePressed: escapePressed,
       copyAttributes: copyAttributes,
-      findWithSelf: findWithSelf,
+      selectInSubtree: selectInSubtree,
+      selectInDynasty: selectInDynasty,
       contains: contains,
       toArray: toArray,
       castedAttr: castedAttr,
@@ -2445,12 +2187,7 @@ that might save you from loading something like [Underscore.js](http://underscor
       only: only,
       except: except,
       trim: trim,
-      unresolvableDeferred: unresolvableDeferred,
       unresolvablePromise: unresolvablePromise,
-      resolvedPromise: resolvedPromise,
-      rejectedPromise: rejectedPromise,
-      resolvedDeferred: resolvedDeferred,
-      resolvableWhen: resolvableWhen,
       setMissingAttrs: setMissingAttrs,
       remove: remove,
       memoize: memoize,
@@ -2458,7 +2195,6 @@ that might save you from loading something like [Underscore.js](http://underscor
       documentHasVerticalScrollbar: documentHasVerticalScrollbar,
       config: config,
       openConfig: openConfig,
-      cache: cache,
       unwrapElement: unwrapElement,
       multiSelector: multiSelector,
       error: fail,
@@ -2481,11 +2217,1246 @@ that might save you from loading something like [Underscore.js](http://underscor
       horizontalScreenHalf: horizontalScreenHalf,
       detachWith: detachWith,
       flatten: flatten,
-      isTruthy: isTruthy
+      isTruthy: isTruthy,
+      newDeferred: newDeferred,
+      always: always,
+      rejectOnError: rejectOnError,
+      isBodyDescendant: isBodyDescendant,
+      isCrossDomain: isCrossDomain,
+      microtask: microtask
     };
   })(jQuery);
 
   up.fail = up.util.fail;
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    slice = [].slice;
+
+  u = up.util;
+
+
+  /**
+  @class up.Cache
+  @internal
+   */
+
+  up.Cache = (function() {
+
+    /**
+    @constructor
+    @param {number|Function() :number} [config.size]
+      Maximum number of cache entries.
+      Set to `undefined` to not limit the cache size.
+    @param {number|Function(): number} [config.expiry]
+      The number of milliseconds after which a cache entry
+      will be discarded.
+    @param {string} [config.log]
+      A prefix for log entries printed by this cache object.
+    @param {Function(any): string} [config.key]
+      A function that takes an argument and returns a string key
+      for storage. If omitted, `toString()` is called on the argument.
+    @param {Function(any): boolean} [config.cachable]
+      A function that takes a potential cache entry and returns whether
+      this entry  can be stored in the hash. If omitted, all entries are considered
+      cachable.
+     */
+    function Cache(config) {
+      this.config = config != null ? config : {};
+      this.get = bind(this.get, this);
+      this.isFresh = bind(this.isFresh, this);
+      this.remove = bind(this.remove, this);
+      this.set = bind(this.set, this);
+      this.timestamp = bind(this.timestamp, this);
+      this.alias = bind(this.alias, this);
+      this.makeRoomForAnotherKey = bind(this.makeRoomForAnotherKey, this);
+      this.keys = bind(this.keys, this);
+      this.log = bind(this.log, this);
+      this.clear = bind(this.clear, this);
+      this.isCachable = bind(this.isCachable, this);
+      this.isEnabled = bind(this.isEnabled, this);
+      this.normalizeStoreKey = bind(this.normalizeStoreKey, this);
+      this.expiryMillis = bind(this.expiryMillis, this);
+      this.maxKeys = bind(this.maxKeys, this);
+      this.store = {};
+    }
+
+    Cache.prototype.maxKeys = function() {
+      return u.evalOption(this.config.size);
+    };
+
+    Cache.prototype.expiryMillis = function() {
+      return u.evalOption(this.config.expiry);
+    };
+
+    Cache.prototype.normalizeStoreKey = function(key) {
+      if (this.config.key) {
+        return this.config.key(key);
+      } else {
+        return this.key.toString();
+      }
+    };
+
+    Cache.prototype.isEnabled = function() {
+      return this.maxKeys() !== 0 && this.expiryMillis() !== 0;
+    };
+
+    Cache.prototype.isCachable = function(key) {
+      if (this.config.cachable) {
+        return this.config.cachable(key);
+      } else {
+        return true;
+      }
+    };
+
+    Cache.prototype.clear = function() {
+      return this.store = {};
+    };
+
+    Cache.prototype.log = function() {
+      var args;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      if (this.config.logPrefix) {
+        args[0] = "[" + this.config.logPrefix + "] " + args[0];
+        return up.puts.apply(up, args);
+      }
+    };
+
+    Cache.prototype.keys = function() {
+      return Object.keys(this.store);
+    };
+
+    Cache.prototype.makeRoomForAnotherKey = function() {
+      var max, oldestKey, oldestTimestamp, storeKeys;
+      storeKeys = u.copy(this.keys());
+      max = this.maxKeys();
+      if (max && storeKeys.length >= max) {
+        oldestKey = null;
+        oldestTimestamp = null;
+        u.each(storeKeys, (function(_this) {
+          return function(key) {
+            var promise, timestamp;
+            promise = _this.store[key];
+            timestamp = promise.timestamp;
+            if (!oldestTimestamp || oldestTimestamp > timestamp) {
+              oldestKey = key;
+              return oldestTimestamp = timestamp;
+            }
+          };
+        })(this));
+        if (oldestKey) {
+          return delete this.store[oldestKey];
+        }
+      }
+    };
+
+    Cache.prototype.alias = function(oldKey, newKey) {
+      var value;
+      value = this.get(oldKey, {
+        silent: true
+      });
+      if (u.isDefined(value)) {
+        return this.set(newKey, value);
+      }
+    };
+
+    Cache.prototype.timestamp = function() {
+      return (new Date()).valueOf();
+    };
+
+    Cache.prototype.set = function(key, value) {
+      var storeKey;
+      if (this.isEnabled() && this.isCachable(key)) {
+        this.makeRoomForAnotherKey();
+        storeKey = this.normalizeStoreKey(key);
+        this.log("Setting entry %o to %o", storeKey, value);
+        return this.store[storeKey] = {
+          timestamp: this.timestamp(),
+          value: value
+        };
+      }
+    };
+
+    Cache.prototype.remove = function(key) {
+      var storeKey;
+      if (this.isCachable(key)) {
+        storeKey = this.normalizeStoreKey(key);
+        return delete this.store[storeKey];
+      }
+    };
+
+    Cache.prototype.isFresh = function(entry) {
+      var millis, timeSinceTouch;
+      millis = this.expiryMillis();
+      if (millis) {
+        timeSinceTouch = this.timestamp() - entry.timestamp;
+        return timeSinceTouch < millis;
+      } else {
+        return true;
+      }
+    };
+
+    Cache.prototype.get = function(key, options) {
+      var entry;
+      if (options == null) {
+        options = {};
+      }
+      if (this.isCachable(key) && (entry = this.store[this.normalizeStoreKey(key)])) {
+        if (this.isFresh(entry)) {
+          if (!options.silent) {
+            this.log("Cache hit for '%s'", key);
+          }
+          return entry.value;
+        } else {
+          if (!options.silent) {
+            this.log("Discarding stale cache entry for '%s'", key);
+          }
+          this.remove(key);
+          return void 0;
+        }
+      } else {
+        if (!options.silent) {
+          this.log("Cache miss for '%s'", key);
+        }
+        return void 0;
+      }
+    };
+
+    return Cache;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  u = up.util;
+
+  up.ExtractCascade = (function() {
+    function ExtractCascade(selector, options) {
+      this.oldPlanNotFound = bind(this.oldPlanNotFound, this);
+      this.matchingPlanNotFound = bind(this.matchingPlanNotFound, this);
+      this.bestMatchingSteps = bind(this.bestMatchingSteps, this);
+      this.bestPreflightSelector = bind(this.bestPreflightSelector, this);
+      this.detectPlan = bind(this.detectPlan, this);
+      this.matchingPlan = bind(this.matchingPlan, this);
+      this.newPlan = bind(this.newPlan, this);
+      this.oldPlan = bind(this.oldPlan, this);
+      this.options = u.options(options, {
+        humanizedTarget: 'selector',
+        layer: 'auto'
+      });
+      this.candidates = this.buildCandidates(selector);
+      this.plans = u.map(this.candidates, (function(_this) {
+        return function(candidate, i) {
+          var planOptions;
+          planOptions = u.copy(_this.options);
+          if (i > 0) {
+            planOptions.transition = up.dom.config.fallbackTransition;
+          }
+          return new up.ExtractPlan(candidate, planOptions);
+        };
+      })(this));
+    }
+
+    ExtractCascade.prototype.buildCandidates = function(selector) {
+      var candidates;
+      candidates = [selector, this.options.fallback, up.dom.config.fallbacks];
+      candidates = u.flatten(candidates);
+      candidates = u.select(candidates, u.isTruthy);
+      if (this.options.fallback === false || this.options.provideTarget) {
+        candidates = [candidates[0]];
+      }
+      return candidates;
+    };
+
+    ExtractCascade.prototype.oldPlan = function() {
+      return this.detectPlan('oldExists');
+    };
+
+    ExtractCascade.prototype.newPlan = function() {
+      return this.detectPlan('newExists');
+    };
+
+    ExtractCascade.prototype.matchingPlan = function() {
+      return this.detectPlan('matchExists');
+    };
+
+    ExtractCascade.prototype.detectPlan = function(checker) {
+      return u.detect(this.plans, function(plan) {
+        return plan[checker]();
+      });
+    };
+
+    ExtractCascade.prototype.bestPreflightSelector = function() {
+      var plan;
+      if (this.options.provideTarget) {
+        return this.plans[0].selector;
+      } else if (plan = this.oldPlan()) {
+        return plan.selector;
+      } else {
+        return this.oldPlanNotFound();
+      }
+    };
+
+    ExtractCascade.prototype.bestMatchingSteps = function() {
+      var plan;
+      if (plan = this.matchingPlan()) {
+        return plan.steps;
+      } else {
+        return this.matchingPlanNotFound();
+      }
+    };
+
+    ExtractCascade.prototype.matchingPlanNotFound = function() {
+      var inspectAction, message;
+      if (this.newPlan()) {
+        return this.oldPlanNotFound();
+      } else {
+        if (this.oldPlan()) {
+          message = "Could not find " + this.options.humanizedTarget + " in response";
+        } else {
+          message = "Could not match " + this.options.humanizedTarget + " in current page and response";
+        }
+        if (this.options.inspectResponse) {
+          inspectAction = {
+            label: 'Open response',
+            callback: this.options.inspectResponse
+          };
+        }
+        return up.fail([message + " (tried %o)", this.candidates], {
+          action: inspectAction
+        });
+      }
+    };
+
+    ExtractCascade.prototype.oldPlanNotFound = function() {
+      var layerProse;
+      layerProse = this.options.layer;
+      if (layerProse === 'auto') {
+        layerProse = 'page, modal or popup';
+      }
+      return up.fail("Could not find " + this.options.humanizedTarget + " in current " + layerProse + " (tried %o)", this.candidates);
+    };
+
+    return ExtractCascade;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  u = up.util;
+
+  up.ExtractPlan = (function() {
+    function ExtractPlan(selector, options) {
+      this.parseSteps = bind(this.parseSteps, this);
+      this.matchExists = bind(this.matchExists, this);
+      this.newExists = bind(this.newExists, this);
+      this.oldExists = bind(this.oldExists, this);
+      this.findNew = bind(this.findNew, this);
+      this.findOld = bind(this.findOld, this);
+      this.origin = options.origin;
+      this.selector = up.dom.resolveSelector(selector, options.origin);
+      this.transition = options.transition || options.animation || 'none';
+      this.response = options.response;
+      this.oldLayer = options.layer;
+      this.steps = this.parseSteps();
+    }
+
+    ExtractPlan.prototype.findOld = function() {
+      return u.each(this.steps, (function(_this) {
+        return function(step) {
+          return step.$old = up.dom.first(step.selector, {
+            layer: _this.oldLayer
+          });
+        };
+      })(this));
+    };
+
+    ExtractPlan.prototype.findNew = function() {
+      return u.each(this.steps, (function(_this) {
+        return function(step) {
+          return step.$new = _this.response.first(step.selector);
+        };
+      })(this));
+    };
+
+    ExtractPlan.prototype.oldExists = function() {
+      this.findOld();
+      return u.all(this.steps, function(step) {
+        return step.$old;
+      });
+    };
+
+    ExtractPlan.prototype.newExists = function() {
+      this.findNew();
+      return u.all(this.steps, function(step) {
+        return step.$new;
+      });
+    };
+
+    ExtractPlan.prototype.matchExists = function() {
+      return this.oldExists() && this.newExists();
+    };
+
+
+    /**
+    Example:
+    
+        parseSelector('foo, bar:before', transition: 'cross-fade')
+    
+        [
+          { selector: 'foo', pseudoClass: undefined, transition: 'cross-fade' },
+          { selector: 'bar', pseudoClass: 'before', transition: 'cross-fade' }
+        ]
+     */
+
+    ExtractPlan.prototype.parseSteps = function() {
+      var comma, disjunction, transitions;
+      if (u.isString(this.transition)) {
+        transitions = this.transition.split(comma);
+      } else {
+        transitions = [this.transition];
+      }
+      comma = /\ *,\ */;
+      disjunction = this.selector.split(comma);
+      return u.map(disjunction, function(literal, i) {
+        var literalParts, pseudoClass, selector, transition;
+        literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/);
+        literalParts || up.fail('Could not parse selector literal "%s"', literal);
+        selector = literalParts[1];
+        if (selector === 'html') {
+          selector = 'body';
+        }
+        pseudoClass = literalParts[2];
+        transition = transitions[i] || u.last(transitions);
+        return {
+          selector: selector,
+          pseudoClass: pseudoClass,
+          transition: transition
+        };
+      });
+    };
+
+    return ExtractPlan;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  u = up.util;
+
+  up.FieldObserver = (function() {
+    var CHANGE_EVENTS;
+
+    CHANGE_EVENTS = 'input change';
+
+    function FieldObserver($field, options) {
+      this.$field = $field;
+      this.check = bind(this.check, this);
+      this.readFieldValue = bind(this.readFieldValue, this);
+      this.requestCallback = bind(this.requestCallback, this);
+      this.isNewValue = bind(this.isNewValue, this);
+      this.scheduleTimer = bind(this.scheduleTimer, this);
+      this.cancelTimer = bind(this.cancelTimer, this);
+      this.stop = bind(this.stop, this);
+      this.start = bind(this.start, this);
+      this.delay = options.delay;
+      this.callback = options.callback;
+    }
+
+    FieldObserver.prototype.start = function() {
+      this.scheduledValue = null;
+      this.processedValue = this.readFieldValue();
+      this.currentTimer = void 0;
+      this.currentCallback = void 0;
+      return this.$field.on(CHANGE_EVENTS, this.check);
+    };
+
+    FieldObserver.prototype.stop = function() {
+      this.$field.off(CHANGE_EVENTS, this.check);
+      return this.cancelTimer();
+    };
+
+    FieldObserver.prototype.cancelTimer = function() {
+      clearTimeout(this.currentTimer);
+      return this.currentTimer = void 0;
+    };
+
+    FieldObserver.prototype.scheduleTimer = function() {
+      return this.currentTimer = u.setTimer(this.delay, (function(_this) {
+        return function() {
+          _this.currentTimer = void 0;
+          return _this.requestCallback();
+        };
+      })(this));
+    };
+
+    FieldObserver.prototype.isNewValue = function(value) {
+      return value !== this.processedValue && (this.scheduledValue === null || this.scheduledValue !== value);
+    };
+
+    FieldObserver.prototype.requestCallback = function() {
+      var callbackDone;
+      if (this.scheduledValue !== null && !this.currentTimer && !this.currentCallback) {
+        this.processedValue = this.scheduledValue;
+        this.scheduledValue = null;
+        this.currentCallback = (function(_this) {
+          return function() {
+            return _this.callback.call(_this.$field.get(0), _this.processedValue, _this.$field);
+          };
+        })(this);
+        callbackDone = Promise.resolve(this.currentCallback());
+        return u.always(callbackDone, (function(_this) {
+          return function() {
+            _this.currentCallback = void 0;
+            return _this.requestCallback();
+          };
+        })(this));
+      }
+    };
+
+    FieldObserver.prototype.readFieldValue = function() {
+      return u.submittedValue(this.$field);
+    };
+
+    FieldObserver.prototype.check = function() {
+      var value;
+      value = this.readFieldValue();
+      if (this.isNewValue(value)) {
+        this.scheduledValue = value;
+        this.cancelTimer();
+        return this.scheduleTimer();
+      }
+    };
+
+    return FieldObserver;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    slice = [].slice;
+
+  u = up.util;
+
+  up.FollowVariant = (function() {
+    function FollowVariant(selector, options) {
+      this.matchesLink = bind(this.matchesLink, this);
+      this.preloadLink = bind(this.preloadLink, this);
+      this.followLink = bind(this.followLink, this);
+      this.shouldProcessLinkEvent = bind(this.shouldProcessLinkEvent, this);
+      this.fullSelector = bind(this.fullSelector, this);
+      this.onMousedown = bind(this.onMousedown, this);
+      this.onClick = bind(this.onClick, this);
+      this.followNow = options.follow;
+      this.preloadNow = options.preload;
+      this.selectors = selector.split(/\s*,\s*/);
+    }
+
+    FollowVariant.prototype.onClick = function(event, $link) {
+      if (this.shouldProcessLinkEvent(event, $link)) {
+        if ($link.is('[up-instant]')) {
+          return up.bus.haltEvent(event);
+        } else {
+          up.bus.consumeAction(event);
+          return this.followLink($link);
+        }
+      } else {
+        return up.link.allowDefault(event);
+      }
+    };
+
+    FollowVariant.prototype.onMousedown = function(event, $link) {
+      if (this.shouldProcessLinkEvent(event, $link)) {
+        up.bus.consumeAction(event);
+        return this.followLink($link);
+      }
+    };
+
+    FollowVariant.prototype.fullSelector = function(additionalClause) {
+      var parts;
+      if (additionalClause == null) {
+        additionalClause = '';
+      }
+      parts = [];
+      this.selectors.forEach(function(variantSelector) {
+        return ['a', '[up-href]'].forEach(function(tagSelector) {
+          return parts.push("" + tagSelector + variantSelector + additionalClause);
+        });
+      });
+      return parts.join(', ');
+    };
+
+    FollowVariant.prototype.registerEvents = function() {
+      up.on('click', this.fullSelector(), (function(_this) {
+        return function() {
+          var args;
+          args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+          return _this.onClick.apply(_this, args);
+        };
+      })(this));
+      return up.on('mousedown', this.fullSelector('[up-instant]'), (function(_this) {
+        return function() {
+          var args;
+          args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+          return _this.onMousedown.apply(_this, args);
+        };
+      })(this));
+    };
+
+    FollowVariant.prototype.shouldProcessLinkEvent = function(event, $link) {
+      return u.isUnmodifiedMouseEvent(event) && !up.link.childClicked(event, $link);
+    };
+
+    FollowVariant.prototype.followLink = function($link, options) {
+      if (options == null) {
+        options = {};
+      }
+      return up.feedback.start($link, options, (function(_this) {
+        return function() {
+          return _this.followNow($link, options);
+        };
+      })(this));
+    };
+
+    FollowVariant.prototype.preloadLink = function($link, options) {
+      if (options == null) {
+        options = {};
+      }
+      return this.preloadNow($link, options);
+    };
+
+    FollowVariant.prototype.matchesLink = function($link) {
+      return $link.is(this.fullSelector());
+    };
+
+    return FollowVariant;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  u = up.util;
+
+  up.MotionTracker = (function() {
+    function MotionTracker(name) {
+      this.forwardFinishEvent = bind(this.forwardFinishEvent, this);
+      this.unmarkElement = bind(this.unmarkElement, this);
+      this.markElement = bind(this.markElement, this);
+      this.whenElementFinished = bind(this.whenElementFinished, this);
+      this.finishOneElement = bind(this.finishOneElement, this);
+      this.finish = bind(this.finish, this);
+      this.claim = bind(this.claim, this);
+      this.className = "up-" + name;
+      this.dataKey = "up-" + name + "-finished";
+      this.selector = "." + this.className;
+      this.finishEvent = "up:" + name + ":finish";
+    }
+
+
+    /**
+    Finishes all animations in the given element's ancestors and descendants,
+    then calls the animator.
+    
+    @method claim
+    @param {jQuery} $element
+    @param {Function(jQuery): Promise} animator
+    @return {Promise} A promise that is fulfilled when the new animation ends.
+     */
+
+    MotionTracker.prototype.claim = function($element, animator) {
+      return this.finish($element).then((function(_this) {
+        return function() {
+          return _this.start($element, animator);
+        };
+      })(this));
+    };
+
+
+    /**
+    Calls the given animator to animate the given element.
+    
+    The animation returned by the animator is tracked so it can be
+    [`finished`](/up.MotionTracker.finish) later.
+    
+    No animations are finished before starting the new animation.
+    Use [`claim()`](/up.MotionTracker.claim) for that.
+    
+    @method claim
+    @param {jQuery} $element
+    @param {Function(jQuery): Promise} animator
+    @return {Promise} A promise that is fulfilled when the new animation ends.
+     */
+
+    MotionTracker.prototype.start = function($element, animator) {
+      var promise;
+      promise = animator($element);
+      this.markElement($element, promise);
+      promise.then((function(_this) {
+        return function() {
+          return _this.unmarkElement($element);
+        };
+      })(this));
+      return promise;
+    };
+
+
+    /**
+    @method finish
+    @param {jQuery} [elements]
+      If no element is given, finishes all animations in the documnet.
+      If an element is given, only finishes animations in its subtree and ancestors.
+    @return {Promise} A promise that is fulfilled when animations have finished.
+     */
+
+    MotionTracker.prototype.finish = function(elements) {
+      var $elements, allFinished;
+      $elements = this.expandFinishRequest(elements);
+      allFinished = u.map($elements, this.finishOneElement);
+      return Promise.all(allFinished);
+    };
+
+    MotionTracker.prototype.expandFinishRequest = function(elements) {
+      if (elements) {
+        return u.selectInDynasty($(elements), this.selector);
+      } else {
+        return $(this.selector);
+      }
+    };
+
+    MotionTracker.prototype.finishOneElement = function(element) {
+      var $element;
+      $element = $(element);
+      $element.trigger(this.finishEvent);
+      return this.whenElementFinished($element);
+    };
+
+    MotionTracker.prototype.whenElementFinished = function($element) {
+      return $element.data(this.dataKey) || Promise.resolve();
+    };
+
+    MotionTracker.prototype.markElement = function($element, promise) {
+      $element.addClass(this.className);
+      return $element.data(this.dataKey, promise);
+    };
+
+    MotionTracker.prototype.unmarkElement = function($element) {
+      $element.removeClass(this.className);
+      return $element.removeData(this.dataKey);
+    };
+
+    MotionTracker.prototype.forwardFinishEvent = function($original, $ghost, duration) {
+      return this.start($original, (function(_this) {
+        return function() {
+          var doForward;
+          doForward = function() {
+            return $ghost.trigger(_this.finishEvent);
+          };
+          $original.on(_this.finishEvent, doForward);
+          return duration.then(function() {
+            return $original.off(_this.finishEvent, doForward);
+          });
+        };
+      })(this));
+    };
+
+    return MotionTracker;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    slice = [].slice;
+
+  u = up.util;
+
+  up.Record = (function() {
+    Record.prototype.fields = function() {
+      throw 'Return an array of property names';
+    };
+
+    function Record(options) {
+      this.copy = bind(this.copy, this);
+      this.attributes = bind(this.attributes, this);
+      u.assign(this, this.attributes(options));
+    }
+
+    Record.prototype.attributes = function(source) {
+      if (source == null) {
+        source = this;
+      }
+      return u.only.apply(u, [source].concat(slice.call(this.fields())));
+    };
+
+    Record.prototype.copy = function(changes) {
+      var attributesWithChanges;
+      if (changes == null) {
+        changes = {};
+      }
+      attributesWithChanges = u.merge(this.attributes(), changes);
+      return new this.constructor(attributesWithChanges);
+    };
+
+    return Record;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  u = up.util;
+
+
+  /**
+  Instances of `up.Request` normalizes properties of an [`AJAX request`](/up.request)
+  such as the requested URL, form parameters and HTTP method.
+  
+  @class up.Request
+   */
+
+  up.Request = (function(superClass) {
+    extend(Request, superClass);
+
+
+    /**
+    The HTTP method for the request.
+    
+    @property up.Request#method
+    @param {string} method
+    @stable
+     */
+
+
+    /**
+    The URL for the request.
+    
+    @property up.Request#url
+    @param {string} url
+    @stable
+     */
+
+
+    /**
+    Parameters that should be sent as the request's payload.
+    
+    Parameters may be passed as one of the following forms:
+    
+    1. An object where keys are param names and the values are param values
+    2. An array of `{ name: 'param-name', value: 'param-value' }` objects
+    3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+    
+    @property up.Request#data
+    @param {String} data
+    @stable
+     */
+
+
+    /**
+    The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
+    
+    @property up.Request#target
+    @param {string} target
+    @stable
+     */
+
+
+    /**
+    The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
+    
+    @property up.Request#failTarget
+    @param {string} failTarget
+    @stable
+     */
+
+
+    /**
+    An object of additional HTTP headers.
+    
+    @property up.Request#headers
+    @param {object} headers
+    @stable
+     */
+
+
+    /**
+    A timeout in milliseconds.
+    
+    If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set,
+    the timeout will not include the time spent waiting in the queue.
+    
+    @property up.Request#timeout
+    @param {object|undefined} timeout
+    @stable
+     */
+
+    Request.prototype.fields = function() {
+      return ['method', 'url', 'data', 'target', 'failTarget', 'headers', 'timeout'];
+    };
+
+
+    /**
+    @constructor up.Request
+    @param {string} [attributes]
+     */
+
+    function Request(options) {
+      this.cacheKey = bind(this.cacheKey, this);
+      this.isCachable = bind(this.isCachable, this);
+      this.buildResponse = bind(this.buildResponse, this);
+      this.csrfToken = bind(this.csrfToken, this);
+      this.navigate = bind(this.navigate, this);
+      this.send = bind(this.send, this);
+      this.isSafe = bind(this.isSafe, this);
+      this.transferDataToUrl = bind(this.transferDataToUrl, this);
+      this.extractHashFromUrl = bind(this.extractHashFromUrl, this);
+      this.normalize = bind(this.normalize, this);
+      Request.__super__.constructor.call(this, options);
+      this.normalize();
+    }
+
+    Request.prototype.normalize = function() {
+      this.method = u.normalizeMethod(this.method);
+      this.headers || (this.headers = {});
+      this.extractHashFromUrl();
+      if (this.data && !u.methodAllowsPayload(this.method) && !u.isFormData(this.data)) {
+        return this.transferDataToUrl();
+      }
+    };
+
+    Request.prototype.extractHashFromUrl = function() {
+      var urlParts;
+      urlParts = u.parseUrl(this.url);
+      this.hash = urlParts.hash;
+      return this.url = u.normalizeUrl(urlParts, {
+        hash: false
+      });
+    };
+
+    Request.prototype.transferDataToUrl = function() {
+      var query, separator;
+      query = u.requestDataAsQuery(this.data);
+      separator = u.contains(this.url, '?') ? '&' : '?';
+      this.url += separator + query;
+      return this.data = void 0;
+    };
+
+    Request.prototype.isSafe = function() {
+      return up.proxy.isSafeMethod(this.method);
+    };
+
+    Request.prototype.send = function() {
+      return new Promise((function(_this) {
+        return function(resolve, reject) {
+          var csrfToken, header, ref, resolveWithResponse, value, xhr, xhrData, xhrHeaders, xhrMethod, xhrUrl;
+          xhr = new XMLHttpRequest();
+          xhrHeaders = u.copy(_this.headers);
+          xhrData = _this.data;
+          xhrMethod = _this.method;
+          xhrUrl = _this.url;
+          ref = up.proxy.wrapMethod(xhrMethod, xhrData), xhrMethod = ref[0], xhrData = ref[1];
+          if (u.isFormData(xhrData)) {
+            delete xhrHeaders['Content-Type'];
+          } else if (u.isPresent(xhrData)) {
+            xhrData = u.requestDataAsQuery(xhrData, {
+              purpose: 'form'
+            });
+            xhrHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
+          } else {
+            xhrData = null;
+          }
+          if (_this.target) {
+            xhrHeaders[up.protocol.config.targetHeader] = _this.target;
+          }
+          if (_this.failTarget) {
+            xhrHeaders[up.protocol.config.failTargetHeader] = _this.failTarget;
+          }
+          if (csrfToken = _this.csrfToken()) {
+            xhrHeaders[up.protocol.config.csrfHeader] = csrfToken;
+          }
+          xhr.open(xhrMethod, xhrUrl);
+          for (header in xhrHeaders) {
+            value = xhrHeaders[header];
+            xhr.setRequestHeader(header, value);
+          }
+          resolveWithResponse = function() {
+            var response;
+            response = _this.buildResponse(xhr);
+            if (response.isSuccess()) {
+              return resolve(response);
+            } else {
+              return reject(response);
+            }
+          };
+          xhr.onload = resolveWithResponse;
+          xhr.onerror = resolveWithResponse;
+          xhr.ontimeout = resolveWithResponse;
+          if (_this.timeout) {
+            xhr.timeout = _this.timeout;
+          }
+          return xhr.send(xhrData);
+        };
+      })(this));
+    };
+
+    Request.prototype.navigate = function() {
+      var $form, addField, csrfParam, csrfToken, formMethod;
+      $form = $('<form class="up-page-loader"></form>');
+      addField = function(field) {
+        return $('<input type="hidden">').attr(field).appendTo($form);
+      };
+      if (this.method === 'GET') {
+        formMethod = 'GET';
+      } else {
+        addField({
+          name: up.protocol.config.methodParam,
+          value: this.method
+        });
+        formMethod = 'POST';
+      }
+      $form.attr({
+        method: formMethod,
+        action: this.url
+      });
+      if ((csrfParam = up.protocol.csrfParam()) && (csrfToken = this.csrfToken())) {
+        addField({
+          name: csrfParam,
+          value: csrfToken
+        });
+      }
+      u.each(u.requestDataAsArray(this.data), addField);
+      $form.hide().appendTo('body');
+      return up.browser.submitForm($form);
+    };
+
+    Request.prototype.csrfToken = function() {
+      if (!this.isSafe() && !u.isCrossDomain(this.url)) {
+        return up.protocol.csrfToken();
+      }
+    };
+
+    Request.prototype.buildResponse = function(xhr) {
+      var ref, responseAttrs, urlFromServer;
+      responseAttrs = {
+        method: this.method,
+        url: this.url,
+        text: xhr.responseText,
+        status: xhr.status,
+        request: this,
+        xhr: xhr
+      };
+      if (urlFromServer = up.protocol.locationFromXhr(xhr)) {
+        responseAttrs.url = urlFromServer;
+        responseAttrs.method = (ref = up.protocol.methodFromXhr(xhr)) != null ? ref : 'GET';
+      }
+      responseAttrs.title = up.protocol.titleFromXhr(xhr);
+      return new up.Response(responseAttrs);
+    };
+
+    Request.prototype.isCachable = function() {
+      return this.isSafe() && !u.isFormData(this.data);
+    };
+
+    Request.prototype.cacheKey = function() {
+      return [this.url, this.method, u.requestDataAsQuery(this.data), this.target].join('|');
+    };
+
+    Request.wrap = function(object) {
+      if (object instanceof this) {
+        return object;
+      } else {
+        return new this(object);
+      }
+    };
+
+    return Request;
+
+  })(up.Record);
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  u = up.util;
+
+
+  /**
+  Instances of `up.Response` describe the server response to an [`AJAX request`](/up.request).
+  
+  \#\#\# Example
+  
+      up.request('/foo').then(function(response) {
+        console.log(response.status); // 200
+        console.log(response.text);   // "<html><body>..."
+      });
+  
+  @class up.Response
+   */
+
+  up.Response = (function(superClass) {
+    extend(Response, superClass);
+
+
+    /**
+    The HTTP method used for the response.
+    
+    This is usually the HTTP method used by the request.
+    However, after a redirect the server should signal a `GET` method using
+    an [`X-Up-Method: GET` header](/up.protocol#redirect-detection).
+    
+    @property up.Response#method
+    @param {string} method
+    @stable
+     */
+
+
+    /**
+    The URL used for the response.
+    
+    This is usually the requested URL.
+    However, after a redirect the server should signal a the new URL
+    using an [`X-Up-Location: /new-url` header](/up.protocol#redirect-detection).
+    
+    @property up.Response#url
+    @param {string} method
+    @stable
+     */
+
+
+    /**
+    The response body as a `string`.
+    
+    @property up.Response#text
+    @param {string} text
+    @stable
+     */
+
+
+    /**
+    The response's
+    [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
+    as a `number`.
+    
+    A successful response will usually have a `200` or `201' status code.
+    
+    @property up.Response#status
+    @param {number} status
+    @stable
+     */
+
+
+    /**
+    The [request](/up.Request) that triggered this response.
+    
+    @property up.Response#request
+    @param {up.Request} request
+    @experimental
+     */
+
+
+    /**
+    The [`XMLHttpRequest`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
+    object that was used to create this response.
+    
+    @property up.Response#xhr
+    @param {XMLHttpRequest} xhr
+    @experimental
+     */
+
+
+    /**
+    A [document title pushed by the server](/up.protocol#pushing-a-document-title-to-the-client).
+    
+    If the server pushed no title via HTTP header, this will be `undefined`.
+    
+    @property up.Response#title
+    @param {string} [title]
+    @stable
+     */
+
+    Response.prototype.fields = function() {
+      return ['method', 'url', 'text', 'status', 'request', 'xhr', 'title'];
+    };
+
+    function Response(options) {
+      this.isFatalError = bind(this.isFatalError, this);
+      this.isError = bind(this.isError, this);
+      this.isSuccess = bind(this.isSuccess, this);
+      Response.__super__.constructor.call(this, options);
+    }
+
+
+    /**
+    Returns whether the server responded with a 2xx HTTP status.
+    
+    @function up.Response#isSuccess
+    @return {boolean}
+    @experimental
+     */
+
+    Response.prototype.isSuccess = function() {
+      return this.status && (this.status >= 200 && this.status <= 299);
+    };
+
+
+    /**
+    Returns whether the response was not [successful](/up.Request.prototype.isSuccess).
+    
+    This also returns `true` when the request encountered a [fatal error](/up.Request.prototype.isFatalError)
+    like a timeout or loss of network connectivity.
+    
+    @function up.Response#isError
+    @return {boolean}
+    @experimental
+     */
+
+    Response.prototype.isError = function() {
+      return !this.isSuccess();
+    };
+
+
+    /**
+    Returns whether the request encountered a [fatal error](/up.Request.prototype.isFatalError)
+    like a timeout or loss of network connectivity.
+    
+    When the server produces an error message with an HTTP status like `500`,
+    this is not considered a fatal error and `false` is returned.
+    
+    @function up.Response#isFatalError
+    @return {boolean}
+    @experimental
+     */
+
+    Response.prototype.isFatalError = function() {
+      return this.isError() && u.isBlank(this.text);
+    };
+
+    return Response;
+
+  })(up.Record);
 
 }).call(this);
 
@@ -2522,7 +3493,6 @@ After the form's action performs a redirect, the next response should include th
 URL in the HTTP headers:
 
 ```http
-X-Up-Method: GET
 X-Up-Location: /current-url
 ```
 
@@ -2531,8 +3501,8 @@ The **simplest implementation** is to set these headers for every request.
 
 \#\#\# Optimizing responses
 
-When [updating a fragment](/up.link), Unpoly will send
-an additional HTTP header containing the CSS selector that is being replaced:
+When [updating a fragment](/up.link), Unpoly will send an
+additional HTTP header containing the CSS selector that is being replaced:
 
 ```http
 X-Up-Target: .user-list
@@ -2541,6 +3511,13 @@ X-Up-Target: .user-list
 Server-side code is free to **optimize its response** by only returning HTML
 that matches the selector. For example, you might prefer to not render an
 expensive sidebar if the sidebar is not targeted.
+
+Unpoly will often update a different selector in case the request fails.
+This selector is also included as a HTTP header:
+
+```
+X-Up-Fail-Target: body
+```
 
 
 \#\#\# Pushing a document title to the client
@@ -2588,7 +3565,7 @@ To do so in [Ruby on Rails](http://rubyonrails.org/), pass a [`:status` option t
 
 \#\#\# Detecting live form validations
 
-When [validating a form](/up-validate), Unpoly will
+When [validating a form](/input-up-validate), Unpoly will
 send an additional HTTP header containing a CSS selector for the form that is
 being updated:
 
@@ -2635,7 +3612,8 @@ This fixes two edge cases you might or might not care about:
 2. Some browsers have a bug where the initial request method is used for all
    subsequently pushed states. That means if the user reloads the page on a later
    GET state, the browser will wrongly attempt a POST request.
-   Modern Firefoxes, Chromes and IE10+ don't seem to be affected by this.
+   This issue affects Safari 9 and 10 (last tested in 2017-08).
+   Modern Firefoxes, Chromes and IE10+ don't have this behavior.
 
 In order to allow Unpoly to detect the HTTP method of the initial page load,
 the server must set a cookie:
@@ -2657,7 +3635,7 @@ an existing cookie should be deleted.
 
 (function() {
   up.protocol = (function($) {
-    var config, initialRequestMethod, locationFromXhr, methodFromXhr, titleFromXhr, u;
+    var config, csrfParam, csrfToken, initialRequestMethod, locationFromXhr, methodFromXhr, reset, titleFromXhr, u;
     u = up.util;
 
     /**
@@ -2705,31 +3683,82 @@ an existing cookie should be deleted.
     Configures strings used in the optional [server protocol](/up.protocol).
     
     @property up.protocol.config
-    @param [config.targetHeader='X-Up-Target']
-    @param [config.locationHeader='X-Up-Location']
-    @param [config.titleHeader='X-Up-Title']
-    @param [config.validateHeader='X-Up-Validate']
-    @param [config.methodHeader='X-Up-Method']
-    @param [config.methodCookie='_up_method']
-    @param [config.methodParam='_method']
+    @param {String} [config.targetHeader='X-Up-Target']
+    @param {String} [config.failTargetHeader='X-Up-Fail-Target']
+    @param {String} [config.locationHeader='X-Up-Location']
+    @param {String} [config.titleHeader='X-Up-Title']
+    @param {String} [config.validateHeader='X-Up-Validate']
+    @param {String} [config.methodHeader='X-Up-Method']
+    @param {String} [config.methodCookie='_up_method']
+      The name of the optional cookie the server can send to
+      [signal the initial request method](/up.protocol#signaling-the-initial-request-method).
+    @param {String} [config.methodParam='_method']
       The name of the POST parameter when [wrapping HTTP methods](/up.form.config#config.wrapMethods)
       in a `POST` request.
+    @param {String} [config.csrfHeader='X-CSRF-Token']
+      The name of the HTTP header that will include the
+      [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
+      for AJAX requests.
+    @param {String|Function} [config.csrfParam]
+      The `name` of the hidden `<input>` used for sending a
+      [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
+      submitting a default, non-AJAX form. For AJAX request the token is sent as an HTTP header instead.
+    
+      The parameter name can be configured as a string or as function that returns the parameter name.
+      If no name is set, no token will be sent.
+    
+      Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
+    
+          <meta name="csrf-param" content="authenticity_token" />
+    
+    @param {String|Function} [config.csrfToken]
+      The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
+      to send for unsafe requests. The token will be sent as either a HTTP header (for AJAX requests)
+      or hidden form `<input>` (for default, non-AJAX form submissions).
+    
+      The token can either be configured as a string or as function that returns the token.
+      If no token is set, no token will be sent.
+    
+      Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
+    
+          <meta name='csrf-token' content='secret12345'>
+    
     @experimental
      */
     config = u.config({
       targetHeader: 'X-Up-Target',
+      failTargetHeader: 'X-Up-Fail-Target',
       locationHeader: 'X-Up-Location',
       validateHeader: 'X-Up-Validate',
       titleHeader: 'X-Up-Title',
       methodHeader: 'X-Up-Method',
       methodCookie: '_up_method',
-      methodParam: '_method'
+      methodParam: '_method',
+      csrfParam: function() {
+        return $('meta[name="csrf-param"]').attr('content');
+      },
+      csrfToken: function() {
+        return $('meta[name="csrf-token"]').attr('content');
+      },
+      csrfHeader: 'X-CSRF-Token'
     });
+    csrfParam = function() {
+      return u.evalOption(config.csrfParam);
+    };
+    csrfToken = function() {
+      return u.evalOption(config.csrfToken);
+    };
+    reset = function() {
+      return config.reset();
+    };
     return {
       config: config,
+      reset: reset,
       locationFromXhr: locationFromXhr,
       titleFromXhr: titleFromXhr,
       methodFromXhr: methodFromXhr,
+      csrfParam: csrfParam,
+      csrfToken: csrfToken,
       initialRequestMethod: initialRequestMethod
     };
   })(jQuery);
@@ -2740,14 +3769,16 @@ an existing cookie should be deleted.
 Browser support
 ===============
 
-Unpoly supports all modern browsers. It degrades gracefully with old versions of Internet Explorer:
+Unpoly supports all modern browsers.
 
-IE11, Edge
+Chrome, Firefox, Edge, Safari
 : Full support
 
-IE 10 or lower
-: Unpoly prevents itself from booting itself, leaving you with a classic server-side application.
+Internet Explorer 11
+: Full support with a `Promise` polyfill like [es6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).
 
+Internet Explorer 10 or lower
+: Unpoly prevents itself from booting itself, leaving you with a classic server-side application.
 
 @class up.browser
  */
@@ -2756,47 +3787,25 @@ IE 10 or lower
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canDomParser, canFormData, canInputEvent, canPushState, hash, isIE10OrWorse, isRecentJQuery, isSupported, loadPage, polyfilledSessionStorage, popCookie, puts, sessionStorage, setLocationHref, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
+    var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canDOMParser, canFormData, canInputEvent, canPromise, canPushState, hash, isIE10OrWorse, isRecentJQuery, isSupported, navigate, polyfilledSessionStorage, popCookie, puts, sessionStorage, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /**
-    @method up.browser.loadPage
-    @param {String} url
-    @param {String} [options.method='get']
+    @method up.browser.navigate
+    @param {string} url
+    @param {string} [options.method='get']
     @param {Object|Array} [options.data]
     @internal
      */
-    loadPage = function(url, options) {
-      var $form, addField, csrfField, method, query;
+    navigate = function(url, options) {
+      var request;
       if (options == null) {
         options = {};
       }
-      method = u.option(options.method, 'get').toLowerCase();
-      if (method === 'get') {
-        query = u.requestDataAsQuery(options.data);
-        if (query) {
-          url = url + "?" + query;
-        }
-        return setLocationHref(url);
-      } else {
-        $form = $("<form method='post' action='" + url + "' class='up-page-loader'></form>");
-        addField = function(field) {
-          var $field;
-          $field = $('<input type="hidden">');
-          $field.attr(field);
-          return $field.appendTo($form);
-        };
-        addField({
-          name: up.protocol.config.methodParam,
-          value: method
-        });
-        if (csrfField = up.rails.csrfField()) {
-          addField(csrfField);
-        }
-        u.each(u.requestDataAsArray(options.data), addField);
-        $form.hide().appendTo('body');
-        return submitForm($form);
-      }
+      request = new up.Request(u.merge(options, {
+        url: url
+      }));
+      return request.navigate();
     };
 
     /**
@@ -2806,15 +3815,6 @@ IE 10 or lower
      */
     submitForm = function($form) {
       return $form.submit();
-    };
-
-    /**
-    For mocking in specs.
-    
-    @method setLocationHref
-     */
-    setLocationHref = function(url) {
-      return location.href = url;
     };
 
     /**
@@ -2929,12 +3929,12 @@ IE 10 or lower
     a request method other than GET.
     
     @function up.browser.canPushState
-    @return {Boolean}
+    @return {boolean}
     @experimental
      */
-    canPushState = u.memoize(function() {
+    canPushState = function() {
       return u.isDefined(history.pushState) && up.protocol.initialRequestMethod() === 'get';
-    });
+    };
 
     /**
     Returns whether this browser supports animation using
@@ -2945,66 +3945,77 @@ IE 10 or lower
     animation by instantly jumping to the last frame.
     
     @function up.browser.canCssTransition
-    @return {Boolean}
+    @return {boolean}
     @internal
      */
-    canCssTransition = u.memoize(function() {
+    canCssTransition = function() {
       return 'transition' in document.documentElement.style;
-    });
+    };
 
     /**
     Returns whether this browser supports the DOM event [`input`](https://developer.mozilla.org/de/docs/Web/Events/input).
     
     @function up.browser.canInputEvent
-    @return {Boolean}
+    @return {boolean}
     @internal
      */
-    canInputEvent = u.memoize(function() {
+    canInputEvent = function() {
       return 'oninput' in document.createElement('input');
-    });
+    };
+
+    /**
+    Returns whether this browser supports promises.
+    
+    @function up.browser.canPromise
+    @return {boolean}
+    @internal
+     */
+    canPromise = function() {
+      return !!window.Promise;
+    };
 
     /**
     Returns whether this browser supports the [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
     interface.
     
     @function up.browser.canFormData
-    @return {Boolean}
+    @return {boolean}
     @experimental
      */
-    canFormData = u.memoize(function() {
+    canFormData = function() {
       return !!window.FormData;
-    });
+    };
 
     /**
     Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
     interface.
     
-    @function up.browser.canDomParser
-    @return {Boolean}
+    @function up.browser.canDOMParser
+    @return {boolean}
     @internal
      */
-    canDomParser = u.memoize(function() {
+    canDOMParser = function() {
       return !!window.DOMParser;
-    });
+    };
 
     /**
     Returns whether this browser supports the [`debugging console`](https://developer.mozilla.org/en-US/docs/Web/API/Console).
     
     @function up.browser.canConsole
-    @return {Boolean}
+    @return {boolean}
     @internal
      */
-    canConsole = u.memoize(function() {
+    canConsole = function() {
       return window.console && console.debug && console.info && console.warn && console.error && console.group && console.groupCollapsed && console.groupEnd;
-    });
-    isRecentJQuery = u.memoize(function() {
+    };
+    isRecentJQuery = function() {
       var major, minor, parts, version;
       version = $.fn.jquery;
       parts = version.split('.');
       major = parseInt(parts[0]);
       minor = parseInt(parts[1]);
       return major >= 2 || (major === 1 && minor >= 9);
-    });
+    };
 
     /**
     Returns and deletes a cookie with the given name
@@ -3025,15 +4036,15 @@ IE 10 or lower
     /**
     @function up,browser.whenConfirmed
     @return {Promise}
-    @param {String} options.confirm
-    @param {Boolean} options.preload
+    @param {string} options.confirm
+    @param {boolean} options.preload
     @internal
      */
     whenConfirmed = function(options) {
       if (options.preload || u.isBlank(options.confirm) || window.confirm(options.confirm)) {
-        return u.resolvedPromise();
+        return Promise.resolve();
       } else {
-        return u.unresolvablePromise();
+        return Promise.reject(new Error('User canceled action'));
       }
     };
 
@@ -3046,18 +4057,11 @@ IE 10 or lower
     This is usually a better fallback than loading incompatible Javascript and causing
     many errors on load.
     
-    \#\#\# Graceful degradation
-    
-    This function also returns `true` if Unpoly only support some features, but can degrade
-    gracefully for other features. E.g. Internet Explorer 9 is almost fully supported, but due to
-    its lack of [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState)
-    Unpoly falls back to a full page load when asked to manipulate history.
-    
     @function up.browser.isSupported
     @stable
      */
     isSupported = function() {
-      return !isIE10OrWorse() && isRecentJQuery() && canConsole() && canPushState() && canDomParser() && canFormData() && canCssTransition() && canInputEvent();
+      return !isIE10OrWorse() && isRecentJQuery() && canConsole() && canDOMParser() && canFormData() && canCssTransition() && canInputEvent() && canPromise();
     };
 
     /**
@@ -3106,7 +4110,8 @@ IE 10 or lower
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       url: url,
-      loadPage: loadPage,
+      navigate: navigate,
+      submitForm: submitForm,
       canPushState: canPushState,
       whenConfirmed: whenConfirmed,
       isSupported: isSupported,
@@ -3115,7 +4120,8 @@ IE 10 or lower
       sprintfWithFormattedArgs: sprintfWithFormattedArgs,
       sessionStorage: sessionStorage,
       popCookie: popCookie,
-      hash: hash
+      hash: hash,
+      canPushState: canPushState
     };
   })(jQuery);
 
@@ -3174,10 +4180,11 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
   var slice = [].slice;
 
   up.bus = (function($) {
-    var boot, consumeAction, emit, emitReset, forgetUpDescription, haltEvent, live, liveUpDescriptions, logEmission, nextUpDescriptionNumber, nobodyPrevents, onEscape, rememberUpDescription, restoreSnapshot, snapshot, u, unbind, upDescriptionNumber, upDescriptionToJqueryDescription, upListenerToJqueryListener, whenEmitted;
+    var boot, consumeAction, emit, emitReset, fixRenamedEvents, forgetUpDescription, haltEvent, live, liveUpDescriptions, logEmission, nextUpDescriptionNumber, nobodyPrevents, onEscape, rememberUpDescription, renamedEvent, renamedEvents, resetBus, snapshot, u, unbind, upDescriptionNumber, upDescriptionToJqueryDescription, upListenerToJqueryListener, whenEmitted;
     u = up.util;
     liveUpDescriptions = {};
     nextUpDescriptionNumber = 0;
+    renamedEvents = {};
 
     /**
     Convert an Unpoly style listener (second argument is the event target
@@ -3204,6 +4211,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     upDescriptionToJqueryDescription = function(upDescription, isNew) {
       var jqueryDescription, jqueryListener, upListener;
       jqueryDescription = u.copy(upDescription);
+      fixRenamedEvents(jqueryDescription);
       upListener = jqueryDescription.pop();
       jqueryListener = void 0;
       if (isNew) {
@@ -3212,10 +4220,24 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
         upListener._descriptionNumber = ++nextUpDescriptionNumber;
       } else {
         jqueryListener = upListener._asJqueryListener;
-        jqueryListener || up.fail('up.off: The event listener %o was never registered through up.on');
+        jqueryListener || up.fail('up.off(): The callback %o was never registered through up.on()', upListener);
       }
       jqueryDescription.push(jqueryListener);
       return jqueryDescription;
+    };
+    fixRenamedEvents = function(description) {
+      var events;
+      events = description[0].split(/\s+/);
+      events = u.map(events, function(event) {
+        var newEvent;
+        if (newEvent = renamedEvents[event]) {
+          up.log.warn(event + " has been renamed to " + newEvent);
+          return newEvent;
+        } else {
+          return event;
+        }
+      });
+      return description[0] = events.join(' ');
     };
 
     /**
@@ -3294,9 +4316,9 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
         });
     
     @function up.on
-    @param {String} events
+    @param {string} events
       A space-separated list of event names to bind.
-    @param {String} [selector]
+    @param {string} [selector]
       The selector of an element on which the event must be triggered.
       Omit the selector to listen to all events with that name, regardless
       of the event target.
@@ -3382,7 +4404,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
          * Prints "bar" to the console
     
     @function up.emit
-    @param {String} eventName
+    @param {string} eventName
       The name of the event.
     @param {Object} [eventProps={}]
       A list of properties to become part of the event object
@@ -3391,7 +4413,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       or `stopPropagation()`.
     @param {jQuery} [eventProps.$element=$(document)]
       The element on which the event is triggered.
-    @param {String|Array} [eventProps.message]
+    @param {string|Array} [eventProps.message]
       A message to print to the console when the event is emitted.
       If omitted, a default message is printed.
       Set this to `false` to prevent any console output.
@@ -3445,10 +4467,10 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     has prevented the default action.
     
     @function up.bus.nobodyPrevents
-    @param {String} eventName
+    @param {string} eventName
     @param {Object} eventProps
-    @param {String|Array} [eventProps.message]
-    @return {Boolean}
+    @param {string|Array} [eventProps.message]
+    @return {boolean}
       whether no listener has prevented the default action
     @experimental
      */
@@ -3456,36 +4478,33 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       var args, event;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       event = emit.apply(null, args);
-      if (event.isDefaultPrevented()) {
-        up.puts("An observer prevented the event %s", args[0]);
-        return false;
-      } else {
-        return true;
-      }
+      return !event.isDefaultPrevented();
     };
 
     /**
     [Emits](/up.emit) the given event and returns a promise
-    that will be resolved if no listener has prevented the default action.
+    that will be fulfilled if no listener has prevented the default action.
     
     If any listener prevented the default listener
     the returned promise will never be resolved.
     
     @function up.bus.whenEmitted
-    @param {String} eventName
+    @param {string} eventName
     @param {Object} eventProps
-    @param {String|Array} [eventProps.message]
+    @param {string|Array} [eventProps.message]
     @return {Promise}
     @internal
      */
     whenEmitted = function() {
-      var args, deferred;
+      var args;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      deferred = $.Deferred();
-      if (nobodyPrevents.apply(null, args)) {
-        deferred.resolve();
-      }
-      return deferred.promise();
+      return new Promise(function(resolve, reject) {
+        if (nobodyPrevents.apply(null, args)) {
+          return resolve();
+        } else {
+          return reject(new Error("Event " + args[0] + " was prevented"));
+        }
+      });
     };
 
     /**
@@ -3540,26 +4559,23 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     @internal
      */
     snapshot = function() {
-      var description, i, len, results;
+      var description, number, results;
       results = [];
-      for (i = 0, len = liveUpDescriptions.length; i < len; i++) {
-        description = liveUpDescriptions[i];
+      for (number in liveUpDescriptions) {
+        description = liveUpDescriptions[number];
         results.push(description.isDefault = true);
       }
       return results;
     };
-
-    /**
-    Resets the list of registered event listeners to the
-    moment when the framework was booted.
-    
-    @internal
-     */
-    restoreSnapshot = function() {
-      var description, doomedDescriptions, i, len, results;
-      doomedDescriptions = u.reject(liveUpDescriptions, function(description) {
-        return description.isDefault;
-      });
+    resetBus = function() {
+      var description, doomedDescriptions, i, len, number, results;
+      doomedDescriptions = [];
+      for (number in liveUpDescriptions) {
+        description = liveUpDescriptions[number];
+        if (!description.isDefault) {
+          doomedDescriptions.push(description);
+        }
+      }
       results = [];
       for (i = 0, len = doomedDescriptions.length; i < len; i++) {
         description = doomedDescriptions[i];
@@ -3582,9 +4598,10 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     @experimental
      */
     emitReset = function() {
-      return emit('up:framework:reset', {
+      emit('up:framework:reset', {
         message: 'Resetting framework'
       });
+      return up.protocol.reset();
     };
 
     /**
@@ -3593,6 +4610,9 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     @event up:framework:reset
     @experimental
      */
+    renamedEvent = function(oldEvent, newEvent) {
+      return renamedEvents[oldEvent] = newEvent;
+    };
 
     /**
     Boots the Unpoly framework.
@@ -3635,7 +4655,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     @internal
      */
     live('up:framework:booted', snapshot);
-    live('up:framework:reset', restoreSnapshot);
+    live('up:framework:reset', resetBus);
     return {
       knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       on: live,
@@ -3647,6 +4667,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       emitReset: emitReset,
       haltEvent: haltEvent,
       consumeAction: consumeAction,
+      renamedEvent: renamedEvent,
       boot: boot
     };
   })(jQuery);
@@ -3692,18 +4713,18 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     Configures the logging output on the developer console.
     
     @property up.log.config
-    @param {Boolean} [options.enabled=false]
+    @param {boolean} [options.enabled=false]
       Whether Unpoly will print debugging information to the developer console.
     
       Debugging information includes which elements are being [compiled](/up.syntax)
       and which [events](/up.bus) are being emitted.
       Note that errors will always be printed, regardless of this setting.
-    @param {Boolean} [options.collapse=false]
+    @param {boolean} [options.collapse=false]
       Whether debugging information is printed as a collapsed tree.
     
       Set this to `true` if you are overwhelmed by the debugging information Unpoly
       prints to the developer console.
-    @param {String} [options.prefix='[UP] ']
+    @param {string} [options.prefix='[UP] ']
       A string to prepend to Unpoly's logging messages so you can distinguish it from your own messages.
     @stable
      */
@@ -3723,7 +4744,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     Prints a debugging message to the browser console.
     
     @function up.log.debug
-    @param {String} message
+    @param {string} message
     @param {Array} args...
     @internal
      */
@@ -3739,7 +4760,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     Prints a logging message to the browser console.
     
     @function up.puts
-    @param {String} message
+    @param {string} message
     @param {Array} args...
     @internal
      */
@@ -3959,10 +4980,19 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
   var slice = [].slice;
 
   up.syntax = (function($) {
-    var DESTRUCTIBLE_CLASS, DESTRUCTORS_KEY, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, insertCompiler, macro, macros, normalizeDestructor, prepareClean, removeDestructors, reset, snapshot, u;
+    var DESTRUCTIBLE_CLASS, DESTRUCTORS_KEY, SYSTEM_MACRO_PRIORITIES, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, detectSystemMacroPriority, insertCompiler, isBooting, macro, macros, normalizeDestructor, prepareClean, removeDestructors, reset, u;
     u = up.util;
     DESTRUCTIBLE_CLASS = 'up-destructible';
     DESTRUCTORS_KEY = 'up-destructors';
+    SYSTEM_MACRO_PRIORITIES = {
+      '[up-back]': -100,
+      '[up-drawer]': -200,
+      '[up-dash]': -200,
+      '[up-expand]': -300,
+      '[data-method]': -400,
+      '[data-confirm]': -400
+    };
+    isBooting = true;
     compilers = [];
     macros = [];
 
@@ -4113,17 +5143,17 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
     
     @function up.compiler
-    @param {String} selector
+    @param {string} selector
       The selector to match.
-    @param {Number} [options.priority=0]
-      The priority of this compilers.
+    @param {number} [options.priority=0]
+      The priority of this compiler.
       Compilers with a higher priority are run first.
       Two compilers with the same priority are run in the order they were registered.
-    @param {Boolean} [options.batch=false]
+    @param {boolean} [options.batch=false]
       If set to `true` and a fragment insertion contains multiple
       elements matching the selector, `compiler` is only called once
       with a jQuery collection containing all matching elements. 
-    @param {Boolean} [options.keep=false]
+    @param {boolean} [options.keep=false]
       If set to `true` compiled fragment will be [persisted](/up-keep) during
       [page updates](/a-up-target).
     
@@ -4145,9 +5175,11 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @stable
      */
     compiler = function() {
-      var args;
-      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      return insertCompiler.apply(null, [compilers].concat(slice.call(args)));
+      var args, callback, options, selector;
+      selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      callback = args.pop();
+      options = u.options(args[0]);
+      return insertCompiler(compilers, selector, options, callback);
     };
 
     /**
@@ -4179,50 +5211,53 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
           $link.attr('up-duration', '300');
         });
     
-    Examples for built-in macros are [`up-dash`](/up-dash) and [`up-expand`](/up-expand).
+    Examples for built-in macros are [`a[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand).
     
     @function up.macro
-    @param {String} selector
+    @param {string} selector
       The selector to match.
     @param {Object} options
       See options for [`up.compiler()`](/up.compiler).
-    @param {Function($element, data)} compiler
+    @param {Function($element, data)} macro
       The function to call when a matching element is inserted.
       See [`up.compiler()`](/up.compiler) for details.
     @stable
      */
     macro = function() {
-      var args;
-      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      return insertCompiler.apply(null, [macros].concat(slice.call(args)));
-    };
-    buildCompiler = function() {
       var args, callback, options, selector;
       selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       callback = args.pop();
-      options = u.options(args[0], {
-        priority: 0
-      });
-      if (options.priority === 'first') {
-        options.priority = Number.POSITIVE_INFINITY;
-      } else if (options.priority === 'last') {
-        options.priority = Number.NEGATIVE_INFINITY;
+      options = u.options(args[0]);
+      if (isBooting) {
+        options.priority = detectSystemMacroPriority(selector) || up.fail('Unregistered priority for system macro %o', selector);
       }
+      return insertCompiler(macros, selector, options, callback);
+    };
+    detectSystemMacroPriority = function(fullMacroSelector) {
+      var priority, substr;
+      for (substr in SYSTEM_MACRO_PRIORITIES) {
+        priority = SYSTEM_MACRO_PRIORITIES[substr];
+        if (fullMacroSelector.indexOf(substr) >= 0) {
+          return priority;
+        }
+      }
+    };
+    buildCompiler = function(selector, options, callback) {
       return {
         selector: selector,
         callback: callback,
-        priority: options.priority,
+        isSystem: isBooting,
+        priority: options.priority || 0,
         batch: options.batch,
         keep: options.keep
       };
     };
-    insertCompiler = function() {
-      var args, index, newCompiler, oldCompiler, queue;
-      queue = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+    insertCompiler = function(queue, selector, options, callback) {
+      var index, newCompiler, oldCompiler;
       if (!up.browser.isSupported()) {
         return;
       }
-      newCompiler = buildCompiler.apply(null, args);
+      newCompiler = buildCompiler(selector, options, callback);
       index = 0;
       while ((oldCompiler = queue[index]) && (oldCompiler.priority >= newCompiler.priority)) {
         index += 1;
@@ -4231,7 +5266,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     };
     applyCompiler = function(compiler, $jqueryElement, nativeElement) {
       var returnValue, value;
-      up.puts((!compiler.isDefault ? "Compiling '%s' on %o" : void 0), compiler.selector, nativeElement);
+      up.puts((!compiler.isSystem ? "Compiling '%s' on %o" : void 0), compiler.selector, nativeElement);
       if (compiler.keep) {
         value = u.isString(compiler.keep) ? compiler.keep : '';
         $jqueryElement.attr('up-keep', value);
@@ -4294,7 +5329,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
             results1 = [];
             for (j = 0, len1 = queue.length; j < len1; j++) {
               compiler = queue[j];
-              $matches = u.findWithSelf($fragment, compiler.selector);
+              $matches = u.selectInSubtree($fragment, compiler.selector);
               $matches = $matches.filter(function() {
                 var $match;
                 $match = $(this);
@@ -4303,7 +5338,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
                 });
               });
               if ($matches.length) {
-                results1.push(up.log.group((!compiler.isDefault ? "Compiling '%s' on %d element(s)" : void 0), compiler.selector, $matches.length, function() {
+                results1.push(up.log.group((!compiler.isSystem ? "Compiling '%s' on %d element(s)" : void 0), compiler.selector, $matches.length, function() {
                   if (compiler.batch) {
                     return applyCompiler(compiler, $matches, $matches.get());
                   } else {
@@ -4342,14 +5377,12 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @internal
      */
     prepareClean = function($fragment) {
-      var destructors;
-      destructors = [];
-      u.findWithSelf($fragment, "." + DESTRUCTIBLE_CLASS).each(function() {
-        var destructor;
-        if (destructor = $(this).data(DESTRUCTORS_KEY)) {
-          return destructors.push(destructor);
-        }
+      var $candidates, destructors;
+      $candidates = u.selectInSubtree($fragment, "." + DESTRUCTIBLE_CLASS);
+      destructors = u.map($candidates, function(candidate) {
+        return $(candidate).data(DESTRUCTORS_KEY);
       });
+      destructors = u.compact(destructors);
       return u.sequence.apply(u, destructors);
     };
 
@@ -4370,7 +5403,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
         up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
     
     @function up.syntax.data
-    @param {String|Element|jQuery} elementOrSelector
+    @param {string|Element|jQuery} elementOrSelector
     @return
       The JSON-decoded value of the `up-data` attribute.
     
@@ -4433,35 +5466,22 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     };
 
     /**
-    Makes a snapshot of the currently registered event listeners,
-    to later be restored through `reset`.
-    
-    @internal
-     */
-    snapshot = function() {
-      var setDefault;
-      setDefault = function(compiler) {
-        return compiler.isDefault = true;
-      };
-      u.each(compilers, setDefault);
-      return u.each(macros, setDefault);
-    };
-
-    /**
     Resets the list of registered compiler directives to the
     moment when the framework was booted.
     
     @internal
      */
     reset = function() {
-      var isDefault;
-      isDefault = function(compiler) {
-        return compiler.isDefault;
+      var isSystem;
+      isSystem = function(compiler) {
+        return compiler.isSystem;
       };
-      compilers = u.select(compilers, isDefault);
-      return macros = u.select(macros, isDefault);
+      compilers = u.select(compilers, isSystem);
+      return macros = u.select(macros, isSystem);
     };
-    up.on('up:framework:booted', snapshot);
+    up.on('up:framework:booted', function() {
+      return isBooting = false;
+    });
     up.on('up:framework:reset', reset);
     return {
       compiler: compiler,
@@ -4480,15 +5500,12 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
 }).call(this);
 
 /**
-Browser history
-===============
+History
+========
   
 In an Unpoly app, every page has an URL.
 
 [Fragment updates](/up.link) automatically update the URL.
-
-
-Going back behavior .... configure.
 
 @class up.history
  */
@@ -4505,12 +5522,13 @@ Going back behavior .... configure.
     @param {Array} [config.popTargets=['body']]
       An array of CSS selectors to replace when the user goes
       back in history.
-    @param {Boolean} [config.restoreScroll=true]
+    @param {boolean} [config.restoreScroll=true]
       Whether to restore the known scroll positions
       when the user goes back or forward in history.
     @stable
      */
     config = u.config({
+      enabled: true,
       popTargets: ['body'],
       restoreScroll: true
     });
@@ -4582,8 +5600,8 @@ Going back behavior .... configure.
     browser's location bar for you.
     
     @function up.history.replace
-    @param {String} url
-    @experimental
+    @param {string} url
+    @internal
      */
     replace = function(url) {
       return manipulate('replaceState', url);
@@ -4604,7 +5622,7 @@ Going back behavior .... configure.
     Emits events [`up:history:push`](/up:history:push) and [`up:history:pushed`](/up:history:pushed).
     
     @function up.history.push
-    @param {String} url
+    @param {string} url
       The URL for the history entry to be added.
     @experimental
      */
@@ -4617,11 +5635,17 @@ Going back behavior .... configure.
         url: url,
         message: "Adding history entry for " + url
       })) {
-        manipulate('pushState', url);
-        return up.emit('up:history:pushed', {
-          url: url,
-          message: "Advanced to location " + url
-        });
+        if (manipulate('pushState', url)) {
+          return up.emit('up:history:pushed', {
+            url: url,
+            message: "Advanced to location " + url
+          });
+        } else {
+          return up.emit('up:history:muted', {
+            url: url,
+            message: "Did not advance to " + url + " (history is unavailable)"
+          });
+        }
       }
     };
 
@@ -4629,7 +5653,7 @@ Going back behavior .... configure.
     This event is [emitted](/up.emit) before a new history entry is added.
     
     @event up:history:push
-    @param {String} event.url
+    @param {string} event.url
       The URL for the history entry that is going to be added.
     @param event.preventDefault()
       Event listeners may call this method to prevent the history entry from being added.
@@ -4640,18 +5664,19 @@ Going back behavior .... configure.
     This event is [emitted](/up.emit) after a new history entry has been added.
     
     @event up:history:pushed
-    @param {String} event.url
+    @param {string} event.url
       The URL for the history entry that has been added.
     @experimental
      */
     manipulate = function(method, url) {
       var state;
-      if (up.browser.canPushState()) {
+      if (up.browser.canPushState() && config.enabled) {
         state = buildState();
         window.history[method](state, '', url);
-        return observeNewUrl(currentUrl());
+        observeNewUrl(currentUrl());
+        return true;
       } else {
-        return up.fail("This browser doesn't support history." + method);
+        return false;
       }
     };
     buildState = function() {
@@ -4704,7 +5729,7 @@ Going back behavior .... configure.
     History entries are restored when the user uses the *Back* or *Forward* button.
     
     @event up:history:restore
-    @param {String} event.url
+    @param {string} event.url
       The URL for the history entry that has been restored.
     @internal
      */
@@ -4715,7 +5740,7 @@ Going back behavior .... configure.
     History entries are restored when the user uses the *Back* or *Forward* button.
     
     @event up:history:restored
-    @param {String} event.url
+    @param {string} event.url
       The URL for the history entry that has been restored.
     @experimental
      */
@@ -4739,6 +5764,8 @@ Going back behavior .... configure.
     Note that this will *not* call `location.back()`, but will set
     the link's `up-href` attribute to the actual, previous URL.
     
+    If no previous URL is known, the link will not be changed.
+    
     \#\#\# Example
     
     This link ...
@@ -4753,10 +5780,10 @@ Going back behavior .... configure.
           Go back
         </a>
     
-    @selector [up-back]
+    @selector a[up-back]
     @stable
      */
-    up.compiler('[up-back]', function($link) {
+    up.macro('a[up-back], [up-href][up-back]', function($link) {
       if (u.isPresent(previousUrl)) {
         u.setMissingAttrs($link, {
           'up-href': previousUrl,
@@ -4788,7 +5815,7 @@ Application layout
 
 You can [make Unpoly aware](/up.layout.config) of fixed elements in your
 layout, such as navigation bars or headers. Unpoly will respect these sticky
-elements when [revealing elements](/up.reveal) or [opening a modal dialog](/up-modal).
+elements when [revealing elements](/up.reveal) or [opening a modal dialog](/a-up-modal).
 
 This modules also contains functions to programmatically [scroll a viewport](/up.scroll)
 or [reveal an element within its viewport](/up.reveal).
@@ -4807,7 +5834,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
   var slice = [].slice;
 
   up.layout = (function($) {
-    var SCROLL_PROMISE_KEY, anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealHash, revealOrRestoreScroll, saveScroll, scroll, scrollTopKey, scrollTops, u, viewportOf, viewportSelector, viewports, viewportsWithin;
+    var anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealHash, revealOrRestoreScroll, revealSelector, saveScroll, scroll, scrollAbruptlyNow, scrollTopKey, scrollTops, scrollWithAnimateNow, scrollableElementForViewport, scrollingTracker, u, viewportOf, viewportSelector, viewports, viewportsWithin;
     u = up.util;
 
     /**
@@ -4829,17 +5856,17 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       An array of CSS selectors that find elements anchored to the
       right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
       See [`[up-anchored="right"]`](/up-anchored-right) for details.
-    @param {Number} [config.duration=0]
+    @param {number} [config.duration=0]
       The duration of the scrolling animation in milliseconds.
       Setting this to `0` will disable scrolling animations.
-    @param {String} [config.easing='swing']
+    @param {string} [config.easing='swing']
       The timing function that controls the animation's acceleration.
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
-    @param {Number} [config.snap=50]
+    @param {number} [config.snap=50]
       When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
       to the top when the revealed element is closer to the top than `config.snap`.
-    @param {Number} [config.substance=150]
+    @param {number} [config.substance=150]
       A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
     @stable
      */
@@ -4853,15 +5880,16 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       substance: 150,
       easing: 'swing'
     });
-    lastScrollTops = u.cache({
+    lastScrollTops = new up.Cache({
       size: 30,
       key: up.history.normalizeUrl
     });
+    scrollingTracker = new up.MotionTracker('scrolling');
     reset = function() {
       config.reset();
-      return lastScrollTops.clear();
+      lastScrollTops.clear();
+      return scrollingTracker.finish();
     };
-    SCROLL_PROMISE_KEY = 'up-scroll-promise';
 
     /**
     Scrolls the given viewport to the given Y-position.
@@ -4889,65 +5917,76 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     last frame before the next animation is started.
     
     @function up.scroll
-    @param {String|Element|jQuery} viewport
+    @param {string|Element|jQuery} viewport
       The container element to scroll.
-    @param {Number} scrollPos
+    @param {number} scrollPos
       The absolute number of pixels to set the scroll position to.
-    @param {Number}[options.duration]
+    @param {number}[options.duration]
       The number of miliseconds for the scrolling's animation.
-    @param {String}[options.easing]
+    @param {string}[options.easing]
       The timing function that controls the acceleration for the scrolling's animation.
-    @return {Deferred}
-      A promise that will be resolved when the scrolling ends.
+    @return {Promise}
+      A promise that will be fulfilled when the scrolling ends.
     @experimental
      */
     scroll = function(viewport, scrollTop, options) {
-      var $viewport, deferred, duration, easing, targetProps;
-      $viewport = $(viewport);
+      var $scrollable;
+      $scrollable = scrollableElementForViewport(viewport);
       options = u.options(options);
-      duration = u.option(options.duration, config.duration);
-      easing = u.option(options.easing, config.easing);
-      finishScrolling($viewport);
-      if (duration > 0) {
-        deferred = $.Deferred();
-        $viewport.data(SCROLL_PROMISE_KEY, deferred);
-        deferred.then(function() {
-          $viewport.removeData(SCROLL_PROMISE_KEY);
-          return $viewport.finish();
-        });
-        targetProps = {
-          scrollTop: scrollTop
-        };
-        if ($viewport.get(0) === document) {
-          $viewport = $('html, body');
+      options.duration = u.option(options.duration, config.duration);
+      options.easing = u.option(options.easing, config.easing);
+      return finishScrolling($scrollable).then(function() {
+        if (up.motion.isEnabled() && options.duration > 0) {
+          return scrollWithAnimateNow($scrollable, scrollTop, options);
+        } else {
+          return scrollAbruptlyNow($scrollable, scrollTop);
         }
-        $viewport.animate(targetProps, {
-          duration: duration,
-          easing: easing,
-          complete: function() {
-            return deferred.resolve();
-          }
-        });
-        return deferred;
+      });
+    };
+    scrollableElementForViewport = function(viewport) {
+      var $viewport;
+      $viewport = $(viewport);
+      if ($viewport.get(0) === document) {
+        return $('html, body');
       } else {
-        $viewport.scrollTop(scrollTop);
-        return u.resolvedDeferred();
+        return $viewport;
       }
+    };
+    scrollWithAnimateNow = function($scrollable, scrollTop, animateOptions) {
+      var start;
+      start = function() {
+        var finish, scrollDone;
+        finish = function() {
+          return $scrollable.finish();
+        };
+        $scrollable.on(scrollingTracker.eventName, finish);
+        scrollDone = $scrollable.animate({
+          scrollTop: scrollTop
+        }, animateOptions).promise();
+        scrollDone.then(function() {
+          return $scrollable.off(scrollingTracker.eventName);
+        });
+        return scrollDone;
+      };
+      return scrollingTracker.claim($scrollable, start);
+    };
+    scrollAbruptlyNow = function($scrollable, scrollTop) {
+      $scrollable.scrollTop(scrollTop);
+      return Promise.resolve();
     };
 
     /**
+    Finishes scrolling animations in the given element, its ancestors or its descendants.
+    
     @function up.layout.finishScrolling
-    @param {String|Element|jQuery}
-      The element that might currently be scrolling.
+    @param {string|Element|jQuery}
+    @return {Promise}
     @internal
      */
-    finishScrolling = function(elementOrSelector) {
-      return $(elementOrSelector).each(function() {
-        var existingScrolling;
-        if (existingScrolling = $(this).data(SCROLL_PROMISE_KEY)) {
-          return existingScrolling.resolve();
-        }
-      });
+    finishScrolling = function(element) {
+      var $scrollable;
+      $scrollable = scrollableElementForViewport(element);
+      return scrollingTracker.finish($scrollable);
     };
 
     /**
@@ -4957,6 +5996,12 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     anchoredRight = function() {
       return u.multiSelector(config.anchoredRight).select();
     };
+
+    /**
+    @function measureObstruction
+    @return {Object}
+    @internal
+     */
     measureObstruction = function() {
       var fixedBottomTops, fixedTopBottoms, measurePosition, obstructor;
       measurePosition = function(obstructor, cssAttr) {
@@ -5025,16 +6070,16 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     - [configure default options](/up.layout.config) for `fixedTop` or `fixedBottom`
     
     @function up.reveal
-    @param {String|Element|jQuery} element
-    @param {Number} [options.duration]
-    @param {String} [options.easing]
-    @param {String} [options.snap]
-    @param {String|Element|jQuery} [options.viewport]
-    @param {Boolean} [options.top=false]
+    @param {string|Element|jQuery} element
+    @param {number} [options.duration]
+    @param {string} [options.easing]
+    @param {string} [options.snap]
+    @param {string|Element|jQuery} [options.viewport]
+    @param {boolean} [options.top=false]
       Whether to scroll the viewport so that the first element row aligns
       with the top edge of the viewport.
-    @return {Deferred}
-      A promise that will be resolved when the element is revealed.
+    @return {Promise}
+      A promise that fulfills when the element is revealed.
     @stable
      */
     reveal = function(elementOrSelector, options) {
@@ -5084,7 +6129,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       if (newScrollPos !== originalScrollPos) {
         return scroll($viewport, newScrollPos, options);
       } else {
-        return u.resolvedDeferred();
+        return Promise.resolve();
       }
     };
 
@@ -5098,18 +6143,16 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     This is called automatically when the page loads initially.
     
     @function up.layout.revealHash
+    @return {Promise}
+      A promise that is fulfilled when scroll position has changed to match the location hash.
     @experimental
      */
     revealHash = function() {
       var $match, hash;
-      if (hash = up.browser.hash()) {
-        if ($match = firstHashTarget(hash)) {
-          return reveal($match);
-        } else {
-          return u.rejectedPromise();
-        }
+      if ((hash = up.browser.hash()) && ($match = firstHashTarget(hash))) {
+        return reveal($match);
       } else {
-        return u.resolvedPromise();
+        return Promise.resolve();
       }
     };
     viewportSelector = function() {
@@ -5122,7 +6165,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     Throws an error if no viewport could be found.
     
     @function up.layout.viewportOf
-    @param {String|Element|jQuery} selectorOrElement
+    @param {string|Element|jQuery} selectorOrElement
     @internal
      */
     viewportOf = function(selectorOrElement, options) {
@@ -5143,14 +6186,14 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     given selector or element.
     
     @function up.layout.viewportsWithin
-    @param {String|Element|jQuery} selectorOrElement
+    @param {string|Element|jQuery} selectorOrElement
     @return jQuery
     @internal
      */
     viewportsWithin = function(selectorOrElement) {
       var $element;
       $element = $(selectorOrElement);
-      return viewportSelector().findWithSelf($element);
+      return viewportSelector().selectInSubtree($element);
     };
 
     /**
@@ -5182,7 +6225,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         => { '.main': 0, '.sidebar': 73 }
     
     @function up.layout.scrollTops
-    @return Object<String, Number>
+    @return Object<string, number>
     @internal
      */
     scrollTops = function() {
@@ -5234,8 +6277,8 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     Unpoly automatically saves scroll positions whenever a fragment was updated on the page.
     
     @function up.layout.saveScroll
-    @param {String} [options.url]
-    @param {Object<String, Number>} [options.tops]
+    @param {string} [options.url]
+    @param {Object<string, number>} [options.tops]
     @experimental
      */
     saveScroll = function(options) {
@@ -5245,7 +6288,6 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       }
       url = u.option(options.url, up.history.url());
       tops = u.option(options.tops, scrollTops());
-      up.puts('Saving scroll positions for URL %s (%o)', url, tops);
       return lastScrollTops.set(url, tops);
     };
 
@@ -5260,6 +6302,8 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @param {jQuery} [options.around]
       If set, only restores viewports that are either an ancestor
       or descendant of the given element.
+    @return {Promise}
+      A promise that will be fulfilled once scroll positions have been restored.
     @experimental
      */
     restoreScroll = function(options) {
@@ -5278,45 +6322,57 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       }
       scrollTopsForUrl = lastScrollTops.get(url) || {};
       return up.log.group('Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, function() {
-        $viewports.each(function() {
-          var $viewport, key, scrollTop;
-          $viewport = $(this);
-          key = scrollTopKey($viewport);
+        var allScrollPromises;
+        allScrollPromises = u.map($viewports, function(viewport) {
+          var key, scrollTop;
+          key = scrollTopKey(viewport);
           scrollTop = scrollTopsForUrl[key] || 0;
-          return scroll($viewport, scrollTop, {
+          return scroll(viewport, scrollTop, {
             duration: 0
           });
         });
-        return u.resolvedDeferred();
+        return Promise.all(allScrollPromises);
       });
     };
 
     /**
     @function up.layout.revealOrRestoreScroll
-    @return {Deferred}
-      A promise for when the revealing or scroll restoration ends
+    @param {boolean} [options.restoreScroll]
+    @param {boolean|string} [options.reveal]
+    @return {Promise}
+      A promise that is fulfilled when the element is revealed or
+      the scroll position is restored.
     @internal
      */
     revealOrRestoreScroll = function(selectorOrElement, options) {
-      var $element, $target, parsed, revealOptions;
+      var $element, revealOptions, selector;
       $element = $(selectorOrElement);
       if (options.restoreScroll) {
         return restoreScroll({
           around: $element
         });
-      } else if (options.reveal) {
+      }
+      if (options.reveal) {
         revealOptions = {};
-        if (options.source) {
-          parsed = u.parseUrl(options.source);
-          if ($target = firstHashTarget(parsed.hash)) {
-            $element = $target;
-            revealOptions.top = true;
-          }
+        if (u.isString(options.reveal)) {
+          selector = revealSelector(options.reveal);
+          $element = up.first(selector) || $element;
+          revealOptions.top = true;
         }
         return reveal($element, revealOptions);
-      } else {
-        return u.resolvedDeferred();
       }
+      return Promise.resolve();
+    };
+
+    /**
+    @internal
+     */
+    revealSelector = function(selector, options) {
+      selector = up.dom.resolveSelector(selector, options);
+      if (selector[0] === '#') {
+        selector += ", a[name='" + selector + "']";
+      }
+      return selector;
     };
 
     /**
@@ -5464,7 +6520,6 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       revealHash: revealHash,
       firstHashTarget: firstHashTarget,
       scroll: scroll,
-      finishScrolling: finishScrolling,
       config: config,
       viewportOf: viewportOf,
       viewportsWithin: viewportsWithin,
@@ -5502,19 +6557,19 @@ is built from these functions. You can use them to extend Unpoly from your
 
 (function() {
   up.dom = (function($) {
-    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, first, firstInLayer, firstInPriority, hello, isRealElement, isSingletonElement, layerOf, matchesLayer, parseResponse, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, source, swapElements, swapSingletonElement, transferKeepableElements, u, updateHistoryAndTitle;
+    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, first, firstInLayer, firstInPriority, hello, isRealElement, isSingletonElement, layerOf, matchesLayer, parseResponseDoc, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, swapSingletonElement, transferKeepableElements, u, updateHistoryAndTitle;
     u = up.util;
 
     /**
     Configures defaults for fragment insertion.
     
     @property up.dom.config
-    @param {Boolean} [options.runInlineScripts=true]
+    @param {boolean} [options.runInlineScripts=true]
       Whether inline `<script>` tags inside inserted HTML fragments will be executed.
-    @param {Boolean} [options.runLinkedScripts=false]
+    @param {boolean} [options.runLinkedScripts=false]
       Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
       the linked JavaScript file.
-    @param {String} [options.fallbacks=['body']]
+    @param {string} [options.fallbacks=['body']]
       When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
     
       The first selector that matches an element in the current page (or response) will be used.
@@ -5523,7 +6578,7 @@ is built from these functions. You can use them to extend Unpoly from your
       It is recommend to always keep `'body'` as the last selector in the last in the case
       your server or load balancer renders an error message that does not contain your
       application layout.
-    @param {String} [options.fallbackTransition='none']
+    @param {string} [options.fallbackTransition='none']
       The transition to use when using a fallback target.
     @stable
      */
@@ -5549,7 +6604,7 @@ is built from these functions. You can use them to extend Unpoly from your
     Returns the URL the given element was retrieved from.
     
     @method up.dom.source
-    @param {String|Element|jQuery} selectorOrElement
+    @param {string|Element|jQuery} selectorOrElement
     @experimental
      */
     source = function(selectorOrElement) {
@@ -5563,8 +6618,8 @@ is built from these functions. You can use them to extend Unpoly from your
     to an absolute selector.
     
     @function up.dom.resolveSelector
-    @param {String|Element|jQuery} selectorOrElement
-    @param {String|Element|jQuery} origin
+    @param {string|Element|jQuery} selectorOrElement
+    @param {string|Element|jQuery} origin
       The element that this selector resolution is relative to.
       That element's selector will be substituted for `&`.
     @internal
@@ -5665,57 +6720,59 @@ is built from these functions. You can use them to extend Unpoly from your
     element that replaces it.
     
     @function up.replace
-    @param {String|Element|jQuery} selectorOrElement
+    @param {string|Element|jQuery} selectorOrElement
       The CSS selector to update. You can also pass a DOM element or jQuery element
       here, in which case a selector will be inferred from the element's class and ID.
-    @param {String} url
+    @param {string} url
       The URL to fetch from the server.
-    @param {String} [options.failTarget='body']
+    @param {string} [options.failTarget='body']
       The CSS selector to update if the server sends a non-200 status code.
-    @param {String} [options.fallback]
+    @param {string} [options.fallback]
       The selector to update when the original target was not found in the page.
-    @param {String} [options.title]
+    @param {string} [options.title]
       The document title after the replacement.
     
       If the call pushes an history entry and this option is missing, the title is extracted from the response's `<title>` tag.
       You can also pass `false` to explicitly prevent the title from being updated.
-    @param {String} [options.method='get']
+    @param {string} [options.method='get']
       The HTTP method to use for the request.
-    @param {Object|Array} [options.data]
+    @param {Object|Array|FormData} [options.data]
       Parameters that should be sent as the request's payload.
     
       Parameters can either be passed as an object (where the property names become
       the param names and the property values become the param values) or as
       an array of `{ name: 'param-name', value: 'param-value' }` objects
-      (compare to jQuery's [`serializeArray`](https://api.jquery.com/serializeArray/)).
-    @param {String} [options.transition='none']
-    @param {String|Boolean} [options.history=true]
-      If a `String` is given, it is used as the URL the browser's location bar and history.
+    
+    @param {string} [options.transition='none']
+    @param {string|boolean} [options.history=true]
+      If a string is given, it is used as the URL the browser's location bar and history.
       If omitted or true, the `url` argument will be used.
       If set to `false`, the history will remain unchanged.
-    @param {String|Boolean} [options.source=true]
-    @param {String} [options.reveal=false]
+    @param {boolean|string} [options.source=true]
+    @param {boolean|string} [options.reveal=false]
       Whether to [reveal](/up.reveal) the element being updated, by
       scrolling its containing viewport.
-    @param {Boolean} [options.restoreScroll=false]
+    
+      You can also pass a CSS selector for the element to reveal.
+    @param {boolean} [options.restoreScroll=false]
       If set to true, Unpoly will try to restore the scroll position
       of all the viewports around or below the updated element. The position
       will be reset to the last known top position before a previous
       history change for the current URL.
-    @param {Boolean} [options.cache]
+    @param {boolean} [options.cache]
       Whether to use a [cached response](/up.proxy) if available.
-    @param {String} [options.historyMethod='push']
+    @param {string} [options.historyMethod='push']
     @param {Object} [options.headers={}]
       An object of additional header key/value pairs to send along
       with the request.
-    @param {Boolean} [options.requireMatch=true]
+    @param {boolean} [options.requireMatch=true]
       Whether to raise an error if the given selector is missing in
       either the current page or in the response.
     @param {Element|jQuery} [options.origin]
       The element that triggered the replacement.
     
       The element's selector will be substituted for the `&` shorthand in the target selector.
-    @param {String} [options.layer='auto']
+    @param {string} [options.layer='auto']
       The name of the layer that ought to be updated. Valid values are
       `auto`, `page`, `modal` and `popup`.
     
@@ -5723,25 +6780,25 @@ is built from these functions. You can use them to extend Unpoly from your
       same layer as the element that triggered the replacement (see `options.origin`).
       If that element is not known, or no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
-    @param {String} [options.failLayer='auto']
+    @param {string} [options.failLayer='auto']
       The name of the layer that ought to be updated if the server sends a non-200 status code.
     
     @return {Promise}
-      A promise that will be resolved when the page has been updated.
+      A promise that will be fulfilled when the page has been updated.
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var failTarget, failureOptions, onFailure, onSuccess, promise, request, successOptions, target;
+      var e, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
       options = u.options(options);
+      options.inspectResponse = fullLoad = function() {
+        return up.browser.navigate(url, u.only(options, 'method', 'data'));
+      };
       if (!up.browser.canPushState() && options.history !== false) {
         if (!options.preload) {
-          up.browser.loadPage(url, u.only(options, 'method', 'data'));
+          fullLoad();
         }
         return u.unresolvablePromise();
       }
-      options.inspectResponse = function() {
-        return up.browser.loadPage(url, u.only(options, 'method', 'data'));
-      };
       successOptions = u.merge(options, {
         humanizedTarget: 'target'
       });
@@ -5751,68 +6808,67 @@ is built from these functions. You can use them to extend Unpoly from your
       });
       u.renameKey(failureOptions, 'failTransition', 'transition');
       u.renameKey(failureOptions, 'failLayer', 'layer');
-      target = bestPreflightSelector(selectorOrElement, successOptions);
-      failTarget = bestPreflightSelector(options.failTarget, failureOptions);
+      try {
+        improvedTarget = bestPreflightSelector(selectorOrElement, successOptions);
+        improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions);
+      } catch (error) {
+        e = error;
+        return Promise.reject(e);
+      }
       request = {
         url: url,
         method: options.method,
         data: options.data,
-        target: target,
-        failTarget: failTarget,
+        target: improvedTarget,
+        failTarget: improvedFailTarget,
         cache: options.cache,
         preload: options.preload,
         headers: options.headers,
         timeout: options.timeout
       };
-      onSuccess = function(html, textStatus, xhr) {
-        return processResponse(true, target, url, request, xhr, successOptions);
+      onSuccess = function(response) {
+        return processResponse(true, improvedTarget, response, successOptions);
       };
-      onFailure = function(xhr, textStatus, errorThrown) {
+      onFailure = function(response) {
         var promise, rejection;
         rejection = function() {
-          return u.rejectedPromise(xhr, textStatus, errorThrown);
+          return Promise.reject(response);
         };
-        if (xhr.responseText) {
-          promise = processResponse(false, failTarget, url, request, xhr, failureOptions);
-          return promise.then(rejection, rejection);
-        } else {
+        if (response.isFatalError()) {
           return rejection();
+        } else {
+          promise = processResponse(false, improvedFailTarget, response, failureOptions);
+          return u.always(promise, rejection);
         }
       };
-      promise = up.ajax(request);
-      promise = promise.then(onSuccess, onFailure);
+      promise = up.request(request);
+      if (!options.preload) {
+        promise = promise.then(onSuccess, onFailure);
+      }
       return promise;
     };
 
     /**
     @internal
      */
-    processResponse = function(isSuccess, selector, url, request, xhr, options) {
-      var isReloadable, newRequest, query, titleFromXhr, urlFromServer;
-      options.method = u.normalizeMethod(u.option(up.protocol.methodFromXhr(xhr), options.method));
-      isReloadable = options.method === 'GET';
-      if (urlFromServer = up.protocol.locationFromXhr(xhr)) {
-        url = urlFromServer;
-        if (isSuccess && up.proxy.isCachable(request)) {
-          newRequest = {
-            url: url,
-            method: up.protocol.methodFromXhr(xhr),
-            target: selector
-          };
-          up.proxy.alias(request, newRequest);
-        }
-      } else if (isReloadable) {
-        if (query = u.requestDataAsQuery(options.data)) {
-          url = url + "?" + query;
-        }
+    processResponse = function(isSuccess, selector, response, options) {
+      var hash, historyUrl, isReloadable, request, sourceUrl;
+      request = response.request;
+      sourceUrl = response.url;
+      historyUrl = sourceUrl;
+      hash = request.hash;
+      if (options.reveal === true && hash) {
+        options.reveal = hash;
+        historyUrl += hash;
       }
+      isReloadable = response.method === 'GET';
       if (isSuccess) {
         if (isReloadable) {
           if (!(options.history === false || u.isString(options.history))) {
-            options.history = url;
+            options.history = historyUrl;
           }
           if (!(options.source === false || u.isString(options.source))) {
-            options.source = url;
+            options.source = sourceUrl;
           }
         } else {
           if (!u.isString(options.history)) {
@@ -5825,24 +6881,20 @@ is built from these functions. You can use them to extend Unpoly from your
       } else {
         if (isReloadable) {
           if (options.history !== false) {
-            options.history = url;
+            options.history = historyUrl;
           }
           if (options.source !== false) {
-            options.source = url;
+            options.source = sourceUrl;
           }
         } else {
-          options.source = 'keep';
           options.history = false;
+          options.source = 'keep';
         }
       }
-      if (shouldExtractTitle(options) && (titleFromXhr = up.protocol.titleFromXhr(xhr))) {
-        options.title = titleFromXhr;
+      if (shouldExtractTitle(options) && response.title) {
+        options.title = response.title;
       }
-      if (options.preload) {
-        return u.resolvedPromise();
-      } else {
-        return extract(selector, xhr.responseText, options);
-      }
+      return extract(selector, response.text, options);
     };
     shouldExtractTitle = function(options) {
       return !(options.title === false || u.isString(options.title) || (options.history === false && options.title !== true));
@@ -5877,18 +6929,17 @@ is built from these functions. You can use them to extend Unpoly from your
     discarded, since it didn't match the selector.
     
     @function up.extract
-    @param {String|Element|jQuery} selectorOrElement
-    @param {String} html
+    @param {string|Element|jQuery} selectorOrElement
+    @param {string} html
     @param {Object} [options]
       See options for [`up.replace()`](/up.replace).
     @return {Promise}
-      A promise that will be resolved then the selector was updated
+      A promise that will be fulfilled then the selector was updated
       and all animation has finished.
     @stable
      */
     extract = function(selectorOrElement, html, options) {
       return up.log.group('Extracting %s from %d bytes of HTML', selectorOrElement, html != null ? html.length : void 0, function() {
-        var i, implantSteps, len, response, responseTitle, step, swapPromises;
         options = u.options(options, {
           historyMethod: 'push',
           requireMatch: true,
@@ -5898,32 +6949,37 @@ is built from these functions. You can use them to extend Unpoly from your
         if (options.saveScroll !== false) {
           up.layout.saveScroll();
         }
-        if (typeof options.provideTarget === "function") {
-          options.provideTarget();
-        }
-        response = parseResponse(html);
-        implantSteps = bestMatchingSteps(selectorOrElement, response, options);
-        if (shouldExtractTitle(options) && (responseTitle = response.title())) {
-          options.title = responseTitle;
-        }
-        updateHistoryAndTitle(options);
-        swapPromises = [];
-        for (i = 0, len = implantSteps.length; i < len; i++) {
-          step = implantSteps[i];
-          up.log.group('Updating %s', step.selector, function() {
-            var swapPromise;
-            filterScripts(step.$new, options);
-            swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options);
-            swapPromises.push(swapPromise);
-            return options.reveal = false;
-          });
-        }
-        return $.when.apply($, swapPromises);
+        return u.rejectOnError(function() {
+          var extractSteps, i, len, responseDoc, responseTitle, step, swapPromises;
+          if (typeof options.provideTarget === "function") {
+            options.provideTarget();
+          }
+          responseDoc = parseResponseDoc(html);
+          extractSteps = bestMatchingSteps(selectorOrElement, responseDoc, options);
+          if (shouldExtractTitle(options) && (responseTitle = responseDoc.title())) {
+            options.title = responseTitle;
+          }
+          updateHistoryAndTitle(options);
+          swapPromises = [];
+          for (i = 0, len = extractSteps.length; i < len; i++) {
+            step = extractSteps[i];
+            up.log.group('Updating %s', step.selector, function() {
+              var swapPromise;
+              filterScripts(step.$new, options);
+              swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options);
+              swapPromises.push(swapPromise);
+              return options = u.merge(options, {
+                reveal: false
+              });
+            });
+          }
+          return Promise.all(swapPromises);
+        });
       });
     };
     bestPreflightSelector = function(selector, options) {
       var cascade;
-      cascade = new up.dom.ExtractCascade(selector, options);
+      cascade = new up.ExtractCascade(selector, options);
       return cascade.bestPreflightSelector();
     };
     bestMatchingSteps = function(selector, response, options) {
@@ -5931,14 +6987,14 @@ is built from these functions. You can use them to extend Unpoly from your
       options = u.merge(options, {
         response: response
       });
-      cascade = new up.dom.ExtractCascade(selector, options);
+      cascade = new up.ExtractCascade(selector, options);
       return cascade.bestMatchingSteps();
     };
     filterScripts = function($element, options) {
       var $script, $scripts, i, isInline, isLinked, len, results, runInlineScripts, runLinkedScripts, script;
       runInlineScripts = u.option(options.runInlineScripts, config.runInlineScripts);
       runLinkedScripts = u.option(options.runLinkedScripts, config.runLinkedScripts);
-      $scripts = u.findWithSelf($element, 'script');
+      $scripts = u.selectInSubtree($element, 'script');
       results = [];
       for (i = 0, len = $scripts.length; i < len; i++) {
         script = $scripts[i];
@@ -5953,7 +7009,7 @@ is built from these functions. You can use them to extend Unpoly from your
       }
       return results;
     };
-    parseResponse = function(html) {
+    parseResponseDoc = function(html) {
       var htmlElement;
       htmlElement = u.createElementFromHtml(html);
       return {
@@ -6006,7 +7062,7 @@ is built from these functions. You can use them to extend Unpoly from your
         });
       } else if (keepPlan = findKeepPlan($old, $new, options)) {
         emitFragmentKept(keepPlan);
-        promise = u.resolvedPromise();
+        promise = Promise.resolve();
       } else {
         options.keepPlans = transferKeepableElements($old, $new, options);
         clean = up.syntax.prepareClean($old);
@@ -6026,7 +7082,8 @@ is built from these functions. You can use them to extend Unpoly from your
         };
         promise = destroy($old, {
           clean: clean,
-          animation: replacement
+          beforeWipe: replacement,
+          log: false
         });
       }
       return promise;
@@ -6067,7 +7124,7 @@ is built from these functions. You can use them to extend Unpoly from your
           if (options.descendantsOnly) {
             $partner = $new.find(partnerSelector);
           } else {
-            $partner = u.findWithSelf($new, partnerSelector);
+            $partner = u.selectInSubtree($new, partnerSelector);
           }
           $partner = $partner.first();
           if ($partner.length && $partner.is('[up-keep]')) {
@@ -6150,9 +7207,9 @@ is built from these functions. You can use them to extend Unpoly from your
       Event listeners may call this method to prevent the element from being preserved.
     @param {jQuery} event.$element
       The fragment that will be kept.
-    @param {jqQuery} event.$newElement
+    @param {jQuery} event.$newElement
       The discarded element.
-    @param {jQuery} event.newData
+    @param {Object} event.newData
       The value of the [`up-data`](/up-data) attribute of the discarded element,
       parsed as a JSON object.
     @stable
@@ -6168,9 +7225,9 @@ is built from these functions. You can use them to extend Unpoly from your
     @event up:fragment:kept
     @param {jQuery} event.$element
       The fragment that has been kept.
-    @param {jqQuery} event.$newElement
+    @param {jQuery} event.$newElement
       The discarded element.
-    @param {jQuery} event.newData
+    @param {Object} event.newData
       The value of the [`up-data`](/up-data) attribute of the discarded element,
       parsed as a JSON object.
     @stable
@@ -6194,9 +7251,9 @@ is built from these functions. You can use them to extend Unpoly from your
     event.
     
     @function up.hello
-    @param {String|Element|jQuery} selectorOrElement
-    @param {String|Element|jQuery} [options.origin]
-    @param {String|Element|jQuery} [options.kept]
+    @param {string|Element|jQuery} selectorOrElement
+    @param {string|Element|jQuery} [options.origin]
+    @param {string|Element|jQuery} [options.kept]
     @return {jQuery}
       The compiled element
     @stable
@@ -6255,7 +7312,7 @@ is built from these functions. You can use them to extend Unpoly from your
     autofocus = function($element) {
       var $control, selector;
       selector = '[autofocus]:last';
-      $control = u.findWithSelf($element, selector);
+      $control = u.selectInSubtree($element, selector);
       if ($control.length && $control.get(0) !== document.activeElement) {
         return $control.focus();
       }
@@ -6277,16 +7334,16 @@ is built from these functions. You can use them to extend Unpoly from your
     Returns `undefined` if no element matches these conditions.
     
     @function up.first
-    @param {String|Element|jQuery|Array<Element>} selectorOrElement
-    @param {String} options.layer
+    @param {string|Element|jQuery|Array<Element>} selectorOrElement
+    @param {string} options.layer
       The name of the layer in which to find the element. Valid values are
       `auto`, `page`, `modal` and `popup`.
-    @param {String|Element|jQuery} [options.origin]
+    @param {string|Element|jQuery} [options.origin]
       An second element or selector that can be referenced as `&` in the first selector:
     
           $input = $('input.email');
           up.first('.field:has(&)', $input); // returns the .field containing $input
-    @return {jQuery|Undefined}
+    @return {jQuery|undefined}
       The first element that is neither a ghost or being destroyed,
       or `undefined` if no such element was found.
     @experimental
@@ -6361,58 +7418,65 @@ is built from these functions. You can use them to extend Unpoly from your
     Emits events [`up:fragment:destroy`](/up:fragment:destroy) and [`up:fragment:destroyed`](/up:fragment:destroyed).
     
     @function up.destroy
-    @param {String|Element|jQuery} selectorOrElement 
-    @param {String} [options.history]
+    @param {string|Element|jQuery} selectorOrElement
+    @param {string} [options.history]
       A URL that will be pushed as a new history entry when the element begins destruction.
-    @param {String} [options.title]
+    @param {string} [options.title]
       The document title to set when the element begins destruction.
-    @param {String|Function} [options.animation='none']
+    @param {string|Function} [options.animation='none']
       The animation to use before the element is removed from the DOM.
-    @param {Number} [options.duration]
+    @param {number} [options.duration]
       The duration of the animation. See [`up.animate()`](/up.animate).
-    @param {Number} [options.delay]
+    @param {number} [options.delay]
       The delay before the animation starts. See [`up.animate()`](/up.animate).
-    @param {String} [options.easing]
+    @param {string} [options.easing]
       The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
-    @return {Deferred}
-      A promise that will be resolved once the element has been removed from the DOM.
+    @return {Promise}
+      A promise that will be fulfilled once the element has been removed from the DOM.
     @stable
      */
     destroy = function(selectorOrElement, options) {
-      var $element, animateOptions, animationDeferred, destroyMessage, destroyedMessage;
+      var $element, animate, beforeWipe, destroyMessage, destroyedMessage, wipe;
+      $element = $(selectorOrElement);
       options = u.options(options, {
         animation: false
       });
-      $element = $(selectorOrElement);
-      if (!$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')) {
+      if (shouldLogDestruction($element, options)) {
         destroyMessage = ['Destroying fragment %o', $element.get(0)];
         destroyedMessage = ['Destroyed fragment %o', $element.get(0)];
       }
       if ($element.length === 0) {
-        return u.resolvedDeferred();
-      } else if (up.bus.nobodyPrevents('up:fragment:destroy', {
-        $element: $element,
-        message: destroyMessage
-      })) {
-        animateOptions = up.motion.animateOptions(options);
+        return Promise.resolve();
+      } else {
+        up.emit('up:fragment:destroy', {
+          $element: $element,
+          message: destroyMessage
+        });
         $element.addClass('up-destroying');
         updateHistoryAndTitle(options);
-        animationDeferred = u.presence(options.animation, u.isDeferred) || up.motion.animate($element, options.animation, animateOptions);
-        animationDeferred.then(function() {
+        animate = function() {
+          var animateOptions;
+          animateOptions = up.motion.animateOptions(options);
+          return up.motion.animate($element, options.animation, animateOptions);
+        };
+        beforeWipe = options.beforeWipe || Promise.resolve();
+        wipe = function() {
           options.clean || (options.clean = function() {
             return up.syntax.clean($element);
           });
           options.clean();
+          up.syntax.clean($element);
           up.emit('up:fragment:destroyed', {
             $element: $element,
             message: destroyedMessage
           });
           return $element.remove();
-        });
-        return animationDeferred;
-      } else {
-        return u.unresolvableDeferred();
+        };
+        return animate().then(beforeWipe).then(wipe);
       }
+    };
+    shouldLogDestruction = function($element, options) {
+      return options.log !== false && !$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup');
     };
 
     /**
@@ -6425,8 +7489,6 @@ is built from these functions. You can use them to extend Unpoly from your
     @event up:fragment:destroy
     @param {jQuery} event.$element
       The page fragment that is about to be destroyed.
-    @param event.preventDefault()
-      Event listeners may call this method to prevent the fragment from being destroyed.
     @stable
      */
 
@@ -6456,10 +7518,10 @@ is built from these functions. You can use them to extend Unpoly from your
     don't usually need to give an URL when reloading.
     
     @function up.reload
-    @param {String|Element|jQuery} selectorOrElement
+    @param {string|Element|jQuery} selectorOrElement
     @param {Object} [options]
       See options for [`up.replace()`](/up.replace)
-    @param {String} [options.url]
+    @param {string} [options.url]
       The URL from which to reload the fragment.
       This defaults to the URL from which the fragment was originally loaded.
     @stable
@@ -6508,226 +7570,6 @@ is built from these functions. You can use them to extend Unpoly from your
   up.renamedModule('flow', 'dom');
 
 }).call(this);
-(function() {
-  var u,
-    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  u = up.util;
-
-  up.dom.ExtractCascade = (function() {
-    function ExtractCascade(selector, options) {
-      this.oldPlanNotFound = bind(this.oldPlanNotFound, this);
-      this.matchingPlanNotFound = bind(this.matchingPlanNotFound, this);
-      this.bestMatchingSteps = bind(this.bestMatchingSteps, this);
-      this.bestPreflightSelector = bind(this.bestPreflightSelector, this);
-      this.detectPlan = bind(this.detectPlan, this);
-      this.matchingPlan = bind(this.matchingPlan, this);
-      this.newPlan = bind(this.newPlan, this);
-      this.oldPlan = bind(this.oldPlan, this);
-      this.options = u.options(options, {
-        humanizedTarget: 'selector',
-        layer: 'auto'
-      });
-      this.candidates = this.buildCandidates(selector);
-      this.plans = u.map(this.candidates, (function(_this) {
-        return function(candidate, i) {
-          var planOptions;
-          planOptions = u.copy(_this.options);
-          if (i > 0) {
-            planOptions.transition = up.dom.config.fallbackTransition;
-          }
-          return new up.dom.ExtractPlan(candidate, planOptions);
-        };
-      })(this));
-    }
-
-    ExtractCascade.prototype.buildCandidates = function(selector) {
-      var candidates;
-      candidates = [selector, this.options.fallback, up.dom.config.fallbacks];
-      candidates = u.flatten(candidates);
-      candidates = u.select(candidates, u.isTruthy);
-      if (this.options.fallback === false || this.options.provideTarget) {
-        candidates = [candidates[0]];
-      }
-      return candidates;
-    };
-
-    ExtractCascade.prototype.oldPlan = function() {
-      return this.detectPlan('oldExists');
-    };
-
-    ExtractCascade.prototype.newPlan = function() {
-      return this.detectPlan('newExists');
-    };
-
-    ExtractCascade.prototype.matchingPlan = function() {
-      return this.detectPlan('matchExists');
-    };
-
-    ExtractCascade.prototype.detectPlan = function(checker) {
-      return u.detect(this.plans, function(plan) {
-        return plan[checker]();
-      });
-    };
-
-    ExtractCascade.prototype.bestPreflightSelector = function() {
-      var plan;
-      if (this.options.provideTarget) {
-        return this.plans[0].selector;
-      } else if (plan = this.oldPlan()) {
-        return plan.selector;
-      } else {
-        return this.oldPlanNotFound();
-      }
-    };
-
-    ExtractCascade.prototype.bestMatchingSteps = function() {
-      var plan;
-      if (plan = this.matchingPlan()) {
-        return plan.steps;
-      } else {
-        return this.matchingPlanNotFound();
-      }
-    };
-
-    ExtractCascade.prototype.matchingPlanNotFound = function() {
-      var inspectAction, message;
-      if (this.newPlan()) {
-        return this.oldPlanNotFound();
-      } else {
-        if (this.oldPlan()) {
-          message = "Could not find " + this.options.humanizedTarget + " in response";
-        } else {
-          message = "Could not match " + this.options.humanizedTarget + " in current page and response";
-        }
-        if (this.response && this.options.inspectResponse) {
-          inspectAction = {
-            label: 'Open response',
-            callback: this.options.inspectResponse
-          };
-        }
-        return up.fail([message + " (tried %o)", this.candidates], {
-          action: inspectAction
-        });
-      }
-    };
-
-    ExtractCascade.prototype.oldPlanNotFound = function() {
-      var layerProse;
-      layerProse = this.options.layer;
-      if (layerProse === 'auto') {
-        layerProse = 'page, modal or popup';
-      }
-      return up.fail("Could not find " + this.options.humanizedTarget + " in current " + layerProse + " (tried %o)", this.candidates);
-    };
-
-    return ExtractCascade;
-
-  })();
-
-}).call(this);
-(function() {
-  var u,
-    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  u = up.util;
-
-  up.dom.ExtractPlan = (function() {
-    function ExtractPlan(selector, options) {
-      this.parseSteps = bind(this.parseSteps, this);
-      this.matchExists = bind(this.matchExists, this);
-      this.newExists = bind(this.newExists, this);
-      this.oldExists = bind(this.oldExists, this);
-      this.findNew = bind(this.findNew, this);
-      this.findOld = bind(this.findOld, this);
-      this.origin = options.origin;
-      this.selector = up.dom.resolveSelector(selector, options.origin);
-      this.transition = options.transition || options.animation || 'none';
-      this.response = options.response;
-      this.oldLayer = options.layer;
-      this.steps = this.parseSteps();
-    }
-
-    ExtractPlan.prototype.findOld = function() {
-      return u.each(this.steps, (function(_this) {
-        return function(step) {
-          return step.$old = up.dom.first(step.selector, {
-            layer: _this.oldLayer
-          });
-        };
-      })(this));
-    };
-
-    ExtractPlan.prototype.findNew = function() {
-      return u.each(this.steps, (function(_this) {
-        return function(step) {
-          return step.$new = _this.response.first(step.selector);
-        };
-      })(this));
-    };
-
-    ExtractPlan.prototype.oldExists = function() {
-      this.findOld();
-      return u.all(this.steps, function(step) {
-        return step.$old;
-      });
-    };
-
-    ExtractPlan.prototype.newExists = function() {
-      this.findNew();
-      return u.all(this.steps, function(step) {
-        return step.$new;
-      });
-    };
-
-    ExtractPlan.prototype.matchExists = function() {
-      return this.oldExists() && this.newExists();
-    };
-
-
-    /**
-    Example:
-    
-        parseSelector('foo, bar:before', transition: 'cross-fade')
-    
-        [
-          { selector: 'foo', pseudoClass: undefined, transition: 'cross-fade' },
-          { selector: 'bar', pseudoClass: 'before', transition: 'cross-fade' }
-        ]
-     */
-
-    ExtractPlan.prototype.parseSteps = function() {
-      var comma, disjunction, transitions;
-      if (u.isString(this.transition)) {
-        transitions = this.transition.split(comma);
-      } else {
-        transitions = [this.transition];
-      }
-      comma = /\ *,\ */;
-      disjunction = this.selector.split(comma);
-      return u.map(disjunction, function(literal, i) {
-        var literalParts, pseudoClass, selector, transition;
-        literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/);
-        literalParts || up.fail('Could not parse selector literal "%s"', literal);
-        selector = literalParts[1];
-        if (selector === 'html') {
-          selector = 'body';
-        }
-        pseudoClass = literalParts[2];
-        transition = transitions[i] || u.last(transitions);
-        return {
-          selector: selector,
-          pseudoClass: pseudoClass,
-          transition: transition
-        };
-      });
-    };
-
-    return ExtractPlan;
-
-  })();
-
-}).call(this);
 
 /**
 Animation
@@ -6748,7 +7590,7 @@ In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
 
 An example for an animation is opening a new dialog. We can animate the appearance
-of the dialog by adding an [`up-animation`](/up-modal#up-animation) attribute to the opening link:
+of the dialog by adding an [`[up-animation]`](/a-up-modal#up-animation) attribute to the opening link:
 
     <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
 
@@ -6767,27 +7609,28 @@ You can define custom animations using [`up.transition()`](/up.transition) and
   var slice = [].slice;
 
   up.motion = (function($) {
-    var GHOSTING_CLASS, GHOSTING_DEFERRED_KEY, animate, animateOptions, animation, animations, assertIsDeferred, config, defaultAnimations, defaultTransitions, ensureMorphable, findAnimation, finish, finishGhosting, isEnabled, isNone, morph, none, prependCopy, reset, resolvableWhen, skipMorph, snapshot, transition, transitions, translateCss, u, withGhosts;
+    var animate, animateOptions, animateWithCss, config, defaultNamedAnimations, defaultNamedTransitions, findNamedAnimation, findTransitionFn, finish, finishOnce, isEnabled, isNone, morph, motionTracker, namedAnimations, namedTransitions, prependCopy, registerAnimation, registerTransition, reset, skipAnimate, skipMorph, snapshot, translateCss, u, willAnimate, withGhosts;
     u = up.util;
-    animations = {};
-    defaultAnimations = {};
-    transitions = {};
-    defaultTransitions = {};
+    namedAnimations = {};
+    defaultNamedAnimations = {};
+    namedTransitions = {};
+    defaultNamedTransitions = {};
+    motionTracker = new up.MotionTracker('motion');
 
     /**
     Sets default options for animations and transitions.
     
     @property up.motion.config
-    @param {Number} [config.duration=300]
+    @param {number} [config.duration=300]
       The default duration for all animations and transitions (in milliseconds).
-    @param {Number} [config.delay=0]
+    @param {number} [config.delay=0]
       The default delay for all animations and transitions (in milliseconds).
-    @param {String} [config.easing='ease']
+    @param {string} [config.easing='ease']
       The default timing function that controls the acceleration of animations and transitions.
     
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
-    @param {Boolean} [config.enabled=true]
+    @param {boolean} [config.enabled=true]
       Whether animation is enabled.
     
       Set this to `false` to disable animation globally.
@@ -6805,8 +7648,8 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     });
     reset = function() {
       finish();
-      animations = u.copy(defaultAnimations);
-      transitions = u.copy(defaultTransitions);
+      namedAnimations = u.copy(defaultNamedAnimations);
+      namedTransitions = u.copy(defaultNamedTransitions);
       return config.reset();
     };
 
@@ -6816,7 +7659,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     Set [`up.motion.config.enabled`](/up.motion.config) `false` in order to disable animations globally.
     
     @function up.motion.isEnabled
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isEnabled = function() {
@@ -6874,19 +7717,19 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     the new animation begins.
     
     @function up.animate
-    @param {Element|jQuery|String} elementOrSelector
+    @param {Element|jQuery|string} elementOrSelector
       The element to animate.
-    @param {String|Function|Object} animation
+    @param {string|Function|Object} animation
       Can either be:
     
       - The animation's name
       - A function performing the animation
       - An object of CSS attributes describing the last frame of the animation
-    @param {Number} [options.duration=300]
+    @param {number} [options.duration=300]
       The duration of the animation, in milliseconds.
-    @param {Number} [options.delay=0]
+    @param {number} [options.delay=0]
       The delay before the animation starts, in milliseconds.
-    @param {String} [options.easing='ease']
+    @param {string} [options.easing='ease']
       The timing function that controls the animation's acceleration.
     
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
@@ -6898,24 +7741,106 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     animate = function(elementOrSelector, animation, options) {
       var $element;
       $element = $(elementOrSelector);
-      finish($element);
       options = animateOptions(options);
-      if (isNone(animation)) {
-        return none();
-      } else if (u.isFunction(animation)) {
-        return assertIsDeferred(animation($element, options), animation);
-      } else if (u.isString(animation)) {
-        return animate($element, findAnimation(animation), options);
-      } else if (u.isHash(animation)) {
-        if (isEnabled()) {
-          return u.cssAnimate($element, animation, options);
+      return finishOnce($element, options).then(function() {
+        if (!willAnimate($element, animation, options)) {
+          return skipAnimate($element, animation);
+        } else if (u.isFunction(animation)) {
+          return animation($element, options);
+        } else if (u.isString(animation)) {
+          return animate($element, findNamedAnimation(animation), options);
+        } else if (u.isOptions(animation)) {
+          return animateWithCss($element, animation, options);
         } else {
-          $element.css(animation);
-          return u.resolvedDeferred();
+          return up.fail('Animation must be a function, animation name or object of CSS properties, but it was %o', animation);
         }
-      } else {
-        return up.fail("Unknown animation type for %o", animation);
+      });
+    };
+    willAnimate = function($elements, animationOrTransition, options) {
+      return isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && u.all($elements, u.isBodyDescendant);
+    };
+    skipAnimate = function($element, animation) {
+      if (u.isOptions(animation)) {
+        $element.css(animation);
       }
+      return Promise.resolve();
+    };
+
+    /**
+    Animates the given element's CSS properties using CSS transitions.
+    
+    If the element is already being animated, the previous animation
+    will instantly jump to its last frame before the new animation begins.
+    
+    To improve performance, the element will be forced into compositing for
+    the duration of the animation.
+    
+    @function up.util.cssAnimate
+    @param {Element|jQuery|string} elementOrSelector
+      The element to animate.
+    @param {Object} lastFrame
+      The CSS properties that should be transitioned to.
+    @param {number} [options.duration=300]
+      The duration of the animation, in milliseconds.
+    @param {number} [options.delay=0]
+      The delay before the animation starts, in milliseconds.
+    @param {string} [options.easing='ease']
+      The timing function that controls the animation's acceleration.
+      See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+      for a list of pre-defined timing functions.
+    @return {Promise}
+      A promise that fulfills when the animation ends.
+    @internal
+     */
+    animateWithCss = function($element, lastFrame, options) {
+      var startCssTransition;
+      startCssTransition = function() {
+        var cancelFallbackTimer, deferred, fulfill, oldTransition, onFinish, onTransitionEnd, transition, transitionProperties, transitionTimingTolerance, undoCompositing;
+        transitionProperties = Object.keys(lastFrame);
+        transition = {
+          'transition-property': transitionProperties.join(', '),
+          'transition-duration': options.duration + "ms",
+          'transition-delay': options.delay + "ms",
+          'transition-timing-function': options.easing
+        };
+        oldTransition = $element.css(Object.keys(transition));
+        deferred = u.newDeferred();
+        fulfill = function() {
+          return deferred.resolve();
+        };
+        onTransitionEnd = function(event) {
+          var completedProperty;
+          completedProperty = event.originalEvent.propertyName;
+          if (u.contains(transitionProperties, completedProperty)) {
+            return fulfill();
+          }
+        };
+        onFinish = fulfill;
+        $element.on(motionTracker.finishEvent, onFinish);
+        $element.on('transitionend', onTransitionEnd);
+        transitionTimingTolerance = 5;
+        cancelFallbackTimer = u.setTimer(options.duration + transitionTimingTolerance, fulfill);
+        deferred.then(function() {
+          var hadTransitionBefore;
+          $element.off(motionTracker.finishEvent, onFinish);
+          $element.off('transitionend', onTransitionEnd);
+          clearTimeout(cancelFallbackTimer);
+          undoCompositing();
+          $element.css({
+            'transition': 'none'
+          });
+          hadTransitionBefore = !(oldTransition['transition-property'] === 'none' || (oldTransition['transition-property'] === 'all' && oldTransition['transition-duration'][0] === '0'));
+          if (hadTransitionBefore) {
+            u.forceRepaint($element);
+            return $element.css(oldTransition);
+          }
+        });
+        undoCompositing = u.forceCompositing($element);
+        $element.css(transition);
+        $element.css(lastFrame);
+        return deferred.promise();
+      };
+      return motionTracker.start($element, startCssTransition);
     };
 
     /**
@@ -6936,53 +7861,53 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       consolidatedOptions.easing = u.option(userOptions.easing, u.presentAttr($element, 'up-easing'), moduleDefaults.easing, config.easing);
       consolidatedOptions.duration = Number(u.option(userOptions.duration, u.presentAttr($element, 'up-duration'), moduleDefaults.duration, config.duration));
       consolidatedOptions.delay = Number(u.option(userOptions.delay, u.presentAttr($element, 'up-delay'), moduleDefaults.delay, config.delay));
+      consolidatedOptions.finishedMotion = userOptions.finishedMotion;
       return consolidatedOptions;
     };
-    findAnimation = function(name) {
-      return animations[name] || up.fail("Unknown animation %o", name);
+    findNamedAnimation = function(name) {
+      return namedAnimations[name] || up.fail("Unknown animation %o", name);
     };
-    GHOSTING_DEFERRED_KEY = 'up-ghosting-deferred';
-    GHOSTING_CLASS = 'up-ghosting';
-    withGhosts = function($old, $new, options, block) {
-      var $both, $viewport, deferred, newCopy, newScrollTop, oldCopy, oldScrollTop, showNew;
+
+    /**
+    @function withGhosts
+    @return {Promise}
+    @internal
+     */
+    withGhosts = function($old, $new, options, transitionFn) {
+      var $viewport, newCopy, newScrollTop, oldCopy, oldScrollTop;
       if (options.copy === false || $old.is('.up-ghost') || $new.is('.up-ghost')) {
-        return block($old, $new);
+        return transitionFn($old, $new, options);
       }
       oldCopy = void 0;
       newCopy = void 0;
       oldScrollTop = void 0;
       newScrollTop = void 0;
       $viewport = up.layout.viewportOf($old);
-      $both = $old.add($new);
       u.temporaryCss($new, {
         display: 'none'
       }, function() {
         oldCopy = prependCopy($old, $viewport);
         return oldScrollTop = $viewport.scrollTop();
       });
-      u.temporaryCss($old, {
-        display: 'none'
-      }, function() {
-        up.layout.revealOrRestoreScroll($new, options);
-        newCopy = prependCopy($new, $viewport);
-        return newScrollTop = $viewport.scrollTop();
-      });
-      oldCopy.moveTop(newScrollTop - oldScrollTop);
       $old.hide();
-      showNew = u.temporaryCss($new, {
-        opacity: '0'
+      return up.layout.revealOrRestoreScroll($new, options).then(function() {
+        var $bothGhosts, $bothOriginals, restoreNewOpacity, transitionDone;
+        newCopy = prependCopy($new, $viewport);
+        newScrollTop = $viewport.scrollTop();
+        oldCopy.moveTop(newScrollTop - oldScrollTop);
+        restoreNewOpacity = u.temporaryCss($new, {
+          opacity: '0'
+        });
+        transitionDone = transitionFn(oldCopy.$ghost, newCopy.$ghost, options);
+        $bothGhosts = oldCopy.$ghost.add(newCopy.$ghost);
+        $bothOriginals = $old.add($new);
+        motionTracker.forwardFinishEvent($bothOriginals, $bothGhosts, transitionDone);
+        return transitionDone.then(function() {
+          restoreNewOpacity();
+          oldCopy.$bounds.remove();
+          return newCopy.$bounds.remove();
+        });
       });
-      deferred = block(oldCopy.$ghost, newCopy.$ghost);
-      $both.data(GHOSTING_DEFERRED_KEY, deferred);
-      $both.addClass(GHOSTING_CLASS);
-      deferred.then(function() {
-        $both.removeData(GHOSTING_DEFERRED_KEY);
-        $both.removeClass(GHOSTING_CLASS);
-        showNew();
-        oldCopy.$bounds.remove();
-        return newCopy.$bounds.remove();
-      });
-      return deferred;
     };
 
     /**
@@ -6997,38 +7922,13 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     Does nothing if there are no animation to complete.
     
     @function up.motion.finish
-    @param {Element|jQuery|String} [elementOrSelector]
+    @param {Element|jQuery|string} [elementOrSelector]
+    @return {Promise}
+      A promise that fulfills when animations and transitions have finished.
     @stable
      */
     finish = function(elementOrSelector) {
-      var $animatingSubtree, $element, $ghostingSubtree;
-      if (elementOrSelector == null) {
-        elementOrSelector = '.up-animating';
-      }
-      if (!isEnabled()) {
-        return;
-      }
-      $element = $(elementOrSelector);
-      $animatingSubtree = u.findWithSelf($element, '.up-animating');
-      u.finishCssAnimate($animatingSubtree);
-      $ghostingSubtree = u.findWithSelf($element, "." + GHOSTING_CLASS);
-      return finishGhosting($ghostingSubtree);
-    };
-    finishGhosting = function($collection) {
-      return $collection.each(function() {
-        var $element, existingGhosting;
-        $element = $(this);
-        if (existingGhosting = u.pluckData($element, GHOSTING_DEFERRED_KEY)) {
-          return existingGhosting.resolve();
-        }
-      });
-    };
-    assertIsDeferred = function(object, source) {
-      if (u.isDeferred(object)) {
-        return object;
-      } else {
-        return up.fail("Did not return a promise with .then and .resolve methods: %o", source);
-      }
+      return motionTracker.finish(elementOrSelector);
     };
 
     /**
@@ -7077,75 +7977,82 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       The old element remains hidden in the DOM.
     
     @function up.morph
-    @param {Element|jQuery|String} source
-    @param {Element|jQuery|String} target
-    @param {Function|String} transitionOrName
-    @param {Number} [options.duration=300]
+    @param {Element|jQuery|string} source
+    @param {Element|jQuery|string} target
+    @param {Function|string} transitionOrName
+    @param {number} [options.duration=300]
       The duration of the animation, in milliseconds.
-    @param {Number} [options.delay=0]
+    @param {number} [options.delay=0]
       The delay before the animation starts, in milliseconds.
-    @param {String} [options.easing='ease']
+    @param {string} [options.easing='ease']
       The timing function that controls the transition's acceleration.
     
       See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
       for a list of pre-defined timing functions.
-    @param {Boolean} [options.reveal=false]
+    @param {boolean} [options.reveal=false]
       Whether to reveal the new element by scrolling its parent viewport.
     @return {Promise}
-      A promise for the transition's end.
+      A promise that fulfills when the transition ends.
     @stable
      */
-    morph = function(source, target, transitionOrName, options) {
-      var $new, $old, willMorph;
+    morph = function(source, target, transitionObject, options) {
+      var $both, $new, $old, transitionFn, willMorph;
       options = u.options(options);
-      willMorph = isEnabled() && !isNone(transitionOrName);
+      options = u.assign(options, animateOptions(options));
       $old = $(source);
       $new = $(target);
-      return up.log.group((willMorph ? 'Morphing %o to %o (using %s, %o)' : void 0), $old.get(0), $new.get(0), transitionOrName, options, function() {
-        var animation, parsedOptions, parts, transition;
-        parsedOptions = u.only(options, 'reveal', 'restoreScroll', 'source');
-        parsedOptions = u.assign(parsedOptions, animateOptions(options));
-        finish($old);
-        finish($new);
-        if (willMorph) {
-          ensureMorphable($old);
-          ensureMorphable($new);
-          if (animation = animations[transitionOrName]) {
-            skipMorph($old, $new, parsedOptions);
-            return animate($new, animation, parsedOptions);
-          } else if (transition = u.presence(transitionOrName, u.isFunction) || transitions[transitionOrName]) {
-            return withGhosts($old, $new, parsedOptions, function($oldGhost, $newGhost) {
-              var transitionPromise;
-              transitionPromise = transition($oldGhost, $newGhost, parsedOptions);
-              return assertIsDeferred(transitionPromise, transitionOrName);
-            });
-          } else if (u.isString(transitionOrName) && transitionOrName.indexOf('/') >= 0) {
-            parts = transitionOrName.split('/');
-            transition = function($old, $new, options) {
-              return resolvableWhen(animate($old, parts[0], options), animate($new, parts[1], options));
-            };
-            return morph($old, $new, transition, parsedOptions);
+      $both = $old.add($new);
+      transitionFn = findTransitionFn(transitionObject);
+      willMorph = willAnimate($both, transitionFn, options);
+      return up.log.group((willMorph ? 'Morphing %o to %o with transition %o' : void 0), $old.get(0), $new.get(0), transitionObject, function() {
+        return finishOnce($both, options).then(function() {
+          if (!willMorph) {
+            return skipMorph($old, $new, options);
+          } else if (transitionFn) {
+            return withGhosts($old, $new, options, transitionFn);
           } else {
-            return up.fail("Unknown transition %o", transitionOrName);
+            return up.fail("Unknown transition %o", transitionObject);
           }
-        } else {
-          return skipMorph($old, $new, parsedOptions);
-        }
+        });
       });
     };
-    ensureMorphable = function($element) {
-      var element;
-      if ($element.parents('body').length === 0) {
-        element = $element.get(0);
-        return up.fail("Can't morph a <%s> element (%o)", element.tagName, element);
+    finishOnce = function($elements, options) {
+      if (options.finishedMotion) {
+        return Promise.resolve();
+      } else {
+        options.finishedMotion = true;
+        return finish($elements);
+      }
+    };
+    findTransitionFn = function(object) {
+      var namedTransition;
+      if (isNone(object)) {
+        return void 0;
+      } else if (u.isFunction(object)) {
+        return object;
+      } else if (u.isArray(object)) {
+        if (isNone(object[0]) && isNone(object[1])) {
+          return void 0;
+        } else {
+          return function($old, $new, options) {
+            return Promise.all([animate($old, object[0], options), animate($new, object[1], options)]);
+          };
+        }
+      } else if (u.isString(object)) {
+        if (object.indexOf('/') >= 0) {
+          return findTransitionFn(object.split('/'));
+        } else if (namedTransition = namedTransitions[object]) {
+          return findTransitionFn(namedTransition);
+        }
       }
     };
 
     /**
-    This causes the side effects of a successful transition, but instantly.
+    This instantly causes the side effects of a successful transition.
     We use this to skip morphing for old browsers, or when the developer
-    decides to only animate the new element (i.e. no real ghosting or transition)   .
+    decides to only animate the new element (i.e. no real ghosting or transition).
     
+    @return {Promise}
     @internal
      */
     skipMorph = function($old, $new, options) {
@@ -7221,22 +8128,23 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     If you choose to *not* use `up.animate()` and roll your own
     logic instead, your code must honor the following contract:
     
-    1. It must honor the passed options `{ delay, duration, easing }` if present
+    1. It must honor the options `{ delay, duration, easing }` if given
     2. It must *not* remove any of the given elements from the DOM.
-    3. It returns a promise that is resolved when the transition ends
-    4. The returned promise responds to a `resolve()` function that
-       instantly jumps to the last transition frame and resolves the promise.
+    3. It returns a promise that is fulfilled when the transition has ended
+    4. If during the animation an event `up:motion:finish` is emitted on
+       the given element, the transition instantly jumps to the last frame
+       and resolves the returned promise.
     
     Calling [`up.animate()`](/up.animate) with an object argument
     will take care of all these points.
     
     @function up.transition
-    @param {String} name
+    @param {string} name
     @param {Function} transition
     @stable
      */
-    transition = function(name, transition) {
-      return transitions[name] = transition;
+    registerTransition = function(name, transition) {
+      return namedTransitions[name] = transition;
     };
 
     /**
@@ -7256,57 +8164,28 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     If you choose to *not* use `up.animate()` and roll your own
     animation code instead, your code must honor the following contract:
     
-    1. It must honor the passed options `{ delay, duration, easing }` if present
-    2. It must *not* remove the passed element from the DOM.
-    3. It returns a promise that is resolved when the animation ends
-    4. The returned promise responds to a `resolve()` function that
-       instantly jumps to the last animation frame and resolves the promise.
+    1. It must honor the options `{ delay, duration, easing }` if given
+    2. It must *not* remove any of the given elements from the DOM.
+    3. It returns a promise that is fulfilled when the transition has ended
+    4. If during the animation an event `up:motion:finish` is emitted on
+       the given element, the transition instantly jumps to the last frame
+       and resolves the returned promise.
     
     Calling [`up.animate()`](/up.animate) with an object argument
     will take care of all these points.
     
     @function up.animation
-    @param {String} name
+    @param {string} name
     @param {Function} animation
     @stable
      */
-    animation = function(name, animation) {
-      return animations[name] = animation;
+    registerAnimation = function(name, animation) {
+      return namedAnimations[name] = animation;
     };
     snapshot = function() {
-      defaultAnimations = u.copy(animations);
-      return defaultTransitions = u.copy(transitions);
+      defaultNamedAnimations = u.copy(namedAnimations);
+      return defaultNamedTransitions = u.copy(namedTransitions);
     };
-
-    /**
-    Returns a new deferred that resolves once all given deferreds have resolved.
-    
-    Other then [`$.when` from jQuery](https://api.jquery.com/jquery.when/),
-    the combined deferred will have a `resolve` method. This `resolve` method
-    will resolve all the wrapped deferreds.
-    
-    This is important when composing multiple existing animations into
-    a [custom transition](/up.transition), since the transition function
-    must return a deferred with a `resolve` function that fast-forwards
-    the animation to its last frame.
-    
-    @function up.motion.when
-    @param {Array<Deferred>} deferreds...
-    @return {Deferred} A new deferred
-    @experimental
-     */
-    resolvableWhen = u.resolvableWhen;
-
-    /**
-    Returns a no-op animation or transition which has no visual effects
-    and completes instantly.
-    
-    @function up.motion.none
-    @return {Promise}
-      A resolved promise
-    @stable
-     */
-    none = u.resolvedDeferred;
 
     /**
     Returns whether the given animation option will cause the animation
@@ -7315,11 +8194,10 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     @function up.motion.isNone
     @internal
      */
-    isNone = function(animation) {
-      return animation === false || animation === 'none' || u.isMissing(animation) || u.isResolvedPromise(animation);
+    isNone = function(animationOrTransition) {
+      return !animationOrTransition || animationOrTransition === 'none' || (u.isOptions(animationOrTransition) && u.isBlank(animationOrTransition));
     };
-    animation('none', none);
-    animation('fade-in', function($ghost, options) {
+    registerAnimation('fade-in', function($ghost, options) {
       $ghost.css({
         opacity: 0
       });
@@ -7327,7 +8205,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
         opacity: 1
       }, options);
     });
-    animation('fade-out', function($ghost, options) {
+    registerAnimation('fade-out', function($ghost, options) {
       $ghost.css({
         opacity: 1
       });
@@ -7340,63 +8218,63 @@ You can define custom animations using [`up.transition()`](/up.transition) and
         transform: "translate(" + x + "px, " + y + "px)"
       };
     };
-    animation('move-to-top', function($ghost, options) {
+    registerAnimation('move-to-top', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = box.top + box.height;
       $ghost.css(translateCss(0, 0));
       return animate($ghost, translateCss(0, -travelDistance), options);
     });
-    animation('move-from-top', function($ghost, options) {
+    registerAnimation('move-from-top', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = box.top + box.height;
       $ghost.css(translateCss(0, -travelDistance));
       return animate($ghost, translateCss(0, 0), options);
     });
-    animation('move-to-bottom', function($ghost, options) {
+    registerAnimation('move-to-bottom', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = u.clientSize().height - box.top;
       $ghost.css(translateCss(0, 0));
       return animate($ghost, translateCss(0, travelDistance), options);
     });
-    animation('move-from-bottom', function($ghost, options) {
+    registerAnimation('move-from-bottom', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = u.clientSize().height - box.top;
       $ghost.css(translateCss(0, travelDistance));
       return animate($ghost, translateCss(0, 0), options);
     });
-    animation('move-to-left', function($ghost, options) {
+    registerAnimation('move-to-left', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = box.left + box.width;
       $ghost.css(translateCss(0, 0));
       return animate($ghost, translateCss(-travelDistance, 0), options);
     });
-    animation('move-from-left', function($ghost, options) {
+    registerAnimation('move-from-left', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = box.left + box.width;
       $ghost.css(translateCss(-travelDistance, 0));
       return animate($ghost, translateCss(0, 0), options);
     });
-    animation('move-to-right', function($ghost, options) {
+    registerAnimation('move-to-right', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = u.clientSize().width - box.left;
       $ghost.css(translateCss(0, 0));
       return animate($ghost, translateCss(travelDistance, 0), options);
     });
-    animation('move-from-right', function($ghost, options) {
+    registerAnimation('move-from-right', function($ghost, options) {
       var box, travelDistance;
       box = u.measure($ghost);
       travelDistance = u.clientSize().width - box.left;
       $ghost.css(translateCss(travelDistance, 0));
       return animate($ghost, translateCss(0, 0), options);
     });
-    animation('roll-down', function($ghost, options) {
+    registerAnimation('roll-down', function($ghost, options) {
       var deferred, fullHeight, styleMemo;
       fullHeight = $ghost.height();
       styleMemo = u.temporaryCss($ghost, {
@@ -7409,22 +8287,11 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       deferred.then(styleMemo);
       return deferred;
     });
-    transition('none', none);
-    transition('move-left', function($old, $new, options) {
-      return resolvableWhen(animate($old, 'move-to-left', options), animate($new, 'move-from-right', options));
-    });
-    transition('move-right', function($old, $new, options) {
-      return resolvableWhen(animate($old, 'move-to-right', options), animate($new, 'move-from-left', options));
-    });
-    transition('move-up', function($old, $new, options) {
-      return resolvableWhen(animate($old, 'move-to-top', options), animate($new, 'move-from-bottom', options));
-    });
-    transition('move-down', function($old, $new, options) {
-      return resolvableWhen(animate($old, 'move-to-bottom', options), animate($new, 'move-from-top', options));
-    });
-    transition('cross-fade', function($old, $new, options) {
-      return resolvableWhen(animate($old, 'fade-out', options), animate($new, 'fade-in', options));
-    });
+    registerTransition('move-left', 'move-to-left/move-from-right');
+    registerTransition('move-right', 'move-to-right/move-from-left');
+    registerTransition('move-up', 'move-to-top/move-from-bottom');
+    registerTransition('move-down', 'move-to-bottom/move-from-top');
+    registerTransition('cross-fade', 'fade-out/fade-in');
     up.on('up:framework:booted', snapshot);
     up.on('up:framework:reset', reset);
     return {
@@ -7432,12 +8299,10 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       animate: animate,
       animateOptions: animateOptions,
       finish: finish,
-      transition: transition,
-      animation: animation,
+      transition: registerTransition,
+      animation: registerAnimation,
       config: config,
       isEnabled: isEnabled,
-      none: none,
-      when: resolvableWhen,
       prependCopy: prependCopy,
       isNone: isNone
     };
@@ -7472,12 +8337,12 @@ The cache holds up to 70 responses for 5 minutes. You can configure the cache si
 Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
 
 If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
-use [`up.ajax()`](/up.ajax).
+use [`up.request()`](/up.request).
 
 \#\#\# Preloading links
 
 Unpoly also lets you speed up reaction times by [preloading
-links](/up-preload) when the user hovers over the click area (or puts the mouse/finger
+links](/a-up-preload) when the user hovers over the click area (or puts the mouse/finger
 down). This way the response will already be cached when
 the user releases the mouse/finger.
 
@@ -7490,8 +8355,8 @@ that appears during a long-running request.
 
 Other Unpoly modules contain even more tricks to outsmart network latency:
 
-- [Instantaneous feedback for links that are currently loading](/up-active)
-- [Follow links on `mousedown` instead of `click`](/up-instant)
+- [Instantaneous feedback for links that are currently loading](/a.up-active)
+- [Follow links on `mousedown` instead of `click`](/a-up-instant)
 
 @class up.proxy
  */
@@ -7500,30 +8365,30 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
   var slice = [].slice;
 
   up.proxy = (function($) {
-    var $waitingLink, ajax, alias, cache, cacheKey, cancelPreloadDelay, cancelSlowDelay, checkPreload, clear, config, get, isBusy, isCachable, isIdempotent, isIdle, load, loadEnded, loadOrQueue, loadStarted, normalizeRequest, pendingCount, pokeQueue, preload, preloadDelayTimer, queue, queuedRequests, remove, reset, responseReceived, set, slowDelayTimer, slowEventEmitted, startPreloadDelay, u;
+    var $waitingLink, ajax, alias, cache, cancelPreloadDelay, cancelSlowDelay, checkPreload, clear, config, get, isBusy, isIdle, isSafeMethod, load, loadEnded, loadOrQueue, loadStarted, makeRequest, pendingCount, pokeQueue, preload, preloadDelayTimer, queue, queuedLoaders, registerAliasForRedirect, remove, reset, responseReceived, set, slowDelayTimer, slowEventEmitted, startPreloadDelay, u, wrapMethod;
     u = up.util;
     $waitingLink = void 0;
     preloadDelayTimer = void 0;
     slowDelayTimer = void 0;
     pendingCount = void 0;
     slowEventEmitted = void 0;
-    queuedRequests = [];
+    queuedLoaders = [];
 
     /**
     @property up.proxy.config
-    @param {Number} [config.preloadDelay=75]
-      The number of milliseconds to wait before [`[up-preload]`](/up-preload)
+    @param {number} [config.preloadDelay=75]
+      The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
       starts preloading.
-    @param {Number} [config.cacheSize=70]
+    @param {number} [config.cacheSize=70]
       The maximum number of responses to cache.
       If the size is exceeded, the oldest items will be dropped from the cache.
-    @param {Number} [config.cacheExpiry=300000]
+    @param {number} [config.cacheExpiry=300000]
       The number of milliseconds until a cache entry expires.
       Defaults to 5 minutes.
-    @param {Number} [config.slowDelay=300]
+    @param {number} [config.slowDelay=300]
       How long the proxy waits until emitting the [`up:proxy:slow` event](/up:proxy:slow).
       Use this to prevent flickering of spinners.
-    @param {Number} [config.maxRequests=4]
+    @param {number} [config.maxRequests=4]
       The maximum number of concurrent requests to allow before additional
       requests are queued. This currently ignores preloading requests.
     
@@ -7532,14 +8397,14 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     
       Note that your browser might [impose its own request limit](http://www.browserscope.org/?category=network)
       regardless of what you configure here.
-    @param {Array<String>} [config.wrapMethods]
+    @param {Array<string>} [config.wrapMethods]
       An array of uppercase HTTP method names. AJAX requests with one of these methods
       will be converted into a `POST` request and carry their original method as a `_method`
       parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-    @param {Array<String>} [config.safeMethods]
-      An array of uppercase HTTP method names that are considered idempotent.
-      The proxy cache will only cache idempotent requests and will clear the entire
-      cache after a non-idempotent request.
+    @param {Array<string>} [config.safeMethods]
+      An array of uppercase HTTP method names that are considered [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1).
+      The proxy cache will only cache safe requests and will clear the entire
+      cache after an unsafe request.
     @stable
      */
     config = u.config({
@@ -7551,18 +8416,19 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       wrapMethods: ['PATCH', 'PUT', 'DELETE'],
       safeMethods: ['GET', 'OPTIONS', 'HEAD']
     });
-    cacheKey = function(request) {
-      normalizeRequest(request);
-      return [request.url, request.method, u.requestDataAsQuery(request.data), request.target].join('|');
-    };
-    cache = u.cache({
+    cache = new up.Cache({
       size: function() {
         return config.cacheSize;
       },
       expiry: function() {
         return config.cacheExpiry;
       },
-      key: cacheKey
+      key: function(request) {
+        return up.Request.wrap(request).cacheKey();
+      },
+      cachable: function(request) {
+        return up.Request.wrap(request).isCachable();
+      }
     });
 
     /**
@@ -7571,33 +8437,30 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     Returns `undefined` if the given request is not currently cached.
     
     @function up.proxy.get
-    @return {Promise}
-      A promise for the response that is API-compatible with the
-      promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+    @return {Promise<up.Response>}
+      A promise for the response.
     @experimental
      */
     get = function(request) {
       var candidate, candidates, i, len, requestForBody, requestForHtml, response;
-      request = normalizeRequest(request);
-      if (isCachable(request)) {
-        candidates = [request];
-        if (request.target !== 'html') {
-          requestForHtml = u.merge(request, {
-            target: 'html'
+      request = up.Request.wrap(request);
+      candidates = [request];
+      if (request.target !== 'html') {
+        requestForHtml = request.copy({
+          target: 'html'
+        });
+        candidates.push(requestForHtml);
+        if (request.target !== 'body') {
+          requestForBody = request.copy({
+            target: 'body'
           });
-          candidates.push(requestForHtml);
-          if (request.target !== 'body') {
-            requestForBody = u.merge(request, {
-              target: 'body'
-            });
-            candidates.push(requestForBody);
-          }
+          candidates.push(requestForBody);
         }
-        for (i = 0, len = candidates.length; i < len; i++) {
-          candidate = candidates[i];
-          if (response = cache.get(candidate)) {
-            return response;
-          }
+      }
+      for (i = 0, len = candidates.length; i < len; i++) {
+        candidate = candidates[i];
+        if (response = cache.get(candidate)) {
+          return response;
         }
       }
     };
@@ -7617,112 +8480,157 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       config.reset();
       cache.clear();
       slowEventEmitted = false;
-      return queuedRequests = [];
+      return queuedLoaders = [];
     };
     reset();
-    normalizeRequest = function(request) {
-      if (!request._normalized) {
-        request.method = u.normalizeMethod(request.method);
-        if (request.url) {
-          request.url = u.normalizeUrl(request.url);
-        }
-        request.target || (request.target = 'body');
-        request._normalized = true;
-      }
-      return request;
-    };
 
     /**
-    Makes a request to the given URL and caches the response.
-    If the response was already cached, returns the HTML instantly.
-    
-    If requesting a URL that is not read-only, the response will
-    not be cached and the entire cache will be cleared.
-    Only requests with a method of `GET`, `OPTIONS` and `HEAD`
-    are considered to be read-only.
+    Makes an AJAX request to the given URL.
     
     \#\#\# Example
     
-        up.ajax('/search', data: { query: 'sunshine' }).then(function(data, status, xhr) {
-          console.log('The response body is %o', data);
-        }).fail(function(xhr, status, error) {
+        up.request('/search', data: { query: 'sunshine' }).then(function(response) {
+          console.log('The response text is %o', response.text);
+        }).fail(function() {
           console.error('The request failed');
         });
+    
+    \#\#\# Caching
+    
+    All responses are cached by default. If requesting a URL with a non-`GET` method, the response will
+    not be cached and the entire cache will be cleared.
+    
+    You can configure caching with the [`up.proxy.config`](/up.proxy.config) property.
     
     \#\#\# Events
     
     If a network connection is attempted, the proxy will emit
     a [`up:proxy:load`](/up:proxy:load) event with the `request` as its argument.
-    Once the response is received, a [`up:proxy:receive`](/up:proxy:receive) event will
+    Once the response is received, a [`up:proxy:loaded`](/up:proxy:loaded) event will
     be emitted.
     
-    @function up.ajax
-    @param {String} url
-    @param {String} [request.method='GET']
-    @param {String} [request.target='body']
-    @param {Boolean} [request.cache]
-      Whether to use a cached response, if available.
-      If set to `false` a network connection will always be attempted.
-    @param {Object} [request.headers={}]
-      An object of additional header key/value pairs to send along
-      with the request.
-    @param {Object} [request.data={}]
-      An object of request parameters.
-    @param {String} [request.url]
+    @function up.request
+    @param {string} [url]
+      The URL for the request.
+    
+      Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
+    @param {string} [options.url]
       You can omit the first string argument and pass the URL as
       a `request` property instead.
-    @param {String} [request.timeout]
-      A timeout in milliseconds for the request.
+    @param {string} [options.method='GET']
+      The HTTP method for the options.
+    @param {boolean} [options.cache]
+      Whether to use a cached response for [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+      requests, if available. If set to `false` a network connection will always be attempted.
+    @param {Object} [options.headers={}]
+      An object of additional HTTP headers.
+    @param {Object|Array|FormData} [options.data={}]
+      Parameters that should be sent as the request's payload.
+    
+      Parameters may be passed as one of the following forms:
+    
+      1. An object where keys are param names and the values are param values
+      2. An array of `{ name: 'param-name', value: 'param-value' }` objects
+      3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+    @param {string} [options.timeout]
+      A timeout in milliseconds.
     
       If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set, the timeout
       will not include the time spent waiting in the queue.
-    @return
-      A promise for the response that is API-compatible with the
-      promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+    @param {string} [options.target='body']
+      The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
+    @param {string} [options.failTarget='body']
+      The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
+    @return {Promise<up.Response>}
+      A promise for the response.
     @stable
      */
-    ajax = function() {
-      var args, forceCache, ignoreCache, options, pending, promise, request;
+    makeRequest = function() {
+      var args, ignoreCache, options, promise, request;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       options = u.extractOptions(args);
       if (u.isGiven(args[0])) {
         options.url = args[0];
       }
-      forceCache = options.cache === true;
       ignoreCache = options.cache === false;
-      request = u.only(options, 'url', 'method', 'data', 'target', 'headers', 'timeout', '_normalized');
-      request = normalizeRequest(request);
-      pending = true;
-      if (!isIdempotent(request) && !forceCache) {
+      request = up.Request.wrap(options);
+      if (!request.isSafe()) {
         clear();
-        promise = loadOrQueue(request);
-      } else if ((promise = get(request)) && !ignoreCache) {
+      }
+      if (!ignoreCache && (promise = get(request))) {
         up.puts('Re-using cached response for %s %s', request.method, request.url);
-        pending = promise.state() === 'pending';
       } else {
         promise = loadOrQueue(request);
         set(request, promise);
-        promise.fail(function() {
+        promise["catch"](function(e) {
           return remove(request);
         });
       }
-      if (pending && !options.preload) {
+      if (!options.preload) {
         loadStarted();
-        promise.always(loadEnded);
+        u.always(promise, loadEnded);
       }
       return promise;
     };
 
     /**
-    Returns whether the proxy is capable of caching the given request.
-    Even if this returns `true`, only idempodent requests will be
-    cached by default.
+    Makes an AJAX request to the given URL and caches the response.
     
-    @function up.proxy.isCachable
-    @internal
+    The function returns a promise that fulfills with the response text.
+    
+    \#\#\# Example
+    
+        up.request('/search', data: { query: 'sunshine' }).then(function(text) {
+          console.log('The response text is %o', text);
+        }).fail(function() {
+          console.error('The request failed');
+        });
+    
+    @function up.ajax
+    @param {string} [url]
+      The URL for the request.
+    
+      Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
+    @param {string} [request.url]
+      You can omit the first string argument and pass the URL as
+      a `request` property instead.
+    @param {string} [request.method='GET']
+      The HTTP method for the request.
+    @param {boolean} [request.cache]
+      Whether to use a cached response for [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+      requests, if available. If set to `false` a network connection will always be attempted.
+    @param {Object} [request.headers={}]
+      An object of additional header key/value pairs to send along
+      with the request.
+    @param {Object|Array|FormData} [options.data]
+      Parameters that should be sent as the request's payload.
+    
+      Parameters may be passed as one of the following forms:
+    
+      1. An object where keys are param names and the values are param values
+      2. An array of `{ name: 'param-name', value: 'param-value' }` objects
+      3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+    @param {string} [request.timeout]
+      A timeout in milliseconds for the request.
+    
+      If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set, the timeout
+      will not include the time spent waiting in the queue.
+    @return {Promise<string>}
+      A promise for the response text.
+    @deprecated
+      Use [`up.request()`](/up.request) instead.
      */
-    isCachable = function(request) {
-      return !u.isFormData(request.data);
+    ajax = function() {
+      var args;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      up.log.warn('up.ajax() has been deprecated. Use up.request() instead.');
+      return new Promise(function(resolve, reject) {
+        var pickResponseText;
+        pickResponseText = function(response) {
+          return resolve(response.text);
+        };
+        return makeRequest.apply(null, args).then(pickResponseText, reject);
+      });
     };
 
     /**
@@ -7730,7 +8638,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     for a request to finish. Returns `false` otherwise.
     
     @function up.proxy.isIdle
-    @return {Boolean}
+    @return {boolean}
       Whether the proxy is idle
     @experimental
      */
@@ -7743,7 +8651,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     for a request to finish. Returns `false` otherwise.
     
     @function up.proxy.isBusy
-    @return {Boolean}
+    @return {boolean}
       Whether the proxy is busy
     @experimental
      */
@@ -7751,14 +8659,13 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       return pendingCount > 0;
     };
     loadStarted = function() {
-      var emission, wasIdle;
-      wasIdle = isIdle();
+      var emission;
       pendingCount += 1;
-      if (wasIdle) {
+      if (!slowDelayTimer) {
         emission = function() {
           if (isBusy()) {
             up.emit('up:proxy:slow', {
-              message: 'Proxy is busy'
+              message: 'Proxy is slow to respond'
             });
             return slowEventEmitted = true;
           }
@@ -7768,7 +8675,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     };
 
     /**
-    This event is [emitted](/up.emit) when [AJAX requests](/up.ajax)
+    This event is [emitted](/up.emit) when [AJAX requests](/up.request)
     are taking long to finish.
     
     By default Unpoly will wait 300 ms for an AJAX request to finish
@@ -7820,16 +8727,19 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
      */
     loadEnded = function() {
       pendingCount -= 1;
-      if (isIdle() && slowEventEmitted) {
-        up.emit('up:proxy:recover', {
-          message: 'Proxy is idle'
-        });
-        return slowEventEmitted = false;
+      if (isIdle()) {
+        cancelSlowDelay();
+        if (slowEventEmitted) {
+          up.emit('up:proxy:recover', {
+            message: 'Proxy has recovered from slow response'
+          });
+          return slowEventEmitted = false;
+        }
       }
     };
 
     /**
-    This event is [emitted](/up.emit) when [AJAX requests](/up.ajax)
+    This event is [emitted](/up.emit) when [AJAX requests](/up.request)
     have [taken long to finish](/up:proxy:slow), but have finished now.
     
     See [`up:proxy:slow`](/up:proxy:slow) for more documentation on
@@ -7847,63 +8757,103 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       }
     };
     queue = function(request) {
-      var deferred, entry;
+      var loader;
       up.puts('Queuing request for %s %s', request.method, request.url);
-      deferred = $.Deferred();
-      entry = {
-        deferred: deferred,
-        request: request
+      loader = function() {
+        return load(request);
       };
-      queuedRequests.push(entry);
-      return deferred.promise();
+      loader = u.previewable(loader);
+      queuedLoaders.push(loader);
+      return loader.promise;
     };
     load = function(request) {
-      var promise;
-      up.emit('up:proxy:load', u.merge(request, {
+      var eventProps, responsePromise;
+      eventProps = {
+        request: request,
         message: ['Loading %s %s', request.method, request.url]
-      }));
-      request = u.copy(request);
-      request.headers || (request.headers = {});
-      request.headers[up.protocol.config.targetHeader] = request.target;
-      if (u.contains(config.wrapMethods, request.method)) {
-        request.data = u.appendRequestData(request.data, up.protocol.config.methodParam, request.method);
-        request.method = 'POST';
+      };
+      if (up.bus.nobodyPrevents('up:proxy:load', eventProps)) {
+        responsePromise = request.send();
+        u.always(responsePromise, responseReceived);
+        u.always(responsePromise, pokeQueue);
+        return responsePromise;
+      } else {
+        u.microtask(pokeQueue);
+        return Promise.reject(new Error('Event up:proxy:load was prevented'));
       }
-      if (u.isFormData(request.data)) {
-        request.contentType = false;
-        request.processData = false;
+    };
+
+    /**
+    This event is [emitted](/up.emit) before an [AJAX request](/up.request)
+    is sent over the network.
+    
+    @event up:proxy:load
+    @param {up.Request} event.request
+    @param event.preventDefault()
+      Event listeners may call this method to prevent the request from being sent.
+    @experimental
+     */
+    registerAliasForRedirect = function(response) {
+      var newRequest, request;
+      request = response.request;
+      if (request.url !== response.url) {
+        newRequest = request.copy({
+          method: response.method,
+          url: response.url
+        });
+        return up.proxy.alias(request, newRequest);
       }
-      promise = $.ajax(request);
-      promise.done(function(data, textStatus, xhr) {
-        return responseReceived(request, xhr);
-      });
-      promise.fail(function(xhr, textStatus, errorThrown) {
-        return responseReceived(request, xhr);
-      });
-      return promise;
     };
-    responseReceived = function(request, xhr) {
-      var ref;
-      up.emit('up:proxy:received', u.merge(request, {
-        message: ['Server responded with %s %s (%d bytes)', xhr.status, xhr.statusText, (ref = xhr.responseText) != null ? ref.length : void 0]
-      }));
-      return pokeQueue();
+    responseReceived = function(response) {
+      if (response.isFatalError()) {
+        return up.emit('up:proxy:fatal', {
+          message: 'Fatal error during request',
+          request: response.request,
+          response: response
+        });
+      } else {
+        if (!response.isError()) {
+          registerAliasForRedirect(response);
+        }
+        return up.emit('up:proxy:loaded', {
+          message: ['Server responded with HTTP %d (%d bytes)', response.status, response.text.length],
+          request: response.request,
+          response: response
+        });
+      }
     };
+
+    /**
+    This event is [emitted](/up.emit) when the response to an
+    [AJAX request](/up.request) has been received.
+    
+    Note that this event will also be emitted when the server signals an
+    error with an HTTP status like `500`. Only if the request
+    encounters a fatal error (like a loss of network connectivity),
+    [`up:proxy:fatal`](/up:proxy:fatal) is emitted instead.
+    
+    @event up:proxy:loaded
+    @param {up.Request} event.request
+    @param {up.Response} event.response
+    @experimental
+     */
+
+    /**
+    This event is [emitted](/up.emit) when an [AJAX request](/up.request)
+    encounters fatal error like a timeout or loss of network connectivity.
+    
+    Note that this event will *not* be emitted when the server produces an
+    error message with an HTTP status like `500`. When the server can produce
+    any response, [`up:proxy:loaded`](/up:proxy:loaded) is emitted instead.
+    
+    @event up:proxy:fatal
+     */
     pokeQueue = function() {
-      var entry, promise;
-      if (entry = queuedRequests.shift()) {
-        promise = load(entry.request);
-        promise.done(function() {
-          var args, ref;
-          args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-          return (ref = entry.deferred).resolve.apply(ref, args);
-        });
-        promise.fail(function() {
-          var args, ref;
-          args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-          return (ref = entry.deferred).reject.apply(ref, args);
-        });
+      var base;
+      if (typeof (base = queuedLoaders.shift()) === "function") {
+        base();
       }
+      return void 0;
     };
 
     /**
@@ -7924,12 +8874,11 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     Manually stores a promise for the response to the given request.
     
     @function up.proxy.set
-    @param {String} request.url
-    @param {String} [request.method='GET']
-    @param {String} [request.target='body']
-    @param {Promise} response
-      A promise for the response that is API-compatible with the
-      promise returned by [`jQuery.ajax`](http://api.jquery.com/jquery.ajax/).
+    @param {string} request.url
+    @param {string} [request.method='GET']
+    @param {string} [request.target='body']
+    @param {Promise<up.Response>} response
+      A promise for the response.
     @experimental
      */
     set = cache.set;
@@ -7941,9 +8890,9 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     automatically removes cache entries.
     
     @function up.proxy.remove
-    @param {String} request.url
-    @param {String} [request.method='GET']
-    @param {String} [request.target='body']
+    @param {string} request.url
+    @param {string} [request.method='GET']
+    @param {string} [request.target='body']
     @experimental
      */
     remove = cache.remove;
@@ -7952,38 +8901,14 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     Removes all cache entries.
     
     Unpoly also automatically clears the cache whenever it processes
-    a request with a non-GET HTTP method.
+    a request with an [unsafe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+    HTTP method like `POST`.
     
     @function up.proxy.clear
     @stable
      */
     clear = cache.clear;
-
-    /**
-    This event is [emitted](/up.emit) before an [AJAX request](/up.ajax)
-    is starting to load.
-    
-    @event up:proxy:load
-    @param event.url
-    @param event.method
-    @param event.target
-    @experimental
-     */
-
-    /**
-    This event is [emitted](/up.emit) when the response to an [AJAX request](/up.ajax)
-    has been received.
-    
-    @event up:proxy:received
-    @param event.url
-    @param event.method
-    @param event.target
-    @experimental
-     */
-    isIdempotent = function(request) {
-      normalizeRequest(request);
-      return u.contains(config.safeMethods, request.method);
-    };
+    up.bus.renamedEvent('up:proxy:received', 'up:proxy:loaded');
     checkPreload = function($link) {
       var curriedPreload, delay;
       delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay;
@@ -8002,47 +8927,67 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     };
 
     /**
+    Preloads the given link.
+    
+    When the link is clicked later, the response will already be cached,
+    making the interaction feel instant.
+    
     @function up.proxy.preload
-    @param {String|Element|jQuery}
+    @param {string|Element|jQuery}
       The element whose destination should be preloaded.
     @return
-      A promise that will be resolved when the request was loaded and cached
+      A promise that will be fulfilled when the request was loaded and cached
     @experimental
      */
-    preload = function(linkOrSelector, options) {
-      var $link, method;
+    preload = function(linkOrSelector) {
+      var $link;
       $link = $(linkOrSelector);
-      options = u.options(options);
-      method = up.link.followMethod($link, options);
-      if (isIdempotent({
-        method: method
-      })) {
-        return up.log.group("Preloading link %o", $link, function() {
-          options.preload = true;
-          return up.follow($link, options);
+      if (up.link.isSafe($link)) {
+        return up.log.group("Preloading link %o", $link.get(0), function() {
+          var variant;
+          variant = up.link.followVariantForLink($link);
+          return variant.preloadLink($link);
         });
       } else {
-        up.puts("Won't preload %o due to unsafe method %s", $link, method);
-        return u.resolvedPromise();
+        return Promise.reject(new Error("Won't preload unsafe link"));
       }
+    };
+
+    /**
+    @internal
+     */
+    isSafeMethod = function(method) {
+      return u.contains(config.safeMethods, method);
+    };
+
+    /**
+    @internal
+     */
+    wrapMethod = function(method, data, appendOpts) {
+      if (u.contains(config.wrapMethods, method)) {
+        data = u.appendRequestData(data, up.protocol.config.methodParam, method, appendOpts);
+        method = 'POST';
+      }
+      return [method, data];
     };
 
     /**
     Links with an `up-preload` attribute will silently fetch their target
     when the user hovers over the click area, or when the user puts her
-    mouse/finger down (before releasing). This way the
-    response will already be cached when the user performs the click,
+    mouse/finger down (before releasing).
+    
+    When the link is clicked later, the response will already be cached,
     making the interaction feel instant.   
     
-    @selector [up-preload]
+    @selector a[up-preload]
     @param [up-delay=75]
       The number of milliseconds to wait between hovering
       and preloading. Increasing this will lower the load in your server,
       but will also make the interaction feel less instant.
     @stable
      */
-    up.on('mouseover mousedown touchstart', '[up-preload]', function(event, $element) {
-      if (!up.link.childClicked(event, $element)) {
+    up.on('mouseover mousedown touchstart', 'a[up-preload], [up-href][up-preload]', function(event, $element) {
+      if (!up.link.childClicked(event, $element) && up.link.isSafe($element)) {
         return checkPreload($element);
       }
     });
@@ -8050,18 +8995,22 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     return {
       preload: preload,
       ajax: ajax,
+      request: makeRequest,
       get: get,
       alias: alias,
       clear: clear,
       remove: remove,
       isIdle: isIdle,
       isBusy: isBusy,
-      isCachable: isCachable,
+      isSafeMethod: isSafeMethod,
+      wrapMethod: wrapMethod,
       config: config
     };
   })(jQuery);
 
   up.ajax = up.proxy.ajax;
+
+  up.request = up.proxy.request;
 
 }).call(this);
 
@@ -8136,22 +9085,22 @@ new page is loading.
 
 (function() {
   up.link = (function($) {
-    var allowDefault, childClicked, follow, followMethod, followVariantSelectors, isFollowable, makeFollowable, onAction, shouldProcessLinkEvent, u, visit;
+    var DEFAULT_FOLLOW_VARIANT, addFollowVariant, allowDefault, childClicked, defaultFollow, defaultPreload, follow, followMethod, followVariantForLink, followVariants, isFollowable, isSafe, makeFollowable, u, visit;
     u = up.util;
 
     /**
     Visits the given URL without a full page load.
     This is done by fetching `url` through an AJAX request
-    and replacing the current `<body>` element with the response's `<body>` element.
+    and [replacing](/up.replace) the current `<body>` element with the response's `<body>` element.
     
     For example, this would fetch the `/users` URL:
     
         up.visit('/users')
     
     @function up.visit
-    @param {String} url
+    @param {string} url
       The URL to visit.
-    @param {String} [options.target='body']
+    @param {string} [options.target='body']
       The selector to replace.
     @param {Object} [options]
       See options for [`up.replace()`](/up.replace)
@@ -8165,77 +9114,51 @@ new page is loading.
     };
 
     /**
-    Follows the given link via AJAX and [replaces](/up.replace) a CSS selector in the current page
-    with corresponding elements from a new page fetched from the server.
+    Follows the given link via AJAX and [replaces](/up.replace) the current page
+    with HTML from the response.
     
-    Any Unpoly UJS attributes on the given link will be honored. E. g. you have this link:
+    By default the page's `<body>` element will be replaced.
+    If the link has an attribute like [`[up-target]`](/up-target)
+    or [`[up-modal]`](/a-up-modal), the corresponding UJS behavior will be activated
+    just as if the user had clicked on the link.
+    
+    \#\#\# Examples
+    
+    Let's say you have a link with an [`a[up-target]`](/a-up-target) attribute:
     
         <a href="/users" up-target=".main">Users</a>
     
-    You can update the page's `.main` selector with the `.main` from `/users` like this:
+    Calling `up.follow()` with this link will replace the page's `.main` fragment
+    as if the user had clicked on the link:
     
-        var $link = $('a:first'); // select link with jQuery
+        var $link = $('a:first');
         up.follow($link);
     
-    The unobtrusive variant of this are the [`a[up-target]`](/a-up-target) and [`a[up-follow]`](/a-up-follow) selectors.
-    
     @function up.follow
-    @param {Element|jQuery|String} linkOrSelector
-      An element or selector which resolves to an `<a>` tag
-      or any element that is marked up with an `up-href` attribute.
-    @param {String} [options.target]
+    @param {Element|jQuery|string} linkOrSelector
+      An element or selector which is either an `<a>` tag or any element with an `up-href` attribute.
+    @param {string} [options.target]
       The selector to replace.
-      Defaults to the `up-target` attribute on `link`, or to `body` if such an attribute does not exist.
-    @param {String} [options.failTarget]
-      The selector to replace if the server responds with a non-200 status code.
-      Defaults to the `up-fail-target` attribute on `link`, or to `body` if such an attribute does not exist.
-    @param {String} [options.fallback]
-      The selector to update when the original target was not found in the page.
-    @param {String} [options.method='get']
-      The HTTP method to use for the request.
-    @param {String} [options.confirm]
-      A message that will be displayed in a cancelable confirmation dialog
-      before the link is followed.
-    @param {Function|String} [options.transition]
-      A transition function or name.
-    @param {Function|String} [options.failTransition]
-      The transition to use if the server responds with a non-200 status code.
-    @param {Number} [options.duration]
-      The duration of the transition. See [`up.morph()`](/up.morph).
-    @param {Number} [options.delay]
-      The delay before the transition starts. See [`up.morph()`](/up.morph).
-    @param {String} [options.easing]
-      The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
-    @param {Element|jQuery|String} [options.reveal]
-      Whether to reveal the target  element within its viewport before updating.
-    @param {Boolean} [options.restoreScroll]
-      If set to `true`, this will attempt to [restore scroll positions](/up.restoreScroll)
-      previously seen on the destination URL.
-    @param {Boolean} [options.cache]
-      Whether to force the use of a cached response (`true`)
-      or never use the cache (`false`)
-      or make an educated guess (`undefined`).
-    @param {Object} [options.headers={}]
-      An object of additional header key/value pairs to send along
-      with the request.
-    @param {Object} [options.timeout={}]
-      A timeout in milliseconds for the request.
-    @param {String} [options.layer='auto']
-      The name of the layer that ought to be updated. Valid values are
-      `auto`, `page`, `modal` and `popup`.
-    
-      If set to `auto` (default), Unpoly will try to find a match in the
-      same layer as the given link. If no match was found in that layer,
-      Unpoly will search in other layers, starting from the topmost layer.
-    @param {String} [options.failLayer='auto']
-      The name of the layer that ought to be updated if the server sends a non-200 status code.
+      Defaults to the `[up-target]`, `[up-modal]` or `[up-popup]` attribute on `link`.
+      If no target is given, the `<body>` element will be replaced.
     
     @return {Promise}
-      A promise that will be resolved when the link destination
+      A promise that will be fulfilled when the link destination
       has been loaded and rendered.
     @stable
      */
     follow = function(linkOrSelector, options) {
+      var $link, variant;
+      $link = $(linkOrSelector);
+      variant = followVariantForLink($link);
+      return variant.followLink($link, options);
+    };
+
+    /**
+    @function defaultFollow
+    @internal
+     */
+    defaultFollow = function(linkOrSelector, options) {
       var $link, target, url;
       $link = $(linkOrSelector);
       options = u.options(options);
@@ -8259,6 +9182,11 @@ new page is loading.
         return up.replace(target, url, options);
       });
     };
+    defaultPreload = function($link, options) {
+      options = u.options(options);
+      options.preload = true;
+      return defaultFollow($link, options);
+    };
 
     /**
     Returns the HTTP method that should be used when following the given link.
@@ -8268,7 +9196,7 @@ new page is loading.
     
     @function up.link.followMethod
     @param linkOrSelector
-    @param options.method {String}
+    @param options.method {string}
     @internal
      */
     followMethod = function(linkOrSelector, options) {
@@ -8279,21 +9207,6 @@ new page is loading.
     };
 
     /**
-    @function up.link.childClicked
-    @internal
-     */
-    childClicked = function(event, $link) {
-      var $target, $targetLink;
-      $target = $(event.target);
-      $targetLink = $target.closest('a, [up-href]');
-      return $targetLink.length && $link.find($targetLink).length;
-    };
-    shouldProcessLinkEvent = function(event, $link) {
-      return u.isUnmodifiedMouseEvent(event) && !childClicked(event, $link);
-    };
-    followVariantSelectors = [];
-
-    /**
     No-op that is called when we allow a browser's default action to go through,
     so we can spy on it in unit tests. See `link_spec.js`.
     
@@ -8301,32 +9214,29 @@ new page is loading.
     @internal
      */
     allowDefault = function(event) {};
-    onAction = function(selector, handler) {
-      var handlerWithActiveMark;
-      followVariantSelectors.push(selector);
-      handlerWithActiveMark = function($link) {
-        return up.feedback.start($link, function() {
-          return handler($link);
-        });
-      };
-      up.on('click', "a" + selector + ", [up-href]" + selector, function(event, $link) {
-        if (shouldProcessLinkEvent(event, $link)) {
-          if ($link.is('[up-instant]')) {
-            return up.bus.haltEvent(event);
-          } else {
-            up.bus.consumeAction(event);
-            return handlerWithActiveMark($link);
-          }
-        } else {
-          return allowDefault(event);
-        }
-      });
-      return up.on('mousedown', "a" + selector + "[up-instant], [up-href]" + selector + "[up-instant]", function(event, $link) {
-        if (shouldProcessLinkEvent(event, $link)) {
-          up.bus.consumeAction(event);
-          return handlerWithActiveMark($link);
-        }
-      });
+    followVariants = [];
+
+    /**
+    Registers the given handler for links with the given selector.
+    
+    This does more than a simple `click` handler:
+    
+    - It also handles `[up-instant]`
+    - It also handles `[up-href]`
+    
+    @function up.link.addFollowVariant
+    @param {string} simplifiedSelector
+      A selector without `a` or `[up-href]`, e.g. `[up-target]`
+    @param {Function<jQuery, Object>} options.follow
+    @param {Function<jQuery, Object>} options.preload
+    @internal
+     */
+    addFollowVariant = function(simplifiedSelector, options) {
+      var variant;
+      variant = new up.FollowVariant(simplifiedSelector, options);
+      followVariants.push(variant);
+      variant.registerEvents();
+      return variant;
     };
 
     /**
@@ -8336,16 +9246,36 @@ new page is loading.
     like `up-target` or `up-modal`.
     
     @function up.link.isFollowable
-    @param {Element|jQuery|String} linkOrSelector
+    @param {Element|jQuery|string} linkOrSelector
       The link to check.
     @experimental
      */
     isFollowable = function(link) {
-      var $link;
-      $link = $(link);
-      return u.any(followVariantSelectors, function(selector) {
-        return $link.is(selector);
+      return !!followVariantForLink(link, {
+        "default": false
       });
+    };
+
+    /**
+    Returns the handler function that can be used to follow the given link.
+    E.g. it wil return a handler calling `up.modal.follow` if the link is a `[up-modal]`,
+    but a handler calling `up.link.follow` if the links is `[up-target]`.
+    
+    @param {Element|jQuery|string}
+    @return {Function(jQuery)}
+    @internal
+     */
+    followVariantForLink = function(linkOrSelector, options) {
+      var $link, variant;
+      options = u.options(options);
+      $link = $(linkOrSelector);
+      variant = u.detect(followVariants, function(variant) {
+        return variant.matchesLink($link);
+      });
+      if (options["default"] !== false) {
+        variant || (variant = DEFAULT_FOLLOW_VARIANT);
+      }
+      return variant;
     };
 
     /**
@@ -8355,7 +9285,7 @@ new page is loading.
     unless it already have it an attribute like `up-target` or `up-modal`.
     
     @function up.link.makeFollowable
-    @param {Element|jQuery|String} linkOrSelector
+    @param {Element|jQuery|string} linkOrSelector
       The link to process.
     @experimental
      */
@@ -8365,6 +9295,26 @@ new page is loading.
       if (!isFollowable($link)) {
         return $link.attr('up-follow', '');
       }
+    };
+    childClicked = function(event, $link) {
+      var $target, $targetLink;
+      $target = $(event.target);
+      $targetLink = $target.closest('a, [up-href]');
+      return $targetLink.length && $link.find($targetLink).length;
+    };
+
+    /**
+    Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+    HTTP method like `GET`.
+    
+    @function up.link.isSafe
+    @experimental
+     */
+    isSafe = function(selectorOrLink, options) {
+      var $link, method;
+      $link = $(selectorOrLink);
+      method = followMethod($link, options);
+      return up.proxy.isSafeMethod(method);
     };
 
     /**
@@ -8415,42 +9365,42 @@ new page is loading.
     opening the destination in a new tab.
     
     @selector a[up-target]
-    @param {String} up-target
+    @param {string} up-target
       The CSS selector to replace
-    @param {String} [up-method='get']
+    @param {string} [up-method='get']
       The HTTP method to use for the request.
-    @param {String} [up-transition='none']
+    @param {string} [up-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements.
     @param [up-fail-target='body']
       The selector to replace if the server responds with a non-200 status code.
-    @param {String} [up-fail-transition='none']
+    @param {string} [up-fail-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements
       when the server responds with a non-200 status code.
-    @param {String} [up-fallback]
+    @param {string} [up-fallback]
       The selector to update when the original target was not found in the page.
-    @param {String} [up-href]
+    @param {string} [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
-    @param {String} [up-confirm]
+    @param {string} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the link is followed.
-    @param {String} [up-reveal='true']
+    @param {string} [up-reveal='true']
       Whether to reveal the target element within its viewport before updating.
-    @param {String} [up-restore-scroll='false']
+    @param {string} [up-restore-scroll='false']
       Whether to restore previously known scroll position of all viewports
       within the target selector.
-    @param {String} [up-cache]
+    @param {string} [up-cache]
       Whether to force the use of a cached response (`true`)
       or never use the cache (`false`)
       or make an educated guess (default).
-    @param {String} [up-layer='auto']
+    @param {string} [up-layer='auto']
       The name of the layer that ought to be updated. Valid values are
       `auto`, `page`, `modal` and `popup`.
     
       If set to `auto` (default), Unpoly will try to find a match in the link's layer.
       If no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
-    @param {String} [up-fail-layer='auto']
+    @param {string} [up-fail-layer='auto']
       The name of the layer that ought to be updated if the server sends a
       non-200 status code.
     @param [up-history]
@@ -8460,34 +9410,17 @@ new page is loading.
       Set this to a URL string to update the history with the given URL.
     @stable
      */
-    onAction('[up-target]', function($link) {
-      return follow($link);
+    DEFAULT_FOLLOW_VARIANT = addFollowVariant('[up-target], [up-follow]', {
+      follow: function($link, options) {
+        return defaultFollow($link, options);
+      },
+      preload: function($link, options) {
+        return defaultPreload($link, options);
+      }
     });
 
     /**
-    By adding an `up-instant` attribute to a link, the destination will be
-    fetched on `mousedown` instead of `click` (`mouseup`).
-    
-        <a href="/users" up-target=".main" up-instant>User list</a>
-    
-    This will save precious milliseconds that otherwise spent
-    on waiting for the user to release the mouse button. Since an
-    AJAX request will be triggered right way, the interaction will
-    appear faster.
-    
-    Note that using `[up-instant]` will prevent a user from canceling a link
-    click by moving the mouse away from the interaction area. However, for
-    navigation actions this isn't needed. E.g. popular operation
-    systems switch tabs on `mousedown` instead of `click`.
-    
-    `up-instant` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
-    
-    @selector [up-instant]
-    @stable
-     */
-
-    /**
-    If applied on a link, Follows this link via AJAX and replaces the
+    If applied on a link, follows this link via AJAX and replaces the
     current `<body>` element with the response's `<body>` element.
     
     To only update a fragment instead of the entire page, see
@@ -8509,24 +9442,24 @@ new page is loading.
     
     @selector a[up-follow]
     
-    @param {String} [up-method='get']
+    @param {string} [up-method='get']
       The HTTP method to use for the request.
     @param [up-fail-target='body']
       The selector to replace if the server responds with a non-200 status code.
-    @param {String} [up-fallback]
+    @param {string} [up-fallback]
       The selector to update when the original target was not found in the page.
-    @param {String} [up-transition='none']
+    @param {string} [up-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements.
-    @param {String} [up-fail-transition='none']
+    @param {string} [up-fail-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements
       when the server responds with a non-200 status code.
     @param [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
-    @param {String} [up-confirm]
+    @param {string} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the link is followed.
-    @param {String} [up-history]
+    @param {string} [up-history]
       Whether to push an entry to the browser history when following the link.
     
       Set this to `'false'` to prevent the URL bar from being updated.
@@ -8536,9 +9469,28 @@ new page is loading.
       within the response.
     @stable
      */
-    onAction('[up-follow]', function($link) {
-      return follow($link);
-    });
+
+    /**
+    By adding an `up-instant` attribute to a link, the destination will be
+    fetched on `mousedown` instead of `click` (`mouseup`).
+    
+        <a href="/users" up-target=".main" up-instant>User list</a>
+    
+    This will save precious milliseconds that otherwise spent
+    on waiting for the user to release the mouse button. Since an
+    AJAX request will be triggered right way, the interaction will
+    appear faster.
+    
+    Note that using `[up-instant]` will prevent a user from canceling a link
+    click by moving the mouse away from the interaction area. However, for
+    navigation actions this isn't needed. E.g. popular operation
+    systems switch tabs on `mousedown` instead of `click`.
+    
+    `up-instant` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
+    
+    @selector a[up-instant]
+    @stable
+     */
 
     /**
     Marks up the current link to be followed *as fast as possible*.
@@ -8546,8 +9498,8 @@ new page is loading.
     This is done by:
     
     - [Following the link through AJAX](/a-up-target) instead of a full page load
-    - [Preloading the link's destination URL](/up-preload)
-    - [Triggering the link on `mousedown`](/up-instant) instead of on `click`
+    - [Preloading the link's destination URL](/a-up-preload)
+    - [Triggering the link on `mousedown`](/a-up-instant) instead of on `click`
     
     Use `up-dash` like this:
     
@@ -8557,12 +9509,10 @@ new page is loading.
     
         <a href="/users" up-target=".main" up-instant up-preload>User list</a>
     
-    @selector [up-dash]
+    @selector a[up-dash]
     @stable
      */
-    up.macro('[up-dash]', {
-      priority: 'last'
-    }, function($element) {
+    up.macro('[up-dash]', function($element) {
       var newAttrs, target;
       target = u.castedAttr($element, 'up-dash');
       $element.removeAttr('up-dash');
@@ -8579,11 +9529,11 @@ new page is loading.
     });
 
     /**
-    Add an `up-expand` class to any element that contains a link
+    Add an `[up-expand]` attribute to any element that contains a link
     in order to enlarge the link's click area.
     
-    `up-expand` honors all the UJS behavior in expanded links
-    ([`up-target`](/a-up-target), [`up-instant`](/up-instant), [`up-preload`](/up-preload), etc.).
+    `[up-expand]` honors all the UJS behavior in expanded links
+    ([`a[up-target]`](/a-up-target), [`a[up-instant]`](/a-up-instant), [`a[up-preload]`](/a-up-preload), etc.).
     
     \#\#\# Example
     
@@ -8610,22 +9560,22 @@ new page is loading.
     
     \#\#\# Limitations
     
-    Users will not be able to use the expanded area to open a context menu by right clicking,
-    or to open the link in a new tab.
-    To enable this, make the entire clickable area an actual `<a>` tag.
+    `[up-expand]` has some limitations for advanced browser users:
+    
+    - Users won't be able to right-click the expanded area to open a context menu
+    - Users won't be able to CTRL+click the expanded area to open a new tab
+    
+    To overcome these limitations, consider nesting the entire clickable area in an actual `<a>` tag.
     [It's OK to put block elements inside an anchor tag](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
     
-    
     @selector [up-expand]
-    @param {String} [up-expand]
+    @param {string} [up-expand]
       A CSS selector that defines which containing link should be expanded.
     
       If omitted, the first contained link will be expanded.
     @stable
      */
-    up.macro('[up-expand]', {
-      priority: 'last'
-    }, function($area) {
+    up.macro('[up-expand]', function($area) {
       var $childLinks, attribute, i, len, link, name, newAttrs, ref, selector, upAttributePattern;
       $childLinks = $area.find('a, [up-href]');
       if (selector = $area.attr('up-expand')) {
@@ -8653,11 +9603,13 @@ new page is loading.
       visit: visit,
       follow: follow,
       makeFollowable: makeFollowable,
+      isSafe: isSafe,
       isFollowable: isFollowable,
-      shouldProcessLinkEvent: shouldProcessLinkEvent,
       childClicked: childClicked,
       followMethod: followMethod,
-      onAction: onAction
+      addFollowVariant: addFollowVariant,
+      followVariantForLink: followVariantForLink,
+      allowDefault: allowDefault
     };
   })(jQuery);
 
@@ -8671,7 +9623,7 @@ new page is loading.
 Forms
 =====
   
-Unpoly comes with functionality to [submit](/form-up-target) and [validate](/up-validate)
+Unpoly comes with functionality to [submit](/form-up-target) and [validate](/input-up-validate)
 forms without leaving the current page. This means you can replace page fragments,
 open dialogs with sub-forms, etc. all without losing form state.
 
@@ -8689,7 +9641,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     Sets default options for form submission and validation.
     
     @property up.form.config
-    @param {Number} [config.observeDelay=0]
+    @param {number} [config.observeDelay=0]
       The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
       after the input value changes. Use this to limit how often the callback
       will be invoked for a fast typist.
@@ -8701,7 +9653,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       By default this looks for a `<fieldset>`, `<label>` or `<form>`
       around the validating input field, or any element with an
       `up-fieldset` attribute.
-    @param {String} [config.fields=[':input']]
+    @param {string} [config.fields=[':input']]
       An array of CSS selectors that represent form fields, such as `input` or `select`.
     @stable
      */
@@ -8728,51 +9680,51 @@ open dialogs with sub-forms, etc. all without losing form state.
     information on how AJAX form submissions work in Unpoly.
     
     @function up.submit
-    @param {Element|jQuery|String} formOrSelector
+    @param {Element|jQuery|string} formOrSelector
       A reference or selector for the form to submit.
       If the argument points to an element that is not a form,
       Unpoly will search its ancestors for the closest form.
-    @param {String} [options.url]
+    @param {string} [options.url]
       The URL where to submit the form.
       Defaults to the form's `action` attribute, or to the current URL of the browser window.
-    @param {String} [options.method='post']
+    @param {string} [options.method='post']
       The HTTP method used for the form submission.
       Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
       if none of these attributes are given.
-    @param {String} [options.target]
+    @param {string} [options.target]
       The selector to update when the form submission succeeds (server responds with status 200).
       Defaults to the form's `up-target` attribute.
-    @param {String} [options.failTarget]
+    @param {string} [options.failTarget]
       The selector to update when the form submission fails (server responds with non-200 status).
       Defaults to the form's `up-fail-target` attribute, or to an auto-generated
       selector that matches the form itself.
-    @param {String} [options.fallback]
+    @param {string} [options.fallback]
       The selector to update when the original target was not found in the page.
       Defaults to the form's `up-fallback` attribute.
-    @param {Boolean|String} [options.history=true]
+    @param {boolean|string} [options.history=true]
       Successful form submissions will add a history entry and change the browser's
       location bar if the form either uses the `GET` method or the response redirected
       to another page (this requires the `unpoly-rails` gem).
       If you want to prevent history changes in any case, set this to `false`.
-      If you pass a `String`, it is used as the URL for the browser history.
-    @param {String} [options.transition='none']
+      If you pass a string, it is used as the URL for the browser history.
+    @param {string} [options.transition='none']
       The transition to use when a successful form submission updates the `options.target` selector.
       Defaults to the form's `up-transition` attribute, or to `'none'`.
-    @param {String} [options.failTransition='none']
+    @param {string} [options.failTransition='none']
       The transition to use when a failed form submission updates the `options.failTarget` selector.
       Defaults to the form's `up-fail-transition` attribute, or to `options.transition`, or to `'none'`.
-    @param {Number} [options.duration]
+    @param {number} [options.duration]
       The duration of the transition. See [`up.morph()`](/up.morph).
-    @param {Number} [options.delay]
+    @param {number} [options.delay]
       The delay before the transition starts. See [`up.morph()`](/up.morph).
-    @param {String} [options.easing]
+    @param {string} [options.easing]
       The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
-    @param {Element|jQuery|String} [options.reveal]
+    @param {Element|jQuery|string} [options.reveal=true]
       Whether to reveal the target element within its viewport.
-    @param {Boolean} [options.restoreScroll]
+    @param {boolean} [options.restoreScroll]
       If set to `true`, this will attempt to [`restore scroll positions`](/up.restoreScroll)
       previously seen on the destination URL.
-    @param {Boolean} [options.cache]
+    @param {boolean} [options.cache]
       Whether to force the use of a cached response (`true`)
       or never use the cache (`false`)
       or make an educated guess (`undefined`).
@@ -8782,12 +9734,12 @@ open dialogs with sub-forms, etc. all without losing form state.
     @param {Object} [options.headers={}]
       An object of additional header key/value pairs to send along
       with the request.
-    @param {String} [options.layer='auto']
+    @param {string} [options.layer='auto']
       The name of the layer that ought to be updated. Valid values are
       `auto`, `page`, `modal` and `popup`.
     
       If set to `auto` (default), Unpoly will try to find a match in the form's layer.
-    @param {String} [options.failLayer='auto']
+    @param {string} [options.failLayer='auto']
       The name of the layer that ought to be updated if the server sends a non-200 status code.
     @return {Promise}
       A promise for the successful form submission.
@@ -8826,7 +9778,7 @@ open dialogs with sub-forms, etc. all without losing form state.
         return u.unresolvablePromise();
       }
       promise = up.replace(target, url, options);
-      promise.always(function() {
+      u.always(promise, function() {
         return up.feedback.stop($form);
       });
       return promise;
@@ -8885,16 +9837,16 @@ open dialogs with sub-forms, etc. all without losing form state.
         });
     
     @function up.observe
-    @param {Element|jQuery|String} selectorOrElement
+    @param {Element|jQuery|string} selectorOrElement
       The form fields that wiill be observed.
     
       You can pass one or more fields, a `<form>` or any container that contains form fields.
       The callback will be run if any of the given fields change.
-    @param {Number} [options.delay=up.form.config.observeDelay]
+    @param {number} [options.delay=up.form.config.observeDelay]
       The number of miliseconds to wait before executing the callback
       after the input value changes. Use this to limit how often the callback
       will be invoked for a fast typist.
-    @param {Function(value, $field)|String} onChange
+    @param {Function(value, $field)|string} onChange
       The callback to run when the field's value changes.
       If given as a function, it must take two arguments (`value`, `$field`).
       If given as a string, it will be evaled as JavaScript code in a context where
@@ -8926,59 +9878,32 @@ open dialogs with sub-forms, etc. all without losing form state.
       }
       delay = u.option(u.presentAttr($element, 'up-delay'), options.delay, config.observeDelay);
       delay = parseInt(delay);
-      $fields = u.multiSelector(config.fields).findWithSelf($element);
+      $fields = u.multiSelector(config.fields).selectInSubtree($element);
       destructors = u.map($fields, function(field) {
         return observeField($(field), delay, callback);
       });
       return u.sequence.apply(u, destructors);
     };
     observeField = function($field, delay, callback) {
-      var changeEvents, check, lastCallbackDone, processedValue, runCallback, timer;
-      processedValue = u.submittedValue($field);
-      timer = void 0;
-      lastCallbackDone = u.resolvedPromise();
-      runCallback = function(value) {
-        var callbackReturnValue;
-        processedValue = value;
-        callbackReturnValue = callback.apply($field.get(0), [value, $field]);
-        if (u.isPromise(callbackReturnValue)) {
-          return lastCallbackDone = callbackReturnValue;
-        } else {
-          return lastCallbackDone = callbackReturnValue;
-        }
-      };
-      check = function() {
-        var nextCallback, value;
-        value = u.submittedValue($field);
-        if (processedValue !== value) {
-          nextCallback = function() {
-            return runCallback(value);
-          };
-          if (timer != null) {
-            timer.cancel();
-          }
-          timer = u.promiseTimer(delay);
-          return $.when(timer, lastCallbackDone).then(nextCallback);
-        }
-      };
-      changeEvents = 'input change';
-      $field.on(changeEvents, check);
-      return function() {
-        $field.off(changeEvents, check);
-        return timer != null ? timer.cancel() : void 0;
-      };
+      var observer;
+      observer = new up.FieldObserver($field, {
+        delay: delay,
+        callback: callback
+      });
+      observer.start();
+      return observer.stop;
     };
 
     /**
     [Observes](/up.observe) a field or form and submits the form when a value changes.
     
-    The changed form field will be assigned a CSS class [`up-active`](/up-active)
+    Both the form and the changed field will be assigned a CSS class [`form-up-active`](/form-up-active)
     while the autosubmitted form is processing.
     
-    The unobtrusive variant of this is the [`up-autosubmit`](/up-autosubmit) attribute.
+    The unobtrusive variant of this is the [`up-autosubmit`](/form-up-autosubmit) attribute.
     
     @function up.autosubmit
-    @param {String|Element|jQuery} selectorOrElement
+    @param {string|Element|jQuery} selectorOrElement
       The field or form to observe.
     @param {Object} [options]
       See options for [`up.observe()`](/up.observe)
@@ -9015,15 +9940,14 @@ open dialogs with sub-forms, etc. all without losing form state.
     };
 
     /**
-    Performs a server-side validation of a form and update the form
-    with validation messages.
+    Performs a server-side validation of a form field.
     
     `up.validate()` submits the given field's form with an additional `X-Up-Validate`
     HTTP header. Upon seeing this header, the server is expected to validate (but not save)
     the form submission and render a new copy of the form with validation errors.
     
-    The unobtrusive variant of this is the [`[up-validate]`](/up-validate) selector.
-    See the documentation for [`[up-validate]`](/up-validate) for more information
+    The unobtrusive variant of this is the [`input[up-validate]`](/input-up-validate) selector.
+    See the documentation for [`input[up-validate]`](/input-up-validate) for more information
     on how server-side validation works in Unpoly.
     
     \#\#\# Example
@@ -9031,11 +9955,11 @@ open dialogs with sub-forms, etc. all without losing form state.
         up.validate('input[name=email]', { target: '.email-errors' })
     
     @function up.validate
-    @param {String|Element|jQuery} fieldOrSelector
+    @param {string|Element|jQuery} fieldOrSelector
     
-    @param {String|Element|jQuery} [options.target]
+    @param {string|Element|jQuery} [options.target]
     @return {Promise}
-      A promise that is resolved when the server-side
+      A promise that is fulfilled when the server-side
       validation is received and the form was updated.
     @stable
      */
@@ -9091,15 +10015,15 @@ open dialogs with sub-forms, etc. all without losing form state.
     /**
     Shows or hides a target selector depending on the value.
     
-    See [`[up-switch]`](/up-switch) for more documentation and examples.
+    See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
     
     This function does not currently have a very useful API outside
     of our use for `up-switch`'s UJS behavior, that's why it's currently
     still marked `@internal`.
     
     @function up.form.switchTargets
-    @param {String|Element|jQuery} fieldOrSelector
-    @param {String} [options.target]
+    @param {string|Element|jQuery} fieldOrSelector
+    @param {string} [options.target]
       The target selectors to switch.
       Defaults to an `up-switch` attribute on the given field.
     @internal
@@ -9175,7 +10099,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     it will usually re-render an updated copy of the form with
     validation messages.
     
-    For Unpoly to be able to detect a failed form submission,,
+    For Unpoly to be able to detect a failed form submission,
     the form must be re-rendered with a non-200 HTTP status code.
     We recommend to use either 400 (bad request) or
     422 (unprocessable entity).
@@ -9198,8 +10122,8 @@ open dialogs with sub-forms, etc. all without losing form state.
     
         end
     
-    Note that you can also use the
-    [`up-validate`](/up-validate) attribute to perform server-side
+    Note that you can also use
+    [`input[up-validate]`](/input-up-validate) to perform server-side
     validations while the user is completing fields.
     
     \#\#\# Redirects
@@ -9215,7 +10139,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     \#\#\# Giving feedback while the form is processing
     
-    The `<form>` element will be assigned a CSS class `up-active` while
+    The `<form>` element will be assigned a CSS class [`up-active`](/form.up-active) while
     the submission is loading.
     
     You can also [implement a spinner](/up.proxy/#spinners)
@@ -9223,17 +10147,17 @@ open dialogs with sub-forms, etc. all without losing form state.
     and [`up:proxy:recover`](/up:proxy:recover) events.
     
     @selector form[up-target]
-    @param {String} up-target
+    @param {string} up-target
       The selector to [replace](/up.replace) if the form submission is successful (200 status code).
-    @param {String} [up-fail-target]
+    @param {string} [up-fail-target]
       The selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
       If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
       server has echoed the form with validation errors.
     @param [up-fallback]
       The selector to replace if the server responds with a non-200 status code.
-    @param {String} [up-transition]
+    @param {string} [up-transition]
       The animation to use when the form is replaced after a successful submission.
-    @param {String} [up-fail-transition]
+    @param {string} [up-fail-transition]
       The animation to use when the form is replaced after a failed submission.
     @param [up-history]
       Whether to push a browser history entry after a successful form submission.
@@ -9243,27 +10167,27 @@ open dialogs with sub-forms, etc. all without losing form state.
     
       Set this to `'false'` to prevent the URL bar from being updated.
       Set this to a URL string to update the history with the given URL.
-    @param {String} [up-method]
+    @param {string} [up-method]
       The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
       Alternately you can use an attribute `data-method`
       ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
       or `method` (vanilla HTML) for the same purpose.
-    @param {String} [up-layer='auto']
+    @param {string} [up-layer='auto']
       The name of the layer that ought to be updated. Valid values are
       `auto`, `page`, `modal` and `popup`.
     
       If set to `auto` (default), Unpoly will try to find a match in the form's layer.
       If no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
-    @param {String} [up-fail-layer='auto']
+    @param {string} [up-fail-layer='auto']
       The name of the layer that ought to be updated if the server sends a
       non-200 status code.
-    @param {String} [up-reveal='true']
+    @param {string} [up-reveal='true']
       Whether to reveal the target element within its viewport before updating.
-    @param {String} [up-restore-scroll='false']
+    @param {string} [up-restore-scroll='false']
       Whether to restore previously known scroll position of all viewports
       within the target selector.
-    @param {String} [up-cache]
+    @param {string} [up-cache]
       Whether to force the use of a cached response (`true`)
       or never use the cache (`false`)
       or make an educated guess (`undefined`).
@@ -9414,8 +10338,8 @@ open dialogs with sub-forms, etc. all without losing form state.
     In order to update the `department` field in addition to the `employee` field, you could say
     `up-validate="&, [name=employee]"`, or simply `up-validate="form"` to update the entire form.
     
-    @selector [up-validate]
-    @param {String} up-validate
+    @selector input[up-validate]
+    @param {string} up-validate
       The CSS selector to update with the server response.
     
       This defaults to a fieldset or form group around the validating field.
@@ -9426,11 +10350,11 @@ open dialogs with sub-forms, etc. all without losing form state.
     });
 
     /**
-    Show or hide part of a form if certain options are selected or boxes are checked.
+    Show or hide elements when a `<select>` or `<input>` has a given value.
     
-    \#\#\# Example
+    \#\#\# Example: Select options
     
-    The triggering input gets an `up-switch` attribute with a selector for the elements to show or hide:
+    The controlling form field gets an `up-switch` attribute with a selector for the elements to show or hide:
     
         <select name="advancedness" up-switch=".target">
           <option value="basic">Basic parts</option>
@@ -9438,7 +10362,8 @@ open dialogs with sub-forms, etc. all without losing form state.
           <option value="very-advanced">Very advanced parts</option>
         </select>
     
-    The target elements get a space-separated list of select values for which they are shown or hidden:
+    The target elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`](/up-hide-for)
+    attributes to indicate for which values they should be shown or hidden:
     
         <div class="target" up-show-for="basic">
           only shown for advancedness = basic
@@ -9452,7 +10377,28 @@ open dialogs with sub-forms, etc. all without losing form state.
           shown for advancedness = advanced or very-advanced
         </div>
     
-    For checkboxes you can also use the pseudo-values `:checked` or `:unchecked` like so:
+    \#\#\# Example: Text field
+    
+    The controlling `<input>` gets an `up-switch` attribute with a selector for the elements to show or hide:
+    
+        <input type="text" name="user" up-switch=".target">
+    
+        <div class="target" up-show-for="alice">
+          only shown for user alice
+        </div>
+    
+    You can also use the pseudo-values `:blank` to match an empty input value,
+    or `:present` to match a non-empty input value:
+    
+        <input type="text" name="user" up-switch=".target">
+    
+        <div class="target" up-show-for=":blank">
+          please enter a username
+        </div>
+    
+    \#\#\# Example: Checkbox
+    
+    For checkboxes you can match against the pseudo-values `:checked` or `:unchecked`:
     
         <input type="checkbox" name="flag" up-switch=".target">
     
@@ -9460,44 +10406,27 @@ open dialogs with sub-forms, etc. all without losing form state.
           only shown when checkbox is checked
         </div>
     
-    You can also use the pseudo-values `:blank` to match an empty input value,
-    or `:present` to match a non-empty input value:
-    
-        <input type="text" name="email" up-switch=".target">
-    
-        <div class="target" up-show-for=":blank">
-          please enter an email address
+        <div class="target" up-show-for=":cunhecked">
+          only shown when checkbox is unchecked
         </div>
     
-    @selector [up-switch]
+    Of course you can also match against the `value` property of the checkbox element:
+    
+        <input type="checkbox" name="flag" value="active" up-switch=".target">
+    
+        <div class="target" up-show-for="active">
+          only shown when checkbox is checked
+        </div>
+    
+    @selector input[up-switch]
+    @param {string} up-switch
+      A CSS selector for elements whose visibility depends on this field's value.
     @stable
      */
-
-    /**
-    Show this element only if a form field has a given value.
-    
-    See [`[up-switch]`](/up-switch) for more documentation and examples.
-    
-    @selector [up-show-for]
-    @param up-show-for
-      A space-separated list of values for which to show this element.
-    @stable
-     */
-
-    /**
-    Hide this element if a form field has a given value.
-    
-    See [`[up-switch]`](/up-switch) for more documentation and examples.
-    
-    @selector [up-hide-for]
-    @param up-hide-for
-      A space-separated list of values for which to hide this element.
-    @stable
-     */
-    up.on('change', '[up-switch]', function(event, $field) {
+    up.compiler('[up-switch]', function($field) {
       return switchTargets($field);
     });
-    up.compiler('[up-switch]', function($field) {
+    up.on('change', '[up-switch]', function(event, $field) {
       return switchTargets($field);
     });
     up.compiler('[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', function($element) {
@@ -9505,9 +10434,10 @@ open dialogs with sub-forms, etc. all without losing form state.
     });
 
     /**
-    Observes this field or form and runs a callback when a value changes.
+    Observes this field and runs a callback when a value changes.
     
     This is useful for observing text fields while the user is typing.
+    If you want to submit the form after a change see [`input[up-autosubmit]`](/input-up-autosubmit).
     
     The programmatic variant of this is the [`up.observe()`](/up.observe) function.
     
@@ -9520,7 +10450,35 @@ open dialogs with sub-forms, etc. all without losing form state.
           <input name="query" up-observe="showSuggestions(value)">
         </form>
     
-    The following would run a global `somethingChanged(value)` function
+    \#\#\# Callback context
+    
+    The script given to `up-observe` runs with the following context:
+    
+    | Name     | Type      | Description                           |
+    | -------- | --------- | ------------------------------------- |
+    | `value`  | `string`  | The current value of the field        |
+    | `this`   | `Element` | The form field                        |
+    | `$field` | `jQuery`  | The form field as a jQuery collection |
+    
+    @selector input[up-observe]
+    @param {string} up-observe
+      The code to run when the field's value changes.
+    @param {string} up-delay
+      The number of miliseconds to wait after a change before the code is run.
+    @stable
+     */
+
+    /**
+    Observes this form and runs a callback when any field changes.
+    
+    This is useful for observing text fields while the user is typing.
+    If you want to submit the form after a change see [`input[up-autosubmit]`](/input-up-autosubmit).
+    
+    The programmatic variant of this is the [`up.observe()`](/up.observe) function.
+    
+    \#\#\# Example
+    
+    The would call a function `somethingChanged(value)`
     when any `<input>` within the `<form>` changes:
     
         <form up-observe="somethingChanged(value)">
@@ -9534,14 +10492,14 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     | Name     | Type      | Description                           |
     | -------- | --------- | ------------------------------------- |
-    | `value`  | `String`  | The current value of the field        |
+    | `value`  | `string`  | The current value of the field        |
     | `this`   | `Element` | The form field                        |
     | `$field` | `jQuery`  | The form field as a jQuery collection |
     
-    @selector [up-observe]
-    @param {String} up-observe
-      The code to run when the field's value changes.
-    @param {String} up-delay
+    @selector form[up-observe]
+    @param {string} up-observe
+      The code to run when any field's value changes.
+    @param {string} up-delay
       The number of miliseconds to wait after a change before the code is run.
     @stable
      */
@@ -9550,33 +10508,48 @@ open dialogs with sub-forms, etc. all without losing form state.
     });
 
     /**
-    [Observes](/up.observe) this field or form and submits the form when a value changes.
+    [Observes](/up.observe) this form field and submits the form when its value changes.
     
-    The form field will be assigned a CSS class [`up-active`](/up-active)
-    while the autosubmitted form is processing.
+    Both the form and the changed field will be assigned a CSS class [`up-active`](/form-up-active)
+    while the autosubmitted form is loading.
     
     The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
     
     \#\#\# Example
     
-    The following would submit the form when either query or checkbox was changed:
-    
-        <form method="GET" action="/search" up-autosubmit>
-          <input type="search" name="query">
-          <input type="checkbox" name="archive"> Include archive
-        </form>
-    
-    The following would submit the form only if the query was changed,
-    but not if the checkbox was changed:
+    The following would automatically submit the form when the query is changed:
     
         <form method="GET" action="/search">
           <input type="search" name="query" up-autosubmit>
           <input type="checkbox" name="archive"> Include archive
         </form>
     
-    @selector [up-autosubmit]
-    @param {String} up-delay
-      The number of miliseconds to wait after the change before the form is submitted.
+    @selector input[up-autosubmit]
+    @param {string} up-delay
+      The number of miliseconds to wait after a change before the form is submitted.
+    @stable
+     */
+
+    /**
+    [Observes](/up.observe) this form and submits the form when *any* field changes.
+    
+    Both the form and the field will be assigned a CSS class [`up-active`](/form-up-active)
+    while the autosubmitted form is loading.
+    
+    The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
+    
+    \#\#\# Example
+    
+    This will submit the form when either query or checkbox was changed:
+    
+        <form method="GET" action="/search" up-autosubmit>
+          <input type="search" name="query">
+          <input type="checkbox" name="archive"> Include archive
+        </form>
+    
+    @selector form[up-autosubmit]
+    @param {string} up-delay
+      The number of miliseconds to wait after a change before the form is submitted.
     @stable
      */
     up.compiler('[up-autosubmit]', function($formOrField) {
@@ -9611,7 +10584,7 @@ Pop-up overlays
 Instead of [linking to a page fragment](/up.link), you can choose
 to show a fragment in a popup overlay that rolls down from an anchoring element.
 
-To open a popup, add an [`up-popup` attribute](/up-popup) to a link:
+To open a popup, add an [`up-popup` attribute](/a-up-popup) to a link:
 
     <a href="/options" up-popup=".menu">Show options</a>
 
@@ -9628,7 +10601,7 @@ The popup also closes *when a link within the popup changes a fragment behind th
 This is useful to have the popup interact with the page that
 opened it, e.g. by updating parts of a larger form.
 
-To disable this behavior, give the opening link an [`up-sticky`](/up-popup#up-sticky) attribute.
+To disable this behavior, give the opening link an [`up-sticky`](/a-up-popup#up-sticky) attribute.
 
 
 \#\#\# Customizing the popup design
@@ -9654,32 +10627,32 @@ The HTML of a popup element is simply this:
 
 (function() {
   up.popup = (function($) {
-    var align, attachAsap, attachNow, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, isOpen, reset, state, u, unveilFrame;
+    var align, attachAsap, attachNow, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, isOpen, preloadNow, reset, state, toggleAsap, u, unveilFrame;
     u = up.util;
 
     /**
     Sets default options for future popups.
     
     @property up.popup.config
-    @param {String} [config.position='bottom-right']
+    @param {string} [config.position='bottom-right']
       Defines where the popup is attached to the opening element.
     
       Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
-    @param {String} [config.history=false]
+    @param {string} [config.history=false]
       Whether opening a popup will add a browser history entry.
-    @param {String} [config.openAnimation='fade-in']
+    @param {string} [config.openAnimation='fade-in']
       The animation used to open a popup.
-    @param {String} [config.closeAnimation='fade-out']
+    @param {string} [config.closeAnimation='fade-out']
       The animation used to close a popup.
-    @param {String} [config.openDuration]
+    @param {string} [config.openDuration]
       The duration of the open animation (in milliseconds).
-    @param {String} [config.closeDuration]
+    @param {string} [config.closeDuration]
       The duration of the close animation (in milliseconds).
-    @param {String} [config.openEasing]
+    @param {string} [config.openEasing]
       The timing function controlling the acceleration of the opening animation.
-    @param {String} [config.closeEasing]
+    @param {string} [config.closeEasing]
       The timing function controlling the acceleration of the closing animation.
-    @param {Boolean} [options.sticky=false]
+    @param {boolean} [options.sticky=false]
       If set to `true`, the popup remains
       open even it changes the page in the background.
     @stable
@@ -9701,7 +10674,7 @@ The HTML of a popup element is simply this:
     Returns `undefined` if no  popup is open.
     
     @function up.popup.url
-    @return {String}
+    @return {string}
       the source URL
     @stable
      */
@@ -9710,7 +10683,7 @@ The HTML of a popup element is simply this:
     Returns the URL of the page or modal behind the popup.
     
     @function up.popup.coveredUrl
-    @return {String}
+    @return {string}
     @experimental
      */
     state = u.config({
@@ -9786,7 +10759,7 @@ The HTML of a popup element is simply this:
     Returns whether popup modal is currently open.
     
     @function up.popup.isOpen
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isOpen = function() {
@@ -9799,63 +10772,57 @@ The HTML of a popup element is simply this:
     Emits events [`up:popup:open`](/up:popup:open) and [`up:popup:opened`](/up:popup:opened).
     
     @function up.popup.attach
-    @param {Element|jQuery|String} anchor
+    @param {Element|jQuery|string} anchor
       The element to which the popup will be attached.
-    @param {String} [options.url]
+    @param {string} [options.url]
       The URL from which to fetch the popup contents.
     
       If omitted, the `href` or `up-href` attribute of the anchor element will be used.
     
       Will be ignored if `options.html` is given.
-    @param {String} [options.target]
+    @param {string} [options.target]
       A CSS selector that will be extracted from the response and placed into the popup.
-    @param {String} [options.position='bottom-right']
+    @param {string} [options.position='bottom-right']
       Defines where the popup is attached to the opening element.
     
       Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
-    @param {String} [options.html]
+    @param {string} [options.html]
       A string of HTML from which to extract the popup contents. No network request will be made.
-    @param {String} [options.confirm]
+    @param {string} [options.confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the modal is being opened.
-    @param {String} [options.animation]
+    @param {string} [options.animation]
       The animation to use when opening the popup.
-    @param {Number} [options.duration]
+    @param {number} [options.duration]
       The duration of the animation. See [`up.animate()`](/up.animate).
-    @param {Number} [options.delay]
+    @param {number} [options.delay]
       The delay before the animation starts. See [`up.animate()`](/up.animate).
-    @param {String} [options.easing]
+    @param {string} [options.easing]
       The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
-    @param {String} [options.method="GET"]
+    @param {string} [options.method="GET"]
       Override the request method.
-    @param {Boolean} [options.sticky=false]
+    @param {boolean} [options.sticky=false]
       If set to `true`, the popup remains
       open even if the page changes in the background.
-    @param {Object} [options.history=false]
+    @param {boolean} [options.history=false]
     @return {Promise}
-      A promise that will be resolved when the popup has been loaded and
+      A promise that will be fulfilled when the popup has been loaded and
       the opening animation has completed.
     @stable
      */
     attachAsap = function(elementOrSelector, options) {
-      var curriedAttachNow;
-      curriedAttachNow = function() {
+      return chain.asap(closeNow, (function() {
         return attachNow(elementOrSelector, options);
-      };
-      if (isOpen()) {
-        chain.asap(closeNow, curriedAttachNow);
-      } else {
-        chain.asap(curriedAttachNow);
-      }
-      return chain.promise();
+      }));
     };
     attachNow = function(elementOrSelector, options) {
-      var $anchor, animateOptions, html, position, target, url;
+      var $anchor, animateOptions, extractOptions, html, position, target, url;
       $anchor = $(elementOrSelector);
       $anchor.length || up.fail('Cannot attach popup to non-existing element %o', elementOrSelector);
       options = u.options(options);
       url = u.option(u.pluckKey(options, 'url'), $anchor.attr('up-href'), $anchor.attr('href'));
       html = u.option(u.pluckKey(options, 'html'));
+      url || html || up.fail('up.popup.attach() requires either an { url } or { html } option');
       target = u.option(u.pluckKey(options, 'target'), $anchor.attr('up-popup'), 'body');
       position = u.option(options.position, $anchor.attr('up-position'), config.position);
       options.animation = u.option(options.animation, $anchor.attr('up-animation'), config.openAnimation);
@@ -9864,17 +10831,27 @@ The HTML of a popup element is simply this:
       options.confirm = u.option(options.confirm, $anchor.attr('up-confirm'));
       options.method = up.link.followMethod($anchor, options);
       options.layer = 'popup';
+      options.failTarget = u.option(options.failTarget, $anchor.attr('up-fail-target'));
       options.failLayer = u.option(options.failLayer, $anchor.attr('up-fail-layer'), 'auto');
+      options.provideTarget = function() {
+        return createHiddenFrame(target);
+      };
       animateOptions = up.motion.animateOptions(options, $anchor, {
         duration: config.openDuration,
         easing: config.openEasing
       });
+      extractOptions = u.merge(options, {
+        animation: false
+      });
+      if (options.preload && url) {
+        return up.replace(target, url, options);
+      }
       return up.browser.whenConfirmed(options).then(function() {
         return up.bus.whenEmitted('up:popup:open', {
           url: url,
           message: 'Opening popup'
         }).then(function() {
-          var extractOptions, promise;
+          var promise;
           state.phase = 'opening';
           state.$anchor = $anchor;
           state.position = position;
@@ -9883,12 +10860,6 @@ The HTML of a popup element is simply this:
             state.coveredTitle = document.title;
           }
           state.sticky = options.sticky;
-          options.provideTarget = function() {
-            return createHiddenFrame(target);
-          };
-          extractOptions = u.merge(options, {
-            animation: false
-          });
           if (html) {
             promise = up.extract(target, html, extractOptions);
           } else {
@@ -9937,22 +10908,19 @@ The HTML of a popup element is simply this:
     @param {Object} options
       See options for [`up.animate()`](/up.animate).
     @return {Promise}
-      A promise that will be resolved once the modal's close
+      A promise that will be fulfilled once the modal's close
       animation has finished.
     @stable
      */
     closeAsap = function(options) {
-      if (isOpen()) {
-        chain.asap(function() {
-          return closeNow(options);
-        });
-      }
-      return chain.promise();
+      return chain.asap(function() {
+        return closeNow(options);
+      });
     };
     closeNow = function(options) {
       var animateOptions;
       if (!isOpen()) {
-        return u.resolvedPromise();
+        return Promise.resolve();
       }
       options = u.options(options, {
         animation: config.closeAnimation,
@@ -9982,6 +10950,18 @@ The HTML of a popup element is simply this:
           });
         });
       });
+    };
+    preloadNow = function($link, options) {
+      options = u.options(options);
+      options.preload = true;
+      return attachNow($link, options);
+    };
+    toggleAsap = function($link, options) {
+      if ($link.is('.up-current')) {
+        return closeAsap();
+      } else {
+        return attachAsap($link, options);
+      }
     };
 
     /**
@@ -10013,9 +10993,9 @@ The HTML of a popup element is simply this:
     within the current popup.
     
     @methods up.popup.contains
-    @param {String} elementOrSelector
+    @param {string} elementOrSelector
       The element to test
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     contains = function(elementOrSelector) {
@@ -10035,23 +11015,23 @@ The HTML of a popup element is simply this:
         <a href="/decks" up-popup=".deck_list">Switch deck</a>
         <a href="/settings" up-popup=".options" up-sticky>Settings</a>
     
-    @selector [up-popup]
-    @param {String} up-popup
+    @selector a[up-popup]
+    @param {string} up-popup
       The CSS selector that will be extracted from the response and
       displayed in a popup overlay.
     @param [up-position]
       Defines where the popup is attached to the opening element.
     
       Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
-    @param {String} [up-confirm]
+    @param {string} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the popup is opened.
-    @param {String} [up-method='GET']
+    @param {string} [up-method='GET']
       Override the request method.
     @param [up-sticky]
       If set to `true`, the popup remains
       open even if the page changes in the background.
-    @param {String} [up-history='false']
+    @param {string} [up-history='false']
       Whether to push an entry to the browser history for the popup's source URL.
     
       Set this to `'false'` to prevent the URL bar from being updated.
@@ -10059,11 +11039,12 @@ The HTML of a popup element is simply this:
     
     @stable
      */
-    up.link.onAction('[up-popup]', function($link) {
-      if ($link.is('.up-current')) {
-        return closeAsap();
-      } else {
-        return attachAsap($link);
+    up.link.addFollowVariant('[up-popup]', {
+      follow: function($link, options) {
+        return toggleAsap($link, options);
+      },
+      preload: function($link, options) {
+        return preloadNow($link, options);
       }
     });
     up.on('click up:action:consumed', function(event) {
@@ -10138,7 +11119,7 @@ Modal dialogs
 Instead of [linking to a page fragment](/up.link), you can choose to show a fragment
 in a modal dialog. The existing page will remain open in the background.
 
-To open a modal, add an [`up-modal`](/up-modal) attribute to a link:
+To open a modal, add an [`up-modal`](/a-up-modal) attribute to a link:
 
     <a href="/blogs" up-modal=".blog-list">Switch blog</a>
 
@@ -10154,7 +11135,7 @@ By default the dialog automatically closes
 This is useful to have the dialog interact with the page that
 opened it, e.g. by updating parts of a larger form.
 
-To disable this behavior, give the opening link an [`up-sticky`](/up-modal#up-sticky) attribute:
+To disable this behavior, give the opening link an [`up-sticky`](/a-up-modal#up-sticky) attribute:
 
 
 \#\#\# Customizing the dialog design
@@ -10192,31 +11173,31 @@ or function.
 
 (function() {
   up.modal = (function($) {
-    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, flavors, followAsap, isOpen, markAsAnimating, openAsap, openNow, reset, shiftElements, state, templateHtml, u, unshiftElements, unveilFrame, visitAsap;
+    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, flavors, followAsap, isOpen, markAsAnimating, openAsap, openNow, preloadNow, reset, shiftElements, state, templateHtml, u, unshiftElements, unveilFrame, visitAsap;
     u = up.util;
 
     /**
     Sets default options for future modals.
     
     @property up.modal.config
-    @param {String} [config.history=true]
+    @param {string} [config.history=true]
       Whether opening a modal will add a browser history entry.
-    @param {Number} [config.width]
+    @param {number} [config.width]
       The width of the dialog as a CSS value like `'400px'` or `'50%'`.
     
       Defaults to `undefined`, meaning that the dialog will grow to fit its contents
       until it reaches `config.maxWidth`. Leaving this as `undefined` will
       also allow you to control the width using CSS on `.up-modal-dialog´.
-    @param {Number} [config.maxWidth]
+    @param {number} [config.maxWidth]
       The width of the dialog as a CSS value like `'400px'` or `50%`.
       You can set this to `undefined` to make the dialog fit its contents.
       Be aware however, that e.g. Bootstrap stretches input elements
       to `width: 100%`, meaning the dialog will also stretch to the full
       width of the screen.
-    @param {Number} [config.height='auto']
+    @param {number} [config.height='auto']
       The height of the dialog in pixels.
       Defaults to `undefined`, meaning that the dialog will grow to fit its contents.
-    @param {String|Function(config)} [config.template]
+    @param {string|Function(config)} [config.template]
       A string containing the HTML structure of the modal.
       You can supply an alternative template string, but make sure that it
       defines tag with the classes `up-modal`, `up-modal-dialog` and  `up-modal-content`.
@@ -10224,34 +11205,34 @@ or function.
       You can also supply a function that returns a HTML string.
       The function will be called with the modal options (merged from these defaults
       and any per-open overrides) whenever a modal opens.
-    @param {String} [config.closeLabel='×']
+    @param {string} [config.closeLabel='×']
       The label of the button that closes the dialog.
-    @param {Boolean} [config.closable=true]
+    @param {boolean} [config.closable=true]
       When `true`, the modal will render a close icon and close when the user
       clicks on the backdrop or presses Escape.
     
       When `false`, you need to either supply an element with `[up-close]` or
       close the modal manually with `up.modal.close()`.
-    @param {String} [config.openAnimation='fade-in']
+    @param {string} [config.openAnimation='fade-in']
       The animation used to open the viewport around the dialog.
-    @param {String} [config.closeAnimation='fade-out']
+    @param {string} [config.closeAnimation='fade-out']
       The animation used to close the viewport the dialog.
-    @param {String} [config.backdropOpenAnimation='fade-in']
+    @param {string} [config.backdropOpenAnimation='fade-in']
       The animation used to open the backdrop that dims the page below the dialog.
-    @param {String} [config.backdropCloseAnimation='fade-out']
+    @param {string} [config.backdropCloseAnimation='fade-out']
       The animation used to close the backdrop that dims the page below the dialog.
-    @param {Number} [config.openDuration]
+    @param {number} [config.openDuration]
       The duration of the open animation (in milliseconds).
-    @param {Number} [config.closeDuration]
+    @param {number} [config.closeDuration]
       The duration of the close animation (in milliseconds).
-    @param {String} [config.openEasing]
+    @param {string} [config.openEasing]
       The timing function controlling the acceleration of the opening animation.
-    @param {String} [config.closeEasing]
+    @param {string} [config.closeEasing]
       The timing function controlling the acceleration of the closing animation.
-    @param {Boolean} [options.sticky=false]
+    @param {boolean} [options.sticky=false]
       If set to `true`, the modal remains
       open even it changes the page in the background.
-    @param {String} [options.flavor='default']
+    @param {string} [options.flavor='default']
       The default [flavor](/up.modal.flavors).
     @stable
      */
@@ -10283,7 +11264,7 @@ or function.
     
     \#\#\# Example
     
-    Unpoly's [`[up-drawer]`](/up-drawer) is implemented as a modal flavor:
+    Unpoly's [`[up-drawer]`](/a-up-drawer) is implemented as a modal flavor:
     
         up.modal.flavors.drawer = {
           openAnimation: 'move-from-right',
@@ -10325,7 +11306,7 @@ or function.
     or `undefined` if no modal is currently open.
     
     @function up.modal.url
-    @return {String}
+    @return {string}
       the source URL
     @stable
      */
@@ -10334,7 +11315,7 @@ or function.
     Returns the URL of the page behind the modal overlay.
     
     @function up.modal.coveredUrl
-    @return {String}
+    @return {string}
     @experimental
      */
     state = u.config(function() {
@@ -10443,7 +11424,7 @@ or function.
     This also returns `true` if the modal is in an opening or closing animation.
     
     @function up.modal.isOpen
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     isOpen = function() {
@@ -10461,42 +11442,42 @@ or function.
     Emits events [`up:modal:open`](/up:modal:open) and [`up:modal:opened`](/up:modal:opened).
     
     @function up.modal.follow
-    @param {Element|jQuery|String} linkOrSelector
+    @param {Element|jQuery|string} linkOrSelector
       The link to follow.
-    @param {String} [options.target]
+    @param {string} [options.target]
       The selector to extract from the response and open in a modal dialog.
-    @param {Number} [options.width]
+    @param {number} [options.width]
       The width of the dialog in pixels.
       By [default](/up.modal.config) the dialog will grow to fit its contents.
-    @param {Number} [options.height]
+    @param {number} [options.height]
       The width of the dialog in pixels.
       By [default](/up.modal.config) the dialog will grow to fit its contents.
-    @param {Boolean} [options.sticky=false]
+    @param {boolean} [options.sticky=false]
       If set to `true`, the modal remains
       open even it changes the page in the background.
-    @param {Boolean} [config.closable=true]
+    @param {boolean} [config.closable=true]
       When `true`, the modal will render a close icon and close when the user
       clicks on the backdrop or presses Escape.
     
       When `false`, you need to either supply an element with `[up-close]` or
       close the modal manually with `up.modal.close()`.
-    @param {String} [options.confirm]
+    @param {string} [options.confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the modal is being opened.
-    @param {String} [options.method="GET"]
+    @param {string} [options.method="GET"]
       Override the request method.
-    @param {Object} [options.history=true]
+    @param {boolean} [options.history=true]
       Whether to add a browser history entry for the modal's source URL.
-    @param {String} [options.animation]
+    @param {string} [options.animation]
       The animation to use when opening the modal.
-    @param {Number} [options.duration]
+    @param {number} [options.duration]
       The duration of the animation. See [`up.animate()`](/up.animate).
-    @param {Number} [options.delay]
+    @param {number} [options.delay]
       The delay before the animation starts. See [`up.animate()`](/up.animate).
-    @param {String} [options.easing]
+    @param {string} [options.easing]
       The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
     @return {Promise}
-      A promise that will be resolved when the modal has been loaded and
+      A promise that will be fulfilled when the modal has been loaded and
       the opening animation has completed.
     @stable
      */
@@ -10504,6 +11485,12 @@ or function.
       options = u.options(options);
       options.$link = $(linkOrSelector);
       return openAsap(options);
+    };
+    preloadNow = function($link, options) {
+      options = u.options(options);
+      options.$link = $link;
+      options.preload = true;
+      return openNow(options);
     };
 
     /**
@@ -10519,15 +11506,15 @@ or function.
     Emits events [`up:modal:open`](/up:modal:open) and [`up:modal:opened`](/up:modal:opened).
     
     @function up.modal.visit
-    @param {String} url
+    @param {string} url
       The URL to load.
-    @param {String} options.target
+    @param {string} options.target
       The CSS selector to extract from the response.
       The extracted content will be placed into the dialog window.
     @param {Object} options
       See options for [`up.modal.follow()`](/up.modal.follow).
     @return {Promise}
-      A promise that will be resolved when the modal has been loaded and the opening
+      A promise that will be fulfilled when the modal has been loaded and the opening
       animation has completed.
     @stable
      */
@@ -10553,14 +11540,14 @@ or function.
     Emits events [`up:modal:open`](/up:modal:open) and [`up:modal:opened`](/up:modal:opened).
     
     @function up.modal.extract
-    @param {String} selector
+    @param {string} selector
       The CSS selector to extract from the HTML.
-    @param {String} html
+    @param {string} html
       The HTML containing the modal content.
     @param {Object} options
       See options for [`up.modal.follow()`](/up.modal.follow).
     @return {Promise}
-      A promise that will be resolved when the modal has been opened and the opening
+      A promise that will be fulfilled when the modal has been opened and the opening
       animation has completed.
     @stable
      */
@@ -10572,16 +11559,9 @@ or function.
       return openAsap(options);
     };
     openAsap = function(options) {
-      var curriedOpenNow;
-      curriedOpenNow = function() {
+      return chain.asap(closeNow, (function() {
         return openNow(options);
-      };
-      if (isOpen()) {
-        chain.asap(closeNow, curriedOpenNow);
-      } else {
-        chain.asap(curriedOpenNow);
-      }
-      return chain.promise();
+      }));
     };
     openNow = function(options) {
       var $link, animateOptions, html, target, url;
@@ -10611,6 +11591,7 @@ or function.
       options.confirm = u.option(options.confirm, $link.attr('up-confirm'));
       options.method = up.link.followMethod($link, options);
       options.layer = 'modal';
+      options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'));
       options.failLayer = u.option(options.failLayer, $link.attr('up-fail-layer'), 'auto');
       animateOptions = up.motion.animateOptions(options, $link, {
         duration: flavorDefault('openDuration', options.flavor),
@@ -10619,6 +11600,12 @@ or function.
       options.history = u.option(options.history, u.castedAttr($link, 'up-history'), flavorDefault('history', options.flavor));
       if (!up.browser.canPushState()) {
         options.history = false;
+      }
+      options.provideTarget = function() {
+        return createHiddenFrame(target, options);
+      };
+      if (options.preload) {
+        return up.replace(target, url, options);
       }
       return up.browser.whenConfirmed(options).then(function() {
         return up.bus.whenEmitted('up:modal:open', {
@@ -10635,9 +11622,6 @@ or function.
             state.coveredUrl = up.browser.url();
             state.coveredTitle = document.title;
           }
-          options.provideTarget = function() {
-            return createHiddenFrame(target, options);
-          };
           extractOptions = u.merge(options, {
             animation: false
           });
@@ -10689,24 +11673,21 @@ or function.
     @param {Object} options
       See options for [`up.animate()`](/up.animate)
     @return {Promise}
-      A promise that will be resolved once the modal's close
+      A promise that will be fulfilled once the modal's close
       animation has finished.
     @stable
      */
     closeAsap = function(options) {
-      if (isOpen()) {
-        chain.asap(function() {
-          return closeNow(options);
-        });
-      }
-      return chain.promise();
+      return chain.asap(function() {
+        return closeNow(options);
+      });
     };
     closeNow = function(options) {
       var animateOptions, backdropCloseAnimation, destroyOptions, viewportCloseAnimation;
-      if (!isOpen()) {
-        return u.resolvedPromise();
-      }
       options = u.options(options);
+      if (!isOpen()) {
+        return Promise.resolve();
+      }
       viewportCloseAnimation = u.option(options.animation, flavorDefault('closeAnimation'));
       viewportCloseAnimation = u.evalOption(viewportCloseAnimation, {
         position: state.position
@@ -10760,10 +11741,10 @@ or function.
     animate = function(viewportAnimation, backdropAnimation, animateOptions) {
       var promise;
       if (up.motion.isNone(viewportAnimation)) {
-        return u.resolvedPromise();
+        return Promise.resolve();
       } else {
         markAsAnimating();
-        promise = $.when(up.animate(state.$modal.find('.up-modal-viewport'), viewportAnimation, animateOptions), up.animate(state.$modal.find('.up-modal-backdrop'), backdropAnimation, animateOptions));
+        promise = Promise.all([up.animate(state.$modal.find('.up-modal-viewport'), viewportAnimation, animateOptions), up.animate(state.$modal.find('.up-modal-backdrop'), backdropAnimation, animateOptions)]);
         promise = promise.then(function() {
           return markAsAnimating(false);
         });
@@ -10800,9 +11781,9 @@ or function.
     within the current modal.
     
     @function up.modal.contains
-    @param {String} elementOrSelector
+    @param {string} elementOrSelector
       The element to test
-    @return {Boolean}
+    @return {boolean}
     @stable
      */
     contains = function(elementOrSelector) {
@@ -10814,7 +11795,7 @@ or function.
       if (overrideConfig == null) {
         overrideConfig = {};
       }
-      up.log.warn('The up.modal.flavor function is deprecated. Use the up.modal.flavors property instead.');
+      up.log.warn('up.modal.flavor() is deprecated. Use the up.modal.flavors property instead.');
       return u.assign(flavorOverrides(name), overrideConfig);
     };
 
@@ -10863,34 +11844,34 @@ or function.
     and place the matching `.blog-list` tag will be placed in
     a modal dialog.
     
-    @selector [up-modal]
-    @param {String} up-modal
+    @selector a[up-modal]
+    @param {string} up-modal
       The CSS selector that will be extracted from the response and displayed in a modal dialog.
-    @param {String} [up-confirm]
+    @param {string} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the modal is opened.
-    @param {String} [up-method='GET']
+    @param {string} [up-method='GET']
       Override the request method.
-    @param {String} [up-sticky]
+    @param {string} [up-sticky]
       If set to `"true"`, the modal remains
       open even if the page changes in the background.
-    @param {Boolean} [up-closable]
+    @param {boolean} [up-closable]
       When `true`, the modal will render a close icon and close when the user
       clicks on the backdrop or presses Escape.
     
       When `false`, you need to either supply an element with `[up-close]` or
       close the modal manually with `up.modal.close()`.
-    @param {String} [up-animation]
+    @param {string} [up-animation]
       The animation to use when opening the viewport containing the dialog.
-    @param {String} [up-backdrop-animation]
+    @param {string} [up-backdrop-animation]
       The animation to use when opening the backdrop that dims the page below the dialog.
-    @param {String} [up-height]
+    @param {string} [up-height]
       The width of the dialog in pixels.
       By [default](/up.modal.config) the dialog will grow to fit its contents.
-    @param {String} [up-width]
+    @param {string} [up-width]
       The width of the dialog in pixels.
       By [default](/up.modal.config) the dialog will grow to fit its contents.
-    @param {String} [up-history]
+    @param {string} [up-history]
       Whether to push an entry to the browser history for the modal's source URL.
     
       Set this to `'false'` to prevent the URL bar from being updated.
@@ -10898,8 +11879,13 @@ or function.
     
     @stable
      */
-    up.link.onAction('[up-modal]', function($link) {
-      return followAsap($link);
+    up.link.addFollowVariant('[up-modal]', {
+      follow: function($link, options) {
+        return followAsap($link, options);
+      },
+      preload: function($link, options) {
+        return preloadNow($link, options);
+      }
     });
     up.on('click', '.up-modal', function(event) {
       var $target;
@@ -10961,10 +11947,10 @@ or function.
     and place the matching `.blog-list` tag will be placed in
     a modal drawer.
     
-    @selector [up-drawer]
-    @param {String} up-drawer
+    @selector a[up-drawer]
+    @param {string} up-drawer
       The CSS selector to extract from the response and open in the drawer.
-    @param {String} [up-position='auto']
+    @param {string} [up-position='auto']
       The side from which the drawer slides in.
     
       Valid values are `'left'`, `'right'` and `'auto'`. If set to `'auto'`, the
@@ -10972,7 +11958,7 @@ or function.
       Otherwise it will slide in from the right.
     @stable
      */
-    up.macro('[up-drawer]', function($link) {
+    up.macro('a[up-drawer], [up-href][up-drawer]', function($link) {
       var target;
       target = $link.attr('up-drawer');
       return $link.attr({
@@ -10988,7 +11974,7 @@ or function.
     @param {Object} config
       Default options for future drawers.
     
-      See [`up.modal.config`] for available options.
+      See [`up.modal.config`](/up.modal.config) for available options.
     @experimental
      */
     flavors.drawer = {
@@ -11081,20 +12067,20 @@ The tooltip element is appended to the end of `<body>`.
     Configures defaults for future tooltips.
     
     @property up.tooltip.config
-    @param {String} [config.position]
+    @param {string} [config.position]
       The default position of tooltips relative to the element.
       Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
-    @param {String} [config.openAnimation='fade-in']
+    @param {string} [config.openAnimation='fade-in']
       The animation used to open a tooltip.
-    @param {String} [config.closeAnimation='fade-out']
+    @param {string} [config.closeAnimation='fade-out']
       The animation used to close a tooltip.
-    @param {Number} [config.openDuration]
+    @param {number} [config.openDuration]
       The duration of the open animation (in milliseconds).
-    @param {Number} [config.closeDuration]
+    @param {number} [config.closeDuration]
       The duration of the close animation (in milliseconds).
-    @param {String} [config.openEasing]
+    @param {string} [config.openEasing]
       The timing function controlling the acceleration of the opening animation.
-    @param {String} [config.closeEasing]
+    @param {string} [config.closeEasing]
       The timing function controlling the acceleration of the closing animation.
     @stable
      */
@@ -11182,40 +12168,33 @@ The tooltip element is appended to the end of `<body>`.
         });
     
     @function up.tooltip.attach
-    @param {Element|jQuery|String} elementOrSelector
-    @param {String} [options.text]
+    @param {Element|jQuery|string} elementOrSelector
+    @param {string} [options.text]
       The text to display in the tooltip.
     
       Any HTML control characters will be escaped.
       If you need to use HTML formatting in the tooltip, use `options.html` instead.
-    @param {String} [options.html]
+    @param {string} [options.html]
       The HTML to display in the tooltip unescaped.
     
       Make sure to escape any user-provided text before passing it as this option,
       or use `options.text` (which automatically escapes).
-    @param {String} [options.position='top']
+    @param {string} [options.position='top']
       The position of the tooltip.
       Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
-    @param {String} [options.animation]
+    @param {string} [options.animation]
       The [animation](/up.motion) to use when opening the tooltip.
     @return {Promise}
-      A promise that will be resolved when the tooltip's opening animation has finished.
+      A promise that will be fulfilled when the tooltip's opening animation has finished.
     @stable
      */
     attachAsap = function(elementOrSelector, options) {
-      var curriedAttachNow;
       if (options == null) {
         options = {};
       }
-      curriedAttachNow = function() {
+      return chain.asap(closeNow, (function() {
         return attachNow(elementOrSelector, options);
-      };
-      if (isOpen()) {
-        chain.asap(closeNow, curriedAttachNow);
-      } else {
-        chain.asap(curriedAttachNow);
-      }
-      return chain.promise();
+      }));
     };
     attachNow = function(elementOrSelector, options) {
       var $anchor, animateOptions, animation, html, position, text;
@@ -11255,17 +12234,14 @@ The tooltip element is appended to the end of `<body>`.
     @stable
      */
     closeAsap = function(options) {
-      if (isOpen()) {
-        chain.asap(function() {
-          return closeNow(options);
-        });
-      }
-      return chain.promise();
+      return chain.asap(function() {
+        return closeNow(options);
+      });
     };
     closeNow = function(options) {
       var animateOptions;
       if (!isOpen()) {
-        return u.resolvedPromise();
+        return Promise.resolve();
       }
       options = u.options(options, {
         animation: config.closeAnimation
@@ -11306,10 +12282,10 @@ The tooltip element is appended to the end of `<body>`.
         <a href="/decks" up-tooltip="Show all decks" up-position="bottom">Decks</a>
     
     @selector [up-tooltip]
-    @param {String} [up-animation]
+    @param {string} [up-animation]
       The animation used to open the tooltip.
       Defaults to [`up.tooltip.config.openAnimation`](/up.tooltip.config).
-    @param {String} [up-position]
+    @param {string} [up-position]
       The default position of tooltips relative to the element.
       Can be either `"top"` or `"bottom"`.
       Defaults to [`up.tooltip.config.position`](/up.tooltip.config).
@@ -11354,8 +12330,8 @@ Navigation feedback
 ===================
 
 Unpoly automatically adds CSS classes to links while they are
-currently loading ([`.up-active`](/up-active)) or
-pointing to the current location ([`.up-current`](/up-current)).
+currently loading ([`.up-active`](/a.up-active)) or
+pointing to the current location ([`.up-current`](/a.up-current)).
 
 By styling these classes with CSS you can provide instant feedback to user interactions.
 This improves the perceived speed of your interface.
@@ -11367,12 +12343,12 @@ Let's say we have an navigation bar with two links, pointing to `/foo` and `/bar
     <a href="/foo" up-follow>Foo</a>
     <a href="/bar" up-follow>Bar</a>
 
-If the current URL is `/foo`, the first link is automatically marked with an [`up-current`](/up-current) class:
+If the current URL is `/foo`, the first link is automatically marked with an [`up-current`](/a.up-current) class:
 
     <a href="/foo" up-follow class="up-current">Foo</a>
     <a href="/bar" up-follow>Bar</a>
 
-When the user clicks on the `/bar` link, the link will receive the [`up-active`](/up-active) class while it is waiting
+When the user clicks on the `/bar` link, the link will receive the [`up-active`](/a.up-active) class while it is waiting
 for the server to respond:
 
     <a href="/foo" up-follow class="up-current">Foo</a>
@@ -11388,6 +12364,8 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
  */
 
 (function() {
+  var slice = [].slice;
+
   up.feedback = (function($) {
     var CLASS_ACTIVE, SELECTOR_SECTION, config, currentClass, findActionableArea, locationChanged, normalizeUrl, reset, sectionUrls, start, stop, u, urlSet;
     u = up.util;
@@ -11396,8 +12374,8 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     Sets default options for this module.
     
     @property up.feedback.config
-    @param {Number} [config.currentClasses]
-      An array of classes to set on [links that point the current location](/up-current).
+    @param {Array<string>} [config.currentClasses]
+      An array of classes to set on [links that point the current location](/a.up-current).
     @stable
      */
     config = u.config({
@@ -11443,6 +12421,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     };
     urlSet = function(urls) {
       var doesMatchFully, doesMatchPrefix, matches, matchesAny;
+      urls = u.map(urls, normalizeUrl);
       urls = u.compact(urls);
       matches = function(testUrl) {
         if (testUrl.substr(-1) === '*') {
@@ -11468,13 +12447,13 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     };
     locationChanged = function() {
       var currentUrls, klass;
-      currentUrls = urlSet([normalizeUrl(up.browser.url()), normalizeUrl(up.modal.url()), normalizeUrl(up.modal.coveredUrl()), normalizeUrl(up.popup.url()), normalizeUrl(up.popup.coveredUrl())]);
+      currentUrls = urlSet([up.browser.url(), up.modal.url(), up.modal.coveredUrl(), up.popup.url(), up.popup.coveredUrl()]);
       klass = currentClass();
       return u.each($(SELECTOR_SECTION), function(section) {
         var $section, urls;
         $section = $(section);
         urls = sectionUrls($section);
-        if (currentUrls.matchesAny(urls)) {
+        if (up.link.isSafe($section) && currentUrls.matchesAny(urls)) {
           return $section.addClass(klass);
         } else if ($section.hasClass(klass) && $section.closest('.up-destroying').length === 0) {
           return $section.removeClass(klass);
@@ -11484,7 +12463,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
 
     /**
     @function findActionableArea
-    @param {String|Element|jQuery} elementOrSelector
+    @param {string|Element|jQuery} elementOrSelector
     @internal
      */
     findActionableArea = function(elementOrSelector) {
@@ -11497,7 +12476,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     };
 
     /**
-    Marks the given element as currently loading, by assigning the CSS class [`up-active`](/up-active).
+    Marks the given element as currently loading, by assigning the CSS class [`up-active`](/a.up-active).
     
     This happens automatically when following links or submitting forms through the Unpoly API.
     Use this function if you make custom network calls from your own JavaScript code.
@@ -11509,38 +12488,37 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     
         var $button = $('button');
         $button.on('click', function() {
-          up.feedback.start($button);
-          up.ajax(...).always(function() {
-            up.feedback.stop($button);
-          });
-        });
-    
-    Or shorter:
-    
-        var $button = $('button');
-        $button.on('click', function() {
           up.feedback.start($button, function() {
-            up.ajax(...);
+            // the .up-active class will be removed when this promise resolves:
+            return up.request(...);
           });
         });
     
     @method up.feedback.start
-    @param {Element|jQuery|String} elementOrSelector
+    @param {Element|jQuery|string} elementOrSelector
       The element to mark as active
+    @param {Object} [options.preload]
+      If set to `false`, the element will not be marked as loading.
     @param {Function} [action]
       An optional function to run while the element is marked as loading.
       The function must return a promise.
       Once the promise resolves, the element will be [marked as no longer loading](/up.feedback.stop).
     @internal
      */
-    start = function(elementOrSelector, action) {
-      var $element, promise;
+    start = function() {
+      var $element, action, args, elementOrSelector, options, promise;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      elementOrSelector = args.shift();
+      action = args.pop();
+      options = u.options(args[0]);
       $element = findActionableArea(elementOrSelector);
-      $element.addClass(CLASS_ACTIVE);
+      if (!options.preload) {
+        $element.addClass(CLASS_ACTIVE);
+      }
       if (action) {
         promise = action();
         if (u.isPromise(promise)) {
-          promise.always(function() {
+          u.always(promise, function() {
             return stop($element);
           });
         } else {
@@ -11551,12 +12529,12 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     };
 
     /**
-    Links that are currently loading are assigned the `up-active`
-    class automatically. Style `.up-active` in your CSS to improve the
-    perceived responsiveness of your user interface.
+    Links that are currently [loading through Unpoly](/form-up-target)
+    are assigned the `up-active` class automatically.
+    Style `.up-active` in your CSS to improve the perceived responsiveness
+    of your user interface.
     
-    The `up-active` class will be removed as soon as another
-    page fragment is added or updated through Unpoly.
+    The `up-active` class will be removed when the link is done loading.
     
     \#\#\# Example
     
@@ -11570,16 +12548,47 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
         <a href="/foo" up-follow class="up-active">Foo</a>
     
     Once the link destination has loaded and rendered, the `up-active` class
-    is removed and the [`up-current`](/up-current) class is added:
+    is removed and the [`up-current`](/a.up-current) class is added:
     
         <a href="/foo" up-follow class="up-current">Foo</a>
     
-    @selector .up-active
+    @selector a.up-active
     @stable
      */
 
     /**
-    Marks the given element as no longer loading, by removing the CSS class [`up-active`](/up-active).
+    Forms that are currently [loading through Unpoly](/a-up-target)
+    are assigned the `up-active` class automatically.
+    Style `.up-active` in your CSS to improve the perceived responsiveness
+    of your user interface.
+    
+    The `up-active` class will be removed as soon as the response to the
+    form submission has been received.
+    
+    \#\#\# Example
+    
+    We have a form:
+    
+        <form up-target=".foo">
+          <button type="submit">Submit</button>
+        </form>
+    
+    The user clicks on the submit button. While the form is being submitted
+    and waiting for the server to respond, the form has the `up-active` class:
+    
+        <form up-target=".foo" class="up-active">
+          <button type="submit">Submit</button>
+        </form>
+    
+    Once the link destination has loaded and rendered, the `up-active` class
+    is removed.
+    
+    @selector form.up-active
+    @stable
+     */
+
+    /**
+    Marks the given element as no longer loading, by removing the CSS class [`up-active`](/a.up-active).
     
     This happens automatically when network requests initiated by the Unpoly API have completed.
     Use this function if you make custom network calls from your own JavaScript code.
@@ -11636,7 +12645,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     
         <a href="/reports" up-alias="/reports/*">Reports</a>
     
-    @selector .up-current
+    @selector a.up-current
     @stable
      */
     up.on('up:fragment:inserted', function() {
@@ -11666,21 +12675,18 @@ Play nice with Rails UJS
 
 (function() {
   up.rails = (function($) {
-    var csrfField, isRails, u, willHandle;
+    var isRails, u;
     u = up.util;
-    willHandle = function($element) {
-      return $element.is('[up-follow], [up-target], [up-modal], [up-popup]');
-    };
     isRails = function() {
-      return u.isGiven($.rails);
+      return !!$.rails;
     };
-    u.each(['method', 'confirm'], function(feature) {
+    return u.each(['method', 'confirm'], function(feature) {
       var dataAttribute, upAttribute;
       dataAttribute = "data-" + feature;
       upAttribute = "up-" + feature;
-      return up.compiler("[" + dataAttribute + "]", function($element) {
+      return up.macro("[" + dataAttribute + "]", function($element) {
         var replacement;
-        if (isRails() && willHandle($element)) {
+        if (isRails() && up.link.isFollowable($element)) {
           replacement = {};
           replacement[upAttribute] = $element.attr(dataAttribute);
           u.setMissingAttrs($element, replacement);
@@ -11688,18 +12694,6 @@ Play nice with Rails UJS
         }
       });
     });
-    csrfField = function() {
-      if (isRails()) {
-        return {
-          name: $.rails.csrfParam(),
-          value: $.rails.csrfToken()
-        };
-      }
-    };
-    return {
-      csrfField: csrfField,
-      isRails: isRails
-    };
   })(jQuery);
 
 }).call(this);
