@@ -10613,7 +10613,7 @@ Popups have a minimal default design:
 - The box will grow to fit the popup contents
 
 The easiest way to change how the popup looks is to override the
-[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/popup.css.sass).
+[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/popup.sass).
 
 The HTML of a popup element is simply this:
 
@@ -11148,7 +11148,7 @@ Dialogs have a minimal default design:
 - There is a button to close the dialog in the top-right corner
 
 The easiest way to change how the dialog looks is to override the
-[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/modal.css.sass).
+[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/modal.sass).
 
 By default the dialog uses the following DOM structure:
 
@@ -12044,7 +12044,7 @@ The default styles
 render a tooltip with white text on a gray background.
 A gray triangle points to the element.
 
-To change the styling, simply override the [CSS rules](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/tooltip.css.sass) for the `.up-tooltip` selector and its `:after`
+To change the styling, simply override the [CSS rules](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/tooltip.sass) for the `.up-tooltip` selector and its `:after`
 selector that is used for the triangle.
 
 The HTML of a tooltip element is simply this:

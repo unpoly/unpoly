@@ -34,7 +34,7 @@ Dialogs have a minimal default design:
 - There is a button to close the dialog in the top-right corner
 
 The easiest way to change how the dialog looks is to override the
-[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/modal.css.sass).
+[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/modal.sass).
 
 By default the dialog uses the following DOM structure:
 
