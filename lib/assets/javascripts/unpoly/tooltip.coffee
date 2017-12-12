@@ -16,7 +16,7 @@ The default styles
 render a tooltip with white text on a gray background.
 A gray triangle points to the element.
 
-To change the styling, simply override the [CSS rules](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/tooltip.css.sass) for the `.up-tooltip` selector and its `:after`
+To change the styling, simply override the [CSS rules](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/tooltip.sass) for the `.up-tooltip` selector and its `:after`
 selector that is used for the triangle.
 
 The HTML of a tooltip element is simply this:

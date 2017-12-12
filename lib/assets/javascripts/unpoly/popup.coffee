@@ -34,7 +34,7 @@ Popups have a minimal default design:
 - The box will grow to fit the popup contents
 
 The easiest way to change how the popup looks is to override the
-[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/up/popup.css.sass).
+[default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/popup.sass).
 
 The HTML of a popup element is simply this:
 
