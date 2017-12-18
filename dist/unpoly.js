@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.50.0",
+    version: "0.50.1",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -1263,8 +1263,8 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         case 'false':
           return false;
         case 'true':
-          return true;
         case '':
+        case attrName:
           return true;
         default:
           return value;
@@ -2092,7 +2092,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     rejectOnError = function(block) {
-      var error;
+      var error, error1;
       try {
         return block();
       } catch (error1) {
@@ -3124,6 +3124,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       this.cacheKey = bind(this.cacheKey, this);
       this.isCachable = bind(this.isCachable, this);
       this.buildResponse = bind(this.buildResponse, this);
+      this.isCrossDomain = bind(this.isCrossDomain, this);
       this.csrfToken = bind(this.csrfToken, this);
       this.navigate = bind(this.navigate, this);
       this.send = bind(this.send, this);
@@ -3191,6 +3192,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
           if (_this.failTarget) {
             xhrHeaders[up.protocol.config.failTargetHeader] = _this.failTarget;
           }
+          if (!_this.isCrossDomain()) {
+            xhrHeaders['X-Requested-With'] || (xhrHeaders['X-Requested-With'] = 'XMLHttpRequest');
+          }
           if (csrfToken = _this.csrfToken()) {
             xhrHeaders[up.protocol.config.csrfHeader] = csrfToken;
           }
@@ -3250,9 +3254,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     Request.prototype.csrfToken = function() {
-      if (!this.isSafe() && !u.isCrossDomain(this.url)) {
+      if (!this.isSafe() && !this.isCrossDomain()) {
         return up.protocol.csrfToken();
       }
+    };
+
+    Request.prototype.isCrossDomain = function() {
+      return u.isCrossDomain(this.url);
     };
 
     Request.prototype.buildResponse = function(xhr) {
@@ -4068,6 +4076,7 @@ Internet Explorer 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
+      var error;
       try {
         return window.sessionStorage;
       } catch (error) {
@@ -6788,7 +6797,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var e, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
+      var e, error, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
       options = u.options(options);
       options.inspectResponse = fullLoad = function() {
         return up.browser.navigate(url, u.only(options, 'method', 'data'));
