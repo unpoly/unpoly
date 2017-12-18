@@ -1038,9 +1038,8 @@ up.util = (($) ->
   castedAttr = ($element, attrName) ->
     value = $element.attr(attrName)
     switch value
-      when 'false'  then false
-      when 'true'   then true
-      when ''       then true
+      when 'false' then false
+      when 'true', '', attrName then true
       else value # other strings, undefined, null, ...
 
 #  castsToTrue = (object) ->

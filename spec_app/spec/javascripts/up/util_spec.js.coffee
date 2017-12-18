@@ -303,6 +303,10 @@ describe 'up.util', ->
         $element = affix('div').attr('foo', 'true')
         expect(up.util.castedAttr($element, 'foo')).toBe(true)
 
+      it 'returns true if the attribute value is the name of the attribute', ->
+        $element = affix('div').attr('foo', 'foo')
+        expect(up.util.castedAttr($element, 'foo')).toBe(true)
+
       it 'returns false if the attribute value is the string "false"', ->
         $element = affix('div').attr('foo', 'false')
         expect(up.util.castedAttr($element, 'foo')).toBe(false)

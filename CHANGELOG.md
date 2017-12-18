@@ -9,6 +9,10 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+### General
+
+- Boolean HTML attributes are now also considered `true` if their values equal the attribute name, e.g. `up-keep="up-keep"` ([#36](https://github.com/unpoly/unpoly/issues/36))
+
 ### AJAX
 
 - [`up.request()`](/up.request) now sends an `X-Requested-With: XMLHttpRequest` headers. This header is used by many server-side frameworks to detect an AJAX request.
