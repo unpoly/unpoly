@@ -15,7 +15,7 @@ Unreleased
 
 ### AJAX
 
-- [`up.request()`](/up.request) now sends an `X-Requested-With: XMLHttpRequest` headers. This header is used by many server-side frameworks to detect an AJAX request.
+- [`up.request()`](/up.request) now sends an `X-Requested-With: XMLHttpRequest` headers. This header is used by many server-side frameworks to detect an AJAX request. ([#42](https://github.com/unpoly/unpoly/issues/42))
 
 
 0.50.0
