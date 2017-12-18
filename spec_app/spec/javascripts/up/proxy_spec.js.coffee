@@ -213,6 +213,21 @@ describe 'up.proxy', ->
             headers = @lastRequest().requestHeaders
             expect(headers['csrf-header']).toBeMissing()
 
+      describe 'X-Requested-With header', ->
+
+        it 'sets the header to "XMLHttpRequest" by default', asyncSpec (next) ->
+          up.request('/path', method: 'post')
+          next =>
+            headers = @lastRequest().requestHeaders
+            debugger
+            expect(headers['X-Requested-With']).toEqual('XMLHttpRequest')
+
+        it 'does not overrride an existing X-Requested-With header', asyncSpec (next) ->
+          up.request('/path', method: 'post', headers: { 'X-Requested-With': 'Love' })
+          next =>
+            headers = @lastRequest().requestHeaders
+            expect(headers['X-Requested-With']).toEqual('Love')
+
       describe 'with { data } option', ->
 
         it "uses the given params as a non-GET request's payload", asyncSpec (next) ->

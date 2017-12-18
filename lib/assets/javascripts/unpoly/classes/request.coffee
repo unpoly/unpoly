@@ -142,6 +142,7 @@ class up.Request extends up.Record
 
       xhrHeaders[up.protocol.config.targetHeader] = @target if @target
       xhrHeaders[up.protocol.config.failTargetHeader] = @failTarget if @failTarget
+      xhrHeaders['X-Requested-With'] ||= 'XMLHttpRequest' unless @isCrossDomain()
 
       if csrfToken = @csrfToken()
         xhrHeaders[up.protocol.config.csrfHeader] = csrfToken
@@ -193,8 +194,11 @@ class up.Request extends up.Record
 
   # Returns a csrfToken if this request requires it
   csrfToken: =>
-    if !@isSafe() && !u.isCrossDomain(@url)
+    if !@isSafe() && !@isCrossDomain()
       up.protocol.csrfToken()
+
+  isCrossDomain: =>
+    u.isCrossDomain(@url)
 
   buildResponse: (xhr) =>
     responseAttrs =
