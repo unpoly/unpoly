@@ -17,7 +17,9 @@ class up.ExtractCascade
     candidates = [selector, @options.fallback, up.dom.config.fallbacks]
     candidates = u.flatten(candidates)
     # Remove undefined, null and false from the list
-    candidates = u.select candidates, u.isTruthy
+    candidates = u.select(candidates, u.isTruthy)
+    candidates = u.uniq(candidates)
+
     if @options.fallback == false || @options.provideTarget
       # Use the first defined candidate, but not `selector` since that
       # might be an undefined options.failTarget

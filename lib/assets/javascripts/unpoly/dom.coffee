@@ -404,7 +404,7 @@ up.dom = (($) ->
     cascade.bestPreflightSelector()
 
   bestMatchingSteps = (selector, response, options) ->
-    options = u.merge(options, response: response)
+    options = u.merge(options, { response })
     cascade = new up.ExtractCascade(selector, options)
     cascade.bestMatchingSteps()
 
