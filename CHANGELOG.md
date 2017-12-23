@@ -6,6 +6,14 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Fragment updates
+
+- Updating fragments is now much faster when no [`[up-keep]`](/up-keep) elements are involved.
+
+
 0.50.1
 ------
 

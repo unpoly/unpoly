@@ -345,10 +345,14 @@ up.syntax = (($) ->
           $matches = u.selectInSubtree($fragment, compiler.selector)
 
           # Exclude all elements that are descendants of the subtrees we want to keep.
-          $matches = $matches.filter ->
-            $match = $(this)
-            u.all $skipSubtrees, (skipSubtree) ->
-              $match.closest(skipSubtree).length == 0
+          # We only do this if `options.skip` was given, since the exclusion
+          # process below is very expensive (we had a case where compiling 100 slements
+          # took 1.5s because of this).
+          if $skipSubtrees.length
+            $matches = $matches.filter ->
+              $match = $(this)
+              u.all $skipSubtrees, (skipSubtree) ->
+                $match.closest(skipSubtree).length == 0
 
           if $matches.length
             up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isSystem), compiler.selector, $matches.length, ->
