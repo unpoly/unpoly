@@ -207,6 +207,12 @@ describe 'up.layout', ->
             # [F] 0 ............ 99
             expect($(document).scrollTop()).toBe(@clientHeight + 50)
 
+        it 'does not crash when called with a CSS selector (bugfix)', (done) ->
+          promise = up.reveal('.container')
+          promiseState(promise).then (result) ->
+            expect(result.state).toEqual('fulfilled')
+            done()
+
         describe 'with { top: true } option', ->
 
           it 'scrolls the viewport to the first row of the element, even if that element is already fully revealed', asyncSpec (next) ->

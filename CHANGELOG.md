@@ -12,6 +12,8 @@ Unreleased
 ### Fragment updates
 
 - Updating fragments is now much faster when no [`[up-keep]`](/up-keep) elements are involved.
+- [`up.reveal()`](/up.reveal) no longer crashes when called with a CSS selector or non-jQuery element.
+- [`up.reveal()`](/up.reveal) now returns a rejected promise when no viewport could be found for the given element.
 
 
 0.50.1

@@ -238,57 +238,59 @@ up.layout = (($) ->
   ###
   reveal = (elementOrSelector, options) ->
     $element = $(elementOrSelector)
-    up.puts 'Revealing fragment %o', elementOrSelector.get(0)
+    up.puts 'Revealing fragment %o', $element.get(0)
     options = u.options(options)
-    $viewport = if options.viewport then $(options.viewport) else viewportOf($element)
 
-    snap = u.option(options.snap, config.snap)
+    u.rejectOnError ->
+      $viewport = if options.viewport then $(options.viewport) else viewportOf($element)
 
-    viewportIsDocument = $viewport.is(document)
-    viewportHeight = if viewportIsDocument then u.clientSize().height else $viewport.outerHeight()
-    originalScrollPos = $viewport.scrollTop()
-    newScrollPos = originalScrollPos
+      snap = u.option(options.snap, config.snap)
 
-    offsetShift = undefined
-    obstruction = undefined
+      viewportIsDocument = $viewport.is(document)
+      viewportHeight = if viewportIsDocument then u.clientSize().height else $viewport.outerHeight()
+      originalScrollPos = $viewport.scrollTop()
+      newScrollPos = originalScrollPos
 
-    if viewportIsDocument
-      obstruction = measureObstruction()
-      # Within the body, $.position will always return the distance
-      # from the document top and *not* the distance of the viewport
-      # top. This is what the calculations below expect, so don't shift.
-      offsetShift = 0
-    else
-      obstruction = { top: 0, bottom: 0 }
-      # When the scrolled element is not <body> but instead a container
-      # with overflow-y: scroll, $.position returns the distance to the
-      # viewport's currently visible top edge (instead of the distance to
-      # the first row of the viewport's entire canvas buffer).
-      # http://codepen.io/anon/pen/jPojGE
-      offsetShift = originalScrollPos
+      offsetShift = undefined
+      obstruction = undefined
 
-    predictFirstVisibleRow = -> newScrollPos + obstruction.top
-    predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom - 1
+      if viewportIsDocument
+        obstruction = measureObstruction()
+        # Within the body, $.position will always return the distance
+        # from the document top and *not* the distance of the viewport
+        # top. This is what the calculations below expect, so don't shift.
+        offsetShift = 0
+      else
+        obstruction = { top: 0, bottom: 0 }
+        # When the scrolled element is not <body> but instead a container
+        # with overflow-y: scroll, $.position returns the distance to the
+        # viewport's currently visible top edge (instead of the distance to
+        # the first row of the viewport's entire canvas buffer).
+        # http://codepen.io/anon/pen/jPojGE
+        offsetShift = originalScrollPos
 
-    elementDims = u.measure($element, relative: $viewport, includeMargin: true)
-    firstElementRow = elementDims.top + offsetShift
-    lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1
+      predictFirstVisibleRow = -> newScrollPos + obstruction.top
+      predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom - 1
 
-    if lastElementRow > predictLastVisibleRow()
-      # Try to show the full height of the element
-      newScrollPos += (lastElementRow - predictLastVisibleRow())
+      elementDims = u.measure($element, relative: $viewport, includeMargin: true)
+      firstElementRow = elementDims.top + offsetShift
+      lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1
 
-    if firstElementRow < predictFirstVisibleRow() || options.top
-      # If the full element does not fit, scroll to the first row
-      newScrollPos = firstElementRow - obstruction.top
+      if lastElementRow > predictLastVisibleRow()
+        # Try to show the full height of the element
+        newScrollPos += (lastElementRow - predictLastVisibleRow())
 
-    if newScrollPos < snap && elementDims.top < (0.5 * viewportHeight)
-      newScrollPos = 0
+      if firstElementRow < predictFirstVisibleRow() || options.top
+        # If the full element does not fit, scroll to the first row
+        newScrollPos = firstElementRow - obstruction.top
 
-    if newScrollPos != originalScrollPos
-      scroll($viewport, newScrollPos, options)
-    else
-      Promise.resolve()
+      if newScrollPos < snap && elementDims.top < (0.5 * viewportHeight)
+        newScrollPos = 0
+
+      if newScrollPos != originalScrollPos
+        scroll($viewport, newScrollPos, options)
+      else
+        Promise.resolve()
 
   ###*
   [Reveals](/up.reveal) an element matching the `#hash` in the current URL.
