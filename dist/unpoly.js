@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.50.1",
+    version: "0.50.2",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -2092,7 +2092,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     rejectOnError = function(block) {
-      var error, error1;
+      var error;
       try {
         return block();
       } catch (error1) {
@@ -2467,6 +2467,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       candidates = [selector, this.options.fallback, up.dom.config.fallbacks];
       candidates = u.flatten(candidates);
       candidates = u.select(candidates, u.isTruthy);
+      candidates = u.uniq(candidates);
       if (this.options.fallback === false || this.options.provideTarget) {
         candidates = [candidates[0]];
       }
@@ -2756,7 +2757,6 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       this.matchesLink = bind(this.matchesLink, this);
       this.preloadLink = bind(this.preloadLink, this);
       this.followLink = bind(this.followLink, this);
-      this.shouldProcessLinkEvent = bind(this.shouldProcessLinkEvent, this);
       this.fullSelector = bind(this.fullSelector, this);
       this.onMousedown = bind(this.onMousedown, this);
       this.onClick = bind(this.onClick, this);
@@ -2766,7 +2766,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     }
 
     FollowVariant.prototype.onClick = function(event, $link) {
-      if (this.shouldProcessLinkEvent(event, $link)) {
+      if (up.link.shouldProcessEvent(event, $link)) {
         if ($link.is('[up-instant]')) {
           return up.bus.haltEvent(event);
         } else {
@@ -2779,7 +2779,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     FollowVariant.prototype.onMousedown = function(event, $link) {
-      if (this.shouldProcessLinkEvent(event, $link)) {
+      if (up.link.shouldProcessEvent(event, $link)) {
         up.bus.consumeAction(event);
         return this.followLink($link);
       }
@@ -2814,10 +2814,6 @@ that might save you from loading something like [Lodash](https://lodash.com/).
           return _this.onMousedown.apply(_this, args);
         };
       })(this));
-    };
-
-    FollowVariant.prototype.shouldProcessLinkEvent = function(event, $link) {
-      return u.isUnmodifiedMouseEvent(event) && !up.link.childClicked(event, $link);
     };
 
     FollowVariant.prototype.followLink = function($link, options) {
@@ -4076,7 +4072,6 @@ Internet Explorer 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
-      var error;
       try {
         return window.sessionStorage;
       } catch (error) {
@@ -5339,13 +5334,15 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
             for (j = 0, len1 = queue.length; j < len1; j++) {
               compiler = queue[j];
               $matches = u.selectInSubtree($fragment, compiler.selector);
-              $matches = $matches.filter(function() {
-                var $match;
-                $match = $(this);
-                return u.all($skipSubtrees, function(skipSubtree) {
-                  return $match.closest(skipSubtree).length === 0;
+              if ($skipSubtrees.length) {
+                $matches = $matches.filter(function() {
+                  var $match;
+                  $match = $(this);
+                  return u.all($skipSubtrees, function(skipSubtree) {
+                    return $match.closest(skipSubtree).length === 0;
+                  });
                 });
-              });
+              }
               if ($matches.length) {
                 results1.push(up.log.group((!compiler.isSystem ? "Compiling '%s' on %d element(s)" : void 0), compiler.selector, $matches.length, function() {
                   if (compiler.batch) {
@@ -6092,54 +6089,57 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @stable
      */
     reveal = function(elementOrSelector, options) {
-      var $element, $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsDocument;
+      var $element;
       $element = $(elementOrSelector);
-      up.puts('Revealing fragment %o', elementOrSelector.get(0));
+      up.puts('Revealing fragment %o', $element.get(0));
       options = u.options(options);
-      $viewport = options.viewport ? $(options.viewport) : viewportOf($element);
-      snap = u.option(options.snap, config.snap);
-      viewportIsDocument = $viewport.is(document);
-      viewportHeight = viewportIsDocument ? u.clientSize().height : $viewport.outerHeight();
-      originalScrollPos = $viewport.scrollTop();
-      newScrollPos = originalScrollPos;
-      offsetShift = void 0;
-      obstruction = void 0;
-      if (viewportIsDocument) {
-        obstruction = measureObstruction();
-        offsetShift = 0;
-      } else {
-        obstruction = {
-          top: 0,
-          bottom: 0
+      return u.rejectOnError(function() {
+        var $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsDocument;
+        $viewport = options.viewport ? $(options.viewport) : viewportOf($element);
+        snap = u.option(options.snap, config.snap);
+        viewportIsDocument = $viewport.is(document);
+        viewportHeight = viewportIsDocument ? u.clientSize().height : $viewport.outerHeight();
+        originalScrollPos = $viewport.scrollTop();
+        newScrollPos = originalScrollPos;
+        offsetShift = void 0;
+        obstruction = void 0;
+        if (viewportIsDocument) {
+          obstruction = measureObstruction();
+          offsetShift = 0;
+        } else {
+          obstruction = {
+            top: 0,
+            bottom: 0
+          };
+          offsetShift = originalScrollPos;
+        }
+        predictFirstVisibleRow = function() {
+          return newScrollPos + obstruction.top;
         };
-        offsetShift = originalScrollPos;
-      }
-      predictFirstVisibleRow = function() {
-        return newScrollPos + obstruction.top;
-      };
-      predictLastVisibleRow = function() {
-        return newScrollPos + viewportHeight - obstruction.bottom - 1;
-      };
-      elementDims = u.measure($element, {
-        relative: $viewport,
-        includeMargin: true
+        predictLastVisibleRow = function() {
+          return newScrollPos + viewportHeight - obstruction.bottom - 1;
+        };
+        elementDims = u.measure($element, {
+          relative: $viewport,
+          includeMargin: true
+        });
+        firstElementRow = elementDims.top + offsetShift;
+        lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1;
+        if (lastElementRow > predictLastVisibleRow()) {
+          newScrollPos += lastElementRow - predictLastVisibleRow();
+        }
+        if (firstElementRow < predictFirstVisibleRow() || options.top) {
+          newScrollPos = firstElementRow - obstruction.top;
+        }
+        if (newScrollPos < snap && elementDims.top < (0.5 * viewportHeight)) {
+          newScrollPos = 0;
+        }
+        if (newScrollPos !== originalScrollPos) {
+          return scroll($viewport, newScrollPos, options);
+        } else {
+          return Promise.resolve();
+        }
       });
-      firstElementRow = elementDims.top + offsetShift;
-      lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1;
-      if (lastElementRow > predictLastVisibleRow()) {
-        newScrollPos += lastElementRow - predictLastVisibleRow();
-      }
-      if (firstElementRow < predictFirstVisibleRow() || options.top) {
-        newScrollPos = firstElementRow - obstruction.top;
-      }
-      if (newScrollPos < snap && elementDims.top < (0.5 * viewportHeight)) {
-        newScrollPos = 0;
-      }
-      if (newScrollPos !== originalScrollPos) {
-        return scroll($viewport, newScrollPos, options);
-      } else {
-        return Promise.resolve();
-      }
     };
 
     /**
@@ -6797,7 +6797,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var e, error, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
+      var e, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
       options = u.options(options);
       options.inspectResponse = fullLoad = function() {
         return up.browser.navigate(url, u.only(options, 'method', 'data'));
@@ -8500,7 +8500,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     
         up.request('/search', data: { query: 'sunshine' }).then(function(response) {
           console.log('The response text is %o', response.text);
-        }).fail(function() {
+        }).catch(function() {
           console.error('The request failed');
         });
     
@@ -8591,7 +8591,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     
         up.request('/search', data: { query: 'sunshine' }).then(function(text) {
           console.log('The response text is %o', text);
-        }).fail(function() {
+        }).catch(function() {
           console.error('The request failed');
         });
     
@@ -8995,9 +8995,9 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       but will also make the interaction feel less instant.
     @stable
      */
-    up.on('mouseover mousedown touchstart', 'a[up-preload], [up-href][up-preload]', function(event, $element) {
-      if (!up.link.childClicked(event, $element) && up.link.isSafe($element)) {
-        return checkPreload($element);
+    up.on('mouseover mousedown touchstart', 'a[up-preload], [up-href][up-preload]', function(event, $link) {
+      if (up.link.shouldProcessEvent(event, $link) && up.link.isSafe($link)) {
+        return checkPreload($link);
       }
     });
     up.on('up:framework:reset', reset);
@@ -9094,7 +9094,7 @@ new page is loading.
 
 (function() {
   up.link = (function($) {
-    var DEFAULT_FOLLOW_VARIANT, addFollowVariant, allowDefault, childClicked, defaultFollow, defaultPreload, follow, followMethod, followVariantForLink, followVariants, isFollowable, isSafe, makeFollowable, u, visit;
+    var DEFAULT_FOLLOW_VARIANT, addFollowVariant, allowDefault, defaultFollow, defaultPreload, follow, followMethod, followVariantForLink, followVariants, isFollowable, isSafe, makeFollowable, shouldProcessEvent, u, visit;
     u = up.util;
 
     /**
@@ -9305,11 +9305,12 @@ new page is loading.
         return $link.attr('up-follow', '');
       }
     };
-    childClicked = function(event, $link) {
-      var $target, $targetLink;
+    shouldProcessEvent = function(event, $link) {
+      var $target, $targetedChildLink, $targetedInput;
       $target = $(event.target);
-      $targetLink = $target.closest('a, [up-href]');
-      return $targetLink.length && $link.find($targetLink).length;
+      $targetedChildLink = $target.closest('a, [up-href]').not($link);
+      $targetedInput = up.form.fieldSelector().seekUp($target);
+      return $targetedChildLink.length === 0 && $targetedInput.length === 0 && u.isUnmodifiedMouseEvent(event);
     };
 
     /**
@@ -9614,7 +9615,7 @@ new page is loading.
       makeFollowable: makeFollowable,
       isSafe: isSafe,
       isFollowable: isFollowable,
-      childClicked: childClicked,
+      shouldProcessEvent: shouldProcessEvent,
       followMethod: followMethod,
       addFollowVariant: addFollowVariant,
       followVariantForLink: followVariantForLink,
@@ -9643,7 +9644,7 @@ open dialogs with sub-forms, etc. all without losing form state.
   var slice = [].slice;
 
   up.form = (function($) {
-    var autosubmit, config, findSwitcherForTarget, observe, observeField, reset, resolveValidateTarget, submit, switchTarget, switchTargets, switcherValues, u, validate;
+    var autosubmit, config, fieldSelector, findSwitcherForTarget, observe, observeField, reset, resolveValidateTarget, submit, switchTarget, switchTargets, switcherValues, u, validate;
     u = up.util;
 
     /**
@@ -9673,6 +9674,14 @@ open dialogs with sub-forms, etc. all without losing form state.
     });
     reset = function() {
       return config.reset();
+    };
+
+    /**
+    @function up.form.fieldSelector
+    @internal
+     */
+    fieldSelector = function() {
+      return u.multiSelector(config.fields);
     };
 
     /**
@@ -9887,7 +9896,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       }
       delay = u.option(u.presentAttr($element, 'up-delay'), options.delay, config.observeDelay);
       delay = parseInt(delay);
-      $fields = u.multiSelector(config.fields).selectInSubtree($element);
+      $fields = fieldSelector().selectInSubtree($element);
       destructors = u.map($fields, function(field) {
         return observeField($(field), delay, callback);
       });
@@ -10572,7 +10581,8 @@ open dialogs with sub-forms, etc. all without losing form state.
       observe: observe,
       validate: validate,
       switchTargets: switchTargets,
-      autosubmit: autosubmit
+      autosubmit: autosubmit,
+      fieldSelector: fieldSelector
     };
   })(jQuery);
 
