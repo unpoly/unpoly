@@ -8,7 +8,7 @@ class up.FollowVariant
     @selectors = selector.split(/\s*,\s*/)
 
   onClick: (event, $link) =>
-    if @shouldProcessLinkEvent(event, $link)
+    if up.link.shouldProcessEvent(event, $link)
       if $link.is('[up-instant]')
         # If the link was already processed on mousedown, we still need
         # to prevent this later click event's chain.
@@ -21,7 +21,7 @@ class up.FollowVariant
       up.link.allowDefault(event)
 
   onMousedown: (event, $link) =>
-    if @shouldProcessLinkEvent(event, $link)
+    if up.link.shouldProcessEvent(event, $link)
       up.bus.consumeAction(event)
       @followLink($link)
 
@@ -37,9 +37,6 @@ class up.FollowVariant
       @onClick(args...)
     up.on 'mousedown', @fullSelector('[up-instant]'), (args...) =>
       @onMousedown(args...)
-
-  shouldProcessLinkEvent: (event, $link) =>
-    u.isUnmodifiedMouseEvent(event) && !up.link.childClicked(event, $link)
 
   followLink: ($link, options = {}) =>
     up.feedback.start $link, options, =>

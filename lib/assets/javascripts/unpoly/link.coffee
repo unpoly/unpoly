@@ -261,10 +261,11 @@ up.link = (($) ->
     unless isFollowable($link)
       $link.attr('up-follow', '')
 
-  childClicked = (event, $link) ->
+  shouldProcessEvent = (event, $link) ->
     $target = $(event.target)
-    $targetLink = $target.closest('a, [up-href]')
-    $targetLink.length && $link.find($targetLink).length
+    $targetedChildLink = $target.closest('a, [up-href]').not($link)
+    $targetedInput = up.form.fieldSelector().seekUp($target)
+    $targetedChildLink.length == 0 && $targetedInput.length == 0 && u.isUnmodifiedMouseEvent(event)
 
   ###*
   Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
@@ -553,7 +554,7 @@ up.link = (($) ->
   makeFollowable: makeFollowable
   isSafe: isSafe
   isFollowable: isFollowable
-  childClicked: childClicked
+  shouldProcessEvent: shouldProcessEvent
   followMethod: followMethod
   addFollowVariant: addFollowVariant
   followVariantForLink: followVariantForLink

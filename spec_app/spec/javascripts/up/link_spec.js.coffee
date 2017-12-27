@@ -368,7 +368,7 @@ describe 'up.link', ->
 
       describeFallback 'canPushState', ->
 
-        it 'follows the given link', asyncSpec (next) ->
+        it 'navigates to the given link without JavaScript', asyncSpec (next) ->
           $link = affix('a[href="/path"]')
           spyOn(up.browser, 'navigate')
           up.follow($link)
@@ -383,6 +383,57 @@ describe 'up.link', ->
 
           next =>
             expect(up.browser.navigate).toHaveBeenCalledWith('/path', { method: 'PUT' })
+
+    describe 'up.link.shouldProcessEvent', ->
+
+      buildEvent = ($element, attrs) ->
+        event = Trigger.createMouseEvent('mousedown', attrs)
+        event = $.event.fix(event) # convert native event to jQuery event
+        event.target = u.unJQuery($element)
+        event
+
+      it "returns true when the given event's target is the given link itself", ->
+        $link = affix('a[href="/foo"]')
+        event = buildEvent($link)
+        expect(up.link.shouldProcessEvent(event, $link)).toBe(true)
+
+      it "returns true when the given event's target is a non-link child of the given link", ->
+        $link = affix('a[href="/foo"]')
+        $span = $link.affix('span')
+        event = buildEvent($span)
+        expect(up.link.shouldProcessEvent(event, $link)).toBe(true)
+
+      it "returns false when the given event's target is a child link of the given link (think [up-expand])", ->
+        $link = affix('div[up-href="/foo"]')
+        $childLink = $link.affix('a[href="/bar"]')
+        event = buildEvent($childLink)
+        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+
+      it "returns false when the given event's target is a child input of the given link (think [up-expand])", ->
+        $link = affix('div[up-href="/foo"]')
+        $childInput = $link.affix('input[type="text"]')
+        event = buildEvent($childInput)
+        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+
+      it 'returns false if the right mouse button is used', ->
+        $link = affix('a[href="/foo"]')
+        event = buildEvent($link, button: 2)
+        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+
+      it 'returns false if shift is pressed during the click', ->
+        $link = affix('a[href="/foo"]')
+        event = buildEvent($link, shiftKey: 2)
+        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+
+      it 'returns false if ctrl is pressed during the click', ->
+        $link = affix('a[href="/foo"]')
+        event = buildEvent($link, ctrlKey: 2)
+        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+
+      it 'returns false if meta is pressed during the click', ->
+        $link = affix('a[href="/foo"]')
+        event = buildEvent($link, metaKey: 2)
+        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
 
     describe 'up.link.makeFollowable', ->
 
@@ -823,6 +874,27 @@ describe 'up.link', ->
         Trigger.clickSequence($area)
         next =>
           expect(up.replace).toHaveBeenCalled()
+
+      it 'does nothing when the user clicks another link in the expanded area', asyncSpec (next) ->
+        $area = affix('div[up-expand]')
+        $expandedLink = $area.affix('a[href="/expanded-path"][up-follow]')
+        $otherLink = $area.affix('a[href="/other-path"][up-follow]')
+        up.hello($area)
+        followSpy = up.link.knife.mock('defaultFollow').and.returnValue(Promise.resolve())
+        Trigger.clickSequence($otherLink)
+        next =>
+          expect(followSpy.calls.count()).toEqual(1)
+          expect(followSpy.calls.mostRecent().args[0]).toEqual($otherLink)
+
+      it 'does nothing when the user clicks on an input in the expanded area', asyncSpec (next) ->
+        $area = affix('div[up-expand]')
+        $expandedLink = $area.affix('a[href="/expanded-path"][up-follow]')
+        $input = $area.affix('input[type=text]')
+        up.hello($area)
+        followSpy = up.link.knife.mock('defaultFollow').and.returnValue(Promise.resolve())
+        Trigger.clickSequence($input)
+        next =>
+          expect(followSpy).not.toHaveBeenCalled()
 
       it 'does not trigger multiple replaces when the user clicks on the expanded area of an [up-instant] link (bugfix)', asyncSpec (next) ->
         $area = affix('div[up-expand] a[href="/path"][up-follow][up-instant]')

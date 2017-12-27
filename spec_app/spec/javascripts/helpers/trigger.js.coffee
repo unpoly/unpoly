@@ -81,6 +81,6 @@
   mouseup: mouseup
   click: click
   clickSequence: clickSequence
-
+  createMouseEvent: createMouseEvent
   
 )()

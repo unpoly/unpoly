@@ -41,6 +41,13 @@ up.form = (($) ->
     config.reset()
 
   ###*
+  @function up.form.fieldSelector
+  @internal
+  ###
+  fieldSelector = ->
+    u.multiSelector(config.fields)
+
+  ###*
   Submits a form via AJAX and updates a page fragment with the response.
 
       up.submit('form.new-user', { target: '.main' })
@@ -251,7 +258,7 @@ up.form = (($) ->
     delay = u.option(u.presentAttr($element, 'up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
 
-    $fields = u.multiSelector(config.fields).selectInSubtree($element)
+    $fields = fieldSelector().selectInSubtree($element)
 
     destructors = u.map $fields, (field) ->
       observeField($(field), delay, callback)
@@ -903,6 +910,7 @@ up.form = (($) ->
   validate: validate
   switchTargets: switchTargets
   autosubmit: autosubmit
+  fieldSelector: fieldSelector
 
 )(jQuery)
 

@@ -12,8 +12,19 @@ Unreleased
 ### Fragment updates
 
 - Updating fragments is now much faster when no [`[up-keep]`](/up-keep) elements are involved.
+
+### Scrolling
+
 - [`up.reveal()`](/up.reveal) no longer crashes when called with a CSS selector or non-jQuery element.
 - [`up.reveal()`](/up.reveal) now returns a rejected promise when no viewport could be found for the given element.
+
+### Links
+
+- [`[up-expand]`](/up-expand) now ignores clicks on [form fields](/up.form.config#config.fields). This is useful e.g. when `up-expand`ing a table row that contains both links and form fields.
+
+### Network
+
+- [`a[up-preload]`](/a-up-preload) will no longer preload a link when the user holds the Shift, Ctrl or Meta key while hovering.
 
 
 0.50.1

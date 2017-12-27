@@ -631,11 +631,11 @@ up.proxy = (($) ->
     but will also make the interaction feel less instant.
   @stable
   ###
-  up.on 'mouseover mousedown touchstart', 'a[up-preload], [up-href][up-preload]', (event, $element) ->
+  up.on 'mouseover mousedown touchstart', 'a[up-preload], [up-href][up-preload]', (event, $link) ->
     # Don't do anything if we are hovering over the child of a link.
     # The actual link will receive the event and bubble in a second.
-    if !up.link.childClicked(event, $element) && up.link.isSafe($element)
-      checkPreload($element)
+    if up.link.shouldProcessEvent(event, $link) && up.link.isSafe($link)
+      checkPreload($link)
 
   up.on 'up:framework:reset', reset
 
