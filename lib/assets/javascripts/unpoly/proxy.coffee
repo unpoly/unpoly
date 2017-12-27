@@ -159,7 +159,7 @@ up.proxy = (($) ->
 
       up.request('/search', data: { query: 'sunshine' }).then(function(response) {
         console.log('The response text is %o', response.text);
-      }).fail(function() {
+      }).catch(function() {
         console.error('The request failed');
       });
 
@@ -266,7 +266,7 @@ up.proxy = (($) ->
 
       up.request('/search', data: { query: 'sunshine' }).then(function(text) {
         console.log('The response text is %o', text);
-      }).fail(function() {
+      }).catch(function() {
         console.error('The request failed');
       });
 
