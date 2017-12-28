@@ -74,7 +74,9 @@ namespace :publish do
 
   desc 'Remind user to update unpoly.com'
   task :remind_to_update_site do
-    puts "Now remember to update unpoly.com so user see the updated CHANGELOG and CDN link!"
+    puts "Now remember to:"
+    puts "- update unpoly.com so user see the updated CHANGELOG and CDN link"
+    puts "- send a message to the e-mail group announcing the new release"
   end
 
   desc 'Build artifacts, push to git and release to package managers'

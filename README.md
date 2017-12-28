@@ -76,7 +76,10 @@ Always remember to build, commit and push build artifacts before calling `rake p
 
 If you have done this process a few times and know what you're doing, you can call `rake publish:all` to run all these steps in sequence.
 
-After you have published all release channels, remember to update [unpoly.com](https://unpoly.com/) so users see the new version, CDN link and CHANGELOG.
+After you have published all release channels, remember to:
+
+1. Update [unpoly.com](https://unpoly.com/) so users see the new version, CDN link and CHANGELOG.
+2. Send a message to the [E-mail group](https://groups.google.com/group/unpoly) with the title "Unpoly X.Y.Z released". You can copy the relevant CHANGELOG part from [here](http://localhost:4567/changes_google_groups).
 
 
 Credits
