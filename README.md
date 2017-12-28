@@ -6,7 +6,7 @@ Unobtrusive JavaScript framework for server-side applications
 
 [Unpoly](https://unpoly.com) enables fast and flexible frontends with minimal changes to your server-side code.
 
-This repository is home to both the Unpoly javascript code and its (optional) bindings for Ruby on Rails (`unpoly-rails` gem).
+This repository is home to both the Unpoly JavaScript code and its (optional) bindings for Ruby on Rails (`unpoly-rails` gem).
 
 
 Getting started
