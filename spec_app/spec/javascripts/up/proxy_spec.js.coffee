@@ -219,7 +219,6 @@ describe 'up.proxy', ->
           up.request('/path', method: 'post')
           next =>
             headers = @lastRequest().requestHeaders
-            debugger
             expect(headers['X-Requested-With']).toEqual('XMLHttpRequest')
 
         it 'does not overrride an existing X-Requested-With header', asyncSpec (next) ->
