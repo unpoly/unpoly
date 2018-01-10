@@ -259,7 +259,7 @@ describe 'up.modal', ->
             expect(events).toEqual ['up:modal:open']
             expect($('.target')).toHaveText('response1')
 
-          next.after 60, =>
+          next.after 80, =>
             # First modal has completed opening animation after 50 ms
             expect(events).toEqual ['up:modal:open', 'up:modal:opened']
             expect($('.target')).toHaveText('response1')

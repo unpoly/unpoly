@@ -92,7 +92,8 @@ describe 'up.form', ->
                 # Second callback is triggerd, but waits for first callback to complete
                 expect(callbackCount).toEqual(1)
 
-              next.after 50, ->
+              next.after 90, ->
+                # After 150 ms the first callback should be finished and the queued 2nd callback has executed
                 expect(callbackCount).toEqual(2)
 
             it 'only runs the last callback when a previous long-running callback has been delaying multiple callbacks', asyncSpec (next) ->
