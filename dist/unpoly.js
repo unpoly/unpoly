@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.50.2",
+    version: "0.51.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,7 +41,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElement, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, methodAllowsPayload, microtask, multiSelector, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, openTagPattern, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, methodAllowsPayload, microtask, multiSelector, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -220,14 +220,6 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
       return $root;
     };
-    createElement = function(tagName, html) {
-      var element;
-      element = document.createElement(tagName);
-      if (isPresent(html)) {
-        element.innerHTML = html;
-      }
-      return element;
-    };
 
     /**
     @function $create
@@ -288,18 +280,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         return isPresent(klass) && !klass.match(/^up-/);
       });
     };
-    openTagPattern = function(tag) {
-      return new RegExp("<" + tag + "(?: [^>]*)?>", 'i');
-    };
     createElementFromHtml = function(html) {
-      var bodyPattern, parser;
-      bodyPattern = openTagPattern('body');
-      if (html.match(bodyPattern)) {
-        parser = new DOMParser();
-        return parser.parseFromString(html, 'text/html');
-      } else {
-        return createElement('div', html);
-      }
+      var parser;
+      parser = new DOMParser();
+      return parser.parseFromString(html, 'text/html');
     };
     assignPolyfill = function() {
       var i, key, len, source, sources, target, value;
@@ -2092,7 +2076,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     rejectOnError = function(block) {
-      var error;
+      var error, error1;
       try {
         return block();
       } catch (error1) {
@@ -2119,7 +2103,6 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       fixedToAbsolute: fixedToAbsolute,
       isFixed: isFixed,
       presentAttr: presentAttr,
-      createElement: createElement,
       parseUrl: parseUrl,
       normalizeUrl: normalizeUrl,
       normalizeMethod: normalizeMethod,
@@ -4072,6 +4055,7 @@ Internet Explorer 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
+      var error;
       try {
         return window.sessionStorage;
       } catch (error) {
@@ -6566,18 +6550,13 @@ is built from these functions. You can use them to extend Unpoly from your
 
 (function() {
   up.dom = (function($) {
-    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentInserted, emitFragmentKept, extract, filterScripts, findKeepPlan, first, firstInLayer, firstInPriority, hello, isRealElement, isSingletonElement, layerOf, matchesLayer, parseResponseDoc, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, swapSingletonElement, transferKeepableElements, u, updateHistoryAndTitle;
+    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, fixScripts, hello, isRealElement, isSingletonElement, layerOf, matchesLayer, parseResponseDoc, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, swapSingletonElement, transferKeepableElements, u, updateHistoryAndTitle;
     u = up.util;
 
     /**
     Configures defaults for fragment insertion.
     
     @property up.dom.config
-    @param {boolean} [options.runInlineScripts=true]
-      Whether inline `<script>` tags inside inserted HTML fragments will be executed.
-    @param {boolean} [options.runLinkedScripts=false]
-      Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
-      the linked JavaScript file.
     @param {string} [options.fallbacks=['body']]
       When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
     
@@ -6593,9 +6572,7 @@ is built from these functions. You can use them to extend Unpoly from your
      */
     config = u.config({
       fallbacks: ['body'],
-      fallbackTransition: 'none',
-      runInlineScripts: true,
-      runLinkedScripts: false
+      fallbackTransition: 'none'
     });
     reset = function() {
       return config.reset();
@@ -6797,7 +6774,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var e, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
+      var e, error, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
       options = u.options(options);
       options.inspectResponse = fullLoad = function() {
         return up.browser.navigate(url, u.only(options, 'method', 'data'));
@@ -6974,7 +6951,7 @@ is built from these functions. You can use them to extend Unpoly from your
             step = extractSteps[i];
             up.log.group('Updating %s', step.selector, function() {
               var swapPromise;
-              filterScripts(step.$new, options);
+              fixScripts(step.$new.get(0));
               swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options);
               swapPromises.push(swapPromise);
               return options = u.merge(options, {
@@ -6999,24 +6976,23 @@ is built from these functions. You can use them to extend Unpoly from your
       cascade = new up.ExtractCascade(selector, options);
       return cascade.bestMatchingSteps();
     };
-    filterScripts = function($element, options) {
-      var $script, $scripts, i, isInline, isLinked, len, results, runInlineScripts, runLinkedScripts, script;
-      runInlineScripts = u.option(options.runInlineScripts, config.runInlineScripts);
-      runLinkedScripts = u.option(options.runLinkedScripts, config.runLinkedScripts);
-      $scripts = u.selectInSubtree($element, 'script');
-      results = [];
-      for (i = 0, len = $scripts.length; i < len; i++) {
-        script = $scripts[i];
-        $script = $(script);
-        isLinked = u.isPresent($script.attr('src'));
-        isInline = !isLinked;
-        if (!((isLinked && runLinkedScripts) || (isInline && runInlineScripts))) {
-          results.push($script.remove());
-        } else {
-          results.push(void 0);
+    fixScripts = function(element) {
+      var child, clone, i, len, ref, results;
+      if (element.tagName === 'NOSCRIPT') {
+        clone = document.createElement('noscript');
+        clone.textContent = element.innerHTML;
+        return element.parentNode.replaceChild(clone, element);
+      } else if (element.tagName === 'SCRIPT') {
+        return element.parentNode.removeChild(element);
+      } else {
+        ref = element.children;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          child = ref[i];
+          results.push(fixScripts(child));
         }
+        return results;
       }
-      return results;
     };
     parseResponseDoc = function(html) {
       var htmlElement;
