@@ -259,7 +259,7 @@ describe 'up.modal', ->
             expect(events).toEqual ['up:modal:open']
             expect($('.target')).toHaveText('response1')
 
-          next.after 80, =>
+          next.after (50 + 100), =>
             # First modal has completed opening animation after 50 ms
             expect(events).toEqual ['up:modal:open', 'up:modal:opened']
             expect($('.target')).toHaveText('response1')
@@ -273,8 +273,8 @@ describe 'up.modal', ->
             expect($('.target')).toHaveText('response1')
 
           # I don't know why this spec is so off with timing.
-          # We need to add 100ms to make it pass all of the time.
-          next.after (25 + 50 + 100), =>
+          # We need to add 200ms to make it pass all of the time.
+          next.after (25 + 50 + 200), =>
             # First modal has finished closing, second modal has finished opening.
             expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed', 'up:modal:open', 'up:modal:opened']
             expect($('.target')).toHaveText('response2')
