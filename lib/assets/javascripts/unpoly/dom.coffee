@@ -19,11 +19,6 @@ up.dom = (($) ->
   Configures defaults for fragment insertion.
 
   @property up.dom.config
-  @param {boolean} [options.runInlineScripts=true]
-    Whether inline `<script>` tags inside inserted HTML fragments will be executed.
-  @param {boolean} [options.runLinkedScripts=false]
-    Whether `<script src='...'>` tags inside inserted HTML fragments will fetch and execute
-    the linked JavaScript file.
   @param {string} [options.fallbacks=['body']]
     When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
 
@@ -40,8 +35,6 @@ up.dom = (($) ->
   config = u.config
     fallbacks: ['body']
     fallbackTransition: 'none'
-    runInlineScripts: true
-    runLinkedScripts: false
 
   reset = ->
     config.reset()
@@ -386,7 +379,7 @@ up.dom = (($) ->
         swapPromises = []
         for step in extractSteps
           up.log.group 'Updating %s', step.selector, ->
-            filterScripts(step.$new, options)
+            fixScripts(step.$new.get(0))
             swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options)
             swapPromises.push(swapPromise)
             # When extracting multiple selectors, we only want to reveal the first element.
@@ -408,16 +401,31 @@ up.dom = (($) ->
     cascade = new up.ExtractCascade(selector, options)
     cascade.bestMatchingSteps()
 
-  filterScripts = ($element, options) ->
-    runInlineScripts = u.option(options.runInlineScripts, config.runInlineScripts)
-    runLinkedScripts = u.option(options.runLinkedScripts, config.runLinkedScripts)
-    $scripts = u.selectInSubtree($element, 'script')
-    for script in $scripts
-      $script = $(script)
-      isLinked = u.isPresent($script.attr('src'))
-      isInline = not isLinked
-      unless (isLinked && runLinkedScripts) || (isInline && runInlineScripts)
-        $script.remove()
+  fixScripts = (element) ->
+    # IE11 and Edge cannot find <noscript> tags with jQuery or querySelector() or getElementsByTagName()
+    # when the tag was created by DOMParser. That's why we traverse the DOM manually.
+    # https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12453464/
+    if element.tagName == 'NOSCRIPT'
+      # Create a clone of the <noscript> element because IE11 and Edge cannot find <noscript> tags
+      # created by DOMParser. They will be able to find the clone.
+      clone = document.createElement('noscript')
+      # The children of a <nonscript> tag are expected to be a verbatim text node
+      # in a scripting-capable browser. However, due to rules in the DOMParser spec,
+      # the children are parsed into actual DOM nodes. This confuses libraries that
+      # work with <noscript> tags, such as lazysizes.
+      # http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring
+      clone.textContent = element.innerHTML
+      element.parentNode.replaceChild(clone, element)
+    else if element.tagName == 'SCRIPT'
+      # We don't support the execution of <script> tags in new fragments.
+      # This is a feature that we had in Unpoly once, but no one used it for years.
+      # It's also tricky to implement since <script> tags created by DOMParser are
+      # marked as non-executable.
+      # http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring
+      element.parentNode.removeChild(element)
+    else
+      for child in element.children
+        fixScripts(child)
 
   parseResponseDoc = (html) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags

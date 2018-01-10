@@ -158,11 +158,6 @@ up.util = (($) ->
       $parent = $element
     $root
 
-  createElement = (tagName, html) ->
-    element = document.createElement(tagName)
-    element.innerHTML = html if isPresent(html)
-    element
-
   ###*
   @function $create
   ###
@@ -211,20 +206,12 @@ up.util = (($) ->
     classes = classString.split(' ')
     select classes, (klass) -> isPresent(klass) && !klass.match(/^up-/)
 
-  openTagPattern = (tag) ->
-    new RegExp("<#{tag}(?: [^>]*)?>", 'i')
-
   # jQuery's implementation of $(...) cannot create elements that have
   # an <html> or <body> tag. So we're using native elements.
   # Also IE9 cannot set innerHTML on a <html> or <head> element.
   createElementFromHtml = (html) ->
-    bodyPattern = openTagPattern('body')
-    return if html.match(bodyPattern)
-      parser = new DOMParser()
-      parser.parseFromString(html, 'text/html')
-    else
-      # we possibly received a layout-less fragment
-      createElement('div', html)
+    parser = new DOMParser()
+    parser.parseFromString(html, 'text/html')
 
   assignPolyfill = (target, sources...) ->
     for source in sources
@@ -1747,7 +1734,6 @@ up.util = (($) ->
   fixedToAbsolute: fixedToAbsolute
   isFixed: isFixed
   presentAttr: presentAttr
-  createElement: createElement
   parseUrl: parseUrl
   normalizeUrl: normalizeUrl
   normalizeMethod: normalizeMethod

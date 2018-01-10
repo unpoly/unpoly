@@ -6,6 +6,19 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Fragment updates
+
+- `<script>` tags that were inserted by a fragment update are no longer executed. They are still executed during the initial page load. If you need a fragment update to call JavaScript code, call it from a compiler ([Google Analytics example](https://makandracards.com/makandra/41488-using-google-analytics-with-unpoly)).
+- The configuration option `up.dom.config.runInlineScripts` has been removed without replacement.
+- The configuration option `up.dom.config.runLinkedScripts` has been removed without replacement.
+- Fix a bug where the contents of `<noscript>` tags were parsed into DOM elements (instead of a single verbatim text node). This was confusing libraries that work with `<noscript>` tags, such as [lazysizes](https://github.com/aFarkas/lazysizes).
+- Work around a [bug in IE11 and Edge](https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12453464/) where `<noscript>` tags that were inserted by a fragment update could not be found with jQuery or `document.querySelectorAll()`.
+
+
+
 0.50.2
 ------
 
