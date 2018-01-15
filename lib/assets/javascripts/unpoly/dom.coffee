@@ -379,7 +379,7 @@ up.dom = (($) ->
         swapPromises = []
         for step in extractSteps
           up.log.group 'Updating %s', step.selector, ->
-            fixScripts(step.$new.get(0))
+            fixScripts(step.$new)
             swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options)
             swapPromises.push(swapPromise)
             # When extracting multiple selectors, we only want to reveal the first element.
@@ -401,7 +401,16 @@ up.dom = (($) ->
     cascade = new up.ExtractCascade(selector, options)
     cascade.bestMatchingSteps()
 
-  fixScripts = (element) ->
+  fixScripts = ($element) ->
+    # detectScriptFixes() both (1) iterates over element.children and
+    # (2) removes elements from that live array. This would cause calls to
+    # detectScriptFixes(undefined). Hence we collect all required deletions
+    # and replacements and execute them in one sweep when we're done iterating.
+    fixes = []
+    detectScriptFixes($element.get(0), fixes)
+    fix() for fix in fixes
+
+  detectScriptFixes = (element, fixes) ->
     # IE11 and Edge cannot find <noscript> tags with jQuery or querySelector() or getElementsByTagName()
     # when the tag was created by DOMParser. That's why we traverse the DOM manually.
     # https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12453464/
@@ -415,17 +424,17 @@ up.dom = (($) ->
       # work with <noscript> tags, such as lazysizes.
       # http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring
       clone.textContent = element.innerHTML
-      element.parentNode.replaceChild(clone, element)
+      fixes.push -> element.parentNode.replaceChild(clone, element)
     else if element.tagName == 'SCRIPT'
       # We don't support the execution of <script> tags in new fragments.
       # This is a feature that we had in Unpoly once, but no one used it for years.
       # It's also tricky to implement since <script> tags created by DOMParser are
       # marked as non-executable.
       # http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring
-      element.parentNode.removeChild(element)
+      fixes.push -> element.parentNode.removeChild(element)
     else
       for child in element.children
-        fixScripts(child)
+        detectScriptFixes(child, fixes)
 
   parseResponseDoc = (html) ->
     # jQuery cannot construct transient elements that contain <html> or <body> tags

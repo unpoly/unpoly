@@ -784,6 +784,26 @@ describe 'up.dom', ->
                 expect(window.scriptTagExecuted).not.toHaveBeenCalled()
                 done()
 
+            it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', (done) ->
+              @responseText = """
+                <div class="middle">
+                  <div>new-middle-before</div>
+                  <script type="text/javascript">
+                    window.scriptTagExecuted()
+                  </script>
+                  <div>new-middle-after</div>
+                </div>
+                """
+
+              promise = up.replace('.middle', '/path')
+              @respond()
+
+              u.nextFrame ->
+                promiseState(promise).then (result) ->
+                  expect(result.state).toEqual('fulfilled')
+                  expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+                  done()
+
           describe 'linked scripts', ->
 
             beforeEach ->

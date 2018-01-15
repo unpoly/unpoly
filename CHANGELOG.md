@@ -6,6 +6,16 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+
+Unreleased
+----------
+
+### Fragment updates
+
+- Fix a bug where Unpoly would crash when replacing a fragment with a `<script>` tag with a later sibling element.
+
+
+
 0.51.0
 ------
 
