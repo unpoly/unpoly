@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.51.0",
+    version: "0.51.1",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -6550,7 +6550,7 @@ is built from these functions. You can use them to extend Unpoly from your
 
 (function() {
   up.dom = (function($) {
-    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, fixScripts, hello, isRealElement, isSingletonElement, layerOf, matchesLayer, parseResponseDoc, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, swapSingletonElement, transferKeepableElements, u, updateHistoryAndTitle;
+    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, detectScriptFixes, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, fixScripts, hello, isRealElement, isSingletonElement, layerOf, matchesLayer, parseResponseDoc, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, swapSingletonElement, transferKeepableElements, u, updateHistoryAndTitle;
     u = up.util;
 
     /**
@@ -6951,7 +6951,7 @@ is built from these functions. You can use them to extend Unpoly from your
             step = extractSteps[i];
             up.log.group('Updating %s', step.selector, function() {
               var swapPromise;
-              fixScripts(step.$new.get(0));
+              fixScripts(step.$new);
               swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options);
               swapPromises.push(swapPromise);
               return options = u.merge(options, {
@@ -6976,20 +6976,35 @@ is built from these functions. You can use them to extend Unpoly from your
       cascade = new up.ExtractCascade(selector, options);
       return cascade.bestMatchingSteps();
     };
-    fixScripts = function(element) {
+    fixScripts = function($element) {
+      var fix, fixes, i, len, results;
+      fixes = [];
+      detectScriptFixes($element.get(0), fixes);
+      results = [];
+      for (i = 0, len = fixes.length; i < len; i++) {
+        fix = fixes[i];
+        results.push(fix());
+      }
+      return results;
+    };
+    detectScriptFixes = function(element, fixes) {
       var child, clone, i, len, ref, results;
       if (element.tagName === 'NOSCRIPT') {
         clone = document.createElement('noscript');
         clone.textContent = element.innerHTML;
-        return element.parentNode.replaceChild(clone, element);
+        return fixes.push(function() {
+          return element.parentNode.replaceChild(clone, element);
+        });
       } else if (element.tagName === 'SCRIPT') {
-        return element.parentNode.removeChild(element);
+        return fixes.push(function() {
+          return element.parentNode.removeChild(element);
+        });
       } else {
         ref = element.children;
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           child = ref[i];
-          results.push(fixScripts(child));
+          results.push(detectScriptFixes(child, fixes));
         }
         return results;
       }
