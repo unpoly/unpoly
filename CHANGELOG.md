@@ -7,8 +7,8 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
 
-Unreleased
-----------
+0.51.1
+------
 
 ### Fragment updates
 
