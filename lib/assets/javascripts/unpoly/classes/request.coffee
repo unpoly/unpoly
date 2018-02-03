@@ -97,7 +97,10 @@ class up.Request extends up.Record
     @method = u.normalizeMethod(@method)
     @headers ||= {}
     @extractHashFromUrl()
-    if @data && !u.methodAllowsPayload(@method) && !u.isFormData(@data)
+
+    if u.methodAllowsPayload(@method)
+      @transferSearchToData()
+    else
       @transferDataToUrl()
 
   extractHashFromUrl: =>
@@ -108,12 +111,20 @@ class up.Request extends up.Record
     @url = u.normalizeUrl(urlParts, hash: false)
 
   transferDataToUrl: =>
-    # GET methods are not allowed to have a payload, so we transfer { data } params to the URL.
-    query = u.requestDataAsQuery(@data)
-    separator = if u.contains(@url, '?') then '&' else '?'
-    @url += separator + query
-    # Now that we have transfered the params into the URL, we delete them from the { data } option.
-    @data = undefined
+    if @data && !u.isFormData(@data)
+      # GET methods are not allowed to have a payload, so we transfer { data } params to the URL.
+      query = u.requestDataAsQuery(@data)
+      separator = if u.contains(@url, '?') then '&' else '?'
+      @url += separator + query
+      # Now that we have transfered the params into the URL, we delete them from the { data } option.
+      @data = undefined
+
+  transferSearchToData: =>
+    urlParts = u.parseUrl(@url)
+    query = urlParts.search
+    if query
+      @data = u.mergeRequestData(@data, query)
+      @url = u.normalizeUrl(urlParts, search: false)
 
   isSafe: =>
     up.proxy.isSafeMethod(@method)
@@ -187,6 +198,8 @@ class up.Request extends up.Record
     if (csrfParam = up.protocol.csrfParam()) && (csrfToken = @csrfToken())
       addField(name: csrfParam, value: csrfToken)
 
+    # @data will be undefined for GET requests, since we have already
+    # transfered all params to the URL during normalize().
     u.each u.requestDataAsArray(@data), addField
 
     $form.hide().appendTo('body')

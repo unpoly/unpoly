@@ -1330,9 +1330,10 @@ up.util = (($) ->
   ###
   requestDataAsQuery = (data, opts) ->
     opts = options(opts, purpose: 'url')
+
     if isString(data)
-      data
-    if isFormData(data)
+      data.replace(/^\?/, '')
+    else if isFormData(data)
       # Until FormData#entries is implemented in all major browsers we must give up here.
       # However, up.form will prefer to serialize forms as arrays, so we should be good
       # in most cases. We only use FormData for forms with file inputs.
@@ -1408,6 +1409,18 @@ up.util = (($) ->
       newPair = requestDataAsQuery([ name: name, value: value ], opts)
       data = [data, newPair].join('&')
     data
+
+  ###*
+  Merges the request data in `source` into `target`.
+  Will modify the passed-in `target`.
+
+  @return
+    The merged form data.
+  ###
+  mergeRequestData = (target, source) ->
+    each requestDataAsArray(source), (field) ->
+      target = appendRequestData(target, field.name, field.value)
+    target
 
   ###*
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
@@ -1729,6 +1742,7 @@ up.util = (($) ->
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
   appendRequestData: appendRequestData
+  mergeRequestData:  mergeRequestData
   requestDataFromForm: requestDataFromForm
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute

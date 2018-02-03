@@ -6,6 +6,13 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### General
+
+- When making HTTP requests Unpoly will now always merge params in the URL with params from the `{ data }` option.
+
 
 0.51.1
 ------
@@ -13,7 +20,6 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 ### Fragment updates
 
 - Fix a bug where Unpoly would crash when replacing a fragment with a `<script>` tag with a later sibling element.
-
 
 
 0.51.0
@@ -26,7 +32,6 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 - The configuration option `up.dom.config.runLinkedScripts` has been removed without replacement.
 - Fix a bug where the contents of `<noscript>` tags were parsed into DOM elements (instead of a single verbatim text node). This was confusing libraries that work with `<noscript>` tags, such as [lazysizes](https://github.com/aFarkas/lazysizes).
 - Work around a [bug in IE11 and Edge](https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12453464/) where `<noscript>` tags that were inserted by a fragment update could not be found with jQuery or `document.querySelectorAll()`.
-
 
 
 0.50.2

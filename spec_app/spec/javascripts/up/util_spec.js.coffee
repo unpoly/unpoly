@@ -485,6 +485,14 @@ describe 'up.util', ->
         ])
         expect(string).toEqual("foo-key=foo#{encodedSpace}value&bar-key=bar#{encodedSpace}value")
 
+      it 'returns a given query string', ->
+        string = up.util.requestDataAsQuery('foo=bar')
+        expect(string).toEqual('foo=bar')
+
+      it 'strips a leading question mark from the given query string', ->
+        string = up.util.requestDataAsQuery('?foo=bar')
+        expect(string).toEqual('foo=bar')
+
       it 'returns an empty string for an empty object', ->
         string = up.util.requestDataAsQuery({})
         expect(string).toEqual('')
