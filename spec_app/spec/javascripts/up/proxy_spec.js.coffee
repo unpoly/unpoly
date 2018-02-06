@@ -182,6 +182,65 @@ describe 'up.proxy', ->
               # See that the promise was not rejected due to an internal error.
               expect(result.state).toEqual('pending')
 
+
+      describe 'when the XHR object has a { responseURL } property', ->
+
+        it 'sets the { url } property on the response object', (done) ->
+          promise = up.request('/request-url#request-hash')
+
+          u.nextFrame =>
+            @respondWith
+              responseURL: '/response-url'
+
+            promise.then (response) ->
+              expect(response.request.url).toMatchUrl('/request-url')
+              expect(response.request.hash).toEqual('#request-hash')
+              expect(response.url).toMatchUrl('/response-url')
+              done()
+
+        it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
+          up.request('/foo')
+
+          next =>
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            @respondWith
+              responseURL: '/bar'
+
+          next =>
+            up.request('/bar')
+
+          next =>
+            # See that the cached alias is used and no additional requests are made
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+        it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
+          up.request('/foo', method: 'post') # POST requests are not cached
+
+          next =>
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            @respondWith
+              responseURL: '/bar'
+
+          next =>
+            up.request('/bar')
+
+          next =>
+            # See that an additional request was made
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+        it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec (next) ->
+          up.request('/foo')
+
+          next =>
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            @respondWith
+              responseURL: '/bar'
+              status: 500
+
+          next =>
+            up.request('/bar')
+
+
       describe 'CSRF', ->
 
         beforeEach ->

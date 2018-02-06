@@ -20,3 +20,5 @@ beforeEach ->
       contentType: options.contentType || 'text/html'
       responseHeaders: options.responseHeaders
       responseText: responseText
+      responseURL: options.responseURL
+

@@ -459,7 +459,7 @@ up.proxy = (($) ->
 
   registerAliasForRedirect = (response) ->
     request = response.request
-    if request.url != response.url
+    if response.url && request.url != response.url
       newRequest = request.copy(
         method: response.method
         url: response.url

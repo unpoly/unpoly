@@ -22,13 +22,11 @@ in your controllers and views. If your server-side app uses another language
 or framework, you should be able to implement the protocol in a very short time.
 
 
-\#\#\# Redirect detection
+\#\#\# Redirect detection for IE11
 
-Unpoly requires an additional response header to detect redirects, which are
-otherwise undetectable for any AJAX client.
-
-After the form's action performs a redirect, the next response should include the new
-URL in the HTTP headers:
+On Internet Explorer 11, Unpoly cannot detect the final URL after a redirect.
+You can fix this edge case by delivering an additional HTTP header
+with the *last* response in a series of redirects:
 
 ```http
 X-Up-Location: /current-url
@@ -179,7 +177,7 @@ up.protocol = (($) ->
   @internal
   ###
   locationFromXhr = (xhr) ->
-    xhr.getResponseHeader(config.locationHeader)
+    xhr.getResponseHeader(config.locationHeader) || xhr.responseURL
 
   ###*
   @function up.protocol.titleFromXhr

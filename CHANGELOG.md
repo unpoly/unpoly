@@ -12,6 +12,8 @@ Unreleased
 ### General
 
 - When making HTTP requests Unpoly will now always merge params in the URL with params from the `{ data }` option.
+- Unpoly can now detect the final URL of a redirect response without the [optional server protocol](/up.protocol).
+  The server protocol is still needed to detect redirects on Internet Explorer 11.
 
 
 0.51.1
