@@ -60,6 +60,8 @@ up.form = (($) ->
   See the documentation for [`form[up-target]`](/form-up-target) for more
   information on how AJAX form submissions work in Unpoly.
 
+  Emits the event [`up:form:submit`](/up:form:submit).
+
   @function up.submit
   @param {Element|jQuery|string} formOrSelector
     A reference or selector for the form to submit.
