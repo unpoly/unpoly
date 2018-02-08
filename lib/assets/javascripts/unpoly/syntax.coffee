@@ -218,6 +218,9 @@ up.syntax = (($) ->
   @stable
   ###
   compiler = (selector, args...) ->
+    # Developer might still call top-level compiler registrations even when we don't boot
+    # due to an unsupported browser. In that case do no work and exit early.
+    return unless up.browser.isSupported()
     callback = args.pop()
     options = u.options(args[0])
     insertCompiler(compilers, selector, options, callback)
@@ -264,6 +267,9 @@ up.syntax = (($) ->
   @stable
   ###
   macro = (selector, args...) ->
+    # Developer might still call top-level compiler registrations even when we don't boot
+    # due to an unsupported browser. In that case do no work and exit early.
+    return unless up.browser.isSupported()
     callback = args.pop()
     options = u.options(args[0])
     if isBooting

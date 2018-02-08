@@ -9,7 +9,11 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
-### General
+### Browser support
+
+- No longer prints an error to console when registering a [macro](/up.macro] on an unsupported browser.
+
+### AJAX requests
 
 - When making HTTP requests Unpoly will now always merge params in the URL with params from the `{ data }` option.
 - Unpoly can now detect the final URL of a redirect response without the [optional server protocol](/up.protocol).
