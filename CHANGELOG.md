@@ -19,6 +19,10 @@ Unreleased
 - Unpoly can now detect the final URL of a redirect response without the [optional server protocol](/up.protocol).
   The server protocol is still needed to detect redirects on Internet Explorer 11.
 
+### Forms
+
+- [Submitting](/up.submit) a form through Unpoly now emits an [`up:form:submit`](/up:form:submit) event. The event can be prevented.
+
 
 0.51.1
 ------

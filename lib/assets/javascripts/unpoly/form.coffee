@@ -154,17 +154,29 @@ up.form = (($) ->
       options.failTransition = false
       options.headers[up.protocol.config.validateHeader] = options.validate
 
-    up.feedback.start($form)
+    up.bus.whenEmitted('up:form:submit', $element: $form).then ->
+      up.feedback.start($form)
 
-    # If we can't update the location URL, fall back to a vanilla form submission.
-    unless up.browser.canPushState() || options.history == false
-      # Don't use up.browser.navigate(); It cannot deal with file inputs.
-      $form.get(0).submit()
-      return u.unresolvablePromise()
+      # If we can't update the location URL, fall back to a vanilla form submission.
+      unless up.browser.canPushState() || options.history == false
+        # Don't use up.browser.navigate(); It cannot deal with file inputs.
+        $form.get(0).submit()
+        return u.unresolvablePromise()
 
-    promise = up.replace(target, url, options)
-    u.always promise, -> up.feedback.stop($form)
-    promise
+      promise = up.replace(target, url, options)
+      u.always promise, -> up.feedback.stop($form)
+      promise
+
+  ###*
+  This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
+
+  @event up:form:submit
+  @param {jQuery} event.$element
+    The `<form>` element that will be submitted.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the form from being submitted.
+  @stable
+  ###
 
   ###*
   Observes form fields and runs a callback when a value changes.

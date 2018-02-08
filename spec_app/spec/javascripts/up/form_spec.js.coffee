@@ -263,6 +263,24 @@ describe 'up.form', ->
 
     describe 'up.submit', ->
 
+      it 'emits a preventable up:form:submit event', asyncSpec (next) ->
+        $form = affix('form[action="/form-target"][up-target=".response"]')
+
+        listener = jasmine.createSpy('submit listener').and.callFake (event) ->
+          event.preventDefault()
+
+        $form.on('up:form:submit', listener)
+
+        up.submit($form)
+
+        next =>
+          expect(listener).toHaveBeenCalled()
+          event = listener.calls.mostRecent().args[0]
+          expect(event.$element).toEqual($form)
+
+          # No request should be made because we prevented the event
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
       describeCapability 'canPushState', ->
 
         beforeEach ->
