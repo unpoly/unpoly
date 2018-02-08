@@ -11,7 +11,7 @@ Unreleased
 
 ### Browser support
 
-- No longer prints an error to console when registering a [macro](/up.macro] on an unsupported browser.
+- No longer prints an error to console when registering a [macro](/up.macro) on an unsupported browser.
 
 ### AJAX requests
 
