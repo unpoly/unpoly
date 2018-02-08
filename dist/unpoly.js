@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.51.1",
+    version: "0.52.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,7 +41,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, methodAllowsPayload, microtask, multiSelector, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, multiSelector, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -1618,9 +1618,8 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         purpose: 'url'
       });
       if (isString(data)) {
-        data;
-      }
-      if (isFormData(data)) {
+        return data.replace(/^\?/, '');
+      } else if (isFormData(data)) {
         return up.fail('Cannot convert FormData into a query string');
       } else if (isPresent(data)) {
         query = $.param(data);
@@ -1706,6 +1705,20 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         data = [data, newPair].join('&');
       }
       return data;
+    };
+
+    /**
+    Merges the request data in `source` into `target`.
+    Will modify the passed-in `target`.
+    
+    @return
+      The merged form data.
+     */
+    mergeRequestData = function(target, source) {
+      each(requestDataAsArray(source), function(field) {
+        return target = appendRequestData(target, field.name, field.value);
+      });
+      return target;
     };
 
     /**
@@ -2076,7 +2089,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     rejectOnError = function(block) {
-      var error, error1;
+      var error;
       try {
         return block();
       } catch (error1) {
@@ -2098,6 +2111,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       requestDataAsArray: requestDataAsArray,
       requestDataAsQuery: requestDataAsQuery,
       appendRequestData: appendRequestData,
+      mergeRequestData: mergeRequestData,
       requestDataFromForm: requestDataFromForm,
       offsetParent: offsetParent,
       fixedToAbsolute: fixedToAbsolute,
@@ -2803,9 +2817,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       if (options == null) {
         options = {};
       }
-      return up.feedback.start($link, options, (function(_this) {
+      return up.bus.whenEmitted('up:link:follow', {
+        $element: $link
+      }).then((function(_this) {
         return function() {
-          return _this.followNow($link, options);
+          return up.feedback.start($link, options, function() {
+            return _this.followNow($link, options);
+          });
         };
       })(this));
     };
@@ -3108,6 +3126,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       this.navigate = bind(this.navigate, this);
       this.send = bind(this.send, this);
       this.isSafe = bind(this.isSafe, this);
+      this.transferSearchToData = bind(this.transferSearchToData, this);
       this.transferDataToUrl = bind(this.transferDataToUrl, this);
       this.extractHashFromUrl = bind(this.extractHashFromUrl, this);
       this.normalize = bind(this.normalize, this);
@@ -3119,7 +3138,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       this.method = u.normalizeMethod(this.method);
       this.headers || (this.headers = {});
       this.extractHashFromUrl();
-      if (this.data && !u.methodAllowsPayload(this.method) && !u.isFormData(this.data)) {
+      if (u.methodAllowsPayload(this.method)) {
+        return this.transferSearchToData();
+      } else {
         return this.transferDataToUrl();
       }
     };
@@ -3135,10 +3156,24 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
     Request.prototype.transferDataToUrl = function() {
       var query, separator;
-      query = u.requestDataAsQuery(this.data);
-      separator = u.contains(this.url, '?') ? '&' : '?';
-      this.url += separator + query;
-      return this.data = void 0;
+      if (this.data && !u.isFormData(this.data)) {
+        query = u.requestDataAsQuery(this.data);
+        separator = u.contains(this.url, '?') ? '&' : '?';
+        this.url += separator + query;
+        return this.data = void 0;
+      }
+    };
+
+    Request.prototype.transferSearchToData = function() {
+      var query, urlParts;
+      urlParts = u.parseUrl(this.url);
+      query = urlParts.search;
+      if (query) {
+        this.data = u.mergeRequestData(this.data, query);
+        return this.url = u.normalizeUrl(urlParts, {
+          search: false
+        });
+      }
     };
 
     Request.prototype.isSafe = function() {
@@ -3471,13 +3506,11 @@ in your controllers and views. If your server-side app uses another language
 or framework, you should be able to implement the protocol in a very short time.
 
 
-\#\#\# Redirect detection
+\#\#\# Redirect detection for IE11
 
-Unpoly requires an additional response header to detect redirects, which are
-otherwise undetectable for any AJAX client.
-
-After the form's action performs a redirect, the next response should include the new
-URL in the HTTP headers:
+On Internet Explorer 11, Unpoly cannot detect the final URL after a redirect.
+You can fix this edge case by delivering an additional HTTP header
+with the *last* response in a series of redirects:
 
 ```http
 X-Up-Location: /current-url
@@ -3630,7 +3663,7 @@ an existing cookie should be deleted.
     @internal
      */
     locationFromXhr = function(xhr) {
-      return xhr.getResponseHeader(config.locationHeader);
+      return xhr.getResponseHeader(config.locationHeader) || xhr.responseURL;
     };
 
     /**
@@ -4055,7 +4088,6 @@ Internet Explorer 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
-      var error;
       try {
         return window.sessionStorage;
       } catch (error) {
@@ -5165,6 +5197,9 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     compiler = function() {
       var args, callback, options, selector;
       selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      if (!up.browser.isSupported()) {
+        return;
+      }
       callback = args.pop();
       options = u.options(args[0]);
       return insertCompiler(compilers, selector, options, callback);
@@ -5214,6 +5249,9 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     macro = function() {
       var args, callback, options, selector;
       selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      if (!up.browser.isSupported()) {
+        return;
+      }
       callback = args.pop();
       options = u.options(args[0]);
       if (isBooting) {
@@ -6774,7 +6812,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var e, error, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
+      var e, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
       options = u.options(options);
       options.inspectResponse = fullLoad = function() {
         return up.browser.navigate(url, u.only(options, 'method', 'data'));
@@ -8796,7 +8834,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     registerAliasForRedirect = function(response) {
       var newRequest, request;
       request = response.request;
-      if (request.url !== response.url) {
+      if (response.url && request.url !== response.url) {
         newRequest = request.copy({
           method: response.method,
           url: response.url
@@ -9122,6 +9160,8 @@ new page is loading.
     or [`[up-modal]`](/a-up-modal), the corresponding UJS behavior will be activated
     just as if the user had clicked on the link.
     
+    Emits the event [`up:link:follow`](/up:link:follow).
+    
     \#\#\# Examples
     
     Let's say you have a link with an [`a[up-target]`](/a-up-target) attribute:
@@ -9153,6 +9193,17 @@ new page is loading.
       variant = followVariantForLink($link);
       return variant.followLink($link, options);
     };
+
+    /**
+    This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
+    
+    @event up:link:follow
+    @param {jQuery} event.$element
+      The link element that will be followed.
+    @param event.preventDefault()
+      Event listeners may call this method to prevent the link from being followed.
+    @stable
+     */
 
     /**
     @function defaultFollow
@@ -9688,6 +9739,8 @@ open dialogs with sub-forms, etc. all without losing form state.
     See the documentation for [`form[up-target]`](/form-up-target) for more
     information on how AJAX form submissions work in Unpoly.
     
+    Emits the event [`up:form:submit`](/up:form:submit).
+    
     @function up.submit
     @param {Element|jQuery|string} formOrSelector
       A reference or selector for the form to submit.
@@ -9755,7 +9808,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
     submit = function(formOrSelector, options) {
-      var $form, promise, target, url;
+      var $form, target, url;
       $form = $(formOrSelector).closest('form');
       options = u.options(options);
       target = u.option(options.target, $form.attr('up-target'), 'body');
@@ -9781,17 +9834,33 @@ open dialogs with sub-forms, etc. all without losing form state.
         options.failTransition = false;
         options.headers[up.protocol.config.validateHeader] = options.validate;
       }
-      up.feedback.start($form);
-      if (!(up.browser.canPushState() || options.history === false)) {
-        $form.get(0).submit();
-        return u.unresolvablePromise();
-      }
-      promise = up.replace(target, url, options);
-      u.always(promise, function() {
-        return up.feedback.stop($form);
+      return up.bus.whenEmitted('up:form:submit', {
+        $element: $form
+      }).then(function() {
+        var promise;
+        up.feedback.start($form);
+        if (!(up.browser.canPushState() || options.history === false)) {
+          $form.get(0).submit();
+          return u.unresolvablePromise();
+        }
+        promise = up.replace(target, url, options);
+        u.always(promise, function() {
+          return up.feedback.stop($form);
+        });
+        return promise;
       });
-      return promise;
     };
+
+    /**
+    This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
+    
+    @event up:form:submit
+    @param {jQuery} event.$element
+      The `<form>` element that will be submitted.
+    @param event.preventDefault()
+      Event listeners may call this method to prevent the form from being submitted.
+    @stable
+     */
 
     /**
     Observes form fields and runs a callback when a value changes.
