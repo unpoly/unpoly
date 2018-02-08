@@ -103,6 +103,8 @@ up.link = (($) ->
   or [`[up-modal]`](/a-up-modal), the corresponding UJS behavior will be activated
   just as if the user had clicked on the link.
 
+  Emits the event [`up:link:follow`](/up:link:follow).
+
   \#\#\# Examples
 
   Let's say you have a link with an [`a[up-target]`](/a-up-target) attribute:
@@ -132,6 +134,17 @@ up.link = (($) ->
     $link = $(linkOrSelector)
     variant = followVariantForLink($link)
     variant.followLink($link, options)
+
+  ###*
+  This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
+
+  @event up:link:follow
+  @param {jQuery} event.$element
+    The link element that will be followed.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the link from being followed.
+  @stable
+  ###
 
   ###*
   @function defaultFollow

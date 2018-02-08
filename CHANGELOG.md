@@ -15,9 +15,13 @@ Unreleased
 
 ### AJAX requests
 
-- When making HTTP requests Unpoly will now always merge params in the URL with params from the `{ data }` option.
 - Unpoly can now detect the final URL of a redirect response without the [optional server protocol](/up.protocol).
   The server protocol is still needed to detect redirects on Internet Explorer 11.
+- When making HTTP requests Unpoly will now always merge params in the URL's query section with params from the `{ data }` option.
+
+### Forms
+
+- [Following](/up.follow) a link now emits an [`up:link:follow`](/up:link:follow) event. The event can be prevented.
 
 ### Forms
 

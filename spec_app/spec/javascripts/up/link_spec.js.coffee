@@ -6,6 +6,24 @@ describe 'up.link', ->
   
     describe 'up.follow', ->
 
+      it 'emits a preventable up:link:follow event', asyncSpec (next) ->
+        $link = affix('a[href="/destination"][up-target=".response"]')
+
+        listener = jasmine.createSpy('follow listener').and.callFake (event) ->
+          event.preventDefault()
+
+        $link.on('up:link:follow', listener)
+
+        up.follow($link)
+
+        next =>
+          expect(listener).toHaveBeenCalled()
+          event = listener.calls.mostRecent().args[0]
+          expect(event.$element).toEqual($link)
+
+          # No request should be made because we prevented the event
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
       describeCapability 'canPushState', ->
 
         it 'loads the given link via AJAX and replaces the response in the given target', asyncSpec (next) ->

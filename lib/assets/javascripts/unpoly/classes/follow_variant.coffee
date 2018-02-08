@@ -39,8 +39,9 @@ class up.FollowVariant
       @onMousedown(args...)
 
   followLink: ($link, options = {}) =>
-    up.feedback.start $link, options, =>
-      @followNow($link, options)
+    up.bus.whenEmitted('up:link:follow', $element: $link).then =>
+      up.feedback.start $link, options, =>
+        @followNow($link, options)
 
   preloadLink: ($link, options = {}) =>
     @preloadNow($link, options)
