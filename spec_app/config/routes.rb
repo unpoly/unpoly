@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   get 'error_test/:action', controller: 'error_test'
   post 'error_test/:action', controller: 'error_test'
   get 'replace_test/:action', controller: 'replace_test'
+  get 'hash_test/:action', controller: 'hash_test'
 
   namespace :form_test do
     resource :basic, only: [:new, :create]
