@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.52.0",
+    version: "0.53.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,7 +41,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, multiSelector, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, attributeSelector, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, multiSelector, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -252,25 +252,36 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @experimental
      */
     selectorForElement = function(element) {
-      var $element, classes, i, id, klass, len, name, selector, upId;
+      var $element, ariaLabel, classes, i, id, klass, len, name, selector, tagName, upId;
       $element = $(element);
       selector = void 0;
+      tagName = $element.prop('tagName').toLowerCase();
       if (upId = presence($element.attr("up-id"))) {
-        selector = "[up-id='" + upId + "']";
+        selector = attributeSelector('up-id', upId);
       } else if (id = presence($element.attr("id"))) {
-        selector = "#" + id;
+        if (id.match(/^[a-z0-9\-_]+$/i)) {
+          selector = "#" + id;
+        } else {
+          selector = attributeSelector('id', id);
+        }
       } else if (name = presence($element.attr("name"))) {
-        selector = "[name='" + name + "']";
+        selector = tagName + attributeSelector('name', name);
       } else if (classes = presence(nonUpClasses($element))) {
         selector = '';
         for (i = 0, len = classes.length; i < len; i++) {
           klass = classes[i];
           selector += "." + klass;
         }
+      } else if (ariaLabel = presence($element.attr("aria-label"))) {
+        selector = attributeSelector('aria-label', ariaLabel);
       } else {
-        selector = $element.prop('tagName').toLowerCase();
+        selector = tagName;
       }
       return selector;
+    };
+    attributeSelector = function(attribute, value) {
+      value = value.replace(/"/g, '\\"');
+      return "[" + attribute + "=\"" + value + "\"]";
     };
     nonUpClasses = function($element) {
       var classString, classes;
@@ -2436,6 +2447,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     function ExtractCascade(selector, options) {
       this.oldPlanNotFound = bind(this.oldPlanNotFound, this);
       this.matchingPlanNotFound = bind(this.matchingPlanNotFound, this);
+      this.hungrySteps = bind(this.hungrySteps, this);
       this.bestMatchingSteps = bind(this.bestMatchingSteps, this);
       this.bestPreflightSelector = bind(this.bestPreflightSelector, this);
       this.detectPlan = bind(this.detectPlan, this);
@@ -2446,13 +2458,15 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         humanizedTarget: 'selector',
         layer: 'auto'
       });
+      this.options.transition = u.option(this.options.transition, this.options.animation);
+      this.options.hungry = u.option(this.options.hungry, true);
       this.candidates = this.buildCandidates(selector);
       this.plans = u.map(this.candidates, (function(_this) {
         return function(candidate, i) {
           var planOptions;
           planOptions = u.copy(_this.options);
           if (i > 0) {
-            planOptions.transition = up.dom.config.fallbackTransition;
+            planOptions.transition = u.option(up.dom.config.fallbackTransition, _this.options.transition);
           }
           return new up.ExtractPlan(candidate, planOptions);
         };
@@ -2503,10 +2517,32 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     ExtractCascade.prototype.bestMatchingSteps = function() {
       var plan;
       if (plan = this.matchingPlan()) {
-        return plan.steps;
+        return plan.steps.concat(this.hungrySteps());
       } else {
         return this.matchingPlanNotFound();
       }
+    };
+
+    ExtractCascade.prototype.hungrySteps = function() {
+      var $hungries, $hungry, $newHungry, hungry, j, len, selector, steps, transition;
+      steps = [];
+      if (this.options.hungry) {
+        $hungries = up.radio.hungrySelector().select();
+        for (j = 0, len = $hungries.length; j < len; j++) {
+          hungry = $hungries[j];
+          $hungry = $(hungry);
+          selector = u.selectorForElement($hungry);
+          if ($newHungry = this.options.response.first(selector)) {
+            transition = u.option(up.radio.config.hungryTransition, this.options.transition);
+            steps.push({
+              $old: $hungry,
+              $new: $newHungry,
+              transition: transition
+            });
+          }
+        }
+      }
+      return steps;
     };
 
     ExtractCascade.prototype.matchingPlanNotFound = function() {
@@ -2561,7 +2597,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       this.findOld = bind(this.findOld, this);
       this.origin = options.origin;
       this.selector = up.dom.resolveSelector(selector, options.origin);
-      this.transition = options.transition || options.animation || 'none';
+      this.transition = options.transition;
       this.response = options.response;
       this.oldLayer = options.layer;
       this.steps = this.parseSteps();
@@ -2616,30 +2652,26 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
     ExtractPlan.prototype.parseSteps = function() {
-      var comma, disjunction, transitions;
-      if (u.isString(this.transition)) {
-        transitions = this.transition.split(comma);
-      } else {
-        transitions = [this.transition];
-      }
+      var comma, disjunction;
       comma = /\ *,\ */;
       disjunction = this.selector.split(comma);
-      return u.map(disjunction, function(literal, i) {
-        var literalParts, pseudoClass, selector, transition;
-        literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/);
-        literalParts || up.fail('Could not parse selector literal "%s"', literal);
-        selector = literalParts[1];
-        if (selector === 'html') {
-          selector = 'body';
-        }
-        pseudoClass = literalParts[2];
-        transition = transitions[i] || u.last(transitions);
-        return {
-          selector: selector,
-          pseudoClass: pseudoClass,
-          transition: transition
+      return u.map(disjunction, (function(_this) {
+        return function(literal, i) {
+          var literalParts, pseudoClass, selector;
+          literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/);
+          literalParts || up.fail('Could not parse selector literal "%s"', literal);
+          selector = literalParts[1];
+          if (selector === 'html') {
+            selector = 'body';
+          }
+          pseudoClass = literalParts[2];
+          return {
+            selector: selector,
+            pseudoClass: pseudoClass,
+            transition: _this.transition
+          };
         };
-      });
+      })(this));
     };
 
     return ExtractPlan;
@@ -3495,16 +3527,22 @@ That said, there is an **optional** protocol your server can use to
 exchange additional information when Unpoly is [updating fragments](/up.link).
 
 While the protocol can help you optimize performance and handle some
-edge cases, implementing it is entirely optional. For instance,
+edge cases, implementing it is **entirely optional**. For instance,
 `unpoly.com` itself is a static site that uses Unpoly on the frontend
 and doesn't even have a server component.
 
-If you have [installed Unpoly as a Rails gem](/install/rails), the protocol
-is already implemented and you will get some
-[Ruby bindings](https://github.com/unpoly/unpoly/blob/master/README_RAILS.md)
-in your controllers and views. If your server-side app uses another language
-or framework, you should be able to implement the protocol in a very short time.
+## Existing implementations
 
+You should be able to implement the protocol in a very short time.
+There are existing implementations for various web frameworks:
+
+- [Ruby on Rails](/install/rails)
+- [Roda](https://github.com/adam12/roda-unpoly)
+- [Rack](https://github.com/adam12/rack-unpoly) (Sinatra, Padrino, Hanami, Cuba, ...)
+- [Phoenix](https://elixirforum.com/t/unpoly-a-framework-like-turbolinks/3614/15) (Elixir)
+
+
+## Protocol details
 
 \#\#\# Redirect detection for IE11
 
@@ -6112,7 +6150,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
      */
     reveal = function(elementOrSelector, options) {
       var $element;
-      $element = $(elementOrSelector);
+      $element = $(elementOrSelector).first();
       up.puts('Revealing fragment %o', $element.get(0));
       options = u.options(options);
       return u.rejectOnError(function() {
@@ -6390,7 +6428,9 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
           $element = up.first(selector) || $element;
           revealOptions.top = true;
         }
-        return reveal($element, revealOptions);
+        if ($element.length) {
+          return reveal($element, revealOptions);
+        }
       }
       return Promise.resolve();
     };
@@ -6604,13 +6644,15 @@ is built from these functions. You can use them to extend Unpoly from your
       It is recommend to always keep `'body'` as the last selector in the last in the case
       your server or load balancer renders an error message that does not contain your
       application layout.
-    @param {string} [options.fallbackTransition='none']
-      The transition to use when using a fallback target.
+    @param {string} [options.fallbackTransition=null]
+      The transition to use when using a [fallback target](/#options.fallbacks).
+    
+      By default this is not set and the original replacement's transition is used.
     @stable
      */
     config = u.config({
       fallbacks: ['body'],
-      fallbackTransition: 'none'
+      fallbackTransition: null
     });
     reset = function() {
       return config.reset();
@@ -6774,8 +6816,11 @@ is built from these functions. You can use them to extend Unpoly from your
       If set to `false`, the history will remain unchanged.
     @param {boolean|string} [options.source=true]
     @param {boolean|string} [options.reveal=false]
-      Whether to [reveal](/up.reveal) the element being updated, by
-      scrolling its containing viewport.
+      Whether to [reveal](/up.reveal) the new fragment.
+    
+      You can also pass a CSS selector for the element to reveal.
+    @param {boolean|string} [options.failReveal=false]
+      Whether to [reveal](/up.reveal) the new fragment when the server responds with an error.
     
       You can also pass a CSS selector for the element to reveal.
     @param {boolean} [options.restoreScroll=false]
@@ -6828,10 +6873,13 @@ is built from these functions. You can use them to extend Unpoly from your
       });
       failureOptions = u.merge(options, {
         humanizedTarget: 'failure target',
-        provideTarget: void 0
+        provideTarget: void 0,
+        restoreScroll: false,
+        hungry: false
       });
       u.renameKey(failureOptions, 'failTransition', 'transition');
       u.renameKey(failureOptions, 'failLayer', 'layer');
+      u.renameKey(failureOptions, 'failReveal', 'reveal');
       try {
         improvedTarget = bestPreflightSelector(selectorOrElement, successOptions);
         improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions);
@@ -9181,7 +9229,14 @@ new page is loading.
       The selector to replace.
       Defaults to the `[up-target]`, `[up-modal]` or `[up-popup]` attribute on `link`.
       If no target is given, the `<body>` element will be replaced.
+    @param {boolean|string} [options.reveal=true]
+      Whether to [reveal](/up.reveal) the target fragment after it was replaced.
     
+      You can also pass a CSS selector for the element to reveal.
+    @param {boolean|string} [options.failReveal=true]
+      Whether to [reveal](/up.reveal) the target fragment when the server responds with an error.
+    
+      You can also pass a CSS selector for the element to reveal.
     @return {Promise}
       A promise that will be fulfilled when the link destination
       has been loaded and rendered.
@@ -9221,6 +9276,7 @@ new page is loading.
       options.failTransition = u.option(options.failTransition, u.castedAttr($link, 'up-fail-transition'), 'none');
       options.history = u.option(options.history, u.castedAttr($link, 'up-history'));
       options.reveal = u.option(options.reveal, u.castedAttr($link, 'up-reveal'), true);
+      options.failReveal = u.option(options.failReveal, u.castedAttr($link, 'up-fail-reveal'), true);
       options.cache = u.option(options.cache, u.castedAttr($link, 'up-cache'));
       options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'));
       options.method = followMethod($link, options);
@@ -9424,10 +9480,10 @@ new page is loading.
     @param {string} [up-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements.
     @param [up-fail-target='body']
-      The selector to replace if the server responds with a non-200 status code.
+      The selector to replace if the server responds with an error.
     @param {string} [up-fail-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements
-      when the server responds with a non-200 status code.
+      when the server responds with an error.
     @param {string} [up-fallback]
       The selector to update when the original target was not found in the page.
     @param {string} [up-href]
@@ -9437,7 +9493,13 @@ new page is loading.
       A message that will be displayed in a cancelable confirmation dialog
       before the link is followed.
     @param {string} [up-reveal='true']
-      Whether to reveal the target element within its viewport before updating.
+      Whether to reveal the target element after it was replaced.
+    
+      You can also pass a CSS selector for the element to reveal.
+    @param {string} [up-fail-reveal='true']
+      Whether to reveal the target element when the server responds with an error.
+    
+      You can also pass a CSS selector for the element to reveal.
     @param {string} [up-restore-scroll='false']
       Whether to restore previously known scroll position of all viewports
       within the target selector.
@@ -9497,14 +9559,14 @@ new page is loading.
     @param {string} [up-method='get']
       The HTTP method to use for the request.
     @param [up-fail-target='body']
-      The selector to replace if the server responds with a non-200 status code.
+      The selector to replace if the server responds with an error.
     @param {string} [up-fallback]
       The selector to update when the original target was not found in the page.
     @param {string} [up-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements.
     @param {string} [up-fail-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements
-      when the server responds with a non-200 status code.
+      when the server responds with an error.
     @param [up-href]
       The destination URL to follow.
       If omitted, the the link's `href` attribute will be used.
@@ -9781,8 +9843,14 @@ open dialogs with sub-forms, etc. all without losing form state.
       The delay before the transition starts. See [`up.morph()`](/up.morph).
     @param {string} [options.easing]
       The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
-    @param {Element|jQuery|string} [options.reveal=true]
-      Whether to reveal the target element within its viewport.
+    @param {Element|string} [options.reveal=true]
+      Whether to reveal the target fragment after it was replaced.
+    
+      You can also pass a CSS selector for the element to reveal.
+    @param {boolean|string} [options.failReveal=true]
+      Whether to [reveal](/up.reveal) the target fragment when the server responds with an error.
+    
+      You can also pass a CSS selector for the element to reveal.
     @param {boolean} [options.restoreScroll]
       If set to `true`, this will attempt to [`restore scroll positions`](/up.restoreScroll)
       previously seen on the destination URL.
@@ -9814,13 +9882,14 @@ open dialogs with sub-forms, etc. all without losing form state.
       target = u.option(options.target, $form.attr('up-target'), 'body');
       url = u.option(options.url, $form.attr('action'), up.browser.url());
       options.failTarget = u.option(options.failTarget, $form.attr('up-fail-target')) || u.selectorForElement($form);
+      options.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true);
+      options.failReveal = u.option(options.failReveal, u.castedAttr($form, 'up-fail-reveal'), true);
       options.fallback = u.option(options.fallback, $form.attr('up-fallback'));
       options.history = u.option(options.history, u.castedAttr($form, 'up-history'), true);
       options.transition = u.option(options.transition, u.castedAttr($form, 'up-transition'), 'none');
       options.failTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), 'none');
       options.method = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase();
       options.headers = u.option(options.headers, {});
-      options.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true);
       options.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'));
       options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'));
       options.origin = u.option(options.origin, $form);
@@ -10232,7 +10301,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
       server has echoed the form with validation errors.
     @param [up-fallback]
-      The selector to replace if the server responds with a non-200 status code.
+      The selector to replace if the server responds with an error.
     @param {string} [up-transition]
       The animation to use when the form is replaced after a successful submission.
     @param {string} [up-fail-transition]
@@ -10261,7 +10330,18 @@ open dialogs with sub-forms, etc. all without losing form state.
       The name of the layer that ought to be updated if the server sends a
       non-200 status code.
     @param {string} [up-reveal='true']
-      Whether to reveal the target element within its viewport before updating.
+      Whether to reveal the target element after it was replaced.
+    
+      You can also pass a CSS selector for the element to reveal.
+    @param {string} [up-fail-reveal='true']
+      Whether to reveal the target element when the server responds with an error.
+    
+      You can also pass a CSS selector for the element to reveal. You may use this, for example,
+      to reveal the first validation error message:
+    
+          <form up-target=".content" up-fail-reveal=".error">
+            ...
+          </form>
     @param {string} [up-restore-scroll='false']
       Whether to restore previously known scroll position of all viewports
       within the target selector.
@@ -12744,6 +12824,75 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
   })(jQuery);
 
   up.renamedModule('navigation', 'feedback');
+
+}).call(this);
+
+/**
+Passive updates
+===============
+
+This work-in-progress package will contain functionality to
+passively receive updates from the server.
+
+@class up.radio
+ */
+
+(function() {
+  up.radio = (function($) {
+    var config, hungrySelector, reset, u;
+    u = up.util;
+
+    /**
+    Configures defaults for passive updates.
+    
+    @property up.radio.config
+    @param {Array<string>} [options.hungry]
+      An array of CSS selectors that is replaced whenever a matching element is found in a response.
+      These elements are replaced even when they were not targeted directly.
+    
+      By default this contains the [`[up-hungry]`](/up-hungry) attribute as well as
+      `<meta name="csrf-param">` and `<meta name="csrf-token">` tags.
+    @param {string} [options.hungryTransition=null]
+      The transition to use when a [hungry element](/up-hungry) is replacing itself
+      while another target is replaced.
+    
+      By default this is not set and the original replacement's transition is used.
+    @stable
+     */
+    config = u.config({
+      hungry: ['[up-hungry]', 'meta[name="csrf-param"]', 'meta[name="csrf-token"]'],
+      hungryTransition: null
+    });
+    reset = function() {
+      return config.reset();
+    };
+
+    /**
+    @function up.radio.hungrySelector
+    @internal
+     */
+    hungrySelector = function() {
+      return u.multiSelector(config.hungry);
+    };
+
+    /**
+    Elements with this attribute are [updated](/up.replace) whenever there is a
+    matching element found in a successful response. The element is replaced even
+    when it isn't [targeted](/a-up-target) directly.
+    
+    Use cases for this are unread message counters or notification flashes.
+    Such elements often live in the layout, outside of the content area that is
+    being replaced.
+    
+    @selector [up-hungry]
+    @stable
+     */
+    up.on('up:framework:reset', reset);
+    return {
+      config: config,
+      hungrySelector: hungrySelector
+    };
+  })(jQuery);
 
 }).call(this);
 
