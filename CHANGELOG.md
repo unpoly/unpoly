@@ -6,9 +6,8 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-
-Unreleased
-----------
+0.53.0
+------
 
 ### New module: Passive updates
 
