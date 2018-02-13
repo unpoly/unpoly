@@ -28,13 +28,15 @@ up.dom = (($) ->
     It is recommend to always keep `'body'` as the last selector in the last in the case
     your server or load balancer renders an error message that does not contain your
     application layout.
-  @param {string} [options.fallbackTransition='none']
-    The transition to use when using a fallback target.
+  @param {string} [options.fallbackTransition=null]
+    The transition to use when using a [fallback target](/#options.fallbacks).
+
+    By default this is not set and the original replacement's transition is used.
   @stable
   ###
   config = u.config
     fallbacks: ['body']
-    fallbackTransition: 'none'
+    fallbackTransition: null
 
   reset = ->
     config.reset()
@@ -243,6 +245,8 @@ up.dom = (($) ->
       humanizedTarget: 'failure target'
       provideTarget: undefined # don't provide a target if we're targeting the failTarget
       restoreScroll: false
+      hungry: false
+
     u.renameKey(failureOptions, 'failTransition', 'transition')
     u.renameKey(failureOptions, 'failLayer', 'layer')
     u.renameKey(failureOptions, 'failReveal', 'reveal')

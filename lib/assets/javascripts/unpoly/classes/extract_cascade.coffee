@@ -4,13 +4,16 @@ class up.ExtractCascade
 
   constructor: (selector, options) ->
     @options = u.options(options, humanizedTarget: 'selector', layer: 'auto')
+    @options.transition = u.option(@options.transition, @options.animation)
+    @options.hungry = u.option(@options.hungry, true)
+
     @candidates = @buildCandidates(selector)
     @plans = u.map @candidates, (candidate, i) =>
       planOptions = u.copy(@options)
       if i > 0
         # If we're using a fallback (any candidate that's not the first),
         # the original transition might no longer be appropriate.
-        planOptions.transition = up.dom.config.fallbackTransition
+        planOptions.transition = u.option(up.dom.config.fallbackTransition, @options.transition)
       new up.ExtractPlan(candidate, planOptions)
 
   buildCandidates: (selector) ->
@@ -50,9 +53,24 @@ class up.ExtractCascade
 
   bestMatchingSteps: =>
     if plan = @matchingPlan()
-      plan.steps
+      plan.steps.concat(@hungrySteps())
     else
       @matchingPlanNotFound()
+
+  hungrySteps: =>
+    steps = []
+    if @options.hungry
+      $hungries = up.radio.hungrySelector().select()
+      for hungry in $hungries
+        $hungry = $(hungry)
+        selector = u.selectorForElement($hungry)
+        if $newHungry = @options.response.first(selector)
+          transition = u.option(up.radio.config.hungryTransition, @options.transition)
+          steps.push
+            $old: $hungry
+            $new: $newHungry
+            transition: transition
+    steps
 
   matchingPlanNotFound: =>
     # The job of this method is to simply throw an error.

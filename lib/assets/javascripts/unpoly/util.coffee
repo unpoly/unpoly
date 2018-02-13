@@ -187,19 +187,30 @@ up.util = (($) ->
     $element = $(element)
     selector = undefined
 
+    tagName = $element.prop('tagName').toLowerCase()
+
     if upId = presence($element.attr("up-id"))
-      selector = "[up-id='#{upId}']"
+      selector = attributeSelector('up-id', upId)
     else if id = presence($element.attr("id"))
-      selector = "##{id}"
+      if id.match(/^[a-z0-9\-_]+$/i)
+        selector = "##{id}"
+      else
+        selector = attributeSelector('id', id)
     else if name = presence($element.attr("name"))
-      selector = "[name='#{name}']"
+      selector = tagName + attributeSelector('name', name)
     else if classes = presence(nonUpClasses($element))
       selector = ''
       for klass in classes
         selector += ".#{klass}"
+    else if ariaLabel = presence($element.attr("aria-label"))
+      selector = attributeSelector('aria-label', ariaLabel)
     else
-      selector = $element.prop('tagName').toLowerCase()
+      selector = tagName
     selector
+
+  attributeSelector = (attribute, value) ->
+    value = value.replace(/"/g, '\\"')
+    "[#{attribute}=\"#{value}\"]"
 
   nonUpClasses = ($element) ->
     classString = $element.attr('class') || ''

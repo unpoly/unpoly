@@ -5,7 +5,7 @@ class up.ExtractPlan
   constructor: (selector, options) ->
     @origin = options.origin
     @selector = up.dom.resolveSelector(selector, options.origin)
-    @transition = options.transition || options.animation || 'none'
+    @transition = options.transition
     @response = options.response
     @oldLayer = options.layer
     @steps = @parseSteps()
@@ -41,16 +41,11 @@ class up.ExtractPlan
       ]
   ###
   parseSteps: =>
-    if u.isString(@transition)
-      transitions = @transition.split(comma)
-    else
-      transitions = [@transition]
-
     comma = /\ *,\ */
 
     disjunction = @selector.split(comma)
 
-    u.map disjunction, (literal, i) ->
+    u.map disjunction, (literal, i) =>
       literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/)
       literalParts or up.fail('Could not parse selector literal "%s"', literal)
       selector = literalParts[1]
@@ -60,8 +55,7 @@ class up.ExtractPlan
         selector = 'body'
 
       pseudoClass = literalParts[2]
-      transition = transitions[i] || u.last(transitions)
 
       selector: selector
       pseudoClass: pseudoClass
-      transition: transition
+      transition: @transition

@@ -709,7 +709,7 @@ describe 'up.form', ->
           next =>
             request = @lastRequest()
             expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
-            expect(request.requestHeaders['X-Up-Target']).toEqual(".field-group:has([name='user'])")
+            expect(request.requestHeaders['X-Up-Target']).toEqual('.field-group:has(input[name="user"])')
 
             @respondWith """
               <div class="field-group has-error">

@@ -237,7 +237,7 @@ up.layout = (($) ->
   @stable
   ###
   reveal = (elementOrSelector, options) ->
-    $element = $(elementOrSelector)
+    $element = $(elementOrSelector).first() # we can only reveal one element
     up.puts 'Revealing fragment %o', $element.get(0)
     options = u.options(options)
 

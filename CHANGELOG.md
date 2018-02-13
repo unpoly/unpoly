@@ -10,6 +10,26 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+### New module: Passive updates
+
+Thi work-in-progress package [`up.radio`](/up.radio) will contain functionality to
+passively receive updates from the server. Currently the following functionality is implemented:
+
+- Elements with an [`[up-hungry]`](/up-hungry) attribute are [updated](/up.replace) whenever there is a matching element found in a successful response. The element is replaced even when it isn't [targeted](/a-up-target) directly.
+
+  Use cases for this are unread message counters or notification flashes. Such elements often live in the layout, outside of the content area that is being replaced.
+- When a reserver response contains a `<meta name="csrf-param">` or `<meta name="csrf-token">` element, it is automatically updated in the current page.
+
+
+### General
+
+- Changes when generating CSS selectors for elements:
+  - `[aria-label]` attributes are used if no better attributes exist (like `[id]` or `[up-id]` attributes).
+  - Attribute values with quotes are now escaped if they appear in an attribute selector.
+  - Attribute selectors now use double quotes instead of single quotes.
+  - When a `[name]` attribute is used, the tag name is also used. E.g. `meta[name="csrf-token"]`.
+  - Element IDs that contain non-word characters (e.g. slashes, spaces, dots), will now generate an attribute selector like `[id="foo/bar"]`.
+
 ### Forms
 
 - You can give forms an `[up-fail-reveal]` attribute to indicate which element should be [revealed](/up.reveal) when the server responds with an error. You may use this, for example, to reveal the first validation error message:
@@ -21,7 +41,7 @@ Unreleased
 - Forms with an `[up-reveal]` attribute will now only honor the attribute when the form submission was successful.
 - Forms with an `[up-restore-scroll]` attribute will now only honor the attribute when the form submission was successful.
 - Forms with an `[up-reveal="css-selector"]` attribute will no longer crash when the selector could not be found.
-
+- Fix a bug where you couldn't submit a form if it's ID contains a slash character ([#46](https://github.com/unpoly/unpoly/issues/46)).
 
 ### Links
 
@@ -29,6 +49,11 @@ Unreleased
 - Links with an `[up-reveal]` attribute will now only honor the attribute when the link could be followed successfully.
 - Links with an `[up-restore-scroll]` attribute will now only honor the attribute when the link could be followed successfully.
 - Links with an `[up-reveal="css-selector"]` attribute will no longer crash when the selector could not be found.
+
+### Animations
+
+- When [replacing](/up.replace) multiple elements, it is no longer possible to use different [transitions](/up.morph) for each element. The same transition is always applied to all elements.
+
 
 
 0.52.0

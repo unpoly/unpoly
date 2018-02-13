@@ -18,6 +18,7 @@
 #= require ./unpoly/modal
 #= require ./unpoly/tooltip
 #= require ./unpoly/feedback
+#= require ./unpoly/radio
 #= require ./unpoly/rails
 
 up.boot()
