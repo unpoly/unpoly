@@ -11,16 +11,22 @@ That said, there is an **optional** protocol your server can use to
 exchange additional information when Unpoly is [updating fragments](/up.link).
 
 While the protocol can help you optimize performance and handle some
-edge cases, implementing it is entirely optional. For instance,
+edge cases, implementing it is **entirely optional**. For instance,
 `unpoly.com` itself is a static site that uses Unpoly on the frontend
 and doesn't even have a server component.
 
-If you have [installed Unpoly as a Rails gem](/install/rails), the protocol
-is already implemented and you will get some
-[Ruby bindings](https://github.com/unpoly/unpoly/blob/master/README_RAILS.md)
-in your controllers and views. If your server-side app uses another language
-or framework, you should be able to implement the protocol in a very short time.
+## Existing implementations
 
+You should be able to implement the protocol in a very short time.
+There are existing implementations for various web frameworks:
+
+- [Ruby on Rails](/install/rails)
+- [Roda](https://github.com/adam12/roda-unpoly)
+- [Rack](https://github.com/adam12/rack-unpoly) (Sinatra, Padrino)
+- [Phoenix](https://elixirforum.com/t/unpoly-a-framework-like-turbolinks/3614/15) (Elixir)
+
+
+## Protocol details
 
 \#\#\# Redirect detection for IE11
 
