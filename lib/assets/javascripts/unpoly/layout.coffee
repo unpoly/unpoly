@@ -473,7 +473,13 @@ up.layout = (($) ->
         selector = revealSelector(options.reveal)
         $element = up.first(selector) || $element
         revealOptions.top = true
-      return reveal($element, revealOptions)
+
+      # If selectorOrElement was a CSS selector, don't blow up by calling reveal()
+      # with an empty jQuery collection. This might happen if a failed form submission
+      # reveals the first validation error message, but the error is shown in an
+      # unexpected element.
+      if $element.length
+        return reveal($element, revealOptions)
 
     # If we didn't need to scroll above, just return a resolved promise
     # to fulfill this function's signature.

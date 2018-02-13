@@ -124,7 +124,14 @@ up.link = (($) ->
     The selector to replace.
     Defaults to the `[up-target]`, `[up-modal]` or `[up-popup]` attribute on `link`.
     If no target is given, the `<body>` element will be replaced.
+  @param {boolean|string} [options.reveal=true]
+    Whether to [reveal](/up.reveal) the target fragment after it was replaced.
 
+    You can also pass a CSS selector for the element to reveal.
+  @param {boolean|string} [options.failReveal=true]
+    Whether to [reveal](/up.reveal) the target fragment when the server responds with an error.
+
+    You can also pass a CSS selector for the element to reveal.
   @return {Promise}
     A promise that will be fulfilled when the link destination
     has been loaded and rendered.
@@ -163,6 +170,7 @@ up.link = (($) ->
     options.failTransition = u.option(options.failTransition, u.castedAttr($link, 'up-fail-transition'), 'none')
     options.history = u.option(options.history, u.castedAttr($link, 'up-history'))
     options.reveal = u.option(options.reveal, u.castedAttr($link, 'up-reveal'), true)
+    options.failReveal = u.option(options.failReveal, u.castedAttr($link, 'up-fail-reveal'), true)
     options.cache = u.option(options.cache, u.castedAttr($link, 'up-cache'))
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'))
     options.method = followMethod($link, options)
@@ -347,10 +355,10 @@ up.link = (($) ->
   @param {string} [up-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements.
   @param [up-fail-target='body']
-    The selector to replace if the server responds with a non-200 status code.
+    The selector to replace if the server responds with an error.
   @param {string} [up-fail-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements
-    when the server responds with a non-200 status code.
+    when the server responds with an error.
   @param {string} [up-fallback]
     The selector to update when the original target was not found in the page.
   @param {string} [up-href]
@@ -360,7 +368,13 @@ up.link = (($) ->
     A message that will be displayed in a cancelable confirmation dialog
     before the link is followed.
   @param {string} [up-reveal='true']
-    Whether to reveal the target element within its viewport before updating.
+    Whether to reveal the target element after it was replaced.
+
+    You can also pass a CSS selector for the element to reveal.
+  @param {string} [up-fail-reveal='true']
+    Whether to reveal the target element when the server responds with an error.
+
+    You can also pass a CSS selector for the element to reveal.
   @param {string} [up-restore-scroll='false']
     Whether to restore previously known scroll position of all viewports
     within the target selector.
@@ -416,14 +430,14 @@ up.link = (($) ->
   @param {string} [up-method='get']
     The HTTP method to use for the request.
   @param [up-fail-target='body']
-    The selector to replace if the server responds with a non-200 status code.
+    The selector to replace if the server responds with an error.
   @param {string} [up-fallback]
     The selector to update when the original target was not found in the page.
   @param {string} [up-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements.
   @param {string} [up-fail-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements
-    when the server responds with a non-200 status code.
+    when the server responds with an error.
   @param [up-href]
     The destination URL to follow.
     If omitted, the the link's `href` attribute will be used.

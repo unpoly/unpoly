@@ -392,6 +392,116 @@ describe 'up.form', ->
             next => @respondWith('<div class="response">new-text</div>')
             next =>expect(up.browser.url()).toEqual(@hrefBeforeExample)
 
+        describe 'revealing', ->
+
+          it 'reaveals the target fragment if the submission succeeds', asyncSpec (next) ->
+            $form = affix('form[action="/action"][up-target=".target"]')
+            $target = affix('.target')
+
+            revealStub = up.layout.knife.mock('reveal')
+
+            up.submit($form)
+
+            next =>
+              @respondWith('<div class="target">new text</div>')
+
+            next =>
+              expect(revealStub).toHaveBeenCalled()
+              expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.target')
+
+          it 'reveals the form if the submission fails', asyncSpec (next) ->
+            $form = affix('form#foo-form[action="/action"][up-target=".target"]')
+            $target = affix('.target')
+
+            revealStub = up.layout.knife.mock('reveal')
+
+            up.submit($form)
+
+            next =>
+              @respondWith
+                status: 500,
+                responseText: """
+                  <form id="foo-form">
+                    Errors here
+                  </form>
+                  """
+
+            next =>
+              expect(revealStub).toHaveBeenCalled()
+              expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('#foo-form')
+
+
+          describe 'with { reveal } option', ->
+
+            it 'allows to reveal a different selector', asyncSpec (next) ->
+              $form = affix('form[action="/action"][up-target=".target"]')
+              $target = affix('.target')
+              $other = affix('.other')
+
+              revealStub = up.layout.knife.mock('reveal')
+
+              up.submit($form, reveal: '.other')
+
+              next =>
+                @respondWith """
+                  <div class="target">
+                    new text
+                  </div>
+                  <div class="other">
+                    new other
+                  </div>
+                """
+
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.other')
+
+            it 'still reveals the form for a failed submission', asyncSpec (next) ->
+              $form = affix('form#foo-form[action="/action"][up-target=".target"]')
+              $target = affix('.target')
+              $other = affix('.other')
+
+              revealStub = up.layout.knife.mock('reveal')
+
+              up.submit($form, reveal: '.other')
+
+              next =>
+                @respondWith
+                  status: 500,
+                  responseText: """
+                    <form id="foo-form">
+                      Errors here
+                    </form>
+                    """
+
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('#foo-form')
+
+          describe 'with { failReveal } option', ->
+
+            it 'reveals the given selector for a failed submission', asyncSpec (next) ->
+              $form = affix('form#foo-form[action="/action"][up-target=".target"]')
+              $target = affix('.target')
+              $other = affix('.other')
+
+              revealStub = up.layout.knife.mock('reveal')
+
+              up.submit($form, reveal: '.other', failReveal: '.error')
+
+              next =>
+                @respondWith
+                  status: 500,
+                  responseText: """
+                    <form id="foo-form">
+                      <div class="error">Errors here</div>
+                    </form>
+                    """
+
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.error')
+
         describe 'in a form with file inputs', ->
 
           beforeEach ->

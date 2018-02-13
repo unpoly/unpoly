@@ -133,7 +133,7 @@ describe 'up.dom', ->
           up.replace('.middle', '/path', method: 'put')
           next => expect(@lastRequest()).toHaveRequestMethod('PUT')
 
-        describe 'when the server responds with a non-200 status code', ->
+        describe 'when the server responds with an error', ->
 
           it 'replaces the first fallback instead of the given selector', asyncSpec (next) ->
             up.dom.config.fallbacks = ['.fallback']

@@ -336,11 +336,129 @@ describe 'up.link', ->
             next =>
               expect($viewport.scrollTop()).toEqual(65)
 
-        describe "when the browser is already on the link's destination", ->
 
-          it "doesn't make a request and reveals the target container"
+        describe 'revealing', ->
 
-          it "doesn't make a request and reveals the target of a #hash in the URL"
+          it 'reaveals the target fragment', asyncSpec (next) ->
+            $link = affix('a[href="/action"][up-target=".target"]')
+            $target = affix('.target')
+
+            revealStub = up.layout.knife.mock('reveal')
+
+            up.follow($link)
+
+            next =>
+              @respondWith('<div class="target">new text</div>')
+
+            next =>
+              expect(revealStub).toHaveBeenCalled()
+              expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.target')
+
+          it 'reveals the { failTarget } if the server responds with an error', asyncSpec (next) ->
+            $link = affix('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+            $target = affix('.target')
+            $failTarget = affix('.fail-target')
+
+            revealStub = up.layout.knife.mock('reveal')
+
+            up.follow($link)
+
+            next =>
+              @respondWith
+                status: 500,
+                responseText: """
+                  <div class="fail-target">
+                    Errors here
+                  </div>
+                  """
+
+            next =>
+              expect(revealStub).toHaveBeenCalled()
+              expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.fail-target')
+
+
+          describe 'with { reveal } option', ->
+
+            it 'allows to reveal a different selector', asyncSpec (next) ->
+              $link = affix('a[href="/action"][up-target=".target"]')
+              $target = affix('.target')
+              $other = affix('.other')
+
+              revealStub = up.layout.knife.mock('reveal')
+
+              up.follow($link, reveal: '.other')
+
+              next =>
+                @respondWith """
+                  <div class="target">
+                    new text
+                  </div>
+                  <div class="other">
+                    new other
+                  </div>
+                """
+
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.other')
+
+            it 'still reveals the { failTarget } for a failed submission', asyncSpec (next) ->
+              $link = affix('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+              $target = affix('.target')
+              $failTarget = affix('.fail-target')
+              $other = affix('.other')
+
+              revealStub = up.layout.knife.mock('reveal')
+
+              up.submit($link, reveal: '.other', failTarget: '.fail-target')
+
+              next =>
+                @respondWith
+                  status: 500,
+                  responseText: """
+                    <div class="fail-target">
+                      Errors here
+                    </div>
+                    """
+
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.fail-target')
+
+          describe 'with { failReveal } option', ->
+
+            it 'reveals the given selector when the server responds with an error', asyncSpec (next) ->
+              $link = affix('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+              $target = affix('.target')
+              $failTarget = affix('.fail-target')
+              $other = affix('.other')
+              $failOther = affix('.fail-other')
+
+              revealStub = up.layout.knife.mock('reveal')
+
+              up.follow($link, reveal: '.other', failReveal: '.fail-other')
+
+              next =>
+                @respondWith
+                  status: 500,
+                  responseText: """
+                    <div class="fail-target">
+                      Errors here
+                    </div>
+                    <div class="fail-other">
+                      Fail other here
+                    </div>
+                    """
+
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.fail-other')
+
+          describe "when the browser is already on the link's destination", ->
+
+            it "doesn't make a request and reveals the target container"
+
+            it "doesn't make a request and reveals the target of a #hash in the URL"
 
         describe 'with { confirm } option', ->
 
@@ -609,7 +727,7 @@ describe 'up.link', ->
                 expect($('.document .target')).toHaveText('new text from modal link')
                 expect($('.up-modal .target')).toHaveText('old modal text')
 
-            it 'ignores [up-layer] if the server responds with a non-200 status code', asyncSpec (next) ->
+            it 'ignores [up-layer] if the server responds with an error', asyncSpec (next) ->
               affix('.document').affix('.target').text('old document text')
               up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
 

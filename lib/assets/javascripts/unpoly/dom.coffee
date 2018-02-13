@@ -187,8 +187,11 @@ up.dom = (($) ->
     If set to `false`, the history will remain unchanged.
   @param {boolean|string} [options.source=true]
   @param {boolean|string} [options.reveal=false]
-    Whether to [reveal](/up.reveal) the element being updated, by
-    scrolling its containing viewport.
+    Whether to [reveal](/up.reveal) the new fragment.
+
+    You can also pass a CSS selector for the element to reveal.
+  @param {boolean|string} [options.failReveal=false]
+    Whether to [reveal](/up.reveal) the new fragment when the server responds with an error.
 
     You can also pass a CSS selector for the element to reveal.
   @param {boolean} [options.restoreScroll=false]
@@ -239,8 +242,10 @@ up.dom = (($) ->
     failureOptions = u.merge options,
       humanizedTarget: 'failure target'
       provideTarget: undefined # don't provide a target if we're targeting the failTarget
+      restoreScroll: false
     u.renameKey(failureOptions, 'failTransition', 'transition')
     u.renameKey(failureOptions, 'failLayer', 'layer')
+    u.renameKey(failureOptions, 'failReveal', 'reveal')
 
     try
       improvedTarget = bestPreflightSelector(selectorOrElement, successOptions)

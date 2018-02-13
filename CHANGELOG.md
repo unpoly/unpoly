@@ -6,6 +6,31 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+
+Unreleased
+----------
+
+### Forms
+
+- You can give forms an `[up-fail-reveal]` attribute to indicate which element should be [revealed](/up.reveal) when the server responds with an error. You may use this, for example, to reveal the first validation error message:
+  ```
+  <form up-target=".content" up-fail-reveal=".error">
+    ...
+  </form>
+  ```
+- Forms with an `[up-reveal]` attribute will now only honor the attribute when the form submission was successful.
+- Forms with an `[up-restore-scroll]` attribute will now only honor the attribute when the form submission was successful.
+- Forms with an `[up-reveal="css-selector"]` attribute will no longer crash when the selector could not be found.
+
+
+### Links
+
+- You can give links an `[up-fail-reveal]` attribute to indicate which element should be [revealed](/up.reveal) when the server responds with an error
+- Links with an `[up-reveal]` attribute will now only honor the attribute when the link could be followed successfully.
+- Links with an `[up-restore-scroll]` attribute will now only honor the attribute when the link could be followed successfully.
+- Links with an `[up-reveal="css-selector"]` attribute will no longer crash when the selector could not be found.
+
+
 0.52.0
 ------
 
@@ -832,9 +857,9 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - Loading modals and popups will now open if there is a fragment update between the modal/popup's
   request and response.
 - [`up.follow()`](/up.follow) and [`up.replace()`](/up.replace) now have an option `{ failTarget }`.
-  Use it to define the selector to replace if the server responds with a non-200 status code.
+  Use it to define the selector to replace if the server responds with an error.
 - [`[up-target]`](/a-up-target) and [`up-follow`](/a-up-follow) now have a modifying attribute `up-fail-target`.
-  Use it to define the selector to replace if the server responds with a non-200 status code.
+  Use it to define the selector to replace if the server responds with an error.
 - New utility method [`up.util.reject()`](/up.util.reject)
 - New utility method [`up.util.only()`](/up.util.only)
 - New utility method [`up.util.except()`](/up.util.except)

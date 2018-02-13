@@ -102,8 +102,14 @@ up.form = (($) ->
     The delay before the transition starts. See [`up.morph()`](/up.morph).
   @param {string} [options.easing]
     The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
-  @param {Element|jQuery|string} [options.reveal=true]
-    Whether to reveal the target element within its viewport.
+  @param {Element|string} [options.reveal=true]
+    Whether to reveal the target fragment after it was replaced.
+
+    You can also pass a CSS selector for the element to reveal.
+  @param {boolean|string} [options.failReveal=true]
+    Whether to [reveal](/up.reveal) the target fragment when the server responds with an error.
+
+    You can also pass a CSS selector for the element to reveal.
   @param {boolean} [options.restoreScroll]
     If set to `true`, this will attempt to [`restore scroll positions`](/up.restoreScroll)
     previously seen on the destination URL.
@@ -135,13 +141,14 @@ up.form = (($) ->
     target = u.option(options.target, $form.attr('up-target'), 'body')
     url = u.option(options.url, $form.attr('action'), up.browser.url())
     options.failTarget = u.option(options.failTarget, $form.attr('up-fail-target')) || u.selectorForElement($form)
+    options.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true)
+    options.failReveal = u.option(options.failReveal, u.castedAttr($form, 'up-fail-reveal'), true)
     options.fallback = u.option(options.fallback, $form.attr('up-fallback'))
     options.history = u.option(options.history, u.castedAttr($form, 'up-history'), true)
     options.transition = u.option(options.transition, u.castedAttr($form, 'up-transition'), 'none')
     options.failTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), 'none')
     options.method = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase()
     options.headers = u.option(options.headers, {})
-    options.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true)
     options.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
     options.origin = u.option(options.origin, $form)
@@ -520,7 +527,7 @@ up.form = (($) ->
     If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
     server has echoed the form with validation errors.
   @param [up-fallback]
-    The selector to replace if the server responds with a non-200 status code.
+    The selector to replace if the server responds with an error.
   @param {string} [up-transition]
     The animation to use when the form is replaced after a successful submission.
   @param {string} [up-fail-transition]
@@ -549,7 +556,18 @@ up.form = (($) ->
     The name of the layer that ought to be updated if the server sends a
     non-200 status code.
   @param {string} [up-reveal='true']
-    Whether to reveal the target element within its viewport before updating.
+    Whether to reveal the target element after it was replaced.
+
+    You can also pass a CSS selector for the element to reveal.
+  @param {string} [up-fail-reveal='true']
+    Whether to reveal the target element when the server responds with an error.
+
+    You can also pass a CSS selector for the element to reveal. You may use this, for example,
+    to reveal the first validation error message:
+
+        <form up-target=".content" up-fail-reveal=".error">
+          ...
+        </form>
   @param {string} [up-restore-scroll='false']
     Whether to restore previously known scroll position of all viewports
     within the target selector.
