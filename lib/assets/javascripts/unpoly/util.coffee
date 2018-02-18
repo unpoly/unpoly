@@ -648,8 +648,8 @@ up.util = (($) ->
   ###
   any = (array, tester) ->
     match = false
-    for element in array
-      if tester(element)
+    for element, index in array
+      if tester(element, index)
         match = true
         break
     match
@@ -666,8 +666,8 @@ up.util = (($) ->
   ###
   all = (array, tester) ->
     match = true
-    for element in array
-      unless tester(element)
+    for element, index in array
+      unless tester(element, index)
         match = false
         break
     match
@@ -1695,6 +1695,9 @@ up.util = (($) ->
         flattened.push(object)
     flattened
 
+  flatMap = (array, block) ->
+    flatten map(array, block)
+
   ###*
   Returns whether the given value is truthy.
 
@@ -1750,6 +1753,22 @@ up.util = (($) ->
   isBodyDescendant = (element) ->
     $(element).parents('body').length > 0
 
+  separatedValues = (string, separator) ->
+    values = string.split(separator)
+    values = map(values, trim)
+    values = select(values, isPresent)
+    values
+
+  isEqual = (a, b) ->
+    if typeof(a) != typeof(b)
+      false
+    else if isArray(a)
+      a.length == b.length && all(a, (elem, index) -> isEqual(elem, b[index]))
+    else if isObject(a)
+      fail('isEqual cannot compare objects yet')
+    else
+      a == b
+
   requestDataAsArray: requestDataAsArray
   requestDataAsQuery: requestDataAsQuery
   appendRequestData: appendRequestData
@@ -1767,6 +1786,7 @@ up.util = (($) ->
   $createElementFromSelector: $createElementFromSelector
   $createPlaceholder: $createPlaceholder
   selectorForElement: selectorForElement
+  attributeSelector: attributeSelector
   assign: assign
   assignPolyfill: assignPolyfill
   copy: copy
@@ -1776,6 +1796,7 @@ up.util = (($) ->
   fail: fail
   each: each
   map: map
+  flatMap: flatMap
   times: times
   any: any
   all: all
@@ -1863,7 +1884,8 @@ up.util = (($) ->
   isBodyDescendant: isBodyDescendant
   isCrossDomain: isCrossDomain
   microtask: microtask
-
+  separatedValues : separatedValues
+  isEqual: isEqual
 
 )(jQuery)
 

@@ -154,7 +154,24 @@ up.history = (($) ->
       false
 
   buildState = ->
+    waypointIndexes = upsertWaypointIndexes()
     fromUp: true
+    waypointIndexes: waypointIndexes
+
+  upsertWaypointIndexes = ->
+    $waypoints = $('[up-waypoint]')
+
+    u.flatMap $waypoints, (waypoint) ->
+      $waypoint = $(waypoint)
+      names = u.separatedValues($waypoint.attr('up-waypoint'), ' ')
+      previousIndexes = u.separatedValues($waypoint.attr('up-waypoint-index'), ' ')
+      newIndexes = u.map names, (name, i) ->
+        previousIndex = previousIndexes[i] # might be undefined if it's a new waypoint
+        waypoint = waypoints.upsert(name, previousIndex)
+        waypoint.index
+      unless u.isEqual(previousIndexes, newIndexes)
+        $waypoint.attr('up-waypoint-index', newIndexes.join(' '))
+      newIndexes
 
   restoreStateOnPop = (state) ->
     if state?.fromUp

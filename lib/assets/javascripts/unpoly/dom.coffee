@@ -749,11 +749,10 @@ up.dom = (($) ->
     if $control.length && $control.get(0) != document.activeElement
       $control.focus()
 
-  isRealElement = ($element) ->
+  isRealElement = (element) ->
     unreal = '.up-ghost, .up-destroying'
-    # Closest matches both the element itself
-    # as well as its ancestors
-    $element.closest(unreal).length == 0
+    # Closest matches both the element itself as well as its ancestors
+    $(element).closest(unreal).length == 0
 
   ###*
   Returns the first element matching the given selector, but
@@ -822,6 +821,29 @@ up.dom = (($) ->
 
   matchesLayer = (selectorOrElement, layer) ->
     layerOf(selectorOrElement) == layer
+
+  ###*
+  Returns all elements matching the given selector, but
+  ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
+
+  If the given argument is already a jQuery collection (or an array
+  of DOM elements), returns the subset of the given list that is matching these conditions.
+
+  @function up.all
+  @param {string|jQuery|Array<Element>} selectorOrElements
+  @param {string|Element|jQuery} [options.origin]
+    An second element or selector that can be referenced as `&` in the first selector:
+
+        $input = $('input.email');
+        up.first('.field:has(&)', $input); // returns the .field containing $input
+  @return {jQuery}
+    A jQuery collection of matching elements.
+  @experimental
+  ###
+  all = (selectorOrElements, options) ->
+    options = u.options(options)
+    resolved = resolveSelector(selectorOrElements, options.origin)
+    $(resolved).filter (index, element) -> isRealElement(element)
 
   ###*
   Destroys the given element or selector.
@@ -956,6 +978,7 @@ up.dom = (($) ->
   destroy: destroy
   extract: extract
   first: first
+  all: all
   source: source
   resolveSelector: resolveSelector
   hello: hello
@@ -968,6 +991,7 @@ up.extract = up.dom.extract
 up.reload = up.dom.reload
 up.destroy = up.dom.destroy
 up.first = up.dom.first
+up.all = up.dom.all
 up.hello = up.dom.hello
 
 up.renamedModule 'flow', 'dom'
