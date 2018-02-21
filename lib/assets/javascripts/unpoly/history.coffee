@@ -28,6 +28,7 @@ up.history = (($) ->
     enabled: true
     popTargets: ['body']
     restoreScroll: true
+    maxWaypoints: 70
 
   ###*
   Returns the previous URL in the browser history.
@@ -42,8 +43,11 @@ up.history = (($) ->
   previousUrl = undefined
   nextPreviousUrl = undefined
 
+  waypoints = new up.Cache(size: config.maxWaypoints)
+
   reset = ->
     config.reset()
+    waypoints.clear()
     previousUrl = undefined
     nextPreviousUrl = undefined
 
@@ -149,14 +153,24 @@ up.history = (($) ->
       state = buildState()
       window.history[method](state, '', url)
       observeNewUrl(currentUrl())
+      observeWaypoints()
       true
     else
       false
 
   buildState = ->
-    waypointIndexes = upsertWaypointIndexes()
+    # waypointIndexes = upsertWaypointIndexes()
     fromUp: true
-    waypointIndexes: waypointIndexes
+    # waypointIndexes: waypointIndexes
+
+  observeWaypoints = ->
+    $waypoints = $('[up-waypoint]')
+    u.eachJQuery $waypoints, ($waypoint) ->
+      names = u.separatedValues($waypoint.attr('up-waypoint'), ' ')
+      waypoint = new up.Waypoint()
+      waypoint.updateFromElement($waypoint)
+      for name in names
+        waypoints.set(name, waypoint)
 
   upsertWaypointIndexes = ->
     $waypoints = $('[up-waypoint]')

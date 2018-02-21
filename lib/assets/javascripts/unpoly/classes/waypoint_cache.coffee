@@ -2,41 +2,43 @@ u = up.util
 
 class up.WaypointCache
 
-  MAX_SIZE = 70
-
-  constructor: =>
-    @reset()
-
-  reset: =>
-    @waypoints = []
-    @cursorIndex = 0
-
-  add: (name) =>
-    throw "soll aktuellen waypoint erweitern"
-    waypoint = new up.Waypoint(name: name, index: @cursorIndex)
-    waypoint.update()
-    @waypoints[@cursorIndex] = waypoint
-    @clean()
-
-  clean: =>
-    # We cannot just shift elements from the beginning the array,
-    # since that index is referenced in history states.
-    while @cursorIndex - @firstIndex > MAX_SIZE
-      delete @waypoints[@firstIndex]
-      @firstIndex++
-
-  upsert: (name, index) =>
 
 
-
-  beforeDomChange: =>
-
-  beforeBackClick: =>
-
-  beforeHistoryPush: =>
-
-  afterHistoryPop: =>
-    @cursorIndex--
+#  MAX_SIZE = 70
+#
+#  constructor: =>
+#    @reset()
+#
+#  reset: =>
+#    @waypoints = []
+#    @cursorIndex = 0
+#
+#  add: (name) =>
+#    throw "soll aktuellen waypoint erweitern"
+#    waypoint = new up.Waypoint(name: name, index: @cursorIndex)
+#    waypoint.update()
+#    @waypoints[@cursorIndex] = waypoint
+#    @clean()
+#
+#  clean: =>
+#    # We cannot just shift elements from the beginning the array,
+#    # since that index is referenced in history states.
+#    while @cursorIndex - @firstIndex > MAX_SIZE
+#      delete @waypoints[@firstIndex]
+#      @firstIndex++
+#
+#  upsert: (name, index) =>
+#
+#
+#
+#  beforeDomChange: =>
+#
+#  beforeBackClick: =>
+#
+#  beforeHistoryPush: =>
+#
+#  afterHistoryPop: =>
+#    @cursorIndex--
 
 ###
   es wird updates geben mir [up-waypoint]
