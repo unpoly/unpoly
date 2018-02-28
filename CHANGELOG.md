@@ -10,6 +10,7 @@ Unreleased
 ----------
 
 - Fix a bug where replacing the first element on the page (in DOM order) would shift the scroll position if animation is disabled
+- The optional cookie the server can send to [signal the initial request method](/up.protocol#signaling-the-initial-request-method) will now be removed as soon as Unpoly has booted.
 
 
 0.53.0

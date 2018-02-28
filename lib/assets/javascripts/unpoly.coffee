@@ -1,9 +1,9 @@
 #= require ./unpoly/namespace
 #= require ./unpoly/util
 #= require_tree ./unpoly/classes
-#= require ./unpoly/protocol
 #= require ./unpoly/browser
 #= require ./unpoly/bus
+#= require ./unpoly/protocol
 #= require ./unpoly/log
 #= require ./unpoly/toast
 #= require ./unpoly/syntax
