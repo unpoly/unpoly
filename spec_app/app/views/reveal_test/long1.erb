@@ -3,8 +3,10 @@
   <h2>Long page 1</h2>
 
   <ul>
-    <li><a up-target=".long-page" href="long2">Go to long page 2 (with default reveal)</a></li>
-    <li><a up-target=".long-page" href="long2" up-reveal="false" up-transition="cross-fade">Go to long page 2 (with reveal disabled)</a></li>
+    <li><a up-target=".long-page" href="long2" up-reveal="true"  up-transition="false"     >Go to long page 2 (with reveal,    without animation)</a></li>
+    <li><a up-target=".long-page" href="long2" up-reveal="true"  up-transition="cross-fade">Go to long page 2 (with reveal,    with animation)   </a></li>
+    <li><a up-target=".long-page" href="long2" up-reveal="false" up-transition="false"     >Go to long page 2 (without reveal, without animation)</a></li>
+    <li><a up-target=".long-page" href="long2" up-reveal="false" up-transition="cross-fade">Go to long page 2 (without reveal, with animation)</a></li>
   </ul>
 
 </div>
