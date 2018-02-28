@@ -6,6 +6,12 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+- Fix a bug where replacing the first element on the page (in DOM order) would shift the scroll position if animation is disabled
+
+
 0.53.0
 ------
 

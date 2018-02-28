@@ -65,8 +65,8 @@ describe 'up.dom', ->
               expect(destructor).toHaveBeenCalled()
 
           it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec (next) ->
-            # isSingletonElement() is true for body, but can't have the example replace the Jasmine test runner UI
-            up.dom.knife.mock('isSingletonElement').and.callFake ($element) -> $element.is('.container')
+            # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
+            up.dom.knife.mock('shouldSwapElementsDirectly').and.callFake ($element) -> $element.is('.container')
             destructor = jasmine.createSpy('destructor')
             up.compiler '.container', -> destructor
             $container = affix('.container')
@@ -100,7 +100,7 @@ describe 'up.dom', ->
               expect(resolution).toHaveBeenCalled()
 
           it 'ignores a { transition } option when replacing the body element', asyncSpec (next) ->
-            up.dom.knife.mock('swapSingletonElement') # can't have the example replace the Jasmine test runner UI
+            up.dom.knife.mock('swapElementsDirectly') # can't have the example replace the Jasmine test runner UI
             up.dom.knife.mock('destroy')  # if we don't swap the body, up.dom will destroy it
             replaceCallback = jasmine.createSpy()
             promise = up.replace('body', '/path', transition: 'cross-fade', duration: 50)
@@ -1168,6 +1168,14 @@ describe 'up.dom', ->
             next =>
               expect($('.element')).toHaveText('version 2')
               expect($('.up-ghost')).toHaveLength(0)
+
+          it "replaces the elements directly, since first inserting and then removing would shift scroll positions", asyncSpec (next) ->
+            swapDirectlySpy = up.dom.knife.mock('swapElementsDirectly')
+            affix('.element').text('version 1')
+            up.extract('.element', '<div class="element">version 2</div>', transition: false)
+
+            next =>
+              expect(swapDirectlySpy).toHaveBeenCalled()
 
       describe 'handling of [up-keep] elements', ->
 

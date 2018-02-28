@@ -179,6 +179,7 @@ up.motion = (($) ->
         up.fail('Animation must be a function, animation name or object of CSS properties, but it was %o', animation)
 
   willAnimate = ($elements, animationOrTransition, options) ->
+    options = animateOptions(options)
     isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && u.all($elements, u.isBodyDescendant)
 
   skipAnimate = ($element, animation) ->
@@ -755,6 +756,7 @@ up.motion = (($) ->
   morph: morph
   animate: animate
   animateOptions: animateOptions
+  willAnimate: willAnimate
   finish: finish
   transition: registerTransition
   animation: registerAnimation

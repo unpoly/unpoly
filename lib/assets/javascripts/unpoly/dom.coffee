@@ -514,11 +514,12 @@ up.dom = (($) ->
       clean = up.syntax.prepareClean($old)
 
       replacement = ->
-        if isSingletonElement($old)
+        if shouldSwapElementsDirectly($old, $new, transition, options)
           # jQuery will actually let us .insertBefore the new <body> tag,
           # but that's probably bad Karma.
-          swapSingletonElement($old, $new)
-          # We cannot morph the <body> tag
+          swapElementsDirectly($old, $new)
+          # We cannot morph the <body> tag. Also in case we have found that we won't
+          # animate above, save ourselves from reepeating the expensive check in up.morph().
           transition = false
         else
           # Don't insert the new element after the old element. For some reason
@@ -544,11 +545,12 @@ up.dom = (($) ->
 
     promise
 
-  isSingletonElement = ($element) ->
-    $element.is('body')
+  shouldSwapElementsDirectly = ($old, $new, transition, options) ->
+    $both = $old.add($new)
+    $old.is('body') || !up.motion.willAnimate($both, transition, options)
 
   # This is a separate method so we can mock it in specs
-  swapSingletonElement = ($old, $new) ->
+  swapElementsDirectly = ($old, $new) ->
     # jQuery will actually let us .insertBefore the new <body> tag,
     # but that's probably bad Karma.
     $old.replaceWith($new)
