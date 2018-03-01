@@ -6,13 +6,13 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.53.1
+------
 
 ### General
 
-- Fix a bug where replacing the first element on the page (in DOM order) would shift the scroll position if animation is disabled
-- Fix a bug where query params would be lost when Unpoly would fall back to a full page load
+- Fix a bug where replacing the first element on the page (in DOM order) would shift the scroll position if animation is disabled.
+- Fix a bug where query params would be lost when Unpoly would fall back to a full page load.
 
 ### Optional server protocol
 
@@ -20,10 +20,10 @@ Unreleased
 
 ### Animations
 
-- Fix a bug where the animation `move-from-top` would finish instantly after animating with `move-to-top`
-- Fix a bug where the animation `move-from-right` would finish instantly  after animating with `move-to-right`
-- Fix a bug where the animation `move-from-bottom` would finish instantly after animating with `move-to-bottom`
-- Fix a bug where the animation `move-from-left` wwould finish instantly  after animating with `move-to-left`
+- Fix a bug where the animation `move-from-top` would finish instantly after animating with `move-to-top`.
+- Fix a bug where the animation `move-from-right` would finish instantly  after animating with `move-to-right`.
+- Fix a bug where the animation `move-from-bottom` would finish instantly after animating with `move-to-bottom`.
+- Fix a bug where the animation `move-from-left` wwould finish instantly  after animating with `move-to-left`.
 
 
 0.53.0
