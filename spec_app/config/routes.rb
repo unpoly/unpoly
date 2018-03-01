@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   get 'replace_test/:action', controller: 'replace_test'
   get 'hash_test/:action', controller: 'hash_test'
   get 'reveal_test/:action', controller: 'reveal_test'
+  get 'motion_test/:action', controller: 'motion_test'
 
   namespace :form_test do
     resource :basic, only: [:new, :create]

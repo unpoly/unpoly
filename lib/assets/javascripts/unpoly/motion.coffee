@@ -678,13 +678,14 @@ up.motion = (($) ->
     { transform: "translate(#{x}px, #{y}px)" }
 
   registerAnimation('move-to-top', ($ghost, options) ->
+    $ghost.css(translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = box.top + box.height
-    $ghost.css(translateCss(0, 0))
     animate($ghost, translateCss(0, -travelDistance), options)
   )
 
   registerAnimation('move-from-top', ($ghost, options) ->
+    $ghost.css(translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = box.top + box.height
     $ghost.css(translateCss(0, -travelDistance))
@@ -692,13 +693,14 @@ up.motion = (($) ->
   )
 
   registerAnimation('move-to-bottom', ($ghost, options) ->
+    $ghost.css(translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = u.clientSize().height - box.top
-    $ghost.css(translateCss(0, 0))
     animate($ghost, translateCss(0, travelDistance), options)
   )
 
   registerAnimation('move-from-bottom', ($ghost, options) ->
+    $ghost.css(translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = u.clientSize().height - box.top
     $ghost.css(translateCss(0, travelDistance))
@@ -706,13 +708,14 @@ up.motion = (($) ->
   )
 
   registerAnimation('move-to-left', ($ghost, options) ->
+    $ghost.css(translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = box.left + box.width
-    $ghost.css(translateCss(0, 0))
     animate($ghost, translateCss(-travelDistance, 0), options)
   )
 
   registerAnimation('move-from-left', ($ghost, options) ->
+    $ghost.css(translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = box.left + box.width
     $ghost.css(translateCss(-travelDistance, 0))
@@ -720,13 +723,14 @@ up.motion = (($) ->
   )
 
   registerAnimation('move-to-right', ($ghost, options) ->
+    $ghost.css(translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = u.clientSize().width - box.left
-    $ghost.css(translateCss(0, 0))
     animate($ghost, translateCss(travelDistance, 0), options)
   )
 
   registerAnimation('move-from-right', ($ghost, options) ->
+    $ghost.css(translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = u.clientSize().width - box.left
     $ghost.css(translateCss(travelDistance, 0))

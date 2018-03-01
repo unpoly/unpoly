@@ -1,0 +1,16 @@
+<div class="fixed-top-bar">
+  <% for animation in %w(fade-in fade-out move-to-top move-from-top move-to-bottom move-from-bottom move-to-left move-from-left move-to-right move-from-right roll-down) do %>
+    <span class="button" onclick="up.animate('.animated-object', '<%= animation %>', { duration: 500 })">
+      <%= animation %>
+    </span>
+  <% end %>
+</div>
+
+<div class="spacer">
+</div>
+
+<div class="example">
+  <div class="animated-object" style="padding: 30px; background-color: red; color: white; width: 300px; height: 200px; margin-left: 200px; margin-top: 200px">
+    Animated object
+  </div>
+</div>

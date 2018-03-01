@@ -9,8 +9,20 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+### Scrolling
+
 - Fix a bug where replacing the first element on the page (in DOM order) would shift the scroll position if animation is disabled
+
+### Optional server protocol
+
 - The optional cookie the server can send to [signal the initial request method](/up.protocol#signaling-the-initial-request-method) will now be removed as soon as Unpoly has booted.
+
+### Animations
+
+- Fix a bug where the animation `move-from-top` would finish instantly after animating with `move-to-top`
+- Fix a bug where the animation `move-from-right` would finish instantly  after animating with `move-to-right`
+- Fix a bug where the animation `move-from-bottom` would finish instantly after animating with `move-to-bottom`
+- Fix a bug where the animation `move-from-left` wwould finish instantly  after animating with `move-to-left`
 
 
 0.53.0
