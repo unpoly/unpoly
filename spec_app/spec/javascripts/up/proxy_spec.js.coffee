@@ -573,7 +573,7 @@ describe 'up.proxy', ->
         beforeEach ->
           up.proxy.config.slowDelay = 0
           @events = []
-          u.each ['up:proxy:load', 'up:proxy:loaded', 'up:proxy:slow', 'up:proxy:recover'], (eventName) =>
+          u.each ['up:proxy:load', 'up:proxy:loaded', 'up:proxy:slow', 'up:proxy:recover', 'up:proxy:fatal'], (eventName) =>
             up.on eventName, =>
               @events.push eventName
 
@@ -676,7 +676,7 @@ describe 'up.proxy', ->
               'up:proxy:loaded'
             ])
 
-        it 'emits up:proxy:recover if a request returned but failed', asyncSpec (next) ->
+        it 'emits up:proxy:recover if a request returned but failed with an error code', asyncSpec (next) ->
           next =>
             up.request(url: '/foo')
 
@@ -697,6 +697,31 @@ describe 'up.proxy', ->
               'up:proxy:load',
               'up:proxy:slow',
               'up:proxy:loaded',
+              'up:proxy:recover'
+            ])
+
+
+        it 'emits up:proxy:recover if a request returned but failed fatally', asyncSpec (next) ->
+          up.proxy.config.slowDelay = 10
+
+          next =>
+            up.request(url: '/foo', timeout: 75)
+
+          next.after 50, =>
+            expect(@events).toEqual([
+              'up:proxy:load',
+              'up:proxy:slow'
+            ])
+
+          next =>
+            jasmine.clock().install() # required by responseTimeout()
+            @lastRequest().responseTimeout()
+
+          next =>
+            expect(@events).toEqual([
+              'up:proxy:load',
+              'up:proxy:slow',
+              'up:proxy:fatal',
               'up:proxy:recover'
             ])
 
