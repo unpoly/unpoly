@@ -9,9 +9,10 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
-### Scrolling
+### General
 
 - Fix a bug where replacing the first element on the page (in DOM order) would shift the scroll position if animation is disabled
+- Fix a bug where query params would be lost when Unpoly would fall back to a full page load
 
 ### Optional server protocol
 

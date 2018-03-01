@@ -1,9 +1,17 @@
+<script>
+  up.dom.config.fallbacks = [];
+</script>
+
 <div class="example">
 
   <h2>Link to unexpected response</h2>
 
   <p>
-    <a href="/error_test/unexpected_response" up-target=".link-target">Link</a>
+    <a href="/error_test/unexpected_response" up-target=".link-target" up-fail-target=".link-target">Link</a>
+  </p>
+
+  <p>
+    <a href="/error_test/unexpected_response?foo=bar" up-target=".link-target" up-fail-target=".link-target">Link with query params</a>
   </p>
 
   <div class="area link-target">
@@ -16,7 +24,7 @@
 
   <h2>Form to unexpected response</h2>
 
-  <%= form_tag "/error_test/unexpected_response", 'up-target' => '.form-target' do %>
+  <%= form_tag "/error_test/unexpected_response", 'up-target' => '.form-target', 'up-fail-target' => '.form-target' do %>
 
       <p>
         <input type="text" name="param" value="param-value">

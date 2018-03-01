@@ -13,15 +13,17 @@ describe 'up.browser', ->
 
       describe "for GET requests", ->
 
-        it "creates a GET form, adds all { data } params to the form action and submits the form", ->
+        it "creates a GET form, adds all { data } params as hidden fields and submits the form", ->
           submitForm = spyOn(up.browser, 'submitForm')
           up.browser.navigate('/foo', method: 'GET', data: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           expect($form).toExist()
-          expect($form.attr('action')).toMatchUrl('/foo?param1=param1%20value&param2=param2%20value')
-          # No params should be left in the form
-          expect($form.find('input')).not.toExist()
+          # GET forms cannot have an URL with a query section in their [action] attribute.
+          # The query section would be overridden by the serialized input values on submission.
+          expect($form.attr('action')).toMatchUrl('/foo')
+          expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
 
         it 'merges params from the given URL and the { data } option', ->
           submitForm = spyOn(up.browser, 'submitForm')
@@ -29,11 +31,15 @@ describe 'up.browser', ->
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           expect($form).toExist()
-          expect($form.attr('action')).toMatchUrl('/foo?param1=param1%20value&param2=param2%20value')
+          # GET forms cannot have an URL with a query section in their [action] attribute.
+          # The query section would be overridden by the serialized input values on submission.
+          expect($form.attr('action')).toMatchUrl('/foo')
+          expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
 
       describe "for POST requests", ->
 
-        it "creates a POST form, adds all { data } params a hidden fields and submits the form", ->
+        it "creates a POST form, adds all { data } params as hidden fields and submits the form", ->
           submitForm = spyOn(up.browser, 'submitForm')
           up.browser.navigate('/foo', method: 'POST', data: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()

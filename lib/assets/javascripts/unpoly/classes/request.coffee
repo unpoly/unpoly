@@ -180,6 +180,10 @@ class up.Request extends up.Record
       xhr.send(xhrData)
 
   navigate: =>
+    # GET forms cannot have an URL with a query section in their [action] attribute.
+    # The query section would be overridden by the serialized input values on submission.
+    @transferSearchToData()
+
     $form = $('<form class="up-page-loader"></form>')
 
     addField = (field) -> $('<input type="hidden">').attr(field).appendTo($form)
