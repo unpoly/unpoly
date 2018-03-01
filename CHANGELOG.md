@@ -145,7 +145,7 @@ This release contains no new features, but will help you when using tools like B
 - Fix a bug where the animation `move-from-top` would finish instantly after animating with `move-to-top`.
 - Fix a bug where the animation `move-from-right` would finish instantly  after animating with `move-to-right`.
 - Fix a bug where the animation `move-from-bottom` would finish instantly after animating with `move-to-bottom`.
-- Fix a bug where the animation `move-from-left` would finish instantly  after animating with `move-to-left`.
+- Fix a bug where the animation `move-from-left` would finish instantly  after animating with `move-to-left`
 
 
 0.53.0

@@ -49,88 +49,122 @@ up.feedback = (($) ->
   ###
   config = u.config
     currentClasses: ['up-current']
+    navSelectors: ['[up-nav]']
+
+  previousUrlSet = undefined
+  currentUrlSet = undefined
+  cachedNavMultiSelector = undefined
 
   reset = ->
     config.reset()
-
-  currentClass = ->
-    classes = config.currentClasses
-    classes = classes.concat(['up-current'])
-    classes = u.uniq(classes)
-    classes.join(' ')
+    previousUrlSet = undefined
+    currentUrlSet = undefined
+    cachedNavMultiSelector = undefined
 
   CLASS_ACTIVE = 'up-active'
-  SELECTOR_SECTION = 'a, [up-href]'
+  SELECTOR_NAV = '[up-nav]'
+  console.debug("!!! Make nav selector configurable")
+  SELECTOR_LINK = 'a, [up-href]'
+
+  navMultiSelector = ->
+    cachedNavMultiSelector ||= u.multiSelector(config.navSelectors)
 
   normalizeUrl = (url) ->
     if u.isPresent(url)
       u.normalizeUrl(url, stripTrailingSlash: true)
 
+  NORMALIZED_SECTION_URLS_KEY = 'up-normalized-urls'
+
   sectionUrls = ($section) ->
-    urls = []
-    for attr in ['href', 'up-href', 'up-alias']
-      if value = u.presentAttr($section, attr)
-        values = if attr == 'up-alias' then value.split(' ') else [value]
-        for url in values
-          unless url == '#'
-            url = normalizeUrl(url)
-            urls.push(url)
+    # Check if we have computed the URLs before.
+    # Computation is sort of expensive (multiplied by number of links),
+    # so we cache the results in a data attribute.
+    unless urls = $section.data(NORMALIZED_SECTION_URLS_KEY)
+      urls = buildSectionUrls($section)
+      $section.data(NORMALIZED_SECTION_URLS_KEY, urls)
     urls
 
-  urlSet = (urls) ->
-    urls = u.map(urls, normalizeUrl)
-    urls = u.compact(urls)
+  buildSectionUrls = ($section) ->
+    urls = []
 
-    matches = (testUrl) ->
-      if testUrl.substr(-1) == '*'
-        doesMatchPrefix(testUrl.slice(0, -1))
+    # A link with an unsafe method will never be higlighted with .up-current,
+    # so we cache an empty array.
+    if up.link.isSafe($section)
+      for attr in ['href', 'up-href', 'up-alias']
+        if value = u.presentAttr($section, attr)
+          # Allow to include multiple space-separated URLs in [up-alias]
+          for url in value.split(/\s+/)
+            unless url == '#'
+              url = normalizeUrl(url)
+              urls.push(url)
+    urls
+
+  buildCurrentUrlSet = ->
+    urls = [
+      up.browser.url(),      # The URL displayed in the address bar
+      up.modal.url(),        # Even when a modal does not change the address bar, we consider the URL of its content
+      up.modal.coveredUrl(), # The URL of the page behind the modal
+      up.popup.url(),        # Even when a popup does not change the address bar, we consider the URL of its content
+      up.popup.coveredUrl()  # The URL of the page behind the popup
+    ]
+    new up.UrlSet(urls, { normalizeUrl })
+
+  updateAllNavigationSectionsIfLocationChanged = ->
+    previousUrlSet = currentUrlSet
+    currentUrlSet = buildCurrentUrlSet()
+    unless currentUrlSet.isEqual(previousUrlSet)
+      updateAllNavigationSections($('body'))
+
+  updateAllNavigationSections = ($root) ->
+    $navs = navMultiSelector().selectInSubtree($root)
+    $sections = u.selectInSubtree($navs, SELECTOR_LINK)
+    updateCurrentClassForLinks($sections)
+
+  updateNavigationSectionsInNewFragment = ($fragment) ->
+    if navMultiSelector().seekUp($fragment).length
+      # If the new fragment is an [up-nav], or if the new fragment is a child of an [up-nav],
+      # all links in the new fragment are considered sections that we need to update.
+      # Note that:
+      # - The [up-nav] element might not be part of this update.
+      #   It might already be in the DOM, and only a child was updated.
+      # - The $fragment might be a link itself
+      # - We do not need to update sibling links of $fragment that have been processed before.
+      $sections = u.selectInSubtree($fragment, SELECTOR_LINK)
+      updateCurrentClassForLinks($sections)
+    else
+      updateAllNavigationSections($fragment)
+
+  updateCurrentClassForLinks = ($links) ->
+    currentUrlSet ||= buildCurrentUrlSet()
+    u.each $links, (link) ->
+      $link = $(link)
+      urls = sectionUrls($link)
+
+      # We use Element#classList to manipulate classes instead of jQuery's
+      # addClass and removeClass. Since we are in an inner loop, we want to
+      # be as fast as we can.
+      classList = link.classList
+      if currentUrlSet.matchesAny(urls)
+        for klass in config.currentClasses
+          console.debug("!!! adding klass %o from %o", klass, config.currentClasses)
+          # Once we drop IE11 support in 2020 we can call add() with multiple arguments
+          classList.add(klass)
       else
-        doesMatchFully(testUrl)
-
-    doesMatchFully = (testUrl) ->
-      u.contains(urls, testUrl)
-
-    doesMatchPrefix = (prefix) ->
-      u.detect urls, (url) ->
-        url.indexOf(prefix) == 0
-
-    matchesAny = (testUrls) ->
-      u.detect(testUrls, matches)
-
-    matchesAny: matchesAny
-
-  locationChanged = ->
-    currentUrls = urlSet([
-      up.browser.url(),
-      up.modal.url(),
-      up.modal.coveredUrl(),
-      up.popup.url(),
-      up.popup.coveredUrl()
-    ])
-
-    klass = currentClass()
-
-    u.each $(SELECTOR_SECTION), (section) ->
-      $section = $(section)
-      # if $section is marked up with up-follow,
-      # the actual link might be a child element.
-      urls = sectionUrls($section)
-
-      if up.link.isSafe($section) && currentUrls.matchesAny(urls)
-        $section.addClass(klass)
-      else if $section.hasClass(klass) && $section.closest('.up-destroying').length == 0
-        $section.removeClass(klass)
+        for klass in config.currentClasses
+          console.debug("!!! removing klass %o from %o", klass, config.currentClasses)
+          # Once we drop IE11 support in 2020 we can call add() with multiple arguments
+          classList.remove(klass)
 
   ###**
-  @function findActionableArea
+  @function findActivatableArea
   @param {string|Element|jQuery} elementOrSelector
   @internal
   ###
-  findActionableArea = (elementOrSelector) ->
+  findActivatableArea = (elementOrSelector) ->
     $area = $(elementOrSelector)
-    if $area.is(SELECTOR_SECTION)
+    if $area.is(SELECTOR_LINK)
       # Try to enlarge links that are expanded with [up-expand] on a surrounding container.
-      $area = u.presence($area.parent(SELECTOR_SECTION)) || $area
+      $area = u.presence($area.parent(SELECTOR_LINK)) || $area
     $area
 
   ###**
@@ -167,7 +201,7 @@ up.feedback = (($) ->
     elementOrSelector = args.shift()
     action = args.pop()
     options = u.options(args[0])
-    $element = findActionableArea(elementOrSelector)
+    $element = findActivatableArea(elementOrSelector)
     unless options.preload
       $element.addClass(CLASS_ACTIVE)
     if action
@@ -249,7 +283,7 @@ up.feedback = (($) ->
   @internal
   ###
   stop = (elementOrSelector) ->
-    $element = findActionableArea(elementOrSelector)
+    $element = findActivatableArea(elementOrSelector)
     $element.removeClass(CLASS_ACTIVE)
 
   ###**
@@ -296,20 +330,13 @@ up.feedback = (($) ->
   @selector a.up-current
   @stable
   ###
-  up.on 'up:fragment:inserted', ->
-    # When a fragment is inserted it might either have brought a location change
-    # with it, or it might have opened a modal / popup which we consider
-    # to be secondary location sources (the primary being the browser's
-    # location bar).
-    locationChanged()
 
-  up.on 'up:fragment:destroyed', (event, $fragment) ->
-    # If the destroyed fragment is a modal or popup container
-    # this changes which URLs we consider currents.
-    # Also modals and popups restore their previous history
-    # once they close.
-    if $fragment.is('.up-modal, .up-popup')
-      locationChanged()
+  # Even when the modal or popup does not change history, we consider the URLs of the content it displays.
+  up.on 'up:history:pushed up:history:replaced up:history:restored up:modal:opened up:modal:closed up:popup:opened up:popup:closed', (event) ->
+    updateAllNavigationSectionsIfLocationChanged()
+
+  up.on 'up:fragment:inserted', (event, $newFragment) ->
+    updateNavigationSectionsInNewFragment($newFragment)
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset

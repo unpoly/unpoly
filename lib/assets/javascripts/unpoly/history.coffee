@@ -94,7 +94,8 @@ up.history = (($) ->
   @internal
   ###
   replace = (url) ->
-    manipulate('replaceState', url)
+    if manipulate('replaceState', url)
+      up.emit('up:history:replaced', url: url)
 
   ###**
   Adds a new history entry and updates the browser's

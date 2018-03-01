@@ -3,60 +3,118 @@ describe 'up.feedback', ->
   u = up.util
 
   beforeEach ->
+    up.history.config.enabled = true
     up.modal.config.openAnimation = 'none'
     up.modal.config.closeAnimation = 'none'
+    up.popup.config.openAnimation = 'none'
+    up.popup.config.closeAnimation = 'none'
 
   describe 'unobtrusive behavior', ->
 
-    describe '.up-current', ->
+    describe '[up-nav]', ->
 
-      it 'marks a link as .up-current if it links to the current URL', ->
-        spyOn(up.browser, 'url').and.returnValue('/foo')
-        $currentLink = up.hello(affix('a[href="/foo"]'))
-        $otherLink = up.hello(affix('a[href="/bar"]'))
+      it 'marks a child link as .up-current if it links to the current URL', ->
+        up.history.replace('/foo')
+        $nav = affix('div[up-nav]')
+        $currentLink = $nav.affix('a[href="/foo"]')
+        $otherLink = $nav.affix('a[href="/bar"]')
+        up.hello($nav)
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
+      it 'marks the element as .up-current if it is also a link to the current URL', ->
+        up.history.replace('/foo')
+        $currentLink = affix('a[href="/foo"][up-nav]')
+        $otherLink = affix('a[href="/bar"][up-nav]')
+        up.hello($currentLink)
+        up.hello($otherLink)
+        expect($currentLink).toHaveClass('up-current')
+        expect($otherLink).not.toHaveClass('up-current')
+
+      it 'does not mark a link as .up-current if the link is outside an [up-nav]', ->
+        up.history.replace('/foo')
+        $nav = affix('div[up-nav]')
+        $currentLinkInNav = $nav.affix('a[href="/foo"]')
+        $currentLinkOutsideNav = affix('a[href="/foo"]')
+        up.hello($nav)
+        expect($currentLinkInNav).toHaveClass('up-current')
+        expect($currentLinkOutsideNav).not.toHaveClass('up-current')
+
+      it 'marks a replaced child link as .up-current if it links to the current URL', asyncSpec (next) ->
+        up.history.replace('/foo')
+        $nav = affix('div[up-nav]')
+        $nav.affix('a.link[href="/bar"]').text('old link')
+        up.hello($nav)
+
+        expect('.link').toHaveText('old link')
+        expect('.link').not.toHaveClass('up-current')
+
+        up.replace('.link', '/src', history: false)
+
+        next =>
+          @respondWith """
+            <a class="link" href="/foo">
+              new link
+            </a>
+          """
+
+        next =>
+          expect('.link').toHaveText('new link')
+          expect('.link').toHaveClass('up-current')
+
       it 'marks any link as .up-current if its up-href attribute matches the current URL', ->
-        spyOn(up.browser, 'url').and.returnValue('/foo')
-        $currentLink = up.hello(affix('span[up-href="/foo"]'))
-        $otherLink = up.hello(affix('span[up-href="/bar"]'))
+        up.history.replace('/foo')
+        $nav = affix('div[up-nav]')
+        $currentLink = $nav.affix('span[up-href="/foo"]')
+        $otherLink = $nav.affix('span[up-href="/bar"]')
+        up.hello($nav)
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
       it 'matches the current and destination URLs if they only differ by a trailing slash', ->
-        spyOn(up.browser, 'url').and.returnValue('/foo')
-        $currentLink = up.hello(affix('span[up-href="/foo/"]'))
+        up.history.replace('/foo')
+        $nav = affix('div[up-nav]')
+        $currentLink = $nav.affix('span[up-href="/foo/"]')
+        up.hello($nav)
         expect($currentLink).toHaveClass('up-current')
 
       it 'does not match the current and destination URLs if they differ in the search', ->
-        spyOn(up.browser, 'url').and.returnValue('/foo?q=1')
-        $currentLink = up.hello(affix('span[up-href="/foo?q=2"]'))
+        up.history.replace('/foo?q=1')
+        $nav = affix('div[up-nav]')
+        $currentLink = $nav.affix('span[up-href="/foo?q=2"]')
+        up.hello($nav)
         expect($currentLink).not.toHaveClass('up-current')
 
       it 'marks any link as .up-current if any of its space-separated up-alias values matches the current URL', ->
-        spyOn(up.browser, 'url').and.returnValue('/foo')
-        $currentLink = up.hello(affix('a[href="/x"][up-alias="/aaa /foo /bbb"]'))
-        $otherLink = up.hello(affix('a[href="/y"][up-alias="/bar"]'))
+        up.history.replace('/foo')
+        $nav = affix('div[up-nav]')
+        $currentLink = $nav.affix('a[href="/x"][up-alias="/aaa /foo /bbb"]')
+        $otherLink = $nav.affix('a[href="/y"][up-alias="/bar"]')
+        up.hello($nav)
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
       it 'does not throw if the current location does not match an up-alias wildcard (bugfix)', ->
-        inserter = -> up.hello(affix('a[up-alias="/qqqq*"]'))
+        inserter = -> up.hello(affix('a[up-nav][up-alias="/qqqq*"]'))
         expect(inserter).not.toThrow()
 
       it 'does not highlight a link to "#" (commonly used for JS-only buttons)', ->
-        $link = up.hello(affix('a[href="#"]'))
+        $nav = affix('div[up-nav]')
+        $link = $nav.affix('a[href="#"]')
+        up.hello($nav)
         expect($link).not.toHaveClass('up-current')
 
       it 'does not highlight links with unsafe methods', ->
-        spyOn(up.browser, 'url').and.returnValue('/foo')
-        $defaultLink = up.hello(affix('a[href="/foo"]'))
-        $getLink = up.hello(affix('a[href="/foo"][up-method="get"]'))
-        $putLink = up.hello(affix('a[href="/foo"][up-method="put"]'))
-        $patchLink = up.hello(affix('a[href="/foo"][up-method="patch"]'))
-        $postLink = up.hello(affix('a[href="/foo"][up-method="post"]'))
-        $deleteLink = up.hello(affix('a[href="/foo"][up-method="delete"]'))
+        up.history.replace('/foo')
+        $nav = affix('div[up-nav]')
+        $defaultLink = $nav.affix('a[href="/foo"]')
+        $getLink = $nav.affix('a[href="/foo"][up-method="get"]')
+        $putLink = $nav.affix('a[href="/foo"][up-method="put"]')
+        $patchLink = $nav.affix('a[href="/foo"][up-method="patch"]')
+        $postLink = $nav.affix('a[href="/foo"][up-method="post"]')
+        $deleteLink = $nav.affix('a[href="/foo"][up-method="delete"]')
+        up.hello($nav)
+
         expect($defaultLink).toHaveClass('up-current')
         expect($getLink).toHaveClass('up-current')
         expect($putLink).not.toHaveClass('up-current')
@@ -65,27 +123,47 @@ describe 'up.feedback', ->
         expect($deleteLink).not.toHaveClass('up-current')
 
       it 'marks URL prefixes as .up-current if an up-alias value ends in *', ->
-        spyOn(up.browser, 'url').and.returnValue('/foo/123')
-        $currentLink = up.hello(affix('a[href="/x"][up-alias="/aaa /foo/* /bbb"]'))
-        $otherLink = up.hello(affix('a[href="/y"][up-alias="/bar"]'))
+        up.history.replace('/foo/123')
+
+        $nav = affix('div[up-nav]')
+        $currentLink = $nav.affix('a[href="/x"][up-alias="/aaa /foo/* /bbb"]')
+        $otherLink = $nav.affix('a[href="/y"][up-alias="/bar"]')
+        up.hello($nav)
+
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
-      it 'allows to configure a custom "current" class, but always also sets .up-current', ->
-        up.feedback.config.currentClasses = ['highlight']
-        spyOn(up.browser, 'url').and.returnValue('/foo')
-        $currentLink = up.hello(affix('a[href="/foo"]'))
-        expect($currentLink).toHaveClass('highlight up-current')
+      it 'allows to configure a custom "current" class in addition to .up-current', ->
+        up.feedback.config.currentClasses.push('highlight')
+        up.history.replace('/foo')
+        $nav = affix('div[up-nav]')
+        $currentLink = $nav.affix('a[href="/foo"]')
+        up.hello($nav)
+
+        expect($currentLink).toHaveClass('highlight')
+        expect($currentLink).toHaveClass('up-current')
+
+      it 'allows to configure multiple additional "current" classes', ->
+        up.feedback.config.currentClasses.push('highlight1')
+        up.feedback.config.currentClasses.push('highlight2')
+        up.history.replace('/foo')
+        $nav = affix('div[up-nav]')
+        $currentLink = $nav.affix('a[href="/foo"]')
+        up.hello($nav)
+
+        expect($currentLink).toHaveClass('highlight1')
+        expect($currentLink).toHaveClass('highlight2')
+        expect($currentLink).toHaveClass('up-current')
 
       describeCapability 'canPushState', ->
 
         describe 'updating .up-current marks wen the URL changes', ->
 
-          beforeEach ->
-            up.history.config.enabled = true
-
           it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec (next) ->
-            $link = affix('a[href="/foo"][up-target=".main"]')
+            $nav = affix('div[up-nav]')
+            $link = $nav.affix('a[href="/foo"][up-target=".main"]')
+            up.hello($nav)
+
             affix('.main')
             Trigger.clickSequence($link)
 
@@ -98,7 +176,10 @@ describe 'up.feedback', ->
               expect($link).toHaveClass('up-current')
 
           it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', asyncSpec (next) ->
-            $link = affix('a[href="/foo/"][up-target=".main"]')
+            $nav = affix('div[up-nav]')
+            $link = $nav.affix('a[href="/foo/"][up-target=".main"]')
+            up.hello($nav)
+
             affix('.main')
             Trigger.clickSequence($link)
 
@@ -113,9 +194,11 @@ describe 'up.feedback', ->
           it 'marks a link as .up-current if it links to an URL currently shown either within or below the modal', asyncSpec (next) ->
             up.history.replace('/foo')
 
-            $backgroundLink = affix('a[href="/foo"]')
-            $modalLink = affix('a[href="/bar"][up-modal=".main"]')
-            $unrelatedLink = affix('a[href="/baz]')
+            $nav = affix('div[up-nav]')
+            $backgroundLink = $nav.affix('a[href="/foo"]')
+            $modalLink = $nav.affix('a[href="/bar"][up-modal=".main"]')
+            $unrelatedLink = $nav.affix('a[href="/baz"]')
+            up.hello($nav)
 
             Trigger.clickSequence($modalLink)
 
@@ -133,12 +216,21 @@ describe 'up.feedback', ->
               expect($modalLink).not.toHaveClass('up-current')
               expect($unrelatedLink).not.toHaveClass('up-current')
 
-          it 'marks a link as .up-current if it links to the URL currently either within or below the popup', asyncSpec (next) ->
+          it "marks a link as .up-current if it links to the URL currently either within or below the popup, even if the popup doesn't change history", asyncSpec (next) ->
             up.history.replace('/foo')
 
-            $backgroundLink = affix('a[href="/foo"]')
-            $popupLink = affix('a[href="/bar"][up-popup=".main"]')
-            $unrelatedLink = affix('a[href="/baz]')
+            # This is actually the default. Popups don't change the address bar by default,
+            # but we still want to cause their URL to mark links as current.
+            up.popup.config.history = false
+
+            $nav = affix('div[up-nav]')
+            $backgroundLink = $nav.affix('a[href="/foo"]')
+            $popupLink = $nav.affix('a[href="/bar"][up-popup=".main"]')
+            $unrelatedLink = $nav.affix('a[href="/baz"]')
+            up.hello($nav)
+
+            expect(up.browser.url()).toMatchUrl('/foo')
+            expect(up.popup.coveredUrl()).toBeMissing()
 
             next =>
               Trigger.clickSequence($popupLink)
@@ -147,6 +239,8 @@ describe 'up.feedback', ->
               @respondWith('<div class="main">new-text</div>')
 
             next =>
+              expect(up.browser.url()).toMatchUrl('/foo') # popup did not change history
+              expect(up.popup.url()).toMatchUrl('/bar') # popup still knows which URL it is displaying
               expect($backgroundLink).toHaveClass('up-current')
               expect($popupLink).toHaveClass('up-current')
               expect($unrelatedLink).not.toHaveClass('up-current')
