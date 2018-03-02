@@ -1,8 +1,13 @@
+<script>
+  up.motion.config.duration = 2000
+  up.layout.config.duration = 2000
+</script>
+
 <div class="long-page" style="height: 2000px; background-color: rgba(255, 0, 0, 0.3)">
 
   <h2>Long page 2</h2>
 
-  <ul>
+  <ul style="margin-top: 200px">
     <li><a up-target=".long-page" href="long1" up-reveal="true"  up-transition="false"     >Go to long page 1 (with reveal,    without animation)</a></li>
     <li><a up-target=".long-page" href="long1" up-reveal="true"  up-transition="cross-fade">Go to long page 1 (with reveal,    with animation)   </a></li>
     <li><a up-target=".long-page" href="long1" up-reveal="false" up-transition="false"     >Go to long page 1 (without reveal, without animation)</a></li>

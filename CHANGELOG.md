@@ -6,6 +6,14 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Animated transitions
+
+- Fix a bug where a page transition would flicker if [revealing](/up.reveal) was animated globally by setting `up.layout.config.duration`.
+
+
 0.53.1
 ------
 

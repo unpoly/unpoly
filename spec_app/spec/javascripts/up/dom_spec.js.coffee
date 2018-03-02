@@ -940,7 +940,7 @@ describe 'up.dom', ->
 
               next =>
                 expect(@revealedHTML).toEqual ['<div id="three">three</div>']
-                expect(@revealOptions).toEqual { top: true }
+                expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
 
             it "reveals the entire element if it has no child with the ID of that #hash", asyncSpec (next) ->
               up.replace('.middle', '/path#four', reveal: true)

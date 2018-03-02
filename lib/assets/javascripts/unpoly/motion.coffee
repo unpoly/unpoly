@@ -345,7 +345,10 @@ up.motion = (($) ->
     # It's not our job to remove $old from the DOM.
     $old.hide()
 
-    up.layout.revealOrRestoreScroll($new, options).then ->
+    # Don't animate the scrolling.
+    # We just want to scroll $new into position before we start the enter animation.
+    scrollOptions = u.merge(options, { duration: 0})
+    up.layout.revealOrRestoreScroll($new, scrollOptions).then ->
       newCopy = prependCopy($new, $viewport)
       newScrollTop = $viewport.scrollTop()
 
@@ -523,9 +526,14 @@ up.motion = (($) ->
   skipMorph = ($old, $new, options) ->
     # Simply hide the old element, which would be the side effect of withGhosts(...) below.
     $old.hide()
+
+    # Don't animate the scrolling.
+    # We just want to scroll $new into position before we start the enter animation.
+    scrollOptions = u.merge(options, { duration: 0})
+
     # Since we cannot rely on withGhosts to control the scroll position
     # in this branch, we need to do it ourselves.
-    up.layout.revealOrRestoreScroll($new, options)
+    up.layout.revealOrRestoreScroll($new, scrollOptions)
 
   ###*
   @internal

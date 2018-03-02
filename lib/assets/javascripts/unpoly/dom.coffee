@@ -489,6 +489,8 @@ up.dom = (($) ->
       hello($wrapper.children(), options)
 
       # Reveal element that was being prepended/appended.
+      # Since we will animate (not morph) it's OK to allow animation of scrolling
+      # if the user has configured up.layout.config.duration.
       promise = up.layout.revealOrRestoreScroll($wrapper, options)
 
       # Since we're adding content instead of replacing, we'll only

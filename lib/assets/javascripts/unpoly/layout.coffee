@@ -462,13 +462,14 @@ up.layout = (($) ->
   @internal
   ###
   revealOrRestoreScroll = (selectorOrElement, options) ->
+    options = u.options(options)
     $element = $(selectorOrElement)
 
     if options.restoreScroll
       return restoreScroll(around: $element)
 
     if options.reveal
-      revealOptions = {}
+      revealOptions = { duration: options.duration }
       if u.isString(options.reveal)
         selector = revealSelector(options.reveal)
         $element = up.first(selector) || $element
