@@ -2100,7 +2100,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     rejectOnError = function(block) {
-      var error, error1;
+      var error;
       try {
         return block();
       } catch (error1) {
@@ -3818,7 +3818,6 @@ Internet Explorer 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
-      var error;
       try {
         return window.sessionStorage;
       } catch (error) {
@@ -6418,6 +6417,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
      */
     revealOrRestoreScroll = function(selectorOrElement, options) {
       var $element, revealOptions, selector;
+      options = u.options(options);
       $element = $(selectorOrElement);
       if (options.restoreScroll) {
         return restoreScroll({
@@ -6425,7 +6425,9 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         });
       }
       if (options.reveal) {
-        revealOptions = {};
+        revealOptions = {
+          duration: options.duration
+        };
         if (u.isString(options.reveal)) {
           selector = revealSelector(options.reveal);
           $element = up.first(selector) || $element;
@@ -6860,7 +6862,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var e, error, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
+      var e, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
       options = u.options(options);
       options.inspectResponse = fullLoad = function() {
         return up.browser.navigate(url, u.only(options, 'method', 'data'));
@@ -7966,7 +7968,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     @internal
      */
     withGhosts = function($old, $new, options, transitionFn) {
-      var $viewport, newCopy, newScrollTop, oldCopy, oldScrollTop;
+      var $viewport, newCopy, newScrollTop, oldCopy, oldScrollTop, scrollOptions;
       if (options.copy === false || $old.is('.up-ghost') || $new.is('.up-ghost')) {
         return transitionFn($old, $new, options);
       }
@@ -7982,7 +7984,10 @@ You can define custom animations using [`up.transition()`](/up.transition) and
         return oldScrollTop = $viewport.scrollTop();
       });
       $old.hide();
-      return up.layout.revealOrRestoreScroll($new, options).then(function() {
+      scrollOptions = u.merge(options, {
+        duration: 0
+      });
+      return up.layout.revealOrRestoreScroll($new, scrollOptions).then(function() {
         var $bothGhosts, $bothOriginals, restoreNewOpacity, transitionDone;
         newCopy = prependCopy($new, $viewport);
         newScrollTop = $viewport.scrollTop();
@@ -8148,8 +8153,12 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     @internal
      */
     skipMorph = function($old, $new, options) {
+      var scrollOptions;
       $old.hide();
-      return up.layout.revealOrRestoreScroll($new, options);
+      scrollOptions = u.merge(options, {
+        duration: 0
+      });
+      return up.layout.revealOrRestoreScroll($new, scrollOptions);
     };
 
     /**
