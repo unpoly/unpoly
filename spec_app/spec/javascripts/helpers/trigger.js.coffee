@@ -7,9 +7,24 @@
     event = createMouseEvent('mouseover', options)
     dispatch($element, event)
 
+  mouseenter = (element, options) ->
+    $element = $(element)
+    event = createMouseEvent('mouseenter', options)
+    dispatch($element, event)
+
   mousedown = (element, options) ->
     $element = $(element)
     event = createMouseEvent('mousedown', options)
+    dispatch($element, event)
+
+  mouseout = (element, options) ->
+    $element = $(element)
+    event = createMouseEvent('mouseout', options)
+    dispatch($element, event)
+
+  mouseleave = (element, options) ->
+    $element = $(element)
+    event = createMouseEvent('mouseleave', options)
     dispatch($element, event)
 
   mouseup = (element, options) ->
@@ -33,6 +48,16 @@
     focus($element, options)
     mouseup($element, options)
     click($element, options)
+
+  hoverSequence = (element, options) ->
+    $element = $(element)
+    mouseover($element, options)
+    mouseenter($element, options)
+
+  unhoverSequence = (element, options) ->
+    $element = $(element)
+    mouseout($element, options)
+    mouseleave($element, options)
 
   # Can't use the new MouseEvent constructor in IE11 because computer.
   # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
@@ -77,10 +102,15 @@
       this.dispatchEvent(event)
 
   mouseover: mouseover
+  mouseenter: mouseenter
   mousedown: mousedown
   mouseup: mouseup
+  mouseout: mouseout
+  mouseleave: mouseleave
   click: click
   clickSequence: clickSequence
+  hoverSequence: hoverSequence
+  unhoverSequence: unhoverSequence
   createMouseEvent: createMouseEvent
   
 )()

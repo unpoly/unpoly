@@ -565,7 +565,7 @@ up.proxy = (($) ->
 
   up.bus.renamedEvent('up:proxy:received', 'up:proxy:loaded')
 
-  checkPreload = ($link) ->
+  preloadAfterDelay = ($link) ->
     delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay
     unless $link.is($waitingLink)
       $waitingLink = $link
@@ -577,6 +577,11 @@ up.proxy = (($) ->
 
   startPreloadDelay = (block, delay) ->
     preloadDelayTimer = setTimeout(block, delay)
+
+  stopPreload = ($link) ->
+    if $link.is($waitingLink)
+      $waitingLink = undefined
+      cancelPreloadDelay()
 
   ###*
   Preloads the given link.
@@ -631,11 +636,15 @@ up.proxy = (($) ->
     but will also make the interaction feel less instant.
   @stable
   ###
-  up.on 'mouseover mousedown touchstart', 'a[up-preload], [up-href][up-preload]', (event, $link) ->
-    # Don't do anything if we are hovering over the child of a link.
-    # The actual link will receive the event and bubble in a second.
-    if up.link.shouldProcessEvent(event, $link) && up.link.isSafe($link)
-      checkPreload($link)
+  up.compiler 'a[up-preload], [up-href][up-preload]', ($link) ->
+    if up.link.isSafe($link)
+      $link.on 'mouseenter touchstart', (event) ->
+        # Don't do anything if we are hovering over the child of a link.
+        # The actual link will receive the event and bubble in a second.
+        if up.link.shouldProcessEvent(event, $link)
+          preloadAfterDelay($link)
+      $link.on 'mouseleave', ->
+        stopPreload($link)
 
   up.on 'up:framework:reset', reset
 

@@ -973,13 +973,15 @@ describe 'up.proxy', ->
 
     describe '[up-preload]', ->
 
-      it 'preloads the link destination on mouseover, after a delay', asyncSpec (next) ->
+      it 'preloads the link destination when hovering, after a delay', asyncSpec (next) ->
         up.proxy.config.preloadDelay = 100
 
         affix('.target').text('old text')
 
         $link = affix('a[href="/foo"][up-target=".target"][up-preload]')
-        Trigger.mouseover($link)
+        up.hello($link)
+
+        Trigger.hoverSequence($link)
 
         next.after 50, =>
           # It's still too early
@@ -1010,13 +1012,34 @@ describe 'up.proxy', ->
           # The target is replaced instantly
           expect('.target').toHaveText('new text')
 
+      it 'does not send a request if the user stops hovering before the delay is over', asyncSpec (next) ->
+        up.proxy.config.preloadDelay = 100
+
+        affix('.target').text('old text')
+
+        $link = affix('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello($link)
+
+        Trigger.hoverSequence($link)
+
+        next.after 40, =>
+          # It's still too early
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+          Trigger.unhoverSequence($link)
+
+        next.after 90, =>
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
       it 'does not cache a failed response', asyncSpec (next) ->
         up.proxy.config.preloadDelay = 0
 
         affix('.target').text('old text')
 
         $link = affix('a[href="/foo"][up-target=".target"][up-preload]')
-        Trigger.mouseover($link)
+        up.hello($link)
+
+        Trigger.hoverSequence($link)
 
         next.after 2, =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -1033,7 +1056,6 @@ describe 'up.proxy', ->
           # We only preloaded, so the target isn't replaced yet.
           expect('.target').toHaveText('old text')
 
-          console.log("--- clicking")
           Trigger.click($link)
 
         next =>
@@ -1047,20 +1069,23 @@ describe 'up.proxy', ->
       it 'triggers a separate AJAX request when hovered multiple times and the cache expires between hovers', asyncSpec (next)  ->
         up.proxy.config.cacheExpiry = 50
         up.proxy.config.preloadDelay = 0
+
         $element = affix('a[href="/foo"][up-preload]')
-        Trigger.mouseover($element)
+        up.hello($element)
+
+        Trigger.hoverSequence($element)
 
         next.after 1, =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
         next.after 1, =>
-          Trigger.mouseover($element)
+          Trigger.hoverSequence($element)
 
         next.after 1, =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
         next.after 60, =>
-          Trigger.mouseover($element)
+          Trigger.hoverSequence($element)
 
         next.after 1, =>
           expect(jasmine.Ajax.requests.count()).toEqual(2)
