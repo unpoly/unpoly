@@ -11,7 +11,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### General
 
-- Failed requests in event handlers of CSS selectors like `form[up-target]` no longer print `Uncaught (in promise) to the error console. You still need to catch and handle rejected promises in your own code when it calls Unpoly functions.
+- Failed requests in event handlers of CSS selectors like `form[up-target]` no longer print `Uncaught (in promise)` to the error console. You still need to catch and handle rejected promises in your own code when it calls Unpoly functions.
 
 ### Animated transitions
 
