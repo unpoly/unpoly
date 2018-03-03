@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.53.1",
+    version: "0.53.2",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,7 +41,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, attributeSelector, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, multiSelector, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, attributeSelector, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, multiSelector, muteRejection, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /**
@@ -2073,6 +2073,29 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /**
+     * Registers an empty rejection handler with the given promise.
+     * This prevents browsers from printing "Uncaught (in promise)" to the error
+     * console when the promise is rejection.
+     *
+     * This is helpful for event handlers where it is clear that no rejection
+     * handler will be registered:
+     *
+     *     up.on('submit', 'form[up-target]', (event, $form) => {
+     *       promise = up.submit($form)
+     *       up.util.muteRejection(promise)
+     *     })
+     *
+     * Does nothing if passed a missing value.
+     *
+     * @function up.util.muteRejection
+     * @param {Promise|undefined|null} promise
+     * @return {Promise}
+     */
+    muteRejection = function(promise) {
+      return promise != null ? promise["catch"](noop) : void 0;
+    };
+
+    /**
     @function up.util.newDeferred
     @internal
      */
@@ -2228,6 +2251,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       isTruthy: isTruthy,
       newDeferred: newDeferred,
       always: always,
+      muteRejection: muteRejection,
       rejectOnError: rejectOnError,
       isBodyDescendant: isBodyDescendant,
       isCrossDomain: isCrossDomain,
@@ -2833,14 +2857,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         return function() {
           var args;
           args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-          return _this.onClick.apply(_this, args);
+          return u.muteRejection(_this.onClick.apply(_this, args));
         };
       })(this));
       return up.on('mousedown', this.fullSelector('[up-instant]'), (function(_this) {
         return function() {
           var args;
           args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-          return _this.onMousedown.apply(_this, args);
+          return u.muteRejection(_this.onMousedown.apply(_this, args));
         };
       })(this));
     };
@@ -8471,7 +8495,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
   var slice = [].slice;
 
   up.proxy = (function($) {
-    var $waitingLink, ajax, alias, cache, cancelPreloadDelay, cancelSlowDelay, checkPreload, clear, config, get, isBusy, isIdle, isSafeMethod, load, loadEnded, loadOrQueue, loadStarted, makeRequest, pendingCount, pokeQueue, preload, preloadDelayTimer, queue, queuedLoaders, registerAliasForRedirect, remove, reset, responseReceived, set, slowDelayTimer, slowEventEmitted, startPreloadDelay, u, wrapMethod;
+    var $waitingLink, ajax, alias, cache, cancelPreloadDelay, cancelSlowDelay, clear, config, get, isBusy, isIdle, isSafeMethod, load, loadEnded, loadOrQueue, loadStarted, makeRequest, pendingCount, pokeQueue, preload, preloadAfterDelay, preloadDelayTimer, queue, queuedLoaders, registerAliasForRedirect, remove, reset, responseReceived, set, slowDelayTimer, slowEventEmitted, startPreloadDelay, stopPreload, u, wrapMethod;
     u = up.util;
     $waitingLink = void 0;
     preloadDelayTimer = void 0;
@@ -9015,14 +9039,14 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
      */
     clear = cache.clear;
     up.bus.renamedEvent('up:proxy:received', 'up:proxy:loaded');
-    checkPreload = function($link) {
+    preloadAfterDelay = function($link) {
       var curriedPreload, delay;
       delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay;
       if (!$link.is($waitingLink)) {
         $waitingLink = $link;
         cancelPreloadDelay();
         curriedPreload = function() {
-          preload($link);
+          u.muteRejection(preload($link));
           return $waitingLink = null;
         };
         return startPreloadDelay(curriedPreload, delay);
@@ -9030,6 +9054,12 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     };
     startPreloadDelay = function(block, delay) {
       return preloadDelayTimer = setTimeout(block, delay);
+    };
+    stopPreload = function($link) {
+      if ($link.is($waitingLink)) {
+        $waitingLink = void 0;
+        return cancelPreloadDelay();
+      }
     };
 
     /**
@@ -9092,9 +9122,16 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       but will also make the interaction feel less instant.
     @stable
      */
-    up.on('mouseover mousedown touchstart', 'a[up-preload], [up-href][up-preload]', function(event, $link) {
-      if (up.link.shouldProcessEvent(event, $link) && up.link.isSafe($link)) {
-        return checkPreload($link);
+    up.compiler('a[up-preload], [up-href][up-preload]', function($link) {
+      if (up.link.isSafe($link)) {
+        $link.on('mouseenter touchstart', function(event) {
+          if (up.link.shouldProcessEvent(event, $link)) {
+            return preloadAfterDelay($link);
+          }
+        });
+        return $link.on('mouseleave', function() {
+          return stopPreload($link);
+        });
       }
     });
     up.on('up:framework:reset', reset);
@@ -10375,7 +10412,7 @@ open dialogs with sub-forms, etc. all without losing form state.
      */
     up.on('submit', 'form[up-target]', function(event, $form) {
       up.bus.consumeAction(event);
-      return submit($form);
+      return u.muteRejection(submit($form));
     });
 
     /**
@@ -10524,7 +10561,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
     up.on('change', '[up-validate]', function(event, $field) {
-      return validate($field);
+      return u.muteRejection(validate($field));
     });
 
     /**

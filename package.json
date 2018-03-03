@@ -1,6 +1,6 @@
 {
   "name": "unpoly",
-  "version": "0.53.1",
+  "version": "0.53.2",
   "description": "Unobtrusive JavaScript framework",
   "main": "dist/unpoly.js",
   "files": [
