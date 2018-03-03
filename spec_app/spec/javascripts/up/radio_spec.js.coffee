@@ -1,5 +1,7 @@
 describe 'up.radio', ->
 
+  u = up.util
+
   describe 'JavaScript functions', ->
 
   describe 'unobtrusive behavior', ->

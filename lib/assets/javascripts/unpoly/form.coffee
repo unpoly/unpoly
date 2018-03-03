@@ -581,7 +581,7 @@ up.form = (($) ->
   ###
   up.on 'submit', 'form[up-target]', (event, $form) ->
     up.bus.consumeAction(event)
-    submit($form)
+    u.muteRejection submit($form)
 
   ###*
   When a form field with this attribute is changed, the form is validated on the server
@@ -729,7 +729,7 @@ up.form = (($) ->
   @stable
   ###
   up.on 'change', '[up-validate]', (event, $field) ->
-    validate($field)
+    u.muteRejection validate($field)
 
   ###*
   Show or hide elements when a `<select>` or `<input>` has a given value.

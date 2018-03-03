@@ -355,6 +355,8 @@ describe 'up.form', ->
             expect('.before').not.toHaveText('old-before')
             expect('.after').not.toHaveText('old-after')
 
+            expect(window).toHaveUnhandledRejections()
+
         it 'respects X-Up-Method and X-Up-Location response headers so the server can show that it redirected to a GET URL', asyncSpec (next) ->
           up.submit(@$form)
 
@@ -529,7 +531,70 @@ describe 'up.form', ->
 
     describe 'form[up-target]', ->
 
-      it 'rigs the form to use up.submit instead of a standard submit'
+      it 'submits the form with AJAX and replaces the [up-target] selector', asyncSpec (next) ->
+        up.history.config.enabled = true
+
+        affix('.response').text('old text')
+
+        $form = affix('form[action="/form-target"][method="put"][up-target=".response"]')
+        $form.append('<input name="field1" value="value1">')
+        $form.append('<input name="field2" value="value2">')
+        $submitButton = $form.affix('input[type="submit"][name="submit-button"][value="submit-button-value"]')
+        up.hello($form)
+
+        Trigger.clickSequence($submitButton)
+
+        next =>
+          params = @lastRequest().data()
+          expect(params['field1']).toEqual(['value1'])
+          expect(params['field2']).toEqual(['value2'])
+
+        next =>
+          @respondWith """
+            <div class="response">
+              new text
+            </div>
+          """
+
+        next =>
+          expect('.response').toHaveText('new text')
+
+      describe 'when the server responds with an error code', ->
+
+        it 'replaces the form instead of the [up-target] selector', asyncSpec (next) ->
+          up.history.config.enabled = true
+
+          affix('.response').text('old text')
+
+          $form = affix('form.test-form[action="/form-target"][method="put"][up-target=".response"]')
+          $form.append('<input name="field1" value="value1">')
+          $form.append('<input name="field2" value="value2">')
+          $submitButton = $form.affix('input[type="submit"][name="submit-button"][value="submit-button-value"]')
+          up.hello($form)
+
+          Trigger.clickSequence($submitButton)
+
+          next =>
+            params = @lastRequest().data()
+            expect(params['field1']).toEqual(['value1'])
+            expect(params['field2']).toEqual(['value2'])
+
+          next =>
+            @respondWith
+              status: 500
+              responseText: """
+                <form class="test-form">
+                  validation errors
+                </form>
+              """
+
+          next =>
+            expect('.response').toHaveText('old text')
+            expect('form.test-form').toHaveText('validation errors')
+
+            # Since there isn't anyone who could handle the rejection inside
+            # the event handler, our handler mutes the rejection.
+            expect(window).not.toHaveUnhandledRejections()
 
       describe 'submit buttons', ->
 
@@ -711,18 +776,24 @@ describe 'up.form', ->
             expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
             expect(request.requestHeaders['X-Up-Target']).toEqual('.field-group:has(input[name="user"])')
 
-            @respondWith """
-              <div class="field-group has-error">
-                <div class='error'>Username has already been taken</div>
-                <input name="user" value="judy" up-validate=".field-group:has(&)">
-              </div>
-            """
+            @respondWith
+              status: 500
+              responseText: """
+                <div class="field-group has-error">
+                  <div class='error'>Username has already been taken</div>
+                  <input name="user" value="judy" up-validate=".field-group:has(&)">
+                </div>
+              """
 
           next =>
             $group = $('.field-group')
             expect($group.length).toBe(1)
             expect($group).toHaveClass('has-error')
             expect($group).toHaveText('Username has already been taken')
+
+            # Since there isn't anyone who could handle the rejection inside
+            # the event handler, our handler mutes the rejection.
+            expect(window).not.toHaveUnhandledRejections()
 
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
           revealSpy = up.layout.knife.mock('reveal').and.returnValue(Promise.resolve())

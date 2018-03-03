@@ -9,6 +9,10 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+### General
+
+- Failed requests in event handlers of CSS selectors like `form[up-target]` no longer print `Uncaught (in promise) to the error console. You still need to catch and handle rejected promises in your own code when it calls Unpoly functions.
+
 ### Animated transitions
 
 - Fix a bug where a page transition would flicker if [revealing](/up.reveal) was animated globally by setting `up.layout.config.duration`.

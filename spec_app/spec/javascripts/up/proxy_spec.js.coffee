@@ -973,7 +973,76 @@ describe 'up.proxy', ->
 
     describe '[up-preload]', ->
 
-      it 'preloads the link destination on mouseover, after a delay'
+      it 'preloads the link destination on mouseover, after a delay', asyncSpec (next) ->
+        up.proxy.config.preloadDelay = 100
+
+        affix('.target').text('old text')
+
+        $link = affix('a[href="/foo"][up-target=".target"][up-preload]')
+        Trigger.mouseover($link)
+
+        next.after 50, =>
+          # It's still too early
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        next.after 75, =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(@lastRequest().url).toMatchUrl('/foo')
+          expect(@lastRequest()).toHaveRequestMethod('GET')
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+
+          @respondWith """
+            <div class="target">
+              new text
+            </div>
+            """
+
+        next =>
+          # We only preloaded, so the target isn't replaced yet.
+          expect('.target').toHaveText('old text')
+
+          Trigger.clickSequence($link)
+
+        next =>
+          # No additional request has been sent since we already preloaded
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          # The target is replaced instantly
+          expect('.target').toHaveText('new text')
+
+      it 'does not cache a failed response', asyncSpec (next) ->
+        up.proxy.config.preloadDelay = 0
+
+        affix('.target').text('old text')
+
+        $link = affix('a[href="/foo"][up-target=".target"][up-preload]')
+        Trigger.mouseover($link)
+
+        next.after 2, =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          @respondWith
+            status: 500
+            responseText: """
+              <div class="target">
+                new text
+              </div>
+              """
+
+        next =>
+          # We only preloaded, so the target isn't replaced yet.
+          expect('.target').toHaveText('old text')
+
+          console.log("--- clicking")
+          Trigger.click($link)
+
+        next =>
+          # Since the preloading failed, we send another request
+          expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+          # Since there isn't anyone who could handle the rejection inside
+          # the event handler, our handler mutes the rejection.
+          expect(window).not.toHaveUnhandledRejections()
 
       it 'triggers a separate AJAX request when hovered multiple times and the cache expires between hovers', asyncSpec (next)  ->
         up.proxy.config.cacheExpiry = 50

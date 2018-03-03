@@ -1714,6 +1714,28 @@ up.util = (($) ->
     promise.then(callback, callback)
 
   ###*
+  # Registers an empty rejection handler with the given promise.
+  # This prevents browsers from printing "Uncaught (in promise)" to the error
+  # console when the promise is rejection.
+  #
+  # This is helpful for event handlers where it is clear that no rejection
+  # handler will be registered:
+  #
+  #     up.on('submit', 'form[up-target]', (event, $form) => {
+  #       promise = up.submit($form)
+  #       up.util.muteRejection(promise)
+  #     })
+  #
+  # Does nothing if passed a missing value.
+  #
+  # @function up.util.muteRejection
+  # @param {Promise|undefined|null} promise
+  # @return {Promise}
+  ###
+  muteRejection = (promise) ->
+    promise?.catch(noop)
+
+  ###*
   @function up.util.newDeferred
   @internal
   ###
@@ -1859,6 +1881,7 @@ up.util = (($) ->
   isTruthy: isTruthy
   newDeferred: newDeferred
   always: always
+  muteRejection: muteRejection
   rejectOnError: rejectOnError
   isBodyDescendant: isBodyDescendant
   isCrossDomain: isCrossDomain

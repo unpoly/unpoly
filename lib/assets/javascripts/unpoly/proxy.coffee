@@ -571,10 +571,10 @@ up.proxy = (($) ->
       $waitingLink = $link
       cancelPreloadDelay()
       curriedPreload = ->
-        preload($link)
+        u.muteRejection preload($link)
         $waitingLink = null
       startPreloadDelay(curriedPreload, delay)
-      
+
   startPreloadDelay = (block, delay) ->
     preloadDelayTimer = setTimeout(block, delay)
 

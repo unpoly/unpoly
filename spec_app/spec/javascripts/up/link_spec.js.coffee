@@ -654,6 +654,18 @@ describe 'up.link', ->
 
       describeCapability 'canPushState', ->
 
+        it 'requests the [href] with AJAX and replaces the [up-target] selector', asyncSpec (next) ->
+          affix('.target')
+          $link = affix('a[href="/path"][up-target=".target"]')
+          Trigger.clickSequence($link)
+
+          next =>
+            @respondWith('<div class="target">new text</div>')
+
+          next =>
+            expect($('.target')).toHaveText('new text')
+
+
         it 'adds a history entry', asyncSpec (next) ->
           up.history.config.enabled = true
 
@@ -783,6 +795,11 @@ describe 'up.link', ->
             next =>
               expect($('.success-target')).toHaveText('old success text')
               expect($('.failure-target')).toHaveText('new failure text')
+
+              # Since there isn't anyone who could handle the rejection inside
+              # the event handler, our handler mutes the rejection.
+              expect(window).not.toHaveUnhandledRejections()
+
 
           it 'uses the [up-target] selector for a successful response', asyncSpec (next) ->
             Trigger.clickSequence(@$link)

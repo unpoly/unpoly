@@ -7,7 +7,7 @@ module FormTest
     end
 
     def create
-      render 'form_test/submission_result'
+      render 'form_test/submission_result', status: 500
     end
 
   end

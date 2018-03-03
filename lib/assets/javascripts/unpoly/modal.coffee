@@ -706,6 +706,9 @@ up.modal = (($) ->
     preload: ($link, options) -> preloadNow($link, options)
 
   # Close the modal when someone clicks outside the dialog (but not on a modal opener).
+  # We register the event on .up-modal, which covers the *entire* viewport, not just
+  # the dialog area.
+  #
   # Note that we cannot listen to clicks on .up-modal-backdrop, which is a sister element
   # of .up-modal-viewport. Since the user will effectively click on the viewport, not
   # the backdrop, backdrop will not receive a bubbling event.

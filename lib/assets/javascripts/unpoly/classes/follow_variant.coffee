@@ -34,9 +34,9 @@ class up.FollowVariant
 
   registerEvents: ->
     up.on 'click', @fullSelector(), (args...) =>
-      @onClick(args...)
+      u.muteRejection @onClick(args...)
     up.on 'mousedown', @fullSelector('[up-instant]'), (args...) =>
-      @onMousedown(args...)
+      u.muteRejection @onMousedown(args...)
 
   followLink: ($link, options = {}) =>
     up.bus.whenEmitted('up:link:follow', $element: $link).then =>
