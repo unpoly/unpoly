@@ -1286,7 +1286,6 @@ describe 'up.dom', ->
           barDestructor = jasmine.createSpy()
           up.compiler '.bar', ($bar) ->
             text = $bar.text()
-            console.info('Compiling %o', text)
             barCompiler(text)
             return -> barDestructor(text)
 

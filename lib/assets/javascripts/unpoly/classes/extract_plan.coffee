@@ -3,12 +3,13 @@ u = up.util
 class up.ExtractPlan
 
   constructor: (selector, options) ->
+    @reveal = options.reveal
     @origin = options.origin
-    @selector = up.dom.resolveSelector(selector, options.origin)
+    @selector = up.dom.resolveSelector(selector, @origin)
     @transition = options.transition
     @response = options.response
     @oldLayer = options.layer
-    @steps = @parseSteps()
+    @parseSteps()
 
   findOld: =>
     u.each @steps, (step) =>
@@ -43,9 +44,11 @@ class up.ExtractPlan
   parseSteps: =>
     comma = /\ *,\ */
 
+    @steps = []
+
     disjunction = @selector.split(comma)
 
-    u.map disjunction, (literal, i) =>
+    u.each disjunction, (literal, i) =>
       literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/)
       literalParts or up.fail('Could not parse selector literal "%s"', literal)
       selector = literalParts[1]
@@ -56,6 +59,13 @@ class up.ExtractPlan
 
       pseudoClass = literalParts[2]
 
-      selector: selector
-      pseudoClass: pseudoClass
-      transition: @transition
+      # When extracting multiple selectors, we only want to reveal the first element.
+      # So we set the { reveal } option to false for the next iteration.
+      doReveal = if i == 0 then @reveal else false
+
+      @steps.push
+        selector: selector
+        pseudoClass: pseudoClass
+        transition: @transition
+        origin: @origin
+        reveal: doReveal

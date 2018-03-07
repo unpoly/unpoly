@@ -75,3 +75,77 @@ describe 'up.radio', ->
         next =>
           expect('.target').toHaveText('new target')
           expect('.hungry').toHaveText('old hungry')
+
+      it 'does not auto-close a non-sticky modal if a link within the modal changes both modal content and an [up-hungry] below', asyncSpec (next) ->
+        up.modal.config.openDuration = 0
+        up.modal.config.closeDuration = 0
+
+        affix('.outside').text('old outside').attr('up-hungry', true)
+
+        closeEventHandler = jasmine.createSpy('close event handler')
+        up.on('up:modal:close', closeEventHandler)
+
+        up.modal.extract '.inside', """
+          <div class='inside'>
+            <div class="inside-text">old inside</div>
+            <div class="inside-link">update</div>
+          </div>
+          """
+
+        next =>
+          expect(up.modal.isOpen()).toBe(true)
+
+          up.extract '.inside-text', """
+            <div class="outside">
+              new outside
+            </div>
+            <div class='inside'>
+              <div class="inside-text">new inside</div>
+              <div class="inside-link">update</div>
+            </div>
+            """,
+            origin: $('.inside-link')
+
+        next =>
+          expect(closeEventHandler).not.toHaveBeenCalled()
+          expect($('.inside-text')).toHaveText('new inside')
+          expect($('.outside')).toHaveText('new outside')
+
+      it 'does not auto-close a non-sticky popup if a link within the modal replaces an [up-hungry] below', asyncSpec (next) ->
+        up.popup.config.openDuration = 0
+        up.popup.config.closeDuration = 0
+
+        affix('.outside').text('old outside').attr('up-hungry', true)
+        $popupAnchor = affix('span.link').text('link')
+
+        closeEventHandler = jasmine.createSpy('close event handler')
+        up.on('up:popup:close', closeEventHandler)
+
+        up.popup.attach $popupAnchor,
+          target: '.inside'
+          html: """
+            <div class='inside'>
+              <div class="inside-text">old inside</div>
+              <div class="inside-link">update</div>
+            </div>
+            """
+
+        next =>
+          expect(up.popup.isOpen()).toBe(true)
+
+          up.extract '.inside-text', """
+            <div class="outside">
+              new outside
+            </div>
+            <div class='inside'>
+              <div class="inside-text">new inside</div>
+              <div class="inside-link">update</div>
+            </div>
+            """,
+            origin: $('.inside-link')
+
+        next =>
+          expect(closeEventHandler).not.toHaveBeenCalled()
+          expect($('.inside-text')).toHaveText('new inside')
+          expect($('.outside')).toHaveText('new outside')
+

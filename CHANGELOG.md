@@ -5,6 +5,14 @@ Changes to this project will be documented in this file.
 
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
+Unreleased
+----------
+
+### Passive updates
+
+- Updates for [`[up-hungry]`](/up-hungry) elements will no longer auto-close a [modal dialog](/up.modal).
+- Updates for [`[up-hungry]`](/up-hungry) elements will no longer auto-close a [popup overlay](/up.popup).
+
 
 0.53.2
 ------

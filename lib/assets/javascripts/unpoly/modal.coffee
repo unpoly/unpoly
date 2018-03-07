@@ -725,7 +725,7 @@ up.modal = (($) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
         state.url = newSource
-    else if contains(event.origin) && !up.popup.contains($fragment)
+    else if event.origin && contains(event.origin) && !up.popup.contains($fragment)
       autoclose()
   )
 

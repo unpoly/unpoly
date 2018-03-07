@@ -386,17 +386,18 @@ up.dom = (($) ->
         updateHistoryAndTitle(options)
 
         swapPromises = []
+
         for step in extractSteps
           up.log.group 'Updating %s', step.selector, ->
-            fixScripts(step.$new)
-            swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options)
-            swapPromises.push(swapPromise)
-            # When extracting multiple selectors, we only want to reveal the first element.
-            # So we set the { reveal } option to false for the next iteration.
             # Note that we must copy the options hash instead of changing it in-place,  since the
             # async swapElements() is scheduled for the next microtask and we must not change the options
             # for the previous iteration.
-            options = u.merge(options, reveal: false)
+            swapOptions = u.merge(options, u.only(step, 'origin', 'reveal'))
+
+            fixScripts(step.$new)
+
+            swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, swapOptions)
+            swapPromises.push(swapPromise)
 
         # Delay all further links in the promise chain until all fragments have been swapped
         Promise.all(swapPromises)

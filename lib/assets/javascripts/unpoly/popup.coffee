@@ -441,7 +441,7 @@ up.popup = (($) ->
     if contains($fragment)
       if newSource = $fragment.attr('up-source')
         state.url = newSource
-    else if contains(event.origin)
+    else if event.origin && contains(event.origin)
       autoclose()
 
   # Close the pop-up overlay when the user presses ESC.
