@@ -14,6 +14,10 @@ Unreleased
 - Updates for [`[up-hungry]`](/up-hungry) elements will no longer auto-close a [popup overlay](/up.popup).
 - CSRF-related `<meta>` tags are no longer updated automatically with every request. This is to prevent unnecessary DOM jitter in applications that don't rotate CSRF tokens.
 
+### Popup overlays
+
+- Calling `up.popup.attach()` without a target selector will now throw an error.
+
 
 0.53.2
 ------

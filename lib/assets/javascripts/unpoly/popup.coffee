@@ -234,7 +234,7 @@ up.popup = (($) ->
     url = u.option(u.pluckKey(options, 'url'), $anchor.attr('up-href'), $anchor.attr('href'))
     html = u.option(u.pluckKey(options, 'html'))
     url or html or up.fail('up.popup.attach() requires either an { url } or { html } option')
-    target = u.option(u.pluckKey(options, 'target'), $anchor.attr('up-popup'), 'body')
+    target = u.option(u.pluckKey(options, 'target'), $anchor.attr('up-popup')) or up.fail('No target selector given for [up-popup]')
     position = u.option(options.position, $anchor.attr('up-position'), config.position)
     options.animation = u.option(options.animation, $anchor.attr('up-animation'), config.openAnimation)
     options.sticky = u.option(options.sticky, u.castedAttr($anchor, 'up-sticky'), config.sticky)
