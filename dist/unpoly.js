@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.53.3",
+    version: "0.53.4",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -2123,7 +2123,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     rejectOnError = function(block) {
-      var error;
+      var error, error1;
       try {
         return block();
       } catch (error1) {
@@ -2559,9 +2559,12 @@ that might save you from loading something like [Lodash](https://lodash.com/).
           if ($newHungry = this.options.response.first(selector)) {
             transition = u.option(up.radio.config.hungryTransition, this.options.transition);
             steps.push({
+              selector: selector,
               $old: $hungry,
               $new: $newHungry,
-              transition: transition
+              transition: transition,
+              reveal: false,
+              origin: null
             });
           }
         }
@@ -2619,12 +2622,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       this.oldExists = bind(this.oldExists, this);
       this.findNew = bind(this.findNew, this);
       this.findOld = bind(this.findOld, this);
+      this.reveal = options.reveal;
       this.origin = options.origin;
-      this.selector = up.dom.resolveSelector(selector, options.origin);
+      this.selector = up.dom.resolveSelector(selector, this.origin);
       this.transition = options.transition;
       this.response = options.response;
       this.oldLayer = options.layer;
-      this.steps = this.parseSteps();
+      this.parseSteps();
     }
 
     ExtractPlan.prototype.findOld = function() {
@@ -2678,10 +2682,11 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     ExtractPlan.prototype.parseSteps = function() {
       var comma, disjunction;
       comma = /\ *,\ */;
+      this.steps = [];
       disjunction = this.selector.split(comma);
-      return u.map(disjunction, (function(_this) {
+      return u.each(disjunction, (function(_this) {
         return function(literal, i) {
-          var literalParts, pseudoClass, selector;
+          var doReveal, literalParts, pseudoClass, selector;
           literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/);
           literalParts || up.fail('Could not parse selector literal "%s"', literal);
           selector = literalParts[1];
@@ -2689,11 +2694,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
             selector = 'body';
           }
           pseudoClass = literalParts[2];
-          return {
+          doReveal = i === 0 ? _this.reveal : false;
+          return _this.steps.push({
             selector: selector,
             pseudoClass: pseudoClass,
-            transition: _this.transition
-          };
+            transition: _this.transition,
+            origin: _this.origin,
+            reveal: doReveal
+          });
         };
       })(this));
     };
@@ -3842,6 +3850,7 @@ Internet Explorer 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
+      var error;
       try {
         return window.sessionStorage;
       } catch (error) {
@@ -6886,7 +6895,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var e, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
+      var e, error, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
       options = u.options(options);
       options.inspectResponse = fullLoad = function() {
         return up.browser.navigate(url, u.only(options, 'method', 'data'));
@@ -7065,13 +7074,11 @@ is built from these functions. You can use them to extend Unpoly from your
           for (i = 0, len = extractSteps.length; i < len; i++) {
             step = extractSteps[i];
             up.log.group('Updating %s', step.selector, function() {
-              var swapPromise;
+              var swapOptions, swapPromise;
+              swapOptions = u.merge(options, u.only(step, 'origin', 'reveal'));
               fixScripts(step.$new);
-              swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, options);
-              swapPromises.push(swapPromise);
-              return options = u.merge(options, {
-                reveal: false
-              });
+              swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, swapOptions);
+              return swapPromises.push(swapPromise);
             });
           }
           return Promise.all(swapPromises);
@@ -11039,7 +11046,7 @@ The HTML of a popup element is simply this:
       url = u.option(u.pluckKey(options, 'url'), $anchor.attr('up-href'), $anchor.attr('href'));
       html = u.option(u.pluckKey(options, 'html'));
       url || html || up.fail('up.popup.attach() requires either an { url } or { html } option');
-      target = u.option(u.pluckKey(options, 'target'), $anchor.attr('up-popup'), 'body');
+      target = u.option(u.pluckKey(options, 'target'), $anchor.attr('up-popup')) || up.fail('No target selector given for [up-popup]');
       position = u.option(options.position, $anchor.attr('up-position'), config.position);
       options.animation = u.option(options.animation, $anchor.attr('up-animation'), config.openAnimation);
       options.sticky = u.option(options.sticky, u.castedAttr($anchor, 'up-sticky'), config.sticky);
@@ -11276,7 +11283,7 @@ The HTML of a popup element is simply this:
         if (newSource = $fragment.attr('up-source')) {
           return state.url = newSource;
         }
-      } else if (contains(event.origin)) {
+      } else if (event.origin && contains(event.origin)) {
         return autoclose();
       }
     });
@@ -12120,7 +12127,7 @@ or function.
         if (newSource = $fragment.attr('up-source')) {
           return state.url = newSource;
         }
-      } else if (contains(event.origin) && !up.popup.contains($fragment)) {
+      } else if (event.origin && contains(event.origin) && !up.popup.contains($fragment)) {
         return autoclose();
       }
     });
@@ -12907,8 +12914,7 @@ passively receive updates from the server.
       An array of CSS selectors that is replaced whenever a matching element is found in a response.
       These elements are replaced even when they were not targeted directly.
     
-      By default this contains the [`[up-hungry]`](/up-hungry) attribute as well as
-      `<meta name="csrf-param">` and `<meta name="csrf-token">` tags.
+      By default this contains the [`[up-hungry]`](/up-hungry) attribute.
     @param {string} [options.hungryTransition=null]
       The transition to use when a [hungry element](/up-hungry) is replacing itself
       while another target is replaced.
@@ -12917,7 +12923,7 @@ passively receive updates from the server.
     @stable
      */
     config = u.config({
-      hungry: ['[up-hungry]', 'meta[name="csrf-param"]', 'meta[name="csrf-token"]'],
+      hungry: ['[up-hungry]'],
       hungryTransition: null
     });
     reset = function() {
