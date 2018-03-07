@@ -19,8 +19,7 @@ up.radio = (($) ->
     An array of CSS selectors that is replaced whenever a matching element is found in a response.
     These elements are replaced even when they were not targeted directly.
 
-    By default this contains the [`[up-hungry]`](/up-hungry) attribute as well as
-    `<meta name="csrf-param">` and `<meta name="csrf-token">` tags.
+    By default this contains the [`[up-hungry]`](/up-hungry) attribute.
   @param {string} [options.hungryTransition=null]
     The transition to use when a [hungry element](/up-hungry) is replacing itself
     while another target is replaced.
@@ -29,7 +28,7 @@ up.radio = (($) ->
   @stable
   ###
   config = u.config
-    hungry: ['[up-hungry]', 'meta[name="csrf-param"]', 'meta[name="csrf-token"]']
+    hungry: ['[up-hungry]']
     hungryTransition: null
 
   reset = ->
