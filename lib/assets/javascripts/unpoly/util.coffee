@@ -1589,7 +1589,6 @@ up.util = (($) ->
     poke: =>
       unless @currentTask # don't start a new task while we're still running one
         if @currentTask = @queue.shift()
-          # console.debug('[DivertibleChain.poke] currentTask is now %o', @currentTask)
           promise = @currentTask()
           always promise, =>
             @currentTask = undefined

@@ -886,8 +886,7 @@ describe 'up.dom', ->
             # No need to respond because /foo has been cached before
             next => expect($viewport.scrollTop()).toEqual(65)
 
-
-        describe 'with { reveal: true } option', ->
+        describe 'with { reveal } option', ->
 
           beforeEach ->
             @revealedHTML = []
@@ -909,6 +908,73 @@ describe 'up.dom', ->
             next =>
               expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
               expect(@revealedText).toEqual ['new-middle']
+
+          it 'allows to pass another selector to reveal', asyncSpec (next)->
+            $other = affix('.other').text('other text')
+
+            up.replace('.middle', '/path', reveal: '.other')
+
+            next =>
+              @respond()
+
+            next =>
+              expect(@revealedText).toEqual ['other text']
+
+          it 'allows to refer to the replacement { origin } as "&" in the { reveal } selector', asyncSpec (next) ->
+            $origin = affix('.origin').text('origin text')
+
+            up.replace('.middle', '/path', reveal: '&', origin: '.origin')
+
+            next =>
+              @respond()
+
+            next =>
+              expect(@revealedText).toEqual ['origin text']
+
+          describe 'when the server responds with an error code', ->
+
+            it 'ignores the { reveal } option', asyncSpec (next) ->
+              $failTarget = affix('.fail-target')
+              up.replace('.middle', '/path', failTarget: '.fail-target', reveal: true)
+
+              next =>
+                @respond(status: 500)
+
+              next =>
+                expect(@revealMock).not.toHaveBeenCalled()
+
+            it 'accepts a { failReveal } option for error responses', asyncSpec (next) ->
+              $failTarget = affix('.fail-target').text('old fail target text')
+              up.replace('.middle', '/path', failTarget: '.fail-target', reveal: false, failReveal: true)
+
+              next =>
+              @respondWith
+                status: 500
+                responseText: """
+                  <div class="fail-target">
+                    new fail target text
+                  </div>
+                  """
+
+              next =>
+                expect(@revealedText).toEqual ['new fail target text']
+
+            it 'allows to refer to the replacement { origin } as "&" in the { failTarget } selector', asyncSpec (next) ->
+              $origin = affix('.origin').text('origin text')
+              $failTarget = affix('.fail-target').text('old fail target text')
+              up.replace('.middle', '/path', failTarget: '.fail-target', reveal: false, failReveal: '&', origin: $origin)
+
+              next =>
+              @respondWith
+                status: 500
+                responseText: """
+                  <div class="fail-target">
+                    new fail target text
+                  </div>
+                  """
+
+              next =>
+                expect(@revealedText).toEqual ['origin text']
 
           describe 'when more than one fragment is replaced', ->
 

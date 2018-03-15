@@ -75,12 +75,16 @@ up.form = (($) ->
     Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
     if none of these attributes are given.
   @param {string} [options.target]
-    The selector to update when the form submission succeeds (server responds with status 200).
+    The CSS selector to update when the form submission succeeds (server responds with status 200).
     Defaults to the form's `up-target` attribute.
+
+    Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [options.failTarget]
-    The selector to update when the form submission fails (server responds with non-200 status).
+    The CSS selector to update when the form submission fails (server responds with non-200 status).
     Defaults to the form's `up-fail-target` attribute, or to an auto-generated
     selector that matches the form itself.
+
+    Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [options.fallback]
     The selector to update when the original target was not found in the page.
     Defaults to the form's `up-fallback` attribute.
@@ -521,11 +525,15 @@ up.form = (($) ->
 
   @selector form[up-target]
   @param {string} up-target
-    The selector to [replace](/up.replace) if the form submission is successful (200 status code).
+    The CSS selector to [replace](/up.replace) if the form submission is successful (200 status code).
+
+    Inside the CSS selector you may refer to this form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [up-fail-target]
-    The selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
-    If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
-    server has echoed the form with validation errors.
+    The CSS selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
+
+    Inside the CSS selector you may refer to this form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+
+    If omitted, Unpoly will replace the `<form>` tag itself, assuming that the server has echoed the form with validation errors.
   @param [up-fallback]
     The selector to replace if the server responds with an error.
   @param {string} [up-transition]
@@ -559,6 +567,7 @@ up.form = (($) ->
     Whether to reveal the target element after it was replaced.
 
     You can also pass a CSS selector for the element to reveal.
+    Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [up-fail-reveal='true']
     Whether to reveal the target element when the server responds with an error.
 
@@ -568,6 +577,8 @@ up.form = (($) ->
         <form up-target=".content" up-fail-reveal=".error">
           ...
         </form>
+
+    Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [up-restore-scroll='false']
     Whether to restore previously known scroll position of all viewports
     within the target selector.

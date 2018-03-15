@@ -480,6 +480,28 @@ describe 'up.form', ->
                 expect(revealStub).toHaveBeenCalled()
                 expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('#foo-form')
 
+            it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
+              $form = affix('form#foo-form[action="/action"][up-target="#foo-form"]')
+
+              revealStub = up.layout.knife.mock('reveal')
+
+              up.submit($form, reveal: '& .form-child')
+
+              next =>
+                @respondWith """
+                  <div class="target">
+                    new text
+                  </div>
+
+                  <form id="foo-form">
+                    <div class="form-child">other</div>
+                  </form>
+                """
+
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toEqual($('#foo-form .form-child'))
+
           describe 'with { failReveal } option', ->
 
             it 'reveals the given selector for a failed submission', asyncSpec (next) ->
@@ -503,6 +525,31 @@ describe 'up.form', ->
               next =>
                 expect(revealStub).toHaveBeenCalled()
                 expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.error')
+
+            it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
+              $form = affix('form#foo-form[action="/action"][up-target=".target"][up-fail-reveal="#foo-form .form-child"]')
+              $target = affix('.target')
+
+              revealStub = up.layout.knife.mock('reveal')
+
+              up.submit($form, reveal: '& .form-child')
+
+              next =>
+                @respondWith
+                  status: 500
+                  responseText: """
+                    <div class="target">
+                      new text
+                    </div>
+
+                    <form id="foo-form">
+                      <div class="form-child">other</div>
+                    </form>
+                    """
+
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toEqual($('#foo-form .form-child'))
 
         describe 'in a form with file inputs', ->
 
@@ -559,6 +606,23 @@ describe 'up.form', ->
         next =>
           expect('.response').toHaveText('new text')
 
+      it 'allows to refer to this form as "&" in the target selector', asyncSpec (next) ->
+        $form = affix('form.my-form[action="/form-target"][up-target="&"]').text('old form text')
+        $submitButton = $form.affix('input[type="submit"]')
+        up.hello($form)
+
+        Trigger.clickSequence($submitButton)
+
+        next =>
+          @respondWith """
+            <form class="my-form">
+              new form text
+            </form>
+          """
+
+        next =>
+          expect('.my-form').toHaveText('new form text')
+
       describe 'when the server responds with an error code', ->
 
         it 'replaces the form instead of the [up-target] selector', asyncSpec (next) ->
@@ -595,6 +659,56 @@ describe 'up.form', ->
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
             expect(window).not.toHaveUnhandledRejections()
+
+        it 'updates a given selector when an [up-fail-target] is given', asyncSpec (next) ->
+          $form = affix('form.my-form[action="/path"][up-target=".target"][up-fail-target=".errors"]').text('old form text')
+          $errors = affix('.target').text('old target text')
+          $errors = affix('.errors').text('old errors text')
+
+          $submitButton = $form.affix('input[type="submit"]')
+          up.hello($form)
+
+          Trigger.clickSequence($submitButton)
+
+          next =>
+            @respondWith
+              status: 500
+              responseText: """
+                <form class="my-form">
+                  new form text
+                </form>
+
+                <div class="errors">
+                  new errors text
+                </div>
+                """
+
+          next =>
+            expect('.my-form').toHaveText('old form text')
+            expect('.target').toHaveText('old target text')
+            expect('.errors').toHaveText('new errors text')
+
+        it 'allows to refer to this form as "&" in the [up-fail-target] selector', asyncSpec (next) ->
+          $form = affix('form.my-form[action="/form-target"][up-target=".target"][up-fail-target="&"]').text('old form text')
+          $target = affix('.target').text('old target text')
+
+          $submitButton = $form.affix('input[type="submit"]')
+          up.hello($form)
+
+          Trigger.clickSequence($submitButton)
+
+          next =>
+            @respondWith
+              status: 500,
+              responseText: """
+                <form class="my-form">
+                  new form text
+                </form>
+                """
+
+          next =>
+            expect('.target').toHaveText('old target text')
+            expect('.my-form').toHaveText('new form text')
 
       describe 'submit buttons', ->
 

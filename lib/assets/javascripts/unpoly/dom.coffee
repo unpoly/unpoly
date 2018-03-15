@@ -65,7 +65,7 @@ up.dom = (($) ->
   @param {string|Element|jQuery} selectorOrElement
   @param {string|Element|jQuery} origin
     The element that this selector resolution is relative to.
-    That element's selector will be substituted for `&`.
+    That element's selector will be substituted for `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @internal
   ###
   resolveSelector = (selectorOrElement, origin) ->
@@ -213,7 +213,7 @@ up.dom = (($) ->
   @param {Element|jQuery} [options.origin]
     The element that triggered the replacement.
 
-    The element's selector will be substituted for the `&` shorthand in the target selector.
+    The element's selector will be substituted for the `&` shorthand in the target selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [options.layer='auto']
     The name of the layer that ought to be updated. Valid values are
     `auto`, `page`, `modal` and `popup`.

@@ -350,12 +350,16 @@ up.link = (($) ->
   @selector a[up-target]
   @param {string} up-target
     The CSS selector to replace
+
+    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [up-method='get']
     The HTTP method to use for the request.
   @param {string} [up-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements.
   @param [up-fail-target='body']
-    The selector to replace if the server responds with an error.
+    The CSS selector to replace if the server responds with an error.
+
+    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [up-fail-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements
     when the server responds with an error.
@@ -371,10 +375,12 @@ up.link = (($) ->
     Whether to reveal the target element after it was replaced.
 
     You can also pass a CSS selector for the element to reveal.
+    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [up-fail-reveal='true']
     Whether to reveal the target element when the server responds with an error.
 
     You can also pass a CSS selector for the element to reveal.
+    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [up-restore-scroll='false']
     Whether to restore previously known scroll position of all viewports
     within the target selector.

@@ -9,14 +9,48 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+### Passive updates
+
+- [`[up-hungry]`](/up-hungry) elements will now also be updated when the server responds with an error code. This helps when `[up-hungry]` is used to display error messages.
+
+### Forms
+
+- When a [form is submitted](/form-up-target) you can now consistently refer to that form element as `&` in CSS selectors ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+
+  E.g. to reveal the first error message within a failed form submission:
+
+  ```
+  <form id="my-form" up-target=".page" up-fail-reveal="& .error">
+    ...
+  </form>
+  ```
+
+  In this case `& .error` will be replaced by `#my-form .error` before submission.
+
+  This affects CSS selectors in the following HTML attributes:
+
+  - `form[up-target]`
+  - `form[up-fail-target]`
+  - `form[up-reveal]`
+  - `form[up-fail-reveal]`
+
+
+### Linking to fragments
+
+* When a [link is followed](/a-up-target) you can now consistently refer to that link element as `&` in CSS selectors ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+
+  This affects CSS selectors in the following HTML attributes:
+
+  - `a[up-target]`
+  - `a[up-fail-target]`
+  - `a[up-reveal]`
+  - `a[up-fail-reveal]`
+
+
 ### Fragment update API
 
 - New option for [`up.replace()`](/up.replace): `{ keep: false }` will disable preservation of [`[up-keep]`](/up-keep) elements.
 - New option for [`up.replace()`](/up.replace): `{ hungry: false }` will disable updates of [`[up-hungry]`](/up-hungry) elements.
-
-### Passive updates
-
-- [`[up-hungry]`](/up-hungry) elements will now also be updated when the server responds with an error code. This helps when `[up-hungry]` is used to display error messages.
 
 
 

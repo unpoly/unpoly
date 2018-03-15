@@ -471,7 +471,7 @@ up.layout = (($) ->
     if options.reveal
       revealOptions = { duration: options.duration }
       if u.isString(options.reveal)
-        selector = revealSelector(options.reveal)
+        selector = revealSelector(options.reveal, options)
         $element = up.first(selector) || $element
         revealOptions.top = true
 
@@ -490,7 +490,7 @@ up.layout = (($) ->
   @internal
   ###
   revealSelector = (selector, options) ->
-    selector = up.dom.resolveSelector(selector, options)
+    selector = up.dom.resolveSelector(selector, options.origin)
     if selector[0] == '#'
       selector += ", a[name='#{selector}']"
     selector
