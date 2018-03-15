@@ -1187,7 +1187,7 @@ describe 'up.dom', ->
           string
 
         beforeEach ->
-# Need to refactor this spec file so examples don't all share one example
+          # Need to refactor this spec file so examples don't all share one example
           $('.before, .middle, .after').remove()
 
         it 'keeps an [up-keep] element, but does replace other elements around it', asyncSpec (next) ->
@@ -1227,6 +1227,26 @@ describe 'up.dom', ->
 
           next =>
             expect(squish($('.container').text())).toEqual('new-before old-inside new-after')
+
+        it 'updates an [up-keep] element with { keep: false } option', asyncSpec (next) ->
+          $container = affix('.container')
+          $container.html """
+            old-before
+            <div class='element' up-keep>old-inside</div>
+            old-after
+            """
+
+          up.extract '.container', """
+            <div class='container'>
+              new-before
+              <div class='element' up-keep>new-inside</div>
+              new-after
+            </div>
+            """,
+            keep: false
+
+          next =>
+            expect(squish($('.container').text())).toEqual('new-before new-inside new-after')
 
         describe 'if an [up-keep] element is itself a direct replacement target', ->
 
@@ -1558,6 +1578,8 @@ describe 'up.dom', ->
             expect(oldTextDuringTransition).toEqual('old-foo old-bar')
             expect(newTextDuringTransition).toEqual('new-foo old-bar')
             done()
+
+
 
     describe 'up.destroy', ->
 

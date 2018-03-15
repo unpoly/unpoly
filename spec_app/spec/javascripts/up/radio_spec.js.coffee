@@ -51,11 +51,23 @@ describe 'up.radio', ->
           promiseState(promise).then (result) ->
             expect(result.state).toEqual('fulfilled')
 
-      it 'does not replace the element when the server responds with an error', asyncSpec (next) ->
+      it 'does not change the X-Up-Target header for the request', asyncSpec (next) ->
         affix('.hungry[up-hungry]').text('old hungry')
         affix('.target').text('old target')
+        affix('.fail-target').text('old fail target')
 
-        up.replace('.target', '/path', failTarget: '.target')
+        up.replace('.target', '/path', failTarget: '.fail-target')
+
+        next =>
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+          expect(@lastRequest().requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
+
+      it 'does replace the element when the server responds with an error (e.g. for error flashes)', asyncSpec (next) ->
+        affix('.hungry[up-hungry]').text('old hungry')
+        affix('.target').text('old target')
+        affix('.fail-target').text('old fail target')
+
+        up.replace('.target', '/path', failTarget: '.fail-target')
 
         next =>
           @respondWith
@@ -64,8 +76,28 @@ describe 'up.radio', ->
               <div class="target">
                 new target
               </div>
+              <div class="fail-target">
+                new fail target
+              </div>
               <div class="between">
                 new between
+              </div>
+              <div class="hungry">
+                new hungry
+              </div>
+              """
+
+      it 'does not update [up-hungry] elements with { hungry: false } option', asyncSpec (next) ->
+        affix('.hungry[up-hungry]').text('old hungry')
+        affix('.target').text('old target')
+
+        up.replace('.target', '/path', hungry: false)
+
+        next =>
+          @respondWith
+            responseText: """
+              <div class="target">
+                new target
               </div>
               <div class="hungry">
                 new hungry

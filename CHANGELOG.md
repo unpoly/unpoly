@@ -5,6 +5,21 @@ Changes to this project will be documented in this file.
 
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
+
+Unreleased
+----------
+
+### Fragment update API
+
+- New option for [`up.replace()`](/up.replace): `{ keep: false }` will disable preservation of [`[up-keep]`](/up-keep) elements.
+- New option for [`up.replace()`](/up.replace): `{ hungry: false }` will disable updates of [`[up-hungry]`](/up-hungry) elements.
+
+### Passive updates
+
+- [`[up-hungry]`](/up-hungry) elements will now also be updated when the server responds with an error code. This helps when `[up-hungry]` is used to display error messages.
+
+
+
 0.53.4
 ------
 

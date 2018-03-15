@@ -164,7 +164,7 @@ up.dom = (($) ->
     here, in which case a selector will be inferred from the element's class and ID.
   @param {string} url
     The URL to fetch from the server.
-  @param {string} [options.failTarget='body']
+  @param {string} [options.failTarget]
     The CSS selector to update if the server sends a non-200 status code.
   @param {string} [options.fallback]
     The selector to update when the original target was not found in the page.
@@ -224,6 +224,10 @@ up.dom = (($) ->
     Unpoly will search in other layers, starting from the topmost layer.
   @param {string} [options.failLayer='auto']
     The name of the layer that ought to be updated if the server sends a non-200 status code.
+  @param {boolean} [options.keep=true]
+    Whether this replacement will preserve [`[up-keep]`](/up-keep) elements.
+  @param {boolean} [options.hungry=true]
+    Whether this replacement will update [`[up-hungry]`](/up-hungry) elements.
 
   @return {Promise}
     A promise that will be fulfilled when the page has been updated.
@@ -245,7 +249,6 @@ up.dom = (($) ->
       humanizedTarget: 'failure target'
       provideTarget: undefined # don't provide a target if we're targeting the failTarget
       restoreScroll: false
-      hungry: false
 
     u.renameKey(failureOptions, 'failTransition', 'transition')
     u.renameKey(failureOptions, 'failLayer', 'layer')
