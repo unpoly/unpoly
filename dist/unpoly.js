@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.53.4",
+    version: "0.54.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -2076,17 +2076,17 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      * Registers an empty rejection handler with the given promise.
      * This prevents browsers from printing "Uncaught (in promise)" to the error
      * console when the promise is rejection.
-     *
+    #
      * This is helpful for event handlers where it is clear that no rejection
      * handler will be registered:
-     *
+    #
      *     up.on('submit', 'form[up-target]', (event, $form) => {
      *       promise = up.submit($form)
      *       up.util.muteRejection(promise)
      *     })
-     *
+    #
      * Does nothing if passed a missing value.
-     *
+    #
      * @function up.util.muteRejection
      * @param {Promise|undefined|null} promise
      * @return {Promise}
@@ -2123,11 +2123,11 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     rejectOnError = function(block) {
-      var error, error1;
+      var error;
       try {
         return block();
-      } catch (error1) {
-        error = error1;
+      } catch (_error) {
+        error = _error;
         return Promise.reject(error);
       }
     };
@@ -3850,10 +3850,9 @@ Internet Explorer 10 or lower
     @internal
      */
     sessionStorage = u.memoize(function() {
-      var error;
       try {
         return window.sessionStorage;
-      } catch (error) {
+      } catch (_error) {
         return polyfilledSessionStorage();
       }
     });
@@ -4705,7 +4704,7 @@ an existing cookie should be deleted.
       The name of the optional cookie the server can send to
       [signal the initial request method](/up.protocol#signaling-the-initial-request-method).
     @param {String} [config.methodParam='_method']
-      The name of the POST parameter when [wrapping HTTP methods](/up.form.config#config.wrapMethods)
+      The name of the POST parameter when [wrapping HTTP methods](/up.proxy.config#config.wrapMethods)
       in a `POST` request.
     @param {String} [config.csrfHeader='X-CSRF-Token']
       The name of the HTTP header that will include the
@@ -6462,7 +6461,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
           duration: options.duration
         };
         if (u.isString(options.reveal)) {
-          selector = revealSelector(options.reveal);
+          selector = revealSelector(options.reveal, options);
           $element = up.first(selector) || $element;
           revealOptions.top = true;
         }
@@ -6477,7 +6476,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @internal
      */
     revealSelector = function(selector, options) {
-      selector = up.dom.resolveSelector(selector, options);
+      selector = up.dom.resolveSelector(selector, options.origin);
       if (selector[0] === '#') {
         selector += ", a[name='" + selector + "']";
       }
@@ -6718,14 +6717,17 @@ is built from these functions. You can use them to extend Unpoly from your
     };
 
     /**
-    Resolves the given selector (which might contain `&` references)
-    to an absolute selector.
+    Resolves the given CSS selector (which might contain `&` references)
+    to a full CSS selector without ampersands.
+    
+    If passed an `Element` or `jQuery` element, returns a CSS selector string
+    for that element.
     
     @function up.dom.resolveSelector
     @param {string|Element|jQuery} selectorOrElement
     @param {string|Element|jQuery} origin
       The element that this selector resolution is relative to.
-      That element's selector will be substituted for `&`.
+      That element's selector will be substituted for `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @internal
      */
     resolveSelector = function(selectorOrElement, origin) {
@@ -6829,7 +6831,7 @@ is built from these functions. You can use them to extend Unpoly from your
       here, in which case a selector will be inferred from the element's class and ID.
     @param {string} url
       The URL to fetch from the server.
-    @param {string} [options.failTarget='body']
+    @param {string} [options.failTarget]
       The CSS selector to update if the server sends a non-200 status code.
     @param {string} [options.fallback]
       The selector to update when the original target was not found in the page.
@@ -6878,7 +6880,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @param {Element|jQuery} [options.origin]
       The element that triggered the replacement.
     
-      The element's selector will be substituted for the `&` shorthand in the target selector.
+      The element's selector will be substituted for the `&` shorthand in the target selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [options.layer='auto']
       The name of the layer that ought to be updated. Valid values are
       `auto`, `page`, `modal` and `popup`.
@@ -6889,13 +6891,17 @@ is built from these functions. You can use them to extend Unpoly from your
       Unpoly will search in other layers, starting from the topmost layer.
     @param {string} [options.failLayer='auto']
       The name of the layer that ought to be updated if the server sends a non-200 status code.
+    @param {boolean} [options.keep=true]
+      Whether this replacement will preserve [`[up-keep]`](/up-keep) elements.
+    @param {boolean} [options.hungry=true]
+      Whether this replacement will update [`[up-hungry]`](/up-hungry) elements.
     
     @return {Promise}
       A promise that will be fulfilled when the page has been updated.
     @stable
      */
     replace = function(selectorOrElement, url, options) {
-      var e, error, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
+      var e, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
       options = u.options(options);
       options.inspectResponse = fullLoad = function() {
         return up.browser.navigate(url, u.only(options, 'method', 'data'));
@@ -6912,8 +6918,7 @@ is built from these functions. You can use them to extend Unpoly from your
       failureOptions = u.merge(options, {
         humanizedTarget: 'failure target',
         provideTarget: void 0,
-        restoreScroll: false,
-        hungry: false
+        restoreScroll: false
       });
       u.renameKey(failureOptions, 'failTransition', 'transition');
       u.renameKey(failureOptions, 'failLayer', 'layer');
@@ -6921,8 +6926,8 @@ is built from these functions. You can use them to extend Unpoly from your
       try {
         improvedTarget = bestPreflightSelector(selectorOrElement, successOptions);
         improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions);
-      } catch (error) {
-        e = error;
+      } catch (_error) {
+        e = _error;
         return Promise.reject(e);
       }
       request = {
@@ -9539,12 +9544,16 @@ new page is loading.
     @selector a[up-target]
     @param {string} up-target
       The CSS selector to replace
+    
+      Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [up-method='get']
       The HTTP method to use for the request.
     @param {string} [up-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements.
     @param [up-fail-target='body']
-      The selector to replace if the server responds with an error.
+      The CSS selector to replace if the server responds with an error.
+    
+      Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [up-fail-transition='none']
       The [transition](/up.motion) to use for morphing between the old and new elements
       when the server responds with an error.
@@ -9560,10 +9569,12 @@ new page is loading.
       Whether to reveal the target element after it was replaced.
     
       You can also pass a CSS selector for the element to reveal.
+      Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [up-fail-reveal='true']
       Whether to reveal the target element when the server responds with an error.
     
       You can also pass a CSS selector for the element to reveal.
+      Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [up-restore-scroll='false']
       Whether to restore previously known scroll position of all viewports
       within the target selector.
@@ -9880,12 +9891,16 @@ open dialogs with sub-forms, etc. all without losing form state.
       Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
       if none of these attributes are given.
     @param {string} [options.target]
-      The selector to update when the form submission succeeds (server responds with status 200).
+      The CSS selector to update when the form submission succeeds (server responds with status 200).
       Defaults to the form's `up-target` attribute.
+    
+      Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [options.failTarget]
-      The selector to update when the form submission fails (server responds with non-200 status).
+      The CSS selector to update when the form submission fails (server responds with non-200 status).
       Defaults to the form's `up-fail-target` attribute, or to an auto-generated
       selector that matches the form itself.
+    
+      Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [options.fallback]
       The selector to update when the original target was not found in the page.
       Defaults to the form's `up-fallback` attribute.
@@ -10359,11 +10374,15 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     @selector form[up-target]
     @param {string} up-target
-      The selector to [replace](/up.replace) if the form submission is successful (200 status code).
+      The CSS selector to [replace](/up.replace) if the form submission is successful (200 status code).
+    
+      Inside the CSS selector you may refer to this form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [up-fail-target]
-      The selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
-      If omitted, Unpoly will replace the `<form>` tag itself, assuming that the
-      server has echoed the form with validation errors.
+      The CSS selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
+    
+      Inside the CSS selector you may refer to this form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+    
+      If omitted, Unpoly will replace the `<form>` tag itself, assuming that the server has echoed the form with validation errors.
     @param [up-fallback]
       The selector to replace if the server responds with an error.
     @param {string} [up-transition]
@@ -10397,6 +10416,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       Whether to reveal the target element after it was replaced.
     
       You can also pass a CSS selector for the element to reveal.
+      Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [up-fail-reveal='true']
       Whether to reveal the target element when the server responds with an error.
     
@@ -10406,6 +10426,8 @@ open dialogs with sub-forms, etc. all without losing form state.
           <form up-target=".content" up-fail-reveal=".error">
             ...
           </form>
+    
+      Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [up-restore-scroll='false']
       Whether to restore previously known scroll position of all viewports
       within the target selector.
