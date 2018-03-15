@@ -58,8 +58,11 @@ up.dom = (($) ->
     u.presence($element.attr("up-source")) || up.browser.url()
 
   ###*
-  Resolves the given selector (which might contain `&` references)
-  to an absolute selector.
+  Resolves the given CSS selector (which might contain `&` references)
+  to a full CSS selector without ampersands.
+
+  If passed an `Element` or `jQuery` element, returns a CSS selector string
+  for that element.
 
   @function up.dom.resolveSelector
   @param {string|Element|jQuery} selectorOrElement

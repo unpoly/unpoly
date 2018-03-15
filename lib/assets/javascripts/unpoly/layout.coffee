@@ -490,6 +490,8 @@ up.layout = (($) ->
   @internal
   ###
   revealSelector = (selector, options) ->
+    # up.dom.resolveSelector() will (1) substitute any "&" shorthands with an selector
+    # for options.origin and (2) convert selector into a string, if it is an Element.
     selector = up.dom.resolveSelector(selector, options.origin)
     if selector[0] == '#'
       selector += ", a[name='#{selector}']"
