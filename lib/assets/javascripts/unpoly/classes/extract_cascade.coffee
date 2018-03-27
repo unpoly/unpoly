@@ -45,9 +45,13 @@ class up.ExtractCascade
     if @options.provideTarget
       # We know that the target will be created right before swapping,
       # so just assume the first plan will work.
-      @plans[0].selector
-    else if plan = @oldPlan()
-      plan.selector
+      plan = @plans[0]
+    else
+      plan = @oldPlan()
+
+    if plan
+      plan.resolveNesting()
+      plan.selector()
     else
       @oldPlanNotFound()
 
@@ -55,27 +59,11 @@ class up.ExtractCascade
     if plan = @matchingPlan()
       # Only when we have a match in the required selectors, we
       # append the optional steps for [up-hungry] elements.
-      plan.steps.concat(@hungrySteps())
+      plan.addHungrySteps()
+      plan.resolveNesting()
+      plan.steps
     else
       @matchingPlanNotFound()
-
-  hungrySteps: =>
-    steps = []
-    if @options.hungry
-      $hungries = up.radio.hungrySelector().select()
-      for hungry in $hungries
-        $hungry = $(hungry)
-        selector = u.selectorForElement($hungry)
-        if $newHungry = @options.response.first(selector)
-          transition = u.option(up.radio.config.hungryTransition, @options.transition)
-          steps.push
-            selector: selector
-            $old: $hungry
-            $new: $newHungry
-            transition: transition
-            reveal: false # we never auto-reveal a hungry element
-            origin: null # don't let the hungry element auto-close a non-sticky modal or popup
-    steps
 
   matchingPlanNotFound: =>
     # The job of this method is to simply throw an error.

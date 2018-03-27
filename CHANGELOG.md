@@ -6,6 +6,33 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+### Fragment updates
+
+- Unpoly now detects when an [`[up-target]`](/up-target) with multiple selectors would [replace](/up.replace) the same element multiple times. In such a case the target selector will be shortened to contain the element once.
+- Unpoly now detects when an [`[up-target]`](/up-target) with multiple selectors contains nested elements. In such a case the target selector will be shortened to only contain the outmost element.
+
+
+### Utility functions
+
+- [`up.util.uniq()`](/up.util.uniq) now works on DOM elements and other object references.
+- New experimental function [`up.util.uniqBy()`](/up.util.uniqBy). This function is like [`uniq`](/up.util.uniq), accept that the given function is invoked for each element to generate the value for which uniquness is computed.
+- Changes to [utility functions](/up.util) that work on lists ([`up.util.each()`](/up.util.each), [`up.util.map()`](/up.util.map), [`up.util.all()`](/up.util.all), [`up.util.any()`](/up.util.any), [`up.util.select()`](/up.util.select), [`up.util.reject()`](/up.util.reject)):
+  - List functions now accept a property name instead of a mapping function:
+
+    ```
+    users = [{ name: 'foo' }, { name: 'bar' }]
+    up.util.map(users, 'name') // ['foo', 'bar']
+    ```
+  - List functions now pass the iteration index as a second argument to the given function:
+
+    ```
+    users = [{ name: 'foo' }, { name: 'bar' }]
+    up.util.map(users, function(user, index) { return index }) // [0, 1]
+    ```
+
 0.54.1
 ------
 

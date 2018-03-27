@@ -252,6 +252,31 @@ up.util = (($) ->
   ###
   trim = $.trim
 
+  listBlock = (block) ->
+    if isString(block)
+      (item) -> item[block]
+    else
+      block
+
+  ###**
+  Translate all items in an array to new array of items.
+
+  @function up.util.map
+  @param {Array<T>} array
+  @param {Function(T, number): any|String} block
+    A function that will be called with each element and (optional) iteration index.
+
+    You can also pass a property name as a String,
+    which will be collected from each item in the array.
+  @return {Array}
+    A new array containing the result of each function call.
+  @stable
+  ###
+  map = (array, block) ->
+    block = listBlock(block)
+    for item, index in array
+      block(item, index)
+
   ###**
   Calls the given function for each element (and, optional, index)
   of the given array.
@@ -262,21 +287,7 @@ up.util = (($) ->
     A function that will be called with each element and (optional) iteration index.
   @stable
   ###
-  each = (array, block) ->
-    block(item, index) for item, index in array
-
-  ###**
-  Translate all items in an array to new array of items.
-
-  @function up.util.map
-  @param {Array<T>} array
-  @param {Function(T, number): any} block
-    A function that will be called with each element and (optional) iteration index.
-  @return {Array}
-    A new array containing the result of each function call.
-  @stable
-  ###
-  map = each
+  each = map
 
   ###**
   Calls the given function for the given number of times.
@@ -642,14 +653,17 @@ up.util = (($) ->
 
   @function up.util.any
   @param {Array<T>} array
-  @param {Function(T): boolean} tester
+  @param {Function(T, number): boolean} tester
+    A function that will be called with each element and (optional) iteration index.
+
   @return {boolean}
   @experimental
   ###
   any = (array, tester) ->
+    tester = listBlock(tester)
     match = false
-    for element in array
-      if tester(element)
+    for element, index in array
+      if tester(element, index)
         match = true
         break
     match
@@ -660,14 +674,17 @@ up.util = (($) ->
 
   @function up.util.all
   @param {Array<T>} array
-  @param {Function(T): boolean} tester
+  @param {Function(T, number): boolean} tester
+    A function that will be called with each element and (optional) iteration index.
+
   @return {boolean}
   @experimental
   ###
   all = (array, tester) ->
+    tester = listBlock(tester)
     match = true
-    for element in array
-      unless tester(element)
+    for element, index in array
+      unless tester(element, index)
         match = false
         break
     match
@@ -693,12 +710,41 @@ up.util = (($) ->
   @stable
   ###
   uniq = (array) ->
-    seen = {}
-    select array, (element) ->
-      if seen.hasOwnProperty(element)
+    return array if array.length < 2
+    set = new Set(array)
+    setToArray(set)
+
+  ###*
+  This function is like [`uniq`](/up.util.uniq), accept that
+  the given function is invoked for each element to generate the value
+  for which uniquness is computed.
+
+  @function up.util.uniqBy
+  @param {Array<T>} array
+  @param {Function<T>: any} array
+  @return {Array<T>}
+  @experimental
+  ###
+  uniqBy = (array, mapper) ->
+    return array if array.length < 2
+    mapper = listBlock(mapper)
+    set = new Set()
+    select array, (elem, index) ->
+      mapped = mapper(elem, index)
+      if set.has(mapped)
         false
       else
-        seen[element] = true
+        set.add(mapped)
+        true
+
+  ###*
+  @function up.util.setToArray
+  @internal
+  ###
+  setToArray = (set) ->
+    array = []
+    set.forEach (elem) -> array.push(elem)
+    array
 
   ###**
   Returns all elements from the given array that return
@@ -706,13 +752,15 @@ up.util = (($) ->
 
   @function up.util.select
   @param {Array<T>} array
+  @param {Function(T, number): boolean} tester
   @return {Array<T>}
   @stable
   ###
   select = (array, tester) ->
+    tester = listBlock(tester)
     matches = []
-    each array, (element) ->
-      if tester(element)
+    each array, (element, index) ->
+      if tester(element, index)
         matches.push(element)
     matches
 
@@ -722,11 +770,13 @@ up.util = (($) ->
 
   @function up.util.reject
   @param {Array<T>} array
+  @param {Function(T, number): boolean} tester
   @return {Array<T>}
   @stable
   ###
   reject = (array, tester) ->
-    select(array, (element) -> !tester(element))
+    tester = listBlock(tester)
+    select(array, (element, index) -> !tester(element, index))
 
   ###**
   Returns the intersection of the given two arrays.
@@ -1534,7 +1584,7 @@ up.util = (($) ->
   isDetached = (element) ->
     element = unJQuery(element)
     # This is by far the fastest way to do this
-    not jQuery.contains(document.documentElement, element)
+    not $.contains(document.documentElement, element)
 
   ###**
   Given a function that will return a promise, returns a proxy function
@@ -1806,6 +1856,7 @@ up.util = (($) ->
   intersect: intersect
   compact: compact
   uniq: uniq
+  uniqBy: uniqBy
   last: last
   isNull: isNull
   isDefined: isDefined

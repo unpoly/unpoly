@@ -5,11 +5,12 @@ class up.ExtractPlan
   constructor: (selector, options) ->
     @reveal = options.reveal
     @origin = options.origin
-    @selector = up.dom.resolveSelector(selector, @origin)
+    @hungry = options.hungry
     @transition = options.transition
     @response = options.response
     @oldLayer = options.layer
-    @parseSteps()
+    originalSelector = up.dom.resolveSelector(selector, @origin)
+    @parseSteps(originalSelector)
 
   findOld: =>
     u.each @steps, (step) =>
@@ -31,41 +32,80 @@ class up.ExtractPlan
   matchExists: =>
     @oldExists() && @newExists()
 
-  ###**
-  Example:
+  addSteps: (steps) =>
+    @steps = @steps.concat(steps)
+    
+  resolveNesting: =>
+    return if @steps.length < 2
 
-      parseSelector('foo, bar:before', transition: 'cross-fade')
+    compressed = u.copy(@steps)
 
-      [
-        { selector: 'foo', pseudoClass: undefined, transition: 'cross-fade' },
-        { selector: 'bar', pseudoClass: 'before', transition: 'cross-fade' }
-      ]
-  ###
-  parseSteps: =>
+    # When two replacements target the same element, we would process
+    # the same content twice. We never want that, so we only keep the first step.
+    compressed = u.uniqBy(compressed, (step) -> step.$old[0])
+
+    compressed = u.select compressed, (candidateStep, candidateIndex) =>
+      u.all compressed, (rivalStep, rivalIndex) =>
+        if rivalIndex == candidateIndex
+          true
+        else
+          candidateElement = candidateStep.$old[0]
+          rivalElement = rivalStep.$old[0]
+          rivalStep.pseudoClass || !$.contains(rivalElement, candidateElement)
+
+    # If we revealed before, we should reveal now
+    compressed[0].reveal = @steps[0].reveal
+    @steps = compressed
+
+  selector: =>
+    u.map(@steps, 'expression').join(', ')
+
+  parseSteps: (originalSelector) =>
     comma = /\ *,\ */
 
     @steps = []
 
-    disjunction = @selector.split(comma)
+    disjunction = originalSelector.split(comma)
 
-    u.each disjunction, (literal, i) =>
-      literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/)
-      literalParts or up.fail('Could not parse selector literal "%s"', literal)
-      selector = literalParts[1]
+    u.each disjunction, (expression, i) =>
+      expressionParts = expression.match(/^(.+?)(?:\:(before|after))?$/)
+      expressionParts or up.fail('Could not parse selector literal "%s"', expression)
+      selector = expressionParts[1]
       if selector == 'html'
         # If someone really asked us to replace the <html> root, the best
         # we can do is replace the <body>.
         selector = 'body'
 
-      pseudoClass = literalParts[2]
+      pseudoClass = expressionParts[2]
 
       # When extracting multiple selectors, we only want to reveal the first element.
       # So we set the { reveal } option to false for the next iteration.
       doReveal = if i == 0 then @reveal else false
 
       @steps.push
+        expression: expression
         selector: selector
         pseudoClass: pseudoClass
         transition: @transition
         origin: @origin
         reveal: doReveal
+
+  addHungrySteps: =>
+    hungrySteps = []
+    if @hungry
+      $hungries = up.radio.hungrySelector().select()
+      transition = u.option(up.radio.config.hungryTransition, @transition)
+      for hungry in $hungries
+        $hungry = $(hungry)
+        selector = u.selectorForElement($hungry)
+        if $newHungry = @response.first(selector)
+          hungrySteps.push
+            selector: selector
+            $old: $hungry
+            $new: $newHungry
+            transition: transition
+            reveal: false # we never auto-reveal a hungry element
+            origin: null # don't let the hungry element auto-close a non-sticky modal or popup
+
+    @addSteps(hungrySteps)
+

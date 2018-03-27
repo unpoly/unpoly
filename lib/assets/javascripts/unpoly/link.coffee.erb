@@ -226,8 +226,8 @@ up.link = (($) ->
   @function up.link.addFollowVariant
   @param {string} simplifiedSelector
     A selector without `a` or `[up-href]`, e.g. `[up-target]`
-  @param {Function<jQuery, Object>} options.follow
-  @param {Function<jQuery, Object>} options.preload
+  @param {Function(jQuery, Object)} options.follow
+  @param {Function(jQuery, Object)} options.preload
   @internal
   ###
   addFollowVariant = (simplifiedSelector, options) ->

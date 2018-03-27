@@ -4,6 +4,102 @@ describe 'up.util', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.util.uniq', ->
+
+      it 'returns the given array with duplicates elements removed', ->
+        input = [1, 2, 1, 1, 3]
+        result = up.util.uniq(input)
+        expect(result).toEqual [1, 2, 3]
+
+      it 'works on DOM elements', ->
+        one = document.createElement("div")
+        two = document.createElement("div")
+        input = [one, one, two, two]
+        result = up.util.uniq(input)
+        expect(result).toEqual [one, two]
+
+      it 'preserves insertion order', ->
+        input = [1, 2, 1]
+        result = up.util.uniq(input)
+        expect(result).toEqual [1, 2]
+
+    describe 'up.util.uniqBy', ->
+
+      it 'returns the given array with duplicate elements removed, calling the given function to determine value for uniqueness', ->
+        input = ["foo", "bar", "apple", 'orange', 'banana']
+        result = up.util.uniqBy(input, (element) -> element.length)
+        expect(result).toEqual ['foo', 'apple', 'orange']
+
+      it 'accepts a property name instead of a function, which collects that property from each item to compute uniquness', ->
+        input = ["foo", "bar", "apple", 'orange', 'banana']
+        result = up.util.uniqBy(input, 'length')
+        expect(result).toEqual ['foo', 'apple', 'orange']
+
+    describe 'up.util.map', ->
+
+      it 'creates a new array of values by calling the given function on each item of the given array', ->
+        array = ["apple", "orange", "cucumber"]
+        mapped = up.util.map(array, (element) -> element.length)
+        expect(mapped).toEqual [5, 6, 8]
+
+      it 'accepts a property name instead of a function, which collects that property from each item', ->
+        array = ["apple", "orange", "cucumber"]
+        mapped = up.util.map(array, 'length')
+        expect(mapped).toEqual [5, 6, 8]
+
+      it 'passes the iteration index as second argument to the given function', ->
+        array = ["apple", "orange", "cucumber"]
+        mapped = up.util.map(array, (element, i) -> i)
+        expect(mapped).toEqual [0, 1, 2]
+
+    describe 'up.util.each', ->
+
+      it 'calls the given function once for each itm of the given array', ->
+        args = []
+        array = ["apple", "orange", "cucumber"]
+        up.util.each array, (item) -> args.push(item)
+        expect(args).toEqual ["apple", "orange", "cucumber"]
+
+      it 'passes the iteration index as second argument to the given function', ->
+        args = []
+        array = ["apple", "orange", "cucumber"]
+        up.util.each array, (item, index) -> args.push(index)
+        expect(args).toEqual [0, 1, 2]
+
+    describe 'up.util.select', ->
+
+      it 'returns an array of those elements in the given array for which the given function returns true', ->
+        array = ["foo", "orange", "cucumber"]
+        results = up.util.select array, (item) -> item.length > 3
+        expect(results).toEqual ['orange', 'cucumber']
+
+      it 'passes the iteration index as second argument to the given function', ->
+        array = ["apple", "orange", "cucumber", "banana"]
+        results = up.util.select array, (item, index) -> index % 2 == 0
+        expect(results).toEqual ['apple', 'cucumber']
+
+      it 'accepts a property name instead of a function, which checks that property from each item', ->
+        array = [ { name: 'a', prop: false }, { name: 'b', prop: true } ]
+        results = up.util.select array, 'prop'
+        expect(results).toEqual [{ name: 'b', prop: true }]
+
+    describe 'up.util.reject', ->
+
+      it 'returns an array of those elements in the given array for which the given function returns false', ->
+        array = ["foo", "orange", "cucumber"]
+        results = up.util.reject array, (item) -> item.length < 4
+        expect(results).toEqual ['orange', 'cucumber']
+
+      it 'passes the iteration index as second argument to the given function', ->
+        array = ["apple", "orange", "cucumber", "banana"]
+        results = up.util.reject array, (item, index) -> index % 2 == 0
+        expect(results).toEqual ['orange', 'banana']
+
+      it 'accepts a property name instead of a function, which checks that property from each item', ->
+        array = [ { name: 'a', prop: false }, { name: 'b', prop: true } ]
+        results = up.util.reject array, 'prop'
+        expect(results).toEqual [{ name: 'a', prop: false }]
+
     describe 'up.util.previewable', ->
 
       it 'wraps a function into a proxy function with an additional .promise attribute', ->
@@ -377,6 +473,75 @@ describe 'up.util', ->
           count += 1
           up.util.isPresent(element)
         expect(count).toBe(3)
+
+      it 'passes the iteration index as second argument to the given function', ->
+        array = ["apple", "orange", "cucumber"]
+        args = []
+        up.util.all array, (item, index) ->
+          args.push(index)
+          true
+        expect(args).toEqual [0, 1, 2]
+
+      it 'accepts a property name instead of a function, which collects that property from each item', ->
+        allTrue = [ { prop: true }, { prop: true } ]
+        someFalse = [ { prop: true }, { prop: false } ]
+        expect(up.util.all(allTrue, 'prop')).toBe(true)
+        expect(up.util.all(someFalse, 'prop')).toBe(false)
+
+#    describe 'up.util.none', ->
+#
+#      it 'returns true if no element in the array returns true for the given function', ->
+#        result = up.util.none ['foo', 'bar', 'baz'], up.util.isBlank
+#        expect(result).toBe(true)
+#
+#      it 'returns false if an element in the array returns false for the given function', ->
+#        result = up.util.none ['foo', 'bar', null, 'baz'], up.util.isBlank
+#        expect(result).toBe(false)
+#
+#      it 'short-circuits once an element returns true', ->
+#        count = 0
+#        up.util.none ['foo', 'bar', '', 'baz'], (element) ->
+#          count += 1
+#          up.util.isBlank(element)
+#        expect(count).toBe(3)
+#
+#      it 'passes the iteration index as second argument to the given function', ->
+#        array = ["apple", "orange", "cucumber"]
+#        args = []
+#        up.util.none array, (item, index) ->
+#          args.push(index)
+#          false
+#        expect(args).toEqual [0, 1, 2]
+#
+#      it 'accepts a property name instead of a function, which collects that property from each item', ->
+#        allFalse = [ { prop: false }, { prop: false } ]
+#        someTrue = [ { prop: true }, { prop: false } ]
+#        expect(up.util.none(allFalse, 'prop')).toBe(true)
+#        expect(up.util.none(someTrue, 'prop')).toBe(false)
+
+    describe 'up.util.any', ->
+
+      it 'returns true if at least one element in the array returns true for the given function', ->
+        result = up.util.any ['', 'bar', null], up.util.isPresent
+        expect(result).toBe(true)
+
+      it 'returns false if no element in the array returns true for the given function', ->
+        result = up.util.any ['', null, undefined], up.util.isPresent
+        expect(result).toBe(false)
+
+      it 'passes the iteration index as second argument to the given function', ->
+        array = ["apple", "orange", "cucumber"]
+        args = []
+        up.util.any array, (item, index) ->
+          args.push(index)
+          false
+        expect(args).toEqual [0, 1, 2]
+
+      it 'accepts a property name instead of a function, which collects that property from each item', ->
+        someTrue = [ { prop: true }, { prop: false } ]
+        allFalse = [ { prop: false }, { prop: false } ]
+        expect(up.util.any(someTrue, 'prop')).toBe(true)
+        expect(up.util.any(allFalse, 'prop')).toBe(false)
 
     describe 'up.util.isBlank', ->
 

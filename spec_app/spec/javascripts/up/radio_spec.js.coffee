@@ -51,6 +51,28 @@ describe 'up.radio', ->
           promiseState(promise).then (result) ->
             expect(result.state).toEqual('fulfilled')
 
+      it 'still reveals the element that was originally targeted', asyncSpec (next) ->
+        affix('.hungry[up-hungry]').text('old hungry')
+        affix('.target').text('old target')
+
+        revealStub = up.layout.knife.mock('reveal')
+
+        up.replace('.target', '/path', reveal: true)
+
+        next =>
+          @respondWith """
+            <div class="target">
+              new target
+            </div>
+          """
+
+        next =>
+          expect(revealStub).toHaveBeenCalled()
+          revealArg = revealStub.calls.mostRecent().args[0]
+          expect(revealArg).not.toBeMatchedBy('.hungry')
+          expect(revealArg).toBeMatchedBy('.target')
+
+
       it 'does not change the X-Up-Target header for the request', asyncSpec (next) ->
         affix('.hungry[up-hungry]').text('old hungry')
         affix('.target').text('old target')

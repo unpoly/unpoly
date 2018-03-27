@@ -12,6 +12,7 @@ gem 'jquery-rails'
 gem 'unpoly-rails', path: '..'
 gem 'bower-rails'
 gem 'bootstrap-sass', '~> 3.3'
+gem 'rake', '< 11'
 
 # Jasmine spec runner won't boot with a more modern version of sprockets.
 # It crashes with an "asset not precompiled" error.
