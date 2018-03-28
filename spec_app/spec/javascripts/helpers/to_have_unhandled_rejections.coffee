@@ -1,4 +1,7 @@
 UNHANDLED_REJECTIONS = []
+# In Firefox promise events are disabled by default.
+# We need to enable them in about:config.
+window.REJECTION_EVENTS_SUPPORTED = ("onunhandledrejection" in window)
 
 beforeAll ->
   window.addEventListener 'unhandledrejection', (event) ->

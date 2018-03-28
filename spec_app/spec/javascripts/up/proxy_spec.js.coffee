@@ -1064,7 +1064,7 @@ describe 'up.proxy', ->
 
           # Since there isn't anyone who could handle the rejection inside
           # the event handler, our handler mutes the rejection.
-          expect(window).not.toHaveUnhandledRejections()
+          expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
 
       it 'triggers a separate AJAX request when hovered multiple times and the cache expires between hovers', asyncSpec (next)  ->
         up.proxy.config.cacheExpiry = 50

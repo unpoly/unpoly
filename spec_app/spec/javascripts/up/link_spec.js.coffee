@@ -798,7 +798,7 @@ describe 'up.link', ->
 
               # Since there isn't anyone who could handle the rejection inside
               # the event handler, our handler mutes the rejection.
-              expect(window).not.toHaveUnhandledRejections()
+              expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
 
 
           it 'uses the [up-target] selector for a successful response', asyncSpec (next) ->

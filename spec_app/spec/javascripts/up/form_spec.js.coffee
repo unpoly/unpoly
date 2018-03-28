@@ -355,7 +355,8 @@ describe 'up.form', ->
             expect('.before').not.toHaveText('old-before')
             expect('.after').not.toHaveText('old-after')
 
-            expect(window).toHaveUnhandledRejections()
+            expect(window).toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+
 
         it 'respects X-Up-Method and X-Up-Location response headers so the server can show that it redirected to a GET URL', asyncSpec (next) ->
           up.submit(@$form)
@@ -658,7 +659,7 @@ describe 'up.form', ->
 
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
-            expect(window).not.toHaveUnhandledRejections()
+            expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
 
         it 'updates a given selector when an [up-fail-target] is given', asyncSpec (next) ->
           $form = affix('form.my-form[action="/path"][up-target=".target"][up-fail-target=".errors"]').text('old form text')
@@ -907,7 +908,7 @@ describe 'up.form', ->
 
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
-            expect(window).not.toHaveUnhandledRejections()
+            expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
 
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
           revealSpy = up.layout.knife.mock('reveal').and.returnValue(Promise.resolve())
