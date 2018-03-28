@@ -1,5 +1,5 @@
 
-/**
+/***
 @module up
  */
 
@@ -18,7 +18,7 @@
 
 }).call(this);
 
-/**
+/***
 Utility functions
 =================
   
@@ -35,7 +35,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
   up.util = (function($) {
 
-    /**
+    /***
     A function that does nothing.
     
     @function up.util.noop
@@ -44,7 +44,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, attributeSelector, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, multiSelector, muteRejection, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
-    /**
+    /***
     Ensures that the given function can only be called a single time.
     Subsequent calls will return the return value of the first call.
     
@@ -70,7 +70,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       };
     };
 
-    /**
+    /***
     Returns if the given port is the default port for the given protocol.
     
     @function up.util.isStandardPort
@@ -81,7 +81,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return ((port === "" || port === "80") && protocol === 'http:') || (port === "443" && protocol === 'https:');
     };
 
-    /**
+    /***
     Normalizes relative paths and absolute paths to a full URL
     that can be checked for equality with other normalized URLs.
     
@@ -126,7 +126,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return currentUrl.protocol !== targetUrl.protocol || currentUrl.host !== targetUrl.host;
     };
 
-    /**
+    /***
     Parses the given URL into components such as hostname and path.
     
     If the given URL is not fully qualified, it is assumed to be relative
@@ -154,7 +154,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return anchor;
     };
 
-    /**
+    /***
     @function up.util.normalizeMethod
     @internal
      */
@@ -166,7 +166,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     @function up.util.methodAllowsPayload
     @internal
      */
@@ -174,7 +174,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return method !== 'GET' && method !== 'HEAD';
     };
 
-    /**
+    /***
     @function $createElementFromSelector
     @internal
      */
@@ -221,7 +221,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return $root;
     };
 
-    /**
+    /***
     @function $create
      */
     $createPlaceholder = function(selector, container) {
@@ -235,7 +235,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return $placeholder;
     };
 
-    /**
+    /***
     Returns a CSS selector that matches the given element as good as possible.
     
     This uses, in decreasing order of priority:
@@ -310,7 +310,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return target;
     };
 
-    /**
+    /***
     Merge the own properties of one or more `sources` into the `target` object.
     
     @function up.util.assign
@@ -320,7 +320,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     assign = Object.assign || assignPolyfill;
 
-    /**
+    /***
     Returns a new string with whitespace removed from the beginning
     and end of the given string.
     
@@ -332,7 +332,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     trim = $.trim;
 
-    /**
+    /***
     Calls the given function for each element (and, optional, index)
     of the given array.
     
@@ -352,7 +352,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return results;
     };
 
-    /**
+    /***
     Translate all items in an array to new array of items.
     
     @function up.util.map
@@ -365,7 +365,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     map = each;
 
-    /**
+    /***
     Calls the given function for the given number of times.
     
     @function up.util.times
@@ -382,7 +382,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return results;
     };
 
-    /**
+    /***
     Returns whether the given argument is `null`.
     
     @function up.util.isNull
@@ -394,7 +394,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return object === null;
     };
 
-    /**
+    /***
     Returns whether the given argument is `undefined`.
     
     @function up.util.isUndefined
@@ -406,7 +406,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return object === void 0;
     };
 
-    /**
+    /***
     Returns whether the given argument is not `undefined`.
     
     @function up.util.isDefined
@@ -418,7 +418,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return !isUndefined(object);
     };
 
-    /**
+    /***
     Returns whether the given argument is either `undefined` or `null`.
     
     Note that empty strings or zero are *not* considered to be "missing".
@@ -434,7 +434,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return isUndefined(object) || isNull(object);
     };
 
-    /**
+    /***
     Returns whether the given argument is neither `undefined` nor `null`.
     
     Note that empty strings or zero *are* considered to be "given".
@@ -450,7 +450,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return !isMissing(object);
     };
 
-    /**
+    /***
     Return whether the given argument is considered to be blank.
     
     This returns `true` for:
@@ -472,7 +472,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return isMissing(object) || (isObject(object) && Object.keys(object).length === 0) || (object.length === 0);
     };
 
-    /**
+    /***
     Returns the given argument if the argument is [present](/up.util.isPresent),
     otherwise returns `undefined`.
     
@@ -494,7 +494,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     Returns whether the given argument is not [blank](/up.util.isBlank).
     
     @function up.util.isPresent
@@ -506,7 +506,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return !isBlank(object);
     };
 
-    /**
+    /***
     Returns whether the given argument is a function.
     
     @function up.util.isFunction
@@ -518,7 +518,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return typeof object === 'function';
     };
 
-    /**
+    /***
     Returns whether the given argument is a string.
     
     @function up.util.isString
@@ -530,7 +530,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return typeof object === 'string' || object instanceof String;
     };
 
-    /**
+    /***
     Returns whether the given argument is a number.
     
     Note that this will check the argument's *type*.
@@ -545,7 +545,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return typeof object === 'number' || object instanceof Number;
     };
 
-    /**
+    /***
     Returns whether the given argument is an options hash,
     
     Differently from [`up.util.isObject()`], this returns false for
@@ -560,7 +560,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return typeof object === 'object' && !isNull(object) && !isJQuery(object) && !isPromise(object) && !isFormData(object) && !isArray(object);
     };
 
-    /**
+    /***
     Returns whether the given argument is an object.
     
     This also returns `true` for functions, which may behave like objects in JavaScript.
@@ -576,7 +576,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return (typeOfResult === 'object' && !isNull(object)) || typeOfResult === 'function';
     };
 
-    /**
+    /***
     Returns whether the given argument is a DOM element.
     
     @function up.util.isElement
@@ -588,7 +588,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return !!(object && object.nodeType === 1);
     };
 
-    /**
+    /***
     Returns whether the given argument is a jQuery collection.
     
     @function up.util.isJQuery
@@ -600,7 +600,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return object instanceof jQuery;
     };
 
-    /**
+    /***
     Returns whether the given argument is an object with a `then` method.
     
     @function up.util.isPromise
@@ -612,7 +612,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return isObject(object) && isFunction(object.then);
     };
 
-    /**
+    /***
     Returns whether the given argument is an array.
     
     @function up.util.isArray
@@ -622,7 +622,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     isArray = Array.isArray;
 
-    /**
+    /***
     Returns whether the given argument is a `FormData` instance.
     
     Always returns `false` in browsers that don't support `FormData`.
@@ -636,7 +636,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return object instanceof FormData;
     };
 
-    /**
+    /***
     Converts the given array-like argument into an array.
     
     Returns the array.
@@ -650,7 +650,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return Array.prototype.slice.call(object);
     };
 
-    /**
+    /***
     Returns a shallow copy of the given array or object.
     
     @function up.util.copy
@@ -669,7 +669,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return object;
     };
 
-    /**
+    /***
     If given a jQuery collection, returns the underlying array of DOM element.
     If given any other argument, returns the argument unchanged.
     
@@ -685,7 +685,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     Creates a new object by merging together the properties from the given objects.
     
     @function up.util.merge
@@ -699,7 +699,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return assign.apply(null, [{}].concat(slice.call(sources)));
     };
 
-    /**
+    /***
     Creates an options hash from the given argument and some defaults.
     
     The semantics of this function are confusing.
@@ -728,7 +728,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return merged;
     };
 
-    /**
+    /***
     Returns the first argument that is considered [given](/up.util.isGiven).
     
     This function is useful when you have multiple option sources and the value can be boolean.
@@ -745,7 +745,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return detect(args, isGiven);
     };
 
-    /**
+    /***
     Passes each element in the given array to the given function.
     Returns the first element for which the function returns a truthy value.
     
@@ -770,7 +770,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return match;
     };
 
-    /**
+    /***
     Returns whether the given function returns a truthy value
     for any element in the given array.
     
@@ -793,7 +793,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return match;
     };
 
-    /**
+    /***
     Returns whether the given function returns a truthy value
     for all elements in the given array.
     
@@ -816,7 +816,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return match;
     };
 
-    /**
+    /***
     Returns all elements from the given array that are
     neither `null` or `undefined`.
     
@@ -829,7 +829,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return select(array, isGiven);
     };
 
-    /**
+    /***
     Returns the given array without duplicates.
     
     @function up.util.uniq
@@ -849,7 +849,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       });
     };
 
-    /**
+    /***
     Returns all elements from the given array that return
     a truthy value when passed to the given function.
     
@@ -869,7 +869,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return matches;
     };
 
-    /**
+    /***
     Returns all elements from the given array that do not return
     a truthy value when passed to the given function.
     
@@ -884,7 +884,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       });
     };
 
-    /**
+    /***
     Returns the intersection of the given two arrays.
     
     Implementation is not optimized. Don't use it for large arrays.
@@ -898,7 +898,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       });
     };
 
-    /**
+    /***
     Returns the first [present](/up.util.isPresent) element attribute
     among the given list of attribute names.
     
@@ -920,7 +920,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return detect(values, isPresent);
     };
 
-    /**
+    /***
     Waits for the given number of milliseconds, the runs the given callback.
     
     Instead of `up.util.setTimer(0, fn)` you can also use [`up.util.nextFrame(fn)`](/up.util.nextFrame).
@@ -934,7 +934,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return setTimeout(callback, millis);
     };
 
-    /**
+    /***
     Schedules the given function to be called in the
     next JavaScript execution frame.
     
@@ -946,7 +946,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return setTimeout(block, 0);
     };
 
-    /**
+    /***
     Queue a function to be executed in the next microtask.
     
     @function up.util.queueMicrotask
@@ -957,7 +957,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return Promise.resolve().then(task);
     };
 
-    /**
+    /***
     Returns the last element of the given array.
     
     @function up.util.last
@@ -968,7 +968,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return array[array.length - 1];
     };
 
-    /**
+    /***
     Measures the drawable area of the document.
     
     @function up.util.clientSize
@@ -983,7 +983,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       };
     };
 
-    /**
+    /***
     Returns the width of a scrollbar.
     
     This only runs once per page load.
@@ -1010,7 +1010,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return width;
     });
 
-    /**
+    /***
     Returns whether the given element is currently showing a vertical scrollbar.
     
     @function up.util.documentHasVerticalScrollbar
@@ -1027,7 +1027,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return forcedScroll || (!forcedHidden && html.scrollHeight > html.clientHeight);
     };
 
-    /**
+    /***
     Modifies the given function so it only runs once.
     Subsequent calls will return the previous return value.
     
@@ -1049,7 +1049,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       };
     };
 
-    /**
+    /***
     Temporarily sets the CSS for the given element.
     
     @function up.util.temporaryCss
@@ -1078,7 +1078,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     Forces the given jQuery element into an accelerated compositing layer.
     
     @function up.util.forceCompositing
@@ -1101,7 +1101,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return memo;
     };
 
-    /**
+    /***
     Forces a repaint of the given element.
     
     @function up.util.forceRepaint
@@ -1113,7 +1113,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
     cssAnimate = function(elementOrSelector, lastFrame, opts) {};
 
-    /**
+    /***
     @internal
      */
     margins = function(selectorOrElement) {
@@ -1128,7 +1128,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       };
     };
 
-    /**
+    /***
     Measures the given element.
     
     @function up.util.measure
@@ -1181,7 +1181,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return box;
     };
 
-    /**
+    /***
     Copies all attributes from the source element to the target element.
     
     @function up.util.copyAttributes
@@ -1202,7 +1202,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return results;
     };
 
-    /**
+    /***
     Looks for the given selector in the element and its descendants.
     
     @function up.util.selectInSubtree
@@ -1212,7 +1212,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return $element.find(selector).addBack(selector);
     };
 
-    /**
+    /***
     Looks for the given selector in the element, its descendants and its ancestors.
     
     @function up.util.selectInDynasty
@@ -1225,7 +1225,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return $subtree.add($ancestors);
     };
 
-    /**
+    /***
     Returns whether the given keyboard event involved the ESC key.
     
     @function up.util.escapePressed
@@ -1235,7 +1235,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return event.keyCode === 27;
     };
 
-    /**
+    /***
     Returns whether the given array or string contains the given element or substring.
     
     @function up.util.contains
@@ -1247,7 +1247,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return arrayOrString.indexOf(elementOrSubstring) >= 0;
     };
 
-    /**
+    /***
     @function up.util.castedAttr
     @internal
      */
@@ -1266,7 +1266,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     Returns a copy of the given object that only contains
     the given properties.
     
@@ -1288,7 +1288,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return filtered;
     };
 
-    /**
+    /***
     Returns a copy of the given object that contains all except
     the given properties.
     
@@ -1308,7 +1308,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return filtered;
     };
 
-    /**
+    /***
     @function up.util.isUnmodifiedKeyEvent
     @internal
      */
@@ -1316,7 +1316,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return !(event.metaKey || event.shiftKey || event.ctrlKey);
     };
 
-    /**
+    /***
     @function up.util.isUnmodifiedMouseEvent
     @internal
      */
@@ -1326,7 +1326,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return isLeftButton && isUnmodifiedKeyEvent(event);
     };
 
-    /**
+    /***
     Returns a promise that will never be resolved.
     
     @function up.util.unresolvablePromise
@@ -1336,7 +1336,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return new Promise(noop);
     };
 
-    /**
+    /***
     Returns an empty jQuery collection.
     
     @function up.util.nullJQuery
@@ -1346,7 +1346,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return $();
     };
 
-    /**
+    /***
     On the given element, set attributes that are still missing.
     
     @function up.util.setMissingAttrs
@@ -1366,7 +1366,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return results;
     };
 
-    /**
+    /***
     Removes the given element from the given array.
     
     This changes the given array.
@@ -1385,7 +1385,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     @function up.util.multiSelector
     @internal
      */
@@ -1453,7 +1453,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return obj;
     };
 
-    /**
+    /***
     If the given `value` is a function, calls the function with the given `args`.
     Otherwise it just returns `value`.
     
@@ -1470,7 +1470,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     @function up.util.config
     @param {Object|Function} blueprint
       Default configuration options.
@@ -1486,7 +1486,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return hash;
     };
 
-    /**
+    /***
     @function up.util.openConfig
     @internal
      */
@@ -1508,7 +1508,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return hash;
     };
 
-    /**
+    /***
     @function up.util.unwrapElement
     @internal
      */
@@ -1523,7 +1523,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return parent.removeChild(wrapper);
     };
 
-    /**
+    /***
     @function up.util.offsetParent
     @internal
      */
@@ -1540,7 +1540,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return $match;
     };
 
-    /**
+    /***
     Returns if the given element has a `fixed` position.
     
     @function up.util.isFixed
@@ -1562,7 +1562,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     @function up.util.fixedToAbsolute
     @internal
      */
@@ -1581,7 +1581,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       });
     };
 
-    /**
+    /***
     Normalizes the given params object to the form returned by
     [`jQuery.serializeArray`](https://api.jquery.com/serializeArray/).
     
@@ -1614,7 +1614,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     Returns an URL-encoded query string for the given params object.
     
     The returned string does **not** include a leading `?` character.
@@ -1660,7 +1660,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     Serializes the given form into a request data representation.
     
     @function up.util.requestDataFromForm
@@ -1681,7 +1681,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return data;
     };
 
-    /**
+    /***
     Adds a key/value pair to the given request data representation.
     
     This mutates the given `data` if `data` is a `FormData`, an object
@@ -1718,7 +1718,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return data;
     };
 
-    /**
+    /***
     Merges the request data in `source` into `target`.
     Will modify the passed-in `target`.
     
@@ -1732,7 +1732,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return target;
     };
 
-    /**
+    /***
     Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
     with the given message.
     
@@ -1779,7 +1779,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       '"': '&quot;'
     };
 
-    /**
+    /***
     Escapes the given string of HTML by replacing control chars with their HTML entities.
     
     @function up.util.escapeHtml
@@ -1839,7 +1839,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return arg;
     };
 
-    /**
+    /***
     Returns whether the given element has been detached from the DOM
     (or whether it was never attached).
     
@@ -1851,7 +1851,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return !jQuery.contains(document.documentElement, element);
     };
 
-    /**
+    /***
     Given a function that will return a promise, returns a proxy function
     with an additional `.promise` attribute.
     
@@ -1879,7 +1879,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return preview;
     };
 
-    /**
+    /***
     A linear task queue whose (2..n)th tasks can be changed at any time.
     
     @function up.util.DivertibleChain
@@ -1943,7 +1943,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
     })();
 
-    /**
+    /***
     @function up.util.submittedValue
     @internal
      */
@@ -1957,7 +1957,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     @function up.util.sequence
     @param {Array<Function>} functions...
     @return {Function}
@@ -1975,7 +1975,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       };
     };
 
-    /**
+    /***
     @function up.util.promiseTimer
     @internal
      */
@@ -1991,7 +1991,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return promise;
     };
 
-    /**
+    /***
     Returns `'left'` if the center of the given element is in the left 50% of the screen.
     Otherwise returns `'right'`.
     
@@ -2011,7 +2011,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     Like `$old.replaceWith($new)`, but keeps event handlers bound to `$old`.
     
     Note that this is a memory leak unless you re-attach `$old` to the DOM aferwards.
@@ -2028,7 +2028,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return $old;
     };
 
-    /**
+    /***
     Flattens the given `array` a single level deep.
     
     @function up.util.flatten
@@ -2052,7 +2052,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return flattened;
     };
 
-    /**
+    /***
     Returns whether the given value is truthy.
     
     @function up.util.isTruthy
@@ -2062,7 +2062,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return !!object;
     };
 
-    /**
+    /***
     Sets the given callback as both fulfillment and rejection handler for the given promise.
     
     @function up.util.always
@@ -2072,21 +2072,21 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return promise.then(callback, callback);
     };
 
-    /**
+    /***
      * Registers an empty rejection handler with the given promise.
      * This prevents browsers from printing "Uncaught (in promise)" to the error
      * console when the promise is rejection.
-    #
+     *
      * This is helpful for event handlers where it is clear that no rejection
      * handler will be registered:
-    #
+     *
      *     up.on('submit', 'form[up-target]', (event, $form) => {
      *       promise = up.submit($form)
      *       up.util.muteRejection(promise)
      *     })
-    #
+     *
      * Does nothing if passed a missing value.
-    #
+     *
      * @function up.util.muteRejection
      * @param {Promise|undefined|null} promise
      * @return {Promise}
@@ -2095,7 +2095,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return promise != null ? promise["catch"](noop) : void 0;
     };
 
-    /**
+    /***
     @function up.util.newDeferred
     @internal
      */
@@ -2115,7 +2115,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return nativePromise;
     };
 
-    /**
+    /***
     Calls the given block. If the block throws an exception,
     a rejected promise is returned instead.
     
@@ -2126,13 +2126,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       var error;
       try {
         return block();
-      } catch (_error) {
-        error = _error;
+      } catch (error1) {
+        error = error1;
         return Promise.reject(error);
       }
     };
 
-    /**
+    /***
     Returns whether the given element is a descendant of the `<body>` element.
     
     @function up.util.isBodyDescendant
@@ -2270,14 +2270,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
   u = up.util;
 
 
-  /**
+  /***
   @class up.Cache
   @internal
    */
 
   up.Cache = (function() {
 
-    /**
+    /***
     @constructor
     @param {number|Function() :number} [config.size]
       Maximum number of cache entries.
@@ -2668,7 +2668,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
 
-    /**
+    /***
     Example:
     
         parseSelector('foo, bar:before', transition: 'cross-fade')
@@ -2930,7 +2930,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     }
 
 
-    /**
+    /***
     Finishes all animations in the given element's ancestors and descendants,
     then calls the animator.
     
@@ -2949,7 +2949,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
 
-    /**
+    /***
     Calls the given animator to animate the given element.
     
     The animation returned by the animator is tracked so it can be
@@ -2977,7 +2977,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
 
-    /**
+    /***
     @method finish
     @param {jQuery} [elements]
       If no element is given, finishes all animations in the documnet.
@@ -3089,7 +3089,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
   u = up.util;
 
 
-  /**
+  /***
   Instances of `up.Request` normalizes properties of an [`AJAX request`](/up.request)
   such as the requested URL, form parameters and HTTP method.
   
@@ -3100,7 +3100,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     extend(Request, superClass);
 
 
-    /**
+    /***
     The HTTP method for the request.
     
     @property up.Request#method
@@ -3109,7 +3109,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     The URL for the request.
     
     @property up.Request#url
@@ -3118,7 +3118,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     Parameters that should be sent as the request's payload.
     
     Parameters may be passed as one of the following forms:
@@ -3133,7 +3133,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
     
     @property up.Request#target
@@ -3142,7 +3142,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
     
     @property up.Request#failTarget
@@ -3151,7 +3151,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     An object of additional HTTP headers.
     
     @property up.Request#headers
@@ -3160,7 +3160,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     A timeout in milliseconds.
     
     If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set,
@@ -3176,7 +3176,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
 
-    /**
+    /***
     @constructor up.Request
     @param {string} [attributes]
      */
@@ -3390,7 +3390,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
   u = up.util;
 
 
-  /**
+  /***
   Instances of `up.Response` describe the server response to an [`AJAX request`](/up.request).
   
   \#\#\# Example
@@ -3407,7 +3407,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     extend(Response, superClass);
 
 
-    /**
+    /***
     The HTTP method used for the response.
     
     This is usually the HTTP method used by the request.
@@ -3420,7 +3420,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     The URL used for the response.
     
     This is usually the requested URL.
@@ -3433,7 +3433,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     The response body as a `string`.
     
     @property up.Response#text
@@ -3442,7 +3442,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     The response's
     [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
     as a `number`.
@@ -3455,7 +3455,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     The [request](/up.Request) that triggered this response.
     
     @property up.Response#request
@@ -3464,7 +3464,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     The [`XMLHttpRequest`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
     object that was used to create this response.
     
@@ -3474,7 +3474,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
 
-    /**
+    /***
     A [document title pushed by the server](/up.protocol#pushing-a-document-title-to-the-client).
     
     If the server pushed no title via HTTP header, this will be `undefined`.
@@ -3496,7 +3496,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     }
 
 
-    /**
+    /***
     Returns whether the server responded with a 2xx HTTP status.
     
     @function up.Response#isSuccess
@@ -3509,7 +3509,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
 
-    /**
+    /***
     Returns whether the response was not [successful](/up.Request.prototype.isSuccess).
     
     This also returns `true` when the request encountered a [fatal error](/up.Request.prototype.isFatalError)
@@ -3525,7 +3525,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
 
-    /**
+    /***
     Returns whether the request encountered a [fatal error](/up.Request.prototype.isFatalError)
     like a timeout or loss of network connectivity.
     
@@ -3547,7 +3547,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
 }).call(this);
 
-/**
+/***
 Browser support
 ===============
 
@@ -3572,7 +3572,7 @@ Internet Explorer 10 or lower
     var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canDOMParser, canFormData, canInputEvent, canPromise, canPushState, hash, isIE10OrWorse, isRecentJQuery, isSupported, navigate, polyfilledSessionStorage, popCookie, puts, sessionStorage, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
     u = up.util;
 
-    /**
+    /***
     @method up.browser.navigate
     @param {string} url
     @param {string} [options.method='get']
@@ -3590,7 +3590,7 @@ Internet Explorer 10 or lower
       return request.navigate();
     };
 
-    /**
+    /***
     For mocking in specs.
     
     @method submitForm
@@ -3599,7 +3599,7 @@ Internet Explorer 10 or lower
       return $form.submit();
     };
 
-    /**
+    /***
     A cross-browser way to interact with `console.log`, `console.error`, etc.
     
     This function falls back to `console.log` if the output stream is not implemented.
@@ -3662,7 +3662,7 @@ Internet Explorer 10 or lower
       return string;
     };
 
-    /**
+    /***
     See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
     
     @function up.browser.sprintf
@@ -3674,7 +3674,7 @@ Internet Explorer 10 or lower
       return sprintfWithFormattedArgs.apply(null, [u.identity, message].concat(slice.call(args)));
     };
 
-    /**
+    /***
     @function up.browser.sprintfWithBounds
     @internal
      */
@@ -3700,7 +3700,7 @@ Internet Explorer 10 or lower
       return !window.atob;
     });
 
-    /**
+    /***
     Returns whether this browser supports manipulation of the current URL
     via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
     
@@ -3718,7 +3718,7 @@ Internet Explorer 10 or lower
       return u.isDefined(history.pushState) && up.protocol.initialRequestMethod() === 'get';
     };
 
-    /**
+    /***
     Returns whether this browser supports animation using
     [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions).
     
@@ -3734,7 +3734,7 @@ Internet Explorer 10 or lower
       return 'transition' in document.documentElement.style;
     };
 
-    /**
+    /***
     Returns whether this browser supports the DOM event [`input`](https://developer.mozilla.org/de/docs/Web/Events/input).
     
     @function up.browser.canInputEvent
@@ -3745,7 +3745,7 @@ Internet Explorer 10 or lower
       return 'oninput' in document.createElement('input');
     };
 
-    /**
+    /***
     Returns whether this browser supports promises.
     
     @function up.browser.canPromise
@@ -3756,7 +3756,7 @@ Internet Explorer 10 or lower
       return !!window.Promise;
     };
 
-    /**
+    /***
     Returns whether this browser supports the [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
     interface.
     
@@ -3768,7 +3768,7 @@ Internet Explorer 10 or lower
       return !!window.FormData;
     };
 
-    /**
+    /***
     Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
     interface.
     
@@ -3780,7 +3780,7 @@ Internet Explorer 10 or lower
       return !!window.DOMParser;
     };
 
-    /**
+    /***
     Returns whether this browser supports the [`debugging console`](https://developer.mozilla.org/en-US/docs/Web/API/Console).
     
     @function up.browser.canConsole
@@ -3799,7 +3799,7 @@ Internet Explorer 10 or lower
       return major >= 2 || (major === 1 && minor >= 9);
     };
 
-    /**
+    /***
     Returns and deletes a cookie with the given name
     Inspired by Turbolinks: https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/lib/assets/javascripts/turbolinks.coffee#L292
     
@@ -3815,7 +3815,7 @@ Internet Explorer 10 or lower
       return value;
     };
 
-    /**
+    /***
     @function up,browser.whenConfirmed
     @return {Promise}
     @param {string} options.confirm
@@ -3830,7 +3830,7 @@ Internet Explorer 10 or lower
       }
     };
 
-    /**
+    /***
     Returns whether Unpoly supports the current browser.
     
     If this returns `false` Unpoly will prevent itself from [booting](/up.boot)
@@ -3846,18 +3846,18 @@ Internet Explorer 10 or lower
       return !isIE10OrWorse() && isRecentJQuery() && canConsole() && canDOMParser() && canFormData() && canCssTransition() && canInputEvent() && canPromise();
     };
 
-    /**
+    /***
     @internal
      */
     sessionStorage = u.memoize(function() {
       try {
         return window.sessionStorage;
-      } catch (_error) {
+      } catch (error) {
         return polyfilledSessionStorage();
       }
     });
 
-    /**
+    /***
     @internal
      */
     polyfilledSessionStorage = function() {
@@ -3873,7 +3873,7 @@ Internet Explorer 10 or lower
       };
     };
 
-    /**
+    /***
     Returns `'foo'` if the hash is `'#foo'`.
     
     Returns undefined if the hash is `'#'`, `''` or `undefined`.
@@ -3890,7 +3890,6 @@ Internet Explorer 10 or lower
       return u.presence(value);
     };
     return {
-      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       url: url,
       navigate: navigate,
       submitForm: submitForm,
@@ -3909,7 +3908,7 @@ Internet Explorer 10 or lower
 
 }).call(this);
 
-/**
+/***
 Events
 ======
 
@@ -3968,7 +3967,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     nextUpDescriptionNumber = 0;
     renamedEvents = {};
 
-    /**
+    /***
     Convert an Unpoly style listener (second argument is the event target
     as a jQuery collection) to a vanilla jQuery listener
     
@@ -3983,7 +3982,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       };
     };
 
-    /**
+    /***
     Converts an argument list for `up.on()` to an argument list for `jQuery.on`.
     This involves rewriting the listener signature in the last argument slot.
     
@@ -4022,7 +4021,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       return description[0] = events.join(' ');
     };
 
-    /**
+    /***
     Listens to an event on `document`.
     
     The given event listener which will be executed whenever the
@@ -4127,7 +4126,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       };
     };
 
-    /**
+    /***
     Unbinds an event listener previously bound with [`up.on()`](/up.on).
     
     \#\#\# Example
@@ -4168,7 +4167,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       return u.last(upDescription)._descriptionNumber;
     };
 
-    /**
+    /***
     Emits a event with the given name and properties.
     
     The event will be triggered as a jQuery event on `document`.
@@ -4244,7 +4243,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       }
     };
 
-    /**
+    /***
     [Emits an event](/up.emit) and returns whether no listener
     has prevented the default action.
     
@@ -4263,7 +4262,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       return !event.isDefaultPrevented();
     };
 
-    /**
+    /***
     [Emits](/up.emit) the given event and returns a promise
     that will be fulfilled if no listener has prevented the default action.
     
@@ -4289,7 +4288,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       });
     };
 
-    /**
+    /***
     Registers an event listener to be called when the user
     presses the `Escape` key.
     
@@ -4308,7 +4307,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       });
     };
 
-    /**
+    /***
     Stops the given event from propagating and prevents the default action.
     
     @function up.bus.haltEvent
@@ -4320,7 +4319,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       return event.preventDefault();
     };
 
-    /**
+    /***
     @function up.bus.consumeAction
     @internal
      */
@@ -4334,7 +4333,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       }
     };
 
-    /**
+    /***
     Makes a snapshot of the currently registered event listeners,
     to later be restored through [`up.bus.reset()`](/up.bus.reset).
     
@@ -4366,7 +4365,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       return results;
     };
 
-    /**
+    /***
     Resets Unpoly to the state when it was booted.
     All custom event handlers, animations, etc. that have been registered
     will be discarded.
@@ -4386,7 +4385,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       return up.protocol.reset();
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when Unpoly is [reset](/up.reset) during unit tests.
     
     @event up:framework:reset
@@ -4396,7 +4395,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       return renamedEvents[oldEvent] = newEvent;
     };
 
-    /**
+    /***
     Boots the Unpoly framework.
     
     **This is called automatically** by including the Unpoly JavaScript files.
@@ -4430,7 +4429,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       }
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when Unpoly [starts to boot](/up.boot).
     
     @event up:framework:boot
@@ -4439,7 +4438,6 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     live('up:framework:booted', snapshot);
     live('up:framework:reset', resetBus);
     return {
-      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       on: live,
       off: unbind,
       emit: emit,
@@ -4466,7 +4464,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 
 }).call(this);
 
-/**
+/***
 Server protocol
 ===============
 
@@ -4648,7 +4646,7 @@ an existing cookie should be deleted.
     var config, csrfParam, csrfToken, initialRequestMethod, locationFromXhr, methodFromXhr, reset, titleFromXhr, u;
     u = up.util;
 
-    /**
+    /***
     @function up.protocol.locationFromXhr
     @internal
      */
@@ -4656,7 +4654,7 @@ an existing cookie should be deleted.
       return xhr.getResponseHeader(config.locationHeader) || xhr.responseURL;
     };
 
-    /**
+    /***
     @function up.protocol.titleFromXhr
     @internal
      */
@@ -4664,7 +4662,7 @@ an existing cookie should be deleted.
       return xhr.getResponseHeader(config.titleHeader);
     };
 
-    /**
+    /***
     @function up.protocol.methodFromXhr
     @internal
      */
@@ -4675,7 +4673,7 @@ an existing cookie should be deleted.
       }
     };
 
-    /**
+    /***
     Server-side companion libraries like unpoly-rails set this cookie so we
     have a way to detect the request method of the initial page load.
     There is no JavaScript API for this.
@@ -4690,7 +4688,7 @@ an existing cookie should be deleted.
     });
     up.bus.on('up:framework:booted', initialRequestMethod);
 
-    /**
+    /***
     Configures strings used in the optional [server protocol](/up.protocol).
     
     @property up.protocol.config
@@ -4776,7 +4774,7 @@ an existing cookie should be deleted.
 
 }).call(this);
 
-/**
+/***
 Logging
 =======
 
@@ -4801,7 +4799,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     b = up.browser;
     SESSION_KEY_ENABLED = 'up.log.enabled';
 
-    /**
+    /***
     Configures the logging output on the developer console.
     
     @property up.log.config
@@ -4832,7 +4830,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       return "" + config.prefix + message;
     };
 
-    /**
+    /***
     Prints a debugging message to the browser console.
     
     @function up.log.debug
@@ -4848,7 +4846,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       }
     };
 
-    /**
+    /***
     Prints a logging message to the browser console.
     
     @function up.puts
@@ -4864,7 +4862,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       }
     };
 
-    /**
+    /***
     @function up.log.warn
     @internal
      */
@@ -4876,7 +4874,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       }
     };
 
-    /**
+    /***
     - Makes sure the group always closes
     - Does not make a group if the message is nil
     
@@ -4902,7 +4900,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       }
     };
 
-    /**
+    /***
     @function up.log.error
     @internal
      */
@@ -4930,7 +4928,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       return config.enabled = value;
     };
 
-    /**
+    /***
     Makes future Unpoly events print vast amounts of debugging information to the developer console.
     
     Debugging information includes which elements are being [compiled](/up.syntax)
@@ -4943,7 +4941,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       return setEnabled(true);
     };
 
-    /**
+    /***
     Prevents future Unpoly events from printing vast amounts of debugging information to the developer console.
     
     Errors will still be printed, even with logging disabled.
@@ -4970,7 +4968,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
 
 }).call(this);
 
-/**
+/***
 Toast alerts
 ============
 
@@ -5046,7 +5044,7 @@ Toast alerts
 
 }).call(this);
 
-/**
+/***
 Custom JavaScript
 =================
 
@@ -5088,7 +5086,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     compilers = [];
     macros = [];
 
-    /**
+    /***
     Registers a function to be called whenever an element with
     the given selector is inserted into the DOM.
     
@@ -5277,7 +5275,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       return insertCompiler(compilers, selector, options, callback);
     };
 
-    /**
+    /***
     Registers a [compiler](/up.compiler) that is run before all other compilers.
     
     You can use `up.macro()` to register a compiler that sets other UJS attributes.
@@ -5373,7 +5371,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       return addDestructor($jqueryElement, returnValue);
     };
 
-    /**
+    /***
     Tries to find a list of destructors in a compiler's return value.
     
     @param {Object} returnValue
@@ -5403,7 +5401,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       return $element.removeClass(DESTRUCTIBLE_CLASS);
     };
 
-    /**
+    /***
     Applies all compilers on the given element and its descendants.
     Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
     
@@ -5458,7 +5456,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       });
     };
 
-    /**
+    /***
     Runs any destroyers on the given fragment and its descendants.
     Unlike [`up.destroy()`](/up.destroy), this doesn't emit any events
     and does not remove the element from the DOM.
@@ -5470,7 +5468,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       return prepareClean($fragment)();
     };
 
-    /**
+    /***
     @function up.syntax.prepareClean
     @param {jQuery} $fragment
     @return {Function}
@@ -5486,7 +5484,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       return u.sequence.apply(u, destructors);
     };
 
-    /**
+    /***
     Checks if the given element has an [`up-data`](/up-data) attribute.
     If yes, parses the attribute value as JSON and returns the parsed object.
     
@@ -5511,7 +5509,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @stable
      */
 
-    /**
+    /***
     If an element with an `up-data` attribute enters the DOM,
     Unpoly will parse the JSON and pass the resulting object to any matching
     [`up.compiler()`](/up.compiler) handlers.
@@ -5565,7 +5563,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       }
     };
 
-    /**
+    /***
     Resets the list of registered compiler directives to the
     moment when the framework was booted.
     
@@ -5599,7 +5597,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
 
 }).call(this);
 
-/**
+/***
 History
 ========
   
@@ -5615,7 +5613,7 @@ In an Unpoly app, every page has an URL.
     var buildState, config, currentUrl, isCurrentUrl, manipulate, nextPreviousUrl, normalizeUrl, observeNewUrl, pop, previousUrl, push, register, replace, reset, restoreStateOnPop, u;
     u = up.util;
 
-    /**
+    /***
     Configures behavior when the user goes back or forward in browser history.
     
     @property up.history.config
@@ -5633,7 +5631,7 @@ In an Unpoly app, every page has an URL.
       restoreScroll: true
     });
 
-    /**
+    /***
     Returns the previous URL in the browser history.
     
     Note that this will only work reliably for history changes that
@@ -5656,7 +5654,7 @@ In an Unpoly app, every page has an URL.
       return u.normalizeUrl(url, normalizeOptions);
     };
 
-    /**
+    /***
     Returns a normalized URL for the current history entry.
     
     @function up.history.url
@@ -5673,7 +5671,7 @@ In an Unpoly app, every page has an URL.
       return normalizeUrl(url, normalizeOptions) === currentUrl(normalizeOptions);
     };
 
-    /**
+    /***
     Remembers the given URL so we can offer `up.history.previousUrl()`.
     
     @function observeNewUrl
@@ -5687,7 +5685,7 @@ In an Unpoly app, every page has an URL.
       return nextPreviousUrl = url;
     };
 
-    /**
+    /***
     Replaces the current history entry and updates the
     browser's location bar with the given URL.
     
@@ -5707,7 +5705,7 @@ In an Unpoly app, every page has an URL.
       return manipulate('replaceState', url);
     };
 
-    /**
+    /***
     Adds a new history entry and updates the browser's
     address bar with the given URL.
     
@@ -5749,7 +5747,7 @@ In an Unpoly app, every page has an URL.
       }
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) before a new history entry is added.
     
     @event up:history:push
@@ -5760,7 +5758,7 @@ In an Unpoly app, every page has an URL.
     @experimental
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) after a new history entry has been added.
     
     @event up:history:pushed
@@ -5823,7 +5821,7 @@ In an Unpoly app, every page has an URL.
       return restoreStateOnPop(state);
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) before a history entry will be restored.
     
     History entries are restored when the user uses the *Back* or *Forward* button.
@@ -5834,7 +5832,7 @@ In an Unpoly app, every page has an URL.
     @internal
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) after a history entry has been restored.
     
     History entries are restored when the user uses the *Back* or *Forward* button.
@@ -5858,7 +5856,7 @@ In an Unpoly app, every page has an URL.
       }
     }
 
-    /**
+    /***
     Changes the link's destination so it points to the previous URL.
     
     Note that this will *not* call `location.back()`, but will set
@@ -5909,7 +5907,7 @@ In an Unpoly app, every page has an URL.
 
 }).call(this);
 
-/**
+/***
 Application layout
 ==================
 
@@ -5937,7 +5935,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     var anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealHash, revealOrRestoreScroll, revealSelector, saveScroll, scroll, scrollAbruptlyNow, scrollTopKey, scrollTops, scrollWithAnimateNow, scrollableElementForViewport, scrollingTracker, u, viewportOf, viewportSelector, viewports, viewportsWithin;
     u = up.util;
 
-    /**
+    /***
     Configures the application layout.
     
     @property up.layout.config
@@ -5991,7 +5989,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return scrollingTracker.finish();
     };
 
-    /**
+    /***
     Scrolls the given viewport to the given Y-position.
     
     A "viewport" is an element that has scrollbars, e.g. `<body>` or
@@ -6075,7 +6073,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return Promise.resolve();
     };
 
-    /**
+    /***
     Finishes scrolling animations in the given element, its ancestors or its descendants.
     
     @function up.layout.finishScrolling
@@ -6089,7 +6087,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return scrollingTracker.finish($scrollable);
     };
 
-    /**
+    /***
     @function up.layout.anchoredRight
     @internal
      */
@@ -6097,7 +6095,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return u.multiSelector(config.anchoredRight).select();
     };
 
-    /**
+    /***
     @function measureObstruction
     @return {Object}
     @internal
@@ -6139,7 +6137,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       };
     };
 
-    /**
+    /***
     Scroll's the given element's viewport so the first rows of the
     element are visible for the user.
     
@@ -6236,7 +6234,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       });
     };
 
-    /**
+    /***
     [Reveals](/up.reveal) an element matching the `#hash` in the current URL.
     
     Other than the default behavior found in browsers, `up.revealHash` works with
@@ -6262,7 +6260,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return u.multiSelector(config.viewports);
     };
 
-    /**
+    /***
     Returns the viewport for the given element.
     
     Throws an error if no viewport could be found.
@@ -6284,7 +6282,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return $viewport;
     };
 
-    /**
+    /***
     Returns a jQuery collection of all the viewports contained within the
     given selector or element.
     
@@ -6299,7 +6297,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return viewportSelector().selectInSubtree($element);
     };
 
-    /**
+    /***
     Returns a jQuery collection of all the viewports on the screen.
     
     @function up.layout.viewports
@@ -6318,7 +6316,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       }
     };
 
-    /**
+    /***
     Returns a hash with scroll positions.
     
     Each key in the hash is a viewport selector. The corresponding
@@ -6348,7 +6346,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return topsBySelector;
     };
 
-    /**
+    /***
     @function up.layout.fixedChildren
     @internal
      */
@@ -6369,7 +6367,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return $elements;
     };
 
-    /**
+    /***
     Saves the top scroll positions of all the
     viewports configured in [`up.layout.config.viewports`](/up.layout.config).
     
@@ -6394,7 +6392,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return lastScrollTops.set(url, tops);
     };
 
-    /**
+    /***
     Restores [previously saved](/up.layout.saveScroll) scroll positions of viewports
     viewports configured in [`up.layout.config.viewports`](/up.layout.config).
     
@@ -6438,7 +6436,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       });
     };
 
-    /**
+    /***
     @function up.layout.revealOrRestoreScroll
     @param {boolean} [options.restoreScroll]
     @param {boolean|string} [options.reveal]
@@ -6472,7 +6470,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return Promise.resolve();
     };
 
-    /**
+    /***
     @internal
      */
     revealSelector = function(selector, options) {
@@ -6483,7 +6481,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       return selector;
     };
 
-    /**
+    /***
     Marks this element as a scrolling container ("viewport").
     
     Apply this attribute if your app uses a custom panel layout with fixed positioning
@@ -6536,7 +6534,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @stable
      */
 
-    /**
+    /***
     Marks this element as being fixed to the top edge of the screen
     using `position: fixed`.
     
@@ -6556,7 +6554,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @stable
      */
 
-    /**
+    /***
     Marks this element as being fixed to the bottom edge of the screen
     using `position: fixed`.
     
@@ -6576,7 +6574,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @stable
      */
 
-    /**
+    /***
     Marks this element as being anchored to the right edge of the screen,
     typically fixed navigation bars.
     
@@ -6611,7 +6609,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @stable
      */
 
-    /**
+    /***
     @function up.layout.firstHashTarget
     @internal
      */
@@ -6623,7 +6621,6 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     up.on('up:app:booted', revealHash);
     up.on('up:framework:reset', reset);
     return {
-      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       reveal: reveal,
       revealHash: revealHash,
       firstHashTarget: firstHashTarget,
@@ -6649,7 +6646,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
 
 }).call(this);
 
-/**
+/***
 Fragment update API
 ===================
   
@@ -6668,7 +6665,7 @@ is built from these functions. You can use them to extend Unpoly from your
     var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, detectScriptFixes, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, fixScripts, hello, isRealElement, layerOf, matchesLayer, parseResponseDoc, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, shouldSwapElementsDirectly, source, swapElements, swapElementsDirectly, transferKeepableElements, u, updateHistoryAndTitle;
     u = up.util;
 
-    /**
+    /***
     Configures defaults for fragment insertion.
     
     @property up.dom.config
@@ -6703,7 +6700,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return $element.attr("up-source", sourceUrl);
     };
 
-    /**
+    /***
     Returns the URL the given element was retrieved from.
     
     @method up.dom.source
@@ -6716,7 +6713,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return u.presence($element.attr("up-source")) || up.browser.url();
     };
 
-    /**
+    /***
     Resolves the given CSS selector (which might contain `&` references)
     to a full CSS selector without ampersands.
     
@@ -6748,7 +6745,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return selector;
     };
 
-    /**
+    /***
     Replaces elements on the current page with corresponding elements
     from a new page fetched from the server.
     
@@ -6926,8 +6923,8 @@ is built from these functions. You can use them to extend Unpoly from your
       try {
         improvedTarget = bestPreflightSelector(selectorOrElement, successOptions);
         improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions);
-      } catch (_error) {
-        e = _error;
+      } catch (error) {
+        e = error;
         return Promise.reject(e);
       }
       request = {
@@ -6963,7 +6960,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return promise;
     };
 
-    /**
+    /***
     @internal
      */
     processResponse = function(isSuccess, selector, response, options) {
@@ -7015,7 +7012,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return !(options.title === false || u.isString(options.title) || (options.history === false && options.title !== true));
     };
 
-    /**
+    /***
     Updates a selector on the current page with the
     same selector from the given HTML string.
     
@@ -7273,7 +7270,7 @@ is built from these functions. You can use them to extend Unpoly from your
       }
     };
 
-    /**
+    /***
     Elements with an `up-keep` attribute will be persisted during
     [fragment updates](/a-up-target).
     
@@ -7323,7 +7320,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) before an existing element is [kept](/up-keep) during
     a page update.
     
@@ -7344,7 +7341,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) when an existing element has been [kept](/up-keep)
     during a page update.
     
@@ -7362,7 +7359,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
 
-    /**
+    /***
     Compiles a page fragment that has been inserted into the DOM
     by external code.
     
@@ -7407,7 +7404,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return $element;
     };
 
-    /**
+    /***
     When a page fragment has been [inserted or updated](/up.replace),
     this event is [emitted](/up.emit) on the fragment.
     
@@ -7452,7 +7449,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return $element.closest(unreal).length === 0;
     };
 
-    /**
+    /***
     Returns the first element matching the given selector, but
     ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
     
@@ -7535,7 +7532,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return layerOf(selectorOrElement) === layer;
     };
 
-    /**
+    /***
     Destroys the given element or selector.
     
     Takes care that all [`up.compiler()`](/up.compiler) destructors, if any, are called.
@@ -7608,7 +7605,7 @@ is built from these functions. You can use them to extend Unpoly from your
       return options.log !== false && !$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup');
     };
 
-    /**
+    /***
     Before a page fragment is being [destroyed](/up.destroy), this
     event is [emitted](/up.emit) on the fragment.
     
@@ -7621,7 +7618,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) right before a [destroyed](/up.destroy)
     page fragment is removed from the DOM.
     
@@ -7634,7 +7631,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
 
-    /**
+    /***
     Replaces the given element with a fresh copy fetched from the server.
     
     \#\#\# Example
@@ -7671,7 +7668,6 @@ is built from these functions. You can use them to extend Unpoly from your
     });
     up.on('up:framework:reset', reset);
     return {
-      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       replace: replace,
       reload: reload,
       destroy: destroy,
@@ -7700,7 +7696,7 @@ is built from these functions. You can use them to extend Unpoly from your
 
 }).call(this);
 
-/**
+/***
 Animation
 =========
   
@@ -7746,7 +7742,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     defaultNamedTransitions = {};
     motionTracker = new up.MotionTracker('motion');
 
-    /**
+    /***
     Sets default options for animations and transitions.
     
     @property up.motion.config
@@ -7782,7 +7778,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       return config.reset();
     };
 
-    /**
+    /***
     Returns whether Unpoly will perform animations.
     
     Set [`up.motion.config.enabled`](/up.motion.config) `false` in order to disable animations globally.
@@ -7795,7 +7791,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       return config.enabled;
     };
 
-    /**
+    /***
     Applies the given animation to the given element.
     
     \#\#\# Example
@@ -7896,7 +7892,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       return Promise.resolve();
     };
 
-    /**
+    /***
     Animates the given element's CSS properties using CSS transitions.
     
     If the element is already being animated, the previous animation
@@ -7973,7 +7969,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       return motionTracker.start($element, startCssTransition);
     };
 
-    /**
+    /***
     Extracts animation-related options from the given options hash.
     If `$element` is given, also inspects the element for animation-related
     attributes like `up-easing` or `up-duration`.
@@ -7998,7 +7994,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       return namedAnimations[name] || up.fail("Unknown animation %o", name);
     };
 
-    /**
+    /***
     @function withGhosts
     @return {Promise}
     @internal
@@ -8043,7 +8039,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       });
     };
 
-    /**
+    /***
     Completes [animations](/up.animate) and [transitions](/up.morph).
     
     If called without arguments, all animations on the screen are completed.
@@ -8064,7 +8060,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       return motionTracker.finish(elementOrSelector);
     };
 
-    /**
+    /***
     Performs an animated transition between two elements.
     Transitions are implement by performing two animations in parallel,
     causing one element to disappear and the other to appear.
@@ -8180,7 +8176,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       }
     };
 
-    /**
+    /***
     This instantly causes the side effects of a successful transition.
     We use this to skip morphing for old browsers, or when the developer
     decides to only animate the new element (i.e. no real ghosting or transition).
@@ -8197,7 +8193,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       return up.layout.revealOrRestoreScroll($new, scrollOptions);
     };
 
-    /**
+    /***
     @internal
      */
     prependCopy = function($element, $viewport) {
@@ -8247,7 +8243,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       };
     };
 
-    /**
+    /***
     Defines a named transition.
     
     Here is the definition of the pre-defined `cross-fade` animation:
@@ -8284,7 +8280,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       return namedTransitions[name] = transition;
     };
 
-    /**
+    /***
     Defines a named animation.
     
     Here is the definition of the pre-defined `fade-in` animation:
@@ -8324,7 +8320,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       return defaultNamedTransitions = u.copy(namedTransitions);
     };
 
-    /**
+    /***
     Returns whether the given animation option will cause the animation
     to be skipped.
     
@@ -8460,7 +8456,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
 
 }).call(this);
 
-/**
+/***
 AJAX acceleration
 =================
 
@@ -8516,7 +8512,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     slowEventEmitted = void 0;
     queuedLoaders = [];
 
-    /**
+    /***
     @property up.proxy.config
     @param {number} [config.preloadDelay=75]
       The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
@@ -8573,7 +8569,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       }
     });
 
-    /**
+    /***
     Returns a cached response for the given request.
     
     Returns `undefined` if the given request is not currently cached.
@@ -8626,7 +8622,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     };
     reset();
 
-    /**
+    /***
     Makes an AJAX request to the given URL.
     
     \#\#\# Example
@@ -8715,7 +8711,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       return promise;
     };
 
-    /**
+    /***
     Makes an AJAX request to the given URL and caches the response.
     
     The function returns a promise that fulfills with the response text.
@@ -8775,7 +8771,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       });
     };
 
-    /**
+    /***
     Returns `true` if the proxy is not currently waiting
     for a request to finish. Returns `false` otherwise.
     
@@ -8788,7 +8784,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       return pendingCount === 0;
     };
 
-    /**
+    /***
     Returns `true` if the proxy is currently waiting
     for a request to finish. Returns `false` otherwise.
     
@@ -8816,7 +8812,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       }
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when [AJAX requests](/up.request)
     are taking long to finish.
     
@@ -8880,7 +8876,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       }
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when [AJAX requests](/up.request)
     have [taken long to finish](/up:proxy:slow), but have finished now.
     
@@ -8925,7 +8921,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       }
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) before an [AJAX request](/up.request)
     is sent over the network.
     
@@ -8965,7 +8961,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       }
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when the response to an
     [AJAX request](/up.request) has been received.
     
@@ -8980,7 +8976,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     @experimental
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) when an [AJAX request](/up.request)
     encounters fatal error like a timeout or loss of network connectivity.
     
@@ -8998,7 +8994,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       return void 0;
     };
 
-    /**
+    /***
     Makes the proxy assume that `newRequest` has the same response as the
     already cached `oldRequest`.
     
@@ -9012,7 +9008,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
      */
     alias = cache.alias;
 
-    /**
+    /***
     Manually stores a promise for the response to the given request.
     
     @function up.proxy.set
@@ -9025,7 +9021,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
      */
     set = cache.set;
 
-    /**
+    /***
     Manually removes the given request from the cache.
     
     You can also [configure](/up.proxy.config) when the proxy
@@ -9039,7 +9035,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
      */
     remove = cache.remove;
 
-    /**
+    /***
     Removes all cache entries.
     
     Unpoly also automatically clears the cache whenever it processes
@@ -9074,7 +9070,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       }
     };
 
-    /**
+    /***
     Preloads the given link.
     
     When the link is clicked later, the response will already be cached,
@@ -9101,14 +9097,14 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       }
     };
 
-    /**
+    /***
     @internal
      */
     isSafeMethod = function(method) {
       return u.contains(config.safeMethods, method);
     };
 
-    /**
+    /***
     @internal
      */
     wrapMethod = function(method, data, appendOpts) {
@@ -9119,7 +9115,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       return [method, data];
     };
 
-    /**
+    /***
     Links with an `up-preload` attribute will silently fetch their target
     when the user hovers over the click area, or when the user puts her
     mouse/finger down (before releasing).
@@ -9169,7 +9165,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
 
 }).call(this);
 
-/**
+/***
 Linking to fragments
 ====================
 
@@ -9243,7 +9239,7 @@ new page is loading.
     var DEFAULT_FOLLOW_VARIANT, addFollowVariant, allowDefault, defaultFollow, defaultPreload, follow, followMethod, followVariantForLink, followVariants, isFollowable, isSafe, makeFollowable, shouldProcessEvent, u, visit;
     u = up.util;
 
-    /**
+    /***
     Visits the given URL without a full page load.
     This is done by fetching `url` through an AJAX request
     and [replacing](/up.replace) the current `<body>` element with the response's `<body>` element.
@@ -9268,7 +9264,7 @@ new page is loading.
       return up.replace(selector, url, options);
     };
 
-    /**
+    /***
     Follows the given link via AJAX and [replaces](/up.replace) the current page
     with HTML from the response.
     
@@ -9318,7 +9314,7 @@ new page is loading.
       return variant.followLink($link, options);
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
     
     @event up:link:follow
@@ -9329,7 +9325,7 @@ new page is loading.
     @stable
      */
 
-    /**
+    /***
     @function defaultFollow
     @internal
      */
@@ -9364,7 +9360,7 @@ new page is loading.
       return defaultFollow($link, options);
     };
 
-    /**
+    /***
     Returns the HTTP method that should be used when following the given link.
     
     Looks at the link's `up-method` or `data-method` attribute.
@@ -9382,7 +9378,7 @@ new page is loading.
       return u.option(options.method, $link.attr('up-method'), $link.attr('data-method'), 'get').toUpperCase();
     };
 
-    /**
+    /***
     No-op that is called when we allow a browser's default action to go through,
     so we can spy on it in unit tests. See `link_spec.js`.
     
@@ -9392,7 +9388,7 @@ new page is loading.
     allowDefault = function(event) {};
     followVariants = [];
 
-    /**
+    /***
     Registers the given handler for links with the given selector.
     
     This does more than a simple `click` handler:
@@ -9415,7 +9411,7 @@ new page is loading.
       return variant;
     };
 
-    /**
+    /***
     Returns whether the given link will be handled by Unpoly instead of making a full page load.
     
     A link will be handled by Unpoly if it has an attribute
@@ -9432,7 +9428,7 @@ new page is loading.
       });
     };
 
-    /**
+    /***
     Returns the handler function that can be used to follow the given link.
     E.g. it wil return a handler calling `up.modal.follow` if the link is a `[up-modal]`,
     but a handler calling `up.link.follow` if the links is `[up-target]`.
@@ -9454,7 +9450,7 @@ new page is loading.
       return variant;
     };
 
-    /**
+    /***
     Makes sure that the given link will be handled by Unpoly instead of making a full page load.
     
     This is done by giving the link an `up-follow` attribute
@@ -9480,7 +9476,7 @@ new page is loading.
       return $targetedChildLink.length === 0 && $targetedInput.length === 0 && u.isUnmodifiedMouseEvent(event);
     };
 
-    /**
+    /***
     Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
     HTTP method like `GET`.
     
@@ -9494,7 +9490,7 @@ new page is loading.
       return up.proxy.isSafeMethod(method);
     };
 
-    /**
+    /***
     Follows this link via AJAX and replaces a CSS selector in the current page
     with corresponding elements from a new page fetched from the server:
     
@@ -9608,7 +9604,7 @@ new page is loading.
       }
     });
 
-    /**
+    /***
     If applied on a link, follows this link via AJAX and replaces the
     current `<body>` element with the response's `<body>` element.
     
@@ -9659,7 +9655,7 @@ new page is loading.
     @stable
      */
 
-    /**
+    /***
     By adding an `up-instant` attribute to a link, the destination will be
     fetched on `mousedown` instead of `click` (`mouseup`).
     
@@ -9681,7 +9677,7 @@ new page is loading.
     @stable
      */
 
-    /**
+    /***
     Marks up the current link to be followed *as fast as possible*.
     
     This is done by:
@@ -9717,7 +9713,7 @@ new page is loading.
       return u.setMissingAttrs($element, newAttrs);
     });
 
-    /**
+    /***
     Add an `[up-expand]` attribute to any element that contains a link
     in order to enlarge the link's click area.
     
@@ -9788,7 +9784,6 @@ new page is loading.
       }
     });
     return {
-      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       visit: visit,
       follow: follow,
       makeFollowable: makeFollowable,
@@ -9808,7 +9803,7 @@ new page is loading.
 
 }).call(this);
 
-/**
+/***
 Forms
 =====
   
@@ -9826,7 +9821,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     var autosubmit, config, fieldSelector, findSwitcherForTarget, observe, observeField, reset, resolveValidateTarget, submit, switchTarget, switchTargets, switcherValues, u, validate;
     u = up.util;
 
-    /**
+    /***
     Sets default options for form submission and validation.
     
     @property up.form.config
@@ -9855,7 +9850,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return config.reset();
     };
 
-    /**
+    /***
     @function up.form.fieldSelector
     @internal
      */
@@ -9863,7 +9858,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return u.multiSelector(config.fields);
     };
 
-    /**
+    /***
     Submits a form via AJAX and updates a page fragment with the response.
     
         up.submit('form.new-user', { target: '.main' })
@@ -9999,7 +9994,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       });
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
     
     @event up:form:submit
@@ -10010,7 +10005,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
 
-    /**
+    /***
     Observes form fields and runs a callback when a value changes.
     
     This is useful for observing text fields while the user is typing.
@@ -10096,9 +10091,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       callback = null;
       rawCallback = u.option(callbackArg, u.presentAttr($element, 'up-observe'));
       if (u.isString(rawCallback)) {
-        callback = function(value, $field) {
-          return eval(rawCallback);
-        };
+        callback = new Function('value', '$field', rawCallback);
       } else {
         callback = rawCallback || up.fail('up.observe: No change callback given');
       }
@@ -10120,7 +10113,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return observer.stop;
     };
 
-    /**
+    /***
     [Observes](/up.observe) a field or form and submits the form when a value changes.
     
     Both the form and the changed field will be assigned a CSS class [`form-up-active`](/form-up-active)
@@ -10165,7 +10158,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return target;
     };
 
-    /**
+    /***
     Performs a server-side validation of a form field.
     
     `up.validate()` submits the given field's form with an additional `X-Up-Validate`
@@ -10238,7 +10231,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return values;
     };
 
-    /**
+    /***
     Shows or hides a target selector depending on the value.
     
     See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
@@ -10266,7 +10259,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       });
     };
 
-    /**
+    /***
     @internal
      */
     switchTarget = function(target, fieldValues) {
@@ -10288,7 +10281,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return $target.addClass('up-switched');
     };
 
-    /**
+    /***
     @internal
      */
     findSwitcherForTarget = function($target) {
@@ -10306,7 +10299,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       }
     };
 
-    /**
+    /***
     Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
     instead of triggering a full page reload.
     
@@ -10444,7 +10437,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return u.muteRejection(submit($form));
     });
 
-    /**
+    /***
     When a form field with this attribute is changed, the form is validated on the server
     and is updated with validation messages.
     
@@ -10593,7 +10586,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return u.muteRejection(validate($field));
     });
 
-    /**
+    /***
     Show or hide elements when a `<select>` or `<input>` has a given value.
     
     \#\#\# Example: Select options
@@ -10677,7 +10670,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return switchTarget($element);
     });
 
-    /**
+    /***
     Observes this field and runs a callback when a value changes.
     
     This is useful for observing text fields while the user is typing.
@@ -10712,7 +10705,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
 
-    /**
+    /***
     Observes this form and runs a callback when any field changes.
     
     This is useful for observing text fields while the user is typing.
@@ -10751,7 +10744,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       return observe($formOrField);
     });
 
-    /**
+    /***
     [Observes](/up.observe) this form field and submits the form when its value changes.
     
     Both the form and the changed field will be assigned a CSS class [`up-active`](/form-up-active)
@@ -10774,7 +10767,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
 
-    /**
+    /***
     [Observes](/up.observe) this form and submits the form when *any* field changes.
     
     Both the form and the field will be assigned a CSS class [`up-active`](/form-up-active)
@@ -10801,7 +10794,6 @@ open dialogs with sub-forms, etc. all without losing form state.
     });
     up.on('up:framework:reset', reset);
     return {
-      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       config: config,
       submit: submit,
       observe: observe,
@@ -10822,7 +10814,7 @@ open dialogs with sub-forms, etc. all without losing form state.
 
 }).call(this);
 
-/**
+/***
 Pop-up overlays
 ===============
 
@@ -10875,7 +10867,7 @@ The HTML of a popup element is simply this:
     var align, attachAsap, attachNow, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, isOpen, preloadNow, reset, state, toggleAsap, u, unveilFrame;
     u = up.util;
 
-    /**
+    /***
     Sets default options for future popups.
     
     @property up.popup.config
@@ -10913,7 +10905,7 @@ The HTML of a popup element is simply this:
       history: false
     });
 
-    /**
+    /***
     Returns the URL from which the current popup's contents were loaded.
     
     Returns `undefined` if no  popup is open.
@@ -10924,7 +10916,7 @@ The HTML of a popup element is simply this:
     @stable
      */
 
-    /**
+    /***
     Returns the URL of the page or modal behind the popup.
     
     @function up.popup.coveredUrl
@@ -11000,7 +10992,7 @@ The HTML of a popup element is simply this:
       return state.$popup.show();
     };
 
-    /**
+    /***
     Returns whether popup modal is currently open.
     
     @function up.popup.isOpen
@@ -11011,7 +11003,7 @@ The HTML of a popup element is simply this:
       return state.phase === 'opened' || state.phase === 'opening';
     };
 
-    /**
+    /***
     Attaches a popup overlay to the given element or selector.
     
     Emits events [`up:popup:open`](/up:popup:open) and [`up:popup:opened`](/up:popup:opened).
@@ -11126,7 +11118,7 @@ The HTML of a popup element is simply this:
       });
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a popup is starting to open.
     
     @event up:popup:open
@@ -11135,14 +11127,14 @@ The HTML of a popup element is simply this:
     @stable
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a popup has finished opening.
     
     @event up:popup:opened
     @stable
      */
 
-    /**
+    /***
     Closes a currently opened popup overlay.
     
     Does nothing if no popup is currently open.
@@ -11209,7 +11201,7 @@ The HTML of a popup element is simply this:
       }
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a popup dialog
     is starting to [close](/up.popup.close).
     
@@ -11219,7 +11211,7 @@ The HTML of a popup element is simply this:
     @stable
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a popup dialog
     is done [closing](/up.popup.close).
     
@@ -11233,7 +11225,7 @@ The HTML of a popup element is simply this:
       }
     };
 
-    /**
+    /***
     Returns whether the given element or selector is contained
     within the current popup.
     
@@ -11249,7 +11241,7 @@ The HTML of a popup element is simply this:
       return $element.closest('.up-popup').length > 0;
     };
 
-    /**
+    /***
     Opens this link's destination of in a popup overlay:
     
         <a href="/decks" up-popup=".deck_list">Switch deck</a>
@@ -11311,7 +11303,7 @@ The HTML of a popup element is simply this:
     });
     up.bus.onEscape(closeAsap);
 
-    /**
+    /***
     When this element is clicked, a currently open [popup](/up.popup) is closed.
     
     Does nothing if no popup is currently open.
@@ -11340,7 +11332,6 @@ The HTML of a popup element is simply this:
     up.on('up:history:restore', closeAsap);
     up.on('up:framework:reset', reset);
     return {
-      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       attach: attachAsap,
       close: closeAsap,
       url: function() {
@@ -11357,7 +11348,7 @@ The HTML of a popup element is simply this:
 
 }).call(this);
 
-/**
+/***
 Modal dialogs
 =============
 
@@ -11421,7 +11412,7 @@ or function.
     var animate, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, flavors, followAsap, isOpen, markAsAnimating, openAsap, openNow, preloadNow, reset, shiftElements, state, templateHtml, u, unshiftElements, unveilFrame, visitAsap;
     u = up.util;
 
-    /**
+    /***
     Sets default options for future modals.
     
     @property up.modal.config
@@ -11504,7 +11495,7 @@ or function.
       }
     });
 
-    /**
+    /***
     Define modal variants with their own default configuration, CSS or HTML template.
     
     \#\#\# Example
@@ -11546,7 +11537,7 @@ or function.
       "default": {}
     });
 
-    /**
+    /***
     Returns the source URL for the fragment displayed in the current modal overlay,
     or `undefined` if no modal is currently open.
     
@@ -11556,7 +11547,7 @@ or function.
     @stable
      */
 
-    /**
+    /***
     Returns the URL of the page behind the modal overlay.
     
     @function up.modal.coveredUrl
@@ -11663,7 +11654,7 @@ or function.
       return results;
     };
 
-    /**
+    /***
     Returns whether a modal is currently open.
     
     This also returns `true` if the modal is in an opening or closing animation.
@@ -11676,7 +11667,7 @@ or function.
       return state.phase === 'opened' || state.phase === 'opening';
     };
 
-    /**
+    /***
     Opens the given link's destination in a modal overlay:
     
         var $link = $('...');
@@ -11738,7 +11729,7 @@ or function.
       return openNow(options);
     };
 
-    /**
+    /***
     Opens a modal for the given URL.
     
     \#\#\# Example
@@ -11769,7 +11760,7 @@ or function.
       return openAsap(options);
     };
 
-    /**
+    /***
     [Extracts](/up.extract) the given CSS selector from the given HTML string and
     opens the results in a modal.
     
@@ -11891,7 +11882,7 @@ or function.
       });
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a modal dialog is starting to open.
     
     @event up:modal:open
@@ -11900,14 +11891,14 @@ or function.
     @stable
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a modal dialog has finished opening.
     
     @event up:modal:opened
     @stable
      */
 
-    /**
+    /***
     Closes a currently opened modal overlay.
     
     Does nothing if no modal is currently open.
@@ -11997,7 +11988,7 @@ or function.
       }
     };
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a modal dialog
     is starting to [close](/up.modal.close).
     
@@ -12007,7 +11998,7 @@ or function.
     @stable
      */
 
-    /**
+    /***
     This event is [emitted](/up.emit) when a modal dialog
     is done [closing](/up.modal.close).
     
@@ -12021,7 +12012,7 @@ or function.
       }
     };
 
-    /**
+    /***
     Returns whether the given element or selector is contained
     within the current modal.
     
@@ -12044,7 +12035,7 @@ or function.
       return u.assign(flavorOverrides(name), overrideConfig);
     };
 
-    /**
+    /***
     Returns a config object for the given flavor.
     Properties in that config should be preferred to the defaults in
     [`/up.modal.config`](/up.modal.config).
@@ -12056,7 +12047,7 @@ or function.
       return flavors[flavor] || (flavors[flavor] = {});
     };
 
-    /**
+    /***
     Returns the config option for the current flavor.
     
     @function flavorDefault
@@ -12076,7 +12067,7 @@ or function.
       return value;
     };
 
-    /**
+    /***
     Clicking this link will load the destination via AJAX and open
     the given selector in a modal dialog.
     
@@ -12159,7 +12150,7 @@ or function.
       }
     });
 
-    /**
+    /***
     When this element is clicked, closes a currently open dialog.
     
     Does nothing if no modal is currently open.
@@ -12177,7 +12168,7 @@ or function.
       return up.bus.consumeAction(event);
     });
 
-    /**
+    /***
     Clicking this link will load the destination via AJAX and open
     the given selector in a modal drawer that slides in from the edge of the screen.
     
@@ -12212,7 +12203,7 @@ or function.
       });
     });
 
-    /**
+    /***
     Sets default options for future drawers.
     
     @property up.modal.flavors.drawer
@@ -12250,7 +12241,6 @@ or function.
     up.on('up:history:restore', closeAsap);
     up.on('up:framework:reset', reset);
     return {
-      knife: eval(typeof Knife !== "undefined" && Knife !== null ? Knife.point : void 0),
       visit: visitAsap,
       follow: followAsap,
       extract: extractAsap,
@@ -12271,7 +12261,7 @@ or function.
 
 }).call(this);
 
-/**
+/***
 Tooltips
 ========
 
@@ -12308,7 +12298,7 @@ The tooltip element is appended to the end of `<body>`.
     var align, attachAsap, attachNow, chain, closeAsap, closeNow, config, createElement, isOpen, reset, state, u;
     u = up.util;
 
-    /**
+    /***
     Configures defaults for future tooltips.
     
     @property up.tooltip.config
@@ -12399,7 +12389,7 @@ The tooltip element is appended to the end of `<body>`.
       return state.$tooltip = $element;
     };
 
-    /**
+    /***
     Opens a tooltip over the given element.
     
     The unobtrusive variant of this is the [`[up-tooltip]`](/up-tooltip) selector.
@@ -12466,7 +12456,7 @@ The tooltip element is appended to the end of `<body>`.
       });
     };
 
-    /**
+    /***
     Closes a currently shown tooltip.
     
     Does nothing if no tooltip is currently shown.
@@ -12504,7 +12494,7 @@ The tooltip element is appended to the end of `<body>`.
       });
     };
 
-    /**
+    /***
     Returns whether a tooltip is currently showing.
     
     @function up.tooltip.isOpen
@@ -12514,7 +12504,7 @@ The tooltip element is appended to the end of `<body>`.
       return state.phase === 'opening' || state.phase === 'opened';
     };
 
-    /**
+    /***
     Displays a tooltip with text content when hovering the mouse over this element.
     
     \#\#\# Example
@@ -12537,7 +12527,7 @@ The tooltip element is appended to the end of `<body>`.
     @stable
      */
 
-    /**
+    /***
     Displays a tooltip with HTML content when hovering the mouse over this element:
     
         <a href="/decks" up-tooltip-html="Show &lt;b&gt;all&lt;/b&gt; decks">Decks</a>
@@ -12570,7 +12560,7 @@ The tooltip element is appended to the end of `<body>`.
 
 }).call(this);
 
-/**
+/***
 Navigation feedback
 ===================
 
@@ -12615,7 +12605,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     var CLASS_ACTIVE, SELECTOR_SECTION, config, currentClass, findActionableArea, locationChanged, normalizeUrl, reset, sectionUrls, start, stop, u, urlSet;
     u = up.util;
 
-    /**
+    /***
     Sets default options for this module.
     
     @property up.feedback.config
@@ -12706,7 +12696,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
       });
     };
 
-    /**
+    /***
     @function findActionableArea
     @param {string|Element|jQuery} elementOrSelector
     @internal
@@ -12720,7 +12710,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
       return $area;
     };
 
-    /**
+    /***
     Marks the given element as currently loading, by assigning the CSS class [`up-active`](/a.up-active).
     
     This happens automatically when following links or submitting forms through the Unpoly API.
@@ -12773,7 +12763,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
       }
     };
 
-    /**
+    /***
     Links that are currently [loading through Unpoly](/form-up-target)
     are assigned the `up-active` class automatically.
     Style `.up-active` in your CSS to improve the perceived responsiveness
@@ -12801,7 +12791,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     @stable
      */
 
-    /**
+    /***
     Forms that are currently [loading through Unpoly](/a-up-target)
     are assigned the `up-active` class automatically.
     Style `.up-active` in your CSS to improve the perceived responsiveness
@@ -12832,7 +12822,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     @stable
      */
 
-    /**
+    /***
     Marks the given element as no longer loading, by removing the CSS class [`up-active`](/a.up-active).
     
     This happens automatically when network requests initiated by the Unpoly API have completed.
@@ -12849,7 +12839,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
       return $element.removeClass(CLASS_ACTIVE);
     };
 
-    /**
+    /***
     Links that point to the current location are assigned
     the `up-current` class automatically.
     
@@ -12913,7 +12903,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
 
 }).call(this);
 
-/**
+/***
 Passive updates
 ===============
 
@@ -12928,7 +12918,7 @@ passively receive updates from the server.
     var config, hungrySelector, reset, u;
     u = up.util;
 
-    /**
+    /***
     Configures defaults for passive updates.
     
     @property up.radio.config
@@ -12952,7 +12942,7 @@ passively receive updates from the server.
       return config.reset();
     };
 
-    /**
+    /***
     @function up.radio.hungrySelector
     @internal
      */
@@ -12960,7 +12950,7 @@ passively receive updates from the server.
       return u.multiSelector(config.hungry);
     };
 
-    /**
+    /***
     Elements with this attribute are [updated](/up.replace) whenever there is a
     matching element found in a successful response. The element is replaced even
     when it isn't [targeted](/a-up-target) directly.
@@ -12981,7 +12971,7 @@ passively receive updates from the server.
 
 }).call(this);
 
-/**
+/***
 Play nice with Rails UJS
 ========================
  */
