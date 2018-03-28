@@ -276,7 +276,7 @@ up.form = (($) ->
     callback = null
     rawCallback = u.option(callbackArg, u.presentAttr($element, 'up-observe'))
     if u.isString(rawCallback)
-      callback = (value, $field) -> eval(rawCallback)
+      callback = new Function('value', '$field', rawCallback)
     else
       callback = rawCallback or up.fail('up.observe: No change callback given')
 
