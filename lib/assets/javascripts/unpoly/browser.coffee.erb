@@ -325,7 +325,7 @@ up.browser = (($) ->
     u.presence(value)
 
 
-  knife: eval(Knife?.point)
+  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url
   navigate: navigate
   submitForm: submitForm

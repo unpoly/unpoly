@@ -483,7 +483,7 @@ up.bus = (($) ->
   live 'up:framework:booted', snapshot
   live 'up:framework:reset', resetBus
 
-  knife: eval(Knife?.point)
+  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   on: live # can't name symbols `on` in Coffeescript
   off: unbind # can't name symbols `off` in Coffeescript
   emit: emit

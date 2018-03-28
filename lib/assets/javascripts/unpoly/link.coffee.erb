@@ -581,7 +581,7 @@ up.link = (($) ->
       $area.removeAttr('up-expand')
       makeFollowable($area)
 
-  knife: <% if eval(Knife?.point)
+  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   visit: visit
   follow: follow
   makeFollowable: makeFollowable

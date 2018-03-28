@@ -961,7 +961,7 @@ up.dom = (($) ->
 
   up.on 'up:framework:reset', reset
 
-  knife: eval(Knife?.point)
+  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   replace: replace
   reload: reload
   destroy: destroy
