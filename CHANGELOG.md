@@ -6,6 +6,15 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.54.1
+------
+
+This release contains no new features, but will help you when using tools like Babel or Webpack:
+
+- Unpoly now ship without any uses of [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) in its JavaScript sources. Use of `eval()` had previously prevented minifiers from shortening local variables in some files. It could also trigger some bugs with Webpack 3.
+- Documentation in Unpoly's JavaScript sources can no longer be confused with [JSDoc](http://usejsdoc.org/) comments. Unpoly does not use JSDoc, but some build pipelines eagerly look for JSDoc comments to generate type information.
+
+
 0.54.0
 ------
 
