@@ -1,4 +1,4 @@
-###*
+###**
 History
 ========
   
@@ -12,7 +12,7 @@ up.history = (($) ->
   
   u = up.util
 
-  ###*
+  ###**
   Configures behavior when the user goes back or forward in browser history.
 
   @property up.history.config
@@ -29,7 +29,7 @@ up.history = (($) ->
     popTargets: ['body']
     restoreScroll: true
 
-  ###*
+  ###**
   Returns the previous URL in the browser history.
 
   Note that this will only work reliably for history changes that
@@ -52,7 +52,7 @@ up.history = (($) ->
     normalizeOptions.hash = true
     u.normalizeUrl(url, normalizeOptions)
 
-  ###*
+  ###**
   Returns a normalized URL for the current history entry.
 
   @function up.history.url
@@ -65,7 +65,7 @@ up.history = (($) ->
     normalizeOptions = { stripTrailingSlash: true }
     normalizeUrl(url, normalizeOptions) == currentUrl(normalizeOptions)
 
-  ###*
+  ###**
   Remembers the given URL so we can offer `up.history.previousUrl()`.
 
   @function observeNewUrl
@@ -77,7 +77,7 @@ up.history = (($) ->
       nextPreviousUrl = undefined
     nextPreviousUrl = url
 
-  ###*
+  ###**
   Replaces the current history entry and updates the
   browser's location bar with the given URL.
 
@@ -96,7 +96,7 @@ up.history = (($) ->
   replace = (url) ->
     manipulate('replaceState', url)
 
-  ###*
+  ###**
   Adds a new history entry and updates the browser's
   address bar with the given URL.
 
@@ -124,7 +124,7 @@ up.history = (($) ->
       else
         up.emit('up:history:muted', url: url, message: "Did not advance to #{url} (history is unavailable)")
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) before a new history entry is added.
 
   @event up:history:push
@@ -135,7 +135,7 @@ up.history = (($) ->
   @experimental
   ###
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) after a new history entry has been added.
 
   @event up:history:pushed
@@ -184,7 +184,7 @@ up.history = (($) ->
     state = event.originalEvent.state
     restoreStateOnPop(state)
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) before a history entry will be restored.
 
   History entries are restored when the user uses the *Back* or *Forward* button.
@@ -195,7 +195,7 @@ up.history = (($) ->
   @internal
   ###
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) after a history entry has been restored.
 
   History entries are restored when the user uses the *Back* or *Forward* button.
@@ -220,7 +220,7 @@ up.history = (($) ->
       # We should check in 2023 if we can remove this.
       setTimeout register, 100
 
-  ###*
+  ###**
   Changes the link's destination so it points to the previous URL.
 
   Note that this will *not* call `location.back()`, but will set

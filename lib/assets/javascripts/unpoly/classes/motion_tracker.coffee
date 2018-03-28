@@ -8,7 +8,7 @@ class up.MotionTracker
     @selector = ".#{@className}"
     @finishEvent = "up:#{name}:finish"
 
-  ###*
+  ###**
   Finishes all animations in the given element's ancestors and descendants,
   then calls the animator.
 
@@ -21,7 +21,7 @@ class up.MotionTracker
     @finish($element).then =>
       @start($element, animator)
 
-  ###*
+  ###**
   Calls the given animator to animate the given element.
 
   The animation returned by the animator is tracked so it can be
@@ -41,7 +41,7 @@ class up.MotionTracker
     promise.then => @unmarkElement($element)
     promise
 
-  ###*
+  ###**
   @method finish
   @param {jQuery} [elements]
     If no element is given, finishes all animations in the documnet.

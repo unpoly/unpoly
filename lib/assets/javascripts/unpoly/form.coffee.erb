@@ -1,4 +1,4 @@
-###*
+###**
 Forms
 =====
   
@@ -12,7 +12,7 @@ up.form = (($) ->
   
   u = up.util
 
-  ###*
+  ###**
   Sets default options for form submission and validation.
 
   @property up.form.config
@@ -40,14 +40,14 @@ up.form = (($) ->
   reset = ->
     config.reset()
 
-  ###*
+  ###**
   @function up.form.fieldSelector
   @internal
   ###
   fieldSelector = ->
     u.multiSelector(config.fields)
 
-  ###*
+  ###**
   Submits a form via AJAX and updates a page fragment with the response.
 
       up.submit('form.new-user', { target: '.main' })
@@ -180,7 +180,7 @@ up.form = (($) ->
       u.always promise, -> up.feedback.stop($form)
       promise
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
 
   @event up:form:submit
@@ -191,7 +191,7 @@ up.form = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Observes form fields and runs a callback when a value changes.
 
   This is useful for observing text fields while the user is typing.
@@ -295,7 +295,7 @@ up.form = (($) ->
     observer.start()
     return observer.stop
 
-  ###*
+  ###**
   [Observes](/up.observe) a field or form and submits the form when a value changes.
 
   Both the form and the changed field will be assigned a CSS class [`form-up-active`](/form-up-active)
@@ -331,7 +331,7 @@ up.form = (($) ->
       target = u.selectorForElement(target)
     target
 
-  ###*
+  ###**
   Performs a server-side validation of a form field.
 
   `up.validate()` submits the given field's form with an additional `X-Up-Validate`
@@ -398,7 +398,7 @@ up.form = (($) ->
       values.push(meta)
     values
 
-  ###*
+  ###**
   Shows or hides a target selector depending on the value.
 
   See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
@@ -423,7 +423,7 @@ up.form = (($) ->
     $(targetSelector).each ->
       switchTarget($(this), fieldValues)
 
-  ###*
+  ###**
   @internal
   ###
   switchTarget = (target, fieldValues) ->
@@ -444,7 +444,7 @@ up.form = (($) ->
     $target.toggle(show)
     $target.addClass('up-switched')
 
-  ###*
+  ###**
   @internal
   ###
   findSwitcherForTarget = ($target) ->
@@ -457,7 +457,7 @@ up.form = (($) ->
     else
       u.fail('Could not find [up-switch] field for %o', $target.get(0))
 
-  ###*
+  ###**
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
   instead of triggering a full page reload.
 
@@ -594,7 +594,7 @@ up.form = (($) ->
     up.bus.consumeAction(event)
     u.muteRejection submit($form)
 
-  ###*
+  ###**
   When a form field with this attribute is changed, the form is validated on the server
   and is updated with validation messages.
 
@@ -742,7 +742,7 @@ up.form = (($) ->
   up.on 'change', '[up-validate]', (event, $field) ->
     u.muteRejection validate($field)
 
-  ###*
+  ###**
   Show or hide elements when a `<select>` or `<input>` has a given value.
 
   \#\#\# Example: Select options
@@ -825,7 +825,7 @@ up.form = (($) ->
   up.compiler '[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', ($element) ->
     switchTarget($element)
 
-  ###*
+  ###**
   Observes this field and runs a callback when a value changes.
 
   This is useful for observing text fields while the user is typing.
@@ -860,7 +860,7 @@ up.form = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Observes this form and runs a callback when any field changes.
 
   This is useful for observing text fields while the user is typing.
@@ -897,7 +897,7 @@ up.form = (($) ->
   ###
   up.compiler '[up-observe]', ($formOrField) -> observe($formOrField)
 
-  ###*
+  ###**
   [Observes](/up.observe) this form field and submits the form when its value changes.
 
   Both the form and the changed field will be assigned a CSS class [`up-active`](/form-up-active)
@@ -920,7 +920,7 @@ up.form = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   [Observes](/up.observe) this form and submits the form when *any* field changes.
 
   Both the form and the field will be assigned a CSS class [`up-active`](/form-up-active)

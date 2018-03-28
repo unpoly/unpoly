@@ -1,4 +1,4 @@
-###*
+###**
 Browser support
 ===============
 
@@ -19,7 +19,7 @@ up.browser = (($) ->
 
   u = up.util
 
-  ###*
+  ###**
   @method up.browser.navigate
   @param {string} url
   @param {string} [options.method='get']
@@ -30,7 +30,7 @@ up.browser = (($) ->
     request = new up.Request(u.merge(options, { url }))
     request.navigate()
 
-  ###*
+  ###**
   For mocking in specs.
 
   @method submitForm
@@ -38,7 +38,7 @@ up.browser = (($) ->
   submitForm = ($form) ->
     $form.submit()
 
-  ###*
+  ###**
   A cross-browser way to interact with `console.log`, `console.error`, etc.
 
   This function falls back to `console.log` if the output stream is not implemented.
@@ -94,7 +94,7 @@ up.browser = (($) ->
       string += closer
     string
 
-  ###*
+  ###**
   See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
 
   @function up.browser.sprintf
@@ -103,7 +103,7 @@ up.browser = (($) ->
   sprintf = (message, args...) ->
     sprintfWithFormattedArgs(u.identity, message, args...)
 
-  ###*
+  ###**
   @function up.browser.sprintfWithBounds
   @internal
   ###
@@ -123,7 +123,7 @@ up.browser = (($) ->
   isIE10OrWorse = u.memoize ->
     !window.atob
 
-  ###*
+  ###**
   Returns whether this browser supports manipulation of the current URL
   via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
 
@@ -156,7 +156,7 @@ up.browser = (($) ->
     # the framework was booted from a GET request.
     u.isDefined(history.pushState) && up.protocol.initialRequestMethod() == 'get'
 
-  ###*
+  ###**
   Returns whether this browser supports animation using
   [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions).
 
@@ -171,7 +171,7 @@ up.browser = (($) ->
   canCssTransition = ->
     'transition' of document.documentElement.style
 
-  ###*
+  ###**
   Returns whether this browser supports the DOM event [`input`](https://developer.mozilla.org/de/docs/Web/Events/input).
 
   @function up.browser.canInputEvent
@@ -181,7 +181,7 @@ up.browser = (($) ->
   canInputEvent = ->
     'oninput' of document.createElement('input')
 
-  ###*
+  ###**
   Returns whether this browser supports promises.
 
   @function up.browser.canPromise
@@ -191,7 +191,7 @@ up.browser = (($) ->
   canPromise = ->
     !!window.Promise
 
-  ###*
+  ###**
   Returns whether this browser supports the [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
   interface.
 
@@ -202,7 +202,7 @@ up.browser = (($) ->
   canFormData = ->
     !!window.FormData
 
-  ###*
+  ###**
   Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
   interface.
 
@@ -213,7 +213,7 @@ up.browser = (($) ->
   canDOMParser = ->
     !!window.DOMParser
 
-  ###*
+  ###**
   Returns whether this browser supports the [`debugging console`](https://developer.mozilla.org/en-US/docs/Web/API/Console).
 
   @function up.browser.canConsole
@@ -238,7 +238,7 @@ up.browser = (($) ->
     # When updating minimum jQuery, also update the dependency in package.json.
     major >= 2 || (major == 1 && minor >= 9)
 
-  ###*
+  ###**
   Returns and deletes a cookie with the given name
   Inspired by Turbolinks: https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/lib/assets/javascripts/turbolinks.coffee#L292
 
@@ -251,7 +251,7 @@ up.browser = (($) ->
       document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
     value
 
-  ###*
+  ###**
   @function up,browser.whenConfirmed
   @return {Promise}
   @param {string} options.confirm
@@ -264,7 +264,7 @@ up.browser = (($) ->
     else
       Promise.reject(new Error('User canceled action'))
 
-  ###*
+  ###**
   Returns whether Unpoly supports the current browser.
 
   If this returns `false` Unpoly will prevent itself from [booting](/up.boot)
@@ -288,7 +288,7 @@ up.browser = (($) ->
       canInputEvent() &&
       canPromise()
 
-  ###*
+  ###**
   @internal
   ###
   sessionStorage = u.memoize ->
@@ -302,7 +302,7 @@ up.browser = (($) ->
       # as an <iframe>. See https://bugs.chromium.org/p/chromium/issues/detail?id=357625
       polyfilledSessionStorage()
 
-  ###*
+  ###**
   @internal
   ###
   polyfilledSessionStorage = ->
@@ -310,7 +310,7 @@ up.browser = (($) ->
     getItem: (prop) -> data[prop]
     setItem: (prop, value) -> data[prop] = value
 
-  ###*
+  ###**
   Returns `'foo'` if the hash is `'#foo'`.
 
   Returns undefined if the hash is `'#'`, `''` or `undefined`.

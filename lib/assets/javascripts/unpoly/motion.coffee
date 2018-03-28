@@ -1,4 +1,4 @@
-###*
+###**
 Animation
 =========
   
@@ -42,7 +42,7 @@ up.motion = (($) ->
 
   motionTracker = new up.MotionTracker('motion')
 
-  ###*
+  ###**
   Sets default options for animations and transitions.
 
   @property up.motion.config
@@ -77,7 +77,7 @@ up.motion = (($) ->
     namedTransitions = u.copy(defaultNamedTransitions)
     config.reset()
 
-  ###*
+  ###**
   Returns whether Unpoly will perform animations.
 
   Set [`up.motion.config.enabled`](/up.motion.config) `false` in order to disable animations globally.
@@ -89,7 +89,7 @@ up.motion = (($) ->
   isEnabled = ->
     config.enabled
 
-  ###*
+  ###**
   Applies the given animation to the given element.
 
   \#\#\# Example
@@ -190,7 +190,7 @@ up.motion = (($) ->
     # Signal that the animation is already done.
     Promise.resolve()
 
-  ###*
+  ###**
   Animates the given element's CSS properties using CSS transitions.
 
   If the element is already being animated, the previous animation
@@ -295,7 +295,7 @@ up.motion = (($) ->
 
     motionTracker.start($element, startCssTransition)
 
-  ###*
+  ###**
   Extracts animation-related options from the given options hash.
   If `$element` is given, also inspects the element for animation-related
   attributes like `up-easing` or `up-duration`.
@@ -317,7 +317,7 @@ up.motion = (($) ->
   findNamedAnimation = (name) ->
     namedAnimations[name] or up.fail("Unknown animation %o", name)
 
-  ###*
+  ###**
   @function withGhosts
   @return {Promise}
   @internal
@@ -381,7 +381,7 @@ up.motion = (($) ->
         oldCopy.$bounds.remove()
         newCopy.$bounds.remove()
 
-  ###*
+  ###**
   Completes [animations](/up.animate) and [transitions](/up.morph).
 
   If called without arguments, all animations on the screen are completed.
@@ -401,7 +401,7 @@ up.motion = (($) ->
   finish = (elementOrSelector) ->
     motionTracker.finish(elementOrSelector)
 
-  ###*
+  ###**
   Performs an animated transition between two elements.
   Transitions are implement by performing two animations in parallel,
   causing one element to disappear and the other to appear.
@@ -515,7 +515,7 @@ up.motion = (($) ->
       else if namedTransition = namedTransitions[object]
         findTransitionFn(namedTransition)
 
-  ###*
+  ###**
   This instantly causes the side effects of a successful transition.
   We use this to skip morphing for old browsers, or when the developer
   decides to only animate the new element (i.e. no real ghosting or transition).
@@ -535,7 +535,7 @@ up.motion = (($) ->
     # in this branch, we need to do it ourselves.
     up.layout.revealOrRestoreScroll($new, scrollOptions)
 
-  ###*
+  ###**
   @internal
   ###
   prependCopy = ($element, $viewport) ->
@@ -586,7 +586,7 @@ up.motion = (($) ->
     $bounds: $bounds
     moveTop: moveTop
 
-  ###*
+  ###**
   Defines a named transition.
 
   Here is the definition of the pre-defined `cross-fade` animation:
@@ -622,7 +622,7 @@ up.motion = (($) ->
   registerTransition = (name, transition) ->
     namedTransitions[name] = transition
 
-  ###*
+  ###**
   Defines a named animation.
 
   Here is the definition of the pre-defined `fade-in` animation:
@@ -661,7 +661,7 @@ up.motion = (($) ->
     defaultNamedAnimations = u.copy(namedAnimations)
     defaultNamedTransitions = u.copy(namedTransitions)
 
-  ###*
+  ###**
   Returns whether the given animation option will cause the animation
   to be skipped.
 

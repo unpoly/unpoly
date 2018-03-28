@@ -1,12 +1,12 @@
 u = up.util
 
-###*
+###**
 @class up.Cache
 @internal
 ###
 class up.Cache
 
-  ###*
+  ###**
   @constructor
   @param {number|Function() :number} [config.size]
     Maximum number of cache entries.

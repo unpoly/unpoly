@@ -31,7 +31,7 @@ class up.ExtractPlan
   matchExists: =>
     @oldExists() && @newExists()
 
-  ###*
+  ###**
   Example:
 
       parseSelector('foo, bar:before', transition: 'cross-fade')

@@ -1,4 +1,4 @@
-###*
+###**
 Server protocol
 ===============
 
@@ -178,21 +178,21 @@ up.protocol = (($) ->
 
   u = up.util
 
-  ###*
+  ###**
   @function up.protocol.locationFromXhr
   @internal
   ###
   locationFromXhr = (xhr) ->
     xhr.getResponseHeader(config.locationHeader) || xhr.responseURL
 
-  ###*
+  ###**
   @function up.protocol.titleFromXhr
   @internal
   ###
   titleFromXhr = (xhr) ->
     xhr.getResponseHeader(config.titleHeader)
 
-  ###*
+  ###**
   @function up.protocol.methodFromXhr
   @internal
   ###
@@ -200,7 +200,7 @@ up.protocol = (($) ->
     if method = xhr.getResponseHeader(config.methodHeader)
       u.normalizeMethod(method)
 
-  ###*
+  ###**
   Server-side companion libraries like unpoly-rails set this cookie so we
   have a way to detect the request method of the initial page load.
   There is no JavaScript API for this.
@@ -217,7 +217,7 @@ up.protocol = (($) ->
   # which might be much later.
   up.bus.on('up:framework:booted', initialRequestMethod)
 
-  ###*
+  ###**
   Configures strings used in the optional [server protocol](/up.protocol).
 
   @property up.protocol.config

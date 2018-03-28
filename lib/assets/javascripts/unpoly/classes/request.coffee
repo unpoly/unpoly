@@ -2,7 +2,7 @@
 
 u = up.util
 
-###*
+###**
 Instances of `up.Request` normalizes properties of an [`AJAX request`](/up.request)
 such as the requested URL, form parameters and HTTP method.
 
@@ -10,7 +10,7 @@ such as the requested URL, form parameters and HTTP method.
 ###
 class up.Request extends up.Record
 
-  ###*
+  ###**
   The HTTP method for the request.
 
   @property up.Request#method
@@ -18,7 +18,7 @@ class up.Request extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   The URL for the request.
 
   @property up.Request#url
@@ -26,7 +26,7 @@ class up.Request extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   Parameters that should be sent as the request's payload.
 
   Parameters may be passed as one of the following forms:
@@ -40,7 +40,7 @@ class up.Request extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
 
   @property up.Request#target
@@ -48,7 +48,7 @@ class up.Request extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
 
   @property up.Request#failTarget
@@ -56,7 +56,7 @@ class up.Request extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   An object of additional HTTP headers.
 
   @property up.Request#headers
@@ -64,7 +64,7 @@ class up.Request extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   A timeout in milliseconds.
 
   If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set,
@@ -85,7 +85,7 @@ class up.Request extends up.Record
       'timeout'
     ]
 
-  ###*
+  ###**
   @constructor up.Request
   @param {string} [attributes]
   ###

@@ -1,4 +1,4 @@
-###*
+###**
 Fragment update API
 ===================
   
@@ -15,7 +15,7 @@ up.dom = (($) ->
   
   u = up.util
 
-  ###*
+  ###**
   Configures defaults for fragment insertion.
 
   @property up.dom.config
@@ -46,7 +46,7 @@ up.dom = (($) ->
     sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
     $element.attr("up-source", sourceUrl)
 
-  ###*
+  ###**
   Returns the URL the given element was retrieved from.
 
   @method up.dom.source
@@ -57,7 +57,7 @@ up.dom = (($) ->
     $element = $(selectorOrElement).closest('[up-source]')
     u.presence($element.attr("up-source")) || up.browser.url()
 
-  ###*
+  ###**
   Resolves the given CSS selector (which might contain `&` references)
   to a full CSS selector without ampersands.
 
@@ -84,7 +84,7 @@ up.dom = (($) ->
       selector = u.selectorForElement(selectorOrElement)
     selector
 
-  ###*
+  ###**
   Replaces elements on the current page with corresponding elements
   from a new page fetched from the server.
 
@@ -293,7 +293,7 @@ up.dom = (($) ->
     promise = promise.then(onSuccess, onFailure) unless options.preload
     promise
 
-  ###*
+  ###**
   @internal
   ###
   processResponse = (isSuccess, selector, response, options) ->
@@ -333,7 +333,7 @@ up.dom = (($) ->
   shouldExtractTitle = (options) ->
     not (options.title is false || u.isString(options.title) || (options.history is false && options.title isnt true))
 
-  ###*
+  ###**
   Updates a selector on the current page with the
   same selector from the given HTML string.
 
@@ -603,7 +603,7 @@ up.dom = (($) ->
           if up.bus.nobodyPrevents('up:fragment:keep', keepEventArgs)
             plan
 
-  ###*
+  ###**
   Elements with an `up-keep` attribute will be persisted during
   [fragment updates](/a-up-target).
 
@@ -653,7 +653,7 @@ up.dom = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) before an existing element is [kept](/up-keep) during
   a page update.
 
@@ -674,7 +674,7 @@ up.dom = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when an existing element has been [kept](/up-keep)
   during a page update.
 
@@ -692,7 +692,7 @@ up.dom = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Compiles a page fragment that has been inserted into the DOM
   by external code.
 
@@ -728,7 +728,7 @@ up.dom = (($) ->
     emitFragmentInserted($element, options)
     $element
 
-  ###*
+  ###**
   When a page fragment has been [inserted or updated](/up.replace),
   this event is [emitted](/up.emit) on the fragment.
 
@@ -766,7 +766,7 @@ up.dom = (($) ->
     # as well as its ancestors
     $element.closest(unreal).length == 0
 
-  ###*
+  ###**
   Returns the first element matching the given selector, but
   ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
 
@@ -834,7 +834,7 @@ up.dom = (($) ->
   matchesLayer = (selectorOrElement, layer) ->
     layerOf(selectorOrElement) == layer
 
-  ###*
+  ###**
   Destroys the given element or selector.
 
   Takes care that all [`up.compiler()`](/up.compiler) destructors, if any, are called.
@@ -902,7 +902,7 @@ up.dom = (($) ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
     options.log != false && !$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')
 
-  ###*
+  ###**
   Before a page fragment is being [destroyed](/up.destroy), this
   event is [emitted](/up.emit) on the fragment.
 
@@ -915,7 +915,7 @@ up.dom = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) right before a [destroyed](/up.destroy)
   page fragment is removed from the DOM.
 
@@ -928,7 +928,7 @@ up.dom = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Replaces the given element with a fresh copy fetched from the server.
 
   \#\#\# Example

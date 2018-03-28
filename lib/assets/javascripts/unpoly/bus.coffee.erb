@@ -1,4 +1,4 @@
-###*
+###**
 Events
 ======
 
@@ -58,7 +58,7 @@ up.bus = (($) ->
   # A hash mapping oldEventName => newEventName
   renamedEvents = {}
 
-  ###*
+  ###**
   Convert an Unpoly style listener (second argument is the event target
   as a jQuery collection) to a vanilla jQuery listener
 
@@ -70,7 +70,7 @@ up.bus = (($) ->
       $me = event.$element || $(this)
       upListener.apply($me.get(0), [event, $me, up.syntax.data($me)])
 
-  ###*
+  ###**
   Converts an argument list for `up.on()` to an argument list for `jQuery.on`.
   This involves rewriting the listener signature in the last argument slot.
 
@@ -108,7 +108,7 @@ up.bus = (($) ->
         event
     description[0] = events.join(' ')
 
-  ###*
+  ###**
   Listens to an event on `document`.
 
   The given event listener which will be executed whenever the
@@ -216,7 +216,7 @@ up.bus = (($) ->
     # Return destructor
     -> unbind(upDescription...)
 
-  ###*
+  ###**
   Unbinds an event listener previously bound with [`up.on()`](/up.on).
 
   \#\#\# Example
@@ -252,7 +252,7 @@ up.bus = (($) ->
   upDescriptionNumber = (upDescription) ->
     u.last(upDescription)._descriptionNumber
 
-  ###*
+  ###**
   Emits a event with the given name and properties.
 
   The event will be triggered as a jQuery event on `document`.
@@ -317,7 +317,7 @@ up.bus = (($) ->
       else
         up.puts 'Emitted event %s', eventName
 
-  ###*
+  ###**
   [Emits an event](/up.emit) and returns whether no listener
   has prevented the default action.
 
@@ -333,7 +333,7 @@ up.bus = (($) ->
     event = emit(args...)
     not event.isDefaultPrevented()
 
-  ###*
+  ###**
   [Emits](/up.emit) the given event and returns a promise
   that will be fulfilled if no listener has prevented the default action.
 
@@ -354,7 +354,7 @@ up.bus = (($) ->
       else
         reject(new Error("Event #{args[0]} was prevented"))
 
-  ###*
+  ###**
   Registers an event listener to be called when the user
   presses the `Escape` key.
 
@@ -371,7 +371,7 @@ up.bus = (($) ->
         listener(event)
     )
 
-  ###*
+  ###**
   Stops the given event from propagating and prevents the default action.
 
   @function up.bus.haltEvent
@@ -382,7 +382,7 @@ up.bus = (($) ->
     event.stopPropagation()
     event.preventDefault()
 
-  ###*
+  ###**
   @function up.bus.consumeAction
   @internal
   ###
@@ -395,7 +395,7 @@ up.bus = (($) ->
       # an outside link consumes the user click. So we emit another event for that.
       emit('up:action:consumed', $element: $(event.target), message: false)
 
-  ###*
+  ###**
   Makes a snapshot of the currently registered event listeners,
   to later be restored through [`up.bus.reset()`](/up.bus.reset).
 
@@ -419,7 +419,7 @@ up.bus = (($) ->
     for description in doomedDescriptions
       unbind(description...)
 
-  ###*
+  ###**
   Resets Unpoly to the state when it was booted.
   All custom event handlers, animations, etc. that have been registered
   will be discarded.
@@ -438,7 +438,7 @@ up.bus = (($) ->
     # without introducing cycles in the asset load order
     up.protocol.reset()
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when Unpoly is [reset](/up.reset) during unit tests.
 
   @event up:framework:reset
@@ -448,7 +448,7 @@ up.bus = (($) ->
   renamedEvent = (oldEvent, newEvent) ->
     renamedEvents[oldEvent] = newEvent
 
-  ###*
+  ###**
   Boots the Unpoly framework.
 
   **This is called automatically** by including the Unpoly JavaScript files.
@@ -473,7 +473,7 @@ up.bus = (($) ->
     else
       console.log?("Unpoly doesn't support this browser. Framework was not booted.")
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when Unpoly [starts to boot](/up.boot).
 
   @event up:framework:boot

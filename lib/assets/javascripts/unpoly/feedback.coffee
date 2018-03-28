@@ -1,4 +1,4 @@
-###*
+###**
 Navigation feedback
 ===================
 
@@ -39,7 +39,7 @@ up.feedback = (($) ->
 
   u = up.util
 
-  ###*
+  ###**
   Sets default options for this module.
 
   @property up.feedback.config
@@ -121,7 +121,7 @@ up.feedback = (($) ->
       else if $section.hasClass(klass) && $section.closest('.up-destroying').length == 0
         $section.removeClass(klass)
 
-  ###*
+  ###**
   @function findActionableArea
   @param {string|Element|jQuery} elementOrSelector
   @internal
@@ -133,7 +133,7 @@ up.feedback = (($) ->
       $area = u.presence($area.parent(SELECTOR_SECTION)) || $area
     $area
 
-  ###*
+  ###**
   Marks the given element as currently loading, by assigning the CSS class [`up-active`](/a.up-active).
 
   This happens automatically when following links or submitting forms through the Unpoly API.
@@ -178,7 +178,7 @@ up.feedback = (($) ->
         up.warn('Expected block to return a promise, but got %o', promise)
       promise
 
-  ###*
+  ###**
   Links that are currently [loading through Unpoly](/form-up-target)
   are assigned the `up-active` class automatically.
   Style `.up-active` in your CSS to improve the perceived responsiveness
@@ -206,7 +206,7 @@ up.feedback = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Forms that are currently [loading through Unpoly](/a-up-target)
   are assigned the `up-active` class automatically.
   Style `.up-active` in your CSS to improve the perceived responsiveness
@@ -237,7 +237,7 @@ up.feedback = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Marks the given element as no longer loading, by removing the CSS class [`up-active`](/a.up-active).
 
   This happens automatically when network requests initiated by the Unpoly API have completed.
@@ -252,7 +252,7 @@ up.feedback = (($) ->
     $element = findActionableArea(elementOrSelector)
     $element.removeClass(CLASS_ACTIVE)
 
-  ###*
+  ###**
   Links that point to the current location are assigned
   the `up-current` class automatically.
 

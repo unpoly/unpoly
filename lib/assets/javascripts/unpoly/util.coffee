@@ -1,4 +1,4 @@
-###*
+###**
 Utility functions
 =================
   
@@ -9,7 +9,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 ###
 up.util = (($) ->
 
-  ###*
+  ###**
   A function that does nothing.
 
   @function up.util.noop
@@ -17,7 +17,7 @@ up.util = (($) ->
   ###
   noop = $.noop
 
-  ###*
+  ###**
   Ensures that the given function can only be called a single time.
   Subsequent calls will return the return value of the first call.
 
@@ -37,7 +37,7 @@ up.util = (($) ->
         cached = true
         cachedValue = func(args...)
 
-  ###*
+  ###**
   Returns if the given port is the default port for the given protocol.
 
   @function up.util.isStandardPort
@@ -47,7 +47,7 @@ up.util = (($) ->
     port = port.toString()
     ((port == "" || port == "80") && protocol == 'http:') || (port == "443" && protocol == 'https:')
 
-  ###*
+  ###**
   Normalizes relative paths and absolute paths to a full URL
   that can be checked for equality with other normalized URLs.
   
@@ -82,7 +82,7 @@ up.util = (($) ->
     targetUrl = parseUrl(targetUrl)
     currentUrl.protocol != targetUrl.protocol || currentUrl.host != targetUrl.host
 
-  ###*
+  ###**
   Parses the given URL into components such as hostname and path.
 
   If the given URL is not fully qualified, it is assumed to be relative
@@ -111,7 +111,7 @@ up.util = (($) ->
     anchor.href = anchor.href if isBlank(anchor.hostname)
     anchor
 
-  ###*
+  ###**
   @function up.util.normalizeMethod
   @internal
   ###
@@ -121,14 +121,14 @@ up.util = (($) ->
     else
       'GET'
 
-  ###*
+  ###**
   @function up.util.methodAllowsPayload
   @internal
   ###
   methodAllowsPayload = (method) ->
     method != 'GET' && method != 'HEAD'
 
-  ###*
+  ###**
   @function $createElementFromSelector
   @internal
   ###
@@ -158,7 +158,7 @@ up.util = (($) ->
       $parent = $element
     $root
 
-  ###*
+  ###**
   @function $create
   ###
   $createPlaceholder = (selector, container = document.body) ->
@@ -167,7 +167,7 @@ up.util = (($) ->
     $placeholder.appendTo(container)
     $placeholder
 
-  ###*
+  ###**
   Returns a CSS selector that matches the given element as good as possible.
 
   This uses, in decreasing order of priority:
@@ -230,7 +230,7 @@ up.util = (($) ->
         target[key] = value
     target
 
-  ###*
+  ###**
   Merge the own properties of one or more `sources` into the `target` object.
 
   @function up.util.assign
@@ -240,7 +240,7 @@ up.util = (($) ->
   ###
   assign = Object.assign || assignPolyfill
 
-  ###*
+  ###**
   Returns a new string with whitespace removed from the beginning
   and end of the given string.
 
@@ -252,7 +252,7 @@ up.util = (($) ->
   ###
   trim = $.trim
 
-  ###*
+  ###**
   Calls the given function for each element (and, optional, index)
   of the given array.
 
@@ -265,7 +265,7 @@ up.util = (($) ->
   each = (array, block) ->
     block(item, index) for item, index in array
 
-  ###*
+  ###**
   Translate all items in an array to new array of items.
 
   @function up.util.map
@@ -278,7 +278,7 @@ up.util = (($) ->
   ###
   map = each
 
-  ###*
+  ###**
   Calls the given function for the given number of times.
 
   @function up.util.times
@@ -289,7 +289,7 @@ up.util = (($) ->
   times = (count, block) ->
     block(iteration) for iteration in [0..(count - 1)]
 
-  ###*
+  ###**
   Returns whether the given argument is `null`.
 
   @function up.util.isNull
@@ -300,7 +300,7 @@ up.util = (($) ->
   isNull = (object) ->
     object == null
 
-  ###*
+  ###**
   Returns whether the given argument is `undefined`.
 
   @function up.util.isUndefined
@@ -311,7 +311,7 @@ up.util = (($) ->
   isUndefined = (object) ->
     object == undefined
 
-  ###*
+  ###**
   Returns whether the given argument is not `undefined`.
 
   @function up.util.isDefined
@@ -322,7 +322,7 @@ up.util = (($) ->
   isDefined = (object) ->
     !isUndefined(object)
 
-  ###*
+  ###**
   Returns whether the given argument is either `undefined` or `null`.
 
   Note that empty strings or zero are *not* considered to be "missing".
@@ -337,7 +337,7 @@ up.util = (($) ->
   isMissing = (object) ->
     isUndefined(object) || isNull(object) # || isNaN(object)
 
-  ###*
+  ###**
   Returns whether the given argument is neither `undefined` nor `null`.
 
   Note that empty strings or zero *are* considered to be "given".
@@ -355,7 +355,7 @@ up.util = (($) ->
   # isNan = (object) ->
   #   isNumber(value) && value != +value
 
-  ###*
+  ###**
   Return whether the given argument is considered to be blank.
 
   This returns `true` for:
@@ -378,7 +378,7 @@ up.util = (($) ->
     (isObject(object) && Object.keys(object).length == 0) ||
     (object.length == 0)                  # string, Array, jQuery
 
-  ###*
+  ###**
   Returns the given argument if the argument is [present](/up.util.isPresent),
   otherwise returns `undefined`.
 
@@ -392,7 +392,7 @@ up.util = (($) ->
   presence = (object, tester = isPresent) ->
     if tester(object) then object else undefined
 
-  ###*
+  ###**
   Returns whether the given argument is not [blank](/up.util.isBlank).
 
   @function up.util.isPresent
@@ -403,7 +403,7 @@ up.util = (($) ->
   isPresent = (object) ->
     !isBlank(object)
 
-  ###*
+  ###**
   Returns whether the given argument is a function.
 
   @function up.util.isFunction
@@ -414,7 +414,7 @@ up.util = (($) ->
   isFunction = (object) ->
     typeof(object) == 'function'
 
-  ###*
+  ###**
   Returns whether the given argument is a string.
 
   @function up.util.isString
@@ -425,7 +425,7 @@ up.util = (($) ->
   isString = (object) ->
     typeof(object) == 'string' || object instanceof String
 
-  ###*
+  ###**
   Returns whether the given argument is a number.
 
   Note that this will check the argument's *type*.
@@ -439,7 +439,7 @@ up.util = (($) ->
   isNumber = (object) ->
     typeof(object) == 'number' || object instanceof Number
 
-  ###*
+  ###**
   Returns whether the given argument is an options hash,
 
   Differently from [`up.util.isObject()`], this returns false for
@@ -453,7 +453,7 @@ up.util = (($) ->
   isOptions = (object) ->
     typeof(object) == 'object' && !isNull(object) && !isJQuery(object) && !isPromise(object) && !isFormData(object) && !isArray(object)
 
-  ###*
+  ###**
   Returns whether the given argument is an object.
 
   This also returns `true` for functions, which may behave like objects in JavaScript.
@@ -467,7 +467,7 @@ up.util = (($) ->
     typeOfResult = typeof(object)
     (typeOfResult == 'object' && !isNull(object)) || typeOfResult == 'function'
 
-  ###*
+  ###**
   Returns whether the given argument is a DOM element.
 
   @function up.util.isElement
@@ -478,7 +478,7 @@ up.util = (($) ->
   isElement = (object) ->
     !!(object && object.nodeType == 1)
 
-  ###*
+  ###**
   Returns whether the given argument is a jQuery collection.
 
   @function up.util.isJQuery
@@ -489,7 +489,7 @@ up.util = (($) ->
   isJQuery = (object) ->
     object instanceof jQuery
 
-  ###*
+  ###**
   Returns whether the given argument is an object with a `then` method.
 
   @function up.util.isPromise
@@ -500,7 +500,7 @@ up.util = (($) ->
   isPromise = (object) ->
     isObject(object) && isFunction(object.then)
 
-  ###*
+  ###**
   Returns whether the given argument is an array.
 
   @function up.util.isArray
@@ -511,7 +511,7 @@ up.util = (($) ->
   # https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
   isArray = Array.isArray
 
-  ###*
+  ###**
   Returns whether the given argument is a `FormData` instance.
 
   Always returns `false` in browsers that don't support `FormData`.
@@ -524,7 +524,7 @@ up.util = (($) ->
   isFormData = (object) ->
     object instanceof FormData
 
-  ###*
+  ###**
   Converts the given array-like argument into an array.
 
   Returns the array.
@@ -537,7 +537,7 @@ up.util = (($) ->
   toArray = (object) ->
     Array.prototype.slice.call(object)
 
-  ###*
+  ###**
   Returns a shallow copy of the given array or object.
 
   @function up.util.copy
@@ -554,7 +554,7 @@ up.util = (($) ->
       up.fail('Cannot copy %o', object)
     object
 
-  ###*
+  ###**
   If given a jQuery collection, returns the underlying array of DOM element.
   If given any other argument, returns the argument unchanged.
 
@@ -568,7 +568,7 @@ up.util = (($) ->
     else
       object
 
-  ###*
+  ###**
   Creates a new object by merging together the properties from the given objects.
 
   @function up.util.merge
@@ -579,7 +579,7 @@ up.util = (($) ->
   merge = (sources...) ->
     assign({}, sources...)
 
-  ###*
+  ###**
   Creates an options hash from the given argument and some defaults.
 
   The semantics of this function are confusing.
@@ -602,7 +602,7 @@ up.util = (($) ->
           merged[key] = options(value, defaultValue)
     merged
 
-  ###*
+  ###**
   Returns the first argument that is considered [given](/up.util.isGiven).
 
   This function is useful when you have multiple option sources and the value can be boolean.
@@ -616,7 +616,7 @@ up.util = (($) ->
   option = (args...) ->
     detect(args, isGiven)
 
-  ###*
+  ###**
   Passes each element in the given array to the given function.
   Returns the first element for which the function returns a truthy value.
 
@@ -636,7 +636,7 @@ up.util = (($) ->
         break
     match
 
-  ###*
+  ###**
   Returns whether the given function returns a truthy value
   for any element in the given array.
 
@@ -654,7 +654,7 @@ up.util = (($) ->
         break
     match
 
-  ###*
+  ###**
   Returns whether the given function returns a truthy value
   for all elements in the given array.
 
@@ -672,7 +672,7 @@ up.util = (($) ->
         break
     match
 
-  ###*
+  ###**
   Returns all elements from the given array that are
   neither `null` or `undefined`.
 
@@ -684,7 +684,7 @@ up.util = (($) ->
   compact = (array) ->
     select array, isGiven
 
-  ###*
+  ###**
   Returns the given array without duplicates.
 
   @function up.util.uniq
@@ -700,7 +700,7 @@ up.util = (($) ->
       else
         seen[element] = true
 
-  ###*
+  ###**
   Returns all elements from the given array that return
   a truthy value when passed to the given function.
 
@@ -716,7 +716,7 @@ up.util = (($) ->
         matches.push(element)
     matches
 
-  ###*
+  ###**
   Returns all elements from the given array that do not return
   a truthy value when passed to the given function.
 
@@ -728,7 +728,7 @@ up.util = (($) ->
   reject = (array, tester) ->
     select(array, (element) -> !tester(element))
 
-  ###*
+  ###**
   Returns the intersection of the given two arrays.
 
   Implementation is not optimized. Don't use it for large arrays.
@@ -740,7 +740,7 @@ up.util = (($) ->
     select array1, (element) ->
       contains(array2, element)
 
-  ###*
+  ###**
   Returns the first [present](/up.util.isPresent) element attribute
   among the given list of attribute names.
 
@@ -751,7 +751,7 @@ up.util = (($) ->
     values = ($element.attr(attrName) for attrName in attrNames)
     detect(values, isPresent)
 
-  ###*
+  ###**
   Waits for the given number of milliseconds, the runs the given callback.
 
   Instead of `up.util.setTimer(0, fn)` you can also use [`up.util.nextFrame(fn)`](/up.util.nextFrame).
@@ -764,7 +764,7 @@ up.util = (($) ->
   setTimer = (millis, callback) ->
     setTimeout(callback, millis)
 
-  ###*
+  ###**
   Schedules the given function to be called in the
   next JavaScript execution frame.
 
@@ -775,7 +775,7 @@ up.util = (($) ->
   nextFrame = (block) ->
     setTimeout(block, 0)
 
-  ###*
+  ###**
   Queue a function to be executed in the next microtask.
 
   @function up.util.queueMicrotask
@@ -785,7 +785,7 @@ up.util = (($) ->
   microtask = (task) ->
     Promise.resolve().then(task)
 
-  ###*
+  ###**
   Returns the last element of the given array.
 
   @function up.util.last
@@ -795,7 +795,7 @@ up.util = (($) ->
   last = (array) ->
     array[array.length - 1]
 
-  ###*
+  ###**
   Measures the drawable area of the document.
 
   @function up.util.clientSize
@@ -806,7 +806,7 @@ up.util = (($) ->
     width: element.clientWidth
     height: element.clientHeight
 
-  ###*
+  ###**
   Returns the width of a scrollbar.
 
   This only runs once per page load.
@@ -832,7 +832,7 @@ up.util = (($) ->
     $outer.remove()
     width
 
-  ###*
+  ###**
   Returns whether the given element is currently showing a vertical scrollbar.
 
   @function up.util.documentHasVerticalScrollbar
@@ -850,7 +850,7 @@ up.util = (($) ->
 
     forcedScroll || (!forcedHidden && html.scrollHeight > html.clientHeight)
 
-  ###*
+  ###**
   Modifies the given function so it only runs once.
   Subsequent calls will return the previous return value.
 
@@ -865,7 +865,7 @@ up.util = (($) ->
       fun = undefined
       result
 
-  ###*
+  ###**
   Temporarily sets the CSS for the given element.
 
   @function up.util.temporaryCss
@@ -889,7 +889,7 @@ up.util = (($) ->
     else
       once(memo)
 
-  ###*
+  ###**
   Forces the given jQuery element into an accelerated compositing layer.
 
   @function up.util.forceCompositing
@@ -908,7 +908,7 @@ up.util = (($) ->
       memo = ->
     memo
 
-  ###*
+  ###**
   Forces a repaint of the given element.
 
   @function up.util.forceRepaint
@@ -920,7 +920,7 @@ up.util = (($) ->
 
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
 
-  ###*
+  ###**
   @internal
   ###
   margins = (selectorOrElement) ->
@@ -931,7 +931,7 @@ up.util = (($) ->
     bottom: parseFloat(withUnits['margin-bottom'])
     left:   parseFloat(withUnits['margin-left'])
 
-  ###*
+  ###**
   Measures the given element.
 
   @function up.util.measure
@@ -978,7 +978,7 @@ up.util = (($) ->
 
     box
 
-  ###*
+  ###**
   Copies all attributes from the source element to the target element.
 
   @function up.util.copyAttributes
@@ -989,7 +989,7 @@ up.util = (($) ->
       if attr.specified
         $target.attr(attr.name, attr.value)
 
-  ###*
+  ###**
   Looks for the given selector in the element and its descendants.
 
   @function up.util.selectInSubtree
@@ -998,7 +998,7 @@ up.util = (($) ->
   selectInSubtree = ($element, selector) ->
     $element.find(selector).addBack(selector)
 
-  ###*
+  ###**
   Looks for the given selector in the element, its descendants and its ancestors.
 
   @function up.util.selectInDynasty
@@ -1009,7 +1009,7 @@ up.util = (($) ->
     $ancestors = $element.parents(selector)
     $subtree.add($ancestors)
 
-  ###*
+  ###**
   Returns whether the given keyboard event involved the ESC key.
 
   @function up.util.escapePressed
@@ -1018,7 +1018,7 @@ up.util = (($) ->
   escapePressed = (event) ->
     event.keyCode == 27
 
-  ###*
+  ###**
   Returns whether the given array or string contains the given element or substring.
 
   @function up.util.contains
@@ -1029,7 +1029,7 @@ up.util = (($) ->
   contains = (arrayOrString, elementOrSubstring) ->
     arrayOrString.indexOf(elementOrSubstring) >= 0
 
-  ###*
+  ###**
   @function up.util.castedAttr
   @internal
   ###
@@ -1046,7 +1046,7 @@ up.util = (($) ->
 #  castsToFalse = (object) ->
 #    String(object) == "false"
 
-  ###*
+  ###**
   Returns a copy of the given object that only contains
   the given properties.
 
@@ -1062,7 +1062,7 @@ up.util = (($) ->
         filtered[property] = object[property]
     filtered
 
-  ###*
+  ###**
   Returns a copy of the given object that contains all except
   the given properties.
 
@@ -1077,14 +1077,14 @@ up.util = (($) ->
       delete filtered[property]
     filtered
 
-  ###*
+  ###**
   @function up.util.isUnmodifiedKeyEvent
   @internal
   ###
   isUnmodifiedKeyEvent = (event) ->
     not (event.metaKey or event.shiftKey or event.ctrlKey)
 
-  ###*
+  ###**
   @function up.util.isUnmodifiedMouseEvent
   @internal
   ###
@@ -1092,7 +1092,7 @@ up.util = (($) ->
     isLeftButton = isUndefined(event.button) || event.button == 0
     isLeftButton && isUnmodifiedKeyEvent(event)
 
-  ###*
+  ###**
   Returns a promise that will never be resolved.
 
   @function up.util.unresolvablePromise
@@ -1101,7 +1101,7 @@ up.util = (($) ->
   unresolvablePromise = ->
     new Promise(noop)
 
-  ###*
+  ###**
   Returns an empty jQuery collection.
 
   @function up.util.nullJQuery
@@ -1110,7 +1110,7 @@ up.util = (($) ->
   nullJQuery = ->
     $()
 
-  ###*
+  ###**
   On the given element, set attributes that are still missing.
 
   @function up.util.setMissingAttrs
@@ -1121,7 +1121,7 @@ up.util = (($) ->
       if isMissing($element.attr(key))
         $element.attr(key, value)
 
-  ###*
+  ###**
   Removes the given element from the given array.
 
   This changes the given array.
@@ -1137,7 +1137,7 @@ up.util = (($) ->
       array.splice(index, 1)
       element
 
-  ###*
+  ###**
   @function up.util.multiSelector
   @internal
   ###
@@ -1194,7 +1194,7 @@ up.util = (($) ->
 
     obj
 
-  ###*
+  ###**
   If the given `value` is a function, calls the function with the given `args`.
   Otherwise it just returns `value`.
 
@@ -1207,7 +1207,7 @@ up.util = (($) ->
     else
       value
 
-  ###*
+  ###**
   @function up.util.config
   @param {Object|Function} blueprint
     Default configuration options.
@@ -1221,7 +1221,7 @@ up.util = (($) ->
     Object.preventExtensions(hash)
     hash
 
-  ###*
+  ###**
   @function up.util.openConfig
   @internal
   ###
@@ -1234,7 +1234,7 @@ up.util = (($) ->
     hash.reset()
     hash
 
-  ###*
+  ###**
   @function up.util.unwrapElement
   @internal
   ###
@@ -1246,7 +1246,7 @@ up.util = (($) ->
       parent.insertBefore(wrappedNode, wrapper)
     parent.removeChild(wrapper)
 
-  ###*
+  ###**
   @function up.util.offsetParent
   @internal
   ###
@@ -1259,7 +1259,7 @@ up.util = (($) ->
         break
     $match
 
-  ###*
+  ###**
   Returns if the given element has a `fixed` position.
 
   @function up.util.isFixed
@@ -1276,7 +1276,7 @@ up.util = (($) ->
         if $element.length == 0 || $element.is(document)
           return false
 
-  ###*
+  ###**
   @function up.util.fixedToAbsolute
   @internal
   ###
@@ -1303,7 +1303,7 @@ up.util = (($) ->
 #    else
 #      error('Could not parse argument names of %o', fun)
 
-  ###*
+  ###**
   Normalizes the given params object to the form returned by
   [`jQuery.serializeArray`](https://api.jquery.com/serializeArray/).
 
@@ -1330,7 +1330,7 @@ up.util = (($) ->
             value: decodeURIComponent(pair[1])
       array
 
-  ###*
+  ###**
   Returns an URL-encoded query string for the given params object.
 
   The returned string does **not** include a leading `?` character.
@@ -1370,7 +1370,7 @@ up.util = (($) ->
     else
       $form.find(submitButtonSelector).first()
 
-  ###*
+  ###**
   Serializes the given form into a request data representation.
 
   @function up.util.requestDataFromForm
@@ -1394,7 +1394,7 @@ up.util = (($) ->
     data
 
 
-  ###*
+  ###**
   Adds a key/value pair to the given request data representation.
 
   This mutates the given `data` if `data` is a `FormData`, an object
@@ -1421,7 +1421,7 @@ up.util = (($) ->
       data = [data, newPair].join('&')
     data
 
-  ###*
+  ###**
   Merges the request data in `source` into `target`.
   Will modify the passed-in `target`.
 
@@ -1433,7 +1433,7 @@ up.util = (($) ->
       target = appendRequestData(target, field.name, field.value)
     target
 
-  ###*
+  ###**
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
 
@@ -1477,7 +1477,7 @@ up.util = (($) ->
     ">": "&gt;"
     '"': '&quot;'
 
-  ###*
+  ###**
   Escapes the given string of HTML by replacing control chars with their HTML entities.
 
   @function up.util.escapeHtml
@@ -1524,7 +1524,7 @@ up.util = (($) ->
 
   identity = (arg) -> arg
 
-  ###*
+  ###**
   Returns whether the given element has been detached from the DOM
   (or whether it was never attached).
 
@@ -1536,7 +1536,7 @@ up.util = (($) ->
     # This is by far the fastest way to do this
     not jQuery.contains(document.documentElement, element)
 
-  ###*
+  ###**
   Given a function that will return a promise, returns a proxy function
   with an additional `.promise` attribute.
 
@@ -1561,7 +1561,7 @@ up.util = (($) ->
     preview.promise = deferred.promise()
     preview
 
-  ###*
+  ###**
   A linear task queue whose (2..n)th tasks can be changed at any time.
 
   @function up.util.DivertibleChain
@@ -1599,7 +1599,7 @@ up.util = (($) ->
       @poke()
       @promise()
 
-  ###*
+  ###**
   @function up.util.submittedValue
   @internal
   ###
@@ -1610,7 +1610,7 @@ up.util = (($) ->
     else
       $field.val()
 
-  ###*
+  ###**
   @function up.util.sequence
   @param {Array<Function>} functions...
   @return {Function}
@@ -1622,7 +1622,7 @@ up.util = (($) ->
     ->
       map functions, (f) -> f()
 
-#  ###*
+#  ###**
 #  @function up.util.race
 #  @internal
 #  ###
@@ -1632,7 +1632,7 @@ up.util = (($) ->
 #      promise.then -> raceDone.resolve()
 #    raceDone.promise()
 
-  ###*
+  ###**
   @function up.util.promiseTimer
   @internal
   ###
@@ -1643,7 +1643,7 @@ up.util = (($) ->
     promise.cancel = -> clearTimeout(timeout)
     promise
 
-  ###*
+  ###**
   Returns `'left'` if the center of the given element is in the left 50% of the screen.
   Otherwise returns `'right'`.
 
@@ -1660,7 +1660,7 @@ up.util = (($) ->
     else
       'right'
 
-  ###*
+  ###**
   Like `$old.replaceWith($new)`, but keeps event handlers bound to `$old`.
 
   Note that this is a memory leak unless you re-attach `$old` to the DOM aferwards.
@@ -1675,7 +1675,7 @@ up.util = (($) ->
     $insertion.replaceWith($new)
     $old
 
-  ###*
+  ###**
   Flattens the given `array` a single level deep.
 
   @function up.util.flatten
@@ -1694,7 +1694,7 @@ up.util = (($) ->
         flattened.push(object)
     flattened
 
-  ###*
+  ###**
   Returns whether the given value is truthy.
 
   @function up.util.isTruthy
@@ -1703,7 +1703,7 @@ up.util = (($) ->
   isTruthy = (object) ->
     !!object
 
-  ###*
+  ###**
   Sets the given callback as both fulfillment and rejection handler for the given promise.
 
   @function up.util.always
@@ -1712,7 +1712,7 @@ up.util = (($) ->
   always = (promise, callback) ->
     promise.then(callback, callback)
 
-  ###*
+  ###**
   # Registers an empty rejection handler with the given promise.
   # This prevents browsers from printing "Uncaught (in promise)" to the error
   # console when the promise is rejection.
@@ -1734,7 +1734,7 @@ up.util = (($) ->
   muteRejection = (promise) ->
     promise?.catch(noop)
 
-  ###*
+  ###**
   @function up.util.newDeferred
   @internal
   ###
@@ -1749,7 +1749,7 @@ up.util = (($) ->
     nativePromise.promise = -> nativePromise # just return self
     nativePromise
 
-  ###*
+  ###**
   Calls the given block. If the block throws an exception,
   a rejected promise is returned instead.
 
@@ -1762,7 +1762,7 @@ up.util = (($) ->
     catch error
       Promise.reject(error)
 
-  ###*
+  ###**
   Returns whether the given element is a descendant of the `<body>` element.
 
   @function up.util.isBodyDescendant

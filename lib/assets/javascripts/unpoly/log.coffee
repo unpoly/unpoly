@@ -1,4 +1,4 @@
-###*
+###**
 Logging
 =======
 
@@ -20,7 +20,7 @@ up.log = (($) ->
 
   SESSION_KEY_ENABLED = 'up.log.enabled'
 
-  ###*
+  ###**
   Configures the logging output on the developer console.
 
   @property up.log.config
@@ -50,7 +50,7 @@ up.log = (($) ->
   prefix = (message) ->
     "#{config.prefix}#{message}"
 
-  ###*
+  ###**
   Prints a debugging message to the browser console.
 
   @function up.log.debug
@@ -62,7 +62,7 @@ up.log = (($) ->
     if config.enabled && message
       b.puts('debug', prefix(message), args...)
 
-  ###*
+  ###**
   Prints a logging message to the browser console.
 
   @function up.puts
@@ -74,7 +74,7 @@ up.log = (($) ->
     if config.enabled && message
       b.puts('log', prefix(message), args...)
 
-  ###*
+  ###**
   @function up.log.warn
   @internal
   ###
@@ -82,7 +82,7 @@ up.log = (($) ->
     if message
       b.puts('warn', prefix(message), args...)
 
-  ###*
+  ###**
   - Makes sure the group always closes
   - Does not make a group if the message is nil
 
@@ -101,7 +101,7 @@ up.log = (($) ->
     else
       block()
 
-  ###*
+  ###**
   @function up.log.error
   @internal
   ###
@@ -130,7 +130,7 @@ up.log = (($) ->
     b.sessionStorage().setItem(SESSION_KEY_ENABLED, value.toString())
     config.enabled = value
 
-  ###*
+  ###**
   Makes future Unpoly events print vast amounts of debugging information to the developer console.
 
   Debugging information includes which elements are being [compiled](/up.syntax)
@@ -142,7 +142,7 @@ up.log = (($) ->
   enable = ->
     setEnabled(true)
 
-  ###*
+  ###**
   Prevents future Unpoly events from printing vast amounts of debugging information to the developer console.
 
   Errors will still be printed, even with logging disabled.

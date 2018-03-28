@@ -2,7 +2,7 @@
 
 u = up.util
 
-###*
+###**
 Instances of `up.Response` describe the server response to an [`AJAX request`](/up.request).
 
 \#\#\# Example
@@ -16,7 +16,7 @@ Instances of `up.Response` describe the server response to an [`AJAX request`](/
 ###
 class up.Response extends up.Record
 
-  ###*
+  ###**
   The HTTP method used for the response.
 
   This is usually the HTTP method used by the request.
@@ -28,7 +28,7 @@ class up.Response extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   The URL used for the response.
 
   This is usually the requested URL.
@@ -40,7 +40,7 @@ class up.Response extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   The response body as a `string`.
 
   @property up.Response#text
@@ -48,7 +48,7 @@ class up.Response extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   The response's
   [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
   as a `number`.
@@ -60,7 +60,7 @@ class up.Response extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   The [request](/up.Request) that triggered this response.
 
   @property up.Response#request
@@ -68,7 +68,7 @@ class up.Response extends up.Record
   @experimental
   ###
 
-  ###*
+  ###**
   The [`XMLHttpRequest`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
   object that was used to create this response.
 
@@ -77,7 +77,7 @@ class up.Response extends up.Record
   @experimental
   ###
 
-  ###*
+  ###**
   A [document title pushed by the server](/up.protocol#pushing-a-document-title-to-the-client).
 
   If the server pushed no title via HTTP header, this will be `undefined`.
@@ -100,7 +100,7 @@ class up.Response extends up.Record
   constructor: (options) ->
     super(options)
 
-  ###*
+  ###**
   Returns whether the server responded with a 2xx HTTP status.
 
   @function up.Response#isSuccess
@@ -110,7 +110,7 @@ class up.Response extends up.Record
   isSuccess: =>
     @status && (@status >= 200 && @status <= 299)
 
-  ###*
+  ###**
   Returns whether the response was not [successful](/up.Request.prototype.isSuccess).
 
   This also returns `true` when the request encountered a [fatal error](/up.Request.prototype.isFatalError)
@@ -123,7 +123,7 @@ class up.Response extends up.Record
   isError: =>
     !@isSuccess()
 
-  ###*
+  ###**
   Returns whether the request encountered a [fatal error](/up.Request.prototype.isFatalError)
   like a timeout or loss of network connectivity.
 

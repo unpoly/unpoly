@@ -1,4 +1,4 @@
-###*
+###**
 Passive updates
 ===============
 
@@ -11,7 +11,7 @@ up.radio = (($) ->
 
   u = up.util
 
-  ###*
+  ###**
   Configures defaults for passive updates.
 
   @property up.radio.config
@@ -34,14 +34,14 @@ up.radio = (($) ->
   reset = ->
     config.reset()
 
-  ###*
+  ###**
   @function up.radio.hungrySelector
   @internal
   ###
   hungrySelector = ->
     u.multiSelector(config.hungry)
 
-  ###*
+  ###**
   Elements with this attribute are [updated](/up.replace) whenever there is a
   matching element found in a successful response. The element is replaced even
   when it isn't [targeted](/a-up-target) directly.

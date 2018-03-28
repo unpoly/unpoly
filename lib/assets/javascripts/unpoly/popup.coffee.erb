@@ -1,4 +1,4 @@
-###*
+###**
 Pop-up overlays
 ===============
 
@@ -49,7 +49,7 @@ up.popup = (($) ->
 
   u = up.util
 
-  ###*
+  ###**
   Sets default options for future popups.
 
   @property up.popup.config
@@ -86,7 +86,7 @@ up.popup = (($) ->
     position: 'bottom-right'
     history: false
 
-  ###*
+  ###**
   Returns the URL from which the current popup's contents were loaded.
 
   Returns `undefined` if no  popup is open.
@@ -97,7 +97,7 @@ up.popup = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Returns the URL of the page or modal behind the popup.
 
   @function up.popup.coveredUrl
@@ -169,7 +169,7 @@ up.popup = (($) ->
   unveilFrame = ->
     state.$popup.show()
 
-  ###*
+  ###**
   Returns whether popup modal is currently open.
 
   @function up.popup.isOpen
@@ -179,7 +179,7 @@ up.popup = (($) ->
   isOpen = ->
     state.phase == 'opened' || state.phase == 'opening'
 
-  ###*
+  ###**
   Attaches a popup overlay to the given element or selector.
 
   Emits events [`up:popup:open`](/up:popup:open) and [`up:popup:opened`](/up:popup:opened).
@@ -277,7 +277,7 @@ up.popup = (($) ->
           up.emit('up:popup:opened', message: 'Popup opened')#
         promise
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when a popup is starting to open.
 
   @event up:popup:open
@@ -286,14 +286,14 @@ up.popup = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when a popup has finished opening.
 
   @event up:popup:opened
   @stable
   ###
 
-  ###*
+  ###**
   Closes a currently opened popup overlay.
 
   Does nothing if no popup is currently open.
@@ -349,7 +349,7 @@ up.popup = (($) ->
     else
       attachAsap($link, options)
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when a popup dialog
   is starting to [close](/up.popup.close).
 
@@ -359,7 +359,7 @@ up.popup = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when a popup dialog
   is done [closing](/up.popup.close).
 
@@ -372,7 +372,7 @@ up.popup = (($) ->
       discardHistory()
       closeAsap()
 
-  ###*
+  ###**
   Returns whether the given element or selector is contained
   within the current popup.
 
@@ -386,7 +386,7 @@ up.popup = (($) ->
     $element = $(elementOrSelector)
     $element.closest('.up-popup').length > 0
 
-  ###*
+  ###**
   Opens this link's destination of in a popup overlay:
 
       <a href="/decks" up-popup=".deck_list">Switch deck</a>
@@ -447,7 +447,7 @@ up.popup = (($) ->
   # Close the pop-up overlay when the user presses ESC.
   up.bus.onEscape(closeAsap)
 
-  ###*
+  ###**
   When this element is clicked, a currently open [popup](/up.popup) is closed.
 
   Does nothing if no popup is currently open.

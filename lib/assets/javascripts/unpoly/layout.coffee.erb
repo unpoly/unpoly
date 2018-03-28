@@ -1,4 +1,4 @@
-###*
+###**
 Application layout
 ==================
 
@@ -22,7 +22,7 @@ up.layout = (($) ->
 
   u = up.util
 
-  ###*
+  ###**
   Configures the application layout.
 
   @property up.layout.config
@@ -76,7 +76,7 @@ up.layout = (($) ->
     lastScrollTops.clear()
     scrollingTracker.finish()
 
-  ###*
+  ###**
   Scrolls the given viewport to the given Y-position.
 
   A "viewport" is an element that has scrollbars, e.g. `<body>` or
@@ -152,7 +152,7 @@ up.layout = (($) ->
     $scrollable.scrollTop(scrollTop)
     Promise.resolve()
 
-  ###*
+  ###**
   Finishes scrolling animations in the given element, its ancestors or its descendants.
 
   @function up.layout.finishScrolling
@@ -164,14 +164,14 @@ up.layout = (($) ->
     $scrollable = scrollableElementForViewport(element)
     scrollingTracker.finish($scrollable)
 
-  ###*
+  ###**
   @function up.layout.anchoredRight
   @internal
   ###
   anchoredRight = ->
     u.multiSelector(config.anchoredRight).select()
 
-  ###*
+  ###**
   @function measureObstruction
   @return {Object}
   @internal
@@ -193,7 +193,7 @@ up.layout = (($) ->
     top: Math.max(0, fixedTopBottoms...)
     bottom: Math.max(0, fixedBottomTops...)
 
-  ###*
+  ###**
   Scroll's the given element's viewport so the first rows of the
   element are visible for the user.
 
@@ -292,7 +292,7 @@ up.layout = (($) ->
       else
         Promise.resolve()
 
-  ###*
+  ###**
   [Reveals](/up.reveal) an element matching the `#hash` in the current URL.
 
   Other than the default behavior found in browsers, `up.revealHash` works with
@@ -315,7 +315,7 @@ up.layout = (($) ->
   viewportSelector = ->
     u.multiSelector(config.viewports)
 
-  ###*
+  ###**
   Returns the viewport for the given element.
 
   Throws an error if no viewport could be found.
@@ -331,7 +331,7 @@ up.layout = (($) ->
       up.fail("Could not find viewport for %o", $element)
     $viewport
 
-  ###*
+  ###**
   Returns a jQuery collection of all the viewports contained within the
   given selector or element.
 
@@ -344,7 +344,7 @@ up.layout = (($) ->
     $element = $(selectorOrElement)
     viewportSelector().selectInSubtree($element)
 
-  ###*
+  ###**
   Returns a jQuery collection of all the viewports on the screen.
 
   @function up.layout.viewports
@@ -360,7 +360,7 @@ up.layout = (($) ->
     else
       u.selectorForElement($viewport)
 
-  ###*
+  ###**
   Returns a hash with scroll positions.
 
   Each key in the hash is a viewport selector. The corresponding
@@ -383,7 +383,7 @@ up.layout = (($) ->
         topsBySelector[key] = top
     topsBySelector
 
-  ###*
+  ###**
   @function up.layout.fixedChildren
   @internal
   ###
@@ -395,7 +395,7 @@ up.layout = (($) ->
     $elements = $elements.add($root.find(config.fixedBottom.join(', '))) if u.isPresent(config.fixedBottom)
     $elements
 
-  ###*
+  ###**
   Saves the top scroll positions of all the
   viewports configured in [`up.layout.config.viewports`](/up.layout.config).
 
@@ -415,7 +415,7 @@ up.layout = (($) ->
     tops = u.option(options.tops, scrollTops())
     lastScrollTops.set(url, tops)
 
-  ###*
+  ###**
   Restores [previously saved](/up.layout.saveScroll) scroll positions of viewports
   viewports configured in [`up.layout.config.viewports`](/up.layout.config).
 
@@ -452,7 +452,7 @@ up.layout = (($) ->
 
       Promise.all(allScrollPromises)
 
-  ###*
+  ###**
   @function up.layout.revealOrRestoreScroll
   @param {boolean} [options.restoreScroll]
   @param {boolean|string} [options.reveal]
@@ -486,7 +486,7 @@ up.layout = (($) ->
     # to fulfill this function's signature.
     return Promise.resolve()
 
-  ###*
+  ###**
   @internal
   ###
   revealSelector = (selector, options) ->
@@ -497,7 +497,7 @@ up.layout = (($) ->
       selector += ", a[name='#{selector}']"
     selector
 
-  ###*
+  ###**
   Marks this element as a scrolling container ("viewport").
 
   Apply this attribute if your app uses a custom panel layout with fixed positioning
@@ -550,7 +550,7 @@ up.layout = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Marks this element as being fixed to the top edge of the screen
   using `position: fixed`.
 
@@ -570,7 +570,7 @@ up.layout = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Marks this element as being fixed to the bottom edge of the screen
   using `position: fixed`.
 
@@ -591,7 +591,7 @@ up.layout = (($) ->
   ###
 
 
-  ###*
+  ###**
   Marks this element as being anchored to the right edge of the screen,
   typically fixed navigation bars.
 
@@ -626,7 +626,7 @@ up.layout = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   @function up.layout.firstHashTarget
   @internal
   ###

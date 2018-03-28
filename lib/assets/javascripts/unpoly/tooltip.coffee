@@ -1,4 +1,4 @@
-###*
+###**
 Tooltips
 ========
 
@@ -33,7 +33,7 @@ up.tooltip = (($) ->
   
   u = up.util
 
-  ###*
+  ###**
   Configures defaults for future tooltips.
 
   @property up.tooltip.config
@@ -116,7 +116,7 @@ up.tooltip = (($) ->
     $element.appendTo(document.body)
     state.$tooltip = $element
 
-  ###*
+  ###**
   Opens a tooltip over the given element.
 
   The unobtrusive variant of this is the [`[up-tooltip]`](/up-tooltip) selector.
@@ -170,7 +170,7 @@ up.tooltip = (($) ->
     up.animate(state.$tooltip, animation, animateOptions).then ->
       state.phase = 'opened'
 
-  ###*
+  ###**
   Closes a currently shown tooltip.
 
   Does nothing if no tooltip is currently shown.
@@ -198,7 +198,7 @@ up.tooltip = (($) ->
       state.$tooltip = null
       state.$anchor = null
 
-  ###*
+  ###**
   Returns whether a tooltip is currently showing.
 
   @function up.tooltip.isOpen
@@ -207,7 +207,7 @@ up.tooltip = (($) ->
   isOpen = ->
     state.phase == 'opening' || state.phase == 'opened'
 
-  ###*
+  ###**
   Displays a tooltip with text content when hovering the mouse over this element.
 
   \#\#\# Example
@@ -230,7 +230,7 @@ up.tooltip = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   Displays a tooltip with HTML content when hovering the mouse over this element:
 
       <a href="/decks" up-tooltip-html="Show &lt;b&gt;all&lt;/b&gt; decks">Decks</a>

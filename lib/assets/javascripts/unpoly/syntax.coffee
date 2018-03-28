@@ -1,4 +1,4 @@
-###*
+###**
 Custom JavaScript
 =================
 
@@ -39,7 +39,7 @@ up.syntax = (($) ->
   compilers = []
   macros = []
 
-  ###*
+  ###**
   Registers a function to be called whenever an element with
   the given selector is inserted into the DOM.
 
@@ -225,7 +225,7 @@ up.syntax = (($) ->
     options = u.options(args[0])
     insertCompiler(compilers, selector, options, callback)
 
-  ###*
+  ###**
   Registers a [compiler](/up.compiler) that is run before all other compilers.
 
   You can use `up.macro()` to register a compiler that sets other UJS attributes.
@@ -307,7 +307,7 @@ up.syntax = (($) ->
     returnValue = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
     addDestructor($jqueryElement, returnValue)
 
-  ###*
+  ###**
   Tries to find a list of destructors in a compiler's return value.
 
   @param {Object} returnValue
@@ -332,7 +332,7 @@ up.syntax = (($) ->
     $element.removeData(DESTRUCTORS_KEY)
     $element.removeClass(DESTRUCTIBLE_CLASS)
 
-  ###*
+  ###**
   Applies all compilers on the given element and its descendants.
   Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
 
@@ -367,7 +367,7 @@ up.syntax = (($) ->
               else
                 $matches.each -> applyCompiler(compiler, $(this), this)
 
-  ###*
+  ###**
   Runs any destroyers on the given fragment and its descendants.
   Unlike [`up.destroy()`](/up.destroy), this doesn't emit any events
   and does not remove the element from the DOM.
@@ -378,7 +378,7 @@ up.syntax = (($) ->
   clean = ($fragment) ->
     prepareClean($fragment)()
 
-  ###*
+  ###**
   @function up.syntax.prepareClean
   @param {jQuery} $fragment
   @return {Function}
@@ -393,7 +393,7 @@ up.syntax = (($) ->
     destructors = u.compact destructors
     u.sequence(destructors...)
 
-  ###*
+  ###**
   Checks if the given element has an [`up-data`](/up-data) attribute.
   If yes, parses the attribute value as JSON and returns the parsed object.
 
@@ -418,7 +418,7 @@ up.syntax = (($) ->
   @stable
   ###
 
-  ###*
+  ###**
   If an element with an `up-data` attribute enters the DOM,
   Unpoly will parse the JSON and pass the resulting object to any matching
   [`up.compiler()`](/up.compiler) handlers.
@@ -469,7 +469,7 @@ up.syntax = (($) ->
     else
       {}
 
-  ###*
+  ###**
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
   

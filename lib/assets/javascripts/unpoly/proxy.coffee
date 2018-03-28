@@ -1,4 +1,4 @@
-###*
+###**
 AJAX acceleration
 =================
 
@@ -52,7 +52,7 @@ up.proxy = (($) ->
 
   queuedLoaders = []
 
-  ###*
+  ###**
   @property up.proxy.config
   @param {number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
@@ -101,7 +101,7 @@ up.proxy = (($) ->
     cachable: (request) -> up.Request.wrap(request).isCachable()
     # logPrefix: 'up.proxy'
 
-  ###*
+  ###**
   Returns a cached response for the given request.
 
   Returns `undefined` if the given request is not currently cached.
@@ -152,7 +152,7 @@ up.proxy = (($) ->
 
   reset()
 
-  ###*
+  ###**
   Makes an AJAX request to the given URL.
 
   \#\#\# Example
@@ -257,7 +257,7 @@ up.proxy = (($) ->
 
     promise
 
-  ###*
+  ###**
   Makes an AJAX request to the given URL and caches the response.
 
   The function returns a promise that fulfills with the response text.
@@ -310,7 +310,7 @@ up.proxy = (($) ->
       pickResponseText = (response) -> resolve(response.text)
       makeRequest(args...).then(pickResponseText, reject)
 
-  ###*
+  ###**
   Returns `true` if the proxy is not currently waiting
   for a request to finish. Returns `false` otherwise.
 
@@ -322,7 +322,7 @@ up.proxy = (($) ->
   isIdle = ->
     pendingCount == 0
 
-  ###*
+  ###**
   Returns `true` if the proxy is currently waiting
   for a request to finish. Returns `false` otherwise.
 
@@ -346,7 +346,7 @@ up.proxy = (($) ->
       slowDelayTimer = u.setTimer(config.slowDelay, emission)
 
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   are taking long to finish.
 
@@ -407,7 +407,7 @@ up.proxy = (($) ->
         up.emit('up:proxy:recover', message: 'Proxy has recovered from slow response')
         slowEventEmitted = false
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   have [taken long to finish](/up:proxy:slow), but have finished now.
 
@@ -446,7 +446,7 @@ up.proxy = (($) ->
       u.microtask(pokeQueue)
       Promise.reject(new Error('Event up:proxy:load was prevented'))
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
   is sent over the network.
 
@@ -479,7 +479,7 @@ up.proxy = (($) ->
         request: response.request
         response: response
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when the response to an
   [AJAX request](/up.request) has been received.
 
@@ -494,7 +494,7 @@ up.proxy = (($) ->
   @experimental
   ###
 
-  ###*
+  ###**
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   encounters fatal error like a timeout or loss of network connectivity.
 
@@ -510,7 +510,7 @@ up.proxy = (($) ->
     # Don't return the promise from the loader above
     return undefined
 
-  ###*
+  ###**
   Makes the proxy assume that `newRequest` has the same response as the
   already cached `oldRequest`.
 
@@ -524,7 +524,7 @@ up.proxy = (($) ->
   ###
   alias = cache.alias
 
-  ###*
+  ###**
   Manually stores a promise for the response to the given request.
 
   @function up.proxy.set
@@ -537,7 +537,7 @@ up.proxy = (($) ->
   ###
   set = cache.set
 
-  ###*
+  ###**
   Manually removes the given request from the cache.
 
   You can also [configure](/up.proxy.config) when the proxy
@@ -551,7 +551,7 @@ up.proxy = (($) ->
   ###
   remove = cache.remove
 
-  ###*
+  ###**
   Removes all cache entries.
 
   Unpoly also automatically clears the cache whenever it processes
@@ -583,7 +583,7 @@ up.proxy = (($) ->
       $waitingLink = undefined
       cancelPreloadDelay()
 
-  ###*
+  ###**
   Preloads the given link.
 
   When the link is clicked later, the response will already be cached,
@@ -606,13 +606,13 @@ up.proxy = (($) ->
     else
       Promise.reject(new Error("Won't preload unsafe link"))
 
-  ###*
+  ###**
   @internal
   ###
   isSafeMethod = (method) ->
     u.contains(config.safeMethods, method)
 
-  ###*
+  ###**
   @internal
   ###
   wrapMethod = (method, data, appendOpts) ->
@@ -621,7 +621,7 @@ up.proxy = (($) ->
       method = 'POST'
     [method, data]
 
-  ###*
+  ###**
   Links with an `up-preload` attribute will silently fetch their target
   when the user hovers over the click area, or when the user puts her
   mouse/finger down (before releasing).
