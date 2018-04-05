@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.54.1",
+    version: "0.55.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,7 +41,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, attributeSelector, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, multiSelector, muteRejection, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, unresolvablePromise, unwrapElement, whenReady;
+    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, attributeSelector, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, listBlock, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, multiSelector, muteRejection, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, setToArray, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, uniqBy, unresolvablePromise, unwrapElement, whenReady;
     noop = $.noop;
 
     /***
@@ -331,6 +331,40 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     trim = $.trim;
+    listBlock = function(block) {
+      if (isString(block)) {
+        return function(item) {
+          return item[block];
+        };
+      } else {
+        return block;
+      }
+    };
+
+    /***
+    Translate all items in an array to new array of items.
+    
+    @function up.util.map
+    @param {Array<T>} array
+    @param {Function(T, number): any|String} block
+      A function that will be called with each element and (optional) iteration index.
+    
+      You can also pass a property name as a String,
+      which will be collected from each item in the array.
+    @return {Array}
+      A new array containing the result of each function call.
+    @stable
+     */
+    map = function(array, block) {
+      var i, index, item, len, results;
+      block = listBlock(block);
+      results = [];
+      for (index = i = 0, len = array.length; i < len; index = ++i) {
+        item = array[index];
+        results.push(block(item, index));
+      }
+      return results;
+    };
 
     /***
     Calls the given function for each element (and, optional, index)
@@ -342,28 +376,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       A function that will be called with each element and (optional) iteration index.
     @stable
      */
-    each = function(array, block) {
-      var i, index, item, len, results;
-      results = [];
-      for (index = i = 0, len = array.length; i < len; index = ++i) {
-        item = array[index];
-        results.push(block(item, index));
-      }
-      return results;
-    };
-
-    /***
-    Translate all items in an array to new array of items.
-    
-    @function up.util.map
-    @param {Array<T>} array
-    @param {Function(T, number): any} block
-      A function that will be called with each element and (optional) iteration index.
-    @return {Array}
-      A new array containing the result of each function call.
-    @stable
-     */
-    map = each;
+    each = map;
 
     /***
     Calls the given function for the given number of times.
@@ -776,16 +789,19 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     
     @function up.util.any
     @param {Array<T>} array
-    @param {Function(T): boolean} tester
+    @param {Function(T, number): boolean} tester
+      A function that will be called with each element and (optional) iteration index.
+    
     @return {boolean}
     @experimental
      */
     any = function(array, tester) {
-      var element, i, len, match;
+      var element, i, index, len, match;
+      tester = listBlock(tester);
       match = false;
-      for (i = 0, len = array.length; i < len; i++) {
-        element = array[i];
-        if (tester(element)) {
+      for (index = i = 0, len = array.length; i < len; index = ++i) {
+        element = array[index];
+        if (tester(element, index)) {
           match = true;
           break;
         }
@@ -799,16 +815,19 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     
     @function up.util.all
     @param {Array<T>} array
-    @param {Function(T): boolean} tester
+    @param {Function(T, number): boolean} tester
+      A function that will be called with each element and (optional) iteration index.
+    
     @return {boolean}
     @experimental
      */
     all = function(array, tester) {
-      var element, i, len, match;
+      var element, i, index, len, match;
+      tester = listBlock(tester);
       match = true;
-      for (i = 0, len = array.length; i < len; i++) {
-        element = array[i];
-        if (!tester(element)) {
+      for (index = i = 0, len = array.length; i < len; index = ++i) {
+        element = array[index];
+        if (!tester(element, index)) {
           match = false;
           break;
         }
@@ -838,15 +857,55 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     uniq = function(array) {
-      var seen;
-      seen = {};
-      return select(array, function(element) {
-        if (seen.hasOwnProperty(element)) {
+      var set;
+      if (array.length < 2) {
+        return array;
+      }
+      set = new Set(array);
+      return setToArray(set);
+    };
+
+    /**
+    This function is like [`uniq`](/up.util.uniq), accept that
+    the given function is invoked for each element to generate the value
+    for which uniquness is computed.
+    
+    @function up.util.uniqBy
+    @param {Array<T>} array
+    @param {Function<T>: any} array
+    @return {Array<T>}
+    @experimental
+     */
+    uniqBy = function(array, mapper) {
+      var set;
+      if (array.length < 2) {
+        return array;
+      }
+      mapper = listBlock(mapper);
+      set = new Set();
+      return select(array, function(elem, index) {
+        var mapped;
+        mapped = mapper(elem, index);
+        if (set.has(mapped)) {
           return false;
         } else {
-          return seen[element] = true;
+          set.add(mapped);
+          return true;
         }
       });
+    };
+
+    /**
+    @function up.util.setToArray
+    @internal
+     */
+    setToArray = function(set) {
+      var array;
+      array = [];
+      set.forEach(function(elem) {
+        return array.push(elem);
+      });
+      return array;
     };
 
     /***
@@ -855,14 +914,16 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     
     @function up.util.select
     @param {Array<T>} array
+    @param {Function(T, number): boolean} tester
     @return {Array<T>}
     @stable
      */
     select = function(array, tester) {
       var matches;
+      tester = listBlock(tester);
       matches = [];
-      each(array, function(element) {
-        if (tester(element)) {
+      each(array, function(element, index) {
+        if (tester(element, index)) {
           return matches.push(element);
         }
       });
@@ -875,12 +936,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     
     @function up.util.reject
     @param {Array<T>} array
+    @param {Function(T, number): boolean} tester
     @return {Array<T>}
     @stable
      */
     reject = function(array, tester) {
-      return select(array, function(element) {
-        return !tester(element);
+      tester = listBlock(tester);
+      return select(array, function(element, index) {
+        return !tester(element, index);
       });
     };
 
@@ -1848,7 +1911,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     isDetached = function(element) {
       element = unJQuery(element);
-      return !jQuery.contains(document.documentElement, element);
+      return !$.contains(document.documentElement, element);
     };
 
     /***
@@ -2076,17 +2139,17 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      * Registers an empty rejection handler with the given promise.
      * This prevents browsers from printing "Uncaught (in promise)" to the error
      * console when the promise is rejection.
-     *
+    #
      * This is helpful for event handlers where it is clear that no rejection
      * handler will be registered:
-     *
+    #
      *     up.on('submit', 'form[up-target]', (event, $form) => {
      *       promise = up.submit($form)
      *       up.util.muteRejection(promise)
      *     })
-     *
+    #
      * Does nothing if passed a missing value.
-     *
+    #
      * @function up.util.muteRejection
      * @param {Promise|undefined|null} promise
      * @return {Promise}
@@ -2126,8 +2189,8 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       var error;
       try {
         return block();
-      } catch (error1) {
-        error = error1;
+      } catch (_error) {
+        error = _error;
         return Promise.reject(error);
       }
     };
@@ -2177,6 +2240,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       intersect: intersect,
       compact: compact,
       uniq: uniq,
+      uniqBy: uniqBy,
       last: last,
       isNull: isNull,
       isDefined: isDefined,
@@ -2471,7 +2535,6 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     function ExtractCascade(selector, options) {
       this.oldPlanNotFound = bind(this.oldPlanNotFound, this);
       this.matchingPlanNotFound = bind(this.matchingPlanNotFound, this);
-      this.hungrySteps = bind(this.hungrySteps, this);
       this.bestMatchingSteps = bind(this.bestMatchingSteps, this);
       this.bestPreflightSelector = bind(this.bestPreflightSelector, this);
       this.detectPlan = bind(this.detectPlan, this);
@@ -2530,9 +2593,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     ExtractCascade.prototype.bestPreflightSelector = function() {
       var plan;
       if (this.options.provideTarget) {
-        return this.plans[0].selector;
-      } else if (plan = this.oldPlan()) {
-        return plan.selector;
+        plan = this.plans[0];
+      } else {
+        plan = this.oldPlan();
+      }
+      if (plan) {
+        plan.resolveNesting();
+        return plan.selector();
       } else {
         return this.oldPlanNotFound();
       }
@@ -2541,35 +2608,12 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     ExtractCascade.prototype.bestMatchingSteps = function() {
       var plan;
       if (plan = this.matchingPlan()) {
-        return plan.steps.concat(this.hungrySteps());
+        plan.addHungrySteps();
+        plan.resolveNesting();
+        return plan.steps;
       } else {
         return this.matchingPlanNotFound();
       }
-    };
-
-    ExtractCascade.prototype.hungrySteps = function() {
-      var $hungries, $hungry, $newHungry, hungry, j, len, selector, steps, transition;
-      steps = [];
-      if (this.options.hungry) {
-        $hungries = up.radio.hungrySelector().select();
-        for (j = 0, len = $hungries.length; j < len; j++) {
-          hungry = $hungries[j];
-          $hungry = $(hungry);
-          selector = u.selectorForElement($hungry);
-          if ($newHungry = this.options.response.first(selector)) {
-            transition = u.option(up.radio.config.hungryTransition, this.options.transition);
-            steps.push({
-              selector: selector,
-              $old: $hungry,
-              $new: $newHungry,
-              transition: transition,
-              reveal: false,
-              origin: null
-            });
-          }
-        }
-      }
-      return steps;
     };
 
     ExtractCascade.prototype.matchingPlanNotFound = function() {
@@ -2616,19 +2660,25 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
   up.ExtractPlan = (function() {
     function ExtractPlan(selector, options) {
+      this.addHungrySteps = bind(this.addHungrySteps, this);
       this.parseSteps = bind(this.parseSteps, this);
+      this.selector = bind(this.selector, this);
+      this.resolveNesting = bind(this.resolveNesting, this);
+      this.addSteps = bind(this.addSteps, this);
       this.matchExists = bind(this.matchExists, this);
       this.newExists = bind(this.newExists, this);
       this.oldExists = bind(this.oldExists, this);
       this.findNew = bind(this.findNew, this);
       this.findOld = bind(this.findOld, this);
+      var originalSelector;
       this.reveal = options.reveal;
       this.origin = options.origin;
-      this.selector = up.dom.resolveSelector(selector, this.origin);
+      this.hungry = options.hungry;
       this.transition = options.transition;
       this.response = options.response;
       this.oldLayer = options.layer;
-      this.parseSteps();
+      originalSelector = up.dom.resolveSelector(selector, this.origin);
+      this.parseSteps(originalSelector);
     }
 
     ExtractPlan.prototype.findOld = function() {
@@ -2667,35 +2717,59 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return this.oldExists() && this.newExists();
     };
 
+    ExtractPlan.prototype.addSteps = function(steps) {
+      return this.steps = this.steps.concat(steps);
+    };
 
-    /***
-    Example:
-    
-        parseSelector('foo, bar:before', transition: 'cross-fade')
-    
-        [
-          { selector: 'foo', pseudoClass: undefined, transition: 'cross-fade' },
-          { selector: 'bar', pseudoClass: 'before', transition: 'cross-fade' }
-        ]
-     */
+    ExtractPlan.prototype.resolveNesting = function() {
+      var compressed;
+      if (this.steps.length < 2) {
+        return;
+      }
+      compressed = u.copy(this.steps);
+      compressed = u.uniqBy(compressed, function(step) {
+        return step.$old[0];
+      });
+      compressed = u.select(compressed, (function(_this) {
+        return function(candidateStep, candidateIndex) {
+          return u.all(compressed, function(rivalStep, rivalIndex) {
+            var candidateElement, rivalElement;
+            if (rivalIndex === candidateIndex) {
+              return true;
+            } else {
+              candidateElement = candidateStep.$old[0];
+              rivalElement = rivalStep.$old[0];
+              return rivalStep.pseudoClass || !$.contains(rivalElement, candidateElement);
+            }
+          });
+        };
+      })(this));
+      compressed[0].reveal = this.steps[0].reveal;
+      return this.steps = compressed;
+    };
 
-    ExtractPlan.prototype.parseSteps = function() {
+    ExtractPlan.prototype.selector = function() {
+      return u.map(this.steps, 'expression').join(', ');
+    };
+
+    ExtractPlan.prototype.parseSteps = function(originalSelector) {
       var comma, disjunction;
       comma = /\ *,\ */;
       this.steps = [];
-      disjunction = this.selector.split(comma);
+      disjunction = originalSelector.split(comma);
       return u.each(disjunction, (function(_this) {
-        return function(literal, i) {
-          var doReveal, literalParts, pseudoClass, selector;
-          literalParts = literal.match(/^(.+?)(?:\:(before|after))?$/);
-          literalParts || up.fail('Could not parse selector literal "%s"', literal);
-          selector = literalParts[1];
+        return function(expression, i) {
+          var doReveal, expressionParts, pseudoClass, selector;
+          expressionParts = expression.match(/^(.+?)(?:\:(before|after))?$/);
+          expressionParts || up.fail('Could not parse selector literal "%s"', expression);
+          selector = expressionParts[1];
           if (selector === 'html') {
             selector = 'body';
           }
-          pseudoClass = literalParts[2];
+          pseudoClass = expressionParts[2];
           doReveal = i === 0 ? _this.reveal : false;
           return _this.steps.push({
+            expression: expression,
             selector: selector,
             pseudoClass: pseudoClass,
             transition: _this.transition,
@@ -2706,7 +2780,45 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       })(this));
     };
 
+    ExtractPlan.prototype.addHungrySteps = function() {
+      var $hungries, $hungry, $newHungry, hungry, hungrySteps, j, len, selector, transition;
+      hungrySteps = [];
+      if (this.hungry) {
+        $hungries = up.radio.hungrySelector().select();
+        transition = u.option(up.radio.config.hungryTransition, this.transition);
+        for (j = 0, len = $hungries.length; j < len; j++) {
+          hungry = $hungries[j];
+          $hungry = $(hungry);
+          selector = u.selectorForElement($hungry);
+          if ($newHungry = this.response.first(selector)) {
+            hungrySteps.push({
+              selector: selector,
+              $old: $hungry,
+              $new: $newHungry,
+              transition: transition,
+              reveal: false,
+              origin: null
+            });
+          }
+        }
+      }
+      return this.addSteps(hungrySteps);
+    };
+
     return ExtractPlan;
+
+  })();
+
+}).call(this);
+(function() {
+  var u;
+
+  u = up.util;
+
+  up.ExtractStep = (function() {
+    function ExtractStep() {}
+
+    return ExtractStep;
 
   })();
 
@@ -3852,7 +3964,7 @@ Internet Explorer 10 or lower
     sessionStorage = u.memoize(function() {
       try {
         return window.sessionStorage;
-      } catch (error) {
+      } catch (_error) {
         return polyfilledSessionStorage();
       }
     });
@@ -3901,8 +4013,7 @@ Internet Explorer 10 or lower
       sprintfWithFormattedArgs: sprintfWithFormattedArgs,
       sessionStorage: sessionStorage,
       popCookie: popCookie,
-      hash: hash,
-      canPushState: canPushState
+      hash: hash
     };
   })(jQuery);
 
@@ -6923,8 +7034,8 @@ is built from these functions. You can use them to extend Unpoly from your
       try {
         improvedTarget = bestPreflightSelector(selectorOrElement, successOptions);
         improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions);
-      } catch (error) {
-        e = error;
+      } catch (_error) {
+        e = _error;
         return Promise.reject(e);
       }
       request = {
@@ -9399,8 +9510,8 @@ new page is loading.
     @function up.link.addFollowVariant
     @param {string} simplifiedSelector
       A selector without `a` or `[up-href]`, e.g. `[up-target]`
-    @param {Function<jQuery, Object>} options.follow
-    @param {Function<jQuery, Object>} options.preload
+    @param {Function(jQuery, Object)} options.follow
+    @param {Function(jQuery, Object)} options.preload
     @internal
      */
     addFollowVariant = function(simplifiedSelector, options) {
