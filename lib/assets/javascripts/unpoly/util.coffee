@@ -251,7 +251,7 @@ up.util = (($) ->
   @return {Array<string>}
   @internal
   ###
-  values = Object.values || valuesPolyfill
+  objectValues = Object.values || valuesPolyfill
 
   ###**
   Returns a new string with whitespace removed from the beginning
@@ -1870,7 +1870,7 @@ up.util = (($) ->
   separatedValues : separatedValues
   isEqual: isEqual
   wrapArray: wrapArray
-  values: values
+  values: objectValues
 
 )(jQuery)
 
