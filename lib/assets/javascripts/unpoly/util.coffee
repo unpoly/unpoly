@@ -1697,13 +1697,13 @@ up.util = (($) ->
   @internal
   ###
   newDeferred = ->
-    resolve = undefined
-    reject = undefined
+    resolveFn = undefined
+    rejectFn = undefined
     nativePromise = new Promise (givenResolve, givenReject) ->
-      resolve = givenResolve
-      reject = givenReject
-    nativePromise.resolve = resolve
-    nativePromise.reject = reject
+      resolveFn = givenResolve
+      rejectFn = givenReject
+    nativePromise.resolve = resolveFn
+    nativePromise.reject = rejectFn
     nativePromise.promise = -> nativePromise # just return self
     nativePromise
 
