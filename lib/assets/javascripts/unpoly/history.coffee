@@ -1,7 +1,7 @@
 ###**
 History
 ========
-  
+
 In an Unpoly app, every page has an URL.
 
 [Fragment updates](/up.link) automatically update the URL.
@@ -60,7 +60,7 @@ up.history = (($) ->
   ###
   currentUrl = (normalizeOptions) ->
     normalizeUrl(up.browser.url(), normalizeOptions)
-  
+
   isCurrentUrl = (url) ->
     normalizeOptions = { stripTrailingSlash: true }
     normalizeUrl(url, normalizeOptions) == currentUrl(normalizeOptions)

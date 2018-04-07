@@ -85,14 +85,25 @@ up.link = (($) ->
     The URL to visit.
   @param {string} [options.target='body']
     The selector to replace.
+  @param {string} [options.layer='page']
+    The layer in which to open the URL.
+
+    Valid values are `'page'` and `'modal'`.
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace)
   @stable
   ###
   visit = (url, options) ->
-    options = u.options(options)
-    selector = u.option(options.target, 'body')
-    up.replace(selector, url, options)
+    options = u.options(options, layer: 'page')
+
+    switch options.layer
+      when 'page'
+        selector = u.option(options.target, 'body')
+        up.replace(selector, url, options)
+      when 'modal'
+        up.modal.visit(url, options)
+      else
+        up.fail("Cannot directly visit a URL in layer \"#{options.layer}\"")
 
   ###**
   Follows the given link via AJAX and [replaces](/up.replace) the current page
@@ -122,8 +133,13 @@ up.link = (($) ->
     An element or selector which is either an `<a>` tag or any element with an `up-href` attribute.
   @param {string} [options.target]
     The selector to replace.
-    Defaults to the `[up-target]`, `[up-modal]` or `[up-popup]` attribute on `link`.
+
+    Defaults to the link's `[up-target]`, `[up-modal]` or `[up-popup]` attribute.
     If no target is given, the `<body>` element will be replaced.
+  @param {String} [options.url]
+    The URL to navigate to.
+
+    Defaults to the link's `[up-href]` or `[href]` attribute.
   @param {boolean|string} [options.reveal=true]
     Whether to [reveal](/up.reveal) the target fragment after it was replaced.
 
@@ -146,7 +162,7 @@ up.link = (($) ->
   This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
 
   @event up:link:follow
-  @param {jQuery} event.$element
+  @param {jQuery} event.$link
     The link element that will be followed.
   @param event.preventDefault()
     Event listeners may call this method to prevent the link from being followed.
@@ -162,7 +178,7 @@ up.link = (($) ->
 
     options = u.options(options)
 
-    url = u.option($link.attr('up-href'), $link.attr('href'))
+    url = u.option(options.url, $link.attr('up-href'), $link.attr('href'))
     target = u.option(options.target, $link.attr('up-target'))
     options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'))
     options.fallback = u.option(options.fallback, $link.attr('up-fallback'))
@@ -390,9 +406,9 @@ up.link = (($) ->
     or make an educated guess (default).
   @param {string} [up-layer='auto']
     The name of the layer that ought to be updated. Valid values are
-    `auto`, `page`, `modal` and `popup`.
+    `'auto'`, `'page'`, `'modal'` and `'popup'`.
 
-    If set to `auto` (default), Unpoly will try to find a match in the link's layer.
+    If set to `'auto'` (default), Unpoly will try to find a match in the link's layer.
     If no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
   @param {string} [up-fail-layer='auto']

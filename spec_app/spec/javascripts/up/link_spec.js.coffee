@@ -216,7 +216,7 @@ describe 'up.link', ->
             expect($('.target')).toHaveText('restored text from two')
             expect(location.pathname).toEqual('/two')
 
-        it 'does adds additional history entries when linking to the current URL, but with a different hash', asyncSpec (next) ->
+        it 'does add additional history entries when linking to the current URL, but with a different hash', asyncSpec (next) ->
           up.history.config.enabled = true
 
           # By default, up.history will replace the <body> tag when

@@ -70,7 +70,7 @@ up.feedback = (($) ->
     urls = []
     for attr in ['href', 'up-href', 'up-alias']
       if value = u.presentAttr($section, attr)
-        values = if attr == 'up-alias' then value.split(' ') else [value]
+        values = if attr == 'up-alias' then u.separatedValues(value) else [value]
         for url in values
           unless url == '#'
             url = normalizeUrl(url)
@@ -320,4 +320,4 @@ up.feedback = (($) ->
 
 )(jQuery)
 
-up.renamedModule 'navigation', 'feedback'
+up.deprecateRenamedModule 'navigation', 'feedback'

@@ -259,7 +259,7 @@ describe 'up.modal', ->
             expect(events).toEqual ['up:modal:open']
             expect($('.target')).toHaveText('response1')
 
-          next.after (50 + 100), =>
+          next.after (50 + (patience = 50)), =>
             # First modal has completed opening animation after 50 ms
             expect(events).toEqual ['up:modal:open', 'up:modal:opened']
             expect($('.target')).toHaveText('response1')
@@ -267,14 +267,14 @@ describe 'up.modal', ->
             # We open another modal, which will cause the first modal to start closing (will take 50 ms)
             up.modal.extract('.target', '<div class="target">response2</div>')
 
-          next.after 25, =>
+          next.after 10, =>
             # Second modal is still waiting for first modal's closing animaton to finish.
             expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close']
             expect($('.target')).toHaveText('response1')
 
           # I don't know why this spec is so off with timing.
           # We need to add 200ms to make it pass all of the time.
-          next.after (25 + 50 + 200), =>
+          next.after ((50 - 10) + (patience = 200)), =>
             # First modal has finished closing, second modal has finished opening.
             expect(events).toEqual ['up:modal:open', 'up:modal:opened', 'up:modal:close', 'up:modal:closed', 'up:modal:open', 'up:modal:opened']
             expect($('.target')).toHaveText('response2')
@@ -379,6 +379,7 @@ describe 'up.modal', ->
         it 'returns the URL behind the modal overlay', (done) ->
           up.history.config.enabled = true
           up.history.replace('/foo')
+
           expect(up.modal.coveredUrl()).toBeMissing()
           visitPromise = up.modal.visit('/bar', target: '.container')
           u.nextFrame =>

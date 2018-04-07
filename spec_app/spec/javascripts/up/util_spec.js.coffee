@@ -4,6 +4,13 @@ describe 'up.util', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.util.flatMap', ->
+
+      it 'collects the Array results of the given map function, then concatenates the result arrays into one flat array', ->
+        fun = (x) -> [x, x]
+        result = up.util.flatMap([1, 2, 3], fun)
+        expect(result).toEqual([1, 1, 2, 2, 3, 3])
+
     describe 'up.util.uniq', ->
 
       it 'returns the given array with duplicates elements removed', ->
@@ -653,56 +660,6 @@ describe 'up.util', ->
         up.util.remove(array, obj2)
         expect(array).toEqual [obj1, obj3]
 
-
-    describe 'up.util.requestDataAsQuery', ->
-
-      encodedOpeningBracket = '%5B'
-      encodedClosingBracket = '%5D'
-      encodedSpace = '%20'
-
-      it 'returns the query section for the given object', ->
-        string = up.util.requestDataAsQuery('foo-key': 'foo value', 'bar-key': 'bar value')
-        expect(string).toEqual("foo-key=foo#{encodedSpace}value&bar-key=bar#{encodedSpace}value")
-
-      it 'returns the query section for the given nested object', ->
-        string = up.util.requestDataAsQuery('foo-key': { 'bar-key': 'bar-value' }, 'bam-key': 'bam-value')
-        expect(string).toEqual("foo-key#{encodedOpeningBracket}bar-key#{encodedClosingBracket}=bar-value&bam-key=bam-value")
-
-      it 'returns the query section for the given array with { name } and { value } keys', ->
-        string = up.util.requestDataAsQuery([
-          { name: 'foo-key', value: 'foo value' },
-          { name: 'bar-key', value: 'bar value' }
-        ])
-        expect(string).toEqual("foo-key=foo#{encodedSpace}value&bar-key=bar#{encodedSpace}value")
-
-      it 'returns a given query string', ->
-        string = up.util.requestDataAsQuery('foo=bar')
-        expect(string).toEqual('foo=bar')
-
-      it 'strips a leading question mark from the given query string', ->
-        string = up.util.requestDataAsQuery('?foo=bar')
-        expect(string).toEqual('foo=bar')
-
-      it 'returns an empty string for an empty object', ->
-        string = up.util.requestDataAsQuery({})
-        expect(string).toEqual('')
-
-      it 'returns an empty string for an empty string', ->
-        string = up.util.requestDataAsQuery('')
-        expect(string).toEqual('')
-
-      it 'returns an empty string for undefined', ->
-        string = up.util.requestDataAsQuery(undefined)
-        expect(string).toEqual('')
-
-      it 'URL-encodes characters in the key and value', ->
-        string = up.util.requestDataAsQuery({ 'äpfel': 'bäume' })
-        expect(string).toEqual('%C3%A4pfel=b%C3%A4ume')
-
-      it 'URL-encodes plus characters', ->
-        string = up.util.requestDataAsQuery({ 'my+key': 'my+value' })
-        expect(string).toEqual('my%2Bkey=my%2Bvalue')
-
     describe 'up.util.unresolvablePromise', ->
 
       it 'return a pending promise', (done) ->
@@ -715,84 +672,6 @@ describe 'up.util', ->
         one = up.util.unresolvablePromise()
         two = up.util.unresolvablePromise()
         expect(one).not.toBe(two)
-
-    describe 'up.util.requestDataAsArray', ->
-
-      it 'normalized null to an empty array', ->
-        array = up.util.requestDataAsArray(null)
-        expect(array).toEqual([])
-
-      it 'normalized undefined to an empty array', ->
-        array = up.util.requestDataAsArray(undefined)
-        expect(array).toEqual([])
-
-      it 'normalizes an object hash to an array of objects with { name } and { value } keys', ->
-        array = up.util.requestDataAsArray(
-          'foo-key': 'foo-value'
-          'bar-key': 'bar-value'
-        )
-        expect(array).toEqual([
-          { name: 'foo-key', value: 'foo-value' },
-          { name: 'bar-key', value: 'bar-value' },
-        ])
-
-      it 'normalizes a nested object hash to a flat array using param naming conventions', ->
-        array = up.util.requestDataAsArray(
-          'foo-key': 'foo-value'
-          'bar-key': {
-            'bam-key': 'bam-value'
-            'baz-key': {
-              'qux-key': 'qux-value'
-            }
-          }
-        )
-        expect(array).toEqual([
-          { name: 'foo-key', value: 'foo-value' },
-          { name: 'bar-key[bam-key]', value: 'bam-value' },
-          { name: 'bar-key[baz-key][qux-key]', value: 'qux-value' },
-        ])
-
-      it 'returns a given array without modification', ->
-        array = up.util.requestDataAsArray([
-          { name: 'foo-key', value: 'foo-value' },
-          { name: 'bar-key', value: 'bar-value' },
-        ])
-        expect(array).toEqual([
-          { name: 'foo-key', value: 'foo-value' },
-          { name: 'bar-key', value: 'bar-value' },
-        ])
-
-      it 'does not URL-encode special characters keys or values', ->
-        array = up.util.requestDataAsArray(
-          'äpfel': { 'bäume': 'börse' }
-        )
-        expect(array).toEqual([
-          { name: 'äpfel[bäume]', value: 'börse' },
-        ])
-
-      it 'does not URL-encode spaces in keys or values', ->
-        array = up.util.requestDataAsArray(
-          'my key': 'my value'
-        )
-        expect(array).toEqual([
-          { name: 'my key', value: 'my value' },
-        ])
-
-      it 'does not URL-encode ampersands in keys or values', ->
-        array = up.util.requestDataAsArray(
-          'my&key': 'my&value'
-        )
-        expect(array).toEqual([
-          { name: 'my&key', value: 'my&value' },
-        ])
-
-      it 'does not URL-encode equal signs in keys or values', ->
-        array = up.util.requestDataAsArray(
-          'my=key': 'my=value'
-        )
-        expect(array).toEqual([
-          { name: 'my=key', value: 'my=value' },
-        ])
 
     describe 'up.util.flatten', ->
 
@@ -896,6 +775,9 @@ describe 'up.util', ->
       it 'returns true for an object literal', ->
         expect(up.util.isOptions({ foo: 'bar'})).toBe(true)
 
+      it 'returns true for a prototype-less object', ->
+        expect(up.util.isOptions(Object.create(null))).toBe(true)
+
       it 'returns false for undefined', ->
         expect(up.util.isOptions(undefined)).toBe(false)
 
@@ -907,17 +789,23 @@ describe 'up.util', ->
         fn.key = 'value'
         expect(up.util.isOptions(fn)).toBe(false)
 
-      it 'returns false for an array', ->
+      it 'returns false for an Array', ->
         expect(up.util.isOptions(['foo'])).toBe(false)
 
       it 'returns false for a jQuery collection', ->
         expect(up.util.isOptions($('body'))).toBe(false)
 
-      it 'returns false for a promise', ->
+      it 'returns false for a Promise', ->
         expect(up.util.isOptions(Promise.resolve())).toBe(false)
 
       it 'returns false for a FormData object', ->
         expect(up.util.isOptions(new FormData())).toBe(false)
+
+      it 'returns false for a Date', ->
+        expect(up.util.isOptions(new Date())).toBe(false)
+
+      it 'returns false for a RegExp', ->
+        expect(up.util.isOptions(new RegExp('foo'))).toBe(false)
 
     describe 'up.util.isObject', ->
 
@@ -949,6 +837,20 @@ describe 'up.util', ->
 
       it 'returns true for a FormData object', ->
         expect(up.util.isObject(new FormData())).toBe(true)
+
+    describe 'up.util.deepMerge', ->
+
+      it 'recursively merges the given objects', ->
+        obj = { a: '1', b: { c: '2', d: '3' } }
+        other = { e: '4', b: { f: '5', g: '6' }}
+        obj = up.util.deepMerge(obj, other)
+        expect(obj).toEqual { a: '1', e: '4', b: { c: '2', d: '3', f: '5', g: '6' } }
+
+      it 'overwrites (and does not concatenate) array values', ->
+        obj = { a: ['1', '2'] }
+        other = { a: ['3', '4'] }
+        obj = up.util.deepMerge(obj, other)
+        expect(obj).toEqual { a: ['3', '4'] }
 
     describe 'up.util.memoize', ->
 

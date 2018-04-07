@@ -214,8 +214,8 @@ up.util = (($) ->
 
   nonUpClasses = ($element) ->
     classString = $element.attr('class') || ''
-    classes = classString.split(' ')
-    select classes, (klass) -> isPresent(klass) && !klass.match(/^up-/)
+    classes = u.separatedValues(classString)
+    reject classes, (klass) -> klass.match(/^up-/)
 
   # jQuery's implementation of $(...) cannot create elements that have
   # an <html> or <body> tag. So we're using native elements.
@@ -239,6 +239,19 @@ up.util = (($) ->
   @stable
   ###
   assign = Object.assign || assignPolyfill
+
+  valuesPolyfill = (object) ->
+    value for key, value of object
+
+  ###**
+  Returns an array of values of the given object.
+
+  @function up.util.values
+  @param {Object} object
+  @return {Array<string>}
+  @internal
+  ###
+  values = Object.values || valuesPolyfill
 
   ###**
   Returns a new string with whitespace removed from the beginning
@@ -462,7 +475,7 @@ up.util = (($) ->
   @internal
   ###
   isOptions = (object) ->
-    typeof(object) == 'object' && !isNull(object) && !isJQuery(object) && !isPromise(object) && !isFormData(object) && !isArray(object)
+    typeof(object) == 'object' && !isNull(object) && (isUndefined(object.constructor) || object.constructor == Object)
 
   ###**
   Returns whether the given argument is an object.
@@ -559,7 +572,7 @@ up.util = (($) ->
   copy = (object)  ->
     if isArray(object)
       object = object.slice()
-    else if isObject(object) && !isFunction(object)
+    else if isOptions(object)
       object = assign({}, object)
     else
       up.fail('Cannot copy %o', object)
@@ -591,6 +604,26 @@ up.util = (($) ->
     assign({}, sources...)
 
   ###**
+  Creates a new object by recursively merging together the properties from the given objects.
+
+  @function up.util.deepMerge
+  @param {Array<Object>} sources...
+  @return Object
+
+  @internal
+  ###
+  deepMerge = (sources...) ->
+    target = {}
+    for source in sources
+      for key, newValue of source
+        if isOptions(newValue)
+          oldValue = target[key]
+          if isOptions(oldValue)
+            newValue = deepMerge(oldValue, newValue)
+        target[key] = newValue
+    target
+
+  ###**
   Creates an options hash from the given argument and some defaults.
 
   The semantics of this function are confusing.
@@ -602,16 +635,13 @@ up.util = (($) ->
   @return {Object}
   @internal
   ###
-  options = (object, defaults) ->
-    merged = if object then copy(object) else {}
+  newOptions = (object, defaults) ->
     if defaults
-      for key, defaultValue of defaults
-        value = merged[key]
-        if !isGiven(value)
-          merged[key] = defaultValue
-        else if isObject(defaultValue) && isObject(value)
-          merged[key] = options(value, defaultValue)
-    merged
+      deepMerge(defaults, object)
+    else if object
+      copy(object)
+    else
+      {}
 
   ###**
   Returns the first argument that is considered [given](/up.util.isGiven).
@@ -714,7 +744,7 @@ up.util = (($) ->
     set = new Set(array)
     setToArray(set)
 
-  ###*
+  ###**
   This function is like [`uniq`](/up.util.uniq), accept that
   the given function is invoked for each element to generate the value
   for which uniquness is computed.
@@ -737,7 +767,7 @@ up.util = (($) ->
         set.add(mapped)
         true
 
-  ###*
+  ###**
   @function up.util.setToArray
   @internal
   ###
@@ -988,7 +1018,7 @@ up.util = (($) ->
   @internal
   ###
   measure = ($element, opts) ->
-    opts = options(opts, relative: false, inner: false, includeMargin: false)
+    opts = newOptions(opts, relative: false, inner: false, includeMargin: false)
 
     if opts.relative
       if opts.relative == true
@@ -1278,9 +1308,9 @@ up.util = (($) ->
   openConfig = (blueprint = {}) ->
     hash = {}
     hash.reset = ->
-      newOptions = blueprint
-      newOptions = newOptions() if isFunction(newOptions)
-      assign(hash, newOptions)
+      opts = blueprint
+      opts = opts() if isFunction(opts)
+      assign(hash, opts)
     hash.reset()
     hash
 
@@ -1354,136 +1384,6 @@ up.util = (($) ->
 #      error('Could not parse argument names of %o', fun)
 
   ###**
-  Normalizes the given params object to the form returned by
-  [`jQuery.serializeArray`](https://api.jquery.com/serializeArray/).
-
-  @function up.util.requestDataAsArray
-  @param {Object|Array|undefined|null} data
-  @internal
-  ###
-  requestDataAsArray = (data) ->
-    if isArray(data)
-      data
-    if isFormData(data)
-      # Until FormData#entries is implemented in all major browsers we must give up here.
-      # However, up.form will prefer to serialize forms as arrays, so we should be good
-      # in most cases. We only use FormData for forms with file inputs.
-      up.fail('Cannot convert FormData into an array')
-    else
-      query = requestDataAsQuery(data)
-      array = []
-      for part in query.split('&')
-        if isPresent(part)
-          pair = part.split('=')
-          array.push
-            name: decodeURIComponent(pair[0])
-            value: decodeURIComponent(pair[1])
-      array
-
-  ###**
-  Returns an URL-encoded query string for the given params object.
-
-  The returned string does **not** include a leading `?` character.
-
-  @function up.util.requestDataAsQuery
-  @param {Object|Array|undefined|null} data
-  @internal
-  ###
-  requestDataAsQuery = (data, opts) ->
-    opts = options(opts, purpose: 'url')
-
-    if isString(data)
-      data.replace(/^\?/, '')
-    else if isFormData(data)
-      # Until FormData#entries is implemented in all major browsers we must give up here.
-      # However, up.form will prefer to serialize forms as arrays, so we should be good
-      # in most cases. We only use FormData for forms with file inputs.
-      up.fail('Cannot convert FormData into a query string')
-    else if isPresent(data)
-      query = $.param(data)
-      switch opts.purpose
-        when 'url'
-          query = query.replace(/\+/g, '%20')
-        when 'form'
-          query = query.replace(/\%20/g, '+')
-        else
-          up.fail('Unknown purpose %o', opts.purpose)
-      query
-    else
-      ""
-
-  $submittingButton = ($form) ->
-    submitButtonSelector = 'input[type=submit], button[type=submit], button:not([type])'
-    $activeElement = $(document.activeElement)
-    if $activeElement.is(submitButtonSelector) && $form.has($activeElement)
-      $activeElement
-    else
-      $form.find(submitButtonSelector).first()
-
-  ###**
-  Serializes the given form into a request data representation.
-
-  @function up.util.requestDataFromForm
-  @return {Array|FormData}
-  @internal
-  ###
-  requestDataFromForm = (form) ->
-    $form = $(form)
-    hasFileInputs = $form.find('input[type=file]').length
-
-    $button = $submittingButton($form)
-    buttonName = $button.attr('name')
-    buttonValue = $button.val()
-
-    # We try to stick with an array representation, whose contents we can inspect.
-    # We cannot inspect FormData on IE11 because it has no support for `FormData.entries`.
-    # Inspection is needed to generate a cache key (see `up.proxy`) and to make
-    # vanilla requests when `pushState` is unavailable (see `up.browser.navigate`).
-    data = if hasFileInputs then new FormData($form.get(0)) else $form.serializeArray()
-    appendRequestData(data, buttonName, buttonValue) if isPresent(buttonName)
-    data
-
-
-  ###**
-  Adds a key/value pair to the given request data representation.
-
-  This mutates the given `data` if `data` is a `FormData`, an object
-  or an array. When `data` is a string a new string with the appended key/value
-  pair is returned.
-
-  @function up.util.appendRequestData
-  @param {FormData|Object|Array|undefined|null} data
-  @param {string} key
-  @param {string|Blob|File} value
-  @internal
-  ###
-  appendRequestData = (data, name, value, opts) ->
-    data ||= []
-
-    if isArray(data)
-      data.push(name: name, value: value)
-    else if isFormData(data)
-      data.append(name, value)
-    else if isObject(data)
-      data[name] = value
-    else if isString(data)
-      newPair = requestDataAsQuery([ name: name, value: value ], opts)
-      data = [data, newPair].join('&')
-    data
-
-  ###**
-  Merges the request data in `source` into `target`.
-  Will modify the passed-in `target`.
-
-  @return
-    The merged form data.
-  ###
-  mergeRequestData = (target, source) ->
-    each requestDataAsArray(source), (field) ->
-      target = appendRequestData(target, field.name, field.value)
-    target
-
-  ###**
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
 
@@ -1545,6 +1445,11 @@ up.util = (($) ->
 
   renameKey = (object, oldKey, newKey) ->
     object[newKey] = pluckKey(object, oldKey)
+
+  deprecateRenamedKey = (object, oldKey, newKey) ->
+    if isDefined(object[oldKey])
+      up.log.warn('Deprecated: Object key { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+      renameKey(object, oldKey, newKey)
 
   pluckData = (elementOrSelector, key) ->
     $element = $(elementOrSelector)
@@ -1744,6 +1649,9 @@ up.util = (($) ->
         flattened.push(object)
     flattened
 
+  flatMap = (array, block) ->
+    flatten map(array, block)
+
   ###**
   Returns whether the given value is truthy.
 
@@ -1821,11 +1729,30 @@ up.util = (($) ->
   isBodyDescendant = (element) ->
     $(element).parents('body').length > 0
 
-  requestDataAsArray: requestDataAsArray
-  requestDataAsQuery: requestDataAsQuery
-  appendRequestData: appendRequestData
-  mergeRequestData:  mergeRequestData
-  requestDataFromForm: requestDataFromForm
+  separatedValues = (string, separator = ' ') ->
+    values = string.split(separator)
+    values = map(values, trim)
+    values = select(values, isPresent)
+    values
+
+  wrapArray = (objOrArray) ->
+    if isUndefined(objOrArray)
+      []
+    else if isArray(objOrArray)
+      objOrArray
+    else
+      [objOrArray]
+
+  isEqual = (a, b) ->
+    if typeof(a) != typeof(b)
+      false
+    else if isArray(a)
+      a.length == b.length && all(a, (elem, index) -> isEqual(elem, b[index]))
+    else if isObject(a)
+      fail('isEqual cannot compare objects yet')
+    else
+      a == b
+
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   isFixed: isFixed
@@ -1838,15 +1765,18 @@ up.util = (($) ->
   $createElementFromSelector: $createElementFromSelector
   $createPlaceholder: $createPlaceholder
   selectorForElement: selectorForElement
+  attributeSelector: attributeSelector
   assign: assign
   assignPolyfill: assignPolyfill
   copy: copy
   merge: merge
-  options: options
+  deepMerge: deepMerge
+  options: newOptions
   option: option
   fail: fail
   each: each
   map: map
+  flatMap: flatMap
   times: times
   any: any
   all: all
@@ -1912,6 +1842,7 @@ up.util = (($) ->
   pluckData: pluckData
   pluckKey: pluckKey
   renameKey: renameKey
+  deprecateRenamedKey: deprecateRenamedKey
   extractOptions: extractOptions
   isDetached: isDetached
   noop: noop
@@ -1936,7 +1867,10 @@ up.util = (($) ->
   isBodyDescendant: isBodyDescendant
   isCrossDomain: isCrossDomain
   microtask: microtask
-
+  separatedValues : separatedValues
+  isEqual: isEqual
+  wrapArray: wrapArray
+  values: values
 
 )(jQuery)
 

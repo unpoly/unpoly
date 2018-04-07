@@ -23,7 +23,7 @@ up.browser = (($) ->
   @method up.browser.navigate
   @param {string} url
   @param {string} [options.method='get']
-  @param {Object|Array} [options.data]
+  @param {Object|Array} [options.params]
   @internal
   ###
   navigate = (url, options = {}) ->

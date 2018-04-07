@@ -275,6 +275,7 @@ up.protocol = (($) ->
     csrfParam: -> $('meta[name="csrf-param"]').attr('content')
     csrfToken: -> $('meta[name="csrf-token"]').attr('content')
     csrfHeader: 'X-CSRF-Token'
+    waypointsHeader: 'X-Up-Waypoints'
 
   csrfParam = ->
     u.evalOption(config.csrfParam)

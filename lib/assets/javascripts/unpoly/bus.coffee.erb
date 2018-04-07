@@ -99,10 +99,10 @@ up.bus = (($) ->
     jqueryDescription
 
   fixRenamedEvents = (description) ->
-    events = description[0].split(/\s+/)
+    events = u.separatedValues(description[0])
     events = u.map events, (event) ->
       if newEvent = renamedEvents[event]
-        up.log.warn("#{event} has been renamed to #{newEvent}")
+        up.log.warn("Deprecated: #{event} has been renamed to #{newEvent}")
         newEvent
       else
         event
@@ -445,7 +445,7 @@ up.bus = (($) ->
   @experimental
   ###
 
-  renamedEvent = (oldEvent, newEvent) ->
+  deprecateRenamedEvent = (oldEvent, newEvent) ->
     renamedEvents[oldEvent] = newEvent
 
   ###**
@@ -493,7 +493,7 @@ up.bus = (($) ->
   emitReset: emitReset
   haltEvent: haltEvent
   consumeAction: consumeAction
-  renamedEvent: renamedEvent
+  deprecateRenamedEvent: deprecateRenamedEvent
   boot: boot
 
 )(jQuery)

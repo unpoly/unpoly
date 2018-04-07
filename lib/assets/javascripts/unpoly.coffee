@@ -3,6 +3,7 @@
 #= require_tree ./unpoly/classes
 #= require ./unpoly/browser
 #= require ./unpoly/bus
+#= require ./unpoly/params
 #= require ./unpoly/protocol
 #= require ./unpoly/log
 #= require ./unpoly/toast
@@ -12,6 +13,7 @@
 #= require ./unpoly/dom
 #= require ./unpoly/motion
 #= require ./unpoly/proxy
+#= require ./unpoly/waypoint
 #= require ./unpoly/link
 #= require ./unpoly/form
 #= require ./unpoly/popup

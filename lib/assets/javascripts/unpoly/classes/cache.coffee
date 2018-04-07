@@ -37,7 +37,7 @@ class up.Cache
     if @config.key
       @config.key(key)
     else
-      @key.toString()
+      key.toString()
 
   isEnabled: =>
     @maxKeys() isnt 0 && @expiryMillis() isnt 0
@@ -115,3 +115,12 @@ class up.Cache
     else
       @log("Cache miss for '%s'", key) unless options.silent
       undefined
+
+  all: (keys) ->
+    keys = u.wrapArray(keys)
+    if keys.length
+      matches = u.map keys, (key) =>
+        @get(key)
+      u.select(matches, u.isPresent)
+    else
+      u.values(@store)

@@ -129,9 +129,9 @@ up.form = (($) ->
     with the request.
   @param {string} [options.layer='auto']
     The name of the layer that ought to be updated. Valid values are
-    `auto`, `page`, `modal` and `popup`.
+    `'auto'`, `'page'`, `'modal'` and `'popup'`.
 
-    If set to `auto` (default), Unpoly will try to find a match in the form's layer.
+    If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
   @param {string} [options.failLayer='auto']
     The name of the layer that ought to be updated if the server sends a non-200 status code.
   @return {Promise}
@@ -158,7 +158,7 @@ up.form = (($) ->
     options.origin = u.option(options.origin, $form)
     options.layer = u.option(options.layer, $form.attr('up-layer'), 'auto')
     options.failLayer = u.option(options.failLayer, $form.attr('up-fail-layer'), 'auto')
-    options.data = u.requestDataFromForm($form)
+    options.params = up.params.fromForm($form)
     options = u.merge(options, up.motion.animateOptions(options, $form))
 
     if options.validate
@@ -167,7 +167,7 @@ up.form = (($) ->
       options.failTransition = false
       options.headers[up.protocol.config.validateHeader] = options.validate
 
-    up.bus.whenEmitted('up:form:submit', $element: $form).then ->
+    up.bus.whenEmitted('up:form:submit', message: 'Submitting form', $form: $form, $element: $form).then ->
       up.feedback.start($form)
 
       # If we can't update the location URL, fall back to a vanilla form submission.
@@ -184,7 +184,7 @@ up.form = (($) ->
   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
 
   @event up:form:submit
-  @param {jQuery} event.$element
+  @param {jQuery} event.$form
     The `<form>` element that will be submitted.
   @param event.preventDefault()
     Event listeners may call this method to prevent the form from being submitted.
@@ -430,11 +430,11 @@ up.form = (($) ->
     $target = $(target)
     fieldValues ||= switcherValues(findSwitcherForTarget($target))
     if hideValues = $target.attr('up-hide-for')
-      hideValues = hideValues.split(' ')
+      hideValues = u.separatedValues(hideValues)
       show = u.intersect(fieldValues, hideValues).length == 0
     else
       if showValues = $target.attr('up-show-for')
-        showValues = showValues.split(' ')
+        showValues = u.separatedValues(showValues)
       else
         # If the target has neither up-show-for or up-hide-for attributes,
         # assume the user wants the target to be visible whenever anything
@@ -472,7 +472,7 @@ up.form = (($) ->
 
   \#\#\# Failed submission
 
-  When the server was unable to save the form due to invalid data,
+  When the server was unable to save the form due to invalid params,
   it will usually re-render an updated copy of the form with
   validation messages.
 
@@ -555,9 +555,9 @@ up.form = (($) ->
     or `method` (vanilla HTML) for the same purpose.
   @param {string} [up-layer='auto']
     The name of the layer that ought to be updated. Valid values are
-    `auto`, `page`, `modal` and `popup`.
+    `'auto'`, `'page'`, `'modal'` and `'popup'`.
 
-    If set to `auto` (default), Unpoly will try to find a match in the form's layer.
+    If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
     If no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
   @param {string} [up-fail-layer='auto']

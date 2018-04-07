@@ -69,6 +69,7 @@ up.dom = (($) ->
   @param {string|Element|jQuery} origin
     The element that this selector resolution is relative to.
     That element's selector will be substituted for `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+  @return {string}
   @internal
   ###
   resolveSelector = (selectorOrElement, origin) ->
@@ -178,7 +179,7 @@ up.dom = (($) ->
     You can also pass `false` to explicitly prevent the title from being updated.
   @param {string} [options.method='get']
     The HTTP method to use for the request.
-  @param {Object|Array|FormData} [options.data]
+  @param {Object|Array|FormData} [options.params]
     Parameters that should be sent as the request's payload.
 
     Parameters can either be passed as an object (where the property names become
@@ -219,9 +220,9 @@ up.dom = (($) ->
     The element's selector will be substituted for the `&` shorthand in the target selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @param {string} [options.layer='auto']
     The name of the layer that ought to be updated. Valid values are
-    `auto`, `page`, `modal` and `popup`.
+    `'auto'`, `'page'`, `'modal'` and `'popup'`.
 
-    If set to `auto` (default), Unpoly will try to find a match in the
+    If set to `'auto'` (default), Unpoly will try to find a match in the
     same layer as the element that triggered the replacement (see `options.origin`).
     If that element is not known, or no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
@@ -239,7 +240,7 @@ up.dom = (($) ->
   replace = (selectorOrElement, url, options) ->
     options = u.options(options)
 
-    options.inspectResponse = fullLoad = -> up.browser.navigate(url, u.only(options, 'method', 'data'))
+    options.inspectResponse = fullLoad = -> up.browser.navigate(url, u.only(options, 'method', 'params'))
 
     if !up.browser.canPushState() && options.history != false
       fullLoad() unless options.preload
@@ -268,7 +269,8 @@ up.dom = (($) ->
     request =
       url: url
       method: options.method
-      data: options.data
+      data: options.data # deprecated, use { params }
+      params: options.params
       target: improvedTarget
       failTarget: improvedFailTarget
       cache: options.cache
@@ -760,11 +762,10 @@ up.dom = (($) ->
     if $control.length && $control.get(0) != document.activeElement
       $control.focus()
 
-  isRealElement = ($element) ->
+  isRealElement = (element) ->
     unreal = '.up-ghost, .up-destroying'
-    # Closest matches both the element itself
-    # as well as its ancestors
-    $element.closest(unreal).length == 0
+    # Closest matches both the element itself as well as its ancestors
+    $(element).closest(unreal).length == 0
 
   ###**
   Returns the first element matching the given selector, but
@@ -778,9 +779,10 @@ up.dom = (($) ->
 
   @function up.first
   @param {string|Element|jQuery|Array<Element>} selectorOrElement
-  @param {string} options.layer
-    The name of the layer in which to find the element. Valid values are
-    `auto`, `page`, `modal` and `popup`.
+  @param {string} [options.layer='auto']
+    The name of the layer in which to find the element.
+
+    Valid values are `'auto'`, `'page'`, `'modal'` and `'popup'`.
   @param {string|Element|jQuery} [options.origin]
     An second element or selector that can be referenced as `&` in the first selector:
 
@@ -832,7 +834,36 @@ up.dom = (($) ->
       'page'
 
   matchesLayer = (selectorOrElement, layer) ->
-    layerOf(selectorOrElement) == layer
+    !layer || layerOf(selectorOrElement) == layer
+
+  ###**
+  Returns all elements matching the given selector, but
+  ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
+
+  If the given argument is already a jQuery collection (or an array
+  of DOM elements), returns the subset of the given list that is matching these conditions.
+
+  @function up.all
+  @param {string|jQuery|Array<Element>} selectorOrElements
+  @param {string|Element|jQuery} [options.origin]
+    An second element or selector that can be referenced as `&` in the first selector:
+
+        $input = $('input.email');
+        up.first('.field:has(&)', $input); // returns the .field containing $input
+  @param {string} [options.layer]
+    The name of the layer in which to find the element. Valid values are
+    `'page'`, `'modal'` and `'popup'`.
+  @return {jQuery}
+    A jQuery collection of matching elements.
+  @experimental
+  ###
+  all = (selectorOrElements, options) ->
+    options = u.options(options)
+    resolved = resolveSelector(selectorOrElements, options.origin)
+    $root = $(u.option(options.root, document))
+    $root.find(resolved).filter (index, element) ->
+      $element = $(element)
+      isRealElement($element) && matchesLayer($element, options.layer)
 
   ###**
   Destroys the given element or selector.
@@ -967,10 +998,12 @@ up.dom = (($) ->
   destroy: destroy
   extract: extract
   first: first
+  all: all
   source: source
   resolveSelector: resolveSelector
   hello: hello
   config: config
+  layerOf: layerOf
 
 )(jQuery)
 
@@ -979,6 +1012,7 @@ up.extract = up.dom.extract
 up.reload = up.dom.reload
 up.destroy = up.dom.destroy
 up.first = up.dom.first
+up.all = up.dom.all
 up.hello = up.dom.hello
 
-up.renamedModule 'flow', 'dom'
+up.deprecateRenamedModule 'flow', 'dom'

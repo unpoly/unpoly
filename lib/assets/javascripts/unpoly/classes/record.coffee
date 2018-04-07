@@ -5,8 +5,12 @@ class up.Record
   fields: ->
     throw 'Return an array of property names'
 
+  defaults: ->
+    {}
+
   constructor: (options) ->
-    u.assign(@, @attributes(options))
+    attributes = u.merge(@defaults(), @attributes(options))
+    u.assign(this, attributes)
 
   attributes: (source = @) =>
     u.only(source, @fields()...)

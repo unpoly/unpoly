@@ -114,11 +114,11 @@ describe 'up.dom', ->
             next =>
               expect(replaceCallback).toHaveBeenCalled()
 
-        describe 'with { data } option', ->
+        describe 'with { params } option', ->
 
           it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-            up.replace('.middle', '/path', method: 'put', data: givenParams)
+            up.replace('.middle', '/path', method: 'put', params: givenParams)
 
             next =>
               expect(@lastRequest().data()['foo-key']).toEqual(['foo-value'])
@@ -126,7 +126,7 @@ describe 'up.dom', ->
 
           it "encodes the given params into the URL of a GET request", asyncSpec (next) ->
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-            up.replace('.middle', '/path', method: 'get', data: givenParams)
+            up.replace('.middle', '/path', method: 'get', params: givenParams)
             next => expect(@lastRequest().url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
 
         it 'uses a HTTP method given as { method } option', asyncSpec (next) ->
@@ -248,8 +248,8 @@ describe 'up.dom', ->
             next => @respond(responseHeaders: { 'X-Up-Location': '/other-path' })
             next => expect(location.href).toMatchUrl('/other-path')
 
-          it 'adds params from a { data } option to the URL of a GET request', asyncSpec (next) ->
-            up.replace('.middle', '/path', data: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
+          it 'adds params from a { params } option to the URL of a GET request', asyncSpec (next) ->
+            up.replace('.middle', '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
             next => @respond()
             next => expect(location.href).toMatchUrl('/path?foo-key=foo%20value&bar-key=bar%20value')
 
