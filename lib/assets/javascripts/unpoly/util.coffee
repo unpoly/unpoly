@@ -214,7 +214,7 @@ up.util = (($) ->
 
   nonUpClasses = ($element) ->
     classString = $element.attr('class') || ''
-    classes = u.separatedValues(classString)
+    classes = separatedValues(classString)
     reject classes, (klass) -> klass.match(/^up-/)
 
   # jQuery's implementation of $(...) cannot create elements that have

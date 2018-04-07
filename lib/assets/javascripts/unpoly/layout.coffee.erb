@@ -469,8 +469,8 @@ up.layout = (($) ->
       # If options.restoreScroll is an object, its keys map viewport selectors
       # to scroll positions. If it is just true, we leave the scrollTops option
       # undefined and let restoreScroll() retrieve previous scrollTops from cache.
-      scrollTops = u.presence(options.restoreScroll, u.isObject)
-      return restoreScroll(around: $element, scrollTops: scrollTops)
+      givenTops = u.presence(options.restoreScroll, u.isObject)
+      return restoreScroll(around: $element, scrollTops: givenTops)
 
     if options.reveal
       revealOptions = { duration: options.duration }
