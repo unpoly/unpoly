@@ -13,9 +13,9 @@ describe 'up.browser', ->
 
       describe "for GET requests", ->
 
-        it "creates a GET form, adds all { data } params as hidden fields and submits the form", ->
+        it "creates a GET form, adds all { params } as hidden fields and submits the form", ->
           submitForm = spyOn(up.browser, 'submitForm')
-          up.browser.navigate('/foo', method: 'GET', data: { param1: 'param1 value', param2: 'param2 value' })
+          up.browser.navigate('/foo', method: 'GET', params: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           expect($form).toExist()
@@ -25,9 +25,9 @@ describe 'up.browser', ->
           expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
           expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
 
-        it 'merges params from the given URL and the { data } option', ->
+        it 'merges params from the given URL and the { params } option', ->
           submitForm = spyOn(up.browser, 'submitForm')
-          up.browser.navigate('/foo?param1=param1%20value', method: 'GET', data: { param2: 'param2 value' })
+          up.browser.navigate('/foo?param1=param1%20value', method: 'GET', params: { param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           expect($form).toExist()
@@ -39,9 +39,9 @@ describe 'up.browser', ->
 
       describe "for POST requests", ->
 
-        it "creates a POST form, adds all { data } params as hidden fields and submits the form", ->
+        it "creates a POST form, adds all { params } params as hidden fields and submits the form", ->
           submitForm = spyOn(up.browser, 'submitForm')
-          up.browser.navigate('/foo', method: 'POST', data: { param1: 'param1 value', param2: 'param2 value' })
+          up.browser.navigate('/foo', method: 'POST', params: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           expect($form).toExist()
@@ -50,9 +50,9 @@ describe 'up.browser', ->
           expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
           expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
 
-        it 'merges params from the given URL and the { data } option', ->
+        it 'merges params from the given URL and the { params } option', ->
           submitForm = spyOn(up.browser, 'submitForm')
-          up.browser.navigate('/foo?param1=param1%20value', method: 'POST', data: { param2: 'param2 value' })
+          up.browser.navigate('/foo?param1=param1%20value', method: 'POST', params: { param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           expect($form).toExist()

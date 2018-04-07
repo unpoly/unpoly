@@ -7,14 +7,14 @@ describe 'up.proxy', ->
     describe 'up.request', ->
 
       it 'makes a request with the given URL and params', ->
-        up.request('/foo', data: { key: 'value' }, method: 'post')
+        up.request('/foo', params: { key: 'value' }, method: 'post')
         request = @lastRequest()
         expect(request.url).toMatchUrl('/foo')
         expect(request.data()).toEqual(key: ['value'])
         expect(request.method).toEqual('POST')
 
       it 'also allows to pass the URL as a { url } option instead', ->
-        up.request(url: '/foo', data: { key: 'value' }, method: 'post')
+        up.request(url: '/foo', params: { key: 'value' }, method: 'post')
         request = @lastRequest()
         expect(request.url).toMatchUrl('/foo')
         expect(request.data()).toEqual(key: ['value'])
@@ -31,7 +31,7 @@ describe 'up.proxy', ->
       it 'resolves to a Response object that contains information about the response and request', (done) ->
         promise = up.request(
           url: '/url'
-          data: { key: 'value' }
+          params: { key: 'value' }
           method: 'post'
           target: '.target'
         )
@@ -44,7 +44,7 @@ describe 'up.proxy', ->
 
           promise.then (response) ->
             expect(response.request.url).toMatchUrl('/url')
-            expect(response.request.data).toEqual(key: 'value')
+            expect(response.request.params).toEqual(key: 'value')
             expect(response.request.method).toEqual('POST')
             expect(response.request.target).toEqual('.target')
             expect(response.request.hash).toBeBlank()
@@ -77,7 +77,7 @@ describe 'up.proxy', ->
         it 'updates the { method } property in the response object', (done) ->
           promise = up.request(
             url: '/url'
-            data: { key: 'value' }
+            params: { key: 'value' }
             method: 'post'
             target: '.target'
           )
@@ -164,8 +164,8 @@ describe 'up.proxy', ->
             # See that an additional request was made
             expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        it "does not explode if the original request's { data } is a FormData object", asyncSpec (next) ->
-          up.request('/foo', method: 'post', data: new FormData()) # POST requests are not cached
+        it "does not explode if the original request's { params } is a FormData object", asyncSpec (next) ->
+          up.request('/foo', method: 'post', params: new FormData()) # POST requests are not cached
 
           next =>
             expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -286,11 +286,11 @@ describe 'up.proxy', ->
             headers = @lastRequest().requestHeaders
             expect(headers['X-Requested-With']).toEqual('Love')
 
-      describe 'with { data } option', ->
+      describe 'with { params } option', ->
 
         it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
           givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-          up.request(url: '/path', method: 'put', data: givenParams)
+          up.request(url: '/path', method: 'put', params: givenParams)
 
           next =>
             expect(@lastRequest().data()['foo-key']).toEqual(['foo-value'])
@@ -298,7 +298,7 @@ describe 'up.proxy', ->
 
         it "encodes the given params into the URL of a GET request", (done) ->
           givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-          promise = up.request(url: '/path', method: 'get', data: givenParams)
+          promise = up.request(url: '/path', method: 'get', params: givenParams)
 
           u.nextFrame =>
             expect(@lastRequest().url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
@@ -310,7 +310,7 @@ describe 'up.proxy', ->
               # See that the response object has been updated by moving the data options
               # to the URL. This is important for up.dom code that works on response.request.
               expect(response.request.url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
-              expect(response.request.data).toBeBlank()
+              expect(response.request.params).toBeBlank()
               done()
 
       it 'caches server responses for the configured duration', asyncSpec (next) ->
@@ -384,8 +384,8 @@ describe 'up.proxy', ->
         next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       it "doesn't reuse responses when asked for the same path, but different params", asyncSpec (next) ->
-        next => up.request(url: '/path', data: { query: 'foo' })
-        next => up.request(url: '/path', data: { query: 'bar' })
+        next => up.request(url: '/path', params: { query: 'foo' })
+        next => up.request(url: '/path', params: { query: 'bar' })
         next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       it "reuses a response for an 'html' selector when asked for the same path and any other selector", asyncSpec (next) ->
@@ -460,6 +460,7 @@ describe 'up.proxy', ->
               request = @lastRequest()
               expect(request.method).toEqual('POST')
               expect(request.data()['_method']).toEqual([method])
+#              expect(request.data()['foo']).toEqual('bar')
 
       describe 'with config.maxRequests set', ->
 
@@ -935,16 +936,16 @@ describe 'up.proxy', ->
     describe 'up.proxy.get', ->
 
       it 'returns an existing cache entry for the given request', ->
-        promise1 = up.request(url: '/foo', data: { key: 'value' })
-        promise2 = up.proxy.get(url: '/foo', data: { key: 'value' })
+        promise1 = up.request(url: '/foo', params: { key: 'value' })
+        promise2 = up.proxy.get(url: '/foo', params: { key: 'value' })
         expect(promise1).toBe(promise2)
 
       it 'returns undefined if the given request is not cached', ->
-        promise = up.proxy.get(url: '/foo', data: { key: 'value' })
+        promise = up.proxy.get(url: '/foo', params: { key: 'value' })
         expect(promise).toBeUndefined()
 
-      it "returns undefined if the given request's { data } is a FormData object", ->
-        promise = up.proxy.get(url: '/foo', data: new FormData())
+      it "returns undefined if the given request's { params } is a FormData object", ->
+        promise = up.proxy.get(url: '/foo', params: new FormData())
         expect(promise).toBeUndefined()
 
     describe 'up.proxy.set', ->
@@ -962,7 +963,7 @@ describe 'up.proxy', ->
       it 'does nothing if the given request is not cached'
 
       it 'does not crash when passed a request with FormData (bugfix)', ->
-        removal = -> up.proxy.remove(url: '/path', data: new FormData())
+        removal = -> up.proxy.remove(url: '/path', params: new FormData())
         expect(removal).not.toThrowError()
 
     describe 'up.proxy.clear', ->

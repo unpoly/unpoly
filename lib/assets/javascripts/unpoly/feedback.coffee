@@ -92,7 +92,7 @@ up.feedback = (($) ->
       for attr in ['href', 'up-href', 'up-alias']
         if value = u.presentAttr($section, attr)
           # Allow to include multiple space-separated URLs in [up-alias]
-          for url in value.split(/\s+/)
+          for url in u.separatedValues(value)
             unless url == '#'
               url = normalizeUrl(url)
               urls.push(url)
@@ -371,4 +371,4 @@ up.feedback = (($) ->
 
 )(jQuery)
 
-up.renamedModule 'navigation', 'feedback'
+up.deprecateRenamedModule 'navigation', 'feedback'

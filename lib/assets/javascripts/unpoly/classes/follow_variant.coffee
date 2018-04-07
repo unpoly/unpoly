@@ -38,12 +38,15 @@ class up.FollowVariant
     up.on 'mousedown', @fullSelector('[up-instant]'), (args...) =>
       u.muteRejection @onMousedown(args...)
 
-  followLink: ($link, options = {}) =>
-    up.bus.whenEmitted('up:link:follow', $element: $link).then =>
+  followLink: ($link, options) =>
+    options = u.options(options)
+    followEventAttrs = { message: 'Following link', $link: $link, $element: $link, followOptions: options }
+    up.bus.whenEmitted('up:link:follow', followEventAttrs).then =>
       up.feedback.start $link, options, =>
         @followNow($link, options)
 
-  preloadLink: ($link, options = {}) =>
+  preloadLink: ($link, options) =>
+    options = u.options(options)
     @preloadNow($link, options)
 
   matchesLink: ($link) =>

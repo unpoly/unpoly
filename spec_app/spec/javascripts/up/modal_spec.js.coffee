@@ -381,6 +381,7 @@ describe 'up.modal', ->
         it 'returns the URL behind the modal overlay', (done) ->
           up.history.config.enabled = true
           up.history.replace('/foo')
+
           expect(up.modal.coveredUrl()).toBeMissing()
           visitPromise = up.modal.visit('/bar', target: '.container')
           u.nextFrame =>

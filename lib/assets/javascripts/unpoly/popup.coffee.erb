@@ -56,7 +56,7 @@ up.popup = (($) ->
   @param {string} [config.position='bottom-right']
     Defines where the popup is attached to the opening element.
 
-    Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+    Valid values are `'bottom-right'`, `'bottom-left'`, `'top-right'` and `'top-left'`.
   @param {string} [config.history=false]
     Whether opening a popup will add a browser history entry.
   @param {string} [config.openAnimation='fade-in']
@@ -199,7 +199,7 @@ up.popup = (($) ->
   @param {string} [options.position='bottom-right']
     Defines where the popup is attached to the opening element.
 
-    Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+    Valid values are `'bottom-right'`, `'bottom-left'`, `'top-right'` and `'top-left'`.
   @param {string} [options.html]
     A string of HTML from which to extract the popup contents. No network request will be made.
   @param {string} [options.confirm]
@@ -405,7 +405,7 @@ up.popup = (($) ->
   @param [up-position]
     Defines where the popup is attached to the opening element.
 
-    Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+    Valid values are `'bottom-right'`, `'bottom-left'`, `'top-right'` and `'top-left'`.
   @param {string} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the popup is opened.
@@ -479,7 +479,7 @@ up.popup = (($) ->
 
   # When the user uses the back button we will usually restore <body> or a base container.
   # We close any open modal because it probably won't match the restored state.
-  up.on 'up:history:restore', closeAsap
+  up.on 'up:history:restore', -> closeAsap()
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset

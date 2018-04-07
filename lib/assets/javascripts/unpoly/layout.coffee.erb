@@ -447,7 +447,7 @@ up.layout = (($) ->
     else
       $viewports = viewports()
 
-    scrollTopsForUrl = lastScrollTops.get(url) || {}
+    scrollTopsForUrl = options.scrollTops || lastScrollTops.get(url) || {}
 
     up.log.group 'Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, ->
       allScrollPromises = u.map $viewports, (viewport) ->
@@ -459,7 +459,7 @@ up.layout = (($) ->
 
   ###**
   @function up.layout.revealOrRestoreScroll
-  @param {boolean} [options.restoreScroll]
+  @param {boolean|object} [options.restoreScroll]
   @param {boolean|string} [options.reveal]
   @return {Promise}
     A promise that is fulfilled when the element is revealed or
@@ -471,7 +471,11 @@ up.layout = (($) ->
     $element = $(selectorOrElement)
 
     if options.restoreScroll
-      return restoreScroll(around: $element)
+      # If options.restoreScroll is an object, its keys map viewport selectors
+      # to scroll positions. If it is just true, we leave the scrollTops option
+      # undefined and let restoreScroll() retrieve previous scrollTops from cache.
+      givenTops = u.presence(options.restoreScroll, u.isObject)
+      return restoreScroll(around: $element, scrollTops: givenTops)
 
     if options.reveal
       revealOptions = { duration: options.duration }
