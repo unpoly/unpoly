@@ -580,6 +580,10 @@ describe 'up.util', ->
         $element = affix('div.class1.class2[aria-label="ARIA label value"]')
         expect(up.util.selectorForElement($element)).toBe(".class1.class2")
 
+      it 'does not use Unpoly classes to compose a class selector', ->
+        $element = affix('div.class1.up-current.class2')
+        expect(up.util.selectorForElement($element)).toBe(".class1.class2")
+
       it "prefers using the element's ARIA label to using the element's tag name", ->
         $element = affix('div[aria-label="ARIA label value"]')
         expect(up.util.selectorForElement($element)).toBe('[aria-label="ARIA label value"]')
