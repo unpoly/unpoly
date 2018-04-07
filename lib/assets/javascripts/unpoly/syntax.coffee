@@ -453,9 +453,11 @@ up.syntax = (($) ->
     A serialized JSON string
   @stable
   ###
-  data = (elementOrSelector) ->
+  data = (elementOrSelector, options) ->
+    options = u.options(options)
+    attribute = u.option(options.attribute, 'up-data')
     $element = $(elementOrSelector)
-    json = $element.attr('up-data')
+    json = $element.attr(attribute)
     if u.isString(json) && u.trim(json) != ''
       JSON.parse(json)
     else

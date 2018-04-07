@@ -97,9 +97,6 @@ class up.Response extends up.Record
       'title'
     ]
 
-  constructor: (options) ->
-    super(options)
-
   ###**
   Returns whether the server responded with a 2xx HTTP status.
 

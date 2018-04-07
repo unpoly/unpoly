@@ -439,7 +439,8 @@ up.modal = (($) ->
     $link = u.option(u.pluckKey(options, '$link'), u.nullJQuery())
     url = u.option(u.pluckKey(options, 'url'), $link.attr('up-href'), $link.attr('href'))
     html = u.option(u.pluckKey(options, 'html'))
-    target = u.option(u.pluckKey(options, 'target'), $link.attr('up-modal'), 'body')
+    target = u.option(u.pluckKey(options, 'target'), $link.attr('up-modal'))
+    validateTarget(target)
     options.flavor = u.option(options.flavor, $link.attr('up-flavor'), config.flavor)
     options.position = u.option(options.position, $link.attr('up-position'), flavorDefault('position', options.flavor))
     options.position = u.evalOption(options.position, $link: $link)
@@ -496,6 +497,12 @@ up.modal = (($) ->
           state.phase = 'opened'
           up.emit('up:modal:opened', message: 'Modal opened')
         promise
+
+  validateTarget = (target) ->
+    if u.isBlank(target)
+      up.fail('Cannot open a modal without a target selector')
+    else if target == 'body'
+      up.fail('Cannot open the <body> in a modal')
 
   ###**
   This event is [emitted](/up.emit) when a modal dialog is starting to open.

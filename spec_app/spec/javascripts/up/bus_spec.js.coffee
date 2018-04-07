@@ -132,7 +132,7 @@ describe 'up.bus', ->
 
           expect(emittedEvent.$element).toEqual($element)
 
-    describe 'up.bus.renamedEvent', ->
+    describe 'up.bus.deprecateRenamedEvent', ->
 
       it 'prints a warning and registers the event listener for the new event name', ->
         warnSpy = spyOn(up.log, 'warn')

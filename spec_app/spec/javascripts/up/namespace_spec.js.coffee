@@ -1,6 +1,6 @@
 describe 'window.up namespace', ->
 
-  describe 'renamedModule()', ->
+  describe 'deprecateRenamedModule()', ->
 
     it 'prints a warning and forwards the call to the new module', ->
       warnSpy = spyOn(up.log, 'warn')
