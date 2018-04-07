@@ -254,7 +254,6 @@ up.params = (($) ->
       obj = {}
       for entry in array
         addToNestedObject(obj, entry.name, entry.value)
-      console.info("==== resulting obj is %o", obj)
       obj
 
   buildURL = (base, params) ->

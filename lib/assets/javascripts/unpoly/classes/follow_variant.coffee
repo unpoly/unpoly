@@ -45,8 +45,8 @@ class up.FollowVariant
       up.feedback.start $link, options, =>
         @followNow($link, options)
 
-  preloadLink: ($link, options = {}) =>
-    options = u.copy(options)
+  preloadLink: ($link, options) =>
+    options = u.options(options)
     @preloadNow($link, options)
 
   matchesLink: ($link) =>

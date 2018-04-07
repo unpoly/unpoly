@@ -846,10 +846,7 @@ up.dom = (($) ->
   @function up.all
   @param {string|jQuery|Array<Element>} selectorOrElements
   @param {string|Element|jQuery} [options.origin]
-    An second element or selector that can be referenced as `&` in the first selector:
-
-        $input = $('input.email');
-        up.first('.field:has(&)', $input); // returns the .field containing $input
+    An second element or selector that can be referenced as `&` in the first selector.
   @param {string} [options.layer]
     The name of the layer in which to find the element. Valid values are
     `'page'`, `'modal'` and `'popup'`.
