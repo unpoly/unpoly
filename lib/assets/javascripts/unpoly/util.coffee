@@ -1726,6 +1726,10 @@ up.util = (($) ->
     $insertion.replaceWith($new)
     $old
 
+  fastHide = (element) ->
+    element = unJQuery(element)
+    element.style.display = 'none'
+
   ###**
   Flattens the given `array` a single level deep.
 
@@ -1948,6 +1952,7 @@ up.util = (($) ->
   isCrossDomain: isCrossDomain
   microtask: microtask
   isEqual: isEqual
+  fastHide: fastHide
 
 )(jQuery)
 
