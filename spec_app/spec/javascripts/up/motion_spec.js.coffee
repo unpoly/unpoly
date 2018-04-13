@@ -427,7 +427,8 @@ describe 'up.motion', ->
         $child = $('<div class="child"></div>').css(margin: '40px').appendTo($element)
         up.motion.prependCopy($element)
         $clonedChild = $('.up-ghost .child')
-        expect($clonedChild.offset()).toEqual($child.offset())
+        expect($clonedChild.offset().top).toBeAround($child.offset().top, 0.5)
+        expect($clonedChild.offset().left).toBeAround($child.offset().left, 0.5)
 
       it 'correctly positions the ghost over an element within a scrolled body', ->
         $body = $('body')
