@@ -46,7 +46,7 @@ Thanks to [@foobear](https://github.com/foobear) for helping with this.
 
 This release contains no new features, but will help you when using tools like Babel or Webpack:
 
-- Unpoly now ship without any uses of [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) in its JavaScript sources. Use of `eval()` had previously prevented minifiers from shortening local variables in some files. It could also trigger some bugs with Webpack 3.
+- Unpoly now ship without any uses of [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) in its JavaScript sources. Use of `eval()` had previously prevented minifiers from shortening local variables in some files.
 - Documentation in Unpoly's JavaScript sources can no longer be confused with [JSDoc](http://usejsdoc.org/) comments. Unpoly does not use JSDoc, but some build pipelines eagerly look for JSDoc comments to generate type information.
 
 
