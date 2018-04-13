@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.55.0",
+    version: "0.55.1",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -861,7 +861,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       if (array.length < 2) {
         return array;
       }
-      set = new Set(array);
+      set = new Set();
+      each(array, function(element) {
+        return set.add(element);
+      });
       return setToArray(set);
     };
 
