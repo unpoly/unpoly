@@ -11,6 +11,8 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 This release restores support for Internet Explorer 11, which we accidentally broke in 0.55.0.
 
+Thanks to [@foobear](https://github.com/foobear) for helping with this.
+
 
 0.55.0
 ------
