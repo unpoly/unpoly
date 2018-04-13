@@ -711,7 +711,8 @@ up.util = (($) ->
   ###
   uniq = (array) ->
     return array if array.length < 2
-    set = new Set(array)
+    set = new Set()
+    each array, (element) -> set.add(element)
     setToArray(set)
 
   ###*
