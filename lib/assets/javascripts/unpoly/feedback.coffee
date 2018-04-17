@@ -2,12 +2,13 @@
 Navigation feedback
 ===================
 
-Unpoly automatically adds CSS classes to links while they are
-currently loading ([`.up-active`](/a.up-active)) or
-pointing to the current location ([`.up-current`](/a.up-current)).
+Unpoly automatically adds the class [`.up-active`](/a.up-active) to links or forms while they are loading.
 
-By styling these classes with CSS you can provide instant feedback to user interactions.
-This improves the perceived speed of your interface.
+By marking navigation elements as [`[up-nav]`](/up-nav), contained links that point to the current location
+automatically get the [`.up-current`](/up-nav-a.up-current) class.
+
+You should style [`.up-active`](/a.up-active) and [`.up-current`](/up-nav a.up-current) with CSS to
+provide instant feedback to user interactions. This improves the perceived speed of your interface.
 
 \#\#\# Example
 
@@ -45,6 +46,8 @@ up.feedback = (($) ->
   @property up.feedback.config
   @param {Array<string>} [config.currentClasses]
     An array of classes to set on [links that point the current location](/a.up-current).
+  @param {Array<string>} [config.navs]
+    An array of CSS selectors that match [navigation components](/up-nav).
   @stable
   ###
   config = u.config
@@ -283,35 +286,53 @@ up.feedback = (($) ->
     $element.removeClass(CLASS_ACTIVE)
 
   ###**
-  Links that point to the current location are assigned
-  the `up-current` class automatically.
+  Marks this element as a navigation component, such as a menu or navigation bar.
 
-  The use case for this is navigation bars:
+  When a link within an `[up-nav]` element points to the current location, it is assigned the `.up-current` class. When the browser navigates to another location, the class is removed automatically.
 
-      <nav>
+  You may also assign `[up-nav]` to an individual link instead of an navigational container.
+
+  If you don't want to manually add this attribute to every navigational element, you can configure selectors to automatically match your navigation components in [`up.feedback.config.navs`](/up.feedback.config#config.navs).
+
+
+  \#\#\# Example
+
+  Let's take a simple menu with two links. The menu has been marked with the `[up-nav]` attribute:
+
+      <div up-nav>
         <a href="/foo">Foo</a>
         <a href="/bar">Bar</a>
-      </nav>
+      </div>
 
-  If the browser location changes to `/foo`, the markup changes to this:
+  If the browser location changes to `/foo`, the first link is marked as `.up-current`:
 
-      <nav>
+      <div up-nav>
         <a href="/foo" class="up-current">Foo</a>
         <a href="/bar">Bar</a>
-      </nav>
+      </div>
 
-  \#\#\# What's considered to be "current"?
+  If the browser location changes to `/bar`, the first link automatically loses its `.up-current` class. Now the second link is marked as `.up-current`:
+
+      <div up-nav>
+        <a href="/foo">Foo</a>
+        <a href="/bar" class="up-current">Bar</a>
+      </div>
+
+
+  \#\#\# What is considered to be "current"?
 
   The current location is considered to be either:
 
   - the URL displayed in the browser window's location bar
-  - the source URL of a currently opened [modal dialog](/up.modal)
-  - the source URL of a currently opened [popup overlay](/up.popup)
+  - the source URL of a [modal dialog](/up.modal)
+  - the URL of the page behind a [modal dialog](/up.modal)
+  - the source URL of a [popup overlay](/up.popup)
+  - the URL of the content behind a [popup overlay](/up.popup)
 
   A link matches the current location (and is marked as `.up-current`) if it matches either:
 
   - the link's `href` attribute
-  - the link's [`up-href`](#turn-any-element-into-a-link) attribute
+  - the link's `up-href` attribute
   - a space-separated list of URLs in the link's `up-alias` attribute
 
   \#\#\# Matching URL by prefix
@@ -319,11 +340,20 @@ up.feedback = (($) ->
   You can mark a link as `.up-current` whenever the current URL matches a prefix.
   To do so, end the `up-alias` attribute in an asterisk (`*`).
 
-  For instance, the following link is highlighted for both `/reports` and `/reports/123`:
+  For instance, the following `[up-nav]` link is highlighted for both `/reports` and `/reports/123`:
 
-      <a href="/reports" up-alias="/reports/*">Reports</a>
+      <a up-nav href="/reports" up-alias="/reports/*">Reports</a>
 
-  @selector a.up-current
+  @selector [up-nav]
+  @stable
+  ###
+
+  ###**
+  When a link within an `[up-nav]` element points to the current location, it is assigned the `.up-current` class.
+
+  See [`[up-nav]`](/up-nav) for more documentation and examples.
+
+  @selector [up-nav] a.up-current
   @stable
   ###
 
