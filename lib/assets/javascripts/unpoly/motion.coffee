@@ -399,6 +399,8 @@ up.motion = (($) ->
   @stable
   ###
   finish = (elementOrSelector) ->
+    # Don't emit expensive events if no animation can be running anyway
+    return Promise.resolve() unless up.motion.isEnabled()
     motionTracker.finish(elementOrSelector)
 
   ###**

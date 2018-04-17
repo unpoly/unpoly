@@ -161,6 +161,9 @@ up.layout = (($) ->
   @internal
   ###
   finishScrolling = (element) ->
+    # Don't emit expensive events if no animation can be running anyway
+    return Promise.resolve() unless up.motion.isEnabled()
+
     $scrollable = scrollableElementForViewport(element)
     scrollingTracker.finish($scrollable)
 
