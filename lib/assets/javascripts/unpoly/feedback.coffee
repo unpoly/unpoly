@@ -49,25 +49,21 @@ up.feedback = (($) ->
   ###
   config = u.config
     currentClasses: ['up-current']
-    navSelectors: ['[up-nav]']
+    navs: ['[up-nav]']
 
   previousUrlSet = undefined
   currentUrlSet = undefined
-  cachedNavMultiSelector = undefined
 
   reset = ->
     config.reset()
     previousUrlSet = undefined
     currentUrlSet = undefined
-    cachedNavMultiSelector = undefined
 
   CLASS_ACTIVE = 'up-active'
-  SELECTOR_NAV = '[up-nav]'
-  console.debug("!!! Make nav selector configurable")
   SELECTOR_LINK = 'a, [up-href]'
 
   navMultiSelector = ->
-    cachedNavMultiSelector ||= u.multiSelector(config.navSelectors)
+    u.multiSelector(config.navs)
 
   normalizeUrl = (url) ->
     if u.isPresent(url)

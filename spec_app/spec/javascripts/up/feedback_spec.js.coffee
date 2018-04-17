@@ -155,6 +155,16 @@ describe 'up.feedback', ->
         expect($currentLink).toHaveClass('highlight2')
         expect($currentLink).toHaveClass('up-current')
 
+      it 'allows to configure additional nav selectors', ->
+        up.history.replace('/foo')
+        up.feedback.config.navs.push('.navi')
+        $nav = affix('div.navi')
+        $currentLink = $nav.affix('a[href="/foo"]')
+        $otherLink = $nav.affix('a[href="/bar"]')
+        up.hello($nav)
+        expect($currentLink).toHaveClass('up-current')
+        expect($otherLink).not.toHaveClass('up-current')
+
       describeCapability 'canPushState', ->
 
         describe 'updating .up-current marks wen the URL changes', ->
