@@ -816,6 +816,28 @@ up.form = (($) ->
     A CSS selector for elements whose visibility depends on this field's value.
   @stable
   ###
+
+  ###**
+  Only shows this element if an input field with [`[up-switch]`](/input-up-switch) has one of the given values.
+
+  See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
+
+  @selector [up-show-for]
+  @param {string} [up-show-for]
+    A space-separated list of input values for which this element should be shown.
+  @stable
+  ###
+
+  ###**
+  Hides this element if an input field with [`[up-switch]`](/input-up-switch) has one of the given values.
+
+  See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
+
+  @selector [up-hide-for]
+  @param {string} [up-hide-for]
+    A space-separated list of input values for which this element should be hidden.
+  @stable
+  ###
   up.compiler '[up-switch]', ($field) ->
     switchTargets($field)
 
