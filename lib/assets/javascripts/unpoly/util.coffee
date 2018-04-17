@@ -15,7 +15,7 @@ up.util = (($) ->
   @function up.util.noop
   @experimental
   ###
-  noop = $.noop
+  noop = (->)
 
   ###**
   Ensures that the given function can only be called a single time.
@@ -97,7 +97,8 @@ up.util = (($) ->
   ###
   parseUrl = (urlOrAnchor) ->
     # In case someone passed us a $link, unwrap it
-    urlOrAnchor = unJQuery(urlOrAnchor)
+    if isJQuery(urlOrAnchor)
+      urlOrAnchor = getElement(urlOrAnchor)
 
     # If we are handed a parsed URL, just return it
     if urlOrAnchor.pathname
@@ -159,7 +160,8 @@ up.util = (($) ->
     $root
 
   ###**
-  @function $create
+  @function $createPlaceHolder
+  @internal
   ###
   $createPlaceholder = (selector, container = document.body) ->
     $placeholder = $createElementFromSelector(selector)
@@ -566,16 +568,20 @@ up.util = (($) ->
     object
 
   ###**
-  If given a jQuery collection, returns the underlying array of DOM element.
+  If given a jQuery collection, returns the first native DOM element in the collection.
+  If given a string, returns the first element matching that string.
   If given any other argument, returns the argument unchanged.
 
-  @function up.util.unJQuery
-  @param object
+  @function up.util.element
+  @param {jQuery|Element|String} object
+  @return {Element}
   @internal
   ###
-  unJQuery = (object) ->
+  getElement = (object) ->
     if isJQuery(object)
       object.get(0)
+    else if isString(object)
+      $(object).get(0)
     else
       object
 
@@ -711,9 +717,7 @@ up.util = (($) ->
   ###
   uniq = (array) ->
     return array if array.length < 2
-    set = new Set()
-    each array, (element) -> set.add(element)
-    setToArray(set)
+    setToArray(arrayToSet(array))
 
   ###*
   This function is like [`uniq`](/up.util.uniq), accept that
@@ -746,6 +750,15 @@ up.util = (($) ->
     array = []
     set.forEach (elem) -> array.push(elem)
     array
+
+  ###*
+  @function up.util.arrayToSet
+  @internal
+  ###
+  arrayToSet = (array) ->
+    set = new Set()
+    array.forEach (elem) -> set.add(elem)
+    set
 
   ###**
   Returns all elements from the given array that return
@@ -869,8 +882,9 @@ up.util = (($) ->
     # This is how Bootstrap does it also:
     # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
     $outer = $('<div>')
+    outer = $outer.get(0)
     $outer.attr('up-viewport', '')
-    $outer.css
+    writeInlineStyle outer,
       position:  'absolute'
       top:       '0'
       left:      '0'
@@ -878,7 +892,6 @@ up.util = (($) ->
       height:    '100px' # Firefox needs at least 100px to show a scrollbar
       overflowY: 'scroll'
     $outer.appendTo(document.body)
-    outer = $outer.get(0)
     width = outer.offsetWidth - outer.clientWidth
     $outer.remove()
     width
@@ -894,7 +907,7 @@ up.util = (($) ->
     $body = $(body)
     html = document.documentElement
 
-    bodyOverflow = $body.css('overflow-y')
+    bodyOverflow = readComputedStyle($body, 'overflowY')
 
     forcedScroll = (bodyOverflow == 'scroll')
     forcedHidden = (bodyOverflow == 'hidden')
@@ -902,24 +915,9 @@ up.util = (($) ->
     forcedScroll || (!forcedHidden && html.scrollHeight > html.clientHeight)
 
   ###**
-  Modifies the given function so it only runs once.
-  Subsequent calls will return the previous return value.
-
-  @function up.util.once
-  @param {Function} fun
-  @experimental
-  ###
-  once = (fun) ->
-    result = undefined
-    (args...) ->
-      result = fun(args...) if fun?
-      fun = undefined
-      result
-
-  ###**
   Temporarily sets the CSS for the given element.
 
-  @function up.util.temporaryCss
+  @function up.util.writeTemporaryStyle
   @param {jQuery} $element
   @param {Object} css
   @param {Function} [block]
@@ -929,35 +927,18 @@ up.util = (($) ->
     A function that restores the original CSS when called.
   @internal
   ###
-  temporaryCss = (elementOrSelector, css, block) ->
+  writeTemporaryStyle = (elementOrSelector, newCss, block) ->
     $element = $(elementOrSelector)
-    oldCss = $element.css(Object.keys(css))
-    $element.css(css)
-    memo = -> $element.css(oldCss)
+    oldStyles = readInlineStyle($element, Object.keys(newCss))
+    restoreOldStyles = -> writeInlineStyle($element, oldStyles)
+    writeInlineStyle($element, newCss)
     if block
+      # If a block was passed, we run the block and restore old styles.
       block()
-      memo()
+      restoreOldStyles()
     else
-      once(memo)
-
-  ###**
-  Forces the given jQuery element into an accelerated compositing layer.
-
-  @function up.util.forceCompositing
-  @internal
-  ###
-  forceCompositing = ($element) ->
-    oldTransforms = $element.css(['transform', '-webkit-transform'])
-    if isBlank(oldTransforms) || oldTransforms['transform'] == 'none'
-      memo = -> $element.css(oldTransforms)
-      $element.css
-        'transform': 'translateZ(0)'
-        '-webkit-transform': 'translateZ(0)' # Safari
-    else
-      # Since the element already has a transform, it is already
-      # drawn using compositing. Do nothing.
-      memo = ->
-    memo
+      # If no block was passed, we return the restoration function.
+      restoreOldStyles
 
   ###**
   Forces a repaint of the given element.
@@ -966,7 +947,7 @@ up.util = (($) ->
   @internal
   ###
   forceRepaint = (element) ->
-    element = unJQuery(element)
+    element = getElement(element)
     element.offsetHeight
 
   cssAnimate = (elementOrSelector, lastFrame, opts) ->
@@ -975,12 +956,11 @@ up.util = (($) ->
   @internal
   ###
   margins = (selectorOrElement) ->
-    $element = $(selectorOrElement)
-    withUnits = $element.css(['margin-top', 'margin-right', 'margin-bottom', 'margin-left'])
-    top:    parseFloat(withUnits['margin-top'])
-    right:  parseFloat(withUnits['margin-right'])
-    bottom: parseFloat(withUnits['margin-bottom'])
-    left:   parseFloat(withUnits['margin-left'])
+    element = getElement(selectorOrElement)
+    top:    readComputedStyleNumber(element, 'marginTop')
+    right:  readComputedStyleNumber(element, 'marginRight')
+    bottom: readComputedStyleNumber(element, 'marginBottom')
+    left:   readComputedStyleNumber(element, 'marginLeft')
 
   ###**
   Measures the given element.
@@ -1233,7 +1213,7 @@ up.util = (($) ->
   @internal
   ###
   unwrapElement = (wrapper) ->
-    wrapper = unJQuery(wrapper)
+    wrapper = getElement(wrapper)
     parent = wrapper.parentNode;
     wrappedNodes = toArray(wrapper.childNodes)
     each wrappedNodes, (wrappedNode) ->
@@ -1247,7 +1227,7 @@ up.util = (($) ->
   offsetParent = ($element) ->
     $match = undefined
     while ($element = $element.parent()) && $element.length
-      position = $element.css('position')
+      position = readComputedStyle($element, 'position')
       if position == 'absolute' || position == 'relative' || $element.is('body')
         $match = $element
         break
@@ -1262,7 +1242,7 @@ up.util = (($) ->
   isFixed = (element) ->
     $element = $(element)
     loop
-      position = $element.css('position')
+      position = readComputedStyle($element, 'position')
       if position == 'fixed'
         return true
       else
@@ -1282,7 +1262,7 @@ up.util = (($) ->
     # scrollTop of the viewport.
     elementCoords = $element.position()
     futureParentCoords = $futureOffsetParent.offset()
-    $element.css
+    writeInlineStyle $element,
       position: 'absolute'
       left: elementCoords.left - futureParentCoords.left
       top: elementCoords.top - futureParentCoords.top + $viewport.scrollTop()
@@ -1503,12 +1483,76 @@ up.util = (($) ->
     else
       {}
 
+  CASE_CONVERSION_GROUP = /[^\-\_]+?(?=[A-Z\-\_]|$)/g
+
+  convertCase = (string, separator, fn) ->
+    parts = string.match(CASE_CONVERSION_GROUP)
+    parts = map parts, fn
+    parts.join(separator)
+
+  ###**
+  Returns a copy of the given string that is transformed to `kebab-case`.
+
+  @function up.util.kebabCase
+  @param {string} string
+  @return {string}
+  @internal
+  ###
+  kebabCase = (string) ->
+    convertCase string, '-', (part) -> part.toLowerCase()
+
+  ###**
+  Returns a copy of the given string that is transformed to `camelCase`.
+
+  @function up.util.camelCase
+  @param {string} string
+  @return {string}
+  @internal
+  ###
+  camelCase = (string) ->
+    convertCase string, '', (part, i) ->
+      if i == 0
+        part.toLowerCase()
+      else
+        part.charAt(0).toUpperCase() + part.substr(1).toLowerCase()
+
+  ###**
+  Returns a copy of the given object with all keys renamed
+  in `kebab-case`.
+
+  Does not change the given object.
+
+  @function up.util.kebabCaseKeys
+  @param {object} obj
+  @return {object}
+  @internal
+  ###
+  kebabCaseKeys = (obj) ->
+    copyWithRenamedKeys(obj, kebabCase)
+
+  ###**
+  Returns a copy of the given object with all keys renamed
+  in `camelCase`.
+
+  Does not change the given object.
+
+  @function up.util.camelCaseKeys
+  @param {object} obj
+  @return {object}
+  @internal
+  ###
+  camelCaseKeys = (obj) ->
+    copyWithRenamedKeys(obj, camelCase)
+
+  copyWithRenamedKeys = (obj, keyTransformer) ->
+    result = {}
+    for k, v of obj
+      k = keyTransformer(k)
+      result[k] = v
+    result
+
   opacity = (element) ->
-    rawOpacity = $(element).css('opacity')
-    if isGiven(rawOpacity)
-      parseFloat(rawOpacity)
-    else
-      undefined
+    readComputedStyleNumber(element, 'opacity')
 
   whenReady = memoize ->
     if $.isReady
@@ -1526,7 +1570,7 @@ up.util = (($) ->
   @internal
   ###
   isDetached = (element) ->
-    element = unJQuery(element)
+    element = getElement(element)
     # This is by far the fastest way to do this
     not $.contains(document.documentElement, element)
 
@@ -1669,9 +1713,129 @@ up.util = (($) ->
     $insertion.replaceWith($new)
     $old
 
-  fastHide = (element) ->
-    element = unJQuery(element)
-    element.style.display = 'none'
+  ###**
+  Hides the given element faster than `jQuery.fn.hide()`.
+
+  @function up.util.hide
+  @param {jQuery|Element} element
+  ###
+  hide = (element) ->
+    writeInlineStyle(element, display: 'none')
+
+  ###**
+  Gets the computed style(s) for the given element.
+
+  @function up.util.readComputedStyle
+  @param {jQuery|Element} element
+  @param {String|Array} propOrProps
+    One or more CSS property names in camelCase.
+  @return {string|object}
+  @internal
+  ###
+  readComputedStyle = (element, props) ->
+    element = getElement(element)
+    style = window.getComputedStyle(element)
+    extractFromStyleObject(style, props)
+
+  ###**
+  Gets a computed style value for the given element.
+  If a value is set, the value is parsed to a number before returning.
+
+  @function up.util.readComputedStyleNumber
+  @param {jQuery|Element} element
+  @param {String} prop
+    A CSS property name in camelCase.
+  @return {string|object}
+  @internal
+  ###
+  readComputedStyleNumber = (element, prop) ->
+    rawValue = readComputedStyle(element, prop)
+    if isGiven(rawValue)
+      parseFloat(rawValue)
+    else
+      undefined
+
+  ###**
+  Gets the given inline style(s) from the given element's `[style]` attribute.
+
+  @function up.util.readInlineStyle
+  @param {jQuery|Element} element
+  @param {String|Array} propOrProps
+    One or more CSS property names in camelCase.
+  @return {string|object}
+  @internal
+  ###
+  readInlineStyle = (element, props) ->
+    element = getElement(element)
+    style = element.style
+    extractFromStyleObject(style, props)
+
+  extractFromStyleObject = (style, props) ->
+    if isString(props)
+      style[props]
+    else # array
+      only style, props...
+
+  ###**
+  Merges the given inline style(s) into the given element's `[style]` attribute.
+
+  @function up.util.readInlineStyle
+  @param {jQuery|Element} element
+  @param {Object} props
+    One or more CSS properties with camelCase keys.
+  @return {string|object}
+  @internal
+  ###
+  writeInlineStyle = (element, props) ->
+    element = getElement(element)
+    style = element.style
+    for key, value of props
+      value = normalizeStyleValueForWrite(key, value)
+      style[key] = value
+
+  normalizeStyleValueForWrite = (key, value) ->
+    if isMissing(value)
+      value = ''
+    else if CSS_LENGTH_PROPS.has(key)
+      value = cssLength(value)
+    value
+
+  CSS_LENGTH_PROPS = arrayToSet [
+    'top', 'right', 'bottom', 'left',
+    'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+    'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
+    'width', 'height',
+    'maxWidth', 'maxHeight',
+    'minWidth', 'minHeight',
+  ]
+
+  ###*
+  Converts the given value to a CSS length value, adding a `px` unit if required.
+
+  @function up.util.cssLength
+  @internal
+  ###
+  cssLength = (obj) ->
+    if isNumber(obj) || (isString(obj) && /^\d+$/.test(obj))
+      obj.toString() + "px"
+    else
+      obj
+
+  ###*
+  Returns whether the given element has a CSS transition set.
+
+  @function up.util.hasTransition
+  @return {boolean}
+  @internal
+  ###
+  hasTransition = (element) ->
+    element = getElement(element)
+    prop = readComputedStyle(element, 'transitionProperty')
+    duration = readComputedStyleNumber(element,  'transitionDuration')
+    # The default transition for elements is actually "all 0s ease 0s"
+    # instead of "none", although that has the same effect as "none".
+    noTransition = (prop == 'none' || (prop == 'all' && duration == 0))
+    not noTransition
 
   ###**
   Flattens the given `array` a single level deep.
@@ -1837,13 +2001,12 @@ up.util = (($) ->
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   nullJQuery: nullJQuery
-  unJQuery: unJQuery
+  element: getElement
   setTimer: setTimer
   nextFrame: nextFrame
   measure: measure
-  temporaryCss: temporaryCss
+  writeTemporaryStyle: writeTemporaryStyle
   cssAnimate: cssAnimate
-  forceCompositing: forceCompositing
   forceRepaint: forceRepaint
   escapePressed: escapePressed
   copyAttributes: copyAttributes
@@ -1865,6 +2028,10 @@ up.util = (($) ->
   config: config
   openConfig: openConfig
   unwrapElement: unwrapElement
+  camelCase: camelCase
+  camelCaseKeys: camelCaseKeys
+  kebabCase: kebabCase
+  kebabCaseKeys: kebabCaseKeys
   error: fail
   pluckData: pluckData
   pluckKey: pluckKey
@@ -1894,7 +2061,13 @@ up.util = (($) ->
   isCrossDomain: isCrossDomain
   microtask: microtask
   isEqual: isEqual
-  fastHide: fastHide
+  hide: hide
+  cssLength: cssLength
+  readComputedStyle: readComputedStyle
+  readComputedStyleNumber: readComputedStyleNumber
+  readInlineStyle: readInlineStyle
+  writeInlineStyle: writeInlineStyle
+  hasTransition: hasTransition
 
 )(jQuery)
 

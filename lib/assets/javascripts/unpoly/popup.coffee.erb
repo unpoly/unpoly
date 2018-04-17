@@ -124,34 +124,35 @@ up.popup = (($) ->
     config.reset()
 
   align = ->
-    css = {}
+    style = {}
 
     popupBox = u.measure(state.$popup)
 
     if u.isFixed(state.$anchor)
       linkBox = state.$anchor.get(0).getBoundingClientRect()
-      css['position'] = 'fixed'
+      style.position = 'fixed'
     else
       linkBox = u.measure(state.$anchor)
 
     switch state.position
       when 'bottom-right' # anchored to bottom-right of link, opens towards bottom-left
-        css['top'] = linkBox.top + linkBox.height
-        css['left'] = linkBox.left + linkBox.width - popupBox.width
+        style.top = linkBox.top + linkBox.height
+        style.left = linkBox.left + linkBox.width - popupBox.width
       when 'bottom-left' # anchored to bottom-left of link, opens towards bottom-right
-        css['top'] = linkBox.top + linkBox.height
-        css['left'] = linkBox.left
+        style.top = linkBox.top + linkBox.height
+        style.left = linkBox.left
       when 'top-right' # anchored to top-right of link, opens to top-left
-        css['top'] = linkBox.top - popupBox.height
-        css['left'] = linkBox.left + linkBox.width - popupBox.width
+        style.top = linkBox.top - popupBox.height
+        style.left = linkBox.left + linkBox.width - popupBox.width
       when 'top-left' # anchored to top-left of link, opens to top-right
-        css['top'] = linkBox.top - popupBox.height
-        css['left'] = linkBox.left
+        style.top = linkBox.top - popupBox.height
+        style.left = linkBox.left
       else
         up.fail("Unknown position option '%s'", state.position)
 
     state.$popup.attr('up-position', state.position)
-    state.$popup.css(css)
+
+    u.writeInlineStyle(state.$popup, style)
 
   discardHistory = ->
     state.coveredTitle = null

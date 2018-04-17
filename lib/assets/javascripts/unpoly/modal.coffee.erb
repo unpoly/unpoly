@@ -245,10 +245,11 @@ up.modal = (($) ->
     $modal = $(templateHtml())
     $modal.attr('up-flavor', state.flavor)
     $modal.attr('up-position', state.position) if u.isPresent(state.position)
+
     $dialog = $modal.find('.up-modal-dialog')
-    $dialog.css('width', options.width) if u.isPresent(options.width)
-    $dialog.css('max-width', options.maxWidth) if u.isPresent(options.maxWidth)
-    $dialog.css('height', options.height) if u.isPresent(options.height)
+    dialogStyles = u.only(options, 'width', 'maxWidth', 'height')
+    u.writeInlineStyle($dialog, dialogStyles)
+
     $modal.find('.up-modal-close').remove() unless state.closable
     $content = $modal.find('.up-modal-content')
     # Create an empty element that will match the
@@ -272,18 +273,18 @@ up.modal = (($) ->
     if u.documentHasVerticalScrollbar()
       $body = $('body')
       scrollbarWidth = u.scrollbarWidth()
-      bodyRightPadding = parseFloat($body.css('padding-right'))
+      bodyRightPadding = u.readComputedStyleNumber($body, 'paddingRight')
       bodyRightShift = scrollbarWidth + bodyRightPadding
-      unshiftBody = u.temporaryCss($body,
-        'padding-right': "#{bodyRightShift}px",
-        'overflow-y': 'hidden'
+      unshiftBody = u.writeTemporaryStyle($body,
+        paddingRight: bodyRightShift
+        overflowY: 'hidden'
       )
       state.unshifters.push(unshiftBody)
       up.layout.anchoredRight().each ->
         $element = $(this)
-        elementRight = parseFloat($element.css('right'))
+        elementRight = u.readComputedStyleNumber($element, 'right')
         elementRightShift = scrollbarWidth + elementRight
-        unshifter = u.temporaryCss($element, 'right': elementRightShift)
+        unshifter = u.writeTemporaryStyle($element, right: elementRightShift)
         state.unshifters.push(unshifter)
 
 

@@ -16,7 +16,7 @@ describe 'up.popup', ->
                 Math.abs(popupDims.right - linkDims.right) < 1.0 && Math.abs(popupDims.top - linkDims.bottom) < 1.0
 
       beforeEach ->
-        @restoreBodyHeight = u.temporaryCss('body', 'min-height': '3000px')
+        @restoreBodyHeight = u.writeTemporaryStyle('body', minHeight: '3000px')
 
       afterEach ->
         @restoreBodyHeight()

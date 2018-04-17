@@ -135,6 +135,82 @@ describe 'up.util', ->
             expect(callback).toHaveBeenCalledWith('return value')
             done()
 
+    describe 'up.util.kebabCase', ->
+
+      it 'converts a string of multiple words from camel-case to kebap-case', ->
+        result = up.util.kebabCase('fooBarBaz')
+        expect(result).toEqual('foo-bar-baz')
+
+      it 'does not change a single word', ->
+        result = up.util.kebabCase('foo')
+        expect(result).toEqual('foo')
+
+      it 'downcases the first word when it starts with a capital letter', ->
+        result = up.util.kebabCase('FooBar')
+        expect(result).toEqual('foo-bar')
+
+      it 'does not change a string that is already in kebab-case', ->
+        result = up.util.kebabCase('foo-bar-baz')
+        expect(result).toEqual('foo-bar-baz')
+
+    describe 'up.util.camelCase', ->
+
+      it 'converts a string of multiple words from kebap-case to camel-case', ->
+        result = up.util.camelCase('foo-bar-baz')
+        expect(result).toEqual('fooBarBaz')
+
+      it 'does not change a single word', ->
+        result = up.util.camelCase('foo')
+        expect(result).toEqual('foo')
+
+      it 'downcases the first word when it starts with a capital letter', ->
+        result = up.util.camelCase('Foo-Bar')
+        expect(result).toEqual('fooBar')
+
+      it 'does not change a string that is already in camel-case', ->
+        result = up.util.camelCase('fooBarBaz')
+        expect(result).toEqual('fooBarBaz')
+
+    describe 'up.util.kebabCaseKeys', ->
+
+      it "converts the given object's keys from camel-case to kebab-case", ->
+        input =
+          fooBar: 'one'
+          barBaz: 'two'
+        result = up.util.kebabCaseKeys(input)
+        expect(result).toEqual
+          'foo-bar': 'one'
+          'bar-baz': 'two'
+
+      it "does not change an object whose keys are already kebab-case", ->
+        input =
+          'foo-bar': 'one'
+          'bar-baz': 'two'
+        result = up.util.kebabCaseKeys(input)
+        expect(result).toEqual
+          'foo-bar': 'one'
+          'bar-baz': 'two'
+
+    describe 'up.util.camelCaseKeys', ->
+
+      it "converts the given object's keys from kebab-case to camel-case", ->
+        input =
+          'foo-bar': 'one'
+          'bar-baz': 'two'
+        result = up.util.camelCaseKeys(input)
+        expect(result).toEqual
+          fooBar: 'one'
+          barBaz: 'two'
+
+      it "does not change an object whose keys are already camel-case", ->
+        input =
+          fooBar: 'one'
+          barBaz: 'two'
+        result = up.util.camelCaseKeys(input)
+        expect(result).toEqual
+          fooBar: 'one'
+          barBaz: 'two'
+
     describe 'up.util.DivertibleChain', ->
 
       it "instantiates a task queue whose (2..n)th tasks can be changed by calling '.asap'", (done) ->
@@ -350,6 +426,98 @@ describe 'up.util', ->
           bar: 'bar-value'
           baz: 'baz-value'
           bam: 'bam-value'
+
+      it 'does not add empty keys to the returned object if the given object does not have that key', ->
+        original =
+          foo: 'foo-value'
+        whitelisted = up.util.only(original, 'foo', 'bar')
+        expect(whitelisted).toHaveOwnProperty('foo')
+        expect(whitelisted).not.toHaveOwnProperty('bar')
+
+    describe 'up.util.readInlineStyle', ->
+      
+      describe 'with a string as second argument', ->
+
+        it 'returns a CSS value string from an inline [style] attribute', ->
+          $div = affix('div').attr('style', 'background-color: #ff0000')
+          style = up.util.readInlineStyle($div, 'backgroundColor')
+          # Browsers convert colors to rgb() values, even IE11
+          expect(style).toEqual('rgb(255, 0, 0)')
+
+        it 'returns a blank value if the element does not have the given property in the [style] attribute', ->
+          $div = affix('div').attr('style', 'background-color: red')
+          style = up.util.readInlineStyle($div, 'color')
+          expect(style).toBeBlank()
+
+        it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
+          $div = affix('div[class="red-background"]')
+          inlineStyle = up.util.readInlineStyle($div, 'backgroundColor')
+          computedStyle = up.util.readComputedStyle($div, 'backgroundColor')
+          expect(computedStyle).toEqual('rgb(255, 0, 0)')
+          expect(inlineStyle).toBeBlank()
+
+      describe 'with an array as second argument', ->
+
+        it 'returns an object with the given inline [style] properties', ->
+          $div = affix('div').attr('style', 'background-color: #ff0000; color: #0000ff')
+          style = up.util.readInlineStyle($div, ['backgroundColor', 'color'])
+          expect(style).toEqual
+            backgroundColor: 'rgb(255, 0, 0)'
+            color: 'rgb(0, 0, 255)'
+
+        it 'returns blank keys if the element does not have the given property in the [style] attribute', ->
+          $div = affix('div').attr('style', 'background-color: #ff0000')
+          style = up.util.readInlineStyle($div, ['backgroundColor', 'color'])
+          expect(style).toHaveOwnProperty('color')
+          expect(style.color).toBeBlank()
+
+        it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
+          $div = affix('div[class="red-background"]')
+          inlineStyleHash = up.util.readInlineStyle($div, ['backgroundColor'])
+          computedBackground = up.util.readComputedStyle($div, 'backgroundColor')
+          expect(computedBackground).toEqual('rgb(255, 0, 0)')
+          expect(inlineStyleHash).toHaveOwnProperty('backgroundColor')
+          expect(inlineStyleHash.backgroundColor).toBeBlank()
+
+    describe 'up.util.writeInlineStyle', ->
+
+      it "sets the given style properties as the given element's [style] attribute", ->
+        $div = affix('div')
+        up.util.writeInlineStyle($div, { color: 'red', backgroundColor: 'blue' })
+        style = $div.attr('style')
+        expect(style).toContain('color: red')
+        expect(style).toContain('background-color: blue')
+
+      it "merges the given style properties into the given element's existing [style] value", ->
+        $div = affix('div[style="color: red"]')
+        up.util.writeInlineStyle($div, { backgroundColor: 'blue' })
+        style = $div.attr('style')
+        expect(style).toContain('color: red')
+        expect(style).toContain('background-color: blue')
+
+      it "converts the values of known length properties to px values automatically", ->
+        $div = affix('div')
+        up.util.writeInlineStyle($div, { paddingTop: 100 })
+        style = $div.attr('style')
+        expect(style).toContain('padding-top: 100px')
+
+    describe 'up.util.writeTemporaryStyle', ->
+
+      it "sets the given inline styles and returns a function that will restore the previous inline styles", ->
+        $div = affix('div[style="color: red"]')
+        restore = up.util.writeTemporaryStyle($div, { color: 'blue' })
+        expect($div.attr('style')).toContain('color: blue')
+        expect($div.attr('style')).not.toContain('color: red')
+        restore()
+        expect($div.attr('style')).not.toContain('color: blue')
+        expect($div.attr('style')).toContain('color: red')
+
+      it "does not restore inherited styles", ->
+        $div = affix('div[class="red-background"]')
+        restore = up.util.writeTemporaryStyle($div, { backgroundColor: 'blue' })
+        expect($div.attr('style')).toContain('background-color: blue')
+        restore()
+        expect($div.attr('style')).not.toContain('background-color')
 
     describe 'up.util.except', ->
 

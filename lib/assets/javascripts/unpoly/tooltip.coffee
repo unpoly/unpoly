@@ -79,33 +79,33 @@ up.tooltip = (($) ->
     config.reset()
 
   align = ->
-    css = {}
+    style = {}
     tooltipBox = u.measure(state.$tooltip)
 
     if u.isFixed(state.$anchor)
       linkBox = state.$anchor.get(0).getBoundingClientRect()
-      css['position'] = 'fixed'
+      style.position = 'fixed'
     else
       linkBox = u.measure(state.$anchor)
 
     switch state.position
       when 'top'
-        css['top'] = linkBox.top - tooltipBox.height
-        css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
+        style.top = linkBox.top - tooltipBox.height
+        style.left = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
       when 'left'
-        css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
-        css['left'] = linkBox.left - tooltipBox.width
+        style.top = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
+        style.left = linkBox.left - tooltipBox.width
       when 'right'
-        css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
-        css['left'] = linkBox.left + linkBox.width
+        style.top = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
+        style.left = linkBox.left + linkBox.width
       when 'bottom'
-        css['top'] = linkBox.top + linkBox.height
-        css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
+        style.top = linkBox.top + linkBox.height
+        style.left = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
       else
         up.fail("Unknown position option '%s'", state.position)
 
     state.$tooltip.attr('up-position', state.position)
-    state.$tooltip.css(css)
+    u.writeInlineStyle(state.$tooltip, style)
 
   createElement = (options) ->
     $element = u.$createElementFromSelector('.up-tooltip')

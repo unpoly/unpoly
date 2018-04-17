@@ -77,7 +77,7 @@ describe 'up.motion', ->
 
           next =>
             expect($element.css('font-size')).toEqual('40px')
-            expect(parseFloat($element.css('opacity'))).toBeAround(0.5, 0.01) # Safari sometimes has rounding errors
+            expect(u.opacity($element, 'opacity')).toBeAround(0.5, 0.01) # Safari sometimes has rounding errors
 
         it 'cancels animations on children of the given element', asyncSpec (next) ->
           $parent = affix('.element')

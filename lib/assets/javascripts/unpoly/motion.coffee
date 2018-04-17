@@ -186,7 +186,7 @@ up.motion = (($) ->
     if u.isOptions(animation)
       # If we are given the final animation frame as an object of CSS properties,
       # the best we can do is to set the final frame without animation.
-      $element.css(animation)
+      u.writeInlineStyle($element, animation)
     # Signal that the animation is already done.
     Promise.resolve()
 
@@ -217,15 +217,13 @@ up.motion = (($) ->
   @internal
   ###
   animateWithCss = ($element, lastFrame, options) ->
+    lastFrameKebab = u.kebabCaseKeys(lastFrame)
+    lastFrameCamel = u.camelCaseKeys(lastFrame)
+    element = u.element($element)
+
     startCssTransition = ->
-      transitionProperties = Object.keys(lastFrame)
-      transition =
-        'transition-property': transitionProperties.join(', ')
-        'transition-duration': "#{options.duration}ms"
-        'transition-delay': "#{options.delay}ms"
-        'transition-timing-function': options.easing
-      oldTransition = $element.css(Object.keys(transition))
-  
+      hadTransitionBefore = u.hasTransition(element)
+
       deferred = u.newDeferred()
       # May not call this finish() since this would override the global finish()
       # function in this scope. We really need `let`, which CoffeeScript will never get.
@@ -233,14 +231,12 @@ up.motion = (($) ->
   
       onTransitionEnd = (event) ->
         # Check if the transitionend event was caused by our own transition,
-        # and not by some other transition that happens to live on the same element.
-        completedProperty = event.originalEvent.propertyName
-        fulfill() if u.contains(transitionProperties, completedProperty)
-  
+        # and not by some other transition that happens to affect this element.
+        fulfill() if event.target == element
+
       # Animating code is expected to listen to this event to enable external code
       # to fulfil the animation.
       onFinish = fulfill
-
       $element.on(motionTracker.finishEvent, onFinish)
   
       # Ideally, we want to fulfil when we receive the `transitionend` event
@@ -249,7 +245,7 @@ up.motion = (($) ->
       # The `transitionend` event might not fire reliably if other transitions
       # are interfering on the same element. This is why we register a fallback
       # timeout that forces the animation to fulfil a few ms later.
-      transitionTimingTolerance = 5
+      transitionTimingTolerance = 8
       cancelFallbackTimer = u.setTimer(options.duration + transitionTimingTolerance, fulfill)
 
       # All clean-up is handled in the following then() handler.
@@ -261,33 +257,26 @@ up.motion = (($) ->
         $element.off('transitionend', onTransitionEnd)
         clearTimeout(cancelFallbackTimer)
 
-        # Elements with compositing might look blurry, so undo that.
-        undoCompositing()
-  
         # To interrupt the running transition we *must* set it to 'none' exactly.
         # We cannot simply restore the old transition properties because browsers
         # would simply keep transitioning.
-        $element.css('transition': 'none')
+        u.writeInlineStyle($element, transition: 'none')
   
-        # Restoring a previous transition involves forcing a repaint, so we only do it if
-        # we know the element was transitioning before.
-        # Note that the default transition for elements is actually "all 0s ease 0s"
-        # instead of "none", although that has the same effect as "none".
-        hadTransitionBefore = !(oldTransition['transition-property'] == 'none' || (oldTransition['transition-property'] == 'all' && oldTransition['transition-duration'][0] == '0'))
+        # If there is no repaint between the "none" transition and restoring the previous
+        # transition, the browser will simply keep transitioning. I'm sorry.
         if hadTransitionBefore
-          # If there is no repaint between the "none" transition and restoring the previous
-          # transition, the browser will simply keep transitioning. I'm sorry.
           u.forceRepaint($element)
-          $element.css(oldTransition)
+          undoTransition()
 
-      # Push the element into its own compositing layer before we are going
-      # to massively change the element against background.
-      undoCompositing = u.forceCompositing($element)
-  
       # CSS will start animating when we set the `transition-*` properties and then change
       # the animating properties to the last frame.
-      $element.css(transition)
-      $element.css(lastFrame)
+      transitionCamel =
+        transitionProperty: Object.keys(lastFrameKebab).join(', ') # still kebab
+        transitionDuration: "#{options.duration}ms"
+        transitionDelay: "#{options.delay}ms"
+        transitionTimingFunction: options.easing
+      undoTransition = u.writeTemporaryStyle($element, transitionCamel)
+      u.writeInlineStyle($element, lastFrameCamel)
   
       # Return a promise that fulfills when either the animation ends
       # or someone finishes the animation.
@@ -336,7 +325,7 @@ up.motion = (($) ->
 
     # Right now $old and $new are visible siblings in the DOM.
     # Temporarily hide $new while we copy $old and take some measurements.
-    u.temporaryCss $new, display: 'none', ->
+    u.writeTemporaryStyle $new, display: 'none', ->
       oldCopy = prependCopy($old, $viewport)
       # Remember the previous scroll position in case we will reveal $new below.
       oldScrollTop = $viewport.scrollTop()
@@ -363,7 +352,7 @@ up.motion = (($) ->
       # Note that we must **not** use `visibility: hidden` to hide the new
       # element. This would delay browser painting until the element is
       # shown again, causing a flicker while the browser is painting.
-      restoreNewOpacity = u.temporaryCss($new, opacity: '0')
+      restoreNewOpacity = u.writeTemporaryStyle($new, opacity: 0)
 
       # Perform the transition on the ghosts.
       transitionDone = transitionFn(oldCopy.$ghost, newCopy.$ghost, options)
@@ -527,7 +516,7 @@ up.motion = (($) ->
   ###
   skipMorph = ($old, $new, options) ->
     # Simply hide the old element, which would be the side effect of withGhosts(...) below.
-    u.fastHide($old)
+    u.hide($old)
 
     # Don't animate the scrolling.
     # We just want to scroll $new into position before we start the enter animation.
@@ -545,10 +534,10 @@ up.motion = (($) ->
 
     $ghost = $element.clone()
     $ghost.find('script').remove()
-    $ghost.css
+    u.writeInlineStyle $ghost,
       # If the element had a layout context before, make sure the
       # ghost will have layout context as well (and vice versa).
-      position: if $element.css('position') == 'static' then 'static' else 'relative'
+      position: if u.readComputedStyle($element, 'position') == 'static' then 'static' else 'relative'
       top:    'auto'
       right:  'auto'
       bottom: 'auto'
@@ -561,15 +550,15 @@ up.motion = (($) ->
     # freely. If we would position the element directly (old implementation),
     # it would gain a layout context which cannot be crossed by margins.
     $bounds = $('<div class="up-bounds"></div>')
-    $bounds.css(position: 'absolute')
-    $bounds.css(elementDims)
+    u.writeInlineStyle($bounds, position: 'absolute')
+    u.writeInlineStyle($bounds, elementDims)
 
     top = elementDims.top
 
     moveTop = (diff) ->
       if diff != 0
         top += diff
-        $bounds.css(top: top)
+        u.writeInlineStyle($bounds, { top })
 
     $ghost.appendTo($bounds)
     $bounds.insertBefore($element)
@@ -675,12 +664,12 @@ up.motion = (($) ->
     !animationOrTransition || animationOrTransition == 'none' || (u.isOptions(animationOrTransition) && u.isBlank(animationOrTransition))
 
   registerAnimation('fade-in', ($ghost, options) ->
-    $ghost.css(opacity: 0)
+    u.writeInlineStyle($ghost, opacity: 0)
     animate($ghost, { opacity: 1 }, options)
   )
 
   registerAnimation('fade-out', ($ghost, options) ->
-    $ghost.css(opacity: 1)
+    u.writeInlineStyle($ghost, opacity: 1)
     animate($ghost, { opacity: 0 }, options)
   )
 
@@ -688,68 +677,68 @@ up.motion = (($) ->
     { transform: "translate(#{x}px, #{y}px)" }
 
   registerAnimation('move-to-top', ($ghost, options) ->
-    $ghost.css(translateCss(0, 0))
+    u.writeInlineStyle($ghost, translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = box.top + box.height
     animate($ghost, translateCss(0, -travelDistance), options)
   )
 
   registerAnimation('move-from-top', ($ghost, options) ->
-    $ghost.css(translateCss(0, 0))
+    u.writeInlineStyle($ghost, translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = box.top + box.height
-    $ghost.css(translateCss(0, -travelDistance))
+    u.writeInlineStyle($ghost, translateCss(0, -travelDistance))
     animate($ghost, translateCss(0, 0), options)
   )
 
   registerAnimation('move-to-bottom', ($ghost, options) ->
-    $ghost.css(translateCss(0, 0))
+    u.writeInlineStyle($ghost, translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = u.clientSize().height - box.top
     animate($ghost, translateCss(0, travelDistance), options)
   )
 
   registerAnimation('move-from-bottom', ($ghost, options) ->
-    $ghost.css(translateCss(0, 0))
+    u.writeInlineStyle($ghost, translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = u.clientSize().height - box.top
-    $ghost.css(translateCss(0, travelDistance))
+    u.writeInlineStyle($ghost, translateCss(0, travelDistance))
     animate($ghost, translateCss(0, 0), options)
   )
 
   registerAnimation('move-to-left', ($ghost, options) ->
-    $ghost.css(translateCss(0, 0))
+    u.writeInlineStyle($ghost, translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = box.left + box.width
     animate($ghost, translateCss(-travelDistance, 0), options)
   )
 
   registerAnimation('move-from-left', ($ghost, options) ->
-    $ghost.css(translateCss(0, 0))
+    u.writeInlineStyle($ghost, translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = box.left + box.width
-    $ghost.css(translateCss(-travelDistance, 0))
+    u.writeInlineStyle($ghost, translateCss(-travelDistance, 0))
     animate($ghost, translateCss(0, 0), options)
   )
 
   registerAnimation('move-to-right', ($ghost, options) ->
-    $ghost.css(translateCss(0, 0))
+    u.writeInlineStyle($ghost, translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = u.clientSize().width - box.left
     animate($ghost, translateCss(travelDistance, 0), options)
   )
 
   registerAnimation('move-from-right', ($ghost, options) ->
-    $ghost.css(translateCss(0, 0))
+    u.writeInlineStyle($ghost, translateCss(0, 0))
     box = u.measure($ghost)
     travelDistance = u.clientSize().width - box.left
-    $ghost.css(translateCss(travelDistance, 0))
+    u.writeInlineStyle($ghost, translateCss(travelDistance, 0))
     animate($ghost, translateCss(0, 0), options)
   )
 
   registerAnimation('roll-down', ($ghost, options) ->
     fullHeight = $ghost.height()
-    styleMemo = u.temporaryCss($ghost,
+    styleMemo = u.writeTemporaryStyle($ghost,
       height: '0px'
       overflow: 'hidden'
     )

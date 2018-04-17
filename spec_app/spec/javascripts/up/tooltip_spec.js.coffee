@@ -40,7 +40,7 @@ describe 'up.tooltip', ->
           )
 
         beforeEach ->
-          @restoreBodyHeight = u.temporaryCss('body', 'min-height': '3000px')
+          @restoreBodyHeight = u.writeTemporaryStyle('body', minHeight: '3000px')
 
         afterEach ->
           @restoreBodyHeight()

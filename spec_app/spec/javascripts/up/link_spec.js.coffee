@@ -525,7 +525,7 @@ describe 'up.link', ->
       buildEvent = ($element, attrs) ->
         event = Trigger.createMouseEvent('mousedown', attrs)
         event = $.event.fix(event) # convert native event to jQuery event
-        event.target = u.unJQuery($element)
+        event.target = u.element($element)
         event
 
       it "returns true when the given event's target is the given link itself", ->

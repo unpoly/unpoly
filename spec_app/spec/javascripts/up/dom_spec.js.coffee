@@ -1482,7 +1482,7 @@ describe 'up.dom', ->
 
         it 'morphs between the old and new element', asyncSpec (next) ->
           affix('.element').text('version 1')
-          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
+          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 400)
 
           next =>
             @$ghost1 = $('.element.up-ghost:contains("version 1")')
@@ -1493,7 +1493,7 @@ describe 'up.dom', ->
             expect(@$ghost2).toHaveLength(1)
             expect(u.opacity(@$ghost2)).toBeAround(0.0, 0.1)
 
-          next.after 190, =>
+          next.after 350, =>
             expect(u.opacity(@$ghost1)).toBeAround(0.0, 0.3)
             expect(u.opacity(@$ghost2)).toBeAround(1.0, 0.3)
 
