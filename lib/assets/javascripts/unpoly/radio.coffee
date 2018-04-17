@@ -39,7 +39,7 @@ up.radio = (($) ->
   @internal
   ###
   hungrySelector = ->
-    u.multiSelector(config.hungry)
+    config.hungry.join(',')
 
   ###**
   Elements with this attribute are [updated](/up.replace) whenever there is a

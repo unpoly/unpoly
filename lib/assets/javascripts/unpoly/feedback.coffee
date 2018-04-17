@@ -62,8 +62,8 @@ up.feedback = (($) ->
   CLASS_ACTIVE = 'up-active'
   SELECTOR_LINK = 'a, [up-href]'
 
-  navMultiSelector = ->
-    u.multiSelector(config.navs)
+  navSelector = ->
+    config.navs.join(',')
 
   normalizeUrl = (url) ->
     if u.isPresent(url)
@@ -112,12 +112,12 @@ up.feedback = (($) ->
       updateAllNavigationSections($('body'))
 
   updateAllNavigationSections = ($root) ->
-    $navs = navMultiSelector().selectInSubtree($root)
+    $navs = u.selectInSubtree($root, navSelector())
     $sections = u.selectInSubtree($navs, SELECTOR_LINK)
     updateCurrentClassForLinks($sections)
 
   updateNavigationSectionsInNewFragment = ($fragment) ->
-    if navMultiSelector().seekUp($fragment).length
+    if $fragment.closest(navSelector()).length
       # If the new fragment is an [up-nav], or if the new fragment is a child of an [up-nav],
       # all links in the new fragment are considered sections that we need to update.
       # Note that:

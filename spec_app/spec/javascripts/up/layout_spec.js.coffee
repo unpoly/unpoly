@@ -9,7 +9,6 @@ describe 'up.layout', ->
       beforeEach ->
         up.layout.config.snap = 0
         up.layout.config.substance = 99999
-        up.layout.config.viewports = [document]
 
       describe 'when the viewport is the document', ->
 
@@ -403,7 +402,7 @@ describe 'up.layout', ->
 
       it 'should have tests'
 
-    describe 'up.layout.viewportsOf', ->
+    describe 'up.layout.viewportOf', ->
 
       it 'seeks upwards from the given element', ->
         up.layout.config.viewports = ['.viewport1', '.viewport2']
@@ -417,18 +416,12 @@ describe 'up.layout', ->
         $viewport = affix('.viewport')
         expect(up.layout.viewportOf($viewport)).toEqual($viewport)
 
-      it 'finds the document if the viewport is the document', ->
+      it 'finds the document if no better viewport matches', ->
         # This actually tests that the hierarchy returned by `$.parent`
         # is $element => ... => $('body') => $('html') => $(document)
-        up.layout.config.viewports = [document]
+        up.layout.config.viewports = ['.other-viewport']
         $element = affix('div')
         expect(up.layout.viewportOf($element)).toEqual($(document))
-
-      it 'throws an error if no viewport could be found', ->
-        up.layout.config.viewports = ['.does-not-exist']
-        $element = affix('div')
-        lookup = -> up.layout.viewportOf($element)
-        expect(lookup).toThrowError(/Could not find viewport/i)
 
     describe 'up.layout.restoreScroll', ->
 

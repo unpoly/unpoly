@@ -93,7 +93,7 @@ class up.ExtractPlan
   addHungrySteps: =>
     hungrySteps = []
     if @hungry
-      $hungries = up.radio.hungrySelector().select()
+      $hungries = $(up.radio.hungrySelector())
       transition = u.option(up.radio.config.hungryTransition, @transition)
       for hungry in $hungries
         $hungry = $(hungry)

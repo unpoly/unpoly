@@ -57,7 +57,7 @@ up.layout = (($) ->
   ###
   config = u.config
     duration: 0
-    viewports: [document, '.up-modal-viewport', '[up-viewport]']
+    viewports: ['.up-modal-viewport', '[up-viewport]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
@@ -169,7 +169,8 @@ up.layout = (($) ->
   @internal
   ###
   anchoredRight = ->
-    u.multiSelector(config.anchoredRight).select()
+    selector = config.anchoredRight.join(',')
+    $(selector)
 
   ###**
   @function measureObstruction
@@ -313,22 +314,23 @@ up.layout = (($) ->
       Promise.resolve()
 
   viewportSelector = ->
-    u.multiSelector(config.viewports)
+    config.viewports.join(',')
 
   ###**
   Returns the viewport for the given element.
 
-  Throws an error if no viewport could be found.
+  Returns `$(document)` if no better viewpoint could be found.
 
   @function up.layout.viewportOf
   @param {string|Element|jQuery} selectorOrElement
+  @return {jQuery}
   @internal
   ###
   viewportOf = (selectorOrElement, options = {}) ->
     $element = $(selectorOrElement)
-    $viewport = viewportSelector().seekUp($element)
-    if $viewport.length == 0 && options.strict isnt false
-      up.fail("Could not find viewport for %o", $element)
+    $viewport = $element.closest(viewportSelector())
+    if $viewport.length == 0
+      $viewport = $(document)
     $viewport
 
   ###**
@@ -342,7 +344,7 @@ up.layout = (($) ->
   ###
   viewportsWithin = (selectorOrElement) ->
     $element = $(selectorOrElement)
-    viewportSelector().selectInSubtree($element)
+    u.selectInSubtree($element, viewportSelector())
 
   ###**
   Returns a jQuery collection of all the viewports on the screen.
@@ -351,7 +353,7 @@ up.layout = (($) ->
   @internal
   ###
   viewports = ->
-    viewportSelector().select()
+    $(document).add(viewportSelector())
 
   scrollTopKey = (viewport) ->
     $viewport = $(viewport)

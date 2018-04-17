@@ -285,7 +285,7 @@ up.link = (($) ->
   shouldProcessEvent = (event, $link) ->
     $target = $(event.target)
     $targetedChildLink = $target.closest('a, [up-href]').not($link)
-    $targetedInput = up.form.fieldSelector().seekUp($target)
+    $targetedInput = $target.closest(up.form.fieldSelector())
     $targetedChildLink.length == 0 && $targetedInput.length == 0 && u.isUnmodifiedMouseEvent(event)
 
   ###**

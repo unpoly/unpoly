@@ -1189,63 +1189,6 @@ up.util = (($) ->
       element
 
   ###**
-  @function up.util.multiSelector
-  @internal
-  ###
-  multiSelector = (parts) ->
-
-    obj = {}
-    selectors = []
-    elements = []
-
-    for part in parts
-      if isString(part)
-        selectors.push(part)
-      else
-        elements.push(part)
-
-    obj.parsed = elements
-
-    if selectors.length
-      # Although other methods would work with an array of
-      # selectors, we combine them to a single separator for
-      # performance reasons.
-      combinedSelector = selectors.join(', ')
-      obj.parsed.push(combinedSelector)
-
-    obj.select = ->
-      obj.find(undefined)
-
-    obj.find = ($root) ->
-      $result = nullJQuery()
-      for selector in obj.parsed
-        $matches = if $root then $root.find(selector) else $(selector)
-        $result = $result.add($matches)
-      $result
-
-    obj.selectInSubtree = ($start) ->
-      $matches = obj.find($start)
-      $matches = $matches.add($start) if obj.doesMatch($start)
-      $matches
-
-    obj.doesMatch = (element) ->
-      $element = $(element)
-      any obj.parsed, (selector) -> $element.is(selector)
-
-    obj.seekUp = (start) ->
-      $start = $(start)
-      $element = $start
-      $result = undefined
-      while $element.length
-        if obj.doesMatch($element)
-          $result = $element
-          break
-        $element = $element.parent()
-      $result || nullJQuery()
-
-    obj
-
-  ###**
   If the given `value` is a function, calls the function with the given `args`.
   Otherwise it just returns `value`.
 
@@ -1922,7 +1865,6 @@ up.util = (($) ->
   config: config
   openConfig: openConfig
   unwrapElement: unwrapElement
-  multiSelector: multiSelector
   error: fail
   pluckData: pluckData
   pluckKey: pluckKey

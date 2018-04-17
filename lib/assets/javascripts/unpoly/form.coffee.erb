@@ -45,7 +45,7 @@ up.form = (($) ->
   @internal
   ###
   fieldSelector = ->
-    u.multiSelector(config.fields)
+    config.fields.join(',')
 
   ###**
   Submits a form via AJAX and updates a page fragment with the response.
@@ -283,7 +283,7 @@ up.form = (($) ->
     delay = u.option(u.presentAttr($element, 'up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
 
-    $fields = fieldSelector().selectInSubtree($element)
+    $fields = u.selectInSubtree($element, fieldSelector())
 
     destructors = u.map $fields, (field) ->
       observeField($(field), delay, callback)
