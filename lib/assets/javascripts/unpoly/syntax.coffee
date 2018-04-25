@@ -379,6 +379,12 @@ up.syntax = (($) ->
     prepareClean($fragment)()
 
   ###**
+  Returns a function that will call destructors in the given subtree.
+
+  This is useful when you plan to detach the element from the DOM before
+  destruction, since jQuery removes data properties on detachment, and we use
+  data properties to store destructors,
+
   @function up.syntax.prepareClean
   @param {jQuery} $fragment
   @return {Function}

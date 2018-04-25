@@ -42,9 +42,10 @@ up.dom = (($) ->
     config.reset()
 
   setSource = (element, sourceUrl) ->
-    $element = $(element)
-    sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
-    $element.attr("up-source", sourceUrl)
+    unless sourceUrl is false
+      $element = $(element)
+      sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
+      $element.attr("up-source", sourceUrl)
 
   ###**
   Returns the URL the given element was retrieved from.
@@ -474,8 +475,13 @@ up.dom = (($) ->
   swapElements = ($old, $new, pseudoClass, transition, options) ->
     transition ||= 'none'
 
+    # When the server responds with an error, or when the request method is not
+    # reloadable (not GET), we keep the same source as before.
     if options.source == 'keep'
       options = u.merge(options, source: source($old))
+
+    # Remember where the element came from in case someone needs to up.reload($new) later.
+    setSource($new, options.source)
 
     # Ensure that all transitions and animations have completed.
     up.motion.finish($old)
@@ -507,11 +513,13 @@ up.dom = (($) ->
       # Remove the wrapper now that is has served it purpose
       promise = promise.then -> u.unwrapElement($wrapper)
 
+      return promise
+
     else if keepPlan = findKeepPlan($old, $new, options)
       # Since we're keeping the element that was requested to be swapped,
-      # there is nothing left to do here.
+      # there is nothing left to do here, except notify event listeners.
       emitFragmentKept(keepPlan)
-      promise = Promise.resolve()
+      return Promise.resolve()
 
     else
       # This needs to happen before prepareClean() below.
@@ -535,10 +543,6 @@ up.dom = (($) ->
           # this will make the browser scroll to the bottom of the new element.
           $new.insertBefore($old)
 
-        # Remember where the element came from so we can
-        # offer reload functionality.
-        setSource($new, options.source) unless options.source is false
-
         autofocus($new)
 
         # The fragment should be compiled before animating,
@@ -550,9 +554,7 @@ up.dom = (($) ->
 
       # Wrap the replacement as a destroy animation, so $old will
       # get marked as .up-destroying right away.
-      promise = destroy($old, { clean, beforeWipe: replacement, log: false })
-
-    promise
+      return destroy($old, { clean, beforeWipe: replacement, log: false })
 
   shouldSwapElementsDirectly = ($old, $new, transition, options) ->
     $both = $old.add($new)
@@ -564,6 +566,9 @@ up.dom = (($) ->
     # but that's probably bad Karma.
     $old.replaceWith($new)
 
+  # This will find all [up-keep] descendants in $old an, overwrite their partner
+  # element in $new and leave a visually identical clone in $old for a later transition.
+  # Returns an array of keepPlans.
   transferKeepableElements = ($old, $new, options) ->
     keepPlans = []
     if options.keep
