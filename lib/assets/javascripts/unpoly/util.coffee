@@ -348,7 +348,7 @@ up.util = (($) ->
   @stable
   ###
   isMissing = (object) ->
-    isUndefined(object) || isNull(object) # || isNaN(object)
+    isUndefined(object) || isNull(object)
 
   ###**
   Returns whether the given argument is neither `undefined` nor `null`.
@@ -387,9 +387,10 @@ up.util = (($) ->
   @stable
   ###
   isBlank = (object) ->
-    isMissing(object) ||                  # null or undefined
-    (isObject(object) && Object.keys(object).length == 0) ||
-    (object.length == 0)                  # string, Array, jQuery
+    return true if isMissing(object)
+    return false if isFunction(object)
+    return (isObject(object) && Object.keys(object).length == 0) || # object
+      (object.length == 0) # string, Array, jQuery
 
   ###**
   Returns the given argument if the argument is [present](/up.util.isPresent),
@@ -613,10 +614,9 @@ up.util = (($) ->
     if defaults
       for key, defaultValue of defaults
         value = merged[key]
-        if !isGiven(value)
-          merged[key] = defaultValue
-        else if isObject(defaultValue) && isObject(value)
-          merged[key] = options(value, defaultValue)
+        if isMissing(value)
+          value = defaultValue
+        merged[key] = value
     merged
 
   ###**
@@ -803,6 +803,24 @@ up.util = (($) ->
   intersect = (array1, array2) ->
     select array1, (element) ->
       contains(array2, element)
+
+  addClass = (element, klassOrKlasses) ->
+    changeClassList(element, klassOrKlasses, 'add')
+
+  removeClass = (element, klassOrKlasses) ->
+    changeClassList(element, klassOrKlasses, 'remove')
+
+  changeClassList = (element, klassOrKlasses, fnName) ->
+    classList = getElement(element).classList
+    if isArray(klassOrKlasses)
+      each klassOrKlasses, (klass) ->
+        classList[fnName](klass)
+    else
+      classList[fnName](klassOrKlasses)
+
+  addTemporaryClass = (element, klassOrKlasses) ->
+    addClass(element, klassOrKlasses)
+    -> removeClass(element, klassOrKlasses)
 
   ###**
   Returns the first [present](/up.util.isPresent) element attribute
@@ -2005,6 +2023,9 @@ up.util = (($) ->
   setTimer: setTimer
   nextFrame: nextFrame
   measure: measure
+  addClass: addClass
+  addTemporaryClass: addTemporaryClass
+  removeClass: removeClass
   writeTemporaryStyle: writeTemporaryStyle
   cssAnimate: cssAnimate
   forceRepaint: forceRepaint

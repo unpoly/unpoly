@@ -11,11 +11,11 @@ describe 'up.motion', ->
         up.animate($element, 'fade-in', duration: 200, easing: 'linear')
 
         u.setTimer 5, ->
-          expect(u.opacity($element)).toBeAround(0.0, 0.25)
+          expect($element).toHaveOpacity(0.0, 0.25)
         u.setTimer 100, ->
-          expect(u.opacity($element)).toBeAround(0.5, 0.25)
+          expect($element).toHaveOpacity(0.5, 0.25)
         u.setTimer 200, ->
-          expect(u.opacity($element)).toBeAround(1.0, 0.25)
+          expect($element).toHaveOpacity(1.0, 0.25)
           done()
 
       it 'returns a promise that is fulfilled when the animation has completed', (done) ->
@@ -103,7 +103,7 @@ describe 'up.motion', ->
             expect(Number($element1.css('opacity'))).toEqual(1)
             expect(Number($element2.css('opacity'))).toBeAround(0, 0.1)
 
-        it 'restores existing transitions on the element', asyncSpec (next) ->
+        it 'restores CSS transitions from before the Unpoly transition', asyncSpec (next) ->
           $element = affix('.element').text('content')
           $element.css('transition': 'font-size 3s ease')
           oldTransitionProperty = $element.css('transition-property')
@@ -121,38 +121,38 @@ describe 'up.motion', ->
             expect(currentTransitionProperty).toContain('font-size')
             expect(currentTransitionProperty).not.toContain('opacity')
 
-        it 'cancels an existing transition on the element by instantly jumping to the last frame', asyncSpec (next) ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content')
 
-          up.morph($old, $new, 'cross-fade', duration: 2000)
+        it 'cancels an existing transition on the old element by instantly jumping to the last frame', asyncSpec (next) ->
+          $v1 = affix('.element').text('v1')
+          $v2 = affix('.element').text('v2')
 
-          next =>
-            expect($('.up-ghost').length).toBe(2)
-
-          next.await =>
-            up.motion.finish($old)
-
-          next.after 100, =>
-            expect($('.up-ghost').length).toBe(0)
-            expect($old.css('display')).toEqual('none')
-            expect($new.css('display')).toEqual('block')
-
-        it 'can be called on either element involved in a transition', asyncSpec (next) ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content')
-
-          up.morph($old, $new, 'cross-fade', duration: 2000)
+          up.morph($v1, $v2, 'cross-fade', duration: 200)
 
           next =>
-            expect($('.up-ghost').length).toBe(2)
+            expect($v1).toHaveOpacity(1.0, 0.2)
+            expect($v2).toHaveOpacity(0.0, 0.2)
 
-            up.motion.finish($new)
+            up.motion.finish($v1)
 
           next =>
-            expect($('.up-ghost').length).toBe(0)
-            expect($old.css('display')).toEqual('none')
-            expect($new.css('display')).toEqual('block')
+            expect($v1).toBeDetached()
+            expect($v2).toHaveOpacity(1.0, 0.2)
+
+        it 'cancels an existing transition on the new element by instantly jumping to the last frame', asyncSpec (next) ->
+          $v1 = affix('.element').text('v1')
+          $v2 = affix('.element').text('v2')
+
+          up.morph($v1, $v2, 'cross-fade', duration: 200)
+
+          next =>
+            expect($v1).toHaveOpacity(1.0, 0.2)
+            expect($v2).toHaveOpacity(0.0, 0.2)
+
+            up.motion.finish($v2)
+
+          next =>
+            expect($v1).toBeDetached()
+            expect($v2).toHaveOpacity(1.0, 0.2)
 
 
         it 'cancels transitions on children of the given element', asyncSpec (next) ->
@@ -163,14 +163,29 @@ describe 'up.motion', ->
           up.morph($old, $new, 'cross-fade', duration: 2000)
 
           next =>
-            expect($('.up-ghost').length).toBe(2)
+            expect($old).toHaveOpacity(1.0)
+            expect($new).toHaveOpacity(0.0)
 
             up.motion.finish($parent)
 
           next =>
-            expect($('.up-ghost').length).toBe(0)
-            expect($old.css('display')).toEqual('none')
-            expect($new.css('display')).toEqual('block')
+            expect($old).toBeDetached()
+            expect($new).toHaveOpacity(1.0)
+
+
+        it 'does not leave .up-bounds elements in the DOM', asyncSpec (next) ->
+          $old = affix('.old').text('old content')
+          $new = affix('.new').text('new content')
+
+          up.morph($old, $new, 'cross-fade', duration: 2000)
+
+          next =>
+            up.motion.finish($old)
+
+          next =>
+            expect($old).toBeDetached()
+            expect($('.up-bounds').length).toBe(0)
+
 
       describe 'when called without arguments', ->
 
@@ -195,120 +210,110 @@ describe 'up.motion', ->
 
     describe 'up.morph', ->
 
-      it 'transitions between two element by animating two copies while keeping the originals in the background', asyncSpec (next) ->
+      it 'transitions between two element by absolutely positioning one element above the other', asyncSpec (next) ->
+        $old = affix('.old').text('old content').css(width: '200px', width: '200px')
+        $new = affix('.new').text('new content').css(width: '200px', width: '200px').detach()
 
-        $old = affix('.old').text('old content').css(
-          position: 'absolute'
-          top:      '10px'
-          left:     '11px',
-          width:    '12px',
-          height:   '13px'
-        )
-        $new = affix('.new').text('new content').css(
-          position: 'absolute'
-          top:      '20px'
-          left:     '21px',
-          width:    '22px',
-          height:   '23px'
-        )
+        oldDims = u.measure($old)
+
         up.morph($old, $new, 'cross-fade', duration: 200, easing: 'linear')
 
         next =>
-          # The actual animation will be performed on Ghosts since
-          # two element usually cannot exist in the DOM at the same time
-          # without undesired visual effects
-          @$oldGhost = $('.old.up-ghost')
-          @$newGhost = $('.new.up-ghost')
-          expect(@$oldGhost).toExist()
-          expect(@$newGhost).toExist()
+          expect(u.measure($old)).toEqual(oldDims)
+          expect(u.measure($new)).toEqual(oldDims)
 
-          $oldBounds = @$oldGhost.parent('.up-bounds')
-          $newBounds = @$newGhost.parent('.up-bounds')
-          expect($oldBounds).toExist()
-          expect($newBounds).toExist()
+          expect(u.opacity($old)).toBeAround(1.0, 0.25)
+          expect(u.opacity($new)).toBeAround(0.0, 0.25)
 
-          # Ghosts should be inserted before (not after) the element
-          # or the browser scroll position will be too low after the
-          # transition ends.
-          expect(@$oldGhost.parent().next()).toEqual($old)
-          expect(@$newGhost.parent().next()).toEqual($new)
+        next.after 100, =>
+          expect(u.opacity($old)).toBeAround(0.5, 0.25)
+          expect(u.opacity($new)).toBeAround(0.5, 0.25)
 
-          # The old element is removed from the layout flow.
-          # It will be removed from the DOM after the animation has ended.
-          expect($old.css('display')).toEqual('none')
+        next.after 150, =>
+          expect(u.opacity($new)).toBeAround(1.0, 0.25)
+          expect($old).toBeDetached()
 
-          # The new element is invisible due to an opacity of zero,
-          # but takes up the space in the layout flow.
-          expect($new.css(['display', 'opacity'])).toEqual(
-            display: 'block',
-            opacity: '0'
-          )
+      it 'does not change the position of sibling elements (as long as the old and new elements are of equal size)', asyncSpec (next) ->
+        $container = affix('.container')
 
-          # We **must not** use `visibility: hidden` to hide the new
-          # element. This would delay browser painting until the element is
-          # shown again, causing a flicker while the browser is painting.
-          expect($new.css('visibility')).not.toEqual('hidden')
+        $before = $container.affix('.before').css(margin: '20px')
+        $old = $container.affix('.old').text('old content').css(width: '200px', width: '200px', margin: '20px')
+        $new = $container.affix('.new').text('new content').css(width: '200px', width: '200px', margin: '20px').detach()
+        $after = $container.affix('.before').css(margin: '20px')
 
-          # Ghosts will hover over $old and $new using absolute positioning,
-          # matching the coordinates of the original elements.
-          expect($oldBounds.css(['position', 'top', 'left', 'width', 'height'])).toEqual(
-            position: 'absolute'
-            top:      '10px'
-            left:     '11px',
-            width:    '12px',
-            height:   '13px'
-          )
-          expect($newBounds.css(['position', 'top', 'left', 'width', 'height'])).toEqual(
-            position: 'absolute'
-            top:      '20px'
-            left:     '21px',
-            width:    '22px',
-            height:   '23px'
-          )
+        beforeDims = u.measure($before)
+        afterDims = u.measure($after)
 
-          expect(u.opacity(@$newGhost)).toBeAround(0.0, 0.25)
-          expect(u.opacity(@$oldGhost)).toBeAround(1.0, 0.25)
-
-        next.after 80, =>
-          expect(u.opacity(@$newGhost)).toBeAround(0.4, 0.25)
-          expect(u.opacity(@$oldGhost)).toBeAround(0.6, 0.25)
-
-        next.after 60, =>
-          expect(u.opacity(@$newGhost)).toBeAround(0.7, 0.25)
-          expect(u.opacity(@$oldGhost)).toBeAround(0.3, 0.25)
-
-        next.after 110, =>
-          # Once our two ghosts have rendered their visual effect,
-          # we remove them from the DOM.
-          expect(@$newGhost).not.toBeInDOM()
-          expect(@$oldGhost).not.toBeInDOM()
-
-          # The old element is still in the DOM, but hidden.
-          # Morphing does *not* remove the target element.
-          expect($old.css('display')).toEqual('none')
-          expect($new.css(['display', 'visibility'])).toEqual(
-            display: 'block',
-            visibility: 'visible'
-          )
-
-      it 'cancels an existing transition on the element by instantly jumping to the last frame', asyncSpec (next) ->
-        $old = affix('.old').text('old content')
-        $new = affix('.new').text('new content')
-
-        up.morph($old, $new, 'cross-fade', duration: 200)
+        up.morph($old, $new, 'cross-fade', duration: 30, easing: 'linear')
 
         next =>
-          @$ghost1 = $('.old.up-ghost')
-          expect(@$ghost1).toHaveLength(1)
+          expect(u.measure($before)).toEqual(beforeDims)
+          expect(u.measure($after)).toEqual(afterDims)
 
-          up.morph($old, $new, 'cross-fade', duration: 200)
+        next.after 50, =>
+          expect(u.measure($before)).toEqual(beforeDims)
+          expect(u.measure($after)).toEqual(afterDims)
+
+      it 'transitions between two elements that are already positioned absolutely', asyncSpec (next) ->
+        elementStyles =
+          position: 'absolute'
+          left: '30px'
+          top: '30px'
+          width: '200px'
+          width: '200px'
+        $old = affix('.old').text('old content').css(elementStyles)
+        $new = affix('.new').text('new content').css(elementStyles).detach()
+
+        oldDims = u.measure($old)
+
+        up.morph($old, $new, 'cross-fade', duration: 30, easing: 'linear')
 
         next =>
-          @$ghost2 = $('.old.up-ghost')
-          # Check that we didn't create additional ghosts
-          expect(@$ghost2).toHaveLength(1)
-          # Check that it's a different ghosts
-          expect(@$ghost2).not.toEqual(@$ghost1)
+          expect(u.measure($old)).toEqual(oldDims)
+          expect(u.measure($new)).toEqual(oldDims)
+
+        next.after 50, =>
+          expect($old).toBeDetached()
+          expect(u.measure($new)).toEqual(oldDims)
+
+      it 'cancels an existing transition on the new element by instantly jumping to the last frame', asyncSpec (next) ->
+        $v1 = affix('.element').text('v1')
+        $v2 = affix('.element').text('v2')
+        $v3 = affix('.element').text('v3')
+
+        up.morph($v1, $v2, 'cross-fade', duration: 200)
+
+        next =>
+          expect($v1).toHaveOpacity(1.0, 0.2)
+          expect($v2).toHaveOpacity(0.0, 0.2)
+
+          up.morph($v2, $v3, 'cross-fade', duration: 200)
+
+        next =>
+          expect($v1).toBeDetached()
+          expect($v2).toHaveOpacity(1.0, 0.2)
+          expect($v3).toHaveOpacity(0.0, 0.2)
+
+      it 'detaches the old element in the DOM', (done) ->
+        $v1 = affix('.element').text('v1')
+        $v2 = affix('.element').text('v2')
+
+        morphDone = up.morph($v1, $v2, 'cross-fade', duration: 5)
+
+        morphDone.then ->
+          expect($v1).toBeDetached()
+          expect($v2).toBeAttached()
+          done()
+
+      it 'does not leave .up-bounds elements in the DOM', (done) ->
+        $v1 = affix('.element').text('v1')
+        $v2 = affix('.element').text('v2')
+
+        morphDone = up.morph($v1, $v2, 'cross-fade', duration: 5)
+
+        morphDone.then ->
+          expect('.up-bounds').not.toExist()
+          done()
 
       describe 'with { reveal: true } option', ->
 
@@ -325,14 +330,11 @@ describe 'up.motion', ->
 
           expect($container.scrollTop()).toEqual(300)
 
-          $new = affix('.new').insertBefore($old).css(height: '600px')
+          $new = affix('.new').css(height: '600px').detach()
 
           up.morph($old, $new, 'cross-fade', duration: 50, reveal: true)
 
           next =>
-            $oldGhost = $('.old.up-ghost')
-            $newGhost = $('.new.up-ghost')
-
             # Container is scrolled up due to { reveal: true } option.
             # Since $old and $new are sitting in the same viewport with a
             # single shared scrollbar, this will make the ghost for $old jump.
@@ -340,41 +342,41 @@ describe 'up.motion', ->
 
             # See that the ghost for $new is aligned with the top edge
             # of the viewport.
-            expect($newGhost.offset().top).toEqual(0)
+            expect($new.offset().top).toEqual(0)
 
-            # The ghost for $old is shifted upwards to make it looks like it
+            # The absolitized $old is shifted upwards to make it looks like it
             # was at the scroll position before we revealed $new.
-            expect($oldGhost.offset().top).toEqual(-300)
+            expect($old.offset().top).toEqual(-300)
 
       describe 'with animations disabled globally', ->
 
         beforeEach ->
           up.motion.config.enabled = false
 
-        it "doesn't animate and hides the old element instead", asyncSpec (next) ->
+        it "doesn't animate and detaches the old element instead", asyncSpec (next) ->
           $old = affix('.old').text('old content')
           $new = affix('.new').text('new content')
           up.morph($old, $new, 'cross-fade', duration: 1000)
 
           next =>
-            expect($old).toBeHidden()
-            expect($new).toBeVisible()
-            expect($new.css('opacity')).toEqual('1')
+            expect($old).toBeDetached()
+            expect($new).toBeAttached()
+            expect($new).toHaveOpacity(1.0)
 
 
       [false, null, undefined, 'none', 'none/none', '', [], [undefined, null], ['none', 'none'], ['none', {}]].forEach (noneTransition) ->
 
-        describe "when called with a `#{noneTransition}` transition", ->
+        describe "when called with a `#{JSON.stringify(noneTransition)}` transition", ->
 
-          it "doesn't animate and hides the old element instead", asyncSpec (next) ->
+          it "doesn't animate and detaches the old element instead", asyncSpec (next) ->
             $old = affix('.old').text('old content')
             $new = affix('.new').text('new content')
             up.morph($old, $new, noneTransition, duration: 1000)
 
             next =>
-              expect($old).toBeHidden()
-              expect($new).toBeVisible()
-              expect($new.css('opacity')).toEqual('1')
+              expect($old).toBeDetached()
+              expect($new).toBeAttached()
+              expect($new).toHaveOpacity(1.0)
 
 
     describe 'up.transition', ->
@@ -384,78 +386,3 @@ describe 'up.motion', ->
     describe 'up.animation', ->
 
       it 'should have tests'
-      
-    describe 'up.motion.prependCopy', ->
-
-      afterEach ->
-        $('.up-bounds, .up-ghost, .fixture').remove()
-
-      it 'clones the given element into a .up-ghost-bounds container and inserts it as a sibling before the element', ->
-        $element = affix('.element').text('element text')
-        up.motion.prependCopy($element)
-        $bounds = $element.prev()
-        expect($bounds).toExist()
-        expect($bounds).toHaveClass('up-bounds')
-        $ghost = $bounds.children(':first')# $ghost.find('.element')
-        expect($ghost).toExist()
-        expect($ghost).toHaveClass('element')
-        expect($ghost).toHaveText('element text')
-
-      it 'removes <script> tags from the cloned element', ->
-        $element = affix('.element')
-        $('<script></script>').appendTo($element)
-        up.motion.prependCopy($element)
-        $ghost = $('.up-ghost')
-        expect($ghost.find('script')).not.toExist()
-
-      it 'absolutely positions the ghost over the given element', ->
-        $element = affix('.element')
-        up.motion.prependCopy($element)
-        $ghost = $('.up-ghost')
-        expect($ghost.offset()).toEqual($element.offset())
-        expect($ghost.width()).toEqual($element.width())
-        expect($ghost.height()).toEqual($element.height())
-
-      it 'accurately positions the ghost over an element with margins', ->
-        $element = affix('.element').css(margin: '40px')
-        up.motion.prependCopy($element)
-        $ghost = $('.up-ghost')
-        expect($ghost.offset()).toEqual($element.offset())
-
-      it "doesn't change the position of a child whose margins no longer collapse", ->
-        $element = affix('.element')
-        $child = $('<div class="child"></div>').css(margin: '40px').appendTo($element)
-        up.motion.prependCopy($element)
-        $clonedChild = $('.up-ghost .child')
-        expect($clonedChild.offset().top).toBeAround($child.offset().top, 0.5)
-        expect($clonedChild.offset().left).toBeAround($child.offset().left, 0.5)
-
-      it 'correctly positions the ghost over an element within a scrolled body', ->
-        $body = $('body')
-        $element1 = $('<div class="fixture"></div>').css(height: '75px').prependTo($body)
-        $element2 = $('<div class="fixture"></div>').css(height: '100px').insertAfter($element1)
-        $body.scrollTop(17)
-        { $bounds, $ghost } = up.motion.prependCopy($element2)
-        expect($bounds.css('position')).toBe('absolute')
-        expect($bounds.css('top')).toEqual('75px')
-        expect($ghost.css('position')).toBe('static')
-
-      it 'correctly positions the ghost over an element within a viewport with overflow-y: scroll'
-
-      it 'converts fixed elements within the copies to absolutely positioning', ->
-        $element = affix('.element').css
-          position: 'absolute'
-          top: '50px'
-          left: '50px'
-        $fixedChild = $('<div class="fixed-child" up-fixed></div>').css
-          position: 'fixed'
-          left: '77px'
-          top: '77px'
-        $fixedChild.appendTo($element)
-        up.motion.prependCopy($element, $('body'))
-        $fixedChildGhost = $('.up-ghost .fixed-child')
-        expect($fixedChildGhost.css(['position', 'left', 'top'])).toEqual
-          position: 'absolute',
-          left: '27px',
-          top: '27px'
-

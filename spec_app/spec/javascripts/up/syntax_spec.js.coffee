@@ -13,7 +13,7 @@ describe 'up.syntax', ->
         up.hello(affix('.container .child'))
    
         expect(observeClass).not.toHaveBeenCalledWith('container')
-        expect(observeClass).toHaveBeenCalledWith('child')           
+        expect(observeClass).toHaveBeenCalledWith('child')
 
       describe 'destructors', ->
 

@@ -503,6 +503,56 @@ up.layout = (($) ->
     selector
 
   ###**
+  @internal
+  ###
+  absolutize = ($element, options) ->
+    options = u.options(options, afterMeasure: u.noop)
+    $viewport = up.layout.viewportOf($element)
+    originalDims = u.measure($element, relative: true, inner: true)
+    originalOffset = $element.offset()
+    options.afterMeasure()
+
+    u.writeInlineStyle $element,
+      # If the element had a layout context before, make sure the
+      # ghost will have layout context as well (and vice versa).
+      position: if u.readComputedStyle($element, 'position') == 'static' then 'static' else 'relative'
+      top:    'auto'
+      right:  'auto'
+      bottom: 'auto'
+      left:   'auto'
+      width:  '100%'
+      height: '100%'
+
+    # Wrap the ghost in another container so its margin can expand
+    # freely. If we would position the element directly (old implementation),
+    # it would gain a layout context which cannot be crossed by margins.
+    $bounds = $('<div class="up-bounds"></div>')
+    boundsStyle = u.merge(originalDims, position: 'absolute')
+    u.writeInlineStyle($bounds, boundsStyle)
+    $bounds.insertBefore($element)
+    $element.appendTo($bounds)
+
+    top = originalDims.top
+
+    moveTop = (diff) ->
+      if diff != 0
+        top += diff
+        u.writeInlineStyle($bounds, { top })
+
+    # In theory, $element should not have moved visually.
+    # However, $element (or a child of $element) might collapse its margin
+    # against a previous sibling element, and now that it is absolute it does
+    # not have the same sibling. So we manually correct $element's top
+    # position so it aligns with the previous top position.
+    moveTop(originalOffset.top - $element.offset().top)
+
+    $fixedElements = up.layout.fixedChildren()
+    for fixedElement in $fixedElements
+      u.fixedToAbsolute(fixedElement, $viewport)
+
+    { $element, $bounds, moveTop }
+
+  ###**
   Marks this element as a scrolling container ("viewport").
 
   Apply this attribute if your app uses a custom panel layout with fixed positioning
@@ -658,6 +708,7 @@ up.layout = (($) ->
   revealOrRestoreScroll: revealOrRestoreScroll
   anchoredRight: anchoredRight
   fixedChildren: fixedChildren
+  absolutize: absolutize
 
 )(jQuery)
 

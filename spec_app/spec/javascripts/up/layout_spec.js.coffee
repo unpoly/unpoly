@@ -449,3 +449,87 @@ describe 'up.layout', ->
     describe 'up.scroll', ->
 
       it 'should have tests'
+
+    describe 'up.layout.absolutize', ->
+
+      afterEach ->
+        $('.up-bounds, .fixture').remove()
+
+      it 'absolutely positions the element, preserving visual position and size', ->
+        $element = affix('.element').text('element text').css(paddingTop: '20px', paddingLeft: '20px')
+
+        expect($element.css('position')).toEqual('static')
+        previousDims = u.measure($element)
+
+        up.layout.absolutize($element)
+
+        expect($element.closest('.up-bounds').css('position')).toEqual('absolute')
+
+        newDims = u.measure($element)
+        expect(newDims).toEqual(previousDims)
+
+      it 'accurately positions the ghost over an element with margins', ->
+        $element = affix('.element').css(margin: '40px')
+        previousDims = u.measure($element)
+
+        up.layout.absolutize($element)
+
+        newDims = u.measure($element)
+        expect(newDims).toEqual(previousDims)
+
+      it "doesn't change the position of a child whose margins no longer collapse", ->
+        $element = affix('.element')
+        $child = $('<div class="child">child text</div>').css(margin: '40px').appendTo($element)
+        previousChildDims = u.measure($child)
+
+        up.layout.absolutize($element)
+
+        newChildDims = u.measure($child)
+        expect(newChildDims).toEqual(previousChildDims)
+
+      it 'correctly positions an element within a scrolled body', ->
+        $body = $('body')
+        $element1 = $('<div class="fixture"></div>').css(height: '75px').prependTo($body)
+        $element2 = $('<div class="fixture"></div>').css(height: '100px').insertAfter($element1)
+        $body.scrollTop(33)
+
+        previousDims = u.measure($element2)
+
+        up.layout.absolutize($element2)
+
+        newDims = u.measure($element2)
+        expect(newDims).toEqual(previousDims)
+
+      it 'correctly positions an element within a scrolled parent element (that has overflow-y: scroll)', ->
+        $viewport = affix('div').css
+          overflowY: 'scroll'
+          height: '50px'
+
+        $element1 = $('<div class="fixture"></div>').css(height: '75px').prependTo($viewport)
+        $element2 = $('<div class="fixture"></div>').css(height: '100px').insertAfter($element1)
+        $viewport.scrollTop(33)
+
+        previousDims = u.measure($element2)
+
+        up.layout.absolutize($element2)
+
+        newDims = u.measure($element2)
+        expect(newDims).toEqual(previousDims)
+
+      it 'converts fixed elements within the copies to absolutely positioning (relative to the closest offset parent)', ->
+        $element = affix('.element').css
+          position: 'absolute'
+          top: '50px'
+          left: '50px'
+        $fixedChild = $('<div class="fixed-child" up-fixed></div>').css
+          position: 'fixed'
+          left: '77px'
+          top: '77px'
+        $fixedChild.appendTo($element)
+        up.layout.absolutize($element)
+
+        expect($fixedChild.css(['position', 'left', 'top'])).toEqual
+          position: 'absolute',
+          left: '27px',
+          top: '27px'
+

@@ -822,8 +822,8 @@ describe 'up.link', ->
               @respondWith '<div class="target new">new text</div>'
 
             next =>
-              @$oldGhost = $('.target.old.up-ghost')
-              @$newGhost = $('.target.new.up-ghost')
+              @$oldGhost = $('.target.old')
+              @$newGhost = $('.target.new')
               expect(@$oldGhost).toExist()
               expect(@$newGhost).toExist()
               expect(u.opacity(@$oldGhost)).toBeAround(1, 0.15)

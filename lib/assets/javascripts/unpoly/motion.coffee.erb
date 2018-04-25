@@ -180,7 +180,11 @@ up.motion = (($) ->
 
   willAnimate = ($elements, animationOrTransition, options) ->
     options = animateOptions(options)
-    isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && u.all($elements, u.isBodyDescendant)
+    isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !isSingletonElement($elements)
+
+  isSingletonElement = ($element) ->
+    # jQuery's is() returns true if at least one element in the collection matches the selector
+    $element.is('body')
 
   skipAnimate = ($element, animation) ->
     if u.isOptions(animation)
@@ -276,13 +280,19 @@ up.motion = (($) ->
         transitionDelay: "#{options.delay}ms"
         transitionTimingFunction: options.easing
       undoTransition = u.writeTemporaryStyle($element, transitionCamel)
+
+      console.debug("!!! transition camel: ", transitionCamel)
+
       u.writeInlineStyle($element, lastFrameCamel)
   
       # Return a promise that fulfills when either the animation ends
       # or someone finishes the animation.
       deferred.promise()
 
-    motionTracker.start($element, startCssTransition)
+    if options.motionTracked
+      startCssTransition()
+    else
+      motionTracker.start($element, startCssTransition)
 
   ###**
   Extracts animation-related options from the given options hash.
@@ -301,74 +311,11 @@ up.motion = (($) ->
     consolidatedOptions.duration = Number(u.option(userOptions.duration, u.presentAttr($element, 'up-duration'), moduleDefaults.duration, config.duration))
     consolidatedOptions.delay = Number(u.option(userOptions.delay, u.presentAttr($element, 'up-delay'), moduleDefaults.delay, config.delay))
     consolidatedOptions.finishedMotion = userOptions.finishedMotion # this is required by animate() and finishOnceBeforeMotion()
+    consolidatedOptions.trackedMotion = userOptions.trackedMotion # this is required so animate() doesn't override the tracking from morph()
     consolidatedOptions
       
   findNamedAnimation = (name) ->
     namedAnimations[name] or up.fail("Unknown animation %o", name)
-
-  ###**
-  @function withGhosts
-  @return {Promise}
-  @internal
-  ###
-  withGhosts = ($old, $new, options, transitionFn) ->
-    # Don't create ghosts of ghosts in case a transition function calling `morph` recursively.
-    if options.copy == false || $old.is('.up-ghost') || $new.is('.up-ghost')
-      return transitionFn($old, $new, options)
-
-    oldCopy = undefined
-    newCopy = undefined
-    oldScrollTop = undefined
-    newScrollTop = undefined
-
-    $viewport = up.layout.viewportOf($old)
-
-    # Right now $old and $new are visible siblings in the DOM.
-    # Temporarily hide $new while we copy $old and take some measurements.
-    u.writeTemporaryStyle $new, display: 'none', ->
-      oldCopy = prependCopy($old, $viewport)
-      # Remember the previous scroll position in case we will reveal $new below.
-      oldScrollTop = $viewport.scrollTop()
-
-    # Hide $old. We will never re-show it.
-    # It's not our job to remove $old from the DOM.
-    $old.hide()
-
-    # Don't animate the scrolling.
-    # We just want to scroll $new into position before we start the enter animation.
-    scrollOptions = u.merge(options, { duration: 0})
-    up.layout.revealOrRestoreScroll($new, scrollOptions).then ->
-      newCopy = prependCopy($new, $viewport)
-      newScrollTop = $viewport.scrollTop()
-
-      # Since we have scrolled the viewport (containing both $old and $new),
-      # we must shift the old copy so it looks like it it is still sitting
-      # in the same position.
-      oldCopy.moveTop(newScrollTop - oldScrollTop)
-
-      # We will let $new take up space in the element flow, but hide it.
-      # The user will only see the two animated ghosts until the transition
-      # is over.
-      # Note that we must **not** use `visibility: hidden` to hide the new
-      # element. This would delay browser painting until the element is
-      # shown again, causing a flicker while the browser is painting.
-      restoreNewOpacity = u.writeTemporaryStyle($new, opacity: 0)
-
-      # Perform the transition on the ghosts.
-      transitionDone = transitionFn(oldCopy.$ghost, newCopy.$ghost, options)
-
-      # The animations on both ghosts should finish if someone calls finish()
-      # on either of the original elements.
-      $bothGhosts = oldCopy.$ghost.add(newCopy.$ghost)
-      $bothOriginals = $old.add($new)
-      motionTracker.forwardFinishEvent($bothOriginals, $bothGhosts, transitionDone)
-
-      transitionDone.then ->
-        # This will be called when the transition in the block is either done
-        # or when it is finished by triggering up:motion:finish on either element.
-        restoreNewOpacity()
-        oldCopy.$bounds.remove()
-        newCopy.$bounds.remove()
 
   ###**
   Completes [animations](/up.animate) and [transitions](/up.morph).
@@ -454,7 +401,7 @@ up.motion = (($) ->
     Whether to reveal the new element by scrolling its parent viewport.
   @return {Promise}
     A promise that fulfills when the transition ends.
-  @stable
+  @experimental
   ###  
   morph = (source, target, transitionObject, options) ->
     options = u.options(options)
@@ -465,17 +412,67 @@ up.motion = (($) ->
     $both = $old.add($new)
 
     transitionFn = findTransitionFn(transitionObject)
-    willMorph = willAnimate($both, transitionFn, options)
+    willMorph = willAnimate($old, transitionFn, options)
 
-    up.log.group ('Morphing %o to %o with transition %o' if willMorph), $old.get(0), $new.get(0), transitionObject, ->
-      finishOnce($both, options).then ->
-        if !willMorph
-          skipMorph($old, $new, options)
-        else if transitionFn
-          withGhosts($old, $new, options, transitionFn)
-        else
-          # Exception will be converted to rejected Promise inside a then() handler
-          up.fail("Unknown transition %o", transitionObject)
+    options.afterInsert ||= u.noop
+    options.beforeDetach ||= u.noop
+    options.afterDetach ||= u.noop
+
+    scrollNew = ->
+      # Don't animate the scrolling. The { duration } option was meant for the transition.
+      scrollOptions = u.merge(options, duration: 0)
+      # Scroll $new into position before we start the enter animation.
+      up.layout.revealOrRestoreScroll($new, scrollOptions)
+
+    finishOnce($both, options).then ->
+      if willMorph
+        up.puts 'Morphing %o to %o with transition %o', $old.get(0), $new.get(0), transitionObject
+        restoreOldClass = u.addTemporaryClass($old, ['up-morphing', 'up-old'])
+        restoreNewClass = u.addTemporaryClass($new, ['up-morphing', 'up-new'])
+
+        $viewport = up.layout.viewportOf($old)
+        scrollTopBeforeReveal = $viewport.scrollTop()
+
+        oldRemote = up.layout.absolutize $old,
+          # Because the insertion will shift elements visually, we must delay insertion
+          # until absolutize() has measured the bounding box of the old element.
+          afterMeasure: ->
+            $new.insertBefore($old)
+            options.afterInsert()
+
+        # Scroll $new into position before we start the enter animation.
+        promise = scrollNew()
+
+        promise = promise.then ->
+          # Since we have scrolled the viewport (containing both $old and $new),
+          # we must shift the old copy so it looks like it it is still sitting
+          # in the same position.
+          scrollTopAfterReveal = $viewport.scrollTop()
+          oldRemote.moveTop(scrollTopAfterReveal - scrollTopBeforeReveal)
+
+          motionTracker.start $both, ->
+            options.trackedMotion = true
+            transitionFn($old, $new, options)
+
+        promise = promise.then ->
+          options.beforeDetach()
+          $old.detach()
+          oldRemote.$bounds.remove()
+          options.afterDetach()
+          restoreOldClass()
+          restoreNewClass()
+
+        return promise
+
+      else
+        options.beforeDetach()
+        # Swapping the elements directly with replaceWith() will cause
+        # jQuery to remove all data attributes, which we use to store destructors
+        swapElementsDirectly($old, $new)
+        options.afterInsert()
+        options.afterDetach()
+        promise = scrollNew()
+        return promise
 
   finishOnce = ($elements, options) ->
     # Finish existing transitions, but only once in case morph() or animate() is called recursively.
@@ -505,77 +502,13 @@ up.motion = (($) ->
         findTransitionFn(object.split('/'))
       else if namedTransition = namedTransitions[object]
         findTransitionFn(namedTransition)
+      else
+        up.fail("Unknown transition %o", object)
 
-  ###**
-  This instantly causes the side effects of a successful transition.
-  We use this to skip morphing for old browsers, or when the developer
-  decides to only animate the new element (i.e. no real ghosting or transition).
-
-  @return {Promise}
-  @internal
-  ###
-  skipMorph = ($old, $new, options) ->
-    # Simply hide the old element, which would be the side effect of withGhosts(...) below.
-    u.hide($old)
-
-    # Don't animate the scrolling.
-    # We just want to scroll $new into position before we start the enter animation.
-    scrollOptions = u.merge(options, { duration: 0})
-
-    # Since we cannot rely on withGhosts to control the scroll position
-    # in this branch, we need to do it ourselves.
-    up.layout.revealOrRestoreScroll($new, scrollOptions)
-
-  ###**
-  @internal
-  ###
-  prependCopy = ($element, $viewport) ->
-    elementDims = u.measure($element, relative: true, inner: true)
-
-    $ghost = $element.clone()
-    $ghost.find('script').remove()
-    u.writeInlineStyle $ghost,
-      # If the element had a layout context before, make sure the
-      # ghost will have layout context as well (and vice versa).
-      position: if u.readComputedStyle($element, 'position') == 'static' then 'static' else 'relative'
-      top:    'auto'
-      right:  'auto'
-      bottom: 'auto'
-      left:   'auto'
-      width:  '100%'
-      height: '100%'
-    $ghost.addClass('up-ghost')
-
-    # Wrap the ghost in another container so its margin can expand
-    # freely. If we would position the element directly (old implementation),
-    # it would gain a layout context which cannot be crossed by margins.
-    $bounds = $('<div class="up-bounds"></div>')
-    u.writeInlineStyle($bounds, position: 'absolute')
-    u.writeInlineStyle($bounds, elementDims)
-
-    top = elementDims.top
-
-    moveTop = (diff) ->
-      if diff != 0
-        top += diff
-        u.writeInlineStyle($bounds, { top })
-
-    $ghost.appendTo($bounds)
-    $bounds.insertBefore($element)
-
-    # In theory, $ghost should now sit over $element perfectly.
-    # However, $element might collapse its margin against a previous sibling
-    # element, and $ghost does not have the same sibling.
-    # So we manually correct $ghost's top position so it aligns with $element.
-    moveTop($element.offset().top - $ghost.offset().top)
-
-    $fixedElements = up.layout.fixedChildren($ghost)
-    for fixedElement in $fixedElements
-      u.fixedToAbsolute(fixedElement, $viewport)
-
-    $ghost: $ghost
-    $bounds: $bounds
-    moveTop: moveTop
+  swapElementsDirectly = ($old, $new) ->
+    # jQuery will actually let us .insertBefore the new <body> tag,
+    # but that's probably bad Karma.
+     $old.replaceWith($new)
 
   ###**
   Defines a named transition.
@@ -620,7 +553,7 @@ up.motion = (($) ->
 
       up.animation('fade-in', function($element, options) {
         $element.css(opacity: 0);
-        up.animate($ghost, { opacity: 1 }, options);
+        up.animate($element, { opacity: 1 }, options);
       })
 
   It is recommended that your definitions always end by calling
@@ -660,102 +593,103 @@ up.motion = (($) ->
   @internal
   ###
   isNone = (animationOrTransition) ->
-    # false, undefined, null and the string "none" are all ways to skip animations
-    !animationOrTransition || animationOrTransition == 'none' || (u.isOptions(animationOrTransition) && u.isBlank(animationOrTransition))
+    # false, undefined, '', null and the string "none" are all ways to skip animations
+    !animationOrTransition || animationOrTransition == 'none' || u.isBlank(animationOrTransition)
 
-  registerAnimation('fade-in', ($ghost, options) ->
-    u.writeInlineStyle($ghost, opacity: 0)
-    animate($ghost, { opacity: 1 }, options)
+  registerAnimation('fade-in', ($element, options) ->
+    u.writeInlineStyle($element, opacity: 0)
+    animate($element, { opacity: 1 }, options)
   )
 
-  registerAnimation('fade-out', ($ghost, options) ->
-    u.writeInlineStyle($ghost, opacity: 1)
-    animate($ghost, { opacity: 0 }, options)
+  registerAnimation('fade-out', ($element, options) ->
+    u.writeInlineStyle($element, opacity: 1)
+    animate($element, { opacity: 0 }, options)
   )
 
   translateCss = (x, y) ->
     { transform: "translate(#{x}px, #{y}px)" }
 
-  registerAnimation('move-to-top', ($ghost, options) ->
-    u.writeInlineStyle($ghost, translateCss(0, 0))
-    box = u.measure($ghost)
+  registerAnimation('move-to-top', ($element, options) ->
+    u.writeInlineStyle($element, translateCss(0, 0))
+    box = u.measure($element)
     travelDistance = box.top + box.height
-    animate($ghost, translateCss(0, -travelDistance), options)
+    animate($element, translateCss(0, -travelDistance), options)
   )
 
-  registerAnimation('move-from-top', ($ghost, options) ->
-    u.writeInlineStyle($ghost, translateCss(0, 0))
-    box = u.measure($ghost)
+  registerAnimation('move-from-top', ($element, options) ->
+    u.writeInlineStyle($element, translateCss(0, 0))
+    box = u.measure($element)
     travelDistance = box.top + box.height
-    u.writeInlineStyle($ghost, translateCss(0, -travelDistance))
-    animate($ghost, translateCss(0, 0), options)
+    u.writeInlineStyle($element, translateCss(0, -travelDistance))
+    animate($element, translateCss(0, 0), options)
   )
 
-  registerAnimation('move-to-bottom', ($ghost, options) ->
-    u.writeInlineStyle($ghost, translateCss(0, 0))
-    box = u.measure($ghost)
+  registerAnimation('move-to-bottom', ($element, options) ->
+    u.writeInlineStyle($element, translateCss(0, 0))
+    box = u.measure($element)
     travelDistance = u.clientSize().height - box.top
-    animate($ghost, translateCss(0, travelDistance), options)
+    animate($element, translateCss(0, travelDistance), options)
   )
 
-  registerAnimation('move-from-bottom', ($ghost, options) ->
-    u.writeInlineStyle($ghost, translateCss(0, 0))
-    box = u.measure($ghost)
+  registerAnimation('move-from-bottom', ($element, options) ->
+    u.writeInlineStyle($element, translateCss(0, 0))
+    box = u.measure($element)
     travelDistance = u.clientSize().height - box.top
-    u.writeInlineStyle($ghost, translateCss(0, travelDistance))
-    animate($ghost, translateCss(0, 0), options)
+    u.writeInlineStyle($element, translateCss(0, travelDistance))
+    animate($element, translateCss(0, 0), options)
   )
 
-  registerAnimation('move-to-left', ($ghost, options) ->
-    u.writeInlineStyle($ghost, translateCss(0, 0))
-    box = u.measure($ghost)
+  registerAnimation('move-to-left', ($element, options) ->
+    u.writeInlineStyle($element, translateCss(0, 0))
+    box = u.measure($element)
     travelDistance = box.left + box.width
-    animate($ghost, translateCss(-travelDistance, 0), options)
+    animate($element, translateCss(-travelDistance, 0), options)
   )
 
-  registerAnimation('move-from-left', ($ghost, options) ->
-    u.writeInlineStyle($ghost, translateCss(0, 0))
-    box = u.measure($ghost)
+  registerAnimation('move-from-left', ($element, options) ->
+    u.writeInlineStyle($element, translateCss(0, 0))
+    box = u.measure($element)
     travelDistance = box.left + box.width
-    u.writeInlineStyle($ghost, translateCss(-travelDistance, 0))
-    animate($ghost, translateCss(0, 0), options)
+    u.writeInlineStyle($element, translateCss(-travelDistance, 0))
+    animate($element, translateCss(0, 0), options)
   )
 
-  registerAnimation('move-to-right', ($ghost, options) ->
-    u.writeInlineStyle($ghost, translateCss(0, 0))
-    box = u.measure($ghost)
+  registerAnimation('move-to-right', ($element, options) ->
+    u.writeInlineStyle($element, translateCss(0, 0))
+    box = u.measure($element)
     travelDistance = u.clientSize().width - box.left
-    animate($ghost, translateCss(travelDistance, 0), options)
+    animate($element, translateCss(travelDistance, 0), options)
   )
 
-  registerAnimation('move-from-right', ($ghost, options) ->
-    u.writeInlineStyle($ghost, translateCss(0, 0))
-    box = u.measure($ghost)
+  registerAnimation('move-from-right', ($element, options) ->
+    u.writeInlineStyle($element, translateCss(0, 0))
+    box = u.measure($element)
     travelDistance = u.clientSize().width - box.left
-    u.writeInlineStyle($ghost, translateCss(travelDistance, 0))
-    animate($ghost, translateCss(0, 0), options)
+    u.writeInlineStyle($element, translateCss(travelDistance, 0))
+    animate($element, translateCss(0, 0), options)
   )
 
-  registerAnimation('roll-down', ($ghost, options) ->
-    fullHeight = $ghost.height()
-    styleMemo = u.writeTemporaryStyle($ghost,
+  registerAnimation('roll-down', ($element, options) ->
+    fullHeight = $element.height()
+    styleMemo = u.writeTemporaryStyle($element,
       height: '0px'
       overflow: 'hidden'
     )
-    deferred = animate($ghost, { height: "#{fullHeight}px" }, options)
+    deferred = animate($element, { height: "#{fullHeight}px" }, options)
     deferred.then(styleMemo)
     deferred
   )
 
-  registerTransition('move-left', 'move-to-left/move-from-right')
-  registerTransition('move-right', 'move-to-right/move-from-left')
-  registerTransition('move-up', 'move-to-top/move-from-bottom')
-  registerTransition('move-down', 'move-to-bottom/move-from-top')
-  registerTransition('cross-fade', 'fade-out/fade-in')
+  registerTransition('move-left', ['move-to-left', 'move-from-right'])
+  registerTransition('move-right', ['move-to-right', 'move-from-left'])
+  registerTransition('move-up', ['move-to-top', 'move-from-bottom'])
+  registerTransition('move-down', ['move-to-bottom', 'move-from-top'])
+  registerTransition('cross-fade', ['fade-out', 'fade-in'])
 
   up.on 'up:framework:booted', snapshot
   up.on 'up:framework:reset', reset
     
+  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   morph: morph
   animate: animate
   animateOptions: animateOptions
@@ -765,7 +699,6 @@ up.motion = (($) ->
   animation: registerAnimation
   config: config
   isEnabled: isEnabled
-  prependCopy: prependCopy
   isNone: isNone
 
 )(jQuery)

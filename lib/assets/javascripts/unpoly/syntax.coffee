@@ -376,28 +376,14 @@ up.syntax = (($) ->
   @internal
   ###
   clean = ($fragment) ->
-    prepareClean($fragment)()
-
-  ###**
-  Returns a function that will call destructors in the given subtree.
-
-  This is useful when you plan to detach the element from the DOM before
-  destruction, since jQuery removes data properties on detachment, and we use
-  data properties to store destructors,
-
-  @function up.syntax.prepareClean
-  @param {jQuery} $fragment
-  @return {Function}
-  @internal
-  ###
-  prepareClean = ($fragment) ->
-    $candidates = u.selectInSubtree($fragment, ".#{DESTRUCTIBLE_CLASS}")
-    destructors = u.map $candidates, (candidate) -> $(candidate).data(DESTRUCTORS_KEY)
-    # Although destructible elements should always have an destructor function, we might be
-    # destroying a clone of such an element. E.g. Unpoly creates a clone when keeping an
-    # [up-keep] element, and that clone still has the .up-destructible class.
-    destructors = u.compact destructors
-    u.sequence(destructors...)
+    $destructibles = u.selectInSubtree($fragment, ".#{DESTRUCTIBLE_CLASS}")
+    u.each $destructibles, (destructible) ->
+      # The destructor function may be undefined at this point.
+      # Although destructible elements should always have an destructor function, we might be
+      # destroying a clone of such an element. E.g. Unpoly creates a clone when keeping an
+      # [up-keep] element, and that clone still has the .up-destructible class.
+      if destructor = $(destructible).data(DESTRUCTORS_KEY)
+        destructor()
 
   ###**
   Checks if the given element has an [`up-data`](/up-data) attribute.
@@ -493,7 +479,6 @@ up.syntax = (($) ->
   macro: macro
   compile: compile
   clean: clean
-  prepareClean: prepareClean
   data: data
 
 )(jQuery)

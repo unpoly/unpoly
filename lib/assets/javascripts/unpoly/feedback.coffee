@@ -145,13 +145,11 @@ up.feedback = (($) ->
       classList = link.classList
       if currentUrlSet.matchesAny(urls)
         for klass in config.currentClasses
-          console.debug("!!! adding klass %o from %o", klass, config.currentClasses)
           # Once we drop IE11 support in 2020 we can call add() with multiple arguments
           classList.add(klass)
       else
         for klass in config.currentClasses
-          console.debug("!!! removing klass %o from %o", klass, config.currentClasses)
-          # Once we drop IE11 support in 2020 we can call add() with multiple arguments
+          # Once we drop IE11 support in 2020 we can call remove() with multiple arguments
           classList.remove(klass)
 
   ###**

@@ -746,6 +746,9 @@ describe 'up.util', ->
       it 'returns true for an empty object', ->
         expect(up.util.isBlank({})).toBe(true)
 
+      it 'returns false for a function', ->
+        expect(up.util.isBlank((->))).toBe(false)
+
       it 'returns true for an object with at least one key', ->
         expect(up.util.isBlank({key: 'value'})).toBe(false)
 

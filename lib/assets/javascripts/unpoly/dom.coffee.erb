@@ -508,10 +508,10 @@ up.dom = (($) ->
 
       # Since we're adding content instead of replacing, we'll only
       # animate $new instead of morphing between $old and $new
-      promise = promise.then -> up.animate($wrapper, transition, options)
+      promise.then -> up.animate($wrapper, transition, options)
 
       # Remove the wrapper now that is has served it purpose
-      promise = promise.then -> u.unwrapElement($wrapper)
+      promise.then -> u.unwrapElement($wrapper)
 
       return promise
 
@@ -523,48 +523,23 @@ up.dom = (($) ->
 
     else
       # This needs to happen before prepareClean() below.
+      # Otherwise we would collect destructors for elements we want to keep.
       options.keepPlans = transferKeepableElements($old, $new, options)
 
-      # Collect destructor functions before swapping the elements.
-      # Detaching an element from the DOM will cause jQuery to remove the data properties
-      # where we store constructor functions.
-      clean = up.syntax.prepareClean($old)
+      $parent = $old.parent()
 
-      replacement = ->
-        if shouldSwapElementsDirectly($old, $new, transition, options)
-          # jQuery will actually let us .insertBefore the new <body> tag,
-          # but that's probably bad Karma.
-          swapElementsDirectly($old, $new)
-          # We cannot morph the <body> tag. Also in case we have found that we won't
-          # animate above, save ourselves from reepeating the expensive check in up.morph().
-          transition = false
-        else
-          # Don't insert the new element after the old element. For some reason
-          # this will make the browser scroll to the bottom of the new element.
-          $new.insertBefore($old)
+      morphOptions = u.merge options,
+        afterInsert: ->
+          up.hello($new, options)
+          markElementAsDestroying($old)
+          emitFragmentDestroy($old, log: false)
+        beforeDetach: ->
+          up.syntax.clean($old)
+        afterDetach: ->
+          $old.remove() # clean up jQuery data
+          emitFragmentDestroyed($old, $parent: $parent, log: false)
 
-        autofocus($new)
-
-        # The fragment should be compiled before animating,
-        # so transitions see .up-current classes
-        hello($new, options)
-
-        # Morphing will also process options.reveal
-        up.morph($old, $new, transition, options)
-
-      # Wrap the replacement as a destroy animation, so $old will
-      # get marked as .up-destroying right away.
-      return destroy($old, { clean, beforeWipe: replacement, log: false })
-
-  shouldSwapElementsDirectly = ($old, $new, transition, options) ->
-    $both = $old.add($new)
-    $old.is('body') || !up.motion.willAnimate($both, transition, options)
-
-  # This is a separate method so we can mock it in specs
-  swapElementsDirectly = ($old, $new) ->
-    # jQuery will actually let us .insertBefore the new <body> tag,
-    # but that's probably bad Karma.
-    $old.replaceWith($new)
+      return up.morph($old, $new, transition, morphOptions)
 
   # This will find all [up-keep] descendants in $old an, overwrite their partner
   # element in $new and leave a visually identical clone in $old for a later transition.
@@ -579,7 +554,7 @@ up.dom = (($) ->
           # $old and $new. Note that $keepable will still point to the same element
           # after the replacement, which is now detached.
           $keepableClone = $keepable.clone()
-          up.util.detachWith($keepable, $keepableClone)
+          u.detachWith($keepable, $keepableClone)
 
           # $keepable.replaceWith($keepableClone)
           # Since we're going to swap the entire $old and $new containers afterwards,
@@ -748,27 +723,35 @@ up.dom = (($) ->
     The fragment that has been inserted or updated.
   @stable
   ###
-  emitFragmentInserted = (fragment, options) ->
-    $fragment = $(fragment)
+  emitFragmentInserted = ($element, options) ->
     up.emit 'up:fragment:inserted',
-      $element: $fragment
-      message: ['Inserted fragment %o', $fragment.get(0)]
+      $element: $element
+      message: ['Inserted fragment %o', $element.get(0)]
       origin: options.origin
 
   emitFragmentKept = (keepPlan) ->
     eventAttrs = u.merge(keepPlan, message: ['Kept fragment %o', keepPlan.$element.get(0)])
     up.emit('up:fragment:kept', eventAttrs)
 
-  autofocus = ($element) ->
-    selector = '[autofocus]:last'
-    $control = u.selectInSubtree($element, selector)
-    if $control.length && $control.get(0) != document.activeElement
-      $control.focus()
+  emitFragmentDestroy = ($element, options) ->
+    if shouldLogDestruction($element, options)
+      message = ['Destroying fragment %o', $element.get(0)]
+    up.emit 'up:fragment:destroy', { $element, message }
+
+  emitFragmentDestroyed = ($element, options) ->
+    if shouldLogDestruction($element, options)
+      message = ['Destroyed fragment %o', $element.get(0)]
+
+    $parent = options.$parent or up.fail("Missing { $parent } option")
+
+    up.emit 'up:fragment:destroyed',
+      $target: $parent,
+      $parent: $parent,
+      $element: $element,
+      message: message
 
   isRealElement = ($element) ->
-    unreal = '.up-ghost, .up-destroying'
-    # Closest matches both the element itself
-    # as well as its ancestors
+    unreal = '.up-destroying'
     $element.closest(unreal).length == 0
 
   ###**
@@ -872,40 +855,32 @@ up.dom = (($) ->
     $element = $(selectorOrElement)
     options = u.options(options, animation: false)
 
-    if shouldLogDestruction($element, options)
-      destroyMessage = ['Destroying fragment %o', $element.get(0)]
-      destroyedMessage = ['Destroyed fragment %o', $element.get(0)]
-
     if $element.length == 0
-      Promise.resolve()
-    else
-      up.emit 'up:fragment:destroy', $element: $element, message: destroyMessage
-      $element.addClass('up-destroying')
-      # If e.g. a modal or popup asks us to restore a URL, do this
-      # before emitting `fragment:destroy`. This way up.navigate sees the
-      # new URL and can assign/remove .up-current classes accordingly.
-      updateHistoryAndTitle(options)
+      return Promise.resolve()
 
-      animate = ->
-        animateOptions = up.motion.animateOptions(options)
-        up.motion.animate($element, options.animation, animateOptions)
+    markElementAsDestroying($element)
+    emitFragmentDestroy($element, options)
 
-      beforeWipe = options.beforeWipe || Promise.resolve()
+    updateHistoryAndTitle(options)
 
-      wipe = ->
-        options.clean ||= -> up.syntax.clean($element)
-        options.clean()
-        up.syntax.clean($element)
-        # Emit this while $element is still part of the DOM, so event
-        # listeners bound to the document will receive the event.
-        up.emit 'up:fragment:destroyed', $element: $element, message: destroyedMessage
-        $element.remove()
+    animate = ->
+      animateOptions = up.motion.animateOptions(options)
+      up.motion.animate($element, options.animation, animateOptions)
 
-      animate().then(beforeWipe).then(wipe)
+    wipe = ->
+      $parent = $element.parent()
+      up.syntax.clean($element)
+      $element.remove()
+      emitFragmentDestroyed($element, { $parent })
+
+    animate().then(wipe)
 
   shouldLogDestruction = ($element, options) ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
     options.log != false && !$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')
+
+  markElementAsDestroying = ($element) ->
+    $element.addClass('up-destroying')
 
   ###**
   Before a page fragment is being [destroyed](/up.destroy), this
@@ -921,15 +896,17 @@ up.dom = (($) ->
   ###
 
   ###**
-  This event is [emitted](/up.emit) right before a [destroyed](/up.destroy)
-  page fragment is removed from the DOM.
+  This event is [emitted](/up.emit) after a page fragment
+  was [destroyed](/up.destroy) and removed from the DOM.
 
   If the destruction is animated, this event is emitted after
   the animation has ended.
 
   @event up:fragment:destroyed
   @param {jQuery} event.$element
-    The page fragment that is about to be removed from the DOM.
+    The page fragment that has been removed from the DOM.
+  @param {jQuery} event.$parent
+    The page fragment that has been removed from the DOM.
   @stable
   ###
 

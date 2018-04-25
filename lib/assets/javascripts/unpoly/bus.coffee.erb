@@ -287,12 +287,11 @@ up.bus = (($) ->
   ###
   emit = (eventName, eventProps = {}) ->
     event = $.Event(eventName, eventProps)
-    if $target = eventProps.$element
-      # If a `.$element` option is given, we trigger the event
-      # on that element instead of the document.
-      delete eventProps.$element
-    else
-      $target = $(document)
+    # Three cases:
+    # - Event is triggered on document (default)
+    # - Event is triggered on { $element }
+    # - Event is triggered on { $target }, but should have an { $element } property
+    $target = eventProps.$target || eventProps.$element || $(document)
     logEmission(eventName, eventProps)
     $target.trigger(event)
     event

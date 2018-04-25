@@ -966,6 +966,8 @@ up.form = (($) ->
   ###
   up.compiler '[up-autosubmit]', ($formOrField) -> autosubmit($formOrField)
 
+  up.compiler '[autofocus]', { batch: true }, ($input) -> $input.last().focus()
+
   up.on 'up:framework:reset', reset
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>

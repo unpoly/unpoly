@@ -31,14 +31,14 @@ class up.MotionTracker
   Use [`claim()`](/up.MotionTracker.claim) for that.
 
   @method claim
-  @param {jQuery} $element
+  @param {jQuery} $elements
   @param {Function(jQuery): Promise} animator
   @return {Promise} A promise that is fulfilled when the new animation ends.
   ###
-  start: ($element, animator) ->
-    promise = animator($element)
-    @markElement($element, promise)
-    promise.then => @unmarkElement($element)
+  start: ($elements, animator) ->
+    promise = @whileForwardingFinishEvent($elements, animator)
+    @markElement($elements, promise)
+    promise.then => @unmarkElement($elements)
     promise
 
   ###**
@@ -93,3 +93,16 @@ class up.MotionTracker
       $original.on @finishEvent, doForward
       # Our own pseudo-animation finishes when the actual animation on $ghost finishes
       duration.then => $original.off @finishEvent, doForward
+
+  whileForwardingFinishEvent: ($elements, fn) =>
+    return fn() if $elements.length < 2
+
+    doForward = (event) =>
+      unless event.forwarded
+        u.each $elements.not(event.target), (element) =>
+          up.bus.emit(@finishEvent, forwarded: true, $element: $(element))
+
+    # Forward the finish event to the $ghost that is actually animating
+    $elements.on @finishEvent, doForward
+    # Our own pseudo-animation finishes when the actual animation on $ghost finishes
+    fn().then => $elements.off @finishEvent, doForward
