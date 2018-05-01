@@ -281,8 +281,6 @@ up.motion = (($) ->
         transitionTimingFunction: options.easing
       undoTransition = u.writeTemporaryStyle($element, transitionCamel)
 
-      console.debug("!!! transition camel: ", transitionCamel)
-
       u.writeInlineStyle($element, lastFrameCamel)
   
       # Return a promise that fulfills when either the animation ends
@@ -340,12 +338,16 @@ up.motion = (($) ->
     motionTracker.finish(elementOrSelector)
 
   ###**
-  Performs an animated transition between two elements.
-  Transitions are implement by performing two animations in parallel,
-  causing one element to disappear and the other to appear.
+  Performs an animated transition between the `source` and `target` elements.
 
-  Note that the transition does not remove any elements from the DOM.
-  The first element will remain in the DOM, albeit hidden using `display: none`.
+  Transitions are implement by performing two animations in parallel,
+  causing `source` to disappear and the `target` to appear.
+
+  - `target` is [inserted before](https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore) `source`
+  - `source` is removed from the [document flow](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Positioning) with `position: absolute`.
+     It will be positioned over its original place in the flow that is now occupied by `target`.
+  - Both `source` and `target` are animated in parallel
+  - `source` is removed from the DOM
 
   \#\#\# Named transitions
 
