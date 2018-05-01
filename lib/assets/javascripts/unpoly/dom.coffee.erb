@@ -508,10 +508,10 @@ up.dom = (($) ->
 
       # Since we're adding content instead of replacing, we'll only
       # animate $new instead of morphing between $old and $new
-      promise.then -> up.animate($wrapper, transition, options)
+      promise = promise.then -> up.animate($wrapper, transition, options)
 
       # Remove the wrapper now that is has served it purpose
-      promise.then -> u.unwrapElement($wrapper)
+      promise = promise.then -> u.unwrapElement($wrapper)
 
       return promise
 
@@ -896,17 +896,17 @@ up.dom = (($) ->
   ###
 
   ###**
-  This event is [emitted](/up.emit) after a page fragment
-  was [destroyed](/up.destroy) and removed from the DOM.
+  This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
 
-  If the destruction is animated, this event is emitted after
-  the animation has ended.
+  If the destruction is animated, this event is emitted after the animation has ended.
+
+  The event is emitted on the parent element of the fragment that was removed.
 
   @event up:fragment:destroyed
   @param {jQuery} event.$element
     The page fragment that has been removed from the DOM.
   @param {jQuery} event.$parent
-    The page fragment that has been removed from the DOM.
+    The parent element of the fragment that has been removed from the DOM.
   @stable
   ###
 
