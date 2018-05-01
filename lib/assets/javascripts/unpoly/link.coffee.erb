@@ -283,10 +283,16 @@ up.link = (($) ->
       $link.attr('up-follow', '')
 
   shouldProcessEvent = (event, $link) ->
-    $target = $(event.target)
-    $targetedChildLink = $target.closest('a, [up-href]').not($link)
-    $targetedInput = $target.closest(up.form.fieldSelector())
-    $targetedChildLink.length == 0 && $targetedInput.length == 0 && u.isUnmodifiedMouseEvent(event)
+    target = event.target
+    # We never handle events for the right mouse button, or when Shift/CTRL/Meta is pressed
+    return false unless u.isUnmodifiedMouseEvent(event)
+    # If we actually targeted $link, save ourselves the expensive DOM traversal below
+    return true if target == $link.get(0)
+    # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
+    # we want those other elements handle the click.
+    $betterTarget = $(target).closest("a, [up-href], #{up.form.fieldSelector()}").not($link)
+    return false if $betterTarget.length
+    return true
 
   ###**
   Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
