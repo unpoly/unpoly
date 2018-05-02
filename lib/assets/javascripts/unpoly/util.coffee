@@ -1788,11 +1788,11 @@ up.util = (($) ->
     style = element.style
     extractFromStyleObject(style, props)
 
-  extractFromStyleObject = (style, props) ->
-    if isString(props)
-      style[props]
+  extractFromStyleObject = (style, keyOrKeys) ->
+    if isString(keyOrKeys)
+      style[keyOrKeys]
     else # array
-      only style, props...
+      only(style, keyOrKeys...)
 
   ###**
   Merges the given inline style(s) into the given element's `[style]` attribute.
