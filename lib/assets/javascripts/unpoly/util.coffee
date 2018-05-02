@@ -389,8 +389,9 @@ up.util = (($) ->
   isBlank = (object) ->
     return true if isMissing(object)
     return false if isFunction(object)
-    return (isObject(object) && Object.keys(object).length == 0) || # object
-      (object.length == 0) # string, Array, jQuery
+    return true if isObject(object) && Object.keys(object).length == 0 # object
+    return true if object.length == 0 # string, array, jQuery
+    return false
 
   ###**
   Returns the given argument if the argument is [present](/up.util.isPresent),
