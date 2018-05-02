@@ -6,6 +6,59 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.56.0
+------
+
+This release includes some major performance improvements.
+
+Beware of the breaking change with [`.up-current`](/up-nav-a.up-current)!
+
+
+### Navigation feedback
+
+Maintaining the [`.up-current`](/up-nav-a.up-current) on all links turned out to be a major performance bottleneck, so we had to make some breaking changes:
+
+- The [`.up-current`](/up-nav-a.up-current) class is now only assigned to links with an [`[up-nav]`](/up-nav) attribute, or to links within a container with an [`[up-nav]`](/up-nav) attribute. You should assign the [`[up-nav]`](/up-nav) attribute to all navigational elements that rely on `.up-current` for styling`.
+- You can also globally configure selectors for your navigational elements in `up.feedback.config.navs`:
+
+      up.feedback.config.navs.push('.my-nav-bar')
+- The normalized URLs of [`[up-nav]`](/up-nav) links are now cached for performance reasons.
+- [`[up-nav]`](/up-nav) links are only updated once when multiple fragments are updated in a single [replacement](/a-up-target).
+
+
+### Animation
+
+- When performing an [animated page transition](/up.motion) Unpoly will no longer create copies of the old and new fragment versions. The animation will instead be performed on the original fragment versions.
+- Unpoly now does less work when animation is disabled globally through `up.motion.config.enabled = false`.
+- [`up.morph()`](/up.morph) will now expect the new fragment version to be detached from the DOM before morphing.
+- [`up.morph()`](/up.morph) will now detach the old fragment version from the DOM after morphing.
+- The [`up.morph()`](/up.morph) function has been demoted from *stable* to *experimental*.
+
+
+### Application layout
+
+- When Unpoly cannot find the viewport of an element, it will now always considers `document` to be the viewport.
+
+
+### Fragment updates
+
+- The [`up:fragment:destroyed`](/up:fragment:destroyed) event is now emitted after the fragment has been removed from the DOM. The event is emitted on the former parent of the removed fragment.
+
+
+### Utility functions
+
+- Fix a bug where `up.util.isBlank()` returned `true` for a function value
+
+
+### General
+
+- Partially remove jQuery from internal code for performance reasons. We want to eventually remove jQuery as a dependency.
+- Cache the results of feature detection for performance reasons.
+- Unpoly is now more efficient when selecting elements from the DOM.
+- Unpoly is now more efficient when reacting to mouse events.
+
+
+
 0.55.1
 ------
 
