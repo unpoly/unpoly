@@ -1045,7 +1045,12 @@ up.util = (($) ->
   @internal
   ###
   selectInSubtree = ($element, selector) ->
-    $element.find(selector).addBack(selector)
+    # This implementation is faster than $element.find(selector).addBack(Seelctor)
+    $matches = $()
+    if $element.is(selector)
+      $matches = $matches.add($element)
+    $matches = $matches.add($element.find(selector))
+    $matches
 
   ###**
   Looks for the given selector in the element, its descendants and its ancestors.
