@@ -1107,7 +1107,7 @@ up.util = (($) ->
   only = (object, properties...) ->
     filtered = {}
     for property in properties
-      if object.hasOwnProperty(property)
+      if property of object
         filtered[property] = object[property]
     filtered
 
