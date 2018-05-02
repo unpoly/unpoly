@@ -168,7 +168,7 @@ up.browser = (($) ->
   @return {boolean}
   @internal
   ###
-  canCssTransition = ->
+  canCssTransition = u.memoize ->
     'transition' of document.documentElement.style
 
   ###**
@@ -178,7 +178,7 @@ up.browser = (($) ->
   @return {boolean}
   @internal
   ###
-  canInputEvent = ->
+  canInputEvent = u.memoize ->
     'oninput' of document.createElement('input')
 
   ###**
@@ -188,7 +188,7 @@ up.browser = (($) ->
   @return {boolean}
   @internal
   ###
-  canPromise = ->
+  canPromise = u.memoize ->
     !!window.Promise
 
   ###**
@@ -199,7 +199,7 @@ up.browser = (($) ->
   @return {boolean}
   @experimental
   ###
-  canFormData = ->
+  canFormData = u.memoize ->
     !!window.FormData
 
   ###**
@@ -210,7 +210,7 @@ up.browser = (($) ->
   @return {boolean}
   @internal
   ###
-  canDOMParser = ->
+  canDOMParser = u.memoize ->
     !!window.DOMParser
 
   ###**
@@ -220,7 +220,7 @@ up.browser = (($) ->
   @return {boolean}
   @internal
   ###
-  canConsole = ->
+  canConsole = u.memoize ->
     window.console &&
       console.debug &&
       console.info &&
@@ -230,7 +230,7 @@ up.browser = (($) ->
       console.groupCollapsed &&
       console.groupEnd
 
-  isRecentJQuery = ->
+  isRecentJQuery = u.memoize ->
     version = $.fn.jquery
     parts = version.split('.')
     major = parseInt(parts[0])
