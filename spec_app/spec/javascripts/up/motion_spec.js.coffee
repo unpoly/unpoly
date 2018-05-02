@@ -163,8 +163,8 @@ describe 'up.motion', ->
           up.morph($old, $new, 'cross-fade', duration: 2000)
 
           next =>
-            expect($old).toHaveOpacity(1.0)
-            expect($new).toHaveOpacity(0.0)
+            expect($old).toHaveOpacity(1.0, 0.1)
+            expect($new).toHaveOpacity(0.0, 0.1)
 
             up.motion.finish($parent)
 

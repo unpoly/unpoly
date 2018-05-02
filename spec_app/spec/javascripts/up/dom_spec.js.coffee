@@ -2059,15 +2059,15 @@ describe 'up.dom', ->
 
       it 'runs an animation before removal with { animate } option', asyncSpec (next) ->
         $element = affix('.element')
-        up.destroy($element, animation: 'fade-out', duration: 80, easing: 'linear')
+        up.destroy($element, animation: 'fade-out', duration: 150, easing: 'linear')
 
         next ->
           expect($element).toHaveOpacity(1.0, 0.2)
 
-        next.after 40, ->
+        next.after 75, ->
           expect($element).toHaveOpacity(0.5, 0.2)
 
-        next.after 60, ->
+        next.after (75 + 20), ->
           expect($element).toBeDetached()
 
       it 'marks the element as .up-destroying while it is animating', asyncSpec (next) ->
