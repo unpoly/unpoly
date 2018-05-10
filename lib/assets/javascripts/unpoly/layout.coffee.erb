@@ -74,7 +74,7 @@ up.layout = (($) ->
   reset = ->
     config.reset()
     lastScrollTops.clear()
-    scrollingTracker.finish()
+    scrollingTracker.reset()
 
   ###**
   Scrolls the given viewport to the given Y-position.
@@ -546,7 +546,7 @@ up.layout = (($) ->
     # position so it aligns with the previous top position.
     moveTop(originalOffset.top - $element.offset().top)
 
-    $fixedElements = up.layout.fixedChildren()
+    $fixedElements = up.layout.fixedChildren($element)
     for fixedElement in $fixedElements
       u.fixedToAbsolute(fixedElement, $viewport)
 

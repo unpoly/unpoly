@@ -395,7 +395,7 @@ up.dom = (($) ->
         swapPromises = []
 
         for step in extractSteps
-          up.log.group 'Updating %s', step.selector, ->
+          up.log.group 'Swapping fragment %s', step.selector, ->
             # Note that we must copy the options hash instead of changing it in-place,  since the
             # async swapElements() is scheduled for the next microtask and we must not change the options
             # for the previous iteration.
@@ -482,9 +482,6 @@ up.dom = (($) ->
 
     # Remember where the element came from in case someone needs to up.reload($new) later.
     setSource($new, options.source)
-
-    # Ensure that all transitions and animations have completed.
-    up.motion.finish($old)
 
     if pseudoClass
       # Text nodes are wrapped in a .up-insertion container so we can

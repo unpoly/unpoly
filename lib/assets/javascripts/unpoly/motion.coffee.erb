@@ -72,7 +72,7 @@ up.motion = (($) ->
     enabled: true
 
   reset = ->
-    finish()
+    motionTracker.reset()
     namedAnimations = u.copy(defaultNamedAnimations)
     namedTransitions = u.copy(defaultNamedTransitions)
     config.reset()
@@ -165,18 +165,14 @@ up.motion = (($) ->
     $element = $(elementOrSelector)
     options = animateOptions(options)
 
-    finishOnce($element, options).then ->
-      if !willAnimate($element, animation, options)
-        skipAnimate($element, animation)
-      else if u.isFunction(animation)
-        animation($element, options)
-      else if u.isString(animation)
-        animate($element, findNamedAnimation(animation), options)
-      else if u.isOptions(animation)
-        animateWithCss($element, animation, options)
-      else
-        # Error will be converted to rejected promise in a then() callback
-        up.fail('Animation must be a function, animation name or object of CSS properties, but it was %o', animation)
+    animationFn = findAnimationFn(animation)
+    willRun = willAnimate($element, animation, options)
+
+    if willRun
+      runNow = -> animationFn($element, options)
+      motionTracker.claim($element, runNow, options)
+    else
+      skipAnimate($element, animation)
 
   willAnimate = ($elements, animationOrTransition, options) ->
     options = animateOptions(options)
@@ -194,16 +190,16 @@ up.motion = (($) ->
     # Signal that the animation is already done.
     Promise.resolve()
 
+  animCount = 0
+
   ###**
   Animates the given element's CSS properties using CSS transitions.
 
-  If the element is already being animated, the previous animation
-  will instantly jump to its last frame before the new animation begins.
+  Does not track the animation, nor does it finishes existing animations
+  (use `up.motion.animate()` for that). It does, however, listen to the motionTracker's
+  finish event.
 
-  To improve performance, the element will be forced into compositing for
-  the duration of the animation.
-
-  @function up.util.cssAnimate
+  @function animateNow
   @param {Element|jQuery|string} elementOrSelector
     The element to animate.
   @param {Object} lastFrame
@@ -220,77 +216,10 @@ up.motion = (($) ->
     A promise that fulfills when the animation ends.
   @internal
   ###
-  animateWithCss = ($element, lastFrame, options) ->
-    lastFrameKebab = u.kebabCaseKeys(lastFrame)
-    lastFrameCamel = u.camelCaseKeys(lastFrame)
-    element = u.element($element)
-
-    startCssTransition = ->
-      hadTransitionBefore = u.hasTransition(element)
-
-      deferred = u.newDeferred()
-      # May not call this finish() since this would override the global finish()
-      # function in this scope. We really need `let`, which CoffeeScript will never get.
-      fulfill = -> deferred.resolve()
-  
-      onTransitionEnd = (event) ->
-        # Check if the transitionend event was caused by our own transition,
-        # and not by some other transition that happens to affect this element.
-        fulfill() if event.target == element
-
-      # Animating code is expected to listen to this event to enable external code
-      # to fulfil the animation.
-      onFinish = fulfill
-      $element.on(motionTracker.finishEvent, onFinish)
-  
-      # Ideally, we want to fulfil when we receive the `transitionend` event
-      $element.on('transitionend', onTransitionEnd)
-  
-      # The `transitionend` event might not fire reliably if other transitions
-      # are interfering on the same element. This is why we register a fallback
-      # timeout that forces the animation to fulfil a few ms later.
-      transitionTimingTolerance = 8
-      cancelFallbackTimer = u.setTimer(options.duration + transitionTimingTolerance, fulfill)
-
-      # All clean-up is handled in the following then() handler.
-      # This way it will be run both when the animation finishAnimatees naturally and
-      # when it is finishAnimateed externally.
-      deferred.then ->
-        # Disable all three triggers that would fulfil the motion:
-        $element.off(motionTracker.finishEvent, onFinish)
-        $element.off('transitionend', onTransitionEnd)
-        clearTimeout(cancelFallbackTimer)
-
-        # To interrupt the running transition we *must* set it to 'none' exactly.
-        # We cannot simply restore the old transition properties because browsers
-        # would simply keep transitioning.
-        u.writeInlineStyle($element, transition: 'none')
-  
-        # If there is no repaint between the "none" transition and restoring the previous
-        # transition, the browser will simply keep transitioning. I'm sorry.
-        if hadTransitionBefore
-          u.forceRepaint($element)
-          undoTransition()
-
-      # CSS will start animating when we set the `transition-*` properties and then change
-      # the animating properties to the last frame.
-      transitionCamel =
-        transitionProperty: Object.keys(lastFrameKebab).join(', ') # still kebab
-        transitionDuration: "#{options.duration}ms"
-        transitionDelay: "#{options.delay}ms"
-        transitionTimingFunction: options.easing
-      undoTransition = u.writeTemporaryStyle($element, transitionCamel)
-
-      u.writeInlineStyle($element, lastFrameCamel)
-  
-      # Return a promise that fulfills when either the animation ends
-      # or someone finishes the animation.
-      deferred.promise()
-
-    if options.motionTracked
-      startCssTransition()
-    else
-      motionTracker.start($element, startCssTransition)
+  animateNow = ($element, lastFrame, options) ->
+    options = u.merge(options, finishEvent: motionTracker.finishEvent)
+    cssTransition = new up.CssTransition($element, lastFrame, options)
+    return cssTransition.start()
 
   ###**
   Extracts animation-related options from the given options hash.
@@ -308,8 +237,7 @@ up.motion = (($) ->
     consolidatedOptions.easing = u.option(userOptions.easing, u.presentAttr($element, 'up-easing'), moduleDefaults.easing, config.easing)
     consolidatedOptions.duration = Number(u.option(userOptions.duration, u.presentAttr($element, 'up-duration'), moduleDefaults.duration, config.duration))
     consolidatedOptions.delay = Number(u.option(userOptions.delay, u.presentAttr($element, 'up-delay'), moduleDefaults.delay, config.delay))
-    consolidatedOptions.finishedMotion = userOptions.finishedMotion # this is required by animate() and finishOnceBeforeMotion()
-    consolidatedOptions.trackedMotion = userOptions.trackedMotion # this is required so animate() doesn't override the tracking from morph()
+    consolidatedOptions.trackMotion = userOptions.trackMotion # required by up.MotionTracker
     consolidatedOptions
       
   findNamedAnimation = (name) ->
@@ -333,8 +261,6 @@ up.motion = (($) ->
   @stable
   ###
   finish = (elementOrSelector) ->
-    # Don't emit expensive events if no animation can be running anyway
-    return Promise.resolve() unless up.motion.isEnabled()
     motionTracker.finish(elementOrSelector)
 
   ###**
@@ -426,22 +352,23 @@ up.motion = (($) ->
       # Scroll $new into position before we start the enter animation.
       up.layout.revealOrRestoreScroll($new, scrollOptions)
 
-    finishOnce($both, options).then ->
-      if willMorph
-        up.puts 'Morphing %o to %o with transition %o', $old.get(0), $new.get(0), transitionObject
-        restoreOldClass = u.addTemporaryClass($old, ['up-morphing', 'up-old'])
-        restoreNewClass = u.addTemporaryClass($new, ['up-morphing', 'up-new'])
+    if willMorph
+      if motionTracker.isActive($old) && options.trackMotion is false
+        return transitionFn($old, $new, options)
 
-        $viewport = up.layout.viewportOf($old)
-        scrollTopBeforeReveal = $viewport.scrollTop()
+      up.puts 'Morphing %o to %o with transition %o', $old.get(0), $new.get(0), transitionObject
 
-        oldRemote = up.layout.absolutize $old,
-          # Because the insertion will shift elements visually, we must delay insertion
-          # until absolutize() has measured the bounding box of the old element.
-          afterMeasure: ->
-            $new.insertBefore($old)
-            options.afterInsert()
+      $viewport = up.layout.viewportOf($old)
+      scrollTopBeforeReveal = $viewport.scrollTop()
 
+      oldRemote = up.layout.absolutize $old,
+        # Because the insertion will shift elements visually, we must delay insertion
+        # until absolutize() has measured the bounding box of the old element.
+        afterMeasure: ->
+          $new.insertBefore($old)
+          options.afterInsert()
+
+      trackable = ->
         # Scroll $new into position before we start the enter animation.
         promise = scrollNew()
 
@@ -452,38 +379,27 @@ up.motion = (($) ->
           scrollTopAfterReveal = $viewport.scrollTop()
           oldRemote.moveTop(scrollTopAfterReveal - scrollTopBeforeReveal)
 
-          motionTracker.start $both, ->
-            options.trackedMotion = true
-            transitionFn($old, $new, options)
+          transitionFn($old, $new, options)
 
         promise = promise.then ->
           options.beforeDetach()
           $old.detach()
           oldRemote.$bounds.remove()
           options.afterDetach()
-          restoreOldClass()
-          restoreNewClass()
 
         return promise
 
-      else
-        options.beforeDetach()
-        # Swapping the elements directly with replaceWith() will cause
-        # jQuery to remove all data attributes, which we use to store destructors
-        swapElementsDirectly($old, $new)
-        options.afterInsert()
-        options.afterDetach()
-        promise = scrollNew()
-        return promise
+      motionTracker.claim($both, trackable, options)
 
-  finishOnce = ($elements, options) ->
-    # Finish existing transitions, but only once in case morph() or animate() is called recursively.
-    if options.finishedMotion
-      Promise.resolve()
     else
-      # Use options to persist that we have finished motion.
-      options.finishedMotion = true
-      finish($elements)
+      options.beforeDetach()
+      # Swapping the elements directly with replaceWith() will cause
+      # jQuery to remove all data attributes, which we use to store destructors
+      swapElementsDirectly($old, $new)
+      options.afterInsert()
+      options.afterDetach()
+      promise = scrollNew()
+      return promise
 
   findTransitionFn = (object) ->
     if isNone(object)
@@ -491,21 +407,40 @@ up.motion = (($) ->
     else if u.isFunction(object)
       object
     else if u.isArray(object)
-      if isNone(object[0]) && isNone(object[1])
-        # A composition of two "none" animations is again a "none" animation
-        undefined
-      else
-        ($old, $new, options) -> Promise.all([
-          animate($old, object[0], options),
-          animate($new, object[1], options)
-        ])
+      composeTransitionFn(object...)
     else if u.isString(object)
       if object.indexOf('/') >= 0 # Compose a transition from two animation names
-        findTransitionFn(object.split('/'))
+        composeTransitionFn(object.split('/')...)
       else if namedTransition = namedTransitions[object]
         findTransitionFn(namedTransition)
-      else
-        up.fail("Unknown transition %o", object)
+    else
+      up.fail("Unknown transition %o", object)
+
+  composeTransitionFn = (oldAnimation, newAnimation) ->
+    if isNone(oldAnimation) && isNone(oldAnimation)
+      # A composition of two null-animations is a null-transform
+      # and should be skipped.
+      undefined
+    else
+      oldAnimationFn = findAnimationFn(oldAnimation) || u.asyncNoop
+      newAnimationFn = findAnimationFn(newAnimation) || u.asyncNoop
+      ($old, $new, options) ->
+        Promise.all([
+          oldAnimationFn($old, options),
+          newAnimationFn($new, options)
+        ])
+
+  findAnimationFn = (object) ->
+    if isNone(object)
+      undefined
+    else if u.isFunction(object)
+      object
+    else if u.isString(object)
+      findNamedAnimation(object)
+    else if u.isOptions(object)
+      ($element, options) -> animateNow($element, object, options)
+    else
+      up.fail('Unknown animation %o', object)
 
   swapElementsDirectly = ($old, $new) ->
     # jQuery will actually let us .insertBefore the new <body> tag,
@@ -546,7 +481,7 @@ up.motion = (($) ->
   @stable
   ###
   registerTransition = (name, transition) ->
-    namedTransitions[name] = transition
+    namedTransitions[name] = findTransitionFn(transition)
 
   ###**
   Defines a named animation.
@@ -581,7 +516,7 @@ up.motion = (($) ->
   @stable
   ###
   registerAnimation = (name, animation) ->
-    namedAnimations[name] = animation
+    namedAnimations[name] = findAnimationFn(animation)
 
   snapshot = ->
     defaultNamedAnimations = u.copy(namedAnimations)
@@ -600,12 +535,12 @@ up.motion = (($) ->
 
   registerAnimation('fade-in', ($element, options) ->
     u.writeInlineStyle($element, opacity: 0)
-    animate($element, { opacity: 1 }, options)
+    animateNow($element, { opacity: 1 }, options)
   )
 
   registerAnimation('fade-out', ($element, options) ->
     u.writeInlineStyle($element, opacity: 1)
-    animate($element, { opacity: 0 }, options)
+    animateNow($element, { opacity: 0 }, options)
   )
 
   translateCss = (x, y) ->
@@ -615,7 +550,7 @@ up.motion = (($) ->
     u.writeInlineStyle($element, translateCss(0, 0))
     box = u.measure($element)
     travelDistance = box.top + box.height
-    animate($element, translateCss(0, -travelDistance), options)
+    animateNow($element, translateCss(0, -travelDistance), options)
   )
 
   registerAnimation('move-from-top', ($element, options) ->
@@ -623,14 +558,14 @@ up.motion = (($) ->
     box = u.measure($element)
     travelDistance = box.top + box.height
     u.writeInlineStyle($element, translateCss(0, -travelDistance))
-    animate($element, translateCss(0, 0), options)
+    animateNow($element, translateCss(0, 0), options)
   )
 
   registerAnimation('move-to-bottom', ($element, options) ->
     u.writeInlineStyle($element, translateCss(0, 0))
     box = u.measure($element)
     travelDistance = u.clientSize().height - box.top
-    animate($element, translateCss(0, travelDistance), options)
+    animateNow($element, translateCss(0, travelDistance), options)
   )
 
   registerAnimation('move-from-bottom', ($element, options) ->
@@ -638,14 +573,14 @@ up.motion = (($) ->
     box = u.measure($element)
     travelDistance = u.clientSize().height - box.top
     u.writeInlineStyle($element, translateCss(0, travelDistance))
-    animate($element, translateCss(0, 0), options)
+    animateNow($element, translateCss(0, 0), options)
   )
 
   registerAnimation('move-to-left', ($element, options) ->
     u.writeInlineStyle($element, translateCss(0, 0))
     box = u.measure($element)
     travelDistance = box.left + box.width
-    animate($element, translateCss(-travelDistance, 0), options)
+    animateNow($element, translateCss(-travelDistance, 0), options)
   )
 
   registerAnimation('move-from-left', ($element, options) ->
@@ -653,14 +588,14 @@ up.motion = (($) ->
     box = u.measure($element)
     travelDistance = box.left + box.width
     u.writeInlineStyle($element, translateCss(-travelDistance, 0))
-    animate($element, translateCss(0, 0), options)
+    animateNow($element, translateCss(0, 0), options)
   )
 
   registerAnimation('move-to-right', ($element, options) ->
     u.writeInlineStyle($element, translateCss(0, 0))
     box = u.measure($element)
     travelDistance = u.clientSize().width - box.left
-    animate($element, translateCss(travelDistance, 0), options)
+    animateNow($element, translateCss(travelDistance, 0), options)
   )
 
   registerAnimation('move-from-right', ($element, options) ->
@@ -668,7 +603,7 @@ up.motion = (($) ->
     box = u.measure($element)
     travelDistance = u.clientSize().width - box.left
     u.writeInlineStyle($element, translateCss(travelDistance, 0))
-    animate($element, translateCss(0, 0), options)
+    animateNow($element, translateCss(0, 0), options)
   )
 
   registerAnimation('roll-down', ($element, options) ->
@@ -697,6 +632,7 @@ up.motion = (($) ->
   animateOptions: animateOptions
   willAnimate: willAnimate
   finish: finish
+  finishCount: -> motionTracker.finishCount
   transition: registerTransition
   animation: registerAnimation
   config: config

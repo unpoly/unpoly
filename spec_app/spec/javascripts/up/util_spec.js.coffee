@@ -586,6 +586,29 @@ describe 'up.util', ->
         expect(up.util.selectorForElement($element)).toBe('[aria-label="foo\\"bar"]')
 
 
+    describe 'up.util.addTemporaryClass', ->
+
+      it 'adds the given class to the given element', ->
+        $element = affix('.foo.bar')
+        element = $element.get(0)
+
+        expect(element.className).toEqual('foo bar')
+
+        up.util.addTemporaryClass(element, 'baz')
+
+        expect(element.className).toEqual('foo bar baz')
+
+      it 'returns a function that restores the original class', ->
+        $element = affix('.foo.bar')
+        element = $element.get(0)
+
+        restoreClass = up.util.addTemporaryClass(element, 'baz')
+        expect(element.className).toEqual('foo bar baz')
+
+        restoreClass()
+        expect(element.className).toEqual('foo bar')
+
+
     describe 'up.util.castedAttr', ->
 
       it 'returns true if the attribute value is the string "true"', ->

@@ -1439,18 +1439,22 @@ describe 'up.dom', ->
             expect('.container').toHaveText('new text')
             expect(destructor).toHaveBeenCalledWith('old text')
 
-        it 'calls destructors on the old element after a { transition }', asyncSpec (next) ->
+        it 'calls destructors on the old element after a { transition }', (done) ->
           destructor = jasmine.createSpy('destructor')
           up.compiler '.container', ($element) ->
             -> destructor($element.text())
           $container = affix('.container').text('old text')
           up.hello($container)
 
-          up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 10)
+          up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
 
-          next.after 50, =>
+          u.setTimer 50, =>
+            expect(destructor).not.toHaveBeenCalled()
+
+          u.setTimer 220, =>
             expect('.container').toHaveText('new text')
             expect(destructor).toHaveBeenCalledWith('old text')
+            done()
 
         it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec (next) ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
@@ -1499,15 +1503,15 @@ describe 'up.dom', ->
       describe 'with { transition } option', ->
 
         it 'morphs between the old and new element', asyncSpec (next) ->
-          affix('.element').text('version 1')
-          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 100, easing: 'linear')
+          affix('.element.v1').text('version 1')
+          up.extract('.element', '<div class="element v2">version 2</div>', transition: 'cross-fade', duration: 100, easing: 'linear')
 
           $old = undefined
           $new = undefined
 
           next =>
-            $old = $('.element.up-old')
-            $new = $('.element.up-new')
+            $old = $('.element.v1')
+            $new = $('.element.v2')
 
             expect($old).toHaveLength(1)
             expect(u.opacity($old)).toBeAround(1.0, 0.2)
@@ -1555,8 +1559,9 @@ describe 'up.dom', ->
             expect($version2).not.toHaveClass('up-destroying')
 
         it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
-          affix('.element').text('version 1')
-          up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
+          affix('.element.v1').text('version 1')
+
+          up.extract('.element', '<div class="element v2">version 2</div>', transition: 'cross-fade', duration: 200)
 
           next =>
             $ghost1 = $('.element:contains("version 1")')
@@ -1568,7 +1573,7 @@ describe 'up.dom', ->
             expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
 
           next =>
-            up.extract('.element', '<div class="element">version 3</div>', transition: 'cross-fade', duration: 200)
+            up.extract('.element', '<div class="element v3">version 3</div>', transition: 'cross-fade', duration: 200)
 
           next =>
             $ghost1 = $('.element:contains("version 1")')
@@ -1585,10 +1590,14 @@ describe 'up.dom', ->
         it 'delays the resolution of the returned promise until the transition is over', (done) ->
           affix('.element').text('version 1')
           resolution = jasmine.createSpy()
-          promise = up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 30)
+          promise = up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 60)
           promise.then(resolution)
           expect(resolution).not.toHaveBeenCalled()
-          u.setTimer 80, ->
+
+          u.setTimer 40, ->
+            expect(resolution).not.toHaveBeenCalled()
+
+          u.setTimer 200, ->
             expect(resolution).toHaveBeenCalled()
             done()
 
@@ -1944,7 +1953,7 @@ describe 'up.dom', ->
             expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container'), jasmine.anything())
             expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper'), jasmine.anything())
 
-        it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', (next) ->
+        it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
           up.on 'up:fragment:kept', (event) -> keptListener(event.$element, event.newData)
           $container = affix('.container')

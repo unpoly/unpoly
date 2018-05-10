@@ -18,6 +18,14 @@ up.util = (($) ->
   noop = (->)
 
   ###**
+  A function that returns a resolved promise.
+
+  @function up.util.asyncNoop
+  @internal
+  ###
+  asyncNoop = -> Promise.resolve()
+
+  ###**
   Ensures that the given function can only be called a single time.
   Subsequent calls will return the return value of the first call.
 
@@ -275,6 +283,7 @@ up.util = (($) ->
   @stable
   ###
   map = (array, block) ->
+    return [] if array.length == 0
     block = listBlock(block)
     for item, index in array
       block(item, index)
@@ -823,6 +832,10 @@ up.util = (($) ->
     addClass(element, klassOrKlasses)
     -> removeClass(element, klassOrKlasses)
 
+  hasClass = (element, klass) ->
+    classList = getElement(element).classList
+    classList.contains(klass)
+
   ###**
   Returns the first [present](/up.util.isPresent) element attribute
   among the given list of attribute names.
@@ -969,7 +982,17 @@ up.util = (($) ->
     element = getElement(element)
     element.offsetHeight
 
-  cssAnimate = (elementOrSelector, lastFrame, opts) ->
+  ###*
+  @function up.util.finishTransition
+  @internal
+  ###
+  concludeCssTransition = (element) ->
+    undo = writeTemporaryStyle(element, transition: 'none')
+    # Browsers need to paint at least one frame without a transition to stop the
+    # animation. In theory we could just wait until the next paint, but in case
+    # someone will set another transition after us, let's force a repaint here.
+    forceRepaint(element)
+    return undo
 
   ###**
   @internal
@@ -1848,14 +1871,19 @@ up.util = (($) ->
   ###*
   Returns whether the given element has a CSS transition set.
 
-  @function up.util.hasTransition
+  @function up.util.hasCssTransition
   @return {boolean}
   @internal
   ###
-  hasTransition = (element) ->
-    element = getElement(element)
-    prop = readComputedStyle(element, 'transitionProperty')
-    duration = readComputedStyleNumber(element,  'transitionDuration')
+  hasCssTransition = (elementOrStyleHash) ->
+    if isOptions(elementOrStyleHash)
+      style = elementOrStyleHash
+    else
+      element = getElement(element)
+      style = getComputedStyle(element)
+
+    prop = style.transitionProperty
+    duration = style.transitionDuration
     # The default transition for elements is actually "all 0s ease 0s"
     # instead of "none", although that has the same effect as "none".
     noTransition = (prop == 'none' || (prop == 'all' && duration == 0))
@@ -2030,11 +2058,12 @@ up.util = (($) ->
   nextFrame: nextFrame
   measure: measure
   addClass: addClass
-  addTemporaryClass: addTemporaryClass
   removeClass: removeClass
+  hasClass: hasClass
+  addTemporaryClass: addTemporaryClass
   writeTemporaryStyle: writeTemporaryStyle
-  cssAnimate: cssAnimate
   forceRepaint: forceRepaint
+  concludeCssTransition: concludeCssTransition
   escapePressed: escapePressed
   copyAttributes: copyAttributes
   selectInSubtree: selectInSubtree
@@ -2066,6 +2095,7 @@ up.util = (($) ->
   extractOptions: extractOptions
   isDetached: isDetached
   noop: noop
+  asyncNoop: asyncNoop
   opacity: opacity
   whenReady: whenReady
   identity: identity
@@ -2094,7 +2124,7 @@ up.util = (($) ->
   readComputedStyleNumber: readComputedStyleNumber
   readInlineStyle: readInlineStyle
   writeInlineStyle: writeInlineStyle
-  hasTransition: hasTransition
+  hasCssTransition: hasCssTransition
 
 )(jQuery)
 

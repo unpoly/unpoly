@@ -533,3 +533,13 @@ describe 'up.layout', ->
           left: '27px',
           top: '27px'
 
+      it "does not convert fixed elements outside the element's subtree (bugfix)", ->
+        $element = affix('.element').css(position: 'absolute')
+        $fixedChild = $('<div class="fixed-child" up-fixed></div>').css(position: 'fixed')
+        $fixedChild.appendTo($element)
+        $fixedSibling = affix('[up-fixed]').css(position: 'fixed')
+
+        up.layout.absolutize($element)
+
+        expect($fixedChild.css('position')).toEqual('absolute')
+        expect($fixedSibling.css('position')).toEqual('fixed')

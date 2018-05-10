@@ -345,7 +345,7 @@ up.popup = (($) ->
     attachNow($link, options)
 
   toggleAsap = ($link, options) ->
-    if $link.is('.up-current')
+    if u.hasClass($link, 'up-current')
       closeAsap()
     else
       attachAsap($link, options)

@@ -3,43 +3,43 @@ u = up.util
 class up.MotionTracker
 
   constructor: (name) ->
-    @className = "up-#{name}"
+    @activeClass = "up-#{name}"
     @dataKey = "up-#{name}-finished"
-    @selector = ".#{@className}"
+    @selector = ".#{@activeClass}"
     @finishEvent = "up:#{name}:finish"
+    @finishCount = 0
+    @clusterCount = 0
 
   ###**
-  Finishes all animations in the given element's ancestors and descendants,
+  Finishes all animations in the given element cluster's ancestors and descendants,
   then calls the animator.
-
-  @method claim
-  @param {jQuery} $element
-  @param {Function(jQuery): Promise} animator
-  @return {Promise} A promise that is fulfilled when the new animation ends.
-  ###
-  claim: ($element, animator) =>
-    @finish($element).then =>
-      @start($element, animator)
-
-  ###**
-  Calls the given animator to animate the given element.
 
   The animation returned by the animator is tracked so it can be
   [`finished`](/up.MotionTracker.finish) later.
 
-  No animations are finished before starting the new animation.
-  Use [`claim()`](/up.MotionTracker.claim) for that.
-
   @method claim
-  @param {jQuery} $elements
+  @param {jQuery} $cluster
   @param {Function(jQuery): Promise} animator
+  @param {Object} memory.trackMotion = true
+    Whether
   @return {Promise} A promise that is fulfilled when the new animation ends.
   ###
-  start: ($elements, animator) ->
-    promise = @whileForwardingFinishEvent($elements, animator)
-    @markElement($elements, promise)
-    promise.then => @unmarkElement($elements)
-    promise
+  claim: (cluster, animator, memory = {}) =>
+    $cluster = $(cluster)
+    memory.trackMotion = u.option(memory.trackMotion, up.motion.isEnabled())
+    if memory.trackMotion is false
+      # Since we don't want recursive tracking or finishing, we could run
+      # the animator() now. However, since the else branch is async, we push
+      # the animator into the microtask queue to be async as well.
+      u.microtask(animator)
+    else
+      memory.trackMotion = false
+      @finish($cluster).then =>
+        promise = @whileForwardingFinishEvent($cluster, animator)
+        promise = promise.then => @unmarkCluster($cluster)
+        # Attach the modified promise to the cluster's elements
+        @markCluster($cluster, promise)
+        promise
 
   ###**
   @method finish
@@ -49,15 +49,20 @@ class up.MotionTracker
   @return {Promise} A promise that is fulfilled when animations have finished.
   ###
   finish: (elements) =>
+    @finishCount++
+    return Promise.resolve() if @clusterCount == 0 || !up.motion.isEnabled()
     $elements = @expandFinishRequest(elements)
     allFinished = u.map($elements, @finishOneElement)
     Promise.all(allFinished)
 
-  expandFinishRequest: (elements) ->
+  expandFinishRequest: (elements) =>
     if elements
       u.selectInDynasty($(elements), @selector)
     else
       $(@selector)
+
+  isActive: (element) =>
+    u.hasClass(element, @activeClass)
 
   finishOneElement: (element) =>
     $element = $(element)
@@ -65,12 +70,16 @@ class up.MotionTracker
     # Animating code is expected to listen to this event, fast-forward
     # the animation and resolve their promise. All built-ins like
     # `up.animate`, `up.morph`, or `up.scroll` behave that way.
-    $element.trigger(@finishEvent)
+    @emitFinishEvent($element)
 
     # If animating code ignores the event, we cannot force the animation to
     # finish from here. We will wait for the animation to end naturally before
     # starting the next animation.
     @whenElementFinished($element)
+
+  emitFinishEvent: ($element, eventAttrs = {}) =>
+    eventAttrs = u.merge({ $element: $element, message: false }, eventAttrs)
+    up.emit(@finishEvent, eventAttrs)
 
   whenElementFinished: ($element) =>
     # There are some cases related to element ghosting where an element
@@ -78,13 +87,15 @@ class up.MotionTracker
     # a resolved promise.
     $element.data(@dataKey) || Promise.resolve()
 
-  markElement: ($element, promise) =>
-    $element.addClass(@className)
-    $element.data(@dataKey, promise)
+  markCluster: ($cluster, promise) =>
+    @clusterCount++
+    $cluster.addClass(@activeClass)
+    $cluster.data(@dataKey, promise)
 
-  unmarkElement: ($element) =>
-    $element.removeClass(@className)
-    $element.removeData(@dataKey)
+  unmarkCluster: ($cluster) =>
+    @clusterCount--
+    $cluster.removeClass(@activeClass)
+    $cluster.removeData(@dataKey)
 
   forwardFinishEvent: ($original, $ghost, duration) =>
     @start $original, =>
@@ -96,13 +107,19 @@ class up.MotionTracker
 
   whileForwardingFinishEvent: ($elements, fn) =>
     return fn() if $elements.length < 2
-
     doForward = (event) =>
       unless event.forwarded
-        u.each $elements.not(event.target), (element) =>
-          up.bus.emit(@finishEvent, forwarded: true, $element: $(element))
+        u.each $elements, (element) =>
+          $element = $(element)
+          if element != event.target && @isActive($element)
+            @emitFinishEvent($element, forwarded: true)
 
     # Forward the finish event to the $ghost that is actually animating
     $elements.on @finishEvent, doForward
     # Our own pseudo-animation finishes when the actual animation on $ghost finishes
     fn().then => $elements.off @finishEvent, doForward
+
+  reset: =>
+    @finish().then =>
+      @finishCount = 0
+      @clusterCount = 0

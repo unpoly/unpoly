@@ -27,15 +27,52 @@ describe 'up.motion', ->
 
         u.setTimer 50, ->
           expect(resolveSpy).not.toHaveBeenCalled()
-          u.setTimer 100, ->
+          u.setTimer 50 + (timingTolerance = 120), ->
             expect(resolveSpy).toHaveBeenCalled()
             done()
 
       it 'cancels an existing animation on the element by instantly jumping to the last frame', asyncSpec (next) ->
         $element = affix('.element').text('content')
         up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
-        next => up.animate($element, { 'fade-in' }, duration: 100, easing: 'linear')
-        next => expect($element.css('font-size')).toEqual('40px')
+
+        next =>
+          up.animate($element, { 'fade-in' }, duration: 100, easing: 'linear')
+
+        next =>
+          expect($element.css('font-size')).toEqual('40px')
+
+      describe 'when up.animate() is called from inside an animation function', ->
+
+        it 'animates', (done) ->
+          $element = affix('.element').text('content')
+
+          animation = ($element, options) ->
+            u.writeInlineStyle($element, opacity: 0)
+            up.animate($element, { opacity: 1 }, options)
+
+          up.animate($element, animation, duration: 200, easing: 'linear')
+
+          u.setTimer 5, ->
+            expect($element).toHaveOpacity(0.0, 0.25)
+          u.setTimer 100, ->
+            expect($element).toHaveOpacity(0.5, 0.25)
+          u.setTimer 200, ->
+            expect($element).toHaveOpacity(1.0, 0.25)
+            done()
+
+        it "finishes animations only once", (done) ->
+          $element = affix('.element').text('content')
+
+          animation = ($element, options) ->
+            u.writeInlineStyle($element, opacity: 0)
+            up.animate($element, { opacity: 1 }, options)
+
+          up.animate($element, animation, duration: 200, easing: 'linear')
+
+          u.nextFrame =>
+            expect(up.motion.finishCount()).toEqual(1)
+            done()
+
 
       describe 'with animations disabled globally', ->
 
@@ -103,7 +140,7 @@ describe 'up.motion', ->
             expect(Number($element1.css('opacity'))).toEqual(1)
             expect(Number($element2.css('opacity'))).toBeAround(0, 0.1)
 
-        it 'restores CSS transitions from before the Unpoly transition', asyncSpec (next) ->
+        it 'restores CSS transitions from before the Unpoly animation', asyncSpec (next) ->
           $element = affix('.element').text('content')
           $element.css('transition': 'font-size 3s ease')
           oldTransitionProperty = $element.css('transition-property')
@@ -120,6 +157,48 @@ describe 'up.motion', ->
             expect(currentTransitionProperty).toEqual(oldTransitionProperty)
             expect(currentTransitionProperty).toContain('font-size')
             expect(currentTransitionProperty).not.toContain('opacity')
+
+        it 'pauses an existing CSS transitions and restores it once the Unpoly animation is done', asyncSpec (next) ->
+          $element = affix('.element').text('content').css
+            backgroundColor: 'yellow'
+            fontSize: '10px'
+            height: '20px'
+
+          expect(parseFloat($element.css('fontSize'))).toBeAround(10, 0.1)
+          expect(parseFloat($element.css('height'))).toBeAround(20, 0.1)
+
+          next.after 10, =>
+            $element.css
+              transition: 'font-size 500ms linear, height 500ms linear'
+              fontSize: '100px'
+              height: '200px'
+
+          next.after 250, =>
+            # Original CSS transition should now be ~50% done
+            @fontSizeBeforeAnimate = parseFloat($element.css('fontSize'))
+            @heightBeforeAnimate = parseFloat($element.css('height'))
+
+            expect(@fontSizeBeforeAnimate).toBeAround(0.5 * (100 - 10), 20)
+            expect(@heightBeforeAnimate).toBeAround(0.5 * (200 - 20), 40)
+
+            up.animate($element, 'fade-in', duration: 500, easing: 'linear')
+
+          next.after 250, =>
+            # Original CSS transition should remain paused at ~50%
+            # Unpoly animation should now be ~50% done
+            expect(parseFloat($element.css('fontSize'))).toBeAround(@fontSizeBeforeAnimate, 2)
+            expect(parseFloat($element.css('height'))).toBeAround(@heightBeforeAnimate, 2)
+            expect(parseFloat($element.css('opacity'))).toBeAround(0.5, 0.3)
+
+          next.after 250, =>
+            # Unpoly animation should now be done
+            # The original transition resumes. For technical reasons it will take
+            # its full duration for the remaining frames of the transition.
+            expect(parseFloat($element.css('opacity'))).toBeAround(1.0, 0.3)
+
+          next.after (500 + (tolerance = 125)), =>
+            expect(parseFloat($element.css('fontSize'))).toBeAround(100, 20)
+            expect(parseFloat($element.css('height'))).toBeAround(200, 40)
 
 
         it 'cancels an existing transition on the old element by instantly jumping to the last frame', asyncSpec (next) ->
@@ -187,6 +266,30 @@ describe 'up.motion', ->
             expect($('.up-bounds').length).toBe(0)
 
 
+        it 'emits an up:motion:finish event on the given animating element, so custom animation functions can react to the finish request', asyncSpec (next) ->
+          $element = affix('.element').text('element text')
+          listener = jasmine.createSpy('finish event listener')
+          $element.on('up:motion:finish', listener)
+
+          up.animate($element, 'fade-in')
+
+          next =>
+            expect(listener).not.toHaveBeenCalled()
+            up.motion.finish()
+
+          next =>
+            expect(listener).toHaveBeenCalled()
+
+
+        it 'does not emit an up:motion:finish event if no element is animating', asyncSpec (next) ->
+          listener = jasmine.createSpy('finish event listener')
+          up.on('up:motion:finish', listener)
+          up.motion.finish()
+
+          next =>
+            expect(listener).not.toHaveBeenCalled()
+
+
       describe 'when called without arguments', ->
 
         it 'cancels all animations on the screen', asyncSpec (next) ->
@@ -229,7 +332,7 @@ describe 'up.motion', ->
           expect(u.opacity($old)).toBeAround(0.5, 0.25)
           expect(u.opacity($new)).toBeAround(0.5, 0.25)
 
-        next.after 150, =>
+        next.after (100 + (tolerance = 110)), =>
           expect(u.opacity($new)).toBeAround(1.0, 0.25)
           expect($old).toBeDetached()
 
@@ -266,13 +369,13 @@ describe 'up.motion', ->
 
         oldDims = u.measure($old)
 
-        up.morph($old, $new, 'cross-fade', duration: 30, easing: 'linear')
+        up.morph($old, $new, 'cross-fade', duration: 100, easing: 'linear')
 
         next =>
           expect(u.measure($old)).toEqual(oldDims)
           expect(u.measure($new)).toEqual(oldDims)
 
-        next.after 50, =>
+        next.after (100 + (timingTolerance = 120)), =>
           expect($old).toBeDetached()
           expect(u.measure($new)).toEqual(oldDims)
 
@@ -314,6 +417,92 @@ describe 'up.motion', ->
         morphDone.then ->
           expect('.up-bounds').not.toExist()
           done()
+
+
+      describe 'when up.animate() is called from inside a transition function', ->
+
+        it 'animates', asyncSpec (next) ->
+          $old = affix('.old').text('old content')
+          $new = affix('.new').text('new content').detach()
+
+          oldDims = u.measure($old)
+
+          transition = ($old, $new, options) ->
+            up.animate($old, 'fade-out', options)
+            up.animate($new, 'fade-in', options)
+
+          up.morph($old, $new, transition, duration: 200, easing: 'linear')
+
+          next =>
+            expect(u.measure($old)).toEqual(oldDims)
+            expect(u.measure($new)).toEqual(oldDims)
+
+            expect(u.opacity($old)).toBeAround(1.0, 0.25)
+            expect(u.opacity($new)).toBeAround(0.0, 0.25)
+
+          next.after 100, =>
+            expect(u.opacity($old)).toBeAround(0.5, 0.25)
+            expect(u.opacity($new)).toBeAround(0.5, 0.25)
+
+          next.after (100 + (tolerance = 110)), =>
+            expect(u.opacity($new)).toBeAround(1.0, 0.1)
+            expect($old).toBeDetached()
+            expect($new).toBeAttached()
+
+        it 'finishes animations only once', asyncSpec (next) ->
+          $old = affix('.old').text('old content')
+          $new = affix('.new').text('new content').detach()
+
+          transition = ($old, $new, options) ->
+            up.animate($old, 'fade-out', options)
+            up.animate($new, 'fade-in', options)
+
+          up.morph($old, $new, transition, duration: 200, easing: 'linear')
+
+          next ->
+            expect(up.motion.finishCount()).toEqual(1)
+
+      describe 'when up.morph() is called from inside a transition function', ->
+
+        it 'morphs', asyncSpec (next) ->
+          $old = affix('.old').text('old content')
+          $new = affix('.new').text('new content').detach()
+
+          oldDims = u.measure($old)
+
+          transition = ($old, $new, options) ->
+            up.morph($old, $new, 'cross-fade', options)
+
+          up.morph($old, $new, transition, duration: 200, easing: 'linear')
+
+          next =>
+            expect(u.measure($old)).toEqual(oldDims)
+            expect(u.measure($new)).toEqual(oldDims)
+
+            expect(u.opacity($old)).toBeAround(1.0, 0.25)
+            expect(u.opacity($new)).toBeAround(0.0, 0.25)
+
+          next.after 100, =>
+            expect(u.opacity($old)).toBeAround(0.5, 0.25)
+            expect(u.opacity($new)).toBeAround(0.5, 0.25)
+
+          next.after (100 + (tolerance = 110)), =>
+            expect(u.opacity($new)).toBeAround(1.0, 0.25)
+            expect($old).toBeDetached()
+            expect($new).toBeAttached()
+
+        it "finishes animations only once", asyncSpec (next) ->
+          $old = affix('.old').text('old content')
+          $new = affix('.new').text('new content').detach()
+
+          transition = ($old, $new, options) ->
+            up.morph($old, $new, 'cross-fade', options)
+
+          up.morph($old, $new, transition, duration: 200, easing: 'linear')
+
+          next ->
+            expect(up.motion.finishCount()).toEqual(1)
+
 
       describe 'with { reveal: true } option', ->
 
