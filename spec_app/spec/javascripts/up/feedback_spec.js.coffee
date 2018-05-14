@@ -262,6 +262,20 @@ describe 'up.feedback', ->
               expect($popupLink).not.toHaveClass('up-current')
               expect($unrelatedLink).not.toHaveClass('up-current')
 
+          it "respects links that are added to an existing [up-nav] by a fragment update", asyncSpec (next) ->
+            $nav = affix('.nav[up-nav]')
+            $link = $nav.affix('a[href="/foo"][up-target=".main"]')
+            $more = $nav.affix('.more')
+            up.hello($nav)
+
+            up.extract '.more', '<div class="more"><a href="/bar"></div>', history: '/bar'
+
+            next =>
+              $moreLink = $('.more').find('a')
+              expect($moreLink).toExist()
+              expect($moreLink).toHaveClass('up-current')
+
+
     describe '.up-active', ->
 
       describeCapability 'canPushState', ->
