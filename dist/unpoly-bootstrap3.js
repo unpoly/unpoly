@@ -1,4 +1,10 @@
 (function() {
+  up.feedback.config.currentClasses.push('active');
+
+  up.feedback.config.navSelectors.push('.nav');
+
+}).call(this);
+(function() {
   up.form.config.validateTargets.unshift('.form-group:has(&)');
 
 }).call(this);
@@ -16,10 +22,6 @@
 }).call(this);
 (function() {
   up.modal.config.template = "<div class=\"up-modal\">\n  <div class=\"up-modal-backdrop\"></div>\n  <div class=\"up-modal-viewport\">\n    <div class=\"up-modal-dialog modal-dialog\">\n      <div class=\"up-modal-content modal-content\"></div>\n    </div>\n  </div>\n</div>";
-
-}).call(this);
-(function() {
-  up.feedback.config.currentClasses.push('active');
 
 }).call(this);
 (function() {

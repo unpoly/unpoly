@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.55.1",
+    version: "0.56.0",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -41,8 +41,18 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, $submittingButton, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, all, always, any, appendRequestData, assign, assignPolyfill, attributeSelector, castedAttr, clientSize, compact, config, contains, copy, copyAttributes, createElementFromHtml, cssAnimate, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractOptions, fail, fixedToAbsolute, flatten, forceCompositing, forceRepaint, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, listBlock, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, multiSelector, muteRejection, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeUrl, nullJQuery, offsetParent, once, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, reject, rejectOnError, remove, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, setToArray, submittedValue, temporaryCss, times, toArray, trim, unJQuery, uniq, uniqBy, unresolvablePromise, unwrapElement, whenReady;
-    noop = $.noop;
+    var $createElementFromSelector, $createPlaceholder, $submittingButton, CASE_CONVERSION_GROUP, CSS_LENGTH_PROPS, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, addClass, addTemporaryClass, all, always, any, appendRequestData, arrayToSet, assign, assignPolyfill, asyncNoop, attributeSelector, camelCase, camelCaseKeys, castedAttr, changeClassList, clientSize, compact, concludeCssTransition, config, contains, convertCase, copy, copyAttributes, copyWithRenamedKeys, createElementFromHtml, cssLength, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractFromStyleObject, extractOptions, fail, fixedToAbsolute, flatten, forceRepaint, getElement, hasClass, hasCssTransition, hide, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isEqual, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, kebabCase, kebabCaseKeys, last, listBlock, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, muteRejection, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeStyleValueForWrite, normalizeUrl, nullJQuery, offsetParent, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, readComputedStyle, readComputedStyleNumber, readInlineStyle, reject, rejectOnError, remove, removeClass, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, setToArray, submittedValue, times, toArray, trim, uniq, uniqBy, unresolvablePromise, unwrapElement, whenReady, writeInlineStyle, writeTemporaryStyle;
+    noop = (function() {});
+
+    /***
+    A function that returns a resolved promise.
+    
+    @function up.util.asyncNoop
+    @internal
+     */
+    asyncNoop = function() {
+      return Promise.resolve();
+    };
 
     /***
     Ensures that the given function can only be called a single time.
@@ -141,7 +151,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     parseUrl = function(urlOrAnchor) {
       var anchor;
-      urlOrAnchor = unJQuery(urlOrAnchor);
+      if (isJQuery(urlOrAnchor)) {
+        urlOrAnchor = getElement(urlOrAnchor);
+      }
       if (urlOrAnchor.pathname) {
         return urlOrAnchor;
       }
@@ -179,17 +191,17 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     $createElementFromSelector = function(selector) {
-      var $element, $parent, $root, classes, conjunction, depthSelector, expression, html, i, id, iteration, j, len, len1, path, tag;
+      var $element, $parent, $root, classes, conjunction, depthSelector, expression, html, id, iteration, j, l, len, len1, path, tag;
       path = selector.split(/[ >]/);
       $root = null;
-      for (iteration = i = 0, len = path.length; i < len; iteration = ++i) {
+      for (iteration = j = 0, len = path.length; j < len; iteration = ++j) {
         depthSelector = path[iteration];
         conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g);
         tag = "div";
         classes = [];
         id = null;
-        for (j = 0, len1 = conjunction.length; j < len1; j++) {
-          expression = conjunction[j];
+        for (l = 0, len1 = conjunction.length; l < len1; l++) {
+          expression = conjunction[l];
           switch (expression[0]) {
             case ".":
               classes.push(expression.substr(1));
@@ -222,7 +234,8 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
-    @function $create
+    @function $createPlaceHolder
+    @internal
      */
     $createPlaceholder = function(selector, container) {
       var $placeholder;
@@ -252,7 +265,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @experimental
      */
     selectorForElement = function(element) {
-      var $element, ariaLabel, classes, i, id, klass, len, name, selector, tagName, upId;
+      var $element, ariaLabel, classes, id, j, klass, len, name, selector, tagName, upId;
       $element = $(element);
       selector = void 0;
       tagName = $element.prop('tagName').toLowerCase();
@@ -268,8 +281,8 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         selector = tagName + attributeSelector('name', name);
       } else if (classes = presence(nonUpClasses($element))) {
         selector = '';
-        for (i = 0, len = classes.length; i < len; i++) {
-          klass = classes[i];
+        for (j = 0, len = classes.length; j < len; j++) {
+          klass = classes[j];
           selector += "." + klass;
         }
       } else if (ariaLabel = presence($element.attr("aria-label"))) {
@@ -297,10 +310,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return parser.parseFromString(html, 'text/html');
     };
     assignPolyfill = function() {
-      var i, key, len, source, sources, target, value;
+      var j, key, len, source, sources, target, value;
       target = arguments[0], sources = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      for (i = 0, len = sources.length; i < len; i++) {
-        source = sources[i];
+      for (j = 0, len = sources.length; j < len; j++) {
+        source = sources[j];
         for (key in source) {
           if (!hasProp.call(source, key)) continue;
           value = source[key];
@@ -356,10 +369,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     map = function(array, block) {
-      var i, index, item, len, results;
+      var index, item, j, len, results;
+      if (array.length === 0) {
+        return [];
+      }
       block = listBlock(block);
       results = [];
-      for (index = i = 0, len = array.length; i < len; index = ++i) {
+      for (index = j = 0, len = array.length; j < len; index = ++j) {
         item = array[index];
         results.push(block(item, index));
       }
@@ -387,9 +403,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     times = function(count, block) {
-      var i, iteration, ref, results;
+      var iteration, j, ref, results;
       results = [];
-      for (iteration = i = 0, ref = count - 1; 0 <= ref ? i <= ref : i >= ref; iteration = 0 <= ref ? ++i : --i) {
+      for (iteration = j = 0, ref = count - 1; 0 <= ref ? j <= ref : j >= ref; iteration = 0 <= ref ? ++j : --j) {
         results.push(block(iteration));
       }
       return results;
@@ -482,7 +498,19 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     isBlank = function(object) {
-      return isMissing(object) || (isObject(object) && Object.keys(object).length === 0) || (object.length === 0);
+      if (isMissing(object)) {
+        return true;
+      }
+      if (isFunction(object)) {
+        return false;
+      }
+      if (isObject(object) && Object.keys(object).length === 0) {
+        return true;
+      }
+      if (object.length === 0) {
+        return true;
+      }
+      return false;
     };
 
     /***
@@ -683,16 +711,20 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
-    If given a jQuery collection, returns the underlying array of DOM element.
+    If given a jQuery collection, returns the first native DOM element in the collection.
+    If given a string, returns the first element matching that string.
     If given any other argument, returns the argument unchanged.
     
-    @function up.util.unJQuery
-    @param object
+    @function up.util.element
+    @param {jQuery|Element|String} object
+    @return {Element}
     @internal
      */
-    unJQuery = function(object) {
+    getElement = function(object) {
       if (isJQuery(object)) {
         return object.get(0);
+      } else if (isString(object)) {
+        return $(object).get(0);
       } else {
         return object;
       }
@@ -731,11 +763,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         for (key in defaults) {
           defaultValue = defaults[key];
           value = merged[key];
-          if (!isGiven(value)) {
-            merged[key] = defaultValue;
-          } else if (isObject(defaultValue) && isObject(value)) {
-            merged[key] = options(value, defaultValue);
+          if (isMissing(value)) {
+            value = defaultValue;
           }
+          merged[key] = value;
         }
       }
       return merged;
@@ -771,10 +802,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     detect = function(array, tester) {
-      var element, i, len, match;
+      var element, j, len, match;
       match = void 0;
-      for (i = 0, len = array.length; i < len; i++) {
-        element = array[i];
+      for (j = 0, len = array.length; j < len; j++) {
+        element = array[j];
         if (tester(element)) {
           match = element;
           break;
@@ -796,10 +827,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @experimental
      */
     any = function(array, tester) {
-      var element, i, index, len, match;
+      var element, index, j, len, match;
       tester = listBlock(tester);
       match = false;
-      for (index = i = 0, len = array.length; i < len; index = ++i) {
+      for (index = j = 0, len = array.length; j < len; index = ++j) {
         element = array[index];
         if (tester(element, index)) {
           match = true;
@@ -822,10 +853,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @experimental
      */
     all = function(array, tester) {
-      var element, i, index, len, match;
+      var element, index, j, len, match;
       tester = listBlock(tester);
       match = true;
-      for (index = i = 0, len = array.length; i < len; index = ++i) {
+      for (index = j = 0, len = array.length; j < len; index = ++j) {
         element = array[index];
         if (!tester(element, index)) {
           match = false;
@@ -857,15 +888,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     uniq = function(array) {
-      var set;
       if (array.length < 2) {
         return array;
       }
-      set = new Set();
-      each(array, function(element) {
-        return set.add(element);
-      });
-      return setToArray(set);
+      return setToArray(arrayToSet(array));
     };
 
     /**
@@ -909,6 +935,19 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         return array.push(elem);
       });
       return array;
+    };
+
+    /**
+    @function up.util.arrayToSet
+    @internal
+     */
+    arrayToSet = function(array) {
+      var set;
+      set = new Set();
+      array.forEach(function(elem) {
+        return set.add(elem);
+      });
+      return set;
     };
 
     /***
@@ -963,6 +1002,34 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         return contains(array2, element);
       });
     };
+    addClass = function(element, klassOrKlasses) {
+      return changeClassList(element, klassOrKlasses, 'add');
+    };
+    removeClass = function(element, klassOrKlasses) {
+      return changeClassList(element, klassOrKlasses, 'remove');
+    };
+    changeClassList = function(element, klassOrKlasses, fnName) {
+      var classList;
+      classList = getElement(element).classList;
+      if (isArray(klassOrKlasses)) {
+        return each(klassOrKlasses, function(klass) {
+          return classList[fnName](klass);
+        });
+      } else {
+        return classList[fnName](klassOrKlasses);
+      }
+    };
+    addTemporaryClass = function(element, klassOrKlasses) {
+      addClass(element, klassOrKlasses);
+      return function() {
+        return removeClass(element, klassOrKlasses);
+      };
+    };
+    hasClass = function(element, klass) {
+      var classList;
+      classList = getElement(element).classList;
+      return classList.contains(klass);
+    };
 
     /***
     Returns the first [present](/up.util.isPresent) element attribute
@@ -975,10 +1042,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       var $element, attrName, attrNames, values;
       $element = arguments[0], attrNames = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       values = (function() {
-        var i, len, results;
+        var j, len, results;
         results = [];
-        for (i = 0, len = attrNames.length; i < len; i++) {
-          attrName = attrNames[i];
+        for (j = 0, len = attrNames.length; j < len; j++) {
+          attrName = attrNames[j];
           results.push($element.attr(attrName));
         }
         return results;
@@ -1060,8 +1127,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     scrollbarWidth = memoize(function() {
       var $outer, outer, width;
       $outer = $('<div>');
+      outer = $outer.get(0);
       $outer.attr('up-viewport', '');
-      $outer.css({
+      writeInlineStyle(outer, {
         position: 'absolute',
         top: '0',
         left: '0',
@@ -1070,7 +1138,6 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         overflowY: 'scroll'
       });
       $outer.appendTo(document.body);
-      outer = $outer.get(0);
       width = outer.offsetWidth - outer.clientWidth;
       $outer.remove();
       return width;
@@ -1087,38 +1154,16 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       body = document.body;
       $body = $(body);
       html = document.documentElement;
-      bodyOverflow = $body.css('overflow-y');
+      bodyOverflow = readComputedStyle($body, 'overflowY');
       forcedScroll = bodyOverflow === 'scroll';
       forcedHidden = bodyOverflow === 'hidden';
       return forcedScroll || (!forcedHidden && html.scrollHeight > html.clientHeight);
     };
 
     /***
-    Modifies the given function so it only runs once.
-    Subsequent calls will return the previous return value.
-    
-    @function up.util.once
-    @param {Function} fun
-    @experimental
-     */
-    once = function(fun) {
-      var result;
-      result = void 0;
-      return function() {
-        var args;
-        args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-        if (fun != null) {
-          result = fun.apply(null, args);
-        }
-        fun = void 0;
-        return result;
-      };
-    };
-
-    /***
     Temporarily sets the CSS for the given element.
     
-    @function up.util.temporaryCss
+    @function up.util.writeTemporaryStyle
     @param {jQuery} $element
     @param {Object} css
     @param {Function} [block]
@@ -1128,43 +1173,20 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       A function that restores the original CSS when called.
     @internal
      */
-    temporaryCss = function(elementOrSelector, css, block) {
-      var $element, memo, oldCss;
+    writeTemporaryStyle = function(elementOrSelector, newCss, block) {
+      var $element, oldStyles, restoreOldStyles;
       $element = $(elementOrSelector);
-      oldCss = $element.css(Object.keys(css));
-      $element.css(css);
-      memo = function() {
-        return $element.css(oldCss);
+      oldStyles = readInlineStyle($element, Object.keys(newCss));
+      restoreOldStyles = function() {
+        return writeInlineStyle($element, oldStyles);
       };
+      writeInlineStyle($element, newCss);
       if (block) {
         block();
-        return memo();
+        return restoreOldStyles();
       } else {
-        return once(memo);
+        return restoreOldStyles;
       }
-    };
-
-    /***
-    Forces the given jQuery element into an accelerated compositing layer.
-    
-    @function up.util.forceCompositing
-    @internal
-     */
-    forceCompositing = function($element) {
-      var memo, oldTransforms;
-      oldTransforms = $element.css(['transform', '-webkit-transform']);
-      if (isBlank(oldTransforms) || oldTransforms['transform'] === 'none') {
-        memo = function() {
-          return $element.css(oldTransforms);
-        };
-        $element.css({
-          'transform': 'translateZ(0)',
-          '-webkit-transform': 'translateZ(0)'
-        });
-      } else {
-        memo = function() {};
-      }
-      return memo;
     };
 
     /***
@@ -1174,23 +1196,34 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     forceRepaint = function(element) {
-      element = unJQuery(element);
+      element = getElement(element);
       return element.offsetHeight;
     };
-    cssAnimate = function(elementOrSelector, lastFrame, opts) {};
+
+    /**
+    @function up.util.finishTransition
+    @internal
+     */
+    concludeCssTransition = function(element) {
+      var undo;
+      undo = writeTemporaryStyle(element, {
+        transition: 'none'
+      });
+      forceRepaint(element);
+      return undo;
+    };
 
     /***
     @internal
      */
     margins = function(selectorOrElement) {
-      var $element, withUnits;
-      $element = $(selectorOrElement);
-      withUnits = $element.css(['margin-top', 'margin-right', 'margin-bottom', 'margin-left']);
+      var element;
+      element = getElement(selectorOrElement);
       return {
-        top: parseFloat(withUnits['margin-top']),
-        right: parseFloat(withUnits['margin-right']),
-        bottom: parseFloat(withUnits['margin-bottom']),
-        left: parseFloat(withUnits['margin-left'])
+        top: readComputedStyleNumber(element, 'marginTop'),
+        right: readComputedStyleNumber(element, 'marginRight'),
+        bottom: readComputedStyleNumber(element, 'marginBottom'),
+        left: readComputedStyleNumber(element, 'marginLeft')
       };
     };
 
@@ -1254,11 +1287,11 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     copyAttributes = function($source, $target) {
-      var attr, i, len, ref, results;
+      var attr, j, len, ref, results;
       ref = $source.get(0).attributes;
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        attr = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        attr = ref[j];
         if (attr.specified) {
           results.push($target.attr(attr.name, attr.value));
         } else {
@@ -1275,7 +1308,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     selectInSubtree = function($element, selector) {
-      return $element.find(selector).addBack(selector);
+      var $matches;
+      $matches = $();
+      if ($element.is(selector)) {
+        $matches = $matches.add($element);
+      }
+      $matches = $matches.add($element.find(selector));
+      return $matches;
     };
 
     /***
@@ -1342,12 +1381,12 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     only = function() {
-      var filtered, i, len, object, properties, property;
+      var filtered, j, len, object, properties, property;
       object = arguments[0], properties = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       filtered = {};
-      for (i = 0, len = properties.length; i < len; i++) {
-        property = properties[i];
-        if (object.hasOwnProperty(property)) {
+      for (j = 0, len = properties.length; j < len; j++) {
+        property = properties[j];
+        if (property in object) {
           filtered[property] = object[property];
         }
       }
@@ -1364,11 +1403,11 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     except = function() {
-      var filtered, i, len, object, properties, property;
+      var filtered, j, len, object, properties, property;
       object = arguments[0], properties = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       filtered = copy(object);
-      for (i = 0, len = properties.length; i < len; i++) {
-        property = properties[i];
+      for (j = 0, len = properties.length; j < len; j++) {
+        property = properties[j];
         delete filtered[property];
       }
       return filtered;
@@ -1452,74 +1491,6 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
-    @function up.util.multiSelector
-    @internal
-     */
-    multiSelector = function(parts) {
-      var combinedSelector, elements, i, len, obj, part, selectors;
-      obj = {};
-      selectors = [];
-      elements = [];
-      for (i = 0, len = parts.length; i < len; i++) {
-        part = parts[i];
-        if (isString(part)) {
-          selectors.push(part);
-        } else {
-          elements.push(part);
-        }
-      }
-      obj.parsed = elements;
-      if (selectors.length) {
-        combinedSelector = selectors.join(', ');
-        obj.parsed.push(combinedSelector);
-      }
-      obj.select = function() {
-        return obj.find(void 0);
-      };
-      obj.find = function($root) {
-        var $matches, $result, j, len1, ref, selector;
-        $result = nullJQuery();
-        ref = obj.parsed;
-        for (j = 0, len1 = ref.length; j < len1; j++) {
-          selector = ref[j];
-          $matches = $root ? $root.find(selector) : $(selector);
-          $result = $result.add($matches);
-        }
-        return $result;
-      };
-      obj.selectInSubtree = function($start) {
-        var $matches;
-        $matches = obj.find($start);
-        if (obj.doesMatch($start)) {
-          $matches = $matches.add($start);
-        }
-        return $matches;
-      };
-      obj.doesMatch = function(element) {
-        var $element;
-        $element = $(element);
-        return any(obj.parsed, function(selector) {
-          return $element.is(selector);
-        });
-      };
-      obj.seekUp = function(start) {
-        var $element, $result, $start;
-        $start = $(start);
-        $element = $start;
-        $result = void 0;
-        while ($element.length) {
-          if (obj.doesMatch($element)) {
-            $result = $element;
-            break;
-          }
-          $element = $element.parent();
-        }
-        return $result || nullJQuery();
-      };
-      return obj;
-    };
-
-    /***
     If the given `value` is a function, calls the function with the given `args`.
     Otherwise it just returns `value`.
     
@@ -1580,7 +1551,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     unwrapElement = function(wrapper) {
       var parent, wrappedNodes;
-      wrapper = unJQuery(wrapper);
+      wrapper = getElement(wrapper);
       parent = wrapper.parentNode;
       wrappedNodes = toArray(wrapper.childNodes);
       each(wrappedNodes, function(wrappedNode) {
@@ -1597,7 +1568,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       var $match, position;
       $match = void 0;
       while (($element = $element.parent()) && $element.length) {
-        position = $element.css('position');
+        position = readComputedStyle($element, 'position');
         if (position === 'absolute' || position === 'relative' || $element.is('body')) {
           $match = $element;
           break;
@@ -1616,7 +1587,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       var $element, position;
       $element = $(element);
       while (true) {
-        position = $element.css('position');
+        position = readComputedStyle($element, 'position');
         if (position === 'fixed') {
           return true;
         } else {
@@ -1638,7 +1609,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       $futureOffsetParent = offsetParent($element);
       elementCoords = $element.position();
       futureParentCoords = $futureOffsetParent.offset();
-      return $element.css({
+      return writeInlineStyle($element, {
         position: 'absolute',
         left: elementCoords.left - futureParentCoords.left,
         top: elementCoords.top - futureParentCoords.top + $viewport.scrollTop(),
@@ -1656,7 +1627,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     requestDataAsArray = function(data) {
-      var array, i, len, pair, part, query, ref;
+      var array, j, len, pair, part, query, ref;
       if (isArray(data)) {
         data;
       }
@@ -1666,8 +1637,8 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         query = requestDataAsQuery(data);
         array = [];
         ref = query.split('&');
-        for (i = 0, len = ref.length; i < len; i++) {
-          part = ref[i];
+        for (j = 0, len = ref.length; j < len; j++) {
+          part = ref[j];
           if (isPresent(part)) {
             pair = part.split('=');
             array.push({
@@ -1883,14 +1854,87 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         return {};
       }
     };
-    opacity = function(element) {
-      var rawOpacity;
-      rawOpacity = $(element).css('opacity');
-      if (isGiven(rawOpacity)) {
-        return parseFloat(rawOpacity);
-      } else {
-        return void 0;
+    CASE_CONVERSION_GROUP = /[^\-\_]+?(?=[A-Z\-\_]|$)/g;
+    convertCase = function(string, separator, fn) {
+      var parts;
+      parts = string.match(CASE_CONVERSION_GROUP);
+      parts = map(parts, fn);
+      return parts.join(separator);
+    };
+
+    /***
+    Returns a copy of the given string that is transformed to `kebab-case`.
+    
+    @function up.util.kebabCase
+    @param {string} string
+    @return {string}
+    @internal
+     */
+    kebabCase = function(string) {
+      return convertCase(string, '-', function(part) {
+        return part.toLowerCase();
+      });
+    };
+
+    /***
+    Returns a copy of the given string that is transformed to `camelCase`.
+    
+    @function up.util.camelCase
+    @param {string} string
+    @return {string}
+    @internal
+     */
+    camelCase = function(string) {
+      return convertCase(string, '', function(part, i) {
+        if (i === 0) {
+          return part.toLowerCase();
+        } else {
+          return part.charAt(0).toUpperCase() + part.substr(1).toLowerCase();
+        }
+      });
+    };
+
+    /***
+    Returns a copy of the given object with all keys renamed
+    in `kebab-case`.
+    
+    Does not change the given object.
+    
+    @function up.util.kebabCaseKeys
+    @param {object} obj
+    @return {object}
+    @internal
+     */
+    kebabCaseKeys = function(obj) {
+      return copyWithRenamedKeys(obj, kebabCase);
+    };
+
+    /***
+    Returns a copy of the given object with all keys renamed
+    in `camelCase`.
+    
+    Does not change the given object.
+    
+    @function up.util.camelCaseKeys
+    @param {object} obj
+    @return {object}
+    @internal
+     */
+    camelCaseKeys = function(obj) {
+      return copyWithRenamedKeys(obj, camelCase);
+    };
+    copyWithRenamedKeys = function(obj, keyTransformer) {
+      var k, result, v;
+      result = {};
+      for (k in obj) {
+        v = obj[k];
+        k = keyTransformer(k);
+        result[k] = v;
       }
+      return result;
+    };
+    opacity = function(element) {
+      return readComputedStyleNumber(element, 'opacity');
     };
     whenReady = memoize(function() {
       if ($.isReady) {
@@ -1913,7 +1957,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     isDetached = function(element) {
-      element = unJQuery(element);
+      element = getElement(element);
       return !$.contains(document.documentElement, element);
     };
 
@@ -2095,6 +2139,147 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
+    Hides the given element faster than `jQuery.fn.hide()`.
+    
+    @function up.util.hide
+    @param {jQuery|Element} element
+     */
+    hide = function(element) {
+      return writeInlineStyle(element, {
+        display: 'none'
+      });
+    };
+
+    /***
+    Gets the computed style(s) for the given element.
+    
+    @function up.util.readComputedStyle
+    @param {jQuery|Element} element
+    @param {String|Array} propOrProps
+      One or more CSS property names in camelCase.
+    @return {string|object}
+    @internal
+     */
+    readComputedStyle = function(element, props) {
+      var style;
+      element = getElement(element);
+      style = window.getComputedStyle(element);
+      return extractFromStyleObject(style, props);
+    };
+
+    /***
+    Gets a computed style value for the given element.
+    If a value is set, the value is parsed to a number before returning.
+    
+    @function up.util.readComputedStyleNumber
+    @param {jQuery|Element} element
+    @param {String} prop
+      A CSS property name in camelCase.
+    @return {string|object}
+    @internal
+     */
+    readComputedStyleNumber = function(element, prop) {
+      var rawValue;
+      rawValue = readComputedStyle(element, prop);
+      if (isGiven(rawValue)) {
+        return parseFloat(rawValue);
+      } else {
+        return void 0;
+      }
+    };
+
+    /***
+    Gets the given inline style(s) from the given element's `[style]` attribute.
+    
+    @function up.util.readInlineStyle
+    @param {jQuery|Element} element
+    @param {String|Array} propOrProps
+      One or more CSS property names in camelCase.
+    @return {string|object}
+    @internal
+     */
+    readInlineStyle = function(element, props) {
+      var style;
+      element = getElement(element);
+      style = element.style;
+      return extractFromStyleObject(style, props);
+    };
+    extractFromStyleObject = function(style, keyOrKeys) {
+      if (isString(keyOrKeys)) {
+        return style[keyOrKeys];
+      } else {
+        return only.apply(null, [style].concat(slice.call(keyOrKeys)));
+      }
+    };
+
+    /***
+    Merges the given inline style(s) into the given element's `[style]` attribute.
+    
+    @function up.util.readInlineStyle
+    @param {jQuery|Element} element
+    @param {Object} props
+      One or more CSS properties with camelCase keys.
+    @return {string|object}
+    @internal
+     */
+    writeInlineStyle = function(element, props) {
+      var key, results, style, value;
+      element = getElement(element);
+      style = element.style;
+      results = [];
+      for (key in props) {
+        value = props[key];
+        value = normalizeStyleValueForWrite(key, value);
+        results.push(style[key] = value);
+      }
+      return results;
+    };
+    normalizeStyleValueForWrite = function(key, value) {
+      if (isMissing(value)) {
+        value = '';
+      } else if (CSS_LENGTH_PROPS.has(key)) {
+        value = cssLength(value);
+      }
+      return value;
+    };
+    CSS_LENGTH_PROPS = arrayToSet(['top', 'right', 'bottom', 'left', 'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft', 'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight']);
+
+    /**
+    Converts the given value to a CSS length value, adding a `px` unit if required.
+    
+    @function up.util.cssLength
+    @internal
+     */
+    cssLength = function(obj) {
+      if (isNumber(obj) || (isString(obj) && /^\d+$/.test(obj))) {
+        return obj.toString() + "px";
+      } else {
+        return obj;
+      }
+    };
+
+    /**
+    Returns whether the given element has a CSS transition set.
+    
+    @function up.util.hasCssTransition
+    @return {boolean}
+    @internal
+     */
+    hasCssTransition = function(elementOrStyleHash) {
+      var duration, element, noTransition, prop, style;
+      if (isOptions(elementOrStyleHash)) {
+        style = elementOrStyleHash;
+      } else {
+        element = getElement(element);
+        style = getComputedStyle(element);
+      }
+      prop = style.transitionProperty;
+      duration = style.transitionDuration;
+      noTransition = prop === 'none' || (prop === 'all' && duration === 0);
+      return !noTransition;
+    };
+
+    /***
     Flattens the given `array` a single level deep.
     
     @function up.util.flatten
@@ -2105,10 +2290,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     flatten = function(array) {
-      var flattened, i, len, object;
+      var flattened, j, len, object;
       flattened = [];
-      for (i = 0, len = array.length; i < len; i++) {
-        object = array[i];
+      for (j = 0, len = array.length; j < len; j++) {
+        object = array[j];
         if (isArray(object)) {
           flattened = flattened.concat(object);
         } else {
@@ -2207,6 +2392,19 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     isBodyDescendant = function(element) {
       return $(element).parents('body').length > 0;
     };
+    isEqual = function(a, b) {
+      if (typeof a !== typeof b) {
+        return false;
+      } else if (isArray(a)) {
+        return a.length === b.length && all(a, function(elem, index) {
+          return isEqual(elem, b[index]);
+        });
+      } else if (isObject(a)) {
+        return fail('isEqual cannot compare objects yet');
+      } else {
+        return a === b;
+      }
+    };
     return {
       requestDataAsArray: requestDataAsArray,
       requestDataAsQuery: requestDataAsQuery,
@@ -2266,14 +2464,17 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       isUnmodifiedKeyEvent: isUnmodifiedKeyEvent,
       isUnmodifiedMouseEvent: isUnmodifiedMouseEvent,
       nullJQuery: nullJQuery,
-      unJQuery: unJQuery,
+      element: getElement,
       setTimer: setTimer,
       nextFrame: nextFrame,
       measure: measure,
-      temporaryCss: temporaryCss,
-      cssAnimate: cssAnimate,
-      forceCompositing: forceCompositing,
+      addClass: addClass,
+      removeClass: removeClass,
+      hasClass: hasClass,
+      addTemporaryClass: addTemporaryClass,
+      writeTemporaryStyle: writeTemporaryStyle,
       forceRepaint: forceRepaint,
+      concludeCssTransition: concludeCssTransition,
       escapePressed: escapePressed,
       copyAttributes: copyAttributes,
       selectInSubtree: selectInSubtree,
@@ -2294,7 +2495,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       config: config,
       openConfig: openConfig,
       unwrapElement: unwrapElement,
-      multiSelector: multiSelector,
+      camelCase: camelCase,
+      camelCaseKeys: camelCaseKeys,
+      kebabCase: kebabCase,
+      kebabCaseKeys: kebabCaseKeys,
       error: fail,
       pluckData: pluckData,
       pluckKey: pluckKey,
@@ -2302,6 +2506,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       extractOptions: extractOptions,
       isDetached: isDetached,
       noop: noop,
+      asyncNoop: asyncNoop,
       opacity: opacity,
       whenReady: whenReady,
       identity: identity,
@@ -2322,7 +2527,15 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       rejectOnError: rejectOnError,
       isBodyDescendant: isBodyDescendant,
       isCrossDomain: isCrossDomain,
-      microtask: microtask
+      microtask: microtask,
+      isEqual: isEqual,
+      hide: hide,
+      cssLength: cssLength,
+      readComputedStyle: readComputedStyle,
+      readComputedStyleNumber: readComputedStyleNumber,
+      readInlineStyle: readInlineStyle,
+      writeInlineStyle: writeInlineStyle,
+      hasCssTransition: hasCssTransition
     };
   })(jQuery);
 
@@ -2524,6 +2737,159 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     return Cache;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  u = up.util;
+
+  up.CssTransition = (function() {
+    function CssTransition($element, lastFrame, options) {
+      this.startMotion = bind(this.startMotion, this);
+      this.resumeOldTransition = bind(this.resumeOldTransition, this);
+      this.pauseOldTransition = bind(this.pauseOldTransition, this);
+      this.finish = bind(this.finish, this);
+      this.onTransitionEnd = bind(this.onTransitionEnd, this);
+      this.stopListenToTransitionEnd = bind(this.stopListenToTransitionEnd, this);
+      this.listenToTransitionEnd = bind(this.listenToTransitionEnd, this);
+      this.stopFallbackTimer = bind(this.stopFallbackTimer, this);
+      this.startFallbackTimer = bind(this.startFallbackTimer, this);
+      this.onFinishEvent = bind(this.onFinishEvent, this);
+      this.stopListenToFinishEvent = bind(this.stopListenToFinishEvent, this);
+      this.listenToFinishEvent = bind(this.listenToFinishEvent, this);
+      this.start = bind(this.start, this);
+      this.$element = $element;
+      this.element = u.element($element);
+      this.lastFrameCamel = u.camelCaseKeys(lastFrame);
+      this.lastFrameKebab = u.kebabCaseKeys(lastFrame);
+      this.lastFrameKeysKebab = Object.keys(this.lastFrameKebab);
+      this.finishEvent = options.finishEvent;
+      this.duration = options.duration;
+      this.delay = options.delay;
+      this.totalDuration = this.delay + this.duration;
+      this.easing = options.easing;
+      this.finished = false;
+    }
+
+    CssTransition.prototype.start = function() {
+      if (this.lastFrameKeysKebab.length === 0) {
+        this.finished = true;
+        return Promise.resolve();
+      }
+      this.deferred = u.newDeferred();
+      this.pauseOldTransition();
+      this.startTime = new Date();
+      this.startFallbackTimer();
+      this.listenToFinishEvent();
+      this.listenToTransitionEnd();
+      this.startMotion();
+      return this.deferred.promise();
+    };
+
+    CssTransition.prototype.listenToFinishEvent = function() {
+      if (this.finishEvent) {
+        return this.$element.on(this.finishEvent, this.onFinishEvent);
+      }
+    };
+
+    CssTransition.prototype.stopListenToFinishEvent = function() {
+      if (this.finishEvent) {
+        return this.$element.off(this.finishEvent, this.onFinishEvent);
+      }
+    };
+
+    CssTransition.prototype.onFinishEvent = function(event) {
+      event.stopPropagation();
+      return this.finish();
+    };
+
+    CssTransition.prototype.startFallbackTimer = function() {
+      var timingTolerance;
+      timingTolerance = 100;
+      return this.fallbackTimer = u.setTimer(this.totalDuration + timingTolerance, (function(_this) {
+        return function() {
+          return _this.finish();
+        };
+      })(this));
+    };
+
+    CssTransition.prototype.stopFallbackTimer = function() {
+      return clearTimeout(this.fallbackTimer);
+    };
+
+    CssTransition.prototype.listenToTransitionEnd = function() {
+      return this.$element.on('transitionend', this.onTransitionEnd);
+    };
+
+    CssTransition.prototype.stopListenToTransitionEnd = function() {
+      return this.$element.off('transitionend', this.onTransitionEnd);
+    };
+
+    CssTransition.prototype.onTransitionEnd = function(event) {
+      var completedPropertyKebab, elapsed;
+      if (event.target !== this.element) {
+        return;
+      }
+      elapsed = new Date() - this.startTime;
+      if (!(elapsed > 0.25 * this.totalDuration)) {
+        return;
+      }
+      completedPropertyKebab = event.originalEvent.propertyName;
+      if (!u.contains(this.lastFrameKeysKebab, completedPropertyKebab)) {
+        return;
+      }
+      return this.finish();
+    };
+
+    CssTransition.prototype.finish = function() {
+      if (this.finished) {
+        return;
+      }
+      this.finished = true;
+      this.stopFallbackTimer();
+      this.stopListenToFinishEvent();
+      this.stopListenToTransitionEnd();
+      u.concludeCssTransition(this.element);
+      this.resumeOldTransition();
+      return this.deferred.resolve();
+    };
+
+    CssTransition.prototype.pauseOldTransition = function() {
+      var oldTransition, oldTransitionFrameCamel, oldTransitionFrameKebab, oldTransitionProperties;
+      oldTransition = u.readComputedStyle(this.element, ['transitionProperty', 'transitionDuration', 'transitionDelay', 'transitionTimingFunction']);
+      if (u.hasCssTransition(oldTransition)) {
+        if (oldTransition.transitionProperty !== 'all') {
+          oldTransitionProperties = oldTransition.transitionProperty.split(/\s*,\s*/);
+          oldTransitionFrameKebab = u.readComputedStyle(this.element, oldTransitionProperties);
+          oldTransitionFrameCamel = u.camelCaseKeys(oldTransitionFrameKebab);
+          this.setOldTransitionTargetFrame = u.writeTemporaryStyle(this.element, oldTransitionFrameCamel);
+        }
+        return this.setOldTransition = u.concludeCssTransition(this.element);
+      }
+    };
+
+    CssTransition.prototype.resumeOldTransition = function() {
+      if (typeof this.setOldTransitionTargetFrame === "function") {
+        this.setOldTransitionTargetFrame();
+      }
+      return typeof this.setOldTransition === "function" ? this.setOldTransition() : void 0;
+    };
+
+    CssTransition.prototype.startMotion = function() {
+      u.writeInlineStyle(this.element, {
+        transitionProperty: Object.keys(this.lastFrameKebab).join(', '),
+        transitionDuration: this.duration + "ms",
+        transitionDelay: this.delay + "ms",
+        transitionTimingFunction: this.easing
+      });
+      return u.writeInlineStyle(this.element, this.lastFrameCamel);
+    };
+
+    return CssTransition;
 
   })();
 
@@ -2787,7 +3153,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       var $hungries, $hungry, $newHungry, hungry, hungrySteps, j, len, selector, transition;
       hungrySteps = [];
       if (this.hungry) {
-        $hungries = up.radio.hungrySelector().select();
+        $hungries = $(up.radio.hungrySelector());
         transition = u.option(up.radio.config.hungryTransition, this.transition);
         for (j = 0, len = $hungries.length; j < len; j++) {
           hungry = $hungries[j];
@@ -3031,64 +3397,65 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
   up.MotionTracker = (function() {
     function MotionTracker(name) {
+      this.reset = bind(this.reset, this);
+      this.whileForwardingFinishEvent = bind(this.whileForwardingFinishEvent, this);
       this.forwardFinishEvent = bind(this.forwardFinishEvent, this);
-      this.unmarkElement = bind(this.unmarkElement, this);
-      this.markElement = bind(this.markElement, this);
+      this.unmarkCluster = bind(this.unmarkCluster, this);
+      this.markCluster = bind(this.markCluster, this);
       this.whenElementFinished = bind(this.whenElementFinished, this);
+      this.emitFinishEvent = bind(this.emitFinishEvent, this);
       this.finishOneElement = bind(this.finishOneElement, this);
+      this.isActive = bind(this.isActive, this);
+      this.expandFinishRequest = bind(this.expandFinishRequest, this);
       this.finish = bind(this.finish, this);
       this.claim = bind(this.claim, this);
-      this.className = "up-" + name;
+      this.activeClass = "up-" + name;
       this.dataKey = "up-" + name + "-finished";
-      this.selector = "." + this.className;
+      this.selector = "." + this.activeClass;
       this.finishEvent = "up:" + name + ":finish";
+      this.finishCount = 0;
+      this.clusterCount = 0;
     }
 
 
     /***
-    Finishes all animations in the given element's ancestors and descendants,
+    Finishes all animations in the given element cluster's ancestors and descendants,
     then calls the animator.
-    
-    @method claim
-    @param {jQuery} $element
-    @param {Function(jQuery): Promise} animator
-    @return {Promise} A promise that is fulfilled when the new animation ends.
-     */
-
-    MotionTracker.prototype.claim = function($element, animator) {
-      return this.finish($element).then((function(_this) {
-        return function() {
-          return _this.start($element, animator);
-        };
-      })(this));
-    };
-
-
-    /***
-    Calls the given animator to animate the given element.
     
     The animation returned by the animator is tracked so it can be
     [`finished`](/up.MotionTracker.finish) later.
     
-    No animations are finished before starting the new animation.
-    Use [`claim()`](/up.MotionTracker.claim) for that.
-    
     @method claim
-    @param {jQuery} $element
+    @param {jQuery} $cluster
     @param {Function(jQuery): Promise} animator
+    @param {Object} memory.trackMotion = true
+      Whether
     @return {Promise} A promise that is fulfilled when the new animation ends.
      */
 
-    MotionTracker.prototype.start = function($element, animator) {
-      var promise;
-      promise = animator($element);
-      this.markElement($element, promise);
-      promise.then((function(_this) {
-        return function() {
-          return _this.unmarkElement($element);
-        };
-      })(this));
-      return promise;
+    MotionTracker.prototype.claim = function(cluster, animator, memory) {
+      var $cluster;
+      if (memory == null) {
+        memory = {};
+      }
+      $cluster = $(cluster);
+      memory.trackMotion = u.option(memory.trackMotion, up.motion.isEnabled());
+      if (memory.trackMotion === false) {
+        return u.microtask(animator);
+      } else {
+        memory.trackMotion = false;
+        return this.finish($cluster).then((function(_this) {
+          return function() {
+            var promise;
+            promise = _this.whileForwardingFinishEvent($cluster, animator);
+            promise = promise.then(function() {
+              return _this.unmarkCluster($cluster);
+            });
+            _this.markCluster($cluster, promise);
+            return promise;
+          };
+        })(this));
+      }
     };
 
 
@@ -3102,6 +3469,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
     MotionTracker.prototype.finish = function(elements) {
       var $elements, allFinished;
+      this.finishCount++;
+      if (this.clusterCount === 0 || !up.motion.isEnabled()) {
+        return Promise.resolve();
+      }
       $elements = this.expandFinishRequest(elements);
       allFinished = u.map($elements, this.finishOneElement);
       return Promise.all(allFinished);
@@ -3115,25 +3486,42 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
+    MotionTracker.prototype.isActive = function(element) {
+      return u.hasClass(element, this.activeClass);
+    };
+
     MotionTracker.prototype.finishOneElement = function(element) {
       var $element;
       $element = $(element);
-      $element.trigger(this.finishEvent);
+      this.emitFinishEvent($element);
       return this.whenElementFinished($element);
+    };
+
+    MotionTracker.prototype.emitFinishEvent = function($element, eventAttrs) {
+      if (eventAttrs == null) {
+        eventAttrs = {};
+      }
+      eventAttrs = u.merge({
+        $element: $element,
+        message: false
+      }, eventAttrs);
+      return up.emit(this.finishEvent, eventAttrs);
     };
 
     MotionTracker.prototype.whenElementFinished = function($element) {
       return $element.data(this.dataKey) || Promise.resolve();
     };
 
-    MotionTracker.prototype.markElement = function($element, promise) {
-      $element.addClass(this.className);
-      return $element.data(this.dataKey, promise);
+    MotionTracker.prototype.markCluster = function($cluster, promise) {
+      this.clusterCount++;
+      $cluster.addClass(this.activeClass);
+      return $cluster.data(this.dataKey, promise);
     };
 
-    MotionTracker.prototype.unmarkElement = function($element) {
-      $element.removeClass(this.className);
-      return $element.removeData(this.dataKey);
+    MotionTracker.prototype.unmarkCluster = function($cluster) {
+      this.clusterCount--;
+      $cluster.removeClass(this.activeClass);
+      return $cluster.removeData(this.dataKey);
     };
 
     MotionTracker.prototype.forwardFinishEvent = function($original, $ghost, duration) {
@@ -3147,6 +3535,43 @@ that might save you from loading something like [Lodash](https://lodash.com/).
           return duration.then(function() {
             return $original.off(_this.finishEvent, doForward);
           });
+        };
+      })(this));
+    };
+
+    MotionTracker.prototype.whileForwardingFinishEvent = function($elements, fn) {
+      var doForward;
+      if ($elements.length < 2) {
+        return fn();
+      }
+      doForward = (function(_this) {
+        return function(event) {
+          if (!event.forwarded) {
+            return u.each($elements, function(element) {
+              var $element;
+              $element = $(element);
+              if (element !== event.target && _this.isActive($element)) {
+                return _this.emitFinishEvent($element, {
+                  forwarded: true
+                });
+              }
+            });
+          }
+        };
+      })(this);
+      $elements.on(this.finishEvent, doForward);
+      return fn().then((function(_this) {
+        return function() {
+          return $elements.off(_this.finishEvent, doForward);
+        };
+      })(this));
+    };
+
+    MotionTracker.prototype.reset = function() {
+      return this.finish().then((function(_this) {
+        return function() {
+          _this.finishCount = 0;
+          return _this.clusterCount = 0;
         };
       })(this));
     };
@@ -3661,6 +4086,59 @@ that might save you from loading something like [Lodash](https://lodash.com/).
   })(up.Record);
 
 }).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  u = up.util;
+
+  up.UrlSet = (function() {
+    function UrlSet(urls, options) {
+      this.urls = urls;
+      if (options == null) {
+        options = {};
+      }
+      this.isEqual = bind(this.isEqual, this);
+      this.matchesAny = bind(this.matchesAny, this);
+      this.doesMatchPrefix = bind(this.doesMatchPrefix, this);
+      this.doesMatchFully = bind(this.doesMatchFully, this);
+      this.matches = bind(this.matches, this);
+      this.normalizeUrl = options.normalizeUrl || u.normalizeUrl;
+      this.urls = u.map(this.urls, this.normalizeUrl);
+      this.urls = u.compact(this.urls);
+    }
+
+    UrlSet.prototype.matches = function(testUrl) {
+      if (testUrl.substr(-1) === '*') {
+        return this.doesMatchPrefix(testUrl.slice(0, -1));
+      } else {
+        return this.doesMatchFully(testUrl);
+      }
+    };
+
+    UrlSet.prototype.doesMatchFully = function(testUrl) {
+      return u.contains(this.urls, testUrl);
+    };
+
+    UrlSet.prototype.doesMatchPrefix = function(prefix) {
+      return u.detect(this.urls, function(url) {
+        return url.indexOf(prefix) === 0;
+      });
+    };
+
+    UrlSet.prototype.matchesAny = function(testUrls) {
+      return u.detect(testUrls, this.matches);
+    };
+
+    UrlSet.prototype.isEqual = function(otherSet) {
+      return u.isEqual(this.urls, otherSet != null ? otherSet.urls : void 0);
+    };
+
+    return UrlSet;
+
+  })();
+
+}).call(this);
 
 /***
 Browser support
@@ -3845,9 +4323,9 @@ Internet Explorer 10 or lower
     @return {boolean}
     @internal
      */
-    canCssTransition = function() {
+    canCssTransition = u.memoize(function() {
       return 'transition' in document.documentElement.style;
-    };
+    });
 
     /***
     Returns whether this browser supports the DOM event [`input`](https://developer.mozilla.org/de/docs/Web/Events/input).
@@ -3856,9 +4334,9 @@ Internet Explorer 10 or lower
     @return {boolean}
     @internal
      */
-    canInputEvent = function() {
+    canInputEvent = u.memoize(function() {
       return 'oninput' in document.createElement('input');
-    };
+    });
 
     /***
     Returns whether this browser supports promises.
@@ -3867,9 +4345,9 @@ Internet Explorer 10 or lower
     @return {boolean}
     @internal
      */
-    canPromise = function() {
+    canPromise = u.memoize(function() {
       return !!window.Promise;
-    };
+    });
 
     /***
     Returns whether this browser supports the [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
@@ -3879,9 +4357,9 @@ Internet Explorer 10 or lower
     @return {boolean}
     @experimental
      */
-    canFormData = function() {
+    canFormData = u.memoize(function() {
       return !!window.FormData;
-    };
+    });
 
     /***
     Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
@@ -3891,9 +4369,9 @@ Internet Explorer 10 or lower
     @return {boolean}
     @internal
      */
-    canDOMParser = function() {
+    canDOMParser = u.memoize(function() {
       return !!window.DOMParser;
-    };
+    });
 
     /***
     Returns whether this browser supports the [`debugging console`](https://developer.mozilla.org/en-US/docs/Web/API/Console).
@@ -3902,17 +4380,17 @@ Internet Explorer 10 or lower
     @return {boolean}
     @internal
      */
-    canConsole = function() {
+    canConsole = u.memoize(function() {
       return window.console && console.debug && console.info && console.warn && console.error && console.group && console.groupCollapsed && console.groupEnd;
-    };
-    isRecentJQuery = function() {
+    });
+    isRecentJQuery = u.memoize(function() {
       var major, minor, parts, version;
       version = $.fn.jquery;
       parts = version.split('.');
       major = parseInt(parts[0]);
       minor = parseInt(parts[1]);
       return major >= 2 || (major === 1 && minor >= 9);
-    };
+    });
 
     /***
     Returns and deletes a cookie with the given name
@@ -4320,11 +4798,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
         eventProps = {};
       }
       event = $.Event(eventName, eventProps);
-      if ($target = eventProps.$element) {
-        delete eventProps.$element;
-      } else {
-        $target = $(document);
-      }
+      $target = eventProps.$target || eventProps.$element || $(document);
       logEmission(eventName, eventProps);
       $target.trigger(event);
       return event;
@@ -5184,7 +5658,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
   var slice = [].slice;
 
   up.syntax = (function($) {
-    var DESTRUCTIBLE_CLASS, DESTRUCTORS_KEY, SYSTEM_MACRO_PRIORITIES, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, detectSystemMacroPriority, insertCompiler, isBooting, macro, macros, normalizeDestructor, prepareClean, removeDestructors, reset, u;
+    var DESTRUCTIBLE_CLASS, DESTRUCTORS_KEY, SYSTEM_MACRO_PRIORITIES, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, detectSystemMacroPriority, insertCompiler, isBooting, macro, macros, normalizeDestructor, removeDestructors, reset, u;
     u = up.util;
     DESTRUCTIBLE_CLASS = 'up-destructible';
     DESTRUCTORS_KEY = 'up-destructors';
@@ -5579,23 +6053,14 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @internal
      */
     clean = function($fragment) {
-      return prepareClean($fragment)();
-    };
-
-    /***
-    @function up.syntax.prepareClean
-    @param {jQuery} $fragment
-    @return {Function}
-    @internal
-     */
-    prepareClean = function($fragment) {
-      var $candidates, destructors;
-      $candidates = u.selectInSubtree($fragment, "." + DESTRUCTIBLE_CLASS);
-      destructors = u.map($candidates, function(candidate) {
-        return $(candidate).data(DESTRUCTORS_KEY);
+      var $destructibles;
+      $destructibles = u.selectInSubtree($fragment, "." + DESTRUCTIBLE_CLASS);
+      return u.each($destructibles, function(destructible) {
+        var destructor;
+        if (destructor = $(destructible).data(DESTRUCTORS_KEY)) {
+          return destructor();
+        }
       });
-      destructors = u.compact(destructors);
-      return u.sequence.apply(u, destructors);
     };
 
     /***
@@ -5700,7 +6165,6 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       macro: macro,
       compile: compile,
       clean: clean,
-      prepareClean: prepareClean,
       data: data
     };
   })(jQuery);
@@ -5816,7 +6280,11 @@ In an Unpoly app, every page has an URL.
     @internal
      */
     replace = function(url) {
-      return manipulate('replaceState', url);
+      if (manipulate('replaceState', url)) {
+        return up.emit('up:history:replaced', {
+          url: url
+        });
+      }
     };
 
     /***
@@ -6046,7 +6514,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
   var slice = [].slice;
 
   up.layout = (function($) {
-    var anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealHash, revealOrRestoreScroll, revealSelector, saveScroll, scroll, scrollAbruptlyNow, scrollTopKey, scrollTops, scrollWithAnimateNow, scrollableElementForViewport, scrollingTracker, u, viewportOf, viewportSelector, viewports, viewportsWithin;
+    var absolutize, anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealHash, revealOrRestoreScroll, revealSelector, saveScroll, scroll, scrollAbruptlyNow, scrollTopKey, scrollTops, scrollWithAnimateNow, scrollableElementForViewport, scrollingTracker, u, viewportOf, viewportSelector, viewports, viewportsWithin;
     u = up.util;
 
     /***
@@ -6084,7 +6552,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
      */
     config = u.config({
       duration: 0,
-      viewports: [document, '.up-modal-viewport', '[up-viewport]'],
+      viewports: ['.up-modal-viewport', '[up-viewport]'],
       fixedTop: ['[up-fixed~=top]'],
       fixedBottom: ['[up-fixed~=bottom]'],
       anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]'],
@@ -6100,7 +6568,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     reset = function() {
       config.reset();
       lastScrollTops.clear();
-      return scrollingTracker.finish();
+      return scrollingTracker.reset();
     };
 
     /***
@@ -6197,6 +6665,9 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
      */
     finishScrolling = function(element) {
       var $scrollable;
+      if (!up.motion.isEnabled()) {
+        return Promise.resolve();
+      }
       $scrollable = scrollableElementForViewport(element);
       return scrollingTracker.finish($scrollable);
     };
@@ -6206,7 +6677,9 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @internal
      */
     anchoredRight = function() {
-      return u.multiSelector(config.anchoredRight).select();
+      var selector;
+      selector = config.anchoredRight.join(',');
+      return $(selector);
     };
 
     /***
@@ -6219,11 +6692,11 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       measurePosition = function(obstructor, cssAttr) {
         var $obstructor, anchorPosition;
         $obstructor = $(obstructor);
-        anchorPosition = $obstructor.css(cssAttr);
+        anchorPosition = u.readComputedStyleNumber($obstructor, cssAttr);
         if (!u.isPresent(anchorPosition)) {
           up.fail("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr);
         }
-        return parseFloat(anchorPosition) + $obstructor.height();
+        return anchorPosition + $obstructor.height();
       };
       fixedTopBottoms = (function() {
         var i, len, ref, results;
@@ -6371,16 +6844,17 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       }
     };
     viewportSelector = function() {
-      return u.multiSelector(config.viewports);
+      return config.viewports.join(',');
     };
 
     /***
     Returns the viewport for the given element.
     
-    Throws an error if no viewport could be found.
+    Returns `$(document)` if no better viewpoint could be found.
     
     @function up.layout.viewportOf
     @param {string|Element|jQuery} selectorOrElement
+    @return {jQuery}
     @internal
      */
     viewportOf = function(selectorOrElement, options) {
@@ -6389,9 +6863,9 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         options = {};
       }
       $element = $(selectorOrElement);
-      $viewport = viewportSelector().seekUp($element);
-      if ($viewport.length === 0 && options.strict !== false) {
-        up.fail("Could not find viewport for %o", $element);
+      $viewport = $element.closest(viewportSelector());
+      if ($viewport.length === 0) {
+        $viewport = $(document);
       }
       return $viewport;
     };
@@ -6408,7 +6882,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     viewportsWithin = function(selectorOrElement) {
       var $element;
       $element = $(selectorOrElement);
-      return viewportSelector().selectInSubtree($element);
+      return u.selectInSubtree($element, viewportSelector());
     };
 
     /***
@@ -6418,7 +6892,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @internal
      */
     viewports = function() {
-      return viewportSelector().select();
+      return $(document).add(viewportSelector());
     };
     scrollTopKey = function(viewport) {
       var $viewport;
@@ -6596,6 +7070,59 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     };
 
     /***
+    @internal
+     */
+    absolutize = function($element, options) {
+      var $bounds, $fixedElements, $viewport, boundsStyle, fixedElement, i, len, moveTop, originalDims, originalOffset, top;
+      options = u.options(options, {
+        afterMeasure: u.noop
+      });
+      $viewport = up.layout.viewportOf($element);
+      originalDims = u.measure($element, {
+        relative: true,
+        inner: true
+      });
+      originalOffset = $element.offset();
+      options.afterMeasure();
+      u.writeInlineStyle($element, {
+        position: u.readComputedStyle($element, 'position') === 'static' ? 'static' : 'relative',
+        top: 'auto',
+        right: 'auto',
+        bottom: 'auto',
+        left: 'auto',
+        width: '100%',
+        height: '100%'
+      });
+      $bounds = $('<div class="up-bounds"></div>');
+      boundsStyle = u.merge(originalDims, {
+        position: 'absolute'
+      });
+      u.writeInlineStyle($bounds, boundsStyle);
+      $bounds.insertBefore($element);
+      $element.appendTo($bounds);
+      top = originalDims.top;
+      moveTop = function(diff) {
+        if (diff !== 0) {
+          top += diff;
+          return u.writeInlineStyle($bounds, {
+            top: top
+          });
+        }
+      };
+      moveTop(originalOffset.top - $element.offset().top);
+      $fixedElements = up.layout.fixedChildren($element);
+      for (i = 0, len = $fixedElements.length; i < len; i++) {
+        fixedElement = $fixedElements[i];
+        u.fixedToAbsolute(fixedElement, $viewport);
+      }
+      return {
+        $element: $element,
+        $bounds: $bounds,
+        moveTop: moveTop
+      };
+    };
+
+    /***
     Marks this element as a scrolling container ("viewport").
     
     Apply this attribute if your app uses a custom panel layout with fixed positioning
@@ -6748,7 +7275,8 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       restoreScroll: restoreScroll,
       revealOrRestoreScroll: revealOrRestoreScroll,
       anchoredRight: anchoredRight,
-      fixedChildren: fixedChildren
+      fixedChildren: fixedChildren,
+      absolutize: absolutize
     };
   })(jQuery);
 
@@ -6776,7 +7304,7 @@ is built from these functions. You can use them to extend Unpoly from your
 
 (function() {
   up.dom = (function($) {
-    var autofocus, bestMatchingSteps, bestPreflightSelector, config, destroy, detectScriptFixes, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, fixScripts, hello, isRealElement, layerOf, matchesLayer, parseResponseDoc, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, shouldSwapElementsDirectly, source, swapElements, swapElementsDirectly, transferKeepableElements, u, updateHistoryAndTitle;
+    var bestMatchingSteps, bestPreflightSelector, config, destroy, detectScriptFixes, emitFragmentDestroy, emitFragmentDestroyed, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, fixScripts, hello, isRealElement, layerOf, markElementAsDestroying, matchesLayer, parseResponseDoc, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, transferKeepableElements, u, updateHistoryAndTitle;
     u = up.util;
 
     /***
@@ -6807,11 +7335,13 @@ is built from these functions. You can use them to extend Unpoly from your
     };
     setSource = function(element, sourceUrl) {
       var $element;
-      $element = $(element);
-      if (u.isPresent(sourceUrl)) {
-        sourceUrl = u.normalizeUrl(sourceUrl);
+      if (sourceUrl !== false) {
+        $element = $(element);
+        if (u.isPresent(sourceUrl)) {
+          sourceUrl = u.normalizeUrl(sourceUrl);
+        }
+        return $element.attr("up-source", sourceUrl);
       }
-      return $element.attr("up-source", sourceUrl);
     };
 
     /***
@@ -7189,7 +7719,7 @@ is built from these functions. You can use them to extend Unpoly from your
           swapPromises = [];
           for (i = 0, len = extractSteps.length; i < len; i++) {
             step = extractSteps[i];
-            up.log.group('Updating %s', step.selector, function() {
+            up.log.group('Swapping fragment %s', step.selector, function() {
               var swapOptions, swapPromise;
               swapOptions = u.merge(options, u.only(step, 'origin', 'reveal'));
               fixScripts(step.$new);
@@ -7275,14 +7805,14 @@ is built from these functions. You can use them to extend Unpoly from your
       }
     };
     swapElements = function($old, $new, pseudoClass, transition, options) {
-      var $wrapper, clean, keepPlan, promise, replacement;
+      var $parent, $wrapper, keepPlan, morphOptions, promise;
       transition || (transition = 'none');
       if (options.source === 'keep') {
         options = u.merge(options, {
           source: source($old)
         });
       }
-      up.motion.finish($old);
+      setSource($new, options.source);
       if (pseudoClass) {
         $wrapper = $new.contents().wrapAll('<div class="up-insertion"></div>').parent();
         if (pseudoClass === 'before') {
@@ -7298,41 +7828,34 @@ is built from these functions. You can use them to extend Unpoly from your
         promise = promise.then(function() {
           return u.unwrapElement($wrapper);
         });
+        return promise;
       } else if (keepPlan = findKeepPlan($old, $new, options)) {
         emitFragmentKept(keepPlan);
-        promise = Promise.resolve();
+        return Promise.resolve();
       } else {
         options.keepPlans = transferKeepableElements($old, $new, options);
-        clean = up.syntax.prepareClean($old);
-        replacement = function() {
-          if (shouldSwapElementsDirectly($old, $new, transition, options)) {
-            swapElementsDirectly($old, $new);
-            transition = false;
-          } else {
-            $new.insertBefore($old);
+        $parent = $old.parent();
+        morphOptions = u.merge(options, {
+          afterInsert: function() {
+            up.hello($new, options);
+            markElementAsDestroying($old);
+            return emitFragmentDestroy($old, {
+              log: false
+            });
+          },
+          beforeDetach: function() {
+            return up.syntax.clean($old);
+          },
+          afterDetach: function() {
+            $old.remove();
+            return emitFragmentDestroyed($old, {
+              $parent: $parent,
+              log: false
+            });
           }
-          if (options.source !== false) {
-            setSource($new, options.source);
-          }
-          autofocus($new);
-          hello($new, options);
-          return up.morph($old, $new, transition, options);
-        };
-        promise = destroy($old, {
-          clean: clean,
-          beforeWipe: replacement,
-          log: false
         });
+        return up.morph($old, $new, transition, morphOptions);
       }
-      return promise;
-    };
-    shouldSwapElementsDirectly = function($old, $new, transition, options) {
-      var $both;
-      $both = $old.add($new);
-      return $old.is('body') || !up.motion.willAnimate($both, transition, options);
-    };
-    swapElementsDirectly = function($old, $new) {
-      return $old.replaceWith($new);
     };
     transferKeepableElements = function($old, $new, options) {
       var $keepable, $keepableClone, i, keepPlans, keepable, len, plan, ref;
@@ -7346,7 +7869,7 @@ is built from these functions. You can use them to extend Unpoly from your
             descendantsOnly: true
           }))) {
             $keepableClone = $keepable.clone();
-            up.util.detachWith($keepable, $keepableClone);
+            u.detachWith($keepable, $keepableClone);
             plan.$newElement.replaceWith($keepable);
             keepPlans.push(plan);
           }
@@ -7533,12 +8056,10 @@ is built from these functions. You can use them to extend Unpoly from your
       The fragment that has been inserted or updated.
     @stable
      */
-    emitFragmentInserted = function(fragment, options) {
-      var $fragment;
-      $fragment = $(fragment);
+    emitFragmentInserted = function($element, options) {
       return up.emit('up:fragment:inserted', {
-        $element: $fragment,
-        message: ['Inserted fragment %o', $fragment.get(0)],
+        $element: $element,
+        message: ['Inserted fragment %o', $element.get(0)],
         origin: options.origin
       });
     };
@@ -7549,17 +8070,32 @@ is built from these functions. You can use them to extend Unpoly from your
       });
       return up.emit('up:fragment:kept', eventAttrs);
     };
-    autofocus = function($element) {
-      var $control, selector;
-      selector = '[autofocus]:last';
-      $control = u.selectInSubtree($element, selector);
-      if ($control.length && $control.get(0) !== document.activeElement) {
-        return $control.focus();
+    emitFragmentDestroy = function($element, options) {
+      var message;
+      if (shouldLogDestruction($element, options)) {
+        message = ['Destroying fragment %o', $element.get(0)];
       }
+      return up.emit('up:fragment:destroy', {
+        $element: $element,
+        message: message
+      });
+    };
+    emitFragmentDestroyed = function($element, options) {
+      var $parent, message;
+      if (shouldLogDestruction($element, options)) {
+        message = ['Destroyed fragment %o', $element.get(0)];
+      }
+      $parent = options.$parent || up.fail("Missing { $parent } option");
+      return up.emit('up:fragment:destroyed', {
+        $target: $parent,
+        $parent: $parent,
+        $element: $element,
+        message: message
+      });
     };
     isRealElement = function($element) {
       var unreal;
-      unreal = '.up-ghost, .up-destroying';
+      unreal = '.up-destroying';
       return $element.closest(unreal).length === 0;
     };
 
@@ -7676,47 +8212,38 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
     destroy = function(selectorOrElement, options) {
-      var $element, animate, beforeWipe, destroyMessage, destroyedMessage, wipe;
+      var $element, animate, wipe;
       $element = $(selectorOrElement);
       options = u.options(options, {
         animation: false
       });
-      if (shouldLogDestruction($element, options)) {
-        destroyMessage = ['Destroying fragment %o', $element.get(0)];
-        destroyedMessage = ['Destroyed fragment %o', $element.get(0)];
-      }
       if ($element.length === 0) {
         return Promise.resolve();
-      } else {
-        up.emit('up:fragment:destroy', {
-          $element: $element,
-          message: destroyMessage
-        });
-        $element.addClass('up-destroying');
-        updateHistoryAndTitle(options);
-        animate = function() {
-          var animateOptions;
-          animateOptions = up.motion.animateOptions(options);
-          return up.motion.animate($element, options.animation, animateOptions);
-        };
-        beforeWipe = options.beforeWipe || Promise.resolve();
-        wipe = function() {
-          options.clean || (options.clean = function() {
-            return up.syntax.clean($element);
-          });
-          options.clean();
-          up.syntax.clean($element);
-          up.emit('up:fragment:destroyed', {
-            $element: $element,
-            message: destroyedMessage
-          });
-          return $element.remove();
-        };
-        return animate().then(beforeWipe).then(wipe);
       }
+      markElementAsDestroying($element);
+      emitFragmentDestroy($element, options);
+      updateHistoryAndTitle(options);
+      animate = function() {
+        var animateOptions;
+        animateOptions = up.motion.animateOptions(options);
+        return up.motion.animate($element, options.animation, animateOptions);
+      };
+      wipe = function() {
+        var $parent;
+        $parent = $element.parent();
+        up.syntax.clean($element);
+        $element.remove();
+        return emitFragmentDestroyed($element, {
+          $parent: $parent
+        });
+      };
+      return animate().then(wipe);
     };
     shouldLogDestruction = function($element, options) {
       return options.log !== false && !$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup');
+    };
+    markElementAsDestroying = function($element) {
+      return $element.addClass('up-destroying');
     };
 
     /***
@@ -7733,15 +8260,17 @@ is built from these functions. You can use them to extend Unpoly from your
      */
 
     /***
-    This event is [emitted](/up.emit) right before a [destroyed](/up.destroy)
-    page fragment is removed from the DOM.
+    This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
     
-    If the destruction is animated, this event is emitted after
-    the animation has ended.
+    If the destruction is animated, this event is emitted after the animation has ended.
+    
+    The event is emitted on the parent element of the fragment that was removed.
     
     @event up:fragment:destroyed
     @param {jQuery} event.$element
-      The page fragment that is about to be removed from the DOM.
+      The page fragment that has been removed from the DOM.
+    @param {jQuery} event.$parent
+      The parent element of the fragment that has been removed from the DOM.
     @stable
      */
 
@@ -7848,7 +8377,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
   var slice = [].slice;
 
   up.motion = (function($) {
-    var animate, animateOptions, animateWithCss, config, defaultNamedAnimations, defaultNamedTransitions, findNamedAnimation, findTransitionFn, finish, finishOnce, isEnabled, isNone, morph, motionTracker, namedAnimations, namedTransitions, prependCopy, registerAnimation, registerTransition, reset, skipAnimate, skipMorph, snapshot, translateCss, u, willAnimate, withGhosts;
+    var animCount, animate, animateNow, animateOptions, composeTransitionFn, config, defaultNamedAnimations, defaultNamedTransitions, findAnimationFn, findNamedAnimation, findTransitionFn, finish, isEnabled, isNone, isSingletonElement, morph, motionTracker, namedAnimations, namedTransitions, registerAnimation, registerTransition, reset, skipAnimate, snapshot, swapElementsDirectly, translateCss, u, willAnimate;
     u = up.util;
     namedAnimations = {};
     defaultNamedAnimations = {};
@@ -7886,7 +8415,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       enabled: true
     });
     reset = function() {
-      finish();
+      motionTracker.reset();
       namedAnimations = u.copy(defaultNamedAnimations);
       namedTransitions = u.copy(defaultNamedTransitions);
       return config.reset();
@@ -7978,44 +8507,43 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     @stable
      */
     animate = function(elementOrSelector, animation, options) {
-      var $element;
+      var $element, animationFn, runNow, willRun;
       $element = $(elementOrSelector);
       options = animateOptions(options);
-      return finishOnce($element, options).then(function() {
-        if (!willAnimate($element, animation, options)) {
-          return skipAnimate($element, animation);
-        } else if (u.isFunction(animation)) {
-          return animation($element, options);
-        } else if (u.isString(animation)) {
-          return animate($element, findNamedAnimation(animation), options);
-        } else if (u.isOptions(animation)) {
-          return animateWithCss($element, animation, options);
-        } else {
-          return up.fail('Animation must be a function, animation name or object of CSS properties, but it was %o', animation);
-        }
-      });
+      animationFn = findAnimationFn(animation);
+      willRun = willAnimate($element, animation, options);
+      if (willRun) {
+        runNow = function() {
+          return animationFn($element, options);
+        };
+        return motionTracker.claim($element, runNow, options);
+      } else {
+        return skipAnimate($element, animation);
+      }
     };
     willAnimate = function($elements, animationOrTransition, options) {
       options = animateOptions(options);
-      return isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && u.all($elements, u.isBodyDescendant);
+      return isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !isSingletonElement($elements);
+    };
+    isSingletonElement = function($element) {
+      return $element.is('body');
     };
     skipAnimate = function($element, animation) {
       if (u.isOptions(animation)) {
-        $element.css(animation);
+        u.writeInlineStyle($element, animation);
       }
       return Promise.resolve();
     };
+    animCount = 0;
 
     /***
     Animates the given element's CSS properties using CSS transitions.
     
-    If the element is already being animated, the previous animation
-    will instantly jump to its last frame before the new animation begins.
+    Does not track the animation, nor does it finishes existing animations
+    (use `up.motion.animate()` for that). It does, however, listen to the motionTracker's
+    finish event.
     
-    To improve performance, the element will be forced into compositing for
-    the duration of the animation.
-    
-    @function up.util.cssAnimate
+    @function animateNow
     @param {Element|jQuery|string} elementOrSelector
       The element to animate.
     @param {Object} lastFrame
@@ -8032,55 +8560,13 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       A promise that fulfills when the animation ends.
     @internal
      */
-    animateWithCss = function($element, lastFrame, options) {
-      var startCssTransition;
-      startCssTransition = function() {
-        var cancelFallbackTimer, deferred, fulfill, oldTransition, onFinish, onTransitionEnd, transition, transitionProperties, transitionTimingTolerance, undoCompositing;
-        transitionProperties = Object.keys(lastFrame);
-        transition = {
-          'transition-property': transitionProperties.join(', '),
-          'transition-duration': options.duration + "ms",
-          'transition-delay': options.delay + "ms",
-          'transition-timing-function': options.easing
-        };
-        oldTransition = $element.css(Object.keys(transition));
-        deferred = u.newDeferred();
-        fulfill = function() {
-          return deferred.resolve();
-        };
-        onTransitionEnd = function(event) {
-          var completedProperty;
-          completedProperty = event.originalEvent.propertyName;
-          if (u.contains(transitionProperties, completedProperty)) {
-            return fulfill();
-          }
-        };
-        onFinish = fulfill;
-        $element.on(motionTracker.finishEvent, onFinish);
-        $element.on('transitionend', onTransitionEnd);
-        transitionTimingTolerance = 5;
-        cancelFallbackTimer = u.setTimer(options.duration + transitionTimingTolerance, fulfill);
-        deferred.then(function() {
-          var hadTransitionBefore;
-          $element.off(motionTracker.finishEvent, onFinish);
-          $element.off('transitionend', onTransitionEnd);
-          clearTimeout(cancelFallbackTimer);
-          undoCompositing();
-          $element.css({
-            'transition': 'none'
-          });
-          hadTransitionBefore = !(oldTransition['transition-property'] === 'none' || (oldTransition['transition-property'] === 'all' && oldTransition['transition-duration'][0] === '0'));
-          if (hadTransitionBefore) {
-            u.forceRepaint($element);
-            return $element.css(oldTransition);
-          }
-        });
-        undoCompositing = u.forceCompositing($element);
-        $element.css(transition);
-        $element.css(lastFrame);
-        return deferred.promise();
-      };
-      return motionTracker.start($element, startCssTransition);
+    animateNow = function($element, lastFrame, options) {
+      var cssTransition;
+      options = u.merge(options, {
+        finishEvent: motionTracker.finishEvent
+      });
+      cssTransition = new up.CssTransition($element, lastFrame, options);
+      return cssTransition.start();
     };
 
     /***
@@ -8101,56 +8587,11 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       consolidatedOptions.easing = u.option(userOptions.easing, u.presentAttr($element, 'up-easing'), moduleDefaults.easing, config.easing);
       consolidatedOptions.duration = Number(u.option(userOptions.duration, u.presentAttr($element, 'up-duration'), moduleDefaults.duration, config.duration));
       consolidatedOptions.delay = Number(u.option(userOptions.delay, u.presentAttr($element, 'up-delay'), moduleDefaults.delay, config.delay));
-      consolidatedOptions.finishedMotion = userOptions.finishedMotion;
+      consolidatedOptions.trackMotion = userOptions.trackMotion;
       return consolidatedOptions;
     };
     findNamedAnimation = function(name) {
       return namedAnimations[name] || up.fail("Unknown animation %o", name);
-    };
-
-    /***
-    @function withGhosts
-    @return {Promise}
-    @internal
-     */
-    withGhosts = function($old, $new, options, transitionFn) {
-      var $viewport, newCopy, newScrollTop, oldCopy, oldScrollTop, scrollOptions;
-      if (options.copy === false || $old.is('.up-ghost') || $new.is('.up-ghost')) {
-        return transitionFn($old, $new, options);
-      }
-      oldCopy = void 0;
-      newCopy = void 0;
-      oldScrollTop = void 0;
-      newScrollTop = void 0;
-      $viewport = up.layout.viewportOf($old);
-      u.temporaryCss($new, {
-        display: 'none'
-      }, function() {
-        oldCopy = prependCopy($old, $viewport);
-        return oldScrollTop = $viewport.scrollTop();
-      });
-      $old.hide();
-      scrollOptions = u.merge(options, {
-        duration: 0
-      });
-      return up.layout.revealOrRestoreScroll($new, scrollOptions).then(function() {
-        var $bothGhosts, $bothOriginals, restoreNewOpacity, transitionDone;
-        newCopy = prependCopy($new, $viewport);
-        newScrollTop = $viewport.scrollTop();
-        oldCopy.moveTop(newScrollTop - oldScrollTop);
-        restoreNewOpacity = u.temporaryCss($new, {
-          opacity: '0'
-        });
-        transitionDone = transitionFn(oldCopy.$ghost, newCopy.$ghost, options);
-        $bothGhosts = oldCopy.$ghost.add(newCopy.$ghost);
-        $bothOriginals = $old.add($new);
-        motionTracker.forwardFinishEvent($bothOriginals, $bothGhosts, transitionDone);
-        return transitionDone.then(function() {
-          restoreNewOpacity();
-          oldCopy.$bounds.remove();
-          return newCopy.$bounds.remove();
-        });
-      });
     };
 
     /***
@@ -8175,12 +8616,16 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     };
 
     /***
-    Performs an animated transition between two elements.
-    Transitions are implement by performing two animations in parallel,
-    causing one element to disappear and the other to appear.
+    Performs an animated transition between the `source` and `target` elements.
     
-    Note that the transition does not remove any elements from the DOM.
-    The first element will remain in the DOM, albeit hidden using `display: none`.
+    Transitions are implement by performing two animations in parallel,
+    causing `source` to disappear and the `target` to appear.
+    
+    - `target` is [inserted before](https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore) `source`
+    - `source` is removed from the [document flow](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Positioning) with `position: absolute`.
+       It will be positioned over its original place in the flow that is now occupied by `target`.
+    - Both `source` and `target` are animated in parallel
+    - `source` is removed from the DOM
     
     \#\#\# Named transitions
     
@@ -8236,35 +8681,65 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       Whether to reveal the new element by scrolling its parent viewport.
     @return {Promise}
       A promise that fulfills when the transition ends.
-    @stable
+    @experimental
      */
     morph = function(source, target, transitionObject, options) {
-      var $both, $new, $old, transitionFn, willMorph;
+      var $both, $new, $old, $viewport, oldRemote, promise, scrollNew, scrollTopBeforeReveal, trackable, transitionFn, willMorph;
       options = u.options(options);
       options = u.assign(options, animateOptions(options));
       $old = $(source);
       $new = $(target);
       $both = $old.add($new);
       transitionFn = findTransitionFn(transitionObject);
-      willMorph = willAnimate($both, transitionFn, options);
-      return up.log.group((willMorph ? 'Morphing %o to %o with transition %o' : void 0), $old.get(0), $new.get(0), transitionObject, function() {
-        return finishOnce($both, options).then(function() {
-          if (!willMorph) {
-            return skipMorph($old, $new, options);
-          } else if (transitionFn) {
-            return withGhosts($old, $new, options, transitionFn);
-          } else {
-            return up.fail("Unknown transition %o", transitionObject);
+      willMorph = willAnimate($old, transitionFn, options);
+      options.afterInsert || (options.afterInsert = u.noop);
+      options.beforeDetach || (options.beforeDetach = u.noop);
+      options.afterDetach || (options.afterDetach = u.noop);
+      scrollNew = function() {
+        var scrollOptions;
+        scrollOptions = u.merge(options, {
+          duration: 0
+        });
+        return up.layout.revealOrRestoreScroll($new, scrollOptions);
+      };
+      if (willMorph) {
+        if (motionTracker.isActive($old) && options.trackMotion === false) {
+          return transitionFn($old, $new, options);
+        }
+        up.puts('Morphing %o to %o with transition %o', $old.get(0), $new.get(0), transitionObject);
+        $viewport = up.layout.viewportOf($old);
+        scrollTopBeforeReveal = $viewport.scrollTop();
+        oldRemote = up.layout.absolutize($old, {
+          afterMeasure: function() {
+            $new.insertBefore($old);
+            return options.afterInsert();
           }
         });
-      });
-    };
-    finishOnce = function($elements, options) {
-      if (options.finishedMotion) {
-        return Promise.resolve();
+        trackable = function() {
+          var promise;
+          promise = scrollNew();
+          promise = promise.then(function() {
+            var scrollTopAfterReveal;
+            scrollTopAfterReveal = $viewport.scrollTop();
+            oldRemote.moveTop(scrollTopAfterReveal - scrollTopBeforeReveal);
+            return transitionFn($old, $new, options);
+          });
+          promise = promise.then(function() {
+            options.beforeDetach();
+            $old.detach();
+            oldRemote.$bounds.remove();
+            return options.afterDetach();
+          });
+          return promise;
+        };
+        return motionTracker.claim($both, trackable, options);
       } else {
-        options.finishedMotion = true;
-        return finish($elements);
+        options.beforeDetach();
+        swapElementsDirectly($old, $new);
+        options.afterInsert();
+        options.afterDetach();
+        promise = scrollNew();
+        return promise;
       }
     };
     findTransitionFn = function(object) {
@@ -8274,87 +8749,46 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       } else if (u.isFunction(object)) {
         return object;
       } else if (u.isArray(object)) {
-        if (isNone(object[0]) && isNone(object[1])) {
-          return void 0;
-        } else {
-          return function($old, $new, options) {
-            return Promise.all([animate($old, object[0], options), animate($new, object[1], options)]);
-          };
-        }
+        return composeTransitionFn.apply(null, object);
       } else if (u.isString(object)) {
         if (object.indexOf('/') >= 0) {
-          return findTransitionFn(object.split('/'));
+          return composeTransitionFn.apply(null, object.split('/'));
         } else if (namedTransition = namedTransitions[object]) {
           return findTransitionFn(namedTransition);
         }
+      } else {
+        return up.fail("Unknown transition %o", object);
       }
     };
-
-    /***
-    This instantly causes the side effects of a successful transition.
-    We use this to skip morphing for old browsers, or when the developer
-    decides to only animate the new element (i.e. no real ghosting or transition).
-    
-    @return {Promise}
-    @internal
-     */
-    skipMorph = function($old, $new, options) {
-      var scrollOptions;
-      $old.hide();
-      scrollOptions = u.merge(options, {
-        duration: 0
-      });
-      return up.layout.revealOrRestoreScroll($new, scrollOptions);
-    };
-
-    /***
-    @internal
-     */
-    prependCopy = function($element, $viewport) {
-      var $bounds, $fixedElements, $ghost, elementDims, fixedElement, i, len, moveTop, top;
-      elementDims = u.measure($element, {
-        relative: true,
-        inner: true
-      });
-      $ghost = $element.clone();
-      $ghost.find('script').remove();
-      $ghost.css({
-        position: $element.css('position') === 'static' ? 'static' : 'relative',
-        top: 'auto',
-        right: 'auto',
-        bottom: 'auto',
-        left: 'auto',
-        width: '100%',
-        height: '100%'
-      });
-      $ghost.addClass('up-ghost');
-      $bounds = $('<div class="up-bounds"></div>');
-      $bounds.css({
-        position: 'absolute'
-      });
-      $bounds.css(elementDims);
-      top = elementDims.top;
-      moveTop = function(diff) {
-        if (diff !== 0) {
-          top += diff;
-          return $bounds.css({
-            top: top
-          });
-        }
-      };
-      $ghost.appendTo($bounds);
-      $bounds.insertBefore($element);
-      moveTop($element.offset().top - $ghost.offset().top);
-      $fixedElements = up.layout.fixedChildren($ghost);
-      for (i = 0, len = $fixedElements.length; i < len; i++) {
-        fixedElement = $fixedElements[i];
-        u.fixedToAbsolute(fixedElement, $viewport);
+    composeTransitionFn = function(oldAnimation, newAnimation) {
+      var newAnimationFn, oldAnimationFn;
+      if (isNone(oldAnimation) && isNone(oldAnimation)) {
+        return void 0;
+      } else {
+        oldAnimationFn = findAnimationFn(oldAnimation) || u.asyncNoop;
+        newAnimationFn = findAnimationFn(newAnimation) || u.asyncNoop;
+        return function($old, $new, options) {
+          return Promise.all([oldAnimationFn($old, options), newAnimationFn($new, options)]);
+        };
       }
-      return {
-        $ghost: $ghost,
-        $bounds: $bounds,
-        moveTop: moveTop
-      };
+    };
+    findAnimationFn = function(object) {
+      if (isNone(object)) {
+        return void 0;
+      } else if (u.isFunction(object)) {
+        return object;
+      } else if (u.isString(object)) {
+        return findNamedAnimation(object);
+      } else if (u.isOptions(object)) {
+        return function($element, options) {
+          return animateNow($element, object, options);
+        };
+      } else {
+        return up.fail('Unknown animation %o', object);
+      }
+    };
+    swapElementsDirectly = function($old, $new) {
+      return $old.replaceWith($new);
     };
 
     /***
@@ -8391,7 +8825,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     @stable
      */
     registerTransition = function(name, transition) {
-      return namedTransitions[name] = transition;
+      return namedTransitions[name] = findTransitionFn(transition);
     };
 
     /***
@@ -8401,7 +8835,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     
         up.animation('fade-in', function($element, options) {
           $element.css(opacity: 0);
-          up.animate($ghost, { opacity: 1 }, options);
+          up.animate($element, { opacity: 1 }, options);
         })
     
     It is recommended that your definitions always end by calling
@@ -8427,7 +8861,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     @stable
      */
     registerAnimation = function(name, animation) {
-      return namedAnimations[name] = animation;
+      return namedAnimations[name] = findAnimationFn(animation);
     };
     snapshot = function() {
       defaultNamedAnimations = u.copy(namedAnimations);
@@ -8442,21 +8876,21 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     @internal
      */
     isNone = function(animationOrTransition) {
-      return !animationOrTransition || animationOrTransition === 'none' || (u.isOptions(animationOrTransition) && u.isBlank(animationOrTransition));
+      return !animationOrTransition || animationOrTransition === 'none' || u.isBlank(animationOrTransition);
     };
-    registerAnimation('fade-in', function($ghost, options) {
-      $ghost.css({
+    registerAnimation('fade-in', function($element, options) {
+      u.writeInlineStyle($element, {
         opacity: 0
       });
-      return animate($ghost, {
+      return animateNow($element, {
         opacity: 1
       }, options);
     });
-    registerAnimation('fade-out', function($ghost, options) {
-      $ghost.css({
+    registerAnimation('fade-out', function($element, options) {
+      u.writeInlineStyle($element, {
         opacity: 1
       });
-      return animate($ghost, {
+      return animateNow($element, {
         opacity: 0
       }, options);
     });
@@ -8465,84 +8899,84 @@ You can define custom animations using [`up.transition()`](/up.transition) and
         transform: "translate(" + x + "px, " + y + "px)"
       };
     };
-    registerAnimation('move-to-top', function($ghost, options) {
+    registerAnimation('move-to-top', function($element, options) {
       var box, travelDistance;
-      $ghost.css(translateCss(0, 0));
-      box = u.measure($ghost);
+      u.writeInlineStyle($element, translateCss(0, 0));
+      box = u.measure($element);
       travelDistance = box.top + box.height;
-      return animate($ghost, translateCss(0, -travelDistance), options);
+      return animateNow($element, translateCss(0, -travelDistance), options);
     });
-    registerAnimation('move-from-top', function($ghost, options) {
+    registerAnimation('move-from-top', function($element, options) {
       var box, travelDistance;
-      $ghost.css(translateCss(0, 0));
-      box = u.measure($ghost);
+      u.writeInlineStyle($element, translateCss(0, 0));
+      box = u.measure($element);
       travelDistance = box.top + box.height;
-      $ghost.css(translateCss(0, -travelDistance));
-      return animate($ghost, translateCss(0, 0), options);
+      u.writeInlineStyle($element, translateCss(0, -travelDistance));
+      return animateNow($element, translateCss(0, 0), options);
     });
-    registerAnimation('move-to-bottom', function($ghost, options) {
+    registerAnimation('move-to-bottom', function($element, options) {
       var box, travelDistance;
-      $ghost.css(translateCss(0, 0));
-      box = u.measure($ghost);
+      u.writeInlineStyle($element, translateCss(0, 0));
+      box = u.measure($element);
       travelDistance = u.clientSize().height - box.top;
-      return animate($ghost, translateCss(0, travelDistance), options);
+      return animateNow($element, translateCss(0, travelDistance), options);
     });
-    registerAnimation('move-from-bottom', function($ghost, options) {
+    registerAnimation('move-from-bottom', function($element, options) {
       var box, travelDistance;
-      $ghost.css(translateCss(0, 0));
-      box = u.measure($ghost);
+      u.writeInlineStyle($element, translateCss(0, 0));
+      box = u.measure($element);
       travelDistance = u.clientSize().height - box.top;
-      $ghost.css(translateCss(0, travelDistance));
-      return animate($ghost, translateCss(0, 0), options);
+      u.writeInlineStyle($element, translateCss(0, travelDistance));
+      return animateNow($element, translateCss(0, 0), options);
     });
-    registerAnimation('move-to-left', function($ghost, options) {
+    registerAnimation('move-to-left', function($element, options) {
       var box, travelDistance;
-      $ghost.css(translateCss(0, 0));
-      box = u.measure($ghost);
+      u.writeInlineStyle($element, translateCss(0, 0));
+      box = u.measure($element);
       travelDistance = box.left + box.width;
-      return animate($ghost, translateCss(-travelDistance, 0), options);
+      return animateNow($element, translateCss(-travelDistance, 0), options);
     });
-    registerAnimation('move-from-left', function($ghost, options) {
+    registerAnimation('move-from-left', function($element, options) {
       var box, travelDistance;
-      $ghost.css(translateCss(0, 0));
-      box = u.measure($ghost);
+      u.writeInlineStyle($element, translateCss(0, 0));
+      box = u.measure($element);
       travelDistance = box.left + box.width;
-      $ghost.css(translateCss(-travelDistance, 0));
-      return animate($ghost, translateCss(0, 0), options);
+      u.writeInlineStyle($element, translateCss(-travelDistance, 0));
+      return animateNow($element, translateCss(0, 0), options);
     });
-    registerAnimation('move-to-right', function($ghost, options) {
+    registerAnimation('move-to-right', function($element, options) {
       var box, travelDistance;
-      $ghost.css(translateCss(0, 0));
-      box = u.measure($ghost);
+      u.writeInlineStyle($element, translateCss(0, 0));
+      box = u.measure($element);
       travelDistance = u.clientSize().width - box.left;
-      return animate($ghost, translateCss(travelDistance, 0), options);
+      return animateNow($element, translateCss(travelDistance, 0), options);
     });
-    registerAnimation('move-from-right', function($ghost, options) {
+    registerAnimation('move-from-right', function($element, options) {
       var box, travelDistance;
-      $ghost.css(translateCss(0, 0));
-      box = u.measure($ghost);
+      u.writeInlineStyle($element, translateCss(0, 0));
+      box = u.measure($element);
       travelDistance = u.clientSize().width - box.left;
-      $ghost.css(translateCss(travelDistance, 0));
-      return animate($ghost, translateCss(0, 0), options);
+      u.writeInlineStyle($element, translateCss(travelDistance, 0));
+      return animateNow($element, translateCss(0, 0), options);
     });
-    registerAnimation('roll-down', function($ghost, options) {
+    registerAnimation('roll-down', function($element, options) {
       var deferred, fullHeight, styleMemo;
-      fullHeight = $ghost.height();
-      styleMemo = u.temporaryCss($ghost, {
+      fullHeight = $element.height();
+      styleMemo = u.writeTemporaryStyle($element, {
         height: '0px',
         overflow: 'hidden'
       });
-      deferred = animate($ghost, {
+      deferred = animate($element, {
         height: fullHeight + "px"
       }, options);
       deferred.then(styleMemo);
       return deferred;
     });
-    registerTransition('move-left', 'move-to-left/move-from-right');
-    registerTransition('move-right', 'move-to-right/move-from-left');
-    registerTransition('move-up', 'move-to-top/move-from-bottom');
-    registerTransition('move-down', 'move-to-bottom/move-from-top');
-    registerTransition('cross-fade', 'fade-out/fade-in');
+    registerTransition('move-left', ['move-to-left', 'move-from-right']);
+    registerTransition('move-right', ['move-to-right', 'move-from-left']);
+    registerTransition('move-up', ['move-to-top', 'move-from-bottom']);
+    registerTransition('move-down', ['move-to-bottom', 'move-from-top']);
+    registerTransition('cross-fade', ['fade-out', 'fade-in']);
     up.on('up:framework:booted', snapshot);
     up.on('up:framework:reset', reset);
     return {
@@ -8551,11 +8985,13 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       animateOptions: animateOptions,
       willAnimate: willAnimate,
       finish: finish,
+      finishCount: function() {
+        return motionTracker.finishCount;
+      },
       transition: registerTransition,
       animation: registerAnimation,
       config: config,
       isEnabled: isEnabled,
-      prependCopy: prependCopy,
       isNone: isNone
     };
   })(jQuery);
@@ -9583,11 +10019,19 @@ new page is loading.
       }
     };
     shouldProcessEvent = function(event, $link) {
-      var $target, $targetedChildLink, $targetedInput;
-      $target = $(event.target);
-      $targetedChildLink = $target.closest('a, [up-href]').not($link);
-      $targetedInput = up.form.fieldSelector().seekUp($target);
-      return $targetedChildLink.length === 0 && $targetedInput.length === 0 && u.isUnmodifiedMouseEvent(event);
+      var $betterTarget, target;
+      target = event.target;
+      if (!u.isUnmodifiedMouseEvent(event)) {
+        return false;
+      }
+      if (target === $link.get(0)) {
+        return true;
+      }
+      $betterTarget = $(target).closest("a, [up-href], " + (up.form.fieldSelector())).not($link);
+      if ($betterTarget.length) {
+        return false;
+      }
+      return true;
     };
 
     /***
@@ -9969,7 +10413,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @internal
      */
     fieldSelector = function() {
-      return u.multiSelector(config.fields);
+      return config.fields.join(',');
     };
 
     /***
@@ -10211,7 +10655,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       }
       delay = u.option(u.presentAttr($element, 'up-delay'), options.delay, config.observeDelay);
       delay = parseInt(delay);
-      $fields = fieldSelector().selectInSubtree($element);
+      $fields = u.selectInSubtree($element, fieldSelector());
       destructors = u.map($fields, function(field) {
         return observeField($(field), delay, callback);
       });
@@ -10774,6 +11218,28 @@ open dialogs with sub-forms, etc. all without losing form state.
       A CSS selector for elements whose visibility depends on this field's value.
     @stable
      */
+
+    /***
+    Only shows this element if an input field with [`[up-switch]`](/input-up-switch) has one of the given values.
+    
+    See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
+    
+    @selector [up-show-for]
+    @param {string} [up-show-for]
+      A space-separated list of input values for which this element should be shown.
+    @stable
+     */
+
+    /***
+    Hides this element if an input field with [`[up-switch]`](/input-up-switch) has one of the given values.
+    
+    See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
+    
+    @selector [up-hide-for]
+    @param {string} [up-hide-for]
+      A space-separated list of input values for which this element should be hidden.
+    @stable
+     */
     up.compiler('[up-switch]', function($field) {
       return switchTargets($field);
     });
@@ -10905,6 +11371,11 @@ open dialogs with sub-forms, etc. all without losing form state.
      */
     up.compiler('[up-autosubmit]', function($formOrField) {
       return autosubmit($formOrField);
+    });
+    up.compiler('[autofocus]', {
+      batch: true
+    }, function($input) {
+      return $input.last().focus();
     });
     up.on('up:framework:reset', reset);
     return {
@@ -11058,37 +11529,37 @@ The HTML of a popup element is simply this:
       return config.reset();
     };
     align = function() {
-      var css, linkBox, popupBox;
-      css = {};
+      var linkBox, popupBox, style;
+      style = {};
       popupBox = u.measure(state.$popup);
       if (u.isFixed(state.$anchor)) {
         linkBox = state.$anchor.get(0).getBoundingClientRect();
-        css['position'] = 'fixed';
+        style.position = 'fixed';
       } else {
         linkBox = u.measure(state.$anchor);
       }
       switch (state.position) {
         case 'bottom-right':
-          css['top'] = linkBox.top + linkBox.height;
-          css['left'] = linkBox.left + linkBox.width - popupBox.width;
+          style.top = linkBox.top + linkBox.height;
+          style.left = linkBox.left + linkBox.width - popupBox.width;
           break;
         case 'bottom-left':
-          css['top'] = linkBox.top + linkBox.height;
-          css['left'] = linkBox.left;
+          style.top = linkBox.top + linkBox.height;
+          style.left = linkBox.left;
           break;
         case 'top-right':
-          css['top'] = linkBox.top - popupBox.height;
-          css['left'] = linkBox.left + linkBox.width - popupBox.width;
+          style.top = linkBox.top - popupBox.height;
+          style.left = linkBox.left + linkBox.width - popupBox.width;
           break;
         case 'top-left':
-          css['top'] = linkBox.top - popupBox.height;
-          css['left'] = linkBox.left;
+          style.top = linkBox.top - popupBox.height;
+          style.left = linkBox.left;
           break;
         default:
           up.fail("Unknown position option '%s'", state.position);
       }
       state.$popup.attr('up-position', state.position);
-      return state.$popup.css(css);
+      return u.writeInlineStyle(state.$popup, style);
     };
     discardHistory = function() {
       state.coveredTitle = null;
@@ -11308,7 +11779,7 @@ The HTML of a popup element is simply this:
       return attachNow($link, options);
     };
     toggleAsap = function($link, options) {
-      if ($link.is('.up-current')) {
+      if (u.hasClass($link, 'up-current')) {
         return closeAsap();
       } else {
         return attachAsap($link, options);
@@ -11707,22 +12178,15 @@ or function.
       return state.coveredUrl = null;
     };
     createHiddenFrame = function(target, options) {
-      var $content, $dialog, $modal;
+      var $content, $dialog, $modal, dialogStyles;
       $modal = $(templateHtml());
       $modal.attr('up-flavor', state.flavor);
       if (u.isPresent(state.position)) {
         $modal.attr('up-position', state.position);
       }
       $dialog = $modal.find('.up-modal-dialog');
-      if (u.isPresent(options.width)) {
-        $dialog.css('width', options.width);
-      }
-      if (u.isPresent(options.maxWidth)) {
-        $dialog.css('max-width', options.maxWidth);
-      }
-      if (u.isPresent(options.height)) {
-        $dialog.css('height', options.height);
-      }
+      dialogStyles = u.only(options, 'width', 'maxWidth', 'height');
+      u.writeInlineStyle($dialog, dialogStyles);
       if (!state.closable) {
         $modal.find('.up-modal-close').remove();
       }
@@ -11740,20 +12204,20 @@ or function.
       if (u.documentHasVerticalScrollbar()) {
         $body = $('body');
         scrollbarWidth = u.scrollbarWidth();
-        bodyRightPadding = parseFloat($body.css('padding-right'));
+        bodyRightPadding = u.readComputedStyleNumber($body, 'paddingRight');
         bodyRightShift = scrollbarWidth + bodyRightPadding;
-        unshiftBody = u.temporaryCss($body, {
-          'padding-right': bodyRightShift + "px",
-          'overflow-y': 'hidden'
+        unshiftBody = u.writeTemporaryStyle($body, {
+          paddingRight: bodyRightShift,
+          overflowY: 'hidden'
         });
         state.unshifters.push(unshiftBody);
         return up.layout.anchoredRight().each(function() {
           var $element, elementRight, elementRightShift, unshifter;
           $element = $(this);
-          elementRight = parseFloat($element.css('right'));
+          elementRight = u.readComputedStyleNumber($element, 'right');
           elementRightShift = scrollbarWidth + elementRight;
-          unshifter = u.temporaryCss($element, {
-            'right': elementRightShift
+          unshifter = u.writeTemporaryStyle($element, {
+            right: elementRightShift
           });
           return state.unshifters.push(unshifter);
         });
@@ -12459,37 +12923,37 @@ The tooltip element is appended to the end of `<body>`.
       return config.reset();
     };
     align = function() {
-      var css, linkBox, tooltipBox;
-      css = {};
+      var linkBox, style, tooltipBox;
+      style = {};
       tooltipBox = u.measure(state.$tooltip);
       if (u.isFixed(state.$anchor)) {
         linkBox = state.$anchor.get(0).getBoundingClientRect();
-        css['position'] = 'fixed';
+        style.position = 'fixed';
       } else {
         linkBox = u.measure(state.$anchor);
       }
       switch (state.position) {
         case 'top':
-          css['top'] = linkBox.top - tooltipBox.height;
-          css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width);
+          style.top = linkBox.top - tooltipBox.height;
+          style.left = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width);
           break;
         case 'left':
-          css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height);
-          css['left'] = linkBox.left - tooltipBox.width;
+          style.top = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height);
+          style.left = linkBox.left - tooltipBox.width;
           break;
         case 'right':
-          css['top'] = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height);
-          css['left'] = linkBox.left + linkBox.width;
+          style.top = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height);
+          style.left = linkBox.left + linkBox.width;
           break;
         case 'bottom':
-          css['top'] = linkBox.top + linkBox.height;
-          css['left'] = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width);
+          style.top = linkBox.top + linkBox.height;
+          style.left = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width);
           break;
         default:
           up.fail("Unknown position option '%s'", state.position);
       }
       state.$tooltip.attr('up-position', state.position);
-      return state.$tooltip.css(css);
+      return u.writeInlineStyle(state.$tooltip, style);
     };
     createElement = function(options) {
       var $element;
@@ -12678,12 +13142,13 @@ The tooltip element is appended to the end of `<body>`.
 Navigation feedback
 ===================
 
-Unpoly automatically adds CSS classes to links while they are
-currently loading ([`.up-active`](/a.up-active)) or
-pointing to the current location ([`.up-current`](/a.up-current)).
+Unpoly automatically adds the class [`.up-active`](/a.up-active) to links or forms while they are loading.
 
-By styling these classes with CSS you can provide instant feedback to user interactions.
-This improves the perceived speed of your interface.
+By marking navigation elements as [`[up-nav]`](/up-nav), contained links that point to the current location
+automatically get the [`.up-current`](/up-nav-a.up-current) class.
+
+You should style [`.up-active`](/a.up-active) and [`.up-current`](/up-nav a.up-current) with CSS to
+provide instant feedback to user interactions. This improves the perceived speed of your interface.
 
 \#\#\# Example
 
@@ -12716,7 +13181,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
   var slice = [].slice;
 
   up.feedback = (function($) {
-    var CLASS_ACTIVE, SELECTOR_SECTION, config, currentClass, findActionableArea, locationChanged, normalizeUrl, reset, sectionUrls, start, stop, u, urlSet;
+    var CLASS_ACTIVE, NORMALIZED_SECTION_URLS_KEY, SELECTOR_LINK, buildCurrentUrlSet, buildSectionUrls, config, currentUrlSet, findActivatableArea, navSelector, normalizeUrl, previousUrlSet, reset, sectionUrls, start, stop, u, updateAllNavigationSections, updateAllNavigationSectionsIfLocationChanged, updateCurrentClassForLinks, updateNavigationSectionsInNewFragment;
     u = up.util;
 
     /***
@@ -12725,23 +13190,26 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     @property up.feedback.config
     @param {Array<string>} [config.currentClasses]
       An array of classes to set on [links that point the current location](/a.up-current).
+    @param {Array<string>} [config.navs]
+      An array of CSS selectors that match [navigation components](/up-nav).
     @stable
      */
     config = u.config({
-      currentClasses: ['up-current']
+      currentClasses: ['up-current'],
+      navs: ['[up-nav]']
     });
+    previousUrlSet = void 0;
+    currentUrlSet = void 0;
     reset = function() {
-      return config.reset();
-    };
-    currentClass = function() {
-      var classes;
-      classes = config.currentClasses;
-      classes = classes.concat(['up-current']);
-      classes = u.uniq(classes);
-      return classes.join(' ');
+      config.reset();
+      previousUrlSet = void 0;
+      return currentUrlSet = void 0;
     };
     CLASS_ACTIVE = 'up-active';
-    SELECTOR_SECTION = 'a, [up-href]';
+    SELECTOR_LINK = 'a, [up-href]';
+    navSelector = function() {
+      return config.navs.join(',');
+    };
     normalizeUrl = function(url) {
       if (u.isPresent(url)) {
         return u.normalizeUrl(url, {
@@ -12749,77 +13217,102 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
         });
       }
     };
+    NORMALIZED_SECTION_URLS_KEY = 'up-normalized-urls';
     sectionUrls = function($section) {
-      var attr, i, j, len, len1, ref, url, urls, value, values;
+      var urls;
+      if (!(urls = $section.data(NORMALIZED_SECTION_URLS_KEY))) {
+        urls = buildSectionUrls($section);
+        $section.data(NORMALIZED_SECTION_URLS_KEY, urls);
+      }
+      return urls;
+    };
+    buildSectionUrls = function($section) {
+      var attr, i, j, len, len1, ref, ref1, url, urls, value;
       urls = [];
-      ref = ['href', 'up-href', 'up-alias'];
-      for (i = 0, len = ref.length; i < len; i++) {
-        attr = ref[i];
-        if (value = u.presentAttr($section, attr)) {
-          values = attr === 'up-alias' ? value.split(' ') : [value];
-          for (j = 0, len1 = values.length; j < len1; j++) {
-            url = values[j];
-            if (url !== '#') {
-              url = normalizeUrl(url);
-              urls.push(url);
+      if (up.link.isSafe($section)) {
+        ref = ['href', 'up-href', 'up-alias'];
+        for (i = 0, len = ref.length; i < len; i++) {
+          attr = ref[i];
+          if (value = u.presentAttr($section, attr)) {
+            ref1 = value.split(/\s+/);
+            for (j = 0, len1 = ref1.length; j < len1; j++) {
+              url = ref1[j];
+              if (url !== '#') {
+                url = normalizeUrl(url);
+                urls.push(url);
+              }
             }
           }
         }
       }
       return urls;
     };
-    urlSet = function(urls) {
-      var doesMatchFully, doesMatchPrefix, matches, matchesAny;
-      urls = u.map(urls, normalizeUrl);
-      urls = u.compact(urls);
-      matches = function(testUrl) {
-        if (testUrl.substr(-1) === '*') {
-          return doesMatchPrefix(testUrl.slice(0, -1));
-        } else {
-          return doesMatchFully(testUrl);
-        }
-      };
-      doesMatchFully = function(testUrl) {
-        return u.contains(urls, testUrl);
-      };
-      doesMatchPrefix = function(prefix) {
-        return u.detect(urls, function(url) {
-          return url.indexOf(prefix) === 0;
-        });
-      };
-      matchesAny = function(testUrls) {
-        return u.detect(testUrls, matches);
-      };
-      return {
-        matchesAny: matchesAny
-      };
+    buildCurrentUrlSet = function() {
+      var urls;
+      urls = [up.browser.url(), up.modal.url(), up.modal.coveredUrl(), up.popup.url(), up.popup.coveredUrl()];
+      return new up.UrlSet(urls, {
+        normalizeUrl: normalizeUrl
+      });
     };
-    locationChanged = function() {
-      var currentUrls, klass;
-      currentUrls = urlSet([up.browser.url(), up.modal.url(), up.modal.coveredUrl(), up.popup.url(), up.popup.coveredUrl()]);
-      klass = currentClass();
-      return u.each($(SELECTOR_SECTION), function(section) {
-        var $section, urls;
-        $section = $(section);
-        urls = sectionUrls($section);
-        if (up.link.isSafe($section) && currentUrls.matchesAny(urls)) {
-          return $section.addClass(klass);
-        } else if ($section.hasClass(klass) && $section.closest('.up-destroying').length === 0) {
-          return $section.removeClass(klass);
+    updateAllNavigationSectionsIfLocationChanged = function() {
+      previousUrlSet = currentUrlSet;
+      currentUrlSet = buildCurrentUrlSet();
+      if (!currentUrlSet.isEqual(previousUrlSet)) {
+        return updateAllNavigationSections($('body'));
+      }
+    };
+    updateAllNavigationSections = function($root) {
+      var $navs, $sections;
+      $navs = u.selectInSubtree($root, navSelector());
+      $sections = u.selectInSubtree($navs, SELECTOR_LINK);
+      return updateCurrentClassForLinks($sections);
+    };
+    updateNavigationSectionsInNewFragment = function($fragment) {
+      var $sections;
+      if ($fragment.closest(navSelector()).length) {
+        $sections = u.selectInSubtree($fragment, SELECTOR_LINK);
+        return updateCurrentClassForLinks($sections);
+      } else {
+        return updateAllNavigationSections($fragment);
+      }
+    };
+    updateCurrentClassForLinks = function($links) {
+      currentUrlSet || (currentUrlSet = buildCurrentUrlSet());
+      return u.each($links, function(link) {
+        var $link, classList, i, j, klass, len, len1, ref, ref1, results, results1, urls;
+        $link = $(link);
+        urls = sectionUrls($link);
+        classList = link.classList;
+        if (currentUrlSet.matchesAny(urls)) {
+          ref = config.currentClasses;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            klass = ref[i];
+            results.push(classList.add(klass));
+          }
+          return results;
+        } else {
+          ref1 = config.currentClasses;
+          results1 = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            klass = ref1[j];
+            results1.push(classList.remove(klass));
+          }
+          return results1;
         }
       });
     };
 
     /***
-    @function findActionableArea
+    @function findActivatableArea
     @param {string|Element|jQuery} elementOrSelector
     @internal
      */
-    findActionableArea = function(elementOrSelector) {
+    findActivatableArea = function(elementOrSelector) {
       var $area;
       $area = $(elementOrSelector);
-      if ($area.is(SELECTOR_SECTION)) {
-        $area = u.presence($area.parent(SELECTOR_SECTION)) || $area;
+      if ($area.is(SELECTOR_LINK)) {
+        $area = u.presence($area.parent(SELECTOR_LINK)) || $area;
       }
       return $area;
     };
@@ -12860,7 +13353,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
       elementOrSelector = args.shift();
       action = args.pop();
       options = u.options(args[0]);
-      $element = findActionableArea(elementOrSelector);
+      $element = findActivatableArea(elementOrSelector);
       if (!options.preload) {
         $element.addClass(CLASS_ACTIVE);
       }
@@ -12949,40 +13442,58 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
      */
     stop = function(elementOrSelector) {
       var $element;
-      $element = findActionableArea(elementOrSelector);
+      $element = findActivatableArea(elementOrSelector);
       return $element.removeClass(CLASS_ACTIVE);
     };
 
     /***
-    Links that point to the current location are assigned
-    the `up-current` class automatically.
+    Marks this element as a navigation component, such as a menu or navigation bar.
     
-    The use case for this is navigation bars:
+    When a link within an `[up-nav]` element points to the current location, it is assigned the `.up-current` class. When the browser navigates to another location, the class is removed automatically.
     
-        <nav>
+    You may also assign `[up-nav]` to an individual link instead of an navigational container.
+    
+    If you don't want to manually add this attribute to every navigational element, you can configure selectors to automatically match your navigation components in [`up.feedback.config.navs`](/up.feedback.config#config.navs).
+    
+    
+    \#\#\# Example
+    
+    Let's take a simple menu with two links. The menu has been marked with the `[up-nav]` attribute:
+    
+        <div up-nav>
           <a href="/foo">Foo</a>
           <a href="/bar">Bar</a>
-        </nav>
+        </div>
     
-    If the browser location changes to `/foo`, the markup changes to this:
+    If the browser location changes to `/foo`, the first link is marked as `.up-current`:
     
-        <nav>
+        <div up-nav>
           <a href="/foo" class="up-current">Foo</a>
           <a href="/bar">Bar</a>
-        </nav>
+        </div>
     
-    \#\#\# What's considered to be "current"?
+    If the browser location changes to `/bar`, the first link automatically loses its `.up-current` class. Now the second link is marked as `.up-current`:
+    
+        <div up-nav>
+          <a href="/foo">Foo</a>
+          <a href="/bar" class="up-current">Bar</a>
+        </div>
+    
+    
+    \#\#\# What is considered to be "current"?
     
     The current location is considered to be either:
     
     - the URL displayed in the browser window's location bar
-    - the source URL of a currently opened [modal dialog](/up.modal)
-    - the source URL of a currently opened [popup overlay](/up.popup)
+    - the source URL of a [modal dialog](/up.modal)
+    - the URL of the page behind a [modal dialog](/up.modal)
+    - the source URL of a [popup overlay](/up.popup)
+    - the URL of the content behind a [popup overlay](/up.popup)
     
     A link matches the current location (and is marked as `.up-current`) if it matches either:
     
     - the link's `href` attribute
-    - the link's [`up-href`](#turn-any-element-into-a-link) attribute
+    - the link's `up-href` attribute
     - a space-separated list of URLs in the link's `up-alias` attribute
     
     \#\#\# Matching URL by prefix
@@ -12990,20 +13501,27 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     You can mark a link as `.up-current` whenever the current URL matches a prefix.
     To do so, end the `up-alias` attribute in an asterisk (`*`).
     
-    For instance, the following link is highlighted for both `/reports` and `/reports/123`:
+    For instance, the following `[up-nav]` link is highlighted for both `/reports` and `/reports/123`:
     
-        <a href="/reports" up-alias="/reports/*">Reports</a>
+        <a up-nav href="/reports" up-alias="/reports/*">Reports</a>
     
-    @selector a.up-current
+    @selector [up-nav]
     @stable
      */
-    up.on('up:fragment:inserted', function() {
-      return locationChanged();
+
+    /***
+    When a link within an `[up-nav]` element points to the current location, it is assigned the `.up-current` class.
+    
+    See [`[up-nav]`](/up-nav) for more documentation and examples.
+    
+    @selector [up-nav] a.up-current
+    @stable
+     */
+    up.on('up:history:pushed up:history:replaced up:history:restored up:modal:opened up:modal:closed up:popup:opened up:popup:closed', function(event) {
+      return updateAllNavigationSectionsIfLocationChanged();
     });
-    up.on('up:fragment:destroyed', function(event, $fragment) {
-      if ($fragment.is('.up-modal, .up-popup')) {
-        return locationChanged();
-      }
+    up.on('up:fragment:inserted', function(event, $newFragment) {
+      return updateNavigationSectionsInNewFragment($newFragment);
     });
     up.on('up:framework:reset', reset);
     return {
@@ -13061,7 +13579,7 @@ passively receive updates from the server.
     @internal
      */
     hungrySelector = function() {
-      return u.multiSelector(config.hungry);
+      return config.hungry.join(',');
     };
 
     /***
