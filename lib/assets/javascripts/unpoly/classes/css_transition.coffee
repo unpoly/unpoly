@@ -68,7 +68,7 @@ class up.CssTransition
     # Check if we are receiving a late transitionEnd event
     # from a previous CSS transition.
     elapsed = new Date() - @startTime
-    return end unless elapsed > 0.3 * @totalDuration
+    return unless elapsed > 0.25 * @totalDuration
 
     completedPropertyKebab = event.originalEvent.propertyName
     return unless u.contains(@lastFrameKeysKebab, completedPropertyKebab)
