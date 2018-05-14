@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.56.0",
+    version: "0.56.1",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -2327,17 +2327,17 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      * Registers an empty rejection handler with the given promise.
      * This prevents browsers from printing "Uncaught (in promise)" to the error
      * console when the promise is rejection.
-    #
+     *
      * This is helpful for event handlers where it is clear that no rejection
      * handler will be registered:
-    #
+     *
      *     up.on('submit', 'form[up-target]', (event, $form) => {
      *       promise = up.submit($form)
      *       up.util.muteRejection(promise)
      *     })
-    #
+     *
      * Does nothing if passed a missing value.
-    #
+     *
      * @function up.util.muteRejection
      * @param {Promise|undefined|null} promise
      * @return {Promise}
@@ -2377,8 +2377,8 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       var error;
       try {
         return block();
-      } catch (_error) {
-        error = _error;
+      } catch (error1) {
+        error = error1;
         return Promise.reject(error);
       }
     };
@@ -4445,7 +4445,7 @@ Internet Explorer 10 or lower
     sessionStorage = u.memoize(function() {
       try {
         return window.sessionStorage;
-      } catch (_error) {
+      } catch (error) {
         return polyfilledSessionStorage();
       }
     });
@@ -7567,8 +7567,8 @@ is built from these functions. You can use them to extend Unpoly from your
       try {
         improvedTarget = bestPreflightSelector(selectorOrElement, successOptions);
         improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions);
-      } catch (_error) {
-        e = _error;
+      } catch (error) {
+        e = error;
         return Promise.reject(e);
       }
       request = {
@@ -7836,12 +7836,14 @@ is built from these functions. You can use them to extend Unpoly from your
         options.keepPlans = transferKeepableElements($old, $new, options);
         $parent = $old.parent();
         morphOptions = u.merge(options, {
-          afterInsert: function() {
-            up.hello($new, options);
+          beforeStart: function() {
             markElementAsDestroying($old);
             return emitFragmentDestroy($old, {
               log: false
             });
+          },
+          afterInsert: function() {
+            return up.hello($new, options);
           },
           beforeDetach: function() {
             return up.syntax.clean($old);
@@ -8101,13 +8103,16 @@ is built from these functions. You can use them to extend Unpoly from your
 
     /***
     Returns the first element matching the given selector, but
-    ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
+    ignores elements that are being [destroyed](/up.destroy) or that are being
+    removed by a [transition](/up.morph).
     
     If the given argument is already a jQuery collection (or an array
     of DOM elements), the first element matching these conditions
     is returned.
     
     Returns `undefined` if no element matches these conditions.
+    
+    Also see the [`.up-destroying`](/up-destroying) class.
     
     @function up.first
     @param {string|Element|jQuery|Array<Element>} selectorOrElement
@@ -8242,6 +8247,18 @@ is built from these functions. You can use them to extend Unpoly from your
     shouldLogDestruction = function($element, options) {
       return options.log !== false && !$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup');
     };
+
+    /***
+    Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
+    or while they are being removed by a [transition](/up.morph).
+    
+    If the removal is animated, the class is assigned before the animation.
+    
+    Also see the [`up.first()`](/up.first) function.
+    
+    @selector .up-destroying
+    @stable
+     */
     markElementAsDestroying = function($element) {
       return $element.addClass('up-destroying');
     };
@@ -8684,7 +8701,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     @experimental
      */
     morph = function(source, target, transitionObject, options) {
-      var $both, $new, $old, $viewport, oldRemote, promise, scrollNew, scrollTopBeforeReveal, trackable, transitionFn, willMorph;
+      var $both, $new, $old, $viewport, afterDetach, afterInsert, beforeDetach, beforeStart, oldRemote, promise, scrollNew, scrollTopBeforeReveal, trackable, transitionFn, willMorph;
       options = u.options(options);
       options = u.assign(options, animateOptions(options));
       $old = $(source);
@@ -8692,9 +8709,11 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       $both = $old.add($new);
       transitionFn = findTransitionFn(transitionObject);
       willMorph = willAnimate($old, transitionFn, options);
-      options.afterInsert || (options.afterInsert = u.noop);
-      options.beforeDetach || (options.beforeDetach = u.noop);
-      options.afterDetach || (options.afterDetach = u.noop);
+      beforeStart = u.pluckKey(options, 'beforeStart') || u.noop;
+      afterInsert = u.pluckKey(options, 'afterInsert') || u.noop;
+      beforeDetach = u.pluckKey(options, 'beforeDetach') || u.noop;
+      afterDetach = u.pluckKey(options, 'afterDetach') || u.noop;
+      beforeStart();
       scrollNew = function() {
         var scrollOptions;
         scrollOptions = u.merge(options, {
@@ -8712,7 +8731,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
         oldRemote = up.layout.absolutize($old, {
           afterMeasure: function() {
             $new.insertBefore($old);
-            return options.afterInsert();
+            return afterInsert();
           }
         });
         trackable = function() {
@@ -8725,19 +8744,19 @@ You can define custom animations using [`up.transition()`](/up.transition) and
             return transitionFn($old, $new, options);
           });
           promise = promise.then(function() {
-            options.beforeDetach();
+            beforeDetach();
             $old.detach();
             oldRemote.$bounds.remove();
-            return options.afterDetach();
+            return afterDetach();
           });
           return promise;
         };
         return motionTracker.claim($both, trackable, options);
       } else {
-        options.beforeDetach();
+        beforeDetach();
         swapElementsDirectly($old, $new);
-        options.afterInsert();
-        options.afterDetach();
+        afterInsert();
+        afterDetach();
         promise = scrollNew();
         return promise;
       }
