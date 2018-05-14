@@ -9,7 +9,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 0.56.0
 ------
 
-This release includes some major performance improvements.
+This release includes major performance improvements and a new animation engine.
 
 Beware of the breaking change with [`.up-current`](/up-nav-a.up-current)!
 
