@@ -498,7 +498,7 @@ describe 'up.motion', ->
           transition = ($old, $new, options) ->
             up.morph($old, $new, 'cross-fade', options)
 
-          up.morph($old, $new, transition, duration: 200, easing: 'linear')
+          up.morph($old, $new, transition, duration: 50, easing: 'linear')
 
           next ->
             expect(up.motion.finishCount()).toEqual(1)

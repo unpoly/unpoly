@@ -1425,6 +1425,73 @@ describe 'up.dom', ->
           expect(input).toBeGiven()
           expect(document.activeElement).toBe(input)
 
+
+      it 'emits an up:fragment:destroy event while the element is still in the DOM', asyncSpec (next) ->
+        $element = affix('.element')
+        expect($element).toBeAttached()
+
+        listener = jasmine.createSpy('event listener')
+        $element.on('up:fragment:destroy', listener)
+
+        destroyDone = up.destroy($element, animation: 'fade-out', duration: 30)
+
+        next ->
+          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining($element: $element))
+          expect($element).toBeAttached()
+
+          next.await(destroyDone)
+
+        next ->
+          expect($element).toBeDetached()
+
+      it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', asyncSpec (next) ->
+        $parent = affix('.parent')
+        $element = $parent.affix('.element')
+        expect($element).toBeAttached()
+
+        listener = jasmine.createSpy('event listener')
+
+        $parent.on('up:fragment:destroyed', listener)
+
+        destroyDone = up.destroy($element, animation: 'fade-out', duration: 30)
+
+        next ->
+          expect(listener).not.toHaveBeenCalled()
+          expect($element).toBeAttached()
+
+          next.await(destroyDone)
+
+        next ->
+          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining($element: $element, $parent: $parent))
+          expect($element).toBeDetached()
+
+      it 'emits an up:fragment:destroy event while the element is still in the DOM', (done) ->
+        $element = affix('.element.v1').text('v1')
+        expect($element).toBeAttached()
+
+        listener = jasmine.createSpy('event listener')
+        $element.on 'up:fragment:destroy', -> listener(u.isDetached($element))
+
+        extractDone = up.extract('.element', '<div class="element v2">v2</div>')
+
+        extractDone.then ->
+          expect(listener).toHaveBeenCalledWith(false)
+          done()
+
+      it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
+        $parent = affix('.parent')
+        $element = $parent.affix('.element.v1').text('v1')
+        expect($element).toBeAttached()
+
+        listener = jasmine.createSpy('event listener')
+        $parent.on 'up:fragment:destroyed', -> listener(u.isDetached($element))
+
+        extractDone = up.extract('.element', '<div class="element v2">v2</div>')
+
+        extractDone.then ->
+          expect(listener).toHaveBeenCalledWith(true)
+          done()
+
       describe 'cleaning up', ->
 
         it 'calls destructors on the old element', asyncSpec (next) ->
@@ -1469,6 +1536,34 @@ describe 'up.dom', ->
             expect('.container').toHaveText('new text')
             expect(destructor).toHaveBeenCalled()
 
+        it 'marks the old element as .up-destroying before destructors', (done) ->
+          destructor = jasmine.createSpy('destructor')
+          up.compiler '.container', ($element) ->
+            -> destructor($element.text(), $element.is('.up-destroying'))
+          $container = affix('.container').text('old text')
+          up.hello($container)
+
+          extractDone = up.extract('.container', '<div class="container">new text</div>')
+
+          extractDone.then ->
+            expect('.container').toHaveText('new text')
+            expect(destructor).toHaveBeenCalledWith('old text', true)
+            done()
+
+        it 'marks the old element as .up-destroying before destructors after a { transition }', (done) ->
+          destructor = jasmine.createSpy('destructor')
+          up.compiler '.container', ($element) ->
+            -> destructor($element.text(), $element.is('.up-destroying'))
+          $container = affix('.container').text('old text')
+          up.hello($container)
+
+          extractDone = up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
+
+          extractDone.then ->
+            expect('.container').toHaveText('new text')
+            expect(destructor).toHaveBeenCalledWith('old text', true)
+            done()
+
         it 'calls destructors while the element is still attached to the DOM, so destructors see ancestry and events bubble up', asyncSpec (next) ->
           spy = jasmine.createSpy('parent spy')
           up.compiler '.element', ($element) ->
@@ -1499,6 +1594,7 @@ describe 'up.dom', ->
           extractDone.then ->
             expect(spy).toHaveBeenCalledWith('old text', $parent)
             done()
+
 
       describe 'with { transition } option', ->
 
@@ -1544,7 +1640,6 @@ describe 'up.dom', ->
               expect($('.container').length).toEqual(1)
               expect(u.opacity($('.container'))).toEqual(1.0)
 
-
         it 'marks the old fragment as .up-destroying during the transition', asyncSpec (next) ->
           affix('.element').text('version 1')
           up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
@@ -1557,6 +1652,34 @@ describe 'up.dom', ->
             $version2 = $('.element:contains("version 2")')
             expect($version2).toHaveLength(1)
             expect($version2).not.toHaveClass('up-destroying')
+
+        it 'emits an up:fragment:destroy event while the old element is still in the DOM', (done) ->
+          $element = affix('.element.v1').text('v1')
+          expect($element).toBeAttached()
+
+          listener = jasmine.createSpy('event listener')
+          $element.on 'up:fragment:destroy', -> listener(u.isDetached($element))
+
+          extractDone = up.extract('.element', '<div class="element v2">v2</div>', transition: 'cross-fade', duration: 50)
+
+          extractDone.then ->
+            expect(listener).toHaveBeenCalledWith(false)
+            done()
+
+        it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
+          $parent = affix('.parent')
+          $element = $parent.affix('.element.v1').text('v1')
+          expect($element).toBeAttached()
+
+          listener = jasmine.createSpy('event listener')
+          $parent.on 'up:fragment:destroyed', -> listener(u.isDetached($element))
+
+          extractDone = up.extract('.element', '<div class="element v2">v2</div>', transition: 'cross-fade', duration: 50)
+
+          extractDone.then ->
+            expect(listener).toHaveBeenCalledWith(true)
+            done()
+
 
         it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
           affix('.element.v1').text('version 1')
@@ -1587,6 +1710,7 @@ describe 'up.dom', ->
             expect($ghost3).toHaveLength(1)
             expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
 
+
         it 'delays the resolution of the returned promise until the transition is over', (done) ->
           affix('.element').text('version 1')
           resolution = jasmine.createSpy()
@@ -1610,6 +1734,64 @@ describe 'up.dom', ->
 
           next =>
             expect(spy).toHaveBeenCalledWith('new text', $parent)
+
+
+        describe 'when up.morph() is called from a transition function', ->
+
+          it "does not emit multiple replacement events (bugfix)", (done) ->
+            $element = affix('.element').text('old content')
+
+            transition = ($old, $new, options) ->
+              up.morph($old, $new, 'cross-fade', options)
+
+            destroyListener = jasmine.createSpy('listener to up:fragment:destroy')
+            up.on 'up:fragment:destroy', destroyListener
+            destroyedListener = jasmine.createSpy('listener to up:fragment:destroyed')
+            up.on 'up:fragment:destroyed', destroyedListener
+            insertedListener = jasmine.createSpy('listener to up:fragment:inserted')
+            up.on 'up:fragment:inserted', insertedListener
+
+            extractDone = up.extract('.element', '<div class="element">new content</div>', transition: transition, duration: 50, easing: 'linear')
+
+            extractDone.then ->
+              expect(destroyListener.calls.count()).toBe(1)
+              expect(destroyedListener.calls.count()).toBe(1)
+              expect(insertedListener.calls.count()).toBe(1)
+              done()
+
+          it "does not compile the element multiple times (bugfix)", (done) ->
+            $element = affix('.element').text('old content')
+
+            transition = ($old, $new, options) ->
+              up.morph($old, $new, 'cross-fade', options)
+
+            compiler = jasmine.createSpy('compiler')
+            up.compiler '.element', compiler
+
+            extractDone = up.extract('.element', '<div class="element">new content</div>', transition: transition, duration: 50, easing: 'linear')
+
+            extractDone.then ->
+              expect(compiler.calls.count()).toBe(1)
+              done()
+
+          it "does not call destructors multiple times (bugfix)", (done) ->
+            $element = affix('.element').text('old content')
+
+            transition = ($old, $new, options) ->
+              up.morph($old, $new, 'cross-fade', options)
+
+            destructor = jasmine.createSpy('destructor')
+            up.compiler '.element', (element) ->
+              return destructor
+
+            up.hello($element)
+
+            extractDone = up.extract('.element', '<div class="element">new content</div>', transition: transition, duration: 50, easing: 'linear')
+
+            extractDone.then ->
+              expect(destructor.calls.count()).toBe(1)
+              done()
+
 
         describe 'when animation is disabled', ->
 
@@ -2043,6 +2225,19 @@ describe 'up.dom', ->
           expect($('.element')).not.toExist()
           done()
 
+      it 'runs an animation before removal with { animate } option', asyncSpec (next) ->
+        $element = affix('.element')
+        up.destroy($element, animation: 'fade-out', duration: 150, easing: 'linear')
+
+        next ->
+          expect($element).toHaveOpacity(1.0, 0.2)
+
+        next.after 75, ->
+          expect($element).toHaveOpacity(0.5, 0.2)
+
+        next.after (75 + 20), ->
+          expect($element).toBeDetached()
+
       it 'calls destructors for custom elements', (done) ->
         up.compiler('.element', ($element) -> destructor)
         destructor = jasmine.createSpy('destructor')
@@ -2050,6 +2245,48 @@ describe 'up.dom', ->
         up.destroy('.element').then ->
           expect(destructor).toHaveBeenCalled()
           done()
+
+      it 'marks the old element as .up-destroying before destructors', (done) ->
+        destructor = jasmine.createSpy('destructor')
+        up.compiler '.container', ($element) ->
+          -> destructor($element.text(), $element.is('.up-destroying'))
+        $container = affix('.container').text('old text')
+        up.hello($container)
+
+        destroyDone = up.destroy('.container')
+
+        destroyDone.then ->
+          expect(destructor).toHaveBeenCalledWith('old text', true)
+          done()
+
+      it 'marks the old element as .up-destroying before destructors after an { animation }', (done) ->
+        destructor = jasmine.createSpy('destructor')
+        up.compiler '.container', ($element) ->
+          -> destructor($element.text(), $element.is('.up-destroying'))
+        $container = affix('.container').text('old text')
+        up.hello($container)
+
+        destroyDone = up.destroy('.container', animation: 'fade-out', duration: 100)
+
+        destroyDone.then ->
+          expect(destructor).toHaveBeenCalledWith('old text', true)
+          done()
+
+      it 'waits until an { animation } is done before calling destructors', asyncSpec (next) ->
+        destructor = jasmine.createSpy('destructor')
+        up.compiler '.container', ($element) ->
+          -> destructor($element.text())
+        $container = affix('.container').text('old text')
+        up.hello($container)
+
+        destroyDone = up.destroy('.container', animation: 'fade-out', duration: 100)
+
+        next.after 50, ->
+          expect(destructor).not.toHaveBeenCalled()
+
+        next.after (50 + (tolerance = 70)), ->
+          expect(destructor).toHaveBeenCalledWith('old text',)
+
 
       it 'allows to pass a new history entry as { history } option', (done) ->
         up.history.config.enabled = true
@@ -2065,19 +2302,6 @@ describe 'up.dom', ->
         up.destroy('.element', history: '/new-path', title: 'Title from options').then ->
           expect(document.title).toEqual('Title from options')
           done()
-
-      it 'runs an animation before removal with { animate } option', asyncSpec (next) ->
-        $element = affix('.element')
-        up.destroy($element, animation: 'fade-out', duration: 150, easing: 'linear')
-
-        next ->
-          expect($element).toHaveOpacity(1.0, 0.2)
-
-        next.after 75, ->
-          expect($element).toHaveOpacity(0.5, 0.2)
-
-        next.after (75 + 20), ->
-          expect($element).toBeDetached()
 
       it 'marks the element as .up-destroying while it is animating', asyncSpec (next) ->
         $element = affix('.element')

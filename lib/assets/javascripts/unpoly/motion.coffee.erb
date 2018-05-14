@@ -342,9 +342,14 @@ up.motion = (($) ->
     transitionFn = findTransitionFn(transitionObject)
     willMorph = willAnimate($old, transitionFn, options)
 
-    options.afterInsert ||= u.noop
-    options.beforeDetach ||= u.noop
-    options.afterDetach ||= u.noop
+    # Remove callbacks from our options hash in case transitionFn calls morph() recursively.
+    # If we passed on these callbacks, we might call destructors, events, etc. multiple times.
+    beforeStart = u.pluckKey(options, 'beforeStart') || u.noop
+    afterInsert = u.pluckKey(options, 'afterInsert') || u.noop
+    beforeDetach = u.pluckKey(options, 'beforeDetach') || u.noop
+    afterDetach = u.pluckKey(options, 'afterDetach') || u.noop
+
+    beforeStart()
 
     scrollNew = ->
       # Don't animate the scrolling. The { duration } option was meant for the transition.
@@ -366,7 +371,7 @@ up.motion = (($) ->
         # until absolutize() has measured the bounding box of the old element.
         afterMeasure: ->
           $new.insertBefore($old)
-          options.afterInsert()
+          afterInsert()
 
       trackable = ->
         # Scroll $new into position before we start the enter animation.
@@ -382,22 +387,22 @@ up.motion = (($) ->
           transitionFn($old, $new, options)
 
         promise = promise.then ->
-          options.beforeDetach()
+          beforeDetach()
           $old.detach()
           oldRemote.$bounds.remove()
-          options.afterDetach()
+          afterDetach()
 
         return promise
 
       motionTracker.claim($both, trackable, options)
 
     else
-      options.beforeDetach()
+      beforeDetach()
       # Swapping the elements directly with replaceWith() will cause
       # jQuery to remove all data attributes, which we use to store destructors
       swapElementsDirectly($old, $new)
-      options.afterInsert()
-      options.afterDetach()
+      afterInsert()
+      afterDetach()
       promise = scrollNew()
       return promise
 

@@ -526,10 +526,11 @@ up.dom = (($) ->
       $parent = $old.parent()
 
       morphOptions = u.merge options,
-        afterInsert: ->
-          up.hello($new, options)
+        beforeStart: ->
           markElementAsDestroying($old)
           emitFragmentDestroy($old, log: false)
+        afterInsert: ->
+          up.hello($new, options)
         beforeDetach: ->
           up.syntax.clean($old)
         afterDetach: ->
@@ -753,13 +754,16 @@ up.dom = (($) ->
 
   ###**
   Returns the first element matching the given selector, but
-  ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
+  ignores elements that are being [destroyed](/up.destroy) or that are being
+  removed by a [transition](/up.morph).
 
   If the given argument is already a jQuery collection (or an array
   of DOM elements), the first element matching these conditions
   is returned.
 
   Returns `undefined` if no element matches these conditions.
+
+  Also see the [`.up-destroying`](/up-destroying) class.
 
   @function up.first
   @param {string|Element|jQuery|Array<Element>} selectorOrElement
@@ -876,6 +880,17 @@ up.dom = (($) ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
     options.log != false && !$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')
 
+  ###**
+  Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
+  or while they are being removed by a [transition](/up.morph).
+
+  If the removal is animated, the class is assigned before the animation.
+
+  Also see the [`up.first()`](/up.first) function.
+
+  @selector .up-destroying
+  @stable
+  ###
   markElementAsDestroying = ($element) ->
     $element.addClass('up-destroying')
 
