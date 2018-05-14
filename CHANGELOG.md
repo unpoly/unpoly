@@ -35,7 +35,7 @@ Maintaining the [`.up-current`](/up-nav-a.up-current) on all links turned out to
 
 ### Animation
 
-- When performing an [animated page transition](/up.motion) Unpoly will no longer create copies of the old and new fragment versions. The animation will instead be performed on the original fragment versions.
+- When performing an [animated page transition](/up.motion) Unpoly will no longer create copies of the old and new fragment versions. The animation will instead be performed on the fragment elements themselves.
 - When animating an element with an existing [CSS transition](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions), Unpoly will now pause the CSS transition in its current state, perform the animation, then resume the CSS transition.
 - Unpoly now does less work when animation is disabled globally through `up.motion.config.enabled = false`.
 - [`up.morph()`](/up.morph) will now expect the new fragment version to be detached from the DOM before morphing.
