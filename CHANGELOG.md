@@ -56,7 +56,8 @@ Maintaining the [`.up-current`](/up-nav-a.up-current) on all links turned out to
 
 ### Utility functions
 
-- Fix a bug where `up.util.isBlank()` returned `true` for a function value
+- Fix a bug where [`up.util.isBlank()`](/up.util.isBlank) returned `true` for a function value
+- Fix a bug where [`up.util.only()`](/up.util.only) did not copy properties inherited from a prototype
 
 
 ### General
