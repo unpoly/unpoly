@@ -6,8 +6,8 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.56.1
+------
 
 - New stable selector [`.up-destroying`](/up-destroying). This CSS class is assigned to elements before they are [destroyed](/up.destroy) or while they are being removed by a [transition](/up.morph).
 - Fix a bug where [`up.first()`](/up.first) would sometimes find an element that is being destroyed.
