@@ -576,7 +576,6 @@ describe 'up.util', ->
         expect(up.util.selectorForElement($element)).toBe('input[name="name-value"]')
 
       it "prefers using the element's classes to using the element's ARIA label", ->
-        console.debug("------------")
         $element = affix('div.class1.class2[aria-label="ARIA label value"]')
         expect(up.util.selectorForElement($element)).toBe(".class1.class2")
 
