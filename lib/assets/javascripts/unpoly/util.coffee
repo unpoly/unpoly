@@ -195,7 +195,6 @@ up.util = (($) ->
   ###
   selectorForElement = (element) ->
     $element = $(element)
-    console.debug("Creating selector for element %o, nonUpClasses %o", getElement(element), nonUpClasses($element))
     selector = undefined
 
     tagName = $element.prop('tagName').toLowerCase()
