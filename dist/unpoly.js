@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.56.1",
+    version: "0.56.2",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -2350,16 +2350,21 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.newDeferred
     @internal
      */
+
+    /***
+    @function up.util.newDeferred
+    @internal
+     */
     newDeferred = function() {
-      var nativePromise, resolve;
-      resolve = void 0;
-      reject = void 0;
+      var nativePromise, rejectFn, resolveFn;
+      resolveFn = void 0;
+      rejectFn = void 0;
       nativePromise = new Promise(function(givenResolve, givenReject) {
-        resolve = givenResolve;
-        return reject = givenReject;
+        resolveFn = givenResolve;
+        return rejectFn = givenReject;
       });
-      nativePromise.resolve = resolve;
-      nativePromise.reject = reject;
+      nativePromise.resolve = resolveFn;
+      nativePromise.reject = rejectFn;
       nativePromise.promise = function() {
         return nativePromise;
       };
