@@ -6,8 +6,8 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.56.2
+------
 
 - Fix a bug where [`up.util.reject()`](/up.util.reject) would stop working after an animation.
 
