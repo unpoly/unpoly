@@ -333,6 +333,18 @@ up.params = (($) ->
 
     params
 
+  ###**
+  Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.
+
+  The query string is returned without a leading question mark (`?`).
+
+  Returns `undefined` if the given URL has no query component.
+
+  @function up.params.fromURL
+  @param {String} url
+  @return {string|undefined}
+  @experimental
+  ###
   fromURL = (url) ->
     urlParts = u.parseUrl(url)
     if query = urlParts.search
