@@ -92,7 +92,7 @@ up.feedback = (($) ->
       for attr in ['href', 'up-href', 'up-alias']
         if value = u.presentAttr($section, attr)
           # Allow to include multiple space-separated URLs in [up-alias]
-          for url in u.separatedValues(value)
+          for url in u.splitValues(value)
             unless url == '#'
               url = normalizeUrl(url)
               urls.push(url)

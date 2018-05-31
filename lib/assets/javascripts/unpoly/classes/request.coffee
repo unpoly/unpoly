@@ -231,6 +231,7 @@ class up.Request extends up.Record
       responseAttrs.method = up.protocol.methodFromXhr(xhr) ? 'GET'
 
     responseAttrs.title = up.protocol.titleFromXhr(xhr)
+    responseAttrs.extraHeaders = up.protocol.extraHeadersFromCookie()
 
     new up.Response(responseAttrs)
 

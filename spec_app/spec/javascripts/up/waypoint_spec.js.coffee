@@ -29,6 +29,8 @@ describe 'up.waypoint', ->
 
       it 'honors the cache size limit'
 
+      it 'stores the waypoint in sessionStorage so it survives a vanilla link'
+
     describe 'up.waypoint.discard', ->
 
       it 'discards a waypoint with the given name'
@@ -123,6 +125,8 @@ describe 'up.waypoint', ->
             field3: 'value3'
             field4: 'value4'
 
+      it "saves a waypoint with the name 'default' if no name is given"
+
       it "only saves forms on the same layer as this link"
 
       it "only saves forms in the subtree of an optional [up-root] selector"
@@ -135,7 +139,7 @@ describe 'up.waypoint', ->
 
       it 'ignores some form fields in config (such as authenticity token)'
 
-      it "saves data from JSON in an [up-data] attribute"
+      it "saves client-side meta information from JSON in an [up-data] attribute"
 
       it "follows the link after saving"
 
@@ -145,13 +149,13 @@ describe 'up.waypoint', ->
 
       it "saves multiple waypoints in a space-separated list of names"
 
+      it "passes the waypoint to the compiler's { data }"
+
       describe 'up:waypoint:save event', ->
 
         it "is emitted before the waypoint is saved"
 
         it "is not emitted when preloading"
-
-        it "can be prevented to not save a waypoint before following"
 
         it "allows to change { url } before saving"
 
@@ -182,7 +186,7 @@ describe 'up.waypoint', ->
 
       it "merges nested params from JSON in an [up-params] attribute into saved params"
 
-      it "merges data from JSON in an [up-data] attribute into saved data"
+      it "merges client-side meta information from JSON in an [up-data] attribute into saved { data }"
 
       it "discards the restored waypoint"
 
@@ -207,12 +211,6 @@ describe 'up.waypoint', ->
         it "allows to change { data } before restoring"
 
         it "does not propagate changes to the waypoint cache, in case the waypoint is restored again"
-
-        describe 'when prevented', ->
-
-          it "follows the link's original URL instead"
-
-          it "does not discard the waypoint"
 
       describe 'up:waypoint:restored event', ->
 
@@ -250,21 +248,24 @@ describe 'up.waypoint', ->
 
     describe 'X-Up-Waypoints request header', ->
 
-      it 'is sent with every request and contains a space-separated list of currently saved waypoints'
+      it 'is sent with every request and contains the current waypoints as a JSON object'
 
     describe 'X-Up-Restore-Waypoint response header', ->
 
       it "let's the server restore a waypoint, which immediately triggers another GET request (like a redirect)"
 
-      it 'fulfills up.request() with the response from the restored waypoint'
+      it 'restores a waypoint that is no longer known on the client'
+
+      it 'restores a waypoint without { name }'
+
+      it 'restores a waypoint with { method: "POST" } so controller actions can resume a previous submission'
 
       it "discards the waypoint"
 
-      it "emits a preventable up:waypoint:restore event"
-
-      it "is ignored if no waypoint with that name is saved"
+      it "emits a up:waypoint:restored event once the waypoint has been restored to the DOM"
 
       it 'lets the server pass { data } and { params } to merge into the restored waypoint'
 
       it 'uncaches a GET response that restores a waypoint, since another request might yield a different response from a waypoint-aware server'
 
+      it 'restores multiple waypoints in a row'

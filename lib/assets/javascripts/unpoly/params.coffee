@@ -310,6 +310,16 @@ up.params = (($) ->
     else
       $form.find(submitButtonSelector).first()
 
+  ###*
+  Extracts request params from the given '<form>`.
+
+  @function up.params.fromForm
+  @param {Element|jQuery|string} form
+  @param {String} [options.nature]
+    If set to `'array'`, the params will be extracted in array representation instead of `FormData`.
+    The array representation cannot hold values for `<input type="file">` controls.
+  @return {Array|FormData}
+  ###
   fromForm = (form, options) ->
     options = u.options(options)
     $form = $(form)

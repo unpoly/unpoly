@@ -224,7 +224,7 @@ up.util = (($) ->
 
   nonUpClasses = ($element) ->
     classString = $element.attr('class') || ''
-    classes = separatedValues(classString)
+    classes = splitValues(classString)
     reject classes, (klass) -> klass.match(/^up-/)
 
   # jQuery's implementation of $(...) cannot create elements that have
@@ -1497,6 +1497,9 @@ up.util = (($) ->
   camelCaseKeys = (obj) ->
     copyWithRenamedKeys(obj, camelCase)
 
+  lowerCaseKeys = (obj) ->
+    copyWithRenamedKeys(obj, (key) -> key.toLowerCase())
+
   copyWithRenamedKeys = (obj, keyTransformer) ->
     result = {}
     for k, v of obj
@@ -1908,7 +1911,7 @@ up.util = (($) ->
     else
       a == b
 
-  separatedValues = (string, separator = ' ') ->
+  splitValues = (string, separator = ' ') ->
     values = string.split(separator)
     values = map(values, trim)
     values = select(values, isPresent)
@@ -2021,6 +2024,7 @@ up.util = (($) ->
   unwrapElement: unwrapElement
   camelCase: camelCase
   camelCaseKeys: camelCaseKeys
+  lowerCaseKeys: lowerCaseKeys
   kebabCase: kebabCase
   kebabCaseKeys: kebabCaseKeys
   error: fail
@@ -2061,7 +2065,7 @@ up.util = (($) ->
   readInlineStyle: readInlineStyle
   writeInlineStyle: writeInlineStyle
   hasCssTransition: hasCssTransition
-  separatedValues : separatedValues
+  splitValues : splitValues
   wrapArray: wrapArray
   values: objectValues
 
