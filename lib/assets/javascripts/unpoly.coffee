@@ -4,6 +4,7 @@
 #= require ./unpoly/browser
 #= require ./unpoly/bus
 #= require ./unpoly/params
+#= require ./unpoly/cookies
 #= require ./unpoly/protocol
 #= require ./unpoly/log
 #= require ./unpoly/toast

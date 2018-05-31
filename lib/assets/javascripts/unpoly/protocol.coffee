@@ -200,6 +200,10 @@ up.protocol = (($) ->
     if method = xhr.getResponseHeader(config.methodHeader)
       u.normalizeMethod(method)
 
+  extraHeadersFromCookie = ->
+    if extraHeaders = up.cookies.pop(config.headersCookie)
+      JSON.parse(extraHeaders)
+
   ###**
   Server-side companion libraries like unpoly-rails set this cookie so we
   have a way to detect the request method of the initial page load.
@@ -209,7 +213,7 @@ up.protocol = (($) ->
   @internal
   ###
   initialRequestMethod = u.memoize ->
-    methodFromServer = up.browser.popCookie(config.methodCookie)
+    methodFromServer = up.cookies.pop(config.methodCookie)
     (methodFromServer || 'get').toLowerCase()
 
   # Remove the method cookie as soon as possible.
@@ -271,6 +275,7 @@ up.protocol = (($) ->
     titleHeader: 'X-Up-Title'
     methodHeader: 'X-Up-Method'
     methodCookie: '_up_method'
+    headersCookie: '_up_headers'
     methodParam: '_method'
     csrfParam: -> $('meta[name="csrf-param"]').attr('content')
     csrfToken: -> $('meta[name="csrf-token"]').attr('content')
@@ -296,6 +301,7 @@ up.protocol = (($) ->
   locationFromXhr: locationFromXhr
   titleFromXhr: titleFromXhr
   methodFromXhr: methodFromXhr
+  extraHeadersFromCookie: extraHeadersFromCookie
   csrfParam :csrfParam
   csrfToken: csrfToken
   initialRequestMethod: initialRequestMethod

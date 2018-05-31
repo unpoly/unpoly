@@ -239,19 +239,6 @@ up.browser = (($) ->
     major >= 2 || (major == 1 && minor >= 9)
 
   ###**
-  Returns and deletes a cookie with the given name
-  Inspired by Turbolinks: https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/lib/assets/javascripts/turbolinks.coffee#L292
-
-  @function up.browser.popCookie
-  @internal
-  ###
-  popCookie = (name) ->
-    value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
-    if u.isPresent(value)
-      document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
-    value
-
-  ###**
   @function up,browser.whenConfirmed
   @return {Promise}
   @param {string} options.confirm
@@ -293,9 +280,10 @@ up.browser = (($) ->
   ###
   sessionStorage = u.memoize ->
     try
-      # All supported browsers have sessionStorage, so we do not support
-      # the case where window.sessionStorage is undefined.
-      window.sessionStorage
+      # All supported browsers have sessionStorage, but the property is `null`
+      # in privat browsing mode in Safari and the default Android webkit browser.
+      # See https://makandracards.com/makandra/32865-sessionstorage-per-window-browser-storage
+      window.sessionStorage || polyfilledSessionStorage()
     catch
       # Unfortunately Chrome explodes upon access of window.sessionStorage when
       # user blocks third-party cookies and site data and this page is embedded
@@ -336,7 +324,6 @@ up.browser = (($) ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   sessionStorage: sessionStorage
-  popCookie: popCookie
   hash: hash
 
 )(jQuery)

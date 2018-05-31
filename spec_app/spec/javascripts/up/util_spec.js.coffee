@@ -218,6 +218,17 @@ describe 'up.util', ->
           fooBar: 'one'
           barBaz: 'two'
 
+    describe 'up.util.lowerCaseKeys', ->
+
+      it "returns a copy of the given object will all keys in lower case", ->
+        input =
+          'A-B': 'C-D'
+          'E-F': 'G-H'
+        result = up.util.lowerCaseKeys(input)
+        expect(result).toEqual
+          'a-b': 'C-D'
+          'e-f': 'G-H'
+
     describe 'up.util.DivertibleChain', ->
 
       it "instantiates a task queue whose (2..n)th tasks can be changed by calling '.asap'", (done) ->

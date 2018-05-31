@@ -12,7 +12,7 @@ describe 'up.waypoint', ->
 
       it "merges { params } option into the saved params"
 
-      it "merges { data } option into the saved params"
+      it "merges { meta } option into the saved params"
 
       it "rejects if the given waypoint name is unknown"
 
@@ -135,7 +135,7 @@ describe 'up.waypoint', ->
 
       it 'ignores some form fields in config (such as authenticity token)'
 
-      it "saves data from JSON in an [up-data] attribute"
+      it "saves client-side meta information from JSON in an [up-meta] attribute"
 
       it "follows the link after saving"
 
@@ -159,7 +159,7 @@ describe 'up.waypoint', ->
 
         it "allows to change nested { params } before saving"
 
-        it "allows to change { data } before saving"
+        it "allows to change { meta } before saving"
 
       describe 'up:waypoint:saved event', ->
 
@@ -182,7 +182,7 @@ describe 'up.waypoint', ->
 
       it "merges nested params from JSON in an [up-params] attribute into saved params"
 
-      it "merges data from JSON in an [up-data] attribute into saved data"
+      it "merges client-side meta information from JSON in an [up-meta] attribute into saved { meta }"
 
       it "discards the restored waypoint"
 
@@ -204,7 +204,7 @@ describe 'up.waypoint', ->
 
         it "allows to change nested { params } before restoring"
 
-        it "allows to change { data } before restoring"
+        it "allows to change { meta } before restoring"
 
         it "does not propagate changes to the waypoint cache, in case the waypoint is restored again"
 
@@ -220,7 +220,7 @@ describe 'up.waypoint', ->
 
         it 'is not emitted when a waypoint was preloaded'
 
-        it "sees the restored waypoint's { data } to polish the restauration with JavaScript"
+        it "sees the restored waypoint's { meta } to polish the restauration with JavaScript"
 
 
     describe 'a[up-discard-waypoint]', ->
@@ -240,7 +240,7 @@ describe 'up.waypoint', ->
 
       it "merges the params from (1) the form fields, (2) the waypoint and (3) the JSON in form[up-params] and encodes it all into the URL's query section"
 
-      it "merges data from (1) the waypoint and (2) the JSON in form[up-data]"
+      it "merges meta from (1) the waypoint and (2) the JSON in form[up-meta]"
 
       it "uses the original form's [action] and method if no waypoint with that name is saved"
 
@@ -264,7 +264,7 @@ describe 'up.waypoint', ->
 
       it "is ignored if no waypoint with that name is saved"
 
-      it 'lets the server pass { data } and { params } to merge into the restored waypoint'
+      it 'lets the server pass { meta } and { params } to merge into the restored waypoint'
 
       it 'uncaches a GET response that restores a waypoint, since another request might yield a different response from a waypoint-aware server'
 

@@ -1497,6 +1497,9 @@ up.util = (($) ->
   camelCaseKeys = (obj) ->
     copyWithRenamedKeys(obj, camelCase)
 
+  lowerCaseKeys = (obj) ->
+    copyWithRenamedKeys(obj, (key) -> key.toLowerCase())
+
   copyWithRenamedKeys = (obj, keyTransformer) ->
     result = {}
     for k, v of obj
@@ -2021,6 +2024,7 @@ up.util = (($) ->
   unwrapElement: unwrapElement
   camelCase: camelCase
   camelCaseKeys: camelCaseKeys
+  lowerCaseKeys: lowerCaseKeys
   kebabCase: kebabCase
   kebabCaseKeys: kebabCaseKeys
   error: fail

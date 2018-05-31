@@ -94,8 +94,14 @@ class up.Response extends up.Record
       'status',
       'request',
       'xhr',
-      'title'
+      'title',
+      'extraHeaders'
     ]
+
+  constructor: (options) ->
+    super(options)
+    @extraHeaders ||= {}
+    @extraHeaders = u.lowerCaseKeys(@extraHeaders)
 
   ###**
   Returns whether the server responded with a 2xx HTTP status.
@@ -133,3 +139,18 @@ class up.Response extends up.Record
   ###
   isFatalError: =>
     @isError() && u.isBlank(@text)
+
+  ###*
+  Returns the HTTP header value with the given name.
+
+  The search for the header name is case-insensitive.
+
+  Returns `undefined` if the given header name was not included in the response.
+
+  @function up.Response#getHeader
+  @param {string} name
+  @return {string|undefined} value
+  ###
+  getHeader: (name) =>
+    name = name.toLowerCase()
+    @extraHeaders[name] || @xhr.getResponseHeader(name)

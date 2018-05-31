@@ -97,7 +97,7 @@ up.waypoint = (($) ->
     defaultLayer = up.dom.layerOf($origin) if !root && u.isPresent($origin)
     formLayer = u.option(options.layer, defaultLayer)
     # Gather params from all forms
-    $forms = up.all('form:not([up-save-form="false"])', { root, formLayer })
+    $forms = up.all('form:not([up-save-form="false"])', root: root, layout: formLayer)
     formParams = u.flatMap $forms, (form) -> up.params.fromForm(form, nature: 'array')
     # We want to represent params as a (nested) object for convenient programmatic access
     formParams = up.params.toObject(formParams)
