@@ -17,7 +17,7 @@ class up.store.Memory
     @data[key] = value
 
   remove: (key) =>
-    @data[key] = undefined
+    delete @data[key]
 
   keys: =>
     Object.keys(@data)

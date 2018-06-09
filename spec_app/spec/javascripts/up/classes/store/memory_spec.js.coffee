@@ -25,6 +25,14 @@ describe 'up.store.Memory', ->
 
       expect(store.keys().sort()).toEqual ['bar', 'foo']
 
+    it 'does not return keys for entries that were removed (bugfix)', ->
+      store = new up.store.Memory()
+      store.set('foo', 'value of foo')
+      store.set('bar', 'value of bar')
+      store.remove('bar')
+
+      expect(store.keys().sort()).toEqual ['foo']
+
   describe '#values', ->
 
     it 'returns an array of values in the store', ->

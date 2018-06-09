@@ -41,7 +41,7 @@ class up.store.Session
     @saveToSessionStorage()
 
   remove: (key) =>
-    @data[key] = undefined
+    delete @data[key]
     @saveToSessionStorage()
 
   keys: =>

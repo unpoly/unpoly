@@ -66,8 +66,8 @@ class up.Cache
       oldestKey = undefined
       oldestTimestamp = undefined
       u.each storeKeys, (key) =>
-        promise = @store.get(key) # we don't need to call cacheKey here
-        timestamp = promise.timestamp
+        entry = @store.get(key) # we don't need to call cacheKey here
+        timestamp = entry.timestamp
         if !oldestTimestamp || oldestTimestamp > timestamp
           oldestKey = key
           oldestTimestamp = timestamp
