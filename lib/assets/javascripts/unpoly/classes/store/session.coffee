@@ -49,6 +49,9 @@ class up.store.Session
     u.remove(keys, '_version')
     keys
 
+  values: =>
+    u.map @keys(), (key) => @data[key]
+
   loadFromSessionStorage: =>
     try
       if raw = sessionStorage?.getItem(@rootKey)

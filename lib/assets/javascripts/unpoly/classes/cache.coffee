@@ -25,7 +25,7 @@ class up.Cache
     cachable.
   ###
   constructor: (@config = {}) ->
-    @store = {}
+    @store = @config.store || new up.store.Memory()
 
   maxKeys: =>
     u.evalOption(@config.size)
@@ -49,7 +49,7 @@ class up.Cache
       true
 
   clear: =>
-    @store = {}
+    @store.clear()
 
   log: (args...) =>
     if @config.logPrefix
@@ -57,21 +57,21 @@ class up.Cache
       up.puts(args...)
 
   keys: =>
-    Object.keys(@store)
+    @store.keys()
 
   makeRoomForAnotherKey: =>
     storeKeys = u.copy(@keys())
     max = @maxKeys()
     if max && storeKeys.length >= max
-      oldestKey = null
-      oldestTimestamp = null
+      oldestKey = undefined
+      oldestTimestamp = undefined
       u.each storeKeys, (key) =>
-        promise = @store[key] # we don't need to call cacheKey here
+        promise = @store.get(key) # we don't need to call cacheKey here
         timestamp = promise.timestamp
         if !oldestTimestamp || oldestTimestamp > timestamp
           oldestKey = key
           oldestTimestamp = timestamp
-      delete @store[oldestKey] if oldestKey
+      @store.remove(oldestKey) if oldestKey
 
   alias: (oldKey, newKey) =>
     value = @get(oldKey, silent: true)
@@ -86,14 +86,15 @@ class up.Cache
       @makeRoomForAnotherKey()
       storeKey = @normalizeStoreKey(key)
       @log("Setting entry %o to %o", storeKey, value)
-      @store[storeKey] =
+      timestampedValue =
         timestamp: @timestamp()
         value: value
+      @store.set(storeKey, timestampedValue)
 
   remove: (key) =>
     if @isCachable(key)
       storeKey = @normalizeStoreKey(key)
-      delete @store[storeKey]
+      @store.remove(storeKey)
 
   isFresh: (entry) =>
     millis = @expiryMillis()
@@ -104,7 +105,7 @@ class up.Cache
       true
 
   get: (key, options = {}) =>
-    if @isCachable(key) && (entry = @store[@normalizeStoreKey(key)])
+    if @isCachable(key) && (entry = @store.get(@normalizeStoreKey(key)))
       if @isFresh(entry)
         @log("Cache hit for '%s'", key) unless options.silent
         entry.value
@@ -123,4 +124,4 @@ class up.Cache
         @get(key)
       u.select(matches, u.isPresent)
     else
-      u.values(@store)
+      @store.values()

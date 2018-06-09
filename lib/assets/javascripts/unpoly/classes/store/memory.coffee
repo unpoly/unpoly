@@ -1,5 +1,7 @@
 up.store ||= {}
 
+u = up.util
+
 class up.store.Memory
 
   constructor: ->
@@ -19,3 +21,6 @@ class up.store.Memory
 
   keys: =>
     Object.keys(@data)
+
+  values: =>
+    u.values(@data)

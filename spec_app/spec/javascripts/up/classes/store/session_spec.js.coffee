@@ -70,6 +70,15 @@ describe 'up.store.Session', ->
 
       expect(store.keys().sort()).toEqual ['bar', 'foo']
 
+  describe '#values', ->
+
+    it 'returns an array of values in the store', ->
+      store = new up.store.Session('spec')
+      store.set('foo', 'value of foo')
+      store.set('bar', 'value of bar')
+
+      expect(store.values().sort()).toEqual ['value of bar', 'value of foo']
+
   describe '#clear', ->
 
     it 'removes all keys from the store', ->
