@@ -21,11 +21,12 @@ describe 'up.store.Session', ->
 
       expect(store.get('bar')).toBeUndefined()
 
-    it 'returns undefined if the value was set with another { version }', ->
-      store = new up.store.Session('spec', version: 1)
+    it 'does not read keys from a store with anotther root key', ->
+      store = new up.store.Session('spec.v1')
       store.set('foo', 'value of foo')
+      expect(store.get('foo')).toEqual('value of foo')
 
-      store = new up.store.Session('spec', version: 2)
+      store = new up.store.Session('spec.v2')
       expect(store.get('foo')).toBeUndefined()
 
   describe '#set', ->
@@ -69,6 +70,23 @@ describe 'up.store.Session', ->
       store.set('bar', 'value of bar')
 
       expect(store.keys().sort()).toEqual ['bar', 'foo']
+
+    it 'does not return keys for entries that were removed (bugfix)', ->
+      store = new up.store.Session('spec')
+      store.set('foo', 'value of foo')
+      store.set('bar', 'value of bar')
+      store.remove('bar')
+
+      expect(store.keys().sort()).toEqual ['foo']
+
+  describe '#values', ->
+
+    it 'returns an array of values in the store', ->
+      store = new up.store.Session('spec')
+      store.set('foo', 'value of foo')
+      store.set('bar', 'value of bar')
+
+      expect(store.values().sort()).toEqual ['value of bar', 'value of foo']
 
   describe '#clear', ->
 

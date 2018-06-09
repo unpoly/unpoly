@@ -22,47 +22,33 @@ u = up.util
 # user blocks third-party cookies and site data and this page is embedded
 # as an <iframe>. See https://bugs.chromium.org/p/chromium/issues/detail?id=357625
 #
-class up.store.Session
+class up.store.Session extends up.store.Memory
 
-  constructor: (rootKey, options = {}) ->
-    @version = u.option(options.version, 1)
+  constructor: (rootKey) ->
     @rootKey = rootKey
     @loadFromSessionStorage()
 
   clear: =>
-    @data = @defaultData()
+    super()
     @saveToSessionStorage()
 
-  get: (key) =>
-    @data[key]
-
   set: (key, value) =>
-    @data[key] = value
+    super(key, value)
     @saveToSessionStorage()
 
   remove: (key) =>
-    @data[key] = undefined
+    super(key)
     @saveToSessionStorage()
-
-  keys: =>
-    keys = Object.keys(@data)
-    u.remove(keys, '_version')
-    keys
 
   loadFromSessionStorage: =>
     try
       if raw = sessionStorage?.getItem(@rootKey)
-        parsed = JSON.parse(raw)
-        if parsed._version == @version
-          @data = parsed
+        @data = JSON.parse(raw)
     catch
       # window.sessionStorage not supported (see class comment)
       # or JSON syntax error. We start with a blank object instead.
 
-    @data ||= @defaultData()
-
-  defaultData: =>
-    { _version: @version }
+    @data ||= {}
 
   saveToSessionStorage: =>
     json = JSON.stringify(@data)
