@@ -21,6 +21,13 @@ describe 'up.store.Session', ->
 
       expect(store.get('bar')).toBeUndefined()
 
+    it 'returns undefined if the value was set with another { version }', ->
+      store = new up.store.Session('spec', version: 1)
+      store.set('foo', 'value of foo')
+
+      store = new up.store.Session('spec', version: 2)
+      expect(store.get('foo')).toBeUndefined()
+
   describe '#set', ->
 
     it 'stores the given item in window.sessionStorage where it survives a follow without Unpoly', ->
