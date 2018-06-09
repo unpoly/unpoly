@@ -430,11 +430,11 @@ up.form = (($) ->
     $target = $(target)
     fieldValues ||= switcherValues(findSwitcherForTarget($target))
     if hideValues = $target.attr('up-hide-for')
-      hideValues = u.separatedValues(hideValues)
+      hideValues = u.splitValues(hideValues)
       show = u.intersect(fieldValues, hideValues).length == 0
     else
       if showValues = $target.attr('up-show-for')
-        showValues = u.separatedValues(showValues)
+        showValues = u.splitValues(showValues)
       else
         # If the target has neither up-show-for or up-hide-for attributes,
         # assume the user wants the target to be visible whenever anything

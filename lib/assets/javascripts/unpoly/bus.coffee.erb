@@ -99,7 +99,7 @@ up.bus = (($) ->
     jqueryDescription
 
   fixRenamedEvents = (description) ->
-    events = u.separatedValues(description[0])
+    events = u.splitValues(description[0])
     events = u.map events, (event) ->
       if newEvent = renamedEvents[event]
         up.log.warn("Deprecated: #{event} has been renamed to #{newEvent}")

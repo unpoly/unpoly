@@ -224,7 +224,7 @@ up.util = (($) ->
 
   nonUpClasses = ($element) ->
     classString = $element.attr('class') || ''
-    classes = separatedValues(classString)
+    classes = splitValues(classString)
     reject classes, (klass) -> klass.match(/^up-/)
 
   # jQuery's implementation of $(...) cannot create elements that have
@@ -1911,7 +1911,7 @@ up.util = (($) ->
     else
       a == b
 
-  separatedValues = (string, separator = ' ') ->
+  splitValues = (string, separator = ' ') ->
     values = string.split(separator)
     values = map(values, trim)
     values = select(values, isPresent)
@@ -2065,7 +2065,7 @@ up.util = (($) ->
   readInlineStyle: readInlineStyle
   writeInlineStyle: writeInlineStyle
   hasCssTransition: hasCssTransition
-  separatedValues : separatedValues
+  splitValues : splitValues
   wrapArray: wrapArray
   values: objectValues
 

@@ -22,9 +22,9 @@ up.cookies = (->
 
   parse = ->
     hash = {}
-    pairs = u.separatedValues(document.cookie, ';')
+    pairs = u.splitValues(document.cookie, ';')
     for pair in pairs
-      parts = u.separatedValues(pair, '=')
+      parts = u.splitValues(pair, '=')
       name = unescape(parts[0])
       value = unescape(parts[1])
       hash[name] = value

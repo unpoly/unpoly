@@ -82,10 +82,23 @@ up.waypoint = (($) ->
       message: ["Restored waypoint %s", waypoint.name]
       waypoint: waypoint
 
-  save = (name, options) ->
+  save = (options) ->
+    waypoint = capture(options)
+    add(waypoint)
+
+    event =
+      message: ['Saving waypoint %s', name]
+      waypoint: waypoint
+
+    if up.bus.nobodyPrevents('up:waypoint:save', event)
+      waypoints.set(name, waypoint)
+
+  capture: ->
     options = u.options(options)
 
     $origin = $(options.origin)
+
+    name = u.option(options.name, $origin.attr('up-save-waypoint'))
 
     # The user can pass a { root } if she only wants to serialize forms
     # within a root element.
@@ -117,23 +130,25 @@ up.waypoint = (($) ->
       data: data
       params: params
 
-    event =
-      message: ['Saving waypoint %s', name]
-      waypoint: waypoint
+  expandNames = (nameOrNames) ->
+    if u.isMissing(nameOrNames)
+      ['default']
+    else if u.isArray(nameOrNames)
+      nameOrNames
+    else if u.isString(nameOrNames)
+      u.splitValues(nameOrNames)
 
-    if up.bus.nobodyPrevents('up:waypoint:save', event)
-      waypoints.set(name, waypoint)
+  add: (waypoint) ->
+    for name in expandNames(waypoint.name)
+      waypoints.set(name, waypoint.copy({ name }))
 
   first = (names) ->
     all(names)[0]
 
   all = (names) ->
     if u.isString(names)
-      names = u.separatedValues(names)
+      names = u.splitValues(names)
     waypoints.all(names)
-
-  allNames = (names) ->
-    u.map all(names), (waypoint) -> waypoint.name
 
   ###**
   DOCUMENT ME
@@ -146,7 +161,7 @@ up.waypoint = (($) ->
     each all(nameOrNames), (waypoint) ->
       waypoints.remove(waypoint.name)
 
-  considerSaveBeforeFollow = (event) ->
+  saveBeforeFollow = (event) ->
     $link = event.$link
     if name = $link.attr('up-save-waypoint')
       save(name, origin: $link)
@@ -164,15 +179,15 @@ up.waypoint = (($) ->
 
   considerRestoreBeforeSubmit = (event) ->
 
-  up.on 'up:link:follow', (event) ->
+  up.on 'up:link:follow', '[up-save-waypoint]', (event) ->
     # considerDiscardBeforeFollow(event)
-    considerSaveBeforeFollow(event)
+    save(origin: event.$link)
     # considerRestoreBeforeFollow(event, discard: true)
 #
-#  up.on 'up:link:preload', (event) ->
+#  up.on 'up:link:preload', '[up-save-waypoint]', (event) ->
 #    considerRestoreBeforeFollow(event, discard: false, preload: true)
 #
-#  up.on 'up:link:follow', (event) ->
+#  up.on 'up:link:follow', '[up-restore-waypoint]', (event) ->
 #    considerRestoreBeforeSubmit(event, discard: true)
 
   up.on 'up:framework:reset', reset
