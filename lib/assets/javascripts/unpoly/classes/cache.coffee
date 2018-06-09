@@ -14,7 +14,7 @@ class up.Cache
   @param {number|Function(): number} [config.expiry]
     The number of milliseconds after which a cache entry
     will be discarded.
-  @param {string} [config.log]
+  @param {string} [config.logPrefix]
     A prefix for log entries printed by this cache object.
   @param {Function(any): string} [config.key]
     A function that takes an argument and returns a string key
