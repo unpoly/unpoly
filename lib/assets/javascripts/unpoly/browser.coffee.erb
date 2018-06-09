@@ -276,29 +276,6 @@ up.browser = (($) ->
       canPromise()
 
   ###**
-  @internal
-  ###
-  sessionStorage = u.memoize ->
-    try
-      # All supported browsers have sessionStorage, but the property is `null`
-      # in privat browsing mode in Safari and the default Android webkit browser.
-      # See https://makandracards.com/makandra/32865-sessionstorage-per-window-browser-storage
-      window.sessionStorage || polyfilledSessionStorage()
-    catch
-      # Unfortunately Chrome explodes upon access of window.sessionStorage when
-      # user blocks third-party cookies and site data and this page is embedded
-      # as an <iframe>. See https://bugs.chromium.org/p/chromium/issues/detail?id=357625
-      polyfilledSessionStorage()
-
-  ###**
-  @internal
-  ###
-  polyfilledSessionStorage = ->
-    data = {}
-    getItem: (prop) -> data[prop]
-    setItem: (prop, value) -> data[prop] = value
-
-  ###**
   Returns `'foo'` if the hash is `'#foo'`.
 
   Returns undefined if the hash is `'#'`, `''` or `undefined`.
@@ -323,7 +300,6 @@ up.browser = (($) ->
   puts: puts
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
-  sessionStorage: sessionStorage
   hash: hash
 
 )(jQuery)

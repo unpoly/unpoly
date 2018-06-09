@@ -18,7 +18,7 @@ up.log = (($) ->
   u = up.util
   b = up.browser
 
-  SESSION_KEY_ENABLED = 'up.log.enabled'
+  sessionStore = new up.store.Session('up.log')
 
   ###**
   Configures the logging output on the developer console.
@@ -41,7 +41,7 @@ up.log = (($) ->
   ###
   config = u.config
     prefix: '[UP] '
-    enabled: (b.sessionStorage().getItem(SESSION_KEY_ENABLED) == 'true')
+    enabled: sessionStore.get('enabled')
     collapse: false
 
   reset = ->
@@ -126,8 +126,7 @@ up.log = (($) ->
   up.on 'up:framework:reset', reset
 
   setEnabled = (value) ->
-    # Session storage can only store string values
-    b.sessionStorage().setItem(SESSION_KEY_ENABLED, value.toString())
+    sessionStore.set('enabled', value)
     config.enabled = value
 
   ###**
