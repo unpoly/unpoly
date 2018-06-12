@@ -21,11 +21,12 @@ describe 'up.store.Session', ->
 
       expect(store.get('bar')).toBeUndefined()
 
-    it 'returns undefined if the value was set with another { version }', ->
-      store = new up.store.Session('spec', version: 1)
+    it 'does not read keys from a store with anotther root key', ->
+      store = new up.store.Session('spec.v1')
       store.set('foo', 'value of foo')
+      expect(store.get('foo')).toEqual('value of foo')
 
-      store = new up.store.Session('spec', version: 2)
+      store = new up.store.Session('spec.v2')
       expect(store.get('foo')).toBeUndefined()
 
   describe '#set', ->
