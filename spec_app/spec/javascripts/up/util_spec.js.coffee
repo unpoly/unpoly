@@ -42,6 +42,56 @@ describe 'up.util', ->
         result = up.util.uniqBy(input, 'length')
         expect(result).toEqual ['foo', 'apple', 'orange']
 
+    describe 'up.util.parsePath', ->
+
+      it 'parses a plain name', ->
+        path = up.util.parsePath("foo")
+        expect(path).toEqual ['foo']
+
+      it 'considers underscores to be part of a name', ->
+        path = up.util.parsePath("foo_bar")
+        expect(path).toEqual ['foo_bar']
+
+      it 'considers dashes to be part of a name', ->
+        path = up.util.parsePath("foo-bar")
+        expect(path).toEqual ['foo-bar']
+
+      it 'parses dot-separated names into multiple path segments', ->
+        path = up.util.parsePath('foo.bar.baz')
+        expect(path).toEqual ['foo', 'bar', 'baz']
+
+      it 'parses nested params notation with square brackets', ->
+        path = up.util.parsePath('user[account][email]')
+        expect(path).toEqual ['user', 'account', 'email']
+
+      it 'parses double quotes in square brackets', ->
+        path = up.util.parsePath('user["account"]["email"]')
+        expect(path).toEqual ['user', 'account', 'email']
+
+      it 'parses single quotes in square brackets', ->
+        path = up.util.parsePath("user['account']['email']")
+        expect(path).toEqual ['user', 'account', 'email']
+
+      it 'allows square brackets inside quotes', ->
+        path = up.util.parsePath("element['a[up-href]']")
+        expect(path).toEqual ['element', 'a[up-href]']
+
+      it 'allows single quotes inside double quotes', ->
+        path = up.util.parsePath("element[\"a[up-href='foo']\"]")
+        expect(path).toEqual ['element', "a[up-href='foo']"]
+
+      it 'allows double quotes inside single quotes', ->
+        path = up.util.parsePath("element['a[up-href=\"foo\"]']")
+        expect(path).toEqual ['element', 'a[up-href="foo"]']
+
+      it 'allows dots in square brackets when it is quoted', ->
+        path = up.util.parsePath('elements[".foo"]')
+        expect(path).toEqual ['elements', '.foo']
+
+      it 'allows different notation for each segment', ->
+        path = up.util.parsePath('foo.bar[baz]["bam"][\'qux\']')
+        expect(path).toEqual ['foo', 'bar', 'baz', 'bam', 'qux']
+
     describe 'up.util.map', ->
 
       it 'creates a new array of values by calling the given function on each item of the given array', ->

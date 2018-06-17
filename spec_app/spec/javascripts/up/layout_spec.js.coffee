@@ -416,12 +416,9 @@ describe 'up.layout', ->
         $viewport = affix('.viewport')
         expect(up.layout.viewportOf($viewport)).toEqual($viewport)
 
-      it 'finds the document if no better viewport matches', ->
-        # This actually tests that the hierarchy returned by `$.parent`
-        # is $element => ... => $('body') => $('html') => $(document)
-        up.layout.config.viewports = ['.other-viewport']
-        $element = affix('div')
-        expect(up.layout.viewportOf($element)).toEqual($(document))
+      it 'is configured to fall back to the document viewport if no other viewport matches', ->
+        fallback = up.layout.config.viewports[0]
+        expect(fallback).toEqual(up.browser.documentViewportSelector())
 
     describe 'up.layout.restoreScroll', ->
 

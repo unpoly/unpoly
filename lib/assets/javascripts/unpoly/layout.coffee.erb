@@ -57,7 +57,7 @@ up.layout = (($) ->
   ###
   config = u.config
     duration: 0
-    viewports: ['.up-modal-viewport', '[up-viewport]']
+    viewports: [up.browser.documentViewportSelector(), '.up-modal-viewport', '[up-viewport]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
@@ -115,23 +115,16 @@ up.layout = (($) ->
   @experimental
   ###
   scroll = (viewport, scrollTop, options) ->
-    $scrollable = scrollableElementForViewport(viewport)
+    $viewport = $(viewport)
     options = u.options(options)
     options.duration = u.option(options.duration, config.duration)
     options.easing = u.option(options.easing, config.easing)
 
-    finishScrolling($scrollable).then ->
+    finishScrolling($viewport).then ->
       if up.motion.isEnabled() && options.duration > 0
-        scrollWithAnimateNow($scrollable, scrollTop, options)
+        scrollWithAnimateNow($viewport, scrollTop, options)
       else
-        scrollAbruptlyNow($scrollable, scrollTop)
-
-  scrollableElementForViewport = (viewport) ->
-    $viewport = $(viewport)
-    if $viewport.get(0) == document
-      $('html, body') # FML
-    else
-      $viewport
+        scrollAbruptlyNow($viewport, scrollTop)
 
   scrollWithAnimateNow = ($scrollable, scrollTop, animateOptions) ->
     start = ->
@@ -164,7 +157,7 @@ up.layout = (($) ->
     # Don't emit expensive events if no animation can be running anyway
     return Promise.resolve() unless up.motion.isEnabled()
 
-    $scrollable = scrollableElementForViewport(element)
+    $scrollable = viewportOf(element)
     scrollingTracker.finish($scrollable)
 
   ###**
@@ -250,7 +243,7 @@ up.layout = (($) ->
 
       snap = u.option(options.snap, config.snap)
 
-      viewportIsDocument = $viewport.is(document)
+      viewportIsDocument = $viewport.is(up.browser.documentViewportSelector())
       viewportHeight = if viewportIsDocument then u.clientSize().height else $viewport.outerHeight()
       originalScrollPos = $viewport.scrollTop()
       newScrollPos = originalScrollPos
@@ -322,7 +315,8 @@ up.layout = (($) ->
   ###**
   Returns the viewport for the given element.
 
-  Returns `$(document)` if no better viewpoint could be found.
+  Returns the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement)
+  if no closer viewpoint exists.
 
   @function up.layout.viewportOf
   @param {string|Element|jQuery} selectorOrElement
@@ -331,10 +325,7 @@ up.layout = (($) ->
   ###
   viewportOf = (selectorOrElement, options = {}) ->
     $element = $(selectorOrElement)
-    $viewport = $element.closest(viewportSelector())
-    if $viewport.length == 0
-      $viewport = $(document)
-    $viewport
+    $element.closest(viewportSelector())
 
   ###**
   Returns a jQuery collection of all the viewports contained within the
@@ -356,14 +347,10 @@ up.layout = (($) ->
   @internal
   ###
   viewports = ->
-    $(document).add(viewportSelector())
+    $(viewportSelector())
 
   scrollTopKey = (viewport) ->
-    $viewport = $(viewport)
-    if $viewport.is(document)
-      'document'
-    else
-      u.selectorForElement($viewport)
+    u.selectorForElement(viewport)
 
   ###**
   Returns a hash with scroll positions.
@@ -475,6 +462,7 @@ up.layout = (($) ->
       # to scroll positions. If it is just true, we leave the scrollTops option
       # undefined and let restoreScroll() retrieve previous scrollTops from cache.
       givenTops = u.presence(options.restoreScroll, u.isObject)
+      console.debug("restoreScroll() und seinen Cache gibt es dann nicht mehr. Das ist dann im history-State.")
       return restoreScroll(around: $element, scrollTops: givenTops)
 
     if options.reveal
@@ -692,6 +680,8 @@ up.layout = (($) ->
   firstHashTarget = (hash) ->
     if hash = up.browser.hash(hash)
       up.first("[id='#{hash}'], a[name='#{hash}']")
+
+  up.syntax.persistProps viewportSelector, ['scrollTop', 'scrollLeft']
 
   up.on 'up:app:booted', revealHash
 

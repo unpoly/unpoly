@@ -140,11 +140,9 @@ class up.Request extends up.Record
 
       [xhrMethod, xhrPayload] = up.proxy.wrapMethod(xhrMethod, xhrPayload)
 
-      if u.isFormData(xhrPayload)
+      if xhrPayload
         delete xhrHeaders['Content-Type'] # let the browser set the content type
-      else if u.isPresent(xhrPayload)
-        xhrPayload = up.params.toQuery(xhrPayload, purpose: 'form')
-        xhrHeaders['Content-Type'] = 'application/x-www-form-urlencoded'
+        xhrPayload = up.params.toFormData(xhrPayload)
       else
         # XMLHttpRequest expects null for an empty body
         xhrPayload = null

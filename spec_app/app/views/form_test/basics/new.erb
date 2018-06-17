@@ -5,17 +5,46 @@
   <%= form_tag "/form_test/basic", method: :post, 'up-target' => '.result' do %>
 
     <p>
-      <input type="text" name="text-param" value="text-value" />
+      <label>
+        input[type=text]
+        <input type="text" name="text-param" value="text-value" />
+      </label>
     </p>
 
     <p>
-      <input type="password" name="password-param" value="password-value" />
+      <label>
+        input[type=password]
+        <input type="password" name="password-param" value="password-value" />
+      </label>
     </p>
 
     <p>
-      <select name="select-param">
-        <option value="select-value">select-label</option>
-      </select>
+      <label>
+        input[type=checkbox]
+        <select name="checkbox-param">
+          <option value="checkbox-value">checkbox-label</option>
+        </select>
+      </label>
+    </p>
+
+    <p>
+      <label>
+        select
+        <select name="select-param">
+          <option value="select-value">select-label</option>
+        </select>
+      </label>
+    </p>
+
+    <p>
+      <label>
+        select[multiple]
+        <select name="multiple-select-param[]" multiple>
+          <option value="multiple-select-value-1">multiple-select-label-1</option>
+          <option value="multiple-select-value-2">multiple-select-label-2</option>
+          <option value="multiple-select-value-3">multiple-select-label-3</option>
+        </select>
+      </label>
     </p>
 
     <p>

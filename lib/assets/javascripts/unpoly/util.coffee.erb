@@ -197,9 +197,9 @@ up.util = (($) ->
     $element = $(element)
     selector = undefined
 
-    tagName = $element.prop('tagName').toLowerCase()
-
-    if upId = presence($element.attr("up-id"))
+    if isSingletonElement($element)
+      selector = elementTagName($element)
+    else if upId = presence($element.attr("up-id"))
       selector = attributeSelector('up-id', upId)
     else if id = presence($element.attr("id"))
       if id.match(/^[a-z0-9\-_]+$/i)
@@ -207,7 +207,7 @@ up.util = (($) ->
       else
         selector = attributeSelector('id', id)
     else if name = presence($element.attr("name"))
-      selector = tagName + attributeSelector('name', name)
+      selector = elementTagName($element) + attributeSelector('name', name)
     else if classes = presence(nonUpClasses($element))
       selector = ''
       for klass in classes
@@ -215,8 +215,27 @@ up.util = (($) ->
     else if ariaLabel = presence($element.attr("aria-label"))
       selector = attributeSelector('aria-label', ariaLabel)
     else
-      selector = tagName
-    selector
+      selector = elementTagName($element)
+
+    return selector
+
+  isSingletonElement = ($element) ->
+    # jQuery's is() returns true if at least one element
+    # in the collection matches the selector
+    $element.is('html, body, head, title')
+
+  isGoodSelector = (selector) ->
+    selector.indexOf('#') >= -1 || selector.indexOf('[') >= -1
+
+#  defineMemoizedGetter = (obj, property, fetchFn) ->
+#    cacheProperty = "_#{property}Cache"
+#    Object.defineProperty methods, property,
+#      get: ->
+#        @[cacheProperty] ||= [fetchFn(this)]
+#        @[cacheProperty][0]
+
+  elementTagName = ($element) ->
+    $element.prop('tagName').toLowerCase()
 
   attributeSelector = (attribute, value) ->
     value = value.replace(/"/g, '\\"')
@@ -463,6 +482,17 @@ up.util = (($) ->
     typeof(object) == 'string' || object instanceof String
 
   ###**
+  Returns whether the given argument is a boolean value.
+
+  @function up.util.isBoolean
+  @param object
+  @return {boolean}
+  @experimental
+  ###
+  isBoolean = (object) ->
+    typeof(object) == 'boolean' || object instanceof Boolean
+
+  ###**
   Returns whether the given argument is a number.
 
   Note that this will check the argument's *type*.
@@ -582,14 +612,28 @@ up.util = (($) ->
   @return {Object|Array}
   @stable
   ###
-  copy = (object)  ->
+  copy = (object, deep)  ->
     if isArray(object)
       object = object.slice()
+      copied = true
     else if isOptions(object)
       object = assign({}, object)
-    else
-      up.fail('Cannot copy %o', object)
+      copied = true
+    if copied && deep
+      for key, value of object
+        object[key] = copy(value, true)
     object
+
+  ###**
+  Returns a deep copy of the given array or object.
+
+  @function up.util.deepCopy
+  @param {Object|Array} object
+  @return {Object|Array}
+  @internal
+  ###
+  deepCopy = (object) ->
+    copy(object, true)
 
   ###**
   If given a jQuery collection, returns the first native DOM element in the collection.
@@ -630,7 +674,14 @@ up.util = (($) ->
   @internal
   ###
   deepMerge = (sources...) ->
-    target = {}
+    deepAssign({}, sources...)
+
+  ###**
+  @function up.util.deepAssign
+  @param {Array<Object>} sources...
+  @return Object
+  ###
+  deepAssign = (target, sources...) ->
     for source in sources
       for key, newValue of source
         if isOptions(newValue)
@@ -792,7 +843,7 @@ up.util = (($) ->
     set.forEach (elem) -> array.push(elem)
     array
 
-  ###*
+  ###**
   @function up.util.arrayToSet
   @internal
   ###
@@ -1013,7 +1064,7 @@ up.util = (($) ->
     element = getElement(element)
     element.offsetHeight
 
-  ###*
+  ###**
   @function up.util.finishTransition
   @internal
   ###
@@ -1142,12 +1193,23 @@ up.util = (($) ->
   @function up.util.castedAttr
   @internal
   ###
-  castedAttr = ($element, attrName) ->
-    value = $element.attr(attrName)
+  castedAttr = ($element, attribute) ->
+    value = $element.attr(attribute)
     switch value
       when 'false' then false
-      when 'true', '', attrName then true
+      when 'true', '', attribute then true
       else value # other strings, undefined, null, ...
+
+  ###**
+  @function up.util.jsonAttr
+  @internal
+  ###
+  jsonAttr = (elementOrSelector, attribute) ->
+    if element = getElement(elementOrSelector)
+      # The document does not respond to #getAttribute()
+      json = element.getAttribute?(attribute)
+      if isString(json) && trim(json) != ''
+        JSON.parse(json)
 
 #  castsToTrue = (object) ->
 #    String(object) == "true"
@@ -1185,6 +1247,13 @@ up.util = (($) ->
     for property in properties
       delete filtered[property]
     filtered
+
+  pickBy = (obj, predicate) ->
+    result = {}
+    for k, v of obj
+      if predicate(v, k)
+        result[k] = v
+    result
 
   ###**
   @function up.util.isUnmodifiedKeyEvent
@@ -1420,7 +1489,7 @@ up.util = (($) ->
 
   deprecateRenamedKey = (object, oldKey, newKey) ->
     if isDefined(object[oldKey])
-      up.log.warn('Deprecated: Object key { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+      up.warn('Deprecated: Object key { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
       renameKey(object, oldKey, newKey)
 
   pluckData = (elementOrSelector, key) ->
@@ -1529,6 +1598,15 @@ up.util = (($) ->
     element = getElement(element)
     # This is by far the fastest way to do this
     not $.contains(document.documentElement, element)
+
+  ###**
+  ###
+  parsePath = (input) ->
+    path = []
+    pattern = /([^\.\[\]\"\']+)|\[\'([^\']+?)\'\]|\[\"([^\"]+?)\"\]|\[([^\]]+?)\]/g
+    while match = pattern.exec(input)
+      path.push(match[1] || match[2] || match[3] || match[4])
+    path
 
   ###**
   Given a function that will return a promise, returns a proxy function
@@ -1765,7 +1843,7 @@ up.util = (($) ->
     'minWidth', 'minHeight',
   ]
 
-  ###*
+  ###**
   Converts the given value to a CSS length value, adding a `px` unit if required.
 
   @function up.util.cssLength
@@ -1777,7 +1855,7 @@ up.util = (($) ->
     else
       obj
 
-  ###*
+  ###**
   Returns whether the given element has a CSS transition set.
 
   @function up.util.hasCssTransition
@@ -1935,6 +2013,7 @@ up.util = (($) ->
     else
       a == b
 
+  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   isFixed: isFixed
@@ -1947,11 +2026,14 @@ up.util = (($) ->
   $createElementFromSelector: $createElementFromSelector
   $createPlaceholder: $createPlaceholder
   selectorForElement: selectorForElement
+  isGoodSelector: isGoodSelector
   attributeSelector: attributeSelector
   assign: assign
   assignPolyfill: assignPolyfill
   copy: copy
+  deepCopy: deepCopy
   merge: merge
+  deepAssign: deepAssign
   deepMerge: deepMerge
   options: newOptions
   option: option
@@ -1981,6 +2063,7 @@ up.util = (($) ->
   isObject: isObject
   isFunction: isFunction
   isString: isString
+  isBoolean: isBoolean
   isNumber: isNumber
   isElement: isElement
   isJQuery: isJQuery
@@ -2009,9 +2092,11 @@ up.util = (($) ->
   contains: contains
   toArray: toArray
   castedAttr: castedAttr
+  jsonAttr: jsonAttr
   clientSize: clientSize
   only: only
   except: except
+  pickBy: pickBy
   trim: trim
   unresolvablePromise: unresolvablePromise
   setMissingAttrs: setMissingAttrs
@@ -2045,11 +2130,13 @@ up.util = (($) ->
   sequence: sequence
   promiseTimer: promiseTimer
   previewable: previewable
+  parsePath: parsePath
   evalOption: evalOption
   horizontalScreenHalf: horizontalScreenHalf
   detachWith: detachWith
   flatten: flatten
   isTruthy: isTruthy
+  isSingletonElement: isSingletonElement
   newDeferred: newDeferred
   always: always
   muteRejection: muteRejection

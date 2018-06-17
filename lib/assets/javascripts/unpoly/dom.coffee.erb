@@ -183,9 +183,12 @@ up.dom = (($) ->
   @param {Object|Array|FormData} [options.params]
     Parameters that should be sent as the request's payload.
 
-    Parameters can either be passed as an object (where the property names become
-    the param names and the property values become the param values) or as
-    an array of `{ name: 'param-name', value: 'param-value' }` objects
+    Parameters can either be passed as either:
+
+    1. an object (where the property names become the param names and the
+       property values become the param values) or as
+    2. an array of `{ name: 'param-name', value: 'param-value' }` objects
+    3. a query string
 
   @param {string} [options.transition='none']
   @param {string|boolean} [options.history=true]
@@ -212,9 +215,6 @@ up.dom = (($) ->
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
-  @param {boolean} [options.requireMatch=true]
-    Whether to raise an error if the given selector is missing in
-    either the current page or in the response.
   @param {Element|jQuery} [options.origin]
     The element that triggered the replacement.
 
@@ -378,7 +378,6 @@ up.dom = (($) ->
     up.log.group 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length, ->
       options = u.options options,
         historyMethod: 'push'
-        requireMatch: true
         keep: true
         layer: 'auto'
 
@@ -527,9 +526,9 @@ up.dom = (($) ->
         $partner = $partner.first()
         if $partner.length && $partner.is('[up-keep]')
           plan =
-            $element: $keepable               # the element that should be kept
-            $newElement: $partner             # the element that would have replaced it but now does not
-            newData: up.syntax.data($partner) # the parsed up-data attribute of the element we will discard
+            $element: $keepable # the element that should be kept
+            $newElement: $partner # the element that would have replaced it but now does not
+            newData: up.syntax.serverData($partner) # the parsed up-data attribute of the element we will discard
           keepEventArgs = u.merge(plan, message: ['Keeping element %o', $keepable.get(0)])
           if up.bus.nobodyPrevents('up:fragment:keep', keepEventArgs)
             plan

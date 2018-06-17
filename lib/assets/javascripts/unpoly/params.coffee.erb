@@ -7,15 +7,6 @@ class up.params
 up.params = (($) ->
   u = up.util
 
-  config = u.config
-    nest: true
-
-#  throw "make sure everything nests / unnest properly"
-#  throw "honor config.nest"
-#  throw "fix red tests"
-
-  reset = config.reset
-
   detectNature = (params) ->
     if u.isMissing(params)
       'missing'
@@ -28,10 +19,7 @@ up.params = (($) ->
     else if u.isObject(params)
       'object'
     else
-      unknownNature(params)
-
-  unknownNature = (obj) ->
-    up.fail("Not a supported params nature: %o", obj)
+      up.fail("Unsupport params type: %o", params)
 
   ###**
   Returns an array representation of the given `params`.
@@ -55,10 +43,7 @@ up.params = (($) ->
         # No nesting conversion since we're converting from one unnested type to another
         buildArrayFromQuery(params)
       when 'formData'
-        # Until FormData#entries is implemented in all major browsers we must give up here.
-        # However, up.form will prefer to serialize forms as arrays, so we should be good
-        # in most cases. We only use FormData for forms with file inputs.
-        up.fail('Cannot convert FormData into an array')
+        buildArrayFromFormData(params)
       when 'object'
         # We need to flatten the nesting from the given object
         buildArrayFromNestedObject(params)
@@ -75,40 +60,51 @@ up.params = (($) ->
       when 'missing'
         # No nesting conversion since we're just returning an object
         {}
-      when 'array'
-        # We must create a nested object from the given, flat array keys.
-        buildNestedObjectFromArray(params)
-      when 'query'
-        # We must create a nested object from the given, flat array keys.
-        # We don't want to duplicate the logic to parse a query string, so
-        # we're converting to array first.
+      when 'array', 'query', 'formData'
+        # We must create a nested object from the given, flat array or FormData keys.
+        # We don't want to duplicate the logic to parse a query string, so we're
+        # converting to array first.
         buildNestedObjectFromArray(toArray(params))
-      when 'formData'
-        # Until FormData#entries is implemented in all major browsers we must give up here.
-        # However, up.form will prefer to serialize forms as arrays, so we should be good
-        # in most cases. We only use FormData for forms with file inputs.
-        up.fail('Cannot convert FormData into an object')
       when 'object'
         # No nesting conversion since we're not changing param types.
         params
 
+  ###**
+  Returns [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given `params`.
+
+  If `params` is a nested object, the nesting will be flattened and expressed
+  in the `FormData` keys using square bracket notation (e.g. `user[name]`).
+
+  @function up.params.toArray
+  ###
+  toFormData = (params) ->
+    switch detectNature(params)
+      when 'missing'
+        # Return an empty FormData object
+        new FormData()
+      when 'array', 'query', 'object'
+        buildFormDataFromArray(toArray(params))
+      when 'formData'
+        params
+
+  ###**
+  Returns an query string for the given `params`.
+
+  If `params` is a nested object, the nesting will be flattened and expressed
+  with square bracket notiation in the query keys (e.g. `user[name]`).
+
+  @function up.params.toString
+  ###
   toQuery = (params, options = {}) ->
-    purpose = options.purpose || 'url'
     query = switch detectNature(params)
       when 'missing'
         ''
       when 'query'
         params
-      when 'formData'
-        # Until FormData#entries is implemented in all major browsers we must give up here.
-        # However, up.form will prefer to serialize forms as arrays, so we should be good
-        # in most cases. We only use FormData for forms with file inputs.
-        up.fail('Cannot convert FormData into a query string')
-      when 'array'
-        u.map(params, arrayEntryToQuery).join('&')
-      when 'object'
-        buildQueryFromNestedObject(params)
+      when 'array', 'formData', 'object'
+        buildQueryFromArray(toArray(params))
 
+    purpose = options.purpose || 'url'
     switch purpose
       when 'url'
         query = query.replace(/\+/g, '%20')
@@ -205,16 +201,29 @@ up.params = (($) ->
     true
 
   arrayEntryToQuery = (entry) ->
+    value = entry.value
+    return undefined unless isPrimitiveValue(value)
     query = encodeURIComponent(entry.name)
-    if u.isGiven(entry.value)
+    # There is a subtle difference when encoding blank values:
+    # 1. An undefined or null value is encoded to `key` with no equals sign
+    # 2. An empty string value is encoded to `key=` with an equals sign but no value
+    if u.isGiven(value)
       query += "="
-      query += encodeURIComponent(entry.value)
+      query += encodeURIComponent(value)
     query
 
-  buildQueryFromNestedObject = (value) ->
-    array = buildArrayFromNestedObject(value)
+  ###**
+  Returns whether the given value can be encoded into a query string.
+
+  We will have `File` values in our params when we serialize a form with a file input.
+  These entries will be filtered out when converting to a query string.
+  ###
+  isPrimitiveValue = (value) ->
+    u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value)
+
+  buildQueryFromArray = (array) ->
     parts = u.map(array, arrayEntryToQuery)
-    parts = u.select(parts, u.isPresent)
+    parts = u.compact(parts)
     parts.join('&')
 
   buildArrayFromQuery = (query) ->
@@ -256,6 +265,27 @@ up.params = (($) ->
         addToNestedObject(obj, entry.name, entry.value)
       obj
 
+  buildArrayFromFormData = (formData) ->
+    ensureCanInspectFormData()
+    array = []
+    iterator = formData.entries()
+    while (entry = iterator.next()) && !entry.done
+      [name, value] = entry.value
+      array.push({ name, value })
+    array
+
+  buildFormDataFromArray = (array) ->
+    formData = new FormData()
+    for entry in array
+      formData.append(entry.name, entry.value)
+    <% if ENV['JS_KNIFE'] %>formData.originalArray = array<% end %>
+    formData
+
+  ensureCanInspectFormData = ->
+    # Throw a nice error for IE11
+    unless up.browser.canInspectFormData()
+      up.fail('This browser cannot inspect FormData values. Consider storing params as objects or arrays.')
+
   buildURL = (base, params) ->
     parts = [base, toQuery(params)]
     parts = u.select(parts, u.isPresent)
@@ -263,25 +293,30 @@ up.params = (($) ->
     parts.join(separator)
 
   ###**
-  Adds a new entry with the given `name` and `value` to the given `params`.
+  Adds to the given `params` a new  entry with the given `name` and `value`.
 
-  Returns a new params value that includes the added entry.
-  When adding to a `FormData`, the value will be modified in place (since we
-  cannot copy `FormData` objects).
+  The given `params` is changed in-place, if possible.
+  The return value is always a params value that includes the new entry.
 
   @function up.params.add
+  @param {string|object|FormData|Array|undefined} params
+  @param {string} name
+  @param {any} value
+  @return {string|object|FormData|Array}
   ###
   add = (params, name, value) ->
-    merge(params, [{ name, value }])
+    newEntry = [{ name, value }]
+    assign(params, newEntry)
 
   ###**
-  Merges the request params from `otherParams` into `params`.
+  Returns a new params value that contains entries from both `params` and `otherParams`.
 
-  Returns a new params value that includes the new entries.
-  When adding to a `FormData`, the value will be modified in place (since we
-  cannot copy `FormData` objects).
+  The given `params` argument is not changed.
 
   @function up.params.merge
+  @param {string|object|FormData|Array|undefined} params
+  @param {string|object|FormData|Array|undefined} otherParams
+  @return {string|object|FormData|Array}
   ###
   merge = (params, otherParams) ->
     switch detectNature(params)
@@ -290,58 +325,88 @@ up.params = (($) ->
       when 'array'
         otherArray = toArray(otherParams)
         params.concat(otherArray)
+      when 'formData'
+        formData = new FormData()
+        assign(formData, params)
+        assign(formData, otherParams)
+        formData
       when 'query'
         otherQuery = toQuery(otherParams)
         parts = u.select([params, otherQuery], u.isPresent)
         parts.join('&')
-      when 'formData'
-        otherObject = toObject(otherParams)
-        for name, value of otherObject
-          params.append(name, value)
-        params
       when 'object'
         u.deepMerge(params, toObject(otherParams))
 
-  $submittingButton = ($form) ->
-    submitButtonSelector = 'input[type=submit], button[type=submit], button:not([type])'
+  ###**
+  Extends the given `params` with entries from the given `otherParams`.
+
+  The given `params` is changed in-place, if possible.
+  The return value is always a params value that includes the new entries.
+
+  @function up.params.assign
+  @param {string|object|FormData|Array|undefined} params
+  @param {string|object|FormData|Array|undefined} otherParams
+  @return {string|object|FormData|Array}
+  ###
+  assign = (params, otherParams) ->
+    switch detectNature(params)
+      when 'array'
+        otherArray = toArray(otherParams)
+        params.push(otherArray...)
+        params
+      when 'formData'
+        otherArray = toArray(otherParams)
+        for entry in otherArray
+          params.append(entry.name, entry.value)
+        params
+      when 'object'
+        u.deepAssign(params, toObject(otherParams))
+      when 'query', 'missing'
+        # `params` is immutable, so we merge instead.
+        merge(params, otherParams)
+
+  submittingButton = (form) ->
+    $form = $(form)
+    submitButtonSelector = up.form.submitButtonSelector()
     $activeElement = $(document.activeElement)
     if $activeElement.is(submitButtonSelector) && $form.has($activeElement)
-      $activeElement
+      $activeElement[0]
     else
-      $form.find(submitButtonSelector).first()
+      # If no button is focused, we assume the first button in the form.
+      $form.find(submitButtonSelector)[0]
 
-  ###*
+  ###**
   Extracts request params from the given '<form>`.
 
   @function up.params.fromForm
   @param {Element|jQuery|string} form
-  @param {String} [options.nature]
-    If set to `'array'`, the params will be extracted in array representation instead of `FormData`.
-    The array representation cannot hold values for `<input type="file">` controls.
-  @return {Array|FormData}
+  @return {Object}
   ###
-  fromForm = (form, options) ->
-    options = u.options(options)
-    $form = $(form)
-    hasFileInputs = $form.find('input[type=file]').length
+  fromForm = (form ,options) ->
+    if form = u.element(form)
+      options = u.options(options)
+      params = {}
 
-    # We try to stick with an array representation, whose contents we can inspect.
-    # We cannot inspect FormData on IE11 because it has no support for `FormData.entries`.
-    # Inspection is needed to generate a cache key (see `up.proxy`) and to make
-    # vanilla requests when `pushState` is unavailable (see `up.browser.navigate`).
-    params = undefined
-    if !hasFileInputs || options.nature == 'array'
-      params = $form.serializeArray()
-    else
-      params = new FormData($form.get(0))
+      inputs = u.toArray(form.querySelectorAll(up.form.fieldSelector()))
+      if button = submittingButton(form)
+        inputs.push(button)
 
-    $button = $submittingButton($form)
-    buttonName = $button.attr('name')
-    buttonValue = $button.val()
-    if u.isPresent(buttonName)
-      params = add(params, buttonName, buttonValue)
+      u.each inputs, (input) ->
+        # Don't use the #name property, which is only available for native
+        # input elements, but not Unpoly components.
+        name = input.getAttribute('name')
+        if input && name && !input.disabled
+          # There are four cases:
+          # 1. The input has an undefined value. We don't add it to the params.
+          # 2. The input is [multiple] and clientValue() returns an array.
+          #    We add them all to the params. Input's [name] should be an array ([] suffix)
+          #    for this to be unpacked conveniently on the server.
+          # 3. The input has another defined value. We add it to the params.
+          valueOrValues = up.syntax.clientValue(input)
+          u.each u.wrapArray(valueOrValues), (value) ->
+            add(params, name, value)
 
-    params
+      params
 
   ###**
   Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.
@@ -351,7 +416,7 @@ up.params = (($) ->
   Returns `undefined` if the given URL has no query component.
 
   @function up.params.fromURL
-  @param {String} url
+  @param {string} url
   @return {string|undefined}
   @experimental
   ###
@@ -361,13 +426,13 @@ up.params = (($) ->
       query = query.replace(/^\?/, '')
       query
 
-  up.on 'up:framework:reset', reset
-
   toArray: toArray
   toObject: toObject
   toQuery: toQuery
+  toFormData: toFormData
   buildURL: buildURL
   add: add
+  assign: assign
   merge: merge
   fromForm: fromForm
   fromURL: fromURL

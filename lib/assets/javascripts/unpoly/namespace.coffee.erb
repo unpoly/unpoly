@@ -6,5 +6,5 @@ window.up =
 
   deprecateRenamedModule: (oldName, newName) ->
     Object.defineProperty? up, oldName, get: ->
-      up.log.warn("Deprecated: up.#{oldName} has been renamed to up.#{newName}")
+      up.warn("Deprecated: up.#{oldName} has been renamed to up.#{newName}")
       up[newName]

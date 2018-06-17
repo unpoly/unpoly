@@ -164,3 +164,5 @@ up.log = (($) ->
 )(jQuery)
 
 up.puts = up.log.puts
+up.warn = up.log.warn
+

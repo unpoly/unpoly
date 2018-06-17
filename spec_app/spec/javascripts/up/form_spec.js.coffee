@@ -561,8 +561,8 @@ describe 'up.form', ->
           it 'transfers the form fields via FormData', asyncSpec (next) ->
             up.submit(@$form)
             next =>
-              data = @lastRequest().data()
-              expect(u.isFormData(data)).toBe(true)
+              rawData = @lastRequest().params
+              expect(u.isFormData(rawData)).toBe(true)
 
       describeFallback 'canPushState', ->
 

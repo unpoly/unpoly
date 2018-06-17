@@ -128,6 +128,16 @@ describe 'up.params', ->
             revertedObject = up.params.toObject(query)
             expect(revertedObject).toEqual(object)
 
+
+      describeCapability 'canInspectFormData', ->
+
+        it 'converts a FormData object to a query string'
+
+      describeFallback 'canInspectFormData', ->
+
+        it 'throws an error when passed a FormData object'
+
+
     describe 'up.params.toArray', ->
 
       it 'normalized null to an empty array', ->
@@ -205,6 +215,36 @@ describe 'up.params', ->
         expect(array).toEqual([
           { name: 'my=key', value: 'my=value' },
         ])
+
+      describeCapability 'canInspectFormData', ->
+
+        it 'converts a FormData object to an array'
+
+      describeFallback 'canInspectFormData', ->
+
+        it 'throws an error when passed a FormData object'
+
+
+    describe 'up.params.toFormData', ->
+
+      describeCapability 'canInspectFormData', ->
+
+        it 'converts undefined to an empty FormData object'
+
+        it 'converts null to an empty FormDat object'
+
+        it 'converts a FormData object to a FormData object'
+
+        it 'converts an object to a FormData object'
+
+        it 'converts a nested object to a FormData object with flat names'
+
+        it 'returns a FormData object unchanged'
+
+        it 'converts a query string to a FormData object'
+
+        it 'unescapes percent-encoded characters from a query string'
+
 
     describe 'up.params.toObject', ->
 
@@ -291,6 +331,10 @@ describe 'up.params', ->
             ]
           )
 
+
+
+
+
     describe 'up.params.add', ->
 
       describe '(with object)', ->
@@ -323,6 +367,13 @@ describe 'up.params', ->
           query = 'foo=one'
           query = up.params.add(query, 'bär', 'twö')
           expect(query).toEqual('foo=one&b%C3%A4r=tw%C3%B6')
+
+      describeCapability 'canInspectFormData', ->
+
+        describe '(with FormData)', ->
+
+          it 'adds a single entry'
+
 
       describe '(with missing params)', ->
 
@@ -388,6 +439,8 @@ describe 'up.params', ->
           obj = { a: '1', b: '2' }
           obj = up.params.merge(obj, undefined)
           expect(obj).toEqual({ a: '1', b: '2' })
+
+        it 'merges a FormData object'
 
       describe '(with array)', ->
 
@@ -469,6 +522,8 @@ describe 'up.params', ->
             { name: 'b', value: '2' }
           ]
 
+        it 'merges a FormData object'
+
       describe '(with query)', ->
 
         it 'merges a flat object', ->
@@ -502,3 +557,8 @@ describe 'up.params', ->
           obj = 'a=1&b=2'
           obj = up.params.merge(obj, undefined)
           expect(obj).toEqual('a=1&b=2')
+
+        it 'merges a FormData object'
+
+
+
