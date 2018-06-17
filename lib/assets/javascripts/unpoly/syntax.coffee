@@ -434,6 +434,7 @@ up.syntax = (($) ->
         savableData = saveFn()
         if u.isObject(savableData)
           selector = u.selectorForElement(savable)
+          throw "Warn if the selector is not an ID or [up-id]"
           elementsData[selector] ||= {}
           u.assign(elementsData[selector], savableData)
 

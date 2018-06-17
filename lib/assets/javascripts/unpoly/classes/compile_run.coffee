@@ -19,6 +19,9 @@ class up.CompileRun
     @elementDataByElement = new Map()
     for selector, elementData of @elementDataBySelector
       for element in u.selectInSubtree(@$root, selector)
+        # The same element might be targeted with two different selectors
+        if existingData = @elementDataByElement.get(element)
+          elementData = u.merge(existingData, elementData)
         @elementDataByElement.set(element, elementData)
 
     @resultByElement = new Map()
@@ -41,6 +44,7 @@ class up.CompileRun
         callData = @dataForElement($batch[0])
         rawResult = compiler.callback.apply($batch[0], [$batch, callData])
         @mergeResult($batch, rawResult)
+        throw "implement or deprecate { keep } option"
 
   dataForElement: (element) ->
     domData = up.data(element)
