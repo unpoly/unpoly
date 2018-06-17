@@ -22,3 +22,8 @@ class up.Waypoint extends up.Record
 
   restoreURL: =>
     up.params.buildURL(@url, @params)
+
+  submitRequestOptions:  =>
+    url: @submitUrl || @url
+    method: @submitMethod || @method
+    params: @parmas

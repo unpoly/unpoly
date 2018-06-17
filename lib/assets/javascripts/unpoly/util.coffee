@@ -1186,6 +1186,13 @@ up.util = (($) ->
       delete filtered[property]
     filtered
 
+  pickBy = (obj, predicate) ->
+    result = {}
+    for k, v of obj
+      if predicate(v, k)
+        result[k] = v
+    result
+
   ###**
   @function up.util.isUnmodifiedKeyEvent
   @internal
@@ -2012,6 +2019,7 @@ up.util = (($) ->
   clientSize: clientSize
   only: only
   except: except
+  pickBy: pickBy
   trim: trim
   unresolvablePromise: unresolvablePromise
   setMissingAttrs: setMissingAttrs

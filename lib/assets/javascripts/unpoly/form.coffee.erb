@@ -847,6 +847,27 @@ up.form = (($) ->
   up.compiler '[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', ($element) ->
     switchTarget($element)
 
+  # A list of <input> properties that don't survive a form roundtrip.
+  TRANSIENT_INPUT_PROPS = [
+    'scrollLeft',
+    'scrollTop',
+    'selectionStart',
+    'selectionEnd',
+    'files'
+  ]
+
+  pickTransientInputProps = (obj) ->
+    props = u.only(data, TRANSIENT_INPUT_PROPS)
+    props = u.pickBy(props, u.isGiven)
+    props
+
+  restorableInputs = ($input, data) ->
+    input = $input.get(0)
+    previousProps = pickTransientInputProps(data)
+    u.assign(input, previousProps)
+    save: ->
+      pickTransientInputProps(input)
+
   ###**
   Observes this field and runs a callback when a value changes.
 
@@ -967,6 +988,8 @@ up.form = (($) ->
   up.compiler '[up-autosubmit]', ($formOrField) -> autosubmit($formOrField)
 
   up.compiler '[autofocus]', { batch: true }, ($input) -> $input.last().focus()
+
+  up.compiler 'input[type=file]', restorableInputs
 
   up.on 'up:framework:reset', reset
 
