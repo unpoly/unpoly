@@ -1047,6 +1047,38 @@ describe 'up.util', ->
       it 'returns true for a FormData object', ->
         expect(up.util.isObject(new FormData())).toBe(true)
 
+    describe 'up.util.merge', ->
+
+      it 'merges the given objects', ->
+        obj = { a: '1', b: '2' }
+        other = { b: '3', c: '4' }
+        obj = up.util.merge(obj, other)
+        expect(obj).toEqual { a: '1', b: '3', c: '4' }
+
+      it 'overrides (not merges) keys with object value', ->
+        obj = { a: '1', b: { c: '2', d: '3' } }
+        other = { e: '4', b: { f: '5', g: '6' }}
+        obj = up.util.merge(obj, other)
+        expect(obj).toEqual { a: '1', e: '4', b: { f: '5', g: '6' } }
+
+      it 'ignores undefined arguments', ->
+        obj = { a: 1, b: 2 }
+
+        result = up.util.merge(obj, undefined)
+        expect(result).toEqual { a: 1, b: 2 }
+
+        reverseResult = up.util.merge(undefined, obj)
+        expect(reverseResult).toEqual { a: 1, b: 2 }
+
+      it 'ignores null arguments', ->
+        obj = { a: 1, b: 2 }
+
+        result = up.util.merge(obj, null)
+        expect(result).toEqual { a: 1, b: 2 }
+
+        reverseResult = up.util.merge(null, obj)
+        expect(reverseResult).toEqual { a: 1, b: 2 }
+
     describe 'up.util.deepMerge', ->
 
       it 'recursively merges the given objects', ->
@@ -1054,6 +1086,24 @@ describe 'up.util', ->
         other = { e: '4', b: { f: '5', g: '6' }}
         obj = up.util.deepMerge(obj, other)
         expect(obj).toEqual { a: '1', e: '4', b: { c: '2', d: '3', f: '5', g: '6' } }
+
+      it 'ignores undefined arguments', ->
+        obj = { a: 1, b: 2 }
+
+        result = up.util.deepMerge(obj, undefined)
+        expect(result).toEqual { a: 1, b: 2 }
+
+        reverseResult = up.util.deepMerge(undefined, obj)
+        expect(reverseResult).toEqual { a: 1, b: 2 }
+
+      it 'ignores null arguments', ->
+        obj = { a: 1, b: 2 }
+
+        result = up.util.deepMerge(obj, null)
+        expect(result).toEqual { a: 1, b: 2 }
+
+        reverseResult = up.util.deepMerge(null, obj)
+        expect(reverseResult).toEqual { a: 1, b: 2 }
 
       it 'overwrites (and does not concatenate) array values', ->
         obj = { a: ['1', '2'] }
