@@ -23,8 +23,7 @@ up.syntax = (($) ->
 
   u = up.util
 
-  DESTRUCTIBLE_CLASS = 'up-destructible'
-  DESTRUCTORS_KEY = 'up-destructors'
+  RESULT_DATA_KEY = 'up-compile-result'
 
   SYSTEM_MACRO_PRIORITIES = {
     '[up-back]': -100        # sets [up-href] to previous URL
@@ -299,38 +298,17 @@ up.syntax = (($) ->
       index += 1
     queue.splice(index, 0, newCompiler)
 
-  applyCompiler = (compiler, $jqueryElement, nativeElement) ->
-    up.puts ("Compiling '%s' on %o" unless compiler.isSystem), compiler.selector, nativeElement
-    if compiler.keep
-      value = if u.isString(compiler.keep) then compiler.keep else ''
-      $jqueryElement.attr('up-keep', value)
-    returnValue = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)])
-    addDestructor($jqueryElement, returnValue)
+  getResult = (element) ->
+    $(element).data(RESULT_DATA_KEY)
 
-  ###**
-  Tries to find a list of destructors in a compiler's return value.
+  setResult = (element, result) ->
+    if result.save
+      u.addClass(element, 'up-can-save')
 
-  @param {Object} returnValue
-  @return {Function|undefined}
-  @internal
-  ###
-  normalizeDestructor = (returnValue) ->
-    if u.isFunction(returnValue)
-      returnValue
-    else if u.isArray(returnValue) && u.all(returnValue, u.isFunction)
-      u.sequence(returnValue...)
+    if result.clean
+      u.addClass(element, 'up-can-clean')
 
-  addDestructor = ($element, newDestructor) ->
-    if newDestructor = normalizeDestructor(newDestructor)
-      $element.addClass(DESTRUCTIBLE_CLASS)
-      # The initial destructor function is a function that removes the destructor class and data.
-      elementDestructor = $element.data(DESTRUCTORS_KEY) || -> removeDestructors($element)
-      elementDestructor = u.sequence(elementDestructor, newDestructor)
-      $element.data(DESTRUCTORS_KEY, elementDestructor)
-
-  removeDestructors = ($element) ->
-    $element.removeData(DESTRUCTORS_KEY)
-    $element.removeClass(DESTRUCTIBLE_CLASS)
+    $(element).data(RESULT_DATA_KEY, result)
 
   ###**
   Applies all compilers on the given element and its descendants.
@@ -342,30 +320,11 @@ up.syntax = (($) ->
   @internal
   ###
   compile = ($fragment, options) ->
-    options = u.options(options)
-    $skipSubtrees = $(options.skip)
-
-    up.log.group "Compiling fragment %o", $fragment.get(0), ->
-      for queue in [macros, compilers]
-        for compiler in queue
-          $matches = u.selectInSubtree($fragment, compiler.selector)
-
-          # Exclude all elements that are descendants of the subtrees we want to keep.
-          # We only do this if `options.skip` was given, since the exclusion
-          # process below is very expensive (we had a case where compiling 100 slements
-          # took 1.5s because of this).
-          if $skipSubtrees.length
-            $matches = $matches.filter ->
-              $match = $(this)
-              u.all $skipSubtrees, (skipSubtree) ->
-                $match.closest(skipSubtree).length == 0
-
-          if $matches.length
-            up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isSystem), compiler.selector, $matches.length, ->
-              if compiler.batch
-                applyCompiler(compiler, $matches, $matches.get())
-              else
-                $matches.each -> applyCompiler(compiler, $(this), this)
+    allCompilers = macros.concat(compilers)
+    compileRun = new up.CompileRun($fragment, allCompilers, options)
+    resultsByElement = compileRun.compile()
+    resultsByElement.forEach (result, element) ->
+      setResult(element, result)
 
   ###**
   Runs any destroyers on the given fragment and its descendants.
@@ -376,14 +335,13 @@ up.syntax = (($) ->
   @internal
   ###
   clean = ($fragment) ->
-    $destructibles = u.selectInSubtree($fragment, ".#{DESTRUCTIBLE_CLASS}")
-    u.each $destructibles, (destructible) ->
-      # The destructor function may be undefined at this point.
-      # Although destructible elements should always have an destructor function, we might be
-      # destroying a clone of such an element. E.g. Unpoly creates a clone when keeping an
-      # [up-keep] element, and that clone still has the .up-destructible class.
-      if destructor = $(destructible).data(DESTRUCTORS_KEY)
-        destructor()
+    cleanables = u.selectInSubtree($fragment, '.up-can-clean')
+    u.each cleanables, (cleanable) ->
+      if result = getResult(cleanable)
+        for cleanFn in result.clean
+          cleanFn()
+    # We do not actually remove the $.data key or .up-can-* classes for performance reasons.
+    # The element we just cleaned is about to be removed from the DOM.
 
   ###**
   Checks if the given element has an [`up-data`](/up-data) attribute.
@@ -463,6 +421,22 @@ up.syntax = (($) ->
     else
       {}
 
+  ###*
+  @function up.util.saveData
+  @internal
+  ###
+  saveData = ($fragment, state) ->
+    savables = u.selectInSubtree($fragment, '.up-can-save')
+    elementsData = state.data.elements = {}
+    for savable in savables
+      result = getResult(savable)
+      for saveFn in result.save(state)
+        savableData = saveFn()
+        if u.isObject(savableData)
+          selector = u.selectorForElement(savable)
+          elementsData[selector] ||= {}
+          u.assign(elementsData[selector], savableData)
+
   ###**
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
@@ -481,6 +455,7 @@ up.syntax = (($) ->
   macro: macro
   compile: compile
   clean: clean
+  saveData: saveData
   data: data
 
 )(jQuery)
