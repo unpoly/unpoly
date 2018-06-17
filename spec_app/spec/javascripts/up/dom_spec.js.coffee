@@ -2381,8 +2381,31 @@ describe 'up.dom', ->
           next =>
             expect(up.browser.navigate).toHaveBeenCalledWith('/source', jasmine.anything())
 
+    describe 'up.dom.layerOf', ->
 
-    describe 'up.reset', ->
+      it 'returns "popup" for an element in a popup over the page', ->
+        $popup = affix('.up-popup')
+        $element = $popup.affix('.element')
+        expect(up.dom.layerOf($element)).toEqual('popup')
 
-      it 'should have tests'
+      it 'returns "popup" for an element in a popup over a modal', ->
+        $modal = affix('.up-modal')
+        $popupInModal = $modal.affix('.up-popup')
+        $element = $popupInModal.affix('.element')
+        expect(up.dom.layerOf($element)).toEqual('popup')
+
+      it 'returns "modal" for an element in a modal', ->
+        $modal = affix('.up-modal')
+        $element = $modal.affix('.element')
+        expect(up.dom.layerOf($element)).toEqual('modal')
+
+      it 'returns "page" for an element below a modal or popup', ->
+        $element = affix('.element')
+        expect(up.dom.layerOf($element)).toEqual('page')
+
+      it 'returns undefined for an empty jQuery collection', ->
+        expect(up.dom.layerOf($())).toBeUndefined()
+
+      it 'returns undefined for undefined', ->
+        expect(up.dom.layerOf(undefined)).toBeUndefined()
 
