@@ -767,12 +767,13 @@ up.dom = (($) ->
 
   layerOf = (selectorOrElement) ->
     $element = $(selectorOrElement)
-    if up.popup.contains($element)
-      'popup'
-    else if up.modal.contains($element)
-      'modal'
-    else
-      'page'
+    if $element.length
+      if up.popup.contains($element)
+        'popup'
+      else if up.modal.contains($element)
+        'modal'
+      else
+        'page'
 
   matchesLayer = (selectorOrElement, layer) ->
     !layer || layerOf(selectorOrElement) == layer
