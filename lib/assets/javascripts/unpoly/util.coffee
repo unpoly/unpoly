@@ -193,21 +193,24 @@ up.util = (($) ->
     The element for which to create a selector.
   @experimental
   ###
-  selectorForElement = (element) ->
+  selectorForElement = (element, options) ->
     $element = $(element)
     selector = undefined
 
-    tagName = $element.prop('tagName').toLowerCase()
+    precise = false
 
     if upId = presence($element.attr("up-id"))
+      precise = true
       selector = attributeSelector('up-id', upId)
     else if id = presence($element.attr("id"))
+      precise = true
       if id.match(/^[a-z0-9\-_]+$/i)
         selector = "##{id}"
       else
         selector = attributeSelector('id', id)
     else if name = presence($element.attr("name"))
-      selector = tagName + attributeSelector('name', name)
+      precise = true
+      selector = elementTagName($element) + attributeSelector('name', name)
     else if classes = presence(nonUpClasses($element))
       selector = ''
       for klass in classes
@@ -215,8 +218,15 @@ up.util = (($) ->
     else if ariaLabel = presence($element.attr("aria-label"))
       selector = attributeSelector('aria-label', ariaLabel)
     else
-      selector = tagName
-    selector
+      selector = elementTagName($element)
+
+    if options?.qualifyPrecision
+      { precise, selector }
+    else
+      selector
+
+  elementTagName = ($element) ->
+    $element.prop('tagName').toLowerCase()
 
   attributeSelector = (attribute, value) ->
     value = value.replace(/"/g, '\\"')

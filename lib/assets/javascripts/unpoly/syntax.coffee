@@ -433,10 +433,10 @@ up.syntax = (($) ->
       for saveFn in result.save(state)
         savableData = saveFn()
         if u.isObject(savableData)
-          selector = u.selectorForElement(savable)
+          qualifiedSelector = u.selectorForElement(savable, qualifyPrecision: true)
           throw "Warn if the selector is not an ID or [up-id]"
-          elementsData[selector] ||= {}
-          u.assign(elementsData[selector], savableData)
+          elementsData[qualifiedSelector.selector] ||= {}
+          u.assign(elementsData[qualifiedSelector.selector], savableData)
 
   ###**
   Resets the list of registered compiler directives to the

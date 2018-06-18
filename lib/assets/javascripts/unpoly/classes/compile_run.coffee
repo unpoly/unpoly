@@ -5,6 +5,7 @@ u = up.util
 class up.CompileRun
 
   constructor: (@$root, @compilers, @options = {}) ->
+    @root = @$root[0]
 
   compile: ->
     @$skipSubtrees = $(@options.skip)
@@ -26,7 +27,7 @@ class up.CompileRun
 
     @resultByElement = new Map()
 
-    up.log.group "Compiling fragment %o", @$root[0], ->
+    up.log.group "Compiling fragment %o", @root, =>
       for compiler in @compilers
         @runCompiler(compiler)
 
@@ -44,10 +45,13 @@ class up.CompileRun
         callData = @dataForElement($batch[0])
         rawResult = compiler.callback.apply($batch[0], [$batch, callData])
         @mergeResult($batch, rawResult)
-        throw "implement or deprecate { keep } option"
+        if compiler.keep
+          up.log.warn("The { keep } option to compiler() has been deprecated. Use the [up-keep] attribute instead.")
+          value = if u.isString(compiler.keep) then compiler.keep else ''
+          $batch.attr('up-keep', value)
 
   dataForElement: (element) ->
-    domData = up.data(element)
+    domData = up.syntax.data(element)
     restoredData = @elementDataByElement.get(element)
     u.merge(@globalData, domData, restoredData)
 
@@ -78,7 +82,7 @@ class up.CompileRun
     # Te exclusion process is very expensive (in one case compiling 100 slements
     # took 1.5s because of this). That's why we only do it if (1) $skipSubtrees
     # was given and (2) there is an [up-keep] element in $root.
-    if @$skipSubtrees.length && @$root.querySelector('[up-keep]')
+    if @$skipSubtrees.length && @root.querySelector('[up-keep]')
       $matches = $matches.filter ->
         $match = $(this)
         u.all $skipSubtrees, (skipSubtree) ->
