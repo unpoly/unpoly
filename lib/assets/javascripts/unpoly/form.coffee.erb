@@ -857,7 +857,7 @@ up.form = (($) ->
   ]
 
   pickTransientInputProps = (obj) ->
-    props = u.only(data, TRANSIENT_INPUT_PROPS)
+    props = u.only(obj, TRANSIENT_INPUT_PROPS)
     props = u.pickBy(props, u.isGiven)
     props
 
@@ -989,7 +989,7 @@ up.form = (($) ->
 
   up.compiler '[autofocus]', { batch: true }, ($input) -> $input.last().focus()
 
-  up.compiler 'input[type=file]', restorableInputs
+  up.compiler 'input[type=file], input[type=text], input[type=number], input[type=email], input[type=url], input[type=search], textarea', restorableInputs
 
   up.on 'up:framework:reset', reset
 
