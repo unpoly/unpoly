@@ -35,8 +35,8 @@ up.syntax = (($) ->
   }
 
   isBooting = true
-  compilers = []
-  macros = []
+  componentClasses = []
+  macroClasses = []
 
   ###**
   Registers a function to be called whenever an element with
@@ -216,13 +216,10 @@ up.syntax = (($) ->
     The function may also return an array of destructor functions.
   @stable
   ###
-  compiler = (selector, args...) ->
-    # Developer might still call top-level compiler registrations even when we don't boot
-    # due to an unsupported browser. In that case do no work and exit early.
-    return unless up.browser.isSupported()
-    callback = args.pop()
-    options = u.options(args[0])
-    insertCompiler(compilers, selector, options, callback)
+  registerCompilerFunction = (selector, args...) ->
+    lastIndex = args.length - 1
+    args[lastIndex] = up.CompilerComponent.buildClass(args[lastIndex])
+    registerComponentClass(args...)
 
   ###**
   Registers a [compiler](/up.compiler) that is run before all other compilers.
@@ -265,38 +262,48 @@ up.syntax = (($) ->
     See [`up.compiler()`](/up.compiler) for details.
   @stable
   ###
-  macro = (selector, args...) ->
-    # Developer might still call top-level compiler registrations even when we don't boot
-    # due to an unsupported browser. In that case do no work and exit early.
-    return unless up.browser.isSupported()
-    callback = args.pop()
-    options = u.options(args[0])
-    if isBooting
-      options.priority = detectSystemMacroPriority(selector) ||
-        up.fail('Unregistered priority for system macro %o', selector)
-    insertCompiler(macros, selector, options, callback)
+  registerMacroFunction = (selector, args...) ->
+    fn = args.pop()
+    options = u.options(args[0], macro: true)
+    registerCompiler(selector, options, fn)
 
-  detectSystemMacroPriority = (fullMacroSelector) ->
+  detectSystemMacroPriority = (macroSelector) ->
     for substr, priority of SYSTEM_MACRO_PRIORITIES
-      if fullMacroSelector.indexOf(substr) >= 0
+      if macroSelector.indexOf(substr) >= 0
         return priority
 
-  buildCompiler = (selector, options, callback) ->
-    selector: selector
-    callback: callback
-    isSystem: isBooting
-    priority: options.priority || 0
-    batch: options.batch
-    keep: options.keep
+  registerComponentClass = (selector, args...) ->
+    klass = args.pop()
+    options = u.options(args[0])
 
-  insertCompiler = (queue, selector, options, callback) ->
-    # Silently discard any compilers that are registered on unsupported browsers
-    return unless up.browser.isSupported()
-    newCompiler = buildCompiler(selector, options, callback)
+    if options.macro
+      classList = macroClasses
+      if isBooting
+        options.priority = detectSystemMacroPriority(selector) ||
+          up.fail('Unregistered priority for system macro %o', selector)
+    else
+      classList = componentClasses
+
+    insertComponentClass(classList, selector, options, klass)
+
+  annotateComponentClass = (klass, selector, options) ->
+    options = u.options(
+      selector: selector,
+      isSystem: isBooting,
+      priority: 0,
+      batch: false
+      keep: false
+    )
+    for key, value of options
+      if u.isUndefined(klass[key])
+        klass[key] = value
+
+  insertComponentClass = (queue, selector, options, newClass) ->
+    annotateComponentClass(newClass, selector, options)
     index = 0
-    while (oldCompiler = queue[index]) && (oldCompiler.priority >= newCompiler.priority)
+    while (existingClass = queue[index]) && (existingClass.priority >= newClass.priority)
       index += 1
-    queue.splice(index, 0, newCompiler)
+    queue.splice(index, 0, newClass)
 
   getResult = (element) ->
     $(element).data(RESULT_DATA_KEY)
@@ -320,8 +327,8 @@ up.syntax = (($) ->
   @internal
   ###
   compile = ($fragment, options) ->
-    allCompilers = macros.concat(compilers)
-    compileRun = new up.CompileRun($fragment, allCompilers, options)
+    allClasses = macroClasses.concat(componentClasses)
+    compileRun = new up.CompileRun($fragment, allClasses, options)
     resultsByElement = compileRun.compile()
     resultsByElement.forEach (result, element) ->
       setResult(element, result)
@@ -347,7 +354,7 @@ up.syntax = (($) ->
   Checks if the given element has an [`up-data`](/up-data) attribute.
   If yes, parses the attribute value as JSON and returns the parsed object.
 
-  Returns an empty object if the element has no `up-data` attribute.
+  Returns `undefined` if the element has no `up-data` attribute.
 
   \#\#\# Example
 
@@ -364,7 +371,7 @@ up.syntax = (($) ->
   @return
     The JSON-decoded value of the `up-data` attribute.
 
-    Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
+    Returns `undefined` if the element has no (or an empty) `up-data` attribute.
   @stable
   ###
 
@@ -411,15 +418,12 @@ up.syntax = (($) ->
     A serialized JSON string
   @stable
   ###
-  data = (elementOrSelector, options) ->
-    options = u.options(options)
-    attribute = u.option(options.attribute, 'up-data')
-    $element = $(elementOrSelector)
-    json = $element.attr(attribute)
-    if u.isString(json) && u.trim(json) != ''
-      JSON.parse(json)
-    else
-      {}
+  readData = (elementOrSelector) ->
+    u.jsonAttribute(elementOrSelector, 'up-data')
+
+  readValue = (elementOrSelector) ->
+    if element = u.element(elementOrSelector)
+      u.jsonAttribute(elementOrSelector, 'up-value') || element.value
 
   ###*
   @function up.util.saveData
@@ -448,17 +452,19 @@ up.syntax = (($) ->
   reset = ->
     isSystem = (compiler) -> compiler.isSystem
     compilers = u.select(compilers, isSystem)
-    macros = u.select(macros, isSystem)
+    macroClasses = u.select(macroClasses, isSystem)
 
   up.on 'up:framework:booted', -> isBooting = false
   up.on 'up:framework:reset', reset
 
-  compiler: compiler
-  macro: macro
+  compiler: registerCompilerFunction
+  macro: registerMacroFunction
+  component: registerComponentClass
   compile: compile
   clean: clean
   saveData: saveData
-  data: data
+  data: readData
+  value: readValue
 
 )(jQuery)
 

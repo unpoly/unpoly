@@ -247,18 +247,11 @@ describe 'up.syntax', ->
         data = up.syntax.data($element)
         expect(data).toEqual(foo: 1, bar: 2)
 
-      it 'allows to pass a different attribute name as { attribute } option', ->
-        $element = affix('.element').attr('up-params', '{ "foo": 1, "bar": 2 }')
-        data = up.syntax.data($element, attribute: 'up-params')
-        expect(data).toEqual(foo: 1, bar: 2)
-
-      it 'returns an empty object if the given element has no [up-data] attribute', ->
+      it 'returns undefined if the given element has no [up-data] attribute', ->
         $element = affix('.element')
         data = up.syntax.data($element)
-        expect(u.isObject(data)).toBe(true)
-        expect(data).toEqual({})
+        expect(data).toBeUndefined()
 
-      it 'returns an empty object if undefined is passed instead of an element', ->
+      it 'returns undefined if undefined is passed instead of an element', ->
         data = up.syntax.data(undefined)
-        expect(u.isObject(data)).toBe(true)
-        expect(data).toEqual({})
+        expect(data).toBeUndefined()

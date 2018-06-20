@@ -220,6 +220,13 @@ up.util = (($) ->
   isGoodSelector = (selector) ->
     selector.indexOf('#') >= -1 || selector.indexOf('[') >= -1
 
+#  defineMemoizedGetter = (obj, property, fetchFn) ->
+#    cacheProperty = "_#{property}Cache"
+#    Object.defineProperty methods, property,
+#      get: ->
+#        @[cacheProperty] ||= [fetchFn(this)]
+#        @[cacheProperty][0]
+
   elementTagName = ($element) ->
     $element.prop('tagName').toLowerCase()
 
@@ -1147,12 +1154,22 @@ up.util = (($) ->
   @function up.util.castedAttr
   @internal
   ###
-  castedAttr = ($element, attrName) ->
-    value = $element.attr(attrName)
+  castedAttr = ($element, attribute) ->
+    value = $element.attr(attribute)
     switch value
       when 'false' then false
-      when 'true', '', attrName then true
+      when 'true', '', attribute then true
       else value # other strings, undefined, null, ...
+
+  ###**
+  @function up.util.jsonAttr
+  @internal
+  ###
+  jsonAttr = (elementOrSelector, attribute) ->
+    if element = getElement(elementOrSelector)
+      json = element.getAttribute(attribute)
+      if isString(json) && trim(json) != ''
+        JSON.parse(json)
 
 #  castsToTrue = (object) ->
 #    String(object) == "true"
@@ -2022,6 +2039,7 @@ up.util = (($) ->
   contains: contains
   toArray: toArray
   castedAttr: castedAttr
+  jsonAttr: jsonAttr
   clientSize: clientSize
   only: only
   except: except

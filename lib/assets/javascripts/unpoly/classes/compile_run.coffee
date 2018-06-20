@@ -4,7 +4,7 @@ u = up.util
 
 class up.CompileRun
 
-  constructor: (@$root, @compilers, @options = {}) ->
+  constructor: (@$root, @componentClasses, @options = {}) ->
     @root = @$root[0]
 
   compile: ->
@@ -14,9 +14,9 @@ class up.CompileRun
     @elementDataBySelector = data.elements || {}
     @globalData = u.except(data, 'elements')
 
-    # Match elements with argument { data } once before all compilers
+    # Match elements with argument { data } once before all components
     # and hash them in a Map. Otherwise we would have to check #matches()
-    # on all compiled elements for all compilers.
+    # on all compiled elements for all components.
     @elementDataByElement = new Map()
     for selector, elementData of @elementDataBySelector
       for element in u.selectInSubtree(@$root, selector)
@@ -28,29 +28,30 @@ class up.CompileRun
     @resultByElement = new Map()
 
     up.log.group "Compiling fragment %o", @root, =>
-      for compiler in @compilers
-        @runCompiler(compiler)
+      for componentClass in @componentClasses
+        @instantiateComponents(componentClass)
 
     return @resultByElement
 
-  runCompiler: (compiler) ->
-    $matches = @select(compiler.selector)
-    return unless $matches.length
+  @instantiateComponents: (componentClass) ->
+    matches = @select(componentClass.selector)
+    return unless matches.length
 
-    up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isSystem), compiler.selector, $matches.length, =>
-      batches = if compiler.batch then [$matches] else $matches
+    up.log.group ("Compiling '%s' on %d element(s)" unless componentClass.isSystem), componentClass.selector, $matches.length, =>
+      batches = if componentClass.batch then [matches] else matches
       # Returns the raw results of our compile run
       for batch in batches
-        $batch = $(batch)
-        callData = @dataForElement($batch[0])
-        rawResult = compiler.callback.apply($batch[0], [$batch, callData])
-        @mergeResult($batch, rawResult)
+        compileOptions = new CompileOptions(element, fetchData: dataForElement, value: up.syntax.value)
+        component = new componentClass(batch)
+        component.compile(compileOptions)
+
+        @mergeResult($batch, component)
+
         if compiler.keep
-          up.log.warn("The { keep } option to compiler() has been deprecated. Use the [up-keep] attribute instead.")
           value = if u.isString(compiler.keep) then compiler.keep else ''
           $batch.attr('up-keep', value)
 
-  dataForElement: (element) ->
+  dataForElement: (element) =>
     domData = up.syntax.data(element)
     restoredData = @elementDataByElement.get(element)
     u.merge(@globalData, domData, restoredData)
@@ -65,15 +66,6 @@ class up.CompileRun
           reportedResult[action] ||= []
           reportedResult[action].push(callback)
 
-  normalizeResult: (result) ->
-    if u.isFunction(result)
-      { clean: result }
-    else if u.isObject(result) && (result.save || result.clean)
-      result
-    else if u.isArray(result) && u.all(result, u.isFunction)
-      { clean: u.sequence(result...) }
-    else
-      undefined
 
   select: (selector) ->
     $matches = u.selectInSubtree(@$root, selector)
@@ -88,4 +80,4 @@ class up.CompileRun
         u.all $skipSubtrees, (skipSubtree) ->
           $match.closest(skipSubtree).length == 0
 
-    $matches
+    $matches.get()
