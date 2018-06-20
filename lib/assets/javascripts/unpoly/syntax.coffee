@@ -433,10 +433,11 @@ up.syntax = (($) ->
       for saveFn in result.save(state)
         savableData = saveFn()
         if u.isObject(savableData)
-          qualifiedSelector = u.selectorForElement(savable, qualifyPrecision: true)
-          throw "Warn if the selector is not an ID or [up-id]"
-          elementsData[qualifiedSelector.selector] ||= {}
-          u.assign(elementsData[qualifiedSelector.selector], savableData)
+          selector = u.selectorForElement(savable)
+          unless u.isGoodSelector(selector)
+            up.warn('Saving state for possibly ambiguous selector %o', selector)
+          elementsData[selector] ||= {}
+          u.assign(elementsData[selector], savableData)
 
   ###**
   Resets the list of registered compiler directives to the
