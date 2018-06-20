@@ -366,13 +366,13 @@ up.syntax = (($) ->
 
       up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
 
-  @function up.syntax.data
+  @function up.syntax.serverData
   @param {string|Element|jQuery} elementOrSelector
   @return
     The JSON-decoded value of the `up-data` attribute.
 
     Returns `undefined` if the element has no (or an empty) `up-data` attribute.
-  @stable
+  @experimental
   ###
 
   ###**
@@ -418,7 +418,7 @@ up.syntax = (($) ->
     A serialized JSON string
   @stable
   ###
-  readData = (elementOrSelector) ->
+  readServerData = (elementOrSelector) ->
     u.jsonAttribute(elementOrSelector, 'up-data')
 
   readValue = (elementOrSelector) ->
@@ -450,9 +450,8 @@ up.syntax = (($) ->
   @internal
   ###
   reset = ->
-    isSystem = (compiler) -> compiler.isSystem
-    compilers = u.select(compilers, isSystem)
-    macroClasses = u.select(macroClasses, isSystem)
+    componentClasses = u.select(componentClasses, 'isSystem')
+    macroClasses = u.select(macroClasses, 'isSystem')
 
   up.on 'up:framework:booted', -> isBooting = false
   up.on 'up:framework:reset', reset
@@ -463,10 +462,15 @@ up.syntax = (($) ->
   compile: compile
   clean: clean
   saveData: saveData
-  data: readData
+  serverData: readServerData
   value: readValue
+  data: (element) ->
+    up.warn('Deprecated: up.syntax.data() has been renamed to up.syntax.serverData()')
+    readServerData(element)
+
 
 )(jQuery)
 
+up.component = up.syntax.component
 up.compiler = up.syntax.compiler
 up.macro = up.syntax.macro

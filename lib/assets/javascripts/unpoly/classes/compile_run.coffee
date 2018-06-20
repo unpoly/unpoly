@@ -25,13 +25,14 @@ class up.CompileRun
           elementData = u.merge(existingData, elementData)
         @elementDataByElement.set(element, elementData)
 
-    @resultByElement = new Map()
+    @results = []
 
     up.log.group "Compiling fragment %o", @root, =>
       for componentClass in @componentClasses
         @instantiateComponents(componentClass)
 
-    return @resultByElement
+    for result in @results
+      result.finalize()
 
   @instantiateComponents: (componentClass) ->
     matches = @select(componentClass.selector)
@@ -45,7 +46,8 @@ class up.CompileRun
         component = new componentClass(batch)
         component.compile(compileOptions)
 
-        @mergeResult($batch, component)
+        if result = up.CompileResult.consider(element, component)
+          @results.push(result)
 
         if compiler.keep
           value = if u.isString(compiler.keep) then compiler.keep else ''
@@ -55,17 +57,6 @@ class up.CompileRun
     domData = up.syntax.data(element)
     restoredData = @elementDataByElement.get(element)
     u.merge(@globalData, domData, restoredData)
-
-  mergeResult: ($elements, rawResult) ->
-    if normalizedResult = @normalizeResult(rawResult)
-      for element in $elements
-        unless reportedResult = @resultByElement.get(element)
-          reportedResult = {}
-          @resultByElement.set(element, reportedResult)
-        for action, callback of normalizedResult
-          reportedResult[action] ||= []
-          reportedResult[action].push(callback)
-
 
   select: (selector) ->
     $matches = u.selectInSubtree(@$root, selector)
