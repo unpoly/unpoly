@@ -1,7 +1,7 @@
 (function() {
   up.feedback.config.currentClasses.push('active');
 
-  up.feedback.config.navSelectors.push('.nav');
+  up.feedback.config.navs.push('.nav');
 
 }).call(this);
 (function() {
