@@ -6,6 +6,12 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.56.3
+------
+
+- Fix a bug where the Bootstrap 3 integration failed to load. Thanks [@dastra-mak](https://github.com/dastra-mak)!
+
+
 0.56.2
 ------
 
