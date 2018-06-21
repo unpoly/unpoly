@@ -8,15 +8,27 @@ class up.CompileResult
     @cleanComponents = []
     @selectorComponents = []
 
+  # If we got any #valueComponents, this will be set to #valueNow in #finalize()
+  value: null
+
   valueNow: ->
     u.last(@valueComponents).value()
+
+  # If we got any #dataComponents, this will be set to #dataNow in #finalize()
+  data: null
 
   dataNow: ->
     datas = u.map @dataComponents, (c) -> c.data()
     u.merge(datas...)
 
+  # If we got any #cleanComponents, this will be set to #cleanNow in #finalize()
+  clean: null
+
   cleanNow: ->
     u.each @cleanComponents, (c) -> c.clean()
+
+  # If we got any #selectorComponents, this will be set to #selectorNow in #finalize()
+  selector: null
 
   selectorNow: ->
     u.last(@selectorComponents).selector()
@@ -30,7 +42,7 @@ class up.CompileResult
         # Expose component API
         @[action] ||= @["#{action}Now"]
         # Mark in DOM so up.syntax can quickly find results supporting an action
-        up.util.addClass(@element, "up-can-#{action}")
+        u.addClass(@element, "up-can-#{action}")
 
   @consider: (element, component) ->
     actions = @trackableActions(comoponent)
