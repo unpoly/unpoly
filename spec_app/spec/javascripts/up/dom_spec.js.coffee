@@ -1672,7 +1672,7 @@ describe 'up.dom', ->
             expect(u.opacity($old)).toBeAround(0.5, 0.2)
             expect(u.opacity($new)).toBeAround(0.5, 0.2)
 
-          next.after 60, =>
+          next.after (50 + 30), =>
             expect(u.opacity($new)).toBeAround(1.0, 0.1)
             expect($old).toBeDetached()
 
@@ -2288,7 +2288,7 @@ describe 'up.dom', ->
         next.after 75, ->
           expect($element).toHaveOpacity(0.5, 0.2)
 
-        next.after (75 + 20), ->
+        next.after (75 + 40), ->
           expect($element).toBeDetached()
 
       it 'calls destructors for custom elements', (done) ->
