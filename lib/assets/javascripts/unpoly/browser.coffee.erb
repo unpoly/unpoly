@@ -230,6 +230,9 @@ up.browser = (($) ->
       console.groupCollapsed &&
       console.groupEnd
 
+  canCustomElements = u.memoize ->
+    !!window.customElements
+
   isRecentJQuery = u.memoize ->
     version = $.fn.jquery
     parts = version.split('.')
@@ -324,12 +327,12 @@ up.browser = (($) ->
     value = value.substr(1) if value[0] == '#'
     u.presence(value)
 
-
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url
   navigate: navigate
   submitForm: submitForm
   canPushState: canPushState
+  canCustomElements: canCustomElements
   whenConfirmed: whenConfirmed
   isSupported: isSupported
   puts: puts

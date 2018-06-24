@@ -1044,7 +1044,7 @@ describe 'up.dom', ->
                 expect(e).toBeError(/Could not find target in response/i)
                 done()
 
-        describe 'execution of script tags', ->
+        describe 'execution of scripts', ->
 
           beforeEach ->
             window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
@@ -1140,6 +1140,59 @@ describe 'up.dom', ->
                 text = u.trim($noscript.text())
                 expect(text).toEqual('<img src="foo.png">')
                 done()
+
+          if up.browser.canCustomElements()
+
+            describe 'custom elements', ->
+
+              beforeAll ->
+                TestComponent = ->
+                  instance = Reflect.construct(HTMLElement, [], TestComponent)
+                  instance.innerHTML = 'text from component'
+                  up.emit('test-component:new')
+                  instance
+                Object.setPrototypeOf(TestComponent.prototype, HTMLElement.prototype)
+                Object.setPrototypeOf(TestComponent, HTMLElement)
+
+                window.customElements.define('test-component-activation', TestComponent)
+
+              it 'activates custom elements in inserted fragments', (done) ->
+                @responseText = """
+                  <div class="middle">
+                    <test-component-activation></test-component-activation>
+                  </div>
+                  """
+
+                promise = up.replace('.middle', '/path')
+                @respond()
+
+                promise.then ->
+                  expect('.middle test-component-activation').toHaveText('text from component')
+                  done()
+
+              it 'does not activate custom elements outside of inserted fragments', (done) ->
+                constructorSpy = jasmine.createSpy('constructor called')
+                up.on('test-component:new', constructorSpy)
+
+                @responseText = """
+                  <div class="before">
+                    <test-component-activation></test-component-activation>
+                  </div>
+                  <div class="middle">
+                    <test-component-activation></test-component-activation>
+                  </div>
+                  <div class="after">
+                    <test-component-activation></test-component-activation>
+                  </div>
+                  """
+
+                promise = up.replace('.middle', '/path')
+                @respond()
+
+                promise.then =>
+                  expect(constructorSpy.calls.count()).toBe(1)
+                  done()
+
 
         describe 'with { restoreScroll: true } option', ->
 
