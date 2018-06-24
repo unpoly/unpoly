@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.56.3",
+    version: "0.56.4",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -3395,6 +3395,70 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
 }).call(this);
 (function() {
+  var u;
+
+  u = up.util;
+
+  up.HtmlParser = (function() {
+    function HtmlParser(html) {
+      this.html = html;
+      this.wrapNoscriptInHtml();
+      this.parsedDoc = u.createElementFromHtml(this.html);
+    }
+
+    HtmlParser.prototype.title = function() {
+      var ref;
+      return (ref = this.parsedDoc.querySelector("head title")) != null ? ref.textContent : void 0;
+    };
+
+    HtmlParser.prototype.first = function(selector) {
+      var match;
+      if (match = $.find(selector, this.parsedDoc)[0]) {
+        return $(match);
+      }
+    };
+
+    HtmlParser.prototype.prepareForInsertion = function($element) {
+      var element;
+      element = $element[0];
+      this.unwrapNoscriptInElement(element);
+      return $(element);
+    };
+
+    HtmlParser.prototype.wrapNoscriptInHtml = function() {
+      var noscriptPattern;
+      noscriptPattern = /<noscript[^>]*>((.|\s)*?)<\/noscript>/i;
+      return this.html = this.html.replace(noscriptPattern, (function(_this) {
+        return function(match, content) {
+          _this.didWrapNoscript = true;
+          return '<div class="up-noscript" data-html="' + u.escapeHtml(content) + '"></div>';
+        };
+      })(this));
+    };
+
+    HtmlParser.prototype.unwrapNoscriptInElement = function(element) {
+      var i, len, noscript, results, wrappedContent, wrappedNoscript, wrappedNoscripts;
+      if (!this.didWrapNoscript) {
+        return;
+      }
+      wrappedNoscripts = element.querySelectorAll('.up-noscript');
+      results = [];
+      for (i = 0, len = wrappedNoscripts.length; i < len; i++) {
+        wrappedNoscript = wrappedNoscripts[i];
+        wrappedContent = wrappedNoscript.getAttribute('data-html');
+        noscript = document.createElement('noscript');
+        noscript.textContent = wrappedContent;
+        results.push(wrappedNoscript.parentNode.replaceChild(noscript, wrappedNoscript));
+      }
+      return results;
+    };
+
+    return HtmlParser;
+
+  })();
+
+}).call(this);
+(function() {
   var u,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -4167,7 +4231,7 @@ Internet Explorer 10 or lower
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canDOMParser, canFormData, canInputEvent, canPromise, canPushState, hash, isIE10OrWorse, isRecentJQuery, isSupported, navigate, polyfilledSessionStorage, popCookie, puts, sessionStorage, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
+    var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canCustomElements, canDOMParser, canFormData, canInputEvent, canPromise, canPushState, hash, isIE10OrWorse, isRecentJQuery, isSupported, navigate, polyfilledSessionStorage, popCookie, puts, sessionStorage, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /***
@@ -4388,6 +4452,9 @@ Internet Explorer 10 or lower
     canConsole = u.memoize(function() {
       return window.console && console.debug && console.info && console.warn && console.error && console.group && console.groupCollapsed && console.groupEnd;
     });
+    canCustomElements = u.memoize(function() {
+      return !!window.customElements;
+    });
     isRecentJQuery = u.memoize(function() {
       var major, minor, parts, version;
       version = $.fn.jquery;
@@ -4492,6 +4559,7 @@ Internet Explorer 10 or lower
       navigate: navigate,
       submitForm: submitForm,
       canPushState: canPushState,
+      canCustomElements: canCustomElements,
       whenConfirmed: whenConfirmed,
       isSupported: isSupported,
       puts: puts,
@@ -7309,7 +7377,7 @@ is built from these functions. You can use them to extend Unpoly from your
 
 (function() {
   up.dom = (function($) {
-    var bestMatchingSteps, bestPreflightSelector, config, destroy, detectScriptFixes, emitFragmentDestroy, emitFragmentDestroyed, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, fixScripts, hello, isRealElement, layerOf, markElementAsDestroying, matchesLayer, parseResponseDoc, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, transferKeepableElements, u, updateHistoryAndTitle;
+    var bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentDestroy, emitFragmentDestroyed, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, hello, isRealElement, layerOf, markElementAsDestroying, matchesLayer, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, transferKeepableElements, u, updateHistoryAndTitle;
     u = up.util;
 
     /***
@@ -7715,7 +7783,7 @@ is built from these functions. You can use them to extend Unpoly from your
           if (typeof options.provideTarget === "function") {
             options.provideTarget();
           }
-          responseDoc = parseResponseDoc(html);
+          responseDoc = new up.HtmlParser(html);
           extractSteps = bestMatchingSteps(selectorOrElement, responseDoc, options);
           if (shouldExtractTitle(options) && (responseTitle = responseDoc.title())) {
             options.title = responseTitle;
@@ -7727,7 +7795,7 @@ is built from these functions. You can use them to extend Unpoly from your
             up.log.group('Swapping fragment %s', step.selector, function() {
               var swapOptions, swapPromise;
               swapOptions = u.merge(options, u.only(step, 'origin', 'reveal'));
-              fixScripts(step.$new);
+              responseDoc.prepareForInsertion(step.$new);
               swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, swapOptions);
               return swapPromises.push(swapPromise);
             });
@@ -7748,55 +7816,6 @@ is built from these functions. You can use them to extend Unpoly from your
       });
       cascade = new up.ExtractCascade(selector, options);
       return cascade.bestMatchingSteps();
-    };
-    fixScripts = function($element) {
-      var fix, fixes, i, len, results;
-      fixes = [];
-      detectScriptFixes($element.get(0), fixes);
-      results = [];
-      for (i = 0, len = fixes.length; i < len; i++) {
-        fix = fixes[i];
-        results.push(fix());
-      }
-      return results;
-    };
-    detectScriptFixes = function(element, fixes) {
-      var child, clone, i, len, ref, results;
-      if (element.tagName === 'NOSCRIPT') {
-        clone = document.createElement('noscript');
-        clone.textContent = element.innerHTML;
-        return fixes.push(function() {
-          return element.parentNode.replaceChild(clone, element);
-        });
-      } else if (element.tagName === 'SCRIPT') {
-        return fixes.push(function() {
-          return element.parentNode.removeChild(element);
-        });
-      } else {
-        ref = element.children;
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          child = ref[i];
-          results.push(detectScriptFixes(child, fixes));
-        }
-        return results;
-      }
-    };
-    parseResponseDoc = function(html) {
-      var htmlElement;
-      htmlElement = u.createElementFromHtml(html);
-      return {
-        title: function() {
-          var ref;
-          return (ref = htmlElement.querySelector("head title")) != null ? ref.textContent : void 0;
-        },
-        first: function(selector) {
-          var child;
-          if (child = $.find(selector, htmlElement)[0]) {
-            return $(child);
-          }
-        }
-      };
     };
     updateHistoryAndTitle = function(options) {
       options = u.options(options, {
