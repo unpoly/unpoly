@@ -1,4 +1,4 @@
-ITERATIONS = 100;
+ITERATIONS = 5000;
 CHUNK_SIZE = 10;
 
 HTML = "<body>" + document.body.innerHTML + "</body>";
@@ -140,7 +140,6 @@ function removeScripts(doc) {
 domParser = new DOMParser();
 
 
-/*
 experiment('PlainDOMParser', function() {
   var doc = domParser.parseFromString(HTML, "text/html");
   var body = doc.querySelector('body');
@@ -148,8 +147,19 @@ experiment('PlainDOMParser', function() {
     throw "parsing failed";
   }
 });
-*/
 
+experiment('CreateHTMLDocument', function() {
+  var doc = document.implementation.createHTMLDocument('')
+  doc.documentElement.innerHTML = HTML;
+  var body = doc.querySelector('body');
+  if (!body) {
+    throw "parsing failed";
+  }
+});
+
+
+
+/*
 experiment('DOMParserWithFixScripts', function() {
   var doc = domParser.parseFromString(HTML, "text/html");
   var body = doc.querySelector('body');
@@ -158,6 +168,7 @@ experiment('DOMParserWithFixScripts', function() {
   }
   fixScripts(body);
 });
+*/
 
 
 /*
@@ -171,7 +182,7 @@ experiment('DOMParserWithImport', function() {
 });
 */
 
-
+/*
 var noScriptPattern = /<noscript[^>]*>(.*?)<\/noscript>/i
 
 experiment('DOMParserWitSmartFixScripts', function() {
@@ -313,7 +324,7 @@ experiment('SmartInnerHTMLWithRemoveScripts', function() {
   removeScripts(body);
   
 });
-
+*/
 
 
 pokeQueue();
