@@ -81,8 +81,8 @@ up.util = (($) ->
     pathname = "/#{pathname}" unless pathname[0] == '/'
     pathname = pathname.replace(/\/$/, '') if options?.stripTrailingSlash == true
     normalized += pathname
-    normalized += parts.hash if options?.hash == true
     normalized += parts.search unless options?.search == false
+    normalized += parts.hash if options?.hash == true
     normalized
 
   isCrossDomain = (targetUrl) ->
