@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.56.4",
+    version: "0.56.5",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -121,11 +121,11 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         pathname = pathname.replace(/\/$/, '');
       }
       normalized += pathname;
-      if ((options != null ? options.hash : void 0) === true) {
-        normalized += parts.hash;
-      }
       if ((options != null ? options.search : void 0) !== false) {
         normalized += parts.search;
+      }
+      if ((options != null ? options.hash : void 0) === true) {
+        normalized += parts.hash;
       }
       return normalized;
     };
@@ -2327,17 +2327,17 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      * Registers an empty rejection handler with the given promise.
      * This prevents browsers from printing "Uncaught (in promise)" to the error
      * console when the promise is rejection.
-     *
+    #
      * This is helpful for event handlers where it is clear that no rejection
      * handler will be registered:
-     *
+    #
      *     up.on('submit', 'form[up-target]', (event, $form) => {
      *       promise = up.submit($form)
      *       up.util.muteRejection(promise)
      *     })
-     *
+    #
      * Does nothing if passed a missing value.
-     *
+    #
      * @function up.util.muteRejection
      * @param {Promise|undefined|null} promise
      * @return {Promise}
@@ -2382,8 +2382,8 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       var error;
       try {
         return block();
-      } catch (error1) {
-        error = error1;
+      } catch (_error) {
+        error = _error;
         return Promise.reject(error);
       }
     };
@@ -4517,7 +4517,7 @@ Internet Explorer 10 or lower
     sessionStorage = u.memoize(function() {
       try {
         return window.sessionStorage;
-      } catch (error) {
+      } catch (_error) {
         return polyfilledSessionStorage();
       }
     });
@@ -7640,8 +7640,8 @@ is built from these functions. You can use them to extend Unpoly from your
       try {
         improvedTarget = bestPreflightSelector(selectorOrElement, successOptions);
         improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions);
-      } catch (error) {
-        e = error;
+      } catch (_error) {
+        e = _error;
         return Promise.reject(e);
       }
       request = {
