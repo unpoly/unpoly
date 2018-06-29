@@ -6,6 +6,12 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+0.56.5
+------
+
+- Fix a bug where loading a page with both a ?query string and a #fragment hash would throw an error
+
+
 0.56.4
 ------
 
