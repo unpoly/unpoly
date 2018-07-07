@@ -1167,7 +1167,8 @@ up.util = (($) ->
   ###
   jsonAttr = (elementOrSelector, attribute) ->
     if element = getElement(elementOrSelector)
-      json = element.getAttribute(attribute)
+      # The document does not respond to #getAttribute()
+      json = element.getAttribute?(attribute)
       if isString(json) && trim(json) != ''
         JSON.parse(json)
 
@@ -1449,7 +1450,7 @@ up.util = (($) ->
 
   deprecateRenamedKey = (object, oldKey, newKey) ->
     if isDefined(object[oldKey])
-      up.log.warn('Deprecated: Object key { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+      up.warn('Deprecated: Object key { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
       renameKey(object, oldKey, newKey)
 
   pluckData = (elementOrSelector, key) ->

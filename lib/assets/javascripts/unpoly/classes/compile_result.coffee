@@ -3,54 +3,45 @@ POST_COMPILE_ACTIONS = ['value', 'data', 'clean', 'selector']
 class up.CompileResult
 
   constructor: (@element) ->
-    @valueComponents = []
-    @dataComponents = []
-    @cleanComponents = []
-    @selectorComponents = []
-
-  # If we got any #valueComponents, this will be set to #valueNow in #finalize()
-  value: null
 
   valueNow: ->
     u.last(@valueComponents).value()
 
-  # If we got any #dataComponents, this will be set to #dataNow in #finalize()
-  data: null
-
   dataNow: ->
-    datas = u.map @dataComponents, (c) -> c.data()
-    u.merge(datas...)
-
-  # If we got any #cleanComponents, this will be set to #cleanNow in #finalize()
-  clean: null
+    datas = u.map(@dataComponents, (c) -> c.data())
+    # Deep-merge hashes so each component can set keys in { data.elements }
+    u.deepMerge(datas...)
 
   cleanNow: ->
-    u.each @cleanComponents, (c) -> c.clean()
-
-  # If we got any #selectorComponents, this will be set to #selectorNow in #finalize()
-  selector: null
+    u.each(@cleanComponents, (c) -> c.clean())
 
   selectorNow: ->
     u.last(@selectorComponents).selector()
 
   accept: (action, component) ->
-    @["#{action}Components"].push(component)
+    actionComponents = (@["#{action}Components"] ||= [])
+    actionComponents.push(component)
 
   finalize: ->
+    # Since CompileRun compiles component after component, it might
+    # have collected multiple CompileResults for the same element.
+    return if @finalized
+    @finalized = true
     u.each POST_COMPILE_ACTIONS, (action) =>
-      if @["#{action}Components"].length
+      if @["#{action}Components"]?.length
         # Expose component API
-        @[action] ||= @["#{action}Now"]
+        @[action] = @["#{action}Now"]
         # Mark in DOM so up.syntax can quickly find results supporting an action
+        console.debug("Marking %o as can-%s", @element, action)
         u.addClass(@element, "up-can-#{action}")
 
   @consider: (element, component) ->
-    actions = @trackableActions(comoponent)
+    actions = @actionsImplementedByComponent(component)
+    # Only if we have at least one implemented action we want to set element.upResult
     if actions.length
-      element.upResult ||= new @()
-      for action in actions
-        element.upResult.accept(action, component)
-      element.upResult
+      result = (element.upResult ||= new @(element))
+      result.accept(action, component) for action in actions
+      result
 
-  @trackableActions: (component) ->
+  @actionsImplementedByComponent: (component) ->
     u.select POST_COMPILE_ACTIONS, (action) -> component[action]

@@ -240,18 +240,18 @@ describe 'up.syntax', ->
 
       it 'should have tests'
       
-    describe 'up.syntax.data', ->
+    describe 'up.syntax.serverData', ->
 
       it 'returns the [up-data] attribute of the given element, parsed as JSON', ->
         $element = affix('.element').attr('up-data', '{ "foo": 1, "bar": 2 }')
-        data = up.syntax.data($element)
+        data = up.syntax.serverData($element)
         expect(data).toEqual(foo: 1, bar: 2)
 
       it 'returns undefined if the given element has no [up-data] attribute', ->
         $element = affix('.element')
-        data = up.syntax.data($element)
+        data = up.syntax.serverData($element)
         expect(data).toBeUndefined()
 
       it 'returns undefined if undefined is passed instead of an element', ->
-        data = up.syntax.data(undefined)
+        data = up.syntax.serverData(undefined)
         expect(data).toBeUndefined()

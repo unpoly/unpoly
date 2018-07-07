@@ -47,8 +47,8 @@ up.waypoint = (($) ->
       # for this particular waypoint restoration. Values will be merged
       # with the originally saved { params } and { data }.
       context =
-        params: options.params || up.syntax.data($origin, 'up-params')
-        data: options.data || up.syntax.data($origin)
+        params: options.params || u.jsonAttr($origin, 'up-params')
+        data: options.data || up.syntax.serverData($origin)
 
       # Make a copy of the waypoint so (1) event handlers that modify the
       # event don't change the original and (2) so we can merge in additional
@@ -115,13 +115,13 @@ up.waypoint = (($) ->
     # We want to represent params as a (nested) object for convenient programmatic access
     formParams = up.params.toObject(formParams)
     # Users can pass additional params
-    extraParams = u.option(options.params, up.syntax.data($origin, attribute: 'up-params'))
+    extraParams = u.option(options.params, u.jsonAttr($origin, 'up-params'))
     params = up.params.merge(formParams, extraParams)
 
     # User can also set a { data } hash for custom restore logic in JavaScript.
     # The { data } hash will not be sent to the server, but will be made available
     # to listeners of up:waypoint events.
-    data = options.data || up.syntax.data($origin)
+    data = options.data || up.syntax.serverData($origin)
 
     waypoint = new up.Waypoint
       name: name

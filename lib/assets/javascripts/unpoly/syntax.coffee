@@ -23,8 +23,6 @@ up.syntax = (($) ->
 
   u = up.util
 
-  RESULT_DATA_KEY = 'up-compile-result'
-
   SYSTEM_MACRO_PRIORITIES = {
     '[up-back]': -100        # sets [up-href] to previous URL
     '[up-drawer]': -200      # sets [up-modal] and makes link followable
@@ -216,7 +214,8 @@ up.syntax = (($) ->
     The function may also return an array of destructor functions.
   @stable
   ###
-  registerCompilerFunction = (selector, args...) ->
+  registerCompilerFunction = (args...) ->
+    console.debug("registerCompilerFunction(%o, %o)", args)
     lastIndex = args.length - 1
     args[lastIndex] = up.CompilerComponent.buildClass(args[lastIndex])
     registerComponentClass(args...)
@@ -265,7 +264,8 @@ up.syntax = (($) ->
   registerMacroFunction = (selector, args...) ->
     fn = args.pop()
     options = u.options(args[0], macro: true)
-    registerCompiler(selector, options, fn)
+    console.debug('calling registerCompilerFunction(%o, %o)', options, fn)
+    registerCompilerFunction(selector, options, fn)
 
   detectSystemMacroPriority = (macroSelector) ->
     for substr, priority of SYSTEM_MACRO_PRIORITIES
@@ -273,6 +273,8 @@ up.syntax = (($) ->
         return priority
 
   registerComponentClass = (selector, args...) ->
+    console.debug("registerComponentClass(%o, %o)", selector, args)
+
     klass = args.pop()
     options = u.options(args[0])
 
@@ -305,18 +307,6 @@ up.syntax = (($) ->
       index += 1
     queue.splice(index, 0, newClass)
 
-  getResult = (element) ->
-    $(element).data(RESULT_DATA_KEY)
-
-  setResult = (element, result) ->
-    if result.save
-      u.addClass(element, 'up-can-save')
-
-    if result.clean
-      u.addClass(element, 'up-can-clean')
-
-    $(element).data(RESULT_DATA_KEY, result)
-
   ###**
   Applies all compilers on the given element and its descendants.
   Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
@@ -329,9 +319,7 @@ up.syntax = (($) ->
   compile = ($fragment, options) ->
     allClasses = macroClasses.concat(componentClasses)
     compileRun = new up.CompileRun($fragment, allClasses, options)
-    resultsByElement = compileRun.compile()
-    resultsByElement.forEach (result, element) ->
-      setResult(element, result)
+    compileRun.compile()
 
   ###**
   Runs any destroyers on the given fragment and its descendants.
@@ -343,12 +331,13 @@ up.syntax = (($) ->
   ###
   clean = ($fragment) ->
     cleanables = u.selectInSubtree($fragment, '.up-can-clean')
+    console.debug('/// got cleanables: %o', cleanables.get())
     u.each cleanables, (cleanable) ->
-      if result = getResult(cleanable)
-        for cleanFn in result.clean
-          cleanFn()
-    # We do not actually remove the $.data key or .up-can-* classes for performance reasons.
-    # The element we just cleaned is about to be removed from the DOM.
+      if result = cleanable.upResult
+        console.debug('/// got result %o', result)
+        result.clean()
+      # We do not actually remove the $.data key or .up-can-* classes for performance reasons.
+      # The element we just cleaned is about to be removed from the DOM.
 
   ###**
   Checks if the given element has an [`up-data`](/up-data) attribute.
@@ -419,11 +408,11 @@ up.syntax = (($) ->
   @stable
   ###
   readServerData = (elementOrSelector) ->
-    u.jsonAttribute(elementOrSelector, 'up-data')
+    u.jsonAttr(elementOrSelector, 'up-data')
 
   readValue = (elementOrSelector) ->
     if element = u.element(elementOrSelector)
-      u.jsonAttribute(elementOrSelector, 'up-value') || element.value
+      u.jsonAttr(elementOrSelector, 'up-value') || element.value
 
   ###*
   @function up.util.saveData
@@ -433,7 +422,7 @@ up.syntax = (($) ->
     savables = u.selectInSubtree($fragment, '.up-can-save')
     elementsData = state.data.elements = {}
     for savable in savables
-      result = getResult(savable)
+      result = savable.upResult
       for saveFn in result.save(state)
         savableData = saveFn()
         if u.isObject(savableData)

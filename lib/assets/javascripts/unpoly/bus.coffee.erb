@@ -68,7 +68,7 @@ up.bus = (($) ->
   upListenerToJqueryListener = (upListener) ->
     (event) ->
       $me = event.$element || $(this)
-      upListener.apply($me.get(0), [event, $me, up.syntax.data($me)])
+      upListener.apply($me.get(0), [event, $me, up.syntax.serverData($me)])
 
   ###**
   Converts an argument list for `up.on()` to an argument list for `jQuery.on`.
@@ -102,7 +102,7 @@ up.bus = (($) ->
     events = u.splitValues(description[0])
     events = u.map events, (event) ->
       if newEvent = renamedEvents[event]
-        up.log.warn("Deprecated: #{event} has been renamed to #{newEvent}")
+        up.warn("Deprecated: #{event} has been renamed to #{newEvent}")
         newEvent
       else
         event

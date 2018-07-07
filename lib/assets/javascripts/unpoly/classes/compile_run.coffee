@@ -34,27 +34,27 @@ class up.CompileRun
     for result in @results
       result.finalize()
 
-  @instantiateComponents: (componentClass) ->
+  instantiateComponents: (componentClass) ->
     matches = @select(componentClass.selector)
     return unless matches.length
 
-    up.log.group ("Compiling '%s' on %d element(s)" unless componentClass.isSystem), componentClass.selector, $matches.length, =>
+    up.log.group ("Compiling '%s' on %d element(s)" unless componentClass.isSystem), componentClass.selector, matches.length, =>
       batches = if componentClass.batch then [matches] else matches
       # Returns the raw results of our compile run
       for batch in batches
-        compileOptions = new CompileOptions(element, fetchData: dataForElement, value: up.syntax.value)
+        compileOptions = new up.CompileOptions(batch, fetchData: @dataForElement, fetchValue: up.syntax.value)
         component = new componentClass(batch)
         component.compile(compileOptions)
 
-        if result = up.CompileResult.consider(element, component)
+        if result = up.CompileResult.consider(batch, component)
           @results.push(result)
 
-        if compiler.keep
+        if component.keep
           value = if u.isString(compiler.keep) then compiler.keep else ''
           $batch.attr('up-keep', value)
 
   dataForElement: (element) =>
-    domData = up.syntax.data(element)
+    domData = up.syntax.serverData(element)
     restoredData = @elementDataByElement.get(element)
     u.merge(@globalData, domData, restoredData)
 
