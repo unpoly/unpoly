@@ -289,7 +289,7 @@ up.syntax = (($) ->
     insertComponentClass(classList, selector, options, klass)
 
   annotateComponentClass = (klass, selector, options) ->
-    options = u.options(
+    options = u.options(options,
       selector: selector,
       isSystem: isBooting,
       priority: 0,
@@ -408,11 +408,12 @@ up.syntax = (($) ->
   @stable
   ###
   readServerData = (elementOrSelector) ->
-    u.jsonAttr(elementOrSelector, 'up-data')
+    if element = u.element(elementOrSelector)
+      u.jsonAttr(element, 'up-data') || {}
 
   readValue = (elementOrSelector) ->
     if element = u.element(elementOrSelector)
-      u.jsonAttr(elementOrSelector, 'up-value') || element.value
+      u.jsonAttr(element, 'up-value') || element.value
 
   ###*
   @function up.util.saveData

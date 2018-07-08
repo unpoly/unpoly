@@ -135,7 +135,7 @@ describe 'up.bus', ->
     describe 'up.bus.deprecateRenamedEvent', ->
 
       it 'prints a warning and registers the event listener for the new event name', ->
-        warnSpy = spyOn(up.log, 'warn')
+        warnSpy = spyOn(up, 'warn')
         listener = jasmine.createSpy('listener')
 
         # Reister listener for the old event name

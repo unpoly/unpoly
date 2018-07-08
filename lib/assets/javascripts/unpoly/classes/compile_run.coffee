@@ -49,9 +49,9 @@ class up.CompileRun
         if result = up.CompileResult.consider(batch, component)
           @results.push(result)
 
-        if component.keep
-          value = if u.isString(compiler.keep) then compiler.keep else ''
-          $batch.attr('up-keep', value)
+        if keepValue = componentClass.keep
+          value = if u.isString(keepValue) then keepValue else ''
+          $(batch).attr('up-keep', value)
 
   dataForElement: (element) =>
     domData = up.syntax.serverData(element)
