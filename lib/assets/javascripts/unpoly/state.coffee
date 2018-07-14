@@ -39,7 +39,7 @@ up.state = (($) ->
     state = new up.State(
       url: up.browser.url()
       params: formParams
-      focus: focusedSelector($form)
+      focus: focusedSelector($form) # selection and scroll are saved to data by up.form
       submitUrl: $form.attr('action')
       submitMethod: $form.attr('method')
     )

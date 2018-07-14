@@ -642,7 +642,9 @@ up.util = (($) ->
   @internal
   ###
   deepMerge = (sources...) ->
-    target = {}
+    deepAssign({}, sources...)
+
+  deepAssign = (target, sources...) ->
     for source in sources
       for key, newValue of source
         if isOptions(newValue)

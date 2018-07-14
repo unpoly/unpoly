@@ -420,18 +420,14 @@ up.syntax = (($) ->
   @internal
   ###
   saveData = ($fragment, state) ->
-    savables = u.selectInSubtree($fragment, '.up-can-save')
+    savables = u.selectInSubtree($fragment, '.up-can-data')
     elementsData = state.data.elements = {}
     for savable in savables
-      result = savable.upResult
-      for saveFn in result.save(state)
-        savableData = saveFn()
-        if u.isObject(savableData)
-          selector = u.selectorForElement(savable)
-          unless u.isGoodSelector(selector)
-            up.warn('Saving state for possibly ambiguous selector %o', selector)
-          elementsData[selector] ||= {}
-          u.assign(elementsData[selector], savableData)
+      savableData = savable.upResult.data()
+      selector = u.selectorForElement(savable)
+      unless u.isGoodSelector(selector)
+        up.warn('Saving state for possibly ambiguous selector "%o". Consider using [id] or [up-id] attributes.', selector)
+      u.deepAssign(elementsData, "#{selector}": savableData)
 
   ###**
   Resets the list of registered compiler directives to the
