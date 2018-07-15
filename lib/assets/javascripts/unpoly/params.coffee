@@ -341,7 +341,7 @@ up.params = (($) ->
     if u.isPresent(buttonName)
       params = add(params, buttonName, buttonValue)
 
-    throw "get components value"
+    up.warn("!!! get components value here")
 
     params
 

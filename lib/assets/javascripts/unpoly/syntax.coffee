@@ -427,7 +427,8 @@ up.syntax = (($) ->
       selector = u.selectorForElement(savable)
       unless u.isGoodSelector(selector)
         up.warn('Saving state for possibly ambiguous selector "%o". Consider using [id] or [up-id] attributes.', selector)
-      u.deepAssign(elementsData, "#{selector}": savableData)
+      selectorData = (elementsData[selector] ||= {})
+      u.deepAssign(selectorData, savableData)
 
   ###**
   Resets the list of registered compiler directives to the
