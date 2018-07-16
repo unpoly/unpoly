@@ -30,11 +30,7 @@ up.state = (($) ->
     $origin = $(options.origin)
     $root = $rootForCapture($origin, options)
     $form = $formForCapture($origin, $root, options)
-    # This will capture all form data except <input type="file">.
-    # We don't want to capture into a FormData because that cannot be inspected
-    # or extended with nested keys. up.form has a compiler that will save and restore
-    # the `files` property of <input type="file">, so nothing lost here.
-    formParams = up.params.fromForm($form, nature: 'array')
+    formParams = up.params.fromForm($form)
 
     state = new up.State(
       url: up.browser.url()
@@ -76,5 +72,6 @@ up.state = (($) ->
     states.clear()
 
   reset: reset
+  first: states.first
 
 )(jQuery)

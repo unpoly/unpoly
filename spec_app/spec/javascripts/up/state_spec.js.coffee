@@ -31,6 +31,7 @@ describe 'up.state', ->
 
       it 'stores the state in sessionStorage so it survives a vanilla link'
 
+
     describe 'up.state.discard', ->
 
       it 'discards a state with the given name'
@@ -42,14 +43,14 @@ describe 'up.state', ->
 
       it 'returns a state with the given name'
 
-      it 'returns a state with one of the given name'
+      it 'returns a state with one of the given namen'
 
       it 'returns undefined if the given state name is unknown'
 
 
     describe 'up.state.all', ->
 
-      it 'returns an array of all saved waypoints'
+      it 'returns an array of all saved states'
 
 
   describe 'unobtrusive behavior', ->
@@ -151,25 +152,25 @@ describe 'up.state', ->
 
       it "passes the state to the compiler's { data }"
 
-      describe 'up:state:save event', ->
-
-        it "is emitted before the state is saved"
-
-        it "is not emitted when preloading"
-
-        it "allows to change { url } before saving"
-
-        it "allows to change flat { params } before saving"
-
-        it "allows to change nested { params } before saving"
-
-        it "allows to change { data } before saving"
-
-      describe 'up:state:saved event', ->
-
-        it 'is emitted after the state is saved'
-
-        it 'is passed the state that was just saved'
+#      describe 'up:state:save event', ->
+#
+#        it "is emitted before the state is saved"
+#
+#        it "is not emitted when preloading"
+#
+#        it "allows to change { url } before saving"
+#
+#        it "allows to change flat { params } before saving"
+#
+#        it "allows to change nested { params } before saving"
+#
+#        it "allows to change { data } before saving"
+#
+#      describe 'up:state:saved event', ->
+#
+#        it 'is emitted after the state is saved'
+#
+#        it 'is passed the state that was just saved'
 
 
     describe 'a[up-restore-state]', ->
@@ -196,29 +197,29 @@ describe 'up.state', ->
 
       it "does not change the link's [up-target], even though another URL is loaded"
 
-      describe 'up:state:restore event', ->
-
-        it 'is emitted before the state is restored'
-
-        it 'is passed the previously saved state'
-
-        it "allows to change { url } before saving"
-
-        it "allows to change flat { params } before restoring"
-
-        it "allows to change nested { params } before restoring"
-
-        it "allows to change { data } before restoring"
-
-        it "does not propagate changes to the state cache, in case the state is restored again"
-
-      describe 'up:state:restored event', ->
-
-        it 'is emitted after the state was restored and after the link was followed'
-
-        it 'is not emitted when a state was preloaded'
-
-        it "sees the restored state's { data } to polish the restauration with JavaScript"
+#      describe 'up:state:restore event', ->
+#
+#        it 'is emitted before the state is restored'
+#
+#        it 'is passed the previously saved state'
+#
+#        it "allows to change { url } before saving"
+#
+#        it "allows to change flat { params } before restoring"
+#
+#        it "allows to change nested { params } before restoring"
+#
+#        it "allows to change { data } before restoring"
+#
+#        it "does not propagate changes to the state cache, in case the state is restored again"
+#
+#      describe 'up:state:restored event', ->
+#
+#        it 'is emitted after the state was restored and after the link was followed'
+#
+#        it 'is not emitted when a state was preloaded'
+#
+#        it "sees the restored state's { data } to polish the restauration with JavaScript"
 
 
     describe 'a[up-discard-state]', ->
@@ -246,9 +247,9 @@ describe 'up.state', ->
 
   describe 'server protocol', ->
 
-    describe 'X-Up-Waypoints request header', ->
+    describe 'X-Up-State-Names request header', ->
 
-      it 'is sent with every request and contains the current waypoints as a JSON object'
+      it 'is sent with every request and contains names of all known states as a space-separated list'
 
     describe 'X-Up-Restore-State response header', ->
 

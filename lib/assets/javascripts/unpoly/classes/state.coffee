@@ -18,7 +18,9 @@ class up.State extends up.Record
       'focusSelectionEnd',
       'focusScrollLeft',
       'focusScrollTop',
-      'scrollTops'
+      'scrollTops',
+      'mapData',
+      'mapParams'
     ]
 
   defaults: ->
