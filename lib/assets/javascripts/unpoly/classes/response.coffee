@@ -140,7 +140,7 @@ class up.Response extends up.Record
   isFatalError: =>
     @isError() && u.isBlank(@text)
 
-  ###*
+  ###**
   Returns the HTTP header value with the given name.
 
   The search for the header name is case-insensitive.

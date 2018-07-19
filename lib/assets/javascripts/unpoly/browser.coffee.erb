@@ -203,6 +203,16 @@ up.browser = (($) ->
     !!window.FormData
 
   ###**
+  Returns whether this browser can inspect [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) values.
+
+  @function up.browser.canInspectFormData
+  @return {boolean}
+  @experimental
+  ###
+  canInspectFormData = u.memoize ->
+    canFormData() && !!FormData.prototype.entries
+
+  ###**
   Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
   interface.
 

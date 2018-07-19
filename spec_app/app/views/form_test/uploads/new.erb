@@ -5,11 +5,24 @@
   <%= form_tag "/form_test/upload", method: :post, multipart: true, 'up-target' => '.result' do %>
 
     <p>
-      <input type="text" name="text-param" value="text-value" />
+      <label>
+        input[type=text]
+        <input type="text" name="text-param" value="text-value" />
+      </label>
     </p>
 
     <p>
-      <input type="file" name="file-param" />
+      <label>
+        input[type=file]
+       <input type="file" name="file-param" />
+      </label>
+    </p>
+
+    <p>
+      <label>
+        input[type=file][multiple]
+       <input type="file" name="multiple-file-param" multiple />
+      </label>
     </p>
 
     <p>

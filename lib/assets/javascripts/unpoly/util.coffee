@@ -475,6 +475,17 @@ up.util = (($) ->
     typeof(object) == 'string' || object instanceof String
 
   ###**
+  Returns whether the given argument is a boolean value.
+
+  @function up.util.isBoolean
+  @param object
+  @return {boolean}
+  @experimental
+  ###
+  isBoolean = (object) ->
+    typeof(object) == 'boolean' || object instanceof Boolean
+
+  ###**
   Returns whether the given argument is a number.
 
   Note that this will check the argument's *type*.
@@ -594,14 +605,28 @@ up.util = (($) ->
   @return {Object|Array}
   @stable
   ###
-  copy = (object)  ->
+  copy = (object, deep)  ->
     if isArray(object)
       object = object.slice()
+      copied = true
     else if isOptions(object)
       object = assign({}, object)
-    else
-      up.fail('Cannot copy %o', object)
+      copied = true
+    if copied && deep
+      for key, value of object
+        object[key] = copy(value, true)
     object
+
+  ###**
+  Returns a deep copy of the given array or object.
+
+  @function up.util.deepCopy
+  @param {Object|Array} object
+  @return {Object|Array}
+  @internal
+  ###
+  deepCopy = (object) ->
+    copy(object, true)
 
   ###**
   If given a jQuery collection, returns the first native DOM element in the collection.
@@ -644,6 +669,11 @@ up.util = (($) ->
   deepMerge = (sources...) ->
     deepAssign({}, sources...)
 
+  ###**
+  @function up.util.deepMerge
+  @param {Array<Object>} sources...
+  @return Object
+  ###
   deepAssign = (target, sources...) ->
     for source in sources
       for key, newValue of source
@@ -806,7 +836,7 @@ up.util = (($) ->
     set.forEach (elem) -> array.push(elem)
     array
 
-  ###*
+  ###**
   @function up.util.arrayToSet
   @internal
   ###
@@ -1027,7 +1057,7 @@ up.util = (($) ->
     element = getElement(element)
     element.offsetHeight
 
-  ###*
+  ###**
   @function up.util.finishTransition
   @internal
   ###
@@ -1797,7 +1827,7 @@ up.util = (($) ->
     'minWidth', 'minHeight',
   ]
 
-  ###*
+  ###**
   Converts the given value to a CSS length value, adding a `px` unit if required.
 
   @function up.util.cssLength
@@ -1809,7 +1839,7 @@ up.util = (($) ->
     else
       obj
 
-  ###*
+  ###**
   Returns whether the given element has a CSS transition set.
 
   @function up.util.hasCssTransition
@@ -1984,6 +2014,7 @@ up.util = (($) ->
   assign: assign
   assignPolyfill: assignPolyfill
   copy: copy
+  deepCopy: deepCopy
   merge: merge
   deepMerge: deepMerge
   options: newOptions
@@ -2014,6 +2045,7 @@ up.util = (($) ->
   isObject: isObject
   isFunction: isFunction
   isString: isString
+  isBoolean: isBoolean
   isNumber: isNumber
   isElement: isElement
   isJQuery: isJQuery

@@ -42,7 +42,7 @@ class up.CompileRun
       batches = if componentClass.batch then [matches] else matches
       # Returns the raw results of our compile run
       for batch in batches
-        compileOptions = new up.CompileOptions(batch, fetchData: @dataForElement, fetchValue: up.syntax.value)
+        compileOptions = new up.CompileOptions(batch, fetchData: @dataForElement, fetchValue: up.syntax.serverValue)
         component = new componentClass(batch)
         component.compile(compileOptions)
 

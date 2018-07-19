@@ -333,9 +333,7 @@ up.syntax = (($) ->
     cleanables = u.selectInSubtree($fragment, '.up-can-clean')
     console.debug('/// got cleanables: %o', cleanables.get())
     u.each cleanables, (cleanable) ->
-      if result = cleanable.upResult
-        console.debug('/// got result %o', result)
-        result.clean()
+      cleanable.upResult?.clean()
       # We do not actually remove the $.data key or .up-can-* classes for performance reasons.
       # The element we just cleaned is about to be removed from the DOM.
 
@@ -411,24 +409,55 @@ up.syntax = (($) ->
     if element = u.element(elementOrSelector)
       u.jsonAttr(element, 'up-data') || {}
 
-  readValue = (elementOrSelector) ->
+  readServerValue = (elementOrSelector) ->
     if element = u.element(elementOrSelector)
+      up.warn("element.value still returns client value; should this be 'initial component' value or something?")
       u.jsonAttr(element, 'up-value') || element.value
 
-  ###*
-  @function up.util.saveData
+  readClientValue = (elementOrSelector) ->
+    if element = u.element(elementOrSelector)
+      tagName = input.tagName
+      type = input.type
+
+      if u.hasClass(element, 'up-can-value')
+        return element.upResult?.value()
+
+      else if tagName == 'SELECT'
+        # We would prefer using select.value, but we need to handle select[multiple]
+        return u.map input.querySelectorAll('option:selected'), 'value'
+
+      else if type == 'checkbox' || type == 'radio'
+        return input.value if input.checked
+
+      else if type == 'file'
+        # The value of an input[type=file] is the local path displayed in the form.
+        # The actual File objects are in the #files property. There might be multiple
+        # files in an input[type=file][multiple]
+        return u.toArray(input.files)
+
+      else
+        return input.value
+
+  readClientData = (elementOrSelector) ->
+    element = u.element(elementOrSelector)
+    element?.upResult?.data()
+
+  ###**
+  @function up.syntax.clientData
   @internal
   ###
-  saveData = ($fragment, state) ->
+  readClientData2 = (fragment = document) ->
+    $fragment = $(fragment)
     savables = u.selectInSubtree($fragment, '.up-can-data')
-    elementsData = state.data.elements = {}
+    data = {}
+    elementsData = data.elements = {}
     for savable in savables
-      savableData = savable.upResult.data()
-      selector = u.selectorForElement(savable)
-      unless u.isGoodSelector(selector)
-        up.warn('Saving state for possibly ambiguous selector "%o". Consider using [id] or [up-id] attributes.', selector)
-      selectorData = (elementsData[selector] ||= {})
-      u.deepAssign(selectorData, savableData)
+      if savableData = savable.upResult?.data()
+        selector = u.selectorForElement(savable)
+        unless u.isGoodSelector(selector)
+          up.warn('Saving state for possibly ambiguous selector "%o". Consider using [id] or [up-id] attributes.', selector)
+        selectorData = (elementsData[selector] ||= {})
+        u.deepAssign(selectorData, savableData)
 
   ###**
   Resets the list of registered compiler directives to the
@@ -450,7 +479,9 @@ up.syntax = (($) ->
   clean: clean
   saveData: saveData
   serverData: readServerData
-  value: readValue
+  clientData: readClientData
+  serverValue: readServerValue
+  clientValue: readClientValue
   data: (element) ->
     up.warn('Deprecated: up.syntax.data() has been renamed to up.syntax.serverData()')
     readServerData(element)

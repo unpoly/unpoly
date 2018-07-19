@@ -30,17 +30,15 @@ up.state = (($) ->
     $origin = $(options.origin)
     $root = $rootForCapture($origin, options)
     $form = $formForCapture($origin, $root, options)
-    formParams = up.params.fromForm($form)
 
-    state = new up.State(
+    new up.State(
       url: up.browser.url()
-      params: formParams
+      params: up.params.fromForm($form)
       focus: focusedSelector($form) # selection and scroll are saved to data by up.form
       submitUrl: $form.attr('action')
       submitMethod: $form.attr('method')
+      data: up.syntax.clientData($root)
     )
-    state.data = up.syntax.saveData(state)
-    state
 
   focusedSelector = ($form) ->
     element = document.activeElement

@@ -183,9 +183,12 @@ up.dom = (($) ->
   @param {Object|Array|FormData} [options.params]
     Parameters that should be sent as the request's payload.
 
-    Parameters can either be passed as an object (where the property names become
-    the param names and the property values become the param values) or as
-    an array of `{ name: 'param-name', value: 'param-value' }` objects
+    Parameters can either be passed as either:
+
+    1. an object (where the property names become the param names and the
+       property values become the param values) or as
+    2. an array of `{ name: 'param-name', value: 'param-value' }` objects
+    3. a query string
 
   @param {string} [options.transition='none']
   @param {string|boolean} [options.history=true]
