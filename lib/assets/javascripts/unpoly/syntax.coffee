@@ -477,7 +477,6 @@ up.syntax = (($) ->
   component: registerComponentClass
   compile: compile
   clean: clean
-  saveData: saveData
   serverData: readServerData
   clientData: readClientData
   serverValue: readServerValue

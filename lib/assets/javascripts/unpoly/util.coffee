@@ -1593,6 +1593,15 @@ up.util = (($) ->
     not $.contains(document.documentElement, element)
 
   ###**
+  ###
+  parsePath = (input) ->
+    path = []
+    pattern = /([^\.\[\]\"\']+)|\[\'([^\']+?)\'\]|\[\"([^\"]+?)\"\]|\[([^\]]+?)\]/g
+    while match = pattern.exec(input)
+      path.push(match[1] || match[2] || match[3] || match[4])
+    path
+
+  ###**
   Given a function that will return a promise, returns a proxy function
   with an additional `.promise` attribute.
 
@@ -2112,6 +2121,7 @@ up.util = (($) ->
   sequence: sequence
   promiseTimer: promiseTimer
   previewable: previewable
+  parsePath: parsePath
   evalOption: evalOption
   horizontalScreenHalf: horizontalScreenHalf
   detachWith: detachWith
