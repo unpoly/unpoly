@@ -72,6 +72,18 @@ describe 'up.util', ->
         path = up.util.parsePath("user['account']['email']")
         expect(path).toEqual ['user', 'account', 'email']
 
+      it 'allows square brackets inside quotes', ->
+        path = up.util.parsePath("element['a[up-href]']")
+        expect(path).toEqual ['element', 'a[up-href]']
+
+      it 'allows single quotes inside double quotes', ->
+        path = up.util.parsePath("element[\"a[up-href='foo']\"]")
+        expect(path).toEqual ['element', "a[up-href='foo']"]
+
+      it 'allows double quotes inside single quotes', ->
+        path = up.util.parsePath("element['a[up-href=\"foo\"]']")
+        expect(path).toEqual ['element', 'a[up-href="foo"]']
+
       it 'allows dots in square brackets when it is quoted', ->
         path = up.util.parsePath('elements[".foo"]')
         expect(path).toEqual ['elements', '.foo']
