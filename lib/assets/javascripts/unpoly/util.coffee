@@ -2025,6 +2025,7 @@ up.util = (($) ->
   copy: copy
   deepCopy: deepCopy
   merge: merge
+  deepAssign: deepAssign
   deepMerge: deepMerge
   options: newOptions
   option: option

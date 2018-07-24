@@ -415,25 +415,30 @@ up.syntax = (($) ->
       u.jsonAttr(element, 'up-value') || element.value
 
   readClientValue = (elementOrSelector) ->
-    if element = u.element(elementOrSelector)
+    if input = u.element(elementOrSelector)
       tagName = input.tagName
       type = input.type
 
-      if u.hasClass(element, 'up-can-value')
-        return element.upResult?.value()
+      if u.hasClass(input, 'up-can-value')
+        return input.upResult?.value()
 
       else if tagName == 'SELECT'
-        # We would prefer using select.value, but we need to handle select[multiple]
-        return u.map input.querySelectorAll('option:selected'), 'value'
+        if input.getAttribute('multiple')
+          return u.map(input.querySelectorAll('option:selected'), 'value')
+        else
+          return input.value
 
       else if type == 'checkbox' || type == 'radio'
         return input.value if input.checked
 
       else if type == 'file'
-        # The value of an input[type=file] is the local path displayed in the form.
-        # The actual File objects are in the #files property. There might be multiple
-        # files in an input[type=file][multiple]
-        return u.toArray(input.files)
+         # The value of an input[type=file] is the local path displayed in the form.
+         # The actual File objects are in the #files property.
+        files = input.files
+        if input.getAttribute('multiple')
+          return u.toArray(files)
+        else
+          return files[0]
 
       else
         return input.value

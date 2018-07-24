@@ -381,11 +381,13 @@ up.params = (($) ->
   @return {Object}
   ###
   fromForm = (form ,options) ->
+    form = u.element(form)
     options = u.options(options)
     params = {}
 
-    inputs = form.querySelectorAll('select, input, textarea, .up-can-value')
-    inputs.push(submittingButton(form))
+    inputs = u.toArray(form.querySelectorAll('select, input, textarea, .up-can-value'))
+    if button = submittingButton(form)
+      inputs.push(button)
 
     u.each inputs, (input) ->
       # Don't use the #name property, which is only available for native
@@ -399,7 +401,7 @@ up.params = (($) ->
         #    for this to be unpacked conveniently on the server.
         # 3. The input has another defined value. We add it to the params.
         valueOrValues = up.syntax.clientValue(input)
-        each u.wrapArray(valueOrValues), (value) ->
+        u.each u.wrapArray(valueOrValues), (value) ->
           add(params, name, value)
 
     params
