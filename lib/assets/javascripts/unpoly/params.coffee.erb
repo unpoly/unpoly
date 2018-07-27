@@ -202,7 +202,7 @@ up.params = (($) ->
 
   arrayEntryToQuery = (entry) ->
     value = entry.value
-    return undefined unless canValueExistInQuery(value)
+    return undefined unless isPrimitiveValue(value)
     query = encodeURIComponent(entry.name)
     # There is a subtle difference when encoding blank values:
     # 1. An undefined or null value is encoded to `key` with no equals sign
@@ -218,7 +218,7 @@ up.params = (($) ->
   We will have `File` values in our params when we serialize a form with a file input.
   These entries will be filtered out when converting to a query string.
   ###
-  canValueExistInQuery = (value) ->
+  isPrimitiveValue = (value) ->
     u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value)
 
   buildQueryFromArray = (array) ->
@@ -269,7 +269,7 @@ up.params = (($) ->
     ensureCanInspectFormData()
     array = []
     iterator = formData.entries()
-    while entry = iterator.next() && !entry.done
+    while (entry = iterator.next()) && !entry.done
       [name, value] = entry.value
       array.push({ name, value })
     array
@@ -278,6 +278,7 @@ up.params = (($) ->
     formData = new FormData()
     for entry in array
       formData.append(entry.name, entry.value)
+    <% if ENV['JS_KNIFE'] %>formData.originalArray = array<% end %>
     formData
 
   ensureCanInspectFormData = ->
@@ -381,30 +382,30 @@ up.params = (($) ->
   @return {Object}
   ###
   fromForm = (form ,options) ->
-    form = u.element(form)
-    options = u.options(options)
-    params = {}
+    if form = u.element(form)
+      options = u.options(options)
+      params = {}
 
-    inputs = u.toArray(form.querySelectorAll('select, input, textarea, .up-can-value'))
-    if button = submittingButton(form)
-      inputs.push(button)
+      inputs = u.toArray(form.querySelectorAll('select, input, textarea, .up-can-value'))
+      if button = submittingButton(form)
+        inputs.push(button)
 
-    u.each inputs, (input) ->
-      # Don't use the #name property, which is only available for native
-      # input elements, but not Unpoly components.
-      name = input.getAttribute('name')
-      if input && name && !input.disabled
-        # There are four cases:
-        # 1. The input has an undefined value. We don't add it to the params.
-        # 2. The input is [multiple] and clientValue() returns an array.
-        #    We add them all to the params. Input's [name] should be an array ([] suffix)
-        #    for this to be unpacked conveniently on the server.
-        # 3. The input has another defined value. We add it to the params.
-        valueOrValues = up.syntax.clientValue(input)
-        u.each u.wrapArray(valueOrValues), (value) ->
-          add(params, name, value)
+      u.each inputs, (input) ->
+        # Don't use the #name property, which is only available for native
+        # input elements, but not Unpoly components.
+        name = input.getAttribute('name')
+        if input && name && !input.disabled
+          # There are four cases:
+          # 1. The input has an undefined value. We don't add it to the params.
+          # 2. The input is [multiple] and clientValue() returns an array.
+          #    We add them all to the params. Input's [name] should be an array ([] suffix)
+          #    for this to be unpacked conveniently on the server.
+          # 3. The input has another defined value. We add it to the params.
+          valueOrValues = up.syntax.clientValue(input)
+          u.each u.wrapArray(valueOrValues), (value) ->
+            add(params, name, value)
 
-    params
+      params
 
   ###**
   Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.
