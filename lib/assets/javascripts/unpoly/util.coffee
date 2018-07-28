@@ -670,7 +670,7 @@ up.util = (($) ->
     deepAssign({}, sources...)
 
   ###**
-  @function up.util.deepMerge
+  @function up.util.deepAssign
   @param {Array<Object>} sources...
   @return Object
   ###

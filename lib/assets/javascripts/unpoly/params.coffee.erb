@@ -353,6 +353,7 @@ up.params = (($) ->
       when 'array'
         otherArray = toArray(otherParams)
         params.push(otherArray...)
+        params
       when 'formData'
         otherArray = toArray(otherParams)
         for entry in otherArray
@@ -386,7 +387,7 @@ up.params = (($) ->
       options = u.options(options)
       params = {}
 
-      inputs = u.toArray(form.querySelectorAll('select, input, textarea, .up-can-value'))
+      inputs = u.toArray(form.querySelectorAll('select, input:not([type=submit]), button[type]:not([type=submit]), textarea, .up-can-value'))
       if button = submittingButton(form)
         inputs.push(button)
 
