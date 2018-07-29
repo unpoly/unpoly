@@ -197,7 +197,9 @@ up.util = (($) ->
     $element = $(element)
     selector = undefined
 
-    if upId = presence($element.attr("up-id"))
+    if isSingletonElement($element)
+      selector = elementTagName($element)
+    else if upId = presence($element.attr("up-id"))
       selector = attributeSelector('up-id', upId)
     else if id = presence($element.attr("id"))
       if id.match(/^[a-z0-9\-_]+$/i)
@@ -216,6 +218,11 @@ up.util = (($) ->
       selector = elementTagName($element)
 
     return selector
+
+  isSingletonElement = ($element) ->
+    # jQuery's is() returns true if at least one element
+    # in the collection matches the selector
+    $element.is('html, body, head, title')
 
   isGoodSelector = (selector) ->
     selector.indexOf('#') >= -1 || selector.indexOf('[') >= -1
@@ -2128,6 +2135,7 @@ up.util = (($) ->
   detachWith: detachWith
   flatten: flatten
   isTruthy: isTruthy
+  isSingletonElement: isSingletonElement
   newDeferred: newDeferred
   always: always
   muteRejection: muteRejection

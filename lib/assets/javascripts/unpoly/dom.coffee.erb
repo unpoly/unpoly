@@ -215,9 +215,6 @@ up.dom = (($) ->
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
-  @param {boolean} [options.requireMatch=true]
-    Whether to raise an error if the given selector is missing in
-    either the current page or in the response.
   @param {Element|jQuery} [options.origin]
     The element that triggered the replacement.
 
@@ -381,7 +378,6 @@ up.dom = (($) ->
     up.log.group 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length, ->
       options = u.options options,
         historyMethod: 'push'
-        requireMatch: true
         keep: true
         layer: 'auto'
 

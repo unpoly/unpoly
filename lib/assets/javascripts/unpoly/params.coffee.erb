@@ -367,7 +367,7 @@ up.params = (($) ->
 
   submittingButton = (form) ->
     $form = $(form)
-    submitButtonSelector = 'input[type=submit], button[type=submit], button:not([type])'
+    submitButtonSelector = up.form.submitButtonSelector()
     $activeElement = $(document.activeElement)
     if $activeElement.is(submitButtonSelector) && $form.has($activeElement)
       $activeElement[0]
@@ -387,7 +387,7 @@ up.params = (($) ->
       options = u.options(options)
       params = {}
 
-      inputs = u.toArray(form.querySelectorAll('select, input:not([type=submit]), button[type]:not([type=submit]), textarea, .up-can-value'))
+      inputs = u.toArray(form.querySelectorAll(up.form.fieldSelector()))
       if button = submittingButton(form)
         inputs.push(button)
 

@@ -176,11 +176,7 @@ up.motion = (($) ->
 
   willAnimate = ($elements, animationOrTransition, options) ->
     options = animateOptions(options)
-    isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !isSingletonElement($elements)
-
-  isSingletonElement = ($element) ->
-    # jQuery's is() returns true if at least one element in the collection matches the selector
-    $element.is('body')
+    isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !u.isSingletonElement($elements)
 
   skipAnimate = ($element, animation) ->
     if u.isOptions(animation)

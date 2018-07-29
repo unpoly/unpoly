@@ -14,10 +14,6 @@ class up.State extends up.Record
       'params',
       'data',
       'focus',
-      'focusSelectionStart',
-      'focusSelectionEnd',
-      'focusScrollLeft',
-      'focusScrollTop',
       'scrollTops',
       'mapData',
       'mapParams'

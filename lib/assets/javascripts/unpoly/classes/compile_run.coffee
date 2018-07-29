@@ -43,7 +43,11 @@ class up.CompileRun
       # Returns the raw results of our compile run
       for batch in batches
         compileOptions = new up.CompileOptions(batch, fetchData: @dataForElement, fetchValue: up.syntax.serverValue)
+        # In case the component class has a constructor, we call it with the input.
         component = new componentClass(batch)
+        # We don't force components classes to have a constructor that simple stores
+        # the given input. So we set it on the instance directly.
+        component.input = batch
         component.compile(compileOptions)
 
         if result = up.CompileResult.consider(batch, component)
@@ -59,6 +63,10 @@ class up.CompileRun
     u.merge(@globalData, domData, restoredData)
 
   select: (selector) ->
+    if u.isFunction(selector)
+      selector = selector()
+      throw "should this selectinSubtree instead?"
+
     $matches = u.selectInSubtree(@$root, selector)
 
     # Exclude all elements that are descendants of the subtrees we want to keep.

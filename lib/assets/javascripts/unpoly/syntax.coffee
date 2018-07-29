@@ -447,6 +447,15 @@ up.syntax = (($) ->
     element = u.element(elementOrSelector)
     element?.upResult?.data()
 
+  persistProps: (selector, propNames) ->
+    up.component selector, class
+      pickProps: (obj) ->
+        u.pickBy(u.only(obj, propNames), u.isGiven)
+      compile: (opts) ->
+        u.assign(@input, @pickProps(opts.data))
+      data: ->
+        @pickProps(@input)
+
   ###**
   @function up.syntax.clientData
   @internal
@@ -482,6 +491,7 @@ up.syntax = (($) ->
   component: registerComponentClass
   compile: compile
   clean: clean
+  persistProps: persistProps
   serverData: readServerData
   clientData: readClientData
   serverValue: readServerValue
