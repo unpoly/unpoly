@@ -447,7 +447,7 @@ up.syntax = (($) ->
     element = u.element(elementOrSelector)
     element?.upResult?.data()
 
-  persistProps: (selector, propNames) ->
+  persistProps = (selector, propNames) ->
     up.component selector, class
       pickProps: (obj) ->
         u.pickBy(u.only(obj, propNames), u.isGiven)

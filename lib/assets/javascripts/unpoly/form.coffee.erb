@@ -34,7 +34,7 @@ up.form = (($) ->
   ###
   config = u.config
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
-    fields: ['select', 'input:not([type=submit], [type=image])', 'button[type]:not([type=submit])', 'textarea', '.up-can-value'],
+    fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea', '.up-can-value'],
     textFields: ['input[type=file]', 'input[type=text]', 'input[type=number]', 'input[type=email]', 'input[type=url]', 'input[type=search]', 'textarea']
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
@@ -984,10 +984,8 @@ up.form = (($) ->
 
   up.compiler '[autofocus]', { batch: true }, ($input) -> $input.last().focus()
 
-  up.compiler 'input[type=file], input[type=text], input[type=number], input[type=email], input[type=url], input[type=search], textarea', restorableInputs
-
   up.syntax.persistProps 'input[type=file]', ['files']
-  up.syntax.persistProps textFieldSelector(), ['scrollLeft', 'scrollTop', 'selectionStart', 'selectionEnd']
+  up.syntax.persistProps textFieldSelector, ['scrollLeft', 'scrollTop', 'selectionStart', 'selectionEnd']
 
   up.on 'up:framework:reset', reset
 

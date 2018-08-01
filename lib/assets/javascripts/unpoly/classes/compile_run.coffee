@@ -65,7 +65,6 @@ class up.CompileRun
   select: (selector) ->
     if u.isFunction(selector)
       selector = selector()
-      throw "should this selectinSubtree instead?"
 
     $matches = u.selectInSubtree(@$root, selector)
 

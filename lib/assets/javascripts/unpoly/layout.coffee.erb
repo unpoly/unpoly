@@ -57,7 +57,7 @@ up.layout = (($) ->
   ###
   config = u.config
     duration: 0
-    viewports: [documentViewportSelector(), '.up-modal-viewport', '[up-viewport]']
+    viewports: [up.browser.documentViewportSelector(), '.up-modal-viewport', '[up-viewport]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
@@ -75,17 +75,6 @@ up.layout = (($) ->
     config.reset()
     lastScrollTops.clear()
     scrollingTracker.reset()
-
-  documentViewportSelector: ->
-    # The spec says this should be <html> in standards mode
-    # and <body> in quirks mode. However, it is currently (2018-07)
-    # always <body> in Webkit browsers (not Blink). Luckily Webkit
-    # also supports document.scrollingElement.
-   if element = document.scrollingElement
-      element.tagName
-    else
-      # IE11
-      'html'
 
   ###**
   Scrolls the given viewport to the given Y-position.
@@ -168,7 +157,7 @@ up.layout = (($) ->
     # Don't emit expensive events if no animation can be running anyway
     return Promise.resolve() unless up.motion.isEnabled()
 
-    $scrollable = scrollableElementForViewport(element)
+    $scrollable = viewportOf(element)
     scrollingTracker.finish($scrollable)
 
   ###**
@@ -254,7 +243,7 @@ up.layout = (($) ->
 
       snap = u.option(options.snap, config.snap)
 
-      viewportIsDocument = $viewport.is(documentViewportSelector())
+      viewportIsDocument = $viewport.is(up.browser.documentViewportSelector())
       viewportHeight = if viewportIsDocument then u.clientSize().height else $viewport.outerHeight()
       originalScrollPos = $viewport.scrollTop()
       newScrollPos = originalScrollPos
@@ -361,7 +350,7 @@ up.layout = (($) ->
     $(viewportSelector())
 
   scrollTopKey = (viewport) ->
-    u.selectorForElement($viewport)
+    u.selectorForElement(viewport)
 
   ###**
   Returns a hash with scroll positions.

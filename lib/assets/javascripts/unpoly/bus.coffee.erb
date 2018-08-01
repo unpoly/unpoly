@@ -461,7 +461,7 @@ up.bus = (($) ->
   boot = ->
     if up.browser.isSupported()
       emit('up:framework:boot', message: 'Booting framework')
-      # Unpoly modules now snapshot themselves to suppot reset()
+      # Unpoly modules now snapshot themselves to support reset()
       emit('up:framework:booted', message: 'Framework booted')
       u.nextFrame ->
         # At this point all user-provided compilers have been registered.

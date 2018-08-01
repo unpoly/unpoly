@@ -299,6 +299,20 @@ up.browser = (($) ->
     value = value.substr(1) if value[0] == '#'
     u.presence(value)
 
+  ###**
+  @function up.browser.documentViewportSelector
+  @internal
+  ###
+  documentViewportSelector = ->
+    # The spec says this should be <html> in standards mode
+    # and <body> in quirks mode. However, it is currently (2018-07)
+    # always <body> in Webkit browsers (not Blink). Luckily Webkit
+    # also supports document.scrollingElement.
+    if element = document.scrollingElement
+      element.tagName
+    else
+      # IE11
+      'html'
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url
@@ -312,6 +326,7 @@ up.browser = (($) ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   hash: hash
+  documentViewportSelector: documentViewportSelector
 
 )(jQuery)
 

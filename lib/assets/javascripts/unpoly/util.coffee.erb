@@ -2013,6 +2013,7 @@ up.util = (($) ->
     else
       a == b
 
+  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   isFixed: isFixed
