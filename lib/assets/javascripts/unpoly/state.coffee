@@ -8,6 +8,9 @@ up.state = (($) ->
 
   u = up.util
 
+  focusTracker = undefined
+  up.on 'up:framework:boot', -> focusTracker = new up.FocusTracker()
+
   ###**
   Configures behavior for states.
 
@@ -20,6 +23,10 @@ up.state = (($) ->
   ###
   config = u.config
     cacheSize: 10
+
+  reset = ->
+    config.reset()
+    focusTracker.reset()
 
   states = new up.Cache
     size: -> config.cacheSize
@@ -41,7 +48,7 @@ up.state = (($) ->
     )
 
   focusedSelector = ($form) ->
-    element = document.activeElement
+    element = focusTracker.lastField()
     if $form.has(element).length
       u.selectorForElement(element)
 
@@ -68,6 +75,8 @@ up.state = (($) ->
   reset = ->
     config.reset()
     states.clear()
+
+  up.on 'up:framework:reset', reset
 
   reset: reset
   first: states.first

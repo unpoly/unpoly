@@ -1,14 +1,15 @@
+# Working example for this: https://codepen.io/anon/pen/MBVewo
 class up.FocusTracker
 
   constructor: ->
-    @delay = 80
-    $(document).on('focusin', up.form.fieldSelector(), @fieldFocused)
-    $(document).on('focusout', up.form.fieldSelector(), @fieldBlurred)
+    @discardDelay = 80
+    fieldSelector = up.form.fieldSelector()
+    $(document).on('focusin', fieldSelector, @fieldFocused)
+    $(document).on('focusout', fieldSelector, @fieldBlurred)
     @reset()
 
   reset: ->
     clearTimeout(@discardTimer)
-    @discardTimer = undefined
     @field = undefined
 
   fieldFocused: (event) =>
@@ -17,7 +18,7 @@ class up.FocusTracker
 
   fieldBlurred: (event) =>
     clearTimeout(@discardTimer)
-    @discardTimer = u.setTimer(@delay, @discardField)
+    @discardTimer = u.setTimer(@discardDelay, @discardField)
 
   discardField: =>
     @field = undefined
