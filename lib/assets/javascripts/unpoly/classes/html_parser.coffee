@@ -38,7 +38,7 @@ class up.HtmlParser
     #
     # We will unwrap the wrapped <noscript> tags when a fragment is requested with
     # #first(), and only in the requested fragment.
-    noscriptPattern = /<noscript[^>]*>((.|\s)*?)<\/noscript>/i
+    noscriptPattern = /<noscript[^>]*>((.|\s)*?)<\/noscript>/ig
     @html = @html.replace noscriptPattern, (match, content) =>
       @didWrapNoscript = true
       '<div class="up-noscript" data-html="' + u.escapeHtml(content) + '"></div>'

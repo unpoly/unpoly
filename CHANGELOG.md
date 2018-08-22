@@ -6,6 +6,12 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+- Fix a regression where the contents of `<noscript>` tags were parsed into DOM elements (instead of text) when a fragment contained more than one `<noscript>` element.
+
+
 0.56.5
 ------
 

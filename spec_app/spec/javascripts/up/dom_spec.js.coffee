@@ -1141,6 +1141,49 @@ describe 'up.dom', ->
                 expect(text).toEqual('<img src="foo.png">')
                 done()
 
+            it 'parses <noscript> contents with multiple lines as text, not DOM nodes', (done) ->
+              @responseText = """
+                <div class="middle">
+                  <noscript>
+                    <img src="foo.png">
+                    <img src="bar.png">
+                  </noscript>
+                </div>
+                """
+
+              promise = up.replace('.middle', '/path')
+              @respond()
+
+              promise.then ->
+                $noscript = $('.middle noscript')
+                text = u.trim($noscript.text())
+                expect(text).toMatch(/<img src="foo\.png">\s+<img src="bar\.png">/)
+                done()
+
+            it 'parses multiple <noscript> tags in the same fragment as text, not DOM nodes', (done) ->
+              @responseText = """
+                <div class="middle">
+                  <noscript>
+                    <img src="foo.png">
+                  </noscript>
+                  <noscript>
+                    <img src="bar.png">
+                  </noscript>
+                </div>
+                """
+
+              promise = up.replace('.middle', '/path')
+              @respond()
+
+              promise.then ->
+                $noscripts = $('.middle noscript')
+                expect($noscripts.length).toBe(2)
+                text0 = u.trim($noscripts[0].textContent)
+                text1 = u.trim($noscripts[1].textContent)
+                expect(text0).toEqual('<img src="foo.png">')
+                expect(text1).toEqual('<img src="bar.png">')
+                done()
+
           if up.browser.canCustomElements()
 
             describe 'custom elements', ->
