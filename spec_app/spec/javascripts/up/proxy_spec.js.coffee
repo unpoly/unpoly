@@ -88,7 +88,7 @@ describe 'up.proxy', ->
           # Lookup is case-insensitive
           expect(response.getHeader('BAZ')).toEqual('bam')
 
-          expect(up.cookies.set('_up_headers')).toBeUndefined()
+          expect(up.cookies.get('_up_headers')).toBeUndefined()
 
           done()
 
