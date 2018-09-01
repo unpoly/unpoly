@@ -14,7 +14,6 @@
 #= require ./unpoly/dom
 #= require ./unpoly/motion
 #= require ./unpoly/proxy
-#= require ./unpoly/state
 #= require ./unpoly/link
 #= require ./unpoly/form
 #= require ./unpoly/popup
