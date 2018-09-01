@@ -73,25 +73,6 @@ describe 'up.proxy', ->
 
           done()
 
-      it 'merges headers from a _up_headers cookie, then removes the cookie', (done) ->
-        promise = up.request(url: '/url')
-
-        u.nextFrame =>
-          up.cookies.set('_up_headers', '{ "baz": "bam" }')
-          @respondWith
-            responseHeaders: { 'foo': 'bar' }
-            responseText: 'hello'
-
-        promise.then (response) ->
-          expect(response.getHeader('foo')).toEqual('bar')
-
-          # Lookup is case-insensitive
-          expect(response.getHeader('BAZ')).toEqual('bam')
-
-          expect(up.cookies.get('_up_headers')).toBeUndefined()
-
-          done()
-
       it "preserves the URL hash in a separate { hash } property, since although it isn't sent to server, code might need it to process the response", (done) ->
         promise = up.request('/url#hash')
 

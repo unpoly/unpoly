@@ -95,13 +95,10 @@ class up.Response extends up.Record
       'request',
       'xhr',
       'title',
-      'extraHeaders'
     ]
 
   constructor: (options) ->
     super(options)
-    @extraHeaders ||= {}
-    @extraHeaders = u.lowerCaseKeys(@extraHeaders)
 
   ###**
   Returns whether the server responded with a 2xx HTTP status.
@@ -153,4 +150,4 @@ class up.Response extends up.Record
   ###
   getHeader: (name) =>
     name = name.toLowerCase()
-    @extraHeaders[name] || @xhr.getResponseHeader(name)
+    @xhr.getResponseHeader(name)
