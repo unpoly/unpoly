@@ -150,7 +150,6 @@ class up.Request extends up.Record
       pc = up.protocol.config
       xhrHeaders[pc.targetHeader] = @target if @target
       xhrHeaders[pc.failTargetHeader] = @failTarget if @failTarget
-#      xhrHeaders[pc.waypointsHeader] = up.waypoint.allNames().join(' ')
       xhrHeaders['X-Requested-With'] ||= 'XMLHttpRequest' unless @isCrossDomain()
       if csrfToken = @csrfToken()
         xhrHeaders[pc.csrfHeader] = csrfToken
