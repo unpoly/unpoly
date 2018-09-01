@@ -117,11 +117,11 @@ class up.Cache
       @log("Cache miss for '%s'", key) unless options.silent
       undefined
 
-  first: (keyOrKeys) =>
-    @all(keyOrKeys)[0]
-
-  all: (keys = @keys()) =>
-    keys = u.wrapArray(keys)
-    matches = u.map keys, (key) =>
-      @get(key)
-    u.select(matches, u.isPresent)
+#  first: (keyOrKeys) =>
+#    @all(keyOrKeys)[0]
+#
+#  all: (keys = @keys()) =>
+#    keys = u.wrapArray(keys)
+#    matches = u.map keys, (key) =>
+#      @get(key)
+#    u.select(matches, u.isPresent)
