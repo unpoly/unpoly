@@ -10,20 +10,18 @@ class up.CompileRun
   compile: ->
     @$skipSubtrees = $(@options.skip)
 
-    data = @options.data || {}
-    @elementDataBySelector = data.elements || {}
-    @globalData = u.except(data, 'elements')
+    @datas = @options.datas || {}
 
     # Match elements with argument { data } once before all components
     # and hash them in a Map. Otherwise we would have to check #matches()
     # on all compiled elements for all components.
-    @elementDataByElement = new Map()
+    @dataByElement = new Map()
     for selector, elementData of @elementDataBySelector
       for element in u.selectInSubtree(@$root, selector)
         # The same element might be targeted with two different selectors
-        if existingData = @elementDataByElement.get(element)
+        if existingData = @dataByElement.get(element)
           elementData = u.merge(existingData, elementData)
-        @elementDataByElement.set(element, elementData)
+        @dataByElement.set(element, elementData)
 
     @results = []
 
@@ -42,7 +40,7 @@ class up.CompileRun
       batches = if componentClass.batch then [matches] else matches
       # Returns the raw results of our compile run
       for batch in batches
-        compileOptions = new up.CompileOptions(batch, fetchData: @dataForElement, fetchValue: up.syntax.serverValue)
+        compileOptions = new up.CompileOptions(batch, fetchData: @dataForElement, fetchValue: @valueForElement)
         # In case the component class has a constructor, we call it with the input.
         component = new componentClass(batch)
         # We don't force components classes to have a constructor that simple stores
@@ -58,9 +56,12 @@ class up.CompileRun
           $(batch).attr('up-keep', value)
 
   dataForElement: (element) =>
-    domData = up.syntax.serverData(element)
-    restoredData = @elementDataByElement.get(element)
-    u.merge(@globalData, domData, restoredData)
+    serverData = up.syntax.serverData(element)
+    optionsData = @dataByElement.get(element)
+    u.merge(serverData, optionsData)
+
+  valueForElement: (element) =>
+    up.syntax.serverValue(element)
 
   select: (selector) ->
     if u.isFunction(selector)

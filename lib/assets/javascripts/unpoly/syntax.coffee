@@ -411,8 +411,7 @@ up.syntax = (($) ->
 
   readServerValue = (elementOrSelector) ->
     if element = u.element(elementOrSelector)
-      up.warn("element.value still returns client value; should this be 'initial component' value or something?")
-      u.jsonAttr(element, 'up-value') || element.value
+      u.jsonAttr(element, 'up-value') || element.getAttribute('value')
 
   readClientValue = (elementOrSelector) ->
     if input = u.element(elementOrSelector)
