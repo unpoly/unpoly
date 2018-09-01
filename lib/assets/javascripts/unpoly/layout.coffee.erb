@@ -325,7 +325,7 @@ up.layout = (($) ->
   ###
   viewportOf = (selectorOrElement, options = {}) ->
     $element = $(selectorOrElement)
-    $element.closest(viewportSelector())
+    u.presence($element.closest(viewportSelector())) || $(document)
 
   ###**
   Returns a jQuery collection of all the viewports contained within the
