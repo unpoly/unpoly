@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.56.6",
+    version: "0.56.7",
     renamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
@@ -11916,7 +11916,7 @@ The HTML of a popup element is simply this:
       var $target;
       $target = $(event.target);
       if (!$target.closest('.up-popup, [up-popup]').length) {
-        return closeAsap();
+        return u.muteRejection(closeAsap());
       }
     });
     up.on('up:fragment:inserted', function(event, $fragment) {
@@ -11926,10 +11926,12 @@ The HTML of a popup element is simply this:
           return state.url = newSource;
         }
       } else if (event.origin && contains(event.origin)) {
-        return autoclose();
+        return u.muteRejection(autoclose());
       }
     });
-    up.bus.onEscape(closeAsap);
+    up.bus.onEscape(function() {
+      return u.muteRejection(closeAsap());
+    });
 
     /***
     When this element is clicked, a currently open [popup](/up.popup) is closed.
@@ -11954,10 +11956,12 @@ The HTML of a popup element is simply this:
     @stable
      */
     up.on('click', '.up-popup [up-close]', function(event, $element) {
-      closeAsap();
+      u.muteRejection(closeAsap());
       return up.bus.consumeAction(event);
     });
-    up.on('up:history:restore', closeAsap);
+    up.on('up:history:restore', function() {
+      return u.muteRejection(closeAsap());
+    });
     up.on('up:framework:reset', reset);
     return {
       attach: attachAsap,
@@ -12752,7 +12756,7 @@ or function.
       $target = $(event.target);
       if (!($target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length)) {
         up.bus.consumeAction(event);
-        return closeAsap();
+        return u.muteRejection(closeAsap());
       }
     });
     up.on('up:fragment:inserted', function(event, $fragment) {
@@ -12762,12 +12766,12 @@ or function.
           return state.url = newSource;
         }
       } else if (event.origin && contains(event.origin) && !up.popup.contains($fragment)) {
-        return autoclose();
+        return u.muteRejection(autoclose());
       }
     });
     up.bus.onEscape(function() {
       if (state.closable) {
-        return closeAsap();
+        return u.muteRejection(closeAsap());
       }
     });
 
@@ -12785,7 +12789,7 @@ or function.
     @stable
      */
     up.on('click', '.up-modal [up-close]', function(event, $element) {
-      closeAsap();
+      u.muteRejection(closeAsap());
       return up.bus.consumeAction(event);
     });
 
@@ -12859,7 +12863,9 @@ or function.
         }
       }
     };
-    up.on('up:history:restore', closeAsap);
+    up.on('up:history:restore', function() {
+      return u.muteRejection(closeAsap());
+    });
     up.on('up:framework:reset', reset);
     return {
       visit: visitAsap,
