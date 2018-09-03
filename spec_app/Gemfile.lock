@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    unpoly-rails (0.56.3)
+    unpoly-rails (0.56.6)
       rails (>= 3)
 
 GEM
@@ -219,4 +219,4 @@ DEPENDENCIES
   web-console (~> 2.0)
 
 BUNDLED WITH
-   1.16.1
+   1.16.4

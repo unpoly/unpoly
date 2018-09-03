@@ -720,7 +720,7 @@ up.modal = (($) ->
     $target = $(event.target)
     unless $target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length
       up.bus.consumeAction(event)
-      closeAsap()
+      u.muteRejection closeAsap()
   )
 
   up.on('up:fragment:inserted', (event, $fragment) ->
@@ -728,12 +728,13 @@ up.modal = (($) ->
       if newSource = $fragment.attr('up-source')
         state.url = newSource
     else if event.origin && contains(event.origin) && !up.popup.contains($fragment)
-      autoclose()
+      u.muteRejection autoclose()
   )
 
   # Close the pop-up overlay when the user presses ESC.
   up.bus.onEscape ->
-    closeAsap() if state.closable
+    if state.closable
+      u.muteRejection closeAsap()
 
   ###**
   When this element is clicked, closes a currently open dialog.
@@ -749,7 +750,7 @@ up.modal = (($) ->
   @stable
   ###
   up.on('click', '.up-modal [up-close]', (event, $element) ->
-    closeAsap()
+    u.muteRejection closeAsap()
     # If the user closes the modal by clicking on the background, we want to halt the event chain here.
     # The event should not trigger anything else. The user needs to click again for another interaction.
     # Also only prevent the default when we actually closed a modal.
@@ -818,7 +819,8 @@ up.modal = (($) ->
 
   # When the user uses the back button we will usually restore <body> or a base container.
   # We close any open modal because it probably won't match the restored state.
-  up.on 'up:history:restore', closeAsap
+  up.on 'up:history:restore', ->
+    u.muteRejection closeAsap()
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset

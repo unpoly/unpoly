@@ -6,6 +6,12 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+- Calling `event.preventDefault()` on [`up:modal:close`](/up:modal:close) and [`up:popup:close`](/up:popup:close) events no longer prints `Uncaught (in promise)` to the error console. You still need to catch rejected promises in your own code when it calls Unpoly functions and that function is prevented by an event handler.
+
+
 0.56.6
 ------
 

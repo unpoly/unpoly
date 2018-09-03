@@ -479,6 +479,24 @@ describe 'up.popup', ->
         next =>
           expect(up.popup.isOpen()).toBe(false)
 
+      it 'does not close the popup if #preventDefault() is called on up:popup:close event', asyncSpec (next) ->
+        affix('.outside').text('old outside')
+        $link = affix('.link')
+        up.popup.attach($link, target: '.inside', html: "<div class='inside'>inside</div>")
+
+        up.on 'up:popup:close', (e) -> e.preventDefault()
+
+        next =>
+          expect(up.popup.isOpen()).toBe(true)
+          Trigger.clickSequence($('body'))
+
+        next =>
+          expect(up.popup.isOpen()).toBe(true)
+
+          # Since there isn't anyone who could handle the rejection inside
+          # the event handler, our handler mutes the rejection.
+          expect(window).not.toHaveUnhandledRejections()
+
       it 'does not close the popup if a link outside the popup is followed with the up.follow function (bugfix)', asyncSpec (next) ->
         $target = affix('.target')
         $outsideLink = affix('a[href="/foo"][up-target=".target"]')

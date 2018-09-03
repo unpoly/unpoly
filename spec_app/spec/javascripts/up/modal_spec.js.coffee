@@ -660,6 +660,7 @@ describe 'up.modal', ->
             expect(up.modal.isOpen()).toBe(false)
             expect(backgroundClicked).not.toHaveBeenCalled()
 
+
       describe 'when no modal is open', ->
 
         it 'does nothing and allows the event chain to continue', asyncSpec (next) ->
@@ -715,6 +716,21 @@ describe 'up.modal', ->
 
         next =>
           expect(wasClosed).toBe(true)
+
+      it 'stays open if #preventDefault() is called on up:modal:close event', asyncSpec (next) ->
+        up.modal.extract('.target', '<div class="target"><a up-close>text</a></div>', animation: false)
+        up.on 'up:modal:close', (e) -> e.preventDefault()
+
+        next =>
+          $backdrop = $('.up-modal-backdrop')
+          Trigger.clickSequence($backdrop)
+
+        next =>
+          expect(up.modal.isOpen()).toBe(true)
+
+          # Since there isn't anyone who could handle the rejection inside
+          # the event handler, our handler mutes the rejection.
+          expect(window).not.toHaveUnhandledRejections()
 
       describe 'when opened with { closable: false }', ->
 

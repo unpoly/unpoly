@@ -434,7 +434,7 @@ up.popup = (($) ->
     $target = $(event.target)
     # Don't close when the user clicked on a popup opener.
     unless $target.closest('.up-popup, [up-popup]').length
-      closeAsap()
+      u.muteRejection closeAsap()
       # Do not halt the event chain here. The user is allowed to directly activate
       # a link in the background, even with a (now closing) popup open.
 
@@ -443,10 +443,11 @@ up.popup = (($) ->
       if newSource = $fragment.attr('up-source')
         state.url = newSource
     else if event.origin && contains(event.origin)
-      autoclose()
+      u.muteRejection autoclose()
 
   # Close the pop-up overlay when the user presses ESC.
-  up.bus.onEscape(closeAsap)
+  up.bus.onEscape ->
+    u.muteRejection closeAsap()
 
   ###**
   When this element is clicked, a currently open [popup](/up.popup) is closed.
@@ -471,7 +472,7 @@ up.popup = (($) ->
   @stable
   ###
   up.on 'click', '.up-popup [up-close]', (event, $element) ->
-    closeAsap()
+    u.muteRejection closeAsap()
     # Only prevent the default when we actually closed a popup.
     # This way we can have buttons that close a popup when within a popup,
     # but link to a destination if not.
@@ -479,7 +480,8 @@ up.popup = (($) ->
 
   # When the user uses the back button we will usually restore <body> or a base container.
   # We close any open modal because it probably won't match the restored state.
-  up.on 'up:history:restore', closeAsap
+  up.on 'up:history:restore', ->
+    u.muteRejection closeAsap()
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
