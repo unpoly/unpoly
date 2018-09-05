@@ -68,7 +68,16 @@ up.bus = (($) ->
   upListenerToJqueryListener = (upListener) ->
     (event) ->
       $me = event.$element || $(this)
-      upListener.apply($me.get(0), [event, $me, up.syntax.serverData($me)])
+      args = [event, $me]
+
+      # Do not retrieve and parse [up-data] unless the listener function
+      # expects a third argument. Note that we must pass data for an argument
+      # count of 0, since then the function might take varargs.
+      expectedArgCount = upListener.length
+      unless expectedArgCount == 1 || expectedArgCount == 2
+        args.push(up.syntax.serverData($me))
+
+      upListener.apply($me.get(0), args)
 
   ###**
   Converts an argument list for `up.on()` to an argument list for `jQuery.on`.

@@ -31,30 +31,54 @@ describe 'up.bus', ->
         next =>
           expect(clickSpy.calls.count()).toEqual(1)
 
-      it 'parses an up-data attribute as JSON and passes the parsed object as a third argument to the initializer', asyncSpec (next) ->
-        $child = affix('.child')
-        observeArgs = jasmine.createSpy()
-        up.on 'click', '.child', (event, $element, data) ->
-          observeArgs($element.attr('class'), data)
+      describe 'passing of [up-data]', ->
 
-        data = { key1: 'value1', key2: 'value2' }
-        $tag = affix(".child").attr('up-data', JSON.stringify(data))
+        it 'parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', asyncSpec (next) ->
+          $child = affix('.child')
+          observeArgs = jasmine.createSpy()
+          up.on 'click', '.child', (event, $element, data) ->
+            observeArgs($element.attr('class'), data)
 
-        Trigger.click($('.child'))
+          data = { key1: 'value1', key2: 'value2' }
+          $tag = affix(".child").attr('up-data', JSON.stringify(data))
 
-        next =>
-          expect(observeArgs).toHaveBeenCalledWith('child', data)
+          Trigger.click($('.child'))
 
-      it 'passes an empty object as a second argument to the listener if there is no up-data attribute', asyncSpec (next) ->
-        $child = affix('.child')
-        observeArgs = jasmine.createSpy()
-        up.on 'click', '.child', (event, $element, data) ->
-          observeArgs($element.attr('class'), data)
+          next =>
+            expect(observeArgs).toHaveBeenCalledWith('child', data)
 
-        Trigger.click($('.child'))
+        it 'passes an empty object as a second argument to the listener if there is no [up-data] attribute', asyncSpec (next) ->
+          $child = affix('.child')
+          observeArgs = jasmine.createSpy()
+          up.on 'click', '.child', (event, $element, data) ->
+            observeArgs($element.attr('class'), data)
 
-        next =>
-          expect(observeArgs).toHaveBeenCalledWith('child', {})
+          Trigger.click($('.child'))
+
+          next =>
+            expect(observeArgs).toHaveBeenCalledWith('child', {})
+
+        it 'does not parse an [up-data] attribute if the listener function only takes one argument', asyncSpec (next) ->
+          parseDataSpy = spyOn(up.syntax, 'serverData').and.returnValue({})
+
+          $child = affix('.child')
+          up.on 'click', '.child', (event) -> # no-op
+
+          Trigger.click($('.child'))
+
+          next =>
+            expect(parseDataSpy).not.toHaveBeenCalled()
+
+        it 'does not parse an [up-data] attribute if the listener function only takes two arguments', asyncSpec (next) ->
+          parseDataSpy = spyOn(up.syntax, 'serverData').and.returnValue({})
+
+          $child = affix('.child')
+          up.on 'click', '.child', (event, $element) -> # no-op
+
+          Trigger.click($('.child'))
+
+          next =>
+            expect(parseDataSpy).not.toHaveBeenCalled()
 
     describe 'up.off', ->
 

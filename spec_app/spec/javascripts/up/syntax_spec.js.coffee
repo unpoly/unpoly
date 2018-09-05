@@ -98,28 +98,36 @@ describe 'up.syntax', ->
           promiseState(promise).then (result) ->
             expect(result.state).toEqual('fulfilled')
 
-      it 'parses an up-data attribute as JSON and passes the parsed object as a second argument to the initializer', ->
+      describe 'passing of [up-data]', ->
 
-        observeArgs = jasmine.createSpy()
-        up.compiler '.child', ($element, data) ->
-          observeArgs($element.attr('class'), data)
+        it 'parses an [up-data] attribute as JSON and passes the parsed object as a second argument to the compiler', ->
+          observeArgs = jasmine.createSpy()
+          up.compiler '.child', ($element, data) ->
+            observeArgs($element.attr('class'), data)
 
-        data = { key1: 'value1', key2: 'value2' }
+          data = { key1: 'value1', key2: 'value2' }
 
-        $tag = affix(".child").attr('up-data', JSON.stringify(data))
-        up.hello($tag)
+          $tag = affix(".child").attr('up-data', JSON.stringify(data))
+          up.hello($tag)
 
-        expect(observeArgs).toHaveBeenCalledWith('child', data)
+          expect(observeArgs).toHaveBeenCalledWith('child', data)
 
-      it 'passes an empty object as a second argument to the initializer if there is no up-data attribute', ->
+        it 'passes an empty object as a second argument to the compiler if there is no [up-data] attribute', ->
+          observeArgs = jasmine.createSpy()
+          up.compiler '.child', ($element, data) ->
+            observeArgs($element.attr('class'), data)
 
-        observeArgs = jasmine.createSpy()
-        up.compiler '.child', ($element, data) ->
-          observeArgs($element.attr('class'), data)
+          up.hello(affix(".child"))
 
-        up.hello(affix(".child"))
+          expect(observeArgs).toHaveBeenCalledWith('child', {})
 
-        expect(observeArgs).toHaveBeenCalledWith('child', {})
+        it 'does not parse an [up-data] attribute if the compiler function only takes a single argument', ->
+          parseDataSpy = spyOn(up.syntax, 'serverData').and.returnValue({})
+
+          up.compiler '.child', ($element) -> # no-op
+          up.hello(affix(".child"))
+
+          expect(parseDataSpy).not.toHaveBeenCalled()
 
       it 'compiles matching elements one-by-one', ->
         compiler = jasmine.createSpy('compiler')

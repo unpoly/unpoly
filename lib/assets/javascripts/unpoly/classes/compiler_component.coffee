@@ -13,8 +13,19 @@ class up.CompilerComponent
   constructor: (@element, @compilerFn) ->
 
   compile: (options) ->
+    # Compilers still take jQuery collections instead of native DOM elements.
     $element = $(@element)
-    result = @compilerFn.call($element[0], $element, options.data)
+
+    args = [$element]
+
+    # Do not retrieve and parse [up-data] unless the compiler function
+    # expects a second argument. Note that we must pass data for an argument
+    # count of 0, since then the function might take varargs.
+    expectedArgCount = @compilerFn.length
+    unless expectedArgCount == 1
+      args.push(options.data)
+
+    result = @compilerFn.apply(@element, args)
     # If the compiler function returned an object with known actions
     # like #clean() or #value(), these actions are copied to this component.
     if result = @normalizeResult(result)
