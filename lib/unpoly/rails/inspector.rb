@@ -114,17 +114,6 @@ module Unpoly
         response.headers['X-Up-Title'] = new_title
       end
 
-      ##
-      #
-      #
-      def waypoints
-        if waypoints = request.headers['X-Up-Waypoints']
-          waypoints.split(' ')
-        else
-          []
-        end
-      end
-
       private
 
       def request
