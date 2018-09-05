@@ -124,8 +124,10 @@ describe 'up.syntax', ->
         it 'does not parse an [up-data] attribute if the compiler function only takes a single argument', ->
           parseDataSpy = spyOn(up.syntax, 'serverData').and.returnValue({})
 
+          $child = affix(".child")
+
           up.compiler '.child', ($element) -> # no-op
-          up.hello(affix(".child"))
+          up.hello($child)
 
           expect(parseDataSpy).not.toHaveBeenCalled()
 

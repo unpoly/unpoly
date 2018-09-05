@@ -1992,7 +1992,6 @@ describe 'up.dom', ->
 
           it "only emits an event up:fragment:kept, but not an event up:fragment:inserted", asyncSpec (next) ->
             insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')
-            up.on('up:fragment:inserted', insertedListener)
             keptListener = jasmine.createSpy('subscriber to up:fragment:kept')
             up.on('up:fragment:kept', keptListener)
             up.on 'up:fragment:inserted', insertedListener
