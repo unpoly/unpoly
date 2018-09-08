@@ -31,6 +31,20 @@ describe 'up.bus', ->
         next =>
           expect(clickSpy.calls.count()).toEqual(1)
 
+      it 'throws an error when trying to register the same callback multiple times', ->
+        callback = ->
+        register = -> up.on 'foo', callback
+        register()
+        expect(register).toThrowError(/cannot be registered more than once/i)
+
+      it 'does not throw an error if a callback is registered, unregistered and registered a second time', ->
+        callback = ->
+        register = -> up.on 'foo', callback
+        unregister = -> up.off 'foo', callback
+        register()
+        unregister()
+        expect(register).not.toThrowError()
+
       describe 'passing of [up-data]', ->
 
         it 'parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', asyncSpec (next) ->
