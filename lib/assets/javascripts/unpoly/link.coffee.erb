@@ -85,25 +85,14 @@ up.link = (($) ->
     The URL to visit.
   @param {string} [options.target='body']
     The selector to replace.
-  @param {string} [options.layer='page']
-    The layer in which to open the URL.
-
-    Valid values are `'page'` and `'modal'`.
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace)
   @stable
   ###
   visit = (url, options) ->
-    options = u.options(options, layer: 'page')
-
-    switch options.layer
-      when 'page'
-        selector = u.option(options.target, 'body')
-        up.replace(selector, url, options)
-      when 'modal'
-        up.modal.visit(url, options)
-      else
-        up.fail("Cannot directly visit a URL in layer \"#{options.layer}\"")
+    options = u.options(options)
+    selector = u.option(options.target, 'body')
+    up.replace(selector, url, options)
 
   ###**
   Follows the given link via AJAX and [replaces](/up.replace) the current page

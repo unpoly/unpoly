@@ -75,7 +75,7 @@ up.log = (($) ->
       b.puts('log', prefix(message), args...)
 
   ###**
-  @function up.log.warn
+  @function up.warn
   @internal
   ###
   warn = (message, args...) ->

@@ -462,7 +462,6 @@ up.layout = (($) ->
       # to scroll positions. If it is just true, we leave the scrollTops option
       # undefined and let restoreScroll() retrieve previous scrollTops from cache.
       givenTops = u.presence(options.restoreScroll, u.isObject)
-      console.debug("restoreScroll() und seinen Cache gibt es dann nicht mehr. Das ist dann im history-State.")
       return restoreScroll(around: $element, scrollTops: givenTops)
 
     if options.reveal
@@ -680,8 +679,6 @@ up.layout = (($) ->
   firstHashTarget = (hash) ->
     if hash = up.browser.hash(hash)
       up.first("[id='#{hash}'], a[name='#{hash}']")
-
-  up.syntax.persistProps viewportSelector, ['scrollTop', 'scrollLeft']
 
   up.on 'up:app:booted', revealHash
 

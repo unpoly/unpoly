@@ -122,7 +122,7 @@ describe 'up.syntax', ->
           expect(observeArgs).toHaveBeenCalledWith('child', {})
 
         it 'does not parse an [up-data] attribute if the compiler function only takes a single argument', ->
-          parseDataSpy = spyOn(up.syntax, 'serverData').and.returnValue({})
+          parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
 
           $child = affix(".child")
 
@@ -154,6 +154,13 @@ describe 'up.syntax', ->
           up.hello($container)
           expect(compiler.calls.count()).toEqual(1)
           expect(compiler).toHaveBeenCalledWith($both)
+
+        it 'throws an error if the batch compiler returns a destructor', ->
+          destructor = ->
+          up.compiler '.element', { batch: true }, ($element) -> destructor
+          $container = affix('.element')
+          compile = -> up.hello($container)
+          expect(compile).toThrowError(/cannot return destructor/i)
 
       describe 'with { keep } option', ->
 
@@ -250,18 +257,18 @@ describe 'up.syntax', ->
 
       it 'should have tests'
       
-    describe 'up.syntax.serverData', ->
+    describe 'up.syntax.data', ->
 
       it 'returns the [up-data] attribute of the given element, parsed as JSON', ->
         $element = affix('.element').attr('up-data', '{ "foo": 1, "bar": 2 }')
-        data = up.syntax.serverData($element)
+        data = up.syntax.data($element)
         expect(data).toEqual(foo: 1, bar: 2)
 
       it 'returns en empty object if the given element has no [up-data] attribute', ->
         $element = affix('.element')
-        data = up.syntax.serverData($element)
+        data = up.syntax.data($element)
         expect(data).toEqual({})
 
       it 'returns undefined if undefined is passed instead of an element', ->
-        data = up.syntax.serverData(undefined)
+        data = up.syntax.data(undefined)
         expect(data).toBeUndefined()

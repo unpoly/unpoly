@@ -9,7 +9,7 @@ afterEach (done) ->
 
   up.util.nextFrame =>
     up.reset()
-    up.cookies.remove(up.protocol.config.methodCookie)
+    up.browser.popCookie(up.protocol.config.methodCookie)
 
     # Give async reset behavior another frame to play out,
     # then start the next example.

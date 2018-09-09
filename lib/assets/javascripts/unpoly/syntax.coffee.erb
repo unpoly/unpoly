@@ -33,8 +33,8 @@ up.syntax = (($) ->
   }
 
   isBooting = true
-  componentClasses = []
-  macroClasses = []
+  compilers = []
+  macros = []
 
   ###**
   Registers a function to be called whenever an element with
@@ -210,15 +210,11 @@ up.syntax = (($) ->
     such as timeouts and event handlers bound to the document.
     The destructor is *not* expected to remove the element from the DOM, which
     is already handled by [`up.destroy()`](/up.destroy).
-
-    The function may also return an array of destructor functions.
   @stable
   ###
-  registerCompilerFunction = (args...) ->
-    console.debug("registerCompilerFunction(%o, %o)", args)
-    lastIndex = args.length - 1
-    args[lastIndex] = up.CompilerComponent.buildClass(args[lastIndex])
-    registerComponentClass(args...)
+  registerCompiler = (args...) ->
+    compiler = buildCompiler(args...)
+    insertCompiler(compilers, compiler)
 
   ###**
   Registers a [compiler](/up.compiler) that is run before all other compilers.
@@ -261,34 +257,21 @@ up.syntax = (($) ->
     See [`up.compiler()`](/up.compiler) for details.
   @stable
   ###
-  registerMacroFunction = (selector, args...) ->
-    fn = args.pop()
-    options = u.options(args[0], macro: true)
-    console.debug('calling registerCompilerFunction(%o, %o)', options, fn)
-    registerCompilerFunction(selector, options, fn)
+  registerMacro = (args...) ->
+    macro = buildCompiler(args...)
+    if isBooting
+      macro.priority = detectSystemMacroPriority(macro.selector) ||
+        up.fail('Unregistered priority for system macro %o', macro.selector)
+    insertCompiler(macros, macro)
 
   detectSystemMacroPriority = (macroSelector) ->
     for substr, priority of SYSTEM_MACRO_PRIORITIES
       if macroSelector.indexOf(substr) >= 0
         return priority
 
-  registerComponentClass = (selector, args...) ->
-    console.debug("registerComponentClass(%o, %o)", selector, args)
-
-    klass = args.pop()
-    options = u.options(args[0])
-
-    if options.macro
-      classList = macroClasses
-      if isBooting
-        options.priority = detectSystemMacroPriority(selector) ||
-          up.fail('Unregistered priority for system macro %o', selector)
-    else
-      classList = componentClasses
-
-    insertComponentClass(classList, selector, options, klass)
-
-  annotateComponentClass = (klass, selector, options) ->
+  buildCompiler = (selector, args...) ->
+    callback = args.pop()
+    options = u.extractOptions(args)
     options = u.options(options,
       selector: selector,
       isSystem: isBooting,
@@ -296,16 +279,14 @@ up.syntax = (($) ->
       batch: false
       keep: false
     )
-    for key, value of options
-      if u.isUndefined(klass[key])
-        klass[key] = value
+    #
+    return u.assign(callback, options)
 
-  insertComponentClass = (queue, selector, options, newClass) ->
-    annotateComponentClass(newClass, selector, options)
+  insertCompiler = (queue, newCompiler) ->
     index = 0
-    while (existingClass = queue[index]) && (existingClass.priority >= newClass.priority)
+    while (existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)
       index += 1
-    queue.splice(index, 0, newClass)
+    queue.splice(index, 0, newCompiler)
 
   ###**
   Applies all compilers on the given element and its descendants.
@@ -317,9 +298,21 @@ up.syntax = (($) ->
   @internal
   ###
   compile = ($fragment, options) ->
-    allClasses = macroClasses.concat(componentClasses)
-    compileRun = new up.CompileRun($fragment, allClasses, options)
+    orderedCompilers = macros.concat(compilers)
+    compileRun = new up.CompilePass($fragment, orderedCompilers, options)
     compileRun.compile()
+
+  ###**
+  @function up.syntax.destructor
+  @internal
+  ###
+  registerDestructor = (element, destructor) ->
+    element = u.element(element)
+    unless destructors = element.upDestructors
+      destructors = []
+      element.upDestructors = destructors
+      element.classList.add('up-can-clean')
+    destructors.push(destructor)
 
   ###**
   Runs any destroyers on the given fragment and its descendants.
@@ -331,10 +324,10 @@ up.syntax = (($) ->
   ###
   clean = ($fragment) ->
     cleanables = u.selectInSubtree($fragment, '.up-can-clean')
-    console.debug('/// got cleanables: %o', cleanables.get())
     u.each cleanables, (cleanable) ->
-      cleanable.upResult?.clean()
-      # We do not actually remove the $.data key or .up-can-* classes for performance reasons.
+      if destructors = cleanable.upDestructors
+        destructor() for destructor in destructors
+      # We do not actually remove the #upDestructors property or .up-can-* classes for performance reasons.
       # The element we just cleaned is about to be removed from the DOM.
 
   ###**
@@ -353,7 +346,7 @@ up.syntax = (($) ->
 
       up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
 
-  @function up.syntax.serverData
+  @function up.syntax.data
   @param {string|Element|jQuery} elementOrSelector
   @return
     The JSON-decoded value of the `up-data` attribute.
@@ -405,72 +398,9 @@ up.syntax = (($) ->
     A serialized JSON string
   @stable
   ###
-  readServerData = (elementOrSelector) ->
+  readData = (elementOrSelector) ->
     if element = u.element(elementOrSelector)
       u.jsonAttr(element, 'up-data') || {}
-
-  readServerValue = (elementOrSelector) ->
-    if element = u.element(elementOrSelector)
-      u.jsonAttr(element, 'up-value') || element.getAttribute('value')
-
-  readClientValue = (elementOrSelector) ->
-    if input = u.element(elementOrSelector)
-      tagName = input.tagName
-      type = input.type
-
-      if u.hasClass(input, 'up-can-value')
-        return input.upResult?.value()
-
-      else if tagName == 'SELECT'
-        if input.getAttribute('multiple')
-          return u.map(input.querySelectorAll('option:selected'), 'value')
-        else
-          return input.value
-
-      else if type == 'checkbox' || type == 'radio'
-        return input.value if input.checked
-
-      else if type == 'file'
-         # The value of an input[type=file] is the local path displayed in the form.
-         # The actual File objects are in the #files property.
-        files = input.files
-        if input.getAttribute('multiple')
-          return u.toArray(files)
-        else
-          return files[0]
-
-      else
-        return input.value
-
-  readClientData = (elementOrSelector) ->
-    element = u.element(elementOrSelector)
-    element?.upResult?.data()
-
-  persistProps = (selector, propNames) ->
-    up.component selector, class
-      pickProps: (obj) ->
-        u.pickBy(u.only(obj, propNames), u.isGiven)
-      compile: (opts) ->
-        u.assign(@input, @pickProps(opts.data))
-      data: ->
-        @pickProps(@input)
-
-  ###**
-  @function up.syntax.clientData
-  @internal
-  ###
-  readClientData2 = (fragment = document) ->
-    $fragment = $(fragment)
-    savables = u.selectInSubtree($fragment, '.up-can-data')
-    data = {}
-    elementsData = data.elements = {}
-    for savable in savables
-      if savableData = savable.upResult?.data()
-        selector = u.selectorForElement(savable)
-        unless u.isGoodSelector(selector)
-          up.warn('Saving state for possibly ambiguous selector "%o". Consider using [id] or [up-id] attributes.', selector)
-        selectorData = (elementsData[selector] ||= {})
-        u.deepAssign(selectorData, savableData)
 
   ###**
   Resets the list of registered compiler directives to the
@@ -479,29 +409,22 @@ up.syntax = (($) ->
   @internal
   ###
   reset = ->
-    componentClasses = u.select(componentClasses, 'isSystem')
-    macroClasses = u.select(macroClasses, 'isSystem')
+    compilers = u.select(compilers, 'isSystem')
+    macros = u.select(macros, 'isSystem')
 
   up.on 'up:framework:booted', -> isBooting = false
   up.on 'up:framework:reset', reset
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  compiler: registerCompilerFunction
-  macro: registerMacroFunction
-  component: registerComponentClass
+  compiler: registerCompiler
+  macro: registerMacro
+  destructor: registerDestructor
   compile: compile
   clean: clean
-  persistProps: persistProps
-  serverData: readServerData
-  clientData: readClientData
-  serverValue: readServerValue
-  clientValue: readClientValue
-  data: (element) ->
-    up.warn('Deprecated: up.syntax.data() has been renamed to up.syntax.serverData()')
-    readServerData(element)
+  data: readData
 
 )(jQuery)
 
-up.component = up.syntax.component
 up.compiler = up.syntax.compiler
+up.destructor = up.syntax.destructor
 up.macro = up.syntax.macro

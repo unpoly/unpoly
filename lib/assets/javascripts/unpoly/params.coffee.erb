@@ -93,7 +93,7 @@ up.params = (($) ->
   If `params` is a nested object, the nesting will be flattened and expressed
   with square bracket notiation in the query keys (e.g. `user[name]`).
 
-  @function up.params.toString
+  @function up.params.toQuery
   ###
   toQuery = (params, options = {}) ->
     query = switch detectNature(params)
@@ -392,17 +392,14 @@ up.params = (($) ->
         inputs.push(button)
 
       u.each inputs, (input) ->
-        # Don't use the #name property, which is only available for native
-        # input elements, but not Unpoly components.
-        name = input.getAttribute('name')
-        if input && name && !input.disabled
+        if input && (name = input.name) && !input.disabled
           # There are four cases:
           # 1. The input has an undefined value. We don't add it to the params.
           # 2. The input is [multiple] and clientValue() returns an array.
           #    We add them all to the params. Input's [name] should be an array ([] suffix)
           #    for this to be unpacked conveniently on the server.
           # 3. The input has another defined value. We add it to the params.
-          valueOrValues = up.syntax.clientValue(input)
+          valueOrValues = up.form.value(input)
           u.each u.wrapArray(valueOrValues), (value) ->
             add(params, name, value)
 

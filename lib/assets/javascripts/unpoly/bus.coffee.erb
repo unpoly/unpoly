@@ -75,7 +75,7 @@ up.bus = (($) ->
       # count of 0, since then the function might take varargs.
       expectedArgCount = upListener.length
       unless expectedArgCount == 1 || expectedArgCount == 2
-        args.push(up.syntax.serverData($me))
+        args.push(up.syntax.data($me))
 
       upListener.apply($me.get(0), args)
 

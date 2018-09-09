@@ -209,7 +209,7 @@ up.protocol = (($) ->
   @internal
   ###
   initialRequestMethod = u.memoize ->
-    methodFromServer = up.cookies.pop(config.methodCookie)
+    methodFromServer = up.browser.popCookie(config.methodCookie)
     (methodFromServer || 'get').toLowerCase()
 
   # Remove the method cookie as soon as possible.

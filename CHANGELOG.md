@@ -6,6 +6,17 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
+Unreleased
+----------
+
+- When Unpoly cannot find the viewport of an element, it will now find the scrolling root element. This is either `<body>` or `<html>`, depending on the browser. Previously Unpoly would return the `document` in such cases.
+- [`up.on()`](/up.on) will now throw an error when the same callback function is registered multiple times.
+- New experimental function [`up.all()`], which returns all elements matching the given selector. Like [`up.first()`](/up.first) it ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
+- New experimental function [`up.Response#getHeader()`](/up.Response.prototype.getHeader). It looks up the header value for the given name in the HTTP response header.
+- { data } is now { params } everywhere
+- up.params module
+
+
 0.56.7
 ------
 

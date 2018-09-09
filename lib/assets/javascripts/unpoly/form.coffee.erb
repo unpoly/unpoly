@@ -34,8 +34,7 @@ up.form = (($) ->
   ###
   config = u.config
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
-    fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea', '.up-can-value'],
-    textFields: ['input[type=file]', 'input[type=text]', 'input[type=number]', 'input[type=email]', 'input[type=url]', 'input[type=search]', 'textarea']
+    fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
 
@@ -48,13 +47,6 @@ up.form = (($) ->
   ###
   fieldSelector = ->
     config.fields.join(',')
-
-  ###**
-  @function up.form.textFieldSelector
-  @internal
-  ###
-  textFieldSelector = ->
-    config.textFields.join(',')
 
   ###**
   @function up.form.submitButtonSelector
@@ -472,6 +464,36 @@ up.form = (($) ->
       $(switcher)
     else
       u.fail('Could not find [up-switch] field for %o', $target.get(0))
+
+  ###**
+  @function up.form.value
+  @experimental
+  ###
+  elementValue = (elementOrSelector) ->
+    if input = u.element(elementOrSelector)
+      tagName = input.tagName
+      type = input.type
+
+      if tagName == 'SELECT'
+        if input.getAttribute('multiple')
+          return u.map(input.querySelectorAll('option:selected'), 'value')
+        else
+          return input.value
+
+      else if type == 'checkbox' || type == 'radio'
+        return input.value if input.checked
+
+      else if type == 'file'
+         # The value of an input[type=file] is the local path displayed in the form.
+         # The actual File objects are in the #files property.
+        files = input.files
+        if input.getAttribute('multiple')
+          return u.toArray(files)
+        else
+          return files[0]
+
+      else
+        return input.value
 
   ###**
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
@@ -984,9 +1006,6 @@ up.form = (($) ->
 
   up.compiler '[autofocus]', { batch: true }, ($input) -> $input.last().focus()
 
-  up.syntax.persistProps 'input[type=file]', ['files']
-  up.syntax.persistProps textFieldSelector, ['scrollLeft', 'scrollTop', 'selectionStart', 'selectionEnd']
-
   up.on 'up:framework:reset', reset
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
@@ -998,6 +1017,7 @@ up.form = (($) ->
   autosubmit: autosubmit
   fieldSelector: fieldSelector
   submitButtonSelector: submitButtonSelector
+  value: elementValue
 
 )(jQuery)
 

@@ -147,7 +147,7 @@ class up.Response extends up.Record
   @function up.Response#getHeader
   @param {string} name
   @return {string|undefined} value
+  @experimental
   ###
   getHeader: (name) =>
-    name = name.toLowerCase()
     @xhr.getResponseHeader(name)

@@ -560,5 +560,17 @@ describe 'up.params', ->
 
         it 'merges a FormData object'
 
+    describe 'up.params.buildURL', ->
+
+      it 'must have tests'
+
+    describe 'up.params.fromForm', ->
+
+      it 'must have tests'
+
+    describe 'up.params.fromURL', ->
+
+      it 'must have tests'
+
 
 

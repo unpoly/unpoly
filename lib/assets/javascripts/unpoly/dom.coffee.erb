@@ -528,7 +528,7 @@ up.dom = (($) ->
           plan =
             $element: $keepable # the element that should be kept
             $newElement: $partner # the element that would have replaced it but now does not
-            newData: up.syntax.serverData($partner) # the parsed up-data attribute of the element we will discard
+            newData: up.syntax.data($partner) # the parsed up-data attribute of the element we will discard
           keepEventArgs = u.merge(plan, message: ['Keeping element %o', $keepable.get(0)])
           if up.bus.nobodyPrevents('up:fragment:keep', keepEventArgs)
             plan
@@ -653,7 +653,7 @@ up.dom = (($) ->
     keptElements = []
     for plan in options.keepPlans
       emitFragmentKept(plan)
-      keptElements.push(plan.$element)
+      keptElements.push(plan.$element[0])
     up.syntax.compile($element, skip: keptElements)
     emitFragmentInserted($element, options)
     $element
@@ -764,6 +764,10 @@ up.dom = (($) ->
         break
     $match
 
+  ###**
+  @function up.dom.layerOf
+  @internal
+  ###
   layerOf = (selectorOrElement) ->
     $element = $(selectorOrElement)
     if $element.length

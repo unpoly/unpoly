@@ -73,7 +73,7 @@ describe 'up.bus', ->
             expect(observeArgs).toHaveBeenCalledWith('child', {})
 
         it 'does not parse an [up-data] attribute if the listener function only takes one argument', asyncSpec (next) ->
-          parseDataSpy = spyOn(up.syntax, 'serverData').and.returnValue({})
+          parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
 
           $child = affix('.child')
           up.on 'click', '.child', (event) -> # no-op
@@ -84,7 +84,7 @@ describe 'up.bus', ->
             expect(parseDataSpy).not.toHaveBeenCalled()
 
         it 'does not parse an [up-data] attribute if the listener function only takes two arguments', asyncSpec (next) ->
-          parseDataSpy = spyOn(up.syntax, 'serverData').and.returnValue({})
+          parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
 
           $child = affix('.child')
           up.on 'click', '.child', (event, $element) -> # no-op

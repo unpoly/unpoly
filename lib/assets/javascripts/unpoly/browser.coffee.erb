@@ -251,6 +251,12 @@ up.browser = (($) ->
     # When updating minimum jQuery, also update the dependency in package.json.
     major >= 2 || (major == 1 && minor >= 9)
 
+  popCookie = (name) ->
+    value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
+    if u.isPresent(value)
+      document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
+    value
+
   ###**
   @function up,browser.whenConfirmed
   @return {Promise}
@@ -330,6 +336,7 @@ up.browser = (($) ->
   puts: puts
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
+  popCookie: popCookie
   hash: hash
 
 )(jQuery)
