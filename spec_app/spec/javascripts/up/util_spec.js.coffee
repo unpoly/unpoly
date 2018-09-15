@@ -4,12 +4,12 @@ describe 'up.util', ->
 
   describe 'JavaScript functions', ->
 
-    describe 'up.util.flatMap', ->
-
-      it 'collects the Array results of the given map function, then concatenates the result arrays into one flat array', ->
-        fun = (x) -> [x, x]
-        result = up.util.flatMap([1, 2, 3], fun)
-        expect(result).toEqual([1, 1, 2, 2, 3, 3])
+#    describe 'up.util.flatMap', ->
+#
+#      it 'collects the Array results of the given map function, then concatenates the result arrays into one flat array', ->
+#        fun = (x) -> [x, x]
+#        result = up.util.flatMap([1, 2, 3], fun)
+#        expect(result).toEqual([1, 1, 2, 2, 3, 3])
 
     describe 'up.util.uniq', ->
 
