@@ -15,7 +15,7 @@ Unreleased
 - New experimental function [`up.Response#getHeader()`](/up.Response.prototype.getHeader). It looks up the header value for the given name in the HTTP response header.
 - { data } is now { params } everywhere
 - up.params module
-- New experimental function [`up.util.values()`]. Like [`Object.values()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Object/values) it returns the values of an object, but also works in IE11.
+- New experimental function [`up.util.isBoolean()`](/up.util.isBoolean).
 
 
 0.56.7
