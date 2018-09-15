@@ -466,36 +466,6 @@ up.form = (($) ->
       u.fail('Could not find [up-switch] field for %o', $target.get(0))
 
   ###**
-  @function up.form.value
-  @experimental
-  ###
-  elementValue = (elementOrSelector) ->
-    if input = u.element(elementOrSelector)
-      tagName = input.tagName
-      type = input.type
-
-      if tagName == 'SELECT'
-        if input.getAttribute('multiple')
-          return u.map(input.querySelectorAll('option:selected'), 'value')
-        else
-          return input.value
-
-      else if type == 'checkbox' || type == 'radio'
-        return input.value if input.checked
-
-      else if type == 'file'
-         # The value of an input[type=file] is the local path displayed in the form.
-         # The actual File objects are in the #files property.
-        files = input.files
-        if input.getAttribute('multiple')
-          return u.toArray(files)
-        else
-          return files[0]
-
-      else
-        return input.value
-
-  ###**
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
   instead of triggering a full page reload.
 
@@ -1017,7 +987,6 @@ up.form = (($) ->
   autosubmit: autosubmit
   fieldSelector: fieldSelector
   submitButtonSelector: submitButtonSelector
-  value: elementValue
 
 )(jQuery)
 

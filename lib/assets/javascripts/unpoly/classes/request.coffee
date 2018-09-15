@@ -32,11 +32,11 @@ class up.Request extends up.Record
   Parameters may be passed as one of the following forms:
 
   1. An object where keys are param names and the values are param values
-  2. An array of `{ name: 'param-name', value: 'param-value' }` objects
-  3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+  2. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+  3. A query string
 
   @property up.Request#params
-  @param {object|Array|FormData} params
+  @param {object|FormData|string} params
   @stable
   ###
 

@@ -330,7 +330,11 @@ up.util = (($) ->
     A function that will be called with each element and (optional) iteration index.
   @stable
   ###
-  each = map
+  each = map # note that the native Array.forEach is very slow (https://jsperf.com/fast-array-foreach)
+
+  eachIterator = (iterator, callback) ->
+    while (entry = iterator.next()) && !entry.done
+      callback(entry.value)
 
   ###**
   Calls the given function for the given number of times.
@@ -2039,6 +2043,7 @@ up.util = (($) ->
   option: option
   fail: fail
   each: each
+  eachIterator: eachIterator
   map: map
   flatMap: flatMap
   times: times

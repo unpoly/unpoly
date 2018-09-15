@@ -7,198 +7,88 @@ class up.params
 up.params = (($) ->
   u = up.util
 
-  detectNature = (params) ->
+  NATURE_MISSING = 0
+  NATURE_ARRAY = 1
+  NATURE_QUERY = 2
+  NATURE_FORM_DATA = 3
+  NATURE_OBJECT = 4
+
+  natureOf = (params) ->
     if u.isMissing(params)
-      'missing'
+      NATURE_MISSING
     else if u.isArray(params)
-      'array'
+      NATURE_ARRAY
     else if u.isString(params)
-      'query'
+      NATURE_QUERY
     else if u.isFormData(params)
-      'formData'
+      NATURE_FORM_DATA
     else if u.isObject(params)
-      'object'
+      NATURE_OBJECT
     else
       up.fail("Unsupport params type: %o", params)
 
   ###**
   Returns an array representation of the given `params`.
 
-  Each array element will be an object with `{ name }` and `{ key }` properties.
-
-  If `params` is a nested object, the nesting will be flattened and expressed
-  in `{ name }` properties instead.
+  Each array element will be an object with `{ name }` and `{ value }` properties.
 
   @function up.params.toArray
   ###
   toArray = (params) ->
-    switch detectNature(params)
-      when 'missing'
-        # No nesting conversion since we're just returning an empty list
+    switch natureOf(params)
+      when NATURE_MISSING
         []
-      when 'array'
-       # No nesting conversion since we're not changing param type
+      when NATURE_ARRAY
         params
-      when 'query'
-        # No nesting conversion since we're converting from one unnested type to another
+      when NATURE_QUERY
         buildArrayFromQuery(params)
-      when 'formData'
+      when NATURE_FORM_DATA
         buildArrayFromFormData(params)
-      when 'object'
-        # We need to flatten the nesting from the given object
-        buildArrayFromNestedObject(params)
+      when NATURE_OBJECT
+        buildArrayFromObject(params)
 
   ###**
   Returns an object representation of the given `params`.
 
-  The object will have a nested structure if `params` has keys like `foo[bar]` or `baz[]`.
-
   @function up.params.toArray
   ###
   toObject = (params) ->
-    switch detectNature(params)
-      when 'missing'
-        # No nesting conversion since we're just returning an object
+    switch natureOf(params)
+      when NATURE_MISSING
         {}
-      when 'array', 'query', 'formData'
-        # We must create a nested object from the given, flat array or FormData keys.
-        # We don't want to duplicate the logic to parse a query string, so we're
-        # converting to array first.
-        buildNestedObjectFromArray(toArray(params))
-      when 'object'
-        # No nesting conversion since we're not changing param types.
+      when NATURE_ARRAY, NATURE_QUERY, NATURE_FORM_DATA
+        buildObjectFromArray(toArray(params))
+      when NATURE_OBJECT
         params
 
   ###**
   Returns [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given `params`.
 
-  If `params` is a nested object, the nesting will be flattened and expressed
-  in the `FormData` keys using square bracket notation (e.g. `user[name]`).
-
   @function up.params.toArray
   ###
   toFormData = (params) ->
-    switch detectNature(params)
-      when 'missing'
+    switch natureOf(params)
+      when NATURE_MISSING
         # Return an empty FormData object
         new FormData()
-      when 'array', 'query', 'object'
+      when NATURE_ARRAY, NATURE_QUERY, NATURE_OBJECT
         buildFormDataFromArray(toArray(params))
-      when 'formData'
+      when NATURE_FORM_DATA
         params
 
   ###**
   Returns an query string for the given `params`.
 
-  If `params` is a nested object, the nesting will be flattened and expressed
-  with square bracket notiation in the query keys (e.g. `user[name]`).
-
   @function up.params.toQuery
   ###
-  toQuery = (params, options = {}) ->
-    query = switch detectNature(params)
-      when 'missing'
+  toQuery = (params) ->
+    switch natureOf(params)
+      when NATURE_MISSING
         ''
-      when 'query'
+      when NATURE_QUERY
         params
-      when 'array', 'formData', 'object'
+      when NATURE_ARRAY, NATURE_FORM_DATA, NATURE_OBJECT
         buildQueryFromArray(toArray(params))
-
-    purpose = options.purpose || 'url'
-    switch purpose
-      when 'url'
-        query = query.replace(/\+/g, '%20')
-      when 'form'
-        query = query.replace(/\%20/g, '+')
-      else
-        up.fail('Unknown purpose %o', purpose)
-
-    query
-
-  ###**
-  # Adds the given name (which might have nesting marks like `foo[bar][][baz]`) and
-  # string value to the given object. The name is recursively expanded to create
-  # an object of nested sub-objects and arrays.
-  #
-  # Throws an error if the given name indicates a structure that is incompatible
-  # with the existing structure in the given object.
-  #
-  # @function addToNestedObject
-  # @internal
-  # @param {Object} obj
-  # @param {string} name
-  # @param {string} value
-  ###
-  addToNestedObject = (obj, name, value) ->
-    # Parse the name:
-    # $1: the next names key without square brackets
-    # $2: the rest of the key until the end
-    match = /^[\[\]]*([^\[\]]+)\]*(.*?)$/.exec(name)
-
-    k = match?[1]
-    after = match?[2]
-
-    console.log("!!! k is %o, v is %o, name is %o", k, value, name)
-
-    if u.isBlank(k)
-      if u.isGiven(value) && name == "[]"
-        return [value]
-      else
-        return null
-
-    if after == ''
-      safeSet(obj, k, value)
-    else if after == "["
-      safeSet(obj, name, value)
-    else if after == "[]"
-      assertTypeForNestedKey(obj, k, 'Array', [])
-      obj[k].push(value)
-    else if match = (/^\[\]\[([^\[\]]+)\]$/.exec(after) || /^\[\](.+)$/.exec(after))
-      childKey = match[1]
-      assertTypeForNestedKey(obj, k, 'Array', [])
-      lastObject = u.last(obj[k])
-      # If the last element in the array is an object, we add more properties to that object,
-      # but only if that same property hasn't been set on the object before.
-      # If we have seen it before (or if the last elementis not an object) we assume the user
-      # wants to push a new value into the array.
-      if u.isObject(lastObject) && !nestedObjectHasDeepKey(lastObject, childKey)
-        addToNestedObject(lastObject, childKey, value)
-      else
-        obj[k].push addToNestedObject({}, childKey, value)
-    else
-      assertTypeForNestedKey(obj, k, 'Object', {})
-      safeSet(obj, k, addToNestedObject(obj[k], after, value))
-
-    obj
-
-  safeSet = (obj, k, value) ->
-    unless Object.prototype.hasOwnProperty(k)
-      obj[k] = value
-
-  assertTypeForNestedKey = (obj, k, type, defaultValue) ->
-    if value = obj[k]
-      unless u["is#{type}"](value)
-        up.fail("expected #{type} for params key %o, but got %o", k, value)
-    else
-      obj[k] = defaultValue
-
-  nestedObjectHasDeepKey = (hash, key) ->
-    console.info("nestedParamsObjectHasKey (%o, %o)", hash, key)
-    return false if /\[\]/.test(key)
-
-    keyParts = key.split(/[\[\]]+/)
-
-    console.info("has keyParts %o", keyParts)
-
-    for keyPart in keyParts
-      console.info("nestedParamsObjectHasKey with keyPart %o and hash %o", keyPart, hash)
-      continue if keyPart == ''
-      return false unless u.isObject(hash) && hash.hasOwnProperty(keyPart)
-      hash = hash[keyPart]
-
-    console.info("nestedParamsObjectHasKey returns TRUE")
-
-    true
 
   arrayEntryToQuery = (entry) ->
     value = entry.value
@@ -221,6 +111,10 @@ up.params = (($) ->
   isPrimitiveValue = (value) ->
     u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value)
 
+  safeSet = (obj, k, value) ->
+    unless Object.prototype.hasOwnProperty(k)
+      obj[k] = value
+
   buildQueryFromArray = (array) ->
     parts = u.map(array, arrayEntryToQuery)
     parts = u.compact(parts)
@@ -229,7 +123,7 @@ up.params = (($) ->
   buildArrayFromQuery = (query) ->
     array = []
     for part in query.split('&')
-      if u.isPresent(part)
+      if part
         [name, value] = part.split('=')
         name = decodeURIComponent(name)
         # There are three forms we need to handle:
@@ -243,34 +137,22 @@ up.params = (($) ->
         array.push({ name, value })
     array
 
-  buildArrayFromNestedObject = (value, prefix) ->
-    if u.isArray(value)
-      u.flatMap value, (v) -> buildArrayFromNestedObject(v, "#{prefix}[]")
-    else if u.isObject(value)
-      entries = []
-      for k, v of value
-        p = if prefix then "#{prefix}[#{k}]" else k
-        entries = entries.concat(buildArrayFromNestedObject(v, p))
-      entries
-    else if u.isMissing(value)
-      [{ name: prefix, value: null }]
-    else
-      if u.isMissing(prefix)
-        throw new Error("value must be a Hash")
-      [ { name: prefix, value: value } ]
+  buildArrayFromObject = (object) ->
+    array = []
+    for k, v of object
+      array.push(name: k, value: v)
+    array
 
-  buildNestedObjectFromArray = (array) ->
-      obj = {}
-      for entry in array
-        addToNestedObject(obj, entry.name, entry.value)
-      obj
+  buildObjectFromArray = (array) ->
+    obj = {}
+    for entry in array
+      safeSet(obj, entry.name, entry.value)
+    obj
 
   buildArrayFromFormData = (formData) ->
-    ensureCanInspectFormData()
     array = []
-    iterator = formData.entries()
-    while (entry = iterator.next()) && !entry.done
-      [name, value] = entry.value
+    u.eachIterator formData.entries(), (value) ->
+      [name, value] = value
       array.push({ name, value })
     array
 
@@ -278,17 +160,11 @@ up.params = (($) ->
     formData = new FormData()
     for entry in array
       formData.append(entry.name, entry.value)
-    <% if ENV['JS_KNIFE'] %>formData.originalArray = array<% end %>
     formData
-
-  ensureCanInspectFormData = ->
-    # Throw a nice error for IE11
-    unless up.browser.canInspectFormData()
-      up.fail('This browser cannot inspect FormData values. Consider storing params as objects or arrays.')
 
   buildURL = (base, params) ->
     parts = [base, toQuery(params)]
-    parts = u.select(parts, u.isPresent)
+    parts = u.compact(parts)
     separator = if u.contains(base, '?') then '&' else '?'
     parts.join(separator)
 
@@ -319,23 +195,23 @@ up.params = (($) ->
   @return {string|object|FormData|Array}
   ###
   merge = (params, otherParams) ->
-    switch detectNature(params)
-      when 'missing'
+    switch natureOf(params)
+      when NATURE_MISSING
         merge({}, otherParams)
-      when 'array'
+      when NATURE_ARRAY
         otherArray = toArray(otherParams)
         params.concat(otherArray)
-      when 'formData'
+      when NATURE_FORM_DATA
         formData = new FormData()
         assign(formData, params)
         assign(formData, otherParams)
         formData
-      when 'query'
+      when NATURE_QUERY
         otherQuery = toQuery(otherParams)
         parts = u.select([params, otherQuery], u.isPresent)
         parts.join('&')
-      when 'object'
-        u.deepMerge(params, toObject(otherParams))
+      when NATURE_OBJECT
+        u.merge(params, toObject(otherParams))
 
   ###**
   Extends the given `params` with entries from the given `otherParams`.
@@ -349,20 +225,20 @@ up.params = (($) ->
   @return {string|object|FormData|Array}
   ###
   assign = (params, otherParams) ->
-    switch detectNature(params)
-      when 'array'
+    switch natureOf(params)
+      when NATURE_ARRAY
         otherArray = toArray(otherParams)
         params.push(otherArray...)
         params
-      when 'formData'
+      when NATURE_FORM_DATA
         otherArray = toArray(otherParams)
         for entry in otherArray
           params.append(entry.name, entry.value)
         params
-      when 'object'
-        u.deepAssign(params, toObject(otherParams))
-      when 'query', 'missing'
-        # `params` is immutable, so we merge instead.
+      when NATURE_OBJECT
+        u.assign(params, toObject(otherParams))
+      when NATURE_QUERY, NATURE_MISSING
+        # Strings and undefined are immutable, so we merge instead.
         merge(params, otherParams)
 
   submittingButton = (form) ->
@@ -382,28 +258,12 @@ up.params = (($) ->
   @param {Element|jQuery|string} form
   @return {Object}
   ###
-  fromForm = (form ,options) ->
+  fromForm = (form) ->
     if form = u.element(form)
-      options = u.options(options)
-      params = {}
-
-      inputs = u.toArray(form.querySelectorAll(up.form.fieldSelector()))
+      fd = new FormData(form)
       if button = submittingButton(form)
-        inputs.push(button)
-
-      u.each inputs, (input) ->
-        if input && (name = input.name) && !input.disabled
-          # There are four cases:
-          # 1. The input has an undefined value. We don't add it to the params.
-          # 2. The input is [multiple] and clientValue() returns an array.
-          #    We add them all to the params. Input's [name] should be an array ([] suffix)
-          #    for this to be unpacked conveniently on the server.
-          # 3. The input has another defined value. We add it to the params.
-          valueOrValues = up.form.value(input)
-          u.each u.wrapArray(valueOrValues), (value) ->
-            add(params, name, value)
-
-      params
+        fd.append(button.name, button.value)
+      return fd
 
   ###**
   Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.

@@ -28,7 +28,7 @@ class up.FollowVariant
   fullSelector: (additionalClause = '') =>
     parts = []
     @selectors.forEach (variantSelector) ->
-      ['a', '[up-href]'].forEach (tagSelector) ->
+      for tagSelector in ['a', '[up-href]']
         parts.push "#{tagSelector}#{variantSelector}#{additionalClause}"
     parts.join(', ')
 
