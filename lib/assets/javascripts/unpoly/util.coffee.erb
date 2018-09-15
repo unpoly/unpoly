@@ -1999,13 +1999,13 @@ up.util = (($) ->
     values = select(values, isPresent)
     values
 
-  wrapArray = (objOrArray) ->
-    if isUndefined(objOrArray)
-      []
-    else if isArray(objOrArray)
-      objOrArray
-    else
-      [objOrArray]
+#  wrapArray = (objOrArray) ->
+#    if isUndefined(objOrArray)
+#      []
+#    else if isArray(objOrArray)
+#      objOrArray
+#    else
+#      [objOrArray]
 
   isEqual = (a, b) ->
     if typeof(a) != typeof(b)
@@ -2158,7 +2158,7 @@ up.util = (($) ->
   writeInlineStyle: writeInlineStyle
   hasCssTransition: hasCssTransition
   splitValues : splitValues
-  wrapArray: wrapArray
+#  wrapArray: wrapArray
   values: objectValues
 
 )(jQuery)
