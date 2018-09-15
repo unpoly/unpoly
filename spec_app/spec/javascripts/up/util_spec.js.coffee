@@ -1144,37 +1144,37 @@ describe 'up.util', ->
         reverseResult = up.util.merge(null, obj)
         expect(reverseResult).toEqual { a: 1, b: 2 }
 
-    describe 'up.util.deepMerge', ->
-
-      it 'recursively merges the given objects', ->
-        obj = { a: '1', b: { c: '2', d: '3' } }
-        other = { e: '4', b: { f: '5', g: '6' }}
-        obj = up.util.deepMerge(obj, other)
-        expect(obj).toEqual { a: '1', e: '4', b: { c: '2', d: '3', f: '5', g: '6' } }
-
-      it 'ignores undefined arguments', ->
-        obj = { a: 1, b: 2 }
-
-        result = up.util.deepMerge(obj, undefined)
-        expect(result).toEqual { a: 1, b: 2 }
-
-        reverseResult = up.util.deepMerge(undefined, obj)
-        expect(reverseResult).toEqual { a: 1, b: 2 }
-
-      it 'ignores null arguments', ->
-        obj = { a: 1, b: 2 }
-
-        result = up.util.deepMerge(obj, null)
-        expect(result).toEqual { a: 1, b: 2 }
-
-        reverseResult = up.util.deepMerge(null, obj)
-        expect(reverseResult).toEqual { a: 1, b: 2 }
-
-      it 'overwrites (and does not concatenate) array values', ->
-        obj = { a: ['1', '2'] }
-        other = { a: ['3', '4'] }
-        obj = up.util.deepMerge(obj, other)
-        expect(obj).toEqual { a: ['3', '4'] }
+#    describe 'up.util.deepMerge', ->
+#
+#      it 'recursively merges the given objects', ->
+#        obj = { a: '1', b: { c: '2', d: '3' } }
+#        other = { e: '4', b: { f: '5', g: '6' }}
+#        obj = up.util.deepMerge(obj, other)
+#        expect(obj).toEqual { a: '1', e: '4', b: { c: '2', d: '3', f: '5', g: '6' } }
+#
+#      it 'ignores undefined arguments', ->
+#        obj = { a: 1, b: 2 }
+#
+#        result = up.util.deepMerge(obj, undefined)
+#        expect(result).toEqual { a: 1, b: 2 }
+#
+#        reverseResult = up.util.deepMerge(undefined, obj)
+#        expect(reverseResult).toEqual { a: 1, b: 2 }
+#
+#      it 'ignores null arguments', ->
+#        obj = { a: 1, b: 2 }
+#
+#        result = up.util.deepMerge(obj, null)
+#        expect(result).toEqual { a: 1, b: 2 }
+#
+#        reverseResult = up.util.deepMerge(null, obj)
+#        expect(reverseResult).toEqual { a: 1, b: 2 }
+#
+#      it 'overwrites (and does not concatenate) array values', ->
+#        obj = { a: ['1', '2'] }
+#        other = { a: ['3', '4'] }
+#        obj = up.util.deepMerge(obj, other)
+#        expect(obj).toEqual { a: ['3', '4'] }
 
     describe 'up.util.memoize', ->
 

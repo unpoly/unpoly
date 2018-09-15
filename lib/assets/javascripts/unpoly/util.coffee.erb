@@ -668,32 +668,32 @@ up.util = (($) ->
   merge = (sources...) ->
     assign({}, sources...)
 
-  ###**
-  Creates a new object by recursively merging together the properties from the given objects.
-
-  @function up.util.deepMerge
-  @param {Array<Object>} sources...
-  @return Object
-
-  @internal
-  ###
-  deepMerge = (sources...) ->
-    deepAssign({}, sources...)
-
-  ###**
-  @function up.util.deepAssign
-  @param {Array<Object>} sources...
-  @return Object
-  ###
-  deepAssign = (target, sources...) ->
-    for source in sources
-      for key, newValue of source
-        if isOptions(newValue)
-          oldValue = target[key]
-          if isOptions(oldValue)
-            newValue = deepMerge(oldValue, newValue)
-        target[key] = newValue
-    target
+#  ###**
+#  Creates a new object by recursively merging together the properties from the given objects.
+#
+#  @function up.util.deepMerge
+#  @param {Array<Object>} sources...
+#  @return Object
+#
+#  @internal
+#  ###
+#  deepMerge = (sources...) ->
+#    deepAssign({}, sources...)
+#
+#  ###**
+#  @function up.util.deepAssign
+#  @param {Array<Object>} sources...
+#  @return Object
+#  ###
+#  deepAssign = (target, sources...) ->
+#    for source in sources
+#      for key, newValue of source
+#        if isOptions(newValue)
+#          oldValue = target[key]
+#          if isOptions(oldValue)
+#            newValue = deepMerge(oldValue, newValue)
+#        target[key] = newValue
+#    target
 
   ###**
   Creates an options hash from the given argument and some defaults.
@@ -709,7 +709,7 @@ up.util = (($) ->
   ###
   newOptions = (object, defaults) ->
     if defaults
-      deepMerge(defaults, object)
+      merge(defaults, object)
     else if object
       copy(object)
     else
@@ -2037,8 +2037,8 @@ up.util = (($) ->
   copy: copy
   deepCopy: deepCopy
   merge: merge
-  deepAssign: deepAssign
-  deepMerge: deepMerge
+#  deepAssign: deepAssign
+#  deepMerge: deepMerge
   options: newOptions
   option: option
   fail: fail
