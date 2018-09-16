@@ -2,10 +2,6 @@
 
 u = up.util
 
-# New features here:
-# - Array of destructors is deprecated
-# - Batch compilers get an array of data
-# - Batch compilers cannot return destructors
 class up.CompilePass
 
   constructor: (@$root, @compilers, options = {}) ->

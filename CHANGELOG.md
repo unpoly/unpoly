@@ -21,6 +21,9 @@ Unreleased
 - New experimental function [`up.util.isBoolean()`](/up.util.isBoolean).
 - Now requires FormData polyfill for IE11
 - New configuration option [`up.form.config.submitButtons`](/up.form.config#config.submitButtons)
+- [Compilers](/up.compiler) with `{ batch: true }` now receive an array of [`[up-data]`](/up-data) objects as their second argument.
+- [Compilers](/up.compiler) with `{ batch: true }` can no longer return destructor functions. Previously the behavior of this was undefined, now it throws an error.
+- Returning an array of [destructor functions](/up.compiler#cleaning-up-after-yourself) from [`up.compiler()`](/up.compiler) is now deprecated. Please return a single destructor function instead.
 
 
 0.56.7
