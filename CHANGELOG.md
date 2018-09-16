@@ -24,6 +24,9 @@ Unreleased
 - [Compilers](/up.compiler) with `{ batch: true }` now receive an array of [`[up-data]`](/up-data) objects as their second argument.
 - [Compilers](/up.compiler) with `{ batch: true }` can no longer return destructor functions. Previously the behavior of this was undefined, now it throws an error.
 - Returning an array of [destructor functions](/up.compiler#cleaning-up-after-yourself) from [`up.compiler()`](/up.compiler) is now deprecated. Please return a single destructor function instead.
+- [`up.follow()`](/up.follow) now accepts a `{ url }` option. It can be used to override the given link's `[href]` attribute.
+- [`up.preload()`](/up.preload) now accepts an options hash that will be passed on to the function making the preload request.
+- [`up.syntax.data()`](/up.syntax.data) now returns `undefined` if the given object has no (or an empty) `up-data` attribute. It previously returned an empty object.
 
 
 0.56.7

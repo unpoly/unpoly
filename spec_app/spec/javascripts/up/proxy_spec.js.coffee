@@ -773,11 +773,24 @@ describe 'up.proxy', ->
             cachedPromise = up.proxy.get(url: '/path', target: '.target')
             expect(u.isPromise(cachedPromise)).toBe(true)
 
-        it "does not load a link whose method has side-effects", asyncSpec (next) ->
-          $link = affix('a[href="/path"][data-method="post"]')
-          up.proxy.preload($link)
+        it "does not load a link whose method has side-effects", (done) ->
+          affix('.target')
+          $link = affix('a[href="/path"][up-target=".target"][data-method="post"]')
+          preloadPromise = up.proxy.preload($link)
 
-          next => expect(up.proxy.get(url: '/path')).toBeUndefined()
+          promiseState(preloadPromise).then (result) ->
+            expect(result.state).toEqual('rejected')
+            expect(up.proxy.get(url: '/path', target: '.target')).toBeUndefined()
+            done()
+
+        it 'accepts options', asyncSpec (next) ->
+          affix('.target')
+          $link = affix('a[href="/path"][up-target=".target"]')
+          up.proxy.preload($link, url: '/options-path')
+
+          next =>
+            cachedPromise = up.proxy.get(url: '/options-path', target: '.target')
+            expect(u.isPromise(cachedPromise)).toBe(true)
 
         describe 'for an [up-target] link', ->
 
