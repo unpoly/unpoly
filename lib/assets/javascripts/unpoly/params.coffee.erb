@@ -50,7 +50,7 @@ up.params = (($) ->
   ###**
   Returns an object representation of the given `params`.
 
-  @function up.params.toArray
+  @function up.params.toObject
   ###
   toObject = (params) ->
     switch natureOf(params)
@@ -64,7 +64,7 @@ up.params = (($) ->
   ###**
   Returns [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given `params`.
 
-  @function up.params.toArray
+  @function up.params.toFormData
   ###
   toFormData = (params) ->
     switch natureOf(params)
@@ -112,8 +112,10 @@ up.params = (($) ->
     u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value)
 
   safeSet = (obj, k, value) ->
-    unless Object.prototype.hasOwnProperty(k)
-      obj[k] = value
+    obj[k] = value  unless u.isBasicObjectProperty(k)
+
+#  safeGet = (obj, k) ->
+#    obj[k] unless u.isBasicObjectPropery(k)
 
   buildQueryFromArray = (array) ->
     parts = u.map(array, arrayEntryToQuery)
@@ -213,6 +215,24 @@ up.params = (($) ->
       when NATURE_OBJECT
         u.merge(params, toObject(otherParams))
 
+#  ###**
+#  Returns the param value with the given name.
+#
+#  @function up.params.get
+#  ###
+#  get = (params, name) ->
+#    switch natureOf(params)
+#      when NATURE_MISSING
+#        undefined
+#      when NATURE_ARRAY
+#        u.detect params, (entry) -> entry.name == name
+#      when NATURE_FORM_DATA
+#        params.get(name)
+#      when NATURE_QUERY
+#        safeGet(toObject(params), name)
+#      when NATURE_OBJECT
+#        safeGet(params, name)
+
   ###**
   Extends the given `params` with entries from the given `otherParams`.
 
@@ -288,6 +308,7 @@ up.params = (($) ->
   toQuery: toQuery
   toFormData: toFormData
   buildURL: buildURL
+#  get: get
   add: add
   assign: assign
   merge: merge

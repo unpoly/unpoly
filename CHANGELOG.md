@@ -16,6 +16,7 @@ Unreleased
 - { data } is now { params } everywhere
 - up.params module
 - New experimental function [`up.util.isBoolean()`](/up.util.isBoolean).
+- Now requires FormData polyfill for IE11
 
 
 0.56.7

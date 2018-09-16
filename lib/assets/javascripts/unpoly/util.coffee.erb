@@ -1983,6 +1983,9 @@ up.util = (($) ->
   isBodyDescendant = (element) ->
     $(element).parents('body').length > 0
 
+  isBasicObjectProperty = (k) ->
+    Object.prototype.hasOwnProperty(k)
+
   isEqual = (a, b) ->
     if typeof(a) != typeof(b)
       false
@@ -2006,16 +2009,6 @@ up.util = (($) ->
 #      objOrArray
 #    else
 #      [objOrArray]
-
-  isEqual = (a, b) ->
-    if typeof(a) != typeof(b)
-      false
-    else if isArray(a)
-      a.length == b.length && all(a, (elem, index) -> isEqual(elem, b[index]))
-    else if isObject(a)
-      fail('isEqual cannot compare objects yet')
-    else
-      a == b
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   offsetParent: offsetParent
@@ -2147,6 +2140,7 @@ up.util = (($) ->
   muteRejection: muteRejection
   rejectOnError: rejectOnError
   isBodyDescendant: isBodyDescendant
+  isBasicObjectProperty: isBasicObjectProperty
   isCrossDomain: isCrossDomain
   microtask: microtask
   isEqual: isEqual
