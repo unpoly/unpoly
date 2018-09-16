@@ -180,7 +180,7 @@ up.dom = (($) ->
     You can also pass `false` to explicitly prevent the title from being updated.
   @param {string} [options.method='get']
     The HTTP method to use for the request.
-  @param {Object|FormData|string} [options.params]
+  @param {Object|FormData|string|Array} [options.params]
     Parameters that should be sent as the request's payload.
 
     Parameters can either be passed as either:
@@ -189,6 +189,7 @@ up.dom = (($) ->
        property values become the param values) or as
     2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
     3. a query string
+    4. an array of `{ name: 'param-name', value: 'param-value' }` objects
 
   @param {string} [options.transition='none']
   @param {string|boolean} [options.history=true]

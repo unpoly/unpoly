@@ -192,14 +192,16 @@ up.proxy = (($) ->
     requests, if available. If set to `false` a network connection will always be attempted.
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
-  @param {Object|FormData|string} [options.params={}]
+  @param {Object|FormData|string|Array} [options.params={}]
     Parameters that should be sent as the request's payload.
 
     Parameters may be passed as one of the following forms:
 
-    1. An object where keys are param names and the values are param values
-    2. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
-    3. A query string
+    1. an object (where the property names become the param names and the
+       property values become the param values) or as
+    2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+    3. a query string
+    4. an array of `{ name: 'param-name', value: 'param-value' }` objects
   @param {string} [options.timeout]
     A timeout in milliseconds.
 
@@ -286,14 +288,16 @@ up.proxy = (($) ->
   @param {Object} [request.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
-  @param {Object|FormData|string} [options.params]
+  @param {Object|FormData|string|Array} [options.params]
     Parameters that should be sent as the request's payload.
 
     Parameters may be passed as one of the following forms:
 
-    1. An object where keys are param names and the values are param values
-    2. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
-    3. A query string
+    1. an object (where the property names become the param names and the
+       property values become the param values) or as
+    2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+    3. a query string
+    4. an array of `{ name: 'param-name', value: 'param-value' }` objects
   @param {string} [request.timeout]
     A timeout in milliseconds for the request.
 
