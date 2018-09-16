@@ -40,7 +40,7 @@ class up.FollowVariant
 
   followLink: ($link, options) =>
     options = u.options(options)
-    followEventAttrs = { message: 'Following link', $link: $link, $element: $link, followOptions: options }
+    followEventAttrs = { message: 'Following link', $link: $link, $element: $link }
     up.bus.whenEmitted('up:link:follow', followEventAttrs).then =>
       up.feedback.start $link, options, =>
         @followNow($link, options)
