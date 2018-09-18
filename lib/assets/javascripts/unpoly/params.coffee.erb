@@ -276,14 +276,55 @@ up.params = (($) ->
 
   @function up.params.fromForm
   @param {Element|jQuery|string} form
-  @return {Object}
+  @return {Array}
   ###
   fromForm = (form) ->
     if form = u.element(form)
-      fd = new FormData(form)
+      fields = form.querySelectorAll(up.form.fieldSelector())
+      console.debug("Fields of %o are %o", form, fields)
       if button = submittingButton(form)
-        fd.append(button.name, button.value)
-      return fd
+        fields = u.toArray(fields)
+        fields.push(button)
+      return u.flatMap(fields, fromField)
+
+  ###**
+  Extracts request params from the given [input field](/up.form.config#config.fields).
+
+  Note that some fields may produce multiple params, such as `<select multiple>`.
+
+  @function up.params.fromField
+  @param {Element|jQuery|string} form
+  @return {Array}
+  ###
+  fromField = (field) ->
+    params = []
+    if (field = u.element(field)) && (name = field.name) && (!field.disabled)
+      tagName = field.tagName
+      type = field.type
+      if tagName == 'SELECT'
+        for option in field.querySelectorAll('option')
+          if option.selected
+            params.push
+             name: name
+             value: option.value
+      else if type == 'checkbox' || type == 'radio'
+        if field.checked
+          params.push
+            name: name
+            value: field.value
+      else if type == 'file'
+        # The value of an input[type=file] is the local path displayed in the form.
+        # The actual File objects are in the #files property.
+        for file in field.files
+          params.push
+            name: name
+            value: file
+      else
+        params.push
+          name: name
+          value: field.value
+    console.debug("-- params for %o are %o", field, params)
+    params
 
   ###**
   Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.
