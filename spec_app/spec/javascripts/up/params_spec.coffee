@@ -17,8 +17,8 @@ describe 'up.params', ->
 
     describe 'up.params.toQuery', ->
 
-      encodedOpeningBracket = '%5B'
-      encodedClosingBracket = '%5D'
+#      encodedOpeningBracket = '%5B'
+#      encodedClosingBracket = '%5D'
       encodedSpace = '%20'
 
       it 'returns the query section for the given object', ->
