@@ -199,9 +199,16 @@ up.browser = (($) ->
   @return {boolean}
   @experimental
   ###
-  canInspectableFormData = u.memoize ->
-    api = window.FormData
-    !!(api && api.prototype.entries)
+  canFormData = u.memoize ->
+    !!window.FormData
+
+  ###**
+  @function up.browser.canInspectFormData
+  @return {boolean}
+  @internal
+  ###
+  canInspectFormData = u.memoize ->
+    canFormData() && !!FormData.prototype.entries
 
   ###**
   Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
@@ -280,7 +287,7 @@ up.browser = (($) ->
       # We don't require pushState in order to cater for Safari booting Unpoly with a non-GET method.
       # canPushState() &&
       canDOMParser() &&
-      canInspectableFormData() &&
+      canFormData() &&
       canCssTransition() &&
       canInputEvent() &&
       canPromise()
@@ -319,6 +326,8 @@ up.browser = (($) ->
   navigate: navigate
   submitForm: submitForm
   canPushState: canPushState
+  canFormData: canFormData
+  canInspectFormData: canInspectFormData
   canCustomElements: canCustomElements
   documentViewportSelector: documentViewportSelector
   whenConfirmed: whenConfirmed

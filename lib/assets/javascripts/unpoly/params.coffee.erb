@@ -166,7 +166,7 @@ up.params = (($) ->
 
   buildURL = (base, params) ->
     parts = [base, toQuery(params)]
-    parts = u.compact(parts)
+    parts = u.select(parts, u.isPresent)
     separator = if u.contains(base, '?') then '&' else '?'
     parts.join(separator)
 

@@ -56,6 +56,12 @@ describe 'up.params', ->
         string = up.params.toQuery({'foo': ''})
         expect(string).toEqual('foo=')
 
+      it 'omits non-primitive values (like Files) from the given params', ->
+        # I would like to construct a File, but IE11 does not support the constructor
+        blob = new Blob([])
+        string = up.params.toQuery(string: 'foo', blob: blob)
+        expect(string).toEqual('string=foo')
+
       it "omits an equal sign if a key's value is null", ->
         string = up.params.toQuery({'foo': null})
         expect(string).toEqual('foo')
@@ -64,8 +70,14 @@ describe 'up.params', ->
         string = up.params.toQuery({ 'my+key': 'my+value' })
         expect(string).toEqual('my%2Bkey=my%2Bvalue')
 
-      it 'converts a FormData object to a query string'
+      describeCapability 'canInspectFormData', ->
 
+        it 'converts a FormData object to a query string', ->
+          fd = new FormData()
+          fd.append('key1', 'value1')
+          fd.append('key2', 'value2')
+          string = up.params.toQuery(fd)
+          expect(string).toEqual('key1=value1&key2=value2')
 
     describe 'up.params.toArray', ->
 
@@ -129,24 +141,63 @@ describe 'up.params', ->
           { name: 'my=key', value: 'my=value' },
         ])
 
-      it 'converts a FormData object to an array'
+      describeCapability 'canInspectFormData', ->
+
+        it 'converts a FormData object to an array', ->
+          fd = new FormData()
+          fd.append('key1', 'value1')
+          fd.append('key2', 'value2')
+          array = up.params.toArray(fd)
+          expect(array).toEqual([
+            { name: 'key1', value: 'value1' },
+            { name: 'key2', value: 'value2' },
+          ])
 
 
     describe 'up.params.toFormData', ->
 
-      it 'converts undefined to an empty FormData object'
+      describeCapability 'canInspectFormData', ->
 
-      it 'converts null to an empty FormDat object'
+        it 'converts undefined to an empty FormData object', ->
+          params = undefined
+          formData = up.params.toFormData(params)
+          expect(up.params.toArray(formData)).toEqual []
 
-      it 'converts a FormData object to a FormData object'
+        it 'converts null to an empty FormData object', ->
+          params = null
+          formData = up.params.toFormData(params)
+          expect(up.params.toArray(formData)).toEqual []
 
-      it 'converts an object to a FormData object'
+        it 'converts an object to a FormData object', ->
+          params = {
+            key1: 'value1',
+            key2: 'value2'
+          }
+          formData = up.params.toFormData(params)
+          expect(up.params.toArray(formData)).toEqual [
+            { name: 'key1', value: 'value1' },
+            { name: 'key2', value: 'value2' },
+          ]
 
-      it 'returns a FormData object unchanged'
+        it 'returns a FormData object unchanged', ->
+          params = new FormData()
+          formData = up.params.toFormData(params)
+          expect(formData).toBe(params)
 
-      it 'converts a query string to a FormData object'
+        it 'converts a query string to a FormData object', ->
+          params = 'key1=value1&key2=value2'
+          formData = up.params.toFormData(params)
+          expect(up.params.toArray(formData)).toEqual [
+            { name: 'key1', value: 'value1' },
+            { name: 'key2', value: 'value2' },
+          ]
 
-      it 'unescapes percent-encoded characters from a query string'
+        it 'unescapes percent-encoded characters from a query string', ->
+          params = 'my%20key=my%20value'
+          formData = up.params.toFormData(params)
+          expect(up.params.toArray(formData)).toEqual [
+            { name: 'my key', value: 'my value' }
+          ]
 
 
     describe 'up.params.toObject', ->
@@ -209,8 +260,16 @@ describe 'up.params', ->
 
       describe '(with FormData)', ->
 
-        it 'adds a single entry'
+        describeCapability 'canInspectFormData', ->
 
+          it 'adds a single entry', ->
+            formData = new FormData()
+            formData.append('key1', 'value1')
+            up.params.add(formData, 'key2', 'value2')
+            expect(up.params.toArray(formData)).toEqual [
+              { name: 'key1', value: 'value1' },
+              { name: 'key2', value: 'value2' },
+            ]
 
       describe '(with missing params)', ->
 
@@ -249,18 +308,26 @@ describe 'up.params', ->
           obj = up.params.merge(obj, undefined)
           expect(obj).toEqual({ a: '1', b: '2' })
 
-        it 'merges a FormData object'
+        describeCapability 'canInspectFormData', ->
+
+          it 'merges a FormData object', ->
+            obj = { a: '1', b: '2' }
+            formData = new FormData()
+            formData.append('c', '3')
+            formData.append('d', '4')
+            merged = up.params.merge(obj, formData)
+            expect(merged).toEqual({ a: '1', b: '2', c: '3', d: '4' })
 
       describe '(with array)', ->
 
         it 'merges a flat object', ->
-          obj = [
+          array = [
             { name: 'a', value: '1' },
             { name: 'b', value: '2' }
           ]
           other = { c: '3', d: '4'}
-          obj = up.params.merge(obj, other)
-          expect(obj).toEqual [
+          array = up.params.merge(array, other)
+          expect(array).toEqual [
             { name: 'a', value: '1' },
             { name: 'b', value: '2' },
             { name: 'c', value: '3' },
@@ -268,7 +335,7 @@ describe 'up.params', ->
           ]
 
         it 'merges another array', ->
-          obj = [
+          array = [
             { name: 'a', value: '1' },
             { name: 'b', value: '2' }
           ]
@@ -276,8 +343,8 @@ describe 'up.params', ->
             { name: 'c', value: '3' },
             { name: 'd', value: '4' }
           ]
-          obj = up.params.merge(obj, other)
-          expect(obj).toEqual [
+          array = up.params.merge(array, other)
+          expect(array).toEqual [
             { name: 'a', value: '1' },
             { name: 'b', value: '2' },
             { name: 'c', value: '3' },
@@ -285,13 +352,13 @@ describe 'up.params', ->
           ]
 
         it 'merges a query string', ->
-          obj = [
+          array = [
             { name: 'a', value: '1' },
             { name: 'b', value: '2' }
           ]
           other = 'c=3&d=4'
-          obj = up.params.merge(obj, other)
-          expect(obj).toEqual [
+          array = up.params.merge(array, other)
+          expect(array).toEqual [
             { name: 'a', value: '1' },
             { name: 'b', value: '2' },
             { name: 'c', value: '3' },
@@ -299,56 +366,323 @@ describe 'up.params', ->
           ]
 
         it 'does not change or crash when merged with undefined', ->
-          obj = [
+          array = [
             { name: 'a', value: '1' },
             { name: 'b', value: '2' }
           ]
-          obj = up.params.merge(obj, undefined)
-          expect(obj).toEqual [
+          array = up.params.merge(array, undefined)
+          expect(array).toEqual [
             { name: 'a', value: '1' },
             { name: 'b', value: '2' }
           ]
 
-        it 'merges a FormData object'
+        describeCapability 'canInspectFormData', ->
+
+          it 'merges a FormData object', ->
+            array = [
+              { name: 'a', value: '1' },
+              { name: 'b', value: '2' }
+            ]
+            formData = new FormData()
+            formData.append('c', '3')
+            formData.append('d', '4')
+            merged = up.params.merge(array, formData)
+            expect(merged).toEqual [
+              { name: 'a', value: '1' },
+              { name: 'b', value: '2' },
+              { name: 'c', value: '3' },
+              { name: 'd', value: '4' }
+            ]
+
 
       describe '(with query)', ->
 
         it 'merges a flat object', ->
-          obj = 'a=1&b=2'
+          query = 'a=1&b=2'
           other = { c: '3', d: '4'}
-          obj = up.params.merge(obj, other)
-          expect(obj).toEqual('a=1&b=2&c=3&d=4')
+          query = up.params.merge(query, other)
+          expect(query).toEqual('a=1&b=2&c=3&d=4')
 
         it 'merges an array', ->
-          obj = 'a=1&b=2'
+          query = 'a=1&b=2'
           other = [
             { name: 'c', value: '3' },
             { name: 'd', value: '4' }
           ]
-          obj = up.params.merge(obj, other)
-          expect(obj).toEqual('a=1&b=2&c=3&d=4')
+          query = up.params.merge(query, other)
+          expect(query).toEqual('a=1&b=2&c=3&d=4')
 
         it 'merges another query string', ->
-          obj = 'a=1&b=2'
+          query = 'a=1&b=2'
           other = 'c=3&d=4'
-          obj = up.params.merge(obj, other)
-          expect(obj).toEqual('a=1&b=2&c=3&d=4')
+          query = up.params.merge(query, other)
+          expect(query).toEqual('a=1&b=2&c=3&d=4')
 
         it 'does not change or crash when merged with undefined', ->
-          obj = 'a=1&b=2'
-          obj = up.params.merge(obj, undefined)
-          expect(obj).toEqual('a=1&b=2')
+          query = 'a=1&b=2'
+          query = up.params.merge(query, undefined)
+          expect(query).toEqual('a=1&b=2')
 
-        it 'merges a FormData object'
+        describeCapability 'canInspectFormData', ->
+
+          it 'merges a FormData object', ->
+            query = 'a=1&b=2'
+            formData = new FormData()
+            formData.append('c', '3')
+            formData.append('d', '4')
+            merged = up.params.merge(query, formData)
+            expect(merged).toEqual('a=1&b=2&c=3&d=4')
 
     describe 'up.params.buildURL', ->
 
-      it 'must have tests'
+      it 'composes a URL from a base URL (without query section) and a query section', ->
+        base = 'http://foo.bar/path'
+        query = 'key=value'
+        expect(up.params.buildURL(base, query)).toEqual('http://foo.bar/path?key=value')
 
-    describe 'up.params.fromForm', ->
+      it 'accepts other forms of params (instead of query sections)', ->
+        base = 'http://foo.bar/path'
+        params = { key: 'value' }
+        expect(up.params.buildURL(base, params)).toEqual('http://foo.bar/path?key=value')
 
-      it 'must have tests'
+      it 'adds more params to a base URL that already has a query section', ->
+        base = 'http://foo.bar/path?key1=value1'
+        params = { key2: 'value2' }
+        expect(up.params.buildURL(base, params)).toEqual('http://foo.bar/path?key1=value1&key2=value2')
+
+      it 'does not add a question mark to the base URL if the given params are blank', ->
+        base = 'http://foo.bar/path'
+        params = ''
+        expect(up.params.buildURL(base, params)).toEqual('http://foo.bar/path')
 
     describe 'up.params.fromURL', ->
 
-      it 'must have tests'
+      it 'returns the query section from an URL, without leading question mark', ->
+        url = 'http://foo.bar/path?key=value'
+        expect(up.params.fromURL(url)).toEqual('key=value')
+
+      it 'returns undefined if the URL has no query section', ->
+        url = 'http://foo.bar/path'
+        expect(up.params.fromURL(url)).toBeUndefined()
+
+
+    describe 'up.params.fromForm', ->
+
+      it 'serializes a form with multiple inputs', ->
+        $form = affix('form')
+        $form.append('<input name="key1" value="value1">')
+        $form.append('<input name="key2" value="value2">')
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key1', value: 'value1' },
+          { name: 'key2', value: 'value2' },
+        ]
+
+      it 'serializes an <input type="text"> with its default [value]', ->
+        $form = affix('form')
+        $form.append('<input type="text" name="key" value="value-from-attribute">')
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value-from-attribute' }
+        ]
+
+      it 'serializes an <input type="text"> that had its value property changed by a script', ->
+        $form = affix('form')
+        $input = $('<input type="text" name="key" value="value-from-attribute">').appendTo($form)
+        $input[0].value = 'value-from-script'
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value-from-script' }
+        ]
+
+      it 'serializes an <input type="hidden"> with its default [value]', ->
+        $form = affix('form')
+        $form.append('<input type="hidden" name="key" value="value-from-attribute">')
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value-from-attribute' }
+        ]
+
+      it 'serializes an <input type="hidden"> that had its value property changed by a script', ->
+        $form = affix('form')
+        $input = $('<input type="hidden" name="key" value="value-from-attribute">').appendTo($form)
+        $input[0].value = 'value-from-script'
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value-from-script' }
+        ]
+
+      it 'seralizes a <select> with its default selected option', ->
+        $form = affix('form')
+        $select = $('<select name="key"></select>').appendTo($form)
+        $option1 = $('<option value="value1">').appendTo($select)
+        $option2 = $('<option value="value2" selected>').appendTo($select)
+        $option3 = $('<option value="value3">').appendTo($select)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value2' }
+        ]
+
+      it 'seralizes a <select> that had its selection changed by a script', ->
+        $form = affix('form')
+        $select = $('<select name="key"></select>').appendTo($form)
+        $option1 = $('<option value="value1">').appendTo($select)
+        $option2 = $('<option value="value2" selected>').appendTo($select)
+        $option3 = $('<option value="value3">').appendTo($select)
+
+        $option3[0].selected = true
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value3' }
+        ]
+
+      it 'serializes a <select multiple> with multiple selected options into multiple params', ->
+        $form = affix('form')
+        $select = $('<select name="key" multiple></select>').appendTo($form)
+        $option1 = $('<option value="value1">').appendTo($select)
+        $option2 = $('<option value="value2" selected>').appendTo($select)
+        $option3 = $('<option value="value3" selected>').appendTo($select)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value2' },
+          { name: 'key', value: 'value3' }
+        ]
+
+      it 'serializes an <input type="file">'
+
+      it 'serializes an <input type="file" multiple> into multiple params'
+
+      it 'includes an <input type="checkbox"> that was [checked] by default', ->
+        $form = affix('form')
+        $input = $('<input type="checkbox" name="key" value="value" checked>').appendTo($form)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value' }
+        ]
+
+      it 'includes an <input type="checkbox"> that was checked by a script', ->
+        $form = affix('form')
+        $input = $('<input type="checkbox" name="key" value="value">').appendTo($form)
+        $input[0].checked = true
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value' }
+        ]
+
+      it 'excludes an <input type="checkbox"> that is unchecked', ->
+        $form = affix('form')
+        $input = $('<input type="checkbox" name="key" value="value">').appendTo($form)
+        params = up.params.fromForm($form)
+        expect(params).toEqual []
+
+      it 'includes a checked <input type="radio"> in a radio button group that was [checked] by default', ->
+        $form = affix('form')
+        $button1 = $('<input type="radio" name="key" value="value1">').appendTo($form)
+        $button2 = $('<input type="radio" name="key" value="value2" checked>').appendTo($form)
+        $button3 = $('<input type="radio" name="key" value="value3">').appendTo($form)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value2' }
+        ]
+
+      it 'includes a checked <input type="radio"> in a radio button group that was checked by a script', ->
+        $form = affix('form')
+        $button1 = $('<input type="radio" name="key" value="value1">').appendTo($form)
+        $button2 = $('<input type="radio" name="key" value="value2" checked>').appendTo($form)
+        $button3 = $('<input type="radio" name="key" value="value3">').appendTo($form)
+
+        $button3[0].checked = true
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value3' }
+        ]
+
+      it 'excludes an radio button group if no button is selected', ->
+        $form = affix('form')
+        $button1 = $('<input type="radio" name="key" value="value1">').appendTo($form)
+        $button2 = $('<input type="radio" name="key" value="value2">').appendTo($form)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual []
+
+      it 'excludes an <input> that is [disabled] by default', ->
+        $form = affix('form')
+        $input = $('<input type="text" name="key" value="value" disabled>').appendTo($form)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual []
+
+      it 'excludes an <input> that was disabled by a script', ->
+        $form = affix('form')
+        $input = $('<input type="text" name="key" value="value">').appendTo($form)
+        $input[0].disabled = true
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual []
+
+      it 'excludes an <input> without a [name] attribute', ->
+        $form = affix('form')
+        $input = $('<input type="text" value="value">').appendTo($form)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual []
+
+      it 'includes an <input readonly>', ->
+        $form = affix('form')
+        $input = $('<input type="text" name="key" value="value" readonly>').appendTo($form)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'key', value: 'value' }
+        ]
+
+      it 'includes the focused submit button', ->
+        $form = affix('form')
+        $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
+        $submit1 = $('<button type="submit" name="submit1-key" value="submit1-value">').appendTo($form)
+        $submit2 = $('<input type="submit" name="submit2-key" value="submit2-value">').appendTo($form)
+        $submit3 = $('<input type="submit" name="submit3-key" value="submit3-value">').appendTo($form)
+
+        $submit2.focus()
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'input-key', value: 'input-value' },
+          { name: 'submit2-key', value: 'submit2-value' }
+        ]
+
+      it 'includes a the first submit button if no button is focused', ->
+        $form = affix('form')
+        $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
+        $submit1 = $('<button type="submit" name="submit1-key" value="submit1-value">').appendTo($form)
+        $submit2 = $('<input type="submit" name="submit2-key" value="submit2-value">').appendTo($form)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'input-key', value: 'input-value' },
+          { name: 'submit1-key', value: 'submit1-value' }
+        ]
+
+      it 'excludes a submit button without a [name] attribute', ->
+        $form = affix('form')
+        $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
+        $submit = $('<button type="submit" value="submit-value">').appendTo($form)
+
+        params = up.params.fromForm($form)
+        expect(params).toEqual [
+          { name: 'input-key', value: 'input-value' }
+        ]
+
+
