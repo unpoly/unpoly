@@ -307,6 +307,8 @@ up.browser = (($) ->
     u.presence(value)
 
   ###**
+  Do not memoize, since it might change if a stylesheet changes the scrolling element.
+
   @function up.browser.documentViewportSelector
   @internal
   ###

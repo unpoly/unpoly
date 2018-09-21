@@ -28,6 +28,9 @@ describe 'up.layout', ->
         afterEach ->
           @$container.remove()
 
+        $documentViewport = ->
+          $(up.browser.documentViewportSelector())
+
         it 'reveals the given element', asyncSpec (next) ->
           up.reveal(@$elements[0])
 
@@ -37,7 +40,7 @@ describe 'up.layout', ->
             # ---------------------
             # [1] ch+0 ...... ch+49
             # [2] ch+50 ... ch+5049
-            expect($(document).scrollTop()).toBe(0)
+            expect($documentViewport().scrollTop()).toBe(0)
 
             up.reveal(@$elements[1])
 
@@ -47,7 +50,7 @@ describe 'up.layout', ->
             # [1] ch+0 ...... ch+49
             # ---------------------
             # [2] ch+50 ... ch+5049
-            expect($(document).scrollTop()).toBe(50)
+            expect($documentViewport().scrollTop()).toBe(50)
 
             up.reveal(@$elements[2])
 
@@ -57,7 +60,7 @@ describe 'up.layout', ->
             # ---------------------
             # [2] ch+50 ... ch+5049
             # ---------------------
-            expect($(document).scrollTop()).toBe(@clientHeight + 50)
+            expect($documentViewport().scrollTop()).toBe(@clientHeight + 50)
 
         it "includes the element's top margin in the revealed area", asyncSpec (next) ->
           @$elements[1].css('margin-top': '20px')

@@ -31,8 +31,7 @@ class up.Request extends up.Record
 
   Parameters may take on one of the following forms:
 
-  1. an object (where the property names become the param names and the
-     property values become the param values) or as
+  1. an object
   2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
   3. a query string
   4. an array of `{ name, value }` objects

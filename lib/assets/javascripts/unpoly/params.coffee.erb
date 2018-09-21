@@ -2,6 +2,18 @@
 Request parameters
 ==================
 
+Methods like [`up.request()`](/up.request) or [`up.replace()`](/up.replace) accept a `{ params }` option
+to with request parameters.
+
+Parameters may be passed in one of the following types:
+
+1. an object like `{ email: 'foo@bar.com' }`
+2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+3. a query string like `email=foo%40bar.com`
+4. an array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
+
+This module offers a consistent API to read and manipulate request parameters independent of their type.
+
 @class up.params
 ###
 up.params = (($) ->
@@ -33,6 +45,11 @@ up.params = (($) ->
   Each array element will be an object with `{ name }` and `{ value }` properties.
 
   @function up.params.toArray
+  @param {Object|FormData|string|Array|undefined} params
+    the params to convert
+  @return {Array}
+    an array representation of the given params
+  @experimental
   ###
   toArray = (params) ->
     switch natureOf(params)
@@ -51,6 +68,11 @@ up.params = (($) ->
   Returns an object representation of the given `params`.
 
   @function up.params.toObject
+  @param {Object|FormData|string|Array|undefined} params
+    the params to convert
+  @return {Array}
+    an object representation of the given params
+  @experimental
   ###
   toObject = (params) ->
     switch natureOf(params)
@@ -65,6 +87,11 @@ up.params = (($) ->
   Returns [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given `params`.
 
   @function up.params.toFormData
+  @param {Object|FormData|string|Array|undefined} params
+    the params to convert
+  @return {Array}
+    a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given params
+  @experimental
   ###
   toFormData = (params) ->
     switch natureOf(params)
@@ -79,7 +106,13 @@ up.params = (($) ->
   ###**
   Returns an query string for the given `params`.
 
+  Non-primitive values (like [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) will be omitted.
+
   @function up.params.toQuery
+  @param {Object|FormData|string|Array|undefined} params
+    the params to convert
+  @return {string}
+    a query string built from the given params
   ###
   toQuery = (params) ->
     switch natureOf(params)
@@ -162,6 +195,7 @@ up.params = (($) ->
     formData = new FormData()
     for entry in array
       formData.append(entry.name, entry.value)
+    <% if ENV['JS_KNIFE'] %>formData.originalArray = array<% end %>
     formData
 
   buildURL = (base, params) ->
