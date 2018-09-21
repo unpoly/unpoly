@@ -648,40 +648,41 @@ describe 'up.params', ->
           { name: 'key', value: 'value' }
         ]
 
-      it 'includes a focused <button type="submit">', ->
+      it 'includes the focused submit button', ->
         $form = affix('form')
         $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
-        $submit = $('<button type="submit" name="submit-key" value="submit-value">').appendTo($form)
+        $submit1 = $('<button type="submit" name="submit1-key" value="submit1-value">').appendTo($form)
+        $submit2 = $('<input type="submit" name="submit2-key" value="submit2-value">').appendTo($form)
+        $submit3 = $('<input type="submit" name="submit3-key" value="submit3-value">').appendTo($form)
 
-        $submit.focus()
+        $submit2.focus()
 
         params = up.params.fromForm($form)
         expect(params).toEqual [
           { name: 'input-key', value: 'input-value' },
-          { name: 'submit-key', value: 'submit-value' }
+          { name: 'submit2-key', value: 'submit2-value' }
         ]
 
-      it 'includes a focused <input type="submit">', ->
+      it 'includes a the first submit button if no button is focused', ->
         $form = affix('form')
         $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
-        $submit = $('<input type="submit" name="submit-key" value="submit-value">').appendTo($form)
-
-        $submit.focus()
+        $submit1 = $('<button type="submit" name="submit1-key" value="submit1-value">').appendTo($form)
+        $submit2 = $('<input type="submit" name="submit2-key" value="submit2-value">').appendTo($form)
 
         params = up.params.fromForm($form)
         expect(params).toEqual [
           { name: 'input-key', value: 'input-value' },
-          { name: 'submit-key', value: 'submit-value' }
+          { name: 'submit1-key', value: 'submit1-value' }
         ]
 
-      it 'excludes a submit button that has no focus', ->
+      it 'excludes a submit button without a [name] attribute', ->
         $form = affix('form')
         $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
-        $submit = $('<button type="submit" name="submit-key" value="submit-value">').appendTo($form)
+        $submit = $('<button type="submit" value="submit-value">').appendTo($form)
 
         params = up.params.fromForm($form)
         expect(params).toEqual [
-          { name: 'input-key', value: 'input-value' },
+          { name: 'input-key', value: 'input-value' }
         ]
 
-      it 'excludes a submit button without a [name] attribute'
+
