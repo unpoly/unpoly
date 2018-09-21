@@ -1591,7 +1591,6 @@ describe 'up.dom', ->
       describe 'cleaning up', ->
 
         it 'calls destructors on the old element', asyncSpec (next) ->
-          console.debug('--- spec start ---')
           destructor = jasmine.createSpy('destructor')
           up.compiler '.container', ($element) ->
             -> destructor($element.text())

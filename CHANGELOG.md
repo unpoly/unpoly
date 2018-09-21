@@ -9,24 +9,57 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
-- Compilers now execute faster
-- Event listeners now execute faster
-- When Unpoly cannot find the viewport of an element, it will now find the scrolling root element. This is either `<body>` or `<html>`, depending on the browser. Previously Unpoly would return the `document` in such cases.
-- [`up.on()`](/up.on) will now throw an error when the same callback function is registered multiple times.
-- New experimental function [`up.all()`], which returns all elements matching the given selector. Like [`up.first()`](/up.first) it ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
-- New experimental function [`up.Response#getHeader()`](/up.Response.prototype.getHeader). It looks up the header value for the given name in the HTTP response header.
-- [`up.request()`](/up.request) option `{ data }` has been renamed to `{ params }`.
-- [`up.replace()`](/up.replace) option `{ data }` has been renamed to `{ params }`.
-- up.params module (possibly internal)
-- New experimental function [`up.util.isBoolean()`](/up.util.isBoolean).
-- Now requires FormData polyfill for IE11
-- New configuration option [`up.form.config.submitButtons`](/up.form.config#config.submitButtons)
+### Compilers
+
+- [Compilers](/up.compiler) now execute faster
 - [Compilers](/up.compiler) with `{ batch: true }` now receive an array of [`[up-data]`](/up-data) objects as their second argument.
 - [Compilers](/up.compiler) with `{ batch: true }` can no longer return destructor functions. Previously the behavior of this was undefined, now it throws an error.
 - Returning an array of [destructor functions](/up.compiler#cleaning-up-after-yourself) from [`up.compiler()`](/up.compiler) is now deprecated. Please return a single destructor function instead.
-- [`up.follow()`](/up.follow) now accepts a `{ url }` option. It can be used to override the given link's `[href]` attribute.
-- [`up.preload()`](/up.preload) now accepts an options hash that will be passed on to the function making the preload request.
 - [`up.syntax.data()`](/up.syntax.data) now returns `undefined` if the given object has no (or an empty) `up-data` attribute. It previously returned an empty object.
+
+
+### Event listeners
+
+- [Event listeners](/up.on) now execute faster
+- [`up.on()`](/up.on) will now throw an error when the same callback function is registered multiple times.
+
+
+### Form parameters
+
+- [`up.request()`](/up.request) option `{ data }` has been renamed to `{ params }`.
+- [`up.replace()`](/up.replace) option `{ data }` has been renamed to `{ params }`.
+- up.params module (possibly internal)
+  - up.params.toArray
+  - up.params.toObject
+  - up.params.toQuery
+  - up.params.toFormData
+  - up.params.buildURL
+  - up.params.get
+  - up.params.add
+  - up.params.assign
+  - up.params.merge
+  - up.params.fromForm
+  - up.params.fromURL
+
+
+### Application layout
+
+- When Unpoly cannot find the [viewport](/up.layout.config#config.viewports) of an element, it will now find the scrolling root element. This is either `<body>` or `<html>`, depending on the browser. Previously Unpoly would return the `document` in such cases.
+
+
+### Fragment update API
+
+- New experimental function [`up.all()`], which returns all elements matching the given selector. Like [`up.first()`](/up.first) it ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
+
+
+### Various
+
+- New experimental function [`up.util.isBoolean()`](/up.util.isBoolean).
+- [`up.follow()`](/up.follow) now accepts a `{ url }` option. It can be used to override the given link's `[href]` attribute.
+- New configuration option [`up.form.config.submitButtons`](/up.form.config#config.submitButtons)
+- [`up.preload()`](/up.preload) now accepts an options hash that will be passed on to the function making the preload request.
+- New experimental function [`up.Response#getHeader()`](/up.Response.prototype.getHeader). It looks up the header value for the given name in the HTTP response header.
+
 
 
 0.56.7

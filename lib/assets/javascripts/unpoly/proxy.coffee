@@ -201,7 +201,7 @@ up.proxy = (($) ->
        property values become the param values) or as
     2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
     3. a query string
-    4. an array of `{ name: 'param-name', value: 'param-value' }` objects
+    4. an array of `{ name, values }` objects
   @param {string} [options.timeout]
     A timeout in milliseconds.
 
@@ -297,7 +297,7 @@ up.proxy = (($) ->
        property values become the param values) or as
     2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
     3. a query string
-    4. an array of `{ name: 'param-name', value: 'param-value' }` objects
+    4. an array of `{ name, value }` objects
   @param {string} [request.timeout]
     A timeout in milliseconds for the request.
 

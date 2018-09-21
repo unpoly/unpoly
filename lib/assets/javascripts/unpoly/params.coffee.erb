@@ -1,8 +1,8 @@
 ###**
-Params
-======
+Request parameters
+==================
 
-class up.params
+@class up.params
 ###
 up.params = (($) ->
   u = up.util
@@ -114,8 +114,8 @@ up.params = (($) ->
   safeSet = (obj, k, value) ->
     obj[k] = value  unless u.isBasicObjectProperty(k)
 
-#  safeGet = (obj, k) ->
-#    obj[k] unless u.isBasicObjectPropery(k)
+  safeGet = (obj, k) ->
+    obj[k] unless u.isBasicObjectProperty(k)
 
   buildQueryFromArray = (array) ->
     parts = u.map(array, arrayEntryToQuery)
@@ -215,23 +215,26 @@ up.params = (($) ->
       when NATURE_OBJECT
         u.merge(params, toObject(otherParams))
 
-#  ###**
-#  Returns the param value with the given name.
-#
-#  @function up.params.get
-#  ###
-#  get = (params, name) ->
-#    switch natureOf(params)
-#      when NATURE_MISSING
-#        undefined
-#      when NATURE_ARRAY
-#        u.detect params, (entry) -> entry.name == name
-#      when NATURE_FORM_DATA
-#        params.get(name)
-#      when NATURE_QUERY
-#        safeGet(toObject(params), name)
-#      when NATURE_OBJECT
-#        safeGet(params, name)
+  ###**
+  Returns the first param value with the given `name` from the given `params`.
+
+  @function up.params.get
+  ###
+  get = (params, name) ->
+    switch natureOf(params)
+      when NATURE_MISSING
+        undefined
+      when NATURE_ARRAY
+        entry = u.detect(params, (entry) -> entry.name == name)
+        entry?.value
+      when NATURE_FORM_DATA
+        value = params.get(name)
+        value = undefined if u.isNull(value)
+        value
+      when NATURE_QUERY
+        safeGet(toObject(params), name)
+      when NATURE_OBJECT
+        safeGet(params, name)
 
   ###**
   Extends the given `params` with entries from the given `otherParams`.
@@ -281,7 +284,6 @@ up.params = (($) ->
   fromForm = (form) ->
     if form = u.element(form)
       fields = form.querySelectorAll(up.form.fieldSelector())
-      console.debug("Fields of %o are %o", form, fields)
       if button = submittingButton(form)
         fields = u.toArray(fields)
         fields.push(button)
@@ -295,6 +297,8 @@ up.params = (($) ->
   @function up.params.fromField
   @param {Element|jQuery|string} form
   @return {Array}
+    an array of `{ name, value }` objects
+  @experimental
   ###
   fromField = (field) ->
     params = []
@@ -323,7 +327,6 @@ up.params = (($) ->
         params.push
           name: name
           value: field.value
-    console.debug("-- params for %o are %o", field, params)
     params
 
   ###**
@@ -335,7 +338,9 @@ up.params = (($) ->
 
   @function up.params.fromURL
   @param {string} url
+    The URL from which to extract the query string.
   @return {string|undefined}
+    The given URL's query string, or `undefined` if the URL has no query component.
   @experimental
   ###
   fromURL = (url) ->
@@ -349,7 +354,7 @@ up.params = (($) ->
   toQuery: toQuery
   toFormData: toFormData
   buildURL: buildURL
-#  get: get
+  get: get
   add: add
   assign: assign
   merge: merge

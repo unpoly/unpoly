@@ -35,7 +35,7 @@ class up.Request extends up.Record
      property values become the param values) or as
   2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
   3. a query string
-  4. an array of `{ name: 'param-name', value: 'param-value' }` objects
+  4. an array of `{ name, value }` objects
 
   @property up.Request#params
   @param {object|FormData|string|Array} params

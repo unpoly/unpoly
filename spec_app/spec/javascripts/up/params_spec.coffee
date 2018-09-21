@@ -278,6 +278,84 @@ describe 'up.params', ->
           obj = up.params.add(obj, 'bar', 'two')
           expect(obj).toEqual { bar: 'two' }
 
+
+    describe 'up.params.get', ->
+
+      describe '(with object)', ->
+
+        it 'returns the value for the given name', ->
+          obj = { foo: 'one', bar: 'two' }
+          value = up.params.get(obj, 'bar')
+          expect(value).toEqual('two')
+
+        it 'returns undefined if no value is set for the given name', ->
+          obj = { foo: 'one' }
+          value = up.params.get(obj, 'bar')
+          expect(value).toBeUndefined()
+
+        it 'returns undefined for names that are also a basic object property', ->
+          obj = {}
+          value = up.params.get(obj, 'hasOwnProperty')
+          expect(value).toBeUndefined()
+
+      describe '(with array)', ->
+
+        it 'returns the value of the first entry with the given name', ->
+          array = [
+            { name: 'foo', value: 'one' }
+            { name: 'bar', value: 'two' }
+            { name: 'foo', value: 'three' }
+          ]
+          value = up.params.get(array, 'foo')
+          expect(value).toEqual('one')
+
+        it 'returns undefined if there is no entry with the given name', ->
+          array = [
+            { name: 'foo', value: 'one' }
+          ]
+          value = up.params.get(array, 'bar')
+          expect(value).toBeUndefined()
+
+      describe '(with query string)', ->
+
+        it 'returns the query param with the given name', ->
+          query = 'foo=one&bar=two'
+          value = up.params.get(query, 'bar')
+          expect(value).toEqual('two')
+
+        it 'returns undefined if there is no query param with the given name', ->
+          query = 'foo=one'
+          query = up.params.get(query, 'bar')
+          expect(query).toBeUndefined()
+
+        it 'unescapes percent-encoded characters in the returned value', ->
+          query = 'foo=one%20two'
+          value = up.params.get(query, 'foo')
+          expect(value).toEqual('one two')
+
+      describe '(with FormData)', ->
+
+        describeCapability 'canInspectFormData', ->
+
+          it 'returns the first entry with the given name', ->
+            formData = new FormData()
+            formData.append('key1', 'value1')
+            formData.append('key2', 'value2')
+            value = up.params.get(formData, 'key2')
+            expect(value).toEqual('value2')
+
+          it 'returns undefined if there is no entry with the given name', ->
+            formData = new FormData()
+            value = up.params.get(formData, 'key')
+            expect(value).toBeUndefined()
+
+      describe '(with missing params)', ->
+
+        it 'returns undefined', ->
+          params = undefined
+          value = up.params.get(params, 'foo')
+          expect(value).toBeUndefined()
+
     describe 'up.params.merge', ->
 
       describe '(with object)', ->
