@@ -9,24 +9,69 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
-- Compilers now execute faster
-- Event listeners now execute faster
-- When Unpoly cannot find the viewport of an element, it will now find the scrolling root element. This is either `<body>` or `<html>`, depending on the browser. Previously Unpoly would return the `document` in such cases.
-- [`up.on()`](/up.on) will now throw an error when the same callback function is registered multiple times.
-- New experimental function [`up.all()`], which returns all elements matching the given selector. Like [`up.first()`](/up.first) it ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
-- New experimental function [`up.Response#getHeader()`](/up.Response.prototype.getHeader). It looks up the header value for the given name in the HTTP response header.
+### Compilers
+
+- To improve performance, Unpoly no longer parses [`[up-data]`](/up-data) attributes when a [compiler function](/up.compiler) does not require a second `data` argument.
+- Compilers that return [destructor functions](/up.compiler#cleaning-up-after-yourself) now run slightly faster.
+- [Compilers](/up.compiler) with `{ batch: true }` now receive an array of [`[up-data]`](/up-data) objects as their second `data` argument.
+- [Compilers](/up.compiler) with `{ batch: true }` can no longer return destructor functions. Previously the behavior of batch destructors was undefined, now it throws an error.
+- Returning an array of [destructor functions](/up.compiler#cleaning-up-after-yourself) from [`up.compiler()`](/up.compiler) is now deprecated. Please return a single destructor function instead.
+- [`up.syntax.data()`](/up.syntax.data) now returns `undefined` if the given object has no (or an empty) [`[up-data]`](/up-data) attribute. It previously returned an empty object.
+
+
+### Event listeners
+
+- To improve performance, Unpoly no longer parses [`[up-data]`](/up-data) attributes when an [`up.on()`](/up.on) listener does not require a third `data` argument.
+- [`up.on()`](/up.on) now throws an error when the same callback function is registered multiple times.
+
+
+### Request parameters
+
+To prevent confusion with [`[up-data]`](/up-data), Unpoly now uses the word "params" when talking about form values or request parameters:
+
 - [`up.request()`](/up.request) option `{ data }` has been renamed to `{ params }`.
 - [`up.replace()`](/up.replace) option `{ data }` has been renamed to `{ params }`.
-- up.params module (possibly internal)
+
+Parameters may be passed in one of the following types:
+
+1. an object like `{ email: 'foo@bar.com' }`
+2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+3. a query string like `email=foo%40bar.com`
+4. an array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
+
+To help working with form values and request parameters, an experimental module [`up.params`](/up.params) has been added. It offers a consistent API to manipulate request parameters independent of their type.
+
+- [`up.params.fromForm()`](/up.params.fromForm) - serialize a `<form>`
+- [`up.params.fromURL()`](/up.params.fromURL) - extract params from a URL's query string
+- [`up.params.toArray()`](/up.params.toArray) - convert any params type to an array of `{ name, value }` elements
+- [`up.params.toObject()`](/up.params.toObject) - convert any params type to an object
+- [`up.params.toQuery()`](/up.params.toQuery) - convert any params type to a query string
+- [`up.params.toFormData()`](/up.params.toFormData) - convert any params type to a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+- [`up.params.buildURL()`](/up.params.buildURL) - composes a URL with query section from a base URL and a params value of any type
+- [`up.params.get()`](/up.params.get) - retrieve the value for the given params key
+- [`up.params.add()`](/up.params.add) - adds a single key/value to a params value of any type
+- [`up.params.assign()`](/up.params.assign) - adds the params to another params
+- [`up.params.merge()`](/up.params.merge) - [merges](/up.util.merge) two params
+
+
+### Application layout
+
+- When Unpoly cannot find the [viewport](/up.layout.config#config.viewports) of an element, it now uses the scrolling root element. This is either `<body>` or `<html>`, depending on the browser.
+
+
+### Fragment update API
+
+- New experimental function [`up.all()`](/up.all), which returns all elements matching the given selector. Like [`up.first()`](/up.first) it ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
+
+
+### Various
+
 - New experimental function [`up.util.isBoolean()`](/up.util.isBoolean).
-- Now requires FormData polyfill for IE11
-- New configuration option [`up.form.config.submitButtons`](/up.form.config#config.submitButtons)
-- [Compilers](/up.compiler) with `{ batch: true }` now receive an array of [`[up-data]`](/up-data) objects as their second argument.
-- [Compilers](/up.compiler) with `{ batch: true }` can no longer return destructor functions. Previously the behavior of this was undefined, now it throws an error.
-- Returning an array of [destructor functions](/up.compiler#cleaning-up-after-yourself) from [`up.compiler()`](/up.compiler) is now deprecated. Please return a single destructor function instead.
 - [`up.follow()`](/up.follow) now accepts a `{ url }` option. It can be used to override the given link's `[href]` attribute.
+- New configuration option [`up.form.config.submitButtons`](/up.form.config#config.submitButtons)
 - [`up.preload()`](/up.preload) now accepts an options hash that will be passed on to the function making the preload request.
-- [`up.syntax.data()`](/up.syntax.data) now returns `undefined` if the given object has no (or an empty) `up-data` attribute. It previously returned an empty object.
+- New experimental function [`up.Response#getHeader()`](/up.Response.prototype.getHeader). It looks up the header value for the given name in the HTTP response header.
+
 
 
 0.56.7

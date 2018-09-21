@@ -28,6 +28,9 @@ describe 'up.layout', ->
         afterEach ->
           @$container.remove()
 
+        $documentViewport = ->
+          $(up.browser.documentViewportSelector())
+
         it 'reveals the given element', asyncSpec (next) ->
           up.reveal(@$elements[0])
 
@@ -37,7 +40,7 @@ describe 'up.layout', ->
             # ---------------------
             # [1] ch+0 ...... ch+49
             # [2] ch+50 ... ch+5049
-            expect($(document).scrollTop()).toBe(0)
+            expect($documentViewport().scrollTop()).toBe(0)
 
             up.reveal(@$elements[1])
 
@@ -47,7 +50,7 @@ describe 'up.layout', ->
             # [1] ch+0 ...... ch+49
             # ---------------------
             # [2] ch+50 ... ch+5049
-            expect($(document).scrollTop()).toBe(50)
+            expect($documentViewport().scrollTop()).toBe(50)
 
             up.reveal(@$elements[2])
 
@@ -57,7 +60,7 @@ describe 'up.layout', ->
             # ---------------------
             # [2] ch+50 ... ch+5049
             # ---------------------
-            expect($(document).scrollTop()).toBe(@clientHeight + 50)
+            expect($documentViewport().scrollTop()).toBe(@clientHeight + 50)
 
         it "includes the element's top margin in the revealed area", asyncSpec (next) ->
           @$elements[1].css('margin-top': '20px')
@@ -416,9 +419,30 @@ describe 'up.layout', ->
         $viewport = affix('.viewport')
         expect(up.layout.viewportOf($viewport)).toEqual($viewport)
 
-      it 'is configured to fall back to the document viewport if no other viewport matches', ->
-        fallback = up.layout.config.viewports[0]
-        expect(fallback).toEqual(up.browser.documentViewportSelector())
+      describe 'when no configured viewport matches', ->
+
+        afterEach ->
+          @resetBodyCss?()
+          @resetHtmlCss?()
+
+        it 'falls back to the scrolling element', ->
+          $element = affix('.element').css(height: '3000px')
+          $result = up.layout.viewportOf($element)
+          expect($result).toMatchSelector(up.browser.documentViewportSelector())
+
+        it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
+          $element = affix('.element').css(height: '3000px')
+          @resetHtmlCss = u.writeTemporaryStyle('html', 'overflow-y': 'hidden')
+          @resetBodyCss = u.writeTemporaryStyle('body', 'overflow-y': 'scroll')
+          $result = up.layout.viewportOf($element)
+          expect($result).toMatchSelector(up.browser.documentViewportSelector())
+
+        it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
+          $element = affix('.element').css(height: '3000px')
+          @resetHtmlCss = u.writeTemporaryStyle('html', 'overflow-y': 'scroll')
+          @resetBodyCss = u.writeTemporaryStyle('body', 'overflow-y': 'hidden')
+          $result = up.layout.viewportOf($element)
+          expect($result).toMatchSelector(up.browser.documentViewportSelector())
 
     describe 'up.layout.restoreScroll', ->
 

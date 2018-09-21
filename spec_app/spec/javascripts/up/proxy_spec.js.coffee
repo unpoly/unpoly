@@ -673,7 +673,7 @@ describe 'up.proxy', ->
 
         it 'does not emit up:proxy:recover if a delayed up:proxy:slow was never emitted due to a fast response', asyncSpec (next) ->
           next =>
-            up.proxy.config.slowDelay = 100
+            up.proxy.config.slowDelay = 200
             up.request(url: '/foo')
 
           next =>
@@ -681,13 +681,13 @@ describe 'up.proxy', ->
               'up:proxy:load'
             ])
 
-          next.after 50, =>
+          next.after 100, =>
             jasmine.Ajax.requests.at(0).respondWith
               status: 200
               contentType: 'text/html'
               responseText: 'foo'
 
-          next.after 150, =>
+          next.after 250, =>
             expect(@events).toEqual([
               'up:proxy:load',
               'up:proxy:loaded'
@@ -1071,7 +1071,7 @@ describe 'up.proxy', ->
 
         Trigger.hoverSequence($link)
 
-        next.after 2, =>
+        next.after 50, =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
           @respondWith
@@ -1097,7 +1097,7 @@ describe 'up.proxy', ->
           expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
 
       it 'triggers a separate AJAX request when hovered multiple times and the cache expires between hovers', asyncSpec (next)  ->
-        up.proxy.config.cacheExpiry = 50
+        up.proxy.config.cacheExpiry = 100
         up.proxy.config.preloadDelay = 0
 
         $element = affix('a[href="/foo"][up-preload]')
@@ -1105,17 +1105,17 @@ describe 'up.proxy', ->
 
         Trigger.hoverSequence($element)
 
-        next.after 1, =>
+        next.after 40, =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        next.after 1, =>
+        next.after 40, =>
           Trigger.hoverSequence($element)
 
-        next.after 1, =>
+        next.after 40, =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        next.after 60, =>
+        next.after 40, =>
           Trigger.hoverSequence($element)
 
-        next.after 1, =>
+        next.after 40, =>
           expect(jasmine.Ajax.requests.count()).toEqual(2)

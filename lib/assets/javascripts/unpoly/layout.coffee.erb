@@ -57,13 +57,15 @@ up.layout = (($) ->
   ###
   config = u.config
     duration: 0
-    viewports: [up.browser.documentViewportSelector(), '.up-modal-viewport', '[up-viewport]']
+    viewports: ['.up-modal-viewport', '[up-viewport]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
     snap: 50
     substance: 150
     easing: 'swing'
+
+  console.debug("Initialized viewports config to ", config.viewports)
 
   lastScrollTops = new up.Cache
     size: 30,
@@ -284,6 +286,8 @@ up.layout = (($) ->
       if newScrollPos < snap && elementDims.top < (0.5 * viewportHeight)
         newScrollPos = 0
 
+      console.debug("Viewport, newScrollPos", $viewport.get(0), newScrollPos)
+
       if newScrollPos != originalScrollPos
         scroll($viewport, newScrollPos, options)
       else
@@ -310,7 +314,8 @@ up.layout = (($) ->
       Promise.resolve()
 
   viewportSelector = ->
-    config.viewports.join(',')
+    # On Edge the document viewport can be changed from CSS
+    [up.browser.documentViewportSelector(), config.viewports...].join(',')
 
   ###**
   Returns the viewport for the given element.
@@ -325,6 +330,7 @@ up.layout = (($) ->
   ###
   viewportOf = (selectorOrElement, options = {}) ->
     $element = $(selectorOrElement)
+    console.debug("viewportOf", $element.get(0), viewportSelector(), $element.closest(viewportSelector())[0])
     $element.closest(viewportSelector())
 
   ###**

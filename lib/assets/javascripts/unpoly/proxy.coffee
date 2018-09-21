@@ -195,13 +195,12 @@ up.proxy = (($) ->
   @param {Object|FormData|string|Array} [options.params={}]
     Parameters that should be sent as the request's payload.
 
-    Parameters may be passed as one of the following forms:
+    Parameters may be passed in one of the following forms:
 
-    1. an object (where the property names become the param names and the
-       property values become the param values) or as
+    1. an object
     2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
     3. a query string
-    4. an array of `{ name: 'param-name', value: 'param-value' }` objects
+    4. an array of `{ name, values }` objects
   @param {string} [options.timeout]
     A timeout in milliseconds.
 
@@ -291,13 +290,13 @@ up.proxy = (($) ->
   @param {Object|FormData|string|Array} [options.params]
     Parameters that should be sent as the request's payload.
 
-    Parameters may be passed as one of the following forms:
+    Parameters may be passed in one of the following forms:
 
     1. an object (where the property names become the param names and the
        property values become the param values) or as
     2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
     3. a query string
-    4. an array of `{ name: 'param-name', value: 'param-value' }` objects
+    4. an array of `{ name, value }` objects
   @param {string} [request.timeout]
     A timeout in milliseconds for the request.
 
