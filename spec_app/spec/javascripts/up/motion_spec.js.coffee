@@ -10,12 +10,12 @@ describe 'up.motion', ->
         $element = affix('.element').text('content')
         up.animate($element, 'fade-in', duration: 200, easing: 'linear')
 
-        u.setTimer 5, ->
-          expect($element).toHaveOpacity(0.0, 0.25)
+        u.setTimer 1, ->
+          expect($element).toHaveOpacity(0.0, 0.15)
         u.setTimer 100, ->
-          expect($element).toHaveOpacity(0.5, 0.25)
-        u.setTimer 200, ->
-          expect($element).toHaveOpacity(1.0, 0.25)
+          expect($element).toHaveOpacity(0.5, 0.3)
+        u.setTimer 260, ->
+          expect($element).toHaveOpacity(1.0, 0.15)
           done()
 
       it 'returns a promise that is fulfilled when the animation has completed', (done) ->

@@ -40,33 +40,33 @@ describe 'up.form', ->
             it 'debounces the callback when the { delay } option is given', asyncSpec (next) ->
               $input = affix('input[value="old-value"]')
               callback = jasmine.createSpy('change callback')
-              up.observe($input, { delay: 100 }, callback)
+              up.observe($input, { delay: 200 }, callback)
               $input.val('new-value-1')
               $input.trigger(eventName)
 
-              next.after 50, ->
-                # 50 ms after change 1: We're still waiting for the 100ms delay to expire
+              next.after 100, ->
+                # 100 ms after change 1: We're still waiting for the 200ms delay to expire
                 expect(callback.calls.count()).toEqual(0)
 
-              next.after 100, ->
-                # 150 ms after change 1: The 100ms delay has expired
+              next.after 200, ->
+                # 300 ms after change 1: The 200ms delay has expired
                 expect(callback.calls.count()).toEqual(1)
                 expect(callback.calls.mostRecent().args[0]).toEqual('new-value-1')
                 $input.val('new-value-2')
                 $input.trigger(eventName)
 
-              next.after 40, ->
-                # 40 ms after change 2: We change again, resetting the delay
+              next.after 80, ->
+                # 80 ms after change 2: We change again, resetting the delay
                 expect(callback.calls.count()).toEqual(1)
                 $input.val('new-value-3')
                 $input.trigger(eventName)
 
-              next.after 85, ->
-                # 125 ms after change 2, which was superseded by change 3
-                # 85 ms after change 3
+              next.after 170, ->
+                # 250 ms after change 2, which was superseded by change 3
+                # 170 ms after change 3
                 expect(callback.calls.count()).toEqual(1)
 
-              next.after 65, ->
+              next.after 130, ->
                 # 190 ms after change 2, which was superseded by change 3
                 # 150 ms after change 3
                 expect(callback.calls.count()).toEqual(2)

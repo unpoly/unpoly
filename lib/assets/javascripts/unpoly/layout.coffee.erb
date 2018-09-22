@@ -314,7 +314,7 @@ up.layout = (($) ->
       Promise.resolve()
 
   viewportSelector = ->
-    # The viewport selector might
+    # On Edge the document viewport can be changed from CSS
     [up.browser.documentViewportSelector(), config.viewports...].join(',')
 
   ###**

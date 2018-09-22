@@ -614,6 +614,7 @@ describe 'up.params', ->
         $option2 = $('<option value="value2" selected>').appendTo($select)
         $option3 = $('<option value="value3">').appendTo($select)
 
+        $option2[0].selected = false
         $option3[0].selected = true
 
         params = up.params.fromForm($form)
@@ -680,6 +681,7 @@ describe 'up.params', ->
         $button2 = $('<input type="radio" name="key" value="value2" checked>').appendTo($form)
         $button3 = $('<input type="radio" name="key" value="value3">').appendTo($form)
 
+        $button2[0].checked = false
         $button3[0].checked = true
 
         params = up.params.fromForm($form)

@@ -52,7 +52,7 @@ describe 'up.dom', ->
 
           it 'returns a promise that will be fulfilled once the server response was received and the swap transition has completed', asyncSpec (next) ->
             resolution = jasmine.createSpy()
-            promise = up.replace('.middle', '/path', transition: 'cross-fade', duration: 50)
+            promise = up.replace('.middle', '/path', transition: 'cross-fade', duration: 200)
             promise.then(resolution)
             expect(resolution).not.toHaveBeenCalled()
             expect($('.middle')).toHaveText('old-middle')
@@ -61,10 +61,10 @@ describe 'up.dom', ->
               @respond()
               expect(resolution).not.toHaveBeenCalled()
 
-            next.after 20, =>
+            next.after 100, =>
               expect(resolution).not.toHaveBeenCalled()
 
-            next.after 80, =>
+            next.after 200, =>
               expect(resolution).toHaveBeenCalled()
 
         describe 'with { params } option', ->
@@ -1696,7 +1696,7 @@ describe 'up.dom', ->
 
         it 'morphs between the old and new element', asyncSpec (next) ->
           affix('.element.v1').text('version 1')
-          up.extract('.element', '<div class="element v2">version 2</div>', transition: 'cross-fade', duration: 100, easing: 'linear')
+          up.extract('.element', '<div class="element v2">version 2</div>', transition: 'cross-fade', duration: 200, easing: 'linear')
 
           $old = undefined
           $new = undefined
@@ -1706,16 +1706,16 @@ describe 'up.dom', ->
             $new = $('.element.v2')
 
             expect($old).toHaveLength(1)
-            expect(u.opacity($old)).toBeAround(1.0, 0.2)
+            expect(u.opacity($old)).toBeAround(1.0, 0.15)
 
             expect($new).toHaveLength(1)
-            expect(u.opacity($new)).toBeAround(0.0, 0.2)
+            expect(u.opacity($new)).toBeAround(0.0, 0.15)
 
-          next.after 50, =>
-            expect(u.opacity($old)).toBeAround(0.5, 0.2)
-            expect(u.opacity($new)).toBeAround(0.5, 0.2)
+          next.after 100, =>
+            expect(u.opacity($old)).toBeAround(0.5, 0.3)
+            expect(u.opacity($new)).toBeAround(0.5, 0.3)
 
-          next.after (50 + 30), =>
+          next.after (100 + 70), =>
             expect(u.opacity($new)).toBeAround(1.0, 0.1)
             expect($old).toBeDetached()
 
@@ -2322,15 +2322,15 @@ describe 'up.dom', ->
 
       it 'runs an animation before removal with { animate } option', asyncSpec (next) ->
         $element = affix('.element')
-        up.destroy($element, animation: 'fade-out', duration: 150, easing: 'linear')
+        up.destroy($element, animation: 'fade-out', duration: 200, easing: 'linear')
 
         next ->
-          expect($element).toHaveOpacity(1.0, 0.2)
+          expect($element).toHaveOpacity(1.0, 0.15)
 
-        next.after 75, ->
-          expect($element).toHaveOpacity(0.5, 0.2)
+        next.after 100, ->
+          expect($element).toHaveOpacity(0.5, 0.3)
 
-        next.after (75 + 40), ->
+        next.after (100 + 75), ->
           expect($element).toBeDetached()
 
       it 'calls destructors for custom elements', (done) ->
