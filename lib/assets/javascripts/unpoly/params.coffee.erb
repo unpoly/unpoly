@@ -5,14 +5,13 @@ Request parameters
 Methods like [`up.request()`](/up.request) or [`up.replace()`](/up.replace) accept a `{ params }` option
 to with request parameters.
 
-Parameters may be passed in one of the following types:
+This module offers a consistent API to read and manipulate request parameters independent of their type.
+The following types of parameters are supported:
 
 1. an object like `{ email: 'foo@bar.com' }`
 2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
 3. a query string like `email=foo%40bar.com`
 4. an array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
-
-This module offers a consistent API to read and manipulate request parameters independent of their type.
 
 @class up.params
 ###
@@ -42,7 +41,18 @@ up.params = (($) ->
   ###**
   Returns an array representation of the given `params`.
 
-  Each array element will be an object with `{ name }` and `{ value }` properties.
+  The given params value may be of any [supported type](/up.params).
+
+  Each element in the returned array is an object with `{ name }` and `{ value }` properties.
+
+  \#\#\# Example
+
+      var array = up.params.toArray('foo=bar&baz=bam')
+
+      // array is now: [
+      //   { name: 'foo', value: 'bar' },
+      //   { name: 'baz', value: 'bam' },
+      // ]
 
   @function up.params.toArray
   @param {Object|FormData|string|Array|undefined} params
@@ -67,6 +77,20 @@ up.params = (($) ->
   ###**
   Returns an object representation of the given `params`.
 
+  The given params value may be of any [supported type](/up.params).
+
+  The returned value is a simple JavaScript object whose properties correspond
+  to the key/values in the given `params`.
+
+  \#\#\# Example
+
+      var object = up.params.toObject('foo=bar&baz=bam')
+
+      // object is now: {
+      //   foo: 'bar',
+      //   baz: 'bam'
+      // ]
+
   @function up.params.toObject
   @param {Object|FormData|string|Array|undefined} params
     the params to convert
@@ -86,10 +110,19 @@ up.params = (($) ->
   ###**
   Returns [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given `params`.
 
+  The given params value may be of any [supported type](/up.params).
+
+  \#\#\# Example
+
+      var formData = up.params.toFormData('foo=bar&baz=bam')
+
+      formData.get('foo') // 'bar'
+      formData.get('baz') // 'bam'
+
   @function up.params.toFormData
   @param {Object|FormData|string|Array|undefined} params
     the params to convert
-  @return {Array}
+  @return {FormData}
     a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given params
   @experimental
   ###
@@ -106,13 +139,24 @@ up.params = (($) ->
   ###**
   Returns an query string for the given `params`.
 
-  Non-primitive values (like [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) will be omitted.
+  The given params value may be of any [supported type](/up.params).
+
+  The keys and values in the returned query string will be [percent-encoded](https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding).
+  Non-primitive values (like [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) will be omitted from
+  the retuned query string.
+
+  \#\#\# Example
+
+      var query = up.params.toQuery({ foo: 'bar', baz: 'bam' })
+
+      // query is now: 'foo=bar&baz=bam'
 
   @function up.params.toQuery
   @param {Object|FormData|string|Array|undefined} params
     the params to convert
   @return {string}
     a query string built from the given params
+  @experimental
   ###
   toQuery = (params) ->
     switch natureOf(params)
@@ -207,14 +251,23 @@ up.params = (($) ->
   ###**
   Adds to the given `params` a new  entry with the given `name` and `value`.
 
-  The given `params` is changed in-place, if possible.
-  The return value is always a params value that includes the new entry.
+  The given params value may be of any [supported type](/up.params).
+
+  The given `params` value is changed in-place, if possible. Some types, such as query strings,
+  cannot be changed in-place. The return value is always a params value that includes the new entry.
+
+  \#\#\# Example
+
+      var obj = { foo: 'bar' }
+      up.params.add(obj, 'baz', 'bam')
+      // obj is now: { foo: 'bar', baz: 'bam' }
 
   @function up.params.add
   @param {string|object|FormData|Array|undefined} params
   @param {string} name
   @param {any} value
   @return {string|object|FormData|Array}
+  @experimental
   ###
   add = (params, name, value) ->
     newEntry = [{ name, value }]
@@ -223,12 +276,15 @@ up.params = (($) ->
   ###**
   Returns a new params value that contains entries from both `params` and `otherParams`.
 
-  The given `params` argument is not changed.
+  The given params value may be of any [supported type](/up.params).
+
+  This function creates a new params value. The given `params` argument is not changed.
 
   @function up.params.merge
   @param {string|object|FormData|Array|undefined} params
   @param {string|object|FormData|Array|undefined} otherParams
   @return {string|object|FormData|Array}
+  @experimental
   ###
   merge = (params, otherParams) ->
     switch natureOf(params)
@@ -252,7 +308,20 @@ up.params = (($) ->
   ###**
   Returns the first param value with the given `name` from the given `params`.
 
+  The given params value may be of any [supported type](/up.params).
+
+  \#\#\# Example
+
+      var array = [
+        { name: 'foo', value: 'bar' },
+        { name: 'baz', value: 'bam' }
+      }
+
+      value = up.params.get(array, 'baz')
+      // value is now: 'bam'
+
   @function up.params.get
+  @experimental
   ###
   get = (params, name) ->
     switch natureOf(params)
@@ -273,13 +342,16 @@ up.params = (($) ->
   ###**
   Extends the given `params` with entries from the given `otherParams`.
 
-  The given `params` is changed in-place, if possible.
-  The return value is always a params value that includes the new entries.
+  The given params value may be of any [supported type](/up.params).
+
+  The given `params` is changed in-place, if possible. Some types, such as query strings,
+  cannot be changed in-place. The return value is always a params value that includes the new entries.
 
   @function up.params.assign
   @param {string|object|FormData|Array|undefined} params
   @param {string|object|FormData|Array|undefined} otherParams
   @return {string|object|FormData|Array}
+  @experimental
   ###
   assign = (params, otherParams) ->
     switch natureOf(params)
@@ -309,11 +381,36 @@ up.params = (($) ->
       $form.find(submitButtonSelector)[0]
 
   ###**
-  Extracts request params from the given '<form>`.
+  Serializes request params from the given `<form>`.
+
+  The returned params may be passed as `{ params }` option to
+  [`up.request()`](/up.request) or [`up.replace()`](/up.replace).
+
+  The serialized params will include the form's submit button, if that
+  button as a `name` attribute.
+
+  \#\#\#\# Example
+
+  Given this HTML form:
+
+      <form>
+        <input type="text" name="name" value="Foo Bar">
+        <input type="text" name="email" value="foo@bar.com">
+      </form>
+
+  This would serialize the form into an array representation:
+
+      var params = up.params.fromForm('input[name=email]')
+
+      // params is now: [
+      //   { name: 'name', value: 'Foo Bar' },
+      //   { name: 'email', value: 'foo@bar.com' }
+      // ]
 
   @function up.params.fromForm
   @param {Element|jQuery|string} form
   @return {Array}
+  @experimental
   ###
   fromForm = (form) ->
     if form = u.element(form)
@@ -324,9 +421,25 @@ up.params = (($) ->
       return u.flatMap(fields, fromField)
 
   ###**
-  Extracts request params from the given [input field](/up.form.config#config.fields).
+  Serializes request params from a single [input field](/up.form.config#config.fields).
+  To serialize an entire form, use [`up.params.fromForm()`](/up.params.fromForm).
 
   Note that some fields may produce multiple params, such as `<select multiple>`.
+
+  \#\#\#\# Example
+
+  Given this HTML form:
+
+      <form>
+        <input type="text" name="email" value="foo@bar.com">
+        <input type="password" name="password">
+      </form>
+
+  This would retrieve request parameters from the `email` field:
+
+      var params = up.params.fromField('input[name=email]')
+
+      // params is now: [{ name: 'email', value: 'foo@bar.com' }]
 
   @function up.params.fromField
   @param {Element|jQuery|string} form
@@ -366,9 +479,17 @@ up.params = (($) ->
   ###**
   Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.
 
-  The query string is returned without a leading question mark (`?`).
-
+  The query string is returned **without** a leading question mark (`?`).
   Returns `undefined` if the given URL has no query component.
+
+  You can access individual values from the returned query string using functions like
+  [`up.params.get()`](/up.params.get) or [`up.params.toObject()`](/up.params.toObject).
+
+  \#\#\# Example
+
+      var query = up.params.fromURL('http://foo.com?bar=baz')
+
+      // query is now: 'bar=baz'
 
   @function up.params.fromURL
   @param {string} url
