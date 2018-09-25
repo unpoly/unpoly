@@ -65,8 +65,6 @@ up.layout = (($) ->
     substance: 150
     easing: 'swing'
 
-  console.debug("Initialized viewports config to ", config.viewports)
-
   lastScrollTops = new up.Cache
     size: 30,
     key: up.history.normalizeUrl
@@ -286,8 +284,6 @@ up.layout = (($) ->
       if newScrollPos < snap && elementDims.top < (0.5 * viewportHeight)
         newScrollPos = 0
 
-      console.debug("Viewport, newScrollPos", $viewport.get(0), newScrollPos)
-
       if newScrollPos != originalScrollPos
         scroll($viewport, newScrollPos, options)
       else
@@ -330,7 +326,6 @@ up.layout = (($) ->
   ###
   viewportOf = (selectorOrElement, options = {}) ->
     $element = $(selectorOrElement)
-    console.debug("viewportOf", $element.get(0), viewportSelector(), $element.closest(viewportSelector())[0])
     $element.closest(viewportSelector())
 
   ###**
