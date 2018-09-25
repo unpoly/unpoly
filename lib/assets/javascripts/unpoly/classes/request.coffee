@@ -84,7 +84,9 @@ class up.Request extends up.Record
       'target',
       'failTarget',
       'headers',
-      'timeout'
+      'timeout',
+      'preload' # since up.proxy.request() options are sometimes wrapped in this class
+      'cache'   # since up.proxy.request() options are sometimes wrapped in this class
     ]
 
   ###**

@@ -1388,6 +1388,25 @@ describe 'up.dom', ->
                 expect(@revealedHTML).toEqual ['<div id="three">three</div>']
                 expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
 
+            it 'reveals multiple consecutive #hash targets with the same URL (bugfix)', asyncSpec (next) ->
+              up.replace('.middle', '/path#two', reveal: true)
+              @responseText =
+                """
+                <div class="middle">
+                  <div id="one">one</div>
+                  <div id="two">two</div>
+                  <div id="three">three</div>
+                </div>
+                """
+
+              next =>
+                @respond()
+                up.replace('.middle', '/path#three', reveal: true)
+                # response is already cached
+
+              next =>
+                expect(@revealedText).toEqual ['two', 'three']
+
             it "reveals the entire element if it has no child with the ID of that #hash", asyncSpec (next) ->
               up.replace('.middle', '/path#four', reveal: true)
 
