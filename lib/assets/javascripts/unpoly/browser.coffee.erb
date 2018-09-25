@@ -23,7 +23,7 @@ up.browser = (($) ->
   @method up.browser.navigate
   @param {string} url
   @param {string} [options.method='get']
-  @param {Object|FormData|string} [options.params]
+  @param {object|Array|FormData|string} [options.params]
   @internal
   ###
   navigate = (url, options = {}) ->
@@ -307,7 +307,8 @@ up.browser = (($) ->
     u.presence(value)
 
   ###**
-  Do not memoize, since it might change if a stylesheet changes the scrolling element.
+  Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
+  for the browser's main content area.
 
   @function up.browser.documentViewportSelector
   @internal

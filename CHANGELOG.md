@@ -293,7 +293,7 @@ This release contains no new features, but will help you when using tools like B
 
 ### Preloading
 
-- Fix a bug where [preloading](/a-up-target) would not always be aborted when stopping to hover before [`up.proxy.config.preloadDelay`](/up.proxy.config#up.proxy.config.preloadDelay).
+- Fix a bug where [preloading](/a-up-target) would not always be aborted when stopping to hover before [`up.proxy.config.preloadDelay`](/up.proxy.config#config.preloadDelay).
 
 
 0.53.1
