@@ -1974,6 +1974,15 @@ up.util = (($) ->
     catch error
       Promise.reject(error)
 
+  sum = (list, block) ->
+    block = listBlock(block)
+    totalValue = 0
+    for entry in list
+      entryValue = block(entry)
+      if isGiven(entryValue) # ignore undefined/null, like SQL would do
+        totalValue += entryValue
+    totalValue
+
   ###**
   Returns whether the given element is a descendant of the `<body>` element.
 
@@ -2152,6 +2161,7 @@ up.util = (($) ->
   writeInlineStyle: writeInlineStyle
   hasCssTransition: hasCssTransition
   splitValues : splitValues
+  sum: sum
 #  wrapArray: wrapArray
   values: objectValues
 

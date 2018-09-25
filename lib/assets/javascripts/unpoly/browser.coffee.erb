@@ -23,7 +23,7 @@ up.browser = (($) ->
   @method up.browser.navigate
   @param {string} url
   @param {string} [options.method='get']
-  @param {Object|FormData|string} [options.params]
+  @param {object|Array|FormData|string} [options.params]
   @internal
   ###
   navigate = (url, options = {}) ->
@@ -293,21 +293,8 @@ up.browser = (($) ->
       canPromise()
 
   ###**
-  Returns `'foo'` if the hash is `'#foo'`.
-
-  Returns undefined if the hash is `'#'`, `''` or `undefined`.
-
-  @function up.browser.hash
-  @internal
-  ###
-  hash = (value) ->
-    value ||= location.hash
-    value ||= ''
-    value = value.substr(1) if value[0] == '#'
-    u.presence(value)
-
-  ###**
-  Do not memoize, since it might change if a stylesheet changes the scrolling element.
+  Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
+  for the browser's main content area.
 
   @function up.browser.documentViewportSelector
   @internal
@@ -338,7 +325,6 @@ up.browser = (($) ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   popCookie: popCookie
-  hash: hash
 
 )(jQuery)
 

@@ -10,7 +10,9 @@ $block-spacing: 25px
 
 body
   margin: 0
-  background: image-url('grid.png') repeat
+  // background: image-url('grid.png') repeat
+  background-color: red
+
   font-family: arial, sans-serif
 
 h1, h2, h3, h4, p
@@ -29,7 +31,8 @@ a
   height: 150px
   content: 'Free space'
 
-.fixed-top-bar
+.fixed-top-bar,
+.fixed-bottom-bar
   position: fixed
   z-index: 9999999
   top: 0
@@ -37,6 +40,10 @@ a
   right: 0
   background-color: transparentize(blue, 0.5)
   padding: 50px
+
+.fixed-bottom-bar
+  top: auto
+  bottom: 0
 
 .example
   margin: 50px

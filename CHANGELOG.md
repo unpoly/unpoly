@@ -58,6 +58,10 @@ To help working with form values and request parameters, an experimental module 
 
 - When Unpoly cannot find the [viewport](/up.layout.config#config.viewports) of an element, it now uses the scrolling root element. This is either `<body>` or `<html>`, depending on the browser.
 - Fix a bug where linking back and forth between multiple `#anchor` hashes of the same URL would always reveal the first anchor.
+- Revealing elements below [fixed navigation bars](/up-fixed-top) now honors the navigation bar's `padding`, `border`, `margin`, `top` and `bottom` properties.
+- Fix a bug where revealing elements [fixed navigation bars](/up-fixed-top) would scroll 1 pixel too short.
+- [`up.layout.revealHash()`](/up.layout.revealHash) no longer retrieves the hash anchor from the current URL. You need to pass in a `#hash` value as a first argument.
+- Fix a bug where a `#hash` anchor would not be revealed if it included non-word characters like spaces or dots.
 
 
 ### Fragment update API
@@ -293,7 +297,7 @@ This release contains no new features, but will help you when using tools like B
 
 ### Preloading
 
-- Fix a bug where [preloading](/a-up-target) would not always be aborted when stopping to hover before [`up.proxy.config.preloadDelay`](/up.proxy.config#up.proxy.config.preloadDelay).
+- Fix a bug where [preloading](/a-up-target) would not always be aborted when stopping to hover before [`up.proxy.config.preloadDelay`](/up.proxy.config#config.preloadDelay).
 
 
 0.53.1

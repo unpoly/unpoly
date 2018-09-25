@@ -351,7 +351,7 @@ up.motion = (($) ->
       # Don't animate the scrolling. The { duration } option was meant for the transition.
       scrollOptions = u.merge(options, duration: 0)
       # Scroll $new into position before we start the enter animation.
-      up.layout.revealOrRestoreScroll($new, scrollOptions)
+      up.layout.scrollAfterInsertFragment($new, scrollOptions)
 
     if willMorph
       if motionTracker.isActive($old) && options.trackMotion is false
