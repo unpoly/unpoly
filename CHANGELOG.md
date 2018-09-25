@@ -57,6 +57,7 @@ To help working with form values and request parameters, an experimental module 
 ### Application layout
 
 - When Unpoly cannot find the [viewport](/up.layout.config#config.viewports) of an element, it now uses the scrolling root element. This is either `<body>` or `<html>`, depending on the browser.
+- Fix a bug where linking back and forth between multiple `#anchor` hashes of the same URL would always reveal the first anchor.
 
 
 ### Fragment update API

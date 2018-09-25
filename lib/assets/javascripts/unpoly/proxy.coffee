@@ -215,23 +215,30 @@ up.proxy = (($) ->
   @stable
   ###
   makeRequest = (args...) ->
-    options = u.extractOptions(args)
-    options.url = args[0] if u.isGiven(args[0])
+    if u.isString(args[0])
+      url = args.shift()
 
-    ignoreCache = (options.cache == false)
+    # We cannot use u.extractOptions() since sometimes the last argument
+    # is an up.Request instead of a basic object.
+    requestOrOptions = args.shift() || {}
 
-    request = up.Request.wrap(options)
+    if url
+      requestOrOptions.url = url
+
+    request = up.Request.wrap(requestOrOptions)
 
     # Non-GET requests always touch the network
-    # unless `options.cache` is explicitly set to `true`.
+    # unless `request.cache` is explicitly set to `true`.
     # These requests are never cached.
     if !request.isSafe()
       # We clear the entire cache before an unsafe request, since we
       # assume the user is writing a change.
       clear()
 
+    ignoreCache = (request.cache == false)
+
     # If we have an existing promise matching this new request,
-    # we use it unless `options.cache` is explicitly set to `false`.
+    # we use it unless `request.cache` is explicitly set to `false`.
     if !ignoreCache && (promise = get(request))
       up.puts 'Re-using cached response for %s %s', request.method, request.url
     else
@@ -242,7 +249,7 @@ up.proxy = (($) ->
       promise.catch (e) ->
         remove(request)
 
-    if !options.preload
+    if !request.preload
       # This might actually make `pendingCount` higher than the actual
       # number of outstanding requests. However, we need to cover the
       # following case:

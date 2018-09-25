@@ -20,6 +20,15 @@ describe 'up.proxy', ->
         expect(request.data()).toEqual(key: ['value'])
         expect(request.method).toEqual('POST')
 
+      it 'allows to pass in an up.Request instance instead of an options object', ->
+        requestArg = new up.Request(url: '/foo', params: { key: 'value' }, method: 'post')
+        up.request(requestArg)
+
+        jasmineRequest = @lastRequest()
+        expect(jasmineRequest.url).toMatchUrl('/foo')
+        expect(jasmineRequest.data()).toEqual(key: ['value'])
+        expect(jasmineRequest.method).toEqual('POST')
+
       it 'submits the replacement targets as HTTP headers, so the server may choose to only frender the requested fragments', asyncSpec (next) ->
         up.request(url: '/foo', target: '.target', failTarget: '.fail-target')
 
@@ -814,7 +823,7 @@ describe 'up.proxy', ->
             up.proxy.preload($link)
 
             next =>
-              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path', preload: true))
+              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
         describe 'for an [up-modal] link', ->
 
@@ -881,7 +890,7 @@ describe 'up.proxy', ->
             up.proxy.preload($link)
 
             next =>
-              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path', preload: true))
+              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
         describe 'for an [up-popup] link', ->
 
@@ -951,7 +960,7 @@ describe 'up.proxy', ->
             up.proxy.preload($link)
 
             next =>
-              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path', preload: true))
+              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
       describeFallback 'canPushState', ->
 
