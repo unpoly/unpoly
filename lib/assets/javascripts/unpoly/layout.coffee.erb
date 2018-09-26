@@ -173,22 +173,26 @@ up.layout = (($) ->
   @return {Object}
   @internal
   ###
-  measureObstruction = ->
-    measurePosition = (obstructor, cssAttr) ->
-      $obstructor = $(obstructor)
-      anchorPosition = u.readComputedStyleNumber($obstructor, cssAttr)
-      unless u.isPresent(anchorPosition)
-        up.fail("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr)
-      anchorPosition + $obstructor.outerHeight()
+  measureObstruction = (viewportHeight) ->
+    composeHeight = (obstructor, distanceFromEdgeProps) ->
+      throw "readComputedStyleNumber returns NaN for elements with top: auto"
+      distanceFromEdge = u.sum(distanceFromEdgeProps, (prop) -> u.readComputedStyleNumber(obstructor, prop))
+      distanceFromEdge + obstructor.offsetHeight
 
-    fixedTopBottoms = for obstructor in $(config.fixedTop.join(', '))
-      measurePosition(obstructor, 'top')
+    measureTopObstructor = (obstructor) ->
+      composeHeight(obstructor, ['top', 'margin-top'])
 
-    fixedBottomTops = for obstructor in $(config.fixedBottom.join(', '))
-      measurePosition(obstructor, 'bottom')
+    measureBottomObstructor = (obstructor) ->
+      composeHeight(obstructor, ['bottom', 'margin-bottom'])
 
-    top: Math.max(0, fixedTopBottoms...)
-    bottom: Math.max(0, fixedBottomTops...)
+    $topObstructors = $(config.fixedTop.join(', '))
+    $bottomObstructors = $(config.fixedBottom.join(', '))
+
+    topObstructions = u.map($topObstructors, measureTopObstructor)
+    bottomObstructions = u.map($bottomObstructors, measureBottomObstructor)
+
+    top: Math.max(0, topObstructions...)
+    bottom: Math.max(0, bottomObstructions...)
 
   ###**
   Scroll's the given element's viewport so the first rows of the
@@ -252,7 +256,7 @@ up.layout = (($) ->
       obstruction = undefined
 
       if viewportIsDocument
-        obstruction = measureObstruction()
+        obstruction = measureObstruction(viewportHeight)
         # Within the body, $.position will always return the distance
         # from the document top and *not* the distance of the viewport
         # top. This is what the calculations below expect, so don't shift.

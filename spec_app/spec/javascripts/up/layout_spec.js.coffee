@@ -17,11 +17,18 @@ describe 'up.layout', ->
 
           @$elements = []
           @$container = $('<div class="container">').prependTo($body)
+          @$container.css(opacity: 0.2) # reduce flashing during test runs
 
           @clientHeight = u.clientSize().height
 
-          for height in [@clientHeight, '50px', '5000px']
-            $element = $('<div>').css(height: height)
+          elementPlans = [
+            { height: @clientHeight, backgroundColor: 'yellow' }, # [0]
+            { height: '50px',        backgroundColor: 'cyan'   }, # [1]
+            { height: '5000px',      backgroundColor: 'orange' }  # [2]
+          ]
+
+          for elementPlan in elementPlans
+            $element = $('<div>').css(elementPlan)
             $element.appendTo(@$container)
             @$elements.push($element)
 
@@ -166,8 +173,36 @@ describe 'up.layout', ->
             # ----------------
             expect($(document).scrollTop()).toBe(@clientHeight + 50 - 100 - 50)
 
-        it 'scrolls far enough so the element is not obstructed by an element fixed to the top with margin, padding and non-zero top properties', ->
-          throw "needs tests"
+        it 'scrolls far enough so the element is not obstructed by an element fixed to the top with margin, padding, border and non-zero top properties', asyncSpec (next) ->
+          $topNav = affix('[up-fixed=top]').css(
+            position: 'fixed',
+            top: '29px',
+            margin: '16px',
+            border: '7px solid rgba(0, 0, 0, 0.1)',
+            padding: '5px'
+            left: '0',
+            right: '0'
+            height: '100px'
+          )
+
+          up.reveal(@$elements[2], viewport: @viewport)
+
+          next =>
+            # [0] 00000 ...... ch-1  [F] 0 ...... 99+props
+            # [1] ch+0 ...... ch+49
+            # ---------------------  ---------------------
+            # [2] ch+50 ... ch+5049
+            # ---------------------
+
+            expect($(document).scrollTop()).toBe(
+              @clientHeight +  # scroll past @$elements[0]
+              50            -  # scroll past @$elements[1]
+              100           -  # obstruction height
+              29            -  # obstruction's top property
+              (1 * 16)      -  # top margin (bottom margin is not a visual obstruction)
+              (2 * 7)       -  # obstruction top and bottom borders
+              (2 * 5)          # obstruction top and bottom paddings
+            )
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the bottom', asyncSpec (next) ->
           $bottomNav = affix('[up-fixed=bottom]').css(
@@ -211,8 +246,35 @@ describe 'up.layout', ->
             # [F] 0 ............ 99
             expect($(document).scrollTop()).toBe(@clientHeight + 50)
 
-        it 'scrolls far enough so the element is not obstructed by an element fixed to the bottom with margin, padding and non-zero bottom properties', ->
-          throw "needs tests"
+        it 'scrolls far enough so the element is not obstructed by an element fixed to the bottom with margin, padding, border and non-zero bottom properties', asyncSpec (next) ->
+          $bottomNav = affix('[up-fixed=bottom]').css(
+            position: 'fixed',
+            bottom: '29px',
+            margin: '16px',
+            border: '7px solid rgba(0, 0, 0, 0.2)',
+            padding: '5px',
+            left: '0',
+            right: '0'
+            height: '100px'
+          )
+
+          up.reveal(@$elements[1])
+
+          next =>
+            # ---------------------
+            # [0] 0 .......... ch-1
+            # [1] ch+0 ...... ch+49
+            # ---------------------
+            # [2] ch+50 ... ch+5049
+            # [F] 0 ...... 99+props
+            expect($(document).scrollTop()).toBe(
+              50        +  # height of elements[1]
+              100       +  # obstruction height
+              29        +  # obstruction's bottom property
+              (1 * 16)  +  # bottom margin (top margin is not a visual obstruction)
+              (2 * 7)   +  # obstruction top and bottom borders
+              (2 * 5)      # obstruction top and bottom paddings
+            )
 
         it 'does not crash when called with a CSS selector (bugfix)', (done) ->
           promise = up.reveal('.container')
