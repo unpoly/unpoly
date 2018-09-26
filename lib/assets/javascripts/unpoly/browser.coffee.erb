@@ -293,20 +293,6 @@ up.browser = (($) ->
       canPromise()
 
   ###**
-  Returns `'foo'` if the hash is `'#foo'`.
-
-  Returns undefined if the hash is `'#'`, `''` or `undefined`.
-
-  @function up.browser.hash
-  @internal
-  ###
-  hash = (value) ->
-    value ||= location.hash
-    value ||= ''
-    value = value.substr(1) if value[0] == '#'
-    u.presence(value)
-
-  ###**
   Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
   for the browser's main content area.
 
@@ -339,7 +325,6 @@ up.browser = (($) ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   popCookie: popCookie
-  hash: hash
 
 )(jQuery)
 

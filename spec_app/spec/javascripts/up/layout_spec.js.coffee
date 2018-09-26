@@ -166,6 +166,8 @@ describe 'up.layout', ->
             # ----------------
             expect($(document).scrollTop()).toBe(@clientHeight + 50 - 100 - 50)
 
+        it 'scrolls far enough so the element is not obstructed by an element fixed to the top with margin, padding and non-zero top properties', ->
+          throw "needs tests"
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the bottom', asyncSpec (next) ->
           $bottomNav = affix('[up-fixed=bottom]').css(
@@ -208,6 +210,9 @@ describe 'up.layout', ->
             # [2] ch+50 ... ch+5049
             # [F] 0 ............ 99
             expect($(document).scrollTop()).toBe(@clientHeight + 50)
+
+        it 'scrolls far enough so the element is not obstructed by an element fixed to the bottom with margin, padding and non-zero bottom properties', ->
+          throw "needs tests"
 
         it 'does not crash when called with a CSS selector (bugfix)', (done) ->
           promise = up.reveal('.container')
@@ -367,35 +372,31 @@ describe 'up.layout', ->
           # Viewing 100 to 199
           expect($viewport.scrollTop()).toBe(100)
 
-    describe 'revealHash', ->
+    describe 'up.layout.revealHash', ->
 
-      it 'reveals an element with an ID matching the hash in the location', asyncSpec (next) ->
+      it 'reveals an element with an ID matching the given #hash', asyncSpec (next) ->
         revealSpy = up.layout.knife.mock('reveal')
         $match = affix('div#hash')
-        location.hash = '#hash'
-        up.layout.revealHash()
-        next => expect(revealSpy).toHaveBeenCalledWith($match)
+        up.layout.revealHash('#hash')
+        next => expect(revealSpy).toHaveBeenCalledWith($match, top: true)
 
-      it 'reveals a named anchor matching the hash in the location', asyncSpec (next) ->
+      it 'reveals a named anchor matching the given #hash', asyncSpec (next) ->
         revealSpy = up.layout.knife.mock('reveal')
         $match = affix('a[name="hash"]')
-        location.hash = '#hash'
-        up.layout.revealHash()
-        next => expect(revealSpy).toHaveBeenCalledWith($match)
+        up.layout.revealHash('#hash')
+        next => expect(revealSpy).toHaveBeenCalledWith($match, top: true)
 
-      it 'does nothing and returns a fulfilled promise if no element or anchor matches the hash in the location', (done) ->
+      it 'does nothing and returns a fulfilled promise if no element or anchor matches the given #hash', (done) ->
         revealSpy = up.layout.knife.mock('reveal')
-        location.hash = '#hash'
-        promise = up.layout.revealHash()
+        promise = up.layout.revealHash('#hash')
         expect(revealSpy).not.toHaveBeenCalled()
         promiseState(promise).then (result) ->
           expect(result.state).toEqual('fulfilled')
           done()
 
-      it 'does nothing and returns a fulfilled promise if the location has no hash', (done) ->
+      it 'does nothing and returns a fulfilled promise if no #hash is given', (done) ->
         revealSpy = up.layout.knife.mock('reveal')
-        location.hash = ''
-        promise = up.layout.revealHash()
+        promise = up.layout.revealHash('')
         expect(revealSpy).not.toHaveBeenCalled()
         promiseState(promise).then (result) ->
           expect(result.state).toEqual('fulfilled')

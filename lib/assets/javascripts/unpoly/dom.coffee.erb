@@ -74,6 +74,7 @@ up.dom = (($) ->
   @internal
   ###
   resolveSelector = (selectorOrElement, origin) ->
+    console.debug('-- resolveSelector(%o, %o)', selectorOrElement, origin)
     if u.isString(selectorOrElement)
       selector = selectorOrElement
       if u.contains(selector, '&')
@@ -303,11 +304,10 @@ up.dom = (($) ->
   processResponse = (isSuccess, selector, request, response, options) ->
     sourceUrl = response.url
     historyUrl = sourceUrl
-    hash = request.hash
 
-    if options.reveal == true && hash
-      # If the request URL had a #hash and options.reveal is not given, we reveal that #hash.
-      options.reveal = hash
+    if hash = request.hash
+      console.debug("=== Setting options.reveal = hash")
+      options.hash = hash
       historyUrl += hash
 
     isReloadable = (response.method == 'GET')
@@ -453,7 +453,7 @@ up.dom = (($) ->
       # Reveal element that was being prepended/appended.
       # Since we will animate (not morph) it's OK to allow animation of scrolling
       # if the user has configured up.layout.config.duration.
-      promise = up.layout.revealOrRestoreScroll($wrapper, options)
+      promise = up.layout.scrollAfterInsertFragment($wrapper, options)
 
       # Since we're adding content instead of replacing, we'll only
       # animate $new instead of morphing between $old and $new
@@ -491,6 +491,7 @@ up.dom = (($) ->
 
       return up.morph($old, $new, transition, morphOptions)
 
+
   # This will find all [up-keep] descendants in $old an, overwrite their partner
   # element in $new and leave a visually identical clone in $old for a later transition.
   # Returns an array of keepPlans.
@@ -512,6 +513,7 @@ up.dom = (($) ->
           plan.$newElement.replaceWith($keepable)
           keepPlans.push(plan)
     keepPlans
+
 
   findKeepPlan = ($element, $new, options) ->
     if options.keep

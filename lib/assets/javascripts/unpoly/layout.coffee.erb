@@ -179,11 +179,11 @@ up.layout = (($) ->
       anchorPosition = u.readComputedStyleNumber($obstructor, cssAttr)
       unless u.isPresent(anchorPosition)
         up.fail("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr)
-      anchorPosition + $obstructor.height()
+      anchorPosition + $obstructor.outerHeight()
 
     fixedTopBottoms = for obstructor in $(config.fixedTop.join(', '))
       measurePosition(obstructor, 'top')
-  
+
     fixedBottomTops = for obstructor in $(config.fixedBottom.join(', '))
       measurePosition(obstructor, 'bottom')
 
@@ -266,8 +266,12 @@ up.layout = (($) ->
         # http://codepen.io/anon/pen/jPojGE
         offsetShift = originalScrollPos
 
+      console.debug("--- Obstruction is %o", obstruction)
+
       predictFirstVisibleRow = -> newScrollPos + obstruction.top
       predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom - 1
+
+      console.debug("--- $viewport is %o", $viewport.get(0))
 
       elementDims = u.measure($element, relative: $viewport, includeMargin: true)
       firstElementRow = elementDims.top + offsetShift
@@ -290,22 +294,81 @@ up.layout = (($) ->
         Promise.resolve()
 
   ###**
-  [Reveals](/up.reveal) an element matching the `#hash` in the current URL.
+  @function up.layout.scrollAfterInsertFragment
+  @param {boolean|object} [options.restoreScroll]
+  @param {boolean|string|jQuery|Element} [options.reveal]
+  @param {boolean|string} [options.reveal]
+  @return {Promise}
+    A promise that is fulfilled when the scrolling has finished.
+  @internal
+  ###
+  scrollAfterInsertFragment = (selectorOrElement, options) ->
+    options = u.options(options)
+    $element = $(selectorOrElement)
+
+    hashOpt = options.hash
+    revealOpt = options.reveal
+    restoreScrollOpt = options.restoreScroll
+
+    durationOptions = u.only(options, 'duration')
+
+    console.debug("--- scrollAfterInsertFragment", { selectorOrElement: selectorOrElement, $element, $element, hash: options.hash, reveal: options.reveal, restoreScroll: options.restoreScroll, origin: options.origin })
+
+    if restoreScrollOpt
+      # If options.restoreScroll is an object, its keys map viewport selectors
+      # to scroll positions. If it is just true, we leave the scrollTops option
+      # undefined and let restoreScroll() retrieve previous scrollTops from cache.
+      givenTops = u.presence(restoreScrollOpt, u.isObject)
+      return restoreScroll(around: $element, scrollTops: givenTops)
+
+    else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
+      return revealHash(hashOpt, durationOptions)
+
+    else if revealOpt
+      # We allow to pass another element as { reveal } option
+      if u.isElement(revealOpt) || u.isJQuery(revealOpt)
+        $element = $(revealOpt)
+
+      # We allow to pass a selector as { reveal } option
+      else if u.isString(revealOpt)
+        selector = up.dom.resolveSelector(revealOpt, options.origin)
+        $element = up.first(selector)
+
+      else
+        # We reveal the given $element
+
+      # If selectorOrElement was a CSS selector, don't blow up by calling reveal()
+      # with an empty jQuery collection. This might happen if a failed form submission
+      # reveals the first validation error message, but the error is shown in an
+      # unexpected element.
+      if $element.length
+        return reveal($element, durationOptions)
+
+    else
+      # If we didn't need to scroll above, just return a resolved promise
+      # to fulfill this function's signature.
+      return Promise.resolve()
+
+  ###**
+  [Reveals](/up.reveal) an element matching the given `#hash` anchor.
 
   Other than the default behavior found in browsers, `up.revealHash` works with
   [multiple viewports](/up-viewport) and honors [fixed elements](/up-fixed-top) obstructing the user's
   view of the viewport.
 
-  This is called automatically when the page loads initially.
+  When the page loads initially, this function is automatically called with the hash from
+  the current URL.
+
+  If no element matches the given `#hash` anchor, a resolved promise is returned.
 
   @function up.layout.revealHash
   @return {Promise}
     A promise that is fulfilled when scroll position has changed to match the location hash.
   @experimental
   ###
-  revealHash = ->
-    if (hash = up.browser.hash()) && ($match = firstHashTarget(hash))
-      reveal($match)
+  revealHash = (hash) ->
+    if (hash) && ($match = firstHashTarget(hash))
+      reveal($match, top: true)
     else
       Promise.resolve()
 
@@ -444,55 +507,6 @@ up.layout = (($) ->
         scroll(viewport, scrollTop, duration: 0)
 
       Promise.all(allScrollPromises)
-
-  ###**
-  @function up.layout.revealOrRestoreScroll
-  @param {boolean|object} [options.restoreScroll]
-  @param {boolean|string} [options.reveal]
-  @return {Promise}
-    A promise that is fulfilled when the element is revealed or
-    the scroll position is restored.
-  @internal
-  ###
-  revealOrRestoreScroll = (selectorOrElement, options) ->
-    options = u.options(options)
-    $element = $(selectorOrElement)
-
-    if options.restoreScroll
-      # If options.restoreScroll is an object, its keys map viewport selectors
-      # to scroll positions. If it is just true, we leave the scrollTops option
-      # undefined and let restoreScroll() retrieve previous scrollTops from cache.
-      givenTops = u.presence(options.restoreScroll, u.isObject)
-      return restoreScroll(around: $element, scrollTops: givenTops)
-
-    if options.reveal
-      revealOptions = { duration: options.duration }
-      if u.isString(options.reveal)
-        selector = revealSelector(options.reveal, options)
-        $element = up.first(selector) || $element
-        revealOptions.top = true
-
-      # If selectorOrElement was a CSS selector, don't blow up by calling reveal()
-      # with an empty jQuery collection. This might happen if a failed form submission
-      # reveals the first validation error message, but the error is shown in an
-      # unexpected element.
-      if $element.length
-        return reveal($element, revealOptions)
-
-    # If we didn't need to scroll above, just return a resolved promise
-    # to fulfill this function's signature.
-    return Promise.resolve()
-
-  ###**
-  @internal
-  ###
-  revealSelector = (selector, options) ->
-    # up.dom.resolveSelector() will (1) substitute any "&" shorthands with an selector
-    # for options.origin and (2) convert selector into a string, if it is an Element.
-    selector = up.dom.resolveSelector(selector, options.origin)
-    if selector[0] == '#'
-      selector += ", a[name='#{selector}']"
-    selector
 
   ###**
   @internal
@@ -678,10 +692,28 @@ up.layout = (($) ->
   @internal
   ###
   firstHashTarget = (hash) ->
-    if hash = up.browser.hash(hash)
-      up.first("[id='#{hash}'], a[name='#{hash}']")
+    console.debug("--- firstHashTarget(%o)", hash)
+    if hash = pureHash(hash)
+      console.debug("--- after pureHash filter: hash is %o", hash)
+      byID = u.attributeSelector('id', hash)
+      byName = 'a' + u.attributeSelector('name', hash)
+      up.first("#{byID},#{byName}")
 
-  up.on 'up:app:booted', revealHash
+
+  ###**
+  Returns `'foo'` if the hash is `'#foo'`.
+
+  Returns undefined if the hash is `'#'`, `''` or `undefined`.
+
+  @function up.browser.hash
+  @internal
+  ###
+  pureHash = (value) ->
+    if value && value[0] == '#'
+      value = value.substr(1)
+    u.presence(value)
+
+  up.on 'up:app:booted', -> revealHash(location.hash)
 
   up.on 'up:framework:reset', reset
 
@@ -697,7 +729,7 @@ up.layout = (($) ->
   scrollTops: scrollTops
   saveScroll: saveScroll
   restoreScroll: restoreScroll
-  revealOrRestoreScroll: revealOrRestoreScroll
+  scrollAfterInsertFragment: scrollAfterInsertFragment
   anchoredRight: anchoredRight
   fixedChildren: fixedChildren
   absolutize: absolutize
