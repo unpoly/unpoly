@@ -272,13 +272,13 @@ up.layout = (($) ->
       console.debug("--- Obstruction is %o", obstruction)
 
       predictFirstVisibleRow = -> newScrollPos + obstruction.top
-      predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom - 1
+      predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom
 
       console.debug("--- $viewport is %o", $viewport.get(0))
 
       elementDims = u.measure($element, relative: $viewport, includeMargin: true)
       firstElementRow = elementDims.top + offsetShift
-      lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1
+      lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance)
 
       if lastElementRow > predictLastVisibleRow()
         # Try to show the full height of the element
