@@ -74,7 +74,6 @@ up.dom = (($) ->
   @internal
   ###
   resolveSelector = (selectorOrElement, origin) ->
-    console.debug('-- resolveSelector(%o, %o)', selectorOrElement, origin)
     if u.isString(selectorOrElement)
       selector = selectorOrElement
       if u.contains(selector, '&')

@@ -112,7 +112,7 @@ class up.Request extends up.Record
     urlParts = u.parseUrl(@url)
     # Remember the #hash for later revealing.
     # It will be lost during normalization.
-    @hash = urlParts.hash
+    @hash = u.presence(urlParts.hash)
     @url = u.normalizeUrl(urlParts, hash: false)
 
   transferParamsToUrl: =>

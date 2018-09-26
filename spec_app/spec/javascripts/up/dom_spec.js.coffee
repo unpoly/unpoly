@@ -1269,6 +1269,8 @@ describe 'up.dom', ->
         describe 'with { reveal } option', ->
 
           beforeEach ->
+            up.history.config.enabled = true
+
             @revealedHTML = []
             @revealedText = []
             @revealOptions = {}
@@ -1371,13 +1373,11 @@ describe 'up.dom', ->
           describe 'when there is an anchor #hash in the URL', ->
 
             it 'scrolls to the top of an element with the ID of that #hash', asyncSpec (next) ->
-              up.replace('.middle', '/path#three', reveal: true)
+              up.replace('.middle', '/path#hash', reveal: true)
               @responseText =
                 """
                 <div class="middle">
-                  <div id="one">one</div>
-                  <div id="two">two</div>
-                  <div id="three">three</div>
+                  <div id="hash"></div>
                 </div>
                 """
 
@@ -1385,14 +1385,55 @@ describe 'up.dom', ->
                 @respond()
 
               next =>
-                expect(@revealedHTML).toEqual ['<div id="three">three</div>']
+                expect(@revealedHTML).toEqual ['<div id="hash"></div>']
                 expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
 
-            it "scrolls to the top of an <a> element with the name of that hash", ->
-              throw "needs test"
+            it "scrolls to the top of an <a> element with the name of that hash", asyncSpec (next) ->
+              up.replace('.middle', '/path#three', reveal: true)
+              @responseText =
+                """
+                <div class="middle">
+                  <a name="three"></a>
+                </div>
+                """
 
-            it 'does not scroll if { reveal: false } is also set', ->
-              throw "needs test"
+              next =>
+                @respond()
+
+              next =>
+                expect(@revealedHTML).toEqual ['<a name="three"></a>']
+                expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
+
+            it "scrolls to a hash that includes a dot character ('.') (bugfix)", asyncSpec (next) ->
+              up.replace('.middle', '/path#foo.bar', reveal: true)
+              @responseText =
+                """
+                <div class="middle">
+                  <a name="foo.bar"></a>
+                </div>
+                """
+
+              next =>
+                @respond()
+
+              next =>
+                expect(@revealedHTML).toEqual ['<a name="foo.bar"></a>']
+                expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
+
+            it 'does not scroll if { reveal: false } is also set', asyncSpec (next) ->
+              up.replace('.middle', '/path#hash', reveal: false)
+              @responseText =
+                """
+                <div class="middle">
+                  <div id="hash"></div>
+                </div>
+                """
+
+              next =>
+                @respond()
+
+              next =>
+                expect(@revealMock).not.toHaveBeenCalled()
 
             it 'reveals multiple consecutive #hash targets with the same URL (bugfix)', asyncSpec (next) ->
               up.replace('.middle', '/path#two', reveal: true)
@@ -1413,8 +1454,19 @@ describe 'up.dom', ->
               next =>
                 expect(@revealedText).toEqual ['two', 'three']
 
-            it "does not schroll if there is no element with the ID of that #hash", ->
-              throw "needs test"
+            it "does not scroll if there is no element with the ID of that #hash", asyncSpec (next) ->
+              up.replace('.middle', '/path#hash', reveal: true)
+              @responseText =
+                """
+                <div class="middle">
+                </div>
+                """
+
+              next =>
+                @respond()
+
+              next =>
+                expect(@revealMock).not.toHaveBeenCalled()
 
 
           it 'reveals a new element that is being appended', (done) ->

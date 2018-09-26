@@ -175,8 +175,7 @@ up.layout = (($) ->
   ###
   measureObstruction = (viewportHeight) ->
     composeHeight = (obstructor, distanceFromEdgeProps) ->
-      throw "readComputedStyleNumber returns NaN for elements with top: auto"
-      distanceFromEdge = u.sum(distanceFromEdgeProps, (prop) -> u.readComputedStyleNumber(obstructor, prop))
+      distanceFromEdge = u.sum(distanceFromEdgeProps, (prop) -> u.readComputedStyleNumber(obstructor, prop)) || 0
       distanceFromEdge + obstructor.offsetHeight
 
     measureTopObstructor = (obstructor) ->
@@ -316,7 +315,7 @@ up.layout = (($) ->
 
     durationOptions = u.only(options, 'duration')
 
-    console.debug("--- scrollAfterInsertFragment", { selectorOrElement: selectorOrElement, $element, $element, hash: options.hash, reveal: options.reveal, restoreScroll: options.restoreScroll, origin: options.origin })
+    console.debug("=== scrollAfterInsertFragment", { selectorOrElement: selectorOrElement, $element, $element, hash: options.hash, reveal: options.reveal, restoreScroll: options.restoreScroll, origin: options.origin })
 
     if restoreScrollOpt
       # If options.restoreScroll is an object, its keys map viewport selectors
@@ -371,6 +370,7 @@ up.layout = (($) ->
   @experimental
   ###
   revealHash = (hash) ->
+    console.debug("--- revealHash(%o), match is %o", hash, firstHashTarget(hash))
     if (hash) && ($match = firstHashTarget(hash))
       reveal($match, top: true)
     else
@@ -698,9 +698,9 @@ up.layout = (($) ->
   firstHashTarget = (hash) ->
     console.debug("--- firstHashTarget(%o)", hash)
     if hash = pureHash(hash)
-      console.debug("--- after pureHash filter: hash is %o", hash)
       byID = u.attributeSelector('id', hash)
       byName = 'a' + u.attributeSelector('name', hash)
+      console.debug("--- selektor is %o, first match is %o, regular match is %o", "#{byID},#{byName}", up.first("#{byID},#{byName}"), $("#{byID},#{byName}")[0])
       up.first("#{byID},#{byName}")
 
 
