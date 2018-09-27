@@ -6,8 +6,8 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.57.0
+------
 
 ### Request parameters
 
@@ -62,7 +62,6 @@ To help working with form values and request parameters, an experimental module 
 
 - To improve performance, Unpoly no longer parses [`[up-data]`](/up-data) attributes when an [`up.on()`](/up.on) listener does not require a third `data` argument.
 - [`up.on()`](/up.on) now throws an error when the same callback function is registered multiple times.
-
 
 
 ### Fragment update API
