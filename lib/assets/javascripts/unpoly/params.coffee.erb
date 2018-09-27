@@ -2,10 +2,13 @@
 Request parameters
 ==================
 
-Methods like [`up.request()`](/up.request) or [`up.replace()`](/up.replace) accept a `{ params }` option
-to with request parameters.
+Methods like [`up.replace()`](/up.replace) accept request parameters (or form data values) as a `{ params }` option.
 
 This module offers a consistent API to read and manipulate request parameters independent of their type.
+
+
+\#\#\# Supported parameter types
+
 The following types of parameters are supported:
 
 1. an object like `{ email: 'foo@bar.com' }`

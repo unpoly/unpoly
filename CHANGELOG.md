@@ -9,22 +9,6 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
-### Compilers
-
-- To improve performance, Unpoly no longer parses [`[up-data]`](/up-data) attributes when a [compiler function](/up.compiler) does not require a second `data` argument.
-- Compilers that return [destructor functions](/up.compiler#cleaning-up-after-yourself) now run slightly faster.
-- [Compilers](/up.compiler) with `{ batch: true }` now receive an array of [`[up-data]`](/up-data) objects as their second `data` argument.
-- [Compilers](/up.compiler) with `{ batch: true }` can no longer return destructor functions. Previously the behavior of batch destructors was undefined, now it throws an error.
-- Returning an array of [destructor functions](/up.compiler#cleaning-up-after-yourself) from [`up.compiler()`](/up.compiler) is now deprecated. Please return a single destructor function instead.
-- [`up.syntax.data()`](/up.syntax.data) now returns `undefined` if the given object has no (or an empty) [`[up-data]`](/up-data) attribute. It previously returned an empty object.
-
-
-### Event listeners
-
-- To improve performance, Unpoly no longer parses [`[up-data]`](/up-data) attributes when an [`up.on()`](/up.on) listener does not require a third `data` argument.
-- [`up.on()`](/up.on) now throws an error when the same callback function is registered multiple times.
-
-
 ### Request parameters
 
 To prevent confusion with [`[up-data]`](/up-data), Unpoly now uses the word "params" when talking about form values or request parameters:
@@ -62,6 +46,23 @@ To help working with form values and request parameters, an experimental module 
 - Fix a bug where revealing elements [fixed navigation bars](/up-fixed-top) would scroll 1 pixel too short.
 - [`up.layout.revealHash()`](/up.layout.revealHash) no longer retrieves the hash anchor from the current URL. You need to pass in a `#hash` value as a first argument.
 - Fix a bug where a `#hash` anchor would not be revealed if it included non-word characters like spaces or dots.
+
+
+### Compilers
+
+- To improve performance, Unpoly no longer parses [`[up-data]`](/up-data) attributes when a [compiler function](/up.compiler) does not require a second `data` argument.
+- Compilers that return [destructor functions](/up.compiler#cleaning-up-after-yourself) now run slightly faster.
+- [Compilers](/up.compiler) with `{ batch: true }` now receive an array of [`[up-data]`](/up-data) objects as their second `data` argument.
+- [Compilers](/up.compiler) with `{ batch: true }` can no longer return destructor functions. Previously the behavior of batch destructors was undefined, now it throws an error.
+- Returning an array of [destructor functions](/up.compiler#cleaning-up-after-yourself) from [`up.compiler()`](/up.compiler) is now deprecated. Please return a single destructor function instead.
+- [`up.syntax.data()`](/up.syntax.data) now returns `undefined` if the given object has no (or an empty) [`[up-data]`](/up-data) attribute. It previously returned an empty object.
+
+
+### Event listeners
+
+- To improve performance, Unpoly no longer parses [`[up-data]`](/up-data) attributes when an [`up.on()`](/up.on) listener does not require a third `data` argument.
+- [`up.on()`](/up.on) now throws an error when the same callback function is registered multiple times.
+
 
 
 ### Fragment update API

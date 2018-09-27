@@ -27,14 +27,7 @@ class up.Request extends up.Record
   ###
 
   ###**
-  Parameters that should be sent as the request's payload.
-
-  Parameters may take on one of the following forms:
-
-  1. an object
-  2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
-  3. a query string
-  4. an array of `{ name, value }` objects
+  [Parameters](/up.params) that should be sent as the request's payload.
 
   @property up.Request#params
   @param {object|FormData|string|Array} params

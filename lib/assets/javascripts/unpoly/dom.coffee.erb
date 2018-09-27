@@ -181,15 +181,7 @@ up.dom = (($) ->
   @param {string} [options.method='get']
     The HTTP method to use for the request.
   @param {Object|FormData|string|Array} [options.params]
-    Parameters that should be sent as the request's payload.
-
-    Parameters can either be passed as either:
-
-    1. an object
-    2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
-    3. a query string
-    4. an array of `{ name, value }` objects
-
+    [Parameters](/up.params) that should be sent as the request's payload.
   @param {string} [options.transition='none']
   @param {string|boolean} [options.history=true]
     If a string is given, it is used as the URL the browser's location bar and history.
