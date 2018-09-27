@@ -1106,7 +1106,7 @@ describe 'up.proxy', ->
           expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
 
       it 'triggers a separate AJAX request when hovered multiple times and the cache expires between hovers', asyncSpec (next)  ->
-        up.proxy.config.cacheExpiry = 200
+        up.proxy.config.cacheExpiry = 100
         up.proxy.config.preloadDelay = 0
 
         $element = affix('a[href="/foo"][up-preload]')
@@ -1114,17 +1114,17 @@ describe 'up.proxy', ->
 
         Trigger.hoverSequence($element)
 
-        next.after 80, =>
+        next.after 10, =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        next.after 80, =>
+        next.after 10, =>
           Trigger.hoverSequence($element)
 
-        next.after 80, =>
+        next.after 10, =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        next.after 80, =>
+        next.after 150, =>
           Trigger.hoverSequence($element)
 
-        next.after 80, =>
+        next.after 30, =>
           expect(jasmine.Ajax.requests.count()).toEqual(2)
