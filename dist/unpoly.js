@@ -5,11 +5,11 @@
 
 (function() {
   window.up = {
-    version: "0.56.7",
-    renamedModule: function(oldName, newName) {
+    version: "0.57.0",
+    deprecateRenamedModule: function(oldName, newName) {
       return typeof Object.defineProperty === "function" ? Object.defineProperty(up, oldName, {
         get: function() {
-          up.log.warn("up." + oldName + " has been renamed to up." + newName);
+          up.warn("Deprecated: up." + oldName + " has been renamed to up." + newName);
           return up[newName];
         }
       }) : void 0;
@@ -41,7 +41,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.noop
     @experimental
      */
-    var $createElementFromSelector, $createPlaceholder, $submittingButton, CASE_CONVERSION_GROUP, CSS_LENGTH_PROPS, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, addClass, addTemporaryClass, all, always, any, appendRequestData, arrayToSet, assign, assignPolyfill, asyncNoop, attributeSelector, camelCase, camelCaseKeys, castedAttr, changeClassList, clientSize, compact, concludeCssTransition, config, contains, convertCase, copy, copyAttributes, copyWithRenamedKeys, createElementFromHtml, cssLength, detachWith, detect, documentHasVerticalScrollbar, each, escapeHtml, escapePressed, evalOption, except, extractFromStyleObject, extractOptions, fail, fixedToAbsolute, flatten, forceRepaint, getElement, hasClass, hasCssTransition, hide, horizontalScreenHalf, identity, intersect, isArray, isBlank, isBodyDescendant, isCrossDomain, isDefined, isDetached, isElement, isEqual, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, kebabCase, kebabCaseKeys, last, listBlock, map, margins, measure, memoize, merge, mergeRequestData, methodAllowsPayload, microtask, muteRejection, newDeferred, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeStyleValueForWrite, normalizeUrl, nullJQuery, offsetParent, only, opacity, openConfig, option, options, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, readComputedStyle, readComputedStyleNumber, readInlineStyle, reject, rejectOnError, remove, removeClass, renameKey, requestDataAsArray, requestDataAsQuery, requestDataFromForm, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, setToArray, submittedValue, times, toArray, trim, uniq, uniqBy, unresolvablePromise, unwrapElement, whenReady, writeInlineStyle, writeTemporaryStyle;
+    var $createElementFromSelector, $createPlaceholder, CASE_CONVERSION_GROUP, CSS_LENGTH_PROPS, DivertibleChain, ESCAPE_HTML_ENTITY_MAP, addClass, addTemporaryClass, all, always, any, arrayToSet, assign, assignPolyfill, asyncNoop, attributeSelector, camelCase, camelCaseKeys, castedAttr, changeClassList, clientSize, compact, concludeCssTransition, config, contains, convertCase, copy, copyAttributes, copyWithRenamedKeys, createElementFromHtml, cssLength, deprecateRenamedKey, detachWith, detect, documentHasVerticalScrollbar, each, eachIterator, elementTagName, escapeHtml, escapePressed, evalOption, except, extractFromStyleObject, extractOptions, fail, fixedToAbsolute, flatMap, flatten, forceRepaint, getElement, hasClass, hasCssTransition, hide, horizontalScreenHalf, identity, intersect, isArray, isBasicObjectProperty, isBlank, isBodyDescendant, isBoolean, isCrossDomain, isDefined, isDetached, isElement, isEqual, isFixed, isFormData, isFunction, isGiven, isJQuery, isMissing, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isSingletonElement, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, jsonAttr, kebabCase, kebabCaseKeys, last, listBlock, map, margins, measure, memoize, merge, methodAllowsPayload, microtask, muteRejection, newDeferred, newOptions, nextFrame, nonUpClasses, noop, normalizeMethod, normalizeStyleValueForWrite, normalizeUrl, nullJQuery, objectValues, offsetParent, only, opacity, openConfig, option, parseUrl, pluckData, pluckKey, presence, presentAttr, previewable, promiseTimer, readComputedStyle, readComputedStyleNumber, readInlineStyle, reject, rejectOnError, remove, removeClass, renameKey, scrollbarWidth, select, selectInDynasty, selectInSubtree, selectorForElement, sequence, setMissingAttrs, setTimer, setToArray, splitValues, submittedValue, sum, times, toArray, trim, uniq, uniqBy, unresolvablePromise, unwrapElement, valuesPolyfill, whenReady, writeInlineStyle, writeTemporaryStyle;
     noop = (function() {});
 
     /***
@@ -265,11 +265,12 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @experimental
      */
     selectorForElement = function(element) {
-      var $element, ariaLabel, classes, id, j, klass, len, name, selector, tagName, upId;
+      var $element, ariaLabel, classes, id, j, klass, len, name, selector, upId;
       $element = $(element);
       selector = void 0;
-      tagName = $element.prop('tagName').toLowerCase();
-      if (upId = presence($element.attr("up-id"))) {
+      if (isSingletonElement($element)) {
+        selector = elementTagName($element);
+      } else if (upId = presence($element.attr("up-id"))) {
         selector = attributeSelector('up-id', upId);
       } else if (id = presence($element.attr("id"))) {
         if (id.match(/^[a-z0-9\-_]+$/i)) {
@@ -278,7 +279,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
           selector = attributeSelector('id', id);
         }
       } else if (name = presence($element.attr("name"))) {
-        selector = tagName + attributeSelector('name', name);
+        selector = elementTagName($element) + attributeSelector('name', name);
       } else if (classes = presence(nonUpClasses($element))) {
         selector = '';
         for (j = 0, len = classes.length; j < len; j++) {
@@ -288,9 +289,15 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       } else if (ariaLabel = presence($element.attr("aria-label"))) {
         selector = attributeSelector('aria-label', ariaLabel);
       } else {
-        selector = tagName;
+        selector = elementTagName($element);
       }
       return selector;
+    };
+    isSingletonElement = function($element) {
+      return $element.is('html, body, head, title');
+    };
+    elementTagName = function($element) {
+      return $element.prop('tagName').toLowerCase();
     };
     attributeSelector = function(attribute, value) {
       value = value.replace(/"/g, '\\"');
@@ -299,9 +306,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     nonUpClasses = function($element) {
       var classString, classes;
       classString = $element.attr('class') || '';
-      classes = classString.split(' ');
-      return select(classes, function(klass) {
-        return isPresent(klass) && !klass.match(/^up-/);
+      classes = splitValues(classString);
+      return reject(classes, function(klass) {
+        return klass.match(/^up-/);
       });
     };
     createElementFromHtml = function(html) {
@@ -332,6 +339,25 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     assign = Object.assign || assignPolyfill;
+    valuesPolyfill = function(object) {
+      var key, results, value;
+      results = [];
+      for (key in object) {
+        value = object[key];
+        results.push(value);
+      }
+      return results;
+    };
+
+    /***
+    Returns an array of values of the given object.
+    
+    @function up.util.values
+    @param {Object} object
+    @return {Array<string>}
+    @experimental
+     */
+    objectValues = Object.values || valuesPolyfill;
 
     /***
     Returns a new string with whitespace removed from the beginning
@@ -393,6 +419,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     each = map;
+    eachIterator = function(iterator, callback) {
+      var entry, results;
+      results = [];
+      while ((entry = iterator.next()) && !entry.done) {
+        results.push(callback(entry.value));
+      }
+      return results;
+    };
 
     /***
     Calls the given function for the given number of times.
@@ -572,6 +606,18 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
+    Returns whether the given argument is a boolean value.
+    
+    @function up.util.isBoolean
+    @param object
+    @return {boolean}
+    @experimental
+     */
+    isBoolean = function(object) {
+      return typeof object === 'boolean' || object instanceof Boolean;
+    };
+
+    /***
     Returns whether the given argument is a number.
     
     Note that this will check the argument's *type*.
@@ -598,7 +644,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     isOptions = function(object) {
-      return typeof object === 'object' && !isNull(object) && !isJQuery(object) && !isPromise(object) && !isFormData(object) && !isArray(object);
+      return typeof object === 'object' && !isNull(object) && (isUndefined(object.constructor) || object.constructor === Object);
     };
 
     /***
@@ -699,13 +745,11 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @return {Object|Array}
     @stable
      */
-    copy = function(object) {
+    copy = function(object, deep) {
       if (isArray(object)) {
         object = object.slice();
-      } else if (isObject(object) && !isFunction(object)) {
+      } else if (isOptions(object)) {
         object = assign({}, object);
-      } else {
-        up.fail('Cannot copy %o', object);
       }
       return object;
     };
@@ -756,20 +800,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @return {Object}
     @internal
      */
-    options = function(object, defaults) {
-      var defaultValue, key, merged, value;
-      merged = object ? copy(object) : {};
+    newOptions = function(object, defaults) {
       if (defaults) {
-        for (key in defaults) {
-          defaultValue = defaults[key];
-          value = merged[key];
-          if (isMissing(value)) {
-            value = defaultValue;
-          }
-          merged[key] = value;
-        }
+        return merge(defaults, object);
+      } else if (object) {
+        return copy(object);
+      } else {
+        return {};
       }
-      return merged;
     };
 
     /***
@@ -894,7 +932,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return setToArray(arrayToSet(array));
     };
 
-    /**
+    /***
     This function is like [`uniq`](/up.util.uniq), accept that
     the given function is invoked for each element to generate the value
     for which uniquness is computed.
@@ -924,7 +962,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       });
     };
 
-    /**
+    /***
     @function up.util.setToArray
     @internal
      */
@@ -937,7 +975,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return array;
     };
 
-    /**
+    /***
     @function up.util.arrayToSet
     @internal
      */
@@ -1200,7 +1238,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return element.offsetHeight;
     };
 
-    /**
+    /***
     @function up.util.finishTransition
     @internal
      */
@@ -1235,7 +1273,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     measure = function($element, opts) {
       var $context, box, contextCoords, coordinates, elementCoords, mgs;
-      opts = options(opts, {
+      opts = newOptions(opts, {
         relative: false,
         inner: false,
         includeMargin: false
@@ -1356,18 +1394,32 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.castedAttr
     @internal
      */
-    castedAttr = function($element, attrName) {
+    castedAttr = function($element, attribute) {
       var value;
-      value = $element.attr(attrName);
+      value = $element.attr(attribute);
       switch (value) {
         case 'false':
           return false;
         case 'true':
         case '':
-        case attrName:
+        case attribute:
           return true;
         default:
           return value;
+      }
+    };
+
+    /***
+    @function up.util.jsonAttr
+    @internal
+     */
+    jsonAttr = function(elementOrSelector, attribute) {
+      var element, json;
+      if (element = getElement(elementOrSelector)) {
+        json = typeof element.getAttribute === "function" ? element.getAttribute(attribute) : void 0;
+        if (isString(json) && trim(json) !== '') {
+          return JSON.parse(json);
+        }
       }
     };
 
@@ -1534,12 +1586,12 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
       hash = {};
       hash.reset = function() {
-        var newOptions;
-        newOptions = blueprint;
-        if (isFunction(newOptions)) {
-          newOptions = newOptions();
+        var opts;
+        opts = blueprint;
+        if (isFunction(opts)) {
+          opts = opts();
         }
-        return assign(hash, newOptions);
+        return assign(hash, opts);
       };
       hash.reset();
       return hash;
@@ -1619,157 +1671,6 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
-    Normalizes the given params object to the form returned by
-    [`jQuery.serializeArray`](https://api.jquery.com/serializeArray/).
-    
-    @function up.util.requestDataAsArray
-    @param {Object|Array|undefined|null} data
-    @internal
-     */
-    requestDataAsArray = function(data) {
-      var array, j, len, pair, part, query, ref;
-      if (isArray(data)) {
-        data;
-      }
-      if (isFormData(data)) {
-        return up.fail('Cannot convert FormData into an array');
-      } else {
-        query = requestDataAsQuery(data);
-        array = [];
-        ref = query.split('&');
-        for (j = 0, len = ref.length; j < len; j++) {
-          part = ref[j];
-          if (isPresent(part)) {
-            pair = part.split('=');
-            array.push({
-              name: decodeURIComponent(pair[0]),
-              value: decodeURIComponent(pair[1])
-            });
-          }
-        }
-        return array;
-      }
-    };
-
-    /***
-    Returns an URL-encoded query string for the given params object.
-    
-    The returned string does **not** include a leading `?` character.
-    
-    @function up.util.requestDataAsQuery
-    @param {Object|Array|undefined|null} data
-    @internal
-     */
-    requestDataAsQuery = function(data, opts) {
-      var query;
-      opts = options(opts, {
-        purpose: 'url'
-      });
-      if (isString(data)) {
-        return data.replace(/^\?/, '');
-      } else if (isFormData(data)) {
-        return up.fail('Cannot convert FormData into a query string');
-      } else if (isPresent(data)) {
-        query = $.param(data);
-        switch (opts.purpose) {
-          case 'url':
-            query = query.replace(/\+/g, '%20');
-            break;
-          case 'form':
-            query = query.replace(/\%20/g, '+');
-            break;
-          default:
-            up.fail('Unknown purpose %o', opts.purpose);
-        }
-        return query;
-      } else {
-        return "";
-      }
-    };
-    $submittingButton = function($form) {
-      var $activeElement, submitButtonSelector;
-      submitButtonSelector = 'input[type=submit], button[type=submit], button:not([type])';
-      $activeElement = $(document.activeElement);
-      if ($activeElement.is(submitButtonSelector) && $form.has($activeElement)) {
-        return $activeElement;
-      } else {
-        return $form.find(submitButtonSelector).first();
-      }
-    };
-
-    /***
-    Serializes the given form into a request data representation.
-    
-    @function up.util.requestDataFromForm
-    @return {Array|FormData}
-    @internal
-     */
-    requestDataFromForm = function(form) {
-      var $button, $form, buttonName, buttonValue, data, hasFileInputs;
-      $form = $(form);
-      hasFileInputs = $form.find('input[type=file]').length;
-      $button = $submittingButton($form);
-      buttonName = $button.attr('name');
-      buttonValue = $button.val();
-      data = hasFileInputs ? new FormData($form.get(0)) : $form.serializeArray();
-      if (isPresent(buttonName)) {
-        appendRequestData(data, buttonName, buttonValue);
-      }
-      return data;
-    };
-
-    /***
-    Adds a key/value pair to the given request data representation.
-    
-    This mutates the given `data` if `data` is a `FormData`, an object
-    or an array. When `data` is a string a new string with the appended key/value
-    pair is returned.
-    
-    @function up.util.appendRequestData
-    @param {FormData|Object|Array|undefined|null} data
-    @param {string} key
-    @param {string|Blob|File} value
-    @internal
-     */
-    appendRequestData = function(data, name, value, opts) {
-      var newPair;
-      data || (data = []);
-      if (isArray(data)) {
-        data.push({
-          name: name,
-          value: value
-        });
-      } else if (isFormData(data)) {
-        data.append(name, value);
-      } else if (isObject(data)) {
-        data[name] = value;
-      } else if (isString(data)) {
-        newPair = requestDataAsQuery([
-          {
-            name: name,
-            value: value
-          }
-        ], opts);
-        data = [data, newPair].join('&');
-      }
-      return data;
-    };
-
-    /***
-    Merges the request data in `source` into `target`.
-    Will modify the passed-in `target`.
-    
-    @return
-      The merged form data.
-     */
-    mergeRequestData = function(target, source) {
-      each(requestDataAsArray(source), function(field) {
-        return target = appendRequestData(target, field.name, field.value);
-      });
-      return target;
-    };
-
-    /***
     Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
     with the given message.
     
@@ -1837,6 +1738,12 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
     renameKey = function(object, oldKey, newKey) {
       return object[newKey] = pluckKey(object, oldKey);
+    };
+    deprecateRenamedKey = function(object, oldKey, newKey) {
+      if (isDefined(object[oldKey])) {
+        up.warn('Deprecated: Object key { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object);
+        return renameKey(object, oldKey, newKey);
+      }
     };
     pluckData = function(elementOrSelector, key) {
       var $element, value;
@@ -2244,7 +2151,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
     CSS_LENGTH_PROPS = arrayToSet(['top', 'right', 'bottom', 'left', 'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft', 'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight']);
 
-    /**
+    /***
     Converts the given value to a CSS length value, adding a `px` unit if required.
     
     @function up.util.cssLength
@@ -2258,7 +2165,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
     };
 
-    /**
+    /***
     Returns whether the given element has a CSS transition set.
     
     @function up.util.hasCssTransition
@@ -2301,6 +2208,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         }
       }
       return flattened;
+    };
+    flatMap = function(array, block) {
+      return flatten(map(array, block));
     };
 
     /***
@@ -2387,6 +2297,19 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         return Promise.reject(error);
       }
     };
+    sum = function(list, block) {
+      var entry, entryValue, j, len, totalValue;
+      block = listBlock(block);
+      totalValue = 0;
+      for (j = 0, len = list.length; j < len; j++) {
+        entry = list[j];
+        entryValue = block(entry);
+        if (isGiven(entryValue)) {
+          totalValue += entryValue;
+        }
+      }
+      return totalValue;
+    };
 
     /***
     Returns whether the given element is a descendant of the `<body>` element.
@@ -2396,6 +2319,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     isBodyDescendant = function(element) {
       return $(element).parents('body').length > 0;
+    };
+    isBasicObjectProperty = function(k) {
+      return Object.prototype.hasOwnProperty(k);
     };
     isEqual = function(a, b) {
       if (typeof a !== typeof b) {
@@ -2410,12 +2336,17 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         return a === b;
       }
     };
+    splitValues = function(string, separator) {
+      var values;
+      if (separator == null) {
+        separator = ' ';
+      }
+      values = string.split(separator);
+      values = map(values, trim);
+      values = select(values, isPresent);
+      return values;
+    };
     return {
-      requestDataAsArray: requestDataAsArray,
-      requestDataAsQuery: requestDataAsQuery,
-      appendRequestData: appendRequestData,
-      mergeRequestData: mergeRequestData,
-      requestDataFromForm: requestDataFromForm,
       offsetParent: offsetParent,
       fixedToAbsolute: fixedToAbsolute,
       isFixed: isFixed,
@@ -2428,15 +2359,18 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       $createElementFromSelector: $createElementFromSelector,
       $createPlaceholder: $createPlaceholder,
       selectorForElement: selectorForElement,
+      attributeSelector: attributeSelector,
       assign: assign,
       assignPolyfill: assignPolyfill,
       copy: copy,
       merge: merge,
-      options: options,
+      options: newOptions,
       option: option,
       fail: fail,
       each: each,
+      eachIterator: eachIterator,
       map: map,
+      flatMap: flatMap,
       times: times,
       any: any,
       all: all,
@@ -2459,6 +2393,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       isObject: isObject,
       isFunction: isFunction,
       isString: isString,
+      isBoolean: isBoolean,
       isNumber: isNumber,
       isElement: isElement,
       isJQuery: isJQuery,
@@ -2487,6 +2422,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       contains: contains,
       toArray: toArray,
       castedAttr: castedAttr,
+      jsonAttr: jsonAttr,
       clientSize: clientSize,
       only: only,
       except: except,
@@ -2508,6 +2444,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       pluckData: pluckData,
       pluckKey: pluckKey,
       renameKey: renameKey,
+      deprecateRenamedKey: deprecateRenamedKey,
       extractOptions: extractOptions,
       isDetached: isDetached,
       noop: noop,
@@ -2526,11 +2463,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       detachWith: detachWith,
       flatten: flatten,
       isTruthy: isTruthy,
+      isSingletonElement: isSingletonElement,
       newDeferred: newDeferred,
       always: always,
       muteRejection: muteRejection,
       rejectOnError: rejectOnError,
       isBodyDescendant: isBodyDescendant,
+      isBasicObjectProperty: isBasicObjectProperty,
       isCrossDomain: isCrossDomain,
       microtask: microtask,
       isEqual: isEqual,
@@ -2540,7 +2479,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       readComputedStyleNumber: readComputedStyleNumber,
       readInlineStyle: readInlineStyle,
       writeInlineStyle: writeInlineStyle,
-      hasCssTransition: hasCssTransition
+      hasCssTransition: hasCssTransition,
+      splitValues: splitValues,
+      sum: sum,
+      values: objectValues
     };
   })(jQuery);
 
@@ -2570,7 +2512,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @param {number|Function(): number} [config.expiry]
       The number of milliseconds after which a cache entry
       will be discarded.
-    @param {string} [config.log]
+    @param {string} [config.logPrefix]
       A prefix for log entries printed by this cache object.
     @param {Function(any): string} [config.key]
       A function that takes an argument and returns a string key
@@ -2597,7 +2539,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       this.normalizeStoreKey = bind(this.normalizeStoreKey, this);
       this.expiryMillis = bind(this.expiryMillis, this);
       this.maxKeys = bind(this.maxKeys, this);
-      this.store = {};
+      this.store = this.config.store || new up.store.Memory();
     }
 
     Cache.prototype.maxKeys = function() {
@@ -2612,7 +2554,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       if (this.config.key) {
         return this.config.key(key);
       } else {
-        return this.key.toString();
+        return key.toString();
       }
     };
 
@@ -2629,7 +2571,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     Cache.prototype.clear = function() {
-      return this.store = {};
+      return this.store.clear();
     };
 
     Cache.prototype.log = function() {
@@ -2642,7 +2584,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     Cache.prototype.keys = function() {
-      return Object.keys(this.store);
+      return this.store.keys();
     };
 
     Cache.prototype.makeRoomForAnotherKey = function() {
@@ -2650,13 +2592,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       storeKeys = u.copy(this.keys());
       max = this.maxKeys();
       if (max && storeKeys.length >= max) {
-        oldestKey = null;
-        oldestTimestamp = null;
+        oldestKey = void 0;
+        oldestTimestamp = void 0;
         u.each(storeKeys, (function(_this) {
           return function(key) {
-            var promise, timestamp;
-            promise = _this.store[key];
-            timestamp = promise.timestamp;
+            var entry, timestamp;
+            entry = _this.store.get(key);
+            timestamp = entry.timestamp;
             if (!oldestTimestamp || oldestTimestamp > timestamp) {
               oldestKey = key;
               return oldestTimestamp = timestamp;
@@ -2664,7 +2606,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
           };
         })(this));
         if (oldestKey) {
-          return delete this.store[oldestKey];
+          return this.store.remove(oldestKey);
         }
       }
     };
@@ -2684,15 +2626,16 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     Cache.prototype.set = function(key, value) {
-      var storeKey;
+      var storeKey, timestampedValue;
       if (this.isEnabled() && this.isCachable(key)) {
         this.makeRoomForAnotherKey();
         storeKey = this.normalizeStoreKey(key);
         this.log("Setting entry %o to %o", storeKey, value);
-        return this.store[storeKey] = {
+        timestampedValue = {
           timestamp: this.timestamp(),
           value: value
         };
+        return this.store.set(storeKey, timestampedValue);
       }
     };
 
@@ -2700,7 +2643,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       var storeKey;
       if (this.isCachable(key)) {
         storeKey = this.normalizeStoreKey(key);
-        return delete this.store[storeKey];
+        return this.store.remove(storeKey);
       }
     };
 
@@ -2720,7 +2663,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       if (options == null) {
         options = {};
       }
-      if (this.isCachable(key) && (entry = this.store[this.normalizeStoreKey(key)])) {
+      if (this.isCachable(key) && (entry = this.store.get(this.normalizeStoreKey(key)))) {
         if (this.isFresh(entry)) {
           if (!options.silent) {
             this.log("Cache hit for '%s'", key);
@@ -2742,6 +2685,160 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     return Cache;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    slice = [].slice;
+
+  u = up.util;
+
+  up.Record = (function() {
+    Record.prototype.fields = function() {
+      throw 'Return an array of property names';
+    };
+
+    function Record(options) {
+      this.copy = bind(this.copy, this);
+      this.attributes = bind(this.attributes, this);
+      u.assign(this, this.attributes(options));
+    }
+
+    Record.prototype.attributes = function(source) {
+      if (source == null) {
+        source = this;
+      }
+      return u.only.apply(u, [source].concat(slice.call(this.fields())));
+    };
+
+    Record.prototype.copy = function(changes) {
+      var attributesWithChanges;
+      if (changes == null) {
+        changes = {};
+      }
+      attributesWithChanges = u.merge(this.attributes(), changes);
+      return new this.constructor(attributesWithChanges);
+    };
+
+    return Record;
+
+  })();
+
+}).call(this);
+(function() {
+  var u;
+
+  u = up.util;
+
+  up.CompilePass = (function() {
+    function CompilePass($root, compilers, options) {
+      this.$root = $root;
+      this.compilers = compilers;
+      if (options == null) {
+        options = {};
+      }
+      this.root = this.$root[0];
+      this.$skipSubtrees = $(options.skip);
+      if (!(this.$skipSubtrees.length && this.root.querySelector('[up-keep]'))) {
+        this.$skipSubtrees = void 0;
+      }
+    }
+
+    CompilePass.prototype.compile = function() {
+      return up.log.group("Compiling fragment %o", this.root, (function(_this) {
+        return function() {
+          var compiler, i, len, ref, results;
+          ref = _this.compilers;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            compiler = ref[i];
+            results.push(_this.runCompiler(compiler));
+          }
+          return results;
+        };
+      })(this));
+    };
+
+    CompilePass.prototype.runCompiler = function(compiler) {
+      var $matches;
+      $matches = this.$select(compiler.selector);
+      if (!$matches.length) {
+        return;
+      }
+      return up.log.group((!compiler.isSystem ? "Compiling '%s' on %d element(s)" : void 0), compiler.selector, $matches.length, (function(_this) {
+        return function() {
+          var i, keepValue, len, match, value;
+          if (compiler.batch) {
+            _this.compileBatch(compiler, $matches);
+          } else {
+            for (i = 0, len = $matches.length; i < len; i++) {
+              match = $matches[i];
+              _this.compileOneElement(compiler, $(match));
+            }
+          }
+          if (keepValue = compiler.keep) {
+            value = u.isString(keepValue) ? keepValue : '';
+            return $matches.attr('up-keep', value);
+          }
+        };
+      })(this));
+    };
+
+    CompilePass.prototype.compileOneElement = function(compiler, $element) {
+      var compileArgs, data, destructor, result;
+      compileArgs = [$element];
+      if (compiler.length !== 1) {
+        data = up.syntax.data($element);
+        compileArgs.push(data);
+      }
+      result = compiler.apply($element[0], compileArgs);
+      if (destructor = this.normalizeDestructor(result)) {
+        return up.syntax.destructor($element, destructor);
+      }
+    };
+
+    CompilePass.prototype.compileBatch = function(compiler, $elements) {
+      var compileArgs, dataList, result;
+      compileArgs = [$elements];
+      if (compiler.length !== 1) {
+        dataList = u.map($elements, up.syntax.data);
+        compileArgs.push(dataList);
+      }
+      result = compiler.apply($elements.get(), compileArgs);
+      if (this.normalizeDestructor(result)) {
+        return up.fail('Compilers with { batch: true } cannot return destructors');
+      }
+    };
+
+    CompilePass.prototype.normalizeDestructor = function(result) {
+      if (u.isFunction(result)) {
+        return result;
+      } else if (u.isArray(result) && u.all(result, u.isFunction)) {
+        up.warn('up.compiler(): Returning an array of destructor functions is deprecated. Return a single function instead.');
+        return u.sequence.apply(u, result);
+      }
+    };
+
+    CompilePass.prototype.$select = function(selector) {
+      var $matches, $skipSubtrees;
+      if (u.isFunction(selector)) {
+        selector = selector();
+      }
+      $matches = u.selectInSubtree(this.$root, selector);
+      if ($skipSubtrees = this.$skipSubtrees) {
+        $matches = $matches.filter(function() {
+          var $match;
+          $match = $(this);
+          return $match.closest($skipSubtrees).length === 0;
+        });
+      }
+      return $matches;
+    };
+
+    return CompilePass;
 
   })();
 
@@ -3293,6 +3390,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
 }).call(this);
 (function() {
+
+
+}).call(this);
+(function() {
   var u,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     slice = [].slice;
@@ -3339,9 +3440,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       }
       parts = [];
       this.selectors.forEach(function(variantSelector) {
-        return ['a', '[up-href]'].forEach(function(tagSelector) {
-          return parts.push("" + tagSelector + variantSelector + additionalClause);
-        });
+        var i, len, ref, results, tagSelector;
+        ref = ['a', '[up-href]'];
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          tagSelector = ref[i];
+          results.push(parts.push("" + tagSelector + variantSelector + additionalClause));
+        }
+        return results;
       });
       return parts.join(', ');
     };
@@ -3364,12 +3470,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     FollowVariant.prototype.followLink = function($link, options) {
-      if (options == null) {
-        options = {};
-      }
-      return up.bus.whenEmitted('up:link:follow', {
+      var followEventAttrs;
+      options = u.options(options);
+      followEventAttrs = {
+        message: 'Following link',
+        $link: $link,
         $element: $link
-      }).then((function(_this) {
+      };
+      return up.bus.whenEmitted('up:link:follow', followEventAttrs).then((function(_this) {
         return function() {
           return up.feedback.start($link, options, function() {
             return _this.followNow($link, options);
@@ -3379,9 +3487,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     FollowVariant.prototype.preloadLink = function($link, options) {
-      if (options == null) {
-        options = {};
-      }
+      options = u.options(options);
       return this.preloadNow($link, options);
     };
 
@@ -3653,45 +3759,6 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 (function() {
   var u,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    slice = [].slice;
-
-  u = up.util;
-
-  up.Record = (function() {
-    Record.prototype.fields = function() {
-      throw 'Return an array of property names';
-    };
-
-    function Record(options) {
-      this.copy = bind(this.copy, this);
-      this.attributes = bind(this.attributes, this);
-      u.assign(this, this.attributes(options));
-    }
-
-    Record.prototype.attributes = function(source) {
-      if (source == null) {
-        source = this;
-      }
-      return u.only.apply(u, [source].concat(slice.call(this.fields())));
-    };
-
-    Record.prototype.copy = function(changes) {
-      var attributesWithChanges;
-      if (changes == null) {
-        changes = {};
-      }
-      attributesWithChanges = u.merge(this.attributes(), changes);
-      return new this.constructor(attributesWithChanges);
-    };
-
-    return Record;
-
-  })();
-
-}).call(this);
-(function() {
-  var u,
-    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -3728,16 +3795,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
 
     /***
-    Parameters that should be sent as the request's payload.
+    [Parameters](/up.params) that should be sent as the request's payload.
     
-    Parameters may be passed as one of the following forms:
-    
-    1. An object where keys are param names and the values are param values
-    2. An array of `{ name: 'param-name', value: 'param-value' }` objects
-    3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
-    
-    @property up.Request#data
-    @param {String} data
+    @property up.Request#params
+    @param {object|FormData|string|Array} params
     @stable
      */
 
@@ -3781,7 +3842,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
 
     Request.prototype.fields = function() {
-      return ['method', 'url', 'data', 'target', 'failTarget', 'headers', 'timeout'];
+      return ['method', 'url', 'params', 'data', 'target', 'failTarget', 'headers', 'timeout', 'preload', 'cache'];
     };
 
 
@@ -3799,8 +3860,8 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       this.navigate = bind(this.navigate, this);
       this.send = bind(this.send, this);
       this.isSafe = bind(this.isSafe, this);
-      this.transferSearchToData = bind(this.transferSearchToData, this);
-      this.transferDataToUrl = bind(this.transferDataToUrl, this);
+      this.transferSearchToParams = bind(this.transferSearchToParams, this);
+      this.transferParamsToUrl = bind(this.transferParamsToUrl, this);
       this.extractHashFromUrl = bind(this.extractHashFromUrl, this);
       this.normalize = bind(this.normalize, this);
       Request.__super__.constructor.call(this, options);
@@ -3808,42 +3869,38 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     }
 
     Request.prototype.normalize = function() {
+      u.deprecateRenamedKey(this, 'data', 'params');
       this.method = u.normalizeMethod(this.method);
       this.headers || (this.headers = {});
       this.extractHashFromUrl();
       if (u.methodAllowsPayload(this.method)) {
-        return this.transferSearchToData();
+        return this.transferSearchToParams();
       } else {
-        return this.transferDataToUrl();
+        return this.transferParamsToUrl();
       }
     };
 
     Request.prototype.extractHashFromUrl = function() {
       var urlParts;
       urlParts = u.parseUrl(this.url);
-      this.hash = urlParts.hash;
+      this.hash = u.presence(urlParts.hash);
       return this.url = u.normalizeUrl(urlParts, {
         hash: false
       });
     };
 
-    Request.prototype.transferDataToUrl = function() {
-      var query, separator;
-      if (this.data && !u.isFormData(this.data)) {
-        query = u.requestDataAsQuery(this.data);
-        separator = u.contains(this.url, '?') ? '&' : '?';
-        this.url += separator + query;
-        return this.data = void 0;
+    Request.prototype.transferParamsToUrl = function() {
+      if (this.params && !u.isFormData(this.params)) {
+        this.url = up.params.buildURL(this.url, this.params);
+        return this.params = void 0;
       }
     };
 
-    Request.prototype.transferSearchToData = function() {
-      var query, urlParts;
-      urlParts = u.parseUrl(this.url);
-      query = urlParts.search;
-      if (query) {
-        this.data = u.mergeRequestData(this.data, query);
-        return this.url = u.normalizeUrl(urlParts, {
+    Request.prototype.transferSearchToParams = function() {
+      var query;
+      if (query = up.params.fromURL(this.url)) {
+        this.params = up.params.merge(this.params, query);
+        return this.url = u.normalizeUrl(this.url, {
           search: false
         });
       }
@@ -3856,34 +3913,31 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     Request.prototype.send = function() {
       return new Promise((function(_this) {
         return function(resolve, reject) {
-          var csrfToken, header, ref, resolveWithResponse, value, xhr, xhrData, xhrHeaders, xhrMethod, xhrUrl;
+          var csrfToken, header, pc, ref, resolveWithResponse, value, xhr, xhrHeaders, xhrMethod, xhrPayload, xhrUrl;
           xhr = new XMLHttpRequest();
           xhrHeaders = u.copy(_this.headers);
-          xhrData = _this.data;
+          xhrPayload = _this.params;
           xhrMethod = _this.method;
           xhrUrl = _this.url;
-          ref = up.proxy.wrapMethod(xhrMethod, xhrData), xhrMethod = ref[0], xhrData = ref[1];
-          if (u.isFormData(xhrData)) {
+          ref = up.proxy.wrapMethod(xhrMethod, xhrPayload), xhrMethod = ref[0], xhrPayload = ref[1];
+          if (xhrPayload) {
             delete xhrHeaders['Content-Type'];
-          } else if (u.isPresent(xhrData)) {
-            xhrData = u.requestDataAsQuery(xhrData, {
-              purpose: 'form'
-            });
-            xhrHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
+            xhrPayload = up.params.toFormData(xhrPayload);
           } else {
-            xhrData = null;
+            xhrPayload = null;
           }
+          pc = up.protocol.config;
           if (_this.target) {
-            xhrHeaders[up.protocol.config.targetHeader] = _this.target;
+            xhrHeaders[pc.targetHeader] = _this.target;
           }
           if (_this.failTarget) {
-            xhrHeaders[up.protocol.config.failTargetHeader] = _this.failTarget;
+            xhrHeaders[pc.failTargetHeader] = _this.failTarget;
           }
           if (!_this.isCrossDomain()) {
             xhrHeaders['X-Requested-With'] || (xhrHeaders['X-Requested-With'] = 'XMLHttpRequest');
           }
           if (csrfToken = _this.csrfToken()) {
-            xhrHeaders[up.protocol.config.csrfHeader] = csrfToken;
+            xhrHeaders[pc.csrfHeader] = csrfToken;
           }
           xhr.open(xhrMethod, xhrUrl);
           for (header in xhrHeaders) {
@@ -3905,14 +3959,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
           if (_this.timeout) {
             xhr.timeout = _this.timeout;
           }
-          return xhr.send(xhrData);
+          return xhr.send(xhrPayload);
         };
       })(this));
     };
 
     Request.prototype.navigate = function() {
       var $form, addField, csrfParam, csrfToken, formMethod;
-      this.transferSearchToData();
+      this.transferSearchToParams();
       $form = $('<form class="up-page-loader"></form>');
       addField = function(field) {
         return $('<input type="hidden">').attr(field).appendTo($form);
@@ -3936,7 +3990,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
           value: csrfToken
         });
       }
-      u.each(u.requestDataAsArray(this.data), addField);
+      u.each(up.params.toArray(this.params), addField);
       $form.hide().appendTo('body');
       return up.browser.submitForm($form);
     };
@@ -3970,11 +4024,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     Request.prototype.isCachable = function() {
-      return this.isSafe() && !u.isFormData(this.data);
+      return this.isSafe() && !u.isFormData(this.params);
     };
 
     Request.prototype.cacheKey = function() {
-      return [this.url, this.method, u.requestDataAsQuery(this.data), this.target].join('|');
+      var query;
+      query = up.params.toQuery(this.params);
+      return [this.url, this.method, query, this.target].join('|');
     };
 
     Request.wrap = function(object) {
@@ -4098,6 +4154,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     function Response(options) {
+      this.getHeader = bind(this.getHeader, this);
       this.isFatalError = bind(this.isFatalError, this);
       this.isError = bind(this.isError, this);
       this.isSuccess = bind(this.isSuccess, this);
@@ -4150,9 +4207,138 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       return this.isError() && u.isBlank(this.text);
     };
 
+
+    /***
+    Returns the HTTP header value with the given name.
+    
+    The search for the header name is case-insensitive.
+    
+    Returns `undefined` if the given header name was not included in the response.
+    
+    @function up.Response#getHeader
+    @param {string} name
+    @return {string|undefined} value
+    @experimental
+     */
+
+    Response.prototype.getHeader = function(name) {
+      return this.xhr.getResponseHeader(name);
+    };
+
     return Response;
 
   })(up.Record);
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  up.store || (up.store = {});
+
+  u = up.util;
+
+  up.store.Memory = (function() {
+    function Memory() {
+      this.values = bind(this.values, this);
+      this.keys = bind(this.keys, this);
+      this.remove = bind(this.remove, this);
+      this.set = bind(this.set, this);
+      this.get = bind(this.get, this);
+      this.clear = bind(this.clear, this);
+      this.clear();
+    }
+
+    Memory.prototype.clear = function() {
+      return this.data = {};
+    };
+
+    Memory.prototype.get = function(key) {
+      return this.data[key];
+    };
+
+    Memory.prototype.set = function(key, value) {
+      return this.data[key] = value;
+    };
+
+    Memory.prototype.remove = function(key) {
+      return delete this.data[key];
+    };
+
+    Memory.prototype.keys = function() {
+      return Object.keys(this.data);
+    };
+
+    Memory.prototype.values = function() {
+      return u.values(this.data);
+    };
+
+    return Memory;
+
+  })();
+
+}).call(this);
+(function() {
+  var u,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  u = up.util;
+
+  up.store.Session = (function(superClass) {
+    extend(Session, superClass);
+
+    function Session(rootKey) {
+      this.saveToSessionStorage = bind(this.saveToSessionStorage, this);
+      this.loadFromSessionStorage = bind(this.loadFromSessionStorage, this);
+      this.remove = bind(this.remove, this);
+      this.set = bind(this.set, this);
+      this.clear = bind(this.clear, this);
+      this.rootKey = rootKey;
+      this.loadFromSessionStorage();
+    }
+
+    Session.prototype.clear = function() {
+      Session.__super__.clear.call(this);
+      return this.saveToSessionStorage();
+    };
+
+    Session.prototype.set = function(key, value) {
+      Session.__super__.set.call(this, key, value);
+      return this.saveToSessionStorage();
+    };
+
+    Session.prototype.remove = function(key) {
+      Session.__super__.remove.call(this, key);
+      return this.saveToSessionStorage();
+    };
+
+    Session.prototype.loadFromSessionStorage = function() {
+      var raw;
+      try {
+        if (raw = typeof sessionStorage !== "undefined" && sessionStorage !== null ? sessionStorage.getItem(this.rootKey) : void 0) {
+          this.data = JSON.parse(raw);
+        }
+      } catch (error) {
+
+      }
+      return this.data || (this.data = {});
+    };
+
+    Session.prototype.saveToSessionStorage = function() {
+      var json;
+      json = JSON.stringify(this.data);
+      try {
+        return typeof sessionStorage !== "undefined" && sessionStorage !== null ? sessionStorage.setItem(this.rootKey, json) : void 0;
+      } catch (error) {
+
+      }
+    };
+
+    return Session;
+
+  })(up.store.Memory);
 
 }).call(this);
 (function() {
@@ -4231,14 +4417,14 @@ Internet Explorer 10 or lower
   var slice = [].slice;
 
   up.browser = (function($) {
-    var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canCustomElements, canDOMParser, canFormData, canInputEvent, canPromise, canPushState, hash, isIE10OrWorse, isRecentJQuery, isSupported, navigate, polyfilledSessionStorage, popCookie, puts, sessionStorage, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
+    var CONSOLE_PLACEHOLDERS, canConsole, canCssTransition, canCustomElements, canDOMParser, canFormData, canInputEvent, canInspectFormData, canPromise, canPushState, documentViewportSelector, isIE10OrWorse, isRecentJQuery, isSupported, navigate, popCookie, puts, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /***
     @method up.browser.navigate
     @param {string} url
     @param {string} [options.method='get']
-    @param {Object|Array} [options.data]
+    @param {object|Array|FormData|string} [options.params]
     @internal
      */
     navigate = function(url, options) {
@@ -4431,6 +4617,15 @@ Internet Explorer 10 or lower
     });
 
     /***
+    @function up.browser.canInspectFormData
+    @return {boolean}
+    @internal
+     */
+    canInspectFormData = u.memoize(function() {
+      return canFormData() && !!FormData.prototype.entries;
+    });
+
+    /***
     Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
     interface.
     
@@ -4463,14 +4658,6 @@ Internet Explorer 10 or lower
       minor = parseInt(parts[1]);
       return major >= 2 || (major === 1 && minor >= 9);
     });
-
-    /***
-    Returns and deletes a cookie with the given name
-    Inspired by Turbolinks: https://github.com/rails/turbolinks/blob/83d4b3d2c52a681f07900c28adb28bc8da604733/lib/assets/javascripts/turbolinks.coffee#L292
-    
-    @function up.browser.popCookie
-    @internal
-     */
     popCookie = function(name) {
       var ref, value;
       value = (ref = document.cookie.match(new RegExp(name + "=(\\w+)"))) != null ? ref[1] : void 0;
@@ -4512,62 +4699,35 @@ Internet Explorer 10 or lower
     };
 
     /***
-    @internal
-     */
-    sessionStorage = u.memoize(function() {
-      try {
-        return window.sessionStorage;
-      } catch (error) {
-        return polyfilledSessionStorage();
-      }
-    });
-
-    /***
-    @internal
-     */
-    polyfilledSessionStorage = function() {
-      var data;
-      data = {};
-      return {
-        getItem: function(prop) {
-          return data[prop];
-        },
-        setItem: function(prop, value) {
-          return data[prop] = value;
-        }
-      };
-    };
-
-    /***
-    Returns `'foo'` if the hash is `'#foo'`.
+    Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
+    for the browser's main content area.
     
-    Returns undefined if the hash is `'#'`, `''` or `undefined`.
-    
-    @function up.browser.hash
+    @function up.browser.documentViewportSelector
     @internal
      */
-    hash = function(value) {
-      value || (value = location.hash);
-      value || (value = '');
-      if (value[0] === '#') {
-        value = value.substr(1);
+    documentViewportSelector = function() {
+      var element;
+      if (element = document.scrollingElement) {
+        return element.tagName;
+      } else {
+        return 'html';
       }
-      return u.presence(value);
     };
     return {
       url: url,
       navigate: navigate,
       submitForm: submitForm,
       canPushState: canPushState,
+      canFormData: canFormData,
+      canInspectFormData: canInspectFormData,
       canCustomElements: canCustomElements,
+      documentViewportSelector: documentViewportSelector,
       whenConfirmed: whenConfirmed,
       isSupported: isSupported,
       puts: puts,
       sprintf: sprintf,
       sprintfWithFormattedArgs: sprintfWithFormattedArgs,
-      sessionStorage: sessionStorage,
-      popCookie: popCookie,
-      hash: hash
+      popCookie: popCookie
     };
   })(jQuery);
 
@@ -4626,7 +4786,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
   var slice = [].slice;
 
   up.bus = (function($) {
-    var boot, consumeAction, emit, emitReset, fixRenamedEvents, forgetUpDescription, haltEvent, live, liveUpDescriptions, logEmission, nextUpDescriptionNumber, nobodyPrevents, onEscape, rememberUpDescription, renamedEvent, renamedEvents, resetBus, snapshot, u, unbind, upDescriptionNumber, upDescriptionToJqueryDescription, upListenerToJqueryListener, whenEmitted;
+    var boot, consumeAction, deprecateRenamedEvent, emit, emitReset, fixRenamedEvents, forgetUpDescription, haltEvent, live, liveUpDescriptions, logEmission, nextUpDescriptionNumber, nobodyPrevents, onEscape, rememberUpDescription, renamedEvents, resetBus, snapshot, u, unbind, upDescriptionNumber, upDescriptionToJqueryDescription, upListenerToJqueryListener, whenEmitted;
     u = up.util;
     liveUpDescriptions = {};
     nextUpDescriptionNumber = 0;
@@ -4641,9 +4801,14 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
      */
     upListenerToJqueryListener = function(upListener) {
       return function(event) {
-        var $me;
+        var $me, args, expectedArgCount;
         $me = event.$element || $(this);
-        return upListener.apply($me.get(0), [event, $me, up.syntax.data($me)]);
+        args = [event, $me];
+        expectedArgCount = upListener.length;
+        if (!(expectedArgCount === 1 || expectedArgCount === 2)) {
+          args.push(up.syntax.data($me));
+        }
+        return upListener.apply($me.get(0), args);
       };
     };
 
@@ -4663,6 +4828,9 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       if (isNew) {
         jqueryListener = upListenerToJqueryListener(upListener);
         upListener._asJqueryListener = jqueryListener;
+        if (upListener._descriptionNumber) {
+          up.fail('up.on(): The callback %o cannot be registered more than once');
+        }
         upListener._descriptionNumber = ++nextUpDescriptionNumber;
       } else {
         jqueryListener = upListener._asJqueryListener;
@@ -4673,11 +4841,11 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     };
     fixRenamedEvents = function(description) {
       var events;
-      events = description[0].split(/\s+/);
+      events = u.splitValues(description[0]);
       events = u.map(events, function(event) {
         var newEvent;
         if (newEvent = renamedEvents[event]) {
-          up.log.warn(event + " has been renamed to " + newEvent);
+          up.warn("Deprecated: " + event + " has been renamed to " + newEvent);
           return newEvent;
         } else {
           return event;
@@ -4824,8 +4992,11 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       return liveUpDescriptions[number] = upDescription;
     };
     forgetUpDescription = function(upDescription) {
-      var number;
+      var number, upListener;
       number = upDescriptionNumber(upDescription);
+      upListener = u.last(upDescription);
+      delete upListener._descriptionNumber;
+      delete upListener._asJqueryListener;
       return delete liveUpDescriptions[number];
     };
     upDescriptionNumber = function(upDescription) {
@@ -5052,7 +5223,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
     @event up:framework:reset
     @experimental
      */
-    renamedEvent = function(oldEvent, newEvent) {
+    deprecateRenamedEvent = function(oldEvent, newEvent) {
       return renamedEvents[oldEvent] = newEvent;
     };
 
@@ -5108,7 +5279,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
       emitReset: emitReset,
       haltEvent: haltEvent,
       consumeAction: consumeAction,
-      renamedEvent: renamedEvent,
+      deprecateRenamedEvent: deprecateRenamedEvent,
       boot: boot
     };
   })(jQuery);
@@ -5122,6 +5293,625 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
   up.reset = up.bus.emitReset;
 
   up.boot = up.bus.boot;
+
+}).call(this);
+
+/***
+Request parameters
+==================
+
+Methods like [`up.replace()`](/up.replace) accept request parameters (or form data values) as a `{ params }` option.
+
+This module offers a consistent API to read and manipulate request parameters independent of their type.
+
+
+\#\#\# Supported parameter types
+
+The following types of parameters are supported:
+
+1. an object like `{ email: 'foo@bar.com' }`
+2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+3. a query string like `email=foo%40bar.com`
+4. an array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
+
+@class up.params
+ */
+
+(function() {
+  up.params = (function($) {
+    var NATURE_ARRAY, NATURE_FORM_DATA, NATURE_MISSING, NATURE_OBJECT, NATURE_QUERY, add, arrayEntryToQuery, assign, buildArrayFromFormData, buildArrayFromObject, buildArrayFromQuery, buildFormDataFromArray, buildObjectFromArray, buildQueryFromArray, buildURL, fromField, fromForm, fromURL, get, isPrimitiveValue, merge, natureOf, safeGet, safeSet, submittingButton, toArray, toFormData, toObject, toQuery, u;
+    u = up.util;
+    NATURE_MISSING = 0;
+    NATURE_ARRAY = 1;
+    NATURE_QUERY = 2;
+    NATURE_FORM_DATA = 3;
+    NATURE_OBJECT = 4;
+    natureOf = function(params) {
+      if (u.isMissing(params)) {
+        return NATURE_MISSING;
+      } else if (u.isArray(params)) {
+        return NATURE_ARRAY;
+      } else if (u.isString(params)) {
+        return NATURE_QUERY;
+      } else if (u.isFormData(params)) {
+        return NATURE_FORM_DATA;
+      } else if (u.isObject(params)) {
+        return NATURE_OBJECT;
+      } else {
+        return up.fail("Unsupport params type: %o", params);
+      }
+    };
+
+    /***
+    Returns an array representation of the given `params`.
+    
+    The given params value may be of any [supported type](/up.params).
+    
+    Each element in the returned array is an object with `{ name }` and `{ value }` properties.
+    
+    \#\#\# Example
+    
+        var array = up.params.toArray('foo=bar&baz=bam')
+    
+        // array is now: [
+        //   { name: 'foo', value: 'bar' },
+        //   { name: 'baz', value: 'bam' },
+        // ]
+    
+    @function up.params.toArray
+    @param {Object|FormData|string|Array|undefined} params
+      the params to convert
+    @return {Array}
+      an array representation of the given params
+    @experimental
+     */
+    toArray = function(params) {
+      switch (natureOf(params)) {
+        case NATURE_MISSING:
+          return [];
+        case NATURE_ARRAY:
+          return params;
+        case NATURE_QUERY:
+          return buildArrayFromQuery(params);
+        case NATURE_FORM_DATA:
+          return buildArrayFromFormData(params);
+        case NATURE_OBJECT:
+          return buildArrayFromObject(params);
+      }
+    };
+
+    /***
+    Returns an object representation of the given `params`.
+    
+    The given params value may be of any [supported type](/up.params).
+    
+    The returned value is a simple JavaScript object whose properties correspond
+    to the key/values in the given `params`.
+    
+    \#\#\# Example
+    
+        var object = up.params.toObject('foo=bar&baz=bam')
+    
+        // object is now: {
+        //   foo: 'bar',
+        //   baz: 'bam'
+        // ]
+    
+    @function up.params.toObject
+    @param {Object|FormData|string|Array|undefined} params
+      the params to convert
+    @return {Array}
+      an object representation of the given params
+    @experimental
+     */
+    toObject = function(params) {
+      switch (natureOf(params)) {
+        case NATURE_MISSING:
+          return {};
+        case NATURE_ARRAY:
+        case NATURE_QUERY:
+        case NATURE_FORM_DATA:
+          return buildObjectFromArray(toArray(params));
+        case NATURE_OBJECT:
+          return params;
+      }
+    };
+
+    /***
+    Returns [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given `params`.
+    
+    The given params value may be of any [supported type](/up.params).
+    
+    \#\#\# Example
+    
+        var formData = up.params.toFormData('foo=bar&baz=bam')
+    
+        formData.get('foo') // 'bar'
+        formData.get('baz') // 'bam'
+    
+    @function up.params.toFormData
+    @param {Object|FormData|string|Array|undefined} params
+      the params to convert
+    @return {FormData}
+      a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given params
+    @experimental
+     */
+    toFormData = function(params) {
+      switch (natureOf(params)) {
+        case NATURE_MISSING:
+          return new FormData();
+        case NATURE_ARRAY:
+        case NATURE_QUERY:
+        case NATURE_OBJECT:
+          return buildFormDataFromArray(toArray(params));
+        case NATURE_FORM_DATA:
+          return params;
+      }
+    };
+
+    /***
+    Returns an query string for the given `params`.
+    
+    The given params value may be of any [supported type](/up.params).
+    
+    The keys and values in the returned query string will be [percent-encoded](https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding).
+    Non-primitive values (like [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) will be omitted from
+    the retuned query string.
+    
+    \#\#\# Example
+    
+        var query = up.params.toQuery({ foo: 'bar', baz: 'bam' })
+    
+        // query is now: 'foo=bar&baz=bam'
+    
+    @function up.params.toQuery
+    @param {Object|FormData|string|Array|undefined} params
+      the params to convert
+    @return {string}
+      a query string built from the given params
+    @experimental
+     */
+    toQuery = function(params) {
+      switch (natureOf(params)) {
+        case NATURE_MISSING:
+          return '';
+        case NATURE_QUERY:
+          return params;
+        case NATURE_ARRAY:
+        case NATURE_FORM_DATA:
+        case NATURE_OBJECT:
+          return buildQueryFromArray(toArray(params));
+      }
+    };
+    arrayEntryToQuery = function(entry) {
+      var query, value;
+      value = entry.value;
+      if (!isPrimitiveValue(value)) {
+        return void 0;
+      }
+      query = encodeURIComponent(entry.name);
+      if (u.isGiven(value)) {
+        query += "=";
+        query += encodeURIComponent(value);
+      }
+      return query;
+    };
+
+    /***
+    Returns whether the given value can be encoded into a query string.
+    
+    We will have `File` values in our params when we serialize a form with a file input.
+    These entries will be filtered out when converting to a query string.
+     */
+    isPrimitiveValue = function(value) {
+      return u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value);
+    };
+    safeSet = function(obj, k, value) {
+      if (!u.isBasicObjectProperty(k)) {
+        return obj[k] = value;
+      }
+    };
+    safeGet = function(obj, k) {
+      if (!u.isBasicObjectProperty(k)) {
+        return obj[k];
+      }
+    };
+    buildQueryFromArray = function(array) {
+      var parts;
+      parts = u.map(array, arrayEntryToQuery);
+      parts = u.compact(parts);
+      return parts.join('&');
+    };
+    buildArrayFromQuery = function(query) {
+      var array, i, len, name, part, ref, ref1, value;
+      array = [];
+      ref = query.split('&');
+      for (i = 0, len = ref.length; i < len; i++) {
+        part = ref[i];
+        if (part) {
+          ref1 = part.split('='), name = ref1[0], value = ref1[1];
+          name = decodeURIComponent(name);
+          if (u.isGiven(value)) {
+            value = decodeURIComponent(value);
+          } else {
+            value = null;
+          }
+          array.push({
+            name: name,
+            value: value
+          });
+        }
+      }
+      return array;
+    };
+    buildArrayFromObject = function(object) {
+      var array, k, v;
+      array = [];
+      for (k in object) {
+        v = object[k];
+        array.push({
+          name: k,
+          value: v
+        });
+      }
+      return array;
+    };
+    buildObjectFromArray = function(array) {
+      var entry, i, len, obj;
+      obj = {};
+      for (i = 0, len = array.length; i < len; i++) {
+        entry = array[i];
+        safeSet(obj, entry.name, entry.value);
+      }
+      return obj;
+    };
+    buildArrayFromFormData = function(formData) {
+      var array;
+      array = [];
+      u.eachIterator(formData.entries(), function(value) {
+        var name, ref;
+        ref = value, name = ref[0], value = ref[1];
+        return array.push({
+          name: name,
+          value: value
+        });
+      });
+      return array;
+    };
+    buildFormDataFromArray = function(array) {
+      var entry, formData, i, len;
+      formData = new FormData();
+      for (i = 0, len = array.length; i < len; i++) {
+        entry = array[i];
+        formData.append(entry.name, entry.value);
+      }
+      return formData;
+    };
+    buildURL = function(base, params) {
+      var parts, separator;
+      parts = [base, toQuery(params)];
+      parts = u.select(parts, u.isPresent);
+      separator = u.contains(base, '?') ? '&' : '?';
+      return parts.join(separator);
+    };
+
+    /***
+    Adds to the given `params` a new  entry with the given `name` and `value`.
+    
+    The given params value may be of any [supported type](/up.params).
+    
+    The given `params` value is changed in-place, if possible. Some types, such as query strings,
+    cannot be changed in-place. The return value is always a params value that includes the new entry.
+    
+    \#\#\# Example
+    
+        var obj = { foo: 'bar' }
+        up.params.add(obj, 'baz', 'bam')
+        // obj is now: { foo: 'bar', baz: 'bam' }
+    
+    @function up.params.add
+    @param {string|object|FormData|Array|undefined} params
+    @param {string} name
+    @param {any} value
+    @return {string|object|FormData|Array}
+    @experimental
+     */
+    add = function(params, name, value) {
+      var newEntry;
+      newEntry = [
+        {
+          name: name,
+          value: value
+        }
+      ];
+      return assign(params, newEntry);
+    };
+
+    /***
+    Returns a new params value that contains entries from both `params` and `otherParams`.
+    
+    The given params value may be of any [supported type](/up.params).
+    
+    This function creates a new params value. The given `params` argument is not changed.
+    
+    @function up.params.merge
+    @param {string|object|FormData|Array|undefined} params
+    @param {string|object|FormData|Array|undefined} otherParams
+    @return {string|object|FormData|Array}
+    @experimental
+     */
+    merge = function(params, otherParams) {
+      var formData, otherArray, otherQuery, parts;
+      switch (natureOf(params)) {
+        case NATURE_MISSING:
+          return merge({}, otherParams);
+        case NATURE_ARRAY:
+          otherArray = toArray(otherParams);
+          return params.concat(otherArray);
+        case NATURE_FORM_DATA:
+          formData = new FormData();
+          assign(formData, params);
+          assign(formData, otherParams);
+          return formData;
+        case NATURE_QUERY:
+          otherQuery = toQuery(otherParams);
+          parts = u.select([params, otherQuery], u.isPresent);
+          return parts.join('&');
+        case NATURE_OBJECT:
+          return u.merge(params, toObject(otherParams));
+      }
+    };
+
+    /***
+    Returns the first param value with the given `name` from the given `params`.
+    
+    The given params value may be of any [supported type](/up.params).
+    
+    \#\#\# Example
+    
+        var array = [
+          { name: 'foo', value: 'bar' },
+          { name: 'baz', value: 'bam' }
+        }
+    
+        value = up.params.get(array, 'baz')
+        // value is now: 'bam'
+    
+    @function up.params.get
+    @experimental
+     */
+    get = function(params, name) {
+      var entry, value;
+      switch (natureOf(params)) {
+        case NATURE_MISSING:
+          return void 0;
+        case NATURE_ARRAY:
+          entry = u.detect(params, function(entry) {
+            return entry.name === name;
+          });
+          return entry != null ? entry.value : void 0;
+        case NATURE_FORM_DATA:
+          value = params.get(name);
+          if (u.isNull(value)) {
+            value = void 0;
+          }
+          return value;
+        case NATURE_QUERY:
+          return safeGet(toObject(params), name);
+        case NATURE_OBJECT:
+          return safeGet(params, name);
+      }
+    };
+
+    /***
+    Extends the given `params` with entries from the given `otherParams`.
+    
+    The given params value may be of any [supported type](/up.params).
+    
+    The given `params` is changed in-place, if possible. Some types, such as query strings,
+    cannot be changed in-place. The return value is always a params value that includes the new entries.
+    
+    @function up.params.assign
+    @param {string|object|FormData|Array|undefined} params
+    @param {string|object|FormData|Array|undefined} otherParams
+    @return {string|object|FormData|Array}
+    @experimental
+     */
+    assign = function(params, otherParams) {
+      var entry, i, len, otherArray;
+      switch (natureOf(params)) {
+        case NATURE_ARRAY:
+          otherArray = toArray(otherParams);
+          params.push.apply(params, otherArray);
+          return params;
+        case NATURE_FORM_DATA:
+          otherArray = toArray(otherParams);
+          for (i = 0, len = otherArray.length; i < len; i++) {
+            entry = otherArray[i];
+            params.append(entry.name, entry.value);
+          }
+          return params;
+        case NATURE_OBJECT:
+          return u.assign(params, toObject(otherParams));
+        case NATURE_QUERY:
+        case NATURE_MISSING:
+          return merge(params, otherParams);
+      }
+    };
+    submittingButton = function(form) {
+      var $activeElement, $form, submitButtonSelector;
+      $form = $(form);
+      submitButtonSelector = up.form.submitButtonSelector();
+      $activeElement = $(document.activeElement);
+      if ($activeElement.is(submitButtonSelector) && $form.has($activeElement)) {
+        return $activeElement[0];
+      } else {
+        return $form.find(submitButtonSelector)[0];
+      }
+    };
+
+    /***
+    Serializes request params from the given `<form>`.
+    
+    The returned params may be passed as `{ params }` option to
+    [`up.request()`](/up.request) or [`up.replace()`](/up.replace).
+    
+    The serialized params will include the form's submit button, if that
+    button as a `name` attribute.
+    
+    \#\#\#\# Example
+    
+    Given this HTML form:
+    
+        <form>
+          <input type="text" name="name" value="Foo Bar">
+          <input type="text" name="email" value="foo@bar.com">
+        </form>
+    
+    This would serialize the form into an array representation:
+    
+        var params = up.params.fromForm('input[name=email]')
+    
+        // params is now: [
+        //   { name: 'name', value: 'Foo Bar' },
+        //   { name: 'email', value: 'foo@bar.com' }
+        // ]
+    
+    @function up.params.fromForm
+    @param {Element|jQuery|string} form
+    @return {Array}
+    @experimental
+     */
+    fromForm = function(form) {
+      var button, fields;
+      if (form = u.element(form)) {
+        fields = form.querySelectorAll(up.form.fieldSelector());
+        if (button = submittingButton(form)) {
+          fields = u.toArray(fields);
+          fields.push(button);
+        }
+        return u.flatMap(fields, fromField);
+      }
+    };
+
+    /***
+    Serializes request params from a single [input field](/up.form.config#config.fields).
+    To serialize an entire form, use [`up.params.fromForm()`](/up.params.fromForm).
+    
+    Note that some fields may produce multiple params, such as `<select multiple>`.
+    
+    \#\#\#\# Example
+    
+    Given this HTML form:
+    
+        <form>
+          <input type="text" name="email" value="foo@bar.com">
+          <input type="password" name="password">
+        </form>
+    
+    This would retrieve request parameters from the `email` field:
+    
+        var params = up.params.fromField('input[name=email]')
+    
+        // params is now: [{ name: 'email', value: 'foo@bar.com' }]
+    
+    @function up.params.fromField
+    @param {Element|jQuery|string} form
+    @return {Array}
+      an array of `{ name, value }` objects
+    @experimental
+     */
+    fromField = function(field) {
+      var file, i, j, len, len1, name, option, params, ref, ref1, tagName, type;
+      params = [];
+      if ((field = u.element(field)) && (name = field.name) && (!field.disabled)) {
+        tagName = field.tagName;
+        type = field.type;
+        if (tagName === 'SELECT') {
+          ref = field.querySelectorAll('option');
+          for (i = 0, len = ref.length; i < len; i++) {
+            option = ref[i];
+            if (option.selected) {
+              params.push({
+                name: name,
+                value: option.value
+              });
+            }
+          }
+        } else if (type === 'checkbox' || type === 'radio') {
+          if (field.checked) {
+            params.push({
+              name: name,
+              value: field.value
+            });
+          }
+        } else if (type === 'file') {
+          ref1 = field.files;
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            file = ref1[j];
+            params.push({
+              name: name,
+              value: file
+            });
+          }
+        } else {
+          params.push({
+            name: name,
+            value: field.value
+          });
+        }
+      }
+      return params;
+    };
+
+    /***
+    Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.
+    
+    The query string is returned **without** a leading question mark (`?`).
+    Returns `undefined` if the given URL has no query component.
+    
+    You can access individual values from the returned query string using functions like
+    [`up.params.get()`](/up.params.get) or [`up.params.toObject()`](/up.params.toObject).
+    
+    \#\#\# Example
+    
+        var query = up.params.fromURL('http://foo.com?bar=baz')
+    
+        // query is now: 'bar=baz'
+    
+    @function up.params.fromURL
+    @param {string} url
+      The URL from which to extract the query string.
+    @return {string|undefined}
+      The given URL's query string, or `undefined` if the URL has no query component.
+    @experimental
+     */
+    fromURL = function(url) {
+      var query, urlParts;
+      urlParts = u.parseUrl(url);
+      if (query = urlParts.search) {
+        query = query.replace(/^\?/, '');
+        return query;
+      }
+    };
+    return {
+      toArray: toArray,
+      toObject: toObject,
+      toQuery: toQuery,
+      toFormData: toFormData,
+      buildURL: buildURL,
+      get: get,
+      add: add,
+      assign: assign,
+      merge: merge,
+      fromForm: fromForm,
+      fromURL: fromURL
+    };
+  })(jQuery);
+
+}).call(this);
+(function() {
+
 
 }).call(this);
 
@@ -5455,10 +6245,10 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
   var slice = [].slice;
 
   up.log = (function($) {
-    var SESSION_KEY_ENABLED, b, config, debug, disable, enable, error, group, prefix, printBanner, puts, reset, setEnabled, u, warn;
+    var b, config, debug, disable, enable, error, group, prefix, printBanner, puts, reset, sessionStore, setEnabled, u, warn;
     u = up.util;
     b = up.browser;
-    SESSION_KEY_ENABLED = 'up.log.enabled';
+    sessionStore = new up.store.Session('up.log');
 
     /***
     Configures the logging output on the developer console.
@@ -5481,7 +6271,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
      */
     config = u.config({
       prefix: '[UP] ',
-      enabled: b.sessionStorage().getItem(SESSION_KEY_ENABLED) === 'true',
+      enabled: sessionStore.get('enabled'),
       collapse: false
     });
     reset = function() {
@@ -5524,7 +6314,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     };
 
     /***
-    @function up.log.warn
+    @function up.warn
     @internal
      */
     warn = function() {
@@ -5585,7 +6375,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     up.on('up:framework:boot', printBanner);
     up.on('up:framework:reset', reset);
     setEnabled = function(value) {
-      b.sessionStorage().setItem(SESSION_KEY_ENABLED, value.toString());
+      sessionStore.set('enabled', value);
       return config.enabled = value;
     };
 
@@ -5626,6 +6416,8 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
   })(jQuery);
 
   up.puts = up.log.puts;
+
+  up.warn = up.log.warn;
 
 }).call(this);
 
@@ -5731,10 +6523,8 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
   var slice = [].slice;
 
   up.syntax = (function($) {
-    var DESTRUCTIBLE_CLASS, DESTRUCTORS_KEY, SYSTEM_MACRO_PRIORITIES, addDestructor, applyCompiler, buildCompiler, clean, compile, compiler, compilers, data, detectSystemMacroPriority, insertCompiler, isBooting, macro, macros, normalizeDestructor, removeDestructors, reset, u;
+    var SYSTEM_MACRO_PRIORITIES, buildCompiler, clean, compile, compilers, detectSystemMacroPriority, insertCompiler, isBooting, macros, readData, registerCompiler, registerDestructor, registerMacro, reset, u;
     u = up.util;
-    DESTRUCTIBLE_CLASS = 'up-destructible';
-    DESTRUCTORS_KEY = 'up-destructors';
     SYSTEM_MACRO_PRIORITIES = {
       '[up-back]': -100,
       '[up-drawer]': -200,
@@ -5921,19 +6711,13 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       such as timeouts and event handlers bound to the document.
       The destructor is *not* expected to remove the element from the DOM, which
       is already handled by [`up.destroy()`](/up.destroy).
-    
-      The function may also return an array of destructor functions.
     @stable
      */
-    compiler = function() {
-      var args, callback, options, selector;
-      selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      if (!up.browser.isSupported()) {
-        return;
-      }
-      callback = args.pop();
-      options = u.options(args[0]);
-      return insertCompiler(compilers, selector, options, callback);
+    registerCompiler = function() {
+      var args, compiler;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      compiler = buildCompiler.apply(null, args);
+      return insertCompiler(compilers, compiler);
     };
 
     /***
@@ -5977,89 +6761,45 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       See [`up.compiler()`](/up.compiler) for details.
     @stable
      */
-    macro = function() {
-      var args, callback, options, selector;
-      selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      if (!up.browser.isSupported()) {
-        return;
-      }
-      callback = args.pop();
-      options = u.options(args[0]);
+    registerMacro = function() {
+      var args, macro;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      macro = buildCompiler.apply(null, args);
       if (isBooting) {
-        options.priority = detectSystemMacroPriority(selector) || up.fail('Unregistered priority for system macro %o', selector);
+        macro.priority = detectSystemMacroPriority(macro.selector) || up.fail('Unregistered priority for system macro %o', macro.selector);
       }
-      return insertCompiler(macros, selector, options, callback);
+      return insertCompiler(macros, macro);
     };
-    detectSystemMacroPriority = function(fullMacroSelector) {
+    detectSystemMacroPriority = function(macroSelector) {
       var priority, substr;
       for (substr in SYSTEM_MACRO_PRIORITIES) {
         priority = SYSTEM_MACRO_PRIORITIES[substr];
-        if (fullMacroSelector.indexOf(substr) >= 0) {
+        if (macroSelector.indexOf(substr) >= 0) {
           return priority;
         }
       }
     };
-    buildCompiler = function(selector, options, callback) {
-      return {
+    buildCompiler = function() {
+      var args, callback, options, selector;
+      selector = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      callback = args.pop();
+      options = u.extractOptions(args);
+      options = u.options(options, {
         selector: selector,
-        callback: callback,
         isSystem: isBooting,
-        priority: options.priority || 0,
-        batch: options.batch,
-        keep: options.keep
-      };
+        priority: 0,
+        batch: false,
+        keep: false
+      });
+      return u.assign(callback, options);
     };
-    insertCompiler = function(queue, selector, options, callback) {
-      var index, newCompiler, oldCompiler;
-      if (!up.browser.isSupported()) {
-        return;
-      }
-      newCompiler = buildCompiler(selector, options, callback);
+    insertCompiler = function(queue, newCompiler) {
+      var existingCompiler, index;
       index = 0;
-      while ((oldCompiler = queue[index]) && (oldCompiler.priority >= newCompiler.priority)) {
+      while ((existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)) {
         index += 1;
       }
       return queue.splice(index, 0, newCompiler);
-    };
-    applyCompiler = function(compiler, $jqueryElement, nativeElement) {
-      var returnValue, value;
-      up.puts((!compiler.isSystem ? "Compiling '%s' on %o" : void 0), compiler.selector, nativeElement);
-      if (compiler.keep) {
-        value = u.isString(compiler.keep) ? compiler.keep : '';
-        $jqueryElement.attr('up-keep', value);
-      }
-      returnValue = compiler.callback.apply(nativeElement, [$jqueryElement, data($jqueryElement)]);
-      return addDestructor($jqueryElement, returnValue);
-    };
-
-    /***
-    Tries to find a list of destructors in a compiler's return value.
-    
-    @param {Object} returnValue
-    @return {Function|undefined}
-    @internal
-     */
-    normalizeDestructor = function(returnValue) {
-      if (u.isFunction(returnValue)) {
-        return returnValue;
-      } else if (u.isArray(returnValue) && u.all(returnValue, u.isFunction)) {
-        return u.sequence.apply(u, returnValue);
-      }
-    };
-    addDestructor = function($element, newDestructor) {
-      var elementDestructor;
-      if (newDestructor = normalizeDestructor(newDestructor)) {
-        $element.addClass(DESTRUCTIBLE_CLASS);
-        elementDestructor = $element.data(DESTRUCTORS_KEY) || function() {
-          return removeDestructors($element);
-        };
-        elementDestructor = u.sequence(elementDestructor, newDestructor);
-        return $element.data(DESTRUCTORS_KEY, elementDestructor);
-      }
-    };
-    removeDestructors = function($element) {
-      $element.removeData(DESTRUCTORS_KEY);
-      return $element.removeClass(DESTRUCTIBLE_CLASS);
     };
 
     /***
@@ -6072,49 +6812,25 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @internal
      */
     compile = function($fragment, options) {
-      var $skipSubtrees;
-      options = u.options(options);
-      $skipSubtrees = $(options.skip);
-      return up.log.group("Compiling fragment %o", $fragment.get(0), function() {
-        var $matches, i, len, queue, ref, results;
-        ref = [macros, compilers];
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          queue = ref[i];
-          results.push((function() {
-            var j, len1, results1;
-            results1 = [];
-            for (j = 0, len1 = queue.length; j < len1; j++) {
-              compiler = queue[j];
-              $matches = u.selectInSubtree($fragment, compiler.selector);
-              if ($skipSubtrees.length) {
-                $matches = $matches.filter(function() {
-                  var $match;
-                  $match = $(this);
-                  return u.all($skipSubtrees, function(skipSubtree) {
-                    return $match.closest(skipSubtree).length === 0;
-                  });
-                });
-              }
-              if ($matches.length) {
-                results1.push(up.log.group((!compiler.isSystem ? "Compiling '%s' on %d element(s)" : void 0), compiler.selector, $matches.length, function() {
-                  if (compiler.batch) {
-                    return applyCompiler(compiler, $matches, $matches.get());
-                  } else {
-                    return $matches.each(function() {
-                      return applyCompiler(compiler, $(this), this);
-                    });
-                  }
-                }));
-              } else {
-                results1.push(void 0);
-              }
-            }
-            return results1;
-          })());
-        }
-        return results;
-      });
+      var compileRun, orderedCompilers;
+      orderedCompilers = macros.concat(compilers);
+      compileRun = new up.CompilePass($fragment, orderedCompilers, options);
+      return compileRun.compile();
+    };
+
+    /***
+    @function up.syntax.destructor
+    @internal
+     */
+    registerDestructor = function(element, destructor) {
+      var destructors;
+      element = u.element(element);
+      if (!(destructors = element.upDestructors)) {
+        destructors = [];
+        element.upDestructors = destructors;
+        element.classList.add('up-can-clean');
+      }
+      return destructors.push(destructor);
     };
 
     /***
@@ -6126,12 +6842,17 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @internal
      */
     clean = function($fragment) {
-      var $destructibles;
-      $destructibles = u.selectInSubtree($fragment, "." + DESTRUCTIBLE_CLASS);
-      return u.each($destructibles, function(destructible) {
-        var destructor;
-        if (destructor = $(destructible).data(DESTRUCTORS_KEY)) {
-          return destructor();
+      var cleanables;
+      cleanables = u.selectInSubtree($fragment, '.up-can-clean');
+      return u.each(cleanables, function(cleanable) {
+        var destructor, destructors, i, len, results;
+        if (destructors = cleanable.upDestructors) {
+          results = [];
+          for (i = 0, len = destructors.length; i < len; i++) {
+            destructor = destructors[i];
+            results.push(destructor());
+          }
+          return results;
         }
       });
     };
@@ -6140,7 +6861,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     Checks if the given element has an [`up-data`](/up-data) attribute.
     If yes, parses the attribute value as JSON and returns the parsed object.
     
-    Returns an empty object if the element has no `up-data` attribute.
+    Returns `undefined` if the element has no `up-data` attribute.
     
     \#\#\# Example
     
@@ -6157,8 +6878,8 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @return
       The JSON-decoded value of the `up-data` attribute.
     
-      Returns an empty object (`{}`) if the element has no (or an empty) `up-data` attribute.
-    @stable
+      Returns `undefined` if the element has no (or an empty) `up-data` attribute.
+    @experimental
      */
 
     /***
@@ -6204,14 +6925,10 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       A serialized JSON string
     @stable
      */
-    data = function(elementOrSelector) {
-      var $element, json;
-      $element = $(elementOrSelector);
-      json = $element.attr('up-data');
-      if (u.isString(json) && u.trim(json) !== '') {
-        return JSON.parse(json);
-      } else {
-        return {};
+    readData = function(elementOrSelector) {
+      var element;
+      if (element = u.element(elementOrSelector)) {
+        return u.jsonAttr(element, 'up-data') || {};
       }
     };
 
@@ -6222,27 +6939,26 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @internal
      */
     reset = function() {
-      var isSystem;
-      isSystem = function(compiler) {
-        return compiler.isSystem;
-      };
-      compilers = u.select(compilers, isSystem);
-      return macros = u.select(macros, isSystem);
+      compilers = u.select(compilers, 'isSystem');
+      return macros = u.select(macros, 'isSystem');
     };
     up.on('up:framework:booted', function() {
       return isBooting = false;
     });
     up.on('up:framework:reset', reset);
     return {
-      compiler: compiler,
-      macro: macro,
+      compiler: registerCompiler,
+      macro: registerMacro,
+      destructor: registerDestructor,
       compile: compile,
       clean: clean,
-      data: data
+      data: readData
     };
   })(jQuery);
 
   up.compiler = up.syntax.compiler;
+
+  up.destructor = up.syntax.destructor;
 
   up.macro = up.syntax.macro;
 
@@ -6251,7 +6967,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
 /***
 History
 ========
-  
+
 In an Unpoly app, every page has an URL.
 
 [Fragment updates](/up.link) automatically update the URL.
@@ -6587,7 +7303,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
   var slice = [].slice;
 
   up.layout = (function($) {
-    var absolutize, anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, reset, restoreScroll, reveal, revealHash, revealOrRestoreScroll, revealSelector, saveScroll, scroll, scrollAbruptlyNow, scrollTopKey, scrollTops, scrollWithAnimateNow, scrollableElementForViewport, scrollingTracker, u, viewportOf, viewportSelector, viewports, viewportsWithin;
+    var absolutize, anchoredRight, config, finishScrolling, firstHashTarget, fixedChildren, lastScrollTops, measureObstruction, pureHash, reset, restoreScroll, reveal, revealHash, saveScroll, scroll, scrollAbruptlyNow, scrollAfterInsertFragment, scrollTopKey, scrollTops, scrollWithAnimateNow, scrollingTracker, u, viewportOf, viewportSelector, viewports, viewportsWithin;
     u = up.util;
 
     /***
@@ -6683,27 +7399,18 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @experimental
      */
     scroll = function(viewport, scrollTop, options) {
-      var $scrollable;
-      $scrollable = scrollableElementForViewport(viewport);
+      var $viewport;
+      $viewport = $(viewport);
       options = u.options(options);
       options.duration = u.option(options.duration, config.duration);
       options.easing = u.option(options.easing, config.easing);
-      return finishScrolling($scrollable).then(function() {
+      return finishScrolling($viewport).then(function() {
         if (up.motion.isEnabled() && options.duration > 0) {
-          return scrollWithAnimateNow($scrollable, scrollTop, options);
+          return scrollWithAnimateNow($viewport, scrollTop, options);
         } else {
-          return scrollAbruptlyNow($scrollable, scrollTop);
+          return scrollAbruptlyNow($viewport, scrollTop);
         }
       });
-    };
-    scrollableElementForViewport = function(viewport) {
-      var $viewport;
-      $viewport = $(viewport);
-      if ($viewport.get(0) === document) {
-        return $('html, body');
-      } else {
-        return $viewport;
-      }
     };
     scrollWithAnimateNow = function($scrollable, scrollTop, animateOptions) {
       var start;
@@ -6741,7 +7448,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       if (!up.motion.isEnabled()) {
         return Promise.resolve();
       }
-      $scrollable = scrollableElementForViewport(element);
+      $scrollable = viewportOf(element);
       return scrollingTracker.finish($scrollable);
     };
 
@@ -6760,40 +7467,28 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @return {Object}
     @internal
      */
-    measureObstruction = function() {
-      var fixedBottomTops, fixedTopBottoms, measurePosition, obstructor;
-      measurePosition = function(obstructor, cssAttr) {
-        var $obstructor, anchorPosition;
-        $obstructor = $(obstructor);
-        anchorPosition = u.readComputedStyleNumber($obstructor, cssAttr);
-        if (!u.isPresent(anchorPosition)) {
-          up.fail("Fixed element %o must have a CSS attribute %s", $obstructor.get(0), cssAttr);
-        }
-        return anchorPosition + $obstructor.height();
+    measureObstruction = function(viewportHeight) {
+      var $bottomObstructors, $topObstructors, bottomObstructions, composeHeight, measureBottomObstructor, measureTopObstructor, topObstructions;
+      composeHeight = function(obstructor, distanceFromEdgeProps) {
+        var distanceFromEdge;
+        distanceFromEdge = u.sum(distanceFromEdgeProps, function(prop) {
+          return u.readComputedStyleNumber(obstructor, prop);
+        }) || 0;
+        return distanceFromEdge + obstructor.offsetHeight;
       };
-      fixedTopBottoms = (function() {
-        var i, len, ref, results;
-        ref = $(config.fixedTop.join(', '));
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          obstructor = ref[i];
-          results.push(measurePosition(obstructor, 'top'));
-        }
-        return results;
-      })();
-      fixedBottomTops = (function() {
-        var i, len, ref, results;
-        ref = $(config.fixedBottom.join(', '));
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          obstructor = ref[i];
-          results.push(measurePosition(obstructor, 'bottom'));
-        }
-        return results;
-      })();
+      measureTopObstructor = function(obstructor) {
+        return composeHeight(obstructor, ['top', 'margin-top']);
+      };
+      measureBottomObstructor = function(obstructor) {
+        return composeHeight(obstructor, ['bottom', 'margin-bottom']);
+      };
+      $topObstructors = $(config.fixedTop.join(', '));
+      $bottomObstructors = $(config.fixedBottom.join(', '));
+      topObstructions = u.map($topObstructors, measureTopObstructor);
+      bottomObstructions = u.map($bottomObstructors, measureBottomObstructor);
       return {
-        top: Math.max.apply(Math, [0].concat(slice.call(fixedTopBottoms))),
-        bottom: Math.max.apply(Math, [0].concat(slice.call(fixedBottomTops)))
+        top: Math.max.apply(Math, [0].concat(slice.call(topObstructions))),
+        bottom: Math.max.apply(Math, [0].concat(slice.call(bottomObstructions)))
       };
     };
 
@@ -6849,14 +7544,14 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         var $viewport, elementDims, firstElementRow, lastElementRow, newScrollPos, obstruction, offsetShift, originalScrollPos, predictFirstVisibleRow, predictLastVisibleRow, snap, viewportHeight, viewportIsDocument;
         $viewport = options.viewport ? $(options.viewport) : viewportOf($element);
         snap = u.option(options.snap, config.snap);
-        viewportIsDocument = $viewport.is(document);
+        viewportIsDocument = $viewport.is(up.browser.documentViewportSelector());
         viewportHeight = viewportIsDocument ? u.clientSize().height : $viewport.outerHeight();
         originalScrollPos = $viewport.scrollTop();
         newScrollPos = originalScrollPos;
         offsetShift = void 0;
         obstruction = void 0;
         if (viewportIsDocument) {
-          obstruction = measureObstruction();
+          obstruction = measureObstruction(viewportHeight);
           offsetShift = 0;
         } else {
           obstruction = {
@@ -6869,14 +7564,14 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
           return newScrollPos + obstruction.top;
         };
         predictLastVisibleRow = function() {
-          return newScrollPos + viewportHeight - obstruction.bottom - 1;
+          return newScrollPos + viewportHeight - obstruction.bottom;
         };
         elementDims = u.measure($element, {
           relative: $viewport,
           includeMargin: true
         });
         firstElementRow = elementDims.top + offsetShift;
-        lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance) - 1;
+        lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance);
         if (lastElementRow > predictLastVisibleRow()) {
           newScrollPos += lastElementRow - predictLastVisibleRow();
         }
@@ -6895,35 +7590,83 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     };
 
     /***
-    [Reveals](/up.reveal) an element matching the `#hash` in the current URL.
+    @function up.layout.scrollAfterInsertFragment
+    @param {boolean|object} [options.restoreScroll]
+    @param {boolean|string|jQuery|Element} [options.reveal]
+    @param {boolean|string} [options.reveal]
+    @return {Promise}
+      A promise that is fulfilled when the scrolling has finished.
+    @internal
+     */
+    scrollAfterInsertFragment = function(selectorOrElement, options) {
+      var $element, durationOptions, givenTops, hashOpt, restoreScrollOpt, revealOpt, selector;
+      options = u.options(options);
+      $element = $(selectorOrElement);
+      hashOpt = options.hash;
+      revealOpt = options.reveal;
+      restoreScrollOpt = options.restoreScroll;
+      durationOptions = u.only(options, 'duration');
+      if (restoreScrollOpt) {
+        givenTops = u.presence(restoreScrollOpt, u.isObject);
+        return restoreScroll({
+          around: $element,
+          scrollTops: givenTops
+        });
+      } else if (hashOpt && revealOpt === true) {
+        return revealHash(hashOpt, durationOptions);
+      } else if (revealOpt) {
+        if (u.isElement(revealOpt) || u.isJQuery(revealOpt)) {
+          $element = $(revealOpt);
+        } else if (u.isString(revealOpt)) {
+          selector = up.dom.resolveSelector(revealOpt, options.origin);
+          $element = up.first(selector);
+        } else {
+
+        }
+        if ($element.length) {
+          return reveal($element, durationOptions);
+        }
+      } else {
+        return Promise.resolve();
+      }
+    };
+
+    /***
+    [Reveals](/up.reveal) an element matching the given `#hash` anchor.
     
     Other than the default behavior found in browsers, `up.revealHash` works with
     [multiple viewports](/up-viewport) and honors [fixed elements](/up-fixed-top) obstructing the user's
     view of the viewport.
     
-    This is called automatically when the page loads initially.
+    When the page loads initially, this function is automatically called with the hash from
+    the current URL.
+    
+    If no element matches the given `#hash` anchor, a resolved promise is returned.
     
     @function up.layout.revealHash
     @return {Promise}
       A promise that is fulfilled when scroll position has changed to match the location hash.
     @experimental
      */
-    revealHash = function() {
-      var $match, hash;
-      if ((hash = up.browser.hash()) && ($match = firstHashTarget(hash))) {
-        return reveal($match);
+    revealHash = function(hash) {
+      var $match;
+      if (hash && ($match = firstHashTarget(hash))) {
+        return reveal($match, {
+          top: true
+        });
       } else {
         return Promise.resolve();
       }
     };
     viewportSelector = function() {
-      return config.viewports.join(',');
+      return [up.browser.documentViewportSelector()].concat(slice.call(config.viewports)).join(',');
     };
 
     /***
     Returns the viewport for the given element.
     
-    Returns `$(document)` if no better viewpoint could be found.
+    Returns the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement)
+    if no closer viewpoint exists.
     
     @function up.layout.viewportOf
     @param {string|Element|jQuery} selectorOrElement
@@ -6931,16 +7674,12 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @internal
      */
     viewportOf = function(selectorOrElement, options) {
-      var $element, $viewport;
+      var $element;
       if (options == null) {
         options = {};
       }
       $element = $(selectorOrElement);
-      $viewport = $element.closest(viewportSelector());
-      if ($viewport.length === 0) {
-        $viewport = $(document);
-      }
-      return $viewport;
+      return $element.closest(viewportSelector());
     };
 
     /***
@@ -6965,16 +7704,10 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @internal
      */
     viewports = function() {
-      return $(document).add(viewportSelector());
+      return $(viewportSelector());
     };
     scrollTopKey = function(viewport) {
-      var $viewport;
-      $viewport = $(viewport);
-      if ($viewport.is(document)) {
-        return 'document';
-      } else {
-        return u.selectorForElement($viewport);
-      }
+      return u.selectorForElement(viewport);
     };
 
     /***
@@ -7082,7 +7815,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       } else {
         $viewports = viewports();
       }
-      scrollTopsForUrl = lastScrollTops.get(url) || {};
+      scrollTopsForUrl = options.scrollTops || lastScrollTops.get(url) || {};
       return up.log.group('Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, function() {
         var allScrollPromises;
         allScrollPromises = u.map($viewports, function(viewport) {
@@ -7095,51 +7828,6 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
         });
         return Promise.all(allScrollPromises);
       });
-    };
-
-    /***
-    @function up.layout.revealOrRestoreScroll
-    @param {boolean} [options.restoreScroll]
-    @param {boolean|string} [options.reveal]
-    @return {Promise}
-      A promise that is fulfilled when the element is revealed or
-      the scroll position is restored.
-    @internal
-     */
-    revealOrRestoreScroll = function(selectorOrElement, options) {
-      var $element, revealOptions, selector;
-      options = u.options(options);
-      $element = $(selectorOrElement);
-      if (options.restoreScroll) {
-        return restoreScroll({
-          around: $element
-        });
-      }
-      if (options.reveal) {
-        revealOptions = {
-          duration: options.duration
-        };
-        if (u.isString(options.reveal)) {
-          selector = revealSelector(options.reveal, options);
-          $element = up.first(selector) || $element;
-          revealOptions.top = true;
-        }
-        if ($element.length) {
-          return reveal($element, revealOptions);
-        }
-      }
-      return Promise.resolve();
-    };
-
-    /***
-    @internal
-     */
-    revealSelector = function(selector, options) {
-      selector = up.dom.resolveSelector(selector, options.origin);
-      if (selector[0] === '#') {
-        selector += ", a[name='" + selector + "']";
-      }
-      return selector;
     };
 
     /***
@@ -7328,11 +8016,31 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     @internal
      */
     firstHashTarget = function(hash) {
-      if (hash = up.browser.hash(hash)) {
-        return up.first("[id='" + hash + "'], a[name='" + hash + "']");
+      var byID, byName;
+      if (hash = pureHash(hash)) {
+        byID = u.attributeSelector('id', hash);
+        byName = 'a' + u.attributeSelector('name', hash);
+        return up.first(byID + "," + byName);
       }
     };
-    up.on('up:app:booted', revealHash);
+
+    /***
+    Returns `'foo'` if the hash is `'#foo'`.
+    
+    Returns undefined if the hash is `'#'`, `''` or `undefined`.
+    
+    @function up.browser.hash
+    @internal
+     */
+    pureHash = function(value) {
+      if (value && value[0] === '#') {
+        value = value.substr(1);
+      }
+      return u.presence(value);
+    };
+    up.on('up:app:booted', function() {
+      return revealHash(location.hash);
+    });
     up.on('up:framework:reset', reset);
     return {
       reveal: reveal,
@@ -7346,7 +8054,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       scrollTops: scrollTops,
       saveScroll: saveScroll,
       restoreScroll: restoreScroll,
-      revealOrRestoreScroll: revealOrRestoreScroll,
+      scrollAfterInsertFragment: scrollAfterInsertFragment,
       anchoredRight: anchoredRight,
       fixedChildren: fixedChildren,
       absolutize: absolutize
@@ -7377,7 +8085,7 @@ is built from these functions. You can use them to extend Unpoly from your
 
 (function() {
   up.dom = (function($) {
-    var bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentDestroy, emitFragmentDestroyed, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, hello, isRealElement, layerOf, markElementAsDestroying, matchesLayer, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, transferKeepableElements, u, updateHistoryAndTitle;
+    var all, bestMatchingSteps, bestPreflightSelector, config, destroy, emitFragmentDestroy, emitFragmentDestroyed, emitFragmentInserted, emitFragmentKept, extract, findKeepPlan, first, firstInLayer, firstInPriority, hello, isRealElement, layerOf, markElementAsDestroying, matchesLayer, processResponse, reload, replace, reset, resolveSelector, setSource, shouldExtractTitle, shouldLogDestruction, source, swapElements, transferKeepableElements, u, updateHistoryAndTitle;
     u = up.util;
 
     /***
@@ -7442,6 +8150,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @param {string|Element|jQuery} origin
       The element that this selector resolution is relative to.
       That element's selector will be substituted for `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+    @return {string}
     @internal
      */
     resolveSelector = function(selectorOrElement, origin) {
@@ -7556,13 +8265,8 @@ is built from these functions. You can use them to extend Unpoly from your
       You can also pass `false` to explicitly prevent the title from being updated.
     @param {string} [options.method='get']
       The HTTP method to use for the request.
-    @param {Object|Array|FormData} [options.data]
-      Parameters that should be sent as the request's payload.
-    
-      Parameters can either be passed as an object (where the property names become
-      the param names and the property values become the param values) or as
-      an array of `{ name: 'param-name', value: 'param-value' }` objects
-    
+    @param {Object|FormData|string|Array} [options.params]
+      [Parameters](/up.params) that should be sent as the request's payload.
     @param {string} [options.transition='none']
     @param {string|boolean} [options.history=true]
       If a string is given, it is used as the URL the browser's location bar and history.
@@ -7588,18 +8292,15 @@ is built from these functions. You can use them to extend Unpoly from your
     @param {Object} [options.headers={}]
       An object of additional header key/value pairs to send along
       with the request.
-    @param {boolean} [options.requireMatch=true]
-      Whether to raise an error if the given selector is missing in
-      either the current page or in the response.
     @param {Element|jQuery} [options.origin]
       The element that triggered the replacement.
     
       The element's selector will be substituted for the `&` shorthand in the target selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
     @param {string} [options.layer='auto']
       The name of the layer that ought to be updated. Valid values are
-      `auto`, `page`, `modal` and `popup`.
+      `'auto'`, `'page'`, `'modal'` and `'popup'`.
     
-      If set to `auto` (default), Unpoly will try to find a match in the
+      If set to `'auto'` (default), Unpoly will try to find a match in the
       same layer as the element that triggered the replacement (see `options.origin`).
       If that element is not known, or no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
@@ -7618,7 +8319,7 @@ is built from these functions. You can use them to extend Unpoly from your
       var e, failureOptions, fullLoad, improvedFailTarget, improvedTarget, onFailure, onSuccess, promise, request, successOptions;
       options = u.options(options);
       options.inspectResponse = fullLoad = function() {
-        return up.browser.navigate(url, u.only(options, 'method', 'data'));
+        return up.browser.navigate(url, u.only(options, 'method', 'params'));
       };
       if (!up.browser.canPushState() && options.history !== false) {
         if (!options.preload) {
@@ -7644,19 +8345,20 @@ is built from these functions. You can use them to extend Unpoly from your
         e = error;
         return Promise.reject(e);
       }
-      request = {
+      request = new up.Request({
         url: url,
         method: options.method,
         data: options.data,
+        params: options.params,
         target: improvedTarget,
         failTarget: improvedFailTarget,
         cache: options.cache,
         preload: options.preload,
         headers: options.headers,
         timeout: options.timeout
-      };
+      });
       onSuccess = function(response) {
-        return processResponse(true, improvedTarget, response, successOptions);
+        return processResponse(true, improvedTarget, request, response, successOptions);
       };
       onFailure = function(response) {
         var promise, rejection;
@@ -7666,7 +8368,7 @@ is built from these functions. You can use them to extend Unpoly from your
         if (response.isFatalError()) {
           return rejection();
         } else {
-          promise = processResponse(false, improvedFailTarget, response, failureOptions);
+          promise = processResponse(false, improvedFailTarget, request, response, failureOptions);
           return u.always(promise, rejection);
         }
       };
@@ -7680,14 +8382,12 @@ is built from these functions. You can use them to extend Unpoly from your
     /***
     @internal
      */
-    processResponse = function(isSuccess, selector, response, options) {
-      var hash, historyUrl, isReloadable, request, sourceUrl;
-      request = response.request;
+    processResponse = function(isSuccess, selector, request, response, options) {
+      var hash, historyUrl, isReloadable, sourceUrl;
       sourceUrl = response.url;
       historyUrl = sourceUrl;
-      hash = request.hash;
-      if (options.reveal === true && hash) {
-        options.reveal = hash;
+      if (hash = request.hash) {
+        options.hash = hash;
         historyUrl += hash;
       }
       isReloadable = response.method === 'GET';
@@ -7771,7 +8471,6 @@ is built from these functions. You can use them to extend Unpoly from your
       return up.log.group('Extracting %s from %d bytes of HTML', selectorOrElement, html != null ? html.length : void 0, function() {
         options = u.options(options, {
           historyMethod: 'push',
-          requireMatch: true,
           keep: true,
           layer: 'auto'
         });
@@ -7845,7 +8544,7 @@ is built from these functions. You can use them to extend Unpoly from your
           $old.append($wrapper);
         }
         hello($wrapper.children(), options);
-        promise = up.layout.revealOrRestoreScroll($wrapper, options);
+        promise = up.layout.scrollAfterInsertFragment($wrapper, options);
         promise = promise.then(function() {
           return up.animate($wrapper, transition, options);
         });
@@ -8058,7 +8757,7 @@ is built from these functions. You can use them to extend Unpoly from your
       for (i = 0, len = ref.length; i < len; i++) {
         plan = ref[i];
         emitFragmentKept(plan);
-        keptElements.push(plan.$element);
+        keptElements.push(plan.$element[0]);
       }
       up.syntax.compile($element, {
         skip: keptElements
@@ -8140,9 +8839,10 @@ is built from these functions. You can use them to extend Unpoly from your
     
     @function up.first
     @param {string|Element|jQuery|Array<Element>} selectorOrElement
-    @param {string} options.layer
-      The name of the layer in which to find the element. Valid values are
-      `auto`, `page`, `modal` and `popup`.
+    @param {string} [options.layer='auto']
+      The name of the layer in which to find the element.
+    
+      Valid values are `'auto'`, `'page'`, `'modal'` and `'popup'`.
     @param {string|Element|jQuery} [options.origin]
       An second element or selector that can be referenced as `&` in the first selector:
     
@@ -8196,19 +8896,56 @@ is built from these functions. You can use them to extend Unpoly from your
       }
       return $match;
     };
+
+    /***
+    @function up.dom.layerOf
+    @internal
+     */
     layerOf = function(selectorOrElement) {
       var $element;
       $element = $(selectorOrElement);
-      if (up.popup.contains($element)) {
-        return 'popup';
-      } else if (up.modal.contains($element)) {
-        return 'modal';
-      } else {
-        return 'page';
+      if ($element.length) {
+        if (up.popup.contains($element)) {
+          return 'popup';
+        } else if (up.modal.contains($element)) {
+          return 'modal';
+        } else {
+          return 'page';
+        }
       }
     };
     matchesLayer = function(selectorOrElement, layer) {
-      return layerOf(selectorOrElement) === layer;
+      return !layer || layerOf(selectorOrElement) === layer;
+    };
+
+    /***
+    Returns all elements matching the given selector, but
+    ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
+    
+    If the given argument is already a jQuery collection (or an array
+    of DOM elements), returns the subset of the given list that is matching these conditions.
+    
+    @function up.all
+    @param {string|jQuery|Array<Element>} selectorOrElements
+    @param {string|Element|jQuery} [options.origin]
+      An second element or selector that can be referenced as `&` in the first selector.
+    @param {string} [options.layer]
+      The name of the layer in which to find the element. Valid values are
+      `'page'`, `'modal'` and `'popup'`.
+    @return {jQuery}
+      A jQuery collection of matching elements.
+    @experimental
+     */
+    all = function(selectorOrElements, options) {
+      var $root, resolved;
+      options = u.options(options);
+      resolved = resolveSelector(selectorOrElements, options.origin);
+      $root = $(u.option(options.root, document));
+      return $root.find(resolved).filter(function(index, element) {
+        var $element;
+        $element = $(element);
+        return isRealElement($element) && matchesLayer($element, options.layer);
+      });
     };
 
     /***
@@ -8357,10 +9094,12 @@ is built from these functions. You can use them to extend Unpoly from your
       destroy: destroy,
       extract: extract,
       first: first,
+      all: all,
       source: source,
       resolveSelector: resolveSelector,
       hello: hello,
-      config: config
+      config: config,
+      layerOf: layerOf
     };
   })(jQuery);
 
@@ -8374,9 +9113,11 @@ is built from these functions. You can use them to extend Unpoly from your
 
   up.first = up.dom.first;
 
+  up.all = up.dom.all;
+
   up.hello = up.dom.hello;
 
-  up.renamedModule('flow', 'dom');
+  up.deprecateRenamedModule('flow', 'dom');
 
 }).call(this);
 
@@ -8418,7 +9159,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
   var slice = [].slice;
 
   up.motion = (function($) {
-    var animCount, animate, animateNow, animateOptions, composeTransitionFn, config, defaultNamedAnimations, defaultNamedTransitions, findAnimationFn, findNamedAnimation, findTransitionFn, finish, isEnabled, isNone, isSingletonElement, morph, motionTracker, namedAnimations, namedTransitions, registerAnimation, registerTransition, reset, skipAnimate, snapshot, swapElementsDirectly, translateCss, u, willAnimate;
+    var animCount, animate, animateNow, animateOptions, composeTransitionFn, config, defaultNamedAnimations, defaultNamedTransitions, findAnimationFn, findNamedAnimation, findTransitionFn, finish, isEnabled, isNone, morph, motionTracker, namedAnimations, namedTransitions, registerAnimation, registerTransition, reset, skipAnimate, snapshot, swapElementsDirectly, translateCss, u, willAnimate;
     u = up.util;
     namedAnimations = {};
     defaultNamedAnimations = {};
@@ -8564,10 +9305,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     };
     willAnimate = function($elements, animationOrTransition, options) {
       options = animateOptions(options);
-      return isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !isSingletonElement($elements);
-    };
-    isSingletonElement = function($element) {
-      return $element.is('body');
+      return isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !u.isSingletonElement($elements);
     };
     skipAnimate = function($element, animation) {
       if (u.isOptions(animation)) {
@@ -8743,7 +9481,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
         scrollOptions = u.merge(options, {
           duration: 0
         });
-        return up.layout.revealOrRestoreScroll($new, scrollOptions);
+        return up.layout.scrollAfterInsertFragment($new, scrollOptions);
       };
       if (willMorph) {
         if (motionTracker.isActive($old) && options.trackMotion === false) {
@@ -9220,7 +9958,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     
     \#\#\# Example
     
-        up.request('/search', data: { query: 'sunshine' }).then(function(response) {
+        up.request('/search', params: { query: 'sunshine' }).then(function(response) {
           console.log('The response text is %o', response.text);
         }).catch(function() {
           console.error('The request failed');
@@ -9255,14 +9993,8 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
       requests, if available. If set to `false` a network connection will always be attempted.
     @param {Object} [options.headers={}]
       An object of additional HTTP headers.
-    @param {Object|Array|FormData} [options.data={}]
-      Parameters that should be sent as the request's payload.
-    
-      Parameters may be passed as one of the following forms:
-    
-      1. An object where keys are param names and the values are param values
-      2. An array of `{ name: 'param-name', value: 'param-value' }` objects
-      3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+    @param {Object|FormData|string|Array} [options.params={}]
+      [Parameters](/up.params) that should be sent as the request's payload.
     @param {string} [options.timeout]
       A timeout in milliseconds.
     
@@ -9277,17 +10009,20 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     @stable
      */
     makeRequest = function() {
-      var args, ignoreCache, options, promise, request;
+      var args, ignoreCache, promise, request, requestOrOptions, url;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      options = u.extractOptions(args);
-      if (u.isGiven(args[0])) {
-        options.url = args[0];
+      if (u.isString(args[0])) {
+        url = args.shift();
       }
-      ignoreCache = options.cache === false;
-      request = up.Request.wrap(options);
+      requestOrOptions = args.shift() || {};
+      if (url) {
+        requestOrOptions.url = url;
+      }
+      request = up.Request.wrap(requestOrOptions);
       if (!request.isSafe()) {
         clear();
       }
+      ignoreCache = request.cache === false;
       if (!ignoreCache && (promise = get(request))) {
         up.puts('Re-using cached response for %s %s', request.method, request.url);
       } else {
@@ -9297,7 +10032,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
           return remove(request);
         });
       }
-      if (!options.preload) {
+      if (!request.preload) {
         loadStarted();
         u.always(promise, loadEnded);
       }
@@ -9311,7 +10046,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     
     \#\#\# Example
     
-        up.request('/search', data: { query: 'sunshine' }).then(function(text) {
+        up.request('/search', params: { query: 'sunshine' }).then(function(text) {
           console.log('The response text is %o', text);
         }).catch(function() {
           console.error('The request failed');
@@ -9333,14 +10068,8 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     @param {Object} [request.headers={}]
       An object of additional header key/value pairs to send along
       with the request.
-    @param {Object|Array|FormData} [options.data]
-      Parameters that should be sent as the request's payload.
-    
-      Parameters may be passed as one of the following forms:
-    
-      1. An object where keys are param names and the values are param values
-      2. An array of `{ name: 'param-name', value: 'param-value' }` objects
-      3. A [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
+    @param {Object|FormData|string|Array} [options.params]
+      [Parameters](/up.params) that should be sent as the request's payload.
     @param {string} [request.timeout]
       A timeout in milliseconds for the request.
     
@@ -9354,7 +10083,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     ajax = function() {
       var args;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      up.log.warn('up.ajax() has been deprecated. Use up.request() instead.');
+      up.warn('up.ajax() has been deprecated. Use up.request() instead.');
       return new Promise(function(resolve, reject) {
         var pickResponseText;
         pickResponseText = function(response) {
@@ -9639,7 +10368,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     @stable
      */
     clear = cache.clear;
-    up.bus.renamedEvent('up:proxy:received', 'up:proxy:loaded');
+    up.bus.deprecateRenamedEvent('up:proxy:received', 'up:proxy:loaded');
     preloadAfterDelay = function($link) {
       var curriedPreload, delay;
       delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay;
@@ -9672,23 +10401,41 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     @function up.proxy.preload
     @param {string|Element|jQuery}
       The element whose destination should be preloaded.
+    @param {object} options
+      Options that will be passed to the function making the HTTP requests.
     @return
       A promise that will be fulfilled when the request was loaded and cached
     @experimental
      */
-    preload = function(linkOrSelector) {
-      var $link;
+    preload = function(linkOrSelector, options) {
+      var $link, preloadEventAttrs;
       $link = $(linkOrSelector);
       if (up.link.isSafe($link)) {
-        return up.log.group("Preloading link %o", $link.get(0), function() {
+        preloadEventAttrs = {
+          message: ['Preloading link %o', $link.get(0)],
+          $element: $link,
+          $link: $link
+        };
+        return up.bus.whenEmitted('up:link:preload', preloadEventAttrs).then(function() {
           var variant;
           variant = up.link.followVariantForLink($link);
-          return variant.preloadLink($link);
+          return variant.preloadLink($link, options);
         });
       } else {
         return Promise.reject(new Error("Won't preload unsafe link"));
       }
     };
+
+    /***
+    This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
+    
+    @event up:link:preload
+    @param {jQuery} event.$link
+      The link element that will be preloaded.
+    @param event.preventDefault()
+      Event listeners may call this method to prevent the link from being preloaded.
+    @stable
+     */
 
     /***
     @internal
@@ -9700,12 +10447,12 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     /***
     @internal
      */
-    wrapMethod = function(method, data, appendOpts) {
+    wrapMethod = function(method, params) {
       if (u.contains(config.wrapMethods, method)) {
-        data = u.appendRequestData(data, up.protocol.config.methodParam, method, appendOpts);
+        params = up.params.add(params, up.protocol.config.methodParam, method);
         method = 'POST';
       }
-      return [method, data];
+      return [method, params];
     };
 
     /***
@@ -9885,8 +10632,13 @@ new page is loading.
       An element or selector which is either an `<a>` tag or any element with an `up-href` attribute.
     @param {string} [options.target]
       The selector to replace.
-      Defaults to the `[up-target]`, `[up-modal]` or `[up-popup]` attribute on `link`.
+    
+      Defaults to the link's `[up-target]`, `[up-modal]` or `[up-popup]` attribute.
       If no target is given, the `<body>` element will be replaced.
+    @param {String} [options.url]
+      The URL to navigate to.
+    
+      Defaults to the link's `[up-href]` or `[href]` attribute.
     @param {boolean|string} [options.reveal=true]
       Whether to [reveal](/up.reveal) the target fragment after it was replaced.
     
@@ -9910,8 +10662,10 @@ new page is loading.
     /***
     This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
     
+    The event is emitted on the `<a>` element that is being followed.
+    
     @event up:link:follow
-    @param {jQuery} event.$element
+    @param {jQuery} event.$link
       The link element that will be followed.
     @param event.preventDefault()
       Event listeners may call this method to prevent the link from being followed.
@@ -9926,7 +10680,7 @@ new page is loading.
       var $link, target, url;
       $link = $(linkOrSelector);
       options = u.options(options);
-      url = u.option($link.attr('up-href'), $link.attr('href'));
+      url = u.option(options.url, $link.attr('up-href'), $link.attr('href'));
       target = u.option(options.target, $link.attr('up-target'));
       options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'));
       options.fallback = u.option(options.fallback, $link.attr('up-fallback'));
@@ -10181,9 +10935,9 @@ new page is loading.
       or make an educated guess (default).
     @param {string} [up-layer='auto']
       The name of the layer that ought to be updated. Valid values are
-      `auto`, `page`, `modal` and `popup`.
+      `'auto'`, `'page'`, `'modal'` and `'popup'`.
     
-      If set to `auto` (default), Unpoly will try to find a match in the link's layer.
+      If set to `'auto'` (default), Unpoly will try to find a match in the link's layer.
       If no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
     @param {string} [up-fail-layer='auto']
@@ -10419,7 +11173,7 @@ open dialogs with sub-forms, etc. all without losing form state.
   var slice = [].slice;
 
   up.form = (function($) {
-    var autosubmit, config, fieldSelector, findSwitcherForTarget, observe, observeField, reset, resolveValidateTarget, submit, switchTarget, switchTargets, switcherValues, u, validate;
+    var autosubmit, config, fieldSelector, findSwitcherForTarget, observe, observeField, reset, resolveValidateTarget, submit, submitButtonSelector, switchTarget, switchTargets, switcherValues, u, validate;
     u = up.util;
 
     /***
@@ -10438,13 +11192,16 @@ open dialogs with sub-forms, etc. all without losing form state.
       By default this looks for a `<fieldset>`, `<label>` or `<form>`
       around the validating input field, or any element with an
       `up-fieldset` attribute.
-    @param {string} [config.fields=[':input']]
+    @param {string} [config.fields]
       An array of CSS selectors that represent form fields, such as `input` or `select`.
+    @param {string} [config.submitButtons]
+      An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
     @stable
      */
     config = u.config({
       validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)'],
-      fields: [':input'],
+      fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
+      submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
       observeDelay: 0
     });
     reset = function() {
@@ -10457,6 +11214,14 @@ open dialogs with sub-forms, etc. all without losing form state.
      */
     fieldSelector = function() {
       return config.fields.join(',');
+    };
+
+    /***
+    @function up.form.submitButtonSelector
+    @internal
+     */
+    submitButtonSelector = function() {
+      return config.submitButtons.join(',');
     };
 
     /***
@@ -10541,9 +11306,9 @@ open dialogs with sub-forms, etc. all without losing form state.
       with the request.
     @param {string} [options.layer='auto']
       The name of the layer that ought to be updated. Valid values are
-      `auto`, `page`, `modal` and `popup`.
+      `'auto'`, `'page'`, `'modal'` and `'popup'`.
     
-      If set to `auto` (default), Unpoly will try to find a match in the form's layer.
+      If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
     @param {string} [options.failLayer='auto']
       The name of the layer that ought to be updated if the server sends a non-200 status code.
     @return {Promise}
@@ -10570,7 +11335,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       options.origin = u.option(options.origin, $form);
       options.layer = u.option(options.layer, $form.attr('up-layer'), 'auto');
       options.failLayer = u.option(options.failLayer, $form.attr('up-fail-layer'), 'auto');
-      options.data = u.requestDataFromForm($form);
+      options.params = up.params.fromForm($form);
       options = u.merge(options, up.motion.animateOptions(options, $form));
       if (options.validate) {
         options.headers || (options.headers = {});
@@ -10579,6 +11344,8 @@ open dialogs with sub-forms, etc. all without losing form state.
         options.headers[up.protocol.config.validateHeader] = options.validate;
       }
       return up.bus.whenEmitted('up:form:submit', {
+        message: 'Submitting form',
+        $form: $form,
         $element: $form
       }).then(function() {
         var promise;
@@ -10599,7 +11366,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
     
     @event up:form:submit
-    @param {jQuery} event.$element
+    @param {jQuery} event.$form
       The `<form>` element that will be submitted.
     @param event.preventDefault()
       Event listeners may call this method to prevent the form from being submitted.
@@ -10868,11 +11635,11 @@ open dialogs with sub-forms, etc. all without losing form state.
       $target = $(target);
       fieldValues || (fieldValues = switcherValues(findSwitcherForTarget($target)));
       if (hideValues = $target.attr('up-hide-for')) {
-        hideValues = hideValues.split(' ');
+        hideValues = u.splitValues(hideValues);
         show = u.intersect(fieldValues, hideValues).length === 0;
       } else {
         if (showValues = $target.attr('up-show-for')) {
-          showValues = showValues.split(' ');
+          showValues = u.splitValues(showValues);
         } else {
           showValues = [':present', ':checked'];
         }
@@ -10915,7 +11682,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     \#\#\# Failed submission
     
-    When the server was unable to save the form due to invalid data,
+    When the server was unable to save the form due to invalid params,
     it will usually re-render an updated copy of the form with
     validation messages.
     
@@ -10998,9 +11765,9 @@ open dialogs with sub-forms, etc. all without losing form state.
       or `method` (vanilla HTML) for the same purpose.
     @param {string} [up-layer='auto']
       The name of the layer that ought to be updated. Valid values are
-      `auto`, `page`, `modal` and `popup`.
+      `'auto'`, `'page'`, `'modal'` and `'popup'`.
     
-      If set to `auto` (default), Unpoly will try to find a match in the form's layer.
+      If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
       If no match was found in that layer,
       Unpoly will search in other layers, starting from the topmost layer.
     @param {string} [up-fail-layer='auto']
@@ -11428,7 +12195,8 @@ open dialogs with sub-forms, etc. all without losing form state.
       validate: validate,
       switchTargets: switchTargets,
       autosubmit: autosubmit,
-      fieldSelector: fieldSelector
+      fieldSelector: fieldSelector,
+      submitButtonSelector: submitButtonSelector
     };
   })(jQuery);
 
@@ -11502,7 +12270,7 @@ The HTML of a popup element is simply this:
     @param {string} [config.position='bottom-right']
       Defines where the popup is attached to the opening element.
     
-      Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+      Valid values are `'bottom-right'`, `'bottom-left'`, `'top-right'` and `'top-left'`.
     @param {string} [config.history=false]
       Whether opening a popup will add a browser history entry.
     @param {string} [config.openAnimation='fade-in']
@@ -11650,7 +12418,7 @@ The HTML of a popup element is simply this:
     @param {string} [options.position='bottom-right']
       Defines where the popup is attached to the opening element.
     
-      Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+      Valid values are `'bottom-right'`, `'bottom-left'`, `'top-right'` and `'top-left'`.
     @param {string} [options.html]
       A string of HTML from which to extract the popup contents. No network request will be made.
     @param {string} [options.confirm]
@@ -11887,7 +12655,7 @@ The HTML of a popup element is simply this:
     @param [up-position]
       Defines where the popup is attached to the opening element.
     
-      Valid values are `bottom-right`, `bottom-left`, `top-right` and `top-left`.
+      Valid values are `'bottom-right'`, `'bottom-left'`, `'top-right'` and `'top-left'`.
     @param {string} [up-confirm]
       A message that will be displayed in a cancelable confirmation dialog
       before the popup is opened.
@@ -12041,7 +12809,7 @@ or function.
 
 (function() {
   up.modal = (function($) {
-    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, flavors, followAsap, isOpen, markAsAnimating, openAsap, openNow, preloadNow, reset, shiftElements, state, templateHtml, u, unshiftElements, unveilFrame, visitAsap;
+    var animate, autoclose, chain, closeAsap, closeNow, config, contains, createHiddenFrame, discardHistory, extractAsap, flavor, flavorDefault, flavorOverrides, flavors, followAsap, isOpen, markAsAnimating, openAsap, openNow, preloadNow, reset, shiftElements, state, templateHtml, u, unshiftElements, unveilFrame, validateTarget, visitAsap;
     u = up.util;
 
     /***
@@ -12430,7 +13198,8 @@ or function.
       $link = u.option(u.pluckKey(options, '$link'), u.nullJQuery());
       url = u.option(u.pluckKey(options, 'url'), $link.attr('up-href'), $link.attr('href'));
       html = u.option(u.pluckKey(options, 'html'));
-      target = u.option(u.pluckKey(options, 'target'), $link.attr('up-modal'), 'body');
+      target = u.option(u.pluckKey(options, 'target'), $link.attr('up-modal'));
+      validateTarget(target);
       options.flavor = u.option(options.flavor, $link.attr('up-flavor'), config.flavor);
       options.position = u.option(options.position, $link.attr('up-position'), flavorDefault('position', options.flavor));
       options.position = u.evalOption(options.position, {
@@ -12505,6 +13274,13 @@ or function.
           return promise;
         });
       });
+    };
+    validateTarget = function(target) {
+      if (u.isBlank(target)) {
+        return up.fail('Cannot open a modal without a target selector');
+      } else if (target === 'body') {
+        return up.fail('Cannot open the <body> in a modal');
+      }
     };
 
     /***
@@ -12656,7 +13432,7 @@ or function.
       if (overrideConfig == null) {
         overrideConfig = {};
       }
-      up.log.warn('up.modal.flavor() is deprecated. Use the up.modal.flavors property instead.');
+      up.warn('up.modal.flavor() is deprecated. Use the up.modal.flavors property instead.');
       return u.assign(flavorOverrides(name), overrideConfig);
     };
 
@@ -13283,7 +14059,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
         for (i = 0, len = ref.length; i < len; i++) {
           attr = ref[i];
           if (value = u.presentAttr($section, attr)) {
-            ref1 = value.split(/\s+/);
+            ref1 = u.splitValues(value);
             for (j = 0, len1 = ref1.length; j < len1; j++) {
               url = ref1[j];
               if (url !== '#') {
@@ -13580,7 +14356,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     };
   })(jQuery);
 
-  up.renamedModule('navigation', 'feedback');
+  up.deprecateRenamedModule('navigation', 'feedback');
 
 }).call(this);
 
