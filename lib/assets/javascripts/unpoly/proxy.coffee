@@ -584,7 +584,7 @@ up.proxy = (($) ->
   making the interaction feel instant.
 
   @function up.proxy.preload
-  @param {string|Element|jQuery}
+  @param {string|Element|jQuery} linkOrSelector
     The element whose destination should be preloaded.
   @param {object} options
     Options that will be passed to the function making the HTTP requests.
