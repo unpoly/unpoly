@@ -606,7 +606,13 @@ up.util = (($) ->
   @stable
   ###
   toArray = (object) ->
-    Array.prototype.slice.call(object)
+    if isArray(object)
+      object
+    else
+      Array.prototype.slice.call(object)
+
+  pushAll = (array, newElements) ->
+    array.push.apply(array, newElements)
 
   ###**
   Returns a shallow copy of the given array or object.
@@ -2098,6 +2104,7 @@ up.util = (($) ->
   selectInDynasty: selectInDynasty
   contains: contains
   toArray: toArray
+  pushAll: pushAll
   castedAttr: castedAttr
   jsonAttr: jsonAttr
   clientSize: clientSize

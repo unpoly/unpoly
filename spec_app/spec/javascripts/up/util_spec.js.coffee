@@ -968,7 +968,7 @@ describe 'up.util', ->
 
     describe 'up.util.selectInSubtree', ->
 
-      it 'finds the selector in ancestors and descendants of the given element', ->
+      it 'finds the selector in descendants of the given element', ->
         $grandMother = affix('.grand-mother.match')
         $mother = $grandMother.affix('.mother')
         $element = $mother.affix('.element')
