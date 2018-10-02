@@ -109,6 +109,12 @@ describe 'up.radio', ->
               </div>
               """
 
+        next =>
+          expect('.target').toHaveText('old target')
+          expect('.fail-target').toHaveText('new fail target')
+          expect('.hungry').toHaveText('new hungry')
+
+
       it 'does not update [up-hungry] elements with { hungry: false } option', asyncSpec (next) ->
         affix('.hungry[up-hungry]').text('old hungry')
         affix('.target').text('old target')
