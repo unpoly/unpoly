@@ -7,7 +7,7 @@ passively receive updates from the server.
 
 @class up.radio
 ###
-up.radio = (($) ->
+up.radio = do ->
 
   u = up.util
 
@@ -58,5 +58,3 @@ up.radio = (($) ->
 
   config: config
   hungrySelector: hungrySelector
-
-)(jQuery)
