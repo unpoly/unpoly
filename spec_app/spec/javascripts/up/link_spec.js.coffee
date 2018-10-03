@@ -410,7 +410,7 @@ describe 'up.link', ->
 
               revealStub = up.layout.knife.mock('reveal')
 
-              up.submit($link, reveal: '.other', failTarget: '.fail-target')
+              up.follow($link, reveal: '.other', failTarget: '.fail-target')
 
               next =>
                 @respondWith

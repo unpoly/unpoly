@@ -36,9 +36,10 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
 
 @class up.feedback
 ###
-up.feedback = (($) ->
+up.feedback = do ->
 
   u = up.util
+  q = up.query
 
   ###**
   Sets default options for this module.
@@ -72,25 +73,23 @@ up.feedback = (($) ->
     if u.isPresent(url)
       u.normalizeUrl(url, stripTrailingSlash: true)
 
-  NORMALIZED_SECTION_URLS_KEY = 'up-normalized-urls'
-
-  sectionUrls = ($section) ->
+  sectionUrls = (section) ->
     # Check if we have computed the URLs before.
     # Computation is sort of expensive (multiplied by number of links),
     # so we cache the results in a data attribute.
-    unless urls = $section.data(NORMALIZED_SECTION_URLS_KEY)
-      urls = buildSectionUrls($section)
-      $section.data(NORMALIZED_SECTION_URLS_KEY, urls)
+    unless urls = section.upNormalizedUrls
+      urls = buildSectionUrls(section)
+      section.upNormalizedUrls = urls
     urls
 
-  buildSectionUrls = ($section) ->
+  buildSectionUrls = (section) ->
     urls = []
 
     # A link with an unsafe method will never be higlighted with .up-current,
     # so we cache an empty array.
-    if up.link.isSafe($section)
+    if up.link.isSafe(section)
       for attr in ['href', 'up-href', 'up-alias']
-        if value = u.presentAttr($section, attr)
+        if value = u.presentAttr(section, attr)
           # Allow to include multiple space-separated URLs in [up-alias]
           for url in u.splitValues(value)
             unless url == '#'
@@ -112,36 +111,32 @@ up.feedback = (($) ->
     previousUrlSet = currentUrlSet
     currentUrlSet = buildCurrentUrlSet()
     unless currentUrlSet.isEqual(previousUrlSet)
-      updateAllNavigationSections($('body'))
+      updateAllNavigationSections(document.body)
 
-  updateAllNavigationSections = ($root) ->
-    $navs = u.selectInSubtree($root, navSelector())
-    $sections = u.selectInSubtree($navs, SELECTOR_LINK)
-    updateCurrentClassForLinks($sections)
+  updateAllNavigationSections = (root) ->
+    navs = q.subtree(root, navSelector())
+    sections = u.flatMap navs, (nav) -> q.subtree(nav, SELECTOR_LINK)
+    updateCurrentClassForLinks(sections)
 
-  updateNavigationSectionsInNewFragment = ($fragment) ->
-    if $fragment.closest(navSelector()).length
+  updateNavigationSectionsInNewFragment = (fragment) ->
+    if q.closest(fragment, navSelector())
       # If the new fragment is an [up-nav], or if the new fragment is a child of an [up-nav],
       # all links in the new fragment are considered sections that we need to update.
       # Note that:
       # - The [up-nav] element might not be part of this update.
       #   It might already be in the DOM, and only a child was updated.
-      # - The $fragment might be a link itself
-      # - We do not need to update sibling links of $fragment that have been processed before.
-      $sections = u.selectInSubtree($fragment, SELECTOR_LINK)
-      updateCurrentClassForLinks($sections)
+      # - The fragment might be a link itself
+      # - We do not need to update sibling links of fragment that have been processed before.
+      sections = q.subtree(fragment, SELECTOR_LINK)
+      updateCurrentClassForLinks(sections)
     else
-      updateAllNavigationSections($fragment)
+      updateAllNavigationSections(fragment)
 
-  updateCurrentClassForLinks = ($links) ->
+  updateCurrentClassForLinks = (links) ->
     currentUrlSet ||= buildCurrentUrlSet()
-    u.each $links, (link) ->
-      $link = $(link)
-      urls = sectionUrls($link)
+    u.each links, (link) ->
+      urls = sectionUrls(link)
 
-      # We use Element#classList to manipulate classes instead of jQuery's
-      # addClass and removeClass. Since we are in an inner loop, we want to
-      # be as fast as we can.
       classList = link.classList
       if currentUrlSet.matchesAny(urls)
         for klass in config.currentClasses
@@ -158,11 +153,11 @@ up.feedback = (($) ->
   @internal
   ###
   findActivatableArea = (elementOrSelector) ->
-    $area = $(elementOrSelector)
-    if $area.is(SELECTOR_LINK)
+    area = q.element(elementOrSelector)
+    if q.matches(area, SELECTOR_LINK)
       # Try to enlarge links that are expanded with [up-expand] on a surrounding container.
-      $area = u.presence($area.parent(SELECTOR_LINK)) || $area
-    $area
+      area = q.ancestor(area, SELECTOR_LINK) || area
+    area
 
   ###**
   Marks the given element as currently loading, by assigning the CSS class [`up-active`](/a.up-active).
@@ -177,7 +172,7 @@ up.feedback = (($) ->
 
       var $button = $('button');
       $button.on('click', function() {
-        up.feedback.start($button, function() {
+        up.feedback.start(button, function() {
           // the .up-active class will be removed when this promise resolves:
           return up.request(...);
         });
@@ -198,13 +193,13 @@ up.feedback = (($) ->
     elementOrSelector = args.shift()
     action = args.pop()
     options = u.options(args[0])
-    $element = findActivatableArea(elementOrSelector)
-    unless options.preload
-      $element.addClass(CLASS_ACTIVE)
+    element = findActivatableArea(elementOrSelector)
+    if element && !options.preload
+      element.classList.add(CLASS_ACTIVE)
     if action
       promise = action()
       if u.isPromise(promise)
-        u.always promise, -> stop($element)
+        u.always promise, -> stop(element)
       else
         up.warn('Expected block to return a promise, but got %o', promise)
       promise
@@ -280,8 +275,8 @@ up.feedback = (($) ->
   @internal
   ###
   stop = (elementOrSelector) ->
-    $element = findActivatableArea(elementOrSelector)
-    $element.removeClass(CLASS_ACTIVE)
+    if element = findActivatableArea(elementOrSelector)
+      element.classList.remove(CLASS_ACTIVE)
 
   ###**
   Marks this element as a navigation component, such as a menu or navigation bar.
@@ -360,7 +355,7 @@ up.feedback = (($) ->
     updateAllNavigationSectionsIfLocationChanged()
 
   up.on 'up:fragment:inserted', (event, $newFragment) ->
-    updateNavigationSectionsInNewFragment($newFragment)
+    updateNavigationSectionsInNewFragment($newFragment[0])
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
@@ -368,7 +363,5 @@ up.feedback = (($) ->
   config: config
   start: start
   stop: stop
-
-)(jQuery)
 
 up.deprecateRenamedModule 'navigation', 'feedback'

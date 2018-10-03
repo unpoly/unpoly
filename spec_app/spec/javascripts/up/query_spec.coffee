@@ -54,23 +54,23 @@ describe 'up.query', ->
       result = up.query.first($element[0], '.match')
       expect(result).toEqual $matchingChild[0]
 
-    it 'returns null if no descendant matches', ->
+    it 'returns missing if no descendant matches', ->
       $element = affix('.element')
       $child = $element.affix('.child')
       $grandChild = $child.affix('.grand-child')
       result = up.query.first($element[0], '.match')
-      expect(result).toBeNull()
+      expect(result).toBeMissing()
 
     it 'does not return the root itself, even if it matches', ->
       $element = affix('.element.match')
       result = up.query.first($element[0], '.match')
-      expect(result).toBeNull()
+      expect(result).toBeMissing()
 
     it 'does not return an ancestor of the root, even if it matches', ->
       $parent = affix('.parent.match')
       $element = $parent.affix('.element')
       result = up.query.first($element[0], '.match')
-      expect(result).toBeNull()
+      expect(result).toBeMissing()
 
     it 'supports the custom :has() selector', ->
       $element = affix('.element')
@@ -147,16 +147,46 @@ describe 'up.query', ->
       expect(result).toBe($element[0])
 
     it 'does not return descendants of the root, even if they match', ->
-      $mother = affix('.match')
-      $element = $mother.affix('.match')
+      $element = affix('.element')
+      $child = $element.affix('.match')
 
       result = up.query.closest($element[0], '.match')
-      expect(result).toBe($element[0])
+      expect(result).toBeMissing()
 
-    it 'returns null if neither root nor ancestor matches', ->
+    it 'returns missing if neither root nor ancestor matches', ->
       $mother = affix('.no-match')
       $element = $mother.affix('.no-match')
 
       result = up.query.closest($element[0], '.match')
-      expect(result).toBeNull()
+      expect(result).toBeMissing()
 
+  describe 'ancestor()', ->
+
+    it 'returns the closest ancestor of the given root that matches the given selector', ->
+      $grandGrandMother = affix('.match')
+      $grandMother = affix('.match')
+      $mother = $grandMother.affix('.no-match')
+      $element = $mother.affix('.element')
+
+      result = up.query.ancestor($element[0], '.match')
+      expect(result).toBe($grandMother[0])
+
+    it 'does not return the given root, even if it matches', ->
+      $element = affix('.match')
+
+      result = up.query.ancestor($element[0], '.match')
+      expect(result).toBeMissing()
+
+    it 'does not return descendants of the root, even if they match', ->
+      $element = affix('.element')
+      $child = $element.affix('.match')
+
+      result = up.query.ancestor($element[0], '.match')
+      expect(result).toBeMissing()
+
+    it 'returns missing if no ancestor matches', ->
+      $mother = affix('.no-match')
+      $element = $mother.affix('.no-match')
+
+      result = up.query.ancestor($element[0], '.match')
+      expect(result).toBeMissing()

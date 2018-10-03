@@ -656,6 +656,7 @@ up.util = (($) ->
   @internal
   ###
   getElement = (object) ->
+    # TODO: Remove me! Use up.query.element() instead
     if isJQuery(object)
       object.get(0)
     else if isString(object)
@@ -929,15 +930,16 @@ up.util = (($) ->
     classList.contains(klass)
 
   ###**
-  Returns the first [present](/up.util.isPresent) element attribute
-  among the given list of attribute names.
+  Returns the element attribute with the gvien value.
+  Returns `undefined` if the value is [blank](/up.util.isBlank).
 
   @function up.util.presentAttr
   @internal
   ###
-  presentAttr = ($element, attrNames...) ->
-    values = ($element.attr(attrName) for attrName in attrNames)
-    detect(values, isPresent)
+  presentAttr = (element, attrName) ->
+    if element = getElement(element) # TMP
+      value = element.getAttribute(attrName)
+      presence(value)
 
   ###**
   Waits for the given number of milliseconds, the runs the given callback.

@@ -56,8 +56,15 @@ class up.Selector
   closestPolyfill: (root) ->
     if @matches(root, selector)
       root
-    else if parentElement = root.parentElement
-      @closestPolyfill(parentElement)
+    else
+      @ancestor(root)
+
+  ancestor: (element) ->
+    if parentElement = element.parentElement
+      if @matches(parentElement)
+        parentElement
+      else
+        @ancestor(parentElement)
 
   filterAll: (list) ->
     if @filterFn == NO_FILTER

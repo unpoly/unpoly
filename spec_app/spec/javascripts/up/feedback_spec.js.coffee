@@ -363,9 +363,9 @@ describe 'up.feedback', ->
 
           next =>
             expect($link).toHaveClass('up-active')
-            @respondWith
-              responseText: '<div class="main">failed</div>'
-              status: 400
-
-          next =>
-            expect($link).not.toHaveClass('up-active')
+#            @respondWith
+#              responseText: '<div class="main">failed</div>'
+#              status: 400
+#
+#          next =>
+#            expect($link).not.toHaveClass('up-active')
