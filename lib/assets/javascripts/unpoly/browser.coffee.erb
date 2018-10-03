@@ -241,14 +241,6 @@ up.browser = (($) ->
   canCustomElements = u.memoize ->
     !!window.customElements
 
-  isRecentJQuery = u.memoize ->
-    version = $.fn.jquery
-    parts = version.split('.')
-    major = parseInt(parts[0])
-    minor = parseInt(parts[1])
-    # When updating minimum jQuery, also update the dependency in package.json.
-    major >= 2 || (major == 1 && minor >= 9)
-
   popCookie = (name) ->
     value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
     if u.isPresent(value)
@@ -282,7 +274,6 @@ up.browser = (($) ->
   ###
   isSupported = ->
     !isIE10OrWorse() &&
-      isRecentJQuery() &&
       canConsole() &&
       # We don't require pushState in order to cater for Safari booting Unpoly with a non-GET method.
       # canPushState() &&
