@@ -15,7 +15,7 @@ Internet Explorer 10 or lower
 
 @class up.browser
 ###
-up.browser = (($) ->
+up.browser = do ->
 
   u = up.util
 
@@ -35,8 +35,8 @@ up.browser = (($) ->
 
   @method submitForm
   ###
-  submitForm = ($form) ->
-    $form.submit()
+  submitForm = (form) ->
+    form.submit()
 
   ###**
   A cross-browser way to interact with `console.log`, `console.error`, etc.
@@ -80,10 +80,9 @@ up.browser = (($) ->
       string = "$(#{u.map(arg, stringifyArg).join(', ')})"
       closer = ')'
     else if u.isElement(arg)
-      $arg = $(arg)
       string = "<#{arg.tagName.toLowerCase()}"
       for attr in ['id', 'name', 'class']
-        if value = $arg.attr(attr)
+        if value = arg.getAttribute(attr)
           string += " #{attr}=\"#{value}\""
       string += ">"
       closer = '>'
@@ -241,6 +240,9 @@ up.browser = (($) ->
   canCustomElements = u.memoize ->
     !!window.customElements
 
+  canJQuery = u.memoize ->
+    !!window.jQuery
+
   popCookie = (name) ->
     value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
     if u.isPresent(value)
@@ -309,6 +311,7 @@ up.browser = (($) ->
   canFormData: canFormData
   canInspectFormData: canInspectFormData
   canCustomElements: canCustomElements
+  canJQuery: canJQuery
   documentViewportSelector: documentViewportSelector
   whenConfirmed: whenConfirmed
   isSupported: isSupported
@@ -316,6 +319,3 @@ up.browser = (($) ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   popCookie: popCookie
-
-)(jQuery)
-

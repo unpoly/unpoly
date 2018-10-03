@@ -199,7 +199,7 @@ class up.Request extends up.Record
     u.each(up.params.toArray(@params), addField)
 
     $form.hide().appendTo('body')
-    up.browser.submitForm($form)
+    up.browser.submitForm($form[0])
 
   # Returns a csrfToken if this request requires it
   csrfToken: =>

@@ -558,7 +558,7 @@ up.util = (($) ->
   @stable
   ###
   isJQuery = (object) ->
-    object instanceof jQuery
+    up.browser.canJQuery() && (object instanceof jQuery)
 
   ###**
   Returns whether the given argument is an object with a `then` method.
