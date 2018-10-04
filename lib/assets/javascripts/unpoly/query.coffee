@@ -41,6 +41,15 @@ up.query = do ->
     else
       object
 
+  triggerCustom = (element, name, props = {}) ->
+    console.debug('-- triggerCustom(%o, %o)', element, name)
+    event = document.createEvent('Event')
+    event.initEvent(name, true, true)
+    u.assign(event, props)
+    console.debug('-- dispatch %o on %o', event, element)
+    element.dispatchEvent(event)
+    return event
+
   first: first
   all: all
   subtree: subtree
@@ -48,3 +57,4 @@ up.query = do ->
   matches: matches
   ancestor: ancestor
   element: element
+  triggerCustom: triggerCustom

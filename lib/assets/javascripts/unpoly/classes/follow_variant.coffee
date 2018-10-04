@@ -1,4 +1,5 @@
 u = up.util
+q = up.query
 
 class up.FollowVariant
 
@@ -7,23 +8,23 @@ class up.FollowVariant
     @preloadNow = options.preload
     @selectors = selector.split(/\s*,\s*/)
 
-  onClick: (event, $link) =>
-    if up.link.shouldProcessEvent(event, $link)
-      if $link.is('[up-instant]')
+  onClick: (event, link) =>
+    if up.link.shouldProcessEvent(event, link)
+      if q.matches(link, '[up-instant]')
         # If the link was already processed on mousedown, we still need
         # to prevent this later click event's chain.
         up.bus.haltEvent(event)
       else
         up.bus.consumeAction(event)
-        @followLink($link)
+        @followLink(link)
     else
       # For tests
       up.link.allowDefault(event)
 
-  onMousedown: (event, $link) =>
-    if up.link.shouldProcessEvent(event, $link)
+  onMousedown: (event, link) =>
+    if up.link.shouldProcessEvent(event, link)
       up.bus.consumeAction(event)
-      @followLink($link)
+      @followLink(link)
 
   fullSelector: (additionalClause = '') =>
     parts = []
@@ -38,16 +39,16 @@ class up.FollowVariant
     up.on 'mousedown', @fullSelector('[up-instant]'), (args...) =>
       u.muteRejection @onMousedown(args...)
 
-  followLink: ($link, options) =>
+  followLink: (link, options) =>
     options = u.options(options)
-    followEventAttrs = { message: 'Following link', $link: $link, $element: $link }
+    followEventAttrs = { message: 'Following link', link: link, element: link }
     up.bus.whenEmitted('up:link:follow', followEventAttrs).then =>
-      up.feedback.start $link, options, =>
-        @followNow($link, options)
+      up.feedback.start link, options, =>
+        @followNow(link, options)
 
-  preloadLink: ($link, options) =>
+  preloadLink: (link, options) =>
     options = u.options(options)
-    @preloadNow($link, options)
+    @preloadNow(link, options)
 
-  matchesLink: ($link) =>
-    $link.is(@fullSelector())
+  matchesLink: (link) =>
+    q.matches(link, @fullSelector())

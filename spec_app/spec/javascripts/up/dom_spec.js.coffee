@@ -1598,7 +1598,7 @@ describe 'up.dom', ->
         destroyDone = up.destroy($element, animation: 'fade-out', duration: 30)
 
         next ->
-          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining($element: $element))
+          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining(target: $element[0]))
           expect($element).toBeAttached()
 
           next.await(destroyDone)
@@ -2481,7 +2481,7 @@ describe 'up.dom', ->
         destroyDone = up.destroy($element, animation: 'fade-out', duration: 30)
 
         next ->
-          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining($element: $element))
+          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining(target: $element[0]))
           expect($element).toBeAttached()
 
           next.await(destroyDone)

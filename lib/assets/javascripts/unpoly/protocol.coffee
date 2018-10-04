@@ -215,7 +215,7 @@ up.protocol = (($) ->
   # Remove the method cookie as soon as possible.
   # Don't wait until the first call to initialRequestMethod(),
   # which might be much later.
-  up.bus.on('up:framework:booted', initialRequestMethod)
+  up.on('up:framework:booted', initialRequestMethod)
 
   ###**
   Configures strings used in the optional [server protocol](/up.protocol).

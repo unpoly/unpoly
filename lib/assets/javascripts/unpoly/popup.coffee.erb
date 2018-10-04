@@ -438,9 +438,9 @@ up.popup = (($) ->
       # Do not halt the event chain here. The user is allowed to directly activate
       # a link in the background, even with a (now closing) popup open.
 
-  up.on 'up:fragment:inserted', (event, $fragment) ->
-    if contains($fragment)
-      if newSource = $fragment.attr('up-source')
+  up.on 'up:fragment:inserted', (event, fragment) ->
+    if contains(fragment)
+      if newSource = fragment.getAttribute('up-source')
         state.url = newSource
     else if event.origin && contains(event.origin)
       u.muteRejection autoclose()
@@ -471,7 +471,7 @@ up.popup = (($) ->
   @selector .up-popup [up-close]
   @stable
   ###
-  up.on 'click', '.up-popup [up-close]', (event, $element) ->
+  up.on 'click', '.up-popup [up-close]', (event) ->
     u.muteRejection closeAsap()
     # Only prevent the default when we actually closed a popup.
     # This way we can have buttons that close a popup when within a popup,

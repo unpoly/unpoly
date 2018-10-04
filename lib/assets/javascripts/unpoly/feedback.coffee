@@ -119,6 +119,7 @@ up.feedback = do ->
     updateCurrentClassForLinks(sections)
 
   updateNavigationSectionsInNewFragment = (fragment) ->
+    console.debug("updateNavigationSectionsInNewFragment(%o)", fragment)
     if q.closest(fragment, navSelector())
       # If the new fragment is an [up-nav], or if the new fragment is a child of an [up-nav],
       # all links in the new fragment are considered sections that we need to update.
@@ -354,8 +355,8 @@ up.feedback = do ->
   up.on 'up:history:pushed up:history:replaced up:history:restored up:modal:opened up:modal:closed up:popup:opened up:popup:closed', (event) ->
     updateAllNavigationSectionsIfLocationChanged()
 
-  up.on 'up:fragment:inserted', (event, $newFragment) ->
-    updateNavigationSectionsInNewFragment($newFragment[0])
+  up.on 'up:fragment:inserted', (event, newFragment) ->
+    updateNavigationSectionsInNewFragment(newFragment)
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset

@@ -49,6 +49,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 up.bus = (($) ->
   
   u = up.util
+  q = up.query
 
   # We remember which argument lists have been passed to `up.on()`
   # so we can clean out the listener registry between tests.
@@ -79,6 +80,22 @@ up.bus = (($) ->
 
       upListener.apply($me.get(0), args)
 
+  upListenerToNativeListener = (upListener, selector) ->
+    (event) ->
+      target = event.target
+
+      if !selector || q.matches(event.target, selector)
+        args = [event, target]
+        # Do not retrieve and parse [up-data] unless the listener function
+        # expects a third argument. Note that we must pass data for an argument
+        # count of 0, since then the function might take varargs.
+        expectedArgCount = upListener.length
+        unless expectedArgCount == 1 || expectedArgCount == 2
+          data = up.syntax.data(target)
+          args.push(data)
+
+        upListener.apply(target, args)
+
   ###**
   Converts an argument list for `up.on()` to an argument list for `jQuery.on`.
   This involves rewriting the listener signature in the last argument slot.
@@ -91,7 +108,7 @@ up.bus = (($) ->
 
     # Prefer to rename events in the copied jQuery description instead of
     # changing the original up description.
-    fixRenamedEvents(jqueryDescription)
+    jqueryDescription[0] = fixRenamedEvents(jqueryDescription[0])
 
     # We remove the listener function from the end of the description.
     # We will re-push it to the description at the end.
@@ -109,15 +126,38 @@ up.bus = (($) ->
     jqueryDescription.push(jqueryListener)
     jqueryDescription
 
-  fixRenamedEvents = (description) ->
-    events = u.splitValues(description[0])
+
+  upDescriptionToNativeDescription = (upDescription, isNew) ->
+    upDescription = u.copy(upDescription)
+
+    eventNames = upDescription.shift()
+    upListener = upDescription.pop()
+    selector = upDescription.shift() # might be undefined
+
+    eventNames = renameEvents(eventNames)
+
+    if isNew
+      nativeListener = upListenerToNativeListener(upListener, selector)
+      upListener._asNativeListener = nativeListener
+      if upListener._descriptionNumber
+        up.fail('up.on(): The callback %o cannot be registered more than once')
+      upListener._descriptionNumber = ++nextUpDescriptionNumber
+    else
+      nativeListener = upListener._asNativeListener
+      nativeListener or up.fail('up.off(): The callback %o was never registered through up.on()', upListener)
+
+    u.compact [eventNames, nativeListener]
+
+
+  renameEvents = (eventNames) ->
+    events = u.splitValues(eventNames)
     events = u.map events, (event) ->
       if newEvent = renamedEvents[event]
         up.warn("Deprecated: #{event} has been renamed to #{newEvent}")
         newEvent
       else
         event
-    description[0] = events.join(' ')
+    return events.join(' ')
 
   ###**
   Listens to an event on `document`.
@@ -215,14 +255,16 @@ up.bus = (($) ->
     # browsers and return a no-op destructor
     return (->) unless up.browser.isSupported()
 
-    # Convert the args for up.on to an argument list as expected by jQuery.on.
-    jqueryDescription = upDescriptionToJqueryDescription(upDescription, true)
+    # Convert the args for up.on to an argument list as expected by #addEventListener
+    nativeDescription = upDescriptionToNativeDescription(upDescription, true)
 
     # Remember the descriptions we registered, so we can
     # clean up after ourselves during a `reset`
     rememberUpDescription(upDescription)
 
-    $(document).on(jqueryDescription...)
+    console.debug("-- Adding event listener: %o", nativeDescription)
+
+    document.addEventListener(nativeDescription...)
 
     # Return destructor
     -> unbind(upDescription...)
@@ -248,9 +290,9 @@ up.bus = (($) ->
   @stable
   ###
   unbind = (upDescription...) ->
-    jqueryDescription = upDescriptionToJqueryDescription(upDescription, false)
+    nativeDescription = upDescriptionToNativeDescription(upDescription, false)
     forgetUpDescription(upDescription)
-    $(document).off(jqueryDescription...)
+    document.removeEventListener(nativeDescription...)
 
   rememberUpDescription = (upDescription) ->
     number = upDescriptionNumber(upDescription)
@@ -300,15 +342,16 @@ up.bus = (($) ->
   @experimental
   ###
   emit = (eventName, eventProps = {}) ->
-    event = $.Event(eventName, eventProps)
     # Three cases:
     # - Event is triggered on document (default)
     # - Event is triggered on { $element }
     # - Event is triggered on { $target }, but should have an { $element } property
-    $target = eventProps.$target || eventProps.$element || $(document)
+    $target = $(eventProps.target || eventProps.element || u.presence(eventProps.$element) || document)
+    if $target.length == 0
+      debugger
+    console.debug("*** emit on $target %o", $target.get(0), eventProps)
     logEmission(eventName, eventProps)
-    $target.trigger(event)
-    event
+    q.triggerCustom($target[0], eventName, eventProps)
 
   logEmission = (eventName, eventProps) ->
     if eventProps.hasOwnProperty('message')
@@ -344,7 +387,7 @@ up.bus = (($) ->
   ###
   nobodyPrevents = (args...) ->
     event = emit(args...)
-    not event.isDefaultPrevented()
+    not event.defaultPrevented
 
   ###**
   [Emits](/up.emit) the given event and returns a promise

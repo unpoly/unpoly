@@ -730,11 +730,11 @@ up.modal = (($) ->
       u.muteRejection closeAsap()
   )
 
-  up.on('up:fragment:inserted', (event, $fragment) ->
-    if contains($fragment)
-      if newSource = $fragment.attr('up-source')
+  up.on('up:fragment:inserted', (event, fragment) ->
+    if contains(fragment)
+      if newSource = fragment.getAttribute('up-source')
         state.url = newSource
-    else if event.origin && contains(event.origin) && !up.popup.contains($fragment)
+    else if event.origin && contains(event.origin) && !up.popup.contains(fragment)
       u.muteRejection autoclose()
   )
 
@@ -756,7 +756,7 @@ up.modal = (($) ->
   @selector .up-modal [up-close]
   @stable
   ###
-  up.on('click', '.up-modal [up-close]', (event, $element) ->
+  up.on('click', '.up-modal [up-close]', (event) ->
     u.muteRejection closeAsap()
     # If the user closes the modal by clicking on the background, we want to halt the event chain here.
     # The event should not trigger anything else. The user needs to click again for another interaction.

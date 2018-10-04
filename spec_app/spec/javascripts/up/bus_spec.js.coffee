@@ -5,10 +5,11 @@ describe 'up.bus', ->
     describe 'up.on', ->
 
       it 'registers a delagating event listener to the document body, which passes the $element as a second argument to the listener', asyncSpec (next) ->
+        console.debug('--------------------------- spec start ---------------------')
         affix('.container .child')
         observeClass = jasmine.createSpy()
-        up.on 'click', '.child', (event, $element) ->
-          observeClass($element.attr('class'))
+        up.on 'click', '.child', (event, element) ->
+          observeClass(element.className)
 
         Trigger.click($('.container'))
         Trigger.click($('.child'))
@@ -50,8 +51,8 @@ describe 'up.bus', ->
         it 'parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', asyncSpec (next) ->
           $child = affix('.child')
           observeArgs = jasmine.createSpy()
-          up.on 'click', '.child', (event, $element, data) ->
-            observeArgs($element.attr('class'), data)
+          up.on 'click', '.child', (event, element, data) ->
+            observeArgs(element.className, data)
 
           data = { key1: 'value1', key2: 'value2' }
           $tag = affix(".child").attr('up-data', JSON.stringify(data))
@@ -64,8 +65,8 @@ describe 'up.bus', ->
         it 'passes an empty object as a second argument to the listener if there is no [up-data] attribute', asyncSpec (next) ->
           $child = affix('.child')
           observeArgs = jasmine.createSpy()
-          up.on 'click', '.child', (event, $element, data) ->
-            observeArgs($element.attr('class'), data)
+          up.on 'click', '.child', (event, element, data) ->
+            observeArgs(element.className, data)
 
           Trigger.click($('.child'))
 
@@ -126,20 +127,20 @@ describe 'up.bus', ->
 
       it 'triggers an event on the document', ->
         emittedEvent = undefined
-        emitted$Target = undefined
+        emittedTarget = undefined
 
-        up.on 'foo', (event, $target) ->
+        up.on 'foo', (event, target) ->
           emittedEvent = event
-          emitted$Target = $target
+          emittedTarget = target
 
         expect(emittedEvent).toBeUndefined()
-        expect(emitted$Target).toBeUndefined()
+        expect(emittedTarget).toBeUndefined()
 
         up.emit('foo')
 
         expect(emittedEvent).toBeDefined()
         expect(emittedEvent.preventDefault).toBeDefined()
-        expect(emitted$Target).toEqual($(document))
+        expect(emittedTarget).toEqual(document)
 
       it 'accepts custom event properties', ->
         emittedEvent = undefined
@@ -151,24 +152,24 @@ describe 'up.bus', ->
 
         expect(emittedEvent.customField).toEqual('custom-value')
 
-      describe 'with .$element option', ->
+      describe 'with { element } option', ->
 
         it 'triggers an event on the given element', ->
           emittedEvent = undefined
-          $emittedTarget = undefined
+          emittedElement = undefined
 
           $element = affix('.element').text('foo')
 
-          up.on 'foo', (event, $target) ->
+          up.on 'foo', (event, element) ->
             emittedEvent = event
-            $emittedTarget = $target
+            emittedElement = element
 
-          up.emit('foo', $element: $element)
+          up.emit('foo', element: $element[0])
 
           expect(emittedEvent).toBeDefined()
-          expect($emittedTarget).toEqual($element)
+          expect(emittedElement).toEqual($element[0])
 
-          expect(emittedEvent.$element).toEqual($element)
+          expect(emittedEvent.target).toEqual($element[0])
 
     describe 'up.bus.deprecateRenamedEvent', ->
 

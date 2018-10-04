@@ -27,6 +27,7 @@ class up.Selector
   constructor: (@selector, @filterFn) ->
 
   matches: (element) ->
+    console.debug("--- matches(%o)", element)
     doesMatch = if element.matches then element.matches(@selector) else element.msMatchesSelector(@selector)
     doesMatch &&= @filterFn(element) unless @filterFn == NO_FILTER
     doesMatch
@@ -54,7 +55,7 @@ class up.Selector
     @filterOne(match)
 
   closestPolyfill: (root) ->
-    if @matches(root, selector)
+    if @matches(root, @selector)
       root
     else
       @ancestor(root)
