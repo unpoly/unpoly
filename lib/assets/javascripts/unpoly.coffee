@@ -1,8 +1,8 @@
 #= require ./unpoly/namespace
 #= require ./unpoly/util
+#= require ./unpoly/query
 #= require_tree ./unpoly/classes
 #= require ./unpoly/browser
-#= require ./unpoly/query
 #= require ./unpoly/bus
 #= require ./unpoly/params
 #= require ./unpoly/cookie

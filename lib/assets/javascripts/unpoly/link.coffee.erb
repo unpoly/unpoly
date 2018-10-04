@@ -70,6 +70,7 @@ new page is loading.
 up.link = (($) ->
 
   u = up.util
+  q = up.query
   
   ###**
   Visits the given URL without a full page load.
@@ -268,8 +269,8 @@ up.link = (($) ->
   ###
   followVariantForLink = (linkOrSelector, options) ->
     options = u.options(options)
-    $link = $(linkOrSelector)
-    variant = u.detect followVariants, (variant) -> variant.matchesLink($link)
+    link = q.element(linkOrSelector)
+    variant = u.detect followVariants, (variant) -> variant.matchesLink(link)
     variant ||= DEFAULT_FOLLOW_VARIANT unless options.default is false
     variant
 
@@ -289,15 +290,15 @@ up.link = (($) ->
     unless isFollowable($link)
       $link.attr('up-follow', '')
 
-  shouldProcessEvent = (event, $link) ->
+  shouldProcessEvent = (event, link) ->
     target = event.target
     # We never handle events for the right mouse button, or when Shift/CTRL/Meta is pressed
     return false unless u.isUnmodifiedMouseEvent(event)
     # If we actually targeted $link, save ourselves the expensive DOM traversal below
-    return true if target == $link.get(0)
+    return true if target == link
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.
-    $betterTarget = $(target).closest("a, [up-href], #{up.form.fieldSelector()}").not($link)
+    $betterTarget = $(target).closest("a, [up-href], #{up.form.fieldSelector()}").not(link)
     return false if $betterTarget.length
     return true
 

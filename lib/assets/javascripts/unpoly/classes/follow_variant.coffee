@@ -51,4 +51,5 @@ class up.FollowVariant
     @preloadNow(link, options)
 
   matchesLink: (link) =>
+    console.debug('--- q.matches(%o)', link)
     q.matches(link, @fullSelector())

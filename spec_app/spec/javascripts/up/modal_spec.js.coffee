@@ -504,7 +504,7 @@ describe 'up.modal', ->
         it 'opens the modal on mousedown (instead of on click)', asyncSpec (next) ->
           Trigger.mousedown(@$link)
           next =>
-            expect(@followSpy).toHaveBeenCalledWith(@$link, {})
+            expect(@followSpy).toHaveBeenCalledWith(@$link[0], {})
 
         it 'does nothing on mouseup', asyncSpec (next) ->
           Trigger.mouseup(@$link)
@@ -712,8 +712,29 @@ describe 'up.modal', ->
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
 
         next =>
-          escapeEvent = $.Event('keydown', keyCode: 27)
-          $('body').trigger(escapeEvent)
+          escapeEvent = document.createEvent('KeyboardEvent')
+          escapeEvent.initKeyboardEvent(
+            'keydown', # type
+            true,      # canBubble
+            true,      # cancelable
+          )
+
+          escapeEvent.altKey = false
+          # escapeEvent.char = '???'
+          escapeEvent.charCode = 27
+          escapeEvent.ctrlKey = false
+          escapeEvent.key = 'Escape'
+          escapeEvent.keyCode = 27
+          escapeEvent.metaKey = 27
+          escapeEvent.repeat = false
+          escapeEvent.shiftKey = false
+          escapeEvent.which = 27
+          escapeEvent.foooooooooo = 'baaaaaaaaaaaaaaaaaaaaaaar'
+
+          console.debug("========== dispatching keyboard event %o", escapeEvent)
+          document.body.dispatchEvent(escapeEvent)
+
+          # initKeyboardEvent(typeArg: string, canBubbleArg: boolean, cancelableArg: boolean, viewArg: Window, keyArg: string, locationArg: number, modifiersListArg: string, repeat: boolean, locale: string): void;
 
         next =>
           expect(wasClosed).toBe(true)

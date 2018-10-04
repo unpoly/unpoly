@@ -1188,6 +1188,7 @@ up.util = (($) ->
   @internal
   ###
   escapePressed = (event) ->
+    console.debug("escapePressed(%o), keyCode is %o", event, event.keyCode)
     event.keyCode == 27
 
   ###**

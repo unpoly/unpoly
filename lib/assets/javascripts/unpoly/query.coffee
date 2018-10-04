@@ -1,3 +1,5 @@
+#= require ./classes/selector
+
 up.query = do ->
 
   u = up.util
@@ -42,11 +44,9 @@ up.query = do ->
       object
 
   triggerCustom = (element, name, props = {}) ->
-    console.debug('-- triggerCustom(%o, %o)', element, name)
     event = document.createEvent('Event')
     event.initEvent(name, true, true)
     u.assign(event, props)
-    console.debug('-- dispatch %o on %o', event, element)
     element.dispatchEvent(event)
     return event
 

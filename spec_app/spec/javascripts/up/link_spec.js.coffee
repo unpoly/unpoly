@@ -19,7 +19,7 @@ describe 'up.link', ->
         next =>
           expect(listener).toHaveBeenCalled()
           event = listener.calls.mostRecent().args[0]
-          expect(event.$element).toEqual($link)
+          expect(event.target).toEqual($link[0])
 
           # No request should be made because we prevented the event
           expect(jasmine.Ajax.requests.count()).toEqual(0)
@@ -892,7 +892,7 @@ describe 'up.link', ->
       it "calls up.follow with the clicked link", asyncSpec (next) ->
         Trigger.click(@$link)
         next =>
-          expect(@followSpy).toHaveBeenCalledWith(@$link, {})
+          expect(@followSpy).toHaveBeenCalledWith(@$link[0], {})
 
       # IE does not call JavaScript and always performs the default action on right clicks
       unless AgentDetector.isIE() || AgentDetector.isEdge()
@@ -919,7 +919,7 @@ describe 'up.link', ->
 
         it 'follows a link on mousedown (instead of on click)', asyncSpec (next)->
           Trigger.mousedown(@$link)
-          next => expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link)
+          next => expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link[0])
 
         it 'does nothing on mouseup', asyncSpec (next)->
           Trigger.mouseup(@$link)
@@ -1037,7 +1037,7 @@ describe 'up.link', ->
         Trigger.clickSequence($otherLink)
         next =>
           expect(followSpy.calls.count()).toEqual(1)
-          expect(followSpy.calls.mostRecent().args[0]).toEqual($otherLink)
+          expect(followSpy.calls.mostRecent().args[0]).toEqual($otherLink[0])
 
       it 'does nothing when the user clicks on an input in the expanded area', asyncSpec (next) ->
         $area = affix('div[up-expand]')
