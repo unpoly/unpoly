@@ -1,6 +1,7 @@
 @Trigger = (->
   
   u = up.util
+  q = up.query
   
   mouseover = (element, options) ->
     $element = $(element)
@@ -40,6 +41,33 @@
   focus = (element, options) ->
     $element = $(element)
     $element.focus()
+
+  submit = (form, options) ->
+    form = q.element(form)
+    options = u.options(options,
+      cancelable: true,
+      bubbles: true
+    )
+    event = new Event('submit', options)
+    form.dispatchEvent(event)
+
+  change = (field, options) ->
+    field = q.element(field)
+    options = u.options(options,
+      cancelable: false,
+      bubbles: true
+    )
+    event = new Event('change', options)
+    field.dispatchEvent(event)
+
+  input = (field, options) ->
+    field = q.element(field)
+    options = u.options(options,
+      cancelable: false,
+      bubbles: true
+    )
+    event = new Event('input', options)
+    field.dispatchEvent(event)
 
   escapeSequence = (element, options) ->
     options = u.options(options,
@@ -122,6 +150,9 @@
   hoverSequence: hoverSequence
   unhoverSequence: unhoverSequence
   escapeSequence: escapeSequence
+  submit: submit
+  change: change
+  input: input
   createMouseEvent: createMouseEvent
   
 )()

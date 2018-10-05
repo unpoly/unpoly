@@ -24,7 +24,7 @@ describe 'up.form', ->
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               $input.val('new-value')
-              u.times 2, -> $input.trigger(eventName)
+              u.times 2, -> Trigger[eventName]($input)
               next =>
                 expect(callback).toHaveBeenCalledWith('new-value', $input)
                 expect(callback.calls.count()).toEqual(1)
@@ -33,7 +33,7 @@ describe 'up.form', ->
               $input = affix('input[value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
-              $input.trigger(eventName)
+              Trigger[eventName]($input)
               next =>
                 expect(callback).not.toHaveBeenCalled()
 
@@ -42,7 +42,7 @@ describe 'up.form', ->
               callback = jasmine.createSpy('change callback')
               up.observe($input, { delay: 200 }, callback)
               $input.val('new-value-1')
-              $input.trigger(eventName)
+              Trigger[eventName]($input)
 
               next.after 100, ->
                 # 100 ms after change 1: We're still waiting for the 200ms delay to expire
@@ -53,13 +53,13 @@ describe 'up.form', ->
                 expect(callback.calls.count()).toEqual(1)
                 expect(callback.calls.mostRecent().args[0]).toEqual('new-value-1')
                 $input.val('new-value-2')
-                $input.trigger(eventName)
+                Trigger[eventName]($input)
 
               next.after 80, ->
                 # 80 ms after change 2: We change again, resetting the delay
                 expect(callback.calls.count()).toEqual(1)
                 $input.val('new-value-3')
-                $input.trigger(eventName)
+                Trigger[eventName]($input)
 
               next.after 170, ->
                 # 250 ms after change 2, which was superseded by change 3
@@ -80,13 +80,13 @@ describe 'up.form', ->
                 return u.promiseTimer(100)
               up.observe($input, { delay: 1 }, callback)
               $input.val('new-value-1')
-              $input.trigger(eventName)
+              Trigger[eventName]($input)
 
               next.after 30, ->
                 # Callback has been called and takes 100 ms to complete
                 expect(callbackCount).toEqual(1)
                 $input.val('new-value-2')
-                $input.trigger(eventName)
+                Trigger[eventName]($input)
 
               next.after 30, ->
                 # Second callback is triggerd, but waits for first callback to complete
@@ -106,18 +106,18 @@ describe 'up.form', ->
 
               up.observe($input, { delay: 1 }, callback)
               $input.val('new-value-1')
-              $input.trigger(eventName)
+              Trigger[eventName]($input)
 
               next.after 10, ->
                 # Callback has been called and takes 100 ms to complete
                 expect(callbackArgs).toEqual ['new-value-1']
                 $input.val('new-value-2')
-                $input.trigger(eventName)
+                Trigger[eventName]($input)
 
               next.after 10, ->
                 expect(callbackArgs).toEqual ['new-value-1']
                 $input.val('new-value-3')
-                $input.trigger(eventName)
+                Trigger[eventName]($input)
 
               next.after 100, ->
                 expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
@@ -237,7 +237,7 @@ describe 'up.form', ->
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
               $input.val('new-value')
-              u.times 2, -> $input.trigger(eventName)
+              u.times 2, -> Trigger[eventName]($input)
               next =>
                 expect(callback).toHaveBeenCalledWith('new-value', $input)
                 expect(callback.calls.count()).toEqual(1)
@@ -247,7 +247,7 @@ describe 'up.form', ->
               $input = $form.affix('input[value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
-              $input.trigger(eventName)
+              Trigger[eventName]($input)
               next =>
                 expect(callback).not.toHaveBeenCalled()
 
@@ -275,8 +275,8 @@ describe 'up.form', ->
 
         next =>
           expect(listener).toHaveBeenCalled()
-          event = listener.calls.mostRecent().args[0]
-          expect(event.$element).toEqual($form)
+          element = listener.calls.mostRecent().args[1]
+          expect(element).toEqual(element)
 
           # No request should be made because we prevented the event
           expect(jasmine.Ajax.requests.count()).toEqual(0)
@@ -745,7 +745,8 @@ describe 'up.form', ->
           $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
           $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
           up.hello($form)
-          $form.submit() # sorry
+
+          Trigger.submit($form) # sorry
 
           next =>
             params = @lastRequest().data()
@@ -757,7 +758,8 @@ describe 'up.form', ->
           $form = affix('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           up.hello($form)
-          $form.submit() # sorry
+
+          Trigger.submit($form) # sorry
 
           next =>
             params = @lastRequest().data()
@@ -772,7 +774,7 @@ describe 'up.form', ->
         up.hello($field)
         submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
         $field.val('new-value')
-        $field.trigger('change')
+        Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
 
       it 'marks the field with an .up-active class while the form is submitting', asyncSpec (next) ->
@@ -782,7 +784,7 @@ describe 'up.form', ->
         submission = u.newDeferred()
         submitSpy = up.form.knife.mock('submit').and.returnValue(submission)
         $field.val('new-value')
-        $field.trigger('change')
+        Trigger.change($field)
         next =>
           expect(submitSpy).toHaveBeenCalled()
           expect($field).toHaveClass('up-active')
@@ -799,7 +801,7 @@ describe 'up.form', ->
         up.hello($form)
         submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
         $field.val('new-value')
-        $field.trigger('change')
+        Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
 
       describe 'with [up-delay] modifier', ->
@@ -810,9 +812,9 @@ describe 'up.form', ->
           up.hello($form)
           submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
           $field.val('new-value-1')
-          $field.trigger('change')
+          Trigger.change($field)
           $field.val('new-value-2')
-          $field.trigger('change')
+          Trigger.change($field)
 
           next =>
             expect(submitSpy.calls.count()).toBe(0)
@@ -831,7 +833,7 @@ describe 'up.form', ->
         $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
         up.hello($form)
         $field.val('new-value')
-        $field.trigger('change')
+        Trigger.change($field)
 
         next =>
           expect(window.observeCallbackSpy).toHaveBeenCalledWith('new-value', $field.get(0))
@@ -844,7 +846,7 @@ describe 'up.form', ->
           $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="50"]')
           up.hello($form)
           $field.val('new-value')
-          $field.trigger('change')
+          Trigger.change($field)
 
           next => expect(window.observeCallbackSpy).not.toHaveBeenCalled()
           next.after 80, => expect(window.observeCallbackSpy).toHaveBeenCalled()
@@ -861,13 +863,13 @@ describe 'up.form', ->
         $field2 = $form.affix('input[val="field2-old-value"]')
         up.hello($form)
         $field1.val('field1-new-value')
-        $field1.trigger('change')
+        Trigger.change($field1)
 
         next =>
           expect(window.observeCallbackSpy.calls.allArgs()).toEqual [['field1-new-value', $field1.get(0)]]
 
           $field2.val('field2-new-value')
-          $field2.trigger('change')
+          Trigger.change($field2)
 
         next =>
           expect(window.observeCallbackSpy.calls.allArgs()).toEqual [['field1-new-value', $field1.get(0)], ['field2-new-value', $field2.get(0)]]
@@ -884,7 +886,8 @@ describe 'up.form', ->
               <input name="user" value="judy" up-validate=".field-group:has(&)">
             </div>
           """).appendTo($form)
-          $group.find('input').trigger('change')
+
+          Trigger.change($group.find('input'))
 
           next =>
             request = @lastRequest()
@@ -919,7 +922,7 @@ describe 'up.form', ->
               <input name="user" value="judy" up-validate=".field-group:has(&)">
             </div>
           """).appendTo($form)
-          $group.find('input').trigger('change')
+          Trigger.change($group.find('input'))
 
           next =>
             @respondWith """
@@ -951,7 +954,7 @@ describe 'up.form', ->
             </form>
           """
 
-          $('#registration input[name=password]').trigger('change')
+          Trigger.change $('#registration input[name=password]')
 
           next =>
             @respondWith """
@@ -992,7 +995,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$select.val('bar').change()
+            @$select.val('bar')
+            Trigger.change(@$select)
 
           next =>
             expect($target).toBeVisible()
@@ -1003,7 +1007,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeVisible()
-            @$select.val('bar').change()
+            @$select.val('bar')
+            Trigger.change(@$select)
 
           next =>
             expect($target).toBeHidden()
@@ -1014,7 +1019,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$select.val('bar').change()
+            @$select.val('bar')
+            Trigger.change(@$select)
 
           next =>
             expect($target).toBeVisible()
@@ -1025,7 +1031,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$select.val('bar').change()
+            @$select.val('bar')
+            Trigger.change(@$select)
 
           next =>
             expect($target).toBeVisible()
@@ -1036,7 +1043,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeVisible()
-            @$select.val('bar').change()
+            @$select.val('bar')
+            Trigger.change(@$select)
 
           next =>
             expect($target).toBeHidden()
@@ -1052,7 +1060,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$checkbox.prop('checked', true).change()
+            @$checkbox.prop('checked', true)
+            Trigger.change(@$checkbox)
 
           next =>
             expect($target).toBeVisible()
@@ -1063,7 +1072,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeVisible()
-            @$checkbox.prop('checked', true).change()
+            @$checkbox.prop('checked', true)
+            Trigger.change(@$checkbox)
 
           next =>
             expect($target).toBeHidden()
@@ -1074,7 +1084,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeVisible()
-            @$checkbox.prop('checked', true).change()
+            @$checkbox.prop('checked', true)
+            Trigger.change(@$checkbox)
 
           next =>
             expect($target).toBeHidden()
@@ -1085,7 +1096,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$checkbox.prop('checked', true).change()
+            @$checkbox.prop('checked', true)
+            Trigger.change(@$checkbox)
 
           next =>
             expect($target).toBeVisible()
@@ -1096,7 +1108,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$checkbox.prop('checked', true).change()
+            @$checkbox.prop('checked', true)
+            Trigger.change(@$checkbox)
 
           next =>
             expect($target).toBeVisible()
@@ -1116,7 +1129,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$barButton.prop('checked', true).change()
+            @$barButton.prop('checked', true)
+            Trigger.change(@$barButton)
 
           next =>
             expect($target).toBeVisible()
@@ -1127,7 +1141,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeVisible()
-            @$barButton.prop('checked', true).change()
+            @$barButton.prop('checked', true)
+            Trigger.change(@$barButton)
 
           next =>
             expect($target).toBeHidden()
@@ -1138,7 +1153,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$barButton.prop('checked', true).change()
+            @$barButton.prop('checked', true)
+            Trigger.change(@$barButton)
 
           next =>
             expect($target).toBeVisible()
@@ -1149,11 +1165,13 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$blankButton.prop('checked', true).change()
+            @$blankButton.prop('checked', true)
+            Trigger.change(@$blankButton)
 
           next =>
             expect($target).toBeHidden()
-            @$barButton.prop('checked', true).change()
+            @$barButton.prop('checked', true)
+            Trigger.change(@$barButton)
 
           next =>
             expect($target).toBeVisible()
@@ -1164,11 +1182,13 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeVisible()
-            @$blankButton.prop('checked', true).change()
+            @$blankButton.prop('checked', true)
+            Trigger.change(@$blankButton)
 
           next =>
             expect($target).toBeVisible()
-            @$barButton.prop('checked', true).change()
+            @$barButton.prop('checked', true)
+            Trigger.change(@$barButton)
 
           next =>
             expect($target).toBeHidden()
@@ -1179,7 +1199,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$blankButton.prop('checked', true).change()
+            @$blankButton.prop('checked', true)
+            Trigger.change(@$blankButton)
 
           next =>
             expect($target).toBeVisible()
@@ -1190,7 +1211,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeVisible()
-            @$blankButton.prop('checked', true).change()
+            @$blankButton.prop('checked', true)
+            Trigger.change(@$blankButton)
 
           next =>
             expect($target).toBeHidden()
@@ -1206,7 +1228,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$textInput.val('bar').change()
+            @$textInput.val('bar')
+            Trigger.change(@$textInput)
 
           next =>
             expect($target).toBeVisible()
@@ -1217,7 +1240,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeVisible()
-            @$textInput.val('bar').change()
+            @$textInput.val('bar')
+            Trigger.change(@$textInput)
 
           next =>
             expect($target).toBeHidden()
@@ -1228,7 +1252,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$textInput.val('bar').change()
+            @$textInput.val('bar')
+            Trigger.change(@$textInput)
 
           next =>
             expect($target).toBeVisible()
@@ -1239,7 +1264,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
-            @$textInput.val('bar').change()
+            @$textInput.val('bar')
+            Trigger.change(@$textInput)
 
           next =>
             expect($target).toBeVisible()
@@ -1250,7 +1276,8 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeVisible()
-            @$textInput.val('bar').change()
+            @$textInput.val('bar')
+            Trigger.change(@$textInput)
 
           next =>
             expect($target).toBeHidden()
@@ -1274,7 +1301,8 @@ describe 'up.form', ->
 
           next =>
             # Check that the new element will notify subsequent changes
-            $select.val('bar').change()
+            $select.val('bar')
+            Trigger.change($select)
             expect(@$target).toBeVisible()
 
         it "doesn't re-switch targets that were part of the original compile run", asyncSpec (next) ->
