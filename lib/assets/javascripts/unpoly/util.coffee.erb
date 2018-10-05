@@ -1188,8 +1188,8 @@ up.util = (($) ->
   @internal
   ###
   escapePressed = (event) ->
-    console.debug("escapePressed(%o), keyCode is %o", event, event.keyCode)
-    event.keyCode == 27
+    key = event.key
+    key == 'Escape' || key == 'Esc'
 
   ###**
   Returns whether the given array or string contains the given element or substring.

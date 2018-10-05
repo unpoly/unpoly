@@ -641,7 +641,6 @@ up.dom = (($) ->
   ###
   hello = (selectorOrElement, options) ->
     $element = $(selectorOrElement)
-    console.debug("hello(%o)", $element[0])
     options = u.options(options, keepPlans: [])
     keptElements = []
     for plan in options.keepPlans
@@ -667,7 +666,6 @@ up.dom = (($) ->
   @stable
   ###
   emitFragmentInserted = ($element, options) ->
-    console.debug('-- emitting up:fragment:inserted on %o', $element[0])
     up.emit 'up:fragment:inserted',
       $element: $element
       message: ['Inserted fragment %o', $element.get(0)]

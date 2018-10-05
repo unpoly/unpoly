@@ -5,7 +5,6 @@ describe 'up.bus', ->
     describe 'up.on', ->
 
       it 'registers a delagating event listener to the document body, which passes the $element as a second argument to the listener', asyncSpec (next) ->
-        console.debug('--------------------------- spec start ---------------------')
         affix('.container .child')
         observeClass = jasmine.createSpy()
         up.on 'click', '.child', (event, element) ->
@@ -17,6 +16,21 @@ describe 'up.bus', ->
         next =>
           expect(observeClass).not.toHaveBeenCalledWith('container')
           expect(observeClass).toHaveBeenCalledWith('child')
+
+      it 'calls the event listener if the event was triggered on a child of the requested selector', asyncSpec (next) ->
+        $container = affix('.container')
+        $child = $container.affix('.child')
+        listener = jasmine.createSpy()
+        up.on 'click', '.container', listener
+
+        Trigger.click($('.child'))
+
+        next =>
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.any(MouseEvent),
+            $container[0],
+            {}
+          )
 
       it 'returns a method that unregisters the event listener when called', asyncSpec (next) ->
         $child = affix('.child')

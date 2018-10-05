@@ -82,19 +82,25 @@ up.bus = (($) ->
 
   upListenerToNativeListener = (upListener, selector) ->
     (event) ->
-      target = event.target
+      # 1. Since we're listing on `document`, event.currentTarget is now `document`.
+      # 2. event.target is the element that received an event, which might be a
+      #    child of `selector`.
+      # 3. There is only a single event bubbling up the DOM, so we are only called once.
 
-      if !selector || q.matches(event.target, selector)
-        args = [event, target]
+      element = event.target
+      element = q.closest(element, selector) if selector
+
+      if element
+        args = [event, element]
         # Do not retrieve and parse [up-data] unless the listener function
         # expects a third argument. Note that we must pass data for an argument
         # count of 0, since then the function might take varargs.
         expectedArgCount = upListener.length
         unless expectedArgCount == 1 || expectedArgCount == 2
-          data = up.syntax.data(target)
+          data = up.syntax.data(element)
           args.push(data)
 
-        upListener.apply(target, args)
+        upListener.apply(element, args)
 
   ###**
   Converts an argument list for `up.on()` to an argument list for `jQuery.on`.
@@ -262,8 +268,6 @@ up.bus = (($) ->
     # clean up after ourselves during a `reset`
     rememberUpDescription(upDescription)
 
-    console.debug("-- Adding event listener: %o", nativeDescription)
-
     document.addEventListener(nativeDescription...)
 
     # Return destructor
@@ -349,7 +353,6 @@ up.bus = (($) ->
     $target = $(eventProps.target || eventProps.element || u.presence(eventProps.$element) || document)
     if $target.length == 0
       debugger
-    console.debug("*** emit on $target %o", $target.get(0), eventProps)
     logEmission(eventName, eventProps)
     q.triggerCustom($target[0], eventName, eventProps)
 

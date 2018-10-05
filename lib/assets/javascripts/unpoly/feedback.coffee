@@ -119,7 +119,6 @@ up.feedback = do ->
     updateCurrentClassForLinks(sections)
 
   updateNavigationSectionsInNewFragment = (fragment) ->
-    console.debug("updateNavigationSectionsInNewFragment(%o)", fragment)
     if q.closest(fragment, navSelector())
       # If the new fragment is an [up-nav], or if the new fragment is a child of an [up-nav],
       # all links in the new fragment are considered sections that we need to update.

@@ -585,8 +585,7 @@ describe 'up.modal', ->
         next =>
           expect(up.modal.isOpen()).toBe(true)
 
-          escapeEvent = $.Event('keydown', keyCode: 27)
-          $('body').trigger(escapeEvent)
+          Trigger.escapeSequence(document.body)
 
         next =>
           expect(up.modal.isOpen()).toBe(false)
@@ -712,29 +711,7 @@ describe 'up.modal', ->
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
 
         next =>
-          escapeEvent = document.createEvent('KeyboardEvent')
-          escapeEvent.initKeyboardEvent(
-            'keydown', # type
-            true,      # canBubble
-            true,      # cancelable
-          )
-
-          escapeEvent.altKey = false
-          # escapeEvent.char = '???'
-          escapeEvent.charCode = 27
-          escapeEvent.ctrlKey = false
-          escapeEvent.key = 'Escape'
-          escapeEvent.keyCode = 27
-          escapeEvent.metaKey = 27
-          escapeEvent.repeat = false
-          escapeEvent.shiftKey = false
-          escapeEvent.which = 27
-          escapeEvent.foooooooooo = 'baaaaaaaaaaaaaaaaaaaaaaar'
-
-          console.debug("========== dispatching keyboard event %o", escapeEvent)
-          document.body.dispatchEvent(escapeEvent)
-
-          # initKeyboardEvent(typeArg: string, canBubbleArg: boolean, cancelableArg: boolean, viewArg: Window, keyArg: string, locationArg: number, modifiersListArg: string, repeat: boolean, locale: string): void;
+          Trigger.escapeSequence(document.body)
 
         next =>
           expect(wasClosed).toBe(true)
@@ -776,8 +753,7 @@ describe 'up.modal', ->
           up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
 
           next =>
-            escapeEvent = $.Event('keydown', keyCode: 27)
-            $('body').trigger(escapeEvent)
+            Trigger.escapeSequence(document.body)
 
           next =>
             expect(up.modal.isOpen()).toBe(true)

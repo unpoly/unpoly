@@ -41,6 +41,16 @@
     $element = $(element)
     $element.focus()
 
+  escapeSequence = (element, options) ->
+    options = u.options(options,
+      key: 'Escape'
+      cancelable: true,
+      bubbles: true
+    )
+    for type in ['keydown', 'keypress', 'keyup']
+      event = new KeyboardEvent(type, options)
+      element.dispatchEvent(event)
+
   clickSequence = (element, options) ->
     $element = $(element)
     mouseover($element, options)
@@ -111,6 +121,7 @@
   clickSequence: clickSequence
   hoverSequence: hoverSequence
   unhoverSequence: unhoverSequence
+  escapeSequence: escapeSequence
   createMouseEvent: createMouseEvent
   
 )()
