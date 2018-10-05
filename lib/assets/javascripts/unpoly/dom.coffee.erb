@@ -438,7 +438,8 @@ up.dom = (($) ->
       else
         $old.append($wrapper)
 
-      hello($wrapper.children(), options)
+      for child in $wrapper.children()
+        hello(child, options)
 
       # Reveal element that was being prepended/appended.
       # Since we will animate (not morph) it's OK to allow animation of scrolling
@@ -848,6 +849,7 @@ up.dom = (($) ->
       $parent = $element.parent()
       up.syntax.clean($element)
       $element.remove()
+      console.debug("!!! emitFragmentDestroyed will be called on %o", $parent[0])
       emitFragmentDestroyed($element, { $parent })
 
     animate().then(wipe)

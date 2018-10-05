@@ -17,6 +17,7 @@ up.query = do ->
     s(selector).subtree(root)
 
   closest = (element, selector) ->
+    assertIsElement(element)
     s(selector).closest(element)
 
   matches = (element, selector) ->
@@ -49,6 +50,10 @@ up.query = do ->
     u.assign(event, props)
     element.dispatchEvent(event)
     return event
+
+  assertIsElement = (element) ->
+    unless u.isElement(element)
+      up.fail('Not an element: %o', element)
 
   first: first
   all: all

@@ -1606,27 +1606,6 @@ describe 'up.dom', ->
         next ->
           expect($element).toBeDetached()
 
-      it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', asyncSpec (next) ->
-        $parent = affix('.parent')
-        $element = $parent.affix('.element')
-        expect($element).toBeAttached()
-
-        listener = jasmine.createSpy('event listener')
-
-        $parent.on('up:fragment:destroyed', listener)
-
-        destroyDone = up.destroy($element, animation: 'fade-out', duration: 30)
-
-        next ->
-          expect(listener).not.toHaveBeenCalled()
-          expect($element).toBeAttached()
-
-          next.await(destroyDone)
-
-        next ->
-          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining($element: $element, $parent: $parent))
-          expect($element).toBeDetached()
-
       it 'emits an up:fragment:destroy event while the element is still in the DOM', (done) ->
         $element = affix('.element.v1').text('v1')
         expect($element).toBeAttached()
@@ -1640,6 +1619,7 @@ describe 'up.dom', ->
           expect(listener).toHaveBeenCalledWith(false)
           done()
 
+      # up.extract
       it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
         $parent = affix('.parent')
         $element = $parent.affix('.element.v1').text('v1')
@@ -1828,6 +1808,7 @@ describe 'up.dom', ->
             expect(listener).toHaveBeenCalledWith(false)
             done()
 
+        # extract with { transition } option
         it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
           $parent = affix('.parent')
           $element = $parent.affix('.element.v1').text('v1')
@@ -2065,7 +2046,7 @@ describe 'up.dom', ->
 
             next =>
               expect(insertedListener).not.toHaveBeenCalled()
-              expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.keeper'), jasmine.anything())
+              expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.keeper')[0], jasmine.anything())
 
         it "removes an [up-keep] element if no matching element is found in the response", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
@@ -2267,7 +2248,7 @@ describe 'up.dom', ->
 
         it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
           $keeper = affix('.keeper[up-keep]').text('version 1')
-          $keeper.on 'up:fragment:keep', (event) ->
+          $keeper[0].addEventListener 'up:fragment:keep', (event) ->
             event.preventDefault() if event.$newElement.text() == 'version 3'
 
           next => up.extract '.keeper', "<div class='keeper' up-keep>version 2</div>"
@@ -2293,8 +2274,8 @@ describe 'up.dom', ->
             """
 
           next =>
-            expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container'), jasmine.anything())
-            expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper'), jasmine.anything())
+            expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container')[0], jasmine.anything())
+            expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper')[0], jasmine.anything())
 
         it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
@@ -2489,6 +2470,7 @@ describe 'up.dom', ->
         next ->
           expect($element).toBeDetached()
 
+      # up.destroy
       it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', asyncSpec (next) ->
         $parent = affix('.parent')
         $element = $parent.affix('.element')
@@ -2507,7 +2489,7 @@ describe 'up.dom', ->
           next.await(destroyDone)
 
         next ->
-          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining($element: $element, $parent: $parent))
+          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining(target: $parent[0]))
           expect($element).toBeDetached()
 
     describe 'up.reload', ->

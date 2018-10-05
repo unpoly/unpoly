@@ -32,6 +32,19 @@ describe 'up.bus', ->
             {}
           )
 
+      it 'passes the event target as the second argument if no selector was passed to up.on()', asyncSpec (next) ->
+        $element = affix('.element')
+        listener = jasmine.createSpy()
+        up.on 'click', listener
+        Trigger.click($element)
+
+        next =>
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.any(MouseEvent),
+            $element[0],
+            {}
+          )
+
       it 'returns a method that unregisters the event listener when called', asyncSpec (next) ->
         $child = affix('.child')
         clickSpy = jasmine.createSpy()
