@@ -181,7 +181,7 @@ describe 'up.popup', ->
       it 'opens the clicked link in a popup', asyncSpec (next) ->
         @stubAttach()
         Trigger.click(@$link)
-        next => expect(@attachSpy).toHaveBeenCalledWith(@$link, {})
+        next => expect(@attachSpy).toHaveBeenCalledWith(@$link[0], {})
 
       # IE does not call JavaScript and always performs the default action on right clicks
       unless AgentDetector.isIE() || AgentDetector.isEdge()
@@ -242,7 +242,7 @@ describe 'up.popup', ->
 
         it 'opens the modal on mousedown (instead of on click)', asyncSpec (next) ->
           Trigger.mousedown(@$link)
-          next => expect(@attachSpy.calls.mostRecent().args[0]).toEqual(@$link)
+          next => expect(@attachSpy.calls.mostRecent().args[0]).toEqual(@$link[0])
 
         it 'does nothing on mouseup', asyncSpec (next) ->
           Trigger.mouseup(@$link)

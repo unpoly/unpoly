@@ -45,6 +45,17 @@ describe 'up.bus', ->
             {}
           )
 
+      it 'registers the listener to multiple, space-separated events', ->
+        listener = jasmine.createSpy()
+
+        up.on 'foo bar', listener
+
+        up.emit('foo')
+        expect(listener.calls.count()).toEqual(1)
+
+        up.emit('bar')
+        expect(listener.calls.count()).toEqual(2)
+
       it 'returns a method that unregisters the event listener when called', asyncSpec (next) ->
         $child = affix('.child')
         clickSpy = jasmine.createSpy()

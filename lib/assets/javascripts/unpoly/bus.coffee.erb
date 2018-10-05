@@ -59,27 +59,6 @@ up.bus = (($) ->
   # A hash mapping oldEventName => newEventName
   renamedEvents = {}
 
-  ###**
-  Convert an Unpoly style listener (second argument is the event target
-  as a jQuery collection) to a vanilla jQuery listener
-
-  @function upListenerToJqueryListener
-  @internal
-  ###
-  upListenerToJqueryListener = (upListener) ->
-    (event) ->
-      $me = event.$element || $(this)
-      args = [event, $me]
-
-      # Do not retrieve and parse [up-data] unless the listener function
-      # expects a third argument. Note that we must pass data for an argument
-      # count of 0, since then the function might take varargs.
-      expectedArgCount = upListener.length
-      unless expectedArgCount == 1 || expectedArgCount == 2
-        args.push(up.syntax.data($me))
-
-      upListener.apply($me.get(0), args)
-
   upListenerToNativeListener = (upListener, selector) ->
     (event) ->
       # 1. Since we're listing on `document`, event.currentTarget is now `document`.
@@ -103,36 +82,12 @@ up.bus = (($) ->
         upListener.apply(element, args)
 
   ###**
-  Converts an argument list for `up.on()` to an argument list for `jQuery.on`.
+  Converts an argument list for `up.on()` to an argument list for `Element#addEventListener`.
   This involves rewriting the listener signature in the last argument slot.
 
-  @function upDescriptionToJqueryDescription
+  @function upDescriptionTonNativeDescription
   @internal
   ###
-  upDescriptionToJqueryDescription = (upDescription, isNew) ->
-    jqueryDescription = u.copy(upDescription)
-
-    # Prefer to rename events in the copied jQuery description instead of
-    # changing the original up description.
-    jqueryDescription[0] = fixRenamedEvents(jqueryDescription[0])
-
-    # We remove the listener function from the end of the description.
-    # We will re-push it to the description at the end.
-    upListener = jqueryDescription.pop()
-    jqueryListener = undefined
-    if isNew
-      jqueryListener = upListenerToJqueryListener(upListener)
-      upListener._asJqueryListener = jqueryListener
-      if upListener._descriptionNumber
-        up.fail('up.on(): The callback %o cannot be registered more than once')
-      upListener._descriptionNumber = ++nextUpDescriptionNumber
-    else
-      jqueryListener = upListener._asJqueryListener
-      jqueryListener or up.fail('up.off(): The callback %o was never registered through up.on()', upListener)
-    jqueryDescription.push(jqueryListener)
-    jqueryDescription
-
-
   upDescriptionToNativeDescription = (upDescription, isNew) ->
     upDescription = u.copy(upDescription)
 
@@ -152,7 +107,7 @@ up.bus = (($) ->
       nativeListener = upListener._asNativeListener
       nativeListener or up.fail('up.off(): The callback %o was never registered through up.on()', upListener)
 
-    u.compact [eventNames, nativeListener]
+    [eventNames, nativeListener]
 
 
   renameEvents = (eventNames) ->
@@ -262,13 +217,14 @@ up.bus = (($) ->
     return (->) unless up.browser.isSupported()
 
     # Convert the args for up.on to an argument list as expected by #addEventListener
-    nativeDescription = upDescriptionToNativeDescription(upDescription, true)
+    [eventNames, nativeListener] = upDescriptionToNativeDescription(upDescription, true)
 
     # Remember the descriptions we registered, so we can
     # clean up after ourselves during a `reset`
     rememberUpDescription(upDescription)
 
-    document.addEventListener(nativeDescription...)
+    for eventName in u.splitValues(eventNames)
+      document.addEventListener(eventName, nativeListener)
 
     # Return destructor
     -> unbind(upDescription...)
@@ -294,9 +250,11 @@ up.bus = (($) ->
   @stable
   ###
   unbind = (upDescription...) ->
-    nativeDescription = upDescriptionToNativeDescription(upDescription, false)
+    [eventNames, nativeListener] = upDescriptionToNativeDescription(upDescription, false)
     forgetUpDescription(upDescription)
-    document.removeEventListener(nativeDescription...)
+
+    for eventName in u.splitValues(eventNames)
+      document.removeEventListener(eventName, nativeListener)
 
   rememberUpDescription = (upDescription) ->
     number = upDescriptionNumber(upDescription)
