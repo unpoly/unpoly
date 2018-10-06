@@ -42,7 +42,7 @@ describe 'up.rails', ->
             expect($element.attr('up-method')).toEqual('put')
 
           it 'transforms an element that becomes followable through a user macro like [content-link]', ->
-            up.macro '[user-make-followable]', ($element) -> $element.attr('up-follow', '')
+            up.$macro '[user-make-followable]', ($element) -> $element.attr('up-follow', '')
             $element = affix('a[user-make-followable][data-method="put"]')
             up.hello($element)
             expect($element.attr('data-method')).toBeUndefined()

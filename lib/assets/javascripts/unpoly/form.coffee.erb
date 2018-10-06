@@ -848,13 +848,13 @@ up.form = (($) ->
     A space-separated list of input values for which this element should be hidden.
   @stable
   ###
-  up.compiler '[up-switch]', ($field) ->
+  up.$compiler '[up-switch]', ($field) ->
     switchTargets($field)
 
   up.on 'change', '[up-switch]', (event, field) ->
     switchTargets(field)
 
-  up.compiler '[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', ($element) ->
+  up.$compiler '[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', ($element) ->
     switchTarget($element)
 
   ###**
@@ -927,7 +927,7 @@ up.form = (($) ->
     The number of miliseconds to wait after a change before the code is run.
   @stable
   ###
-  up.compiler '[up-observe]', ($formOrField) -> observe($formOrField)
+  up.$compiler '[up-observe]', ($formOrField) -> observe($formOrField)
 
   ###**
   [Observes](/up.observe) this form field and submits the form when its value changes.
@@ -974,9 +974,9 @@ up.form = (($) ->
     The number of miliseconds to wait after a change before the form is submitted.
   @stable
   ###
-  up.compiler '[up-autosubmit]', ($formOrField) -> autosubmit($formOrField)
+  up.$compiler '[up-autosubmit]', ($formOrField) -> autosubmit($formOrField)
 
-  up.compiler '[autofocus]', { batch: true }, ($input) -> $input.last().focus()
+  up.$compiler '[autofocus]', { batch: true }, ($input) -> $input.last().focus()
 
   up.on 'up:framework:reset', reset
 

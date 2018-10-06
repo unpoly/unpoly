@@ -148,7 +148,6 @@ up.history = (($) ->
   manipulate = (method, url) ->
     if up.browser.canPushState() && config.enabled
       state = buildState()
-      console.debug("--- calling window.history[%] %o %o", method, state, url)
       window.history[method](state, '', url)
       observeNewUrl(currentUrl())
       true
@@ -247,7 +246,7 @@ up.history = (($) ->
   @selector a[up-back]
   @stable
   ###
-  up.macro 'a[up-back], [up-href][up-back]', ($link) ->
+  up.$macro 'a[up-back], [up-href][up-back]', ($link) ->
     if u.isPresent(previousUrl)
       u.setMissingAttrs $link,
         'up-href': previousUrl,

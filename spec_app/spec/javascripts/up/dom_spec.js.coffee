@@ -1638,7 +1638,7 @@ describe 'up.dom', ->
 
         it 'calls destructors on the old element', asyncSpec (next) ->
           destructor = jasmine.createSpy('destructor')
-          up.compiler '.container', ($element) ->
+          up.$compiler '.container', ($element) ->
             -> destructor($element.text())
           $container = affix('.container').text('old text')
           up.hello($container)
@@ -1650,7 +1650,7 @@ describe 'up.dom', ->
 
         it 'calls destructors on the old element after a { transition }', (done) ->
           destructor = jasmine.createSpy('destructor')
-          up.compiler '.container', ($element) ->
+          up.$compiler '.container', ($element) ->
             -> destructor($element.text())
           $container = affix('.container').text('old text')
           up.hello($container)
@@ -1669,7 +1669,7 @@ describe 'up.dom', ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
           up.util.knife.mock('isSingletonElement').and.callFake ($element) -> $element.is('.container')
           destructor = jasmine.createSpy('destructor')
-          up.compiler '.container', -> destructor
+          up.$compiler '.container', -> destructor
           $container = affix('.container')
           up.hello($container)
           up.extract('.container', '<div class="container">new text</div>')
@@ -1680,7 +1680,7 @@ describe 'up.dom', ->
 
         it 'marks the old element as .up-destroying before destructors', (done) ->
           destructor = jasmine.createSpy('destructor')
-          up.compiler '.container', ($element) ->
+          up.$compiler '.container', ($element) ->
             -> destructor($element.text(), $element.is('.up-destroying'))
           $container = affix('.container').text('old text')
           up.hello($container)
@@ -1694,7 +1694,7 @@ describe 'up.dom', ->
 
         it 'marks the old element as .up-destroying before destructors after a { transition }', (done) ->
           destructor = jasmine.createSpy('destructor')
-          up.compiler '.container', ($element) ->
+          up.$compiler '.container', ($element) ->
             -> destructor($element.text(), $element.is('.up-destroying'))
           $container = affix('.container').text('old text')
           up.hello($container)
@@ -1708,7 +1708,7 @@ describe 'up.dom', ->
 
         it 'calls destructors while the element is still attached to the DOM, so destructors see ancestry and events bubble up', asyncSpec (next) ->
           spy = jasmine.createSpy('parent spy')
-          up.compiler '.element', ($element) ->
+          up.$compiler '.element', ($element) ->
             return -> spy($element.text(), $element.parent())
 
           $parent = affix('.parent')
@@ -1722,7 +1722,7 @@ describe 'up.dom', ->
 
         it 'calls destructors while the element is still attached to the DOM when also using a { transition }', (done) ->
           spy = jasmine.createSpy('parent spy')
-          up.compiler '.element', ($element) ->
+          up.$compiler '.element', ($element) ->
             return ->
               # We must seek .parent in our ancestry, because our direct parent() is an .up-bounds container
               spy($element.text(), $element.closest('.parent'))
@@ -1872,7 +1872,7 @@ describe 'up.dom', ->
           $parent = affix('.parent')
           $element = $parent.affix('.element').text('old text')
           spy = jasmine.createSpy('parent spy')
-          up.compiler '.element', ($element) -> spy($element.text(), $element.parent())
+          up.$compiler '.element', ($element) -> spy($element.text(), $element.parent())
           up.extract '.element', '<div class="element">new text</div>', transition: 'cross-fade', duration: 50
 
           next =>
@@ -1909,7 +1909,7 @@ describe 'up.dom', ->
               up.morph($old, $new, 'cross-fade', options)
 
             compiler = jasmine.createSpy('compiler')
-            up.compiler '.element', compiler
+            up.$compiler '.element', compiler
 
             extractDone = up.extract('.element', '<div class="element">new content</div>', transition: transition, duration: 50, easing: 'linear')
 
@@ -1924,7 +1924,7 @@ describe 'up.dom', ->
               up.morph($old, $new, 'cross-fade', options)
 
             destructor = jasmine.createSpy('destructor')
-            up.compiler '.element', (element) ->
+            up.$compiler '.element', (element) ->
               return destructor
 
             up.hello($element)
@@ -2051,7 +2051,7 @@ describe 'up.dom', ->
         it "removes an [up-keep] element if no matching element is found in the response", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
           barDestructor = jasmine.createSpy()
-          up.compiler '.bar', ($bar) ->
+          up.$compiler '.bar', ($bar) ->
             text = $bar.text()
             barCompiler(text)
             return -> barDestructor(text)
@@ -2082,7 +2082,7 @@ describe 'up.dom', ->
         it "updates an element if a matching element is found in the response, but that other element is no longer [up-keep]", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
           barDestructor = jasmine.createSpy()
-          up.compiler '.bar', ($bar) ->
+          up.$compiler '.bar', ($bar) ->
             text = $bar.text()
             barCompiler(text)
             return -> barDestructor(text)
@@ -2150,7 +2150,7 @@ describe 'up.dom', ->
 
         it 'does not compile a kept element a second time', asyncSpec (next) ->
           compiler = jasmine.createSpy('compiler')
-          up.compiler('.keeper', compiler)
+          up.$compiler('.keeper', compiler)
           $container = affix('.container')
           $container.html """
             <div class="keeper" up-keep>old-text</div>
@@ -2171,7 +2171,7 @@ describe 'up.dom', ->
 
         it 'does not lose jQuery event handlers on a kept element (bugfix)', asyncSpec (next) ->
           handler = jasmine.createSpy('event handler')
-          up.compiler '.keeper', ($keeper) ->
+          up.$compiler '.keeper', ($keeper) ->
             $keeper.on 'click', handler
 
           $container = affix('.container')
@@ -2197,7 +2197,7 @@ describe 'up.dom', ->
 
         it 'does not call destructors on a kept alement', asyncSpec (next) ->
           destructor = jasmine.createSpy('destructor')
-          up.compiler '.keeper', ($keeper) ->
+          up.$compiler '.keeper', ($keeper) ->
             return destructor
 
           $container = affix('.container')
@@ -2220,7 +2220,7 @@ describe 'up.dom', ->
         it 'calls destructors when a kept element is eventually removed from the DOM', asyncSpec (next) ->
           handler = jasmine.createSpy('event handler')
           destructor = jasmine.createSpy('destructor')
-          up.compiler '.keeper', ($keeper) ->
+          up.$compiler '.keeper', ($keeper) ->
             return destructor
 
           $container = affix('.container')
@@ -2381,7 +2381,7 @@ describe 'up.dom', ->
           expect($element).toBeDetached()
 
       it 'calls destructors for custom elements', (done) ->
-        up.compiler('.element', ($element) -> destructor)
+        up.$compiler('.element', ($element) -> destructor)
         destructor = jasmine.createSpy('destructor')
         up.hello(affix('.element'))
         up.destroy('.element').then ->
@@ -2390,7 +2390,7 @@ describe 'up.dom', ->
 
       it 'marks the old element as .up-destroying before destructors', (done) ->
         destructor = jasmine.createSpy('destructor')
-        up.compiler '.container', ($element) ->
+        up.$compiler '.container', ($element) ->
           -> destructor($element.text(), $element.is('.up-destroying'))
         $container = affix('.container').text('old text')
         up.hello($container)
@@ -2403,7 +2403,7 @@ describe 'up.dom', ->
 
       it 'marks the old element as .up-destroying before destructors after an { animation }', (done) ->
         destructor = jasmine.createSpy('destructor')
-        up.compiler '.container', ($element) ->
+        up.$compiler '.container', ($element) ->
           -> destructor($element.text(), $element.is('.up-destroying'))
         $container = affix('.container').text('old text')
         up.hello($container)
@@ -2416,7 +2416,7 @@ describe 'up.dom', ->
 
       it 'waits until an { animation } is done before calling destructors', asyncSpec (next) ->
         destructor = jasmine.createSpy('destructor')
-        up.compiler '.container', ($element) ->
+        up.$compiler '.container', ($element) ->
           -> destructor($element.text())
         $container = affix('.container').text('old text')
         up.hello($container)

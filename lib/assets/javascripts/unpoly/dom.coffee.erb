@@ -849,7 +849,6 @@ up.dom = (($) ->
       $parent = $element.parent()
       up.syntax.clean($element)
       $element.remove()
-      console.debug("!!! emitFragmentDestroyed will be called on %o", $parent[0])
       emitFragmentDestroyed($element, { $parent })
 
     animate().then(wipe)

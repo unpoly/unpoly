@@ -58,7 +58,7 @@ describe 'up.history', ->
         constructorSpy = jasmine.createSpy('constructor')
         destructorSpy = jasmine.createSpy('destructor')
 
-        up.compiler '.example', ($example) ->
+        up.$compiler '.example', ($example) ->
           constructorSpy()
           return destructorSpy
 

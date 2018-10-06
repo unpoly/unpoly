@@ -15,7 +15,7 @@ up.rails = (($) ->
     dataAttribute = "data-#{feature}"
     upAttribute = "up-#{feature}"
 
-    up.macro "[#{dataAttribute}]", ($element) ->
+    up.$macro "[#{dataAttribute}]", ($element) ->
       if isRails() && up.link.isFollowable($element)
         replacement = {}
         replacement[upAttribute] = $element.attr(dataAttribute)

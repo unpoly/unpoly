@@ -38,7 +38,9 @@ class up.CompilePass
         $matches.attr('up-keep', value)
 
   compileOneElement: (compiler, $element) ->
-    compileArgs = [$element]
+    element = $element[0]
+    elementArg = if compiler.jQuery then $element else element
+    compileArgs = [elementArg]
     # Do not retrieve and parse [up-data] unless the compiler function
     # expects a second argument. Note that we must pass data for an argument
     # count of 0, since then the function might take varargs.
@@ -46,21 +48,23 @@ class up.CompilePass
       data = up.syntax.data($element)
       compileArgs.push(data)
 
-    result = compiler.apply($element[0], compileArgs)
+    result = compiler.apply(element, compileArgs)
 
     if destructor = @normalizeDestructor(result)
       up.syntax.destructor($element, destructor)
 
   compileBatch: (compiler, $elements) ->
-    compileArgs = [$elements]
+    elements = $elements.get()
+    elementsArgs = if compiler.jQuery then $elements else elements
+    compileArgs = [elementsArgs]
     # Do not retrieve and parse [up-data] unless the compiler function
     # expects a second argument. Note that we must pass data for an argument
     # count of 0, since then the function might take varargs.
     unless compiler.length == 1
-      dataList = u.map($elements, up.syntax.data)
+      dataList = u.map(elements, up.syntax.data)
       compileArgs.push(dataList)
 
-    result = compiler.apply($elements.get(), compileArgs)
+    result = compiler.apply(elements, compileArgs)
 
     if @normalizeDestructor(result)
       up.fail('Compilers with { batch: true } cannot return destructors')

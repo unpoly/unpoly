@@ -238,7 +238,7 @@ up.tooltip = (($) ->
   @selector [up-tooltip-html]
   @stable
   ###
-  up.compiler '[up-tooltip], [up-tooltip-html]', ($opener) ->
+  up.$compiler '[up-tooltip], [up-tooltip-html]', ($opener) ->
     # Don't register these events on document since *every*
     # mouse move interaction  bubbles up to the document. 
     $opener.on('mouseenter', -> attachAsap($opener))

@@ -213,8 +213,13 @@ up.syntax = (($) ->
   @stable
   ###
   registerCompiler = (args...) ->
-    compiler = buildCompiler(args...)
-    insertCompiler(compilers, compiler)
+    compiler = buildCompiler(args)
+    return insertCompiler(compilers, compiler)
+
+  registerJQueryCompiler = (args...) ->
+    compiler = registerCompiler(args...)
+    compiler.jQuery = true
+    compiler
 
   ###**
   Registers a [compiler](/up.compiler) that is run before all other compilers.
@@ -258,26 +263,37 @@ up.syntax = (($) ->
   @stable
   ###
   registerMacro = (args...) ->
-    macro = buildCompiler(args...)
+    macro = buildCompiler(args)
     if isBooting
       macro.priority = detectSystemMacroPriority(macro.selector) ||
         up.fail('Unregistered priority for system macro %o', macro.selector)
-    insertCompiler(macros, macro)
+    return insertCompiler(macros, macro)
+
+  registerJQueryMacro = (args...) ->
+    macro = registerMacro(args...)
+    macro.jQuery = true
+    macro
 
   detectSystemMacroPriority = (macroSelector) ->
     for substr, priority of SYSTEM_MACRO_PRIORITIES
       if macroSelector.indexOf(substr) >= 0
         return priority
 
-  buildCompiler = (selector, args...) ->
+  parseCompilerArgs = (args) ->
+    selector = args.shift()
     callback = args.pop()
     options = u.extractOptions(args)
+    return [selector, options, callback]
+
+  buildCompiler = (args) ->
+    [selector, options, callback] = parseCompilerArgs(args)
     options = u.options(options,
       selector: selector,
       isSystem: isBooting,
       priority: 0,
       batch: false
-      keep: false
+      keep: false,
+      jQuery: false
     )
     return u.assign(callback, options)
 
@@ -286,6 +302,7 @@ up.syntax = (($) ->
     while (existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)
       index += 1
     queue.splice(index, 0, newCompiler)
+    return newCompiler
 
   ###**
   Applies all compilers on the given element and its descendants.
@@ -417,6 +434,8 @@ up.syntax = (($) ->
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   compiler: registerCompiler
   macro: registerMacro
+  $compiler: registerJQueryCompiler
+  $macro: registerJQueryMacro
   destructor: registerDestructor
   compile: compile
   clean: clean
@@ -425,5 +444,8 @@ up.syntax = (($) ->
 )(jQuery)
 
 up.compiler = up.syntax.compiler
+up.$compiler = up.syntax.$compiler
 up.destructor = up.syntax.destructor
 up.macro = up.syntax.macro
+up.$macro = up.syntax.$macro
+

@@ -644,7 +644,7 @@ up.proxy = (($) ->
     but will also make the interaction feel less instant.
   @stable
   ###
-  up.compiler 'a[up-preload], [up-href][up-preload]', ($link) ->
+  up.$compiler 'a[up-preload], [up-href][up-preload]', ($link) ->
     if up.link.isSafe($link)
       $link.on 'mouseenter touchstart', (event) ->
         # Don't do anything if we are hovering over the child of a link.
