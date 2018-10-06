@@ -55,6 +55,13 @@ up.query = do ->
     unless u.isElement(element)
       up.fail('Not an element: %o', element)
 
+  remove = (element) ->
+    if element.remove
+      element.remove()
+    # IE does not support Element#remove()
+    else if parent = element.parentNode
+      parent.removeChild(element)
+
   first: first
   all: all
   subtree: subtree
@@ -63,3 +70,5 @@ up.query = do ->
   ancestor: ancestor
   element: element
   triggerCustom: triggerCustom
+  remove: remove
+

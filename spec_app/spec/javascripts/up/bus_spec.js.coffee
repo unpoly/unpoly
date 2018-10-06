@@ -117,10 +117,13 @@ describe 'up.bus', ->
           $child = affix('.child')
           up.on 'click', '.child', (event) -> # no-op
 
-          Trigger.click($('.child'))
+          Trigger.click($child)
 
           next =>
             expect(parseDataSpy).not.toHaveBeenCalled()
+
+        it 'does not parse an [up-data] attribute if no selector was given', ->
+          throw "implement me"
 
         it 'does not parse an [up-data] attribute if the listener function only takes two arguments', asyncSpec (next) ->
           parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
@@ -128,7 +131,7 @@ describe 'up.bus', ->
           $child = affix('.child')
           up.on 'click', '.child', (event, $element) -> # no-op
 
-          Trigger.click($('.child'))
+          Trigger.click($child)
 
           next =>
             expect(parseDataSpy).not.toHaveBeenCalled()

@@ -1104,7 +1104,8 @@ up.util = (($) ->
   @function up.util.measure
   @internal
   ###
-  measure = ($element, opts) ->
+  measure = (element, opts) ->
+    $element = $(element)
     opts = newOptions(opts, relative: false, inner: false, includeMargin: false)
 
     if opts.relative
@@ -1206,12 +1207,16 @@ up.util = (($) ->
   @function up.util.castedAttr
   @internal
   ###
-  castedAttr = ($element, attribute) ->
-    value = $element.attr(attribute)
-    switch value
-      when 'false' then false
-      when 'true', '', attribute then true
-      else value # other strings, undefined, null, ...
+  castedAttr = (element, attribute) ->
+    if element = up.query.element(element)
+      value = element.getAttribute(attribute)
+      switch value
+        when 'false' then false
+        when 'true', '', attribute then true
+        else value # other strings, undefined, null, ...
+    else
+      console.warn('Someone called up.util.castedAttr(undefined). Why?')
+      undefined
 
   ###**
   @function up.util.jsonAttr

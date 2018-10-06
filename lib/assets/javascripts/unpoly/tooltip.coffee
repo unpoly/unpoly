@@ -29,9 +29,10 @@ The tooltip element is appended to the end of `<body>`.
 
 @class up.tooltip
 ###
-up.tooltip = (($) ->
+up.tooltip = do ->
   
   u = up.util
+  q = up.query
 
   ###**
   Configures defaults for future tooltips.
@@ -65,28 +66,28 @@ up.tooltip = (($) ->
 
   state = u.config
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
-    $anchor: null        # the element to which the tooltip is anchored
-    $tooltip: null       # the tooltiop element
+    anchor: null         # the element to which the tooltip is anchored
+    tooltip: null        # the tooltiop element
     position: null       # the position of the tooltip element relative to its anchor
 
   chain = new u.DivertibleChain()
 
   reset = ->
     # Destroy the tooltip container regardless whether it's currently in a closing animation
-    state.$tooltip?.remove()
+    q.remove(state.tooltip) if state.tooltip
     state.reset()
     chain.reset()
     config.reset()
 
   align = ->
     style = {}
-    tooltipBox = u.measure(state.$tooltip)
+    tooltipBox = u.measure(state.tooltip)
 
-    if u.isFixed(state.$anchor)
-      linkBox = state.$anchor.get(0).getBoundingClientRect()
+    if u.isFixed(state.anchor)
+      linkBox = state.anchor.getBoundingClientRect()
       style.position = 'fixed'
     else
-      linkBox = u.measure(state.$anchor)
+      linkBox = u.measure(state.anchor)
 
     switch state.position
       when 'top'
@@ -104,17 +105,17 @@ up.tooltip = (($) ->
       else
         up.fail("Unknown position option '%s'", state.position)
 
-    state.$tooltip.attr('up-position', state.position)
-    u.writeInlineStyle(state.$tooltip, style)
+    state.tooltip.setAttribute('up-position', state.position)
+    u.writeInlineStyle(state.tooltip, style)
 
   createElement = (options) ->
-    $element = u.$createElementFromSelector('.up-tooltip')
+    element = u.$createElementFromSelector('.up-tooltip')[0]
     if u.isGiven(options.text)
-      $element.text(options.text)
+      element.innerText = options.text
     else
-      $element.html(options.html)
-    $element.appendTo(document.body)
-    state.$tooltip = $element
+      element.innerHTML = options.html
+    document.body.appendChild(element)
+    state.tooltip = element
 
   ###**
   Opens a tooltip over the given element.
@@ -154,20 +155,20 @@ up.tooltip = (($) ->
     chain.asap closeNow, (-> attachNow(elementOrSelector, options))
 
   attachNow = (elementOrSelector, options) ->
-    $anchor = $(elementOrSelector)
+    anchor = q.element(elementOrSelector)
     options = u.options(options)
-    html = u.option(options.html, $anchor.attr('up-tooltip-html'))
-    text = u.option(options.text, $anchor.attr('up-tooltip'))
-    position = u.option(options.position, $anchor.attr('up-position'), config.position)
-    animation = u.option(options.animation, u.castedAttr($anchor, 'up-animation'), config.openAnimation)
-    animateOptions = up.motion.animateOptions(options, $anchor, duration: config.openDuration, easing: config.openEasing)
+    html = u.option(options.html, anchor.getAttribute('up-tooltip-html'))
+    text = u.option(options.text, anchor.getAttribute('up-tooltip'))
+    position = u.option(options.position, anchor.getAttribute('up-position'), config.position)
+    animation = u.option(options.animation, u.castedAttr(anchor, 'up-animation'), config.openAnimation)
+    animateOptions = up.motion.animateOptions(options, anchor, duration: config.openDuration, easing: config.openEasing)
 
     state.phase = 'opening'
-    state.$anchor = $anchor
+    state.anchor = anchor
     createElement(text: text, html: html)
     state.position = position
     align()
-    up.animate(state.$tooltip, animation, animateOptions).then ->
+    up.animate(state.tooltip, animation, animateOptions).then ->
       state.phase = 'opened'
 
   ###**
@@ -193,10 +194,10 @@ up.tooltip = (($) ->
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
     u.assign(options, animateOptions)
     state.phase = 'closing'
-    up.destroy(state.$tooltip, options).then ->
+    up.destroy(state.tooltip, options).then ->
       state.phase = 'closed'
-      state.$tooltip = null
-      state.$anchor = null
+      state.tooltip = null
+      state.anchor = null
 
   ###**
   Returns whether a tooltip is currently showing.
@@ -238,16 +239,16 @@ up.tooltip = (($) ->
   @selector [up-tooltip-html]
   @stable
   ###
-  up.$compiler '[up-tooltip], [up-tooltip-html]', ($opener) ->
+  up.compiler '[up-tooltip], [up-tooltip-html]', (opener) ->
     # Don't register these events on document since *every*
     # mouse move interaction  bubbles up to the document. 
-    $opener.on('mouseenter', -> attachAsap($opener))
-    $opener.on('mouseleave', -> closeAsap())
+    opener.addEventListener 'mouseenter', -> attachAsap(opener)
+    opener.addEventListener 'mouseleave', -> closeAsap()
 
   # We close the tooltip when someone clicks on the document.
   # We also need to listen to up:action:consumed in case an [up-instant] link
   # was followed on mousedown.
-  up.on 'click up:action:consumed', (event) ->
+  up.on 'click up:action:consumed', (_event) -> # do take an argument so we won't parse [up-data]
     closeAsap()
     # Do not halt the event chain here. The user is allowed to directly activate
     # a link in the background, even with a (now closing) tooltip open.
@@ -263,4 +264,3 @@ up.tooltip = (($) ->
   isOpen: isOpen
   close: closeAsap
 
-)(jQuery)

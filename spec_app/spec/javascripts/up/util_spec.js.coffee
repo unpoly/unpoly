@@ -695,9 +695,9 @@ describe 'up.util', ->
         $element = affix('div').attr('foo', 'false')
         expect(up.util.castedAttr($element, 'foo')).toBe(false)
 
-      it 'returns undefined if the element has no such attribute', ->
+      it 'returns a missing value if the element has no such attribute', ->
         $element = affix('div')
-        expect(up.util.castedAttr($element, 'foo')).toBe(undefined)
+        expect(up.util.castedAttr($element, 'foo')).toBeMissing()
 
       it 'returns the attribute value unchanged if the value is some string', ->
         $element = affix('div').attr('foo', 'some text')
