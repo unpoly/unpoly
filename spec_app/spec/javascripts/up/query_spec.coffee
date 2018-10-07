@@ -128,7 +128,7 @@ describe 'up.query', ->
       results = up.query.subtree($element[0], '.selector:has(.match)')
       expect(results).toEqual [$element[0], $childWithSelectorWithChild[0]]
 
-  describe 'closest()', ->
+  describe 'up.query.closest()', ->
 
     it 'returns the closest ancestor of the given root that matches the given selector', ->
       $grandGrandMother = affix('.match')
@@ -160,7 +160,7 @@ describe 'up.query', ->
       result = up.query.closest($element[0], '.match')
       expect(result).toBeMissing()
 
-  describe 'ancestor()', ->
+  describe 'up.query.ancestor()', ->
 
     it 'returns the closest ancestor of the given root that matches the given selector', ->
       $grandGrandMother = affix('.match')
@@ -190,3 +190,19 @@ describe 'up.query', ->
 
       result = up.query.ancestor($element[0], '.match')
       expect(result).toBeMissing()
+
+  describe 'up.query.triggerCustom()', ->
+
+    it 'must have tests', ->
+      throw "needs tests"
+
+  describe 'up.query.remove()', ->
+
+    it 'must have tests', ->
+      throw "needs tests"
+
+  describe 'up.query.toggle()', ->
+
+    it 'must have tests', ->
+      throw "needs tests"
+

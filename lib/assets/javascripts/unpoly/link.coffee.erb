@@ -146,7 +146,7 @@ up.link = (($) ->
   follow = (linkOrSelector, options) ->
     $link = $(linkOrSelector)
     variant = followVariantForLink($link)
-    variant.followLink($link, options)
+    variant.followLink($link[0], options)
 
   ###**
   This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.

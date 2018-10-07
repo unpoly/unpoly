@@ -193,8 +193,10 @@ up.util = (($) ->
     The element for which to create a selector.
   @experimental
   ###
-  selectorForElement = (element) ->
-    $element = $(element)
+  selectorForElement = (input) ->
+    return input if isString(input)
+
+    $element = $(input)
     selector = undefined
 
     if isSingletonElement($element)
@@ -658,6 +660,8 @@ up.util = (($) ->
   getElement = (object) ->
     # TODO: Remove me! Use up.query.element() instead
     if isJQuery(object)
+      if object.length > 1
+        up.fail('up.query.element(): Cannot cast a multi-element jQuery collection to a single elenent')
       object.get(0)
     else if isString(object)
       $(object).get(0)
@@ -769,13 +773,29 @@ up.util = (($) ->
   @experimental
   ###
   any = (array, tester) ->
+    !!detectResult(array, tester)
+
+  ###**
+  Consecutively calls the given function which each element
+  in the given array. Return the first truthy return value.
+
+  Returned `undefined` iif the function does not return a truthy
+  value for all elements in the array.
+
+  @function up.util.detectResult
+  @param {Array<A>} array
+  @param {Function(A): B} tester
+    A function that will be called with each element and (optional) iteration index.
+
+  @return {B}
+  @experimental
+  ###
+  detectResult = (array, tester) ->
     tester = listBlock(tester)
-    match = false
     for element, index in array
-      if tester(element, index)
-        match = true
-        break
-    match
+      if result = tester(element, index)
+        return result
+    return undefined
 
   ###**
   Returns whether the given function returns a truthy value
@@ -928,18 +948,6 @@ up.util = (($) ->
   hasClass = (element, klass) ->
     classList = getElement(element).classList
     classList.contains(klass)
-
-  ###**
-  Returns the element attribute with the gvien value.
-  Returns `undefined` if the value is [blank](/up.util.isBlank).
-
-  @function up.util.presentAttr
-  @internal
-  ###
-  presentAttr = (element, attrName) ->
-    if element = getElement(element) # TMP
-      value = element.getAttribute(attrName)
-      presence(value)
 
   ###**
   Waits for the given number of milliseconds, the runs the given callback.
@@ -1690,17 +1698,6 @@ up.util = (($) ->
       @promise()
 
   ###**
-  @function up.util.submittedValue
-  @internal
-  ###
-  submittedValue = (fieldOrSelector) ->
-    $field = $(fieldOrSelector)
-    if $field.is('[type=checkbox], [type=radio]') && !$field.is(':checked')
-      undefined
-    else
-      $field.val()
-
-  ###**
   @function up.util.sequence
   @param {Array<Function>} functions...
   @return {Function}
@@ -2037,7 +2034,6 @@ up.util = (($) ->
   offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   isFixed: isFixed
-  presentAttr: presentAttr
   parseUrl: parseUrl
   normalizeUrl: normalizeUrl
   normalizeMethod: normalizeMethod
@@ -2063,6 +2059,7 @@ up.util = (($) ->
   map: map
   flatMap: flatMap
   times: times
+  detectResult: detectResult
   any: any
   all: all
   detect: detect
@@ -2148,7 +2145,6 @@ up.util = (($) ->
   identity: identity
   escapeHtml: escapeHtml
   DivertibleChain: DivertibleChain
-  submittedValue: submittedValue
   sequence: sequence
   promiseTimer: promiseTimer
   previewable: previewable

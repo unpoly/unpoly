@@ -8,9 +8,10 @@ open dialogs with sub-forms, etc. all without losing form state.
 
 @class up.form
 ###
-up.form = (($) ->
+up.form = do ->
   
   u = up.util
+  q = up.query
 
   ###**
   Sets default options for form submission and validation.
@@ -149,27 +150,28 @@ up.form = (($) ->
   @stable
   ###
   submit = (formOrSelector, options) ->
-    $form = $(formOrSelector).closest('form')
+    form = q.element(formOrSelector)
+    form = q.closest(form, 'form')
 
     options = u.options(options)
-    target = u.option(options.target, $form.attr('up-target'), 'body')
-    url = u.option(options.url, $form.attr('action'), up.browser.url())
-    options.failTarget = u.option(options.failTarget, $form.attr('up-fail-target')) || u.selectorForElement($form)
-    options.reveal = u.option(options.reveal, u.castedAttr($form, 'up-reveal'), true)
-    options.failReveal = u.option(options.failReveal, u.castedAttr($form, 'up-fail-reveal'), true)
-    options.fallback = u.option(options.fallback, $form.attr('up-fallback'))
-    options.history = u.option(options.history, u.castedAttr($form, 'up-history'), true)
-    options.transition = u.option(options.transition, u.castedAttr($form, 'up-transition'), 'none')
-    options.failTransition = u.option(options.failTransition, u.castedAttr($form, 'up-fail-transition'), 'none')
-    options.method = u.option(options.method, $form.attr('up-method'), $form.attr('data-method'), $form.attr('method'), 'post').toUpperCase()
+    target = u.option(options.target, form.getAttribute('up-target'), 'body')
+    url = u.option(options.url, form.getAttribute('action'), up.browser.url())
+    options.failTarget = u.option(options.failTarget, form.getAttribute('up-fail-target')) || u.selectorForElement(form)
+    options.reveal = u.option(options.reveal, u.castedAttr(form, 'up-reveal'), true)
+    options.failReveal = u.option(options.failReveal, u.castedAttr(form, 'up-fail-reveal'), true)
+    options.fallback = u.option(options.fallback, form.getAttribute('up-fallback'))
+    options.history = u.option(options.history, u.castedAttr(form, 'up-history'), true)
+    options.transition = u.option(options.transition, u.castedAttr(form, 'up-transition'), 'none')
+    options.failTransition = u.option(options.failTransition, u.castedAttr(form, 'up-fail-transition'), 'none')
+    options.method = u.option(options.method, form.getAttribute('up-method'), form.getAttribute('data-method'), form.getAttribute('method'), 'post').toUpperCase()
     options.headers = u.option(options.headers, {})
-    options.cache = u.option(options.cache, u.castedAttr($form, 'up-cache'))
-    options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($form, 'up-restore-scroll'))
-    options.origin = u.option(options.origin, $form)
-    options.layer = u.option(options.layer, $form.attr('up-layer'), 'auto')
-    options.failLayer = u.option(options.failLayer, $form.attr('up-fail-layer'), 'auto')
-    options.params = up.params.fromForm($form)
-    options = u.merge(options, up.motion.animateOptions(options, $form))
+    options.cache = u.option(options.cache, u.castedAttr(form, 'up-cache'))
+    options.restoreScroll = u.option(options.restoreScroll, u.castedAttr(form, 'up-restore-scroll'))
+    options.origin = u.option(options.origin, form)
+    options.layer = u.option(options.layer, form.getAttribute('up-layer'), 'auto')
+    options.failLayer = u.option(options.failLayer, form.getAttribute('up-fail-layer'), 'auto')
+    options.params = up.params.fromForm(form)
+    options = u.merge(options, up.motion.animateOptions(options, form))
 
     if options.validate
       options.headers ||= {}
@@ -177,24 +179,26 @@ up.form = (($) ->
       options.failTransition = false
       options.headers[up.protocol.config.validateHeader] = options.validate
 
-    up.bus.whenEmitted('up:form:submit', message: 'Submitting form', $form: $form, $element: $form).then ->
-      up.feedback.start($form)
+    up.bus.whenEmitted('up:form:submit', message: 'Submitting form', target: form).then ->
+      up.feedback.start(form)
 
       # If we can't update the location URL, fall back to a vanilla form submission.
       unless up.browser.canPushState() || options.history == false
         # Don't use up.browser.navigate(); It cannot deal with file inputs.
-        $form.get(0).submit()
+        form.submit()
         return u.unresolvablePromise()
 
       promise = up.replace(target, url, options)
-      u.always promise, -> up.feedback.stop($form)
+      u.always promise, -> up.feedback.stop(form)
       promise
 
   ###**
   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
 
+  The event is emitted on the`<form>` element.
+
   @event up:form:submit
-  @param {jQuery} event.$form
+  @param {jQuery} event.target
     The `<form>` element that will be submitted.
   @param event.preventDefault()
     Event listeners may call this method to prevent the form from being submitted.
@@ -281,27 +285,27 @@ up.form = (($) ->
       options = u.options(extraArgs[0])
       callbackArg = extraArgs[1]
 
-    $element = $(selectorOrElement)
+    element = q.element(selectorOrElement)
 
     callback = null
-    rawCallback = u.option(callbackArg, u.presentAttr($element, 'up-observe'))
+    rawCallback = u.option(callbackArg, element.getAttribute('up-observe'))
     if u.isString(rawCallback)
-      callback = new Function('value', '$field', rawCallback)
+      callback = new Function('value', 'field', rawCallback)
     else
       callback = rawCallback or up.fail('up.observe: No change callback given')
 
-    delay = u.option(u.presentAttr($element, 'up-delay'), options.delay, config.observeDelay)
+    delay = u.option(element.getAttribute('up-delay'), options.delay, config.observeDelay)
     delay = parseInt(delay)
 
-    $fields = u.selectInSubtree($element, fieldSelector())
+    fields = q.subtree(element, fieldSelector())
 
-    destructors = u.map $fields, (field) ->
-      observeField($(field), delay, callback)
+    destructors = u.map fields, (field) ->
+      observeField(field, delay, callback)
 
     u.sequence(destructors...)
 
-  observeField = ($field, delay, callback) ->
-    observer = new up.FieldObserver($field, { delay, callback })
+  observeField = (field, delay, callback) ->
+    observer = new up.FieldObserver(field, { delay, callback })
     observer.start()
     return observer.stop
 
@@ -323,23 +327,21 @@ up.form = (($) ->
   @stable
   ###
   autosubmit = (selectorOrElement, options) ->
-    observe(selectorOrElement, options, (value, $field) ->
-      $form = $field.closest('form')
-      up.feedback.start $field, -> submit($form)
+    observe(selectorOrElement, options, (value, field) ->
+      up.feedback.start field, -> submit(field)
     )
 
-  resolveValidateTarget = ($field, options) ->
-    target = u.option(options.target, $field.attr('up-validate'))
-    if u.isBlank(target)
-      target ||= u.detect(config.validateTargets, (defaultTarget) ->
-        resolvedDefault = up.dom.resolveSelector(defaultTarget, options.origin)
-        $field.closest(resolvedDefault).length
-      )
-    if u.isBlank(target)
-      up.fail('Could not find default validation target for %o (tried ancestors %o)', $field.get(0), config.validateTargets)
-    unless u.isString(target)
-      target = u.selectorForElement(target)
-    target
+  findValidateTargetSelector = (field, options) ->
+    option = u.option(options.target, field.getAttribute('up-validate'))
+    option ||= u.detectResult config.validateTargets, (defaultTarget) ->
+      resolvedDefault = up.dom.resolveSelector(defaultTarget, options.origin)
+      return q.closest(defaultTarget)
+
+    unless option
+      up.fail('Could not find validation target for %o (tried defaults %o)', field, config.validateTargets)
+
+    # resolveSelector() also creates a selector string if given an element
+    return up.dom.resolveSelector(option, options.origin)
 
   ###**
   Performs a server-side validation of a form field.
@@ -366,38 +368,44 @@ up.form = (($) ->
   @stable
   ###
   validate = (fieldOrSelector, options) ->
-    $field = $(fieldOrSelector)
+    field = q.element(fieldOrSelector)
     options = u.options(options)
-    options.origin = $field
-    options.target = resolveValidateTarget($field, options)
+    options.origin = field
+    options.target = findValidateTargetSelector(field, options)
+    console.debug("*** validate target selector is now %o, origin was %o", options.target, options.origin)
     options.failTarget = options.target
-    options.reveal = u.option(options.reveal, u.castedAttr($field, 'up-reveal'), false)
+    options.reveal = u.option(options.reveal, u.castedAttr(field, 'up-reveal'), false)
     options.history = false
     options.headers = u.option(options.headers, {})
     # Make sure the X-Up-Validate header is present, so the server-side
     # knows that it should not persist the form submission
-    options.validate = ($field.attr('name') || '__none__')
-    options = u.merge(options, up.motion.animateOptions(options, $field))
-    $form = $field.closest('form')
-    promise = up.submit($form, options)
+    options.validate = field.getAttribute('name') || ':none'
+    options = u.merge(options, up.motion.animateOptions(options, field))
+    promise = up.submit(field, options)
     promise
 
-  switcherValues = ($field) ->
-    if $field.is('input[type=checkbox]')
-      if $field.is(':checked')
-        value = $field.val()
+  switcherValues = (field) ->
+    value = undefined
+    meta = undefined
+
+    if q.matches(field, 'input[type=checkbox]')
+      if field.checked
+        value = field.value
         meta = ':checked'
       else
         meta = ':unchecked'
-    else if $field.is('input[type=radio]')
-      $checkedButton = $field.closest('form, body').find("input[type='radio'][name='#{$field.attr('name')}']:checked")
-      if $checkedButton.length
+    else if q.matches(field, 'input[type=radio]')
+      form = closestContainer(field)
+      groupName = field.getAttribute('name')
+      checkedButton = form.querySelector("input[type=radio]#{u.attributeSelector('name', groupName)}:checked")
+      if checkedButton
         meta = ':checked'
-        value = $checkedButton.val()
+        value = checkedButton.value
       else
         meta = ':unchecked'
     else
-      value = $field.val()
+      value = field.value
+
     values = []
     if u.isPresent(value)
       values.push(value)
@@ -421,29 +429,34 @@ up.form = (($) ->
   @param {string|Element|jQuery} fieldOrSelector
   @param {string} [options.target]
     The target selectors to switch.
-    Defaults to an `up-switch` attribute on the given field.
+    Defaults to an `[up-switch]` attribute on the given field.
   @internal
   ###
   switchTargets = (fieldOrSelector, options) ->
-    $switcher = $(fieldOrSelector)
+    switcher = q.element(fieldOrSelector)
     options = u.options(options)
-    targetSelector = u.option(options.target, $switcher.attr('up-switch'))
-    u.isPresent(targetSelector) or up.fail("No switch target given for %o", $switcher.get(0))
-    fieldValues = switcherValues($switcher)
-    $(targetSelector).each ->
-      switchTarget($(this), fieldValues)
+    targetSelector = u.option(options.target, switcher.getAttribute('up-switch'))
+    console.debug("=== targetSelector is %o", targetSelector)
+    form = closestContainer(switcher)
+    u.isPresent(targetSelector) or up.fail("No switch target given for %o", switcher)
+    fieldValues = switcherValues(switcher)
+    console.debug("--- calling q.all(%o, %o)", form, targetSelector)
+    console.debug("--- result is %o", q.all(form, targetSelector))
+
+    q.all(form, targetSelector).forEach (target) ->
+      switchTarget(target, fieldValues)
 
   ###**
   @internal
   ###
   switchTarget = (target, fieldValues) ->
-    $target = $(target)
-    fieldValues ||= switcherValues(findSwitcherForTarget($target))
-    if hideValues = $target.attr('up-hide-for')
+    fieldValues ||= switcherValues(findSwitcherForTarget(target))
+
+    if hideValues = target.getAttribute('up-hide-for')
       hideValues = u.splitValues(hideValues)
       show = u.intersect(fieldValues, hideValues).length == 0
     else
-      if showValues = $target.attr('up-show-for')
+      if showValues = target.getAttribute('up-show-for')
         showValues = u.splitValues(showValues)
       else
         # If the target has neither up-show-for or up-hide-for attributes,
@@ -451,21 +464,23 @@ up.form = (($) ->
         # is checked or entered.
         showValues = [':present', ':checked']
       show = u.intersect(fieldValues, showValues).length > 0
-    $target.toggle(show)
-    $target.addClass('up-switched')
+
+    q.toggle(target, show)
+    target.classList.add('up-switched')
 
   ###**
   @internal
   ###
-  findSwitcherForTarget = ($target) ->
-    $switchers = $('[up-switch]')
-    switcher = u.detect $switchers, (switcher) ->
-      target = $(switcher).attr('up-switch')
-      $target.is(target)
-    if switcher
-      $(switcher)
-    else
-      u.fail('Could not find [up-switch] field for %o', $target.get(0))
+  findSwitcherForTarget = (target) ->
+    form = closestContainer(target)
+    switchers = q.all(form, '[up-switch]')
+    switcher = u.detect switchers, (switcher) ->
+      targetSelector = switcher.getAttribute('up-switch')
+      q.matches(target, targetSelector)
+    return switcher or u.fail('Could not find [up-switch] field for %o', target)
+
+  closestContainer = (element) ->
+    q.closest(element, 'form, body')
 
   ###**
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
@@ -848,14 +863,14 @@ up.form = (($) ->
     A space-separated list of input values for which this element should be hidden.
   @stable
   ###
-  up.$compiler '[up-switch]', ($field) ->
-    switchTargets($field)
+  up.compiler '[up-switch]', (switcher) ->
+    switchTargets(switcher)
 
-  up.on 'change', '[up-switch]', (event, field) ->
-    switchTargets(field)
+  up.on 'change', '[up-switch]', (event, switcher) ->
+    switchTargets(switcher)
 
-  up.$compiler '[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', ($element) ->
-    switchTarget($element)
+  up.compiler '[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', (element) ->
+    switchTarget(element)
 
   ###**
   Observes this field and runs a callback when a value changes.
@@ -927,7 +942,7 @@ up.form = (($) ->
     The number of miliseconds to wait after a change before the code is run.
   @stable
   ###
-  up.$compiler '[up-observe]', ($formOrField) -> observe($formOrField)
+  up.compiler '[up-observe]', (formOrField) -> observe(formOrField)
 
   ###**
   [Observes](/up.observe) this form field and submits the form when its value changes.
@@ -974,9 +989,9 @@ up.form = (($) ->
     The number of miliseconds to wait after a change before the form is submitted.
   @stable
   ###
-  up.$compiler '[up-autosubmit]', ($formOrField) -> autosubmit($formOrField)
+  up.compiler '[up-autosubmit]', (formOrField) -> autosubmit(formOrField)
 
-  up.$compiler '[autofocus]', { batch: true }, ($input) -> $input.last().focus()
+  up.compiler '[autofocus]', { batch: true }, (inputs) -> u.last(inputs).focus()
 
   up.on 'up:framework:reset', reset
 
@@ -989,8 +1004,6 @@ up.form = (($) ->
   autosubmit: autosubmit
   fieldSelector: fieldSelector
   submitButtonSelector: submitButtonSelector
-
-)(jQuery)
 
 up.submit = up.form.submit
 up.observe = up.form.observe

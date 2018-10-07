@@ -122,9 +122,6 @@ describe 'up.bus', ->
           next =>
             expect(parseDataSpy).not.toHaveBeenCalled()
 
-        it 'does not parse an [up-data] attribute if no selector was given', ->
-          throw "implement me"
-
         it 'does not parse an [up-data] attribute if the listener function only takes two arguments', asyncSpec (next) ->
           parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
 

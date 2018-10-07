@@ -222,17 +222,21 @@ up.motion = (($) ->
   If `$element` is given, also inspects the element for animation-related
   attributes like `up-easing` or `up-duration`.
 
+  @param {Object} userOptions
+  @param {Element|jQuery} [element]
+  @param {Object} moduleDefaults
   @function up.motion.animateOptions
   @internal
   ###
   animateOptions = (args...) ->
-    userOptions = args.shift() || {}
-    $element = if u.isJQuery(args[0]) then args.shift() else u.nullJQuery()
-    moduleDefaults = if u.isObject(args[0]) then args.shift() else {}
+    userOptions = args.shift()
+    moduleDefaults = u.extractOptions(args)
+    element = u.element(args.pop()) # might be undefined
+
     consolidatedOptions = {}
-    consolidatedOptions.easing = u.option(userOptions.easing, u.presentAttr($element, 'up-easing'), moduleDefaults.easing, config.easing)
-    consolidatedOptions.duration = Number(u.option(userOptions.duration, u.presentAttr($element, 'up-duration'), moduleDefaults.duration, config.duration))
-    consolidatedOptions.delay = Number(u.option(userOptions.delay, u.presentAttr($element, 'up-delay'), moduleDefaults.delay, config.delay))
+    consolidatedOptions.easing = u.option(userOptions.easing, element?.getAttribute('up-easing'), moduleDefaults.easing, config.easing)
+    consolidatedOptions.duration = Number(u.option(userOptions.duration, element?.getAttribute('up-duration'), moduleDefaults.duration, config.duration))
+    consolidatedOptions.delay = Number(u.option(userOptions.delay, element?.getAttribute('up-delay'), moduleDefaults.delay, config.delay))
     consolidatedOptions.trackMotion = userOptions.trackMotion # required by up.MotionTracker
     consolidatedOptions
       

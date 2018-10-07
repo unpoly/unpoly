@@ -667,13 +667,18 @@ up.dom = (($) ->
   @stable
   ###
   emitFragmentInserted = ($element, options) ->
+    element = $element[0]
     up.emit 'up:fragment:inserted',
-      $element: $element
-      message: ['Inserted fragment %o', $element.get(0)]
+      target: element
+      message: ['Inserted fragment %o', element]
       origin: options.origin
 
   emitFragmentKept = (keepPlan) ->
-    eventAttrs = u.merge(keepPlan, message: ['Kept fragment %o', keepPlan.$element.get(0)])
+    keptElement = keepPlan.$element.get(0)
+    eventAttrs = u.merge(keepPlan,
+      target: keptElement,
+      message: ['Kept fragment %o', keptElement]
+    )
     up.emit('up:fragment:kept', eventAttrs)
 
   emitFragmentDestroy = ($element, options) ->
@@ -736,26 +741,20 @@ up.dom = (($) ->
 
   firstInPriority = (selectorOrElement, origin) ->
     layers = ['popup', 'modal', 'page']
-    $match = undefined
     if u.isPresent(origin)
       originLayer = layerOf(origin)
       # Make the origin's layer the top priority
       u.remove(layers, originLayer)
       layers.unshift(originLayer)
-    for layer in layers
-      if $match = firstInLayer(selectorOrElement, layer)
-        break
-    $match
+    u.detectResult layers, (layer) ->
+      return firstInLayer(selectorOrElement, layer)
 
   firstInLayer = (selectorOrElement, layer) ->
     $elements = $(selectorOrElement)
-    $match = undefined
-    for element in $elements
+    return u.detectResult $elements, (element) ->
       $element = $(element)
       if isRealElement($element) && matchesLayer($element, layer)
-        $match = $element
-        break
-    $match
+        return $element
 
   ###**
   @function up.dom.layerOf

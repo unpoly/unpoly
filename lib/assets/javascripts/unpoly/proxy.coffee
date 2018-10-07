@@ -560,7 +560,7 @@ up.proxy = (($) ->
   up.bus.deprecateRenamedEvent('up:proxy:received', 'up:proxy:loaded')
 
   preloadAfterDelay = ($link) ->
-    delay = parseInt(u.presentAttr($link, 'up-delay')) || config.preloadDelay
+    delay = parseInt($link.attr('up-delay')) || config.preloadDelay
     unless $link.is($waitingLink)
       $waitingLink = $link
       cancelPreloadDelay()

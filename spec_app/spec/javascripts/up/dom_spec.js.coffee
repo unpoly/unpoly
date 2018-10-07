@@ -48,6 +48,9 @@ describe 'up.dom', ->
             expect(resolution).toHaveBeenCalled()
             expect($('.middle')).toHaveText('new-middle')
 
+          it 'allows to pass an element instead of a selector',->
+            throw "implement me and simplify up.form.findValidateTargetSelector with it"
+
         describe 'with { transition } option', ->
 
           it 'returns a promise that will be fulfilled once the server response was received and the swap transition has completed', asyncSpec (next) ->

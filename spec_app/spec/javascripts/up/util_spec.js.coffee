@@ -806,6 +806,28 @@ describe 'up.util', ->
         expect(up.util.any(someTrue, 'prop')).toBe(true)
         expect(up.util.any(allFalse, 'prop')).toBe(false)
 
+    describe 'up.util.detectResult', ->
+
+      it 'consecutively applies the function to each array element and returns the first truthy return value', ->
+        map = {
+          a: '',
+          b: null,
+          c: undefined,
+          d: 'DEH',
+          e: 'EH'
+        }
+        fn = (el) -> map[el]
+
+        result = up.util.detectResult ['a', 'b', 'c', 'd', 'e'], fn
+        expect(result).toEqual('DEH')
+
+      it 'returns undefined if the function does not return a truthy value for any element in the array', ->
+        map = {}
+        fn = (el) -> map[el]
+
+        result = up.util.detectResult ['a', 'b', 'c'], fn
+        expect(result).toBeUndefined()
+
     describe 'up.util.isBlank', ->
 
       it 'returns false for false', ->

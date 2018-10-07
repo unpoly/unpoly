@@ -76,10 +76,7 @@ up.bus = (($) ->
         # count of 0, since then the function might take varargs.
         expectedArgCount = upListener.length
 
-        console.debug("=== arg count %o for %o", expectedArgCount, upListener)
-
         unless expectedArgCount == 1 || expectedArgCount == 2
-          console.debug("*** will call data!")
           data = up.syntax.data(element)
           args.push(data)
 
@@ -312,9 +309,25 @@ up.bus = (($) ->
     # - Event is triggered on document (default)
     # - Event is triggered on { $element }
     # - Event is triggered on { $target }, but should have an { $element } property
-    $target = $(eventProps.target || u.presence(eventProps.$target) || eventProps.element || u.presence(eventProps.$element) || document)
+    target = undefined
+    if target = eventProps.target
+      delete eventProps.target
+    else if target = eventProps.element
+      # TODO: remove this option
+      delete eventProps.element
+    else if $target = u.presence(eventProps.$target)
+      # TODO: remove this option
+      target = $target[0]
+      delete eventProps.$target
+    else if $target = u.presence(eventProps.$element)
+      # TODO: remove this option
+      target = $target[0]
+      delete eventProps.$element
+    else
+      target = document
+
     logEmission(eventName, eventProps)
-    q.triggerCustom($target[0], eventName, eventProps)
+    q.triggerCustom(target, eventName, eventProps)
 
   logEmission = (eventName, eventProps) ->
     if eventProps.hasOwnProperty('message')
@@ -367,6 +380,7 @@ up.bus = (($) ->
   @internal
   ###
   whenEmitted = (args...) ->
+    console.debug("whenEmitted %o" ,args)
     new Promise (resolve, reject) ->
       if nobodyPrevents(args...)
         resolve()

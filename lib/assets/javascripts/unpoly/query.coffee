@@ -38,6 +38,8 @@ up.query = do ->
   ###
   element = (object) ->
     if u.isJQuery(object)
+      if object.length > 1
+        up.fail('up.query.element(): Cannot cast a multi-element jQuery collection to a single elenent')
       object[0]
     else if u.isString(object)
       first(object)
@@ -62,6 +64,12 @@ up.query = do ->
     else if parent = element.parentNode
       parent.removeChild(element)
 
+  toggle = (element, newVisible) ->
+    if newVisible
+      element.style.display = ''
+    else
+      element.style.display = 'none'
+
   first: first
   all: all
   subtree: subtree
@@ -71,4 +79,6 @@ up.query = do ->
   element: element
   triggerCustom: triggerCustom
   remove: remove
+  toggle: toggle
+
 

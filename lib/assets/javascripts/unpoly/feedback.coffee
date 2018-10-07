@@ -89,7 +89,7 @@ up.feedback = do ->
     # so we cache an empty array.
     if up.link.isSafe(section)
       for attr in ['href', 'up-href', 'up-alias']
-        if value = u.presentAttr(section, attr)
+        if value = section.getAttribute(attr)
           # Allow to include multiple space-separated URLs in [up-alias]
           for url in u.splitValues(value)
             unless url == '#'

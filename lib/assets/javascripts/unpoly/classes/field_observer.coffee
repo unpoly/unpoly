@@ -4,9 +4,9 @@ class up.FieldObserver
 
   # Although (depending on the browser) we only need/receive either input or change,
   # we always bind to both events in case another script manually triggers it.
-  CHANGE_EVENTS = 'input change'
+  CHANGE_EVENTS = ['input', 'change']
 
-  constructor: (@$field, options) ->
+  constructor: (@field, options) ->
     @delay = options.delay
     @callback = options.callback
 
@@ -16,10 +16,12 @@ class up.FieldObserver
     @processedValue = @readFieldValue()
     @currentTimer = undefined
     @currentCallback = undefined
-    @$field.on(CHANGE_EVENTS, @check)
+    for event in CHANGE_EVENTS
+      @field.addEventListener(event, @check)
 
   stop: =>
-    @$field.off(CHANGE_EVENTS, @check)
+    for event in CHANGE_EVENTS
+      @field.removeEventListener(event, @check)
     @cancelTimer()
 
   cancelTimer: =>
@@ -38,7 +40,7 @@ class up.FieldObserver
     if @scheduledValue != null && !@currentTimer && !@currentCallback
       @processedValue = @scheduledValue
       @scheduledValue = null
-      @currentCallback = => @callback.call(@$field.get(0), @processedValue, @$field)
+      @currentCallback = => @callback.call(@field, @processedValue, @field)
       # If the callback returns a promise x, Promise.resolve(x) will wait for it
       callbackDone = Promise.resolve(@currentCallback())
       u.always callbackDone, =>
@@ -47,10 +49,14 @@ class up.FieldObserver
         @requestCallback()
 
   readFieldValue: =>
-    u.submittedValue(@$field)
+    params = up.params.fromField(@field)
+    console.debug("! params from field %o are %o", @field, params)
+    u.map(params, 'value')[0]
 
   check: =>
+    console.debug("! check()")
     value = @readFieldValue()
+    console.debug("! current value is: %o", value)
     if @isNewValue(value)
       @scheduledValue = value
       @cancelTimer()

@@ -20,17 +20,18 @@ describe 'up.form', ->
           describe "when the input receives a #{eventName} event", ->
 
             it "runs the callback if the value changed", asyncSpec (next) ->
-              $input = affix('input[value="old-value"]')
+              console.debug("===================================")
+              $input = affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               $input.val('new-value')
               u.times 2, -> Trigger[eventName]($input)
               next =>
-                expect(callback).toHaveBeenCalledWith('new-value', $input)
+                expect(callback).toHaveBeenCalledWith('new-value', $input[0])
                 expect(callback.calls.count()).toEqual(1)
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
-              $input = affix('input[value="old-value"]')
+              $input = affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               Trigger[eventName]($input)
@@ -38,7 +39,7 @@ describe 'up.form', ->
                 expect(callback).not.toHaveBeenCalled()
 
             it 'debounces the callback when the { delay } option is given', asyncSpec (next) ->
-              $input = affix('input[value="old-value"]')
+              $input = affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, { delay: 200 }, callback)
               $input.val('new-value-1')
@@ -73,7 +74,7 @@ describe 'up.form', ->
                 expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
 
             it 'delays a callback if a previous async callback is taking long to execute', asyncSpec (next) ->
-              $input = affix('input[value="old-value"]')
+              $input = affix('input[name="input-name"][value="old-value"]')
               callbackCount = 0
               callback = ->
                 callbackCount += 1
@@ -97,7 +98,7 @@ describe 'up.form', ->
                 expect(callbackCount).toEqual(2)
 
             it 'only runs the last callback when a previous long-running callback has been delaying multiple callbacks', asyncSpec (next) ->
-              $input = affix('input[value="old-value"]')
+              $input = affix('input[name="input-name"][value="old-value"]')
 
               callbackArgs = []
               callback = (value, field) ->
@@ -126,7 +127,7 @@ describe 'up.form', ->
 
           it 'runs the callback when the checkbox changes its checked state', asyncSpec (next) ->
             $form = affix('form')
-            $checkbox = $form.affix('input[type="checkbox"][value="checkbox-value"]')
+            $checkbox = $form.affix('input[name="input-name"][type="checkbox"][value="checkbox-value"]')
             callback = jasmine.createSpy('change callback')
             up.observe($checkbox, callback)
             expect($checkbox.is(':checked')).toBe(false)
@@ -143,7 +144,7 @@ describe 'up.form', ->
 
           it 'runs the callback when the checkbox is toggled by clicking its label', asyncSpec (next) ->
             $form = affix('form')
-            $checkbox = $form.affix('input#tick[type="checkbox"][value="checkbox-value"]')
+            $checkbox = $form.affix('input#tick[name="input-name"][type="checkbox"][value="checkbox-value"]')
             $label = $form.affix('label[for="tick"]').text('tick label')
             callback = jasmine.createSpy('change callback')
             up.observe($checkbox, callback)
@@ -169,14 +170,25 @@ describe 'up.form', ->
             callback = jasmine.createSpy('change callback')
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(false)
+
+            console.debug("--- clicking on $radio1")
             Trigger.clickSequence($radio1)
 
             next =>
+              console.debug("--- checking is radio1 is checked")
               expect($radio1.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
-              Trigger.clickSequence($radio2)
+              console.debug('--- clicking on $radio2')
+              # Trigger.clickSequence($radio2)
+              $radio1[0].checked = false
+              $radio2[0].checked = true
+              Trigger.change($radio2)
 
             next =>
+              console.debug('--- next')
+              debugger
+              console.log($form)
+              console.log($radio2)
               expect($radio1.is(':checked')).toBe(false)
               expect(callback.calls.count()).toEqual(2)
 
@@ -225,6 +237,10 @@ describe 'up.form', ->
               expect($radio2.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
 
+          it "does not make more than one request if a radio button group changes", ->
+            throw "implement and test me (maybe need to reduce observe-delay)"
+
+
       describe 'when the first argument is a form', ->
 
         u.each changeEvents, (eventName) ->
@@ -233,7 +249,7 @@ describe 'up.form', ->
 
             it "runs the callback if the value changed", asyncSpec (next) ->
               $form = affix('form')
-              $input = $form.affix('input[value="old-value"]')
+              $input = $form.affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
               $input.val('new-value')
@@ -244,7 +260,7 @@ describe 'up.form', ->
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
               $form = affix('form')
-              $input = $form.affix('input[value="old-value"]')
+              $input = $form.affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
               Trigger[eventName]($input)
@@ -770,7 +786,7 @@ describe 'up.form', ->
 
       it 'submits the form when a change is observed in the given form field', asyncSpec (next) ->
         $form = affix('form')
-        $field = $form.affix('input[up-autosubmit][val="old-value"]')
+        $field = $form.affix('input[up-autosubmit][name="input-name"][value="old-value"]')
         up.hello($field)
         submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
         $field.val('new-value')
@@ -779,7 +795,7 @@ describe 'up.form', ->
 
       it 'marks the field with an .up-active class while the form is submitting', asyncSpec (next) ->
         $form = affix('form')
-        $field = $form.affix('input[up-autosubmit][val="old-value"]')
+        $field = $form.affix('input[up-autosubmit][name="input-name"][value="old-value"]')
         up.hello($field)
         submission = u.newDeferred()
         submitSpy = up.form.knife.mock('submit').and.returnValue(submission)
@@ -797,7 +813,7 @@ describe 'up.form', ->
 
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
         $form = affix('form[up-autosubmit]')
-        $field = $form.affix('input[val="old-value"]')
+        $field = $form.affix('input[name="input-name"][value="old-value"]')
         up.hello($form)
         submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
         $field.val('new-value')
@@ -808,7 +824,7 @@ describe 'up.form', ->
 
         it 'debounces the form submission', asyncSpec (next) ->
           $form = affix('form[up-autosubmit][up-delay="50"]')
-          $field = $form.affix('input[val="old-value"]')
+          $field = $form.affix('input[name="input-name"][value="old-value"]')
           up.hello($form)
           submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
           $field.val('new-value-1')
@@ -830,7 +846,7 @@ describe 'up.form', ->
       it 'runs the JavaScript code in the attribute value when a change is observed in the field', asyncSpec (next) ->
         $form = affix('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
+        $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
         up.hello($form)
         $field.val('new-value')
         Trigger.change($field)
@@ -843,7 +859,7 @@ describe 'up.form', ->
         it 'debounces the callback', asyncSpec (next) ->
           $form = affix('form')
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          $field = $form.affix('input[val="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="50"]')
+          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="50"]')
           up.hello($form)
           $field.val('new-value')
           Trigger.change($field)
@@ -859,8 +875,8 @@ describe 'up.form', ->
       it 'runs the JavaScript code in the attribute value when a change is observed in any contained field', asyncSpec (next) ->
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
         $form = affix('form[up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
-        $field1 = $form.affix('input[val="field1-old-value"]')
-        $field2 = $form.affix('input[val="field2-old-value"]')
+        $field1 = $form.affix('input[name="input-name"][value="field1-old-value"]')
+        $field2 = $form.affix('input[name="input-name"][value="field2-old-value"]')
         up.hello($form)
         $field1.val('field1-new-value')
         Trigger.change($field1)
@@ -912,6 +928,9 @@ describe 'up.form', ->
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
             expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+
+        it "does not make more than one request if a radio button group changes", ->
+          throw "implement and test me"
 
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
           revealSpy = up.layout.knife.mock('reveal').and.returnValue(Promise.resolve())
@@ -983,7 +1002,7 @@ describe 'up.form', ->
       describe 'on a select', ->
 
         beforeEach ->
-          @$select = affix('select[up-switch=".target"]')
+          @$select = affix('select[name="select-name"][up-switch=".target"]')
           @$blankOption = @$select.affix('option').text('<Please select something>').val('')
           @$fooOption = @$select.affix('option[value="foo"]').text('Foo')
           @$barOption = @$select.affix('option[value="bar"]').text('Bar')
@@ -1052,7 +1071,7 @@ describe 'up.form', ->
       describe 'on a checkbox', ->
 
         beforeEach ->
-          @$checkbox = affix('input[type="checkbox"][value="1"][up-switch=".target"]')
+          @$checkbox = affix('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
 
         it "shows the target element iff its up-show-for attribute is :checked and the checkbox is checked", asyncSpec (next) ->
           $target = affix('.target[up-show-for=":checked"]')
@@ -1220,7 +1239,7 @@ describe 'up.form', ->
       describe 'on a text input', ->
 
         beforeEach ->
-          @$textInput = affix('input[type="text"][up-switch=".target"]')
+          @$textInput = affix('input[name="input-name"][type="text"][up-switch=".target"]')
 
         it "shows the target element iff its up-show-for attribute contains the input value", asyncSpec (next) ->
           $target = affix('.target[up-show-for="something bar other"]')
@@ -1285,7 +1304,7 @@ describe 'up.form', ->
       describe 'when an [up-show-for] element is dynamically inserted later', ->
 
         it "shows the element iff it matches the [up-switch] control's value", asyncSpec (next) ->
-          $select = affix('select[up-switch=".target"]')
+          $select = affix('select[name="select-name"][up-switch=".target"]')
           $select.affix('option[value="foo"]').text('Foo')
           $select.affix('option[value="bar"]').text('Bar')
           $select.val('foo')
@@ -1308,7 +1327,7 @@ describe 'up.form', ->
         it "doesn't re-switch targets that were part of the original compile run", asyncSpec (next) ->
           $container = affix('.container')
 
-          $select = $container.affix('select[up-switch=".target"]')
+          $select = $container.affix('select[name="select-name"][up-switch=".target"]')
           $select.affix('option[value="foo"]').text('Foo')
           $select.affix('option[value="bar"]').text('Bar')
           $select.val('foo')
@@ -1325,5 +1344,5 @@ describe 'up.form', ->
 
           next =>
             expect(switchTargetSpy.calls.count()).toBe(2)
-            expect(switchTargetSpy.calls.argsFor(0)[0]).toEqual($existingTarget)
-            expect(switchTargetSpy.calls.argsFor(1)[0]).toEqual(@$lateTarget)
+            expect(switchTargetSpy.calls.argsFor(0)[0]).toEqual($existingTarget[0])
+            expect(switchTargetSpy.calls.argsFor(1)[0]).toEqual(@$lateTarget[0])

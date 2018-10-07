@@ -1,0 +1,4 @@
+- Update docs
+- Get rid of u.addClass, u.writeInlineStyle, u.fastHide, etc.
+- Move all remaining element-related helper methods from util to query
+- Remove event.element, event.$element, event.$target options for up.emit()
