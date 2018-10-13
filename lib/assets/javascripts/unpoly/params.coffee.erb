@@ -191,11 +191,16 @@ up.params = (($) ->
   isPrimitiveValue = (value) ->
     u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value)
 
-  safeSet = (obj, k, value) ->
-    obj[k] = value  unless u.isBasicObjectProperty(k)
+  safeSet = (obj, name, value) ->
+    unless u.isBasicObjectProperty(name)
+      if u.endsWith(name, '[]')
+        obj[name] ||= []
+        obj[name].push(value)
+      else
+        obj[name] = value
 
-  safeGet = (obj, k) ->
-    obj[k] unless u.isBasicObjectProperty(k)
+  safeGet = (obj, name) ->
+    obj[name] unless u.isBasicObjectProperty(name)
 
   buildQueryFromArray = (array) ->
     parts = u.map(array, arrayEntryToQuery)
@@ -216,18 +221,24 @@ up.params = (($) ->
           value = decodeURIComponent(value)
         else
           value = null
-        array.push({ name, value })
+        addToArray(array, name, value)
     array
+
+  addToArray = (array, name, value) ->
+    array.push({name, value})
 
   buildArrayFromObject = (object) ->
     array = []
-    for k, v of object
-      array.push(name: k, value: v)
+    for key, value of object
+      valueElements = if u.isArray(value) then value else [value]
+      for valueElement in valueElements
+        addToArray(array, key, valueElement)
     array
 
   buildObjectFromArray = (array) ->
     obj = {}
     for entry in array
+
       safeSet(obj, entry.name, entry.value)
     obj
 
@@ -235,7 +246,7 @@ up.params = (($) ->
     array = []
     u.eachIterator formData.entries(), (value) ->
       [name, value] = value
-      array.push({ name, value })
+      addToArray(array, name, value)
     array
 
   buildFormDataFromArray = (array) ->
@@ -458,25 +469,17 @@ up.params = (($) ->
       if tagName == 'SELECT'
         for option in field.querySelectorAll('option')
           if option.selected
-            params.push
-             name: name
-             value: option.value
+            addToArray(params, name, option.value)
       else if type == 'checkbox' || type == 'radio'
         if field.checked
-          params.push
-            name: name
-            value: field.value
+          addToArray(params, name, field.value)
       else if type == 'file'
         # The value of an input[type=file] is the local path displayed in the form.
         # The actual File objects are in the #files property.
         for file in field.files
-          params.push
-            name: name
-            value: file
+          addToArray(params, name, file)
       else
-        params.push
-          name: name
-          value: field.value
+        addToArray(params, name, field.value)
     params
 
   ###**

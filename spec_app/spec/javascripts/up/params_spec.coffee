@@ -99,6 +99,17 @@ describe 'up.params', ->
           { name: 'bar-key', value: 'bar-value' },
         ])
 
+      it 'builds multiple entries if the given object has array values', ->
+        array = up.params.toArray(
+          foo: ['1', '2']
+          bar: '3'
+        )
+        expect(array).toEqual([
+          { name: 'foo', value: '1' },
+          { name: 'foo', value: '2' },
+          { name: 'bar', value: '3' },
+        ])
+
       it 'returns a given array without modification', ->
         array = up.params.toArray([
           { name: 'foo-key', value: 'foo-value' },
@@ -202,7 +213,7 @@ describe 'up.params', ->
 
     describe 'up.params.toObject', ->
 
-      it "parses flat key/value pairs", ->
+      it "parses a query string of flat key/value pairs", ->
         expect(up.params.toObject("xfoo")).toEqual("xfoo": null)
         expect(up.params.toObject("foo=")).toEqual("foo": "")
         expect(up.params.toObject("foo=bar")).toEqual("foo": "bar")
@@ -219,6 +230,12 @@ describe 'up.params', ->
         expect(up.params.toObject("my%20weird%20field=q1%212%22%27w%245%267%2Fz8%29%3F")).toEqual("my weird field": "q1!2\"'w$5&7/z8)?")
         expect(up.params.toObject("a=b&pid%3D1234=1023")).toEqual("pid=1234": "1023", "a": "b")
         # expect(-> up.params.toObject("foo%81E=1")).toThrowError() # invalid byte sequence in UTF-8
+
+      it 'keeps the last value if the same key appears multiple time in the input', ->
+        expect(up.params.toObject("foo=1&bar=2&foo=3")).toEqual("foo": "3", "bar": "2")
+
+      it 'builds an array value if the key ends in "[]"', ->
+        expect(up.params.toObject("foo[]=1&bar=2&foo[]=3")).toEqual("foo[]": ["1", "3"], "bar": "2")
 
       it 'ignores keys that would overwrite an Object prototype property', ->
         obj = up.params.toObject("foo=bar&hasOwnProperty=baz")

@@ -2022,6 +2022,12 @@ up.util = (($) ->
     values = select(values, isPresent)
     values
 
+  endsWith = (string, search) ->
+    if search.length > string.length
+      false
+    else
+      string.substring(string.length - search.length) == search
+
 #  wrapArray = (objOrArray) ->
 #    if isUndefined(objOrArray)
 #      []
@@ -2172,6 +2178,7 @@ up.util = (($) ->
   writeInlineStyle: writeInlineStyle
   hasCssTransition: hasCssTransition
   splitValues : splitValues
+  endsWith: endsWith
   sum: sum
 #  wrapArray: wrapArray
   values: objectValues
