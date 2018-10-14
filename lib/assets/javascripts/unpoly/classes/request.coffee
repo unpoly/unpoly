@@ -92,6 +92,7 @@ class up.Request extends up.Record
 
   normalize: =>
     u.deprecateRenamedKey(@, 'data', 'params')
+    @params = new up.Params(@params) # copies, which we want
     @method = u.normalizeMethod(@method)
     @headers ||= {}
     @extractHashFromUrl()
@@ -109,15 +110,16 @@ class up.Request extends up.Record
     @url = u.normalizeUrl(urlParts, hash: false)
 
   transferParamsToUrl: =>
-    if @params && !u.isFormData(@params)
+    unless @params.isEmpty()
       # GET methods are not allowed to have a payload, so we transfer { params } params to the URL.
-      @url = up.params.buildURL(@url, @params)
+      @url = @params.toURL(@url)
       # Now that we have transfered the params into the URL, we delete them from the { params } option.
-      @params = undefined
+      @params.clear()
 
   transferSearchToParams: =>
-    if query = up.params.fromURL(@url)
-      @params = up.params.merge(@params, query)
+    paramsFromQuery = up.Params.fromURL(@url)
+    unless paramsFromQuery.isEmpty()
+      @params.addAll(paramsFromQuery)
       @url = u.normalizeUrl(@url, search: false)
 
   isSafe: =>
@@ -130,18 +132,14 @@ class up.Request extends up.Record
       xhr = new XMLHttpRequest()
 
       xhrHeaders = u.copy(@headers)
-      xhrPayload = @params
-      xhrMethod = @method
       xhrUrl = @url
+      xhrParams = @params.copy()
+      xhrMethod = up.proxy.wrapMethod(@method, @params)
 
-      [xhrMethod, xhrPayload] = up.proxy.wrapMethod(xhrMethod, xhrPayload)
-
-      if xhrPayload
+      xhrPayload = null
+      unless xhrParams.isEmpty()
         delete xhrHeaders['Content-Type'] # let the browser set the content type
-        xhrPayload = up.params.toFormData(xhrPayload)
-      else
-        # XMLHttpRequest expects null for an empty body
-        xhrPayload = null
+        xhrPayload = xhrParams.toFormData()
 
       pc = up.protocol.config
       xhrHeaders[pc.targetHeader] = @target if @target
@@ -234,9 +232,5 @@ class up.Request extends up.Record
     query = up.params.toQuery(@params)
     [@url, @method, query, @target].join('|')
 
-  @wrap: (object) ->
-    if object instanceof @
-      # This object has gone through instantiation and normalization before.
-      object
-    else
-      new @(object)
+  @wrap: (value) ->
+    u.wrapValue(value, @)

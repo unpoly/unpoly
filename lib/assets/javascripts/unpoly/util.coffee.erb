@@ -2028,6 +2028,13 @@ up.util = (($) ->
     else
       string.substring(string.length - search.length) == search
 
+  wrapValue = (object, constructor) ->
+    if object instanceof constructor
+      # This object has gone through instantiation and normalization before.
+      object
+    else
+      new @(object)
+
 #  wrapArray = (objOrArray) ->
 #    if isUndefined(objOrArray)
 #      []
@@ -2181,6 +2188,7 @@ up.util = (($) ->
   endsWith: endsWith
   sum: sum
 #  wrapArray: wrapArray
+  wrapValue: wrapValue
   values: objectValues
 
 )(jQuery)
