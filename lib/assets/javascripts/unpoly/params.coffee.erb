@@ -431,7 +431,7 @@ up.params = (($) ->
   ###
   fromForm = (form) ->
     if form = u.element(form)
-      fields = form.querySelectorAll(up.form.fieldSelector())
+      fields = up.form.fields(form)
       if button = submittingButton(form)
         fields = u.toArray(fields)
         fields.push(button)

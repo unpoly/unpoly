@@ -235,8 +235,8 @@ up.motion = (($) ->
 
     consolidatedOptions = {}
     consolidatedOptions.easing = u.option(userOptions.easing, element?.getAttribute('up-easing'), moduleDefaults.easing, config.easing)
-    consolidatedOptions.duration = Number(u.option(userOptions.duration, element?.getAttribute('up-duration'), moduleDefaults.duration, config.duration))
-    consolidatedOptions.delay = Number(u.option(userOptions.delay, element?.getAttribute('up-delay'), moduleDefaults.delay, config.delay))
+    consolidatedOptions.duration = u.option(userOptions.duration, u.numberAttr(element, 'up-duration'), moduleDefaults.duration, config.duration)
+    consolidatedOptions.delay = u.option(userOptions.delay, u.numberAttr(element, 'up-delay'), moduleDefaults.delay, config.delay)
     consolidatedOptions.trackMotion = userOptions.trackMotion # required by up.MotionTracker
     consolidatedOptions
       

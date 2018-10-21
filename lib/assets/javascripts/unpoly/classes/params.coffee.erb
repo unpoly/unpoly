@@ -1,4 +1,5 @@
 u = up.util
+q = up.query
 
 ###**
 Request parameters
@@ -56,9 +57,9 @@ class up.Params
     an object representation of the given params
   @experimental
   ###
-  toObject: (params) ->
+  toObject: ->
     obj = {}
-    for entry in array
+    for entry in @entries
       { name, value } = entry
       unless u.isBasicObjectProperty(name)
         if @isArrayKey(name)
@@ -122,7 +123,7 @@ class up.Params
     a query string built from the given params
   @experimental
   ###
-  toQuery: (params) ->
+  toQuery: ->
     parts = u.map(@entries, @arrayEntryToQuery)
     parts = u.compact(parts)
     parts.join('&')
@@ -152,7 +153,7 @@ class up.Params
   TODO: Document me for experimental API
   ###
   toURL: (base) ->
-    parts = [base, @toQuery(params)]
+    parts = [base, @toQuery()]
     parts = u.select(parts, u.isPresent)
     separator = if u.contains(base, '?') then '&' else '?'
     parts.join(separator)
@@ -191,6 +192,8 @@ class up.Params
       @entries.push(raw...)
     else if u.isString(raw)
       @addAllFromQuery(raw)
+    else if u.isFormData(raw)
+      @addAllFromFormData(raw)
     else if u.isObject(raw)
       @addAllFromObject(raw)
     else
@@ -216,6 +219,10 @@ class up.Params
         else
           value = null
         @add(name, value)
+
+  addAllFromFormData: (formData) ->
+    u.eachIterator formData.entries(), (value) =>
+      @add(value...)
 
   set: (name, value) ->
     @delete(name)
@@ -245,7 +252,7 @@ class up.Params
   @function up.params.get
   @experimental
   ###
-  get: (params, name) ->
+  get: (name) ->
     if @isArrayKey(name)
       @getAll(name)
     else
@@ -267,16 +274,6 @@ class up.Params
 
   isEmpty: ->
     @entries.length == 0
-
-  @submittingButton: (form) ->
-    $form = $(form)
-    submitButtonSelector = up.form.submitButtonSelector()
-    $activeElement = $(document.activeElement)
-    if $activeElement.is(submitButtonSelector) && $form.has($activeElement)
-      $activeElement[0]
-    else
-      # If no button is focused, we assume the first button in the form.
-      $form.find(submitButtonSelector)[0]
 
   ###**
   Serializes request params from the given `<form>`.
@@ -311,16 +308,18 @@ class up.Params
   @experimental
   ###
   @fromForm: (form) ->
-    if form = u.element(form)
-      fields = form.querySelectorAll(up.form.fieldSelector())
-      if button = @submittingButton(form)
-        fields = u.toArray(fields)
-        fields.push(button)
+    if form = q.element(form)
+      fields = up.form.submissionFields(form)
+      @fromFields(fields)
 
-      params = new @()
-      for field in fields
-        params.addAll(@fromField(field))
-      params
+  ###**
+  TODO
+  ###
+  @fromFields: (fields) ->
+    params = new @()
+    for field in fields
+      params.addField(field)
+    params
 
   ###**
   Serializes request params from a single [input field](/up.form.config#config.fields).
@@ -350,25 +349,36 @@ class up.Params
   @experimental
   ###
   @fromField: (field) ->
+    # TODO: REMOVE THIS
     params = new @()
+    params.addField(field)
+    params
+
+  addFields: (fields) ->
+    @addField(field) for field in fields
+
+  addField: (field) ->
+    params = new @constructor()
     if (field = u.element(field)) && (name = field.name) && (!field.disabled)
       tagName = field.tagName
       type = field.type
       if tagName == 'SELECT'
         for option in field.querySelectorAll('option')
           if option.selected
-            params.add(name, option.value)
+            @add(name, option.value)
       else if type == 'checkbox' || type == 'radio'
         if field.checked
-          params.add(name, field.value)
+          @add(name, field.value)
       else if type == 'file'
         # The value of an input[type=file] is the local path displayed in the form.
         # The actual File objects are in the #files property.
         for file in field.files
-          params.add(name, file)
+          @add(name, file)
       else
-        params.add(name, field.value)
-    params
+        @add(name, field.value)
+
+  isEqual: (other) ->
+    @constructor == @other.constructor && u.isEqual(@entries, other.entries)
 
   ###**
   Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.

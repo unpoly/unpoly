@@ -13,6 +13,7 @@ describe 'up.Params', ->
         compare: (actual, expected) ->
           pass: actual == encodeBrackets(expected)
 
+  toObject = (value) -> new up.Params(value).toObject()
   toQuery = (value) -> new up.Params(value).toQuery()
   toArray = (value) -> new up.Params(value).toArray()
   toFormData = (value) -> new up.Params(value).toFormData()
@@ -165,7 +166,7 @@ describe 'up.Params', ->
 #        ])
 
 
-  describe 'up.params.toFormData', ->
+  describe '#toFormData', ->
 
     describeCapability 'canInspectFormData', ->
 
@@ -190,10 +191,12 @@ describe 'up.Params', ->
           { name: 'key2', value: 'value2' },
         ]
 
-      it 'returns a FormData object unchanged', ->
-        params = new FormData()
-        formData = toFormData(params)
-        expect(formData).toBe(params)
+      it 'returns a FormData with the same values', ->
+        input = new FormData()
+        input.append('foo', 'bar')
+
+        formData = toFormData(input)
+        expect(formData.get('foo')).toEqual('bar')
 
       it 'converts a query string to a FormData object', ->
         params = 'key1=value1&key2=value2'
@@ -211,7 +214,7 @@ describe 'up.Params', ->
         ]
 
 
-  describe 'up.params.toObject', ->
+  describe '#toObject', ->
 
     it "parses a query string of flat key/value pairs", ->
       expect(toObject("xfoo")).toEqual("xfoo": null)
@@ -242,334 +245,102 @@ describe 'up.Params', ->
       expect(obj['foo']).toEqual('bar')
       expect(u.isFunction obj['hasOwnProperty']).toBe(true)
 
-  describe 'up.params.add', ->
+  describe '#add', ->
 
-    describe '(with object)', ->
+    it 'adds a single key and value', ->
+      params = new up.Params(foo: 'one')
+      params.add('bar', 'two')
+      expect(params.toObject()).toEqual { foo: 'one', bar: 'two' }
 
-      it 'adds a single key and value', ->
-        obj = { foo: 'one' }
-        obj = up.params.add(obj, 'bar', 'two')
-        expect(obj).toEqual { foo: 'one', bar: 'two' }
+    it 'stores multiple entries with the same name', ->
+      params = new up.Params(foo: 'one')
+      params.add('foo', 'two')
+      expect(params.toArray()).toEqual [
+        { name: 'foo', value: 'one' },
+        { name: 'foo', value: 'two' }
+      ]
 
-    describe '(with array)', ->
-
-      it 'adds a single key and value', ->
-        obj = [{ name: 'foo', value: 'one' }]
-        obj = up.params.add(obj, 'bar', 'two')
-        expect(obj).toEqual [{ name: 'foo', value: 'one' }, { name: 'bar', value: 'two' }]
-
-    describe '(with query string)', ->
-
-      it 'adds a new key/value pair to the end of a query', ->
-        query = 'foo=one'
-        query = up.params.add(query, 'bar', 'two')
-        expect(query).toEqual('foo=one&bar=two')
-
-      it 'does not add superfluous ampersands if the previous query was a blank string', ->
-        query = ''
-        query = up.params.add(query, 'bar', 'two')
-        expect(query).toEqual('bar=two')
-
-      it 'escapes special characters in the new key and value', ->
-        query = 'foo=one'
-        query = up.params.add(query, 'bär', 'twö')
-        expect(query).toEqual('foo=one&b%C3%A4r=tw%C3%B6')
-
-    describe '(with FormData)', ->
-
-      describeCapability 'canInspectFormData', ->
-
-        it 'adds a single entry', ->
-          formData = new FormData()
-          formData.append('key1', 'value1')
-          up.params.add(formData, 'key2', 'value2')
-          expect(up.params.toArray(formData)).toEqual [
-            { name: 'key1', value: 'value1' },
-            { name: 'key2', value: 'value2' },
-          ]
-
-    describe '(with missing params)', ->
-
-      it 'returns an object with only the new key and value', ->
-        obj = undefined
-        obj = up.params.add(obj, 'bar', 'two')
-        expect(obj).toEqual { bar: 'two' }
-
-
-  describe 'up.params.get', ->
+  describe '#get', ->
 
     describe '(with object)', ->
 
       it 'returns the value for the given name', ->
-        obj = { foo: 'one', bar: 'two' }
-        value = up.params.get(obj, 'bar')
+        params = new up.Params(foo: 'one', bar: 'two')
+        value = params.get('bar')
         expect(value).toEqual('two')
 
       it 'returns undefined if no value is set for the given name', ->
-        obj = { foo: 'one' }
-        value = up.params.get(obj, 'bar')
+        params = new up.Params(foo: 'one')
+        value = params.get('bar')
         expect(value).toBeUndefined()
 
       it 'returns undefined for names that are also a basic object property', ->
-        obj = {}
-        value = up.params.get(obj, 'hasOwnProperty')
+        params = new up.Params({})
+        value = params.get('hasOwnProperty')
         expect(value).toBeUndefined()
 
-    describe '(with array)', ->
-
-      it 'returns the value of the first entry with the given name', ->
-        array = [
-          { name: 'foo', value: 'one' }
-          { name: 'bar', value: 'two' }
-          { name: 'foo', value: 'three' }
-        ]
-        value = up.params.get(array, 'foo')
+      it 'returns the first matching entries if there are are multiple entries with the same name', ->
+        params = new up.Params('foo=one&foo=two')
+        value = params.get('foo')
         expect(value).toEqual('one')
 
-      it 'returns undefined if there is no entry with the given name', ->
-        array = [
-          { name: 'foo', value: 'one' }
-        ]
-        value = up.params.get(array, 'bar')
-        expect(value).toBeUndefined()
+  describe '#getAll', ->
 
-    describe '(with query string)', ->
+    it 'returns all entries with the given name'
 
-      it 'returns the query param with the given name', ->
-        query = 'foo=one&bar=two'
-        value = up.params.get(query, 'bar')
-        expect(value).toEqual('two')
+  describe '#delete', ->
 
-      it 'returns undefined if there is no query param with the given name', ->
-        query = 'foo=one'
-        query = up.params.get(query, 'bar')
-        expect(query).toBeUndefined()
+    it 'deletes all entries with the given name'
 
-      it 'unescapes percent-encoded characters in the returned value', ->
-        query = 'foo=one%20two'
-        value = up.params.get(query, 'foo')
-        expect(value).toEqual('one two')
+  describe '#set', ->
 
-    describe '(with FormData)', ->
+    it 'adds an entry with the given name and value'
 
-      describeCapability 'canInspectFormData', ->
+    it 'deletes any previous entries with the same name'
 
-        it 'returns the first entry with the given name', ->
-          formData = new FormData()
-          formData.append('key1', 'value1')
-          formData.append('key2', 'value2')
-          value = up.params.get(formData, 'key2')
-          expect(value).toEqual('value2')
-
-        it 'returns undefined if there is no entry with the given name', ->
-          formData = new FormData()
-          value = up.params.get(formData, 'key')
-          expect(value).toBeUndefined()
-
-    describe '(with missing params)', ->
-
-      it 'returns undefined', ->
-        params = undefined
-        value = up.params.get(params, 'foo')
-        expect(value).toBeUndefined()
-
-  describe 'up.params.merge', ->
-
-    describe '(with object)', ->
-
-      it 'merges a flat object', ->
-        obj = { a: '1', b: '2' }
-        other = { c: '3', d: '4'}
-        obj = up.params.merge(obj, other)
-        expect(obj).toEqual({ a: '1', b: '2', c: '3', d: '4' })
-
-      it 'merges an array', ->
-        obj = { a: '1', b: '2' }
-        other = [
-          { name: 'c', value: '3' },
-          { name: 'd', value: '4' }
-        ]
-        obj = up.params.merge(obj, other)
-        expect(obj).toEqual({ a: '1', b: '2', c: '3', d: '4' })
-
-      it 'merges a query string', ->
-        obj = { a: '1', b: '2' }
-        other = 'c=3&d=4'
-        obj = up.params.merge(obj, other)
-        expect(obj).toEqual({ a: '1', b: '2', c: '3', d: '4' })
-
-      it 'does not change or crash when merged with undefined', ->
-        obj = { a: '1', b: '2' }
-        obj = up.params.merge(obj, undefined)
-        expect(obj).toEqual({ a: '1', b: '2' })
-
-      describeCapability 'canInspectFormData', ->
-
-        it 'merges a FormData object', ->
-          obj = { a: '1', b: '2' }
-          formData = new FormData()
-          formData.append('c', '3')
-          formData.append('d', '4')
-          merged = up.params.merge(obj, formData)
-          expect(merged).toEqual({ a: '1', b: '2', c: '3', d: '4' })
-
-    describe '(with array)', ->
-
-      it 'merges a flat object', ->
-        array = [
-          { name: 'a', value: '1' },
-          { name: 'b', value: '2' }
-        ]
-        other = { c: '3', d: '4'}
-        array = up.params.merge(array, other)
-        expect(array).toEqual [
-          { name: 'a', value: '1' },
-          { name: 'b', value: '2' },
-          { name: 'c', value: '3' },
-          { name: 'd', value: '4' }
-        ]
-
-      it 'merges another array', ->
-        array = [
-          { name: 'a', value: '1' },
-          { name: 'b', value: '2' }
-        ]
-        other = [
-          { name: 'c', value: '3' },
-          { name: 'd', value: '4' }
-        ]
-        array = up.params.merge(array, other)
-        expect(array).toEqual [
-          { name: 'a', value: '1' },
-          { name: 'b', value: '2' },
-          { name: 'c', value: '3' },
-          { name: 'd', value: '4' }
-        ]
-
-      it 'merges a query string', ->
-        array = [
-          { name: 'a', value: '1' },
-          { name: 'b', value: '2' }
-        ]
-        other = 'c=3&d=4'
-        array = up.params.merge(array, other)
-        expect(array).toEqual [
-          { name: 'a', value: '1' },
-          { name: 'b', value: '2' },
-          { name: 'c', value: '3' },
-          { name: 'd', value: '4' }
-        ]
-
-      it 'does not change or crash when merged with undefined', ->
-        array = [
-          { name: 'a', value: '1' },
-          { name: 'b', value: '2' }
-        ]
-        array = up.params.merge(array, undefined)
-        expect(array).toEqual [
-          { name: 'a', value: '1' },
-          { name: 'b', value: '2' }
-        ]
-
-      describeCapability 'canInspectFormData', ->
-
-        it 'merges a FormData object', ->
-          array = [
-            { name: 'a', value: '1' },
-            { name: 'b', value: '2' }
-          ]
-          formData = new FormData()
-          formData.append('c', '3')
-          formData.append('d', '4')
-          merged = up.params.merge(array, formData)
-          expect(merged).toEqual [
-            { name: 'a', value: '1' },
-            { name: 'b', value: '2' },
-            { name: 'c', value: '3' },
-            { name: 'd', value: '4' }
-          ]
-
-
-    describe '(with query)', ->
-
-      it 'merges a flat object', ->
-        query = 'a=1&b=2'
-        other = { c: '3', d: '4'}
-        query = up.params.merge(query, other)
-        expect(query).toEqual('a=1&b=2&c=3&d=4')
-
-      it 'merges an array', ->
-        query = 'a=1&b=2'
-        other = [
-          { name: 'c', value: '3' },
-          { name: 'd', value: '4' }
-        ]
-        query = up.params.merge(query, other)
-        expect(query).toEqual('a=1&b=2&c=3&d=4')
-
-      it 'merges another query string', ->
-        query = 'a=1&b=2'
-        other = 'c=3&d=4'
-        query = up.params.merge(query, other)
-        expect(query).toEqual('a=1&b=2&c=3&d=4')
-
-      it 'does not change or crash when merged with undefined', ->
-        query = 'a=1&b=2'
-        query = up.params.merge(query, undefined)
-        expect(query).toEqual('a=1&b=2')
-
-      describeCapability 'canInspectFormData', ->
-
-        it 'merges a FormData object', ->
-          query = 'a=1&b=2'
-          formData = new FormData()
-          formData.append('c', '3')
-          formData.append('d', '4')
-          merged = up.params.merge(query, formData)
-          expect(merged).toEqual('a=1&b=2&c=3&d=4')
-
-  describe 'up.params.buildURL', ->
+    describe '#toURL', ->
 
     it 'composes a URL from a base URL (without query section) and a query section', ->
       base = 'http://foo.bar/path'
-      query = 'key=value'
-      expect(up.params.buildURL(base, query)).toEqual('http://foo.bar/path?key=value')
+      params = new up.Params('key=value')
+      expect(params.toURL(base)).toEqual('http://foo.bar/path?key=value')
 
     it 'accepts other forms of params (instead of query sections)', ->
       base = 'http://foo.bar/path'
-      params = { key: 'value' }
-      expect(up.params.buildURL(base, params)).toEqual('http://foo.bar/path?key=value')
+      params = new up.Params(key: 'value')
+      expect(params.toURL(base)).toEqual('http://foo.bar/path?key=value')
 
     it 'adds more params to a base URL that already has a query section', ->
       base = 'http://foo.bar/path?key1=value1'
-      params = { key2: 'value2' }
-      expect(up.params.buildURL(base, params)).toEqual('http://foo.bar/path?key1=value1&key2=value2')
+      params = new up.Params(key2: 'value2')
+      expect(params.toURL(base)).toEqual('http://foo.bar/path?key1=value1&key2=value2')
 
     it 'does not add a question mark to the base URL if the given params are blank', ->
       base = 'http://foo.bar/path'
-      params = ''
-      expect(up.params.buildURL(base, params)).toEqual('http://foo.bar/path')
+      params = new up.Params([])
+      expect(params.toURL(base)).toEqual('http://foo.bar/path')
 
-  describe 'up.params.fromURL', ->
+  describe '.fromURL', ->
 
-    it 'returns the query section from an URL, without leading question mark', ->
+    it 'parses the query section from an URL, without leading question mark', ->
       url = 'http://foo.bar/path?key=value'
-      expect(up.params.fromURL(url)).toEqual('key=value')
+      params = up.Params.fromURL(url)
+      expect(params.toQuery()).toEqual('key=value')
 
-    it 'returns undefined if the URL has no query section', ->
+    it 'parses no params if the URL has no query section', ->
       url = 'http://foo.bar/path'
-      expect(up.params.fromURL(url)).toBeUndefined()
+      params = up.Params.fromURL(url)
+      expect(params.toArray()).toEqual([])
 
-
-  describe 'up.params.fromForm', ->
+  describe '.fromForm', ->
 
     it 'serializes a form with multiple inputs', ->
       $form = affix('form')
       $form.append('<input name="key1" value="value1">')
       $form.append('<input name="key2" value="value2">')
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key1', value: 'value1' },
         { name: 'key2', value: 'value2' },
       ]
@@ -578,8 +349,8 @@ describe 'up.Params', ->
       $form = affix('form')
       $form.append('<input type="text" name="key" value="value-from-attribute">')
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value-from-attribute' }
       ]
 
@@ -588,8 +359,8 @@ describe 'up.Params', ->
       $input = $('<input type="text" name="key" value="value-from-attribute">').appendTo($form)
       $input[0].value = 'value-from-script'
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value-from-script' }
       ]
 
@@ -597,8 +368,8 @@ describe 'up.Params', ->
       $form = affix('form')
       $form.append('<input type="hidden" name="key" value="value-from-attribute">')
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value-from-attribute' }
       ]
 
@@ -607,8 +378,8 @@ describe 'up.Params', ->
       $input = $('<input type="hidden" name="key" value="value-from-attribute">').appendTo($form)
       $input[0].value = 'value-from-script'
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value-from-script' }
       ]
 
@@ -619,8 +390,8 @@ describe 'up.Params', ->
       $option2 = $('<option value="value2" selected>').appendTo($select)
       $option3 = $('<option value="value3">').appendTo($select)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value2' }
       ]
 
@@ -634,8 +405,8 @@ describe 'up.Params', ->
       $option2[0].selected = false
       $option3[0].selected = true
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value3' }
       ]
 
@@ -646,8 +417,8 @@ describe 'up.Params', ->
       $option2 = $('<option value="value2" selected>').appendTo($select)
       $option3 = $('<option value="value3" selected>').appendTo($select)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value2' },
         { name: 'key', value: 'value3' }
       ]
@@ -660,8 +431,8 @@ describe 'up.Params', ->
       $form = affix('form')
       $input = $('<input type="checkbox" name="key" value="value" checked>').appendTo($form)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value' }
       ]
 
@@ -670,16 +441,16 @@ describe 'up.Params', ->
       $input = $('<input type="checkbox" name="key" value="value">').appendTo($form)
       $input[0].checked = true
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value' }
       ]
 
     it 'excludes an <input type="checkbox"> that is unchecked', ->
       $form = affix('form')
       $input = $('<input type="checkbox" name="key" value="value">').appendTo($form)
-      params = up.params.fromForm($form)
-      expect(params).toEqual []
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual []
 
     it 'includes a checked <input type="radio"> in a radio button group that was [checked] by default', ->
       $form = affix('form')
@@ -687,8 +458,8 @@ describe 'up.Params', ->
       $button2 = $('<input type="radio" name="key" value="value2" checked>').appendTo($form)
       $button3 = $('<input type="radio" name="key" value="value3">').appendTo($form)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value2' }
       ]
 
@@ -701,8 +472,8 @@ describe 'up.Params', ->
       $button2[0].checked = false
       $button3[0].checked = true
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value3' }
       ]
 
@@ -711,37 +482,37 @@ describe 'up.Params', ->
       $button1 = $('<input type="radio" name="key" value="value1">').appendTo($form)
       $button2 = $('<input type="radio" name="key" value="value2">').appendTo($form)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual []
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual []
 
     it 'excludes an <input> that is [disabled] by default', ->
       $form = affix('form')
       $input = $('<input type="text" name="key" value="value" disabled>').appendTo($form)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual []
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual []
 
     it 'excludes an <input> that was disabled by a script', ->
       $form = affix('form')
       $input = $('<input type="text" name="key" value="value">').appendTo($form)
       $input[0].disabled = true
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual []
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual []
 
     it 'excludes an <input> without a [name] attribute', ->
       $form = affix('form')
       $input = $('<input type="text" value="value">').appendTo($form)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual []
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual []
 
     it 'includes an <input readonly>', ->
       $form = affix('form')
       $input = $('<input type="text" name="key" value="value" readonly>').appendTo($form)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'key', value: 'value' }
       ]
 
@@ -754,8 +525,8 @@ describe 'up.Params', ->
 
       $submit2.focus()
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'input-key', value: 'input-value' },
         { name: 'submit2-key', value: 'submit2-value' }
       ]
@@ -766,8 +537,8 @@ describe 'up.Params', ->
       $submit1 = $('<button type="submit" name="submit1-key" value="submit1-value">').appendTo($form)
       $submit2 = $('<input type="submit" name="submit2-key" value="submit2-value">').appendTo($form)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'input-key', value: 'input-value' },
         { name: 'submit1-key', value: 'submit1-value' }
       ]
@@ -777,8 +548,8 @@ describe 'up.Params', ->
       $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
       $submit = $('<button type="submit" value="submit-value">').appendTo($form)
 
-      params = up.params.fromForm($form)
-      expect(params).toEqual [
+      params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual [
         { name: 'input-key', value: 'input-value' }
       ]
 

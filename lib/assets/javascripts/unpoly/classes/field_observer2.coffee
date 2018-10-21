@@ -1,4 +1,5 @@
 u = up.util
+q = up.query
 
 class up.FieldObserver2
 
@@ -6,16 +7,17 @@ class up.FieldObserver2
   # we always bind to both events in case another script manually triggers it.
   CHANGE_EVENTS = ['input', 'change']
 
-  constructor: (@container, options) ->
+  constructor: (fieldOrFields, options) ->
+    @fields = q.elements(fieldOrFields)
     @delay = options.delay
     @callback = options.callback
+    @batch = options.batch
 
   start: =>
-    # Don't use undefined since an unchecked checkbox actually has an undefined value
-    @scheduledValuesByName = null
-    @processedValuesByName = @readFieldValues()
+    @scheduledValues = null
+    @processedValues = @readFieldValues()
     @currentTimer = undefined
-    @currentCallback = undefined
+    @callbackRunning = false
     for event in CHANGE_EVENTS
       @field.addEventListener(event, @check)
 
@@ -29,36 +31,54 @@ class up.FieldObserver2
     @currentTimer = undefined
 
   scheduleTimer: =>
+    @cancelTimer()
     @currentTimer = u.setTimer @delay, =>
       @currentTimer = undefined
       @requestCallback()
 
-  isNewValue: (value) =>
-    value != @processedValue && (@scheduledValue == null || @scheduledValue != value)
+  scheduleValues: (values) =>
+    @scheduledValues = values
+    @scheduleTimer()
+
+  isNewValues: (values) =>
+    !u.isEqual(values, processedValues) && !u.isEqual(@scheduledValues, values)
 
   requestCallback: =>
-    if @scheduledValue != null && !@currentTimer && !@currentCallback
-      @processedValue = @scheduledValue
-      @scheduledValue = null
-      @currentCallback = => @callback.call(@field, @processedValue, @field)
-      # If the callback returns a promise x, Promise.resolve(x) will wait for it
-      callbackDone = Promise.resolve(@currentCallback())
-      u.always callbackDone, =>
-        # Don't use undefined since an unchecked checkbox actually has an undefined value
-        @currentCallback = undefined
+    if @scheduledValues != null && !@currentTimer && !@callbackRunning
+      diff = @changedValues(@processedValues, @scheduledValues)
+      @processedValues = @scheduledValues
+      @scheduledValues = null
+
+      callbackReturnValues = []
+      if @batch
+        callbackReturnValues.push(@callback(diff))
+      else
+        for name, value of diff
+          callbackReturnValues.push(@callback(value, name))
+
+      # Promise.all() will wait for any promises that might be
+      # contained in the `callbackReturnValues` array.
+      callbacksDone = Promise.all(callbackReturnValues)
+
+      u.always callbacksDone, =>
+        @callbackRunning = false
         @requestCallback()
 
-  readFieldValues: =>
+  changedValues: (previous, next) ->
+    changes = {}
+    keys = Object.keys(previous)
+    keys = keys.concat(Object.keys(next))
+    keys = u.uniq(keys)
+    for key in keys
+      previousValue = previous[key]
+      nextValue = next[key]
+      unless u.isEqual(previousValue, nextValue)
+        changes[key] = nextValue
+    changes
 
-    params = up.params.fromField(@field)
-    console.debug("! params from field %o are %o", @field, params)
-    u.map(params, 'value')[0]
+  readFieldValues: =>
+    up.Params.fromFields(@fields).toObject()
 
   check: =>
-    console.debug("! check()")
-    value = @readFieldValue()
-    console.debug("! current value is: %o", value)
-    if @isNewValue(value)
-      @scheduledValue = value
-      @cancelTimer()
-      @scheduleTimer()
+    values = @readFieldValues()
+    @scheduleValues(values) if @isNewValues(values)

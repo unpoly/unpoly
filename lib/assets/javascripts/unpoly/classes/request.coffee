@@ -194,7 +194,7 @@ class up.Request extends up.Record
 
     # @params will be undefined for GET requests, since we have already
     # transfered all params to the URL during normalize().
-    u.each(up.params.toArray(@params), addField)
+    u.each(@params.toArray(), addField)
 
     $form.hide().appendTo('body')
     up.browser.submitForm($form[0])
@@ -229,8 +229,7 @@ class up.Request extends up.Record
     @isSafe() && !u.isFormData(@params)
 
   cacheKey: =>
-    query = up.params.toQuery(@params)
-    [@url, @method, query, @target].join('|')
+    [@url, @method, @params.toQuery(), @target].join('|')
 
   @wrap: (value) ->
     u.wrapValue(value, @)

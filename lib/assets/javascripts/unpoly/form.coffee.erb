@@ -52,6 +52,42 @@ up.form = do ->
     config.fields.join(',')
 
   ###**
+  @function up.form.fields
+  @internal
+  ###
+  findFields = (root) ->
+    q.subtree(root, fieldSelector())
+
+#  findFields = (rootOrRoots) ->
+#    rootOrRoots = q.elements(rootOrRoots)
+#    u.flatMap rootOrRoots, (root) -> q.subtree(root, fieldSelector())
+
+  ###***
+  TODO
+  ###
+  findSubmissionFields = (root) ->
+    console.debug("findSubmissionFields(%o)", root)
+    fields = findFields(root)
+    if button = submittingButton(root)
+      fields = u.toArray(fields)
+      fields.push(button)
+    fields
+
+  ###**
+  @function up.form.submittingButton
+  @internal
+  ###
+  submittingButton = (form) ->
+    $form = $(form)
+    selector = submitButtonSelector()
+    $activeElement = $(document.activeElement)
+    if $activeElement.is(selector) && $form.has($activeElement)
+      $activeElement[0]
+    else
+      # If no button is focused, we assume the first button in the form.
+      $form.find(selector)[0]
+
+  ###**
   @function up.form.submitButtonSelector
   @internal
   ###
@@ -276,38 +312,19 @@ up.form = do ->
     A destructor function that removes the observe watch when called.
   @stable
   ###
-  observe = (selectorOrElement, extraArgs...) ->
-    options = {}
-    callbackArg = undefined
-    if extraArgs.length == 1
-      callbackArg = extraArgs[0]
-    else if extraArgs.length > 1
-      options = u.options(extraArgs[0])
-      callbackArg = extraArgs[1]
-
-    element = q.element(selectorOrElement)
-
-    callback = null
-    rawCallback = u.option(callbackArg, element.getAttribute('up-observe'))
-    if u.isString(rawCallback)
-      callback = new Function('value', 'field', rawCallback)
-    else
-      callback = rawCallback or up.fail('up.observe: No change callback given')
-
-    delay = u.option(element.getAttribute('up-delay'), options.delay, config.observeDelay)
-    delay = parseInt(delay)
-
-    fields = q.subtree(element, fieldSelector())
-
-    destructors = u.map fields, (field) ->
-      observeField(field, delay, callback)
-
-    u.sequence(destructors...)
-
-  observeField = (field, delay, callback) ->
-    observer = new up.FieldObserver(field, { delay, callback })
+  observe = (selectorOrElement, args...) ->
+    elements = q.elements(selectorOrElement)
+    fields = u.flatMap(elements, findFields)
+    options = u.extractOptions(args)
+    options.delay = options.delay ? u.numberAttr(elements[0], 'up-delay') ? config.observeDelay
+    options.callback = u.extractCallback(args) ? observeCallbackFromElement(elements[0]) ? up.fail('up.observe: No change callback given')
+    observer = new up.FieldObserver2(fields, options)
     observer.start()
     return observer.stop
+
+  observeCallbackFromElement = (element) ->
+    if callback = element.getAttribute('up-observe')
+      new Function('value', 'name', rawCallback)
 
   ###**
   [Observes](/up.observe) a field or form and submits the form when a value changes.
@@ -1003,7 +1020,8 @@ up.form = do ->
   switchTargets: switchTargets
   autosubmit: autosubmit
   fieldSelector: fieldSelector
-  submitButtonSelector: submitButtonSelector
+  fields: findFields
+  submissionFields: findSubmissionFields
 
 up.submit = up.form.submit
 up.observe = up.form.observe

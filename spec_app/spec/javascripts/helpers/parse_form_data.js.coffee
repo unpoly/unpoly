@@ -6,10 +6,10 @@ beforeEach ->
 
     parse: (params) ->
       if up.browser.canInspectFormData()
-        array = up.params.toArray(params)
+        array = new up.Params(params).toArray()
       else if params.originalArray
         # In browser that don't support FormData#entries(),
-        # up.params.toArray() stores the original array with the generated
+        # up.Params#toArray() stores the original array with the generated
         # FormData object.
         array = params.originalArray
       else

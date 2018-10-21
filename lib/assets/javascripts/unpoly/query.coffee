@@ -46,6 +46,21 @@ up.query = do ->
     else
       object
 
+  ###**
+  If given a string, returns the all elements matching that string.
+  If given any other argument, returns the argument [wrapped as a collection](/up.util.wrapCollection).
+
+  @function up.query.elements
+  @param {jQuery|Element|String} object
+  @return {Element}
+  @internal
+  ###
+  elements = (object) ->
+    if u.isString(object)
+      all(object)
+    else
+      u.wrapCollection(object)
+
   triggerCustom = (element, name, props = {}) ->
     event = document.createEvent('Event')
     event.initEvent(name, true, true)
@@ -77,8 +92,7 @@ up.query = do ->
   matches: matches
   ancestor: ancestor
   element: element
+  elements: elements
   triggerCustom: triggerCustom
   remove: remove
   toggle: toggle
-
-

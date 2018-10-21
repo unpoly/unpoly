@@ -14,3 +14,6 @@ class up.Record
   copy: (changes = {}) =>
     attributesWithChanges = u.merge(@attributes(), changes)
     new @constructor(attributesWithChanges)
+
+  isEqual: (other) ->
+    @constructor == other.constructor && u.isEqual(@attributes(), other.attributes())

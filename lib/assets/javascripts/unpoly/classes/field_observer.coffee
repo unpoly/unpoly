@@ -49,7 +49,7 @@ class up.FieldObserver
         @requestCallback()
 
   readFieldValue: =>
-    params = up.params.fromField(@field)
+    params = up.Params.fromField(@field)
     console.debug("! params from field %o are %o", @field, params)
     u.map(params, 'value')[0]
 

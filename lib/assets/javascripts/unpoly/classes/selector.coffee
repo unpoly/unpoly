@@ -43,7 +43,7 @@ class up.Selector
     matches = []
     if @matches(root)
       matches.push(root)
-    u.pushAll(matches, @all(root))
+    matches.push(@all(root)...)
     @filterAll(matches)
 
   closest: (root) ->

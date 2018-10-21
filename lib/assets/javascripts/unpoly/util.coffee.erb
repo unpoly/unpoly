@@ -613,8 +613,22 @@ up.util = (($) ->
     else
       Array.prototype.slice.call(object)
 
-  pushAll = (array, newElements) ->
-    array.push.apply(array, newElements)
+  isCollection = (value) ->
+    isArray(value) || isNodeList(value) || isJQuery(value)
+
+  isNodeList = (value) ->
+    value instanceof NodeList
+
+  wrapCollection = (value) ->
+    if isCollection(value)
+      value
+    else if isMissing(value)
+      []
+    else
+      [value]
+
+#  pushAll = (array, newElements) ->
+#    array.push.apply(array, newElements)
 
   ###**
   Returns a shallow copy of the given array or object.
@@ -1227,6 +1241,14 @@ up.util = (($) ->
       undefined
 
   ###**
+  @function up.util.numberAttr
+  @internal
+  ###
+  numberAttr = (element, attribute) ->
+    if (element = up.query.element(element)) && (value = element.getAttribute(attribute)) && (value.match(/^[\d\.]+$/))
+      parseFloat(value)
+
+  ###**
   @function up.util.jsonAttr
   @internal
   ###
@@ -1523,6 +1545,11 @@ up.util = (($) ->
     value = $element.data(key)
     $element.removeData(key)
     value
+
+  extractCallback = (args) ->
+    lastArg = last(args)
+    if isFunction(lastArg)
+      args.pop()
 
   extractOptions = (args) ->
     lastArg = last(args)
@@ -2012,7 +2039,15 @@ up.util = (($) ->
     else if isArray(a)
       a.length == b.length && all(a, (elem, index) -> isEqual(elem, b[index]))
     else if isObject(a)
-      fail('isEqual cannot compare objects yet')
+      if a.isEqual
+        a.isEqual(b)
+      else
+        aKeys = Object.keys(a)
+        bKeys = Object.keys(b)
+        if isEqual(aKeys, bKeys)
+          all aKeys, (aKey) -> isEqual(a[aKey], b[aKey])
+        else
+          false
     else
       a == b
 
@@ -2122,8 +2157,9 @@ up.util = (($) ->
   selectInDynasty: selectInDynasty
   contains: contains
   toArray: toArray
-  pushAll: pushAll
+#  pushAll: pushAll
   castedAttr: castedAttr
+  numberAttr: numberAttr
   jsonAttr: jsonAttr
   clientSize: clientSize
   only: only
@@ -2150,6 +2186,7 @@ up.util = (($) ->
   renameKey: renameKey
   deprecateRenamedKey: deprecateRenamedKey
   extractOptions: extractOptions
+  extractCallback: extractCallback
   isDetached: isDetached
   noop: noop
   asyncNoop: asyncNoop
@@ -2188,6 +2225,7 @@ up.util = (($) ->
   endsWith: endsWith
   sum: sum
 #  wrapArray: wrapArray
+  wrapCollection: wrapCollection
   wrapValue: wrapValue
   values: objectValues
 
