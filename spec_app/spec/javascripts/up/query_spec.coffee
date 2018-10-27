@@ -2,7 +2,7 @@ describe 'up.query', ->
 
   u = up.util
 
-  describe 'up.query.all()', ->
+  describe 'up.query.descendants()', ->
 
     it 'returns all descendants of the given root matching the given selector', ->
       $element = affix('.element')
@@ -10,25 +10,25 @@ describe 'up.query', ->
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
       $otherGrandChild = $otherChild.affix('.grand-child')
-      results = up.query.all($element[0], '.match')
+      results = up.query.descendants($element[0], '.match')
       expect(results).toEqual [$matchingChild[0], $matchingGrandChild[0]]
 
     it 'returns an empty list if no descendant matches', ->
       $element = affix('.element')
       $child = $element.affix('.child')
       $grandChild = $child.affix('.grand-child')
-      results = up.query.all($element[0], '.match')
+      results = up.query.descendants($element[0], '.match')
       expect(results).toEqual []
 
     it 'does not return the root itself, even if it matches', ->
       $element = affix('.element.match')
-      results = up.query.all($element[0], '.match')
+      results = up.query.descendants($element[0], '.match')
       expect(results).toEqual []
 
     it 'does not return ancestors of the root, even if they match', ->
       $parent = affix('.parent.match')
       $element = $parent.affix('.element')
-      results = up.query.all($element[0], '.match')
+      results = up.query.descendants($element[0], '.match')
       expect(results).toEqual []
 
     it 'supports the custom :has() selector', ->
@@ -40,10 +40,10 @@ describe 'up.query', ->
       $childWithoutSelectorWithChild.affix('.match')
       $childWithoutSelectorWithoutChild = affix('.other-selector')
 
-      results = up.query.all($element[0], '.selector:has(.match)')
+      results = up.query.descendants($element[0], '.selector:has(.match)')
       expect(results).toEqual [$childWithSelectorWithChild[0]]
 
-  describe 'up.query.first()', ->
+  describe 'up.query.descendant()', ->
 
     it 'returns the first descendant of the given root that matches the given selector', ->
       $element = affix('.element')
@@ -51,25 +51,25 @@ describe 'up.query', ->
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
       $otherGrandChild = $otherChild.affix('.grand-child')
-      result = up.query.first($element[0], '.match')
+      result = up.query.descendant($element[0], '.match')
       expect(result).toEqual $matchingChild[0]
 
     it 'returns missing if no descendant matches', ->
       $element = affix('.element')
       $child = $element.affix('.child')
       $grandChild = $child.affix('.grand-child')
-      result = up.query.first($element[0], '.match')
+      result = up.query.descendant($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'does not return the root itself, even if it matches', ->
       $element = affix('.element.match')
-      result = up.query.first($element[0], '.match')
+      result = up.query.descendant($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'does not return an ancestor of the root, even if it matches', ->
       $parent = affix('.parent.match')
       $element = $parent.affix('.element')
-      result = up.query.first($element[0], '.match')
+      result = up.query.descendant($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'supports the custom :has() selector', ->
@@ -81,7 +81,7 @@ describe 'up.query', ->
       $childWithoutSelectorWithChild.affix('.match')
       $childWithoutSelectorWithoutChild = affix('.other-selector')
 
-      result = up.query.first($element[0], '.selector:has(.match)')
+      result = up.query.descendant($element[0], '.selector:has(.match)')
       expect(result).toEqual [$childWithSelectorWithChild[0]]
 
   describe 'up.query.subtree()', ->

@@ -211,6 +211,7 @@ up.form = do ->
     options = u.merge(options, up.motion.animateOptions(options, form))
 
     if options.validate
+      console.debug("==> validate target in up.submit() is %o", target)
       options.headers ||= {}
       options.transition = false
       options.failTransition = false
@@ -225,7 +226,7 @@ up.form = do ->
         form.submit()
         return u.unresolvablePromise()
 
-      console.debug("--- called up.replace with options", options.origin)
+      console.debug("--- called up.replace(%o, %o, %o)", target, url, options)
       promise = up.replace(target, url, options)
       u.always promise, -> up.feedback.stop(form)
       promise
@@ -296,7 +297,7 @@ up.form = do ->
       });
 
   @function up.observe
-  @param {Element|jQuery|string} selectorOrElement
+  @param {string|Element|Array<Element>|jQuery} selectorOrElement
     The form fields that wiill be observed.
 
     You can pass one or more fields, a `<form>` or any container that contains form fields.
@@ -325,7 +326,7 @@ up.form = do ->
     return observer.stop
 
   observeCallbackFromElement = (element) ->
-    if callback = element.getAttribute('up-observe')
+    if rawCallback = element.getAttribute('up-observe')
       new Function('value', 'name', rawCallback)
 
   ###**
@@ -346,19 +347,20 @@ up.form = do ->
   @stable
   ###
   autosubmit = (selectorOrElement, options) ->
-
-    observe(selectorOrElement, options, (value, field) ->
-      up.feedback.start field, -> submit(field)
-    )
+    observe(selectorOrElement, options, -> submit(selectorOrElement))
 
   findValidateTargetSelector = (field, options) ->
     option = u.option(options.target, field.getAttribute('up-validate'))
     option ||= u.detectResult config.validateTargets, (defaultTarget) ->
       resolvedDefault = up.dom.resolveSelector(defaultTarget, options.origin)
-      return q.closest(defaultTarget)
+      console.debug('### resolvedDefault is %o', resolvedDefault)
+      if q.first(resolvedDefault)
+        return resolvedDefault
 
     unless option
       up.fail('Could not find validation target for %o (tried defaults %o)', field, config.validateTargets)
+
+    console.debug("*** options is now %o", option)
 
     # resolveSelector() also creates a selector string if given an element
     return up.dom.resolveSelector(option, options.origin)
@@ -392,7 +394,6 @@ up.form = do ->
     options = u.options(options)
     options.origin = field
     options.target = findValidateTargetSelector(field, options)
-    console.debug("*** validate target selector is now %o, origin was %o", options.target, options.origin)
     options.failTarget = options.target
     options.reveal = u.option(options.reveal, u.castedAttr(field, 'up-reveal'), false)
     options.history = false

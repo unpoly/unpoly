@@ -791,22 +791,6 @@ describe 'up.form', ->
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
 
-      it 'marks the field with an .up-active class while the form is submitting', asyncSpec (next) ->
-        $form = affix('form')
-        $field = $form.affix('input[up-autosubmit][name="input-name"][value="old-value"]')
-        up.hello($field)
-        submission = u.newDeferred()
-        submitSpy = up.form.knife.mock('submit').and.returnValue(submission)
-        $field.val('new-value')
-        Trigger.change($field)
-        next =>
-          expect(submitSpy).toHaveBeenCalled()
-          expect($field).toHaveClass('up-active')
-          submission.resolve()
-
-        next =>
-          expect($field).not.toHaveClass('up-active')
-
     describe 'form[up-autosubmit]', ->
 
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
@@ -872,21 +856,26 @@ describe 'up.form', ->
 
       it 'runs the JavaScript code in the attribute value when a change is observed in any contained field', asyncSpec (next) ->
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        $form = affix('form[up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
-        $field1 = $form.affix('input[name="input-name"][value="field1-old-value"]')
-        $field2 = $form.affix('input[name="input-name"][value="field2-old-value"]')
+        $form = affix('form[up-observe="window.observeCallbackSpy(value, name)"]')
+        $field1 = $form.affix('input[name="field1"][value="field1-old-value"]')
+        $field2 = $form.affix('input[name="field2"][value="field2-old-value"]')
         up.hello($form)
         $field1.val('field1-new-value')
         Trigger.change($field1)
 
         next =>
-          expect(window.observeCallbackSpy.calls.allArgs()).toEqual [['field1-new-value', $field1.get(0)]]
+          expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
+            ['field1-new-value', 'field1']
+          ]
 
           $field2.val('field2-new-value')
           Trigger.change($field2)
 
         next =>
-          expect(window.observeCallbackSpy.calls.allArgs()).toEqual [['field1-new-value', $field1.get(0)], ['field2-new-value', $field2.get(0)]]
+          expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
+            ['field1-new-value', 'field1'],
+            ['field2-new-value', 'field2']
+          ]
 
     describe 'input[up-validate]', ->
 

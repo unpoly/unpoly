@@ -31,13 +31,19 @@ class up.Selector
     doesMatch &&= @filterFn(element) unless @filterFn == NO_FILTER
     doesMatch
 
-  all: (root) ->
+  descendants: (root) ->
     matches = root.querySelectorAll(@selector)
     @filterAll(matches)
 
-  first: (root) ->
+  descendant: (root) ->
     match = root.querySelector(@selector)
     @filterOne(match)
+
+  all: ->
+    @descendants(document)
+
+  first: ->
+    @descendant(document)
 
   subtree: (root) ->
     matches = []
@@ -73,7 +79,7 @@ class up.Selector
       u.select(list, @filterFn)
 
   filterOne: (element) ->
-    if @filterFn == NO_FILTER || @filterFn(element)
+    if element && (@filterFn == NO_FILTER || @filterFn(element))
       element
 
   @parse: (selector) ->

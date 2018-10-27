@@ -7,11 +7,17 @@ up.query = do ->
   s = (selector) ->
     up.Selector.parse(selector)
 
-  first = (root, selector) ->
-    s(selector).first(root)
+  descendant = (selector) ->
+    s(selector).descendant()
 
-  all = (root, selector) ->
-    s(selector).all(root)
+  descendants = (selector) ->
+    s(selector).descendants()
+
+  first = (selector) ->
+    s(selector).first()
+
+  all = (selector) ->
+    s(selector).all()
 
   subtree = (root, selector) ->
     s(selector).subtree(root)
@@ -85,6 +91,8 @@ up.query = do ->
     else
       element.style.display = 'none'
 
+  descendant: descendant
+  descendants: descendants
   first: first
   all: all
   subtree: subtree

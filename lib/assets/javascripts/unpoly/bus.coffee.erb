@@ -380,7 +380,6 @@ up.bus = (($) ->
   @internal
   ###
   whenEmitted = (args...) ->
-    console.debug("whenEmitted %o" ,args)
     new Promise (resolve, reject) ->
       if nobodyPrevents(args...)
         resolve()
