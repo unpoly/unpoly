@@ -272,7 +272,7 @@ class up.Params
   isArrayKey: (key) ->
     u.endsWith(key, '[]')
 
-  isEmpty: ->
+  isBlank: ->
     @entries.length == 0
 
   ###**
@@ -378,7 +378,7 @@ class up.Params
         @add(name, field.value)
 
   isEqual: (other) ->
-    @constructor == @other.constructor && u.isEqual(@entries, other.entries)
+    other && (@constructor == other.constructor) && u.isEqual(@entries, other.entries)
 
   ###**
   Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.

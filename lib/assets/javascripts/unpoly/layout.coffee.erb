@@ -303,6 +303,7 @@ up.layout = (($) ->
   ###
   scrollAfterInsertFragment = (selectorOrElement, options) ->
     options = u.options(options)
+    console.debug("scrollAfterInsertFragment with opts %o", options)
     $element = $(selectorOrElement)
 
     hashOpt = options.hash
@@ -328,7 +329,9 @@ up.layout = (($) ->
 
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
+        console.debug("--- revealing %o with %o", revealOpt, options.origin)
         selector = up.dom.resolveSelector(revealOpt, options.origin)
+        console.debug("--- reveal done")
         $element = up.first(selector)
 
       else

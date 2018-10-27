@@ -53,7 +53,7 @@ describe 'up.proxy', ->
 
           promise.then (response) ->
             expect(response.request.url).toMatchUrl('/url')
-            expect(response.request.params).toEqual(key: 'value')
+            expect(response.request.params).toEqual(new up.Params(key: 'value'))
             expect(response.request.method).toEqual('POST')
             expect(response.request.target).toEqual('.target')
             expect(response.request.hash).toBeBlank()
@@ -335,7 +335,7 @@ describe 'up.proxy', ->
               # See that the response object has been updated by moving the data options
               # to the URL. This is important for up.dom code that works on response.request.
               expect(response.request.url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
-              expect(response.request.params).toBeBlank()
+              expect(response.request.params.isEmpty()).toBe(true)
               done()
 
       it 'caches server responses for the configured duration', asyncSpec (next) ->

@@ -16,4 +16,4 @@ class up.Record
     new @constructor(attributesWithChanges)
 
   isEqual: (other) ->
-    @constructor == other.constructor && u.isEqual(@attributes(), other.attributes())
+    other && (@constructor == other.constructor) && u.isEqual(@attributes(), other.attributes())

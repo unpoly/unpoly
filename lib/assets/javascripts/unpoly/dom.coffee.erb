@@ -74,6 +74,7 @@ up.dom = (($) ->
   @internal
   ###
   resolveSelector = (selectorOrElement, origin) ->
+    console.debug("resolveReselector(%o, %o)", selectorOrElement, origin)
     if u.isString(selectorOrElement)
       selector = selectorOrElement
       if u.contains(selector, '&')
@@ -81,6 +82,7 @@ up.dom = (($) ->
           originSelector = u.selectorForElement(origin)
           selector = selector.replace(/\&/, originSelector)
         else
+          debugger
           up.fail("Found origin reference (%s) in selector %s, but no origin was given", '&', selector)
     else
       selector = u.selectorForElement(selectorOrElement)
@@ -385,12 +387,16 @@ up.dom = (($) ->
 
         swapPromises = []
 
+        console.debug("extractSteps are %o", extractSteps)
+
         for step in extractSteps
           up.log.group 'Swapping fragment %s', step.selector, ->
             # Note that we must copy the options hash instead of changing it in-place,  since the
             # async swapElements() is scheduled for the next microtask and we must not change the options
             # for the previous iteration.
             swapOptions = u.merge(options, u.only(step, 'origin', 'reveal'))
+
+            console.debug("swapOptions are %o", swapOptions)
 
             responseDoc.prepareForInsertion(step.$new)
 
@@ -479,6 +485,8 @@ up.dom = (($) ->
         afterDetach: ->
           $old.remove() # clean up jQuery data
           emitFragmentDestroyed($old, $parent: $parent, log: false)
+
+      console.debug("-- morphOptions are %o", morphOptions)
 
       return up.morph($old, $new, transition, morphOptions)
 

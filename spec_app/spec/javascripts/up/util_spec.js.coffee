@@ -869,6 +869,18 @@ describe 'up.util', ->
       it 'returns true for an object with at least one key', ->
         expect(up.util.isBlank({key: 'value'})).toBe(false)
 
+      it 'returns true for an object with an #isBlank method that returns true', ->
+        value = { isBlank: (-> true) }
+        expect(up.util.isBlank(value)).toBe(true)
+
+      it 'returns false for an object with an #isBlank method that returns false', ->
+        value = { isBlank: (-> false) }
+        expect(up.util.isBlank(value)).toBe(false)
+
+      it 'returns false for a DOM element', ->
+        value = document.body
+        expect(up.util.isBlank(value)).toBe(false)
+
     describe 'up.util.normalizeUrl', ->
 
       it 'normalizes a relative path', ->

@@ -433,11 +433,15 @@ up.util = (($) ->
   @return {boolean}
   @stable
   ###
-  isBlank = (object) ->
-    return true if isMissing(object)
-    return false if isFunction(object)
-    return true if isObject(object) && Object.keys(object).length == 0 # object
-    return true if object.length == 0 # string, array, jQuery
+  isBlank = (value) ->
+    if isMissing(value)
+      return true
+    if isObject(value) && isFunction(value.isBlank)
+      return value.isBlank()
+    if isString(value) || isCollection(value)
+      return value.length == 0
+    if isOptions(value)
+      return Object.keys(value).length == 0
     return false
 
   ###**
@@ -549,7 +553,7 @@ up.util = (($) ->
   @stable
   ###
   isElement = (object) ->
-    !!(object && object.nodeType == 1)
+    object instanceof HTMLElement
 
   ###**
   Returns whether the given argument is a jQuery collection.
@@ -2039,7 +2043,7 @@ up.util = (($) ->
     else if isArray(a)
       a.length == b.length && all(a, (elem, index) -> isEqual(elem, b[index]))
     else if isObject(a)
-      if a.isEqual
+      if isFunction(a.isEqual)
         a.isEqual(b)
       else
         aKeys = Object.keys(a)
@@ -2068,7 +2072,7 @@ up.util = (($) ->
       # This object has gone through instantiation and normalization before.
       object
     else
-      new @(object)
+      new constructor(object)
 
 #  wrapArray = (objOrArray) ->
 #    if isUndefined(objOrArray)

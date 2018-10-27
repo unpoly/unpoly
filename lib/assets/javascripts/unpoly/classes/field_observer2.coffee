@@ -7,24 +7,27 @@ class up.FieldObserver2
   # we always bind to both events in case another script manually triggers it.
   CHANGE_EVENTS = ['input', 'change']
 
-  constructor: (fieldOrFields, options) ->
+  constructor: (fieldOrFields, options, @callback) ->
     @fields = q.elements(fieldOrFields)
     @delay = options.delay
-    @callback = options.callback
     @batch = options.batch
+    console.debug("FieldObserver for fields %o and delay %o", @fields, @delay)
 
   start: =>
     @scheduledValues = null
     @processedValues = @readFieldValues()
     @currentTimer = undefined
     @callbackRunning = false
-    for event in CHANGE_EVENTS
-      @field.addEventListener(event, @check)
+    @changeEventSubscription('addEventListener')
 
   stop: =>
-    for event in CHANGE_EVENTS
-      @field.removeEventListener(event, @check)
+    @changeEventSubscription('removeEventListener')
     @cancelTimer()
+
+  changeEventSubscription: (fn) ->
+    for eventName in CHANGE_EVENTS
+      for field in @fields
+        field[fn](eventName, @check)
 
   cancelTimer: =>
     clearTimeout(@currentTimer)
@@ -38,16 +41,22 @@ class up.FieldObserver2
 
   scheduleValues: (values) =>
     @scheduledValues = values
+    console.debug('--- scheduledValues is now set to %o', @scheduledValues)
     @scheduleTimer()
 
   isNewValues: (values) =>
-    !u.isEqual(values, processedValues) && !u.isEqual(@scheduledValues, values)
+    console.debug("-- isNewValues: processedValues = %o, scheduledValues = %o", @processedValues, @scheduledValues)
+    !u.isEqual(values, @processedValues) && !u.isEqual(@scheduledValues, values)
 
   requestCallback: =>
+    console.debug("-- requestCallback: scheduledValues = %o, currentTimer = %o, callbackRunning = %o", @scheduledValues, @currentTimer, @callbackRunning)
+
     if @scheduledValues != null && !@currentTimer && !@callbackRunning
+      console.debug(">>> propagating events")
       diff = @changedValues(@processedValues, @scheduledValues)
       @processedValues = @scheduledValues
       @scheduledValues = null
+      @callbackRunning = true
 
       callbackReturnValues = []
       if @batch
@@ -81,4 +90,5 @@ class up.FieldObserver2
 
   check: =>
     values = @readFieldValues()
+    console.debug("-- check got values %o (new == %o)", values, @isNewValues(values))
     @scheduleValues(values) if @isNewValues(values)

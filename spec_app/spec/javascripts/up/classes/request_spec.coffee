@@ -39,12 +39,12 @@ describe 'up.Request', ->
     it 'returns the constructed params for HTTP methods that allow a payload', ->
       params = { key: 'value' }
       request = new up.Request(url: 'http://host.com/foo', params: params, method: 'post')
-      expect(request.params).toEqual(params)
+      expect(request.params).toEqual(new up.Params(params))
 
-    it "returns undefined for HTTP methods that don't allow a payload", ->
+    it "returns a blank up.Params object for HTTP methods that don't allow a payload", ->
       request = new up.Request(url: 'http://host.com/foo', params: { key: 'value' }, method: 'get')
-      expect(request.params).toBeUndefined()
+      expect(request.params).toBeBlank()
 
     it 'returns the merged { params } and params from the URL for HTTP methods that allow a payload', ->
       request = new up.Request(url: 'http://host.com/foo?urlKey=urlValue', params: { paramsKey: 'paramsValue' }, method: 'post')
-      expect(request.params).toEqual(paramsKey: 'paramsValue', urlKey: 'urlValue')
+      expect(request.params).toEqual(new up.Params(paramsKey: 'paramsValue', urlKey: 'urlValue'))

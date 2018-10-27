@@ -110,7 +110,7 @@ class up.Request extends up.Record
     @url = u.normalizeUrl(urlParts, hash: false)
 
   transferParamsToUrl: =>
-    unless @params.isEmpty()
+    unless @params.isBlank()
       # GET methods are not allowed to have a payload, so we transfer { params } params to the URL.
       @url = @params.toURL(@url)
       # Now that we have transfered the params into the URL, we delete them from the { params } option.
@@ -118,7 +118,7 @@ class up.Request extends up.Record
 
   transferSearchToParams: =>
     paramsFromQuery = up.Params.fromURL(@url)
-    unless paramsFromQuery.isEmpty()
+    unless paramsFromQuery.isBlank()
       @params.addAll(paramsFromQuery)
       @url = u.normalizeUrl(@url, search: false)
 
@@ -134,10 +134,11 @@ class up.Request extends up.Record
       xhrHeaders = u.copy(@headers)
       xhrUrl = @url
       xhrParams = @params.copy()
-      xhrMethod = up.proxy.wrapMethod(@method, @params)
+      xhrMethod = up.proxy.wrapMethod(@method, xhrParams)
+      console.debug('-- params after wrapMethod is %o', xhrParams)
 
       xhrPayload = null
-      unless xhrParams.isEmpty()
+      unless xhrParams.isBlank()
         delete xhrHeaders['Content-Type'] # let the browser set the content type
         xhrPayload = xhrParams.toFormData()
 

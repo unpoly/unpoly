@@ -20,14 +20,13 @@ describe 'up.form', ->
           describe "when the input receives a #{eventName} event", ->
 
             it "runs the callback if the value changed", asyncSpec (next) ->
-              console.debug("===================================")
               $input = affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               $input.val('new-value')
               u.times 2, -> Trigger[eventName]($input)
               next =>
-                expect(callback).toHaveBeenCalledWith('new-value', $input[0])
+                expect(callback).toHaveBeenCalledWith('new-value', 'input-name')
                 expect(callback.calls.count()).toEqual(1)
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
@@ -186,7 +185,6 @@ describe 'up.form', ->
 
             next =>
               console.debug('--- next')
-              debugger
               console.log($form)
               console.log($radio2)
               expect($radio1.is(':checked')).toBe(false)
@@ -255,7 +253,7 @@ describe 'up.form', ->
               $input.val('new-value')
               u.times 2, -> Trigger[eventName]($input)
               next =>
-                expect(callback).toHaveBeenCalledWith('new-value', $input)
+                expect(callback).toHaveBeenCalledWith('new-value', 'input-name')
                 expect(callback.calls.count()).toEqual(1)
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
@@ -846,13 +844,13 @@ describe 'up.form', ->
       it 'runs the JavaScript code in the attribute value when a change is observed in the field', asyncSpec (next) ->
         $form = affix('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, $field.get(0))"]')
+        $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, name)"]')
         up.hello($form)
         $field.val('new-value')
         Trigger.change($field)
 
         next =>
-          expect(window.observeCallbackSpy).toHaveBeenCalledWith('new-value', $field.get(0))
+          expect(window.observeCallbackSpy).toHaveBeenCalledWith('new-value', 'input-name')
 
       describe 'with [up-delay] modifier', ->
 

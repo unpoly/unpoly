@@ -204,6 +204,7 @@ up.form = do ->
     options.cache = u.option(options.cache, u.castedAttr(form, 'up-cache'))
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr(form, 'up-restore-scroll'))
     options.origin = u.option(options.origin, form)
+    console.debug("up.submit() set origin to %o", options.origin)
     options.layer = u.option(options.layer, form.getAttribute('up-layer'), 'auto')
     options.failLayer = u.option(options.failLayer, form.getAttribute('up-fail-layer'), 'auto')
     options.params = up.Params.fromForm(form)
@@ -224,6 +225,7 @@ up.form = do ->
         form.submit()
         return u.unresolvablePromise()
 
+      console.debug("--- called up.replace with options", options.origin)
       promise = up.replace(target, url, options)
       u.always promise, -> up.feedback.stop(form)
       promise
@@ -315,10 +317,10 @@ up.form = do ->
   observe = (selectorOrElement, args...) ->
     elements = q.elements(selectorOrElement)
     fields = u.flatMap(elements, findFields)
+    callback = u.extractCallback(args) ? observeCallbackFromElement(elements[0]) ? up.fail('up.observe: No change callback given')
     options = u.extractOptions(args)
     options.delay = options.delay ? u.numberAttr(elements[0], 'up-delay') ? config.observeDelay
-    options.callback = u.extractCallback(args) ? observeCallbackFromElement(elements[0]) ? up.fail('up.observe: No change callback given')
-    observer = new up.FieldObserver2(fields, options)
+    observer = new up.FieldObserver2(fields, options, callback)
     observer.start()
     return observer.stop
 
@@ -344,6 +346,7 @@ up.form = do ->
   @stable
   ###
   autosubmit = (selectorOrElement, options) ->
+
     observe(selectorOrElement, options, (value, field) ->
       up.feedback.start field, -> submit(field)
     )
