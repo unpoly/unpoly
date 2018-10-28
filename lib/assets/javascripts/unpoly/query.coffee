@@ -7,11 +7,11 @@ up.query = do ->
   s = (selector) ->
     up.Selector.parse(selector)
 
-  descendant = (selector) ->
-    s(selector).descendant()
+  descendant = (root, selector) ->
+    s(selector).descendant(root)
 
-  descendants = (selector) ->
-    s(selector).descendants()
+  descendants = (root, selector) ->
+    s(selector).descendants(root)
 
   first = (selector) ->
     s(selector).first()

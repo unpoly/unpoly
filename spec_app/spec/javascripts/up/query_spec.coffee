@@ -84,6 +84,16 @@ describe 'up.query', ->
       result = up.query.descendant($element[0], '.selector:has(.match)')
       expect(result).toEqual [$childWithSelectorWithChild[0]]
 
+    it 'supports the custom :has() selector when a previous sibling only matches its own selector, but not the descendant selector (bugfix)', ->
+      $element = affix('.element')
+      $childWithSelectorWithoutChild = $element.affix('.selector')
+      $childWithSelectorWithChild = $element.affix('.selector')
+      $childWithSelectorWithChild.affix('.match')
+
+      result = up.query.descendant($element[0], '.selector:has(.match)')
+      expect(result).toEqual [$childWithSelectorWithChild[0]]
+
+
   describe 'up.query.subtree()', ->
 
     it 'returns all descendants of the given root matching the given selector', ->
@@ -92,7 +102,7 @@ describe 'up.query', ->
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
       $otherGrandChild = $otherChild.affix('.grand-child')
-      results = up.query.all($element[0], '.match')
+      results = up.query.subtree($element[0], '.match')
       expect(results).toEqual [$matchingChild[0], $matchingGrandChild[0]]
 
     it 'includes the given root if it matches the selector', ->

@@ -22,22 +22,25 @@ class up.Selector
   CSS_HAS_SUFFIX = "\\:has\\(([^\\)]+)\\)$"
   CSS_HAS_SUFFIX_RE = new RegExp(CSS_HAS_SUFFIX)
 
-  NO_FILTER = 'NO'
-
   constructor: (@selector, @filterFn) ->
 
   matches: (element) ->
     doesMatch = if element.matches then element.matches(@selector) else element.msMatchesSelector(@selector)
-    doesMatch &&= @filterFn(element) unless @filterFn == NO_FILTER
+    doesMatch &&= @filterFn(element) if @filterFn
     doesMatch
 
   descendants: (root) ->
     matches = root.querySelectorAll(@selector)
-    @filterAll(matches)
+    if @filterFn
+      matches = u.select(matches, @filterFn)
+    matches
 
   descendant: (root) ->
-    match = root.querySelector(@selector)
-    @filterOne(match)
+    if !@filterFn
+     root.querySelector(@selector)
+    else
+      candidates = root.querySelectorAll(@selector)
+      u.detect(candidates, @filterFn)
 
   all: ->
     @descendants(document)
@@ -49,15 +52,14 @@ class up.Selector
     matches = []
     if @matches(root)
       matches.push(root)
-    matches.push(@all(root)...)
-    @filterAll(matches)
+    matches.push(@descendants(root)...)
+    matches
 
   closest: (root) ->
-    if root.closest
-      match = root.closest(@selector)
+    if root.closest && !@filterFn
+      return root.closest(@selector)
     else
-      match = @closestPolyfill(root)
-    @filterOne(match)
+      return @closestPolyfill(root)
 
   closestPolyfill: (root) ->
     if @matches(root, @selector)
@@ -72,18 +74,9 @@ class up.Selector
       else
         @ancestor(parentElement)
 
-  filterAll: (list) ->
-    if @filterFn == NO_FILTER
-      list
-    else
-      u.select(list, @filterFn)
-
-  filterOne: (element) ->
-    if element && (@filterFn == NO_FILTER || @filterFn(element))
-      element
-
   @parse: (selector) ->
-    filter = NO_FILTER
+    console.debug("Selector.parse(%o)", selector)
+    filter = null
     selector = selector.replace CSS_HAS_SUFFIX_RE, (match, descendantSelector) ->
       filter = (element) ->
         element.querySelector(descendantSelector)

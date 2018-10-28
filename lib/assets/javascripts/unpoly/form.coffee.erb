@@ -27,8 +27,7 @@ up.form = do ->
     will be updated with the validation messages from the server.
 
     By default this looks for a `<fieldset>`, `<label>` or `<form>`
-    around the validating input field, or any element with an
-    `up-fieldset` attribute.
+    around the validating input field.
   @param {string} [config.fields]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
   @param {string} [config.submitButtons]
@@ -36,7 +35,7 @@ up.form = do ->
   @stable
   ###
   config = u.config
-    validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
+    validateTargets: ['fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
@@ -355,7 +354,11 @@ up.form = do ->
       resolvedDefault = up.dom.resolveSelector(defaultTarget, options.origin)
       console.debug('### resolvedDefault is %o', resolvedDefault)
       if q.first(resolvedDefault)
+        console.debug("IS match: #{resolvedDefault}")
         return resolvedDefault
+      else
+        console.debug("NOT a match: #{resolvedDefault}")
+        return undefined
 
     unless option
       up.fail('Could not find validation target for %o (tried defaults %o)', field, config.validateTargets)
