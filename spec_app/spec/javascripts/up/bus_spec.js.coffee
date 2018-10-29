@@ -180,15 +180,23 @@ describe 'up.bus', ->
         expect(emittedEvent.preventDefault).toBeDefined()
         expect(emittedTarget).toEqual(document)
 
-      it 'accepts custom event properties', ->
-        emittedEvent = undefined
+      describe 'custom event properties', ->
 
-        up.on 'foo', (event) ->
-          emittedEvent = event
+        it 'accepts custom event properties that can be accessed from an up.on() handler', ->
+          emittedEvent = undefined
 
-        up.emit('foo', { customField: 'custom-value' })
+          up.on 'foo', (event) ->
+            emittedEvent = event
 
-        expect(emittedEvent.customField).toEqual('custom-value')
+          up.emit('foo', { customField: 'custom-value' })
+
+          expect(emittedEvent.customField).toEqual('custom-value')
+
+      it 'accepts custom event properties that can be accessed from an jQuery.on() handler', ->
+        throw "implement me"
+
+      it 'accepts custom event properties that can be accessed from an addEventListener() handler', ->
+        throw "implement me"
 
       describe 'with { element } option', ->
 

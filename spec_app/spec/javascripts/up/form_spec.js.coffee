@@ -235,10 +235,6 @@ describe 'up.form', ->
               expect($radio2.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
 
-          it "does not make more than one request if a radio button group changes", ->
-            throw "implement and test me (maybe need to reduce observe-delay)"
-
-
       describe 'when the first argument is a form', ->
 
         u.each changeEvents, (eventName) ->
@@ -915,9 +911,6 @@ describe 'up.form', ->
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
             expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
-
-        it "does not make more than one request if a radio button group changes", ->
-          throw "implement and test me"
 
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
           revealSpy = up.layout.knife.mock('reveal').and.returnValue(Promise.resolve())
