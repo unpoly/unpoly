@@ -19,9 +19,10 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
 
 @class up.syntax
 ###
-up.syntax = (($) ->
+up.syntax = do ->
 
   u = up.util
+  e = up.element
 
   SYSTEM_MACRO_PRIORITIES = {
     '[up-back]': -100        # sets [up-href] to previous URL
@@ -313,9 +314,9 @@ up.syntax = (($) ->
     A list of elements whose subtrees should not be compiled.
   @internal
   ###
-  compile = ($fragment, options) ->
+  compile = (fragment, options) ->
     orderedCompilers = macros.concat(compilers)
-    compileRun = new up.CompilePass($fragment, orderedCompilers, options)
+    compileRun = new up.CompilePass(fragment, orderedCompilers, options)
     compileRun.compile()
 
   ###**
@@ -338,8 +339,8 @@ up.syntax = (($) ->
   @function up.syntax.clean
   @internal
   ###
-  clean = ($fragment) ->
-    cleanables = u.selectInSubtree($fragment, '.up-can-clean')
+  clean = (fragment) ->
+    cleanables = e.subtree(fragment, '.up-can-clean')
     u.each cleanables, (cleanable) ->
       if destructors = cleanable.upDestructors
         destructor() for destructor in destructors
@@ -440,8 +441,6 @@ up.syntax = (($) ->
   compile: compile
   clean: clean
   data: readData
-
-)(jQuery)
 
 up.compiler = up.syntax.compiler
 up.$compiler = up.syntax.$compiler

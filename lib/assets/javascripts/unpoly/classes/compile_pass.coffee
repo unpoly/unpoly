@@ -1,19 +1,18 @@
 #= require ./record
 
 u = up.util
+e = up.element
 
 class up.CompilePass
 
-  constructor: (@$root, @compilers, options = {}) ->
-    @root = @$root[0]
-
+  constructor: (@root, @compilers, options = {}) ->
     # Exclude all elements that are descendants of the subtrees we want to keep.
     # The exclusion process is very expensive (in one case compiling 100 slements
-    # took 1.5s because of this). That's why we only do it if (1) $skipSubtrees
+    # took 1.5s because of this). That's why we only do it if (1) options.skipSubtrees
     # was given and (2) there is an [up-keep] element in $root.
-    @$skipSubtrees = $(options.skip)
-    unless @$skipSubtrees.length && @root.querySelector('[up-keep]')
-      @$skipSubtrees = undefined
+    @skipSubtrees = options.skip
+    unless @skipSubtrees.length && @root.querySelector('[up-keep]')
+      @skipSubtrees = undefined
 
   compile: ->
     up.log.group "Compiling fragment %o", @root, =>
@@ -21,41 +20,40 @@ class up.CompilePass
         @runCompiler(compiler)
 
   runCompiler: (compiler) ->
-    $matches = @$select(compiler.selector)
-    return unless $matches.length
+    matches = @select(compiler.selector)
+    return unless matches.length
 
-    up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isSystem), compiler.selector, $matches.length, =>
+    up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isSystem), compiler.selector, matches.length, =>
       if compiler.batch
-        @compileBatch(compiler, $matches)
+        @compileBatch(compiler, matches)
       else
-        for match in $matches
-          @compileOneElement(compiler, $(match))
+        for match in matches
+          @compileOneElement(compiler, match)
 
       # up.compiler() has a legacy { keep } option that will automatically
       # set [up-keep] on the elements it compiles
       if keepValue = compiler.keep
         value = if u.isString(keepValue) then keepValue else ''
-        $matches.attr('up-keep', value)
+        for match in matches
+          match.setAttribute('up-keep', value)
 
-  compileOneElement: (compiler, $element) ->
-    element = $element[0]
-    elementArg = if compiler.jQuery then $element else element
+  compileOneElement: (compiler, element) ->
+    elementArg = if compiler.jQuery then jQuery(element) else element
     compileArgs = [elementArg]
     # Do not retrieve and parse [up-data] unless the compiler function
     # expects a second argument. Note that we must pass data for an argument
     # count of 0, since then the function might take varargs.
     unless compiler.length == 1
-      data = up.syntax.data($element)
+      data = up.syntax.data(element)
       compileArgs.push(data)
 
     result = compiler.apply(element, compileArgs)
 
     if destructor = @normalizeDestructor(result)
-      up.syntax.destructor($element, destructor)
+      up.syntax.destructor(element, destructor)
 
-  compileBatch: (compiler, $elements) ->
-    elements = $elements.get()
-    elementsArgs = if compiler.jQuery then $elements else elements
+  compileBatch: (compiler, elements) ->
+    elementsArgs = if compiler.jQuery then jQuery(elements) else elements
     compileArgs = [elementsArgs]
     # Do not retrieve and parse [up-data] unless the compiler function
     # expects a second argument. Note that we must pass data for an argument
@@ -76,16 +74,21 @@ class up.CompilePass
       up.warn('up.compiler(): Returning an array of destructor functions is deprecated. Return a single function instead.')
       u.sequence(result...)
 
-  $select: (selector) ->
+  select: (selector) ->
     if u.isFunction(selector)
       selector = selector()
 
-    $matches = u.selectInSubtree(@$root, selector)
+    matches = e.subtree(@root, selector)
+    if @skipSubtrees
+      matches = u.reject(matches, @isInSkippedSubtree)
 
-    # Assign @$skipSubtrees to a local variable because jQuery#filter needs `this`.
-    if $skipSubtrees = @$skipSubtrees
-      $matches = $matches.filter ->
-        $match = $(this)
-        $match.closest($skipSubtrees).length == 0
+    matches
 
-    $matches
+  isInSkippedSubtree: (element) =>
+    if u.contains(@skipSubtrees, element)
+      true
+    else if parent = element.parentElement
+      @isInSkippedSubtree(parent)
+    else
+      false
+

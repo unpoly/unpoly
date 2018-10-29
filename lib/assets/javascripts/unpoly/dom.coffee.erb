@@ -480,7 +480,7 @@ up.dom = (($) ->
         afterInsert: ->
           up.hello($new, options)
         beforeDetach: ->
-          up.syntax.clean($old)
+          up.syntax.clean($old[0])
         afterDetach: ->
           $old.remove() # clean up jQuery data
           emitFragmentDestroyed($old, $parent: $parent, log: false)
@@ -654,7 +654,7 @@ up.dom = (($) ->
     for plan in options.keepPlans
       emitFragmentKept(plan)
       keptElements.push(plan.$element[0])
-    up.syntax.compile($element, skip: keptElements)
+    up.syntax.compile($element[0], skip: keptElements)
     emitFragmentInserted($element, options)
     $element
 
@@ -853,7 +853,7 @@ up.dom = (($) ->
 
     wipe = ->
       $parent = $element.parent()
-      up.syntax.clean($element)
+      up.syntax.clean($element[0])
       $element.remove()
       emitFragmentDestroyed($element, { $parent })
 
