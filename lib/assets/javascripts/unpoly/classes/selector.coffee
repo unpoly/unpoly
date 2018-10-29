@@ -75,7 +75,6 @@ class up.Selector
         @ancestor(parentElement)
 
   @parse: (selector) ->
-    console.debug("Selector.parse(%o)", selector)
     filter = null
     selector = selector.replace CSS_HAS_SUFFIX_RE, (match, descendantSelector) ->
       filter = (element) ->

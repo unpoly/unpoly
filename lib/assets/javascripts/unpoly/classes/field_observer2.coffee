@@ -52,7 +52,7 @@ class up.FieldObserver2
     console.debug("-- requestCallback: scheduledValues = %o, currentTimer = %o, callbackRunning = %o", @scheduledValues, @currentTimer, @callbackRunning)
 
     if @scheduledValues != null && !@currentTimer && !@callbackRunning
-      console.debug(">>> propagating events")
+      console.debug(">>> propagating events for %o", @scheduledValues)
       diff = @changedValues(@processedValues, @scheduledValues)
       @processedValues = @scheduledValues
       @scheduledValues = null

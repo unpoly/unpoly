@@ -271,6 +271,41 @@ describe 'up.form', ->
   #          u.nextFrame ->
   #            expect(callback.calls.count()).toEqual(1)
 
+
+      describe 'with { batch: true } options', ->
+
+        it 'calls the callback once with all collected changes in a diff object', asyncSpec (next) ->
+          $form = affix('form')
+          $input1 = $form.affix('input[name="input1"][value="input1-a"]')
+          $input2 = $form.affix('input[name="input2"][value="input2-a"]')
+          callback = jasmine.createSpy('change callback')
+          up.observe($form, { batch: true }, callback)
+
+          next ->
+            expect(callback.calls.count()).toEqual(0)
+
+            $input1.val('input1-b')
+            Trigger.change($input1)
+            $input2.val('input2-b')
+            Trigger.change($input2)
+
+          next ->
+            expect(callback.calls.count()).toEqual(1)
+            expect(callback.calls.mostRecent().args[0]).toEqual {
+              'input1': 'input1-b'
+              'input2': 'input2-b'
+            }
+
+            $input2.val('input2-c')
+            Trigger.change($input2)
+
+          next ->
+            expect(callback.calls.count()).toEqual(2)
+            expect(callback.calls.mostRecent().args[0]).toEqual {
+              'input2': 'input2-c'
+            }
+
+
     describe 'up.submit', ->
 
       it 'emits a preventable up:form:submit event', asyncSpec (next) ->
