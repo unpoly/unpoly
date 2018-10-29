@@ -465,9 +465,9 @@ up.form = do ->
     u.isPresent(targetSelector) or up.fail("No switch target given for %o", switcher)
     fieldValues = switcherValues(switcher)
     console.debug("--- calling q.all(%o, %o)", form, targetSelector)
-    console.debug("--- result is %o", q.all(form, targetSelector))
+    console.debug("--- result is %o", q.descendants(form, targetSelector))
 
-    q.all(form, targetSelector).forEach (target) ->
+    q.descendants(form, targetSelector).forEach (target) ->
       switchTarget(target, fieldValues)
 
   ###**
@@ -497,7 +497,7 @@ up.form = do ->
   ###
   findSwitcherForTarget = (target) ->
     form = closestContainer(target)
-    switchers = q.all(form, '[up-switch]')
+    switchers = q.descendants(form, '[up-switch]')
     switcher = u.detect switchers, (switcher) ->
       targetSelector = switcher.getAttribute('up-switch')
       q.matches(target, targetSelector)
