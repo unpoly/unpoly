@@ -203,16 +203,59 @@ describe 'up.query', ->
 
   describe 'up.query.triggerCustom()', ->
 
-    it 'must have tests', ->
-      throw "needs tests"
+    it 'triggers an event with the given name on the given element', ->
+      element = affix('.element')[0]
+      callback = jasmine.createSpy('event handler')
+      element.addEventListener('custom:name', callback)
+      expect(callback).not.toHaveBeenCalled()
+      up.query.triggerCustom(element, 'custom:name')
+      expect(callback).toHaveBeenCalled()
+
+    it 'allows to pass custom event properties', ->
+      element = affix('.element')[0]
+      callback = jasmine.createSpy('event handler')
+      element.addEventListener('custom:name', callback)
+      up.query.triggerCustom(element, 'custom:name', customProp: 'customValue')
+      expect(callback).toHaveBeenCalled()
+      expect(callback.calls.mostRecent().args[0].customProp).toEqual('customValue')
+
+    it 'triggers an event that bubbles', ->
+      $parent = affix('.parent')
+      $element = $parent.affix('.element')
+      callback = jasmine.createSpy('event handler')
+      $parent[0].addEventListener('custom:name', callback)
+      up.query.triggerCustom($element[0], 'custom:name')
+      expect(callback).toHaveBeenCalled()
+
+    it 'triggers an event that can be stopped from propagating', ->
+      $parent = affix('.parent')
+      $element = $parent.affix('.element')
+      callback = jasmine.createSpy('event handler')
+      $parent[0].addEventListener('custom:name', callback)
+      $element[0].addEventListener('custom:name', (event) -> event.stopPropagation())
+      up.query.triggerCustom($element[0], 'custom:name')
+      expect(callback).not.toHaveBeenCalled()
 
   describe 'up.query.remove()', ->
 
-    it 'must have tests', ->
-      throw "needs tests"
+    it 'removes the given element from the DOM', ->
+      element = affix('.element')[0]
+      expect(element).toBeAttached()
+      up.query.remove(element)
+      expect(element).toBeDetached()
 
   describe 'up.query.toggle()', ->
 
-    it 'must have tests', ->
-      throw "needs tests"
+    it 'hides the given element if the second argument is false', ->
+      element = affix('.element')[0]
+      expect(element).toBeVisible()
+      up.query.toggle(element, false)
+      expect(element).toBeHidden()
+
+    it 'shows the given element if the second argument is true', ->
+      element = affix('.element')[0]
+      element.style.display = 'none'
+      expect(element).toBeHidden()
+      up.query.toggle(element, true)
+      expect(element).toBeVisible()
 

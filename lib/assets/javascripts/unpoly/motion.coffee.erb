@@ -162,6 +162,8 @@ up.motion = (($) ->
   @stable
   ###
   animate = (elementOrSelector, animation, options) ->
+    console.debug("animate(%o, %o, %o)", elementOrSelector, animation, options)
+
     $element = $(elementOrSelector)
     options = animateOptions(options)
 
@@ -224,14 +226,16 @@ up.motion = (($) ->
 
   @param {Object} userOptions
   @param {Element|jQuery} [element]
-  @param {Object} moduleDefaults
+  @param {Object} [moduleDefaults]
   @function up.motion.animateOptions
   @internal
   ###
   animateOptions = (args...) ->
-    userOptions = args.shift()
+    userOptions = args.shift() ? {}
     moduleDefaults = u.extractOptions(args)
     element = u.element(args.pop()) # might be undefined
+
+    console.debug("animateOptions(), userOptions = %o, moduleDefaults = %o, element = %o", userOptions, moduleDefaults, element)
 
     consolidatedOptions = {}
     consolidatedOptions.easing = u.option(userOptions.easing, element?.getAttribute('up-easing'), moduleDefaults.easing, config.easing)
