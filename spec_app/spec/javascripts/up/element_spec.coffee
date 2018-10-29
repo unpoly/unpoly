@@ -1,8 +1,8 @@
-describe 'up.query', ->
+describe 'up.element', ->
 
   u = up.util
 
-  describe 'up.query.descendants()', ->
+  describe 'up.element.descendants()', ->
 
     it 'returns all descendants of the given root matching the given selector', ->
       $element = affix('.element')
@@ -10,25 +10,25 @@ describe 'up.query', ->
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
       $otherGrandChild = $otherChild.affix('.grand-child')
-      results = up.query.descendants($element[0], '.match')
+      results = up.element.descendants($element[0], '.match')
       expect(results).toEqual [$matchingChild[0], $matchingGrandChild[0]]
 
     it 'returns an empty list if no descendant matches', ->
       $element = affix('.element')
       $child = $element.affix('.child')
       $grandChild = $child.affix('.grand-child')
-      results = up.query.descendants($element[0], '.match')
+      results = up.element.descendants($element[0], '.match')
       expect(results).toEqual []
 
     it 'does not return the root itself, even if it matches', ->
       $element = affix('.element.match')
-      results = up.query.descendants($element[0], '.match')
+      results = up.element.descendants($element[0], '.match')
       expect(results).toEqual []
 
     it 'does not return ancestors of the root, even if they match', ->
       $parent = affix('.parent.match')
       $element = $parent.affix('.element')
-      results = up.query.descendants($element[0], '.match')
+      results = up.element.descendants($element[0], '.match')
       expect(results).toEqual []
 
     it 'supports the custom :has() selector', ->
@@ -40,10 +40,10 @@ describe 'up.query', ->
       $childWithoutSelectorWithChild.affix('.match')
       $childWithoutSelectorWithoutChild = affix('.other-selector')
 
-      results = up.query.descendants($element[0], '.selector:has(.match)')
+      results = up.element.descendants($element[0], '.selector:has(.match)')
       expect(results).toEqual [$childWithSelectorWithChild[0]]
 
-  describe 'up.query.descendant()', ->
+  describe 'up.element.descendant()', ->
 
     it 'returns the first descendant of the given root that matches the given selector', ->
       $element = affix('.element')
@@ -51,25 +51,25 @@ describe 'up.query', ->
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
       $otherGrandChild = $otherChild.affix('.grand-child')
-      result = up.query.descendant($element[0], '.match')
+      result = up.element.descendant($element[0], '.match')
       expect(result).toEqual $matchingChild[0]
 
     it 'returns missing if no descendant matches', ->
       $element = affix('.element')
       $child = $element.affix('.child')
       $grandChild = $child.affix('.grand-child')
-      result = up.query.descendant($element[0], '.match')
+      result = up.element.descendant($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'does not return the root itself, even if it matches', ->
       $element = affix('.element.match')
-      result = up.query.descendant($element[0], '.match')
+      result = up.element.descendant($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'does not return an ancestor of the root, even if it matches', ->
       $parent = affix('.parent.match')
       $element = $parent.affix('.element')
-      result = up.query.descendant($element[0], '.match')
+      result = up.element.descendant($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'supports the custom :has() selector', ->
@@ -81,7 +81,7 @@ describe 'up.query', ->
       $childWithoutSelectorWithChild.affix('.match')
       $childWithoutSelectorWithoutChild = affix('.other-selector')
 
-      result = up.query.descendant($element[0], '.selector:has(.match)')
+      result = up.element.descendant($element[0], '.selector:has(.match)')
       expect(result).toEqual [$childWithSelectorWithChild[0]]
 
     it 'supports the custom :has() selector when a previous sibling only matches its own selector, but not the descendant selector (bugfix)', ->
@@ -90,11 +90,11 @@ describe 'up.query', ->
       $childWithSelectorWithChild = $element.affix('.selector')
       $childWithSelectorWithChild.affix('.match')
 
-      result = up.query.descendant($element[0], '.selector:has(.match)')
+      result = up.element.descendant($element[0], '.selector:has(.match)')
       expect(result).toEqual [$childWithSelectorWithChild[0]]
 
 
-  describe 'up.query.subtree()', ->
+  describe 'up.element.subtree()', ->
 
     it 'returns all descendants of the given root matching the given selector', ->
       $element = affix('.element')
@@ -102,7 +102,7 @@ describe 'up.query', ->
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
       $otherGrandChild = $otherChild.affix('.grand-child')
-      results = up.query.subtree($element[0], '.match')
+      results = up.element.subtree($element[0], '.match')
       expect(results).toEqual [$matchingChild[0], $matchingGrandChild[0]]
 
     it 'includes the given root if it matches the selector', ->
@@ -111,19 +111,19 @@ describe 'up.query', ->
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
       $otherGrandChild = $otherChild.affix('.grand-child')
-      results = up.query.subtree($element[0], '.match')
+      results = up.element.subtree($element[0], '.match')
       expect(results).toEqual [$element[0], $matchingChild[0], $matchingGrandChild[0]]
 
     it 'does not return ancestors of the root, even if they match', ->
       $parent = affix('.parent.match')
       $element = $parent.affix('.element')
-      results = up.query.subtree($element[0], '.match')
+      results = up.element.subtree($element[0], '.match')
       expect(results).toEqual []
 
     it 'returns an empty list if neither root nor any descendant matches', ->
       $element = affix('.element')
       $child = $element.affix('.child')
-      results = up.query.subtree($element[0], '.match')
+      results = up.element.subtree($element[0], '.match')
       expect(results).toEqual []
 
     it 'supports the custom :has() selector', ->
@@ -135,10 +135,10 @@ describe 'up.query', ->
       $childWithoutSelectorWithChild.affix('.match')
       $childWithoutSelectorWithoutChild = affix('.other-selector')
 
-      results = up.query.subtree($element[0], '.selector:has(.match)')
+      results = up.element.subtree($element[0], '.selector:has(.match)')
       expect(results).toEqual [$element[0], $childWithSelectorWithChild[0]]
 
-  describe 'up.query.closest()', ->
+  describe 'up.element.closest()', ->
 
     it 'returns the closest ancestor of the given root that matches the given selector', ->
       $grandGrandMother = affix('.match')
@@ -146,31 +146,31 @@ describe 'up.query', ->
       $mother = $grandMother.affix('.no-match')
       $element = $mother.affix('.element')
 
-      result = up.query.closest($element[0], '.match')
+      result = up.element.closest($element[0], '.match')
       expect(result).toBe($grandMother[0])
 
     it 'returns the given root if it matches', ->
       $mother = affix('.match')
       $element = $mother.affix('.match')
 
-      result = up.query.closest($element[0], '.match')
+      result = up.element.closest($element[0], '.match')
       expect(result).toBe($element[0])
 
     it 'does not return descendants of the root, even if they match', ->
       $element = affix('.element')
       $child = $element.affix('.match')
 
-      result = up.query.closest($element[0], '.match')
+      result = up.element.closest($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'returns missing if neither root nor ancestor matches', ->
       $mother = affix('.no-match')
       $element = $mother.affix('.no-match')
 
-      result = up.query.closest($element[0], '.match')
+      result = up.element.closest($element[0], '.match')
       expect(result).toBeMissing()
 
-  describe 'up.query.ancestor()', ->
+  describe 'up.element.ancestor()', ->
 
     it 'returns the closest ancestor of the given root that matches the given selector', ->
       $grandGrandMother = affix('.match')
@@ -178,44 +178,44 @@ describe 'up.query', ->
       $mother = $grandMother.affix('.no-match')
       $element = $mother.affix('.element')
 
-      result = up.query.ancestor($element[0], '.match')
+      result = up.element.ancestor($element[0], '.match')
       expect(result).toBe($grandMother[0])
 
     it 'does not return the given root, even if it matches', ->
       $element = affix('.match')
 
-      result = up.query.ancestor($element[0], '.match')
+      result = up.element.ancestor($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'does not return descendants of the root, even if they match', ->
       $element = affix('.element')
       $child = $element.affix('.match')
 
-      result = up.query.ancestor($element[0], '.match')
+      result = up.element.ancestor($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'returns missing if no ancestor matches', ->
       $mother = affix('.no-match')
       $element = $mother.affix('.no-match')
 
-      result = up.query.ancestor($element[0], '.match')
+      result = up.element.ancestor($element[0], '.match')
       expect(result).toBeMissing()
 
-  describe 'up.query.triggerCustom()', ->
+  describe 'up.element.triggerCustom()', ->
 
     it 'triggers an event with the given name on the given element', ->
       element = affix('.element')[0]
       callback = jasmine.createSpy('event handler')
       element.addEventListener('custom:name', callback)
       expect(callback).not.toHaveBeenCalled()
-      up.query.triggerCustom(element, 'custom:name')
+      up.element.triggerCustom(element, 'custom:name')
       expect(callback).toHaveBeenCalled()
 
     it 'allows to pass custom event properties', ->
       element = affix('.element')[0]
       callback = jasmine.createSpy('event handler')
       element.addEventListener('custom:name', callback)
-      up.query.triggerCustom(element, 'custom:name', customProp: 'customValue')
+      up.element.triggerCustom(element, 'custom:name', customProp: 'customValue')
       expect(callback).toHaveBeenCalled()
       expect(callback.calls.mostRecent().args[0].customProp).toEqual('customValue')
 
@@ -224,7 +224,7 @@ describe 'up.query', ->
       $element = $parent.affix('.element')
       callback = jasmine.createSpy('event handler')
       $parent[0].addEventListener('custom:name', callback)
-      up.query.triggerCustom($element[0], 'custom:name')
+      up.element.triggerCustom($element[0], 'custom:name')
       expect(callback).toHaveBeenCalled()
 
     it 'triggers an event that can be stopped from propagating', ->
@@ -233,29 +233,29 @@ describe 'up.query', ->
       callback = jasmine.createSpy('event handler')
       $parent[0].addEventListener('custom:name', callback)
       $element[0].addEventListener('custom:name', (event) -> event.stopPropagation())
-      up.query.triggerCustom($element[0], 'custom:name')
+      up.element.triggerCustom($element[0], 'custom:name')
       expect(callback).not.toHaveBeenCalled()
 
-  describe 'up.query.remove()', ->
+  describe 'up.element.remove()', ->
 
     it 'removes the given element from the DOM', ->
       element = affix('.element')[0]
       expect(element).toBeAttached()
-      up.query.remove(element)
+      up.element.remove(element)
       expect(element).toBeDetached()
 
-  describe 'up.query.toggle()', ->
+  describe 'up.element.toggle()', ->
 
     it 'hides the given element if the second argument is false', ->
       element = affix('.element')[0]
       expect(element).toBeVisible()
-      up.query.toggle(element, false)
+      up.element.toggle(element, false)
       expect(element).toBeHidden()
 
     it 'shows the given element if the second argument is true', ->
       element = affix('.element')[0]
       element.style.display = 'none'
       expect(element).toBeHidden()
-      up.query.toggle(element, true)
+      up.element.toggle(element, true)
       expect(element).toBeVisible()
 

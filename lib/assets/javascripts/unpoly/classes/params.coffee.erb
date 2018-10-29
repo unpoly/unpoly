@@ -1,5 +1,5 @@
 u = up.util
-q = up.query
+e = up.element
 
 ###**
 Request parameters
@@ -308,7 +308,7 @@ class up.Params
   @experimental
   ###
   @fromForm: (form) ->
-    if form = q.element(form)
+    if form = e.get(form)
       fields = up.form.submissionFields(form)
       @fromFields(fields)
 

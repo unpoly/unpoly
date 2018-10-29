@@ -32,7 +32,7 @@ The tooltip element is appended to the end of `<body>`.
 up.tooltip = do ->
   
   u = up.util
-  q = up.query
+  e = up.element
 
   ###**
   Configures defaults for future tooltips.
@@ -74,7 +74,7 @@ up.tooltip = do ->
 
   reset = ->
     # Destroy the tooltip container regardless whether it's currently in a closing animation
-    q.remove(state.tooltip) if state.tooltip
+    e.remove(state.tooltip) if state.tooltip
     state.reset()
     chain.reset()
     config.reset()
@@ -155,7 +155,7 @@ up.tooltip = do ->
     chain.asap closeNow, (-> attachNow(elementOrSelector, options))
 
   attachNow = (elementOrSelector, options) ->
-    anchor = q.element(elementOrSelector)
+    anchor = e.get(elementOrSelector)
     options = u.options(options)
     html = u.option(options.html, anchor.getAttribute('up-tooltip-html'))
     text = u.option(options.text, anchor.getAttribute('up-tooltip'))

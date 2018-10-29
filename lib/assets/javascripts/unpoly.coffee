@@ -1,6 +1,6 @@
 #= require ./unpoly/namespace
 #= require ./unpoly/util
-#= require ./unpoly/query
+#= require ./unpoly/element
 #= require_tree ./unpoly/classes
 #= require ./unpoly/browser
 #= require ./unpoly/bus

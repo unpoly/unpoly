@@ -11,7 +11,7 @@ open dialogs with sub-forms, etc. all without losing form state.
 up.form = do ->
   
   u = up.util
-  q = up.query
+  e = up.element
 
   ###**
   Sets default options for form submission and validation.
@@ -55,11 +55,11 @@ up.form = do ->
   @internal
   ###
   findFields = (root) ->
-    q.subtree(root, fieldSelector())
+    e.subtree(root, fieldSelector())
 
 #  findFields = (rootOrRoots) ->
-#    rootOrRoots = q.elements(rootOrRoots)
-#    u.flatMap rootOrRoots, (root) -> q.subtree(root, fieldSelector())
+#    rootOrRoots = e.list(rootOrRoots)
+#    u.flatMap rootOrRoots, (root) -> e.subtree(root, fieldSelector())
 
   ###***
   TODO
@@ -185,8 +185,8 @@ up.form = do ->
   @stable
   ###
   submit = (formOrSelector, options) ->
-    form = q.element(formOrSelector)
-    form = q.closest(form, 'form')
+    form = e.get(formOrSelector)
+    form = e.closest(form, 'form')
 
     options = u.options(options)
     target = u.option(options.target, form.getAttribute('up-target'), 'body')
@@ -315,7 +315,7 @@ up.form = do ->
   @stable
   ###
   observe = (selectorOrElement, args...) ->
-    elements = q.elements(selectorOrElement)
+    elements = e.list(selectorOrElement)
     fields = u.flatMap(elements, findFields)
     callback = u.extractCallback(args) ? observeCallbackFromElement(elements[0]) ? up.fail('up.observe: No change callback given')
     options = u.extractOptions(args)
@@ -353,7 +353,7 @@ up.form = do ->
     option ||= u.detectResult config.validateTargets, (defaultTarget) ->
       resolvedDefault = up.dom.resolveSelector(defaultTarget, options.origin)
       console.debug('### resolvedDefault is %o', resolvedDefault)
-      if q.first(resolvedDefault)
+      if e.first(resolvedDefault)
         console.debug("IS match: #{resolvedDefault}")
         return resolvedDefault
       else
@@ -393,7 +393,7 @@ up.form = do ->
   @stable
   ###
   validate = (fieldOrSelector, options) ->
-    field = q.element(fieldOrSelector)
+    field = e.get(fieldOrSelector)
     options = u.options(options)
     options.origin = field
     options.target = findValidateTargetSelector(field, options)
@@ -412,13 +412,13 @@ up.form = do ->
     value = undefined
     meta = undefined
 
-    if q.matches(field, 'input[type=checkbox]')
+    if e.matches(field, 'input[type=checkbox]')
       if field.checked
         value = field.value
         meta = ':checked'
       else
         meta = ':unchecked'
-    else if q.matches(field, 'input[type=radio]')
+    else if e.matches(field, 'input[type=radio]')
       form = closestContainer(field)
       groupName = field.getAttribute('name')
       checkedButton = form.querySelector("input[type=radio]#{u.attributeSelector('name', groupName)}:checked")
@@ -457,17 +457,17 @@ up.form = do ->
   @internal
   ###
   switchTargets = (fieldOrSelector, options) ->
-    switcher = q.element(fieldOrSelector)
+    switcher = e.get(fieldOrSelector)
     options = u.options(options)
     targetSelector = u.option(options.target, switcher.getAttribute('up-switch'))
     console.debug("=== targetSelector is %o", targetSelector)
     form = closestContainer(switcher)
     u.isPresent(targetSelector) or up.fail("No switch target given for %o", switcher)
     fieldValues = switcherValues(switcher)
-    console.debug("--- calling q.all(%o, %o)", form, targetSelector)
-    console.debug("--- result is %o", q.descendants(form, targetSelector))
+    console.debug("--- calling e.all(%o, %o)", form, targetSelector)
+    console.debug("--- result is %o", e.descendants(form, targetSelector))
 
-    q.descendants(form, targetSelector).forEach (target) ->
+    e.descendants(form, targetSelector).forEach (target) ->
       switchTarget(target, fieldValues)
 
   ###**
@@ -489,7 +489,7 @@ up.form = do ->
         showValues = [':present', ':checked']
       show = u.intersect(fieldValues, showValues).length > 0
 
-    q.toggle(target, show)
+    e.toggle(target, show)
     target.classList.add('up-switched')
 
   ###**
@@ -497,14 +497,14 @@ up.form = do ->
   ###
   findSwitcherForTarget = (target) ->
     form = closestContainer(target)
-    switchers = q.descendants(form, '[up-switch]')
+    switchers = e.descendants(form, '[up-switch]')
     switcher = u.detect switchers, (switcher) ->
       targetSelector = switcher.getAttribute('up-switch')
-      q.matches(target, targetSelector)
+      e.matches(target, targetSelector)
     return switcher or u.fail('Could not find [up-switch] field for %o', target)
 
   closestContainer = (element) ->
-    q.closest(element, 'form, body')
+    e.closest(element, 'form, body')
 
   ###**
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)

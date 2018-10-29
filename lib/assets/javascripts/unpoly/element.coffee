@@ -1,6 +1,6 @@
 #= require ./classes/selector
 
-up.query = do ->
+up.element = do ->
 
   u = up.util
 
@@ -37,15 +37,15 @@ up.query = do ->
   If given a string, returns the first element matching that string.
   If given any other argument, returns the argument unchanged.
 
-  @function up.query.element
+  @function up.element.get
   @param {jQuery|Element|String} object
   @return {Element}
   @internal
   ###
-  element = (object) ->
+  getOne = (object) ->
     if u.isJQuery(object)
       if object.length > 1
-        up.fail('up.query.element(): Cannot cast a multi-element jQuery collection to a single elenent')
+        up.fail('up.element.get(): Cannot cast a multi-element jQuery collection to a single elenent')
       object[0]
     else if u.isString(object)
       first(object)
@@ -56,12 +56,12 @@ up.query = do ->
   If given a string, returns the all elements matching that string.
   If given any other argument, returns the argument [wrapped as a collection](/up.util.wrapCollection).
 
-  @function up.query.elements
+  @function up.element.elements
   @param {jQuery|Element|String} object
   @return {Element}
   @internal
   ###
-  elements = (object) ->
+  getList = (object) ->
     if u.isString(object)
       all(object)
     else
@@ -99,8 +99,8 @@ up.query = do ->
   closest: closest
   matches: matches
   ancestor: ancestor
-  element: element
-  elements: elements
+  get: getOne
+  list: getList
   triggerCustom: triggerCustom
   remove: remove
   toggle: toggle

@@ -676,10 +676,10 @@ up.util = (($) ->
   @internal
   ###
   getElement = (object) ->
-    # TODO: Remove me! Use up.query.element() instead
+    # TODO: Remove me! Use up.element.get() instead
     if isJQuery(object)
       if object.length > 1
-        up.fail('up.query.element(): Cannot cast a multi-element jQuery collection to a single elenent')
+        up.fail('up.element.get(): Cannot cast a multi-element jQuery collection to a single elenent')
       object.get(0)
     else if isString(object)
       $(object).get(0)
@@ -1234,7 +1234,7 @@ up.util = (($) ->
   @internal
   ###
   castedAttr = (element, attribute) ->
-    if element = up.query.element(element)
+    if element = up.element.get(element)
       value = element.getAttribute(attribute)
       switch value
         when 'false' then false
@@ -1249,7 +1249,7 @@ up.util = (($) ->
   @internal
   ###
   numberAttr = (element, attribute) ->
-    if (element = up.query.element(element)) && (value = element.getAttribute(attribute)) && (value.match(/^[\d\.]+$/))
+    if (element = up.element.get(element)) && (value = element.getAttribute(attribute)) && (value.match(/^[\d\.]+$/))
       parseFloat(value)
 
   ###**

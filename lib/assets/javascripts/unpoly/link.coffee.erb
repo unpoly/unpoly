@@ -70,7 +70,7 @@ new page is loading.
 up.link = (($) ->
 
   u = up.util
-  q = up.query
+  e = up.element
   
   ###**
   Visits the given URL without a full page load.
@@ -269,7 +269,7 @@ up.link = (($) ->
   ###
   followVariantForLink = (linkOrSelector, options) ->
     options = u.options(options)
-    link = q.element(linkOrSelector)
+    link = e.get(linkOrSelector)
     variant = u.detect followVariants, (variant) -> variant.matchesLink(link)
     variant ||= DEFAULT_FOLLOW_VARIANT unless options.default is false
     variant

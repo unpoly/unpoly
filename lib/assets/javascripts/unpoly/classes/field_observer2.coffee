@@ -1,5 +1,5 @@
 u = up.util
-q = up.query
+e = up.element
 
 class up.FieldObserver2
 
@@ -8,7 +8,7 @@ class up.FieldObserver2
   CHANGE_EVENTS = ['input', 'change']
 
   constructor: (fieldOrFields, options, @callback) ->
-    @fields = q.elements(fieldOrFields)
+    @fields = e.list(fieldOrFields)
     @delay = options.delay
     @batch = options.batch
     console.debug("FieldObserver for fields %o and delay %o", @fields, @delay)

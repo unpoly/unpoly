@@ -39,7 +39,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
 up.feedback = do ->
 
   u = up.util
-  q = up.query
+  e = up.element
 
   ###**
   Sets default options for this module.
@@ -114,12 +114,12 @@ up.feedback = do ->
       updateAllNavigationSections(document.body)
 
   updateAllNavigationSections = (root) ->
-    navs = q.subtree(root, navSelector())
-    sections = u.flatMap navs, (nav) -> q.subtree(nav, SELECTOR_LINK)
+    navs = e.subtree(root, navSelector())
+    sections = u.flatMap navs, (nav) -> e.subtree(nav, SELECTOR_LINK)
     updateCurrentClassForLinks(sections)
 
   updateNavigationSectionsInNewFragment = (fragment) ->
-    if q.closest(fragment, navSelector())
+    if e.closest(fragment, navSelector())
       # If the new fragment is an [up-nav], or if the new fragment is a child of an [up-nav],
       # all links in the new fragment are considered sections that we need to update.
       # Note that:
@@ -127,7 +127,7 @@ up.feedback = do ->
       #   It might already be in the DOM, and only a child was updated.
       # - The fragment might be a link itself
       # - We do not need to update sibling links of fragment that have been processed before.
-      sections = q.subtree(fragment, SELECTOR_LINK)
+      sections = e.subtree(fragment, SELECTOR_LINK)
       updateCurrentClassForLinks(sections)
     else
       updateAllNavigationSections(fragment)
@@ -153,10 +153,10 @@ up.feedback = do ->
   @internal
   ###
   findActivatableArea = (elementOrSelector) ->
-    area = q.element(elementOrSelector)
-    if q.matches(area, SELECTOR_LINK)
+    area = e.get(elementOrSelector)
+    if e.matches(area, SELECTOR_LINK)
       # Try to enlarge links that are expanded with [up-expand] on a surrounding container.
-      area = q.ancestor(area, SELECTOR_LINK) || area
+      area = e.ancestor(area, SELECTOR_LINK) || area
     area
 
   ###**

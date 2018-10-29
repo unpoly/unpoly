@@ -1,7 +1,7 @@
 @Trigger = (->
   
   u = up.util
-  q = up.query
+  e = up.element
   
   mouseover = (element, options) ->
     $element = $(element)
@@ -43,7 +43,7 @@
     $element.focus()
 
   submit = (form, options) ->
-    form = q.element(form)
+    form = e.get(form)
     options = u.options(options,
       cancelable: true,
       bubbles: true
@@ -52,7 +52,7 @@
     form.dispatchEvent(event)
 
   change = (field, options) ->
-    field = q.element(field)
+    field = e.get(field)
     options = u.options(options,
       cancelable: false,
       bubbles: true
@@ -61,7 +61,7 @@
     field.dispatchEvent(event)
 
   input = (field, options) ->
-    field = q.element(field)
+    field = e.get(field)
     options = u.options(options,
       cancelable: false,
       bubbles: true

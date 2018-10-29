@@ -1,5 +1,5 @@
 u = up.util
-q = up.query
+e = up.element
 
 class up.FollowVariant
 
@@ -10,7 +10,7 @@ class up.FollowVariant
 
   onClick: (event, link) =>
     if up.link.shouldProcessEvent(event, link)
-      if q.matches(link, '[up-instant]')
+      if e.matches(link, '[up-instant]')
         # If the link was already processed on mousedown, we still need
         # to prevent this later click event's chain.
         up.bus.haltEvent(event)
@@ -51,4 +51,4 @@ class up.FollowVariant
     @preloadNow(link, options)
 
   matchesLink: (link) =>
-    q.matches(link, @fullSelector())
+    e.matches(link, @fullSelector())
