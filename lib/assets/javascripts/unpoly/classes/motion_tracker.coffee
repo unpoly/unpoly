@@ -108,6 +108,7 @@ class up.MotionTracker
   whileForwardingFinishEvent: ($elements, fn) =>
     return fn() if $elements.length < 2
     doForward = (event) =>
+      event = event.originalEvent
       unless event.forwarded
         u.each $elements, (element) =>
           $element = $(element)
