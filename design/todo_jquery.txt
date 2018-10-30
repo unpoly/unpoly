@@ -4,10 +4,9 @@
 - Remove event.element, event.$element, event.$target options for up.emit()
 - Check if we really need to do e.get(...) in every single function that works with elements
 - Move duplicate u.element when we already have e.get
-
+- Remove 'none' default for animation options in link.follow etc.
 
 - rename up.element to up.element
   - e.list()
 - rename up.dom to up.fragment
-
-
+- upgrade roca-style.org PR

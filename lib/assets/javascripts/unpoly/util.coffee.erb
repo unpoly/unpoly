@@ -1226,6 +1226,19 @@ up.util = (($) ->
     arrayOrString.indexOf(elementOrSubstring) >= 0
 
   ###**
+  Returns the value for the given element and attribute, if it is present.
+
+  If it is blank it returns `undefined`.
+
+  @function up.util.presentAttr
+  @internal
+  ###
+  presentAttr = (element, attribute) ->
+    element = up.element.get(element)
+    value = element.getAttribute(attribute)
+    presence(value)
+
+  ###**
   @function up.util.castedAttr
   @internal
   ###
@@ -1342,10 +1355,11 @@ up.util = (($) ->
   @function up.util.setMissingAttrs
   @internal
   ###
-  setMissingAttrs = ($element, attrs) ->
+  setMissingAttrs = (element, attrs) ->
+    element = up.element.get(element)
     for key, value of attrs
-      if isMissing($element.attr(key))
-        $element.attr(key, value)
+      if isMissing(element.getAttribute(key))
+        element.setAttribute(key, value)
 
   ###**
   Removes the given element from the given array.
@@ -2157,6 +2171,7 @@ up.util = (($) ->
   contains: contains
   toArray: toArray
 #  pushAll: pushAll
+  presentAttr: presentAttr
   castedAttr: castedAttr
   numberAttr: numberAttr
   jsonAttr: jsonAttr

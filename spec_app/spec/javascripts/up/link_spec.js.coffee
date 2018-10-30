@@ -522,75 +522,75 @@ describe 'up.link', ->
 
     describe 'up.link.shouldProcessEvent', ->
 
-      buildEvent = ($element, attrs) ->
+      buildEvent = (target, attrs) ->
         event = Trigger.createMouseEvent('mousedown', attrs)
-        event = $.event.fix(event) # convert native event to jQuery event
-        event.target = u.element($element)
+        # Cannot change event.target on a native event property, but we can with Object.defineProperty()
+        Object.defineProperty(event, 'target', value: target)
         event
 
       it "returns true when the given event's target is the given link itself", ->
         $link = affix('a[href="/foo"]')
-        event = buildEvent($link)
-        expect(up.link.shouldProcessEvent(event, $link)).toBe(true)
+        event = buildEvent($link[0])
+        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(true)
 
       it "returns true when the given event's target is a non-link child of the given link", ->
         $link = affix('a[href="/foo"]')
         $span = $link.affix('span')
-        event = buildEvent($span)
-        expect(up.link.shouldProcessEvent(event, $link)).toBe(true)
+        event = buildEvent($span[0])
+        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(true)
 
       it "returns false when the given event's target is a child link of the given link (think [up-expand])", ->
         $link = affix('div[up-href="/foo"]')
         $childLink = $link.affix('a[href="/bar"]')
-        event = buildEvent($childLink)
-        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+        event = buildEvent($childLink[0])
+        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it "returns false when the given event's target is a child input of the given link (think [up-expand])", ->
         $link = affix('div[up-href="/foo"]')
         $childInput = $link.affix('input[type="text"]')
-        event = buildEvent($childInput)
-        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+        event = buildEvent($childInput[0])
+        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it 'returns false if the right mouse button is used', ->
         $link = affix('a[href="/foo"]')
-        event = buildEvent($link, button: 2)
-        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+        event = buildEvent($link[0], button: 2)
+        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it 'returns false if shift is pressed during the click', ->
         $link = affix('a[href="/foo"]')
-        event = buildEvent($link, shiftKey: 2)
-        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+        event = buildEvent($link[0], shiftKey: 2)
+        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it 'returns false if ctrl is pressed during the click', ->
         $link = affix('a[href="/foo"]')
-        event = buildEvent($link, ctrlKey: 2)
-        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+        event = buildEvent($link[0], ctrlKey: 2)
+        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it 'returns false if meta is pressed during the click', ->
         $link = affix('a[href="/foo"]')
-        event = buildEvent($link, metaKey: 2)
-        expect(up.link.shouldProcessEvent(event, $link)).toBe(false)
+        event = buildEvent($link[0], metaKey: 2)
+        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
     describe 'up.link.makeFollowable', ->
 
       it "adds [up-follow] to a link that wouldn't otherwise be handled by Unpoly", ->
         $link = affix('a[href="/path"]').text('label')
-        up.link.makeFollowable($link)
+        up.link.makeFollowable($link[0])
         expect($link.attr('up-follow')).toEqual('')
 
       it "does not add [up-follow] to a link that is already [up-target]", ->
         $link = affix('a[href="/path"][up-target=".target"]').text('label')
-        up.link.makeFollowable($link)
+        up.link.makeFollowable($link[0])
         expect($link.attr('up-follow')).toBeMissing()
 
       it "does not add [up-follow] to a link that is already [up-modal]", ->
         $link = affix('a[href="/path"][up-modal=".target"]').text('label')
-        up.link.makeFollowable($link)
+        up.link.makeFollowable($link[0])
         expect($link.attr('up-follow')).toBeMissing()
 
       it "does not add [up-follow] to a link that is already [up-popup]", ->
         $link = affix('a[href="/path"][up-popup=".target"]').text('label')
-        up.link.makeFollowable($link)
+        up.link.makeFollowable($link[0])
         expect($link.attr('up-follow')).toBeMissing()
 
     describe 'up.visit', ->

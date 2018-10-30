@@ -135,9 +135,9 @@
     )
     event
 
-  dispatch = ($element, event) ->
-    $element.each ->
-      this.dispatchEvent(event)
+  dispatch = (element, event) ->
+    element = e.get(element)
+    element.dispatchEvent(event)
 
   mouseover: mouseover
   mouseenter: mouseenter

@@ -67,7 +67,7 @@ new page is loading.
 @class up.link
 ###
 
-up.link = (($) ->
+up.link = do ->
 
   u = up.util
   e = up.element
@@ -144,9 +144,9 @@ up.link = (($) ->
   @stable
   ###
   follow = (linkOrSelector, options) ->
-    $link = $(linkOrSelector)
-    variant = followVariantForLink($link)
-    variant.followLink($link[0], options)
+    link = e.get(linkOrSelector)
+    variant = followVariantForLink(link)
+    variant.followLink(link, options)
 
   ###**
   This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
@@ -166,35 +166,35 @@ up.link = (($) ->
   @internal
   ###
   defaultFollow = (linkOrSelector, options) ->
-    $link = $(linkOrSelector)
+    link = e.get(linkOrSelector)
 
     options = u.options(options)
 
-    url = u.option(options.url, $link.attr('up-href'), $link.attr('href'))
-    target = u.option(options.target, $link.attr('up-target'))
-    options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'))
-    options.fallback = u.option(options.fallback, $link.attr('up-fallback'))
-    options.transition = u.option(options.transition, u.castedAttr($link, 'up-transition'), 'none')
-    options.failTransition = u.option(options.failTransition, u.castedAttr($link, 'up-fail-transition'), 'none')
-    options.history = u.option(options.history, u.castedAttr($link, 'up-history'))
-    options.reveal = u.option(options.reveal, u.castedAttr($link, 'up-reveal'), true)
-    options.failReveal = u.option(options.failReveal, u.castedAttr($link, 'up-fail-reveal'), true)
-    options.cache = u.option(options.cache, u.castedAttr($link, 'up-cache'))
-    options.restoreScroll = u.option(options.restoreScroll, u.castedAttr($link, 'up-restore-scroll'))
-    options.method = followMethod($link, options)
-    options.origin = u.option(options.origin, $link)
-    options.layer = u.option(options.layer, $link.attr('up-layer'), 'auto')
-    options.failLayer = u.option(options.failLayer, $link.attr('up-fail-layer'), 'auto')
-    options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
-    options = u.merge(options, up.motion.animateOptions(options, $link))
+    url = options.url ? link.getAttribute('up-href') ? link.getAttribute('href')
+    target = options.target ? link.getAttribute('up-target')
+    options.failTarget = options.failTarget ? link.getAttribute('up-fail-target')
+    options.fallback = options.fallback ? link.getAttribute('up-fallback')
+    options.transition = options.transition ? u.castedAttr(link, 'up-transition') ? 'none'
+    options.failTransition = options.failTransition ? u.castedAttr(link, 'up-fail-transition') ? 'none'
+    options.history = options.history ? u.castedAttr(link, 'up-history')
+    options.reveal = options.reveal ? u.castedAttr(link, 'up-reveal') ? true
+    options.failReveal = options.failReveal ? u.castedAttr(link, 'up-fail-reveal') ? true
+    options.cache = options.cache ? u.castedAttr(link, 'up-cache')
+    options.restoreScroll = options.restoreScroll ? u.castedAttr(link, 'up-restore-scroll')
+    options.method = followMethod(link, options)
+    options.origin = options.origin ? link
+    options.layer = options.layer ? link.getAttribute('up-layer') ? 'auto'
+    options.failLayer = options.failLayer ? link.getAttribute('up-fail-layer') ? 'auto'
+    options.confirm = options.confirm ? link.getAttribute('up-confirm')
+    options = u.merge(options, up.motion.animateOptions(options, link))
 
     up.browser.whenConfirmed(options).then ->
       up.replace(target, url, options)
 
-  defaultPreload = ($link, options) ->
+  defaultPreload = (link, options) ->
     options = u.options(options)
     options.preload = true
-    defaultFollow($link, options)
+    defaultFollow(link, options)
 
   ###**
   Returns the HTTP method that should be used when following the given link.
@@ -208,9 +208,10 @@ up.link = (($) ->
   @internal
   ###
   followMethod = (linkOrSelector, options) ->
-    $link = $(linkOrSelector)
+    link = e.get(linkOrSelector)
     options = u.options(options)
-    u.option(options.method, $link.attr('up-method'), $link.attr('data-method'), 'get').toUpperCase()
+    rawMethod = options.method ? link?.getAttribute('up-method') ? link?.getAttribute('data-method') ? 'GET'
+    rawMethod.toUpperCase()
 
   ###**
   No-op that is called when we allow a browser's default action to go through,
@@ -286,9 +287,9 @@ up.link = (($) ->
   @experimental
   ###
   makeFollowable = (link) ->
-    $link = $(link)
-    unless isFollowable($link)
-      $link.attr('up-follow', '')
+    console.debug("makeFollowable(%o)", link)
+    unless isFollowable(link)
+      link.setAttribute('up-follow', '')
 
   shouldProcessEvent = (event, link) ->
     target = event.target
@@ -298,9 +299,9 @@ up.link = (($) ->
     return true if target == link
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.
-    $betterTarget = $(target).closest("a, [up-href], #{up.form.fieldSelector()}").not(link)
-    return false if $betterTarget.length
-    return true
+    betterTargetSelector = "a, [up-href], #{up.form.fieldSelector()}"
+    betterTarget = e.closest(target, betterTargetSelector)
+    return !betterTarget || betterTarget == link
 
   ###**
   Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
@@ -310,8 +311,7 @@ up.link = (($) ->
   @experimental
   ###
   isSafe = (selectorOrLink, options) ->
-    $link = $(selectorOrLink)
-    method = followMethod($link, options)
+    method = followMethod(selectorOrLink, options)
     up.proxy.isSafeMethod(method)
 
   ###**
@@ -421,8 +421,8 @@ up.link = (($) ->
   ###
   DEFAULT_FOLLOW_VARIANT = addFollowVariant '[up-target], [up-follow]',
     # Don't just pass the `defaultFollow` function reference so we can stub it in tests
-    follow: ($link, options) -> defaultFollow($link, options)
-    preload: ($link, options) -> defaultPreload($link, options)
+    follow: (link, options) -> defaultFollow(link, options)
+    preload: (link, options) -> defaultPreload(link, options)
 
   ###**
   If applied on a link, follows this link via AJAX and replaces the
@@ -517,9 +517,9 @@ up.link = (($) ->
   @selector a[up-dash]
   @stable
   ###
-  up.$macro '[up-dash]', ($element) ->
-    target = u.castedAttr($element, 'up-dash')
-    $element.removeAttr('up-dash')
+  up.macro '[up-dash]', (element) ->
+    target = u.castedAttr(element, 'up-dash')
+    element.removeAttribute('up-dash')
     newAttrs = {
       'up-preload': '',
       'up-instant': ''
@@ -527,10 +527,10 @@ up.link = (($) ->
     if target is true
       # If it's literally `true` then we don't have a target selector.
       # Just follow the link by replacing `<body>`.
-      makeFollowable($element)
+      makeFollowable(element)
     else
       newAttrs['up-target'] = target
-    u.setMissingAttrs($element, newAttrs)
+    u.setMissingAttrs(element, newAttrs)
 
   ###**
   Add an `[up-expand]` attribute to any element that contains a link
@@ -579,21 +579,22 @@ up.link = (($) ->
     If omitted, the first contained link will be expanded.
   @stable
   ###
-  up.$macro '[up-expand]', ($area) ->
-    $childLinks = $area.find('a, [up-href]')
-    if selector = $area.attr('up-expand')
-      $childLinks = $childLinks.filter(selector)
-    if link = $childLinks.get(0)
+  up.macro '[up-expand]', (area) ->
+    selector = u.presentAttr(area, 'up-expand') ? 'a, [up-href]'
+    console.debug("[up-macro] calling descendants(%o, %o)", area, selector)
+    childLinks = e.descendants(area, selector)
+
+    if childLink = childLinks[0]
       upAttributePattern = /^up-/
       newAttrs = {}
-      newAttrs['up-href'] = $(link).attr('href')
-      for attribute in link.attributes
+      newAttrs['up-href'] = childLink.getAttribute('href')
+      for attribute in childLink.attributes
         name = attribute.name
         if name.match(upAttributePattern)
           newAttrs[name] = attribute.value
-      u.setMissingAttrs($area, newAttrs)
-      $area.removeAttr('up-expand')
-      makeFollowable($area)
+      u.setMissingAttrs(area, newAttrs)
+      area.removeAttribute('up-expand')
+      makeFollowable(area)
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   visit: visit
@@ -606,8 +607,6 @@ up.link = (($) ->
   addFollowVariant: addFollowVariant
   followVariantForLink: followVariantForLink
   allowDefault: allowDefault
-
-)(jQuery)
 
 up.visit = up.link.visit
 up.follow = up.link.follow

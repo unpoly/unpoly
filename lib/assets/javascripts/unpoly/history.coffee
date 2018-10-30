@@ -252,7 +252,7 @@ up.history = (($) ->
         'up-href': previousUrl,
         'up-restore-scroll': ''
       $link.removeAttr 'up-back'
-      up.link.makeFollowable($link)
+      up.link.makeFollowable($link[0])
 
   up.on 'up:framework:reset', reset
 
