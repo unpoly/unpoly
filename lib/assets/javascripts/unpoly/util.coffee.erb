@@ -959,10 +959,6 @@ up.util = (($) ->
     else
       classList[fnName](klassOrKlasses)
 
-  addTemporaryClass = (element, klassOrKlasses) ->
-    addClass(element, klassOrKlasses)
-    -> removeClass(element, klassOrKlasses)
-
   hasClass = (element, klass) ->
     classList = getElement(element).classList
     classList.contains(klass)
@@ -2151,7 +2147,6 @@ up.util = (($) ->
   addClass: addClass
   removeClass: removeClass
   hasClass: hasClass
-  addTemporaryClass: addTemporaryClass
   writeTemporaryStyle: writeTemporaryStyle
   forceRepaint: forceRepaint
   concludeCssTransition: concludeCssTransition
