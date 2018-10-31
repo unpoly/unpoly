@@ -424,8 +424,8 @@ up.popup = (($) ->
   ###
   up.link.addFollowVariant '[up-popup]',
     # Don't just pass the `toggleAsap` function reference so we can stub it in tests
-    follow: ($link, options) -> toggleAsap($link, options)
-    preload: ($link, options) -> preloadNow($link, options)
+    follow: (link, options) -> toggleAsap($(link), options)
+    preload: (link, options) -> preloadNow($(link), options)
 
   # We close the popup when someone clicks on the document.
   # We also need to listen to up:action:consumed in case an [up-instant] link

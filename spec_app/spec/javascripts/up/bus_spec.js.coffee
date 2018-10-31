@@ -87,15 +87,15 @@ describe 'up.bus', ->
       describe 'passing of [up-data]', ->
 
         it 'parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', asyncSpec (next) ->
-          $child = affix('.child')
           observeArgs = jasmine.createSpy()
           up.on 'click', '.child', (event, element, data) ->
             observeArgs(element.className, data)
 
+          $child = affix(".child")
           data = { key1: 'value1', key2: 'value2' }
-          $tag = affix(".child").attr('up-data', JSON.stringify(data))
+          $child.attr('up-data', JSON.stringify(data))
 
-          Trigger.click($('.child'))
+          Trigger.click($child)
 
           next =>
             expect(observeArgs).toHaveBeenCalledWith('child', data)

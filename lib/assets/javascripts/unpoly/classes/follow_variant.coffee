@@ -40,6 +40,7 @@ class up.FollowVariant
       u.muteRejection @onMousedown(args...)
 
   followLink: (link, options) =>
+    link = e.get(link) # TODO: Remove me, just use link
     options = u.options(options)
     followEventAttrs = { message: 'Following link', link: link, element: link }
     up.bus.whenEmitted('up:link:follow', followEventAttrs).then =>
@@ -47,6 +48,7 @@ class up.FollowVariant
         @followNow(link, options)
 
   preloadLink: (link, options) =>
+    link = e.get(link) # TODO: Remove me, just use link
     options = u.options(options)
     @preloadNow(link, options)
 

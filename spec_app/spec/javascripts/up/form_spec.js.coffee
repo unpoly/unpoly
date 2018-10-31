@@ -170,23 +170,17 @@ describe 'up.form', ->
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(false)
 
-            console.debug("--- clicking on $radio1")
             Trigger.clickSequence($radio1)
 
             next =>
-              console.debug("--- checking is radio1 is checked")
               expect($radio1.is(':checked')).toBe(true)
               expect(callback.calls.count()).toEqual(1)
-              console.debug('--- clicking on $radio2')
               # Trigger.clickSequence($radio2)
               $radio1[0].checked = false
               $radio2[0].checked = true
               Trigger.change($radio2)
 
             next =>
-              console.debug('--- next')
-              console.log($form)
-              console.log($radio2)
               expect($radio1.is(':checked')).toBe(false)
               expect(callback.calls.count()).toEqual(2)
 

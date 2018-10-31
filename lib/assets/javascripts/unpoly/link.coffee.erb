@@ -192,6 +192,7 @@ up.link = do ->
       up.replace(target, url, options)
 
   defaultPreload = (link, options) ->
+    console.debug("** defaultPreload(%o)", link)
     options = u.options(options)
     options.preload = true
     defaultFollow(link, options)
@@ -269,8 +270,9 @@ up.link = do ->
   @internal
   ###
   followVariantForLink = (linkOrSelector, options) ->
+    console.debug("** followVariantForLink(%o)", linkOrSelector)
     options = u.options(options)
-    link = e.get(linkOrSelector)
+    link = e.get(linkOrSelector) # TODO: Can we remove this?
     variant = u.detect followVariants, (variant) -> variant.matchesLink(link)
     variant ||= DEFAULT_FOLLOW_VARIANT unless options.default is false
     variant
@@ -292,6 +294,7 @@ up.link = do ->
       link.setAttribute('up-follow', '')
 
   shouldProcessEvent = (event, link) ->
+    link = e.get(link) # TODO: Remove e.get(), just use link
     target = event.target
     # We never handle events for the right mouse button, or when Shift/CTRL/Meta is pressed
     return false unless u.isUnmodifiedMouseEvent(event)

@@ -711,8 +711,8 @@ up.modal = (($) ->
   ###
   up.link.addFollowVariant '[up-modal]',
     # Don't just pass the `follow` function reference so we can stub it in tests
-    follow: ($link, options) -> followAsap($link, options)
-    preload: ($link, options) -> preloadNow($link, options)
+    follow: (link, options) -> followAsap($(link), options)
+    preload: (link, options) -> preloadNow($(link), options)
 
   # Close the modal when someone clicks outside the dialog (but not on a modal opener).
   # We register the event on .up-modal, which covers the *entire* viewport, not just
