@@ -8,7 +8,7 @@ In an Unpoly app, every page has an URL.
 
 @class up.history
 ###
-up.history = (($) ->
+up.history = do ->
   
   u = up.util
 
@@ -182,7 +182,7 @@ up.history = (($) ->
   pop = (event) ->
     observeNewUrl(currentUrl())
     up.layout.saveScroll(url: previousUrl)
-    state = event.originalEvent.state
+    state = event.state
     restoreStateOnPop(state)
 
   ###**
@@ -209,7 +209,7 @@ up.history = (($) ->
 
   if up.browser.canPushState()
     register = ->
-      $(window).on "popstate", pop
+      window.addEventListener('popstate', pop)
       replace(currentUrl(), force: true)
 
     if jasmine?
@@ -219,7 +219,7 @@ up.history = (($) ->
       # Defeat an unnecessary popstate that some browsers trigger
       # on pageload (Safari, Chrome < 34).
       # We should check in 2023 if we can remove this.
-      setTimeout register, 100
+      setTimeout(register, 100)
 
   ###**
   Changes the link's destination so it points to the previous URL.
@@ -246,13 +246,13 @@ up.history = (($) ->
   @selector a[up-back]
   @stable
   ###
-  up.$macro 'a[up-back], [up-href][up-back]', ($link) ->
+  up.macro 'a[up-back], [up-href][up-back]', (link) ->
     if u.isPresent(previousUrl)
-      u.setMissingAttrs $link,
+      u.setMissingAttrs link,
         'up-href': previousUrl,
         'up-restore-scroll': ''
-      $link.removeAttr 'up-back'
-      up.link.makeFollowable($link[0])
+      link.removeAttribute('up-back')
+      up.link.makeFollowable(link)
 
   up.on 'up:framework:reset', reset
 
@@ -264,4 +264,3 @@ up.history = (($) ->
   previousUrl: -> previousUrl
   normalizeUrl: normalizeUrl
 
-)(jQuery)

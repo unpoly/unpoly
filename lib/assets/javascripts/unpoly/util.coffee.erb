@@ -1356,7 +1356,7 @@ up.util = (($) ->
   @internal
   ###
   setMissingAttrs = (element, attrs) ->
-    element = up.element.get(element)
+    element = up.element.get(element) # TODO: Remove up.element and just work on element
     for key, value of attrs
       if isMissing(element.getAttribute(key))
         element.setAttribute(key, value)
