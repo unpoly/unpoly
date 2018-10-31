@@ -1,12 +1,13 @@
 - Update docs
 - Get rid of u.addClass, u.writeInlineStyle, u.fastHide, etc. if possible
 - Move all remaining element-related helper methods from util to query
-- Remove event.element, event.$element, event.$target options for up.emit()
+- Remove event.element, event.$element, event.$target options for up.emit() (only support { target })
 - Check if we really need to do e.get(...) in every single function that works with elements
 - Move duplicate u.element when we already have e.get
 - Remove 'none' default for animation options in link.follow etc.
-
 - rename up.element to up.element
   - e.list()
 - rename up.dom to up.fragment
 - upgrade roca-style.org PR
+- migration guide
+  - jquery event listeners need to use addEventListener or use event.originalEvent

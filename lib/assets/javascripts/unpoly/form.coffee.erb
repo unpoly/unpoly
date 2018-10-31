@@ -77,14 +77,13 @@ up.form = do ->
   @internal
   ###
   submittingButton = (form) ->
-    $form = $(form)
     selector = submitButtonSelector()
-    $activeElement = $(document.activeElement)
-    if $activeElement.is(selector) && $form.has($activeElement)
-      $activeElement[0]
+    focusedElement = document.activeElement
+    if e.matches(focusedElement, selector) && form.contains(focusedElement)
+      return focusedElement
     else
       # If no button is focused, we assume the first button in the form.
-      $form.find(selector)[0]
+      return e.descendant(form, selector)
 
   ###**
   @function up.form.submitButtonSelector

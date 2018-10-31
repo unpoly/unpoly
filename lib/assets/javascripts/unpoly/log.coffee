@@ -13,7 +13,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
 
 @class up.log
 ###
-up.log = (($) ->
+up.log = do ->
 
   u = up.util
   b = up.browser
@@ -160,8 +160,6 @@ up.log = (($) ->
   config: config
   enable: enable
   disable: disable
-
-)(jQuery)
 
 up.puts = up.log.puts
 up.warn = up.log.warn
