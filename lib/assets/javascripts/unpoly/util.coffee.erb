@@ -177,6 +177,9 @@ up.util = (($) ->
     $placeholder.appendTo(container)
     $placeholder
 
+  createPlaceholder = (selector, container = document.body) ->
+    $createPlaceholder(selector, container)[0]
+
   ###**
   Returns a CSS selector that matches the given element as good as possible.
 
@@ -248,12 +251,14 @@ up.util = (($) ->
     classes = splitValues(classString)
     reject classes, (klass) -> klass.match(/^up-/)
 
-  # jQuery's implementation of $(...) cannot create elements that have
-  # an <html> or <body> tag. So we're using native elements.
-  # Also IE9 cannot set innerHTML on a <html> or <head> element.
-  createElementFromHtml = (html) ->
+  createDocumentFromHtml = (html) ->
+    # IE9 cannot set innerHTML on a <html> or <head> element.
     parser = new DOMParser()
-    parser.parseFromString(html, 'text/html')
+    return parser.parseFromString(html, 'text/html')
+
+  createFragmentFromHtml = (html) ->
+    doc = createDocumentFromHtml(html)
+    return doc.body.children[0]
 
   assignPolyfill = (target, sources...) ->
     for source in sources
@@ -1243,15 +1248,12 @@ up.util = (($) ->
   @internal
   ###
   castedAttr = (element, attribute) ->
-    if element = up.element.get(element)
+    if element = up.element.get(element) # up.modal.openNow() will sometimes call this with an undefined link
       value = element.getAttribute(attribute)
       switch value
         when 'false' then false
         when 'true', '', attribute then true
         else value # other strings, undefined, null, ...
-    else
-      console.warn('Someone called up.util.castedAttr(undefined). Why?')
-      undefined
 
   ###**
   @function up.util.numberAttr
@@ -1778,8 +1780,8 @@ up.util = (($) ->
   @function up.util.horizontalScreenHalf
   @internal
   ###
-  horizontalScreenHalf = ($element) ->
-    elementDims = measure($element)
+  horizontalScreenHalf = (element) ->
+    elementDims = measure(element)
     screenDims = clientSize()
     elementMid = elementDims.left + 0.5 * elementDims.width
     screenMid = 0.5 * screenDims.width
@@ -2100,9 +2102,11 @@ up.util = (($) ->
   normalizeUrl: normalizeUrl
   normalizeMethod: normalizeMethod
   methodAllowsPayload: methodAllowsPayload
-  createElementFromHtml: createElementFromHtml
+  createDocumentFromHtml: createDocumentFromHtml
+  createFragmentFromHtml: createFragmentFromHtml
   $createElementFromSelector: $createElementFromSelector
   $createPlaceholder: $createPlaceholder
+  createPlaceholder: createPlaceholder
   selectorForElement: selectorForElement
 #  isGoodSelector: isGoodSelector
   attributeSelector: attributeSelector

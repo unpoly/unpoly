@@ -56,9 +56,10 @@ or function.
 
 @class up.modal
 ###
-up.modal = (($) ->
+up.modal = do ->
 
   u = up.util
+  e = up.element
 
   ###**
   Sets default options for future modals.
@@ -212,8 +213,8 @@ up.modal = (($) ->
   
   state = u.config ->
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
-    $anchor: null        # the element to which the tooltip is anchored
-    $modal: null         # the modal container
+    anchorElement: null  # the element to which the tooltip is anchored
+    modalElement: null   # the modal container
     sticky: null
     closable: null
     flavor: null
@@ -226,7 +227,7 @@ up.modal = (($) ->
   chain = new u.DivertibleChain()
 
   reset = ->
-    state.$modal?.remove()
+    state.modalElement?.remove()
     unshiftElements()
     state.reset()
     chain.reset()
@@ -241,26 +242,35 @@ up.modal = (($) ->
     state.coveredTitle = null
     state.coveredUrl = null
 
+  part = (name) ->
+    selector = ".up-modal-#{name}"
+    state.modalElement.querySelector(selector)
+
+  $part = (name) ->
+    $(part(name))
+
   createHiddenFrame = (target, options) ->
-    $modal = $(templateHtml())
-    $modal.attr('up-flavor', state.flavor)
-    $modal.attr('up-position', state.position) if u.isPresent(state.position)
+    html = templateHtml()
+    state.modalElement = modalElement = u.createFragmentFromHtml(html)
+    modalElement.setAttribute('up-flavor', state.flavor)
+    modalElement.setAttribute('up-position', state.position) if u.isPresent(state.position)
 
-    $dialog = $modal.find('.up-modal-dialog')
     dialogStyles = u.only(options, 'width', 'maxWidth', 'height')
-    u.writeInlineStyle($dialog, dialogStyles)
+    u.writeInlineStyle(part('dialog'), dialogStyles)
 
-    $modal.find('.up-modal-close').remove() unless state.closable
-    $content = $modal.find('.up-modal-content')
+    unless state.closable
+      closeElement = part('close')
+      e.remove(closeElement)
+
+    contentElement = part('content')
     # Create an empty element that will match the
     # selector that is being replaced.
-    u.$createPlaceholder(target, $content)
-    $modal.hide()
-    $modal.appendTo(document.body)
-    state.$modal = $modal
+    u.createPlaceholder(target, contentElement)
+    e.hide(modalElement)
+    document.body.appendChild(modalElement)
 
   unveilFrame = ->
-    state.$modal.show()
+    e.show(state.modalElement)
 
   # Gives `<body>` a right padding in the width of a scrollbar.
   # Also gives elements anchored to the right side of the screen
@@ -271,20 +281,19 @@ up.modal = (($) ->
   # This is screwed up, but Bootstrap does the same.
   shiftElements = ->
     if u.documentHasVerticalScrollbar()
-      $body = $('body')
+      body = document.body
       scrollbarWidth = u.scrollbarWidth()
-      bodyRightPadding = u.readComputedStyleNumber($body, 'paddingRight')
+      bodyRightPadding = u.readComputedStyleNumber(body, 'paddingRight')
       bodyRightShift = scrollbarWidth + bodyRightPadding
-      unshiftBody = u.writeTemporaryStyle($body,
+      unshiftBody = u.writeTemporaryStyle(body,
         paddingRight: bodyRightShift
         overflowY: 'hidden'
       )
       state.unshifters.push(unshiftBody)
-      up.layout.anchoredRight().each ->
-        $element = $(this)
-        elementRight = u.readComputedStyleNumber($element, 'right')
+      for anchor in up.layout.anchoredRight()
+        elementRight = u.readComputedStyleNumber(anchor, 'right')
         elementRightShift = scrollbarWidth + elementRight
-        unshifter = u.writeTemporaryStyle($element, right: elementRightShift)
+        unshifter = u.writeTemporaryStyle(anchor, right: elementRightShift)
         state.unshifters.push(unshifter)
 
 
@@ -356,12 +365,12 @@ up.modal = (($) ->
   ###
   followAsap = (linkOrSelector, options) ->
     options = u.options(options)
-    options.$link = $(linkOrSelector)
+    options.link = e.get(linkOrSelector)
     openAsap(options)
 
-  preloadNow = ($link, options) ->
+  preloadNow = (link, options) ->
     options = u.options(options)
-    options.$link = $link
+    options.link = link
     options.preload = true
     # Use openNow() and not openAsap() so (1) we don't close a currently open modal
     # and (2) our pending AJAX request does not prevent other modals from opening
@@ -434,37 +443,36 @@ up.modal = (($) ->
   openAsap = (options) ->
     chain.asap closeNow, (-> openNow(options))
 
-  openNow = (options) ->
-    options = u.options(options)
-    $link = u.option(u.pluckKey(options, '$link'), u.nullJQuery())
-    url = u.option(u.pluckKey(options, 'url'), $link.attr('up-href'), $link.attr('href'))
-    html = u.option(u.pluckKey(options, 'html'))
-    target = u.option(u.pluckKey(options, 'target'), $link.attr('up-modal'))
+  openNow = (options = {}) ->
+    link = u.pluckKey(options, 'link') # might be missing
+    url = u.pluckKey(options, 'url') ? link?.getAttribute('up-href') ? link?.getAttribute('href')
+    html = u.pluckKey(options, 'html')
+    target = u.pluckKey(options, 'target') ? link?.getAttribute('up-modal')
     validateTarget(target)
-    options.flavor = u.option(options.flavor, $link.attr('up-flavor'), config.flavor)
-    options.position = u.option(options.position, $link.attr('up-position'), flavorDefault('position', options.flavor))
-    options.position = u.evalOption(options.position, $link: $link)
-    options.width = u.option(options.width, $link.attr('up-width'), flavorDefault('width', options.flavor))
-    options.maxWidth = u.option(options.maxWidth, $link.attr('up-max-width'), flavorDefault('maxWidth', options.flavor))
-    options.height = u.option(options.height, $link.attr('up-height'), flavorDefault('height'))
-    options.animation = u.option(options.animation, $link.attr('up-animation'), flavorDefault('openAnimation', options.flavor))
+    options.flavor ?= link?.getAttribute('up-flavor') ? config.flavor
+    options.position ?= link?.getAttribute('up-position') ? flavorDefault('position', options.flavor)
+    options.position = u.evalOption(options.position, { link })
+    options.width ?= link?.getAttribute('up-width') ? flavorDefault('width', options.flavor)
+    options.maxWidth ?= link?.getAttribute('up-max-width') ? flavorDefault('maxWidth', options.flavor)
+    options.height ?= link?.getAttribute('up-height') ? flavorDefault('height')
+    options.animation ?= link?.getAttribute('up-animation') ? flavorDefault('openAnimation', options.flavor)
     options.animation = u.evalOption(options.animation, position: options.position)
-    options.backdropAnimation = u.option(options.backdropAnimation, $link.attr('up-backdrop-animation'), flavorDefault('backdropOpenAnimation', options.flavor))
+    options.backdropAnimation ?= link?.getAttribute('up-backdrop-animation') ? flavorDefault('backdropOpenAnimation', options.flavor)
     options.backdropAnimation = u.evalOption(options.backdropAnimation, position: options.position)
-    options.sticky = u.option(options.sticky, u.castedAttr($link, 'up-sticky'), flavorDefault('sticky', options.flavor))
-    options.closable = u.option(options.closable, u.castedAttr($link, 'up-closable'), flavorDefault('closable', options.flavor))
-    options.confirm = u.option(options.confirm, $link.attr('up-confirm'))
-    options.method = up.link.followMethod($link, options)
+    options.sticky ?= u.castedAttr(link, 'up-sticky') ? flavorDefault('sticky', options.flavor)
+    options.closable ?= u.castedAttr(link, 'up-closable') ? flavorDefault('closable', options.flavor)
+    options.confirm ?= link?.getAttribute('up-confirm')
+    options.method = up.link.followMethod(link, options)
     options.layer = 'modal'
-    options.failTarget = u.option(options.failTarget, $link.attr('up-fail-target'))
-    options.failLayer = u.option(options.failLayer, $link.attr('up-fail-layer'), 'auto')
+    options.failTarget ?= link?.getAttribute('up-fail-target')
+    options.failLayer ?= link?.getAttribute('up-fail-layer') ? 'auto'
 
-    animateOptions = up.motion.animateOptions(options, $link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
+    animateOptions = up.motion.animateOptions(options, link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
 
     # Although we usually fall back to full page loads if a browser doesn't support pushState,
     # in the case of modals we assume that the developer would rather see a dialog
     # without an URL update.
-    options.history = u.option(options.history, u.castedAttr($link, 'up-history'), flavorDefault('history', options.flavor))
+    options.history ?= u.castedAttr(link, 'up-history') ? flavorDefault('history', options.flavor)
     options.history = false unless up.browser.canPushState()
 
     # This will prevent up.replace() from looking for fallbacks, since
@@ -556,7 +564,7 @@ up.modal = (($) ->
       title: state.coveredTitle
     )
 
-    up.bus.whenEmitted('up:modal:close', $element: state.$modal, message: 'Closing modal').then ->
+    up.bus.whenEmitted('up:modal:close', target: state.modalElement, message: 'Closing modal').then ->
       state.phase = 'closing'
       # the current URL must be deleted *before* calling up.destroy,
       # since up.feedback listens to up:fragment:destroyed and then
@@ -568,12 +576,12 @@ up.modal = (($) ->
       promise = animate(viewportCloseAnimation, backdropCloseAnimation, animateOptions)
 
       promise = promise.then ->
-        up.destroy(state.$modal, destroyOptions)
+        up.destroy(state.modalElement, destroyOptions)
 
       promise = promise.then ->
         unshiftElements()
         state.phase = 'closed'
-        state.$modal = null
+        state.modalElement = null
         state.flavor = null
         state.sticky = null
         state.closable = null
@@ -583,7 +591,7 @@ up.modal = (($) ->
       promise
 
   markAsAnimating = (isAnimating = true) ->
-    state.$modal.toggleClass('up-modal-animating', isAnimating)
+    e.toggleClass(state.modalElement, 'up-modal-animating', isAnimating)
 
   animate = (viewportAnimation, backdropAnimation, animateOptions) ->
     # If we're not animating the dialog, don't animate the backdrop either
@@ -591,9 +599,10 @@ up.modal = (($) ->
       Promise.resolve()
     else
       markAsAnimating()
+
       promise = Promise.all([
-        up.animate(state.$modal.find('.up-modal-viewport'), viewportAnimation, animateOptions),
-        up.animate(state.$modal.find('.up-modal-backdrop'), backdropAnimation, animateOptions)
+        up.animate($part('viewport'), viewportAnimation, animateOptions),
+        up.animate($part('backdrop'), backdropAnimation, animateOptions)
       ])
       promise = promise.then -> markAsAnimating(false)
       promise
@@ -632,8 +641,8 @@ up.modal = (($) ->
   @stable
   ###
   contains = (elementOrSelector) ->
-    $element = $(elementOrSelector)
-    $element.closest('.up-modal').length > 0
+    element = e.get(elementOrSelector)
+    !!e.closest(element, '.up-modal')
 
   flavor = (name, overrideConfig = {}) ->
     up.warn 'up.modal.flavor() is deprecated. Use the up.modal.flavors property instead.'
@@ -711,8 +720,8 @@ up.modal = (($) ->
   ###
   up.link.addFollowVariant '[up-modal]',
     # Don't just pass the `follow` function reference so we can stub it in tests
-    follow: (link, options) -> followAsap($(link), options)
-    preload: (link, options) -> preloadNow($(link), options)
+    follow: (link, options) -> followAsap(link, options)
+    preload: (link, options) -> preloadNow(link, options)
 
   # Close the modal when someone clicks outside the dialog (but not on a modal opener).
   # We register the event on .up-modal, which covers the *entire* viewport, not just
@@ -724,8 +733,8 @@ up.modal = (($) ->
   up.on('click', '.up-modal', (event) ->
     return unless state.closable
 
-    $target = $(event.target)
-    unless $target.closest('.up-modal-dialog').length || $target.closest('[up-modal]').length
+    target = event.target
+    unless e.closest(target, '.up-modal-dialog') || e.closest(target, '[up-modal]')
       up.bus.consumeAction(event)
       u.muteRejection closeAsap()
   )
@@ -791,9 +800,9 @@ up.modal = (($) ->
     Otherwise it will slide in from the right.
   @stable
   ###
-  up.$macro 'a[up-drawer], [up-href][up-drawer]', ($link) ->
-    target = $link.attr('up-drawer')
-    $link.attr
+  up.macro 'a[up-drawer], [up-href][up-drawer]', (link) ->
+    target = link.getAttribute('up-drawer')
+    e.setAttrs link,
       'up-modal': target
       'up-flavor': 'drawer'
 
@@ -817,8 +826,8 @@ up.modal = (($) ->
         when 'left' then 'move-to-left'
         when 'right' then 'move-to-right'
     position: (options) ->
-      if u.isPresent(options.$link)
-        u.horizontalScreenHalf(options.$link)
+      if u.isPresent(options.link)
+        u.horizontalScreenHalf(options.link)
       else
         # In case the drawer was opened programmatically through Javascript,
         # we might now know the link that was clicked on.
@@ -844,5 +853,3 @@ up.modal = (($) ->
   contains: contains
   isOpen: isOpen
   flavor: flavor # deprecated
-
-)(jQuery)

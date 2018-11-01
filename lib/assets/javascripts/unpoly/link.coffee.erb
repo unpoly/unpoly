@@ -154,7 +154,7 @@ up.link = do ->
   The event is emitted on the `<a>` element that is being followed.
 
   @event up:link:follow
-  @param {jQuery} event.$link
+  @param {jQuery} event.link
     The link element that will be followed.
   @param event.preventDefault()
     Event listeners may call this method to prevent the link from being followed.
@@ -209,7 +209,7 @@ up.link = do ->
   @internal
   ###
   followMethod = (linkOrSelector, options) ->
-    link = e.get(linkOrSelector)
+    link = e.get(linkOrSelector) # up.modal.openNow() will sometimes call this with an undefined link
     options = u.options(options)
     rawMethod = options.method ? link?.getAttribute('up-method') ? link?.getAttribute('data-method') ? 'GET'
     rawMethod.toUpperCase()

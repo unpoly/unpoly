@@ -332,7 +332,7 @@ describe 'up.util', ->
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])
 
-    describe 'up.util.createElementFromHtml', ->
+    describe 'up.util.createDocumentFromHtml', ->
 
       it 'parses a string that contains a serialized HTML document', ->
         string = """
@@ -347,7 +347,7 @@ describe 'up.util', ->
           </html>
           """
 
-        element = up.util.createElementFromHtml(string)
+        element = up.util.createDocumentFromHtml(string)
 
         expect(element.querySelector('head title').textContent).toEqual('document title')
         expect(element.querySelector('body').getAttribute('data-env')).toEqual('production')
@@ -364,7 +364,7 @@ describe 'up.util', ->
           </html>\r
           """
 
-        $element = up.util.createElementFromHtml(string)
+        $element = up.util.createDocumentFromHtml(string)
         expect($element.querySelector('body')).toBeGiven()
         expect($element.querySelector('body div').textContent).toEqual('line')
 
@@ -400,7 +400,7 @@ describe 'up.util', ->
             </body>
           </html>
           """
-        element = up.util.createElementFromHtml(html)
+        element = up.util.createDocumentFromHtml(html)
         expect(element.querySelector("title")).toBeMissing()
         expect(element.querySelector("h1").textContent).toEqual('Full story')
 
@@ -412,7 +412,7 @@ describe 'up.util', ->
             </body>
           </html>
           """
-        element = up.util.createElementFromHtml(html)
+        element = up.util.createDocumentFromHtml(html)
         expect(element.querySelector("title")).toBeMissing()
         expect(element.querySelector("h1").textContent).toEqual('Full story')
 
@@ -420,9 +420,19 @@ describe 'up.util', ->
         html = """
           <h1>Full story</h1>
           """
-        element = up.util.createElementFromHtml(html)
+        element = up.util.createDocumentFromHtml(html)
         expect(element.querySelector("title")).toBeMissing()
         expect(element.querySelector("h1").textContent).toEqual('Full story')
+
+    describe 'up.util.createFragmentFromHtml', ->
+
+      it 'creates an element from the given HTML fragment', ->
+        html = """
+          <h1>Full story</h1>
+          """
+        element = up.util.createFragmentFromHtml(html)
+        expect(element.tagName).toEqual('H1')
+        expect(element.textContent).toEqual('Full story')
 
     describe 'up.util.isFixed', ->
 

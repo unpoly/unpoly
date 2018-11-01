@@ -4,7 +4,7 @@ class up.HtmlParser
 
   constructor: (@html) ->
     @wrapNoscriptInHtml()
-    @parsedDoc = u.createElementFromHtml(@html)
+    @parsedDoc = u.createDocumentFromHtml(@html)
 
   title: ->
     @parsedDoc.querySelector("head title")?.textContent

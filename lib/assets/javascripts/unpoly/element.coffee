@@ -85,11 +85,31 @@ up.element = do ->
     else if parent = element.parentNode
       parent.removeChild(element)
 
+  hide = (element) ->
+    element.style.display = 'none'
+
+  show = (element) ->
+    element.style.display = ''
+
   toggle = (element, newVisible) ->
     if newVisible
-      element.style.display = ''
+      show(element)
     else
-      element.style.display = 'none'
+      hide(element)
+
+#  trace = (fn) ->
+#    (args...) ->
+#      console.debug("Calling %o with %o", fn, args)
+#      fn(args...)
+
+  toggleClass = (element, klass, newPresent) ->
+    console.debug("toggleClass(%o, %o, %o)", element, klass, newPresent)
+    fn = if newPresent then 'add' else 'remove'
+    element.classList[fn](klass)
+
+  setAttrs = (element, attrMap) ->
+    for key, value of attrMap
+        element.setAttribute(key, value)
 
   descendant: descendant
   descendants: descendants
@@ -104,3 +124,9 @@ up.element = do ->
   triggerCustom: triggerCustom
   remove: remove
   toggle: toggle
+  toggleClass: toggleClass
+  hide: hide
+  show: show
+  setAttrs: setAttrs
+
+

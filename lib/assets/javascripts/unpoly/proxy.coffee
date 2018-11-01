@@ -607,7 +607,7 @@ up.proxy = (($) ->
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
 
   @event up:link:preload
-  @param {jQuery} event.$link
+  @param {jQuery} event.link
     The link element that will be preloaded.
   @param event.preventDefault()
     Event listeners may call this method to prevent the link from being preloaded.
