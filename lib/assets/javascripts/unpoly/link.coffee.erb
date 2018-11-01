@@ -295,7 +295,7 @@ up.link = do ->
     target = event.target
     # We never handle events for the right mouse button, or when Shift/CTRL/Meta is pressed
     return false unless u.isUnmodifiedMouseEvent(event)
-    # If we actually targeted $link, save ourselves the expensive DOM traversal below
+    # If we actually targeted `link`, save ourselves the expensive DOM traversal below
     return true if target == link
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.

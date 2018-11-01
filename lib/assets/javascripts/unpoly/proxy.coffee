@@ -40,11 +40,12 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
 
 @class up.proxy  
 ###
-up.proxy = (($) ->
+up.proxy = do ->
 
   u = up.util
+  e = up.element
 
-  $waitingLink = undefined
+  waitingLink = undefined
   preloadDelayTimer = undefined
   slowDelayTimer = undefined
   pendingCount = undefined
@@ -141,7 +142,7 @@ up.proxy = (($) ->
     slowDelayTimer = null
 
   reset = ->
-    $waitingLink = null
+    waitingLink = null
     cancelPreloadDelay()
     cancelSlowDelay()
     pendingCount = 0
@@ -239,7 +240,7 @@ up.proxy = (($) ->
       promise = loadOrQueue(request)
       set(request, promise)
       # Uncache failed requests
-      promise.catch (e) ->
+      promise.catch ->
         remove(request)
 
     if !request.preload
@@ -559,22 +560,22 @@ up.proxy = (($) ->
 
   up.bus.deprecateRenamedEvent('up:proxy:received', 'up:proxy:loaded')
 
-  preloadAfterDelay = ($link) ->
-    delay = u.numberAttr($link, 'up-delay') || config.preloadDelay
-    unless $link.is($waitingLink)
-      $waitingLink = $link
+  preloadAfterDelay = (link) ->
+    delay = u.numberAttr(link, 'up-delay') || config.preloadDelay
+    unless link == waitingLink
+      waitingLink = link
       cancelPreloadDelay()
       curriedPreload = ->
-        u.muteRejection preload($link)
-        $waitingLink = null
+        u.muteRejection preload(link)
+        waitingLink = null
       startPreloadDelay(curriedPreload, delay)
 
   startPreloadDelay = (block, delay) ->
     preloadDelayTimer = setTimeout(block, delay)
 
-  stopPreload = ($link) ->
-    if $link.is($waitingLink)
-      $waitingLink = undefined
+  stopPreload = (link) ->
+    if link == waitingLink
+      waitingLink = undefined
       cancelPreloadDelay()
 
   ###**
@@ -593,13 +594,13 @@ up.proxy = (($) ->
   @experimental
   ###
   preload = (linkOrSelector, options) ->
-    $link = $(linkOrSelector)
+    link = e.get(linkOrSelector)
 
-    if up.link.isSafe($link)
-      preloadEventAttrs = { message: ['Preloading link %o', $link.get(0)], $element: $link, $link: $link }
+    if up.link.isSafe(link)
+      preloadEventAttrs = { message: ['Preloading link %o', link], target: link, link: link }
       up.bus.whenEmitted('up:link:preload', preloadEventAttrs).then ->
-        variant = up.link.followVariantForLink($link)
-        variant.preloadLink($link, options)
+        variant = up.link.followVariantForLink(link)
+        variant.preloadLink(link, options)
     else
       Promise.reject(new Error("Won't preload unsafe link"))
 
@@ -644,15 +645,14 @@ up.proxy = (($) ->
     but will also make the interaction feel less instant.
   @stable
   ###
-  up.$compiler 'a[up-preload], [up-href][up-preload]', ($link) ->
-    if up.link.isSafe($link)
-      $link.on 'mouseenter touchstart', (event) ->
-        # Don't do anything if we are hovering over the child of a link.
-        # The actual link will receive the event and bubble in a second.
-        if up.link.shouldProcessEvent(event, $link)
-          preloadAfterDelay($link)
-      $link.on 'mouseleave', ->
-        stopPreload($link)
+  up.compiler 'a[up-preload], [up-href][up-preload]', (link) ->
+    if up.link.isSafe(link)
+      for eventName in ['mouseenter', 'touchstart']
+        link.addEventListener eventName, (event) ->
+          if up.link.shouldProcessEvent(event, link)
+            preloadAfterDelay(link)
+      link.addEventListener 'mouseleave', ->
+        stopPreload(link)
 
   up.on 'up:framework:reset', reset
 
@@ -668,8 +668,6 @@ up.proxy = (($) ->
   isSafeMethod: isSafeMethod
   wrapMethod: wrapMethod
   config: config
-  
-)(jQuery)
 
 up.ajax = up.proxy.ajax
 up.request = up.proxy.request
