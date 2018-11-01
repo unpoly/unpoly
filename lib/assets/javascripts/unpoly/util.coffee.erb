@@ -1652,10 +1652,14 @@ up.util = (($) ->
     readComputedStyleNumber(element, 'opacity')
 
   whenReady = memoize ->
-    if $.isReady
+    readyState = document.readyState
+    # Values are "loading", "interactive" and "completed".
+    # https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
+    if readyState != 'loading'
       Promise.resolve()
     else
-      new Promise (resolve) -> $(resolve)
+      new Promise (resolve) ->
+        document.addEventListener('DOMContentLoaded', resolve)
 
   identity = (arg) -> arg
 
