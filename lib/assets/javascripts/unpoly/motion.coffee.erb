@@ -352,8 +352,6 @@ up.motion = (($) ->
     beforeStart()
 
     scrollNew = ->
-      console.debug("scrollNew() from options %o", options)
-
       # Don't animate the scrolling. The { duration } option was meant for the transition.
       scrollOptions = u.merge(options, duration: 0)
       # Scroll $new into position before we start the enter animation.

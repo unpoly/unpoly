@@ -1,13 +1,18 @@
 - Update docs
+- Specs should load jQuery with noConflict and only assign $ = jQuery at the top of each spec file
 - Get rid of u.addClass, u.writeInlineStyle, u.fastHide, etc. if possible
 - Move all remaining element-related helper methods from util to query
 - Remove event.element, event.$element, event.$target options for up.emit() (only support { target })
 - Check if we really need to do e.get(...) in every single function that works with elements
+  - Do we really need to support `elementOrSelector` instead of just `element` in the public API?
 - Move duplicate u.element when we already have e.get
 - Remove 'none' default for animation options in link.follow etc.
+- Remove 'auto' default from { layer, failLayer } in link, modal, popup
 - rename up.element to up.element
   - e.list()
 - rename up.dom to up.fragment
+- grip everything for "$" once again
+
 - upgrade roca-style.org PR
 - migration guide
   - jquery event listeners need to use addEventListener or use event.originalEvent

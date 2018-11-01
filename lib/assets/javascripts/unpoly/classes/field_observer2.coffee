@@ -11,7 +11,6 @@ class up.FieldObserver2
     @fields = e.list(fieldOrFields)
     @delay = options.delay
     @batch = options.batch
-    console.debug("FieldObserver for fields %o and delay %o", @fields, @delay)
 
   start: =>
     @scheduledValues = null
@@ -41,18 +40,13 @@ class up.FieldObserver2
 
   scheduleValues: (values) =>
     @scheduledValues = values
-    console.debug('--- scheduledValues is now set to %o', @scheduledValues)
     @scheduleTimer()
 
   isNewValues: (values) =>
-    console.debug("-- isNewValues: processedValues = %o, scheduledValues = %o", @processedValues, @scheduledValues)
     !u.isEqual(values, @processedValues) && !u.isEqual(@scheduledValues, values)
 
   requestCallback: =>
-    console.debug("-- requestCallback: scheduledValues = %o, currentTimer = %o, callbackRunning = %o", @scheduledValues, @currentTimer, @callbackRunning)
-
     if @scheduledValues != null && !@currentTimer && !@callbackRunning
-      console.debug(">>> propagating events for %o", @scheduledValues)
       diff = @changedValues(@processedValues, @scheduledValues)
       @processedValues = @scheduledValues
       @scheduledValues = null
@@ -90,5 +84,4 @@ class up.FieldObserver2
 
   check: =>
     values = @readFieldValues()
-    console.debug("-- check got values %o (new == %o)", values, @isNewValues(values))
     @scheduleValues(values) if @isNewValues(values)

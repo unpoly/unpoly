@@ -167,6 +167,9 @@ up.util = (($) ->
       $parent = $element
     $root
 
+  createElementFromSelector = (selector) ->
+    $createElementFromSelector(selector)[0]
+
   ###**
   @function $createPlaceHolder
   @internal
@@ -2105,6 +2108,7 @@ up.util = (($) ->
   createDocumentFromHtml: createDocumentFromHtml
   createFragmentFromHtml: createFragmentFromHtml
   $createElementFromSelector: $createElementFromSelector
+  createElementFromSelector: createElementFromSelector
   $createPlaceholder: $createPlaceholder
   createPlaceholder: createPlaceholder
   selectorForElement: selectorForElement

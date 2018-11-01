@@ -45,9 +45,10 @@ The HTML of a popup element is simply this:
 
 @class up.popup
 ###
-up.popup = (($) ->
+up.popup = do ->
 
   u = up.util
+  e = up.element
 
   ###**
   Sets default options for future popups.
@@ -107,8 +108,8 @@ up.popup = (($) ->
 
   state = u.config
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
-    $anchor: null        # the element to which the tooltip is anchored
-    $popup: null         # the popup container
+    anchorElement: null  # the element to which the tooltip is anchored
+    popupElement: null   # the popup container
     position: null       # the position of the popup container element relative to its anchor
     sticky: null
     url: null
@@ -118,7 +119,7 @@ up.popup = (($) ->
   chain = new u.DivertibleChain()
 
   reset = ->
-    state.$popup?.remove()
+    e.remove(state.popupElement) if state.popupElement
     state.reset()
     chain.reset()
     config.reset()
@@ -126,13 +127,13 @@ up.popup = (($) ->
   align = ->
     style = {}
 
-    popupBox = u.measure(state.$popup)
+    popupBox = u.measure(state.popupElement)
 
-    if u.isFixed(state.$anchor)
-      linkBox = state.$anchor.get(0).getBoundingClientRect()
+    if u.isFixed(state.anchorElement)
+      linkBox = state.anchorElement.getBoundingClientRect()
       style.position = 'fixed'
     else
-      linkBox = u.measure(state.$anchor)
+      linkBox = u.measure(state.anchorElement)
 
     switch state.position
       when 'bottom-right' # anchored to bottom-right of link, opens towards bottom-left
@@ -150,25 +151,24 @@ up.popup = (($) ->
       else
         up.fail("Unknown position option '%s'", state.position)
 
-    state.$popup.attr('up-position', state.position)
+    state.popupElement.setAttribute('up-position', state.position)
 
-    u.writeInlineStyle(state.$popup, style)
+    u.writeInlineStyle(state.popupElement, style)
 
   discardHistory = ->
     state.coveredTitle = null
     state.coveredUrl = null
 
-  createHiddenFrame = (target) ->
-    $popup = u.$createElementFromSelector('.up-popup')
+  createHiddenFrame = (targetSelector) ->
+    state.popupElement = popupElement = u.createElementFromSelector('.up-popup')
     # Create an empty element that will match the
     # selector that is being replaced.
-    u.$createPlaceholder(target, $popup)
-    $popup.hide()
-    $popup.appendTo(document.body)
-    state.$popup = $popup
+    u.createPlaceholder(targetSelector, popupElement)
+    e.hide(popupElement)
+    document.body.appendChild(popupElement)
 
   unveilFrame = ->
-    state.$popup.show()
+    e.show(state.popupElement)
 
   ###**
   Returns whether popup modal is currently open.
@@ -228,29 +228,28 @@ up.popup = (($) ->
     chain.asap closeNow, (-> attachNow(elementOrSelector, options))
 
   attachNow = (elementOrSelector, options) ->
-    $anchor = $(elementOrSelector)
-    $anchor.length or up.fail('Cannot attach popup to non-existing element %o', elementOrSelector)
+    anchorElement = e.get(elementOrSelector)
 
-    options = u.options(options)
-    url = u.option(u.pluckKey(options, 'url'), $anchor.attr('up-href'), $anchor.attr('href'))
-    html = u.option(u.pluckKey(options, 'html'))
+    options ?= {}
+    url = u.pluckKey(options, 'url') ? anchorElement.getAttribute('up-href') ? anchorElement.getAttribute('href')
+    html = u.pluckKey(options, 'html')
     url or html or up.fail('up.popup.attach() requires either an { url } or { html } option')
-    target = u.option(u.pluckKey(options, 'target'), $anchor.attr('up-popup')) or up.fail('No target selector given for [up-popup]')
-    position = u.option(options.position, $anchor.attr('up-position'), config.position)
-    options.animation = u.option(options.animation, $anchor.attr('up-animation'), config.openAnimation)
-    options.sticky = u.option(options.sticky, u.castedAttr($anchor, 'up-sticky'), config.sticky)
-    options.history = if up.browser.canPushState() then u.option(options.history, u.castedAttr($anchor, 'up-history'), config.history) else false
-    options.confirm = u.option(options.confirm, $anchor.attr('up-confirm'))
-    options.method = up.link.followMethod($anchor, options)
+    target = u.pluckKey(options, 'target') ? anchorElement.getAttribute('up-popup') or up.fail('No target selector given for [up-popup]')
+    position = anchorElement.getAttribute('up-position') ? config.position
+    options.animation ?= anchorElement.getAttribute('up-animation') ? config.openAnimation
+    options.sticky ?= u.castedAttr(anchorElement, 'up-sticky') ? config.sticky
+    options.history = if up.browser.canPushState() then (options.history ? u.castedAttr(anchorElement, 'up-history') ? config.history) else false
+    options.confirm ?= anchorElement.getAttribute('up-confirm')
+    options.method = up.link.followMethod(anchorElement, options)
     options.layer = 'popup'
-    options.failTarget = u.option(options.failTarget, $anchor.attr('up-fail-target'))
-    options.failLayer = u.option(options.failLayer, $anchor.attr('up-fail-layer'), 'auto')
+    options.failTarget ?= anchorElement.getAttribute('up-fail-target')
+    options.failLayer ?= anchorElement.getAttribute('up-fail-layer') ? 'auto'
 
     # This will prevent up.replace() from looking for fallbacks, since
     # it knows the target will always exist.
     options.provideTarget = -> createHiddenFrame(target)
 
-    animateOptions = up.motion.animateOptions(options, $anchor, duration: config.openDuration, easing: config.openEasing)
+    animateOptions = up.motion.animateOptions(options, anchorElement, duration: config.openDuration, easing: config.openEasing)
     extractOptions = u.merge(options, animation: false)
 
     if options.preload && url
@@ -259,7 +258,7 @@ up.popup = (($) ->
     up.browser.whenConfirmed(options).then ->
       up.bus.whenEmitted('up:popup:open', url: url, message: 'Opening popup').then ->
         state.phase = 'opening'
-        state.$anchor = $anchor
+        state.anchorElement = anchorElement
         state.position = position
         if options.history
           state.coveredUrl = up.browser.url()
@@ -272,7 +271,7 @@ up.popup = (($) ->
         promise = promise.then ->
           align()
           unveilFrame()
-          up.animate(state.$popup, options.animation, animateOptions)
+          up.animate(state.popupElement, options.animation, animateOptions)
         promise = promise.then ->
           state.phase = 'opened'
           up.emit('up:popup:opened', message: 'Popup opened')#
@@ -324,31 +323,31 @@ up.popup = (($) ->
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
     u.assign(options, animateOptions)
 
-    up.bus.whenEmitted('up:popup:close', message: 'Closing popup', $element: state.$popup).then ->
+    up.bus.whenEmitted('up:popup:close', message: 'Closing popup', target: state.popupElement).then ->
       state.phase = 'closing'
       state.url = null
       state.coveredUrl = null
       state.coveredTitle = null
 
-      up.destroy(state.$popup, options).then ->
+      up.destroy(state.popupElement, options).then ->
         state.phase = 'closed'
-        state.$popup = null
-        state.$anchor = null
+        state.popupElement = null
+        state.anchorElement = null
         state.sticky = null
         up.emit('up:popup:closed', message: 'Popup closed')
 
-  preloadNow = ($link, options) ->
+  preloadNow = (link, options) ->
     options = u.options(options)
     options.preload = true
     # Use attachNow() and not attachAsap() so (1) we don't close a currently open popup
     # and (2) our pending AJAX request does not prevent other popups from opening
-    attachNow($link, options)
+    attachNow(link, options)
 
-  toggleAsap = ($link, options) ->
-    if u.hasClass($link, 'up-current')
+  toggleAsap = (link, options) ->
+    if link.classList.contains('up-current')
       closeAsap()
     else
-      attachAsap($link, options)
+      attachAsap(link, options)
 
   ###**
   This event is [emitted](/up.emit) when a popup dialog
@@ -384,8 +383,8 @@ up.popup = (($) ->
   @stable
   ###
   contains = (elementOrSelector) ->
-    $element = $(elementOrSelector)
-    $element.closest('.up-popup').length > 0
+    element = e.get(elementOrSelector)
+    !!e.closest(element, '.up-popup')
 
   ###**
   Opens this link's destination of in a popup overlay:
@@ -424,16 +423,16 @@ up.popup = (($) ->
   ###
   up.link.addFollowVariant '[up-popup]',
     # Don't just pass the `toggleAsap` function reference so we can stub it in tests
-    follow: (link, options) -> toggleAsap($(link), options)
-    preload: (link, options) -> preloadNow($(link), options)
+    follow: (link, options) -> toggleAsap(link, options)
+    preload: (link, options) -> preloadNow(link, options)
 
   # We close the popup when someone clicks on the document.
   # We also need to listen to up:action:consumed in case an [up-instant] link
   # was followed on mousedown.
   up.on 'click up:action:consumed', (event) ->
-    $target = $(event.target)
+    target = event.target
     # Don't close when the user clicked on a popup opener.
-    unless $target.closest('.up-popup, [up-popup]').length
+    unless e.closest(target, '.up-popup, [up-popup]')
       u.muteRejection closeAsap()
       # Do not halt the event chain here. The user is allowed to directly activate
       # a link in the background, even with a (now closing) popup open.
@@ -494,5 +493,3 @@ up.popup = (($) ->
   config: config
   contains: contains
   isOpen: isOpen
-
-)(jQuery)

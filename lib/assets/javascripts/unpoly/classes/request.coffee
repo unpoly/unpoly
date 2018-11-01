@@ -135,7 +135,6 @@ class up.Request extends up.Record
       xhrUrl = @url
       xhrParams = @params.copy()
       xhrMethod = up.proxy.wrapMethod(@method, xhrParams)
-      console.debug('-- params after wrapMethod is %o', xhrParams)
 
       xhrPayload = null
       unless xhrParams.isBlank()

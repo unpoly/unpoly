@@ -65,7 +65,6 @@ up.form = do ->
   TODO
   ###
   findSubmissionFields = (root) ->
-    console.debug("findSubmissionFields(%o)", root)
     fields = findFields(root)
     if button = submittingButton(root)
       fields = u.toArray(fields)
@@ -202,14 +201,12 @@ up.form = do ->
     options.cache = u.option(options.cache, u.castedAttr(form, 'up-cache'))
     options.restoreScroll = u.option(options.restoreScroll, u.castedAttr(form, 'up-restore-scroll'))
     options.origin = u.option(options.origin, form)
-    console.debug("up.submit() set origin to %o", options.origin)
     options.layer = u.option(options.layer, form.getAttribute('up-layer'), 'auto')
     options.failLayer = u.option(options.failLayer, form.getAttribute('up-fail-layer'), 'auto')
     options.params = up.Params.fromForm(form)
     options = u.merge(options, up.motion.animateOptions(options, form))
 
     if options.validate
-      console.debug("==> validate target in up.submit() is %o", target)
       options.headers ||= {}
       options.transition = false
       options.failTransition = false
@@ -351,18 +348,11 @@ up.form = do ->
     option = u.option(options.target, field.getAttribute('up-validate'))
     option ||= u.detectResult config.validateTargets, (defaultTarget) ->
       resolvedDefault = up.dom.resolveSelector(defaultTarget, options.origin)
-      console.debug('### resolvedDefault is %o', resolvedDefault)
       if e.first(resolvedDefault)
-        console.debug("IS match: #{resolvedDefault}")
         return resolvedDefault
-      else
-        console.debug("NOT a match: #{resolvedDefault}")
-        return undefined
 
     unless option
       up.fail('Could not find validation target for %o (tried defaults %o)', field, config.validateTargets)
-
-    console.debug("*** options is now %o", option)
 
     # resolveSelector() also creates a selector string if given an element
     return up.dom.resolveSelector(option, options.origin)
@@ -459,12 +449,9 @@ up.form = do ->
     switcher = e.get(fieldOrSelector)
     options = u.options(options)
     targetSelector = u.option(options.target, switcher.getAttribute('up-switch'))
-    console.debug("=== targetSelector is %o", targetSelector)
     form = closestContainer(switcher)
     u.isPresent(targetSelector) or up.fail("No switch target given for %o", switcher)
     fieldValues = switcherValues(switcher)
-    console.debug("--- calling e.all(%o, %o)", form, targetSelector)
-    console.debug("--- result is %o", e.descendants(form, targetSelector))
 
     e.descendants(form, targetSelector).forEach (target) ->
       switchTarget(target, fieldValues)

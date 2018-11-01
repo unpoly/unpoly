@@ -227,7 +227,7 @@ up.modal = do ->
   chain = new u.DivertibleChain()
 
   reset = ->
-    state.modalElement?.remove()
+    e.remove(state.modalElement) if state.modalElement
     unshiftElements()
     state.reset()
     chain.reset()

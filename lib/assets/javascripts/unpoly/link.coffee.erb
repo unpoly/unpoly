@@ -192,7 +192,6 @@ up.link = do ->
       up.replace(target, url, options)
 
   defaultPreload = (link, options) ->
-    console.debug("** defaultPreload(%o)", link)
     options = u.options(options)
     options.preload = true
     defaultFollow(link, options)
@@ -270,7 +269,6 @@ up.link = do ->
   @internal
   ###
   followVariantForLink = (linkOrSelector, options) ->
-    console.debug("** followVariantForLink(%o)", linkOrSelector)
     options = u.options(options)
     link = e.get(linkOrSelector) # TODO: Can we remove this?
     variant = u.detect followVariants, (variant) -> variant.matchesLink(link)
@@ -289,7 +287,6 @@ up.link = do ->
   @experimental
   ###
   makeFollowable = (link) ->
-    console.debug("makeFollowable(%o)", link)
     unless isFollowable(link)
       link.setAttribute('up-follow', '')
 
@@ -584,7 +581,6 @@ up.link = do ->
   ###
   up.macro '[up-expand]', (area) ->
     selector = u.presentAttr(area, 'up-expand') ? 'a, [up-href]'
-    console.debug("[up-macro] calling descendants(%o, %o)", area, selector)
     childLinks = e.descendants(area, selector)
 
     if childLink = childLinks[0]

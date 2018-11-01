@@ -624,11 +624,8 @@ up.proxy = (($) ->
   @internal
   ###
   wrapMethod = (method, params) ->
-    console.debug("-- wrapMethod(%o)", method)
     if u.contains(config.wrapMethods, method)
-      console.debug('-- adding param %o / %o', up.protocol.config.methodParam, method)
       params.add(up.protocol.config.methodParam, method)
-      console.debug('-- params is now %o', params)
       method = 'POST'
     method
 

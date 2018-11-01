@@ -103,7 +103,6 @@ up.element = do ->
 #      fn(args...)
 
   toggleClass = (element, klass, newPresent) ->
-    console.debug("toggleClass(%o, %o, %o)", element, klass, newPresent)
     fn = if newPresent then 'add' else 'remove'
     element.classList[fn](klass)
 
@@ -128,5 +127,3 @@ up.element = do ->
   hide: hide
   show: show
   setAttrs: setAttrs
-
-
