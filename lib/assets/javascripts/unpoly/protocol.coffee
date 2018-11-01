@@ -174,9 +174,10 @@ an existing cookie should be deleted.
 
 @class up.protocol
 ###
-up.protocol = (($) ->
+up.protocol = do ->
 
   u = up.util
+  e = up.element
 
   ###**
   @function up.protocol.locationFromXhr
@@ -272,8 +273,8 @@ up.protocol = (($) ->
     methodHeader: 'X-Up-Method'
     methodCookie: '_up_method'
     methodParam: '_method'
-    csrfParam: -> $('meta[name="csrf-param"]').attr('content')
-    csrfToken: -> $('meta[name="csrf-token"]').attr('content')
+    csrfParam: -> e.metaContent('csrf-param')
+    csrfToken: -> e.metaContent('csrf-token')
     csrfHeader: 'X-CSRF-Token'
 
   csrfParam = ->
@@ -298,5 +299,3 @@ up.protocol = (($) ->
   csrfParam :csrfParam
   csrfToken: csrfToken
   initialRequestMethod: initialRequestMethod
-
-)(jQuery)

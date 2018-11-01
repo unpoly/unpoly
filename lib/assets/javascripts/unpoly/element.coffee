@@ -110,6 +110,10 @@ up.element = do ->
     for key, value of attrMap
         element.setAttribute(key, value)
 
+  metaContent = (name) ->
+    selector = "meta" + u.attributeSelector('name', name)
+    first(selector)?.getAttribute('content')
+
   descendant: descendant
   descendants: descendants
   first: first
@@ -127,3 +131,4 @@ up.element = do ->
   hide: hide
   show: show
   setAttrs: setAttrs
+  metaContent: metaContent
