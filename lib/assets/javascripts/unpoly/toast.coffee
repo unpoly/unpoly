@@ -4,15 +4,16 @@ Toast alerts
 
 @class up.toast
 ###
-up.toast = (($) ->
+up.toast = do ->
 
   u = up.util
   b = up.browser
+  e = up.element
 
   VARIABLE_FORMATTER = (arg) -> "<span class='up-toast-variable'>#{u.escapeHtml(arg)}</span>"
 
   state = u.config
-    $toast: null
+    element: null
 
   reset = ->
     close()
@@ -27,33 +28,39 @@ up.toast = (($) ->
     message
 
   isOpen = ->
-    !!state.$toast
+    !!state.element
     
-  addAction = ($actions, label, callback) ->
-    $action = $('<span class="up-toast-action"></span>').text(label)
-    $action.on 'click', callback
-    $action.appendTo($actions)
-  
+  addAction = (label, callback) ->
+    actions = state.element.querySelector('.up-toast-actions')
+    action = u.createFragmentFromHtml """
+      <span class="up-toast-action">#{u.escapeHtml(label)}</span>
+    """
+    action.addEventListener('click', callback)
+    actions.appendChild(action)
+
   open = (message, options = {}) ->
     close()
-    $toast = $('<div class="up-toast"></div>').prependTo('body')
-    $message = $('<div class="up-toast-message"></div>').appendTo($toast)
-    $actions = $('<div class="up-toast-actions"></div>').appendTo($toast)
 
     message = messageToHtml(message)
-    $message.html(message)
+
+    state.element = u.createFragmentFromHtml """
+      <div class="up-toast">
+        <div class="up-toast-message">#{message}</div>
+        <div class="up-toast-actions"></div>
+      </div>
+    """
 
     if action = (options.action || options.inspect)
-      addAction($actions, action.label, action.callback)
+      addAction(action.label, action.callback)
 
-    addAction($actions, 'Close', close)
+    addAction('Close', close)
 
-    state.$toast = $toast
+    document.body.appendChild(state.element)
 
   close = ->
     if isOpen()
-      state.$toast.remove()
-      state.$toast = null
+      e.remove(state.element)
+      state.element = null
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
@@ -62,5 +69,3 @@ up.toast = (($) ->
   close: close
   reset: reset
   isOpen: isOpen
-
-)(jQuery)
