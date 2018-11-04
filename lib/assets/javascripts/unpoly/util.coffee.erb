@@ -205,7 +205,7 @@ up.util = (($) ->
     $element = $(input)
     selector = undefined
 
-    if isSingletonElement($element)
+    if isSingletonElement($element[0])
       selector = elementTagName($element)
     else if upId = presence($element.attr("up-id"))
       selector = attributeSelector('up-id', upId)
@@ -227,10 +227,8 @@ up.util = (($) ->
 
     return selector
 
-  isSingletonElement = ($element) ->
-    # jQuery's is() returns true if at least one element
-    # in the collection matches the selector
-    $element.is('html, body, head, title')
+  isSingletonElement = (element) ->
+    up.element.matches(element, 'html, body, head, title')
 
 #  isGoodSelector = (selector) ->
 #    selector.indexOf('#') >= -1 || selector.indexOf('[') >= -1

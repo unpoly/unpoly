@@ -14,7 +14,12 @@
 - Remove 'none' default for animation options in link.follow etc.
 - Remove 'auto' default from { layer, failLayer } in link, modal, popup
 - rename up.dom to up.fragment
-- grip everything for "$" once again
+- grep everything for "$" once again
+- grep for TODO comments
 - migration guide
   - jquery event listeners need to use addEventListener or use event.originalEvent
 - upgrade roca-style.org PR
+- implement up.$animation
+- implement up.$animate
+- implement up.$morph
+- implement up.$transition

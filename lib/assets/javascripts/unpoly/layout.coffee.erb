@@ -511,7 +511,8 @@ up.layout = (($) ->
   ###**
   @internal
   ###
-  absolutize = ($element, options) ->
+  absolutize = (element, options) ->
+    $element = $(element)
     options = u.options(options, afterMeasure: u.noop)
     $viewport = up.layout.viewportOf($element)
     originalDims = u.measure($element, relative: true, inner: true)

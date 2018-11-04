@@ -114,6 +114,12 @@ up.element = do ->
     selector = "meta" + u.attributeSelector('name', name)
     first(selector)?.getAttribute('content')
 
+  insertBefore = (existingElement, newElement) ->
+    existingElement.insertAdjacentElement('beforebegin', newElement)
+
+  replace = (oldElement, newElement) ->
+    oldElement.parentElement.replaceChild(newElement, oldElement)
+
   descendant: descendant
   descendants: descendants
   first: first
@@ -132,3 +138,6 @@ up.element = do ->
   show: show
   setAttrs: setAttrs
   metaContent: metaContent
+  replace: replace
+  insertBefore: insertBefore
+

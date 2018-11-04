@@ -1,6 +1,7 @@
 describe 'up.dom', ->
 
   u = up.util
+  e = up.element
   
   describe 'JavaScript functions', ->
 
@@ -1670,7 +1671,7 @@ describe 'up.dom', ->
 
         it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec (next) ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.util.knife.mock('isSingletonElement').and.callFake ($element) -> $element.is('.container')
+          up.util.knife.mock('isSingletonElement').and.callFake (element) -> e.matches(element, '.container')
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', -> destructor
           $container = affix('.container')
@@ -1771,7 +1772,7 @@ describe 'up.dom', ->
 
           it 'ignores a { transition } option when replacing a singleton element like <body>', asyncSpec (next) ->
             # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-            up.util.knife.mock('isSingletonElement').and.callFake ($element) -> $element.is('.container')
+            up.util.knife.mock('isSingletonElement').and.callFake (element) -> e.matches(element, '.container')
 
             affix('.container').text('old text')
 
@@ -1887,8 +1888,8 @@ describe 'up.dom', ->
           it "does not emit multiple replacement events (bugfix)", (done) ->
             $element = affix('.element').text('old content')
 
-            transition = ($old, $new, options) ->
-              up.morph($old, $new, 'cross-fade', options)
+            transition = (oldElement, newElement, options) ->
+              up.morph(oldElement, newElement, 'cross-fade', options)
 
             destroyListener = jasmine.createSpy('listener to up:fragment:destroy')
             up.on 'up:fragment:destroy', destroyListener
@@ -1908,8 +1909,8 @@ describe 'up.dom', ->
           it "does not compile the element multiple times (bugfix)", (done) ->
             $element = affix('.element').text('old content')
 
-            transition = ($old, $new, options) ->
-              up.morph($old, $new, 'cross-fade', options)
+            transition = (oldElement, newElement, options) ->
+              up.morph(oldElement, newElement, 'cross-fade', options)
 
             compiler = jasmine.createSpy('compiler')
             up.$compiler '.element', compiler
@@ -1923,8 +1924,8 @@ describe 'up.dom', ->
           it "does not call destructors multiple times (bugfix)", (done) ->
             $element = affix('.element').text('old content')
 
-            transition = ($old, $new, options) ->
-              up.morph($old, $new, 'cross-fade', options)
+            transition = (oldElement, newElement, options) ->
+              up.morph(oldElement, newElement, 'cross-fade', options)
 
             destructor = jasmine.createSpy('destructor')
             up.$compiler '.element', (element) ->
@@ -2339,9 +2340,9 @@ describe 'up.dom', ->
         it "doesn't let the discarded element appear in a transition", (done) ->
           oldTextDuringTransition = undefined
           newTextDuringTransition = undefined
-          transition = ($old, $new) ->
-            oldTextDuringTransition = squish($old.text())
-            newTextDuringTransition = squish($new.text())
+          transition = (oldElement, newElement) ->
+            oldTextDuringTransition = squish(oldElement.innerText)
+            newTextDuringTransition = squish(newElement.innerText)
             Promise.resolve()
           $container = affix('.container')
           $container.html """

@@ -428,9 +428,9 @@ describe 'up.motion', ->
 
           oldDims = u.measure($old)
 
-          transition = ($old, $new, options) ->
-            up.animate($old, 'fade-out', options)
-            up.animate($new, 'fade-in', options)
+          transition = (oldElement, newElement, options) ->
+            up.animate(oldElement, 'fade-out', options)
+            up.animate(newElement, 'fade-in', options)
 
           up.morph($old, $new, transition, duration: 200, easing: 'linear')
 
@@ -454,9 +454,9 @@ describe 'up.motion', ->
           $old = affix('.old').text('old content')
           $new = affix('.new').text('new content').detach()
 
-          transition = ($old, $new, options) ->
-            up.animate($old, 'fade-out', options)
-            up.animate($new, 'fade-in', options)
+          transition = (oldElement, newElement, options) ->
+            up.animate(oldElement, 'fade-out', options)
+            up.animate(newElement, 'fade-in', options)
 
           up.morph($old, $new, transition, duration: 200, easing: 'linear')
 
@@ -471,8 +471,8 @@ describe 'up.motion', ->
 
           oldDims = u.measure($old)
 
-          transition = ($old, $new, options) ->
-            up.morph($old, $new, 'cross-fade', options)
+          transition = (oldElement, newElement, options) ->
+            up.morph(oldElement, newElement, 'cross-fade', options)
 
           up.morph($old, $new, transition, duration: 400, easing: 'linear')
 
@@ -496,8 +496,8 @@ describe 'up.motion', ->
           $old = affix('.old').text('old content')
           $new = affix('.new').text('new content').detach()
 
-          transition = ($old, $new, options) ->
-            up.morph($old, $new, 'cross-fade', options)
+          transition = (oldElement, newElement, options) ->
+            up.morph(oldElement, newElement, 'cross-fade', options)
 
           up.morph($old, $new, transition, duration: 50, easing: 'linear')
 
