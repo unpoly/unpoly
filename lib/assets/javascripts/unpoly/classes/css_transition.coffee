@@ -2,9 +2,7 @@ u = up.util
 
 class up.CssTransition
 
-  constructor: ($element, lastFrame, options) ->
-    @$element = $element
-    @element = u.element($element)
+  constructor: (@element, lastFrame, options) ->
     @lastFrameCamel = u.camelCaseKeys(lastFrame)
     @lastFrameKebab = u.kebabCaseKeys(lastFrame)
     @lastFrameKeysKebab = Object.keys(@lastFrameKebab)
@@ -35,11 +33,11 @@ class up.CssTransition
 
   listenToFinishEvent: =>
     if @finishEvent
-      @$element.on(@finishEvent, @onFinishEvent)
+      @element.addEventListener(@finishEvent, @onFinishEvent)
 
   stopListenToFinishEvent: =>
     if @finishEvent
-      @$element.off(@finishEvent, @onFinishEvent)
+      @element.removeEventListener(@finishEvent, @onFinishEvent)
 
   onFinishEvent: (event) =>
     # don't waste time letting the event bubble up the DOM
@@ -55,10 +53,10 @@ class up.CssTransition
     clearTimeout(@fallbackTimer)
 
   listenToTransitionEnd: =>
-    @$element.on 'transitionend', @onTransitionEnd
+    @element.addEventListener 'transitionend', @onTransitionEnd
 
   stopListenToTransitionEnd: =>
-    @$element.off 'transitionend', @onTransitionEnd
+    @element.removeEventListener 'transitionend', @onTransitionEnd
 
   onTransitionEnd: (event) =>
     # Check if the transitionend event was caused by our own transition,
@@ -70,7 +68,7 @@ class up.CssTransition
     elapsed = new Date() - @startTime
     return unless elapsed > 0.25 * @totalDuration
 
-    completedPropertyKebab = event.originalEvent.propertyName
+    completedPropertyKebab = event.propertyName
     return unless u.contains(@lastFrameKeysKebab, completedPropertyKebab)
 
     @finish()
