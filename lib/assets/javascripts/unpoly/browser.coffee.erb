@@ -243,6 +243,12 @@ up.browser = do ->
   canJQuery = u.memoize ->
     !!window.jQuery
 
+  canSmoothScroll = u.memoize ->
+    'scrollBehavior' of document.documentElement.style
+
+  canAnimationFrame = u.memoize ->
+    'requestAnimationFrame' of window
+
   popCookie = (name) ->
     value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
     if u.isPresent(value)
@@ -312,6 +318,8 @@ up.browser = do ->
   canInspectFormData: canInspectFormData
   canCustomElements: canCustomElements
   canJQuery: canJQuery
+  canAnimationFrame: canAnimationFrame
+  canSmoothScroll: canSmoothScroll
   documentViewportSelector: documentViewportSelector
   whenConfirmed: whenConfirmed
   isSupported: isSupported

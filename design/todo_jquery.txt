@@ -18,8 +18,13 @@
 - grep for TODO comments
 - migration guide
   - jquery event listeners need to use addEventListener or use event.originalEvent
+- refactor motion tracker
+  - can we write CssTransition as a motion with start/finish methods? that does not register finish events?
+  - also unify claim/claim2 or rename them
 - upgrade roca-style.org PR
 - implement up.$animation
 - implement up.$animate
 - implement up.$morph
 - implement up.$transition
+- consider renaming wrapCollection / isCollection to wrapList / isList
+- support smooth-scrolling to an existing #anchor in the current page, to justify all that animation code

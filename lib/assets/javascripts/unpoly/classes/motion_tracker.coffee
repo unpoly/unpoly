@@ -21,7 +21,6 @@ class up.MotionTracker
   @param {jQuery} $cluster
   @param {Function(jQuery): Promise} animator
   @param {Object} memory.trackMotion = true
-    Whether
   @return {Promise} A promise that is fulfilled when the new animation ends.
   ###
   claim: (cluster, animator, memory = {}) =>
@@ -40,6 +39,12 @@ class up.MotionTracker
         # Attach the modified promise to the cluster's elements
         @markCluster($cluster, promise)
         promise
+
+  claim2: (element, motion) ->
+    element.addEventListener(@finishEvent, motion.finish)
+    promise = claim(element, motion.start)
+    promise = promise.then => element.removeEventListener(@finishEvent, motion.finish)
+    promise
 
   ###**
   @method finish

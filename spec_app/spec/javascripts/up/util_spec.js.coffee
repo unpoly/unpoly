@@ -109,6 +109,16 @@ describe 'up.util', ->
         mapped = up.util.map(array, (element, i) -> i)
         expect(mapped).toEqual [0, 1, 2]
 
+    describe 'up.util.mapObject', ->
+
+      it 'creates an object from the given array and pairer', ->
+        array = ['foo', 'bar', 'baz']
+        object = up.util.mapObject(array, (str) -> ["#{str}Key", "#{str}Value"])
+        expect(object).toEqual
+          fooKey: 'fooValue'
+          barKey: 'barValue'
+          bazKey: 'bazValue'
+
     describe 'up.util.each', ->
 
       it 'calls the given function once for each itm of the given array', ->

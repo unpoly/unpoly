@@ -329,6 +329,16 @@ up.util = (($) ->
       block(item, index)
 
   ###**
+  @function up.util.mapObject
+  @internal
+  ###
+  mapObject = (array, pairer) ->
+    merger = (object, pair) ->
+      object[pair[0]] = pair[1]
+      return object
+    map(array, pairer).reduce(merger, {})
+
+  ###**
   Calls the given function for each element (and, optional, index)
   of the given array.
 
@@ -2084,6 +2094,16 @@ up.util = (($) ->
     else
       string.substring(string.length - search.length) == search
 
+  simpleEase = (x) ->
+    # easing: http://fooplot.com/?lang=de#W3sidHlwZSI6MCwiZXEiOiJ4PDAuNT8yKngqeDp4Kig0LXgqMiktMSIsImNvbG9yIjoiIzEzRjIxNyJ9LHsidHlwZSI6MCwiZXEiOiJzaW4oKHheMC43LTAuNSkqcGkpKjAuNSswLjUiLCJjb2xvciI6IiMxQTUyRUQifSx7InR5cGUiOjEwMDAsIndpbmRvdyI6WyItMS40NyIsIjEuNzgiLCItMC41NSIsIjEuNDUiXX1d
+    # easing nice: sin((x^0.7-0.5)*pi)*0.5+0.5
+    # easing performant: x < 0.5 ? 2*x*x : x*(4 - x*2)-1
+    # https://jsperf.com/easings/1
+    if x < 0.5
+      2*x*x
+    else
+      x*(4 - x*2)-1
+
   wrapValue = (object, constructor) ->
     if object instanceof constructor
       # This object has gone through instantiation and normalization before.
@@ -2130,6 +2150,7 @@ up.util = (($) ->
   eachIterator: eachIterator
   map: map
   flatMap: flatMap
+  mapObject: mapObject
   times: times
   detectResult: detectResult
   any: any
@@ -2251,6 +2272,7 @@ up.util = (($) ->
 #  wrapArray: wrapArray
   wrapCollection: wrapCollection
   wrapValue: wrapValue
+  simpleEase: simpleEase
   values: objectValues
 
 )(jQuery)

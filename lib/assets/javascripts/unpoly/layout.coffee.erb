@@ -18,7 +18,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
 
 @class up.layout
 ###
-up.layout = (($) ->
+up.layout = do ->
 
   u = up.util
 
@@ -41,13 +41,6 @@ up.layout = (($) ->
     An array of CSS selectors that find elements anchored to the
     right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
     See [`[up-anchored="right"]`](/up-anchored-right) for details.
-  @param {number} [config.duration=0]
-    The duration of the scrolling animation in milliseconds.
-    Setting this to `0` will disable scrolling animations.
-  @param {string} [config.easing='swing']
-    The timing function that controls the animation's acceleration.
-    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
-    for a list of pre-defined timing functions.
   @param {number} [config.snap=50]
     When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
     to the top when the revealed element is closer to the top than `config.snap`.
@@ -63,7 +56,7 @@ up.layout = (($) ->
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
     snap: 50
     substance: 150
-    easing: 'swing'
+    scrollSpeed: 2.0 # pixels per ms
 
   lastScrollTops = new up.Cache
     size: 30,
@@ -106,44 +99,17 @@ up.layout = (($) ->
     The container element to scroll.
   @param {number} scrollPos
     The absolute number of pixels to set the scroll position to.
-  @param {number}[options.duration]
-    The number of miliseconds for the scrolling's animation.
-  @param {string}[options.easing]
-    The timing function that controls the acceleration for the scrolling's animation.
+  @param {string}[options.behavior='auto']
+    When set to `'auto'`, this will immediately scroll to the new position.
+
+    When set to `'smooth'`, this will scroll smoothly to the new position.
   @return {Promise}
     A promise that will be fulfilled when the scrolling ends.
   @experimental
   ###
   scroll = (viewport, scrollTop, options) ->
-    $viewport = $(viewport)
-    options = u.options(options)
-    options.duration = u.option(options.duration, config.duration)
-    options.easing = u.option(options.easing, config.easing)
-
-    finishScrolling($viewport).then ->
-      if up.motion.isEnabled() && options.duration > 0
-        scrollWithAnimateNow($viewport, scrollTop, options)
-      else
-        scrollAbruptlyNow($viewport, scrollTop)
-
-  scrollWithAnimateNow = ($scrollable, scrollTop, animateOptions) ->
-    start = ->
-      finish = ->
-        # jQuery exposes a finish() method that completes all animations orchestrated through jQuery.
-        # This will also resolve the promise returned by $element.animate(..).promise().
-        $scrollable.finish()
-
-      $scrollable.on(scrollingTracker.eventName, finish)
-      scrollDone = $scrollable.animate({ scrollTop }, animateOptions).promise()
-      scrollDone.then -> $scrollable.off(scrollingTracker.eventName)
-      scrollDone
-
-    # Tracker will either finish or wait for previous scrolling animations before starting the next
-    scrollingTracker.claim($scrollable, start)
-
-  scrollAbruptlyNow = ($scrollable, scrollTop) ->
-    $scrollable.scrollTop(scrollTop)
-    Promise.resolve()
+    motion = new up.ScrollMotion(viewport, scrollTop, options)
+    scrollingTracker.claim2(viewport, motion)
 
   ###**
   Finishes scrolling animations in the given element, its ancestors or its descendants.
@@ -310,7 +276,7 @@ up.layout = (($) ->
     revealOpt = options.reveal
     restoreScrollOpt = options.restoreScroll
 
-    durationOptions = u.only(options, 'duration')
+    scrollBehaviorOptions = u.only(options, 'scrollBehavior')
 
     if restoreScrollOpt
       # If options.restoreScroll is an object, its keys map viewport selectors
@@ -320,7 +286,7 @@ up.layout = (($) ->
       return restoreScroll(around: $element, scrollTops: givenTops)
 
     else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
-      return revealHash(hashOpt, durationOptions)
+      return revealHash(hashOpt, scrollBehaviorOptions)
 
     else if revealOpt
       # We allow to pass another element as { reveal } option
@@ -342,7 +308,7 @@ up.layout = (($) ->
       # reveals the first validation error message, but the error is shown in an
       # unexpected element.
       if $element.length
-        return reveal($element, durationOptions)
+        return reveal($element, scrollBehaviorOptions)
 
     else
       # If we didn't need to scroll above, just return a resolved promise
@@ -411,7 +377,7 @@ up.layout = (($) ->
   @internal
   ###
   viewports = ->
-    $(viewportSelector())
+    e.all(viewportSelector())
 
   scrollTopKey = (viewport) ->
     u.selectorForElement(viewport)
@@ -430,14 +396,8 @@ up.layout = (($) ->
   @internal
   ###
   scrollTops = ->
-    topsBySelector = {}
-    for group in config.viewports
-      $(group).each ->
-        $viewport = $(this)
-        key = scrollTopKey($viewport)
-        top = $viewport.scrollTop()
-        topsBySelector[key] = top
-    topsBySelector
+    u.mapObject viewports(), (viewport) ->
+      [scrollTopKey(viewport), viewport.scrollTop]
 
   ###**
   @function up.layout.fixedChildren
@@ -732,8 +692,6 @@ up.layout = (($) ->
   anchoredRight: anchoredRight
   fixedChildren: fixedChildren
   absolutize: absolutize
-
-)(jQuery)
 
 up.scroll = up.layout.scroll
 up.reveal = up.layout.reveal
