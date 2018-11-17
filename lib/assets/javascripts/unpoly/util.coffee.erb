@@ -2102,13 +2102,11 @@ up.util = (($) ->
     # easing nice: sin((x^0.7-0.5)*pi)*0.5+0.5
     # easing performant: x < 0.5 ? 2*x*x : x*(4 - x*2)-1
     # https://jsperf.com/easings/1
-
-    Math.sin((Math.pow(x, 0.7) - 0.5) * Math.PI) * 0.5 + 0.5
-
-    # if x < 0.5
-    #   2*x*x
-    # else
-    #   x*(4 - x*2)-1
+    # Math.sin((Math.pow(x, 0.7) - 0.5) * Math.PI) * 0.5 + 0.5
+    if x < 0.5
+      2*x*x
+    else
+      x*(4 - x*2)-1
 
   wrapValue = (object, constructor) ->
     if object instanceof constructor
