@@ -1,0 +1,24 @@
+<div class="example">
+
+  <p>
+    <a class="button" href="#" onclick="up.scroll(document.scrollingElement, document.getElementById('content').offsetHeight, { behavior: 'smooth' }); return false">Scroll down with Unpoly</a>
+    <a class="button" href="#" onclick="document.scrollingElement.scrollTo({ top: document.getElementById('content').offsetHeight, behavior: 'smooth' }); return false">Scroll down with native</a>
+  </p>
+
+  <h2>Long page</h2>
+
+  <div style="height: 2000px" id="content">
+    Content height:
+    <a href="#" onclick="document.getElementById('content').style.height = '100px'; return false">100px</a>
+    <a href="#" onclick="document.getElementById('content').style.height = '300px'; return false">300px</a>
+    <a href="#" onclick="document.getElementById('content').style.height = '1000px'; return false">1000px</a>
+    <a href="#" onclick="document.getElementById('content').style.height = '3000px'; return false">3000px</a>
+    <a href="#" onclick="document.getElementById('content').style.height = '10000px'; return false">10000px</a>
+  </div>
+
+  <p>
+    <a class="button" href="#" onclick="up.scroll(document.scrollingElement, 0, { behavior: 'smooth' }); return false">Scroll up with Unpoly</a>
+    <a class="button" href="#" onclick="document.scrollingElement.scrollTo({ top: 0, behavior: 'smooth' }); return false">Scroll up with native</a>
+  </p>
+
+</div>

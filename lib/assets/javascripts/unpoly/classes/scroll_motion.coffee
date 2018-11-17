@@ -2,59 +2,61 @@ u = up.util
 
 class up.ScrollMotion
 
-  constructor: (@scrollable, @targetTop, @options = {}) ->
-
-  start: =>
-    # We set up a new promise so we can capture @resolve() for use in @finish()
-    @promise = new Promise (@resolve, _reject) =>
-
+  constructor: (@scrollable, @targetTop, options = {}) ->
     # The option for up.scroll() is { behavior }, but coming
     # from up.replace() it's { scrollBehavior }.
-    behavior = @options.behavior ? @options.scrollBehavior
+    @behavior = options.behavior ? options.scrollBehavior ? 'instant'
 
-    if behavior == 'smooth' && up.motion.isEnabled()
-      if up.browser.canSmoothScroll()
-        @startNativeAnimation()
-      else if up.browser.canAnimationFrame()
-        @startEmulatedAnimation()
+    # The option for up.scroll() is { behavior }, but coming
+    # from up.replace() it's { scrollSpeed }.
+    @speed = options.speed ? options.scrollSpeed ? up.layout.config.scrollSpeed
+
+  start: =>
+    return new Promise (@resolve, @reject) =>
+      if @behavior == 'smooth' && up.motion.isEnabled()
+        @startAnimation()
       else
         @finish()
-    else
-      @finish()
 
-  startNativeAnimation: ->
-    @scrollable.scrollTo({ left: 0, top: @targetTop, behavior: 'smooth'})
-
-  startEmulatedAnimation: ->
+  startAnimation: ->
     @startTime = Date.now()
     @startTop = @scrollable.scrollTop
     @topDiff = @targetTop - @startTop
-    @duration = Math.abs(@topDiff) / up.layout.config.scrollSpeed
-    requestAnimationFrame(@emulatedFrame)
+    @duration = Math.abs(@topDiff) / @speed
+    requestAnimationFrame(@animationFrame)
 
-  emulatedFrame: =>
-    return if @finished
+  animationFrame: =>
+    return if @settled
+
+    # When the scroll position is not the one we previously set, we assume
+    # that the user has tried scrolling on her own. We then cancel the scrolling animation.
+    if @frameTop && Math.abs(@frameTop - @scrollable.scrollTop) > 1.5
+      @cancel('Animation aborted due to user intervention')
 
     currentTime = Date.now()
     timeElapsed = currentTime - @startTime
     timeFraction = Math.min(timeElapsed / @duration, 1)
-    frameTop = @startTop + (u.ease(timeFraction) * @topDiff)
 
-    if Math.abs(@targetTop - frameTop) < 0.25
+    console.debug(timeFraction, u.ease(timeFraction))
+
+    @frameTop = @startTop + (u.ease(timeFraction) * @topDiff)
+
+    # When we're very close to the target top, finish the animation
+    # directly to deal with rounding errors.
+    if Math.abs(@targetTop - @frameTop) < 0.3
       @finish()
     else
-      scrollable.scrollTop = frameTop
-      requestAnimationFrame(@emulatedFrame)
+      @scrollable.scrollTop = @frameTop
+      requestAnimationFrame(@animationFrame)
+
+  cancel: (reason) =>
+    @settled = true
+    @reject(new Error(reason))
 
   finish: =>
     # In case we're animating with emulation, cancel the next scheduled frame
-    @finished = true
-
+    @settled = true
     # Setting the { scrollTop } prop will also finish a native scrolling
     # animation in Firefox and Chrome.
     @scrollable.scrollTop = @targetTop
     @resolve()
-
-  @run: (args...) ->
-    animation = new @(args...)
-    animation.promise

@@ -342,6 +342,39 @@ describe 'up.util', ->
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])
 
+    describe 'up.util.muteRejection', ->
+
+      it 'returns a promise that fulfills when the given promise fulfills', (done) ->
+        fulfilledPromise = Promise.resolve()
+        mutedPromise = up.util.muteRejection(fulfilledPromise)
+
+        u.nextFrame ->
+          promiseState(mutedPromise).then (result) ->
+            expect(result.state).toEqual('fulfilled')
+            done()
+
+      it 'returns a promise that fulfills when the given promise rejects', (done) ->
+        rejectedPromise = Promise.reject()
+        mutedPromise = up.util.muteRejection(rejectedPromise)
+
+        u.nextFrame ->
+          promiseState(mutedPromise).then (result) ->
+            expect(result.state).toEqual('fulfilled')
+            done()
+
+    describe 'up.util.simpleEase', ->
+
+      it 'returns 0 for 0', ->
+        expect(up.util.simpleEase(0)).toBe(0)
+
+      it 'returns 1 for 1', ->
+        expect(up.util.simpleEase(1)).toBe(1)
+
+      it 'returns steadily increasing values between 0 and 1', ->
+        expect(up.util.simpleEase(0.25)).toBeAround(0.40, 0.2)
+        expect(up.util.simpleEase(0.50)).toBeAround(0.70, 0.2)
+        expect(up.util.simpleEase(0.75)).toBeAround(0.85, 0.2)
+
     describe 'up.util.createDocumentFromHtml', ->
 
       it 'parses a string that contains a serialized HTML document', ->

@@ -352,8 +352,8 @@ up.motion = do ->
     beforeStart()
 
     scrollNew = ->
-      # Don't animate the scrolling. The { duration } option was meant for the transition.
-      scrollOptions = u.merge(options, duration: 0)
+      # Don't animate the scrolling.
+      scrollOptions = u.merge(options, behavior: 'instant')
       # Scroll newElement into position before we start the enter animation.
       up.layout.scrollAfterInsertFragment(newElement, scrollOptions)
 

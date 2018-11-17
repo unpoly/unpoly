@@ -243,9 +243,6 @@ up.browser = do ->
   canJQuery = u.memoize ->
     !!window.jQuery
 
-  canSmoothScroll = u.memoize ->
-    'scrollBehavior' of document.documentElement.style
-
   canAnimationFrame = u.memoize ->
     'requestAnimationFrame' of window
 
@@ -289,7 +286,8 @@ up.browser = do ->
       canFormData() &&
       canCssTransition() &&
       canInputEvent() &&
-      canPromise()
+      canPromise() &&
+      canAnimationFrame()
 
   ###**
   Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
@@ -318,8 +316,6 @@ up.browser = do ->
   canInspectFormData: canInspectFormData
   canCustomElements: canCustomElements
   canJQuery: canJQuery
-  canAnimationFrame: canAnimationFrame
-  canSmoothScroll: canSmoothScroll
   documentViewportSelector: documentViewportSelector
   whenConfirmed: whenConfirmed
   isSupported: isSupported

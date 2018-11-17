@@ -1006,8 +1006,11 @@ up.util = (($) ->
   ###**
   Queue a function to be executed in the next microtask.
 
+  Returns a promise that will be resolved when the given task was executed.
+
   @function up.util.queueMicrotask
   @param {Function} task
+  @return {Promise}
   @internal
   ###
   microtask = (task) ->
@@ -2094,15 +2097,18 @@ up.util = (($) ->
     else
       string.substring(string.length - search.length) == search
 
-  simpleEase = (x) ->
+  ease = (x) ->
     # easing: http://fooplot.com/?lang=de#W3sidHlwZSI6MCwiZXEiOiJ4PDAuNT8yKngqeDp4Kig0LXgqMiktMSIsImNvbG9yIjoiIzEzRjIxNyJ9LHsidHlwZSI6MCwiZXEiOiJzaW4oKHheMC43LTAuNSkqcGkpKjAuNSswLjUiLCJjb2xvciI6IiMxQTUyRUQifSx7InR5cGUiOjEwMDAsIndpbmRvdyI6WyItMS40NyIsIjEuNzgiLCItMC41NSIsIjEuNDUiXX1d
     # easing nice: sin((x^0.7-0.5)*pi)*0.5+0.5
     # easing performant: x < 0.5 ? 2*x*x : x*(4 - x*2)-1
     # https://jsperf.com/easings/1
-    if x < 0.5
-      2*x*x
-    else
-      x*(4 - x*2)-1
+
+    Math.sin((Math.pow(x, 0.7) - 0.5) * Math.PI) * 0.5 + 0.5
+
+    # if x < 0.5
+    #   2*x*x
+    # else
+    #   x*(4 - x*2)-1
 
   wrapValue = (object, constructor) ->
     if object instanceof constructor
@@ -2272,7 +2278,7 @@ up.util = (($) ->
 #  wrapArray: wrapArray
   wrapCollection: wrapCollection
   wrapValue: wrapValue
-  simpleEase: simpleEase
+  ease: ease
   values: objectValues
 
 )(jQuery)

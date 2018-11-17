@@ -19,22 +19,35 @@ class up.MotionTracker
 
   @method claim
   @param {jQuery} $cluster
-  @param {Function(jQuery): Promise} animator
-  @param {Object} memory.trackMotion = true
-  @return {Promise} A promise that is fulfilled when the new animation ends.
+    A list of elements that will be affected by the motion.
+  @param {Function(): Promise} startMotion
+  @param {Object} [memory.trackMotion=true]
+  @return {Promise}
+    A promise that is fulfilled when the new animation ends.
   ###
-  claim: (cluster, animator, memory = {}) =>
+  claim: (cluster, startMotion, memory = {}) =>
     $cluster = $(cluster)
+
+    # Some motions might reject after starting. E.g. a scrolling animation
+    # will reject when the user scrolls manually during the animation. For
+    # the purpose of this tracker, we just want to know when the animation
+    # has setteld, regardless of whether it was resolved or rejected.
+    mutedAnimator = -> u.muteRejection(startMotion())
+
+    # Callers can pass an options hash `memory` in which we store a { trackMotion }
+    # property. With this we can prevent tracking the same motion multiple times.
+    # This is an issue when composing a transition from two animations, or when
+    # using another transition from within a transition function.
     memory.trackMotion = u.option(memory.trackMotion, up.motion.isEnabled())
     if memory.trackMotion is false
       # Since we don't want recursive tracking or finishing, we could run
       # the animator() now. However, since the else branch is async, we push
       # the animator into the microtask queue to be async as well.
-      u.microtask(animator)
+      u.microtask(mutedAnimator)
     else
       memory.trackMotion = false
       @finish($cluster).then =>
-        promise = @whileForwardingFinishEvent($cluster, animator)
+        promise = @whileForwardingFinishEvent($cluster, mutedAnimator)
         promise = promise.then => @unmarkCluster($cluster)
         # Attach the modified promise to the cluster's elements
         @markCluster($cluster, promise)
@@ -42,7 +55,7 @@ class up.MotionTracker
 
   claim2: (element, motion) ->
     element.addEventListener(@finishEvent, motion.finish)
-    promise = claim(element, motion.start)
+    promise = @claim(element, motion.start)
     promise = promise.then => element.removeEventListener(@finishEvent, motion.finish)
     promise
 

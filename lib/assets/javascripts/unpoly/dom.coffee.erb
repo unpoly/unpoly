@@ -453,7 +453,7 @@ up.dom = (($) ->
 
       # Since we're adding content instead of replacing, we'll only
       # animate $new instead of morphing between $old and $new
-      promise = promise.then -> up.animate($wrapper, transition, options)
+      promise = u.always(promise, up.animate($wrapper, transition, options))
 
       # Remove the wrapper now that is has served it purpose
       promise = promise.then -> u.unwrapElement($wrapper)
@@ -732,7 +732,7 @@ up.dom = (($) ->
     An second element or selector that can be referenced as `&` in the first selector:
 
         $input = $('input.email');
-        up.first('.field:has(&)', $input); // returns the .field containing $input
+        up.first('.field:has(&)', { origin: $input }); // returns the .field containing $input
   @return {jQuery|undefined}
     The first element that is neither a ghost or being destroyed,
     or `undefined` if no such element was found.

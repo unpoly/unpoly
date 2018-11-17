@@ -28,3 +28,7 @@
 - implement up.$transition
 - consider renaming wrapCollection / isCollection to wrapList / isList
 - support smooth-scrolling to an existing #anchor in the current page, to justify all that animation code
+- support this syntax:
+  - <a href="#foo" up-scroll="smooth" up-scroll-speed="3">
+  - [up-scroll] should make a link followable (if it is not already)
+- scrolling to #hash should also find [up-id], to prevent jumping of browser
