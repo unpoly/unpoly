@@ -21,6 +21,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
 up.layout = do ->
 
   u = up.util
+  e = up.element
 
   ###**
   Configures the application layout.
@@ -123,8 +124,8 @@ up.layout = do ->
     # Don't emit expensive events if no animation can be running anyway
     return Promise.resolve() unless up.motion.isEnabled()
 
-    $scrollable = viewportOf(element)
-    scrollingTracker.finish($scrollable)
+    scrollable = viewportOf(element)
+    scrollingTracker.finish(scrollable)
 
   ###**
   @function up.layout.anchoredRight
@@ -132,7 +133,7 @@ up.layout = do ->
   ###
   anchoredRight = ->
     selector = config.anchoredRight.join(',')
-    $(selector)
+    e.all(selector)
 
   ###**
   @function measureObstruction
@@ -150,11 +151,11 @@ up.layout = do ->
     measureBottomObstructor = (obstructor) ->
       composeHeight(obstructor, ['bottom', 'margin-bottom'])
 
-    $topObstructors = $(config.fixedTop.join(', '))
-    $bottomObstructors = $(config.fixedBottom.join(', '))
+    topObstructors = e.all(config.fixedTop.join(', '))
+    bottomObstructors = e.all(config.fixedBottom.join(', '))
 
-    topObstructions = u.map($topObstructors, measureTopObstructor)
-    bottomObstructions = u.map($bottomObstructors, measureBottomObstructor)
+    topObstructions = u.map(topObstructors, measureTopObstructor)
+    bottomObstructions = u.map(bottomObstructors, measureBottomObstructor)
 
     top: Math.max(0, topObstructions...)
     bottom: Math.max(0, bottomObstructions...)
@@ -203,18 +204,18 @@ up.layout = do ->
   @stable
   ###
   reveal = (elementOrSelector, options) ->
-    $element = $(elementOrSelector).first() # we can only reveal one element
-    up.puts 'Revealing fragment %o', $element.get(0)
+    element = e.get(elementOrSelector)
+    up.puts 'Revealing fragment %o', element
     options = u.options(options)
 
     u.rejectOnError ->
-      $viewport = if options.viewport then $(options.viewport) else viewportOf($element)
+      viewport = options.viewport ? viewportOf(element)
 
       snap = u.option(options.snap, config.snap)
 
-      viewportIsDocument = $viewport.is(up.browser.documentViewportSelector())
-      viewportHeight = if viewportIsDocument then u.clientSize().height else $viewport.outerHeight()
-      originalScrollPos = $viewport.scrollTop()
+      viewportIsDocument = e.matches(viewport, up.browser.documentViewportSelector())
+      viewportHeight = if viewportIsDocument then u.clientSize().height else viewport.offsetHeight
+      originalScrollPos = viewport.scrollTop
       newScrollPos = originalScrollPos
 
       offsetShift = undefined
@@ -238,7 +239,7 @@ up.layout = do ->
       predictFirstVisibleRow = -> newScrollPos + obstruction.top
       predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom
 
-      elementDims = u.measure($element, relative: $viewport, includeMargin: true)
+      elementDims = u.measure(element, relative: viewport, includeMargin: true)
       firstElementRow = elementDims.top + offsetShift
       lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance)
 
@@ -254,7 +255,7 @@ up.layout = do ->
         newScrollPos = 0
 
       if newScrollPos != originalScrollPos
-        scroll($viewport, newScrollPos, options)
+        scroll(viewport, newScrollPos, options)
       else
         Promise.resolve()
 
@@ -270,45 +271,45 @@ up.layout = do ->
   scrollAfterInsertFragment = (selectorOrElement, options) ->
     options = u.options(options)
     console.debug("scrollAfterInsertFragment with opts %o", options)
-    $element = $(selectorOrElement)
+    eelement = e.get(selectorOrElement)
 
     hashOpt = options.hash
     revealOpt = options.reveal
     restoreScrollOpt = options.restoreScroll
 
-    scrollBehaviorOptions = u.only(options, 'scrollBehavior')
+    scrollOptions = u.only(options, 'scrollBehavior', 'scrollSpeed')
 
     if restoreScrollOpt
       # If options.restoreScroll is an object, its keys map viewport selectors
       # to scroll positions. If it is just true, we leave the scrollTops option
       # undefined and let restoreScroll() retrieve previous scrollTops from cache.
       givenTops = u.presence(restoreScrollOpt, u.isObject)
-      return restoreScroll(around: $element, scrollTops: givenTops)
+      return restoreScroll(around: element, scrollTops: givenTops)
 
     else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
-      return revealHash(hashOpt, scrollBehaviorOptions)
+      return revealHash(hashOpt, scrollOptions)
 
     else if revealOpt
       # We allow to pass another element as { reveal } option
       if u.isElement(revealOpt) || u.isJQuery(revealOpt)
-        $element = $(revealOpt)
+        element = e.get(revealOpt)
 
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
         console.debug("--- revealing %o with %o", revealOpt, options.origin)
         selector = up.dom.resolveSelector(revealOpt, options.origin)
         console.debug("--- reveal done")
-        $element = up.first(selector)
+        element = up.first(selector)
 
       else
-        # We reveal the given $element
+        # We reveal the given element
 
       # If selectorOrElement was a CSS selector, don't blow up by calling reveal()
       # with an empty jQuery collection. This might happen if a failed form submission
       # reveals the first validation error message, but the error is shown in an
       # unexpected element.
-      if $element.length
-        return reveal($element, scrollBehaviorOptions)
+      if element
+        return reveal(element, scrollOptions)
 
     else
       # If we didn't need to scroll above, just return a resolved promise
@@ -333,8 +334,8 @@ up.layout = do ->
   @experimental
   ###
   revealHash = (hash) ->
-    if (hash) && ($match = firstHashTarget(hash))
-      reveal($match, top: true)
+    if (hash) && (match = firstHashTarget(hash))
+      reveal(match, top: true)
     else
       Promise.resolve()
 
@@ -354,8 +355,8 @@ up.layout = do ->
   @internal
   ###
   viewportOf = (selectorOrElement, options = {}) ->
-    $element = $(selectorOrElement)
-    $element.closest(viewportSelector())
+    element = e.get(selectorOrElement)
+    e.closest(element, viewportSelector())
 
   ###**
   Returns a jQuery collection of all the viewports contained within the
@@ -367,8 +368,8 @@ up.layout = do ->
   @internal
   ###
   viewportsWithin = (selectorOrElement) ->
-    $element = $(selectorOrElement)
-    u.selectInSubtree($element, viewportSelector())
+    element = e.get(selectorOrElement)
+    e.subtree(element, viewportSelector())
 
   ###**
   Returns a jQuery collection of all the viewports on the screen.
@@ -403,13 +404,9 @@ up.layout = do ->
   @function up.layout.fixedChildren
   @internal
   ###
-  fixedChildren = (root = undefined) ->
-    root ||= document.body
-    $root = $(root)
-    $elements = $root.find('[up-fixed]')
-    $elements = $elements.add($root.find(config.fixedTop.join(', '))) if u.isPresent(config.fixedTop)
-    $elements = $elements.add($root.find(config.fixedBottom.join(', '))) if u.isPresent(config.fixedBottom)
-    $elements
+  fixedChildren = (root) ->
+    queryParts = ['[up-fixed]'].concat(config.fixedTop).concat(config.fixedBottom)
+    root.querySelectorAll(queryParts.join(','))
 
   ###**
   Saves the top scroll positions of all the
@@ -452,8 +449,11 @@ up.layout = do ->
     $viewports = undefined
 
     if options.around
-      $descendantViewports = viewportsWithin(options.around)
-      $ancestorViewports = viewportOf(options.around)
+
+      descendantViewports = viewportsWithin(options.around)
+      ancestorViewports = viewportOf(options.around)
+      viewports = e.list(ancestorViewports, descendantViewports)
+
       $viewports = $ancestorViewports.add($descendantViewports)
     else
       $viewports = viewports()

@@ -61,11 +61,14 @@ up.element = do ->
   @return {Element}
   @internal
   ###
-  getList = (object) ->
-    if u.isString(object)
-      all(object)
+  getList = (args...) ->
+    u.flatMap args, valueToList
+
+  valueToList = (value) ->
+    if u.isString(value)
+      all(value)
     else
-      u.wrapCollection(object)
+      u.wrapCollection(value)
 
   triggerCustom = (element, name, props = {}) ->
     event = document.createEvent('Event')

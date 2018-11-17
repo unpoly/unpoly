@@ -2097,7 +2097,7 @@ up.util = (($) ->
     else
       string.substring(string.length - search.length) == search
 
-  ease = (x) ->
+  simpleEase = (x) ->
     # easing: http://fooplot.com/?lang=de#W3sidHlwZSI6MCwiZXEiOiJ4PDAuNT8yKngqeDp4Kig0LXgqMiktMSIsImNvbG9yIjoiIzEzRjIxNyJ9LHsidHlwZSI6MCwiZXEiOiJzaW4oKHheMC43LTAuNSkqcGkpKjAuNSswLjUiLCJjb2xvciI6IiMxQTUyRUQifSx7InR5cGUiOjEwMDAsIndpbmRvdyI6WyItMS40NyIsIjEuNzgiLCItMC41NSIsIjEuNDUiXX1d
     # easing nice: sin((x^0.7-0.5)*pi)*0.5+0.5
     # easing performant: x < 0.5 ? 2*x*x : x*(4 - x*2)-1
@@ -2276,7 +2276,7 @@ up.util = (($) ->
 #  wrapArray: wrapArray
   wrapCollection: wrapCollection
   wrapValue: wrapValue
-  ease: ease
+  simpleEase: simpleEase
   values: objectValues
 
 )(jQuery)

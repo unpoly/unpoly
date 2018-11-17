@@ -2,6 +2,26 @@ describe 'up.element', ->
 
   u = up.util
 
+  describe 'up.element.list()', ->
+
+    it 'returns the given array of elements', ->
+      throw "implement me"
+
+    it 'returns an empty list for undefined', ->
+      throw "implement me"
+
+    it 'returns an empty list for null', ->
+      throw "implement me"
+
+    it 'converts a NodeList to an array', ->
+      throw "implement me"
+
+    it 'returns a concatenated array from multiple lists and elements', ->
+      throw "implement me"
+
+    it 'ignores missing values when concatenating arrays', ->
+      throw "implement me"
+
   describe 'up.element.descendants()', ->
 
     it 'returns all descendants of the given root matching the given selector', ->

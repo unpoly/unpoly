@@ -27,6 +27,8 @@ class up.ScrollMotion
     @startTime = Date.now()
     @startTop = @scrollable.scrollTop
     @topDiff = @targetTop - @startTop
+    # We're applying a square root to become slower for small distances
+    # and faster for large distances.
     @duration = Math.sqrt(Math.abs(@topDiff)) / @speed
     requestAnimationFrame(@animationFrame)
 
@@ -42,7 +44,7 @@ class up.ScrollMotion
     timeElapsed = currentTime - @startTime
     timeFraction = Math.min(timeElapsed / @duration, 1)
 
-    @frameTop = @startTop + (u.ease(timeFraction) * @topDiff)
+    @frameTop = @startTop + (u.simpleEase(timeFraction) * @topDiff)
 
     # When we're very close to the target top, finish the animation
     # directly to deal with rounding errors.
