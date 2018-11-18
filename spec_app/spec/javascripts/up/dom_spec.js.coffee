@@ -11,9 +11,9 @@ describe 'up.dom', ->
 
         beforeEach ->
 
-          @oldBefore = affix('.before').text('old-before')
-          @oldMiddle = affix('.middle').text('old-middle')
-          @oldAfter = affix('.after').text('old-after')
+          @$oldBefore = affix('.before').text('old-before')
+          @$oldMiddle = affix('.middle').text('old-middle')
+          @$oldAfter = affix('.after').text('old-after')
 
           @responseText =
             """
@@ -237,7 +237,7 @@ describe 'up.dom', ->
               done()
 
           it 'reuses the previous source for a non-GET request (since that is reloadable)', asyncSpec (next) ->
-            @oldMiddle.attr('up-source', '/previous-source')
+            @$oldMiddle.attr('up-source', '/previous-source')
             up.replace('.middle', '/path', method: 'post')
             next =>
               @respond()
@@ -258,7 +258,7 @@ describe 'up.dom', ->
               next => expect(up.dom.source('.middle')).toMatchUrl('/given-path')
 
             it 'ignores the option and reuses the previous source after a failed non-GET request', asyncSpec (next) ->
-              @oldMiddle.attr('up-source', '/previous-source')
+              @$oldMiddle.attr('up-source', '/previous-source')
               up.replace('.middle', '/path', method: 'post', source: '/given-path', failTarget: '.middle')
               next => @respond(status: 500)
               next => expect(up.dom.source('.middle')).toMatchUrl('/previous-source')
@@ -1279,9 +1279,9 @@ describe 'up.dom', ->
             @revealedText = []
             @revealOptions = {}
 
-            @revealMock = up.layout.knife.mock('reveal').and.callFake ($element, options) =>
-              @revealedHTML.push $element.get(0).outerHTML
-              @revealedText.push $element.text().trim()
+            @revealMock = up.layout.knife.mock('reveal').and.callFake (element, options) =>
+              @revealedHTML.push element.outerHTML
+              @revealedText.push u.trim(element.textContent)
               @revealOptions = options
               Promise.resolve()
 
@@ -1292,7 +1292,7 @@ describe 'up.dom', ->
               @respond()
 
             next =>
-              expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
+              expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
               expect(@revealedText).toEqual ['new-middle']
 
           it 'allows to pass another selector to reveal', asyncSpec (next)->
@@ -1371,7 +1371,7 @@ describe 'up.dom', ->
                 @respond()
 
               next =>
-                expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
+                expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
                 expect(@revealedText).toEqual ['new-middle']
 
           describe 'when there is an anchor #hash in the URL', ->
@@ -1477,7 +1477,7 @@ describe 'up.dom', ->
             promise = up.replace('.middle:after', '/path', reveal: true)
             @respond()
             promise.then =>
-              expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
+              expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
@@ -1490,7 +1490,7 @@ describe 'up.dom', ->
             promise = up.replace('.middle:before', '/path', reveal: true)
             @respond()
             promise.then =>
-              expect(@revealMock).not.toHaveBeenCalledWith(@oldMiddle)
+              expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.

@@ -275,7 +275,7 @@ up.layout = do ->
   scrollAfterInsertFragment = (selectorOrElement, options) ->
     options = u.options(options)
     console.debug("scrollAfterInsertFragment with opts %o", options)
-    eelement = e.get(selectorOrElement)
+    element = e.get(selectorOrElement)
 
     hashOpt = options.hash
     revealOpt = options.reveal
@@ -288,12 +288,15 @@ up.layout = do ->
       # to scroll positions. If it is just true, we leave the scrollTops option
       # undefined and let restoreScroll() retrieve previous scrollTops from cache.
       givenTops = u.presence(restoreScrollOpt, u.isObject)
+      console.debug('-- restoreScroll()')
       return restoreScroll(around: element, scrollTops: givenTops)
 
     else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
+      console.debug('--- revealHash()')
       return revealHash(hashOpt, scrollOptions)
 
     else if revealOpt
+      console.debug('--- revealOp is %o', revealOpt)
       # We allow to pass another element as { reveal } option
       if u.isElement(revealOpt) || u.isJQuery(revealOpt)
         element = e.get(revealOpt)
@@ -303,10 +306,12 @@ up.layout = do ->
         console.debug("--- revealing %o with %o", revealOpt, options.origin)
         selector = up.dom.resolveSelector(revealOpt, options.origin)
         console.debug("--- reveal done")
-        element = up.first(selector)
+        element = e.get up.first(selector) # TODO: Remove e.get
 
       else
         # We reveal the given element
+
+      console.debug('-- final element is %o', element)
 
       # If selectorOrElement was a CSS selector, don't blow up by calling reveal()
       # with an empty jQuery collection. This might happen if a failed form submission

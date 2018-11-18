@@ -363,7 +363,7 @@ up.motion = do ->
 
       up.puts 'Morphing %o to %o with transition %o', oldElement, newElement, transitionObject
 
-      viewport = e.get(up.layout.viewportOf(oldElement)) # TODO: remove e.get()
+      viewport = up.layout.viewportOf(oldElement)
       scrollTopBeforeReveal = viewport.scrollTop
 
       oldRemote = up.layout.absolutize oldElement, # TODO: migrate up.layout.absolutize, which has a { $bounds } prop
