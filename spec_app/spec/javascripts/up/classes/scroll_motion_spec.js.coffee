@@ -27,10 +27,7 @@ describe 'up.ScrollMotion', ->
 
     describe '(with { behavior: "scroll" } option)', ->
 
-      describeCapability 'canSmoothScroll', ->
-
-        it 'animates the scrolling to the given y-position', asyncSpec (next) ->
-
+      it 'animates the scrolling to the given y-position', asyncSpec (next) ->
         motion = new up.ScrollMotion(@$viewport[0], 2050, { behavior: 'smooth' })
 
         scrollDone = motion.start()
@@ -43,22 +40,9 @@ describe 'up.ScrollMotion', ->
         next =>
           expect(@$viewport.scrollTop())
 
-
-
-
-      describeFallback 'canSmoothScroll', ->
-
-        describeCapability 'canAnimationFrame', ->
-
-          it 'animates the scrolling to the given y-position'
-
-        describeFallback 'canAnimationFrame', ->
-
-          it 'abruptly scrolls the given element to the given y-position'
+      it "aborts the scrolling animation if the user or another script changes the viewport's scrollTop during the animation"
 
   describe '#finish()', ->
 
-    describeCapability 'canSmoothScroll', ->
-
-      it 'abruptly finishes the scrolling animation by setting the target y-position'
+    it 'abruptly finishes the scrolling animation by setting the target y-position'
 

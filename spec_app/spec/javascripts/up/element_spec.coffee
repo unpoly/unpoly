@@ -5,22 +5,44 @@ describe 'up.element', ->
   describe 'up.element.list()', ->
 
     it 'returns the given array of elements', ->
-      throw "implement me"
+      array = [document.body]
+      result = up.element.list(array)
+      expect(result).toEqual(array)
 
     it 'returns an empty list for undefined', ->
-      throw "implement me"
+      result = up.element.list(undefined)
+      expect(result).toEqual []
 
     it 'returns an empty list for null', ->
-      throw "implement me"
+      result = up.element.list(null)
+      expect(result).toEqual []
 
     it 'converts a NodeList to an array', ->
-      throw "implement me"
+      nodeList = document.querySelectorAll('body')
+      result = up.element.list(nodeList)
+      expect(u.isArray(result)).toBe(true)
+      expect(result.length).toBe(1)
+      expect(result[0]).toBe(document.body)
 
     it 'returns a concatenated array from multiple lists and elements', ->
-      throw "implement me"
+      div0 = affix('div.div0')[0]
+      div1 = affix('div.div1')[0]
+      div2 = affix('div.div2')[0]
+      div3 = affix('div.div3')[0]
+
+      result = up.element.list(div0, [div1, div2], div3)
+      expect(u.isArray(result)).toBe(true)
+      expect(result).toEqual [div0, div1, div2, div3]
 
     it 'ignores missing values when concatenating arrays', ->
-      throw "implement me"
+      div0 = affix('div.div0')[0]
+      div1 = affix('div.div1')[0]
+      div2 = affix('div.div2')[0]
+      div3 = affix('div.div3')[0]
+
+      result = up.element.list(null, div0, [div1, div2], undefined, div3)
+      expect(u.isArray(result)).toBe(true)
+      expect(result).toEqual [div0, div1, div2, div3]
 
   describe 'up.element.descendants()', ->
 

@@ -81,7 +81,6 @@ up.dom = (($) ->
           originSelector = u.selectorForElement(origin)
           selector = selector.replace(/\&/, originSelector)
         else
-          debugger
           up.fail("Found origin reference (%s) in selector %s, but no origin was given", '&', selector)
     else
       selector = u.selectorForElement(selectorOrElement)

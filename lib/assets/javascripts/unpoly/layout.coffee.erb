@@ -215,12 +215,16 @@ up.layout = do ->
 
       viewportIsDocument = e.matches(viewport, up.browser.documentViewportSelector())
       viewportHeight = if viewportIsDocument then u.clientSize().height else viewport.offsetHeight
+
+      # debugger
+
       originalScrollPos = viewport.scrollTop
       newScrollPos = originalScrollPos
 
       offsetShift = undefined
       obstruction = undefined
 
+      # TODO: Check if we can get rid of this if/else by writing a saner $.position
       if viewportIsDocument
         obstruction = measureObstruction(viewportHeight)
         # Within the body, $.position will always return the distance
@@ -371,13 +375,17 @@ up.layout = do ->
     element = e.get(selectorOrElement)
     e.subtree(element, viewportSelector())
 
+  viewportsAround = (selectorOrElement) ->
+    element = e.get(selectorOrElement)
+    e.list(viewportOf(element), viewportsWithin(element))
+
   ###**
   Returns a jQuery collection of all the viewports on the screen.
 
   @function up.layout.viewports
   @internal
   ###
-  viewports = ->
+  allViewports = ->
     e.all(viewportSelector())
 
   scrollTopKey = (viewport) ->
@@ -397,7 +405,7 @@ up.layout = do ->
   @internal
   ###
   scrollTops = ->
-    u.mapObject viewports(), (viewport) ->
+    u.mapObject allViewports(), (viewport) ->
       [scrollTopKey(viewport), viewport.scrollTop]
 
   ###**
@@ -445,23 +453,11 @@ up.layout = do ->
   ###
   restoreScroll = (options = {}) ->
     url = up.history.url()
-
-    $viewports = undefined
-
-    if options.around
-
-      descendantViewports = viewportsWithin(options.around)
-      ancestorViewports = viewportOf(options.around)
-      viewports = e.list(ancestorViewports, descendantViewports)
-
-      $viewports = $ancestorViewports.add($descendantViewports)
-    else
-      $viewports = viewports()
-
+    viewports = if options.around then viewportsAround(options.around) else allViewports()
     scrollTopsForUrl = options.scrollTops || lastScrollTops.get(url) || {}
 
     up.log.group 'Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, ->
-      allScrollPromises = u.map $viewports, (viewport) ->
+      allScrollPromises = u.map viewports, (viewport) ->
         key = scrollTopKey(viewport)
         scrollTop = scrollTopsForUrl[key] || 0
         scroll(viewport, scrollTop, duration: 0)
@@ -471,18 +467,18 @@ up.layout = do ->
   ###**
   @internal
   ###
-  absolutize = (element, options) ->
-    $element = $(element)
+  absolutize = (elementOrSelector, options) ->
+    element = e.get(elementOrSelector)
     options = u.options(options, afterMeasure: u.noop)
-    $viewport = up.layout.viewportOf($element)
-    originalDims = u.measure($element, relative: true, inner: true)
-    originalOffset = $element.offset()
+    viewport = up.layout.viewportOf(element)
+    originalDims = u.measure(element, relative: true, inner: true)
+    originalOffset = e.offsetFromDocument(element)
     options.afterMeasure()
 
-    u.writeInlineStyle $element,
+    u.writeInlineStyle element,
       # If the element had a layout context before, make sure the
       # ghost will have layout context as well (and vice versa).
-      position: if u.readComputedStyle($element, 'position') == 'static' then 'static' else 'relative'
+      position: if element.style.position == 'static' then 'static' else 'relative'
       top:    'auto'
       right:  'auto'
       bottom: 'auto'
@@ -493,31 +489,39 @@ up.layout = do ->
     # Wrap the ghost in another container so its margin can expand
     # freely. If we would position the element directly (old implementation),
     # it would gain a layout context which cannot be crossed by margins.
-    $bounds = $('<div class="up-bounds"></div>')
+    bounds = u.createElementFromSelector('.up-bounds')
     boundsStyle = u.merge(originalDims, position: 'absolute')
-    u.writeInlineStyle($bounds, boundsStyle)
-    $bounds.insertBefore($element)
-    $element.appendTo($bounds)
+    u.writeInlineStyle(bounds, boundsStyle)
+
+    # Insert the bounds object before our element, then move element into it.
+    e.insertBefore(element, bounds)
+    bounds.appendChild(element)
 
     top = originalDims.top
 
     moveTop = (diff) ->
       if diff != 0
         top += diff
-        u.writeInlineStyle($bounds, { top })
+        bounds.style.top = "#{top}px"
 
-    # In theory, $element should not have moved visually.
-    # However, $element (or a child of $element) might collapse its margin
+    # In theory, element should not have moved visually.
+    # However, element (or a child of element) might collapse its margin
     # against a previous sibling element, and now that it is absolute it does
-    # not have the same sibling. So we manually correct $element's top
+    # not have the same sibling. So we manually correct element's top
     # position so it aligns with the previous top position.
-    moveTop(originalOffset.top - $element.offset().top)
+    newOffset = e.offsetFromDocument(element)
+    moveTop(originalOffset.top - newOffset.top)
 
-    $fixedElements = up.layout.fixedChildren($element)
-    for fixedElement in $fixedElements
-      u.fixedToAbsolute(fixedElement, $viewport)
+    for fixedChild in fixedChildren(element)
+      u.fixedToAbsolute(fixedChild, viewport)
 
-    { $element, $bounds, moveTop }
+    element: element
+    $element: jQuery(element) # TODO: Remove me
+    bounds: bounds
+    $bounds: jQuery(bounds) # TODO: Remove me
+    moveTop: moveTop
+
+    # { element, bounds, moveTop }
 
   ###**
   Marks this element as a scrolling container ("viewport").
@@ -684,7 +688,7 @@ up.layout = do ->
   config: config
   viewportOf: viewportOf
   viewportsWithin: viewportsWithin
-  viewports: viewports
+  viewports: allViewports
   scrollTops: scrollTops
   saveScroll: saveScroll
   restoreScroll: restoreScroll

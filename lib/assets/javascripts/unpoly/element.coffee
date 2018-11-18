@@ -123,6 +123,13 @@ up.element = do ->
   replace = (oldElement, newElement) ->
     oldElement.parentElement.replaceChild(newElement, oldElement)
 
+  offsetFromDocument = (element) ->
+    viewport = up.browser.documentViewport()
+    scrolledRect = element.getBoundingClientRect()
+
+    top: scrolledRect.top + viewport.scrollTop,
+    left: scrolledRect.left + viewport.scrollLeft
+
   descendant: descendant
   descendants: descendants
   first: first
@@ -143,4 +150,5 @@ up.element = do ->
   metaContent: metaContent
   replace: replace
   insertBefore: insertBefore
+  offsetFromDocument: offsetFromDocument
 

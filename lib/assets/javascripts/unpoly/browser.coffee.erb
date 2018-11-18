@@ -307,6 +307,9 @@ up.browser = do ->
       # IE11
       'html'
 
+  documentViewport = ->
+    document.querySelector(documentViewportSelector())
+
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url
   navigate: navigate
@@ -317,6 +320,7 @@ up.browser = do ->
   canCustomElements: canCustomElements
   canJQuery: canJQuery
   documentViewportSelector: documentViewportSelector
+  documentViewport: documentViewport
   whenConfirmed: whenConfirmed
   isSupported: isSupported
   puts: puts

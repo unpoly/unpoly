@@ -4,12 +4,35 @@ describe 'up.util', ->
 
   describe 'JavaScript functions', ->
 
-#    describe 'up.util.flatMap', ->
-#
-#      it 'collects the Array results of the given map function, then concatenates the result arrays into one flat array', ->
-#        fun = (x) -> [x, x]
-#        result = up.util.flatMap([1, 2, 3], fun)
-#        expect(result).toEqual([1, 1, 2, 2, 3, 3])
+    describe 'up.util.flatMap', ->
+
+      it 'collects the Array results of the given map function, then concatenates the result arrays into one flat array', ->
+        fun = (x) -> [x, x]
+        result = up.util.flatMap([1, 2, 3], fun)
+        expect(result).toEqual([1, 1, 2, 2, 3, 3])
+
+      it 'builds an array from mixed function return values of scalar values and lists', ->
+        fun = (x) ->
+          if x == 1
+            1
+          else
+            [x, x]
+
+        result = up.util.flatMap([0, 1, 2], fun)
+        expect(result).toEqual [0, 0, 1, 2, 2]
+
+
+      it 'flattens return values that are NodeLists', ->
+        fun = (selector) -> document.querySelectorAll(selector)
+
+        foo1 = affix('.foo-element')[0]
+        foo2 = affix('.foo-element')[0]
+        bar = affix('.bar-element')[0]
+
+        result = up.util.flatMap(['.foo-element', '.bar-element'], fun)
+
+        expect(result).toEqual [foo1, foo2, bar]
+
 
     describe 'up.util.uniq', ->
 

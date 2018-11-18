@@ -1479,8 +1479,9 @@ up.util = (($) ->
   @function up.util.fixedToAbsolute
   @internal
   ###
-  fixedToAbsolute = (element, $viewport) ->
+  fixedToAbsolute = (element, viewport) ->
     $element = $(element)
+    $viewport = $(viewport)
     $futureOffsetParent = offsetParent($element)
     # To get a fixed elements distance from the edge of the screen,
     # use position(), not offset(). offset() would include the current
@@ -1965,8 +1966,8 @@ up.util = (($) ->
   flatten = (array) ->
     flattened = []
     for object in array
-      if isArray(object)
-        flattened = flattened.concat(object)
+      if isCollection(object)
+        flattened.push(object...)
       else
         flattened.push(object)
     flattened

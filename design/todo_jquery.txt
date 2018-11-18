@@ -22,13 +22,13 @@
   - can we write CssTransition as a motion with start/finish methods? that does not register finish events?
   - also unify claim/claim2 or rename them
 - upgrade roca-style.org PR
-- implement up.$animation
-- implement up.$animate
-- implement up.$morph
-- implement up.$transition
 - consider renaming wrapCollection / isCollection to wrapList / isList
 - support smooth-scrolling to an existing #anchor in the current page, to justify all that animation code
-- support this syntax:
-  - <a href="#foo" up-scroll="smooth" up-scroll-speed="3">
-  - [up-scroll] should make a link followable (if it is not already)
+  - basically [up-follow] should check:
+    - if the link href includes "#"
+      - is the (normalized source of the target | the current URL) the URL of the link (or is it only a hash)
+      - does the hash anchor exist in the current page
+      - if yes, scroll to it and resolve the replacemnet
+      - if no, do a usual replacement
+- who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
 - scrolling to #hash should also find [up-id], to prevent jumping of browser
