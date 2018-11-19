@@ -437,29 +437,31 @@ up.dom = (($) ->
       # Text nodes are wrapped in a .up-insertion container so we can
       # animate them and measure their position/size for scrolling.
       # This is not possible for container-less text nodes.
-      $wrapper = $(newElement).contents().wrapAll('<div class="up-insertion"></div>').parent()
+      wrapper = u.createElementFromSelector('.up-insertion')
+      while childNode = newElement.firstChild
+        wrapper.appendChild(childNode)
 
       # Note that since we're prepending/appending instead of replacing,
       # `$new` will not actually be inserted into the DOM, only its children.
       if pseudoClass == 'before'
-        oldElement.insertAdjacentElement('afterbegin', $wrapper[0])
+        oldElement.insertAdjacentElement('afterbegin', wrapper)
       else
-        oldElement.insertAdjacentElement('beforeend', $wrapper[0])
+        oldElement.insertAdjacentElement('beforeend', wrapper)
 
-      for child in $wrapper[0].children
+      for child in wrapper.children
         hello(child, options)
 
       # Reveal element that was being prepended/appended.
       # Since we will animate (not morph) it's OK to allow animation of scrolling
       # if options.scrollBehavior is given.
-      promise = up.layout.scrollAfterInsertFragment($wrapper[0], options)
+      promise = up.layout.scrollAfterInsertFragment(wrapper, options)
 
       # Since we're adding content instead of replacing, we'll only
       # animate newElement instead of morphing between oldElement and newElement
-      promise = u.always(promise, up.animate($wrapper[0], transition, options))
+      promise = u.always(promise, up.animate(wrapper, transition, options))
 
       # Remove the wrapper now that is has served it purpose
-      promise = promise.then -> u.unwrapElement($wrapper[0])
+      promise = promise.then -> u.unwrapElement(wrapper)
 
       return promise
 
