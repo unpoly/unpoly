@@ -75,7 +75,8 @@ class up.MotionTracker
 
   expandFinishRequest: (elements) =>
     if elements
-      u.selectInDynasty($(elements), @selector)
+      expanded = u.flatMap elements, (el) => u.selectInDynasty(el, @selector)
+      $(expanded)
     else
       $(@selector)
 

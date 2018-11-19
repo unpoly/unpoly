@@ -1045,10 +1045,9 @@ up.util = (($) ->
   ###
   documentHasVerticalScrollbar = ->
     body = document.body
-    $body = $(body)
     html = document.documentElement
 
-    bodyOverflow = readComputedStyle($body, 'overflowY')
+    bodyOverflow = readComputedStyle(body, 'overflowY')
 
     forcedScroll = (bodyOverflow == 'scroll')
     forcedHidden = (bodyOverflow == 'hidden')
@@ -1068,11 +1067,10 @@ up.util = (($) ->
     A function that restores the original CSS when called.
   @internal
   ###
-  writeTemporaryStyle = (elementOrSelector, newCss, block) ->
-    $element = $(elementOrSelector)
-    oldStyles = readInlineStyle($element, Object.keys(newCss))
-    restoreOldStyles = -> writeInlineStyle($element, oldStyles)
-    writeInlineStyle($element, newCss)
+  writeTemporaryStyle = (element, newCss, block) ->
+    oldStyles = readInlineStyle(element, Object.keys(newCss))
+    restoreOldStyles = -> writeInlineStyle(element, oldStyles)
+    writeInlineStyle(element, newCss)
     if block
       # If a block was passed, we run the block and restore old styles.
       block()
@@ -1162,38 +1160,15 @@ up.util = (($) ->
     box
 
   ###**
-  Copies all attributes from the source element to the target element.
-
-  @function up.util.copyAttributes
-  @internal
-  ###
-  copyAttributes = ($source, $target) ->
-    for attr in $source.get(0).attributes
-      if attr.specified
-        $target.attr(attr.name, attr.value)
-
-  ###**
-  Looks for the given selector in the element and its descendants.
-
-  @function up.util.selectInSubtree
-  @internal
-  ###
-  selectInSubtree = ($element, selector) ->
-    # This implementation is faster than $element.find(selector).addBack(Seelctor)
-    $matches = $()
-    if $element.is(selector)
-      $matches = $matches.add($element)
-    $matches = $matches.add($element.find(selector))
-    $matches
-
-  ###**
   Looks for the given selector in the element, its descendants and its ancestors.
 
   @function up.util.selectInDynasty
   @internal
   ###
-  selectInDynasty = ($element, selector) ->
-    $subtree = selectInSubtree($element, selector)
+  selectInDynasty = (element, selector) ->
+    $element = $(element)
+    subtree = up.element.subtree(up.element.get($element), selector) # TODO: Move to up.element and remove e.get()
+    $subtree = $(subtree)
     $ancestors = $element.parents(selector)
     $subtree.add($ancestors)
 
@@ -2173,8 +2148,6 @@ up.util = (($) ->
   forceRepaint: forceRepaint
   concludeCssTransition: concludeCssTransition
   escapePressed: escapePressed
-  copyAttributes: copyAttributes
-  selectInSubtree: selectInSubtree
   selectInDynasty: selectInDynasty
   contains: contains
   toArray: toArray
