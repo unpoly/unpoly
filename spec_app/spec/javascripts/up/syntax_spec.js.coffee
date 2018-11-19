@@ -171,10 +171,10 @@ describe 'up.syntax', ->
           up.$compiler '.bar', { keep: false }, ->
           up.$compiler '.bam', { keep: '.partner' }, ->
 
-          $foo = up.hello(affix('.foo'))
-          $bar = up.hello(affix('.bar'))
-          $baz = up.hello(affix('.baz'))
-          $bam = up.hello(affix('.bam'))
+          $foo = $ up.hello(affix('.foo'))
+          $bar = $ up.hello(affix('.bar'))
+          $baz = $ up.hello(affix('.baz'))
+          $bam = $ up.hello(affix('.bam'))
 
           expect($foo.attr('up-keep')).toEqual('')
           expect($bar.attr('up-keep')).toBeMissing()

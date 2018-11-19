@@ -11,7 +11,7 @@ is built from these functions. You can use them to extend Unpoly from your
 
 @class up.dom
 ###
-up.dom = (($) ->
+up.dom = do ->
   
   u = up.util
   e = up.element
@@ -442,7 +442,7 @@ up.dom = (($) ->
         wrapper.appendChild(childNode)
 
       # Note that since we're prepending/appending instead of replacing,
-      # `$new` will not actually be inserted into the DOM, only its children.
+      # newElement will not actually be inserted into the DOM, only its children.
       if pseudoClass == 'before'
         oldElement.insertAdjacentElement('afterbegin', wrapper)
       else
@@ -465,7 +465,7 @@ up.dom = (($) ->
 
       return promise
 
-    else if keepPlan = findKeepPlan($(oldElement), $(newElement), options)
+    else if keepPlan = findKeepPlan(oldElement, newElement, options)
       # Since we're keeping the element that was requested to be swapped,
       # there is nothing left to do here, except notify event listeners.
       emitFragmentKept(keepPlan)
@@ -474,7 +474,7 @@ up.dom = (($) ->
     else
       # This needs to happen before prepareClean() below.
       # Otherwise we would collect destructors for elements we want to keep.
-      options.keepPlans = transferKeepableElements($(oldElement), $(newElement), options)
+      options.keepPlans = transferKeepableElements(oldElement, newElement, options)
 
       parent = oldElement.parentNode
 
@@ -495,46 +495,43 @@ up.dom = (($) ->
       return up.morph(oldElement, newElement, transition, morphOptions)
 
 
-  # This will find all [up-keep] descendants in $old an, overwrite their partner
-  # element in $new and leave a visually identical clone in $old for a later transition.
+  # This will find all [up-keep] descendants in oldElement, overwrite their partner
+  # element in newElement and leave a visually identical clone in oldElement for a later transition.
   # Returns an array of keepPlans.
-  transferKeepableElements = ($old, $new, options) ->
+  transferKeepableElements = (oldElement, newElement, options) ->
     keepPlans = []
     if options.keep
-      for keepable in $old.find('[up-keep]')
-        $keepable = $(keepable)
-        if plan = findKeepPlan($keepable, $new, u.merge(options, descendantsOnly: true))
-          # Replace $keepable with its clone so it looks good in a transition between
-          # $old and $new. Note that $keepable will still point to the same element
+      for keepable in oldElement.querySelectorAll('[up-keep]')
+        if plan = findKeepPlan(keepable, newElement, u.merge(options, descendantsOnly: true))
+          # Replace keepable with its clone so it looks good in a transition between
+          # oldElement and newElement. Note that keepable will still point to the same element
           # after the replacement, which is now detached.
-          $keepableClone = $keepable.clone()
-          u.detachWith($keepable, $keepableClone)
+          keepableClone = keepable.cloneNode(true)
+          e.replace(keepable, keepableClone)
 
-          # $keepable.replaceWith($keepableClone)
-          # Since we're going to swap the entire $old and $new containers afterwards,
-          # replace the matching element with $keepable so it will eventually return to the DOM.
-          plan.$newElement.replaceWith($keepable)
+          # Since we're going to swap the entire oldElement and newElement containers afterwards,
+          # replace the matching element with keepable so it will eventually return to the DOM.
+          e.replace(plan.newElement, keepable)
           keepPlans.push(plan)
     keepPlans
 
 
-  findKeepPlan = ($element, $new, options) ->
+  findKeepPlan = (element, newElement, options) ->
     if options.keep
-      $keepable = $element
-      if partnerSelector = u.castedAttr($keepable, 'up-keep')
+      keepable = element
+      if partnerSelector = u.castedAttr(keepable, 'up-keep')
         u.isString(partnerSelector) or partnerSelector = '&'
-        partnerSelector = resolveSelector(partnerSelector, $keepable)
+        partnerSelector = resolveSelector(partnerSelector, keepable)
         if options.descendantsOnly
-          $partner = $new.find(partnerSelector)
+          partner = e.descendant(newElement, partnerSelector)
         else
-          $partner = u.selectInSubtree($new, partnerSelector)
-        $partner = $partner.first()
-        if $partner.length && $partner.is('[up-keep]')
+          partner = e.subtree(newElement, partnerSelector)[0]
+        if partner && e.matches(partner, '[up-keep]')
           plan =
-            $element: $keepable # the element that should be kept
-            $newElement: $partner # the element that would have replaced it but now does not
-            newData: up.syntax.data($partner) # the parsed up-data attribute of the element we will discard
-          keepEventArgs = u.merge(plan, message: ['Keeping element %o', $keepable.get(0)])
+            element: keepable # the element that should be kept
+            newElement: partner # the element that would have replaced it but now does not
+            newData: up.syntax.data(partner) # the parsed up-data attribute of the element we will discard
+          keepEventArgs = u.merge(plan, message: ['Keeping element %o', keepable])
           if up.bus.nobodyPrevents('up:fragment:keep', keepEventArgs)
             plan
 
@@ -653,15 +650,15 @@ up.dom = (($) ->
   @stable
   ###
   hello = (selectorOrElement, options) ->
-    $element = $(selectorOrElement)
+    element = e.get(selectorOrElement)
     options = u.options(options, keepPlans: [])
     keptElements = []
     for plan in options.keepPlans
       emitFragmentKept(plan)
-      keptElements.push(plan.$element[0])
-    up.syntax.compile($element[0], skip: keptElements)
-    emitFragmentInserted($element, options)
-    $element
+      keptElements.push(plan.element)
+    up.syntax.compile(element, skip: keptElements)
+    emitFragmentInserted(element, options)
+    element
 
   ###**
   When a page fragment has been [inserted or updated](/up.replace),
@@ -678,15 +675,14 @@ up.dom = (($) ->
     The fragment that has been inserted or updated.
   @stable
   ###
-  emitFragmentInserted = ($element, options) ->
-    element = $element[0]
+  emitFragmentInserted = (element, options) ->
     up.emit 'up:fragment:inserted',
       target: element
       message: ['Inserted fragment %o', element]
       origin: options.origin
 
   emitFragmentKept = (keepPlan) ->
-    keptElement = keepPlan.$element.get(0)
+    keptElement = keepPlan.element
     eventAttrs = u.merge(keepPlan,
       target: keptElement,
       message: ['Kept fragment %o', keptElement]
@@ -763,22 +759,20 @@ up.dom = (($) ->
       return firstInLayer(selectorOrElement, layer)
 
   firstInLayer = (selectorOrElement, layer) ->
-    $elements = $(selectorOrElement)
-    return u.detectResult $elements, (element) ->
-      $element = $(element)
-      if isRealElement($element) && matchesLayer($element, layer)
-        return $element
+    elements = e.all(selectorOrElement)
+    return u.detectResult elements, (element) ->
+      if isRealElement(element) && matchesLayer(element, layer)
+        return element
 
   ###**
   @function up.dom.layerOf
   @internal
   ###
   layerOf = (selectorOrElement) ->
-    $element = $(selectorOrElement)
-    if $element.length
-      if up.popup.contains($element)
+    if element = e.get(selectorOrElement)
+      if up.popup.contains(element)
         'popup'
-      else if up.modal.contains($element)
+      else if up.modal.contains(element)
         'modal'
       else
         'page'
@@ -807,10 +801,10 @@ up.dom = (($) ->
   all = (selectorOrElements, options) ->
     options = u.options(options)
     resolved = resolveSelector(selectorOrElements, options.origin)
-    $root = $(u.option(options.root, document))
-    $root.find(resolved).filter (index, element) ->
-      $element = $(element)
-      isRealElement($element) && matchesLayer($element, options.layer)
+    root = options.root ? document
+    matches = e.descendants(root, resolved)
+    e.select matches, (match) ->
+      isRealElement(element) && matchesLayer(element, options.layer)
 
   ###**
   Destroys the given element or selector.
@@ -842,26 +836,26 @@ up.dom = (($) ->
   @stable
   ###
   destroy = (selectorOrElement, options) ->
-    $element = $(selectorOrElement)
+    element = e.get(selectorOrElement)
     options = u.options(options, animation: false)
 
-    if $element.length == 0
+    unless element
       return Promise.resolve()
 
-    markElementAsDestroying($element[0])
-    emitFragmentDestroy($element[0], options)
+    markElementAsDestroying(element)
+    emitFragmentDestroy(element, options)
 
     updateHistoryAndTitle(options)
 
     animate = ->
       animateOptions = up.motion.animateOptions(options)
-      up.motion.animate($element, options.animation, animateOptions)
+      up.motion.animate(element, options.animation, animateOptions)
 
     wipe = ->
-      $parent = $element.parent()
-      up.syntax.clean($element[0])
-      $element.remove()
-      emitFragmentDestroyed($element[0], { parent: $parent[0] })
+      parent = element.parentNode
+      up.syntax.clean(element)
+      element.remove()
+      emitFragmentDestroyed(element, { parent: parent })
 
     animate().then(wipe)
 
@@ -938,9 +932,9 @@ up.dom = (($) ->
     replace(selectorOrElement, sourceUrl, options)
 
   up.on 'up:app:boot', ->
-    $body = $(document.body)
-    setSource($body, up.browser.url())
-    hello($body)
+    body = document.body
+    setSource(body, up.browser.url())
+    hello(body)
 
   up.on 'up:framework:reset', reset
 
@@ -956,8 +950,6 @@ up.dom = (($) ->
   hello: hello
   config: config
   layerOf: layerOf
-
-)(jQuery)
 
 up.replace = up.dom.replace
 up.extract = up.dom.extract

@@ -2253,7 +2253,7 @@ describe 'up.dom', ->
         it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
           $keeper = affix('.keeper[up-keep]').text('version 1')
           $keeper[0].addEventListener 'up:fragment:keep', (event) ->
-            event.preventDefault() if event.$newElement.text() == 'version 3'
+            event.preventDefault() if u.trim(event.newElement.textContent) == 'version 3'
 
           next => up.extract '.keeper', "<div class='keeper' up-keep>version 2</div>"
           next => expect($('.keeper')).toHaveText('version 1')
@@ -2283,7 +2283,7 @@ describe 'up.dom', ->
 
         it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
-          up.on 'up:fragment:kept', (event) -> keptListener(event.$element, event.newData)
+          up.on 'up:fragment:kept', (event) -> keptListener(event.element, event.newData)
           $container = affix('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
@@ -2295,7 +2295,7 @@ describe 'up.dom', ->
 
           next =>
             expect($('.keeper')).toHaveText('old-inside')
-            expect(keptListener).toHaveBeenCalledWith($keeper, { 'foo': 'bar' })
+            expect(keptListener).toHaveBeenCalledWith($keeper[0], { 'foo': 'bar' })
 
         it 'emits an up:fragment:kept with { newData: {} } if the discarded element had no up-data value', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
@@ -2314,7 +2314,7 @@ describe 'up.dom', ->
 
         it 'reuses the same element and emits up:fragment:kept during multiple extractions', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
-          up.on 'up:fragment:kept', (event) -> keptListener(event.$element, event.newData)
+          up.on 'up:fragment:kept', (event) -> keptListener(event.element, event.newData)
           $container = affix('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
@@ -2334,8 +2334,8 @@ describe 'up.dom', ->
           next =>
             $keeper = $('.keeper')
             expect($keeper).toHaveText('old-inside')
-            expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value1' })
-            expect(keptListener).toHaveBeenCalledWith($keeper, { key: 'value2' })
+            expect(keptListener).toHaveBeenCalledWith($keeper[0], { key: 'value1' })
+            expect(keptListener).toHaveBeenCalledWith($keeper[0], { key: 'value2' })
 
         it "doesn't let the discarded element appear in a transition", (done) ->
           oldTextDuringTransition = undefined

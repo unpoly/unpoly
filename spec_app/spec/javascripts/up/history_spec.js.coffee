@@ -88,7 +88,8 @@ describe 'up.history', ->
         it 'sets an [up-href] attribute to the previous URL and sets the up-restore-scroll attribute to "true"', ->
           up.history.push('/path1')
           up.history.push('/path2')
-          $element = up.hello(affix('a[href="/path3"][up-back]').text('text'))
+          element = up.hello(affix('a[href="/path3"][up-back]').text('text'))
+          $element = $(element)
           expect($element.attr('href')).toMatchUrl('/path3')
           expect($element.attr('up-href')).toMatchUrl('/path1')
           expect($element.attr('up-restore-scroll')).toBe('')
@@ -101,7 +102,7 @@ describe 'up.history', ->
       describeFallback 'canPushState', ->
 
         it 'does not change the element', ->
-          $element = up.hello(affix('a[href="/three"][up-back]').text('text'))
+          $element = $(up.hello(affix('a[href="/three"][up-back]').text('text')))
           expect($element.attr('up-href')).toBeUndefined()
 
     describe 'scroll restoration', ->
