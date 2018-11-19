@@ -292,7 +292,7 @@ up.layout = do ->
       return restoreScroll(around: element, scrollTops: givenTops)
 
     else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
-      console.debug('--- revealHash()')
+      console.debug('--- revealHash(%o)', hashOpt)
       return revealHash(hashOpt, scrollOptions)
 
     else if revealOpt
@@ -665,8 +665,7 @@ up.layout = do ->
     if hash = pureHash(hash)
       byID = u.attributeSelector('id', hash)
       byName = 'a' + u.attributeSelector('name', hash)
-      up.first("#{byID},#{byName}")
-
+      e.get up.first("#{byID},#{byName}") # TODO: Remove e.get()
 
   ###**
   Returns `'foo'` if the hash is `'#foo'`.

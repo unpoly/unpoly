@@ -440,13 +440,13 @@ describe 'up.layout', ->
         revealSpy = up.layout.knife.mock('reveal')
         $match = affix('div#hash')
         up.layout.revealHash('#hash')
-        next => expect(revealSpy).toHaveBeenCalledWith($match, top: true)
+        next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'reveals a named anchor matching the given #hash', asyncSpec (next) ->
         revealSpy = up.layout.knife.mock('reveal')
         $match = affix('a[name="hash"]')
         up.layout.revealHash('#hash')
-        next => expect(revealSpy).toHaveBeenCalledWith($match, top: true)
+        next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'does nothing and returns a fulfilled promise if no element or anchor matches the given #hash', (done) ->
         revealSpy = up.layout.knife.mock('reveal')
