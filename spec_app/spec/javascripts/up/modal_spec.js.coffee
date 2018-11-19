@@ -11,7 +11,7 @@ describe 'up.modal', ->
     # The scrollbar does not take space.
     assumedScrollbarWidth = if AgentDetector.isSafari() then 0 else 15
 
-    describe 'xxx up.modal.follow', ->
+    describe 'up.modal.follow', ->
 
       it "loads the given link's destination in a dialog window", (done) ->
         $link = affix('a[href="/path/to"][up-modal=".middle"]').text('link')
@@ -34,7 +34,7 @@ describe 'up.modal', ->
             expect($('.up-modal-dialog .after')).not.toExist()
             done()
 
-    describe 'xxx up.modal.extract', ->
+    describe 'up.modal.extract', ->
 
       it 'opens a modal by extracting the given selector from the given HTML string', (done) ->
         up.history.config.enabled = true
@@ -58,7 +58,7 @@ describe 'up.modal', ->
           expect(location.href).toEqual(oldHref)
           done()
 
-    describe 'xxx up.modal.visit', ->
+    describe 'up.modal.visit', ->
 
       it "requests the given URL and places the given selector into a modal", (done) ->
         up.history.config.enabled = true

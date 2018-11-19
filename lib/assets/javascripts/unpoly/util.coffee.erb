@@ -675,14 +675,7 @@ up.util = (($) ->
   ###
   getElement = (object) ->
     # TODO: Remove me! Use up.element.get() instead
-    if isJQuery(object)
-      if object.length > 1
-        up.fail('up.element.get(): Cannot cast a multi-element jQuery collection to a single elenent')
-      object.get(0)
-    else if isString(object)
-      $(object).get(0)
-    else
-      object
+    up.element.get(object)
 
   ###**
   Creates a new object by merging together the properties from the given objects.
@@ -1030,9 +1023,8 @@ up.util = (($) ->
   scrollbarWidth = memoize ->
     # This is how Bootstrap does it also:
     # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
-    $outer = $('<div>')
-    outer = $outer.get(0)
-    $outer.attr('up-viewport', '')
+    outer = document.createElement('div')
+    outer.setAttribute('up-viewport', '')
     writeInlineStyle outer,
       position:  'absolute'
       top:       '0'
@@ -1040,9 +1032,9 @@ up.util = (($) ->
       width:     '100px'
       height:    '100px' # Firefox needs at least 100px to show a scrollbar
       overflowY: 'scroll'
-    $outer.appendTo(document.body)
+    document.body.appendChild(outer)
     width = outer.offsetWidth - outer.clientWidth
-    $outer.remove()
+    up.element.remove(outer)
     width
 
   ###**
