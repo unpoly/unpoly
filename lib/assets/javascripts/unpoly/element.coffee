@@ -133,6 +133,11 @@ up.element = do ->
     top: scrolledRect.top + viewport.scrollTop,
     left: scrolledRect.left + viewport.scrollLeft
 
+  # createDivWithClass = (className) ->
+  #   element = document.createElement('div')
+  #   element.className = className
+  #   element
+
   descendant: descendant
   descendants: descendants
   first: first
@@ -155,4 +160,6 @@ up.element = do ->
   insertBefore: insertBefore
   insertAfter: insertAfter
   offsetFromDocument: offsetFromDocument
+  # createDivWithClass: createDivWithClass
+
 

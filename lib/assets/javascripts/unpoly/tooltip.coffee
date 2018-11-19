@@ -109,7 +109,7 @@ up.tooltip = do ->
     u.writeInlineStyle(state.tooltip, style)
 
   createElement = (options) ->
-    element = u.$createElementFromSelector('.up-tooltip')[0]
+    element = u.createElementFromSelector('.up-tooltip')
     if u.isGiven(options.text)
       element.innerText = options.text
     else

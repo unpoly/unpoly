@@ -300,4 +300,3 @@ describe 'up.element', ->
       expect(element).toBeHidden()
       up.element.toggle(element, true)
       expect(element).toBeVisible()
-

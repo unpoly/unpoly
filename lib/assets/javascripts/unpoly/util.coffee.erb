@@ -112,12 +112,14 @@ up.util = (($) ->
     if urlOrAnchor.pathname
       return urlOrAnchor
 
-    anchor = $('<a>').attr(href: urlOrAnchor).get(0)
+    anchor = document.createElement('a')
+    anchor.href = urlOrAnchor
     # In IE11 the #hostname and #port properties of such a link are empty
     # strings. However, we can fix this by assigning the anchor its own
     # href because computer:
     # https://gist.github.com/jlong/2428561#comment-1461205
-    anchor.href = anchor.href if isBlank(anchor.hostname)
+    # anchor.href = anchor.href if isBlank(anchor.hostname)
+    # TODO: Check if we can remove this comment without breaking IE11
     anchor
 
   ###**
@@ -137,13 +139,10 @@ up.util = (($) ->
   methodAllowsPayload = (method) ->
     method != 'GET' && method != 'HEAD'
 
-  ###**
-  @function $createElementFromSelector
-  @internal
-  ###
-  $createElementFromSelector = (selector) ->
+  createElementFromSelector = (selector) ->
     path = selector.split(/[ >]/)
-    $root = null
+    # Something we can set { innerHTML } on
+    root = document.createElement('div')
     for depthSelector, iteration in path
       conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g)
       tag = "div"
@@ -161,27 +160,21 @@ up.util = (($) ->
       html += " class=\"" + classes.join(" ") + "\""  if classes.length
       html += " id=\"" + id + "\""  if id
       html += ">"
-      $element = $(html)
-      $element.appendTo($parent) if $parent
-      $root = $element if iteration == 0
-      $parent = $element
-    $root
 
-  createElementFromSelector = (selector) ->
-    $createElementFromSelector(selector)[0]
+      root.innerHTML = html
+
+      root = root.firstChild
+    root
 
   ###**
-  @function $createPlaceHolder
+  @function createPlaceHolder
   @internal
   ###
-  $createPlaceholder = (selector, container = document.body) ->
-    $placeholder = $createElementFromSelector(selector)
-    $placeholder.addClass('up-placeholder')
-    $placeholder.appendTo(container)
-    $placeholder
-
   createPlaceholder = (selector, container = document.body) ->
-    $createPlaceholder(selector, container)[0]
+    placeholder = createElementFromSelector(selector)
+    placeholder.classList.add('up-placeholder')
+    container.appendChild(placeholder)
+    placeholder
 
   ###**
   Returns a CSS selector that matches the given element as good as possible.
@@ -199,31 +192,32 @@ up.util = (($) ->
     The element for which to create a selector.
   @experimental
   ###
-  selectorForElement = (input) ->
-    return input if isString(input)
+  selectorForElement = (element) ->
+    return element if isString(element)
 
-    $element = $(input)
+    element = up.element.get(element) # TODO: Remove e.get()
+
     selector = undefined
 
-    if isSingletonElement($element[0])
-      selector = elementTagName($element)
-    else if upId = presence($element.attr("up-id"))
+    if isSingletonElement(element)
+      selector = elementTagName(element)
+    else if upId = element.getAttribute("up-id")
       selector = attributeSelector('up-id', upId)
-    else if id = presence($element.attr("id"))
+    else if id = element.getAttribute("id")
       if id.match(/^[a-z0-9\-_]+$/i)
         selector = "##{id}"
       else
         selector = attributeSelector('id', id)
-    else if name = presence($element.attr("name"))
-      selector = elementTagName($element) + attributeSelector('name', name)
-    else if classes = presence(nonUpClasses($element))
+    else if name = element.getAttribute("name")
+      selector = elementTagName(element) + attributeSelector('name', name)
+    else if classes = presence(nonUpClasses(element))
       selector = ''
       for klass in classes
         selector += ".#{klass}"
-    else if ariaLabel = presence($element.attr("aria-label"))
+    else if ariaLabel = element.getAttribute("aria-label")
       selector = attributeSelector('aria-label', ariaLabel)
     else
-      selector = elementTagName($element)
+      selector = elementTagName(element)
 
     return selector
 
@@ -240,15 +234,15 @@ up.util = (($) ->
 #        @[cacheProperty] ||= [fetchFn(this)]
 #        @[cacheProperty][0]
 
-  elementTagName = ($element) ->
-    $element.prop('tagName').toLowerCase()
+  elementTagName = (element) ->
+    element.tagName.toLowerCase()
 
   attributeSelector = (attribute, value) ->
     value = value.replace(/"/g, '\\"')
     "[#{attribute}=\"#{value}\"]"
 
-  nonUpClasses = ($element) ->
-    classString = $element.attr('class') || ''
+  nonUpClasses = (element) ->
+    classString = element.className
     classes = splitValues(classString)
     reject classes, (klass) -> klass.match(/^up-/)
 
@@ -2134,9 +2128,7 @@ up.util = (($) ->
   methodAllowsPayload: methodAllowsPayload
   createDocumentFromHtml: createDocumentFromHtml
   createFragmentFromHtml: createFragmentFromHtml
-  $createElementFromSelector: $createElementFromSelector
   createElementFromSelector: createElementFromSelector
-  $createPlaceholder: $createPlaceholder
   createPlaceholder: createPlaceholder
   selectorForElement: selectorForElement
 #  isGoodSelector: isGoodSelector
