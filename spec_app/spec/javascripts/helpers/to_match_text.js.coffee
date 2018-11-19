@@ -3,7 +3,7 @@ beforeEach ->
     toMatchText: (util, customEqualityTesters) ->
       compare: (actualString, expectedString) ->
         normalize = (str) ->
-          str = up.util.trim(str)
+          str = str.trim()
           str = str.replace(/[\n\r\t ]+/g, ' ')
           str
 

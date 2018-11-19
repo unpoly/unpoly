@@ -322,7 +322,7 @@ describe 'up.modal', ->
           spyOn(up, 'animate').and.callFake ($element, animation, options) ->
             if $element.is('.up-modal-viewport')
               animations.push
-                text: u.trim($element.find('.target').text())
+                text: $element.find('.target').text().trim()
                 animation: animation
             deferred = u.newDeferred()
             u.setTimer options.duration, -> deferred.resolve()

@@ -284,18 +284,6 @@ up.util = (($) ->
   ###
   objectValues = Object.values || valuesPolyfill
 
-  ###**
-  Returns a new string with whitespace removed from the beginning
-  and end of the given string.
-
-  @param {string}
-    A string that might have whitespace at the beginning and end.
-  @return {string}
-    The trimmed string.
-  @stable
-  ###
-  trim = $.trim
-
   listBlock = (block) ->
     if isString(block)
       (item) -> item[block]
@@ -1279,7 +1267,7 @@ up.util = (($) ->
     if element = getElement(elementOrSelector)
       # The document does not respond to #getAttribute()
       json = element.getAttribute?(attribute)
-      if isString(json) && trim(json) != ''
+      if isString(json) && json.trim() != ''
         JSON.parse(json)
 
 #  castsToTrue = (object) ->
@@ -2082,7 +2070,7 @@ up.util = (($) ->
 
   splitValues = (string, separator = ' ') ->
     values = string.split(separator)
-    values = map(values, trim)
+    values = map values, (v) -> v.trim()
     values = select(values, isPresent)
     values
 
@@ -2207,7 +2195,6 @@ up.util = (($) ->
   only: only
   except: except
 #  pickBy: pickBy
-  trim: trim
   unresolvablePromise: unresolvablePromise
   setMissingAttrs: setMissingAttrs
   remove: remove

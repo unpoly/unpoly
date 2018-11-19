@@ -1141,7 +1141,7 @@ describe 'up.dom', ->
 
               promise.then ->
                 $noscript = $('.middle noscript')
-                text = u.trim($noscript.text())
+                text = $noscript.text().trim()
                 expect(text).toEqual('<img src="foo.png">')
                 done()
 
@@ -1160,7 +1160,7 @@ describe 'up.dom', ->
 
               promise.then ->
                 $noscript = $('.middle noscript')
-                text = u.trim($noscript.text())
+                text = $noscript.text().trim()
                 expect(text).toMatch(/<img src="foo\.png">\s+<img src="bar\.png">/)
                 done()
 
@@ -1182,8 +1182,8 @@ describe 'up.dom', ->
               promise.then ->
                 $noscripts = $('.middle noscript')
                 expect($noscripts.length).toBe(2)
-                text0 = u.trim($noscripts[0].textContent)
-                text1 = u.trim($noscripts[1].textContent)
+                text0 = $noscripts[0].textContent.trim()
+                text1 = $noscripts[1].textContent.trim()
                 expect(text0).toEqual('<img src="foo.png">')
                 expect(text1).toEqual('<img src="bar.png">')
                 done()
@@ -1281,7 +1281,7 @@ describe 'up.dom', ->
 
             @revealMock = up.layout.knife.mock('reveal').and.callFake (element, options) =>
               @revealedHTML.push element.outerHTML
-              @revealedText.push u.trim(element.textContent)
+              @revealedText.push element.textContent.trim()
               @revealOptions = options
               Promise.resolve()
 
@@ -2253,7 +2253,7 @@ describe 'up.dom', ->
         it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
           $keeper = affix('.keeper[up-keep]').text('version 1')
           $keeper[0].addEventListener 'up:fragment:keep', (event) ->
-            event.preventDefault() if u.trim(event.newElement.textContent) == 'version 3'
+            event.preventDefault() if event.newElement.textContent.trim() == 'version 3'
 
           next => up.extract '.keeper', "<div class='keeper' up-keep>version 2</div>"
           next => expect($('.keeper')).toHaveText('version 1')

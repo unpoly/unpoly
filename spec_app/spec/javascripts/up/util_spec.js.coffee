@@ -546,12 +546,6 @@ describe 'up.util', ->
 #        fun = ($element, data) ->
 #        expect(up.util.argNames(fun)).toEqual(['$element', 'data'])
 
-    describe 'up.util.trim', ->
-
-      it 'removes leading and trailing whitespace from the given string', ->
-        string = "\t\n\r abc \r\n\t"
-        expect(up.util.trim(string)).toEqual('abc')
-
     describe 'up.util.only', ->
 
       it 'returns a copy of the given object with only the given whitelisted properties', ->
