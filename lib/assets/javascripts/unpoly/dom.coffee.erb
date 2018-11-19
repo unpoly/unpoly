@@ -480,15 +480,15 @@ up.dom = (($) ->
 
       morphOptions = u.merge options,
         beforeStart: ->
-          markElementAsDestroying($(oldElement))
-          emitFragmentDestroy($(oldElement), log: false)
+          markElementAsDestroying(oldElement)
+          emitFragmentDestroy(oldElement, log: false)
         afterInsert: ->
           up.hello(newElement, options)
         beforeDetach: ->
           up.syntax.clean(oldElement)
         afterDetach: ->
           e.remove(oldElement) # clean up jQuery data
-          emitFragmentDestroyed($(oldElement), $parent: $(parent), log: false)
+          emitFragmentDestroyed(oldElement, parent: parent, log: false)
 
       console.debug("-- morphOptions are %o", morphOptions)
 
@@ -693,26 +693,27 @@ up.dom = (($) ->
     )
     up.emit('up:fragment:kept', eventAttrs)
 
-  emitFragmentDestroy = ($element, options) ->
-    if shouldLogDestruction($element, options)
-      message = ['Destroying fragment %o', $element.get(0)]
-    up.emit 'up:fragment:destroy', { $element, message }
+  emitFragmentDestroy = (element, options) ->
+    if shouldLogDestruction(element, options)
+      message = ['Destroying fragment %o', element]
+    up.emit 'up:fragment:destroy', { element, message }
 
-  emitFragmentDestroyed = ($element, options) ->
-    if shouldLogDestruction($element, options)
-      message = ['Destroyed fragment %o', $element.get(0)]
+  emitFragmentDestroyed = (element, options) ->
+    if shouldLogDestruction(element, options)
+      message = ['Destroyed fragment %o', element]
 
-    $parent = options.$parent or up.fail("Missing { $parent } option")
+    parent = options.parent or up.fail("Missing { parent } option")
 
     up.emit 'up:fragment:destroyed',
-      $target: $parent,
-      $parent: $parent,
-      $element: $element,
+      target: parent,
+      parent: parent,
+      element: element,
       message: message
 
-  isRealElement = ($element) ->
+  isRealElement = (element) ->
+    element = e.get(element) # TODO: remove e.get()
     unreal = '.up-destroying'
-    $element.closest(unreal).length == 0
+    !e.closest(element, unreal)
 
   ###**
   Returns the first element matching the given selector, but
@@ -847,8 +848,8 @@ up.dom = (($) ->
     if $element.length == 0
       return Promise.resolve()
 
-    markElementAsDestroying($element)
-    emitFragmentDestroy($element, options)
+    markElementAsDestroying($element[0])
+    emitFragmentDestroy($element[0], options)
 
     updateHistoryAndTitle(options)
 
@@ -860,13 +861,13 @@ up.dom = (($) ->
       $parent = $element.parent()
       up.syntax.clean($element[0])
       $element.remove()
-      emitFragmentDestroyed($element, { $parent })
+      emitFragmentDestroyed($element[0], { parent: $parent[0] })
 
     animate().then(wipe)
 
-  shouldLogDestruction = ($element, options) ->
+  shouldLogDestruction = (element, options) ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
-    options.log != false && !$element.is('.up-placeholder, .up-tooltip, .up-modal, .up-popup')
+    options.log != false && !e.matches(element, '.up-placeholder, .up-tooltip, .up-modal, .up-popup')
 
   ###**
   Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
@@ -879,8 +880,8 @@ up.dom = (($) ->
   @selector .up-destroying
   @stable
   ###
-  markElementAsDestroying = ($element) ->
-    $element.addClass('up-destroying')
+  markElementAsDestroying = (element) ->
+    element.classList.add('up-destroying')
 
   ###**
   Before a page fragment is being [destroyed](/up.destroy), this
