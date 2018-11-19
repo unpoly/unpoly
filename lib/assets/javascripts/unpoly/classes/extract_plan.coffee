@@ -19,7 +19,8 @@ class up.ExtractPlan
   findNew: =>
     u.each @steps, (step) =>
       # The response has no layers. It's always just the page.
-      step.$new = @response.first(step.selector)
+      if newElement = @response.first(step.selector)
+        step.$new = $(newElement)
 
   oldExists: =>
     @findOld()
@@ -98,7 +99,8 @@ class up.ExtractPlan
       for hungry in $hungries
         $hungry = $(hungry)
         selector = u.selectorForElement($hungry)
-        if $newHungry = @response.first(selector)
+        if newHungry = @response.first(selector)
+          $newHungry = $(newHungry)
           hungrySteps.push
             selector: selector
             $old: $hungry
