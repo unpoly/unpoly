@@ -508,14 +508,14 @@ describe 'up.util', ->
         $parent = $grandParent.affix('.parent')
         $child = $parent.affix('.child')
         $grandParent.css(position: 'fixed')
-        expect(up.util.isFixed($child)).toBe(true)
-        expect(up.util.isFixed($parent)).toBe(true)
-        expect(up.util.isFixed($grandParent)).toBe(true)
-        expect(up.util.isFixed($grandGrandParent)).toBe(false)
+        expect(up.util.isFixed($child[0])).toBe(true)
+        expect(up.util.isFixed($parent[0])).toBe(true)
+        expect(up.util.isFixed($grandParent[0])).toBe(true)
+        expect(up.util.isFixed($grandGrandParent[0])).toBe(false)
 
       it 'returns false if the given element and its ancestors all have a non-"fixed" CSS position', ->
         $element = affix('.element')
-        expect(up.util.isFixed($element)).toBe(false)
+        expect(up.util.isFixed($element[0])).toBe(false)
 
     describe 'up.util.setTimer', ->
 

@@ -1306,15 +1306,6 @@ up.util = (($) ->
     new Promise(noop)
 
   ###**
-  Returns an empty jQuery collection.
-
-  @function up.util.nullJQuery
-  @internal
-  ###
-  nullJQuery = ->
-    $()
-
-  ###**
   On the given element, set attributes that are still missing.
 
   @function up.util.setMissingAttrs
@@ -1398,14 +1389,14 @@ up.util = (($) ->
   @function up.util.offsetParent
   @internal
   ###
-  offsetParent = ($element) ->
-    $match = undefined
-    while ($element = $element.parent()) && $element.length
-      position = readComputedStyle($element, 'position')
-      if position == 'absolute' || position == 'relative' || $element.is('body')
-        $match = $element
+  offsetParent = (element) ->
+    match = undefined
+    while element = element.parentNode
+      position = element.style.position
+      if position != 'static' || element.tagName == 'BODY'
+        match = element
         break
-    $match
+    match
 
   ###**
   Returns if the given element has a `fixed` position.
@@ -1414,14 +1405,12 @@ up.util = (($) ->
   @internal
   ###
   isFixed = (element) ->
-    $element = $(element)
     loop
-      position = readComputedStyle($element, 'position')
-      if position == 'fixed'
+      if element.style.position == 'fixed'
         return true
       else
-        $element = $element.parent()
-        if $element.length == 0 || $element.is(document)
+        element = element.parentNode
+        if !element || element == document
           return false
 
   ###**
@@ -1431,7 +1420,7 @@ up.util = (($) ->
   fixedToAbsolute = (element, viewport) ->
     $element = $(element)
     $viewport = $(viewport)
-    $futureOffsetParent = offsetParent($element)
+    $futureOffsetParent = $(offsetParent($element[0]))
     # To get a fixed elements distance from the edge of the screen,
     # use position(), not offset(). offset() would include the current
     # scrollTop of the viewport.
@@ -2074,7 +2063,6 @@ up.util = (($) ->
 #      [objOrArray]
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  offsetParent: offsetParent
   fixedToAbsolute: fixedToAbsolute
   isFixed: isFixed
   parseUrl: parseUrl
@@ -2136,7 +2124,6 @@ up.util = (($) ->
   isFormData: isFormData
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
-  nullJQuery: nullJQuery
   element: getElement
   setTimer: setTimer
   nextFrame: nextFrame
