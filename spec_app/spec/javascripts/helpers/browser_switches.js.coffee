@@ -11,7 +11,7 @@ window.describeCapability = (capabilities, examples) ->
   if allSupported
     examples()
 
-window.describeFallback = (capability, examples) ->
+window.describeFallback = (capabilities, examples) ->
   capabilities = u.wrapCollection(capabilities)
   describe "(in a browser without #{capabilities.join(', ')})", ->
     beforeEach ->

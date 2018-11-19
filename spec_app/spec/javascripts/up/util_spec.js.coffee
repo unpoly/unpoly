@@ -394,9 +394,9 @@ describe 'up.util', ->
         expect(up.util.simpleEase(1)).toBe(1)
 
       it 'returns steadily increasing values between 0 and 1', ->
-        expect(up.util.simpleEase(0.25)).toBeAround(0.40, 0.2)
-        expect(up.util.simpleEase(0.50)).toBeAround(0.70, 0.2)
-        expect(up.util.simpleEase(0.75)).toBeAround(0.85, 0.2)
+        expect(up.util.simpleEase(0.25)).toBeAround(0.25, 0.2)
+        expect(up.util.simpleEase(0.50)).toBeAround(0.50, 0.2)
+        expect(up.util.simpleEase(0.75)).toBeAround(0.75, 0.2)
 
     describe 'up.util.createDocumentFromHtml', ->
 
