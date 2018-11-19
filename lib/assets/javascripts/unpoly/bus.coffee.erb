@@ -46,7 +46,7 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 
 @class up.bus
 ###
-up.bus = (($) ->
+up.bus = do ->
   
   u = up.util
   e = up.element
@@ -425,7 +425,7 @@ up.bus = (($) ->
       # Although we have consumed this action and halted the event chain,
       # other components might still need to react. E.g. a popup needs to close when
       # an outside link consumes the user click. So we emit another event for that.
-      emit('up:action:consumed', $element: $(event.target), message: false)
+      emit('up:action:consumed', element: event.target, message: false)
 
   ###**
   Makes a snapshot of the currently registered event listeners,
@@ -527,8 +527,6 @@ up.bus = (($) ->
   consumeAction: consumeAction
   deprecateRenamedEvent: deprecateRenamedEvent
   boot: boot
-
-)(jQuery)
 
 up.on = up.bus.on
 up.off = up.bus.off

@@ -1,5 +1,6 @@
-- build up.$on
-- build up.$observe
+- build up.$on (really?)
+- build up.$observe (really?)
+- think whether we want to keep $macro and $compiler
 - Update docs
   - Examples with $
   - Stuff like  @param {jQuery} event.link
@@ -15,6 +16,7 @@
 - Remove 'auto' default from { layer, failLayer } in link, modal, popup
 - rename up.dom to up.fragment
 - grep everything for "$" once again
+- grep everything for "jQuery" once again
 - grep for TODO comments
 - migration guide
   - jquery event listeners need to use addEventListener or use event.originalEvent
