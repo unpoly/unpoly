@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 class up.ExtractPlan
 
@@ -14,21 +15,20 @@ class up.ExtractPlan
 
   findOld: =>
     u.each @steps, (step) =>
-      step.$old = up.dom.first(step.selector, layer: @oldLayer)
+      step.oldElement = e.get up.dom.first(step.selector, layer: @oldLayer) # TODO: Remove e.get()
 
   findNew: =>
     u.each @steps, (step) =>
       # The response has no layers. It's always just the page.
-      if newElement = @response.first(step.selector)
-        step.$new = $(newElement)
+      step.newElement = @response.first(step.selector)
 
   oldExists: =>
     @findOld()
-    u.all @steps, (step) -> step.$old
+    u.all @steps, (step) -> step.oldElement
 
   newExists: =>
     @findNew()
-    u.all @steps, (step) -> step.$new
+    u.all @steps, (step) -> step.newElement
 
   matchExists: =>
     @oldExists() && @newExists()
@@ -43,15 +43,15 @@ class up.ExtractPlan
 
     # When two replacements target the same element, we would process
     # the same content twice. We never want that, so we only keep the first step.
-    compressed = u.uniqBy(compressed, (step) -> step.$old[0])
+    compressed = u.uniqBy(compressed, (step) -> step.oldElement)
 
     compressed = u.select compressed, (candidateStep, candidateIndex) =>
       u.all compressed, (rivalStep, rivalIndex) =>
         if rivalIndex == candidateIndex
           true
         else
-          candidateElement = candidateStep.$old[0]
-          rivalElement = rivalStep.$old[0]
+          candidateElement = candidateStep.oldElement
+          rivalElement = rivalStep.oldElement
           rivalStep.pseudoClass || !$.contains(rivalElement, candidateElement)
 
     # If we revealed before, we should reveal now
@@ -94,17 +94,15 @@ class up.ExtractPlan
   addHungrySteps: =>
     hungrySteps = []
     if @hungry
-      $hungries = $(up.radio.hungrySelector())
+      hungries = e.all(up.radio.hungrySelector())
       transition = u.option(up.radio.config.hungryTransition, @transition)
-      for hungry in $hungries
-        $hungry = $(hungry)
-        selector = u.selectorForElement($hungry)
+      for hungry in hungries
+        selector = u.selectorForElement(hungry)
         if newHungry = @response.first(selector)
-          $newHungry = $(newHungry)
           hungrySteps.push
             selector: selector
-            $old: $hungry
-            $new: $newHungry
+            oldElement: hungry
+            newElement: newHungry
             transition: transition
             reveal: false # we never auto-reveal a hungry element
             origin: null # don't let the hungry element auto-close a non-sticky modal or popup
