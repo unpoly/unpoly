@@ -34,3 +34,4 @@
       - if no, do a usual replacement
 - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
 - scrolling to #hash should also find [up-id], to prevent jumping of browser
+- rename up.FieldObserver2 to up.FieldObserver

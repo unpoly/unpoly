@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 class up.HtmlParser
 
@@ -15,13 +16,10 @@ class up.HtmlParser
     # jQuery.find is the Sizzle function (https://github.com/jquery/sizzle/wiki#public-api)
     # which gives us non-standard CSS selectors such as `:has`.
     # It returns an array of DOM elements, not a jQuery collection.
-    if match = $.find(selector, @parsedDoc)[0]
-      return $(match)
+    e.descendant(@parsedDoc, selector)
 
-  prepareForInsertion: ($element) ->
-    element = $element[0]
+  prepareForInsertion: (element) ->
     @unwrapNoscriptInElement(element)
-    $(element)
 
   wrapNoscriptInHtml: ->
     # We wrap <noscript> tags into a <div> for two reasons:

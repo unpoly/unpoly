@@ -396,7 +396,7 @@ up.dom = (($) ->
 
             console.debug("swapOptions are %o", swapOptions)
 
-            responseDoc.prepareForInsertion(step.$new)
+            responseDoc.prepareForInsertion(step.$new[0])
 
             swapPromise = swapElements(step.$old, step.$new, step.pseudoClass, step.transition, swapOptions)
             swapPromises.push(swapPromise)
