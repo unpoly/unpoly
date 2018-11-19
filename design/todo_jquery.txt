@@ -35,4 +35,5 @@
 - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
 - scrolling to #hash should also find [up-id], to prevent jumping of browser
 - rename up.FieldObserver2 to up.FieldObserver
-- check if we can git rid of any up.util.methods (e.g. detachWith)
+- check if we can git rid of any up.util methods (e.g. detachWith)
+- check if we can git rid of any up.element methods (e.g. insertAfter)

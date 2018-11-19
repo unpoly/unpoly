@@ -14,6 +14,7 @@ is built from these functions. You can use them to extend Unpoly from your
 up.dom = (($) ->
   
   u = up.util
+  e = up.element
 
   ###**
   Configures defaults for fragment insertion.
@@ -42,10 +43,10 @@ up.dom = (($) ->
     config.reset()
 
   setSource = (element, sourceUrl) ->
+    element = e.get(element) # TODO: Remove e.get()
     unless sourceUrl is false
-      $element = $(element)
       sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
-      $element.attr("up-source", sourceUrl)
+      element.setAttribute("up-source", sourceUrl)
 
   ###**
   Returns the URL the given element was retrieved from.
@@ -55,8 +56,11 @@ up.dom = (($) ->
   @experimental
   ###
   source = (selectorOrElement) ->
-    $element = $(selectorOrElement).closest('[up-source]')
-    u.presence($element.attr("up-source")) || up.browser.url()
+    element = e.get(selectorOrElement)
+    if element = e.closest(element, '[up-source]')
+      element.getAttribute("up-source")
+    else
+      up.browser.url()
 
   ###**
   Resolves the given CSS selector (which might contain `&` references)
@@ -254,10 +258,10 @@ up.dom = (($) ->
     try
       improvedTarget = bestPreflightSelector(selectorOrElement, successOptions)
       improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions)
-    catch e
+    catch error
       # Since we're an async function, we should not throw exceptions but return a rejected promise.
       # http://2ality.com/2016/03/promise-rejections-vs-exceptions.html
-      return Promise.reject(e)
+      return Promise.reject(error)
 
     request = new up.Request(
       url: url
@@ -398,7 +402,7 @@ up.dom = (($) ->
 
             responseDoc.prepareForInsertion(step.newElement)
 
-            swapPromise = swapElements($(step.oldElement), $(step.newElement), step.pseudoClass, step.transition, swapOptions)
+            swapPromise = swapElements(step.oldElement, step.newElement, step.pseudoClass, step.transition, swapOptions)
             swapPromises.push(swapPromise)
 
         # Delay all further links in the promise chain until all fragments have been swapped
@@ -418,48 +422,48 @@ up.dom = (($) ->
     up.history[options.historyMethod](options.history) if options.history
     document.title = options.title if u.isString(options.title)
 
-  swapElements = ($old, $new, pseudoClass, transition, options) ->
+  swapElements = (oldElement, newElement, pseudoClass, transition, options) ->
     transition ||= 'none'
 
     # When the server responds with an error, or when the request method is not
     # reloadable (not GET), we keep the same source as before.
     if options.source == 'keep'
-      options = u.merge(options, source: source($old))
+      options = u.merge(options, source: source(oldElement))
 
-    # Remember where the element came from in case someone needs to up.reload($new) later.
-    setSource($new, options.source)
+    # Remember where the element came from in case someone needs to up.reload(newElement) later.
+    setSource(newElement, options.source)
 
     if pseudoClass
       # Text nodes are wrapped in a .up-insertion container so we can
       # animate them and measure their position/size for scrolling.
       # This is not possible for container-less text nodes.
-      $wrapper = $new.contents().wrapAll('<div class="up-insertion"></div>').parent()
+      $wrapper = $(newElement).contents().wrapAll('<div class="up-insertion"></div>').parent()
 
       # Note that since we're prepending/appending instead of replacing,
       # `$new` will not actually be inserted into the DOM, only its children.
       if pseudoClass == 'before'
-        $old.prepend($wrapper)
+        oldElement.insertAdjacentElement('afterbegin', $wrapper[0])
       else
-        $old.append($wrapper)
+        oldElement.insertAdjacentElement('beforeend', $wrapper[0])
 
-      for child in $wrapper.children()
+      for child in $wrapper[0].children
         hello(child, options)
 
       # Reveal element that was being prepended/appended.
       # Since we will animate (not morph) it's OK to allow animation of scrolling
       # if options.scrollBehavior is given.
-      promise = up.layout.scrollAfterInsertFragment($wrapper, options)
+      promise = up.layout.scrollAfterInsertFragment($wrapper[0], options)
 
       # Since we're adding content instead of replacing, we'll only
-      # animate $new instead of morphing between $old and $new
-      promise = u.always(promise, up.animate($wrapper, transition, options))
+      # animate newElement instead of morphing between oldElement and newElement
+      promise = u.always(promise, up.animate($wrapper[0], transition, options))
 
       # Remove the wrapper now that is has served it purpose
-      promise = promise.then -> u.unwrapElement($wrapper)
+      promise = promise.then -> u.unwrapElement($wrapper[0])
 
       return promise
 
-    else if keepPlan = findKeepPlan($old, $new, options)
+    else if keepPlan = findKeepPlan($(oldElement), $(newElement), options)
       # Since we're keeping the element that was requested to be swapped,
       # there is nothing left to do here, except notify event listeners.
       emitFragmentKept(keepPlan)
@@ -468,25 +472,25 @@ up.dom = (($) ->
     else
       # This needs to happen before prepareClean() below.
       # Otherwise we would collect destructors for elements we want to keep.
-      options.keepPlans = transferKeepableElements($old, $new, options)
+      options.keepPlans = transferKeepableElements($(oldElement), $(newElement), options)
 
-      $parent = $old.parent()
+      parent = oldElement.parentNode
 
       morphOptions = u.merge options,
         beforeStart: ->
-          markElementAsDestroying($old)
-          emitFragmentDestroy($old, log: false)
+          markElementAsDestroying($(oldElement))
+          emitFragmentDestroy($(oldElement), log: false)
         afterInsert: ->
-          up.hello($new, options)
+          up.hello(newElement, options)
         beforeDetach: ->
-          up.syntax.clean($old[0])
+          up.syntax.clean(oldElement)
         afterDetach: ->
-          $old.remove() # clean up jQuery data
-          emitFragmentDestroyed($old, $parent: $parent, log: false)
+          e.remove(oldElement) # clean up jQuery data
+          emitFragmentDestroyed($(oldElement), $parent: $(parent), log: false)
 
       console.debug("-- morphOptions are %o", morphOptions)
 
-      return up.morph($old, $new, transition, morphOptions)
+      return up.morph(oldElement, newElement, transition, morphOptions)
 
 
   # This will find all [up-keep] descendants in $old an, overwrite their partner

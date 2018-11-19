@@ -120,6 +120,9 @@ up.element = do ->
   insertBefore = (existingElement, newElement) ->
     existingElement.insertAdjacentElement('beforebegin', newElement)
 
+  insertAfter = (existingElement, newElement) ->
+    existingElement.insertAdjacentElement('afterend', newElement)
+
   replace = (oldElement, newElement) ->
     oldElement.parentElement.replaceChild(newElement, oldElement)
 
@@ -150,5 +153,6 @@ up.element = do ->
   metaContent: metaContent
   replace: replace
   insertBefore: insertBefore
+  insertAfter: insertAfter
   offsetFromDocument: offsetFromDocument
 
