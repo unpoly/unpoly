@@ -1615,7 +1615,7 @@ describe 'up.dom', ->
         expect($element).toBeAttached()
 
         listener = jasmine.createSpy('event listener')
-        $element.on 'up:fragment:destroy', -> listener(u.isDetached($element))
+        $element.on 'up:fragment:destroy', -> listener(up.testUtil.isDetached($element))
 
         extractDone = up.extract('.element', '<div class="element v2">v2</div>')
 
@@ -1630,7 +1630,7 @@ describe 'up.dom', ->
         expect($element).toBeAttached()
 
         listener = jasmine.createSpy('event listener')
-        $parent.on 'up:fragment:destroyed', -> listener(u.isDetached($element))
+        $parent.on 'up:fragment:destroyed', -> listener(up.testUtil.isDetached($element))
 
         extractDone = up.extract('.element', '<div class="element v2">v2</div>')
 
@@ -1804,7 +1804,7 @@ describe 'up.dom', ->
           expect($element).toBeAttached()
 
           listener = jasmine.createSpy('event listener')
-          $element.on 'up:fragment:destroy', -> listener(u.isDetached($element))
+          $element.on 'up:fragment:destroy', -> listener(up.testUtil.isDetached($element))
 
           extractDone = up.extract('.element', '<div class="element v2">v2</div>', transition: 'cross-fade', duration: 50)
 
@@ -1819,7 +1819,7 @@ describe 'up.dom', ->
           expect($element).toBeAttached()
 
           listener = jasmine.createSpy('event listener')
-          $parent.on 'up:fragment:destroyed', -> listener(u.isDetached($element))
+          $parent.on 'up:fragment:destroyed', -> listener(up.testUtil.isDetached($element))
 
           extractDone = up.extract('.element', '<div class="element v2">v2</div>', transition: 'cross-fade', duration: 50)
 

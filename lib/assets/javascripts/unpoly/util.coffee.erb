@@ -1509,12 +1509,6 @@ up.util = (($) ->
       up.warn('Deprecated: Object key { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
       renameKey(object, oldKey, newKey)
 
-  pluckData = (elementOrSelector, key) ->
-    $element = $(elementOrSelector)
-    value = $element.data(key)
-    $element.removeData(key)
-    value
-
   extractCallback = (args) ->
     lastArg = last(args)
     if isFunction(lastArg)
@@ -1612,18 +1606,6 @@ up.util = (($) ->
         document.addEventListener('DOMContentLoaded', resolve)
 
   identity = (arg) -> arg
-
-  ###**
-  Returns whether the given element has been detached from the DOM
-  (or whether it was never attached).
-
-  @function up.util.isDetached
-  @internal
-  ###
-  isDetached = (element) ->
-    element = getElement(element)
-    # This is by far the fastest way to do this
-    not $.contains(document.documentElement, element)
 
 #  ###**
 #  ###
@@ -2162,13 +2144,11 @@ up.util = (($) ->
   kebabCase: kebabCase
   kebabCaseKeys: kebabCaseKeys
   error: fail
-  pluckData: pluckData
   pluckKey: pluckKey
   renameKey: renameKey
   deprecateRenamedKey: deprecateRenamedKey
   extractOptions: extractOptions
   extractCallback: extractCallback
-  isDetached: isDetached
   noop: noop
   asyncNoop: asyncNoop
   opacity: opacity
