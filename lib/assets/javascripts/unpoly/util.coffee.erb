@@ -1160,19 +1160,6 @@ up.util = (($) ->
     box
 
   ###**
-  Looks for the given selector in the element, its descendants and its ancestors.
-
-  @function up.util.selectInDynasty
-  @internal
-  ###
-  selectInDynasty = (element, selector) ->
-    $element = $(element)
-    subtree = up.element.subtree(up.element.get($element), selector) # TODO: Move to up.element and remove e.get()
-    $subtree = $(subtree)
-    $ancestors = $element.parents(selector)
-    $subtree.add($ancestors)
-
-  ###**
   Returns whether the given keyboard event involved the ESC key.
 
   @function up.util.escapePressed
@@ -2117,7 +2104,6 @@ up.util = (($) ->
   forceRepaint: forceRepaint
   concludeCssTransition: concludeCssTransition
   escapePressed: escapePressed
-  selectInDynasty: selectInDynasty
   contains: contains
   toArray: toArray
 #  pushAll: pushAll
