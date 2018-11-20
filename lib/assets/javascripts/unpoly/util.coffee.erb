@@ -1717,21 +1717,6 @@ up.util = (($) ->
       'right'
 
   ###**
-  Like `$old.replaceWith($new)`, but keeps event handlers bound to `$old`.
-
-  Note that this is a memory leak unless you re-attach `$old` to the DOM aferwards.
-
-  @function up.util.detachWith
-  @internal
-  ###
-  detachWith = ($old, $new) ->
-    $insertion = $('<div></div>')
-    $insertion.insertAfter($old)
-    $old.detach()
-    $insertion.replaceWith($new)
-    $old
-
-  ###**
   Hides the given element faster than `jQuery.fn.hide()`.
 
   @function up.util.hide
@@ -1963,15 +1948,6 @@ up.util = (($) ->
         totalValue += entryValue
     totalValue
 
-  ###**
-  Returns whether the given element is a descendant of the `<body>` element.
-
-  @function up.util.isBodyDescendant
-  @internal
-  ###
-  isBodyDescendant = (element) ->
-    $(element).parents('body').length > 0
-
   isBasicObjectProperty = (k) ->
     Object.prototype.hasOwnProperty(k)
 
@@ -2148,7 +2124,6 @@ up.util = (($) ->
   # parsePath: parsePath
   evalOption: evalOption
   horizontalScreenHalf: horizontalScreenHalf
-  detachWith: detachWith
   flatten: flatten
   isTruthy: isTruthy
   isSingletonElement: isSingletonElement
@@ -2156,7 +2131,6 @@ up.util = (($) ->
   always: always
   muteRejection: muteRejection
   rejectOnError: rejectOnError
-  isBodyDescendant: isBodyDescendant
   isBasicObjectProperty: isBasicObjectProperty
   isCrossDomain: isCrossDomain
   microtask: microtask
