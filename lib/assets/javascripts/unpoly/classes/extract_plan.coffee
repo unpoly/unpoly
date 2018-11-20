@@ -52,7 +52,7 @@ class up.ExtractPlan
         else
           candidateElement = candidateStep.oldElement
           rivalElement = rivalStep.oldElement
-          rivalStep.pseudoClass || !$.contains(rivalElement, candidateElement)
+          rivalStep.pseudoClass || !rivalElement.contains(candidateElement)
 
     # If we revealed before, we should reveal now
     compressed[0].reveal = @steps[0].reveal

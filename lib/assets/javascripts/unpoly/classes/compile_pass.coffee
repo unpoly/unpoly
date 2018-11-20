@@ -9,7 +9,7 @@ class up.CompilePass
     # Exclude all elements that are descendants of the subtrees we want to keep.
     # The exclusion process is very expensive (in one case compiling 100 slements
     # took 1.5s because of this). That's why we only do it if (1) options.skipSubtrees
-    # was given and (2) there is an [up-keep] element in $root.
+    # was given and (2) there is an [up-keep] element in root.
     @skipSubtrees = options.skip
     unless @skipSubtrees.length && @root.querySelector('[up-keep]')
       @skipSubtrees = undefined
