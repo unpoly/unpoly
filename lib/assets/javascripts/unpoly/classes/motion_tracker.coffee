@@ -27,7 +27,7 @@ class up.MotionTracker
     A promise that is fulfilled when the new animation ends.
   ###
   claim: (cluster, startMotion, memory = {}) =>
-    $cluster = $(cluster)
+    cluster = e.list(cluster)
 
     # Some motions might reject after starting. E.g. a scrolling animation
     # will reject when the user scrolls manually during the animation. For
@@ -47,11 +47,11 @@ class up.MotionTracker
       u.microtask(mutedAnimator)
     else
       memory.trackMotion = false
-      @finish($cluster).then =>
-        promise = @whileForwardingFinishEvent($cluster, mutedAnimator)
-        promise = promise.then => @unmarkCluster($cluster)
+      @finish(cluster).then =>
+        promise = @whileForwardingFinishEvent(cluster, mutedAnimator)
+        promise = promise.then => @unmarkCluster(cluster)
         # Attach the modified promise to the cluster's elements
-        @markCluster($cluster, promise)
+        @markCluster(cluster, promise)
         promise
 
   claim2: (element, motion) ->
@@ -70,76 +70,78 @@ class up.MotionTracker
   finish: (elements) =>
     @finishCount++
     return Promise.resolve() if @clusterCount == 0 || !up.motion.isEnabled()
-    $elements = @expandFinishRequest(elements)
-    allFinished = u.map($elements, @finishOneElement)
+    elements = @expandFinishRequest(elements)
+    allFinished = u.map(elements, @finishOneElement)
     Promise.all(allFinished)
 
   expandFinishRequest: (elements) =>
     if elements
-      expanded = u.flatMap elements, (el) =>
+      u.flatMap elements, (el) =>
         e.list(e.closest(el, @selector), e.descendants(el, @selector))
-      $(expanded)
     else
-      $(@selector)
+      # If no reference elements were given, we finish every matching
+      # element on the screen.
+      e.all(@selector)
 
   isActive: (element) =>
-    u.hasClass(element, @activeClass)
+    element.classList.contains(@activeClass)
 
   finishOneElement: (element) =>
-    $element = $(element)
-
     # Animating code is expected to listen to this event, fast-forward
     # the animation and resolve their promise. All built-ins like
     # `up.animate`, `up.morph`, or `up.scroll` behave that way.
-    @emitFinishEvent($element)
+    @emitFinishEvent(element)
 
     # If animating code ignores the event, we cannot force the animation to
     # finish from here. We will wait for the animation to end naturally before
     # starting the next animation.
-    @whenElementFinished($element)
+    @whenElementFinished(element)
 
-  emitFinishEvent: ($element, eventAttrs = {}) =>
-    eventAttrs = u.merge({ $element: $element, message: false }, eventAttrs)
+  emitFinishEvent: (element, eventAttrs = {}) =>
+    eventAttrs = u.merge({ target: element, message: false }, eventAttrs)
     up.emit(@finishEvent, eventAttrs)
 
-  whenElementFinished: ($element) =>
+  whenElementFinished: (element) =>
     # There are some cases related to element ghosting where an element
     # has the class, but not the data value. In that case simply return
     # a resolved promise.
-    $element.data(@dataKey) || Promise.resolve()
+    element[@dataKey] || Promise.resolve()
 
-  markCluster: ($cluster, promise) =>
+  markCluster: (cluster, promise) =>
     @clusterCount++
-    $cluster.addClass(@activeClass)
-    $cluster.data(@dataKey, promise)
+    for element in cluster
+      element.classList.add(@activeClass)
+      element[@dataKey] = promise
 
-  unmarkCluster: ($cluster) =>
+  unmarkCluster: (cluster) =>
     @clusterCount--
-    $cluster.removeClass(@activeClass)
-    $cluster.removeData(@dataKey)
+    for element in cluster
+      element.classList.remove(@activeClass)
+      delete element[@dataKey]
 
-  forwardFinishEvent: ($original, $ghost, duration) =>
-    @start $original, =>
-      doForward = => $ghost.trigger(@finishEvent)
-      # Forward the finish event to the $ghost that is actually animating
-      $original.on @finishEvent, doForward
-      # Our own pseudo-animation finishes when the actual animation on $ghost finishes
-      duration.then => $original.off @finishEvent, doForward
+  forwardFinishEvent: (original, ghost, duration) =>
+    @start original, =>
+      doForward = => e.triggerCustom(ghost, @finishEvent)
+      # Forward the finish event to the ghost that is actually animating
+      original.addEventListener(@finishEvent, doForward)
+      # Our own pseudo-animation finishes when the actual animation on ghost finishes
+      duration.then => original.removeEventListener(@finishEvent, doForward)
 
-  whileForwardingFinishEvent: ($elements, fn) =>
-    return fn() if $elements.length < 2
+  whileForwardingFinishEvent: (elements, fn) =>
+    return fn() if elements.length < 2
     doForward = (event) =>
-      event = event.originalEvent
       unless event.forwarded
-        u.each $elements, (element) =>
-          $element = $(element)
-          if element != event.target && @isActive($element)
-            @emitFinishEvent($element, forwarded: true)
+        u.each elements, (element) =>
+          if element != event.target && @isActive(element)
+            @emitFinishEvent(element, forwarded: true)
 
-    # Forward the finish event to the $ghost that is actually animating
-    $elements.on @finishEvent, doForward
+    # Forward the finish event to the ghost that is actually animating
+    for element in elements
+      element.addEventListener(@finishEvent, doForward)
     # Our own pseudo-animation finishes when the actual animation on $ghost finishes
-    fn().then => $elements.off @finishEvent, doForward
+    fn().then =>
+      for element in elements
+        element.removeEventListener(@finishEvent, doForward)
 
   reset: =>
     @finish().then =>

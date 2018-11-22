@@ -138,6 +138,16 @@ up.element = do ->
   #   element.className = className
   #   element
 
+#  bind = (elements, eventNames, callback) ->
+#    for element in u.wrapCollection(elements)
+#      for eventName in u.wrapCollection(eventNames)
+#        element.addEventListener(eventName, callback)
+#
+#  unbind = (elements, eventNames, callback) ->
+#    for element in u.wrapCollection(elements)
+#      for eventName in u.wrapCollection(eventNames)
+#        element.removeEventListener(eventName, callback)
+
   descendant: descendant
   descendants: descendants
   first: first
@@ -160,6 +170,8 @@ up.element = do ->
   insertBefore: insertBefore
   insertAfter: insertAfter
   offsetFromDocument: offsetFromDocument
+  # on: bind
+  # off: unbind
   # createDivWithClass: createDivWithClass
 
 
