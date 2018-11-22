@@ -490,7 +490,7 @@ up.motion = (($) ->
   Here is the definition of the pre-defined `fade-in` animation:
 
       up.animation('fade-in', function($element, options) {
-        $element.css(opacity: 0);
+        $element.css({opacity: 0});
         up.animate($element, { opacity: 1 }, options);
       })
 
