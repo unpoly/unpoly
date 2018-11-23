@@ -437,7 +437,7 @@ up.dom = do ->
       # Text nodes are wrapped in a .up-insertion container so we can
       # animate them and measure their position/size for scrolling.
       # This is not possible for container-less text nodes.
-      wrapper = u.createElementFromSelector('.up-insertion')
+      wrapper = e.fromSelector('.up-insertion')
       while childNode = newElement.firstChild
         wrapper.appendChild(childNode)
 

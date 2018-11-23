@@ -174,6 +174,7 @@ class up.Request extends up.Record
     # The query section would be overridden by the serialized input values on submission.
     @transferSearchToParams()
 
+    # form = u.createElementFromSelector('form.up-page-loader')
     $form = $('<form class="up-page-loader"></form>')
 
     addField = (field) -> $('<input type="hidden">').attr(field).appendTo($form)

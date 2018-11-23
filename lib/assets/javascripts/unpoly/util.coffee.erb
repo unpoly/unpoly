@@ -139,39 +139,12 @@ up.util = (($) ->
   methodAllowsPayload = (method) ->
     method != 'GET' && method != 'HEAD'
 
-  createElementFromSelector = (selector) ->
-    path = selector.split(/[ >]/)
-    # Something we can set { innerHTML } on
-    root = document.createElement('div')
-    for depthSelector, iteration in path
-      conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g)
-      tag = "div"
-      classes = []
-      id = null
-      for expression in conjunction
-        switch expression[0]
-          when "."
-            classes.push expression.substr(1)
-          when "#"
-            id = expression.substr(1)
-          else
-            tag = expression
-      html = "<" + tag
-      html += " class=\"" + classes.join(" ") + "\""  if classes.length
-      html += " id=\"" + id + "\""  if id
-      html += ">"
-
-      root.innerHTML = html
-
-      root = root.firstChild
-    root
-
   ###**
   @function createPlaceHolder
   @internal
   ###
   createPlaceholder = (selector, container = document.body) ->
-    placeholder = createElementFromSelector(selector)
+    placeholder = up.element.fromSelector(selector)
     placeholder.classList.add('up-placeholder')
     container.appendChild(placeholder)
     placeholder
@@ -2016,7 +1989,6 @@ up.util = (($) ->
   methodAllowsPayload: methodAllowsPayload
   createDocumentFromHtml: createDocumentFromHtml
   createFragmentFromHtml: createFragmentFromHtml
-  createElementFromSelector: createElementFromSelector
   createPlaceholder: createPlaceholder
   selectorForElement: selectorForElement
 #  isGoodSelector: isGoodSelector

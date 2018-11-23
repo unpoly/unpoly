@@ -133,6 +133,80 @@ up.element = do ->
     top: scrolledRect.top + viewport.scrollTop,
     left: scrolledRect.left + viewport.scrollLeft
 
+  fromSelector = (selector) ->
+    path = selector.split(/[ >]+/)
+    # Something we can set { innerHTML } on
+    initial = root = document.createElement('div')
+    for depthSelector, iteration in path
+      conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g)
+      tag = "div"
+      classes = []
+      id = null
+      for expression in conjunction
+        switch expression[0]
+          when "."
+            classes.push expression.substr(1)
+          when "#"
+            id = expression.substr(1)
+          else
+            tag = expression
+      html = "<" + tag
+      html += " class=\"" + classes.join(" ") + "\""  if classes.length
+      html += " id=\"" + id + "\""  if id
+      html += ">"
+
+      root.innerHTML = html
+
+      root = root.firstChild
+    initial.firstChild
+
+  fromSelector = (givenSelector) ->
+    # Extract attribute values before we do anything else.
+    # Attribute values might contain spaces, and then we would incorrectly
+    # split depths at that space.
+    attrValues = []
+    selectorWithoutAttrValues = givenSelector.replace /\[([\w-]+)(?:=(["'])?([^"'\]]*?)\2)?\]/g, (_match, attrName, _quote, attrValue) ->
+      attrValues.push(attrValue || '')
+      "[#{attrName}]"
+
+    depths = selectorWithoutAttrValues.split(/[ >]+/)
+    rootElement = undefined
+    depthElement = undefined
+    previousElement = undefined
+
+    for depthSelector in depths
+      tagName = undefined
+
+      depthSelector = depthSelector.replace /^[\w-]+/, (match) ->
+        tagName = match
+        ''
+
+      depthElement = document.createElement(tagName || 'div')
+      rootElement ||= depthElement
+
+      depthSelector = depthSelector.replace /\#([\w-]+)/, (_match, id) ->
+        depthElement.id = id
+        ''
+
+      depthSelector = depthSelector.replace /\.([\w-]+)/g, (_match, className) ->
+        depthElement.classList.add(className)
+        ''
+
+      # If we have stripped out attrValues at the beginning of the function,
+      # they have been replaced with the attribute name only (as "[name]").
+      if attrValues.length
+        depthSelector = depthSelector.replace /\[([\w-]+)\]/g, (_match, attrName) ->
+          depthElement.setAttribute(attrName, attrValues.shift())
+          ''
+
+      unless depthSelector == ''
+        throw new Error('Cannot parse selector: ' + givenSelector)
+
+      previousElement?.appendChild(depthElement)
+      previousElement = depthElement
+
+    rootElement
+
   # createDivWithClass = (className) ->
   #   element = document.createElement('div')
   #   element.className = className
@@ -170,8 +244,7 @@ up.element = do ->
   insertBefore: insertBefore
   insertAfter: insertAfter
   offsetFromDocument: offsetFromDocument
+  fromSelector: fromSelector
   # on: bind
   # off: unbind
   # createDivWithClass: createDivWithClass
-
-

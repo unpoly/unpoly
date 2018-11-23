@@ -160,7 +160,7 @@ up.popup = do ->
     state.coveredUrl = null
 
   createHiddenFrame = (targetSelector) ->
-    state.popupElement = popupElement = u.createElementFromSelector('.up-popup')
+    state.popupElement = popupElement = e.fromSelector('.up-popup')
     # Create an empty element that will match the
     # selector that is being replaced.
     u.createPlaceholder(targetSelector, popupElement)
