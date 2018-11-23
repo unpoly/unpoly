@@ -144,9 +144,8 @@ up.util = (($) ->
   @internal
   ###
   createPlaceholder = (selector, container = document.body) ->
-    placeholder = up.element.fromSelector(selector)
+    placeholder = up.element.affix(container, selector)
     placeholder.classList.add('up-placeholder')
-    container.appendChild(placeholder)
     placeholder
 
   ###**

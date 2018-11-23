@@ -17,11 +17,14 @@ describe 'up.browser', ->
           submitForm = spyOn(up.browser, 'submitForm')
           up.browser.navigate('/foo', method: 'GET', params: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
+
           $form = $('form.up-page-loader')
+
           expect($form).toExist()
           # GET forms cannot have an URL with a query section in their [action] attribute.
           # The query section would be overridden by the serialized input values on submission.
           expect($form.attr('action')).toMatchUrl('/foo')
+
           expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
           expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
 

@@ -111,7 +111,8 @@ up.element = do ->
 
   setAttrs = (element, attrMap) ->
     for key, value of attrMap
-        element.setAttribute(key, value)
+      console.debug("Setting attr on %o: %o => %o", element, key, value)
+      element.setAttribute(key, value)
 
   metaContent = (name) ->
     selector = "meta" + u.attributeSelector('name', name)
@@ -133,32 +134,9 @@ up.element = do ->
     top: scrolledRect.top + viewport.scrollTop,
     left: scrolledRect.left + viewport.scrollLeft
 
-  fromSelector = (selector) ->
-    path = selector.split(/[ >]+/)
-    # Something we can set { innerHTML } on
-    initial = root = document.createElement('div')
-    for depthSelector, iteration in path
-      conjunction = depthSelector.match(/(^|\.|\#)[A-Za-z0-9\-_]+/g)
-      tag = "div"
-      classes = []
-      id = null
-      for expression in conjunction
-        switch expression[0]
-          when "."
-            classes.push expression.substr(1)
-          when "#"
-            id = expression.substr(1)
-          else
-            tag = expression
-      html = "<" + tag
-      html += " class=\"" + classes.join(" ") + "\""  if classes.length
-      html += " id=\"" + id + "\""  if id
-      html += ">"
-
-      root.innerHTML = html
-
-      root = root.firstChild
-    initial.firstChild
+  setAttrs = (element, attrs) ->
+    for name, value of attrs
+      element.setAttribute(name, value)
 
   fromSelector = (givenSelector) ->
     # Extract attribute values before we do anything else.
@@ -222,6 +200,11 @@ up.element = do ->
 #      for eventName in u.wrapCollection(eventNames)
 #        element.removeEventListener(eventName, callback)
 
+  affix = (container, selector, attrs) ->
+    element = fromSelector(selector)
+    setAttrs(element, attrs) if attrs
+    container.appendChild(element)
+
   descendant: descendant
   descendants: descendants
   first: first
@@ -245,6 +228,8 @@ up.element = do ->
   insertAfter: insertAfter
   offsetFromDocument: offsetFromDocument
   fromSelector: fromSelector
+  setAttrs: setAttrs
+  affix: affix
   # on: bind
   # off: unbind
   # createDivWithClass: createDivWithClass

@@ -1,6 +1,7 @@
 #= require ./record
 
 u = up.util
+e = up.element
 
 ###**
 Instances of `up.Request` normalizes properties of an [`AJAX request`](/up.request)
@@ -174,10 +175,10 @@ class up.Request extends up.Record
     # The query section would be overridden by the serialized input values on submission.
     @transferSearchToParams()
 
-    # form = u.createElementFromSelector('form.up-page-loader')
-    $form = $('<form class="up-page-loader"></form>')
+    form = e.fromSelector('form.up-page-loader')
 
-    addField = (field) -> $('<input type="hidden">').attr(field).appendTo($form)
+    addField = (attrs) ->
+      e.affix(form, 'input[type=hidden]', attrs)
 
     if @method == 'GET'
       formMethod = 'GET'
@@ -188,7 +189,7 @@ class up.Request extends up.Record
       addField(name: up.protocol.config.methodParam, value: @method)
       formMethod = 'POST'
 
-    $form.attr(method: formMethod, action: @url)
+    e.setAttrs(form, method: formMethod, action: @url)
 
     if (csrfParam = up.protocol.csrfParam()) && (csrfToken = @csrfToken())
       addField(name: csrfParam, value: csrfToken)
@@ -197,8 +198,10 @@ class up.Request extends up.Record
     # transfered all params to the URL during normalize().
     u.each(@params.toArray(), addField)
 
-    $form.hide().appendTo('body')
-    up.browser.submitForm($form[0])
+    e.hide(form)
+    document.body.appendChild(form)
+
+    up.browser.submitForm(form)
 
   # Returns a csrfToken if this request requires it
   csrfToken: =>

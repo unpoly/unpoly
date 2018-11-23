@@ -32,9 +32,8 @@ up.toast = do ->
     
   addAction = (label, callback) ->
     actions = state.element.querySelector('.up-toast-actions')
-    action = u.createFragmentFromHtml """
-      <span class="up-toast-action">#{u.escapeHtml(label)}</span>
-    """
+    action = e.fromSelector('.up-toast-action')
+    action.innerText = label
     action.addEventListener('click', callback)
     actions.appendChild(action)
 
