@@ -1,7 +1,7 @@
 <script>
   var u = up.util;
-  up.compiler('.clamped-open', function($link) {
-    $link.on('click', function(event) {
+  up.compiler('.clamped-open', function(link) {
+    link.addEventListener('click', function(event) {
       event.preventDefault();
       u.nextFrame(function() {
         u.nextFrame(function() {
@@ -9,7 +9,7 @@
             u.nextFrame(function() {
               u.nextFrame(function() {
                 u.nextFrame(function() {
-                  up.popup.attach($link, {
+                  up.popup.attach(link, {
                     target: '.contents',
                     duration: 1000
                   });
@@ -24,7 +24,7 @@
 </script>
 
 
-<div class="fixed-top-bar">
+<div class="fixed-top-bar" up-fixed="top">
   <a class="button" href="/css_test/popup_contents?1" up-popup=".contents" up-position="top-left">Top-left popup</a>
   <a class="button" href="/css_test/popup_contents?2" up-popup=".contents" up-position="top-right">Top-right popup</a>
   <a class="button" href="/css_test/popup_contents?3" up-popup=".contents" up-position="bottom-right">Bottom-right popup</a>
@@ -52,4 +52,20 @@
 
 <div class="example">
   <a class="button clamped-open" href="/css_test/popup_contents">Clamped open</a>
+</div>
+
+<div class="example">
+  <div up-viewport style="height: 300px; width: 500px; overflow-y: scroll; background-color: rgba(0,0,0,0.2)">
+    <div class="spacer"></div>
+    <a class="button" href="/css_test/popup_contents?8" up-popup=".contents" up-position="bottom-left">Popup within a viewport that has no position</a>
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<div class="example">
+  <div up-viewport style="height: 300px; width: 500px; overflow-y: scroll; background-color: rgba(0,0,0,0.2); position: relative">
+    <div class="spacer"></div>
+    <a class="button" href="/css_test/popup_contents?8" up-popup=".contents" up-position="bottom-left">Popup within a viewport that has position</a>
+    <div class="spacer"></div>
+  </div>
 </div>

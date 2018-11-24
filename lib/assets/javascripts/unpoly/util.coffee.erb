@@ -1351,7 +1351,7 @@ up.util = (($) ->
   offsetParent = (element) ->
     match = undefined
     while element = element.parentNode
-      position = element.style.position
+      position = readComputedStyle(element, 'position')
       if position != 'static' || element.tagName == 'BODY'
         match = element
         break
@@ -1365,7 +1365,7 @@ up.util = (($) ->
   ###
   isFixed = (element) ->
     loop
-      if element.style.position == 'fixed'
+      if readComputedStyle(element, 'position') == 'fixed'
         return true
       else
         element = element.parentNode
@@ -1550,6 +1550,23 @@ up.util = (($) ->
       k = keyTransformer(k)
       result[k] = v
     result
+
+  partial = (fn, fixedArgs...) ->
+    return (callArgs...) ->
+      fn.apply(this, fixedArgs.concat(callArgs))
+
+#function throttle(callback, limit) { // From https://jsfiddle.net/jonathansampson/m7G64/
+#  var wait = false                   // Initially, we're not waiting
+#  return function () {               // We return a throttled function
+#    if (!wait) {                     // If we're not waiting
+#      callback.call()                // Execute users function
+#      wait = true                    // Prevent future invocations
+#      setTimeout(function () {       // After a period of time
+#        wait = false                 // And allow future invocations
+#      }, limit)
+#    }
+#  }
+#}
 
   opacity = (element) ->
     readComputedStyleNumber(element, 'opacity')
@@ -2121,6 +2138,8 @@ up.util = (($) ->
   wrapValue: wrapValue
   simpleEase: simpleEase
   values: objectValues
+  partial: partial
+  offsetParent: offsetParent
 
 )(jQuery)
 

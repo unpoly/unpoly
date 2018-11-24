@@ -3,10 +3,6 @@ e = up.element
 
 class up.FieldObserver2
 
-  # Although (depending on the browser) we only need/receive either input or change,
-  # we always bind to both events in case another script manually triggers it.
-  CHANGE_EVENTS = ['input', 'change']
-
   constructor: (fieldOrFields, options, @callback) ->
     @fields = e.list(fieldOrFields)
     @delay = options.delay
@@ -17,16 +13,16 @@ class up.FieldObserver2
     @processedValues = @readFieldValues()
     @currentTimer = undefined
     @callbackRunning = false
-    @changeEventSubscription('addEventListener')
+    @changeEventSubscription('on')
 
   stop: =>
-    @changeEventSubscription('removeEventListener')
+    @changeEventSubscription('off')
     @cancelTimer()
 
   changeEventSubscription: (fn) ->
-    for eventName in CHANGE_EVENTS
-      for field in @fields
-        field[fn](eventName, @check)
+    # Although (depending on the browser) we only need/receive either input or change,
+    # we always bind to both events in case another script manually triggers it.
+    e[fn](@fields, ['input', 'change'], @check)
 
   cancelTimer: =>
     clearTimeout(@currentTimer)

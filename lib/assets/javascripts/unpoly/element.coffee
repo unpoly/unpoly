@@ -190,19 +190,24 @@ up.element = do ->
   #   element.className = className
   #   element
 
-#  bind = (elements, eventNames, callback) ->
-#    for element in u.wrapCollection(elements)
-#      for eventName in u.wrapCollection(eventNames)
-#        element.addEventListener(eventName, callback)
-#
-#  unbind = (elements, eventNames, callback) ->
-#    for element in u.wrapCollection(elements)
-#      for eventName in u.wrapCollection(eventNames)
-#        element.removeEventListener(eventName, callback)
+  subscribeEvents = (fn, elements, eventNames, callback) ->
+    for element in u.wrapCollection(elements)
+      for eventName in u.wrapCollection(eventNames)
+        element[fn](eventName, callback)
+
+  bind = u.partial(subscribeEvents, 'addEventListener')
+
+  unbind = u.partial(subscribeEvents, 'removeEventListener')
 
   affix = (container, selector, attrs) ->
     element = fromSelector(selector)
-    setAttrs(element, attrs) if attrs
+    if attrs
+      if classValue = u.pluckKey(attrs, 'class')
+        for klass in u.wrapCollection(classValue)
+          element.classList.add(klass)
+      if styleValue = u.pluckKey(attrs, 'style')
+        u.writeInlineStyle(element, styleValue)
+      setAttrs(element, attrs)
     container.appendChild(element)
 
   descendant: descendant
@@ -230,6 +235,6 @@ up.element = do ->
   fromSelector: fromSelector
   setAttrs: setAttrs
   affix: affix
-  # on: bind
-  # off: unbind
+  on: bind
+  off: unbind
   # createDivWithClass: createDivWithClass

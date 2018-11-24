@@ -51,7 +51,7 @@ up.layout = do ->
   ###
   config = u.config
     duration: 0
-    viewports: ['.up-modal-viewport', '[up-viewport]']
+    viewports: ['.up-modal-viewport', '[up-viewport]', '[up-fixed]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
@@ -495,8 +495,7 @@ up.layout = do ->
     # freely. If we would position the element directly (old implementation),
     # it would gain a layout context which cannot be crossed by margins.
     bounds = e.fromSelector('.up-bounds')
-    boundsStyle = u.merge(originalDims, position: 'absolute')
-    u.writeInlineStyle(bounds, boundsStyle)
+    u.writeInlineStyle(bounds, originalDims)
 
     # Insert the bounds object before our element, then move element into it.
     e.insertBefore(element, bounds)
