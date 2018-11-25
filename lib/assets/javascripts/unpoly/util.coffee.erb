@@ -1694,7 +1694,7 @@ up.util = (($) ->
   @internal
   ###
   horizontalScreenHalf = (element) ->
-    elementDims = measure(element)
+    elementDims = element.getBoundingClientRect()
     screenDims = clientSize()
     elementMid = elementDims.left + 0.5 * elementDims.width
     screenMid = 0.5 * screenDims.width
