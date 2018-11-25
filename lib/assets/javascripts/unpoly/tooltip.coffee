@@ -67,8 +67,9 @@ up.tooltip = do ->
   state = u.config
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
     anchor: null         # the element to which the tooltip is anchored
-    tooltip: null
-    tether: null
+    tooltip: null        # the .up-tooltip element
+    content: null        # the .up-tooltip-content element
+    tether: null         # the up.Tether instance controlling the tooltip's position
     position: null       # the position of the tooltip element relative to its anchor
 
   chain = new u.DivertibleChain()
@@ -80,21 +81,14 @@ up.tooltip = do ->
     config.reset()
 
   createElement = (options) ->
-    state.tether = new up.Tether2
-      anchor: state.anchor
-      position: state.position
-      class: 'up-tooltip'
-
-    # The .up-tooltip container needs to be the tether root so the root adopt's
-    # the .up-tooltip's z-index. Otherwise the root would establish a new
-    # stacking context which we couldn't override from within.
-    state.tooltip = state.tether.root
-    content = e.affix(state.tooltip, '.up-tooltip-content')
+    state.tether = new up.Tether2(u.only(state, 'anchor', 'position'))
+    state.tooltip = e.affix(state.tether.root, '.up-tooltip', 'up-position': state.position)
+    state.content = e.affix(state.tooltip, '.up-tooltip-content')
 
     if options.text
-      content.innerText = options.text
+      state.content.innerText = options.text
     else
-      content.innerHTML = options.html
+      state.content.innerHTML = options.html
 
   ###**
   Opens a tooltip over the given element.
@@ -178,6 +172,7 @@ up.tooltip = do ->
       state.tether.destroy()
       state.tether = null
       state.tooltip = null
+      state.content = null
       state.anchor = null
 
   ###**

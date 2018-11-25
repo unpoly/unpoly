@@ -15,11 +15,7 @@ class up.Tether2
     # If not however, we have no choice but to move it on every scroll event.
     @alignAtScroll = !@viewport.contains(@offsetParent)
 
-    @root = e.affix(@parent, '.up-bounds', {
-      'up-position': @position
-      class: options.class
-    })
-
+    @root = e.affix(@parent, '.up-bounds')
     @setBoundsOffset(0, 0)
 
     @changeEventSubscription('on')

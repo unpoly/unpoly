@@ -108,8 +108,10 @@ up.popup = do ->
 
   state = u.config
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
-    anchor: null  # the element to which the tooltip is anchored
-    tether: null   # the popup container
+    anchor: null         # the element to which the tooltip is anchored
+    popup: null          # the .up-popup element
+    content: null        # the .up-popup-content element
+    tether: null         # the up.Tether instance controlling the popup's position
     position: null       # the position of the popup container element relative to its anchor
     sticky: null
     url: null
@@ -129,18 +131,17 @@ up.popup = do ->
     state.coveredUrl = null
 
   createHiddenFrame = (targetSelector) ->
-    state.tether = new up.Tether2
-      anchor: state.anchor
-      position: state.position
-      class: 'up-popup'
+    state.tether = new up.Tether2(u.only(state, 'anchor', 'position'))
+    state.popup = e.affix(state.tether.root, '.up-popup', 'up-position': state.position)
+    state.content = e.affix(state.popup, '.up-popup-content')
 
     # Create an empty element that will match the
     # selector that is being replaced.
-    u.createPlaceholder(targetSelector, state.tether.root)
-    e.hide(state.tether.root)
+    u.createPlaceholder(targetSelector, state.content)
+    e.hide(state.popup)
 
   unveilFrame = ->
-    e.show(state.tether.root)
+    e.show(state.popup)
 
   ###**
   Returns whether popup modal is currently open.
@@ -243,7 +244,7 @@ up.popup = do ->
         promise = promise.then ->
           unveilFrame()
           state.tether.align()
-          up.animate(state.tether.root, options.animation, animateOptions)
+          up.animate(state.popup, options.animation, animateOptions)
         promise = promise.then ->
           state.phase = 'opened'
           up.emit('up:popup:opened', message: 'Popup opened')#
@@ -295,16 +296,18 @@ up.popup = do ->
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
     u.assign(options, animateOptions)
 
-    up.bus.whenEmitted('up:popup:close', message: 'Closing popup', target: state.tether.root).then ->
+    up.bus.whenEmitted('up:popup:close', message: 'Closing popup', target: state.popup).then ->
       state.phase = 'closing'
       state.url = null
       state.coveredUrl = null
       state.coveredTitle = null
 
-      up.destroy(state.tether.root, options).then ->
+      up.destroy(state.popup, options).then ->
         state.phase = 'closed'
         state.tether.destroy()
         state.tether = null
+        state.popup = null
+        state.content = null
         state.anchor = null
         state.sticky = null
         up.emit('up:popup:closed', message: 'Popup closed')

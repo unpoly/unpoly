@@ -144,9 +144,7 @@ up.util = (($) ->
   @internal
   ###
   createPlaceholder = (selector, container = document.body) ->
-    placeholder = up.element.affix(container, selector)
-    placeholder.classList.add('up-placeholder')
-    placeholder
+    up.element.affix(container, selector, class: 'up-placeholder')
 
   ###**
   Returns a CSS selector that matches the given element as good as possible.
