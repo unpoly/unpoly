@@ -318,13 +318,13 @@ describe 'up.motion', ->
         $old = affix('.old').text('old content').css(width: '200px', width: '200px')
         $new = affix('.new').text('new content').css(width: '200px', width: '200px').detach()
 
-        oldDims = u.measure($old)
+        oldDims = $old[0].getBoundingClientRect()
 
         up.morph($old, $new, 'cross-fade', duration: 200, easing: 'linear')
 
         next =>
-          expect(u.measure($old)).toEqual(oldDims)
-          expect(u.measure($new)).toEqual(oldDims)
+          expect($old[0].getBoundingClientRect()).toEqual(oldDims)
+          expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
           expect(u.opacity($old)).toBeAround(1.0, 0.25)
           expect(u.opacity($new)).toBeAround(0.0, 0.25)
@@ -345,18 +345,18 @@ describe 'up.motion', ->
         $new = $container.affix('.new').text('new content').css(width: '200px', width: '200px', margin: '20px').detach()
         $after = $container.affix('.before').css(margin: '20px')
 
-        beforeDims = u.measure($before)
-        afterDims = u.measure($after)
+        beforeDims = $before[0].getBoundingClientRect()
+        afterDims = $after[0].getBoundingClientRect()
 
         up.morph($old, $new, 'cross-fade', duration: 30, easing: 'linear')
 
         next =>
-          expect(u.measure($before)).toEqual(beforeDims)
-          expect(u.measure($after)).toEqual(afterDims)
+          expect($before[0].getBoundingClientRect()).toEqual(beforeDims)
+          expect($after[0].getBoundingClientRect()).toEqual(afterDims)
 
         next.after 50, =>
-          expect(u.measure($before)).toEqual(beforeDims)
-          expect(u.measure($after)).toEqual(afterDims)
+          expect($before[0].getBoundingClientRect()).toEqual(beforeDims)
+          expect($after[0].getBoundingClientRect()).toEqual(afterDims)
 
       it 'transitions between two elements that are already positioned absolutely', asyncSpec (next) ->
         elementStyles =
@@ -368,17 +368,17 @@ describe 'up.motion', ->
         $old = affix('.old').text('old content').css(elementStyles)
         $new = affix('.new').text('new content').css(elementStyles).detach()
 
-        oldDims = u.measure($old)
+        oldDims = $old[0].getBoundingClientRect()
 
         up.morph($old, $new, 'cross-fade', duration: 100, easing: 'linear')
 
         next =>
-          expect(u.measure($old)).toEqual(oldDims)
-          expect(u.measure($new)).toEqual(oldDims)
+          expect($old[0].getBoundingClientRect()).toEqual(oldDims)
+          expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
         next.after (100 + (timingTolerance = 120)), =>
           expect($old).toBeDetached()
-          expect(u.measure($new)).toEqual(oldDims)
+          expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
       it 'cancels an existing transition on the new element by instantly jumping to the last frame', asyncSpec (next) ->
         $v1 = affix('.element').text('v1')
@@ -426,7 +426,7 @@ describe 'up.motion', ->
           $old = affix('.old').text('old content')
           $new = affix('.new').text('new content').detach()
 
-          oldDims = u.measure($old)
+          oldDims = $old[0].getBoundingClientRect()
 
           transition = (oldElement, newElement, options) ->
             up.animate(oldElement, 'fade-out', options)
@@ -435,8 +435,8 @@ describe 'up.motion', ->
           up.morph($old, $new, transition, duration: 200, easing: 'linear')
 
           next =>
-            expect(u.measure($old)).toEqual(oldDims)
-            expect(u.measure($new)).toEqual(oldDims)
+            expect($old[0].getBoundingClientRect()).toEqual(oldDims)
+            expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
             expect(u.opacity($old)).toBeAround(1.0, 0.25)
             expect(u.opacity($new)).toBeAround(0.0, 0.25)
@@ -469,7 +469,7 @@ describe 'up.motion', ->
           $old = affix('.old').text('old content')
           $new = affix('.new').text('new content').detach()
 
-          oldDims = u.measure($old)
+          oldDims = $old[0].getBoundingClientRect()
 
           transition = (oldElement, newElement, options) ->
             up.morph(oldElement, newElement, 'cross-fade', options)
@@ -477,8 +477,8 @@ describe 'up.motion', ->
           up.morph($old, $new, transition, duration: 400, easing: 'linear')
 
           next =>
-            expect(u.measure($old)).toEqual(oldDims)
-            expect(u.measure($new)).toEqual(oldDims)
+            expect($old[0].getBoundingClientRect()).toEqual(oldDims)
+            expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
             expect(u.opacity($old)).toBeAround(1.0, 0.25)
             expect(u.opacity($new)).toBeAround(0.0, 0.25)

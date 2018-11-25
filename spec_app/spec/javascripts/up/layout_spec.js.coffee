@@ -543,32 +543,32 @@ describe 'up.layout', ->
         $element = affix('.element').text('element text').css(paddingTop: '20px', paddingLeft: '20px')
 
         expect($element.css('position')).toEqual('static')
-        previousDims = u.measure($element)
+        previousDims = $element[0].getBoundingClientRect()
 
         up.layout.absolutize($element)
 
         expect($element.closest('.up-bounds').css('position')).toEqual('absolute')
 
-        newDims = u.measure($element)
+        newDims = $element[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
 
       it 'accurately positions the ghost over an element with margins', ->
         $element = affix('.element').css(margin: '40px')
-        previousDims = u.measure($element)
+        previousDims = $element[0].getBoundingClientRect()
 
         up.layout.absolutize($element)
 
-        newDims = u.measure($element)
+        newDims = $element[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
 
       it "doesn't change the position of a child whose margins no longer collapse", ->
         $element = affix('.element')
         $child = $('<div class="child">child text</div>').css(margin: '40px').appendTo($element)
-        previousChildDims = u.measure($child)
+        previousChildDims = $child[0].getBoundingClientRect()
 
         up.layout.absolutize($element)
 
-        newChildDims = u.measure($child)
+        newChildDims = $child[0].getBoundingClientRect()
         expect(newChildDims).toEqual(previousChildDims)
 
       it 'correctly positions an element within a scrolled body', ->
@@ -577,11 +577,11 @@ describe 'up.layout', ->
         $element2 = $('<div class="fixture"></div>').css(height: '100px').insertAfter($element1)
         $body.scrollTop(33)
 
-        previousDims = u.measure($element2)
+        previousDims = $element2[0].getBoundingClientRect()
 
         up.layout.absolutize($element2)
 
-        newDims = u.measure($element2)
+        newDims = $element2[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
 
       it 'correctly positions an element within a scrolled parent element (that has overflow-y: scroll)', ->
@@ -593,11 +593,11 @@ describe 'up.layout', ->
         $element2 = $('<div class="fixture"></div>').css(height: '100px').insertAfter($element1)
         $viewport.scrollTop(33)
 
-        previousDims = u.measure($element2)
+        previousDims = $element2[0].getBoundingClientRect()
 
         up.layout.absolutize($element2)
 
-        newDims = u.measure($element2)
+        newDims = $element2[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
 
       it 'converts fixed elements within the copies to absolutely positioning (relative to the closest offset parent)', ->
