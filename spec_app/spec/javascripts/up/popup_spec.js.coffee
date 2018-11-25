@@ -46,7 +46,6 @@ describe 'up.popup', ->
           expect($popup.find('.middle')).toHaveText('new-middle')
           expect($popup.find('.before')).not.toExist()
           expect($popup.find('.after')).not.toExist()
-          expect($popup.css('position')).toEqual('absolute')
           expect($popup).toSitBelow($link)
 
       it 'always makes a request for the given selector, and does not "improve" the selector with a fallback', asyncSpec (next) ->
@@ -57,26 +56,6 @@ describe 'up.popup', ->
           expect(jasmine.Ajax.requests.count()).toEqual(1)
           headers = @lastRequest().requestHeaders
           expect(headers['X-Up-Target']).toEqual('.content')
-
-      it 'gives the popup { position: "fixed" } if the given link is fixed', asyncSpec (next) ->
-        # Let's test the harder case where the document is scrolled
-        up.layout.scroll(document, 50)
-        $container = affix('.container')
-        $container.css
-          position: 'fixed'
-          left: '100px'
-          top: '50px'
-        $link = $container.affix('a[href="/path/to"][up-popup=".content"]').text('link')
-
-        up.popup.attach($link)
-
-        next =>
-          @respondWith('<div class="content">popup-content</div>')
-
-        next =>
-          $popup = $('.up-popup')
-          expect($popup.css('position')).toEqual('fixed')
-          expect($popup).toSitBelow($link)
 
       it 'never resolves the open() promise and shows no error if close() was called before the response was received', asyncSpec (next) ->
         $span = affix('span')

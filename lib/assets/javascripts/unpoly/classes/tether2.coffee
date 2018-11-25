@@ -87,10 +87,6 @@ class up.Tether2
       targetTop - rootBox.top + @offsetTop
     )
 
-    # Avoid setting top and left so it keeps its current position in the flow.
-    # u.writeInlineStyle(@root, marginLeft: @offsetLeft, marginTop: @offsetTop)
-    # u.writeInlineStyle(@root, transform: "translate(#{@offsetLeft}px, #{@offsetTop}px)")
-
   setBoundsOffset: (left, top) ->
     @offsetLeft = left
     @offsetTop = top

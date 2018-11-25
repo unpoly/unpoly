@@ -17,14 +17,14 @@ describe 'up.tooltip', ->
         $link = affix('span')
         up.tooltip.attach($link, html: '<b>text</b>').then ->
           $tooltip = $('.up-tooltip')
-          expect($tooltip.html()).toEqual('<b>text</b>')
+          expect($tooltip.html()).toContain('<b>text</b>')
           done()
 
       it 'escapes HTML for the tooltip text when contents given as { text } option', (done) ->
         $link = affix('span')
         up.tooltip.attach($link, text: '<b>text</b>').then ->
           $tooltip = $('.up-tooltip')
-          expect($tooltip.html()).toEqual('&lt;b&gt;text&lt;/b&gt;')
+          expect($tooltip.html()).toContain('&lt;b&gt;text&lt;/b&gt;')
           done()
 
       describe 'positioning', ->
@@ -52,8 +52,8 @@ describe 'up.tooltip', ->
             up.tooltip.attach(@$link, html: 'tooltip text', position: 'top').then =>
               $tooltip = $('.up-tooltip')
               tooltipBox = $tooltip.get(0).getBoundingClientRect()
-              expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height, 15)
-              expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
+              expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height, 1)
+              expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 1)
               done()
 
         describe 'with { position: "right" }', ->
@@ -63,8 +63,8 @@ describe 'up.tooltip', ->
             up.tooltip.attach(@$link, html: 'tooltip text', position: 'right').then =>
               $tooltip = $('.up-tooltip')
               tooltipBox = $tooltip.get(0).getBoundingClientRect()
-              expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 15)
-              expect(tooltipBox.left).toBeAround(@linkBox.left + @linkBox.width, 15)
+              expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 1)
+              expect(tooltipBox.left).toBeAround(@linkBox.left + @linkBox.width, 1)
               done()
 
         describe 'with { position: "bottom" }', ->
@@ -74,8 +74,8 @@ describe 'up.tooltip', ->
             up.tooltip.attach(@$link, html: 'tooltip text', position: 'bottom').then =>
               $tooltip = $('.up-tooltip')
               tooltipBox = $tooltip.get(0).getBoundingClientRect()
-              expect(tooltipBox.top).toBeAround(@linkBox.top + @linkBox.height, 15)
-              expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
+              expect(tooltipBox.top).toBeAround(@linkBox.top + @linkBox.height, 1)
+              expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 1)
               done()
 
         describe 'with { position: "left" }', ->
@@ -85,33 +85,13 @@ describe 'up.tooltip', ->
             up.tooltip.attach(@$link, html: 'tooltip text', position: 'left').then =>
               $tooltip = $('.up-tooltip')
               tooltipBox = $tooltip.get(0).getBoundingClientRect()
-              expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 15)
-              expect(tooltipBox.left).toBeAround(@linkBox.left - tooltipBox.width, 15)
+              expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 1)
+              expect(tooltipBox.left).toBeAround(@linkBox.left - tooltipBox.width, 1)
               done()
 
-        it 'gives the tooltip { position: "fixed" } if the given link is fixed', (done) ->
-          # Let's test the harder case where the document is scrolled
-          up.layout.scroll(document, 50)
-          @$link.css(position: 'fixed')
-          @linkBox = @$link.get(0).getBoundingClientRect()
-
-          up.tooltip.attach(@$link, html: 'tooltip text', position: 'top').then =>
-            $tooltip = $('.up-tooltip')
-            tooltipBox = $tooltip.get(0).getBoundingClientRect()
-            expect($tooltip.css('position')).toEqual('fixed')
-            expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height, 15)
-            expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 15)
-            done()
-
-      it 'closes an existing tooltip'
-      
-      describe 'with position option', ->
-        
-        it 'anchors the tooltip at a different edge of the element'
-      
     describe 'up.tooltip.close', ->
 
-      it 'should have tests'
+      it 'closes an existing tooltip'
   
   describe 'unobtrusive behavior', ->
     
