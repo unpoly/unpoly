@@ -15,12 +15,12 @@ class up.Tether2
     # If not however, we have no choice but to move it on every scroll event.
     @alignAtScroll = !@viewport.contains(@offsetParent)
 
-    console.debug("will alignAtScroll: %o (viewport = %o, offsetParent = %o)", @alignAtScroll, @viewport, @offsetParent)
+    @root = e.affix(@parent, '.up-bounds', {
+      'up-position': @position
+      class: options.class
+    })
 
-    @offsetLeft = 0
-    @offsetTop = 0
-
-    @root = e.affix(@parent, 'div', 'up-position': @position, class: ['up-bounds', options.class])
+    @setBoundsOffset(0, 0)
 
     @changeEventSubscription('on')
 
@@ -86,8 +86,16 @@ class up.Tether2
 
   moveTo: (targetLeft, targetTop) ->
     rootBox = @root.getBoundingClientRect()
+    @setBoundsOffset(
+      targetLeft - rootBox.left + @offsetLeft,
+      targetTop - rootBox.top + @offsetTop
+    )
 
-    @offsetLeft = targetLeft - rootBox.left + @offsetLeft
-    @offsetTop = targetTop - rootBox.top + @offsetTop
+    # Avoid setting top and left so it keeps its current position in the flow.
+    # u.writeInlineStyle(@root, marginLeft: @offsetLeft, marginTop: @offsetTop)
+    # u.writeInlineStyle(@root, transform: "translate(#{@offsetLeft}px, #{@offsetTop}px)")
 
-    u.writeInlineStyle(@root, marginLeft: @offsetLeft, marginTop: @offsetTop)
+  setBoundsOffset: (left, top) ->
+    @offsetLeft = left
+    @offsetTop = top
+    u.writeInlineStyle(@root, { left, top })

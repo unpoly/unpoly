@@ -108,8 +108,8 @@ up.popup = do ->
 
   state = u.config
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
-    anchorElement: null  # the element to which the tooltip is anchored
-    popupTether: null   # the popup container
+    anchor: null  # the element to which the tooltip is anchored
+    tether: null   # the popup container
     position: null       # the position of the popup container element relative to its anchor
     sticky: null
     url: null
@@ -119,32 +119,28 @@ up.popup = do ->
   chain = new u.DivertibleChain()
 
   reset = ->
-    state.popupTether?.destroy()
+    state.tether?.destroy()
     state.reset()
     chain.reset()
     config.reset()
-
-  align = ->
-    console.debug("align() on %o", state.popupTether)
-    state.popupTether.align()
 
   discardHistory = ->
     state.coveredTitle = null
     state.coveredUrl = null
 
   createHiddenFrame = (targetSelector) ->
-    state.popupTether = new up.Tether2
-      anchor: state.anchorElement
+    state.tether = new up.Tether2
+      anchor: state.anchor
       position: state.position
       class: 'up-popup'
 
     # Create an empty element that will match the
     # selector that is being replaced.
-    u.createPlaceholder(targetSelector, state.popupTether.root)
-    e.hide(state.popupTether.root)
+    u.createPlaceholder(targetSelector, state.tether.root)
+    e.hide(state.tether.root)
 
   unveilFrame = ->
-    e.show(state.popupTether.root)
+    e.show(state.tether.root)
 
   ###**
   Returns whether popup modal is currently open.
@@ -204,28 +200,28 @@ up.popup = do ->
     chain.asap closeNow, (-> attachNow(elementOrSelector, options))
 
   attachNow = (elementOrSelector, options) ->
-    anchorElement = e.get(elementOrSelector)
+    anchor = e.get(elementOrSelector)
 
     options ?= {}
-    url = u.pluckKey(options, 'url') ? anchorElement.getAttribute('up-href') ? anchorElement.getAttribute('href')
+    url = u.pluckKey(options, 'url') ? anchor.getAttribute('up-href') ? anchor.getAttribute('href')
     html = u.pluckKey(options, 'html')
     url or html or up.fail('up.popup.attach() requires either an { url } or { html } option')
-    target = u.pluckKey(options, 'target') ? anchorElement.getAttribute('up-popup') or up.fail('No target selector given for [up-popup]')
-    position = anchorElement.getAttribute('up-position') ? config.position
-    options.animation ?= anchorElement.getAttribute('up-animation') ? config.openAnimation
-    options.sticky ?= u.castedAttr(anchorElement, 'up-sticky') ? config.sticky
-    options.history = if up.browser.canPushState() then (options.history ? u.castedAttr(anchorElement, 'up-history') ? config.history) else false
-    options.confirm ?= anchorElement.getAttribute('up-confirm')
-    options.method = up.link.followMethod(anchorElement, options)
+    target = u.pluckKey(options, 'target') ? anchor.getAttribute('up-popup') or up.fail('No target selector given for [up-popup]')
+    position = anchor.getAttribute('up-position') ? config.position
+    options.animation ?= anchor.getAttribute('up-animation') ? config.openAnimation
+    options.sticky ?= u.castedAttr(anchor, 'up-sticky') ? config.sticky
+    options.history = if up.browser.canPushState() then (options.history ? u.castedAttr(anchor, 'up-history') ? config.history) else false
+    options.confirm ?= anchor.getAttribute('up-confirm')
+    options.method = up.link.followMethod(anchor, options)
     options.layer = 'popup'
-    options.failTarget ?= anchorElement.getAttribute('up-fail-target')
-    options.failLayer ?= anchorElement.getAttribute('up-fail-layer') ? 'auto'
+    options.failTarget ?= anchor.getAttribute('up-fail-target')
+    options.failLayer ?= anchor.getAttribute('up-fail-layer') ? 'auto'
 
     # This will prevent up.replace() from looking for fallbacks, since
     # it knows the target will always exist.
     options.provideTarget = -> createHiddenFrame(target)
 
-    animateOptions = up.motion.animateOptions(options, anchorElement, duration: config.openDuration, easing: config.openEasing)
+    animateOptions = up.motion.animateOptions(options, anchor, duration: config.openDuration, easing: config.openEasing)
     extractOptions = u.merge(options, animation: false)
 
     if options.preload && url
@@ -234,7 +230,7 @@ up.popup = do ->
     up.browser.whenConfirmed(options).then ->
       up.bus.whenEmitted('up:popup:open', url: url, message: 'Opening popup').then ->
         state.phase = 'opening'
-        state.anchorElement = anchorElement
+        state.anchor = anchor
         state.position = position
         if options.history
           state.coveredUrl = up.browser.url()
@@ -246,8 +242,8 @@ up.popup = do ->
           promise = up.replace(target, url, extractOptions)
         promise = promise.then ->
           unveilFrame()
-          align()
-          up.animate(state.popupTether.root, options.animation, animateOptions)
+          state.tether.align()
+          up.animate(state.tether.root, options.animation, animateOptions)
         promise = promise.then ->
           state.phase = 'opened'
           up.emit('up:popup:opened', message: 'Popup opened')#
@@ -299,17 +295,17 @@ up.popup = do ->
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
     u.assign(options, animateOptions)
 
-    up.bus.whenEmitted('up:popup:close', message: 'Closing popup', target: state.popupTether.root).then ->
+    up.bus.whenEmitted('up:popup:close', message: 'Closing popup', target: state.tether.root).then ->
       state.phase = 'closing'
       state.url = null
       state.coveredUrl = null
       state.coveredTitle = null
 
-      up.destroy(state.popupTether.root, options).then ->
+      up.destroy(state.tether.root, options).then ->
         state.phase = 'closed'
-        state.popupTether.destroy()
-        state.popupTether = null
-        state.anchorElement = null
+        state.tether.destroy()
+        state.tether = null
+        state.anchor = null
         state.sticky = null
         up.emit('up:popup:closed', message: 'Popup closed')
 

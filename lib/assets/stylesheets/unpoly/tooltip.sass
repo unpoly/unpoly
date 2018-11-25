@@ -1,16 +1,11 @@
 $stratum: 30000
-$distance-from-trigger: 6px
-$corner-size: 8px
+$distance-from-trigger: 10px
+$corner-size: 6px
 $background-color: #111
 
+
 .up-tooltip
-  // position: absolute
   z-index: $stratum
-  background-color: $background-color
-  color: white
-  padding: 6px 9px
-  white-space: nowrap
-  pointer-events: none
 
   &:after
     content: ''
@@ -21,7 +16,10 @@ $background-color: #111
     border: $corner-size solid transparent
 
   &[up-position=top]
-    margin-top: -$distance-from-trigger
+    // margin-bottom: $distance-from-trigger
+    // margin-top: -$distance-from-trigger
+    border-bottom: $distance-from-trigger solid transparent
+
     &:after
       border-top-color: $background-color
       border-bottom-width: 0
@@ -30,7 +28,9 @@ $background-color: #111
       margin-left: -$corner-size
 
   &[up-position=left]
-    margin-left: -$distance-from-trigger
+    // margin-right: $distance-from-trigger
+    border-right: $distance-from-trigger solid transparent
+
     &:after
       border-left-color: $background-color
       border-right-width: 0
@@ -39,7 +39,9 @@ $background-color: #111
       margin-top: -$corner-size
 
   &[up-position=right]
-    margin-left: $distance-from-trigger
+    // margin-left: $distance-from-trigger
+    border-left: $distance-from-trigger solid transparent
+
     &:after
       border-right-color: $background-color
       border-left-width: 0
@@ -48,10 +50,19 @@ $background-color: #111
       margin-top: -$corner-size
 
   &[up-position=bottom]
-    margin-top: $distance-from-trigger
+    // margin-top: $distance-from-trigger
+    border-top: $distance-from-trigger solid transparent
+
+
     &:after
       border-bottom-color: $background-color
       border-top-width: 0
       top: -$corner-size
       left: 50%
       margin-left: -$corner-size
+
+.up-tooltip-content
+  background-color: $background-color
+  color: white
+  padding: 6px 9px
+  white-space: nowrap

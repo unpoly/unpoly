@@ -67,55 +67,34 @@ up.tooltip = do ->
   state = u.config
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
     anchor: null         # the element to which the tooltip is anchored
-    tooltip: null        # the tooltiop element
+    tooltip: null
+    tether: null
     position: null       # the position of the tooltip element relative to its anchor
 
   chain = new u.DivertibleChain()
 
   reset = ->
-    # Destroy the tooltip container regardless whether it's currently in a closing animation
-    e.remove(state.tooltip) if state.tooltip
+    state.tether?.destroy()
     state.reset()
     chain.reset()
     config.reset()
 
-  align = ->
-    style = {}
-    tooltipBox = u.measure(state.tooltip)
-
-    if u.isFixed(state.anchor)
-      linkBox = state.anchor.getBoundingClientRect()
-      style.position = 'fixed'
-    else
-      linkBox = u.measure(state.anchor)
-
-    switch state.position
-      when 'top'
-        style.top = linkBox.top - tooltipBox.height
-        style.left = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
-      when 'left'
-        style.top = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
-        style.left = linkBox.left - tooltipBox.width
-      when 'right'
-        style.top = linkBox.top + 0.5 * (linkBox.height - tooltipBox.height)
-        style.left = linkBox.left + linkBox.width
-      when 'bottom'
-        style.top = linkBox.top + linkBox.height
-        style.left = linkBox.left + 0.5 * (linkBox.width - tooltipBox.width)
-      else
-        up.fail("Unknown position option '%s'", state.position)
-
-    state.tooltip.setAttribute('up-position', state.position)
-    u.writeInlineStyle(state.tooltip, style)
-
   createElement = (options) ->
-    element = e.fromSelector('.up-tooltip')
-    if u.isGiven(options.text)
-      element.innerText = options.text
+    state.tether = new up.Tether2
+      anchor: state.anchor
+      position: state.position
+      class: 'up-tooltip'
+
+    # The .up-tooltip container needs to be the tether root so the root adopt's
+    # the .up-tooltip's z-index. Otherwise the root would establish a new
+    # stacking context which we couldn't override from within.
+    state.tooltip = state.tether.root
+    content = e.affix(state.tooltip, '.up-tooltip-content')
+
+    if options.text
+      content.innerText = options.text
     else
-      element.innerHTML = options.html
-    document.body.appendChild(element)
-    state.tooltip = element
+      content.innerHTML = options.html
 
   ###**
   Opens a tooltip over the given element.
@@ -165,9 +144,9 @@ up.tooltip = do ->
 
     state.phase = 'opening'
     state.anchor = anchor
-    createElement(text: text, html: html)
     state.position = position
-    align()
+    createElement({ text, html })
+    state.tether.align()
     up.animate(state.tooltip, animation, animateOptions).then ->
       state.phase = 'opened'
 
@@ -196,6 +175,8 @@ up.tooltip = do ->
     state.phase = 'closing'
     up.destroy(state.tooltip, options).then ->
       state.phase = 'closed'
+      state.tether.destroy()
+      state.tether = null
       state.tooltip = null
       state.anchor = null
 
