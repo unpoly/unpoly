@@ -37,3 +37,4 @@
 - rename up.FieldObserver2 to up.FieldObserver
 - check if we can git rid of any up.util methods (e.g. detachWith)
 - check if we can git rid of any up.element methods (e.g. insertAfter)
+- rename up.layout to up.viewport

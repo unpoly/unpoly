@@ -45,8 +45,6 @@ up.layout = do ->
   @param {number} [config.snap=50]
     When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
     to the top when the revealed element is closer to the top than `config.snap`.
-  @param {number} [config.substance=150]
-    A number indicating how many top pixel rows of an element to [reveal](/up.reveal).
   @stable
   ###
   config = u.config
@@ -55,8 +53,9 @@ up.layout = do ->
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
-    snap: 50
-    substance: 150
+    snap: null # only for deprecation
+    revealSnap: 50
+    revealPadding: 0,
     scrollSpeed: 1
 
   lastScrollTops = new up.Cache
@@ -262,6 +261,58 @@ up.layout = do ->
         scroll(viewport, newScrollPos, options)
       else
         Promise.resolve()
+
+  reveal2 = (elementOrSelector, options = {}) ->
+    element = e.get(elementOrSelector)
+    viewport = u.pluckKey(options, 'viewport') ? viewportOf(element)
+
+    options.speed ?= config.scrollSpeed
+
+    elementRect = up.Rect.fromElement(element)
+    viewportRect = up.Rect.fromElement(viewport)
+
+    # TODO: use Rect objects that we can manipulate cross-browser (IE 11 does not change bottom when we change height)
+    # TODO: if viewport is document, manually restrict it to (0, 0, clientWidth, clientHeight)
+    # TODO: Remove config.substance options
+    # TODO: reduce viewport by overlapping fixed elements
+    # TODO: Replace `reveal` with this `reveal2`
+    # TODO: Documentation
+
+    elementRect.addPadddingY(config.revealPadding)
+
+    originalScrollPos = viewport.scrollTop
+    newScrollPos = originalScrollPos
+
+    if viewportRect.height < 0
+      return Promise.reject(new Error('Viewport has no visible area'))
+
+    # elementOffset = elementBounds.top - viewportBounds.top
+
+    if options.top || elementRect.height > viewportRect.height
+      # Element is either larger than the viewport,
+      # or the user has explicitely requested for the element to align at top
+      # => Scroll the viewport so the first element row is the first viewport row
+      newScrollPos = elementBounds.top
+    else if elementRect.top < viewportRect.top
+      # Element fits within viewport, but sits too high
+      # => Scroll up (reduce scrollY), so the element comes down
+      newScrollPos -= (viewportRect.top - elementBounds.top)
+    else if elementRect.bottom > viewportRect.bottom
+      # Element fits within viewport, but sits too low
+      # => Scroll down (increase scrollY), so the element comes up
+      newScrollPos += (elementBounds.bottom - viewportRect.bottom)
+    else
+      # Element is fully visible within viewport
+      # => Do nothing
+
+    u.deprecateRenamedKey(config, 'snap', 'revealSnap')
+    if config.revealSnap < viewportRect.height && newScrollPos < config.revealSnap
+      newScrollPos = 0
+
+    if newScrollPos != originalScrollPos
+      scroll(viewport, newScrollPos, options)
+    else
+      Promise.resolve()
 
   ###**
   @function up.layout.scrollAfterInsertFragment
