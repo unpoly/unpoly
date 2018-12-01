@@ -6,7 +6,12 @@ class up.RevealMotion
     layoutConfig = up.layout.config
     @viewport = options.viewport ? up.layout.viewportOf(@element)
     @speed = options.speed ? options.scrollSpeed ? layoutConfig.scrollSpeed
-    @snap = options.snap ? options.revealSnap ? layoutConfig.revealSnap
+    snapDefault = layoutConfig.revealSnap
+    @snap = options.snap ? options.revealSnap ? snapDefault
+    if @snap == false
+      @snap = 0
+    else if @snap == true
+      @snap = snapDefault
     @padding = options.padding ? options.revealPadding ? layoutConfig.revealPadding
     @behavior = options.behavior ? options.scrollBehavior
     @top = options.top
@@ -30,7 +35,6 @@ class up.RevealMotion
       # Element is either larger than the viewport,
       # or the user has explicitely requested for the element to align at top
       # => Scroll the viewport so the first element row is the first viewport row
-      # newScrollTop = elementRect.top + originalScrollTop
       diff = elementRect.top - viewportRect.top
       newScrollTop += diff
     else if elementRect.top < viewportRect.top

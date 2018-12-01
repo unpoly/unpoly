@@ -278,16 +278,28 @@ describe 'up.layout', ->
 
         it 'does not crash when called with a CSS selector (bugfix)', (done) ->
           promise = up.reveal('.container', { behavior: 'instant' })
-          promiseState(promise).then (result) ->
-            expect(result.state).toEqual('fulfilled')
+          promise.then ->
+            expect(true).toBe(true)
             done()
+
+        it 'scrolls the viewport to the first row if the element if the element is higher than the viewport', asyncSpec (next) ->
+          @$elements[0].css(height: '1000px')
+          @$elements[1].css(height: '3000px')
+
+          up.reveal(@$elements[1])
+
+          next =>
+            # [0] 0 ............ 999
+            # [1] 1000 ........ 4999
+            expect($(document).scrollTop()).toBe(1000)
+
 
         describe 'with { top: true } option', ->
 
           it 'scrolls the viewport to the first row of the element, even if that element is already fully revealed', asyncSpec (next) ->
             @$elements[0].css(height: '20px')
 
-            up.reveal(@$elements[1], { top: true })
+            up.reveal(@$elements[1], { top: true, snap: false })
 
             next =>
               # [0] 0 ............ 19
@@ -375,64 +387,6 @@ describe 'up.layout', ->
             # [4] 200..249
             # [5] 250..299
             expect($viewport.scrollTop()).toBe(50)
-
-      it 'only reveals the top number of pixels defined in config.substance', asyncSpec (next) ->
-
-        up.layout.config.substance = 20
-
-        $viewport = affix('div').css
-          'position': 'absolute'
-          'top': '50px'
-          'left': '50px'
-          'width': '100px'
-          'height': '100px'
-          'overflow-y': 'scroll'
-        $elements = []
-        u.each [0..5], ->
-          $element = $('<div>').css(height: '50px')
-          $element.appendTo($viewport)
-          $elements.push($element)
-
-        # [0] 000..049
-        # [1] 050..099
-        # [2] 100..149
-        # [3] 150..199
-        # [4] 200..249
-        # [5] 250..299
-
-        # Viewing 0 .. 99
-        expect($viewport.scrollTop()).toBe(0)
-
-        # See that the view only scrolls down as little as possible
-        # in order to reveal the first 20 rows of the element
-        up.reveal($elements[3], viewport: $viewport[0])
-
-        next =>
-          # Viewing 70 to 169
-          expect($viewport.scrollTop()).toBe(50 + 20)
-
-          # See that the view doesn't move if the element
-          # is already revealed
-          up.reveal($elements[2], viewport: $viewport[0])
-
-        next =>
-          expect($viewport.scrollTop()).toBe(50 + 20)
-
-          # See that the view scrolls as far down as it cans
-          # to show the first 20 rows of the bottom element
-          up.reveal($elements[5], viewport: $viewport[0])
-
-        next =>
-          # Viewing 170 to 269
-          expect($viewport.scrollTop()).toBe(150 + 20)
-
-          # See that the view only scrolls up as little as possible
-          # in order to reveal the first 20 rows element
-          up.reveal($elements[2], viewport: $viewport[0])
-
-        next =>
-          # Viewing 100 to 199
-          expect($viewport.scrollTop()).toBe(100)
 
     describe 'up.layout.revealHash', ->
 
