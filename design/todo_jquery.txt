@@ -39,3 +39,4 @@
 - check if we can git rid of any up.element methods (e.g. insertAfter)
 - rename up.layout to up.viewport
   - move up.browser.documentViewport and documentViewportSelector to up.layout
+- up-target should support [up-reveal-padding], { revealPadding }, [

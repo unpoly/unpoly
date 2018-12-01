@@ -277,7 +277,7 @@ describe 'up.layout', ->
             )
 
         it 'does not crash when called with a CSS selector (bugfix)', (done) ->
-          promise = up.reveal('.container')
+          promise = up.reveal('.container', { behavior: 'instant' })
           promiseState(promise).then (result) ->
             expect(result.state).toEqual('fulfilled')
             done()
