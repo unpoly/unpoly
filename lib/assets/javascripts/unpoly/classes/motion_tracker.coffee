@@ -54,10 +54,12 @@ class up.MotionTracker
         @markCluster(cluster, promise)
         promise
 
-  claim2: (element, motion) ->
-    element.addEventListener(@finishEvent, motion.finish)
-    promise = @claim(element, motion.start)
-    promise = promise.then => element.removeEventListener(@finishEvent, motion.finish)
+  claim2: (element, motion, memory = {}) ->
+    start = -> motion.start() # TODO: Get rid of claim() and pass on the motion object everywhere
+    finish = -> motion.finish() # TODO: Get rid of claim() and pass on the motion object everywhere
+    element.addEventListener(@finishEvent, finish)
+    promise = @claim(element, start, memory)
+    promise = promise.then => element.removeEventListener(@finishEvent, finish)
     promise
 
   ###**

@@ -18,6 +18,7 @@ Internet Explorer 10 or lower
 up.browser = do ->
 
   u = up.util
+  e = up.element
 
   ###**
   @method up.browser.navigate
@@ -310,6 +311,9 @@ up.browser = do ->
   documentViewport = ->
     document.querySelector(documentViewportSelector())
 
+  isDocumentViewport = (element) ->
+    e.matches(element, documentViewportSelector())
+
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url
   navigate: navigate
@@ -321,6 +325,7 @@ up.browser = do ->
   canJQuery: canJQuery
   documentViewportSelector: documentViewportSelector
   documentViewport: documentViewport
+  isDocumentViewport: isDocumentViewport
   whenConfirmed: whenConfirmed
   isSupported: isSupported
   puts: puts

@@ -53,7 +53,6 @@ up.layout = do ->
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
-    snap: null # only for deprecation
     revealSnap: 50
     revealPadding: 0,
     scrollSpeed: 1
@@ -109,7 +108,7 @@ up.layout = do ->
   ###
   scroll = (viewport, scrollTop, options) ->
     motion = new up.ScrollMotion(viewport, scrollTop, options)
-    scrollingTracker.claim2(viewport, motion)
+    scrollingTracker.claim2(viewport, motion, options)
 
   ###**
   Finishes scrolling animations in the given element, its ancestors or its descendants.
@@ -191,8 +190,7 @@ up.layout = do ->
 
   @function up.reveal
   @param {string|Element|jQuery} element
-  @param {number} [options.duration]
-  @param {string} [options.easing]
+  @param {number} [options.speed]
   @param {string} [options.snap]
   @param {string|Element|jQuery} [options.viewport]
   @param {boolean} [options.top=false]
@@ -202,117 +200,12 @@ up.layout = do ->
     A promise that fulfills when the element is revealed.
   @stable
   ###
-  reveal = (elementOrSelector, options) ->
+  # TODO: Documentation
+  reveal = (elementOrSelector, options = {}) ->
     element = e.get(elementOrSelector)
-    up.puts 'Revealing fragment %o', element
-    options = u.options(options)
-
-    u.rejectOnError ->
-      viewport = options.viewport ? viewportOf(element)
-
-      snap = u.option(options.snap, config.snap)
-
-      viewportIsDocument = e.matches(viewport, up.browser.documentViewportSelector())
-      viewportHeight = if viewportIsDocument then u.clientSize().height else viewport.offsetHeight
-
-      # debugger
-
-      originalScrollPos = viewport.scrollTop
-      newScrollPos = originalScrollPos
-
-      offsetShift = undefined
-      obstruction = undefined
-
-      # TODO: Check if we can get rid of this if/else by writing a saner $.position
-      if viewportIsDocument
-        obstruction = measureObstruction(viewportHeight)
-        # Within the body, $.position will always return the distance
-        # from the document top and *not* the distance of the viewport
-        # top. This is what the calculations below expect, so don't shift.
-        offsetShift = 0
-      else
-        obstruction = { top: 0, bottom: 0 }
-        # When the scrolled element is not <body> but instead a container
-        # with overflow-y: scroll, $.position returns the distance to the
-        # viewport's currently visible top edge (instead of the distance to
-        # the first row of the viewport's entire canvas buffer).
-        # http://codepen.io/anon/pen/jPojGE
-        offsetShift = originalScrollPos
-
-      predictFirstVisibleRow = -> newScrollPos + obstruction.top
-      predictLastVisibleRow = -> newScrollPos + viewportHeight - obstruction.bottom
-
-      elementDims = u.measure(element, relative: viewport, includeMargin: true)
-      firstElementRow = elementDims.top + offsetShift
-      lastElementRow = firstElementRow + Math.min(elementDims.height, config.substance)
-
-      if lastElementRow > predictLastVisibleRow()
-        # Try to show the full height of the element
-        newScrollPos += (lastElementRow - predictLastVisibleRow())
-
-      if firstElementRow < predictFirstVisibleRow() || options.top
-        # If the full element does not fit, scroll to the first row
-        newScrollPos = firstElementRow - obstruction.top
-
-      if newScrollPos < snap && elementDims.top < (0.5 * viewportHeight)
-        newScrollPos = 0
-
-      if newScrollPos != originalScrollPos
-        scroll(viewport, newScrollPos, options)
-      else
-        Promise.resolve()
-
-  reveal2 = (elementOrSelector, options = {}) ->
-    element = e.get(elementOrSelector)
-    viewport = u.pluckKey(options, 'viewport') ? viewportOf(element)
-
-    options.speed ?= config.scrollSpeed
-
-    elementRect = up.Rect.fromElement(element)
-    viewportRect = up.Rect.fromElement(viewport)
-
-    # TODO: use Rect objects that we can manipulate cross-browser (IE 11 does not change bottom when we change height)
-    # TODO: if viewport is document, manually restrict it to (0, 0, clientWidth, clientHeight)
-    # TODO: Remove config.substance options
-    # TODO: reduce viewport by overlapping fixed elements
-    # TODO: Replace `reveal` with this `reveal2`
-    # TODO: Documentation
-
-    elementRect.addPadddingY(config.revealPadding)
-
-    originalScrollPos = viewport.scrollTop
-    newScrollPos = originalScrollPos
-
-    if viewportRect.height < 0
-      return Promise.reject(new Error('Viewport has no visible area'))
-
-    # elementOffset = elementBounds.top - viewportBounds.top
-
-    if options.top || elementRect.height > viewportRect.height
-      # Element is either larger than the viewport,
-      # or the user has explicitely requested for the element to align at top
-      # => Scroll the viewport so the first element row is the first viewport row
-      newScrollPos = elementBounds.top
-    else if elementRect.top < viewportRect.top
-      # Element fits within viewport, but sits too high
-      # => Scroll up (reduce scrollY), so the element comes down
-      newScrollPos -= (viewportRect.top - elementBounds.top)
-    else if elementRect.bottom > viewportRect.bottom
-      # Element fits within viewport, but sits too low
-      # => Scroll down (increase scrollY), so the element comes up
-      newScrollPos += (elementBounds.bottom - viewportRect.bottom)
-    else
-      # Element is fully visible within viewport
-      # => Do nothing
-
-    u.deprecateRenamedKey(config, 'snap', 'revealSnap')
-    if config.revealSnap < viewportRect.height && newScrollPos < config.revealSnap
-      newScrollPos = 0
-
-    if newScrollPos != originalScrollPos
-      scroll(viewport, newScrollPos, options)
-    else
-      Promise.resolve()
+    console.debug("Instantiating RevealMotion with %o", element)
+    motion = new up.RevealMotion(element, options)
+    scrollingTracker.claim2(element, motion, options)
 
   ###**
   @function up.layout.scrollAfterInsertFragment
@@ -465,10 +358,10 @@ up.layout = do ->
       [scrollTopKey(viewport), viewport.scrollTop]
 
   ###**
-  @function up.layout.fixedChildren
+  @function up.layout.fixedElements
   @internal
   ###
-  fixedChildren = (root) ->
+  fixedElements = (root = document) ->
     queryParts = ['[up-fixed]'].concat(config.fixedTop).concat(config.fixedBottom)
     root.querySelectorAll(queryParts.join(','))
 
@@ -567,7 +460,7 @@ up.layout = do ->
     newOffset = e.offsetFromDocument(element)
     moveTop(originalOffset.top - newOffset.top)
 
-    for fixedChild in fixedChildren(element)
+    for fixedChild in fixedElements(element)
       u.fixedToAbsolute(fixedChild, viewport)
 
     element: element
@@ -748,7 +641,7 @@ up.layout = do ->
   restoreScroll: restoreScroll
   scrollAfterInsertFragment: scrollAfterInsertFragment
   anchoredRight: anchoredRight
-  fixedChildren: fixedChildren
+  fixedElements: fixedElements
   absolutize: absolutize
 
 up.scroll = up.layout.scroll
