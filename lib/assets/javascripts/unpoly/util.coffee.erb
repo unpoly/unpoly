@@ -406,7 +406,7 @@ up.util = do ->
       return true
     if isObject(value) && isFunction(value.isBlank)
       return value.isBlank()
-    if isString(value) || isCollection(value)
+    if isString(value) || isList(value)
       return value.length == 0
     if isOptions(value)
       return Object.keys(value).length == 0
@@ -585,14 +585,14 @@ up.util = do ->
     else
       Array.prototype.slice.call(object)
 
-  isCollection = (value) ->
+  isList = (value) ->
     isArray(value) || isNodeList(value) || isJQuery(value)
 
   isNodeList = (value) ->
     value instanceof NodeList
 
-  wrapCollection = (value) ->
-    if isCollection(value)
+  wrapList = (value) ->
+    if isList(value)
       value
     else if isMissing(value)
       []
@@ -1755,7 +1755,7 @@ up.util = do ->
   flatten = (array) ->
     flattened = []
     for object in array
-      if isCollection(object)
+      if isList(object)
         flattened.push(object...)
       else
         flattened.push(object)
@@ -2039,7 +2039,7 @@ up.util = do ->
   endsWith: endsWith
   sum: sum
 #  wrapArray: wrapArray
-  wrapCollection: wrapCollection
+  wrapList: wrapList
   wrapValue: wrapValue
   simpleEase: simpleEase
   values: objectValues

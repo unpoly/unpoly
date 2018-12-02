@@ -68,7 +68,7 @@ up.element = do ->
     if u.isString(value)
       all(value)
     else
-      u.wrapCollection(value)
+      u.wrapList(value)
 
   triggerCustom = (element, name, props = {}) ->
     event = document.createEvent('Event')
@@ -191,8 +191,8 @@ up.element = do ->
   #   element
 
   subscribeEvents = (fn, elements, eventNames, callback) ->
-    for element in u.wrapCollection(elements)
-      for eventName in u.wrapCollection(eventNames)
+    for element in u.wrapList(elements)
+      for eventName in u.wrapList(eventNames)
         element[fn](eventName, callback)
 
   bind = u.partial(subscribeEvents, 'addEventListener')
@@ -203,7 +203,7 @@ up.element = do ->
     element = createFromSelector(selector)
     if attrs
       if classValue = u.pluckKey(attrs, 'class')
-        for klass in u.wrapCollection(classValue)
+        for klass in u.wrapList(classValue)
           element.classList.add(klass)
       if styleValue = u.pluckKey(attrs, 'style')
         u.writeInlineStyle(element, styleValue)

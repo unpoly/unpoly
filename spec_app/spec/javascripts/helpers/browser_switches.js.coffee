@@ -2,7 +2,7 @@ u = up.util
 $ = jQuery
 
 window.describeCapability = (capabilities, examples) ->
-  capabilities = u.wrapCollection(capabilities)
+  capabilities = u.wrapList(capabilities)
   allSupported = u.all capabilities, (c) ->
     if fn = up.browser[c]
       fn()
@@ -13,7 +13,7 @@ window.describeCapability = (capabilities, examples) ->
     examples()
 
 window.describeFallback = (capabilities, examples) ->
-  capabilities = u.wrapCollection(capabilities)
+  capabilities = u.wrapList(capabilities)
   describe "(in a browser without #{capabilities.join(', ')})", ->
     beforeEach ->
       u.each capabilities, (c) ->
