@@ -1140,6 +1140,42 @@ describe 'up.util', ->
         expect(object.b).toBe('b value')
         expect(object.c).toBe('a value')
 
+#    describe 'up.util.offsetParent', ->
+#
+#      it 'returns the first ascendant that has a "position" style', ->
+#        $a = affix('.a')
+#        $b = $a.affix('.b').css(position: 'relative')
+#        $c = $b.affix('.c')
+#        $d = $c.affix('.d')
+#
+#        expect(up.util.offsetParent($d[0])).toBe($b[0])
+#
+#      it 'does not return the given element, even when it has position', ->
+#        $a = affix('.a').css(position: 'absolute')
+#        $b = $a.affix('.b').css(position: 'relative')
+#
+#        expect(up.util.offsetParent($b[0])).toBe($a[0])
+#
+#      it 'returns the <body> element if there is no closer offset parent', ->
+#        $a = affix('.a')
+#        $b = $a.affix('.b')
+#
+#        expect(up.util.offsetParent($b[0])).toBe(document.body)
+#
+#      it 'returns the offset parent for a detached element', ->
+#        $a = affix('.a').detach()
+#        $b = $a.affix('.b').css(position: 'relative')
+#        $c = $b.affix('.c')
+#        $d = $c.affix('.d')
+#
+#        expect(up.util.offsetParent($d[0])).toBe($b[0])
+#
+#      it 'returns a missing value (and not <body>) if the given detached element has no ancestor with position', ->
+#        $a = affix('.a').detach()
+#        $b = $a.affix('.b')
+#
+#        expect(up.util.offsetParent($b[0])).toBeMissing()
+
     describe 'up.util.isCrossDomain', ->
 
       it 'returns false for an absolute path', ->

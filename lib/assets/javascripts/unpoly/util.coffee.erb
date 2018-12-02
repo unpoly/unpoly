@@ -7,7 +7,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
 @class up.util
 ###
-up.util = (($) ->
+up.util = do ->
 
   ###**
   A function that does nothing.
@@ -1285,19 +1285,6 @@ up.util = (($) ->
     parent.removeChild(wrapper)
 
   ###**
-  @function up.util.offsetParent
-  @internal
-  ###
-  offsetParent = (element) ->
-    match = undefined
-    while element = element.parentNode
-      position = readComputedStyle(element, 'position')
-      if position != 'static' || element.tagName == 'BODY'
-        match = element
-        break
-    match
-
-  ###**
   Returns if the given element has a `fixed` position.
 
   @function up.util.isFixed
@@ -1316,17 +1303,17 @@ up.util = (($) ->
   @function up.util.fixedToAbsolute
   @internal
   ###
-  fixedToAbsolute = (element, options = {}) ->
-    viewport = options.viewport ? up.layout.viewportOf(element)
-    futureParent = offsetParent(element)
+  fixedToAbsolute = (element) ->
+    elementRectAsFixed = element.getBoundingClientRect()
 
-    elementRect = element.getBoundingClientRect()
-    futureParentRect = futureParent.getBoundingClientRect()
+    # Set the position to 'absolute' so it gains an offsetParent
+    element.style.position = 'absolute'
+
+    offsetParentRect = element.offsetParent.getBoundingClientRect()
 
     writeInlineStyle element,
-      position: 'absolute'
-      left: elementRect.left - readComputedStyleNumber(element, 'margin-left') - futureParentRect.left
-      top: elementRect.top - readComputedStyleNumber(element, 'margin-top') - futureParentRect.top
+      left: elementRectAsFixed.left - readComputedStyleNumber(element, 'margin-left') - offsetParentRect.left
+      top: elementRectAsFixed.top - readComputedStyleNumber(element, 'margin-top') - offsetParentRect.top
       right: ''
       bottom: ''
 
@@ -2076,8 +2063,5 @@ up.util = (($) ->
   simpleEase: simpleEase
   values: objectValues
   partial: partial
-  offsetParent: offsetParent
-
-)(jQuery)
 
 up.fail = up.util.fail

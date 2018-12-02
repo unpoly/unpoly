@@ -468,7 +468,7 @@ up.layout = do ->
     moveBounds(originalRect.left - newElementRect.left, originalRect.top - newElementRect.top)
 
     for fixedChild in fixedElements(element)
-      u.fixedToAbsolute(fixedChild, { viewport })
+      u.fixedToAbsolute(fixedChild)
 
     bounds: bounds
     moveBounds: moveBounds

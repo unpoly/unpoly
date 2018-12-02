@@ -8,12 +8,11 @@ class up.Tether2
     @position = options.position
     @viewport = up.layout.viewportOf(@anchor)
     @parent = if @viewport == document.documentElement then document.body else @viewport
-    @offsetParent = up.util.offsetParent(@anchor)
 
     # If the offsetParent is within the viewport (or is the viewport)
     # we can simply absolutely position it and it will move as the viewport scrolls.
     # If not however, we have no choice but to move it on every scroll event.
-    @alignAtScroll = !@viewport.contains(@offsetParent)
+    @alignAtScroll = !@viewport.contains(@anchor.offsetParent)
 
     @root = e.affix(@parent, '.up-bounds')
     @setBoundsOffset(0, 0)
