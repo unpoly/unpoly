@@ -1757,17 +1757,17 @@ describe 'up.dom', ->
             $new = $('.element.v2')
 
             expect($old).toHaveLength(1)
-            expect(u.opacity($old)).toBeAround(1.0, 0.15)
+            expect($old).toHaveOpacity(1.0, 0.15)
 
             expect($new).toHaveLength(1)
-            expect(u.opacity($new)).toBeAround(0.0, 0.15)
+            expect($new).toHaveOpacity(0.0, 0.15)
 
           next.after 100, =>
-            expect(u.opacity($old)).toBeAround(0.5, 0.3)
-            expect(u.opacity($new)).toBeAround(0.5, 0.3)
+            expect($old).toHaveOpacity(0.5, 0.3)
+            expect($new).toHaveOpacity(0.5, 0.3)
 
           next.after (100 + 70), =>
-            expect(u.opacity($new)).toBeAround(1.0, 0.1)
+            expect($new).toHaveOpacity(1.0, 0.1)
             expect($old).toBeDetached()
 
 
@@ -1785,7 +1785,7 @@ describe 'up.dom', ->
               # See that we've already immediately swapped the element and ignored the duration of 200ms
               expect(extractDone).toHaveBeenCalled()
               expect($('.container').length).toEqual(1)
-              expect(u.opacity($('.container'))).toEqual(1.0)
+              expect($('.container')).toHaveOpacity(1.0)
 
         it 'marks the old fragment as .up-destroying during the transition', asyncSpec (next) ->
           affix('.element').text('version 1')

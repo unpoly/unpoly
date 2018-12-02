@@ -1,12 +1,13 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 beforeEach ->
   jasmine.addMatchers
     toHaveOpacity: (util, customEqualityTesters) ->
       compare: (element, expectedOpacity, tolerance = 0.0) ->
-        element = up.util.element(element)
-        actualOpacity = up.util.opacity(element)
+        element = e.get(element)
+        actualOpacity = u.readComputedStyleNumber(element, 'opacity')
         result = {}
         result.pass =  Math.abs(expectedOpacity - actualOpacity) <= tolerance
         unless result.pass

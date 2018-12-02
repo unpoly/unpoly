@@ -161,7 +161,7 @@ describe 'up.motion', ->
 
           next =>
             expect($element.css('font-size')).toEqual('40px')
-            expect(u.opacity($element, 'opacity')).toBeAround(0.5, 0.01) # Safari sometimes has rounding errors
+            expect($element).toHaveOpacity(0.5, 0.01) # Safari sometimes has rounding errors
 
         it 'cancels animations on children of the given element', asyncSpec (next) ->
           $parent = affix('.element')
@@ -199,7 +199,7 @@ describe 'up.motion', ->
             up.motion.finish($element)
 
           next =>
-            expect(u.opacity($element)).toEqual(1)
+            expect($element).toHaveOpacity(1)
             currentTransitionProperty = $element.css('transition-property')
             expect(currentTransitionProperty).toEqual(oldTransitionProperty)
             expect(currentTransitionProperty).toContain('font-size')
@@ -304,16 +304,16 @@ describe 'up.motion', ->
           up.animate($element2, 'fade-in', duration: 3000)
 
           next =>
-            expect(u.opacity($element1)).toBeAround(0.0, 0.1)
-            expect(u.opacity($element2)).toBeAround(0.0, 0.1)
+            expect($element1).toHaveOpacity(0.0, 0.1)
+            expect($element2).toHaveOpacity(0.0, 0.1)
 
             up.motion.finish()
 
           next =>
             $element1 = $('.element1')
             $element2 = $('.element2')
-            expect(u.opacity($element1)).toBe(1.0)
-            expect(u.opacity($element2)).toBe(1.0)
+            expect($element1).toHaveOpacity(1.0)
+            expect($element2).toHaveOpacity(1.0)
 
     describe 'up.morph', ->
 
@@ -329,15 +329,15 @@ describe 'up.motion', ->
           expect($old[0].getBoundingClientRect()).toEqual(oldDims)
           expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
-          expect(u.opacity($old)).toBeAround(1.0, 0.25)
-          expect(u.opacity($new)).toBeAround(0.0, 0.25)
+          expect($old).toHaveOpacity(1.0, 0.25)
+          expect($new).toHaveOpacity(0.0, 0.25)
 
         next.after 100, =>
-          expect(u.opacity($old)).toBeAround(0.5, 0.25)
-          expect(u.opacity($new)).toBeAround(0.5, 0.25)
+          expect($old).toHaveOpacity(0.5, 0.25)
+          expect($new).toHaveOpacity(0.5, 0.25)
 
         next.after (100 + (tolerance = 110)), =>
-          expect(u.opacity($new)).toBeAround(1.0, 0.25)
+          expect($new).toHaveOpacity(1.0, 0.25)
           expect($old).toBeDetached()
 
       it 'does not change the position of sibling elements (as long as the old and new elements are of equal size)', asyncSpec (next) ->
@@ -441,15 +441,15 @@ describe 'up.motion', ->
             expect($old[0].getBoundingClientRect()).toEqual(oldDims)
             expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
-            expect(u.opacity($old)).toBeAround(1.0, 0.25)
-            expect(u.opacity($new)).toBeAround(0.0, 0.25)
+            expect($old).toHaveOpacity(1.0, 0.25)
+            expect($new).toHaveOpacity(0.0, 0.25)
 
           next.after 100, =>
-            expect(u.opacity($old)).toBeAround(0.5, 0.25)
-            expect(u.opacity($new)).toBeAround(0.5, 0.25)
+            expect($old).toHaveOpacity(0.5, 0.25)
+            expect($new).toHaveOpacity(0.5, 0.25)
 
           next.after (100 + (tolerance = 110)), =>
-            expect(u.opacity($new)).toBeAround(1.0, 0.1)
+            expect($new).toHaveOpacity(1.0, 0.1)
             expect($old).toBeDetached()
             expect($new).toBeAttached()
 
@@ -483,15 +483,15 @@ describe 'up.motion', ->
             expect($old[0].getBoundingClientRect()).toEqual(oldDims)
             expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
-            expect(u.opacity($old)).toBeAround(1.0, 0.25)
-            expect(u.opacity($new)).toBeAround(0.0, 0.25)
+            expect($old).toHaveOpacity(1.0, 0.25)
+            expect($new).toHaveOpacity(0.0, 0.25)
 
           next.after 200, =>
-            expect(u.opacity($old)).toBeAround(0.5, 0.25)
-            expect(u.opacity($new)).toBeAround(0.5, 0.25)
+            expect($old).toHaveOpacity(0.5, 0.25)
+            expect($new).toHaveOpacity(0.5, 0.25)
 
           next.after (200 + (tolerance = 110)), =>
-            expect(u.opacity($new)).toBeAround(1.0, 0.25)
+            expect($new).toHaveOpacity(1.0, 0.25)
             expect($old).toBeDetached()
             expect($new).toBeAttached()
 

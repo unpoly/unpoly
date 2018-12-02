@@ -1,11 +1,11 @@
-- build up.$on (really?)
-- build up.$observe (really?)
-- think whether we want to keep $macro and $compiler
+- compatibility layer
+  - think whether we want to keep $macro and $compiler
+  - build up.$on (really?)
+  - build up.$observe (really?)
 - Update docs
   - Examples with $
   - Stuff like  @param {jQuery} event.link
   - document new stuff like up.$compiler
-- Specs should load jQuery with noConflict and only assign $ = jQuery at the top of each spec file
 - Move all remaining element-related helper methods from util to query
   - Get rid of u.addClass, u.writeInlineStyle, u.fastHide, etc. if possible
 - Remove event.element, event.$element, event.$target options for up.emit() (only support { target })

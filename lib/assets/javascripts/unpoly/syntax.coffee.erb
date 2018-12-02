@@ -324,7 +324,7 @@ up.syntax = do ->
   @internal
   ###
   registerDestructor = (element, destructor) ->
-    element = u.element(element)
+    element = e.get(element)
     unless destructors = element.upDestructors
       destructors = []
       element.upDestructors = destructors
@@ -416,7 +416,7 @@ up.syntax = do ->
   @stable
   ###
   readData = (elementOrSelector) ->
-    if element = u.element(elementOrSelector)
+    if element = e.get(elementOrSelector)
       u.jsonAttr(element, 'up-data') || {}
 
   ###**

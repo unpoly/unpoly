@@ -232,7 +232,7 @@ up.motion = do ->
   animateOptions = (args...) ->
     userOptions = args.shift() ? {}
     moduleDefaults = u.extractOptions(args)
-    element = u.element(args.pop()) # might be undefined
+    element = e.get(args.pop()) # might be undefined
 
     consolidatedOptions = {}
     consolidatedOptions.easing = u.option(userOptions.easing, u.presence(element?.getAttribute('up-easing')), moduleDefaults.easing, config.easing)

@@ -359,7 +359,7 @@ class up.Params
 
   addField: (field) ->
     params = new @constructor()
-    if (field = u.element(field)) && (name = field.name) && (!field.disabled)
+    if (field = e.get(field)) && (name = field.name) && (!field.disabled)
       tagName = field.tagName
       type = field.type
       if tagName == 'SELECT'

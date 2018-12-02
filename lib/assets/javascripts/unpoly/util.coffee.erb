@@ -106,7 +106,7 @@ up.util = do ->
   parseUrl = (urlOrAnchor) ->
     # In case someone passed us a $link, unwrap it
     if isJQuery(urlOrAnchor)
-      urlOrAnchor = getElement(urlOrAnchor)
+      urlOrAnchor = up.element.get(urlOrAnchor)
 
     # If we are handed a parsed URL, just return it
     if urlOrAnchor.pathname
@@ -634,20 +634,6 @@ up.util = do ->
 #    copy(object, true)
 
   ###**
-  If given a jQuery collection, returns the first native DOM element in the collection.
-  If given a string, returns the first element matching that string.
-  If given any other argument, returns the argument unchanged.
-
-  @function up.util.element
-  @param {jQuery|Element|String} object
-  @return {Element}
-  @internal
-  ###
-  getElement = (object) ->
-    # TODO: Remove me! Use up.element.get() instead
-    up.element.get(object)
-
-  ###**
   Creates a new object by merging together the properties from the given objects.
 
   @function up.util.merge
@@ -913,7 +899,7 @@ up.util = do ->
     changeClassList(element, klassOrKlasses, 'remove')
 
   changeClassList = (element, klassOrKlasses, fnName) ->
-    classList = getElement(element).classList
+    classList = up.element.get(element).classList
     if isArray(klassOrKlasses)
       each klassOrKlasses, (klass) ->
         classList[fnName](klass)
@@ -921,7 +907,7 @@ up.util = do ->
       classList[fnName](klassOrKlasses)
 
   hasClass = (element, klass) ->
-    classList = getElement(element).classList
+    classList = up.element.get(element).classList
     classList.contains(klass)
 
   ###**
@@ -1056,7 +1042,7 @@ up.util = do ->
   @internal
   ###
   forceRepaint = (element) ->
-    element = getElement(element)
+    element = up.element.get(element)
     element.offsetHeight
 
   ###**
@@ -1130,7 +1116,7 @@ up.util = do ->
   @internal
   ###
   jsonAttr = (elementOrSelector, attribute) ->
-    if element = getElement(elementOrSelector)
+    if element = up.element.get(elementOrSelector)
       # The document does not respond to #getAttribute()
       json = element.getAttribute?(attribute)
       if isString(json) && json.trim() != ''
@@ -1277,7 +1263,7 @@ up.util = do ->
   @internal
   ###
   unwrapElement = (wrapper) ->
-    wrapper = getElement(wrapper)
+    wrapper = up.element.get(wrapper)
     parent = wrapper.parentNode;
     wrappedNodes = toArray(wrapper.childNodes)
     each wrappedNodes, (wrappedNode) ->
@@ -1493,9 +1479,6 @@ up.util = do ->
 #  }
 #}
 
-  opacity = (element) ->
-    readComputedStyleNumber(element, 'opacity')
-
   whenReady = memoize ->
     readyState = document.readyState
     # Values are "loading", "interactive" and "completed".
@@ -1650,7 +1633,7 @@ up.util = do ->
   @internal
   ###
   readComputedStyle = (element, props) ->
-    element = getElement(element)
+    element = up.element.get(element)
     style = window.getComputedStyle(element)
     extractFromStyleObject(style, props)
 
@@ -1683,7 +1666,7 @@ up.util = do ->
   @internal
   ###
   readInlineStyle = (element, props) ->
-    element = getElement(element)
+    element = up.element.get(element)
     style = element.style
     extractFromStyleObject(style, props)
 
@@ -1704,7 +1687,7 @@ up.util = do ->
   @internal
   ###
   writeInlineStyle = (element, props) ->
-    element = getElement(element)
+    element = up.element.get(element)
     style = element.style
     for key, value of props
       value = normalizeStyleValueForWrite(key, value)
@@ -1749,7 +1732,7 @@ up.util = do ->
     if isOptions(elementOrStyleHash)
       style = elementOrStyleHash
     else
-      element = getElement(element)
+      element = up.element.get(element)
       style = getComputedStyle(element)
 
     prop = style.transitionProperty
@@ -1982,7 +1965,6 @@ up.util = do ->
   isFormData: isFormData
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
-  element: getElement
   setTimer: setTimer
   nextFrame: nextFrame
   addClass: addClass
@@ -2025,7 +2007,6 @@ up.util = do ->
   extractCallback: extractCallback
   noop: noop
   asyncNoop: asyncNoop
-  opacity: opacity
   whenReady: whenReady
   identity: identity
   escapeHtml: escapeHtml

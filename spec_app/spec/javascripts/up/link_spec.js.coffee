@@ -829,12 +829,12 @@ describe 'up.link', ->
               @$newGhost = $('.target.new')
               expect(@$oldGhost).toExist()
               expect(@$newGhost).toExist()
-              expect(u.opacity(@$oldGhost)).toBeAround(1, 0.15)
-              expect(u.opacity(@$newGhost)).toBeAround(0, 0.15)
+              expect(@$oldGhost).toHaveOpacity(1, 0.15)
+              expect(@$newGhost).toHaveOpacity(0, 0.15)
 
             next.after 250, =>
-              expect(u.opacity(@$oldGhost)).toBeAround(0.5, 0.15)
-              expect(u.opacity(@$newGhost)).toBeAround(0.5, 0.15)
+              expect(@$oldGhost).toHaveOpacity(0.5, 0.15)
+              expect(@$newGhost).toHaveOpacity(0.5, 0.15)
 
         describe 'wih a CSS selector in the [up-fallback] attribute', ->
 
