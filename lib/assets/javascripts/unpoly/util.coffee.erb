@@ -1071,65 +1071,7 @@ up.util = (($) ->
     forceRepaint(element)
     return undo
 
-  ###**
-  @internal
-  ###
-  margins = (selectorOrElement) ->
-    element = getElement(selectorOrElement)
-    top:    readComputedStyleNumber(element, 'marginTop')
-    right:  readComputedStyleNumber(element, 'marginRight')
-    bottom: readComputedStyleNumber(element, 'marginBottom')
-    left:   readComputedStyleNumber(element, 'marginLeft')
-
-  ###**
-  Measures the given element.
-
-  @function up.util.measure
-  @internal
-  ###
-  measure = (element, opts) ->
-    $element = $(element)
-    opts = newOptions(opts, relative: false, inner: false, includeMargin: false)
-
-    if opts.relative
-      if opts.relative == true
-        coordinates = $element.position()
-      else
-        # A relative context element is given
-        $context = $(opts.relative)
-        elementCoords = $element.offset()
-        if $context.is(document)
-          # The document is always at the origin
-          coordinates = elementCoords
-        else
-          contextCoords = $context.offset()
-          coordinates =
-            left: elementCoords.left - contextCoords.left
-            top: elementCoords.top - contextCoords.top
-    else
-      coordinates = $element.offset()
-    
-    box = 
-      left: coordinates.left
-      top: coordinates.top
-
-    if opts.inner
-      box.width = $element.width()
-      box.height = $element.height()
-    else
-      box.width = $element.outerWidth()
-      box.height = $element.outerHeight()
-
-    if opts.includeMargin
-      mgs = margins($element)
-      box.left -= mgs.left
-      box.top -= mgs.top
-      box.height += mgs.top + mgs.bottom
-      box.width += mgs.left + mgs.right
-
-    box
-
-  ###**
+    ###**
   Returns whether the given keyboard event involved the ESC key.
 
   @function up.util.escapePressed
@@ -1374,15 +1316,24 @@ up.util = (($) ->
   @function up.util.fixedToAbsolute
   @internal
   ###
-  fixedToAbsolute = (element, viewport) ->
+  fixedToAbsolute = (element, options = {}) ->
     $element = $(element)
-    $viewport = $(viewport)
+    $viewport = $(options.viewport ? up.layout.viewportOf(element))
     $futureOffsetParent = $(offsetParent($element[0]))
+
+    console.debug("future offset parent is %o", $futureOffsetParent[0])
+
     # To get a fixed elements distance from the edge of the screen,
     # use position(), not offset(). offset() would include the current
     # scrollTop of the viewport.
     elementCoords = $element.position()
     futureParentCoords = $futureOffsetParent.offset()
+
+    console.debug("Setting inline style: %o",
+      left: elementCoords.left - futureParentCoords.left
+      top: elementCoords.top - futureParentCoords.top + $viewport.scrollTop()
+    )
+
     writeInlineStyle $element,
       position: 'absolute'
       left: elementCoords.left - futureParentCoords.left
@@ -2058,7 +2009,6 @@ up.util = (($) ->
   element: getElement
   setTimer: setTimer
   nextFrame: nextFrame
-  measure: measure
   addClass: addClass
   removeClass: removeClass
   hasClass: hasClass

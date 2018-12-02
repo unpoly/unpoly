@@ -207,6 +207,8 @@ up.element = do ->
           element.classList.add(klass)
       if styleValue = u.pluckKey(attrs, 'style')
         u.writeInlineStyle(element, styleValue)
+      if textValue = u.pluckKey(attrs, 'text')
+        element.innerText = textValue
       setAttrs(element, attrs)
     container.appendChild(element)
 
