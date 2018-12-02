@@ -1317,27 +1317,16 @@ up.util = (($) ->
   @internal
   ###
   fixedToAbsolute = (element, options = {}) ->
-    $element = $(element)
-    $viewport = $(options.viewport ? up.layout.viewportOf(element))
-    $futureOffsetParent = $(offsetParent($element[0]))
+    viewport = options.viewport ? up.layout.viewportOf(element)
+    futureParent = offsetParent(element)
 
-    console.debug("future offset parent is %o", $futureOffsetParent[0])
+    elementRect = element.getBoundingClientRect()
+    futureParentRect = futureParent.getBoundingClientRect()
 
-    # To get a fixed elements distance from the edge of the screen,
-    # use position(), not offset(). offset() would include the current
-    # scrollTop of the viewport.
-    elementCoords = $element.position()
-    futureParentCoords = $futureOffsetParent.offset()
-
-    console.debug("Setting inline style: %o",
-      left: elementCoords.left - futureParentCoords.left
-      top: elementCoords.top - futureParentCoords.top + $viewport.scrollTop()
-    )
-
-    writeInlineStyle $element,
+    writeInlineStyle element,
       position: 'absolute'
-      left: elementCoords.left - futureParentCoords.left
-      top: elementCoords.top - futureParentCoords.top + $viewport.scrollTop()
+      left: elementRect.left - readComputedStyleNumber(element, 'margin-left') - futureParentRect.left
+      top: elementRect.top - readComputedStyleNumber(element, 'margin-top') - futureParentRect.top
       right: ''
       bottom: ''
 

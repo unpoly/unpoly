@@ -880,14 +880,14 @@ describe 'up.util', ->
       it 'correctly positions an element with margins', ->
         $container = affix('.container').css
           position: 'absolute'
-          left: '100px'
-          top: '100px'
+          left: '20px'
+          top: '20px'
           backgroundColor: 'yellow'
 
         $element = $container.affix('.element').text('element').css
           position: 'fixed',
-          left: '70px'
-          top: '30px'
+          left: '40px'
+          top: '60px'
           backgroundColor: 'red'
           margin: '15px'
 
