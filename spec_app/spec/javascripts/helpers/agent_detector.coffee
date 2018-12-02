@@ -1,3 +1,6 @@
+u = up.util
+$ = jQuery
+
 @AgentDetector = do ->
 
   match = (regexp) ->

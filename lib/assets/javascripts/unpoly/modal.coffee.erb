@@ -246,9 +246,6 @@ up.modal = do ->
     selector = ".up-modal-#{name}"
     state.modalElement.querySelector(selector)
 
-  $part = (name) ->
-    $(part(name))
-
   createHiddenFrame = (target, options) ->
     html = templateHtml()
     state.modalElement = modalElement = u.createFragmentFromHtml(html)
@@ -601,8 +598,8 @@ up.modal = do ->
       markAsAnimating()
 
       promise = Promise.all([
-        up.animate($part('viewport'), viewportAnimation, animateOptions),
-        up.animate($part('backdrop'), backdropAnimation, animateOptions)
+        up.animate(part('viewport'), viewportAnimation, animateOptions),
+        up.animate(part('backdrop'), backdropAnimation, animateOptions)
       ])
       promise = promise.then -> markAsAnimating(false)
       promise

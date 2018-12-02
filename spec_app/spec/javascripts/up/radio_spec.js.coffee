@@ -1,6 +1,7 @@
-describe 'up.radio', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.radio', ->
 
   describe 'JavaScript functions', ->
 

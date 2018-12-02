@@ -1,3 +1,6 @@
+u = up.util
+$ = jQuery
+
 describe 'up.Cache', ->
 
   describe '#get', ->

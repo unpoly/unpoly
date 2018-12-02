@@ -1,7 +1,8 @@
+u = up.util
+$ = jQuery
+
 describe 'up.syntax', ->
 
-  u = up.util
-  
   describe 'JavaScript functions', ->
   
     describe 'up.$compiler', ->

@@ -1,6 +1,7 @@
-describe 'up.store.Session', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.store.Session', ->
 
   afterEach ->
     sessionStorage.removeItem('spec')

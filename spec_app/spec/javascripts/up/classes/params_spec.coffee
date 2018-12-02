@@ -1,6 +1,7 @@
-describe 'up.Params', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.Params', ->
 
   encodeBrackets = (str) ->
     str = str.replace(/\[/g, '%5B')

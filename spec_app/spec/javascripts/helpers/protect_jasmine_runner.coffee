@@ -1,3 +1,6 @@
+u = up.util
+$ = jQuery
+
 beforeEach ->
   up.dom.config.fallbacks = ['.default-fallback']
   up.history.config.popTargets = ['.default-fallback']

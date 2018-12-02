@@ -1,3 +1,6 @@
+u = up.util
+$ = jQuery
+
 describe 'up.motion', ->
 
   u = up.util

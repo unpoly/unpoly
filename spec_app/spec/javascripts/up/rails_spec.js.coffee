@@ -1,6 +1,7 @@
-describe 'up.rails', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.rails', ->
 
   upAttributes = ['up-follow', 'up-target', 'up-modal', 'up-popup']
 

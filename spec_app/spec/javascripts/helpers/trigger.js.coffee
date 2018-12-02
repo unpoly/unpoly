@@ -1,8 +1,10 @@
+u = up.util
+e = up.element
+$ = jQuery
+
 @Trigger = (->
   
-  u = up.util
-  e = up.element
-  
+
   mouseover = (element, options) ->
     $element = $(element)
     event = createMouseEvent('mouseover', options)

@@ -1,3 +1,6 @@
+u = up.util
+$ = jQuery
+
 describe 'window.up namespace', ->
 
   describe 'deprecateRenamedModule()', ->

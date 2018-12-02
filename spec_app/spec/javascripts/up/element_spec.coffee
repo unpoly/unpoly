@@ -1,6 +1,7 @@
-describe 'up.element', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.element', ->
 
   describe 'up.element.list()', ->
 

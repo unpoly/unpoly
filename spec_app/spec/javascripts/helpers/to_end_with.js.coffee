@@ -1,3 +1,6 @@
+u = up.util
+$ = jQuery
+
 endsWith = (string, substring) ->
   string.indexOf(substring) == string.length - substring.length
 

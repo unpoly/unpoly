@@ -1,2 +1,2 @@
-#afterEach ->
-#  Knife.reset()
+afterEach ->
+  Knife.reset()

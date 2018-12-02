@@ -1,6 +1,7 @@
-describe 'up.toast', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.toast', ->
 
   describe 'JavaScript functions', ->
 

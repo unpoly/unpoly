@@ -1,6 +1,7 @@
-describe 'up.layout', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.layout', ->
 
   describe 'JavaScript functions', ->
 

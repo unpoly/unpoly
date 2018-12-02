@@ -1,6 +1,7 @@
-describe 'up.browser', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.browser', ->
 
   describe 'JavaScript functions', ->
 

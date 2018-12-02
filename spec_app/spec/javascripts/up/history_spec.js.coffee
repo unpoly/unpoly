@@ -1,6 +1,7 @@
-describe 'up.history', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.history', ->
 
   beforeEach ->
     up.history.config.enabled = true

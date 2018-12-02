@@ -1,6 +1,7 @@
-describe 'up.proxy', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.proxy', ->
 
   describe 'JavaScript functions', ->
 

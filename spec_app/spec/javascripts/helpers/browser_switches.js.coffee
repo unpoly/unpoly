@@ -1,4 +1,5 @@
 u = up.util
+$ = jQuery
 
 window.describeCapability = (capabilities, examples) ->
   capabilities = u.wrapCollection(capabilities)

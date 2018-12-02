@@ -1,4 +1,5 @@
 u = up.util
+$ = jQuery
 
 replaceStateHelperCount = 0
 

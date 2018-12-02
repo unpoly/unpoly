@@ -1,3 +1,6 @@
+u = up.util
+$ = jQuery
+
 beforeEach ->
   jasmine.addMatchers
     toMatchSelector: (util, customEqualityTesters) ->

@@ -1,6 +1,7 @@
-describe 'up.tooltip', ->
+u = up.util
+$ = jQuery
 
-  u = up.util
+describe 'up.tooltip', ->
 
   describe 'JavaScript functions', ->
     

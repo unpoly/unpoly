@@ -1,8 +1,9 @@
+u = up.util
+e = up.element
+$ = jQuery
+
 describe 'up.dom', ->
 
-  u = up.util
-  e = up.element
-  
   describe 'JavaScript functions', ->
 
     describe 'up.replace', ->

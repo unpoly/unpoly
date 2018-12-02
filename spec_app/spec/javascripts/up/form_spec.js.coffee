@@ -1,7 +1,8 @@
-describe 'up.form', ->
+u = up.util
+e = up.element
+$ = jQuery
 
-  u = up.util
-  e = up.element
+describe 'up.form', ->
 
   describe 'JavaScript functions', ->
 

@@ -1,6 +1,8 @@
-describe 'up.modal', ->
+u = up.util
+e = up.element
+$ = jQuery
 
-  u = up.util
+describe 'up.modal', ->
 
   beforeEach ->
     up.modal.config.openDuration = 5
@@ -319,10 +321,10 @@ describe 'up.modal', ->
             closeAnimation: 'move-to-right'
 
           animations = []
-          spyOn(up, 'animate').and.callFake ($element, animation, options) ->
-            if $element.is('.up-modal-viewport')
+          spyOn(up, 'animate').and.callFake (element, animation, options) ->
+            if e.matches(element, '.up-modal-viewport')
               animations.push
-                text: $element.find('.target').text().trim()
+                text: element.querySelector('.target').innerText.trim()
                 animation: animation
             deferred = u.newDeferred()
             u.setTimer options.duration, -> deferred.resolve()

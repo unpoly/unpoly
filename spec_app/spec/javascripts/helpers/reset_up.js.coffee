@@ -1,6 +1,7 @@
-afterEach (done) ->
-  u = up.util
+u = up.util
+$ = jQuery
 
+afterEach (done) ->
   # If the spec has installed the Jasmine clock, uninstall it so
   # the timeout below will actually happen.
   jasmine.clock().uninstall()

@@ -1,3 +1,6 @@
+u = up.util
+$ = jQuery
+
 showVersions = ->
   $('.jasmine-version').text """
   jQuery #{$.fn.jquery}

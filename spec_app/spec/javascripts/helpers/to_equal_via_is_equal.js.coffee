@@ -1,6 +1,5 @@
-# http://jasmine.github.io/2.0/custom_equality.html
-
 u = up.util
+$ = jQuery
 
 beforeEach ->
   jasmine.addCustomEqualityTester (first, second) ->
