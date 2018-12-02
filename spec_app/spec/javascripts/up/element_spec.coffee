@@ -301,44 +301,44 @@ describe 'up.element', ->
       up.element.toggle(element, true)
       expect(element).toBeVisible()
 
-  describe 'up.element.fromSelector()', ->
+  describe 'up.element.createFromSelector()', ->
 
     it 'creates an element with a given tag', ->
-      element = up.element.fromSelector('table')
+      element = up.element.createFromSelector('table')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('TABLE')
 
     it 'creates a custom element with a dash-separated tag name', ->
-      element = up.element.fromSelector('ta-belle')
+      element = up.element.createFromSelector('ta-belle')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('TA-BELLE')
 
     it 'creates an element with a given tag and class', ->
-      element = up.element.fromSelector('table.foo')
+      element = up.element.createFromSelector('table.foo')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('TABLE')
       expect(element.className).toEqual('foo')
 
     it 'creates an element with multiple classes', ->
-      element = up.element.fromSelector('table.foo.bar')
+      element = up.element.createFromSelector('table.foo.bar')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('TABLE')
       expect(element.className).toEqual('foo bar')
 
     it 'creates an element with a given tag and ID', ->
-      element = up.element.fromSelector('table#foo')
+      element = up.element.createFromSelector('table#foo')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('TABLE')
       expect(element.id).toEqual('foo')
 
     it 'creates a <div> if no tag is given', ->
-      element = up.element.fromSelector('.foo')
+      element = up.element.createFromSelector('.foo')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('DIV')
       expect(element.className).toEqual('foo')
 
     it 'creates a hierarchy of elements for a descendant selector, and returns the root element', ->
-      parent = up.element.fromSelector('ul.foo li.bar')
+      parent = up.element.createFromSelector('ul.foo li.bar')
       expect(parent).toBeElement()
       expect(parent.tagName).toEqual('UL')
       expect(parent.className).toEqual('foo')
@@ -347,7 +347,7 @@ describe 'up.element', ->
       expect(parent.firstChild.className).toEqual('bar')
 
     it 'creates a hierarchy of elements for a child selector, and returns the root element', ->
-      parent = up.element.fromSelector('ul.foo > li.bar')
+      parent = up.element.createFromSelector('ul.foo > li.bar')
       expect(parent).toBeElement()
       expect(parent.tagName).toEqual('UL')
       expect(parent.className).toEqual('foo')
@@ -356,36 +356,36 @@ describe 'up.element', ->
       expect(parent.firstChild.className).toEqual('bar')
 
     it 'creates an element with an attribute', ->
-      element = up.element.fromSelector('ul[foo=bar]')
+      element = up.element.createFromSelector('ul[foo=bar]')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('UL')
       expect(element.getAttribute('foo')).toEqual('bar')
 
     it 'creates an element with a value-less attribute', ->
-      element = up.element.fromSelector('ul[foo]')
+      element = up.element.createFromSelector('ul[foo]')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('UL')
       expect(element.getAttribute('foo')).toEqual('')
 
     it 'creates an element with multiple attributes', ->
-      element = up.element.fromSelector('ul[foo=bar][baz=bam]')
+      element = up.element.createFromSelector('ul[foo=bar][baz=bam]')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('UL')
       expect(element.getAttribute('foo')).toEqual('bar')
       expect(element.getAttribute('baz')).toEqual('bam')
 
     it 'allows to quote attribute values with double quotes', ->
-      element = up.element.fromSelector('ul[foo="bar baz"]')
+      element = up.element.createFromSelector('ul[foo="bar baz"]')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('UL')
       expect(element.getAttribute('foo')).toEqual('bar baz')
 
     it 'allows to quote attribute values with single quotes', ->
-      element = up.element.fromSelector("ul[foo='bar baz']")
+      element = up.element.createFromSelector("ul[foo='bar baz']")
       expect(element).toBeElement()
       expect(element.tagName).toEqual('UL')
       expect(element.getAttribute('foo')).toEqual('bar baz')
 
     it 'throws an error when encountering an unknown selector', ->
-      parse = -> up.element.fromSelector("ul~baz")
+      parse = -> up.element.createFromSelector("ul~baz")
       expect(parse).toThrowError('Cannot parse selector: ul~baz')

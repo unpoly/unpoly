@@ -175,7 +175,7 @@ class up.Request extends up.Record
     # The query section would be overridden by the serialized input values on submission.
     @transferSearchToParams()
 
-    form = e.fromSelector('form.up-page-loader')
+    form = e.createFromSelector('form.up-page-loader')
 
     addField = (attrs) ->
       e.affix(form, 'input[type=hidden]', attrs)

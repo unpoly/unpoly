@@ -32,7 +32,7 @@ up.toast = do ->
     
   addAction = (label, callback) ->
     actions = state.element.querySelector('.up-toast-actions')
-    action = e.fromSelector('.up-toast-action')
+    action = e.createFromSelector('.up-toast-action')
     action.innerText = label
     action.addEventListener('click', callback)
     actions.appendChild(action)

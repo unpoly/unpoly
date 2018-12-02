@@ -382,14 +382,13 @@ up.motion = do ->
           # we must shift the old copy so it looks like it it is still sitting
           # in the same position.
           scrollTopAfterReveal = viewport.scrollTop
-          oldRemote.moveTop(scrollTopAfterReveal - scrollTopBeforeReveal)
+          oldRemote.moveBounds(0, scrollTopAfterReveal - scrollTopBeforeReveal)
 
           transitionFn(oldElement, newElement, options)
 
         promise = promise.then ->
           beforeDetach()
-          e.remove(oldElement)
-          oldRemote.$bounds.remove()
+          e.remove(oldRemote.bounds)
           afterDetach()
 
         return promise

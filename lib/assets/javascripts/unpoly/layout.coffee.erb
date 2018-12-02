@@ -416,60 +416,62 @@ up.layout = do ->
   ###**
   @internal
   ###
-  absolutize = (elementOrSelector, options) ->
+  absolutize = (elementOrSelector, options = {}) ->
     element = e.get(elementOrSelector)
-    options = u.options(options, afterMeasure: u.noop)
     viewport = up.layout.viewportOf(element)
-    originalDims = u.measure(element, relative: true, inner: true)
-    originalOffset = e.offsetFromDocument(element)
-    options.afterMeasure()
+
+    viewportRect = viewport.getBoundingClientRect()
+    originalRect = element.getBoundingClientRect()
+
+    boundsRect = new up.Rect
+      left: originalRect.left - viewportRect.left
+      top: originalRect.top - viewportRect.top
+      width: originalRect.width
+      height: originalRect.height
+
+    # Allow the caller to run code before we start shifting elements around.
+    options.afterMeasure?()
 
     u.writeInlineStyle element,
       # If the element had a layout context before, make sure the
       # ghost will have layout context as well (and vice versa).
       position: if element.style.position == 'static' then 'static' else 'relative'
-      top:    'auto'
-      right:  'auto'
-      bottom: 'auto'
-      left:   'auto'
-      width:  '100%'
-      height: '100%'
+      top:    'auto' # CSS default
+      right:  'auto' # CSS default
+      bottom: 'auto' # CSS default
+      left:   'auto' # CSS default
+      width:  '100%' # stretch to the .up-bounds width we set below
+      height: '100%' # stretch to the .up-bounds height we set below
 
     # Wrap the ghost in another container so its margin can expand
     # freely. If we would position the element directly (old implementation),
     # it would gain a layout context which cannot be crossed by margins.
-    bounds = e.fromSelector('.up-bounds')
-    u.writeInlineStyle(bounds, originalDims)
-
+    bounds = e.createFromSelector('.up-bounds')
     # Insert the bounds object before our element, then move element into it.
     e.insertBefore(element, bounds)
     bounds.appendChild(element)
 
-    top = originalDims.top
+    moveBounds = (diffX, diffY) ->
+      boundsRect.left += diffX
+      boundsRect.top += diffY
+      u.writeInlineStyle(bounds, boundsRect)
 
-    moveTop = (diff) ->
-      if diff != 0
-        top += diff
-        bounds.style.top = "#{top}px"
+    # Position the bounds initially
+    moveBounds(0, 0)
 
-    # In theory, element should not have moved visually.
-    # However, element (or a child of element) might collapse its margin
-    # against a previous sibling element, and now that it is absolute it does
-    # not have the same sibling. So we manually correct element's top
-    # position so it aligns with the previous top position.
-    newOffset = e.offsetFromDocument(element)
-    moveTop(originalOffset.top - newOffset.top)
+    # In theory, element should not have moved visually. However, element
+    # (or a child of element) might collapse its margin against a previous
+    # sibling element, and now that it is absolute it does not have the
+    # same sibling. So we manually correct element's top position so it aligns
+    # with the previous top position.
+    newElementRect = element.getBoundingClientRect()
+    moveBounds(originalRect.left - newElementRect.left, originalRect.top - newElementRect.top)
 
     for fixedChild in fixedElements(element)
       u.fixedToAbsolute(fixedChild, viewport)
 
-    element: element
-    $element: jQuery(element) # TODO: Remove me
     bounds: bounds
-    $bounds: jQuery(bounds) # TODO: Remove me
-    moveTop: moveTop
-
-    # { element, bounds, moveTop }
+    moveBounds: moveBounds
 
   ###**
   Marks this element as a scrolling container ("viewport").

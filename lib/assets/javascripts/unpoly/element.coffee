@@ -127,18 +127,18 @@ up.element = do ->
   replace = (oldElement, newElement) ->
     oldElement.parentElement.replaceChild(newElement, oldElement)
 
-  offsetFromDocument = (element) ->
-    viewport = up.browser.documentViewport()
-    scrolledRect = element.getBoundingClientRect()
-
-    top: scrolledRect.top + viewport.scrollTop,
-    left: scrolledRect.left + viewport.scrollLeft
+#  offsetFromDocument = (element) ->
+#    viewport = up.browser.documentViewport()
+#    scrolledRect = element.getBoundingClientRect()
+#
+#    top: scrolledRect.top + viewport.scrollTop,
+#    left: scrolledRect.left + viewport.scrollLeft
 
   setAttrs = (element, attrs) ->
     for name, value of attrs
       element.setAttribute(name, value)
 
-  fromSelector = (givenSelector) ->
+  createFromSelector = (givenSelector) ->
     # Extract attribute values before we do anything else.
     # Attribute values might contain spaces, and then we would incorrectly
     # split depths at that space.
@@ -200,7 +200,7 @@ up.element = do ->
   unbind = u.partial(subscribeEvents, 'removeEventListener')
 
   affix = (container, selector, attrs) ->
-    element = fromSelector(selector)
+    element = createFromSelector(selector)
     if attrs
       if classValue = u.pluckKey(attrs, 'class')
         for klass in u.wrapCollection(classValue)
@@ -231,8 +231,8 @@ up.element = do ->
   replace: replace
   insertBefore: insertBefore
   insertAfter: insertAfter
-  offsetFromDocument: offsetFromDocument
-  fromSelector: fromSelector
+  # offsetFromDocument: offsetFromDocument
+  createFromSelector: createFromSelector
   setAttrs: setAttrs
   affix: affix
   on: bind
