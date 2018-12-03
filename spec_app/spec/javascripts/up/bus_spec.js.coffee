@@ -221,7 +221,7 @@ describe 'up.bus', ->
             emittedEvent = event
             emittedElement = element
 
-          up.emit('foo', element: $element[0])
+          up.emit('foo', target: $element[0])
 
           expect(emittedEvent).toBeDefined()
           expect(emittedElement).toEqual($element[0])

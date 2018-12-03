@@ -42,7 +42,7 @@ class up.FollowVariant
   followLink: (link, options) =>
     link = e.get(link) # TODO: Remove me, just use link
     options = u.options(options)
-    followEventAttrs = { message: 'Following link', link: link, element: link }
+    followEventAttrs = { message: 'Following link', target: link }
     up.bus.whenEmitted('up:link:follow', followEventAttrs).then =>
       up.feedback.start link, options, =>
         @followNow(link, options)

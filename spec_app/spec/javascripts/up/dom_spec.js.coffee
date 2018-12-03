@@ -1593,24 +1593,6 @@ describe 'up.dom', ->
           expect(document.activeElement).toBe(input)
 
 
-      it 'emits an up:fragment:destroy event while the element is still in the DOM', asyncSpec (next) ->
-        $element = affix('.element')
-        expect($element).toBeAttached()
-
-        listener = jasmine.createSpy('event listener')
-        $element.on('up:fragment:destroy', listener)
-
-        destroyDone = up.destroy($element, animation: 'fade-out', duration: 30)
-
-        next ->
-          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining(target: $element[0]))
-          expect($element).toBeAttached()
-
-          next.await(destroyDone)
-
-        next ->
-          expect($element).toBeDetached()
-
       it 'emits an up:fragment:destroy event while the element is still in the DOM', (done) ->
         $element = affix('.element.v1').text('v1')
         expect($element).toBeAttached()
@@ -2045,13 +2027,13 @@ describe 'up.dom', ->
             insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')
             keptListener = jasmine.createSpy('subscriber to up:fragment:kept')
             up.on('up:fragment:kept', keptListener)
-            up.on 'up:fragment:inserted', insertedListener
+            up.on('up:fragment:inserted', insertedListener)
             $keeper = affix('.keeper[up-keep]').text('old-inside')
-            up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
+            up.extract '.keeper', "<div class='keeper new' up-keep>new-inside</div>"
 
             next =>
               expect(insertedListener).not.toHaveBeenCalled()
-              expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.keeper')[0], jasmine.anything())
+              expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $keeper[0], jasmine.anything())
 
         it "removes an [up-keep] element if no matching element is found in the response", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
@@ -2254,7 +2236,7 @@ describe 'up.dom', ->
         it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
           $keeper = affix('.keeper[up-keep]').text('version 1')
           $keeper[0].addEventListener 'up:fragment:keep', (event) ->
-            event.preventDefault() if event.newElement.textContent.trim() == 'version 3'
+            event.preventDefault() if event.newFragment.textContent.trim() == 'version 3'
 
           next => up.extract '.keeper', "<div class='keeper' up-keep>version 2</div>"
           next => expect($('.keeper')).toHaveText('version 1')

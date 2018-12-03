@@ -36,3 +36,6 @@
 - rename up.layout to up.viewport
   - move up.browser.documentViewport and documentViewportSelector to up.layout
 - up-target should support [up-reveal-padding], { revealPadding }, [
+- keepPlans should have properties { oldFragment } and { newFragment } instead of { element } and { newElement }
+- extractPlans should have properties { oldFragment } and { newFragment } instead of { oldElement } and { newElement }
+- should we get rid of the up:fragment:destroy event?

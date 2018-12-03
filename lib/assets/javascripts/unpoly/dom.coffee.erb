@@ -531,7 +531,15 @@ up.dom = do ->
             element: keepable # the element that should be kept
             newElement: partner # the element that would have replaced it but now does not
             newData: up.syntax.data(partner) # the parsed up-data attribute of the element we will discard
-          keepEventArgs = u.merge(plan, message: ['Keeping element %o', keepable])
+
+          # TODO: extract newData on-demand
+
+          keepEventArgs =
+            target: keepable
+            newFragment: partner
+            newData: plan.newData
+            message: ['Keeping element %o', keepable]
+
           if up.bus.nobodyPrevents('up:fragment:keep', keepEventArgs)
             plan
 
@@ -596,9 +604,9 @@ up.dom = do ->
   @event up:fragment:keep
   @param event.preventDefault()
     Event listeners may call this method to prevent the element from being preserved.
-  @param {jQuery} event.$element
+  @param {Element} event.target
     The fragment that will be kept.
-  @param {jQuery} event.$newElement
+  @param {Element} event.newFragment
     The discarded element.
   @param {Object} event.newData
     The value of the [`up-data`](/up-data) attribute of the discarded element,
@@ -692,18 +700,17 @@ up.dom = do ->
   emitFragmentDestroy = (element, options) ->
     if shouldLogDestruction(element, options)
       message = ['Destroying fragment %o', element]
-    up.emit 'up:fragment:destroy', { element, message }
+    up.emit 'up:fragment:destroy', { target: element, message: message }
 
-  emitFragmentDestroyed = (element, options) ->
-    if shouldLogDestruction(element, options)
-      message = ['Destroyed fragment %o', element]
+  emitFragmentDestroyed = (fragment, options) ->
+    if shouldLogDestruction(fragment, options)
+      message = ['Destroyed fragment %o', fragment]
 
     parent = options.parent or up.fail("Missing { parent } option")
 
     up.emit 'up:fragment:destroyed',
       target: parent,
-      parent: parent,
-      element: element,
+      fragment: fragment,
       message: message
 
   isRealElement = (element) ->
@@ -885,7 +892,7 @@ up.dom = do ->
   animation begins.
 
   @event up:fragment:destroy
-  @param {jQuery} event.$element
+  @param {jQuery} event.target
     The page fragment that is about to be destroyed.
   @stable
   ###
@@ -898,9 +905,9 @@ up.dom = do ->
   The event is emitted on the parent element of the fragment that was removed.
 
   @event up:fragment:destroyed
-  @param {jQuery} event.$element
+  @param {Element} event.fragment
     The page fragment that has been removed from the DOM.
-  @param {jQuery} event.$parent
+  @param {Element} event.target
     The parent element of the fragment that has been removed from the DOM.
   @stable
   ###

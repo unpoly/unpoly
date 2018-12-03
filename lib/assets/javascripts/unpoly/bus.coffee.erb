@@ -309,23 +309,7 @@ up.bus = do ->
     # - Event is triggered on document (default)
     # - Event is triggered on { $element }
     # - Event is triggered on { $target }, but should have an { $element } property
-    target = undefined
-    if target = eventProps.target
-      delete eventProps.target
-    else if target = eventProps.element
-      # TODO: remove this option
-      delete eventProps.element
-    else if $target = u.presence(eventProps.$target)
-      # TODO: remove this option
-      target = $target[0]
-      delete eventProps.$target
-    else if $target = u.presence(eventProps.$element)
-      # TODO: remove this option
-      target = $target[0]
-      delete eventProps.$element
-    else
-      target = document
-
+    target = u.pluckKey(eventProps, 'target') ? document
     logEmission(eventName, eventProps)
     e.triggerCustom(target, eventName, eventProps)
 
@@ -425,7 +409,7 @@ up.bus = do ->
       # Although we have consumed this action and halted the event chain,
       # other components might still need to react. E.g. a popup needs to close when
       # an outside link consumes the user click. So we emit another event for that.
-      emit('up:action:consumed', element: event.target, message: false)
+      emit('up:action:consumed', target: event.target, message: false)
 
   ###**
   Makes a snapshot of the currently registered event listeners,
