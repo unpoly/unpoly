@@ -316,7 +316,7 @@ up.form = do ->
     callback = u.extractCallback(args) ? observeCallbackFromElement(elements[0]) ? up.fail('up.observe: No change callback given')
     options = u.extractOptions(args)
     options.delay = options.delay ? u.numberAttr(elements[0], 'up-delay') ? config.observeDelay
-    observer = new up.FieldObserver2(fields, options, callback)
+    observer = new up.FieldObserver(fields, options, callback)
     observer.start()
     return observer.stop
 

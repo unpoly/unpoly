@@ -1,26 +1,24 @@
 - compatibility layer
-  - think whether we want to keep $macro and $compiler
-  - build up.$on (really?)
-  - build up.$observe (really?)
+  - think whether we want to keep $macro and $compiler => yes
+  - build and test up.$on()
 - Update docs
   - Examples with $
   - Stuff like  @param {jQuery} event.link
   - document new stuff like up.$compiler
 - Move all remaining element-related helper methods from util to query
   - Get rid of u.addClass, u.writeInlineStyle, u.fastHide, etc. if possible
-- Remove event.element, event.$element, event.$target options for up.emit() (only support { target })
 - Check if we really need to do e.get(...) in every single function that works with elements
   - Do we really need to support `elementOrSelector` instead of just `element` in the public API?
-- Remove 'none' default for animation options in link.follow etc.
-- Remove 'auto' default from { layer, failLayer } in link, modal, popup
-- rename up.dom to up.fragment
+- unify link variant parsing
+  - can FollowVariant do most defaults?
+  - Remove 'none' default for animation options in link.follow etc.
+  - Remove 'auto' default from { layer, failLayer } in link, modal, popup
+  - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
+  - support new reveal options for up.replace and all follow variants
 - grep for TODO comments
-- migration guide
-  - jquery event listeners need to use addEventListener or use event.originalEvent
 - refactor motion tracker
   - can we write CssTransition as a motion with start/finish methods? that does not register finish events?
   - also unify claim/claim2 or rename them
-- upgrade roca-style.org PR
 - support smooth-scrolling to an existing #anchor in the current page, to justify all that animation code
   - basically [up-follow] should check:
     - if the link href includes "#"
@@ -28,14 +26,26 @@
       - does the hash anchor exist in the current page
       - if yes, scroll to it and resolve the replacemnet
       - if no, do a usual replacement
-- who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
-- scrolling to #hash should also find [up-id], to prevent jumping of browser
-- rename up.FieldObserver2 to up.FieldObserver
+- scrolling to #hash should also find [up-id], to prevent jumping of browser (which does not remove obstructions and will probably jump before up.reveal starts)
 - check if we can git rid of any up.util methods (e.g. detachWith)
 - check if we can git rid of any up.element methods (e.g. insertAfter)
+- rename up.dom to up.fragment
 - rename up.layout to up.viewport
   - move up.browser.documentViewport and documentViewportSelector to up.layout
 - up-target should support [up-reveal-padding], { revealPadding }, [
 - keepPlans should have properties { oldFragment } and { newFragment } instead of { element } and { newElement }
 - extractPlans should have properties { oldFragment } and { newFragment } instead of { oldElement } and { newElement }
 - should we get rid of the up:fragment:destroy event?
+  - nothing in unpoly uses it anymore
+  - it can no longer be prevented
+  - if no mention in our gitlab, remove it entirely
+- upgrade roca-style.org PR
+  - better claim
+  - no jquery
+- unpoly.com
+  - remove mentions of jquery from unpoly.com
+    - "no dependencies"
+    - installtion guide
+  - migration guide
+    - jquery event listeners need to use addEventListener or use event.originalEvent
+

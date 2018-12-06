@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-class up.FieldObserver2
+class up.FieldObserver
 
   constructor: (fieldOrFields, options, @callback) ->
     @fields = e.list(fieldOrFields)
