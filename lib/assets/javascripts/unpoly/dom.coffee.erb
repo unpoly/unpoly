@@ -481,7 +481,6 @@ up.dom = do ->
       morphOptions = u.merge options,
         beforeStart: ->
           markElementAsDestroying(oldElement)
-          emitFragmentDestroy(oldElement, log: false)
         afterInsert: ->
           up.hello(newElement, options)
         beforeDetach: ->
@@ -697,11 +696,6 @@ up.dom = do ->
     )
     up.emit('up:fragment:kept', eventAttrs)
 
-  emitFragmentDestroy = (element, options) ->
-    if shouldLogDestruction(element, options)
-      message = ['Destroying fragment %o', element]
-    up.emit 'up:fragment:destroy', { target: element, message: message }
-
   emitFragmentDestroyed = (fragment, options) ->
     if shouldLogDestruction(fragment, options)
       message = ['Destroyed fragment %o', fragment]
@@ -822,7 +816,7 @@ up.dom = do ->
   Note that if you choose to animate the element removal using `options.animate`,
   the element won't be removed until after the animation has completed.
 
-  Emits events [`up:fragment:destroy`](/up:fragment:destroy) and [`up:fragment:destroyed`](/up:fragment:destroyed).
+  Emits events [`up:fragment:destroyed`](/up:fragment:destroyed).
   
   @function up.destroy
   @param {string|Element|jQuery} selectorOrElement
@@ -850,7 +844,6 @@ up.dom = do ->
       return Promise.resolve()
 
     markElementAsDestroying(element)
-    emitFragmentDestroy(element, options)
 
     updateHistoryAndTitle(options)
 
@@ -883,19 +876,6 @@ up.dom = do ->
   ###
   markElementAsDestroying = (element) ->
     element.classList.add('up-destroying')
-
-  ###**
-  Before a page fragment is being [destroyed](/up.destroy), this
-  event is [emitted](/up.emit) on the fragment.
-
-  If the destruction is animated, this event is emitted before the
-  animation begins.
-
-  @event up:fragment:destroy
-  @param {jQuery} event.target
-    The page fragment that is about to be destroyed.
-  @stable
-  ###
 
   ###**
   This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.

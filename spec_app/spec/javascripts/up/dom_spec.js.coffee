@@ -1593,19 +1593,6 @@ describe 'up.dom', ->
           expect(document.activeElement).toBe(input)
 
 
-      it 'emits an up:fragment:destroy event while the element is still in the DOM', (done) ->
-        $element = affix('.element.v1').text('v1')
-        expect($element).toBeAttached()
-
-        listener = jasmine.createSpy('event listener')
-        $element.on 'up:fragment:destroy', -> listener(up.testUtil.isDetached($element))
-
-        extractDone = up.extract('.element', '<div class="element v2">v2</div>')
-
-        extractDone.then ->
-          expect(listener).toHaveBeenCalledWith(false)
-          done()
-
       # up.extract
       it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
         $parent = affix('.parent')
@@ -1782,19 +1769,6 @@ describe 'up.dom', ->
             expect($version2).toHaveLength(1)
             expect($version2).not.toHaveClass('up-destroying')
 
-        it 'emits an up:fragment:destroy event while the old element is still in the DOM', (done) ->
-          $element = affix('.element.v1').text('v1')
-          expect($element).toBeAttached()
-
-          listener = jasmine.createSpy('event listener')
-          $element.on 'up:fragment:destroy', -> listener(up.testUtil.isDetached($element))
-
-          extractDone = up.extract('.element', '<div class="element v2">v2</div>', transition: 'cross-fade', duration: 50)
-
-          extractDone.then ->
-            expect(listener).toHaveBeenCalledWith(false)
-            done()
-
         # extract with { transition } option
         it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
           $parent = affix('.parent')
@@ -1874,8 +1848,6 @@ describe 'up.dom', ->
             transition = (oldElement, newElement, options) ->
               up.morph(oldElement, newElement, 'cross-fade', options)
 
-            destroyListener = jasmine.createSpy('listener to up:fragment:destroy')
-            up.on 'up:fragment:destroy', destroyListener
             destroyedListener = jasmine.createSpy('listener to up:fragment:destroyed')
             up.on 'up:fragment:destroyed', destroyedListener
             insertedListener = jasmine.createSpy('listener to up:fragment:inserted')
@@ -1884,7 +1856,6 @@ describe 'up.dom', ->
             extractDone = up.extract('.element', '<div class="element">new content</div>', transition: transition, duration: 50, easing: 'linear')
 
             extractDone.then ->
-              expect(destroyListener.calls.count()).toBe(1)
               expect(destroyedListener.calls.count()).toBe(1)
               expect(insertedListener.calls.count()).toBe(1)
               done()
@@ -2438,24 +2409,6 @@ describe 'up.dom', ->
 
         next ->
           expect($element).toHaveClass('up-destroying')
-
-      it 'emits an up:fragment:destroy event while the element is still in the DOM', asyncSpec (next) ->
-        $element = affix('.element')
-        expect($element).toBeAttached()
-
-        listener = jasmine.createSpy('event listener')
-        $element.on('up:fragment:destroy', listener)
-
-        destroyDone = up.destroy($element, animation: 'fade-out', duration: 30)
-
-        next ->
-          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining(target: $element[0]))
-          expect($element).toBeAttached()
-
-          next.await(destroyDone)
-
-        next ->
-          expect($element).toBeDetached()
 
       # up.destroy
       it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', asyncSpec (next) ->
