@@ -1,5 +1,7 @@
 - compatibility layer
-  - think whether we want to keep $macro and $compiler => yes
+  - think whether we want to keep $macro and $compiler
+    - yes
+    - make sure there are tests
   - build and test up.$on()
 - Update docs
   - Examples with $
@@ -31,7 +33,7 @@
 - check if we can git rid of any up.element methods (e.g. insertAfter)
 - rename up.dom to up.fragment
 - rename up.layout to up.viewport
-  - move up.browser.documentViewport and documentViewportSelector to up.layout
+- move up.browser.documentViewport and documentViewportSelector to up.layout
 - up-target should support [up-reveal-padding], { revealPadding }, [
 - keepPlans should have properties { oldFragment } and { newFragment } instead of { element } and { newElement }
 - extractPlans should have properties { oldFragment } and { newFragment } instead of { oldElement } and { newElement }
