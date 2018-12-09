@@ -617,7 +617,7 @@ describe 'up.modal', ->
         next =>
           expect(up.modal.isOpen()).toBe(true)
           expect($('.up-modal').attr('up-flavor')).toEqual('drawer')
-          windowHeight = u.clientSize().height
+          windowHeight = up.browser.documentViewportHeight()
           modalHeight = $('.up-modal-content').outerHeight()
           expect(modalHeight).toEqual(windowHeight)
           expect($('.up-modal-content').offset()).toEqual(top: 0, left: 0)
@@ -635,7 +635,7 @@ describe 'up.modal', ->
 
         next =>
           expect(up.modal.isOpen()).toBe(true)
-          windowWidth = u.clientSize().width
+          windowWidth = up.browser.documentViewportWidth()
           modalWidth = $('.up-modal-content').outerWidth()
           scrollbarWidth = u.scrollbarWidth()
           expect($('.up-modal-content').offset().left).toBeAround(windowWidth - modalWidth - scrollbarWidth, 1.0)

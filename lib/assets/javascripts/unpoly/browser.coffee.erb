@@ -311,6 +311,12 @@ up.browser = do ->
   documentViewport = ->
     document.querySelector(documentViewportSelector())
 
+  documentViewportWidth = ->
+    e.root().clientWidth
+
+  documentViewportHeight = ->
+    e.root().clientHeight
+
   isDocumentViewport = (element) ->
     e.matches(element, documentViewportSelector())
 
@@ -325,6 +331,8 @@ up.browser = do ->
   canJQuery: canJQuery
   documentViewportSelector: documentViewportSelector
   documentViewport: documentViewport
+  documentViewportWidth: documentViewportWidth
+  documentViewportHeight: documentViewportHeight
   isDocumentViewport: isDocumentViewport
   whenConfirmed: whenConfirmed
   isSupported: isSupported

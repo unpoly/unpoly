@@ -73,8 +73,7 @@ class up.RevealMotion
       # Other than an element with overflow-y, the document viewport
       # stretches to the full height of its contents. So we create a viewport
       # sized to the usuable screen area.
-      html = document.documentElement
-      new up.Rect(left: 0, top: 0, width: html.clientWidth, height: html.clientHeight)
+      new up.Rect(left: 0, top: 0, width: up.browser.documentViewportWidth(), height: up.browser.documentViewportHeight())
     else
       up.Rect.fromElement(@viewport)
 

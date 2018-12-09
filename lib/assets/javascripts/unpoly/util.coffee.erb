@@ -499,12 +499,38 @@ up.util = do ->
     else
       Array.prototype.slice.call(object)
 
+  ###***
+  Returns whether the given value is an `Array`, a
+  [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList) or a jQuery collection.
+
+  Use [`up.util.isArray()`](/up.util.isArray) to test whether a value is an actual `Array`.
+
+  @function up.util.isList
+  @param value
+  @return {Boolean}
+  @experimental
+  ###
   isList = (value) ->
     isArray(value) || isNodeList(value) || isJQuery(value)
 
+  ###**
+  Returns whether the given value is a [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
+
+  `NodeLists` are array-like objects returned by [`document.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll).
+
+  @function up.util.isList
+  @param value
+  @return {Boolean}
+  @experimental
+  ###
   isNodeList = (value) ->
     value instanceof NodeList
 
+  ###**
+  @function up.util.wrapList
+  @return {Array|NodeList|jQuery}
+  @internal
+  ###
   wrapList = (value) ->
     if isList(value)
       value
@@ -867,17 +893,6 @@ up.util = do ->
   ###
   last = (array) ->
     array[array.length - 1]
-
-  ###**
-  Measures the drawable area of the document.
-
-  @function up.util.clientSize
-  @internal
-  ###
-  clientSize = ->
-    element = document.documentElement
-    width: element.clientWidth
-    height: element.clientHeight
 
   ###**
   Returns the width of a scrollbar.
@@ -1516,9 +1531,8 @@ up.util = do ->
   ###
   horizontalScreenHalf = (element) ->
     elementDims = element.getBoundingClientRect()
-    screenDims = clientSize()
     elementMid = elementDims.left + 0.5 * elementDims.width
-    screenMid = 0.5 * screenDims.width
+    screenMid = 0.5 * up.browser.documentViewportWidth()
     if elementMid < screenMid
       'left'
     else
@@ -1887,7 +1901,6 @@ up.util = do ->
   castedAttr: castedAttr
   numberAttr: numberAttr
   jsonAttr: jsonAttr
-  clientSize: clientSize
   only: only
   except: except
 #  pickBy: pickBy

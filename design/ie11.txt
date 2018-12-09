@@ -1,0 +1,5 @@
+Code we can remove once we drop IE11
+====================================
+
+- up.util.assign => Object.assign
+- up.util.toArray => Array.from

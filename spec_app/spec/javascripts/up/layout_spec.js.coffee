@@ -20,7 +20,7 @@ describe 'up.layout', ->
           @$container = $('<div class="container">').prependTo($body)
           @$container.css(opacity: 0.2) # reduce flashing during test runs
 
-          @clientHeight = u.clientSize().height
+          @clientHeight = up.browser.documentViewportHeight()
 
           elementPlans = [
             { height: @clientHeight, backgroundColor: 'yellow' }, # [0]
