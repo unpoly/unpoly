@@ -137,7 +137,7 @@ up.popup = do ->
 
     # Create an empty element that will match the
     # selector that is being replaced.
-    u.createPlaceholder(targetSelector, state.content)
+    up.dom.createPlaceholder(targetSelector, state.content)
     e.hide(state.popup)
 
   unveilFrame = ->

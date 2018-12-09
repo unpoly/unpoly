@@ -97,7 +97,7 @@ class up.ExtractPlan
       hungries = e.all(up.radio.hungrySelector())
       transition = u.option(up.radio.config.hungryTransition, @transition)
       for hungry in hungries
-        selector = u.selectorForElement(hungry)
+        selector = e.toSelector(hungry)
         if newHungry = @response.first(selector)
           hungrySteps.push
             selector: selector

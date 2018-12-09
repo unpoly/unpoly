@@ -177,7 +177,7 @@ up.motion = do ->
 
   willAnimate = (element, animationOrTransition, options) ->
     options = animateOptions(options)
-    isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !u.isSingletonElement(element)
+    isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !e.isSingleton(element)
 
   skipAnimate = (element, animation) ->
     if u.isOptions(animation)

@@ -1641,7 +1641,7 @@ describe 'up.dom', ->
 
         it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec (next) ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.util.knife.mock('isSingletonElement').and.callFake (element) -> e.matches(element, '.container')
+          up.element.knife.mock('isSingleton').and.callFake (element) -> e.matches(element, '.container')
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', -> destructor
           $container = affix('.container')
@@ -1742,7 +1742,7 @@ describe 'up.dom', ->
 
           it 'ignores a { transition } option when replacing a singleton element like <body>', asyncSpec (next) ->
             # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-            up.util.knife.mock('isSingletonElement').and.callFake (element) -> e.matches(element, '.container')
+            up.element.knife.mock('isSingleton').and.callFake (element) -> e.matches(element, '.container')
 
             affix('.container').text('old text')
 

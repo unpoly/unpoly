@@ -338,7 +338,7 @@ up.layout = do ->
     e.all(viewportSelector())
 
   scrollTopKey = (viewport) ->
-    u.selectorForElement(viewport)
+    e.toSelector(viewport)
 
   ###**
   Returns a hash with scroll positions.
@@ -608,8 +608,8 @@ up.layout = do ->
   ###
   firstHashTarget = (hash) ->
     if hash = pureHash(hash)
-      byID = u.attributeSelector('id', hash)
-      byName = 'a' + u.attributeSelector('name', hash)
+      byID = e.attributeSelector('id', hash)
+      byName = 'a' + e.attributeSelector('name', hash)
       e.get up.first("#{byID},#{byName}") # TODO: Remove e.get()
 
   ###**

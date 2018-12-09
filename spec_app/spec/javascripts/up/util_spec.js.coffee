@@ -678,58 +678,6 @@ describe 'up.util', ->
           baz: 'baz-value'
           bam: 'bam-value'
 
-    describe 'up.util.selectorForElement', ->
-
-      it "prefers using the element's 'up-id' attribute to using the element's ID", ->
-        $element = affix('div[up-id=up-id-value]#id-value')
-        expect(up.util.selectorForElement($element)).toBe('[up-id="up-id-value"]')
-
-      it "prefers using the element's ID to using the element's name", ->
-        $element = affix('div#id-value[name=name-value]')
-        expect(up.util.selectorForElement($element)).toBe("#id-value")
-
-      it "selects the ID with an attribute selector if the ID contains a slash", ->
-        $element = affix('div').attr(id: 'foo/bar')
-        expect(up.util.selectorForElement($element)).toBe('[id="foo/bar"]')
-
-      it "selects the ID with an attribute selector if the ID contains a space", ->
-        $element = affix('div').attr(id: 'foo bar')
-        expect(up.util.selectorForElement($element)).toBe('[id="foo bar"]')
-
-      it "selects the ID with an attribute selector if the ID contains a dot", ->
-        $element = affix('div').attr(id: 'foo.bar')
-        expect(up.util.selectorForElement($element)).toBe('[id="foo.bar"]')
-
-      it "selects the ID with an attribute selector if the ID contains a quote", ->
-        $element = affix('div').attr(id: 'foo"bar')
-        expect(up.util.selectorForElement($element)).toBe('[id="foo\\"bar"]')
-
-      it "prefers using the element's tagName + [name] to using the element's classes", ->
-        $element = affix('input[name=name-value].class1.class2')
-        expect(up.util.selectorForElement($element)).toBe('input[name="name-value"]')
-
-      it "prefers using the element's classes to using the element's ARIA label", ->
-        $element = affix('div.class1.class2[aria-label="ARIA label value"]')
-        expect(up.util.selectorForElement($element)).toBe(".class1.class2")
-
-      it 'does not use Unpoly classes to compose a class selector', ->
-        $element = affix('div.class1.up-current.class2')
-        expect(up.util.selectorForElement($element)).toBe(".class1.class2")
-
-      it "prefers using the element's ARIA label to using the element's tag name", ->
-        $element = affix('div[aria-label="ARIA label value"]')
-        expect(up.util.selectorForElement($element)).toBe('[aria-label="ARIA label value"]')
-
-      it "uses the element's tag name if no better description is available", ->
-        $element = affix('div')
-        expect(up.util.selectorForElement($element)).toBe("div")
-
-      it 'escapes quotes in attribute selector values', ->
-        $element = affix('div')
-        $element.attr('aria-label', 'foo"bar')
-        expect(up.util.selectorForElement($element)).toBe('[aria-label="foo\\"bar"]')
-
-
     describe 'up.util.castedAttr', ->
 
       it 'returns true if the attribute value is the string "true"', ->

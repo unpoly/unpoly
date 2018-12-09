@@ -189,7 +189,7 @@ up.form = do ->
     options = u.options(options)
     target = u.option(options.target, form.getAttribute('up-target'), 'body')
     url = u.option(options.url, form.getAttribute('action'), up.browser.url())
-    options.failTarget = u.option(options.failTarget, form.getAttribute('up-fail-target')) || u.selectorForElement(form)
+    options.failTarget = u.option(options.failTarget, form.getAttribute('up-fail-target')) || e.toSelector(form)
     options.reveal = u.option(options.reveal, u.castedAttr(form, 'up-reveal'), true)
     options.failReveal = u.option(options.failReveal, u.castedAttr(form, 'up-fail-reveal'), true)
     options.fallback = u.option(options.fallback, form.getAttribute('up-fallback'))
@@ -410,7 +410,7 @@ up.form = do ->
     else if e.matches(field, 'input[type=radio]')
       form = closestContainer(field)
       groupName = field.getAttribute('name')
-      checkedButton = form.querySelector("input[type=radio]#{u.attributeSelector('name', groupName)}:checked")
+      checkedButton = form.querySelector("input[type=radio]#{e.attributeSelector('name', groupName)}:checked")
       if checkedButton
         meta = ':checked'
         value = checkedButton.value

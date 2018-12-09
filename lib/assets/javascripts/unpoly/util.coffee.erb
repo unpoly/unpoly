@@ -139,83 +139,6 @@ up.util = do ->
   methodAllowsPayload = (method) ->
     method != 'GET' && method != 'HEAD'
 
-  ###**
-  @function createPlaceHolder
-  @internal
-  ###
-  createPlaceholder = (selector, container = document.body) ->
-    up.element.affix(container, selector, class: 'up-placeholder')
-
-  ###**
-  Returns a CSS selector that matches the given element as good as possible.
-
-  This uses, in decreasing order of priority:
-
-  - The element's `up-id` attribute
-  - The element's ID
-  - The element's name
-  - The element's classes
-  - The element's tag names
-
-  @function up.util.selectorForElement
-  @param {string|Element|jQuery}
-    The element for which to create a selector.
-  @experimental
-  ###
-  selectorForElement = (element) ->
-    return element if isString(element)
-
-    element = up.element.get(element) # TODO: Remove e.get()
-
-    selector = undefined
-
-    if isSingletonElement(element)
-      selector = elementTagName(element)
-    else if upId = element.getAttribute("up-id")
-      selector = attributeSelector('up-id', upId)
-    else if id = element.getAttribute("id")
-      if id.match(/^[a-z0-9\-_]+$/i)
-        selector = "##{id}"
-      else
-        selector = attributeSelector('id', id)
-    else if name = element.getAttribute("name")
-      selector = elementTagName(element) + attributeSelector('name', name)
-    else if classes = presence(nonUpClasses(element))
-      selector = ''
-      for klass in classes
-        selector += ".#{klass}"
-    else if ariaLabel = element.getAttribute("aria-label")
-      selector = attributeSelector('aria-label', ariaLabel)
-    else
-      selector = elementTagName(element)
-
-    return selector
-
-  isSingletonElement = (element) ->
-    up.element.matches(element, 'html, body, head, title')
-
-#  isGoodSelector = (selector) ->
-#    selector.indexOf('#') >= -1 || selector.indexOf('[') >= -1
-
-#  defineMemoizedGetter = (obj, property, fetchFn) ->
-#    cacheProperty = "_#{property}Cache"
-#    Object.defineProperty methods, property,
-#      get: ->
-#        @[cacheProperty] ||= [fetchFn(this)]
-#        @[cacheProperty][0]
-
-  elementTagName = (element) ->
-    element.tagName.toLowerCase()
-
-  attributeSelector = (attribute, value) ->
-    value = value.replace(/"/g, '\\"')
-    "[#{attribute}=\"#{value}\"]"
-
-  nonUpClasses = (element) ->
-    classString = element.className
-    classes = splitValues(classString)
-    reject classes, (klass) -> klass.match(/^up-/)
-
   createDocumentFromHtml = (html) ->
     # IE9 cannot set innerHTML on a <html> or <head> element.
     parser = new DOMParser()
@@ -1910,10 +1833,7 @@ up.util = do ->
   methodAllowsPayload: methodAllowsPayload
   createDocumentFromHtml: createDocumentFromHtml
   createFragmentFromHtml: createFragmentFromHtml
-  createPlaceholder: createPlaceholder
-  selectorForElement: selectorForElement
 #  isGoodSelector: isGoodSelector
-  attributeSelector: attributeSelector
   assign: assign
   assignPolyfill: assignPolyfill
   copy: copy
@@ -2016,7 +1936,6 @@ up.util = do ->
   horizontalScreenHalf: horizontalScreenHalf
   flatten: flatten
   isTruthy: isTruthy
-  isSingletonElement: isSingletonElement
   newDeferred: newDeferred
   always: always
   muteRejection: muteRejection

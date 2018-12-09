@@ -262,7 +262,7 @@ up.modal = do ->
     contentElement = part('content')
     # Create an empty element that will match the
     # selector that is being replaced.
-    u.createPlaceholder(target, contentElement)
+    up.dom.createPlaceholder(target, contentElement)
     e.hide(modalElement)
     document.body.appendChild(modalElement)
 
