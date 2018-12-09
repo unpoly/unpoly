@@ -12,21 +12,26 @@ class up.MotionTracker
     @clusterCount = 0
 
   ###**
-  Finishes all animations in the given element cluster's ancestors and descendants,
-  then calls the animator.
+  Finishes all animations in the given elements' ancestors and
+  descendants, then calls the given function.
 
-  The animation returned by the animator is tracked so it can be
+  The function is expected to return a promise that is fulfilled when
+  the animation ends. The function is also expected to listen to
+  `this.finishEvent` and instantly skip to the last frame
+  when the event is observed.
+
+  The animation is tracked so it can be
   [`finished`](/up.MotionTracker.finish) later.
 
-  @method claim
-  @param {jQuery} $cluster
+  @method startFunction
+  @param {Element|List<Element>} cluster
     A list of elements that will be affected by the motion.
   @param {Function(): Promise} startMotion
   @param {Object} [memory.trackMotion=true]
   @return {Promise}
-    A promise that is fulfilled when the new animation ends.
+    A promise that is fulfilled when the animation ends.
   ###
-  claim: (cluster, startMotion, memory = {}) =>
+  startFunction: (cluster, startMotion, memory = {}) =>
     cluster = e.list(cluster)
 
     # Some motions might reject after starting. E.g. a scrolling animation
@@ -39,7 +44,7 @@ class up.MotionTracker
     # property. With this we can prevent tracking the same motion multiple times.
     # This is an issue when composing a transition from two animations, or when
     # using another transition from within a transition function.
-    memory.trackMotion = u.option(memory.trackMotion, up.motion.isEnabled())
+    memory.trackMotion = memory.trackMotion ? up.motion.isEnabled()
     if memory.trackMotion is false
       # Since we don't want recursive tracking or finishing, we could run
       # the animator() now. However, since the else branch is async, we push
@@ -54,12 +59,24 @@ class up.MotionTracker
         @markCluster(cluster, promise)
         promise
 
-  claim2: (element, motion, memory = {}) ->
-    start = -> motion.start() # TODO: Get rid of claim() and pass on the motion object everywhere
-    finish = -> motion.finish() # TODO: Get rid of claim() and pass on the motion object everywhere
-    element.addEventListener(@finishEvent, finish)
-    promise = @claim(element, start, memory)
-    promise = promise.then => element.removeEventListener(@finishEvent, finish)
+  ###*
+  Finishes all animations in the given elements' ancestors and
+  descendants, then calls `motion.start()`.
+
+  Also listens to `this.finishEvent` on the given elements.
+  When this event is observed, calls `motion.finish()`.
+
+  @method startMotion
+  @param {Element|List<Element>} cluster
+  @param {up.Motion} motion
+  @param {Object} [memory.trackMotion=true]
+  ###
+  startMotion: (cluster, motion, memory = {}) ->
+    start = -> motion.start()
+    finish = -> motion.finish()
+    e.on(cluster, @finishEvent, finish)
+    promise = @startFunction(cluster, start, memory)
+    promise = promise.then => e.off(cluster, @finishEvent, finish)
     promise
 
   ###**

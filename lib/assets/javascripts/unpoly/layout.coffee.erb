@@ -108,7 +108,7 @@ up.layout = do ->
   ###
   scroll = (viewport, scrollTop, options) ->
     motion = new up.ScrollMotion(viewport, scrollTop, options)
-    scrollingTracker.claim2(viewport, motion, options)
+    scrollingTracker.startMotion(viewport, motion, options)
 
   ###**
   Finishes scrolling animations in the given element, its ancestors or its descendants.
@@ -205,7 +205,7 @@ up.layout = do ->
     element = e.get(elementOrSelector)
     console.debug("Instantiating RevealMotion with %o", element)
     motion = new up.RevealMotion(element, options)
-    scrollingTracker.claim2(element, motion, options)
+    scrollingTracker.startMotion(element, motion, options)
 
   ###**
   @function up.layout.scrollAfterInsertFragment

@@ -18,9 +18,6 @@
   - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
   - support new reveal options for up.replace and all follow variants
 - grep for TODO comments
-- refactor motion tracker
-  - can we write CssTransition as a motion with start/finish methods? that does not register finish events?
-  - also unify claim/claim2 or rename them
 - support smooth-scrolling to an existing #anchor in the current page, to justify all that animation code
   - basically [up-follow] should check:
     - if the link href includes "#"

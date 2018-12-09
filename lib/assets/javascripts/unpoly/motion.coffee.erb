@@ -171,7 +171,7 @@ up.motion = do ->
 
     if willRun
       runNow = -> animationFn(element, options)
-      motionTracker.claim(element, runNow, options)
+      motionTracker.startFunction(element, runNow, options)
     else
       skipAnimate(element, animation)
 
@@ -393,7 +393,7 @@ up.motion = do ->
 
         return promise
 
-      motionTracker.claim([oldElement, newElement], trackable, options)
+      motionTracker.startFunction([oldElement, newElement], trackable, options)
 
     else
       beforeDetach()
