@@ -442,4 +442,105 @@ describe 'up.element', ->
       $element.attr('aria-label', 'foo"bar')
       expect(up.element.toSelector($element)).toBe('[aria-label="foo\\"bar"]')
 
-    
+  describe 'up.element.createDocumentFromHtml', ->
+
+    it 'parses a string that contains a serialized HTML document', ->
+      string = """
+        <html lang="foo">
+          <head>
+            <title>document title</title>
+          </head>
+          <body data-env='production'>
+            <div>line 1</div>
+            <div>line 2</div>
+          </body>
+        </html>
+        """
+
+      element = up.element.createDocumentFromHtml(string)
+
+      expect(element.querySelector('head title').textContent).toEqual('document title')
+      expect(element.querySelector('body').getAttribute('data-env')).toEqual('production')
+      expect(element.querySelectorAll('body div').length).toBe(2)
+      expect(element.querySelectorAll('body div')[0].textContent).toEqual('line 1')
+      expect(element.querySelectorAll('body div')[1].textContent).toEqual('line 2')
+
+    it 'parses a string that contains carriage returns (bugfix)', ->
+      string = """
+        <html>\r
+          <body>\r
+            <div>line</div>\r
+          </body>\r
+        </html>\r
+        """
+
+      $element = up.element.createDocumentFromHtml(string)
+      expect($element.querySelector('body')).toBeGiven()
+      expect($element.querySelector('body div').textContent).toEqual('line')
+
+    it 'does not run forever if a page has a <head> without a <title> (bugfix)', ->
+      html = """
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no">
+        <link href='/images/favicon.png' rel='shortcut icon' type='image/png'>
+        <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1'>
+
+            <base href="/examples/update-fragment/" />
+            <link href='http://fonts.googleapis.com/css?family=Orbitron:400|Ubuntu+Mono:400,700|Source+Sans+Pro:300,400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+            <link href="/stylesheets/example/all.css" rel="stylesheet" />
+            <script src="/javascripts/example.js"></script>
+          </head>
+          <body>
+            <div class="page">
+              <div class="story">
+
+          <h1>Full story</h1>
+          <p>Lorem ipsum dolor sit amet.</p>
+
+          <a href="preview.html" up-target=".story">
+            Read summary
+          </a>
+        </div>
+
+            </div>
+          </body>
+        </html>
+        """
+      element = up.element.createDocumentFromHtml(html)
+      expect(element.querySelector("title")).toBeMissing()
+      expect(element.querySelector("h1").textContent).toEqual('Full story')
+
+    it 'can parse HTML without a <head>', ->
+      html = """
+        <html>
+          <body>
+            <h1>Full story</h1>
+          </body>
+        </html>
+        """
+      element = up.element.createDocumentFromHtml(html)
+      expect(element.querySelector("title")).toBeMissing()
+      expect(element.querySelector("h1").textContent).toEqual('Full story')
+
+    it 'can parse a HTML fragment without a <body>', ->
+      html = """
+        <h1>Full story</h1>
+        """
+      element = up.element.createDocumentFromHtml(html)
+      expect(element.querySelector("title")).toBeMissing()
+      expect(element.querySelector("h1").textContent).toEqual('Full story')
+
+  describe 'up.element.createFragmentFromHtml', ->
+
+    it 'creates an element from the given HTML fragment', ->
+      html = """
+        <h1>Full story</h1>
+        """
+      element = up.element.createFragmentFromHtml(html)
+      expect(element.tagName).toEqual('H1')
+      expect(element.textContent).toEqual('Full story')
+  

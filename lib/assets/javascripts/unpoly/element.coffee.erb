@@ -272,6 +272,15 @@ up.element = do ->
     classes = u.splitValues(classString)
     u.reject classes, (klass) -> klass.match(/^up-/)
 
+  createDocumentFromHtml = (html) ->
+    # IE9 cannot set innerHTML on a <html> or <head> element.
+    parser = new DOMParser()
+    return parser.parseFromString(html, 'text/html')
+
+  createFragmentFromHtml = (html) ->
+    doc = createDocumentFromHtml(html)
+    return doc.body.children[0]
+
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   descendant: descendant
   descendants: descendants
@@ -303,4 +312,7 @@ up.element = do ->
   toSelector: toSelector
   isSingleton: isSingleton
   attributeSelector: attributeSelector
+  createDocumentFromHtml: createDocumentFromHtml
+  createFragmentFromHtml: createFragmentFromHtml
+
   # createDivWithClass: createDivWithClass
