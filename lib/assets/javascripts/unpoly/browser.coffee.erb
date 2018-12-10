@@ -320,6 +320,39 @@ up.browser = do ->
   isDocumentViewport = (element) ->
     e.matches(element, documentViewportSelector())
 
+  ###**
+  Returns the width of a scrollbar.
+
+  This only runs once per page load.
+
+  @function up.browser.scrollbarWidth
+  @internal
+  ###
+  scrollbarWidth = u.memoize ->
+    # This is how Bootstrap does it also:
+    # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
+    outerStyle =
+      position:  'absolute'
+      top:       '0'
+      left:      '0'
+      width:     '100px'
+      height:    '100px' # Firefox needs at least 100px to show a scrollbar
+      overflowY: 'scroll'
+    outer = up.element.affix(document.body, '[up-viewport]', { style: outerStyle })
+    width = outer.offsetWidth - outer.clientWidth
+    up.element.remove(outer)
+    width
+
+  ###**
+  Returns whether the given element is currently showing a vertical scrollbar.
+
+  @function up.util.documentViewportHasVerticalScrollbar
+  @internal
+  ###
+  documentViewportHasVerticalScrollbar = ->
+    html = document.documentElement
+    html.scrollHeight > html.clientHeight
+
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url
   navigate: navigate
@@ -329,10 +362,12 @@ up.browser = do ->
   canInspectFormData: canInspectFormData
   canCustomElements: canCustomElements
   canJQuery: canJQuery
-  documentViewportSelector: documentViewportSelector
   documentViewport: documentViewport
+  documentViewportSelector: documentViewportSelector
   documentViewportWidth: documentViewportWidth
   documentViewportHeight: documentViewportHeight
+  documentViewportHasVerticalScrollbar: documentViewportHasVerticalScrollbar
+  scrollbarWidth: scrollbarWidth
   isDocumentViewport: isDocumentViewport
   whenConfirmed: whenConfirmed
   isSupported: isSupported

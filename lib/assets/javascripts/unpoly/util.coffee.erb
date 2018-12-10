@@ -895,48 +895,6 @@ up.util = do ->
     array[array.length - 1]
 
   ###**
-  Returns the width of a scrollbar.
-
-  This only runs once per page load.
-
-  @function up.util.scrollbarWidth
-  @internal
-  ###
-  scrollbarWidth = memoize ->
-    # This is how Bootstrap does it also:
-    # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
-    outer = document.createElement('div')
-    outer.setAttribute('up-viewport', '')
-    writeInlineStyle outer,
-      position:  'absolute'
-      top:       '0'
-      left:      '0'
-      width:     '100px'
-      height:    '100px' # Firefox needs at least 100px to show a scrollbar
-      overflowY: 'scroll'
-    document.body.appendChild(outer)
-    width = outer.offsetWidth - outer.clientWidth
-    up.element.remove(outer)
-    width
-
-  ###**
-  Returns whether the given element is currently showing a vertical scrollbar.
-
-  @function up.util.documentHasVerticalScrollbar
-  @internal
-  ###
-  documentHasVerticalScrollbar = ->
-    body = document.body
-    html = document.documentElement
-
-    bodyOverflow = readComputedStyle(body, 'overflowY')
-
-    forcedScroll = (bodyOverflow == 'scroll')
-    forcedHidden = (bodyOverflow == 'hidden')
-
-    forcedScroll || (!forcedHidden && html.scrollHeight > html.clientHeight)
-
-  ###**
   Temporarily sets the CSS for the given element.
 
   @function up.util.writeTemporaryStyle
@@ -1908,8 +1866,6 @@ up.util = do ->
   setMissingAttrs: setMissingAttrs
   remove: remove
   memoize: memoize
-  scrollbarWidth: scrollbarWidth
-  documentHasVerticalScrollbar: documentHasVerticalScrollbar
   config: config
   openConfig: openConfig
   unwrapElement: unwrapElement
@@ -1929,7 +1885,7 @@ up.util = do ->
   whenReady: whenReady
   identity: identity
   escapeHtml: escapeHtml
-  DivertibleChain: DivertibleChain
+  DivertibleChain: DivertibleChain # TODO: move DivertibleChain to classes
   sequence: sequence
   promiseTimer: promiseTimer
   previewable: previewable

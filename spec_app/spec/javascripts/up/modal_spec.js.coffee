@@ -637,7 +637,7 @@ describe 'up.modal', ->
           expect(up.modal.isOpen()).toBe(true)
           windowWidth = up.browser.documentViewportWidth()
           modalWidth = $('.up-modal-content').outerWidth()
-          scrollbarWidth = u.scrollbarWidth()
+          scrollbarWidth = up.browser.scrollbarWidth()
           expect($('.up-modal-content').offset().left).toBeAround(windowWidth - modalWidth - scrollbarWidth, 1.0)
 
     describe '[up-close]', ->

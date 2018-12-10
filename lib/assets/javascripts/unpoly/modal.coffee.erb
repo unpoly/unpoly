@@ -277,9 +277,9 @@ up.modal = do ->
   # modal overlay, which has its own scroll bar.
   # This is screwed up, but Bootstrap does the same.
   shiftElements = ->
-    if u.documentHasVerticalScrollbar()
+    if up.browser.documentViewportHasVerticalScrollbar()
       body = document.body
-      scrollbarWidth = u.scrollbarWidth()
+      scrollbarWidth = up.browser.scrollbarWidth()
       bodyRightPadding = u.readComputedStyleNumber(body, 'paddingRight')
       bodyRightShift = scrollbarWidth + bodyRightPadding
       unshiftBody = u.writeTemporaryStyle(body,
