@@ -350,8 +350,11 @@ up.browser = do ->
   @internal
   ###
   documentViewportHasVerticalScrollbar = ->
-    html = document.documentElement
-    html.scrollHeight > html.clientHeight
+    # We could also check if scrollHeight > offsetHeight for the document viewport.
+    # However, we would also need to check overflow-y for that element.
+    # Also we have no control whether developers set the property on <body> or <html>.
+    # https://tylercipriani.com/blog/2014/07/12/crossbrowser-javascript-scrollbar-detection/
+    window.innerWidth > document.documentElement.offsetWidth
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url

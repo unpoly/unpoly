@@ -282,6 +282,9 @@ up.modal = do ->
       scrollbarWidth = up.browser.scrollbarWidth()
       bodyRightPadding = u.readComputedStyleNumber(body, 'paddingRight')
       bodyRightShift = scrollbarWidth + bodyRightPadding
+      # TODO: Check whether we should set overflowY on <body> or <html>.
+      # If any element already has a computed, non-default overflow-y we
+      # should set it there. If neither has, use documentViewport()
       unshiftBody = u.writeTemporaryStyle(body,
         paddingRight: bodyRightShift
         overflowY: 'hidden'
