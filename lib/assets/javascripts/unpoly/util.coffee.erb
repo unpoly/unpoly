@@ -1527,27 +1527,6 @@ up.util = do ->
       obj
 
   ###**
-  Returns whether the given element has a CSS transition set.
-
-  @function up.util.hasCssTransition
-  @return {boolean}
-  @internal
-  ###
-  hasCssTransition = (elementOrStyleHash) ->
-    if isOptions(elementOrStyleHash)
-      style = elementOrStyleHash
-    else
-      element = up.element.get(element)
-      style = getComputedStyle(element)
-
-    prop = style.transitionProperty
-    duration = style.transitionDuration
-    # The default transition for elements is actually "all 0s ease 0s"
-    # instead of "none", although that has the same effect as "none".
-    noTransition = (prop == 'none' || (prop == 'all' && duration == 0))
-    not noTransition
-
-  ###**
   Flattens the given `array` a single level deep.
 
   @function up.util.flatten
@@ -1824,7 +1803,6 @@ up.util = do ->
   readComputedStyleNumber: readComputedStyleNumber
   readInlineStyle: readInlineStyle
   writeInlineStyle: writeInlineStyle
-  hasCssTransition: hasCssTransition
   splitValues : splitValues
   endsWith: endsWith
   sum: sum

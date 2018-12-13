@@ -99,7 +99,7 @@ class up.CssTransition
       'transitionTimingFunction'
     ])
 
-    if u.hasCssTransition(oldTransition)
+    if e.hasCssTransition(oldTransition)
       # Freeze the previous transition at its current place, by setting the currently computed,
       # animated CSS properties as inline styles. Transitions on all properties will not be frozen,
       # since that would involve setting every single CSS property as an inline style.
