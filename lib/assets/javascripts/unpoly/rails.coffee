@@ -20,5 +20,5 @@ up.rails = do ->
       if isRails() && up.link.isFollowable(element)
         replacement = {}
         replacement[upAttribute] = element.getAttribute(dataAttribute)
-        u.setMissingAttrs(element, replacement)
+        e.setMissingAttrs(element, replacement)
         element.removeAttribute(dataAttribute)

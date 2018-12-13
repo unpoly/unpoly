@@ -344,6 +344,17 @@ up.element = do ->
       right: ''
       bottom: ''
 
+  ###**
+  On the given element, set attributes that are still missing.
+
+  @function up.element.setMissingAttrs
+  @internal
+  ###
+  setMissingAttrs = (element, attrs) ->
+    for key, value of attrs
+      if u.isMissing(element.getAttribute(key))
+        element.setAttribute(key, value)
+
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   descendant: descendant
@@ -383,5 +394,6 @@ up.element = do ->
   concludeCssTransition: concludeCssTransition
   hasCssTransition: hasCssTransition
   fixedToAbsolute: fixedToAbsolute
+  setMissingAttrs: setMissingAttrs
 
   # createDivWithClass: createDivWithClass

@@ -11,6 +11,7 @@ In an Unpoly app, every page has an URL.
 up.history = do ->
   
   u = up.util
+  e = up.element
 
   ###**
   Configures behavior when the user goes back or forward in browser history.
@@ -248,7 +249,7 @@ up.history = do ->
   ###
   up.macro 'a[up-back], [up-href][up-back]', (link) ->
     if u.isPresent(previousUrl)
-      u.setMissingAttrs link,
+      e.setMissingAttrs link,
         'up-href': previousUrl,
         'up-restore-scroll': ''
       link.removeAttribute('up-back')

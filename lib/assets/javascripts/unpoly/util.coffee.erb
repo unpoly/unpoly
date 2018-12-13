@@ -1035,18 +1035,6 @@ up.util = do ->
     new Promise(noop)
 
   ###**
-  On the given element, set attributes that are still missing.
-
-  @function up.util.setMissingAttrs
-  @internal
-  ###
-  setMissingAttrs = (element, attrs) ->
-    element = up.element.get(element) # TODO: Remove up.element and just work on element
-    for key, value of attrs
-      if isMissing(element.getAttribute(key))
-        element.setAttribute(key, value)
-
-  ###**
   Removes the given element from the given array.
 
   This changes the given array.
@@ -1707,7 +1695,6 @@ up.util = do ->
   except: except
 #  pickBy: pickBy
   unresolvablePromise: unresolvablePromise
-  setMissingAttrs: setMissingAttrs
   remove: remove
   memoize: memoize
   config: config
