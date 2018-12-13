@@ -543,4 +543,95 @@ describe 'up.element', ->
       element = up.element.createFragmentFromHtml(html)
       expect(element.tagName).toEqual('H1')
       expect(element.textContent).toEqual('Full story')
-  
+
+  describe 'up.element.fixedToAbsolute', ->
+
+    it "changes the given element's position from fixed to absolute, without changing its rendered position", ->
+      $container = affix('.container').css
+        position: 'absolute'
+        left: '100px'
+        top: '100px'
+        backgroundColor: 'yellow'
+
+      $element = $container.affix('.element').text('element').css
+        position: 'fixed',
+        left: '70px'
+        top: '30px'
+        backgroundColor: 'red'
+
+      oldRect = up.Rect.fromElement($element[0])
+
+      up.element.fixedToAbsolute($element[0])
+
+      expect($element.css('position')).toEqual('absolute')
+      newRect = up.Rect.fromElement($element[0])
+      expect(newRect).toEqual(oldRect)
+
+    it 'correctly positions an element with margins', ->
+      $container = affix('.container').css
+        position: 'absolute'
+        left: '20px'
+        top: '20px'
+        backgroundColor: 'yellow'
+
+      $element = $container.affix('.element').text('element').css
+        position: 'fixed',
+        left: '40px'
+        top: '60px'
+        backgroundColor: 'red'
+        margin: '15px'
+
+      oldRect = up.Rect.fromElement($element[0])
+
+      up.element.fixedToAbsolute($element[0])
+
+      expect($element.css('position')).toEqual('absolute')
+      newRect = up.Rect.fromElement($element[0])
+      expect(newRect).toEqual(oldRect)
+
+    it 'correctly positions an element when its new offset parent has margins', ->
+      $container = affix('.container').css
+        position: 'absolute'
+        left: '100px'
+        top: '100px'
+        margin: '15px',
+        backgroundColor: 'yellow'
+
+      $element = $container.affix('.element').text('element').css
+        position: 'fixed',
+        left: '70px'
+        top: '30px'
+        backgroundColor: 'red'
+
+      oldRect = up.Rect.fromElement($element[0])
+
+      up.element.fixedToAbsolute($element[0])
+
+      expect($element.css('position')).toEqual('absolute')
+      newRect = up.Rect.fromElement($element[0])
+      expect(newRect).toEqual(oldRect)
+
+    it 'correctly positions an element when the new offset parent is scrolled', ->
+      $container = affix('.container').css
+        position: 'absolute'
+        left: '100px'
+        top: '100px'
+        margin: '15px',
+        backgroundColor: 'yellow'
+        overflowY: 'scroll'
+
+      $staticContainerContent = $container.affix('.content').css(height: '3000px').scrollTop(100)
+
+      $element = $container.affix('.element').text('element').css
+        position: 'fixed',
+        left: '70px'
+        top: '30px'
+        backgroundColor: 'red'
+
+      oldRect = up.Rect.fromElement($element[0])
+
+      up.element.fixedToAbsolute($element[0])
+
+      expect($element.css('position')).toEqual('absolute')
+      newRect = up.Rect.fromElement($element[0])
+      expect(newRect).toEqual(oldRect)

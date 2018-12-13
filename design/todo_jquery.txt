@@ -44,3 +44,21 @@
   - migration guide
     - jquery event listeners need to use addEventListener or use event.originalEvent
 
+- stuff to move out of up.query
+  writeTemporaryStyle
+  readInlineStyle
+  writeInlineStyle
+
+  presentAttr
+  castedAttr
+  numberAttr
+  jsonAttr
+
+  setMissingAttrs
+  unwrapElement
+
+  readComputedStyle
+  extractFromStyleObject
+  normalizeStyleValueForWrite
+  CSS_LENGTH_PROPS
+  cssLength

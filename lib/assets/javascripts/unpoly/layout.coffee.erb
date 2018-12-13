@@ -467,8 +467,7 @@ up.layout = do ->
     newElementRect = element.getBoundingClientRect()
     moveBounds(originalRect.left - newElementRect.left, originalRect.top - newElementRect.top)
 
-    for fixedChild in fixedElements(element)
-      u.fixedToAbsolute(fixedChild)
+    u.each(fixedElements(element), e.fixedToAbsolute)
 
     bounds: bounds
     moveBounds: moveBounds

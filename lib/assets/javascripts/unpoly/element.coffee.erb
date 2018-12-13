@@ -326,6 +326,23 @@ up.element = do ->
     noTransition = (prop == 'none' || (prop == 'all' && duration == 0))
     not noTransition
 
+  ###**
+  @function up.util.fixedToAbsolute
+  @internal
+  ###
+  fixedToAbsolute = (element) ->
+    elementRectAsFixed = element.getBoundingClientRect()
+
+    # Set the position to 'absolute' so it gains an offsetParent
+    element.style.position = 'absolute'
+
+    offsetParentRect = element.offsetParent.getBoundingClientRect()
+
+    u.writeInlineStyle element,
+      left: elementRectAsFixed.left - u.readComputedStyleNumber(element, 'margin-left') - offsetParentRect.left
+      top: elementRectAsFixed.top - u.readComputedStyleNumber(element, 'margin-top') - offsetParentRect.top
+      right: ''
+      bottom: ''
 
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
@@ -365,5 +382,6 @@ up.element = do ->
   paint: paint
   concludeCssTransition: concludeCssTransition
   hasCssTransition: hasCssTransition
+  fixedToAbsolute: fixedToAbsolute
 
   # createDivWithClass: createDivWithClass

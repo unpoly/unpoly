@@ -1115,32 +1115,6 @@ up.util = do ->
     parent.removeChild(wrapper)
 
   ###**
-  @function up.util.fixedToAbsolute
-  @internal
-  ###
-  fixedToAbsolute = (element) ->
-    elementRectAsFixed = element.getBoundingClientRect()
-
-    # Set the position to 'absolute' so it gains an offsetParent
-    element.style.position = 'absolute'
-
-    offsetParentRect = element.offsetParent.getBoundingClientRect()
-
-    writeInlineStyle element,
-      left: elementRectAsFixed.left - readComputedStyleNumber(element, 'margin-left') - offsetParentRect.left
-      top: elementRectAsFixed.top - readComputedStyleNumber(element, 'margin-top') - offsetParentRect.top
-      right: ''
-      bottom: ''
-
-#  argNames = (fun) ->
-#    code = fun.toString()
-#    pattern = new RegExp('\\(([^\\)]*)\\)')
-#    if match = code.match(pattern)
-#      match[1].split(/\s*,\s*/)
-#    else
-#      error('Could not parse argument names of %o', fun)
-
-  ###**
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
 
@@ -1665,7 +1639,6 @@ up.util = do ->
 #      [objOrArray]
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  fixedToAbsolute: fixedToAbsolute
   parseUrl: parseUrl
   normalizeUrl: normalizeUrl
   normalizeMethod: normalizeMethod
