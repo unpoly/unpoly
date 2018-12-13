@@ -1370,44 +1370,6 @@ up.util = do ->
     preview
 
   ###**
-  A linear task queue whose (2..n)th tasks can be changed at any time.
-
-  @function up.util.DivertibleChain
-  @internal
-  ###
-  class DivertibleChain
-
-    constructor: ->
-      @reset()
-
-    reset: =>
-      @queue = []
-      @currentTask = undefined
-
-    promise: =>
-      lastTask = last(@allTasks())
-      lastTask?.promise || Promise.resolve()
-
-    allTasks: =>
-      tasks = []
-      tasks.push(@currentTask) if @currentTask
-      tasks = tasks.concat(@queue)
-      tasks
-
-    poke: =>
-      unless @currentTask # don't start a new task while we're still running one
-        if @currentTask = @queue.shift()
-          promise = @currentTask()
-          always promise, =>
-            @currentTask = undefined
-            @poke()
-
-    asap: (newTasks...) =>
-      @queue = map(newTasks, previewable)
-      @poke()
-      @promise()
-
-  ###**
   @function up.util.sequence
   @param {Array<Function>} functions...
   @return {Function}
@@ -1840,7 +1802,6 @@ up.util = do ->
   whenReady: whenReady
   identity: identity
   escapeHtml: escapeHtml
-  DivertibleChain: DivertibleChain # TODO: move DivertibleChain to classes
   sequence: sequence
   promiseTimer: promiseTimer
   previewable: previewable

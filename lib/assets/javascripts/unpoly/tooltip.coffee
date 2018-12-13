@@ -72,7 +72,7 @@ up.tooltip = do ->
     tether: null         # the up.Tether instance controlling the tooltip's position
     position: null       # the position of the tooltip element relative to its anchor
 
-  chain = new u.DivertibleChain()
+  chain = new up.DivertibleChain()
 
   reset = ->
     state.tether?.destroy()
