@@ -902,28 +902,6 @@ up.util = do ->
       restoreOldStyles
 
   ###**
-  Forces a repaint of the given element.
-
-  @function up.util.paint
-  @internal
-  ###
-  paint = (element) ->
-    element = up.element.get(element)
-    element.offsetHeight
-
-  ###**
-  @function up.util.finishTransition
-  @internal
-  ###
-  concludeCssTransition = (element) ->
-    undo = writeTemporaryStyle(element, transition: 'none')
-    # Browsers need to paint at least one frame without a transition to stop the
-    # animation. In theory we could just wait until the next paint, but in case
-    # someone will set another transition after us, let's force a repaint here.
-    paint(element)
-    return undo
-
-    ###**
   Returns whether the given keyboard event involved the ESC key.
 
   @function up.util.escapePressed
@@ -1828,8 +1806,6 @@ up.util = do ->
   setTimer: setTimer
   nextFrame: nextFrame
   writeTemporaryStyle: writeTemporaryStyle
-  paint: paint
-  concludeCssTransition: concludeCssTransition
   escapePressed: escapePressed
   contains: contains
   toArray: toArray

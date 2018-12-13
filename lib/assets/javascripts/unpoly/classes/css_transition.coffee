@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 class up.CssTransition
 
@@ -84,7 +85,7 @@ class up.CssTransition
 
     # Cleanly finish our own transition so the old transition
     # (or any other transition set right after that) will be able to take effect.
-    u.concludeCssTransition(@element)
+    e.concludeCssTransition(@element)
 
     @resumeOldTransition()
 
@@ -109,7 +110,7 @@ class up.CssTransition
         @setOldTransitionTargetFrame = u.writeTemporaryStyle(@element, oldTransitionFrameCamel)
 
       # Stop the existing CSS transition so it does not emit transitionEnd events
-      @setOldTransition = u.concludeCssTransition(@element)
+      @setOldTransition = e.concludeCssTransition(@element)
 
   resumeOldTransition: =>
     @setOldTransitionTargetFrame?()
