@@ -829,24 +829,6 @@ up.util = do ->
     select array1, (element) ->
       contains(array2, element)
 
-  addClass = (element, klassOrKlasses) ->
-    changeClassList(element, klassOrKlasses, 'add')
-
-  removeClass = (element, klassOrKlasses) ->
-    changeClassList(element, klassOrKlasses, 'remove')
-
-  changeClassList = (element, klassOrKlasses, fnName) ->
-    classList = up.element.get(element).classList
-    if isArray(klassOrKlasses)
-      each klassOrKlasses, (klass) ->
-        classList[fnName](klass)
-    else
-      classList[fnName](klassOrKlasses)
-
-  hasClass = (element, klass) ->
-    classList = up.element.get(element).classList
-    classList.contains(klass)
-
   ###**
   Waits for the given number of milliseconds, the runs the given callback.
 
@@ -922,10 +904,10 @@ up.util = do ->
   ###**
   Forces a repaint of the given element.
 
-  @function up.util.forceRepaint
+  @function up.util.paint
   @internal
   ###
-  forceRepaint = (element) ->
+  paint = (element) ->
     element = up.element.get(element)
     element.offsetHeight
 
@@ -938,7 +920,7 @@ up.util = do ->
     # Browsers need to paint at least one frame without a transition to stop the
     # animation. In theory we could just wait until the next paint, but in case
     # someone will set another transition after us, let's force a repaint here.
-    forceRepaint(element)
+    paint(element)
     return undo
 
     ###**
@@ -1845,11 +1827,8 @@ up.util = do ->
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   setTimer: setTimer
   nextFrame: nextFrame
-  addClass: addClass
-  removeClass: removeClass
-  hasClass: hasClass
   writeTemporaryStyle: writeTemporaryStyle
-  forceRepaint: forceRepaint
+  paint: paint
   concludeCssTransition: concludeCssTransition
   escapePressed: escapePressed
   contains: contains
