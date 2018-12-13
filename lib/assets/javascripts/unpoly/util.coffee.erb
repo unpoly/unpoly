@@ -1419,15 +1419,6 @@ up.util = do ->
       'right'
 
   ###**
-  Hides the given element faster than `jQuery.fn.hide()`.
-
-  @function up.util.hide
-  @param {jQuery|Element} element
-  ###
-  hide = (element) ->
-    writeInlineStyle(element, display: 'none')
-
-  ###**
   Gets the computed style(s) for the given element.
 
   @function up.util.readComputedStyle
@@ -1797,7 +1788,6 @@ up.util = do ->
   isCrossDomain: isCrossDomain
   microtask: microtask
   isEqual: isEqual
-  hide: hide
   cssLength: cssLength
   readComputedStyle: readComputedStyle
   readComputedStyleNumber: readComputedStyleNumber
