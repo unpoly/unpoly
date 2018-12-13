@@ -360,23 +360,6 @@ describe 'up.util', ->
         expect(up.util.simpleEase(0.50)).toBeAround(0.50, 0.2)
         expect(up.util.simpleEase(0.75)).toBeAround(0.75, 0.2)
 
-    describe 'up.util.isFixed', ->
-
-      it 'returns true if the given element or one of its ancestors has a "fixed" CSS position', ->
-        $grandGrandParent = affix('.grand-parent')
-        $grandParent = $grandGrandParent.affix('.grand-parent')
-        $parent = $grandParent.affix('.parent')
-        $child = $parent.affix('.child')
-        $grandParent.css(position: 'fixed')
-        expect(up.util.isFixed($child[0])).toBe(true)
-        expect(up.util.isFixed($parent[0])).toBe(true)
-        expect(up.util.isFixed($grandParent[0])).toBe(true)
-        expect(up.util.isFixed($grandGrandParent[0])).toBe(false)
-
-      it 'returns false if the given element and its ancestors all have a non-"fixed" CSS position', ->
-        $element = affix('.element')
-        expect(up.util.isFixed($element[0])).toBe(false)
-
     describe 'up.util.setTimer', ->
 
       it 'calls the given function after waiting the given milliseconds', (done) ->

@@ -1115,21 +1115,6 @@ up.util = do ->
     parent.removeChild(wrapper)
 
   ###**
-  Returns if the given element has a `fixed` position.
-
-  @function up.util.isFixed
-  @internal
-  ###
-  isFixed = (element) ->
-    loop
-      if readComputedStyle(element, 'position') == 'fixed'
-        return true
-      else
-        element = element.parentNode
-        if !element || element == document
-          return false
-
-  ###**
   @function up.util.fixedToAbsolute
   @internal
   ###
@@ -1681,7 +1666,6 @@ up.util = do ->
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   fixedToAbsolute: fixedToAbsolute
-  isFixed: isFixed
   parseUrl: parseUrl
   normalizeUrl: normalizeUrl
   normalizeMethod: normalizeMethod
