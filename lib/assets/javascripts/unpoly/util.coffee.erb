@@ -1252,17 +1252,6 @@ up.util = do ->
 #    raceDone.promise()
 
   ###**
-  @function up.util.promiseTimer
-  @internal
-  ###
-  promiseTimer = (ms) ->
-    timeout = undefined
-    promise = new Promise (resolve, reject) ->
-      timeout = setTimer(ms, resolve)
-    promise.cancel = -> clearTimeout(timeout)
-    promise
-
-  ###**
   Returns `'left'` if the center of the given element is in the left 50% of the screen.
   Otherwise returns `'right'`.
 
@@ -1525,7 +1514,6 @@ up.util = do ->
   identity: identity
   escapeHtml: escapeHtml
   sequence: sequence
-  promiseTimer: promiseTimer
   previewable: previewable
   # parsePath: parsePath
   evalOption: evalOption

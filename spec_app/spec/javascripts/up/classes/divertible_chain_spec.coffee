@@ -10,22 +10,22 @@ describe 'up.DivertibleChain', ->
       timer1Spy = jasmine.createSpy('timer1 has been called')
       timer1 = ->
         timer1Spy()
-        u.promiseTimer(50)
+        up.testUtil.promiseTimer(50)
 
       timer2Spy = jasmine.createSpy('timer2 has been called')
       timer2 = ->
         timer2Spy()
-        u.promiseTimer(50)
+        up.testUtil.promiseTimer(50)
 
       timer3Spy = jasmine.createSpy('timer3 has been called')
       timer3 = ->
         timer3Spy()
-        u.promiseTimer(50)
+        up.testUtil.promiseTimer(50)
 
       timer4Spy = jasmine.createSpy('timer4 has been called')
       timer4 = ->
         timer4Spy()
-        u.promiseTimer(50)
+        up.testUtil.promiseTimer(50)
 
       chain.asap(timer1)
       u.nextFrame ->

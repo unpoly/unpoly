@@ -79,7 +79,7 @@ describe 'up.form', ->
               callbackCount = 0
               callback = ->
                 callbackCount += 1
-                return u.promiseTimer(100)
+                return up.testUtil.promiseTimer(100)
               up.observe($input, { delay: 1 }, callback)
               $input.val('new-value-1')
               Trigger[eventName]($input)
@@ -104,7 +104,7 @@ describe 'up.form', ->
               callbackArgs = []
               callback = (value, field) ->
                 callbackArgs.push(value)
-                return u.promiseTimer(100)
+                return up.testUtil.promiseTimer(100)
 
               up.observe($input, { delay: 1 }, callback)
               $input.val('new-value-1')

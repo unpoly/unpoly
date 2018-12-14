@@ -15,4 +15,20 @@ up.testUtil = do ->
     # This is by far the fastest way to do this
     not jQuery.contains(document.documentElement, element)
 
+  ###**
+  @function up.util.promiseTimer
+  @internal
+  ###
+  promiseTimer = (ms) ->
+    timeout = undefined
+    promise = new Promise (resolve, reject) ->
+      timeout = u.setTimer(ms, resolve)
+    promise.cancel = -> clearTimeout(timeout)
+    promise
+
+
   isDetached: isDetached
+  promiseTimer: promiseTimer
+
+
+
