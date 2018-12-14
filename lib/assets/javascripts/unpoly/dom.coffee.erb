@@ -461,7 +461,7 @@ up.dom = do ->
       promise = u.always(promise, up.animate(wrapper, transition, options))
 
       # Remove the wrapper now that is has served it purpose
-      promise = promise.then -> u.unwrapElement(wrapper)
+      promise = promise.then -> e.unwrapElement(wrapper)
 
       return promise
 
@@ -518,7 +518,7 @@ up.dom = do ->
   findKeepPlan = (element, newElement, options) ->
     if options.keep
       keepable = element
-      if partnerSelector = u.castedAttr(keepable, 'up-keep')
+      if partnerSelector = e.castedAttr(keepable, 'up-keep')
         u.isString(partnerSelector) or partnerSelector = '&'
         partnerSelector = resolveSelector(partnerSelector, keepable)
         if options.descendantsOnly

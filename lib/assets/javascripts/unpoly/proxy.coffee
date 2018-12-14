@@ -561,7 +561,7 @@ up.proxy = do ->
   up.bus.deprecateRenamedEvent('up:proxy:received', 'up:proxy:loaded')
 
   preloadAfterDelay = (link) ->
-    delay = u.numberAttr(link, 'up-delay') || config.preloadDelay
+    delay = e.numberAttr(link, 'up-delay') || config.preloadDelay
     unless link == waitingLink
       waitingLink = link
       cancelPreloadDelay()

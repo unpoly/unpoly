@@ -174,13 +174,13 @@ up.link = do ->
     target = options.target ? link.getAttribute('up-target')
     options.failTarget = options.failTarget ? link.getAttribute('up-fail-target')
     options.fallback = options.fallback ? link.getAttribute('up-fallback')
-    options.transition = options.transition ? u.castedAttr(link, 'up-transition') ? 'none'
-    options.failTransition = options.failTransition ? u.castedAttr(link, 'up-fail-transition') ? 'none'
-    options.history = options.history ? u.castedAttr(link, 'up-history')
-    options.reveal = options.reveal ? u.castedAttr(link, 'up-reveal') ? true
-    options.failReveal = options.failReveal ? u.castedAttr(link, 'up-fail-reveal') ? true
-    options.cache = options.cache ? u.castedAttr(link, 'up-cache')
-    options.restoreScroll = options.restoreScroll ? u.castedAttr(link, 'up-restore-scroll')
+    options.transition = options.transition ? e.castedAttr(link, 'up-transition') ? 'none'
+    options.failTransition = options.failTransition ? e.castedAttr(link, 'up-fail-transition') ? 'none'
+    options.history = options.history ? e.castedAttr(link, 'up-history')
+    options.reveal = options.reveal ? e.castedAttr(link, 'up-reveal') ? true
+    options.failReveal = options.failReveal ? e.castedAttr(link, 'up-fail-reveal') ? true
+    options.cache = options.cache ? e.castedAttr(link, 'up-cache')
+    options.restoreScroll = options.restoreScroll ? e.castedAttr(link, 'up-restore-scroll')
     options.method = followMethod(link, options)
     options.origin = options.origin ? link
     options.layer = options.layer ? link.getAttribute('up-layer') ? 'auto'
@@ -518,7 +518,7 @@ up.link = do ->
   @stable
   ###
   up.macro '[up-dash]', (element) ->
-    target = u.castedAttr(element, 'up-dash')
+    target = e.castedAttr(element, 'up-dash')
     element.removeAttribute('up-dash')
     newAttrs = {
       'up-preload': '',
@@ -580,7 +580,7 @@ up.link = do ->
   @stable
   ###
   up.macro '[up-expand]', (area) ->
-    selector = u.presentAttr(area, 'up-expand') ? 'a, [up-href]'
+    selector = e.presentAttr(area, 'up-expand') ? 'a, [up-href]'
     childLinks = e.descendants(area, selector)
 
     if childLink = childLinks[0]

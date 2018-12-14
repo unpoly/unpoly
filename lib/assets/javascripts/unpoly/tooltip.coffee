@@ -133,7 +133,7 @@ up.tooltip = do ->
     html = u.option(options.html, anchor.getAttribute('up-tooltip-html'))
     text = u.option(options.text, anchor.getAttribute('up-tooltip'))
     position = u.option(options.position, anchor.getAttribute('up-position'), config.position)
-    animation = u.option(options.animation, u.castedAttr(anchor, 'up-animation'), config.openAnimation)
+    animation = u.option(options.animation, e.castedAttr(anchor, 'up-animation'), config.openAnimation)
     animateOptions = up.motion.animateOptions(options, anchor, duration: config.openDuration, easing: config.openEasing)
 
     state.phase = 'opening'

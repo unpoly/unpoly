@@ -417,7 +417,7 @@ up.syntax = do ->
   ###
   readData = (elementOrSelector) ->
     if element = e.get(elementOrSelector)
-      u.jsonAttr(element, 'up-data') || {}
+      e.jsonAttr(element, 'up-data') || {}
 
   ###**
   Resets the list of registered compiler directives to the

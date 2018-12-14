@@ -635,3 +635,25 @@ describe 'up.element', ->
       expect($element.css('position')).toEqual('absolute')
       newRect = up.Rect.fromElement($element[0])
       expect(newRect).toEqual(oldRect)
+
+  describe 'up.element.castedAttr', ->
+    
+    it 'returns true if the attribute value is the string "true"', ->
+      $element = affix('div').attr('foo', 'true')
+      expect(up.element.castedAttr($element, 'foo')).toBe(true)
+
+    it 'returns true if the attribute value is the name of the attribute', ->
+      $element = affix('div').attr('foo', 'foo')
+      expect(up.element.castedAttr($element, 'foo')).toBe(true)
+
+    it 'returns false if the attribute value is the string "false"', ->
+      $element = affix('div').attr('foo', 'false')
+      expect(up.element.castedAttr($element, 'foo')).toBe(false)
+
+    it 'returns a missing value if the element has no such attribute', ->
+      $element = affix('div')
+      expect(up.element.castedAttr($element, 'foo')).toBeMissing()
+
+    it 'returns the attribute value unchanged if the value is some string', ->
+      $element = affix('div').attr('foo', 'some text')
+      expect(up.element.castedAttr($element, 'foo')).toBe('some text')

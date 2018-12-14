@@ -49,14 +49,6 @@
   readInlineStyle
   writeInlineStyle
 
-  presentAttr
-  castedAttr
-  numberAttr
-  jsonAttr
-
-  setMissingAttrs
-  unwrapElement
-
   readComputedStyle
   extractFromStyleObject
   normalizeStyleValueForWrite

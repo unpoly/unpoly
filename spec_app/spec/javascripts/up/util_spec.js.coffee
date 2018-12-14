@@ -519,28 +519,6 @@ describe 'up.util', ->
           baz: 'baz-value'
           bam: 'bam-value'
 
-    describe 'up.util.castedAttr', ->
-
-      it 'returns true if the attribute value is the string "true"', ->
-        $element = affix('div').attr('foo', 'true')
-        expect(up.util.castedAttr($element, 'foo')).toBe(true)
-
-      it 'returns true if the attribute value is the name of the attribute', ->
-        $element = affix('div').attr('foo', 'foo')
-        expect(up.util.castedAttr($element, 'foo')).toBe(true)
-
-      it 'returns false if the attribute value is the string "false"', ->
-        $element = affix('div').attr('foo', 'false')
-        expect(up.util.castedAttr($element, 'foo')).toBe(false)
-
-      it 'returns a missing value if the element has no such attribute', ->
-        $element = affix('div')
-        expect(up.util.castedAttr($element, 'foo')).toBeMissing()
-
-      it 'returns the attribute value unchanged if the value is some string', ->
-        $element = affix('div').attr('foo', 'some text')
-        expect(up.util.castedAttr($element, 'foo')).toBe('some text')
-
     describe 'up.util.any', ->
 
       it 'returns true if an element in the array returns true for the given function', ->
