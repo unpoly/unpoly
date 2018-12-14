@@ -657,3 +657,89 @@ describe 'up.element', ->
     it 'returns the attribute value unchanged if the value is some string', ->
       $element = affix('div').attr('foo', 'some text')
       expect(up.element.castedAttr($element, 'foo')).toBe('some text')
+
+  describe 'up.element.writeTemporaryStyle', ->
+
+    it "sets the given inline styles and returns a function that will restore the previous inline styles", ->
+      $div = affix('div[style="color: red"]')
+      restore = up.element.writeTemporaryStyle($div, { color: 'blue' })
+      expect($div.attr('style')).toContain('color: blue')
+      expect($div.attr('style')).not.toContain('color: red')
+      restore()
+      expect($div.attr('style')).not.toContain('color: blue')
+      expect($div.attr('style')).toContain('color: red')
+
+    it "does not restore inherited styles", ->
+      $div = affix('div[class="red-background"]')
+      restore = up.element.writeTemporaryStyle($div, { backgroundColor: 'blue' })
+      expect($div.attr('style')).toContain('background-color: blue')
+      restore()
+      expect($div.attr('style')).not.toContain('background-color')
+
+  describe 'up.element.readInlineStyle', ->
+
+    describe 'with a string as second argument', ->
+
+      it 'returns a CSS value string from an inline [style] attribute', ->
+        $div = affix('div').attr('style', 'background-color: #ff0000')
+        style = up.element.readInlineStyle($div, 'backgroundColor')
+        # Browsers convert colors to rgb() values, even IE11
+        expect(style).toEqual('rgb(255, 0, 0)')
+
+      it 'returns a blank value if the element does not have the given property in the [style] attribute', ->
+        $div = affix('div').attr('style', 'background-color: red')
+        style = up.element.readInlineStyle($div, 'color')
+        expect(style).toBeBlank()
+
+      it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
+        $div = affix('div[class="red-background"]')
+        inlineStyle = up.element.readInlineStyle($div, 'backgroundColor')
+        computedStyle = up.element.readComputedStyle($div, 'backgroundColor')
+        expect(computedStyle).toEqual('rgb(255, 0, 0)')
+        expect(inlineStyle).toBeBlank()
+
+    describe 'with an array as second argument', ->
+
+      it 'returns an object with the given inline [style] properties', ->
+        $div = affix('div').attr('style', 'background-color: #ff0000; color: #0000ff')
+        style = up.element.readInlineStyle($div, ['backgroundColor', 'color'])
+        expect(style).toEqual
+          backgroundColor: 'rgb(255, 0, 0)'
+          color: 'rgb(0, 0, 255)'
+
+      it 'returns blank keys if the element does not have the given property in the [style] attribute', ->
+        $div = affix('div').attr('style', 'background-color: #ff0000')
+        style = up.element.readInlineStyle($div, ['backgroundColor', 'color'])
+        expect(style).toHaveOwnProperty('color')
+        expect(style.color).toBeBlank()
+
+      it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
+        $div = affix('div[class="red-background"]')
+        inlineStyleHash = up.element.readInlineStyle($div, ['backgroundColor'])
+        computedBackground = up.element.readComputedStyle($div, 'backgroundColor')
+        expect(computedBackground).toEqual('rgb(255, 0, 0)')
+        expect(inlineStyleHash).toHaveOwnProperty('backgroundColor')
+        expect(inlineStyleHash.backgroundColor).toBeBlank()
+
+  describe 'up.element.writeInlineStyle', ->
+
+    it "sets the given style properties as the given element's [style] attribute", ->
+      $div = affix('div')
+      up.element.writeInlineStyle($div, { color: 'red', backgroundColor: 'blue' })
+      style = $div.attr('style')
+      expect(style).toContain('color: red')
+      expect(style).toContain('background-color: blue')
+
+    it "merges the given style properties into the given element's existing [style] value", ->
+      $div = affix('div[style="color: red"]')
+      up.element.writeInlineStyle($div, { backgroundColor: 'blue' })
+      style = $div.attr('style')
+      expect(style).toContain('color: red')
+      expect(style).toContain('background-color: blue')
+
+    it "converts the values of known length properties to px values automatically", ->
+      $div = affix('div')
+      up.element.writeInlineStyle($div, { paddingTop: 100 })
+      style = $div.attr('style')
+      expect(style).toContain('padding-top: 100px')
+

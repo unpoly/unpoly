@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.layout', ->
@@ -450,15 +451,15 @@ describe 'up.layout', ->
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
           $element = affix('.element').css(height: '3000px')
-          @resetHtmlCss = u.writeTemporaryStyle('html', 'overflow-y': 'hidden')
-          @resetBodyCss = u.writeTemporaryStyle('body', 'overflow-y': 'scroll')
+          @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'hidden')
+          @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'scroll')
           $result = up.layout.viewportOf($element)
           expect($result).toMatchSelector(up.browser.documentViewportSelector())
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
           $element = affix('.element').css(height: '3000px')
-          @resetHtmlCss = u.writeTemporaryStyle('html', 'overflow-y': 'scroll')
-          @resetBodyCss = u.writeTemporaryStyle('body', 'overflow-y': 'hidden')
+          @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'scroll')
+          @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'hidden')
           $result = up.layout.viewportOf($element)
           expect($result).toMatchSelector(up.browser.documentViewportSelector())
 

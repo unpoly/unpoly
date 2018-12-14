@@ -140,7 +140,7 @@ up.layout = do ->
   ###
   measureObstruction = (viewportHeight) ->
     composeHeight = (obstructor, distanceFromEdgeProps) ->
-      distanceFromEdge = u.sum(distanceFromEdgeProps, (prop) -> u.readComputedStyleNumber(obstructor, prop)) || 0
+      distanceFromEdge = u.sum(distanceFromEdgeProps, (prop) -> e.readComputedStyleNumber(obstructor, prop)) || 0
       distanceFromEdge + obstructor.offsetHeight
 
     measureTopObstructor = (obstructor) ->
@@ -432,7 +432,7 @@ up.layout = do ->
     # Allow the caller to run code before we start shifting elements around.
     options.afterMeasure?()
 
-    u.writeInlineStyle element,
+    e.writeInlineStyle element,
       # If the element had a layout context before, make sure the
       # ghost will have layout context as well (and vice versa).
       position: if element.style.position == 'static' then 'static' else 'relative'
@@ -454,7 +454,7 @@ up.layout = do ->
     moveBounds = (diffX, diffY) ->
       boundsRect.left += diffX
       boundsRect.top += diffY
-      u.writeInlineStyle(bounds, boundsRect)
+      e.writeInlineStyle(bounds, boundsRect)
 
     # Position the bounds initially
     moveBounds(0, 0)

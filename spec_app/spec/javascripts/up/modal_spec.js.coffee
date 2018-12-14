@@ -154,7 +154,7 @@ describe 'up.modal', ->
                 done()
 
         it 'does not add right padding to the body if the body has overflow-y: hidden', (done) ->
-          restoreBody = u.writeTemporaryStyle($('body'), overflowY: 'hidden')
+          restoreBody = e.writeTemporaryStyle($('body'), overflowY: 'hidden')
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')
@@ -167,8 +167,8 @@ describe 'up.modal', ->
               done()
 
         it 'does not add right padding to the body if the body has overflow-y: auto, but does not currently have scrollbars', (done) ->
-          restoreBody = u.writeTemporaryStyle($('body'), overflowY: 'auto')
-          restoreReporter = u.writeTemporaryStyle($('.jasmine_html-reporter'), height: '100px', overflowY: 'hidden')
+          restoreBody = e.writeTemporaryStyle($('body'), overflowY: 'auto')
+          restoreReporter = e.writeTemporaryStyle($('.jasmine_html-reporter'), height: '100px', overflowY: 'hidden')
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')

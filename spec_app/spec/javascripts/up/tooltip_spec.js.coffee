@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.tooltip', ->
@@ -41,7 +42,7 @@ describe 'up.tooltip', ->
           )
 
         beforeEach ->
-          @restoreBodyHeight = u.writeTemporaryStyle('body', minHeight: '3000px')
+          @restoreBodyHeight = e.writeTemporaryStyle('body', minHeight: '3000px')
 
         afterEach ->
           @restoreBodyHeight()

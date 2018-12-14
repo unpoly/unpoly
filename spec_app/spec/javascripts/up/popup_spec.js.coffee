@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.popup', ->
@@ -19,7 +20,7 @@ describe 'up.popup', ->
                 Math.abs(popupDims.right - linkDims.right) < 1.0 && Math.abs(popupDims.top - linkDims.bottom) < 1.0
 
       beforeEach ->
-        @restoreBodyHeight = u.writeTemporaryStyle('body', minHeight: '3000px')
+        @restoreBodyHeight = e.writeTemporaryStyle('body', minHeight: '3000px')
 
       afterEach ->
         @restoreBodyHeight()

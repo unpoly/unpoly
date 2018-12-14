@@ -7,8 +7,6 @@
   - Examples with $
   - Stuff like  @param {jQuery} event.link
   - document new stuff like up.$compiler
-- Move all remaining element-related helper methods from util to query
-  - Get rid of u.addClass, u.writeInlineStyle, u.fastHide, etc. if possible
 - Check if we really need to do e.get(...) in every single function that works with elements
   - Do we really need to support `elementOrSelector` instead of just `element` in the public API?
 - unify link variant parsing
@@ -18,22 +16,17 @@
   - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
   - support new reveal options for up.replace and all follow variants
 - grep for TODO comments
-- support smooth-scrolling to an existing #anchor in the current page, to justify all that animation code
-  - basically [up-follow] should check:
-    - if the link href includes "#"
-      - is the (normalized source of the target | the current URL) the URL of the link (or is it only a hash)
-      - does the hash anchor exist in the current page
-      - if yes, scroll to it and resolve the replacemnet
-      - if no, do a usual replacement
 - scrolling to #hash should also find [up-id], to prevent jumping of browser (which does not remove obstructions and will probably jump before up.reveal starts)
 - check if we can git rid of any up.util methods (e.g. detachWith)
 - check if we can git rid of any up.element methods (e.g. insertAfter)
 - rename up.dom to up.fragment
 - rename up.layout to up.viewport
 - move up.browser.documentViewport and documentViewportSelector to up.layout
-- up-target should support [up-reveal-padding], { revealPadding }, [
+- up-target should support [up-reveal-padding], { revealPadding }
 - keepPlans should have properties { oldFragment } and { newFragment } instead of { element } and { newElement }
 - extractPlans should have properties { oldFragment } and { newFragment } instead of { oldElement } and { newElement }
+- Write CHANGELOG from diff
+
 - upgrade roca-style.org PR
   - better claim
   - no jquery
@@ -43,14 +36,17 @@
     - installtion guide
   - migration guide
     - jquery event listeners need to use addEventListener or use event.originalEvent
+- upgrade cards with the jquery compatibility layer
 
-- stuff to move out of up.query
-  writeTemporaryStyle
-  readInlineStyle
-  writeInlineStyle
 
-  readComputedStyle
-  extractFromStyleObject
-  normalizeStyleValueForWrite
-  CSS_LENGTH_PROPS
-  cssLength
+
+New features (postponable)
+--------------------------
+
+- support smooth-scrolling to an existing #anchor in the current page, to justify all that animation code
+  - basically [up-follow] should check:
+    - if the link href includes "#"
+      - is the (normalized source of the target | the current URL) the URL of the link (or is it only a hash)
+      - does the hash anchor exist in the current page
+      - if yes, scroll to it and resolve the replacemnet
+      - if no, do a usual replacement

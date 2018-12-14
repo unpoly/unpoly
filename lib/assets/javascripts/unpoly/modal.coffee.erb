@@ -253,7 +253,7 @@ up.modal = do ->
     modalElement.setAttribute('up-position', state.position) if u.isPresent(state.position)
 
     dialogStyles = u.only(options, 'width', 'maxWidth', 'height')
-    u.writeInlineStyle(part('dialog'), dialogStyles)
+    e.writeInlineStyle(part('dialog'), dialogStyles)
 
     unless state.closable
       closeElement = part('close')
@@ -280,20 +280,20 @@ up.modal = do ->
     if up.browser.documentViewportHasVerticalScrollbar()
       body = document.body
       scrollbarWidth = up.browser.scrollbarWidth()
-      bodyRightPadding = u.readComputedStyleNumber(body, 'paddingRight')
+      bodyRightPadding = e.readComputedStyleNumber(body, 'paddingRight')
       bodyRightShift = scrollbarWidth + bodyRightPadding
       # TODO: Check whether we should set overflowY on <body> or <html>.
       # If any element already has a computed, non-default overflow-y we
       # should set it there. If neither has, use documentViewport()
-      unshiftBody = u.writeTemporaryStyle(body,
+      unshiftBody = e.writeTemporaryStyle(body,
         paddingRight: bodyRightShift
         overflowY: 'hidden'
       )
       state.unshifters.push(unshiftBody)
       for anchor in up.layout.anchoredRight()
-        elementRight = u.readComputedStyleNumber(anchor, 'right')
+        elementRight = e.readComputedStyleNumber(anchor, 'right')
         elementRightShift = scrollbarWidth + elementRight
-        unshifter = u.writeTemporaryStyle(anchor, right: elementRightShift)
+        unshifter = e.writeTemporaryStyle(anchor, right: elementRightShift)
         state.unshifters.push(unshifter)
 
 

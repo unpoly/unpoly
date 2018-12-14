@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.motion', ->
@@ -93,7 +94,7 @@ describe 'up.motion', ->
           $element = affix('.element').text('content')
 
           animation = ($element, options) ->
-            u.writeInlineStyle($element, opacity: 0)
+            e.writeInlineStyle($element, opacity: 0)
             up.animate($element, { opacity: 1 }, options)
 
           up.animate($element, animation, duration: 300, easing: 'linear')
@@ -110,7 +111,7 @@ describe 'up.motion', ->
           $element = affix('.element').text('content')
 
           animation = ($element, options) ->
-            u.writeInlineStyle($element, opacity: 0)
+            e.writeInlineStyle($element, opacity: 0)
             up.animate($element, { opacity: 1 }, options)
 
           up.animate($element, animation, duration: 200, easing: 'linear')

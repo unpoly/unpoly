@@ -183,7 +183,7 @@ up.motion = do ->
     if u.isOptions(animation)
       # If we are given the final animation frame as an object of CSS properties,
       # the best we can do is to set the final frame without animation.
-      u.writeInlineStyle(element, animation)
+      e.writeInlineStyle(element, animation)
     # Signal that the animation is already done.
     Promise.resolve()
 
@@ -537,12 +537,12 @@ up.motion = do ->
     !animationOrTransition || animationOrTransition == 'none' || u.isBlank(animationOrTransition)
 
   registerAnimation('fade-in', (element, options) ->
-    u.writeInlineStyle(element, opacity: 0)
+    e.writeInlineStyle(element, opacity: 0)
     animateNow(element, { opacity: 1 }, options)
   )
 
   registerAnimation('fade-out', (element, options) ->
-    u.writeInlineStyle(element, opacity: 1)
+    e.writeInlineStyle(element, opacity: 1)
     animateNow(element, { opacity: 0 }, options)
   )
 
@@ -550,68 +550,68 @@ up.motion = do ->
     { transform: "translate(#{x}px, #{y}px)" }
 
   registerAnimation('move-to-top', (element, options) ->
-    u.writeInlineStyle(element, translateCss(0, 0))
+    e.writeInlineStyle(element, translateCss(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = box.top + box.height
     animateNow(element, translateCss(0, -travelDistance), options)
   )
 
   registerAnimation('move-from-top', (element, options) ->
-    u.writeInlineStyle(element, translateCss(0, 0))
+    e.writeInlineStyle(element, translateCss(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = box.top + box.height
-    u.writeInlineStyle(element, translateCss(0, -travelDistance))
+    e.writeInlineStyle(element, translateCss(0, -travelDistance))
     animateNow(element, translateCss(0, 0), options)
   )
 
   registerAnimation('move-to-bottom', (element, options) ->
-    u.writeInlineStyle(element, translateCss(0, 0))
+    e.writeInlineStyle(element, translateCss(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = e.root().clientHeight - box.top
     animateNow(element, translateCss(0, travelDistance), options)
   )
 
   registerAnimation('move-from-bottom', (element, options) ->
-    u.writeInlineStyle(element, translateCss(0, 0))
+    e.writeInlineStyle(element, translateCss(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = up.browser.documentViewportHeight() - box.top
-    u.writeInlineStyle(element, translateCss(0, travelDistance))
+    e.writeInlineStyle(element, translateCss(0, travelDistance))
     animateNow(element, translateCss(0, 0), options)
   )
 
   registerAnimation('move-to-left', (element, options) ->
-    u.writeInlineStyle(element, translateCss(0, 0))
+    e.writeInlineStyle(element, translateCss(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = box.left + box.width
     animateNow(element, translateCss(-travelDistance, 0), options)
   )
 
   registerAnimation('move-from-left', (element, options) ->
-    u.writeInlineStyle(element, translateCss(0, 0))
+    e.writeInlineStyle(element, translateCss(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = box.left + box.width
-    u.writeInlineStyle(element, translateCss(-travelDistance, 0))
+    e.writeInlineStyle(element, translateCss(-travelDistance, 0))
     animateNow(element, translateCss(0, 0), options)
   )
 
   registerAnimation('move-to-right', (element, options) ->
-    u.writeInlineStyle(element, translateCss(0, 0))
+    e.writeInlineStyle(element, translateCss(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = up.browser.documentViewportWidth() - box.left
     animateNow(element, translateCss(travelDistance, 0), options)
   )
 
   registerAnimation('move-from-right', (element, options) ->
-    u.writeInlineStyle(element, translateCss(0, 0))
+    e.writeInlineStyle(element, translateCss(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = up.browser.documentViewportWidth() - box.left
-    u.writeInlineStyle(element, translateCss(travelDistance, 0))
+    e.writeInlineStyle(element, translateCss(travelDistance, 0))
     animateNow(element, translateCss(0, 0), options)
   )
 
   registerAnimation('roll-down', (element, options) ->
-    previousHeightStr = u.readComputedStyle(element, 'height')
-    styleMemo = u.writeTemporaryStyle(element,
+    previousHeightStr = e.readComputedStyle(element, 'height')
+    styleMemo = e.writeTemporaryStyle(element,
       height: '0px'
       overflow: 'hidden'
     )

@@ -877,31 +877,6 @@ up.util = do ->
     array[array.length - 1]
 
   ###**
-  Temporarily sets the CSS for the given element.
-
-  @function up.util.writeTemporaryStyle
-  @param {jQuery} $element
-  @param {Object} css
-  @param {Function} [block]
-    If given, the CSS is set, the block is called and
-    the old CSS is restored.
-  @return {Function}
-    A function that restores the original CSS when called.
-  @internal
-  ###
-  writeTemporaryStyle = (element, newCss, block) ->
-    oldStyles = readInlineStyle(element, Object.keys(newCss))
-    restoreOldStyles = -> writeInlineStyle(element, oldStyles)
-    writeInlineStyle(element, newCss)
-    if block
-      # If a block was passed, we run the block and restore old styles.
-      block()
-      restoreOldStyles()
-    else
-      # If no block was passed, we return the restoration function.
-      restoreOldStyles
-
-  ###**
   Returns whether the given keyboard event involved the ESC key.
 
   @function up.util.escapePressed
@@ -1304,105 +1279,6 @@ up.util = do ->
       'right'
 
   ###**
-  Gets the computed style(s) for the given element.
-
-  @function up.util.readComputedStyle
-  @param {jQuery|Element} element
-  @param {String|Array} propOrProps
-    One or more CSS property names in camelCase.
-  @return {string|object}
-  @internal
-  ###
-  readComputedStyle = (element, props) ->
-    element = up.element.get(element)
-    style = window.getComputedStyle(element)
-    extractFromStyleObject(style, props)
-
-  ###**
-  Gets a computed style value for the given element.
-  If a value is set, the value is parsed to a number before returning.
-
-  @function up.util.readComputedStyleNumber
-  @param {jQuery|Element} element
-  @param {String} prop
-    A CSS property name in camelCase.
-  @return {string|object}
-  @internal
-  ###
-  readComputedStyleNumber = (element, prop) ->
-    rawValue = readComputedStyle(element, prop)
-    if isGiven(rawValue)
-      parseFloat(rawValue)
-    else
-      undefined
-
-  ###**
-  Gets the given inline style(s) from the given element's `[style]` attribute.
-
-  @function up.util.readInlineStyle
-  @param {jQuery|Element} element
-  @param {String|Array} propOrProps
-    One or more CSS property names in camelCase.
-  @return {string|object}
-  @internal
-  ###
-  readInlineStyle = (element, props) ->
-    element = up.element.get(element)
-    style = element.style
-    extractFromStyleObject(style, props)
-
-  extractFromStyleObject = (style, keyOrKeys) ->
-    if isString(keyOrKeys)
-      style[keyOrKeys]
-    else # array
-      only(style, keyOrKeys...)
-
-  ###**
-  Merges the given inline style(s) into the given element's `[style]` attribute.
-
-  @function up.util.readInlineStyle
-  @param {jQuery|Element} element
-  @param {Object} props
-    One or more CSS properties with camelCase keys.
-  @return {string|object}
-  @internal
-  ###
-  writeInlineStyle = (element, props) ->
-    element = up.element.get(element)
-    style = element.style
-    for key, value of props
-      value = normalizeStyleValueForWrite(key, value)
-      style[key] = value
-
-  normalizeStyleValueForWrite = (key, value) ->
-    if isMissing(value)
-      value = ''
-    else if CSS_LENGTH_PROPS.has(key)
-      value = cssLength(value)
-    value
-
-  CSS_LENGTH_PROPS = arrayToSet [
-    'top', 'right', 'bottom', 'left',
-    'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
-    'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
-    'width', 'height',
-    'maxWidth', 'maxHeight',
-    'minWidth', 'minHeight',
-  ]
-
-  ###**
-  Converts the given value to a CSS length value, adding a `px` unit if required.
-
-  @function up.util.cssLength
-  @internal
-  ###
-  cssLength = (obj) ->
-    if isNumber(obj) || (isString(obj) && /^\d+$/.test(obj))
-      obj.toString() + "px"
-    else
-      obj
-
-  ###**
   Flattens the given `array` a single level deep.
 
   @function up.util.flatten
@@ -1620,7 +1496,6 @@ up.util = do ->
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   setTimer: setTimer
   nextFrame: nextFrame
-  writeTemporaryStyle: writeTemporaryStyle
   escapePressed: escapePressed
   contains: contains
   toArray: toArray
@@ -1665,11 +1540,6 @@ up.util = do ->
   isCrossDomain: isCrossDomain
   microtask: microtask
   isEqual: isEqual
-  cssLength: cssLength
-  readComputedStyle: readComputedStyle
-  readComputedStyleNumber: readComputedStyleNumber
-  readInlineStyle: readInlineStyle
-  writeInlineStyle: writeInlineStyle
   splitValues : splitValues
   endsWith: endsWith
   sum: sum
@@ -1679,5 +1549,7 @@ up.util = do ->
   simpleEase: simpleEase
   values: objectValues
   partial: partial
+  arrayToSet: arrayToSet
+  setToArray: setToArray
 
 up.fail = up.util.fail

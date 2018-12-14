@@ -206,7 +206,7 @@ up.element = do ->
         for klass in u.wrapList(classValue)
           element.classList.add(klass)
       if styleValue = u.pluckKey(attrs, 'style')
-        u.writeInlineStyle(element, styleValue)
+        writeInlineStyle(element, styleValue)
       if textValue = u.pluckKey(attrs, 'text')
         element.innerText = textValue
       setAttrs(element, attrs)
@@ -298,13 +298,12 @@ up.element = do ->
   @internal
   ###
   concludeCssTransition = (element) ->
-    undo = u.writeTemporaryStyle(element, transition: 'none')
+    undo = writeTemporaryStyle(element, transition: 'none')
     # Browsers need to paint at least one frame without a transition to stop the
     # animation. In theory we could just wait until the next paint, but in case
     # someone will set another transition after us, let's force a repaint here.
     paint(element)
     return undo
-
 
   ###**
   Returns whether the given element has a CSS transition set.
@@ -338,9 +337,9 @@ up.element = do ->
 
     offsetParentRect = element.offsetParent.getBoundingClientRect()
 
-    u.writeInlineStyle element,
-      left: elementRectAsFixed.left - u.readComputedStyleNumber(element, 'margin-left') - offsetParentRect.left
-      top: elementRectAsFixed.top - u.readComputedStyleNumber(element, 'margin-top') - offsetParentRect.top
+    writeInlineStyle element,
+      left: elementRectAsFixed.left - readComputedStyleNumber(element, 'margin-left') - offsetParentRect.left
+      top: elementRectAsFixed.top - readComputedStyleNumber(element, 'margin-top') - offsetParentRect.top
       right: ''
       bottom: ''
 
@@ -413,6 +412,131 @@ up.element = do ->
     if (element = getOne(element)) && (json = element.getAttribute?(attribute)) && u.isString(json) && json.trim() != ''
       JSON.parse(json)
 
+  ###**
+  Temporarily sets the CSS for the given element.
+
+  @function up.util.writeTemporaryStyle
+  @param {jQuery} $element
+  @param {Object} css
+  @param {Function} [block]
+    If given, the CSS is set, the block is called and
+    the old CSS is restored.
+  @return {Function}
+    A function that restores the original CSS when called.
+  @internal
+  ###
+  writeTemporaryStyle = (element, newCss, block) ->
+    oldStyles = readInlineStyle(element, Object.keys(newCss))
+    restoreOldStyles = -> writeInlineStyle(element, oldStyles)
+    writeInlineStyle(element, newCss)
+    if block
+      # If a block was passed, we run the block and restore old styles.
+      block()
+      restoreOldStyles()
+    else
+      # If no block was passed, we return the restoration function.
+      restoreOldStyles
+
+  ###**
+  Gets the computed style(s) for the given element.
+
+  @function up.element.readComputedStyle
+  @param {jQuery|Element} element
+  @param {String|Array} propOrProps
+    One or more CSS property names in camelCase.
+  @return {string|object}
+  @internal
+  ###
+  readComputedStyle = (element, props) ->
+    element = up.element.get(element)
+    style = window.getComputedStyle(element)
+    extractFromStyleObject(style, props)
+
+  ###**
+  Gets a computed style value for the given element.
+  If a value is set, the value is parsed to a number before returning.
+
+  @function up.element.readComputedStyleNumber
+  @param {jQuery|Element} element
+  @param {String} prop
+    A CSS property name in camelCase.
+  @return {string|object}
+  @internal
+  ###
+  readComputedStyleNumber = (element, prop) ->
+    rawValue = readComputedStyle(element, prop)
+    if u.isGiven(rawValue)
+      parseFloat(rawValue)
+    else
+      undefined
+
+  ###**
+  Gets the given inline style(s) from the given element's `[style]` attribute.
+
+  @function up.element.readInlineStyle
+  @param {jQuery|Element} element
+  @param {String|Array} propOrProps
+    One or more CSS property names in camelCase.
+  @return {string|object}
+  @internal
+  ###
+  readInlineStyle = (element, props) ->
+    element = up.element.get(element)
+    style = element.style
+    extractFromStyleObject(style, props)
+
+  extractFromStyleObject = (style, keyOrKeys) ->
+    if u.isString(keyOrKeys)
+      style[keyOrKeys]
+    else # array
+      u.only(style, keyOrKeys...)
+
+  ###**
+  Merges the given inline style(s) into the given element's `[style]` attribute.
+
+  @function up.element.readInlineStyle
+  @param {jQuery|Element} element
+  @param {Object} props
+    One or more CSS properties with camelCase keys.
+  @return {string|object}
+  @internal
+  ###
+  writeInlineStyle = (element, props) ->
+    element = up.element.get(element)
+    style = element.style
+    for key, value of props
+      value = normalizeStyleValueForWrite(key, value)
+      style[key] = value
+
+  normalizeStyleValueForWrite = (key, value) ->
+    if u.isMissing(value)
+      value = ''
+    else if CSS_LENGTH_PROPS.has(key)
+      value = cssLength(value)
+    value
+
+  CSS_LENGTH_PROPS = u.arrayToSet [
+    'top', 'right', 'bottom', 'left',
+    'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+    'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
+    'width', 'height',
+    'maxWidth', 'maxHeight',
+    'minWidth', 'minHeight',
+  ]
+
+  ###**
+  Converts the given value to a CSS length value, adding a `px` unit if required.
+
+  @function up.util.cssLength
+  @internal
+  ###
+  cssLength = (obj) ->
+    if u.isNumber(obj) || (u.isString(obj) && /^\d+$/.test(obj))
+      obj.toString() + "px"
+    else
+      obj
+
+
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   descendant: descendant
@@ -458,5 +582,11 @@ up.element = do ->
   castedAttr: castedAttr
   numberAttr: numberAttr
   jsonAttr: jsonAttr
+  writeTemporaryStyle: writeTemporaryStyle
+  readComputedStyle: readComputedStyle
+  readComputedStyleNumber: readComputedStyleNumber
+  readInlineStyle: readInlineStyle
+  writeInlineStyle: writeInlineStyle
+
 
   # createDivWithClass: createDivWithClass
