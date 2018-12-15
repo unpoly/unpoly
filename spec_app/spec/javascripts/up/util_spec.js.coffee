@@ -986,4 +986,33 @@ describe 'up.util', ->
 
           expect(target).toEqual { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
+    describe 'up.util.copy', ->
 
+      it 'returns a shallow copy of the given array', ->
+        original = ['a', { b: 'c' }, 'd']
+
+        copy = up.util.copy(original)
+        expect(copy).toEqual(original)
+
+        # Test that changes to copy don't change original
+        copy.pop()
+        expect(copy.length).toBe(2)
+        expect(original.length).toBe(3)
+
+        # Test that the copy is shallow
+        copy[1].x = 'y'
+        expect(original[1].x).toEqual('y')
+
+      it 'returns  a shallow copy of the given object', ->
+        original = {a: 'b', c: [1, 2], d: 'e'}
+
+        copy = up.util.copy(original)
+        expect(copy).toEqual(original)
+
+        # Test that changes to copy don't change original
+        copy.f = 'g'
+        expect(original.f).toBeMissing()
+
+        # Test that the copy is shallow
+        copy.c.push(3)
+        expect(original.c).toEqual [1, 2, 3]
