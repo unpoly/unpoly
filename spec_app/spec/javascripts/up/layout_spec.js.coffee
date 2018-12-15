@@ -9,8 +9,7 @@ describe 'up.layout', ->
     describe 'up.reveal', ->
 
       beforeEach ->
-        up.layout.config.snap = 0
-        up.layout.config.substance = 99999
+        up.layout.config.revealSnap = 0
 
       describe 'when the viewport is the document', ->
 
@@ -81,8 +80,8 @@ describe 'up.layout', ->
           up.reveal(@$elements[2])
           next => expect($(document).scrollTop()).toBe(@clientHeight + 50 + 20)
 
-        it 'snaps to the top if the space above the future-visible area is smaller than the value of config.snap', asyncSpec (next) ->
-          up.layout.config.snap = 30
+        it 'snaps to the top if the space above the future-visible area is smaller than the value of config.revealSnap', asyncSpec (next) ->
+          up.layout.config.revealSnap = 30
 
           @$elements[0].css(height: '20px')
 
@@ -109,7 +108,7 @@ describe 'up.layout', ->
             expect($(document).scrollTop()).toBe(0)
 
         it 'does not snap to the top if it would un-reveal an element at the bottom edge of the screen (bugfix)', asyncSpec (next) ->
-          up.layout.config.snap = 100
+          up.layout.config.revealSnap = 100
 
           up.reveal(@$elements[1])
 

@@ -3,8 +3,3 @@
 ###
 window.up =
   version: <%= Unpoly::Rails::VERSION.to_json %>
-
-  deprecateRenamedModule: (oldName, newName) ->
-    Object.defineProperty? up, oldName, get: ->
-      up.warn("Deprecated: up.#{oldName} has been renamed to up.#{newName}")
-      up[newName]

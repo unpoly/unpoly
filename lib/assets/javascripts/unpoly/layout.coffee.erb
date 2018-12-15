@@ -47,7 +47,7 @@ up.layout = do ->
     to the top when the revealed element is closer to the top than `config.snap`.
   @stable
   ###
-  config = u.config
+  config = new up.Config
     duration: 0
     viewports: ['.up-modal-viewport', '[up-viewport]', '[up-fixed]']
     fixedTop: ['[up-fixed~=top]']
@@ -56,6 +56,10 @@ up.layout = do ->
     revealSnap: 50
     revealPadding: 0,
     scrollSpeed: 1
+
+  up.legacy.renamedProperty(config, 'snap', 'revealSnap')
+#  up.legacy.removedProperty(config, 'easing')
+#  up.legacy.removedProperty(config, 'duration')
 
   lastScrollTops = new up.Cache
     size: 30,

@@ -364,4 +364,4 @@ up.feedback = do ->
   start: start
   stop: stop
 
-up.deprecateRenamedModule 'navigation', 'feedback'
+up.legacy.renamedModule 'navigation', 'feedback'

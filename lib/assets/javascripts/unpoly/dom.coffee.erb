@@ -263,18 +263,20 @@ up.dom = do ->
       # http://2ality.com/2016/03/promise-rejections-vs-exceptions.html
       return Promise.reject(error)
 
-    request = new up.Request(
+    requestAttrs = u.only options,
+      'method',
+      'data', # deprecated
+      'params',
+      'cache',
+      'preload',
+      'headers',
+      'timeout'
+    u.assign requestAttrs,
       url: url
-      method: options.method
-      data: options.data # deprecated, use { params }
-      params: options.params
       target: improvedTarget
       failTarget: improvedFailTarget
-      cache: options.cache
-      preload: options.preload
-      headers: options.headers
-      timeout: options.timeout
-    )
+
+    request = new up.Request(requestAttrs)
 
     onSuccess = (response) ->
       processResponse(true, improvedTarget, request, response, successOptions)
@@ -954,4 +956,4 @@ up.first = up.dom.first
 up.all = up.dom.all
 up.hello = up.dom.hello
 
-up.deprecateRenamedModule 'flow', 'dom'
+up.legacy.renamedModule 'flow', 'dom'

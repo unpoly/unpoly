@@ -56,9 +56,6 @@ up.bus = do ->
   liveUpDescriptions = {}
   nextUpDescriptionNumber = 0
 
-  # A hash mapping oldEventName => newEventName
-  renamedEvents = {}
-
   upListenerToNativeListener = (upListener, selector) ->
     (event) ->
       # 1. Since we're listing on `document`, event.currentTarget is now `document`.
@@ -92,11 +89,11 @@ up.bus = do ->
   upDescriptionToNativeDescription = (upDescription, isNew) ->
     upDescription = u.copy(upDescription)
 
-    eventNames = upDescription.shift()
+    eventNames = u.splitValues(upDescription.shift())
+    eventNames = u.map(eventNames, up.legacy.fixEventName)
+
     upListener = upDescription.pop()
     selector = upDescription.shift() # might be undefined
-
-    eventNames = renameEvents(eventNames)
 
     if isNew
       nativeListener = upListenerToNativeListener(upListener, selector)
@@ -109,17 +106,6 @@ up.bus = do ->
       nativeListener or up.fail('up.off(): The callback %o was never registered through up.on()', upListener)
 
     [eventNames, nativeListener]
-
-
-  renameEvents = (eventNames) ->
-    events = u.splitValues(eventNames)
-    events = u.map events, (event) ->
-      if newEvent = renamedEvents[event]
-        up.warn("Deprecated: #{event} has been renamed to #{newEvent}")
-        newEvent
-      else
-        event
-    return events.join(' ')
 
   ###**
   Listens to an event on `document`.
@@ -224,7 +210,7 @@ up.bus = do ->
     # clean up after ourselves during a `reset`
     rememberUpDescription(upDescription)
 
-    for eventName in u.splitValues(eventNames)
+    for eventName in eventNames
       document.addEventListener(eventName, nativeListener)
 
     # Return destructor
@@ -254,7 +240,7 @@ up.bus = do ->
     [eventNames, nativeListener] = upDescriptionToNativeDescription(upDescription, false)
     forgetUpDescription(upDescription)
 
-    for eventName in u.splitValues(eventNames)
+    for eventName in eventNames
       document.removeEventListener(eventName, nativeListener)
 
   rememberUpDescription = (upDescription) ->
@@ -461,9 +447,6 @@ up.bus = do ->
   @experimental
   ###
 
-  deprecateRenamedEvent = (oldEvent, newEvent) ->
-    renamedEvents[oldEvent] = newEvent
-
   ###**
   Boots the Unpoly framework.
 
@@ -509,7 +492,6 @@ up.bus = do ->
   emitReset: emitReset
   haltEvent: haltEvent
   consumeAction: consumeAction
-  deprecateRenamedEvent: deprecateRenamedEvent
   boot: boot
 
 up.on = up.bus.on

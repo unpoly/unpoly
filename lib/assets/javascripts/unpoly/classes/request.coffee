@@ -92,7 +92,6 @@ class up.Request extends up.Record
     @normalize()
 
   normalize: =>
-    u.deprecateRenamedKey(@, 'data', 'params')
     @params = new up.Params(@params) # copies, which we want
     @method = u.normalizeMethod(@method)
     @headers ||= {}
@@ -237,3 +236,5 @@ class up.Request extends up.Record
 
   @wrap: (value) ->
     u.wrapValue(value, @)
+
+up.legacy.renamedProperty up.Request.prototype, 'data', 'params'

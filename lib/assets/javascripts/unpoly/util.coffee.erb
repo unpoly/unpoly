@@ -1075,11 +1075,6 @@ up.util = do ->
   renameKey = (object, oldKey, newKey) ->
     object[newKey] = pluckKey(object, oldKey)
 
-  deprecateRenamedKey = (object, oldKey, newKey) ->
-    if isDefined(object[oldKey])
-      up.warn('Deprecated: Object key { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
-      renameKey(object, oldKey, newKey)
-
   extractCallback = (args) ->
     lastArg = last(args)
     if isFunction(lastArg)
@@ -1388,8 +1383,8 @@ up.util = do ->
     else
       a == b
 
-  splitValues = (string, separator = ' ') ->
-    values = string.split(separator)
+  splitValues = (value, separator = ' ') ->
+    values = value.split(separator)
     values = map values, (v) -> v.trim()
     values = select(values, isPresent)
     values
@@ -1502,7 +1497,6 @@ up.util = do ->
   error: fail
   pluckKey: pluckKey
   renameKey: renameKey
-  deprecateRenamedKey: deprecateRenamedKey
   extractOptions: extractOptions
   extractCallback: extractCallback
   noop: noop

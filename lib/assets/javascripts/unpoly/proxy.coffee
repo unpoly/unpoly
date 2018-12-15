@@ -558,7 +558,7 @@ up.proxy = do ->
   ###
   clear = cache.clear
 
-  up.bus.deprecateRenamedEvent('up:proxy:received', 'up:proxy:loaded')
+  up.legacy.renamedEvent('up:proxy:received', 'up:proxy:loaded')
 
   preloadAfterDelay = (link) ->
     delay = e.numberAttr(link, 'up-delay') || config.preloadDelay

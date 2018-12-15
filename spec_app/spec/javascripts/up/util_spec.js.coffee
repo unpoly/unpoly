@@ -656,34 +656,6 @@ describe 'up.util', ->
         tester = (element) -> element[0] == 'z'
         expect(up.util.detect(array, tester)).toBeUndefined()
 
-    describe 'up.util.config', ->
-
-      it 'creates an object with the given attributes', ->
-        object = up.util.config(a: 1, b: 2)
-        expect(object.a).toBe(1)
-        expect(object.b).toBe(2)
-
-      it 'does not allow to set a key that was not included in the factory settings', ->
-        object = up.util.config(a: 1)
-        object.b = 2
-        expect(object.b).toBeUndefined()
-
-      describe '#reset', ->
-
-        it 'resets the object to its original state', ->
-          object = up.util.config(a: 1)
-          expect(object.b).toBeUndefined()
-          object.a = 2
-          expect(object.a).toBe(2)
-          object.reset()
-          expect(object.a).toBe(1)
-
-        it 'does not remove the #reset or #update method from the object', ->
-          object = up.util.config(a: 1)
-          object.b = 2
-          object.reset()
-          expect(object.reset).toBeDefined()
-
     describe 'up.util.remove', ->
 
       it 'removes the given string from the given array', ->

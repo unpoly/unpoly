@@ -136,6 +136,25 @@ describe 'up.bus', ->
           next =>
             expect(parseDataSpy).not.toHaveBeenCalled()
 
+      it 'allows to bind and unbind events by their old, deprecated name', ->
+        warnSpy = spyOn(up, 'warn')
+        listener = jasmine.createSpy('listener')
+
+        # Reister listener for the old event name
+        up.on('up:proxy:received', listener)
+        expect(warnSpy).toHaveBeenCalled()
+
+        # Emit event with new name and see that it invokes the legacy listener
+        up.emit('up:proxy:loaded')
+        expect(listener.calls.count()).toBe(1)
+
+        # Check that up.off works with the old event name
+        up.off('up:proxy:received', listener)
+
+        up.emit('up:proxy:loaded')
+        expect(listener.calls.count()).toBe(1)
+
+
     describe 'up.off', ->
 
       it 'unregisters an event listener previously registered through up.on', asyncSpec (next) ->
@@ -227,26 +246,6 @@ describe 'up.bus', ->
           expect(emittedElement).toEqual($element[0])
 
           expect(emittedEvent.target).toEqual($element[0])
-
-    describe 'up.bus.deprecateRenamedEvent', ->
-
-      it 'prints a warning and registers the event listener for the new event name', ->
-        warnSpy = spyOn(up, 'warn')
-        listener = jasmine.createSpy('listener')
-
-        # Reister listener for the old event name
-        up.on('up:proxy:received', listener)
-        expect(warnSpy).toHaveBeenCalled()
-
-        # Emit event with new name and see that it invokes the legacy listener
-        up.emit('up:proxy:loaded')
-        expect(listener.calls.count()).toBe(1)
-
-        # Check that up.off works with the old event name
-        up.off('up:proxy:received', listener)
-
-        up.emit('up:proxy:loaded')
-        expect(listener.calls.count()).toBe(1)
 
     describe 'up.bus.whenEmitted', ->
 
