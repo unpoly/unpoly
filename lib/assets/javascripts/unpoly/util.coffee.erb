@@ -550,25 +550,25 @@ up.util = do ->
   copy = (object, deep)  ->
     if isArray(object)
       object = object.slice()
-#      copied = true
+      copied = true
     else if isOptions(object)
       object = assign({}, object)
-#      copied = true
-#    if copied && deep
-#      for key, value of object
-#        object[key] = copy(value, true)
+      copied = true
+    if copied && deep
+      for key, value of object
+        object[key] = copy(value, true)
     object
 
-#  ###**
-#  Returns a deep copy of the given array or object.
-#
-#  @function up.util.deepCopy
-#  @param {Object|Array} object
-#  @return {Object|Array}
-#  @internal
-#  ###
-#  deepCopy = (object) ->
-#    copy(object, true)
+  ###**
+  Returns a deep copy of the given array or object.
+
+  @function up.util.deepCopy
+  @param {Object|Array} object
+  @return {Object|Array}
+  @internal
+  ###
+  deepCopy = (object) ->
+    copy(object, true)
 
   ###**
   Creates a new object by merging together the properties from the given objects.
@@ -1008,10 +1008,7 @@ up.util = do ->
   ###
   openConfig = (blueprint = {}) ->
     hash = {}
-    hash.reset = ->
-      opts = blueprint
-      opts = opts() if isFunction(opts)
-      assign(hash, opts)
+    hash.reset = -> assign(hash, deepCopy(blueprint))
     hash.reset()
     hash
 
@@ -1438,7 +1435,7 @@ up.util = do ->
   assign: assign
   assignPolyfill: assignPolyfill
   copy: copy
-#  deepCopy: deepCopy
+  deepCopy: deepCopy
   merge: merge
 #  deepAssign: deepAssign
 #  deepMerge: deepMerge
