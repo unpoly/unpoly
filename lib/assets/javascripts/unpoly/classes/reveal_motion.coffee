@@ -49,7 +49,7 @@ class up.RevealMotion
       # Element is fully visible within viewport
       # => Do nothing
 
-    if newScrollTop < @snap && @snap < viewportRect.height
+    if newScrollTop < @snap && elementRect.top < (0.5 * viewportRect.height)
       newScrollTop = 0
 
     if newScrollTop != originalScrollTop
