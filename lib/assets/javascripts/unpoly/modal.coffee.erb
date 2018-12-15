@@ -121,7 +121,7 @@ up.modal = do ->
     The default [flavor](/up.modal.flavors).
   @stable
   ###
-  config = u.config
+  config = new up.Config
     maxWidth: null
     width: null
     height: null
@@ -190,7 +190,7 @@ up.modal = do ->
     the values are the respective default configurations.
   @experimental
   ###
-  flavors = u.openConfig
+  flavors = new up.Config
     default: {}
 
   ###**
@@ -211,7 +211,7 @@ up.modal = do ->
   @experimental
   ###
   
-  state = u.config
+  state = new up.Config
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
     anchorElement: null  # the element to which the tooltip is anchored
     modalElement: null   # the modal container

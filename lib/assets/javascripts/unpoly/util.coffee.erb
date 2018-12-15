@@ -989,30 +989,6 @@ up.util = do ->
       value
 
   ###**
-  @function up.util.config
-  @param {Object|Function} blueprint
-    Default configuration options.
-    Will be restored by calling `reset` on the returned object.
-  @return {Object}
-    An object with a `reset` function.
-  @internal
-  ###
-  config = (blueprint) ->
-    hash = openConfig(blueprint)
-    Object.preventExtensions(hash)
-    hash
-
-  ###**
-  @function up.util.openConfig
-  @internal
-  ###
-  openConfig = (blueprint = {}) ->
-    hash = {}
-    hash.reset = -> assign(hash, deepCopy(blueprint))
-    hash.reset()
-    hash
-
-  ###**
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
 
@@ -1487,8 +1463,6 @@ up.util = do ->
   unresolvablePromise: unresolvablePromise
   remove: remove
   memoize: memoize
-  config: config
-  openConfig: openConfig
   camelCase: camelCase
   camelCaseKeys: camelCaseKeys
   # lowerCaseKeys: lowerCaseKeys

@@ -27,7 +27,7 @@ up.radio = do ->
     By default this is not set and the original replacement's transition is used.
   @stable
   ###
-  config = u.config
+  config = new up.Config
     hungry: ['[up-hungry]']
     hungryTransition: null
 

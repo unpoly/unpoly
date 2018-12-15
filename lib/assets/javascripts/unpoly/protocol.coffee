@@ -264,7 +264,7 @@ up.protocol = do ->
 
   @experimental
   ###
-  config = u.config
+  config = new up.Config
     targetHeader: 'X-Up-Target'
     failTargetHeader: 'X-Up-Fail-Target'
     locationHeader: 'X-Up-Location'

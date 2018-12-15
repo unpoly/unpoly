@@ -49,3 +49,5 @@ New features (postponable)
       - does the hash anchor exist in the current page
       - if yes, scroll to it and resolve the replacemnet
       - if no, do a usual replacement
+
+- merge up.modal.flavors property into up.modal.config.flavors

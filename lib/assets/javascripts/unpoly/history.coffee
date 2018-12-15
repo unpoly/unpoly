@@ -25,7 +25,7 @@ up.history = do ->
     when the user goes back or forward in history.
   @stable
   ###
-  config = u.config
+  config = new up.Config
     enabled: true
     popTargets: ['body']
     restoreScroll: true

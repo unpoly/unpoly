@@ -39,7 +39,7 @@ up.log = do ->
     A string to prepend to Unpoly's logging messages so you can distinguish it from your own messages.
   @stable
   ###
-  config = u.config
+  config = new up.Config
     prefix: '[UP] '
     enabled: sessionStore.get('enabled')
     collapse: false
