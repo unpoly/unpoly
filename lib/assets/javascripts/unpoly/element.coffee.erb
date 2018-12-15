@@ -23,7 +23,7 @@ up.element = do ->
     s(selector).subtree(root)
 
   closest = (element, selector) ->
-    assertIsElement(element)
+    # assertIsElement(element)
     s(selector).closest(element)
 
   matches = (element, selector) ->
@@ -77,9 +77,9 @@ up.element = do ->
     element.dispatchEvent(event)
     return event
 
-  assertIsElement = (element) ->
-    unless u.isElement(element)
-      up.fail('Not an element: %o', element)
+#  assertIsElement = (element) ->
+#    unless u.isElement(element)
+#      up.fail('Not an element: %o', element)
 
   remove = (element) ->
     if element.remove
@@ -121,8 +121,8 @@ up.element = do ->
   insertBefore = (existingElement, newElement) ->
     existingElement.insertAdjacentElement('beforebegin', newElement)
 
-  insertAfter = (existingElement, newElement) ->
-    existingElement.insertAdjacentElement('afterend', newElement)
+#  insertAfter = (existingElement, newElement) ->
+#    existingElement.insertAdjacentElement('afterend', newElement)
 
   replace = (oldElement, newElement) ->
     oldElement.parentElement.replaceChild(newElement, oldElement)
@@ -559,7 +559,7 @@ up.element = do ->
   metaContent: metaContent
   replace: replace
   insertBefore: insertBefore
-  insertAfter: insertAfter
+  # insertAfter: insertAfter
   # offsetFromDocument: offsetFromDocument
   createFromSelector: createFromSelector
   setAttrs: setAttrs

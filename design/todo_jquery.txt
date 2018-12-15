@@ -17,8 +17,6 @@
   - support new reveal options for up.replace and all follow variants
 - grep for TODO comments
 - scrolling to #hash should also find [up-id], to prevent jumping of browser (which does not remove obstructions and will probably jump before up.reveal starts)
-- check if we can git rid of any up.util methods (e.g. detachWith)
-- check if we can git rid of any up.element methods (e.g. insertAfter)
 - rename up.dom to up.fragment
 - rename up.layout to up.viewport
 - move up.browser.documentViewport and documentViewportSelector to up.layout
@@ -27,16 +25,17 @@
 - extractPlans should have properties { oldFragment } and { newFragment } instead of { oldElement } and { newElement }
 - Write CHANGELOG from diff
 
-- upgrade roca-style.org PR
-  - better claim
-  - no jquery
 - unpoly.com
   - remove mentions of jquery from unpoly.com
     - "no dependencies"
     - installtion guide
   - migration guide
     - jquery event listeners need to use addEventListener or use event.originalEvent
-- upgrade cards with the jquery compatibility layer
+- upgrade makandracards.com with the jquery compatibility layer
+
+- upgrade roca-style.org PR
+  - better claim
+  - no jquery
 
 
 
