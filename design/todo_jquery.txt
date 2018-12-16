@@ -3,38 +3,46 @@
     - yes
     - make sure there are tests
   - build and test up.$on()
-- Update docs
-  - Examples with $
-  - Stuff like  @param {jQuery} event.link
-  - document new stuff like up.$compiler
+  - upgrade makandracards.com with the jquery compatibility layer to see if it's convenient enough
+
 - Check if we really need to do e.get(...) in every single function that works with elements
   - Do we really need to support `elementOrSelector` instead of just `element` in the public API?
-- unify link variant parsing
+
+- complete (and maybe unify) link variant parsing options
   - can FollowVariant do most defaults?
   - Remove 'none' default for animation options in link.follow etc.
   - Remove 'auto' default from { layer, failLayer } in link, modal, popup
-  - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
-  - support new reveal options for up.replace and all follow variants
-- grep for TODO comments
-- rename up.layout to up.viewport
-- move up.browser.documentViewport and documentViewportSelector to up.layout
-- up-target should support [up-reveal-padding], { revealPadding }
-- keepPlans should have properties { oldFragment } and { newFragment } instead of { element } and { newElement }
-- extractPlans should have properties { oldFragment } and { newFragment } instead of { oldElement } and { newElement }
-- Write CHANGELOG from diff
+  - New options
+    - support new reveal options for up.replace and all follow variants
+    - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
+    - up-target should support [up-reveal-padding], { revealPadding }
 
-- unpoly.com
-  - remove mentions of jquery from unpoly.com
-    - "no dependencies"
-    - installtion guide
-  - migration guide
-    - jquery event listeners need to use addEventListener or use event.originalEvent
-- upgrade makandracards.com with the jquery compatibility layer
+- grep for TODO comments
+
+- rename up.layout to up.viewport
+  - move up.browser.documentViewport and documentViewportSelector to up.layout
+
+- Refactor up.fragment wording
+  - keepPlans should have properties { oldFragment } and { newFragment } instead of { element } and { newElement }
+  - extractPlans should have properties { oldFragment } and { newFragment } instead of { oldElement } and { newElement }
+
+- Update docs
+  - Write CHANGELOG from diff
+  - API comments
+    - Examples with $
+    - Stuff like  @param {jQuery} event.link
+    - document new stuff like up.$compiler
+
+  - unpoly.com
+    - remove mentions of jquery from unpoly.com
+      - "no dependencies"
+      - installtion guide
+    - migration guide
+      - jquery event listeners need to use addEventListener or use event.originalEvent
 
 - upgrade roca-style.org PR
   - better claim
   - no jquery
-
 
 
 New features (postponable)
