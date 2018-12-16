@@ -127,13 +127,6 @@ up.element = do ->
   replace = (oldElement, newElement) ->
     oldElement.parentElement.replaceChild(newElement, oldElement)
 
-#  offsetFromDocument = (element) ->
-#    viewport = up.browser.documentViewport()
-#    scrolledRect = element.getBoundingClientRect()
-#
-#    top: scrolledRect.top + viewport.scrollTop,
-#    left: scrolledRect.left + viewport.scrollLeft
-
   setAttrs = (element, attrs) ->
     for name, value of attrs
       element.setAttribute(name, value)
@@ -586,7 +579,6 @@ up.element = do ->
   replace: replace
   insertBefore: insertBefore
   # insertAfter: insertAfter
-  # offsetFromDocument: offsetFromDocument
   createFromSelector: createFromSelector
   setAttrs: setAttrs
   affix: affix

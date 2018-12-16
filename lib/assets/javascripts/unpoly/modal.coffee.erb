@@ -277,14 +277,14 @@ up.modal = do ->
   # modal overlay, which has its own scroll bar.
   # This is screwed up, but Bootstrap does the same.
   shiftElements = ->
-    if up.browser.documentViewportHasVerticalScrollbar()
+    if up.viewport.rootHasVerticalScrollbar()
       body = document.body
-      scrollbarWidth = up.browser.scrollbarWidth()
+      scrollbarWidth = up.viewport.scrollbarWidth()
       bodyRightPadding = e.readComputedStyleNumber(body, 'paddingRight')
       bodyRightShift = scrollbarWidth + bodyRightPadding
       # TODO: Check whether we should set overflowY on <body> or <html>.
       # If any element already has a computed, non-default overflow-y we
-      # should set it there. If neither has, use documentViewport()
+      # should set it there. If neither has, use up.viewport.root()
       unshiftBody = e.writeTemporaryStyle(body,
         paddingRight: bodyRightShift
         overflowY: 'hidden'

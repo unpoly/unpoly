@@ -1229,7 +1229,7 @@ up.util = do ->
   horizontalScreenHalf = (element) ->
     elementDims = element.getBoundingClientRect()
     elementMid = elementDims.left + 0.5 * elementDims.width
-    screenMid = 0.5 * up.browser.documentViewportWidth()
+    screenMid = 0.5 * up.viewport.rootWidth()
     if elementMid < screenMid
       'left'
     else

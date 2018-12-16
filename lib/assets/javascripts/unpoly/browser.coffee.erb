@@ -290,72 +290,6 @@ up.browser = do ->
       canPromise() &&
       canAnimationFrame()
 
-  ###**
-  Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
-  for the browser's main content area.
-
-  @function up.browser.documentViewportSelector
-  @internal
-  ###
-  documentViewportSelector = ->
-    # The spec says this should be <html> in standards mode
-    # and <body> in quirks mode. However, it is currently (2018-07)
-    # always <body> in Webkit browsers (not Blink). Luckily Webkit
-    # also supports document.scrollingElement.
-    if element = document.scrollingElement
-      element.tagName
-    else
-      # IE11
-      'html'
-
-  documentViewport = ->
-    document.querySelector(documentViewportSelector())
-
-  documentViewportWidth = ->
-    e.root().clientWidth
-
-  documentViewportHeight = ->
-    e.root().clientHeight
-
-  isDocumentViewport = (element) ->
-    e.matches(element, documentViewportSelector())
-
-  ###**
-  Returns the width of a scrollbar.
-
-  This only runs once per page load.
-
-  @function up.browser.scrollbarWidth
-  @internal
-  ###
-  scrollbarWidth = u.memoize ->
-    # This is how Bootstrap does it also:
-    # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
-    outerStyle =
-      position:  'absolute'
-      top:       '0'
-      left:      '0'
-      width:     '100px'
-      height:    '100px' # Firefox needs at least 100px to show a scrollbar
-      overflowY: 'scroll'
-    outer = up.element.affix(document.body, '[up-viewport]', { style: outerStyle })
-    width = outer.offsetWidth - outer.clientWidth
-    up.element.remove(outer)
-    width
-
-  ###**
-  Returns whether the given element is currently showing a vertical scrollbar.
-
-  @function up.util.documentViewportHasVerticalScrollbar
-  @internal
-  ###
-  documentViewportHasVerticalScrollbar = ->
-    # We could also check if scrollHeight > offsetHeight for the document viewport.
-    # However, we would also need to check overflow-y for that element.
-    # Also we have no control whether developers set the property on <body> or <html>.
-    # https://tylercipriani.com/blog/2014/07/12/crossbrowser-javascript-scrollbar-detection/
-    window.innerWidth > document.documentElement.offsetWidth
-
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url
   navigate: navigate
@@ -365,13 +299,6 @@ up.browser = do ->
   canInspectFormData: canInspectFormData
   canCustomElements: canCustomElements
   canJQuery: canJQuery
-  documentViewport: documentViewport
-  documentViewportSelector: documentViewportSelector
-  documentViewportWidth: documentViewportWidth
-  documentViewportHeight: documentViewportHeight
-  documentViewportHasVerticalScrollbar: documentViewportHasVerticalScrollbar
-  scrollbarWidth: scrollbarWidth
-  isDocumentViewport: isDocumentViewport
   whenConfirmed: whenConfirmed
   isSupported: isSupported
   puts: puts

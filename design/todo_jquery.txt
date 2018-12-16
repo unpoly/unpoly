@@ -24,9 +24,6 @@
 
 - grep for TODO comments
 
-- rename up.layout to up.viewport
-  - move up.browser.documentViewport and documentViewportSelector to up.layout
-
 - Refactor up.fragment wording
   - keepPlans should have properties { oldFragment } and { newFragment } instead of { element } and { newElement }
   - extractPlans should have properties { oldFragment } and { newFragment } instead of { oldElement } and { newElement }

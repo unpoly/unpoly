@@ -296,9 +296,9 @@ up.viewport = do ->
     else
       Promise.resolve()
 
-  viewportSelector = ->
+  allSelector = ->
     # On Edge the document viewport can be changed from CSS
-    [up.browser.documentViewportSelector(), config.viewports...].join(',')
+    [rootSelector(), config.viewports...].join(',')
 
   ###**
   Returns the viewport for the given element.
@@ -313,7 +313,7 @@ up.viewport = do ->
   ###
   closest = (selectorOrElement, options = {}) ->
     element = e.get(selectorOrElement)
-    e.closest(element, viewportSelector())
+    e.closest(element, allSelector())
 
   ###**
   Returns a jQuery collection of all the viewports contained within the
@@ -326,7 +326,7 @@ up.viewport = do ->
   ###
   getSubtree = (selectorOrElement) ->
     element = e.get(selectorOrElement)
-    e.subtree(element, viewportSelector())
+    e.subtree(element, allSelector())
 
   getAround = (selectorOrElement) ->
     element = e.get(selectorOrElement)
@@ -339,7 +339,75 @@ up.viewport = do ->
   @internal
   ###
   getAll = ->
-    e.all(viewportSelector())
+    e.all(allSelector())
+
+  ###**
+  Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
+  for the browser's main content area.
+
+  @function up.viewport.rootSelector
+  @internal
+  ###
+  rootSelector = ->
+    # The spec says this should be <html> in standards mode
+    # and <body> in quirks mode. However, it is currently (2018-07)
+    # always <body> in Webkit browsers (not Blink). Luckily Webkit
+    # also supports document.scrollingElement.
+    if element = document.scrollingElement
+      element.tagName
+    else
+      # IE11
+      'html'
+
+  getRoot = ->
+    document.querySelector(rootSelector())
+
+  rootWidth = ->
+    # This should happen on the <html> element, regardless of document.scrollingElement
+    e.root().clientWidth
+
+  rootHeight = ->
+  # This should happen on the <html> element, regardless of document.scrollingElement
+    e.root().clientHeight
+
+  isRoot = (element) ->
+    e.matches(element, rootSelector())
+
+  ###**
+  Returns whether the given element is currently showing a vertical scrollbar.
+
+  @function up.viewport.rootHasVerticalScrollbar
+  @internal
+  ###
+  rootHasVerticalScrollbar = ->
+    # We could also check if scrollHeight > offsetHeight for the document viewport.
+    # However, we would also need to check overflow-y for that element.
+    # Also we have no control whether developers set the property on <body> or <html>.
+    # https://tylercipriani.com/blog/2014/07/12/crossbrowser-javascript-scrollbar-detection/
+    window.innerWidth > document.documentElement.offsetWidth
+
+  ###**
+  Returns the width of a scrollbar.
+
+  This only runs once per page load.
+
+  @function up.viewport.scrollbarWidth
+  @internal
+  ###
+  scrollbarWidth = u.memoize ->
+    # This is how Bootstrap does it also:
+    # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
+    outerStyle =
+      position:  'absolute'
+      top:       '0'
+      left:      '0'
+      width:     '100px'
+      height:    '100px' # Firefox needs at least 100px to show a scrollbar
+      overflowY: 'scroll'
+    outer = up.element.affix(document.body, '[up-viewport]', { style: outerStyle })
+    width = outer.offsetWidth - outer.clientWidth
+    up.element.remove(outer)
+    width
 
   scrollTopKey = (viewport) ->
     e.toSelector(viewport)
@@ -636,6 +704,8 @@ up.viewport = do ->
       value = value.substr(1)
     u.presence(value)
 
+
+
   up.on 'up:app:booted', -> revealHash(location.hash)
 
   up.on 'up:framework:reset', reset
@@ -650,6 +720,13 @@ up.viewport = do ->
   subtree: getSubtree
   around: getAround
   all: getAll
+  rootSelector: rootSelector
+  root: getRoot
+  rootWidth: rootWidth
+  rootHeight: rootHeight
+  isRoot: isRoot
+  rootHasVerticalScrollbar: rootHasVerticalScrollbar
+  scrollbarWidth: scrollbarWidth
   scrollTops: scrollTops
   saveScroll: saveScroll
   restoreScroll: restoreScroll

@@ -20,7 +20,7 @@ describe 'up.viewport', ->
           @$container = $('<div class="container">').prependTo($body)
           @$container.css(opacity: 0.2) # reduce flashing during test runs
 
-          @clientHeight = up.browser.documentViewportHeight()
+          @clientHeight = up.viewport.rootHeight()
 
           elementPlans = [
             { height: @clientHeight, backgroundColor: 'yellow' }, # [0]
@@ -37,7 +37,7 @@ describe 'up.viewport', ->
           @$container.remove()
 
         $documentViewport = ->
-          $(up.browser.documentViewportSelector())
+          $(up.viewport.root())
 
         it 'reveals the given element', asyncSpec (next) ->
           up.reveal(@$elements[0])
@@ -430,7 +430,7 @@ describe 'up.viewport', ->
       it 'returns a list of all viewports on the screen', ->
         viewportElement = affix('[up-viewport]')[0]
         results = up.viewport.all()
-        expect(results).toMatchList([viewportElement, up.browser.documentViewport()])
+        expect(results).toMatchList([viewportElement, up.viewport.root()])
 
     describe 'up.viewport.subtree', ->
 
@@ -484,21 +484,21 @@ describe 'up.viewport', ->
         it 'falls back to the scrolling element', ->
           $element = affix('.element').css(height: '3000px')
           $result = up.viewport.closest($element)
-          expect($result).toMatchSelector(up.browser.documentViewportSelector())
+          expect($result).toMatchSelector(up.viewport.rootSelector())
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
           $element = affix('.element').css(height: '3000px')
           @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'hidden')
           @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'scroll')
           $result = up.viewport.closest($element)
-          expect($result).toMatchSelector(up.browser.documentViewportSelector())
+          expect($result).toMatchSelector(up.viewport.rootSelector())
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
           $element = affix('.element').css(height: '3000px')
           @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'scroll')
           @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'hidden')
           $result = up.viewport.closest($element)
-          expect($result).toMatchSelector(up.browser.documentViewportSelector())
+          expect($result).toMatchSelector(up.viewport.rootSelector())
 
     describe 'up.viewport.restoreScroll', ->
 
