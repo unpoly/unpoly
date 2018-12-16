@@ -13,11 +13,11 @@ class up.ExtractCascade
       if i > 0
         # If we're using a fallback (any candidate that's not the first),
         # the original transition might no longer be appropriate.
-        planOptions.transition = u.option(up.dom.config.fallbackTransition, @options.transition)
+        planOptions.transition = u.option(up.fragment.config.fallbackTransition, @options.transition)
       new up.ExtractPlan(candidate, planOptions)
 
   buildCandidates: (selector) ->
-    candidates = [selector, @options.fallback, up.dom.config.fallbacks]
+    candidates = [selector, @options.fallback, up.fragment.config.fallbacks]
     candidates = u.flatten(candidates)
     # Remove undefined, null and false from the list
     candidates = u.select(candidates, u.isTruthy)

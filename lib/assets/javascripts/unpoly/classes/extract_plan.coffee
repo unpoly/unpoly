@@ -10,12 +10,12 @@ class up.ExtractPlan
     @transition = options.transition
     @response = options.response
     @oldLayer = options.layer
-    originalSelector = up.dom.resolveSelector(selector, @origin)
+    originalSelector = e.resolveSelector(selector, @origin)
     @parseSteps(originalSelector)
 
   findOld: =>
     u.each @steps, (step) =>
-      step.oldElement = e.get up.dom.first(step.selector, layer: @oldLayer) # TODO: Remove e.get()
+      step.oldElement = e.get up.fragment.first(step.selector, layer: @oldLayer) # TODO: Remove e.get()
 
   findNew: =>
     u.each @steps, (step) =>

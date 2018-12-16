@@ -9,9 +9,9 @@ Most of Unpoly's functionality (like [fragment links](/up.link) or [modals](/up.
 is built from these functions. You can use them to extend Unpoly from your
 [custom Javascript](/up.syntax).
 
-@class up.dom
+@class up.fragment
 ###
-up.dom = do ->
+up.fragment = do ->
   
   u = up.util
   e = up.element
@@ -19,7 +19,7 @@ up.dom = do ->
   ###**
   Configures defaults for fragment insertion.
 
-  @property up.dom.config
+  @property up.fragment.config
   @param {string} [options.fallbacks=['body']]
     When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
 
@@ -51,7 +51,7 @@ up.dom = do ->
   ###**
   Returns the URL the given element was retrieved from.
 
-  @method up.dom.source
+  @method up.fragment.source
   @param {string|Element|jQuery} selectorOrElement
   @experimental
   ###
@@ -61,34 +61,6 @@ up.dom = do ->
       element.getAttribute("up-source")
     else
       up.browser.url()
-
-  ###**
-  Resolves the given CSS selector (which might contain `&` references)
-  to a full CSS selector without ampersands.
-
-  If passed an `Element` or `jQuery` element, returns a CSS selector string
-  for that element.
-
-  @function up.dom.resolveSelector
-  @param {string|Element|jQuery} selectorOrElement
-  @param {string|Element|jQuery} origin
-    The element that this selector resolution is relative to.
-    That element's selector will be substituted for `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @return {string}
-  @internal
-  ###
-  resolveSelector = (selectorOrElement, origin) ->
-    if u.isString(selectorOrElement)
-      selector = selectorOrElement
-      if u.contains(selector, '&')
-        if u.isPresent(origin) # isPresent returns false for empty jQuery collection
-          originSelector = e.toSelector(origin)
-          selector = selector.replace(/\&/, originSelector)
-        else
-          up.fail("Found origin reference (%s) in selector %s, but no origin was given", '&', selector)
-    else
-      selector = e.toSelector(selectorOrElement)
-    selector
 
   ###**
   Replaces elements on the current page with corresponding elements
@@ -522,7 +494,7 @@ up.dom = do ->
       keepable = element
       if partnerSelector = e.castedAttr(keepable, 'up-keep')
         u.isString(partnerSelector) or partnerSelector = '&'
-        partnerSelector = resolveSelector(partnerSelector, keepable)
+        partnerSelector = e.resolveSelector(partnerSelector, keepable)
         if options.descendantsOnly
           partner = e.descendant(newElement, partnerSelector)
         else
@@ -745,7 +717,7 @@ up.dom = do ->
   ###
   first = (selectorOrElement, options) ->
     options = u.options(options, layer: 'auto')
-    resolved = resolveSelector(selectorOrElement, options.origin)
+    resolved = e.resolveSelector(selectorOrElement, options.origin)
     if options.layer == 'auto'
       firstInPriority(resolved, options.origin)
     else
@@ -768,7 +740,7 @@ up.dom = do ->
         return element
 
   ###**
-  @function up.dom.layerOf
+  @function up.fragment.layerOf
   @internal
   ###
   layerOf = (selectorOrElement) ->
@@ -803,7 +775,7 @@ up.dom = do ->
   ###
   all = (selectorOrElements, options) ->
     options = u.options(options)
-    resolved = resolveSelector(selectorOrElements, options.origin)
+    resolved = e.resolveSelector(selectorOrElements, options.origin)
     root = options.root ? document
     matches = e.descendants(root, resolved)
     e.select matches, (match) ->
@@ -943,17 +915,17 @@ up.dom = do ->
   first: first
   all: all
   source: source
-  resolveSelector: resolveSelector
   hello: hello
   config: config
   layerOf: layerOf
 
-up.replace = up.dom.replace
-up.extract = up.dom.extract
-up.reload = up.dom.reload
-up.destroy = up.dom.destroy
-up.first = up.dom.first
-up.all = up.dom.all
-up.hello = up.dom.hello
+up.replace = up.fragment.replace
+up.extract = up.fragment.extract
+up.reload = up.fragment.reload
+up.destroy = up.fragment.destroy
+up.first = up.fragment.first
+up.all = up.fragment.all
+up.hello = up.fragment.hello
 
-up.legacy.renamedModule 'flow', 'dom'
+up.legacy.renamedModule 'flow', 'fragment'
+up.legacy.renamedModule 'dom', 'fragment'

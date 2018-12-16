@@ -2,7 +2,7 @@ u = up.util
 e = up.element
 $ = jQuery
 
-describe 'up.dom', ->
+describe 'up.fragment', ->
 
   describe 'JavaScript functions', ->
 
@@ -94,11 +94,11 @@ describe 'up.dom', ->
         describe 'when the server responds with an error', ->
 
           it 'replaces the first fallback instead of the given selector', asyncSpec (next) ->
-            up.dom.config.fallbacks = ['.fallback']
+            up.fragment.config.fallbacks = ['.fallback']
             affix('.fallback')
 
             # can't have the example replace the Jasmine test runner UI
-            extractSpy = up.dom.knife.mock('extract').and.returnValue(Promise.resolve())
+            extractSpy = up.fragment.knife.mock('extract').and.returnValue(Promise.resolve())
 
             next => up.replace('.middle', '/path')
             next => @respond(status: 500)
@@ -244,25 +244,25 @@ describe 'up.dom', ->
               @respond()
             next =>
               expect($('.middle')).toHaveText('new-middle')
-              expect(up.dom.source('.middle')).toMatchUrl('/previous-source')
+              expect(up.fragment.source('.middle')).toMatchUrl('/previous-source')
 
           describe 'if a URL is given as { source } option', ->
 
             it 'uses that URL as the source for a GET request', asyncSpec (next) ->
               up.replace('.middle', '/path', source: '/given-path')
               next => @respond()
-              next => expect(up.dom.source('.middle')).toMatchUrl('/given-path')
+              next => expect(up.fragment.source('.middle')).toMatchUrl('/given-path')
 
             it 'uses that URL as the source after a non-GET request', asyncSpec (next) ->
               up.replace('.middle', '/path', method: 'post', source: '/given-path')
               next => @respond()
-              next => expect(up.dom.source('.middle')).toMatchUrl('/given-path')
+              next => expect(up.fragment.source('.middle')).toMatchUrl('/given-path')
 
             it 'ignores the option and reuses the previous source after a failed non-GET request', asyncSpec (next) ->
               @$oldMiddle.attr('up-source', '/previous-source')
               up.replace('.middle', '/path', method: 'post', source: '/given-path', failTarget: '.middle')
               next => @respond(status: 500)
-              next => expect(up.dom.source('.middle')).toMatchUrl('/previous-source')
+              next => expect(up.fragment.source('.middle')).toMatchUrl('/previous-source')
 
         describe 'document title', ->
 
@@ -818,7 +818,7 @@ describe 'up.dom', ->
           describe 'when selectors are missing on the page before the request was made', ->
 
             beforeEach ->
-              up.dom.config.fallbacks = []
+              up.fragment.config.fallbacks = []
 
             it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
               affix('.box').text('old box')
@@ -848,15 +848,15 @@ describe 'up.dom', ->
                 expect('.target').toHaveText('old target')
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
-              up.dom.config.fallbacks = ['.existing']
+            it 'tries a selector from up.fragment.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
+              up.fragment.config.fallbacks = ['.existing']
               affix('.existing').text('old existing')
               up.replace('.unknown', '/path')
               next => @respondWith '<div class="existing">new existing</div>'
               next => expect('.existing').toHaveText('new existing')
 
-            it 'does not try a selector from up.dom.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
-              up.dom.config.fallbacks = ['.existing']
+            it 'does not try a selector from up.fragment.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
+              up.fragment.config.fallbacks = ['.existing']
               affix('.existing').text('old existing')
               up.replace('.unknown', '/path', fallback: false).catch (e) ->
                 expect(e).toBeError(/Could not find target in current page/i)
@@ -865,7 +865,7 @@ describe 'up.dom', ->
           describe 'when selectors are missing on the page after the request was made', ->
 
             beforeEach ->
-              up.dom.config.fallbacks = []
+              up.fragment.config.fallbacks = []
 
             it 'tries selectors from options.fallback before swapping elements', asyncSpec (next) ->
               $target = affix('.target').text('old target')
@@ -918,8 +918,8 @@ describe 'up.dom', ->
                 expect('.target').toHaveText('old target')
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
-              up.dom.config.fallbacks = ['.fallback']
+            it 'tries a selector from up.fragment.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
+              up.fragment.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path')
@@ -934,8 +934,8 @@ describe 'up.dom', ->
               next =>
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'does not try a selector from up.dom.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
-              up.dom.config.fallbacks = ['.fallback']
+            it 'does not try a selector from up.fragment.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
+              up.fragment.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: false)
@@ -954,7 +954,7 @@ describe 'up.dom', ->
           describe 'when selectors are missing in the response', ->
 
             beforeEach ->
-              up.dom.config.fallbacks = []
+              up.fragment.config.fallbacks = []
 
             it 'tries selectors from options.fallback before swapping elements', asyncSpec (next) ->
               $target = affix('.target').text('old target')
@@ -1023,8 +1023,8 @@ describe 'up.dom', ->
                 expect('.target2').toHaveText('old target2')
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.dom.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
-              up.dom.config.fallbacks = ['.fallback']
+            it 'tries a selector from up.fragment.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
+              up.fragment.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               up.replace('.target', '/path')
@@ -1036,8 +1036,8 @@ describe 'up.dom', ->
                 expect('.target').toHaveText('old target')
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'does not try a selector from up.dom.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
-              up.dom.config.fallbacks = ['.fallback']
+            it 'does not try a selector from up.fragment.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
+              up.fragment.config.fallbacks = ['.fallback']
               $target = affix('.target').text('old target')
               $fallback = affix('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: false)
@@ -2464,31 +2464,31 @@ describe 'up.dom', ->
           next =>
             expect(up.browser.navigate).toHaveBeenCalledWith('/source', jasmine.anything())
 
-    describe 'up.dom.layerOf', ->
+    describe 'up.fragment.layerOf', ->
 
       it 'returns "popup" for an element in a popup over the page', ->
         $popup = affix('.up-popup')
         $element = $popup.affix('.element')
-        expect(up.dom.layerOf($element)).toEqual('popup')
+        expect(up.fragment.layerOf($element)).toEqual('popup')
 
       it 'returns "popup" for an element in a popup over a modal', ->
         $modal = affix('.up-modal')
         $popupInModal = $modal.affix('.up-popup')
         $element = $popupInModal.affix('.element')
-        expect(up.dom.layerOf($element)).toEqual('popup')
+        expect(up.fragment.layerOf($element)).toEqual('popup')
 
       it 'returns "modal" for an element in a modal', ->
         $modal = affix('.up-modal')
         $element = $modal.affix('.element')
-        expect(up.dom.layerOf($element)).toEqual('modal')
+        expect(up.fragment.layerOf($element)).toEqual('modal')
 
       it 'returns "page" for an element below a modal or popup', ->
         $element = affix('.element')
-        expect(up.dom.layerOf($element)).toEqual('page')
+        expect(up.fragment.layerOf($element)).toEqual('page')
 
       it 'returns undefined for an empty jQuery collection', ->
-        expect(up.dom.layerOf($())).toBeUndefined()
+        expect(up.fragment.layerOf($())).toBeUndefined()
 
       it 'returns undefined for undefined', ->
-        expect(up.dom.layerOf(undefined)).toBeUndefined()
+        expect(up.fragment.layerOf(undefined)).toBeUndefined()
 

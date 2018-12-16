@@ -16,8 +16,6 @@
   - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
   - support new reveal options for up.replace and all follow variants
 - grep for TODO comments
-- scrolling to #hash should also find [up-id], to prevent jumping of browser (which does not remove obstructions and will probably jump before up.reveal starts)
-- rename up.dom to up.fragment
 - rename up.layout to up.viewport
 - move up.browser.documentViewport and documentViewportSelector to up.layout
 - up-target should support [up-reveal-padding], { revealPadding }
@@ -49,5 +47,3 @@ New features (postponable)
       - does the hash anchor exist in the current page
       - if yes, scroll to it and resolve the replacemnet
       - if no, do a usual replacement
-
-- merge up.modal.flavors property into up.modal.config.flavors

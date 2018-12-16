@@ -252,7 +252,7 @@ up.layout = do ->
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
         console.debug("--- revealing %o with %o", revealOpt, options.origin)
-        selector = up.dom.resolveSelector(revealOpt, options.origin)
+        selector = e.resolveSelector(revealOpt, options.origin)
         console.debug("--- reveal done")
         element = e.get up.first(selector) # TODO: Remove e.get
 
@@ -611,16 +611,24 @@ up.layout = do ->
   ###
   firstHashTarget = (hash) ->
     if hash = pureHash(hash)
-      byID = e.attributeSelector('id', hash)
-      byName = 'a' + e.attributeSelector('name', hash)
-      e.get up.first("#{byID},#{byName}") # TODO: Remove e.get()
+      selector = [
+        # First match an <* up-id="hash">. This won't be picked up without JS,
+        # preventing the scroll position from jump if up.viewport.revealPadding
+        # is set.
+        e.attributeSelector('up-id', hash),
+        # Match an <* id="hash">
+        e.attributeSelector('id', hash),
+        # Match an <a name="hash">
+        'a' + e.attributeSelector('name', hash)
+      ].join(',')
+      up.first(selector)
 
   ###**
   Returns `'foo'` if the hash is `'#foo'`.
 
   Returns undefined if the hash is `'#'`, `''` or `undefined`.
 
-  @function up.browser.hash
+  @function pureHash
   @internal
   ###
   pureHash = (value) ->

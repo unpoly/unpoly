@@ -334,7 +334,7 @@ describe 'up.proxy', ->
 
             promise.then (response) ->
               # See that the response object has been updated by moving the data options
-              # to the URL. This is important for up.dom code that works on response.request.
+              # to the URL. This is important for up.fragment code that works on response.request.
               expect(response.request.url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
               expect(response.request.params.isBlank()).toBe(true)
               done()

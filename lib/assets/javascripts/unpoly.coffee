@@ -12,7 +12,7 @@
 #= require ./unpoly/syntax
 #= require ./unpoly/history
 #= require ./unpoly/layout
-#= require ./unpoly/dom
+#= require ./unpoly/fragment
 #= require ./unpoly/motion
 #= require ./unpoly/proxy
 #= require ./unpoly/link

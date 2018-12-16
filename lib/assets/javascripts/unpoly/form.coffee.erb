@@ -347,7 +347,7 @@ up.form = do ->
   findValidateTargetSelector = (field, options) ->
     option = u.option(options.target, field.getAttribute('up-validate'))
     option ||= u.detectResult config.validateTargets, (defaultTarget) ->
-      resolvedDefault = up.dom.resolveSelector(defaultTarget, options.origin)
+      resolvedDefault = e.resolveSelector(defaultTarget, options.origin)
       if e.first(resolvedDefault)
         return resolvedDefault
 
@@ -355,7 +355,7 @@ up.form = do ->
       up.fail('Could not find validation target for %o (tried defaults %o)', field, config.validateTargets)
 
     # resolveSelector() also creates a selector string if given an element
-    return up.dom.resolveSelector(option, options.origin)
+    return e.resolveSelector(option, options.origin)
 
   ###**
   Performs a server-side validation of a form field.
