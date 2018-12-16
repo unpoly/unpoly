@@ -28,6 +28,11 @@
 
 - Update docs
   - Write CHANGELOG from diff
+
+  - check if the main entries for renamed modules still work
+    - up.fragment
+    - up.layout
+
   - API comments
     - Examples with $
     - Stuff like  @param {jQuery} event.link
@@ -39,6 +44,8 @@
       - installtion guide
     - migration guide
       - jquery event listeners need to use addEventListener or use event.originalEvent
+    - redirect /up.layout to /up.viewport
+    - redirect /up.dom to /up.fragment
 
 - upgrade roca-style.org PR
   - better claim

@@ -125,7 +125,7 @@ describe 'up.history', ->
 
           $viewport = $(longContentHtml).appendTo(document.body)
 
-          up.layout.config.viewports = ['.viewport']
+          up.viewport.config.viewports = ['.viewport']
           up.history.config.popTargets = ['.viewport']
 
           up.replace('.content', '/one')
@@ -177,7 +177,7 @@ describe 'up.history', ->
           next =>
             expect($('.viewport').scrollTop()).toBe(250)
 
-        it 'restores the scroll position of two viewports marked with [up-viewport], but not configured in up.layout.config (bugfix)', asyncSpec (next) ->
+        it 'restores the scroll position of two viewports marked with [up-viewport], but not configured in up.viewport.config (bugfix)', asyncSpec (next) ->
           up.history.config.popTargets = ['.container']
 
           html = """

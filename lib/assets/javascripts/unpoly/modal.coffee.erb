@@ -290,7 +290,7 @@ up.modal = do ->
         overflowY: 'hidden'
       )
       state.unshifters.push(unshiftBody)
-      for anchor in up.layout.anchoredRight()
+      for anchor in up.viewport.anchoredRight()
         elementRight = e.readComputedStyleNumber(anchor, 'right')
         elementRightShift = scrollbarWidth + elementRight
         unshifter = e.writeTemporaryStyle(anchor, right: elementRightShift)

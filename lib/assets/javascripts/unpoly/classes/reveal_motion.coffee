@@ -3,8 +3,8 @@ e = up.element
 class up.RevealMotion
 
   constructor: (@element, options) ->
-    layoutConfig = up.layout.config
-    @viewport = options.viewport ? up.layout.viewportOf(@element)
+    layoutConfig = up.viewport.config
+    @viewport = options.viewport ? up.viewport.viewportOf(@element)
     @speed = options.speed ? options.scrollSpeed ? layoutConfig.scrollSpeed
     snapDefault = layoutConfig.revealSnap
     @snap = options.snap ? options.revealSnap ? snapDefault

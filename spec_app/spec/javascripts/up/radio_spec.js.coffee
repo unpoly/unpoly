@@ -56,7 +56,7 @@ describe 'up.radio', ->
         affix('.hungry[up-hungry]').text('old hungry')
         affix('.target').text('old target')
 
-        revealStub = up.layout.knife.mock('reveal')
+        revealStub = up.viewport.knife.mock('reveal')
 
         up.replace('.target', '/path', reveal: true)
 

@@ -2,7 +2,7 @@
 Application layout
 ==================
 
-You can [make Unpoly aware](/up.layout.config) of fixed elements in your
+You can [make Unpoly aware](/up.viewport.config) of fixed elements in your
 layout, such as navigation bars or headers. Unpoly will respect these sticky
 elements when [revealing elements](/up.reveal) or [opening a modal dialog](/a-up-modal).
 
@@ -16,9 +16,9 @@ When using Bootstrap integration (`unpoly-bootstrap3.js` and `unpoly-bootstrap3.
 Unpoly will automatically be aware of sticky Bootstrap components such as
 [fixed navbar](https://getbootstrap.com/examples/navbar-fixed-top/).
 
-@class up.layout
+@class up.viewport
 ###
-up.layout = do ->
+up.viewport = do ->
 
   u = up.util
   e = up.element
@@ -26,7 +26,7 @@ up.layout = do ->
   ###**
   Configures the application layout.
 
-  @property up.layout.config
+  @property up.viewport.config
   @param {Array} [config.viewports]
     An array of CSS selectors that find viewports
     (containers that scroll their contents).
@@ -117,7 +117,7 @@ up.layout = do ->
   ###**
   Finishes scrolling animations in the given element, its ancestors or its descendants.
 
-  @function up.layout.finishScrolling
+  @function up.viewport.finishScrolling
   @param {string|Element|jQuery}
   @return {Promise}
   @internal
@@ -130,7 +130,7 @@ up.layout = do ->
     scrollingTracker.finish(scrollable)
 
   ###**
-  @function up.layout.anchoredRight
+  @function up.viewport.anchoredRight
   @internal
   ###
   anchoredRight = ->
@@ -178,7 +178,7 @@ up.layout = do ->
   - the currently open [modal](/up.modal)
   - an element with the attribute `[up-viewport]`
   - the `<body>` element
-  - an element matching the selector you have configured using `up.layout.config.viewports.push('my-custom-selector')`
+  - an element matching the selector you have configured using `up.viewport.config.viewports.push('my-custom-selector')`
 
   \#\#\# Fixed elements obstruction the viewport
 
@@ -190,7 +190,7 @@ up.layout = do ->
   To make `up.reveal()` aware fixed elements you can either:
 
   - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
-  - [configure default options](/up.layout.config) for `fixedTop` or `fixedBottom`
+  - [configure default options](/up.viewport.config) for `fixedTop` or `fixedBottom`
 
   @function up.reveal
   @param {string|Element|jQuery} element
@@ -212,7 +212,7 @@ up.layout = do ->
     scrollingTracker.startMotion(element, motion, options)
 
   ###**
-  @function up.layout.scrollAfterInsertFragment
+  @function up.viewport.scrollAfterInsertFragment
   @param {boolean|object} [options.restoreScroll]
   @param {boolean|string|jQuery|Element} [options.reveal]
   @param {boolean|string} [options.reveal]
@@ -285,7 +285,7 @@ up.layout = do ->
 
   If no element matches the given `#hash` anchor, a resolved promise is returned.
 
-  @function up.layout.revealHash
+  @function up.viewport.revealHash
   @return {Promise}
     A promise that is fulfilled when scroll position has changed to match the location hash.
   @experimental
@@ -306,7 +306,7 @@ up.layout = do ->
   Returns the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement)
   if no closer viewpoint exists.
 
-  @function up.layout.viewportOf
+  @function up.viewport.viewportOf
   @param {string|Element|jQuery} selectorOrElement
   @return {jQuery}
   @internal
@@ -319,7 +319,7 @@ up.layout = do ->
   Returns a jQuery collection of all the viewports contained within the
   given selector or element.
 
-  @function up.layout.viewportsWithin
+  @function up.viewport.viewportsWithin
   @param {string|Element|jQuery} selectorOrElement
   @return jQuery
   @internal
@@ -335,7 +335,7 @@ up.layout = do ->
   ###**
   Returns a jQuery collection of all the viewports on the screen.
 
-  @function up.layout.viewports
+  @function up.viewport.viewports
   @internal
   ###
   allViewports = ->
@@ -350,10 +350,10 @@ up.layout = do ->
   Each key in the hash is a viewport selector. The corresponding
   value is the viewport's top scroll position:
 
-      up.layout.scrollTops()
+      up.viewport.scrollTops()
       => { '.main': 0, '.sidebar': 73 }
 
-  @function up.layout.scrollTops
+  @function up.viewport.scrollTops
   @return Object<string, number>
   @internal
   ###
@@ -362,7 +362,7 @@ up.layout = do ->
       [scrollTopKey(viewport), viewport.scrollTop]
 
   ###**
-  @function up.layout.fixedElements
+  @function up.viewport.fixedElements
   @internal
   ###
   fixedElements = (root = document) ->
@@ -371,15 +371,15 @@ up.layout = do ->
 
   ###**
   Saves the top scroll positions of all the
-  viewports configured in [`up.layout.config.viewports`](/up.layout.config).
+  viewports configured in [`up.viewport.config.viewports`](/up.viewport.config).
 
   The scroll positions will be associated with the current URL.
-  They can later be restored by calling [`up.layout.restoreScroll()`](/up.layout.restoreScroll)
+  They can later be restored by calling [`up.viewport.restoreScroll()`](/up.viewport.restoreScroll)
   at the same URL.
 
   Unpoly automatically saves scroll positions whenever a fragment was updated on the page.
 
-  @function up.layout.saveScroll
+  @function up.viewport.saveScroll
   @param {string} [options.url]
   @param {Object<string, number>} [options.tops]
   @experimental
@@ -390,13 +390,13 @@ up.layout = do ->
     lastScrollTops.set(url, tops)
 
   ###**
-  Restores [previously saved](/up.layout.saveScroll) scroll positions of viewports
-  viewports configured in [`up.layout.config.viewports`](/up.layout.config).
+  Restores [previously saved](/up.viewport.saveScroll) scroll positions of viewports
+  viewports configured in [`up.viewport.config.viewports`](/up.viewport.config).
 
   Unpoly automatically restores scroll positions when the user presses the back button.
   You can disable this behavior by setting [`up.history.config.restoreScroll = false`](/up.history.config).
 
-  @function up.layout.restoreScroll
+  @function up.viewport.restoreScroll
   @param {jQuery} [options.around]
     If set, only restores viewports that are either an ancestor
     or descendant of the given element.
@@ -422,7 +422,7 @@ up.layout = do ->
   ###
   absolutize = (elementOrSelector, options = {}) ->
     element = e.get(elementOrSelector)
-    viewport = up.layout.viewportOf(element)
+    viewport = up.viewport.viewportOf(element)
 
     viewportRect = viewport.getBoundingClientRect()
     originalRect = element.getBoundingClientRect()
@@ -481,7 +481,7 @@ up.layout = do ->
 
   Apply this attribute if your app uses a custom panel layout with fixed positioning
   instead of scrolling `<body>`. As an alternative you can also push a selector
-  matching your custom viewport to the [`up.layout.config.viewports`](/up.layout.config) array.
+  matching your custom viewport to the [`up.viewport.config.viewports`](/up.viewport.config) array.
 
   [`up.reveal()`](/up.reveal) will always try to scroll the viewport closest
   to the element that is being revealed. By default this is the `<body>` element.
@@ -539,7 +539,7 @@ up.layout = do ->
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
 
   Instead of using this attribute,
-  you can also configure a selector in [`up.layout.config.fixedTop`](/up.layout.config#config.fixedTop).
+  you can also configure a selector in [`up.viewport.config.fixedTop`](/up.viewport.config#config.fixedTop).
 
   \#\#\# Example
 
@@ -559,7 +559,7 @@ up.layout = do ->
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
 
   Instead of using this attribute,
-  you can also configure a selector in [`up.layout.config.fixedBottom`](/up.layout.config#config.fixedBottom).
+  you can also configure a selector in [`up.viewport.config.fixedBottom`](/up.viewport.config#config.fixedBottom).
 
   \#\#\# Example
 
@@ -583,7 +583,7 @@ up.layout = do ->
   with a CSS of `right: 0` with `position: fixed` or `position:absolute`.
 
   Instead of giving this attribute to any affected element,
-  you can also configure a selector in [`up.layout.config.anchoredRight`](/up.layout.config#config.anchoredRight).
+  you can also configure a selector in [`up.viewport.config.anchoredRight`](/up.viewport.config#config.anchoredRight).
 
   \#\#\# Example
 
@@ -606,7 +606,7 @@ up.layout = do ->
   ###
 
   ###**
-  @function up.layout.firstHashTarget
+  @function up.viewport.firstHashTarget
   @internal
   ###
   firstHashTarget = (hash) ->
@@ -657,6 +657,8 @@ up.layout = do ->
   fixedElements: fixedElements
   absolutize: absolutize
 
-up.scroll = up.layout.scroll
-up.reveal = up.layout.reveal
-up.revealHash = up.layout.revealHash
+up.scroll = up.viewport.scroll
+up.reveal = up.viewport.reveal
+up.revealHash = up.viewport.revealHash
+
+up.legacy.renamedModule 'layout', 'viewport'

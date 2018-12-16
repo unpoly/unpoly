@@ -563,7 +563,7 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it 'does not lose a { reveal: true } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               $outer = affix('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
@@ -592,7 +592,7 @@ describe 'up.fragment', ->
 
 
             it 'does not lose a { reveal: string } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               $outer = affix('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
@@ -1280,7 +1280,7 @@ describe 'up.fragment', ->
             @revealedText = []
             @revealOptions = {}
 
-            @revealMock = up.layout.knife.mock('reveal').and.callFake (element, options) =>
+            @revealMock = up.viewport.knife.mock('reveal').and.callFake (element, options) =>
               @revealedHTML.push element.outerHTML
               @revealedText.push element.textContent.trim()
               @revealOptions = options

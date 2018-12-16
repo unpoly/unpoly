@@ -182,7 +182,7 @@ up.history = do ->
 
   pop = (event) ->
     observeNewUrl(currentUrl())
-    up.layout.saveScroll(url: previousUrl)
+    up.viewport.saveScroll(url: previousUrl)
     state = event.state
     restoreStateOnPop(state)
 

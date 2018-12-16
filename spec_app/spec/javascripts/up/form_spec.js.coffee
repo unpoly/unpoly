@@ -442,7 +442,7 @@ describe 'up.form', ->
             $form = affix('form[action="/action"][up-target=".target"]')
             $target = affix('.target')
 
-            revealStub = up.layout.knife.mock('reveal')
+            revealStub = up.viewport.knife.mock('reveal')
 
             up.submit($form)
 
@@ -457,7 +457,7 @@ describe 'up.form', ->
             $form = affix('form#foo-form[action="/action"][up-target=".target"]')
             $target = affix('.target')
 
-            revealStub = up.layout.knife.mock('reveal')
+            revealStub = up.viewport.knife.mock('reveal')
 
             up.submit($form)
 
@@ -482,7 +482,7 @@ describe 'up.form', ->
               $target = affix('.target')
               $other = affix('.other')
 
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               up.submit($form, reveal: '.other')
 
@@ -505,7 +505,7 @@ describe 'up.form', ->
               $target = affix('.target')
               $other = affix('.other')
 
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               up.submit($form, reveal: '.other')
 
@@ -525,7 +525,7 @@ describe 'up.form', ->
             it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
               $form = affix('form#foo-form[action="/action"][up-target="#foo-form"]')
 
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               up.submit($form, reveal: '& .form-child')
 
@@ -551,7 +551,7 @@ describe 'up.form', ->
               $target = affix('.target')
               $other = affix('.other')
 
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               up.submit($form, reveal: '.other', failReveal: '.error')
 
@@ -572,7 +572,7 @@ describe 'up.form', ->
               $form = affix('form#foo-form[action="/action"][up-target=".target"][up-fail-reveal="#foo-form .form-child"]')
               $target = affix('.target')
 
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               up.submit($form, reveal: '& .form-child')
 
@@ -944,7 +944,7 @@ describe 'up.form', ->
             expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
 
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
-          revealSpy = up.layout.knife.mock('reveal').and.returnValue(Promise.resolve())
+          revealSpy = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
           $form = affix('form[action="/path/to"]')
           $group = $("""

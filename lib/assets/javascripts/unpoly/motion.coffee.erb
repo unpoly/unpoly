@@ -355,7 +355,7 @@ up.motion = do ->
       # Don't animate the scrolling.
       scrollOptions = u.merge(options, behavior: 'instant')
       # Scroll newElement into position before we start the enter animation.
-      up.layout.scrollAfterInsertFragment(newElement, scrollOptions)
+      up.viewport.scrollAfterInsertFragment(newElement, scrollOptions)
 
     if willMorph
       if motionTracker.isActive(oldElement) && options.trackMotion is false
@@ -363,10 +363,10 @@ up.motion = do ->
 
       up.puts 'Morphing %o to %o with transition %o', oldElement, newElement, transitionObject
 
-      viewport = up.layout.viewportOf(oldElement)
+      viewport = up.viewport.viewportOf(oldElement)
       scrollTopBeforeReveal = viewport.scrollTop
 
-      oldRemote = up.layout.absolutize oldElement, # TODO: migrate up.layout.absolutize, which has a { $bounds } prop
+      oldRemote = up.viewport.absolutize oldElement, # TODO: migrate up.viewport.absolutize, which has a { $bounds } prop
         # Because the insertion will shift elements visually, we must delay insertion
         # until absolutize() has measured the bounding box of the old element.
         afterMeasure: ->

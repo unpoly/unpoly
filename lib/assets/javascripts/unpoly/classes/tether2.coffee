@@ -6,7 +6,7 @@ class up.Tether2
   constructor: (options) ->
     @anchor = options.anchor
     @position = options.position
-    @viewport = up.layout.viewportOf(@anchor)
+    @viewport = up.viewport.viewportOf(@anchor)
     @parent = if @viewport == e.root() then document.body else @viewport
 
     # If the offsetParent is within the viewport (or is the viewport)

@@ -3,7 +3,7 @@ u = up.util
 class up.ScrollMotion
 
   # We want to make the default speed mimic Chrome's smooth scrolling behavior.
-  # We also want to keep the default  valuein up.layout.config.scrollSpeed to be 1.
+  # We also want to keep the default  valuein up.viewport.config.scrollSpeed to be 1.
   # For our calculation in #animationFrame() we need to multiply it with this factor.
   SPEED_CALIBRATION = 0.065
 
@@ -14,7 +14,7 @@ class up.ScrollMotion
 
     # The option for up.scroll() is { behavior }, but coming
     # from up.replace() it's { scrollSpeed }.
-    @speed = (options.speed ? options.scrollSpeed ? up.layout.config.scrollSpeed) * SPEED_CALIBRATION
+    @speed = (options.speed ? options.scrollSpeed ? up.viewport.config.scrollSpeed) * SPEED_CALIBRATION
 
   start: =>
     return new Promise (@resolve, @reject) =>

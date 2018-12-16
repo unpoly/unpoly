@@ -346,7 +346,7 @@ describe 'up.link', ->
             $link = affix('a[href="/action"][up-target=".target"]')
             $target = affix('.target')
 
-            revealStub = up.layout.knife.mock('reveal')
+            revealStub = up.viewport.knife.mock('reveal')
 
             up.follow($link)
 
@@ -362,7 +362,7 @@ describe 'up.link', ->
             $target = affix('.target')
             $failTarget = affix('.fail-target')
 
-            revealStub = up.layout.knife.mock('reveal')
+            revealStub = up.viewport.knife.mock('reveal')
 
             up.follow($link)
 
@@ -387,7 +387,7 @@ describe 'up.link', ->
               $target = affix('.target')
               $other = affix('.other')
 
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               up.follow($link, reveal: '.other')
 
@@ -411,7 +411,7 @@ describe 'up.link', ->
               $failTarget = affix('.fail-target')
               $other = affix('.other')
 
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               up.follow($link, reveal: '.other', failTarget: '.fail-target')
 
@@ -437,7 +437,7 @@ describe 'up.link', ->
               $other = affix('.other')
               $failOther = affix('.fail-other')
 
-              revealStub = up.layout.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal')
 
               up.follow($link, reveal: '.other', failReveal: '.fail-other')
 

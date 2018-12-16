@@ -2,14 +2,14 @@ u = up.util
 e = up.element
 $ = jQuery
 
-describe 'up.layout', ->
+describe 'up.viewport', ->
 
   describe 'JavaScript functions', ->
 
     describe 'up.reveal', ->
 
       beforeEach ->
-        up.layout.config.revealSnap = 0
+        up.viewport.config.revealSnap = 0
 
       describe 'when the viewport is the document', ->
 
@@ -81,7 +81,7 @@ describe 'up.layout', ->
           next => expect($(document).scrollTop()).toBe(@clientHeight + 50 + 20)
 
         it 'snaps to the top if the space above the future-visible area is smaller than the value of config.revealSnap', asyncSpec (next) ->
-          up.layout.config.revealSnap = 30
+          up.viewport.config.revealSnap = 30
 
           @$elements[0].css(height: '20px')
 
@@ -108,7 +108,7 @@ describe 'up.layout', ->
             expect($(document).scrollTop()).toBe(0)
 
         it 'does not snap to the top if it would un-reveal an element at the bottom edge of the screen (bugfix)', asyncSpec (next) ->
-          up.layout.config.revealSnap = 100
+          up.viewport.config.revealSnap = 100
 
           up.reveal(@$elements[1])
 
@@ -389,59 +389,59 @@ describe 'up.layout', ->
             # [5] 250..299
             expect($viewport.scrollTop()).toBe(50)
 
-    describe 'up.layout.revealHash', ->
+    describe 'up.viewport.revealHash', ->
 
       it 'reveals an element with an ID matching the given #hash', asyncSpec (next) ->
-        revealSpy = up.layout.knife.mock('reveal')
+        revealSpy = up.viewport.knife.mock('reveal')
         $match = affix('div#hash')
-        up.layout.revealHash('#hash')
+        up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'reveals a named anchor matching the given #hash', asyncSpec (next) ->
-        revealSpy = up.layout.knife.mock('reveal')
+        revealSpy = up.viewport.knife.mock('reveal')
         $match = affix('a[name="hash"]')
-        up.layout.revealHash('#hash')
+        up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'reveals an element with an [up-id] attribute matching the given #hash', asyncSpec (next) ->
-        revealSpy = up.layout.knife.mock('reveal')
+        revealSpy = up.viewport.knife.mock('reveal')
         $match = affix('div[up-id="hash"]')
-        up.layout.revealHash('#hash')
+        up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'does nothing and returns a fulfilled promise if no element or anchor matches the given #hash', (done) ->
-        revealSpy = up.layout.knife.mock('reveal')
-        promise = up.layout.revealHash('#hash')
+        revealSpy = up.viewport.knife.mock('reveal')
+        promise = up.viewport.revealHash('#hash')
         expect(revealSpy).not.toHaveBeenCalled()
         promiseState(promise).then (result) ->
           expect(result.state).toEqual('fulfilled')
           done()
 
       it 'does nothing and returns a fulfilled promise if no #hash is given', (done) ->
-        revealSpy = up.layout.knife.mock('reveal')
-        promise = up.layout.revealHash('')
+        revealSpy = up.viewport.knife.mock('reveal')
+        promise = up.viewport.revealHash('')
         expect(revealSpy).not.toHaveBeenCalled()
         promiseState(promise).then (result) ->
           expect(result.state).toEqual('fulfilled')
           done()
 
-    describe 'up.layout.viewportsWithin', ->
+    describe 'up.viewport.viewportsWithin', ->
 
       it 'should have tests'
 
-    describe 'up.layout.viewportOf', ->
+    describe 'up.viewport.viewportOf', ->
 
       it 'seeks upwards from the given element', ->
-        up.layout.config.viewports = ['.viewport1', '.viewport2']
+        up.viewport.config.viewports = ['.viewport1', '.viewport2']
         $viewport1 = affix('.viewport1')
         $viewport2 = affix('.viewport2')
         $element = affix('div').appendTo($viewport2)
-        expect(up.layout.viewportOf($element)).toEqual($viewport2[0])
+        expect(up.viewport.viewportOf($element)).toEqual($viewport2[0])
 
       it 'returns the given element if it is a configured viewport itself', ->
-        up.layout.config.viewports = ['.viewport']
+        up.viewport.config.viewports = ['.viewport']
         $viewport = affix('.viewport')
-        expect(up.layout.viewportOf($viewport)).toEqual($viewport[0])
+        expect(up.viewport.viewportOf($viewport)).toEqual($viewport[0])
 
       describe 'when no configured viewport matches', ->
 
@@ -451,34 +451,34 @@ describe 'up.layout', ->
 
         it 'falls back to the scrolling element', ->
           $element = affix('.element').css(height: '3000px')
-          $result = up.layout.viewportOf($element)
+          $result = up.viewport.viewportOf($element)
           expect($result).toMatchSelector(up.browser.documentViewportSelector())
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
           $element = affix('.element').css(height: '3000px')
           @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'hidden')
           @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'scroll')
-          $result = up.layout.viewportOf($element)
+          $result = up.viewport.viewportOf($element)
           expect($result).toMatchSelector(up.browser.documentViewportSelector())
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
           $element = affix('.element').css(height: '3000px')
           @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'scroll')
           @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'hidden')
-          $result = up.layout.viewportOf($element)
+          $result = up.viewport.viewportOf($element)
           expect($result).toMatchSelector(up.browser.documentViewportSelector())
 
-    describe 'up.layout.restoreScroll', ->
+    describe 'up.viewport.restoreScroll', ->
 
       it "restores a viewport's previously saved scroll position", (done) ->
         $viewport = affix('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
         $content = $viewport.affix('.content').css(height: '1000px')
         up.hello($viewport)
         $viewport.scrollTop(50)
-        up.layout.saveScroll()
+        up.viewport.saveScroll()
         $viewport.scrollTop(70)
 
-        up.layout.restoreScroll().then ->
+        up.viewport.restoreScroll().then ->
           expect($viewport.scrollTop()).toEqual(50)
           done()
 
@@ -487,7 +487,7 @@ describe 'up.layout', ->
         $content = $viewport.affix('.content').css(height: '1000px')
         $viewport.scrollTop(70)
 
-        up.layout.restoreScroll().then ->
+        up.viewport.restoreScroll().then ->
           expect($viewport.scrollTop()).toEqual(0)
           done()
 
@@ -495,7 +495,7 @@ describe 'up.layout', ->
 
       it 'should have tests'
 
-    describe 'up.layout.absolutize', ->
+    describe 'up.viewport.absolutize', ->
 
       afterEach ->
         $('.up-bounds, .fixture').remove()
@@ -506,7 +506,7 @@ describe 'up.layout', ->
         expect($element.css('position')).toEqual('static')
         previousDims = $element[0].getBoundingClientRect()
 
-        up.layout.absolutize($element)
+        up.viewport.absolutize($element)
 
         expect($element.closest('.up-bounds').css('position')).toEqual('absolute')
 
@@ -517,7 +517,7 @@ describe 'up.layout', ->
         $element = affix('.element').css(margin: '40px')
         previousDims = $element[0].getBoundingClientRect()
 
-        up.layout.absolutize($element)
+        up.viewport.absolutize($element)
 
         newDims = $element[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
@@ -527,7 +527,7 @@ describe 'up.layout', ->
         $child = $('<div class="child">child text</div>').css(margin: '40px').appendTo($element)
         previousChildDims = $child[0].getBoundingClientRect()
 
-        up.layout.absolutize($element)
+        up.viewport.absolutize($element)
 
         newChildDims = $child[0].getBoundingClientRect()
         expect(newChildDims).toEqual(previousChildDims)
@@ -540,7 +540,7 @@ describe 'up.layout', ->
 
         previousDims = $element2[0].getBoundingClientRect()
 
-        up.layout.absolutize($element2)
+        up.viewport.absolutize($element2)
 
         newDims = $element2[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
@@ -556,7 +556,7 @@ describe 'up.layout', ->
 
         previousDims = $element2[0].getBoundingClientRect()
 
-        up.layout.absolutize($element2)
+        up.viewport.absolutize($element2)
 
         newDims = $element2[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
@@ -571,7 +571,7 @@ describe 'up.layout', ->
           left: '77px'
           top: '77px'
         $fixedChild.appendTo($element)
-        up.layout.absolutize($element)
+        up.viewport.absolutize($element)
 
         expect($fixedChild.css(['position', 'left', 'top'])).toEqual
           position: 'absolute',
@@ -584,7 +584,7 @@ describe 'up.layout', ->
         $fixedChild.appendTo($element)
         $fixedSibling = affix('[up-fixed]').css(position: 'fixed')
 
-        up.layout.absolutize($element)
+        up.viewport.absolutize($element)
 
         expect($fixedChild.css('position')).toEqual('absolute')
         expect($fixedSibling.css('position')).toEqual('fixed')
