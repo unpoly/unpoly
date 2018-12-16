@@ -126,7 +126,7 @@ up.viewport = do ->
     # Don't emit expensive events if no animation can be running anyway
     return Promise.resolve() unless up.motion.isEnabled()
 
-    scrollable = viewportOf(element)
+    scrollable = closest(element)
     scrollingTracker.finish(scrollable)
 
   ###**
@@ -306,12 +306,12 @@ up.viewport = do ->
   Returns the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement)
   if no closer viewpoint exists.
 
-  @function up.viewport.viewportOf
+  @function up.viewport.closest
   @param {string|Element|jQuery} selectorOrElement
   @return {jQuery}
   @internal
   ###
-  viewportOf = (selectorOrElement, options = {}) ->
+  closest = (selectorOrElement, options = {}) ->
     element = e.get(selectorOrElement)
     e.closest(element, viewportSelector())
 
@@ -319,26 +319,26 @@ up.viewport = do ->
   Returns a jQuery collection of all the viewports contained within the
   given selector or element.
 
-  @function up.viewport.viewportsWithin
+  @function up.viewport.subtree
   @param {string|Element|jQuery} selectorOrElement
   @return jQuery
   @internal
   ###
-  viewportsWithin = (selectorOrElement) ->
+  getSubtree = (selectorOrElement) ->
     element = e.get(selectorOrElement)
     e.subtree(element, viewportSelector())
 
-  viewportsAround = (selectorOrElement) ->
+  getAround = (selectorOrElement) ->
     element = e.get(selectorOrElement)
-    e.list(viewportOf(element), viewportsWithin(element))
+    e.list(closest(element), getSubtree(element))
 
   ###**
-  Returns a jQuery collection of all the viewports on the screen.
+  Returns a list of all the viewports on the screen.
 
-  @function up.viewport.viewports
+  @function up.viewport.all
   @internal
   ###
-  allViewports = ->
+  getAll = ->
     e.all(viewportSelector())
 
   scrollTopKey = (viewport) ->
@@ -358,7 +358,7 @@ up.viewport = do ->
   @internal
   ###
   scrollTops = ->
-    u.mapObject allViewports(), (viewport) ->
+    u.mapObject getAll(), (viewport) ->
       [scrollTopKey(viewport), viewport.scrollTop]
 
   ###**
@@ -406,7 +406,7 @@ up.viewport = do ->
   ###
   restoreScroll = (options = {}) ->
     url = up.history.url()
-    viewports = if options.around then viewportsAround(options.around) else allViewports()
+    viewports = if options.around then getAround(options.around) else getAll()
     scrollTopsForUrl = options.scrollTops || lastScrollTops.get(url) || {}
 
     up.log.group 'Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, ->
@@ -422,7 +422,7 @@ up.viewport = do ->
   ###
   absolutize = (elementOrSelector, options = {}) ->
     element = e.get(elementOrSelector)
-    viewport = up.viewport.viewportOf(element)
+    viewport = up.viewport.closest(element)
 
     viewportRect = viewport.getBoundingClientRect()
     originalRect = element.getBoundingClientRect()
@@ -646,9 +646,10 @@ up.viewport = do ->
   firstHashTarget: firstHashTarget
   scroll: scroll
   config: config
-  viewportOf: viewportOf
-  viewportsWithin: viewportsWithin
-  viewports: allViewports
+  closest: closest
+  subtree: getSubtree
+  around: getAround
+  all: getAll
   scrollTops: scrollTops
   saveScroll: saveScroll
   restoreScroll: restoreScroll

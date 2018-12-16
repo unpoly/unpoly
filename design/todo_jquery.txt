@@ -7,6 +7,7 @@
 
 - Check if we really need to do e.get(...) in every single function that works with elements
   - Do we really need to support `elementOrSelector` instead of just `element` in the public API?
+  - note that e.get() also converts jquery down to elements. do we want to support this for public API?
 
 - complete (and maybe unify) link variant parsing options
   - can FollowVariant do most defaults?
@@ -16,6 +17,10 @@
     - support new reveal options for up.replace and all follow variants
     - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
     - up-target should support [up-reveal-padding], { revealPadding }
+
+- rename up.Tether2 to up.Tether
+
+- rename up.MotionTracker to up.MotionController
 
 - grep for TODO comments
 
@@ -37,6 +42,9 @@
     - Examples with $
     - Stuff like  @param {jQuery} event.link
     - document new stuff like up.$compiler
+
+  - check if we can publish new functions
+  - check if we can more up.viewport functions
 
   - unpoly.com
     - remove mentions of jquery from unpoly.com

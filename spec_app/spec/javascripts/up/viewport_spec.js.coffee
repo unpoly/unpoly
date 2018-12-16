@@ -425,23 +425,55 @@ describe 'up.viewport', ->
           expect(result.state).toEqual('fulfilled')
           done()
 
-    describe 'up.viewport.viewportsWithin', ->
+    describe 'up.viewport.all', ->
 
-      it 'should have tests'
+      it 'returns a list of all viewports on the screen', ->
+        viewportElement = affix('[up-viewport]')[0]
+        results = up.viewport.all()
+        expect(results).toMatchList([viewportElement, up.browser.documentViewport()])
 
-    describe 'up.viewport.viewportOf', ->
+    describe 'up.viewport.subtree', ->
+
+      it 'returns descendant viewports of the given element', ->
+        $motherViewport = affix('.mother[up-viewport]')
+        $element = $motherViewport.affix('.element')
+        $childViewport = $element.affix('.child[up-viewport]')
+        $grandChildViewport = $childViewport.affix('.grand-child[up-viewport]')
+        actual = up.viewport.subtree($element[0])
+        expected = $childViewport.add($grandChildViewport)
+
+        expect(actual).toMatchList(expected)
+
+      it 'returns the given element if it is a viewport', ->
+        viewportElement = affix('[up-viewport]')[0]
+        results = up.viewport.subtree(viewportElement)
+        expect(results).toMatchList([viewportElement])
+
+    describe 'up.viewport.around', ->
+
+      it 'returns viewports that  are either ancestors, descendants, or the given element itself', ->
+        $motherViewport = affix('.mother[up-viewport]')
+        $element = $motherViewport.affix('.element')
+        $childViewport = $element.affix('.child[up-viewport]')
+        $grandChildViewport = $childViewport.affix('.grand-child[up-viewport]')
+        actual = up.viewport.around($element[0])
+        expected = $motherViewport.add($childViewport).add($grandChildViewport)
+
+        expect(actual).toMatchList(expected)
+
+    describe 'up.viewport.closest', ->
 
       it 'seeks upwards from the given element', ->
         up.viewport.config.viewports = ['.viewport1', '.viewport2']
         $viewport1 = affix('.viewport1')
         $viewport2 = affix('.viewport2')
         $element = affix('div').appendTo($viewport2)
-        expect(up.viewport.viewportOf($element)).toEqual($viewport2[0])
+        expect(up.viewport.closest($element)).toEqual($viewport2[0])
 
       it 'returns the given element if it is a configured viewport itself', ->
         up.viewport.config.viewports = ['.viewport']
         $viewport = affix('.viewport')
-        expect(up.viewport.viewportOf($viewport)).toEqual($viewport[0])
+        expect(up.viewport.closest($viewport)).toEqual($viewport[0])
 
       describe 'when no configured viewport matches', ->
 
@@ -451,21 +483,21 @@ describe 'up.viewport', ->
 
         it 'falls back to the scrolling element', ->
           $element = affix('.element').css(height: '3000px')
-          $result = up.viewport.viewportOf($element)
+          $result = up.viewport.closest($element)
           expect($result).toMatchSelector(up.browser.documentViewportSelector())
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
           $element = affix('.element').css(height: '3000px')
           @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'hidden')
           @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'scroll')
-          $result = up.viewport.viewportOf($element)
+          $result = up.viewport.closest($element)
           expect($result).toMatchSelector(up.browser.documentViewportSelector())
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
           $element = affix('.element').css(height: '3000px')
           @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'scroll')
           @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'hidden')
-          $result = up.viewport.viewportOf($element)
+          $result = up.viewport.closest($element)
           expect($result).toMatchSelector(up.browser.documentViewportSelector())
 
     describe 'up.viewport.restoreScroll', ->
