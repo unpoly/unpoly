@@ -81,7 +81,7 @@ up.tooltip = do ->
     config.reset()
 
   createElement = (options) ->
-    state.tether = new up.Tether2(u.only(state, 'anchor', 'position'))
+    state.tether = new up.Tether(u.only(state, 'anchor', 'position'))
     state.tooltip = e.affix(state.tether.root, '.up-tooltip', 'up-position': state.position)
     state.content = e.affix(state.tooltip, '.up-tooltip-content')
 

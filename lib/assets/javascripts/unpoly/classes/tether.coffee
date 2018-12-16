@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-class up.Tether2
+class up.Tether
 
   constructor: (options) ->
     @anchor = options.anchor

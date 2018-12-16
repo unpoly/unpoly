@@ -131,7 +131,7 @@ up.popup = do ->
     state.coveredUrl = null
 
   createHiddenFrame = (targetSelector) ->
-    state.tether = new up.Tether2(u.only(state, 'anchor', 'position'))
+    state.tether = new up.Tether(u.only(state, 'anchor', 'position'))
     state.popup = e.affix(state.tether.root, '.up-popup', 'up-position': state.position)
     state.content = e.affix(state.popup, '.up-popup-content')
 
