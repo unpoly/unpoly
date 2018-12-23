@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-class up.MotionTracker
+class up.MotionController
 
   constructor: (name) ->
     @activeClass = "up-#{name}"
@@ -21,7 +21,7 @@ class up.MotionTracker
   when the event is observed.
 
   The animation is tracked so it can be
-  [`finished`](/up.MotionTracker.finish) later.
+  [`finished`](/up.MotionController.finish) later.
 
   @method startFunction
   @param {Element|List<Element>} cluster
@@ -36,7 +36,7 @@ class up.MotionTracker
 
     # Some motions might reject after starting. E.g. a scrolling animation
     # will reject when the user scrolls manually during the animation. For
-    # the purpose of this tracker, we just want to know when the animation
+    # the purpose of this controller, we just want to know when the animation
     # has setteld, regardless of whether it was resolved or rejected.
     mutedAnimator = -> u.muteRejection(startMotion())
 

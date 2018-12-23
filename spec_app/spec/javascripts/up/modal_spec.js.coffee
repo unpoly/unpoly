@@ -11,6 +11,7 @@ describe 'up.modal', ->
   describe 'JavaScript functions', ->
     # Safari overlays the scrollbar tracker over the picture.
     # The scrollbar does not take space.
+    # TODO: This is no longer true for new Safaris
     assumedScrollbarWidth = if AgentDetector.isSafari() then 0 else 15
 
     describe 'up.modal.follow', ->

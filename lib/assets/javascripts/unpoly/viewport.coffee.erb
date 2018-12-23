@@ -65,12 +65,12 @@ up.viewport = do ->
     size: 30,
     key: up.history.normalizeUrl
 
-  scrollingTracker = new up.MotionTracker('scrolling')
+  scrollingController = new up.MotionController('scrolling')
 
   reset = ->
     config.reset()
     lastScrollTops.clear()
-    scrollingTracker.reset()
+    scrollingController.reset()
 
   ###**
   Scrolls the given viewport to the given Y-position.
@@ -112,7 +112,7 @@ up.viewport = do ->
   ###
   scroll = (viewport, scrollTop, options) ->
     motion = new up.ScrollMotion(viewport, scrollTop, options)
-    scrollingTracker.startMotion(viewport, motion, options)
+    scrollingController.startMotion(viewport, motion, options)
 
   ###**
   Finishes scrolling animations in the given element, its ancestors or its descendants.
@@ -127,7 +127,7 @@ up.viewport = do ->
     return Promise.resolve() unless up.motion.isEnabled()
 
     scrollable = closest(element)
-    scrollingTracker.finish(scrollable)
+    scrollingController.finish(scrollable)
 
   ###**
   @function up.viewport.anchoredRight
@@ -209,7 +209,7 @@ up.viewport = do ->
     element = e.get(elementOrSelector)
     console.debug("Instantiating RevealMotion with %o", element)
     motion = new up.RevealMotion(element, options)
-    scrollingTracker.startMotion(element, motion, options)
+    scrollingController.startMotion(element, motion, options)
 
   ###**
   @function up.viewport.scrollAfterInsertFragment

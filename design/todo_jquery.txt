@@ -18,7 +18,7 @@
     - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
     - up-target should support [up-reveal-padding], { revealPadding }
 
-- rename up.MotionTracker to up.MotionController
+- rename up.MotionController to up.MotionController
 
 - grep for TODO comments
 

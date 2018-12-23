@@ -1,5 +1,5 @@
 ## Working example for this: https://codepen.io/anon/pen/MBVewo
-#class up.FocusTracker
+#class up.FocusFollower
 #
 #  constructor: ->
 #    @discardDelay = 80

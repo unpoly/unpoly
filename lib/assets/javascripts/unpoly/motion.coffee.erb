@@ -41,7 +41,7 @@ up.motion = do ->
   namedTransitions = {}
   defaultNamedTransitions = {}
 
-  motionTracker = new up.MotionTracker('motion')
+  motionController = new up.MotionController('motion')
 
   ###**
   Sets default options for animations and transitions.
@@ -73,7 +73,7 @@ up.motion = do ->
     enabled: true
 
   reset = ->
-    motionTracker.reset()
+    motionController.reset()
     namedAnimations = u.copy(defaultNamedAnimations)
     namedTransitions = u.copy(defaultNamedTransitions)
     config.reset()
@@ -171,7 +171,7 @@ up.motion = do ->
 
     if willRun
       runNow = -> animationFn(element, options)
-      motionTracker.startFunction(element, runNow, options)
+      motionController.startFunction(element, runNow, options)
     else
       skipAnimate(element, animation)
 
@@ -193,7 +193,7 @@ up.motion = do ->
   Animates the given element's CSS properties using CSS transitions.
 
   Does not track the animation, nor does it finishes existing animations
-  (use `up.motion.animate()` for that). It does, however, listen to the motionTracker's
+  (use `up.motion.animate()` for that). It does, however, listen to the motionController's
   finish event.
 
   @function animateNow
@@ -214,7 +214,7 @@ up.motion = do ->
   @internal
   ###
   animateNow = (element, lastFrame, options) ->
-    options = u.merge(options, finishEvent: motionTracker.finishEvent)
+    options = u.merge(options, finishEvent: motionController.finishEvent)
     cssTransition = new up.CssTransition(element, lastFrame, options)
     return cssTransition.start()
 
@@ -238,7 +238,7 @@ up.motion = do ->
     consolidatedOptions.easing = u.option(userOptions.easing, u.presence(element?.getAttribute('up-easing')), moduleDefaults.easing, config.easing)
     consolidatedOptions.duration = u.option(userOptions.duration, e.numberAttr(element, 'up-duration'), moduleDefaults.duration, config.duration)
     consolidatedOptions.delay = u.option(userOptions.delay, e.numberAttr(element, 'up-delay'), moduleDefaults.delay, config.delay)
-    consolidatedOptions.trackMotion = userOptions.trackMotion # required by up.MotionTracker
+    consolidatedOptions.trackMotion = userOptions.trackMotion # required by up.MotionController
     consolidatedOptions
       
   findNamedAnimation = (name) ->
@@ -262,7 +262,7 @@ up.motion = do ->
   @stable
   ###
   finish = (elementOrSelector) ->
-    motionTracker.finish(elementOrSelector)
+    motionController.finish(elementOrSelector)
 
   ###**
   Performs an animated transition between the `source` and `target` elements.
@@ -358,7 +358,7 @@ up.motion = do ->
       up.viewport.scrollAfterInsertFragment(newElement, scrollOptions)
 
     if willMorph
-      if motionTracker.isActive(oldElement) && options.trackMotion is false
+      if motionController.isActive(oldElement) && options.trackMotion is false
         return transitionFn(oldElement, newElement, options)
 
       up.puts 'Morphing %o to %o with transition %o', oldElement, newElement, transitionObject
@@ -393,7 +393,7 @@ up.motion = do ->
 
         return promise
 
-      motionTracker.startFunction([oldElement, newElement], trackable, options)
+      motionController.startFunction([oldElement, newElement], trackable, options)
 
     else
       beforeDetach()
@@ -634,7 +634,7 @@ up.motion = do ->
   animate: animate
   animateOptions: animateOptions
   finish: finish
-  finishCount: -> motionTracker.finishCount
+  finishCount: -> motionController.finishCount
   transition: registerTransition
   animation: registerAnimation
   config: config
