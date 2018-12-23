@@ -5,7 +5,6 @@ class up.RevealMotion
   constructor: (@element, options) ->
     layoutConfig = up.viewport.config
     @viewport = options.viewport ? up.viewport.closest(@element)
-    @speed = options.speed ? options.scrollSpeed ? layoutConfig.scrollSpeed
     up.legacy.fixKey(layoutConfig, 'snap', 'revealSnap')
     snapDefault = layoutConfig.revealSnap
     @snap = options.snap ? options.revealSnap ? snapDefault
@@ -14,10 +13,13 @@ class up.RevealMotion
     else if @snap == true
       @snap = snapDefault
     @padding = options.padding ? options.revealPadding ? layoutConfig.revealPadding
-    @behavior = options.behavior ? options.scrollBehavior
     @top = options.top
     @fixedTop = options.fixedTop ? layoutConfig.fixedTop
     @fixedBottom = options.fixedBottom ? layoutConfig.fixedBottom
+
+    # Options for up.ScrollMotion
+    @speed = options.speed ? options.scrollSpeed ? layoutConfig.scrollSpeed
+    @behavior = options.behavior ? options.scrollBehavior
 
   start: ->
     elementRect = up.Rect.fromElement(@element)
@@ -65,10 +67,6 @@ class up.RevealMotion
     @scrollMotion = new up.ScrollMotion(@viewport, newScrollTop, scrollOptions)
     @scrollMotion.start()
 
-  addPadding: (elementRect) ->
-    elementRect.top -= @padding
-    elementRect.height += 2 * @padding
-
   getViewportRect: ->
     if up.viewport.isRoot(@viewport)
       # Other than an element with overflow-y, the document viewport
@@ -81,6 +79,10 @@ class up.RevealMotion
         height: up.viewport.rootHeight()
     else
       up.Rect.fromElement(@viewport)
+
+  addPadding: (elementRect) ->
+    elementRect.top -= @padding
+    elementRect.height += 2 * @padding
 
   substractObstructions: (viewportRect) ->
     for obstruction in e.list(@fixedTop...)
@@ -95,28 +97,6 @@ class up.RevealMotion
       diff = viewportRect.bottom - obstructionRect.top
       if diff > 0
         viewportRect.height -= diff
-
-#  substractObstruction: (viewportRect, obstructionRect) ->
-#    console.debug("Removing obstruction %o", obstructionRect)
-#    if obstructionRect.bottom < viewportRect.top || viewportRect.bottom <= obstructionRect.top
-#      console.debug("=> No overlap")
-#      # There is no overlap. Do nothing.
-#    else if obstructionRect.top <= viewportRect.top && viewportRect.bottom <= obstructionRect.bottom
-#      console.debug("=> Viewport inclosed")
-#      # The viewport is completely enclosed by the obstruction.
-#      # We cannot reveal anything.
-#      viewportRect.height = 0
-#    # else if viewportRect.top <= obstructionRect.top && obstructionRect.bottom <= viewportRect.bottom
-#    #   console.debug("=> Element encloses viewport")
-#    #   # The viewport completely encloses the obstruction. This is a weird case, but we will
-#    #   # assume that there are still some visible pixels. Do nothing.
-#    else
-#      console.debug("=> Some overlap")
-#      # The obstruction overlaps the viewport at the top of bottom edge.
-#      # We shrink the viewport so the remainder is free of the obstructionRect.
-#      viewportRect.top = Math.max(viewportRect.top, obstructionRect.top)
-#      viewportRect.height = Math.min(viewportRect.bottom, obstructionRect.bottom) - viewportRect.top
-#    console.debug("Viewport after removal: %o", viewportRect)
 
   finish: ->
     @scrollMotion?.finish()
