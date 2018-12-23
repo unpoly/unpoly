@@ -6,6 +6,7 @@ class up.RevealMotion
     layoutConfig = up.viewport.config
     @viewport = options.viewport ? up.viewport.closest(@element)
     @speed = options.speed ? options.scrollSpeed ? layoutConfig.scrollSpeed
+    up.legacy.fixKey(layoutConfig, 'snap', 'revealSnap')
     snapDefault = layoutConfig.revealSnap
     @snap = options.snap ? options.revealSnap ? snapDefault
     if @snap == false

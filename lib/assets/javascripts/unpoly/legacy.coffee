@@ -2,15 +2,15 @@ u = up.util
 
 up.legacy = do ->
 
-  renamedProperty = (object, oldKey, newKey) ->
-    warning = -> up.warn('Deprecated: Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
-    Object.defineProperty object, oldKey,
-      get: ->
-        warning()
-        @[newKey]
-      set: (newValue) ->
-        warning()
-        @[newKey] = newValue
+#  renamedProperty = (object, oldKey, newKey) ->
+#    warning = -> up.warn('Deprecated: Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+#    Object.defineProperty object, oldKey,
+#      get: ->
+#        warning()
+#        @[newKey]
+#      set: (newValue) ->
+#        warning()
+#        @[newKey] = newValue
 
 #  removedProperty = (object, key) ->
 #    failure = -> up.fail('Deprecated: Property { %s } is no longer supported (found in %o)', key, object)
@@ -21,15 +21,20 @@ up.legacy = do ->
   # Maps old event name to new event name
   renamedEvents = {}
 
+  fixKey = (object, oldKey, newKey) ->
+    if oldKey of object
+      up.warn('Deprecated: Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+      u.renameKey(object, oldKey, newKey)
+
   renamedEvent = (oldName, newName) ->
     renamedEvents[oldName] = newName
 
-  fixEventName = (event) ->
-    if newEvent = renamedEvents[event]
-      up.warn("Deprecated: Event #{event} has been renamed to #{newEvent}")
-      newEvent
+  fixEventName = (eventName) ->
+    if newEventName = renamedEvents[eventName]
+      up.warn("Deprecated: Event #{eventName} has been renamed to #{newEventName}")
+      newEventName
     else
-      event
+      eventName
 
   renamedModule = (oldName, newName) ->
     Object.defineProperty up, oldName, get: ->
@@ -37,7 +42,8 @@ up.legacy = do ->
       up[newName]
 
   renamedModule: renamedModule
-  renamedProperty: renamedProperty
+#  renamedProperty: renamedProperty
 #  removedProperty: removedProperty
   renamedEvent: renamedEvent
   fixEventName: fixEventName
+  fixKey: fixKey

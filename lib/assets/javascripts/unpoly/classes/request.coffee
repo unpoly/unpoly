@@ -74,7 +74,6 @@ class up.Request extends up.Record
       'method',
       'url',
       'params',
-      'data', # deprecated. use #params.
       'target',
       'failTarget',
       'headers',
@@ -88,6 +87,7 @@ class up.Request extends up.Record
   @param {string} [attributes]
   ###
   constructor: (options) ->
+    up.legacy.fixKey(options, 'data', 'params')
     super(options)
     @normalize()
 
@@ -236,5 +236,3 @@ class up.Request extends up.Record
 
   @wrap: (value) ->
     u.wrapValue(value, @)
-
-up.legacy.renamedProperty up.Request.prototype, 'data', 'params'
