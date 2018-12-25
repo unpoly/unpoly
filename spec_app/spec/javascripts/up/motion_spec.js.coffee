@@ -420,7 +420,7 @@ describe 'up.motion', ->
         morphDone = up.morph($v1, $v2, 'cross-fade', duration: 5)
 
         morphDone.then ->
-          expect('.up-bounds').not.toExist()
+          expect('.up-bounds').not.toBeAttached()
           done()
 
 

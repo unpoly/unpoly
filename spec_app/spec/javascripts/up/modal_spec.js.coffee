@@ -29,12 +29,12 @@ describe 'up.modal', ->
             """
 
           promise.then =>
-            expect($('.up-modal')).toExist()
-            expect($('.up-modal-dialog')).toExist()
-            expect($('.up-modal-dialog .middle')).toExist()
+            expect($('.up-modal')).toBeAttached()
+            expect($('.up-modal-dialog')).toBeAttached()
+            expect($('.up-modal-dialog .middle')).toBeAttached()
             expect($('.up-modal-dialog .middle')).toHaveText('new-middle')
-            expect($('.up-modal-dialog .before')).not.toExist()
-            expect($('.up-modal-dialog .after')).not.toExist()
+            expect($('.up-modal-dialog .before')).not.toBeAttached()
+            expect($('.up-modal-dialog .after')).not.toBeAttached()
             done()
 
     describe 'up.modal.extract', ->
@@ -50,12 +50,12 @@ describe 'up.modal', ->
           """
 
         promise.then =>
-          expect($('.up-modal')).toExist()
-          expect($('.up-modal-dialog')).toExist()
-          expect($('.up-modal-dialog .middle')).toExist()
+          expect($('.up-modal')).toBeAttached()
+          expect($('.up-modal-dialog')).toBeAttached()
+          expect($('.up-modal-dialog .middle')).toBeAttached()
           expect($('.up-modal-dialog .middle')).toHaveText('new-middle')
-          expect($('.up-modal-dialog .before')).not.toExist()
-          expect($('.up-modal-dialog .after')).not.toExist()
+          expect($('.up-modal-dialog .before')).not.toBeAttached()
+          expect($('.up-modal-dialog .after')).not.toBeAttached()
 
           # Can't change URLs
           expect(location.href).toEqual(oldHref)
@@ -76,12 +76,12 @@ describe 'up.modal', ->
           """
 
         promise.then =>
-          expect('.up-modal').toExist()
-          expect('.up-modal-dialog').toExist()
-          expect('.up-modal-dialog .middle').toExist()
+          expect('.up-modal').toBeAttached()
+          expect('.up-modal-dialog').toBeAttached()
+          expect('.up-modal-dialog .middle').toBeAttached()
           expect('.up-modal-dialog .middle').toHaveText('new-middle')
-          expect('.up-modal-dialog .before').not.toExist()
-          expect('.up-modal-dialog .after').not.toExist()
+          expect('.up-modal-dialog .before').not.toBeAttached()
+          expect('.up-modal-dialog .after').not.toBeAttached()
           expect(location.pathname).toMatchUrl('/foo')
           done()
 
@@ -99,7 +99,7 @@ describe 'up.modal', ->
               """
 
         promise.catch =>
-          expect('.up-modal').not.toExist()
+          expect('.up-modal').not.toBeAttached()
           expect('.error').toHaveText('new error')
           done()
 
@@ -122,7 +122,7 @@ describe 'up.modal', ->
             $modal = $('.up-modal')
             $viewport = $modal.find('.up-modal-viewport')
             $body = $('body')
-            expect($modal).toExist()
+            expect($modal).toBeAttached()
             expect($viewport.css('overflow-y')).toEqual('scroll')
             expect($body.css('overflow-y')).toEqual('hidden')
             expect(parseInt($body.css('padding-right'))).toBeAround(assumedScrollbarWidth, 5)
@@ -159,7 +159,7 @@ describe 'up.modal', ->
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')
-            expect($('.up-modal')).toExist()
+            expect($('.up-modal')).toBeAttached()
             expect(parseInt($body.css('padding-right'))).toBe(0)
 
             up.modal.close().then ->
@@ -173,7 +173,7 @@ describe 'up.modal', ->
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')
-            expect($('.up-modal')).toExist()
+            expect($('.up-modal')).toBeAttached()
             expect(parseInt($body.css('padding-right'))).toBe(0)
 
             up.modal.close().then ->
@@ -373,7 +373,7 @@ describe 'up.modal', ->
             expect(respond).not.toThrowError()
 
           next.await =>
-            expect($('.up-toast')).not.toExist()
+            expect($('.up-toast')).not.toBeAttached()
             promise = promiseState(openPromise)
             promise.then (result) => expect(result.state).toEqual('pending')
 
@@ -408,7 +408,7 @@ describe 'up.modal', ->
         next =>
           $modal = $('.up-modal')
           $dialog = $modal.find('.up-modal-dialog')
-          expect($modal).toBeInDOM()
+          expect($modal).toBeAttached()
           expect($modal.attr('up-flavor')).toEqual('variant')
           expect($dialog.attr('style')).toContain('max-width: 200px')
 
@@ -423,7 +423,7 @@ describe 'up.modal', ->
         next =>
           $modal = $('.up-modal')
           $dialog = $modal.find('.up-modal-dialog')
-          expect($modal).toBeInDOM()
+          expect($modal).toBeAttached()
           expect($dialog.attr('style')).toBeBlank()
 
     describe 'up.modal.close', ->
@@ -432,10 +432,10 @@ describe 'up.modal', ->
         up.modal.extract('.content', '<div class="content">Modal content</div>')
 
         u.nextFrame =>
-          expect('.up-modal .content').toBeInDOM()
+          expect('.up-modal .content').toBeAttached()
 
           up.modal.close().then ->
-            expect('.up-modal .content').not.toBeInDOM()
+            expect('.up-modal .content').not.toBeAttached()
             done()
 
       it 'does nothing if no modal is open', (done) ->
@@ -471,7 +471,7 @@ describe 'up.modal', ->
           @respondWith '<div class="target">new content</div>'
 
         next =>
-          expect('.up-modal').toExist()
+          expect('.up-modal').toBeAttached()
           expect('.up-modal-content').toHaveText('new content')
 
       describe 'when modifier keys are held', ->
@@ -573,7 +573,7 @@ describe 'up.modal', ->
         next =>
           expect(location.pathname).toEqual('/original-path')
           expect('.container').toHaveText('restored container content')
-          expect('.up-modal').not.toExist()
+          expect('.up-modal').not.toBeAttached()
 
       it 'allows to open a modal after closing a previous modal with the escape key (bugfix)', asyncSpec (next) ->
         up.motion.config.enabled = false
@@ -740,7 +740,7 @@ describe 'up.modal', ->
           up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
 
           next =>
-            expect('.up-modal').not.toContainElement('.up-modal-close')
+            expect('.up-modal').not.toHaveDescendant('.up-modal-close')
 
         it 'does not close the modal on backdrop click', asyncSpec (next) ->
           up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
@@ -777,7 +777,7 @@ describe 'up.modal', ->
           up.extract('.foo', "<div class='foo'>new text</div>")
 
         next =>
-          expect($outside).toBeInDOM()
+          expect($outside).toBeAttached()
           expect($outside).toHaveText('old outside')
           expect($('.up-modal-content')).toHaveText('new text')
 
@@ -793,7 +793,7 @@ describe 'up.modal', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-modal')).not.toExist()
+          expect($('.up-modal')).not.toBeAttached()
 
       it 'does not restore the covered URL when auto-closing (since it would override the URL from the triggering update)', asyncSpec (next) ->
         up.history.config.enabled = true
@@ -826,7 +826,7 @@ describe 'up.modal', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-modal')).toExist()
+          expect($('.up-modal')).toBeAttached()
 
       it 'does not auto-close the modal when a replacement from outside the modal affects a selector outside the modal', asyncSpec (next) ->
         affix('.outside').text('old outside')
@@ -840,7 +840,7 @@ describe 'up.modal', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-modal')).toExist()
+          expect($('.up-modal')).toBeAttached()
 
       it 'does not auto-close the modal when a replacement from outside the modal affects a selector inside the modal', asyncSpec (next) ->
         affix('.outside').text('old outside')
@@ -854,7 +854,7 @@ describe 'up.modal', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-modal')).toExist()
+          expect($('.up-modal')).toBeAttached()
 
       it 'does not auto-close the modal when the new fragment is within a popup', asyncSpec (next) ->
         up.modal.visit('/modal', target: '.modal-content')
@@ -869,8 +869,8 @@ describe 'up.modal', ->
           @respondWith("<div class='popup-content'></div>")
 
         next =>
-          expect($('.up-modal')).toExist()
-          expect($('.up-popup')).toExist()
+          expect($('.up-modal')).toBeAttached()
+          expect($('.up-popup')).toBeAttached()
 
       it 'does not close the modal when a clicked [up-target] link within the modal links to cached content (bugfix)', asyncSpec (next) ->
         up.modal.extract '.content', """
@@ -881,7 +881,7 @@ describe 'up.modal', ->
 
         next =>
           $link = $('.up-modal .content a')
-          expect($link).toExist()
+          expect($link).toBeAttached()
           up.proxy.preload($link)
 
         next =>
@@ -895,5 +895,5 @@ describe 'up.modal', ->
           Trigger.clickSequence('.up-modal .content a')
 
         next =>
-          expect($('.up-modal')).toExist()
+          expect($('.up-modal')).toBeAttached()
           expect($('.up-modal .content')).toHaveText('new text')

@@ -125,7 +125,7 @@ describe 'up.element', ->
       $childWithoutSelectorWithoutChild = affix('.other-selector')
 
       result = up.element.descendant($element[0], '.selector:has(.match)')
-      expect(result).toEqual [$childWithSelectorWithChild[0]]
+      expect(result).toBe $childWithSelectorWithChild[0]
 
     it 'supports the custom :has() selector when a previous sibling only matches its own selector, but not the descendant selector (bugfix)', ->
       $element = affix('.element')
@@ -134,7 +134,7 @@ describe 'up.element', ->
       $childWithSelectorWithChild.affix('.match')
 
       result = up.element.descendant($element[0], '.selector:has(.match)')
-      expect(result).toEqual [$childWithSelectorWithChild[0]]
+      expect(result).toBe $childWithSelectorWithChild[0]
 
 
   describe 'up.element.subtree()', ->

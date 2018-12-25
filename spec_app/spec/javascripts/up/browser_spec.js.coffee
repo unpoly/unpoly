@@ -21,25 +21,25 @@ describe 'up.browser', ->
 
           $form = $('form.up-page-loader')
 
-          expect($form).toExist()
+          expect($form).toBeAttached()
           # GET forms cannot have an URL with a query section in their [action] attribute.
           # The query section would be overridden by the serialized input values on submission.
           expect($form.attr('action')).toMatchUrl('/foo')
 
-          expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
-          expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
+          expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
 
         it 'merges params from the given URL and the { params } option', ->
           submitForm = spyOn(up.browser, 'submitForm')
           up.browser.navigate('/foo?param1=param1%20value', method: 'GET', params: { param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
-          expect($form).toExist()
+          expect($form).toBeAttached()
           # GET forms cannot have an URL with a query section in their [action] attribute.
           # The query section would be overridden by the serialized input values on submission.
           expect($form.attr('action')).toMatchUrl('/foo')
-          expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
-          expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
+          expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
 
       describe "for POST requests", ->
 
@@ -48,22 +48,22 @@ describe 'up.browser', ->
           up.browser.navigate('/foo', method: 'POST', params: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
-          expect($form).toExist()
+          expect($form).toBeAttached()
           expect($form.attr('action')).toMatchUrl('/foo')
           expect($form.attr('method')).toEqual('POST')
-          expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
-          expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
+          expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
 
         it 'merges params from the given URL and the { params } option', ->
           submitForm = spyOn(up.browser, 'submitForm')
           up.browser.navigate('/foo?param1=param1%20value', method: 'POST', params: { param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
-          expect($form).toExist()
+          expect($form).toBeAttached()
           expect($form.attr('action')).toMatchUrl('/foo')
           expect($form.attr('method')).toEqual('POST')
-          expect($form.find('input[name="param1"][value="param1 value"]')).toExist()
-          expect($form.find('input[name="param2"][value="param2 value"]')).toExist()
+          expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
 
       u.each ['PUT', 'PATCH', 'DELETE'], (method) ->
 
@@ -74,7 +74,7 @@ describe 'up.browser', ->
             up.browser.navigate('/foo', method: method)
             expect(submitForm).toHaveBeenCalled()
             $form = $('form.up-page-loader')
-            expect($form).toExist()
+            expect($form).toBeAttached()
             expect($form.attr('method')).toEqual('POST')
             expect($form.find('input[name="_method"]').val()).toEqual(method)
 
@@ -90,7 +90,7 @@ describe 'up.browser', ->
           expect(@submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           $tokenInput = $form.find('input[name="csrf-param"]')
-          expect($tokenInput).toExist()
+          expect($tokenInput).toBeAttached()
           expect($tokenInput.val()).toEqual('csrf-token')
 
         it 'does not add a CSRF token if there is none', ->
@@ -99,21 +99,21 @@ describe 'up.browser', ->
           expect(@submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           $tokenInput = $form.find('input[name="csrf-param"]')
-          expect($tokenInput).not.toExist()
+          expect($tokenInput).not.toBeAttached()
 
         it 'does not add a CSRF token for GET requests', ->
           up.browser.navigate('/foo', method: 'get')
           expect(@submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           $tokenInput = $form.find('input[name="csrf-param"]')
-          expect($tokenInput).not.toExist()
+          expect($tokenInput).not.toBeAttached()
 
         it 'does not add a CSRF token when loading content from another domain', ->
           up.browser.navigate('http://other-domain.tld/foo', method: 'get')
           expect(@submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           $tokenInput = $form.find('input[name="csrf-param"]')
-          expect($tokenInput).not.toExist()
+          expect($tokenInput).not.toBeAttached()
 
     describe 'up.browser.sprintf', ->
 

@@ -1,7 +1,8 @@
 u = up.util
+e = up.element
 $ = jQuery
 
-up.testUtil = do ->
+up.specUtil = do ->
 
   ###**
   Returns whether the given element has been detached from the DOM
@@ -11,9 +12,18 @@ up.testUtil = do ->
   @internal
   ###
   isDetached = (element) ->
-    element = up.element.get(element)
+    element = e.get(element)
     # This is by far the fastest way to do this
-    not jQuery.contains(document.documentElement, element)
+    not $.contains(document.documentElement, element)
+
+  isAttached = (element) ->
+    !isDetached(element)
+
+  isVisible = (element) ->
+    $(element).is(':visible')
+
+  isHidden = (element) ->
+    $(element).is(':hidden')
 
   ###**
   @function up.util.promiseTimer
@@ -28,6 +38,9 @@ up.testUtil = do ->
 
 
   isDetached: isDetached
+  isAttached: isAttached
+  isVisible: isVisible
+  isHidden: isHidden
   promiseTimer: promiseTimer
 
 

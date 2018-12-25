@@ -4,5 +4,6 @@ $ = jQuery
 beforeEach ->
   jasmine.addMatchers
     toBeAttached: (util, customEqualityTesters) ->
-      compare: (actual) ->
-        pass: !up.testUtil.isDetached(actual)
+      compare: (element) ->
+        element = up.element.get(element)
+        pass: element && up.specUtil.isAttached(element)

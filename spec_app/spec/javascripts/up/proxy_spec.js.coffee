@@ -840,7 +840,7 @@ describe 'up.proxy', ->
             $link = affix('a[href="/path"][up-modal=".target"]')
             up.proxy.preload($link)
             next =>
-              expect('.up-modal').not.toExist()
+              expect('.up-modal').not.toBeAttached()
 
           it 'does not emit an up:modal:open event', asyncSpec (next) ->
             $link = affix('a[href="/path"][up-modal=".target"]')
@@ -858,20 +858,20 @@ describe 'up.proxy', ->
             up.modal.extract('.content', '<div class="content">Modal content</div>')
 
             next =>
-              expect('.up-modal .content').toBeInDOM()
+              expect('.up-modal .content').toBeAttached()
 
             next =>
               up.proxy.preload($link)
 
             next =>
-              expect('.up-modal .content').toBeInDOM()
+              expect('.up-modal .content').toBeAttached()
               expect(closeListener).not.toHaveBeenCalled()
 
             next =>
               up.modal.close()
 
             next =>
-              expect('.up-modal .content').not.toBeInDOM()
+              expect('.up-modal .content').not.toBeAttached()
               expect(closeListener).toHaveBeenCalled()
 
           it 'does not prevent the opening of other modals while the request is still pending', asyncSpec (next) ->
@@ -882,7 +882,7 @@ describe 'up.proxy', ->
               up.modal.extract('.content', '<div class="content">Modal content</div>')
 
             next =>
-              expect('.up-modal .content').toBeInDOM()
+              expect('.up-modal .content').toBeAttached()
 
           it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
             requestSpy = spyOn(up, 'request')
@@ -908,7 +908,7 @@ describe 'up.proxy', ->
             $link = affix('a[href="/path"][up-popup=".target"]')
             up.proxy.preload($link)
             next =>
-              expect('.up-popup').not.toExist()
+              expect('.up-popup').not.toBeAttached()
 
           it 'does not emit an up:popup:open event', asyncSpec (next) ->
             $link = affix('a[href="/path"][up-popup=".target"]')
@@ -927,20 +927,20 @@ describe 'up.proxy', ->
             up.popup.attach($existingAnchor, target: '.content', html: '<div class="content">popup content</div>')
 
             next =>
-              expect('.up-popup .content').toBeInDOM()
+              expect('.up-popup .content').toBeAttached()
 
             next =>
               up.proxy.preload($link)
 
             next =>
-              expect('.up-popup .content').toBeInDOM()
+              expect('.up-popup .content').toBeAttached()
               expect(closeListener).not.toHaveBeenCalled()
 
             next =>
               up.popup.close()
 
             next =>
-              expect('.up-popup .content').not.toBeInDOM()
+              expect('.up-popup .content').not.toBeAttached()
               expect(closeListener).toHaveBeenCalled()
 
           it 'does not prevent the opening of other popups while the request is still pending', asyncSpec (next) ->
@@ -952,7 +952,7 @@ describe 'up.proxy', ->
               up.popup.attach($anchor, target: '.content', html: '<div class="content">popup content</div>')
 
             next =>
-              expect('.up-popup .content').toBeInDOM()
+              expect('.up-popup .content').toBeAttached()
 
           it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
             requestSpy = spyOn(up, 'request')

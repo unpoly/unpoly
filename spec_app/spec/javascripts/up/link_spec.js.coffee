@@ -355,7 +355,7 @@ describe 'up.link', ->
 
             next =>
               expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.target')
+              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.target')
 
           it 'reveals the { failTarget } if the server responds with an error', asyncSpec (next) ->
             $link = affix('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
@@ -377,7 +377,7 @@ describe 'up.link', ->
 
             next =>
               expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.fail-target')
+              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-target')
 
 
           describe 'with { reveal } option', ->
@@ -403,7 +403,7 @@ describe 'up.link', ->
 
               next =>
                 expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.other')
+                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
 
             it 'still reveals the { failTarget } for a failed submission', asyncSpec (next) ->
               $link = affix('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
@@ -426,7 +426,7 @@ describe 'up.link', ->
 
               next =>
                 expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.fail-target')
+                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-target')
 
           describe 'with { failReveal } option', ->
 
@@ -455,7 +455,7 @@ describe 'up.link', ->
 
               next =>
                 expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.fail-other')
+                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-other')
 
           describe "when the browser is already on the link's destination", ->
 
@@ -827,8 +827,8 @@ describe 'up.link', ->
             next =>
               @$oldGhost = $('.target.old')
               @$newGhost = $('.target.new')
-              expect(@$oldGhost).toExist()
-              expect(@$newGhost).toExist()
+              expect(@$oldGhost).toBeAttached()
+              expect(@$newGhost).toBeAttached()
               expect(@$oldGhost).toHaveOpacity(1, 0.15)
               expect(@$newGhost).toHaveOpacity(0, 0.15)
 

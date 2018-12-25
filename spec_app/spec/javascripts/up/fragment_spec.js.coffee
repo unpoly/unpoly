@@ -458,9 +458,9 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.outer')).toExist()
+                expect($('.outer')).toBeAttached()
                 expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toExist()
+                expect($('.inner')).toBeAttached()
                 expect($('.inner').text()).toContain('new inner text')
 
               next.await =>
@@ -486,10 +486,10 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.outer')).toExist()
+                expect($('.outer')).toBeAttached()
                 expect($('.outer').text()).toContain('new outer text')
                 expect($('.outer').text()).toContain('old outer text')
-                expect($('.inner')).toExist()
+                expect($('.inner')).toBeAttached()
                 expect($('.inner').text()).toContain('new inner text')
 
               next.await =>
@@ -515,10 +515,10 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.outer')).toExist()
+                expect($('.outer')).toBeAttached()
                 expect($('.outer').text()).toContain('old outer text')
                 expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toExist()
+                expect($('.inner')).toBeAttached()
                 expect($('.inner').text()).toContain('new inner text')
 
               next.await =>
@@ -553,9 +553,9 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.outer')).toExist()
+                expect($('.outer')).toBeAttached()
                 expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toExist()
+                expect($('.inner')).toBeAttached()
                 expect($('.inner').text()).toContain('new inner text')
 
               next.await =>
@@ -583,9 +583,9 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.outer')).toExist()
+                expect($('.outer')).toBeAttached()
                 expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toExist()
+                expect($('.inner')).toBeAttached()
                 expect($('.inner').text()).toContain('new inner text')
 
                 expect(revealStub).toHaveBeenCalled()
@@ -615,14 +615,14 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.outer')).toExist()
+                expect($('.outer')).toBeAttached()
                 expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toExist()
+                expect($('.inner')).toBeAttached()
                 expect($('.inner').text()).toContain('new inner text')
 
                 expect(revealStub).toHaveBeenCalled()
                 revealArg = revealStub.calls.mostRecent().args[0]
-                expect(revealArg).toBeMatchedBy('.revealee')
+                expect(revealArg).toMatchSelector('.revealee')
 
 
             it 'replaces a single fragment if the nesting differs in current page and response', asyncSpec (next) ->
@@ -642,9 +642,9 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.outer')).toExist()
+                expect($('.outer')).toBeAttached()
                 expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).not.toExist()
+                expect($('.inner')).not.toBeAttached()
 
               next.await =>
                 promise = promiseState(replacePromise)
@@ -667,9 +667,9 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.one')).toExist()
+                expect($('.one')).toBeAttached()
                 expect($('.one').text()).toContain('new one text')
-                expect($('.two')).toExist()
+                expect($('.two')).toBeAttached()
                 expect($('.two').text()).toContain('new two text')
 
               next.await =>
@@ -693,9 +693,9 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.one')).toExist()
+                expect($('.one')).toBeAttached()
                 expect($('.one').text()).toContain('new one text')
-                expect($('.two')).toExist()
+                expect($('.two')).toBeAttached()
                 expect($('.two').text()).toContain('new two text')
 
               next.await =>
@@ -717,7 +717,7 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.one')).toExist()
+                expect($('.one')).toBeAttached()
                 expect($('.one').text()).toContain('new one text')
 
               next.await =>
@@ -739,7 +739,7 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect($('.one')).toExist()
+                expect($('.one')).toBeAttached()
                 expect($('.one').text()).toMatchText('new one text old one text')
 
               next.await =>
@@ -761,7 +761,7 @@ describe 'up.fragment', ->
                   """
 
               next =>
-                expect('.elem').toExist()
+                expect('.elem').toBeAttached()
                 expect($('.elem').text()).toMatchText('new text old text')
 
               next.await =>
@@ -995,9 +995,9 @@ describe 'up.fragment', ->
 
                 promise.catch (e) ->
                   $toast = $('.up-toast')
-                  expect($toast).toExist()
+                  expect($toast).toBeAttached()
                   $inspectLink = $toast.find(".up-toast-action:contains('Open response')")
-                  expect($inspectLink).toExist()
+                  expect($inspectLink).toBeAttached()
                   expect(navigate).not.toHaveBeenCalled()
 
                   Trigger.clickSequence($inspectLink)
@@ -1484,7 +1484,7 @@ describe 'up.fragment', ->
               # This is not possible for container-less text nodes.
               expect(@revealedHTML).toEqual ['<div class="up-insertion">new-middle</div>']
               # Show that the wrapper is done after the insertion.
-              expect($('.up-insertion')).not.toExist()
+              expect($('.up-insertion')).not.toBeAttached()
               done()
 
           it 'reveals a new element that is being prepended', (done) ->
@@ -1497,7 +1497,7 @@ describe 'up.fragment', ->
               # This is not possible for container-less text nodes.
               expect(@revealedHTML).toEqual ['<div class="up-insertion">new-middle</div>']
               # Show that the wrapper is done after the insertion.
-              expect($('.up-insertion')).not.toExist()
+              expect($('.up-insertion')).not.toBeAttached()
               done()
 
         it 'uses a { failTransition } option if the request failed'
@@ -1600,7 +1600,7 @@ describe 'up.fragment', ->
         expect($element).toBeAttached()
 
         listener = jasmine.createSpy('event listener')
-        $parent.on 'up:fragment:destroyed', -> listener(up.testUtil.isDetached($element))
+        $parent.on 'up:fragment:destroyed', -> listener(up.specUtil.isDetached($element))
 
         extractDone = up.extract('.element', '<div class="element v2">v2</div>')
 
@@ -1776,7 +1776,7 @@ describe 'up.fragment', ->
           expect($element).toBeAttached()
 
           listener = jasmine.createSpy('event listener')
-          $parent.on 'up:fragment:destroyed', -> listener(up.testUtil.isDetached($element))
+          $parent.on 'up:fragment:destroyed', -> listener(up.specUtil.isDetached($element))
 
           extractDone = up.extract('.element', '<div class="element v2">v2</div>', transition: 'cross-fade', duration: 50)
 
@@ -2031,8 +2031,8 @@ describe 'up.fragment', ->
             """
 
           next =>
-            expect($('.container .foo')).toExist()
-            expect($('.container .bar')).not.toExist()
+            expect($('.container .foo')).toBeAttached()
+            expect($('.container .bar')).not.toBeAttached()
 
             expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
             expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
@@ -2104,7 +2104,7 @@ describe 'up.fragment', ->
             """
 
           next =>
-            expect('.keeper').toExist()
+            expect('.keeper').toBeAttached()
 
         it 'does not compile a kept element a second time', asyncSpec (next) ->
           compiler = jasmine.createSpy('compiler')
@@ -2125,7 +2125,7 @@ describe 'up.fragment', ->
 
           next =>
             expect(compiler.calls.count()).toEqual(1)
-            expect('.keeper').toExist()
+            expect('.keeper').toBeAttached()
 
         it 'does not lose jQuery event handlers on a kept element (bugfix)', asyncSpec (next) ->
           handler = jasmine.createSpy('event handler')
@@ -2322,7 +2322,7 @@ describe 'up.fragment', ->
       it 'removes the element with the given selector', (done) ->
         affix('.element')
         up.destroy('.element').then ->
-          expect($('.element')).not.toExist()
+          expect($('.element')).not.toBeAttached()
           done()
 
       it 'runs an animation before removal with { animate } option', asyncSpec (next) ->

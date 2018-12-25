@@ -70,8 +70,8 @@ describe 'up.radio', ->
         next =>
           expect(revealStub).toHaveBeenCalled()
           revealArg = revealStub.calls.mostRecent().args[0]
-          expect(revealArg).not.toBeMatchedBy('.hungry')
-          expect(revealArg).toBeMatchedBy('.target')
+          expect(revealArg).not.toMatchSelector('.hungry')
+          expect(revealArg).toMatchSelector('.target')
 
 
       it 'does not change the X-Up-Target header for the request', asyncSpec (next) ->

@@ -9,18 +9,18 @@ describe 'up.toast', ->
 
       it 'opens a toast box with the given message', ->
         up.toast.open('This is a message')
-        expect('.up-toast').toBeInDOM()
+        expect('.up-toast').toBeAttached()
         expect($('.up-toast-message').text()).toContain('This is a message')
 
       it 'opens a toast box with a close link', ->
         up.toast.open('This is a message')
-        expect('.up-toast').toBeInDOM()
+        expect('.up-toast').toBeAttached()
         $closeButton = $('.up-toast-action:contains("Close")')
-        expect($closeButton).toBeInDOM()
+        expect($closeButton).toBeAttached()
 
         Trigger.clickSequence($closeButton)
 
-        expect('.up-toast').not.toBeInDOM()
+        expect('.up-toast').not.toBeAttached()
 
       it 'opens a toast box with the given custom action', ->
         action =
@@ -28,7 +28,7 @@ describe 'up.toast', ->
           callback: jasmine.createSpy('action callback')
         up.toast.open('This is a message', { action })
         $actionButton = $('.up-toast-action:contains("Custom action")')
-        expect($actionButton).toBeInDOM()
+        expect($actionButton).toBeAttached()
         expect(action.callback).not.toHaveBeenCalled()
 
         Trigger.clickSequence($actionButton)

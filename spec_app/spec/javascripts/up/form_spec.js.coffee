@@ -79,7 +79,7 @@ describe 'up.form', ->
               callbackCount = 0
               callback = ->
                 callbackCount += 1
-                return up.testUtil.promiseTimer(100)
+                return up.specUtil.promiseTimer(100)
               up.observe($input, { delay: 1 }, callback)
               $input.val('new-value-1')
               Trigger[eventName]($input)
@@ -104,7 +104,7 @@ describe 'up.form', ->
               callbackArgs = []
               callback = (value, field) ->
                 callbackArgs.push(value)
-                return up.testUtil.promiseTimer(100)
+                return up.specUtil.promiseTimer(100)
 
               up.observe($input, { delay: 1 }, callback)
               $input.val('new-value-1')
@@ -451,7 +451,7 @@ describe 'up.form', ->
 
             next =>
               expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.target')
+              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.target')
 
           it 'reveals the form if the submission fails', asyncSpec (next) ->
             $form = affix('form#foo-form[action="/action"][up-target=".target"]')
@@ -472,7 +472,7 @@ describe 'up.form', ->
 
             next =>
               expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('#foo-form')
+              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('#foo-form')
 
 
           describe 'with { reveal } option', ->
@@ -498,7 +498,7 @@ describe 'up.form', ->
 
               next =>
                 expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.other')
+                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
 
             it 'still reveals the form for a failed submission', asyncSpec (next) ->
               $form = affix('form#foo-form[action="/action"][up-target=".target"]')
@@ -520,7 +520,7 @@ describe 'up.form', ->
 
               next =>
                 expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('#foo-form')
+                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('#foo-form')
 
             it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
               $form = affix('form#foo-form[action="/action"][up-target="#foo-form"]')
@@ -566,7 +566,7 @@ describe 'up.form', ->
 
               next =>
                 expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toBeMatchedBy('.error')
+                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.error')
 
             it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
               $form = affix('form#foo-form[action="/action"][up-target=".target"][up-fail-reveal="#foo-form .form-child"]')

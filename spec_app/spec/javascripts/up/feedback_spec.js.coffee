@@ -273,7 +273,7 @@ describe 'up.feedback', ->
 
             next =>
               $moreLink = $('.more').find('a')
-              expect($moreLink).toExist()
+              expect($moreLink).toBeAttached()
               expect($moreLink).toHaveClass('up-current')
 
 

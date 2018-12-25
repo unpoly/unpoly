@@ -46,10 +46,10 @@ describe 'up.popup', ->
 
         next =>
           $popup = $('.up-popup')
-          expect($popup).toExist()
+          expect($popup).toBeAttached()
           expect($popup.find('.middle')).toHaveText('new-middle')
-          expect($popup.find('.before')).not.toExist()
-          expect($popup.find('.after')).not.toExist()
+          expect($popup.find('.before')).not.toBeAttached()
+          expect($popup.find('.after')).not.toBeAttached()
           expect($popup).toSitBelow($link)
 
       it 'always makes a request for the given selector, and does not "improve" the selector with a fallback', asyncSpec (next) ->
@@ -73,7 +73,7 @@ describe 'up.popup', ->
           expect(respond).not.toThrowError()
 
         next.await =>
-          expect($('.up-toast')).not.toExist()
+          expect($('.up-toast')).not.toBeAttached()
           promise = promiseState(openPromise)
           promise.then (result) => expect(result.state).toEqual('pending')
 
@@ -333,7 +333,7 @@ describe 'up.popup', ->
           up.extract('.foo', "<div class='foo'>new text</div>")
 
         next =>
-          expect($outside).toBeInDOM()
+          expect($outside).toBeAttached()
           expect($outside).toHaveText('old outside')
           expect($('.up-popup')).toHaveText('new text')
 
@@ -347,7 +347,7 @@ describe 'up.popup', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-popup')).not.toExist()
+          expect($('.up-popup')).not.toBeAttached()
 
       it 'does not restore the covered URL when auto-closing (since it would override the URL from the triggering update)', asyncSpec (next) ->
         up.history.config.enabled = true
@@ -380,7 +380,7 @@ describe 'up.popup', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-popup')).toExist()
+          expect($('.up-popup')).toBeAttached()
 
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector outside the popup', asyncSpec (next) ->
         affix('.outside').text('old outside')
@@ -392,7 +392,7 @@ describe 'up.popup', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-popup')).toExist()
+          expect($('.up-popup')).toBeAttached()
 
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector inside the popup', asyncSpec (next) ->
         affix('.outside').text('old outside')
@@ -404,7 +404,7 @@ describe 'up.popup', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-popup')).toExist()
+          expect($('.up-popup')).toBeAttached()
 
     describe 'when clicking on the body', ->
 
