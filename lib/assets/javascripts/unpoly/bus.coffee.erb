@@ -410,7 +410,6 @@ up.bus = do ->
   on: bind # can't name symbols `on` in Coffeescript
   $on: $bind
   off: unbind # can't name symbols `off` in Coffeescript
-  $off: unbind # it's the same as `off`
   emit: emit
   nobodyPrevents: nobodyPrevents
   whenEmitted: whenEmitted
@@ -424,7 +423,7 @@ up.bus = do ->
 up.on = up.bus.on
 up.$on = up.bus.$on
 up.off = up.bus.off
-up.$off = up.bus.$off
+up.$off = up.bus.off # it's the same as up.off()
 up.emit = up.bus.emit
 up.reset = up.bus.emitReset
 up.boot = up.bus.boot
