@@ -211,6 +211,20 @@ describe 'up.syntax', ->
           up.hello(fixture('.element'))
           expect(traces).toEqual ['foo', 'bar']
 
+    describe 'up.$compiler', ->
+
+      it 'registers a compiler that receives the element as a jQuery collection', ->
+        observeElement = jasmine.createSpy()
+        up.$compiler '.element', ($element) -> observeElement($element)
+
+        $element = $fixture('.element')
+        up.hello($element)
+
+        expect(observeElement).toHaveBeenCalled()
+        arg = observeElement.calls.argsFor(0)[0]
+        expect(arg).toBeJQuery()
+        expect(arg).toEqual($element)
+
     describe 'up.macro', ->
 
       it 'registers compilers that are run before other compilers', ->
@@ -255,6 +269,22 @@ describe 'up.syntax', ->
         expect($element.attr('up-target')).toEqual('.target')
         expect($element.attr('up-preload')).toEqual('')
         expect($element.attr('up-instant')).toEqual('')
+
+    describe 'up.$macro', ->
+
+      it 'registers a macro that receives the element as a jQuery collection', ->
+        observeElement = jasmine.createSpy()
+        up.$macro '.element', ($element) -> observeElement('macro', $element)
+        up.$compiler '.element', ($element) -> observeElement('compiler', $element)
+
+        $element = $fixture('.element')
+        up.hello($element)
+
+        expect(observeElement).toHaveBeenCalled()
+        args = observeElement.calls.argsFor(0)
+        expect(args[0]).toEqual('macro')
+        expect(args[1]).toBeJQuery()
+        expect(args[1]).toEqual($element)
 
     describe 'up.hello', ->
 
