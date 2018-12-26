@@ -1,7 +1,6 @@
-- can we bind passively to touchstart?
-  - no, because we want to prevent
-  - check if ios sends mousedown
-  - then bind to that
+- merge resolveSelector / toSelector
+  - we just want toSelector
+  - after all of that: check if we can just not call resolveSelector from code before up.replace
 
 - compatibility layer
   - think whether we want to keep $macro and $compiler

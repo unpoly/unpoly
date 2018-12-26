@@ -376,13 +376,13 @@ up.fragment = do ->
         # Delay all further links in the promise chain until all fragments have been swapped
         Promise.all(swapPromises)
 
-  bestPreflightSelector = (selector, options) ->
-    cascade = new up.ExtractCascade(selector, options)
+  bestPreflightSelector = (selectorOrElement, options) ->
+    cascade = new up.ExtractCascade(selectorOrElement, options)
     cascade.bestPreflightSelector()
 
-  bestMatchingSteps = (selector, response, options) ->
+  bestMatchingSteps = (selectorOrElement, response, options) ->
     options = u.merge(options, { response })
-    cascade = new up.ExtractCascade(selector, options)
+    cascade = new up.ExtractCascade(selectorOrElement, options)
     cascade.bestMatchingSteps()
 
   updateHistoryAndTitle = (options) ->

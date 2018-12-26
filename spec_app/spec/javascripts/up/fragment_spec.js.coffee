@@ -50,8 +50,16 @@ describe 'up.fragment', ->
             expect(resolution).toHaveBeenCalled()
             expect($('.middle')).toHaveText('new-middle')
 
-        it 'allows to pass an element instead of a selector',->
-          throw "implement me and simplify up.form.findValidateTargetSelector with it"
+        it 'allows to pass an element instead of a selector', asyncSpec (next) ->
+          up.replace(@$oldMiddle, '/path')
+
+          next =>
+            @respond()
+
+          next =>
+            expect($('.before')).toHaveText('old-before')
+            expect($('.middle')).toHaveText('new-middle')
+            expect($('.after')).toHaveText('old-after')
 
         describe 'with { transition } option', ->
 

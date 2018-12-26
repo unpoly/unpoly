@@ -2,12 +2,12 @@ u = up.util
 
 class up.ExtractCascade
 
-  constructor: (selector, options) ->
+  constructor: (selectorOrElement, options) ->
     @options = u.options(options, humanizedTarget: 'selector', layer: 'auto')
     @options.transition = u.option(@options.transition, @options.animation)
     @options.hungry = u.option(@options.hungry, true)
 
-    @candidates = @buildCandidates(selector)
+    @candidates = @buildCandidates(selectorOrElement)
     @plans = u.map @candidates, (candidate, i) =>
       planOptions = u.copy(@options)
       if i > 0
