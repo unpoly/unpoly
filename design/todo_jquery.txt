@@ -1,3 +1,8 @@
+- can we bind passively to touchstart?
+  - no, because we want to prevent
+  - check if ios sends mousedown
+  - then bind to that
+
 - compatibility layer
   - think whether we want to keep $macro and $compiler
     - yes
