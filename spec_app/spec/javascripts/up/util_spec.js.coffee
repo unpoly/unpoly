@@ -615,7 +615,9 @@ describe 'up.util', ->
     describe 'up.util.normalizeUrl', ->
 
       it 'normalizes a relative path', ->
-        expect(up.util.normalizeUrl('foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
+        up.history.config.enabled = true
+        up.history.replace('/qux/')
+        expect(up.util.normalizeUrl('foo')).toBe("http://#{location.hostname}:#{location.port}/qux/foo")
 
       it 'normalizes an absolute path', ->
         expect(up.util.normalizeUrl('/foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
