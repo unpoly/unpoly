@@ -647,10 +647,9 @@ up.proxy = do ->
   ###
   up.compiler 'a[up-preload], [up-href][up-preload]', (link) ->
     if up.link.isSafe(link)
-      for eventName in ['mouseenter', 'touchstart']
-        link.addEventListener eventName, (event) ->
-          if up.link.shouldProcessEvent(event, link)
-            preloadAfterDelay(link)
+      link.addEventListener 'mouseenter', (event) ->
+        if up.link.shouldProcessEvent(event, link)
+          preloadAfterDelay(link)
       link.addEventListener 'mouseleave', ->
         stopPreload(link)
 
