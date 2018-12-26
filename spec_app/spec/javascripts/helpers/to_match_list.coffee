@@ -7,8 +7,6 @@ beforeEach ->
         actualList = u.toArray(actualList) if actualList
         expectedList = u.toArray(expectedList) if expectedList
 
-        console.debug("toMatchList(%o, %o)", actualList, expectedList)
-
         pass:
           actualList &&
             expectedList &&

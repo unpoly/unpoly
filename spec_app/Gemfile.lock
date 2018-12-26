@@ -203,6 +203,7 @@ DEPENDENCIES
   byebug
   coffee-rails (~> 4.1.0)
   haml-rails
+  jasmine-core (< 3)
   jasmine-rails
   jquery-rails
   rails (= 4.2.0)

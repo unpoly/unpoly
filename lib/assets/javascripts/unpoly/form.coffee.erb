@@ -221,7 +221,6 @@ up.form = do ->
         form.submit()
         return u.unresolvablePromise()
 
-      console.debug("--- called up.replace(%o, %o, %o)", target, url, options)
       promise = up.replace(target, url, options)
       u.always promise, -> up.feedback.stop(form)
       promise

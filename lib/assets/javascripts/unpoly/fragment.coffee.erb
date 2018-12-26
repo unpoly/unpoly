@@ -363,19 +363,13 @@ up.fragment = do ->
 
         swapPromises = []
 
-        console.debug("extractSteps are %o", extractSteps)
-
         for step in extractSteps
           up.log.group 'Swapping fragment %s', step.selector, ->
             # Note that we must copy the options hash instead of changing it in-place,  since the
             # async swapElements() is scheduled for the next microtask and we must not change the options
             # for the previous iteration.
             swapOptions = u.merge(options, u.only(step, 'origin', 'reveal'))
-
-            console.debug("swapOptions are %o", swapOptions)
-
             responseDoc.prepareForInsertion(step.newElement)
-
             swapPromise = swapElements(step.oldElement, step.newElement, step.pseudoClass, step.transition, swapOptions)
             swapPromises.push(swapPromise)
 
@@ -462,8 +456,6 @@ up.fragment = do ->
         afterDetach: ->
           e.remove(oldElement) # clean up jQuery data
           emitFragmentDestroyed(oldElement, parent: parent, log: false)
-
-      console.debug("-- morphOptions are %o", morphOptions)
 
       return up.morph(oldElement, newElement, transition, morphOptions)
 
@@ -836,7 +828,7 @@ up.fragment = do ->
       parent = element.parentNode
       up.syntax.clean(element)
       element.remove()
-      emitFragmentDestroyed(element, { parent: parent })
+      emitFragmentDestroyed(element, { parent: parent, log: options.log })
 
     animate().then(wipe)
 

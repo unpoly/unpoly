@@ -207,7 +207,6 @@ up.viewport = do ->
   # TODO: Documentation
   reveal = (elementOrSelector, options = {}) ->
     element = e.get(elementOrSelector)
-    console.debug("Instantiating RevealMotion with %o", element)
     motion = new up.RevealMotion(element, options)
     scrollingController.startMotion(element, motion, options)
 
@@ -222,7 +221,6 @@ up.viewport = do ->
   ###
   scrollAfterInsertFragment = (selectorOrElement, options) ->
     options = u.options(options)
-    console.debug("scrollAfterInsertFragment with opts %o", options)
     element = e.get(selectorOrElement)
 
     hashOpt = options.hash
@@ -236,30 +234,23 @@ up.viewport = do ->
       # to scroll positions. If it is just true, we leave the scrollTops option
       # undefined and let restoreScroll() retrieve previous scrollTops from cache.
       givenTops = u.presence(restoreScrollOpt, u.isObject)
-      console.debug('-- restoreScroll()')
       return restoreScroll(around: element, scrollTops: givenTops)
 
     else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
-      console.debug('--- revealHash(%o)', hashOpt)
       return revealHash(hashOpt, scrollOptions)
 
     else if revealOpt
-      console.debug('--- revealOp is %o', revealOpt)
       # We allow to pass another element as { reveal } option
       if u.isElement(revealOpt) || u.isJQuery(revealOpt)
         element = e.get(revealOpt)
 
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
-        console.debug("--- revealing %o with %o", revealOpt, options.origin)
         selector = e.resolveSelector(revealOpt, options.origin)
-        console.debug("--- reveal done")
         element = e.get up.first(selector) # TODO: Remove e.get
 
       else
         # We reveal the given element
-
-      console.debug('-- final element is %o', element)
 
       # If selectorOrElement was a CSS selector, don't blow up by calling reveal()
       # with an empty jQuery collection. This might happen if a failed form submission

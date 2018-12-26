@@ -111,7 +111,6 @@ up.element = do ->
 
   setAttrs = (element, attrMap) ->
     for key, value of attrMap
-      console.debug("Setting attr on %o: %o => %o", element, key, value)
       element.setAttribute(key, value)
 
   metaContent = (name) ->

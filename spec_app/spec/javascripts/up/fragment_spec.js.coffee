@@ -50,8 +50,8 @@ describe 'up.fragment', ->
             expect(resolution).toHaveBeenCalled()
             expect($('.middle')).toHaveText('new-middle')
 
-          it 'allows to pass an element instead of a selector',->
-            throw "implement me and simplify up.form.findValidateTargetSelector with it"
+        it 'allows to pass an element instead of a selector',->
+          throw "implement me and simplify up.form.findValidateTargetSelector with it"
 
         describe 'with { transition } option', ->
 
@@ -1740,21 +1740,21 @@ describe 'up.fragment', ->
             expect($old).toBeDetached()
 
 
-          it 'ignores a { transition } option when replacing a singleton element like <body>', asyncSpec (next) ->
-            # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-            up.element.knife.mock('isSingleton').and.callFake (element) -> e.matches(element, '.container')
+        it 'ignores a { transition } option when replacing a singleton element like <body>', asyncSpec (next) ->
+          # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
+          spyOn(up.element, 'isSingleton').and.callFake (element) -> e.matches(element, '.container')
 
-            $fixture('.container').text('old text')
+          $fixture('.container').text('old text')
 
-            extractDone = jasmine.createSpy()
-            promise = up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 200)
-            promise.then(extractDone)
+          extractDone = jasmine.createSpy()
+          promise = up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 200)
+          promise.then(extractDone)
 
-            next =>
-              # See that we've already immediately swapped the element and ignored the duration of 200ms
-              expect(extractDone).toHaveBeenCalled()
-              expect($('.container').length).toEqual(1)
-              expect($('.container')).toHaveOpacity(1.0)
+          next =>
+            # See that we've already immediately swapped the element and ignored the duration of 200ms
+            expect(extractDone).toHaveBeenCalled()
+            expect($('.container').length).toEqual(1)
+            expect($('.container')).toHaveOpacity(1.0)
 
         it 'marks the old fragment as .up-destroying during the transition', asyncSpec (next) ->
           $fixture('.element').text('version 1')

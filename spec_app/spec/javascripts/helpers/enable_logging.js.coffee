@@ -1,2 +1,2 @@
 beforeEach ->
-  up.log.enable()
+  up.log.disable()
