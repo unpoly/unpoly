@@ -4,8 +4,8 @@ GEM
     coffee-script (2.4.1)
       coffee-script-source
       execjs
-    coffee-script-source (1.9.1.1)
-    execjs (2.5.2)
+    coffee-script-source (1.12.2)
+    execjs (2.7.0)
     hike (1.2.3)
     json (1.8.2)
     libv8 (3.16.14.11)
@@ -40,3 +40,6 @@ DEPENDENCIES
   sprockets-standalone
   therubyracer
   uglifier
+
+BUNDLED WITH
+   1.16.1
