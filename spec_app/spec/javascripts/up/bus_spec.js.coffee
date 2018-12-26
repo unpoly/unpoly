@@ -8,7 +8,7 @@ describe 'up.bus', ->
     describe 'up.on', ->
 
       it 'registers a delagating event listener to the document body, which passes the $element as a second argument to the listener', asyncSpec (next) ->
-        affix('.container .child')
+        fixture('.container .child')
         observeClass = jasmine.createSpy()
         up.on 'click', '.child', (event, element) ->
           observeClass(element.className)
@@ -21,7 +21,7 @@ describe 'up.bus', ->
           expect(observeClass).toHaveBeenCalledWith('child')
 
       it 'calls the event listener if the event was triggered on a child of the requested selector', asyncSpec (next) ->
-        $container = affix('.container')
+        $container = $fixture('.container')
         $child = $container.affix('.child')
         listener = jasmine.createSpy()
         up.on 'click', '.container', listener
@@ -36,7 +36,7 @@ describe 'up.bus', ->
           )
 
       it 'passes the event target as the second argument if no selector was passed to up.on()', asyncSpec (next) ->
-        $element = affix('.element')
+        $element = $fixture('.element')
         listener = jasmine.createSpy()
         up.on 'click', listener
         Trigger.click($element)
@@ -60,7 +60,7 @@ describe 'up.bus', ->
         expect(listener.calls.count()).toEqual(2)
 
       it 'returns a method that unregisters the event listener when called', asyncSpec (next) ->
-        $child = affix('.child')
+        $child = $fixture('.child')
         clickSpy = jasmine.createSpy()
         unsubscribe = up.on 'click', '.child', clickSpy
         Trigger.click($('.child'))
@@ -94,7 +94,7 @@ describe 'up.bus', ->
           up.on 'click', '.child', (event, element, data) ->
             observeArgs(element.className, data)
 
-          $child = affix(".child")
+          $child = $fixture(".child")
           data = { key1: 'value1', key2: 'value2' }
           $child.attr('up-data', JSON.stringify(data))
 
@@ -104,7 +104,7 @@ describe 'up.bus', ->
             expect(observeArgs).toHaveBeenCalledWith('child', data)
 
         it 'passes an empty object as a second argument to the listener if there is no [up-data] attribute', asyncSpec (next) ->
-          $child = affix('.child')
+          $child = $fixture('.child')
           observeArgs = jasmine.createSpy()
           up.on 'click', '.child', (event, element, data) ->
             observeArgs(element.className, data)
@@ -117,7 +117,7 @@ describe 'up.bus', ->
         it 'does not parse an [up-data] attribute if the listener function only takes one argument', asyncSpec (next) ->
           parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
 
-          $child = affix('.child')
+          $child = $fixture('.child')
           up.on 'click', '.child', (event) -> # no-op
 
           Trigger.click($child)
@@ -128,7 +128,7 @@ describe 'up.bus', ->
         it 'does not parse an [up-data] attribute if the listener function only takes two arguments', asyncSpec (next) ->
           parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
 
-          $child = affix('.child')
+          $child = $fixture('.child')
           up.on 'click', '.child', (event, $element) -> # no-op
 
           Trigger.click($child)
@@ -158,7 +158,7 @@ describe 'up.bus', ->
     describe 'up.off', ->
 
       it 'unregisters an event listener previously registered through up.on', asyncSpec (next) ->
-        $child = affix('.child')
+        $child = $fixture('.child')
         clickSpy = jasmine.createSpy()
         up.on 'click', '.child', clickSpy
         Trigger.click($('.child'))
@@ -234,7 +234,7 @@ describe 'up.bus', ->
           emittedEvent = undefined
           emittedElement = undefined
 
-          $element = affix('.element').text('foo')
+          $element = $fixture('.element').text('foo')
 
           up.on 'foo', (event, element) ->
             emittedEvent = event

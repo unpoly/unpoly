@@ -122,7 +122,7 @@ describe 'up.viewport', ->
 
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the top', asyncSpec (next) ->
-          $topNav = affix('[up-fixed=top]').css(
+          $topNav = $fixture('[up-fixed=top]').css(
             position: 'fixed',
             top: '0',
             left: '0',
@@ -175,7 +175,7 @@ describe 'up.viewport', ->
             expect($(document).scrollTop()).toBe(@clientHeight + 50 - 100 - 50)
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the top with margin, padding, border and non-zero top properties', asyncSpec (next) ->
-          $topNav = affix('[up-fixed=top]').css(
+          $topNav = $fixture('[up-fixed=top]').css(
             position: 'fixed',
             top: '29px',
             margin: '16px',
@@ -206,7 +206,7 @@ describe 'up.viewport', ->
             )
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the bottom', asyncSpec (next) ->
-          $bottomNav = affix('[up-fixed=bottom]').css(
+          $bottomNav = $fixture('[up-fixed=bottom]').css(
             position: 'fixed',
             bottom: '0',
             left: '0',
@@ -248,7 +248,7 @@ describe 'up.viewport', ->
             expect($(document).scrollTop()).toBe(@clientHeight + 50)
 
         it 'scrolls far enough so the element is not obstructed by an element fixed to the bottom with margin, padding, border and non-zero bottom properties', asyncSpec (next) ->
-          $bottomNav = affix('[up-fixed=bottom]').css(
+          $bottomNav = $fixture('[up-fixed=bottom]').css(
             position: 'fixed',
             bottom: '29px',
             margin: '16px',
@@ -314,7 +314,7 @@ describe 'up.viewport', ->
       describe 'when the viewport is a container with overflow-y: scroll', ->
 
         it 'reveals the given element', asyncSpec (next) ->
-          $viewport = affix('div').css
+          $viewport = $fixture('div').css
             'position': 'absolute'
             'top': '50px'
             'left': '50px'
@@ -393,19 +393,19 @@ describe 'up.viewport', ->
 
       it 'reveals an element with an ID matching the given #hash', asyncSpec (next) ->
         revealSpy = up.viewport.knife.mock('reveal')
-        $match = affix('div#hash')
+        $match = $fixture('div#hash')
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'reveals a named anchor matching the given #hash', asyncSpec (next) ->
         revealSpy = up.viewport.knife.mock('reveal')
-        $match = affix('a[name="hash"]')
+        $match = $fixture('a[name="hash"]')
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'reveals an element with an [up-id] attribute matching the given #hash', asyncSpec (next) ->
         revealSpy = up.viewport.knife.mock('reveal')
-        $match = affix('div[up-id="hash"]')
+        $match = $fixture('div[up-id="hash"]')
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
@@ -428,14 +428,14 @@ describe 'up.viewport', ->
     describe 'up.viewport.all', ->
 
       it 'returns a list of all viewports on the screen', ->
-        viewportElement = affix('[up-viewport]')[0]
+        viewportElement = $fixture('[up-viewport]')[0]
         results = up.viewport.all()
         expect(results).toMatchList([viewportElement, up.viewport.root()])
 
     describe 'up.viewport.subtree', ->
 
       it 'returns descendant viewports of the given element', ->
-        $motherViewport = affix('.mother[up-viewport]')
+        $motherViewport = $fixture('.mother[up-viewport]')
         $element = $motherViewport.affix('.element')
         $childViewport = $element.affix('.child[up-viewport]')
         $grandChildViewport = $childViewport.affix('.grand-child[up-viewport]')
@@ -445,14 +445,14 @@ describe 'up.viewport', ->
         expect(actual).toMatchList(expected)
 
       it 'returns the given element if it is a viewport', ->
-        viewportElement = affix('[up-viewport]')[0]
+        viewportElement = $fixture('[up-viewport]')[0]
         results = up.viewport.subtree(viewportElement)
         expect(results).toMatchList([viewportElement])
 
     describe 'up.viewport.around', ->
 
       it 'returns viewports that  are either ancestors, descendants, or the given element itself', ->
-        $motherViewport = affix('.mother[up-viewport]')
+        $motherViewport = $fixture('.mother[up-viewport]')
         $element = $motherViewport.affix('.element')
         $childViewport = $element.affix('.child[up-viewport]')
         $grandChildViewport = $childViewport.affix('.grand-child[up-viewport]')
@@ -465,14 +465,14 @@ describe 'up.viewport', ->
 
       it 'seeks upwards from the given element', ->
         up.viewport.config.viewports = ['.viewport1', '.viewport2']
-        $viewport1 = affix('.viewport1')
-        $viewport2 = affix('.viewport2')
-        $element = affix('div').appendTo($viewport2)
+        $viewport1 = $fixture('.viewport1')
+        $viewport2 = $fixture('.viewport2')
+        $element = $fixture('div').appendTo($viewport2)
         expect(up.viewport.closest($element)).toEqual($viewport2[0])
 
       it 'returns the given element if it is a configured viewport itself', ->
         up.viewport.config.viewports = ['.viewport']
-        $viewport = affix('.viewport')
+        $viewport = $fixture('.viewport')
         expect(up.viewport.closest($viewport)).toEqual($viewport[0])
 
       describe 'when no configured viewport matches', ->
@@ -482,19 +482,19 @@ describe 'up.viewport', ->
           @resetHtmlCss?()
 
         it 'falls back to the scrolling element', ->
-          $element = affix('.element').css(height: '3000px')
+          $element = $fixture('.element').css(height: '3000px')
           $result = up.viewport.closest($element)
           expect($result).toMatchSelector(up.viewport.rootSelector())
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
-          $element = affix('.element').css(height: '3000px')
+          $element = $fixture('.element').css(height: '3000px')
           @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'hidden')
           @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'scroll')
           $result = up.viewport.closest($element)
           expect($result).toMatchSelector(up.viewport.rootSelector())
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
-          $element = affix('.element').css(height: '3000px')
+          $element = $fixture('.element').css(height: '3000px')
           @resetHtmlCss = e.writeTemporaryStyle('html', 'overflow-y': 'scroll')
           @resetBodyCss = e.writeTemporaryStyle('body', 'overflow-y': 'hidden')
           $result = up.viewport.closest($element)
@@ -503,7 +503,7 @@ describe 'up.viewport', ->
     describe 'up.viewport.restoreScroll', ->
 
       it "restores a viewport's previously saved scroll position", (done) ->
-        $viewport = affix('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
+        $viewport = $fixture('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
         $content = $viewport.affix('.content').css(height: '1000px')
         up.hello($viewport)
         $viewport.scrollTop(50)
@@ -515,7 +515,7 @@ describe 'up.viewport', ->
           done()
 
       it "scrolls a viewport to the top (and does not crash) if no previous scroll position is known", (done) ->
-        $viewport = affix('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
+        $viewport = $fixture('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
         $content = $viewport.affix('.content').css(height: '1000px')
         $viewport.scrollTop(70)
 
@@ -533,7 +533,7 @@ describe 'up.viewport', ->
         $('.up-bounds, .fixture').remove()
 
       it 'absolutely positions the element, preserving visual position and size', ->
-        $element = affix('.element').text('element text').css(paddingTop: '20px', paddingLeft: '20px')
+        $element = $fixture('.element').text('element text').css(paddingTop: '20px', paddingLeft: '20px')
 
         expect($element.css('position')).toEqual('static')
         previousDims = $element[0].getBoundingClientRect()
@@ -546,7 +546,7 @@ describe 'up.viewport', ->
         expect(newDims).toEqual(previousDims)
 
       it 'accurately positions the ghost over an element with margins', ->
-        $element = affix('.element').css(margin: '40px')
+        $element = $fixture('.element').css(margin: '40px')
         previousDims = $element[0].getBoundingClientRect()
 
         up.viewport.absolutize($element)
@@ -555,7 +555,7 @@ describe 'up.viewport', ->
         expect(newDims).toEqual(previousDims)
 
       it "doesn't change the position of a child whose margins no longer collapse", ->
-        $element = affix('.element')
+        $element = $fixture('.element')
         $child = $('<div class="child">child text</div>').css(margin: '40px').appendTo($element)
         previousChildDims = $child[0].getBoundingClientRect()
 
@@ -578,7 +578,7 @@ describe 'up.viewport', ->
         expect(newDims).toEqual(previousDims)
 
       it 'correctly positions an element within a scrolled parent element (that has overflow-y: scroll)', ->
-        $viewport = affix('div').css
+        $viewport = $fixture('div').css
           overflowY: 'scroll'
           height: '50px'
 
@@ -594,7 +594,7 @@ describe 'up.viewport', ->
         expect(newDims).toEqual(previousDims)
 
       it 'converts fixed elements within the copies to absolutely positioning (relative to the closest offset parent)', ->
-        $element = affix('.element').css
+        $element = $fixture('.element').css
           position: 'absolute'
           top: '50px'
           left: '50px'
@@ -611,10 +611,10 @@ describe 'up.viewport', ->
           top: '27px'
 
       it "does not convert fixed elements outside the element's subtree (bugfix)", ->
-        $element = affix('.element').css(position: 'absolute')
+        $element = $fixture('.element').css(position: 'absolute')
         $fixedChild = $('<div class="fixed-child" up-fixed></div>').css(position: 'fixed')
         $fixedChild.appendTo($element)
-        $fixedSibling = affix('[up-fixed]').css(position: 'fixed')
+        $fixedSibling = $fixture('[up-fixed]').css(position: 'fixed')
 
         up.viewport.absolutize($element)
 

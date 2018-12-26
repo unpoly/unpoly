@@ -12,9 +12,9 @@ describe 'up.fragment', ->
 
         beforeEach ->
 
-          @$oldBefore = affix('.before').text('old-before')
-          @$oldMiddle = affix('.middle').text('old-middle')
-          @$oldAfter = affix('.after').text('old-after')
+          @$oldBefore = $fixture('.before').text('old-before')
+          @$oldMiddle = $fixture('.middle').text('old-middle')
+          @$oldAfter = $fixture('.after').text('old-after')
 
           @responseText =
             """
@@ -95,7 +95,7 @@ describe 'up.fragment', ->
 
           it 'replaces the first fallback instead of the given selector', asyncSpec (next) ->
             up.fragment.config.fallbacks = ['.fallback']
-            affix('.fallback')
+            $fixture('.fallback')
 
             # can't have the example replace the Jasmine test runner UI
             extractSpy = up.fragment.knife.mock('extract').and.returnValue(Promise.resolve())
@@ -116,7 +116,7 @@ describe 'up.fragment', ->
               expect($('.after')).toHaveText('new-after')
 
           it 'rejects the returned promise', (done) ->
-            affix('.after')
+            $fixture('.after')
             promise = up.replace('.middle', '/path', failTarget: '.after')
 
             u.nextFrame =>
@@ -134,7 +134,7 @@ describe 'up.fragment', ->
 
           it "doesn't crash and rejects the returned promise", asyncSpec (next) ->
             jasmine.clock().install() # required by responseTimeout()
-            affix('.target')
+            $fixture('.target')
             promise = up.replace('.middle', '/path', timeout: 50)
 
             next =>
@@ -154,7 +154,7 @@ describe 'up.fragment', ->
         describe 'when there is a network issue', ->
 
           it "doesn't crash and rejects the returned promise", (done) ->
-            affix('.target')
+            $fixture('.target')
             promise = up.replace('.middle', '/path')
 
             u.nextFrame =>
@@ -270,7 +270,7 @@ describe 'up.fragment', ->
             up.history.config.enabled = true
 
           it "sets the document title to the response <title>", asyncSpec (next) ->
-            affix('.container').text('old container text')
+            $fixture('.container').text('old container text')
             up.replace('.container', '/path')
 
             next =>
@@ -292,7 +292,7 @@ describe 'up.fragment', ->
               expect(document.title).toBe('Title from HTML')
 
           it "sets the document title to an 'X-Up-Title' header in the response", asyncSpec (next) ->
-            affix('.container').text('old container text')
+            $fixture('.container').text('old container text')
             up.replace('.container', '/path')
 
             next =>
@@ -310,7 +310,7 @@ describe 'up.fragment', ->
               expect(document.title).toBe('Title from header')
 
           it "prefers the X-Up-Title header to the response <title>", asyncSpec (next) ->
-            affix('.container').text('old container text')
+            $fixture('.container').text('old container text')
             up.replace('.container', '/path')
 
             next =>
@@ -335,7 +335,7 @@ describe 'up.fragment', ->
               expect(document.title).toBe('Title from header')
 
           it "sets the document title to the response <title> with { history: false, title: true } options (bugfix)", asyncSpec (next) ->
-            affix('.container').text('old container text')
+            $fixture('.container').text('old container text')
             up.replace('.container', '/path', history: false, title: true)
 
             next =>
@@ -357,7 +357,7 @@ describe 'up.fragment', ->
               expect(document.title).toBe('Title from HTML')
 
           it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec (next) ->
-            affix('.container').text('old container text')
+            $fixture('.container').text('old container text')
             document.title = 'old document title'
             up.replace('.container', '/path', history: false, title: true)
 
@@ -380,7 +380,7 @@ describe 'up.fragment', ->
               expect(document.title).toBe('old document title')
 
           it "does not extract the title from the response or HTTP header if history isn't updated", asyncSpec (next) ->
-            affix('.container').text('old container text')
+            $fixture('.container').text('old container text')
             document.title = 'old document title'
             up.replace('.container', '/path', history: false)
 
@@ -405,7 +405,7 @@ describe 'up.fragment', ->
               expect(document.title).toBe('old document title')
 
           it 'allows to pass an explicit title as { title } option', asyncSpec (next) ->
-            affix('.container').text('old container text')
+            $fixture('.container').text('old container text')
             up.replace('.container', '/path', title: 'Title from options')
 
             next =>
@@ -440,7 +440,7 @@ describe 'up.fragment', ->
           describe 'nested selector merging', ->
 
             it 'replaces a single fragment if a selector contains a subsequent selector in the current page', asyncSpec (next) ->
-              $outer = affix('.outer').text('old outer text')
+              $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
 
               replacePromise = up.replace('.outer, .inner', '/path')
@@ -468,7 +468,7 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it 'does not merge selectors if a selector contains a subsequent selector, but prepends instead of replacing', asyncSpec (next) ->
-              $outer = affix('.outer').text('old outer text')
+              $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
 
               replacePromise = up.replace('.outer:before, .inner', '/path')
@@ -497,7 +497,7 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it 'does not merge selectors if a selector contains a subsequent selector, but appends instead of replacing', asyncSpec (next) ->
-              $outer = affix('.outer').text('old outer text')
+              $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
 
               replacePromise = up.replace('.outer:after, .inner', '/path')
@@ -526,7 +526,7 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it 'does not lose selector pseudo-classes when merging selectors (bugfix)', asyncSpec (next) ->
-              $outer = affix('.outer').text('old outer text')
+              $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
 
               replacePromise = up.replace('.outer:after, .inner', '/path')
@@ -535,7 +535,7 @@ describe 'up.fragment', ->
                 expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
 
             it 'replaces a single fragment if a selector contains a previous selector in the current page', asyncSpec (next) ->
-              $outer = affix('.outer').text('old outer text')
+              $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
 
               replacePromise = up.replace('.outer, .inner', '/path')
@@ -565,7 +565,7 @@ describe 'up.fragment', ->
             it 'does not lose a { reveal: true } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
               revealStub = up.viewport.knife.mock('reveal')
 
-              $outer = affix('.outer').text('old outer text')
+              $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
 
               up.replace('.inner, .outer', '/path', reveal: true)
@@ -594,7 +594,7 @@ describe 'up.fragment', ->
             it 'does not lose a { reveal: string } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
               revealStub = up.viewport.knife.mock('reveal')
 
-              $outer = affix('.outer').text('old outer text')
+              $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
 
               up.replace('.inner, .outer', '/path', reveal: '.revealee')
@@ -626,7 +626,7 @@ describe 'up.fragment', ->
 
 
             it 'replaces a single fragment if the nesting differs in current page and response', asyncSpec (next) ->
-              $outer = affix('.outer').text('old outer text')
+              $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
 
               replacePromise = up.replace('.outer, .inner', '/path')
@@ -651,8 +651,8 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it 'does not crash if two selectors that are siblings in the current page are nested in the response', asyncSpec (next) ->
-              $outer = affix('.one').text('old one text')
-              $inner = affix('.two').text('old two text')
+              $outer = $fixture('.one').text('old one text')
+              $inner = $fixture('.two').text('old two text')
 
               replacePromise = up.replace('.one, .two', '/path')
 
@@ -677,8 +677,8 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it 'does not crash if selectors that siblings in the current page are inversely nested in the response', asyncSpec (next) ->
-              $outer = affix('.one').text('old one text')
-              $inner = affix('.two').text('old two text')
+              $outer = $fixture('.one').text('old one text')
+              $inner = $fixture('.two').text('old two text')
 
               replacePromise = up.replace('.one, .two', '/path')
 
@@ -703,7 +703,7 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it 'updates the first selector if the same element is targeted twice in a single replacement', asyncSpec (next) ->
-              $one = affix('.one.alias').text('old one text')
+              $one = $fixture('.one.alias').text('old one text')
 
               replacePromise = up.replace('.one, .alias', '/path')
 
@@ -725,7 +725,7 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it 'updates the first selector if the same element is prepended or appended twice in a single replacement', asyncSpec (next) ->
-              $one = affix('.one').text('old one text')
+              $one = $fixture('.one').text('old one text')
 
               replacePromise = up.replace('.one:before, .one:after', '/path')
 
@@ -747,7 +747,7 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it "updates the first selector if the same element is prepended, replaced and appended in a single replacement", asyncSpec (next) ->
-              $elem = affix('.elem.alias1.alias2').text("old text")
+              $elem = $fixture('.elem.alias1.alias2').text("old text")
 
               replacePromise = up.replace('.elem:before, .alias1, .alias2:after', '/path')
 
@@ -798,9 +798,9 @@ describe 'up.fragment', ->
               done()
 
           it 'understands non-standard CSS selector extensions such as :has(...)', (done) ->
-            $first = affix('.boxx#first')
+            $first = $fixture('.boxx#first')
             $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
-            $second = affix('.boxx#second')
+            $second = $fixture('.boxx#second')
             $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
 
             promise = up.replace('.boxx:has(.first-child)', '/path')
@@ -821,7 +821,7 @@ describe 'up.fragment', ->
               up.fragment.config.fallbacks = []
 
             it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
-              affix('.box').text('old box')
+              $fixture('.box').text('old box')
               up.replace('.unknown', '/path', fallback: '.box')
 
               next => @respondWith '<div class="box">new box</div>'
@@ -834,8 +834,8 @@ describe 'up.fragment', ->
                 done()
 
             it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
-              affix('.target').text('old target')
-              affix('.fallback').text('old fallback')
+              $fixture('.target').text('old target')
+              $fixture('.fallback').text('old fallback')
               up.replace('.target, .unknown', '/path', fallback: '.fallback')
 
               next =>
@@ -850,14 +850,14 @@ describe 'up.fragment', ->
 
             it 'tries a selector from up.fragment.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
               up.fragment.config.fallbacks = ['.existing']
-              affix('.existing').text('old existing')
+              $fixture('.existing').text('old existing')
               up.replace('.unknown', '/path')
               next => @respondWith '<div class="existing">new existing</div>'
               next => expect('.existing').toHaveText('new existing')
 
             it 'does not try a selector from up.fragment.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
               up.fragment.config.fallbacks = ['.existing']
-              affix('.existing').text('old existing')
+              $fixture('.existing').text('old existing')
               up.replace('.unknown', '/path', fallback: false).catch (e) ->
                 expect(e).toBeError(/Could not find target in current page/i)
                 done()
@@ -868,8 +868,8 @@ describe 'up.fragment', ->
               up.fragment.config.fallbacks = []
 
             it 'tries selectors from options.fallback before swapping elements', asyncSpec (next) ->
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
+              $target = $fixture('.target').text('old target')
+              $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target', '/path', fallback: '.fallback')
               $target.remove()
 
@@ -883,8 +883,8 @@ describe 'up.fragment', ->
                 expect('.fallback').toHaveText('new fallback')
 
             it 'rejects the promise if all alternatives are exhausted', (done) ->
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
+              $target = $fixture('.target').text('old target')
+              $fallback = $fixture('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: '.fallback')
               $target.remove()
               $fallback.remove()
@@ -902,9 +902,9 @@ describe 'up.fragment', ->
                     done()
 
             it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
-              $target = affix('.target').text('old target')
-              $target2 = affix('.target2').text('old target2')
-              $fallback = affix('.fallback').text('old fallback')
+              $target = $fixture('.target').text('old target')
+              $target2 = $fixture('.target2').text('old target2')
+              $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target, .target2', '/path', fallback: '.fallback')
               $target2.remove()
 
@@ -920,8 +920,8 @@ describe 'up.fragment', ->
 
             it 'tries a selector from up.fragment.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
               up.fragment.config.fallbacks = ['.fallback']
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
+              $target = $fixture('.target').text('old target')
+              $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target', '/path')
               $target.remove()
 
@@ -936,8 +936,8 @@ describe 'up.fragment', ->
 
             it 'does not try a selector from up.fragment.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
               up.fragment.config.fallbacks = ['.fallback']
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
+              $target = $fixture('.target').text('old target')
+              $fallback = $fixture('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: false)
               $target.remove()
 
@@ -957,8 +957,8 @@ describe 'up.fragment', ->
               up.fragment.config.fallbacks = []
 
             it 'tries selectors from options.fallback before swapping elements', asyncSpec (next) ->
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
+              $target = $fixture('.target').text('old target')
+              $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target', '/path', fallback: '.fallback')
 
               next =>
@@ -973,8 +973,8 @@ describe 'up.fragment', ->
             describe 'if all alternatives are exhausted', ->
 
               it 'rejects the promise', (done) ->
-                $target = affix('.target').text('old target')
-                $fallback = affix('.fallback').text('old fallback')
+                $target = $fixture('.target').text('old target')
+                $fallback = $fixture('.fallback').text('old fallback')
                 promise = up.replace('.target', '/path', fallback: '.fallback')
 
                 u.nextFrame =>
@@ -985,8 +985,8 @@ describe 'up.fragment', ->
                   done()
 
               it 'shows a link to open the unexpected response', (done) ->
-                $target = affix('.target').text('old target')
-                $fallback = affix('.fallback').text('old fallback')
+                $target = $fixture('.target').text('old target')
+                $fallback = $fixture('.fallback').text('old fallback')
                 promise = up.replace('.target', '/path', fallback: '.fallback')
                 navigate = spyOn(up.browser, 'navigate')
 
@@ -1007,9 +1007,9 @@ describe 'up.fragment', ->
                     done()
 
             it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
-              $target = affix('.target').text('old target')
-              $target2 = affix('.target2').text('old target2')
-              $fallback = affix('.fallback').text('old fallback')
+              $target = $fixture('.target').text('old target')
+              $target2 = $fixture('.target2').text('old target2')
+              $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target, .target2', '/path', fallback: '.fallback')
 
               next =>
@@ -1025,8 +1025,8 @@ describe 'up.fragment', ->
 
             it 'tries a selector from up.fragment.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
               up.fragment.config.fallbacks = ['.fallback']
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
+              $target = $fixture('.target').text('old target')
+              $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target', '/path')
 
               next =>
@@ -1038,8 +1038,8 @@ describe 'up.fragment', ->
 
             it 'does not try a selector from up.fragment.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
               up.fragment.config.fallbacks = ['.fallback']
-              $target = affix('.target').text('old target')
-              $fallback = affix('.fallback').text('old fallback')
+              $target = $fixture('.target').text('old target')
+              $fallback = $fixture('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: false)
 
               u.nextFrame =>
@@ -1249,7 +1249,7 @@ describe 'up.fragment', ->
 
           it 'restores the scroll positions of all viewports around the target', asyncSpec (next) ->
 
-            $viewport = affix('div[up-viewport] .element').css
+            $viewport = $fixture('div[up-viewport] .element').css
               'height': '100px'
               'width': '100px'
               'overflow-y': 'scroll'
@@ -1297,7 +1297,7 @@ describe 'up.fragment', ->
               expect(@revealedText).toEqual ['new-middle']
 
           it 'allows to pass another selector to reveal', asyncSpec (next)->
-            $other = affix('.other').text('other text')
+            $other = $fixture('.other').text('other text')
 
             up.replace('.middle', '/path', reveal: '.other')
 
@@ -1308,7 +1308,7 @@ describe 'up.fragment', ->
               expect(@revealedText).toEqual ['other text']
 
           it 'allows to refer to the replacement { origin } as "&" in the { reveal } selector', asyncSpec (next) ->
-            $origin = affix('.origin').text('origin text')
+            $origin = $fixture('.origin').text('origin text')
 
             up.replace('.middle', '/path', reveal: '&', origin: '.origin')
 
@@ -1321,7 +1321,7 @@ describe 'up.fragment', ->
           describe 'when the server responds with an error code', ->
 
             it 'ignores the { reveal } option', asyncSpec (next) ->
-              $failTarget = affix('.fail-target')
+              $failTarget = $fixture('.fail-target')
               up.replace('.middle', '/path', failTarget: '.fail-target', reveal: true)
 
               next =>
@@ -1331,7 +1331,7 @@ describe 'up.fragment', ->
                 expect(@revealMock).not.toHaveBeenCalled()
 
             it 'accepts a { failReveal } option for error responses', asyncSpec (next) ->
-              $failTarget = affix('.fail-target').text('old fail target text')
+              $failTarget = $fixture('.fail-target').text('old fail target text')
               up.replace('.middle', '/path', failTarget: '.fail-target', reveal: false, failReveal: true)
 
               next =>
@@ -1347,8 +1347,8 @@ describe 'up.fragment', ->
                 expect(@revealedText).toEqual ['new fail target text']
 
             it 'allows to refer to the replacement { origin } as "&" in the { failTarget } selector', asyncSpec (next) ->
-              $origin = affix('.origin').text('origin text')
-              $failTarget = affix('.fail-target').text('old fail target text')
+              $origin = $fixture('.origin').text('origin text')
+              $failTarget = $fixture('.fail-target').text('old fail target text')
               up.replace('.middle', '/path', failTarget: '.fail-target', reveal: false, failReveal: '&', origin: $origin)
 
               next =>
@@ -1515,9 +1515,9 @@ describe 'up.fragment', ->
 
       it 'Updates a selector on the current page with the same selector from the given HTML string', asyncSpec (next) ->
 
-        affix('.before').text('old-before')
-        affix('.middle').text('old-middle')
-        affix('.after').text('old-after')
+        $fixture('.before').text('old-before')
+        $fixture('.middle').text('old-middle')
+        $fixture('.after').text('old-after')
 
         html =
           """
@@ -1542,7 +1542,7 @@ describe 'up.fragment', ->
           done()
 
       it "throws an error if the selector can't be found in the given HTML string", (done) ->
-        affix('.foo-bar')
+        $fixture('.foo-bar')
         promise = up.extract('.foo-bar', '')
         promiseState(promise).then (result) =>
           expect(result.state).toEqual('rejected')
@@ -1551,7 +1551,7 @@ describe 'up.fragment', ->
 
       it "ignores an element that matches the selector but also matches .up-destroying", (done) ->
         html = '<div class="foo-bar">text</div>'
-        affix('.foo-bar.up-destroying')
+        $fixture('.foo-bar.up-destroying')
         promise = up.extract('.foo-bar', html)
         promiseState(promise).then (result) =>
           expect(result.state).toEqual('rejected')
@@ -1560,8 +1560,8 @@ describe 'up.fragment', ->
 
       it "ignores an element that matches the selector but also has a parent matching .up-destroying", (done) ->
         html = '<div class="foo-bar">text</div>'
-        $parent = affix('.up-destroying')
-        $child = affix('.foo-bar').appendTo($parent)
+        $parent = $fixture('.up-destroying')
+        $child = $fixture('.foo-bar').appendTo($parent)
         promise = up.extract('.foo-bar', html)
         promiseState(promise).then (result) =>
           expect(result.state).toEqual('rejected')
@@ -1570,8 +1570,8 @@ describe 'up.fragment', ->
 
       it 'only replaces the first element matching the selector', asyncSpec (next) ->
         html = '<div class="foo-bar">text</div>'
-        affix('.foo-bar')
-        affix('.foo-bar')
+        $fixture('.foo-bar')
+        $fixture('.foo-bar')
         up.extract('.foo-bar', html)
 
         next =>
@@ -1580,7 +1580,7 @@ describe 'up.fragment', ->
           expect($($elements.get(1)).text()).toEqual('')
 
       it 'focuses an [autofocus] element in the new fragment', asyncSpec (next) ->
-        affix('.foo-bar')
+        $fixture('.foo-bar')
         up.extract '.foo-bar', """
           <form class='foo-bar'>
             <input class="autofocused-input" autofocus>
@@ -1595,7 +1595,7 @@ describe 'up.fragment', ->
 
       # up.extract
       it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
-        $parent = affix('.parent')
+        $parent = $fixture('.parent')
         $element = $parent.affix('.element.v1').text('v1')
         expect($element).toBeAttached()
 
@@ -1614,7 +1614,7 @@ describe 'up.fragment', ->
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', ($element) ->
             -> destructor($element.text())
-          $container = affix('.container').text('old text')
+          $container = $fixture('.container').text('old text')
           up.hello($container)
           up.extract('.container', '<div class="container">new text</div>')
 
@@ -1626,7 +1626,7 @@ describe 'up.fragment', ->
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', ($element) ->
             -> destructor($element.text())
-          $container = affix('.container').text('old text')
+          $container = $fixture('.container').text('old text')
           up.hello($container)
 
           up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
@@ -1644,7 +1644,7 @@ describe 'up.fragment', ->
           up.element.knife.mock('isSingleton').and.callFake (element) -> e.matches(element, '.container')
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', -> destructor
-          $container = affix('.container')
+          $container = $fixture('.container')
           up.hello($container)
           up.extract('.container', '<div class="container">new text</div>')
 
@@ -1656,7 +1656,7 @@ describe 'up.fragment', ->
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', ($element) ->
             -> destructor($element.text(), $element.is('.up-destroying'))
-          $container = affix('.container').text('old text')
+          $container = $fixture('.container').text('old text')
           up.hello($container)
 
           extractDone = up.extract('.container', '<div class="container">new text</div>')
@@ -1670,7 +1670,7 @@ describe 'up.fragment', ->
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', ($element) ->
             -> destructor($element.text(), $element.is('.up-destroying'))
-          $container = affix('.container').text('old text')
+          $container = $fixture('.container').text('old text')
           up.hello($container)
 
           extractDone = up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
@@ -1685,7 +1685,7 @@ describe 'up.fragment', ->
           up.$compiler '.element', ($element) ->
             return -> spy($element.text(), $element.parent())
 
-          $parent = affix('.parent')
+          $parent = $fixture('.parent')
           $element = $parent.affix('.element').text('old text')
           up.hello($element)
 
@@ -1701,7 +1701,7 @@ describe 'up.fragment', ->
               # We must seek .parent in our ancestry, because our direct parent() is an .up-bounds container
               spy($element.text(), $element.closest('.parent'))
 
-          $parent = affix('.parent')
+          $parent = $fixture('.parent')
           $element = $parent.affix('.element').text('old text')
           up.hello($element)
 
@@ -1715,7 +1715,7 @@ describe 'up.fragment', ->
       describe 'with { transition } option', ->
 
         it 'morphs between the old and new element', asyncSpec (next) ->
-          affix('.element.v1').text('version 1')
+          $fixture('.element.v1').text('version 1')
           up.extract('.element', '<div class="element v2">version 2</div>', transition: 'cross-fade', duration: 200, easing: 'linear')
 
           $old = undefined
@@ -1744,7 +1744,7 @@ describe 'up.fragment', ->
             # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
             up.element.knife.mock('isSingleton').and.callFake (element) -> e.matches(element, '.container')
 
-            affix('.container').text('old text')
+            $fixture('.container').text('old text')
 
             extractDone = jasmine.createSpy()
             promise = up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 200)
@@ -1757,7 +1757,7 @@ describe 'up.fragment', ->
               expect($('.container')).toHaveOpacity(1.0)
 
         it 'marks the old fragment as .up-destroying during the transition', asyncSpec (next) ->
-          affix('.element').text('version 1')
+          $fixture('.element').text('version 1')
           up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
 
           next =>
@@ -1771,7 +1771,7 @@ describe 'up.fragment', ->
 
         # extract with { transition } option
         it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
-          $parent = affix('.parent')
+          $parent = $fixture('.parent')
           $element = $parent.affix('.element.v1').text('v1')
           expect($element).toBeAttached()
 
@@ -1786,7 +1786,7 @@ describe 'up.fragment', ->
 
 
         it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
-          affix('.element.v1').text('version 1')
+          $fixture('.element.v1').text('version 1')
 
           up.extract('.element', '<div class="element v2">version 2</div>', transition: 'cross-fade', duration: 200)
 
@@ -1816,7 +1816,7 @@ describe 'up.fragment', ->
 
 
         it 'delays the resolution of the returned promise until the transition is over', (done) ->
-          affix('.element').text('version 1')
+          $fixture('.element').text('version 1')
           resolution = jasmine.createSpy()
           promise = up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 60)
           promise.then(resolution)
@@ -1830,7 +1830,7 @@ describe 'up.fragment', ->
             done()
 
         it 'attaches the new element to the DOM before compilers are called, so they can see their parents and trigger bubbling events', asyncSpec (next)->
-          $parent = affix('.parent')
+          $parent = $fixture('.parent')
           $element = $parent.affix('.element').text('old text')
           spy = jasmine.createSpy('parent spy')
           up.$compiler '.element', ($element) -> spy($element.text(), $element.parent())
@@ -1843,7 +1843,7 @@ describe 'up.fragment', ->
         describe 'when up.morph() is called from a transition function', ->
 
           it "does not emit multiple replacement events (bugfix)", (done) ->
-            $element = affix('.element').text('old content')
+            $element = $fixture('.element').text('old content')
 
             transition = (oldElement, newElement, options) ->
               up.morph(oldElement, newElement, 'cross-fade', options)
@@ -1861,7 +1861,7 @@ describe 'up.fragment', ->
               done()
 
           it "does not compile the element multiple times (bugfix)", (done) ->
-            $element = affix('.element').text('old content')
+            $element = $fixture('.element').text('old content')
 
             transition = (oldElement, newElement, options) ->
               up.morph(oldElement, newElement, 'cross-fade', options)
@@ -1876,7 +1876,7 @@ describe 'up.fragment', ->
               done()
 
           it "does not call destructors multiple times (bugfix)", (done) ->
-            $element = affix('.element').text('old content')
+            $element = $fixture('.element').text('old content')
 
             transition = (oldElement, newElement, options) ->
               up.morph(oldElement, newElement, 'cross-fade', options)
@@ -1900,7 +1900,7 @@ describe 'up.fragment', ->
             up.motion.config.enabled = false
 
           it 'immediately swaps the old and new elements without creating unnecessary ghosts', asyncSpec (next) ->
-            affix('.element').text('version 1')
+            $fixture('.element').text('version 1')
             up.extract('.element', '<div class="element">version 2</div>', transition: 'cross-fade', duration: 200)
             next =>
               expect($('.element')).toHaveText('version 2')
@@ -1908,7 +1908,7 @@ describe 'up.fragment', ->
 
           it "replaces the elements directly, since first inserting and then removing would shift scroll positions", asyncSpec (next) ->
             swapDirectlySpy = up.motion.knife.mock('swapElementsDirectly')
-            affix('.element').text('version 1')
+            $fixture('.element').text('version 1')
             up.extract('.element', '<div class="element">version 2</div>', transition: false)
 
             next =>
@@ -1928,7 +1928,7 @@ describe 'up.fragment', ->
           $('.before, .middle, .after').remove()
 
         it 'keeps an [up-keep] element, but does replace other elements around it', asyncSpec (next) ->
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.affix('.before').text('old-before')
           $container.affix('.middle[up-keep]').text('old-middle')
           $container.affix('.after').text('old-after')
@@ -1947,7 +1947,7 @@ describe 'up.fragment', ->
             expect($('.after')).toHaveText('new-after')
 
         it 'keeps an [up-keep] element, but does replace text nodes around it', asyncSpec (next) ->
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             old-before
             <div class='element' up-keep>old-inside</div>
@@ -1966,7 +1966,7 @@ describe 'up.fragment', ->
             expect(squish($('.container').text())).toEqual('new-before old-inside new-after')
 
         it 'updates an [up-keep] element with { keep: false } option', asyncSpec (next) ->
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             old-before
             <div class='element' up-keep>old-inside</div>
@@ -1988,7 +1988,7 @@ describe 'up.fragment', ->
         describe 'if an [up-keep] element is itself a direct replacement target', ->
 
           it "keeps that element", asyncSpec (next) ->
-            affix('.keeper[up-keep]').text('old-inside')
+            $fixture('.keeper[up-keep]').text('old-inside')
             up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
 
             next =>
@@ -1999,7 +1999,7 @@ describe 'up.fragment', ->
             keptListener = jasmine.createSpy('subscriber to up:fragment:kept')
             up.on('up:fragment:kept', keptListener)
             up.on('up:fragment:inserted', insertedListener)
-            $keeper = affix('.keeper[up-keep]').text('old-inside')
+            $keeper = $fixture('.keeper[up-keep]').text('old-inside')
             up.extract '.keeper', "<div class='keeper new' up-keep>new-inside</div>"
 
             next =>
@@ -2014,7 +2014,7 @@ describe 'up.fragment', ->
             barCompiler(text)
             return -> barDestructor(text)
 
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class='foo'>old-foo</div>
             <div class='bar' up-keep>old-bar</div>
@@ -2045,7 +2045,7 @@ describe 'up.fragment', ->
             barCompiler(text)
             return -> barDestructor(text)
 
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class='foo'>old-foo</div>
             <div class='bar' up-keep>old-bar</div>
@@ -2070,7 +2070,7 @@ describe 'up.fragment', ->
             expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
 
         it 'moves a kept element to the ancestry position of the matching element in the response', asyncSpec (next) ->
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class="parent1">
               <div class="keeper" up-keep>old-inside</div>
@@ -2093,7 +2093,7 @@ describe 'up.fragment', ->
             expect($('.keeper').parent()).toEqual($('.parent2'))
 
         it 'lets developers choose a selector to match against as the value of the up-keep attribute', asyncSpec (next) ->
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class="keeper" up-keep=".stayer"></div>
             """
@@ -2109,7 +2109,7 @@ describe 'up.fragment', ->
         it 'does not compile a kept element a second time', asyncSpec (next) ->
           compiler = jasmine.createSpy('compiler')
           up.$compiler('.keeper', compiler)
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class="keeper" up-keep>old-text</div>
             """
@@ -2132,7 +2132,7 @@ describe 'up.fragment', ->
           up.$compiler '.keeper', ($keeper) ->
             $keeper.on 'click', handler
 
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class="keeper" up-keep>old-text</div>
             """
@@ -2158,7 +2158,7 @@ describe 'up.fragment', ->
           up.$compiler '.keeper', ($keeper) ->
             return destructor
 
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class="keeper" up-keep>old-text</div>
             """
@@ -2181,7 +2181,7 @@ describe 'up.fragment', ->
           up.$compiler '.keeper', ($keeper) ->
             return destructor
 
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class="keeper" up-keep>old-text</div>
             """
@@ -2199,13 +2199,13 @@ describe 'up.fragment', ->
             expect(destructor).toHaveBeenCalled()
 
         it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', asyncSpec (next) ->
-          $keeper = affix('.keeper[up-keep]').text('old-inside')
+          $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           $keeper.on 'up:fragment:keep', (event) -> event.preventDefault()
           up.extract '.keeper', "<div class='keeper' up-keep>new-inside</div>"
           next => expect($('.keeper')).toHaveText('new-inside')
 
         it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
-          $keeper = affix('.keeper[up-keep]').text('version 1')
+          $keeper = $fixture('.keeper[up-keep]').text('version 1')
           $keeper[0].addEventListener 'up:fragment:keep', (event) ->
             event.preventDefault() if event.newFragment.textContent.trim() == 'version 3'
 
@@ -2220,7 +2220,7 @@ describe 'up.fragment', ->
           keptListener = jasmine.createSpy()
           up.on('up:fragment:kept', keptListener)
 
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class="keeper" up-keep></div>
             """
@@ -2238,7 +2238,7 @@ describe 'up.fragment', ->
         it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
           up.on 'up:fragment:kept', (event) -> keptListener(event.element, event.newData)
-          $container = affix('.container')
+          $container = $fixture('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
           up.extract '.container', """
@@ -2254,7 +2254,7 @@ describe 'up.fragment', ->
         it 'emits an up:fragment:kept with { newData: {} } if the discarded element had no up-data value', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
           up.on('up:fragment:kept', keptListener)
-          $container = affix('.container')
+          $container = $fixture('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
           up.extract '.keeper', """
             <div class='container'>
@@ -2269,7 +2269,7 @@ describe 'up.fragment', ->
         it 'reuses the same element and emits up:fragment:kept during multiple extractions', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
           up.on 'up:fragment:kept', (event) -> keptListener(event.element, event.newData)
-          $container = affix('.container')
+          $container = $fixture('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
           next =>
@@ -2298,7 +2298,7 @@ describe 'up.fragment', ->
             oldTextDuringTransition = squish(oldElement.innerText)
             newTextDuringTransition = squish(newElement.innerText)
             Promise.resolve()
-          $container = affix('.container')
+          $container = $fixture('.container')
           $container.html """
             <div class='foo'>old-foo</div>
             <div class='bar' up-keep>old-bar</div>
@@ -2320,13 +2320,13 @@ describe 'up.fragment', ->
     describe 'up.destroy', ->
 
       it 'removes the element with the given selector', (done) ->
-        affix('.element')
+        $fixture('.element')
         up.destroy('.element').then ->
           expect($('.element')).not.toBeAttached()
           done()
 
       it 'runs an animation before removal with { animate } option', asyncSpec (next) ->
-        $element = affix('.element')
+        $element = $fixture('.element')
         up.destroy($element, animation: 'fade-out', duration: 200, easing: 'linear')
 
         next ->
@@ -2341,7 +2341,7 @@ describe 'up.fragment', ->
       it 'calls destructors for custom elements', (done) ->
         up.$compiler('.element', ($element) -> destructor)
         destructor = jasmine.createSpy('destructor')
-        up.hello(affix('.element'))
+        up.hello(fixture('.element'))
         up.destroy('.element').then ->
           expect(destructor).toHaveBeenCalled()
           done()
@@ -2350,7 +2350,7 @@ describe 'up.fragment', ->
         destructor = jasmine.createSpy('destructor')
         up.$compiler '.container', ($element) ->
           -> destructor($element.text(), $element.is('.up-destroying'))
-        $container = affix('.container').text('old text')
+        $container = $fixture('.container').text('old text')
         up.hello($container)
 
         destroyDone = up.destroy('.container')
@@ -2363,7 +2363,7 @@ describe 'up.fragment', ->
         destructor = jasmine.createSpy('destructor')
         up.$compiler '.container', ($element) ->
           -> destructor($element.text(), $element.is('.up-destroying'))
-        $container = affix('.container').text('old text')
+        $container = $fixture('.container').text('old text')
         up.hello($container)
 
         destroyDone = up.destroy('.container', animation: 'fade-out', duration: 100)
@@ -2376,7 +2376,7 @@ describe 'up.fragment', ->
         destructor = jasmine.createSpy('destructor')
         up.$compiler '.container', ($element) ->
           -> destructor($element.text())
-        $container = affix('.container').text('old text')
+        $container = $fixture('.container').text('old text')
         up.hello($container)
 
         destroyDone = up.destroy('.container', animation: 'fade-out', duration: 100)
@@ -2390,7 +2390,7 @@ describe 'up.fragment', ->
 
       it 'allows to pass a new history entry as { history } option', (done) ->
         up.history.config.enabled = true
-        affix('.element')
+        $fixture('.element')
         up.destroy('.element', history: '/new-path').then ->
           u.setTimer 100, ->
             expect(location.href).toMatchUrl('/new-path')
@@ -2398,13 +2398,13 @@ describe 'up.fragment', ->
 
       it 'allows to pass a new document title as { title } option', (done) ->
         up.history.config.enabled = true
-        affix('.element')
+        $fixture('.element')
         up.destroy('.element', history: '/new-path', title: 'Title from options').then ->
           expect(document.title).toEqual('Title from options')
           done()
 
       it 'marks the element as .up-destroying while it is animating', asyncSpec (next) ->
-        $element = affix('.element')
+        $element = $fixture('.element')
         up.destroy($element, animation: 'fade-out', duration: 80, easing: 'linear')
 
         next ->
@@ -2412,7 +2412,7 @@ describe 'up.fragment', ->
 
       # up.destroy
       it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', asyncSpec (next) ->
-        $parent = affix('.parent')
+        $parent = $fixture('.parent')
         $element = $parent.affix('.element')
         expect($element).toBeAttached()
 
@@ -2437,7 +2437,7 @@ describe 'up.fragment', ->
       describeCapability 'canPushState', ->
 
         it 'reloads the given selector from the closest known source URL', asyncSpec (next) ->
-          affix('.container[up-source="/source"] .element').find('.element').text('old text')
+          $fixture('.container[up-source="/source"] .element').find('.element').text('old text')
 
           next =>
             up.reload('.element')
@@ -2457,7 +2457,7 @@ describe 'up.fragment', ->
       describeFallback 'canPushState', ->
 
         it 'makes a page load from the closest known source URL', asyncSpec (next) ->
-          affix('.container[up-source="/source"] .element').find('.element').text('old text')
+          $fixture('.container[up-source="/source"] .element').find('.element').text('old text')
           spyOn(up.browser, 'navigate')
           up.reload('.element')
 
@@ -2467,23 +2467,23 @@ describe 'up.fragment', ->
     describe 'up.fragment.layerOf', ->
 
       it 'returns "popup" for an element in a popup over the page', ->
-        $popup = affix('.up-popup')
+        $popup = $fixture('.up-popup')
         $element = $popup.affix('.element')
         expect(up.fragment.layerOf($element)).toEqual('popup')
 
       it 'returns "popup" for an element in a popup over a modal', ->
-        $modal = affix('.up-modal')
+        $modal = $fixture('.up-modal')
         $popupInModal = $modal.affix('.up-popup')
         $element = $popupInModal.affix('.element')
         expect(up.fragment.layerOf($element)).toEqual('popup')
 
       it 'returns "modal" for an element in a modal', ->
-        $modal = affix('.up-modal')
+        $modal = $fixture('.up-modal')
         $element = $modal.affix('.element')
         expect(up.fragment.layerOf($element)).toEqual('modal')
 
       it 'returns "page" for an element below a modal or popup', ->
-        $element = affix('.element')
+        $element = $fixture('.element')
         expect(up.fragment.layerOf($element)).toEqual('page')
 
       it 'returns undefined for an empty jQuery collection', ->

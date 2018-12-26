@@ -774,8 +774,8 @@ describe 'up.proxy', ->
           @requestTarget = => @lastRequest().requestHeaders['X-Up-Target']
 
         it "loads and caches the given link's destination", asyncSpec (next) ->
-          affix('.target')
-          $link = affix('a[href="/path"][up-target=".target"]')
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"]')
 
           up.proxy.preload($link)
 
@@ -784,8 +784,8 @@ describe 'up.proxy', ->
             expect(u.isPromise(cachedPromise)).toBe(true)
 
         it "does not load a link whose method has side-effects", (done) ->
-          affix('.target')
-          $link = affix('a[href="/path"][up-target=".target"][data-method="post"]')
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"][data-method="post"]')
           preloadPromise = up.proxy.preload($link)
 
           promiseState(preloadPromise).then (result) ->
@@ -794,8 +794,8 @@ describe 'up.proxy', ->
             done()
 
         it 'accepts options', asyncSpec (next) ->
-          affix('.target')
-          $link = affix('a[href="/path"][up-target=".target"]')
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"]')
           up.proxy.preload($link, url: '/options-path')
 
           next =>
@@ -805,13 +805,13 @@ describe 'up.proxy', ->
         describe 'for an [up-target] link', ->
 
           it 'includes the [up-target] selector as an X-Up-Target header if the targeted element is currently on the page', asyncSpec (next) ->
-            affix('.target')
-            $link = affix('a[href="/path"][up-target=".target"]')
+            $fixture('.target')
+            $link = $fixture('a[href="/path"][up-target=".target"]')
             up.proxy.preload($link)
             next => expect(@requestTarget()).toEqual('.target')
 
           it 'replaces the [up-target] selector as with a fallback and uses that as an X-Up-Target header if the targeted element is not currently on the page', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-target=".target"]')
+            $link = $fixture('a[href="/path"][up-target=".target"]')
             up.proxy.preload($link)
             # The default fallback would usually be `body`, but in Jasmine specs we change
             # it to protect the test runner during failures.
@@ -820,7 +820,7 @@ describe 'up.proxy', ->
           it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
             requestSpy = spyOn(up, 'request')
 
-            $link = affix('a[href="/path"][up-target=".target"]')
+            $link = $fixture('a[href="/path"][up-target=".target"]')
             up.proxy.preload($link)
 
             next =>
@@ -832,18 +832,18 @@ describe 'up.proxy', ->
             up.motion.config.enabled = false
 
           it 'includes the [up-modal] selector as an X-Up-Target header and does not replace it with a fallback, since the modal frame always exists', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-modal=".target"]')
+            $link = $fixture('a[href="/path"][up-modal=".target"]')
             up.proxy.preload($link)
             next => expect(@requestTarget()).toEqual('.target')
 
           it 'does not create a modal frame', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-modal=".target"]')
+            $link = $fixture('a[href="/path"][up-modal=".target"]')
             up.proxy.preload($link)
             next =>
               expect('.up-modal').not.toBeAttached()
 
           it 'does not emit an up:modal:open event', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-modal=".target"]')
+            $link = $fixture('a[href="/path"][up-modal=".target"]')
             openListener = jasmine.createSpy('listener')
             up.on('up:modal:open', openListener)
             up.proxy.preload($link)
@@ -851,7 +851,7 @@ describe 'up.proxy', ->
               expect(openListener).not.toHaveBeenCalled()
 
           it 'does not close a currently open modal', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-modal=".target"]')
+            $link = $fixture('a[href="/path"][up-modal=".target"]')
             closeListener = jasmine.createSpy('listener')
             up.on('up:modal:close', closeListener)
 
@@ -875,7 +875,7 @@ describe 'up.proxy', ->
               expect(closeListener).toHaveBeenCalled()
 
           it 'does not prevent the opening of other modals while the request is still pending', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-modal=".target"]')
+            $link = $fixture('a[href="/path"][up-modal=".target"]')
             up.proxy.preload($link)
 
             next =>
@@ -887,7 +887,7 @@ describe 'up.proxy', ->
           it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
             requestSpy = spyOn(up, 'request')
 
-            $link = affix('a[href="/path"][up-modal=".target"]')
+            $link = $fixture('a[href="/path"][up-modal=".target"]')
             up.proxy.preload($link)
 
             next =>
@@ -899,19 +899,19 @@ describe 'up.proxy', ->
             up.motion.config.enabled = false
           
           it 'includes the [up-popup] selector as an X-Up-Target header and does not replace it with a fallback, since the popup frame always exists', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-popup=".target"]')
+            $link = $fixture('a[href="/path"][up-popup=".target"]')
             up.proxy.preload($link)
             next => expect(@requestTarget()).toEqual('.target')
 
 
           it 'does not create a popup frame', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-popup=".target"]')
+            $link = $fixture('a[href="/path"][up-popup=".target"]')
             up.proxy.preload($link)
             next =>
               expect('.up-popup').not.toBeAttached()
 
           it 'does not emit an up:popup:open event', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-popup=".target"]')
+            $link = $fixture('a[href="/path"][up-popup=".target"]')
             openListener = jasmine.createSpy('listener')
             up.on('up:popup:open', openListener)
             up.proxy.preload($link)
@@ -919,11 +919,11 @@ describe 'up.proxy', ->
               expect(openListener).not.toHaveBeenCalled()
 
           it 'does not close a currently open popup', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-popup=".target"]')
+            $link = $fixture('a[href="/path"][up-popup=".target"]')
             closeListener = jasmine.createSpy('listener')
             up.on('up:popup:close', closeListener)
 
-            $existingAnchor = affix('.existing-anchor')
+            $existingAnchor = $fixture('.existing-anchor')
             up.popup.attach($existingAnchor, target: '.content', html: '<div class="content">popup content</div>')
 
             next =>
@@ -944,11 +944,11 @@ describe 'up.proxy', ->
               expect(closeListener).toHaveBeenCalled()
 
           it 'does not prevent the opening of other popups while the request is still pending', asyncSpec (next) ->
-            $link = affix('a[href="/path"][up-popup=".target"]')
+            $link = $fixture('a[href="/path"][up-popup=".target"]')
             up.proxy.preload($link)
 
             next =>
-              $anchor = affix('.existing-anchor')
+              $anchor = $fixture('.existing-anchor')
               up.popup.attach($anchor, target: '.content', html: '<div class="content">popup content</div>')
 
             next =>
@@ -957,7 +957,7 @@ describe 'up.proxy', ->
           it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
             requestSpy = spyOn(up, 'request')
 
-            $link = affix('a[href="/path"][up-popup=".target"]')
+            $link = $fixture('a[href="/path"][up-popup=".target"]')
             up.proxy.preload($link)
 
             next =>
@@ -966,8 +966,8 @@ describe 'up.proxy', ->
       describeFallback 'canPushState', ->
 
         it "does nothing", asyncSpec (next) ->
-          affix('.target')
-          $link = affix('a[href="/path"][up-target=".target"]')
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"]')
           up.proxy.preload($link)
           next =>
             expect(jasmine.Ajax.requests.count()).toBe(0)
@@ -1016,9 +1016,9 @@ describe 'up.proxy', ->
       it 'preloads the link destination when hovering, after a delay', asyncSpec (next) ->
         up.proxy.config.preloadDelay = 100
 
-        affix('.target').text('old text')
+        $fixture('.target').text('old text')
 
-        $link = affix('a[href="/foo"][up-target=".target"][up-preload]')
+        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
         up.hello($link)
 
         Trigger.hoverSequence($link)
@@ -1055,9 +1055,9 @@ describe 'up.proxy', ->
       it 'does not send a request if the user stops hovering before the delay is over', asyncSpec (next) ->
         up.proxy.config.preloadDelay = 100
 
-        affix('.target').text('old text')
+        $fixture('.target').text('old text')
 
-        $link = affix('a[href="/foo"][up-target=".target"][up-preload]')
+        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
         up.hello($link)
 
         Trigger.hoverSequence($link)
@@ -1074,9 +1074,9 @@ describe 'up.proxy', ->
       it 'does not cache a failed response', asyncSpec (next) ->
         up.proxy.config.preloadDelay = 0
 
-        affix('.target').text('old text')
+        $fixture('.target').text('old text')
 
-        $link = affix('a[href="/foo"][up-target=".target"][up-preload]')
+        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
         up.hello($link)
 
         Trigger.hoverSequence($link)
@@ -1110,7 +1110,7 @@ describe 'up.proxy', ->
         up.proxy.config.cacheExpiry = 100
         up.proxy.config.preloadDelay = 0
 
-        $element = affix('a[href="/foo"][up-preload]')
+        $element = $fixture('a[href="/foo"][up-preload]')
         up.hello($element)
 
         Trigger.hoverSequence($element)

@@ -22,19 +22,19 @@ describe 'up.rails', ->
         describe "on an [#{upAttribute}] element", ->
 
           it "is transformed to an up-method attribute so the element isn't handled a second time by Rails UJS", ->
-            $element = affix("a[href=\"/foo\"][#{upAttribute}][data-method=\"put\"]")
+            $element = $fixture("a[href=\"/foo\"][#{upAttribute}][data-method=\"put\"]")
             up.hello($element)
             expect($element.attr('data-method')).toBeUndefined()
             expect($element.attr('up-method')).toEqual('put')
 
           it "does not overwrite an existing up-method attribute, but gets deleted", ->
-            $element = affix("a[href=\"/foo\"][#{upAttribute}][up-method=\"patch\"][data-method=\"put\"]")
+            $element = $fixture("a[href=\"/foo\"][#{upAttribute}][up-method=\"patch\"][data-method=\"put\"]")
             up.hello($element)
             expect($element.attr('data-method')).toBeUndefined()
             expect($element.attr('up-method')).toEqual('patch')
 
           it 'transforms an element that becomes followable through [up-expand]', ->
-            $element = affix('a[up-expand][data-method="put"]')
+            $element = $fixture('a[up-expand][data-method="put"]')
             $child = $element.affix('span[up-href="/foo"][up-follow]')
             up.hello($element)
             expect($element.attr('up-href')).toEqual('/foo')
@@ -44,7 +44,7 @@ describe 'up.rails', ->
 
           it 'transforms an element that becomes followable through a user macro like [content-link]', ->
             up.$macro '[user-make-followable]', ($element) -> $element.attr('up-follow', '')
-            $element = affix('a[user-make-followable][data-method="put"]')
+            $element = $fixture('a[user-make-followable][data-method="put"]')
             up.hello($element)
             expect($element.attr('data-method')).toBeUndefined()
             expect($element.attr('up-method')).toEqual('put')
@@ -52,7 +52,7 @@ describe 'up.rails', ->
       describe 'on an element without Unpoly attributes', ->
 
         it "is not changed", ->
-          $element = affix("a[href=\"/foo\"][data-method=\"put\"]")
+          $element = $fixture("a[href=\"/foo\"][data-method=\"put\"]")
           up.hello($element)
           expect($element.attr('data-method')).toEqual('put')
 
@@ -65,7 +65,7 @@ describe 'up.rails', ->
         describe "on an [#{upAttribute}] element", ->
 
           it "is not changed", ->
-            $element = affix("a[href=\"/foo\"][#{upAttribute}][data-method=\"put\"]")
+            $element = $fixture("a[href=\"/foo\"][#{upAttribute}][data-method=\"put\"]")
             up.hello($element)
             expect($element.attr('data-method')).toEqual('put')
 
@@ -86,13 +86,13 @@ describe 'up.rails', ->
         describe "on an [#{upAttribute}] element", ->
 
           it "is transformed to an up-confirm attribute so the element isn't handled a second time by Rails UJS", ->
-            $element = affix("a[href=\"/foo\"][#{upAttribute}][data-confirm=\"Really?\"]")
+            $element = $fixture("a[href=\"/foo\"][#{upAttribute}][data-confirm=\"Really?\"]")
             up.hello($element)
             expect($element.attr('data-confirm')).toBeUndefined()
             expect($element.attr('up-confirm')).toEqual('Really?')
 
           it "does not overwrite an existing up-confirm attribute, but gets deleted", ->
-            $element = affix("a[href=\"/foo\"][#{upAttribute}][up-confirm=\"Seriously?\"][data-confirm=\"Really?\"]")
+            $element = $fixture("a[href=\"/foo\"][#{upAttribute}][up-confirm=\"Seriously?\"][data-confirm=\"Really?\"]")
             up.hello($element)
             expect($element.attr('data-confirm')).toBeUndefined()
             expect($element.attr('up-confirm')).toEqual('Seriously?')
@@ -100,7 +100,7 @@ describe 'up.rails', ->
       describe 'on an element without Unpoly attributes', ->
 
         it "is not changed", ->
-          $element = affix("a[href=\"/foo\"][data-confirm=\"Really?\"]")
+          $element = $fixture("a[href=\"/foo\"][data-confirm=\"Really?\"]")
           up.hello($element)
           expect($element.attr('data-confirm')).toEqual('Really?')
 
@@ -113,6 +113,6 @@ describe 'up.rails', ->
         describe "on an [#{upAttribute}] element", ->
 
           it "is not changed", ->
-            $element = affix("a[href=\"/foo\"][#{upAttribute}][data-confirm=\"Really?\"]")
+            $element = $fixture("a[href=\"/foo\"][#{upAttribute}][data-confirm=\"Really?\"]")
             up.hello($element)
             expect($element.attr('data-confirm')).toEqual('Really?')

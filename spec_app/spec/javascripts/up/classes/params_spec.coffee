@@ -336,7 +336,7 @@ describe 'up.Params', ->
   describe '.fromForm', ->
 
     it 'serializes a form with multiple inputs', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $form.append('<input name="key1" value="value1">')
       $form.append('<input name="key2" value="value2">')
 
@@ -347,7 +347,7 @@ describe 'up.Params', ->
       ]
 
     it 'serializes an <input type="text"> with its default [value]', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $form.append('<input type="text" name="key" value="value-from-attribute">')
 
       params = up.Params.fromForm($form)
@@ -356,7 +356,7 @@ describe 'up.Params', ->
       ]
 
     it 'serializes an <input type="text"> that had its value property changed by a script', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="text" name="key" value="value-from-attribute">').appendTo($form)
       $input[0].value = 'value-from-script'
 
@@ -366,7 +366,7 @@ describe 'up.Params', ->
       ]
 
     it 'serializes an <input type="hidden"> with its default [value]', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $form.append('<input type="hidden" name="key" value="value-from-attribute">')
 
       params = up.Params.fromForm($form)
@@ -375,7 +375,7 @@ describe 'up.Params', ->
       ]
 
     it 'serializes an <input type="hidden"> that had its value property changed by a script', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="hidden" name="key" value="value-from-attribute">').appendTo($form)
       $input[0].value = 'value-from-script'
 
@@ -385,7 +385,7 @@ describe 'up.Params', ->
       ]
 
     it 'seralizes a <select> with its default selected option', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $select = $('<select name="key"></select>').appendTo($form)
       $option1 = $('<option value="value1">').appendTo($select)
       $option2 = $('<option value="value2" selected>').appendTo($select)
@@ -397,7 +397,7 @@ describe 'up.Params', ->
       ]
 
     it 'seralizes a <select> that had its selection changed by a script', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $select = $('<select name="key"></select>').appendTo($form)
       $option1 = $('<option value="value1">').appendTo($select)
       $option2 = $('<option value="value2" selected>').appendTo($select)
@@ -412,7 +412,7 @@ describe 'up.Params', ->
       ]
 
     it 'serializes a <select multiple> with multiple selected options into multiple params', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $select = $('<select name="key" multiple></select>').appendTo($form)
       $option1 = $('<option value="value1">').appendTo($select)
       $option2 = $('<option value="value2" selected>').appendTo($select)
@@ -429,7 +429,7 @@ describe 'up.Params', ->
     it 'serializes an <input type="file" multiple> into multiple params'
 
     it 'includes an <input type="checkbox"> that was [checked] by default', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="checkbox" name="key" value="value" checked>').appendTo($form)
 
       params = up.Params.fromForm($form)
@@ -438,7 +438,7 @@ describe 'up.Params', ->
       ]
 
     it 'includes an <input type="checkbox"> that was checked by a script', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="checkbox" name="key" value="value">').appendTo($form)
       $input[0].checked = true
 
@@ -448,13 +448,13 @@ describe 'up.Params', ->
       ]
 
     it 'excludes an <input type="checkbox"> that is unchecked', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="checkbox" name="key" value="value">').appendTo($form)
       params = up.Params.fromForm($form)
       expect(params.toArray()).toEqual []
 
     it 'includes a checked <input type="radio"> in a radio button group that was [checked] by default', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $button1 = $('<input type="radio" name="key" value="value1">').appendTo($form)
       $button2 = $('<input type="radio" name="key" value="value2" checked>').appendTo($form)
       $button3 = $('<input type="radio" name="key" value="value3">').appendTo($form)
@@ -465,7 +465,7 @@ describe 'up.Params', ->
       ]
 
     it 'includes a checked <input type="radio"> in a radio button group that was checked by a script', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $button1 = $('<input type="radio" name="key" value="value1">').appendTo($form)
       $button2 = $('<input type="radio" name="key" value="value2" checked>').appendTo($form)
       $button3 = $('<input type="radio" name="key" value="value3">').appendTo($form)
@@ -479,7 +479,7 @@ describe 'up.Params', ->
       ]
 
     it 'excludes an radio button group if no button is selected', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $button1 = $('<input type="radio" name="key" value="value1">').appendTo($form)
       $button2 = $('<input type="radio" name="key" value="value2">').appendTo($form)
 
@@ -487,14 +487,14 @@ describe 'up.Params', ->
       expect(params.toArray()).toEqual []
 
     it 'excludes an <input> that is [disabled] by default', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="text" name="key" value="value" disabled>').appendTo($form)
 
       params = up.Params.fromForm($form)
       expect(params.toArray()).toEqual []
 
     it 'excludes an <input> that was disabled by a script', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="text" name="key" value="value">').appendTo($form)
       $input[0].disabled = true
 
@@ -502,14 +502,14 @@ describe 'up.Params', ->
       expect(params.toArray()).toEqual []
 
     it 'excludes an <input> without a [name] attribute', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="text" value="value">').appendTo($form)
 
       params = up.Params.fromForm($form)
       expect(params.toArray()).toEqual []
 
     it 'includes an <input readonly>', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="text" name="key" value="value" readonly>').appendTo($form)
 
       params = up.Params.fromForm($form)
@@ -518,7 +518,7 @@ describe 'up.Params', ->
       ]
 
     it 'includes the focused submit button', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
       $submit1 = $('<button type="submit" name="submit1-key" value="submit1-value">').appendTo($form)
       $submit2 = $('<input type="submit" name="submit2-key" value="submit2-value">').appendTo($form)
@@ -533,7 +533,7 @@ describe 'up.Params', ->
       ]
 
     it 'includes a the first submit button if no button is focused', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
       $submit1 = $('<button type="submit" name="submit1-key" value="submit1-value">').appendTo($form)
       $submit2 = $('<input type="submit" name="submit2-key" value="submit2-value">').appendTo($form)
@@ -545,7 +545,7 @@ describe 'up.Params', ->
       ]
 
     it 'excludes a submit button without a [name] attribute', ->
-      $form = affix('form')
+      $form = $fixture('form')
       $input = $('<input type="text" name="input-key" value="input-value">').appendTo($form)
       $submit = $('<button type="submit" value="submit-value">').appendTo($form)
 

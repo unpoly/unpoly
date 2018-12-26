@@ -11,7 +11,7 @@ describe 'up.motion', ->
     describe 'up.animate', ->
 
       it 'animates the given element', (done) ->
-        $element = affix('.element').text('content')
+        $element = $fixture('.element').text('content')
         up.animate($element, 'fade-in', duration: 200, easing: 'linear')
 
         u.setTimer 1, ->
@@ -23,7 +23,7 @@ describe 'up.motion', ->
           done()
 
       it 'returns a promise that is fulfilled when the animation has completed', (done) ->
-        $element = affix('.element').text('content')
+        $element = $fixture('.element').text('content')
         resolveSpy = jasmine.createSpy('resolve')
 
         promise = up.animate($element, 'fade-in', duration: 100, easing: 'linear')
@@ -36,7 +36,7 @@ describe 'up.motion', ->
             done()
 
       it 'cancels an existing animation on the element by instantly jumping to the last frame', asyncSpec (next) ->
-        $element = affix('.element').text('content')
+        $element = $fixture('.element').text('content')
         up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
 
         next =>
@@ -46,7 +46,7 @@ describe 'up.motion', ->
           expect($element.css('font-size')).toEqual('40px')
 
       it 'pauses an existing CSS transitions and restores it once the Unpoly animation is done', asyncSpec (next) ->
-        $element = affix('.element').text('content').css
+        $element = $fixture('.element').text('content').css
           backgroundColor: 'yellow'
           fontSize: '10px'
           height: '20px'
@@ -91,7 +91,7 @@ describe 'up.motion', ->
       describe 'when up.animate() is called from inside an animation function', ->
 
         it 'animates', (done) ->
-          $element = affix('.element').text('content')
+          $element = $fixture('.element').text('content')
 
           animation = ($element, options) ->
             e.writeInlineStyle($element, opacity: 0)
@@ -108,7 +108,7 @@ describe 'up.motion', ->
             done()
 
         it "finishes animations only once", (done) ->
-          $element = affix('.element').text('content')
+          $element = $fixture('.element').text('content')
 
           animation = ($element, options) ->
             e.writeInlineStyle($element, opacity: 0)
@@ -127,7 +127,7 @@ describe 'up.motion', ->
           up.motion.config.enabled = false
 
         it "doesn't animate and directly sets the last frame instead", (done) ->
-          $element = affix('.element').text('content')
+          $element = $fixture('.element').text('content')
           callback = jasmine.createSpy('animation done callback')
           animateDone = up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
           animateDone.then(callback)
@@ -142,7 +142,7 @@ describe 'up.motion', ->
         describe "when called with a `#{noneAnimation}` animation", ->
 
           it "doesn't animate and resolves instantly", asyncSpec (next) ->
-            $element = affix('.element').text('content')
+            $element = $fixture('.element').text('content')
             callback = jasmine.createSpy('animation done callback')
             animateDone = up.animate($element, noneAnimation, duration: 10000, easing: 'linear')
             animateDone.then(callback)
@@ -154,7 +154,7 @@ describe 'up.motion', ->
       describe 'when called with an element or selector', ->
 
         it 'cancels an existing animation on the given element by instantly jumping to the last frame', asyncSpec (next) ->
-          $element = affix('.element').text('content')
+          $element = $fixture('.element').text('content')
           up.animate($element, { 'font-size': '40px', 'opacity': '0.5' }, duration: 30000)
 
           next =>
@@ -165,7 +165,7 @@ describe 'up.motion', ->
             expect($element).toHaveOpacity(0.5, 0.01) # Safari sometimes has rounding errors
 
         it 'cancels animations on children of the given element', asyncSpec (next) ->
-          $parent = affix('.element')
+          $parent = $fixture('.element')
           $child = $parent.affix('.child')
           up.animate($child, { 'font-size': '40px' }, duration: 10000)
 
@@ -176,8 +176,8 @@ describe 'up.motion', ->
             expect($child.css('font-size')).toEqual('40px')
 
         it 'does not cancel animations on other elements', asyncSpec (next) ->
-          $element1 = affix('.element1').text('content1')
-          $element2 = affix('.element2').text('content2')
+          $element1 = $fixture('.element1').text('content1')
+          $element2 = $fixture('.element2').text('content2')
           up.animate($element1, 'fade-in', duration: 10000)
           up.animate($element2, 'fade-in', duration: 10000)
 
@@ -189,7 +189,7 @@ describe 'up.motion', ->
             expect(Number($element2.css('opacity'))).toBeAround(0, 0.1)
 
         it 'restores CSS transitions from before the Unpoly animation', asyncSpec (next) ->
-          $element = affix('.element').text('content')
+          $element = $fixture('.element').text('content')
           $element.css('transition': 'font-size 3s ease')
           oldTransitionProperty = $element.css('transition-property')
           expect(oldTransitionProperty).toBeDefined()
@@ -207,8 +207,8 @@ describe 'up.motion', ->
             expect(currentTransitionProperty).not.toContain('opacity')
 
         it 'cancels an existing transition on the old element by instantly jumping to the last frame', asyncSpec (next) ->
-          $v1 = affix('.element').text('v1')
-          $v2 = affix('.element').text('v2')
+          $v1 = $fixture('.element').text('v1')
+          $v2 = $fixture('.element').text('v2')
 
           up.morph($v1, $v2, 'cross-fade', duration: 200)
 
@@ -223,8 +223,8 @@ describe 'up.motion', ->
             expect($v2).toHaveOpacity(1.0, 0.2)
 
         it 'cancels an existing transition on the new element by instantly jumping to the last frame', asyncSpec (next) ->
-          $v1 = affix('.element').text('v1')
-          $v2 = affix('.element').text('v2')
+          $v1 = $fixture('.element').text('v1')
+          $v2 = $fixture('.element').text('v2')
 
           up.morph($v1, $v2, 'cross-fade', duration: 200)
 
@@ -240,7 +240,7 @@ describe 'up.motion', ->
 
 
         it 'cancels transitions on children of the given element', asyncSpec (next) ->
-          $parent = affix('.parent')
+          $parent = $fixture('.parent')
           $old = $parent.affix('.old').text('old content')
           $new = $parent.affix('.new').text('new content')
 
@@ -258,8 +258,8 @@ describe 'up.motion', ->
 
 
         it 'does not leave .up-bounds elements in the DOM', asyncSpec (next) ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content')
+          $old = $fixture('.old').text('old content')
+          $new = $fixture('.new').text('new content')
 
           up.morph($old, $new, 'cross-fade', duration: 2000)
 
@@ -272,7 +272,7 @@ describe 'up.motion', ->
 
 
         it 'emits an up:motion:finish event on the given animating element, so custom animation functions can react to the finish request', asyncSpec (next) ->
-          $element = affix('.element').text('element text')
+          $element = $fixture('.element').text('element text')
           listener = jasmine.createSpy('finish event listener')
           $element.on('up:motion:finish', listener)
 
@@ -298,8 +298,8 @@ describe 'up.motion', ->
       describe 'when called without arguments', ->
 
         it 'cancels all animations on the screen', asyncSpec (next) ->
-          $element1 = affix('.element1').text('content1')
-          $element2 = affix('.element2').text('content2')
+          $element1 = $fixture('.element1').text('content1')
+          $element2 = $fixture('.element2').text('content2')
 
           up.animate($element1, 'fade-in', duration: 3000)
           up.animate($element2, 'fade-in', duration: 3000)
@@ -319,8 +319,8 @@ describe 'up.motion', ->
     describe 'up.morph', ->
 
       it 'transitions between two element by absolutely positioning one element above the other', asyncSpec (next) ->
-        $old = affix('.old').text('old content').css(width: '200px', width: '200px')
-        $new = affix('.new').text('new content').css(width: '200px', width: '200px').detach()
+        $old = $fixture('.old').text('old content').css(width: '200px', width: '200px')
+        $new = $fixture('.new').text('new content').css(width: '200px', width: '200px').detach()
 
         oldDims = $old[0].getBoundingClientRect()
 
@@ -342,7 +342,7 @@ describe 'up.motion', ->
           expect($old).toBeDetached()
 
       it 'does not change the position of sibling elements (as long as the old and new elements are of equal size)', asyncSpec (next) ->
-        $container = affix('.container')
+        $container = $fixture('.container')
 
         $before = $container.affix('.before').css(margin: '20px')
         $old = $container.affix('.old').text('old content').css(width: '200px', width: '200px', margin: '20px')
@@ -369,8 +369,8 @@ describe 'up.motion', ->
           top: '30px'
           width: '200px'
           width: '200px'
-        $old = affix('.old').text('old content').css(elementStyles)
-        $new = affix('.new').text('new content').css(elementStyles).detach()
+        $old = $fixture('.old').text('old content').css(elementStyles)
+        $new = $fixture('.new').text('new content').css(elementStyles).detach()
 
         oldDims = $old[0].getBoundingClientRect()
 
@@ -385,9 +385,9 @@ describe 'up.motion', ->
           expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
       it 'cancels an existing transition on the new element by instantly jumping to the last frame', asyncSpec (next) ->
-        $v1 = affix('.element').text('v1')
-        $v2 = affix('.element').text('v2')
-        $v3 = affix('.element').text('v3')
+        $v1 = $fixture('.element').text('v1')
+        $v2 = $fixture('.element').text('v2')
+        $v3 = $fixture('.element').text('v3')
 
         up.morph($v1, $v2, 'cross-fade', duration: 200)
 
@@ -403,8 +403,8 @@ describe 'up.motion', ->
           expect($v3).toHaveOpacity(0.0, 0.2)
 
       it 'detaches the old element in the DOM', (done) ->
-        $v1 = affix('.element').text('v1')
-        $v2 = affix('.element').text('v2')
+        $v1 = $fixture('.element').text('v1')
+        $v2 = $fixture('.element').text('v2')
 
         morphDone = up.morph($v1, $v2, 'cross-fade', duration: 5)
 
@@ -414,8 +414,8 @@ describe 'up.motion', ->
           done()
 
       it 'does not leave .up-bounds elements in the DOM', (done) ->
-        $v1 = affix('.element').text('v1')
-        $v2 = affix('.element').text('v2')
+        $v1 = $fixture('.element').text('v1')
+        $v2 = $fixture('.element').text('v2')
 
         morphDone = up.morph($v1, $v2, 'cross-fade', duration: 5)
 
@@ -427,8 +427,8 @@ describe 'up.motion', ->
       describe 'when up.animate() is called from inside a transition function', ->
 
         it 'animates', asyncSpec (next) ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content').detach()
+          $old = $fixture('.old').text('old content')
+          $new = $fixture('.new').text('new content').detach()
 
           oldDims = $old[0].getBoundingClientRect()
 
@@ -455,8 +455,8 @@ describe 'up.motion', ->
             expect($new).toBeAttached()
 
         it 'finishes animations only once', asyncSpec (next) ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content').detach()
+          $old = $fixture('.old').text('old content')
+          $new = $fixture('.new').text('new content').detach()
 
           transition = (oldElement, newElement, options) ->
             up.animate(oldElement, 'fade-out', options)
@@ -470,8 +470,8 @@ describe 'up.motion', ->
       describe 'when up.morph() is called from inside a transition function', ->
 
         it 'morphs', asyncSpec (next) ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content').detach()
+          $old = $fixture('.old').text('old content')
+          $new = $fixture('.new').text('new content').detach()
 
           oldDims = $old[0].getBoundingClientRect()
 
@@ -497,8 +497,8 @@ describe 'up.motion', ->
             expect($new).toBeAttached()
 
         it "finishes animations only once", asyncSpec (next) ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content').detach()
+          $old = $fixture('.old').text('old content')
+          $new = $fixture('.new').text('new content').detach()
 
           transition = (oldElement, newElement, options) ->
             up.morph(oldElement, newElement, 'cross-fade', options)
@@ -512,19 +512,19 @@ describe 'up.motion', ->
       describe 'with { reveal: true } option', ->
 
         it 'reveals the new element while making the old element within the same viewport appear as if it would keep its scroll position', asyncSpec (next) ->
-          $container = affix('.container[up-viewport]').css
+          $container = $fixture('.container[up-viewport]').css
             'width': '200px'
             'height': '200px'
             'overflow-y': 'scroll'
             'position': 'fixed'
             'left': 0,
             'top': 0
-          $old = affix('.old').appendTo($container).css(height: '600px')
+          $old = $fixture('.old').appendTo($container).css(height: '600px')
           $container.scrollTop(300)
 
           expect($container.scrollTop()).toEqual(300)
 
-          $new = affix('.new').css(height: '600px').detach()
+          $new = $fixture('.new').css(height: '600px').detach()
 
           up.morph($old, $new, 'cross-fade', duration: 50, reveal: true)
 
@@ -548,8 +548,8 @@ describe 'up.motion', ->
           up.motion.config.enabled = false
 
         it "doesn't animate and detaches the old element instead", asyncSpec (next) ->
-          $old = affix('.old').text('old content')
-          $new = affix('.new').text('new content')
+          $old = $fixture('.old').text('old content')
+          $new = $fixture('.new').text('new content')
           up.morph($old, $new, 'cross-fade', duration: 1000)
 
           next =>
@@ -563,8 +563,8 @@ describe 'up.motion', ->
         describe "when called with a `#{JSON.stringify(noneTransition)}` transition", ->
 
           it "doesn't animate and detaches the old element instead", asyncSpec (next) ->
-            $old = affix('.old').text('old content')
-            $new = affix('.new').text('new content')
+            $old = $fixture('.old').text('old content')
+            $new = $fixture('.new').text('new content')
             up.morph($old, $new, noneTransition, duration: 1000)
 
             next =>

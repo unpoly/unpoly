@@ -10,8 +10,8 @@ describe 'up.radio', ->
     describe '[up-hungry]', ->
 
       it "replaces the element when it is found in a response, even when the element wasn't targeted", asyncSpec (next) ->
-        affix('.hungry[up-hungry]').text('old hungry')
-        affix('.target').text('old target')
+        $fixture('.hungry[up-hungry]').text('old hungry')
+        $fixture('.target').text('old target')
 
         up.replace('.target', '/path')
 
@@ -33,8 +33,8 @@ describe 'up.radio', ->
           expect('.hungry').toHaveText('new hungry')
 
       it "does not impede replacements when the element is not part of a response", asyncSpec (next) ->
-        affix('.hungry[up-hungry]').text('old hungry')
-        affix('.target').text('old target')
+        $fixture('.hungry[up-hungry]').text('old hungry')
+        $fixture('.target').text('old target')
 
         promise = up.replace('.target', '/path')
 
@@ -53,8 +53,8 @@ describe 'up.radio', ->
             expect(result.state).toEqual('fulfilled')
 
       it 'still reveals the element that was originally targeted', asyncSpec (next) ->
-        affix('.hungry[up-hungry]').text('old hungry')
-        affix('.target').text('old target')
+        $fixture('.hungry[up-hungry]').text('old hungry')
+        $fixture('.target').text('old target')
 
         revealStub = up.viewport.knife.mock('reveal')
 
@@ -75,9 +75,9 @@ describe 'up.radio', ->
 
 
       it 'does not change the X-Up-Target header for the request', asyncSpec (next) ->
-        affix('.hungry[up-hungry]').text('old hungry')
-        affix('.target').text('old target')
-        affix('.fail-target').text('old fail target')
+        $fixture('.hungry[up-hungry]').text('old hungry')
+        $fixture('.target').text('old target')
+        $fixture('.fail-target').text('old fail target')
 
         up.replace('.target', '/path', failTarget: '.fail-target')
 
@@ -86,9 +86,9 @@ describe 'up.radio', ->
           expect(@lastRequest().requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
 
       it 'does replace the element when the server responds with an error (e.g. for error flashes)', asyncSpec (next) ->
-        affix('.hungry[up-hungry]').text('old hungry')
-        affix('.target').text('old target')
-        affix('.fail-target').text('old fail target')
+        $fixture('.hungry[up-hungry]').text('old hungry')
+        $fixture('.target').text('old target')
+        $fixture('.fail-target').text('old fail target')
 
         up.replace('.target', '/path', failTarget: '.fail-target')
 
@@ -117,8 +117,8 @@ describe 'up.radio', ->
 
 
       it 'does not update [up-hungry] elements with { hungry: false } option', asyncSpec (next) ->
-        affix('.hungry[up-hungry]').text('old hungry')
-        affix('.target').text('old target')
+        $fixture('.hungry[up-hungry]').text('old hungry')
+        $fixture('.target').text('old target')
 
         up.replace('.target', '/path', hungry: false)
 
@@ -141,7 +141,7 @@ describe 'up.radio', ->
         up.modal.config.openDuration = 0
         up.modal.config.closeDuration = 0
 
-        affix('.outside').text('old outside').attr('up-hungry', true)
+        $fixture('.outside').text('old outside').attr('up-hungry', true)
 
         closeEventHandler = jasmine.createSpy('close event handler')
         up.on('up:modal:close', closeEventHandler)
@@ -176,8 +176,8 @@ describe 'up.radio', ->
         up.popup.config.openDuration = 0
         up.popup.config.closeDuration = 0
 
-        affix('.outside').text('old outside').attr('up-hungry', true)
-        $popupAnchor = affix('span.link').text('link')
+        $fixture('.outside').text('old outside').attr('up-hungry', true)
+        $popupAnchor = $fixture('span.link').text('link')
 
         closeEventHandler = jasmine.createSpy('close event handler')
         up.on('up:popup:close', closeEventHandler)

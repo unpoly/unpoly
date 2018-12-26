@@ -17,7 +17,7 @@ describe 'up.modal', ->
     describe 'up.modal.follow', ->
 
       it "loads the given link's destination in a dialog window", (done) ->
-        $link = affix('a[href="/path/to"][up-modal=".middle"]').text('link')
+        $link = $fixture('a[href="/path/to"][up-modal=".middle"]').text('link')
         promise = up.modal.follow($link)
 
         u.nextFrame =>
@@ -86,7 +86,7 @@ describe 'up.modal', ->
           done()
 
       it "doesn't create an .up-modal frame and replaces { failTarget } if the server returns a non-200 response", (done) ->
-        affix('.error').text('old error')
+        $fixture('.error').text('old error')
 
         promise = up.modal.visit('/foo', target: '.target', failTarget: '.error')
 
@@ -184,7 +184,7 @@ describe 'up.modal', ->
 
         it 'pushes right-anchored elements away from the edge of the screen', (done) ->
 
-          $anchoredElement = affix('div[up-anchored=right]').css
+          $anchoredElement = $fixture('div[up-anchored=right]').css
             position: 'absolute'
             top: '0'
             right: '30px'
@@ -399,7 +399,7 @@ describe 'up.modal', ->
 
       it 'allows to register new modal variants with its own default configuration', asyncSpec (next) ->
         up.modal.flavors.variant = { maxWidth: 200 }
-        $link = affix('a[href="/path"][up-modal=".target"][up-flavor="variant"]')
+        $link = $fixture('a[href="/path"][up-modal=".target"][up-flavor="variant"]')
         Trigger.click($link)
 
         next =>
@@ -414,7 +414,7 @@ describe 'up.modal', ->
 
       it 'does not change the configuration of non-flavored modals', asyncSpec (next) ->
         up.modal.flavors.variant = { maxWidth: 200 }
-        $link = affix('a[href="/path"][up-modal=".target"]')
+        $link = $fixture('a[href="/path"][up-modal=".target"]')
         Trigger.click($link)
 
         next =>
@@ -457,12 +457,12 @@ describe 'up.modal', ->
         # Some examples only want to check if follow() has been called, without
         # actually making a request.
         @stubFollow = =>
-          @$link = affix('a[href="/path"][up-modal=".target"]')
+          @$link = $fixture('a[href="/path"][up-modal=".target"]')
           @followSpy = up.modal.knife.mock('followAsap').and.returnValue(Promise.resolve())
           @defaultSpy = spyOn(up.link, 'allowDefault').and.callFake((event) -> event.preventDefault())
 
       it 'opens the clicked link in a modal', asyncSpec (next) ->
-        @$link = affix('a[href="/path"][up-modal=".target"]')
+        @$link = $fixture('a[href="/path"][up-modal=".target"]')
         Trigger.click(@$link)
 
         next =>
@@ -538,7 +538,7 @@ describe 'up.modal', ->
       describe 'with [up-method] modifier', ->
 
         it 'honours the given method', asyncSpec (next) ->
-          $link = affix('a[href="/path"][up-modal=".target"][up-method="post"]')
+          $link = $fixture('a[href="/path"][up-modal=".target"][up-method="post"]')
           Trigger.click($link)
 
           next =>
@@ -551,7 +551,7 @@ describe 'up.modal', ->
 
         up.history.push('/original-path')
 
-        $container = affix('.container').text('old container content')
+        $container = $fixture('.container').text('old container content')
         $link = $container.affix('a[href="/new-path"][up-modal=".target"]')
 
         expect(location.pathname).toEqual('/original-path')
@@ -578,8 +578,8 @@ describe 'up.modal', ->
       it 'allows to open a modal after closing a previous modal with the escape key (bugfix)', asyncSpec (next) ->
         up.motion.config.enabled = false
 
-        $link1 = affix('a[href="/path1"][up-modal=".target"]')
-        $link2 = affix('a[href="/path2"][up-modal=".target"]')
+        $link1 = $fixture('a[href="/path1"][up-modal=".target"]')
+        $link2 = $fixture('a[href="/path2"][up-modal=".target"]')
         Trigger.clickSequence($link1)
 
         next =>
@@ -608,7 +608,7 @@ describe 'up.modal', ->
         up.motion.config.enabled = false
 
       it 'slides in a drawer that covers the full height of the screen', asyncSpec (next) ->
-        $link = affix('a[href="/qux"][up-drawer=".target"]').text('label')
+        $link = $fixture('a[href="/qux"][up-drawer=".target"]').text('label')
         up.hello($link)
         Trigger.clickSequence($link)
 
@@ -624,7 +624,7 @@ describe 'up.modal', ->
           expect($('.up-modal-content').offset()).toEqual(top: 0, left: 0)
 
       it 'puts the drawer on the right if the opening link sits in the right 50% of the screen', asyncSpec (next) ->
-        $link = affix('a[href="/foo"][up-drawer=".target"]').text('label')
+        $link = $fixture('a[href="/foo"][up-drawer=".target"]').text('label')
         $link.css
           position: 'absolute'
           right: '0'
@@ -667,7 +667,7 @@ describe 'up.modal', ->
       describe 'when no modal is open', ->
 
         it 'does nothing and allows the event chain to continue', asyncSpec (next) ->
-          $link = affix('a[up-close]') # link is outside the modal
+          $link = $fixture('a[up-close]') # link is outside the modal
           up.hello($link)
           Trigger.clickSequence($link)
 
@@ -697,7 +697,7 @@ describe 'up.modal', ->
           expect(up.modal.isOpen()).toBe(false)
 
       it "does not close the modal when clicking on an element outside the modal's DOM hierarchy", asyncSpec (next) ->
-        $container = affix('.container')
+        $container = $fixture('.container')
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
 
         next =>
@@ -767,7 +767,7 @@ describe 'up.modal', ->
         up.motion.config.enabled = false
 
       it 'prefers to replace a selector within the modal', asyncSpec (next) ->
-        $outside = affix('.foo').text('old outside')
+        $outside = $fixture('.foo').text('old outside')
         up.modal.visit('/path', target: '.foo')
 
         next =>
@@ -782,7 +782,7 @@ describe 'up.modal', ->
           expect($('.up-modal-content')).toHaveText('new text')
 
       it 'auto-closes the modal when a replacement from inside the modal affects a selector behind the modal', asyncSpec (next) ->
-        affix('.outside').text('old outside')
+        $fixture('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
 
         next =>
@@ -801,7 +801,7 @@ describe 'up.modal', ->
         up.modal.config.openDuration = 0
         up.modal.config.closeDuration = 20
 
-        affix('.outside').text('old outside')
+        $fixture('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
 
         next =>
@@ -815,7 +815,7 @@ describe 'up.modal', ->
           expect(location.href).toMatchUrl '/new-location'
 
       it 'does not auto-close the modal when a replacement from inside the modal affects a selector inside the modal', asyncSpec (next) ->
-        affix('.outside').text('old outside')
+        $fixture('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
 
         next =>
@@ -829,7 +829,7 @@ describe 'up.modal', ->
           expect($('.up-modal')).toBeAttached()
 
       it 'does not auto-close the modal when a replacement from outside the modal affects a selector outside the modal', asyncSpec (next) ->
-        affix('.outside').text('old outside')
+        $fixture('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
 
         next =>
@@ -843,7 +843,7 @@ describe 'up.modal', ->
           expect($('.up-modal')).toBeAttached()
 
       it 'does not auto-close the modal when a replacement from outside the modal affects a selector inside the modal', asyncSpec (next) ->
-        affix('.outside').text('old outside')
+        $fixture('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
 
         next =>

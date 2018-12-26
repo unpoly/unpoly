@@ -26,20 +26,20 @@ describe 'up.element', ->
       expect(result[0]).toBe(document.body)
 
     it 'returns a concatenated array from multiple lists and elements', ->
-      div0 = affix('div.div0')[0]
-      div1 = affix('div.div1')[0]
-      div2 = affix('div.div2')[0]
-      div3 = affix('div.div3')[0]
+      div0 = $fixture('div.div0')[0]
+      div1 = $fixture('div.div1')[0]
+      div2 = $fixture('div.div2')[0]
+      div3 = $fixture('div.div3')[0]
 
       result = up.element.list(div0, [div1, div2], div3)
       expect(u.isArray(result)).toBe(true)
       expect(result).toEqual [div0, div1, div2, div3]
 
     it 'ignores missing values when concatenating arrays', ->
-      div0 = affix('div.div0')[0]
-      div1 = affix('div.div1')[0]
-      div2 = affix('div.div2')[0]
-      div3 = affix('div.div3')[0]
+      div0 = $fixture('div.div0')[0]
+      div1 = $fixture('div.div1')[0]
+      div2 = $fixture('div.div2')[0]
+      div3 = $fixture('div.div3')[0]
 
       result = up.element.list(null, div0, [div1, div2], undefined, div3)
       expect(u.isArray(result)).toBe(true)
@@ -48,7 +48,7 @@ describe 'up.element', ->
   describe 'up.element.descendants()', ->
 
     it 'returns all descendants of the given root matching the given selector', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $matchingChild = $element.affix('.child.match')
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
@@ -57,31 +57,31 @@ describe 'up.element', ->
       expect(results).toEqual [$matchingChild[0], $matchingGrandChild[0]]
 
     it 'returns an empty list if no descendant matches', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $child = $element.affix('.child')
       $grandChild = $child.affix('.grand-child')
       results = up.element.descendants($element[0], '.match')
       expect(results).toEqual []
 
     it 'does not return the root itself, even if it matches', ->
-      $element = affix('.element.match')
+      $element = $fixture('.element.match')
       results = up.element.descendants($element[0], '.match')
       expect(results).toEqual []
 
     it 'does not return ancestors of the root, even if they match', ->
-      $parent = affix('.parent.match')
+      $parent = $fixture('.parent.match')
       $element = $parent.affix('.element')
       results = up.element.descendants($element[0], '.match')
       expect(results).toEqual []
 
     it 'supports the custom :has() selector', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $childWithSelectorWithChild = $element.affix('.selector')
       $childWithSelectorWithChild.affix('.match')
       $childWithSelectorWithoutChild = $element.affix('.selector')
       $childWithoutSelectorWithChild = $element.affix('.other-selector')
       $childWithoutSelectorWithChild.affix('.match')
-      $childWithoutSelectorWithoutChild = affix('.other-selector')
+      $childWithoutSelectorWithoutChild = $fixture('.other-selector')
 
       results = up.element.descendants($element[0], '.selector:has(.match)')
       expect(results).toEqual [$childWithSelectorWithChild[0]]
@@ -89,7 +89,7 @@ describe 'up.element', ->
   describe 'up.element.descendant()', ->
 
     it 'returns the first descendant of the given root that matches the given selector', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $matchingChild = $element.affix('.child.match')
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
@@ -98,37 +98,37 @@ describe 'up.element', ->
       expect(result).toEqual $matchingChild[0]
 
     it 'returns missing if no descendant matches', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $child = $element.affix('.child')
       $grandChild = $child.affix('.grand-child')
       result = up.element.descendant($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'does not return the root itself, even if it matches', ->
-      $element = affix('.element.match')
+      $element = $fixture('.element.match')
       result = up.element.descendant($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'does not return an ancestor of the root, even if it matches', ->
-      $parent = affix('.parent.match')
+      $parent = $fixture('.parent.match')
       $element = $parent.affix('.element')
       result = up.element.descendant($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'supports the custom :has() selector', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $childWithSelectorWithChild = $element.affix('.selector')
       $childWithSelectorWithChild.affix('.match')
       $childWithSelectorWithoutChild = $element.affix('.selector')
       $childWithoutSelectorWithChild = $element.affix('.other-selector')
       $childWithoutSelectorWithChild.affix('.match')
-      $childWithoutSelectorWithoutChild = affix('.other-selector')
+      $childWithoutSelectorWithoutChild = $fixture('.other-selector')
 
       result = up.element.descendant($element[0], '.selector:has(.match)')
       expect(result).toBe $childWithSelectorWithChild[0]
 
     it 'supports the custom :has() selector when a previous sibling only matches its own selector, but not the descendant selector (bugfix)', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $childWithSelectorWithoutChild = $element.affix('.selector')
       $childWithSelectorWithChild = $element.affix('.selector')
       $childWithSelectorWithChild.affix('.match')
@@ -140,7 +140,7 @@ describe 'up.element', ->
   describe 'up.element.subtree()', ->
 
     it 'returns all descendants of the given root matching the given selector', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $matchingChild = $element.affix('.child.match')
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
@@ -149,7 +149,7 @@ describe 'up.element', ->
       expect(results).toEqual [$matchingChild[0], $matchingGrandChild[0]]
 
     it 'includes the given root if it matches the selector', ->
-      $element = affix('.element.match')
+      $element = $fixture('.element.match')
       $matchingChild = $element.affix('.child.match')
       $matchingGrandChild = $matchingChild.affix('.grand-child.match')
       $otherChild = $element.affix('.child')
@@ -158,25 +158,25 @@ describe 'up.element', ->
       expect(results).toEqual [$element[0], $matchingChild[0], $matchingGrandChild[0]]
 
     it 'does not return ancestors of the root, even if they match', ->
-      $parent = affix('.parent.match')
+      $parent = $fixture('.parent.match')
       $element = $parent.affix('.element')
       results = up.element.subtree($element[0], '.match')
       expect(results).toEqual []
 
     it 'returns an empty list if neither root nor any descendant matches', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $child = $element.affix('.child')
       results = up.element.subtree($element[0], '.match')
       expect(results).toEqual []
 
     it 'supports the custom :has() selector', ->
-      $element = affix('.selector')
+      $element = $fixture('.selector')
       $childWithSelectorWithChild = $element.affix('.selector')
       $childWithSelectorWithChild.affix('.match')
       $childWithSelectorWithoutChild = $element.affix('.selector')
       $childWithoutSelectorWithChild = $element.affix('.other-selector')
       $childWithoutSelectorWithChild.affix('.match')
-      $childWithoutSelectorWithoutChild = affix('.other-selector')
+      $childWithoutSelectorWithoutChild = $fixture('.other-selector')
 
       results = up.element.subtree($element[0], '.selector:has(.match)')
       expect(results).toEqual [$element[0], $childWithSelectorWithChild[0]]
@@ -184,8 +184,8 @@ describe 'up.element', ->
   describe 'up.element.closest()', ->
 
     it 'returns the closest ancestor of the given root that matches the given selector', ->
-      $grandGrandMother = affix('.match')
-      $grandMother = affix('.match')
+      $grandGrandMother = $fixture('.match')
+      $grandMother = $fixture('.match')
       $mother = $grandMother.affix('.no-match')
       $element = $mother.affix('.element')
 
@@ -193,21 +193,21 @@ describe 'up.element', ->
       expect(result).toBe($grandMother[0])
 
     it 'returns the given root if it matches', ->
-      $mother = affix('.match')
+      $mother = $fixture('.match')
       $element = $mother.affix('.match')
 
       result = up.element.closest($element[0], '.match')
       expect(result).toBe($element[0])
 
     it 'does not return descendants of the root, even if they match', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $child = $element.affix('.match')
 
       result = up.element.closest($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'returns missing if neither root nor ancestor matches', ->
-      $mother = affix('.no-match')
+      $mother = $fixture('.no-match')
       $element = $mother.affix('.no-match')
 
       result = up.element.closest($element[0], '.match')
@@ -216,8 +216,8 @@ describe 'up.element', ->
   describe 'up.element.ancestor()', ->
 
     it 'returns the closest ancestor of the given root that matches the given selector', ->
-      $grandGrandMother = affix('.match')
-      $grandMother = affix('.match')
+      $grandGrandMother = $fixture('.match')
+      $grandMother = $fixture('.match')
       $mother = $grandMother.affix('.no-match')
       $element = $mother.affix('.element')
 
@@ -225,20 +225,20 @@ describe 'up.element', ->
       expect(result).toBe($grandMother[0])
 
     it 'does not return the given root, even if it matches', ->
-      $element = affix('.match')
+      $element = $fixture('.match')
 
       result = up.element.ancestor($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'does not return descendants of the root, even if they match', ->
-      $element = affix('.element')
+      $element = $fixture('.element')
       $child = $element.affix('.match')
 
       result = up.element.ancestor($element[0], '.match')
       expect(result).toBeMissing()
 
     it 'returns missing if no ancestor matches', ->
-      $mother = affix('.no-match')
+      $mother = $fixture('.no-match')
       $element = $mother.affix('.no-match')
 
       result = up.element.ancestor($element[0], '.match')
@@ -247,7 +247,7 @@ describe 'up.element', ->
   describe 'up.element.triggerCustom()', ->
 
     it 'triggers an event with the given name on the given element', ->
-      element = affix('.element')[0]
+      element = fixture('.element')
       callback = jasmine.createSpy('event handler')
       element.addEventListener('custom:name', callback)
       expect(callback).not.toHaveBeenCalled()
@@ -255,7 +255,7 @@ describe 'up.element', ->
       expect(callback).toHaveBeenCalled()
 
     it 'allows to pass custom event properties', ->
-      element = affix('.element')[0]
+      element = fixture('.element')
       callback = jasmine.createSpy('event handler')
       element.addEventListener('custom:name', callback)
       up.element.triggerCustom(element, 'custom:name', customProp: 'customValue')
@@ -263,7 +263,7 @@ describe 'up.element', ->
       expect(callback.calls.mostRecent().args[0].customProp).toEqual('customValue')
 
     it 'triggers an event that bubbles', ->
-      $parent = affix('.parent')
+      $parent = $fixture('.parent')
       $element = $parent.affix('.element')
       callback = jasmine.createSpy('event handler')
       $parent[0].addEventListener('custom:name', callback)
@@ -271,7 +271,7 @@ describe 'up.element', ->
       expect(callback).toHaveBeenCalled()
 
     it 'triggers an event that can be stopped from propagating', ->
-      $parent = affix('.parent')
+      $parent = $fixture('.parent')
       $element = $parent.affix('.element')
       callback = jasmine.createSpy('event handler')
       $parent[0].addEventListener('custom:name', callback)
@@ -282,7 +282,7 @@ describe 'up.element', ->
   describe 'up.element.remove()', ->
 
     it 'removes the given element from the DOM', ->
-      element = affix('.element')[0]
+      element = fixture('.element')
       expect(element).toBeAttached()
       up.element.remove(element)
       expect(element).toBeDetached()
@@ -290,13 +290,13 @@ describe 'up.element', ->
   describe 'up.element.toggle()', ->
 
     it 'hides the given element if the second argument is false', ->
-      element = affix('.element')[0]
+      element = fixture('.element')
       expect(element).toBeVisible()
       up.element.toggle(element, false)
       expect(element).toBeHidden()
 
     it 'shows the given element if the second argument is true', ->
-      element = affix('.element')[0]
+      element = fixture('.element')
       element.style.display = 'none'
       expect(element).toBeHidden()
       up.element.toggle(element, true)
@@ -394,51 +394,51 @@ describe 'up.element', ->
   describe 'up.element.toSelector', ->
 
     it "prefers using the element's 'up-id' attribute to using the element's ID", ->
-      $element = affix('div[up-id=up-id-value]#id-value')
+      $element = $fixture('div[up-id=up-id-value]#id-value')
       expect(up.element.toSelector($element)).toBe('[up-id="up-id-value"]')
 
     it "prefers using the element's ID to using the element's name", ->
-      $element = affix('div#id-value[name=name-value]')
+      $element = $fixture('div#id-value[name=name-value]')
       expect(up.element.toSelector($element)).toBe("#id-value")
 
     it "selects the ID with an attribute selector if the ID contains a slash", ->
-      $element = affix('div').attr(id: 'foo/bar')
+      $element = $fixture('div').attr(id: 'foo/bar')
       expect(up.element.toSelector($element)).toBe('[id="foo/bar"]')
 
     it "selects the ID with an attribute selector if the ID contains a space", ->
-      $element = affix('div').attr(id: 'foo bar')
+      $element = $fixture('div').attr(id: 'foo bar')
       expect(up.element.toSelector($element)).toBe('[id="foo bar"]')
 
     it "selects the ID with an attribute selector if the ID contains a dot", ->
-      $element = affix('div').attr(id: 'foo.bar')
+      $element = $fixture('div').attr(id: 'foo.bar')
       expect(up.element.toSelector($element)).toBe('[id="foo.bar"]')
 
     it "selects the ID with an attribute selector if the ID contains a quote", ->
-      $element = affix('div').attr(id: 'foo"bar')
+      $element = $fixture('div').attr(id: 'foo"bar')
       expect(up.element.toSelector($element)).toBe('[id="foo\\"bar"]')
 
     it "prefers using the element's tagName + [name] to using the element's classes", ->
-      $element = affix('input[name=name-value].class1.class2')
+      $element = $fixture('input[name=name-value].class1.class2')
       expect(up.element.toSelector($element)).toBe('input[name="name-value"]')
 
     it "prefers using the element's classes to using the element's ARIA label", ->
-      $element = affix('div.class1.class2[aria-label="ARIA label value"]')
+      $element = $fixture('div.class1.class2[aria-label="ARIA label value"]')
       expect(up.element.toSelector($element)).toBe(".class1.class2")
 
     it 'does not use Unpoly classes to compose a class selector', ->
-      $element = affix('div.class1.up-current.class2')
+      $element = $fixture('div.class1.up-current.class2')
       expect(up.element.toSelector($element)).toBe(".class1.class2")
 
     it "prefers using the element's ARIA label to using the element's tag name", ->
-      $element = affix('div[aria-label="ARIA label value"]')
+      $element = $fixture('div[aria-label="ARIA label value"]')
       expect(up.element.toSelector($element)).toBe('[aria-label="ARIA label value"]')
 
     it "uses the element's tag name if no better description is available", ->
-      $element = affix('div')
+      $element = $fixture('div')
       expect(up.element.toSelector($element)).toBe("div")
 
     it 'escapes quotes in attribute selector values', ->
-      $element = affix('div')
+      $element = $fixture('div')
       $element.attr('aria-label', 'foo"bar')
       expect(up.element.toSelector($element)).toBe('[aria-label="foo\\"bar"]')
 
@@ -547,7 +547,7 @@ describe 'up.element', ->
   describe 'up.element.fixedToAbsolute', ->
 
     it "changes the given element's position from fixed to absolute, without changing its rendered position", ->
-      $container = affix('.container').css
+      $container = $fixture('.container').css
         position: 'absolute'
         left: '100px'
         top: '100px'
@@ -568,7 +568,7 @@ describe 'up.element', ->
       expect(newRect).toEqual(oldRect)
 
     it 'correctly positions an element with margins', ->
-      $container = affix('.container').css
+      $container = $fixture('.container').css
         position: 'absolute'
         left: '20px'
         top: '20px'
@@ -590,7 +590,7 @@ describe 'up.element', ->
       expect(newRect).toEqual(oldRect)
 
     it 'correctly positions an element when its new offset parent has margins', ->
-      $container = affix('.container').css
+      $container = $fixture('.container').css
         position: 'absolute'
         left: '100px'
         top: '100px'
@@ -612,7 +612,7 @@ describe 'up.element', ->
       expect(newRect).toEqual(oldRect)
 
     it 'correctly positions an element when the new offset parent is scrolled', ->
-      $container = affix('.container').css
+      $container = $fixture('.container').css
         position: 'absolute'
         left: '100px'
         top: '100px'
@@ -639,29 +639,29 @@ describe 'up.element', ->
   describe 'up.element.castedAttr', ->
     
     it 'returns true if the attribute value is the string "true"', ->
-      $element = affix('div').attr('foo', 'true')
+      $element = $fixture('div').attr('foo', 'true')
       expect(up.element.castedAttr($element, 'foo')).toBe(true)
 
     it 'returns true if the attribute value is the name of the attribute', ->
-      $element = affix('div').attr('foo', 'foo')
+      $element = $fixture('div').attr('foo', 'foo')
       expect(up.element.castedAttr($element, 'foo')).toBe(true)
 
     it 'returns false if the attribute value is the string "false"', ->
-      $element = affix('div').attr('foo', 'false')
+      $element = $fixture('div').attr('foo', 'false')
       expect(up.element.castedAttr($element, 'foo')).toBe(false)
 
     it 'returns a missing value if the element has no such attribute', ->
-      $element = affix('div')
+      $element = $fixture('div')
       expect(up.element.castedAttr($element, 'foo')).toBeMissing()
 
     it 'returns the attribute value unchanged if the value is some string', ->
-      $element = affix('div').attr('foo', 'some text')
+      $element = $fixture('div').attr('foo', 'some text')
       expect(up.element.castedAttr($element, 'foo')).toBe('some text')
 
   describe 'up.element.writeTemporaryStyle', ->
 
     it "sets the given inline styles and returns a function that will restore the previous inline styles", ->
-      $div = affix('div[style="color: red"]')
+      $div = $fixture('div[style="color: red"]')
       restore = up.element.writeTemporaryStyle($div, { color: 'blue' })
       expect($div.attr('style')).toContain('color: blue')
       expect($div.attr('style')).not.toContain('color: red')
@@ -670,7 +670,7 @@ describe 'up.element', ->
       expect($div.attr('style')).toContain('color: red')
 
     it "does not restore inherited styles", ->
-      $div = affix('div[class="red-background"]')
+      $div = $fixture('div[class="red-background"]')
       restore = up.element.writeTemporaryStyle($div, { backgroundColor: 'blue' })
       expect($div.attr('style')).toContain('background-color: blue')
       restore()
@@ -681,18 +681,18 @@ describe 'up.element', ->
     describe 'with a string as second argument', ->
 
       it 'returns a CSS value string from an inline [style] attribute', ->
-        $div = affix('div').attr('style', 'background-color: #ff0000')
+        $div = $fixture('div').attr('style', 'background-color: #ff0000')
         style = up.element.readInlineStyle($div, 'backgroundColor')
         # Browsers convert colors to rgb() values, even IE11
         expect(style).toEqual('rgb(255, 0, 0)')
 
       it 'returns a blank value if the element does not have the given property in the [style] attribute', ->
-        $div = affix('div').attr('style', 'background-color: red')
+        $div = $fixture('div').attr('style', 'background-color: red')
         style = up.element.readInlineStyle($div, 'color')
         expect(style).toBeBlank()
 
       it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
-        $div = affix('div[class="red-background"]')
+        $div = $fixture('div[class="red-background"]')
         inlineStyle = up.element.readInlineStyle($div, 'backgroundColor')
         computedStyle = up.element.readComputedStyle($div, 'backgroundColor')
         expect(computedStyle).toEqual('rgb(255, 0, 0)')
@@ -701,20 +701,20 @@ describe 'up.element', ->
     describe 'with an array as second argument', ->
 
       it 'returns an object with the given inline [style] properties', ->
-        $div = affix('div').attr('style', 'background-color: #ff0000; color: #0000ff')
+        $div = $fixture('div').attr('style', 'background-color: #ff0000; color: #0000ff')
         style = up.element.readInlineStyle($div, ['backgroundColor', 'color'])
         expect(style).toEqual
           backgroundColor: 'rgb(255, 0, 0)'
           color: 'rgb(0, 0, 255)'
 
       it 'returns blank keys if the element does not have the given property in the [style] attribute', ->
-        $div = affix('div').attr('style', 'background-color: #ff0000')
+        $div = $fixture('div').attr('style', 'background-color: #ff0000')
         style = up.element.readInlineStyle($div, ['backgroundColor', 'color'])
         expect(style).toHaveOwnProperty('color')
         expect(style.color).toBeBlank()
 
       it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
-        $div = affix('div[class="red-background"]')
+        $div = $fixture('div[class="red-background"]')
         inlineStyleHash = up.element.readInlineStyle($div, ['backgroundColor'])
         computedBackground = up.element.readComputedStyle($div, 'backgroundColor')
         expect(computedBackground).toEqual('rgb(255, 0, 0)')
@@ -724,21 +724,21 @@ describe 'up.element', ->
   describe 'up.element.writeInlineStyle', ->
 
     it "sets the given style properties as the given element's [style] attribute", ->
-      $div = affix('div')
+      $div = $fixture('div')
       up.element.writeInlineStyle($div, { color: 'red', backgroundColor: 'blue' })
       style = $div.attr('style')
       expect(style).toContain('color: red')
       expect(style).toContain('background-color: blue')
 
     it "merges the given style properties into the given element's existing [style] value", ->
-      $div = affix('div[style="color: red"]')
+      $div = $fixture('div[style="color: red"]')
       up.element.writeInlineStyle($div, { backgroundColor: 'blue' })
       style = $div.attr('style')
       expect(style).toContain('color: red')
       expect(style).toContain('background-color: blue')
 
     it "converts the values of known length properties to px values automatically", ->
-      $div = affix('div')
+      $div = $fixture('div')
       up.element.writeInlineStyle($div, { paddingTop: 100 })
       style = $div.attr('style')
       expect(style).toContain('padding-top: 100px')

@@ -9,21 +9,21 @@ describe 'up.tooltip', ->
     describe 'up.tooltip.attach', ->
       
       it 'opens a tooltip with the given text', (done) ->
-        $link = affix('span')
+        $link = $fixture('span')
         up.tooltip.attach($link, html: 'tooltip text').then ->
           $tooltip = $('.up-tooltip')
           expect($tooltip).toHaveText('tooltip text')
           done()
 
       it 'allows HTML for the tooltip text when contents are given as { html } option', (done) ->
-        $link = affix('span')
+        $link = $fixture('span')
         up.tooltip.attach($link, html: '<b>text</b>').then ->
           $tooltip = $('.up-tooltip')
           expect($tooltip.html()).toContain('<b>text</b>')
           done()
 
       it 'escapes HTML for the tooltip text when contents given as { text } option', (done) ->
-        $link = affix('span')
+        $link = $fixture('span')
         up.tooltip.attach($link, text: '<b>text</b>').then ->
           $tooltip = $('.up-tooltip')
           expect($tooltip.html()).toContain('&lt;b&gt;text&lt;/b&gt;')
@@ -32,7 +32,7 @@ describe 'up.tooltip', ->
       describe 'positioning', ->
 
         beforeEach ->
-          @$link = affix('span').text('button label')
+          @$link = $fixture('span').text('button label')
           @$link.css(
             position: 'absolute'
             left: '200px'
@@ -111,7 +111,7 @@ describe 'up.tooltip', ->
         up.motion.config.enabled = false
 
       it 'closes the tooltip', asyncSpec (next) ->
-        $link = affix('.link')
+        $link = $fixture('.link')
         up.tooltip.attach($link, text: 'Tooltip text')
 
         next =>
@@ -122,9 +122,9 @@ describe 'up.tooltip', ->
           expect(up.tooltip.isOpen()).toBe(false)
 
       it 'closes the tooltip when a an [up-instant] link removes its parent (and thus a click event never bubbles up to the document)', asyncSpec (next) ->
-        $parent = affix('.parent')
+        $parent = $fixture('.parent')
         $parentReplacingLink = $parent.affix('a[href="/foo"][up-target=".parent"][up-instant]')
-        $tooltipOpener = affix('.link')
+        $tooltipOpener = $fixture('.link')
         up.tooltip.attach($tooltipOpener, text: 'Tooltip text')
 
         next =>
@@ -135,9 +135,9 @@ describe 'up.tooltip', ->
           expect(up.tooltip.isOpen()).toBe(false)
 
       it 'closes a tooltip when the user clicks on an [up-target] link outside the tooltip', asyncSpec (next) ->
-        $target = affix('.target')
-        $outsideLink = affix('a[href="/foo"][up-target=".target"]')
-        $tooltipOpener = affix('.link')
+        $target = $fixture('.target')
+        $outsideLink = $fixture('a[href="/foo"][up-target=".target"]')
+        $tooltipOpener = $fixture('.link')
         up.tooltip.attach($tooltipOpener, text: 'Tooltip text')
 
         next =>
@@ -148,9 +148,9 @@ describe 'up.tooltip', ->
           expect(up.tooltip.isOpen()).toBe(false)
 
       it 'closes a tooltip when the user clicks on an [up-instant] link outside the tooltip', asyncSpec (next) ->
-        $target = affix('.target')
-        $outsideLink = affix('a[href="/foo"][up-target=".target"][up-instant]')
-        $tooltipOpener = affix('.link')
+        $target = $fixture('.target')
+        $outsideLink = $fixture('a[href="/foo"][up-target=".target"][up-instant]')
+        $tooltipOpener = $fixture('.link')
         up.tooltip.attach($tooltipOpener, text: 'Tooltip text')
 
         next =>

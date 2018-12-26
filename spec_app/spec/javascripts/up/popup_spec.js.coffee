@@ -26,7 +26,7 @@ describe 'up.popup', ->
         @restoreBodyHeight()
 
       it "loads this link's destination in a popup positioned under the given link", asyncSpec (next) ->
-        $container = affix('.container')
+        $container = $fixture('.container')
         $container.css
           position: 'absolute'
           left: '100px'
@@ -53,7 +53,7 @@ describe 'up.popup', ->
           expect($popup).toSitBelow($link)
 
       it 'always makes a request for the given selector, and does not "improve" the selector with a fallback', asyncSpec (next) ->
-        $container = affix('.container')
+        $container = $fixture('.container')
         $link = $container.affix('a[href="/path/to"][up-popup=".content"]').text('link')
         up.popup.attach($link)
         next =>
@@ -62,7 +62,7 @@ describe 'up.popup', ->
           expect(headers['X-Up-Target']).toEqual('.content')
 
       it 'never resolves the open() promise and shows no error if close() was called before the response was received', asyncSpec (next) ->
-        $span = affix('span')
+        $span = $fixture('span')
         openPromise = up.popup.attach($span, url: '/foo', target: '.container')
 
         next =>
@@ -80,14 +80,14 @@ describe 'up.popup', ->
       describe 'with { html } option', ->
 
         it 'extracts the selector from the given HTML string', asyncSpec (next) ->
-          $span = affix('span')
+          $span = $fixture('span')
           next.await up.popup.attach($span, target: '.container', html: "<div class='container'>container contents</div>")
           next => expect($('.up-popup')).toHaveText('container contents')
 
       describe 'opening a popup while another modal is open', ->
 
         it 'closes the current popup and wait for its close animation to finish before starting the open animation of a second popup', asyncSpec (next) ->
-          $span = affix('span')
+          $span = $fixture('span')
           up.popup.config.openAnimation = 'fade-in'
           up.popup.config.openDuration = 5
           up.popup.config.closeAnimation = 'fade-out'
@@ -131,7 +131,7 @@ describe 'up.popup', ->
           up.history.replace('/foo')
           expect(up.popup.coveredUrl()).toBeMissing()
 
-          $popupLink = affix('a[href="/bar"][up-popup=".container"][up-history="true"]')
+          $popupLink = $fixture('a[href="/bar"][up-popup=".container"][up-history="true"]')
           Trigger.clickSequence($popupLink)
 
           next =>
@@ -157,7 +157,7 @@ describe 'up.popup', ->
 
       beforeEach ->
         @stubAttach = =>
-          @$link = affix('a[href="/path"][up-popup=".target"]')
+          @$link = $fixture('a[href="/path"][up-popup=".target"]')
           @attachSpy = up.popup.knife.mock('attachAsap').and.returnValue(Promise.resolve())
           @defaultSpy = spyOn(up.link, 'allowDefault').and.callFake((event) -> event.preventDefault())
 
@@ -192,8 +192,8 @@ describe 'up.popup', ->
         up.popup.config.openDuration = 0
         up.popup.config.closeDuration = 0
 
-        $link1 = affix('a[href="/path1"][up-popup=".target"]')
-        $link2 = affix('a[href="/path2"][up-popup=".target"]')
+        $link1 = $fixture('a[href="/path1"][up-popup=".target"]')
+        $link2 = $fixture('a[href="/path2"][up-popup=".target"]')
 
         events = []
         u.each ['up:popup:open', 'up:popup:opened', 'up:popup:close', 'up:popup:closed'], (event) ->
@@ -256,7 +256,7 @@ describe 'up.popup', ->
       describe 'with [up-method] modifier', ->
 
         it 'honours the given method', asyncSpec (next) ->
-          $link = affix('a[href="/path"][up-popup=".target"][up-method="post"]')
+          $link = $fixture('a[href="/path"][up-popup=".target"][up-method="post"]')
           Trigger.click($link)
 
           next =>
@@ -274,11 +274,11 @@ describe 'up.popup', ->
       describe 'when clicked inside a popup', ->
 
         it 'closes the open popup and halts the event chain', asyncSpec (next) ->
-          $opener = affix('a')
+          $opener = $fixture('a')
           up.popup.attach($opener, html: '<div class="target">text</div>', target: '.target')
 
           next =>
-            $popup = affix('.up-popup')
+            $popup = $fixture('.up-popup')
             $closer = $popup.affix('a[up-close]') # link is within the popup
             up.hello($closer)
             Trigger.clickSequence($closer)
@@ -311,7 +311,7 @@ describe 'up.popup', ->
       describe 'when no popup is open', ->
 
         it 'does nothing and allows the event chain to continue', asyncSpec (next) ->
-          $link = affix('a[up-close]') # link is outside the popup
+          $link = $fixture('a[up-close]') # link is outside the popup
           up.hello($link)
           Trigger.clickSequence($link)
 
@@ -325,8 +325,8 @@ describe 'up.popup', ->
         up.motion.config.enabled = false
 
       it 'prefers to replace a selector within the popup', asyncSpec (next) ->
-        $outside = affix('.foo').text('old outside')
-        $link = affix('.link')
+        $outside = $fixture('.foo').text('old outside')
+        $link = $fixture('.link')
         up.popup.attach($link, target: '.foo', html: "<div class='foo'>old inside</div>")
 
         next =>
@@ -338,8 +338,8 @@ describe 'up.popup', ->
           expect($('.up-popup')).toHaveText('new text')
 
       it 'auto-closes the popup when a replacement from inside the popup affects a selector behind the popup', asyncSpec (next) ->
-        affix('.outside').text('old outside')
-        $link = affix('.link')
+        $fixture('.outside').text('old outside')
+        $link = $fixture('.link')
         up.popup.attach($link, target: '.inside', html: "<div class='inside'>old inside</div>")
 
         next =>
@@ -356,8 +356,8 @@ describe 'up.popup', ->
         up.popup.config.closeDuration = 20
         up.popup.config.history = true
 
-        affix('.outside').text('old outside')
-        $link = affix('.link')
+        $fixture('.outside').text('old outside')
+        $link = $fixture('.link')
         up.popup.attach($link, url: '/path', target: '.inside')
 
         next =>
@@ -371,8 +371,8 @@ describe 'up.popup', ->
           expect(location.href).toMatchUrl '/new-location'
 
       it 'does not auto-close the popup when a replacement from inside the popup affects a selector inside the popup', asyncSpec (next) ->
-        affix('.outside').text('old outside')
-        $link = affix('.link')
+        $fixture('.outside').text('old outside')
+        $link = $fixture('.link')
         up.popup.attach($link, html: "<div class='inside'>old inside</div>", target: '.inside')
 
         next =>
@@ -383,8 +383,8 @@ describe 'up.popup', ->
           expect($('.up-popup')).toBeAttached()
 
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector outside the popup', asyncSpec (next) ->
-        affix('.outside').text('old outside')
-        $link = affix('.link')
+        $fixture('.outside').text('old outside')
+        $link = $fixture('.link')
         up.popup.attach($link, target: '.inside', html: "<div class='inside'>old inside</div>")
 
         next =>
@@ -395,8 +395,8 @@ describe 'up.popup', ->
           expect($('.up-popup')).toBeAttached()
 
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector inside the popup', asyncSpec (next) ->
-        affix('.outside').text('old outside')
-        $link = affix('.link')
+        $fixture('.outside').text('old outside')
+        $link = $fixture('.link')
         up.popup.attach($link, target: '.inside', html: "<div class='inside'>old inside</div>")
 
         next =>
@@ -412,8 +412,8 @@ describe 'up.popup', ->
         up.motion.config.enabled = false
 
       it 'closes the popup', asyncSpec (next) ->
-        affix('.outside').text('old outside')
-        $link = affix('.link')
+        $fixture('.outside').text('old outside')
+        $link = $fixture('.link')
         up.popup.attach($link, target: '.inside', html: "<div class='inside'>inside</div>")
 
         next =>
@@ -424,9 +424,9 @@ describe 'up.popup', ->
           expect(up.popup.isOpen()).toBe(false)
 
       it 'closes the popup when a an [up-instant] link removes its parent (and thus a click event never bubbles up to the document)', asyncSpec (next) ->
-        $parent = affix('.parent')
+        $parent = $fixture('.parent')
         $parentReplacingLink = $parent.affix('a[href="/foo"][up-target=".parent"][up-instant]')
-        $popupOpener = affix('.link')
+        $popupOpener = $fixture('.link')
         up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
 
         next =>
@@ -437,9 +437,9 @@ describe 'up.popup', ->
           expect(up.popup.isOpen()).toBe(false)
 
       it 'closes the popup when the user clicks on an [up-target] link outside the popup', asyncSpec (next) ->
-        $target = affix('.target')
-        $outsideLink = affix('a[href="/foo"][up-target=".target"]')
-        $popupOpener = affix('.link')
+        $target = $fixture('.target')
+        $outsideLink = $fixture('a[href="/foo"][up-target=".target"]')
+        $popupOpener = $fixture('.link')
         up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
 
         next =>
@@ -450,9 +450,9 @@ describe 'up.popup', ->
           expect(up.popup.isOpen()).toBe(false)
 
       it 'closes the popup when the user clicks on an [up-instant] link outside the popup', asyncSpec (next) ->
-        $target = affix('.target')
-        $outsideLink = affix('a[href="/foo"][up-target=".target"][up-instant]')
-        $popupOpener = affix('.link')
+        $target = $fixture('.target')
+        $outsideLink = $fixture('a[href="/foo"][up-target=".target"][up-instant]')
+        $popupOpener = $fixture('.link')
         up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
 
         next =>
@@ -463,8 +463,8 @@ describe 'up.popup', ->
           expect(up.popup.isOpen()).toBe(false)
 
       it 'does not close the popup if #preventDefault() is called on up:popup:close event', asyncSpec (next) ->
-        affix('.outside').text('old outside')
-        $link = affix('.link')
+        $fixture('.outside').text('old outside')
+        $link = $fixture('.link')
         up.popup.attach($link, target: '.inside', html: "<div class='inside'>inside</div>")
 
         up.on 'up:popup:close', (e) -> e.preventDefault()
@@ -481,9 +481,9 @@ describe 'up.popup', ->
           expect(window).not.toHaveUnhandledRejections()
 
       it 'does not close the popup if a link outside the popup is followed with the up.follow function (bugfix)', asyncSpec (next) ->
-        $target = affix('.target')
-        $outsideLink = affix('a[href="/foo"][up-target=".target"]')
-        $popupOpener = affix('.link')
+        $target = $fixture('.target')
+        $outsideLink = $fixture('a[href="/foo"][up-target=".target"]')
+        $popupOpener = $fixture('.link')
         up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
 
         next =>
@@ -494,9 +494,9 @@ describe 'up.popup', ->
           expect(up.popup.isOpen()).toBe(true)
 
       it 'does not close the popup if a form outside the popup is followed with the up.submit function (bugfix)', asyncSpec (next) ->
-        $target = affix('.target')
-        $outsideForm = affix('form[action="/foo"][up-target=".target"]')
-        $popupOpener = affix('.link')
+        $target = $fixture('.target')
+        $outsideForm = $fixture('form[action="/foo"][up-target=".target"]')
+        $popupOpener = $fixture('.link')
         up.popup.attach($popupOpener, target: '.inside', html: "<div class='inside'>inside</div>")
 
         next =>

@@ -66,7 +66,7 @@ describe 'up.history', ->
         up.history.push('/one')
         up.history.push('/two')
 
-        $container = affix('.container')
+        $container = $fixture('.container')
         $example = $container.affix('.example')
         up.hello($example)
 
@@ -89,7 +89,7 @@ describe 'up.history', ->
         it 'sets an [up-href] attribute to the previous URL and sets the up-restore-scroll attribute to "true"', ->
           up.history.push('/path1')
           up.history.push('/path2')
-          element = up.hello(affix('a[href="/path3"][up-back]').text('text'))
+          element = up.hello($fixture('a[href="/path3"][up-back]').text('text'))
           $element = $(element)
           expect($element.attr('href')).toMatchUrl('/path3')
           expect($element.attr('up-href')).toMatchUrl('/path1')
@@ -103,7 +103,7 @@ describe 'up.history', ->
       describeFallback 'canPushState', ->
 
         it 'does not change the element', ->
-          $element = $(up.hello(affix('a[href="/three"][up-back]').text('text')))
+          $element = $(up.hello($fixture('a[href="/three"][up-back]').text('text')))
           expect($element.attr('up-href')).toBeUndefined()
 
     describe 'scroll restoration', ->
@@ -193,7 +193,7 @@ describe 'up.history', ->
 
           respond = => @respondWith(html)
 
-          $screen = affix('.screen')
+          $screen = $fixture('.screen')
           $screen.html(html)
 
           up.replace('.content1, .content2', '/one', reveal: false)
@@ -233,7 +233,7 @@ describe 'up.history', ->
           up.proxy.config.cacheSize = 0
           up.history.config.popTargets = ['.viewport']
 
-          affix('.viewport .content')
+          fixture('.viewport .content')
           respond = =>
             @respondWith """
               <div class="viewport">

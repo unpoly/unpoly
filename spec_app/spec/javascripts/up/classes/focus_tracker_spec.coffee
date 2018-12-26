@@ -11,14 +11,14 @@
 #
 #    it 'returns a <input type="text"> after it was focused', ->
 #      tracker = new up.FocusTracker()
-#      $form = affix('form')
+#      $form = $fixture('form')
 #      $input = $form.affix('input[type=text]')
 #      $input.focus()
 #      expect(tracker.lastField()).toEqual($input[0])
 #
 #    it 'returns a <select> after it was focused', ->
 #      tracker = new up.FocusTracker()
-#      $form = affix('form')
+#      $form = $fixture('form')
 #      $select = $form.affix('select')
 #      $option = $select.affix('option')
 #      $select.focus()

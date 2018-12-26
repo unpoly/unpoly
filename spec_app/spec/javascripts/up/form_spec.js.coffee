@@ -22,7 +22,7 @@ describe 'up.form', ->
           describe "when the input receives a #{eventName} event", ->
 
             it "runs the callback if the value changed", asyncSpec (next) ->
-              $input = affix('input[name="input-name"][value="old-value"]')
+              $input = $fixture('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               $input.val('new-value')
@@ -32,7 +32,7 @@ describe 'up.form', ->
                 expect(callback.calls.count()).toEqual(1)
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
-              $input = affix('input[name="input-name"][value="old-value"]')
+              $input = $fixture('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               Trigger[eventName]($input)
@@ -40,7 +40,7 @@ describe 'up.form', ->
                 expect(callback).not.toHaveBeenCalled()
 
             it 'debounces the callback when the { delay } option is given', asyncSpec (next) ->
-              $input = affix('input[name="input-name"][value="old-value"]')
+              $input = $fixture('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, { delay: 200 }, callback)
               $input.val('new-value-1')
@@ -75,7 +75,7 @@ describe 'up.form', ->
                 expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
 
             it 'delays a callback if a previous async callback is taking long to execute', asyncSpec (next) ->
-              $input = affix('input[name="input-name"][value="old-value"]')
+              $input = $fixture('input[name="input-name"][value="old-value"]')
               callbackCount = 0
               callback = ->
                 callbackCount += 1
@@ -99,7 +99,7 @@ describe 'up.form', ->
                 expect(callbackCount).toEqual(2)
 
             it 'only runs the last callback when a previous long-running callback has been delaying multiple callbacks', asyncSpec (next) ->
-              $input = affix('input[name="input-name"][value="old-value"]')
+              $input = $fixture('input[name="input-name"][value="old-value"]')
 
               callbackArgs = []
               callback = (value, field) ->
@@ -127,7 +127,7 @@ describe 'up.form', ->
         describe 'when the first argument is a checkbox', ->
 
           it 'runs the callback when the checkbox changes its checked state', asyncSpec (next) ->
-            $form = affix('form')
+            $form = $fixture('form')
             $checkbox = $form.affix('input[name="input-name"][type="checkbox"][value="checkbox-value"]')
             callback = jasmine.createSpy('change callback')
             up.observe($checkbox, callback)
@@ -144,7 +144,7 @@ describe 'up.form', ->
               expect(callback.calls.count()).toEqual(2)
 
           it 'runs the callback when the checkbox is toggled by clicking its label', asyncSpec (next) ->
-            $form = affix('form')
+            $form = $fixture('form')
             $checkbox = $form.affix('input#tick[name="input-name"][type="checkbox"][value="checkbox-value"]')
             $label = $form.affix('label[for="tick"]').text('tick label')
             callback = jasmine.createSpy('change callback')
@@ -164,7 +164,7 @@ describe 'up.form', ->
         describe 'when the first argument is a radio button group', ->
 
           it 'runs the callback when the group changes its selection', asyncSpec (next) ->
-            $form = affix('form')
+            $form = $fixture('form')
             $radio1 = $form.affix('input[type="radio"][name="group"][value="1"]')
             $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
             $group = $radio1.add($radio2)
@@ -187,7 +187,7 @@ describe 'up.form', ->
               expect(callback.calls.count()).toEqual(2)
 
           it "runs the callbacks when a radio button is selected or deselected by clicking a label in the group", asyncSpec (next) ->
-            $form = affix('form')
+            $form = $fixture('form')
             $radio1 = $form.affix('input#radio1[type="radio"][name="group"][value="1"]')
             $radio1Label = $form.affix('label[for="radio1"]').text('label 1')
             $radio2 = $form.affix('input#radio2[type="radio"][name="group"][value="2"]')
@@ -208,7 +208,7 @@ describe 'up.form', ->
               expect(callback.calls.count()).toEqual(2)
 
           it "takes the group's initial selected value into account", asyncSpec (next) ->
-            $form = affix('form')
+            $form = $fixture('form')
             $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
             $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
             $group = $radio1.add($radio2)
@@ -238,7 +238,7 @@ describe 'up.form', ->
           describe "when any of the form's inputs receives a #{eventName} event", ->
 
             it "runs the callback if the value changed", asyncSpec (next) ->
-              $form = affix('form')
+              $form = $fixture('form')
               $input = $form.affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
@@ -249,7 +249,7 @@ describe 'up.form', ->
                 expect(callback.calls.count()).toEqual(1)
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
-              $form = affix('form')
+              $form = $fixture('form')
               $input = $form.affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
@@ -258,7 +258,7 @@ describe 'up.form', ->
                 expect(callback).not.toHaveBeenCalled()
 
   #        it 'runs the callback only once when a radio button group changes its selection', ->
-  #          $form = affix('form')
+  #          $form = $fixture('form')
   #          $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
   #          $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
   #          callback = jasmine.createSpy('change callback')
@@ -271,7 +271,7 @@ describe 'up.form', ->
       describe 'with { batch: true } options', ->
 
         it 'calls the callback once with all collected changes in a diff object', asyncSpec (next) ->
-          $form = affix('form')
+          $form = $fixture('form')
           $input1 = $form.affix('input[name="input1"][value="input1-a"]')
           $input2 = $form.affix('input[name="input2"][value="input2-a"]')
           callback = jasmine.createSpy('change callback')
@@ -305,7 +305,7 @@ describe 'up.form', ->
     describe 'up.submit', ->
 
       it 'emits a preventable up:form:submit event', asyncSpec (next) ->
-        $form = affix('form[action="/form-target"][up-target=".response"]')
+        $form = $fixture('form[action="/form-target"][up-target=".response"]')
 
         listener = jasmine.createSpy('submit listener').and.callFake (event) ->
           event.preventDefault()
@@ -326,10 +326,10 @@ describe 'up.form', ->
 
         beforeEach ->
           up.history.config.enabled = true
-          @$form = affix('form[action="/form-target"][method="put"][up-target=".response"]')
+          @$form = $fixture('form[action="/form-target"][method="put"][up-target=".response"]')
           @$form.append('<input name="field1" value="value1">')
           @$form.append('<input name="field2" value="value2">')
-          affix('.response').text('old-text')
+          $fixture('.response').text('old-text')
 
         it 'submits the given form and replaces the target with the response', asyncSpec (next) ->
           up.submit(@$form)
@@ -439,8 +439,8 @@ describe 'up.form', ->
         describe 'revealing', ->
 
           it 'reaveals the target fragment if the submission succeeds', asyncSpec (next) ->
-            $form = affix('form[action="/action"][up-target=".target"]')
-            $target = affix('.target')
+            $form = $fixture('form[action="/action"][up-target=".target"]')
+            $target = $fixture('.target')
 
             revealStub = up.viewport.knife.mock('reveal')
 
@@ -454,8 +454,8 @@ describe 'up.form', ->
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.target')
 
           it 'reveals the form if the submission fails', asyncSpec (next) ->
-            $form = affix('form#foo-form[action="/action"][up-target=".target"]')
-            $target = affix('.target')
+            $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
+            $target = $fixture('.target')
 
             revealStub = up.viewport.knife.mock('reveal')
 
@@ -478,9 +478,9 @@ describe 'up.form', ->
           describe 'with { reveal } option', ->
 
             it 'allows to reveal a different selector', asyncSpec (next) ->
-              $form = affix('form[action="/action"][up-target=".target"]')
-              $target = affix('.target')
-              $other = affix('.other')
+              $form = $fixture('form[action="/action"][up-target=".target"]')
+              $target = $fixture('.target')
+              $other = $fixture('.other')
 
               revealStub = up.viewport.knife.mock('reveal')
 
@@ -501,9 +501,9 @@ describe 'up.form', ->
                 expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
 
             it 'still reveals the form for a failed submission', asyncSpec (next) ->
-              $form = affix('form#foo-form[action="/action"][up-target=".target"]')
-              $target = affix('.target')
-              $other = affix('.other')
+              $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
+              $target = $fixture('.target')
+              $other = $fixture('.other')
 
               revealStub = up.viewport.knife.mock('reveal')
 
@@ -523,7 +523,7 @@ describe 'up.form', ->
                 expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('#foo-form')
 
             it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
-              $form = affix('form#foo-form[action="/action"][up-target="#foo-form"]')
+              $form = $fixture('form#foo-form[action="/action"][up-target="#foo-form"]')
 
               revealStub = up.viewport.knife.mock('reveal')
 
@@ -547,9 +547,9 @@ describe 'up.form', ->
           describe 'with { failReveal } option', ->
 
             it 'reveals the given selector for a failed submission', asyncSpec (next) ->
-              $form = affix('form#foo-form[action="/action"][up-target=".target"]')
-              $target = affix('.target')
-              $other = affix('.other')
+              $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
+              $target = $fixture('.target')
+              $other = $fixture('.other')
 
               revealStub = up.viewport.knife.mock('reveal')
 
@@ -569,8 +569,8 @@ describe 'up.form', ->
                 expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.error')
 
             it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
-              $form = affix('form#foo-form[action="/action"][up-target=".target"][up-fail-reveal="#foo-form .form-child"]')
-              $target = affix('.target')
+              $form = $fixture('form#foo-form[action="/action"][up-target=".target"][up-fail-reveal="#foo-form .form-child"]')
+              $target = $fixture('.target')
 
               revealStub = up.viewport.knife.mock('reveal')
 
@@ -608,7 +608,7 @@ describe 'up.form', ->
       describeFallback 'canPushState', ->
 
         it 'falls back to a vanilla form submission', asyncSpec (next) ->
-          $form = affix('form[action="/path/to"][method="put"][up-target=".response"]')
+          $form = $fixture('form[action="/path/to"][method="put"][up-target=".response"]')
           form = $form.get(0)
           spyOn(form, 'submit')
 
@@ -623,9 +623,9 @@ describe 'up.form', ->
       it 'submits the form with AJAX and replaces the [up-target] selector', asyncSpec (next) ->
         up.history.config.enabled = true
 
-        affix('.response').text('old text')
+        $fixture('.response').text('old text')
 
-        $form = affix('form[action="/form-target"][method="put"][up-target=".response"]')
+        $form = $fixture('form[action="/form-target"][method="put"][up-target=".response"]')
         $form.append('<input name="field1" value="value1">')
         $form.append('<input name="field2" value="value2">')
         $submitButton = $form.affix('input[type="submit"][name="submit-button"][value="submit-button-value"]')
@@ -649,7 +649,7 @@ describe 'up.form', ->
           expect('.response').toHaveText('new text')
 
       it 'allows to refer to this form as "&" in the target selector', asyncSpec (next) ->
-        $form = affix('form.my-form[action="/form-target"][up-target="&"]').text('old form text')
+        $form = $fixture('form.my-form[action="/form-target"][up-target="&"]').text('old form text')
         $submitButton = $form.affix('input[type="submit"]')
         up.hello($form)
 
@@ -670,9 +670,9 @@ describe 'up.form', ->
         it 'replaces the form instead of the [up-target] selector', asyncSpec (next) ->
           up.history.config.enabled = true
 
-          affix('.response').text('old text')
+          $fixture('.response').text('old text')
 
-          $form = affix('form.test-form[action="/form-target"][method="put"][up-target=".response"]')
+          $form = $fixture('form.test-form[action="/form-target"][method="put"][up-target=".response"]')
           $form.append('<input name="field1" value="value1">')
           $form.append('<input name="field2" value="value2">')
           $submitButton = $form.affix('input[type="submit"][name="submit-button"][value="submit-button-value"]')
@@ -703,9 +703,9 @@ describe 'up.form', ->
             expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
 
         it 'updates a given selector when an [up-fail-target] is given', asyncSpec (next) ->
-          $form = affix('form.my-form[action="/path"][up-target=".target"][up-fail-target=".errors"]').text('old form text')
-          $errors = affix('.target').text('old target text')
-          $errors = affix('.errors').text('old errors text')
+          $form = $fixture('form.my-form[action="/path"][up-target=".target"][up-fail-target=".errors"]').text('old form text')
+          $errors = $fixture('.target').text('old target text')
+          $errors = $fixture('.errors').text('old errors text')
 
           $submitButton = $form.affix('input[type="submit"]')
           up.hello($form)
@@ -731,8 +731,8 @@ describe 'up.form', ->
             expect('.errors').toHaveText('new errors text')
 
         it 'allows to refer to this form as "&" in the [up-fail-target] selector', asyncSpec (next) ->
-          $form = affix('form.my-form[action="/form-target"][up-target=".target"][up-fail-target="&"]').text('old form text')
-          $target = affix('.target').text('old target text')
+          $form = $fixture('form.my-form[action="/form-target"][up-target=".target"][up-fail-target="&"]').text('old form text')
+          $target = $fixture('.target').text('old target text')
 
           $submitButton = $form.affix('input[type="submit"]')
           up.hello($form)
@@ -755,7 +755,7 @@ describe 'up.form', ->
       describe 'submit buttons', ->
 
         it 'includes the clicked submit button in the params', asyncSpec (next) ->
-          $form = affix('form[action="/action"][up-target=".target"]')
+          $form = $fixture('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton = $form.affix('input[type="submit"][name="submit-button"][value="submit-button-value"]')
           up.hello($form)
@@ -767,7 +767,7 @@ describe 'up.form', ->
             expect(params['submit-button']).toEqual(['submit-button-value'])
 
         it 'excludes an unused submit button in the params', asyncSpec (next) ->
-          $form = affix('form[action="/action"][up-target=".target"]')
+          $form = $fixture('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
           $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
@@ -781,7 +781,7 @@ describe 'up.form', ->
             expect(params['submit-button-2']).toEqual(['submit-button-2-value'])
 
         it 'includes the first submit button if the form was submitted with enter', asyncSpec (next) ->
-          $form = affix('form[action="/action"][up-target=".target"]')
+          $form = $fixture('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
           $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
@@ -796,7 +796,7 @@ describe 'up.form', ->
             expect(params['submit-button-2']).toBeUndefined()
 
         it 'does not explode if the form has no submit buttons', asyncSpec (next) ->
-          $form = affix('form[action="/action"][up-target=".target"]')
+          $form = $fixture('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           up.hello($form)
 
@@ -810,7 +810,7 @@ describe 'up.form', ->
     describe 'input[up-autosubmit]', ->
 
       it 'submits the form when a change is observed in the given form field', asyncSpec (next) ->
-        $form = affix('form')
+        $form = $fixture('form')
         $field = $form.affix('input[up-autosubmit][name="input-name"][value="old-value"]')
         up.hello($field)
         submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
@@ -821,7 +821,7 @@ describe 'up.form', ->
     describe 'form[up-autosubmit]', ->
 
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
-        $form = affix('form[up-autosubmit]')
+        $form = $fixture('form[up-autosubmit]')
         $field = $form.affix('input[name="input-name"][value="old-value"]')
         up.hello($form)
         submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
@@ -832,7 +832,7 @@ describe 'up.form', ->
       describe 'with [up-delay] modifier', ->
 
         it 'debounces the form submission', asyncSpec (next) ->
-          $form = affix('form[up-autosubmit][up-delay="50"]')
+          $form = $fixture('form[up-autosubmit][up-delay="50"]')
           $field = $form.affix('input[name="input-name"][value="old-value"]')
           up.hello($form)
           submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
@@ -853,7 +853,7 @@ describe 'up.form', ->
         window.observeCallbackSpy = undefined
 
       it 'runs the JavaScript code in the attribute value when a change is observed in the field', asyncSpec (next) ->
-        $form = affix('form')
+        $form = $fixture('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
         $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, name)"]')
         up.hello($form)
@@ -866,7 +866,7 @@ describe 'up.form', ->
       describe 'with [up-delay] modifier', ->
 
         it 'debounces the callback', asyncSpec (next) ->
-          $form = affix('form')
+          $form = $fixture('form')
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
           $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="50"]')
           up.hello($form)
@@ -883,7 +883,7 @@ describe 'up.form', ->
 
       it 'runs the JavaScript code in the attribute value when a change is observed in any contained field', asyncSpec (next) ->
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        $form = affix('form[up-observe="window.observeCallbackSpy(value, name)"]')
+        $form = $fixture('form[up-observe="window.observeCallbackSpy(value, name)"]')
         $field1 = $form.affix('input[name="field1"][value="field1-old-value"]')
         $field2 = $form.affix('input[name="field2"][value="field2-old-value"]')
         up.hello($form)
@@ -910,7 +910,7 @@ describe 'up.form', ->
 
         it "submits the input's form with an 'X-Up-Validate' header and replaces the selector with the response", asyncSpec (next) ->
 
-          $form = affix('form[action="/path/to"]')
+          $form = $fixture('form[action="/path/to"]')
           $group = $("""
             <div class="field-group">
               <input name="user" value="judy" up-validate=".field-group:has(&)">
@@ -946,7 +946,7 @@ describe 'up.form', ->
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
           revealSpy = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
-          $form = affix('form[action="/path/to"]')
+          $form = $fixture('form[action="/path/to"]')
           $group = $("""
             <div class="field-group">
               <input name="user" value="judy" up-validate=".field-group:has(&)">
@@ -969,8 +969,8 @@ describe 'up.form', ->
       describe 'when no selector is given', ->
 
         it 'automatically finds a form group around the input field and only updates that', asyncSpec (next) ->
-
-          @appendFixture """
+          container = fixture('.container')
+          container.innerHTML = """
             <form action="/users" id="registration">
 
               <label>
@@ -1013,14 +1013,14 @@ describe 'up.form', ->
       describe 'on a select', ->
 
         beforeEach ->
-          @$select = affix('select[name="select-name"][up-switch=".target"]')
+          @$select = $fixture('select[name="select-name"][up-switch=".target"]')
           @$blankOption = @$select.affix('option').text('<Please select something>').val('')
           @$fooOption = @$select.affix('option[value="foo"]').text('Foo')
           @$barOption = @$select.affix('option[value="bar"]').text('Bar')
           @$bazOption = @$select.affix('option[value="baz"]').text('Baz')
 
         it "shows the target element iff its up-show-for attribute contains the select value", asyncSpec (next) ->
-          $target = affix('.target[up-show-for="something bar other"]')
+          $target = $fixture('.target[up-show-for="something bar other"]')
           up.hello(@$select)
 
           next =>
@@ -1032,7 +1032,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-hide-for attribute doesn't contain the select value", asyncSpec (next) ->
-          $target = affix('.target[up-hide-for="something bar other"]')
+          $target = $fixture('.target[up-hide-for="something bar other"]')
           up.hello(@$select)
 
           next =>
@@ -1044,7 +1044,7 @@ describe 'up.form', ->
             expect($target).toBeHidden()
 
         it "shows the target element iff it has neither up-show-for nor up-hide-for and the select value is present", asyncSpec (next) ->
-          $target = affix('.target')
+          $target = $fixture('.target')
           up.hello(@$select)
 
           next =>
@@ -1056,7 +1056,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-show-for attribute contains a value ':present' and the select value is present", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":present"]')
+          $target = $fixture('.target[up-show-for=":present"]')
           up.hello(@$select)
 
           next =>
@@ -1068,7 +1068,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-show-for attribute contains a value ':blank' and the select value is blank", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":blank"]')
+          $target = $fixture('.target[up-show-for=":blank"]')
           up.hello(@$select)
 
           next =>
@@ -1082,10 +1082,10 @@ describe 'up.form', ->
       describe 'on a checkbox', ->
 
         beforeEach ->
-          @$checkbox = affix('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
+          @$checkbox = $fixture('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
 
         it "shows the target element iff its up-show-for attribute is :checked and the checkbox is checked", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":checked"]')
+          $target = $fixture('.target[up-show-for=":checked"]')
           up.hello(@$checkbox)
 
           next =>
@@ -1097,7 +1097,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-show-for attribute is :unchecked and the checkbox is unchecked", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":unchecked"]')
+          $target = $fixture('.target[up-show-for=":unchecked"]')
           up.hello(@$checkbox)
 
           next =>
@@ -1109,7 +1109,7 @@ describe 'up.form', ->
             expect($target).toBeHidden()
 
         it "shows the target element iff its up-hide-for attribute is :checked and the checkbox is unchecked", asyncSpec (next) ->
-          $target = affix('.target[up-hide-for=":checked"]')
+          $target = $fixture('.target[up-hide-for=":checked"]')
           up.hello(@$checkbox)
 
           next =>
@@ -1121,7 +1121,7 @@ describe 'up.form', ->
             expect($target).toBeHidden()
 
         it "shows the target element iff its up-hide-for attribute is :unchecked and the checkbox is checked", asyncSpec (next) ->
-          $target = affix('.target[up-hide-for=":unchecked"]')
+          $target = $fixture('.target[up-hide-for=":unchecked"]')
           up.hello(@$checkbox)
 
           next =>
@@ -1133,7 +1133,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff it has neither up-show-for nor up-hide-for and the checkbox is checked", asyncSpec (next) ->
-          $target = affix('.target')
+          $target = $fixture('.target')
           up.hello(@$checkbox)
 
           next =>
@@ -1147,14 +1147,14 @@ describe 'up.form', ->
       describe 'on a group of radio buttons', ->
 
         beforeEach ->
-          @$buttons     = affix('.radio-buttons')
+          @$buttons     = $fixture('.radio-buttons')
           @$blankButton = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('')
           @$fooButton   = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('foo')
           @$barButton   = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('bar')
           @$bazkButton  = @$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('baz')
 
         it "shows the target element iff its up-show-for attribute contains the selected button value", asyncSpec (next) ->
-          $target = affix('.target[up-show-for="something bar other"]')
+          $target = $fixture('.target[up-show-for="something bar other"]')
           up.hello(@$buttons)
 
           next =>
@@ -1166,7 +1166,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-hide-for attribute doesn't contain the selected button value", asyncSpec (next) ->
-          $target = affix('.target[up-hide-for="something bar other"]')
+          $target = $fixture('.target[up-hide-for="something bar other"]')
           up.hello(@$buttons)
 
           next =>
@@ -1178,7 +1178,7 @@ describe 'up.form', ->
             expect($target).toBeHidden()
 
         it "shows the target element iff it has neither up-show-for nor up-hide-for and the selected button value is present", asyncSpec (next) ->
-          $target = affix('.target')
+          $target = $fixture('.target')
           up.hello(@$buttons)
 
           next =>
@@ -1190,7 +1190,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-show-for attribute contains a value ':present' and the selected button value is present", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":present"]')
+          $target = $fixture('.target[up-show-for=":present"]')
           up.hello(@$buttons)
 
           next =>
@@ -1207,7 +1207,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-show-for attribute contains a value ':blank' and the selected button value is blank", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":blank"]')
+          $target = $fixture('.target[up-show-for=":blank"]')
           up.hello(@$buttons)
 
           next =>
@@ -1224,7 +1224,7 @@ describe 'up.form', ->
             expect($target).toBeHidden()
 
         it "shows the target element iff its up-show-for attribute contains a value ':checked' and any button is checked", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":checked"]')
+          $target = $fixture('.target[up-show-for=":checked"]')
           up.hello(@$buttons)
 
           next =>
@@ -1236,7 +1236,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-show-for attribute contains a value ':unchecked' and no button is checked", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":unchecked"]')
+          $target = $fixture('.target[up-show-for=":unchecked"]')
           up.hello(@$buttons)
 
           next =>
@@ -1250,10 +1250,10 @@ describe 'up.form', ->
       describe 'on a text input', ->
 
         beforeEach ->
-          @$textInput = affix('input[name="input-name"][type="text"][up-switch=".target"]')
+          @$textInput = $fixture('input[name="input-name"][type="text"][up-switch=".target"]')
 
         it "shows the target element iff its up-show-for attribute contains the input value", asyncSpec (next) ->
-          $target = affix('.target[up-show-for="something bar other"]')
+          $target = $fixture('.target[up-show-for="something bar other"]')
           up.hello(@$textInput)
 
           next =>
@@ -1265,7 +1265,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-hide-for attribute doesn't contain the input value", asyncSpec (next) ->
-          $target = affix('.target[up-hide-for="something bar other"]')
+          $target = $fixture('.target[up-hide-for="something bar other"]')
           up.hello(@$textInput)
 
           next =>
@@ -1277,7 +1277,7 @@ describe 'up.form', ->
             expect($target).toBeHidden()
 
         it "shows the target element iff it has neither up-show-for nor up-hide-for and the input value is present", asyncSpec (next) ->
-          $target = affix('.target')
+          $target = $fixture('.target')
           up.hello(@$textInput)
 
           next =>
@@ -1289,7 +1289,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-show-for attribute contains a value ':present' and the input value is present", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":present"]')
+          $target = $fixture('.target[up-show-for=":present"]')
           up.hello(@$textInput)
 
           next =>
@@ -1301,7 +1301,7 @@ describe 'up.form', ->
             expect($target).toBeVisible()
 
         it "shows the target element iff its up-show-for attribute contains a value ':blank' and the input value is blank", asyncSpec (next) ->
-          $target = affix('.target[up-show-for=":blank"]')
+          $target = $fixture('.target[up-show-for=":blank"]')
           up.hello(@$textInput)
 
           next =>
@@ -1315,7 +1315,7 @@ describe 'up.form', ->
       describe 'when an [up-show-for] element is dynamically inserted later', ->
 
         it "shows the element iff it matches the [up-switch] control's value", asyncSpec (next) ->
-          $select = affix('select[name="select-name"][up-switch=".target"]')
+          $select = $fixture('select[name="select-name"][up-switch=".target"]')
           $select.affix('option[value="foo"]').text('Foo')
           $select.affix('option[value="bar"]').text('Bar')
           $select.val('foo')
@@ -1323,7 +1323,7 @@ describe 'up.form', ->
 
           next =>
             # New target enters the DOM after [up-switch] has been compiled
-            @$target = affix('.target[up-show-for="bar"]')
+            @$target = $fixture('.target[up-show-for="bar"]')
             up.hello(@$target)
 
           next =>
@@ -1336,7 +1336,7 @@ describe 'up.form', ->
             expect(@$target).toBeVisible()
 
         it "doesn't re-switch targets that were part of the original compile run", asyncSpec (next) ->
-          $container = affix('.container')
+          $container = $fixture('.container')
 
           $select = $container.affix('select[name="select-name"][up-switch=".target"]')
           $select.affix('option[value="foo"]').text('Foo')

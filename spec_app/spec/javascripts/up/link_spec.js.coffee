@@ -10,7 +10,7 @@ describe 'up.link', ->
     describe 'up.follow', ->
 
       it 'emits a preventable up:link:follow event', asyncSpec (next) ->
-        $link = affix('a[href="/destination"][up-target=".response"]')
+        $link = $fixture('a[href="/destination"][up-target=".response"]')
 
         listener = jasmine.createSpy('follow listener').and.callFake (event) ->
           event.preventDefault()
@@ -30,10 +30,10 @@ describe 'up.link', ->
       describeCapability 'canPushState', ->
 
         it 'loads the given link via AJAX and replaces the response in the given target', asyncSpec (next) ->
-          affix('.before').text('old-before')
-          affix('.middle').text('old-middle')
-          affix('.after').text('old-after')
-          $link = affix('a[href="/path"][up-target=".middle"]')
+          $fixture('.before').text('old-before')
+          $fixture('.middle').text('old-middle')
+          $fixture('.after').text('old-after')
+          $link = $fixture('a[href="/path"][up-target=".middle"]')
     
           up.follow($link)
 
@@ -50,7 +50,7 @@ describe 'up.link', ->
             expect($('.after')).toHaveText('old-after')
 
         it 'uses the method from a data-method attribute', asyncSpec (next) ->
-          $link = affix('a[href="/path"][data-method="PUT"]')
+          $link = $fixture('a[href="/path"][data-method="PUT"]')
           up.follow($link)
 
           next =>
@@ -58,7 +58,7 @@ describe 'up.link', ->
             expect(request).toHaveRequestMethod('PUT')
 
         it 'allows to refer to the link itself as "&" in the CSS selector', asyncSpec (next) ->
-          $container = affix('div')
+          $container = $fixture('div')
           $link1 = $('<a id="first" href="/path" up-target="&">first-link</a>').appendTo($container)
           $link2 = $('<a id="second" href="/path" up-target="&">second-link</a>').appendTo($container)
           up.follow($link2)
@@ -88,11 +88,11 @@ describe 'up.link', ->
 #            respondWith(html, title)
 #            promise
 
-          $link1 = affix('a[href="/one"][up-target=".target"]')
-          $link2 = affix('a[href="/two"][up-target=".target"]')
-          $link3 = affix('a[href="/three"][up-target=".target"]')
-          $container = affix('.container')
-          $target = affix('.target').appendTo($container).text('original text')
+          $link1 = $fixture('a[href="/one"][up-target=".target"]')
+          $link2 = $fixture('a[href="/two"][up-target=".target"]')
+          $link3 = $fixture('a[href="/three"][up-target=".target"]')
+          $container = $fixture('.container')
+          $target = $fixture('.target').appendTo($container).text('original text')
 
           up.follow($link1)
 
@@ -169,10 +169,10 @@ describe 'up.link', ->
               </div>
             """
 
-          $link1 = affix('a[href="/one"][up-target=".target"]')
-          $link2 = affix('a[href="/two"][up-target=".target"]')
-          $container = affix('.container')
-          $target = affix('.target').appendTo($container).text('original text')
+          $link1 = $fixture('a[href="/one"][up-target=".target"]')
+          $link2 = $fixture('a[href="/two"][up-target=".target"]')
+          $container = $fixture('.container')
+          $target = $fixture('.target').appendTo($container).text('original text')
 
           up.follow($link1)
 
@@ -236,11 +236,11 @@ describe 'up.link', ->
               </div>
             """
 
-          $link1 = affix('a[href="/one"][up-target=".target"]')
-          $link2 = affix('a[href="/two"][up-target=".target"]')
-          $link2WithHash = affix('a[href="/two#hash"][up-target=".target"]')
-          $container = affix('.container')
-          $target = affix('.target').appendTo($container).text('original text')
+          $link1 = $fixture('a[href="/one"][up-target=".target"]')
+          $link2 = $fixture('a[href="/two"][up-target=".target"]')
+          $link2WithHash = $fixture('a[href="/two#hash"][up-target=".target"]')
+          $container = $fixture('.container')
+          $target = $fixture('.target').appendTo($container).text('original text')
 
           up.follow($link1)
 
@@ -299,7 +299,7 @@ describe 'up.link', ->
 
           it 'does not reveal, but instead restores the scroll positions of all viewports around the target', asyncSpec (next) ->
 
-            $viewport = affix('div[up-viewport] .element').css
+            $viewport = $fixture('div[up-viewport] .element').css
               'height': '100px'
               'width': '100px'
               'overflow-y': 'scroll'
@@ -343,8 +343,8 @@ describe 'up.link', ->
         describe 'revealing', ->
 
           it 'reaveals the target fragment', asyncSpec (next) ->
-            $link = affix('a[href="/action"][up-target=".target"]')
-            $target = affix('.target')
+            $link = $fixture('a[href="/action"][up-target=".target"]')
+            $target = $fixture('.target')
 
             revealStub = up.viewport.knife.mock('reveal')
 
@@ -358,9 +358,9 @@ describe 'up.link', ->
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.target')
 
           it 'reveals the { failTarget } if the server responds with an error', asyncSpec (next) ->
-            $link = affix('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
-            $target = affix('.target')
-            $failTarget = affix('.fail-target')
+            $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+            $target = $fixture('.target')
+            $failTarget = $fixture('.fail-target')
 
             revealStub = up.viewport.knife.mock('reveal')
 
@@ -383,9 +383,9 @@ describe 'up.link', ->
           describe 'with { reveal } option', ->
 
             it 'allows to reveal a different selector', asyncSpec (next) ->
-              $link = affix('a[href="/action"][up-target=".target"]')
-              $target = affix('.target')
-              $other = affix('.other')
+              $link = $fixture('a[href="/action"][up-target=".target"]')
+              $target = $fixture('.target')
+              $other = $fixture('.other')
 
               revealStub = up.viewport.knife.mock('reveal')
 
@@ -406,10 +406,10 @@ describe 'up.link', ->
                 expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
 
             it 'still reveals the { failTarget } for a failed submission', asyncSpec (next) ->
-              $link = affix('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
-              $target = affix('.target')
-              $failTarget = affix('.fail-target')
-              $other = affix('.other')
+              $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+              $target = $fixture('.target')
+              $failTarget = $fixture('.fail-target')
+              $other = $fixture('.other')
 
               revealStub = up.viewport.knife.mock('reveal')
 
@@ -431,11 +431,11 @@ describe 'up.link', ->
           describe 'with { failReveal } option', ->
 
             it 'reveals the given selector when the server responds with an error', asyncSpec (next) ->
-              $link = affix('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
-              $target = affix('.target')
-              $failTarget = affix('.fail-target')
-              $other = affix('.other')
-              $failOther = affix('.fail-other')
+              $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+              $target = $fixture('.target')
+              $failTarget = $fixture('.fail-target')
+              $other = $fixture('.other')
+              $failOther = $fixture('.fail-other')
 
               revealStub = up.viewport.knife.mock('reveal')
 
@@ -468,7 +468,7 @@ describe 'up.link', ->
           it 'follows the link after the user OKs a confirmation dialog', asyncSpec (next) ->
             spyOn(up, 'replace')
             spyOn(window, 'confirm').and.returnValue(true)
-            $link = affix('a[href="/danger"][up-target=".middle"]')
+            $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Do you really want to go there?')
 
             next =>
@@ -478,7 +478,7 @@ describe 'up.link', ->
           it 'does not follow the link if the user cancels the confirmation dialog', asyncSpec (next) ->
             spyOn(up, 'replace')
             spyOn(window, 'confirm').and.returnValue(false)
-            $link = affix('a[href="/danger"][up-target=".middle"]')
+            $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Do you really want to go there?')
 
             next =>
@@ -488,7 +488,7 @@ describe 'up.link', ->
           it 'does not show a confirmation dialog if the option is not a present string', asyncSpec (next) ->
             spyOn(up, 'replace')
             spyOn(window, 'confirm')
-            $link = affix('a[href="/danger"][up-target=".middle"]')
+            $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: '')
 
             next =>
@@ -498,7 +498,7 @@ describe 'up.link', ->
           it 'does not show a confirmation dialog when preloading', asyncSpec (next) ->
             spyOn(up, 'replace')
             spyOn(window, 'confirm')
-            $link = affix('a[href="/danger"][up-target=".middle"]')
+            $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Are you sure?', preload: true)
 
             next =>
@@ -508,7 +508,7 @@ describe 'up.link', ->
       describeFallback 'canPushState', ->
 
         it 'navigates to the given link without JavaScript', asyncSpec (next) ->
-          $link = affix('a[href="/path"]')
+          $link = $fixture('a[href="/path"]')
           spyOn(up.browser, 'navigate')
           up.follow($link)
 
@@ -516,7 +516,7 @@ describe 'up.link', ->
             expect(up.browser.navigate).toHaveBeenCalledWith('/path', jasmine.anything())
 
         it 'uses the method from a data-method attribute', asyncSpec (next) ->
-          $link = affix('a[href="/path"][data-method="PUT"]')
+          $link = $fixture('a[href="/path"][data-method="PUT"]')
           spyOn(up.browser, 'navigate')
           up.follow($link)
 
@@ -532,67 +532,67 @@ describe 'up.link', ->
         event
 
       it "returns true when the given event's target is the given link itself", ->
-        $link = affix('a[href="/foo"]')
+        $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0])
         expect(up.link.shouldProcessEvent(event, $link[0])).toBe(true)
 
       it "returns true when the given event's target is a non-link child of the given link", ->
-        $link = affix('a[href="/foo"]')
+        $link = $fixture('a[href="/foo"]')
         $span = $link.affix('span')
         event = buildEvent($span[0])
         expect(up.link.shouldProcessEvent(event, $link[0])).toBe(true)
 
       it "returns false when the given event's target is a child link of the given link (think [up-expand])", ->
-        $link = affix('div[up-href="/foo"]')
+        $link = $fixture('div[up-href="/foo"]')
         $childLink = $link.affix('a[href="/bar"]')
         event = buildEvent($childLink[0])
         expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it "returns false when the given event's target is a child input of the given link (think [up-expand])", ->
-        $link = affix('div[up-href="/foo"]')
+        $link = $fixture('div[up-href="/foo"]')
         $childInput = $link.affix('input[type="text"]')
         event = buildEvent($childInput[0])
         expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it 'returns false if the right mouse button is used', ->
-        $link = affix('a[href="/foo"]')
+        $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0], button: 2)
         expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it 'returns false if shift is pressed during the click', ->
-        $link = affix('a[href="/foo"]')
+        $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0], shiftKey: 2)
         expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it 'returns false if ctrl is pressed during the click', ->
-        $link = affix('a[href="/foo"]')
+        $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0], ctrlKey: 2)
         expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
       it 'returns false if meta is pressed during the click', ->
-        $link = affix('a[href="/foo"]')
+        $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0], metaKey: 2)
         expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
 
     describe 'up.link.makeFollowable', ->
 
       it "adds [up-follow] to a link that wouldn't otherwise be handled by Unpoly", ->
-        $link = affix('a[href="/path"]').text('label')
+        $link = $fixture('a[href="/path"]').text('label')
         up.link.makeFollowable($link[0])
         expect($link.attr('up-follow')).toEqual('')
 
       it "does not add [up-follow] to a link that is already [up-target]", ->
-        $link = affix('a[href="/path"][up-target=".target"]').text('label')
+        $link = $fixture('a[href="/path"][up-target=".target"]').text('label')
         up.link.makeFollowable($link[0])
         expect($link.attr('up-follow')).toBeMissing()
 
       it "does not add [up-follow] to a link that is already [up-modal]", ->
-        $link = affix('a[href="/path"][up-modal=".target"]').text('label')
+        $link = $fixture('a[href="/path"][up-modal=".target"]').text('label')
         up.link.makeFollowable($link[0])
         expect($link.attr('up-follow')).toBeMissing()
 
       it "does not add [up-follow] to a link that is already [up-popup]", ->
-        $link = affix('a[href="/path"][up-popup=".target"]').text('label')
+        $link = $fixture('a[href="/path"][up-popup=".target"]').text('label')
         up.link.makeFollowable($link[0])
         expect($link.attr('up-follow')).toBeMissing()
 
@@ -603,42 +603,42 @@ describe 'up.link', ->
     describe 'up.link.isFollowable', ->
 
       it 'returns true for an [up-target] link', ->
-        $link = affix('a[href="/foo"][up-target=".target"]')
+        $link = $fixture('a[href="/foo"][up-target=".target"]')
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
       it 'returns true for an [up-follow] link', ->
-        $link = affix('a[href="/foo"][up-follow]')
+        $link = $fixture('a[href="/foo"][up-follow]')
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
       it 'returns true for an [up-modal] link', ->
-        $link = affix('a[href="/foo"][up-modal=".target"]')
+        $link = $fixture('a[href="/foo"][up-modal=".target"]')
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
       it 'returns true for an [up-popup] link', ->
-        $link = affix('a[href="/foo"][up-popup=".target"]')
+        $link = $fixture('a[href="/foo"][up-popup=".target"]')
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
       it 'returns true for an [up-drawer] link', ->
-        $link = affix('a[href="/foo"][up-drawer=".target"]')
+        $link = $fixture('a[href="/foo"][up-drawer=".target"]')
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
       it 'returns true for an [up-target] span with [up-href]', ->
-        $link = affix('span[up-href="/foo"][up-target=".target"]')
+        $link = $fixture('span[up-href="/foo"][up-target=".target"]')
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
       it 'returns false if the given link will be handled by the browser', ->
-        $link = affix('a[href="/foo"]')
+        $link = $fixture('a[href="/foo"]')
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(false)
 
       it 'returns false if the given link will be handled by Rails UJS', ->
-        $link = affix('a[href="/foo"][data-method="put"]')
+        $link = $fixture('a[href="/foo"][data-method="put"]')
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(false)
 
@@ -647,7 +647,7 @@ describe 'up.link', ->
     describe 'a[up-target]', ->
 
       it 'does not follow a form with up-target attribute (bugfix)', asyncSpec (next) ->
-        $form = affix('form[up-target]')
+        $form = $fixture('form[up-target]')
         up.hello($form)
         followSpy = up.link.knife.mock('defaultFollow').and.returnValue(Promise.resolve())
         Trigger.clickSequence($form)
@@ -658,8 +658,8 @@ describe 'up.link', ->
       describeCapability 'canPushState', ->
 
         it 'requests the [href] with AJAX and replaces the [up-target] selector', asyncSpec (next) ->
-          affix('.target')
-          $link = affix('a[href="/path"][up-target=".target"]')
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"]')
           Trigger.clickSequence($link)
 
           next =>
@@ -672,8 +672,8 @@ describe 'up.link', ->
         it 'adds a history entry', asyncSpec (next) ->
           up.history.config.enabled = true
 
-          affix('.target')
-          $link = affix('a[href="/path"][up-target=".target"]')
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"]')
           Trigger.clickSequence($link)
 
           next =>
@@ -686,8 +686,8 @@ describe 'up.link', ->
         it 'respects a X-Up-Location header that the server sends in case of a redirect', asyncSpec (next) ->
           up.history.config.enabled = true
 
-          affix('.target')
-          $link = affix('a[href="/path"][up-target=".target"]')
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"]')
           Trigger.clickSequence($link)
 
           next =>
@@ -705,7 +705,7 @@ describe 'up.link', ->
             up.motion.config.enabled = false
 
           it 'prefers to update a container in the same layer as the clicked link', asyncSpec (next) ->
-            affix('.document').affix('.target').text('old document text')
+            $fixture('.document').affix('.target').text('old document text')
             up.modal.extract('.target', "<div class='target'>old modal text</div>")
 
             next =>
@@ -725,7 +725,7 @@ describe 'up.link', ->
           describe 'with [up-layer] modifier', ->
 
             it 'allows to name a layer for the update', asyncSpec (next) ->
-              affix('.document').affix('.target').text('old document text')
+              $fixture('.document').affix('.target').text('old document text')
               up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
 
               next =>
@@ -743,7 +743,7 @@ describe 'up.link', ->
                 expect($('.up-modal .target')).toHaveText('old modal text')
 
             it 'ignores [up-layer] if the server responds with an error', asyncSpec (next) ->
-              affix('.document').affix('.target').text('old document text')
+              $fixture('.document').affix('.target').text('old document text')
               up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
 
               next =>
@@ -763,7 +763,7 @@ describe 'up.link', ->
                 expect($('.up-modal .target')).toHaveText('new failure text from modal link')
 
             it 'allows to name a layer for a non-200 response using an [up-fail-layer] modifier', asyncSpec (next) ->
-              affix('.document').affix('.target').text('old document text')
+              $fixture('.document').affix('.target').text('old document text')
               up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
 
               next =>
@@ -785,9 +785,9 @@ describe 'up.link', ->
         describe 'with [up-fail-target] modifier', ->
 
           beforeEach ->
-            affix('.success-target').text('old success text')
-            affix('.failure-target').text('old failure text')
-            @$link = affix('a[href="/path"][up-target=".success-target"][up-fail-target=".failure-target"]')
+            $fixture('.success-target').text('old success text')
+            $fixture('.failure-target').text('old failure text')
+            @$link = $fixture('a[href="/path"][up-target=".success-target"][up-fail-target=".failure-target"]')
 
           it 'uses the [up-fail-target] selector for a failed response', asyncSpec (next) ->
             Trigger.clickSequence(@$link)
@@ -817,8 +817,8 @@ describe 'up.link', ->
         describe 'with [up-transition] modifier', ->
 
           it 'morphs between the old and new target element', asyncSpec (next) ->
-            affix('.target.old')
-            $link = affix('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="500"][up-easing="linear"]')
+            $fixture('.target.old')
+            $link = $fixture('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="500"][up-easing="linear"]')
             Trigger.clickSequence($link)
 
             next =>
@@ -839,8 +839,8 @@ describe 'up.link', ->
         describe 'wih a CSS selector in the [up-fallback] attribute', ->
 
           it 'uses the fallback selector if the [up-target] CSS does not exist on the page', asyncSpec (next) ->
-            affix('.fallback').text('old fallback')
-            $link = affix('a[href="/path"][up-target=".target"][up-fallback=".fallback"]')
+            $fixture('.fallback').text('old fallback')
+            $link = $fixture('a[href="/path"][up-target=".target"][up-fallback=".fallback"]')
             Trigger.clickSequence($link)
 
             next =>
@@ -853,9 +853,9 @@ describe 'up.link', ->
               expect('.fallback').toHaveText('new fallback')
 
           it 'ignores the fallback selector if the [up-target] CSS exists on the page', asyncSpec (next) ->
-            affix('.target').text('old target')
-            affix('.fallback').text('old fallback')
-            $link = affix('a[href="/path"][up-target=".target"][up-fallback=".fallback"]')
+            $fixture('.target').text('old target')
+            $fixture('.fallback').text('old fallback')
+            $link = $fixture('a[href="/path"][up-target=".target"][up-fallback=".fallback"]')
             Trigger.clickSequence($link)
 
             next =>
@@ -872,8 +872,8 @@ describe 'up.link', ->
         up.history.config.enabled = true
 
         oldPathname = location.pathname
-        affix('.target')
-        $link = affix('a[href="/path"][up-target=".target"][up-history="false"]')
+        $fixture('.target')
+        $link = $fixture('a[href="/path"][up-target=".target"][up-history="false"]')
         Trigger.clickSequence($link)
 
         next =>
@@ -888,7 +888,7 @@ describe 'up.link', ->
     describe 'a[up-follow]', ->
 
       beforeEach ->
-        @$link = affix('a[href="/follow-path"][up-follow]')
+        @$link = $fixture('a[href="/follow-path"][up-follow]')
         @followSpy = up.link.knife.mock('defaultFollow').and.returnValue(Promise.resolve())
         @defaultSpy = spyOn(up.link, 'allowDefault').and.callFake((event) -> event.preventDefault())
 
@@ -953,78 +953,78 @@ describe 'up.link', ->
     describe '[up-dash]', ->
 
       it "is a shortcut for [up-preload], [up-instant] and [up-target], using [up-dash]'s value as [up-target]", ->
-        $link = affix('a[href="/path"][up-dash=".target"]').text('label')
+        $link = $fixture('a[href="/path"][up-dash=".target"]').text('label')
         up.hello($link)
         expect($link.attr('up-preload')).toEqual('')
         expect($link.attr('up-instant')).toEqual('')
         expect($link.attr('up-target')).toEqual('.target')
 
       it "adds [up-follow] attribute if [up-dash]'s value is 'true'", ->
-        $link = affix('a[href="/path"][up-dash="true"]').text('label')
+        $link = $fixture('a[href="/path"][up-dash="true"]').text('label')
         up.hello($link)
         expect($link.attr('up-follow')).toEqual('')
 
       it "adds [up-follow] attribute if [up-dash] is present, but has no value", ->
-        $link = affix('a[href="/path"][up-dash]').text('label')
+        $link = $fixture('a[href="/path"][up-dash]').text('label')
         up.hello($link)
         expect($link.attr('up-follow')).toEqual('')
 
       it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-target] is present", ->
-        $link = affix('a[href="/path"][up-dash="true"][up-target=".target"]').text('label')
+        $link = $fixture('a[href="/path"][up-dash="true"][up-target=".target"]').text('label')
         up.hello($link)
         expect($link.attr('up-follow')).toBeMissing()
         expect($link.attr('up-target')).toEqual('.target')
 
       it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-modal] is present", ->
-        $link = affix('a[href="/path"][up-dash="true"][up-modal=".target"]').text('label')
+        $link = $fixture('a[href="/path"][up-dash="true"][up-modal=".target"]').text('label')
         up.hello($link)
         expect($link.attr('up-follow')).toBeMissing()
         expect($link.attr('up-modal')).toEqual('.target')
 
       it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-popup] is present", ->
-        $link = affix('a[href="/path"][up-dash="true"][up-popup=".target"]').text('label')
+        $link = $fixture('a[href="/path"][up-dash="true"][up-popup=".target"]').text('label')
         up.hello($link)
         expect($link.attr('up-follow')).toBeMissing()
         expect($link.attr('up-popup')).toEqual('.target')
 
       it "removes the [up-dash] attribute when it's done", ->
-        $link = affix('a[href="/path"]').text('label')
+        $link = $fixture('a[href="/path"]').text('label')
         up.hello($link)
         expect($link.attr('up-dash')).toBeMissing()
 
     describe '[up-expand]', ->
 
       it 'copies up-related attributes of a contained link', ->
-        $area = affix('div[up-expand] a[href="/path"][up-target="selector"][up-instant][up-preload]')
+        $area = $fixture('div[up-expand] a[href="/path"][up-target="selector"][up-instant][up-preload]')
         up.hello($area)
         expect($area.attr('up-target')).toEqual('selector')
         expect($area.attr('up-instant')).toEqual('')
         expect($area.attr('up-preload')).toEqual('')
 
       it "renames a contained link's href attribute to up-href so the container is considered a link", ->
-        $area = affix('div[up-expand] a[up-follow][href="/path"]')
+        $area = $fixture('div[up-expand] a[up-follow][href="/path"]')
         up.hello($area)
         expect($area.attr('up-href')).toEqual('/path')
 
       it 'copies attributes from the first link if there are multiple links', ->
-        $area = affix('div[up-expand]')
+        $area = $fixture('div[up-expand]')
         $link1 = $area.affix('a[href="/path1"]')
         $link2 = $area.affix('a[href="/path2"]')
         up.hello($area)
         expect($area.attr('up-href')).toEqual('/path1')
 
       it "copies an contained non-link element with up-href attribute", ->
-        $area = affix('div[up-expand] span[up-follow][up-href="/path"]')
+        $area = $fixture('div[up-expand] span[up-follow][up-href="/path"]')
         up.hello($area)
         expect($area.attr('up-href')).toEqual('/path')
 
       it 'adds an up-follow attribute if the contained link has neither up-follow nor up-target attributes', ->
-        $area = affix('div[up-expand] a[href="/path"]')
+        $area = $fixture('div[up-expand] a[href="/path"]')
         up.hello($area)
         expect($area.attr('up-follow')).toEqual('')
 
       it 'can be used to enlarge the click area of a link', asyncSpec (next) ->
-        $area = affix('div[up-expand] a[href="/path"]')
+        $area = $fixture('div[up-expand] a[href="/path"]')
         up.hello($area)
         spyOn(up, 'replace')
         Trigger.clickSequence($area)
@@ -1032,7 +1032,7 @@ describe 'up.link', ->
           expect(up.replace).toHaveBeenCalled()
 
       it 'does nothing when the user clicks another link in the expanded area', asyncSpec (next) ->
-        $area = affix('div[up-expand]')
+        $area = $fixture('div[up-expand]')
         $expandedLink = $area.affix('a[href="/expanded-path"][up-follow]')
         $otherLink = $area.affix('a[href="/other-path"][up-follow]')
         up.hello($area)
@@ -1043,7 +1043,7 @@ describe 'up.link', ->
           expect(followSpy.calls.mostRecent().args[0]).toEqual($otherLink[0])
 
       it 'does nothing when the user clicks on an input in the expanded area', asyncSpec (next) ->
-        $area = affix('div[up-expand]')
+        $area = $fixture('div[up-expand]')
         $expandedLink = $area.affix('a[href="/expanded-path"][up-follow]')
         $input = $area.affix('input[type=text]')
         up.hello($area)
@@ -1053,7 +1053,7 @@ describe 'up.link', ->
           expect(followSpy).not.toHaveBeenCalled()
 
       it 'does not trigger multiple replaces when the user clicks on the expanded area of an [up-instant] link (bugfix)', asyncSpec (next) ->
-        $area = affix('div[up-expand] a[href="/path"][up-follow][up-instant]')
+        $area = $fixture('div[up-expand] a[href="/path"][up-follow][up-instant]')
         up.hello($area)
         spyOn(up, 'replace')
         Trigger.clickSequence($area)
@@ -1061,33 +1061,33 @@ describe 'up.link', ->
           expect(up.replace.calls.count()).toEqual(1)
 
       it 'does not add an up-follow attribute if the expanded link is [up-dash] with a selector (bugfix)', ->
-        $area = affix('div[up-expand] a[href="/path"][up-dash=".element"]')
+        $area = $fixture('div[up-expand] a[href="/path"][up-dash=".element"]')
         up.hello($area)
         expect($area.attr('up-follow')).toBeMissing()
 
       it 'does not an up-follow attribute if the expanded link is [up-dash] without a selector (bugfix)', ->
-        $area = affix('div[up-expand] a[href="/path"][up-dash]')
+        $area = $fixture('div[up-expand] a[href="/path"][up-dash]')
         up.hello($area)
         expect($area.attr('up-follow')).toEqual('')
 
       describe 'with a CSS selector in the property value', ->
 
         it "expands the contained link that matches the selector", ->
-          $area = affix('div[up-expand=".second"]')
+          $area = $fixture('div[up-expand=".second"]')
           $link1 = $area.affix('a.first[href="/path1"]')
           $link2 = $area.affix('a.second[href="/path2"]')
           up.hello($area)
           expect($area.attr('up-href')).toEqual('/path2')
 
         it 'does nothing if no contained link matches the selector', ->
-          $area = affix('div[up-expand=".foo"]')
+          $area = $fixture('div[up-expand=".foo"]')
           $link = $area.affix('a[href="/path1"]')
           up.hello($area)
           expect($area.attr('up-href')).toBeUndefined()
 
         it 'does not match an element that is not a descendant', ->
-          $area = affix('div[up-expand=".second"]')
+          $area = $fixture('div[up-expand=".second"]')
           $link1 = $area.affix('a.first[href="/path1"]')
-          $link2 = affix('a.second[href="/path2"]') # not a child of $area
+          $link2 = $fixture('a.second[href="/path2"]') # not a child of $area
           up.hello($area)
           expect($area.attr('up-href')).toBeUndefined()

@@ -4,7 +4,7 @@ $ = jQuery
 describe 'up.ScrollMotion', ->
 
   beforeEach ->
-    @$viewport = affix('.viewport').css
+    @$viewport = $fixture('.viewport').css
       height: '100px'
       overflowY: 'scroll'
 

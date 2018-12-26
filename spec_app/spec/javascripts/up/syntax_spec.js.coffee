@@ -11,7 +11,7 @@ describe 'up.syntax', ->
         observeElement = jasmine.createSpy()
         up.compiler '.child', (element) -> observeElement(element)
 
-        $container = affix('.container')
+        $container = $fixture('.container')
         $child = $container.affix('.child')
         $otherChild = $container.affix('.other-child')
 
@@ -28,7 +28,7 @@ describe 'up.syntax', ->
           up.compiler '.child', (element) ->
             destructor
 
-          up.hello(affix('.container .child')[0])
+          up.hello(fixture('.container .child'))
 
           next =>
             expect(destructor).not.toHaveBeenCalled()
@@ -43,7 +43,7 @@ describe 'up.syntax', ->
           up.compiler '.child', (element) ->
             [ destructor1, destructor2 ]
 
-          up.hello(affix('.container .child')[0])
+          up.hello(fixture('.container .child'))
 
           next =>
             expect(destructor1).not.toHaveBeenCalled()
@@ -61,7 +61,7 @@ describe 'up.syntax', ->
           up.compiler '.child', (element) ->
             [ value1, value2 ]
 
-          up.hello(affix('.container .child'))
+          up.hello(fixture('.container .child'))
 
           next =>
             expect(value1).not.toHaveBeenCalled()
@@ -77,7 +77,7 @@ describe 'up.syntax', ->
           destructor2 = jasmine.createSpy('destructor2')
           up.compiler '.two', (element) -> destructor2
 
-          $element = affix('.one.two')
+          $element = $fixture('.one.two')
           up.hello($element)
 
           next =>
@@ -111,7 +111,7 @@ describe 'up.syntax', ->
 
           data = { key1: 'value1', key2: 'value2' }
 
-          $tag = affix(".child").attr('up-data', JSON.stringify(data))
+          $tag = $fixture(".child").attr('up-data', JSON.stringify(data))
           up.hello($tag[0])
 
           expect(observeArgs).toHaveBeenCalledWith('child', data)
@@ -121,14 +121,14 @@ describe 'up.syntax', ->
           up.compiler '.child', (element, data) ->
             observeArgs(element.className, data)
 
-          up.hello(affix(".child"))
+          up.hello(fixture(".child"))
 
           expect(observeArgs).toHaveBeenCalledWith('child', {})
 
         it 'does not parse an [up-data] attribute if the compiler function only takes a single argument', ->
           parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
 
-          $child = affix(".child")
+          $child = $fixture(".child")
 
           up.compiler '.child', (element) -> # no-op
           up.hello($child)
@@ -138,7 +138,7 @@ describe 'up.syntax', ->
       it 'compiles multiple matching elements one-by-one', ->
         compiler = jasmine.createSpy('compiler')
         up.compiler '.foo', (element) -> compiler(element)
-        $container = affix('.container')
+        $container = $fixture('.container')
         $first = $container.affix('.foo.first')
         $second = $container.affix('.foo.second')
         up.hello($container[0])
@@ -151,7 +151,7 @@ describe 'up.syntax', ->
         it 'compiles all matching elements at once', ->
           compiler = jasmine.createSpy('compiler')
           up.compiler '.foo', { batch: true }, (elements) -> compiler(elements)
-          $container = affix('.container')
+          $container = $fixture('.container')
           first = $container.affix('.foo.first')[0]
           second = $container.affix('.foo.second')[0]
           up.hello($container)
@@ -161,7 +161,7 @@ describe 'up.syntax', ->
         it 'throws an error if the batch compiler returns a destructor', ->
           destructor = ->
           up.compiler '.element', { batch: true }, (element) -> destructor
-          $container = affix('.element')
+          $container = $fixture('.element')
           compile = -> up.hello($container)
           expect(compile).toThrowError(/cannot return destructor/i)
 
@@ -174,10 +174,10 @@ describe 'up.syntax', ->
           up.compiler '.bar', { keep: false }, ->
           up.compiler '.bam', { keep: '.partner' }, ->
 
-          $foo = $ up.hello(affix('.foo'))
-          $bar = $ up.hello(affix('.bar'))
-          $baz = $ up.hello(affix('.baz'))
-          $bam = $ up.hello(affix('.bam'))
+          $foo = $ up.hello(fixture('.foo'))
+          $bar = $ up.hello(fixture('.bar'))
+          $baz = $ up.hello(fixture('.baz'))
+          $bam = $ up.hello(fixture('.bam'))
 
           expect($foo.attr('up-keep')).toEqual('')
           expect($bar.attr('up-keep')).toBeMissing()
@@ -193,7 +193,7 @@ describe 'up.syntax', ->
           up.compiler '.element', { priority: 0 }, -> traces.push('baz')
           up.compiler '.element', { priority: 3 }, -> traces.push('bam')
           up.compiler '.element', { priority: -1 }, -> traces.push('qux')
-          up.hello(affix('.element'))
+          up.hello(fixture('.element'))
           expect(traces).toEqual ['bam', 'bar', 'foo', 'baz', 'qux']
 
         it 'considers priority-less compilers to be priority zero', ->
@@ -201,14 +201,14 @@ describe 'up.syntax', ->
           up.compiler '.element', { priority: 1 }, -> traces.push('foo')
           up.compiler '.element', -> traces.push('bar')
           up.compiler '.element', { priority: -1 }, -> traces.push('baz')
-          up.hello(affix('.element'))
+          up.hello(fixture('.element'))
           expect(traces).toEqual ['foo', 'bar', 'baz']
 
         it 'runs two compilers with the same priority in the order in which they were registered', ->
           traces = []
           up.compiler '.element', { priority: 1 }, -> traces.push('foo')
           up.compiler '.element', { priority: 1 }, -> traces.push('bar')
-          up.hello(affix('.element'))
+          up.hello(fixture('.element'))
           expect(traces).toEqual ['foo', 'bar']
 
     describe 'up.macro', ->
@@ -218,7 +218,7 @@ describe 'up.syntax', ->
         up.compiler '.element', { priority: 10 }, -> traces.push('foo')
         up.compiler '.element', { priority: -1000 }, -> traces.push('bar')
         up.macro '.element', -> traces.push('baz')
-        up.hello(affix('.element'))
+        up.hello(fixture('.element'))
         expect(traces).toEqual ['baz', 'foo' , 'bar']
 
       it 'allows to macros to have priorities of their own', ->
@@ -229,20 +229,20 @@ describe 'up.syntax', ->
         up.macro '.element', { priority: 3 }, -> traces.push('bam')
         up.macro '.element', { priority: -1 }, -> traces.push('qux')
         up.compiler '.element', { priority: 999 }, -> traces.push('ccc')
-        up.hello(affix('.element'))
+        up.hello(fixture('.element'))
         expect(traces).toEqual ['bam', 'bar', 'foo', 'baz', 'qux', 'ccc']
 
       it 'runs two macros with the same priority in the order in which they were registered', ->
         traces = []
         up.macro '.element', { priority: 1 }, -> traces.push('foo')
         up.macro '.element', { priority: 1 }, -> traces.push('bar')
-        up.hello(affix('.element'))
+        up.hello(fixture('.element'))
         expect(traces).toEqual ['foo', 'bar']
 
       it 'allows users to use the built-in [up-expand] from their own macros', ->
         up.macro '.element', (element) ->
           element.setAttribute('up-expand', '')
-        $element = affix('.element a[href="/foo"][up-target=".target"]')
+        $element = $fixture('.element a[href="/foo"][up-target=".target"]')
         up.hello($element)
         expect($element.attr('up-target')).toEqual('.target')
         expect($element.attr('up-href')).toEqual('/foo')
@@ -250,7 +250,7 @@ describe 'up.syntax', ->
       it 'allows users to use the built-in [up-dash] from their own macros', ->
         up.macro '.element', (element) ->
           element.setAttribute('up-dash', '.target')
-        $element = affix('a.element[href="/foo"]')
+        $element = $fixture('a.element[href="/foo"]')
         up.hello($element)
         expect($element.attr('up-target')).toEqual('.target')
         expect($element.attr('up-preload')).toEqual('')
@@ -263,12 +263,12 @@ describe 'up.syntax', ->
     describe 'up.syntax.data', ->
 
       it 'returns the [up-data] attribute of the given element, parsed as JSON', ->
-        $element = affix('.element').attr('up-data', '{ "foo": 1, "bar": 2 }')
+        $element = $fixture('.element').attr('up-data', '{ "foo": 1, "bar": 2 }')
         data = up.syntax.data($element)
         expect(data).toEqual(foo: 1, bar: 2)
 
       it 'returns en empty object if the given element has no [up-data] attribute', ->
-        $element = affix('.element')
+        $element = $fixture('.element')
         data = up.syntax.data($element)
         expect(data).toEqual({})
 
