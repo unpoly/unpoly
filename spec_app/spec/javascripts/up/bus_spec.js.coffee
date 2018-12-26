@@ -174,9 +174,8 @@ describe 'up.bus', ->
         expect(offing).toThrowError(/(not|never) registered/i)
 
       it 'reduces the internally tracked list of event listeners (bugfix for memory leak)', ->
-        getCount = -> up.bus.knife.get('Object.keys(liveUpDescriptions).length')
+        getCount = -> up.bus.knife.get('Object.keys(appListeners).length')
         oldCount = getCount()
-        expect(oldCount).toBeGreaterThan(0)
         clickSpy = jasmine.createSpy()
         up.on 'click', '.child', clickSpy
         expect(getCount()).toBe(oldCount + 1)

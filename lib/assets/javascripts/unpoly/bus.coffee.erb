@@ -51,61 +51,8 @@ up.bus = do ->
   u = up.util
   e = up.element
 
-  # We remember which argument lists have been passed to `up.on()`
-  # so we can clean out the listener registry between tests.
-  liveUpDescriptions = {}
-  nextUpDescriptionNumber = 0
-
-  upListenerToNativeListener = (upListener, selector) ->
-    (event) ->
-      # 1. Since we're listing on `document`, event.currentTarget is now `document`.
-      # 2. event.target is the element that received an event, which might be a
-      #    child of `selector`.
-      # 3. There is only a single event bubbling up the DOM, so we are only called once.
-
-      element = event.target
-      element = e.closest(element, selector) if selector
-
-      if element
-        args = [event, element]
-        # Do not retrieve and parse [up-data] unless the listener function
-        # expects a third argument. Note that we must pass data for an argument
-        # count of 0, since then the function might take varargs.
-        expectedArgCount = upListener.length
-
-        unless expectedArgCount == 1 || expectedArgCount == 2
-          data = up.syntax.data(element)
-          args.push(data)
-
-        upListener.apply(element, args)
-
-  ###**
-  Converts an argument list for `up.on()` to an argument list for `Element#addEventListener`.
-  This involves rewriting the listener signature in the last argument slot.
-
-  @function upDescriptionTonNativeDescription
-  @internal
-  ###
-  upDescriptionToNativeDescription = (upDescription, isNew) ->
-    upDescription = u.copy(upDescription)
-
-    eventNames = u.splitValues(upDescription.shift())
-    eventNames = u.map(eventNames, up.legacy.fixEventName)
-
-    upListener = upDescription.pop()
-    selector = upDescription.shift() # might be undefined
-
-    if isNew
-      nativeListener = upListenerToNativeListener(upListener, selector)
-      upListener._asNativeListener = nativeListener
-      if upListener._descriptionNumber
-        up.fail('up.on(): The callback %o cannot be registered more than once')
-      upListener._descriptionNumber = ++nextUpDescriptionNumber
-    else
-      nativeListener = upListener._asNativeListener
-      nativeListener or up.fail('up.off(): The callback %o was never registered through up.on()', upListener)
-
-    [eventNames, nativeListener]
+  isBooting = true
+  appListeners = {}
 
   ###**
   Listens to an event on `document`.
@@ -198,23 +145,19 @@ up.bus = do ->
     A function that unbinds the event listeners when called.
   @stable
   ###
-  live = (upDescription...) ->
+  bind = (args...) ->
     # Silently discard any event handlers that are registered on unsupported
     # browsers and return a no-op destructor
     return (->) unless up.browser.isSupported()
 
-    # Convert the args for up.on to an argument list as expected by #addEventListener
-    [eventNames, nativeListener] = upDescriptionToNativeDescription(upDescription, true)
+    listener = up.EventListener.fromBindArgs(args)
 
-    # Remember the descriptions we registered, so we can
-    # clean up after ourselves during a `reset`
-    rememberUpDescription(upDescription)
+    # Remember the user-provided listeners so we can clean up during a `reset`
+    appListeners[listener.id] = listener unless isBooting
 
-    for eventName in eventNames
-      document.addEventListener(eventName, nativeListener)
+    listener.bind()
 
-    # Return destructor
-    -> unbind(upDescription...)
+    return listener.unbind
 
   ###**
   Unbinds an event listener previously bound with [`up.on()`](/up.on).
@@ -236,26 +179,10 @@ up.bus = do ->
   @function up.off
   @stable
   ###
-  unbind = (upDescription...) ->
-    [eventNames, nativeListener] = upDescriptionToNativeDescription(upDescription, false)
-    forgetUpDescription(upDescription)
-
-    for eventName in eventNames
-      document.removeEventListener(eventName, nativeListener)
-
-  rememberUpDescription = (upDescription) ->
-    number = upDescriptionNumber(upDescription)
-    liveUpDescriptions[number] = upDescription
-
-  forgetUpDescription = (upDescription) ->
-    number = upDescriptionNumber(upDescription)
-    upListener = u.last(upDescription)
-    delete upListener._descriptionNumber
-    delete upListener._asJqueryListener
-    delete liveUpDescriptions[number]
-
-  upDescriptionNumber = (upDescription) ->
-    u.last(upDescription)._descriptionNumber
+  unbind = (args...) ->
+    listener = up.EventListener.fromUnbindArgs(args)
+    delete appListeners[listener.id] unless isBooting
+    listener.unbind()
 
   ###**
   Emits a event with the given name and properties.
@@ -368,7 +295,7 @@ up.bus = do ->
   @experimental
   ###
   onEscape = (listener) ->
-    live('keydown', 'body', (event) ->
+    bind('keydown', 'body', (event) ->
       if u.escapePressed(event)
         listener(event)
     )
@@ -397,29 +324,13 @@ up.bus = do ->
       # an outside link consumes the user click. So we emit another event for that.
       emit('up:action:consumed', target: event.target, message: false)
 
-  ###**
-  Makes a snapshot of the currently registered event listeners,
-  to later be restored through [`up.bus.reset()`](/up.bus.reset).
-
-  @internal
-  ###
-  snapshot = ->
-    for number, description of liveUpDescriptions
-      description.isDefault = true
-
   resetBus = ->
     # Resets the list of registered event listeners to the
     # moment when the framework was booted.
+    for number, listener of appListeners
+      listener.unbind()
 
-    # Copy a list of the descriptions we're going to unbind and iterate over
-    # them a second time below. This way we avoid manipulate the object we're
-    # iterating over.
-    doomedDescriptions = []
-    for number, description of liveUpDescriptions
-      doomedDescriptions.push(description) unless description.isDefault
-
-    for description in doomedDescriptions
-      unbind(description...)
+    appListeners = {}
 
   ###**
   Resets Unpoly to the state when it was booted.
@@ -461,8 +372,9 @@ up.bus = do ->
   boot = ->
     if up.browser.isSupported()
       emit('up:framework:boot', message: 'Booting framework')
-      # Unpoly modules now snapshot themselves to support reset()
       emit('up:framework:booted', message: 'Framework booted')
+      isBooting = false
+
       u.nextFrame ->
         # At this point all user-provided compilers have been registered.
         u.whenReady().then ->
@@ -479,11 +391,10 @@ up.bus = do ->
   @internal
   ###
 
-  live 'up:framework:booted', snapshot
-  live 'up:framework:reset', resetBus
+  bind 'up:framework:reset', resetBus
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  on: live # can't name symbols `on` in Coffeescript
+  on: bind # can't name symbols `on` in Coffeescript
   off: unbind # can't name symbols `off` in Coffeescript
   emit: emit
   nobodyPrevents: nobodyPrevents
@@ -493,6 +404,7 @@ up.bus = do ->
   haltEvent: haltEvent
   consumeAction: consumeAction
   boot: boot
+  isBooting: -> isBooting
 
 up.on = up.bus.on
 up.off = up.bus.off

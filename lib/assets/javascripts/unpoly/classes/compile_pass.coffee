@@ -23,7 +23,7 @@ class up.CompilePass
     matches = @select(compiler.selector)
     return unless matches.length
 
-    up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isSystem), compiler.selector, matches.length, =>
+    up.log.group ("Compiling '%s' on %d element(s)" unless compiler.isDefault), compiler.selector, matches.length, =>
       if compiler.batch
         @compileBatch(compiler, matches)
       else

@@ -3,9 +3,6 @@
   - after all of that: check if we can just not call resolveSelector from code before up.replace
 
 - compatibility layer
-  - think whether we want to keep $macro and $compiler
-    - yes
-    - make sure there are tests
   - build and test up.$on()
   - upgrade makandracards.com with the jquery compatibility layer to see if it's convenient enough
 
@@ -23,10 +20,6 @@
     - up-target should support [up-reveal-padding], { revealPadding }
 
 - grep for TODO comments
-
-- Refactor up.fragment wording
-  - keepPlans should have properties { oldFragment } and { newFragment } instead of { element } and { newElement }
-  - extractPlans should have properties { oldFragment } and { newFragment } instead of { oldElement } and { newElement }
 
 - Update docs
   - Write CHANGELOG from diff

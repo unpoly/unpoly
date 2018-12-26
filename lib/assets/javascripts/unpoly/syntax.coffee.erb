@@ -33,7 +33,6 @@ up.syntax = do ->
     '[data-confirm]': -400,  # converts [data-conform] to [up-confirm] only if link has followable [up-*] attributes
   }
 
-  isBooting = true
   compilers = []
   macros = []
 
@@ -217,6 +216,12 @@ up.syntax = do ->
     compiler = buildCompiler(args)
     return insertCompiler(compilers, compiler)
 
+  ###**
+  TODO: Document me
+
+  @function up.$compiler
+  @stable
+  ###
   registerJQueryCompiler = (args...) ->
     compiler = registerCompiler(args...)
     compiler.jQuery = true
@@ -265,11 +270,17 @@ up.syntax = do ->
   ###
   registerMacro = (args...) ->
     macro = buildCompiler(args)
-    if isBooting
+    if up.bus.isBooting()
       macro.priority = detectSystemMacroPriority(macro.selector) ||
         up.fail('Unregistered priority for system macro %o', macro.selector)
     return insertCompiler(macros, macro)
 
+  ###**
+  TODO: Document me
+
+  @function up.$macro
+  @stable
+  ###
   registerJQueryMacro = (args...) ->
     macro = registerMacro(args...)
     macro.jQuery = true
@@ -290,7 +301,7 @@ up.syntax = do ->
     [selector, options, callback] = parseCompilerArgs(args)
     options = u.options(options,
       selector: selector,
-      isSystem: isBooting,
+      isDefault: up.bus.isBooting(),
       priority: 0,
       batch: false
       keep: false,
@@ -426,10 +437,9 @@ up.syntax = do ->
   @internal
   ###
   reset = ->
-    compilers = u.select(compilers, 'isSystem')
-    macros = u.select(macros, 'isSystem')
+    compilers = u.select(compilers, 'isDefault')
+    macros = u.select(macros, 'isDefault')
 
-  up.on 'up:framework:booted', -> isBooting = false
   up.on 'up:framework:reset', reset
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
