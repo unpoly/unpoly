@@ -7,7 +7,7 @@ describe 'up.bus', ->
 
     describe 'up.on', ->
 
-      it 'registers a delagating event listener to the document body, which passes the $element as a second argument to the listener', asyncSpec (next) ->
+      it 'registers a delagating event listener to the document body, which passes the element as a second argument to the listener', asyncSpec (next) ->
         fixture('.container .child')
         observeClass = jasmine.createSpy()
         up.on 'click', '.child', (event, element) ->
@@ -155,6 +155,22 @@ describe 'up.bus', ->
         expect(listener.calls.count()).toBe(1)
 
 
+    describe 'up.$on', ->
+
+      it 'registers a delagating event listener to the document body, which passes a jQuery-wrapped element as a second argument to the listener', asyncSpec (next) ->
+        fixture('.container[data-mark=container] .child[data-mark=child]')
+        observeClass = jasmine.createSpy()
+        up.$on 'click', '.child', (event, $element) ->
+          observeClass($element.attr('data-mark'))
+
+        Trigger.click($('.container'))
+        Trigger.click($('.child'))
+
+        next =>
+          expect(observeClass).not.toHaveBeenCalledWith('container')
+          expect(observeClass).toHaveBeenCalledWith('child')
+
+
     describe 'up.off', ->
 
       it 'unregisters an event listener previously registered through up.on', asyncSpec (next) ->
@@ -181,6 +197,21 @@ describe 'up.bus', ->
         expect(getCount()).toBe(oldCount + 1)
         up.off 'click', '.child', clickSpy
         expect(getCount()).toBe(oldCount)
+
+
+    describe 'up.$off', ->
+
+      it 'unregisters an event listener previously registered through up.$on', asyncSpec (next) ->
+        $child = $fixture('.child')
+        clickSpy = jasmine.createSpy()
+        up.$on 'click', '.child', clickSpy
+        Trigger.click($('.child'))
+        up.$off 'click', '.child', clickSpy
+        Trigger.click($('.child'))
+
+        next =>
+          expect(clickSpy.calls.count()).toEqual(1)
+
 
     describe 'up.emit', ->
 

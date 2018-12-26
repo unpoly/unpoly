@@ -146,11 +146,23 @@ up.bus = do ->
   @stable
   ###
   bind = (args...) ->
+    bindNow(args)
+
+  ###**
+  TODO: Document me
+
+  @function up.$on
+  @stable
+  ###
+  $bind = (args...) ->
+    bindNow(args, jQuery: true)
+
+  bindNow = (args, options) ->
     # Silently discard any event handlers that are registered on unsupported
     # browsers and return a no-op destructor
     return (->) unless up.browser.isSupported()
 
-    listener = up.EventListener.fromBindArgs(args)
+    listener = up.EventListener.fromBindArgs(args, options)
 
     # Remember the user-provided listeners so we can clean up during a `reset`
     appListeners[listener.id] = listener unless isBooting
@@ -158,6 +170,7 @@ up.bus = do ->
     listener.bind()
 
     return listener.unbind
+
 
   ###**
   Unbinds an event listener previously bound with [`up.on()`](/up.on).
@@ -395,7 +408,9 @@ up.bus = do ->
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   on: bind # can't name symbols `on` in Coffeescript
+  $on: $bind
   off: unbind # can't name symbols `off` in Coffeescript
+  $off: unbind # it's the same as `off`
   emit: emit
   nobodyPrevents: nobodyPrevents
   whenEmitted: whenEmitted
@@ -407,7 +422,9 @@ up.bus = do ->
   isBooting: -> isBooting
 
 up.on = up.bus.on
+up.$on = up.bus.$on
 up.off = up.bus.off
+up.$off = up.bus.$off
 up.emit = up.bus.emit
 up.reset = up.bus.emitReset
 up.boot = up.bus.boot

@@ -3,7 +3,6 @@
   - after all of that: check if we can just not call resolveSelector from code before up.replace
 
 - compatibility layer
-  - build and test up.$on()
   - upgrade makandracards.com with the jquery compatibility layer to see if it's convenient enough
 
 - Check if we really need to do e.get(...) in every single function that works with elements
