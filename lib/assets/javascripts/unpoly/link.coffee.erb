@@ -256,8 +256,9 @@ up.link = do ->
     The link to check.
   @experimental
   ###
-  isFollowable = (link) ->
-    !!followVariantForLink(link, default: false)
+  isFollowable = (linkOrSelector) ->
+    linkOrSelector = e.get(linkOrSelector)
+    !!followVariantForLink(linkOrSelector, default: false)
 
   ###**
   Returns the handler function that can be used to follow the given link.
@@ -268,9 +269,7 @@ up.link = do ->
   @return {Function(jQuery)}
   @internal
   ###
-  followVariantForLink = (linkOrSelector, options) ->
-    options = u.options(options)
-    link = e.get(linkOrSelector) # TODO: Can we remove this?
+  followVariantForLink = (link, options = {}) ->
     variant = u.detect followVariants, (variant) -> variant.matchesLink(link)
     variant ||= DEFAULT_FOLLOW_VARIANT unless options.default is false
     variant
@@ -291,7 +290,6 @@ up.link = do ->
       link.setAttribute('up-follow', '')
 
   shouldProcessEvent = (event, link) ->
-    link = e.get(link) # TODO: Remove e.get(), just use link
     target = event.target
     # We never handle events for the right mouse button, or when Shift/CTRL/Meta is pressed
     return false unless u.isUnmodifiedMouseEvent(event)

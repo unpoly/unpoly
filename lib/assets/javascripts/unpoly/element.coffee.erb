@@ -224,7 +224,8 @@ up.element = do ->
   toSelector = (element) ->
     return element if u.isString(element)
 
-    element = getOne(element) # TODO: Remove e.get()
+    # resolveSelector() might be called with jQuery collections
+    element = getOne(element)
 
     selector = undefined
 
@@ -375,7 +376,7 @@ up.element = do ->
   @internal
   ###
   castedAttr = (element, attribute) ->
-    if element = getOne(element) # up.modal.openNow() will sometimes call this with an undefined link. TODO: Can we fix this and get rid of e.get?
+    if element = getOne(element) # TODO: up.modal.openNow() will sometimes call this with an undefined link. Can we fix this and get rid of e.get?
       value = element.getAttribute(attribute)
       switch value
         when 'false' then false

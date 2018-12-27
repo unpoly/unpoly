@@ -366,7 +366,7 @@ up.motion = do ->
       viewport = up.viewport.closest(oldElement)
       scrollTopBeforeReveal = viewport.scrollTop
 
-      oldRemote = up.viewport.absolutize oldElement, # TODO: migrate up.viewport.absolutize, which has a { $bounds } prop
+      oldRemote = up.viewport.absolutize oldElement,
         # Because the insertion will shift elements visually, we must delay insertion
         # until absolutize() has measured the bounding box of the old element.
         afterMeasure: ->

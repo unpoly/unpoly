@@ -247,7 +247,7 @@ up.viewport = do ->
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
         selector = e.resolveSelector(revealOpt, options.origin)
-        element = e.get up.first(selector) # TODO: Remove e.get
+        element = up.first(selector)
 
       else
         # We reveal the given element

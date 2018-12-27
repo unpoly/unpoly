@@ -1,6 +1,4 @@
-- merge resolveSelector / toSelector
-  - we just want toSelector
-  - after all of that: check if we can just not call resolveSelector from code before up.replace
+- test on all browsers
 
 - compatibility layer
   - upgrade makandracards.com with the jquery compatibility layer to see if it's convenient enough

@@ -43,7 +43,6 @@ up.fragment = do ->
     config.reset()
 
   setSource = (element, sourceUrl) ->
-    element = e.get(element) # TODO: Remove e.get()
     unless sourceUrl is false
       sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
       element.setAttribute("up-source", sourceUrl)
@@ -674,9 +673,7 @@ up.fragment = do ->
       message: message
 
   isRealElement = (element) ->
-    element = e.get(element) # TODO: remove e.get()
-    unreal = '.up-destroying'
-    !e.closest(element, unreal)
+    !e.closest(element, '.up-destroying')
 
   ###**
   Returns the first element matching the given selector, but
@@ -820,7 +817,7 @@ up.fragment = do ->
     wipe = ->
       parent = element.parentNode
       up.syntax.clean(element)
-      element.remove()
+      e.remove(element)
       emitFragmentDestroyed(element, { parent: parent, log: options.log })
 
     animate().then(wipe)

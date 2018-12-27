@@ -117,6 +117,58 @@ describe 'up.util', ->
 #        path = up.util.parsePath('foo.bar[baz]["bam"][\'qux\']')
 #        expect(path).toEqual ['foo', 'bar', 'baz', 'bam', 'qux']
 
+    describe 'up.util.parseUrl', ->
+
+      it 'parses a full URL', ->
+        url = up.util.parseUrl('https://subdomain.domain.tld:123/path?search#hash')
+        expect(url.protocol).toEqual('https:')
+        expect(url.hostname).toEqual('subdomain.domain.tld')
+        expect(url.port).toEqual('123')
+        expect(url.pathname).toEqual('/path')
+        expect(url.search).toEqual('?search')
+        expect(url.hash).toEqual('#hash')
+
+      it 'parses an absolute path', ->
+        url = up.util.parseUrl('/qux/foo?search#bar')
+        expect(url.protocol).toEqual(location.protocol)
+        expect(url.hostname).toEqual(location.hostname)
+        expect(url.port).toEqual(location.port)
+        expect(url.pathname).toEqual('/qux/foo')
+        expect(url.search).toEqual('?search')
+        expect(url.hash).toEqual('#bar')
+
+      it 'parses a relative path', ->
+        up.history.config.enabled = true
+        up.history.replace('/qux/')
+        url = up.util.parseUrl('foo?search#bar')
+        expect(url.protocol).toEqual(location.protocol)
+        expect(url.hostname).toEqual(location.hostname)
+        expect(url.port).toEqual(location.port)
+        expect(url.pathname).toEqual('/qux/foo')
+        expect(url.search).toEqual('?search')
+        expect(url.hash).toEqual('#bar')
+
+      it 'allows to pass a link element', ->
+        link = document.createElement('a')
+        link.href = '/qux/foo?search#bar'
+        url = up.util.parseUrl(link)
+        expect(url.protocol).toEqual(location.protocol)
+        expect(url.hostname).toEqual(location.hostname)
+        expect(url.port).toEqual(location.port)
+        expect(url.pathname).toEqual('/qux/foo')
+        expect(url.search).toEqual('?search')
+        expect(url.hash).toEqual('#bar')
+
+      it 'allows to pass a link element as a jQuery collection', ->
+        $link = $('<a></a>').attr(href: '/qux/foo?search#bar')
+        url = up.util.parseUrl($link)
+        expect(url.protocol).toEqual(location.protocol)
+        expect(url.hostname).toEqual(location.hostname)
+        expect(url.port).toEqual(location.port)
+        expect(url.pathname).toEqual('/qux/foo')
+        expect(url.search).toEqual('?search')
+        expect(url.hash).toEqual('#bar')
+
     describe 'up.util.map', ->
 
       it 'creates a new array of values by calling the given function on each item of the given array', ->

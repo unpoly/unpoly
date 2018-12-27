@@ -75,10 +75,6 @@ up.util = do ->
     normalized = parts.protocol + "//" + parts.hostname
     normalized += ":#{parts.port}" unless isStandardPort(parts.protocol, parts.port)
     pathname = parts.pathname
-    # Some IEs don't include a leading slash in the #pathname property.
-    # We have seen this in IE11 and W3Schools claims it happens in IE9 or earlier
-    # http://www.w3schools.com/jsref/prop_anchor_pathname.asp
-    pathname = "/#{pathname}" unless pathname[0] == '/'
     pathname = pathname.replace(/\/$/, '') if options?.stripTrailingSlash == true
     normalized += pathname
     normalized += parts.search unless options?.search == false
@@ -103,24 +99,31 @@ up.util = do ->
     properties.
   @experimental
   ###
-  parseUrl = (urlOrAnchor) ->
-    # In case someone passed us a $link, unwrap it
-    if isJQuery(urlOrAnchor)
-      urlOrAnchor = up.element.get(urlOrAnchor)
+  parseUrl = (urlOrLink) ->
+    if isJQuery(urlOrLink)
+      # In case someone passed us a $link, unwrap it
+      link = up.element.get(urlOrLink)
+    else if urlOrLink.pathname
+      # If we are handed a parsed URL, just return it
+      link = urlOrLink
+    else
+      link = document.createElement('a')
+      link.href = urlOrLink
 
-    # If we are handed a parsed URL, just return it
-    if urlOrAnchor.pathname
-      return urlOrAnchor
+    # In IE11 the #hostname and #port properties of unqualified URLs are empty strings.
+    # We can fix this by setting the link's { href } on the link itself.
+    unless link.hostname
+      link.href = link.href
 
-    anchor = document.createElement('a')
-    anchor.href = urlOrAnchor
-    # In IE11 the #hostname and #port properties of such a link are empty
-    # strings. However, we can fix this by assigning the anchor its own
-    # href because computer:
-    # https://gist.github.com/jlong/2428561#comment-1461205
-    # anchor.href = anchor.href if isBlank(anchor.hostname)
-    # TODO: Check if we can remove this comment without breaking IE11
-    anchor
+    # Some IEs don't include a leading slash in the #pathname property.
+    # We have confirmed this in IE11 and earlier.
+    unless link.pathname[0] == '/'
+      # Only copy the link into an object when we need to (to change a property).
+      # Note that we're parsing a lot of URLs for [up-active].
+      link = u.only(link, 'protocol', 'hostname', 'port', 'pathname', 'search', 'hash')
+      link.pathname = '/' + link.pathname
+
+    link
 
   ###**
   @function up.util.normalizeMethod
