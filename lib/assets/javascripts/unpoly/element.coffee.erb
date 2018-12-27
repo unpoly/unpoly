@@ -72,9 +72,18 @@ up.element = do ->
 
   triggerCustom = (element, name, props = {}) ->
     event = document.createEvent('Event')
-    event.initEvent(name, true, true)
+    event.initEvent(name, true, true) # name, bubbles, cancelable
     u.assign(event, props)
+
+    # IE11 does not set { defaultPrevented: true } after #preventDefault()
+    # was called on a custom event.
+    # See discussion here: https://stackoverflow.com/questions/23349191
+    if up.browser.isIE11()
+      event.preventDefault = ->
+        Object.defineProperty(event, 'defaultPrevented', get: -> true)
+
     element.dispatchEvent(event)
+
     return event
 
 #  assertIsElement = (element) ->

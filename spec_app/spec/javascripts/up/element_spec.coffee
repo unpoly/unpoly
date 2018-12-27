@@ -279,6 +279,12 @@ describe 'up.element', ->
       up.element.triggerCustom($element[0], 'custom:name')
       expect(callback).not.toHaveBeenCalled()
 
+    it 'triggers an event that can have its default prevented (IE11 bugfix)', ->
+      element = fixture('.element')
+      element.addEventListener('custom:name', (event) -> event.preventDefault())
+      event = up.element.triggerCustom(element, 'custom:name')
+      expect(event.defaultPrevented).toBe(true)
+
   describe 'up.element.remove()', ->
 
     it 'removes the given element from the DOM', ->

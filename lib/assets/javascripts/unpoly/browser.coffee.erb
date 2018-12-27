@@ -123,6 +123,9 @@ up.browser = do ->
   isIE10OrWorse = u.memoize ->
     !window.atob
 
+  isIE11 = u.memoize ->
+    'ActiveXObject' of window # this is undefined, but the key is set
+
   ###**
   Returns whether this browser supports manipulation of the current URL
   via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
@@ -305,3 +308,5 @@ up.browser = do ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   popCookie: popCookie
+  isIE11: isIE11
+
