@@ -683,16 +683,12 @@ up.fragment = do ->
   ignores elements that are being [destroyed](/up.destroy) or that are being
   removed by a [transition](/up.morph).
 
-  If the given argument is already a jQuery collection (or an array
-  of DOM elements), the first element matching these conditions
-  is returned.
-
   Returns `undefined` if no element matches these conditions.
 
   Also see the [`.up-destroying`](/up-destroying) class.
 
   @function up.first
-  @param {string|Element|jQuery|Array<Element>} selectorOrElement
+  @param {string} selector
   @param {string} [options.layer='auto']
     The name of the layer in which to find the element.
 
@@ -707,15 +703,15 @@ up.fragment = do ->
     or `undefined` if no such element was found.
   @experimental
   ###
-  first = (selectorOrElement, options) ->
+  first = (selector, options) ->
     options = u.options(options, layer: 'auto')
-    resolved = e.resolveSelector(selectorOrElement, options.origin)
+    selector = e.resolveSelector(selector, options.origin)
     if options.layer == 'auto'
-      firstInPriority(resolved, options.origin)
+      firstInPriority(selector, options.origin)
     else
-      firstInLayer(resolved, options.layer)
+      firstInLayer(selector, options.layer)
 
-  firstInPriority = (selectorOrElement, origin) ->
+  firstInPriority = (selector, origin) ->
     layers = ['popup', 'modal', 'page']
     if u.isPresent(origin)
       originLayer = layerOf(origin)
@@ -723,10 +719,10 @@ up.fragment = do ->
       u.remove(layers, originLayer)
       layers.unshift(originLayer)
     u.detectResult layers, (layer) ->
-      return firstInLayer(selectorOrElement, layer)
+      return firstInLayer(selector, layer)
 
-  firstInLayer = (selectorOrElement, layer) ->
-    elements = e.all(selectorOrElement)
+  firstInLayer = (selector, layer) ->
+    elements = e.all(selector)
     return u.detectResult elements, (element) ->
       if isRealElement(element) && matchesLayer(element, layer)
         return element
@@ -751,9 +747,6 @@ up.fragment = do ->
   Returns all elements matching the given selector, but
   ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
 
-  If the given argument is already a jQuery collection (or an array
-  of DOM elements), returns the subset of the given list that is matching these conditions.
-
   @function up.all
   @param {string|jQuery|Array<Element>} selectorOrElements
   @param {string|Element|jQuery} [options.origin]
@@ -765,11 +758,11 @@ up.fragment = do ->
     A jQuery collection of matching elements.
   @experimental
   ###
-  all = (selectorOrElements, options) ->
+  all = (selector, options) ->
     options = u.options(options)
-    resolved = e.resolveSelector(selectorOrElements, options.origin)
+    selector = e.resolveSelector(selector, options.origin)
     root = options.root ? document
-    matches = e.descendants(root, resolved)
+    matches = e.descendants(root, selector)
     e.select matches, (match) ->
       isRealElement(element) && matchesLayer(element, options.layer)
 
