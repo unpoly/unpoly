@@ -84,7 +84,7 @@ up.util = do ->
   isCrossDomain = (targetUrl) ->
     currentUrl = parseUrl(location.href)
     targetUrl = parseUrl(targetUrl)
-    currentUrl.protocol != targetUrl.protocol || currentUrl.host != targetUrl.host
+    currentUrl.protocol != targetUrl.protocol || currentUrl.hostname != targetUrl.hostname
 
   ###**
   Parses the given URL into components such as hostname and path.
