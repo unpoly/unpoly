@@ -4,9 +4,10 @@ e = up.element
 class up.FollowVariant
 
   constructor: (selector, options) ->
+    # @followLink() will wrap @followNow() with event submission and [up-active] feedback
     @followNow = options.follow
-    @preloadNow = options.preload
-    @selectors = selector.split(/\s*,\s*/)
+    @preloadLink = options.preload
+    @selectors = u.splitValues(selector, ',')
 
   onClick: (event, link) =>
     if up.link.shouldProcessEvent(event, link)
@@ -39,16 +40,14 @@ class up.FollowVariant
     up.on 'mousedown', @fullSelector('[up-instant]'), (args...) =>
       u.muteRejection @onMousedown(args...)
 
-  followLink: (link, options) =>
-    options = u.options(options)
-    followEventAttrs = { message: 'Following link', target: link }
-    up.bus.whenEmitted('up:link:follow', followEventAttrs).then =>
-      up.feedback.start link, options, =>
-        @followNow(link, options)
-
-  preloadLink: (link, options) =>
-    options = u.options(options)
-    @preloadNow(link, options)
+  followLink: (link, options = {}) =>
+    promise = up.bus.whenEmitted('up:link:follow', message: 'Following link', target: link)
+    promise = promise.then =>
+      up.feedback.start(link) unless options.preload
+      @followNow(link, options)
+    unless options.preload
+      promise = promise.then -> up.feedback.stop(link)
+    promise
 
   matchesLink: (link) =>
     e.matches(link, @fullSelector())

@@ -152,12 +152,10 @@ up.feedback = do ->
   @param {string|Element|jQuery} elementOrSelector
   @internal
   ###
-  findActivatableArea = (elementOrSelector) ->
-    area = e.get(elementOrSelector)
-    if e.matches(area, SELECTOR_LINK)
-      # Try to enlarge links that are expanded with [up-expand] on a surrounding container.
-      area = e.ancestor(area, SELECTOR_LINK) || area
-    area
+  findActivatableArea = (element) ->
+    # Try to enlarge links that are expanded with [up-expand] on a surrounding container.
+    # Note that the expression below is not the same as e.closest(area, SELECTOR_LINK)!
+    e.ancestor(element, SELECTOR_LINK) || element
 
   ###**
   Marks the given element as currently loading, by assigning the CSS class [`up-active`](/a.up-active).
@@ -171,38 +169,20 @@ up.feedback = do ->
   \#\#\# Example
 
       var $button = $('button');
-      $button.on('click', function() {
-        up.feedback.start(button, function() {
-          // the .up-active class will be removed when this promise resolves:
-          return up.request(...);
+      $button.on('click', () => {
+        up.feedback.start(button)
+        up.request(...).then(() => {
+          up.feedback.stop(button)
         });
       });
 
   @method up.feedback.start
-  @param {Element|jQuery|string} elementOrSelector
+  @param {Element} element
     The element to mark as active
-  @param {Object} [options.preload]
-    If set to `false`, the element will not be marked as loading.
-  @param {Function} [action]
-    An optional function to run while the element is marked as loading.
-    The function must return a promise.
-    Once the promise resolves, the element will be [marked as no longer loading](/up.feedback.stop).
   @internal
   ###
-  start = (args...) ->
-    elementOrSelector = args.shift()
-    action = args.pop()
-    options = u.options(args[0])
-    element = findActivatableArea(elementOrSelector)
-    if element && !options.preload
-      element.classList.add(CLASS_ACTIVE)
-    if action
-      promise = action()
-      if u.isPromise(promise)
-        u.always promise, -> stop(element)
-      else
-        up.warn('Expected block to return a promise, but got %o', promise)
-      promise
+  start = (element) ->
+    findActivatableArea(element).classList.add(CLASS_ACTIVE)
 
   ###**
   Links that are currently [loading through Unpoly](/form-up-target)
@@ -270,13 +250,12 @@ up.feedback = do ->
   Use this function if you make custom network calls from your own JavaScript code.
 
   @function up.feedback.stop
-  @param {jQuery} event.$element
+  @param {Element} element
     The link or form that has finished loading.
   @internal
   ###
-  stop = (elementOrSelector) ->
-    if element = findActivatableArea(elementOrSelector)
-      element.classList.remove(CLASS_ACTIVE)
+  stop = (element) ->
+    findActivatableArea(element).classList.remove(CLASS_ACTIVE)
 
   ###**
   Marks this element as a navigation component, such as a menu or navigation bar.
