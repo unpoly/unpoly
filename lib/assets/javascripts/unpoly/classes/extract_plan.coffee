@@ -15,7 +15,7 @@ class up.ExtractPlan
 
   findOld: =>
     u.each @steps, (step) =>
-      step.oldElement = e.get up.fragment.first(step.selector, layer: @oldLayer) # TODO: Remove e.get()
+      step.oldElement = up.first(step.selector, layer: @oldLayer)
 
   findNew: =>
     u.each @steps, (step) =>
