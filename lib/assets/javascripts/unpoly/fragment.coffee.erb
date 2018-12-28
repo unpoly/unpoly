@@ -710,7 +710,7 @@ up.fragment = do ->
 
   firstInPriority = (selector, origin) ->
     layers = ['popup', 'modal', 'page']
-    if u.isPresent(origin)
+    if origin
       originLayer = layerOf(origin)
       # Make the origin's layer the top priority
       u.remove(layers, originLayer)
@@ -728,17 +728,16 @@ up.fragment = do ->
   @function up.fragment.layerOf
   @internal
   ###
-  layerOf = (selectorOrElement) ->
-    if element = e.get(selectorOrElement)
-      if up.popup.contains(element)
-        'popup'
-      else if up.modal.contains(element)
-        'modal'
-      else
-        'page'
+  layerOf = (element) ->
+    if up.popup.contains(element)
+      'popup'
+    else if up.modal.contains(element)
+      'modal'
+    else
+      'page'
 
-  matchesLayer = (selectorOrElement, layer) ->
-    !layer || layerOf(selectorOrElement) == layer
+  matchesLayer = (element, layer) ->
+    !layer || layerOf(element) == layer
 
   ###**
   Returns all elements matching the given selector, but

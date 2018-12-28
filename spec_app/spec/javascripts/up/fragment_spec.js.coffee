@@ -2477,26 +2477,20 @@ describe 'up.fragment', ->
       it 'returns "popup" for an element in a popup over the page', ->
         $popup = $fixture('.up-popup')
         $element = $popup.affix('.element')
-        expect(up.fragment.layerOf($element)).toEqual('popup')
+        expect(up.fragment.layerOf($element[0])).toEqual('popup')
 
       it 'returns "popup" for an element in a popup over a modal', ->
         $modal = $fixture('.up-modal')
         $popupInModal = $modal.affix('.up-popup')
         $element = $popupInModal.affix('.element')
-        expect(up.fragment.layerOf($element)).toEqual('popup')
+        expect(up.fragment.layerOf($element[0])).toEqual('popup')
 
       it 'returns "modal" for an element in a modal', ->
         $modal = $fixture('.up-modal')
         $element = $modal.affix('.element')
-        expect(up.fragment.layerOf($element)).toEqual('modal')
+        expect(up.fragment.layerOf($element[0])).toEqual('modal')
 
       it 'returns "page" for an element below a modal or popup', ->
         $element = $fixture('.element')
-        expect(up.fragment.layerOf($element)).toEqual('page')
-
-      it 'returns undefined for an empty jQuery collection', ->
-        expect(up.fragment.layerOf($())).toBeUndefined()
-
-      it 'returns undefined for undefined', ->
-        expect(up.fragment.layerOf(undefined)).toBeUndefined()
+        expect(up.fragment.layerOf($element[0])).toEqual('page')
 
