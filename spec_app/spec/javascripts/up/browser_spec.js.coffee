@@ -117,43 +117,43 @@ describe 'up.browser', ->
 
     describe 'up.browser.sprintf', ->
 
-      describe '(string argument)', ->
+      describe 'with string argument', ->
 
         it 'serializes with surrounding quotes', ->
           formatted = up.browser.sprintf('before %o after', 'argument')
           expect(formatted).toEqual('before "argument" after')
   
-      describe '(undefined argument)', ->
+      describe 'with undefined argument', ->
   
         it 'serializes to the word "undefined"', ->
           formatted = up.browser.sprintf('before %o after', undefined)
           expect(formatted).toEqual('before undefined after')
   
-      describe '(null argument)', ->
+      describe 'with null argument', ->
   
         it 'serializes to the word "null"', ->
           formatted = up.browser.sprintf('before %o after', null)
           expect(formatted).toEqual('before null after')
   
-      describe '(number argument)', ->
+      describe 'with number argument', ->
   
         it 'serializes the number as string', ->
           formatted = up.browser.sprintf('before %o after', 5)
           expect(formatted).toEqual('before 5 after')
   
-      describe '(function argument)', ->
+      describe 'with function argument', ->
   
         it 'serializes the function code', ->
           formatted = up.browser.sprintf('before %o after', `function foo() {}`)
           expect(formatted).toEqual('before function foo() {} after')
   
-      describe '(array argument)', ->
+      describe 'with array argument', ->
   
         it 'recursively serializes the elements', ->
           formatted = up.browser.sprintf('before %o after', [1, "foo"])
           expect(formatted).toEqual('before [1, "foo"] after')
   
-      describe '(element argument)', ->
+      describe 'with element argument', ->
   
         it 'serializes the tag name with id, name and class attributes, but ignores other attributes', ->
           $element = $('<table id="id-value" name="name-value" class="class-value" title="title-value">')
@@ -161,7 +161,7 @@ describe 'up.browser', ->
           formatted = up.browser.sprintf('before %o after', element)
           expect(formatted).toEqual('before <table id="id-value" name="name-value" class="class-value"> after')
   
-      describe '(jQuery argument)', ->
+      describe 'with jQuery argument', ->
   
         it 'serializes the tag name with id, name and class attributes, but ignores other attributes', ->
           $element1 = $('<table id="table-id">')
@@ -169,7 +169,7 @@ describe 'up.browser', ->
           formatted = up.browser.sprintf('before %o after', $element1.add($element2))
           expect(formatted).toEqual('before $(<table id="table-id">, <ul id="ul-id">) after')
   
-      describe '(object argument)', ->
+      describe 'with object argument', ->
   
         it 'serializes to JSON', ->
           object = { foo: 'foo-value', bar: 'bar-value' }
