@@ -2387,12 +2387,12 @@ describe 'up.fragment', ->
         $container = $fixture('.container').text('old text')
         up.hello($container)
 
-        destroyDone = up.destroy('.container', animation: 'fade-out', duration: 100)
+        destroyDone = up.destroy('.container', animation: 'fade-out', duration: 200)
 
-        next.after 50, ->
+        next.after 100, ->
           expect(destructor).not.toHaveBeenCalled()
 
-        next.after (50 + (tolerance = 70)), ->
+        next.after (100 + (tolerance = 70)), ->
           expect(destructor).toHaveBeenCalledWith('old text',)
 
 

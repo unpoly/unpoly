@@ -4,6 +4,8 @@ up.element = do ->
 
   u = up.util
 
+  NONE = { getAttribute: -> undefined }
+
   s = (selector) ->
     up.Selector.parse(selector)
 
@@ -385,20 +387,19 @@ up.element = do ->
   @internal
   ###
   castedAttr = (element, attribute) ->
-    if element = getOne(element) # TODO: up.modal.openNow() will sometimes call this with an undefined link. Can we fix this and get rid of e.get?
-      value = element.getAttribute(attribute)
-      switch value
-        when 'false' then false
-        when 'true', '', attribute then true
-        else value # other strings, undefined, null, ...
+    value = element.getAttribute(attribute)
+    switch value
+      when 'false' then false
+      when 'true', '', attribute then true
+      else value # other strings, undefined, null, ...
 
   ###**
   @function up.util.numberAttr
   @internal
   ###
   numberAttr = (element, attribute) ->
-    # TODO: Something calls numberAttr with an undefined value. Can we fix this and get rid of e.get()?
-    if (element = getOne(element)) && (value = element.getAttribute(attribute)) && (value.match(/^[\d\.]+$/))
+    value = element.getAttribute(attribute)
+    if value?.match(/^[\d\.]+$/)
       parseFloat(value)
 
   ###**
@@ -410,9 +411,8 @@ up.element = do ->
   @internal
   ###
   jsonAttr = (element, attribute) ->
-    # TODO: Something calls jsonAttr with an undefined value. Can we fix this and get rid of e.get()?
     # The document does not respond to #getAttribute()
-    if (element = getOne(element)) && (json = element.getAttribute?(attribute)) && u.isString(json) && json.trim() != ''
+    if json = element.getAttribute?(attribute)?.trim()
       JSON.parse(json)
 
   ###**
@@ -616,5 +616,6 @@ up.element = do ->
   readInlineStyle: readInlineStyle
   writeInlineStyle: writeInlineStyle
   resolveSelector: resolveSelector
+  none: -> NONE
 
   # createDivWithClass: createDivWithClass

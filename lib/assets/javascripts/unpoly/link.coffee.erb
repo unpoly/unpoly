@@ -203,14 +203,12 @@ up.link = do ->
   Defaults to `"get"`.
 
   @function up.link.followMethod
-  @param linkOrSelector
+  @param link
   @param options.method {string}
   @internal
   ###
-  followMethod = (linkOrSelector, options) ->
-    link = e.get(linkOrSelector) # up.modal.openNow() will sometimes call this with an undefined link
-    options = u.options(options)
-    rawMethod = options.method ? link?.getAttribute('up-method') ? link?.getAttribute('data-method') ? 'GET'
+  followMethod = (link, options = {}) ->
+    rawMethod = options.method ? link.getAttribute('up-method') ? link.getAttribute('data-method') ? 'GET'
     rawMethod.toUpperCase()
 
   ###**

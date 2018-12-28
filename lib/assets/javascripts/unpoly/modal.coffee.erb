@@ -413,28 +413,28 @@ up.modal = do ->
     chain.asap closeNow, (-> openNow(options))
 
   openNow = (options = {}) ->
-    link = u.pluckKey(options, 'link') # might be missing
-    url = u.pluckKey(options, 'url') ? link?.getAttribute('up-href') ? link?.getAttribute('href')
+    link = u.pluckKey(options, 'link') || e.none()
+    url = u.pluckKey(options, 'url') ? link.getAttribute('up-href') ? link.getAttribute('href')
     html = u.pluckKey(options, 'html')
-    target = u.pluckKey(options, 'target') ? link?.getAttribute('up-modal')
+    target = u.pluckKey(options, 'target') ? link.getAttribute('up-modal')
     validateTarget(target)
-    options.flavor ?= link?.getAttribute('up-flavor') ? config.flavor
-    options.position ?= link?.getAttribute('up-position') ? flavorDefault('position', options.flavor)
+    options.flavor ?= link.getAttribute('up-flavor') ? config.flavor
+    options.position ?= link.getAttribute('up-position') ? flavorDefault('position', options.flavor)
     options.position = u.evalOption(options.position, { link })
-    options.width ?= link?.getAttribute('up-width') ? flavorDefault('width', options.flavor)
-    options.maxWidth ?= link?.getAttribute('up-max-width') ? flavorDefault('maxWidth', options.flavor)
-    options.height ?= link?.getAttribute('up-height') ? flavorDefault('height')
-    options.animation ?= link?.getAttribute('up-animation') ? flavorDefault('openAnimation', options.flavor)
+    options.width ?= link.getAttribute('up-width') ? flavorDefault('width', options.flavor)
+    options.maxWidth ?= link.getAttribute('up-max-width') ? flavorDefault('maxWidth', options.flavor)
+    options.height ?= link.getAttribute('up-height') ? flavorDefault('height')
+    options.animation ?= link.getAttribute('up-animation') ? flavorDefault('openAnimation', options.flavor)
     options.animation = u.evalOption(options.animation, position: options.position)
-    options.backdropAnimation ?= link?.getAttribute('up-backdrop-animation') ? flavorDefault('backdropOpenAnimation', options.flavor)
+    options.backdropAnimation ?= link.getAttribute('up-backdrop-animation') ? flavorDefault('backdropOpenAnimation', options.flavor)
     options.backdropAnimation = u.evalOption(options.backdropAnimation, position: options.position)
     options.sticky ?= e.castedAttr(link, 'up-sticky') ? flavorDefault('sticky', options.flavor)
     options.closable ?= e.castedAttr(link, 'up-closable') ? flavorDefault('closable', options.flavor)
-    options.confirm ?= link?.getAttribute('up-confirm')
+    options.confirm ?= link.getAttribute('up-confirm')
     options.method = up.link.followMethod(link, options)
     options.layer = 'modal'
-    options.failTarget ?= link?.getAttribute('up-fail-target')
-    options.failLayer ?= link?.getAttribute('up-fail-layer') ? 'auto'
+    options.failTarget ?= link.getAttribute('up-fail-target')
+    options.failLayer ?= link.getAttribute('up-fail-layer') ? 'auto'
 
     animateOptions = up.motion.animateOptions(options, link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
 

@@ -232,12 +232,12 @@ up.motion = do ->
   animateOptions = (args...) ->
     userOptions = args.shift() ? {}
     moduleDefaults = u.extractOptions(args)
-    element = e.get(args.pop()) # might be undefined
+    element = args.pop() || e.none()
 
     consolidatedOptions = {}
-    consolidatedOptions.easing = u.option(userOptions.easing, u.presence(element?.getAttribute('up-easing')), moduleDefaults.easing, config.easing)
-    consolidatedOptions.duration = u.option(userOptions.duration, e.numberAttr(element, 'up-duration'), moduleDefaults.duration, config.duration)
-    consolidatedOptions.delay = u.option(userOptions.delay, e.numberAttr(element, 'up-delay'), moduleDefaults.delay, config.delay)
+    consolidatedOptions.easing = userOptions.easing ? element.getAttribute('up-easing') ? moduleDefaults.easing ? config.easing
+    consolidatedOptions.duration = userOptions.duration ? e.numberAttr(element, 'up-duration') ? moduleDefaults.duration ? config.duration
+    consolidatedOptions.delay = userOptions.delay ? e.numberAttr(element, 'up-delay') ? moduleDefaults.delay ? config.delay
     consolidatedOptions.trackMotion = userOptions.trackMotion # required by up.MotionController
     consolidatedOptions
       

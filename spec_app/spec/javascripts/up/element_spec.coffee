@@ -645,24 +645,24 @@ describe 'up.element', ->
   describe 'up.element.castedAttr', ->
     
     it 'returns true if the attribute value is the string "true"', ->
-      $element = $fixture('div').attr('foo', 'true')
-      expect(up.element.castedAttr($element, 'foo')).toBe(true)
+      element = fixture('div[foo=true]')
+      expect(up.element.castedAttr(element, 'foo')).toBe(true)
 
     it 'returns true if the attribute value is the name of the attribute', ->
-      $element = $fixture('div').attr('foo', 'foo')
-      expect(up.element.castedAttr($element, 'foo')).toBe(true)
+      element = fixture('div[foo=foo]')
+      expect(up.element.castedAttr(element, 'foo')).toBe(true)
 
     it 'returns false if the attribute value is the string "false"', ->
-      $element = $fixture('div').attr('foo', 'false')
-      expect(up.element.castedAttr($element, 'foo')).toBe(false)
+      element = fixture('div[foo=false]')
+      expect(up.element.castedAttr(element, 'foo')).toBe(false)
 
     it 'returns a missing value if the element has no such attribute', ->
-      $element = $fixture('div')
-      expect(up.element.castedAttr($element, 'foo')).toBeMissing()
+      element = fixture('div')
+      expect(up.element.castedAttr(element, 'foo')).toBeMissing()
 
     it 'returns the attribute value unchanged if the value is some string', ->
-      $element = $fixture('div').attr('foo', 'some text')
-      expect(up.element.castedAttr($element, 'foo')).toBe('some text')
+      element = fixture('div[foo="some text"]')
+      expect(up.element.castedAttr(element, 'foo')).toBe('some text')
 
   describe 'up.element.writeTemporaryStyle', ->
 
