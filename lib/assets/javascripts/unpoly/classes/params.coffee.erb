@@ -23,13 +23,22 @@ The following types of parameters are supported:
 ###
 class up.Params
 
+  ###**
+  TODO: Document me
+  ###
   constructor: (raw) ->
     @clear()
     @addAll(raw)
 
+  ###**
+  TODO: Document me
+  ###
   clear: ->
     @entries = []
 
+  ###**
+  TODO: Document me
+  ###
   copy: ->
     new up.Params(@)
 
@@ -70,7 +79,7 @@ class up.Params
     obj
 
   ###**
-  Document me
+  TODO: Document me
   ###
   toArray: ->
     @entries
@@ -182,6 +191,9 @@ class up.Params
   add: (name, value) ->
     @entries.push({name, value})
 
+  ###**
+  TODO: Document me
+  ###
   addAll: (raw) ->
     if u.isMissing(raw)
       # no-op
@@ -224,10 +236,16 @@ class up.Params
     u.eachIterator formData.entries(), (value) =>
       @add(value...)
 
+  ###**
+  TODO: Document me
+  ###
   set: (name, value) ->
     @delete(name)
     @add(name, value)
 
+  ###**
+  TODO: Document me
+  ###
   delete: (name) ->
     @entries = u.reject(@entries, @matchEntryFn(name))
 
@@ -258,10 +276,16 @@ class up.Params
     else
       @getFirst(name)
 
+  ###**
+  TODO: Document me
+  ###
   getFirst: (name) ->
     entry = u.detect(@entries, @matchEntryFn(name))
     entry?.value
 
+  ###**
+  TODO: Document me
+  ###
   getAll: (name) ->
     if @isArrayKey(name)
       @getAll(name)
@@ -272,6 +296,9 @@ class up.Params
   isArrayKey: (key) ->
     u.endsWith(key, '[]')
 
+  ###**
+  TODO: Document me
+  ###
   isBlank: ->
     @entries.length == 0
 
@@ -313,16 +340,7 @@ class up.Params
       @fromFields(fields)
 
   ###**
-  TODO
-  ###
-  @fromFields: (fields) ->
-    params = new @()
-    for field in fields
-      params.addField(field)
-    params
-
-  ###**
-  Serializes request params from a single [input field](/up.form.config#config.fields).
+  Serializes request params from a one or more [input fields](/up.form.config#config.fields).
   To serialize an entire form, use [`up.params.fromForm()`](/up.params.fromForm).
 
   Note that some fields may produce multiple params, such as `<select multiple>`.
@@ -343,20 +361,19 @@ class up.Params
       // params is now: [{ name: 'email', value: 'foo@bar.com' }]
 
   @function up.params.fromField
-  @param {Element|jQuery|string} form
-  @return {Array}
-    an array of `{ name, value }` objects
+  @param {Element|List<Element>|jQuery} fields
+  @return {up.Params}
   @experimental
   ###
-  @fromField: (field) ->
-    # TODO: REMOVE THIS
+  @fromFields: (fields) ->
     params = new @()
-    params.addField(field)
+    for field in u.wrapList(fields)
+      params.addField(field)
     params
 
-  addFields: (fields) ->
-    @addField(field) for field in fields
-
+  ###**
+  TODO: Document me
+  ###
   addField: (field) ->
     params = new @constructor()
     if (field = e.get(field)) && (name = field.name) && (!field.disabled)
@@ -377,6 +394,9 @@ class up.Params
       else
         @add(name, field.value)
 
+  ###**
+  TODO: Document me
+  ###
   isEqual: (other) ->
     other && (@constructor == other.constructor) && u.isEqual(@entries, other.entries)
 
@@ -410,5 +430,8 @@ class up.Params
       params.addAll(query)
     params
 
+  ###**
+  TODO: Document me
+  ###
   @wrap: (value) ->
     u.wrapValue(value, @)
