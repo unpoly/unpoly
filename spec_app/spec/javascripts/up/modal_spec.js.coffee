@@ -113,6 +113,9 @@ describe 'up.modal', ->
       describe 'preventing elements from jumping as scrollbars change', ->
 
         it "brings its own scrollbar, padding the body on the right", (done) ->
+          $body = $(document.body)
+          $rootOverflowElement = $(up.viewport.rootOverflowElement())
+
           promise = up.modal.visit('/foo', target: '.container')
 
           u.nextFrame =>
@@ -121,14 +124,14 @@ describe 'up.modal', ->
           promise.then ->
             $modal = $('.up-modal')
             $viewport = $modal.find('.up-modal-viewport')
-            $body = $('body')
+
             expect($modal).toBeAttached()
             expect($viewport.css('overflow-y')).toEqual('scroll')
-            expect($body.css('overflow-y')).toEqual('hidden')
+            expect($rootOverflowElement.css('overflow-y')).toEqual('hidden')
             expect(parseInt($body.css('padding-right'))).toBeAround(assumedScrollbarWidth, 5)
 
             up.modal.close().then ->
-              expect($body.css('overflow-y')).toEqual('scroll')
+              expect($rootOverflowElement.css('overflow-y')).toEqual('scroll')
               expect(parseInt($body.css('padding-right'))).toBe(0)
               done()
 

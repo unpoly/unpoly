@@ -527,6 +527,39 @@ describe 'up.viewport', ->
 
       it 'should have tests'
 
+    describe 'up.viewport.rootOverflowElement', ->
+
+      beforeEach ->
+        @body = document.body
+        @html = document.documentElement
+        @restoreBodyOverflowY = e.writeTemporaryStyle(@body, 'overflow-y': 'visible')
+        @restoreHtmlOverflowY = e.writeTemporaryStyle(@html, 'overflow-y': 'visible')
+
+      afterEach ->
+        @restoreBodyOverflowY()
+        @restoreHtmlOverflowY()
+
+      it 'returns the <html> element if the developer set { overflow-y: scroll } on it', ->
+        @html.style.overflowY = 'scroll'
+        expect(up.viewport.rootOverflowElement()).toBe(@html)
+
+      it 'returns the <html> element if the developer set { overflow-y: auto } on it', ->
+        @html.style.overflowY = 'auto'
+        expect(up.viewport.rootOverflowElement()).toBe(@html)
+
+      it 'returns the <body> element if the developer set { overflow-y: scroll } on it', ->
+        @body.style.overflowY = 'scroll'
+        expect(up.viewport.rootOverflowElement()).toBe(@body)
+
+      it 'returns the <body> element if the developer set { overflow-y: auto } on it', ->
+        @body.style.overflowY = 'auto'
+        expect(up.viewport.rootOverflowElement()).toBe(@body)
+
+      it 'returns the scrolling element if the developer set { overflow-y: visible } on both <html> and <body>', ->
+        @html.style.overflowY = 'visible'
+        @body.style.overflowY = 'visible'
+        expect(up.viewport.rootOverflowElement()).toBe(up.viewport.root())
+
     describe 'up.viewport.absolutize', ->
 
       afterEach ->

@@ -378,6 +378,35 @@ up.viewport = do ->
     window.innerWidth > document.documentElement.offsetWidth
 
   ###**
+  Returns the element that controls the `overflow-y` behavior for the
+  [document viewport](/up.viewport.root()).
+
+  @function up.viewport.rootOverflowElement
+  @internal
+  ###
+  rootOverflowElement = ->
+    body = document.body
+    html = document.documentElement
+
+    element = u.detect([html, body], wasChosenAsOverflowingElement)
+    element || getRoot()
+
+  ###**
+  Returns whether the given element was chosen as the overflowing
+  element by the developer.
+
+  We have no control whether developers set the property on <body> or
+  <html>. The developer also won't know what is going to be the
+  [scrolling element](/up.viewport.root()) on the user's brower.
+
+  @function wasChosenAsOverflowingElement
+  @internal
+  ###
+  wasChosenAsOverflowingElement = (element) ->
+    overflowY = e.readComputedStyle(element, 'overflow-y')
+    overflowY == 'auto' || overflowY == 'scroll'
+
+  ###**
   Returns the width of a scrollbar.
 
   This only runs once per page load.
@@ -715,8 +744,9 @@ up.viewport = do ->
   root: getRoot
   rootWidth: rootWidth
   rootHeight: rootHeight
-  isRoot: isRoot
   rootHasVerticalScrollbar: rootHasVerticalScrollbar
+  rootOverflowElement: rootOverflowElement
+  isRoot: isRoot
   scrollbarWidth: scrollbarWidth
   scrollTops: scrollTops
   saveScroll: saveScroll

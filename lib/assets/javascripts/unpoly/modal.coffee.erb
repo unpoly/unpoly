@@ -222,13 +222,14 @@ up.modal = do ->
     coveredUrl: null
     coveredTitle: null
     position: null
-    unshifters: []
+
+  bodyShifter = new up.BodyShifter()
 
   chain = new up.DivertibleChain()
 
   reset = ->
     e.remove(state.modalElement) if state.modalElement
-    unshiftElements()
+    bodyShifter.unshift()
     state.reset()
     chain.reset()
     config.reset()
@@ -268,38 +269,6 @@ up.modal = do ->
 
   unveilFrame = ->
     e.show(state.modalElement)
-
-  # Gives `<body>` a right padding in the width of a scrollbar.
-  # Also gives elements anchored to the right side of the screen
-  # an increased `right`.
-  #
-  # This is to prevent the body and elements from jumping when we add the
-  # modal overlay, which has its own scroll bar.
-  # This is screwed up, but Bootstrap does the same.
-  shiftElements = ->
-    if up.viewport.rootHasVerticalScrollbar()
-      body = document.body
-      scrollbarWidth = up.viewport.scrollbarWidth()
-      bodyRightPadding = e.readComputedStyleNumber(body, 'paddingRight')
-      bodyRightShift = scrollbarWidth + bodyRightPadding
-      # TODO: Check whether we should set overflowY on <body> or <html>.
-      # If any element already has a computed, non-default overflow-y we
-      # should set it there. If neither has, use up.viewport.root()
-      unshiftBody = e.writeTemporaryStyle(body,
-        paddingRight: bodyRightShift
-        overflowY: 'hidden'
-      )
-      state.unshifters.push(unshiftBody)
-      for anchor in up.viewport.anchoredRight()
-        elementRight = e.readComputedStyleNumber(anchor, 'right')
-        elementRightShift = scrollbarWidth + elementRight
-        unshifter = e.writeTemporaryStyle(anchor, right: elementRightShift)
-        state.unshifters.push(unshifter)
-
-
-  # Reverts the effects of `shiftElements`.
-  unshiftElements = ->
-    unshifter() while unshifter = state.unshifters.pop()
 
   ###**
   Returns whether a modal is currently open.
@@ -498,7 +467,7 @@ up.modal = do ->
         else
           promise = up.replace(target, url, extractOptions)
         promise = promise.then ->
-          shiftElements()
+          bodyShifter.shift()
           unveilFrame()
           animate(options.animation, options.backdropAnimation, animateOptions)
         promise = promise.then ->
@@ -579,7 +548,7 @@ up.modal = do ->
         up.destroy(state.modalElement, destroyOptions)
 
       promise = promise.then ->
-        unshiftElements()
+        bodyShifter.unshift()
         state.phase = 'closed'
         state.modalElement = null
         state.flavor = null
