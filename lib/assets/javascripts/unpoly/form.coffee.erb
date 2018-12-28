@@ -441,16 +441,14 @@ up.form = do ->
   still marked `@internal`.
 
   @function up.form.switchTargets
-  @param {string|Element|jQuery} fieldOrSelector
+  @param {Element} switcher
   @param {string} [options.target]
     The target selectors to switch.
     Defaults to an `[up-switch]` attribute on the given field.
   @internal
   ###
-  switchTargets = (fieldOrSelector, options) ->
-    switcher = e.get(fieldOrSelector)
-    options = u.options(options)
-    targetSelector = u.option(options.target, switcher.getAttribute('up-switch'))
+  switchTargets = (switcher, options = {}) ->
+    targetSelector = options.target ? switcher.getAttribute('up-switch')
     form = closestContainer(switcher)
     u.isPresent(targetSelector) or up.fail("No switch target given for %o", switcher)
     fieldValues = switcherValues(switcher)
@@ -1012,7 +1010,6 @@ up.form = do ->
   submit: submit
   observe: observe
   validate: validate
-  switchTargets: switchTargets
   autosubmit: autosubmit
   fieldSelector: fieldSelector
   fields: findFields
