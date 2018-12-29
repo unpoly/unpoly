@@ -1,3 +1,5 @@
+u = up.util
+
 class up.Config
 
   constructor: (@blueprint) ->

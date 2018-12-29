@@ -1,4 +1,4 @@
-e = up.util
+u = up.util
 
 ###**
 A linear task queue whose (2..n)th tasks can be changed at any time.

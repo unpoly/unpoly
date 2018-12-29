@@ -120,7 +120,7 @@ up.util = do ->
     unless link.pathname[0] == '/'
       # Only copy the link into an object when we need to (to change a property).
       # Note that we're parsing a lot of URLs for [up-active].
-      link = u.only(link, 'protocol', 'hostname', 'port', 'pathname', 'search', 'hash')
+      link = only(link, 'protocol', 'hostname', 'port', 'pathname', 'search', 'hash')
       link.pathname = '/' + link.pathname
 
     link
