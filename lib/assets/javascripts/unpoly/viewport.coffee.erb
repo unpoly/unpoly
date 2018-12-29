@@ -219,10 +219,7 @@ up.viewport = do ->
     A promise that is fulfilled when the scrolling has finished.
   @internal
   ###
-  scrollAfterInsertFragment = (selectorOrElement, options) ->
-    options = u.options(options)
-    element = e.get(selectorOrElement)
-
+  scrollAfterInsertFragment = (element, options = {}) ->
     hashOpt = options.hash
     revealOpt = options.reveal
     restoreScrollOpt = options.restoreScroll

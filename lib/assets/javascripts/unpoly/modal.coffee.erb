@@ -332,13 +332,11 @@ up.modal = do ->
     the opening animation has completed.
   @stable
   ###
-  followAsap = (linkOrSelector, options) ->
-    options = u.options(options)
+  followAsap = (linkOrSelector, options = {}) ->
     options.link = e.get(linkOrSelector)
     openAsap(options)
 
-  preloadNow = (link, options) ->
-    options = u.options(options)
+  preloadNow = (link, options = {}) ->
     options.link = link
     options.preload = true
     # Use openNow() and not openAsap() so (1) we don't close a currently open modal

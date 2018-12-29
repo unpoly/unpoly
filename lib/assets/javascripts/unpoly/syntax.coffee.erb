@@ -335,7 +335,6 @@ up.syntax = do ->
   @internal
   ###
   registerDestructor = (element, destructor) ->
-    element = e.get(element)
     unless destructors = element.upDestructors
       destructors = []
       element.upDestructors = destructors
@@ -427,8 +426,8 @@ up.syntax = do ->
   @stable
   ###
   readData = (elementOrSelector) ->
-    if element = e.get(elementOrSelector)
-      e.jsonAttr(element, 'up-data') || {}
+    element = e.get(elementOrSelector)
+    e.jsonAttr(element, 'up-data') || {}
 
   ###**
   Resets the list of registered compiler directives to the
