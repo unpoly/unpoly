@@ -302,6 +302,3 @@ describe 'up.syntax', ->
         data = up.syntax.data($element)
         expect(data).toEqual({})
 
-      it 'returns undefined if undefined is passed instead of an element', ->
-        data = up.syntax.data(undefined)
-        expect(data).toBeUndefined()
