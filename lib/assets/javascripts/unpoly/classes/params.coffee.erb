@@ -14,10 +14,11 @@ This module offers a consistent API to read and manipulate request parameters in
 
 The following types of parameters are supported:
 
-1. an object like `{ email: 'foo@bar.com' }`
-2. a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object
-3. a query string like `email=foo%40bar.com`
-4. an array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
+1. An object like `{ email: 'foo@bar.com' }`
+2. A query string like `email=foo%40bar.com`
+3. An array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
+2. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
+   On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
 
 @class up.params
 ###

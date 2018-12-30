@@ -190,23 +190,25 @@ describe 'up.proxy', ->
             # See that an additional request was made
             expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        it "does not explode if the original request's { params } is a FormData object", asyncSpec (next) ->
-          up.request('/foo', method: 'post', params: new FormData()) # POST requests are not cached
+        describeCapability 'canInspectFormData', ->
 
-          next =>
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respondWith
-              responseHeaders:
-                'X-Up-Location': '/bar'
-                'X-Up-Method': 'GET'
+          it "does not explode if the original request's { params } is a FormData object", asyncSpec (next) ->
+            up.request('/foo', method: 'post', params: new FormData()) # POST requests are not cached
 
-          next =>
-            @secondAjaxPromise = up.request('/bar')
+            next =>
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+              @respondWith
+                responseHeaders:
+                  'X-Up-Location': '/bar'
+                  'X-Up-Method': 'GET'
 
-          next.await =>
-            promiseState(@secondAjaxPromise).then (result) ->
-              # See that the promise was not rejected due to an internal error.
-              expect(result.state).toEqual('pending')
+            next =>
+              @secondAjaxPromise = up.request('/bar')
+
+            next.await =>
+              promiseState(@secondAjaxPromise).then (result) ->
+                # See that the promise was not rejected due to an internal error.
+                expect(result.state).toEqual('pending')
 
 
       describe 'when the XHR object has a { responseURL } property', ->
@@ -983,9 +985,11 @@ describe 'up.proxy', ->
         promise = up.proxy.get(url: '/foo', params: { key: 'value' })
         expect(promise).toBeUndefined()
 
-      it "returns undefined if the given request's { params } is a FormData object", ->
-        promise = up.proxy.get(url: '/foo', params: new FormData())
-        expect(promise).toBeUndefined()
+      describeCapability 'canInspectFormData', ->
+
+        it "returns undefined if the given request's { params } is a FormData object", ->
+          promise = up.proxy.get(url: '/foo', params: new FormData())
+          expect(promise).toBeUndefined()
 
     describe 'up.proxy.set', ->
 
@@ -1001,9 +1005,11 @@ describe 'up.proxy', ->
 
       it 'does nothing if the given request is not cached'
 
-      it 'does not crash when passed a request with FormData (bugfix)', ->
-        removal = -> up.proxy.remove(url: '/path', params: new FormData())
-        expect(removal).not.toThrowError()
+      describeCapability 'canInspectFormData', ->
+
+        it 'does not crash when passed a request with FormData (bugfix)', ->
+          removal = -> up.proxy.remove(url: '/path', params: new FormData())
+          expect(removal).not.toThrowError()
 
     describe 'up.proxy.clear', ->
 
