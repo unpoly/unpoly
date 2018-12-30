@@ -110,27 +110,36 @@ describe 'up.modal', ->
 
         it "brings its own scrollbar, padding the body on the right", (done) ->
           $body = $(document.body)
-          $rootOverflowElement = $(up.viewport.rootOverflowElement())
 
-          promise = up.modal.visit('/foo', target: '.container')
+          $fixture('.spacer').css(height: '9000px')
+          # Safari 11 has no vertical scrollbar that takes away space from the document,
+          # so the entire shifting logic is skipped.
+          if up.viewport.rootHasVerticalScrollbar()
 
-          u.nextFrame =>
-            @respondWith('<div class="container">text</div>')
+            $rootOverflowElement = $(up.viewport.rootOverflowElement())
 
-          promise.then ->
-            $modal = $('.up-modal')
-            $viewport = $modal.find('.up-modal-viewport')
-            scrollbarWidth = up.viewport.scrollbarWidth()
+            promise = up.modal.visit('/foo', target: '.container')
 
-            expect($modal).toBeAttached()
-            expect($viewport.css('overflow-y')).toEqual('scroll')
-            expect($rootOverflowElement.css('overflow-y')).toEqual('hidden')
-            expect(parseInt($body.css('padding-right'))).toBeAround(scrollbarWidth, 5)
+            u.nextFrame =>
+              @respondWith('<div class="container">text</div>')
 
-            up.modal.close().then ->
-              expect($rootOverflowElement.css('overflow-y')).toEqual('scroll')
-              expect(parseInt($body.css('padding-right'))).toBe(0)
-              done()
+            promise.then ->
+              $modal = $('.up-modal')
+              $viewport = $modal.find('.up-modal-viewport')
+              scrollbarWidth = up.viewport.scrollbarWidth()
+
+              expect($modal).toBeAttached()
+              expect($viewport.css('overflow-y')).toEqual('scroll')
+              expect($rootOverflowElement.css('overflow-y')).toEqual('hidden')
+              expect(parseInt($body.css('padding-right'))).toBeAround(scrollbarWidth, 5)
+
+              up.modal.close().then ->
+                expect($rootOverflowElement.css('overflow-y')).toEqual('scroll')
+                expect(parseInt($body.css('padding-right'))).toBe(0)
+                done()
+          else
+            expect(true).toBe(true)
+            done()
 
         it "gives the scrollbar to .up-modal instead of .up-modal-viewport while animating, so we don't see scaled scrollbars in a zoom-in animation", (done) ->
           openPromise = up.modal.extract('.container', '<div class="container">text</div>', animation: 'fade-in', duration: 100)
@@ -154,8 +163,9 @@ describe 'up.modal', ->
                 expect($viewport.css('overflow-y')).toEqual('hidden')
                 done()
 
-        it 'does not add right padding to the body if the body has overflow-y: hidden', (done) ->
-          restoreBody = e.writeTemporaryStyle($('body'), overflowY: 'hidden')
+        it "does not add right padding to the body if the document's overflow element has overflow-y: hidden", (done) ->
+          restoreBody = e.writeTemporaryStyle(up.viewport.rootOverflowElement(), overflowY: 'hidden')
+          $fixture('.spacer').css(height: '9000px')
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')
@@ -167,8 +177,8 @@ describe 'up.modal', ->
               restoreBody()
               done()
 
-        it 'does not add right padding to the body if the body has overflow-y: auto, but does not currently have scrollbars', (done) ->
-          restoreBody = e.writeTemporaryStyle($('body'), overflowY: 'auto')
+        it "does not add right padding to the body if the document's overflow element has overflow-y: auto, but does not currently have scrollbars", (done) ->
+          restoreBody = e.writeTemporaryStyle(up.viewport.rootOverflowElement(), overflowY: 'auto')
           restoreReporter = e.writeTemporaryStyle($('.jasmine_html-reporter'), height: '100px', overflowY: 'hidden')
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
@@ -183,23 +193,30 @@ describe 'up.modal', ->
               done()
 
         it 'pushes right-anchored elements away from the edge of the screen', (done) ->
-          scrollbarWidth = up.viewport.scrollbarWidth()
-          $anchoredElement = $fixture('div[up-anchored=right]').css
-            position: 'absolute'
-            top: '0'
-            right: '30px'
+          $fixture('.spacer').css(height: '9000px')
+          # Safari 11 has no vertical scrollbar that takes away space from the document,
+          # so the entire shifting logic is skipped.
+          if up.viewport.rootHasVerticalScrollbar()
+            scrollbarWidth = up.viewport.scrollbarWidth()
+            $anchoredElement = $fixture('div[up-anchored=right]').css
+              position: 'absolute'
+              top: '0'
+              right: '30px'
 
-          promise = up.modal.visit('/foo', target: '.container')
+            promise = up.modal.visit('/foo', target: '.container')
 
-          u.nextFrame =>
-            @respondWith('<div class="container">text</div>')
+            u.nextFrame =>
+              @respondWith('<div class="container">text</div>')
 
-          promise.then ->
-            expect(parseInt($anchoredElement.css('right'))).toBeAround(30 + scrollbarWidth, 10)
+            promise.then ->
+              expect(parseInt($anchoredElement.css('right'))).toBeAround(30 + scrollbarWidth, 10)
 
-            up.modal.close().then ->
-              expect(parseInt($anchoredElement.css('right'))).toBeAround(30 , 10)
-              done()
+              up.modal.close().then ->
+                expect(parseInt($anchoredElement.css('right'))).toBeAround(30 , 10)
+                done()
+          else
+            expect(true).toBe(true)
+            done()
 
       describe 'opening a modal while another modal is open', ->
 
