@@ -9,10 +9,6 @@ describe 'up.modal', ->
     up.modal.config.closeDuration = 5
 
   describe 'JavaScript functions', ->
-    # Safari overlays the scrollbar tracker over the picture.
-    # The scrollbar does not take space.
-    # TODO: This is no longer true for new Safaris
-    assumedScrollbarWidth = if AgentDetector.isSafari() then 0 else 15
 
     describe 'up.modal.follow', ->
 
@@ -124,11 +120,12 @@ describe 'up.modal', ->
           promise.then ->
             $modal = $('.up-modal')
             $viewport = $modal.find('.up-modal-viewport')
+            scrollbarWidth = up.viewport.scrollbarWidth()
 
             expect($modal).toBeAttached()
             expect($viewport.css('overflow-y')).toEqual('scroll')
             expect($rootOverflowElement.css('overflow-y')).toEqual('hidden')
-            expect(parseInt($body.css('padding-right'))).toBeAround(assumedScrollbarWidth, 5)
+            expect(parseInt($body.css('padding-right'))).toBeAround(scrollbarWidth, 5)
 
             up.modal.close().then ->
               expect($rootOverflowElement.css('overflow-y')).toEqual('scroll')
@@ -186,7 +183,7 @@ describe 'up.modal', ->
               done()
 
         it 'pushes right-anchored elements away from the edge of the screen', (done) ->
-
+          scrollbarWidth = up.viewport.scrollbarWidth()
           $anchoredElement = $fixture('div[up-anchored=right]').css
             position: 'absolute'
             top: '0'
@@ -198,7 +195,7 @@ describe 'up.modal', ->
             @respondWith('<div class="container">text</div>')
 
           promise.then ->
-            expect(parseInt($anchoredElement.css('right'))).toBeAround(30 + assumedScrollbarWidth, 10)
+            expect(parseInt($anchoredElement.css('right'))).toBeAround(30 + scrollbarWidth, 10)
 
             up.modal.close().then ->
               expect(parseInt($anchoredElement.css('right'))).toBeAround(30 , 10)
@@ -208,7 +205,8 @@ describe 'up.modal', ->
 
         it 'does not open multiple modals or pad the body twice if the user starts loading a second modal before the first was done loading', (done) ->
           up.modal.config.closeDuration = 10
-
+          scrollbarWidth = up.viewport.scrollbarWidth()
+          
           # Load a first modal
           up.modal.visit('/path1', target: '.container', animation: 'fade-in', duration: 50)
 
@@ -246,9 +244,9 @@ describe 'up.modal', ->
                     expect($('.up-modal-dialog').length).toBe(1)
                     expect($('.container')).toHaveText('response3')
                     bodyPadding = parseInt($('body').css('padding-right'))
-                    expect(bodyPadding).toBeAround(assumedScrollbarWidth, 10)
-                    if assumedScrollbarWidth > 0 # this test does not make sense on Safari
-                      expect(bodyPadding).not.toBeAround(2 * assumedScrollbarWidth, 2 * 5)
+                    expect(bodyPadding).toBeAround(scrollbarWidth, 10)
+                    if scrollbarWidth > 0 # this test does not make sense on old Safaris
+                      expect(bodyPadding).not.toBeAround(2 * scrollbarWidth, 2 * 5)
                     done()
 
         it 'closes the current modal and wait for its close animation to finish before starting the open animation of a second modal', asyncSpec (next) ->
