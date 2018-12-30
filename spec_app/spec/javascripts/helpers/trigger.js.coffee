@@ -50,7 +50,7 @@ $ = jQuery
       cancelable: true,
       bubbles: true
     )
-    event = new Event('submit', options)
+    event = createEvent('submit', options)
     form.dispatchEvent(event)
 
   change = (field, options) ->
@@ -59,7 +59,7 @@ $ = jQuery
       cancelable: false,
       bubbles: true
     )
-    event = new Event('change', options)
+    event = createEvent('change', options)
     field.dispatchEvent(event)
 
   input = (field, options) ->
@@ -68,17 +68,15 @@ $ = jQuery
       cancelable: false,
       bubbles: true
     )
-    event = new Event('input', options)
+    event = createEvent('input', options)
     field.dispatchEvent(event)
 
   escapeSequence = (element, options) ->
     options = u.options(options,
       key: 'Escape'
-      cancelable: true,
-      bubbles: true
     )
     for type in ['keydown', 'keypress', 'keyup']
-      event = new KeyboardEvent(type, options)
+      event = createKeyboardEvent(type, options)
       element.dispatchEvent(event)
 
   clickSequence = (element, options) ->
@@ -98,6 +96,17 @@ $ = jQuery
     $element = $(element)
     mouseout($element, options)
     mouseleave($element, options)
+
+  # Can't use the new Event constructor in IE11 because computer.
+  # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
+  createEvent = (type, options) ->
+    options = u.options(options,
+      cancelable: true,
+      bubbles: true
+    )
+    event = document.createEvent('Event')
+    event.initEvent(type, options.bubbles, options.cancelable)
+    event
 
   # Can't use the new MouseEvent constructor in IE11 because computer.
   # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
@@ -137,6 +146,36 @@ $ = jQuery
     )
     event
 
+  createKeyboardEvent = (type, options) ->
+    options = u.options(options,
+      cancelable: true,
+      bubbles: true,
+      view: window,
+      key: null,
+    )
+
+    if canEventConstructors()
+      event = new KeyboardEvent(type, options)
+    else
+      event = document.createEvent('KeyboardEvent')
+      # The argument of initKeyboardEvent differs wildly between browsers.
+      # In IE 11 it is initKeyboardEvent(type, canBubble, cancelable, view, key, location, modifierList, repeat, locale).
+      event.initKeyboardEvent(type,
+        options.bubbles,
+        options.cancelable,
+        options.view,
+        options.key,
+        null,
+        null,
+        null,
+        null,
+      )
+
+    event
+
+  canEventConstructors = ->
+    typeof window.Event == "function"
+
   dispatch = (element, event) ->
     element = e.get(element)
     element.dispatchEvent(event)
@@ -155,6 +194,8 @@ $ = jQuery
   submit: submit
   change: change
   input: input
+  createEvent: createEvent
   createMouseEvent: createMouseEvent
-  
+  createKeyboardEvent: createKeyboardEvent
+
 )()

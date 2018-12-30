@@ -528,7 +528,7 @@ describe 'up.link', ->
       buildEvent = (target, attrs) ->
         event = Trigger.createMouseEvent('mousedown', attrs)
         # Cannot change event.target on a native event property, but we can with Object.defineProperty()
-        Object.defineProperty(event, 'target', value: target)
+        Object.defineProperty(event, 'target', get: -> target)
         event
 
       it "returns true when the given event's target is the given link itself", ->

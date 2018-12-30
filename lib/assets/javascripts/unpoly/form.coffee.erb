@@ -79,7 +79,7 @@ up.form = do ->
   submittingButton = (form) ->
     selector = submitButtonSelector()
     focusedElement = document.activeElement
-    if e.matches(focusedElement, selector) && form.contains(focusedElement)
+    if focusedElement && e.matches(focusedElement, selector) && form.contains(focusedElement)
       return focusedElement
     else
       # If no button is focused, we assume the first button in the form.
@@ -453,7 +453,7 @@ up.form = do ->
     u.isPresent(targetSelector) or up.fail("No switch target given for %o", switcher)
     fieldValues = switcherValues(switcher)
 
-    e.descendants(form, targetSelector).forEach (target) ->
+    u.each e.descendants(form, targetSelector), (target) ->
       switchTarget(target, fieldValues)
 
   ###**

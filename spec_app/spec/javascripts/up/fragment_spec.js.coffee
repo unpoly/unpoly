@@ -2392,7 +2392,9 @@ describe 'up.fragment', ->
         next.after 100, ->
           expect(destructor).not.toHaveBeenCalled()
 
-        next.after (100 + (tolerance = 70)), ->
+          next.await(destroyDone)
+
+        next ->
           expect(destructor).toHaveBeenCalledWith('old text',)
 
 
