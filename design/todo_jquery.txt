@@ -3,10 +3,6 @@
 - compatibility layer
   - upgrade makandracards.com with the jquery compatibility layer to see if it's convenient enough
 
-- Check if we really need to do e.get(...) in every single function that works with elements
-  - Do we really need to support `elementOrSelector` instead of just `element` in the public API?
-  - note that e.get() also converts jquery down to elements. do we want to support this for public API?
-
 - complete (and maybe unify) link variant parsing options
   - can FollowVariant do most defaults?
   - Remove 'none' default for animation options in link.follow etc.
