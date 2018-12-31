@@ -2,25 +2,7 @@ u = up.util
 
 class up.Selector
 
-  CSS_NAME = '-?[_a-zA-Z]+[_a-zA-Z0-9-]*'
-  CSS_UNQUOTED_VALUE = '[^\'"\\s\\(\\)\\[\\]]*'
-  CSS_QUOTED_VALUE = '(\'[^\']*\'|"[^"]*")'
-  CSS_VALUE = "(#{CSS_QUOTED_VALUE}|#{CSS_UNQUOTED_VALUE})"
-  CSS_ATTR_OPERATOR = '\\s*(\\=|\\*\\=|\\^\\=|\\$\\=|\\|\\=|\\~\\=)\\s*'
-
-  CSS_ATTR = "\\[#{CSS_NAME}(#{CSS_ATTR_OPERATOR}#{CSS_VALUE})?\\]"
-  CSS_CLASS = "\\.#{CSS_NAME}"
-  CSS_ID = "\\##{CSS_NAME}"
-  CSS_TAG = CSS_NAME
-
-  CSS_NODE = "(#{CSS_TAG}|#{CSS_CLASS}|#{CSS_ID}|#{CSS_ATTR})"
-  CSS_NODE_RE = new RegExp(CSS_NODE)
-
-  # CSS_TREE_OPERATOR = '\\s*(\\s+|,|\\>|\\+|\\~)\\s*'
-  # CSS_TREE = "(#{CSS_NODE}(#{CSS_TREE_OPERATOR}#{CSS_NODE})*)"
-
-  CSS_HAS_SUFFIX = "\\:has\\(([^\\)]+)\\)$"
-  CSS_HAS_SUFFIX_RE = new RegExp(CSS_HAS_SUFFIX)
+  CSS_HAS_SUFFIX_PATTERN = new RegExp("\\:has\\(([^\\)]+)\\)$")
 
   constructor: (@selector, @filterFn) ->
 
@@ -41,12 +23,6 @@ class up.Selector
     else
       candidates = root.querySelectorAll(@selector)
       u.detect(candidates, @filterFn)
-
-  all: ->
-    @descendants(document)
-
-  first: ->
-    @descendant(document)
 
   subtree: (root) ->
     matches = []
@@ -76,7 +52,7 @@ class up.Selector
 
   @parse: (selector) ->
     filter = null
-    selector = selector.replace CSS_HAS_SUFFIX_RE, (match, descendantSelector) ->
+    selector = selector.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->
       filter = (element) ->
         element.querySelector(descendantSelector)
       return ''

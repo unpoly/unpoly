@@ -16,10 +16,10 @@ up.element = do ->
     s(selector).descendants(root)
 
   first = (selector) ->
-    s(selector).first()
+    descendant(document, selector)
 
   all = (selector) ->
-    s(selector).all()
+    descendants(document, selector)
 
   subtree = (root, selector) ->
     s(selector).subtree(root)
