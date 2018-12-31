@@ -292,7 +292,7 @@ up.element = do ->
         for klass in u.wrapList(classValue)
           element.classList.add(klass)
       if styleValue = u.pluckKey(attrs, 'style')
-        writeInlineStyle(element, styleValue)
+        setInlineStyle(element, styleValue)
       if textValue = u.pluckKey(attrs, 'text')
         element.innerText = textValue
       setAttrs(element, attrs)
@@ -406,7 +406,7 @@ up.element = do ->
   @internal
   ###
   concludeCssTransition = (element) ->
-    undo = writeTemporaryStyle(element, transition: 'none')
+    undo = setTemporaryStyle(element, transition: 'none')
     # Browsers need to paint at least one frame without a transition to stop the
     # animation. In theory we could just wait until the next paint, but in case
     # someone will set another transition after us, let's force a repaint here.
@@ -424,7 +424,7 @@ up.element = do ->
     if u.isOptions(elementOrStyleHash)
       styleHash = elementOrStyleHash
     else
-      styleHash = readComputedStyle(elementOrStyleHash)
+      styleHash = computedStyle(elementOrStyleHash)
 
     prop = styleHash.transitionProperty
     duration = styleHash.transitionDuration
@@ -445,9 +445,9 @@ up.element = do ->
 
     offsetParentRect = element.offsetParent.getBoundingClientRect()
 
-    writeInlineStyle element,
-      left: elementRectAsFixed.left - readComputedStyleNumber(element, 'margin-left') - offsetParentRect.left
-      top: elementRectAsFixed.top - readComputedStyleNumber(element, 'margin-top') - offsetParentRect.top
+    setInlineStyle element,
+      left: elementRectAsFixed.left - computedStyleNumber(element, 'margin-left') - offsetParentRect.left
+      top: elementRectAsFixed.top - computedStyleNumber(element, 'margin-top') - offsetParentRect.top
       right: ''
       bottom: ''
 
@@ -521,7 +521,7 @@ up.element = do ->
   ###**
   Temporarily sets the CSS for the given element.
 
-  @function up.util.writeTemporaryStyle
+  @function up.util.setTemporaryStyle
   @param {jQuery} $element
   @param {Object} css
   @param {Function} [block]
@@ -531,10 +531,10 @@ up.element = do ->
     A function that restores the original CSS when called.
   @internal
   ###
-  writeTemporaryStyle = (element, newCss, block) ->
-    oldStyles = readInlineStyle(element, Object.keys(newCss))
-    restoreOldStyles = -> writeInlineStyle(element, oldStyles)
-    writeInlineStyle(element, newCss)
+  setTemporaryStyle = (element, newCss, block) ->
+    oldStyles = inlineStyle(element, Object.keys(newCss))
+    restoreOldStyles = -> setInlineStyle(element, oldStyles)
+    setInlineStyle(element, newCss)
     if block
       # If a block was passed, we run the block and restore old styles.
       block()
@@ -546,14 +546,14 @@ up.element = do ->
   ###**
   Gets the computed style(s) for the given element.
 
-  @function up.element.readComputedStyle
+  @function up.element.computedStyle
   @param {jQuery|Element} element
   @param {String|Array} propOrProps
     One or more CSS property names in camelCase.
   @return {string|object}
   @internal
   ###
-  readComputedStyle = (element, props) ->
+  computedStyle = (element, props) ->
     element = up.element.get(element)
     style = window.getComputedStyle(element)
     extractFromStyleObject(style, props)
@@ -562,15 +562,15 @@ up.element = do ->
   Gets a computed style value for the given element.
   If a value is set, the value is parsed to a number before returning.
 
-  @function up.element.readComputedStyleNumber
+  @function up.element.computedStyleNumber
   @param {jQuery|Element} element
   @param {String} prop
     A CSS property name in camelCase.
   @return {string|object}
   @internal
   ###
-  readComputedStyleNumber = (element, prop) ->
-    rawValue = readComputedStyle(element, prop)
+  computedStyleNumber = (element, prop) ->
+    rawValue = computedStyle(element, prop)
     if u.isGiven(rawValue)
       parseFloat(rawValue)
     else
@@ -579,14 +579,14 @@ up.element = do ->
   ###**
   Gets the given inline style(s) from the given element's `[style]` attribute.
 
-  @function up.element.readInlineStyle
+  @function up.element.inlineStyle
   @param {jQuery|Element} element
   @param {String|Array} propOrProps
     One or more CSS property names in camelCase.
   @return {string|object}
   @internal
   ###
-  readInlineStyle = (element, props) ->
+  inlineStyle = (element, props) ->
     element = up.element.get(element)
     style = element.style
     extractFromStyleObject(style, props)
@@ -600,14 +600,14 @@ up.element = do ->
   ###**
   Merges the given inline style(s) into the given element's `[style]` attribute.
 
-  @function up.element.writeInlineStyle
+  @function up.element.setInlineStyle
   @param {jQuery|Element} element
   @param {Object} props
     One or more CSS properties with camelCase keys.
   @return {string|object}
   @internal
   ###
-  writeInlineStyle = (element, props) ->
+  setInlineStyle = (element, props) ->
     element = up.element.get(element)
     style = element.style
     for key, value of props
@@ -713,11 +713,11 @@ up.element = do ->
   castedAttr: castedAttr
   numberAttr: numberAttr
   jsonAttr: jsonAttr
-  writeTemporaryStyle: writeTemporaryStyle
-  readComputedStyle: readComputedStyle
-  readComputedStyleNumber: readComputedStyleNumber
-  readInlineStyle: readInlineStyle
-  writeInlineStyle: writeInlineStyle
+  setTemporaryStyle: setTemporaryStyle
+  computedStyle: computedStyle
+  computedStyleNumber: computedStyleNumber
+  inlineStyle: inlineStyle
+  setInlineStyle: setInlineStyle
   resolveSelector: resolveSelector
   none: -> NONE
 

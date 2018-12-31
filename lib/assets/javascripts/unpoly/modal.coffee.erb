@@ -254,7 +254,7 @@ up.modal = do ->
     modalElement.setAttribute('up-position', state.position) if u.isPresent(state.position)
 
     dialogStyles = u.only(options, 'width', 'maxWidth', 'height')
-    e.writeInlineStyle(part('dialog'), dialogStyles)
+    e.setInlineStyle(part('dialog'), dialogStyles)
 
     unless state.closable
       closeElement = part('close')

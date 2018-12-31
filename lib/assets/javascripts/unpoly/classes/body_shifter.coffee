@@ -20,16 +20,16 @@ class up.BodyShifter
 
     scrollbarWidth = up.viewport.scrollbarWidth()
 
-    bodyRightPadding = e.readComputedStyleNumber(body, 'paddingRight')
+    bodyRightPadding = e.computedStyleNumber(body, 'paddingRight')
     bodyRightShift = scrollbarWidth + bodyRightPadding
 
-    @unshiftFns.push e.writeTemporaryStyle(body, paddingRight: bodyRightShift)
-    @unshiftFns.push e.writeTemporaryStyle(overflowElement, overflowY: 'hidden')
+    @unshiftFns.push e.setTemporaryStyle(body, paddingRight: bodyRightShift)
+    @unshiftFns.push e.setTemporaryStyle(overflowElement, overflowY: 'hidden')
 
     for anchor in up.viewport.anchoredRight()
-      elementRight = e.readComputedStyleNumber(anchor, 'right')
+      elementRight = e.computedStyleNumber(anchor, 'right')
       elementRightShift = scrollbarWidth + elementRight
-      @unshiftFns.push e.writeTemporaryStyle(anchor, right: elementRightShift)
+      @unshiftFns.push e.setTemporaryStyle(anchor, right: elementRightShift)
 
   unshift: ->
     while unshiftFn = @unshiftFns.pop()

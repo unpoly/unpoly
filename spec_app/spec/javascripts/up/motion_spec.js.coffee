@@ -94,7 +94,7 @@ describe 'up.motion', ->
           $element = $fixture('.element').text('content')
 
           animation = ($element, options) ->
-            e.writeInlineStyle($element, opacity: 0)
+            e.setInlineStyle($element, opacity: 0)
             up.animate($element, { opacity: 1 }, options)
 
           up.animate($element, animation, duration: 300, easing: 'linear')
@@ -111,7 +111,7 @@ describe 'up.motion', ->
           $element = $fixture('.element').text('content')
 
           animation = ($element, options) ->
-            e.writeInlineStyle($element, opacity: 0)
+            e.setInlineStyle($element, opacity: 0)
             up.animate($element, { opacity: 1 }, options)
 
           up.animate($element, animation, duration: 200, easing: 'linear')

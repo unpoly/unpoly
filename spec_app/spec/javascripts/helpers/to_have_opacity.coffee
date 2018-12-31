@@ -7,7 +7,7 @@ beforeEach ->
     toHaveOpacity: (util, customEqualityTesters) ->
       compare: (element, expectedOpacity, tolerance = 0.0) ->
         element = e.get(element)
-        actualOpacity = e.readComputedStyleNumber(element, 'opacity')
+        actualOpacity = e.computedStyleNumber(element, 'opacity')
         result = {}
         result.pass =  Math.abs(expectedOpacity - actualOpacity) <= tolerance
         unless result.pass

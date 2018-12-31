@@ -89,4 +89,4 @@ class up.Tether
   setBoundsOffset: (left, top) ->
     @offsetLeft = left
     @offsetTop = top
-    e.writeInlineStyle(@root, { left, top })
+    e.setInlineStyle(@root, { left, top })
