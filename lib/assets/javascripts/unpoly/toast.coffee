@@ -42,7 +42,7 @@ up.toast = do ->
 
     message = messageToHtml(message)
 
-    state.element = e.createFragmentFromHtml """
+    state.element = e.createFromHtml """
       <div class="up-toast">
         <div class="up-toast-message">#{message}</div>
         <div class="up-toast-actions"></div>

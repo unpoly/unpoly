@@ -540,13 +540,13 @@ describe 'up.element', ->
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 
-  describe 'up.element.createFragmentFromHtml', ->
+  describe 'up.element.createFromHtml', ->
 
     it 'creates an element from the given HTML fragment', ->
       html = """
         <h1>Full story</h1>
         """
-      element = up.element.createFragmentFromHtml(html)
+      element = up.element.createFromHtml(html)
       expect(element.tagName).toEqual('H1')
       expect(element.textContent).toEqual('Full story')
 

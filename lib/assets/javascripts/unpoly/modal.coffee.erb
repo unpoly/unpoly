@@ -249,7 +249,7 @@ up.modal = do ->
 
   createHiddenFrame = (target, options) ->
     html = templateHtml()
-    state.modalElement = modalElement = e.createFragmentFromHtml(html)
+    state.modalElement = modalElement = e.createFromHtml(html)
     modalElement.setAttribute('up-flavor', state.flavor)
     modalElement.setAttribute('up-position', state.position) if u.isPresent(state.position)
 

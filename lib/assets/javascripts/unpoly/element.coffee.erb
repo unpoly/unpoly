@@ -9,28 +9,59 @@ up.element = do ->
   s = (selector) ->
     up.Selector.parse(selector)
 
+  ###**
+  @function up.element.descendant
+  @internal
+  ###
   descendant = (root, selector) ->
     s(selector).descendant(root)
 
+  ###**
+  @function up.element.descendants
+  @internal
+  ###
   descendants = (root, selector) ->
     s(selector).descendants(root)
 
+  ###**
+  @function up.element.first
+  @internal
+  ###
   first = (selector) ->
     descendant(document, selector)
 
+  ###**
+  @function up.element.all
+  @internal
+  ###
   all = (selector) ->
     descendants(document, selector)
 
+  ###**
+  @function up.element.subtree
+  @internal
+  ###
   subtree = (root, selector) ->
     s(selector).subtree(root)
 
+  ###**
+  @function up.element.closest
+  @internal
+  ###
   closest = (element, selector) ->
-    # assertIsElement(element)
     s(selector).closest(element)
 
+  ###**
+  @function up.element.matches
+  @internal
+  ###
   matches = (element, selector) ->
     s(selector).matches(element)
 
+  ###**
+  @function up.element.ancestor
+  @internal
+  ###
   ancestor = (element, selector) ->
     s(selector).ancestor(element)
 
@@ -56,9 +87,9 @@ up.element = do ->
 
   ###**
   If given a string, returns the all elements matching that string.
-  If given any other argument, returns the argument [wrapped as a collection](/up.util.wrapCollection).
+  If given any other argument, returns the argument [wrapped as an array](/up.util.wrapList).
 
-  @function up.element.elements
+  @function up.element.list
   @param {jQuery|Element|String} object
   @return {Element}
   @internal
@@ -72,6 +103,10 @@ up.element = do ->
     else
       u.wrapList(value)
 
+  ###**
+  @function up.element.emit
+  @internal
+  ###
   emit = (element, name, props = {}) ->
     event = document.createEvent('Event')
     event.initEvent(name, true, true) # name, bubbles, cancelable
@@ -92,6 +127,10 @@ up.element = do ->
 #    unless u.isElement(element)
 #      up.fail('Not an element: %o', element)
 
+  ###**
+  @function up.element.remove
+  @internal
+  ###
   remove = (element) ->
     if element.remove
       element.remove()
@@ -99,12 +138,24 @@ up.element = do ->
     else if parent = element.parentNode
       parent.removeChild(element)
 
+  ###**
+  @function up.element.hide
+  @internal
+  ###
   hide = (element) ->
     element.style.display = 'none'
 
+  ###**
+  @function up.element.show
+  @internal
+  ###
   show = (element) ->
     element.style.display = ''
 
+  ###**
+  @function up.element.toggle
+  @internal
+  ###
   toggle = (element, newVisible) ->
     if newVisible
       show(element)
@@ -116,31 +167,59 @@ up.element = do ->
 #      console.debug("Calling %o with %o", fn, args)
 #      fn(args...)
 
+  ###**
+  @function up.element.toggleClass
+  @internal
+  ###
   toggleClass = (element, klass, newPresent) ->
     fn = if newPresent then 'add' else 'remove'
     element.classList[fn](klass)
 
+  ###**
+  @function up.element.setAttrs
+  @internal
+  ###
   setAttrs = (element, attrMap) ->
     for key, value of attrMap
       element.setAttribute(key, value)
 
+  ###**
+  @function up.element.metaContent
+  @internal
+  ###
   metaContent = (name) ->
     selector = "meta" + attributeSelector('name', name)
     first(selector)?.getAttribute('content')
 
+  ###**
+  @function up.element.insertBefore
+  @internal
+  ###
   insertBefore = (existingElement, newElement) ->
     existingElement.insertAdjacentElement('beforebegin', newElement)
 
 #  insertAfter = (existingElement, newElement) ->
 #    existingElement.insertAdjacentElement('afterend', newElement)
 
+  ###**
+  @function up.element.replace
+  @internal
+  ###
   replace = (oldElement, newElement) ->
     oldElement.parentElement.replaceChild(newElement, oldElement)
 
+  ###**
+  @function up.element.setAttrs
+  @internal
+  ###
   setAttrs = (element, attrs) ->
     for name, value of attrs
       element.setAttribute(name, value)
 
+  ###**
+  @function up.element.createFromSelector
+  @internal
+  ###
   createFromSelector = (givenSelector) ->
     # Extract attribute values before we do anything else.
     # Attribute values might contain spaces, and then we would incorrectly
@@ -202,6 +281,10 @@ up.element = do ->
 
   unbind = u.partial(subscribeEvents, 'removeEventListener')
 
+  ###**
+  @function up.element.affix
+  @internal
+  ###
   affix = (container, selector, attrs) ->
     element = createFromSelector(selector)
     if attrs
@@ -262,12 +345,20 @@ up.element = do ->
 
     return selector
 
+  ###**
+  @function up.element.isSingleton
+  @internal
+  ###
   isSingleton = (element) ->
     matches(element, 'html, body, head, title')
 
   elementTagName = (element) ->
     element.tagName.toLowerCase()
 
+  ###**
+  @function up.element.attributeSelector
+  @internal
+  ###
   attributeSelector = (attribute, value) ->
     value = value.replace(/"/g, '\\"')
     "[#{attribute}=\"#{value}\"]"
@@ -277,20 +368,32 @@ up.element = do ->
     classes = u.splitValues(classString)
     u.reject classes, (klass) -> klass.match(/^up-/)
 
+  ###**
+  @function up.element.createDocumentFromHtml
+  @internal
+  ###
   createDocumentFromHtml = (html) ->
     # IE9 cannot set innerHTML on a <html> or <head> element.
     parser = new DOMParser()
     return parser.parseFromString(html, 'text/html')
 
-  createFragmentFromHtml = (html) ->
+  ###**
+  @function up.element.createFromHtml
+  @internal
+  ###
+  createFromHtml = (html) ->
     doc = createDocumentFromHtml(html)
     return doc.body.children[0]
 
+  ###**
+  @function up.element.root
+  @internal
+  ###
   getRoot = ->
     document.documentElement
 
   ###**
-  Forces a paint of the given element.
+  Forces the browser to paint the given element now.
 
   @function up.element.paint
   @internal
@@ -319,12 +422,12 @@ up.element = do ->
   ###
   hasCssTransition = (elementOrStyleHash) ->
     if u.isOptions(elementOrStyleHash)
-      style = elementOrStyleHash
+      styleHash = elementOrStyleHash
     else
-      style = u.getComputedStyle(elementOrStyleHash)
+      styleHash = readComputedStyle(elementOrStyleHash)
 
-    prop = style.transitionProperty
-    duration = style.transitionDuration
+    prop = styleHash.transitionProperty
+    duration = styleHash.transitionDuration
     # The default transition for elements is actually "all 0s ease 0s"
     # instead of "none", although that has the same effect as "none".
     noTransition = (prop == 'none' || (prop == 'all' && duration == 0))
@@ -497,7 +600,7 @@ up.element = do ->
   ###**
   Merges the given inline style(s) into the given element's `[style]` attribute.
 
-  @function up.element.readInlineStyle
+  @function up.element.writeInlineStyle
   @param {jQuery|Element} element
   @param {Object} props
     One or more CSS properties with camelCase keys.
@@ -598,7 +701,7 @@ up.element = do ->
   isSingleton: isSingleton
   attributeSelector: attributeSelector
   createDocumentFromHtml: createDocumentFromHtml
-  createFragmentFromHtml: createFragmentFromHtml
+  createFromHtml: createFromHtml
   root: getRoot
   paint: paint
   concludeCssTransition: concludeCssTransition
