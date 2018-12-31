@@ -237,7 +237,7 @@ up.bus = do ->
     # - Event is triggered on { $target }, but should have an { $element } property
     target = u.pluckKey(eventProps, 'target') ? document
     logEmission(eventName, eventProps)
-    e.triggerCustom(target, eventName, eventProps)
+    e.emit(target, eventName, eventProps)
 
   logEmission = (eventName, eventProps) ->
     if eventProps.hasOwnProperty('message')

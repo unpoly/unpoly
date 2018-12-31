@@ -72,7 +72,7 @@ up.element = do ->
     else
       u.wrapList(value)
 
-  triggerCustom = (element, name, props = {}) ->
+  emit = (element, name, props = {}) ->
     event = document.createEvent('Event')
     event.initEvent(name, true, true) # name, bubbles, cancelable
     u.assign(event, props)
@@ -578,7 +578,7 @@ up.element = do ->
   ancestor: ancestor
   get: getOne
   list: getList
-  triggerCustom: triggerCustom
+  emit: emit
   remove: remove
   toggle: toggle
   toggleClass: toggleClass

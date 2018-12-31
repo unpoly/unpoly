@@ -140,7 +140,7 @@ class up.MotionController
 
   forwardFinishEvent: (original, ghost, duration) =>
     @start original, =>
-      doForward = => e.triggerCustom(ghost, @finishEvent)
+      doForward = => e.emit(ghost, @finishEvent)
       # Forward the finish event to the ghost that is actually animating
       original.addEventListener(@finishEvent, doForward)
       # Our own pseudo-animation finishes when the actual animation on ghost finishes
