@@ -4,7 +4,7 @@ Logging
 
 Unpoly can print debugging information to the developer console, e.g.:
 
-- Which [events](/up.bus) are called
+- Which [events](/up.event) are called
 - When we're [making requests to the network](/up.proxy)
 - Which [compilers](/up.syntax) are applied to which elements
 
@@ -28,7 +28,7 @@ up.log = do ->
     Whether Unpoly will print debugging information to the developer console.
 
     Debugging information includes which elements are being [compiled](/up.syntax)
-    and which [events](/up.bus) are being emitted.
+    and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
   @param {boolean} [options.collapse=false]
     Whether debugging information is printed as a collapsed tree.
@@ -133,7 +133,7 @@ up.log = do ->
   Makes future Unpoly events print vast amounts of debugging information to the developer console.
 
   Debugging information includes which elements are being [compiled](/up.syntax)
-  and which [events](/up.bus) are being emitted.
+  and which [events](/up.event) are being emitted.
 
   @function up.log.enable
   @stable

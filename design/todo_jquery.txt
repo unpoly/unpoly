@@ -1,5 +1,3 @@
-- rename up.bus to up.event
-
 - publish up.element
   - also :has()
 

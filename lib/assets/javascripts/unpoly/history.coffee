@@ -120,7 +120,7 @@ up.history = do ->
   push = (url, options) ->
     options = u.options(options, force: false)
     url = normalizeUrl(url)
-    if (options.force || !isCurrentUrl(url)) && up.bus.nobodyPrevents('up:history:push', url: url, message: "Adding history entry for #{url}")
+    if (options.force || !isCurrentUrl(url)) && up.event.nobodyPrevents('up:history:push', url: url, message: "Adding history entry for #{url}")
       if manipulate('pushState', url)
         up.emit('up:history:pushed', url: url, message: "Advanced to location #{url}")
       else

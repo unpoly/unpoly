@@ -504,7 +504,7 @@ up.fragment = do ->
             newData: plan.newData
             message: ['Keeping element %o', keepable]
 
-          if up.bus.nobodyPrevents('up:fragment:keep', keepEventArgs)
+          if up.event.nobodyPrevents('up:fragment:keep', keepEventArgs)
             plan
 
   ###**

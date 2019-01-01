@@ -1,7 +1,7 @@
 u = up.util
 $ = jQuery
 
-describe 'up.bus', ->
+describe 'up.event', ->
   
   describe 'JavaScript functions', ->
 
@@ -190,7 +190,7 @@ describe 'up.bus', ->
         expect(offing).toThrowError(/(not|never) registered/i)
 
       it 'reduces the internally tracked list of event listeners (bugfix for memory leak)', ->
-        getCount = -> up.bus.knife.get('Object.keys(appListeners).length')
+        getCount = -> up.event.knife.get('Object.keys(appListeners).length')
         oldCount = getCount()
         clickSpy = jasmine.createSpy()
         up.on 'click', '.child', clickSpy
@@ -277,12 +277,12 @@ describe 'up.bus', ->
 
           expect(emittedEvent.target).toEqual($element[0])
 
-    describe 'up.bus.whenEmitted', ->
+    describe 'up.event.whenEmitted', ->
 
       it 'emits the event and fulfills the returned promise when no listener calls event.preventDefault()', (done) ->
         eventListener = jasmine.createSpy('event listener')
         up.on('my:event', eventListener)
-        promise = up.bus.whenEmitted('my:event', key: 'value')
+        promise = up.event.whenEmitted('my:event', key: 'value')
         promiseState(promise).then (result) ->
           expect(eventListener).toHaveBeenCalledWith(jasmine.objectContaining(key: 'value'), jasmine.anything(), jasmine.anything())
           expect(result.state).toEqual('fulfilled')
@@ -291,7 +291,7 @@ describe 'up.bus', ->
       it 'emits the event and rejects the returned promise when any listener calls event.preventDefault()', (done) ->
         eventListener = (event) -> event.preventDefault()
         up.on('my:event', eventListener)
-        promise = up.bus.whenEmitted('my:event', key: 'value')
+        promise = up.event.whenEmitted('my:event', key: 'value')
         promiseState(promise).then (result) ->
           expect(result.state).toEqual('rejected')
           done()

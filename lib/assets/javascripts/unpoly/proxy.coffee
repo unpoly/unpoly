@@ -434,7 +434,7 @@ up.proxy = do ->
       request: request
       message: ['Loading %s %s', request.method, request.url]
 
-    if up.bus.nobodyPrevents('up:proxy:load', eventProps)
+    if up.event.nobodyPrevents('up:proxy:load', eventProps)
       responsePromise = request.send()
       u.always responsePromise, responseReceived
       u.always responsePromise, pokeQueue
@@ -600,7 +600,7 @@ up.proxy = do ->
 
     if up.link.isSafe(link)
       preloadEventAttrs = { message: ['Preloading link %o', link], target: link, link: link }
-      up.bus.whenEmitted('up:link:preload', preloadEventAttrs).then ->
+      up.event.whenEmitted('up:link:preload', preloadEventAttrs).then ->
         variant = up.link.followVariantForLink(link)
         variant.preloadLink(link, options)
     else

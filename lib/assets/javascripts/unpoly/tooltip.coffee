@@ -233,7 +233,7 @@ up.tooltip = do ->
   up.on 'up:framework:reset', reset
 
   # Close the tooltip when the user presses ESC.
-  up.bus.onEscape(-> closeAsap())
+  up.event.onEscape(-> closeAsap())
 
   config: config
   attach: attachAsap

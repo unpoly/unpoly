@@ -270,7 +270,7 @@ up.syntax = do ->
   ###
   registerMacro = (args...) ->
     macro = buildCompiler(args)
-    if up.bus.isBooting()
+    if up.event.isBooting()
       macro.priority = detectSystemMacroPriority(macro.selector) ||
         up.fail('Unregistered priority for system macro %o', macro.selector)
     return insertCompiler(macros, macro)
@@ -301,7 +301,7 @@ up.syntax = do ->
     [selector, options, callback] = parseCompilerArgs(args)
     options = u.options(options,
       selector: selector,
-      isDefault: up.bus.isBooting(),
+      isDefault: up.event.isBooting(),
       priority: 0,
       batch: false
       keep: false,

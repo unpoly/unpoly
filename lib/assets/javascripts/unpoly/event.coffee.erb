@@ -44,9 +44,9 @@ This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
 - You use an [`up-data`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
   to observed elements.
 
-@class up.bus
+@class up.event
 ###
-up.bus = do ->
+up.event = do ->
   
   u = up.util
   e = up.element
@@ -263,7 +263,7 @@ up.bus = do ->
   [Emits an event](/up.emit) and returns whether no listener
   has prevented the default action.
 
-  @function up.bus.nobodyPrevents
+  @function up.event.nobodyPrevents
   @param {string} eventName
   @param {Object} eventProps
   @param {string|Array} [eventProps.message]
@@ -282,7 +282,7 @@ up.bus = do ->
   If any listener prevented the default listener
   the returned promise will never be resolved.
 
-  @function up.bus.whenEmitted
+  @function up.event.whenEmitted
   @param {string} eventName
   @param {Object} eventProps
   @param {string|Array} [eventProps.message]
@@ -300,7 +300,7 @@ up.bus = do ->
   Registers an event listener to be called when the user
   presses the `Escape` key.
 
-  @function up.bus.onEscape
+  @function up.event.onEscape
   @param {Function} listener
     The listener function to register.
   @return {Function}
@@ -316,21 +316,21 @@ up.bus = do ->
   ###**
   Stops the given event from propagating and prevents the default action.
 
-  @function up.bus.haltEvent
+  @function up.event.halt
   @internal
   ###
-  haltEvent = (event) ->
+  halt = (event) ->
     event.stopImmediatePropagation()
     event.stopPropagation()
     event.preventDefault()
 
   ###**
-  @function up.bus.consumeAction
+  @function up.event.consumeAction
   @internal
   ###
   consumeAction = (event) ->
     # Halt the event chain to stop duplicate processing of this user interaction.
-    haltEvent(event)
+    halt(event)
     unless event.type == 'up:action:consumed'
       # Although we have consumed this action and halted the event chain,
       # other components might still need to react. E.g. a popup needs to close when
@@ -415,15 +415,18 @@ up.bus = do ->
   whenEmitted: whenEmitted
   onEscape: onEscape
   emitReset: emitReset
-  haltEvent: haltEvent
+  halt: halt
   consumeAction: consumeAction
   boot: boot
   isBooting: -> isBooting
 
-up.on = up.bus.on
-up.$on = up.bus.$on
-up.off = up.bus.off
-up.$off = up.bus.off # it's the same as up.off()
-up.emit = up.bus.emit
-up.reset = up.bus.emitReset
-up.boot = up.bus.boot
+up.on = up.event.on
+up.$on = up.event.$on
+up.off = up.event.off
+up.$off = up.event.off # it's the same as up.off()
+up.emit = up.event.emit
+up.reset = up.event.emitReset
+up.boot = up.event.boot
+
+up.legacy.renamedModule 'bus', 'event'
+

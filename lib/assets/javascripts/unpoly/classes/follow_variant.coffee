@@ -14,9 +14,9 @@ class up.FollowVariant
       if e.matches(link, '[up-instant]')
         # If the link was already processed on mousedown, we still need
         # to prevent this later click event's chain.
-        up.bus.haltEvent(event)
+        up.event.halt(event)
       else
-        up.bus.consumeAction(event)
+        up.event.consumeAction(event)
         @followLink(link)
     else
       # For tests
@@ -24,7 +24,7 @@ class up.FollowVariant
 
   onMousedown: (event, link) =>
     if up.link.shouldProcessEvent(event, link)
-      up.bus.consumeAction(event)
+      up.event.consumeAction(event)
       @followLink(link)
 
   fullSelector: (additionalClause = '') =>
@@ -41,7 +41,7 @@ class up.FollowVariant
       u.muteRejection @onMousedown(args...)
 
   followLink: (link, options = {}) =>
-    promise = up.bus.whenEmitted('up:link:follow', message: 'Following link', target: link)
+    promise = up.event.whenEmitted('up:link:follow', message: 'Following link', target: link)
     promise = promise.then =>
       up.feedback.start(link) unless options.preload
       @followNow(link, options)

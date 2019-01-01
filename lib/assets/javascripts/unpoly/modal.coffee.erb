@@ -450,7 +450,7 @@ up.modal = do ->
       return up.replace(target, url, options)
 
     up.browser.whenConfirmed(options).then ->
-      up.bus.whenEmitted('up:modal:open', url: url, message: 'Opening modal').then ->
+      up.event.whenEmitted('up:modal:open', url: url, message: 'Opening modal').then ->
         state.phase = 'opening'
         state.flavor = options.flavor
         state.sticky = options.sticky
@@ -531,7 +531,7 @@ up.modal = do ->
       title: state.coveredTitle
     )
 
-    up.bus.whenEmitted('up:modal:close', target: state.modalElement, message: 'Closing modal').then ->
+    up.event.whenEmitted('up:modal:close', target: state.modalElement, message: 'Closing modal').then ->
       state.phase = 'closing'
       # the current URL must be deleted *before* calling up.destroy,
       # since up.feedback listens to up:fragment:destroyed and then
@@ -702,7 +702,7 @@ up.modal = do ->
 
     target = event.target
     unless e.closest(target, '.up-modal-dialog') || e.closest(target, '[up-modal]')
-      up.bus.consumeAction(event)
+      up.event.consumeAction(event)
       u.muteRejection closeAsap()
   )
 
@@ -715,7 +715,7 @@ up.modal = do ->
   )
 
   # Close the pop-up overlay when the user presses ESC.
-  up.bus.onEscape ->
+  up.event.onEscape ->
     if state.closable
       u.muteRejection closeAsap()
 
@@ -738,7 +738,7 @@ up.modal = do ->
     # The event should not trigger anything else. The user needs to click again for another interaction.
     # Also only prevent the default when we actually closed a modal.
     # This way we can have buttons that close a modal when within a modal, but link to a destination if not.
-    up.bus.consumeAction(event)
+    up.event.consumeAction(event)
   )
 
   ###**

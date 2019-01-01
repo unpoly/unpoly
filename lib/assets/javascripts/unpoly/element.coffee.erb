@@ -680,7 +680,7 @@ up.element = do ->
   ancestor: ancestor # not practical. we use it to implement closest:
   get: getOne # practical for code that also works with jQuery
   list: getList # practical for composing multiple collections, or wrapping.
-  emit: emit # let's keep this internal. but up.(bus).emit() needs to accept a parent!
+  emit: emit # let's keep this internal. but up.(event).emit() needs to accept a parent!
   remove: remove # needed for IE11
   toggle: toggle # practical, but we need to (1) implement visibility-detection
   toggleClass: toggleClass # practical, but we need to implement class detection
@@ -693,8 +693,8 @@ up.element = do ->
   createFromSelector: createFromSelector # practical for element creation. must support { style } / { attrs } options.
   setAttrs: setAttrs # practical
   affix: affix # practical for element creation
-  on: bind # confusing because we have up.on. let's rather move this to bus and support: up.on(element, event, callback).
-  off: unbind # confusing because we have up.on. let's rather move this to bus and support: up.off(element, event, callback).
+  on: bind # confusing because we have up.on. let's rather move this to event and support: up.on(element, event, callback).
+  off: unbind # confusing because we have up.on. let's rather move this to event and support: up.off(element, event, callback).
   toSelector: toSelector # practical
   isSingleton: isSingleton # internal
   attributeSelector: attributeSelector # internal

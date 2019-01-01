@@ -229,7 +229,7 @@ up.popup = do ->
       return up.replace(target, url, options)
 
     up.browser.whenConfirmed(options).then ->
-      up.bus.whenEmitted('up:popup:open', url: url, message: 'Opening popup').then ->
+      up.event.whenEmitted('up:popup:open', url: url, message: 'Opening popup').then ->
         state.phase = 'opening'
         state.anchor = anchor
         state.position = position
@@ -296,7 +296,7 @@ up.popup = do ->
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
     u.assign(options, animateOptions)
 
-    up.bus.whenEmitted('up:popup:close', message: 'Closing popup', target: state.popup).then ->
+    up.event.whenEmitted('up:popup:close', message: 'Closing popup', target: state.popup).then ->
       state.phase = 'closing'
       state.url = null
       state.coveredUrl = null
@@ -421,7 +421,7 @@ up.popup = do ->
       u.muteRejection autoclose()
 
   # Close the pop-up overlay when the user presses ESC.
-  up.bus.onEscape ->
+  up.event.onEscape ->
     u.muteRejection closeAsap()
 
   ###**
@@ -451,7 +451,7 @@ up.popup = do ->
     # Only prevent the default when we actually closed a popup.
     # This way we can have buttons that close a popup when within a popup,
     # but link to a destination if not.
-    up.bus.consumeAction(event)
+    up.event.consumeAction(event)
 
   # When the user uses the back button we will usually restore <body> or a base container.
   # We close any open modal because it probably won't match the restored state.

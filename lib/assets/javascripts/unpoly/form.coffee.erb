@@ -213,7 +213,7 @@ up.form = do ->
       options.failTransition = false
       options.headers[up.protocol.config.validateHeader] = options.validate
 
-    up.bus.whenEmitted('up:form:submit', message: 'Submitting form', target: form).then ->
+    up.event.whenEmitted('up:form:submit', message: 'Submitting form', target: form).then ->
       up.feedback.start(form)
 
       # If we can't update the location URL, fall back to a vanilla form submission.
@@ -626,7 +626,7 @@ up.form = do ->
   @stable
   ###
   up.on 'submit', 'form[up-target]', (event, form) ->
-    up.bus.consumeAction(event)
+    up.event.consumeAction(event)
     u.muteRejection submit(form)
 
   ###**

@@ -4,7 +4,7 @@
 #= require ./unpoly/element
 #= require_tree ./unpoly/classes
 #= require ./unpoly/browser
-#= require ./unpoly/bus
+#= require ./unpoly/event
 #= require ./unpoly/cookie
 #= require ./unpoly/protocol
 #= require ./unpoly/log
