@@ -487,7 +487,7 @@ up.fragment = do ->
         u.isString(partnerSelector) or partnerSelector = '&'
         partnerSelector = e.resolveSelector(partnerSelector, keepable)
         if options.descendantsOnly
-          partner = e.descendant(newElement, partnerSelector)
+          partner = e.first(newElement, partnerSelector)
         else
           partner = e.subtree(newElement, partnerSelector)[0]
         if partner && e.matches(partner, '[up-keep]')
@@ -684,7 +684,9 @@ up.fragment = do ->
 
   Also see the [`.up-destroying`](/up-destroying) class.
 
-  @function up.first
+  @function up.fragment.first
+  @param {Element|jQuery} [parent=document]
+  @param {Element|jQuery} selector
   @param {string} selector
   @param {string} [options.layer='auto']
     The name of the layer in which to find the element.
@@ -694,21 +696,26 @@ up.fragment = do ->
     An second element or selector that can be referenced as `&` in the first selector:
 
         $input = $('input.email');
-        up.first('.field:has(&)', { origin: $input }); // returns the .field containing $input
+        up.fragment.first('.field:has(&)', { origin: $input }); // returns the .field containing $input
   @return {jQuery|undefined}
     The first element that is neither a ghost or being destroyed,
     or `undefined` if no such element was found.
   @experimental
   ###
-  first = (selector, options) ->
-    options = u.options(options, layer: 'auto')
-    selector = e.resolveSelector(selector, options.origin)
-    if options.layer == 'auto'
-      firstInPriority(selector, options.origin)
-    else
-      firstInLayer(selector, options.layer)
+  first = (args...) ->
+    options = u.extractOptions(args)
+    selector = args.pop()
+    parent = args[0] || document
+    layer = options.layer ? 'auto'
+    origin = options.origin
 
-  firstInPriority = (selector, origin) ->
+    selector = e.resolveSelector(selector, origin)
+    if layer == 'auto'
+      firstInPriority(parent, selector, origin)
+    else
+      firstInLayer(parent, selector, layer)
+
+  firstInPriority = (parent, selector, origin) ->
     layers = ['popup', 'modal', 'page']
     if origin
       originLayer = layerOf(origin)
@@ -716,10 +723,10 @@ up.fragment = do ->
       u.remove(layers, originLayer)
       layers.unshift(originLayer)
     u.detectResult layers, (layer) ->
-      return firstInLayer(selector, layer)
+      return firstInLayer(parent, selector, layer)
 
-  firstInLayer = (selector, layer) ->
-    elements = e.all(selector)
+  firstInLayer = (parent, selector, layer) ->
+    elements = e.all(parent, selector)
     return u.detectResult elements, (element) ->
       if isRealElement(element) && matchesLayer(element, layer)
         return element
@@ -739,28 +746,28 @@ up.fragment = do ->
   matchesLayer = (element, layer) ->
     !layer || layerOf(element) == layer
 
-  ###**
-  Returns all elements matching the given selector, but
-  ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
-
-  @function up.all
-  @param {string|jQuery|Array<Element>} selectorOrElements
-  @param {string|Element|jQuery} [options.origin]
-    An second element or selector that can be referenced as `&` in the first selector.
-  @param {string} [options.layer]
-    The name of the layer in which to find the element. Valid values are
-    `'page'`, `'modal'` and `'popup'`.
-  @return {jQuery}
-    A jQuery collection of matching elements.
-  @experimental
-  ###
-  all = (selector, options) ->
-    options = u.options(options)
-    selector = e.resolveSelector(selector, options.origin)
-    root = options.root ? document
-    matches = e.descendants(root, selector)
-    e.select matches, (match) ->
-      isRealElement(element) && matchesLayer(element, options.layer)
+#  ###**
+#  Returns all elements matching the given selector, but
+#  ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
+#
+#  @function up.all
+#  @param {string|jQuery|Array<Element>} selectorOrElements
+#  @param {string|Element|jQuery} [options.origin]
+#    An second element or selector that can be referenced as `&` in the first selector.
+#  @param {string} [options.layer]
+#    The name of the layer in which to find the element. Valid values are
+#    `'page'`, `'modal'` and `'popup'`.
+#  @return {jQuery}
+#    A jQuery collection of matching elements.
+#  @experimental
+#  ###
+#  all = (selector, options) ->
+#    options = u.options(options)
+#    selector = e.resolveSelector(selector, options.origin)
+#    root = options.root ? document
+#    matches = e.all(root, selector)
+#    u.select matches, (match) ->
+#      isRealElement(element) && matchesLayer(element, options.layer)
 
   ###**
   @function createPlaceHolder
@@ -831,7 +838,7 @@ up.fragment = do ->
 
   If the removal is animated, the class is assigned before the animation.
 
-  Also see the [`up.first()`](/up.first) function.
+  Also see the [`up.fragment.first()`](/up.fragment.first) function.
 
   @selector .up-destroying
   @stable
@@ -894,7 +901,7 @@ up.fragment = do ->
   destroy: destroy
   extract: extract
   first: first
-  all: all
+  # all: all
   source: source
   hello: hello
   config: config
@@ -904,9 +911,15 @@ up.replace = up.fragment.replace
 up.extract = up.fragment.extract
 up.reload = up.fragment.reload
 up.destroy = up.fragment.destroy
-up.first = up.fragment.first
-up.all = up.fragment.all
 up.hello = up.fragment.hello
+
+up.first = (args...) ->
+  up.warn('Deprecated: up.first() has been renamed to up.fragment.first()')
+  up.fragment.first(args...)
+
+#up.all = (args...) ->
+#  up.warn('Deprecated: up.all() has been renamed to up.fragment.all()')
+#  up.fragment.all(args...)
 
 up.legacy.renamedModule 'flow', 'fragment'
 up.legacy.renamedModule 'dom', 'fragment'

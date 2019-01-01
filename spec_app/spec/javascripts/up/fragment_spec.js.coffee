@@ -6,6 +6,47 @@ describe 'up.fragment', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.fragment.first', ->
+
+      it 'returns the first element with the given selector', ->
+        match = fixture('.match')
+        noMatch = fixture('.no-match')
+        result = up.fragment.first('.match')
+        expect(result).toBe(match)
+
+      it 'returns undefined if there are no matches', ->
+        result = up.fragment.first('.match')
+        expect(result).toBeUndefined()
+
+      it 'does not return an element that is currently destroying', ->
+        match = fixture('.match.up-destroying')
+        result = up.fragment.first('.match')
+        expect(result).toBeUndefined()
+
+      describe 'when given a root element for the search', ->
+
+        it 'only matches descendants of that root', ->
+          parent1 = fixture('.parent1')
+          parent1Match = e.affix(parent1, '.match')
+
+          parent2 = fixture('.parent1')
+          parent2Match = e.affix(parent2, '.match')
+
+          expect(up.fragment.first(parent1, '.match')).toBe(parent1Match)
+          expect(up.fragment.first(parent2, '.match')).toBe(parent2Match)
+
+      describe 'with { origin } option', ->
+
+        it 'resolves an & in the selector string with an selector for the origin'
+
+        it 'prefers to find an element in the same layer as the origin'
+
+        it "returns the element in the top-most layer if there are no matches in the origin's layer"
+
+      describe 'with { layer } option', ->
+
+        it 'only matches elements in that layer'
+
     describe 'up.replace', ->
 
       describeCapability 'canPushState', ->

@@ -573,7 +573,7 @@ up.link = do ->
   ###
   up.macro '[up-expand]', (area) ->
     selector = e.presentAttr(area, 'up-expand') ? 'a, [up-href]'
-    childLinks = e.descendants(area, selector)
+    childLinks = e.all(area, selector)
 
     if childLink = childLinks[0]
       upAttributePattern = /^up-/

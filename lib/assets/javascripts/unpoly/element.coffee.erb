@@ -6,64 +6,66 @@ up.element = do ->
 
   NONE = { getAttribute: -> undefined }
 
-  s = (selector) ->
+  parseSelector = (selector) ->
     up.Selector.parse(selector)
 
   ###**
-  @function up.element.descendant
-  @internal
-  ###
-  descendant = (root, selector) ->
-    s(selector).descendant(root)
+  TODO: Document me
+  TODO: Deprecate up.first, use up.fragment.first instead
 
-  ###**
-  @function up.element.descendants
-  @internal
-  ###
-  descendants = (root, selector) ->
-    s(selector).descendants(root)
-
-  ###**
   @function up.element.first
-  @internal
+  @experimental
   ###
-  first = (selector) ->
-    descendant(document, selector)
+  first = (args...) ->
+    selector = args.pop()
+    parent = getParent(args[0])
+    parseSelector(selector).descendant(parent)
 
   ###**
+  TODO: Document me
+  TODO: Deprecate up.first, use up.fragment.first instead
+
   @function up.element.all
-  @internal
+  @experimental
   ###
-  all = (selector) ->
-    descendants(document, selector)
+  all = (args...) ->
+    selector = args.pop()
+    parent = getParent(args[0])
+    parseSelector(selector).descendants(parent)
+
+  getParent = (value) ->
+    if value
+      getOne(value)
+    else
+      document
 
   ###**
   @function up.element.subtree
   @internal
   ###
   subtree = (root, selector) ->
-    s(selector).subtree(root)
+    parseSelector(selector).subtree(root)
 
   ###**
   @function up.element.closest
   @internal
   ###
   closest = (element, selector) ->
-    s(selector).closest(element)
+    parseSelector(selector).closest(element)
 
   ###**
   @function up.element.matches
   @internal
   ###
   matches = (element, selector) ->
-    s(selector).matches(element)
+    parseSelector(selector).matches(element)
 
   ###**
   @function up.element.ancestor
   @internal
   ###
   ancestor = (element, selector) ->
-    s(selector).ancestor(element)
+    parseSelector(selector).ancestor(element)
 
   ###**
   If given a jQuery collection, returns the first native DOM element in the collection.
@@ -672,8 +674,6 @@ up.element = do ->
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   # also document :has()!
-  descendant: descendant # same as element.querySelector. it's a shitty name though. can we turn this into up.element.first(root, 'selector') ?
-  descendants: descendants # same as element.querySelectorAll it's a shitty name though. can we turn this into up.element.all(root, 'selector') ?
   first: first # same as document.querySelector
   all: all # same as document.querySelectorAll
   subtree: subtree # practical

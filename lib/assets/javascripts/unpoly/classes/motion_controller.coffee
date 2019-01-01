@@ -96,7 +96,7 @@ class up.MotionController
   expandFinishRequest: (elements) =>
     if elements
       u.flatMap elements, (el) =>
-        e.list(e.closest(el, @selector), e.descendants(el, @selector))
+        e.list(e.closest(el, @selector), e.all(el, @selector))
     else
       # If no reference elements were given, we finish every matching
       # element on the screen.

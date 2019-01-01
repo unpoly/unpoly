@@ -244,7 +244,7 @@ up.viewport = do ->
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
         selector = e.resolveSelector(revealOpt, options.origin)
-        element = up.first(selector)
+        element = up.fragment.first(selector)
 
       else
         # We reveal the given element
@@ -706,7 +706,7 @@ up.viewport = do ->
         # Match an <a name="hash">
         'a' + e.attributeSelector('name', hash)
       ].join(',')
-      up.first(selector)
+      up.fragment.first(selector)
 
   ###**
   Returns `'foo'` if the hash is `'#foo'`.

@@ -1,4 +1,6 @@
-- do we want to publish up.element?
+- rename up.bus to up.event
+
+- publish up.element
 
 - re-test on all browsers
 

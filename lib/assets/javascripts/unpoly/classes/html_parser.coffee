@@ -11,7 +11,7 @@ class up.HtmlParser
     @parsedDoc.querySelector("head title")?.textContent
 
   first: (selector) ->
-    e.descendant(@parsedDoc, selector)
+    e.first(@parsedDoc, selector)
 
   prepareForInsertion: (element) ->
     @unwrapNoscriptInElement(element)

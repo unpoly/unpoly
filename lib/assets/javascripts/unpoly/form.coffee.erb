@@ -83,7 +83,7 @@ up.form = do ->
       return focusedElement
     else
       # If no button is focused, we assume the first button in the form.
-      return e.descendant(form, selector)
+      return e.first(form, selector)
 
   ###**
   @function up.form.submitButtonSelector
@@ -453,7 +453,7 @@ up.form = do ->
     u.isPresent(targetSelector) or up.fail("No switch target given for %o", switcher)
     fieldValues = switcherValues(switcher)
 
-    u.each e.descendants(form, targetSelector), (target) ->
+    u.each e.all(form, targetSelector), (target) ->
       switchTarget(target, fieldValues)
 
   ###**
@@ -483,7 +483,7 @@ up.form = do ->
   ###
   findSwitcherForTarget = (target) ->
     form = closestContainer(target)
-    switchers = e.descendants(form, '[up-switch]')
+    switchers = e.all(form, '[up-switch]')
     switcher = u.detect switchers, (switcher) ->
       targetSelector = switcher.getAttribute('up-switch')
       e.matches(target, targetSelector)
