@@ -16,37 +16,35 @@ class up.EventListener
       # since we need to unbind the same @nativeCallback reference later.
       @callback.upEventListener = this
 
-    @buildNativeCallback()
     e.on(document, @eventNames, @nativeCallback)
 
   unbind: =>
     e.off(document, @eventNames, @nativeCallback)
     @callback.upEventListener = undefined
 
-  buildNativeCallback: ->
-    @nativeCallback = (event) =>
-      # 1. Since we're listing on `document`, event.currentTarget is now `document`.
-      # 2. event.target is the element that received an event, which might be a
-      #    child of `selector`.
-      # 3. There is only a single event bubbling up the DOM, so we are only called once.
+  nativeCallback: (event) =>
+    # 1. Since we're listing on `document`, event.currentTarget is now `document`.
+    # 2. event.target is the element that received an event, which might be a
+    #    child of `selector`.
+    # 3. There is only a single event bubbling up the DOM, so we are only called once.
 
-      element = event.target
-      element = e.closest(element, @selector) if @selector
+    element = event.target
+    element = e.closest(element, @selector) if @selector
 
-      if element
-        elementArg = if @jQuery then jQuery(element) else element
-        args = [event, elementArg]
+    if element
+      elementArg = if @jQuery then jQuery(element) else element
+      args = [event, elementArg]
 
-        # Do not retrieve and parse [up-data] unless the listener function
-        # expects a third argument. Note that we must pass data for an argument
-        # count of 0, since then the function might take varargs.
-        expectedArgCount = @callback.length
+      # Do not retrieve and parse [up-data] unless the listener function
+      # expects a third argument. Note that we must pass data for an argument
+      # count of 0, since then the function might take varargs.
+      expectedArgCount = @callback.length
 
-        unless expectedArgCount == 1 || expectedArgCount == 2
-          data = up.syntax.data(element)
-          args.push(data)
+      unless expectedArgCount == 1 || expectedArgCount == 2
+        data = up.syntax.data(element)
+        args.push(data)
 
-        @callback.apply(element, args)
+      @callback.apply(element, args)
 
   @fromBindArgs: (bindArgs, options = {}) ->
     bindArgs = u.copy(bindArgs)
