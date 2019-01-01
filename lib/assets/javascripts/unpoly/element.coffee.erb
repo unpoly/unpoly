@@ -11,7 +11,6 @@ up.element = do ->
 
   ###**
   TODO: Document me
-  TODO: Deprecate up.first, use up.fragment.first instead
 
   @function up.element.first
   @experimental
@@ -23,7 +22,6 @@ up.element = do ->
 
   ###**
   TODO: Document me
-  TODO: Deprecate up.first, use up.fragment.first instead
 
   @function up.element.all
   @experimental
@@ -682,7 +680,7 @@ up.element = do ->
   ancestor: ancestor # not practical. we use it to implement closest:
   get: getOne # practical for code that also works with jQuery
   list: getList # practical for composing multiple collections, or wrapping.
-  emit: emit # we already offer up.emit, so let's keep this internal.
+  emit: emit # let's keep this internal. but up.(bus).emit() needs to accept a parent!
   remove: remove # needed for IE11
   toggle: toggle # practical, but we need to (1) implement visibility-detection
   toggleClass: toggleClass # practical, but we need to implement class detection

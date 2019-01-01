@@ -1,6 +1,7 @@
 - rename up.bus to up.event
 
 - publish up.element
+  - also :has()
 
 - re-test on all browsers
 

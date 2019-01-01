@@ -7,7 +7,7 @@ describe 'up.bus', ->
 
     describe 'up.on', ->
 
-      it 'registers a delagating event listener to the document body, which passes the element as a second argument to the listener', asyncSpec (next) ->
+      it 'registers a delagating event listener to the document, which passes the element as a second argument to the listener', asyncSpec (next) ->
         fixture('.container .child')
         observeClass = jasmine.createSpy()
         up.on 'click', '.child', (event, element) ->
