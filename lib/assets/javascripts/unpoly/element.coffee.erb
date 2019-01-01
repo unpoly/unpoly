@@ -463,10 +463,10 @@ up.element = do ->
         element.setAttribute(key, value)
 
   ###**
-  @function up.element.unwrapElement
+  @function up.element.unwrap
   @internal
   ###
-  unwrapElement = (wrapper) ->
+  unwrap = (wrapper) ->
     parent = wrapper.parentNode;
     wrappedNodes = u.toArray(wrapper.childNodes)
     u.each wrappedNodes, (wrappedNode) ->
@@ -671,54 +671,52 @@ up.element = do ->
     selector
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  descendant: descendant
-  descendants: descendants
-  first: first
-  all: all
-  subtree: subtree
-  closest: closest
-  matches: matches
-  ancestor: ancestor
-  get: getOne
-  list: getList
-  emit: emit
-  remove: remove
-  toggle: toggle
-  toggleClass: toggleClass
-  hide: hide
-  show: show
-  setAttrs: setAttrs
-  metaContent: metaContent
-  replace: replace
-  insertBefore: insertBefore
-  # insertAfter: insertAfter
-  createFromSelector: createFromSelector
-  setAttrs: setAttrs
-  affix: affix
-  on: bind
-  off: unbind
-  toSelector: toSelector
-  isSingleton: isSingleton
-  attributeSelector: attributeSelector
-  createDocumentFromHtml: createDocumentFromHtml
-  createFromHtml: createFromHtml
-  root: getRoot
-  paint: paint
-  concludeCssTransition: concludeCssTransition
-  hasCssTransition: hasCssTransition
-  fixedToAbsolute: fixedToAbsolute
-  setMissingAttrs: setMissingAttrs
-  unwrapElement: unwrapElement
-  presentAttr: presentAttr
-  castedAttr: castedAttr
-  numberAttr: numberAttr
-  jsonAttr: jsonAttr
-  setTemporaryStyle: setTemporaryStyle
-  computedStyle: computedStyle
-  computedStyleNumber: computedStyleNumber
-  inlineStyle: inlineStyle
-  setInlineStyle: setInlineStyle
-  resolveSelector: resolveSelector
-  none: -> NONE
-
-  # createDivWithClass: createDivWithClass
+  # also document :has()!
+  descendant: descendant # same as element.querySelector. it's a shitty name though. can we turn this into up.element.first(root, 'selector') ?
+  descendants: descendants # same as element.querySelectorAll it's a shitty name though. can we turn this into up.element.all(root, 'selector') ?
+  first: first # same as document.querySelector
+  all: all # same as document.querySelectorAll
+  subtree: subtree # practical
+  closest: closest # needed for IE11
+  matches: matches # needed for IE11
+  ancestor: ancestor # not practical. we use it to implement closest:
+  get: getOne # practical for code that also works with jQuery
+  list: getList # practical for composing multiple collections, or wrapping.
+  emit: emit # we already offer up.emit, so let's keep this internal.
+  remove: remove # needed for IE11
+  toggle: toggle # practical, but we need to (1) implement visibility-detection
+  toggleClass: toggleClass # practical, but we need to implement class detection
+  hide: hide # practical
+  show: show # practical, but need to restore the same `display` as before hide
+  setAttrs: setAttrs # practical
+  metaContent: metaContent # internal
+  replace: replace # needed for IE11
+  insertBefore: insertBefore # internal shortcut, people can use insertAdjacentElement and i don't want to support insertAfter when I don't need it.
+  createFromSelector: createFromSelector # practical for element creation. must support { style } / { attrs } options.
+  setAttrs: setAttrs # practical
+  affix: affix # practical for element creation
+  on: bind # confusing because we have up.on. let's rather move this to bus and support: up.on(element, event, callback).
+  off: unbind # confusing because we have up.on. let's rather move this to bus and support: up.off(element, event, callback).
+  toSelector: toSelector # practical
+  isSingleton: isSingleton # internal
+  attributeSelector: attributeSelector # internal
+  createDocumentFromHtml: createDocumentFromHtml # internal
+  createFromHtml: createFromHtml # practical for element creation
+  root: getRoot # internal
+  paint: paint # internal
+  concludeCssTransition: concludeCssTransition # internal
+  hasCssTransition: hasCssTransition # internal
+  fixedToAbsolute: fixedToAbsolute # internal
+  setMissingAttrs: setMissingAttrs # internal
+  unwrap: unwrap # practical for jQuery migration
+  presentAttr: presentAttr # experimental
+  castedAttr: castedAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code.
+  numberAttr: numberAttr # practical
+  jsonAttr: jsonAttr # practical
+  setTemporaryStyle: setTemporaryStyle # practical
+  computedStyle: computedStyle # practical. should be named style outside this module.
+  computedStyleNumber: computedStyleNumber # practical. should be named styleNumber outside this module.
+  inlineStyle: inlineStyle # internal
+  setInlineStyle: setInlineStyle # practical. should be named setStyle.
+  resolveSelector: resolveSelector # internal
+  none: -> NONE # internal

@@ -428,7 +428,7 @@ up.fragment = do ->
       promise = u.always(promise, up.animate(wrapper, transition, options))
 
       # Remove the wrapper now that is has served it purpose
-      promise = promise.then -> e.unwrapElement(wrapper)
+      promise = promise.then -> e.unwrap(wrapper)
 
       return promise
 
