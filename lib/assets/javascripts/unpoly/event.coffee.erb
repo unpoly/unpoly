@@ -217,6 +217,10 @@ up.event = do ->
       # Prints "bar" to the console
 
   @function up.emit
+  @param {Element|jQuery} [target=document]
+    The element on which the event is triggered.
+
+    If omitted, the event will be emitted on the `document`.
   @param {string} eventName
     The name of the event.
   @param {Object} [eventProps={}]
@@ -224,19 +228,31 @@ up.event = do ->
     that will be passed to listeners. Note that the event object
     will by default include properties like `preventDefault()`
     or `stopPropagation()`.
-  @param {jQuery} [eventProps.$element=$(document)]
-    The element on which the event is triggered.
   @param {string|Array} [eventProps.log=false]
     A message to print to the console when the event is emitted.
   @experimental
   ###
-  emit = (eventName, eventProps = {}) ->
-    # Three cases:
-    # - Event is triggered on document (default)
-    # - Event is triggered on { $element }
-    # - Event is triggered on { $target }, but should have an { $element } property
-    target = u.pluckKey(eventProps, 'target') ? document
+  emit = (args...) ->
+#    emission = up.EventEmission.fromEmitArgs(args)
+#    emission.log()
+#    emission.emit()
+
+    if args[0].addEventListener
+      target = args.shift()
+    else if u.isJQuery(args[0])
+      target = e.get(args.shift())
+
+    eventName = args[0]
+    eventProps = args[1] || {}
+
+    if targetFromProps = u.pluckKey(eventProps, 'target')
+      up.warn('up.emit: Passing the event target with { target } is deprecated. Pass it as first argument instead.')
+      target = targetFromProps
+
+    target ?= document
+
     logEmission(eventName, eventProps)
+
     e.emit(target, eventName, eventProps)
 
   logEmission = (eventName, eventProps) ->

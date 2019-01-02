@@ -1029,7 +1029,7 @@ describe 'up.util', ->
         copy[1].x = 'y'
         expect(original[1].x).toEqual('y')
 
-      it 'returns  a shallow copy of the given object', ->
+      it 'returns a shallow copy of the given object', ->
         original = {a: 'b', c: [1, 2], d: 'e'}
 
         copy = up.util.copy(original)
@@ -1042,6 +1042,26 @@ describe 'up.util', ->
         # Test that the copy is shallow
         copy.c.push(3)
         expect(original.c).toEqual [1, 2, 3]
+
+      it 'copies the given jQuery collection into an array', ->
+        $one = $fixture('.one')
+        $two = $fixture('.two')
+        $collection = $one.add($two)
+
+        copy = up.util.copy($collection)
+
+        copy[0] = document.body
+        expect($collection[0]).toBe($one[0])
+
+      it 'copies the given arguments object into an array', ->
+        args = undefined
+        (-> args = arguments)(1)
+
+        copy = up.util.copy(args)
+        expect(copy).toBeArray()
+
+        copy[0] = 2
+        expect(args[0]).toBe(1)
 
     describe 'up.util.deepCopy', ->
 
@@ -1074,3 +1094,45 @@ describe 'up.util', ->
         copy.c.push(3)
         expect(original.c).toEqual [1, 2]
 
+    describe 'up.util.isList', ->
+
+      it 'returns true for an array', ->
+        value = [1, 2, 3]
+        expect(up.util.isList(value)).toBe(true)
+
+#      it 'returns true for an HTMLCollection', ->
+#        value = document.getElementsByTagName('div')
+#        expect(up.util.isList(value)).toBe(true)
+
+      it 'returns true for a NodeList', ->
+        value = document.querySelectorAll('div')
+        expect(up.util.isList(value)).toBe(true)
+
+      it 'returns true for an arguments object', ->
+        value = undefined
+        (-> value = arguments)()
+        expect(up.util.isList(value)).toBe(true)
+
+      it 'returns false for an object', ->
+        value = { foo: 'bar' }
+        expect(up.util.isList(value)).toBe(false)
+
+      it 'returns false for a string', ->
+        value = 'foo'
+        expect(up.util.isList(value)).toBe(false)
+
+      it 'returns false for a number', ->
+        value = 123
+        expect(up.util.isList(value)).toBe(false)
+
+      it 'returns false for undefined', ->
+        value = undefined
+        expect(up.util.isList(value)).toBe(false)
+
+      it 'returns false for null', ->
+        value = null
+        expect(up.util.isList(value)).toBe(false)
+
+      it 'returns false for NaN', ->
+        value = NaN
+        expect(up.util.isList(value)).toBe(false)

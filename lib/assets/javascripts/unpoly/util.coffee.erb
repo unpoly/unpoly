@@ -514,20 +514,42 @@ up.util = do ->
   @experimental
   ###
   isList = (value) ->
-    isArray(value) || isNodeList(value) || isJQuery(value)
+    isArray(value) || isNodeList(value) || isJQuery(value) || isArguments(value)
 
   ###**
   Returns whether the given value is a [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
 
   `NodeLists` are array-like objects returned by [`document.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll).
 
-  @function up.util.isList
+  @function up.util.isNodeList
   @param value
   @return {Boolean}
   @experimental
   ###
   isNodeList = (value) ->
     value instanceof NodeList
+
+#  ###**
+#  Returns whether the given value is an [`HTMLCollection`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection).
+#
+#  @function up.util.isHtmlCollection
+#  @param value
+#  @return {Boolean}
+#  @experimental
+#  ###
+#  isHtmlCollection = (value) ->
+#    value instanceof HTMLCollection
+
+  ###**
+  Returns whether the given value is an [arguments object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments).
+
+  @function up.util.isArguments
+  @param value
+  @return {Boolean}
+  @experimental
+  ###
+  isArguments = (value) ->
+    Object.prototype.toString.call(value) == '[object Arguments]'
 
   ###**
   @function up.util.wrapList
@@ -543,24 +565,28 @@ up.util = do ->
       [value]
 
   ###**
-  Returns a shallow copy of the given array or object.
+  Returns a shallow copy of the given array, array-like value or plain object.
+
+  Other types of values are returned unchanged.
+
+  Array-like objects are copied into new arrays.
 
   @function up.util.copy
-  @param {Object|Array} object
+  @param {Object|List} object
   @return {Object|Array}
   @stable
   ###
-  copy = (object, deep)  ->
-    if isArray(object)
-      object = object.slice()
+  copy = (value, deep)  ->
+    if isList(value)
+      value = Array.prototype.slice.call(value)
       copied = true
-    else if isOptions(object)
-      object = assign({}, object)
+    else if isOptions(value)
+      value = assign({}, value)
       copied = true
     if copied && deep
-      for key, value of object
-        object[key] = copy(value, true)
-    object
+      for k, v of value
+        value[k] = copy(v, true)
+    value
 
   ###**
   Returns a deep copy of the given array or object.
@@ -1459,6 +1485,9 @@ up.util = do ->
   isOptions: isOptions
   isArray: isArray
   isFormData: isFormData
+  isNodeList: isNodeList
+  isArguments: isArguments
+  isList: isList
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   setTimer: setTimer

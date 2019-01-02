@@ -1,6 +1,3 @@
-u = up.util
-$ = jQuery
-
 beforeEach ->
   jasmine.addMatchers
     toBeJQuery: (util, customEqualityTesters) ->
