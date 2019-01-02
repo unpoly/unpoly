@@ -24,8 +24,8 @@ class up.Tether
     @changeEventSubscription('off')
 
   changeEventSubscription: (fn) ->
-    e[fn](window, 'resize', @scheduleAlign)
-    e[fn](@viewport, ['scroll', 'up:tether:align'], @scheduleAlign) if @alignAtScroll
+    up[fn](window, 'resize', @scheduleAlign)
+    up[fn](@viewport, 'scroll up:tether:align', @scheduleAlign) if @alignAtScroll
 
   scheduleAlign: =>
     clearTimeout(@alignTimer)

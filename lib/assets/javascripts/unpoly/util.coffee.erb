@@ -1022,8 +1022,6 @@ up.util = do ->
       messageArgs = args
       toastOptions = {}
 
-    up.log.error(messageArgs...)
-
     whenReady().then -> up.toast.open(messageArgs, toastOptions)
 
     asString = up.browser.sprintf(messageArgs...)

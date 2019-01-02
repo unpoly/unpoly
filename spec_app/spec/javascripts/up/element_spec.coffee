@@ -24,8 +24,11 @@ describe 'up.element', ->
       match = fixture('.match')
       expect(up.element.get('.match')).toBe(match)
 
-    it 'returns the given document', ->
+    it 'returns the given document object', ->
       expect(up.element.get(document)).toBe(document)
+
+    it 'returns the given window object', ->
+      expect(up.element.get(window)).toBe(window)
 
     it 'returns undefined for undefined', ->
       expect(up.element.get(undefined)).toBeUndefined()

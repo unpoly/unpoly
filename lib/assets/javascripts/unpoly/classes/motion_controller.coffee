@@ -74,9 +74,9 @@ class up.MotionController
   startMotion: (cluster, motion, memory = {}) ->
     start = -> motion.start()
     finish = -> motion.finish()
-    e.on(cluster, @finishEvent, finish)
+    unbindFinishFns = u.map cluster, (element) => up.on(element, @finishEvent, finish)
     promise = @startFunction(cluster, start, memory)
-    promise = promise.then => e.off(cluster, @finishEvent, finish)
+    promise = promise.then -> u.each(unbindFinishFns)
     promise
 
   ###**

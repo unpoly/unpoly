@@ -72,9 +72,9 @@ class up.EventListener
     # can become part of the upEventListeners key.
     callback.upUid ||= u.uid()
 
-    # The user can pass an element as the first argument.
-    # If omitted, the listener will bind to the document.
-    if u.isElement(args[0])
+    # The user can pass an element (or the document, or the window) as the
+    # first argument. If omitted, the listener will bind to the document.
+    if args[0].addEventListener
       element = args.shift()
     else if u.isJQuery(args[0])
       element = e.get(args.shift())
@@ -97,10 +97,9 @@ class up.EventListener
 
   @fromUnbindArgs: (unbindArgs) ->
     props = @parseArgs(unbindArgs)
-    if map = props.element.upEventListeners
-      listener = map[props.key]
 
-    listener or u.fail('up.off(): The %o callback %o was never registered through up.on()', props.eventNames, props.callback)
+    if map = props.element.upEventListeners
+      return map[props.key]
 
   @unbindNonDefault: (element) ->
     if map = element.upEventListeners

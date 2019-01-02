@@ -63,6 +63,32 @@ describe 'up.event', ->
           )
           expect(listener.calls.count()).toBe(1)
 
+      it 'allows to explicitly bind a listener to the document', asyncSpec (next) ->
+        listener = jasmine.createSpy()
+        up.on(document, 'foo', listener)
+        up.element.emit(document, 'foo')
+
+        next ->
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.any(Event),
+            document,
+            {}
+          )
+          expect(listener.calls.count()).toBe(1)
+
+      it 'allows to bind a listener to the window', asyncSpec (next) ->
+        listener = jasmine.createSpy()
+        up.on(window, 'foo', listener)
+        up.element.emit(window, 'foo')
+
+        next ->
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.any(Event),
+            window,
+            {}
+          )
+          expect(listener.calls.count()).toBe(1)
+
       it 'registers the listener to multiple, space-separated events', ->
         listener = jasmine.createSpy()
 
@@ -226,10 +252,10 @@ describe 'up.event', ->
         next =>
           expect(clickSpy.calls.count()).toEqual(1)
 
-      it 'throws an error if the given event listener was not registered through up.on', ->
-        someFunction = ->
-        offing = -> up.off 'click', '.child', someFunction
-        expect(offing).toThrowError(/(not|never) registered/i)
+#      it 'throws an error if the given event listener was not registered through up.on', ->
+#        someFunction = ->
+#        offing = -> up.off 'click', '.child', someFunction
+#        expect(offing).toThrowError(/(not|never) registered/i)
 
 
     describe 'up.$off', ->

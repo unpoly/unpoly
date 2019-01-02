@@ -267,20 +267,6 @@ up.element = do ->
 
     rootElement
 
-  # createDivWithClass = (className) ->
-  #   element = document.createElement('div')
-  #   element.className = className
-  #   element
-
-  subscribeEvents = (fn, elements, eventNames, callback) ->
-    for element in u.wrapList(elements)
-      for eventName in u.wrapList(eventNames)
-        element[fn](eventName, callback)
-
-  bind = u.partial(subscribeEvents, 'addEventListener')
-
-  unbind = u.partial(subscribeEvents, 'removeEventListener')
-
   ###**
   @function up.element.affix
   @internal
@@ -693,8 +679,6 @@ up.element = do ->
   createFromSelector: createFromSelector # practical for element creation. must support { style } / { attrs } options.
   setAttrs: setAttrs # practical
   affix: affix # practical for element creation
-  on: bind # confusing because we have up.on. let's rather move this to event and support: up.on(element, event, callback).
-  off: unbind # confusing because we have up.on. let's rather move this to event and support: up.off(element, event, callback).
   toSelector: toSelector # practical
   isSingleton: isSingleton # internal
   attributeSelector: attributeSelector # internal

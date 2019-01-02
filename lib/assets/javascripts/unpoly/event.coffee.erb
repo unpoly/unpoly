@@ -54,7 +54,7 @@ up.event = do ->
   reset = ->
     # Resets the list of registered event listeners to the
     # moment when the framework was booted.
-    for element in [document, document.documentElement, document.body]
+    for element in [window, document, document.documentElement, document.body]
       up.EventListener.unbindNonDefault(element)
 
   ###**
@@ -196,8 +196,8 @@ up.event = do ->
   @stable
   ###
   unbind = (args...) ->
-    listener = up.EventListener.fromUnbindArgs(args)
-    listener.unbind()
+    if listener = up.EventListener.fromUnbindArgs(args)
+      listener.unbind()
 
   ###**
   Emits a event with the given name and properties.

@@ -22,7 +22,8 @@ class up.FieldObserver
   changeEventSubscription: (fn) ->
     # Although (depending on the browser) we only need/receive either input or change,
     # we always bind to both events in case another script manually triggers it.
-    e[fn](@fields, ['input', 'change'], @check)
+    for field in @fields
+      up[fn](field, 'input change', @check)
 
   cancelTimer: =>
     clearTimeout(@currentTimer)

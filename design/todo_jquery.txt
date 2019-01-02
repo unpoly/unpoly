@@ -1,3 +1,5 @@
+- don't sprintf if we're not going to print
+
 - publish up.element
   - also :has()
   - rename up.emit option { message } to { log }
