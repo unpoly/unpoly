@@ -296,7 +296,7 @@ up.popup = do ->
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
     u.assign(options, animateOptions)
 
-    up.event.whenEmitted('up:popup:close', log: 'Closing popup', target: state.popup).then ->
+    up.event.whenEmitted(state.popup, 'up:popup:close', log: 'Closing popup').then ->
       state.phase = 'closing'
       state.url = null
       state.coveredUrl = null

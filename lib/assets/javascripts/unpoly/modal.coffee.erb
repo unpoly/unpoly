@@ -531,7 +531,7 @@ up.modal = do ->
       title: state.coveredTitle
     )
 
-    up.event.whenEmitted('up:modal:close', target: state.modalElement, log: 'Closing modal').then ->
+    up.event.whenEmitted(state.modalElement, 'up:modal:close', log: 'Closing modal').then ->
       state.phase = 'closing'
       # the current URL must be deleted *before* calling up.destroy,
       # since up.feedback listens to up:fragment:destroyed and then

@@ -667,10 +667,7 @@ up.fragment = do ->
 
     parent = options.parent or up.fail("Missing { parent } option")
 
-    up.emit 'up:fragment:destroyed',
-      target: parent,
-      fragment: fragment,
-      log: message
+    up.emit(parent, 'up:fragment:destroyed', fragment: fragment, log: message)
 
   isRealElement = (element) ->
     !e.closest(element, '.up-destroying')

@@ -230,13 +230,13 @@ up.event = do ->
     or `stopPropagation()`.
   @param {string|Array} [eventProps.log=false]
     A message to print to the console when the event is emitted.
+
+    Pass `true` to print a default message
+  @param {Element|jQuery} [eventProps.target=document]
+    The element on which the event is triggered.
   @experimental
   ###
   emit = (args...) ->
-#    emission = up.EventEmission.fromEmitArgs(args)
-#    emission.log()
-#    emission.emit()
-
     if args[0].addEventListener
       target = args.shift()
     else if u.isJQuery(args[0])
@@ -246,7 +246,6 @@ up.event = do ->
     eventProps = args[1] || {}
 
     if targetFromProps = u.pluckKey(eventProps, 'target')
-      up.warn('up.emit: Passing the event target with { target } is deprecated. Pass it as first argument instead.')
       target = targetFromProps
 
     target ?= document
@@ -352,7 +351,7 @@ up.event = do ->
       # Although we have consumed this action and halted the event chain,
       # other components might still need to react. E.g. a popup needs to close when
       # an outside link consumes the user click. So we emit another event for that.
-      emit('up:action:consumed', target: event.target, log: false)
+      emit(event.target, 'up:action:consumed', log: false)
 
   bind 'up:framework:reset', reset
 
