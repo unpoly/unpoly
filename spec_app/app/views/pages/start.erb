@@ -9,11 +9,13 @@
       <%= link_to 'Jasmine specs with jQuery 3', '/specs?jquery=3' %>
       <ul>
         <% %w[
-          up.fragment
+          up.browser
+          up.element
+          up.event
           up.feedback
           up.form
+          up.fragment
           up.history
-          up.viewport
           up.legacy
           up.link
           up.log
@@ -27,6 +29,7 @@
           up.toast
           up.tooltip
           up.util
+          up.viewport
         ].each do |mod| %>
           <li><%= link_to mod, "/specs?spec=#{mod}" %></li>
         <% end %>

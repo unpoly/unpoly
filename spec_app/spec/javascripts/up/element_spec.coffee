@@ -3,6 +3,30 @@ $ = jQuery
 
 describe 'up.element', ->
 
+  describe 'up.element.get()', ->
+
+    it 'returns the given element', ->
+      element = fixture('.element')
+      expect(up.element.get(element)).toBe(element)
+
+    it 'returns the first element in the given jQuery collection', ->
+      $element = $fixture('.element')
+      expect(up.element.get($element)).toBe($element[0])
+
+    it 'throws an error if passed a jQuery collection with multiple elements', ->
+      $element1 = $fixture('.element')
+      $element2 = $fixture('.element')
+      $list = $element1.add($element2)
+      get = -> up.element.get($list)
+      expect(get).toThrowError(/cannot cast/i)
+
+    it 'returns the first element matching the given CSS selector string', ->
+      match = fixture('.match')
+      expect(up.element.get('.match')).toBe(match)
+
+    it 'returns the given document', ->
+      expect(up.element.get(document)).toBe(document)
+
   describe 'up.element.first()', ->
 
     it 'returns the first element matching the given selector', ->

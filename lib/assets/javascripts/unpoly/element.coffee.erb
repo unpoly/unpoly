@@ -78,7 +78,7 @@ up.element = do ->
   getOne = (object) ->
     if u.isJQuery(object)
       if object.length > 1
-        up.fail('up.element.get(): Cannot cast a multi-element jQuery collection to a single elenent')
+        up.fail('up.element.get(): Cannot cast a multi-element jQuery collection to a single element')
       object[0]
     else if u.isString(object)
       first(object)
@@ -680,7 +680,7 @@ up.element = do ->
   ancestor: ancestor # not practical. we use it to implement closest:
   get: getOne # practical for code that also works with jQuery
   list: getList # practical for composing multiple collections, or wrapping.
-  emit: emit # let's keep this internal. but up.(event).emit() needs to accept a parent!
+  emit: emit # let's keep this internal. but up.(event).emit() needs to accept a parent instead of { target }!
   remove: remove # needed for IE11
   toggle: toggle # practical, but we need to (1) implement visibility-detection
   toggleClass: toggleClass # practical, but we need to implement class detection

@@ -1,26 +1,29 @@
 u = up.util
 e = up.element
 
-nextId = 0
-
 class up.EventListener
 
-  constructor: ({ @eventNames, @selector, @callback, @jQuery }) ->
-    @id = nextId++
+  constructor: (props, options) ->
+    { @elements, @eventNames, @selector, @callback, @key } = props
+    { @jQuery } = options
+    @isDefault = up.framework.isBooting()
 
   bind: ->
-    if @callback.upEventListener
-      up.fail('up.on(): The callback %o cannot be registered more than once', @callback)
-    else
-      # Allow to retrieve this listener from the @callback function
-      # since we need to unbind the same @nativeCallback reference later.
-      @callback.upEventListener = this
-
-    e.on(document, @eventNames, @nativeCallback)
+    @changeSubscription('addEventListener')
+    map = (@elements[0].upEventListeners ||= {})
+    if map[@key]
+      up.fail('up.on(): The %o callback %o cannot be registered more than once', @eventNames, @callback)
+    map[@key] = this
 
   unbind: =>
-    e.off(document, @eventNames, @nativeCallback)
-    @callback.upEventListener = undefined
+    @changeSubscription('removeEventListener')
+    if map = @elements[0].upEventListeners
+      delete map[@key]
+
+  changeSubscription: (method) ->
+    for element in @elements
+      for eventName in @eventNames
+        element[method](eventName, @nativeCallback)
 
   nativeCallback: (event) =>
     # 1. Since we're listing on `document`, event.currentTarget is now `document`.
@@ -47,18 +50,37 @@ class up.EventListener
       @callback.apply(element, args)
 
   @fromBindArgs: (bindArgs, options = {}) ->
-    bindArgs = u.copy(bindArgs)
+    props = @parseArgs(bindArgs)
+    new @(props, options)
 
-    jQuery = options.jQuery
+  @parseArgs = (args) ->
+    args = u.copy(args)
 
-    eventNames = u.splitValues(bindArgs.shift())
+    elements = [document]
+
+    eventNames = u.splitValues(args.shift())
     eventNames = u.map(eventNames, up.legacy.fixEventName)
 
-    callback = bindArgs.pop()
-    selector = bindArgs.shift() # might be undefined
+    callback = args.pop()
+    callback.upUid ||= u.uid()
 
-    new @({ eventNames, selector, callback, jQuery })
+    selector = args.shift() # might be undefined
+
+    key = [eventNames.join(' '), selector, callback.upUid].join('|')
+
+    { elements, eventNames, selector, callback, key }
 
   @fromUnbindArgs: (unbindArgs) ->
-    callback = u.last(unbindArgs)
-    callback.upEventListener or u.fail('up.off(): The callback %o was never registered through up.on()', callback)
+    props = @parseArgs(unbindArgs)
+    if map = props.elements[0].upEventListeners
+      listener = map[props.key]
+
+    listener or u.fail('up.off(): The %o callback %o was never registered through up.on()', props.eventNames, props.callback)
+
+  @unbindNonDefault: (element) ->
+    if map = element.upEventListeners
+      listeners = u.values(map)
+      listeners = u.reject(listeners, 'isDefault')
+      for listener in listeners
+        # this also removes the listener from upEventListeners
+        listener.unbind()

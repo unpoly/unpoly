@@ -1,9 +1,10 @@
 #= require ./unpoly/namespace
 #= require ./unpoly/util
 #= require ./unpoly/legacy
+#= require ./unpoly/browser
 #= require ./unpoly/element
 #= require_tree ./unpoly/classes
-#= require ./unpoly/browser
+#= require ./unpoly/framework
 #= require ./unpoly/event
 #= require ./unpoly/cookie
 #= require ./unpoly/protocol
@@ -24,4 +25,4 @@
 #= require ./unpoly/radio
 #= require ./unpoly/rails
 
-up.boot()
+up.framework.boot()

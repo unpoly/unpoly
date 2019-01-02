@@ -15,7 +15,7 @@ afterEach (done) ->
     # Pending callbacks might change the URL or cause errors that bleed into
     # the next example.
     up.util.nextFrame =>
-      up.reset()
+      up.framework.reset()
       up.browser.popCookie(up.protocol.config.methodCookie)
 
       # Give async reset behavior another frame to play out,

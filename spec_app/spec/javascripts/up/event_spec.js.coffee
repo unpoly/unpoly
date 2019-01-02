@@ -79,6 +79,22 @@ describe 'up.event', ->
         register()
         expect(register).toThrowError(/cannot be registered more than once/i)
 
+      it 'allows to register the same callback for different event names (bugfix)', ->
+        callback = ->
+        register = ->
+          up.on('foo', callback)
+          up.on('bar', callback)
+        expect(register).not.toThrowError()
+
+      it 'allows to register the same callback for different elements (bugfix)'
+
+      it 'allows to register the same callback for different selectors (bugfix)', ->
+        callback = ->
+        register = ->
+          up.on('foo', '.one', callback)
+          up.on('foo', '.two', callback)
+        expect(register).not.toThrowError()
+
       it 'does not throw an error if a callback is registered, unregistered and registered a second time', ->
         callback = ->
         register = -> up.on 'foo', callback
@@ -188,15 +204,6 @@ describe 'up.event', ->
         someFunction = ->
         offing = -> up.off 'click', '.child', someFunction
         expect(offing).toThrowError(/(not|never) registered/i)
-
-      it 'reduces the internally tracked list of event listeners (bugfix for memory leak)', ->
-        getCount = -> up.event.knife.get('Object.keys(appListeners).length')
-        oldCount = getCount()
-        clickSpy = jasmine.createSpy()
-        up.on 'click', '.child', clickSpy
-        expect(getCount()).toBe(oldCount + 1)
-        up.off 'click', '.child', clickSpy
-        expect(getCount()).toBe(oldCount)
 
 
     describe 'up.$off', ->

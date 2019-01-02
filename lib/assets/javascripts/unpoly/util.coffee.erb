@@ -1400,6 +1400,11 @@ up.util = do ->
 #    else
 #      [objOrArray]
 
+  nextUid = 0
+
+  uid = ->
+    nextUid++
+
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   parseUrl: parseUrl
   normalizeUrl: normalizeUrl
@@ -1507,5 +1512,6 @@ up.util = do ->
   partial: partial
   arrayToSet: arrayToSet
   setToArray: setToArray
+  uid: uid
 
 up.fail = up.util.fail
