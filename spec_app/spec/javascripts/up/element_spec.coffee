@@ -27,6 +27,12 @@ describe 'up.element', ->
     it 'returns the given document', ->
       expect(up.element.get(document)).toBe(document)
 
+    it 'returns undefined for undefined', ->
+      expect(up.element.get(undefined)).toBeUndefined()
+
+    it 'returns null for null', ->
+      expect(up.element.get(null)).toBeNull()
+
   describe 'up.element.first()', ->
 
     it 'returns the first element matching the given selector', ->

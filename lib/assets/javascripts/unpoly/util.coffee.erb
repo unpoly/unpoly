@@ -1054,17 +1054,21 @@ up.util = do ->
   renameKey = (object, oldKey, newKey) ->
     object[newKey] = pluckKey(object, oldKey)
 
-  extractCallback = (args) ->
+  extractLastArg = (args, tester) ->
     lastArg = last(args)
-    if isFunction(lastArg)
-      args.pop()
+    if tester(lastArg)
+      return args.pop()
+
+#  extractFirstArg = (args, tester) ->
+#    firstArg = args[0]
+#    if tester(firstArg)
+#      return args.shift()
+
+  extractCallback = (args) ->
+    extractLastArg(args, isFunction)
 
   extractOptions = (args) ->
-    lastArg = last(args)
-    if isOptions(lastArg)
-      args.pop()
-    else
-      {}
+    extractLastArg(args, isOptions) || {}
 
   CASE_CONVERSION_GROUP = /[^\-\_]+?(?=[A-Z\-\_]|$)/g
 

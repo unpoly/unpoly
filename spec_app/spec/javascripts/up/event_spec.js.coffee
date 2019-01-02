@@ -48,6 +48,21 @@ describe 'up.event', ->
             {}
           )
 
+      it 'allows to bind the listener to a given element', asyncSpec (next) ->
+        element1 = fixture('.element')
+        element2 = fixture('.element')
+        listener = jasmine.createSpy()
+        up.on(element1, 'click', listener)
+        Trigger.click(element1)
+
+        next ->
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.any(MouseEvent),
+            element1,
+            {}
+          )
+          expect(listener.calls.count()).toBe(1)
+
       it 'registers the listener to multiple, space-separated events', ->
         listener = jasmine.createSpy()
 
@@ -58,6 +73,17 @@ describe 'up.event', ->
 
         up.emit('bar')
         expect(listener.calls.count()).toEqual(2)
+
+#      it 'registers the listener to an array of event names', ->
+#        listener = jasmine.createSpy()
+#
+#        up.on ['foo', 'bar'], listener
+#
+#        up.emit('foo')
+#        expect(listener.calls.count()).toEqual(1)
+#
+#        up.emit('bar')
+#        expect(listener.calls.count()).toEqual(2)
 
       it 'returns a method that unregisters the event listener when called', asyncSpec (next) ->
         $child = $fixture('.child')
@@ -152,23 +178,23 @@ describe 'up.event', ->
           next =>
             expect(parseDataSpy).not.toHaveBeenCalled()
 
-      it 'allows to bind and unbind events by their old, deprecated name', ->
-        warnSpy = spyOn(up, 'warn')
-        listener = jasmine.createSpy('listener')
-
-        # Reister listener for the old event name
-        up.on('up:proxy:received', listener)
-        expect(warnSpy).toHaveBeenCalled()
-
-        # Emit event with new name and see that it invokes the legacy listener
-        up.emit('up:proxy:loaded')
-        expect(listener.calls.count()).toBe(1)
-
-        # Check that up.off works with the old event name
-        up.off('up:proxy:received', listener)
-
-        up.emit('up:proxy:loaded')
-        expect(listener.calls.count()).toBe(1)
+#      it 'allows to bind and unbind events by their old, deprecated name', ->
+#        warnSpy = spyOn(up, 'warn')
+#        listener = jasmine.createSpy('listener')
+#
+#        # Reister listener for the old event name
+#        up.on('up:proxy:received', listener)
+#        expect(warnSpy).toHaveBeenCalled()
+#
+#        # Emit event with new name and see that it invokes the legacy listener
+#        up.emit('up:proxy:loaded')
+#        expect(listener.calls.count()).toBe(1)
+#
+#        # Check that up.off works with the old event name
+#        up.off('up:proxy:received', listener)
+#
+#        up.emit('up:proxy:loaded')
+#        expect(listener.calls.count()).toBe(1)
 
 
     describe 'up.$on', ->

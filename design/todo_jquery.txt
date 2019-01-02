@@ -1,5 +1,6 @@
 - publish up.element
   - also :has()
+  - rename up.emit option { message } to { log }
 
 - re-test on all browsers
 

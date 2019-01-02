@@ -58,7 +58,7 @@ up.event = do ->
       up.EventListener.unbindNonDefault(element)
 
   ###**
-  Listens to an event on `document`.
+  Listens to an event on `document` or a given element.
 
   The given event listener which will be executed whenever the
   given event is [triggered](/up.emit) on the given selector:
@@ -133,15 +133,20 @@ up.event = do ->
       });
 
   @function up.on
+  @param {Element|jQuery} [element=document]
+    The element on which to register the event listener.
+
+    If no element is given, the listener is registered on the `document`.
   @param {string} events
-    A space-separated list of event names to bind.
+    A space-separated list of event names to bind to.
   @param {string} [selector]
     The selector of an element on which the event must be triggered.
     Omit the selector to listen to all events with that name, regardless
     of the event target.
-  @param {Function(event, $element, data)} behavior
-    The handler that should be called.
-    The function takes the affected element as the first argument (as a jQuery object).
+  @param {Function(event, [element], [data])} listener
+    The listener function that should be called.
+
+    The function takes the affected element as the first argument).
     If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
     and passed as a second argument.
   @return {Function}
