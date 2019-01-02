@@ -226,10 +226,8 @@ up.event = do ->
     or `stopPropagation()`.
   @param {jQuery} [eventProps.$element=$(document)]
     The element on which the event is triggered.
-  @param {string|Array} [eventProps.message]
+  @param {string|Array} [eventProps.log=false]
     A message to print to the console when the event is emitted.
-    If omitted, a default message is printed.
-    Set this to `false` to prevent any console output.
   @experimental
   ###
   emit = (eventName, eventProps = {}) ->
@@ -242,24 +240,25 @@ up.event = do ->
     e.emit(target, eventName, eventProps)
 
   logEmission = (eventName, eventProps) ->
-    if eventProps.hasOwnProperty('message')
-      niceMessage = eventProps.message
-      delete eventProps.message
-      if niceMessage != false
-        if u.isArray(niceMessage)
-          [niceMessage, niceMessageArgs...] = niceMessage
-        else
-          niceMessageArgs = []
-        if niceMessage
-          if u.isPresent(eventProps)
-            up.puts "#{niceMessage} (%s (%o))", niceMessageArgs..., eventName, eventProps
-          else
-            up.puts "#{niceMessage} (%s)", niceMessageArgs..., eventName
+    return unless up.log.isEnabled()
+
+    message = u.pluckKey(eventProps, 'log')
+
+    if u.isArray(message)
+      [message, messageArgs...] = message
     else
+      messageArgs = []
+
+    if u.isString(message)
       if u.isPresent(eventProps)
-        up.puts 'Emitted event %s (%o)', eventName, eventProps
+        up.puts "#{message} (%s (%o))", messageArgs..., eventName, eventProps
       else
-        up.puts 'Emitted event %s', eventName
+        up.puts "#{message} (%s)", messageArgs..., eventName
+    else if message == true
+      if u.isPresent(eventProps)
+        up.puts 'Event %s (%o)', eventName, eventProps
+      else
+        up.puts 'Event %s', eventName
 
   ###**
   [Emits an event](/up.emit) and returns whether no listener
@@ -337,7 +336,7 @@ up.event = do ->
       # Although we have consumed this action and halted the event chain,
       # other components might still need to react. E.g. a popup needs to close when
       # an outside link consumes the user click. So we emit another event for that.
-      emit('up:action:consumed', target: event.target, message: false)
+      emit('up:action:consumed', target: event.target, log: false)
 
   bind 'up:framework:reset', reset
 

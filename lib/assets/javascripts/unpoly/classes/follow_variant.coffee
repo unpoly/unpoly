@@ -41,7 +41,7 @@ class up.FollowVariant
       u.muteRejection @onMousedown(args...)
 
   followLink: (link, options = {}) =>
-    promise = up.event.whenEmitted('up:link:follow', message: 'Following link', target: link)
+    promise = up.event.whenEmitted('up:link:follow', log: 'Following link', target: link)
     promise = promise.then =>
       up.feedback.start(link) unless options.preload
       @followNow(link, options)

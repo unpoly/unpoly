@@ -229,7 +229,7 @@ up.popup = do ->
       return up.replace(target, url, options)
 
     up.browser.whenConfirmed(options).then ->
-      up.event.whenEmitted('up:popup:open', url: url, message: 'Opening popup').then ->
+      up.event.whenEmitted('up:popup:open', url: url, log: 'Opening popup').then ->
         state.phase = 'opening'
         state.anchor = anchor
         state.position = position
@@ -247,7 +247,7 @@ up.popup = do ->
           up.animate(state.popup, options.animation, animateOptions)
         promise = promise.then ->
           state.phase = 'opened'
-          up.emit('up:popup:opened', message: 'Popup opened')#
+          up.emit('up:popup:opened', log: 'Popup opened')#
         promise
 
   ###**
@@ -296,7 +296,7 @@ up.popup = do ->
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
     u.assign(options, animateOptions)
 
-    up.event.whenEmitted('up:popup:close', message: 'Closing popup', target: state.popup).then ->
+    up.event.whenEmitted('up:popup:close', log: 'Closing popup', target: state.popup).then ->
       state.phase = 'closing'
       state.url = null
       state.coveredUrl = null
@@ -310,7 +310,7 @@ up.popup = do ->
         state.content = null
         state.anchor = null
         state.sticky = null
-        up.emit('up:popup:closed', message: 'Popup closed')
+        up.emit('up:popup:closed', log: 'Popup closed')
 
   preloadNow = (link, options) ->
     options = u.options(options)

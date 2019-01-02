@@ -117,7 +117,7 @@ class up.MotionController
     @whenElementFinished(element)
 
   emitFinishEvent: (element, eventAttrs = {}) =>
-    eventAttrs = u.merge({ target: element, message: false }, eventAttrs)
+    eventAttrs = u.merge({ target: element, log: false }, eventAttrs)
     up.emit(@finishEvent, eventAttrs)
 
   whenElementFinished: (element) =>

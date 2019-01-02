@@ -160,6 +160,7 @@ up.log = do ->
   config: config
   enable: enable
   disable: disable
+  isEnabled: -> config.enabled
 
 up.puts = up.log.puts
 up.warn = up.log.warn

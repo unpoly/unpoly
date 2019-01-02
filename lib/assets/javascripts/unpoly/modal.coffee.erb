@@ -450,7 +450,7 @@ up.modal = do ->
       return up.replace(target, url, options)
 
     up.browser.whenConfirmed(options).then ->
-      up.event.whenEmitted('up:modal:open', url: url, message: 'Opening modal').then ->
+      up.event.whenEmitted('up:modal:open', url: url, log: 'Opening modal').then ->
         state.phase = 'opening'
         state.flavor = options.flavor
         state.sticky = options.sticky
@@ -470,7 +470,7 @@ up.modal = do ->
           animate(options.animation, options.backdropAnimation, animateOptions)
         promise = promise.then ->
           state.phase = 'opened'
-          up.emit('up:modal:opened', message: 'Modal opened')
+          up.emit('up:modal:opened', log: 'Modal opened')
         promise
 
   validateTarget = (target) ->
@@ -531,7 +531,7 @@ up.modal = do ->
       title: state.coveredTitle
     )
 
-    up.event.whenEmitted('up:modal:close', target: state.modalElement, message: 'Closing modal').then ->
+    up.event.whenEmitted('up:modal:close', target: state.modalElement, log: 'Closing modal').then ->
       state.phase = 'closing'
       # the current URL must be deleted *before* calling up.destroy,
       # since up.feedback listens to up:fragment:destroyed and then
@@ -553,7 +553,7 @@ up.modal = do ->
         state.sticky = null
         state.closable = null
         state.position = null
-        up.emit('up:modal:closed', message: 'Modal closed')
+        up.emit('up:modal:closed', log: 'Modal closed')
 
       promise
 

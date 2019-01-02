@@ -339,7 +339,7 @@ up.proxy = do ->
       # we wrap the mission in a function for scheduling below.
       emission = ->
         if isBusy() # a fast response might have beaten the delay
-          up.emit('up:proxy:slow', message: 'Proxy is slow to respond')
+          up.emit('up:proxy:slow', log: 'Proxy is slow to respond')
           slowEventEmitted = true
       slowDelayTimer = u.setTimer(config.slowDelay, emission)
 
@@ -402,7 +402,7 @@ up.proxy = do ->
     if isIdle()
       cancelSlowDelay()
       if slowEventEmitted
-        up.emit('up:proxy:recover', message: 'Proxy has recovered from slow response')
+        up.emit('up:proxy:recover', log: 'Proxy has recovered from slow response')
         slowEventEmitted = false
 
   ###**
@@ -432,7 +432,7 @@ up.proxy = do ->
   load = (request) ->
     eventProps =
       request: request
-      message: ['Loading %s %s', request.method, request.url]
+      log: ['Loading %s %s', request.method, request.url]
 
     if up.event.nobodyPrevents('up:proxy:load', eventProps)
       responsePromise = request.send()
@@ -466,13 +466,13 @@ up.proxy = do ->
   responseReceived = (response) ->
     if response.isFatalError()
       up.emit 'up:proxy:fatal',
-        message: 'Fatal error during request'
+        log: 'Fatal error during request'
         request: response.request
         response: response
     else
       registerAliasForRedirect(response) unless response.isError()
       up.emit 'up:proxy:loaded',
-        message: ['Server responded with HTTP %d (%d bytes)', response.status, response.text.length]
+        log: ['Server responded with HTTP %d (%d bytes)', response.status, response.text.length]
         request: response.request
         response: response
 
@@ -599,7 +599,7 @@ up.proxy = do ->
     link = e.get(linkOrSelector)
 
     if up.link.isSafe(link)
-      preloadEventAttrs = { message: ['Preloading link %o', link], target: link, link: link }
+      preloadEventAttrs = { log: ['Preloading link %o', link], target: link, link: link }
       up.event.whenEmitted('up:link:preload', preloadEventAttrs).then ->
         variant = up.link.followVariantForLink(link)
         variant.preloadLink(link, options)

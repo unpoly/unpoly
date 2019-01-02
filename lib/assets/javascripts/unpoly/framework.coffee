@@ -19,7 +19,7 @@ up.framework = do ->
   @experimental
   ###
   emitReset = ->
-    up.emit('up:framework:reset', message: 'Resetting framework')
+    up.emit('up:framework:reset', log: 'Resetting framework')
 
   ###**
   This event is [emitted](/up.emit) when Unpoly is [reset](/up.framework.reset) during unit tests.
@@ -41,16 +41,16 @@ up.framework = do ->
   ###
   boot = ->
     if up.browser.isSupported()
-      up.emit('up:framework:boot', message: 'Booting framework')
-      up.emit('up:framework:booted', message: 'Framework booted')
+      up.emit('up:framework:boot', log: 'Booting framework')
+      up.emit('up:framework:booted', log: 'Framework booted')
       isBooting = false
 
       u.nextFrame ->
         # At this point all user-provided compilers have been registered.
         u.whenReady().then ->
           # The following event will cause Unpoly to compile the <body>
-          up.emit('up:app:boot', message: 'Booting user application')
-          up.emit('up:app:booted', message: 'User application booted')
+          up.emit('up:app:boot', log: 'Booting user application')
+          up.emit('up:app:booted', log: 'User application booted')
     else
       console.log?("Unpoly doesn't support this browser. Framework was not booted.")
 

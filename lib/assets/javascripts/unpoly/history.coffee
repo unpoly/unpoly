@@ -120,11 +120,11 @@ up.history = do ->
   push = (url, options) ->
     options = u.options(options, force: false)
     url = normalizeUrl(url)
-    if (options.force || !isCurrentUrl(url)) && up.event.nobodyPrevents('up:history:push', url: url, message: "Adding history entry for #{url}")
+    if (options.force || !isCurrentUrl(url)) && up.event.nobodyPrevents('up:history:push', url: url, log: "Adding history entry for #{url}")
       if manipulate('pushState', url)
-        up.emit('up:history:pushed', url: url, message: "Advanced to location #{url}")
+        up.emit('up:history:pushed', url: url, log: "Advanced to location #{url}")
       else
-        up.emit('up:history:muted', url: url, message: "Did not advance to #{url} (history is unavailable)")
+        up.emit('up:history:muted', url: url, log: "Did not advance to #{url} (history is unavailable)")
 
   ###**
   This event is [emitted](/up.emit) before a new history entry is added.
@@ -163,7 +163,7 @@ up.history = do ->
       url = currentUrl()
 
       # We can't let people prevent this event, since `popstate` is also unpreventable.
-      up.emit('up:history:restore', url: url, message: "Restoring location #{url}")
+      up.emit('up:history:restore', url: url, log: "Restoring location #{url}")
 
       popSelector = config.popTargets.join(', ')
       replaced = up.replace popSelector, url,
@@ -176,7 +176,7 @@ up.history = do ->
         layer: 'page'       # Don't replace elements in a modal that might still be open
       replaced.then ->
         url = currentUrl()
-        up.emit('up:history:restored', url: url, message: "Restored location #{url}")
+        up.emit('up:history:restored', url: url, log: "Restored location #{url}")
     else
       up.puts 'Ignoring a state not pushed by Unpoly (%o)', state
 

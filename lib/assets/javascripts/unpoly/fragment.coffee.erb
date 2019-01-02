@@ -502,7 +502,7 @@ up.fragment = do ->
             target: keepable
             newFragment: partner
             newData: plan.newData
-            message: ['Keeping element %o', keepable]
+            log: ['Keeping element %o', keepable]
 
           if up.event.nobodyPrevents('up:fragment:keep', keepEventArgs)
             plan
@@ -650,14 +650,14 @@ up.fragment = do ->
   emitFragmentInserted = (element, options) ->
     up.emit 'up:fragment:inserted',
       target: element
-      message: ['Inserted fragment %o', element]
+      log: ['Inserted fragment %o', element]
       origin: options.origin
 
   emitFragmentKept = (keepPlan) ->
     keptElement = keepPlan.element
     eventAttrs = u.merge(keepPlan,
       target: keptElement,
-      message: ['Kept fragment %o', keptElement]
+      log: ['Kept fragment %o', keptElement]
     )
     up.emit('up:fragment:kept', eventAttrs)
 
@@ -670,7 +670,7 @@ up.fragment = do ->
     up.emit 'up:fragment:destroyed',
       target: parent,
       fragment: fragment,
-      message: message
+      log: message
 
   isRealElement = (element) ->
     !e.closest(element, '.up-destroying')
