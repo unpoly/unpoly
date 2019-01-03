@@ -183,7 +183,9 @@ up.form = do ->
     A promise for the successful form submission.
   @stable
   ###
-  submit = (formOrSelector, options = {}) ->
+  submit = (formOrSelector, options) ->
+    options = u.options(options)
+
     form = e.get(formOrSelector)
     form = e.closest(form, 'form')
 
@@ -381,8 +383,9 @@ up.form = do ->
     validation is received and the form was updated.
   @stable
   ###
-  validate = (fieldOrSelector, options = {}) ->
+  validate = (fieldOrSelector, options) ->
     field = e.get(fieldOrSelector)
+    options = u.options(options)
     options.origin = field
     options.target = findValidateTarget(field, options)
     options.failTarget = options.target

@@ -334,7 +334,7 @@ up.motion = do ->
   ###  
   morph = (oldElement, newElement, transitionObject, options) ->
     options = u.options(options)
-    options = u.assign(options, animateOptions(options))
+    u.assign(options, animateOptions(options))
 
     oldElement = e.get(oldElement)
     newElement = e.get(newElement)

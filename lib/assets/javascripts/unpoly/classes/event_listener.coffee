@@ -3,7 +3,7 @@ e = up.element
 
 class up.EventListener
 
-  constructor: (@element, @eventName, @selector, @callback, options) ->
+  constructor: (@element, @eventName, @selector, @callback, options = {}) ->
     { @jQuery } = options
     @key = @constructor.key(@eventName, @selector, @callback)
     @isDefault = up.framework.isBooting()
@@ -83,7 +83,7 @@ class up.EventListener
 
     { elements, eventNames, selector, callback }
 
-  @bind: (args, options = {}) ->
+  @bind: (args, options) ->
     parsed = @parseArgs(args)
     unbindFns = []
 

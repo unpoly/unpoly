@@ -2,7 +2,7 @@ e = up.element
 
 class up.RevealMotion
 
-  constructor: (@element, options) ->
+  constructor: (@element, options = {}) ->
     layoutConfig = up.viewport.config
     @viewport = options.viewport ? up.viewport.closest(@element)
     up.legacy.fixKey(layoutConfig, 'snap', 'revealSnap')

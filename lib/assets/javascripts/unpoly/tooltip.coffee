@@ -124,7 +124,7 @@ up.tooltip = do ->
     A promise that will be fulfilled when the tooltip's opening animation has finished.
   @stable
   ###
-  attachAsap = (elementOrSelector, options = {}) ->
+  attachAsap = (elementOrSelector, options) ->
     chain.asap closeNow, (-> attachNow(elementOrSelector, options))
 
   attachNow = (elementOrSelector, options = {}) ->

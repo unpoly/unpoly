@@ -205,7 +205,7 @@ up.viewport = do ->
   @stable
   ###
   # TODO: Documentation
-  reveal = (elementOrSelector, options = {}) ->
+  reveal = (elementOrSelector, options) ->
     element = e.get(elementOrSelector)
     motion = new up.RevealMotion(element, options)
     scrollingController.startMotion(element, motion, options)
@@ -299,7 +299,7 @@ up.viewport = do ->
   @return {jQuery}
   @internal
   ###
-  closest = (selectorOrElement, options = {}) ->
+  closest = (selectorOrElement) ->
     element = e.get(selectorOrElement)
     e.closest(element, allSelector())
 

@@ -164,7 +164,8 @@ up.link = do ->
   @function defaultFollow
   @internal
   ###
-  defaultFollow = (link, options = {}) ->
+  defaultFollow = (link, options) ->
+    options = u.options(options)
     url = options.url ? link.getAttribute('up-href') ? link.getAttribute('href')
     target = options.target ? link.getAttribute('up-target')
     options.failTarget ?= link.getAttribute('up-fail-target')
