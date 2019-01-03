@@ -776,7 +776,7 @@ describe 'up.element', ->
       it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
         $div = $fixture('div[class="red-background"]')
         inlineStyle = up.element.inlineStyle($div, 'backgroundColor')
-        computedStyle = up.element.computedStyle($div, 'backgroundColor')
+        computedStyle = up.element.style($div, 'backgroundColor')
         expect(computedStyle).toEqual('rgb(255, 0, 0)')
         expect(inlineStyle).toBeBlank()
 
@@ -798,30 +798,30 @@ describe 'up.element', ->
       it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
         $div = $fixture('div[class="red-background"]')
         inlineStyleHash = up.element.inlineStyle($div, ['backgroundColor'])
-        computedBackground = up.element.computedStyle($div, 'backgroundColor')
+        computedBackground = up.element.style($div, 'backgroundColor')
         expect(computedBackground).toEqual('rgb(255, 0, 0)')
         expect(inlineStyleHash).toHaveOwnProperty('backgroundColor')
         expect(inlineStyleHash.backgroundColor).toBeBlank()
 
-  describe 'up.element.setInlineStyle', ->
+  describe 'up.element.setStyle', ->
 
     it "sets the given style properties as the given element's [style] attribute", ->
       $div = $fixture('div')
-      up.element.setInlineStyle($div, { color: 'red', backgroundColor: 'blue' })
+      up.element.setStyle($div, { color: 'red', backgroundColor: 'blue' })
       style = $div.attr('style')
       expect(style).toContain('color: red')
       expect(style).toContain('background-color: blue')
 
     it "merges the given style properties into the given element's existing [style] value", ->
       $div = $fixture('div[style="color: red"]')
-      up.element.setInlineStyle($div, { backgroundColor: 'blue' })
+      up.element.setStyle($div, { backgroundColor: 'blue' })
       style = $div.attr('style')
       expect(style).toContain('color: red')
       expect(style).toContain('background-color: blue')
 
     it "converts the values of known length properties to px values automatically", ->
       $div = $fixture('div')
-      up.element.setInlineStyle($div, { paddingTop: 100 })
+      up.element.setStyle($div, { paddingTop: 100 })
       style = $div.attr('style')
       expect(style).toContain('padding-top: 100px')
 

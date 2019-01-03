@@ -92,7 +92,7 @@ class up.CssTransition
     @deferred.resolve()
 
   pauseOldTransition: =>
-    oldTransition = e.computedStyle(@element, [
+    oldTransition = e.style(@element, [
       'transitionProperty',
       'transitionDuration',
       'transitionDelay',
@@ -105,7 +105,7 @@ class up.CssTransition
       # since that would involve setting every single CSS property as an inline style.
       unless oldTransition.transitionProperty == 'all'
         oldTransitionProperties = oldTransition.transitionProperty.split(/\s*,\s*/)
-        oldTransitionFrameKebab = e.computedStyle(@element, oldTransitionProperties)
+        oldTransitionFrameKebab = e.style(@element, oldTransitionProperties)
         oldTransitionFrameCamel = u.camelCaseKeys(oldTransitionFrameKebab)
         @setOldTransitionTargetFrame = e.setTemporaryStyle(@element, oldTransitionFrameCamel)
 
@@ -117,10 +117,10 @@ class up.CssTransition
     @setOldTransition?()
 
   startMotion: =>
-    e.setInlineStyle @element,
+    e.setStyle @element,
       transitionProperty: Object.keys(@lastFrameKebab).join(', ')
       transitionDuration: "#{@duration}ms"
       transitionDelay: "#{@delay}ms"
       transitionTimingFunction: @easing
-    e.setInlineStyle(@element, @lastFrameCamel)
+    e.setStyle(@element, @lastFrameCamel)
 

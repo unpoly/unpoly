@@ -520,7 +520,7 @@ up.element = do ->
   ###**
   Gets the computed style(s) for the given element.
 
-  @function up.element.computedStyle
+  @function up.element.style
   @param {jQuery|Element} element
   @param {String|Array} propOrProps
     One or more CSS property names in camelCase.
@@ -536,7 +536,7 @@ up.element = do ->
   Gets a computed style value for the given element.
   If a value is set, the value is parsed to a number before returning.
 
-  @function up.element.computedStyleNumber
+  @function up.element.styleNumber
   @param {jQuery|Element} element
   @param {String} prop
     A CSS property name in camelCase.
@@ -574,7 +574,7 @@ up.element = do ->
   ###**
   Merges the given inline style(s) into the given element's `[style]` attribute.
 
-  @function up.element.setInlineStyle
+  @function up.element.setStyle
   @param {jQuery|Element} element
   @param {Object} props
     One or more CSS properties with camelCase keys.
@@ -690,10 +690,10 @@ up.element = do ->
   numberAttr: numberAttr # practical
   jsonAttr: jsonAttr # practical
   setTemporaryStyle: setTemporaryStyle # practical
-  computedStyle: computedStyle # practical. should be named style outside this module.
-  computedStyleNumber: computedStyleNumber # practical. should be named styleNumber outside this module.
+  style: computedStyle # practical. should be named style outside this module.
+  styleNumber: computedStyleNumber # practical. should be named styleNumber outside this module.
   inlineStyle: inlineStyle # internal
-  setInlineStyle: setInlineStyle # practical. should be named setStyle.
+  setStyle: setInlineStyle # practical. should be named setStyle outside this module.
   resolveSelector: resolveSelector # internal
   none: -> NONE # internal
   isVisible: isVisible
