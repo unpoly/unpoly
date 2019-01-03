@@ -95,7 +95,7 @@ class up.ExtractPlan
     hungrySteps = []
     if @hungry
       hungries = e.all(up.radio.hungrySelector())
-      transition = u.option(up.radio.config.hungryTransition, @transition)
+      transition = up.radio.config.hungryTransition ? @transition
       for hungry in hungries
         selector = e.toSelector(hungry)
         if newHungry = @response.first(selector)

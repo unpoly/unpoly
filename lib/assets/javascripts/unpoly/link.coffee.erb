@@ -90,9 +90,8 @@ up.link = do ->
     See options for [`up.replace()`](/up.replace)
   @stable
   ###
-  visit = (url, options) ->
-    options = u.options(options)
-    selector = u.option(options.target, 'body')
+  visit = (url, options = {}) ->
+    selector = options.target ? 'body'
     up.replace(selector, url, options)
 
   ###**

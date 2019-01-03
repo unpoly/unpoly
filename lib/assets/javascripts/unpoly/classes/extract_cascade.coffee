@@ -4,8 +4,8 @@ class up.ExtractCascade
 
   constructor: (selectorOrElement, options) ->
     @options = u.options(options, humanizedTarget: 'selector', layer: 'auto')
-    @options.transition = u.option(@options.transition, @options.animation)
-    @options.hungry = u.option(@options.hungry, true)
+    @options.transition = @options.transition ? @options.animation
+    @options.hungry = @options.hungry ? true
 
     @candidates = @buildCandidates(selectorOrElement)
     @plans = u.map @candidates, (candidate, i) =>
@@ -13,7 +13,7 @@ class up.ExtractCascade
       if i > 0
         # If we're using a fallback (any candidate that's not the first),
         # the original transition might no longer be appropriate.
-        planOptions.transition = u.option(up.fragment.config.fallbackTransition, @options.transition)
+        planOptions.transition = up.fragment.config.fallbackTransition ? @options.transition
       new up.ExtractPlan(candidate, planOptions)
 
   buildCandidates: (selector) ->

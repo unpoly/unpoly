@@ -343,7 +343,7 @@ up.form = do ->
     observe(selectorOrElement, options, -> submit(selectorOrElement))
 
   findValidateTarget = (field, options) ->
-    option = u.option(options.target, field.getAttribute('up-validate'))
+    option = options.target ? field.getAttribute('up-validate')
     option ||= u.detectResult config.validateTargets, (defaultTarget) ->
       resolvedDefault = e.resolveSelector(defaultTarget, options.origin)
       if e.first(resolvedDefault)
@@ -381,15 +381,13 @@ up.form = do ->
     validation is received and the form was updated.
   @stable
   ###
-  validate = (fieldOrSelector, options) ->
+  validate = (fieldOrSelector, options = {}) ->
     field = e.get(fieldOrSelector)
-    options = u.options(options)
     options.origin = field
     options.target = findValidateTarget(field, options)
     options.failTarget = options.target
     options.reveal ?= e.castedAttr(field, 'up-reveal') ? false
     options.history = false
-    options.headers = u.option(options.headers, {})
     # Make sure the X-Up-Validate header is present, so the server-side
     # knows that it should not persist the form submission
     options.validate = field.getAttribute('name') || ':none'

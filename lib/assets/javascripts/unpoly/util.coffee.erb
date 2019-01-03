@@ -658,20 +658,6 @@ up.util = do ->
       {}
 
   ###**
-  Returns the first argument that is considered [given](/up.util.isGiven).
-
-  This function is useful when you have multiple option sources and the value can be boolean.
-  In that case you cannot change the sources with a `||` operator
-  (since that doesn't short-circuit at `false`).
-  
-  @function up.util.option
-  @param {Array} args...
-  @internal
-  ###
-  option = (args...) ->
-    detect(args, isGiven)
-
-  ###**
   Passes each element in the given array to the given function.
   Returns the first element for which the function returns a truthy value.
 
@@ -1449,7 +1435,6 @@ up.util = do ->
 #  deepAssign: deepAssign
 #  deepMerge: deepMerge
   options: newOptions
-  option: option
   fail: fail
   each: each
   eachIterator: eachIterator

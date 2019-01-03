@@ -127,13 +127,12 @@ up.tooltip = do ->
   attachAsap = (elementOrSelector, options = {}) ->
     chain.asap closeNow, (-> attachNow(elementOrSelector, options))
 
-  attachNow = (elementOrSelector, options) ->
+  attachNow = (elementOrSelector, options = {}) ->
     anchor = e.get(elementOrSelector)
-    options = u.options(options)
-    html = u.option(options.html, anchor.getAttribute('up-tooltip-html'))
-    text = u.option(options.text, anchor.getAttribute('up-tooltip'))
-    position = u.option(options.position, anchor.getAttribute('up-position'), config.position)
-    animation = u.option(options.animation, e.castedAttr(anchor, 'up-animation'), config.openAnimation)
+    html = options.html ? anchor.getAttribute('up-tooltip-html')
+    text = options.text ? anchor.getAttribute('up-tooltip')
+    position = options.position ? anchor.getAttribute('up-position') ? config.position
+    animation = options.animation ? e.castedAttr(anchor, 'up-animation') ? config.openAnimation
     animateOptions = up.motion.animateOptions(options, anchor, duration: config.openDuration, easing: config.openEasing)
 
     state.phase = 'opening'

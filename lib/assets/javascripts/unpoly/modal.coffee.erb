@@ -403,7 +403,7 @@ up.modal = do ->
   extractAsap = (selector, html, options) ->
     options = u.options(options)
     options.html = html
-    options.history = u.option(options.history, false)
+    options.history ?= false
     options.target = selector
     openAsap(options)
 
@@ -519,9 +519,9 @@ up.modal = do ->
     unless isOpen()
       return Promise.resolve()
 
-    viewportCloseAnimation = u.option(options.animation, flavorDefault('closeAnimation'))
+    viewportCloseAnimation = options.animation ? flavorDefault('closeAnimation')
     viewportCloseAnimation = u.evalOption(viewportCloseAnimation, position: state.position)
-    backdropCloseAnimation = u.option(options.backdropAnimation, flavorDefault('backdropCloseAnimation'))
+    backdropCloseAnimation = options.backdropAnimation ? flavorDefault('backdropCloseAnimation')
     backdropCloseAnimation = u.evalOption(backdropCloseAnimation, position: state.position)
     animateOptions = up.motion.animateOptions(options, duration: flavorDefault('closeDuration'), easing: flavorDefault('closeEasing'))
 

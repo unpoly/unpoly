@@ -470,8 +470,8 @@ up.viewport = do ->
   @experimental
   ###
   saveScroll = (options = {}) ->
-    url = u.option(options.url, up.history.url())
-    tops = u.option(options.tops, scrollTops())
+    url = options.url ? up.history.url()
+    tops = options.tops ? scrollTops()
     lastScrollTops.set(url, tops)
 
   ###**
