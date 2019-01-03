@@ -339,6 +339,28 @@ describe 'up.element', ->
       up.element.toggle(element, true)
       expect(element).toBeVisible()
 
+  describe 'up.element.toggleClass()', ->
+
+    it 'removes a class from an element that has that class', ->
+      element = fixture('.klass')
+      up.element.toggleClass(element, 'klass')
+      expect(element).not.toHaveClass('klass')
+
+    it 'adds a class to an element that does not have that class', ->
+      element = fixture('div')
+      up.element.toggleClass(element, 'klass')
+      expect(element).toHaveClass('klass')
+
+    it 'removes a class from the an element if the second argument is false', ->
+      element = fixture('.klass')
+      up.element.toggleClass(element, 'klass', false)
+      expect(element).not.toHaveClass('klass')
+
+    it 'adds a class to an element if the second argument is true', ->
+      element = fixture('div')
+      up.element.toggleClass(element, 'klass', true)
+      expect(element).toHaveClass('klass')
+
   describe 'up.element.createFromSelector()', ->
 
     it 'creates an element with a given tag', ->
