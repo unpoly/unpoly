@@ -450,6 +450,29 @@ describe 'up.element', ->
       parse = -> up.element.createFromSelector("ul~baz")
       expect(parse).toThrowError('Cannot parse selector: ul~baz')
 
+    it 'sets attributes from a second argument', ->
+      element = up.element.createFromSelector('div', foo: 'one', bar: 'two')
+      expect(element.getAttribute('foo')).toEqual('one')
+      expect(element.getAttribute('bar')).toEqual('two')
+
+    it 'sets inline styles from a { style } option', ->
+      element = up.element.createFromSelector('div', style: { fontSize: '100px', marginTop: '200px' })
+      expect(element.style.fontSize).toEqual('100px')
+      expect(element.style.marginTop).toEqual('200px')
+
+    it 'adds an addition class from a { class } option', ->
+      element = up.element.createFromSelector('.foo', class: 'bar')
+      expect(element).toHaveClass('foo')
+      expect(element).toHaveClass('bar')
+
+    it 'sets the element text from a { text } option', ->
+      element = up.element.createFromSelector('.foo', text: 'text')
+      expect(element).toHaveText('text')
+
+    it 'escapes HTML from a { text } option', ->
+      element = up.element.createFromSelector('.foo', text: '<script>alert("foo")</script>')
+      expect(element).toHaveText('<script>alert("foo")</script>')
+
   describe 'up.element.toSelector', ->
 
     it "prefers using the element's 'up-id' attribute to using the element's ID", ->

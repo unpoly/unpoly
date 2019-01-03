@@ -207,7 +207,7 @@ up.element = do ->
   @function up.element.createFromSelector
   @internal
   ###
-  createFromSelector = (givenSelector) ->
+  createFromSelector = (givenSelector, attrs) ->
     # Extract attribute values before we do anything else.
     # Attribute values might contain spaces, and then we would incorrectly
     # split depths at that space.
@@ -252,23 +252,24 @@ up.element = do ->
       previousElement?.appendChild(depthElement)
       previousElement = depthElement
 
+    if attrs
+      if classValue = u.pluckKey(attrs, 'class')
+        for klass in u.wrapList(classValue)
+          rootElement.classList.add(klass)
+      if styleValue = u.pluckKey(attrs, 'style')
+        setInlineStyle(rootElement, styleValue)
+      if textValue = u.pluckKey(attrs, 'text')
+        rootElement.innerText = textValue
+      setAttrs(rootElement, attrs)
+
     rootElement
 
   ###**
   @function up.element.affix
   @internal
   ###
-  affix = (container, selector, attrs) ->
-    element = createFromSelector(selector)
-    if attrs
-      if classValue = u.pluckKey(attrs, 'class')
-        for klass in u.wrapList(classValue)
-          element.classList.add(klass)
-      if styleValue = u.pluckKey(attrs, 'style')
-        setInlineStyle(element, styleValue)
-      if textValue = u.pluckKey(attrs, 'text')
-        element.innerText = textValue
-      setAttrs(element, attrs)
+  affix = (container, selector, options) ->
+    element = createFromSelector(selector, options)
     container.appendChild(element)
     element
 
@@ -662,14 +663,14 @@ up.element = do ->
   list: getList # practical for composing multiple collections, or wrapping.
   remove: remove # needed for IE11
   toggle: toggle # practical
-  toggleClass: toggleClass # practical, but we need to implement class detection
+  toggleClass: toggleClass # practical
   hide: hide # practical
   show: show # practical
   setAttrs: setAttrs # practical
   metaContent: metaContent # internal
   replace: replace # needed for IE11
   insertBefore: insertBefore # internal shortcut, people can use insertAdjacentElement and i don't want to support insertAfter when I don't need it.
-  createFromSelector: createFromSelector # practical for element creation. must support { style } / { attrs } options.
+  createFromSelector: createFromSelector # practical for element creation.
   setAttrs: setAttrs # practical
   affix: affix # practical for element creation
   toSelector: toSelector # practical
