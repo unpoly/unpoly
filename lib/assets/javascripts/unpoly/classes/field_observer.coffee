@@ -13,17 +13,13 @@ class up.FieldObserver
     @processedValues = @readFieldValues()
     @currentTimer = undefined
     @callbackRunning = false
-    @changeEventSubscription('on')
-
-  stop: =>
-    @changeEventSubscription('off')
-    @cancelTimer()
-
-  changeEventSubscription: (fn) ->
     # Although (depending on the browser) we only need/receive either input or change,
     # we always bind to both events in case another script manually triggers it.
-    for field in @fields
-      up[fn](field, 'input change', @check)
+    @unbind = up.on(@fields, 'input change', @check)
+
+  stop: =>
+    @unbind()
+    @cancelTimer()
 
   cancelTimer: =>
     clearTimeout(@currentTimer)

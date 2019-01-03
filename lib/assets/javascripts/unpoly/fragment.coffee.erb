@@ -496,8 +496,6 @@ up.fragment = do ->
             newElement: partner # the element that would have replaced it but now does not
             newData: up.syntax.data(partner) # the parsed up-data attribute of the element we will discard
 
-          # TODO: extract newData on-demand
-
           keepEventArgs =
             target: keepable
             newFragment: partner
@@ -767,7 +765,7 @@ up.fragment = do ->
 #      isRealElement(element) && matchesLayer(element, options.layer)
 
   ###**
-  @function createPlaceHolder
+  @function up.fragment.createPlaceHolder
   @internal
   ###
   createPlaceholder = (selector, container = document.body) ->

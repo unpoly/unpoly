@@ -16,7 +16,7 @@ up.framework = do ->
   Emits event [`up:framework:reset`](/up:framework:reset).
 
   @function up.framework.reset
-  @experimental
+  @internal
   ###
   emitReset = ->
     up.emit('up:framework:reset', log: 'Resetting framework')
@@ -25,7 +25,7 @@ up.framework = do ->
   This event is [emitted](/up.emit) when Unpoly is [reset](/up.framework.reset) during unit tests.
 
   @event up:framework:reset
-  @experimental
+  @internal
   ###
 
   ###**
@@ -47,7 +47,7 @@ up.framework = do ->
 
       u.nextFrame ->
         # At this point all user-provided compilers have been registered.
-        u.whenReady().then ->
+        up.event.whenReady().then ->
           # The following event will cause Unpoly to compile the <body>
           up.emit('up:app:boot', log: 'Booting user application')
           up.emit('up:app:booted', log: 'User application booted')

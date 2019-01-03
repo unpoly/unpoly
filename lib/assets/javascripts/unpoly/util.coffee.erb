@@ -696,7 +696,7 @@ up.util = do ->
   Consecutively calls the given function which each element
   in the given array. Return the first truthy return value.
 
-  Returned `undefined` iif the function does not return a truthy
+  Returned `undefined` iff the function does not return a truthy
   value for all elements in the array.
 
   @function up.util.detectResult
@@ -1034,7 +1034,7 @@ up.util = do ->
       messageArgs = args
       toastOptions = {}
 
-    whenReady().then -> up.toast.open(messageArgs, toastOptions)
+    up.event.whenReady().then -> up.toast.open(messageArgs, toastOptions)
 
     asString = up.browser.sprintf(messageArgs...)
     throw new Error(asString)
@@ -1168,16 +1168,6 @@ up.util = do ->
 #  }
 #}
 
-  whenReady = memoize ->
-    readyState = document.readyState
-    # Values are "loading", "interactive" and "completed".
-    # https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
-    if readyState != 'loading'
-      Promise.resolve()
-    else
-      new Promise (resolve) ->
-        document.addEventListener('DOMContentLoaded', resolve)
-
   identity = (arg) -> arg
 
 #  ###**
@@ -1262,7 +1252,7 @@ up.util = do ->
     An array which might contain other arrays
   @return {Array}
     The flattened array
-  @internal
+  @experimental
   ###
   flatten = (array) ->
     flattened = []
@@ -1273,6 +1263,12 @@ up.util = do ->
         flattened.push(object)
     flattened
 
+  ###**
+  TODO: Document me
+
+  @function up.util.flatMap
+  @experimental
+  ###
   flatMap = (array, block) ->
     flatten map(array, block)
 
@@ -1360,6 +1356,12 @@ up.util = do ->
   isBasicObjectProperty = (k) ->
     Object.prototype.hasOwnProperty(k)
 
+  ###**
+  TODO: Document me
+
+  @function up.util.isEqual
+  @experimental
+  ###
   isEqual = (a, b) ->
     if typeof(a) != typeof(b)
       false
@@ -1482,7 +1484,6 @@ up.util = do ->
   escapePressed: escapePressed
   contains: contains
   toArray: toArray
-#  pushAll: pushAll
   only: only
   except: except
 #  pickBy: pickBy
@@ -1501,7 +1502,6 @@ up.util = do ->
   extractCallback: extractCallback
   noop: noop
   asyncNoop: asyncNoop
-  whenReady: whenReady
   identity: identity
   escapeHtml: escapeHtml
   sequence: sequence

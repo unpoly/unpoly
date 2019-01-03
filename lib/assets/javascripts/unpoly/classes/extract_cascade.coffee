@@ -4,8 +4,8 @@ class up.ExtractCascade
 
   constructor: (selectorOrElement, options) ->
     @options = u.options(options, humanizedTarget: 'selector', layer: 'auto')
-    @options.transition = @options.transition ? @options.animation
-    @options.hungry = @options.hungry ? true
+    @options.transition ?= @options.animation
+    @options.hungry ?= true
 
     @candidates = @buildCandidates(selectorOrElement)
     @plans = u.map @candidates, (candidate, i) =>

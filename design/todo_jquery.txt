@@ -1,20 +1,12 @@
 - re-test on all browsers
-
-- compatibility layer
-  - upgrade makandracards.com with the jquery compatibility layer to see if it's convenient enough
-
-- complete (and maybe unify) link variant parsing options
-  - can FollowVariant do most defaults?
-  - Remove 'none' default for animation options in link.follow etc.
-  - Remove 'auto' default from { layer, failLayer } in link, modal, popup
-
-- grep for TODO comments
+  - prevent popups or tooltips from moving outside the main viewport
 
 - Update docs
-  - publish up.element
-    - also :has()
 
   - Write CHANGELOG from diff
+
+  - publish up.element
+    - also :has()
 
   - check if the main entries for renamed modules still work with their new focus
     - up.fragment
@@ -43,6 +35,7 @@
   - no jquery
 
 
+
 New features (postponable)
 --------------------------
 
@@ -54,12 +47,11 @@ New features (postponable)
       - if yes, scroll to it and resolve the replacemnet
       - if no, do a usual replacement
   - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
-  - rename "page" layer to "root"
 
-Teach
------
+- rename "page" layer to "root"
 
-- JS without Lodash
-- JS without JQuery
-- go through unpoly-guide refactoring together
-
+- Publish protocol symbols
+  - up.util.isEqual.key
+  - up.util.copy.key
+  - up.util.isBlank.key
+  - up.util.deepCopy.key (do we really need this?)

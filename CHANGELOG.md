@@ -9,7 +9,143 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 Unreleased
 ----------
 
+- jQuery no longer required
+  - Migration
+    - all unpoly functions that took a jquery collection before still do
+    - instead of up.compiler, use up.$compiler
+    - instead of up.macro, use up.$macro
+    - instead of up.on, use up.$off
+    - when you use $.fn.on to listen to an Unpoly event (`up:` prefix) and access custom properties
+      - use event.originalEvent (or bind with addEventListener or up.on instead)
+
+- up.on() can now bind to one or more elements
+
+- New module up.element
+  - explain that they can replace jQuery and enable cross-browser DOM API
+  - functions
+    - [`up.element.first()`](/up.element.first)
+    - [`up.element.all()`](/up.element.all)
+    - [`up.element.subtree()`](/up.element.subtree)
+    - [`up.element.closest()`](/up.element.closest)
+    - [`up.element.matches()`](/up.element.matches)
+    - [`up.element.get()`](/up.element.get)
+    - [`up.element.list()`](/up.element.list)
+    - [`up.element.remove()`](/up.element.remove)
+    - [`up.element.toggle()`](/up.element.toggle)
+    - [`up.element.toggleClass()`](/up.element.toggleClass)
+    - [`up.element.hide()`](/up.element.hide)
+    - [`up.element.show()`](/up.element.show)
+    - [`up.element.setAttrs()`](/up.element.setAttrs)
+    - [`up.element.replace()`](/up.element.replace)
+    - [`up.element.createFromSelector()`](/up.element.createFromSelector)
+    - [`up.element.setAttrs()`](/up.element.setAttrs)
+    - [`up.element.affix()`](/up.element.affix)
+    - [`up.element.toSelector()`](/up.element.toSelector)
+    - [`up.element.createFromHtml()`](/up.element.createFromHtml)
+    - [`up.element.presentAttr()`](/up.element.presentAttr)
+    - [`up.element.booleanAttr()`](/up.element.booleanAttr)
+    - [`up.element.numberAttr()`](/up.element.numberAttr)
+    - [`up.element.jsonAttr()`](/up.element.jsonAttr)
+    - [`up.element.setTemporaryStyle()`](/up.element.setTemporaryStyle)
+    - [`up.element.style()`](/up.element.style)
+    - [`up.element.styleNumber()`](/up.element.styleNumber)
+    - [`up.element.setStyle()`](/up.element.setStyle)
+    - [`up.element.isVisible()`](/up.element.isVisible)
+    - [`:has() selector`](/has)
+
+
 - The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed), emitted after a fragment was removed, remains in the API.
+
+- Renamed modules
+  - Future: up.thing.verb()
+  - up.layout has been renamed to up.viewport
+  - up.dom has been renamed to up.fragment
+  - up.bus has been renamed to up.event
+
+- Opening modal will now set overflow-y on the right element (body, html)
+
+- Renamed files so they won't be blocked by over-eager ad blockers on developer PCs
+
+- Experimental up.params module has been completely rewritten. It is now the up.Params class.
+  - List all up.Params methods
+
+- up.scroll() no longer takes a { duration } and { easing }.
+  - It takes { behavior } (auto or smooth).
+  - Mirrors <https://hospodarets.com/native_smooth_scrolling>
+  - For smooth scrolling behavior there is also { speed }.
+
+- new config option up.viewport.scrollSpeed
+
+- config option up.layout.snap has been renamed to up.viewport.revealSnap
+
+- up.reveal() now also takes a { padding } option
+
+- new config option up.viewport.revealPadding
+
+- up.reveal
+
+- popups
+  - now re-align when the screen is resized
+  - no longer grow wider than the screen
+  - popups now follow scrolling when placed within other viewports
+
+- up:form:submit no longer has a { $form } prop. it's now the event target.
+
+- up.observe:
+  - now accepts an array of fields
+
+  - new callback signature
+  - new { batch } option that runs the callback with a diff
+
+- up.emit
+  - option { message } is now { log }
+  - now takes initial argument for element on which to trigger
+  - { $element } etc. is now just { target }
+  - no longer logs by default. you can enable the old efault message with { log: true } option
+
+- up:fragment:destroyed no longer has a { $element } property. now has a { fragment } property. like before, it is emitted on the parent of the destroyed element.
+
+- removed experimental function up.all()
+
+- up.first() has been moved to up.fragment.first()
+
+- removed up.reset() from public API
+- removed up:framework:reset from public API
+- [up-preload] and [up-instant] links no longer bind to `touchstart`, increasing FPS
+- Compatibility with the jQuery-less rails-ujs adapter (now [part of Action View](https://github.com/rails/rails/tree/master/actionview/app/assets/javascripts))
+
+- up.util.parseUrl
+  - now returns correct { hostname } und { protocol } on IE11
+  - { pathname } now always begins with leading slash on IE11
+- up.util.array no longer copies the array if passed the array
+
+- up.util.isBlank now returns false for unsimple objects
+
+- new experimental function up.util.isList
+- new experimental function up.util.isNodeList
+- new experimental function up.util.isArguments
+- new experimental function up.util.detectResult
+- new experimental function up.util.flatten
+- new experimental function up.util.flatMap
+- new experimental function up.util.isEqual
+
+- new experimental up.viewport functions
+  - closest
+  - subtree
+  - around
+  - all
+  - rootSelector
+  - root
+  - rootWidth
+  - rootHeight
+  - rootHasVerticalScrollbar
+  - rootOverflowElement
+  - isRoot
+  - scrollbarWidth
+
+- up.fail no longer prints to the console
+
+
 
 
 0.57.0
