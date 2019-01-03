@@ -306,45 +306,6 @@ describe 'up.element', ->
 
   describe 'up.element.emit()', ->
 
-    it 'triggers an event with the given name on the given element', ->
-      element = fixture('.element')
-      callback = jasmine.createSpy('event handler')
-      element.addEventListener('custom:name', callback)
-      expect(callback).not.toHaveBeenCalled()
-      up.element.emit(element, 'custom:name')
-      expect(callback).toHaveBeenCalled()
-
-    it 'allows to pass custom event properties', ->
-      element = fixture('.element')
-      callback = jasmine.createSpy('event handler')
-      element.addEventListener('custom:name', callback)
-      up.element.emit(element, 'custom:name', customProp: 'customValue')
-      expect(callback).toHaveBeenCalled()
-      expect(callback.calls.mostRecent().args[0].customProp).toEqual('customValue')
-
-    it 'triggers an event that bubbles', ->
-      $parent = $fixture('.parent')
-      $element = $parent.affix('.element')
-      callback = jasmine.createSpy('event handler')
-      $parent[0].addEventListener('custom:name', callback)
-      up.element.emit($element[0], 'custom:name')
-      expect(callback).toHaveBeenCalled()
-
-    it 'triggers an event that can be stopped from propagating', ->
-      $parent = $fixture('.parent')
-      $element = $parent.affix('.element')
-      callback = jasmine.createSpy('event handler')
-      $parent[0].addEventListener('custom:name', callback)
-      $element[0].addEventListener('custom:name', (event) -> event.stopPropagation())
-      up.element.emit($element[0], 'custom:name')
-      expect(callback).not.toHaveBeenCalled()
-
-    it 'triggers an event that can have its default prevented (IE11 bugfix)', ->
-      element = fixture('.element')
-      element.addEventListener('custom:name', (event) -> event.preventDefault())
-      event = up.element.emit(element, 'custom:name')
-      expect(event.defaultPrevented).toBe(true)
-
   describe 'up.element.remove()', ->
 
     it 'removes the given element from the DOM', ->

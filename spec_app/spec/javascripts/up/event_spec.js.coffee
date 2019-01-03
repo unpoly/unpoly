@@ -93,7 +93,7 @@ describe 'up.event', ->
       it 'allows to explicitly bind a listener to the document', asyncSpec (next) ->
         listener = jasmine.createSpy()
         up.on(document, 'foo', listener)
-        up.element.emit(document, 'foo')
+        up.emit(document, 'foo')
 
         next ->
           expect(listener).toHaveBeenCalledWith(
@@ -106,7 +106,7 @@ describe 'up.event', ->
       it 'allows to bind a listener to the window', asyncSpec (next) ->
         listener = jasmine.createSpy()
         up.on(window, 'foo', listener)
-        up.element.emit(window, 'foo')
+        up.emit(window, 'foo')
 
         next ->
           expect(listener).toHaveBeenCalledWith(
@@ -373,6 +373,29 @@ describe 'up.event', ->
         expect(emittedEvent.preventDefault).toBeDefined()
         expect(emittedTarget).toEqual(document)
 
+      it 'triggers an event that bubbles', ->
+        $parent = $fixture('.parent')
+        $element = $parent.affix('.element')
+        callback = jasmine.createSpy('event handler')
+        $parent[0].addEventListener('custom:name', callback)
+        up.emit($element[0], 'custom:name')
+        expect(callback).toHaveBeenCalled()
+
+      it 'triggers an event that can be stopped from propagating', ->
+        $parent = $fixture('.parent')
+        $element = $parent.affix('.element')
+        callback = jasmine.createSpy('event handler')
+        $parent[0].addEventListener('custom:name', callback)
+        $element[0].addEventListener('custom:name', (event) -> event.stopPropagation())
+        up.emit($element[0], 'custom:name')
+        expect(callback).not.toHaveBeenCalled()
+
+      it 'triggers an event that can have its default prevented (IE11 bugfix)', ->
+        element = fixture('.element')
+        element.addEventListener('custom:name', (event) -> event.preventDefault())
+        event = up.emit(element, 'custom:name')
+        expect(event.defaultPrevented).toBe(true)
+
       describe 'custom event properties', ->
 
         it 'accepts custom event properties that can be accessed from an up.on() handler', ->
@@ -399,24 +422,39 @@ describe 'up.event', ->
 
         expect(emittedEvent.customField).toEqual('custom-value')
 
-      describe 'with { element } option', ->
+      it 'triggers an event on an element passed as { target } option', ->
+        emittedEvent = undefined
+        emittedElement = undefined
 
-        it 'triggers an event on the given element', ->
-          emittedEvent = undefined
-          emittedElement = undefined
+        element = fixture('.element')
 
-          $element = $fixture('.element').text('foo')
+        up.on 'foo', (event, element) ->
+          emittedEvent = event
+          emittedElement = element
 
-          up.on 'foo', (event, element) ->
-            emittedEvent = event
-            emittedElement = element
+        up.emit('foo', target: element)
 
-          up.emit('foo', target: $element[0])
+        expect(emittedEvent).toBeDefined()
+        expect(emittedElement).toEqual(element)
 
-          expect(emittedEvent).toBeDefined()
-          expect(emittedElement).toEqual($element[0])
+        expect(emittedEvent.target).toEqual(element)
 
-          expect(emittedEvent.target).toEqual($element[0])
+      it 'triggers an event on an element passed as the first argument', ->
+        emittedEvent = undefined
+        emittedElement = undefined
+
+        element = fixture('.element')
+
+        up.on 'foo', (event, element) ->
+          emittedEvent = event
+          emittedElement = element
+
+        up.emit(element, 'foo')
+
+        expect(emittedEvent).toBeDefined()
+        expect(emittedElement).toEqual(element)
+
+        expect(emittedEvent.target).toEqual(element)
 
     describe 'up.event.whenEmitted', ->
 
