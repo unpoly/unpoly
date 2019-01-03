@@ -658,7 +658,7 @@ up.element = do ->
   subtree: subtree # practical
   closest: closest # needed for IE11
   matches: matches # needed for IE11
-  ancestor: ancestor # not practical. we use it to implement closest:
+  ancestor: ancestor # not practical. we use it to implement closest
   get: getOne # practical for code that also works with jQuery
   list: getList # practical for composing multiple collections, or wrapping.
   remove: remove # needed for IE11
@@ -686,15 +686,15 @@ up.element = do ->
   setMissingAttrs: setMissingAttrs # internal
   unwrap: unwrap # practical for jQuery migration
   presentAttr: presentAttr # experimental
-  castedAttr: castedAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code.
+  castedAttr: castedAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
   numberAttr: numberAttr # practical
   jsonAttr: jsonAttr # practical
   setTemporaryStyle: setTemporaryStyle # practical
-  style: computedStyle # practical. should be named style outside this module.
-  styleNumber: computedStyleNumber # practical. should be named styleNumber outside this module.
+  style: computedStyle # practical.
+  styleNumber: computedStyleNumber # practical.
   inlineStyle: inlineStyle # internal
-  setStyle: setInlineStyle # practical. should be named setStyle outside this module.
+  setStyle: setInlineStyle # practical.
   resolveSelector: resolveSelector # internal
   none: -> NONE # internal
-  isVisible: isVisible
+  isVisible: isVisible # practical
 
