@@ -374,7 +374,7 @@ describe 'up.util', ->
         one = -> values.push('one')
         two = -> values.push('two')
         three = -> values.push('three')
-        sequence = up.util.sequence(one, two, three)
+        sequence = up.util.sequence([one, two, three])
         expect(values).toEqual([])
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])

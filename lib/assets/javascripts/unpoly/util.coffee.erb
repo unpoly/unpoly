@@ -1236,9 +1236,11 @@ up.util = do ->
 
   @internal
   ###
-  sequence = (functions...) ->
-    ->
-      map functions, (f) -> f()
+  sequence = (functions) ->
+    if functions.length == 1
+      return functions[0]
+    else
+      return -> map(functions, (f) -> f())
 
 #  ###**
 #  @function up.util.race

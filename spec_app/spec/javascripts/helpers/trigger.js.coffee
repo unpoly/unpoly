@@ -3,7 +3,6 @@ e = up.element
 $ = jQuery
 
 @Trigger = (->
-  
 
   mouseover = (element, options) ->
     $element = $(element)

@@ -170,10 +170,7 @@ up.event = do ->
     # browsers and return a no-op destructor
     return (->) unless up.browser.isSupported()
 
-    listener = up.EventListener.fromBindArgs(args, options)
-    listener.bind()
-
-    return listener.unbind
+    up.EventListener.bind(args, options)
 
   ###**
   Unbinds an event listener previously bound with [`up.on()`](/up.on).
@@ -196,8 +193,7 @@ up.event = do ->
   @stable
   ###
   unbind = (args...) ->
-    if listener = up.EventListener.fromUnbindArgs(args)
-      listener.unbind()
+    up.EventListener.unbind(args)
 
   ###**
   Emits a event with the given name and properties.

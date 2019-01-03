@@ -74,9 +74,9 @@ class up.MotionController
   startMotion: (cluster, motion, memory = {}) ->
     start = -> motion.start()
     finish = -> motion.finish()
-    unbindFinishFns = u.map cluster, (element) => up.on(element, @finishEvent, finish)
+    unbindFinish = up.on(cluster, @finishEvent, finish)
     promise = @startFunction(cluster, start, memory)
-    promise = promise.then -> u.each(unbindFinishFns)
+    promise = promise.then(unbindFinish)
     promise
 
   ###**
@@ -138,29 +138,18 @@ class up.MotionController
       element.classList.remove(@activeClass)
       delete element[@dataKey]
 
-  forwardFinishEvent: (original, ghost, duration) =>
-    @start original, =>
-      doForward = => e.emit(ghost, @finishEvent)
-      # Forward the finish event to the ghost that is actually animating
-      original.addEventListener(@finishEvent, doForward)
-      # Our own pseudo-animation finishes when the actual animation on ghost finishes
-      duration.then => original.removeEventListener(@finishEvent, doForward)
-
-  whileForwardingFinishEvent: (elements, fn) =>
-    return fn() if elements.length < 2
+  whileForwardingFinishEvent: (cluster, fn) =>
+    return fn() if cluster.length < 2
     doForward = (event) =>
       unless event.forwarded
-        u.each elements, (element) =>
+        u.each cluster, (element) =>
           if element != event.target && @isActive(element)
             @emitFinishEvent(element, forwarded: true)
 
     # Forward the finish event to the ghost that is actually animating
-    for element in elements
-      element.addEventListener(@finishEvent, doForward)
+    unbindFinish = up.on(cluster, @finishEvent, doForward)
     # Our own pseudo-animation finishes when the actual animation on $ghost finishes
-    fn().then =>
-      for element in elements
-        element.removeEventListener(@finishEvent, doForward)
+    fn().then(unbindFinish)
 
   reset: =>
     @finish().then =>

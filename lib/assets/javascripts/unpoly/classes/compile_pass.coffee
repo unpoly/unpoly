@@ -72,7 +72,7 @@ class up.CompilePass
       result
     else if u.isArray(result) && u.all(result, u.isFunction)
       up.warn('up.compiler(): Returning an array of destructor functions is deprecated. Return a single function instead.')
-      u.sequence(result...)
+      u.sequence(result)
 
   select: (selector) ->
     if u.isFunction(selector)

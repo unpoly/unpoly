@@ -63,6 +63,33 @@ describe 'up.event', ->
           )
           expect(listener.calls.count()).toBe(1)
 
+      it 'allows to bind the listener to an array of elements at once', asyncSpec (next) ->
+        element1 = fixture('.element')
+        element2 = fixture('.element')
+        listener = jasmine.createSpy()
+
+        unbindAll = up.on([element1, element2], 'click', listener)
+
+        Trigger.click(element1)
+
+        next =>
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[1]).toBe(element1)
+
+          Trigger.click(element2)
+
+        next =>
+          expect(listener.calls.count()).toBe(2)
+          expect(listener.calls.argsFor(1)[1]).toBe(element2)
+
+          unbindAll()
+
+          Trigger.click(element1)
+          Trigger.click(element2)
+
+        next =>
+          expect(listener.calls.count()).toBe(2)
+
       it 'allows to explicitly bind a listener to the document', asyncSpec (next) ->
         listener = jasmine.createSpy()
         up.on(document, 'foo', listener)
@@ -138,7 +165,14 @@ describe 'up.event', ->
           up.on('bar', callback)
         expect(register).not.toThrowError()
 
-      it 'allows to register the same callback for different elements (bugfix)'
+      it 'allows to register the same callback for different elements (bugfix)', ->
+        element1 = fixture('.element1')
+        element2 = fixture('.element2')
+        callback = ->
+        register = ->
+          up.on(element1, 'foo', callback)
+          up.on(element2, 'foo', callback)
+        expect(register).not.toThrowError()
 
       it 'allows to register the same callback for different selectors (bugfix)', ->
         callback = ->
@@ -251,6 +285,54 @@ describe 'up.event', ->
 
         next =>
           expect(clickSpy.calls.count()).toEqual(1)
+
+      it 'allows to unregister a single event from a group of events that were registered in a single up.on call', asyncSpec (next) ->
+        listener = jasmine.createSpy()
+        element = fixture('.element')
+        up.on(element, 'mouseover mouseout', listener)
+
+        up.off(element, 'mouseover', listener)
+        Trigger.mouseover(element)
+
+        next ->
+          expect(listener.calls.count()).toBe(0)
+
+          Trigger.mouseout(element)
+
+        next ->
+          expect(listener.calls.count()).toBe(1)
+
+          up.off(element, 'mouseout', listener)
+
+          Trigger.mouseout(element)
+
+        next =>
+          expect(listener.calls.count()).toBe(1)
+
+      it 'allows to unregister a single element from a group of elements that were registered in a single up.on call', asyncSpec (next) ->
+        listener = jasmine.createSpy()
+        element1 = fixture('.element1')
+        element2 = fixture('.element2')
+
+        up.on([element1, element2], 'mouseover', listener)
+
+        up.off(element1, 'mouseover', listener)
+        Trigger.mouseover(element1)
+
+        next ->
+          expect(listener.calls.count()).toBe(0)
+
+          Trigger.mouseover(element2)
+
+        next ->
+          expect(listener.calls.count()).toBe(1)
+
+          up.off(element2, 'mouseover', listener)
+
+          Trigger.mouseover(element2)
+
+        next =>
+          expect(listener.calls.count()).toBe(1)
 
 #      it 'throws an error if the given event listener was not registered through up.on', ->
 #        someFunction = ->
