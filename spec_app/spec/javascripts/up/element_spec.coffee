@@ -316,6 +316,16 @@ describe 'up.element', ->
 
   describe 'up.element.toggle()', ->
 
+    it 'hides the given element if it is visible', ->
+      element = fixture('.element')
+      up.element.toggle(element)
+      expect(element).toBeHidden()
+
+    it 'shows the given element if it is hidden', ->
+      element = fixture('.element', style: { display: 'none' })
+      up.element.toggle(element)
+      expect(element).toBeVisible()
+
     it 'hides the given element if the second argument is false', ->
       element = fixture('.element')
       expect(element).toBeVisible()
@@ -770,3 +780,25 @@ describe 'up.element', ->
       style = $div.attr('style')
       expect(style).toContain('padding-top: 100px')
 
+  describe 'up.element.isVisible', ->
+
+    it 'returns true for an attached element', ->
+      element = fixture('.element', text: 'content')
+      expect(up.element.isVisible(element)).toBe(true)
+
+    it 'returns true for an attached block element without content', ->
+      element = fixture('div.element')
+      expect(up.element.isVisible(element)).toBe(true)
+
+    it 'returns true for an attached inline element without content', ->
+      element = fixture('span.element')
+      expect(up.element.isVisible(element)).toBe(true)
+
+    it 'returns false for a detached element', ->
+      element = document.createElement('text')
+      element.innerText = 'content'
+      expect(up.element.isVisible(element)).toBe(false)
+
+    it 'returns false for an attached element with { display: none }', ->
+      element = fixture('.element', text: 'content', style: { display: 'none' })
+      expect(up.element.isVisible(element)).toBe(false)
