@@ -460,10 +460,10 @@ up.element = do ->
     u.presence(value)
 
   ###**
-  @function up.util.castedAttr
+  @function up.util.booleanAttr
   @internal
   ###
-  castedAttr = (element, attribute) ->
+  booleanAttr = (element, attribute) ->
     value = element.getAttribute(attribute)
     switch value
       when 'false' then false
@@ -686,7 +686,7 @@ up.element = do ->
   setMissingAttrs: setMissingAttrs # internal
   unwrap: unwrap # practical for jQuery migration
   presentAttr: presentAttr # experimental
-  castedAttr: castedAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
+  booleanAttr: booleanAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
   numberAttr: numberAttr # practical
   jsonAttr: jsonAttr # practical
   setTemporaryStyle: setTemporaryStyle # practical

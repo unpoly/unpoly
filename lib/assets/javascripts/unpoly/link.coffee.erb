@@ -170,13 +170,13 @@ up.link = do ->
     target = options.target ? link.getAttribute('up-target')
     options.failTarget ?= link.getAttribute('up-fail-target')
     options.fallback ?= link.getAttribute('up-fallback')
-    options.transition ?= e.castedAttr(link, 'up-transition')
-    options.failTransition ?= e.castedAttr(link, 'up-fail-transition')
-    options.history ?= e.castedAttr(link, 'up-history')
-    options.reveal ?= e.castedAttr(link, 'up-reveal') ? true
-    options.failReveal ?= e.castedAttr(link, 'up-fail-reveal') ? true
-    options.cache ?= e.castedAttr(link, 'up-cache')
-    options.restoreScroll ?= e.castedAttr(link, 'up-restore-scroll')
+    options.transition ?= e.booleanAttr(link, 'up-transition')
+    options.failTransition ?= e.booleanAttr(link, 'up-fail-transition')
+    options.history ?= e.booleanAttr(link, 'up-history')
+    options.reveal ?= e.booleanAttr(link, 'up-reveal') ? true
+    options.failReveal ?= e.booleanAttr(link, 'up-fail-reveal') ? true
+    options.cache ?= e.booleanAttr(link, 'up-cache')
+    options.restoreScroll ?= e.booleanAttr(link, 'up-restore-scroll')
     options.method = followMethod(link, options)
     options.origin ?= link
     options.layer ?= link.getAttribute('up-layer')
@@ -510,7 +510,7 @@ up.link = do ->
   @stable
   ###
   up.macro '[up-dash]', (element) ->
-    target = e.castedAttr(element, 'up-dash')
+    target = e.booleanAttr(element, 'up-dash')
     element.removeAttribute('up-dash')
     newAttrs = {
       'up-preload': '',

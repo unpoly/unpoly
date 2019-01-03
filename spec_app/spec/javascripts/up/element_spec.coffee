@@ -718,27 +718,27 @@ describe 'up.element', ->
       newRect = up.Rect.fromElement($element[0])
       expect(newRect).toEqual(oldRect)
 
-  describe 'up.element.castedAttr', ->
+  describe 'up.element.booleanAttr', ->
     
     it 'returns true if the attribute value is the string "true"', ->
       element = fixture('div[foo=true]')
-      expect(up.element.castedAttr(element, 'foo')).toBe(true)
+      expect(up.element.booleanAttr(element, 'foo')).toBe(true)
 
     it 'returns true if the attribute value is the name of the attribute', ->
       element = fixture('div[foo=foo]')
-      expect(up.element.castedAttr(element, 'foo')).toBe(true)
+      expect(up.element.booleanAttr(element, 'foo')).toBe(true)
 
     it 'returns false if the attribute value is the string "false"', ->
       element = fixture('div[foo=false]')
-      expect(up.element.castedAttr(element, 'foo')).toBe(false)
+      expect(up.element.booleanAttr(element, 'foo')).toBe(false)
 
     it 'returns a missing value if the element has no such attribute', ->
       element = fixture('div')
-      expect(up.element.castedAttr(element, 'foo')).toBeMissing()
+      expect(up.element.booleanAttr(element, 'foo')).toBeMissing()
 
     it 'returns the attribute value unchanged if the value is some string', ->
       element = fixture('div[foo="some text"]')
-      expect(up.element.castedAttr(element, 'foo')).toBe('some text')
+      expect(up.element.booleanAttr(element, 'foo')).toBe('some text')
 
   describe 'up.element.setTemporaryStyle', ->
 

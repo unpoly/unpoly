@@ -429,8 +429,8 @@ up.modal = do ->
     options.animation = u.evalOption(options.animation, position: options.position)
     options.backdropAnimation ?= link.getAttribute('up-backdrop-animation') ? flavorDefault('backdropOpenAnimation', options.flavor)
     options.backdropAnimation = u.evalOption(options.backdropAnimation, position: options.position)
-    options.sticky ?= e.castedAttr(link, 'up-sticky') ? flavorDefault('sticky', options.flavor)
-    options.closable ?= e.castedAttr(link, 'up-closable') ? flavorDefault('closable', options.flavor)
+    options.sticky ?= e.booleanAttr(link, 'up-sticky') ? flavorDefault('sticky', options.flavor)
+    options.closable ?= e.booleanAttr(link, 'up-closable') ? flavorDefault('closable', options.flavor)
     options.confirm ?= link.getAttribute('up-confirm')
     options.method = up.link.followMethod(link, options)
     options.layer = 'modal'
@@ -442,7 +442,7 @@ up.modal = do ->
     # Although we usually fall back to full page loads if a browser doesn't support pushState,
     # in the case of modals we assume that the developer would rather see a dialog
     # without an URL update.
-    options.history ?= e.castedAttr(link, 'up-history') ? flavorDefault('history', options.flavor)
+    options.history ?= e.booleanAttr(link, 'up-history') ? flavorDefault('history', options.flavor)
     options.history = false unless up.browser.canPushState()
 
     # This will prevent up.replace() from looking for fallbacks, since
