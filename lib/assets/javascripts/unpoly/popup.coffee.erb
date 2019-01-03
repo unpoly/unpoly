@@ -216,7 +216,7 @@ up.popup = do ->
     options.method = up.link.followMethod(anchor, options)
     options.layer = 'popup'
     options.failTarget ?= anchor.getAttribute('up-fail-target')
-    options.failLayer ?= anchor.getAttribute('up-fail-layer') ? 'auto'
+    options.failLayer ?= anchor.getAttribute('up-fail-layer')
 
     # This will prevent up.replace() from looking for fallbacks, since
     # it knows the target will always exist.

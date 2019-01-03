@@ -170,7 +170,6 @@ up.history = do ->
         history: false,     # don't push a new state
         title: true,        # do extract the title from the response
         reveal: false,
-        transition: 'none',
         saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
         restoreScroll: config.restoreScroll
         layer: 'page'       # Don't replace elements in a modal that might still be open

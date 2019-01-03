@@ -3,3 +3,7 @@ Code we can remove once we drop IE11
 
 - up.util.assign => Object.assign
 - up.util.toArray => Array.from
+- up.element.toggleClass can just be classList.toggleClass
+- we can switch to Babel without requiring Polyfills
+- we might want to parse URLs faster with URL
+

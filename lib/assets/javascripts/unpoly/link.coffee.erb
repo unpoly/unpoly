@@ -168,20 +168,20 @@ up.link = do ->
   defaultFollow = (link, options = {}) ->
     url = options.url ? link.getAttribute('up-href') ? link.getAttribute('href')
     target = options.target ? link.getAttribute('up-target')
-    options.failTarget = options.failTarget ? link.getAttribute('up-fail-target')
-    options.fallback = options.fallback ? link.getAttribute('up-fallback')
-    options.transition = options.transition ? e.castedAttr(link, 'up-transition') ? 'none'
-    options.failTransition = options.failTransition ? e.castedAttr(link, 'up-fail-transition') ? 'none'
-    options.history = options.history ? e.castedAttr(link, 'up-history')
-    options.reveal = options.reveal ? e.castedAttr(link, 'up-reveal') ? true
-    options.failReveal = options.failReveal ? e.castedAttr(link, 'up-fail-reveal') ? true
-    options.cache = options.cache ? e.castedAttr(link, 'up-cache')
-    options.restoreScroll = options.restoreScroll ? e.castedAttr(link, 'up-restore-scroll')
+    options.failTarget ?= link.getAttribute('up-fail-target')
+    options.fallback ?= link.getAttribute('up-fallback')
+    options.transition ?= e.castedAttr(link, 'up-transition')
+    options.failTransition ?= e.castedAttr(link, 'up-fail-transition')
+    options.history ?= e.castedAttr(link, 'up-history')
+    options.reveal ?= e.castedAttr(link, 'up-reveal') ? true
+    options.failReveal ?= e.castedAttr(link, 'up-fail-reveal') ? true
+    options.cache ?= e.castedAttr(link, 'up-cache')
+    options.restoreScroll ?= e.castedAttr(link, 'up-restore-scroll')
     options.method = followMethod(link, options)
-    options.origin = options.origin ? link
-    options.layer = options.layer ? link.getAttribute('up-layer') ? 'auto'
-    options.failLayer = options.failLayer ? link.getAttribute('up-fail-layer') ? 'auto'
-    options.confirm = options.confirm ? link.getAttribute('up-confirm')
+    options.origin ?= link
+    options.layer ?= link.getAttribute('up-layer')
+    options.failLayer ?= link.getAttribute('up-fail-layer')
+    options.confirm ?= link.getAttribute('up-confirm')
     options = u.merge(options, up.motion.animateOptions(options, link))
 
     up.browser.whenConfirmed(options).then ->

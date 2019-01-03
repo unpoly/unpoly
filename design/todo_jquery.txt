@@ -1,7 +1,3 @@
-- publish up.element
-  - also :has()
-  - rename up.emit option { message } to { log }
-
 - re-test on all browsers
 
 - compatibility layer
@@ -11,23 +7,23 @@
   - can FollowVariant do most defaults?
   - Remove 'none' default for animation options in link.follow etc.
   - Remove 'auto' default from { layer, failLayer } in link, modal, popup
-  - New options
-    - support new reveal options for up.replace and all follow variants
-    - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
-    - up-target should support [up-reveal-padding], { revealPadding }
 
 - grep for TODO comments
 
 - Update docs
+  - publish up.element
+    - also :has()
+
   - Write CHANGELOG from diff
 
-  - check if the main entries for renamed modules still work
+  - check if the main entries for renamed modules still work with their new focus
     - up.fragment
     - up.layout
 
   - API comments
     - Examples with $
-    - Stuff like  @param {jQuery} event.link
+    - Stuff like @param {jQuery} $element (basically "$" everywhere)
+    - Stuff like @param {jQuery} event.link
     - document new stuff like up.$compiler
 
   - check if we can publish new functions
@@ -57,6 +53,8 @@ New features (postponable)
       - does the hash anchor exist in the current page
       - if yes, scroll to it and resolve the replacemnet
       - if no, do a usual replacement
+  - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
+  - rename "page" layer to "root"
 
 Teach
 -----

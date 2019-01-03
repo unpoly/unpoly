@@ -183,27 +183,25 @@ up.form = do ->
     A promise for the successful form submission.
   @stable
   ###
-  submit = (formOrSelector, options) ->
+  submit = (formOrSelector, options = {}) ->
     form = e.get(formOrSelector)
     form = e.closest(form, 'form')
 
-    options = u.options(options)
-    target = u.option(options.target, form.getAttribute('up-target'), 'body')
-    url = u.option(options.url, form.getAttribute('action'), up.browser.url())
-    options.failTarget = u.option(options.failTarget, form.getAttribute('up-fail-target')) || e.toSelector(form)
-    options.reveal = u.option(options.reveal, e.castedAttr(form, 'up-reveal'), true)
-    options.failReveal = u.option(options.failReveal, e.castedAttr(form, 'up-fail-reveal'), true)
-    options.fallback = u.option(options.fallback, form.getAttribute('up-fallback'))
-    options.history = u.option(options.history, e.castedAttr(form, 'up-history'), true)
-    options.transition = u.option(options.transition, e.castedAttr(form, 'up-transition'), 'none')
-    options.failTransition = u.option(options.failTransition, e.castedAttr(form, 'up-fail-transition'), 'none')
-    options.method = u.option(options.method, form.getAttribute('up-method'), form.getAttribute('data-method'), form.getAttribute('method'), 'post').toUpperCase()
-    options.headers = u.option(options.headers, {})
-    options.cache = u.option(options.cache, e.castedAttr(form, 'up-cache'))
-    options.restoreScroll = u.option(options.restoreScroll, e.castedAttr(form, 'up-restore-scroll'))
-    options.origin = u.option(options.origin, form)
-    options.layer = u.option(options.layer, form.getAttribute('up-layer'), 'auto')
-    options.failLayer = u.option(options.failLayer, form.getAttribute('up-fail-layer'), 'auto')
+    target = options.target ? form.getAttribute('up-target') ? 'body'
+    url = options.url ? form.getAttribute('action') ? up.browser.url()
+    options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
+    options.reveal ?= e.castedAttr(form, 'up-reveal') ? true
+    options.failReveal ?= e.castedAttr(form, 'up-fail-reveal') ? true
+    options.fallback ?= form.getAttribute('up-fallback')
+    options.history ?= e.castedAttr(form, 'up-history') ? true
+    options.transition ?= e.castedAttr(form, 'up-transition')
+    options.failTransition ?= e.castedAttr(form, 'up-fail-transition')
+    options.method ?= form.getAttribute('up-method') ? form.getAttribute('data-method') ? form.getAttribute('method') ? 'post'
+    options.cache ?= e.castedAttr(form, 'up-cache')
+    options.restoreScroll ?= e.castedAttr(form, 'up-restore-scroll')
+    options.origin ?= form
+    options.layer ?= form.getAttribute('up-layer')
+    options.failLayer ?= form.getAttribute('up-fail-layer')
     options.params = up.Params.fromForm(form)
     options = u.merge(options, up.motion.animateOptions(options, form))
 
@@ -389,7 +387,7 @@ up.form = do ->
     options.origin = field
     options.target = findValidateTarget(field, options)
     options.failTarget = options.target
-    options.reveal = u.option(options.reveal, e.castedAttr(field, 'up-reveal'), false)
+    options.reveal ?= e.castedAttr(field, 'up-reveal') ? false
     options.history = false
     options.headers = u.option(options.headers, {})
     # Make sure the X-Up-Validate header is present, so the server-side
