@@ -97,7 +97,7 @@ up.util = do ->
     The parsed URL as an object with
     `protocol`, `hostname`, `port`, `pathname`, `search` and `hash`
     properties.
-  @experimental
+  @stable
   ###
   parseUrl = (urlOrLink) ->
     if isJQuery(urlOrLink)
@@ -167,7 +167,7 @@ up.util = do ->
   @function up.util.values
   @param {Object} object
   @return {Array<string>}
-  @experimental
+  @stable
   ###
   objectValues = Object.values || valuesPolyfill
 
@@ -382,7 +382,7 @@ up.util = do ->
   @function up.util.isBoolean
   @param object
   @return {boolean}
-  @experimental
+  @stable
   ###
   isBoolean = (object) ->
     typeof(object) == 'boolean' || object instanceof Boolean
@@ -687,7 +687,7 @@ up.util = do ->
     A function that will be called with each element and (optional) iteration index.
 
   @return {boolean}
-  @experimental
+  @stable
   ###
   any = (array, tester) ->
     !!detectResult(array, tester)
@@ -1053,7 +1053,7 @@ up.util = do ->
   @function up.util.escapeHtml
   @param {string} string
     The text that should be escaped
-  @experimental
+  @stable
   ###
   escapeHtml = (string) ->
     string.replace /[&<>"]/g, (char) -> ESCAPE_HTML_ENTITY_MAP[char]
