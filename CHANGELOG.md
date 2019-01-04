@@ -18,7 +18,6 @@ Unreleased
     - when you use $.fn.on to listen to an Unpoly event (`up:` prefix) and access custom properties
       - use event.originalEvent (or bind with addEventListener or up.on instead)
 
-
 - New module up.element
   - explain that they can replace jQuery and enable cross-browser DOM API
   - functions
@@ -56,6 +55,7 @@ Unreleased
 ### Events
 
 - up.bus has been renamed to up.event. Future up.thing.verb()
+
 - up.on() can now bind to one or more elements
 
 - up.on now yields an element instead of a jQuery collection. For the old behavior, use up.$on
@@ -135,6 +135,8 @@ up.dom has been renamed to up.fragment. Future: up.thing.verb()
 - up.util.isBlank.key
 - up.util.copy.key
 - up.util.toArray now returns an argument unchanged if the argument is already an array.
+- up.util.all was renamed to up.util.every to be more in line with Lodash, and to be less confusing with up.element.all and up.fragment.all
+- up.util.any was renamed to up.util.any to be more in line with Lodash
 
 
 ### Viewports

@@ -1,7 +1,3 @@
-- rename up.util.any to up.util.some
-
-- rename up.util.all to up.util.all to up.util.every
-
 - re-test on all browsers
 
 - Update docs
