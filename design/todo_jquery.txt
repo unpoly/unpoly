@@ -1,5 +1,7 @@
+- up.fail SHOULD print to the console. it also opens the toast!
+  - we should rather use throw new Error
+
 - re-test on all browsers
-  - prevent popups or tooltips from moving outside the main viewport
 
 - Update docs
 

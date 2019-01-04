@@ -74,20 +74,19 @@ Unreleased
   - Mirrors <https://hospodarets.com/native_smooth_scrolling>
   - For smooth scrolling behavior there is also { speed }.
 
+Scrolling
+---------
+
 - new config option up.viewport.scrollSpeed
-
 - config option up.layout.snap has been renamed to up.viewport.revealSnap
-
 - up.reveal() now also takes a { padding } option
-
 - new config option up.viewport.revealPadding
-
-- up.reveal
 
 - popups
   - now re-align when the screen is resized
   - no longer grow wider than the screen
   - popups now follow scrolling when placed within other viewports
+  - position is now position/align
 
 - up:form:submit no longer has a { $form } prop. it's now the event target.
 
@@ -109,8 +108,6 @@ Unreleased
 
 - up.first() has been moved to up.fragment.first()
 
-- removed up.reset() from public API
-- removed up:framework:reset from public API
 - [up-preload] and [up-instant] links no longer bind to `touchstart`, increasing FPS
 - Compatibility with the jQuery-less rails-ujs adapter (now [part of Action View](https://github.com/rails/rails/tree/master/actionview/app/assets/javascripts))
 
@@ -143,8 +140,10 @@ Unreleased
   - isRoot
   - scrollbarWidth
 
-- up.fail no longer prints to the console
+### Various
 
+- removed up.reset() from public API
+- removed up:framework:reset from public API
 
 
 
