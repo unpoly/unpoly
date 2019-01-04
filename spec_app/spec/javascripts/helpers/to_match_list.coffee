@@ -11,4 +11,4 @@ beforeEach ->
           actualList &&
             expectedList &&
             actualList.length == expectedList.length &&
-            u.all(expectedList, (elem) -> u.contains(actualList, elem))
+            u.every(expectedList, (elem) -> u.contains(actualList, elem))
