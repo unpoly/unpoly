@@ -487,20 +487,20 @@ up.util = do ->
     object instanceof FormData
 
   ###**
-  Converts the given array-like argument into an array.
+  Converts the given array-like value into an array.
 
-  Returns the array.
+  If the given value is already an array, it is returned unchanged.
 
   @function up.util.toArray
   @param object
   @return {Array}
   @stable
   ###
-  toArray = (object) ->
-    if isArray(object)
-      object
+  toArray = (value) ->
+    if isArray(value)
+      value
     else
-      Array.prototype.slice.call(object)
+      Array.prototype.slice.call(value)
 
   ###***
   Returns whether the given value is an `Array`, a

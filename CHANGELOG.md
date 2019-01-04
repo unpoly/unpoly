@@ -14,11 +14,10 @@ Unreleased
     - all unpoly functions that took a jquery collection before still do
     - instead of up.compiler, use up.$compiler
     - instead of up.macro, use up.$macro
-    - instead of up.on, use up.$off
+    - instead of up.on, use up.$on
     - when you use $.fn.on to listen to an Unpoly event (`up:` prefix) and access custom properties
       - use event.originalEvent (or bind with addEventListener or up.on instead)
 
-- up.on() can now bind to one or more elements
 
 - New module up.element
   - explain that they can replace jQuery and enable cross-browser DOM API
@@ -54,53 +53,65 @@ Unreleased
     - [`:has() selector`](/has)
 
 
-- The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed), emitted after a fragment was removed, remains in the API.
+Events
+------
 
-- Renamed modules
-  - Future: up.thing.verb()
-  - up.layout has been renamed to up.viewport
-  - up.dom has been renamed to up.fragment
-  - up.bus has been renamed to up.event
+- up.bus has been renamed to up.event. Future up.thing.verb()
+- up.on() can now bind to one or more elements
 
-- Opening modal will now set overflow-y on the right element (body, html)
+- up.on now yields an element instead of a jQuery collection. For the old behavior, use up.$on
 
-- Renamed files so they won't be blocked by over-eager ad blockers on developer PCs
+- up.emit
+  - now takes initial argument for element on which to trigger
+  - option { message } is now { log }
+  - { $element } etc. is now just { target }
+  - no longer logs by default. you can enable the old efault message with { log: true } option
+
+
+Custom JavaScript
+------------------
+
+- up.compiler now yields a native Element instead of a jQuery collection, for the old behavior, use up.$compiler
+- up.macro now yields a native Element instead of a jQuery collection, for the old behavior, use up.$macro
+
+
+
+Request parameters
+------------------
 
 - Experimental up.params module has been completely rewritten. It is now the up.Params class.
   - List all up.Params methods
 
-- up.scroll() no longer takes a { duration } and { easing }.
-  - It takes { behavior } (auto or smooth).
-  - Mirrors <https://hospodarets.com/native_smooth_scrolling>
-  - For smooth scrolling behavior there is also { speed }.
 
-Scrolling
----------
+Popups
+-----
 
-- new config option up.viewport.scrollSpeed
-- config option up.layout.snap has been renamed to up.viewport.revealSnap
-- up.reveal() now also takes a { padding } option
-- new config option up.viewport.revealPadding
+- now re-align when the screen is resized
+- popups now follow scrolling when placed within other viewports
+- position is now position/align
 
-- popups
-  - now re-align when the screen is resized
-  - no longer grow wider than the screen
-  - popups now follow scrolling when placed within other viewports
-  - position is now position/align
+
+### Tooltips
+
+- New CSS
+- now re-align when the screen is resized
+- tooltips now follow scrolling when placed within other viewports
+- position is now position/align
+
+
+### Forms
 
 - up:form:submit no longer has a { $form } prop. it's now the event target.
 
 - up.observe:
   - now accepts an array of fields
-
   - new callback signature
   - new { batch } option that runs the callback with a diff
 
-- up.emit
-  - option { message } is now { log }
-  - now takes initial argument for element on which to trigger
-  - { $element } etc. is now just { target }
-  - no longer logs by default. you can enable the old efault message with { log: true } option
+
+### Fragment update API
+
+up.dom has been renamed to up.fragment. Future: up.thing.verb()
 
 - up:fragment:destroyed no longer has a { $element } property. now has a { fragment } property. like before, it is emitted on the parent of the destroyed element.
 
@@ -108,15 +119,14 @@ Scrolling
 
 - up.first() has been moved to up.fragment.first()
 
-- [up-preload] and [up-instant] links no longer bind to `touchstart`, increasing FPS
-- Compatibility with the jQuery-less rails-ujs adapter (now [part of Action View](https://github.com/rails/rails/tree/master/actionview/app/assets/javascripts))
+- The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed), emitted after a fragment was removed, remains in the API.
+
+
+### Utility functions
 
 - up.util.parseUrl
   - now returns correct { hostname } und { protocol } on IE11
   - { pathname } now always begins with leading slash on IE11
-- up.util.array no longer copies the array if passed the array
-
-- up.util.isBlank now returns false for unsimple objects
 
 - new experimental function up.util.isList
 - new experimental function up.util.isNodeList
@@ -126,25 +136,51 @@ Scrolling
 - new experimental function up.util.flatMap
 - new experimental function up.util.isEqual
 
+- up.util.isBlank now returns false for unsimple objects
+
+- up.util.toArray now returns an argument unchanged if the argument is already an array.
+
+
+### Viewports
+
+up.layout has been renamed to up.viewport. Future: up.thing.verb()
+
+- new config option up.viewport.scrollSpeed
+- config option up.layout.snap has been renamed to up.viewport.revealSnap
+- up.reveal() now also takes a { padding } option
+- new config option up.viewport.revealPadding
+- up.scroll() no longer takes a { duration } and { easing }.
+  - It takes { behavior } (auto or smooth).
+  - Mirrors <https://hospodarets.com/native_smooth_scrolling>
+  - For smooth scrolling behavior there is also { speed }.
+
+- Opening modal will now set overflow-y on the right element (body, html)
+
 - new experimental up.viewport functions
-  - closest
-  - subtree
-  - around
-  - all
-  - rootSelector
-  - root
-  - rootWidth
-  - rootHeight
-  - rootHasVerticalScrollbar
-  - rootOverflowElement
-  - isRoot
-  - scrollbarWidth
+  - up.viewport.closest
+  - up.viewport.subtree
+  - up.viewport.all
+  - up.viewport.root
+  - up.viewport.rootWidth
+  - up.viewport.rootHeight
+  - up.viewport.rootHasVerticalScrollbar
+  - up.viewport.scrollbarWidth
+  - up.viewport.rootOverflowElement
+  - up.viewport.isRoot
+
+
+### Performance
+
+- jQuery removal improves performance drastically
+- [up-preload] and [up-instant] links no longer bind to `touchstart`, increasing FPS
+
 
 ### Various
 
 - removed up.reset() from public API
 - removed up:framework:reset from public API
-
+- Compatibility with the jQuery-less rails-ujs adapter (now [part of Action View](https://github.com/rails/rails/tree/master/actionview/app/assets/javascripts))
+- Renamed files so they won't be blocked by over-eager ad blockers on developer PCs
 
 
 0.57.0
