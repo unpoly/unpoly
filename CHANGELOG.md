@@ -53,8 +53,7 @@ Unreleased
     - [`:has() selector`](/has)
 
 
-Events
-------
+### Events
 
 - up.bus has been renamed to up.event. Future up.thing.verb()
 - up.on() can now bind to one or more elements
@@ -68,23 +67,19 @@ Events
   - no longer logs by default. you can enable the old efault message with { log: true } option
 
 
-Custom JavaScript
-------------------
+### Custom JavaScript
 
 - up.compiler now yields a native Element instead of a jQuery collection, for the old behavior, use up.$compiler
 - up.macro now yields a native Element instead of a jQuery collection, for the old behavior, use up.$macro
 
 
-
-Request parameters
-------------------
+### Request parameters
 
 - Experimental up.params module has been completely rewritten. It is now the up.Params class.
   - List all up.Params methods
 
 
-Popups
------
+### Popups
 
 - now re-align when the screen is resized
 - popups now follow scrolling when placed within other viewports
@@ -135,9 +130,10 @@ up.dom has been renamed to up.fragment. Future: up.thing.verb()
 - new experimental function up.util.flatten
 - new experimental function up.util.flatMap
 - new experimental function up.util.isEqual
-
+- up.util.isEqual.key
 - up.util.isBlank now returns false for unsimple objects
-
+- up.util.isBlank.key
+- up.util.copy.key
 - up.util.toArray now returns an argument unchanged if the argument is already an array.
 
 

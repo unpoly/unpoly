@@ -46,6 +46,8 @@ describe 'up.tooltip', ->
 
         afterEach ->
           @restoreBodyHeight()
+          
+        distanceFromOrigin = 10
 
         describe 'with { position: "top" }', ->
 
@@ -54,7 +56,7 @@ describe 'up.tooltip', ->
             up.tooltip.attach(@$link, html: 'tooltip text', position: 'top').then =>
               $tooltip = $('.up-tooltip')
               tooltipBox = $tooltip.get(0).getBoundingClientRect()
-              expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height, 1)
+              expect(tooltipBox.top).toBeAround(@linkBox.top - tooltipBox.height - distanceFromOrigin, 1)
               expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 1)
               done()
 
@@ -66,7 +68,7 @@ describe 'up.tooltip', ->
               $tooltip = $('.up-tooltip')
               tooltipBox = $tooltip.get(0).getBoundingClientRect()
               expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 1)
-              expect(tooltipBox.left).toBeAround(@linkBox.left + @linkBox.width, 1)
+              expect(tooltipBox.left).toBeAround(@linkBox.left + @linkBox.width + distanceFromOrigin, 1)
               done()
 
         describe 'with { position: "bottom" }', ->
@@ -76,7 +78,7 @@ describe 'up.tooltip', ->
             up.tooltip.attach(@$link, html: 'tooltip text', position: 'bottom').then =>
               $tooltip = $('.up-tooltip')
               tooltipBox = $tooltip.get(0).getBoundingClientRect()
-              expect(tooltipBox.top).toBeAround(@linkBox.top + @linkBox.height, 1)
+              expect(tooltipBox.top).toBeAround(@linkBox.top + @linkBox.height + distanceFromOrigin, 1)
               expect(tooltipBox.left).toBeAround(@linkBox.left + 0.5 * (@linkBox.width - tooltipBox.width), 1)
               done()
 
@@ -88,7 +90,7 @@ describe 'up.tooltip', ->
               $tooltip = $('.up-tooltip')
               tooltipBox = $tooltip.get(0).getBoundingClientRect()
               expect(tooltipBox.top).toBeAround(@linkBox.top + 0.5 * (@linkBox.height - tooltipBox.height), 1)
-              expect(tooltipBox.left).toBeAround(@linkBox.left - tooltipBox.width, 1)
+              expect(tooltipBox.left).toBeAround(@linkBox.left - tooltipBox.width - distanceFromOrigin, 1)
               done()
 
     describe 'up.tooltip.close', ->

@@ -321,13 +321,21 @@ up.util = do ->
   isBlank = (value) ->
     if isMissing(value)
       return true
-    if isObject(value) && isFunction(value.isBlank)
-      return value.isBlank()
+    if isObject(value) && value[isBlank.key]
+      return value[isBlank.key]()
     if isString(value) || isList(value)
       return value.length == 0
     if isOptions(value)
       return Object.keys(value).length == 0
     return false
+
+  ###**
+  TODO: Document me
+
+  @property up.util.isBlank.key
+  @experimental
+  ###
+  isBlank.key = 'up.util.isBlank'
 
   ###**
   Returns the given argument if the argument is [present](/up.util.isPresent),
@@ -580,6 +588,8 @@ up.util = do ->
     if isList(value)
       value = Array.prototype.slice.call(value)
       copied = true
+    else if isObject(value) && value[copy.key]
+      value = value[copy.key]()
     else if isOptions(value)
       value = assign({}, value)
       copied = true
@@ -587,6 +597,14 @@ up.util = do ->
       for k, v of value
         value[k] = copy(v, true)
     value
+
+  ###**
+  TODO: Document me
+
+  @property up.util.copy.key
+  @experimental
+  ###
+  copy.key = 'up.util.copy'
 
   ###**
   Returns a deep copy of the given array or object.
@@ -1367,20 +1385,30 @@ up.util = do ->
   isEqual = (a, b) ->
     if typeof(a) != typeof(b)
       false
-    else if isArray(a)
-      a.length == b.length && all(a, (elem, index) -> isEqual(elem, b[index]))
-    else if isObject(a)
-      if isFunction(a.isEqual)
-        a.isEqual(b)
+    else if isArray(a) && isArray(b)
+      isEqualArray(a, b)
+    else if isObject(a) && a[isEqual.key]
+      a[isEqual.key](b)
+    else if isOptions(a) && isOptions(b)
+      aKeys = Object.keys(a)
+      bKeys = Object.keys(b)
+      if isEqualArray(aKeys, bKeys)
+        all aKeys, (aKey) -> isEqual(a[aKey], b[aKey])
       else
-        aKeys = Object.keys(a)
-        bKeys = Object.keys(b)
-        if isEqual(aKeys, bKeys)
-          all aKeys, (aKey) -> isEqual(a[aKey], b[aKey])
-        else
-          false
+        false
     else
       a == b
+
+  ###**
+  TODO: Document me
+
+  @property up.util.isEqual.key
+  @experimental
+  ###
+  isEqual.key = 'up.util.isEqual'
+
+  isEqualArray = (a, b) ->
+    a.length == b.length && all(a, (elem, index) -> isEqual(elem, b[index]))
 
   splitValues = (value, separator = ' ') ->
     values = value.split(separator)

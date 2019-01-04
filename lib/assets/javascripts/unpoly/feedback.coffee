@@ -110,7 +110,7 @@ up.feedback = do ->
   updateAllNavigationSectionsIfLocationChanged = ->
     previousUrlSet = currentUrlSet
     currentUrlSet = buildCurrentUrlSet()
-    unless currentUrlSet.isEqual(previousUrlSet)
+    unless u.isEqual(currentUrlSet, previousUrlSet)
       updateAllNavigationSections(document.body)
 
   updateAllNavigationSections = (root) ->

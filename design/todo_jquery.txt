@@ -57,4 +57,3 @@ New features (postponable)
   - up.util.isEqual.key
   - up.util.copy.key
   - up.util.isBlank.key
-  - up.util.deepCopy.key (do we really need this?)

@@ -40,7 +40,7 @@ class up.Params
   ###**
   TODO: Document me
   ###
-  copy: ->
+  "#{u.copy.key}": ->
     new up.Params(@)
 
   ###**
@@ -297,10 +297,7 @@ class up.Params
   isArrayKey: (key) ->
     u.endsWith(key, '[]')
 
-  ###**
-  TODO: Document me
-  ###
-  isBlank: ->
+  "#{u.isBlank.key}": ->
     @entries.length == 0
 
   ###**
@@ -398,7 +395,7 @@ class up.Params
   ###**
   TODO: Document me
   ###
-  isEqual: (other) ->
+  "#{u.isEqual.key}": (other) ->
     other && (@constructor == other.constructor) && u.isEqual(@entries, other.entries)
 
   ###**

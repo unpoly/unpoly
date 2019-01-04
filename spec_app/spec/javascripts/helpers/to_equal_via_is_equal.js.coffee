@@ -3,5 +3,5 @@ $ = jQuery
 
 beforeEach ->
   jasmine.addCustomEqualityTester (first, second) ->
-    if first && second && u.isFunction(first.isEqual) && u.isFunction(second.isEqual)
-      first.isEqual(second)
+    if u.isObject(first) && u.isObject(second) && first[up.util.isEqual.key]
+      first[u.isEqual.key](second)

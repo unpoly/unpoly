@@ -119,14 +119,14 @@ up.proxy = do ->
     if request.target != 'html'
       # Since <html> is the root tag, a request for the `html` selector
       # will contain all other selectors.
-      requestForHtml = request.copy(target: 'html')
+      requestForHtml = request.variant(target: 'html')
       candidates.push(requestForHtml)
 
       # Although <body> is not the root tag, we consider it the selector developers
       # will use when they want to replace the entire page. Hence we consider it
       # a suitable match for all other selectors, including `html`.
       if request.target != 'body'
-        requestForBody = request.copy(target: 'body')
+        requestForBody = request.variant(target: 'body')
         candidates.push(requestForBody)
 
     for candidate in candidates
@@ -457,7 +457,7 @@ up.proxy = do ->
   registerAliasForRedirect = (response) ->
     request = response.request
     if response.url && request.url != response.url
-      newRequest = request.copy(
+      newRequest = request.variant(
         method: response.method
         url: response.url
       )

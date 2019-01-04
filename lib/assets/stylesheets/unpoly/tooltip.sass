@@ -1,5 +1,5 @@
 $stratum: 30000
-$distance-from-trigger: 10px
+$distance-from-origin: 10px
 $corner-size: 6px
 $background-color: #111
 
@@ -16,7 +16,7 @@ $background-color: #111
     border: $corner-size solid transparent
 
   &[up-position=top]
-    margin-bottom: $distance-from-trigger
+    margin-bottom: $distance-from-origin
 
     &:after
       border-top-color: $background-color
@@ -26,7 +26,7 @@ $background-color: #111
       margin-left: -$corner-size
 
   &[up-position=left]
-    margin-right: $distance-from-trigger
+    margin-right: $distance-from-origin
 
     &:after
       border-left-color: $background-color
@@ -36,7 +36,7 @@ $background-color: #111
       margin-top: -$corner-size
 
   &[up-position=right]
-    margin-left: $distance-from-trigger
+    margin-left: $distance-from-origin
 
     &:after
       border-right-color: $background-color
@@ -46,7 +46,7 @@ $background-color: #111
       margin-top: -$corner-size
 
   &[up-position=bottom]
-    margin-top: $distance-from-trigger
+    margin-top: $distance-from-origin
 
     &:after
       border-bottom-color: $background-color

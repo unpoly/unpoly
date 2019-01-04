@@ -23,5 +23,5 @@ class up.UrlSet
   matchesAny: (testUrls) =>
     u.detect(testUrls, @matches)
 
-  isEqual: (otherSet) =>
+  "#{u.isEqual.key}": (otherSet) =>
     u.isEqual(@urls, otherSet?.urls)
