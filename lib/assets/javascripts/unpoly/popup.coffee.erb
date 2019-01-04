@@ -54,10 +54,15 @@ up.popup = do ->
   Sets default options for future popups.
 
   @property up.popup.config
-  @param {string} [config.position='bottom-right']
-    Defines where the popup is attached to the opening element.
+  @param {string} [config.position='bottom']
+    Defines on which side of the opening element the popup is attached.
 
-    Valid values are `'bottom-right'`, `'bottom-left'`, `'top-right'` and `'top-left'`.
+    Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
+  @param {string} [config.align='left']
+    Defines the alignment of the popup along its side.
+
+    When the popup's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+    When the popup's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
   @param {string} [config.history=false]
     Whether opening a popup will add a browser history entry.
   @param {string} [config.openAnimation='fade-in']
@@ -84,7 +89,8 @@ up.popup = do ->
     closeDuration: 100
     openEasing: null
     closeEasing: null
-    position: 'bottom-right'
+    position: 'bottom'
+    align: 'left'
     history: false
 
   ###**
@@ -113,6 +119,7 @@ up.popup = do ->
     content: null        # the .up-popup-content element
     tether: null         # the up.Tether instance controlling the popup's position
     position: null       # the position of the popup container element relative to its anchor
+    align: null
     sticky: null
     url: null
     coveredUrl: null
@@ -131,8 +138,8 @@ up.popup = do ->
     state.coveredUrl = null
 
   createHiddenFrame = (targetSelector) ->
-    state.tether = new up.Tether(u.only(state, 'anchor', 'position'))
-    state.popup = e.affix(state.tether.root, '.up-popup', 'up-position': state.position)
+    state.tether = new up.Tether(u.only(state, 'anchor', 'position', 'align'))
+    state.popup = e.affix(state.tether.root, '.up-popup', 'up-position': state.position, 'up-align': state.align)
     state.content = e.affix(state.popup, '.up-popup-content')
 
     # Create an empty element that will match the
@@ -169,10 +176,15 @@ up.popup = do ->
     Will be ignored if `options.html` is given.
   @param {string} [options.target]
     A CSS selector that will be extracted from the response and placed into the popup.
-  @param {string} [options.position='bottom-right']
-    Defines where the popup is attached to the opening element.
+  @param {string} [options.position='bottom']
+    Defines on which side of the opening element the popup is attached.
 
-    Valid values are `'bottom-right'`, `'bottom-left'`, `'top-right'` and `'top-left'`.
+    Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
+  @param {string} [options.align='left']
+    Defines the alignment of the popup along its side.
+
+    When the popup's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+    When the popup's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
   @param {string} [options.html]
     A string of HTML from which to extract the popup contents. No network request will be made.
   @param {string} [options.confirm]
@@ -208,7 +220,8 @@ up.popup = do ->
     html = u.pluckKey(options, 'html')
     url or html or up.fail('up.popup.attach() requires either an { url } or { html } option')
     target = u.pluckKey(options, 'target') ? anchor.getAttribute('up-popup') or up.fail('No target selector given for [up-popup]')
-    position = anchor.getAttribute('up-position') ? config.position
+    position = options.position ? anchor.getAttribute('up-position') ? config.position
+    align = options.align ? anchor.getAttribute('up-align') ? config.align
     options.animation ?= anchor.getAttribute('up-animation') ? config.openAnimation
     options.sticky ?= e.booleanAttr(anchor, 'up-sticky') ? config.sticky
     options.history = if up.browser.canPushState() then (options.history ? e.booleanAttr(anchor, 'up-history') ? config.history) else false
@@ -233,6 +246,7 @@ up.popup = do ->
         state.phase = 'opening'
         state.anchor = anchor
         state.position = position
+        state.align = align
         if options.history
           state.coveredUrl = up.browser.url()
           state.coveredTitle = document.title
@@ -243,7 +257,7 @@ up.popup = do ->
           promise = up.replace(target, url, extractOptions)
         promise = promise.then ->
           unveilFrame()
-          state.tether.align()
+          state.tether.sync()
           up.animate(state.popup, options.animation, animateOptions)
         promise = promise.then ->
           state.phase = 'opened'
@@ -377,10 +391,15 @@ up.popup = do ->
   @param {string} up-popup
     The CSS selector that will be extracted from the response and
     displayed in a popup overlay.
-  @param [up-position]
-    Defines where the popup is attached to the opening element.
+  @param {string} [up-position]
+    Defines on which side of the opening element the popup is attached.
 
-    Valid values are `'bottom-right'`, `'bottom-left'`, `'top-right'` and `'top-left'`.
+    Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
+  @param {string} [up-align]
+    Defines the alignment of the popup along its side.
+
+    When the popup's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+    When the popup's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
   @param {string} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the popup is opened.

@@ -17,7 +17,7 @@ describe 'up.popup', ->
               popupDims = $popup.get(0).getBoundingClientRect()
               linkDims = $link.get(0).getBoundingClientRect()
               pass:
-                Math.abs(popupDims.right - linkDims.right) < 1.0 && Math.abs(popupDims.top - linkDims.bottom) < 1.0
+                Math.abs(popupDims.left - linkDims.left) < 1.0 && Math.abs(popupDims.top - linkDims.bottom) < 1.0
 
       beforeEach ->
         @restoreBodyHeight = e.setTemporaryStyle('body', minHeight: '3000px')

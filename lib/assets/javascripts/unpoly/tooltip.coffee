@@ -39,8 +39,14 @@ up.tooltip = do ->
 
   @property up.tooltip.config
   @param {string} [config.position]
-    The default position of tooltips relative to the element.
-    Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
+    The default position of tooltips relative to the opening element.
+
+    Valid values are `'top'`, `'right'`, `'bottom'` or `'left'`.
+  @param {string} [config.align]
+    Defines the alignment of the tooltip along its side.
+
+    When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+    When the tooltip's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
   @param {string} [config.openAnimation='fade-in']
     The animation used to open a tooltip.
   @param {string} [config.closeAnimation='fade-out']
@@ -57,6 +63,7 @@ up.tooltip = do ->
   ###
   config = new up.Config
     position: 'top'
+    align: 'center'
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
     openDuration: 100
@@ -71,6 +78,7 @@ up.tooltip = do ->
     content: null        # the .up-tooltip-content element
     tether: null         # the up.Tether instance controlling the tooltip's position
     position: null       # the position of the tooltip element relative to its anchor
+    align: null
 
   chain = new up.DivertibleChain()
 
@@ -81,8 +89,8 @@ up.tooltip = do ->
     config.reset()
 
   createElement = (options) ->
-    state.tether = new up.Tether(u.only(state, 'anchor', 'position'))
-    state.tooltip = e.affix(state.tether.root, '.up-tooltip', 'up-position': state.position)
+    state.tether = new up.Tether(u.only(state, 'anchor', 'position', 'align'))
+    state.tooltip = e.affix(state.tether.root, '.up-tooltip', 'up-position': state.position, 'up-align': state.align)
     state.content = e.affix(state.tooltip, '.up-tooltip-content')
 
     if options.text
@@ -115,9 +123,15 @@ up.tooltip = do ->
 
     Make sure to escape any user-provided text before passing it as this option,
     or use `options.text` (which automatically escapes).
-  @param {string} [options.position='top']
-    The position of the tooltip.
-    Can be `'top'`, `'right'`, `'bottom'` or `'left'`.
+  @param {string} [options.position]
+    The tooltip's position relative to the opening element.
+
+    Valid values are `'top'`, `'right'`, `'bottom'` or `'left'`.
+  @param {string} [options.align]
+    Defines the alignment of the tooltip along its side.
+
+    When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+    When the tooltip's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
   @param {string} [options.animation]
     The [animation](/up.motion) to use when opening the tooltip.
   @return {Promise}
@@ -132,14 +146,16 @@ up.tooltip = do ->
     html = options.html ? anchor.getAttribute('up-tooltip-html')
     text = options.text ? anchor.getAttribute('up-tooltip')
     position = options.position ? anchor.getAttribute('up-position') ? config.position
+    align = options.align ? anchor.getAttribute('up-align') ? config.align
     animation = options.animation ? e.booleanAttr(anchor, 'up-animation') ? config.openAnimation
     animateOptions = up.motion.animateOptions(options, anchor, duration: config.openDuration, easing: config.openEasing)
 
     state.phase = 'opening'
     state.anchor = anchor
     state.position = position
+    state.align = align
     createElement({ text, html })
-    state.tether.align()
+    state.tether.sync()
     up.animate(state.tooltip, animation, animateOptions).then ->
       state.phase = 'opened'
 
@@ -200,9 +216,14 @@ up.tooltip = do ->
     The animation used to open the tooltip.
     Defaults to [`up.tooltip.config.openAnimation`](/up.tooltip.config).
   @param {string} [up-position]
-    The default position of tooltips relative to the element.
-    Can be either `"top"` or `"bottom"`.
-    Defaults to [`up.tooltip.config.position`](/up.tooltip.config).
+    The tooltip's position relative to the opening element.
+
+    Valid values are `'top'`, `'right'`, `'bottom'` or `'left'`.
+  @param {string} [up-align]
+    Defines the alignment of the tooltip along its side.
+
+    When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+    When the tooltip's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
   @stable
   ###
 
