@@ -1,4 +1,4 @@
-- remove up.util.any
+- rename up.util.any to up.util.some
 
 - rename up.util.all to up.util.all to up.util.every
 
@@ -36,24 +36,3 @@
 - upgrade roca-style.org PR
   - better claim
   - no jquery
-
-
-
-New features (postponable)
---------------------------
-
-- support smooth-scrolling to an existing #anchor in the current page, to justify all that animation code
-  - basically [up-follow] should check:
-    - if the link href includes "#"
-      - is the (normalized source of the target | the current URL) the URL of the link (or is it only a hash)
-      - does the hash anchor exist in the current page
-      - if yes, scroll to it and resolve the replacemnet
-      - if no, do a usual replacement
-  - who parses [up-scroll-behavior] and [up-scroll-speed] from <links>?
-
-- rename "page" layer to "root"
-
-- Publish protocol symbols
-  - up.util.isEqual.key
-  - up.util.copy.key
-  - up.util.isBlank.key
