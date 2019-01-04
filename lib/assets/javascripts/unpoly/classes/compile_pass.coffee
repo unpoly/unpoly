@@ -70,7 +70,7 @@ class up.CompilePass
   normalizeDestructor: (result) ->
     if u.isFunction(result)
       result
-    else if u.isArray(result) && u.all(result, u.isFunction)
+    else if u.isArray(result) && u.every(result, u.isFunction)
       up.warn('up.compiler(): Returning an array of destructor functions is deprecated. Return a single function instead.')
       u.sequence(result)
 

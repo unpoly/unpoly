@@ -699,7 +699,7 @@ up.util = do ->
   Returns whether the given function returns a truthy value
   for any element in the given array.
 
-  @function up.util.any
+  @function up.util.some
   @param {Array<T>} array
   @param {Function(T, number): boolean} tester
     A function that will be called with each element and (optional) iteration index.
@@ -707,7 +707,7 @@ up.util = do ->
   @return {boolean}
   @stable
   ###
-  any = (array, tester) ->
+  some = (array, tester) ->
     !!detectResult(array, tester)
 
   ###**
@@ -736,7 +736,7 @@ up.util = do ->
   Returns whether the given function returns a truthy value
   for all elements in the given array.
 
-  @function up.util.all
+  @function up.util.every
   @param {Array<T>} array
   @param {Function(T, number): boolean} tester
     A function that will be called with each element and (optional) iteration index.
@@ -744,7 +744,7 @@ up.util = do ->
   @return {boolean}
   @experimental
   ###
-  all = (array, tester) ->
+  every = (array, tester) ->
     tester = listBlock(tester)
     match = true
     for element, index in array
@@ -1393,7 +1393,7 @@ up.util = do ->
       aKeys = Object.keys(a)
       bKeys = Object.keys(b)
       if isEqualArray(aKeys, bKeys)
-        all aKeys, (aKey) -> isEqual(a[aKey], b[aKey])
+        every aKeys, (aKey) -> isEqual(a[aKey], b[aKey])
       else
         false
     else
@@ -1408,7 +1408,7 @@ up.util = do ->
   isEqual.key = 'up.util.isEqual'
 
   isEqualArray = (a, b) ->
-    a.length == b.length && all(a, (elem, index) -> isEqual(elem, b[index]))
+    a.length == b.length && every(a, (elem, index) -> isEqual(elem, b[index]))
 
   splitValues = (value, separator = ' ') ->
     values = value.split(separator)
@@ -1475,8 +1475,14 @@ up.util = do ->
   mapObject: mapObject
   times: times
   detectResult: detectResult
-  any: any
-  all: all
+  some: some
+  any: ->
+    up.warn('Deprecated: up.any() has been renamed to up.some()')
+    some.apply(null, arguments)
+  every: every
+  all: ->
+    up.warn('Deprecated: up.all() has been renamed to up.every()')
+    every.apply(null, arguments)
   detect: detect
   select: select
   reject: reject

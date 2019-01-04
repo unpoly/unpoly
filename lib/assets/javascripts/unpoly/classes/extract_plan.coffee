@@ -24,11 +24,11 @@ class up.ExtractPlan
 
   oldExists: =>
     @findOld()
-    u.all @steps, (step) -> step.oldElement
+    u.every @steps, (step) -> step.oldElement
 
   newExists: =>
     @findNew()
-    u.all @steps, (step) -> step.newElement
+    u.every @steps, (step) -> step.newElement
 
   matchExists: =>
     @oldExists() && @newExists()
@@ -46,7 +46,7 @@ class up.ExtractPlan
     compressed = u.uniqBy(compressed, (step) -> step.oldElement)
 
     compressed = u.select compressed, (candidateStep, candidateIndex) =>
-      u.all compressed, (rivalStep, rivalIndex) =>
+      u.every compressed, (rivalStep, rivalIndex) =>
         if rivalIndex == candidateIndex
           true
         else

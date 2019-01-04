@@ -3,7 +3,7 @@ $ = jQuery
 
 window.describeCapability = (capabilities, examples) ->
   capabilities = u.wrapList(capabilities)
-  allSupported = u.all capabilities, (c) ->
+  allSupported = u.every capabilities, (c) ->
     if fn = up.browser[c]
       fn()
     else

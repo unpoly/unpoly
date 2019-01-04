@@ -486,36 +486,36 @@ describe 'up.util', ->
           baz: 'baz-value'
           bam: 'bam-value'
 
-    describe 'up.util.any', ->
+    describe 'up.util.some', ->
 
       it 'returns true if an element in the array returns true for the given function', ->
-        result = up.util.any [null, undefined, 'foo', ''], up.util.isPresent
+        result = up.util.some [null, undefined, 'foo', ''], up.util.isPresent
         expect(result).toBe(true)
 
       it 'returns false if no element in the array returns true for the given function', ->
-        result = up.util.any [null, undefined, ''], up.util.isPresent
+        result = up.util.some [null, undefined, ''], up.util.isPresent
         expect(result).toBe(false)
 
       it 'short-circuits once an element returns true', ->
         count = 0
-        up.util.any [null, undefined, 'foo', ''], (element) ->
+        up.util.some [null, undefined, 'foo', ''], (element) ->
           count += 1
           up.util.isPresent(element)
         expect(count).toBe(3)
 
-    describe 'up.util.all', ->
+    describe 'up.util.every', ->
 
       it 'returns true if all element in the array returns true for the given function', ->
-        result = up.util.all ['foo', 'bar', 'baz'], up.util.isPresent
+        result = up.util.every ['foo', 'bar', 'baz'], up.util.isPresent
         expect(result).toBe(true)
 
       it 'returns false if an element in the array returns false for the given function', ->
-        result = up.util.all ['foo', 'bar', null, 'baz'], up.util.isPresent
+        result = up.util.every ['foo', 'bar', null, 'baz'], up.util.isPresent
         expect(result).toBe(false)
 
       it 'short-circuits once an element returns false', ->
         count = 0
-        up.util.all ['foo', 'bar', '', 'baz'], (element) ->
+        up.util.every ['foo', 'bar', '', 'baz'], (element) ->
           count += 1
           up.util.isPresent(element)
         expect(count).toBe(3)
@@ -523,7 +523,7 @@ describe 'up.util', ->
       it 'passes the iteration index as second argument to the given function', ->
         array = ["apple", "orange", "cucumber"]
         args = []
-        up.util.all array, (item, index) ->
+        up.util.every array, (item, index) ->
           args.push(index)
           true
         expect(args).toEqual [0, 1, 2]
@@ -531,8 +531,8 @@ describe 'up.util', ->
       it 'accepts a property name instead of a function, which collects that property from each item', ->
         allTrue = [ { prop: true }, { prop: true } ]
         someFalse = [ { prop: true }, { prop: false } ]
-        expect(up.util.all(allTrue, 'prop')).toBe(true)
-        expect(up.util.all(someFalse, 'prop')).toBe(false)
+        expect(up.util.every(allTrue, 'prop')).toBe(true)
+        expect(up.util.every(someFalse, 'prop')).toBe(false)
 
 #    describe 'up.util.none', ->
 #
@@ -565,20 +565,20 @@ describe 'up.util', ->
 #        expect(up.util.none(allFalse, 'prop')).toBe(true)
 #        expect(up.util.none(someTrue, 'prop')).toBe(false)
 
-    describe 'up.util.any', ->
+    describe 'up.util.some', ->
 
       it 'returns true if at least one element in the array returns true for the given function', ->
-        result = up.util.any ['', 'bar', null], up.util.isPresent
+        result = up.util.some ['', 'bar', null], up.util.isPresent
         expect(result).toBe(true)
 
       it 'returns false if no element in the array returns true for the given function', ->
-        result = up.util.any ['', null, undefined], up.util.isPresent
+        result = up.util.some ['', null, undefined], up.util.isPresent
         expect(result).toBe(false)
 
       it 'passes the iteration index as second argument to the given function', ->
         array = ["apple", "orange", "cucumber"]
         args = []
-        up.util.any array, (item, index) ->
+        up.util.some array, (item, index) ->
           args.push(index)
           false
         expect(args).toEqual [0, 1, 2]
@@ -586,8 +586,8 @@ describe 'up.util', ->
       it 'accepts a property name instead of a function, which collects that property from each item', ->
         someTrue = [ { prop: true }, { prop: false } ]
         allFalse = [ { prop: false }, { prop: false } ]
-        expect(up.util.any(someTrue, 'prop')).toBe(true)
-        expect(up.util.any(allFalse, 'prop')).toBe(false)
+        expect(up.util.some(someTrue, 'prop')).toBe(true)
+        expect(up.util.some(allFalse, 'prop')).toBe(false)
 
     describe 'up.util.detectResult', ->
 
