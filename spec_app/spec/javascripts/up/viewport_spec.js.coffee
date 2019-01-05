@@ -488,15 +488,15 @@ describe 'up.viewport', ->
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
           $element = $fixture('.element').css(height: '3000px')
-          @resetHtmlCss = e.setTemporaryStyle('html', 'overflow-y': 'hidden')
-          @resetBodyCss = e.setTemporaryStyle('body', 'overflow-y': 'scroll')
+          @resetHtmlCss = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'hidden')
+          @resetBodyCss = e.setTemporaryStyle(document.body, 'overflow-y': 'scroll')
           $result = up.viewport.closest($element)
           expect($result).toMatchSelector(up.viewport.rootSelector())
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
           $element = $fixture('.element').css(height: '3000px')
-          @resetHtmlCss = e.setTemporaryStyle('html', 'overflow-y': 'scroll')
-          @resetBodyCss = e.setTemporaryStyle('body', 'overflow-y': 'hidden')
+          @resetHtmlCss = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'scroll')
+          @resetBodyCss = e.setTemporaryStyle(document.body, 'overflow-y': 'hidden')
           $result = up.viewport.closest($element)
           expect($result).toMatchSelector(up.viewport.rootSelector())
 

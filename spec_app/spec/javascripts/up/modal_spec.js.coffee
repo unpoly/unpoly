@@ -179,7 +179,7 @@ describe 'up.modal', ->
 
         it "does not add right padding to the body if the document's overflow element has overflow-y: auto, but does not currently have scrollbars", (done) ->
           restoreBody = e.setTemporaryStyle(up.viewport.rootOverflowElement(), overflowY: 'auto')
-          restoreReporter = e.setTemporaryStyle($('.jasmine_html-reporter'), height: '100px', overflowY: 'hidden')
+          restoreReporter = e.setTemporaryStyle($('.jasmine_html-reporter')[0], height: '100px', overflowY: 'hidden')
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')

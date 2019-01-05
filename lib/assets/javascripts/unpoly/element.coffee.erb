@@ -328,7 +328,17 @@ up.element = do ->
       list.remove(klass)
 
   ###**
+  Sets all key/values from the given object as attributes on the given element.
+
+  \#\#\# Example
+
+      up.element.setAttrs(element, { title: 'Tooltip', tabindex: 1 })
+
   @function up.element.setAttrs
+  @param {Element} element
+    The element on which to set attributes.
+  @param {object} attributeMap
+    An object of attributes to set.
   @experimental
   ###
   setAttrs = (element, attrMap) ->
@@ -702,7 +712,6 @@ up.element = do ->
   @experimental
   ###
   computedStyle = (element, props) ->
-    element = up.element.get(element)
     style = window.getComputedStyle(element)
     extractFromStyleObject(style, props)
 
@@ -735,7 +744,6 @@ up.element = do ->
   @internal
   ###
   inlineStyle = (element, props) ->
-    element = up.element.get(element)
     style = element.style
     extractFromStyleObject(style, props)
 
@@ -756,7 +764,6 @@ up.element = do ->
   @experimental
   ###
   setInlineStyle = (element, props) ->
-    element = up.element.get(element)
     style = element.style
     for key, value of props
       value = normalizeStyleValueForWrite(key, value)
@@ -765,17 +772,18 @@ up.element = do ->
   normalizeStyleValueForWrite = (key, value) ->
     if u.isMissing(value)
       value = ''
-    else if CSS_LENGTH_PROPS.has(key)
+    else if CSS_LENGTH_PROPS.has(key.toLowerCase().replace(/-/, ''))
       value = cssLength(value)
     value
 
   CSS_LENGTH_PROPS = u.arrayToSet [
     'top', 'right', 'bottom', 'left',
-    'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
-    'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
+    'padding', 'paddingtop', 'paddingright', 'paddingbottom', 'paddingleft',
+    'margin', 'margintop', 'marginright', 'marginbottom', 'marginleft',
+    'borderwidth', 'bordertopwidth', 'borderrightwidth', 'borderbottomwidth', 'borderleftwidth'
     'width', 'height',
-    'maxWidth', 'maxHeight',
-    'minWidth', 'minHeight',
+    'maxwidth', 'maxheight',
+    'minwidth', 'minheight',
   ]
 
   ###**
@@ -850,7 +858,6 @@ up.element = do ->
   toggleClass: toggleClass # practical
   hide: hide # practical
   show: show # practical
-  setAttrs: setAttrs # practical
   metaContent: metaContent # internal
   replace: replace # needed for IE11
   insertBefore: insertBefore # internal shortcut, people can use insertAdjacentElement and i don't want to support insertAfter when I don't need it.

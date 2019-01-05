@@ -743,62 +743,62 @@ describe 'up.element', ->
   describe 'up.element.setTemporaryStyle', ->
 
     it "sets the given inline styles and returns a function that will restore the previous inline styles", ->
-      $div = $fixture('div[style="color: red"]')
-      restore = up.element.setTemporaryStyle($div, { color: 'blue' })
-      expect($div.attr('style')).toContain('color: blue')
-      expect($div.attr('style')).not.toContain('color: red')
+      div = fixture('div[style="color: red"]')
+      restore = up.element.setTemporaryStyle(div, { color: 'blue' })
+      expect(div.getAttribute('style')).toContain('color: blue')
+      expect(div.getAttribute('style')).not.toContain('color: red')
       restore()
-      expect($div.attr('style')).not.toContain('color: blue')
-      expect($div.attr('style')).toContain('color: red')
+      expect(div.getAttribute('style')).not.toContain('color: blue')
+      expect(div.getAttribute('style')).toContain('color: red')
 
     it "does not restore inherited styles", ->
-      $div = $fixture('div[class="red-background"]')
-      restore = up.element.setTemporaryStyle($div, { backgroundColor: 'blue' })
-      expect($div.attr('style')).toContain('background-color: blue')
+      div = fixture('div[class="red-background"]')
+      restore = up.element.setTemporaryStyle(div, { backgroundColor: 'blue' })
+      expect(div.getAttribute('style')).toContain('background-color: blue')
       restore()
-      expect($div.attr('style')).not.toContain('background-color')
+      expect(div.getAttribute('style')).not.toContain('background-color')
 
   describe 'up.element.inlineStyle', ->
 
     describe 'with a string as second argument', ->
 
       it 'returns a CSS value string from an inline [style] attribute', ->
-        $div = $fixture('div').attr('style', 'background-color: #ff0000')
-        style = up.element.inlineStyle($div, 'backgroundColor')
+        div = $fixture('div').attr('style', 'background-color: #ff0000')[0]
+        style = up.element.inlineStyle(div, 'backgroundColor')
         # Browsers convert colors to rgb() values, even IE11
         expect(style).toEqual('rgb(255, 0, 0)')
 
       it 'returns a blank value if the element does not have the given property in the [style] attribute', ->
-        $div = $fixture('div').attr('style', 'background-color: red')
-        style = up.element.inlineStyle($div, 'color')
+        div = $fixture('div').attr('style', 'background-color: red')[0]
+        style = up.element.inlineStyle(div, 'color')
         expect(style).toBeBlank()
 
       it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
-        $div = $fixture('div[class="red-background"]')
-        inlineStyle = up.element.inlineStyle($div, 'backgroundColor')
-        computedStyle = up.element.style($div, 'backgroundColor')
+        div = $fixture('div[class="red-background"]')[0]
+        inlineStyle = up.element.inlineStyle(div, 'backgroundColor')
+        computedStyle = up.element.style(div, 'backgroundColor')
         expect(computedStyle).toEqual('rgb(255, 0, 0)')
         expect(inlineStyle).toBeBlank()
 
     describe 'with an array as second argument', ->
 
       it 'returns an object with the given inline [style] properties', ->
-        $div = $fixture('div').attr('style', 'background-color: #ff0000; color: #0000ff')
-        style = up.element.inlineStyle($div, ['backgroundColor', 'color'])
+        div = $fixture('div').attr('style', 'background-color: #ff0000; color: #0000ff')[0]
+        style = up.element.inlineStyle(div, ['backgroundColor', 'color'])
         expect(style).toEqual
           backgroundColor: 'rgb(255, 0, 0)'
           color: 'rgb(0, 0, 255)'
 
       it 'returns blank keys if the element does not have the given property in the [style] attribute', ->
-        $div = $fixture('div').attr('style', 'background-color: #ff0000')
-        style = up.element.inlineStyle($div, ['backgroundColor', 'color'])
+        div = $fixture('div').attr('style', 'background-color: #ff0000')[0]
+        style = up.element.inlineStyle(div, ['backgroundColor', 'color'])
         expect(style).toHaveOwnProperty('color')
         expect(style.color).toBeBlank()
 
       it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
-        $div = $fixture('div[class="red-background"]')
-        inlineStyleHash = up.element.inlineStyle($div, ['backgroundColor'])
-        computedBackground = up.element.style($div, 'backgroundColor')
+        div = fixture('div[class="red-background"]')
+        inlineStyleHash = up.element.inlineStyle(div, ['backgroundColor'])
+        computedBackground = up.element.style(div, 'backgroundColor')
         expect(computedBackground).toEqual('rgb(255, 0, 0)')
         expect(inlineStyleHash).toHaveOwnProperty('backgroundColor')
         expect(inlineStyleHash.backgroundColor).toBeBlank()
@@ -806,24 +806,64 @@ describe 'up.element', ->
   describe 'up.element.setStyle', ->
 
     it "sets the given style properties as the given element's [style] attribute", ->
-      $div = $fixture('div')
-      up.element.setStyle($div, { color: 'red', backgroundColor: 'blue' })
-      style = $div.attr('style')
+      div = fixture('div')
+      up.element.setStyle(div, { color: 'red', 'background-color': 'blue' })
+      style = div.getAttribute('style')
       expect(style).toContain('color: red')
       expect(style).toContain('background-color: blue')
 
     it "merges the given style properties into the given element's existing [style] value", ->
-      $div = $fixture('div[style="color: red"]')
-      up.element.setStyle($div, { backgroundColor: 'blue' })
-      style = $div.attr('style')
+      div = fixture('div[style="color: red"]')
+      up.element.setStyle(div, { 'background-color': 'blue' })
+      style = div.getAttribute('style')
       expect(style).toContain('color: red')
       expect(style).toContain('background-color: blue')
 
-    it "converts the values of known length properties to px values automatically", ->
-      $div = $fixture('div')
-      up.element.setStyle($div, { paddingTop: 100 })
-      style = $div.attr('style')
+    it "converts the values of known length properties to px values automatically (with kebab-case)", ->
+      div = fixture('div')
+      up.element.setStyle(div, { 'padding-top': 100 })
+      style = div.getAttribute('style')
       expect(style).toContain('padding-top: 100px')
+
+    it "converts the values of known length properties to px values automatically (with camelCase)", ->
+      div = fixture('div')
+      up.element.setStyle(div, { 'paddingTop': 100 })
+      style = div.getAttribute('style')
+      expect(style).toContain('padding-top: 100px')
+
+    it "accepts CSS property names in camelCase", ->
+      div = fixture('div')
+      up.element.setStyle(div, { 'backgroundColor': 'blue' })
+      style = div.getAttribute('style')
+      expect(style).toContain('background-color: blue')
+
+  describe 'up.element.style', ->
+
+    it 'returns the computed style for the given CSS property in kebab-case', ->
+      div = fixture('div')
+      div.style.paddingTop = '10px'
+      value = up.element.style(div, 'padding-top')
+      expect(value).toEqual('10px')
+
+    it 'returns the computed style for the given CSS property in camelCase', ->
+      div = fixture('div')
+      div.style.paddingTop = '10px'
+      value = up.element.style(div, 'paddingTop')
+      expect(value).toEqual('10px')
+
+    it 'returns the computed style for multiple CSS properties in kebab-case', ->
+      div = fixture('div')
+      div.style.paddingTop = '10px'
+      div.style.paddingBottom = '20px'
+      value = up.element.style(div, ['padding-top', 'padding-bottom'])
+      expect(value).toEqual { 'padding-top': '10px', 'padding-bottom': '20px' }
+
+    it 'returns the computed style for multiple CSS properties in camelCase', ->
+      div = fixture('div')
+      div.style.paddingTop = '10px'
+      div.style.paddingBottom = '20px'
+      value = up.element.style(div, ['paddingTop', 'paddingBottom'])
+      expect(value).toEqual { 'paddingTop': '10px', 'paddingBottom': '20px' }
 
   describe 'up.element.isVisible', ->
 

@@ -3,10 +3,10 @@ e = up.element
 
 class up.CssTransition
 
-  constructor: (@element, lastFrame, options) ->
-    @lastFrameCamel = u.camelCaseKeys(lastFrame)
-    @lastFrameKebab = u.kebabCaseKeys(lastFrame)
+  constructor: (@element, @lastFrameKebab, options) ->
     @lastFrameKeysKebab = Object.keys(@lastFrameKebab)
+    if u.some(@lastFrameKeysKebab, (key) -> key.match(/A-Z/))
+      up.fail('Animation keys must be kebab-case')
     @finishEvent = options.finishEvent
     @duration = options.duration
     @delay = options.delay
@@ -106,8 +106,7 @@ class up.CssTransition
       unless oldTransition.transitionProperty == 'all'
         oldTransitionProperties = oldTransition.transitionProperty.split(/\s*,\s*/)
         oldTransitionFrameKebab = e.style(@element, oldTransitionProperties)
-        oldTransitionFrameCamel = u.camelCaseKeys(oldTransitionFrameKebab)
-        @setOldTransitionTargetFrame = e.setTemporaryStyle(@element, oldTransitionFrameCamel)
+        @setOldTransitionTargetFrame = e.setTemporaryStyle(@element, oldTransitionFrameKebab)
 
       # Stop the existing CSS transition so it does not emit transitionEnd events
       @setOldTransition = e.concludeCssTransition(@element)
@@ -122,5 +121,5 @@ class up.CssTransition
       transitionDuration: "#{@duration}ms"
       transitionDelay: "#{@delay}ms"
       transitionTimingFunction: @easing
-    e.setStyle(@element, @lastFrameCamel)
+    e.setStyle(@element, @lastFrameKebab)
 

@@ -42,7 +42,7 @@ describe 'up.tooltip', ->
           )
 
         beforeEach ->
-          @restoreBodyHeight = e.setTemporaryStyle('body', minHeight: '3000px')
+          @restoreBodyHeight = e.setTemporaryStyle(document.body, minHeight: '3000px')
 
         afterEach ->
           @restoreBodyHeight()
