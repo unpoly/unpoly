@@ -6,10 +6,12 @@ Changes to this project will be documented in this file.
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 
-Unreleased
-----------
+0.60.0
+------
 
 - jQuery no longer required
+  - performance considerations
+  - saves you 30 KB of bundle size
   - Migration
     - all unpoly functions that took a jquery collection before still do
     - instead of up.compiler, use up.$compiler

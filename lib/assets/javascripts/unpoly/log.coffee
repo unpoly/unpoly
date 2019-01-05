@@ -55,7 +55,7 @@ up.log = do ->
 
   @function up.log.debug
   @param {string} message
-  @param {Array} args...
+  @param {Array} ...args
   @internal
   ###
   debug = (message, args...) ->
@@ -67,7 +67,7 @@ up.log = do ->
 
   @function up.puts
   @param {string} message
-  @param {Array} args...
+  @param {Array} ...args
   @internal
   ###
   puts = (message, args...) ->

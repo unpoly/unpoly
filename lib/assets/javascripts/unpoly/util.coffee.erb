@@ -438,7 +438,7 @@ up.util = do ->
     (typeOfResult == 'object' && !isNull(object)) || typeOfResult == 'function'
 
   ###**
-  Returns whether the given argument is a DOM element.
+  Returns whether the given argument is a [DOM element](https://developer.mozilla.org/de/docs/Web/API/Element).
 
   @function up.util.isElement
   @param object
@@ -446,10 +446,10 @@ up.util = do ->
   @stable
   ###
   isElement = (object) ->
-    object instanceof HTMLElement
+    object instanceof Element
 
   ###**
-  Returns whether the given argument is a jQuery collection.
+  Returns whether the given argument is a [jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
 
   @function up.util.isJQuery
   @param object

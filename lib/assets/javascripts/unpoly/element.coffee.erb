@@ -1,59 +1,152 @@
 #= require ./classes/selector
 
+###**
+DOM helpers
+===========
+
+Text here
+
+@class up.element
+###
 up.element = do ->
 
   u = up.util
 
+  ###**
+  Returns a null-object that mimics an `Element`.
+
+  @function up.util.none
+  @internal
+  ###
   NONE = { getAttribute: -> undefined }
+
+  ###**
+  Matches all elements that have a descendant matching the given selector.
+
+  \#\#\# Example
+
+  `up.element.all('div:has(span)')`  matches all `<div>` elements with at least one `<span>` among its descendants:
+
+  ```html
+  <div>
+    <span>Will be matched</span>
+  </div>
+  <div>
+    Will NOT be matched
+  </div>
+  <div>
+    <span>Will be matched</span>
+  </div>
+  ```
+
+  \#\#\# Compatibility
+
+  `:has()` is supported by all Unpoly functions (like [`up.element.all()`](/up.element.all)) and
+   selectors (like [`[up-target]`](/up-target)).
+
+  As a [level 4 CSS selector](https://drafts.csswg.org/selectors-4/#relational),
+  `:has()` [has yet to be implemented](https://caniuse.com/#feat=css-has)
+  in native browser functions like [`document.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll).
+
+  You can also use [`:has()` in jQuery](https://api.jquery.com/has-selector/).
+
+  @selector :has()
+  @experimental
+  ###
 
   parseSelector = (selector) ->
     up.Selector.parse(selector)
 
   ###**
-  TODO: Document me
+  Returns the first descendant element matching the given selector.
+
+  It is similar to [`element.querySelector`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector),
+  but also supports the [`:has()`](/has) selector.
 
   @function up.element.first
+  @param {Element} [parent=document]
+    The parent element whose descendants to search.
+
+    If omitted, all elements in the `document` will be searched.
+  @param {string} selector
+    The CSS selector to match.
+  @return {Element|undefined|null}
+    The first element matching the selector.
+
+    Returns `null` or `undefined` if no element macthes.
   @experimental
   ###
   first = (args...) ->
     selector = args.pop()
-    parent = getParent(args[0])
+    parent = args[0] ? document
     parseSelector(selector).descendant(parent)
 
   ###**
-  TODO: Document me
+  Returns all descendant elements matching the given selector.
 
   @function up.element.all
+  @param {Element} [parent=document]
+    The parent element whose descendants to search.
+
+    If omitted, all elements in the `document` will be searched.
+  @param {string} selector
+    The CSS selector to match.
+  @return {NodeList<Element>|Array<Element>}
+    A list of all elements matching the selector.
+
+    Returns an empty list if there are no matches.
   @experimental
   ###
   all = (args...) ->
     selector = args.pop()
-    parent = getParent(args[0])
+    parent = args[0] ? document
     parseSelector(selector).descendants(parent)
 
-  getParent = (value) ->
-    if value
-      getOne(value)
-    else
-      document
-
   ###**
+  Returns a list of the given parent's descendants matching the given selector.
+  The list will also include the parent element if it matches the selector itself.
+
   @function up.element.subtree
-  @internal
+  @param {Element} parent
+    The parent element for the search.
+  @param {string} selector
+    The CSS selector to match.
+  @return {NodeList<Element>|Array<Element>}
+    A list of all matching elements.
+  @experimental
   ###
   subtree = (root, selector) ->
     parseSelector(selector).subtree(root)
 
   ###**
+  Returns the first element that matches the selector by testing the element itself
+  and traversing up through its ancestors in the DOM tree.
+
   @function up.element.closest
-  @internal
+  @param {Element} element
+    The element on which to start the search.
+  @param {string}
+    The CSS selector to match.
+  @return {Element|null|undefined} element
+    The matching element.
+
+    Returns `null` or `undefined` if no element matches.
+  @experimental
   ###
   closest = (element, selector) ->
     parseSelector(selector).closest(element)
 
   ###**
+  Returns whether the given element matches the given CSS selector.
+
   @function up.element.matches
-  @internal
+  @param {Element} element
+    The element to check.
+  @param {string} selector
+    The CSS selector to match.
+  @return {boolean}
+    Whether `element` matches `selector`.
+  @experimental
   ###
   matches = (element, selector) ->
     parseSelector(selector).matches(element)
@@ -66,32 +159,62 @@ up.element = do ->
     parseSelector(selector).ancestor(element)
 
   ###**
-  If given a jQuery collection, returns the first native DOM element in the collection.
-  If given a string, returns the first element matching that string.
-  If given any other argument, returns the argument unchanged.
+  Casts the given value to a native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element).
+
+  This is useful when working with jQuery values, or to allow callers to pass CSS selectors
+  instead of elements.
+
+  \#\#\# Casting rules
+
+  - If given an element, returns that element.
+  - If given a CSS selector string, returns the [first element matching](/up.element.first) that selector.
+  - If given a jQuery collection , returns the first element in the collection.
+    Throws an error if the collection contains more than one element.
+  - If given any other argument (`undefined`, `null`, `document`, `window`…), returns the argument unchanged.
 
   @function up.element.get
-  @param {jQuery|Element|String} object
+  @param {jQuery|Element|String} value
+    The value to cast.
   @return {Element}
-  @internal
+    The obtained `Element`.
+  @experimental
   ###
-  getOne = (object) ->
-    if u.isJQuery(object)
-      if object.length > 1
-        up.fail('up.element.get(): Cannot cast a multi-element jQuery collection to a single element')
-      object[0]
-    else if u.isString(object)
-      first(object)
+  getOne = (value) ->
+    if u.isElement(value) # Return an element before we run any other expensive checks
+      value
+    else if u.isString(value)
+      first(value)
+    else if u.isJQuery(value)
+      if value.length > 1
+        up.fail('up.element.get(): Cannot cast multiple elements (%o) to a single element', value)
+      value[0]
     else
-      object
+      # undefined, null, Window, Document, DocumentFragment, ...
+      value
 
   ###**
-  If given a string, returns the all elements matching that string.
-  If given any other argument, returns the argument [wrapped as an array](/up.util.wrapList).
+  Composes a list of elements from the given arguments.
+
+  \#\#\# Casting rules
+
+  - If given a string, returns the all elements matching that string.
+  - If given any other argument, returns the argument [wrapped as a list](/up.util.wrapList).
+
+  \#\#\# Example
+
+  ```javascript
+  $jquery = $('.jquery')                          // returns jQuery (2) [div.jquery, div.jquery]
+  nodeList = document.querySelectorAll('.node')   // returns NodeList (2) [div.node, div.node]
+  element = document.querySelector('.element')    // returns Element div.element
+  selector = '.selector'                          // returns String '.selector'
+
+  elements = up.element.list($jquery, nodeList, undefined, element, selector)
+  // returns [div.jquery, div.jquery, div.node, div.node, div.element, div.selector]
+  ```
 
   @function up.element.list
-  @param {jQuery|Element|String} object
-  @return {Element}
+  @param {Array<jQuery|Element|Array<Element>|String|undefined|null>} ...args
+  @return {Array<Element>}
   @internal
   ###
   getList = (args...) ->
@@ -108,8 +231,15 @@ up.element = do ->
 #      up.fail('Not an element: %o', element)
 
   ###**
+  Removes the given element from the object tree.
+
+  If you don't need IE11 support you may also use the built-in
+  [`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/remove) to the same effect.
+
   @function up.element.remove
-  @internal
+  @param {Element} element
+    The element to remove.
+  @experimental
   ###
   remove = (element) ->
     if element.remove
@@ -119,24 +249,47 @@ up.element = do ->
       parent.removeChild(element)
 
   ###**
+  Hides the given element.
+
+  The element is hidden by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
+  of `{ display: none }`.
+
   @function up.element.hide
-  @internal
+  @param {Element} element
+  @experimental
   ###
   hide = (element) ->
     element.style.display = 'none'
 
   ###**
-  TODO: Document me. Also explain that it's very naive.
+  Shows the given element.
+
+  The element is shown by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
+  of `{ display: '' }`.
+
+  You might have CSS rules causing the element to remain hidden after calling `up.element.show(element)`.
+  Unpoly will not handle such cases in order to keep this function performant. As a workaround, you may
+  manually set the `element.style.display` property. Also see discussion
+  in jQuery issues [#88](https://github.com/jquery/jquery.com/issues/88),
+  [#2057](https://github.com/jquery/jquery/issues/2057) and
+  [this WHATWG mailing list post](http://lists.w3.org/Archives/Public/public-whatwg-archive/2014Apr/0094.html).
 
   @function up.element.show
-  @internal
+  @experimental
   ###
   show = (element) ->
     element.style.display = ''
 
   ###**
+  Display or hide the given element, depending on its current visibility.
+
   @function up.element.toggle
-  @internal
+  @param {Element} element
+  @param {Boolean} [newVisible]
+    Pass `true` to show the element or `false` to hide it.
+
+    If omitted, the element will be hidden if visible and shown if invisible.
+  @experimental
   ###
   toggle = (element, newVisible) ->
     newVisible ?= !isVisible(element)
@@ -151,8 +304,20 @@ up.element = do ->
 #      fn(args...)
 
   ###**
+  Adds or removes the given class from the given element.
+
+  If you don't need IE11 support you may also use the built-in
+  [`Element#classList.toggle(className)`](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) to the same effect.
+
+
   @function up.element.toggleClass
-  @internal
+  @param {Element} element
+    The element for which to add or remove the class.
+  @param {String} className
+    A boolean value to determine whether the class should be added or removed.
+  @param {String} state
+    If omitted, the class will be added if missing and removed if present.
+  @experimental
   ###
   toggleClass = (element, klass, newPresent) ->
     list = element.classList
@@ -164,7 +329,7 @@ up.element = do ->
 
   ###**
   @function up.element.setAttrs
-  @internal
+  @experimental
   ###
   setAttrs = (element, attrMap) ->
     for key, value of attrMap
@@ -189,15 +354,24 @@ up.element = do ->
 #    existingElement.insertAdjacentElement('afterend', newElement)
 
   ###**
+  Replaces the given old element with the given new element.
+
+  The old element will be removed from the DOM tree.
+
+  If you don't need IE11 support you may also use the built-in
+    [`Element#replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/replaceWith) to the same effect.
+
   @function up.element.replace
-  @internal
+  @param {Element} oldElement
+  @param {Element} newElement
+  @experimental
   ###
   replace = (oldElement, newElement) ->
     oldElement.parentElement.replaceChild(newElement, oldElement)
 
   ###**
   @function up.element.setAttrs
-  @internal
+  @experimental
   ###
   setAttrs = (element, attrs) ->
     for name, value of attrs
@@ -205,7 +379,7 @@ up.element = do ->
 
   ###**
   @function up.element.createFromSelector
-  @internal
+  @experimental
   ###
   createFromSelector = (givenSelector, attrs) ->
     # Extract attribute values before we do anything else.
@@ -266,7 +440,7 @@ up.element = do ->
 
   ###**
   @function up.element.affix
-  @internal
+  @experimental
   ###
   affix = (container, selector, options) ->
     element = createFromSelector(selector, options)
@@ -353,7 +527,7 @@ up.element = do ->
 
   ###**
   @function up.element.createFromHtml
-  @internal
+  @experimental
   ###
   createFromHtml = (html) ->
     doc = createDocumentFromHtml(html)
@@ -453,7 +627,7 @@ up.element = do ->
   If it is blank it returns `undefined`.
 
   @function up.util.presentAttr
-  @internal
+  @experimental
   ###
   presentAttr = (element, attribute) ->
     value = element.getAttribute(attribute)
@@ -461,7 +635,7 @@ up.element = do ->
 
   ###**
   @function up.util.booleanAttr
-  @internal
+  @experimental
   ###
   booleanAttr = (element, attribute) ->
     value = element.getAttribute(attribute)
@@ -472,7 +646,7 @@ up.element = do ->
 
   ###**
   @function up.util.numberAttr
-  @internal
+  @experimental
   ###
   numberAttr = (element, attribute) ->
     value = element.getAttribute(attribute)
@@ -485,7 +659,7 @@ up.element = do ->
   Returns `undefined` if the attribute value is [blank](/up.util.isBlank).
 
   @function up.element.jsonAttr
-  @internal
+  @experimental
   ###
   jsonAttr = (element, attribute) ->
     # The document does not respond to #getAttribute()
@@ -503,7 +677,7 @@ up.element = do ->
     the old CSS is restored.
   @return {Function}
     A function that restores the original CSS when called.
-  @internal
+  @experimental
   ###
   setTemporaryStyle = (element, newCss, block) ->
     oldStyles = inlineStyle(element, Object.keys(newCss))
@@ -525,7 +699,7 @@ up.element = do ->
   @param {String|Array} propOrProps
     One or more CSS property names in camelCase.
   @return {string|object}
-  @internal
+  @experimental
   ###
   computedStyle = (element, props) ->
     element = up.element.get(element)
@@ -541,7 +715,7 @@ up.element = do ->
   @param {String} prop
     A CSS property name in camelCase.
   @return {string|object}
-  @internal
+  @experimental
   ###
   computedStyleNumber = (element, prop) ->
     rawValue = computedStyle(element, prop)
@@ -579,7 +753,7 @@ up.element = do ->
   @param {Object} props
     One or more CSS properties with camelCase keys.
   @return {string|object}
-  @internal
+  @experimental
   ###
   setInlineStyle = (element, props) ->
     element = up.element.get(element)
@@ -645,7 +819,17 @@ up.element = do ->
     selector
 
   ###**
+  Returns whether the given element is currently visible.
+
+  An element is considered visible if it consumes space in the document.
+  Elements with `{ visibility: hidden }` or `{ opacity: 0 }` are considered visible, since they still consume space in the layout.
+
+  Elements not attached to the DOM are considered hidden.
+
   @function up.element.isVisible
+  @param {Element|string|jQuery} element
+    The element to check.
+  @experimental
   ###
   isVisible = (element) ->
     # From https://github.com/jquery/jquery/blame/9cb162f6b62b6d4403060a0f0d2065d3ae96bbcc/src/css/hiddenVisibleSelectors.js#L12
