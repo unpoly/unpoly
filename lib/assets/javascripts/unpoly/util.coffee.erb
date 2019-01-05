@@ -1100,77 +1100,6 @@ up.util = do ->
   extractOptions = (args) ->
     extractLastArg(args, isOptions) || {}
 
-  CASE_CONVERSION_GROUP = /[^\-\_]+?(?=[A-Z\-\_]|$)/g
-
-  convertCase = (string, separator, fn) ->
-    parts = string.match(CASE_CONVERSION_GROUP)
-    parts = map parts, fn
-    parts.join(separator)
-
-  ###**
-  Returns a copy of the given string that is transformed to `kebab-case`.
-
-  @function up.util.kebabCase
-  @param {string} string
-  @return {string}
-  @internal
-  ###
-  kebabCase = (string) ->
-    convertCase string, '-', (part) -> part.toLowerCase()
-
-  ###**
-  Returns a copy of the given string that is transformed to `camelCase`.
-
-  @function up.util.camelCase
-  @param {string} string
-  @return {string}
-  @internal
-  ###
-  camelCase = (string) ->
-    convertCase string, '', (part, i) ->
-      if i == 0
-        part.toLowerCase()
-      else
-        part.charAt(0).toUpperCase() + part.substr(1).toLowerCase()
-
-  ###**
-  Returns a copy of the given object with all keys renamed
-  in `kebab-case`.
-
-  Does not change the given object.
-
-  @function up.util.kebabCaseKeys
-  @param {object} obj
-  @return {object}
-  @internal
-  ###
-  kebabCaseKeys = (obj) ->
-    copyWithRenamedKeys(obj, kebabCase)
-
-  ###**
-  Returns a copy of the given object with all keys renamed
-  in `camelCase`.
-
-  Does not change the given object.
-
-  @function up.util.camelCaseKeys
-  @param {object} obj
-  @return {object}
-  @internal
-  ###
-  camelCaseKeys = (obj) ->
-    copyWithRenamedKeys(obj, camelCase)
-
-#  lowerCaseKeys = (obj) ->
-#    copyWithRenamedKeys(obj, (key) -> key.toLowerCase())
-
-  copyWithRenamedKeys = (obj, keyTransformer) ->
-    result = {}
-    for k, v of obj
-      k = keyTransformer(k)
-      result[k] = v
-    result
-
   partial = (fn, fixedArgs...) ->
     return (callArgs...) ->
       fn.apply(this, fixedArgs.concat(callArgs))
@@ -1526,11 +1455,6 @@ up.util = do ->
   unresolvablePromise: unresolvablePromise
   remove: remove
   memoize: memoize
-  camelCase: camelCase
-  camelCaseKeys: camelCaseKeys
-  # lowerCaseKeys: lowerCaseKeys
-  kebabCase: kebabCase
-  kebabCaseKeys: kebabCaseKeys
   error: fail
   pluckKey: pluckKey
   renameKey: renameKey

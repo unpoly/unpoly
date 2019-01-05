@@ -707,7 +707,7 @@ up.element = do ->
   @function up.element.style
   @param {jQuery|Element} element
   @param {String|Array} propOrProps
-    One or more CSS property names in camelCase.
+    One or more CSS property names in camelCase or kebab-case.
   @return {string|object}
   @experimental
   ###
@@ -722,7 +722,7 @@ up.element = do ->
   @function up.element.styleNumber
   @param {jQuery|Element} element
   @param {String} prop
-    A CSS property name in camelCase.
+    A CSS property name in camelCase or kebab-case.
   @return {string|object}
   @experimental
   ###
@@ -739,7 +739,7 @@ up.element = do ->
   @function up.element.inlineStyle
   @param {jQuery|Element} element
   @param {String|Array} propOrProps
-    One or more CSS property names in camelCase.
+    One or more CSS property names in camelCase or kebab-case.
   @return {string|object}
   @internal
   ###
@@ -759,7 +759,7 @@ up.element = do ->
   @function up.element.setStyle
   @param {jQuery|Element} element
   @param {Object} props
-    One or more CSS properties with camelCase keys.
+    One or more CSS properties with camelCase keys or kebab-case keys.
   @return {string|object}
   @experimental
   ###
