@@ -1,5 +1,5 @@
 ###**
-@class up.framework
+@module up.framework
 ###
 
 up.framework = do ->

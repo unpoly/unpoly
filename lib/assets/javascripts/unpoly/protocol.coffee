@@ -172,7 +172,7 @@ The **simplest implementation** is to set this cookie for every request that is 
 an existing cookie should be deleted.
 
 
-@class up.protocol
+@module up.protocol
 ###
 up.protocol = do ->
 

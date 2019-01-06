@@ -27,7 +27,7 @@ The HTML of a tooltip element is simply this:
 
 The tooltip element is appended to the end of `<body>`.
 
-@class up.tooltip
+@module up.tooltip
 ###
 up.tooltip = do ->
   

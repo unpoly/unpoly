@@ -6,7 +6,7 @@ In an Unpoly app, every page has an URL.
 
 [Fragment updates](/up.link) automatically update the URL.
 
-@class up.history
+@module up.history
 ###
 up.history = do ->
   

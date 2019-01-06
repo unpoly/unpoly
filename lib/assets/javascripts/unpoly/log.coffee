@@ -11,7 +11,7 @@ Unpoly can print debugging information to the developer console, e.g.:
 You can activate logging by calling [`up.log.enable()`](/up.log.enable).
 The output can be configured using the [`up.log.config`](/up.log.config) property.
 
-@class up.log
+@module up.log
 ###
 up.log = do ->
 

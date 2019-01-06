@@ -5,7 +5,7 @@ Passive updates
 This work-in-progress package will contain functionality to
 passively receive updates from the server.
 
-@class up.radio
+@module up.radio
 ###
 up.radio = do ->
 

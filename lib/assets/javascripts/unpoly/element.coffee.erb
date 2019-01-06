@@ -4,9 +4,13 @@
 DOM helpers
 ===========
 
-Text here
+The `up.element` module offers functions for DOM manipulation and traversal.
 
-@class up.element
+`up.element` complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp)
+to implement [jQuery](https://jquery.com/)-like capabilities across all
+[supported browsers](/up.browser).
+
+@module up.element
 ###
 up.element = do ->
 
@@ -867,6 +871,18 @@ up.element = do ->
   Receives [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
   for the given element.
 
+  \#\#\# Examples
+
+  When requesting a single CSS property, its value will be returned as a string:
+
+      value = up.element.style(element, 'font-size')
+      // value is '16px'
+
+  When requesting multiple CSS properties, the function returns an object of property names and values:
+
+      value = up.element.style(element, ['font-size', 'margin-top'])
+      // value is { 'font-size': '16px', 'margin-top': '10px' }
+
   @function up.element.style
   @param {jQuery|Element} element
   @param {String|Array} propOrProps
@@ -878,17 +894,6 @@ up.element = do ->
     style = window.getComputedStyle(element)
     extractFromStyleObject(style, props)
 
-  ###**
-  Gets a computed style value for the given element.
-  If a value is set, the value is parsed to a number before returning.
-
-  @function up.element.styleNumber
-  @param {jQuery|Element} element
-  @param {String} prop
-    A CSS property name in kebab-case or camelCase.
-  @return {string|object}
-  @experimental
-  ###
   computedStyleNumber = (element, prop) ->
     rawValue = computedStyle(element, prop)
     if u.isGiven(rawValue)
@@ -917,12 +922,12 @@ up.element = do ->
       u.only(style, keyOrKeys...)
 
   ###**
-  Merges the given inline style(s) into the given element's `[style]` attribute.
+  Sets the given CSS properties as inline styles on the given element.
 
   @function up.element.setStyle
   @param {jQuery|Element} element
   @param {Object} props
-    One or more CSS properties with camelCase keys or kebab-case keys.
+    One or more CSS properties with kebab-case keys or camelCase keys.
   @return {string|object}
   @experimental
   ###

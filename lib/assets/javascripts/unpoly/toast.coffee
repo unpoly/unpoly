@@ -2,7 +2,7 @@
 Toast alerts
 ============
 
-@class up.toast
+@module up.toast
 ###
 up.toast = do ->
 

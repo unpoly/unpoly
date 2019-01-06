@@ -34,7 +34,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     <a href="/bar" up-follow class="up-current">Bar</a>
 
 
-@class up.feedback
+@module up.feedback
 ###
 up.feedback = do ->
 
