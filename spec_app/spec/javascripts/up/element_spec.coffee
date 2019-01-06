@@ -744,9 +744,9 @@ describe 'up.element', ->
       element = fixture('div')
       expect(up.element.booleanAttr(element, 'foo')).toBeMissing()
 
-    it 'returns the attribute value unchanged if the value is some string', ->
+    it 'returns undefined if the attribute value cannot be cast to a boolean', ->
       element = fixture('div[foo="some text"]')
-      expect(up.element.booleanAttr(element, 'foo')).toBe('some text')
+      expect(up.element.booleanAttr(element, 'foo')).toBeUndefined()
 
   describe 'up.element.setTemporaryStyle', ->
 

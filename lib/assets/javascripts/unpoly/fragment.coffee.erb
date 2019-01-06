@@ -483,7 +483,7 @@ up.fragment = do ->
   findKeepPlan = (element, newElement, options) ->
     if options.keep
       keepable = element
-      if partnerSelector = e.booleanAttr(keepable, 'up-keep')
+      if partnerSelector = e.booleanOrStringAttr(keepable, 'up-keep')
         u.isString(partnerSelector) or partnerSelector = '&'
         partnerSelector = e.resolveSelector(partnerSelector, keepable)
         if options.descendantsOnly

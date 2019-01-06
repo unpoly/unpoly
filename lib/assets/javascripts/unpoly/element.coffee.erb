@@ -723,28 +723,28 @@ up.element = do ->
       parent.insertBefore(wrappedNode, wrapper)
     parent.removeChild(wrapper)
 
+#  ###**
+#  Returns the value of the given attribute on the given element, if the value is [present](/up.util.isPresent).
+#
+#  Returns `undefined` if the attribute is not set, or if it is set to an empty string.
+#
+#  @function up.element.presentAttr
+#  @param {Element} element
+#    The element from which to retrieve the attribute value.
+#  @param {String} attribute
+#    The attribute name.
+#  @return {string|undefined}
+#    The attribute value, if present.
+#  @experimental
+#  ###
+#  presentAttr = (element, attribute) ->
+#    value = element.getAttribute(attribute)
+#    u.presence(value)
+
   ###**
-  Returns the value of the given attribute on the given element, if the value is [present](/up.util.isPresent).
+  Returns the value of the given attribute on the given element, cast as a boolean value.
 
-  Returns `undefined` if the attribute is not set, or if it is set to an empty string.
-
-  @function up.element.presentAttr
-  @param {Element} element
-    The element from which to retrieve the attribute value.
-  @param {String} attribute
-    The attribute name.
-  @return {string|undefined}
-    The attribute value, if present.
-  @experimental
-  ###
-  presentAttr = (element, attribute) ->
-    value = element.getAttribute(attribute)
-    u.presence(value)
-
-  ###**
-  Returns the value of the given attribute on the given element, casted as a boolean value.
-
-  If the attribute value cannot be casted to `true` or `false`, the value is returned unchanged.
+  If the attribute value cannot be cast to `true` or `false`, `undefined` is returned.
 
   \#\#\# Casting rules
 
@@ -765,44 +765,55 @@ up.element = do ->
   | `<div foo="">`      | `true`       |
   | `<div foo="false">` | `false`      |
   | `<div>`             | `undefined`  |
-  | `<div foo="bar">`   | `"bar"`      |
+  | `<div foo="bar">`   | `undefined`  |
 
   @function up.element.booleanAttr
   @param {Element} element
     The element from which to retrieve the attribute value.
   @param {String} attribute
     The attribute name.
-  @return {boolean|any|undefined}
-    The casted attribute value.
+  @return {boolean|undefined}
+    The cast attribute value.
   @experimental
   ###
-  booleanAttr = (element, attribute) ->
+  booleanAttr = (element, attribute, pass) ->
     value = element.getAttribute(attribute)
     switch value
-      when 'false' then false
-      when 'true', '', attribute then true
-      else value # other strings, undefined, null, ...
+      when 'false'
+        false
+      when 'true', '', attribute
+        true
+      else
+        value if pass
 
   ###**
-  Returns the value of the given attribute on the given element, casted to a number.
+  Returns the given attribute value cast as boolean.
 
-  If the attribute value cannot be casted to a number, the value is returned unchanged.
+  If the attribute value cannot be cast, returns the attribute value unchanged.
+
+  @internal
+  ###
+  booleanOrStringAttr = (element, attribute) ->
+    booleanAttr(element, attribute, true)
+
+  ###**
+  Returns the value of the given attribute on the given element, cast to a number.
+
+  If the attribute value cannot be cast to a number, `undefined` is returned.
 
   @function up.element.numberAttr
   @param {Element} element
     The element from which to retrieve the attribute value.
   @param {String} attribute
     The attribute name.
-  @return {number|any|undefined}
-    The casted attribute value.
+  @return {number|undefined}
+    The cast attribute value.
   @experimental
   ###
   numberAttr = (element, attribute) ->
     value = element.getAttribute(attribute)
     if value?.match(/^[\d\.]+$/)
       parseFloat(value)
-    else
-      value # be consistent with booleanAttr
 
   ###**
   Reads the given attribute from the element, parsed as [JSON](https://www.json.org/).
@@ -817,8 +828,8 @@ up.element = do ->
   @param {String} attribute
     The attribute name.
   @return {Object|undefined}
-    The casted attribute value.
-  @experimental
+    The cast attribute value.
+  @external
   ###
   jsonAttr = (element, attribute) ->
     # The document does not respond to #getAttribute()
@@ -1028,10 +1039,11 @@ up.element = do ->
   fixedToAbsolute: fixedToAbsolute # internal
   setMissingAttrs: setMissingAttrs # internal
   unwrap: unwrap # practical for jQuery migration
-  presentAttr: presentAttr # experimental
+  # presentAttr: presentAttr # experimental
   booleanAttr: booleanAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
   numberAttr: numberAttr # practical
   jsonAttr: jsonAttr # practical
+  booleanOrStringAttr: booleanOrStringAttr
   setTemporaryStyle: setTemporaryStyle # practical
   style: computedStyle # practical.
   styleNumber: computedStyleNumber # practical.

@@ -170,13 +170,13 @@ up.link = do ->
     target = options.target ? link.getAttribute('up-target')
     options.failTarget ?= link.getAttribute('up-fail-target')
     options.fallback ?= link.getAttribute('up-fallback')
-    options.transition ?= e.booleanAttr(link, 'up-transition')
-    options.failTransition ?= e.booleanAttr(link, 'up-fail-transition')
-    options.history ?= e.booleanAttr(link, 'up-history')
-    options.reveal ?= e.booleanAttr(link, 'up-reveal') ? true
-    options.failReveal ?= e.booleanAttr(link, 'up-fail-reveal') ? true
+    options.transition ?= e.booleanOrStringAttr(link, 'up-transition')
+    options.failTransition ?= e.booleanOrStringAttr(link, 'up-fail-transition')
+    options.history ?= e.booleanOrStringAttr(link, 'up-history')
+    options.reveal ?= e.booleanOrStringAttr(link, 'up-reveal') ? true
+    options.failReveal ?= e.booleanOrStringAttr(link, 'up-fail-reveal') ? true
     options.cache ?= e.booleanAttr(link, 'up-cache')
-    options.restoreScroll ?= e.booleanAttr(link, 'up-restore-scroll')
+    options.restoreScroll ?= e.booleanAttr(link, 'up-restore-scroll') # the option may contain an Object, but not the attr
     options.method = followMethod(link, options)
     options.origin ?= link
     options.layer ?= link.getAttribute('up-layer')
@@ -510,7 +510,7 @@ up.link = do ->
   @stable
   ###
   up.macro '[up-dash]', (element) ->
-    target = e.booleanAttr(element, 'up-dash')
+    target = e.booleanOrStringAttr(element, 'up-dash')
     element.removeAttribute('up-dash')
     newAttrs = {
       'up-preload': '',
@@ -572,7 +572,7 @@ up.link = do ->
   @stable
   ###
   up.macro '[up-expand]', (area) ->
-    selector = e.presentAttr(area, 'up-expand') ? 'a, [up-href]'
+    selector = area.getAttribute('up-expand') || 'a, [up-href]'
     childLinks = e.all(area, selector)
 
     if childLink = childLinks[0]

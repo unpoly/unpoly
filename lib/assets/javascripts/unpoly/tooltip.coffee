@@ -147,7 +147,7 @@ up.tooltip = do ->
     text = options.text ? anchor.getAttribute('up-tooltip')
     position = options.position ? anchor.getAttribute('up-position') ? config.position
     align = options.align ? anchor.getAttribute('up-align') ? config.align
-    animation = options.animation ? e.booleanAttr(anchor, 'up-animation') ? config.openAnimation
+    animation = options.animation ? e.booleanOrStringAttr(anchor, 'up-animation') ? config.openAnimation
     animateOptions = up.motion.animateOptions(options, anchor, duration: config.openDuration, easing: config.openEasing)
 
     state.phase = 'opening'

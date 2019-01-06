@@ -42,7 +42,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
     - [`up.element.affix()`](/up.element.affix)
     - [`up.element.toSelector()`](/up.element.toSelector)
     - [`up.element.createFromHtml()`](/up.element.createFromHtml)
-    - [`up.element.presentAttr()`](/up.element.presentAttr)
+    - ## [`up.element.presentAttr()`](/up.element.presentAttr)
     - [`up.element.booleanAttr()`](/up.element.booleanAttr)
     - [`up.element.numberAttr()`](/up.element.numberAttr)
     - [`up.element.jsonAttr()`](/up.element.jsonAttr)
