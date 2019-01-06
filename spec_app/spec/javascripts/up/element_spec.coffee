@@ -473,6 +473,14 @@ describe 'up.element', ->
       element = up.element.createFromSelector('.foo', text: '<script>alert("foo")</script>')
       expect(element).toHaveText('<script>alert("foo")</script>')
 
+  describe 'up.element.affix', ->
+
+    it 'creates an element from the given selector and attaches it to the given container', ->
+      container = fixture('.container')
+      element = up.element.affix(container, 'span')
+      expect(element.tagName).toEqual('SPAN')
+      expect(element.parentElement).toBe(container)
+
   describe 'up.element.toSelector', ->
 
     it "prefers using the element's 'up-id' attribute to using the element's ID", ->

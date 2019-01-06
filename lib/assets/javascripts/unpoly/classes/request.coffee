@@ -31,7 +31,7 @@ class up.Request extends up.Record
   [Parameters](/up.params) that should be sent as the request's payload.
 
   @property up.Request#params
-  @param {object|FormData|string|Array} params
+  @param {Object|FormData|string|Array} params
   @stable
   ###
 
@@ -55,7 +55,7 @@ class up.Request extends up.Record
   An object of additional HTTP headers.
 
   @property up.Request#headers
-  @param {object} headers
+  @param {Object} headers
   @stable
   ###
 
@@ -66,7 +66,7 @@ class up.Request extends up.Record
   the timeout will not include the time spent waiting in the queue.
 
   @property up.Request#timeout
-  @param {object|undefined} timeout
+  @param {Object|undefined} timeout
   @stable
   ###
   fields: ->
@@ -174,7 +174,7 @@ class up.Request extends up.Record
     # The query section would be overridden by the serialized input values on submission.
     @transferSearchToParams()
 
-    form = e.createFromSelector('form.up-page-loader')
+    form = e.affix(document.body, 'form.up-page-loader')
 
     addField = (attrs) ->
       e.affix(form, 'input[type=hidden]', attrs)
@@ -198,7 +198,6 @@ class up.Request extends up.Record
     u.each(@params.toArray(), addField)
 
     e.hide(form)
-    document.body.appendChild(form)
 
     up.browser.submitForm(form)
 

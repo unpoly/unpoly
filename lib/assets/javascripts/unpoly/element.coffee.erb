@@ -15,7 +15,7 @@ up.element = do ->
   ###**
   Returns a null-object that mimics an `Element`.
 
-  @function up.util.none
+  @function up.element.none()
   @internal
   ###
   NONE = { getAttribute: -> undefined }
@@ -337,12 +337,12 @@ up.element = do ->
   @function up.element.setAttrs
   @param {Element} element
     The element on which to set attributes.
-  @param {object} attributeMap
+  @param {object} attributes
     An object of attributes to set.
   @experimental
   ###
-  setAttrs = (element, attrMap) ->
-    for key, value of attrMap
+  setAttrs = (element, attributes) ->
+    for key, value of attributes
       element.setAttribute(key, value)
 
   ###**
@@ -380,23 +380,74 @@ up.element = do ->
     oldElement.parentElement.replaceChild(newElement, oldElement)
 
   ###**
-  @function up.element.setAttrs
-  @experimental
-  ###
-  setAttrs = (element, attrs) ->
-    for name, value of attrs
-      element.setAttribute(name, value)
+  Creates an element matching the given CSS selector.
 
-  ###**
+  The created element will not yet be attached to the DOM tree.
+  Attach it with [`Element#appendChild()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild)
+  or use [`up.element.affix()`](/up.element.affix) to create an attached element.
+
+  \#\#\# Examples
+
+  To create an element with a given tag name:
+
+      element = up.element.createFromSelector('span')
+      // element is <span></span>
+
+  To create an element with a given class:
+
+      element = up.element.createFromSelector('.klass')
+      // element is <div class="klass"></div>
+
+  To create an element with a given ID:
+
+      element = up.element.createFromSelector('#foo')
+      // element is <div id="foo"></div>
+
+  To create an element with a given boolean attribute:
+
+      element = up.element.createFromSelector('[attr]')
+      // element is <div attr></div>
+
+  To create an element with a given attribute value:
+
+      element = up.element.createFromSelector('[attr="value"]')
+      // element is <div attr="value"></div>
+
+  You may also pass an object of attribute names/values as a second argument:
+
+      element = up.element.createFromSelector('div', { attr: 'value' })
+      // element is <div attr="value"></div>
+
+  You may set the element's inner text by passing a `{ text }` option:
+
+      element = up.element.createFromSelector('div', { text: 'inner text' })
+      // element is <div>inner text</div>
+
+  You may set inline styles by passing an object of CSS properties as a second argument:
+
+      element = up.element.createFromSelector('div', { style: { color: 'red' }})
+      // element is <div style="color: red"></div>
+
   @function up.element.createFromSelector
+  @params {string} selector
+    The CSS selector from which to create an element.
+  @params {Object} attrs
+    An object of attributes to set on the created element.
+  @param {Object} attrs.text
+    The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
+  @param {Object} attrs.style
+    An object of CSS properties that will be set as the inline style
+    of the created element.
+  @return {Element}
+    The created element.
   @experimental
   ###
-  createFromSelector = (givenSelector, attrs) ->
+  createFromSelector = (selector, attrs) ->
     # Extract attribute values before we do anything else.
     # Attribute values might contain spaces, and then we would incorrectly
     # split depths at that space.
     attrValues = []
-    selectorWithoutAttrValues = givenSelector.replace /\[([\w-]+)(?:=(["'])?([^"'\]]*?)\2)?\]/g, (_match, attrName, _quote, attrValue) ->
+    selectorWithoutAttrValues = selector.replace /\[([\w-]+)(?:=(["'])?([^"'\]]*?)\2)?\]/g, (_match, attrName, _quote, attrValue) ->
       attrValues.push(attrValue || '')
       "[#{attrName}]"
 
@@ -431,7 +482,7 @@ up.element = do ->
           ''
 
       unless depthSelector == ''
-        throw new Error('Cannot parse selector: ' + givenSelector)
+        throw new Error('Cannot parse selector: ' + selector)
 
       previousElement?.appendChild(depthElement)
       previousElement = depthElement
@@ -449,24 +500,56 @@ up.element = do ->
     rootElement
 
   ###**
+  Creates an element matching the given CSS selector and attaches it to the given parent element.
+
+  To create a detached element from a selector,
+  see [`up.element.createFromSelector()`](/up.element.createFromSelector).
+
+  \#\#\# Example
+
+      element = up.element.affix(document.body, '.klass')
+      element.parentChild // returns document.body
+      element.className // returns 'klass'
+
   @function up.element.affix
+  @params {Element} parent
+    The parent to which to attach the created element.
+  @params {string} selector
+    The CSS selector from which to create an element.
+  @params {Object} attrs
+    An object of attributes to set on the created element.
+  @param {Object} attrs.text
+    The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
+  @param {Object} attrs.style
+    An object of CSS properties that will be set as the inline style
+    of the created element.
+  @return {Element}
+    The created element.
   @experimental
   ###
-  affix = (container, selector, options) ->
-    element = createFromSelector(selector, options)
-    container.appendChild(element)
+  affix = (parent, selector, attributes) ->
+    element = createFromSelector(selector, attributes)
+    parent.appendChild(element)
     element
 
   ###**
   Returns a CSS selector that matches the given element as good as possible.
 
-  This uses, in decreasing order of priority:
+  To build the selector, the following element properties are used in decreasing
+  order of priority:
 
-  - The element's `up-id` attribute
-  - The element's ID
-  - The element's name
-  - The element's classes
-  - The element's tag names
+  - The element's `[up-id]` attribute
+  - The element's `[id]` attribute
+  - The element's `[name]` attribute
+  - The element's `[class]` names
+  - The element's [`[aria-label]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute) attribute
+  - The element's tag name
+
+  \#\#\# Example
+
+      element = document.createElement('span')
+      element.className = 'klass'
+      selector = up.element.toSelector(element) // returns '.klass'
 
   @function up.element.toSelector
   @param {string|Element|jQuery}
@@ -536,6 +619,15 @@ up.element = do ->
     return parser.parseFromString(html, 'text/html')
 
   ###**
+  Creates an element from the given HTML fragment.
+
+  \#\#\# Example
+
+    element = up.element.createFromHtml('<div class="foo"><span>text</span></div>')
+    element.className // returns 'foo'
+    element.children[0] // returns <span> element
+    element.children[0].textContent // returns 'text'
+
   @function up.element.createFromHtml
   @experimental
   ###
@@ -574,7 +666,7 @@ up.element = do ->
   ###**
   Returns whether the given element has a CSS transition set.
 
-  @function up.util.hasCssTransition
+  @function up.element.hasCssTransition
   @return {boolean}
   @internal
   ###
@@ -592,7 +684,7 @@ up.element = do ->
     not noTransition
 
   ###**
-  @function up.util.fixedToAbsolute
+  @function up.element.fixedToAbsolute
   @internal
   ###
   fixedToAbsolute = (element) ->
@@ -632,11 +724,17 @@ up.element = do ->
     parent.removeChild(wrapper)
 
   ###**
-  Returns the value for the given element and attribute, if it is present.
+  Returns the value of the given attribute on the given element, if the value is [present](/up.util.isPresent).
 
-  If it is blank it returns `undefined`.
+  Returns `undefined` if the attribute is not set, or if it is set to an empty string.
 
-  @function up.util.presentAttr
+  @function up.element.presentAttr
+  @param {Element} element
+    The element from which to retrieve the attribute value.
+  @param {String} attribute
+    The attribute name.
+  @return {string|undefined}
+    The attribute value, if present.
   @experimental
   ###
   presentAttr = (element, attribute) ->
@@ -644,7 +742,38 @@ up.element = do ->
     u.presence(value)
 
   ###**
-  @function up.util.booleanAttr
+  Returns the value of the given attribute on the given element, casted as a boolean value.
+
+  If the attribute value cannot be casted to `true` or `false`, the value is returned unchanged.
+
+  \#\#\# Casting rules
+
+  This function deviates from the
+  [HTML Standard for boolean attributes](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes)
+  in order to allow `undefined` values. When an attribute is missing, Unpoly considers the value to be `undefined`
+  (where the standard would assume `false`).
+
+  Unpoly also allows `"true"` and `"false"` as attribute values.
+
+  The table below shows return values for `up.element.booleanAttr(element, 'foo')` given different elements:
+
+  | Element             | Return value |
+  |---------------------|--------------|
+  | `<div foo>`         | `true`       |
+  | `<div foo="foo">`   | `true`       |
+  | `<div foo="true">`  | `true`       |
+  | `<div foo="">`      | `true`       |
+  | `<div foo="false">` | `false`      |
+  | `<div>`             | `undefined`  |
+  | `<div foo="bar">`   | `"bar"`      |
+
+  @function up.element.booleanAttr
+  @param {Element} element
+    The element from which to retrieve the attribute value.
+  @param {String} attribute
+    The attribute name.
+  @return {boolean|any|undefined}
+    The casted attribute value.
   @experimental
   ###
   booleanAttr = (element, attribute) ->
@@ -655,20 +784,40 @@ up.element = do ->
       else value # other strings, undefined, null, ...
 
   ###**
-  @function up.util.numberAttr
+  Returns the value of the given attribute on the given element, casted to a number.
+
+  If the attribute value cannot be casted to a number, the value is returned unchanged.
+
+  @function up.element.numberAttr
+  @param {Element} element
+    The element from which to retrieve the attribute value.
+  @param {String} attribute
+    The attribute name.
+  @return {number|any|undefined}
+    The casted attribute value.
   @experimental
   ###
   numberAttr = (element, attribute) ->
     value = element.getAttribute(attribute)
     if value?.match(/^[\d\.]+$/)
       parseFloat(value)
+    else
+      value # be consistent with booleanAttr
 
   ###**
-  Reads the given attribute from the element, parsed JSON.
+  Reads the given attribute from the element, parsed as [JSON](https://www.json.org/).
 
   Returns `undefined` if the attribute value is [blank](/up.util.isBlank).
 
+  Throws a `SyntaxError` if the attribute value is an invalid JSON string.
+
   @function up.element.jsonAttr
+  @param {Element} element
+    The element from which to retrieve the attribute value.
+  @param {String} attribute
+    The attribute name.
+  @return {Object|undefined}
+    The casted attribute value.
   @experimental
   ###
   jsonAttr = (element, attribute) ->
@@ -677,29 +826,21 @@ up.element = do ->
       JSON.parse(json)
 
   ###**
-  Temporarily sets the CSS for the given element.
+  Temporarily sets the given inline styles on the given element.
 
-  @function up.util.setTemporaryStyle
-  @param {jQuery} $element
-  @param {Object} css
-  @param {Function} [block]
-    If given, the CSS is set, the block is called and
-    the old CSS is restored.
+  Returns a function that restores the original inline styles when called.
+
+  @function up.element.setTemporaryStyle
+  @param {Element} element
+  @param {Object} styles
   @return {Function}
-    A function that restores the original CSS when called.
+    A function that restores the original inline styles when called.
   @experimental
   ###
-  setTemporaryStyle = (element, newCss, block) ->
-    oldStyles = inlineStyle(element, Object.keys(newCss))
-    restoreOldStyles = -> setInlineStyle(element, oldStyles)
-    setInlineStyle(element, newCss)
-    if block
-      # If a block was passed, we run the block and restore old styles.
-      block()
-      restoreOldStyles()
-    else
-      # If no block was passed, we return the restoration function.
-      restoreOldStyles
+  setTemporaryStyle = (element, newStyles, block) ->
+    oldStyles = inlineStyle(element, Object.keys(newStyles))
+    setInlineStyle(element, newStyles)
+    return -> setInlineStyle(element, oldStyles)
 
   ###**
   Gets the computed style(s) for the given element.
@@ -789,7 +930,7 @@ up.element = do ->
   ###**
   Converts the given value to a CSS length value, adding a `px` unit if required.
 
-  @function up.util.cssLength
+  @function cssLength
   @internal
   ###
   cssLength = (obj) ->

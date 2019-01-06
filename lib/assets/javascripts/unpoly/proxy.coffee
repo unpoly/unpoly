@@ -589,7 +589,7 @@ up.proxy = do ->
   @function up.proxy.preload
   @param {string|Element|jQuery} linkOrSelector
     The element whose destination should be preloaded.
-  @param {object} options
+  @param {Object} options
     Options that will be passed to the function making the HTTP requests.
   @return
     A promise that will be fulfilled when the request was loaded and cached
