@@ -106,6 +106,11 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   - new { batch } option that runs the callback with a diff
 
 
+### Animation
+
+- CSS property names for custom animations and transitions must be given in kebab-case.
+
+
 ### Fragment update API
 
 up.dom has been renamed to up.fragment. Future: up.thing.verb()

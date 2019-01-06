@@ -288,7 +288,7 @@ up.element = do ->
   @param {Boolean} [newVisible]
     Pass `true` to show the element or `false` to hide it.
 
-    If omitted, the element will be hidden if visible and shown if invisible.
+    If omitted, the element will be hidden if shown and shown if hidden.
   @experimental
   ###
   toggle = (element, newVisible) ->
@@ -826,13 +826,23 @@ up.element = do ->
       JSON.parse(json)
 
   ###**
-  Temporarily sets the given inline styles on the given element.
+  Temporarily sets the given inline CSS styles on the given element.
 
   Returns a function that restores the original inline styles when called.
 
+  \#\#\# Example
+
+      element = document.querySelector('div')
+      unhide = up.element.setTemporaryStyle(element, { 'visibility': 'hidden' })
+      // do things while element is invisible
+      unhide()
+      // element is visible again
+
   @function up.element.setTemporaryStyle
   @param {Element} element
+    The element to style.
   @param {Object} styles
+    An object of CSS property names and values.
   @return {Function}
     A function that restores the original inline styles when called.
   @experimental
@@ -843,12 +853,13 @@ up.element = do ->
     return -> setInlineStyle(element, oldStyles)
 
   ###**
-  Gets the computed style(s) for the given element.
+  Receives [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
+  for the given element.
 
   @function up.element.style
   @param {jQuery|Element} element
   @param {String|Array} propOrProps
-    One or more CSS property names in camelCase or kebab-case.
+    One or more CSS property names in kebab-case or camelCase.
   @return {string|object}
   @experimental
   ###
@@ -863,7 +874,7 @@ up.element = do ->
   @function up.element.styleNumber
   @param {jQuery|Element} element
   @param {String} prop
-    A CSS property name in camelCase or kebab-case.
+    A CSS property name in kebab-case or camelCase.
   @return {string|object}
   @experimental
   ###
@@ -880,7 +891,7 @@ up.element = do ->
   @function up.element.inlineStyle
   @param {jQuery|Element} element
   @param {String|Array} propOrProps
-    One or more CSS property names in camelCase or kebab-case.
+    One or more CSS property names in kebab-case or camelCase.
   @return {string|object}
   @internal
   ###
