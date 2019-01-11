@@ -181,8 +181,8 @@ up.util = do ->
   Translate all items in an array to new array of items.
 
   @function up.util.map
-  @param {Array<T>} array
-  @param {Function(T, number): any|String} block
+  @param {Array} array
+  @param {Function(element, index): any|String} block
     A function that will be called with each element and (optional) iteration index.
 
     You can also pass a property name as a String,
@@ -212,8 +212,8 @@ up.util = do ->
   of the given array.
 
   @function up.util.each
-  @param {Array<T>} array
-  @param {Function(T, number)} block
+  @param {Array} array
+  @param {Function(element, index)} block
     A function that will be called with each element and (optional) iteration index.
   @stable
   ###
@@ -228,7 +228,7 @@ up.util = do ->
 
   @function up.util.times
   @param {number} count
-  @param {Function} block
+  @param {Function()} block
   @stable
   ###
   times = (count, block) ->
@@ -342,14 +342,14 @@ up.util = do ->
   otherwise returns `undefined`.
 
   @function up.util.presence
-  @param object
-  @param {Function(T): boolean} [tester=up.util.isPresent]
+  @param value
+  @param {Function(value): boolean} [tester=up.util.isPresent]
     The function that will be used to test whether the argument is present.
-  @return {T|undefined}
+  @return {any|undefined}
   @stable
   ###
-  presence = (object, tester = isPresent) ->
-    if tester(object) then object else undefined
+  presence = (value, tester = isPresent) ->
+    if tester(value) then value else undefined
 
   ###**
   Returns whether the given argument is not [blank](/up.util.isBlank).
@@ -682,8 +682,8 @@ up.util = do ->
   If no object matches, returns `undefined`.
 
   @function up.util.detect
-  @param {Array<T>} array
-  @param {Function(T): boolean} tester
+  @param {Array} array
+  @param {Function(value): boolean} tester
   @return {T|undefined}
   @stable
   ###
@@ -700,8 +700,8 @@ up.util = do ->
   for any element in the given array.
 
   @function up.util.some
-  @param {Array<T>} array
-  @param {Function(T, number): boolean} tester
+  @param {Array} array
+  @param {Function(value, index): boolean} tester
     A function that will be called with each element and (optional) iteration index.
 
   @return {boolean}
@@ -718,11 +718,11 @@ up.util = do ->
   value for all elements in the array.
 
   @function up.util.detectResult
-  @param {Array<A>} array
-  @param {Function(A): B} tester
+  @param {Array} array
+  @param {Function(element): any} tester
     A function that will be called with each element and (optional) iteration index.
 
-  @return {B}
+  @return {any|undefined}
   @experimental
   ###
   detectResult = (array, tester) ->
@@ -737,8 +737,8 @@ up.util = do ->
   for all elements in the given array.
 
   @function up.util.every
-  @param {Array<T>} array
-  @param {Function(T, number): boolean} tester
+  @param {Array} array
+  @param {Function(element, index): boolean} tester
     A function that will be called with each element and (optional) iteration index.
 
   @return {boolean}
@@ -783,9 +783,9 @@ up.util = do ->
   for which uniquness is computed.
 
   @function up.util.uniqBy
-  @param {Array<T>} array
-  @param {Function<T>: any} array
-  @return {Array<T>}
+  @param {Array} array
+  @param {Function(value): any} array
+  @return {Array}
   @experimental
   ###
   uniqBy = (array, mapper) ->
@@ -823,9 +823,9 @@ up.util = do ->
   a truthy value when passed to the given function.
 
   @function up.util.select
-  @param {Array<T>} array
-  @param {Function(T, number): boolean} tester
-  @return {Array<T>}
+  @param {Array} array
+  @param {Function(value, index): boolean} tester
+  @return {Array}
   @stable
   ###
   select = (array, tester) ->
@@ -841,9 +841,9 @@ up.util = do ->
   a truthy value when passed to the given function.
 
   @function up.util.reject
-  @param {Array<T>} array
-  @param {Function(T, number): boolean} tester
-  @return {Array<T>}
+  @param {Array} array
+  @param {Function(element, index): boolean} tester
+  @return {Array}
   @stable
   ###
   reject = (array, tester) ->
@@ -869,7 +869,7 @@ up.util = do ->
 
   @function up.util.setTimer
   @param {number} millis
-  @param {Function} callback
+  @param {Function()} callback
   @stable
   ###
   setTimer = (millis, callback) ->
@@ -880,7 +880,7 @@ up.util = do ->
   next JavaScript execution frame.
 
   @function up.util.nextFrame
-  @param {Function} block
+  @param {Function()} block
   @stable
   ###
   nextFrame = (block) ->
@@ -892,9 +892,9 @@ up.util = do ->
   Returns a promise that will be resolved when the given task was executed.
 
   @function up.util.queueMicrotask
-  @param {Function} task
+  @param {Function()} task
   @return {Promise}
-  @internal
+  @experimental
   ###
   microtask = (task) ->
     Promise.resolve().then(task)
@@ -1155,8 +1155,8 @@ up.util = do ->
 
   ###**
   @function up.util.sequence
-  @param {Array<Function>} functions...
-  @return {Function}
+  @param {Array<Function()>} functions
+  @return {Function()}
     A function that will call all `functions` if called.
 
   @internal

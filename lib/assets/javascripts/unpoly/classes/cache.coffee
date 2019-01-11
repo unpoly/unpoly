@@ -8,7 +8,7 @@ class up.Cache
 
   ###**
   @constructor
-  @param {number|Function() :number} [config.size]
+  @param {number|Function(): number} [config.size]
     Maximum number of cache entries.
     Set to `undefined` to not limit the cache size.
   @param {number|Function(): number} [config.expiry]
@@ -16,10 +16,10 @@ class up.Cache
     will be discarded.
   @param {string} [config.logPrefix]
     A prefix for log entries printed by this cache object.
-  @param {Function(any): string} [config.key]
+  @param {Function(entry): string} [config.key]
     A function that takes an argument and returns a string key
     for storage. If omitted, `toString()` is called on the argument.
-  @param {Function(any): boolean} [config.cachable]
+  @param {Function(entry): boolean} [config.cachable]
     A function that takes a potential cache entry and returns whether
     this entry  can be stored in the hash. If omitted, all entries are considered
     cachable.

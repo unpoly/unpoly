@@ -82,7 +82,7 @@ up.modal = do ->
   @param {number} [config.height='auto']
     The height of the dialog in pixels.
     Defaults to `undefined`, meaning that the dialog will grow to fit its contents.
-  @param {string|Function(config)} [config.template]
+  @param {string|Function(config): string} [config.template]
     A string containing the HTML structure of the modal.
     You can supply an alternative template string, but make sure that it
     defines tag with the classes `up-modal`, `up-modal-dialog` and  `up-modal-content`.

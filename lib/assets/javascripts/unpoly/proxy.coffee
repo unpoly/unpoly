@@ -371,10 +371,10 @@ up.proxy = do ->
 
   Here is the JavaScript to make it alive:
 
-      up.compiler('.spinner', function($element) {
+      up.compiler('.spinner', function(element) {
 
-        show = function() { $element.show() };
-        hide = function() { $element.hide() };
+        show = () => { up.element.show(element) };
+        hide = () => { up.element.hide(element) };
 
         hide();
 

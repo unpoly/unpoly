@@ -4,7 +4,7 @@ Events
 
 Most Unpoly interactions emit DOM events that are prefixed with `up:`.
 
-    $(document).on('up:modal:opened', function(event) {
+    document.addEventListener('up:modal:opened', (event) => {
       console.log('A new modal has just opened!');
     });
 
@@ -16,7 +16,7 @@ and past forms ([`up:modal:opened`](/up:modal:opened)).
 
 You can prevent most present form events by calling `preventDefault()`:
 
-    $(document).on('up:modal:open', function(event) {
+    document.addEventListener('up:modal:open', (event) => {
       if (event.url == '/evil') {
         // Prevent the modal from opening
         event.preventDefault();
@@ -26,23 +26,23 @@ You can prevent most present form events by calling `preventDefault()`:
 
 \#\#\# A better way to bind event listeners
 
-Instead of using jQuery to bind  an event handler to `document`, you can also
-use the more convenient [`up.on()`](/up.on):
+Instead of using [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener),
+you may find it convenient to use [`up.on()`](/up.on) instead:
 
-    up.on('click', 'button', function(event, $button) {
-      // $button is a jQuery collection containing
-      // the clicked <button> element
+    up.on('click', 'button', function(event, button, data) {
+      // button is the clicked element
+      // data is the parsed [`up-data`](/up-data) attribute
     });
 
-This improves jQuery's [`on`](http://api.jquery.com/on/) in multiple ways:
+There are some advantages to using `up.on()`:
 
 - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
   leaving you with an application without JavaScript. This is typically preferable to
   a soup of randomly broken JavaScript in ancient browsers.
-- A jQuery object with the target element is automatically passed to the event handler
-  as a second argument. You no longer need to write `$(this)` in the handler function.
-- You use an [`up-data`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
-  to observed elements.
+- The event target is automatically passed as a second argument.
+- You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
+  to observed elements. If an `[up-data]` attribute is set, its value will automatically be
+  parsed as JSON and passed as a third argument.
 
 @module up.event
 ###
@@ -149,7 +149,7 @@ up.event = do ->
     The function takes the affected element as the first argument).
     If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
     and passed as a second argument.
-  @return {Function}
+  @return {Function()}
     A function that unbinds the event listeners when called.
   @stable
   ###
@@ -160,6 +160,24 @@ up.event = do ->
   TODO: Document me
 
   @function up.$on
+  @param {Element|jQuery} [element=document]
+    The element on which to register the event listener.
+
+    If no element is given, the listener is registered on the `document`.
+  @param {string} events
+    A space-separated list of event names to bind to.
+  @param {string} [selector]
+    The selector of an element on which the event must be triggered.
+    Omit the selector to listen to all events with that name, regardless
+    of the event target.
+  @param {Function(event, [element], [data])} listener
+    The listener function that should be called.
+
+    The function takes the affected element as the first argument).
+    If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
+    and passed as a second argument.
+  @return {Function()}
+    A function that unbinds the event listeners when called.
   @stable
   ###
   $bind = (args...) ->
@@ -329,9 +347,9 @@ up.event = do ->
   presses the `Escape` key.
 
   @function up.event.onEscape
-  @param {Function} listener
+  @param {Function(event)} listener
     The listener function to register.
-  @return {Function}
+  @return {Function()}
     A function that unbinds the event listeners when called.
   @experimental
   ###

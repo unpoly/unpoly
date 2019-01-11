@@ -143,12 +143,12 @@ up.motion = do ->
   @function up.animate
   @param {Element|jQuery|string} elementOrSelector
     The element to animate.
-  @param {string|Function|Object} animation
+  @param {string|Function(element, options): Promise|Object} animation
     Can either be:
 
     - The animation's name
     - A function performing the animation
-    - An object of CSS attributes describing the last frame of the animation
+    - An object of CSS attributes describing the last frame of the animation (using kebeb-case property names)
   @param {number} [options.duration=300]
     The duration of the animation, in milliseconds.
   @param {number} [options.delay=0]
@@ -316,7 +316,7 @@ up.motion = do ->
   @function up.morph
   @param {Element|jQuery|string} source
   @param {Element|jQuery|string} target
-  @param {Function|string} transitionOrName
+  @param {Function(oldElement, newElement)|string} transitionOrName
   @param {number} [options.duration=300]
     The duration of the animation, in milliseconds.
   @param {number} [options.delay=0]
@@ -480,7 +480,7 @@ up.motion = do ->
 
   @function up.transition
   @param {string} name
-  @param {Function} transition
+  @param {Function(oldElement, newElement, options): Promise|Array} transition
   @stable
   ###
   registerTransition = (name, transition) ->
@@ -515,7 +515,7 @@ up.motion = do ->
 
   @function up.animation
   @param {string} name
-  @param {Function} animation
+  @param {Function(element, options): Promise} animation
   @stable
   ###
   registerAnimation = (name, animation) ->

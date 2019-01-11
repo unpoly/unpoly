@@ -238,7 +238,7 @@ up.protocol = do ->
     The name of the HTTP header that will include the
     [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
     for AJAX requests.
-  @param {String|Function} [config.csrfParam]
+  @param {string|Function(): string} [config.csrfParam]
     The `name` of the hidden `<input>` used for sending a
     [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
     submitting a default, non-AJAX form. For AJAX request the token is sent as an HTTP header instead.
@@ -250,7 +250,7 @@ up.protocol = do ->
 
         <meta name="csrf-param" content="authenticity_token" />
 
-  @param {String|Function} [config.csrfToken]
+  @param {string|Function(): string} [config.csrfToken]
     The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
     to send for unsafe requests. The token will be sent as either a HTTP header (for AJAX requests)
     or hidden form `<input>` (for default, non-AJAX form submissions).

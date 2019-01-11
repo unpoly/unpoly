@@ -591,6 +591,22 @@ up.element = do ->
     return selector
 
   ###**
+  Sets an unique identifier for this element.
+
+  This identifier is used by <`up.element.toSelector()`>
+  to create a selector that matches this element precisely.
+
+  \#\#\# Example
+
+      <a href="/user/4" up-id="link-to-user-4">Open user 4</a>
+
+  @selector [up-id]
+  @param {string} [up-id]
+    A string that uniquely identifies this element.
+  @stable
+  ###
+
+  ###**
   @function up.element.isSingleton
   @internal
   ###
@@ -858,7 +874,7 @@ up.element = do ->
     The element to style.
   @param {Object} styles
     An object of CSS property names and values.
-  @return {Function}
+  @return {Function()}
     A function that restores the original inline styles when called.
   @experimental
   ###

@@ -73,11 +73,12 @@ up.link = do ->
   e = up.element
   
   ###**
-  Visits the given URL without a full page load.
-  This is done by fetching `url` through an AJAX request
-  and [replacing](/up.replace) the current `<body>` element with the response's `<body>` element.
+  Fetches this given URL with JavaScript and [replaces](/up.replace) the
+  current `<body>` element with the response's `<body>` element.
 
-  For example, this would fetch the `/users` URL:
+  \#\#\# Example
+
+  This would replace the current page with the response for `/users`:
 
       up.visit('/users')
 
@@ -95,19 +96,17 @@ up.link = do ->
     up.replace(selector, url, options)
 
   ###**
-  Follows the given link via AJAX and [replaces](/up.replace) the current page
-  with HTML from the response.
+  Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the current page with HTML from the response.
 
   By default the page's `<body>` element will be replaced.
-  If the link has an attribute like [`[up-target]`](/up-target)
-  or [`[up-modal]`](/a-up-modal), the corresponding UJS behavior will be activated
-  just as if the user had clicked on the link.
+  If the link has an attribute like <`a[up-target]`>
+  or <`a[up-modal]`>, the respective Unpoly behavior will be used.
 
-  Emits the event [`up:link:follow`](/up:link:follow).
+  Emits the event <`up:link:follow`>.
 
   \#\#\# Examples
 
-  Let's say you have a link with an [`a[up-target]`](/a-up-target) attribute:
+  Assume we have a link with an <`a[up-target]`> attribute:
 
       <a href="/users" up-target=".main">Users</a>
 
@@ -119,7 +118,7 @@ up.link = do ->
 
   @function up.follow
   @param {Element|jQuery|string} linkOrSelector
-    An element or selector which is either an `<a>` tag or any element with an `up-href` attribute.
+    An element or selector which is either an `<a>` tag or any element with an `[up-href]` attribute.
   @param {string} [options.target]
     The selector to replace.
 
@@ -153,7 +152,7 @@ up.link = do ->
   The event is emitted on the `<a>` element that is being followed.
 
   @event up:link:follow
-  @param {jQuery} event.target
+  @param {Element} event.target
     The link element that will be followed.
   @param event.preventDefault()
     Event listeners may call this method to prevent the link from being followed.
@@ -229,8 +228,8 @@ up.link = do ->
   @function up.link.addFollowVariant
   @param {string} simplifiedSelector
     A selector without `a` or `[up-href]`, e.g. `[up-target]`
-  @param {Function(jQuery, Object)} options.follow
-  @param {Function(jQuery, Object)} options.preload
+  @param {Function(element, options)} options.follow
+  @param {Function(element, options)} options.preload
   @internal
   ###
   addFollowVariant = (simplifiedSelector, options) ->
@@ -243,7 +242,7 @@ up.link = do ->
   Returns whether the given link will be handled by Unpoly instead of making a full page load.
 
   A link will be handled by Unpoly if it has an attribute
-  like `up-target` or `up-modal`.
+  like <`a[up-target]`> or <`a[up-modal]`>.
 
   @function up.link.isFollowable
   @param {Element|jQuery|string} linkOrSelector
@@ -259,8 +258,8 @@ up.link = do ->
   E.g. it wil return a handler calling `up.modal.follow` if the link is a `[up-modal]`,
   but a handler calling `up.link.follow` if the links is `[up-target]`.
 
-  @param {Element|jQuery|string}
-  @return {Function(jQuery)}
+  @param {Element} link
+  @return {Object}
   @internal
   ###
   followVariantForLink = (link, options = {}) ->
@@ -271,8 +270,8 @@ up.link = do ->
   ###**
   Makes sure that the given link will be handled by Unpoly instead of making a full page load.
 
-  This is done by giving the link an `up-follow` attribute
-  unless it already have it an attribute like `up-target` or `up-modal`.
+  This is done by giving the link an <`a[up-follow]`> attribute
+  unless it already have it an attribute like <`a[up-target]`> or <`a[up-modal]`>.
 
   @function up.link.makeFollowable
   @param {Element|jQuery|string} linkOrSelector
@@ -307,15 +306,22 @@ up.link = do ->
     up.proxy.isSafeMethod(method)
 
   ###**
-  Follows this link via AJAX and replaces a CSS selector in the current page
-  with corresponding elements from a new page fetched from the server:
+  [Follows](/up.follow this link with JavaScript and replaces a CSS selector
+  on the current page with a corresponding element from the response.
+
+  \#\#\# Example
+
+  This will update the fragment `<div class="main">` with the same element
+  fetched from `/posts/5`:
 
       <a href="/posts/5" up-target=".main">Read post</a>
 
   \#\#\# Updating multiple fragments
 
   You can update multiple fragments from a single request by separating
-  separators with a comma (like in CSS). E.g. if opening a post should
+  separators with a comma (like in CSS).
+
+  For instance, if opening a post should
   also update a bubble showing the number of unread posts, you might
   do this:
 
@@ -324,7 +330,7 @@ up.link = do ->
   \#\#\# Appending or prepending content
 
   By default Unpoly will replace the given selector with the same
-  selector from a freshly fetched page. Instead of replacing you
+  selector from the server response. Instead of replacing you
   can *append* the loaded content to the existing content by using the
   `:after` pseudo selector. In the same fashion, you can use `:before`
   to indicate that you would like the *prepend* the loaded content.
@@ -346,7 +352,7 @@ up.link = do ->
   \#\#\# Following elements that are no links
 
   You can also use `[up-target]` to turn an arbitrary element into a link.
-  In this case, put the link's destination into the `up-href` attribute:
+  In this case, put the link's destination into the `[up-href]` attribute:
 
       <button up-target=".main" up-href="/foo/bar">Go</button>
 
@@ -417,11 +423,10 @@ up.link = do ->
     preload: (link, options) -> defaultPreload(link, options)
 
   ###**
-  If applied on a link, follows this link via AJAX and replaces the
+  Fetches this link's `[href]` with JavaScript and [replaces](/up.replace) the
   current `<body>` element with the response's `<body>` element.
 
-  To only update a fragment instead of the entire page, see
-  [`a[up-target]`](/a-up-target).
+  To only update a fragment instead of the entire `<body>`, see <`a[up-target]`>.
 
   \#\#\# Example
 
@@ -478,19 +483,19 @@ up.link = do ->
   AJAX request will be triggered right way, the interaction will
   appear faster.
 
-  Note that using `[up-instant]` will prevent a user from canceling a link
-  click by moving the mouse away from the interaction area. However, for
+  Note that using `[up-instant]` will prevent a user from canceling a
+  click by moving the mouse away from the link. However, for
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown` instead of `click`.
 
-  `up-instant` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
+  `[up-instant]` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
 
   @selector a[up-instant]
   @stable
   ###
 
   ###**
-  Marks up the current link to be followed *as fast as possible*.
+  [Follows](/up.follow) this link *as fast as possible*.
 
   This is done by:
 
@@ -498,15 +503,21 @@ up.link = do ->
   - [Preloading the link's destination URL](/a-up-preload)
   - [Triggering the link on `mousedown`](/a-up-instant) instead of on `click`
 
+  \#\#\# Example
+
   Use `up-dash` like this:
 
       <a href="/users" up-dash=".main">User list</a>
 
-  Note that this is shorthand for:
+  This is shorthand for:
 
       <a href="/users" up-target=".main" up-instant up-preload>User list</a>
 
   @selector a[up-dash]
+  @param {string} [up-dash='body']
+    The CSS selector to replace
+
+    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @stable
   ###
   up.macro '[up-dash]', (element) ->
@@ -525,11 +536,13 @@ up.link = do ->
     e.setMissingAttrs(element, newAttrs)
 
   ###**
-  Add an `[up-expand]` attribute to any element that contains a link
-  in order to enlarge the link's click area.
+  Add an `[up-expand]` attribute to any element to enlarge the click area of an
+  descendant link.
 
-  `[up-expand]` honors all the UJS behavior in expanded links
-  ([`a[up-target]`](/a-up-target), [`a[up-instant]`](/a-up-instant), [`a[up-preload]`](/a-up-preload), etc.).
+  `[up-expand]` honors all the Unppoly attributes in expanded links, like
+  <`a[up-target]`>, <`a[up-instant]`> or <`a[up-preload]`>.
+  It also expands links that open [modals](/up.modal) or [popups](/up.popup).
+
 
   \#\#\# Example
 
@@ -540,8 +553,6 @@ up.link = do ->
 
   In the example above, clicking anywhere within `.notification` element
   would [follow](/up.follow) the *Close* link.
-
-  `up-expand` also expands links that open [modals](/up.modal) or [popups](/up.popup).
 
   \#\#\# Elements with multiple contained links
 
@@ -559,7 +570,7 @@ up.link = do ->
   `[up-expand]` has some limitations for advanced browser users:
 
   - Users won't be able to right-click the expanded area to open a context menu
-  - Users won't be able to CTRL+click the expanded area to open a new tab
+  - Users won't be able to `CTRL`+click the expanded area to open a new tab
 
   To overcome these limitations, consider nesting the entire clickable area in an actual `<a>` tag.
   [It's OK to put block elements inside an anchor tag](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
@@ -568,7 +579,7 @@ up.link = do ->
   @param {string} [up-expand]
     A CSS selector that defines which containing link should be expanded.
 
-    If omitted, the first contained link will be expanded.
+    If omitted, the first link in this element will be expanded.
   @stable
   ###
   up.macro '[up-expand]', (area) ->

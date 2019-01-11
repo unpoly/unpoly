@@ -232,7 +232,7 @@ up.form = do ->
   The event is emitted on the`<form>` element.
 
   @event up:form:submit
-  @param {jQuery} event.target
+  @param {Element} event.target
     The `<form>` element that will be submitted.
   @param event.preventDefault()
     Event listeners may call this method to prevent the form from being submitted.
@@ -301,12 +301,16 @@ up.form = do ->
     The number of miliseconds to wait before executing the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
-  @param {Function(value, $field)|string} onChange
+  @param {Function(value, name): string} onChange
     The callback to run when the field's value changes.
-    If given as a function, it must take two arguments (`value`, `$field`).
+
+    If given as a function, it receives two arguments (`value`, `name`).
+    `value` is a string with the new attribute value and `string` is the name
+    of the form field that changed.
+
     If given as a string, it will be evaled as JavaScript code in a context where
-    (`value`, `$field`) are set.
-  @return {Function}
+    (`value`, `name`) are set.
+  @return {Function()}
     A destructor function that removes the observe watch when called.
   @stable
   ###
@@ -337,7 +341,7 @@ up.form = do ->
     The field or form to observe.
   @param {Object} [options]
     See options for [`up.observe()`](/up.observe)
-  @return {Function}
+  @return {Function()}
     A destructor function that removes the observe watch when called.
   @stable
   ###
