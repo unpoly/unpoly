@@ -467,6 +467,8 @@ up.fragment = do ->
     if options.keep
       for keepable in oldElement.querySelectorAll('[up-keep]')
         if plan = findKeepPlan(keepable, newElement, u.merge(options, descendantsOnly: true))
+          # plan.oldElement is now keepable
+
           # Replace keepable with its clone so it looks good in a transition between
           # oldElement and newElement. Note that keepable will still point to the same element
           # after the replacement, which is now detached.
@@ -492,13 +494,13 @@ up.fragment = do ->
           partner = e.subtree(newElement, partnerSelector)[0]
         if partner && e.matches(partner, '[up-keep]')
           plan =
-            element: keepable # the element that should be kept
+            oldElement: keepable # the element that should be kept
             newElement: partner # the element that would have replaced it but now does not
             newData: up.syntax.data(partner) # the parsed up-data attribute of the element we will discard
 
           keepEventArgs =
             target: keepable
-            newFragment: partner
+            newElement: partner
             newData: plan.newData
             log: ['Keeping element %o', keepable]
 
@@ -625,7 +627,7 @@ up.fragment = do ->
     keptElements = []
     for plan in options.keepPlans
       emitFragmentKept(plan)
-      keptElements.push(plan.element)
+      keptElements.push(plan.oldElement)
     up.syntax.compile(element, skip: keptElements)
     emitFragmentInserted(element, options)
     element
@@ -652,11 +654,13 @@ up.fragment = do ->
       origin: options.origin
 
   emitFragmentKept = (keepPlan) ->
-    keptElement = keepPlan.element
-    eventAttrs = u.merge(keepPlan,
+    keptElement = keepPlan.oldElement
+    eventAttrs =
       target: keptElement,
+      newElement: keepPlan.newElement
+      newData: keepPlan.newData
       log: ['Kept fragment %o', keptElement]
-    )
+
     up.emit('up:fragment:kept', eventAttrs)
 
   emitFragmentDestroyed = (fragment, options) ->

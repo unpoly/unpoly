@@ -99,14 +99,14 @@ up.link = do ->
   Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the current page with HTML from the response.
 
   By default the page's `<body>` element will be replaced.
-  If the link has an attribute like <`a[up-target]`>
-  or <`a[up-modal]`>, the respective Unpoly behavior will be used.
+  If the link has an attribute like `a[up-target]`
+  or `a[up-modal]`, the respective Unpoly behavior will be used.
 
-  Emits the event <`up:link:follow`>.
+  Emits the event `up:link:follow`.
 
   \#\#\# Examples
 
-  Assume we have a link with an <`a[up-target]`> attribute:
+  Assume we have a link with an `a[up-target]` attribute:
 
       <a href="/users" up-target=".main">Users</a>
 
@@ -239,10 +239,11 @@ up.link = do ->
     variant
 
   ###**
-  Returns whether the given link will be handled by Unpoly instead of making a full page load.
+  Returns whether the given link will be [followed](/up.follow) by Unpoly
+  instead of making a full page load.
 
-  A link will be handled by Unpoly if it has an attribute
-  like <`a[up-target]`> or <`a[up-modal]`>.
+  A link will be followed by Unpoly if it has an attribute
+  like `a[up-target]` or `a[up-modal]`.
 
   @function up.link.isFollowable
   @param {Element|jQuery|string} linkOrSelector
@@ -268,10 +269,11 @@ up.link = do ->
     variant
 
   ###**
-  Makes sure that the given link will be handled by Unpoly instead of making a full page load.
+  Makes sure that the given link will be [followed](/up.follow)
+  by Unpoly instead of making a full page load.
 
-  This is done by giving the link an <`a[up-follow]`> attribute
-  unless it already have it an attribute like <`a[up-target]`> or <`a[up-modal]`>.
+  This is done by giving the link an `a[up-follow]` attribute
+  unless it already have it an attribute like `a[up-target]` or `a[up-modal]`.
 
   @function up.link.makeFollowable
   @param {Element|jQuery|string} linkOrSelector
@@ -426,7 +428,7 @@ up.link = do ->
   Fetches this link's `[href]` with JavaScript and [replaces](/up.replace) the
   current `<body>` element with the response's `<body>` element.
 
-  To only update a fragment instead of the entire `<body>`, see <`a[up-target]`>.
+  To only update a fragment instead of the entire `<body>`, see `a[up-target]`.
 
   \#\#\# Example
 
@@ -540,7 +542,7 @@ up.link = do ->
   descendant link.
 
   `[up-expand]` honors all the Unppoly attributes in expanded links, like
-  <`a[up-target]`>, <`a[up-instant]`> or <`a[up-preload]`>.
+  `a[up-target]`, `a[up-instant]` or `a[up-preload]`.
   It also expands links that open [modals](/up.modal) or [popups](/up.popup).
 
 

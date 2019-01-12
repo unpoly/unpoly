@@ -45,8 +45,8 @@ up.element = do ->
 
   \#\#\# Compatibility
 
-  `:has()` is supported by all Unpoly functions (like [`up.element.all()`](/up.element.all)) and
-   selectors (like [`[up-target]`](/up-target)).
+  `:has()` is supported by all Unpoly functions (like `up.element.all()`) and
+   selectors (like `a[up-target]`).
 
   As a [level 4 CSS selector](https://drafts.csswg.org/selectors-4/#relational),
   `:has()` [has yet to be implemented](https://caniuse.com/#feat=css-has)
@@ -64,7 +64,7 @@ up.element = do ->
   ###**
   Returns the first descendant element matching the given selector.
 
-  It is similar to [`element.querySelector`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector),
+  It is similar to [`element.querySelector()`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector),
   but also supports the [`:has()`](/has) selector.
 
   @function up.element.first
@@ -313,7 +313,6 @@ up.element = do ->
   If you don't need IE11 support you may also use the built-in
   [`Element#classList.toggle(className)`](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) to the same effect.
 
-
   @function up.element.toggleClass
   @param {Element} element
     The element for which to add or remove the class.
@@ -373,7 +372,7 @@ up.element = do ->
   The old element will be removed from the DOM tree.
 
   If you don't need IE11 support you may also use the built-in
-    [`Element#replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/replaceWith) to the same effect.
+  [`Element#replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/replaceWith) to the same effect.
 
   @function up.element.replace
   @param {Element} oldElement
@@ -388,7 +387,7 @@ up.element = do ->
 
   The created element will not yet be attached to the DOM tree.
   Attach it with [`Element#appendChild()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild)
-  or use [`up.element.affix()`](/up.element.affix) to create an attached element.
+  or use `up.element.affix()` to create an attached element.
 
   \#\#\# Examples
 
@@ -507,7 +506,7 @@ up.element = do ->
   Creates an element matching the given CSS selector and attaches it to the given parent element.
 
   To create a detached element from a selector,
-  see [`up.element.createFromSelector()`](/up.element.createFromSelector).
+  see `up.element.createFromSelector()`.
 
   \#\#\# Example
 
@@ -593,15 +592,35 @@ up.element = do ->
   ###**
   Sets an unique identifier for this element.
 
-  This identifier is used by <`up.element.toSelector()`>
-  to create a selector that matches this element precisely.
+  This identifier is used by `up.element.toSelector()`
+  to create a CSS selector that matches this element precisely.
+
+  If the element already has other attributes that make a good identifier,
+  like a `[id]`, `[class]` or `[aria-label]`, it is not necessary to
+  set `[up-id]`.
 
   \#\#\# Example
 
-      <a href="/user/4" up-id="link-to-user-4">Open user 4</a>
+  Take this element:
+
+      <a href="/">Homepage</a>
+
+  Unpoly cannot generate a good CSS selector for this element:
+
+      up.element.toSelector(element)
+      // returns 'a'
+
+  We can improve this by assigning an `[up-id]`:
+
+      <a href="/" up-id="link-to-home">Open user 4</a>
+
+  The attribute value is used to create a better selector:
+
+      up.element.toSelector(element)
+      // returns '[up-id="link-to-home"]'
 
   @selector [up-id]
-  @param {string} [up-id]
+  @param {string} up-id
     A string that uniquely identifies this element.
   @stable
   ###

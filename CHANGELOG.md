@@ -68,6 +68,12 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   - { $element } etc. is now just { target }
   - no longer logs by default. you can enable the old efault message with { log: true } option
 
+- uses native events that can be received with addEventListener. Use event.originalEvent if you use jQuery.
+
+- up:element:keep properties have been renamed
+- up:element:kept properties have been renamed
+- no event has a property `event.$target` or `event.$element` anymore. Use the standard `event.target` instead.
+
 
 ### Custom JavaScript
 
