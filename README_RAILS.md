@@ -110,7 +110,7 @@ Development
 
 ### Before you make a PR
 
-Before you make a PR, please have some discussion about the proposed change by [opening an issue on Github](https://github.com/unpoly/unpoly/issues/new).
+Before you make a PR, please have some discussion about the proposed change by [opening an issue on GitHub](https://github.com/unpoly/unpoly/issues/new).
 
 ### Running tests
 

@@ -308,10 +308,10 @@ up.feedback = do ->
   - the link's `up-href` attribute
   - a space-separated list of URLs in the link's `up-alias` attribute
 
-  \#\#\# Matching URL by prefix
+  \#\#\# Matching URL by prefix or suffix
 
-  You can mark a link as `.up-current` whenever the current URL matches a prefix.
-  To do so, end the `up-alias` attribute in an asterisk (`*`).
+  You can mark a link as `.up-current` whenever the current URL matches a prefix or suffix.
+  To do so, include an asterisk (`*`) in the `up-alias` attribute.
 
   For instance, the following `[up-nav]` link is highlighted for both `/reports` and `/reports/123`:
 

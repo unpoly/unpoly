@@ -868,7 +868,7 @@ up.element = do ->
     The attribute name.
   @return {Object|undefined}
     The cast attribute value.
-  @external
+  @experimental
   ###
   jsonAttr = (element, attribute) ->
     # The document does not respond to #getAttribute()
@@ -929,6 +929,33 @@ up.element = do ->
     style = window.getComputedStyle(element)
     extractFromStyleObject(style, props)
 
+  ###**
+  Receives a [computed CSS property value](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
+  for the given element, casted as a number.
+
+  The value is casted by removing the property's [unit](https://www.w3schools.com/cssref/css_units.asp) (which is usually `px` for computed properties).
+  The result is then parsed as a floating point number.
+
+  Returns `undefined` if the property value is missing, or if it cannot
+  be parsed as a number.
+
+  \#\#\# Examples
+
+  When requesting a single CSS property, its value will be returned as a string:
+
+      value = up.element.style(element, 'font-size')
+      // value is '16px'
+
+      value = up.element.styleNumber(element, 'font-size')
+      // value is 16
+
+  @function up.element.styleNumber
+  @param {jQuery|Element} element
+  @param {String} prop
+    A single property name in kebab-case or camelCase.
+  @return {number|undefined}
+  @experimental
+  ###
   computedStyleNumber = (element, prop) ->
     rawValue = computedStyle(element, prop)
     if u.isGiven(rawValue)

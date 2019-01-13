@@ -22,36 +22,34 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 - New module up.element
   - explain that they can replace jQuery and enable cross-browser DOM API
-  - functions
-    - [`up.element.first()`](/up.element.first)
-    - [`up.element.all()`](/up.element.all)
-    - [`up.element.subtree()`](/up.element.subtree)
-    - [`up.element.closest()`](/up.element.closest)
-    - [`up.element.matches()`](/up.element.matches)
-    - [`up.element.get()`](/up.element.get)
-    - [`up.element.list()`](/up.element.list)
-    - [`up.element.remove()`](/up.element.remove)
-    - [`up.element.toggle()`](/up.element.toggle)
-    - [`up.element.toggleClass()`](/up.element.toggleClass)
-    - [`up.element.hide()`](/up.element.hide)
-    - [`up.element.show()`](/up.element.show)
-    - [`up.element.setAttrs()`](/up.element.setAttrs)
-    - [`up.element.replace()`](/up.element.replace)
-    - [`up.element.createFromSelector()`](/up.element.createFromSelector)
-    - [`up.element.setAttrs()`](/up.element.setAttrs)
-    - [`up.element.affix()`](/up.element.affix)
-    - [`up.element.toSelector()`](/up.element.toSelector)
-    - [`up.element.createFromHtml()`](/up.element.createFromHtml)
-    - ## [`up.element.presentAttr()`](/up.element.presentAttr)
-    - [`up.element.booleanAttr()`](/up.element.booleanAttr)
-    - [`up.element.numberAttr()`](/up.element.numberAttr)
-    - [`up.element.jsonAttr()`](/up.element.jsonAttr)
-    - [`up.element.setTemporaryStyle()`](/up.element.setTemporaryStyle)
-    - [`up.element.style()`](/up.element.style)
-    - [`up.element.styleNumber()`](/up.element.styleNumber)
-    - [`up.element.setStyle()`](/up.element.setStyle)
-    - [`up.element.isVisible()`](/up.element.isVisible)
-    - [`:has() selector`](/has)
+  - function
+    - `up.element.first()`
+    - `up.element.all()`
+    - `up.element.subtree()`
+    - `up.element.closest()`
+    - `up.element.matches()`
+    - `up.element.get()`
+    - `up.element.remove()`
+    - `up.element.toggle()`
+    - `up.element.toggleClass()`
+    - `up.element.hide()`
+    - `up.element.show()`
+    - `up.element.setAttrs()`
+    - `up.element.replace()`
+    - `up.element.createFromSelector()`
+    - `up.element.setAttrs()`
+    - `up.element.affix()`
+    - `up.element.toSelector()`
+    - `up.element.createFromHtml()`
+    - `up.element.booleanAttr()`
+    - `up.element.numberAttr()`
+    - `up.element.jsonAttr()`
+    - `up.element.setTemporaryStyle()`
+    - `up.element.style()`
+    - `up.element.styleNumber()`
+    - `up.element.setStyle()`
+    - `up.element.isVisible()`
+    - `:has()` selector
 
 
 ### Events

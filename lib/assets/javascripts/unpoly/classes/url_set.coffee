@@ -8,17 +8,22 @@ class up.UrlSet
     @urls = u.compact(@urls)
 
   matches: (testUrl) =>
-    if testUrl.substr(-1) == '*'
-      @doesMatchPrefix(testUrl.slice(0, -1))
+    if testUrl.indexOf('*') >= 0
+      @doesMatchPattern(testUrl)
     else
       @doesMatchFully(testUrl)
 
   doesMatchFully: (testUrl) =>
     u.contains(@urls, testUrl)
 
-  doesMatchPrefix: (prefix) =>
-    u.detect @urls, (url) ->
-      url.indexOf(prefix) == 0
+  doesMatchPattern: (pattern) =>
+    placeholder = "__ASTERISK__"
+    pattern = pattern.replace(/\*/g, placeholder)
+    pattern = u.escapeRegexp(pattern)
+    pattern = pattern.replace(new RegExp(placeholder, 'g'), '.*?')
+    pattern = new RegExp('^' + pattern + '$')
+
+    u.detect @urls, (url) -> pattern.test(url)
 
   matchesAny: (testUrls) =>
     u.detect(testUrls, @matches)

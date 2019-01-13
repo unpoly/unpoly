@@ -134,6 +134,26 @@ describe 'up.feedback', ->
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
+      it 'marks URL prefixes as .up-current if an up-alias has multiple * placeholders', ->
+        up.history.replace('/a-foo-b-bar-c')
+
+        $nav = $fixture('div[up-nav]')
+        $currentLink = $nav.affix('a[href="/x"][up-alias="*-foo-*-bar-*"]')
+        $otherLink1 = $nav.affix('a[href="/y"][up-alias="/foo-bar"]')
+        $otherLink2 = $nav.affix('a[href="/y"][up-alias="/foo-b-bar"]')
+        $otherLink3 = $nav.affix('a[href="/y"][up-alias="/a-foo-b-bar"]')
+        $otherLink4 = $nav.affix('a[href="/y"][up-alias="/foo-b-bar-c"]')
+        $otherLink5 = $nav.affix('a[href="/y"][up-alias="/a-foo-b-bar-c-d"]')
+        up.hello($nav)
+
+        expect($currentLink).toHaveClass('up-current')
+        expect($otherLink1).not.toHaveClass('up-current')
+        expect($otherLink2).not.toHaveClass('up-current')
+        expect($otherLink3).not.toHaveClass('up-current')
+        expect($otherLink4).not.toHaveClass('up-current')
+        expect($otherLink5).not.toHaveClass('up-current')
+
+
       it 'allows to configure a custom "current" class in addition to .up-current', ->
         up.feedback.config.currentClasses.push('highlight')
         up.history.replace('/foo')
