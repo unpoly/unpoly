@@ -30,4 +30,3 @@ up.submit = up.form.submit
 window.up = up
 
 export default up
-
