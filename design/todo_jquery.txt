@@ -1,4 +1,4 @@
-- if animations/transitions require kebab-case, we can get rid of all transformations!
+- how do we document up.Request and up.Params
 
 - re-test on all browsers
 
@@ -34,3 +34,6 @@
 - upgrade roca-style.org PR
   - better claim
   - no jquery
+
+- https://unpoly.com/up.util.parseUrl
+  - https://makandracards.com/makandra/29377-the-easiest-way-to-parse-urls-with-javascript

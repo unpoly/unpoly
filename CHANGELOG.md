@@ -9,7 +9,10 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 0.60.0
 ------
 
+### jQuery is no longer required
+
 - jQuery no longer required
+  - now zero dependencies
   - performance considerations
   - saves you 30 KB of bundle size
   - Migration
@@ -19,6 +22,9 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
     - instead of up.on, use up.$on
     - when you use $.fn.on to listen to an Unpoly event (`up:` prefix) and access custom properties
       - use event.originalEvent (or bind with addEventListener or up.on instead)
+
+
+### New DOM helpers
 
 - New module up.element
   - explain that they can replace jQuery and enable cross-browser DOM API
@@ -67,22 +73,31 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   - no longer logs by default. you can enable the old efault message with { log: true } option
 
 - uses native events that can be received with addEventListener. Use event.originalEvent if you use jQuery.
-
-- up:element:keep properties have been renamed
-- up:element:kept properties have been renamed
 - no event has a property `event.$target` or `event.$element` anymore. Use the standard `event.target` instead.
+
+
+### Fragment update API
+
+- `up:fragment:keep` event properties have been renamed
+- `up:fragment:kept` properties have been renamed
+- `up:fragment:inserted` properties have been renamed
 
 
 ### Custom JavaScript
 
-- up.compiler now yields a native Element instead of a jQuery collection, for the old behavior, use up.$compiler
-- up.macro now yields a native Element instead of a jQuery collection, for the old behavior, use up.$macro
+- The `up.compiler()` callback now receives a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$compiler()`.
+- The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$macro()`.
 
 
 ### Request parameters
 
 - Experimental up.params module has been completely rewritten. It is now the up.Params class.
   - List all up.Params methods
+
+
+### AJAX acceleration
+
+- `up:link:preload` event properties have been renamed
 
 
 ### Popups
@@ -167,15 +182,9 @@ up.layout has been renamed to up.viewport. Future: up.thing.verb()
 
 - new experimental up.viewport functions
   - up.viewport.closest
-  - up.viewport.subtree
-  - up.viewport.all
   - up.viewport.root
   - up.viewport.rootWidth
   - up.viewport.rootHeight
-  - up.viewport.rootHasVerticalScrollbar
-  - up.viewport.scrollbarWidth
-  - up.viewport.rootOverflowElement
-  - up.viewport.isRoot
 
 
 ### Performance

@@ -599,7 +599,7 @@ up.proxy = do ->
     link = e.get(linkOrSelector)
 
     if up.link.isSafe(link)
-      preloadEventAttrs = { log: ['Preloading link %o', link], target: link, link: link }
+      preloadEventAttrs = { log: ['Preloading link %o', link], target: link }
       up.event.whenEmitted('up:link:preload', preloadEventAttrs).then ->
         variant = up.link.followVariantForLink(link)
         variant.preloadLink(link, options)
@@ -610,7 +610,7 @@ up.proxy = do ->
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
 
   @event up:link:preload
-  @param {jQuery} event.link
+  @param {Element} event.target
     The link element that will be preloaded.
   @param event.preventDefault()
     Event listeners may call this method to prevent the link from being preloaded.

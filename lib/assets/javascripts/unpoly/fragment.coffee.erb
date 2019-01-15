@@ -586,9 +586,9 @@ up.fragment = do ->
   and `event.newData` and then modify the preserved element when necessary.
 
   @event up:fragment:kept
-  @param {jQuery} event.$element
+  @param {Element} event.target
     The fragment that has been kept.
-  @param {jQuery} event.$newElement
+  @param {Element} event.newElement
     The discarded element.
   @param {Object} event.newData
     The value of the [`up-data`](/up-data) attribute of the discarded element,
@@ -617,7 +617,7 @@ up.fragment = do ->
   @param {string|Element|jQuery} selectorOrElement
   @param {string|Element|jQuery} [options.origin]
   @param {string|Element|jQuery} [options.kept]
-  @return {jQuery}
+  @return {Element}
     The compiled element
   @stable
   ###
@@ -643,7 +643,7 @@ up.fragment = do ->
       });
 
   @event up:fragment:inserted
-  @param {jQuery} event.$element
+  @param {Element} event.target
     The fragment that has been inserted or updated.
   @stable
   ###
@@ -756,8 +756,8 @@ up.fragment = do ->
 #  @param {string} [options.layer]
 #    The name of the layer in which to find the element. Valid values are
 #    `'page'`, `'modal'` and `'popup'`.
-#  @return {jQuery}
-#    A jQuery collection of matching elements.
+#  @return {List<Element>}
+#    A list of matching elements.
 #  @experimental
 #  ###
 #  all = (selector, options) ->

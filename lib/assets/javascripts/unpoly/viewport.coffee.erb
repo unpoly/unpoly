@@ -291,12 +291,12 @@ up.viewport = do ->
   ###**
   Returns the viewport for the given element.
 
-  Returns the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement)
+  Returns the [document's scrolling element](/up.viewport.root)
   if no closer viewpoint exists.
 
   @function up.viewport.closest
   @param {string|Element|jQuery} selectorOrElement
-  @return {jQuery}
+  @return {Element}
   @internal
   ###
   closest = (selectorOrElement) ->
@@ -329,13 +329,6 @@ up.viewport = do ->
   getAll = ->
     e.all(allSelector())
 
-  ###**
-  Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
-  for the browser's main content area.
-
-  @function up.viewport.rootSelector
-  @internal
-  ###
   rootSelector = ->
     # The spec says this should be <html> in standards mode
     # and <body> in quirks mode. However, it is currently (2018-07)
@@ -347,6 +340,14 @@ up.viewport = do ->
       # IE11
       'html'
 
+  ###**
+  Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
+  for the browser's main content area.
+
+  @function up.viewport.root
+  @return {Element}
+  @internal
+  ###
   getRoot = ->
     document.querySelector(rootSelector())
 

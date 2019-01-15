@@ -81,7 +81,7 @@ class up.MotionController
 
   ###**
   @method finish
-  @param {jQuery} [elements]
+  @param {List<Element>} [elements]
     If no element is given, finishes all animations in the documnet.
     If an element is given, only finishes animations in its subtree and ancestors.
   @return {Promise} A promise that is fulfilled when animations have finished.
