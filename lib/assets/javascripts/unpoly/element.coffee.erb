@@ -177,7 +177,7 @@ up.element = do ->
   - If given any other argument (`undefined`, `null`, `document`, `window`…), returns the argument unchanged.
 
   @function up.element.get
-  @param {jQuery|Element|String} value
+  @param {Element|jQuery|string} value
     The value to cast.
   @return {Element}
     The obtained `Element`.
@@ -919,7 +919,7 @@ up.element = do ->
       // value is { 'font-size': '16px', 'margin-top': '10px' }
 
   @function up.element.style
-  @param {jQuery|Element} element
+  @param {Element} element
   @param {String|Array} propOrProps
     One or more CSS property names in kebab-case or camelCase.
   @return {string|object}
@@ -950,7 +950,7 @@ up.element = do ->
       // value is 16
 
   @function up.element.styleNumber
-  @param {jQuery|Element} element
+  @param {Element} element
   @param {String} prop
     A single property name in kebab-case or camelCase.
   @return {number|undefined}
@@ -967,7 +967,7 @@ up.element = do ->
   Gets the given inline style(s) from the given element's `[style]` attribute.
 
   @function up.element.inlineStyle
-  @param {jQuery|Element} element
+  @param {Element} element
   @param {String|Array} propOrProps
     One or more CSS property names in kebab-case or camelCase.
   @return {string|object}
@@ -987,7 +987,7 @@ up.element = do ->
   Sets the given CSS properties as inline styles on the given element.
 
   @function up.element.setStyle
-  @param {jQuery|Element} element
+  @param {Element} element
   @param {Object} props
     One or more CSS properties with kebab-case keys or camelCase keys.
   @return {string|object}
@@ -1065,7 +1065,7 @@ up.element = do ->
   Elements not attached to the DOM are considered hidden.
 
   @function up.element.isVisible
-  @param {Element|string|jQuery} element
+  @param {Element} element
     The element to check.
   @experimental
   ###

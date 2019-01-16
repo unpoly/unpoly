@@ -25,7 +25,7 @@ class up.Params
   Constructs a new `up.Params` instance.
 
   @constructor up.Params
-  @param {up.Params|Object|Array|string} [params]
+  @param {Object|Array|string|up.Params} [params]
     An existing list of params with which to initialize the new `up.Params` object.
 
     The given params value may be of any [supported type](/up.params).
@@ -140,7 +140,7 @@ class up.Params
 
       // query is now: 'foo=bar&baz=bam'
 
-  @function up.params.toQuery
+  @function up.Params#toQuery
   @param {Object|FormData|string|Array|undefined} params
     the params to convert
   @return {string}
@@ -177,7 +177,18 @@ class up.Params
     u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value)
 
   ###**
-  TODO: Document me for experimental API
+  Builds an URL string from the given base URL and
+  this `up.Params` object as a [query string](/up.Params.toString).
+
+  The base URL may or may not already contain a query string. The
+  additional query string will be joined with an `&` or `?` character accordingly.
+
+  @function up.Params#toURL
+  @param {string} base
+    The base URL that will be prepended to this `up.Params` object as a [query string](/up.Params.toString).
+  @return {string}
+    The built URL.
+  @experimental
   ###
   toURL: (base) ->
     parts = [base, @toQuery()]
@@ -186,31 +197,37 @@ class up.Params
     parts.join(separator)
 
   ###**
-  Adds to the given `params` a new  entry with the given `name` and `value`.
+  Adds a new entry with the given `name` and `value`.
 
-  The given params value may be of any [supported type](/up.params).
-
-  The given `params` value is changed in-place, if possible. Some types, such as query strings,
-  cannot be changed in-place. The return value is always a params value that includes the new entry.
+  An `up.Params` instance can hold multiple entries with the same name.
+  To overwrite all existing entries with the given `name`, use `up.Params#set()` instead.
 
   \#\#\# Example
 
-      var obj = { foo: 'bar' }
-      up.params.add(obj, 'baz', 'bam')
-      // obj is now: { foo: 'bar', baz: 'bam' }
+      var params = new up.Params()
+      params.add('foo', 'fooValue')
 
-  @function up.params.add
-  @param {string|object|FormData|Array|undefined} params
+      var foo = params.get('foo')
+      // foo is now 'fooValue'
+
+  @function up.Params#add
   @param {string} name
+    The name of the new entry.
   @param {any} value
-  @return {string|object|FormData|Array}
+    The value of the new entry.
   @experimental
   ###
   add: (name, value) ->
     @entries.push({name, value})
 
   ###**
-  TODO: Document me
+  Adds all entries from the given list of params.
+
+  The given params value may be of any [supported type](/up.params).
+
+  @function up.Params#addAll
+  @param {Object|Array|string|up.Params|undefined} params
+  @experimental
   ###
   addAll: (raw) ->
     if u.isMissing(raw)
@@ -255,14 +272,29 @@ class up.Params
       @add(value...)
 
   ###**
-  TODO: Document me
+  Sets the `value` for the entry with given `name`.
+
+  An `up.Params` instance can hold multiple entries with the same name.
+  All existing entries with the given `name` are [deleted](/up.Params#delete) before the
+  new entry is set. To add a new entry even if the `name` is taken, use `up.Params#add()`.
+
+  @function up.Params#set
+  @param {string} name
+    The name of the entry to set.
+  @param {any} value
+    The new value of the entry.
+  @experimental
   ###
   set: (name, value) ->
     @delete(name)
     @add(name, value)
 
   ###**
-  TODO: Document me
+  Deletes all entries with the given `name`.
+
+  @function up.Params#delete
+  @param {string} name
+  @experimental
   ###
   delete: (name) ->
     @entries = u.reject(@entries, @matchEntryFn(name))
@@ -273,19 +305,32 @@ class up.Params
   ###**
   Returns the first param value with the given `name` from the given `params`.
 
-  The given params value may be of any [supported type](/up.params).
+  Returns `undefined` if no param value with that name is set.
+
+  If the `name` denotes an array field (e.g. `foo[]`), *all* param values with the given `name`
+  are returned as an array. If no param value with that array name is set, an empty
+  array is returned.
+
+  To always return a single value use `up.Params#getFirst()` instead.
+  To always return an array of values use `up.Params#getAll()` instead.
 
   \#\#\# Example
 
-      var array = [
-        { name: 'foo', value: 'bar' },
-        { name: 'baz', value: 'bam' }
-      }
+      var params = new up.Params({ foo: 'fooValue', bar: 'barValue' })
+      var params = new up.Params([
+        { name: 'foo', value: 'fooValue' }
+        { name: 'bar[]', value: 'barValue1' }
+        { name: 'bar[]', value: 'barValue2' })
+      ]})
 
-      value = up.params.get(array, 'baz')
-      // value is now: 'bam'
+      var foo = params.get('foo')
+      // foo is now 'fooValue'
 
-  @function up.params.get
+      var bar = params.get('bar')
+      // bar is now ['barValue1', 'barValue2']
+
+  @function up.Params#get
+  @param {string} name
   @experimental
   ###
   get: (name) ->
@@ -295,14 +340,26 @@ class up.Params
       @getFirst(name)
 
   ###**
-  TODO: Document me
+  Returns the first param value with the given `name` from the given `params`.
+
+  Returns `undefined` if no param value with that name is set.
+
+  @function up.Params#getAll
+  @param {string} name
+  @return {any}
+    The value of the param with the given name.
   ###
   getFirst: (name) ->
     entry = u.detect(@entries, @matchEntryFn(name))
     entry?.value
 
   ###**
-  TODO: Document me
+  Returns the first param value with the given `name` from the given `params`.
+
+  @function up.Params#getAll
+  @param {string} name
+  @return {any}
+    The value of the param with the iven name
   ###
   getAll: (name) ->
     if @isArrayKey(name)
@@ -387,7 +444,18 @@ class up.Params
     params
 
   ###**
-  TODO: Document me
+  Adds params from the given [HTML form element](https://www.w3schools.com/html/html_form_elements.asp)
+  to this `up.Params` instance.
+
+  - All `<input>` types are suppported
+  - Field values are usually strings, but an `<input type="file">` will produce
+    [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) values.
+  - If passed a `<select multiple>` or `<input type="file" multiple>`, all selected values are added.
+  - An `<input type="radio">` or `<input type="checkbox">` will only be added if they are `[checked]`.
+  - Fields that are `[disabled]` are ignored
+  - Fields without a `[name]` attribute are ignored.
+
+  @function
   ###
   addField: (field) ->
     params = new @constructor()
@@ -409,26 +477,18 @@ class up.Params
       else
         @add(name, field.value)
 
-  ###**
-  TODO: Document me
-  ###
   "#{u.isEqual.key}": (other) ->
     other && (@constructor == other.constructor) && u.isEqual(@entries, other.entries)
 
   ###**
-  Returns the [query string](https://en.wikipedia.org/wiki/Query_string) from the given URL.
-
-  The query string is returned **without** a leading question mark (`?`).
-  Returns `undefined` if the given URL has no query component.
-
-  You can access individual values from the returned query string using functions like
-  [`up.params.get()`](/up.params.get) or [`up.params.toObject()`](/up.params.toObject).
+  Constructs a new `up.Params` instance from the given URL's
+  [query string](https://en.wikipedia.org/wiki/Query_string).
 
   \#\#\# Example
 
-      var query = up.params.fromURL('http://foo.com?bar=baz')
-
-      // query is now: 'bar=baz'
+      var params = up.Params.fromURL('http://foo.com?foo=fooValue&bar=barValue')
+      var foo = params.get('foo')
+      // foo is now: 'fooValue'
 
   @function up.params.fromURL
   @param {string} url

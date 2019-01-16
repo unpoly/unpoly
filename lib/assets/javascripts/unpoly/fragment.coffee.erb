@@ -681,12 +681,34 @@ up.fragment = do ->
 
   Returns `undefined` if no element matches these conditions.
 
-  Also see the [`.up-destroying`](/up-destroying) class.
+  \#\#\# Example
+
+  To select the first element with the selector `.foo`:
+
+      var fooInModal = up.fragment.first('.foo')
+
+  You may also pass a `{ layer }` option to only match elements witin a layer:
+
+      var fooInModal = up.fragment.first('.foo', { layer: 'modal' })
+
+  You may also pass a root element as a first argument:
+
+      var container = up.fragment.first('.container')
+      var fooInContainer = up.fragment.first(container, '.foo')
+
+  \#\#\# Similar features
+
+  - The [`.up-destroying`](/up-destroying) class is assigned to elements during their removal animation.
+  - The [`up.element.first()`](/up.element.first) function simply returns the first element matching a selector
+    without further filtering.
 
   @function up.fragment.first
-  @param {Element|jQuery} [parent=document]
-  @param {Element|jQuery} selector
+  @param {Element|jQuery} [root=document]
+    The root element for the search. Only the root's children will be matched.
+
+    May be omitted to search through all elements in the `document`.
   @param {string} selector
+    The selector to match
   @param {string} [options.layer='auto']
     The name of the layer in which to find the element.
 
@@ -696,7 +718,7 @@ up.fragment = do ->
 
         $input = $('input.email');
         up.fragment.first('.field:has(&)', { origin: $input }); // returns the .field containing $input
-  @return {jQuery|undefined}
+  @return {Element|undefined}
     The first element that is neither a ghost or being destroyed,
     or `undefined` if no such element was found.
   @experimental
@@ -704,15 +726,15 @@ up.fragment = do ->
   first = (args...) ->
     options = u.extractOptions(args)
     selector = args.pop()
-    parent = args[0] || document
+    root = args[0] || document
     layer = options.layer ? 'auto'
     origin = options.origin
 
     selector = e.resolveSelector(selector, origin)
     if layer == 'auto'
-      firstInPriority(parent, selector, origin)
+      firstInPriority(root, selector, origin)
     else
-      firstInLayer(parent, selector, layer)
+      firstInLayer(root, selector, layer)
 
   firstInPriority = (parent, selector, origin) ->
     layers = ['popup', 'modal', 'page']
