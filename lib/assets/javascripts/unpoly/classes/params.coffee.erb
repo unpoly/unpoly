@@ -12,7 +12,7 @@ This module offers a consistent API to read and manipulate request parameters in
 The following types of parameters are supported:
 
 1. An object like `{ email: 'foo@bar.com' }`
-2. A query string like `email=foo%40bar.com`
+2. A query string like `'email=foo%40bar.com'`
 3. An array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
 2. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
    On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
@@ -22,46 +22,50 @@ The following types of parameters are supported:
 class up.Params
 
   ###**
-  TODO: Document me
+  Constructs a new `up.Params` instance.
+
+  @constructor up.Params
+  @param {up.Params|Object|Array|string} [params]
+    An existing list of params with which to initialize the new `up.Params` object.
+
+    The given params value may be of any [supported type](/up.params).
+  @return {up.Params}
+  @experimental
   ###
   constructor: (raw) ->
     @clear()
     @addAll(raw)
 
   ###**
-  TODO: Document me
+  Removes all params from this object.
+
+  @method up.Params#clear
+  @experimental
   ###
   clear: ->
     @entries = []
 
-  ###**
-  TODO: Document me
-  ###
   "#{u.copy.key}": ->
     new up.Params(@)
 
   ###**
-  Returns an object representation of the given `params`.
+  Returns an object representation of this `up.Params` instance.
 
-  The given params value may be of any [supported type](/up.params).
-
-  The returned value is a simple JavaScript object whose properties correspond
-  to the key/values in the given `params`.
+  The returned value is a simple JavaScript object with properties
+  that correspond to the key/values in the given `params`.
 
   \#\#\# Example
 
-      var object = up.params.toObject('foo=bar&baz=bam')
+      var params = new up.Params('foo=bar&baz=bam')
+      var object = params.toObject()
 
       // object is now: {
       //   foo: 'bar',
       //   baz: 'bam'
       // ]
 
-  @function up.params.toObject
-  @param {Object|FormData|string|Array|undefined} params
-    the params to convert
-  @return {Array}
-    an object representation of the given params
+  @function up.Params#toObject
+  @return {Object}
   @experimental
   ###
   toObject: ->
@@ -77,28 +81,42 @@ class up.Params
     obj
 
   ###**
-  TODO: Document me
+  Returns an array representation of this `up.Params` instance.
+
+  The returned value is a JavaScript array with elements that are objects with
+  `{ key }` and `{ value }` properties.
+
+  \#\#\# Example
+
+      var params = new up.Params('foo=bar&baz=bam')
+      var array = up.params.toArray()
+
+      // array is now: [
+      //   { name: 'foo', value: 'bar' },
+      //   { name: 'baz', value: 'bam' }
+      // ]
+
+  @function up.Params#toArray
+  @return {Array}
+  @experimental
   ###
   toArray: ->
     @entries
 
   ###**
-  Returns [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given `params`.
-
-  The given params value may be of any [supported type](/up.params).
+  Returns a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation
+  of this `up.Params` instance.
 
   \#\#\# Example
 
-      var formData = up.params.toFormData('foo=bar&baz=bam')
+      var params = new up.Params('foo=bar&baz=bam')
+      var formData = params.toFormData()
 
       formData.get('foo') // 'bar'
       formData.get('baz') // 'bam'
 
-  @function up.params.toFormData
-  @param {Object|FormData|string|Array|undefined} params
-    the params to convert
+  @function up.Params#toFormData
   @return {FormData}
-    a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of the given params
   @experimental
   ###
   toFormData: ->
@@ -109,9 +127,7 @@ class up.Params
     formData
 
   ###**
-  Returns an query string for the given `params`.
-
-  The given params value may be of any [supported type](/up.params).
+  Returns an [query string](https://en.wikipedia.org/wiki/Query_string) for this `up.Params` instance.
 
   The keys and values in the returned query string will be [percent-encoded](https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding).
   Non-primitive values (like [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) will be omitted from
@@ -119,7 +135,8 @@ class up.Params
 
   \#\#\# Example
 
-      var query = up.params.toQuery({ foo: 'bar', baz: 'bam' })
+      var params = new up.Params({ foo: 'bar', baz: 'bam' })
+      var query = params.toQuery()
 
       // query is now: 'foo=bar&baz=bam'
 
@@ -152,6 +169,9 @@ class up.Params
 
   We will have `File` values in our params when we serialize a form with a file input.
   These entries will be filtered out when converting to a query string.
+
+  @function up.Params#isPrimitiveValue
+  @internal
   ###
   isPrimitiveValue: (value) ->
     u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value)

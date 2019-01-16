@@ -1,10 +1,15 @@
-- how do we document up.Request and up.Params
-
 - re-test on all browsers
 
 - Update docs
 
+  - how do we document up.Request and up.Params
+
+  - remove existing breadcrumbs where the side nav gives enough context
+    - or make them only visible on narrow?
+
   - Write CHANGELOG from diff
+    - migration guide
+      - jquery event listeners need to use addEventListener or use event.originalEvent
 
   - publish up.element
     - also :has()
@@ -22,14 +27,7 @@
   - check if we can publish new functions
   - check if we can more up.viewport functions
 
-  - unpoly.com
-    - remove mentions of jquery from unpoly.com
-      - "no dependencies"
-      - installtion guide
-    - migration guide
-      - jquery event listeners need to use addEventListener or use event.originalEvent
-    - redirect /up.layout to /up.viewport
-    - redirect /up.dom to /up.fragment
+- rc CFP
 
 - upgrade roca-style.org PR
   - better claim
@@ -37,3 +35,4 @@
 
 - https://unpoly.com/up.util.parseUrl
   - https://makandracards.com/makandra/29377-the-easiest-way-to-parse-urls-with-javascript
+

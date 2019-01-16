@@ -97,6 +97,10 @@ class up.Response extends up.Record
       'title',
     ]
 
+  ###**
+  @constructor
+  @internal
+  ###
   constructor: (options) ->
     super(options)
 

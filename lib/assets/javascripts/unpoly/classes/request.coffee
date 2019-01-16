@@ -83,8 +83,19 @@ class up.Request extends up.Record
     ]
 
   ###**
+  Creates a new `up.Request` object.
+
+  This will not actually send the request over the network. For that use `up.request()`.
+
   @constructor up.Request
-  @param {string} [attributes]
+  @param {string} attrs.url
+  @param {string} [attrs.method='get']
+  @param {up.Params|string|Object|Array} [attrs.params]
+  @param {string} [attrs.target]
+  @param {string} [attrs.failTarget]
+  @param {Object<string, string>} [attrs.headers]
+  @param {number} [attrs.timeout]
+  @internal
   ###
   constructor: (options) ->
     up.legacy.fixKey(options, 'data', 'params')
