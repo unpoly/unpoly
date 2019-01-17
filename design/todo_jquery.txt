@@ -2,32 +2,27 @@
 
 - Update docs
 
-  - how do we document up.Request and up.Params
-
-  - remove existing breadcrumbs where the side nav gives enough context
-    - or make them only visible on narrow?
+  - make existing breadcrumbs only visible on narrow
 
   - Write CHANGELOG from diff
     - migration guide
       - jquery event listeners need to use addEventListener or use event.originalEvent
 
-  - publish up.element
-    - also :has()
-
   - check if the main entries for renamed modules still work with their new focus
     - up.fragment
     - up.layout
+    - up.element
 
   - API comments
+    - grep for TODO
     - Examples with $
     - Stuff like @param {jQuery} $element (basically "$" everywhere)
     - Stuff like @param {jQuery} event.link
-    - document new stuff like up.$compiler
 
-  - check if we can publish new functions
-  - check if we can more up.viewport functions
 
-  - rename up-position to up-side and { position } to { side }
+- PUBLISH
+
+- deploy cards with new version
 
 - rc CFP
 
@@ -35,6 +30,6 @@
   - better claim
   - no jquery
 
-- https://unpoly.com/up.util.parseUrl
+- Update card with https://unpoly.com/up.util.parseUrl
   - https://makandracards.com/makandra/29377-the-easiest-way-to-parse-urls-with-javascript
 

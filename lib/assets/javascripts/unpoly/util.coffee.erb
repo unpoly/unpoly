@@ -511,8 +511,12 @@ up.util = do ->
       Array.prototype.slice.call(value)
 
   ###***
-  Returns whether the given value is an `Array`, a
-  [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList) or a jQuery collection.
+  Returns whether the given argument is an array-like value.
+
+  Return true for `Array`, a
+  [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList),
+   the [arguments object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments)
+   or a jQuery collection.
 
   Use [`up.util.isArray()`](/up.util.isArray) to test whether a value is an actual `Array`.
 
@@ -554,7 +558,7 @@ up.util = do ->
   @function up.util.isArguments
   @param value
   @return {Boolean}
-  @experimental
+  @internal
   ###
   isArguments = (value) ->
     Object.prototype.toString.call(value) == '[object Arguments]'
@@ -712,10 +716,10 @@ up.util = do ->
 
   ###**
   Consecutively calls the given function which each element
-  in the given array. Return the first truthy return value.
+  in the given array. Returns the first truthy return value.
 
   Returned `undefined` iff the function does not return a truthy
-  value for all elements in the array.
+  value for any element in the array.
 
   @function up.util.detectResult
   @param {Array} array
@@ -1221,9 +1225,13 @@ up.util = do ->
     flattened
 
   ###**
-  TODO: Document me
+  Maps each element using a mapping function,
+  then flattens the result into a new array.
 
   @function up.util.flatMap
+  @param {Array} array
+  @param {Function(element)} mapping
+  @return {Array}
   @experimental
   ###
   flatMap = (array, block) ->

@@ -62,7 +62,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 - up.bus has been renamed to up.event. Future up.thing.verb()
 
-- up.on() can now bind to one or more elements
+- up.on() can now bind to one or more elements. Use it for event delegation.
 
 - up.on now yields an element instead of a jQuery collection. For the old behavior, use up.$on
 
@@ -76,13 +76,6 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 - no event has a property `event.$target` or `event.$element` anymore. Use the standard `event.target` instead.
 
 -  up.event.nobodyPrevents option { message } is now { log }
-
-
-### Fragment update API
-
-- The properties for the `up:fragment:keep` event have been renamed
-- The properties for the `up:fragment:kept` event have been renamed
-- The properties for the `up:fragment:inserted` event have been renamed
 
 
 ### Custom JavaScript
@@ -159,33 +152,48 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
     </div>
   </div>
   ```
-
 - The default CSS styles for `.up-tooltip` has been changed. If you have customized tooltip styles,
   you should check if your modifications still work with the new defaults.
 - Tooltips now update their position when the screen is resized.
 - Tooltips now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
-
-
-- [up-position] is now divided into [up-position]/[up-align].
-  Similar { position } is divided into { position } and { align }
-  - When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`.
+ - Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`.
+  - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
+  - `{ align }` defines the alignment of the popup along its side. When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
   - When the tooltip's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
-
-- new experimental function up.tooltip.sync()
+- New experimental function `up.tooltip.sync()`. It forces the popup to update its position when a
+  layout change is not detected automatically.
 - Tooltip elements are now appended to the respective viewport of the anchor element.
   They were previously always appended to the end of the `<body>`.
 
 
 ### Forms
 
-- up:form:submit no longer has a { $form } prop. it's now the event target.
+- `up:form:submit` no longer has a `{ $form }` property. The event is now [emitted](/up.emit)
+  on the form that is being submitted.
+- `up.observe()` now accepts a single form field, multiple fields,
+  a `<form>` or any container that contains form fields.
+  The callback is called once for each change in any of the given elements.
+- The callback for `up.observe()` now receives the arguments `(value, name)`, where
+  `value` is the changed field value and `name` is the `[name]` of the field element:
 
-- up.observe:
-  - now accepts an array of fields
-  - new callback signature
-  - new { batch } option that runs the callback with a diff
+  ```
+  up.observe('form', function(value, name) {
+    console.log('The value of %o is now %o', name, value);
+  });
+  ```
 
-- The default `up.form.config.validateTargets` no longer includes `'[up-fieldset]'`.
+  The second argument was previously the observed input element.
+- `up.observe()` now accepts a `{ batch: true }` option to receive all changes
+  since the last callback in a single object:
+
+  ```
+  up.observe('form', { batch: true }, function(diff) {
+    console.log('Observed one or more changes: %o', diff);
+  });
+  ```
+- The default `up.form.config.validateTargets` no longer includes the
+  selector `'[up-fieldset]'`.
 
 
 ### Animation
@@ -195,33 +203,31 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fragment update API
 
-
-- Experimental function `up.dom.all()` has been removed without replacement
-
-- up.dom has been renamed to up.fragment. Future: up.thing.verb()
-
-- up:fragment:destroyed no longer has a { $element } property. now has a { fragment } property. like before, it is emitted on the parent of the destroyed element.
-
-- removed experimental function up.all()
-
-- up.first() has been renamed to up.fragment.first() to not be confused
-  with the new up.element.first()
-
+- The experimental function `up.all()` has been removed without replacement
+- `up.dom` has been renamed to `up.fragment`.
 - The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed) (emitted after a fragment was removed), remains in the API.
+- The `up:fragment:destroyed` event no longer has a `{ $element }` property. It now has a `{ fragment }` property that contains the detached element. Like before, it is emitted on the parent of the destroyed element.
+- The properties for the `up:fragment:keep` event have been renamed
+- The properties for the `up:fragment:kept` event have been renamed
+- The properties for the `up:fragment:inserted` event have been renamed
+- The function `up.first()` has been renamed to `up.fragment.first()` to not be confused
+  with the low-level `up.element.first()`.`
 
 
 ### Utility functions
 
-- up.util.parseUrl
-  - now returns correct { hostname } und { protocol } on IE11
-  - { pathname } now always begins with leading slash on IE11
-
-- new experimental function up.util.isList
-- new experimental function up.util.isNodeList
-- new experimental function up.util.isArguments
-- new experimental function up.util.detectResult
-- new experimental function up.util.flatten
-- new experimental function up.util.flatMap
+- `up.util.parseUrl()` now returns the correct `{ hostname }` und `{ protocol }` on IE11.
+ - The `{ pathname }` property now always begins with leading slash on IE11.
+- New experimental function `up.util.isList()`. It returns whether the given argument is an array-like value, like an `Array` or a
+  [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
+- New experimental function `up.util.isNodeList(). It returns whether the given
+  argument is a [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
+- New experimental function `up.util.detectResult()`.
+  It consecutively calls the given function which each element in the given array and
+  returns the first truthy return value.
+- New experimental function `up.util.flatten()`. This flattens the given `array` a single level deep.
+- new experimental function `up.util.flatMap()`. This maps each element using
+a mapping function, then flattens the result into a new array.
 - new experimental function up.util.isEqual
 - up.util.isEqual.key
 - up.util.isBlank now returns false for unsimple objects
