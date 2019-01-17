@@ -2,10 +2,12 @@ u = up.util
 e = up.element
 
 ###**
-Methods like [`up.replace()`](/up.replace) accept request parameters (or form data values) as a `{ params }` option.
+The `up.Params` class offers a consistent API to read and manipulate request parameters
+independent of their type.
 
-This module offers a consistent API to read and manipulate request parameters independent of their type.
-
+Request parameters are used in [form submissions](/up.Params#fromForm) and
+[URLs](/up.Params#fromURL). Methods like `up.submit()` or `up.replace()` accept
+request parameters as a `{ params }` option.
 
 \#\#\# Supported parameter types
 
@@ -340,11 +342,11 @@ class up.Params
       @getFirst(name)
 
   ###**
-  Returns the first param value with the given `name` from the given `params`.
+  Returns the first param value with the given `name`.
 
   Returns `undefined` if no param value with that name is set.
 
-  @function up.Params#getAll
+  @function up.Params#getFirst
   @param {string} name
   @return {any}
     The value of the param with the given name.
@@ -354,12 +356,14 @@ class up.Params
     entry?.value
 
   ###**
-  Returns the first param value with the given `name` from the given `params`.
+  Returns an array of all param values with the given `name`.
+
+  Returns an empty array if no param value with that name is set.
 
   @function up.Params#getAll
   @param {string} name
-  @return {any}
-    The value of the param with the iven name
+  @return {Array}
+    An array of all values with the given name.
   ###
   getAll: (name) ->
     if @isArrayKey(name)
@@ -375,35 +379,46 @@ class up.Params
     @entries.length == 0
 
   ###**
-  Serializes request params from the given `<form>`.
+  Constructs a new `up.Params` instance from the given `<form>`.
 
   The returned params may be passed as `{ params }` option to
   [`up.request()`](/up.request) or [`up.replace()`](/up.replace).
 
-  The serialized params will include the form's submit button, if that
-  button as a `name` attribute.
+  The constructed `up.Params` will include exactly those form values that would be
+  included in a regular form submission. In particular:
 
-  \#\#\#\# Example
+  - All `<input>` types are suppported
+  - Field values are usually strings, but an `<input type="file">` will produce
+    [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) values.
+  - An `<input type="radio">` or `<input type="checkbox">` will only be added if they are `[checked]`.
+  - An `<select>` will only be added if at least one value is `[checked]`.
+  - If passed a `<select multiple>` or `<input type="file" multiple>`, all selected values are added.
+    If passed a `<select multiple>`, all selected values are added.
+  - Fields that are `[disabled]` are ignored
+  - Fields without a `[name]` attribute are ignored.
+  - The serialized params will include the form's submit button, if that
+    button as a `name` attribute.
+
+  \#\#\# Example
 
   Given this HTML form:
 
       <form>
-        <input type="text" name="name" value="Foo Bar">
         <input type="text" name="email" value="foo@bar.com">
+        <input type="password" name="pass" value="secret">
       </form>
 
   This would serialize the form into an array representation:
 
       var params = up.params.fromForm('input[name=email]')
+      var email = params.get('email') // email is now 'foo@bar.com'
+      var pass = params.get('pass') // pass is now 'secret'
 
-      // params is now: [
-      //   { name: 'name', value: 'Foo Bar' },
-      //   { name: 'email', value: 'foo@bar.com' }
-      // ]
-
-  @function up.params.fromForm
+  @function up.Params.fromForm
   @param {Element|jQuery|string} form
-  @return {Array}
+    A `<form>` element or a selector that matches a `<form>` element.
+  @return {up.Params}
+    A new `up.Params` instance with values from the given form.
   @experimental
   ###
   @fromForm: (form) ->
@@ -412,27 +427,16 @@ class up.Params
       @fromFields(fields)
 
   ###**
-  Serializes request params from a one or more [input fields](/up.form.config#config.fields).
-  To serialize an entire form, use [`up.params.fromForm()`](/up.params.fromForm).
+  Constructs a new `up.Params` instance from one or more
+  [HTML form field](https://www.w3schools.com/html/html_form_elements.asp).
 
-  Note that some fields may produce multiple params, such as `<select multiple>`.
+  The constructed `up.Params` will include exactly those form values that would be
+  included for the given fields in a regular form submission. If a given field wouldn't
+  submit a value (like an unchecked `<input type="checkbox">`, nothing will be added.
 
-  \#\#\#\# Example
+  See `up.Params.fromForm()` for more details and examples.
 
-  Given this HTML form:
-
-      <form>
-        <input type="text" name="email" value="foo@bar.com">
-        <input type="password" name="password">
-      </form>
-
-  This would retrieve request parameters from the `email` field:
-
-      var params = up.params.fromField('input[name=email]')
-
-      // params is now: [{ name: 'email', value: 'foo@bar.com' }]
-
-  @function up.params.fromField
+  @function up.Params.fromField
   @param {Element|List<Element>|jQuery} fields
   @return {up.Params}
   @experimental
@@ -444,18 +448,17 @@ class up.Params
     params
 
   ###**
-  Adds params from the given [HTML form element](https://www.w3schools.com/html/html_form_elements.asp)
-  to this `up.Params` instance.
+  Adds params from the given [HTML form field](https://www.w3schools.com/html/html_form_elements.asp).
 
-  - All `<input>` types are suppported
-  - Field values are usually strings, but an `<input type="file">` will produce
-    [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) values.
-  - If passed a `<select multiple>` or `<input type="file" multiple>`, all selected values are added.
-  - An `<input type="radio">` or `<input type="checkbox">` will only be added if they are `[checked]`.
-  - Fields that are `[disabled]` are ignored
-  - Fields without a `[name]` attribute are ignored.
+  The added params will include exactly those form values that would be
+  included for the given field in a regular form submission. If the given field wouldn't
+    submit a value (like an unchecked `<input type="checkbox">`, nothing will be added.
 
-  @function
+  See `up.Params.fromForm()` for more details and examples.
+
+  @function up.Params#addField
+  @param {Element|jQuery} field
+  @experimental
   ###
   addField: (field) ->
     params = new @constructor()
@@ -484,13 +487,15 @@ class up.Params
   Constructs a new `up.Params` instance from the given URL's
   [query string](https://en.wikipedia.org/wiki/Query_string).
 
+  Constructs an empty `up.Params` instance if the given URL has no query string.
+
   \#\#\# Example
 
       var params = up.Params.fromURL('http://foo.com?foo=fooValue&bar=barValue')
       var foo = params.get('foo')
       // foo is now: 'fooValue'
 
-  @function up.params.fromURL
+  @function up.Params.fromURL
   @param {string} url
     The URL from which to extract the query string.
   @return {string|undefined}
@@ -506,7 +511,15 @@ class up.Params
     params
 
   ###**
-  TODO: Document me
+  If passed an `up.Params` instance, it is returned unchanged.
+  Otherwise constructs an `up.Params` instance from the given value.
+
+  The given params value may be of any [supported type](/up.params)
+  The return value is always an `up.Params` instance.
+
+  @function up.Params.wrap
+  @param {Object|Array|string|up.Params|undefined} params
+  @return {up.Params}
   ###
   @wrap: (value) ->
     u.wrapValue(value, @)
