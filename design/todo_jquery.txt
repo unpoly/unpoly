@@ -16,6 +16,7 @@
   - API comments
     - grep for TODO
     - Examples with $
+      - e.g. up.compiler!
     - Stuff like @param {jQuery} $element (basically "$" everywhere)
     - Stuff like @param {jQuery} event.link
 

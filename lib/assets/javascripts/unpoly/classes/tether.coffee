@@ -34,7 +34,7 @@ class up.Tether
 
   changeEventSubscription: (fn) ->
     up[fn](window, 'resize', @scheduleSync)
-    up[fn](@viewport, 'scroll up:tether:sync', @scheduleSync) if @syncOnScroll
+    up[fn](@viewport, 'scroll', @scheduleSync) if @syncOnScroll
 
   scheduleSync: =>
     clearTimeout(@syncTimer)

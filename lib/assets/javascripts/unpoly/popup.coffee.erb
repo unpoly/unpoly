@@ -154,7 +154,11 @@ up.popup = do ->
     e.show(state.popup)
 
   ###**
-  TODO: Document me
+  Forces the popup to update its position relative to its anchor element.
+
+  Unpoly will try to automatically keep popups aligned when
+  the document is resized or scrolled. Complex layout changes may make
+  it necessary to call this function.
 
   @function up.popup.sync
   @experimental

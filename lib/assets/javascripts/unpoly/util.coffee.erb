@@ -303,19 +303,24 @@ up.util = do ->
   ###**
   Return whether the given argument is considered to be blank.
 
-  This returns `true` for:
+  By default, this function returns `true` for:
 
   - `undefined`
   - `null`
   - Empty strings
   - Empty arrays
-  - An object without own enumerable properties
+  - A plain object without own enumerable properties
 
   All other arguments return `false`.
 
+  To check implement blank-ness checks for user-defined classes,
+  see `up.util.isBlank.key`.
+
   @function up.util.isBlank
-  @param object
+  @param value
+    The value is to check.
   @return {boolean}
+    Whether the value is blank.
   @stable
   ###
   isBlank = (value) ->
@@ -330,7 +335,40 @@ up.util = do ->
     return false
 
   ###**
-  TODO: Document me
+  This property contains the name of a method that user-defined classes
+  may implement to hook into the `up.util.isBlank()` protocol.
+
+  \#\#\# Example
+
+  We have a user-defined `Account` class that we want to use with `up.util.isBlank()`:
+
+  ```
+  class Account {
+    constructor(email) {
+      this.email = email
+    }
+
+    [up.util.isBlank.key]() {
+      return up.util.isBlank(this.email)
+    }
+  }
+  ```
+
+  Note that the protocol method is not actually named `'up.util.isBlank.key'`.
+  Instead it is named after the *value* of the `up.util.isBlank.key` property.
+  To do so, the code sample above is using a
+  [computed property name](https://medium.com/front-end-weekly/javascript-object-creation-356e504173a8)
+  in square brackets.
+
+  We may now use `Account` instances with `up.util.isBlank()`:
+
+  ```
+  foo = new Account('foo@foo.com')
+  bar = new Account('')
+
+  console.log(up.util.isBlank(foo)) // prints false
+  console.log(up.util.isBlank(bar)) // prints true
+  ```
 
   @property up.util.isBlank.key
   @experimental
@@ -578,22 +616,24 @@ up.util = do ->
 
   ###**
   Returns a shallow copy of the given array, array-like value or plain object.
-
   Other types of values are returned unchanged.
+
+  To make the copying protocol work with user-defined class,
+  see `up.util.copy.key`.
 
   Array-like objects are copied into new arrays.
 
   @function up.util.copy
-  @param {Object|List} object
-  @return {Object|Array}
+  @param {any} object
+  @return {any}
   @stable
   ###
   copy = (value, deep)  ->
-    if isList(value)
+    if isObject(value) && value[copy.key]
+      value = value[copy.key]()
+    else if isList(value)
       value = Array.prototype.slice.call(value)
       copied = true
-    else if isObject(value) && value[copy.key]
-      value = value[copy.key]()
     else if isOptions(value)
       value = assign({}, value)
       copied = true
@@ -603,9 +643,45 @@ up.util = do ->
     value
 
   ###**
-  TODO: Document me
+  This property contains the name of a method that user-defined classes
+  may implement to hook into the `up.util.copy()` protocol.
+
+  \#\#\# Example
+
+  We have a user-defined `Account` class that we want to use with `up.util.copy()`:
+
+  ```
+  class Account {
+    constructor(email) {
+      this.email = email
+    }
+
+    [up.util.copy.key]() {
+      return new Account(this.email)
+    }
+  }
+  ```
+
+  Note that the protocol method is not actually named `'up.util.copy.key'`.
+  Instead it is named after the *value* of the `up.util.copy.key` property.
+  To do so, the code sample above is using a
+  [computed property name](https://medium.com/front-end-weekly/javascript-object-creation-356e504173a8)
+  in square brackets.
+
+  We may now use `Account` instances with `up.util.copy()`:
+
+  ```
+  original = new User('foo@foo.com')
+
+  copy = up.util.copy(original)
+  console.log(copy.email) // prints 'foo@foo.com'
+
+  original.email = 'bar@bar.com' // change the original
+  console.log(copy.email) // still prints 'foo@foo.com'
+  ```
 
   @property up.util.copy.key
+  @param {string} key
   @experimental
   ###
   copy.key = 'up.util.copy'
@@ -1322,9 +1398,20 @@ up.util = do ->
     Object.prototype.hasOwnProperty(k)
 
   ###**
-  TODO: Document me
+  Returns whether the two arguments are equal by value.
+
+  By default `up.util.isEqual()` can compare simple JavaScript values,
+  arrays and plain objects.
+
+  To make the copying protocol work with user-defined classes,
+  see `up.util.isEqual.key`. Objects without a defined comparison protocol are
+  defined by reference (`===`).
 
   @function up.util.isEqual
+  @param {any} a
+  @param {any} b
+  @return {boolean}
+    Whether the arguments are equal by value.
   @experimental
   ###
   isEqual = (a, b) ->
@@ -1345,9 +1432,47 @@ up.util = do ->
       a == b
 
   ###**
-  TODO: Document me
+  This property contains the name of a method that user-defined classes
+  may implement to hook into the `up.util.isEqual()` protocol.
+
+  \#\#\# Example
+
+  We have a user-defined `Account` class that we want to use with `up.util.isEqual()`:
+
+  ```
+  class Account {
+    constructor(email) {
+      this.email = email
+    }
+
+    [up.util.isEqual.key](other) {
+      return this.email === other.email;
+    }
+  }
+  ```
+
+  Note that the protocol method is not actually named `'up.util.isEqual.key'`.
+  Instead it is named after the *value* of the `up.util.isEqual.key` property.
+  To do so, the code sample above is using a
+  [computed property name](https://medium.com/front-end-weekly/javascript-object-creation-356e504173a8)
+  in square brackets.
+
+  We may now use `Account` instances with `up.util.isEqual()`:
+
+  ```
+  one = new User('foo@foo.com')
+  two = new User('foo@foo.com')
+  three = new User('bar@bar.com')
+
+  isEqual = up.util.isEqual(one, two)
+  // isEqual is now true
+
+  isEqual = up.util.isEqual(one, three)
+  // isEqual is now false
+  ```
 
   @property up.util.isEqual.key
+  @param {string} key
   @experimental
   ###
   isEqual.key = 'up.util.isEqual'

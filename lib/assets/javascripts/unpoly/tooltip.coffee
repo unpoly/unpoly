@@ -101,7 +101,11 @@ up.tooltip = do ->
       state.content.innerHTML = options.html
 
   ###**
-  TODO: Document me
+  Forces the tooltip to update its position relative to its anchor element.
+
+  Unpoly will try to automatically keep tooltips aligned when
+  the document is resized or scrolled. Complex layout changes may make
+  it necessary to call this function.
 
   @function up.tooltip.sync
   @experimental
