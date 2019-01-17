@@ -1076,6 +1076,10 @@ up.util = do ->
   escapeHtml = (string) ->
     string.replace /[&<>"]/g, (char) -> ESCAPE_HTML_ENTITY_MAP[char]
 
+  ###**
+  @function up.util.escapeRegexp
+  @internal
+  ###
   escapeRegexp = (string) ->
     # From https://github.com/benjamingr/RegExp.escape
     string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');

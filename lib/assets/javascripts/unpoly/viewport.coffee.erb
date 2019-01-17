@@ -42,9 +42,17 @@ up.viewport = do ->
     An array of CSS selectors that find elements anchored to the
     right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
     See [`[up-anchored="right"]`](/up-anchored-right) for details.
-  @param {number} [config.snap=50]
+  @param {number} [config.revealSnap=50]
     When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
-    to the top when the revealed element is closer to the top than `config.snap`.
+    to the top when the revealed element is closer to the top than `config.revealSnap`.
+  @param {number} [config.revealPadding=0]
+    The desired padding between a [revealed](/up.reveal) element and the
+    closest [viewport](/up.viewport) edge (in pixels).
+  @param {number} [config.scrollSpeed=1]
+    The speed of the scrolling motion when [scrolling](/up.scroll) with `{ behavior: 'smooth' }`.
+
+    The default value (`1`) roughly corresponds to the speed of Chrome's
+    [native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
   @stable
   ###
   config = new up.Config
@@ -106,6 +114,10 @@ up.viewport = do ->
     When set to `'auto'`, this will immediately scroll to the new position.
 
     When set to `'smooth'`, this will scroll smoothly to the new position.
+  @param {number}[options.speed]
+    The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
+
+    Defaults to `up.viewport.config.scrollSpeed`.
   @return {Promise}
     A promise that will be fulfilled when the scrolling ends.
   @experimental
@@ -200,11 +212,30 @@ up.viewport = do ->
   @param {boolean} [options.top=false]
     Whether to scroll the viewport so that the first element row aligns
     with the top edge of the viewport.
+  @param {string}[options.behavior='auto']
+    When set to `'auto'`, this will immediately scroll to the new position.
+
+    When set to `'smooth'`, this will scroll smoothly to the new position.
+  @param {number}[options.speed]
+    The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
+
+    Defaults to `up.viewport.config.scrollSpeed`.
+  @param {number} [config.padding=0]
+    The desired padding between the revealed element and the
+    closest [viewport](/up.viewport) edge (in pixels).
+  @param {number|boolean} [config.snap]
+    Whether to snap to the top of the viewport if the new scroll position
+    after revealing the element is close to the top edge.
+
+    You may pass a maximum number of pixels under which to snap to the top.
+
+    Passing `false` will disable snapping.
+
+    Passing `true` will use the snap pixel value from `up.viewport.config.revealSnap`.
   @return {Promise}
     A promise that fulfills when the element is revealed.
   @stable
   ###
-  # TODO: Documentation
   reveal = (elementOrSelector, options) ->
     element = e.get(elementOrSelector)
     motion = new up.RevealMotion(element, options)

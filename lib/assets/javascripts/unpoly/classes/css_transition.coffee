@@ -34,11 +34,7 @@ class up.CssTransition
 
   listenToFinishEvent: =>
     if @finishEvent
-      @element.addEventListener(@finishEvent, @onFinishEvent)
-
-  stopListenToFinishEvent: =>
-    if @finishEvent
-      @element.removeEventListener(@finishEvent, @onFinishEvent)
+      @stopListenToFinishEvent = @element.addEventListener(@finishEvent, @onFinishEvent)
 
   onFinishEvent: (event) =>
     # don't waste time letting the event bubble up the DOM
@@ -54,10 +50,7 @@ class up.CssTransition
     clearTimeout(@fallbackTimer)
 
   listenToTransitionEnd: =>
-    @element.addEventListener 'transitionend', @onTransitionEnd
-
-  stopListenToTransitionEnd: =>
-    @element.removeEventListener 'transitionend', @onTransitionEnd
+    @stopListenToTransitionEnd = up.on(@element, 'transitionend', @onTransitionEnd)
 
   onTransitionEnd: (event) =>
     # Check if the transitionend event was caused by our own transition,
@@ -80,8 +73,8 @@ class up.CssTransition
     @finished = true
 
     @stopFallbackTimer()
-    @stopListenToFinishEvent()
-    @stopListenToTransitionEnd()
+    @stopListenToFinishEvent?()
+    @stopListenToTransitionEnd?()
 
     # Cleanly finish our own transition so the old transition
     # (or any other transition set right after that) will be able to take effect.

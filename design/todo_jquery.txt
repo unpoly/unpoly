@@ -27,6 +27,8 @@
   - check if we can publish new functions
   - check if we can more up.viewport functions
 
+  - rename up-position to up-side and { position } to { side }
+
 - rc CFP
 
 - upgrade roca-style.org PR

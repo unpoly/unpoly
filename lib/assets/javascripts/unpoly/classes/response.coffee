@@ -98,7 +98,7 @@ class up.Response extends up.Record
     ]
 
   ###**
-  @constructor
+  @constructor up.Response
   @internal
   ###
   constructor: (options) ->

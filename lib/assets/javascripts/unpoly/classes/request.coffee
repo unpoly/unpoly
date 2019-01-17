@@ -28,7 +28,7 @@ class up.Request extends up.Record
   ###
 
   ###**
-  [Parameters](/up.params) that should be sent as the request's payload.
+  [Parameters](/up.Params) that should be sent as the request's payload.
 
   @property up.Request#params
   @param {Object|FormData|string|Array} params

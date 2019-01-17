@@ -36,12 +36,15 @@ Popups have a minimal default design:
 The easiest way to change how the popup looks is to override the
 [default CSS styles](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/popup.sass).
 
-The HTML of a popup element is simply this:
+The HTML of a popup element looks like this:
 
     <div class="up-popup">
-      ...
+      <div class="up-popup-content">
+        Fragment content here
+      </div>
     </div>
 
+The popup element is appended to the [viewport](/up.viewport) of the anchor element.
 
 @module up.popup
 ###
@@ -151,6 +154,15 @@ up.popup = do ->
     e.show(state.popup)
 
   ###**
+  TODO: Document me
+
+  @function up.popup.sync
+  @experimental
+  ###
+  syncPosition = ->
+    state.tether?.sync()
+
+  ###**
   Returns whether popup modal is currently open.
 
   @function up.popup.isOpen
@@ -242,7 +254,7 @@ up.popup = do ->
       return up.replace(target, url, options)
 
     up.browser.whenConfirmed(options).then ->
-      up.event.whenEmitted('up:popup:open', url: url, log: 'Opening popup').then ->
+      up.event.whenEmitted('up:popup:open', url: url, anchor: anchor, log: 'Opening popup').then ->
         state.phase = 'opening'
         state.anchor = anchor
         state.position = position
@@ -257,17 +269,19 @@ up.popup = do ->
           promise = up.replace(target, url, extractOptions)
         promise = promise.then ->
           unveilFrame()
-          state.tether.sync()
+          syncPosition()
           up.animate(state.popup, options.animation, animateOptions)
         promise = promise.then ->
           state.phase = 'opened'
-          up.emit('up:popup:opened', log: 'Popup opened')#
+          up.emit(state.popup, 'up:popup:opened', anchor: state.anchor, log: 'Popup opened')#
         promise
 
   ###**
   This event is [emitted](/up.emit) when a popup is starting to open.
 
   @event up:popup:open
+  @param {Element} event.anchor
+    The element to which the popup will be attached.
   @param event.preventDefault()
     Event listeners may call this method to prevent the popup from opening.
   @stable
@@ -277,6 +291,8 @@ up.popup = do ->
   This event is [emitted](/up.emit) when a popup has finished opening.
 
   @event up:popup:opened
+  @param {Element} event.anchor
+    The element to which the popup was attached.
   @stable
   ###
 
@@ -310,7 +326,7 @@ up.popup = do ->
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
     u.assign(options, animateOptions)
 
-    up.event.whenEmitted(state.popup, 'up:popup:close', log: 'Closing popup').then ->
+    up.event.whenEmitted('up:popup:close', anchor: state.anchor, log: 'Closing popup').then ->
       state.phase = 'closing'
       state.url = null
       state.coveredUrl = null
@@ -324,7 +340,7 @@ up.popup = do ->
         state.content = null
         state.anchor = null
         state.sticky = null
-        up.emit('up:popup:closed', log: 'Popup closed')
+        up.emit('up:popup:closed', anchor: state.anchor, log: 'Popup closed')
 
   preloadNow = (link, options) ->
     options = u.options(options)
@@ -344,6 +360,8 @@ up.popup = do ->
   is starting to [close](/up.popup.close).
 
   @event up:popup:close
+  @param {Element} event.anchor
+    The element to which the popup is attached.
   @param event.preventDefault()
     Event listeners may call this method to prevent the popup from closing.
   @stable
@@ -354,6 +372,8 @@ up.popup = do ->
   is done [closing](/up.popup.close).
 
   @event up:popup:closed
+  @param {Element} event.anchor
+    The element to which the popup was attached.
   @stable
   ###
       
@@ -488,3 +508,4 @@ up.popup = do ->
   config: config
   contains: contains
   isOpen: isOpen
+  sync: syncPosition

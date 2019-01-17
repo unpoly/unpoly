@@ -30,7 +30,7 @@ class up.Params
   @param {Object|Array|string|up.Params} [params]
     An existing list of params with which to initialize the new `up.Params` object.
 
-    The given params value may be of any [supported type](/up.params).
+    The given params value may be of any [supported type](/up.Params).
   @return {up.Params}
   @experimental
   ###
@@ -91,7 +91,7 @@ class up.Params
   \#\#\# Example
 
       var params = new up.Params('foo=bar&baz=bam')
-      var array = up.params.toArray()
+      var array = params.toArray()
 
       // array is now: [
       //   { name: 'foo', value: 'bar' },
@@ -225,7 +225,7 @@ class up.Params
   ###**
   Adds all entries from the given list of params.
 
-  The given params value may be of any [supported type](/up.params).
+  The given params value may be of any [supported type](/up.Params).
 
   @function up.Params#addAll
   @param {Object|Array|string|up.Params|undefined} params
@@ -410,7 +410,7 @@ class up.Params
 
   This would serialize the form into an array representation:
 
-      var params = up.params.fromForm('input[name=email]')
+      var params = up.Params.fromForm('input[name=email]')
       var email = params.get('email') // email is now 'foo@bar.com'
       var pass = params.get('pass') // pass is now 'secret'
 
@@ -514,7 +514,7 @@ class up.Params
   If passed an `up.Params` instance, it is returned unchanged.
   Otherwise constructs an `up.Params` instance from the given value.
 
-  The given params value may be of any [supported type](/up.params)
+  The given params value may be of any [supported type](/up.Params)
   The return value is always an `up.Params` instance.
 
   @function up.Params.wrap

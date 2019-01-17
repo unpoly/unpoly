@@ -156,7 +156,7 @@ up.fragment = do ->
   @param {string} [options.method='get']
     The HTTP method to use for the request.
   @param {Object|FormData|string|Array} [options.params]
-    [Parameters](/up.params) that should be sent as the request's payload.
+    [Parameters](/up.Params) that should be sent as the request's payload.
   @param {string} [options.transition='none']
   @param {string|boolean} [options.history=true]
     If a string is given, it is used as the URL the browser's location bar and history.
@@ -171,6 +171,8 @@ up.fragment = do ->
     Whether to [reveal](/up.reveal) the new fragment when the server responds with an error.
 
     You can also pass a CSS selector for the element to reveal.
+  @param {number} [options.revealPadding}
+
   @param {boolean} [options.restoreScroll=false]
     If set to true, Unpoly will try to restore the scroll position
     of all the viewports around or below the updated element. The position
@@ -767,29 +769,6 @@ up.fragment = do ->
   matchesLayer = (element, layer) ->
     !layer || layerOf(element) == layer
 
-#  ###**
-#  Returns all elements matching the given selector, but
-#  ignores elements that are being [destroyed](/up.destroy) or [transitioned](/up.morph).
-#
-#  @function up.all
-#  @param {string|jQuery|Array<Element>} selectorOrElements
-#  @param {string|Element|jQuery} [options.origin]
-#    An second element or selector that can be referenced as `&` in the first selector.
-#  @param {string} [options.layer]
-#    The name of the layer in which to find the element. Valid values are
-#    `'page'`, `'modal'` and `'popup'`.
-#  @return {List<Element>}
-#    A list of matching elements.
-#  @experimental
-#  ###
-#  all = (selector, options) ->
-#    options = u.options(options)
-#    selector = e.resolveSelector(selector, options.origin)
-#    root = options.root ? document
-#    matches = e.all(root, selector)
-#    u.select matches, (match) ->
-#      isRealElement(element) && matchesLayer(element, options.layer)
-
   ###**
   @function up.fragment.createPlaceHolder
   @internal
@@ -922,7 +901,6 @@ up.fragment = do ->
   destroy: destroy
   extract: extract
   first: first
-  # all: all
   source: source
   hello: hello
   config: config
@@ -937,10 +915,6 @@ up.hello = up.fragment.hello
 up.first = (args...) ->
   up.warn('Deprecated: up.first() has been renamed to up.fragment.first()')
   up.fragment.first(args...)
-
-#up.all = (args...) ->
-#  up.warn('Deprecated: up.all() has been renamed to up.fragment.all()')
-#  up.fragment.all(args...)
 
 up.legacy.renamedModule 'flow', 'fragment'
 up.legacy.renamedModule 'dom', 'fragment'

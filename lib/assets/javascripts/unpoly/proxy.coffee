@@ -194,7 +194,7 @@ up.proxy = do ->
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
   @param {Object|FormData|string|Array} [options.params={}]
-    [Parameters](/up.params) that should be sent as the request's payload.
+    [Parameters](/up.Params) that should be sent as the request's payload.
   @param {string} [options.timeout]
     A timeout in milliseconds.
 
@@ -289,7 +289,7 @@ up.proxy = do ->
     An object of additional header key/value pairs to send along
     with the request.
   @param {Object|FormData|string|Array} [options.params]
-    [Parameters](/up.params) that should be sent as the request's payload.
+    [Parameters](/up.Params) that should be sent as the request's payload.
 
     On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
   @param {string} [request.timeout]

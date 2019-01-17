@@ -19,13 +19,15 @@ A gray triangle points to the element.
 To change the styling, simply override the [CSS rules](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/tooltip.sass) for the `.up-tooltip` selector and its `:after`
 selector that is used for the triangle.
 
-The HTML of a tooltip element is simply this:
+The HTML of a tooltip element looks like this:
 
     <div class="up-tooltip">
-      Show all decks
+      <div class="up-tooltip-content">
+        Tooltip text here
+      </div>
     </div>
 
-The tooltip element is appended to the end of `<body>`.
+The tooltip element is appended to the [viewport](/up.viewport) of the anchor element.
 
 @module up.tooltip
 ###
@@ -99,6 +101,15 @@ up.tooltip = do ->
       state.content.innerHTML = options.html
 
   ###**
+  TODO: Document me
+
+  @function up.tooltip.sync
+  @experimental
+  ###
+  syncPosition = ->
+    state.tether?.sync()
+
+  ###**
   Opens a tooltip over the given element.
 
   The unobtrusive variant of this is the [`[up-tooltip]`](/up-tooltip) selector.
@@ -155,7 +166,7 @@ up.tooltip = do ->
     state.position = position
     state.align = align
     createElement({ text, html })
-    state.tether.sync()
+    syncPosition()
     up.animate(state.tooltip, animation, animateOptions).then ->
       state.phase = 'opened'
 
@@ -259,4 +270,5 @@ up.tooltip = do ->
   attach: attachAsap
   isOpen: isOpen
   close: closeAsap
+  sync: syncPosition
 

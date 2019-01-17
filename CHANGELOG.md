@@ -75,6 +75,8 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 - uses native events that can be received with addEventListener. Use event.originalEvent if you use jQuery.
 - no event has a property `event.$target` or `event.$element` anymore. Use the standard `event.target` instead.
 
+-  up.event.nobodyPrevents option { message } is now { log }
+
 
 ### Fragment update API
 
@@ -85,6 +87,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Custom JavaScript
 
+- [Compilers](/up.compiler) may again return an array of destructor functions. The previous deprecation was removed.
 - The `up.compiler()` callback now receives a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$compiler()`.
 - The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$macro()`.
 
@@ -95,6 +98,12 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   - List all up.Params methods
 
 
+### Linking to fragments
+
+- `up:fragment:kept` properties have been renamed
+
+
+
 ### AJAX acceleration
 
 - `up:link:preload` event properties have been renamed
@@ -102,17 +111,53 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Popups
 
+- New CSS, new HTML
+  ```
+  <div class="up-popup">
+    <div class="up-popup-content">
+      Fragment content here
+    </div>
+  </div>
+  ```
+
 - now re-align when the screen is resized
 - popups now follow scrolling when placed within other viewports
-- position is now position/align
+- [up-position] is now divided into [up-position]/[up-align].
+  Similar { position } is divided into { position } and { align }
+  - When the popup's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+  - When the popup's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
+- new experimental function up.popup.sync()
+- Popups now align with the left side of the anchoring element.
+  They previously align with the right side.
+  To restore the old behavior, set `up.popup.config.align = 'right'`
+- Popup elements are now appended to the respective viewport of the anchor element.
+  They were previously always appended to the end of the `<body>`.
+- `up:popup:open`,`up:popup:opened`, `up:popup:close`, `up:popup:closed` have an { anchor } property
 
 
 ### Tooltips
 
-- New CSS
+- New CSS, new HTML
+  ```
+  <div class="up-tooltip">
+    <div class="up-tooltip-content">
+      Tooltip text here
+    </div>
+  </div>
+  ```
+
+
 - now re-align when the screen is resized
 - tooltips now follow scrolling when placed within other viewports
-- position is now position/align
+
+- [up-position] is now divided into [up-position]/[up-align].
+  Similar { position } is divided into { position } and { align }
+  - When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+  - When the tooltip's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
+
+- new experimental function up.tooltip.sync()
+- Tooltip elements are now appended to the respective viewport of the anchor element.
+  They were previously always appended to the end of the `<body>`.
 
 
 ### Forms
@@ -124,23 +169,29 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   - new callback signature
   - new { batch } option that runs the callback with a diff
 
+- The default `up.form.config.validateTargets` no longer includes `'[up-fieldset]'`.
+
 
 ### Animation
 
-- CSS property names for custom animations and transitions must be given in kebab-case.
+- CSS property names for custom [animations](/up.animation) and [transitions](/up.transition) must be given in `kebab-case`. `camelCase` properties are no longer supported.
 
 
 ### Fragment update API
 
-up.dom has been renamed to up.fragment. Future: up.thing.verb()
+
+- Experimental function `up.dom.all()` has been removed without replacement
+
+- up.dom has been renamed to up.fragment. Future: up.thing.verb()
 
 - up:fragment:destroyed no longer has a { $element } property. now has a { fragment } property. like before, it is emitted on the parent of the destroyed element.
 
 - removed experimental function up.all()
 
-- up.first() has been moved to up.fragment.first()
+- up.first() has been renamed to up.fragment.first() to not be confused
+  with the new up.element.first()
 
-- The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed), emitted after a fragment was removed, remains in the API.
+- The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed) (emitted after a fragment was removed), remains in the API.
 
 
 ### Utility functions
@@ -161,22 +212,36 @@ up.dom has been renamed to up.fragment. Future: up.thing.verb()
 - up.util.isBlank.key
 - up.util.copy.key
 - up.util.toArray now returns an argument unchanged if the argument is already an array.
-- up.util.all was renamed to up.util.every to be more in line with Lodash, and to be less confusing with up.element.all and up.fragment.all
-- up.util.any was renamed to up.util.any to be more in line with Lodash
+- up.util.all was renamed to up.util.every to be more in line with the standard [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), and to be less confusing with up.element.all and up.fragment.all
+- up.util.any was renamed to up.util.any to be more in line with the standard
+  [`Array#some()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+- were any experimental/public functions moved to up.element?
+  - `up.util.selectorForElement()` is now `up.element.toSelector()`
+- up.util.trim has been removed without replacement. Use the standard
+  [`String#trim()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim) instead.
+- up.util.boolean is now stable
+-  up.util.escapeHtml is now stable
+- up.util.isJQuery now returns false if no jQuery is loaded into the window.jQuery global
 
 
 ### Viewports
 
 up.layout has been renamed to up.viewport. Future: up.thing.verb()
 
-- new config option up.viewport.scrollSpeed
-- config option up.layout.snap has been renamed to up.viewport.revealSnap
-- up.reveal() now also takes a { padding } option
-- new config option up.viewport.revealPadding
 - up.scroll() no longer takes a { duration } and { easing }.
   - It takes { behavior } (auto or smooth).
   - Mirrors <https://hospodarets.com/native_smooth_scrolling>
   - For smooth scrolling behavior there is also { speed }.
+  - new config option up.viewport.scrollSpeed
+
+- up.reveal() no longer takes a { duration } and { easing }.
+  - up.reveal() now also takes a { padding } option
+  - new up.reveal() option { snap }
+  - new up.reveal() option { behavior }
+  - new up.reveal() option { speed }
+  - new up.reveal() option { padding }
+  - config option up.layout.snap has been renamed to up.viewport.revealSnap
+  - new config option up.viewport.revealPadding
 
 - Opening modal will now set overflow-y on the right element (body, html)
 
@@ -185,6 +250,13 @@ up.layout has been renamed to up.viewport. Future: up.thing.verb()
   - up.viewport.root
   - up.viewport.rootWidth
   - up.viewport.rootHeight
+
+- initial hash reveal tries [up-id] before
+
+### Navigation feedback
+
+- `up-alias` now accepts one or more asterisks (`*`) anywhere in the pattern.
+   It was previously limited to match URLs with a given prefix.
 
 
 ### Performance
@@ -199,6 +271,8 @@ up.layout has been renamed to up.viewport. Future: up.thing.verb()
 - removed up:framework:reset from public API
 - Compatibility with the jQuery-less rails-ujs adapter (now [part of Action View](https://github.com/rails/rails/tree/master/actionview/app/assets/javascripts))
 - Renamed files so they won't be blocked by over-eager ad blockers on developer PCs
+
+
 
 
 0.57.0

@@ -6,6 +6,11 @@ describe 'up.util', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.util.isEqual', ->
+
+      it 'needs tests!', ->
+        throw "needs tests"
+
     describe 'up.util.flatMap', ->
 
       it 'collects the Array results of the given map function, then concatenates the result arrays into one flat array', ->
@@ -976,6 +981,9 @@ describe 'up.util', ->
 
         copy[0] = 2
         expect(args[0]).toBe(1)
+
+      it 'needs tests for copy.key', ->
+        throw "needs tests for copy.key"
 
     describe 'up.util.deepCopy', ->
 
