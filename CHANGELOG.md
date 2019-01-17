@@ -80,9 +80,9 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fragment update API
 
-- `up:fragment:keep` event properties have been renamed
-- `up:fragment:kept` properties have been renamed
-- `up:fragment:inserted` properties have been renamed
+- The properties for the `up:fragment:keep` event have been renamed
+- The properties for the `up:fragment:kept` event have been renamed
+- The properties for the `up:fragment:inserted` event have been renamed
 
 
 ### Custom JavaScript
@@ -94,24 +94,34 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Request parameters
 
-- Experimental up.params module has been completely rewritten. It is now the up.Params class.
-  - List all up.Params methods
+- The experimental `up.params` module has been replaced with the `up.Params` class.
 
-
-### Linking to fragments
-
-- `up:fragment:kept` properties have been renamed
-
+  - `up.Params#add()` -
+  - `up.Params#addAll()`
+  - `up.Params#addField()`
+  - `up.Params#delete()`
+  - `up.Params#get()`
+  - `up.Params#set()`
+  - `up.Params#toArray()`
+  - `up.Params#toFormData()`
+  - `up.Params#toObject()`
+  - `up.Params#toQuery()`
+  - `up.Params#toURL()`
+  - `up.Params.fromField()`
+  - `up.Params.fromForm()`
+  - `up.Params.fromURL()`
 
 
 ### AJAX acceleration
 
-- `up:link:preload` event properties have been renamed
+- The properties for the `up:link:preload` event have been renamed.
 
 
 ### Popups
 
-- New CSS, new HTML
+- The HTML markup for a popup has been changed to make it easier to style with CSS.
+  The new structure is:
+
   ```
   <div class="up-popup">
     <div class="up-popup-content">
@@ -119,6 +129,8 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
     </div>
   </div>
   ```
+- The default CSS styles for `.up-popup` has been changed. If you have customized popup styles,
+  you should check if your modifications still work with the new defaults.
 
 - now re-align when the screen is resized
 - popups now follow scrolling when placed within other viewports
@@ -137,7 +149,9 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### Tooltips
 
-- New CSS, new HTML
+- The HTML markup for a popup has been changed to make it easier to style with CSS.
+  The new structure is:
+
   ```
   <div class="up-tooltip">
     <div class="up-tooltip-content">
@@ -146,9 +160,11 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   </div>
   ```
 
+- The default CSS styles for `.up-tooltip` has been changed. If you have customized tooltip styles,
+  you should check if your modifications still work with the new defaults.
+- Tooltips now update their position when the screen is resized.
+- Tooltips now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
 
-- now re-align when the screen is resized
-- tooltips now follow scrolling when placed within other viewports
 
 - [up-position] is now divided into [up-position]/[up-align].
   Similar { position } is divided into { position } and { align }
