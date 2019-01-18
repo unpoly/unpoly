@@ -1134,7 +1134,7 @@ up.util = do ->
 
     up.log.error(messageArgs...)
 
-    up.event.whenReady().then -> up.toast.open(messageArgs, toastOptions)
+    up.event.onReady(-> up.toast.open(messageArgs, toastOptions))
 
     asString = up.browser.sprintf(messageArgs...)
     throw new Error(asString)

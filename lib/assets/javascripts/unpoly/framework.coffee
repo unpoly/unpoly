@@ -47,7 +47,7 @@ up.framework = do ->
 
       u.nextFrame ->
         # At this point all user-provided compilers have been registered.
-        up.event.whenReady().then ->
+        up.event.onReady ->
           # The following event will cause Unpoly to compile the <body>
           up.emit('up:app:boot', log: 'Booting user application')
           up.emit('up:app:booted', log: 'User application booted')

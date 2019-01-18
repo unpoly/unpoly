@@ -383,15 +383,14 @@ up.event = do ->
       # an outside link consumes the user click. So we emit another event for that.
       emit(event.target, 'up:action:consumed', log: false)
 
-  whenReady = u.memoize ->
+  onReady = (callback) ->
     readyState = document.readyState
     # Values are "loading", "interactive" and "completed".
     # https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
     if readyState != 'loading'
-      Promise.resolve()
+      callback()
     else
-      new Promise (resolve) ->
-        document.addEventListener('DOMContentLoaded', resolve)
+      document.addEventListener('DOMContentLoaded', callback)
 
   bind 'up:framework:reset', reset
 
@@ -405,7 +404,7 @@ up.event = do ->
   onEscape: onEscape
   halt: halt
   consumeAction: consumeAction
-  whenReady: whenReady
+  onReady: onReady
 
 up.on = up.event.on
 up.$on = up.event.$on
