@@ -41,6 +41,15 @@ Sprockets::Standalone::RakeTask.new(:minified_assets) do |task, sprockets|
 end
 
 namespace :publish do
+  task :confirm do
+    puts "Are you ready to publish a new Unpoly version to all release channels? [y/N] "
+    reply = STDIN.gets.strip.downcase
+    unless reply == 'y'
+      puts "Aborted"
+      exit
+    end
+  end
+
   desc 'Build release artifacts'
   task :build do
     ENV['JS_KNIFE'] = nil
@@ -99,7 +108,7 @@ namespace :publish do
   end
 
   desc 'Build artifacts, push to git and release to package managers'
-  task :all => [:build, :commit, :release, :remind_to_update_site] do
+  task :all => [:confirm, :build, :commit, :release, :remind_to_update_site] do
   end
 
 end
