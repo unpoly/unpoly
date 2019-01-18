@@ -2,6 +2,8 @@
   cursor: pointer; }
 .up-insertion {
   display: inline-block; }
+.up-bounds {
+  position: absolute; }
 [up-href] {
   cursor: pointer; }
 .up-modal {
@@ -78,7 +80,6 @@
   box-sizing: border-box; }
 .up-popup {
   z-index: 20000;
-  position: absolute;
   background-color: #fff;
   padding: 15px;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3); }
@@ -112,49 +113,50 @@
   .up-toast-action + .up-toast-action {
     margin-left: 12px; }
 .up-tooltip {
-  position: absolute;
   z-index: 30000;
-  background-color: #111;
-  color: white;
-  padding: 6px 9px;
-  white-space: nowrap;
-  pointer-events: none; }
+  position: relative; }
   .up-tooltip:after {
     content: "";
     position: absolute;
     display: block;
     width: 0;
     height: 0;
-    border: 8px solid transparent; }
+    border: 6px solid transparent; }
   .up-tooltip[up-position=top] {
-    margin-top: -6px; }
+    margin-bottom: 10px; }
     .up-tooltip[up-position=top]:after {
       border-top-color: #111;
       border-bottom-width: 0;
-      bottom: -8px;
+      bottom: -6px;
       left: 50%;
-      margin-left: -8px; }
+      margin-left: -6px; }
   .up-tooltip[up-position=left] {
-    margin-left: -6px; }
+    margin-right: 10px; }
     .up-tooltip[up-position=left]:after {
       border-left-color: #111;
       border-right-width: 0;
-      right: -8px;
+      right: -6px;
       top: 50%;
-      margin-top: -8px; }
+      margin-top: -6px; }
   .up-tooltip[up-position=right] {
-    margin-left: 6px; }
+    margin-left: 10px; }
     .up-tooltip[up-position=right]:after {
       border-right-color: #111;
       border-left-width: 0;
-      left: -8px;
+      left: -6px;
       top: 50%;
-      margin-top: -8px; }
+      margin-top: -6px; }
   .up-tooltip[up-position=bottom] {
-    margin-top: 6px; }
+    margin-top: 10px; }
     .up-tooltip[up-position=bottom]:after {
       border-bottom-color: #111;
       border-top-width: 0;
-      top: -8px;
+      top: -6px;
       left: 50%;
-      margin-left: -8px; }
+      margin-left: -6px; }
+
+.up-tooltip-content {
+  background-color: #111;
+  color: white;
+  padding: 6px 9px;
+  white-space: nowrap; }
