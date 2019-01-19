@@ -564,7 +564,11 @@ up.util = do ->
   @experimental
   ###
   isList = (value) ->
-    isArray(value) || isNodeList(value) || isJQuery(value) || isArguments(value)
+    isArray(value) ||
+      isNodeList(value) ||
+      isArguments(value) ||
+      isJQuery(value) ||
+      isHTMLCollection(value)
 
   ###**
   Returns whether the given value is a [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
@@ -574,10 +578,13 @@ up.util = do ->
   @function up.util.isNodeList
   @param value
   @return {Boolean}
-  @experimental
+  @internal
   ###
   isNodeList = (value) ->
     value instanceof NodeList
+
+  isHTMLCollection = (value) ->
+    value instanceof HTMLCollection
 
 #  ###**
 #  Returns whether the given value is an [`HTMLCollection`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection).
@@ -1401,7 +1408,7 @@ up.util = do ->
   Returns whether the two arguments are equal by value.
 
   By default `up.util.isEqual()` can compare simple JavaScript values,
-  arrays and plain objects.
+  [array-like values](/up.util.isList) and plain objects.
 
   To make the copying protocol work with user-defined classes,
   see `up.util.isEqual.key`. Objects without a defined comparison protocol are
@@ -1415,16 +1422,18 @@ up.util = do ->
   @experimental
   ###
   isEqual = (a, b) ->
+    a = a.valueOf() if a?.valueOf
+    b = b.valueOf() if b?.valueOf
     if typeof(a) != typeof(b)
       false
-    else if isArray(a) && isArray(b)
-      isEqualArray(a, b)
+    else if isList(a) && isList(b)
+      isEqualList(a, b)
     else if isObject(a) && a[isEqual.key]
       a[isEqual.key](b)
     else if isOptions(a) && isOptions(b)
       aKeys = Object.keys(a)
       bKeys = Object.keys(b)
-      if isEqualArray(aKeys, bKeys)
+      if isEqualList(aKeys, bKeys)
         every aKeys, (aKey) -> isEqual(a[aKey], b[aKey])
       else
         false
@@ -1477,7 +1486,7 @@ up.util = do ->
   ###
   isEqual.key = 'up.util.isEqual'
 
-  isEqualArray = (a, b) ->
+  isEqualList = (a, b) ->
     a.length == b.length && every(a, (elem, index) -> isEqual(elem, b[index]))
 
   splitValues = (value, separator = ' ') ->

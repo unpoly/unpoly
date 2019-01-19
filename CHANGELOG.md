@@ -220,8 +220,6 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
  - The `{ pathname }` property now always begins with leading slash on IE11.
 - New experimental function `up.util.isList()`. It returns whether the given argument is an array-like value, like an `Array` or a
   [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
-- New experimental function `up.util.isNodeList(). It returns whether the given
-  argument is a [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
 - New experimental function `up.util.detectResult()`.
   It consecutively calls the given function which each element in the given array and
   returns the first truthy return value.

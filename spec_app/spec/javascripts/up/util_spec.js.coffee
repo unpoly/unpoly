@@ -8,8 +8,262 @@ describe 'up.util', ->
 
     describe 'up.util.isEqual', ->
 
-      it 'needs tests!', ->
-        throw "needs tests"
+      describe 'for an Element', ->
+
+        it 'returns true for the same Element reference', ->
+          div = document.createElement('div')
+          expect(up.util.isEqual(div, div)).toBe(true)
+
+        it 'returns false for a different Element reference', ->
+          div1 = document.createElement('div')
+          div2 = document.createElement('div')
+          expect(up.util.isEqual(div1, div2)).toBe(false)
+
+        it 'returns false for a value this is no Element', ->
+          div = document.createElement('div')
+          expect(up.util.isEqual(div, 'other')).toBe(false)
+
+      describe 'for an Array', ->
+
+        it 'returns true for a different Array reference with the same elements', ->
+          array1 = ['foo', 'bar']
+          array2 = ['foo', 'bar']
+          expect(up.util.isEqual(array1, array2)).toBe(true)
+
+        it 'returns false for an Array with different elements', ->
+          array1 = ['foo', 'bar']
+          array2 = ['foo', 'qux']
+          expect(up.util.isEqual(array1, array2)).toBe(false)
+
+        it 'returns false for an Array that is a suffix', ->
+          array1 = ['foo', 'bar']
+          array2 = [       'bar']
+          expect(up.util.isEqual(array1, array2)).toBe(false)
+
+        it 'returns false for an Array that is a prefix', ->
+          array1 = ['foo', 'bar']
+          array2 = ['foo'       ]
+          expect(up.util.isEqual(array1, array2)).toBe(false)
+
+        it 'returns true for a NodeList with the same elements', ->
+          parent = e.affix(document.body, '.parent')
+          child1 = e.affix(parent, '.child.one')
+          child2 = e.affix(parent, '.child.two')
+
+          array = [child1, child2]
+          nodeList = parent.querySelectorAll('.child')
+
+          expect(up.util.isEqual(array, nodeList)).toBe(true)
+
+        it 'returns true for a HTMLCollection with the same elements', ->
+          parent = e.affix(document.body, '.parent')
+          child1 = e.affix(parent, '.child.one')
+          child2 = e.affix(parent, '.child.two')
+
+          array = [child1, child2]
+          htmlCollection = parent.children
+
+          expect(up.util.isEqual(array, htmlCollection)).toBe(true)
+
+        it 'returns true for an arguments object with the same elements', ->
+          toArguments = -> return arguments
+          array = ['foo', 'bar']
+          args = toArguments('foo', 'bar')
+
+          expect(up.util.isEqual(array, args)).toBe(true)
+
+        it 'returns false for a value that is no Array', ->
+          array = ['foo', 'bar']
+          expect(up.util.isEqual(array, 'foobar')).toBe(false)
+
+      describe 'for a string', ->
+
+        it 'returns true for a different string reference with the same characters', ->
+          string1 = 'bar'
+          string2 = 'bar'
+          expect(up.util.isEqual(string1, string2)).toBe(true)
+
+        it 'returns false for a string with different characters', ->
+          string1 = 'foo'
+          string2 = 'bar'
+          expect(up.util.isEqual(string1, string2)).toBe(false)
+
+        it 'returns true for a String() object with the same characters', ->
+          stringLiteral = 'bar'
+          stringObject = new String('bar')
+          expect(up.util.isEqual(stringLiteral, stringObject)).toBe(true)
+
+        it 'returns false for a String() object with different characters', ->
+          stringLiteral = 'foo'
+          stringObject = new String('bar')
+          expect(up.util.isEqual(stringLiteral, stringObject)).toBe(false)
+
+        it 'returns false for a value that is no string', ->
+          expect(up.util.isEqual('foo', ['foo'])).toBe(false)
+
+      describe 'for a number', ->
+
+        it 'returns true for a different number reference with the same integer value', ->
+          number1 = 123
+          number2 = 123
+          expect(up.util.isEqual(number1, number2)).toBe(true)
+
+        it 'returns true for a different number reference with the same floating point value', ->
+          number1 = 123.4
+          number2 = 123.4
+          expect(up.util.isEqual(number1, number2)).toBe(true)
+
+        it 'returns false for a number with a different value', ->
+          number1 = 123
+          number2 = 124
+          expect(up.util.isEqual(number1, number2)).toBe(false)
+
+        it 'returns true for a Number() object with the same value', ->
+          numberLiteral = 123
+          numberObject = new Number(123)
+          expect(up.util.isEqual(numberLiteral, numberObject)).toBe(true)
+
+        it 'returns false for a Number() object with a different value', ->
+          numberLiteral = 123
+          numberObject = new Object(124)
+          expect(up.util.isEqual(numberLiteral, numberObject)).toBe(false)
+
+        it 'returns false for a value that is no number', ->
+          expect(up.util.isEqual(123, '123')).toBe(false)
+
+      describe 'for undefined', ->
+
+        it 'returns true for undefined', ->
+          expect(up.util.isEqual(undefined, undefined)).toBe(true)
+
+        it 'returns false for null', ->
+          expect(up.util.isEqual(undefined, null)).toBe(false)
+
+        it 'returns false for NaN', ->
+          expect(up.util.isEqual(undefined, NaN)).toBe(false)
+
+        it 'returns false for an empty Object', ->
+          expect(up.util.isEqual(undefined, {})).toBe(false)
+
+        it 'returns false for an empty string', ->
+          expect(up.util.isEqual(undefined, '')).toBe(false)
+
+      describe 'for null', ->
+
+        it 'returns true for null', ->
+          expect(up.util.isEqual(null, null)).toBe(true)
+
+        it 'returns false for undefined', ->
+          expect(up.util.isEqual(null, undefined)).toBe(false)
+
+        it 'returns false for NaN', ->
+          expect(up.util.isEqual(null, NaN)).toBe(false)
+
+        it 'returns false for an empty Object', ->
+          expect(up.util.isEqual(null, {})).toBe(false)
+
+        it 'returns false for an empty string', ->
+          expect(up.util.isEqual(null, '')).toBe(false)
+
+      describe 'for NaN', ->
+
+        it "returns false for NaN because it represents multiple values", ->
+          expect(up.util.isEqual(NaN, NaN)).toBe(false)
+
+        it 'returns false for null', ->
+          expect(up.util.isEqual(NaN, null)).toBe(false)
+
+        it 'returns false for undefined', ->
+          expect(up.util.isEqual(NaN, undefined)).toBe(false)
+
+        it 'returns false for an empty Object', ->
+          expect(up.util.isEqual(NaN, {})).toBe(false)
+
+        it 'returns false for an empty string', ->
+          expect(up.util.isEqual(NaN, '')).toBe(false)
+
+      describe 'for a plain Object', ->
+
+        it 'returns true for the same reference', ->
+          obj = {}
+          reference = obj
+          expect(up.util.isEqual(obj, reference)).toBe(true)
+
+        it 'returns true for another plain object with the same keys and values', ->
+          obj1 = { foo: 'bar', baz: 'bam' }
+          obj2 = { foo: 'bar', baz: 'bam' }
+          expect(up.util.isEqual(obj1, obj2)).toBe(true)
+
+        it 'returns false for another plain object with the same keys, but different values', ->
+          obj1 = { foo: 'bar', baz: 'bam' }
+          obj2 = { foo: 'bar', baz: 'qux' }
+          expect(up.util.isEqual(obj1, obj2)).toBe(false)
+
+        it 'returns false for another plain object that is missing a key', ->
+          obj1 = { foo: 'bar', baz: 'bam' }
+          obj2 = { foo: 'bar'             }
+          expect(up.util.isEqual(obj1, obj2)).toBe(false)
+
+        it 'returns false for another plain object that has an additional key', ->
+          obj1 = { foo: 'bar'             }
+          obj2 = { foo: 'bar', baz: 'bam' }
+          expect(up.util.isEqual(obj1, obj2)).toBe(false)
+
+        it 'returns false for a non-plain Object, even if it has the same keys and values', ->
+          class Account
+            constructor: (@email) ->
+
+          accountInstance = new Account('foo@example.com')
+          accountPlain = {}
+          for key, value of accountInstance
+            accountPlain[key] = value
+          expect(up.util.isEqual(accountPlain, accountInstance)).toBe(false)
+
+        it 'returns false for a value that is no object', ->
+          obj = { foo: 'bar' }
+          expect(up.util.isEqual(obj, 'foobar')).toBe(false)
+
+      describe 'for a non-Plain object', ->
+
+        it 'returns true for the same reference', ->
+          obj = new FormData()
+          reference = obj
+          expect(up.util.isEqual(obj, reference)).toBe(true)
+
+        it 'returns false for different references', ->
+          obj1 = new FormData()
+          obj2 = new FormData()
+          expect(up.util.isEqual(obj1, obj2)).toBe(false)
+
+        it 'returns false for a different object with the same keys and values', ->
+          class Account
+            constructor: (@email) ->
+
+          account1 = new Account('foo@example.com')
+          account2 = new Account('bar@example.com')
+
+          expect(up.util.isEqual(account1, account2)).toBe(false)
+
+        it 'allows the object to hook into the comparison protocol by implementing a method called `up.util.isEqual.key`', ->
+          class Account
+            constructor: (@email) ->
+            "#{up.util.isEqual.key}": (other) ->
+              @email == other.email
+
+          account1 = new Account('foo@example.com')
+          account2 = new Account('bar@example.com')
+          account3 = new Account('foo@example.com')
+
+          expect(up.util.isEqual(account1, account2)).toBe(false)
+          expect(up.util.isEqual(account1, account3)).toBe(true)
+
+        it 'returns false for a value that is no object', ->
+          class Account
+            constructor: (@email) ->
+
+          account = new Account('foo@example.com')
+
+          expect(up.util.isEqual(account, 'foo@example.com')).toBe(false)
 
     describe 'up.util.flatMap', ->
 
@@ -1027,9 +1281,9 @@ describe 'up.util', ->
         value = [1, 2, 3]
         expect(up.util.isList(value)).toBe(true)
 
-#      it 'returns true for an HTMLCollection', ->
-#        value = document.getElementsByTagName('div')
-#        expect(up.util.isList(value)).toBe(true)
+      it 'returns true for an HTMLCollection', ->
+        value = document.getElementsByTagName('div')
+        expect(up.util.isList(value)).toBe(true)
 
       it 'returns true for a NodeList', ->
         value = document.querySelectorAll('div')
