@@ -948,7 +948,7 @@ describe 'up.util', ->
         copy[1].x = 'y'
         expect(original[1].x).toEqual('y')
 
-      it 'returns a shallow copy of the given object', ->
+      it 'returns a shallow copy of the given plain object', ->
         original = {a: 'b', c: [1, 2], d: 'e'}
 
         copy = up.util.copy(original)
@@ -961,6 +961,14 @@ describe 'up.util', ->
         # Test that the copy is shallow
         copy.c.push(3)
         expect(original.c).toEqual [1, 2, 3]
+
+      it 'allows custom classes to hook into the copy protocol by implementing a method named `up.util.copy.key`', ->
+        class TestClass
+          "#{up.util.copy.key}": ->
+            return "custom copy"
+
+        instance = new TestClass()
+        expect(up.util.copy(instance)).toEqual("custom copy")
 
       it 'copies the given jQuery collection into an array', ->
         $one = $fixture('.one')
@@ -981,9 +989,6 @@ describe 'up.util', ->
 
         copy[0] = 2
         expect(args[0]).toBe(1)
-
-      it 'needs tests for copy.key', ->
-        throw "needs tests for copy.key"
 
     describe 'up.util.deepCopy', ->
 
