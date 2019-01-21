@@ -622,13 +622,17 @@ up.util = do ->
       [value]
 
   ###**
-  Returns a shallow copy of the given array, array-like value or plain object.
-  Other types of values are returned unchanged.
+  Returns a shallow copy of the given value.
 
-  To make the copying protocol work with user-defined class,
-  see `up.util.copy.key`.
+  \#\#\# Copying protocol
 
-  Array-like objects are copied into new arrays.
+  - By default `up.util.copy()` can copy [array-like values](/up.util.isList),
+    plain objects and `Date` instances.
+  - Array-like objects are copied into new arrays.
+  - Unsupported types of values are returned unchanged.
+  - To make the copying protocol work with user-defined class,
+    see `up.util.copy.key`.
+  - Immutable objects, like strings or numbers, do not need to be copied.
 
   @function up.util.copy
   @param {any} object
@@ -692,6 +696,9 @@ up.util = do ->
   @experimental
   ###
   copy.key = 'up.util.copy'
+
+  # Implement up.util.copy protocol for Date
+  Date.prototype[copy.key] = -> new Date(+@)
 
   ###**
   Returns a deep copy of the given array or object.
@@ -1407,12 +1414,14 @@ up.util = do ->
   ###**
   Returns whether the two arguments are equal by value.
 
-  By default `up.util.isEqual()` can compare simple JavaScript values,
-  [array-like values](/up.util.isList) and plain objects.
+  \#\#\# Comparison protocol
 
-  To make the copying protocol work with user-defined classes,
-  see `up.util.isEqual.key`. Objects without a defined comparison protocol are
-  defined by reference (`===`).
+  - By default `up.util.isEqual()` can compare strings, numbers,
+    [array-like values](/up.util.isList), plain objects and `Date` objects.
+  - To make the copying protocol work with user-defined classes,
+    see `up.util.isEqual.key`.
+  - Objects without a defined comparison protocol are
+    defined by reference (`===`).
 
   @function up.util.isEqual
   @param {any} a
@@ -1422,8 +1431,8 @@ up.util = do ->
   @experimental
   ###
   isEqual = (a, b) ->
-    a = a.valueOf() if a?.valueOf
-    b = b.valueOf() if b?.valueOf
+    a = a.valueOf() if a?.valueOf # Date, String objects, Number objects
+    b = b.valueOf() if b?.valueOf # Date, String objects, Number objects
     if typeof(a) != typeof(b)
       false
     else if isList(a) && isList(b)

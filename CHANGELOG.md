@@ -270,6 +270,7 @@ a mapping function, then flattens the result into a new array.
 - up.util.isEqual.key
 - up.util.isBlank now returns false for unsimple objects
 - up.util.isBlank.key
+- up.util.copy now works with `Date` objects
 - up.util.copy.key
 - up.util.toArray now returns an argument unchanged if the argument is already an array.
 - up.util.all was renamed to up.util.every to be more in line with the standard [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), and to be less confusing with up.element.all and up.fragment.all

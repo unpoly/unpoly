@@ -182,6 +182,28 @@ describe 'up.util', ->
         it 'returns false for an empty string', ->
           expect(up.util.isEqual(NaN, '')).toBe(false)
 
+      describe 'for a Date', ->
+
+        it 'returns true for another Date object that points to the same millisecond', ->
+          d1 = new Date('1995-12-17T03:24:00')
+          d2 = new Date('1995-12-17T03:24:00')
+          expect(up.util.isEqual(d1, d2)).toBe(true)
+
+        it 'returns false for another Date object that points to another millisecond', ->
+          d1 = new Date('1995-12-17T03:24:00')
+          d2 = new Date('1995-12-17T03:24:01')
+          expect(up.util.isEqual(d1, d2)).toBe(false)
+
+        it 'returns true for another Date object that points to the same millisecond in another time zone', ->
+          d1 = new Date('2019-01-20T17:35:00+01:00')
+          d2 = new Date('2019-01-20T16:35:00+00:00')
+          expect(up.util.isEqual(d1, d2)).toBe(true)
+
+        it 'returns false for a value that is not a Date', ->
+          d1 = new Date('1995-12-17T03:24:00')
+          d2 = '1995-12-17T03:24:00'
+          expect(up.util.isEqual(d1, d2)).toBe(false)
+
       describe 'for a plain Object', ->
 
         it 'returns true for the same reference', ->
@@ -1243,6 +1265,31 @@ describe 'up.util', ->
 
         copy[0] = 2
         expect(args[0]).toBe(1)
+
+      it 'returns the given string (which is immutable)', ->
+        str = "foo"
+        copy = up.util.copy(str)
+        expect(copy).toBe(str)
+
+      it 'returns the given number (which is immutable)', ->
+        number = 123
+        copy = up.util.copy(number)
+        expect(copy).toBe(number)
+
+      it 'copies the given Date object', ->
+        date = new Date('1995-12-17T03:24:00')
+        expect(date.getFullYear()).toBe(1995)
+
+        copy = up.util.copy(date)
+
+        expect(copy.getFullYear()).toBe(1995)
+        expect(copy.getHours()).toBe(3)
+        expect(copy.getMinutes()).toBe(24)
+
+        date.setFullYear(2018)
+
+        expect(copy.getFullYear()).toBe(1995)
+
 
     describe 'up.util.deepCopy', ->
 
