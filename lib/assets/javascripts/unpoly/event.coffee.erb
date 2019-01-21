@@ -114,24 +114,6 @@ up.event = do ->
       // Unbind the listener
       up.off('click', listener)
 
-  \#\#\# Migrating jQuery event handlers to `up.on()`
-
-  Within the event handler, Unpoly will bind `this` to the
-  native DOM element to help you migrate your existing jQuery code to
-  this new syntax.
-
-  So if you had this before:
-
-      $(document).on('click', '.button', function() {
-        $(this).something();
-      });
-
-  ... you can simply copy the event handler to `up.on()`:
-
-      up.on('click', '.button', function() {
-        $(this).something();
-      });
-
   @function up.on
   @param {Element|jQuery} [element=document]
     The element on which to register the event listener.

@@ -6,9 +6,7 @@ DOM helpers
 
 The `up.element` module offers functions for DOM manipulation and traversal.
 
-`up.element` complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp)
-to implement [jQuery](https://jquery.com/)-like capabilities across all
-[supported browsers](/up.browser).
+It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.browser).
 
 @module up.element
 ###
@@ -17,7 +15,7 @@ up.element = do ->
   u = up.util
 
   ###**
-  Returns a null-object that mimics an `Element`.
+  Returns a null-object that mostly behaves like an `Element`.
 
   @function up.element.none()
   @internal
@@ -235,7 +233,7 @@ up.element = do ->
 #      up.fail('Not an element: %o', element)
 
   ###**
-  Removes the given element from the object tree.
+  Removes the given element from the DOM tree.
 
   If you don't need IE11 support you may also use the built-in
   [`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/remove) to the same effect.
@@ -876,7 +874,7 @@ up.element = do ->
       JSON.parse(json)
 
   ###**
-  Temporarily sets the given inline CSS styles on the given element.
+  Temporarily sets the inline CSS styles on the given element.
 
   Returns a function that restores the original inline styles when called.
 

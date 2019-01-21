@@ -180,7 +180,7 @@ class up.Params
 
   ###**
   Builds an URL string from the given base URL and
-  this `up.Params` object as a [query string](/up.Params.toString).
+  this `up.Params` instance as a [query string](/up.Params.toString).
 
   The base URL may or may not already contain a query string. The
   additional query string will be joined with an `&` or `?` character accordingly.
@@ -436,7 +436,7 @@ class up.Params
 
   See `up.Params.fromForm()` for more details and examples.
 
-  @function up.Params.fromField
+  @function up.Params.fromFields
   @param {Element|List<Element>|jQuery} fields
   @return {up.Params}
   @experimental

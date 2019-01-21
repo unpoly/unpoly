@@ -11,98 +11,137 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
 ### jQuery is no longer required
 
-- jQuery no longer required
-  - now zero dependencies
-  - performance considerations
-  - saves you 30 KB of bundle size
-  - Migration
-    - all unpoly functions that took a jquery collection before still do
-    - instead of up.compiler, use up.$compiler
-    - instead of up.macro, use up.$macro
-    - instead of up.on, use up.$on
-    - when you use $.fn.on to listen to an Unpoly event (`up:` prefix) and access custom properties
-      - use event.originalEvent (or bind with addEventListener or up.on instead)
+jQuery no longer required to use Unpoly. That means Unpoly no longer has any dependencies!
+
+Due to its use of native DOM APIs, Unpoly is now a lot faster. Like, a **lot**. Ditching jQuery also saves you 30 KB of gzipped bundle size and speeds up your own code.
+
+#### Migrating apps that use jQuery
+
+Effort has been made to ensure that migrating to this version is smooth for existing apps that use jQuery.
+
+All Unpoly functions that accept element arguments will accept both native elements and jQuery collections.
+
+You will need to prefix some function calls with `$` to have your callbacks called with jQuery collections instead of native elements:
+
+- The `up.compiler()` callback now receives a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$compiler()`.
+- The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$macro()`.
+- The event handler passed to `up.on()` now receives an element instead of a jQuery collection. For the old behavior, use `up.$on()`.
+
+Finally, all Unpoly events (`up:*`) are now triggered as native events that can be received with [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). You may continue to use jQuery's [`jQuery#on()`](http://api.jquery.com/on/) to listen to Unpoly events, but you need to access custom properties from `event.originalEvent`.
+
+See below for detailed changes.
 
 
 ### New DOM helpers
 
-- New module up.element
-  - explain that they can replace jQuery and enable cross-browser DOM API
-  - function
-    - `up.element.first()`
-    - `up.element.all()`
-    - `up.element.subtree()`
-    - `up.element.closest()`
-    - `up.element.matches()`
-    - `up.element.get()`
-    - `up.element.remove()`
-    - `up.element.toggle()`
-    - `up.element.toggleClass()`
-    - `up.element.hide()`
-    - `up.element.show()`
-    - `up.element.setAttrs()`
-    - `up.element.replace()`
-    - `up.element.createFromSelector()`
-    - `up.element.setAttrs()`
-    - `up.element.affix()`
-    - `up.element.toSelector()`
-    - `up.element.createFromHtml()`
-    - `up.element.booleanAttr()`
-    - `up.element.numberAttr()`
-    - `up.element.jsonAttr()`
-    - `up.element.setTemporaryStyle()`
-    - `up.element.style()`
-    - `up.element.styleNumber()`
-    - `up.element.setStyle()`
-    - `up.element.isVisible()`
-    - `:has()` selector
+A new, experimental `up.element` module offers functions for DOM manipulation and traversal.
 
+It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.browser).
+
+| `up.element.first()` |  Returns the first descendant element matching the given selector.|
+| `up.element.all()` |  Returns all descendant elements matching the given selector.|
+| `up.element.subtree()` |  Returns a list of the given parent's descendants matching the given selector. The list will also include the parent element if it matches the selector itself.|
+| `up.element.closest()` |  Returns the first element that matches the selector by testing the element itself and traversing up through its ancestors in the DOM tree.|
+| `up.element.matches()` |  Matches all elements that have a descendant matching the given selector.|
+| `up.element.get()` |  Casts the given value to a native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element).|
+| `up.element.remove()` |  Removes the given element from the DOM tree.|
+| `up.element.toggle()` |  Display or hide the given element, depending on its current visibility.|
+| `up.element.toggleClass()` |  Adds or removes the given class from the given element.|
+| `up.element.hide()` |  Hides the given element.|
+| `up.element.show()` |  Shows the given element.|
+| `up.element.setAttrs()` |  Sets all key/values from the given object as attributes on the given element.|
+| `up.element.replace()` |  Replaces the given old element with the given new element.|
+| `up.element.createFromSelector()` |  Creates an element matching the given CSS selector.|
+| `up.element.setAttrs()` |  Sets all key/values from the given object as attributes on the given element.|
+| `up.element.affix()` |  Creates an element matching the given CSS selector and attaches it to the given parent element.|
+| `up.element.toSelector()` |  Returns a CSS selector that matches the given element as good as possible.|
+| `up.element.createFromHtml()` |  Creates an element from the given HTML fragment.|
+| `up.element.booleanAttr()` |  Returns the value of the given attribute on the given element, cast as a boolean value.|
+| `up.element.numberAttr()` |  Returns the value of the given attribute on the given element, cast to a number.|
+| `up.element.jsonAttr()` |  Reads the given attribute from the element, parsed as [JSON](https://www.json.org/).|
+| `up.element.setTemporaryStyle()` |  Temporarily sets the inline CSS styles on the given element.|
+| `up.element.style()` |  Receives [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle) for the given element.|
+| `up.element.styleNumber()` |  Receives a [computed CSS property value](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle) for the given element, casted as a number.|
+| `up.element.setStyle()` |  Sets the given CSS properties as inline styles on the given element.|
+| `up.element.isVisible()` |  Returns whether the given element is currently visible.|
+| `:has()` |  A non-standard [pseudo-class](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Pseudo-classes_and_pseudo-elements) that matches all elements that have a descendant matching the given selector. |
 
 ### Events
 
-- up.bus has been renamed to up.event. Future up.thing.verb()
+- The `up.bus` module has been renamed to `up.event`. We want to normalize public API to the pattern `up.thing.verb()` in the future.
+- All Unpoly events (`up:*`) are now triggered as native events that can be received with [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). You may continue to use jQuery's [`jQuery#on()`](http://api.jquery.com/on/) to listen to Unpoly events, but you need to access custom properties from `event.originalEvent`.
+- Properties named `event.$target` and `event.$element` have been removed from all Unpoly events. Use the standard `event.target` instead.
+- `up.on()` may now bind to a given element by passing it as an (optional) first argument:
 
-- up.on() can now bind to one or more elements. Use it for event delegation.
+  ```
+  up.on(element, '.button', 'click', (event) => { ... })
+  ```
 
-- up.on now yields an element instead of a jQuery collection. For the old behavior, use up.$on
+  You may use this for [event delegation](https://davidwalsh.name/event-delegate).
+- The event handler passed to `up.on()` now receives an element instead of a jQuery collection:
 
-- up.emit
-  - now takes initial argument for element on which to trigger
-  - option { message } is now { log }
-  - { $element } etc. is now just { target }
-  - no longer logs by default. you can enable the old efault message with { log: true } option
+  ```
+  up.on('click', (event, element) => {
+    alert("Clicked on an " + element.tagName)
+  })
+  ```
 
-- uses native events that can be received with addEventListener. Use event.originalEvent if you use jQuery.
-- no event has a property `event.$target` or `event.$element` anymore. Use the standard `event.target` instead.
+  For the old behavior, use `up.$on()`.
 
--  up.event.nobodyPrevents option { message } is now { log }
+- `up.emit()` may now trigger an event on a given element by passing it as an (optional) first argument:
+
+  ```
+  up.emit(element, 'app:user:login', { email: 'foo@example.com' })
+  ```
+- `up.emit()` option `{ message }` is now `{ log }`.
+- `up.emit()` no longer logs by default. You can enable the old efault message with `{ log: true }`.
+-  `up.event.nobodyPrevents()` option `{ message }` is now `{ log }`.
+
 
 
 ### Custom JavaScript
 
 - [Compilers](/up.compiler) may again return an array of destructor functions. The previous deprecation was removed.
-- The `up.compiler()` callback now receives a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$compiler()`.
-- The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$macro()`.
+- The `up.compiler()` callback now receives a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection:
+
+  ```
+  up.compiler('.button', function(button) {
+    alert("We have a new button with class " + button.className)
+  })
+  ```
+
+  For the old behavior, use `up.$compiler()`.
+- The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection:
+
+  ```
+  up.compiler('a.fast-link', function(element) {
+    element.setAttribute('up-preload', 'up-preload')
+    element.setAttribute('up-instant', 'up-instant')
+  })
+  ```
+
+  For the old behavior, use `up.$macro()`.
 
 
 ### Request parameters
 
-- The experimental `up.params` module has been replaced with the `up.Params` class.
+The experimental `up.params` module has been replaced with the `up.Params` class:
 
-  - `up.Params#add()` -
-  - `up.Params#addAll()`
-  - `up.Params#addField()`
-  - `up.Params#delete()`
-  - `up.Params#get()`
-  - `up.Params#set()`
-  - `up.Params#toArray()`
-  - `up.Params#toFormData()`
-  - `up.Params#toObject()`
-  - `up.Params#toQuery()`
-  - `up.Params#toURL()`
-  - `up.Params.fromField()`
-  - `up.Params.fromForm()`
-  - `up.Params.fromURL()`
+| `new up.Params()` | Constructor. |
+| `up.Params#add()` | Adds a new entry with the given `name` and `value`. |
+| `up.Params#addAll()` | Adds all entries from the given list of params. |
+| `up.Params#addField()` | Adds params from the given [HTML form field](https://www.w3schools.com/html/html_form_elements.asp). |
+| `up.Params#delete()` | Deletes all entries with the given `name`. |
+| `up.Params#get()` | Returns the first param value with the given `name` from the given `params`. |
+| `up.Params#set()` |  Sets the `value` for the entry with given `name`. |
+| `up.Params#toArray()` | Returns an array representation of this `up.Params` instance. |
+| `up.Params#toFormData()` | Returns a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of this `up.Params` instance. |
+| `up.Params#toObject()` | Returns an object representation of this `up.Params` instance. |
+| `up.Params#toQuery()` | Returns an [query string](https://en.wikipedia.org/wiki/Query_string) for this `up.Params` instance. |
+| `up.Params#toURL()` | Builds an URL string from the given base URL and this `up.Params` instance as a [query string](/up.Params.toString). |
+| `up.Params.fromFields()` | Constructs a new `up.Params` instance from one or more [HTML form field](https://www.w3schools.com/html/html_form_elements.asp). |
+| `up.Params.fromForm()` | Constructs a new `up.Params` instance from the given `<form>`. |
+| `up.Params.fromURL()` | Constructs a new `up.Params` instance from the given URL's [query string](https://en.wikipedia.org/wiki/Query_string). |
 
 
 ### AJAX acceleration
@@ -124,20 +163,21 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   ```
 - The default CSS styles for `.up-popup` has been changed. If you have customized popup styles,
   you should check if your modifications still work with the new defaults.
+- Popups now update their position when the screen is resized.
+- Popups now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
 
-- now re-align when the screen is resized
-- popups now follow scrolling when placed within other viewports
-- [up-position] is now divided into [up-position]/[up-align].
-  Similar { position } is divided into { position } and { align }
+- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`.
+  Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
+  - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
+  - `{ align }` defines the alignment of the popup along its side.
   - When the popup's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
   - When the popup's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
-- new experimental function up.popup.sync()
-- Popups now align with the left side of the anchoring element.
-  They previously align with the right side.
-  To restore the old behavior, set `up.popup.config.align = 'right'`
-- Popup elements are now appended to the respective viewport of the anchor element.
+- New experimental function `up.popup.sync()`. It forces the popup to update its position when a
+  layout change is not detected automatically.
+- popup elements are now appended to the respective viewport of the anchor element.
   They were previously always appended to the end of the `<body>`.
-- `up:popup:open`,`up:popup:opened`, `up:popup:close`, `up:popup:closed` have an { anchor } property
+- The events `up:popup:open`,`up:popup:opened`, `up:popup:close` and `up:popup:closed` have an `{ anchor }` property.
+  It references the element that the popup was [attached](/up.popup.attach()) to.
 
 
 ### Tooltips
@@ -156,10 +196,10 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   you should check if your modifications still work with the new defaults.
 - Tooltips now update their position when the screen is resized.
 - Tooltips now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
-- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`.
- - Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`.
+- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`. Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
   - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
-  - `{ align }` defines the alignment of the popup along its side. When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+  - `{ align }` defines the alignment of the popup along its side.
+  - When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
   - When the tooltip's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
 - New experimental function `up.tooltip.sync()`. It forces the popup to update its position when a
   layout change is not detected automatically.
@@ -183,7 +223,7 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
   });
   ```
 
-  The second argument was previously the observed input element.
+  The second argument was previously the observed input element (as a jQuery collection).
 - `up.observe()` now accepts a `{ batch: true }` option to receive all changes
   since the last callback in a single object:
 
@@ -204,14 +244,14 @@ This project mostly adheres to [Semantic Versioning](http://semver.org/).
 ### Fragment update API
 
 - The experimental function `up.all()` has been removed without replacement
-- `up.dom` has been renamed to `up.fragment`.
+- The module `up.dom` has been renamed to `up.fragment`. We want to normalize public API to the pattern `up.thing.verb()` in the future.
+- The function `up.first()` has been renamed to `up.fragment.first()` to not be confused
+  with the low-level `up.element.first()`.
 - The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed) (emitted after a fragment was removed), remains in the API.
 - The `up:fragment:destroyed` event no longer has a `{ $element }` property. It now has a `{ fragment }` property that contains the detached element. Like before, it is emitted on the parent of the destroyed element.
 - The properties for the `up:fragment:keep` event have been renamed
 - The properties for the `up:fragment:kept` event have been renamed
 - The properties for the `up:fragment:inserted` event have been renamed
-- The function `up.first()` has been renamed to `up.fragment.first()` to not be confused
-  with the low-level `up.element.first()`.`
 
 
 ### Utility functions

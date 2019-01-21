@@ -1,5 +1,3 @@
-- re-test on all browsers
-
 - Update docs
 
   - make existing breadcrumbs only visible on narrow
@@ -25,7 +23,9 @@
 
 - deploy cards with new version
 
-- rc CFP
+- deploy unpoly-guide
+
+- RC CFP
 
 - upgrade roca-style.org PR
   - better claim
