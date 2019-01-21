@@ -893,7 +893,7 @@ up.element = do ->
     An object of CSS property names and values.
   @return {Function()}
     A function that restores the original inline styles when called.
-  @experimental
+  @internal
   ###
   setTemporaryStyle = (element, newStyles, block) ->
     oldStyles = inlineStyle(element, Object.keys(newStyles))

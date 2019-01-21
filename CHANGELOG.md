@@ -34,9 +34,9 @@ See below for detailed changes.
 
 ### New DOM helpers
 
-A new, experimental `up.element` module offers functions for DOM manipulation and traversal.
+A new, experimental `up.element` module offers convience functions for DOM manipulation and traversal.
 
-It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.browser).
+It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.browser) without polyfills.
 
 | `up.element.first()` |  Returns the first descendant element matching the given selector.|
 | `up.element.all()` |  Returns all descendant elements matching the given selector.|
@@ -44,22 +44,21 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 | `up.element.closest()` |  Returns the first element that matches the selector by testing the element itself and traversing up through its ancestors in the DOM tree.|
 | `up.element.matches()` |  Matches all elements that have a descendant matching the given selector.|
 | `up.element.get()` |  Casts the given value to a native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element).|
-| `up.element.remove()` |  Removes the given element from the DOM tree.|
 | `up.element.toggle()` |  Display or hide the given element, depending on its current visibility.|
 | `up.element.toggleClass()` |  Adds or removes the given class from the given element.|
 | `up.element.hide()` |  Hides the given element.|
 | `up.element.show()` |  Shows the given element.|
-| `up.element.setAttrs()` |  Sets all key/values from the given object as attributes on the given element.|
+| `up.element.remove()` |  Removes the given element from the DOM tree.|
 | `up.element.replace()` |  Replaces the given old element with the given new element.|
-| `up.element.createFromSelector()` |  Creates an element matching the given CSS selector.|
 | `up.element.setAttrs()` |  Sets all key/values from the given object as attributes on the given element.|
 | `up.element.affix()` |  Creates an element matching the given CSS selector and attaches it to the given parent element.|
-| `up.element.toSelector()` |  Returns a CSS selector that matches the given element as good as possible.|
+| `up.element.createFromSelector()` |  Creates an element matching the given CSS selector.|
 | `up.element.createFromHtml()` |  Creates an element from the given HTML fragment.|
+| `up.element.toSelector()` |  Returns a CSS selector that matches the given element as good as possible.|
+| `up.element.setAttrs()` |  Sets all key/values from the given object as attributes on the given element.|
 | `up.element.booleanAttr()` |  Returns the value of the given attribute on the given element, cast as a boolean value.|
 | `up.element.numberAttr()` |  Returns the value of the given attribute on the given element, cast to a number.|
 | `up.element.jsonAttr()` |  Reads the given attribute from the element, parsed as [JSON](https://www.json.org/).|
-| `up.element.setTemporaryStyle()` |  Temporarily sets the inline CSS styles on the given element.|
 | `up.element.style()` |  Receives [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle) for the given element.|
 | `up.element.styleNumber()` |  Receives a [computed CSS property value](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle) for the given element, casted as a number.|
 | `up.element.setStyle()` |  Sets the given CSS properties as inline styles on the given element.|
@@ -68,7 +67,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
 ### Events
 
-- The `up.bus` module has been renamed to `up.event`. We want to normalize public API to the pattern `up.thing.verb()` in the future.
+- The `up.bus` module has been renamed to `up.event`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
 - All Unpoly events (`up:*`) are now triggered as native events that can be received with [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). You may continue to use jQuery's [`jQuery#on()`](http://api.jquery.com/on/) to listen to Unpoly events, but you need to access custom properties from `event.originalEvent`.
 - Properties named `event.$target` and `event.$element` have been removed from all Unpoly events. Use the standard `event.target` instead.
 - `up.on()` may now bind to a given element by passing it as an (optional) first argument:
@@ -243,8 +242,8 @@ The experimental `up.params` module has been replaced with the `up.Params` class
 
 ### Fragment update API
 
+- The module `up.dom` has been renamed to `up.fragment`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
 - The experimental function `up.all()` has been removed without replacement
-- The module `up.dom` has been renamed to `up.fragment`. We want to normalize public API to the pattern `up.thing.verb()` in the future.
 - The function `up.first()` has been renamed to `up.fragment.first()` to not be confused
   with the low-level `up.element.first()`.
 - The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed) (emitted after a fragment was removed), remains in the API.
@@ -283,6 +282,7 @@ a mapping function, then flattens the result into a new array.
 - up.util.boolean is now stable
 -  up.util.escapeHtml is now stable
 - up.util.isJQuery now returns false if no jQuery is loaded into the window.jQuery global
+- `up.util.unresolvablePromise()` was removed without replacement.
 
 
 ### Viewports

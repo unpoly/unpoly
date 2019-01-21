@@ -73,7 +73,7 @@ up.event = do ->
         console.log("Someone clicked the button %o", $(this));
       });
 
-  Other than jQuery, Unpoly will silently discard event listeners
+  Other than `addEventListener()`, Unpoly will silently discard event listeners
   on [unsupported browsers](/up.browser.isSupported).
 
   \#\#\# Attaching structured data
@@ -198,10 +198,11 @@ up.event = do ->
   ###**
   Emits a event with the given name and properties.
 
-  The event will be triggered as a jQuery event on `document`.
+  The event will be triggered as an event on `document` or on the given element.
 
   Other code can subscribe to events with that name using
-  [`up.on()`](/up.on) or by [binding a jQuery event listener](http://api.jquery.com/on/) to `document`.
+  [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
+  or [`up.on()`](/up.on).
 
   \#\#\# Example
 
@@ -210,7 +211,7 @@ up.event = do ->
       });
 
       up.emit('my:event', { foo: 'bar' });
-      # Prints "bar" to the console
+      // Prints "bar" to the console
 
   @function up.emit
   @param {Element|jQuery} [target=document]

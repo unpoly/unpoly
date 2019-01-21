@@ -985,7 +985,7 @@ up.util = do ->
 
   Returns a promise that will be resolved when the given task was executed.
 
-  @function up.util.queueMicrotask
+  @function up.util.microtask
   @param {Function()} task
   @return {Promise}
   @experimental
@@ -1081,7 +1081,7 @@ up.util = do ->
   Returns a promise that will never be resolved.
 
   @function up.util.unresolvablePromise
-  @experimental
+  @internal
   ###
   unresolvablePromise = ->
     new Promise(noop)

@@ -43,8 +43,10 @@ up.syntax = do ->
   Use compilers to activate your custom Javascript behavior on matching
   elements.
 
-  You should migrate your [jQuery ready callbacks](https://api.jquery.com/ready/)
-  to compilers.
+  You should migrate your [`DOMContentLoaded`](https://api.jquery.com/ready/)
+  callbacks to compilers. This will make sure they run both at page load and
+  when [a new fragment is inserted later](/a-up-target).
+  It will also organize your JavaScript snippets by selector of affected elements.
 
 
   \#\#\# Example
@@ -53,8 +55,8 @@ up.syntax = do ->
   We can implement this behavior as a compiler function that is called on all elements matching
   the `.action` selector:
 
-      up.compiler('.action', function($element) {
-        $element.on('click', function() {
+      up.compiler('.action', function(element) {
+        element.addEventListener('click', function() {
           alert('Action was clicked!');
         });
       });
@@ -63,9 +65,9 @@ up.syntax = do ->
   the page loads, or when a matching fragment is [inserted](/up.replace) later.
 
 
-  \#\#\# Integrating jQuery plugins
+  \#\#\# Integrating JavaScript libraries
 
-  `up.compiler()` is a great way to integrate jQuery plugins.
+  `up.compiler()` is a great way to integrate JavaScript plugins.
   Let's say your JavaScript plugin wants you to call `lightboxify()`
   on links that should open a lightbox. You decide to
   do this for all links with an `lightbox` class:
@@ -75,9 +77,9 @@ up.syntax = do ->
 
   This JavaScript will do exactly that:
 
-      up.compiler('a.lightbox', function($element) {
-        $element.lightboxify();
-      });
+      up.compiler('a.lightbox', function(element) {
+        lightboxify(element)
+      })
 
 
   \#\#\# Custom elements
@@ -88,9 +90,9 @@ up.syntax = do ->
 
   Here is the JavaScript that inserts the current time into to these elements:
 
-      up.compiler('clock', function($element) {
-        var now = new Date();
-        $element.text(now.toString()));
+      up.compiler('clock', function(element) {
+        var now = new Date()
+        element.textContent = nowtoString()
       });
 
 
@@ -113,7 +115,7 @@ up.syntax = do ->
 
         function update() {
           var now = new Date();
-          $element.text(now.toString()));
+          element.textContent = now.toString();
         }
 
         setInterval(update, 1000);
@@ -143,9 +145,8 @@ up.syntax = do ->
 
   The JSON will parsed and handed to your compiler as a second argument:
 
-      up.compiler('.google-map', function($element, pins) {
-
-        var map = new google.maps.Map($element);
+      up.compiler('.google-map', function(element, pins) {
+        var map = new google.maps.Map(element)
 
         pins.forEach(function(pin) {
           var position = new google.maps.LatLng(pin.lat, pin.lng);
@@ -153,33 +154,9 @@ up.syntax = do ->
             position: position,
             map: map,
             title: pin.title
-          });
-        });
-
-      });
-
-
-  \#\#\# Migrating jQuery event handlers to `up.compiler()`
-
-  Within the compiler, Unpoly will bind `this` to the
-  native DOM element to help you migrate your existing jQuery code to
-  this new syntax.
-
-  So if you had this before:
-
-      $(function() {
-        $('.action').on('click', function() {
-          $(this).something();
-        });
-      });
-
-  ... you can reuse the callback function like this:
-
-      up.compiler('.action', function($element) {
-        $element.on('click', function() {
-          $(this).something();
-        });
-      });
+          })
+        })
+      })
 
   
   @function up.compiler
@@ -198,7 +175,7 @@ up.syntax = do ->
     [page updates](/a-up-target).
 
     This has the same effect as setting an `up-keep` attribute on the element.
-  @param {Function($element, data)} compiler
+  @param {Function(element, data)} compiler
     The function to call when a matching element is inserted.
     The function takes the new element as the first argument (as a jQuery object).
     If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
@@ -240,20 +217,20 @@ up.syntax = do ->
       <a href="/page2" up-target=".content" up-transition="cross-fade" up-duration="300">Page 2</a>
       <a href="/page3" up-target=".content" up-transition="cross-fade" up-duration="300">Page 3</a>
 
-  We would much rather define a new `content-link` attribute that let's us
+  We would much rather define a new `[content-link]` attribute that let's us
   write the same links like this:
 
       <a href="/page1" content-link>Page 1</a>
       <a href="/page2" content-link>Page 2</a>
       <a href="/page3" content-link>Page 3</a>
 
-  We can define the `content-link` attribute by registering a macro that
-  sets the `up-target`, `up-transition` and `up-duration` attributes for us:
+  We can define the `[content-link]` attribute by registering a macro that
+  sets the `[up-target]`, `[up-transition]` and `[up-duration]` attributes for us:
 
-      up.macro('[content-link]', function($link) {
-        $link.attr('up-target', '.content');
-        $link.attr('up-transition', 'cross-fade');
-        $link.attr('up-duration', '300');
+      up.macro('[content-link]', function(link) {
+        link.setAttribute('up-target', '.content');
+        link.setAttribute('up-transition', 'cross-fade');
+        link.setAttribute('up-duration', '300');
       });
 
   Examples for built-in macros are [`a[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand).
@@ -263,7 +240,7 @@ up.syntax = do ->
     The selector to match.
   @param {Object} options
     See options for [`up.compiler()`](/up.compiler).
-  @param {Function($element, data)} macro
+  @param {Function(element, data)} macro
     The function to call when a matching element is inserted.
     See [`up.compiler()`](/up.compiler) for details.
   @stable
