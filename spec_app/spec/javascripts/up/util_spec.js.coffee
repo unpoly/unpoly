@@ -933,17 +933,17 @@ describe 'up.util', ->
       it 'puts a #hash behind the query string', ->
         expect(up.util.normalizeUrl('http://example.com/foo/bar?key=value#fragment', hash: true)).toBe('http://example.com/foo/bar?key=value#fragment')
 
-    describe 'up.util.detect', ->
+    describe 'up.util.find', ->
 
       it 'finds the first element in the given array that matches the given tester', ->
         array = ['foo', 'bar', 'baz']
         tester = (element) -> element[0] == 'b'
-        expect(up.util.detect(array, tester)).toEqual('bar')
+        expect(up.util.find(array, tester)).toEqual('bar')
 
       it "returns undefined if the given array doesn't contain a matching element", ->
         array = ['foo', 'bar', 'baz']
         tester = (element) -> element[0] == 'z'
-        expect(up.util.detect(array, tester)).toBeUndefined()
+        expect(up.util.find(array, tester)).toBeUndefined()
 
     describe 'up.util.remove', ->
 

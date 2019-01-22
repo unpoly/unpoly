@@ -465,7 +465,7 @@ up.form = do ->
   findSwitcherForTarget = (target) ->
     form = closestContainer(target)
     switchers = e.all(form, '[up-switch]')
-    switcher = u.detect switchers, (switcher) ->
+    switcher = u.find switchers, (switcher) ->
       targetSelector = switcher.getAttribute('up-switch')
       e.matches(target, targetSelector)
     return switcher or u.fail('Could not find [up-switch] field for %o', target)

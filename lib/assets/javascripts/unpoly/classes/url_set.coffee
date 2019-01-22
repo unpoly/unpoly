@@ -23,10 +23,10 @@ class up.UrlSet
     pattern = pattern.replace(new RegExp(placeholder, 'g'), '.*?')
     pattern = new RegExp('^' + pattern + '$')
 
-    u.detect @urls, (url) -> pattern.test(url)
+    u.find @urls, (url) -> pattern.test(url)
 
   matchesAny: (testUrls) =>
-    u.detect(testUrls, @matches)
+    u.find(testUrls, @matches)
 
   "#{u.isEqual.key}": (otherSet) =>
     u.isEqual(@urls, otherSet?.urls)

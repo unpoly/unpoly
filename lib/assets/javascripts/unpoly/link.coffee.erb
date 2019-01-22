@@ -264,7 +264,7 @@ up.link = do ->
   @internal
   ###
   followVariantForLink = (link, options = {}) ->
-    variant = u.detect followVariants, (variant) -> variant.matchesLink(link)
+    variant = u.find followVariants, (variant) -> variant.matchesLink(link)
     variant ||= DEFAULT_FOLLOW_VARIANT unless options.default is false
     variant
 

@@ -23,7 +23,7 @@ class up.Selector
      root.querySelector(@selector)
     else
       candidates = root.querySelectorAll(@selector)
-      u.detect(candidates, @filterFn)
+      u.find(candidates, @filterFn)
 
   subtree: (root) ->
     matches = []

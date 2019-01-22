@@ -417,7 +417,7 @@ up.viewport = do ->
     body = document.body
     html = document.documentElement
 
-    element = u.detect([html, body], wasChosenAsOverflowingElement)
+    element = u.find([html, body], wasChosenAsOverflowingElement)
     element || getRoot()
 
   ###**

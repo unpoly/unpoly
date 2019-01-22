@@ -352,7 +352,7 @@ class up.Params
     The value of the param with the given name.
   ###
   getFirst: (name) ->
-    entry = u.detect(@entries, @matchEntryFn(name))
+    entry = u.find(@entries, @matchEntryFn(name))
     entry?.value
 
   ###**

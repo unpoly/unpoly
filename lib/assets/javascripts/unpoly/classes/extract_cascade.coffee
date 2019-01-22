@@ -39,7 +39,7 @@ class up.ExtractCascade
     @detectPlan('matchExists')
 
   detectPlan: (checker) =>
-    u.detect @plans, (plan) -> plan[checker]()
+    u.find @plans, (plan) -> plan[checker]()
 
   bestPreflightSelector: =>
     if @options.provideTarget

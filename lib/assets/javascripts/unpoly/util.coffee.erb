@@ -775,13 +775,13 @@ up.util = do ->
 
   If no object matches, returns `undefined`.
 
-  @function up.util.detect
+  @function up.util.find
   @param {List<T>} list
   @param {Function(value): boolean} tester
   @return {T|undefined}
   @stable
   ###
-  detect = (list, tester) ->
+  findInList = (list, tester) ->
     match = undefined
     for element in list
       if tester(element)
@@ -1572,7 +1572,10 @@ up.util = do ->
   all: ->
     up.warn('Deprecated: up.util.all() has been renamed to up.util.every()')
     every.apply(null, arguments)
-  detect: detect
+  detect: ->
+    up.warn('Deprecated: up.util.find() has been renamed to up.util.find()')
+    findInList.apply(null, arguments)
+  find: findInList
   select: ->
     up.warn('Deprecated: up.util.select() has been renamed to up.util.filter()')
     filterList.apply(null, arguments)

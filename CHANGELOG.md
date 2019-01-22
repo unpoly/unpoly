@@ -277,8 +277,11 @@ a mapping function, then flattens the result into a new array.
 - up.util.any was renamed to up.util.any to be more in line with the standard
   [`Array#some()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
 
-- up.util.select was renamed to up.util.filter to be more in line with the standard
+- up.util.select was renamed to `up.util.filter()`` to be more in line with the standard
   [`Array#filter()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+
+- up.util.detect was renamed to `up.util.util()`` to be more in line with the standard
+  [`Array#find()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
 
 
 - were any experimental/public functions moved to up.element?
@@ -292,7 +295,7 @@ a mapping function, then flattens the result into a new array.
 - `up.util.nextFrame()` has been renamed to `up.util.task()`.
 - `up.util.reject()` now works for all [array-like values](/up.util.isList), not just arrays
 - `up.util.filter` now works for all [array-like values](/up.util.isList), not just arrays
-- `up.util.detect` now works for all [array-like values](/up.util.isList), not just arrays
+- `up.util.find` now works for all [array-like values](/up.util.isList), not just arrays
 - `up.util.some` now works for all [array-like values](/up.util.isList), not just arrays
 - `up.util.every` now works for all [array-like values](/up.util.isList), not just arrays
 
