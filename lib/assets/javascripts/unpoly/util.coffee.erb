@@ -1566,11 +1566,11 @@ up.util = do ->
   detectResult: detectResult
   some: some
   any: ->
-    up.warn('Deprecated: up.any() has been renamed to up.some()')
+    up.warn('Deprecated: up.util.any() has been renamed to up.util.some()')
     some.apply(null, arguments)
   every: every
   all: ->
-    up.warn('Deprecated: up.all() has been renamed to up.every()')
+    up.warn('Deprecated: up.util.all() has been renamed to up.util.every()')
     every.apply(null, arguments)
   detect: detect
   select: ->
