@@ -38,7 +38,7 @@ class up.Tether
 
   scheduleSync: =>
     clearTimeout(@syncTimer)
-    @syncTimer = u.nextFrame(@sync)
+    @syncTimer = u.task(@sync)
 
   sync: =>
     rootBox = @root.getBoundingClientRect()

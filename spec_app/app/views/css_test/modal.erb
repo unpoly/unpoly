@@ -3,12 +3,12 @@
   up.compiler('.clamped-open', function($link) {
     $link.on('click', function(event) {
       event.preventDefault();
-      u.nextFrame(function() {
-        u.nextFrame(function() {
-          u.nextFrame(function() {
-            u.nextFrame(function() {
-              u.nextFrame(function() {
-                u.nextFrame(function() {
+      u.task(function() {
+        u.task(function() {
+          u.task(function() {
+            u.task(function() {
+              u.task(function() {
+                u.task(function() {
                   up.modal.follow($link, {
                     target: '.contents',
                     duration: 1000

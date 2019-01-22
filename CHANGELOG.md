@@ -272,9 +272,11 @@ a mapping function, then flattens the result into a new array.
 - up.util.copy now works with `Date` objects
 - up.util.copy.key
 - up.util.toArray now returns an argument unchanged if the argument is already an array.
+
 - up.util.all was renamed to up.util.every to be more in line with the standard [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), and to be less confusing with up.element.all and up.fragment.all
 - up.util.any was renamed to up.util.any to be more in line with the standard
   [`Array#some()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+
 - were any experimental/public functions moved to up.element?
   - `up.util.selectorForElement()` is now `up.element.toSelector()`
 - up.util.trim has been removed without replacement. Use the standard
@@ -283,6 +285,7 @@ a mapping function, then flattens the result into a new array.
 -  up.util.escapeHtml is now stable
 - up.util.isJQuery now returns false if no jQuery is loaded into the window.jQuery global
 - `up.util.unresolvablePromise()` was removed without replacement.
+- `up.util.nextFrame()` has been renamed to `up.util.task()`.
 
 
 ### Viewports

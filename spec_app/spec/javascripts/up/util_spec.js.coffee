@@ -539,10 +539,10 @@ describe 'up.util', ->
         proxy = up.util.previewable(fun)
         callback = jasmine.createSpy('promise callback')
         proxy.promise.then(callback)
-        u.nextFrame ->
+        u.task ->
           expect(callback).not.toHaveBeenCalled()
           proxy()
-          u.nextFrame ->
+          u.task ->
             expect(callback).toHaveBeenCalledWith('return value')
             done()
 
@@ -553,10 +553,10 @@ describe 'up.util', ->
         callback = jasmine.createSpy('promise callback')
         proxy.promise.then(callback)
         proxy()
-        u.nextFrame ->
+        u.task ->
           expect(callback).not.toHaveBeenCalled()
           funDeferred.resolve('return value')
-          u.nextFrame ->
+          u.task ->
             expect(callback).toHaveBeenCalledWith('return value')
             done()
 
@@ -578,7 +578,7 @@ describe 'up.util', ->
         fulfilledPromise = Promise.resolve()
         mutedPromise = up.util.muteRejection(fulfilledPromise)
 
-        u.nextFrame ->
+        u.task ->
           promiseState(mutedPromise).then (result) ->
             expect(result.state).toEqual('fulfilled')
             done()
@@ -587,7 +587,7 @@ describe 'up.util', ->
         rejectedPromise = Promise.reject()
         mutedPromise = up.util.muteRejection(rejectedPromise)
 
-        u.nextFrame ->
+        u.task ->
           promiseState(mutedPromise).then (result) ->
             expect(result.state).toEqual('fulfilled')
             done()

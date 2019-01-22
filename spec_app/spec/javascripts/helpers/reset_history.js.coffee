@@ -8,7 +8,7 @@ beforeAll ->
   @titleBeforeSuite = document.title
 
 afterAll (done) ->
-  up.util.nextFrame =>
+  up.util.task =>
     history.replaceState?({ fromResetPathHelper: true }, '', @hrefBeforeSuite)
     document.title = @titleBeforeSuite
     done()

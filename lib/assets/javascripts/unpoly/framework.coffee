@@ -45,7 +45,7 @@ up.framework = do ->
       up.emit('up:framework:booted', log: 'Framework booted')
       isBooting = false
 
-      u.nextFrame ->
+      u.task ->
         # At this point all user-provided compilers have been registered.
         up.event.onReady ->
           # The following event will cause Unpoly to compile the <body>

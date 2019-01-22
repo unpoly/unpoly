@@ -168,13 +168,13 @@ describe 'up.fragment', ->
             $fixture('.after')
             promise = up.replace('.middle', '/path', failTarget: '.after')
 
-            u.nextFrame =>
+            u.task =>
               promiseState(promise).then (result) =>
                 expect(result.state).toEqual('pending')
 
                 @respond(status: 500)
 
-                u.nextFrame =>
+                u.task =>
                   promiseState(promise).then (result) =>
                     expect(result.state).toEqual('rejected')
                     done()
@@ -206,11 +206,11 @@ describe 'up.fragment', ->
             $fixture('.target')
             promise = up.replace('.middle', '/path')
 
-            u.nextFrame =>
+            u.task =>
               promiseState(promise).then (result) =>
                 expect(result.state).toEqual('pending')
                 @lastRequest().responseError()
-                u.nextFrame =>
+                u.task =>
                   promiseState(promise).then (result) =>
                     expect(result.state).toEqual('rejected')
                     done()
@@ -938,13 +938,13 @@ describe 'up.fragment', ->
               $target.remove()
               $fallback.remove()
 
-              u.nextFrame =>
+              u.task =>
                 @respondWith """
                   <div class="target">new target</div>
                   <div class="fallback">new fallback</div>
                 """
 
-                u.nextFrame =>
+                u.task =>
                   promiseState(promise).then (result) ->
                     expect(result.state).toEqual('rejected')
                     expect(result.value).toBeError(/Could not find target in current page/i)
@@ -990,7 +990,7 @@ describe 'up.fragment', ->
               promise = up.replace('.target', '/path', fallback: false)
               $target.remove()
 
-              u.nextFrame =>
+              u.task =>
                 @respondWith """
                   <div class="target">new target</div>
                   <div class="fallback">new fallback</div>
@@ -1026,7 +1026,7 @@ describe 'up.fragment', ->
                 $fallback = $fixture('.fallback').text('old fallback')
                 promise = up.replace('.target', '/path', fallback: '.fallback')
 
-                u.nextFrame =>
+                u.task =>
                   @respondWith '<div class="unexpected">new unexpected</div>'
 
                 promise.catch (e) ->
@@ -1039,7 +1039,7 @@ describe 'up.fragment', ->
                 promise = up.replace('.target', '/path', fallback: '.fallback')
                 navigate = spyOn(up.browser, 'navigate')
 
-                u.nextFrame =>
+                u.task =>
                   @respondWith '<div class="unexpected">new unexpected</div>'
 
                 promise.catch (e) ->
@@ -1051,7 +1051,7 @@ describe 'up.fragment', ->
 
                   Trigger.clickSequence($inspectLink)
 
-                  u.nextFrame =>
+                  u.task =>
                     expect(navigate).toHaveBeenCalledWith('/path', {})
                     done()
 
@@ -1091,7 +1091,7 @@ describe 'up.fragment', ->
               $fallback = $fixture('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: false)
 
-              u.nextFrame =>
+              u.task =>
                 @respondWith '<div class="fallback">new fallback</div>'
 
               promise.catch (e) ->
@@ -1136,7 +1136,7 @@ describe 'up.fragment', ->
               promise = up.replace('.middle', '/path')
               @respond()
 
-              u.nextFrame ->
+              u.task ->
                 promiseState(promise).then (result) ->
                   expect(result.state).toEqual('fulfilled')
                   expect(window.scriptTagExecuted).not.toHaveBeenCalled()
@@ -1169,7 +1169,7 @@ describe 'up.fragment', ->
 
                 # Now wait for jQuery to parse out <script> tags and fetch the linked scripts.
                 # This actually happens with jasmine_ajax's fake XHR object.
-                u.nextFrame =>
+                u.task =>
                   expect(jasmine.Ajax.requests.count()).toEqual(1)
                   expect(@lastRequest().url).not.toContain('linked_script')
                   expect(window.scriptTagExecuted).not.toHaveBeenCalled()

@@ -116,7 +116,7 @@ describe 'up.motion', ->
 
           up.animate($element, animation, duration: 200, easing: 'linear')
 
-          u.nextFrame =>
+          u.task =>
             expect(up.motion.finishCount()).toEqual(1)
             done()
 

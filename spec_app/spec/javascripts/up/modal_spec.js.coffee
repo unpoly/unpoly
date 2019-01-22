@@ -16,7 +16,7 @@ describe 'up.modal', ->
         $link = $fixture('a[href="/path/to"][up-modal=".middle"]').text('link')
         promise = up.modal.follow($link)
 
-        u.nextFrame =>
+        u.task =>
           expect(@lastRequest().url).toMatch /\/path\/to$/
           @respondWith """
             <div class="before">new-before</div>
@@ -64,7 +64,7 @@ describe 'up.modal', ->
 
         promise = up.modal.visit('/foo', target: '.middle')
 
-        u.nextFrame =>
+        u.task =>
           @respondWith """
             <div class="before">new-before</div>
             <div class="middle">new-middle</div>
@@ -86,7 +86,7 @@ describe 'up.modal', ->
 
         promise = up.modal.visit('/foo', target: '.target', failTarget: '.error')
 
-        u.nextFrame =>
+        u.task =>
           @respondWith
             status: 500
             responseText: """
@@ -120,7 +120,7 @@ describe 'up.modal', ->
 
             promise = up.modal.visit('/foo', target: '.container')
 
-            u.nextFrame =>
+            u.task =>
               @respondWith('<div class="container">text</div>')
 
             promise.then ->
@@ -205,7 +205,7 @@ describe 'up.modal', ->
 
             promise = up.modal.visit('/foo', target: '.container')
 
-            u.nextFrame =>
+            u.task =>
               @respondWith('<div class="container">text</div>')
 
             promise.then ->
@@ -231,7 +231,7 @@ describe 'up.modal', ->
           # This will discard the first request immediately.
           up.modal.visit('/path2', target: '.container', animation: 'fade-in', duration: 50)
 
-          u.nextFrame =>
+          u.task =>
             # The second modal has survived
             expect(jasmine.Ajax.requests.count()).toEqual(1)
             expect(@lastRequest().url).toMatchUrl('/path2')
@@ -244,7 +244,7 @@ describe 'up.modal', ->
               up.modal.visit('/path3', target: '.container', animation: 'fade-in', duration: 50)
 
               # Load a third modal before the second was done opening
-              u.nextFrame =>
+              u.task =>
                 # Since we're still opening the second modal, no request has been made.
                 expect(jasmine.Ajax.requests.count()).toEqual(1)
 
@@ -405,7 +405,7 @@ describe 'up.modal', ->
 
           expect(up.modal.coveredUrl()).toBeMissing()
           visitPromise = up.modal.visit('/bar', target: '.container')
-          u.nextFrame =>
+          u.task =>
             @respondWith('<div class="container">text</div>')
             visitPromise.then ->
               expect(up.modal.coveredUrl()).toMatchUrl('/foo')
@@ -449,7 +449,7 @@ describe 'up.modal', ->
       it 'closes a currently open modal', (done) ->
         up.modal.extract('.content', '<div class="content">Modal content</div>')
 
-        u.nextFrame =>
+        u.task =>
           expect('.up-modal .content').toBeAttached()
 
           up.modal.close().then ->

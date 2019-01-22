@@ -28,10 +28,10 @@ describe 'up.DivertibleChain', ->
         up.specUtil.promiseTimer(100) # delay execution of next timer
 
       chain.asap(timer1)
-      u.nextFrame ->
+      u.task ->
         expect(timer1Spy).toHaveBeenCalled()
         chain.asap(timer2)
-        u.nextFrame ->
+        u.task ->
           # timer2 is still waiting for timer1 to finish
           expect(timer2Spy).not.toHaveBeenCalled()
           # Override the (2..n)th tasks. This unschedules timer2.

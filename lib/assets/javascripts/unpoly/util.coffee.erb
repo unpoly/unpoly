@@ -959,7 +959,7 @@ up.util = do ->
   ###**
   Waits for the given number of milliseconds, the runs the given callback.
 
-  Instead of `up.util.setTimer(0, fn)` you can also use [`up.util.nextFrame(fn)`](/up.util.nextFrame).
+  Instead of `up.util.setTimer(0, fn)` you can also use [`up.util.task(fn)`](/up.util.task).
 
   @function up.util.setTimer
   @param {number} millis
@@ -970,27 +970,28 @@ up.util = do ->
     setTimeout(callback, millis)
 
   ###**
-  Schedules the given function to be called in the
-  next JavaScript execution frame.
+  Pushes the given function to the [JavaScript task queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) (also "macrotask queue").
 
-  @function up.util.nextFrame
+  Equivalent to calling `setTimeout(fn, 0)`.
+
+  Also see `up.util.microtask()`.
+
+  @function up.util.task
   @param {Function()} block
   @stable
   ###
-  nextFrame = (block) ->
+  queueTask = (block) ->
     setTimeout(block, 0)
 
   ###**
-  Queue a function to be executed in the next microtask.
-
-  Returns a promise that will be resolved when the given task was executed.
+  Pushes the given function to the [JavaScript microtask queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
 
   @function up.util.microtask
   @param {Function()} task
   @return {Promise}
   @experimental
   ###
-  microtask = (task) ->
+  queueMicrotask = (task) ->
     Promise.resolve().then(task)
 
   ###**
@@ -1604,7 +1605,6 @@ up.util = do ->
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   setTimer: setTimer
-  nextFrame: nextFrame
   escapePressed: escapePressed
   contains: contains
   toArray: toArray
@@ -1637,7 +1637,11 @@ up.util = do ->
   rejectOnError: rejectOnError
   isBasicObjectProperty: isBasicObjectProperty
   isCrossDomain: isCrossDomain
-  microtask: microtask
+  nextFrame: ->
+    up.warn('Deprecated: up.util.nextFrame() has been renamed to up.util.task()')
+    queueTask.apply(null, arguments)
+  task: queueTask
+  microtask: queueMicrotask
   isEqual: isEqual
   splitValues : splitValues
   endsWith: endsWith

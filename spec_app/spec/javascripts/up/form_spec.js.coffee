@@ -264,7 +264,7 @@ describe 'up.form', ->
   #          callback = jasmine.createSpy('change callback')
   #          up.observe($form, callback)
   #          $radio2.get(0).click()
-  #          u.nextFrame ->
+  #          u.task ->
   #            expect(callback.calls.count()).toEqual(1)
 
 

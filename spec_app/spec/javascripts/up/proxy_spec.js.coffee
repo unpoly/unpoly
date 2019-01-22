@@ -46,7 +46,7 @@ describe 'up.proxy', ->
           target: '.target'
         )
 
-        u.nextFrame =>
+        u.task =>
           @respondWith(
             status: 201,
             responseText: 'response-text'
@@ -70,7 +70,7 @@ describe 'up.proxy', ->
       it 'resolves to a Response that contains the response headers', (done) ->
         promise = up.request(url: '/url')
 
-        u.nextFrame =>
+        u.task =>
           @respondWith
             responseHeaders: { 'foo': 'bar', 'baz': 'bam' }
             responseText: 'hello'
@@ -86,7 +86,7 @@ describe 'up.proxy', ->
       it "preserves the URL hash in a separate { hash } property, since although it isn't sent to server, code might need it to process the response", (done) ->
         promise = up.request('/url#hash')
 
-        u.nextFrame =>
+        u.task =>
           request = @lastRequest()
           expect(request.url).toMatchUrl('/url')
 
@@ -108,7 +108,7 @@ describe 'up.proxy', ->
             target: '.target'
           )
 
-          u.nextFrame =>
+          u.task =>
             @respondWith(
               responseHeaders:
                 'X-Up-Location': '/redirect'
@@ -127,7 +127,7 @@ describe 'up.proxy', ->
         it 'sets the { url } property on the response object', (done) ->
           promise = up.request('/request-url#request-hash')
 
-          u.nextFrame =>
+          u.task =>
             @respondWith
               responseHeaders:
                 'X-Up-Location': '/response-url'
@@ -216,7 +216,7 @@ describe 'up.proxy', ->
         it 'sets the { url } property on the response object', (done) ->
           promise = up.request('/request-url#request-hash')
 
-          u.nextFrame =>
+          u.task =>
             @respondWith
               responseURL: '/response-url'
 
@@ -328,7 +328,7 @@ describe 'up.proxy', ->
           givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
           promise = up.request(url: '/path', method: 'get', params: givenParams)
 
-          u.nextFrame =>
+          u.task =>
             expect(@lastRequest().url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
             expect(@lastRequest().data()).toBeBlank()
 
@@ -557,7 +557,7 @@ describe 'up.proxy', ->
 
           promise = up.request('/bar')
 
-          u.nextFrame ->
+          u.task ->
             expect(listener).toHaveBeenCalled()
             expect(jasmine.Ajax.requests.count()).toEqual(0)
 
@@ -579,7 +579,7 @@ describe 'up.proxy', ->
           promise1 = up.request('/path1')
           promise2 = up.request('/path2')
 
-          u.nextFrame =>
+          u.task =>
             expect(listener.calls.count()).toBe(2)
             expect(jasmine.Ajax.requests.count()).toEqual(1)
             expect(@lastRequest().url).toMatchUrl('/path2')
@@ -593,7 +593,7 @@ describe 'up.proxy', ->
 
           up.request('/path1')
 
-          u.nextFrame =>
+          u.task =>
             expect(@lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
             done()
 
