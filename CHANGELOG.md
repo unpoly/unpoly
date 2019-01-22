@@ -259,7 +259,7 @@ The experimental `up.params` module has been replaced with the `up.Params` class
  - The `{ pathname }` property now always begins with leading slash on IE11.
 - New experimental function `up.util.isList()`. It returns whether the given argument is an array-like value, like an `Array` or a
   [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
-- New experimental function `up.util.detectResult()`.
+- New experimental function `up.util.findResult()`.
   It consecutively calls the given function which each element in the given array and
   returns the first truthy return value.
 - New experimental function `up.util.flatten()`. This flattens the given `array` a single level deep.

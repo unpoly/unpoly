@@ -812,7 +812,7 @@ describe 'up.util', ->
         up.util.some nodeList, callback
         expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
 
-    describe 'up.util.detectResult', ->
+    describe 'up.util.findResult', ->
 
       it 'consecutively applies the function to each array element and returns the first truthy return value', ->
         map = {
@@ -824,14 +824,14 @@ describe 'up.util', ->
         }
         fn = (el) -> map[el]
 
-        result = up.util.detectResult ['a', 'b', 'c', 'd', 'e'], fn
+        result = up.util.findResult ['a', 'b', 'c', 'd', 'e'], fn
         expect(result).toEqual('DEH')
 
       it 'returns undefined if the function does not return a truthy value for any element in the array', ->
         map = {}
         fn = (el) -> map[el]
 
-        result = up.util.detectResult ['a', 'b', 'c'], fn
+        result = up.util.findResult ['a', 'b', 'c'], fn
         expect(result).toBeUndefined()
 
       it 'iterates over an array-like value', ->
@@ -841,7 +841,7 @@ describe 'up.util', ->
 
         callback = jasmine.createSpy()
 
-        up.util.detectResult nodeList, callback
+        up.util.findResult nodeList, callback
         expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
 
     describe 'up.util.isBlank', ->

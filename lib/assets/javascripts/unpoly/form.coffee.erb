@@ -328,7 +328,7 @@ up.form = do ->
 
   findValidateTarget = (field, options) ->
     option = options.target ? field.getAttribute('up-validate')
-    option ||= u.detectResult config.validateTargets, (defaultTarget) ->
+    option ||= u.findResult config.validateTargets, (defaultTarget) ->
       resolvedDefault = e.resolveSelector(defaultTarget, options.origin)
       if e.first(resolvedDefault)
         # We want to return the selector, *not* the element. If we returned the element

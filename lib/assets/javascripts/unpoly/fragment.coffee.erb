@@ -745,12 +745,12 @@ up.fragment = do ->
       # Make the origin's layer the top priority
       u.remove(layers, originLayer)
       layers.unshift(originLayer)
-    u.detectResult layers, (layer) ->
+    u.findResult layers, (layer) ->
       return firstInLayer(parent, selector, layer)
 
   firstInLayer = (parent, selector, layer) ->
     elements = e.all(parent, selector)
-    return u.detectResult elements, (element) ->
+    return u.findResult elements, (element) ->
       if isRealElement(element) && matchesLayer(element, layer)
         return element
 

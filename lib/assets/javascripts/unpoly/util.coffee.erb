@@ -802,7 +802,7 @@ up.util = do ->
   @stable
   ###
   some = (list, tester) ->
-    !!detectResult(list, tester)
+    !!findResult(list, tester)
 
   ###**
   Consecutively calls the given function which each element
@@ -811,7 +811,7 @@ up.util = do ->
   Returned `undefined` iff the function does not return a truthy
   value for any element in the array.
 
-  @function up.util.detectResult
+  @function up.util.findResult
   @param {Array} array
   @param {Function(element): any} tester
     A function that will be called with each element and (optional) iteration index.
@@ -819,7 +819,7 @@ up.util = do ->
   @return {any|undefined}
   @experimental
   ###
-  detectResult = (array, tester) ->
+  findResult = (array, tester) ->
     tester = listBlock(tester)
     for element, index in array
       if result = tester(element, index)
@@ -1563,7 +1563,7 @@ up.util = do ->
   flatMap: flatMap
   mapObject: mapObject
   times: times
-  detectResult: detectResult
+  findResult: findResult
   some: some
   any: ->
     up.warn('Deprecated: up.util.any() has been renamed to up.util.some()')
