@@ -237,7 +237,8 @@ The experimental `up.params` module has been replaced with the `up.Params` class
 
 ### Animation
 
-- CSS property names for custom [animations](/up.animation) and [transitions](/up.transition) must be given in `kebab-case`. `camelCase` properties are no longer supported.
+- CSS property names for custom [animations](/up.animation) and [transitions](/up.transition) must be given in `kebab-case`.
+  `camelCase` properties are no longer supported.
 
 
 ### Fragment update API
@@ -255,49 +256,43 @@ The experimental `up.params` module has been replaced with the `up.Params` class
 
 ### Utility functions
 
-- `up.util.parseUrl()` now returns the correct `{ hostname }` und `{ protocol }` on IE11.
- - The `{ pathname }` property now always begins with leading slash on IE11.
+- `up.util.parseUrl()` now returns the correct `{ hostname }`, `{ protocol }` and `{ pathname }` properties on IE11.
 - New experimental function `up.util.isList()`. It returns whether the given argument is an array-like value, like an `Array` or a
   [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
 - New experimental function `up.util.findResult()`.
   It consecutively calls the given function which each element in the given array and
   returns the first truthy return value.
 - New experimental function `up.util.flatten()`. This flattens the given `array` a single level deep.
-- new experimental function `up.util.flatMap()`. This maps each element using
-a mapping function, then flattens the result into a new array.
-- new experimental function up.util.isEqual
-- up.util.isEqual.key
-- up.util.isBlank now returns false for unsimple objects
-- up.util.isBlank.key
-- up.util.copy now works with `Date` objects
-- up.util.copy.key
-- up.util.toArray now returns an argument unchanged if the argument is already an array.
-
-- up.util.all was renamed to up.util.every to be more in line with the standard [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), and to be less confusing with up.element.all and up.fragment.all
-- up.util.any was renamed to up.util.any to be more in line with the standard
+- New experimental function `up.util.flatMap()`. This maps each element using a mapping function, then flattens the result into a new array.
+- New experimental function `up.util.isEqual()`. It returns whether the given arguments are equal by value.
+- New experimental property `up.util.isEqual.key`.
+  This property contains the name of a method that user-defined classes
+  may implement to hook into the `up.util.isEqual()` protocol.
+- `up.util.isBlank()` now returns false for objects with a constructor.
+- New experimental property `up.util.isBlank.key`. This property contains the name of a method that user-defined classes may implement to hook into the `up.util.isBlank()` protocol.
+- `up.util.copy()`` now works with `Date` objects.
+- New experimental property `up.util.copy.key`. This property contains the name of a method that user-defined classes may implement to hook into the `up.util.copy()` protocol.
+- `up.util.toArray() now returns its unchanged argument if the argument is already an array.
+- `up.util.all()`` was renamed to `up.util.every()` to match the standard [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), and to be less confusing with up.element.all and up.fragment.all
+- `up.util.any()`` was renamed to `up.util.some()` to match the standard
   [`Array#some()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
-
-- up.util.select was renamed to `up.util.filter()`` to be more in line with the standard
+- `up.util.select()` was renamed to `up.util.filter()`` to match the standard
   [`Array#filter()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
-
-- up.util.detect was renamed to `up.util.util()`` to be more in line with the standard
+- `up.util.detect()` was renamed to `up.util.find()` to match the standard
   [`Array#find()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
-
-
-- were any experimental/public functions moved to up.element?
-  - `up.util.selectorForElement()` is now `up.element.toSelector()`
+- `up.util.selectorForElement()` is now `up.element.toSelector()`
 - up.util.trim has been removed without replacement. Use the standard
   [`String#trim()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim) instead.
-- up.util.boolean is now stable
--  up.util.escapeHtml is now stable
-- up.util.isJQuery now returns false if no jQuery is loaded into the `window.jQuery` global
+- `up.util.boolean()` is now stable
+- `up.util.escapeHtml()` is now stable
+- `up.util.isJQuery()` now returns `false` if no jQuery is loaded into the `window.jQuery` global
 - `up.util.unresolvablePromise()` was removed without replacement.
 - `up.util.nextFrame()` has been renamed to `up.util.task()`.
-- `up.util.reject()` now works for all [array-like values](/up.util.isList), not just arrays
-- `up.util.filter` now works for all [array-like values](/up.util.isList), not just arrays
-- `up.util.find` now works for all [array-like values](/up.util.isList), not just arrays
-- `up.util.some` now works for all [array-like values](/up.util.isList), not just arrays
-- `up.util.every` now works for all [array-like values](/up.util.isList), not just arrays
+- `up.util.reject()` now works for all [array-like values](/up.util.isList), not just arrays.
+- `up.util.filter()` now works for all [array-like values](/up.util.isList), not just arrays.
+- `up.util.find()` now works for all [array-like values](/up.util.isList), not just arrays.
+- `up.util.some()` now works for all [array-like values](/up.util.isList), not just arrays.
+- `up.util.every()` now works for all [array-like values](/up.util.isList), not just arrays.
 
 
 ### Viewports
