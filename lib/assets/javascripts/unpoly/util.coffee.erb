@@ -1643,6 +1643,9 @@ up.util = do ->
   rejectOnError: rejectOnError
   isBasicObjectProperty: isBasicObjectProperty
   isCrossDomain: isCrossDomain
+  selectorForElement: ->
+    up.warn('Deprecated: up.util.selectorForElement() has been renamed to up.element.toSelector()')
+    up.element.toSelector.apply(null, arguments)
   nextFrame: ->
     up.warn('Deprecated: up.util.nextFrame() has been renamed to up.util.task()')
     queueTask.apply(null, arguments)
