@@ -20,7 +20,7 @@ class up.ExtractCascade
     candidates = [selector, @options.fallback, up.fragment.config.fallbacks]
     candidates = u.flatten(candidates)
     # Remove undefined, null and false from the list
-    candidates = u.select(candidates, u.isTruthy)
+    candidates = u.filter(candidates, u.isTruthy)
     candidates = u.uniq(candidates)
 
     if @options.fallback == false || @options.provideTarget

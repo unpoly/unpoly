@@ -45,7 +45,7 @@ class up.ExtractPlan
     # the same content twice. We never want that, so we only keep the first step.
     compressed = u.uniqBy(compressed, (step) -> step.oldElement)
 
-    compressed = u.select compressed, (candidateStep, candidateIndex) =>
+    compressed = u.filter compressed, (candidateStep, candidateIndex) =>
       u.every compressed, (rivalStep, rivalIndex) =>
         if rivalIndex == candidateIndex
           true

@@ -124,4 +124,4 @@ class up.Cache
 #    keys = u.wrapArray(keys)
 #    matches = u.map keys, (key) =>
 #      @get(key)
-#    u.select(matches, u.isPresent)
+#    u.filter(matches, u.isPresent)

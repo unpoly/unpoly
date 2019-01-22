@@ -15,7 +15,7 @@ class up.Selector
   descendants: (root) ->
     matches = root.querySelectorAll(@selector)
     if @filterFn
-      matches = u.select(matches, @filterFn)
+      matches = u.filter(matches, @filterFn)
     matches
 
   descendant: (root) ->

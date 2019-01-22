@@ -857,7 +857,7 @@ up.util = do ->
   @stable
   ###
   compact = (array) ->
-    select array, isGiven
+    filterList array, isGiven
 
   ###**
   Returns the given array without duplicates.
@@ -886,7 +886,7 @@ up.util = do ->
     return array if array.length < 2
     mapper = listBlock(mapper)
     set = new Set()
-    select array, (elem, index) ->
+    filterList array, (elem, index) ->
       mapped = mapper(elem, index)
       if set.has(mapped)
         false
@@ -916,13 +916,13 @@ up.util = do ->
   Returns all elements from the given [array-like value](/up.util.isList) that return
   a truthy value when passed to the given function.
 
-  @function up.util.select
+  @function up.util.filter
   @param {List} list
   @param {Function(value, index): boolean} tester
   @return {Array}
   @stable
   ###
-  select = (list, tester) ->
+  filterList = (list, tester) ->
     tester = listBlock(tester)
     matches = []
     each list, (element, index) ->
@@ -942,7 +942,7 @@ up.util = do ->
   ###
   reject = (list, tester) ->
     tester = listBlock(tester)
-    select(list, (element, index) -> !tester(element, index))
+    filterList(list, (element, index) -> !tester(element, index))
 
   ###**
   Returns the intersection of the given two arrays.
@@ -953,7 +953,7 @@ up.util = do ->
   @internal
   ###
   intersect = (array1, array2) ->
-    select array1, (element) ->
+    filterList array1, (element) ->
       contains(array2, element)
 
   ###**
@@ -1502,7 +1502,7 @@ up.util = do ->
   splitValues = (value, separator = ' ') ->
     values = value.split(separator)
     values = map values, (v) -> v.trim()
-    values = select(values, isPresent)
+    values = filterList(values, isPresent)
     values
 
   endsWith = (string, search) ->
@@ -1573,7 +1573,10 @@ up.util = do ->
     up.warn('Deprecated: up.all() has been renamed to up.every()')
     every.apply(null, arguments)
   detect: detect
-  select: select
+  select: ->
+    up.warn('Deprecated: up.util.select() has been renamed to up.util.filter()')
+    filterList.apply(null, arguments)
+  filter: filterList
   reject: reject
   intersect: intersect
   compact: compact

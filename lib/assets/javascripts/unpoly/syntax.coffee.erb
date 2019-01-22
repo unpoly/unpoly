@@ -413,8 +413,8 @@ up.syntax = do ->
   @internal
   ###
   reset = ->
-    compilers = u.select(compilers, 'isDefault')
-    macros = u.select(macros, 'isDefault')
+    compilers = u.filter(compilers, 'isDefault')
+    macros = u.filter(macros, 'isDefault')
 
   up.on 'up:framework:reset', reset
 

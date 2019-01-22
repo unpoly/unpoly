@@ -194,7 +194,7 @@ class up.Params
   ###
   toURL: (base) ->
     parts = [base, @toQuery()]
-    parts = u.select(parts, u.isPresent)
+    parts = u.filter(parts, u.isPresent)
     separator = if u.contains(base, '?') then '&' else '?'
     parts.join(separator)
 

@@ -501,21 +501,21 @@ describe 'up.util', ->
         up.util.each nodeList, callback
         expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
 
-    describe 'up.util.select', ->
+    describe 'up.util.filter', ->
 
       it 'returns an array of those elements in the given array for which the given function returns true', ->
         array = ["foo", "orange", "cucumber"]
-        results = up.util.select array, (item) -> item.length > 3
+        results = up.util.filter array, (item) -> item.length > 3
         expect(results).toEqual ['orange', 'cucumber']
 
       it 'passes the iteration index as second argument to the given function', ->
         array = ["apple", "orange", "cucumber", "banana"]
-        results = up.util.select array, (item, index) -> index % 2 == 0
+        results = up.util.filter array, (item, index) -> index % 2 == 0
         expect(results).toEqual ['apple', 'cucumber']
 
       it 'accepts a property name instead of a function, which checks that property from each item', ->
         array = [ { name: 'a', prop: false }, { name: 'b', prop: true } ]
-        results = up.util.select array, 'prop'
+        results = up.util.filter array, 'prop'
         expect(results).toEqual [{ name: 'b', prop: true }]
 
       it 'iterates over an array-like value', ->
@@ -525,7 +525,7 @@ describe 'up.util', ->
 
         callback = jasmine.createSpy()
 
-        up.util.select nodeList, callback
+        up.util.filter nodeList, callback
         expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
 
     describe 'up.util.reject', ->
