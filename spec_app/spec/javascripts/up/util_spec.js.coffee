@@ -479,7 +479,7 @@ describe 'up.util', ->
 
     describe 'up.util.each', ->
 
-      it 'calls the given function once for each itm of the given array', ->
+      it 'calls the given function once for each item of the given array', ->
         args = []
         array = ["apple", "orange", "cucumber"]
         up.util.each array, (item) -> args.push(item)
@@ -490,6 +490,16 @@ describe 'up.util', ->
         array = ["apple", "orange", "cucumber"]
         up.util.each array, (item, index) -> args.push(index)
         expect(args).toEqual [0, 1, 2]
+
+      it 'iterates over an array-like value', ->
+        one = fixture('.qwertz')
+        two = fixture('.qwertz')
+        nodeList = document.querySelectorAll('.qwertz')
+
+        callback = jasmine.createSpy()
+
+        up.util.each nodeList, callback
+        expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
 
     describe 'up.util.select', ->
 
@@ -508,6 +518,16 @@ describe 'up.util', ->
         results = up.util.select array, 'prop'
         expect(results).toEqual [{ name: 'b', prop: true }]
 
+      it 'iterates over an array-like value', ->
+        one = fixture('.qwertz')
+        two = fixture('.qwertz')
+        nodeList = document.querySelectorAll('.qwertz')
+
+        callback = jasmine.createSpy()
+
+        up.util.select nodeList, callback
+        expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
+
     describe 'up.util.reject', ->
 
       it 'returns an array of those elements in the given array for which the given function returns false', ->
@@ -524,6 +544,16 @@ describe 'up.util', ->
         array = [ { name: 'a', prop: false }, { name: 'b', prop: true } ]
         results = up.util.reject array, 'prop'
         expect(results).toEqual [{ name: 'a', prop: false }]
+
+      it 'iterates over an array-like value', ->
+        one = fixture('.qwertz')
+        two = fixture('.qwertz')
+        nodeList = document.querySelectorAll('.qwertz')
+
+        callback = jasmine.createSpy()
+
+        up.util.reject nodeList, callback
+        expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
 
     describe 'up.util.previewable', ->
 
@@ -679,23 +709,6 @@ describe 'up.util', ->
           baz: 'baz-value'
           bam: 'bam-value'
 
-    describe 'up.util.some', ->
-
-      it 'returns true if an element in the array returns true for the given function', ->
-        result = up.util.some [null, undefined, 'foo', ''], up.util.isPresent
-        expect(result).toBe(true)
-
-      it 'returns false if no element in the array returns true for the given function', ->
-        result = up.util.some [null, undefined, ''], up.util.isPresent
-        expect(result).toBe(false)
-
-      it 'short-circuits once an element returns true', ->
-        count = 0
-        up.util.some [null, undefined, 'foo', ''], (element) ->
-          count += 1
-          up.util.isPresent(element)
-        expect(count).toBe(3)
-
     describe 'up.util.every', ->
 
       it 'returns true if all element in the array returns true for the given function', ->
@@ -782,6 +795,23 @@ describe 'up.util', ->
         expect(up.util.some(someTrue, 'prop')).toBe(true)
         expect(up.util.some(allFalse, 'prop')).toBe(false)
 
+      it 'short-circuits once an element returns true', ->
+        count = 0
+        up.util.some [null, undefined, 'foo', ''], (element) ->
+          count += 1
+          up.util.isPresent(element)
+        expect(count).toBe(3)
+
+      it 'iterates over an array-like value', ->
+        one = fixture('.qwertz')
+        two = fixture('.qwertz')
+        nodeList = document.querySelectorAll('.qwertz')
+
+        callback = jasmine.createSpy()
+
+        up.util.some nodeList, callback
+        expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
+
     describe 'up.util.detectResult', ->
 
       it 'consecutively applies the function to each array element and returns the first truthy return value', ->
@@ -803,6 +833,16 @@ describe 'up.util', ->
 
         result = up.util.detectResult ['a', 'b', 'c'], fn
         expect(result).toBeUndefined()
+
+      it 'iterates over an array-like value', ->
+        one = fixture('.qwertz')
+        two = fixture('.qwertz')
+        nodeList = document.querySelectorAll('.qwertz')
+
+        callback = jasmine.createSpy()
+
+        up.util.detectResult nodeList, callback
+        expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
 
     describe 'up.util.isBlank', ->
 

@@ -533,7 +533,7 @@ up.util = do ->
     object instanceof FormData
 
   ###**
-  Converts the given array-like value into an array.
+  Converts the given [array-like value](/up.util.isList) into an array.
 
   If the given value is already an array, it is returned unchanged.
 
@@ -770,20 +770,20 @@ up.util = do ->
       {}
 
   ###**
-  Passes each element in the given array to the given function.
+  Passes each element in the given [array-like value](/up.util.isList) to the given function.
   Returns the first element for which the function returns a truthy value.
 
   If no object matches, returns `undefined`.
 
   @function up.util.detect
-  @param {Array} array
+  @param {List<T>} list
   @param {Function(value): boolean} tester
   @return {T|undefined}
   @stable
   ###
-  detect = (array, tester) ->
+  detect = (list, tester) ->
     match = undefined
-    for element in array
+    for element in list
       if tester(element)
         match = element
         break
@@ -791,18 +791,18 @@ up.util = do ->
 
   ###**
   Returns whether the given function returns a truthy value
-  for any element in the given array.
+  for any element in the given [array-like value](/up.util.isList).
 
   @function up.util.some
-  @param {Array} array
+  @param {List} list
   @param {Function(value, index): boolean} tester
     A function that will be called with each element and (optional) iteration index.
 
   @return {boolean}
   @stable
   ###
-  some = (array, tester) ->
-    !!detectResult(array, tester)
+  some = (list, tester) ->
+    !!detectResult(list, tester)
 
   ###**
   Consecutively calls the given function which each element
@@ -828,20 +828,20 @@ up.util = do ->
 
   ###**
   Returns whether the given function returns a truthy value
-  for all elements in the given array.
+  for all elements in the given [array-like value](/up.util.isList).
 
   @function up.util.every
-  @param {Array} array
+  @param {List} list
   @param {Function(element, index): boolean} tester
     A function that will be called with each element and (optional) iteration index.
 
   @return {boolean}
   @experimental
   ###
-  every = (array, tester) ->
+  every = (list, tester) ->
     tester = listBlock(tester)
     match = true
-    for element, index in array
+    for element, index in list
       unless tester(element, index)
         match = false
         break
@@ -913,36 +913,36 @@ up.util = do ->
     set
 
   ###**
-  Returns all elements from the given array that return
+  Returns all elements from the given [array-like value](/up.util.isList) that return
   a truthy value when passed to the given function.
 
   @function up.util.select
-  @param {Array} array
+  @param {List} list
   @param {Function(value, index): boolean} tester
   @return {Array}
   @stable
   ###
-  select = (array, tester) ->
+  select = (list, tester) ->
     tester = listBlock(tester)
     matches = []
-    each array, (element, index) ->
+    each list, (element, index) ->
       if tester(element, index)
         matches.push(element)
     matches
 
   ###**
-  Returns all elements from the given array that do not return
+  Returns all elements from the given [array-like value](/up.util.isList) that do not return
   a truthy value when passed to the given function.
 
   @function up.util.reject
-  @param {Array} array
+  @param {List} list
   @param {Function(element, index): boolean} tester
   @return {Array}
   @stable
   ###
-  reject = (array, tester) ->
+  reject = (list, tester) ->
     tester = listBlock(tester)
-    select(array, (element, index) -> !tester(element, index))
+    select(list, (element, index) -> !tester(element, index))
 
   ###**
   Returns the intersection of the given two arrays.

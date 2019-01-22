@@ -283,9 +283,14 @@ a mapping function, then flattens the result into a new array.
   [`String#trim()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim) instead.
 - up.util.boolean is now stable
 -  up.util.escapeHtml is now stable
-- up.util.isJQuery now returns false if no jQuery is loaded into the window.jQuery global
+- up.util.isJQuery now returns false if no jQuery is loaded into the `window.jQuery` global
 - `up.util.unresolvablePromise()` was removed without replacement.
 - `up.util.nextFrame()` has been renamed to `up.util.task()`.
+- `up.util.reject()` now works for all [array-like values](/up.util.isList), not just arrays
+- `up.util.select` now works for all [array-like values](/up.util.isList), not just arrays
+- `up.util.detect` now works for all [array-like values](/up.util.isList), not just arrays
+- `up.util.some` now works for all [array-like values](/up.util.isList), not just arrays
+- `up.util.every` now works for all [array-like values](/up.util.isList), not just arrays
 
 
 ### Viewports
