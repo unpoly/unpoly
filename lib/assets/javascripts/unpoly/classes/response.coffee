@@ -8,9 +8,9 @@ Instances of `up.Response` describe the server response to an [`AJAX request`](/
 \#\#\# Example
 
     up.request('/foo').then(function(response) {
-      console.log(response.status); // 200
-      console.log(response.text);   // "<html><body>..."
-    });
+      console.log(response.status) // 200
+      console.log(response.text)   // "<html><body>..."
+    })
 
 @class up.Response
 ###

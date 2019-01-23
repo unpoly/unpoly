@@ -159,10 +159,10 @@ up.proxy = do ->
   \#\#\# Example
 
       up.request('/search', params: { query: 'sunshine' }).then(function(response) {
-        console.log('The response text is %o', response.text);
+        console.log('The response text is %o', response.text)
       }).catch(function() {
         console.error('The request failed');
-      });
+      })
 
   \#\#\# Caching
 
@@ -270,7 +270,7 @@ up.proxy = do ->
         console.log('The response text is %o', text);
       }).catch(function() {
         console.error('The request failed');
-      });
+      })
 
   @function up.ajax
   @param {string} [url]
@@ -372,18 +372,16 @@ up.proxy = do ->
   Here is the JavaScript to make it alive:
 
       up.compiler('.spinner', function(element) {
+        show = () => { up.element.show(element) }
+        hide = () => { up.element.hide(element) }
 
-        show = () => { up.element.show(element) };
-        hide = () => { up.element.hide(element) };
-
-        hide();
+        hide()
 
         return [
           up.on('up:proxy:slow', show),
           up.on('up:proxy:recover', hide)
-        ];
-
-      });
+        ]
+      })
 
   The `up:proxy:slow` event will be emitted after a delay of 300 ms
   to prevent the spinner from flickering on and off.

@@ -122,9 +122,7 @@ up.tooltip = do ->
 
   In order to attach a tooltip to a `<span class="help">?</span>`:
 
-      up.tooltip.attach('.help', {
-        text: 'Enter multiple words or phrases'
-      });
+      up.tooltip.attach('.help', { text: 'Useful info' })
 
   @function up.tooltip.attach
   @param {Element|jQuery|string} elementOrSelector

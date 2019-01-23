@@ -90,16 +90,13 @@ up.viewport = do ->
 
   This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
 
-      up.scroll('.main', 100);
+      up.scroll('.main', 100)
 
   \#\#\# Animating the scrolling motion
 
   The scrolling can (optionally) be animated.
 
-      up.scroll('.main', 100, {
-        easing: 'swing',
-        duration: 250
-      });
+      up.scroll('.main', 100, { behavior: 'smooth' })
 
   If the given viewport is already in a scroll animation when `up.scroll()`
   is called a second time, the previous animation will instantly jump to the

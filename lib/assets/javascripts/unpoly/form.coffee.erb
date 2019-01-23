@@ -251,23 +251,23 @@ up.form = do ->
   The following would print to the console whenever an input field changes:
 
       up.observe('input.query', function(value) {
-        console.log('Query is now %o', value);
-      });
+        console.log('Query is now %o', value)
+      })
 
   Instead of a single form field, you can also pass multiple fields,
   a `<form>` or any container that contains form fields.
   The callback will be run if any of the given fields change:
 
       up.observe('form', function(value, name) {
-        console.log('The value of %o is now %o', name, value);
-      });
+        console.log('The value of %o is now %o', name, value)
+      })
 
   You may also pass the `{ batch: true }` option to receive all
   changes since the last callback in a single object:
 
       up.observe('form', { batch: true }, function(diff) {
         console.log('Observed one or more changes: %o', diff);
-      });
+      })
 
   @function up.observe
   @param {string|Element|Array<Element>|jQuery} selectorOrElement

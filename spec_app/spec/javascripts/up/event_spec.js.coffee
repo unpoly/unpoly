@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.event', ->
@@ -62,6 +63,25 @@ describe 'up.event', ->
             {}
           )
           expect(listener.calls.count()).toBe(1)
+
+      it 'allows to bind the listener to a given element while also passing a selector', asyncSpec (next) ->
+        element1 = fixture('.element.one')
+        element2 = fixture('.element.two')
+        element2Child1 = e.affix(element2, '.child.one')
+        element2Child2 = e.affix(element2, '.child.two')
+        listener = jasmine.createSpy('event listener')
+        up.on(element2, 'click', '.one', listener)
+
+        Trigger.click(element2Child1)
+
+        next ->
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.any(MouseEvent),
+            element2Child1,
+            {}
+          )
+          expect(listener.calls.count()).toBe(1)
+
 
       it 'allows to bind the listener to an array of elements at once', asyncSpec (next) ->
         element1 = fixture('.element')

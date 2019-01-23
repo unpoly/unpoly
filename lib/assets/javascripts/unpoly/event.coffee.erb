@@ -5,12 +5,13 @@ Events
 Most Unpoly interactions emit DOM events that are prefixed with `up:`.
 
     document.addEventListener('up:modal:opened', (event) => {
-      console.log('A new modal has just opened!');
-    });
+      console.log('A new modal has just opened!')
+    })
 
-Events often have both present ([`up:modal:open`](/up:modal:open))
-and past forms ([`up:modal:opened`](/up:modal:opened)).
-
+Events often have both present and past forms. For example,
+`up:modal:open` is emitted before a modal starts to open.
+`up:modal:opened` is emitted when the modal has finished its
+opening animation.
 
 \#\#\# Preventing events
 
@@ -19,9 +20,9 @@ You can prevent most present form events by calling `preventDefault()`:
     document.addEventListener('up:modal:open', (event) => {
       if (event.url == '/evil') {
         // Prevent the modal from opening
-        event.preventDefault();
+        event.preventDefault()
       }
-    });
+    })
 
 
 \#\#\# A better way to bind event listeners
@@ -32,14 +33,15 @@ you may find it convenient to use [`up.on()`](/up.on) instead:
     up.on('click', 'button', function(event, button, data) {
       // button is the clicked element
       // data is the parsed [`up-data`](/up-data) attribute
-    });
+    })
 
 There are some advantages to using `up.on()`:
 
+- The event target is automatically passed as a second argument.
+- You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
 - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
   leaving you with an application without JavaScript. This is typically preferable to
   a soup of randomly broken JavaScript in ancient browsers.
-- The event target is automatically passed as a second argument.
 - You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
   to observed elements. If an `[up-data]` attribute is set, its value will automatically be
   parsed as JSON and passed as a third argument.
@@ -58,23 +60,44 @@ up.event = do ->
       up.EventListener.unbindNonDefault(element)
 
   ###**
-  Listens to an event on `document` or a given element.
+  Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
+  on `document` or a given element.
 
-  The given event listener which will be executed whenever the
-  given event is [triggered](/up.emit) on the given selector:
+  `up.on()` has some quality of life improvements over
+  [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener):
 
-      up.on('click', '.button', function(event, $element) {
-        console.log("Someone clicked the button %o", $element);
-      });
+  - You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
+  - The event target is automatically passed as a second argument.
+  - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
+    leaving you with an application without JavaScript. This is typically preferable to
+    a soup of randomly broken JavaScript in ancient browsers.
+  - You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
+    to observed elements. If an `[up-data]` attribute is set, its value will automatically be
+    parsed as JSON and passed as a third argument.
 
-  This is roughly equivalent to binding an event listener to `document`:
+  \#\#\# Examples
 
-      $(document).on('click', '.button', function(event) {
-        console.log("Someone clicked the button %o", $(this));
-      });
+  The code below will call the listener when a `<a>` is clicked
+  anywhere in the `document`:
 
-  Other than `addEventListener()`, Unpoly will silently discard event listeners
-  on [unsupported browsers](/up.browser.isSupported).
+      up.on('click', 'a', function(event, element) {
+        console.log("Click on a link %o", element);
+      })
+
+  You may also bind the listener to a given element instead of `document`:
+
+      var form = document.querySelector('form')
+      up.on(form, 'click', function(event, form) {
+        console.log("Click within %o", form);
+      })
+
+  You may also pass both an element and a selector
+  for [event delegation](https://davidwalsh.name/event-delegate):
+
+      var form = document.querySelector('form')
+      document.addEventListener(form, 'click', 'a', function(event, link) {
+        console.log("Click on a link %o within %o", link, form);
+      })
 
   \#\#\# Attaching structured data
 
@@ -86,19 +109,19 @@ up.event = do ->
 
   The JSON will parsed and handed to your event handler as a third argument:
 
-      up.on('click', '.person', function(event, $element, data) {
+      up.on('click', '.person', function(event, element, data) {
         console.log("This is %o who is %o years old", data.name, data.age);
-      });
+      })
 
   \#\#\# Unbinding an event listener
 
   `up.on()` returns a function that unbinds the event listeners when called:
 
       // Define the listener
-      var listener =  function() { ... };
+      var listener =  function(event) { ... }
 
       // Binding the listener returns an unbind function
-      unbind = up.on('click', listener);
+      var unbind = up.on('click', listener)
 
       // Unbind the listener
       unbind()
@@ -106,10 +129,10 @@ up.event = do ->
   There is also a function [`up.off()`](/up.off) which you can use for the same purpose:
 
       // Define the listener
-      var listener =  function() { ... };
+      var listener =  function(event) { ... }
 
       // Bind the listener
-      up.on('click', listener);
+      up.on('click', listener)
 
       // Unbind the listener
       up.off('click', listener)
@@ -139,7 +162,20 @@ up.event = do ->
     bindNow(args)
 
   ###**
-  TODO: Document me
+  Listens to an event on `document` or a given element.
+  The event handler is called with the event target as a
+  [jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
+
+  If you're not using jQuery, use `up.on()` instead, which calls
+  event handlers with a native element.
+
+  \#\#\# Example
+
+  ```
+  up.$on('click', 'a', function(event, $link) {
+    console.log("Click on a link with destination %s", $element.attr('href'));
+  })
+  ```
 
   @function up.$on
   @param {Element|jQuery} [element=document]
@@ -208,9 +244,9 @@ up.event = do ->
 
       up.on('my:event', function(event) {
         console.log(event.foo);
-      });
+      })
 
-      up.emit('my:event', { foo: 'bar' });
+      up.emit('my:event', { foo: 'bar' })
       // Prints "bar" to the console
 
   @function up.emit

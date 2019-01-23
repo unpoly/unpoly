@@ -95,7 +95,7 @@ up.motion = do ->
 
   \#\#\# Example
 
-      up.animate('.warning', 'fade-in');
+      up.animate('.warning', 'fade-in')
 
   You can pass additional options:
 
@@ -103,7 +103,7 @@ up.motion = do ->
         delay: 1000,
         duration: 250,
         easing: 'linear'
-      });
+      })
 
   \#\#\# Named animations
 
@@ -128,9 +128,9 @@ up.motion = do ->
   By passing an object instead of an animation name, you can animate
   the CSS properties of the given element:
 
-      var $warning = $('.warning');
-      $warning.css({ opacity: 0 });
-      up.animate($warning, { opacity: 1 });
+      var warning = document.querySelector('.warning')
+      warning.style.opacity = 0
+      up.animate(warning, { opacity: 1 })
 
   \#\#\# Multiple animations on the same element
 
@@ -455,11 +455,11 @@ up.motion = do ->
 
   Here is the definition of the pre-defined `cross-fade` animation:
 
-      up.transition('cross-fade', ($old, $new, options) ->
-        up.motion.when(
-          up.animate($old, 'fade-out', options),
-          up.animate($new, 'fade-in', options)
-        )
+      up.transition('cross-fade', (oldElement, newElement, options) ->
+        Promise.all([
+          up.animate(oldElement, 'fade-out', options),
+          up.animate(newElement, 'fade-in', options)
+        ])
       )
 
   It is recommended that your transitions use [`up.animate()`](/up.animate),
@@ -491,9 +491,9 @@ up.motion = do ->
 
   Here is the definition of the pre-defined `fade-in` animation:
 
-      up.animation('fade-in', function($element, options) {
-        $element.css({opacity: 0});
-        up.animate($element, { opacity: 1 }, options);
+      up.animation('fade-in', function(element, options) {
+        element.style.opacity = 0
+        up.animate(element, { opacity: 1 }, options);
       })
 
   It is recommended that your definitions always end by calling

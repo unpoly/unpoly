@@ -2,10 +2,6 @@
 
   - make existing breadcrumbs only visible on narrow
 
-  - Write CHANGELOG from diff
-    - migration guide
-      - jquery event listeners need to use addEventListener or use event.originalEvent
-
   - check if the main entries for renamed modules still work with their new focus
     - up.fragment
     - up.layout

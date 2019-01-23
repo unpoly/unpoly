@@ -538,13 +538,13 @@ up.fragment = do ->
   On the client we can achieve this by listening to an `up:keep:fragment` event
   and preventing it if the `src` attribute of the old and new element differ:
 
-      up.compiler('audio', function($element) {
-        $element.on('up:fragment:keep', function(event) {
-          if $element.attr('src') !== event.$newElement.attr('src') {
-            event.preventDefault();
+      up.compiler('audio', function(element) {
+        element.addEventListener('up:fragment:keep', function(event) {
+          if element.getAttribute('src') !== event.newElement.getAttribute('src') {
+            event.preventDefault()
           }
-        });
-      });
+        })
+      })
 
   If we don't want to solve this on the client, we can achieve the same effect
   on the server. By setting the value of the `up-keep` attribute we can
@@ -608,9 +608,9 @@ up.fragment = do ->
   the `innerHTML` property or calling jQuery methods like
   `html`, `insertAfter` or `appendTo`:
 
-      $element = $('.element');
-      $element.html('<div>...</div>');
-      up.hello($element);
+      element = document.createElement('div')
+      element.innerHTML = '... HTML that needs to be activated ...';
+      up.hello(element);
 
   This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
   event.
@@ -635,14 +635,17 @@ up.fragment = do ->
     element
 
   ###**
-  When a page fragment has been [inserted or updated](/up.replace),
+  When any page fragment has been [inserted or updated](/up.replace),
   this event is [emitted](/up.emit) on the fragment.
+
+  If you're looking to run code when a new fragment matches
+  a selector, use `up.compiler()` instead.
 
   \#\#\# Example
 
       up.on('up:fragment:inserted', function(event, fragment) {
-        console.log("Looks like we have a new %o!", fragment);
-      });
+        console.log("Looks like we have a new %o!", fragment)
+      })
 
   @event up:fragment:inserted
   @param {Element} event.target
@@ -718,8 +721,8 @@ up.fragment = do ->
   @param {string|Element|jQuery} [options.origin]
     An second element or selector that can be referenced as `&` in the first selector:
 
-        $input = $('input.email');
-        up.fragment.first('.field:has(&)', { origin: $input }); // returns the .field containing $input
+        var input = document.querySelector('input.email')
+        up.fragment.first('fieldset:has(&)', { origin: input }) // returns the <fieldset> containing input
   @return {Element|undefined}
     The first element that is neither a ghost or being destroyed,
     or `undefined` if no such element was found.
@@ -866,9 +869,7 @@ up.fragment = do ->
 
   \#\#\# Example
 
-      up.on('new-mail', function() {
-        up.reload('.inbox');
-      });
+      up.on('new-mail', function() { up.reload('.inbox') })
 
   Unpoly remembers the URL from which a fragment was loaded, so you
   don't usually need to give an URL when reloading.
