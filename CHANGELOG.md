@@ -11,6 +11,22 @@ Browse a formatted and hyperlinked version of this file at <http://unpoly.com/ch
 0.60.0
 ------
 
+This is a major update with some breaking changes.
+
+### Highlights
+
+- jQuery is no longer required! Unpoly now has zero dependencies.
+- New `up.element` helpers to complement [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp). You might not even miss jQuery anymore.
+- Vastly improved performance on slow devices.
+- Utility functions that work with arrays and array-like values have been greatly improved.
+- The `up.util` module now plug the worst emissions in JavaScript's standard library: Equality-by-value, empty-by-value and shallow-copy. Your own objects may hook into those protocols.
+- You may define a padding when [revealing](/up.reveal).
+- Smooth [scrolling](/up.scroll) now mimics [native scroll behavior](https://hospodarets.com/native_smooth_scrolling).
+- Fixed many positioning issues with [popups](/up.popup) and [tooltips](/up.tooltip).
+
+Details below.
+
+
 ### jQuery is no longer required
 
 jQuery no longer required to use Unpoly. That means Unpoly no longer has any dependencies!
