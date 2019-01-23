@@ -5,6 +5,8 @@ Changes to this project will be documented in this file.
 
 This project mostly adheres to [Semantic Versioning](http://semver.org/).
 
+Browse a formatted and hyperlinked version of this file at <http://unpoly.com/changes>.
+
 
 0.60.0
 ------
@@ -86,8 +88,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
   ```
 
   For the old behavior, use `up.$on()`.
-
-- `up.emit()` may now trigger an event on a given element by passing it as an (optional) first argument:
+- `up.emit()` may now trigger an event on a given element by passing the element as an (optional) first argument:
 
   ```
   up.emit(element, 'app:user:login', { email: 'foo@example.com' })
@@ -256,7 +257,6 @@ The experimental `up.params` module has been replaced with the `up.Params` class
 
 ### Utility functions
 
-- `up.util.parseUrl()` now returns the correct `{ hostname }`, `{ protocol }` and `{ pathname }` properties on IE11.
 - New experimental function `up.util.isList()`. It returns whether the given argument is an array-like value, like an `Array` or a
   [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
 - New experimental function `up.util.findResult()`.
@@ -280,19 +280,20 @@ The experimental `up.params` module has been replaced with the `up.Params` class
   [`Array#filter()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
 - `up.util.detect()` was renamed to `up.util.find()` to match the standard
   [`Array#find()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
-- `up.util.selectorForElement()` is now `up.element.toSelector()`
-- up.util.trim has been removed without replacement. Use the standard
-  [`String#trim()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim) instead.
-- `up.util.boolean()` is now stable
-- `up.util.escapeHtml()` is now stable
-- `up.util.isJQuery()` now returns `false` if no jQuery is loaded into the `window.jQuery` global
-- `up.util.unresolvablePromise()` was removed without replacement.
-- `up.util.nextFrame()` has been renamed to `up.util.task()`.
 - `up.util.reject()` now works for all [array-like values](/up.util.isList), not just arrays.
 - `up.util.filter()` now works for all [array-like values](/up.util.isList), not just arrays.
 - `up.util.find()` now works for all [array-like values](/up.util.isList), not just arrays.
 - `up.util.some()` now works for all [array-like values](/up.util.isList), not just arrays.
 - `up.util.every()` now works for all [array-like values](/up.util.isList), not just arrays.
+- `up.util.isBoolean()` is now stable
+- `up.util.escapeHtml()` is now stable
+- `up.util.isJQuery()` now returns `false` if no jQuery is loaded into the `window.jQuery` global
+- `up.util.unresolvablePromise()` was removed without replacement.
+- `up.util.trim()` has been removed without replacement. Use the standard
+  [`String#trim()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim) instead.
+- `up.util.parseUrl()` now returns the correct `{ hostname }`, `{ protocol }` and `{ pathname }` properties on IE11.
+- `up.util.nextFrame()` has been renamed to `up.util.task()`.
+- `up.util.selectorForElement()` is now `up.element.toSelector()`
 
 
 ### Viewports

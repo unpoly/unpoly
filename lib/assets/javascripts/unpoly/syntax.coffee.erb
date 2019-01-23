@@ -7,11 +7,11 @@ in order to integrate libraries or implement custom behavior.
 
 Unpoly lets you organize your JavaScript snippets using [compilers](/up.compiler).
 
-For instance, to activate the [Masonry](http://masonry.desandro.com/) jQuery plugin for every element
+For instance, to activate the [Masonry](http://masonry.desandro.com/) library for every element
 with a `grid` class, use this compiler:
 
     up.compiler('.grid', function($element) {
-      $element.masonry();
+      new Masonry(element, { itemSelector: 'grid--item' })
     });
 
 The compiler function will be called on matching elements when the page loads
