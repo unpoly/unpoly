@@ -1566,18 +1566,18 @@ up.util = do ->
   findResult: findResult
   some: some
   any: ->
-    up.warn('Deprecated: up.util.any() has been renamed to up.util.some()')
+    up.legacy.warn('up.util.any() has been renamed to up.util.some()')
     some.apply(null, arguments)
   every: every
   all: ->
-    up.warn('Deprecated: up.util.all() has been renamed to up.util.every()')
+    up.legacy.warn('up.util.all() has been renamed to up.util.every()')
     every.apply(null, arguments)
   detect: ->
-    up.warn('Deprecated: up.util.find() has been renamed to up.util.find()')
+    up.legacy.warn('up.util.find() has been renamed to up.util.find()')
     findInList.apply(null, arguments)
   find: findInList
   select: ->
-    up.warn('Deprecated: up.util.select() has been renamed to up.util.filter()')
+    up.legacy.warn('up.util.select() has been renamed to up.util.filter()')
     filterList.apply(null, arguments)
   filter: filterList
   reject: reject
@@ -1644,10 +1644,10 @@ up.util = do ->
   isBasicObjectProperty: isBasicObjectProperty
   isCrossDomain: isCrossDomain
   selectorForElement: ->
-    up.warn('Deprecated: up.util.selectorForElement() has been renamed to up.element.toSelector()')
+    up.legacy.warn('up.util.selectorForElement() has been renamed to up.element.toSelector()')
     up.element.toSelector.apply(null, arguments)
   nextFrame: ->
-    up.warn('Deprecated: up.util.nextFrame() has been renamed to up.util.task()')
+    up.legacy.warn('up.util.nextFrame() has been renamed to up.util.task()')
     queueTask.apply(null, arguments)
   task: queueTask
   microtask: queueMicrotask

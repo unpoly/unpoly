@@ -303,7 +303,7 @@ up.proxy = do ->
     Use [`up.request()`](/up.request) instead.
   ###
   ajax = (args...) ->
-    up.warn('up.ajax() has been deprecated. Use up.request() instead.')
+    up.legacy.warn('up.ajax() has been deprecated. Use up.request() instead.')
     new Promise (resolve, reject) ->
       pickResponseText = (response) -> resolve(response.text)
       makeRequest(args...).then(pickResponseText, reject)

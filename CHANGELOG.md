@@ -3,9 +3,7 @@ Changelog
 
 Changes to this project will be documented in this file.
 
-This project mostly adheres to [Semantic Versioning](http://semver.org/).
-
-Browse a formatted and hyperlinked version of this file at <http://unpoly.com/changes>.
+You may browse a formatted and hyperlinked version of this file at <http://unpoly.com/changes>.
 
 
 0.60.0
@@ -23,6 +21,7 @@ This is a major update with some breaking changes.
 - You may define a padding when [revealing](/up.reveal).
 - Smooth [scrolling](/up.scroll) now mimics [native scroll behavior](https://hospodarets.com/native_smooth_scrolling).
 - Fixed many positioning issues with [popups](/up.popup) and [tooltips](/up.tooltip).
+- Several modules have been renamed to match the pattern `up.thing.verb()`. `up.dom` is now `up.fragment`, `up.bus` is now `up.event`, `up.layout` is now `up.viewport`.
 
 Details below.
 
@@ -390,7 +389,8 @@ And some minor changes:
 
 ### Various
 
-- Renamed some files so they won't be blocked by over-eager ad blockers on developer PCs
+- Renamed some files so they won't be blocked by over-eager ad blockers on developer PCs.
+- Deprecation warnings are only printed once per environment.
 
 
 

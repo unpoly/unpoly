@@ -3,7 +3,7 @@ u = up.util
 up.legacy = do ->
 
 #  renamedProperty = (object, oldKey, newKey) ->
-#    warning = -> up.warn('Deprecated: Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+#    warning = -> warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
 #    Object.defineProperty object, oldKey,
 #      get: ->
 #        warning()
@@ -20,7 +20,7 @@ up.legacy = do ->
 
   fixKey = (object, oldKey, newKey) ->
     if oldKey of object
-      up.warn('Deprecated: Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+      warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
       u.renameKey(object, oldKey, newKey)
 
 #  # Maps old event name to new event name
@@ -31,15 +31,24 @@ up.legacy = do ->
 #
 #  fixEventName = (eventName) ->
 #    if newEventName = renamedEvents[eventName]
-#      up.warn("Deprecated: Event #{eventName} has been renamed to #{newEventName}")
+#      warn("Event #{eventName} has been renamed to #{newEventName}")
 #      newEventName
 #    else
 #      eventName
 
   renamedModule = (oldName, newName) ->
     Object.defineProperty up, oldName, get: ->
-      up.warn("Deprecated: up.#{oldName} has been renamed to up.#{newName}")
+      warn("up.#{oldName} has been renamed to up.#{newName}")
       up[newName]
+
+  warnedMessages = {}
+
+  warn = (message, args...) ->
+    message = "[DEPRECATION] #{message}"
+    message = up.browser.sprintf(message, args...)
+    unless warnedMessages[message]
+      warnedMessages[message] = true
+      up.warn(message)
 
   renamedModule: renamedModule
 #  renamedProperty: renamedProperty
@@ -47,3 +56,5 @@ up.legacy = do ->
 #  renamedEvent: renamedEvent
 #  fixEventName: fixEventName
   fixKey: fixKey
+  warn: warn
+

@@ -8,7 +8,7 @@ class up.Tether
 
     [@position, @align] = options.position.split('-')
     if @align
-      up.warn('The position value %o is deprecated. Use %o instead.', options.position, @describeConstraints())
+      up.legacy.warn('The position value %o is deprecated. Use %o instead.', options.position, @describeConstraints())
     else
       @align = options.align
 

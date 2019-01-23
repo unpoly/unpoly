@@ -913,7 +913,7 @@ up.destroy = up.fragment.destroy
 up.hello = up.fragment.hello
 
 up.first = (args...) ->
-  up.warn('Deprecated: up.first() has been renamed to up.fragment.first()')
+  up.legacy.warn('up.first() has been renamed to up.fragment.first()')
   up.fragment.first(args...)
 
 up.legacy.renamedModule 'flow', 'fragment'
