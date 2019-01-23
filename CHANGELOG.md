@@ -181,7 +181,7 @@ Supported methods are:
 ### Modal dialogs
 
 - Opening/closing a modal will now manipulate the `{ overflow-y }` style on the same element
-  that was chosen by the CSS author.
+  that was chosen by the CSS author ([nasty details](https://makandracards.com/makandra/55801-does-html-or-body-scroll-the-page)).
 
 
 ### Popups
@@ -347,23 +347,19 @@ And some minor changes:
 ### Viewports
 
 - The `up.layout` module has been renamed to `up.viewport`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
-
-- up.scroll() no longer takes a { duration } and { easing }.
-  - It takes { behavior } (auto or smooth).
-  - Mirrors <https://hospodarets.com/native_smooth_scrolling>
-  - For smooth scrolling behavior there is also { speed }.
-  - new config option up.viewport.scrollSpeed
-
-- up.reveal() no longer takes a { duration } and { easing }.
-  - up.reveal() now also takes a { padding } option
-  - new up.reveal() option { snap }
-  - new up.reveal() option { behavior }
-  - new up.reveal() option { speed }
-  - new up.reveal() option { padding }
-  - config option up.layout.snap has been renamed to up.viewport.revealSnap
-  - new config option up.viewport.revealPadding
-
-
+- Smooth [scrolling](/up.scroll) now mimics [native scroll behavior](https://hospodarets.com/native_smooth_scrolling):
+  - `up.scroll()` no longer takes a `{ duration }` or `{ easing }` option.
+  - `up.scroll()` now takes a `{ behavior }` option. Valid values are `auto` (no animation) and `smooth` (animates the scroll motion).
+  - You may control the pace of `{ behavior: 'smooth' }` by also passing a `{ speed }` option`.
+  - New config property `up.viewport.scrollSpeed`. This sets the default speed for smooth scrolling. The default value (`1`) roughly corresponds to the default speed of Chrome's native smooth scrolling.
+- Options for `up.reveal()` have been changed:
+  - Options `{ duration }` and `{ easing }` have been removed.
+  - New option `{ padding }` to pass the desired padding between the revealed element and the closest [viewport](/up.viewport) edge (in pixels).
+  - New option `{ snap }`. It can be `true`, `false` or a pixel number.
+  - New option `{ behavior }`
+  - New option `{ speed }`. Defaults to `up.viewport.scrollSpeed`.
+  - Config property `up.layout.config.snap` has been renamed to `up.viewport.config.revealSnap`.
+  - New config option `up.viewport.revealPadding`.
 - New experimental function `up.viewport.root()`. It return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
   for the browser's main content area.
 - New experimental function `up.viewport.closest()`. It returns the scrolling container for the given element.
@@ -372,13 +368,13 @@ And some minor changes:
 
 ### Navigation feedback
 
-- [`[up-alias]`)(/up-nav#matching-url-by-pattern) now accepts one or more asterisks (`*`) anywhere in the pattern.
+- [`[up-alias]`](/up-nav#matching-url-by-pattern) now accepts one or more asterisks (`*`) anywhere in the pattern.
    It was previously limited to match URLs with a given prefix.
 
 
 ### Performance
 
-- jQuery removal improves performance drastically.
+- Use of native browser APIs has improved performance drastically.
 - `[up-preload]` and `[up-instant]` links no longer bind to the `touchstart` event, increasing frame rate while scrolling.
 
 
