@@ -39,84 +39,6 @@ up.browser = do ->
   submitForm = (form) ->
     form.submit()
 
-  ###**
-  A cross-browser way to interact with `console.log`, `console.error`, etc.
-
-  This function falls back to `console.log` if the output stream is not implemented.
-  It also prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`)
-  as a single string if the browser console does not support substitution strings.
-
-  \#\#\# Example
-
-      up.browser.puts('log', 'Hi world');
-      up.browser.puts('error', 'There was an error in %o', obj);
-
-  @function up.browser.puts
-  @internal
-  ###
-  puts = (stream, args...) ->
-    console[stream](args...)
-
-  CONSOLE_PLACEHOLDERS = /\%[odisf]/g
-
-  stringifyArg = (arg) ->
-    maxLength = 200
-    closer = ''
-
-    if u.isString(arg)
-      string = arg.replace(/[\n\r\t ]+/g, ' ')
-      string = string.replace(/^[\n\r\t ]+/, '')
-      string = string.replace(/[\n\r\t ]$/, '')
-      string = "\"#{string}\""
-      closer = '"'
-    else if u.isUndefined(arg)
-      # JSON.stringify(undefined) is actually undefined
-      string = 'undefined'
-    else if u.isNumber(arg) || u.isFunction(arg)
-      string = arg.toString()
-    else if u.isArray(arg)
-      string = "[#{u.map(arg, stringifyArg).join(', ')}]"
-      closer = ']'
-    else if u.isJQuery(arg)
-      string = "$(#{u.map(arg, stringifyArg).join(', ')})"
-      closer = ')'
-    else if u.isElement(arg)
-      string = "<#{arg.tagName.toLowerCase()}"
-      for attr in ['id', 'name', 'class']
-        if value = arg.getAttribute(attr)
-          string += " #{attr}=\"#{value}\""
-      string += ">"
-      closer = '>'
-    else # object
-      string = JSON.stringify(arg)
-    if string.length > maxLength
-      string = "#{string.substr(0, maxLength)} …"
-      string += closer
-    string
-
-  ###**
-  See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
-
-  @function up.browser.sprintf
-  @internal
-  ###
-  sprintf = (message, args...) ->
-    sprintfWithFormattedArgs(u.identity, message, args...)
-
-  ###**
-  @function up.browser.sprintfWithFormattedArgs
-  @internal
-  ###
-  sprintfWithFormattedArgs = (formatter, message, args...) ->
-    return '' if u.isBlank(message)
-
-    i = 0
-    message.replace CONSOLE_PLACEHOLDERS, ->
-      arg = args[i]
-      arg = formatter(stringifyArg(arg))
-      i += 1
-      arg
-
   url = ->
     location.href
 
@@ -304,9 +226,6 @@ up.browser = do ->
   canJQuery: canJQuery
   whenConfirmed: whenConfirmed
   isSupported: isSupported
-  puts: puts
-  sprintf: sprintf
-  sprintfWithFormattedArgs: sprintfWithFormattedArgs
   popCookie: popCookie
   isIE11: isIE11
 

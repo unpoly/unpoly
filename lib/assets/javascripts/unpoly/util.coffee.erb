@@ -1151,7 +1151,7 @@ up.util = do ->
 
     up.event.onReady(-> up.toast.open(messageArgs, toastOptions))
 
-    asString = up.browser.sprintf(messageArgs...)
+    asString = up.log.sprintf(messageArgs...)
     throw new Error(asString)
 
   ESCAPE_HTML_ENTITY_MAP =

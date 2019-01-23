@@ -51,6 +51,84 @@ up.log = do ->
     "#{config.prefix}#{message}"
 
   ###**
+  A cross-browser way to interact with `console.log`, `console.error`, etc.
+
+  This function falls back to `console.log` if the output stream is not implemented.
+  It also prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`)
+  as a single string if the browser console does not support substitution strings.
+
+  \#\#\# Example
+
+      up.browser.puts('log', 'Hi world');
+      up.browser.puts('error', 'There was an error in %o', obj);
+
+  @function up.browser.puts
+  @internal
+  ###
+  callConsole = (stream, args...) ->
+    console[stream](args...)
+
+  CONSOLE_PLACEHOLDERS = /\%[odisf]/g
+
+  stringifyArg = (arg) ->
+    maxLength = 200
+    closer = ''
+
+    if u.isString(arg)
+      string = arg.replace(/[\n\r\t ]+/g, ' ')
+      string = string.replace(/^[\n\r\t ]+/, '')
+      string = string.replace(/[\n\r\t ]$/, '')
+      string = "\"#{string}\""
+      closer = '"'
+    else if u.isUndefined(arg)
+      # JSON.stringify(undefined) is actually undefined
+      string = 'undefined'
+    else if u.isNumber(arg) || u.isFunction(arg)
+      string = arg.toString()
+    else if u.isArray(arg)
+      string = "[#{u.map(arg, stringifyArg).join(', ')}]"
+      closer = ']'
+    else if u.isJQuery(arg)
+      string = "$(#{u.map(arg, stringifyArg).join(', ')})"
+      closer = ')'
+    else if u.isElement(arg)
+      string = "<#{arg.tagName.toLowerCase()}"
+      for attr in ['id', 'name', 'class']
+        if value = arg.getAttribute(attr)
+          string += " #{attr}=\"#{value}\""
+      string += ">"
+      closer = '>'
+    else # object
+      string = JSON.stringify(arg)
+    if string.length > maxLength
+      string = "#{string.substr(0, maxLength)} …"
+      string += closer
+    string
+
+  ###**
+  See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
+
+  @function up.browser.sprintf
+  @internal
+  ###
+  sprintf = (message, args...) ->
+    sprintfWithFormattedArgs(u.identity, message, args...)
+
+  ###**
+  @function up.browser.sprintfWithFormattedArgs
+  @internal
+  ###
+  sprintfWithFormattedArgs = (formatter, message, args...) ->
+    return '' if u.isBlank(message)
+
+    i = 0
+    message.replace CONSOLE_PLACEHOLDERS, ->
+      arg = args[i]
+      arg = formatter(stringifyArg(arg))
+      i += 1
+      arg
+
+  ###**
   Prints a debugging message to the browser console.
 
   @function up.log.debug
@@ -60,7 +138,7 @@ up.log = do ->
   ###
   debug = (message, args...) ->
     if config.enabled && message
-      b.puts('debug', prefix(message), args...)
+      console.debug(prefix(message), args...)
 
   ###**
   Prints a logging message to the browser console.
@@ -72,7 +150,7 @@ up.log = do ->
   ###
   puts = (message, args...) ->
     if config.enabled && message
-      b.puts('log', prefix(message), args...)
+      console.log(prefix(message), args...)
 
   ###**
   @function up.warn
@@ -80,7 +158,7 @@ up.log = do ->
   ###
   warn = (message, args...) ->
     if message
-      b.puts('warn', prefix(message), args...)
+      console.warn(prefix(message), args...)
 
   ###**
   - Makes sure the group always closes
@@ -92,12 +170,12 @@ up.log = do ->
   group = (message, args...) ->
     block = args.pop() # Coffeescript copies the arguments array
     if config.enabled && message
-      stream = if config.collapse then 'groupCollapsed' else 'group'
-      b.puts(stream, prefix(message), args...)
+      fn = if config.collapse then 'groupCollapsed' else 'group'
+      console[fn](prefix(message), args...)
       try
         block()
       finally
-        b.puts('groupEnd') if message
+        console.groupEnd() if message
     else
       block()
 
@@ -107,7 +185,7 @@ up.log = do ->
   ###
   error = (message, args...) ->
     if message
-      b.puts('error', prefix(message), args...)
+      console.error(prefix(message), args...)
 
   printBanner = ->
     # The ASCII art looks broken in code since we need to escape backslashes
@@ -120,7 +198,7 @@ up.log = do ->
       banner += "Call `up.log.disable()` to disable logging for this session."
     else
       banner += "Call `up.log.enable()` to enable logging for this session."
-    b.puts('log', banner)
+    console.log(banner)
 
   up.on 'up:framework:boot', printBanner
   up.on 'up:framework:reset', reset
@@ -152,6 +230,9 @@ up.log = do ->
   disable = ->
     setEnabled(false)
 
+  puts: puts
+  sprintf: sprintf
+  sprintfWithFormattedArgs: sprintfWithFormattedArgs
   puts: puts
   debug: debug
   error: error

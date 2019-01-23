@@ -5,9 +5,7 @@ Toast alerts
 @module up.toast
 ###
 up.toast = do ->
-
   u = up.util
-  b = up.browser
   e = up.element
 
   VARIABLE_FORMATTER = (arg) -> "<span class='up-toast-variable'>#{u.escapeHtml(arg)}</span>"
@@ -22,7 +20,7 @@ up.toast = do ->
   messageToHtml = (message) ->
     if u.isArray(message)
       message[0] = u.escapeHtml(message[0])
-      message = b.sprintfWithFormattedArgs(VARIABLE_FORMATTER, message...)
+      message = up.log.sprintfWithFormattedArgs(VARIABLE_FORMATTER, message...)
     else
       message = u.escapeHtml(message)
     message
