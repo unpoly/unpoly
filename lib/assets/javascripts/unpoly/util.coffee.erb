@@ -1177,7 +1177,7 @@ up.util = do ->
   ###
   escapeRegexp = (string) ->
     # From https://github.com/benjamingr/RegExp.escape
-    string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
+    string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
 
   pluckKey = (object, key) ->
     value = object[key]

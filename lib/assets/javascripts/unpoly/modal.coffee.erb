@@ -285,8 +285,8 @@ up.modal = do ->
   ###**
   Opens the given link's destination in a modal overlay:
 
-      var $link = $('...');
-      up.modal.follow($link);
+      var link = document.querySelector('a')
+      up.modal.follow(link)
 
   Any option attributes for [`a[up-modal]`](/a.up-modal) will be honored.
 
@@ -382,7 +382,7 @@ up.modal = do ->
   \#\#\# Example
 
       var html = 'before <div class="content">inner</div> after';
-      up.modal.extract('.content', html);
+      up.modal.extract('.content', html)
 
   The would open a modal with the following contents:
 

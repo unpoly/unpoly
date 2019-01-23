@@ -81,14 +81,14 @@ up.event = do ->
   anywhere in the `document`:
 
       up.on('click', 'a', function(event, element) {
-        console.log("Click on a link %o", element);
+        console.log("Click on a link %o", element)
       })
 
   You may also bind the listener to a given element instead of `document`:
 
       var form = document.querySelector('form')
       up.on(form, 'click', function(event, form) {
-        console.log("Click within %o", form);
+        console.log("Click within %o", form)
       })
 
   You may also pass both an element and a selector
@@ -96,7 +96,7 @@ up.event = do ->
 
       var form = document.querySelector('form')
       document.addEventListener(form, 'click', 'a', function(event, link) {
-        console.log("Click on a link %o within %o", link, form);
+        console.log("Click on a link %o within %o", link, form)
       })
 
   \#\#\# Attaching structured data
@@ -110,7 +110,7 @@ up.event = do ->
   The JSON will parsed and handed to your event handler as a third argument:
 
       up.on('click', '.person', function(event, element, data) {
-        console.log("This is %o who is %o years old", data.name, data.age);
+        console.log("This is %o who is %o years old", data.name, data.age)
       })
 
   \#\#\# Unbinding an event listener
@@ -173,7 +173,7 @@ up.event = do ->
 
   ```
   up.$on('click', 'a', function(event, $link) {
-    console.log("Click on a link with destination %s", $element.attr('href'));
+    console.log("Click on a link with destination %s", $element.attr('href'))
   })
   ```
 
@@ -215,12 +215,12 @@ up.event = do ->
 
   Let's say you are listing to clicks on `.button` elements:
 
-      var listener = function() { ... };
-      up.on('click', '.button', listener);
+      var listener = function() { ... }
+      up.on('click', '.button', listener)
 
   You can stop listening to these events like this:
 
-      up.off('click', '.button', listener);
+      up.off('click', '.button', listener)
 
   Note that you need to pass `up.off()` a reference to the same listener function
   that was passed to `up.on()` earlier.
@@ -243,7 +243,7 @@ up.event = do ->
   \#\#\# Example
 
       up.on('my:event', function(event) {
-        console.log(event.foo);
+        console.log(event.foo)
       })
 
       up.emit('my:event', { foo: 'bar' })

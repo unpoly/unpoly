@@ -78,7 +78,7 @@ up.fragment = do ->
 
   We now replace the second `<div>`:
 
-      up.replace('.two', '/new');
+      up.replace('.two', '/new')
 
   The server renders a response for `/new`:
 
@@ -322,7 +322,7 @@ up.fragment = do ->
       html = '<div class="one">new one</div>' +
              '<div class="two">new two</div>';
 
-      up.extract('.two', html);
+      up.extract('.two', html)
 
   Unpoly looks for the selector `.two` in the strings and updates its
   contents in the current page. The current page now looks like this:
@@ -609,8 +609,8 @@ up.fragment = do ->
   `html`, `insertAfter` or `appendTo`:
 
       element = document.createElement('div')
-      element.innerHTML = '... HTML that needs to be activated ...';
-      up.hello(element);
+      element.innerHTML = '... HTML that needs to be activated ...'
+      up.hello(element)
 
   This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
   event.

@@ -97,14 +97,14 @@ up.syntax = do ->
       up.compiler('.current-time', function(element) {
 
         function update() {
-          var now = new Date();
-          element.textContent = now.toString();
+          var now = new Date()
+          element.textContent = now.toString()
         }
 
-        setInterval(update, 1000);
+        setInterval(update, 1000)
 
         return function() {
-          clearInterval(update);
+          clearInterval(update)
         };
 
       })
@@ -132,7 +132,7 @@ up.syntax = do ->
         var map = new google.maps.Map(element)
 
         pins.forEach(function(pin) {
-          var position = new google.maps.LatLng(pin.lat, pin.lng);
+          var position = new google.maps.LatLng(pin.lat, pin.lng)
           new google.maps.Marker({
             position: position,
             map: map,
@@ -249,9 +249,9 @@ up.syntax = do ->
   sets the `[up-target]`, `[up-transition]` and `[up-duration]` attributes for us:
 
       up.macro('[content-link]', function(link) {
-        link.setAttribute('up-target', '.content');
-        link.setAttribute('up-transition', 'cross-fade');
-        link.setAttribute('up-duration', '300');
+        link.setAttribute('up-target', '.content')
+        link.setAttribute('up-transition', 'cross-fade')
+        link.setAttribute('up-duration', '300')
       })
 
   Examples for built-in macros are [`a[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand).
@@ -422,9 +422,9 @@ up.syntax = do ->
   The JSON will parsed and handed to your compiler as a second argument:
 
       up.compiler('.google-map', function(element, pins) {
-        var map = new google.maps.Map(element);
+        var map = new google.maps.Map(element)
         pins.forEach(function(pin) {
-          var position = new google.maps.LatLng(pin.lat, pin.lng);
+          var position = new google.maps.LatLng(pin.lat, pin.lng)
           new google.maps.Marker({
             position: position,
             map: map,

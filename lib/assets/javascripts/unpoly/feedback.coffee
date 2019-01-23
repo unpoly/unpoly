@@ -6,11 +6,6 @@ The `up.feedback` module adds useful CSS classes to links while they are loading
 or when they point to the current URL. By styling these classes you may
 provide instant feedback to user interactions. This improves the perceived speed of your interface.
 
-Unpoly automatically adds the class [`.up-active`](/a.up-active) to links or forms while they are loading.
-
-By marking navigation elements as [`[up-nav]`](/up-nav), contained links that point to the current location
-automatically get the [`.up-current`](/up-nav-a.up-current) class.
-
 
 \#\#\# Example
 
@@ -21,7 +16,7 @@ Let's say we have an navigation bar with two links, pointing to `/foo` and `/bar
       <a href="/bar" up-follow>Bar</a>
     </div>
 
-If the current URL is `/foo`, the first link is automatically marked with an [`up-current`](/a.up-current) class:
+If the current URL is `/foo`, the first link is automatically marked with an [`.up-current`](/a.up-current) class:
 
     <div up-nav>
       <a href="/foo" up-follow class="up-current">Foo</a>
@@ -179,7 +174,8 @@ up.feedback = do ->
 
   \#\#\# Example
 
-      var button = document.querySelector('button');
+      var button = document.querySelector('button')
+
       button.addEventListener('click', () => {
         up.feedback.start(button)
         up.request(...).then(() => {

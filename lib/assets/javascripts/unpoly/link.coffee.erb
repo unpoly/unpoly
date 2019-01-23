@@ -117,8 +117,8 @@ up.link = do ->
   Calling `up.follow()` with this link will replace the page's `.main` fragment
   as if the user had clicked on the link:
 
-      var $link = $('a:first');
-      up.follow($link);
+      var link = document.querSelector('a')
+      up.follow(link)
 
   @function up.follow
   @param {Element|jQuery|string} linkOrSelector

@@ -59,8 +59,8 @@ up.log = do ->
 
   \#\#\# Example
 
-      up.browser.puts('log', 'Hi world');
-      up.browser.puts('error', 'There was an error in %o', obj);
+      up.browser.puts('log', 'Hi world')
+      up.browser.puts('error', 'There was an error in %o', obj)
 
   @function up.browser.puts
   @internal

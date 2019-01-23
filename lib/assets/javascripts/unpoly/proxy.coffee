@@ -161,7 +161,7 @@ up.proxy = do ->
       up.request('/search', params: { query: 'sunshine' }).then(function(response) {
         console.log('The response text is %o', response.text)
       }).catch(function() {
-        console.error('The request failed');
+        console.error('The request failed')
       })
 
   \#\#\# Caching
@@ -267,9 +267,9 @@ up.proxy = do ->
   \#\#\# Example
 
       up.request('/search', params: { query: 'sunshine' }).then(function(text) {
-        console.log('The response text is %o', text);
+        console.log('The response text is %o', text)
       }).catch(function() {
-        console.error('The request failed');
+        console.error('The request failed')
       })
 
   @function up.ajax
