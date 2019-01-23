@@ -959,14 +959,14 @@ up.util = do ->
   ###**
   Waits for the given number of milliseconds, the runs the given callback.
 
-  Instead of `up.util.setTimer(0, fn)` you can also use [`up.util.task(fn)`](/up.util.task).
+  Instead of `up.util.timer(0, fn)` you can also use [`up.util.task(fn)`](/up.util.task).
 
-  @function up.util.setTimer
+  @function up.util.timer
   @param {number} millis
   @param {Function()} callback
   @stable
   ###
-  setTimer = (millis, callback) ->
+  scheduleTimer = (millis, callback) ->
     setTimeout(callback, millis)
 
   ###**
@@ -1610,7 +1610,10 @@ up.util = do ->
   isList: isList
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
-  setTimer: setTimer
+  timer: scheduleTimer
+  setTimer: ->
+    up.legacy.warn('up.util.setTimer() has been renamed to up.util.timer()')
+    scheduleTimer.apply(null, arguments)
   escapePressed: escapePressed
   contains: contains
   toArray: toArray

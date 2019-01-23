@@ -14,11 +14,11 @@ describe 'up.motion', ->
         $element = $fixture('.element').text('content')
         up.animate($element, 'fade-in', duration: 200, easing: 'linear')
 
-        u.setTimer 1, ->
+        u.timer 1, ->
           expect($element).toHaveOpacity(0.0, 0.15)
-        u.setTimer 100, ->
+        u.timer 100, ->
           expect($element).toHaveOpacity(0.5, 0.3)
-        u.setTimer 260, ->
+        u.timer 260, ->
           expect($element).toHaveOpacity(1.0, 0.15)
           done()
 
@@ -29,9 +29,9 @@ describe 'up.motion', ->
         promise = up.animate($element, 'fade-in', duration: 100, easing: 'linear')
         promise.then(resolveSpy)
 
-        u.setTimer 50, ->
+        u.timer 50, ->
           expect(resolveSpy).not.toHaveBeenCalled()
-          u.setTimer 50 + (timingTolerance = 120), ->
+          u.timer 50 + (timingTolerance = 120), ->
             expect(resolveSpy).toHaveBeenCalled()
             done()
 
@@ -99,11 +99,11 @@ describe 'up.motion', ->
 
           up.animate($element, animation, duration: 300, easing: 'linear')
 
-          u.setTimer 5, ->
+          u.timer 5, ->
             expect($element).toHaveOpacity(0.0, 0.25)
-          u.setTimer 150, ->
+          u.timer 150, ->
             expect($element).toHaveOpacity(0.5, 0.25)
-          u.setTimer 300, ->
+          u.timer 300, ->
             expect($element).toHaveOpacity(1.0, 0.25)
             done()
 
@@ -132,7 +132,7 @@ describe 'up.motion', ->
           animateDone = up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
           animateDone.then(callback)
 
-          u.setTimer 5, =>
+          u.timer 5, =>
             expect($element.css('font-size')).toEqual('40px')
             expect(callback).toHaveBeenCalled()
             done()

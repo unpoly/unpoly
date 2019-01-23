@@ -760,7 +760,7 @@ describe 'up.proxy', ->
       it 'fulfills to the response text in order to match the $.ajax() API as good as possible', (done) ->
         promise = up.ajax('/url')
 
-        u.setTimer 100, =>
+        u.timer 100, =>
           @respondWith('response-text')
 
           promise.then (text) ->

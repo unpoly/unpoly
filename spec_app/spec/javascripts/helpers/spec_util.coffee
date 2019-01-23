@@ -32,7 +32,7 @@ up.specUtil = do ->
   promiseTimer = (ms) ->
     timeout = undefined
     promise = new Promise (resolve, reject) ->
-      timeout = u.setTimer(ms, resolve)
+      timeout = u.timer(ms, resolve)
     promise.cancel = -> clearTimeout(timeout)
     promise
 

@@ -332,6 +332,7 @@ All functions that worked for arrays now also work for array-like values:
 And some minor changes:
 
 - `up.util.nextFrame()` has been renamed to `up.util.task()`.
+- `up.util.setTimer()` has been renamed to `up.util.timer()`.
 - `up.util.toArray() now returns its unchanged argument if the argument is already an array.
 - `up.util.copy()` now works with `Date` objects.
 - `up.util.isBoolean()` is now stable

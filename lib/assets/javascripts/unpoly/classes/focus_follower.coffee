@@ -18,7 +18,7 @@
 #
 #  fieldBlurred: (event) =>
 #    clearTimeout(@discardTimer)
-#    @discardTimer = u.setTimer(@discardDelay, @discardField)
+#    @discardTimer = u.timer(@discardDelay, @discardField)
 #
 #  discardField: =>
 #    @field = undefined

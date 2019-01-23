@@ -341,7 +341,7 @@ up.proxy = do ->
         if isBusy() # a fast response might have beaten the delay
           up.emit('up:proxy:slow', log: 'Proxy is slow to respond')
           slowEventEmitted = true
-      slowDelayTimer = u.setTimer(config.slowDelay, emission)
+      slowDelayTimer = u.timer(config.slowDelay, emission)
 
 
   ###**

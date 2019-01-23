@@ -635,14 +635,14 @@ describe 'up.util', ->
         expect(up.util.simpleEase(0.50)).toBeAround(0.50, 0.2)
         expect(up.util.simpleEase(0.75)).toBeAround(0.75, 0.2)
 
-    describe 'up.util.setTimer', ->
+    describe 'up.util.timer', ->
 
       it 'calls the given function after waiting the given milliseconds', (done) ->
         callback = jasmine.createSpy()
         expectNotCalled = -> expect(callback).not.toHaveBeenCalled()
         expectCalled = -> expect(callback).toHaveBeenCalled()
 
-        up.util.setTimer(100, callback)
+        up.util.timer(100, callback)
 
         expectNotCalled()
         setTimeout(expectNotCalled, 50)
@@ -653,7 +653,7 @@ describe 'up.util', ->
 
         it 'calls the given function in the next execution frame', ->
           callback = jasmine.createSpy()
-          up.util.setTimer(0, callback)
+          up.util.timer(0, callback)
           expect(callback).not.toHaveBeenCalled()
 
           setTimeout((-> expect(callback).toHaveBeenCalled()), 0)

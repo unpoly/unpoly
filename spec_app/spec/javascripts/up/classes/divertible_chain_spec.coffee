@@ -36,10 +36,10 @@ describe 'up.DivertibleChain', ->
           expect(timer2Spy).not.toHaveBeenCalled()
           # Override the (2..n)th tasks. This unschedules timer2.
           chain.asap(timer3, timer4)
-          u.setTimer 150, ->
+          u.timer 150, ->
             expect(timer2Spy).not.toHaveBeenCalled() # Has been canceled
             expect(timer3Spy).toHaveBeenCalled() # timer3 overrode timer2
             expect(timer4Spy).not.toHaveBeenCalled()
-            u.setTimer 150, ->
+            u.timer 150, ->
               expect(timer4Spy).toHaveBeenCalled()
               done()

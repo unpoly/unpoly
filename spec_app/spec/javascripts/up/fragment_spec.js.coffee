@@ -1680,10 +1680,10 @@ describe 'up.fragment', ->
 
           up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
 
-          u.setTimer 50, =>
+          u.timer 50, =>
             expect(destructor).not.toHaveBeenCalled()
 
-          u.setTimer 220, =>
+          u.timer 220, =>
             expect('.container').toHaveText('new text')
             expect(destructor).toHaveBeenCalledWith('old text')
             done()
@@ -1871,10 +1871,10 @@ describe 'up.fragment', ->
           promise.then(resolution)
           expect(resolution).not.toHaveBeenCalled()
 
-          u.setTimer 20, ->
+          u.timer 20, ->
             expect(resolution).not.toHaveBeenCalled()
 
-          u.setTimer 200, ->
+          u.timer 200, ->
             expect(resolution).toHaveBeenCalled()
             done()
 
@@ -2443,7 +2443,7 @@ describe 'up.fragment', ->
         up.history.config.enabled = true
         $fixture('.element')
         up.destroy('.element', history: '/new-path').then ->
-          u.setTimer 100, ->
+          u.timer 100, ->
             expect(location.href).toMatchUrl('/new-path')
             done()
 

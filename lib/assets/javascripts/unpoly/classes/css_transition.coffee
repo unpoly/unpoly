@@ -43,7 +43,7 @@ class up.CssTransition
 
   startFallbackTimer: =>
     timingTolerance = 100
-    @fallbackTimer = u.setTimer (@totalDuration + timingTolerance), =>
+    @fallbackTimer = u.timer (@totalDuration + timingTolerance), =>
       @finish()
 
   stopFallbackTimer: =>

@@ -144,7 +144,7 @@ describe 'up.modal', ->
         it "gives the scrollbar to .up-modal instead of .up-modal-viewport while animating, so we don't see scaled scrollbars in a zoom-in animation", (done) ->
           openPromise = up.modal.extract('.container', '<div class="container">text</div>', animation: 'fade-in', duration: 100)
 
-          u.setTimer 50, ->
+          u.timer 50, ->
             $modal = $('.up-modal')
             $viewport = $modal.find('.up-modal-viewport')
             expect($modal).toHaveClass('up-modal-animating')
@@ -157,7 +157,7 @@ describe 'up.modal', ->
               expect($viewport.css('overflow-y')).toEqual('scroll')
               closePromise = up.modal.close(animation: 'fade-out', duration: 400)
 
-              u.setTimer 50, ->
+              u.timer 50, ->
                 expect($modal).toHaveClass('up-modal-animating')
                 expect($modal.css('overflow-y')).toEqual('scroll')
                 expect($viewport.css('overflow-y')).toEqual('hidden')
@@ -239,7 +239,7 @@ describe 'up.modal', ->
             # We send the response for 2
             @respondWith('<div class="container">response2</div>')
 
-            u.setTimer 10, =>
+            u.timer 10, =>
               # The second modal is now opening
               up.modal.visit('/path3', target: '.container', animation: 'fade-in', duration: 50)
 
@@ -248,14 +248,14 @@ describe 'up.modal', ->
                 # Since we're still opening the second modal, no request has been made.
                 expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-                u.setTimer 180, =>
+                u.timer 180, =>
                   # Now that the second modal has opened, we make the request to /path3
                   expect(jasmine.Ajax.requests.count()).toEqual(2)
                   expect(@lastRequest().url).toMatchUrl('/path3')
 
                   @respondWith('<div class="container">response3</div>')
 
-                  u.setTimer 180, =>
+                  u.timer 180, =>
                     expect(jasmine.Ajax.requests.count()).toEqual(2)
                     expect($('.up-modal').length).toBe(1)
                     expect($('.up-modal-dialog').length).toBe(1)
@@ -346,7 +346,7 @@ describe 'up.modal', ->
                 text: element.querySelector('.target').innerText.trim()
                 animation: animation
             deferred = u.newDeferred()
-            u.setTimer options.duration, -> deferred.resolve()
+            u.timer options.duration, -> deferred.resolve()
             deferred.promise()
 
           up.modal.extract('.target', '<div class="target">response1</div>')
