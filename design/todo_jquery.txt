@@ -1,19 +1,9 @@
 - Update docs
-
   - make existing breadcrumbs only visible on narrow
 
   - check if the main entries for renamed modules still work with their new focus
     - up.fragment
-    - up.layout
-    - up.element
-
-  - API comments
-    - grep for TODO
-    - Examples with $
-      - e.g. up.compiler!
-    - Stuff like @param {jQuery} $element (basically "$" everywhere)
-    - Stuff like @param {jQuery} event.link
-
+    - up.viewport
 
 - PUBLISH
 

@@ -421,7 +421,7 @@ up.syntax = do ->
 
   The JSON will parsed and handed to your compiler as a second argument:
 
-      up.compiler('.google-map', function($element, pins) {
+      up.compiler('.google-map', function(element, pins) {
         var map = new google.maps.Map(element);
         pins.forEach(function(pin) {
           var position = new google.maps.LatLng(pin.lat, pin.lng);
@@ -437,7 +437,7 @@ up.syntax = do ->
   [`up-data`], the parsed object will be passed to any matching
   [`up.on()`](/up.on) handlers.
 
-      up.on('click', '.google-map', function(event, $element, pins) {
+      up.on('click', '.google-map', function(event, element, pins) {
         console.log("There are %d pins on the clicked map", pins.length)
       })
 
