@@ -308,7 +308,16 @@ up.syntax = do ->
     compileRun.compile()
 
   ###**
-  @function up.syntax.destructor
+  Registers a function to be called when the given element
+  is [destroyed](/up.destroy).
+
+  The preferred way to register a destructor function is to `return`
+  it from a [compiler function](/up.compiler).
+
+  @function up.destructor
+  @param {Element} element
+  @param {Function|Array<Function>} destructor
+    One or more destructor functions
   @internal
   ###
   registerDestructor = (element, destructor) ->
@@ -316,10 +325,13 @@ up.syntax = do ->
       destructors = []
       element.upDestructors = destructors
       element.classList.add('up-can-clean')
-    destructors.push(destructor)
+    if u.isArray(destructor)
+      destructors.push(destructor...)
+    else
+      destructors.push(destructor)
 
   ###**
-  Runs any destroyers on the given fragment and its descendants.
+  Runs any destructor on the given fragment and its descendants.
   Unlike [`up.destroy()`](/up.destroy), this doesn't emit any events
   and does not remove the element from the DOM.
 

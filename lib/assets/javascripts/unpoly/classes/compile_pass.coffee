@@ -49,8 +49,8 @@ class up.CompilePass
 
     result = compiler.apply(element, compileArgs)
 
-    if destructor = @normalizeDestructor(result)
-      up.syntax.destructor(element, destructor)
+    if destructorOrDestructors = @destructorPresence(result)
+      up.destructor(element, destructorOrDestructors)
 
   compileBatch: (compiler, elements) ->
     elementsArgs = if compiler.jQuery then jQuery(elements) else elements
@@ -64,15 +64,14 @@ class up.CompilePass
 
     result = compiler.apply(elements, compileArgs)
 
-    if @normalizeDestructor(result)
+    if @destructorPresence(result)
       up.fail('Compilers with { batch: true } cannot return destructors')
 
-  normalizeDestructor: (result) ->
-    if u.isFunction(result)
+  destructorPresence: (result) ->
+    # Check if the result value looks like a destructor to filter out
+    # unwanted implicit returns in CoffeeScript.
+    if u.isFunction(result) || u.isArray(result) && (u.every(result, u.isFunction))
       result
-    else if u.isArray(result) && u.every(result, u.isFunction)
-
-      u.sequence(result)
 
   select: (selector) ->
     if u.isFunction(selector)
