@@ -95,7 +95,9 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
   ```
 - `up.emit()` option `{ message }` is now `{ log }`.
 - `up.emit()` no longer logs by default. You can enable the old efault message with `{ log: true }`.
--  `up.event.nobodyPrevents()` option `{ message }` is now `{ log }`.
+- `up.event.nobodyPrevents()` option `{ message }` is now `{ log }`.
+- The experimental function `up.reset()` was removed without replacement.
+- The experimental event `up:framework:reset` was removed without replacement.
 
 
 
@@ -125,7 +127,19 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
 ### Request parameters
 
-The experimental `up.params` module has been replaced with the `up.Params` class:
+The experimental `up.params` module has been replaced with the `up.Params` class.
+Wrap any type of parameter representation into `up.Params` to get consistent API for reading
+and manipulation.
+
+The following types of parameter representation are supported:
+
+1. An object like `{ email: 'foo@bar.com' }`
+2. A query string like `'email=foo%40bar.com'`
+3. An array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
+4. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
+   On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
+
+Supported methods are:
 
 | `new up.Params()` | Constructor. |
 | `up.Params#add()` | Adds a new entry with the given `name` and `value`. |
@@ -149,6 +163,12 @@ The experimental `up.params` module has been replaced with the `up.Params` class
 - The properties for the `up:link:preload` event have been renamed.
 
 
+### Modal dialogs
+
+- Opening/closing a modal will now manipulate the `{ overflow-y }` style on the same element
+  that was chosen by the CSS author.
+
+
 ### Popups
 
 - The HTML markup for a popup has been changed to make it easier to style with CSS.
@@ -165,7 +185,6 @@ The experimental `up.params` module has been replaced with the `up.Params` class
   you should check if your modifications still work with the new defaults.
 - Popups now update their position when the screen is resized.
 - Popups now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
-
 - The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`.
   Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
   - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
@@ -192,7 +211,7 @@ The experimental `up.params` module has been replaced with the `up.Params` class
     </div>
   </div>
   ```
-- The default CSS styles for `.up-tooltip` has been changed. If you have customized tooltip styles,
+- The default CSS styles for `.up-tooltip` have been changed. If you have customized tooltip styles,
   you should check if your modifications still work with the new defaults.
 - Tooltips now update their position when the screen is resized.
 - Tooltips now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
@@ -223,7 +242,7 @@ The experimental `up.params` module has been replaced with the `up.Params` class
   });
   ```
 
-  The second argument was previously the observed input element (as a jQuery collection).
+  The second argument was previously the observed input element as a jQuery collection.
 - `up.observe()` now accepts a `{ batch: true }` option to receive all changes
   since the last callback in a single object:
 
@@ -250,41 +269,56 @@ The experimental `up.params` module has been replaced with the `up.Params` class
   with the low-level `up.element.first()`.
 - The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed) (emitted after a fragment was removed), remains in the API.
 - The `up:fragment:destroyed` event no longer has a `{ $element }` property. It now has a `{ fragment }` property that contains the detached element. Like before, it is emitted on the parent of the destroyed element.
-- The properties for the `up:fragment:keep` event have been renamed
-- The properties for the `up:fragment:kept` event have been renamed
-- The properties for the `up:fragment:inserted` event have been renamed
+- The properties for the `up:fragment:keep` event have been renamed.
+- The properties for the `up:fragment:kept` event have been renamed.
+- The properties for the `up:fragment:inserted` event have been renamed.
 
 
 ### Utility functions
 
-- New experimental function `up.util.isList()`. It returns whether the given argument is an array-like value, like an `Array` or a
-  [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
-- New experimental function `up.util.findResult()`.
-  It consecutively calls the given function which each element in the given array and
-  returns the first truthy return value.
-- New experimental function `up.util.flatten()`. This flattens the given `array` a single level deep.
-- New experimental function `up.util.flatMap()`. This maps each element using a mapping function, then flattens the result into a new array.
+The `up.util` module now plug the worst emissions in JavaScript's standard library: Equality-by-value, empty-by-value, shallow copy:
+
 - New experimental function `up.util.isEqual()`. It returns whether the given arguments are equal by value.
 - New experimental property `up.util.isEqual.key`.
   This property contains the name of a method that user-defined classes
   may implement to hook into the `up.util.isEqual()` protocol.
 - `up.util.isBlank()` now returns false for objects with a constructor.
 - New experimental property `up.util.isBlank.key`. This property contains the name of a method that user-defined classes may implement to hook into the `up.util.isBlank()` protocol.
-- `up.util.copy()`` now works with `Date` objects.
 - New experimental property `up.util.copy.key`. This property contains the name of a method that user-defined classes may implement to hook into the `up.util.copy()` protocol.
-- `up.util.toArray() now returns its unchanged argument if the argument is already an array.
-- `up.util.all()`` was renamed to `up.util.every()` to match the standard [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), and to be less confusing with up.element.all and up.fragment.all
-- `up.util.any()`` was renamed to `up.util.some()` to match the standard
-  [`Array#some()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
-- `up.util.select()` was renamed to `up.util.filter()`` to match the standard
-  [`Array#filter()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+
+More utility functions to have been added to work with lists:
+
+- New experimental function `up.util.findResult()`.
+  It consecutively calls the given function which each element in the given list and
+  returns the first truthy return value.
+- New experimental function `up.util.flatten()`. This flattens the given list a single level deep.
+- New experimental function `up.util.flatMap()`. This maps each element using a mapping function, then flattens the result into a new array.
+
+Some list functions have been renamed to names used in the standard `Array` API:
+
+- `up.util.all()` was renamed to `up.util.every()` to match the standard [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), and to be less confusing with `up.element.all()`.
+- `up.util.any()` was renamed to `up.util.some()` to match the standard
+  [`Array#some()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some).
+- `up.util.select()` was renamed to `up.util.filter()` to match the standard
+  [`Array#filter()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter).
 - `up.util.detect()` was renamed to `up.util.find()` to match the standard
-  [`Array#find()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find)
+  [`Array#find()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find).
+
+All functions that worked for arrays now also work for array-like values:
+
+- New experimental function `up.util.isList()`. It returns whether the given argument is an array-like value, like an `Array` or a
+  [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
 - `up.util.reject()` now works for all [array-like values](/up.util.isList), not just arrays.
 - `up.util.filter()` now works for all [array-like values](/up.util.isList), not just arrays.
 - `up.util.find()` now works for all [array-like values](/up.util.isList), not just arrays.
 - `up.util.some()` now works for all [array-like values](/up.util.isList), not just arrays.
 - `up.util.every()` now works for all [array-like values](/up.util.isList), not just arrays.
+
+And some minor changes:
+
+- `up.util.nextFrame()` has been renamed to `up.util.task()`.
+- `up.util.toArray() now returns its unchanged argument if the argument is already an array.
+- `up.util.copy()` now works with `Date` objects.
 - `up.util.isBoolean()` is now stable
 - `up.util.escapeHtml()` is now stable
 - `up.util.isJQuery()` now returns `false` if no jQuery is loaded into the `window.jQuery` global
@@ -292,13 +326,12 @@ The experimental `up.params` module has been replaced with the `up.Params` class
 - `up.util.trim()` has been removed without replacement. Use the standard
   [`String#trim()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim) instead.
 - `up.util.parseUrl()` now returns the correct `{ hostname }`, `{ protocol }` and `{ pathname }` properties on IE11.
-- `up.util.nextFrame()` has been renamed to `up.util.task()`.
 - `up.util.selectorForElement()` is now `up.element.toSelector()`
 
 
 ### Viewports
 
-up.layout has been renamed to up.viewport. Future: up.thing.verb()
+- The `up.layout` module has been renamed to `up.viewport`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
 
 - up.scroll() no longer takes a { duration } and { easing }.
   - It takes { behavior } (auto or smooth).
@@ -315,34 +348,33 @@ up.layout has been renamed to up.viewport. Future: up.thing.verb()
   - config option up.layout.snap has been renamed to up.viewport.revealSnap
   - new config option up.viewport.revealPadding
 
-- Opening modal will now set overflow-y on the right element (body, html)
 
-- new experimental up.viewport functions
-  - up.viewport.closest
-  - up.viewport.root
-  - up.viewport.rootWidth
-  - up.viewport.rootHeight
+- New experimental function `up.viewport.root()`. It return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
+  for the browser's main content area.
+- New experimental function `up.viewport.closest()`. It returns the scrolling container for the given element.
+- When a `#hash` anchor is [revealed](/up.reveal) during the initial page load, Unpoly will look for an `[up-id=hash]` before looking for `[id=hash]` and `a[name=hash]`.
 
-- initial hash reveal tries [up-id] before
 
 ### Navigation feedback
 
-- `up-alias` now accepts one or more asterisks (`*`) anywhere in the pattern.
+- [`[up-alias]`)(/up-nav#matching-url-by-pattern) now accepts one or more asterisks (`*`) anywhere in the pattern.
    It was previously limited to match URLs with a given prefix.
 
 
 ### Performance
 
-- jQuery removal improves performance drastically
-- [up-preload] and [up-instant] links no longer bind to `touchstart`, increasing FPS
+- jQuery removal improves performance drastically.
+- `[up-preload]` and `[up-instant]` links no longer bind to the `touchstart` event, increasing frame rate while scrolling.
+
+
+### Ruby on Rails integration
+
+- Unpoly is now compatible with the jQuery-less UJS adapter (now [part of Action View](https://github.com/rails/rails/tree/master/actionview/app/assets/javascripts)).
 
 
 ### Various
 
-- removed up.reset() from public API
-- removed up:framework:reset from public API
-- Compatibility with the jQuery-less rails-ujs adapter (now [part of Action View](https://github.com/rails/rails/tree/master/actionview/app/assets/javascripts))
-- Renamed files so they won't be blocked by over-eager ad blockers on developer PCs
+- Renamed some files so they won't be blocked by over-eager ad blockers on developer PCs
 
 
 

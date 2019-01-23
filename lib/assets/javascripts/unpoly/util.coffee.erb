@@ -171,7 +171,7 @@ up.util = do ->
   ###
   objectValues = Object.values || valuesPolyfill
 
-  listBlock = (block) ->
+  iteratee = (block) ->
     if isString(block)
       (item) -> item[block]
     else
@@ -193,7 +193,7 @@ up.util = do ->
   ###
   map = (array, block) ->
     return [] if array.length == 0
-    block = listBlock(block)
+    block = iteratee(block)
     for item, index in array
       block(item, index)
 
@@ -820,7 +820,7 @@ up.util = do ->
   @experimental
   ###
   findResult = (array, tester) ->
-    tester = listBlock(tester)
+    tester = iteratee(tester)
     for element, index in array
       if result = tester(element, index)
         return result
@@ -839,7 +839,7 @@ up.util = do ->
   @experimental
   ###
   every = (list, tester) ->
-    tester = listBlock(tester)
+    tester = iteratee(tester)
     match = true
     for element, index in list
       unless tester(element, index)
@@ -884,7 +884,7 @@ up.util = do ->
   ###
   uniqBy = (array, mapper) ->
     return array if array.length < 2
-    mapper = listBlock(mapper)
+    mapper = iteratee(mapper)
     set = new Set()
     filterList array, (elem, index) ->
       mapped = mapper(elem, index)
@@ -923,7 +923,7 @@ up.util = do ->
   @stable
   ###
   filterList = (list, tester) ->
-    tester = listBlock(tester)
+    tester = iteratee(tester)
     matches = []
     each list, (element, index) ->
       if tester(element, index)
@@ -941,7 +941,7 @@ up.util = do ->
   @stable
   ###
   reject = (list, tester) ->
-    tester = listBlock(tester)
+    tester = iteratee(tester)
     filterList(list, (element, index) -> !tester(element, index))
 
   ###**
@@ -1401,7 +1401,7 @@ up.util = do ->
       Promise.reject(error)
 
   sum = (list, block) ->
-    block = listBlock(block)
+    block = iteratee(block)
     totalValue = 0
     for entry in list
       entryValue = block(entry)

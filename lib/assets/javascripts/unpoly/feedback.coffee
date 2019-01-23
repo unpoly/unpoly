@@ -14,24 +14,32 @@ provide instant feedback to user interactions. This improves the perceived speed
 
 Let's say we have an navigation bar with two links, pointing to `/foo` and `/bar` respectively:
 
-    <a href="/foo" up-follow>Foo</a>
-    <a href="/bar" up-follow>Bar</a>
+    <div up-nav>
+      <a href="/foo" up-follow>Foo</a>
+      <a href="/bar" up-follow>Bar</a>
+    </div>
 
 If the current URL is `/foo`, the first link is automatically marked with an [`up-current`](/a.up-current) class:
 
-    <a href="/foo" up-follow class="up-current">Foo</a>
-    <a href="/bar" up-follow>Bar</a>
+    <div up-nav>
+      <a href="/foo" up-follow class="up-current">Foo</a>
+      <a href="/bar" up-follow>Bar</a>
+    </div>
 
 When the user clicks on the `/bar` link, the link will receive the [`up-active`](/a.up-active) class while it is waiting
 for the server to respond:
 
-    <a href="/foo" up-follow class="up-current">Foo</a>
-    <a href="/bar" up-follow class="up-active">Bar</a>
+    <div up-nav>
+      <a href="/foo" up-follow class="up-current">Foo</a>
+      <a href="/bar" up-follow class="up-active">Bar</a>
+    </div>
 
 Once the response is received the URL will change to `/bar` and the `up-active` class is removed:
 
-    <a href="/foo" up-follow>Foo</a>
-    <a href="/bar" up-follow class="up-current">Bar</a>
+    <div up-nav>
+      <a href="/foo" up-follow>Foo</a>
+      <a href="/bar" up-follow class="up-current">Bar</a>
+    </div>
 
 
 @module up.feedback
@@ -308,7 +316,7 @@ up.feedback = do ->
   - the link's `up-href` attribute
   - a space-separated list of URLs in the link's `up-alias` attribute
 
-  \#\#\# Matching URL by prefix or suffix
+  \#\#\# Matching URL by pattern
 
   You can mark a link as `.up-current` whenever the current URL matches a prefix or suffix.
   To do so, include an asterisk (`*`) in the `up-alias` attribute.

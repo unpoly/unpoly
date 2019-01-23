@@ -256,6 +256,8 @@ up.element = do ->
   The element is hidden by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
   of `{ display: none }`.
 
+  Also see `up.element.show()`.
+
   @function up.element.hide
   @param {Element} element
   @experimental
@@ -265,6 +267,10 @@ up.element = do ->
 
   ###**
   Shows the given element.
+
+  Also see `up.element.hide()`.
+
+  \#\#\# Limitations
 
   The element is shown by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
   of `{ display: '' }`.
@@ -430,13 +436,13 @@ up.element = do ->
       // element is <div style="color: red"></div>
 
   @function up.element.createFromSelector
-  @params {string} selector
+  @param {string} selector
     The CSS selector from which to create an element.
-  @params {Object} attrs
+  @param {Object} [attrs]
     An object of attributes to set on the created element.
-  @param {Object} attrs.text
+  @param {Object} [attrs.text]
     The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
-  @param {Object} attrs.style
+  @param {Object} [attrs.style]
     An object of CSS properties that will be set as the inline style
     of the created element.
   @return {Element}

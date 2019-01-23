@@ -320,15 +320,15 @@ up.viewport = do ->
     [rootSelector(), config.viewports...].join(',')
 
   ###**
-  Returns the viewport for the given element.
+  Returns the scrolling container for the given element.
 
   Returns the [document's scrolling element](/up.viewport.root)
-  if no closer viewpoint exists.
+  if no closer viewport exists.
 
   @function up.viewport.closest
   @param {string|Element|jQuery} selectorOrElement
   @return {Element}
-  @internal
+  @experimental
   ###
   closest = (selectorOrElement) ->
     element = e.get(selectorOrElement)
@@ -340,7 +340,7 @@ up.viewport = do ->
 
   @function up.viewport.subtree
   @param {string|Element|jQuery} selectorOrElement
-  @return jQuery
+  @return List<Element>
   @internal
   ###
   getSubtree = (selectorOrElement) ->
@@ -377,7 +377,7 @@ up.viewport = do ->
 
   @function up.viewport.root
   @return {Element}
-  @internal
+  @experimental
   ###
   getRoot = ->
     document.querySelector(rootSelector())
