@@ -132,6 +132,8 @@ up.motion = do ->
       warning.style.opacity = 0
       up.animate(warning, { opacity: 1 })
 
+  CSS properties must be given in `kebab-case`, not `camelCase`.
+
   \#\#\# Multiple animations on the same element
 
   Unpoly doesn't allow more than one concurrent animation on the same element.
@@ -252,6 +254,9 @@ up.motion = do ->
   are completed.
 
   Animations are completed by jumping to the last animation frame instantly.
+  Promises returned by animation and transition functions instantly settle.
+
+  Emits the `up:motion:finish` event that is already handled by `up.animate()`.
 
   Does nothing if there are no animation to complete.
   
@@ -263,6 +268,20 @@ up.motion = do ->
   ###
   finish = (elementOrSelector) ->
     motionController.finish(elementOrSelector)
+
+  ###**
+  This event is emitted on an [animating](/up.animating) element by `up.motion.finish()` to
+  request the animation to instantly finish and skip to the last frame.
+
+  Promises returned by completed animation functions are expected to settle.
+
+  Animations started by `up.animate()` already handle this event.
+
+  @event up:motion:finish
+  @param {Element} event.target
+    The animating element.
+  @experimental
+  ###
 
   ###**
   Performs an animated transition between the `source` and `target` elements.
@@ -316,7 +335,7 @@ up.motion = do ->
   @function up.morph
   @param {Element|jQuery|string} source
   @param {Element|jQuery|string} target
-  @param {Function(oldElement, newElement)|string} transitionOrName
+  @param {Function(oldElement, newElement)|string} transition
   @param {number} [options.duration=300]
     The duration of the animation, in milliseconds.
   @param {number} [options.delay=0]
@@ -451,7 +470,9 @@ up.motion = do ->
      e.replace(oldElement, newElement)
 
   ###**
-  Defines a named transition.
+  Defines a named transition that [morphs](/up.element) from one element to another.
+
+  \#\#\# Example
 
   Here is the definition of the pre-defined `cross-fade` animation:
 
@@ -468,11 +489,11 @@ up.motion = do ->
   If you choose to *not* use `up.animate()` and roll your own
   logic instead, your code must honor the following contract:
 
-  1. It must honor the options `{ delay, duration, easing }` if given
+  1. It must honor the options `{ delay, duration, easing }` if given.
   2. It must *not* remove any of the given elements from the DOM.
-  3. It returns a promise that is fulfilled when the transition has ended
+  3. It returns a promise that is fulfilled when the transition has ended.
   4. If during the animation an event `up:motion:finish` is emitted on
-     the given element, the transition instantly jumps to the last frame
+     either element, the transition instantly jumps to the last frame
      and resolves the returned promise.
 
   Calling [`up.animate()`](/up.animate) with an object argument
