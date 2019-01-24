@@ -184,7 +184,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 - The function `up.first()` has been renamed to `up.fragment.first()` to not be confused
   with the low-level `up.element.first()`.
 - The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/up:fragment:destroyed) (emitted after a fragment was removed), remains in the API.
-- The `up:fragment:destroyed` event no longer has a `{ $element }` property. It now has a `{ fragment }` property that contains the detached element. Like before, it is emitted on the parent of the destroyed element.
+- The `up:fragment:destroyed` event no longer has a `{ $element }` property. It now has a `{ fragment }` property that contains the detached element. Like before, it is emitted on the former parent of the destroyed element.
 - The properties for the `up:fragment:keep` event have been renamed.
 - The properties for the `up:fragment:kept` event have been renamed.
 - The properties for the `up:fragment:inserted` event have been renamed.

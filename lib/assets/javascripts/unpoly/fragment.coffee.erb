@@ -2,11 +2,14 @@
 Fragment update API
 ===================
   
-This module exposes a low-level Javascript API to [change](/up.replace) or
+The `up.fragment` module exposes a high-level Javascript API to [update](/up.replace) or
 [destroy](/up.destroy) page fragments.
 
+Fragments are [compiled](/up.compiler) elements that can be updated from a server URL.
+They also exist on a layer (page, modal, popup).
+
 Most of Unpoly's functionality (like [fragment links](/up.link) or [modals](/up.modal))
-is built from these functions. You can use them to extend Unpoly from your
+is built from `up.fragment` functions. You may use them to extend Unpoly from your
 [custom Javascript](/up.syntax).
 
 @module up.fragment
@@ -836,9 +839,10 @@ up.fragment = do ->
   Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
   or while they are being removed by a [transition](/up.morph).
 
-  If the removal is animated, the class is assigned before the animation.
+  If the removal is animated, the class is assigned before the animation starts.
 
-  Also see the [`up.fragment.first()`](/up.fragment.first) function.
+  To select an element while ignoring elements that are being destroyed,
+  see the [`up.fragment.first()`](/up.fragment.first) function.
 
   @selector .up-destroying
   @stable
