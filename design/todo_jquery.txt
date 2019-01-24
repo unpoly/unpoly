@@ -1,17 +1,8 @@
-- Update docs
-  - make existing breadcrumbs only visible on narrow
-
-  - check if the main entries for renamed modules still work with their new focus
-    - up.fragment
-    - up.viewport
-
 - PUBLISH
 
 - deploy cards with new version
 
 - deploy unpoly-guide
-
-- RC CFP
 
 - upgrade roca-style.org PR
   - better claim
