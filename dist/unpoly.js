@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.57.0"
+    version: "0.60.0"
   };
 
 }).call(this);
@@ -13,9 +13,13 @@
 /***
 Utility functions
 =================
-  
-Unpoly comes with a number of utility functions
-that might save you from loading something like [Lodash](https://lodash.com/).
+
+The `up.util` module contains functions to facilitate the work with basic JavaScript
+values like lists, strings or functions.
+
+You will recognize many functions form other utility libraries like [Lodash](https://lodash.com/).
+While feature parity with Lodash is not a goal of `up.util`, you might find it sufficient
+to not include another library in your asset bundle.
 
 @module up.util
  */
@@ -32,7 +36,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.noop
     @experimental
      */
-    var ESCAPE_HTML_ENTITY_MAP, always, arrayToSet, assign, assignPolyfill, asyncNoop, compact, contains, copy, deepCopy, detect, detectResult, each, eachIterator, endsWith, escapeHtml, escapePressed, escapeRegexp, evalOption, every, except, extractCallback, extractLastArg, extractOptions, fail, flatMap, flatten, horizontalScreenHalf, identity, intersect, isArguments, isArray, isBasicObjectProperty, isBlank, isBoolean, isCrossDomain, isDefined, isElement, isEqual, isEqualArray, isFormData, isFunction, isGiven, isJQuery, isList, isMissing, isNodeList, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, last, listBlock, map, mapObject, memoize, merge, methodAllowsPayload, microtask, muteRejection, newDeferred, newOptions, nextFrame, nextUid, noop, normalizeMethod, normalizeUrl, objectValues, only, parseUrl, partial, pluckKey, presence, previewable, reject, rejectOnError, remove, renameKey, select, sequence, setTimer, setToArray, simpleEase, some, splitValues, sum, times, toArray, uid, uniq, uniqBy, unresolvablePromise, valuesPolyfill, wrapList, wrapValue;
+    var ESCAPE_HTML_ENTITY_MAP, always, arrayToSet, assign, assignPolyfill, asyncNoop, compact, contains, copy, deepCopy, each, eachIterator, endsWith, escapeHtml, escapePressed, escapeRegexp, evalOption, every, except, extractCallback, extractLastArg, extractOptions, fail, filterList, findInList, findResult, flatMap, flatten, horizontalScreenHalf, identity, intersect, isArguments, isArray, isBasicObjectProperty, isBlank, isBoolean, isCrossDomain, isDefined, isElement, isEqual, isEqualList, isFormData, isFunction, isGiven, isHTMLCollection, isJQuery, isList, isMissing, isNodeList, isNull, isNumber, isObject, isOptions, isPresent, isPromise, isStandardPort, isString, isTruthy, isUndefined, isUnmodifiedKeyEvent, isUnmodifiedMouseEvent, iteratee, last, map, mapObject, memoize, merge, methodAllowsPayload, muteRejection, newDeferred, newOptions, nextUid, noop, normalizeMethod, normalizeUrl, objectValues, only, parseUrl, partial, pluckKey, presence, previewable, queueMicrotask, queueTask, reject, rejectOnError, remove, renameKey, scheduleTimer, sequence, setToArray, simpleEase, some, splitValues, sum, times, toArray, uid, uniq, uniqBy, unresolvablePromise, valuesPolyfill, wrapList, wrapValue;
     noop = (function() {});
 
     /***
@@ -218,7 +222,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     objectValues = Object.values || valuesPolyfill;
-    listBlock = function(block) {
+    iteratee = function(block) {
       if (isString(block)) {
         return function(item) {
           return item[block];
@@ -247,7 +251,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       if (array.length === 0) {
         return [];
       }
-      block = listBlock(block);
+      block = iteratee(block);
       results = [];
       for (index = i = 0, len = array.length; i < len; index = ++i) {
         item = array[index];
@@ -631,7 +635,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
-    Converts the given array-like value into an array.
+    Converts the given [array-like value](/up.util.isList) into an array.
     
     If the given value is already an array, it is returned unchanged.
     
@@ -664,7 +668,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @experimental
      */
     isList = function(value) {
-      return isArray(value) || isNodeList(value) || isJQuery(value) || isArguments(value);
+      return isArray(value) || isNodeList(value) || isArguments(value) || isJQuery(value) || isHTMLCollection(value);
     };
 
     /***
@@ -675,10 +679,13 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @function up.util.isNodeList
     @param value
     @return {Boolean}
-    @experimental
+    @internal
      */
     isNodeList = function(value) {
       return value instanceof NodeList;
+    };
+    isHTMLCollection = function(value) {
+      return value instanceof HTMLCollection;
     };
 
     /***
@@ -709,13 +716,17 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
-    Returns a shallow copy of the given array, array-like value or plain object.
-    Other types of values are returned unchanged.
+    Returns a shallow copy of the given value.
     
-    To make the copying protocol work with user-defined class,
-    see `up.util.copy.key`.
+    \#\#\# Copying protocol
     
-    Array-like objects are copied into new arrays.
+    - By default `up.util.copy()` can copy [array-like values](/up.util.isList),
+      plain objects and `Date` instances.
+    - Array-like objects are copied into new arrays.
+    - Unsupported types of values are returned unchanged.
+    - To make the copying protocol work with user-defined class,
+      see `up.util.copy.key`.
+    - Immutable objects, like strings or numbers, do not need to be copied.
     
     @function up.util.copy
     @param {any} object
@@ -785,6 +796,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @experimental
      */
     copy.key = 'up.util.copy';
+    Date.prototype[copy.key] = function() {
+      return new Date(+this);
+    };
 
     /***
     Returns a deep copy of the given array or object.
@@ -835,22 +849,22 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
-    Passes each element in the given array to the given function.
+    Passes each element in the given [array-like value](/up.util.isList) to the given function.
     Returns the first element for which the function returns a truthy value.
     
     If no object matches, returns `undefined`.
     
-    @function up.util.detect
-    @param {Array} array
+    @function up.util.find
+    @param {List<T>} list
     @param {Function(value): boolean} tester
     @return {T|undefined}
     @stable
      */
-    detect = function(array, tester) {
+    findInList = function(list, tester) {
       var element, i, len, match;
       match = void 0;
-      for (i = 0, len = array.length; i < len; i++) {
-        element = array[i];
+      for (i = 0, len = list.length; i < len; i++) {
+        element = list[i];
         if (tester(element)) {
           match = element;
           break;
@@ -861,18 +875,18 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
     /***
     Returns whether the given function returns a truthy value
-    for any element in the given array.
+    for any element in the given [array-like value](/up.util.isList).
     
     @function up.util.some
-    @param {Array} array
+    @param {List} list
     @param {Function(value, index): boolean} tester
       A function that will be called with each element and (optional) iteration index.
     
     @return {boolean}
     @stable
      */
-    some = function(array, tester) {
-      return !!detectResult(array, tester);
+    some = function(list, tester) {
+      return !!findResult(list, tester);
     };
 
     /***
@@ -882,7 +896,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     Returned `undefined` iff the function does not return a truthy
     value for any element in the array.
     
-    @function up.util.detectResult
+    @function up.util.findResult
     @param {Array} array
     @param {Function(element): any} tester
       A function that will be called with each element and (optional) iteration index.
@@ -890,9 +904,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @return {any|undefined}
     @experimental
      */
-    detectResult = function(array, tester) {
+    findResult = function(array, tester) {
       var element, i, index, len, result;
-      tester = listBlock(tester);
+      tester = iteratee(tester);
       for (index = i = 0, len = array.length; i < len; index = ++i) {
         element = array[index];
         if (result = tester(element, index)) {
@@ -904,22 +918,22 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
     /***
     Returns whether the given function returns a truthy value
-    for all elements in the given array.
+    for all elements in the given [array-like value](/up.util.isList).
     
     @function up.util.every
-    @param {Array} array
+    @param {List} list
     @param {Function(element, index): boolean} tester
       A function that will be called with each element and (optional) iteration index.
     
     @return {boolean}
     @experimental
      */
-    every = function(array, tester) {
+    every = function(list, tester) {
       var element, i, index, len, match;
-      tester = listBlock(tester);
+      tester = iteratee(tester);
       match = true;
-      for (index = i = 0, len = array.length; i < len; index = ++i) {
-        element = array[index];
+      for (index = i = 0, len = list.length; i < len; index = ++i) {
+        element = list[index];
         if (!tester(element, index)) {
           match = false;
           break;
@@ -938,7 +952,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @stable
      */
     compact = function(array) {
-      return select(array, isGiven);
+      return filterList(array, isGiven);
     };
 
     /***
@@ -972,9 +986,9 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       if (array.length < 2) {
         return array;
       }
-      mapper = listBlock(mapper);
+      mapper = iteratee(mapper);
       set = new Set();
-      return select(array, function(elem, index) {
+      return filterList(array, function(elem, index) {
         var mapped;
         mapped = mapper(elem, index);
         if (set.has(mapped)) {
@@ -1013,20 +1027,20 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
-    Returns all elements from the given array that return
+    Returns all elements from the given [array-like value](/up.util.isList) that return
     a truthy value when passed to the given function.
     
-    @function up.util.select
-    @param {Array} array
+    @function up.util.filter
+    @param {List} list
     @param {Function(value, index): boolean} tester
     @return {Array}
     @stable
      */
-    select = function(array, tester) {
+    filterList = function(list, tester) {
       var matches;
-      tester = listBlock(tester);
+      tester = iteratee(tester);
       matches = [];
-      each(array, function(element, index) {
+      each(list, function(element, index) {
         if (tester(element, index)) {
           return matches.push(element);
         }
@@ -1035,18 +1049,18 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
 
     /***
-    Returns all elements from the given array that do not return
+    Returns all elements from the given [array-like value](/up.util.isList) that do not return
     a truthy value when passed to the given function.
     
     @function up.util.reject
-    @param {Array} array
+    @param {List} list
     @param {Function(element, index): boolean} tester
     @return {Array}
     @stable
      */
-    reject = function(array, tester) {
-      tester = listBlock(tester);
-      return select(array, function(element, index) {
+    reject = function(list, tester) {
+      tester = iteratee(tester);
+      return filterList(list, function(element, index) {
         return !tester(element, index);
       });
     };
@@ -1060,7 +1074,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @internal
      */
     intersect = function(array1, array2) {
-      return select(array1, function(element) {
+      return filterList(array1, function(element) {
         return contains(array2, element);
       });
     };
@@ -1068,40 +1082,41 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     /***
     Waits for the given number of milliseconds, the runs the given callback.
     
-    Instead of `up.util.setTimer(0, fn)` you can also use [`up.util.nextFrame(fn)`](/up.util.nextFrame).
+    Instead of `up.util.timer(0, fn)` you can also use [`up.util.task(fn)`](/up.util.task).
     
-    @function up.util.setTimer
+    @function up.util.timer
     @param {number} millis
     @param {Function()} callback
     @stable
      */
-    setTimer = function(millis, callback) {
+    scheduleTimer = function(millis, callback) {
       return setTimeout(callback, millis);
     };
 
     /***
-    Schedules the given function to be called in the
-    next JavaScript execution frame.
+    Pushes the given function to the [JavaScript task queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) (also "macrotask queue").
     
-    @function up.util.nextFrame
+    Equivalent to calling `setTimeout(fn, 0)`.
+    
+    Also see `up.util.microtask()`.
+    
+    @function up.util.task
     @param {Function()} block
     @stable
      */
-    nextFrame = function(block) {
+    queueTask = function(block) {
       return setTimeout(block, 0);
     };
 
     /***
-    Queue a function to be executed in the next microtask.
+    Pushes the given function to the [JavaScript microtask queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
     
-    Returns a promise that will be resolved when the given task was executed.
-    
-    @function up.util.queueMicrotask
+    @function up.util.microtask
     @param {Function()} task
     @return {Promise}
     @experimental
      */
-    microtask = function(task) {
+    queueMicrotask = function(task) {
       return Promise.resolve().then(task);
     };
 
@@ -1204,7 +1219,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     Returns a promise that will never be resolved.
     
     @function up.util.unresolvablePromise
-    @experimental
+    @internal
      */
     unresolvablePromise = function() {
       return new Promise(noop);
@@ -1280,10 +1295,10 @@ that might save you from loading something like [Lodash](https://lodash.com/).
         toastOptions = {};
       }
       (ref = up.log).error.apply(ref, messageArgs);
-      up.event.whenReady().then(function() {
+      up.event.onReady(function() {
         return up.toast.open(messageArgs, toastOptions);
       });
-      asString = (ref1 = up.browser).sprintf.apply(ref1, messageArgs);
+      asString = (ref1 = up.log).sprintf.apply(ref1, messageArgs);
       throw new Error(asString);
     };
     ESCAPE_HTML_ENTITY_MAP = {
@@ -1540,7 +1555,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     };
     sum = function(list, block) {
       var entry, entryValue, i, len, totalValue;
-      block = listBlock(block);
+      block = iteratee(block);
       totalValue = 0;
       for (i = 0, len = list.length; i < len; i++) {
         entry = list[i];
@@ -1558,12 +1573,14 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     /***
     Returns whether the two arguments are equal by value.
     
-    By default `up.util.isEqual()` can compare simple JavaScript values,
-    arrays and plain objects.
+    \#\#\# Comparison protocol
     
-    To make the copying protocol work with user-defined classes,
-    see `up.util.isEqual.key`. Objects without a defined comparison protocol are
-    defined by reference (`===`).
+    - By default `up.util.isEqual()` can compare strings, numbers,
+      [array-like values](/up.util.isList), plain objects and `Date` objects.
+    - To make the copying protocol work with user-defined classes,
+      see `up.util.isEqual.key`.
+    - Objects without a defined comparison protocol are
+      defined by reference (`===`).
     
     @function up.util.isEqual
     @param {any} a
@@ -1574,16 +1591,22 @@ that might save you from loading something like [Lodash](https://lodash.com/).
      */
     isEqual = function(a, b) {
       var aKeys, bKeys;
+      if (a != null ? a.valueOf : void 0) {
+        a = a.valueOf();
+      }
+      if (b != null ? b.valueOf : void 0) {
+        b = b.valueOf();
+      }
       if (typeof a !== typeof b) {
         return false;
-      } else if (isArray(a) && isArray(b)) {
-        return isEqualArray(a, b);
+      } else if (isList(a) && isList(b)) {
+        return isEqualList(a, b);
       } else if (isObject(a) && a[isEqual.key]) {
         return a[isEqual.key](b);
       } else if (isOptions(a) && isOptions(b)) {
         aKeys = Object.keys(a);
         bKeys = Object.keys(b);
-        if (isEqualArray(aKeys, bKeys)) {
+        if (isEqualList(aKeys, bKeys)) {
           return every(aKeys, function(aKey) {
             return isEqual(a[aKey], b[aKey]);
           });
@@ -1640,7 +1663,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
     @experimental
      */
     isEqual.key = 'up.util.isEqual';
-    isEqualArray = function(a, b) {
+    isEqualList = function(a, b) {
       return a.length === b.length && every(a, function(elem, index) {
         return isEqual(elem, b[index]);
       });
@@ -1654,7 +1677,7 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       values = map(values, function(v) {
         return v.trim();
       });
-      values = select(values, isPresent);
+      values = filterList(values, isPresent);
       return values;
     };
     endsWith = function(string, search) {
@@ -1700,19 +1723,27 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       flatMap: flatMap,
       mapObject: mapObject,
       times: times,
-      detectResult: detectResult,
+      findResult: findResult,
       some: some,
       any: function() {
-        up.warn('Deprecated: up.any() has been renamed to up.some()');
+        up.legacy.warn('up.util.any() has been renamed to up.util.some()');
         return some.apply(null, arguments);
       },
       every: every,
       all: function() {
-        up.warn('Deprecated: up.all() has been renamed to up.every()');
+        up.legacy.warn('up.util.all() has been renamed to up.util.every()');
         return every.apply(null, arguments);
       },
-      detect: detect,
-      select: select,
+      detect: function() {
+        up.legacy.warn('up.util.find() has been renamed to up.util.find()');
+        return findInList.apply(null, arguments);
+      },
+      find: findInList,
+      select: function() {
+        up.legacy.warn('up.util.select() has been renamed to up.util.filter()');
+        return filterList.apply(null, arguments);
+      },
+      filter: filterList,
       reject: reject,
       intersect: intersect,
       compact: compact,
@@ -1743,8 +1774,11 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       isList: isList,
       isUnmodifiedKeyEvent: isUnmodifiedKeyEvent,
       isUnmodifiedMouseEvent: isUnmodifiedMouseEvent,
-      setTimer: setTimer,
-      nextFrame: nextFrame,
+      timer: scheduleTimer,
+      setTimer: function() {
+        up.legacy.warn('up.util.setTimer() has been renamed to up.util.timer()');
+        return scheduleTimer.apply(null, arguments);
+      },
       escapePressed: escapePressed,
       contains: contains,
       toArray: toArray,
@@ -1775,7 +1809,16 @@ that might save you from loading something like [Lodash](https://lodash.com/).
       rejectOnError: rejectOnError,
       isBasicObjectProperty: isBasicObjectProperty,
       isCrossDomain: isCrossDomain,
-      microtask: microtask,
+      selectorForElement: function() {
+        up.legacy.warn('up.util.selectorForElement() has been renamed to up.element.toSelector()');
+        return up.element.toSelector.apply(null, arguments);
+      },
+      nextFrame: function() {
+        up.legacy.warn('up.util.nextFrame() has been renamed to up.util.task()');
+        return queueTask.apply(null, arguments);
+      },
+      task: queueTask,
+      microtask: queueMicrotask,
       isEqual: isEqual,
       splitValues: splitValues,
       endsWith: endsWith,
@@ -1795,29 +1838,42 @@ that might save you from loading something like [Lodash](https://lodash.com/).
 
 }).call(this);
 (function() {
-  var u;
+  var u,
+    slice = [].slice;
 
   u = up.util;
 
   up.legacy = (function() {
-    var fixKey, renamedModule;
+    var fixKey, renamedModule, warn, warnedMessages;
     fixKey = function(object, oldKey, newKey) {
       if (oldKey in object) {
-        up.warn('Deprecated: Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object);
+        warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object);
         return u.renameKey(object, oldKey, newKey);
       }
     };
     renamedModule = function(oldName, newName) {
       return Object.defineProperty(up, oldName, {
         get: function() {
-          up.warn("Deprecated: up." + oldName + " has been renamed to up." + newName);
+          warn("up." + oldName + " has been renamed to up." + newName);
           return up[newName];
         }
       });
     };
+    warnedMessages = {};
+    warn = function() {
+      var args, message, ref;
+      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      message = "[DEPRECATION] " + message;
+      message = (ref = up.log).sprintf.apply(ref, [message].concat(slice.call(args)));
+      if (!warnedMessages[message]) {
+        warnedMessages[message] = true;
+        return up.warn(message);
+      }
+    };
     return {
       renamedModule: renamedModule,
-      fixKey: fixKey
+      fixKey: fixKey,
+      warn: warn
     };
   })();
 
@@ -1842,10 +1898,8 @@ Internet Explorer 10 or lower
  */
 
 (function() {
-  var slice = [].slice;
-
   up.browser = (function() {
-    var CONSOLE_PLACEHOLDERS, canAnimationFrame, canConsole, canCssTransition, canCustomElements, canDOMParser, canFormData, canInputEvent, canInspectFormData, canJQuery, canPromise, canPushState, isIE10OrWorse, isIE11, isSupported, navigate, popCookie, puts, sprintf, sprintfWithFormattedArgs, stringifyArg, submitForm, u, url, whenConfirmed;
+    var canAnimationFrame, canConsole, canControlScrollRestoration, canCssTransition, canCustomElements, canDOMParser, canFormData, canInputEvent, canInspectFormData, canJQuery, canPromise, canPushState, isIE10OrWorse, isIE11, isSupported, navigate, popCookie, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /***
@@ -1871,100 +1925,6 @@ Internet Explorer 10 or lower
      */
     submitForm = function(form) {
       return form.submit();
-    };
-
-    /***
-    A cross-browser way to interact with `console.log`, `console.error`, etc.
-    
-    This function falls back to `console.log` if the output stream is not implemented.
-    It also prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`)
-    as a single string if the browser console does not support substitution strings.
-    
-    \#\#\# Example
-    
-        up.browser.puts('log', 'Hi world');
-        up.browser.puts('error', 'There was an error in %o', obj);
-    
-    @function up.browser.puts
-    @internal
-     */
-    puts = function() {
-      var args, stream;
-      stream = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      return console[stream].apply(console, args);
-    };
-    CONSOLE_PLACEHOLDERS = /\%[odisf]/g;
-    stringifyArg = function(arg) {
-      var attr, closer, j, len, maxLength, ref, string, value;
-      maxLength = 200;
-      closer = '';
-      if (u.isString(arg)) {
-        string = arg.replace(/[\n\r\t ]+/g, ' ');
-        string = string.replace(/^[\n\r\t ]+/, '');
-        string = string.replace(/[\n\r\t ]$/, '');
-        string = "\"" + string + "\"";
-        closer = '"';
-      } else if (u.isUndefined(arg)) {
-        string = 'undefined';
-      } else if (u.isNumber(arg) || u.isFunction(arg)) {
-        string = arg.toString();
-      } else if (u.isArray(arg)) {
-        string = "[" + (u.map(arg, stringifyArg).join(', ')) + "]";
-        closer = ']';
-      } else if (u.isJQuery(arg)) {
-        string = "$(" + (u.map(arg, stringifyArg).join(', ')) + ")";
-        closer = ')';
-      } else if (u.isElement(arg)) {
-        string = "<" + (arg.tagName.toLowerCase());
-        ref = ['id', 'name', 'class'];
-        for (j = 0, len = ref.length; j < len; j++) {
-          attr = ref[j];
-          if (value = arg.getAttribute(attr)) {
-            string += " " + attr + "=\"" + value + "\"";
-          }
-        }
-        string += ">";
-        closer = '>';
-      } else {
-        string = JSON.stringify(arg);
-      }
-      if (string.length > maxLength) {
-        string = (string.substr(0, maxLength)) + " …";
-        string += closer;
-      }
-      return string;
-    };
-
-    /***
-    See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
-    
-    @function up.browser.sprintf
-    @internal
-     */
-    sprintf = function() {
-      var args, message;
-      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      return sprintfWithFormattedArgs.apply(null, [u.identity, message].concat(slice.call(args)));
-    };
-
-    /***
-    @function up.browser.sprintfWithBounds
-    @internal
-     */
-    sprintfWithFormattedArgs = function() {
-      var args, formatter, i, message;
-      formatter = arguments[0], message = arguments[1], args = 3 <= arguments.length ? slice.call(arguments, 2) : [];
-      if (u.isBlank(message)) {
-        return '';
-      }
-      i = 0;
-      return message.replace(CONSOLE_PLACEHOLDERS, function() {
-        var arg;
-        arg = args[i];
-        arg = formatter(stringifyArg(arg));
-        i += 1;
-        return arg;
-      });
     };
     url = function() {
       return location.href;
@@ -2084,6 +2044,9 @@ Internet Explorer 10 or lower
     canAnimationFrame = u.memoize(function() {
       return 'requestAnimationFrame' in window;
     });
+    canControlScrollRestoration = u.memoize(function() {
+      return 'scrollRestoration' in history;
+    });
     popCookie = function(name) {
       var ref, value;
       value = (ref = document.cookie.match(new RegExp(name + "=(\\w+)"))) != null ? ref[1] : void 0;
@@ -2132,11 +2095,9 @@ Internet Explorer 10 or lower
       canInspectFormData: canInspectFormData,
       canCustomElements: canCustomElements,
       canJQuery: canJQuery,
+      canControlScrollRestoration: canControlScrollRestoration,
       whenConfirmed: whenConfirmed,
       isSupported: isSupported,
-      puts: puts,
-      sprintf: sprintf,
-      sprintfWithFormattedArgs: sprintfWithFormattedArgs,
       popCookie: popCookie,
       isIE11: isIE11
     };
@@ -2173,7 +2134,7 @@ Internet Explorer 10 or lower
       var matches;
       matches = root.querySelectorAll(this.selector);
       if (this.filterFn) {
-        matches = u.select(matches, this.filterFn);
+        matches = u.filter(matches, this.filterFn);
       }
       return matches;
     };
@@ -2184,7 +2145,7 @@ Internet Explorer 10 or lower
         return root.querySelector(this.selector);
       } else {
         candidates = root.querySelectorAll(this.selector);
-        return u.detect(candidates, this.filterFn);
+        return u.find(candidates, this.filterFn);
       }
     };
 
@@ -2249,9 +2210,7 @@ DOM helpers
 
 The `up.element` module offers functions for DOM manipulation and traversal.
 
-`up.element` complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp)
-to implement [jQuery](https://jquery.com/)-like capabilities across all
-[supported browsers](/up.browser).
+It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.browser).
 
 @module up.element
  */
@@ -2264,7 +2223,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     u = up.util;
 
     /***
-    Returns a null-object that mimics an `Element`.
+    Returns a null-object that mostly behaves like an `Element`.
     
     @function up.element.none()
     @internal
@@ -2498,7 +2457,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     };
 
     /***
-    Removes the given element from the object tree.
+    Removes the given element from the DOM tree.
     
     If you don't need IE11 support you may also use the built-in
     [`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/remove) to the same effect.
@@ -2523,6 +2482,8 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     The element is hidden by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
     of `{ display: none }`.
     
+    Also see `up.element.show()`.
+    
     @function up.element.hide
     @param {Element} element
     @experimental
@@ -2533,6 +2494,10 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
 
     /***
     Shows the given element.
+    
+    Also see `up.element.hide()`.
+    
+    \#\#\# Limitations
     
     The element is shown by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
     of `{ display: '' }`.
@@ -2710,13 +2675,13 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
         // element is <div style="color: red"></div>
     
     @function up.element.createFromSelector
-    @params {string} selector
+    @param {string} selector
       The CSS selector from which to create an element.
-    @params {Object} attrs
+    @param {Object} [attrs]
       An object of attributes to set on the created element.
-    @param {Object} attrs.text
+    @param {Object} [attrs.text]
       The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
-    @param {Object} attrs.style
+    @param {Object} [attrs.style]
       An object of CSS properties that will be set as the inline style
       of the created element.
     @return {Element}
@@ -2793,7 +2758,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     \#\#\# Example
     
         element = up.element.affix(document.body, '.klass')
-        element.parentChild // returns document.body
+        element.parentElement // returns document.body
         element.className // returns 'klass'
     
     @function up.element.affix
@@ -3180,7 +3145,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     };
 
     /***
-    Temporarily sets the given inline CSS styles on the given element.
+    Temporarily sets the inline CSS styles on the given element.
     
     Returns a function that restores the original inline styles when called.
     
@@ -3199,7 +3164,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
       An object of CSS property names and values.
     @return {Function()}
       A function that restores the original inline styles when called.
-    @experimental
+    @internal
      */
     setTemporaryStyle = function(element, newStyles, block) {
       var oldStyles;
@@ -3808,7 +3773,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     };
 
     CompilePass.prototype.compileOneElement = function(compiler, element) {
-      var compileArgs, data, destructor, elementArg, result;
+      var compileArgs, data, destructorOrDestructors, elementArg, result;
       elementArg = compiler.jQuery ? jQuery(element) : element;
       compileArgs = [elementArg];
       if (compiler.length !== 1) {
@@ -3816,8 +3781,8 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
         compileArgs.push(data);
       }
       result = compiler.apply(element, compileArgs);
-      if (destructor = this.normalizeDestructor(result)) {
-        return up.syntax.destructor(element, destructor);
+      if (destructorOrDestructors = this.destructorPresence(result)) {
+        return up.destructor(element, destructorOrDestructors);
       }
     };
 
@@ -3830,16 +3795,14 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
         compileArgs.push(dataList);
       }
       result = compiler.apply(elements, compileArgs);
-      if (this.normalizeDestructor(result)) {
+      if (this.destructorPresence(result)) {
         return up.fail('Compilers with { batch: true } cannot return destructors');
       }
     };
 
-    CompilePass.prototype.normalizeDestructor = function(result) {
-      if (u.isFunction(result)) {
+    CompilePass.prototype.destructorPresence = function(result) {
+      if (u.isFunction(result) || u.isArray(result) && (u.every(result, u.isFunction))) {
         return result;
-      } else if (u.isArray(result) && u.every(result, u.isFunction)) {
-        return u.sequence(result);
       }
     };
 
@@ -3957,7 +3920,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     CssTransition.prototype.startFallbackTimer = function() {
       var timingTolerance;
       timingTolerance = 100;
-      return this.fallbackTimer = u.setTimer(this.totalDuration + timingTolerance, (function(_this) {
+      return this.fallbackTimer = u.timer(this.totalDuration + timingTolerance, (function(_this) {
         return function() {
           return _this.finish();
         };
@@ -4324,7 +4287,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
       var candidates;
       candidates = [selector, this.options.fallback, up.fragment.config.fallbacks];
       candidates = u.flatten(candidates);
-      candidates = u.select(candidates, u.isTruthy);
+      candidates = u.filter(candidates, u.isTruthy);
       candidates = u.uniq(candidates);
       if (this.options.fallback === false || this.options.provideTarget) {
         candidates = [candidates[0]];
@@ -4345,7 +4308,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     };
 
     ExtractCascade.prototype.detectPlan = function(checker) {
-      return u.detect(this.plans, function(plan) {
+      return u.find(this.plans, function(plan) {
         return plan[checker]();
       });
     };
@@ -4492,7 +4455,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
       compressed = u.uniqBy(compressed, function(step) {
         return step.oldElement;
       });
-      compressed = u.select(compressed, (function(_this) {
+      compressed = u.filter(compressed, (function(_this) {
         return function(candidateStep, candidateIndex) {
           return u.every(compressed, function(rivalStep, rivalIndex) {
             var candidateElement, rivalElement;
@@ -4616,7 +4579,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
 
     FieldObserver.prototype.scheduleTimer = function() {
       this.cancelTimer();
-      return this.currentTimer = u.setTimer(this.delay, (function(_this) {
+      return this.currentTimer = u.timer(this.delay, (function(_this) {
         return function() {
           _this.currentTimer = void 0;
           return _this.requestCallback();
@@ -5113,12 +5076,12 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
   
   \#\#\# Supported parameter types
   
-  The following types of parameters are supported:
+  The following types of parameter representation are supported:
   
   1. An object like `{ email: 'foo@bar.com' }`
   2. A query string like `'email=foo%40bar.com'`
   3. An array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
-  2. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
+  4. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
      On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
   
   @class up.Params
@@ -5317,7 +5280,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
 
     /***
     Builds an URL string from the given base URL and
-    this `up.Params` object as a [query string](/up.Params.toString).
+    this `up.Params` instance as a [query string](/up.Params.toString).
     
     The base URL may or may not already contain a query string. The
     additional query string will be joined with an `&` or `?` character accordingly.
@@ -5333,7 +5296,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     Params.prototype.toURL = function(base) {
       var parts, separator;
       parts = [base, this.toQuery()];
-      parts = u.select(parts, u.isPresent);
+      parts = u.filter(parts, u.isPresent);
       separator = u.contains(base, '?') ? '&' : '?';
       return parts.join(separator);
     };
@@ -5542,7 +5505,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
 
     Params.prototype.getFirst = function(name) {
       var entry;
-      entry = u.detect(this.entries, this.matchEntryFn(name));
+      entry = u.find(this.entries, this.matchEntryFn(name));
       return entry != null ? entry.value : void 0;
     };
 
@@ -5640,7 +5603,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
     
     See `up.Params.fromForm()` for more details and examples.
     
-    @function up.Params.fromField
+    @function up.Params.fromFields
     @param {Element|List<Element>|jQuery} fields
     @return {up.Params}
     @experimental
@@ -6100,9 +6063,9 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
   \#\#\# Example
   
       up.request('/foo').then(function(response) {
-        console.log(response.status); // 200
-        console.log(response.text);   // "<html><body>..."
-      });
+        console.log(response.status) // 200
+        console.log(response.text)   // "<html><body>..."
+      })
   
   @class up.Response
    */
@@ -6612,7 +6575,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
       this.anchor = options.anchor;
       ref = options.position.split('-'), this.position = ref[0], this.align = ref[1];
       if (this.align) {
-        up.warn('The position value %o is deprecated. Use %o instead.', options.position, this.describeConstraints());
+        up.legacy.warn('The position value %o is deprecated. Use %o instead.', options.position, this.describeConstraints());
       } else {
         this.align = options.align;
       }
@@ -6639,7 +6602,7 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
 
     Tether.prototype.scheduleSync = function() {
       clearTimeout(this.syncTimer);
-      return this.syncTimer = u.nextFrame(this.sync);
+      return this.syncTimer = u.task(this.sync);
     };
 
     Tether.prototype.sync = function() {
@@ -6764,13 +6727,13 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
       pattern = u.escapeRegexp(pattern);
       pattern = pattern.replace(new RegExp(placeholder, 'g'), '.*?');
       pattern = new RegExp('^' + pattern + '$');
-      return u.detect(this.urls, function(url) {
+      return u.find(this.urls, function(url) {
         return pattern.test(url);
       });
     };
 
     UrlSet.prototype.matchesAny = function(testUrls) {
-      return u.detect(testUrls, this.matches);
+      return u.find(testUrls, this.matches);
     };
 
     UrlSet.prototype["" + u.isEqual.key] = function(otherSet) {
@@ -6829,15 +6792,12 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
      */
     boot = function() {
       if (up.browser.isSupported()) {
-        up.emit('up:framework:boot', {
-          log: 'Booting framework'
-        });
         up.emit('up:framework:booted', {
           log: 'Framework booted'
         });
         isBooting = false;
-        return u.nextFrame(function() {
-          return up.event.whenReady().then(function() {
+        return up.event.onReady(function() {
+          return u.task(function() {
             up.emit('up:app:boot', {
               log: 'Booting user application'
             });
@@ -6851,13 +6811,6 @@ to implement [jQuery](https://jquery.com/)-like capabilities across all
       }
     };
     return {
-
-      /***
-      This event is [emitted](/up.emit) when Unpoly [starts to boot](/up.framework.boot).
-      
-      @event up:framework:boot
-      @internal
-       */
       reset: emitReset,
       boot: boot,
       isBooting: function() {
@@ -6875,12 +6828,13 @@ Events
 Most Unpoly interactions emit DOM events that are prefixed with `up:`.
 
     document.addEventListener('up:modal:opened', (event) => {
-      console.log('A new modal has just opened!');
-    });
+      console.log('A new modal has just opened!')
+    })
 
-Events often have both present ([`up:modal:open`](/up:modal:open))
-and past forms ([`up:modal:opened`](/up:modal:opened)).
-
+Events often have both present and past forms. For example,
+`up:modal:open` is emitted before a modal starts to open.
+`up:modal:opened` is emitted when the modal has finished its
+opening animation.
 
 \#\#\# Preventing events
 
@@ -6889,9 +6843,9 @@ You can prevent most present form events by calling `preventDefault()`:
     document.addEventListener('up:modal:open', (event) => {
       if (event.url == '/evil') {
         // Prevent the modal from opening
-        event.preventDefault();
+        event.preventDefault()
       }
-    });
+    })
 
 
 \#\#\# A better way to bind event listeners
@@ -6902,17 +6856,20 @@ you may find it convenient to use [`up.on()`](/up.on) instead:
     up.on('click', 'button', function(event, button, data) {
       // button is the clicked element
       // data is the parsed [`up-data`](/up-data) attribute
-    });
+    })
 
 There are some advantages to using `up.on()`:
 
-- Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
-  leaving you with an application without JavaScript. This is typically preferable to
-  a soup of randomly broken JavaScript in ancient browsers.
-- The event target is automatically passed as a second argument.
-- You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
-  to observed elements. If an `[up-data]` attribute is set, its value will automatically be
-  parsed as JSON and passed as a third argument.
+  - You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
+  - The event target is automatically passed as a second argument.
+  - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`)
+  - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements.
+  - You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
+    to observed elements. If an `[up-data]` attribute is set, its value will automatically be
+    parsed as JSON and passed as a third argument.
+  - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
+    leaving you with an application without JavaScript. This is typically preferable to
+    a soup of randomly broken JavaScript in ancient browsers.
 
 @module up.event
  */
@@ -6921,7 +6878,7 @@ There are some advantages to using `up.on()`:
   var slice = [].slice;
 
   up.event = (function() {
-    var $bind, bind, bindNow, buildEvent, consumeAction, e, emit, halt, logEmission, nobodyPrevents, onEscape, reset, u, unbind, whenEmitted, whenReady;
+    var $bind, bind, bindNow, buildEvent, consumeAction, e, emit, halt, logEmission, nobodyPrevents, onEscape, onReady, reset, u, unbind, whenEmitted;
     u = up.util;
     e = up.element;
     reset = function() {
@@ -6936,23 +6893,46 @@ There are some advantages to using `up.on()`:
     };
 
     /***
-    Listens to an event on `document` or a given element.
+    Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
+    on `document` or a given element.
     
-    The given event listener which will be executed whenever the
-    given event is [triggered](/up.emit) on the given selector:
+    `up.on()` has some quality of life improvements over
+    [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener):
     
-        up.on('click', '.button', function(event, $element) {
-          console.log("Someone clicked the button %o", $element);
-        });
+    - You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
+    - The event target is automatically passed as a second argument.
+    - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`)
+    - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements.
+    - You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
+      to observed elements. If an `[up-data]` attribute is set, its value will automatically be
+      parsed as JSON and passed as a third argument.
+    - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
+      leaving you with an application without JavaScript. This is typically preferable to
+      a soup of randomly broken JavaScript in ancient browsers.
     
-    This is roughly equivalent to binding an event listener to `document`:
+    \#\#\# Examples
     
-        $(document).on('click', '.button', function(event) {
-          console.log("Someone clicked the button %o", $(this));
-        });
+    The code below will call the listener when a `<a>` is clicked
+    anywhere in the `document`:
     
-    Other than jQuery, Unpoly will silently discard event listeners
-    on [unsupported browsers](/up.browser.isSupported).
+        up.on('click', 'a', function(event, element) {
+          console.log("Click on a link %o", element)
+        })
+    
+    You may also bind the listener to a given element instead of `document`:
+    
+        var form = document.querySelector('form')
+        up.on(form, 'click', function(event, form) {
+          console.log("Click within %o", form)
+        })
+    
+    You may also pass both an element and a selector
+    for [event delegation](https://davidwalsh.name/event-delegate):
+    
+        var form = document.querySelector('form')
+        document.addEventListener(form, 'click', 'a', function(event, link) {
+          console.log("Click on a link %o within %o", link, form)
+        })
     
     \#\#\# Attaching structured data
     
@@ -6964,19 +6944,19 @@ There are some advantages to using `up.on()`:
     
     The JSON will parsed and handed to your event handler as a third argument:
     
-        up.on('click', '.person', function(event, $element, data) {
-          console.log("This is %o who is %o years old", data.name, data.age);
-        });
+        up.on('click', '.person', function(event, element, data) {
+          console.log("This is %o who is %o years old", data.name, data.age)
+        })
     
     \#\#\# Unbinding an event listener
     
     `up.on()` returns a function that unbinds the event listeners when called:
     
         // Define the listener
-        var listener =  function() { ... };
+        var listener =  function(event) { ... }
     
         // Binding the listener returns an unbind function
-        unbind = up.on('click', listener);
+        var unbind = up.on('click', listener)
     
         // Unbind the listener
         unbind()
@@ -6984,31 +6964,13 @@ There are some advantages to using `up.on()`:
     There is also a function [`up.off()`](/up.off) which you can use for the same purpose:
     
         // Define the listener
-        var listener =  function() { ... };
+        var listener =  function(event) { ... }
     
         // Bind the listener
-        up.on('click', listener);
+        up.on('click', listener)
     
         // Unbind the listener
         up.off('click', listener)
-    
-    \#\#\# Migrating jQuery event handlers to `up.on()`
-    
-    Within the event handler, Unpoly will bind `this` to the
-    native DOM element to help you migrate your existing jQuery code to
-    this new syntax.
-    
-    So if you had this before:
-    
-        $(document).on('click', '.button', function() {
-          $(this).something();
-        });
-    
-    ... you can simply copy the event handler to `up.on()`:
-    
-        up.on('click', '.button', function() {
-          $(this).something();
-        });
     
     @function up.on
     @param {Element|jQuery} [element=document]
@@ -7038,7 +7000,20 @@ There are some advantages to using `up.on()`:
     };
 
     /***
-    TODO: Document me
+    Listens to an event on `document` or a given element.
+    The event handler is called with the event target as a
+    [jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
+    
+    If you're not using jQuery, use `up.on()` instead, which calls
+    event handlers with a native element.
+    
+    \#\#\# Example
+    
+    ```
+    up.$on('click', 'a', function(event, $link) {
+      console.log("Click on a link with destination %s", $element.attr('href'))
+    })
+    ```
     
     @function up.$on
     @param {Element|jQuery} [element=document]
@@ -7082,12 +7057,12 @@ There are some advantages to using `up.on()`:
     
     Let's say you are listing to clicks on `.button` elements:
     
-        var listener = function() { ... };
-        up.on('click', '.button', listener);
+        var listener = function() { ... }
+        up.on('click', '.button', listener)
     
     You can stop listening to these events like this:
     
-        up.off('click', '.button', listener);
+        up.off('click', '.button', listener)
     
     Note that you need to pass `up.off()` a reference to the same listener function
     that was passed to `up.on()` earlier.
@@ -7104,19 +7079,20 @@ There are some advantages to using `up.on()`:
     /***
     Emits a event with the given name and properties.
     
-    The event will be triggered as a jQuery event on `document`.
+    The event will be triggered as an event on `document` or on the given element.
     
     Other code can subscribe to events with that name using
-    [`up.on()`](/up.on) or by [binding a jQuery event listener](http://api.jquery.com/on/) to `document`.
+    [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
+    or [`up.on()`](/up.on).
     
     \#\#\# Example
     
         up.on('my:event', function(event) {
-          console.log(event.foo);
-        });
+          console.log(event.foo)
+        })
     
-        up.emit('my:event', { foo: 'bar' });
-         * Prints "bar" to the console
+        up.emit('my:event', { foo: 'bar' })
+        // Prints "bar" to the console
     
     @function up.emit
     @param {Element|jQuery} [target=document]
@@ -7289,17 +7265,13 @@ There are some advantages to using `up.on()`:
         });
       }
     };
-    whenReady = u.memoize(function() {
-      var readyState;
-      readyState = document.readyState;
-      if (readyState !== 'loading') {
-        return Promise.resolve();
+    onReady = function(callback) {
+      if (document.readyState !== 'loading') {
+        return callback();
       } else {
-        return new Promise(function(resolve) {
-          return document.addEventListener('DOMContentLoaded', resolve);
-        });
+        return document.addEventListener('DOMContentLoaded', callback);
       }
-    });
+    };
     bind('up:framework:reset', reset);
     return {
       on: bind,
@@ -7311,7 +7283,7 @@ There are some advantages to using `up.on()`:
       onEscape: onEscape,
       halt: halt,
       consumeAction: consumeAction,
-      whenReady: whenReady
+      onReady: onReady
     };
   })();
 
@@ -7665,7 +7637,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
   var slice = [].slice;
 
   up.log = (function() {
-    var b, config, debug, disable, enable, error, group, prefix, printBanner, puts, reset, sessionStore, setEnabled, u, warn;
+    var CONSOLE_PLACEHOLDERS, b, callConsole, config, debug, disable, enable, error, group, prefix, printBanner, puts, reset, sessionStore, setEnabled, sprintf, sprintfWithFormattedArgs, stringifyArg, u, warn;
     u = up.util;
     b = up.browser;
     sessionStore = new up.store.Session('up.log');
@@ -7702,6 +7674,100 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     };
 
     /***
+    A cross-browser way to interact with `console.log`, `console.error`, etc.
+    
+    This function falls back to `console.log` if the output stream is not implemented.
+    It also prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`)
+    as a single string if the browser console does not support substitution strings.
+    
+    \#\#\# Example
+    
+        up.browser.puts('log', 'Hi world')
+        up.browser.puts('error', 'There was an error in %o', obj)
+    
+    @function up.browser.puts
+    @internal
+     */
+    callConsole = function() {
+      var args, stream;
+      stream = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      return console[stream].apply(console, args);
+    };
+    CONSOLE_PLACEHOLDERS = /\%[odisf]/g;
+    stringifyArg = function(arg) {
+      var attr, closer, j, len, maxLength, ref, string, value;
+      maxLength = 200;
+      closer = '';
+      if (u.isString(arg)) {
+        string = arg.replace(/[\n\r\t ]+/g, ' ');
+        string = string.replace(/^[\n\r\t ]+/, '');
+        string = string.replace(/[\n\r\t ]$/, '');
+        string = "\"" + string + "\"";
+        closer = '"';
+      } else if (u.isUndefined(arg)) {
+        string = 'undefined';
+      } else if (u.isNumber(arg) || u.isFunction(arg)) {
+        string = arg.toString();
+      } else if (u.isArray(arg)) {
+        string = "[" + (u.map(arg, stringifyArg).join(', ')) + "]";
+        closer = ']';
+      } else if (u.isJQuery(arg)) {
+        string = "$(" + (u.map(arg, stringifyArg).join(', ')) + ")";
+        closer = ')';
+      } else if (u.isElement(arg)) {
+        string = "<" + (arg.tagName.toLowerCase());
+        ref = ['id', 'name', 'class'];
+        for (j = 0, len = ref.length; j < len; j++) {
+          attr = ref[j];
+          if (value = arg.getAttribute(attr)) {
+            string += " " + attr + "=\"" + value + "\"";
+          }
+        }
+        string += ">";
+        closer = '>';
+      } else {
+        string = JSON.stringify(arg);
+      }
+      if (string.length > maxLength) {
+        string = (string.substr(0, maxLength)) + " …";
+        string += closer;
+      }
+      return string;
+    };
+
+    /***
+    See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
+    
+    @function up.browser.sprintf
+    @internal
+     */
+    sprintf = function() {
+      var args, message;
+      message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      return sprintfWithFormattedArgs.apply(null, [u.identity, message].concat(slice.call(args)));
+    };
+
+    /***
+    @function up.browser.sprintfWithFormattedArgs
+    @internal
+     */
+    sprintfWithFormattedArgs = function() {
+      var args, formatter, i, message;
+      formatter = arguments[0], message = arguments[1], args = 3 <= arguments.length ? slice.call(arguments, 2) : [];
+      if (u.isBlank(message)) {
+        return '';
+      }
+      i = 0;
+      return message.replace(CONSOLE_PLACEHOLDERS, function() {
+        var arg;
+        arg = args[i];
+        arg = formatter(stringifyArg(arg));
+        i += 1;
+        return arg;
+      });
+    };
+
+    /***
     Prints a debugging message to the browser console.
     
     @function up.log.debug
@@ -7713,7 +7779,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (config.enabled && message) {
-        return b.puts.apply(b, ['debug', prefix(message)].concat(slice.call(args)));
+        return console.debug.apply(console, [prefix(message)].concat(slice.call(args)));
       }
     };
 
@@ -7729,7 +7795,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (config.enabled && message) {
-        return b.puts.apply(b, ['log', prefix(message)].concat(slice.call(args)));
+        return console.log.apply(console, [prefix(message)].concat(slice.call(args)));
       }
     };
 
@@ -7741,7 +7807,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (message) {
-        return b.puts.apply(b, ['warn', prefix(message)].concat(slice.call(args)));
+        return console.warn.apply(console, [prefix(message)].concat(slice.call(args)));
       }
     };
 
@@ -7753,17 +7819,17 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     @internal
      */
     group = function() {
-      var args, block, message, stream;
+      var args, block, fn, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       block = args.pop();
       if (config.enabled && message) {
-        stream = config.collapse ? 'groupCollapsed' : 'group';
-        b.puts.apply(b, [stream, prefix(message)].concat(slice.call(args)));
+        fn = config.collapse ? 'groupCollapsed' : 'group';
+        console[fn].apply(console, [prefix(message)].concat(slice.call(args)));
         try {
           return block();
         } finally {
           if (message) {
-            b.puts('groupEnd');
+            console.groupEnd();
           }
         }
       } else {
@@ -7779,7 +7845,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       var args, message;
       message = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (message) {
-        return b.puts.apply(b, ['error', prefix(message)].concat(slice.call(args)));
+        return console.error.apply(console, [prefix(message)].concat(slice.call(args)));
       }
     };
     printBanner = function() {
@@ -7790,9 +7856,9 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       } else {
         banner += "Call `up.log.enable()` to enable logging for this session.";
       }
-      return b.puts('log', banner);
+      return console.log(banner);
     };
-    up.on('up:framework:boot', printBanner);
+    up.on('up:framework:booted', printBanner);
     up.on('up:framework:reset', reset);
     setEnabled = function(value) {
       sessionStore.set('enabled', value);
@@ -7825,6 +7891,9 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     };
     return {
       puts: puts,
+      sprintf: sprintf,
+      sprintfWithFormattedArgs: sprintfWithFormattedArgs,
+      puts: puts,
       debug: debug,
       error: error,
       warn: warn,
@@ -7855,9 +7924,8 @@ Toast alerts
   var slice = [].slice;
 
   up.toast = (function() {
-    var VARIABLE_FORMATTER, addAction, b, close, e, isOpen, messageToHtml, open, reset, state, u;
+    var VARIABLE_FORMATTER, addAction, close, e, isOpen, messageToHtml, open, reset, state, u;
     u = up.util;
-    b = up.browser;
     e = up.element;
     VARIABLE_FORMATTER = function(arg) {
       return "<span class='up-toast-variable'>" + (u.escapeHtml(arg)) + "</span>";
@@ -7870,9 +7938,10 @@ Toast alerts
       return state.reset();
     };
     messageToHtml = function(message) {
+      var ref;
       if (u.isArray(message)) {
         message[0] = u.escapeHtml(message[0]);
-        message = b.sprintfWithFormattedArgs.apply(b, [VARIABLE_FORMATTER].concat(slice.call(message)));
+        message = (ref = up.log).sprintfWithFormattedArgs.apply(ref, [VARIABLE_FORMATTER].concat(slice.call(message)));
       } else {
         message = u.escapeHtml(message);
       }
@@ -7928,12 +7997,12 @@ in order to integrate libraries or implement custom behavior.
 
 Unpoly lets you organize your JavaScript snippets using [compilers](/up.compiler).
 
-For instance, to activate the [Masonry](http://masonry.desandro.com/) jQuery plugin for every element
+For instance, to activate the [Masonry](http://masonry.desandro.com/) library for every element
 with a `grid` class, use this compiler:
 
-    up.compiler('.grid', function($element) {
-      $element.masonry();
-    });
+    up.compiler('.grid', function(element) {
+      new Masonry(element, { itemSelector: '.grid--item' })
+    })
 
 The compiler function will be called on matching elements when the page loads
 or when a matching fragment is [inserted via AJAX](/up.link) later.
@@ -7960,35 +8029,35 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     macros = [];
 
     /***
-    Registers a function to be called whenever an element with
+    Registers a function to be called when an element with
     the given selector is inserted into the DOM.
     
     Use compilers to activate your custom Javascript behavior on matching
     elements.
     
-    You should migrate your [jQuery ready callbacks](https://api.jquery.com/ready/)
-    to compilers.
+    You should migrate your [`DOMContentLoaded`](https://api.jquery.com/ready/)
+    callbacks to compilers. This will make sure they run both at page load and
+    when [a new fragment is inserted later](/a-up-target).
+    It will also organize your JavaScript snippets by selector of affected elements.
     
     
     \#\#\# Example
     
-    Let's say that any element with the `action` class should alert a message when clicked.
-    We can implement this behavior as a compiler function that is called on all elements matching
-    the `.action` selector:
+    This jQuery compiler will insert the current time into a
+    `<div class='current-time'></div>`:
     
-        up.compiler('.action', function($element) {
-          $element.on('click', function() {
-            alert('Action was clicked!');
-          });
-        });
+        up.compiler('.current-time', function(element) {
+          var now = new Date()
+          element.textContent = now.toString()
+        })
     
     The compiler function will be called once for each matching element when
     the page loads, or when a matching fragment is [inserted](/up.replace) later.
     
     
-    \#\#\# Integrating jQuery plugins
+    \#\#\# Integrating JavaScript libraries
     
-    `up.compiler()` is a great way to integrate jQuery plugins.
+    `up.compiler()` is a great way to integrate JavaScript libraries.
     Let's say your JavaScript plugin wants you to call `lightboxify()`
     on links that should open a lightbox. You decide to
     do this for all links with an `lightbox` class:
@@ -7998,24 +8067,9 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
     This JavaScript will do exactly that:
     
-        up.compiler('a.lightbox', function($element) {
-          $element.lightboxify();
-        });
-    
-    
-    \#\#\# Custom elements
-    
-    You can use `up.compiler()` to implement custom elements like this:
-    
-        <clock></clock>
-    
-    Here is the JavaScript that inserts the current time into to these elements:
-    
-        up.compiler('clock', function($element) {
-          var now = new Date();
-          $element.text(now.toString()));
-        });
-    
+        up.compiler('a.lightbox', function(element) {
+          lightboxify(element)
+        })
     
     \#\#\# Cleaning up after yourself
     
@@ -8028,24 +8082,24 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     side effects, like a [`setInterval`](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setInterval)
     or [event handlers bound to the document root](/up.on).
     
-    Here is a version of `<clock>` that updates
+    Here is a version of `.current-time` that updates
     the time every second, and cleans up once it's done. Note how it returns
     a function that calls `clearInterval`:
     
-        up.compiler('clock', function($element) {
+        up.compiler('.current-time', function(element) {
     
           function update() {
-            var now = new Date();
-            $element.text(now.toString()));
+            var now = new Date()
+            element.textContent = now.toString()
           }
     
-          setInterval(update, 1000);
+          setInterval(update, 1000)
     
           return function() {
-            clearInterval(update);
+            clearInterval(update)
           };
     
-        });
+        })
     
     If we didn't clean up after ourselves, we would have many ticking intervals
     operating on detached DOM elements after we have created and removed a couple
@@ -8066,43 +8120,18 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
     The JSON will parsed and handed to your compiler as a second argument:
     
-        up.compiler('.google-map', function($element, pins) {
-    
-          var map = new google.maps.Map($element);
+        up.compiler('.google-map', function(element, pins) {
+          var map = new google.maps.Map(element)
     
           pins.forEach(function(pin) {
-            var position = new google.maps.LatLng(pin.lat, pin.lng);
+            var position = new google.maps.LatLng(pin.lat, pin.lng)
             new google.maps.Marker({
               position: position,
               map: map,
               title: pin.title
-            });
-          });
-    
-        });
-    
-    
-    \#\#\# Migrating jQuery event handlers to `up.compiler()`
-    
-    Within the compiler, Unpoly will bind `this` to the
-    native DOM element to help you migrate your existing jQuery code to
-    this new syntax.
-    
-    So if you had this before:
-    
-        $(function() {
-          $('.action').on('click', function() {
-            $(this).something();
-          });
-        });
-    
-    ... you can reuse the callback function like this:
-    
-        up.compiler('.action', function($element) {
-          $element.on('click', function() {
-            $(this).something();
-          });
-        });
+            })
+          })
+        })
     
     
     @function up.compiler
@@ -8121,13 +8150,14 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       [page updates](/a-up-target).
     
       This has the same effect as setting an `up-keep` attribute on the element.
-    @param {Function($element, data)} compiler
+    @param {Function(element, data)} compiler
       The function to call when a matching element is inserted.
-      The function takes the new element as the first argument (as a jQuery object).
+    
+      The function takes the new element as the first argument.
       If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
       and passed as a second argument.
     
-      The function may return a destructor function that destroys the compiled
+      The function may return a destructor function that cleans the compiled
       object before it is removed from the DOM. The destructor is supposed to
       [clear global state](/up.compiler#cleaning-up-after-yourself)
       such as timeouts and event handlers bound to the document.
@@ -8143,10 +8173,34 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     };
 
     /***
-    TODO: Document me
+    Registers a function to be called when an element with
+    the given selector is inserted into the DOM. The function is called
+    with each matching element as a
+    [jQuery object](https://learn.jquery.com/using-jquery-core/jquery-object/).
+    
+    If you're not using jQuery, use `up.compiler()` instead, which calls
+    the compiler function with a native element.
+    
+    \#\#\# Example
+    
+    This jQuery compiler will insert the current time into a
+    `<div class='current-time'></div>`:
+    
+        up.$compiler('.current-time', function($element) {
+          var now = new Date()
+          $element.text(now.toString())
+        })
     
     @function up.$compiler
-    @stable
+    @param {string} selector
+      The selector to match.
+    @param {Object} [options]
+      See [`options` argument for `up.compiler()`](/up.compiler#parameters).
+    @param {Function($element, data)} compiler
+      The function to call when a matching element is inserted.
+    
+      See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
+      @stable
      */
     registerJQueryCompiler = function() {
       var args, compiler;
@@ -8159,7 +8213,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     /***
     Registers a [compiler](/up.compiler) that is run before all other compilers.
     
-    You can use `up.macro()` to register a compiler that sets other UJS attributes.
+    Use `up.macro()` to register a compiler that sets multiply Unpoly attributes.
     
     \#\#\# Example
     
@@ -8169,21 +8223,21 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
         <a href="/page2" up-target=".content" up-transition="cross-fade" up-duration="300">Page 2</a>
         <a href="/page3" up-target=".content" up-transition="cross-fade" up-duration="300">Page 3</a>
     
-    We would much rather define a new `content-link` attribute that let's us
+    We would much rather define a new `[content-link]` attribute that let's us
     write the same links like this:
     
         <a href="/page1" content-link>Page 1</a>
         <a href="/page2" content-link>Page 2</a>
         <a href="/page3" content-link>Page 3</a>
     
-    We can define the `content-link` attribute by registering a macro that
-    sets the `up-target`, `up-transition` and `up-duration` attributes for us:
+    We can define the `[content-link]` attribute by registering a macro that
+    sets the `[up-target]`, `[up-transition]` and `[up-duration]` attributes for us:
     
-        up.macro('[content-link]', function($link) {
-          $link.attr('up-target', '.content');
-          $link.attr('up-transition', 'cross-fade');
-          $link.attr('up-duration', '300');
-        });
+        up.macro('[content-link]', function(link) {
+          link.setAttribute('up-target', '.content')
+          link.setAttribute('up-transition', 'cross-fade')
+          link.setAttribute('up-duration', '300')
+        })
     
     Examples for built-in macros are [`a[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand).
     
@@ -8192,9 +8246,10 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       The selector to match.
     @param {Object} options
       See options for [`up.compiler()`](/up.compiler).
-    @param {Function($element, data)} macro
+    @param {Function(element, data)} macro
       The function to call when a matching element is inserted.
-      See [`up.compiler()`](/up.compiler) for details.
+    
+      See [`up.compiler()`](/up.compiler#parameters) for details.
     @stable
      */
     registerMacro = function() {
@@ -8208,9 +8263,32 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     };
 
     /***
-    TODO: Document me
+    Registers a [compiler](/up.compiler) that is run before all other compilers.
+    The compiler function is called with each matching element as a
+    [jQuery object](https://learn.jquery.com/using-jquery-core/jquery-object/).
+    
+    If you're not using jQuery, use `up.macro()` instead, which calls
+    the macro function with a native element.
+    
+    \#\#\# Example
+    
+        up.$macro('[content-link]', function($link) {
+          $link.attr(
+            'up-target': '.content',
+            'up-transition': 'cross-fade',
+            'up-duration':'300'
+          )
+        })
     
     @function up.$macro
+    @param {string} selector
+      The selector to match.
+    @param {Object} options
+      See [`options` argument for `up.compiler()`](/up.compiler#parameters).
+    @param {Function(element, data)} macro
+      The function to call when a matching element is inserted.
+    
+      See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
     @stable
      */
     registerJQueryMacro = function() {
@@ -8276,7 +8354,16 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     };
 
     /***
-    @function up.syntax.destructor
+    Registers a function to be called when the given element
+    is [destroyed](/up.destroy).
+    
+    The preferred way to register a destructor function is to `return`
+    it from a [compiler function](/up.compiler).
+    
+    @function up.destructor
+    @param {Element} element
+    @param {Function|Array<Function>} destructor
+      One or more destructor functions
     @internal
      */
     registerDestructor = function(element, destructor) {
@@ -8286,11 +8373,15 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
         element.upDestructors = destructors;
         element.classList.add('up-can-clean');
       }
-      return destructors.push(destructor);
+      if (u.isArray(destructor)) {
+        return destructors.push.apply(destructors, destructor);
+      } else {
+        return destructors.push(destructor);
+      }
     };
 
     /***
-    Runs any destroyers on the given fragment and its descendants.
+    Runs any destructor on the given fragment and its descendants.
     Unlike [`up.destroy()`](/up.destroy), this doesn't emit any events
     and does not remove the element from the DOM.
     
@@ -8353,28 +8444,25 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     
     The JSON will parsed and handed to your compiler as a second argument:
     
-        up.compiler('.google-map', function($element, pins) {
-    
-          var map = new google.maps.Map($element);
-    
+        up.compiler('.google-map', function(element, pins) {
+          var map = new google.maps.Map(element)
           pins.forEach(function(pin) {
-            var position = new google.maps.LatLng(pin.lat, pin.lng);
+            var position = new google.maps.LatLng(pin.lat, pin.lng)
             new google.maps.Marker({
               position: position,
               map: map,
               title: pin.title
-            });
-          });
-    
-        });
+            })
+          })
+        })
     
     Similarly, when an event is triggered on an element annotated with
     [`up-data`], the parsed object will be passed to any matching
     [`up.on()`](/up.on) handlers.
     
-        up.on('click', '.google-map', function(event, $element, pins) {
-          console.log("There are %d pins on the clicked map", pins.length);
-        });
+        up.on('click', '.google-map', function(event, element, pins) {
+          console.log("There are %d pins on the clicked map", pins.length)
+        })
     
     @selector [up-data]
     @param {JSON} up-data
@@ -8394,8 +8482,8 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     @internal
      */
     reset = function() {
-      compilers = u.select(compilers, 'isDefault');
-      return macros = u.select(macros, 'isDefault');
+      compilers = u.filter(compilers, 'isDefault');
+      return macros = u.filter(macros, 'isDefault');
     };
     up.on('up:framework:reset', reset);
     return {
@@ -8435,7 +8523,7 @@ In an Unpoly app, every page has an URL.
 
 (function() {
   up.history = (function() {
-    var buildState, config, currentUrl, e, isCurrentUrl, manipulate, nextPreviousUrl, normalizeUrl, observeNewUrl, pop, previousUrl, push, register, replace, reset, restoreStateOnPop, u;
+    var buildState, config, currentUrl, e, isCurrentUrl, manipulate, nextPreviousUrl, normalizeUrl, observeNewUrl, pop, previousUrl, push, replace, reset, restoreStateOnPop, u;
     u = up.util;
     e = up.element;
 
@@ -8671,19 +8759,25 @@ In an Unpoly app, every page has an URL.
       The URL for the history entry that has been restored.
     @experimental
      */
-    if (up.browser.canPushState()) {
-      register = function() {
-        window.addEventListener('popstate', pop);
-        return replace(currentUrl(), {
-          force: true
-        });
-      };
-      if (typeof jasmine !== "undefined" && jasmine !== null) {
-        register();
-      } else {
-        setTimeout(register, 100);
+    up.on('up:app:boot', function() {
+      var register;
+      if (up.browser.canPushState()) {
+        register = function() {
+          if (up.browser.canControlScrollRestoration()) {
+            window.history.scrollRestoration = 'manual';
+          }
+          window.addEventListener('popstate', pop);
+          return replace(currentUrl(), {
+            force: true
+          });
+        };
+        if (typeof jasmine !== "undefined" && jasmine !== null) {
+          return register();
+        } else {
+          return setTimeout(register, 100);
+        }
       }
-    }
+    });
 
     /***
     Changes the link's destination so it points to the previous URL.
@@ -8737,18 +8831,29 @@ In an Unpoly app, every page has an URL.
 }).call(this);
 
 /***
-Application layout
-==================
+Scrolling viewports
+===================
 
-You can [make Unpoly aware](/up.viewport.config) of fixed elements in your
+The `up.viewport` module controls the scroll position of scrollable containers ("viewports").
+
+The default viewport for any web application is the main document. An application may
+define additional viewports by giving the CSS property `{ overflow-y: scroll }` to any `<div>`.
+
+
+\#\#\# Revealing new content
+
+When following a [link to a fragment](/a-up-target) Unpoly will automatically
+scroll the document's viewport to [reveal](/up.viewport) the updated content.
+
+You should [make Unpoly aware](/up.viewport.config#config.fixedTop) of fixed elements in your
 layout, such as navigation bars or headers. Unpoly will respect these sticky
-elements when [revealing elements](/up.reveal) or [opening a modal dialog](/a-up-modal).
+elements when [revealing updated fragments](/up.reveal).
 
-This modules also contains functions to programmatically [scroll a viewport](/up.scroll)
-or [reveal an element within its viewport](/up.reveal).
+You should also [tell Unpoly](/up.viewport.config#config.viewports) when your application has more than one viewport,
+you should so Unpoly can pick the right viewport to scroll for each fragment update.
 
-Bootstrap integration
----------------------
+
+\#\#\# Bootstrap integration
 
 When using Bootstrap integration (`unpoly-bootstrap3.js` and `unpoly-bootstrap3.css`)
 Unpoly will automatically be aware of sticky Bootstrap components such as
@@ -8828,16 +8933,13 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     
     This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
     
-        up.scroll('.main', 100);
+        up.scroll('.main', 100)
     
     \#\#\# Animating the scrolling motion
     
     The scrolling can (optionally) be animated.
     
-        up.scroll('.main', 100, {
-          easing: 'swing',
-          duration: 250
-        });
+        up.scroll('.main', 100, { behavior: 'smooth' })
     
     If the given viewport is already in a scroll animation when `up.scroll()`
     is called a second time, the previous animation will instantly jump to the
@@ -9047,7 +9149,13 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     
     If no element matches the given `#hash` anchor, a resolved promise is returned.
     
+    \#\#\# Example
+    
+        up.revealHash('#chapter2')
+    
     @function up.viewport.revealHash
+    @param {string} hash
+    
     @return {Promise}
       A promise that is fulfilled when scroll position has changed to match the location hash.
     @experimental
@@ -9067,15 +9175,15 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     };
 
     /***
-    Returns the viewport for the given element.
+    Returns the scrolling container for the given element.
     
     Returns the [document's scrolling element](/up.viewport.root)
-    if no closer viewpoint exists.
+    if no closer viewport exists.
     
     @function up.viewport.closest
     @param {string|Element|jQuery} selectorOrElement
     @return {Element}
-    @internal
+    @experimental
      */
     closest = function(selectorOrElement) {
       var element;
@@ -9089,7 +9197,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     
     @function up.viewport.subtree
     @param {string|Element|jQuery} selectorOrElement
-    @return jQuery
+    @return List<Element>
     @internal
      */
     getSubtree = function(selectorOrElement) {
@@ -9127,7 +9235,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     
     @function up.viewport.root
     @return {Element}
-    @internal
+    @experimental
      */
     getRoot = function() {
       return document.querySelector(rootSelector());
@@ -9163,7 +9271,7 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
       var body, element, html;
       body = document.body;
       html = document.documentElement;
-      element = u.detect([html, body], wasChosenAsOverflowingElement);
+      element = u.find([html, body], wasChosenAsOverflowingElement);
       return element || getRoot();
     };
 
@@ -9555,11 +9663,14 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
 Fragment update API
 ===================
   
-This module exposes a low-level Javascript API to [change](/up.replace) or
+The `up.fragment` module exposes a high-level Javascript API to [update](/up.replace) or
 [destroy](/up.destroy) page fragments.
 
+Fragments are [compiled](/up.compiler) elements that can be updated from a server URL.
+They also exist on a layer (page, modal, popup).
+
 Most of Unpoly's functionality (like [fragment links](/up.link) or [modals](/up.modal))
-is built from these functions. You can use them to extend Unpoly from your
+is built from `up.fragment` functions. You may use them to extend Unpoly from your
 [custom Javascript](/up.syntax).
 
 @module up.fragment
@@ -9642,7 +9753,7 @@ is built from these functions. You can use them to extend Unpoly from your
     
     We now replace the second `<div>`:
     
-        up.replace('.two', '/new');
+        up.replace('.two', '/new')
     
     The server renders a response for `/new`:
     
@@ -9897,7 +10008,7 @@ is built from these functions. You can use them to extend Unpoly from your
         html = '<div class="one">new one</div>' +
                '<div class="two">new two</div>';
     
-        up.extract('.two', html);
+        up.extract('.two', html)
     
     Unpoly looks for the selector `.two` in the strings and updates its
     contents in the current page. The current page now looks like this:
@@ -10074,7 +10185,7 @@ is built from these functions. You can use them to extend Unpoly from your
             };
             keepEventArgs = {
               target: keepable,
-              newElement: partner,
+              newFragment: partner,
               newData: plan.newData,
               log: ['Keeping element %o', keepable]
             };
@@ -10115,13 +10226,13 @@ is built from these functions. You can use them to extend Unpoly from your
     On the client we can achieve this by listening to an `up:keep:fragment` event
     and preventing it if the `src` attribute of the old and new element differ:
     
-        up.compiler('audio', function($element) {
-          $element.on('up:fragment:keep', function(event) {
-            if $element.attr('src') !== event.$newElement.attr('src') {
-              event.preventDefault();
+        up.compiler('audio', function(element) {
+          element.addEventListener('up:fragment:keep', function(event) {
+            if element.getAttribute('src') !== event.newElement.getAttribute('src') {
+              event.preventDefault()
             }
-          });
-        });
+          })
+        })
     
     If we don't want to solve this on the client, we can achieve the same effect
     on the server. By setting the value of the `up-keep` attribute we can
@@ -10161,16 +10272,16 @@ is built from these functions. You can use them to extend Unpoly from your
     This event is [emitted](/up.emit) when an existing element has been [kept](/up-keep)
     during a page update.
     
-    Event listeners can inspect the discarded update through `event.$newElement`
+    Event listeners can inspect the discarded update through `event.newElement`
     and `event.newData` and then modify the preserved element when necessary.
     
     @event up:fragment:kept
     @param {Element} event.target
       The fragment that has been kept.
-    @param {Element} event.newElement
-      The discarded element.
+    @param {Element} event.newFragment
+      The discarded fragment.
     @param {Object} event.newData
-      The value of the [`up-data`](/up-data) attribute of the discarded element,
+      The value of the [`up-data`](/up-data) attribute of the discarded fragment,
       parsed as a JSON object.
     @stable
      */
@@ -10185,9 +10296,9 @@ is built from these functions. You can use them to extend Unpoly from your
     the `innerHTML` property or calling jQuery methods like
     `html`, `insertAfter` or `appendTo`:
     
-        $element = $('.element');
-        $element.html('<div>...</div>');
-        up.hello($element);
+        element = document.createElement('div')
+        element.innerHTML = '... HTML that needs to be activated ...'
+        up.hello(element)
     
     This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
     event.
@@ -10221,14 +10332,17 @@ is built from these functions. You can use them to extend Unpoly from your
     };
 
     /***
-    When a page fragment has been [inserted or updated](/up.replace),
+    When any page fragment has been [inserted or updated](/up.replace),
     this event is [emitted](/up.emit) on the fragment.
+    
+    If you're looking to run code when a new fragment matches
+    a selector, use `up.compiler()` instead.
     
     \#\#\# Example
     
         up.on('up:fragment:inserted', function(event, fragment) {
-          console.log("Looks like we have a new %o!", fragment);
-        });
+          console.log("Looks like we have a new %o!", fragment)
+        })
     
     @event up:fragment:inserted
     @param {Element} event.target
@@ -10236,8 +10350,7 @@ is built from these functions. You can use them to extend Unpoly from your
     @stable
      */
     emitFragmentInserted = function(element, options) {
-      return up.emit('up:fragment:inserted', {
-        target: element,
+      return up.emit(element, 'up:fragment:inserted', {
         log: ['Inserted fragment %o', element],
         origin: options.origin
       });
@@ -10247,21 +10360,22 @@ is built from these functions. You can use them to extend Unpoly from your
       keptElement = keepPlan.oldElement;
       eventAttrs = {
         target: keptElement,
-        newElement: keepPlan.newElement,
+        newFragment: keepPlan.newElement,
         newData: keepPlan.newData,
         log: ['Kept fragment %o', keptElement]
       };
       return up.emit('up:fragment:kept', eventAttrs);
     };
     emitFragmentDestroyed = function(fragment, options) {
-      var message, parent;
+      var log, parent;
       if (shouldLogDestruction(fragment, options)) {
-        message = ['Destroyed fragment %o', fragment];
+        log = ['Destroyed fragment %o', fragment];
       }
       parent = options.parent || up.fail("Missing { parent } option");
       return up.emit(parent, 'up:fragment:destroyed', {
         fragment: fragment,
-        log: message
+        parent: parent,
+        log: log
       });
     };
     isRealElement = function(element) {
@@ -10310,8 +10424,8 @@ is built from these functions. You can use them to extend Unpoly from your
     @param {string|Element|jQuery} [options.origin]
       An second element or selector that can be referenced as `&` in the first selector:
     
-          $input = $('input.email');
-          up.fragment.first('.field:has(&)', { origin: $input }); // returns the .field containing $input
+          var input = document.querySelector('input.email')
+          up.fragment.first('fieldset:has(&)', { origin: input }) // returns the <fieldset> containing input
     @return {Element|undefined}
       The first element that is neither a ghost or being destroyed,
       or `undefined` if no such element was found.
@@ -10340,14 +10454,14 @@ is built from these functions. You can use them to extend Unpoly from your
         u.remove(layers, originLayer);
         layers.unshift(originLayer);
       }
-      return u.detectResult(layers, function(layer) {
+      return u.findResult(layers, function(layer) {
         return firstInLayer(parent, selector, layer);
       });
     };
     firstInLayer = function(parent, selector, layer) {
       var elements;
       elements = e.all(parent, selector);
-      return u.detectResult(elements, function(element) {
+      return u.findResult(elements, function(element) {
         if (isRealElement(element) && matchesLayer(element, layer)) {
           return element;
         }
@@ -10449,9 +10563,10 @@ is built from these functions. You can use them to extend Unpoly from your
     Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
     or while they are being removed by a [transition](/up.morph).
     
-    If the removal is animated, the class is assigned before the animation.
+    If the removal is animated, the class is assigned before the animation starts.
     
-    Also see the [`up.fragment.first()`](/up.fragment.first) function.
+    To select an element while ignoring elements that are being destroyed,
+    see the [`up.fragment.first()`](/up.fragment.first) function.
     
     @selector .up-destroying
     @stable
@@ -10469,9 +10584,11 @@ is built from these functions. You can use them to extend Unpoly from your
     
     @event up:fragment:destroyed
     @param {Element} event.fragment
-      The page fragment that has been removed from the DOM.
+      The detached element that has been removed from the DOM.
+    @param {Element} event.parent
+      The former parent element of the fragment that has now been detached from the DOM.
     @param {Element} event.target
-      The parent element of the fragment that has been removed from the DOM.
+      The former parent element of the fragment that has now been detached from the DOM.
     @stable
      */
 
@@ -10480,9 +10597,7 @@ is built from these functions. You can use them to extend Unpoly from your
     
     \#\#\# Example
     
-        up.on('new-mail', function() {
-          up.reload('.inbox');
-        });
+        up.on('new-mail', function() { up.reload('.inbox') })
     
     Unpoly remembers the URL from which a fragment was loaded, so you
     don't usually need to give an URL when reloading.
@@ -10538,7 +10653,7 @@ is built from these functions. You can use them to extend Unpoly from your
   up.first = function() {
     var args, ref;
     args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-    up.warn('Deprecated: up.first() has been renamed to up.fragment.first()');
+    up.legacy.warn('up.first() has been renamed to up.fragment.first()');
     return (ref = up.fragment).first.apply(ref, args);
   };
 
@@ -10649,7 +10764,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     
     \#\#\# Example
     
-        up.animate('.warning', 'fade-in');
+        up.animate('.warning', 'fade-in')
     
     You can pass additional options:
     
@@ -10657,7 +10772,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
           delay: 1000,
           duration: 250,
           easing: 'linear'
-        });
+        })
     
     \#\#\# Named animations
     
@@ -10682,9 +10797,11 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     By passing an object instead of an animation name, you can animate
     the CSS properties of the given element:
     
-        var $warning = $('.warning');
-        $warning.css({ opacity: 0 });
-        up.animate($warning, { opacity: 1 });
+        var warning = document.querySelector('.warning')
+        warning.style.opacity = 0
+        up.animate(warning, { opacity: 1 })
+    
+    CSS properties must be given in `kebab-case`, not `camelCase`.
     
     \#\#\# Multiple animations on the same element
     
@@ -10778,7 +10895,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
 
     /***
     Extracts animation-related options from the given options hash.
-    If `$element` is given, also inspects the element for animation-related
+    If `element` is given, also inspects the element for animation-related
     attributes like `up-easing` or `up-duration`.
     
     @param {Object} userOptions
@@ -10812,6 +10929,9 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     are completed.
     
     Animations are completed by jumping to the last animation frame instantly.
+    Promises returned by animation and transition functions instantly settle.
+    
+    Emits the `up:motion:finish` event that is already handled by `up.animate()`.
     
     Does nothing if there are no animation to complete.
     
@@ -10824,6 +10944,20 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     finish = function(elementOrSelector) {
       return motionController.finish(elementOrSelector);
     };
+
+    /***
+    This event is emitted on an [animating](/up.animating) element by `up.motion.finish()` to
+    request the animation to instantly finish and skip to the last frame.
+    
+    Promises returned by completed animation functions are expected to settle.
+    
+    Animations started by `up.animate()` already handle this event.
+    
+    @event up:motion:finish
+    @param {Element} event.target
+      The animating element.
+    @experimental
+     */
 
     /***
     Performs an animated transition between the `source` and `target` elements.
@@ -10877,7 +11011,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     @function up.morph
     @param {Element|jQuery|string} source
     @param {Element|jQuery|string} target
-    @param {Function(oldElement, newElement)|string} transitionOrName
+    @param {Function(oldElement, newElement)|string} transition
     @param {number} [options.duration=300]
       The duration of the animation, in milliseconds.
     @param {number} [options.delay=0]
@@ -11002,15 +11136,17 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     };
 
     /***
-    Defines a named transition.
+    Defines a named transition that [morphs](/up.element) from one element to another.
+    
+    \#\#\# Example
     
     Here is the definition of the pre-defined `cross-fade` animation:
     
-        up.transition('cross-fade', ($old, $new, options) ->
-          up.motion.when(
-            up.animate($old, 'fade-out', options),
-            up.animate($new, 'fade-in', options)
-          )
+        up.transition('cross-fade', (oldElement, newElement, options) ->
+          Promise.all([
+            up.animate(oldElement, 'fade-out', options),
+            up.animate(newElement, 'fade-in', options)
+          ])
         )
     
     It is recommended that your transitions use [`up.animate()`](/up.animate),
@@ -11019,11 +11155,11 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     If you choose to *not* use `up.animate()` and roll your own
     logic instead, your code must honor the following contract:
     
-    1. It must honor the options `{ delay, duration, easing }` if given
+    1. It must honor the options `{ delay, duration, easing }` if given.
     2. It must *not* remove any of the given elements from the DOM.
-    3. It returns a promise that is fulfilled when the transition has ended
+    3. It returns a promise that is fulfilled when the transition has ended.
     4. If during the animation an event `up:motion:finish` is emitted on
-       the given element, the transition instantly jumps to the last frame
+       either element, the transition instantly jumps to the last frame
        and resolves the returned promise.
     
     Calling [`up.animate()`](/up.animate) with an object argument
@@ -11043,9 +11179,9 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     
     Here is the definition of the pre-defined `fade-in` animation:
     
-        up.animation('fade-in', function($element, options) {
-          $element.css({opacity: 0});
-          up.animate($element, { opacity: 1 }, options);
+        up.animation('fade-in', function(element, options) {
+          element.style.opacity = 0
+          up.animate(element, { opacity: 1 }, options)
         })
     
     It is recommended that your definitions always end by calling
@@ -11388,10 +11524,10 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     \#\#\# Example
     
         up.request('/search', params: { query: 'sunshine' }).then(function(response) {
-          console.log('The response text is %o', response.text);
+          console.log('The response text is %o', response.text)
         }).catch(function() {
-          console.error('The request failed');
-        });
+          console.error('The request failed')
+        })
     
     \#\#\# Caching
     
@@ -11476,10 +11612,10 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     \#\#\# Example
     
         up.request('/search', params: { query: 'sunshine' }).then(function(text) {
-          console.log('The response text is %o', text);
+          console.log('The response text is %o', text)
         }).catch(function() {
-          console.error('The request failed');
-        });
+          console.error('The request failed')
+        })
     
     @function up.ajax
     @param {string} [url]
@@ -11514,7 +11650,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     ajax = function() {
       var args;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      up.warn('up.ajax() has been deprecated. Use up.request() instead.');
+      up.legacy.warn('up.ajax() has been deprecated. Use up.request() instead.');
       return new Promise(function(resolve, reject) {
         var pickResponseText;
         pickResponseText = function(response) {
@@ -11561,7 +11697,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
             return slowEventEmitted = true;
           }
         };
-        return slowDelayTimer = u.setTimer(config.slowDelay, emission);
+        return slowDelayTimer = u.timer(config.slowDelay, emission);
       }
     };
 
@@ -11593,18 +11729,16 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     Here is the JavaScript to make it alive:
     
         up.compiler('.spinner', function(element) {
+          show = () => { up.element.show(element) }
+          hide = () => { up.element.hide(element) }
     
-          show = () => { up.element.show(element) };
-          hide = () => { up.element.hide(element) };
-    
-          hide();
+          hide()
     
           return [
             up.on('up:proxy:slow', show),
             up.on('up:proxy:recover', hide)
-          ];
-    
-        });
+          ]
+        })
     
     The `up:proxy:slow` event will be emitted after a delay of 300 ms
     to prevent the spinner from flickering on and off.
@@ -11938,6 +12072,10 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
 Linking to fragments
 ====================
 
+The `up.link` module lets you build links that update fragments instead of entire pages.
+
+\#\#\# Motivation
+
 In a traditional web application, the entire page is destroyed and re-created when the
 user follows a link:
 
@@ -11965,7 +12103,7 @@ Pages also load much faster since the DOM, CSS and Javascript environments do no
 destroyed and recreated for every request.
 
 
-## Example
+\#\#\# Example
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
 
@@ -12055,8 +12193,8 @@ new page is loading.
     Calling `up.follow()` with this link will replace the page's `.main` fragment
     as if the user had clicked on the link:
     
-        var $link = $('a:first');
-        up.follow($link);
+        var link = document.querSelector('a')
+        up.follow(link)
     
     @function up.follow
     @param {Element|jQuery|string} linkOrSelector
@@ -12249,7 +12387,7 @@ new page is loading.
       if (options == null) {
         options = {};
       }
-      variant = u.detect(followVariants, function(variant) {
+      variant = u.find(followVariants, function(variant) {
         return variant.matchesLink(link);
       });
       if (options["default"] !== false) {
@@ -12909,37 +13047,40 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     This is useful for observing text fields while the user is typing.
     
-    The unobtrusive variant of this is the [`up-observe`](/up-observe) attribute.
+    The unobtrusive variant of this is the [`[up-observe]`](/up-observe) attribute.
     
     \#\#\# Example
     
     The following would print to the console whenever an input field changes:
     
         up.observe('input.query', function(value) {
-          console.log('Query is now %o', value);
-        });
+          console.log('Query is now %o', value)
+        })
     
     Instead of a single form field, you can also pass multiple fields,
     a `<form>` or any container that contains form fields.
     The callback will be run if any of the given fields change:
     
         up.observe('form', function(value, name) {
-          console.log('The value of %o is now %o', name, value);
-        });
+          console.log('The value of %o is now %o', name, value)
+        })
     
     You may also pass the `{ batch: true }` option to receive all
     changes since the last callback in a single object:
     
         up.observe('form', { batch: true }, function(diff) {
-          console.log('Observed one or more changes: %o', diff);
-        });
+          console.log('Observed one or more changes: %o', diff)
+        })
     
     @function up.observe
-    @param {string|Element|Array<Element>|jQuery} selectorOrElement
+    @param {string|Element|Array<Element>|jQuery} elements
       The form fields that will be observed.
     
       You can pass one or more fields, a `<form>` or any container that contains form fields.
       The callback will be run if any of the given fields change.
+    @param {boolean} [options.batch=false]
+      If set to `true`, the `onChange` callback will receive multiple
+      detected changes in a single diff object as its argument.
     @param {number} [options.delay=up.form.config.observeDelay]
       The number of miliseconds to wait before executing the callback
       after the input value changes. Use this to limit how often the callback
@@ -12958,9 +13099,9 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
     observe = function() {
-      var args, callback, elements, fields, observer, options, ref, ref1, ref2, ref3, selectorOrElement;
-      selectorOrElement = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-      elements = e.list(selectorOrElement);
+      var args, callback, elements, fields, observer, options, ref, ref1, ref2, ref3;
+      elements = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+      elements = e.list(elements);
       fields = u.flatMap(elements, findFields);
       callback = (ref = (ref1 = u.extractCallback(args)) != null ? ref1 : observeCallbackFromElement(elements[0])) != null ? ref : up.fail('up.observe: No change callback given');
       options = u.extractOptions(args);
@@ -13001,7 +13142,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     findValidateTarget = function(field, options) {
       var option, ref;
       option = (ref = options.target) != null ? ref : field.getAttribute('up-validate');
-      option || (option = u.detectResult(config.validateTargets, function(defaultTarget) {
+      option || (option = u.findResult(config.validateTargets, function(defaultTarget) {
         var resolvedDefault;
         resolvedDefault = e.resolveSelector(defaultTarget, options.origin);
         if (e.first(resolvedDefault)) {
@@ -13149,7 +13290,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       var form, switcher, switchers;
       form = closestContainer(target);
       switchers = e.all(form, '[up-switch]');
-      switcher = u.detect(switchers, function(switcher) {
+      switcher = u.find(switchers, function(switcher) {
         var targetSelector;
         targetSelector = switcher.getAttribute('up-switch');
         return e.matches(target, targetSelector);
@@ -13866,7 +14007,7 @@ The popup element is appended to the [viewport](/up.viewport) of the anchor elem
     /***
     Forces the popup to update its position relative to its anchor element.
     
-    Unpoly will try to automatically keep popups aligned when
+    Unpoly automatically keep popups aligned when
     the document is resized or scrolled. Complex layout changes may make
     it necessary to call this function.
     
@@ -14562,8 +14703,8 @@ or function.
     /***
     Opens the given link's destination in a modal overlay:
     
-        var $link = $('...');
-        up.modal.follow($link);
+        var link = document.querySelector('a')
+        up.modal.follow(link)
     
     Any option attributes for [`a[up-modal]`](/a.up-modal) will be honored.
     
@@ -14626,7 +14767,7 @@ or function.
     
     \#\#\# Example
     
-        up.modal.visit('/foo', { target: '.list' });
+        up.modal.visit('/foo', { target: '.list' })
     
     This will request `/foo`, extract the `.list` selector from the response
     and open the selected container in a modal dialog.
@@ -14659,7 +14800,7 @@ or function.
     \#\#\# Example
     
         var html = 'before <div class="content">inner</div> after';
-        up.modal.extract('.content', html);
+        up.modal.extract('.content', html)
     
     The would open a modal with the following contents:
     
@@ -14958,7 +15099,7 @@ or function.
       if (overrideConfig == null) {
         overrideConfig = {};
       }
-      up.warn('up.modal.flavor() is deprecated. Use the up.modal.flavors property instead.');
+      up.legacy.warn('up.modal.flavor() is deprecated. Use the up.modal.flavors property instead.');
       return u.assign(flavorOverrides(name), overrideConfig);
     };
 
@@ -15303,7 +15444,7 @@ The tooltip element is appended to the [viewport](/up.viewport) of the anchor el
     /***
     Forces the tooltip to update its position relative to its anchor element.
     
-    Unpoly will try to automatically keep tooltips aligned when
+    Unpoly will automatically keep tooltips aligned when
     the document is resized or scrolled. Complex layout changes may make
     it necessary to call this function.
     
@@ -15324,9 +15465,7 @@ The tooltip element is appended to the [viewport](/up.viewport) of the anchor el
     
     In order to attach a tooltip to a `<span class="help">?</span>`:
     
-        up.tooltip.attach('.help', {
-          text: 'Enter multiple words or phrases'
-        });
+        up.tooltip.attach('.help', { text: 'Useful info' })
     
     @function up.tooltip.attach
     @param {Element|jQuery|string} elementOrSelector
@@ -15506,36 +15645,41 @@ The tooltip element is appended to the [viewport](/up.viewport) of the anchor el
 Navigation feedback
 ===================
 
-Unpoly automatically adds the class [`.up-active`](/a.up-active) to links or forms while they are loading.
-
-By marking navigation elements as [`[up-nav]`](/up-nav), contained links that point to the current location
-automatically get the [`.up-current`](/up-nav-a.up-current) class.
-
-You should style [`.up-active`](/a.up-active) and [`.up-current`](/up-nav a.up-current) with CSS to
+The `up.feedback` module adds useful CSS classes to links while they are loading,
+or when they point to the current URL. By styling these classes you may
 provide instant feedback to user interactions. This improves the perceived speed of your interface.
+
 
 \#\#\# Example
 
 Let's say we have an navigation bar with two links, pointing to `/foo` and `/bar` respectively:
 
-    <a href="/foo" up-follow>Foo</a>
-    <a href="/bar" up-follow>Bar</a>
+    <div up-nav>
+      <a href="/foo" up-follow>Foo</a>
+      <a href="/bar" up-follow>Bar</a>
+    </div>
 
-If the current URL is `/foo`, the first link is automatically marked with an [`up-current`](/a.up-current) class:
+If the current URL is `/foo`, the first link is automatically marked with an [`.up-current`](/a.up-current) class:
 
-    <a href="/foo" up-follow class="up-current">Foo</a>
-    <a href="/bar" up-follow>Bar</a>
+    <div up-nav>
+      <a href="/foo" up-follow class="up-current">Foo</a>
+      <a href="/bar" up-follow>Bar</a>
+    </div>
 
 When the user clicks on the `/bar` link, the link will receive the [`up-active`](/a.up-active) class while it is waiting
 for the server to respond:
 
-    <a href="/foo" up-follow class="up-current">Foo</a>
-    <a href="/bar" up-follow class="up-active">Bar</a>
+    <div up-nav>
+      <a href="/foo" up-follow class="up-current">Foo</a>
+      <a href="/bar" up-follow class="up-active">Bar</a>
+    </div>
 
 Once the response is received the URL will change to `/bar` and the `up-active` class is removed:
 
-    <a href="/foo" up-follow>Foo</a>
-    <a href="/bar" up-follow class="up-current">Bar</a>
+    <div up-nav>
+      <a href="/foo" up-follow>Foo</a>
+      <a href="/bar" up-follow class="up-current">Bar</a>
+    </div>
 
 
 @module up.feedback
@@ -15687,13 +15831,14 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     
     \#\#\# Example
     
-        var button = document.querySelector('button');
+        var button = document.querySelector('button')
+    
         button.addEventListener('click', () => {
           up.feedback.start(button)
           up.request(...).then(() => {
             up.feedback.stop(button)
-          });
-        });
+          })
+        })
     
     @method up.feedback.start
     @param {Element|jQuery|string} element
@@ -15828,7 +15973,7 @@ Once the response is received the URL will change to `/bar` and the `up-active` 
     - the link's `up-href` attribute
     - a space-separated list of URLs in the link's `up-alias` attribute
     
-    \#\#\# Matching URL by prefix or suffix
+    \#\#\# Matching URL by pattern
     
     You can mark a link as `.up-current` whenever the current URL matches a prefix or suffix.
     To do so, include an asterisk (`*`) in the `up-alias` attribute.
