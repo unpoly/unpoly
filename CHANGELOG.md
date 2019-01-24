@@ -3,7 +3,7 @@ Changelog
 
 Changes to this project will be documented in this file.
 
-You may browse a formatted and hyperlinked version of this file at <http://unpoly.com/changes>.
+You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
 0.60.0
