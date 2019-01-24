@@ -210,6 +210,7 @@ up.history = do ->
   up.on 'up:app:boot', ->
     if up.browser.canPushState()
       register = ->
+        window.history.scrollRestoration = 'manual' if up.browser.canControlScrollRestoration()
         window.addEventListener('popstate', pop)
         replace(currentUrl(), force: true)
 

@@ -249,7 +249,7 @@ And some minor changes:
 - `up.util.selectorForElement()` is now `up.element.toSelector()`
 
 
-### Viewports
+### Scrolling Viewports
 
 - The `up.layout` module has been renamed to `up.viewport`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
 - Smooth [scrolling](/up.scroll) now mimics [native scroll behavior](https://hospodarets.com/native_smooth_scrolling):
@@ -269,6 +269,7 @@ And some minor changes:
   for the browser's main content area.
 - New experimental function `up.viewport.closest()`. It returns the scrolling container for the given element.
 - When a `#hash` anchor is [revealed](/up.reveal) during the initial page load, Unpoly will look for an `[up-id=hash]` before looking for `[id=hash]` and `a[name=hash]`.
+- Fix issues with restoring scroll positions when going back on some browsers.
 
 
 ### Navigation feedback

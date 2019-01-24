@@ -172,6 +172,9 @@ up.browser = do ->
   canAnimationFrame = u.memoize ->
     'requestAnimationFrame' of window
 
+  canControlScrollRestoration = u.memoize ->
+    'scrollRestoration' of history
+
   popCookie = (name) ->
     value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
     if u.isPresent(value)
@@ -224,6 +227,7 @@ up.browser = do ->
   canInspectFormData: canInspectFormData
   canCustomElements: canCustomElements
   canJQuery: canJQuery
+  canControlScrollRestoration: canControlScrollRestoration
   whenConfirmed: whenConfirmed
   isSupported: isSupported
   popCookie: popCookie
