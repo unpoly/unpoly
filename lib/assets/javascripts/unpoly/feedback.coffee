@@ -337,7 +337,7 @@ up.feedback = do ->
   ###
 
   # Even when the modal or popup does not change history, we consider the URLs of the content it displays.
-  up.on 'up:history:pushed up:history:replaced up:history:restored up:modal:opened up:modal:closed up:popup:opened up:popup:closed', (event) ->
+  up.on 'up:history:pushed up:history:replaced up:history:restored up:modal:opened up:modal:closed up:popup:opened up:popup:closed', (event) -> # take 1 arg to prevent data parsing
     updateAllNavigationSectionsIfLocationChanged()
 
   up.on 'up:fragment:inserted', (event, newFragment) ->

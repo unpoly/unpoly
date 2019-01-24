@@ -407,10 +407,9 @@ up.event = do ->
       emit(event.target, 'up:action:consumed', log: false)
 
   onReady = (callback) ->
-    readyState = document.readyState
     # Values are "loading", "interactive" and "completed".
     # https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
-    if readyState != 'loading'
+    if document.readyState != 'loading'
       callback()
     else
       document.addEventListener('DOMContentLoaded', callback)

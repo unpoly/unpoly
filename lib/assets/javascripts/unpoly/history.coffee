@@ -207,19 +207,20 @@ up.history = do ->
   @experimental
   ###
 
-  if up.browser.canPushState()
-    register = ->
-      window.addEventListener('popstate', pop)
-      replace(currentUrl(), force: true)
+  up.on 'up:app:boot', ->
+    if up.browser.canPushState()
+      register = ->
+        window.addEventListener('popstate', pop)
+        replace(currentUrl(), force: true)
 
-    if jasmine?
-      # Can't delay this in tests.
-      register()
-    else
-      # Defeat an unnecessary popstate that some browsers trigger
-      # on pageload (Safari, Chrome < 34).
-      # We should check in 2023 if we can remove this.
-      setTimeout(register, 100)
+      if jasmine?
+        # Can't delay this in tests.
+        register()
+      else
+        # Defeat an unnecessary popstate that some browsers trigger
+        # on pageload (Safari, Chrome < 34).
+        # We should check in 2023 if we can remove this.
+        setTimeout(register, 100)
 
   ###**
   Changes the link's destination so it points to the previous URL.
