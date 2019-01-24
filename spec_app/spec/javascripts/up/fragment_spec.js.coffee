@@ -1648,13 +1648,14 @@ describe 'up.fragment', ->
         $element = $parent.affix('.element.v1').text('v1')
         expect($element).toBeAttached()
 
-        listener = jasmine.createSpy('event listener')
-        $parent.on 'up:fragment:destroyed', -> listener(up.specUtil.isDetached($element))
+        spy = jasmine.createSpy('event listener')
+        $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
+          spy(event.target, event.element, up.specUtil.isDetached($element))
 
         extractDone = up.extract('.element', '<div class="element v2">v2</div>')
 
         extractDone.then ->
-          expect(listener).toHaveBeenCalledWith(true)
+          expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
           done()
 
       describe 'cleaning up', ->
@@ -1824,13 +1825,14 @@ describe 'up.fragment', ->
           $element = $parent.affix('.element.v1').text('v1')
           expect($element).toBeAttached()
 
-          listener = jasmine.createSpy('event listener')
-          $parent.on 'up:fragment:destroyed', -> listener(up.specUtil.isDetached($element))
+          spy = jasmine.createSpy('event listener')
+          $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
+            spy(event.target, event.element, up.specUtil.isDetached($element))
 
           extractDone = up.extract('.element', '<div class="element v2">v2</div>', transition: 'cross-fade', duration: 50)
 
           extractDone.then ->
-            expect(listener).toHaveBeenCalledWith(true)
+            expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
             done()
 
 
@@ -2469,7 +2471,7 @@ describe 'up.fragment', ->
 
         listener = jasmine.createSpy('event listener')
 
-        $parent.on('up:fragment:destroyed', listener)
+        $parent[0].addEventListener('up:fragment:destroyed', listener)
 
         destroyDone = up.destroy($element, animation: 'fade-out', duration: 30)
 
@@ -2480,7 +2482,7 @@ describe 'up.fragment', ->
           next.await(destroyDone)
 
         next ->
-          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining(target: $parent[0]))
+          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining(target: $parent[0], element: $element[0]))
           expect($element).toBeDetached()
 
     describe 'up.reload', ->

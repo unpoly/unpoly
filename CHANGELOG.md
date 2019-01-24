@@ -86,7 +86,8 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
 - The `up.bus` module has been renamed to `up.event`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
 - All Unpoly events (`up:*`) are now triggered as native events that can be received with [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). You may continue to use jQuery's [`jQuery#on()`](http://api.jquery.com/on/) to listen to Unpoly events, but you need to access custom properties from `event.originalEvent`.
-- Properties named `event.$target` and `event.$element` have been removed from all Unpoly events. Use the standard `event.target` instead.
+- Properties named `event.$target` and `event.$element` have been removed from *all* Unpoly events.
+  Use the standard `event.target` to retrieve the element on which the element was [emitted](/up.emit).
 - `up.on()` may now bind to a given element by passing it as an (optional) first argument:
 
   ```
@@ -139,106 +140,6 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
   For the old behavior, use `up.$macro()`.
 
-
-### Request parameters
-
-The experimental `up.params` module has been replaced with the `up.Params` class.
-Wrap any type of parameter representation into `up.Params` to get consistent API for reading
-and manipulation.
-
-The following types of parameter representation are supported:
-
-1. An object like `{ email: 'foo@bar.com' }`
-2. A query string like `'email=foo%40bar.com'`
-3. An array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
-4. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
-   On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
-
-Supported methods are:
-
-| `new up.Params()` | Constructor. |
-| `up.Params#add()` | Adds a new entry with the given `name` and `value`. |
-| `up.Params#addAll()` | Adds all entries from the given list of params. |
-| `up.Params#addField()` | Adds params from the given [HTML form field](https://www.w3schools.com/html/html_form_elements.asp). |
-| `up.Params#delete()` | Deletes all entries with the given `name`. |
-| `up.Params#get()` | Returns the first param value with the given `name` from the given `params`. |
-| `up.Params#set()` |  Sets the `value` for the entry with given `name`. |
-| `up.Params#toArray()` | Returns an array representation of this `up.Params` instance. |
-| `up.Params#toFormData()` | Returns a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of this `up.Params` instance. |
-| `up.Params#toObject()` | Returns an object representation of this `up.Params` instance. |
-| `up.Params#toQuery()` | Returns an [query string](https://en.wikipedia.org/wiki/Query_string) for this `up.Params` instance. |
-| `up.Params#toURL()` | Builds an URL string from the given base URL and this `up.Params` instance as a [query string](/up.Params.toString). |
-| `up.Params.fromFields()` | Constructs a new `up.Params` instance from one or more [HTML form field](https://www.w3schools.com/html/html_form_elements.asp). |
-| `up.Params.fromForm()` | Constructs a new `up.Params` instance from the given `<form>`. |
-| `up.Params.fromURL()` | Constructs a new `up.Params` instance from the given URL's [query string](https://en.wikipedia.org/wiki/Query_string). |
-
-
-### AJAX acceleration
-
-- The properties for the `up:link:preload` event have been renamed.
-
-
-### Modal dialogs
-
-- Opening/closing a modal will now manipulate the `{ overflow-y }` style on the same element
-  that was chosen by the CSS author ([nasty details](https://makandracards.com/makandra/55801-does-html-or-body-scroll-the-page)).
-
-
-### Popups
-
-- The HTML markup for a popup has been changed to make it easier to style with CSS.
-  The new structure is:
-
-  ```
-  <div class="up-popup">
-    <div class="up-popup-content">
-      Fragment content here
-    </div>
-  </div>
-  ```
-- The default CSS styles for `.up-popup` has been changed. If you have customized popup styles,
-  you should check if your modifications still work with the new defaults.
-- Popups now update their position when the screen is resized.
-- Popups now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
-- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`.
-  Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
-  - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
-  - `{ align }` defines the alignment of the popup along its side.
-  - When the popup's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
-  - When the popup's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
-- New experimental function `up.popup.sync()`. It forces the popup to update its position when a
-  layout change is not detected automatically.
-- popup elements are now appended to the respective viewport of the anchor element.
-  They were previously always appended to the end of the `<body>`.
-- The events `up:popup:open`,`up:popup:opened`, `up:popup:close` and `up:popup:closed` have an `{ anchor }` property.
-  It references the element that the popup was [attached](/up.popup.attach()) to.
-
-
-### Tooltips
-
-- The HTML markup for a popup has been changed to make it easier to style with CSS.
-  The new structure is:
-
-  ```
-  <div class="up-tooltip">
-    <div class="up-tooltip-content">
-      Tooltip text here
-    </div>
-  </div>
-  ```
-- The default CSS styles for `.up-tooltip` have been changed. If you have customized tooltip styles,
-  you should check if your modifications still work with the new defaults.
-- Tooltips now update their position when the screen is resized.
-- Tooltips now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
-- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`. Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
-  - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
-  - `{ align }` defines the alignment of the popup along its side.
-  - When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
-  - When the tooltip's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
-- New experimental function `up.tooltip.sync()`. It forces the popup to update its position when a
-  layout change is not detected automatically.
-- Tooltip elements are now appended to the respective viewport of the anchor element.
-  They were previously always appended to the end of the `<body>`.
 
 
 ### Forms
@@ -379,9 +280,110 @@ And some minor changes:
 - `[up-preload]` and `[up-instant]` links no longer bind to the `touchstart` event, increasing frame rate while scrolling.
 
 
+### Request parameters
+
+The experimental `up.params` module has been replaced with the `up.Params` class.
+Wrap any type of parameter representation into `up.Params` to get consistent API for reading
+and manipulation.
+
+The following types of parameter representation are supported:
+
+1. An object like `{ email: 'foo@bar.com' }`
+2. A query string like `'email=foo%40bar.com'`
+3. An array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
+4. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
+   On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
+
+Supported methods are:
+
+| `new up.Params()` | Constructor. |
+| `up.Params#add()` | Adds a new entry with the given `name` and `value`. |
+| `up.Params#addAll()` | Adds all entries from the given list of params. |
+| `up.Params#addField()` | Adds params from the given [HTML form field](https://www.w3schools.com/html/html_form_elements.asp). |
+| `up.Params#delete()` | Deletes all entries with the given `name`. |
+| `up.Params#get()` | Returns the first param value with the given `name` from the given `params`. |
+| `up.Params#set()` |  Sets the `value` for the entry with given `name`. |
+| `up.Params#toArray()` | Returns an array representation of this `up.Params` instance. |
+| `up.Params#toFormData()` | Returns a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation of this `up.Params` instance. |
+| `up.Params#toObject()` | Returns an object representation of this `up.Params` instance. |
+| `up.Params#toQuery()` | Returns an [query string](https://en.wikipedia.org/wiki/Query_string) for this `up.Params` instance. |
+| `up.Params#toURL()` | Builds an URL string from the given base URL and this `up.Params` instance as a [query string](/up.Params.toString). |
+| `up.Params.fromFields()` | Constructs a new `up.Params` instance from one or more [HTML form field](https://www.w3schools.com/html/html_form_elements.asp). |
+| `up.Params.fromForm()` | Constructs a new `up.Params` instance from the given `<form>`. |
+| `up.Params.fromURL()` | Constructs a new `up.Params` instance from the given URL's [query string](https://en.wikipedia.org/wiki/Query_string). |
+
+
+### Popups
+
+- The HTML markup for a popup has been changed to make it easier to style with CSS.
+  The new structure is:
+
+  ```
+  <div class="up-popup">
+    <div class="up-popup-content">
+      Fragment content here
+    </div>
+  </div>
+  ```
+- The default CSS styles for `.up-popup` has been changed. If you have customized popup styles,
+  you should check if your modifications still work with the new defaults.
+- Popups now update their position when the screen is resized.
+- Popups now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
+- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`.
+  Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
+  - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
+  - `{ align }` defines the alignment of the popup along its side.
+  - When the popup's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+  - When the popup's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
+- New experimental function `up.popup.sync()`. It forces the popup to update its position when a
+  layout change is not detected automatically.
+- popup elements are now appended to the respective viewport of the anchor element.
+  They were previously always appended to the end of the `<body>`.
+- The events `up:popup:open`,`up:popup:opened`, `up:popup:close` and `up:popup:closed` have an `{ anchor }` property.
+  It references the element that the popup was [attached](/up.popup.attach()) to.
+
+
+### Tooltips
+
+- The HTML markup for a popup has been changed to make it easier to style with CSS.
+  The new structure is:
+
+  ```
+  <div class="up-tooltip">
+    <div class="up-tooltip-content">
+      Tooltip text here
+    </div>
+  </div>
+  ```
+- The default CSS styles for `.up-tooltip` have been changed. If you have customized tooltip styles,
+  you should check if your modifications still work with the new defaults.
+- Tooltips now update their position when the screen is resized.
+- Tooltips now follow scrolling when placed within [viewports](/up.viewport) other than the main document.
+- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`. Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
+  - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
+  - `{ align }` defines the alignment of the popup along its side.
+  - When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
+  - When the tooltip's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
+- New experimental function `up.tooltip.sync()`. It forces the popup to update its position when a
+  layout change is not detected automatically.
+- Tooltip elements are now appended to the respective viewport of the anchor element.
+  They were previously always appended to the end of the `<body>`.
+
+
 ### Ruby on Rails integration
 
 - Unpoly is now compatible with the jQuery-less UJS adapter (now [part of Action View](https://github.com/rails/rails/tree/master/actionview/app/assets/javascripts)).
+
+
+### AJAX acceleration
+
+- The properties for the `up:link:preload` event have been renamed.
+
+
+### Modal dialogs
+
+- Opening/closing a modal will now manipulate the `{ overflow-y }` style on the same element
+  that was chosen by the CSS author ([nasty details](https://makandracards.com/makandra/55801-does-html-or-body-scroll-the-page)).
 
 
 ### Various

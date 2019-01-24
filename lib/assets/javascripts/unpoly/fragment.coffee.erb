@@ -668,13 +668,13 @@ up.fragment = do ->
 
     up.emit('up:fragment:kept', eventAttrs)
 
-  emitFragmentDestroyed = (fragment, options) ->
-    if shouldLogDestruction(fragment, options)
-      message = ['Destroyed fragment %o', fragment]
+  emitFragmentDestroyed = (element, options) ->
+    if shouldLogDestruction(element, options)
+      log = ['Destroyed fragment %o', element]
 
     parent = options.parent or up.fail("Missing { parent } option")
 
-    up.emit(parent, 'up:fragment:destroyed', fragment: fragment, log: message)
+    up.emit(parent, 'up:fragment:destroyed', { element, log })
 
   isRealElement = (element) ->
     !e.closest(element, '.up-destroying')
@@ -857,8 +857,8 @@ up.fragment = do ->
   The event is emitted on the parent element of the fragment that was removed.
 
   @event up:fragment:destroyed
-  @param {Element} event.fragment
-    The page fragment that has been removed from the DOM.
+  @param {Element} event.element
+    The detached element that has been removed from the DOM.
   @param {Element} event.target
     The parent element of the fragment that has been removed from the DOM.
   @stable

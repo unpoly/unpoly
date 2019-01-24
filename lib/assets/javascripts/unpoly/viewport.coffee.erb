@@ -1,13 +1,26 @@
 ###**
-Application layout
-==================
+Scrolling viewports
+===================
 
-You can [make Unpoly aware](/up.viewport.config) of fixed elements in your
+The `up.viewport` module controls the scroll position of scrollable containers ("viewports").
+
+The default viewport for any web application is the main document. An application may
+define additional viewports by giving the CSS property `{ overflow-y: scroll }` to any `<div>`.
+
+
+Revealing new content
+---------------------
+
+When following a [link to a fragment](/a-up-target) Unpoly will automatically
+scroll the document's viewport to [reveal](/up.viewport) the updated content.
+
+You should [make Unpoly aware](/up.viewport.config#config.fixedTop) of fixed elements in your
 layout, such as navigation bars or headers. Unpoly will respect these sticky
-elements when [revealing elements](/up.reveal) or [opening a modal dialog](/a-up-modal).
+elements when [revealing updated fragments](/up.reveal).
 
-This modules also contains functions to programmatically [scroll a viewport](/up.scroll)
-or [reveal an element within its viewport](/up.reveal).
+You should also [tell Unpoly](/up.viewport.config#config.viewports) when your application has more than one viewport,
+you should so Unpoly can pick the right viewport to scroll for each fragment update.
+
 
 Bootstrap integration
 ---------------------
