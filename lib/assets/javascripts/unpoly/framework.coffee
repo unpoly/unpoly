@@ -53,6 +53,7 @@ up.framework = do ->
         # In case the DOM was already ready when up.event.boot() was called, we still
         # haven't executed user-provided code. So we wait one more frame until
         # user-provided compilers, event handlers, etc. have been registered.
+        # This also gives async user-code a chance to run in the next microtask.
         u.task ->
           # At this point all user-code has been called.
           # The following event will cause Unpoly to compile the <body>.
