@@ -502,7 +502,7 @@ up.fragment = do ->
 
           keepEventArgs =
             target: keepable
-            newElement: partner
+            newFragment: partner
             newData: plan.newData
             log: ['Keeping element %o', keepable]
 
@@ -590,10 +590,10 @@ up.fragment = do ->
   @event up:fragment:kept
   @param {Element} event.target
     The fragment that has been kept.
-  @param {Element} event.newElement
-    The discarded element.
+  @param {Element} event.newFragment
+    The discarded fragment.
   @param {Object} event.newData
-    The value of the [`up-data`](/up-data) attribute of the discarded element,
+    The value of the [`up-data`](/up-data) attribute of the discarded fragment,
     parsed as a JSON object.
   @stable
   ###
@@ -648,13 +648,15 @@ up.fragment = do ->
       })
 
   @event up:fragment:inserted
+  @param {Element} event.fragment
+    The fragment that has been inserted or updated.
   @param {Element} event.target
     The fragment that has been inserted or updated.
   @stable
   ###
   emitFragmentInserted = (element, options) ->
-    up.emit 'up:fragment:inserted',
-      target: element
+    up.emit element, 'up:fragment:inserted',
+      fragment: element,
       log: ['Inserted fragment %o', element]
       origin: options.origin
 
@@ -662,19 +664,17 @@ up.fragment = do ->
     keptElement = keepPlan.oldElement
     eventAttrs =
       target: keptElement,
-      newElement: keepPlan.newElement
+      newFragment: keepPlan.newElement
       newData: keepPlan.newData
       log: ['Kept fragment %o', keptElement]
 
     up.emit('up:fragment:kept', eventAttrs)
 
-  emitFragmentDestroyed = (element, options) ->
-    if shouldLogDestruction(element, options)
-      log = ['Destroyed fragment %o', element]
-
+  emitFragmentDestroyed = (fragment, options) ->
+    if shouldLogDestruction(fragment, options)
+      log = ['Destroyed fragment %o', fragment]
     parent = options.parent or up.fail("Missing { parent } option")
-
-    up.emit(parent, 'up:fragment:destroyed', { element, log })
+    up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
   isRealElement = (element) ->
     !e.closest(element, '.up-destroying')
@@ -857,10 +857,12 @@ up.fragment = do ->
   The event is emitted on the parent element of the fragment that was removed.
 
   @event up:fragment:destroyed
-  @param {Element} event.element
+  @param {Element} event.fragment
     The detached element that has been removed from the DOM.
+  @param {Element} event.parent
+    The former parent element of the fragment that has now been detached from the DOM.
   @param {Element} event.target
-    The parent element of the fragment that has been removed from the DOM.
+    The former parent element of the fragment that has now been detached from the DOM.
   @stable
   ###
 

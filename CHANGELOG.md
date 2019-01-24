@@ -188,6 +188,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 - The properties for the `up:fragment:keep` event have been renamed.
 - The properties for the `up:fragment:kept` event have been renamed.
 - The properties for the `up:fragment:inserted` event have been renamed.
+- The properties for the `up:fragment:destroyed` event have been renamed.
 
 
 ### Utility functions

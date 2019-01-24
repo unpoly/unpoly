@@ -1650,7 +1650,7 @@ describe 'up.fragment', ->
 
         spy = jasmine.createSpy('event listener')
         $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
-          spy(event.target, event.element, up.specUtil.isDetached($element))
+          spy(event.target, event.fragment, up.specUtil.isDetached($element))
 
         extractDone = up.extract('.element', '<div class="element v2">v2</div>')
 
@@ -1827,7 +1827,7 @@ describe 'up.fragment', ->
 
           spy = jasmine.createSpy('event listener')
           $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
-            spy(event.target, event.element, up.specUtil.isDetached($element))
+            spy(event.target, event.fragment, up.specUtil.isDetached($element))
 
           extractDone = up.extract('.element', '<div class="element v2">v2</div>', transition: 'cross-fade', duration: 50)
 
@@ -2055,7 +2055,11 @@ describe 'up.fragment', ->
 
             next =>
               expect(insertedListener).not.toHaveBeenCalled()
-              expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $keeper[0], jasmine.anything())
+              expect(keptListener).toHaveBeenCalledWith(
+                jasmine.objectContaining(newFragment: jasmine.objectContaining(className: 'keeper new')),
+                $keeper[0],
+                jasmine.anything()
+              )
 
         it "removes an [up-keep] element if no matching element is found in the response", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
@@ -2249,6 +2253,20 @@ describe 'up.fragment', ->
             expect($keeper).toHaveText('new-text')
             expect(destructor).toHaveBeenCalled()
 
+        it 'lets listeners inspect a new element before discarding through properties on an up:fragment:keep event', asyncSpec (next) ->
+          $keeper = $fixture('.keeper[up-keep]').text('old-inside')
+          listener = jasmine.createSpy('event listener')
+          $keeper[0].addEventListener('up:fragment:keep', listener)
+          up.extract '.keeper', "<div class='keeper new' up-keep up-data='{ \"key\": \"new-value\" }'>new-inside</div>"
+          next =>
+            expect(listener).toHaveBeenCalledWith(
+              jasmine.objectContaining(
+                newFragment: jasmine.objectContaining(className: 'keeper new')
+                newData: { key: 'new-value' },
+                target: $keeper[0]
+              )
+            )
+
         it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', asyncSpec (next) ->
           $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           $keeper.on 'up:fragment:keep', (event) -> event.preventDefault()
@@ -2258,14 +2276,14 @@ describe 'up.fragment', ->
         it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
           $keeper = $fixture('.keeper[up-keep]').text('version 1')
           $keeper[0].addEventListener 'up:fragment:keep', (event) ->
-            event.preventDefault() if event.newElement.textContent.trim() == 'version 3'
+            event.preventDefault() if event.newFragment.textContent.trim() == 'version 3'
 
           next => up.extract '.keeper', "<div class='keeper' up-keep>version 2</div>"
           next => expect($('.keeper')).toHaveText('version 1')
           next => up.extract '.keeper', "<div class='keeper' up-keep>version 3</div>"
           next => expect($('.keeper')).toHaveText('version 3')
 
-        it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on an updated parent', asyncSpec (next) ->
+        it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on the targeted parent parent', asyncSpec (next) ->
           insertedListener = jasmine.createSpy()
           up.on('up:fragment:inserted', insertedListener)
           keptListener = jasmine.createSpy()
@@ -2482,7 +2500,13 @@ describe 'up.fragment', ->
           next.await(destroyDone)
 
         next ->
-          expect(listener).toHaveBeenCalledWith(jasmine.objectContaining(target: $parent[0], element: $element[0]))
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.objectContaining(
+              target: $parent[0],
+              parent: $parent[0]
+              fragment: $element[0]
+            )
+          )
           expect($element).toBeDetached()
 
     describe 'up.reload', ->
