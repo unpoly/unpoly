@@ -8,8 +8,7 @@ The default viewport for any web application is the main document. An applicatio
 define additional viewports by giving the CSS property `{ overflow-y: scroll }` to any `<div>`.
 
 
-Revealing new content
----------------------
+\#\#\# Revealing new content
 
 When following a [link to a fragment](/a-up-target) Unpoly will automatically
 scroll the document's viewport to [reveal](/up.viewport) the updated content.
@@ -22,8 +21,7 @@ You should also [tell Unpoly](/up.viewport.config#config.viewports) when your ap
 you should so Unpoly can pick the right viewport to scroll for each fragment update.
 
 
-Bootstrap integration
----------------------
+\#\#\# Bootstrap integration
 
 When using Bootstrap integration (`unpoly-bootstrap3.js` and `unpoly-bootstrap3.css`)
 Unpoly will automatically be aware of sticky Bootstrap components such as
@@ -314,7 +312,13 @@ up.viewport = do ->
 
   If no element matches the given `#hash` anchor, a resolved promise is returned.
 
+  \#\#\# Example
+
+      up.revealHash('#chapter2')
+
   @function up.viewport.revealHash
+  @param {string} hash
+
   @return {Promise}
     A promise that is fulfilled when scroll position has changed to match the location hash.
   @experimental
