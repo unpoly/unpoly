@@ -54,7 +54,7 @@ up.syntax = do ->
   This jQuery compiler will insert the current time into a
   `<div class='current-time'></div>`:
 
-      up.$compiler('.current-time', function(element) {
+      up.compiler('.current-time', function(element) {
         var now = new Date()
         element.textContent = now.toString()
       })
@@ -200,24 +200,11 @@ up.syntax = do ->
   @param {string} selector
     The selector to match.
   @param {Object} [options]
-    See `options` for `up.compiler()`.
+    See [`options` argument for `up.compiler()`](/up.compiler#parameters).
   @param {Function($element, data)} compiler
     The function to call when a matching element is inserted.
 
-  @param {Function(element, data)} compiler
-    The function to call when a matching element is inserted.
-
-    The function takes the new element as the first argument, as a
-    [jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
-    If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
-    and passed as a second argument.
-
-    The function may return a destructor function that cleans the compiled
-    object before it is removed from the DOM. The destructor is supposed to
-    [clear global state](/up.compiler#cleaning-up-after-yourself)
-    such as timeouts and event handlers bound to the document.
-    The destructor is *not* expected to remove the element from the DOM, which
-    is already handled by [`up.destroy()`](/up.destroy).
+    See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
     @stable
   ###
   registerJQueryCompiler = (args...) ->
@@ -282,15 +269,25 @@ up.syntax = do ->
   If you're not using jQuery, use `up.macro()` instead, which calls
   the macro function with a native element.
 
+  \#\#\# Example
+
+      up.$macro('[content-link]', function($link) {
+        $link.attr(
+          'up-target': '.content',
+          'up-transition': 'cross-fade',
+          'up-duration':'300'
+        )
+      })
+
   @function up.$macro
   @param {string} selector
     The selector to match.
   @param {Object} options
-    See options for [`up.compiler()`](/up.compiler).
+    See [`options` argument for `up.compiler()`](/up.compiler#parameters).
   @param {Function(element, data)} macro
     The function to call when a matching element is inserted.
 
-    See [`up.compiler()`](/up.compiler#parameters) for details.
+    See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
   @stable
   ###
   registerJQueryMacro = (args...) ->
