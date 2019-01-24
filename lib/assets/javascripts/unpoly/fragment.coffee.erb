@@ -648,15 +648,12 @@ up.fragment = do ->
       })
 
   @event up:fragment:inserted
-  @param {Element} event.fragment
-    The fragment that has been inserted or updated.
   @param {Element} event.target
     The fragment that has been inserted or updated.
   @stable
   ###
   emitFragmentInserted = (element, options) ->
     up.emit element, 'up:fragment:inserted',
-      fragment: element,
       log: ['Inserted fragment %o', element]
       origin: options.origin
 
