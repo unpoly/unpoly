@@ -44,7 +44,9 @@ You will need to prefix some function calls with `$` to have your callbacks call
 - The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$macro()`.
 - The event handler passed to `up.on()` now receives an element instead of a jQuery collection. For the old behavior, use `up.$on()`.
 
-Finally, all Unpoly events (`up:*`) are now triggered as native events that can be received with [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). You may continue to use jQuery's [`jQuery#on()`](http://api.jquery.com/on/) to listen to Unpoly events, but you need to access custom properties from `event.originalEvent`.
+Finally, all Unpoly events (`up:*`) are now triggered as native events that can be received with [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). You may continue to use jQuery's [`jQuery#on()`](http://api.jquery.com/on/) to listen to Unpoly events, but you need to access custom properties through `event.originalEvent`.
+
+Also know that if you use jQuery's `$.fn.trigger()` to emit events, these events are not received by native event listeners (including Unpoly). Use `up.emit()` instead to trigger an event that can be received by both native listeners and jQuery listeners.
 
 See below for detailed changes.
 
