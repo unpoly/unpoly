@@ -200,7 +200,7 @@ up.log = do ->
       banner += "Call `up.log.enable()` to enable logging for this session."
     console.log(banner)
 
-  up.on 'up:framework:boot', printBanner
+  up.on 'up:framework:booted', printBanner
   up.on 'up:framework:reset', reset
 
   setEnabled = (value) ->
