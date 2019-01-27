@@ -1331,36 +1331,36 @@ describe 'up.util', ->
         expect(copy.getFullYear()).toBe(1995)
 
 
-    describe 'up.util.deepCopy', ->
-
-      it 'returns a deep copy of the given array', ->
-        original = ['a', { b: 'c' }, 'd']
-
-        copy = up.util.deepCopy(original)
-        expect(copy).toEqual(original)
-
-        # Test that changes to copy don't change original
-        copy.pop()
-        expect(copy.length).toBe(2)
-        expect(original.length).toBe(3)
-
-        # Test that the copy is deep
-        copy[1].x = 'y'
-        expect(original[1].x).toBeUndefined()
-
-      it 'returns a deep copy of the given object', ->
-        original = {a: 'b', c: [1, 2], d: 'e'}
-
-        copy = up.util.deepCopy(original)
-        expect(copy).toEqual(original)
-
-        # Test that changes to copy don't change original
-        copy.f = 'g'
-        expect(original.f).toBeMissing()
-
-        # Test that the copy is deep
-        copy.c.push(3)
-        expect(original.c).toEqual [1, 2]
+#    describe 'up.util.deepCopy', ->
+#
+#      it 'returns a deep copy of the given array', ->
+#        original = ['a', { b: 'c' }, 'd']
+#
+#        copy = up.util.deepCopy(original)
+#        expect(copy).toEqual(original)
+#
+#        # Test that changes to copy don't change original
+#        copy.pop()
+#        expect(copy.length).toBe(2)
+#        expect(original.length).toBe(3)
+#
+#        # Test that the copy is deep
+#        copy[1].x = 'y'
+#        expect(original[1].x).toBeUndefined()
+#
+#      it 'returns a deep copy of the given object', ->
+#        original = {a: 'b', c: [1, 2], d: 'e'}
+#
+#        copy = up.util.deepCopy(original)
+#        expect(copy).toEqual(original)
+#
+#        # Test that changes to copy don't change original
+#        copy.f = 'g'
+#        expect(original.f).toBeMissing()
+#
+#        # Test that the copy is deep
+#        copy.c.push(3)
+#        expect(original.c).toEqual [1, 2]
 
     describe 'up.util.isList', ->
 

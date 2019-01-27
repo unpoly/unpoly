@@ -85,7 +85,7 @@ up.popup = do ->
     open even it changes the page in the background.
   @stable
   ###
-  config = new up.Config
+  config = new up.Config ->
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
     openDuration: 150
@@ -115,7 +115,7 @@ up.popup = do ->
   @experimental
   ###
 
-  state = new up.Config
+  state = new up.Config ->
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
     anchor: null         # the element to which the tooltip is anchored
     popup: null          # the .up-popup element

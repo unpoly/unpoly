@@ -643,18 +643,18 @@ up.util = do ->
   @return {any}
   @stable
   ###
-  copy = (value, deep)  ->
+  copy = (value)  ->
     if isObject(value) && value[copy.key]
       value = value[copy.key]()
     else if isList(value)
       value = Array.prototype.slice.call(value)
-      copied = true
+      # copied = true
     else if isOptions(value)
       value = assign({}, value)
-      copied = true
-    if copied && deep
-      for k, v of value
-        value[k] = copy(v, true)
+      # copied = true
+#    if copied && deep
+#      for k, v of value
+#        value[k] = copy(v, true)
     value
 
   ###**
@@ -704,16 +704,16 @@ up.util = do ->
   # Implement up.util.copy protocol for Date
   Date.prototype[copy.key] = -> new Date(+@)
 
-  ###**
-  Returns a deep copy of the given array or object.
-
-  @function up.util.deepCopy
-  @param {Object|Array} object
-  @return {Object|Array}
-  @internal
-  ###
-  deepCopy = (object) ->
-    copy(object, true)
+#  ###**
+#  Returns a deep copy of the given array or object.
+#
+#  @function up.util.deepCopy
+#  @param {Object|Array} object
+#  @return {Object|Array}
+#  @internal
+#  ###
+#  deepCopy = (object) ->
+#    copy(object, true)
 
   ###**
   Creates a new object by merging together the properties from the given objects.
@@ -1555,7 +1555,7 @@ up.util = do ->
   assign: assign
   assignPolyfill: assignPolyfill
   copy: copy
-  deepCopy: deepCopy
+#  deepCopy: deepCopy
   merge: merge
 #  deepAssign: deepAssign
 #  deepMerge: deepMerge

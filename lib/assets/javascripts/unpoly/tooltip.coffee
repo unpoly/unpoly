@@ -63,7 +63,7 @@ up.tooltip = do ->
     The timing function controlling the acceleration of the closing animation.
   @stable
   ###
-  config = new up.Config
+  config = new up.Config ->
     position: 'top'
     align: 'center'
     openAnimation: 'fade-in'
@@ -73,7 +73,7 @@ up.tooltip = do ->
     openEasing: null
     closeEasing: null
 
-  state = new up.Config
+  state = new up.Config ->
     phase: 'closed'      # can be 'opening', 'opened', 'closing' and 'closed'
     anchor: null         # the element to which the tooltip is anchored
     tooltip: null        # the .up-tooltip element

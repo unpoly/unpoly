@@ -10,7 +10,7 @@ up.toast = do ->
 
   VARIABLE_FORMATTER = (arg) -> "<span class='up-toast-variable'>#{u.escapeHtml(arg)}</span>"
 
-  state = new up.Config
+  state = new up.Config ->
     element: null
 
   reset = ->

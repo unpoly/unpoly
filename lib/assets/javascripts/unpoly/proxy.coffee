@@ -86,7 +86,7 @@ up.proxy = do ->
     cache after an unsafe request.
   @stable
   ###
-  config = new up.Config
+  config = new up.Config ->
     slowDelay: 300
     preloadDelay: 75
     cacheSize: 70

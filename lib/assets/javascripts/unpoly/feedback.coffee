@@ -56,7 +56,7 @@ up.feedback = do ->
     An array of CSS selectors that match [navigation components](/up-nav).
   @stable
   ###
-  config = new up.Config
+  config = new up.Config ->
     currentClasses: ['up-current']
     navs: ['[up-nav]']
 

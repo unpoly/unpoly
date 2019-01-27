@@ -34,7 +34,7 @@ up.form = do ->
     An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
   @stable
   ###
-  config = new up.Config
+  config = new up.Config ->
     validateTargets: ['fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']

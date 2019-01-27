@@ -38,7 +38,7 @@ up.fragment = do ->
     By default this is not set and the original replacement's transition is used.
   @stable
   ###
-  config = new up.Config
+  config = new up.Config ->
     fallbacks: ['body']
     fallbackTransition: null
 

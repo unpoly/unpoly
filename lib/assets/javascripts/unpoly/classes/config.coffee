@@ -2,8 +2,8 @@ u = up.util
 
 class up.Config
 
-  constructor: (@blueprint) ->
+  constructor: (@blueprintFn) ->
     @reset()
 
   reset: ->
-    u.assign(@, u.deepCopy(@blueprint))
+    u.assign(@, @blueprintFn())
