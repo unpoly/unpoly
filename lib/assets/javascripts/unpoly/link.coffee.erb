@@ -185,6 +185,8 @@ up.link = do ->
     options.layer ?= link.getAttribute('up-layer')
     options.failLayer ?= link.getAttribute('up-fail-layer')
     options.confirm ?= link.getAttribute('up-confirm')
+    options.scrollBehavior ?= link.getAttribute('up-scroll-behavior')
+    options.scrollSpeed ?= link.getAttribute('up-scroll-speed')
     options = u.merge(options, up.motion.animateOptions(options, link))
 
     up.browser.whenConfirmed(options).then ->
