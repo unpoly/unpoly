@@ -1,0 +1,89 @@
+up.layer = do ->
+
+  state = new up.Config ->
+    layers: [buildRootLayer()]
+    queue: new up.TaskQueue()
+
+  throw "each update needs to update title and url in the current fragemnt"
+  throw "only if the topmost layer is changed we change document.title or pushState(url)"
+
+  reset = ->
+    state.reset()
+
+  bestPreflightSelector = (target, options) ->
+    throw "implement me"
+    # suche müsste jetzt so gehen:
+    # - target + fallbacks im aktuellen layer. wir suchen nie einfach so in anderen layern.
+    # - layer kann mehrere alternativen haben (oder closest reicht ja vielleicht auch)
+    # - target + fallbacks in root
+    # extractIn = -> (layer, target, html, options) ->
+
+  resolveLayerOpt = (layerOpt, origin) ->
+    throw "das ist nicht so hilfreich. hilfreicher wäre direkt { target, element, layer} zu erhalten"
+
+    originLayer = forElement(origin)
+
+    switch layerOpt
+      when 'root'
+        [root()]
+      when 'last'
+        [lastLayer()]
+      when 'origin'
+        [originLayer]
+      when 'parent'
+        [ancestorLayers(originLayer)[0]]
+      when 'ancestors'
+        ancestorLayers(originLayer)
+      when 'closest'
+        [originLayer, ancestorLayers(originLayer)...]
+      when 'new'
+        throw "makes no sense, just build it!"
+
+  root = ->
+    state.layers[0] ||= buildRootLayer()
+
+  buildRootLayer = ->
+    new up.layers.Root()
+
+  openNew = (options) ->
+    throw "implement me"
+
+  lastLayer = ->
+    u.last(state.layers)
+
+  ancestorLayers = (layer) ->
+    layerIndex = state.layers.indexOf(layer)
+    state.layers.slice(0, layerIndex)
+
+  parentLayer = (layer) ->
+    layerIndex = state.layers.indexOf(layer)
+    parentIndex = Math.max(layerIndex - 1, 0)
+    state.layers[parentIndex]
+
+  asap = (fn) ->
+    state.queue.asap(fn)
+
+  dismissLast = ->
+    if nobodyPreventsDismissEvent()
+      asap ->
+        lastLayer()?.close()
+        emitLayerDismissed()
+
+  confirmLast = ->
+    if nobodyPreventsConfirmEvent()
+      asap ->
+        lastLayer()?.close()
+        emitLayerConfirmed()
+
+  forElement = (element) ->
+    for layer in state.layers by -1
+      if layer.contains(element)
+        return element
+
+  # The framework is reset between tests, so also close a currently open tooltip.
+  up.on 'up:framework:reset', reset
+
+  all: -> state.layers
+  last: lastLayer
+
+
