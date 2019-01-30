@@ -372,7 +372,7 @@ up.motion = do ->
 
     scrollNew = ->
       # Don't animate the scrolling.
-      scrollOptions = u.merge(options, behavior: 'instant')
+      scrollOptions = u.merge(options, scrollBehavior: 'auto')
       # Scroll newElement into position before we start the enter animation.
       up.viewport.scrollAfterInsertFragment(newElement, scrollOptions)
 

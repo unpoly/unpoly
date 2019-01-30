@@ -1965,6 +1965,30 @@ describe 'up.fragment', ->
             next =>
               expect(swapDirectlySpy).toHaveBeenCalled()
 
+      describe 'with { scrollBehavior } option', ->
+
+        beforeEach ->
+          up.viewport.knife.mock('reveal').and.callFake (element, options) =>
+            @revealScrollBehavior = options.behavior ? options.scrollBehavior
+
+        it 'animates the revealing when prepending an element', asyncSpec (next) ->
+          fixture('.element', text: 'version 1')
+          up.extract('.element:before', '<div class="element">version 2</div>', reveal: true, scrollBehavior: 'smooth')
+          next =>
+            expect(@revealScrollBehavior).toEqual('smooth')
+
+        it 'animates the revealing when appending an element', asyncSpec (next) ->
+          fixture('.element', text: 'version 1')
+          up.extract('.element:after', '<div class="element">version 2</div>', reveal: true, scrollBehavior: 'smooth')
+          next =>
+            expect(@revealScrollBehavior).toEqual('smooth')
+
+        it 'does not animate the revealing when swapping out an element', asyncSpec (next) ->
+          fixture('.element', text: 'version 1')
+          up.extract('.element', '<div class="element">version 2</div>', reveal: true, scrollBehavior: 'smooth')
+          next =>
+            expect(@revealScrollBehavior).toEqual('auto')
+
       describe 'handling of [up-keep] elements', ->
 
         squish = (string) ->
