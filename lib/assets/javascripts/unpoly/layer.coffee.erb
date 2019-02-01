@@ -7,6 +7,27 @@ up.layer = do ->
   throw "each update needs to update title and url in the current fragemnt"
   throw "only if the topmost layer is changed we change document.title or pushState(url)"
 
+  updateCurrent = (props) ->
+    u.assign(currentLayer(), props)
+
+  syncWindowWithCurrent = ->
+    layer = currentLayer()
+    if layer.history
+      document.title = layer.title
+      up.history.push(layer.url)
+
+  firstElement = (selector) ->
+    matches = e.all(currentLayer().element, selector)
+    if isCurrentRoot()
+      matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
+    matches[0]
+
+  throw "if we fallback to replace <body> or <html> we have also removed .up-layer what do we do?"
+  throw "i think we need to force-close those upper layers, regardless of whether they are sticky or not. also don't emit events that would cause additional XHR requests."
+
+  isCurrentRoot = ->
+    state.layers.length == 1
+
   reset = ->
     state.reset()
 
@@ -18,16 +39,14 @@ up.layer = do ->
     # - target + fallbacks in root
     # extractIn = -> (layer, target, html, options) ->
 
-  resolveLayerOpt = (layerOpt, origin) ->
-    throw "das ist nicht so hilfreich. hilfreicher wäre direkt { target, element, layer} zu erhalten"
-
+  resolveName = (name, origin) ->
     originLayer = forElement(origin)
 
-    switch layerOpt
+    switch name
       when 'root'
         [root()]
       when 'last'
-        [lastLayer()]
+        [currentLayer()]
       when 'origin'
         [originLayer]
       when 'parent'
@@ -36,8 +55,8 @@ up.layer = do ->
         ancestorLayers(originLayer)
       when 'closest'
         [originLayer, ancestorLayers(originLayer)...]
-      when 'new'
-        throw "makes no sense, just build it!"
+      else
+        throw new Error("Unknown { layer } option: #{name}")
 
   root = ->
     state.layers[0] ||= buildRootLayer()
@@ -48,7 +67,7 @@ up.layer = do ->
   openNew = (options) ->
     throw "implement me"
 
-  lastLayer = ->
+  currentLayer = ->
     u.last(state.layers)
 
   ancestorLayers = (layer) ->
@@ -66,13 +85,13 @@ up.layer = do ->
   dismissLast = ->
     if nobodyPreventsDismissEvent()
       asap ->
-        lastLayer()?.close()
+        currentLayer()?.close()
         emitLayerDismissed()
 
   confirmLast = ->
     if nobodyPreventsConfirmEvent()
       asap ->
-        lastLayer()?.close()
+        currentLayer()?.close()
         emitLayerConfirmed()
 
   forElement = (element) ->
@@ -84,6 +103,6 @@ up.layer = do ->
   up.on 'up:framework:reset', reset
 
   all: -> state.layers
-  last: lastLayer
-
+  current: currentLayer
+  resolveName: resolveName
 

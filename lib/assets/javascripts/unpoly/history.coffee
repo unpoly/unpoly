@@ -48,8 +48,7 @@ up.history = do ->
     previousUrl = undefined
     nextPreviousUrl = undefined
 
-  normalizeUrl = (url, normalizeOptions) ->
-    normalizeOptions ||= {}
+  normalizeUrl = (url, normalizeOptions = {}) ->
     normalizeOptions.hash = true
     u.normalizeUrl(url, normalizeOptions)
 
@@ -102,7 +101,7 @@ up.history = do ->
   Adds a new history entry and updates the browser's
   address bar with the given URL.
 
-  When the user navigates to the added  history entry at a later time,
+  When the user navigates to the added history entry at a later time,
   Unpoly will [`replace`](/up.replace) the document body with
   the body from that URL.
 
@@ -117,25 +116,15 @@ up.history = do ->
     The URL for the history entry to be added.
   @experimental
   ###
-  push = (url, options) ->
+  push = (url, options = {}) ->
     options = u.options(options, force: false)
+    force = options.force ? false
     url = normalizeUrl(url)
-    if (options.force || !isCurrentUrl(url)) && up.event.nobodyPrevents('up:history:push', url: url, log: "Adding history entry for #{url}")
+    if (force || !isCurrentUrl(url))
       if manipulate('pushState', url)
         up.emit('up:history:pushed', url: url, log: "Advanced to location #{url}")
       else
         up.emit('up:history:muted', url: url, log: "Did not advance to #{url} (history is unavailable)")
-
-  ###**
-  This event is [emitted](/up.emit) before a new history entry is added.
-
-  @event up:history:push
-  @param {string} event.url
-    The URL for the history entry that is going to be added.
-  @param event.preventDefault()
-    Event listeners may call this method to prevent the history entry from being added.
-  @experimental
-  ###
 
   ###**
   This event is [emitted](/up.emit) after a new history entry has been added.
