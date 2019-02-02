@@ -3,53 +3,49 @@ u = up.util
 class up.ExtractCascade
 
   constructor: (selectorOrElement, options) ->
-    @options = u.options(options, humanizedTarget: 'selector', layer: 'origin')
+    @options = u.options(options)
     @options.transition ?= @options.animation
     @options.hungry ?= true
+    @buildTargetCandidates(selectorOrElement)
+    @buildPlans()
 
-    @targetCandidates = @buildSelectorCandidates(selectorOrElement)
-
+  buildPlans: ->
     @plans = []
 
-    originLayer = options.origin && up.layer.forElement(options.origin)
-    layerOpt = options.layer ? originLayer ? 'current'
+    @originLayer = options.origin && up.layer.forElement(options.origin)
+    @layerOpt = options.layer ? originLayer ? 'current'
 
-    if layerOpt instanceof up.Layer
-      @addCandidatePlans(layer: layerOpt)
-    else if layerOpt == 'new'
+    if layerOpt == 'new'
       unless options.dialog
         throw new Error("{ layer: 'new' } requires a { dialog } option"
         # Dialog options we want to ship with: "window", "full", "drawer", "popup"
       throw "TODO. How does this work? Will I require { provideTarget }? How does the dialog flavor know that the element is ready and the frame can be unveiled?"
-
-    else if layerOpt == 'root'
-      @addCandidatePlans(layer: up.layer.root())
-
-    else if layerOpt == 'origin'
-      @addCandidatePlans(layer: originLayer)
-
-    else if layerOpt == 'current'
-      @addCandidatePlans(layer: up.layer.current())
-
-    else if layerOpt == 'parent'
-      @addCandidatePlans(layer: up.layer.parent(originLayer))
-
-    else if layerOpt == 'ancestors'
-      @addCandidatePlansForLayers(up.layer.ancestors(originLayer))
-
-    else if layerOpt == 'closest'
-      @addCandidatePlansForLayers([originLayer, up.layer.ancestors(originLayer)])
-
-    else if layerOpt == 'any'
-      @addCandidatePlansForLayers(up.layer.all())
+    else
+      for layer in @findLayerCandidates()
+        @addCandidatePlans(layer: layer)
 
     # Make sure we always succeed
     @addPlan(target: document.body, layer: up.layer.root(), resetAll: true)
 
+  findLayerCandidates: ->
+    if @layerOpt instanceof up.Layer
+      return [@layeropt]
 
-  addCandidatePlansForLayers: (layers) ->
-    for layer in layers
-      @addCandidatePlans(layer: layer)
+    return switch @layerOpt
+      when 'root'
+        [up.layer.root()]
+      when 'origin'
+        [@originLayer]
+      when 'current'
+        [up.layer.current()]
+      when 'parent'
+        [up.layer.parent(@originLayer)]
+      when 'ancestors'
+        up.layer.ancestors(@originLayer)
+      when 'closest'
+        up.layer.selfAndAncestors(@originLayer)
+      when 'any'
+        up.layer.all()
 
   addCandidatePlans: (planOptions) ->
     u.each @targetCandidates, (targetCandidate, i) ->
@@ -67,18 +63,17 @@ class up.ExtractCascade
     planOptions = u.merge(@options, planOptions)
     @plans.push new up.ExtractPlan(planOptions)
 
-  buildSelectorCandidates: (selector) ->
-    candidates = [selector, @options.fallback, up.fragment.config.fallbacks]
-    candidates = u.flatten(candidates)
+  buildTargetCandidates: (selector) ->
+    @candidates = [selector, @options.fallback, up.fragment.config.fallbacks]
+    @candidates = u.flatten(@candidates)
     # Remove undefined, null and false from the list
-    candidates = u.filter(candidates, u.isTruthy)
-    candidates = u.uniq(candidates)
+    @candidates = u.filter(@candidates, u.isTruthy)
+    @candidates = u.uniq(@candidates)
 
     if @options.fallback == false || @options.provideTarget
       # Use the first defined candidate, but not `selector` since that
       # might be an undefined options.failTarget
-      candidates = [candidates[0]]
-    candidates
+      @candidates = [@candidates[0]]
 
   oldPlan: =>
     @detectPlan('oldExists')

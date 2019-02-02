@@ -1,11 +1,12 @@
 up.layer = do ->
 
   state = new up.Config ->
-    layers: [buildRootLayer()]
+    stack: new up.layer.Stack(layers: [buildRootLayer()])
     queue: new up.TaskQueue()
 
   throw "each update needs to update title and url in the current fragemnt"
   throw "only if the topmost layer is changed we change document.title or pushState(url)"
+  throw "cancel XHR requests that want to update a destroyed layer"
 
   updateCurrent = (props) ->
     u.assign(currentLayer(), props)
@@ -18,15 +19,12 @@ up.layer = do ->
 
   firstElement = (selector) ->
     matches = e.all(currentLayer().element, selector)
-    if isCurrentRoot()
+    if state.stack.isCurrentRoot()
       matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
     matches[0]
 
   throw "if we fallback to replace <body> or <html> we have also removed .up-layer what do we do?"
-  throw "i think we need to force-close those upper layers, regardless of whether they are sticky or not. also don't emit events that would cause additional XHR requests."
-
-  isCurrentRoot = ->
-    state.layers.length == 1
+  throw "i think we need to force-close those upper layers, regardless of whether they are sticky or not. also don't emit events that would cause additional XHR requests. or maybe cancel all XHR requests linked to a destroyed layer?"
 
   reset = ->
     state.reset()
@@ -39,25 +37,6 @@ up.layer = do ->
     # - target + fallbacks in root
     # extractIn = -> (layer, target, html, options) ->
 
-  resolveName = (name, origin) ->
-    originLayer = forElement(origin)
-
-    switch name
-      when 'root'
-        [root()]
-      when 'last'
-        [currentLayer()]
-      when 'origin'
-        [originLayer]
-      when 'parent'
-        [ancestorLayers(originLayer)[0]]
-      when 'ancestors'
-        ancestorLayers(originLayer)
-      when 'closest'
-        [originLayer, ancestorLayers(originLayer)...]
-      else
-        throw new Error("Unknown { layer } option: #{name}")
-
   root = ->
     state.layers[0] ||= buildRootLayer()
 
@@ -68,41 +47,35 @@ up.layer = do ->
     throw "implement me"
 
   currentLayer = ->
-    u.last(state.layers)
-
-  ancestorLayers = (layer) ->
-    layerIndex = state.layers.indexOf(layer)
-    state.layers.slice(0, layerIndex)
-
-  parentLayer = (layer) ->
-    layerIndex = state.layers.indexOf(layer)
-    parentIndex = Math.max(layerIndex - 1, 0)
-    state.layers[parentIndex]
+    state.stack.current()
 
   asap = (fn) ->
     state.queue.asap(fn)
 
-  dismissLast = ->
-    if nobodyPreventsDismissEvent()
+  dismissCurrent = (reason) ->
+    if nobodyPreventsDismissEvent(reason)
       asap ->
         currentLayer()?.close()
-        emitLayerDismissed()
+        emitLayerDismissed(reason)
 
-  confirmLast = ->
-    if nobodyPreventsConfirmEvent()
+  confirmCurrent = (value) ->
+    if nobodyPreventsConfirmEvent(value)
       asap ->
         currentLayer()?.close()
-        emitLayerConfirmed()
+        emitLayerConfirmed(value)
 
   forElement = (element) ->
-    for layer in state.layers by -1
+    for layer in state.stack.all() by -1
       if layer.contains(element)
         return element
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
-  all: -> state.layers
+  root: -> state.stack.root()
+  all: -> state.stack.all()
+  parent: -> state.stack.parent()
+  ancestors: -> state.stack.ancestors()
+  selfAndAncestors: -> state.stack.selfAndAncestors()
   current: currentLayer
   resolveName: resolveName
-
