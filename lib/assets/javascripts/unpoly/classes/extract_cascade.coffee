@@ -2,11 +2,10 @@ u = up.util
 
 class up.ExtractCascade
 
-  constructor: (selectorOrElement, options) ->
+  constructor: (options) ->
     @options = u.options(options)
-    @options.transition ?= @options.animation
     @options.hungry ?= true
-    @buildTargetCandidates(selectorOrElement)
+    @buildTargetCandidates()
     @buildPlans()
 
   buildPlans: ->
@@ -17,9 +16,25 @@ class up.ExtractCascade
 
     if layerOpt == 'new'
       unless options.dialog
-        throw new Error("{ layer: 'new' } requires a { dialog } option"
-        # Dialog options we want to ship with: "window", "full", "drawer", "popup"
+        throw new Error("{ layer: 'new' } requires a { dialog } option")
+        # Dialog options we want to ship with: "modal", "full", "drawer", "popup", maybe "tooltip"
+      throw "Fail when a selector targets multiple elements for new layer"
       throw "TODO. How does this work? Will I require { provideTarget }? How does the dialog flavor know that the element is ready and the frame can be unveiled?"
+      throw "when the new response does not include the target, how can we use the fallback?"
+
+      # opener = up.layer.getOpener(options.dialog)
+
+      opener = (contentElement, options) ->
+        dialog = up.layer.buildDialog(name)
+        dialog.open(contentElement, options)
+
+
+
+      # layer =
+
+      dialogImplementation = dialogRegistry.forName(options.dialog)
+
+
     else
       for layer in @findLayerCandidates()
         @addCandidatePlans(layer: layer)
@@ -29,7 +44,7 @@ class up.ExtractCascade
 
   findLayerCandidates: ->
     if @layerOpt instanceof up.Layer
-      return [@layeropt]
+      return [@layerOpt]
 
     return switch @layerOpt
       when 'root'
@@ -63,8 +78,8 @@ class up.ExtractCascade
     planOptions = u.merge(@options, planOptions)
     @plans.push new up.ExtractPlan(planOptions)
 
-  buildTargetCandidates: (selector) ->
-    @candidates = [selector, @options.fallback, up.fragment.config.fallbacks]
+  buildTargetCandidates: ->
+    @candidates = [@options.target, @options.fallback, up.fragment.config.fallbacks]
     @candidates = u.flatten(@candidates)
     # Remove undefined, null and false from the list
     @candidates = u.filter(@candidates, u.isTruthy)
@@ -75,19 +90,19 @@ class up.ExtractCascade
       # might be an undefined options.failTarget
       @candidates = [@candidates[0]]
 
-  oldPlan: =>
+  oldPlan: ->
     @detectPlan('oldExists')
 
-  newPlan: =>
+  newPlan: ->
     @detectPlan('newExists')
 
-  matchingPlan: =>
+  matchingPlan: ->
     @detectPlan('matchExists')
 
-  detectPlan: (checker) =>
+  detectPlan: (checker) ->
     u.find @plans, (plan) -> plan[checker]()
 
-  bestPreflightSelector: =>
+  bestPreflightTarget: ->
     if @options.provideTarget
       # We know that the target will be created right before swapping,
       # so just assume the first plan will work.
@@ -97,21 +112,18 @@ class up.ExtractCascade
 
     if plan
       plan.resolveNesting()
-      plan.selector()
+      plan.target()
     else
       @oldPlanNotFound()
 
-  bestMatchingSteps: =>
+  bestSwapSteps: ->
     if plan = @matchingPlan()
-      # Only when we have a match in the required selectors, we
-      # append the optional steps for [up-hungry] elements.
-      plan.addHungrySteps()
-      plan.resolveNesting()
+      plan.prepareForSwapping()
       plan.steps
     else
       @matchingPlanNotFound()
 
-  matchingPlanNotFound: =>
+  matchingPlanNotFound: ->
     # The job of this method is to simply throw an error.
     # However, we will investigate the reasons for the failure
     # so we can provide a more helpful error message.
@@ -126,7 +138,7 @@ class up.ExtractCascade
         inspectAction = { label: 'Open response', callback: @options.inspectResponse }
       up.fail(["#{message} (tried %o)", @selectorCandidates], action: inspectAction)
 
-  oldPlanNotFound: =>
+  oldPlanNotFound: ->
     layerProse = @options.layer
     layerProse = 'page, modal or popup' if layerProse == 'auto'
     up.fail("Could not find #{@options.humanizedTarget} in current #{layerProse} (tried %o)", @selectorCandidates)

@@ -232,8 +232,8 @@ up.fragment = do ->
     u.renameKey(failureOptions, 'failReveal', 'reveal')
 
     try
-      improvedTarget = bestPreflightSelector(selectorOrElement, successOptions)
-      improvedFailTarget = bestPreflightSelector(options.failTarget, failureOptions)
+      improvedTarget = bestPreflightTarget(selectorOrElement, successOptions)
+      improvedFailTarget = bestPreflightTarget(options.failTarget, failureOptions)
     catch error
       # Since we're an async function, we should not throw exceptions but return a rejected promise.
       # http://2ality.com/2016/03/promise-rejections-vs-exceptions.html
@@ -358,8 +358,8 @@ up.fragment = do ->
       u.rejectOnError ->
         # Allow callers to create the targeted element right before we swap.
         options.provideTarget?()
-        responseDoc = new up.HtmlParser(html)
-        extractSteps = bestMatchingSteps(selectorOrElement, responseDoc, options)
+        responseDoc = new up.ResponseDoc(html)
+        swapSteps = bestSwapSteps(selectorOrElement, responseDoc, options)
 
         if shouldExtractTitle(options) && responseTitle = responseDoc.title()
           options.title = responseTitle
@@ -380,14 +380,15 @@ up.fragment = do ->
         # Delay all further links in the promise chain until all fragments have been swapped
         Promise.all(swapPromises)
 
-  bestPreflightSelector = (selectorOrElement, options) ->
-    cascade = new up.ExtractCascade(selectorOrElement, options)
-    cascade.bestPreflightSelector()
+  bestPreflightTarget = (target, options) ->
+    options = u.merge(options, { target })
+    cascade = new up.ExtractCascade(options)
+    cascade.bestPreflightTarget()
 
-  bestMatchingSteps = (selectorOrElement, response, options) ->
-    options = u.merge(options, { response })
-    cascade = new up.ExtractCascade(selectorOrElement, options)
-    cascade.bestMatchingSteps()
+  bestSwapSteps = (target, responseDoc, options) ->
+    options = u.merge(options, { target, responseDoc })
+    cascade = new up.ExtractCascade(options)
+    cascade.bestSwapSteps()
 
   updateHistoryAndTitle = (options) ->
     options = u.options(options, historyMethod: 'push')
@@ -395,8 +396,6 @@ up.fragment = do ->
     document.title = options.title if u.isString(options.title)
 
   swapElements = (oldElement, newElement, pseudoClass, transition, options) ->
-    transition ||= 'none'
-
     # When the server responds with an error, or when the request method is not
     # reloadable (not GET), we keep the same source as before.
     if options.source == 'keep'

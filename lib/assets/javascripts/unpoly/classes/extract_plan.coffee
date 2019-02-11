@@ -1,42 +1,106 @@
 u = up.util
 e = up.element
 
+up.ExtractPlan =
+  NOT_APPLICABLE: 'NA' # a value we can throw and catch
+
+
+class up.ExtractPlan.UpdateLayer
+
+  constructor: (layer, rawTarget, options) ->
+
+  preflightTarget: ->
+    @findOld()
+
+    allStepsHaveOld() or throw up.ExtractPlan.NOT_APPLICABLE
+
+  execute: ->
+    everythingThatOldExtractPlanDoes()
+    everythingThatFragmentDoes()
+
+class up.ExtractPlan.ReplaceRoot
+
+  constructor: ->
+
+  preflightSelector: ->
+    'body'
+
+  execute: (responseDoc) ->
+    promise =
+      # Don't trigger events. We cannot really allow prevention.
+      # Also any { dismissed } handlers might trigger additional requests,
+      # which would be pointless since we're resetting the world.
+      up.layer.dismissAll(events: false)
+    promise.then ->
+      up.viewport.root().scrollTop = 0
+      e.replace(document.body, responseDoc.first('body'))
+      throw "who sets source? should happen before compile"
+      throw "who sets title? should happen before compile"
+      throw "who sets URL? should happen before compile"
+      throw "who compiles the body? should happen after insert"
+
+class up.ExtractPlan.OpenLayer
+
+  constructor: (@flavor, @target) ->
+
+  preflightTarget: ->
+    @target
+
+  execute: (responseDoc) ->
+    if element = responseDoc.first(@target)
+      afterAttach = ->
+        compile()
+        emitInserted()
+      up.layer.open({ @flavor, element, afterAttach })
+    else
+      throw up.ExtractPlan.NOT_APPLICABLE
+
+
+
+#class up.UpdateLayerPlan
+#
+#  oldExists: ->
+#    @findOld()
+#    u.every @steps, (step) -> step.oldElement
+#
+#class up.OpenLayerPlan
+#
+#
+#class up.ReplaceRootPlan
+#
+#  oldExists: ->
+#    true
+
+
 class up.ExtractPlan
 
-  constructor: (selector, options) ->
-    @reveal = options.reveal
-    @origin = options.origin
-    @hungry = options.hungry
-    @transition = options.transition
-    @response = options.response
-    @oldLayer = options.layer
-    originalSelector = e.resolveSelector(selector, @origin)
-    @parseSteps(originalSelector)
+  constructor: (@options) ->
+    @parseSteps()
 
-  findOld: =>
+  findOld: ->
     u.each @steps, (step) =>
-      step.oldElement = up.fragment.first(step.selector, layer: @oldLayer)
+      step.oldElement = up.fragment.first(step.selector, u.only(@options, 'layer'))
 
-  findNew: =>
+  findNew: ->
     u.each @steps, (step) =>
-      # The response has no layers. It's always just the page.
-      step.newElement = @response.first(step.selector)
+      # The responseDoc has no layers. It's always just the page.
+      step.newElement = @responseDoc.first(step.selector)
 
-  oldExists: =>
-    @findOld()
-    u.every @steps, (step) -> step.oldElement
+  oldExists: ->
+    if @options.opener
+      true
+    else
+      @findOld()
+      u.every @steps, (step) -> step.oldElement
 
-  newExists: =>
+  newExists: ->
     @findNew()
     u.every @steps, (step) -> step.newElement
 
-  matchExists: =>
+  matchExists: ->
     @oldExists() && @newExists()
 
-  addSteps: (steps) =>
-    @steps = @steps.concat(steps)
-    
-  resolveNesting: =>
+  resolveNesting: ->
     return if @steps.length < 2
 
     compressed = u.copy(@steps)
@@ -58,19 +122,16 @@ class up.ExtractPlan
     compressed[0].reveal = @steps[0].reveal
     @steps = compressed
 
-  selector: =>
-    u.map(@steps, 'expression').join(', ')
+  target: ->
+    u.map(@steps, 'target').join(', ')
 
-  parseSteps: (originalSelector) =>
-    comma = /\ *,\ */
+  parseSteps: ->
+    resolvedSelector = e.resolveSelector(@options.target, @options.origin)
+    disjunction = resolvedSelector.split(/\ *,\ */)
 
-    @steps = []
-
-    disjunction = originalSelector.split(comma)
-
-    u.each disjunction, (expression, i) =>
-      expressionParts = expression.match(/^(.+?)(?:\:(before|after))?$/)
-      expressionParts or up.fail('Could not parse selector literal "%s"', expression)
+    @steps = disjunction.map (target, i) =>
+      expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/)
+      expressionParts or up.fail('Could not parse selector "%s"', target)
       selector = expressionParts[1]
       if selector == 'html'
         # If someone really asked us to replace the <html> root, the best
@@ -81,31 +142,47 @@ class up.ExtractPlan
 
       # When extracting multiple selectors, we only want to reveal the first element.
       # So we set the { reveal } option to false for the next iteration.
-      doReveal = if i == 0 then @reveal else false
+      doReveal = if i == 0 then @options.reveal else false
 
-      @steps.push
-        expression: expression
+      # When extracting multiple selectors, they will all be only the same layer.
+      # So we only need to peel once.
+      doPeal = if i == 0 then @options.peal else false
+
+      return u.merge @options,
+        target: target
         selector: selector
         pseudoClass: pseudoClass
-        transition: @transition
-        origin: @origin
         reveal: doReveal
+        peal: doPeal
 
-  addHungrySteps: =>
-    hungrySteps = []
-    if @hungry
+  prepareForSwapping: ->
+    throw "does hier ruft niemand auf?"
+    throw "up.fragment macht selbst auch nochmal prepareForInsertion?"
+    # Only when we have a match in the required selectors, we
+    # append the optional steps for [up-hungry] elements.
+    plan.addHungrySteps()
+    plan.resolveNesting()
+
+    # Unwrap <noscript> tags
+    for step in @steps
+      @options.responseDoc.prepareForInsertion(step.newElement)
+
+  addHungrySteps: ->
+    if @options.hungry
+      throw "only find hungries in the target layer"
+      throw "don't find hungries if we are blowing up the page"
+      throw "don't add hungries when we have an { opener }"
       hungries = e.all(up.radio.hungrySelector())
-      transition = up.radio.config.hungryTransition ? @transition
+      transition = up.radio.config.hungryTransition ? @options.transition
       for hungry in hungries
         selector = e.toSelector(hungry)
-        if newHungry = @response.first(selector)
-          hungrySteps.push
+        layer = up.layer.forElement(hungry)
+        if newHungry = @options.responseDoc.first(selector)
+          @steps.push
             selector: selector
             oldElement: hungry
             newElement: newHungry
             transition: transition
             reveal: false # we never auto-reveal a hungry element
             origin: null # don't let the hungry element auto-close a non-sticky modal or popup
-
-    @addSteps(hungrySteps)
-
+            layer: layer # TODO: Do we need this look-up?

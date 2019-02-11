@@ -111,7 +111,7 @@ class up.Response extends up.Record
   @return {boolean}
   @experimental
   ###
-  isSuccess: =>
+  isSuccess: ->
     @status && (@status >= 200 && @status <= 299)
 
   ###**
@@ -124,7 +124,7 @@ class up.Response extends up.Record
   @return {boolean}
   @experimental
   ###
-  isError: =>
+  isError: ->
     !@isSuccess()
 
   ###**
@@ -138,7 +138,7 @@ class up.Response extends up.Record
   @return {boolean}
   @experimental
   ###
-  isFatalError: =>
+  isFatalError: ->
     @isError() && u.isBlank(@text)
 
   ###**
@@ -153,5 +153,5 @@ class up.Response extends up.Record
   @return {string|undefined} value
   @experimental
   ###
-  getHeader: (name) =>
+  getHeader: (name) ->
     @xhr.getResponseHeader(name)

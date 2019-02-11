@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-class up.HtmlParser
+class up.ResponseDoc
 
   constructor: (@html) ->
     @wrapNoscriptInHtml()

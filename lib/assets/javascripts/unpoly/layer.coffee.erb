@@ -29,7 +29,7 @@ up.layer = do ->
   reset = ->
     state.reset()
 
-  bestPreflightSelector = (target, options) ->
+  bestPreflightTarget = (target, options) ->
     throw "implement me"
     # suche müsste jetzt so gehen:
     # - target + fallbacks im aktuellen layer. wir suchen nie einfach so in anderen layern.
@@ -68,6 +68,8 @@ up.layer = do ->
     for layer in state.stack.all() by -1
       if layer.contains(element)
         return element
+
+  swapElements = (step) ->
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
