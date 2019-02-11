@@ -220,20 +220,23 @@ up.fragment = do ->
       return u.unresolvablePromise()
 
     successOptions = u.merge options,
+      target: selectorOrElement,
       humanizedTarget: 'target'
 
     failureOptions = u.merge options,
       humanizedTarget: 'failure target'
-      provideTarget: undefined # don't provide a target if we're targeting the failTarget
-      restoreScroll: false
 
+    throw "rename fail options programmatically instead of listing each one"
+    u.renameKey(failureOptions, 'failTarget', 'target')
     u.renameKey(failureOptions, 'failTransition', 'transition')
     u.renameKey(failureOptions, 'failLayer', 'layer')
     u.renameKey(failureOptions, 'failReveal', 'reveal')
+    u.renameKey(failureOptions, 'failPeel', 'peel')
+    u.renameKey(failureOptions, 'failRestoreScroll', 'restoreScroll')
 
     try
-      improvedTarget = bestPreflightTarget(selectorOrElement, successOptions)
-      improvedFailTarget = bestPreflightTarget(options.failTarget, failureOptions)
+      improvedTarget = bestPreflightTarget(successOptions)
+      improvedFailTarget = bestPreflightTarget(failureOptions)
     catch error
       # Since we're an async function, we should not throw exceptions but return a rejected promise.
       # http://2ality.com/2016/03/promise-rejections-vs-exceptions.html
@@ -300,6 +303,7 @@ up.fragment = do ->
         options.history = false
         options.source  = 'keep'
 
+    # response.title might contain an X-Up-Title header
     if shouldExtractTitle(options) && response.title
       options.title = response.title
 
@@ -347,6 +351,30 @@ up.fragment = do ->
   @stable
   ###
   extract = (selectorOrElement, html, options) ->
+    up.puts 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length
+    options = u.merge(options, target: selectorOrElement)
+    cascade = new up.ExtractCascade(options)
+    responseDoc = new up.ResponseDoc(html)
+
+    throw "Move stuff before #execute() to ExtractCascade"
+
+    unless options.saveScroll == false
+      up.viewport.saveScroll()
+
+    if shouldExtractTitle(options) && responseTitle = responseDoc.title()
+      options.title = responseTitle
+
+    throw "must only update history and title on the current layer! update its props and sync with document/window"
+    updateHistoryAndTitle(options)
+
+    u.rejectOnError ->
+      cascade.execute(responseDoc)
+
+
+
+
+
+
     up.log.group 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length, ->
       options = u.options options,
         historyMethod: 'push'
@@ -380,20 +408,9 @@ up.fragment = do ->
         # Delay all further links in the promise chain until all fragments have been swapped
         Promise.all(swapPromises)
 
-  bestPreflightTarget = (target, options) ->
-    options = u.merge(options, { target })
+  bestPreflightTarget = (options) ->
     cascade = new up.ExtractCascade(options)
-    cascade.bestPreflightTarget()
-
-  bestSwapSteps = (target, responseDoc, options) ->
-    options = u.merge(options, { target, responseDoc })
-    cascade = new up.ExtractCascade(options)
-    cascade.bestSwapSteps()
-
-  updateHistoryAndTitle = (options) ->
-    options = u.options(options, historyMethod: 'push')
-    up.history[options.historyMethod](options.history) if options.history
-    document.title = options.title if u.isString(options.title)
+    cascade.preflightTarget()
 
   swapElements = (oldElement, newElement, pseudoClass, transition, options) ->
     # When the server responds with an error, or when the request method is not
@@ -736,6 +753,7 @@ up.fragment = do ->
 
     selector = e.resolveSelector(selector, origin)
     if layer == 'auto'
+      throw "up.fragment.first() should only see the current layer, unless { layer } is given, in which case we resolve"
       firstInPriority(root, selector, origin)
     else
       firstInLayer(root, selector, layer)
@@ -751,6 +769,7 @@ up.fragment = do ->
       return firstInLayer(parent, selector, layer)
 
   firstInLayer = (parent, selector, layer) ->
+    throw "use up.layer"
     elements = e.all(parent, selector)
     return u.findResult elements, (element) ->
       if isRealElement(element) && matchesLayer(element, layer)

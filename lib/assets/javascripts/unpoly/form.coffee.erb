@@ -194,23 +194,26 @@ up.form = do ->
     options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
     options.reveal ?= e.booleanOrStringAttr(form, 'up-reveal') ? true
     options.failReveal ?= e.booleanOrStringAttr(form, 'up-fail-reveal') ? true
-    options.fallback ?= form.getAttribute('up-fallback')
+    options.peel ?= e.booleanOrStringAttr(form, 'up-peel') ? true
+    options.failPeel ?= e.booleanOrStringAttr(form, 'up-fail-peel') ? true
+    options.fallback ?= e.booleanOrStringAttr(form, 'up-fallback')
     options.history ?= e.booleanOrStringAttr(form, 'up-history') ? true
     options.transition ?= e.booleanOrStringAttr(form, 'up-transition')
     options.failTransition ?= e.booleanOrStringAttr(form, 'up-fail-transition')
     options.method ?= form.getAttribute('up-method') ? form.getAttribute('data-method') ? form.getAttribute('method') ? 'post'
     options.cache ?= e.booleanAttr(form, 'up-cache')
     options.restoreScroll ?= e.booleanAttr(form, 'up-restore-scroll') # the option supports an object value, but not the attr
+    options.failRestoreScroll ?= booleanAttr(form, 'up-fail-restore-scroll')
     options.origin ?= form
     options.layer ?= form.getAttribute('up-layer')
     options.failLayer ?= form.getAttribute('up-fail-layer')
     options.params = up.Params.fromForm(form)
     options = u.merge(options, up.motion.animateOptions(options, form))
 
+    throw "parse layer flavor, position, width ..."
+
     if options.validate
       options.headers ||= {}
-      options.transition = false
-      options.failTransition = false
       options.headers[up.protocol.config.validateHeader] = options.validate
 
     up.event.whenEmitted('up:form:submit', log: 'Submitting form', target: form).then ->
@@ -372,9 +375,18 @@ up.form = do ->
     field = e.get(fieldOrSelector)
     options = u.options(options)
     options.origin = field
+
+    # The protocol doesn't define whether the validation results in a status code.
+    # Hence we use the same options for both success and failure.
     options.target = findValidateTarget(field, options)
     options.failTarget = options.target
-    options.reveal ?= e.booleanOrStringAttr(field, 'up-reveal') ? false
+    options.reveal ?= false
+    options.failReveal = options.reveal
+    options.peel ?= false
+    options.failPeel = options.peel
+    options.transition ?= false
+    options.failTransition = options.transition
+
     options.history = false
     # Make sure the X-Up-Validate header is present, so the server-side
     # knows that it should not persist the form submission

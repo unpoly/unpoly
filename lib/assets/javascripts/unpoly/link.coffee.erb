@@ -172,18 +172,28 @@ up.link = do ->
     url = options.url ? link.getAttribute('up-href') ? link.getAttribute('href')
     target = options.target ? link.getAttribute('up-target')
     options.failTarget ?= link.getAttribute('up-fail-target')
-    options.fallback ?= link.getAttribute('up-fallback')
+    options.fallback ?= e.booleanOrStringAttr(link, 'up-fallback')
     options.transition ?= e.booleanOrStringAttr(link, 'up-transition')
     options.failTransition ?= e.booleanOrStringAttr(link, 'up-fail-transition')
     options.history ?= e.booleanOrStringAttr(link, 'up-history')
     options.reveal ?= e.booleanOrStringAttr(link, 'up-reveal') ? true
     options.failReveal ?= e.booleanOrStringAttr(link, 'up-fail-reveal') ? true
+
     options.cache ?= e.booleanAttr(link, 'up-cache')
+
     options.restoreScroll ?= e.booleanAttr(link, 'up-restore-scroll') # the option may contain an Object, but not the attr
+    options.failRestoreScroll ?= e.booleanAttr(link, 'up-restore-scroll')
+
     options.method = followMethod(link, options)
     options.origin ?= link
     options.layer ?= link.getAttribute('up-layer')
     options.failLayer ?= link.getAttribute('up-fail-layer')
+    options.peel ?= e.booleanOrStringAttr(form, 'up-peel') ? true
+    options.failPeel ?= e.booleanOrStringAttr(form, 'up-fail-peel') ? true
+
+    throw "parse layer flavor, align, position, width, maxWidth ..."
+    throw "can we unify parsing of form and link options? there will be no other when we remove modal, link, ..."
+
     options.confirm ?= link.getAttribute('up-confirm')
     options = u.merge(options, up.motion.animateOptions(options, link))
 

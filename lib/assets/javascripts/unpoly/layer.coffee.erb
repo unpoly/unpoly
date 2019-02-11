@@ -7,24 +7,32 @@ up.layer = do ->
   throw "each update needs to update title and url in the current fragemnt"
   throw "only if the topmost layer is changed we change document.title or pushState(url)"
   throw "cancel XHR requests that want to update a destroyed layer"
+  throw "state.stack is really long to write"
+  throw "maybe default to { history: false } for new layers"
 
   updateCurrent = (props) ->
     u.assign(currentLayer(), props)
 
-  syncWindowWithCurrent = ->
-    layer = currentLayer()
-    if layer.history
-      document.title = layer.title
+  updateUrl = (layer, newUrl) ->
+    layer.url = newUrl
+    urlChanged(layer)
+
+  updateTitle = (layer, title) ->
+    titleChanged(layer)
+
+  urlChanged = (layer) ->
+    if layer == currentLayer() && layer.history
       up.history.push(layer.url)
 
-  firstElement = (selector) ->
-    matches = e.all(currentLayer().element, selector)
+  titleChanged = (layer) ->
+    if layer == currentLayer() && layer.history # history option also says if we're updating title
+      document.title = layer.title
+
+  firstElement = (layer, selector) ->
+    matches = e.all(layer.element, selector)
     if state.stack.isCurrentRoot()
       matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
     matches[0]
-
-  throw "if we fallback to replace <body> or <html> we have also removed .up-layer what do we do?"
-  throw "i think we need to force-close those upper layers, regardless of whether they are sticky or not. also don't emit events that would cause additional XHR requests. or maybe cancel all XHR requests linked to a destroyed layer?"
 
   reset = ->
     state.reset()
@@ -69,7 +77,42 @@ up.layer = do ->
       if layer.contains(element)
         return element
 
-  swapElements = (step) ->
+  resolve = (value, options) ->
+    if value instanceof up.Layer
+      return [value]
+
+    givenOriginLayer = ->
+      if origin = options.origin
+        forElement(origin)
+      else
+        up.fail('Updating layer %s requires { origin } option', value)
+
+    return switch value
+      when 'root'
+        [state.stack.root()]
+      when 'origin'
+        [givenOriginLayer()]
+      when 'current'
+        [currentLayer()]
+      when 'parent'
+        [state.stack.parent(givenOriginLayer())]
+      when 'ancestors'
+        state.stack.ancestors(givenOriginLayer())
+      when 'closest'
+        state.stack.selfAndAncestors(givenOriginLayer())
+      when 'any'
+        state.stack.all()
+
+  dismiss = (layer) ->
+    throw "dismiss layer"
+    throw "cancel XHR requests that would update this layer"
+
+  peel = (layer) ->
+    for ancestor in up.stack.ancestors() by -1
+      asap ->
+        # We only close, but don't emit events!
+        ancestor.close()
+    return state.queue.cursor
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
@@ -81,3 +124,5 @@ up.layer = do ->
   selfAndAncestors: -> state.stack.selfAndAncestors()
   current: currentLayer
   resolveName: resolveName
+  firstElement: firstElement
+  peel: peel

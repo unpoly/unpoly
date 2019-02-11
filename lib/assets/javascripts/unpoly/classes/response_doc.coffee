@@ -10,6 +10,14 @@ class up.ResponseDoc
   title: ->
     @parsedDoc.querySelector("head title")?.textContent
 
+  has: (selector) ->
+    !!@first(selector)
+
+  selectForInsertion: (selector) ->
+    if element = @first(selector)
+      @prepareForInsertion(element)
+      element
+
   first: (selector) ->
     e.first(@parsedDoc, selector)
 

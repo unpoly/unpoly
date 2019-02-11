@@ -2,143 +2,93 @@ u = up.util
 
 class up.ExtractCascade
 
+  BODY_TARGET_PATTERN = /(^|\s|,)(body|html)(,|\s|$)/i
+
   constructor: (options) ->
     @options = u.options(options)
+    @options.target = e.resolveSelector(@options.target, @options.origin)
     @options.hungry ?= true
-    @buildTargetCandidates()
+    @options.historyMethod ?= 'push'
+    @options.keep ?= true
+    @options.layer ?= if @options.origin then 'origin' else 'current'
+
+    throw "should @options.peel be a default? or only for user-clicks?"
+
     @buildPlans()
 
   buildPlans: ->
     @plans = []
+    @buildTargetCandidates()
 
-    @originLayer = options.origin && up.layer.forElement(options.origin)
-    @layerOpt = options.layer ? originLayer ? 'current'
-
-    if layerOpt == 'new'
-      unless options.dialog
-        throw new Error("{ layer: 'new' } requires a { dialog } option")
-        # Dialog options we want to ship with: "modal", "full", "drawer", "popup", maybe "tooltip"
-      throw "Fail when a selector targets multiple elements for new layer"
-      throw "TODO. How does this work? Will I require { provideTarget }? How does the dialog flavor know that the element is ready and the frame can be unveiled?"
-      throw "when the new response does not include the target, how can we use the fallback?"
-
-      # opener = up.layer.getOpener(options.dialog)
-
-      opener = (contentElement, options) ->
-        dialog = up.layer.buildDialog(name)
-        dialog.open(contentElement, options)
-
-
-
-      # layer =
-
-      dialogImplementation = dialogRegistry.forName(options.dialog)
-
-
+    if @options.layer == 'new'
+      @addTargetCandidatePlans(up.ExtractPlan.OpenLayer)
     else
-      for layer in @findLayerCandidates()
-        @addCandidatePlans(layer: layer)
+      for layer in up.layer.resolve(@options.layer)
+        @addTargetCandidatePlans(up.ExtractPlan.UpdateLayer, { layer })
 
     # Make sure we always succeed
-    @addPlan(target: document.body, layer: up.layer.root(), resetAll: true)
+    @plans.push(new ExtractPlan.SwapBody(@options))
 
-  findLayerCandidates: ->
-    if @layerOpt instanceof up.Layer
-      return [@layerOpt]
+  addTargetCandidatePlans: (PlanClass, planOptions) ->
+    for targetCandidate, i in @targetCandidates
+      # Since the last plan is always SwapBody, we don't need to
+      # add other plans that would also swap the body.
+      continue if @targetsBody(targetCandidate)
 
-    return switch @layerOpt
-      when 'root'
-        [up.layer.root()]
-      when 'origin'
-        [@originLayer]
-      when 'current'
-        [up.layer.current()]
-      when 'parent'
-        [up.layer.parent(@originLayer)]
-      when 'ancestors'
-        up.layer.ancestors(@originLayer)
-      when 'closest'
-        up.layer.selfAndAncestors(@originLayer)
-      when 'any'
-        up.layer.all()
-
-  addCandidatePlans: (planOptions) ->
-    u.each @targetCandidates, (targetCandidate, i) ->
-      planOptions = u.copy(planOptions)
-      planOptions.target = targetCandidate
+      candidateOptions = u.options(planOptions, @options)
+      candidateOptions.target = targetCandidate
 
       if i > 0
         # If we're using a fallback (any candidate that's not the first),
         # the original transition might no longer be appropriate.
-        planOptions.transition = up.fragment.config.fallbackTransition ? @options.transition
+        candidateOptions.transition = up.fragment.config.fallbackTransition ? @options.transition
 
-      @addPlan(planOptions)
+      @plans.push(new PlanClass(candidateOptions))
 
-  addPlan: (planOptions) ->
-    planOptions = u.merge(@options, planOptions)
-    @plans.push new up.ExtractPlan(planOptions)
+  targetsBody: (target) ->
+    BODY_TARGET_PATTERN.test(target)
 
   buildTargetCandidates: ->
-    @candidates = [@options.target, @options.fallback, up.fragment.config.fallbacks]
-    @candidates = u.flatten(@candidates)
+    @targetCandidates = [@target, @options.fallback, up.fragment.config.fallbacks]
+    @targetCandidates = u.flatten(@targetCandidates)
     # Remove undefined, null and false from the list
-    @candidates = u.filter(@candidates, u.isTruthy)
-    @candidates = u.uniq(@candidates)
+    @targetCandidates = u.filter(@targetCandidates, u.isTruthy)
+    @targetCandidates = u.uniq(@targetCandidates)
 
-    if @options.fallback == false || @options.provideTarget
+    if @options.fallback == false
       # Use the first defined candidate, but not `selector` since that
       # might be an undefined options.failTarget
-      @candidates = [@candidates[0]]
+      @targetCandidates = [@targetCandidates[0]]
 
-  oldPlan: ->
-    @detectPlan('oldExists')
+  execute: ->
+    @seekPlan
+      attempt: (plan) -> plan.execute()
+      noneApplicable: => @executeNotApplicable()
 
-  newPlan: ->
-    @detectPlan('newExists')
+  executeNotApplicable: ->
+    if @options.inspectResponse
+      inspectAction = { label: 'Open response', callback: @options.inspectResponse }
+    up.fail("Could not match #{@options.humanizedTarget} in current page and response", action: inspectAction)
 
-  matchingPlan: ->
-    @detectPlan('matchExists')
+  preflightTarget: ->
+    @seekPlan
+      attempt: (plan) -> plan.preflightTarget()
+      noneApplicable: => @preflightTargetNotApplicable()
 
-  detectPlan: (checker) ->
-    u.find @plans, (plan) -> plan[checker]()
+  preflightTargetNotApplicable: ->
+    up.fail("Could not find #{@options.humanizedTarget} in current page")
 
-  bestPreflightTarget: ->
-    if @options.provideTarget
-      # We know that the target will be created right before swapping,
-      # so just assume the first plan will work.
-      plan = @plans[0]
-    else
-      plan = @oldPlan()
-
-    if plan
-      plan.resolveNesting()
-      plan.target()
-    else
-      @oldPlanNotFound()
-
-  bestSwapSteps: ->
-    if plan = @matchingPlan()
-      plan.prepareForSwapping()
-      plan.steps
-    else
-      @matchingPlanNotFound()
-
-  matchingPlanNotFound: ->
-    # The job of this method is to simply throw an error.
-    # However, we will investigate the reasons for the failure
-    # so we can provide a more helpful error message.
-    if @newPlan()
-      @oldPlanNotFound()
-    else
-      if @oldPlan()
-        message = "Could not find #{@options.humanizedTarget} in response"
-      else
-        message = "Could not match #{@options.humanizedTarget} in current page and response"
-      if @options.inspectResponse
-        inspectAction = { label: 'Open response', callback: @options.inspectResponse }
-      up.fail(["#{message} (tried %o)", @selectorCandidates], action: inspectAction)
-
-  oldPlanNotFound: ->
-    layerProse = @options.layer
-    layerProse = 'page, modal or popup' if layerProse == 'auto'
-    up.fail("Could not find #{@options.humanizedTarget} in current #{layerProse} (tried %o)", @selectorCandidates)
+  seekPlan: (opts) ->
+    for plan, index in @plans
+      try
+        opts.attempt(plan)
+      catch e
+        if e == up.ExtractPlan.NOT_APPLICABLE
+          if index < @plans.length - 1
+            # Retry with next plan
+          else
+            # No next plan to try
+            opts.noneApplicable()
+        else
+          # Any other exception is re-thrown
+          throw e
