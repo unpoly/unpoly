@@ -5,8 +5,6 @@ class up.ExtractPlan
 
   @NOT_APPLICABLE: 'n/a'
 
-  constructor: (@options) ->
-
   setSource: (element, sourceUrl) ->
     unless sourceUrl is false
       sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
@@ -24,49 +22,17 @@ class up.ExtractPlan
     throw up.ExtractPlan.NOT_APPLICABLE
 
 
-# Replaces the current <body> with a new body from the response.
-class up.ExtractPlan.SwapBody extends up.ExtractPlan
+class up.ExtractPlan.OpenLayer extends up.ExtractPlan
 
   constructor: (@options) ->
 
   preflightTarget: ->
-    # We always have a <body>, so this plan is always applicable.
-    'body'
-
-  execute: (responseDoc) ->
-    layer = up.layer.root()
-    promise =
-      # Don't trigger events. We cannot really allow prevention.
-      # Also any { dismissed } handlers might trigger additional requests,
-      # which would be pointless since we're resetting the world.
-      up.layer.peel(layer)
-    promise.then =>
-      up.viewport.root().scrollTop = 0
-      # Because of the way DOMParser works, the response always has a <body>.
-      # If the server response is only some text, DOMParser will wrap it with <body>.
-      newBody = responseDoc.selectForInsertion('body')
-      @setSource(newBody, @options.source)
-      @updateHistoryAndTitle(layer, @options)
-
-      throw "Should we keep up-keep elements in body?"
-
-      oldBody = document.body
-      e.replace(oldBody, newBody)
-      up.fragment.emitDestroyed(oldBody, u.merge(@options, parent: e.root()))
-      up.hello(document.body, @options) # will emit up:fragment:inserted
-
-
-class up.ExtractPlan.OpenLayer extends up.ExtractPlan
-
-  constructor: (@target, @options) ->
-
-  preflightTarget: ->
     # The target will always "exist" in the current page, since
     # we're opening a new layer just for that.
-    @target
+    @options.target
 
   execute: (responseDoc) ->
-    newLayerContent = responseDoc.selectForInsertion(@target) or @notApplicable()
+    newLayerContent = responseDoc.selectForInsertion(@options.target) or @notApplicable()
     @setSource(newLayerContent, @options.source)
 
     afterAttach = (layer) =>
@@ -102,13 +68,14 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     if @options.peel
       promise = promise.then -> up.layer.peel(@options.layer)
 
+    @updateHistoryAndTitle(@options.layer, @options)
+
     promise.then ->
       swapPromises = @steps.map (step) ->
         # Note that we must copy the options hash instead of changing it in-place, since the
         # async swapElements() is scheduled for the next microtask and we must not change the options
         # for the previous iteration.
-        swapOptions = u.merge(@options, u.only(step, 'origin', 'reveal'))
-        responseDoc.prepareForInsertion(step.newElement)
+        swapOptions = u.merge(@options, step)
         return @swapStep(step, swapOptions)
 
       return Promise.all(swapPromises)
@@ -118,6 +85,8 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     return promise
 
   swapStep: (step, options) ->
+    up.puts('Swapping fragment %s', step.selector)
+
     # When the server responds with an error, or when the request method is not
     # reloadable (not GET), we keep the same source as before.
     if options.source == 'keep'
@@ -186,30 +155,27 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
 
       return up.morph(step.oldElement, step.newElement, step.transition, morphOptions)
 
+  # Returns a object detailling a keep operation iff the given element is [up-keep] and
+  # we can find a matching partner in newElement. Otherwise returns undefined.
   findKeepPlan: (element, newElement, options) ->
-    if options.keep
-      keepable = element
-      if partnerSelector = e.booleanOrStringAttr(keepable, 'up-keep')
-        u.isString(partnerSelector) or partnerSelector = '&'
-        partnerSelector = e.resolveSelector(partnerSelector, keepable)
-        if options.descendantsOnly
-          partner = e.first(newElement, partnerSelector)
-        else
-          partner = e.subtree(newElement, partnerSelector)[0]
-        if partner && e.matches(partner, '[up-keep]')
-          plan =
-            oldElement: keepable # the element that should be kept
-            newElement: partner # the element that would have replaced it but now does not
-            newData: up.syntax.data(partner) # the parsed up-data attribute of the element we will discard
+    return unless options.keep
 
-          keepEventArgs =
-            target: keepable
-            newFragment: partner
-            newData: plan.newData
-            log: ['Keeping element %o', keepable]
+    keepable = element
+    if partnerSelector = e.booleanOrStringAttr(keepable, 'up-keep')
+      u.isString(partnerSelector) or partnerSelector = '&'
+      partnerSelector = e.resolveSelector(partnerSelector, keepable)
+      if options.descendantsOnly
+        partner = e.first(newElement, partnerSelector)
+      else
+        partner = e.subtree(newElement, partnerSelector)[0]
+      if partner && e.matches(partner, '[up-keep]')
+        plan =
+          oldElement: keepable # the element that should be kept
+          newElement: partner # the element that would have replaced it but now does not
+          newData: up.syntax.data(partner) # the parsed up-data attribute of the element we will discard
 
-          if up.event.nobodyPrevents('up:fragment:keep', keepEventArgs)
-            plan
+        return plan unless up.fragment.emitKeep(plan).defaultPrevented
+
 
   # This will find all [up-keep] descendants in oldElement, overwrite their partner
   # element in newElement and leave a visually identical clone in oldElement for a later transition.
@@ -218,7 +184,7 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     keepPlans = []
     if options.keep
       for keepable in oldElement.querySelectorAll('[up-keep]')
-        if plan = findKeepPlan(keepable, newElement, u.merge(options, descendantsOnly: true))
+        if plan = @findKeepPlan(keepable, newElement, u.merge(options, descendantsOnly: true))
           # plan.oldElement is now keepable
 
           # Replace keepable with its clone so it looks good in a transition between
@@ -239,21 +205,21 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     disjunction = u.splitValues(resolvedSelector, ',')
 
     @steps = disjunction.map (target, i) =>
+      expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/) or up.fail('Could not parse selector "%s"', target)
+
       # When extracting multiple selectors, we only want to reveal the first element.
       # So we set the { reveal } option to false for the next iteration.
       doReveal = if i == 0 then @options.reveal else false
 
-      # When extracting multiple selectors, they will all be only the same layer.
-      # So we only need to peel once.
-      doPeel = if i == 0 then @options.peel else false
-
-      expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/) or up.fail('Could not parse selector "%s"', target)
+      selector = expressionParts[1]
+      if selector == 'html'
+        # We cannot replace <html> with the current e.replace() implementation.
+        selector = 'body'
 
       return u.merge @options,
-        selector: expressionParts[1]
+        selector: selector
         pseudoClass: expressionParts[2]
         reveal: doReveal
-        peel: doPeel
 
   findOld: ->
     for step in @steps
@@ -267,10 +233,8 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
 
   addHungrySteps: ->
     if @options.hungry
-      throw "only find hungries in the target layer"
-      throw "don't find hungries if we are blowing up the page"
-      throw "don't add hungries when we have an { opener }"
-      hungries = e.all(up.radio.hungrySelector())
+      throw "replace with up.fragment.all(..., layer: @options.layer)"
+      hungries = up.layer.allElements(@options.layer, up.radio.hungrySelector())
       transition = up.radio.config.hungryTransition ? @options.transition
       for hungry in hungries
         selector = e.toSelector(hungry)
@@ -307,3 +271,15 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
 
   targetWithoutPseudoClasses: ->
     u.map(@steps, 'selector').join(', ')
+
+
+class up.ExtractPlan.ResetWorld extends up.ExtractPlan.UpdateLayer
+
+  constructor: (options) ->
+    options = u.merge(options,
+      target: 'body',
+      peel: true
+      keep: false
+      resetScroll: true
+    )
+    super(options)

@@ -29,10 +29,13 @@ up.layer = do ->
       document.title = layer.title
 
   firstElement = (layer, selector) ->
+    allElements(layer, selector)[0]
+
+  allElements = (layer, selector) ->
     matches = e.all(layer.element, selector)
     if state.stack.isCurrentRoot()
       matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
-    matches[0]
+    matches
 
   reset = ->
     state.reset()
@@ -125,4 +128,5 @@ up.layer = do ->
   current: currentLayer
   resolveName: resolveName
   firstElement: firstElement
+  allElements: allElements
   peel: peel

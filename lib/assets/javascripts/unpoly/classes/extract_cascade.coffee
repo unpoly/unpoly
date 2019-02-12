@@ -18,10 +18,14 @@ class up.ExtractCascade
 
   defaultLayer: ->
     if @options.flavor
+      # Allow users to omit [up-layer=new] if they provide [up-dialog]
       'new'
     else if @options.origin
+      # Links update their own layer by default.
       'origin'
     else
+      # If no origin is given, we assume the highest layer.
+      throw "would it be weird if up.replace() found the tooltip layer?"
       'current'
 
   buildPlans: ->
@@ -29,32 +33,38 @@ class up.ExtractCascade
     @buildTargetCandidates()
 
     if @options.layer == 'new'
-      @addTargetCandidatePlans(up.ExtractPlan.OpenLayer)
+      @eachTargetCandidatePlan (plan) =>
+        # We cannot open a <body> in a new layer
+        unless @targetsBody(plan)
+          @plans.push(new up.ExtractPlan.OpenLayer(plan))
+
     else
       for layer in up.layer.resolve(@options.layer)
-        @addTargetCandidatePlans(up.ExtractPlan.UpdateLayer, { layer })
+        @eachTargetCandidatePlan (plan) =>
+          @plans.push(new up.ExtractPlan.UpdateLayer, { plan })
 
     # Make sure we always succeed
-    @plans.push(new ExtractPlan.SwapBody(@options))
+    @plans.push(new ExtractPlan.ResetWorld(@options))
 
-  addTargetCandidatePlans: (PlanClass, planOptions) ->
+
+  @eachTargetCandidatePlan: (planOptions, fn) ->
     for targetCandidate, i in @targetCandidates
       # Since the last plan is always SwapBody, we don't need to
       # add other plans that would also swap the body.
       continue if @targetsBody(targetCandidate)
 
-      candidateOptions = u.options(planOptions, @options)
-      candidateOptions.target = targetCandidate
+      plan = u.options(planOptions, @options)
+      plan.target = targetCandidate
 
       if i > 0
         # If we're using a fallback (any candidate that's not the first),
         # the original transition might no longer be appropriate.
-        candidateOptions.transition = up.fragment.config.fallbackTransition ? @options.transition
+        plan.transition = up.fragment.config.fallbackTransition ? @options.transition
 
-      @plans.push(new PlanClass(candidateOptions))
+      fn(plan)
 
-  targetsBody: (target) ->
-    BODY_TARGET_PATTERN.test(target)
+  targetsBody: (plan) ->
+    BODY_TARGET_PATTERN.test(plan.target)
 
   buildTargetCandidates: ->
     @targetCandidates = [@target, @options.fallback, up.fragment.config.fallbacks]

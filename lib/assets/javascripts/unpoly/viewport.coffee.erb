@@ -251,6 +251,7 @@ up.viewport = do ->
 
   ###**
   @function up.viewport.scrollAfterInsertFragment
+  @param {boolean} [options.resetScroll]
   @param {boolean|object} [options.restoreScroll]
   @param {boolean|string|jQuery|Element} [options.reveal]
   @param {boolean|string} [options.reveal]
@@ -261,11 +262,15 @@ up.viewport = do ->
   scrollAfterInsertFragment = (element, options = {}) ->
     hashOpt = options.hash
     revealOpt = options.reveal
+    resetScrollOpt = options.resetScroll
     restoreScrollOpt = options.restoreScroll
 
-    scrollOptions = u.only(options, 'scrollBehavior', 'scrollSpeed')
+    animateOptions = u.only(options, 'scrollBehavior', 'scrollSpeed')
 
-    if restoreScrollOpt
+    if resetScrollOpt
+      return resetScroll(around: element)
+
+    else if restoreScrollOpt
       # If options.restoreScroll is an object, its keys map viewport selectors
       # to scroll positions. If it is just true, we leave the scrollTops option
       # undefined and let restoreScroll() retrieve previous scrollTops from cache.
@@ -273,7 +278,7 @@ up.viewport = do ->
       return restoreScroll(around: element, scrollTops: givenTops)
 
     else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
-      return revealHash(hashOpt, scrollOptions)
+      return revealHash(hashOpt, animateOptions)
 
     else if revealOpt
       # We allow to pass another element as { reveal } option
@@ -293,7 +298,7 @@ up.viewport = do ->
       # reveals the first validation error message, but the error is shown in an
       # unexpected element.
       if element
-        return reveal(element, scrollOptions)
+        return reveal(element, animateOptions)
 
     else
       # If we didn't need to scroll above, just return a resolved promise
@@ -547,6 +552,9 @@ up.viewport = do ->
         scroll(viewport, scrollTop, duration: 0)
 
       Promise.all(allScrollPromises)
+
+  resetScroll: (options = {}) ->
+    return restoreScroll(u.merge(options, scrollTops: {}))
 
   ###**
   @internal
