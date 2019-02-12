@@ -29,7 +29,7 @@ class up.ExtractPlan.SwapBody extends up.ExtractPlan
 
   constructor: (@options) ->
 
-  preflightSelector: ->
+  preflightTarget: ->
     # We always have a <body>, so this plan is always applicable.
     'body'
 
@@ -53,7 +53,7 @@ class up.ExtractPlan.SwapBody extends up.ExtractPlan
       oldBody = document.body
       e.replace(oldBody, newBody)
       up.fragment.emitDestroyed(oldBody, u.merge(@options, parent: e.root()))
-      up.hello(document.body, @options)
+      up.hello(document.body, @options) # will emit up:fragment:inserted
 
 
 class up.ExtractPlan.OpenLayer extends up.ExtractPlan
@@ -70,7 +70,7 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
     @setSource(newLayerContent, @options.source)
 
     afterAttach = (layer) =>
-      up.hello(newLayerContent, @options) # will also emit up:fragment:inserted
+      up.hello(newLayerContent, @options) # will emit up:fragment:inserted
       @updateHistoryAndTitle(layer, @options)
 
     openOptions = u.options(@options, { newLayerContent, afterAttach })
@@ -78,7 +78,7 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
     throw "implement up:layer:* events"
     throw "up.layer.open() must have config default for { flavor }"
 
-    up.layer.open(openOptions)
+    return up.layer.open(openOptions)
 
 
 class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
@@ -102,17 +102,20 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     if @options.peel
       promise = promise.then -> up.layer.peel(@options.layer)
 
-    swapPromises = @steps.map (step) ->
-      # Note that we must copy the options hash instead of changing it in-place, since the
-      # async swapElements() is scheduled for the next microtask and we must not change the options
-      # for the previous iteration.
-      swapOptions = u.merge(@options, u.only(step, 'origin', 'reveal'))
-      responseDoc.prepareForInsertion(step.newElement)
-      return @swapStep(step, swapOptions)
+    promise.then ->
+      swapPromises = @steps.map (step) ->
+        # Note that we must copy the options hash instead of changing it in-place, since the
+        # async swapElements() is scheduled for the next microtask and we must not change the options
+        # for the previous iteration.
+        swapOptions = u.merge(@options, u.only(step, 'origin', 'reveal'))
+        responseDoc.prepareForInsertion(step.newElement)
+        return @swapStep(step, swapOptions)
 
-    return Promise.all(swapPromises)
+      return Promise.all(swapPromises)
 
     everythingThatFragmentDoes()
+
+    return promise
 
   swapStep: (step, options) ->
     # When the server responds with an error, or when the request method is not

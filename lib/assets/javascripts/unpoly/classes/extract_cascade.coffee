@@ -10,11 +10,19 @@ class up.ExtractCascade
     @options.hungry ?= true
     @options.historyMethod ?= 'push'
     @options.keep ?= true
-    @options.layer ?= if @options.origin then 'origin' else 'current'
+    @options.layer ?= @defaultLayer()
 
     throw "should @options.peel be a default? or only for user-clicks?"
 
     @buildPlans()
+
+  defaultLayer: ->
+    if @options.flavor
+      'new'
+    else if @options.origin
+      'origin'
+    else
+      'current'
 
   buildPlans: ->
     @plans = []
