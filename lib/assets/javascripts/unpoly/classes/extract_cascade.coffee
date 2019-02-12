@@ -8,7 +8,6 @@ class up.ExtractCascade
     @options = u.options(options)
     @options.target = e.resolveSelector(@options.target, @options.origin)
     @options.hungry ?= true
-    @options.historyMethod ?= 'push'
     @options.keep ?= true
     @options.layer ?= @defaultLayer()
 

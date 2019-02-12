@@ -1,24 +1,31 @@
 up.layer = do ->
 
-  state = new up.Config ->
-    stack: new up.layer.Stack(layers: [buildRootLayer()])
-    queue: new up.TaskQueue()
+  config = new up.Config(-> {})
+  flavors = new up.Config(-> {})
+  stack = new up.layer.Stack(-> layers: [new up.layers.Root()])
+  queue = new up.TaskQueue()
+
+  reset = ->
+    config.reset()
+    flavors.reset()
+    stack.reset()
+    queue.reset()
 
   throw "each update needs to update title and url in the current fragemnt"
   throw "only if the topmost layer is changed we change document.title or pushState(url)"
   throw "cancel XHR requests that want to update a destroyed layer"
-  throw "state.stack is really long to write"
   throw "maybe default to { history: false } for new layers"
 
-  updateCurrent = (props) ->
-    u.assign(currentLayer(), props)
+  updateHistory = (layer, options) ->
+    layer = resolve(layer)[0]
 
-  updateUrl = (layer, newUrl) ->
-    layer.url = newUrl
-    urlChanged(layer)
+    if newUrl = options.history
+      layer.url = newUrl
+      urlChanged(layer)
 
-  updateTitle = (layer, title) ->
-    titleChanged(layer)
+    if newTitle = options.title
+      layer.title = title
+      titleChanged(layer)
 
   urlChanged = (layer) ->
     if layer == currentLayer() && layer.history
@@ -32,36 +39,20 @@ up.layer = do ->
     allElements(layer, selector)[0]
 
   allElements = (layer, selector) ->
+    layer = resolve(layer)[0]
     matches = e.all(layer.element, selector)
-    if state.stack.isCurrentRoot()
+    if stack.isCurrentRoot()
       matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
     matches
-
-  reset = ->
-    state.reset()
-
-  bestPreflightTarget = (target, options) ->
-    throw "implement me"
-    # suche müsste jetzt so gehen:
-    # - target + fallbacks im aktuellen layer. wir suchen nie einfach so in anderen layern.
-    # - layer kann mehrere alternativen haben (oder closest reicht ja vielleicht auch)
-    # - target + fallbacks in root
-    # extractIn = -> (layer, target, html, options) ->
-
-  root = ->
-    state.layers[0] ||= buildRootLayer()
-
-  buildRootLayer = ->
-    new up.layers.Root()
 
   openNew = (options) ->
     throw "implement me"
 
   currentLayer = ->
-    state.stack.current()
+    stack.current()
 
   asap = (fn) ->
-    state.queue.asap(fn)
+    queue.asap(fn)
 
   dismissCurrent = (reason) ->
     if nobodyPreventsDismissEvent(reason)
@@ -76,13 +67,18 @@ up.layer = do ->
         emitLayerConfirmed(value)
 
   forElement = (element) ->
-    for layer in state.stack.all() by -1
+    element = e.get(element)
+
+    for layer in stack.all() by -1
       if layer.contains(element)
         return element
 
   resolve = (value, options) ->
     if value instanceof up.Layer
       return [value]
+
+    if u.isElement(value) || u.isJQuery(value)
+      return [forElement(value)]
 
     givenOriginLayer = ->
       if origin = options.origin
@@ -92,41 +88,62 @@ up.layer = do ->
 
     return switch value
       when 'root'
-        [state.stack.root()]
-      when 'origin'
-        [givenOriginLayer()]
+        [stack.root()]
+      when 'page'
+        up.legacy.warn('Layer "page" has been renamed to "root"')
+        [stack.root()]
       when 'current'
         [currentLayer()]
-      when 'parent'
-        [state.stack.parent(givenOriginLayer())]
-      when 'ancestors'
-        state.stack.ancestors(givenOriginLayer())
-      when 'closest'
-        state.stack.selfAndAncestors(givenOriginLayer())
       when 'any'
-        state.stack.all()
+        u.reverse(stack.all())
+      when 'origin'
+        [givenOriginLayer()]
+      when 'parent'
+        [stack.parent(givenOriginLayer())]
+      when 'ancestors'
+        stack.ancestors(givenOriginLayer())
+      when 'closest'
+        stack.selfAndAncestors(givenOriginLayer())
 
-  dismiss = (layer) ->
-    throw "dismiss layer"
+  confirm = (layer, value) ->
+    layer = resolve(layer)[0]
+
+    throw "confirm layer"
+    throw "call confirm listeners"
     throw "cancel XHR requests that would update this layer"
+    throw "error when confirming root layer"
+
+  dismiss = (layer, reason) ->
+    layer = resolve(layer)[0]
+
+    throw "dismiss layer"
+    throw "call dismiss listeners"
+    throw "cancel XHR requests that would update this layer"
+    throw "error when dismissing root layer"
 
   peel = (layer) ->
+    layer = resolve(layer)[0]
+
     for ancestor in up.stack.ancestors() by -1
       asap ->
         # We only close, but don't emit events!
         ancestor.close()
-    return state.queue.cursor
+
+    throw "cancel XHR requests that would update this layer"
+
+    return queue.cursor
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
-  root: -> state.stack.root()
-  all: -> state.stack.all()
-  parent: -> state.stack.parent()
-  ancestors: -> state.stack.ancestors()
-  selfAndAncestors: -> state.stack.selfAndAncestors()
+  root: -> stack.root()
+  all: -> stack.all()
+  parent: -> stack.parent()
+  ancestors: -> stack.ancestors()
+  selfAndAncestors: -> stack.selfAndAncestors()
   current: currentLayer
-  resolveName: resolveName
+  resolve: resolve
   firstElement: firstElement
   allElements: allElements
+  updateHistory: updateHistory
   peel: peel

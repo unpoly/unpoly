@@ -11,7 +11,6 @@ class up.ExtractPlan
       element.setAttribute('up-source', sourceUrl)
 
   updateHistoryAndTitle: (layer, options) ->
-    options = u.options(options, historyMethod: 'push')
     if newUrl = options.history
       up.layer.updateUrl(layer, newUrl)
 
@@ -37,7 +36,7 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
 
     afterAttach = (layer) =>
       up.hello(newLayerContent, @options) # will emit up:fragment:inserted
-      @updateHistoryAndTitle(layer, @options)
+      up.layer.updateHistory(layer, @options)
 
     openOptions = u.options(@options, { newLayerContent, afterAttach })
     throw "implement up.layer.open()"

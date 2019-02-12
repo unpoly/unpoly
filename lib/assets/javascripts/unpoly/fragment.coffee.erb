@@ -183,7 +183,6 @@ up.fragment = do ->
     history change for the current URL.
   @param {boolean} [options.cache]
     Whether to use a [cached response](/up.proxy) if available.
-  @param {string} [options.historyMethod='push']
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
@@ -682,16 +681,15 @@ up.fragment = do ->
     A promise that will be fulfilled once the element has been removed from the DOM.
   @stable
   ###
-  destroy = (selectorOrElement, options) ->
+  destroy = (selectorOrElement, options = {}) ->
     element = e.get(selectorOrElement)
-    options = u.options(options, animation: false)
 
     unless element
       return Promise.resolve()
 
-    markElementAsDestroying(element)
+    up.layer.updateHistory(element, options)
 
-    updateHistoryAndTitle(options)
+    markElementAsDestroying(element)
 
     animate = ->
       animateOptions = up.motion.animateOptions(options)
