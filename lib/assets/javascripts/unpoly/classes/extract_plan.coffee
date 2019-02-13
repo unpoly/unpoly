@@ -73,7 +73,7 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
       up.hello(newLayerContent, @options) # will emit up:fragment:inserted
       @updateHistoryAndTitle(layer, @options)
 
-    openOptions = u.options(@options, { newLayerContent, afterAttach })
+    openOptions = u.options(@options, { content: newLayerContent, afterAttach })
     throw "implement up.layer.open()"
     throw "implement up:layer:* events"
     throw "up.layer.open() must have config default for { flavor }"
@@ -142,6 +142,8 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
         step.oldElement.insertAdjacentElement('afterbegin', wrapper)
       else
         step.oldElement.insertAdjacentElement('beforeend', wrapper)
+
+      throw "support :destroy pseudoClass"
 
       for child in wrapper.children
         up.hello(child, options) # emits up:fragment:inserted

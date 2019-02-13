@@ -1,14 +1,45 @@
 up.layer = do ->
 
-  state = new up.Config ->
-    stack: new up.layer.Stack(layers: [buildRootLayer()])
-    queue: new up.TaskQueue()
+  config = new up.Config ->
+    dialog: 'window'
+    targets: ['[up-layer-target]']
+    history: true
+
+  throw "API to register new dialog types"
+  throw "allow users to config dialog types"
+
+  stack = new up.layer.Stack(layers: [buildRootLayer()])
+  queue = new up.TaskQueue()
 
   throw "each update needs to update title and url in the current fragemnt"
   throw "only if the topmost layer is changed we change document.title or pushState(url)"
   throw "cancel XHR requests that want to update a destroyed layer"
-  throw "state.stack is really long to write"
   throw "maybe default to { history: false } for new layers"
+  throw "make layer argument optional for all functions (it defaults to current)"
+  throw "config a default { default }"
+  throw "config a default { target }"
+
+  open = (options) ->
+    options = u.options(options)
+    options.dialog ?= config.dialog
+    throw 'set default target by up.ExtractCascade, depending on the value of { layer }'
+    # { layer: 'new' } will use the up.layer.config.targets,
+    # while { layer: anything-else } will use up.link.config.targets.
+    options.target ?= config.targets
+
+    if options.content
+      if u.isString(options.content)
+        options.content = e.createFromHtml(options.innerHTML)
+      throw "open now!"
+    else
+      # up.change() is a new function that takes these forms:
+      # - up.change(target: ..., url: ...)
+      # - up.change(target: ..., html: ...)
+      # - up.change(html: ...)
+      # - up.change(url: ...)
+      # if we would offer { content } for up.change():
+      # - we could only allow a single target (no ",", no hungries)
+      up.change(options)
 
   updateCurrent = (props) ->
     u.assign(currentLayer(), props)
@@ -51,9 +82,6 @@ up.layer = do ->
   buildRootLayer = ->
     new up.layers.Root()
 
-  openNew = (options) ->
-    throw "implement me"
-
   currentLayer = ->
     state.stack.current()
 
@@ -64,12 +92,14 @@ up.layer = do ->
     if nobodyPreventsDismissEvent(reason)
       asap ->
         currentLayer()?.close()
+        callDismissCallbackOption(reason)
         emitLayerDismissed(reason)
 
   confirmCurrent = (value) ->
     if nobodyPreventsConfirmEvent(value)
       asap ->
         currentLayer()?.close()
+        callConfirmCallbackOption(reason)
         emitLayerConfirmed(value)
 
   forElement = (element) ->
@@ -102,10 +132,6 @@ up.layer = do ->
         state.stack.selfAndAncestors(givenOriginLayer())
       when 'any'
         state.stack.all()
-
-  dismiss = (layer) ->
-    throw "dismiss layer"
-    throw "cancel XHR requests that would update this layer"
 
   peel = (layer) ->
     for ancestor in up.stack.ancestors() by -1
