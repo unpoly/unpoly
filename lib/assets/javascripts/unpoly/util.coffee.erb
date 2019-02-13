@@ -1251,6 +1251,7 @@ up.util = do ->
   ###
   previewable = (fun) ->
     deferred = newDeferred()
+    canceled = false
     preview = (args...) ->
       funValue = fun(args...)
       # If funValue is again a Promise, it will defer resolution of `deferred`
@@ -1258,6 +1259,7 @@ up.util = do ->
       deferred.resolve(funValue)
       funValue
     preview.promise = deferred.promise()
+    preview.cancel = -> canceled = true
     preview
 
   ###**
@@ -1372,10 +1374,6 @@ up.util = do ->
   muteRejection = (promise) ->
     promise?.catch(noop)
 
-  ###**
-  @function up.util.newDeferred
-  @internal
-  ###
   ###**
   @function up.util.newDeferred
   @internal
@@ -1545,6 +1543,9 @@ up.util = do ->
 
   uid = ->
     nextUid++
+
+  reverse = (list) ->
+    copy(list).reverse()
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   parseUrl: parseUrl

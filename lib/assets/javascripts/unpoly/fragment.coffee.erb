@@ -183,7 +183,6 @@ up.fragment = do ->
     history change for the current URL.
   @param {boolean} [options.cache]
     Whether to use a [cached response](/up.proxy) if available.
-  @param {string} [options.historyMethod='push']
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
@@ -353,7 +352,7 @@ up.fragment = do ->
   extract = (selectorOrElement, html, options) ->
     up.puts 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length
     options = u.merge(options, target: selectorOrElement)
-    cascade = new up.ExtractCascade(options)
+    options.extractCascade ||= new up.ExtractCascade(options)
     responseDoc = new up.ResponseDoc(html)
 
     throw "Move stuff before #execute() to ExtractCascade"
@@ -364,169 +363,15 @@ up.fragment = do ->
     if shouldExtractTitle(options) && responseTitle = responseDoc.title()
       options.title = responseTitle
 
-    throw "must only update history and title on the current layer! update its props and sync with document/window"
-    updateHistoryAndTitle(options)
-
     u.rejectOnError ->
-      cascade.execute(responseDoc)
+      options.extractCascade.execute(responseDoc)
 
-
-
-
-
-
-    up.log.group 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length, ->
-      options = u.options options,
-        historyMethod: 'push'
-        keep: true
-        layer: 'auto'
-
-      up.viewport.saveScroll() unless options.saveScroll == false
-
-      u.rejectOnError ->
-        # Allow callers to create the targeted element right before we swap.
-        options.provideTarget?()
-        responseDoc = new up.ResponseDoc(html)
-        swapSteps = bestSwapSteps(selectorOrElement, responseDoc, options)
-
-        if shouldExtractTitle(options) && responseTitle = responseDoc.title()
-          options.title = responseTitle
-        updateHistoryAndTitle(options)
-
-        swapPromises = []
-
-        for step in extractSteps
-          up.log.group 'Swapping fragment %s', step.selector, ->
-            # Note that we must copy the options hash instead of changing it in-place,  since the
-            # async swapElements() is scheduled for the next microtask and we must not change the options
-            # for the previous iteration.
-            swapOptions = u.merge(options, u.only(step, 'origin', 'reveal'))
-            responseDoc.prepareForInsertion(step.newElement)
-            swapPromise = swapElements(step.oldElement, step.newElement, step.pseudoClass, step.transition, swapOptions)
-            swapPromises.push(swapPromise)
-
-        # Delay all further links in the promise chain until all fragments have been swapped
-        Promise.all(swapPromises)
 
   bestPreflightTarget = (options) ->
-    cascade = new up.ExtractCascade(options)
-    cascade.preflightTarget()
-
-  swapElements = (oldElement, newElement, pseudoClass, transition, options) ->
-    # When the server responds with an error, or when the request method is not
-    # reloadable (not GET), we keep the same source as before.
-    if options.source == 'keep'
-      options = u.merge(options, source: source(oldElement))
-
-    # Remember where the element came from in case someone needs to up.reload(newElement) later.
-    setSource(newElement, options.source)
-
-    if pseudoClass
-      # Text nodes are wrapped in a .up-insertion container so we can
-      # animate them and measure their position/size for scrolling.
-      # This is not possible for container-less text nodes.
-      wrapper = e.createFromSelector('.up-insertion')
-      while childNode = newElement.firstChild
-        wrapper.appendChild(childNode)
-
-      # Note that since we're prepending/appending instead of replacing,
-      # newElement will not actually be inserted into the DOM, only its children.
-      if pseudoClass == 'before'
-        oldElement.insertAdjacentElement('afterbegin', wrapper)
-      else
-        oldElement.insertAdjacentElement('beforeend', wrapper)
-
-      for child in wrapper.children
-        hello(child, options)
-
-      # Reveal element that was being prepended/appended.
-      # Since we will animate (not morph) it's OK to allow animation of scrolling
-      # if options.scrollBehavior is given.
-      promise = up.viewport.scrollAfterInsertFragment(wrapper, options)
-
-      # Since we're adding content instead of replacing, we'll only
-      # animate newElement instead of morphing between oldElement and newElement
-      promise = u.always(promise, up.animate(wrapper, transition, options))
-
-      # Remove the wrapper now that is has served it purpose
-      promise = promise.then -> e.unwrap(wrapper)
-
-      return promise
-
-    else if keepPlan = findKeepPlan(oldElement, newElement, options)
-      # Since we're keeping the element that was requested to be swapped,
-      # there is nothing left to do here, except notify event listeners.
-      emitFragmentKept(keepPlan)
-      return Promise.resolve()
-
-    else
-      # This needs to happen before prepareClean() below.
-      # Otherwise we would collect destructors for elements we want to keep.
-      options.keepPlans = transferKeepableElements(oldElement, newElement, options)
-
-      parent = oldElement.parentNode
-
-      morphOptions = u.merge options,
-        beforeStart: ->
-          markElementAsDestroying(oldElement)
-        afterInsert: ->
-          up.hello(newElement, options)
-        beforeDetach: ->
-          up.syntax.clean(oldElement)
-        afterDetach: ->
-          e.remove(oldElement) # clean up jQuery data
-          emitFragmentDestroyed(oldElement, parent: parent, log: false)
-
-      return up.morph(oldElement, newElement, transition, morphOptions)
+    options.extractCascade ||= new up.ExtractCascade(options)
+    options.extractCascade.preflightTarget()
 
 
-  # This will find all [up-keep] descendants in oldElement, overwrite their partner
-  # element in newElement and leave a visually identical clone in oldElement for a later transition.
-  # Returns an array of keepPlans.
-  transferKeepableElements = (oldElement, newElement, options) ->
-    keepPlans = []
-    if options.keep
-      for keepable in oldElement.querySelectorAll('[up-keep]')
-        if plan = findKeepPlan(keepable, newElement, u.merge(options, descendantsOnly: true))
-          # plan.oldElement is now keepable
-
-          # Replace keepable with its clone so it looks good in a transition between
-          # oldElement and newElement. Note that keepable will still point to the same element
-          # after the replacement, which is now detached.
-          keepableClone = keepable.cloneNode(true)
-          e.replace(keepable, keepableClone)
-
-          # Since we're going to swap the entire oldElement and newElement containers afterwards,
-          # replace the matching element with keepable so it will eventually return to the DOM.
-          e.replace(plan.newElement, keepable)
-          keepPlans.push(plan)
-    keepPlans
-
-
-  findKeepPlan = (element, newElement, options) ->
-    if options.keep
-      keepable = element
-      if partnerSelector = e.booleanOrStringAttr(keepable, 'up-keep')
-        u.isString(partnerSelector) or partnerSelector = '&'
-        partnerSelector = e.resolveSelector(partnerSelector, keepable)
-        if options.descendantsOnly
-          partner = e.first(newElement, partnerSelector)
-        else
-          partner = e.subtree(newElement, partnerSelector)[0]
-        if partner && e.matches(partner, '[up-keep]')
-          plan =
-            oldElement: keepable # the element that should be kept
-            newElement: partner # the element that would have replaced it but now does not
-            newData: up.syntax.data(partner) # the parsed up-data attribute of the element we will discard
-
-          keepEventArgs =
-            target: keepable
-            newFragment: partner
-            newData: plan.newData
-            log: ['Keeping element %o', keepable]
-
-          if up.event.nobodyPrevents('up:fragment:keep', keepEventArgs)
-            plan
 
   ###**
   Elements with an `up-keep` attribute will be persisted during
@@ -675,6 +520,16 @@ up.fragment = do ->
     up.emit element, 'up:fragment:inserted',
       log: ['Inserted fragment %o', element]
       origin: options.origin
+
+  emitFragmentKeep = (keepPlan) ->
+    keepable = keepPlan.oldElement
+    eventAttrs =
+      target: keepable
+      newFragment: plan.newElement
+      newData: plan.newData
+      log: ['Keeping element %o', keepable]
+
+    up.emit('up:fragment:keep', eventAttrs)
 
   emitFragmentKept = (keepPlan) ->
     keptElement = keepPlan.oldElement
@@ -826,16 +681,15 @@ up.fragment = do ->
     A promise that will be fulfilled once the element has been removed from the DOM.
   @stable
   ###
-  destroy = (selectorOrElement, options) ->
+  destroy = (selectorOrElement, options = {}) ->
     element = e.get(selectorOrElement)
-    options = u.options(options, animation: false)
 
     unless element
       return Promise.resolve()
 
-    markElementAsDestroying(element)
+    up.layer.updateHistory(element, options)
 
-    updateHistoryAndTitle(options)
+    markElementAsDestroying(element)
 
     animate = ->
       animateOptions = up.motion.animateOptions(options)
@@ -927,6 +781,10 @@ up.fragment = do ->
   hello: hello
   config: config
   layerOf: layerOf
+  emitInserted: emitFragmentInserted
+  emitDestroyed: emitFragmentDestroyed
+  emitKeep: emitFragmentKeep
+  emitKept: emitFragmentKept
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract
