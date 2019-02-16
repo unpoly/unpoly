@@ -6,6 +6,9 @@ class up.layer.Stack extends up.Config
     super(blueprintFn)
     @layers ||= []
 
+  isRoot: (layer) ->
+    @layers[0] == layer
+
   isCurrentRoot: ->
     @layers.length == 1
 

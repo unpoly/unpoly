@@ -140,7 +140,7 @@ class up.Request extends up.Record
     # We will modify this request below.
     # This would confuse API clients and cache key logic in up.proxy.
     new Promise (resolve, reject) =>
-      xhr = new XMLHttpRequest()
+      @xhr = new XMLHttpRequest()
 
       xhrHeaders = u.copy(@headers)
       xhrUrl = @url
@@ -159,10 +159,10 @@ class up.Request extends up.Record
       if csrfToken = @csrfToken()
         xhrHeaders[pc.csrfHeader] = csrfToken
 
-      xhr.open(xhrMethod, xhrUrl)
+      @xhr.open(xhrMethod, xhrUrl)
 
       for header, value of xhrHeaders
-        xhr.setRequestHeader(header, value)
+        @xhr.setRequestHeader(header, value)
 
       resolveWithResponse = =>
         response = @buildResponse(xhr)
@@ -172,13 +172,17 @@ class up.Request extends up.Record
           reject(response)
 
       # Convert from XHR API to promise API
-      xhr.onload = resolveWithResponse
-      xhr.onerror = resolveWithResponse
-      xhr.ontimeout = resolveWithResponse
+      @xhr.onload = resolveWithResponse
+      @xhr.onerror = resolveWithResponse
+      @xhr.ontimeout =  -> reject(up.event.abortError('Request aborted by timeout'))
+      @xhr.onabort = -> reject(up.event.abortError('Request aborted by user'))
 
-      xhr.timeout = @timeout if @timeout
+      @xhr.timeout = @timeout if @timeout
 
-      xhr.send(xhrPayload)
+      @xhr.send(xhrPayload)
+
+  abort: =>
+    @xhr?.abort()
 
   navigate: =>
     # GET forms cannot have an URL with a query section in their [action] attribute.

@@ -25,6 +25,9 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
 
   constructor: (@options) ->
 
+  preflightLayer: ->
+    undefined # it does not exist yet
+
   preflightTarget: ->
     # The target will always "exist" in the current page, since
     # we're opening a new layer just for that.
@@ -50,6 +53,9 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
 
   constructor: (@options) ->
     @parseSteps()
+
+  preflightLayer: ->
+    @options.layer
 
   preflightTarget: ->
     @findOld()
@@ -276,8 +282,12 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
 
 class up.ExtractPlan.ResetWorld extends up.ExtractPlan.UpdateLayer
 
+  preflightLayer: ->
+    up.layer.root()
+
   constructor: (options) ->
     options = u.merge(options,
+      layer: 'root',
       target: 'body',
       peel: true
       keep: false

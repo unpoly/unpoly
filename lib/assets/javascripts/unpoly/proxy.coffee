@@ -238,6 +238,7 @@ up.proxy = do ->
     else
       # If no existing promise is available, we make a network request.
       promise = loadOrQueue(request)
+
       set(request, promise)
       # Uncache failed requests
       promise.catch ->
@@ -254,8 +255,8 @@ up.proxy = do ->
       #   This triggers `up:proxy:slow`.
       # - The request finishes.
       #   This triggers `up:proxy:recover`.
-      loadStarted()
-      u.always promise, loadEnded
+      loadStartedForSpinner()
+      u.always promise, loadEndedForSpinner
 
     promise
 
@@ -332,7 +333,7 @@ up.proxy = do ->
   isBusy = ->
     pendingCount > 0
 
-  loadStarted = ->
+  loadStartedForSpinner = ->
     pendingCount += 1
     unless slowDelayTimer
       # Since the emission of up:proxy:slow might be delayed by config.slowDelay,
@@ -343,6 +344,10 @@ up.proxy = do ->
           slowEventEmitted = true
       slowDelayTimer = u.timer(config.slowDelay, emission)
 
+  abort = (requestOrConditions = {}) ->
+    for request in pendingRequests
+      if request == requestOrConditions || u.contains(request, requestOrConditions)
+        request.abort()
 
   ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
@@ -394,7 +399,7 @@ up.proxy = do ->
   @stable
   ###
 
-  loadEnded = ->
+  loadEndedForSpinner = ->
     pendingCount -= 1
 
     if isIdle()
@@ -414,6 +419,7 @@ up.proxy = do ->
   @event up:proxy:recover
   @stable
   ###
+
   loadOrQueue = (request) ->
     if pendingCount < config.maxRequests
       load(request)
@@ -434,12 +440,13 @@ up.proxy = do ->
 
     if up.event.nobodyPrevents('up:proxy:load', eventProps)
       responsePromise = request.send()
-      u.always responsePromise, responseReceived
-      u.always responsePromise, pokeQueue
-      responsePromise
+      u.always(responsePromise, responseReceived)
+      u.always(responsePromise, pokeQueue)
+      return responsePromise
     else
+      # Poke the queue in a Microtask so we can return a rejection for the abortion.
       u.microtask(pokeQueue)
-      Promise.reject(new Error('Event up:proxy:load was prevented'))
+      return up.event.abortRejection('Event up:proxy:load was prevented')
 
   ###**
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
@@ -462,17 +469,26 @@ up.proxy = do ->
       up.proxy.alias(request, newRequest)
 
   responseReceived = (response) ->
+    request = response.request
+
     if response.isFatalError()
       up.emit 'up:proxy:fatal',
         log: 'Fatal error during request'
-        request: response.request
+        request: request
         response: response
     else
       registerAliasForRedirect(response) unless response.isError()
       up.emit 'up:proxy:loaded',
         log: ['Server responded with HTTP %d (%d bytes)', response.status, response.text.length]
-        request: response.request
+        request: request
         response: response
+
+    # While the request is still in flight, we require the target layer
+    # to be able to cancel it when the layers gets closed. We now
+    # loose this property, since response.request.preflightLayer.element will
+    # prevent the layer DOM tree from garbage collection while the response
+    # is cached by up.proxy.
+    request.preflightLayer = undefined
 
   ###**
   This event is [emitted](/up.emit) when the response to an
@@ -667,6 +683,7 @@ up.proxy = do ->
   isSafeMethod: isSafeMethod
   wrapMethod: wrapMethod
   config: config
+  abort: abort
 
 up.ajax = up.proxy.ajax
 up.request = up.proxy.request

@@ -1019,15 +1019,26 @@ up.util = do ->
     key == 'Escape' || key == 'Esc'
 
   ###**
-  Returns whether the given array or string contains the given element or substring.
+  Returns whether the given value contains another value.
+
+  If `value` is a string, this returns whether `subValue` is a sub-string of `value`.
+
+  If `value` is an array, this returns whether `subValue` is an element of `value`.
+
+  If `value` is an object, this returns whether `value`'s entries are a superset
+  of `subValue`'s entries.
 
   @function up.util.contains
-  @param {Array|string} arrayOrString
-  @param elementOrSubstring
+  @param {Array|string|Object} value
+  @param {Array|string|Object} subValue
   @stable
   ###
-  contains = (arrayOrString, elementOrSubstring) ->
-    arrayOrString.indexOf(elementOrSubstring) >= 0
+  contains = (value, subValue) ->
+    if u.isObject(value)
+      reducedValue = only(value, keys(subValue)...)
+      isEqual(value, reducedValue)
+    else
+      value.indexOf(subValue) >= 0
 
   ###**
   Returns a copy of the given object that only contains

@@ -191,7 +191,7 @@ up.link = do ->
     options.peel ?= e.booleanOrStringAttr(form, 'up-peel') ? true
     options.failPeel ?= e.booleanOrStringAttr(form, 'up-fail-peel') ? true
 
-    throw "parse layer flavor, align, position, width, maxWidth ..."
+    throw "parse layer flavor, align, position, width, maxWidth, onConfirmed, onDismissed, onOpened ..."
     throw "can we unify parsing of form and link options? there will be no other when we remove modal, link, ..."
 
     options.confirm ?= link.getAttribute('up-confirm')

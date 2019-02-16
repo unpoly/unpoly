@@ -9,13 +9,13 @@ class up.ExtractCascade
     @options.target = e.resolveSelector(@options.target, @options.origin)
     @options.hungry ?= true
     @options.keep ?= true
-    @options.layer ?= @defaultLayer()
+    @options.layer ?= @defaultLayerOption()
 
     throw "should @options.peel be a default? or only for user-clicks?"
 
     @buildPlans()
 
-  defaultLayer: ->
+  defaultLayerOption: ->
     if @options.flavor
       # Allow users to omit [up-layer=new] if they provide [up-dialog]
       'new'
@@ -44,7 +44,6 @@ class up.ExtractCascade
 
     # Make sure we always succeed
     @plans.push(new ExtractPlan.ResetWorld(@options))
-
 
   @eachTargetCandidatePlan: (planOptions, fn) ->
     for targetCandidate, i in @targetCandidates
@@ -109,3 +108,15 @@ class up.ExtractCascade
         else
           # Any other exception is re-thrown
           throw e
+
+  @forOptions: (options) ->
+    options.extractCascade ||= new @(options)
+
+  @execute: (options, responseDoc) ->
+    @forOptions(options).execute(responseDoc)
+
+  @preflightTarget: (options) ->
+    @forOptions(options).preflightTarget()
+
+  @preflightLayer: (options) ->
+    @forOptions(options).preflightLayer()

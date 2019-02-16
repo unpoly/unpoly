@@ -233,13 +233,9 @@ up.fragment = do ->
     u.renameKey(failureOptions, 'failPeel', 'peel')
     u.renameKey(failureOptions, 'failRestoreScroll', 'restoreScroll')
 
-    try
-      improvedTarget = bestPreflightTarget(successOptions)
-      improvedFailTarget = bestPreflightTarget(failureOptions)
-    catch error
-      # Since we're an async function, we should not throw exceptions but return a rejected promise.
-      # http://2ality.com/2016/03/promise-rejections-vs-exceptions.html
-      return Promise.reject(error)
+    improvedTarget = up.ExtractCascade.preflightTarget(successOptions)
+    improvedFailTarget = up.ExtractCascade.preflightTarget(failureOptions)
+    preflightLayer = up.ExtractCascade.preflightLayer(successOptions)
 
     requestAttrs = u.only options,
       'method',
@@ -253,6 +249,7 @@ up.fragment = do ->
       url: url
       target: improvedTarget
       failTarget: improvedFailTarget
+      preflightLayer: preflightLayer
 
     request = new up.Request(requestAttrs)
 
@@ -352,7 +349,6 @@ up.fragment = do ->
   extract = (selectorOrElement, html, options) ->
     up.puts 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length
     options = u.merge(options, target: selectorOrElement)
-    options.extractCascade ||= new up.ExtractCascade(options)
     responseDoc = new up.ResponseDoc(html)
 
     throw "Move stuff before #execute() to ExtractCascade"
@@ -364,13 +360,7 @@ up.fragment = do ->
       options.title = responseTitle
 
     u.rejectOnError ->
-      options.extractCascade.execute(responseDoc)
-
-
-  bestPreflightTarget = (options) ->
-    options.extractCascade ||= new up.ExtractCascade(options)
-    options.extractCascade.preflightTarget()
-
+      up.ExtractCascade.execute(options, responseDoc)
 
 
   ###**
@@ -548,7 +538,7 @@ up.fragment = do ->
     up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
   isRealElement = (element) ->
-    !e.closest(element, '.up-destroying')
+    !e.closest(element, '.up-destroying') && !e.matches(element, '.up-layer')
 
   ###**
   Returns the first element matching the given selector, but

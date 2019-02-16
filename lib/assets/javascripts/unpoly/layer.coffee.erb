@@ -46,6 +46,14 @@ up.layer = do ->
       # - we could only allow a single target (no ",", no hungries)
       up.change(options)
 
+  prompt = (options) ->
+    return new Promise (onConfirm, onDismiss) ->
+      options = u.merge(options, { onConfirm, onDismiss, })
+      open(options)
+
+  throw "implement a[layer=new][up-on-confirm='code']"
+  throw "implement a[layer=new][up-on-dismiss='code']"
+
   updateHistory = (layer, options) ->
     layer = resolve(layer)[0]
 
@@ -81,26 +89,57 @@ up.layer = do ->
   asap = (fn) ->
     queue.asap(fn)
 
-  dismissCurrent = (reason) ->
-    if nobodyPreventsDismissEvent(reason)
-      asap ->
-        currentLayer()?.close()
-        callDismissCallbackOption(reason)
-        emitLayerDismissed(reason)
+  dismiss = (options = {}) ->
+    options.layer ?= currentLayer()
 
-    throw "cancel XHR requests that would update this layer"
-    throw "error when dismissing root layer"
+    eventProps =
+      target: layer.element
+      layer: layer
+      reason: options.reason
 
+    closeVariant
+      layer: layer,
+      eventProps: eventProps
+      closeEvent: 'up:layer:dismiss'
+      closedEvent: 'up:layer:dismissed'
+      closedCallback: 'onDismissed'
 
-  confirmCurrent = (value) ->
-    if nobodyPreventsConfirmEvent(value)
-      asap ->
-        currentLayer()?.close()
-        callConfirmCallbackOption(reason)
-        emitLayerConfirmed(value)
+  confirm = (options) ->
+    options.layer ?= currentLayer()
 
-    throw "cancel XHR requests that would update this layer"
-    throw "error when confirming root layer"
+    eventProps =
+      target: layer.element
+      layer: layer
+      reason: options.reason
+
+    closeVariant
+      layer: layer,
+      eventProps: eventProps
+      closeEvent: 'up:layer:confirm'
+      closedEvent: 'up:layer:confirmed'
+      closedCallback: 'onConfirmed'
+
+  closeVariant = (options) ->
+    { layer, eventProps } = options
+
+    if stack.isRoot(layer)
+      throw new Error('Cannot close the root layer')
+
+    throw "cancel XHR requests targeting { layer }"
+
+    if up.event.nobodyPrevents(options.closeEvent, eventProps)
+      # Synchronously remove the layer from the stack so other sync calls
+      # immediately see the updated stack. Everything after that is just optics.
+      stack.remove(layer)
+
+      return asap ->
+        layer.close()
+        # Wait for the callbacks until the closing animation ends,
+        # so user-provided code doesn't run too wildly out of order.
+        layer[options.closedCallback]?(eventProps)
+        up.emit(options.closedEvent, eventProps)
+    else
+      return up.event.abortRejection()
 
 
   forElement = (element) ->
@@ -141,7 +180,6 @@ up.layer = do ->
         stack.ancestors(givenOriginLayer())
       when 'closest'
         stack.selfAndAncestors(givenOriginLayer())
-
 
   peel = (layer) ->
     layer = resolve(layer)[0]
