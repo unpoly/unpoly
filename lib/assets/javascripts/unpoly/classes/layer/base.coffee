@@ -8,10 +8,8 @@ class up.layer.Base
     @history = null
 
   open: (element, options) ->
-    throw "implement me. or is it that constructor that opens?"
+    throw "implement me"
 
-  contains: (element) ->
-    @element.contains(element)
 
 class up.layer.Root extends up.layer.Base
 
@@ -22,7 +20,56 @@ class up.layer.Root extends up.layer.Base
     @element = document.documentElement
     @history = true
 
+
 class up.layer.Modal extends up.layer.Base
 
 
-up.layer.dialog 'modal', up.layer.Modal
+class up.layer.Window extends up.layer.Modal
+
+
+#  <div class="up-layer">
+#    <div class="up-layer-backdrop">
+#    <div class="up-layer-viewport">
+#      <div class="up-window">
+#        <div class="up-window-content">
+#          <!-- the matching element will be placed here -->
+#        </div>
+#        <div class="up-window-close" up-close>X</div>
+#      </div>
+#    </div>
+#  </div>
+
+#  <div class="up-layer">
+#    <div class="up-layer-backdrop">
+#    <div class="up-layer-viewport">
+#      <div class="up-window">
+#        <div class="up-window-content">
+#          <!-- the matching element will be placed here -->
+#        </div>
+#        <div class="up-window-close" up-close>X</div>
+#      </div>
+#    </div>
+#  </div>
+
+
+up.layer.dialog 'window', up.layer.Window
+
+
+class up.layer.Drawer extends up.layer.Modal
+
+up.layer.dialog 'drawer', up.layer.Drawer
+
+
+class up.layer.Fullscreen extends up.layer.Modal
+
+up.layer.dialog 'fullscreen', up.layer.Fullscreen
+
+
+class up.layer.Popover extends up.layer.Base
+
+up.layer.dialog 'popover', up.layer.Popover
+
+
+
+
+
