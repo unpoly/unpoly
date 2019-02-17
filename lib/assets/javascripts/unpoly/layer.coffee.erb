@@ -18,7 +18,6 @@ up.layer = do ->
 
   throw "each update needs to update title and url in the current fragemnt"
   throw "only if the topmost layer is changed we change document.title or pushState(url)"
-  throw "cancel XHR requests that want to update a destroyed layer"
   throw "maybe default to { history: false } for new layers"
   throw "make layer argument optional for all functions (it defaults to current)"
   throw "config a default { default }"
@@ -55,7 +54,7 @@ up.layer = do ->
   throw "implement a[layer=new][up-on-dismiss='code']"
 
   updateHistory = (layer, options) ->
-    layer = resolve(layer)[0]
+    layer = lookup(layer)[0]
 
     if newUrl = options.history
       layer.url = newUrl
@@ -77,7 +76,7 @@ up.layer = do ->
     allElements(layer, selector)[0]
 
   allElements = (layer, selector) ->
-    layer = resolve(layer)[0]
+    layer = lookup(layer)[0]
     matches = e.all(layer.element, selector)
     if stack.isCurrentRoot()
       matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
@@ -90,7 +89,7 @@ up.layer = do ->
     queue.asap(fn)
 
   dismiss = (options = {}) ->
-    options.layer ?= currentLayer()
+    options.layer = lookup(options.layer)
 
     eventProps =
       target: layer.element
@@ -105,7 +104,7 @@ up.layer = do ->
       closedCallback: 'onDismissed'
 
   confirm = (options) ->
-    options.layer ?= currentLayer()
+    options.layer = lookup(options.layer)
 
     eventProps =
       target: layer.element
@@ -125,7 +124,7 @@ up.layer = do ->
     if stack.isRoot(layer)
       throw new Error('Cannot close the root layer')
 
-    throw "cancel XHR requests targeting { layer }"
+    up.proxy.abort(preflightLayer: layer)
 
     if up.event.nobodyPrevents(options.closeEvent, eventProps)
       # Synchronously remove the layer from the stack so other sync calls
@@ -141,7 +140,6 @@ up.layer = do ->
     else
       return up.event.abortRejection()
 
-
   forElement = (element) ->
     element = e.get(element)
 
@@ -149,7 +147,10 @@ up.layer = do ->
       if layer.contains(element)
         return element
 
-  resolve = (value, options) ->
+  lookup = (value, options) ->
+    unless value
+      return [stack.root()]
+
     if value instanceof up.Layer
       return [value]
 
@@ -182,7 +183,7 @@ up.layer = do ->
         stack.selfAndAncestors(givenOriginLayer())
 
   peel = (layer) ->
-    layer = resolve(layer)[0]
+    layer = lookup(layer)[0]
 
     for ancestor in up.stack.ancestors() by -1
       asap ->
@@ -202,7 +203,7 @@ up.layer = do ->
   ancestors: -> stack.ancestors()
   selfAndAncestors: -> stack.selfAndAncestors()
   current: currentLayer
-  resolve: resolve
+  resolve: lookup
   firstElement: firstElement
   allElements: allElements
   updateHistory: updateHistory

@@ -7,6 +7,8 @@ e = up.element
 Instances of `up.Request` normalizes properties of an [`AJAX request`](/up.request)
 such as the requested URL, form parameters and HTTP method.
 
+TODO: Docs: up.Request is also a promise for its response. Show example.
+
 @class up.Request
 ###
 class up.Request extends up.Record
@@ -80,6 +82,9 @@ class up.Request extends up.Record
       'timeout',
       'preload' # since up.proxy.request() options are sometimes wrapped in this class
       'cache'   # since up.proxy.request() options are sometimes wrapped in this class
+      # While requests are queued or in flight we keep the layer they're targeting.
+      # If that layer is closed we will cancel all pending requests targeting that layer.
+      'preflightLayer'
     ]
 
   ###**
@@ -101,6 +106,17 @@ class up.Request extends up.Record
     up.legacy.fixKey(options, 'data', 'params')
     super(options)
     @normalize()
+    @aborted = false
+    @deferred = u.newDeferred()
+
+  then: ->
+    @deferred.then(arguments...)
+
+  catch: ->
+    @deferred.then(arguments...)
+
+  finally: ->
+    @deferred.then(arguments...)
 
   normalize: =>
     @params = new up.Params(@params) # copies, which we want
@@ -137,52 +153,62 @@ class up.Request extends up.Record
     up.proxy.isSafeMethod(@method)
 
   send: =>
+    # If the requesr was aborted before it was sent (e.g. because it was queued)
+    # we don't send it.
+    return if @aborted
+
     # We will modify this request below.
     # This would confuse API clients and cache key logic in up.proxy.
-    new Promise (resolve, reject) =>
-      @xhr = new XMLHttpRequest()
+    @xhr = new XMLHttpRequest()
 
-      xhrHeaders = u.copy(@headers)
-      xhrUrl = @url
-      xhrParams = u.copy(@params)
-      xhrMethod = up.proxy.wrapMethod(@method, xhrParams)
+    xhrHeaders = u.copy(@headers)
+    xhrUrl = @url
+    xhrParams = u.copy(@params)
+    xhrMethod = up.proxy.wrapMethod(@method, xhrParams)
 
-      xhrPayload = null
-      unless u.isBlank(xhrParams)
-        delete xhrHeaders['Content-Type'] # let the browser set the content type
-        xhrPayload = xhrParams.toFormData()
+    xhrPayload = null
+    unless u.isBlank(xhrParams)
+      delete xhrHeaders['Content-Type'] # let the browser set the content type
+      xhrPayload = xhrParams.toFormData()
 
-      pc = up.protocol.config
-      xhrHeaders[pc.targetHeader] = @target if @target
-      xhrHeaders[pc.failTargetHeader] = @failTarget if @failTarget
-      xhrHeaders['X-Requested-With'] ||= 'XMLHttpRequest' unless @isCrossDomain()
-      if csrfToken = @csrfToken()
-        xhrHeaders[pc.csrfHeader] = csrfToken
+    pc = up.protocol.config
+    xhrHeaders[pc.targetHeader] = @target if @target
+    xhrHeaders[pc.failTargetHeader] = @failTarget if @failTarget
+    xhrHeaders['X-Requested-With'] ||= 'XMLHttpRequest' unless @isCrossDomain()
+    if csrfToken = @csrfToken()
+      xhrHeaders[pc.csrfHeader] = csrfToken
 
-      @xhr.open(xhrMethod, xhrUrl)
+    @xhr.open(xhrMethod, xhrUrl)
 
-      for header, value of xhrHeaders
-        @xhr.setRequestHeader(header, value)
+    for header, value of xhrHeaders
+      @xhr.setRequestHeader(header, value)
 
-      resolveWithResponse = =>
-        response = @buildResponse(xhr)
-        if response.isSuccess()
-          resolve(response)
-        else
-          reject(response)
+    # Convert from XHR API to promise API
+    @xhr.onload = @responseReceived
+    @xhr.onerror = @responseReceived
+    @xhr.ontimeout =  @setAbortedState
+    @xhr.onabort = @setAbortedState
 
-      # Convert from XHR API to promise API
-      @xhr.onload = resolveWithResponse
-      @xhr.onerror = resolveWithResponse
-      @xhr.ontimeout =  -> reject(up.event.abortError('Request aborted by timeout'))
-      @xhr.onabort = -> reject(up.event.abortError('Request aborted by user'))
+    @xhr.timeout = @timeout if @timeout
 
-      @xhr.timeout = @timeout if @timeout
-
-      @xhr.send(xhrPayload)
+    @xhr.send(xhrPayload)
 
   abort: =>
     @xhr?.abort()
+    @setAbortedState()
+
+  setAbortedState: =>
+    @aborted = true
+    @deferred.reject(up.event.abortError('Request was aborted'))
+
+  responseReceived: =>
+    @respondWith(@extractResponseFromXhr())
+
+  respondWith: (response) ->
+    if response.isSuccess()
+      @deferred.resolve(response)
+    else
+      @deferred.reject(response)
 
   navigate: =>
     # GET forms cannot have an URL with a query section in their [action] attribute.
@@ -224,21 +250,21 @@ class up.Request extends up.Record
   isCrossDomain: =>
     u.isCrossDomain(@url)
 
-  buildResponse: (xhr) =>
+  extractResponseFromXhr:  =>
     responseAttrs =
       method: @method
       url: @url
-      text: xhr.responseText
-      status: xhr.status
+      text: @xhr.responseText
+      status: @xhr.status
       request: @
-      xhr: xhr
+      xhr: @xhr
 
-    if urlFromServer = up.protocol.locationFromXhr(xhr)
+    if urlFromServer = up.protocol.locationFromXhr(@xhr)
       responseAttrs.url = urlFromServer
       # If the server changes a URL, it is expected to signal a new method as well.
-      responseAttrs.method = up.protocol.methodFromXhr(xhr) ? 'GET'
+      responseAttrs.method = up.protocol.methodFromXhr(@xhr) ? 'GET'
 
-    responseAttrs.title = up.protocol.titleFromXhr(xhr)
+    responseAttrs.title = up.protocol.titleFromXhr(@xhr)
 
     new up.Response(responseAttrs)
 

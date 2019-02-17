@@ -1,0 +1,4 @@
+- Grep for TODO
+- Test in all browsers
+- Migrate cards
+

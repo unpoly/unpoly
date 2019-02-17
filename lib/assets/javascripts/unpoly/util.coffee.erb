@@ -1360,6 +1360,7 @@ up.util = do ->
   @function up.util.always
   @internal
   ###
+  # TODO: Rename to finally
   always = (promise, callback) ->
     promise.then(callback, callback)
 

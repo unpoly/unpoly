@@ -258,17 +258,20 @@ up.fragment = do ->
 
     onFailure = (response) ->
       rejection = -> Promise.reject(response)
-      if response.isFatalError()
-        rejection()
-      else
+      if isProcessable(response)
         promise = processResponse(false, improvedFailTarget, request, response, failureOptions)
         # Although processResponse() we will perform a successful replacement of options.failTarget,
         # we still want to reject the promise that's returned to our API client.
         u.always(promise, rejection)
+      else
+        rejection()
 
     promise = up.request(request)
     promise = promise.then(onSuccess, onFailure) unless options.preload
-    promise
+    return promise
+
+  isProcessable = (response) ->
+    (response instanceof up.Response) && !response.isFatalError()
 
   ###**
   @internal

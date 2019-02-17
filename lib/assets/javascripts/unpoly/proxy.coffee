@@ -47,11 +47,12 @@ up.proxy = do ->
 
   waitingLink = undefined
   preloadDelayTimer = undefined
+
   slowDelayTimer = undefined
-  pendingCount = undefined
   slowEventEmitted = undefined
 
-  queuedLoaders = []
+  pendingRequests = []
+  queuedRequests = []
 
   ###**
   @property up.proxy.config
@@ -145,11 +146,12 @@ up.proxy = do ->
     waitingLink = null
     cancelPreloadDelay()
     cancelSlowDelay()
-    pendingCount = 0
+    abort()
+    slowEventEmitted = false
     config.reset()
     cache.clear()
-    slowEventEmitted = false
-    queuedLoaders = []
+    pendingRequests = []
+    queuedRequests = []
 
   reset()
 
@@ -209,56 +211,50 @@ up.proxy = do ->
   @stable
   ###
   makeRequest = (args...) ->
-    if u.isString(args[0])
-      url = args.shift()
+    # Allow to pass the URL as a first argument instead of a { url } property.
+    url = args.shift() if u.isString(args[0])
 
     # We cannot use u.extractOptions() since sometimes the last argument
     # is an up.Request instead of a basic object.
     requestOrOptions = args.shift() || {}
 
-    if url
-      requestOrOptions.url = url
+    # If the URL was passed as a first argument, set it as the request's { url } property.
+    requestOrOptions.url = url if url
 
+    # If requestOrOptions is not already an up.Request, instantiate one.
     request = up.Request.wrap(requestOrOptions)
 
-    # Non-GET requests always touch the network
-    # unless `request.cache` is explicitly set to `true`.
-    # These requests are never cached.
-    if !request.isSafe()
-      # We clear the entire cache before an unsafe request, since we
-      # assume the user is writing a change.
-      clear()
-
-    ignoreCache = (request.cache == false)
+    # We clear the entire cache before an unsafe request, since we
+    # assume the user is writing a change.
+    clearCache() unless request.isSafe()
 
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.
-    if !ignoreCache && (promise = get(request))
+    if (request.cache != false) && (cachedRequest = get(request))
       up.puts 'Re-using cached response for %s %s', request.method, request.url
+
+      # Check if we need to upgrade a cached background request to a foreground request.
+      # This might affect whether we're going to emit an up:proxy:slow event further
+      # down. Consider this case:
+      #
+      # - User preloads a request (1). We have a cache miss and connect to the network.
+      #   This will never trigger `up:proxy:slow`, because we only track foreground requests.
+      # - User loads the same request (2) in the foreground (no preloading).
+      #   We have a cache hit and receive the earlier request that is still preloading.
+      #   Now we *should* trigger `up:proxy:slow`.
+      # - The request (1) finishes. This triggers `up:proxy:recover`.
+      unless request.preload
+        cachedRequest.preload = false
+
+      request = cachedRequest
     else
       # If no existing promise is available, we make a network request.
-      promise = loadOrQueue(request)
+      loadOrQueue(request)
 
-      set(request, promise)
-      # Uncache failed requests
-      promise.catch ->
-        remove(request)
+    processSpinnerEvents()
 
-    if !request.preload
-      # This might actually make `pendingCount` higher than the actual
-      # number of outstanding requests. However, we need to cover the
-      # following case:
-      #
-      # - User starts preloading a request.
-      #   This triggers *no* `up:proxy:slow`.
-      # - User starts loading the request (without preloading).
-      #   This triggers `up:proxy:slow`.
-      # - The request finishes.
-      #   This triggers `up:proxy:recover`.
-      loadStartedForSpinner()
-      u.always promise, loadEndedForSpinner
-
-    promise
+    # The request is also a promise for its response.
+    return request
 
   ###**
   Makes an AJAX request to the given URL and caches the response.
@@ -319,7 +315,7 @@ up.proxy = do ->
   @experimental
   ###
   isIdle = ->
-    pendingCount == 0
+    countPendingForegroundRequests() == 0
 
   ###**
   Returns `true` if the proxy is currently waiting
@@ -331,18 +327,26 @@ up.proxy = do ->
   @experimental
   ###
   isBusy = ->
-    pendingCount > 0
+    not isIdle()
 
-  loadStartedForSpinner = ->
-    pendingCount += 1
-    unless slowDelayTimer
-      # Since the emission of up:proxy:slow might be delayed by config.slowDelay,
-      # we wrap the mission in a function for scheduling below.
-      emission = ->
-        if isBusy() # a fast response might have beaten the delay
-          up.emit('up:proxy:slow', log: 'Proxy is slow to respond')
-          slowEventEmitted = true
-      slowDelayTimer = u.timer(config.slowDelay, emission)
+  countPendingForegroundRequests = ->
+    u.reject(pendingRequests, 'preload').length
+
+  processSpinnerEvents = ->
+    if isBusy()
+      unless slowDelayTimer
+        # Since the emission of up:proxy:slow might be delayed by config.slowDelay,
+        # we wrap the mission in a function for scheduling below.
+        emission = ->
+          if isBusy() # a fast response might have beaten the delay
+            up.emit('up:proxy:slow', log: 'Proxy is slow to respond')
+            slowEventEmitted = true
+        slowDelayTimer = u.timer(config.slowDelay, emission)
+    else
+      cancelSlowDelay()
+      if slowEventEmitted
+        up.emit('up:proxy:recover', log: 'Proxy has recovered from slow response')
+        slowEventEmitted = false
 
   abort = (requestOrConditions = {}) ->
     for request in pendingRequests
@@ -399,15 +403,6 @@ up.proxy = do ->
   @stable
   ###
 
-  loadEndedForSpinner = ->
-    pendingCount -= 1
-
-    if isIdle()
-      cancelSlowDelay()
-      if slowEventEmitted
-        up.emit('up:proxy:recover', log: 'Proxy has recovered from slow response')
-        slowEventEmitted = false
-
   ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   have [taken long to finish](/up:proxy:slow), but have finished now.
@@ -421,17 +416,28 @@ up.proxy = do ->
   ###
 
   loadOrQueue = (request) ->
-    if pendingCount < config.maxRequests
+    if pendingForegroundRequestCount < config.maxRequests
       load(request)
     else
       queue(request)
 
+    # Cache the request for calls for calls with the same URL, method, params
+    # and target. See up.Request#cacheKey().
+    set(request, request)
+
+    # Immediately uncache failed requests.
+    # We have no control over the server, and another request with the
+    # same properties might succeed.
+    request.catch -> remove(request)
+
+    # Track unfinished requests so we can offer cancel() and other features.
+    pendingRequests.push(request)
+    request.finally -> u.remove(pendingRequests, request)
+
   queue = (request) ->
     up.puts('Queuing request for %s %s', request.method, request.url)
-    loader = -> load(request)
-    loader = u.previewable(loader)
-    queuedLoaders.push(loader)
-    loader.promise
+    queuedRequests.push(request)
+    request
 
   load = (request) ->
     eventProps =
@@ -439,10 +445,10 @@ up.proxy = do ->
       log: ['Loading %s %s', request.method, request.url]
 
     if up.event.nobodyPrevents('up:proxy:load', eventProps)
-      responsePromise = request.send()
-      u.always(responsePromise, responseReceived)
-      u.always(responsePromise, pokeQueue)
-      return responsePromise
+      request.send()
+      u.always(request, responseReceived)
+      u.always(request, pokeQueue)
+      return request
     else
       # Poke the queue in a Microtask so we can return a rejection for the abortion.
       u.microtask(pokeQueue)
@@ -517,7 +523,8 @@ up.proxy = do ->
   ###
 
   pokeQueue = ->
-    queuedLoaders.shift()?()
+    if queuedRequest = queuedRequests.shift()
+      load(queuedRequest)
     # Don't return the promise from the loader above
     return undefined
 
@@ -536,6 +543,8 @@ up.proxy = do ->
   alias = cache.alias
 
   ###**
+  TODO: Remove this method. It's hard to use it.
+
   Manually stores a promise for the response to the given request.
 
   @function up.proxy.set
@@ -572,7 +581,7 @@ up.proxy = do ->
   @function up.proxy.clear
   @stable
   ###
-  clear = cache.clear
+  clearCache = cache.clear
 
   # up.legacy.renamedEvent('up:proxy:received', 'up:proxy:loaded')
 
@@ -671,13 +680,13 @@ up.proxy = do ->
 
   up.on 'up:framework:reset', reset
 
-  preload: preload
+  preload: preload # TODO: Rename to up.proxy.preloadLink() or move to up.link.preload()
   ajax: ajax
   request: makeRequest
-  get: get
-  alias: alias
-  clear: clear
-  remove: remove
+  get: get # TODO: Rename to up.proxy.cache.get()
+  alias: alias # TODO: Rename to up.proxy.cache.alias()
+  clear: clearCache # TODO: Rename to up.proxy.cache.clear()
+  remove: remove # TODO: Rename to up.proxy.cache.remove()
   isIdle: isIdle
   isBusy: isBusy
   isSafeMethod: isSafeMethod
