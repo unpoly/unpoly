@@ -65,6 +65,9 @@ class up.ExtractCascade
     BODY_TARGET_PATTERN.test(plan.target)
 
   buildTargetCandidates: ->
+    throw "honor up.link.config.targets for up.plan.UpdateLayer. This should also replace up.fragment.config.fallbacks"
+    throw "honor up.layer.config.targets and up.layer.config.flavors[flavor].target for up.plan.CreateLayer"
+
     @targetCandidates = [@target, @options.fallback, up.fragment.config.fallbacks]
     @targetCandidates = u.flatten(@targetCandidates)
     # Remove undefined, null and false from the list

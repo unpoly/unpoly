@@ -1,20 +1,34 @@
 up.layer = do ->
 
   config = new up.Config ->
-    dialog: 'window'
-    targets: ['[up-layer-target]']
-    history: true
+    hash =
+      flavor: 'window'
+      targets: ['[up-layer-target]']
+    u.merge(hash, up.layer.Base.defaultConfig())
+    return hash
 
-  throw "API to register new dialog types"
-  throw "allow users to config dialog types"
+  flavors = new up.Config ->
+    hash = {}
+    registerFlavor('dialog', up.layer.Dialog, hash)
+    registerFlavor('popover', up.layer.Popover, hash)
+    registerFlavor('drawer', up.layer.Drawer, hash)
+    registerFlavor('fullscreen', up.layer.Fullscreen, hash)
+    return hash
 
   queue = new up.TaskQueue()
   stack = new up.layer.Stack(-> layers: [new up.layers.Root()])
+
+  registerFlavor = (name, implementation, store = flavors) ->
+    store[name] = u.merge(implementation.defaultConfig, { implementation })
+
+  flavorOptions = (name, userOptions) ->
+    u.merge(config, flavors[name], userOptions)
 
   reset = ->
     config.reset()
     stack.reset()
     queue.reset()
+    flavors.reset()
 
   throw "each update needs to update title and url in the current fragemnt"
   throw "only if the topmost layer is changed we change document.title or pushState(url)"
@@ -22,10 +36,15 @@ up.layer = do ->
   throw "make layer argument optional for all functions (it defaults to current)"
   throw "config a default { default }"
   throw "config a default { target }"
+  throw "implement { dismissible } and"
+  throw "implement [up-peel]"
+  throw "allow size classes for bootstrap-like modal implementations; maybe we can support [up-target][up-class] to set a class on the new fragment"
+  throw "implement focus trapping within a layer"
+  throw "make sure .up-layer has [role=dialog]"
 
   open = (options) ->
     options = u.options(options)
-    options.dialog ?= config.dialog
+    options.flavor ?= config.flavor
     throw 'set default target by up.ExtractCascade, depending on the value of { layer }'
     # { layer: 'new' } will use the up.layer.config.targets,
     # while { layer: anything-else } will use up.link.config.targets.
@@ -34,7 +53,7 @@ up.layer = do ->
     if options.content
       if u.isString(options.content)
         options.content = e.createFromHtml(options.innerHTML)
-      throw "open now!"
+      openNow(options.flavor, options.content, options)
     else
       # up.change() is a new function that takes these forms:
       # - up.change(target: ..., url: ...)
@@ -44,6 +63,11 @@ up.layer = do ->
       # if we would offer { content } for up.change():
       # - we could only allow a single target (no ",", no hungries)
       up.change(options)
+
+  openNow = (flavor, content, options) ->
+    options = flavorOptions(flavor, options)
+    layer = new options.implementation(options)
+    return layer.open(layersContainer)
 
   prompt = (options) ->
     return new Promise (onConfirm, onDismiss) ->
@@ -77,10 +101,14 @@ up.layer = do ->
 
   allElements = (layer, selector) ->
     layer = lookup(layer)[0]
-    matches = e.all(layer.element, selector)
+    matches = e.all(layer.containerElement, selector)
     if stack.isCurrentRoot()
       matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
     matches
+
+  layersContainer = ->
+    selector = '.up-layers'
+    e.first(selector) || e.affix(document.body, selector)
 
   currentLayer = ->
     stack.current()
@@ -121,9 +149,6 @@ up.layer = do ->
   closeVariant = (options) ->
     { layer, eventProps } = options
 
-    if stack.isRoot(layer)
-      throw new Error('Cannot close the root layer')
-
     up.proxy.abort(preflightLayer: layer)
 
     if up.event.nobodyPrevents(options.closeEvent, eventProps)
@@ -147,6 +172,7 @@ up.layer = do ->
       if layer.contains(element)
         return element
 
+  throw "Split into lookupAll and lookupOne"
   lookup = (value, options) ->
     unless value
       return [stack.root()]
@@ -208,3 +234,7 @@ up.layer = do ->
   allElements: allElements
   updateHistory: updateHistory
   peel: peel
+  config: config
+  flavors: flavors
+
+  throw "Deprecate up.modal.flavor() registration"

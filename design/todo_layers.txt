@@ -1,4 +1,7 @@
 - Grep for TODO
 - Test in all browsers
 - Migrate cards
-
+- Remove up.tooltip module
+  - Remove with deprecating macro that sets [title] for [up-tooltip]
+- Build up.change
+- Think about whether to keep up.replace and up.extract

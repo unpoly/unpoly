@@ -2,7 +2,7 @@ u = up.util
 
 class up.Config
 
-  constructor: (@blueprintFn) ->
+  constructor: (@blueprintFn = (-> {})) ->
     @reset()
 
   reset: ->
