@@ -4,31 +4,35 @@ up.layer = do ->
     hash =
       flavor: 'window'
       targets: ['[up-layer-target]']
-    u.merge(hash, up.layer.Base.defaultConfig())
-    return hash
+    u.merge(hash, defaultFlavorOptions())
 
-  flavors = new up.Config ->
-    hash = {}
     registerFlavor('dialog', up.layer.Dialog, hash)
     registerFlavor('popover', up.layer.Popover, hash)
     registerFlavor('drawer', up.layer.Drawer, hash)
     registerFlavor('fullscreen', up.layer.Fullscreen, hash)
+
     return hash
 
   queue = new up.TaskQueue()
   stack = new up.layer.Stack(-> layers: [new up.layers.Root()])
 
-  registerFlavor = (name, implementation, store = flavors) ->
+  registerFlavor = (name, implementation, store = config) ->
     store[name] = u.merge(implementation.defaultConfig, { implementation })
 
+  defaultFlavorOptions = ->
+    up.layer.Base.defaultConfig()
+
   flavorOptions = (name, userOptions) ->
-    u.merge(config, flavors[name], userOptions)
+    u.merge(
+      u.only(config, u.keys(defaultFlavorOptions())...),
+      config[name],
+      userOptions
+    )
 
   reset = ->
     config.reset()
     stack.reset()
     queue.reset()
-    flavors.reset()
 
   throw "each update needs to update title and url in the current fragemnt"
   throw "only if the topmost layer is changed we change document.title or pushState(url)"
@@ -237,4 +241,5 @@ up.layer = do ->
   config: config
   flavors: flavors
 
-  throw "Deprecate up.modal.flavor() registration"
+  throw "Deprecate up.modal.flavors property. Use up.modal.config instead."
+

@@ -8,10 +8,12 @@ class up.layer.Base extends up.Record
     fields.conact(u.keys(@constructor.defaultConfig()))
 
   @defaultConfig: ->
-    class: null
     history: true
     maxWidth: null
     width: null
+    position: null
+    align: null
+    class: null
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
     openDuration: null
@@ -22,7 +24,6 @@ class up.layer.Base extends up.Record
     backdropCloseAnimation: 'fade-out'
     dismissLabel: '×'
     dismissible: true
-    position: null
     template: (layer) ->
       """
       <div class="up-layer" role="dialog">
@@ -30,7 +31,7 @@ class up.layer.Base extends up.Record
         <div class="up-layer-viewport"></div>
         <div class="up-layer-box">
           <div class="up-layer-content"></div>
-          <div class="up-layer-close" up-close>#{layer.dismissLabel}</div>
+          <div class="up-layer-dismiss" up-dismiss>#{layer.dismissLabel}</div>
         </div>
       </div>
       """
