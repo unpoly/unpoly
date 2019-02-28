@@ -14,6 +14,7 @@ class up.layer.Base extends up.Record
     position: null
     align: null
     class: null
+    targets: []
     openAnimation: 'fade-in'
     closeAnimation: 'fade-out'
     openDuration: null
@@ -37,6 +38,10 @@ class up.layer.Base extends up.Record
       """
 
   throw "iOS doesnt bubble click events on up-layer-viewport"
+
+  fallbacks: ->
+    flavor = @constructor.flavor
+    up.layer.fallbacks(flavor)
 
   open: (parentElement, innerContentElement) ->
     throw "implement me"
@@ -73,10 +78,15 @@ class up.layer.Base extends up.Record
 
 class up.layer.Root extends up.layer.Base
 
+  @defaultConfig: ->
+    history: true
+    targets: ['body'] # this replaces up.fragment.config.targets
+
+  @flavor: 'root'
+
   constructor: (options) ->
     super(options)
     @element = document.documentElement
-    @history = true
 
   open: (parent) ->
     throw new Error('Cannot open another root layer')
@@ -90,9 +100,9 @@ class up.layer.WithViewport extends up.layer.Base
 
 class up.layer.Dialog extends up.layer.WithViewport
 
+  @flavor: 'dialog'
+
   open: (parentElement, @innerContentElement) ->
-
-
     @containerElement = e.affix(parentElement, '.up-layer[role=dialog]')
     @backdropElement = e.affix(@containerElement, '.up-layer-backdrop')
     @viewportElement = e.affix(@containerElement, '.up-layer-viewport')
@@ -149,6 +159,8 @@ class up.layer.Dialog extends up.layer.WithViewport
 
 class up.layer.Drawer extends up.layer.WithViewport
 
+  @flavor: 'drawer'
+
   @defaultConfig: ->
     history: false
     position: 'right'
@@ -156,8 +168,11 @@ class up.layer.Drawer extends up.layer.WithViewport
 
 class up.layer.Fullscreen extends up.layer.WithViewport
 
+  @flavor: 'fullscreen'
 
 class up.layer.Popover extends up.layer.Base
+
+  @flavor: 'popover'
 
   @defaultConfig: ->
     history: false

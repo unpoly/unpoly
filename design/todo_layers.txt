@@ -7,3 +7,8 @@
 - Think about whether to keep up.replace and up.extract
 - .up-layer-viewport should have { overscroll-behavior: contain }
 - u.only and u.except should take an array
+- update or stop supporting unpoly-boostrap3
+- should we have unpoly-bootstrap4?
+- Simplify z-index for layers
+  - I think we only need a z-index on .up-layers and let stacking context do the rest
+

@@ -6,26 +6,32 @@ up.layer = do ->
       targets: ['[up-layer-target]']
     u.merge(hash, defaultFlavorOptions())
 
-    registerFlavor('dialog', up.layer.Dialog, hash)
-    registerFlavor('popover', up.layer.Popover, hash)
-    registerFlavor('drawer', up.layer.Drawer, hash)
-    registerFlavor('fullscreen', up.layer.Fullscreen, hash)
+    registerFlavor(up.layer.Root, hash)
+    registerFlavor(up.layer.Dialog, hash)
+    registerFlavor(up.layer.Popover, hash)
+    registerFlavor(up.layer.Drawer, hash)
+    registerFlavor(up.layer.Fullscreen, hash)
 
     return hash
 
   queue = new up.TaskQueue()
   stack = new up.layer.Stack(-> layers: [new up.layers.Root()])
 
-  registerFlavor = (name, implementation, store = config) ->
+  registerFlavor = (implementation, store = config) ->
+    name = implementation.flavor or throw "Implementation must implement { flavor } class prop"
     store[name] = u.merge(implementation.defaultConfig, { implementation })
+
+  fallbacks = (flavor) ->
+    flavorOptions(flavor).targets
 
   defaultFlavorOptions = ->
     up.layer.Base.defaultConfig()
 
-  flavorOptions = (name, userOptions) ->
+  flavorOptions = (flavor, userOptions) ->
+    flavor ?= config.flavor
     u.merge(
       u.only(config, u.keys(defaultFlavorOptions())...),
-      config[name],
+      config[flavor],
       userOptions
     )
 
@@ -56,7 +62,7 @@ up.layer = do ->
 
     if options.content
       if u.isString(options.content)
-        options.content = e.createFromHtml(options.innerHTML)
+        options.content = e.createFromHtml(options.content)
       openNow(options.flavor, options.content, options)
     else
       # up.change() is a new function that takes these forms:
@@ -239,7 +245,7 @@ up.layer = do ->
   updateHistory: updateHistory
   peel: peel
   config: config
-  flavors: flavors
+  flavorOptions: flavorOptions
+  fallbacks: fallbacks
 
-  throw "Deprecate up.modal.flavors property. Use up.modal.config instead."
 

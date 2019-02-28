@@ -23,15 +23,6 @@ up.fragment = do ->
   Configures defaults for fragment insertion.
 
   @property up.fragment.config
-  @param {string} [options.fallbacks=['body']]
-    When a fragment updates cannot find the requested element, Unpoly will try this list of alternative selectors.
-
-    The first selector that matches an element in the current page (or response) will be used.
-    If the response contains none of the selectors, an error message will be shown.
-
-    It is recommend to always keep `'body'` as the last selector in the last in the case
-    your server or load balancer renders an error message that does not contain your
-    application layout.
   @param {string} [options.fallbackTransition=null]
     The transition to use when using a [fallback target](/#options.fallbacks).
 
@@ -39,7 +30,6 @@ up.fragment = do ->
   @stable
   ###
   config = new up.Config ->
-    fallbacks: ['body']
     fallbackTransition: null
 
   reset = ->
@@ -233,9 +223,12 @@ up.fragment = do ->
     u.renameKey(failureOptions, 'failPeel', 'peel')
     u.renameKey(failureOptions, 'failRestoreScroll', 'restoreScroll')
 
-    improvedTarget = up.ExtractCascade.preflightTarget(successOptions)
-    improvedFailTarget = up.ExtractCascade.preflightTarget(failureOptions)
-    preflightLayer = up.ExtractCascade.preflightLayer(successOptions)
+    successCascade = new up.ExtractCascade(successOptions)
+    failureCascade = new up.ExtractCascade(failureOptions)
+
+    improvedTarget = successCascade.preflightTarget()
+    improvedFailTarget = failureCascade.preflightTarget()
+    preflightLayer = successCascade.preflightLayer()
 
     requestAttrs = u.only options,
       'method',
@@ -351,19 +344,13 @@ up.fragment = do ->
   ###
   extract = (selectorOrElement, html, options) ->
     up.puts 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length
-    options = u.merge(options, target: selectorOrElement)
-    responseDoc = new up.ResponseDoc(html)
+    options.target = selectorOrElement
+    options.html = html
+    changeNow(options)
 
-    throw "Move stuff before #execute() to ExtractCascade"
 
-    unless options.saveScroll == false
-      up.viewport.saveScroll()
-
-    if shouldExtractTitle(options) && responseTitle = responseDoc.title()
-      options.title = responseTitle
-
-    u.rejectOnError ->
-      up.ExtractCascade.execute(options, responseDoc)
+  changeNow = (options) ->
+    new up.ExtractCascade(options).execute()
 
 
   ###**
@@ -778,6 +765,7 @@ up.fragment = do ->
   emitDestroyed: emitFragmentDestroyed
   emitKeep: emitFragmentKeep
   emitKept: emitFragmentKept
+  shouldExtractTitle: shouldExtractTitle
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract

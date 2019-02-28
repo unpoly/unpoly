@@ -24,29 +24,28 @@ class up.ExtractCascade
       'origin'
     else
       # If no origin is given, we assume the highest layer.
-      throw "would it be weird if up.replace() found the tooltip layer?"
       'current'
 
   buildPlans: ->
     @plans = []
-    @buildTargetCandidates()
-
     if @options.layer == 'new'
-      @eachTargetCandidatePlan (plan) =>
+      layerFallbacks = up.layer.fallbackTargets(@options.flavor)
+      @eachTargetCandidatePlan layerFallbacks, (plan) =>
         # We cannot open a <body> in a new layer
         unless @targetsBody(plan)
           @plans.push(new up.ExtractPlan.OpenLayer(plan))
 
     else
       for layer in up.layer.resolve(@options.layer)
-        @eachTargetCandidatePlan (plan) =>
+        layerFallbacks = layer.fallbackTargets()
+        @eachTargetCandidatePlan layerFallbacks, (plan) =>
           @plans.push(new up.ExtractPlan.UpdateLayer, { plan })
 
     # Make sure we always succeed
     @plans.push(new ExtractPlan.ResetWorld(@options))
 
-  @eachTargetCandidatePlan: (planOptions, fn) ->
-    for targetCandidate, i in @targetCandidates
+  @eachTargetCandidatePlan: (layerFallbacks, planOptions, fn) ->
+    for targetCandidate, i in @buildTargetCandidates(layerFallbacks)
       # Since the last plan is always SwapBody, we don't need to
       # add other plans that would also swap the body.
       continue if @targetsBody(targetCandidate)
@@ -64,22 +63,28 @@ class up.ExtractCascade
   targetsBody: (plan) ->
     BODY_TARGET_PATTERN.test(plan.target)
 
-  buildTargetCandidates: ->
-    throw "honor up.link.config.targets for up.plan.UpdateLayer. This should also replace up.fragment.config.fallbacks"
-    throw "honor up.layer.config.targets and up.layer.config.flavors[flavor].target for up.plan.CreateLayer"
+  buildTargetCandidates: (layerFallbacks) ->
+    targetCandidates = [@options.target, @options.fallback, layerFallbacks]
+    # Remove undefined, null and { fallback: false } from the list
+    targetCandidates = u.filter(targetCandidates, u.isTruthy)
+    targetCandidates = u.flatten(targetCandidates)
+    targetCandidates = u.uniq(targetCandidates)
 
-    @targetCandidates = [@target, @options.fallback, up.fragment.config.fallbacks]
-    @targetCandidates = u.flatten(@targetCandidates)
-    # Remove undefined, null and false from the list
-    @targetCandidates = u.filter(@targetCandidates, u.isTruthy)
-    @targetCandidates = u.uniq(@targetCandidates)
+    if @options.fallback == false || @options.content
+      # Use the first defined candidate, but not @target (which might be missing)
+      targetCandidates = [targetCandidates[0]]
 
-    if @options.fallback == false
-      # Use the first defined candidate, but not `selector` since that
-      # might be an undefined options.failTarget
-      @targetCandidates = [@targetCandidates[0]]
+    targetCandidates
 
   execute: ->
+    @buildResponseDoc()
+
+    unless @options.saveScroll == false
+      up.viewport.saveScroll()
+
+    if up.fragment.shouldExtractTitle(@options) && responseTitle = @responseDoc.title()
+      @options.title = responseTitle
+
     @seekPlan
       attempt: (plan) -> plan.execute()
       noneApplicable: => @executeNotApplicable()
@@ -88,6 +93,9 @@ class up.ExtractCascade
     if @options.inspectResponse
       inspectAction = { label: 'Open response', callback: @options.inspectResponse }
     up.fail("Could not match #{@options.humanizedTarget} in current page and response", action: inspectAction)
+
+  buildResponseDoc: ->
+    @responseDoc = new up.ResponseDoc
 
   preflightTarget: ->
     @seekPlan
@@ -112,14 +120,14 @@ class up.ExtractCascade
           # Any other exception is re-thrown
           throw e
 
-  @forOptions: (options) ->
-    options.extractCascade ||= new @(options)
-
-  @execute: (options, responseDoc) ->
-    @forOptions(options).execute(responseDoc)
-
-  @preflightTarget: (options) ->
-    @forOptions(options).preflightTarget()
-
-  @preflightLayer: (options) ->
-    @forOptions(options).preflightLayer()
+#  @forOptions: (options) ->
+#    options.extractCascade ||= new @(options)
+#
+#  @execute: (options, responseDoc) ->
+#    @forOptions(options).execute(responseDoc)
+#
+#  @preflightTarget: (options) ->
+#    @forOptions(options).preflightTarget()
+#
+#  @preflightLayer: (options) ->
+#    @forOptions(options).preflightLayer()

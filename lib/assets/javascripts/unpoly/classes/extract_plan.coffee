@@ -61,12 +61,12 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     @findOld()
     return @targetWithoutPseudoClasses()
 
-  execute: ->
+  execute: (responseDoc) ->
     @findOld()
-    @findNew()
+    @findNew(responseDoc)
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
-    @addHungrySteps()
+    @addHungrySteps(responseDoc)
 
     promise = Promise.resolve()
 
@@ -233,19 +233,19 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
       step.oldElement = up.layer.firstElement(@options.layer, step.selector) or @notApplicable()
     @resolveOldNesting()
 
-  findNew: ->
+  findNew: (responseDoc) ->
     for step in @steps
       # The responseDoc has no layers. It's always just the page.
-      step.newElement = @responseDoc.selectForInsertion(step.selector) or @notApplicable()
+      step.newElement = responseDoc.selectForInsertion(step.selector) or @notApplicable()
 
-  addHungrySteps: ->
+  addHungrySteps: (responseDoc) ->
     if @options.hungry
       throw "replace with up.fragment.all(..., layer: @options.layer)"
       hungries = up.layer.allElements(@options.layer, up.radio.hungrySelector())
       transition = up.radio.config.hungryTransition ? @options.transition
       for hungry in hungries
         selector = e.toSelector(hungry)
-        if newHungry = @options.responseDoc.first(selector)
+        if newHungry = responseDoc.first(selector)
           @steps.push
             selector: selector
             oldElement: hungry

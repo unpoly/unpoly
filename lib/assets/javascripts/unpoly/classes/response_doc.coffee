@@ -3,12 +3,31 @@ e = up.element
 
 class up.ResponseDoc
 
+  constructor: (options) ->
+    if document = options.document
+      @parsedRoot = @retrieveElement(document, e.createDocumentFromHtml)
+
+    else if content = options.content
+      content = @retrieveElement(content, e.createFromHtml)
+      target = options.target or throw "must pass a { target }"
+      @parsedRoot = e.createFromSelector(target)
+      @parsedRoot.appendChild(content)
+
+    else
+      throw "must pass either { document } or { content }"
+
+  retrieveElement: (element, parser) ->
+    if u.isString(element)
+      element = @wrapNoscriptInHtml(element)
+      element = parser(element)
+    element
+
   constructor: (@html) ->
     @wrapNoscriptInHtml()
-    @parsedDoc = e.createDocumentFromHtml(@html)
+    @parsedRoot = e.createDocumentFromHtml(@html)
 
   title: ->
-    @parsedDoc.querySelector("head title")?.textContent
+    @parsedRoot.querySelector("head title")?.textContent
 
   has: (selector) ->
     !!@first(selector)
@@ -19,12 +38,12 @@ class up.ResponseDoc
       element
 
   first: (selector) ->
-    e.first(@parsedDoc, selector)
+    e.first(@parsedRoot, selector)
 
   prepareForInsertion: (element) ->
     @unwrapNoscriptInElement(element)
 
-  wrapNoscriptInHtml: ->
+  wrapNoscriptInHtml: (html) ->
     # We wrap <noscript> tags into a <div> for two reasons:
     #
     # (1) IE11 and Edge cannot find <noscript> tags with jQuery or querySelector() or
@@ -40,7 +59,7 @@ class up.ResponseDoc
     # We will unwrap the wrapped <noscript> tags when a fragment is requested with
     # #first(), and only in the requested fragment.
     noscriptPattern = /<noscript[^>]*>((.|\s)*?)<\/noscript>/ig
-    @html = @html.replace noscriptPattern, (match, content) =>
+    return html.replace noscriptPattern, (match, content) =>
       @didWrapNoscript = true
       '<div class="up-noscript" data-html="' + u.escapeHtml(content) + '"></div>'
 
