@@ -39,9 +39,9 @@ There are some advantages to using `up.on()`:
 
   - You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
   - The event target is automatically passed as a second argument.
-  - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`)
+  - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`).
   - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements.
-  - You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
+  - You may use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
     to observed elements. If an `[up-data]` attribute is set, its value will automatically be
     parsed as JSON and passed as a third argument.
   - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
