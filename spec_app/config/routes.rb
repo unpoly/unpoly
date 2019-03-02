@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   get 'reveal_test/:action', controller: 'reveal_test'
   get 'scroll_test/:action', controller: 'scroll_test'
   get 'motion_test/:action', controller: 'motion_test'
+  get 'compiler_test/:action', controller: 'compiler_test'
 
   namespace :form_test do
     resource :basic, only: [:new, :create]
