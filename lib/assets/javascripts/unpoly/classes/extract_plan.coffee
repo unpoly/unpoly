@@ -42,9 +42,6 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
       up.layer.updateHistory(layer, @options)
 
     openOptions = u.options(@options, { content: newLayerContent, afterAttach })
-    throw "implement up.layer.open()"
-    throw "implement up:layer:* events"
-    throw "up.layer.open() must have config default for { flavor }"
 
     return up.layer.open(openOptions)
 

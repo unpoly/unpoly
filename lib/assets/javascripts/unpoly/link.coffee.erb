@@ -191,6 +191,15 @@ up.link = do ->
     options.peel ?= e.booleanOrStringAttr(form, 'up-peel') ? true
     options.failPeel ?= e.booleanOrStringAttr(form, 'up-fail-peel') ? true
 
+    options.layer ?= link.getAttribute('up-layer')
+    options.flavor ?= link.getAttribute('up-flavor')
+    options.align ?= link.getAttribute('up-align')
+    options.position ?= link.getAttribute('up-position')
+    options.width ?= link.getAttribute('up-width')
+    options.maxWidth ?= link.getAttribute('up-max-width')
+    options.class ?= link.getAttribute('up-class')
+    options.dismissable ?= e.booleanAttr(link, 'up-dismissible')
+
     throw "parse layer flavor, align, position, width, maxWidth, onConfirmed, onDismissed, onOpened ..."
     throw "can we unify parsing of form and link options? there will be no other when we remove modal, link, ..."
 
