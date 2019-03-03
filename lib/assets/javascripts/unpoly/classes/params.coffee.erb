@@ -233,7 +233,7 @@ class up.Params
   ###
   addAll: (raw) ->
     if u.isMissing(raw)
-      # no-op
+      # nothing to do
     else if raw instanceof @constructor
       @entries.push(raw.entries...)
     else if u.isArray(raw)

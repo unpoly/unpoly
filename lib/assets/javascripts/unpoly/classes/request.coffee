@@ -71,7 +71,7 @@ class up.Request extends up.Record
   @param {Object|undefined} timeout
   @stable
   ###
-  fields: ->
+  @keys: ->
     [
       'method',
       'url',
@@ -105,6 +105,10 @@ class up.Request extends up.Record
   constructor: (options) ->
     up.legacy.fixKey(options, 'data', 'params')
     super(options)
+    @params = new up.Params(@params) # copies, which we want
+
+    @params.addAll(@preflightLayer?.context)
+
     @normalize()
     @aborted = false
     @deferred = u.newDeferred()
@@ -119,7 +123,6 @@ class up.Request extends up.Record
     @deferred.then(arguments...)
 
   normalize: =>
-    @params = new up.Params(@params) # copies, which we want
     @method = u.normalizeMethod(@method)
     @headers ||= {}
     @extractHashFromUrl()

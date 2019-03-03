@@ -1,13 +1,17 @@
 #= require ../../layer
 #= require ./record
+#= require ./config
 
 class up.layer.Base extends up.Record
 
-  fields: ->
-    fields = ['flavor']
-    fields.conact(u.keys(@constructor.defaultConfig()))
+  @keys: ->
+    fields = ['flavor', 'context']
+    fields.concat(Object.keys(@config))
 
-  @defaultConfig: ->
+  @defaults: ->
+    u.merge(super.defaults?(), @config)
+
+  @config: new up.Config ->
     history: true
     maxWidth: null
     width: null
@@ -78,7 +82,7 @@ class up.layer.Base extends up.Record
 
 class up.layer.Root extends up.layer.Base
 
-  @defaultConfig: ->
+  @config: new up.Config ->
     history: true
     targets: ['body'] # this replaces up.fragment.config.targets
 
@@ -102,6 +106,8 @@ class up.layer.Dialog extends up.layer.WithViewport
 
   @flavor: 'dialog'
 
+  @config: new up.Config()
+
   open: (parentElement, @innerContentElement) ->
     @containerElement = e.affix(parentElement, '.up-layer[role=dialog]')
     @backdropElement = e.affix(@containerElement, '.up-layer-backdrop')
@@ -113,8 +119,30 @@ class up.layer.Dialog extends up.layer.WithViewport
 
     @dismissible or e.remove(@part('dismiss'))
 
-    throw "switch to [up-flavor=flavor]?"
-    throw "where to set { class }, { position }, { align } ?"
+    throw "set style-relevant properties on @containerElement"
+
+
+class up.layer.Drawer extends up.layer.WithViewport
+
+  @flavor: 'drawer'
+
+  @config: new up.Config ->
+    history: false
+    position: 'right'
+
+class up.layer.Fullscreen extends up.layer.WithViewport
+
+  @flavor: 'fullscreen'
+
+class up.layer.Popover extends up.layer.Base
+
+  @flavor: 'popover'
+
+  @config: new up.Config ->
+    history: false
+    position: 'bottom'
+    align: 'left'
+
 
 #  <div class="up-layer" role="dialog">
 #    <div class="up-layer-backdrop">
@@ -152,29 +180,3 @@ class up.layer.Dialog extends up.layer.WithViewport
 #      </div>
 #    </div>
 #  </div>
-
-
-
-
-
-class up.layer.Drawer extends up.layer.WithViewport
-
-  @flavor: 'drawer'
-
-  @defaultConfig: ->
-    history: false
-    position: 'right'
-
-
-class up.layer.Fullscreen extends up.layer.WithViewport
-
-  @flavor: 'fullscreen'
-
-class up.layer.Popover extends up.layer.Base
-
-  @flavor: 'popover'
-
-  @defaultConfig: ->
-    history: false
-    position: 'bottom'
-    align: 'left'

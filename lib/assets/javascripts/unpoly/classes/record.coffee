@@ -2,14 +2,22 @@ u = up.util
 
 class up.Record
 
-  fields: ->
-    throw 'Return an array of property names'
+  @keys: ->
+    # Return an array of property names
+    # Defaults to the keys of @defaults(), if that returns an object.
+    if defaults = @defaults()
+      Object.keys(defaults)
+    else
+      []
+
+  @defaults: ->
+    return undefined
 
   constructor: (options) ->
-    u.assign(this, @attributes(options))
+    u.assign(this, @constructor.defaults(), @attributes(options))
 
   attributes: (source = @) ->
-    u.only(source, @fields()...)
+    u.only(source, @constructor.keys()...)
 
   "#{u.copy.key}": ->
     @variant()
@@ -19,4 +27,4 @@ class up.Record
     new @constructor(attributesWithChanges)
 
   "#{u.isEqual.key}": (other) ->
-    other && (@constructor == other.constructor) && u.isEqual(@attributes(), other.attributes())
+    @constructor == other.constructor && u.isEqual(@attributes(), other.attributes())

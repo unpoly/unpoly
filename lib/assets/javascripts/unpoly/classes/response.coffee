@@ -86,7 +86,7 @@ class up.Response extends up.Record
   @param {string} [title]
   @stable
   ###
-  fields: ->
+  @keys: ->
     [
       'method',
       'url',

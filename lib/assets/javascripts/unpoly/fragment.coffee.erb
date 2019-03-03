@@ -223,6 +223,8 @@ up.fragment = do ->
     u.renameKey(failureOptions, 'failPeel', 'peel')
     u.renameKey(failureOptions, 'failRestoreScroll', 'restoreScroll')
 
+    throw "failContext?"
+
     successCascade = new up.ExtractCascade(successOptions)
     failureCascade = new up.ExtractCascade(failureOptions)
 
@@ -237,7 +239,9 @@ up.fragment = do ->
       'cache',
       'preload',
       'headers',
-      'timeout'
+      'timeout',
+      'context'
+
     u.assign requestAttrs,
       url: url
       target: improvedTarget

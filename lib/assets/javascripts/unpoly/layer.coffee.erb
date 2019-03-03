@@ -2,9 +2,9 @@ up.layer = do ->
 
   config = new up.Config ->
     hash =
-      flavor: 'window'
+      flavor: 'dialog'
       targets: ['[up-layer-target]']
-    u.merge(hash, defaultFlavorOptions())
+      all: up.layer.Base.config
 
     registerFlavor(up.layer.Root, hash)
     registerFlavor(up.layer.Dialog, hash)
@@ -19,7 +19,9 @@ up.layer = do ->
 
   registerFlavor = (implementation, store = config) ->
     name = implementation.flavor or throw "Implementation must implement { flavor } class prop"
-    store[name] = u.merge(implementation.defaultConfig, { implementation })
+    subConfig = implementation.config
+    subConfig.implementation = implementation
+    store[name] = subConfig
 
   fallbacks = (flavor) ->
     flavorOptions(flavor).targets
@@ -36,7 +38,7 @@ up.layer = do ->
     )
 
   reset = ->
-    config.reset()
+    config.reset(deep: true)
     stack.reset()
     queue.reset()
 
