@@ -5,6 +5,8 @@ class up.ExtractPlan
 
   @NOT_APPLICABLE: 'n/a'
 
+  constructor: (@options) ->
+
   setSource: (element, sourceUrl) ->
     unless sourceUrl is false
       sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
@@ -23,10 +25,9 @@ class up.ExtractPlan
 
 class up.ExtractPlan.OpenLayer extends up.ExtractPlan
 
-  constructor: (@options) ->
-
   preflightLayer: ->
-    undefined # it does not exist yet
+    # stand-in value
+    'new'
 
   preflightTarget: ->
     # The target will always "exist" in the current page, since
@@ -41,7 +42,7 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
       up.hello(newLayerContent, @options) # will emit up:fragment:inserted
       up.layer.updateHistory(layer, @options)
 
-    openOptions = u.options(@options, { content: newLayerContent, afterAttach })
+    openOptions = u.options(@options, { afterAttach, content: newLayerContent })
 
     return up.layer.open(openOptions)
 
@@ -284,7 +285,7 @@ class up.ExtractPlan.ResetWorld extends up.ExtractPlan.UpdateLayer
 
   constructor: (options) ->
     options = u.merge(options,
-      layer: 'root',
+      layer: @preflightLayer(),
       target: 'body',
       peel: true
       keep: false

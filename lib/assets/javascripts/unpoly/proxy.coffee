@@ -146,7 +146,7 @@ up.proxy = do ->
     waitingLink = null
     cancelPreloadDelay()
     cancelSlowDelay()
-    abort()
+    abortRequests()
     slowEventEmitted = false
     config.reset()
     cache.clear()
@@ -227,6 +227,10 @@ up.proxy = do ->
     # We clear the entire cache before an unsafe request, since we
     # assume the user is writing a change.
     clearCache() unless request.isSafe()
+
+    if request.navigate
+      abortRequests(navigate: true)
+
 
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.
@@ -348,7 +352,7 @@ up.proxy = do ->
         up.emit('up:proxy:recover', log: 'Proxy has recovered from slow response')
         slowEventEmitted = false
 
-  abort = (requestOrConditions = {}) ->
+  abortRequests = (requestOrConditions = {}) ->
     for request in pendingRequests
       if request == requestOrConditions || u.contains(request, requestOrConditions)
         request.abort()
@@ -692,7 +696,7 @@ up.proxy = do ->
   isSafeMethod: isSafeMethod
   wrapMethod: wrapMethod
   config: config
-  abort: abort
+  abort: abortRequests
 
 up.ajax = up.proxy.ajax
 up.request = up.proxy.request

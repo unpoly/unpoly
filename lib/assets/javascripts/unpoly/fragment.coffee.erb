@@ -19,19 +19,6 @@ up.fragment = do ->
   u = up.util
   e = up.element
 
-  ###**
-  Configures defaults for fragment insertion.
-
-  @property up.fragment.config
-  @param {string} [options.fallbackTransition=null]
-    The transition to use when using a [fallback target](/#options.fallbacks).
-
-    By default this is not set and the original replacement's transition is used.
-  @stable
-  ###
-  config = new up.Config ->
-    fallbackTransition: null
-
   reset = ->
     config.reset()
 
@@ -203,6 +190,7 @@ up.fragment = do ->
     options = u.options(options)
 
     options.inspectResponse = fullLoad = -> up.browser.navigate(url, u.only(options, 'method', 'params'))
+    options.navigate ?= true
 
     if !up.browser.canPushState() && options.history != false
       fullLoad() unless options.preload
@@ -223,8 +211,6 @@ up.fragment = do ->
     u.renameKey(failureOptions, 'failPeel', 'peel')
     u.renameKey(failureOptions, 'failRestoreScroll', 'restoreScroll')
 
-    throw "failContext?"
-
     successCascade = new up.ExtractCascade(successOptions)
     failureCascade = new up.ExtractCascade(failureOptions)
 
@@ -240,7 +226,7 @@ up.fragment = do ->
       'preload',
       'headers',
       'timeout',
-      'context'
+      'navigate'
 
     u.assign requestAttrs,
       url: url
@@ -763,7 +749,6 @@ up.fragment = do ->
   first: first
   source: source
   hello: hello
-  config: config
   layerOf: layerOf
   emitInserted: emitFragmentInserted
   emitDestroyed: emitFragmentDestroyed

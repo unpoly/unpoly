@@ -19,23 +19,19 @@ up.layer = do ->
 
   registerFlavor = (implementation, store = config) ->
     name = implementation.flavor or throw "Implementation must implement { flavor } class prop"
+    # Since the layer class names are not public API, we make their static
+    # config property accessible through up.layer.config. E.g. up.layer.config.dialog
+    # is set to up.layer.Dialog.config.
     subConfig = implementation.config
     subConfig.implementation = implementation
     store[name] = subConfig
 
-  fallbacks = (flavor) ->
-    flavorOptions(flavor).targets
+  defaultTargets = (options = {}) ->
+    flavorImplementation(options).defaults().targets
 
-  defaultFlavorOptions = ->
-    up.layer.Base.defaultConfig()
-
-  flavorOptions = (flavor, userOptions) ->
-    flavor ?= config.flavor
-    u.merge(
-      u.only(config, u.keys(defaultFlavorOptions())...),
-      config[flavor],
-      userOptions
-    )
+  flavorImplementation = (options = {}) ->
+    flavor = options.flavor ? config.flavor
+    implementation = config[flavor].implementation or up.fail("Unknown layer flavor: #{flavor}")
 
   reset = ->
     config.reset(deep: true)
@@ -55,18 +51,9 @@ up.layer = do ->
   throw "make sure .up-layer has [role=dialog]"
   throw "implement up:layer:* events"
 
-  open = (options) ->
-    options = u.options(options)
-    options.flavor ?= config.flavor
-    throw 'set default target by up.ExtractCascade, depending on the value of { layer }'
-    # { layer: 'new' } will use the up.layer.config.targets,
-    # while { layer: anything-else } will use up.link.config.targets.
-    options.target ?= config.targets
-
+  open = (options = {}) ->
     if options.content
-      if u.isString(options.content)
-        options.content = e.createFromHtml(options.content)
-      openNow(options.flavor, options.content, options)
+      openWithContent(options)
     else
       # up.change() is a new function that takes these forms:
       # - up.change(target: ..., url: ...)
@@ -75,12 +62,21 @@ up.layer = do ->
       # - up.change(url: ...)
       # if we would offer { content } for up.change():
       # - we could only allow a single target (no ",", no hungries)
+      throw "implement up.change()"
       up.change(options)
 
-  openNow = (flavor, content, options) ->
-    options = flavorOptions(flavor, options)
+  openWithContent = (options) ->
+    options = u.options(options)
+    options.flavor ?= config.flavor
+
+    if u.isString(options.content)
+      options.content = e.createFromHtml(options.content)
+
+    implementation = config[options.flavor].implementation
+
+    # implementation constructor will take care of default options
     layer = new options.implementation(options)
-    return layer.open(layersContainer)
+    return layer.open(layersContainer(), content)
 
   prompt = (options) ->
     return new Promise (onConfirm, onDismiss) ->
@@ -159,9 +155,15 @@ up.layer = do ->
       closedEvent: 'up:layer:confirmed'
       closedCallback: 'onConfirmed'
 
+  abortCompetingRequests = (options) ->
+    layer = lookupOne(options)
+    if layer == 'new'
+      up.proxy.abort(preflightLayer: layer)
+
   closeVariant = (options) ->
     { layer, eventProps } = options
 
+    # Abort all pending requests targeting the layer we're now closing.
     up.proxy.abort(preflightLayer: layer)
 
     if up.event.nobodyPrevents(options.closeEvent, eventProps)
@@ -220,6 +222,8 @@ up.layer = do ->
         stack.ancestors(givenOriginLayer())
       when 'closest'
         stack.selfAndAncestors(givenOriginLayer())
+      when 'new'
+        'new'
 
   peel = (layer) ->
     layer = lookup(layer)[0]
@@ -248,7 +252,4 @@ up.layer = do ->
   updateHistory: updateHistory
   peel: peel
   config: config
-  flavorOptions: flavorOptions
-  fallbacks: fallbacks
-
-
+  defaultTargets: defaultTargets

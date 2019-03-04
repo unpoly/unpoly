@@ -5,14 +5,18 @@
 class up.layer.Base extends up.Record
 
   @keys: ->
-    fields = ['flavor', 'context']
-    fields.concat(Object.keys(@config))
+    keys = [
+      'flavor',
+      'context'
+    ]
+    configKeys = Object.keys(up.layer.Base.config)
+    return keys.concat(configKeys)
 
   @defaults: ->
     u.merge(super.defaults?(), @config)
 
   @config: new up.Config ->
-    history: true
+    history: false
     maxWidth: null
     width: null
     position: null
@@ -33,19 +37,22 @@ class up.layer.Base extends up.Record
       """
       <div class="up-layer" role="dialog">
         <div class="up-layer-backdrop"></div>
-        <div class="up-layer-viewport"></div>
-        <div class="up-layer-box">
-          <div class="up-layer-content"></div>
-          <div class="up-layer-dismiss" up-dismiss>#{layer.dismissLabel}</div>
+        <div class="up-layer-viewport">
+          <div class="up-layer-frame">
+            <div class="up-layer-content"></div>
+            <div class="up-layer-dismiss" up-dismiss>#{layer.dismissLabel}</div>
+          </div>
         </div>
       </div>
       """
 
   throw "iOS doesnt bubble click events on up-layer-viewport"
 
-  fallbacks: ->
-    flavor = @constructor.flavor
-    up.layer.fallbacks(flavor)
+  constructor: (@options) ->
+    @flavor = @constructor.flavor or up.fail('Layer flavor must implement a static { flavor } property')
+
+  defaultTargets: ->
+    @constructor.defaults().targets
 
   open: (parentElement, innerContentElement) ->
     throw "implement me"
@@ -70,14 +77,20 @@ class up.layer.Base extends up.Record
       'up-align', @align
       'up-position', @position
 
-    e.setInlineStyle(maxWidth: maxWidth) if @maxWidth
-    e.setInlineStyle(width: width) if @width
+    e.setInlineStyle(maxWidth: @maxWidth) if @maxWidth
+    e.setInlineStyle(width: @width) if @width
 
     if options.viewport
       @shiftBody()
     else
-      e.remove(@part('backdrop'))
-      e.remove(@part('viewport'))
+      e.unwrap(@part('backdrop'))
+      e.unwrap(@part('viewport'))
+
+    if @dismissable
+      throw "close dialog on click outside layer, or on .up-modal if we make it really high"
+      throw "close dialog onEscape"
+    else
+      e.remove(@part('dismiss'))
 
 
 class up.layer.Root extends up.layer.Base
@@ -108,18 +121,8 @@ class up.layer.Dialog extends up.layer.WithViewport
 
   @config: new up.Config()
 
-  open: (parentElement, @innerContentElement) ->
-    @containerElement = e.affix(parentElement, '.up-layer[role=dialog]')
-    @backdropElement = e.affix(@containerElement, '.up-layer-backdrop')
-    @viewportElement = e.affix(@containerElement, '.up-layer-viewport')
-
-    @element = e.createFromHtml(@template)
-    @contentElement = @element.querySelector('[class$="-content"]')
-    @contentElement.appendChild(@innerContentElement)
-
-    @dismissible or e.remove(@part('dismiss'))
-
-    throw "set style-relevant properties on @containerElement"
+  open: (parentElement, innerContentElement) ->
+    @createElementFromTemplate(viewport: true)
 
 
 class up.layer.Drawer extends up.layer.WithViewport
