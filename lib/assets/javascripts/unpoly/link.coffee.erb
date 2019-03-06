@@ -198,10 +198,15 @@ up.link = do ->
     options.width ?= link.getAttribute('up-width')
     options.maxWidth ?= link.getAttribute('up-max-width')
     options.class ?= link.getAttribute('up-class')
+    options.size ?= link.getAttribute('up-size')
     options.dismissable ?= e.booleanAttr(link, 'up-dismissible')
     options.context ?= e.jsonAttr(link, 'up-context')
+    options.onConfirmed ?= up.layer.closeHandlerAttr(link, 'up-on-confirmed')
+    options.onDismissed ?= up.layer.closeHandlerAttr(link, 'up-on-dismissed')
 
-    throw "parse layer flavor, align, position, width, maxWidth, onConfirmed, onDismissed, onOpened ..."
+    throw "parse [up-on-confirm='code']"
+    throw "parse [up-on-dismiss='code']"
+
     throw "can we unify parsing of form and link options? there will be no other when we remove modal, link, ..."
 
     options.confirm ?= link.getAttribute('up-confirm')

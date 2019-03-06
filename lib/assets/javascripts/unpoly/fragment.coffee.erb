@@ -570,50 +570,7 @@ up.fragment = do ->
   @experimental
   ###
   first = (args...) ->
-    options = u.extractOptions(args)
-    selector = args.pop()
-    root = args[0] || document
-    layer = options.layer ? 'auto'
-    origin = options.origin
-
-    selector = e.resolveSelector(selector, origin)
-    if layer == 'auto'
-      throw "up.fragment.first() should only see the current layer, unless { layer } is given, in which case we resolve"
-      firstInPriority(root, selector, origin)
-    else
-      firstInLayer(root, selector, layer)
-
-  firstInPriority = (parent, selector, origin) ->
-    layers = ['popup', 'modal', 'page']
-    if origin
-      originLayer = layerOf(origin)
-      # Make the origin's layer the top priority
-      u.remove(layers, originLayer)
-      layers.unshift(originLayer)
-    u.findResult layers, (layer) ->
-      return firstInLayer(parent, selector, layer)
-
-  firstInLayer = (parent, selector, layer) ->
-    throw "use up.layer"
-    elements = e.all(parent, selector)
-    return u.findResult elements, (element) ->
-      if isRealElement(element) && matchesLayer(element, layer)
-        return element
-
-  ###**
-  @function up.fragment.layerOf
-  @internal
-  ###
-  layerOf = (element) ->
-    if up.popup.contains(element)
-      'popup'
-    else if up.modal.contains(element)
-      'modal'
-    else
-      'page'
-
-  matchesLayer = (element, layer) ->
-    !layer || layerOf(element) == layer
+    throw "this needs to delegate to up.layer"
 
   ###**
   @function up.fragment.createPlaceHolder
@@ -749,7 +706,6 @@ up.fragment = do ->
   first: first
   source: source
   hello: hello
-  layerOf: layerOf
   emitInserted: emitFragmentInserted
   emitDestroyed: emitFragmentDestroyed
   emitKeep: emitFragmentKeep

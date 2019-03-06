@@ -2,13 +2,13 @@ up.layer = do ->
 
   config = new up.Config ->
     hash =
-      flavor: 'dialog'
+      flavor: 'modal'
       targets: ['[up-layer-target]']
       all: up.layer.Base.config
 
     registerFlavor(up.layer.Root, hash)
-    registerFlavor(up.layer.Dialog, hash)
-    registerFlavor(up.layer.Popover, hash)
+    registerFlavor(up.layer.Modal, hash)
+    registerFlavor(up.layer.Popup, hash)
     registerFlavor(up.layer.Drawer, hash)
     registerFlavor(up.layer.Fullscreen, hash)
 
@@ -33,6 +33,10 @@ up.layer = do ->
     flavor = options.flavor ? config.flavor
     implementation = config[flavor].implementation or up.fail("Unknown layer flavor: #{flavor}")
 
+  closeHandlerAttr = (link, attr) ->
+    if code = link.getAttribute(attr)
+      return new Function('value', code).bind(link)
+
   reset = ->
     config.reset(deep: true)
     stack.reset()
@@ -40,12 +44,6 @@ up.layer = do ->
 
   throw "each update needs to update title and url in the current fragemnt"
   throw "only if the topmost layer is changed we change document.title or pushState(url)"
-  throw "maybe default to { history: false } for new layers"
-  throw "make layer argument optional for all functions (it defaults to current)"
-  throw "config a default { default }"
-  throw "config a default { target }"
-  throw "implement { dismissible } and"
-  throw "implement [up-peel]"
   throw "allow size classes for bootstrap-like modal implementations; maybe we can support [up-target][up-class] to set a class on the new fragment"
   throw "implement focus trapping within a layer"
   throw "make sure .up-layer has [role=dialog]"
@@ -83,11 +81,9 @@ up.layer = do ->
       options = u.merge(options, { onConfirm, onDismiss, })
       open(options)
 
-  throw "implement a[layer=new][up-on-confirm='code']"
-  throw "implement a[layer=new][up-on-dismiss='code']"
-
+  throw "move to up.Layer.Base"
   updateHistory = (layer, options) ->
-    layer = lookup(layer)[0]
+    layer = lookupOne(layer, options)
 
     if newUrl = options.history
       layer.url = newUrl
@@ -97,19 +93,27 @@ up.layer = do ->
       layer.title = title
       titleChanged(layer)
 
+  throw "move to up.Layer.Base"
   urlChanged = (layer) ->
     if layer == currentLayer() && layer.history
       up.history.push(layer.url)
 
+  throw "move to up.Layer.Base"
   titleChanged = (layer) ->
     if layer == currentLayer() && layer.history # history option also says if we're updating title
       document.title = layer.title
 
+  throw "move to up.Layer.Base"
   firstElement = (layer, selector) ->
     allElements(layer, selector)[0]
 
+  throw "move to up.Layer.Base"
+  sync = () ->
+    # todo
+
+  throw "move to up.Layer.Base"
   allElements = (layer, selector) ->
-    layer = lookup(layer)[0]
+    layer = lookupOne(layer)
     matches = e.all(layer.containerElement, selector)
     if stack.isCurrentRoot()
       matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
@@ -125,58 +129,60 @@ up.layer = do ->
   asap = (fn) ->
     queue.asap(fn)
 
-  dismiss = (options = {}) ->
-    options.layer = lookup(options.layer)
-
-    eventProps =
-      target: layer.element
-      layer: layer
-      reason: options.reason
-
-    closeVariant
-      layer: layer,
-      eventProps: eventProps
+  throw "move to up.Layer.Base"
+  dismiss = (options) ->
+    closeVariant(u.merge(options,
+      valueAttr: 'up-dismiss'
       closeEvent: 'up:layer:dismiss'
       closedEvent: 'up:layer:dismissed'
       closedCallback: 'onDismissed'
+    ))
 
+  throw "move to up.Layer.Base"
   confirm = (options) ->
-    options.layer = lookup(options.layer)
+    closeVariant(u.merge(options,
+      valueAttr: 'up-confirm'
+      closeEvent: 'up:layer:confirm'
+      closedEvent: 'up:layer:confirmed'
+      closedCallback: 'onConfirmed'
+    ))
+
+  throw "move to up.Layer.Base"
+  closeVariant = (options) ->
+    layer = lookupOne(options.layer, options)
+    origin = options.origin
+    emitEvents = options.emitEvents ? true
+
+    if origin
+      options.value ?= e.jsonAttr(origin, options.valueAttr)
 
     eventProps =
       target: layer.element
       layer: layer
-      reason: options.reason
-
-    closeVariant
-      layer: layer,
-      eventProps: eventProps
-      closeEvent: 'up:layer:confirm'
-      closedEvent: 'up:layer:confirmed'
-      closedCallback: 'onConfirmed'
-
-  abortCompetingRequests = (options) ->
-    layer = lookupOne(options)
-    if layer == 'new'
-      up.proxy.abort(preflightLayer: layer)
-
-  closeVariant = (options) ->
-    { layer, eventProps } = options
+      value: options.value
+      origin: origin
 
     # Abort all pending requests targeting the layer we're now closing.
     up.proxy.abort(preflightLayer: layer)
 
-    if up.event.nobodyPrevents(options.closeEvent, eventProps)
+    if !emitEvents || up.event.nobodyPrevents(options.closeEvent, eventProps)
       # Synchronously remove the layer from the stack so other sync calls
       # immediately see the updated stack. Everything after that is just optics.
       stack.remove(layer)
 
       return asap ->
-        layer.close()
-        # Wait for the callbacks until the closing animation ends,
-        # so user-provided code doesn't run too wildly out of order.
-        layer[options.closedCallback]?(eventProps)
-        up.emit(options.closedEvent, eventProps)
+        layer.close().then ->
+          if emitEvents
+            # Wait for the callbacks until the closing animation ends,
+            # so user-provided code doesn't run too wildly out of order.
+
+            if closedCallback = layer[options.closedCallback]
+              # Callback option only gets the resolution value.
+              # Also see up.layer.closeHandlerAttr()
+              closedCallback.call(origin, options.value)
+
+            # Global event gets the full event props
+            up.emit(options.closedEvent, eventProps)
     else
       return up.event.abortRejection()
 
@@ -187,8 +193,12 @@ up.layer = do ->
       if layer.contains(element)
         return element
 
-  throw "Split into lookupAll and lookupOne"
-  lookup = (value, options) ->
+  lookupOne = (options) ->
+    lookupAll(options)[0]
+
+  lookupAll = (options) ->
+    value = options.value
+
     unless value
       return [stack.root()]
 
@@ -222,20 +232,21 @@ up.layer = do ->
         stack.ancestors(givenOriginLayer())
       when 'closest'
         stack.selfAndAncestors(givenOriginLayer())
-      when 'new'
-        'new'
 
   peel = (layer) ->
     layer = lookup(layer)[0]
+    ancestors = u.copy(up.stack.ancestors(layer))
 
-    for ancestor in up.stack.ancestors() by -1
+    for ancestor in ancestors by -1
       asap ->
-        # We only close, but don't emit events!
-        ancestor.close()
-
-    throw "cancel XHR requests that would update this layer"
+        dismiss(layer: ancestor, emitEvents: false)
 
     return queue.cursor
+
+  up.event.onEscape (event) ->
+    if currentLayer().dismissable
+      u.muteRejection dismiss()
+      up.event.halt(event)
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
@@ -251,5 +262,6 @@ up.layer = do ->
   allElements: allElements
   updateHistory: updateHistory
   peel: peel
+  sync: sync
   config: config
   defaultTargets: defaultTargets

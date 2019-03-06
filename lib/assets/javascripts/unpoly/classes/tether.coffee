@@ -4,7 +4,8 @@ e = up.element
 class up.Tether
 
   constructor: (options) ->
-    @anchor = options.anchor
+    @element = options.element or u.fail("Missing { element } option")
+    @anchor = options.anchor or u.fail("Missing { anchor } option")
 
     [@position, @align] = options.position.split('-')
     if @align
@@ -15,33 +16,24 @@ class up.Tether
     @alignAxis = if @position == 'top' || @position == 'bottom' then 'horizontal' else 'vertical'
 
     @viewport = up.viewport.closest(@anchor)
-    # The document viewport is <html> on some browsers, and we cannot attach children to that.
-    @parent = if @viewport == e.root() then document.body else @viewport
-
-    # If the offsetParent is within the viewport (or is the viewport)
-    # we can simply absolutely position it and it will move as the viewport scrolls.
-    # If not however, we have no choice but to move it on every scroll event.
-    @syncOnScroll = !@viewport.contains(@anchor.offsetParent)
-
-    @root = e.affix(@parent, '.up-bounds')
+    @element.classList.add('.up-bounds')
     @setBoundsOffset(0, 0)
 
     @changeEventSubscription('on')
 
-  destroy: ->
-    e.remove(@root)
+  stop: ->
     @changeEventSubscription('off')
 
   changeEventSubscription: (fn) ->
     up[fn](window, 'resize', @scheduleSync)
-    up[fn](@viewport, 'scroll', @scheduleSync) if @syncOnScroll
+    up[fn](@viewport, 'scroll', @scheduleSync)
 
   scheduleSync: =>
     clearTimeout(@syncTimer)
     @syncTimer = u.task(@sync)
 
   sync: =>
-    rootBox = @root.getBoundingClientRect()
+    rootBox = @element.getBoundingClientRect()
     anchorBox = @anchor.getBoundingClientRect()
 
     left = undefined
@@ -93,7 +85,7 @@ class up.Tether
     { @position, @align }
 
   moveTo: (targetLeft, targetTop) ->
-    rootBox = @root.getBoundingClientRect()
+    rootBox = @element.getBoundingClientRect()
     @setBoundsOffset(
       targetLeft - rootBox.left + @offsetLeft,
       targetTop - rootBox.top + @offsetTop
@@ -102,4 +94,4 @@ class up.Tether
   setBoundsOffset: (left, top) ->
     @offsetLeft = left
     @offsetTop = top
-    e.setStyle(@root, { left, top })
+    e.setStyle(@element, { left, top })

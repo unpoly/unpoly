@@ -19,8 +19,10 @@ class up.layer.Base extends up.Record
     history: false
     maxWidth: null
     width: null
+    origin: null
     position: null
     align: null
+    size: null
     class: null
     targets: []
     openAnimation: 'fade-in'
@@ -32,21 +34,12 @@ class up.layer.Base extends up.Record
     backdropOpenAnimation: 'fade-in'
     backdropCloseAnimation: 'fade-out'
     dismissLabel: '×'
+    dismissAriaLabel: 'Dismiss dialog'
     dismissible: true
-    template: (layer) ->
-      """
-      <div class="up-layer" role="dialog">
-        <div class="up-layer-backdrop"></div>
-        <div class="up-layer-viewport">
-          <div class="up-layer-frame">
-            <div class="up-layer-content"></div>
-            <div class="up-layer-dismiss" up-dismiss>#{layer.dismissLabel}</div>
-          </div>
-        </div>
-      </div>
-      """
-
-  throw "iOS doesnt bubble click events on up-layer-viewport"
+    onCreated: null
+    onDismissed: null
+    onConfirmed: null
+    onContentAttached: null
 
   constructor: (@options) ->
     @flavor = @constructor.flavor or up.fail('Layer flavor must implement a static { flavor } property')
@@ -63,34 +56,143 @@ class up.layer.Base extends up.Record
   sync: ->
     throw "implement me"
 
-  part: (suffix) ->
-    @element.querySelector("up-layer-#{suffix}")
-
-  createElementFromTemplate: (options) ->
-    @element = e.createFromHtml(@template)
-
+  createElement: (parentElement) ->
+    @element = e.affix(parentElement, '.up-layer',
+      'up-dismissable': @dismissable
+      'up-flavor': @flavor
+      'up-align': @align
+      'up-position': @position,
+      'up-size': @size,
+    )
     @element.classList.add(@class) if @class
 
-    e.setAttrs @element,
-      'up-dismissable', @dismissable
-      'up-flavor', @flavor
-      'up-align', @align
-      'up-position', @position
+    throw "CSS styles that make .up-layer full height"
 
-    e.setInlineStyle(maxWidth: @maxWidth) if @maxWidth
-    e.setInlineStyle(width: @width) if @width
+    e.on @element, 'mousedown', (event) ->
+      if event.closest('.up-layer-frame')
+        # User clicked inside the layer's frame. We will let the event bubble
+        # up to the document where up.link handlers will process [up-follow][up-instant]
+        # for a link inside the frame.
+      else
+        # User clicked outside the layer's frame. We prevent further bubbling
+        # to not hit the body or the document. The user may also dismiss this layer by
+        # clicking outside the frame, but that is handled an click, not mousedown.
+        up.event.halt(event)
 
-    if options.viewport
-      @shiftBody()
-    else
-      e.unwrap(@part('backdrop'))
-      e.unwrap(@part('viewport'))
+    e.on @element, 'click', (event) =>
+      closePromise = if event.closest('.up-layer-frame')
+        # User clicked inside the layer's frame.
+        if dismisser = event.closest('[up-dismiss]')
+          closePromise = up.layer.dismiss({ layer: this, origin: dismisser })
+        else if confirmer = event.closest('[up-confirm]')
+          closePromise = up.layer.confirm({ layer: this, origin: confirmer })
+        else
+          # User clicked inside the layer's frame, but not on a link that would
+          # close this modal. We will let the event bubble up to the document where
+          # up.link handlers will process [up-follow] for a link inside the frame.
+      else
+        # User clicked outside the layer's frame.
+        if @dismissable
+          closePromise = up.layer.dismiss({ layer: this, origin: @element })
 
+      if closePromise
+        u.muteRejection(closePromise)
+        up.event.halt(event)
+
+  createDismissElement: (parentElement) ->
     if @dismissable
-      throw "close dialog on click outside layer, or on .up-modal if we make it really high"
-      throw "close dialog onEscape"
-    else
-      e.remove(@part('dismiss'))
+      @dismissElement = affix(parentElement, '.up-layer-dismiss[up-dismiss]',
+        'aria-label': @dismissAriaLabel
+      )
+      affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
+
+  frameInnerContent: (parentElement, innerContentElement) ->
+    @frameElement = affix(parentElement, '.up-layer-frame')
+    @contentElement = affix(@frameElement, '.up-layer-content')
+    @contentElement.appendChild(innerContentElement)
+    @createDismissElement(@frameElement)
+    @onContentAttached?()
+
+  openAnimateOptions: ->
+    easing: @openEasing
+    duration: @openDuration
+
+  closeAnimateOptions: ->
+    easing: @closeEasing
+    duration: @closeDuration
+
+  evalOption: (option) ->
+    u.evalOption(option, this)
+
+  destroyElement: ->
+    e.remove(@element)
+
+
+class up.layer.WithViewport extends up.layer.Base
+
+  # It makes only sense to have a single body shifter
+  @bodyShifter: new up.BodyShifter()
+
+  open: (parentElement, initialInnerContent) ->
+    @createElement(parentElement)
+    @backdropElement = affix(@element, '.up-layer-backdrop')
+    @viewportElement = affix(@element, '.up-layer-viewport')
+    @frameInnerContent(@viewportElement, initialInnerContent)
+
+    @shiftBody()
+    return @startOpenAnimation()
+
+  close: ->
+    return @startCloseAnimation().then =>
+      @destroyElement()
+      @unshiftBody()
+
+  startOpenAnimation: ->
+    animateOptions = @openAnimateOptions()
+
+    return Promise.all([
+      up.animate(@viewportElement, @evalOption(@openAnimation), animateOptions),
+      up.animate(@backdropElement, @evalOption(@backdropOpenAnimation), animateOptions),
+    ])
+
+  shiftBody: ->
+    @constructor.bodyShifter.shift()
+
+  unshiftBody: ->
+    @constructor.bodyShifter.unshift()
+
+  startCloseAnimation: ->
+    animateOptions = @closeAnimateOptions()
+    return Promise.all([
+      up.animate(@viewportElement, @evalOption(@closeAnimation), animateOptions),
+      up.animate(@backdropElement, @evalOption(@backdropCloseAnimation), animateOptions),
+    ])
+
+
+
+class up.layer.WithTether extends up.layer.Base
+
+  open: (parentElement, initialInnerContent) ->
+    @createElement(parentElement)
+    @frameInnerContent(@element, initialInnerContent)
+    @tether = new up.Tether(
+      element: @frameElement
+      anchor: @origin
+      align: @align
+      position: @position
+    )
+    return @startOpenAnimation()
+
+  close: ->
+    return @startCloseAnimation().then =>
+      @tether.stop()
+      @destroyElement()
+
+  startOpenAnimation: ->
+    return up.animate(@frameElement, @evalOption(@openAnimation), @openAnimateOptions())
+
+  startCloseAnimation: ->
+    return up.animate(@frameElement, @evalOption(@closeAnimation), @closeAnimateOptions())
 
 
 class up.layer.Root extends up.layer.Base
@@ -98,6 +200,7 @@ class up.layer.Root extends up.layer.Base
   @config: new up.Config ->
     history: true
     targets: ['body'] # this replaces up.fragment.config.targets
+    dismissable: false
 
   @flavor: 'root'
 
@@ -105,24 +208,18 @@ class up.layer.Root extends up.layer.Base
     super(options)
     @element = document.documentElement
 
-  open: (parent) ->
+  open: ->
     throw new Error('Cannot open another root layer')
 
   close: ->
     throw new Error('Cannot close the root layer')
 
 
-class up.layer.WithViewport extends up.layer.Base
+class up.layer.Modal extends up.layer.WithViewport
 
+  @flavor: 'modal'
 
-class up.layer.Dialog extends up.layer.WithViewport
-
-  @flavor: 'dialog'
-
-  @config: new up.Config()
-
-  open: (parentElement, innerContentElement) ->
-    @createElementFromTemplate(viewport: true)
+  @config: new up.Config
 
 
 class up.layer.Drawer extends up.layer.WithViewport
@@ -130,56 +227,20 @@ class up.layer.Drawer extends up.layer.WithViewport
   @flavor: 'drawer'
 
   @config: new up.Config ->
-    history: false
     position: 'right'
+
 
 class up.layer.Fullscreen extends up.layer.WithViewport
 
   @flavor: 'fullscreen'
 
-class up.layer.Popover extends up.layer.Base
+  @config: new up.Config
 
-  @flavor: 'popover'
+
+class up.layer.Popup extends up.layer.WithTether
+
+  @flavor: 'popup'
 
   @config: new up.Config ->
-    history: false
     position: 'bottom'
     align: 'left'
-
-
-#  <div class="up-layer" role="dialog">
-#    <div class="up-layer-backdrop">
-#    <div class="up-layer-viewport">
-#      <div class="up-window">
-#        <div class="up-window-content">
-#          <!-- the matching element will be placed here -->
-#        </div>
-#        <div class="up-window-close" up-close>X</div>
-#      </div>
-#    </div>
-#  </div>
-
-#  <div class="up-layer" role="dialog">
-#    <div class="up-layer-backdrop">
-#    <div class="up-layer-viewport">
-#      <div class="up-window">
-#        <div class="up-window-content">
-#          <!-- the matching element will be placed here -->
-#        </div>
-#        <div class="up-window-close" up-close>X</div>
-#      </div>
-#    </div>
-#  </div>
-
-
-#  <div class="up-layer" role="dialog" up-position="..." up-align="..." up-flavor="...">
-#    <div class="up-layer-backdrop">
-#    <div class="up-layer-viewport" onclick>
-#      <div class="up-layer-box">
-#        <div class="up-layer-content">
-#          <!-- the matching element will be placed here -->
-#        </div>
-#        <div class="up-layer-close" up-close>X</div>
-#      </div>
-#    </div>
-#  </div>

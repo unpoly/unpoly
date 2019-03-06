@@ -1,14 +1,47 @@
-- Grep for TODO
-- Test in all browsers
-- Migrate cards
 - Remove up.tooltip module
   - Remove with deprecating macro that sets [title] for [up-tooltip]
 - Build up.change
 - Think about whether to keep up.replace and up.extract
 - .up-layer-viewport should have { overscroll-behavior: contain }
 - u.only and u.except should take an array
-- update or stop supporting unpoly-boostrap3
-- should we have unpoly-bootstrap4?
 - Simplify z-index for layers
   - I think we only need a z-index on .up-layers and let stacking context do the rest
+- Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
+- Test that [up-dismiss][up-follow] inside a layer will dismiss
+- Test that [up-dismiss][up-follow] outside a layer will follow
+
+
+Finishing up
+------------
+
+- Grep for TODO
+- Test in all browsers
+- Migrate cards
+
+
+
+Accessibility
+--------------
+
+- A11Y: current layer should get [role=dialog] and [aria-modal=true], all parent layers should get [inert] and [aria-hidden: true]. Since the root layer has no containers, we should apply this to direct children
+- A11Y: check if [inert] etc. are enough to have the browser rotate focus within the layer
+- A11Y: opening a layer should focus the layer, optionally to [autofocus]
+- A11Y: closing a layer should focus the element that opened the layer
+
+
+Bootstrap integration
+---------------------
+
+- update or stop supporting unpoly-boostrap3
+- should we have unpoly-bootstrap4?
+
+
+Later?
+------
+
+- Turn property-like API symbols into getter
+  - e.g. up.layer.root instead of up.layer.root()
+  - e.g. up.layer.current instead of up.layer.current()
+- Support [up-target][up-class] and [up-target][up-fail-class] to set a class on the new fragment
+  - But think how that would go together with [up-layer="new"][up-class="warning"]
 

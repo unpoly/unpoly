@@ -26,8 +26,7 @@ class up.ExtractPlan
 class up.ExtractPlan.OpenLayer extends up.ExtractPlan
 
   preflightLayer: ->
-    # stand-in value
-    'new'
+    undefined
 
   preflightTarget: ->
     # The target will always "exist" in the current page, since
@@ -38,11 +37,13 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
     newLayerContent = responseDoc.selectForInsertion(@options.target) or @notApplicable()
     @setSource(newLayerContent, @options.source)
 
-    afterAttach = (layer) =>
-      up.hello(newLayerContent, @options) # will emit up:fragment:inserted
-      up.layer.updateHistory(layer, @options)
+    options = @options
 
-    openOptions = u.options(@options, { afterAttach, content: newLayerContent })
+    onContentAttached = (layer) ->
+      up.hello(newLayerContent, options) # will emit up:fragment:inserted
+      up.layer.updateHistory(layer, options)
+
+    openOptions = u.options(@options, { onContentAttached, content: newLayerContent })
 
     return up.layer.open(openOptions)
 
