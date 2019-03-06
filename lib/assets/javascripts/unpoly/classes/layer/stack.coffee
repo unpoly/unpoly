@@ -1,6 +1,8 @@
+#= require ./base
+
 u = up.util
 
-class up.layer.Stack extends up.Config
+class up.Layer.Stack extends up.Config
 
   constructor: (blueprintFn) ->
     super(blueprintFn)

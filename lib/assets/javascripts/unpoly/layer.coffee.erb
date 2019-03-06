@@ -6,6 +6,8 @@ up.layer = do ->
       targets: ['[up-layer-target]']
       all: up.layer.Base.config
 
+    throw "Every flavor should get a macro like [up-modal] => [up-layer=new][up-flavor=modal]"
+
     registerFlavor(up.layer.Root, hash)
     registerFlavor(up.layer.Modal, hash)
     registerFlavor(up.layer.Popup, hash)

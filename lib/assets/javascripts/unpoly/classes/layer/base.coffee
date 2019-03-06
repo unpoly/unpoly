@@ -1,8 +1,10 @@
-#= require ../../layer
 #= require ./record
 #= require ./config
 
-class up.layer.Base extends up.Record
+e = up.element
+u = up.util
+
+class up.Layer extends up.Record
 
   @keys: ->
     keys = [
@@ -126,121 +128,3 @@ class up.layer.Base extends up.Record
 
   destroyElement: ->
     e.remove(@element)
-
-
-class up.layer.WithViewport extends up.layer.Base
-
-  # It makes only sense to have a single body shifter
-  @bodyShifter: new up.BodyShifter()
-
-  open: (parentElement, initialInnerContent) ->
-    @createElement(parentElement)
-    @backdropElement = affix(@element, '.up-layer-backdrop')
-    @viewportElement = affix(@element, '.up-layer-viewport')
-    @frameInnerContent(@viewportElement, initialInnerContent)
-
-    @shiftBody()
-    return @startOpenAnimation()
-
-  close: ->
-    return @startCloseAnimation().then =>
-      @destroyElement()
-      @unshiftBody()
-
-  startOpenAnimation: ->
-    animateOptions = @openAnimateOptions()
-
-    return Promise.all([
-      up.animate(@viewportElement, @evalOption(@openAnimation), animateOptions),
-      up.animate(@backdropElement, @evalOption(@backdropOpenAnimation), animateOptions),
-    ])
-
-  shiftBody: ->
-    @constructor.bodyShifter.shift()
-
-  unshiftBody: ->
-    @constructor.bodyShifter.unshift()
-
-  startCloseAnimation: ->
-    animateOptions = @closeAnimateOptions()
-    return Promise.all([
-      up.animate(@viewportElement, @evalOption(@closeAnimation), animateOptions),
-      up.animate(@backdropElement, @evalOption(@backdropCloseAnimation), animateOptions),
-    ])
-
-
-
-class up.layer.WithTether extends up.layer.Base
-
-  open: (parentElement, initialInnerContent) ->
-    @createElement(parentElement)
-    @frameInnerContent(@element, initialInnerContent)
-    @tether = new up.Tether(
-      element: @frameElement
-      anchor: @origin
-      align: @align
-      position: @position
-    )
-    return @startOpenAnimation()
-
-  close: ->
-    return @startCloseAnimation().then =>
-      @tether.stop()
-      @destroyElement()
-
-  startOpenAnimation: ->
-    return up.animate(@frameElement, @evalOption(@openAnimation), @openAnimateOptions())
-
-  startCloseAnimation: ->
-    return up.animate(@frameElement, @evalOption(@closeAnimation), @closeAnimateOptions())
-
-
-class up.layer.Root extends up.layer.Base
-
-  @config: new up.Config ->
-    history: true
-    targets: ['body'] # this replaces up.fragment.config.targets
-    dismissable: false
-
-  @flavor: 'root'
-
-  constructor: (options) ->
-    super(options)
-    @element = document.documentElement
-
-  open: ->
-    throw new Error('Cannot open another root layer')
-
-  close: ->
-    throw new Error('Cannot close the root layer')
-
-
-class up.layer.Modal extends up.layer.WithViewport
-
-  @flavor: 'modal'
-
-  @config: new up.Config
-
-
-class up.layer.Drawer extends up.layer.WithViewport
-
-  @flavor: 'drawer'
-
-  @config: new up.Config ->
-    position: 'right'
-
-
-class up.layer.Fullscreen extends up.layer.WithViewport
-
-  @flavor: 'fullscreen'
-
-  @config: new up.Config
-
-
-class up.layer.Popup extends up.layer.WithTether
-
-  @flavor: 'popup'
-
-  @config: new up.Config ->
-    position: 'bottom'
-    align: 'left'
