@@ -18,8 +18,7 @@
 #= require ./unpoly/proxy
 #= require ./unpoly/link
 #= require ./unpoly/form
-#= require ./unpoly/popup
-#= require ./unpoly/modal
+#= require ./unpoly/layer
 #= require ./unpoly/tooltip
 #= require ./unpoly/feedback
 #= require ./unpoly/radio

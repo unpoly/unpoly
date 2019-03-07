@@ -6,6 +6,12 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+Unreleased
+----------
+
+- Options removed form modals: up-width, up-max-width, up-height. Use up-size or up-class.
+
+
 0.60.0
 ------
 

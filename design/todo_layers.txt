@@ -9,10 +9,15 @@
 - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
 - Test that [up-dismiss][up-follow] inside a layer will dismiss
 - Test that [up-dismiss][up-follow] outside a layer will follow
+- Documentation
 
 
 Finishing up
 ------------
+
+- Remove unused files after we copied all documentation
+  - popup
+  - modal
 
 - Grep for TODO
 - Test in all browsers

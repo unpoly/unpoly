@@ -181,22 +181,22 @@ up.link = do ->
 
     options.cache ?= e.booleanAttr(link, 'up-cache')
 
+    # TODO: Find a more efficient way to parse fail options
     options.restoreScroll ?= e.booleanAttr(link, 'up-restore-scroll') # the option may contain an Object, but not the attr
-    options.failRestoreScroll ?= e.booleanAttr(link, 'up-restore-scroll')
+    options.failRestoreScroll ?= e.booleanAttr(link, 'up-fail-restore-scroll')
 
     options.method = followMethod(link, options)
     options.origin ?= link
+
+    # Layer options
     options.layer ?= link.getAttribute('up-layer')
     options.failLayer ?= link.getAttribute('up-fail-layer')
     options.peel ?= e.booleanOrStringAttr(form, 'up-peel') ? true
     options.failPeel ?= e.booleanOrStringAttr(form, 'up-fail-peel') ? true
-
     options.layer ?= link.getAttribute('up-layer')
     options.flavor ?= link.getAttribute('up-flavor')
     options.align ?= link.getAttribute('up-align')
     options.position ?= link.getAttribute('up-position')
-    options.width ?= link.getAttribute('up-width')
-    options.maxWidth ?= link.getAttribute('up-max-width')
     options.class ?= link.getAttribute('up-class')
     options.size ?= link.getAttribute('up-size')
     options.dismissable ?= e.booleanAttr(link, 'up-dismissible')
