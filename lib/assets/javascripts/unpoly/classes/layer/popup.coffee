@@ -4,6 +4,8 @@ class up.Layer.Popup extends up.Layer.WithTether
 
   @flavor: 'popup'
 
+  @attr: 'up-popup'
+
   @config: new up.Config ->
     position: 'bottom'
     align: 'left'

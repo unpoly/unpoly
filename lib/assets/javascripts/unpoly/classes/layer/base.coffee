@@ -56,7 +56,7 @@ class up.Layer extends up.Record
     throw "implement me"
 
   sync: ->
-    throw "implement me"
+    # no-op so users can blindly sync without knowing the current flavor
 
   createElement: (parentElement) ->
     @element = e.affix(parentElement, '.up-layer',

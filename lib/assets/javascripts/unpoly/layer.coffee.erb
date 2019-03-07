@@ -1,26 +1,29 @@
 up.layer = do ->
 
+  DEFAULT_FLAVOR_IMPLEMENTATIONS = [
+    up.Layer.Root
+    up.Layer.Modal
+    up.Layer.Popup
+    up.Layer.Drawer
+    up.Layer.Cover
+  ]
+
   config = new up.Config ->
-    hash =
+    newConfig =
       flavor: 'modal'
       targets: ['[up-layer-target]']
       all: up.layer.Base.config
 
-    throw "Every flavor should get a macro like [up-modal] => [up-layer=new][up-flavor=modal]"
+    for implementation in DEFAULT_FLAVOR_IMPLEMENTATIONS
+      registerFlavor(implementation, newConfig)
 
-    registerFlavor(up.layer.Root, hash)
-    registerFlavor(up.layer.Modal, hash)
-    registerFlavor(up.layer.Popup, hash)
-    registerFlavor(up.layer.Drawer, hash)
-    registerFlavor(up.layer.Fullscreen, hash)
-
-    return hash
+    return newConfig
 
   queue = new up.TaskQueue()
-  stack = new up.layer.Stack(-> layers: [new up.layers.Root()])
+  stack = new up.LayerStack(-> layers: [new up.layers.Root()])
 
   registerFlavor = (implementation, store = config) ->
-    name = implementation.flavor or throw "Implementation must implement { flavor } class prop"
+    name = implementation.flavor
     # Since the layer class names are not public API, we make their static
     # config property accessible through up.layer.config. E.g. up.layer.config.dialog
     # is set to up.layer.Dialog.config.
@@ -249,6 +252,19 @@ up.layer = do ->
     if currentLayer().dismissable
       u.muteRejection dismiss()
       up.event.halt(event)
+
+  # TODO: Docs for [up-modal]
+  # TODO: Docs for [up-popup]
+  # TODO: Docs for [up-drawer]
+  # TODO: Docs for [up-cover]
+  for implementation in DEFAULT_FLAVOR_IMPLEMENTATIONS
+    if attr = implementation.attr
+      up.macro "[#{attr}]", (link) ->
+        optionalTarget = link.getAttribute(attr)
+        e.setMissingAttrs
+          'up-layer': 'new'
+          'up-flavor': implementation.flavor
+          'up-target': optionalTarget
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
