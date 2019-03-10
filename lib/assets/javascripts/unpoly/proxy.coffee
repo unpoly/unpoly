@@ -628,8 +628,7 @@ up.proxy = do ->
     if up.link.isSafe(link)
       preloadEventAttrs = { log: ['Preloading link %o', link], target: link }
       up.event.whenEmitted('up:link:preload', preloadEventAttrs).then ->
-        variant = up.link.followVariantForLink(link)
-        variant.preloadLink(link, options)
+        up.link.follow(link, u.merge(options, preload: true))
     else
       Promise.reject(new Error("Won't preload unsafe link"))
 

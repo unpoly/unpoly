@@ -75,6 +75,11 @@ up.link = do ->
 
   u = up.util
   e = up.element
+
+  SELECTORS = ['[up-target]', '[up-follow]']
+
+  fullSelector = ->
+    SELECTORS.join(',')
   
   ###**
   Fetches this given URL with JavaScript and [replaces](/up.replace) the
@@ -89,15 +94,14 @@ up.link = do ->
   @function up.visit
   @param {string} url
     The URL to visit.
-  @param {string} [options.target='body']
+  @param {string} [options.target]
     The selector to replace.
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace)
   @stable
   ###
   visit = (url, options = {}) ->
-    selector = options.target ? 'body'
-    up.replace(selector, url, options)
+    up.change(u.merge(options, { url }))
 
   ###**
   Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the current page with HTML from the response.
@@ -145,32 +149,10 @@ up.link = do ->
     has been loaded and rendered.
   @stable
   ###
-  follow = (linkOrSelector, options) ->
-    link = e.get(linkOrSelector)
-    variant = followVariantForLink(link)
-    variant.followLink(link, options)
-
-  ###**
-  This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
-
-  The event is emitted on the `<a>` element that is being followed.
-
-  @event up:link:follow
-  @param {Element} event.target
-    The link element that will be followed.
-  @param event.preventDefault()
-    Event listeners may call this method to prevent the link from being followed.
-  @stable
-  ###
-
-  ###**
-  @function defaultFollow
-  @internal
-  ###
-  defaultFollow = (link, options) ->
+  follow = (link, options) ->
     options = u.options(options)
-    url = options.url ? link.getAttribute('up-href') ? link.getAttribute('href')
-    target = options.target ? link.getAttribute('up-target')
+    options.url ?= link.getAttribute('up-href') ? link.getAttribute('href')
+    options.target ?= link.getAttribute('up-target')
     options.failTarget ?= link.getAttribute('up-fail-target')
     options.fallback ?= e.booleanOrStringAttr(link, 'up-fallback')
     options.transition ?= e.booleanOrStringAttr(link, 'up-transition')
@@ -200,25 +182,42 @@ up.link = do ->
     options.class ?= link.getAttribute('up-class')
     options.size ?= link.getAttribute('up-size')
     options.dismissable ?= e.booleanAttr(link, 'up-dismissible')
+    options.feedback ?= e.booleanAttr(link, 'up-feedback') ? true
+    options.feedback = false if options.preload
     options.context ?= e.jsonAttr(link, 'up-context')
     options.onConfirmed ?= up.layer.closeHandlerAttr(link, 'up-on-confirmed')
     options.onDismissed ?= up.layer.closeHandlerAttr(link, 'up-on-dismissed')
 
-    throw "parse [up-on-confirm='code']"
-    throw "parse [up-on-dismiss='code']"
-
-    throw "can we unify parsing of form and link options? there will be no other when we remove modal, link, ..."
-
     options.confirm ?= link.getAttribute('up-confirm')
     options = u.merge(options, up.motion.animateOptions(options, link))
 
-    up.browser.whenConfirmed(options).then ->
-      up.replace(target, url, options)
+    promise = up.browser.whenConfirmed(options)
+    promise = promise.then ->
+      up.event.whenEmitted('up:link:follow', log: 'Following link', u.merge(options, target: link))
+    promise = promise.then ->
+      up.feedback.start(link) unless options.feedback
+      changeResult = up.change(options)
+      u.always(changeResult, -> up.feedback.stop(link)) unless options.feedback
+      changeResult
+    promise
 
-  defaultPreload = (link, options) ->
-    options = u.options(options)
-    options.preload = true
-    defaultFollow(link, options)
+  ###**
+  This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
+
+  The event is emitted on the `<a>` element that is being followed.
+
+  @event up:link:follow
+  @param {Element} event.target
+    The link element that will be followed.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the link from being followed.
+  @stable
+  ###
+
+  # TODO: Move up.proxy.preload() to up.link.preload()
+
+  preload = (link, options) ->
+    follow(link, u.merge(options, preload: true))
 
   ###**
   Returns the HTTP method that should be used when following the given link.
@@ -244,29 +243,6 @@ up.link = do ->
   ###
   allowDefault = (event) ->
 
-  followVariants = []
-
-  ###**
-  Registers the given handler for links with the given selector.
-
-  This does more than a simple `click` handler:
-
-  - It also handles `[up-instant]`
-  - It also handles `[up-href]`
-
-  @function up.link.addFollowVariant
-  @param {string} simplifiedSelector
-    A selector without `a` or `[up-href]`, e.g. `[up-target]`
-  @param {Function(element, options)} options.follow
-  @param {Function(element, options)} options.preload
-  @internal
-  ###
-  addFollowVariant = (simplifiedSelector, options) ->
-    variant = new up.FollowVariant(simplifiedSelector, options)
-    followVariants.push(variant)
-    variant.registerEvents()
-    variant
-
   ###**
   Returns whether the given link will be [followed](/up.follow) by Unpoly
   instead of making a full page load.
@@ -280,23 +256,8 @@ up.link = do ->
   @experimental
   ###
   isFollowable = (linkOrSelector) ->
-    linkOrSelector = e.get(linkOrSelector)
-    !!followVariantForLink(linkOrSelector, default: false)
-
-  ###**
-  Returns the handler function that can be used to follow the given link.
-  E.g. it wil return a handler calling `up.modal.follow` if the link is a `[up-modal]`,
-  but a handler calling `up.link.follow` if the links is `[up-target]`.
-
-  @param {Element} link
-  @return {Object}
-  @internal
-  ###
-  followVariantForLink = (link, options = {}) ->
-    throw "Kill follow variants. They're all [up-follow]/[up-target] now!"
-    variant = u.find followVariants, (variant) -> variant.matchesLink(link)
-    variant ||= DEFAULT_FOLLOW_VARIANT unless options.default is false
-    variant
+    link = e.get(linkOrSelector)
+    e.matches(link, fullSelector())
 
   ###**
   Makes sure that the given link will be [followed](/up.follow)
@@ -336,6 +297,15 @@ up.link = do ->
   isSafe = (selectorOrLink, options) ->
     method = followMethod(selectorOrLink, options)
     up.proxy.isSafeMethod(method)
+
+
+  targetMacro = (queryAttr, fixedResultAttrs) ->
+    up.macro "[#{queryAttr}]", (element) ->
+      target = e.optionalTarget(element, queryAttr)
+      optionalTarget = link.getAttribute(queryAttr)
+      resultAttrs = u.merge(fixedResultAttrs, 'up-target': optionalTarget)
+      e.setMissingAttrs(resultAttrs)
+      e.removeAttribute(queryAttr)
 
   ###**
   [Follows](/up.follow) this link with JavaScript and replaces a CSS selector
@@ -449,10 +419,6 @@ up.link = do ->
     Set this to a URL string to update the history with the given URL.
   @stable
   ###
-  DEFAULT_FOLLOW_VARIANT = addFollowVariant '[up-target], [up-follow]',
-    # Don't just pass the `defaultFollow` function reference so we can stub it in tests
-    follow: (link, options) -> defaultFollow(link, options)
-    preload: (link, options) -> defaultPreload(link, options)
 
   ###**
   Fetches this link's `[href]` with JavaScript and [replaces](/up.replace) the
@@ -504,6 +470,29 @@ up.link = do ->
   @stable
   ###
 
+  up.on 'click', fullSelector(), (event, link) ->
+    if shouldProcessEvent(event, link)
+      if e.matches(link, '[up-instant]')
+        # If the link was already processed on mousedown, we still need
+        # to prevent this later click event's chain.
+        up.event.halt(event)
+      else
+        consumeFollowEvent(event, link)
+    else
+      # For tests
+      allowDefault(event)
+
+  up.on 'mousedown', fullSelector(), (event, link) ->
+    if shouldProcessEvent(event, link) && e.matches(link, '[up-instant]')
+      consumeFollowEvent(event, link)
+    else
+      # For tests
+      allowDefault(event)
+
+  consumeFollowEvent = (event, link) ->
+    up.event.consumeAction(event)
+    u.muteRejection follow(link)
+
   ###**
   By adding an `up-instant` attribute to a link, the destination will be
   fetched on `mousedown` instead of `click` (`mouseup`).
@@ -552,20 +541,9 @@ up.link = do ->
     Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @stable
   ###
-  up.macro '[up-dash]', (element) ->
-    target = e.booleanOrStringAttr(element, 'up-dash')
-    element.removeAttribute('up-dash')
-    newAttrs = {
-      'up-preload': '',
-      'up-instant': ''
-    }
-    if target is true
-      # If it's literally `true` then we don't have a target selector.
-      # Just follow the link by replacing `<body>`.
-      makeFollowable(element)
-    else
-      newAttrs['up-target'] = target
-    e.setMissingAttrs(element, newAttrs)
+  targetMacro 'up-dash',
+    'up-preload': '',
+    'up-instant': ''
 
   ###**
   Add an `[up-expand]` attribute to any element to enlarge the click area of an
@@ -574,7 +552,6 @@ up.link = do ->
   `[up-expand]` honors all the Unppoly attributes in expanded links, like
   `a[up-target]`, `a[up-instant]` or `a[up-preload]`.
   It also expands links that open [modals](/up.modal) or [popups](/up.popup).
-
 
   \#\#\# Example
 
@@ -638,8 +615,6 @@ up.link = do ->
   isFollowable: isFollowable
   shouldProcessEvent: shouldProcessEvent
   followMethod: followMethod
-  addFollowVariant: addFollowVariant
-  followVariantForLink: followVariantForLink
   allowDefault: allowDefault
 
 up.visit = up.link.visit

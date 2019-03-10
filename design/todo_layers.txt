@@ -10,6 +10,16 @@
 - Test that [up-dismiss][up-follow] inside a layer will dismiss
 - Test that [up-dismiss][up-follow] outside a layer will follow
 - Documentation
+- can we unify parsing of form and link options? there will be no other when we remove modal, link, ...
+- Do layers really need both [up-class] and [up-size] ? Setting size is the only use case for class.
+- Change up.visit() docs: Will now update the current page, or { layer } option. Maybe deprecate in favor of up.change().
+- What is up.browser.navigate() ?
+- Is { navigate } is really the best name for the option? Maybe { solo } or similar?
+- Unfortunate naming: { confirm } vs. { onConfirmed }. Maybe use { accept } for layers?
+- Deprecate up.replace(). It takes a selector, and that is now mostly optional.
+- Deprecate up.extract(). It takes a selector, and that is now mostly optional.
+- Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
+- up.reload() with an element should update the element in whatever layer it lives in
 
 
 Finishing up

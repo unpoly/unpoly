@@ -259,12 +259,9 @@ up.layer = do ->
   # TODO: Docs for [up-cover]
   for implementation in DEFAULT_FLAVOR_IMPLEMENTATIONS
     if attr = implementation.attr
-      up.macro "[#{attr}]", (link) ->
-        optionalTarget = link.getAttribute(attr)
-        e.setMissingAttrs
-          'up-layer': 'new'
-          'up-flavor': implementation.flavor
-          'up-target': optionalTarget
+      up.link.targetMacro attr,
+        'up-layer': 'new'
+        'up-flavor': implementation.flavor
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
