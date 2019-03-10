@@ -47,13 +47,6 @@ up.layer = do ->
     stack.reset()
     queue.reset()
 
-  throw "each update needs to update title and url in the current fragemnt"
-  throw "only if the topmost layer is changed we change document.title or pushState(url)"
-  throw "allow size classes for bootstrap-like modal implementations; maybe we can support [up-target][up-class] to set a class on the new fragment"
-  throw "implement focus trapping within a layer"
-  throw "make sure .up-layer has [role=dialog]"
-  throw "implement up:layer:* events"
-
   open = (options = {}) ->
     if options.content
       openWithContent(options)
@@ -65,6 +58,7 @@ up.layer = do ->
       # - up.change(url: ...)
       # if we would offer { content } for up.change():
       # - we could only allow a single target (no ",", no hungries)
+      # - would also enable up.reload(Element)
       throw "implement up.change()"
       up.change(options)
 
@@ -76,6 +70,8 @@ up.layer = do ->
       options.content = e.createFromHtml(options.content)
 
     implementation = config[options.flavor].implementation
+
+    throw "implement up:layer:open event in up.Layer"
 
     # implementation constructor will take care of default options
     layer = new options.implementation(options)

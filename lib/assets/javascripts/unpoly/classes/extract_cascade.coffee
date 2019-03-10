@@ -88,7 +88,7 @@ class up.ExtractCascade
   executeNotApplicable: ->
     if @options.inspectResponse
       inspectAction = { label: 'Open response', callback: @options.inspectResponse }
-    up.fail("Could not match #{@options.humanizedTarget} in current page and response", action: inspectAction)
+    up.fail("Could not match target in current page and response", action: inspectAction)
 
   buildResponseDoc: ->
     @responseDoc = new up.ResponseDoc
@@ -99,7 +99,7 @@ class up.ExtractCascade
       noneApplicable: => @preflightTargetNotApplicable()
 
   preflightTargetNotApplicable: ->
-    up.fail("Could not find #{@options.humanizedTarget} in current page")
+    up.fail("Could not find target in current page")
 
   seekPlan: (opts) ->
     for plan, index in @plans

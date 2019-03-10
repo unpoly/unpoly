@@ -196,20 +196,8 @@ up.fragment = do ->
       fullLoad() unless options.preload
       return u.unresolvablePromise()
 
-    successOptions = u.merge options,
-      target: selectorOrElement,
-      humanizedTarget: 'target'
-
-    failureOptions = u.merge options,
-      humanizedTarget: 'failure target'
-
-    throw "rename fail options programmatically instead of listing each one"
-    u.renameKey(failureOptions, 'failTarget', 'target')
-    u.renameKey(failureOptions, 'failTransition', 'transition')
-    u.renameKey(failureOptions, 'failLayer', 'layer')
-    u.renameKey(failureOptions, 'failReveal', 'reveal')
-    u.renameKey(failureOptions, 'failPeel', 'peel')
-    u.renameKey(failureOptions, 'failRestoreScroll', 'restoreScroll')
+    successOptions = u.merge(options, target: selectorOrElement)
+    failureOptions = u.unprefixKeys(options, 'fail')
 
     successCascade = new up.ExtractCascade(successOptions)
     failureCascade = new up.ExtractCascade(failureOptions)
@@ -236,10 +224,10 @@ up.fragment = do ->
 
     request = new up.Request(requestAttrs)
 
-    onSuccess = (response) ->
+    onRequestSuccess = (response) ->
       processResponse(true, improvedTarget, request, response, successOptions)
 
-    onFailure = (response) ->
+    onRequestFailure = (response) ->
       rejection = -> Promise.reject(response)
       if isProcessable(response)
         promise = processResponse(false, improvedFailTarget, request, response, failureOptions)
@@ -250,7 +238,8 @@ up.fragment = do ->
         rejection()
 
     promise = up.request(request)
-    promise = promise.then(onSuccess, onFailure) unless options.preload
+    unless options.preload
+      promise = promise.then(onRequestSuccess, onRequestFailure)
     return promise
 
   isProcessable = (response) ->

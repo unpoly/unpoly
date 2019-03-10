@@ -11,7 +11,7 @@ class up.Layer extends up.Record
       'flavor',
       'context'
     ]
-    configKeys = Object.keys(up.layer.Base.config)
+    configKeys = Object.keys(up.layer.config)
     return keys.concat(configKeys)
 
   @defaults: ->
