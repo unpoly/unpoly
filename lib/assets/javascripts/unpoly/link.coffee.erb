@@ -154,11 +154,15 @@ up.link = do ->
 
     throw "Write up.OptionParser"
 
-    parser = new up.OptionParser(options, link, failVariants: true)
+    parser = new up.OptionParser(options, link)
     parser.attr('url', attribute: ['up-href', 'href'])
-    parser.attr('target')
-    parser.attr('fallback', parser: e.booleanOrStringAttr)
-    parser.attr('reveal', parser: e.booleanOrStringAttr, default: true)
+    parser.attr('target', fail: true)
+    parser.attr('fallback', parser: e.booleanOrStringAttr, fail: true)
+    parser.attr('reveal', parser: e.booleanOrStringAttr, default: true, fail: true)
+
+    # Form has this edge case:
+    # options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
+
 
 
 
