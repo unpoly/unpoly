@@ -91,7 +91,7 @@ class up.ExtractCascade
     up.fail("Could not match target in current page and response", action: inspectAction)
 
   buildResponseDoc: ->
-    @responseDoc = new up.ResponseDoc
+    @responseDoc = new up.ResponseDoc(@options)
 
   preflightTarget: ->
     @seekPlan

@@ -4,6 +4,7 @@ class up.TaskQueue
     @reset()
 
   cancel: ->
+    # TODO: DO we really need .cancel()?
     for task in @tasks
       task.canceled = true
 

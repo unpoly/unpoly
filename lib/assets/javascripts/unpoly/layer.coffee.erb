@@ -19,7 +19,6 @@ up.layer = do ->
 
     return newConfig
 
-  queue = new up.TaskQueue()
   stack = new up.LayerStack(-> layers: [new up.layers.Root()])
 
   registerFlavor = (implementation, store = config) ->
@@ -104,21 +103,14 @@ up.layer = do ->
     if layer == currentLayer() && layer.history # history option also says if we're updating title
       document.title = layer.title
 
-  throw "move to up.Layer.Base"
-  firstElement = (layer, selector) ->
-    allElements(layer, selector)[0]
+  sync = (options) ->
+    lookupOne(options).sync()
 
-  throw "move to up.Layer.Base"
-  sync = () ->
-    # todo
+  dismiss = (options) ->
+    lookupOne(options).dismiss(options)
 
-  throw "move to up.Layer.Base"
-  allElements = (layer, selector) ->
-    layer = lookupOne(layer)
-    matches = e.all(layer.containerElement, selector)
-    if stack.isCurrentRoot()
-      matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
-    matches
+  confirm = (options) ->
+    lookupOne(options).confirm(options)
 
   layersContainer = ->
     selector = '.up-layers'
@@ -126,66 +118,6 @@ up.layer = do ->
 
   currentLayer = ->
     stack.current()
-
-  asap = (fn) ->
-    queue.asap(fn)
-
-  throw "move to up.Layer.Base"
-  dismiss = (options) ->
-    closeVariant(u.merge(options,
-      valueAttr: 'up-dismiss'
-      closeEvent: 'up:layer:dismiss'
-      closedEvent: 'up:layer:dismissed'
-      closedCallback: 'onDismissed'
-    ))
-
-  throw "move to up.Layer.Base"
-  confirm = (options) ->
-    closeVariant(u.merge(options,
-      valueAttr: 'up-confirm'
-      closeEvent: 'up:layer:confirm'
-      closedEvent: 'up:layer:confirmed'
-      closedCallback: 'onConfirmed'
-    ))
-
-  throw "move to up.Layer.Base"
-  closeVariant = (options) ->
-    layer = lookupOne(options.layer, options)
-    origin = options.origin
-    emitEvents = options.emitEvents ? true
-
-    if origin
-      options.value ?= e.jsonAttr(origin, options.valueAttr)
-
-    eventProps =
-      target: layer.element
-      layer: layer
-      value: options.value
-      origin: origin
-
-    # Abort all pending requests targeting the layer we're now closing.
-    up.proxy.abort(preflightLayer: layer)
-
-    if !emitEvents || up.event.nobodyPrevents(options.closeEvent, eventProps)
-      # Synchronously remove the layer from the stack so other sync calls
-      # immediately see the updated stack. Everything after that is just optics.
-      stack.remove(layer)
-
-      return asap ->
-        layer.close().then ->
-          if emitEvents
-            # Wait for the callbacks until the closing animation ends,
-            # so user-provided code doesn't run too wildly out of order.
-
-            if closedCallback = layer[options.closedCallback]
-              # Callback option only gets the resolution value.
-              # Also see up.layer.closeHandlerAttr()
-              closedCallback.call(origin, options.value)
-
-            # Global event gets the full event props
-            up.emit(options.closedEvent, eventProps)
-    else
-      return up.event.abortRejection()
 
   forElement = (element) ->
     element = e.get(element)

@@ -9,8 +9,8 @@ class up.Layer.Root extends up.Layer
 
   @flavor: 'root'
 
-  constructor: (options) ->
-    super(options)
+  constructor: (stack, options) ->
+    super(stack, options)
     @element = document.documentElement
 
   open: ->
@@ -18,3 +18,8 @@ class up.Layer.Root extends up.Layer
 
   close: ->
     throw new Error('Cannot close the root layer')
+
+  allElements: (selector) ->
+    matches = super(selector)
+    matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
+    return matches

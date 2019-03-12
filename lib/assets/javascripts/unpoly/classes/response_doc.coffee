@@ -22,10 +22,6 @@ class up.ResponseDoc
       element = parser(element)
     element
 
-  constructor: (@html) ->
-    @wrapNoscriptInHtml()
-    @parsedRoot = e.createDocumentFromHtml(@html)
-
   title: ->
     @parsedRoot.querySelector("head title")?.textContent
 

@@ -142,7 +142,6 @@ up.fragment = do ->
     If a string is given, it is used as the URL the browser's location bar and history.
     If omitted or true, the `url` argument will be used.
     If set to `false`, the history will remain unchanged.
-  @param {boolean|string} [options.source=true]
   @param {boolean|string} [options.reveal=false]
     Whether to [reveal](/up.reveal) the new fragment.
 
@@ -197,6 +196,13 @@ up.fragment = do ->
       return u.unresolvablePromise()
 
     successOptions = u.merge(options, target: selectorOrElement)
+
+#    failureOptions = u.copy(options)
+#    if u.isString(options.history) && u.isMissing(options.failHistory)
+#      failureOptions.failHistory = null
+
+    # For all other keys we accept the success options as defaults.
+    # They can be overriden by their failVariant keys.
     failureOptions = u.unprefixKeys(options, 'fail')
 
     successCascade = new up.ExtractCascade(successOptions)
@@ -258,21 +264,75 @@ up.fragment = do ->
 
     isReloadable = (response.method == 'GET')
 
-    if isSuccess
-      if isReloadable # e.g. GET returns 200 OK
-        options.history = historyUrl unless options.history is false || u.isString(options.history)
-        options.source  = sourceUrl unless options.source is false || u.isString(options.source)
-      else # e.g. POST returns 200 OK
-        # We allow the developer to pass GETable URLs as { history } and { source } options.
-        options.history = false unless u.isString(options.history)
-        options.source  = 'keep' unless u.isString(options.source)
+#    if isSuccess
+#      if isReloadable # e.g. GET returns 200 OK
+#        options.source  = sourceUrl unless options.source is false || u.isString(options.source)
+#      else # e.g. POST returns 200 OK
+#        # We allow the developer to pass GETable URLs as { history } and { source } options.
+#        options.source  = 'keep' unless u.isString(options.source)
+#    else
+#      if isReloadable # e.g. GET returns 500 Internal Server Error
+#        options.source  = sourceUrl unless options.source is false
+#      else # e.g. POST returns 500 Internal Server Error
+#        options.source  = 'keep'
+
+    if isReloadable
+      options.source = sourceUrl
     else
-      if isReloadable # e.g. GET returns 500 Internal Server Error
-        options.history = historyUrl unless options.history is false
-        options.source  = sourceUrl unless options.source is false
-      else # e.g. POST returns 500 Internal Server Error
-        options.history = false
-        options.source  = 'keep'
+      options.source = 'keep'
+
+    if u.isString(options.history)
+      options.layerHistory = true
+      options.navigateLocation = options.history
+    else if !isReloadable || options.history is false
+      options.layerHistory = false
+      options.navigateLocation = null
+    else
+      # isReloadable and history is (true or missing)
+      options.layerHistory = 'default'    # don't override layer default! but override would do that, too...
+      options.navigateLocation = historyUrl
+
+#    if isSuccess
+#      if isReloadable # e.g. GET returns 200 OK
+#        if options.history is false
+#          options.createLayerHistory = false
+#          options.updateLayerHistory = false
+#        else if u.isString(options.history)
+#          options.createLayerHistory = true
+#          options.createLayerLocation = options.history
+#          options.updateLayerHistory = true
+#          options.updateLayerLocation = options.history
+#        else # options.history is true or missing
+#          options.createLayerHistory = undefined    # don't override layer default!
+#          options.createLayerLocation = historyUrl  # but remember which URL it would have been if layer wants history
+#          options.updateLayerHistory = true
+#          options.updateLayerLocation = historyUrl
+#      else
+#        if u.isString(options.history)
+#          # We allow the developer to pass GETable URLs as { history } option.
+#          options.createLayerHistory = true
+#          options.createLayerLocation = options.history
+#          options.updateLayerHistory = true
+#          options.updateLayerLocation = options.history
+#        else
+#          options.createLayerHistory = false
+#          options.updateLayerHistory = false
+#
+#    else
+#      # failure
+#      if isReloadable # e.g. GET returns 500 Internal Server Error
+#        if options.history is false
+#          options.createLayerHistory = false
+#          options.updateLayerHistory = false
+#        else
+#          options.createLayerHistory = undefined    # don't override layer default!
+#          options.createLayerLocation = historyUrl  # but remember which URL it would have been if layer wants history
+#          options.updateLayerHistory = true
+#          options.updateLayerLocation = historyUrl
+#      else # e.g. POST returns 500 Internal Server Error
+#        options.createLayerHistory = false
+#        options.updateLayerHistory = false
+
 
     # response.title might contain an X-Up-Title header
     if shouldExtractTitle(options) && response.title
@@ -281,7 +341,7 @@ up.fragment = do ->
     extract(selector, response.text, options)
 
   shouldExtractTitle = (options) ->
-    not (options.title is false || u.isString(options.title) || (options.history is false && options.title isnt true))
+    not (options.title is false || u.isString(options.title)
 
   ###**
   Updates a selector on the current page with the
@@ -323,8 +383,9 @@ up.fragment = do ->
   ###
   extract = (selectorOrElement, html, options) ->
     up.puts 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length
+    options = u.options(options) # copy
     options.target = selectorOrElement
-    options.html = html
+    options.content = html
     changeNow(options)
 
 
@@ -603,7 +664,7 @@ up.fragment = do ->
     unless element
       return Promise.resolve()
 
-    up.layer.updateHistory(element, options)
+    up.layer.updateHistory(u.merge(options, origin: element))
 
     markElementAsDestroying(element)
 

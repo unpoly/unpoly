@@ -5,6 +5,10 @@ class up.LayerStack extends up.Config
   constructor: (blueprintFn) ->
     super(blueprintFn)
     @layers ||= []
+    @queue = new up.TaskQueue()
+
+  asap: (task) ->
+    @queue.asap(task)
 
   isRoot: (layer) ->
     @layers[0] == layer

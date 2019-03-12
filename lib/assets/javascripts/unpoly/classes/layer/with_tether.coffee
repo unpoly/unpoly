@@ -18,6 +18,9 @@ class up.Layer.WithTether extends up.Layer
       @tether.stop()
       @destroyElement()
 
+  sync: ->
+    @tether.sync()
+
   startOpenAnimation: ->
     return up.animate(@frameElement, @evalOption(@openAnimation), @openAnimateOptions())
 

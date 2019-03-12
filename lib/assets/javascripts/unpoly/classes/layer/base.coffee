@@ -41,7 +41,8 @@ class up.Layer extends up.Record
     onConfirmed: null
     onContentAttached: null
 
-  constructor: (@options) ->
+  constructor: (@stack, options) ->
+    super(options)
     @flavor = @constructor.flavor or up.fail('Layer flavor must implement a static { flavor } property')
 
   defaultTargets: ->
@@ -126,3 +127,66 @@ class up.Layer extends up.Record
 
   destroyElement: ->
     e.remove(@element)
+
+  confirm: (options) ->
+    @closeVariant(u.merge(options,
+      valueAttr: 'up-confirm'
+      closeEvent: 'up:layer:confirm'
+      closedEvent: 'up:layer:confirmed'
+      closedCallback: @onConfirmed
+    ))
+
+  dismiss: (options) ->
+    @closeVariant(u.merge(options,
+      valueAttr: 'up-dismiss'
+      closeEvent: 'up:layer:dismiss'
+      closedEvent: 'up:layer:dismissed'
+      closedCallback: @onDismissed
+    ))
+
+  closeVariant: (options) ->
+    origin = options.origin
+    emitEvents = options.emitEvents ? true
+
+    if origin
+      options.value ?= e.jsonAttr(origin, options.valueAttr)
+
+    eventProps =
+      target: @element
+      layer: this
+      value: options.value
+      origin: origin
+
+    # Abort all pending requests targeting the layer we're now closing.
+    up.proxy.abort(preflightLayer: this)
+
+    if !emitEvents || up.event.nobodyPrevents(options.closeEvent, eventProps)
+      # Synchronously remove the layer from the stack so other sync calls
+      # immediately see the updated stack. Everything after that is just optics.
+      @stack.remove(this)
+
+      return @stack.asap ->
+        @close().then ->
+          if emitEvents
+            # Wait for the callbacks until the closing animation ends,
+            # so user-provided code doesn't run too wildly out of order.
+
+            if closedCallback = options.closedCallback
+              # Callback option only gets the resolution value.
+              # Also see up.layer.closeHandlerAttr()
+              closedCallback.call(origin, options.value)
+
+            # Global event gets the full event props
+            up.emit(options.closedEvent, eventProps)
+    else
+      return up.event.abortRejection()
+
+  firstElement: (selector) ->
+    @allElements(selector)[0]
+
+  allElements: (selector) ->
+    e.all(@element, selector)
+
+  sync: ->
+    # no-op
+

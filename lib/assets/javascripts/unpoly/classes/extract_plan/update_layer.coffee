@@ -1,56 +1,12 @@
+#= require ./base
+
 u = up.util
 e = up.element
 
-class up.ExtractPlan
-
-  @NOT_APPLICABLE: 'n/a'
-
-  constructor: (@options) ->
-
-  setSource: (element, sourceUrl) ->
-    unless sourceUrl is false
-      sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
-      element.setAttribute('up-source', sourceUrl)
-
-  updateHistoryAndTitle: (layer, options) ->
-    if newUrl = options.history
-      up.layer.updateUrl(layer, newUrl)
-
-    if newTitle = options.title
-      up.layer.updateTitle(layer, newTitle)
-
-  notApplicable: ->
-    throw up.ExtractPlan.NOT_APPLICABLE
-
-
-class up.ExtractPlan.OpenLayer extends up.ExtractPlan
-
-  preflightLayer: ->
-    undefined
-
-  preflightTarget: ->
-    # The target will always "exist" in the current page, since
-    # we're opening a new layer just for that.
-    @options.target
-
-  execute: (responseDoc) ->
-    newLayerContent = responseDoc.selectForInsertion(@options.target) or @notApplicable()
-    @setSource(newLayerContent, @options.source)
-
-    options = @options
-
-    onContentAttached = (layer) ->
-      up.hello(newLayerContent, options) # will emit up:fragment:inserted
-      up.layer.updateHistory(layer, options)
-
-    openOptions = u.options(@options, { onContentAttached, content: newLayerContent })
-
-    return up.layer.open(openOptions)
-
-
 class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
 
-  constructor: (@options) ->
+  constructor: (options) ->
+    super(options)
     @parseSteps()
 
   preflightLayer: ->
@@ -60,19 +16,22 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     @findOld()
     return @targetWithoutPseudoClasses()
 
-  execute: (responseDoc) ->
+  execute: ->
     @findOld()
-    @findNew(responseDoc)
+    @findNew()
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
-    @addHungrySteps(responseDoc)
+    @addHungrySteps()
 
     promise = Promise.resolve()
 
     if @options.peel
       promise = promise.then -> up.layer.peel(@options.layer)
 
-    @updateHistoryAndTitle(@options.layer, @options)
+    navigateOptions = u.copy(@options)
+    navigateOptions.history = navigateOptions.navigateLocation ? navigateOptions.history
+    throw "i need to update my own history, not that of the topmost layer"
+    up.layer.updateHistory(navigateOptions)
 
     promise.then ->
       swapPromises = @steps.map (step) ->
@@ -84,6 +43,7 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
 
       return Promise.all(swapPromises)
 
+    throw "wtf everythingThatFragmentDoes??"
     everythingThatFragmentDoes()
 
     return promise
@@ -232,19 +192,19 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
       step.oldElement = up.layer.firstElement(@options.layer, step.selector) or @notApplicable()
     @resolveOldNesting()
 
-  findNew: (responseDoc) ->
+  findNew: ->
     for step in @steps
       # The responseDoc has no layers. It's always just the page.
-      step.newElement = responseDoc.selectForInsertion(step.selector) or @notApplicable()
+      step.newElement = @responseDoc.selectForInsertion(step.selector) or @notApplicable()
 
-  addHungrySteps: (responseDoc) ->
+  addHungrySteps: ->
     if @options.hungry
       throw "replace with up.fragment.all(..., layer: @options.layer)"
       hungries = up.layer.allElements(@options.layer, up.radio.hungrySelector())
       transition = up.radio.config.hungryTransition ? @options.transition
       for hungry in hungries
         selector = e.toSelector(hungry)
-        if newHungry = responseDoc.first(selector)
+        if newHungry = @responseDoc.first(selector)
           @steps.push
             selector: selector
             oldElement: hungry
@@ -277,19 +237,3 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
 
   targetWithoutPseudoClasses: ->
     u.map(@steps, 'selector').join(', ')
-
-
-class up.ExtractPlan.ResetWorld extends up.ExtractPlan.UpdateLayer
-
-  preflightLayer: ->
-    up.layer.root()
-
-  constructor: (options) ->
-    options = u.merge(options,
-      layer: @preflightLayer(),
-      target: 'body',
-      peel: true
-      keep: false
-      resetScroll: true
-    )
-    super(options)
