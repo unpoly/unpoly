@@ -20,6 +20,7 @@
 - Deprecate up.extract(). It takes a selector, and that is now mostly optional.
 - Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
 - up.reload() with an element should update the element in whatever layer it lives in
+- Document { history / location } changes
 
 
 Finishing up

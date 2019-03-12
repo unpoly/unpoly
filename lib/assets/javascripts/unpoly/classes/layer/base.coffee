@@ -19,6 +19,8 @@ class up.Layer extends up.Record
 
   @config: new up.Config ->
     history: false
+    location: null
+    title: null
     origin: null
     position: null
     align: null

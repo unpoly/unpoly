@@ -16,11 +16,7 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
     newLayerContent = @responseDoc.selectForInsertion(@options.target) or @notApplicable()
     @setSource(newLayerContent, @options.source)
 
-    navigateOptions = u.copy(@options)
-    # If a { history } option was given, it was meant for the layer, not its initial content.
-    # We accept another option { navigateLocation } to set give a location for the initial
-    # content.
-    navigateOptions.history = navigateOptions.navigateLocation
+    historyOptions = u.only(@options, 'title', 'location')
 
     onContentAttached = ->
       # Calling up.hello() will compile the new content
@@ -28,15 +24,8 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
       up.hello(newLayerContent, u.only(this, 'origin'))
 
       # Call updateHistory() with the original options, not the layer.
-      @updateHistory(navigateOptions)
+      @updateHistory(historyOptions)
 
-    openOptions = u.options(@options, { onContentAttached, content: newLayerContent })
-    openOptions.history = openOptions.layerHistory ? openOptions.history
-    if openOptions.layerHistory == 'default'
-      # Take the default from the layer config
-      delete openOptions.history
-
-    throw "up.fragment / processResponse always sets options.history to the URL, overriding any boolean history config of the layer itself"
-
+    openOptions = u.merge(@options, { onContentAttached, content: newLayerContent })
     return up.layer.open(openOptions)
 

@@ -151,6 +151,18 @@ up.link = do ->
   ###
   follow = (link, options) ->
     options = u.options(options)
+
+    throw "Write up.OptionParser"
+
+    parser = new up.OptionParser(options, link, failVariants: true)
+    parser.attr('url', attribute: ['up-href', 'href'])
+    parser.attr('target')
+    parser.attr('fallback', parser: e.booleanOrStringAttr)
+    parser.attr('reveal', parser: e.booleanOrStringAttr, default: true)
+
+
+
+
     options.url ?= link.getAttribute('up-href') ? link.getAttribute('href')
     options.target ?= link.getAttribute('up-target')
     options.failTarget ?= link.getAttribute('up-fail-target')
@@ -158,6 +170,8 @@ up.link = do ->
     options.transition ?= e.booleanOrStringAttr(link, 'up-transition')
     options.failTransition ?= e.booleanOrStringAttr(link, 'up-fail-transition')
     options.history ?= e.booleanOrStringAttr(link, 'up-history')
+    options.location ?= link.getAttribute('up-location')
+    options.title ?= link.getAttribute('up-title')
     options.reveal ?= e.booleanOrStringAttr(link, 'up-reveal') ? true
     options.failReveal ?= e.booleanOrStringAttr(link, 'up-fail-reveal') ? true
 

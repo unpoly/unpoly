@@ -28,10 +28,9 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     if @options.peel
       promise = promise.then -> up.layer.peel(@options.layer)
 
-    navigateOptions = u.copy(@options)
-    navigateOptions.history = navigateOptions.navigateLocation ? navigateOptions.history
+    historyOptions = u.only(@options, 'title', 'location')
     throw "i need to update my own history, not that of the topmost layer"
-    up.layer.updateHistory(navigateOptions)
+    up.layer.updateHistory(historyOptions)
 
     promise.then ->
       swapPromises = @steps.map (step) ->

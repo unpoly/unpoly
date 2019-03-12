@@ -231,12 +231,12 @@ up.fragment = do ->
     request = new up.Request(requestAttrs)
 
     onRequestSuccess = (response) ->
-      processResponse(true, improvedTarget, request, response, successOptions)
+      processResponse(improvedTarget, request, response, successOptions)
 
     onRequestFailure = (response) ->
       rejection = -> Promise.reject(response)
       if isProcessable(response)
-        promise = processResponse(false, improvedFailTarget, request, response, failureOptions)
+        promise = processResponse(improvedFailTarget, request, response, failureOptions)
         # Although processResponse() we will perform a successful replacement of options.failTarget,
         # we still want to reject the promise that's returned to our API client.
         u.always(promise, rejection)
@@ -252,91 +252,43 @@ up.fragment = do ->
     (response instanceof up.Response) && !response.isFatalError()
 
   ###**
+  Infers history-related options from request/response and calls up.extract()
+  with the response body.
+
   @internal
   ###
-  processResponse = (isSuccess, selector, request, response, options) ->
-    sourceUrl = response.url
-    historyUrl = sourceUrl
+  processResponse = (selector, request, response, options) ->
+    responseUrl = response.url
+    locationFromExchange = responseUrl
 
     if hash = request.hash
       options.hash = hash
-      historyUrl += hash
+      locationFromExchange += hash
 
     isReloadable = (response.method == 'GET')
 
-#    if isSuccess
-#      if isReloadable # e.g. GET returns 200 OK
-#        options.source  = sourceUrl unless options.source is false || u.isString(options.source)
-#      else # e.g. POST returns 200 OK
-#        # We allow the developer to pass GETable URLs as { history } and { source } options.
-#        options.source  = 'keep' unless u.isString(options.source)
-#    else
-#      if isReloadable # e.g. GET returns 500 Internal Server Error
-#        options.source  = sourceUrl unless options.source is false
-#      else # e.g. POST returns 500 Internal Server Error
-#        options.source  = 'keep'
+    if u.isString(options.history)
+      up.legacy.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
+      delete options.history
+      options.location = options.history
 
     if isReloadable
-      options.source = sourceUrl
+      # Remember where we got the fragment from so we can up.reload() it later.
+      options.source = responseUrl
     else
+      # Keep the source of the previous fragment (e.g. the form that was submitted into failure).
       options.source = 'keep'
+      # Since the current URL is not retrievable over the GET-only address bar,
+      # we can only provide history if a location URL is passed as an option.
+      options.history = !options.location
 
-    if u.isString(options.history)
-      options.layerHistory = true
-      options.navigateLocation = options.history
-    else if !isReloadable || options.history is false
-      options.layerHistory = false
-      options.navigateLocation = null
+    # Accept { history: false } as a shortcut to disable all history-related options.
+    if options.history == false
+      options.location = null
+      options.title = null
     else
-      # isReloadable and history is (true or missing)
-      options.layerHistory = 'default'    # don't override layer default! but override would do that, too...
-      options.navigateLocation = historyUrl
-
-#    if isSuccess
-#      if isReloadable # e.g. GET returns 200 OK
-#        if options.history is false
-#          options.createLayerHistory = false
-#          options.updateLayerHistory = false
-#        else if u.isString(options.history)
-#          options.createLayerHistory = true
-#          options.createLayerLocation = options.history
-#          options.updateLayerHistory = true
-#          options.updateLayerLocation = options.history
-#        else # options.history is true or missing
-#          options.createLayerHistory = undefined    # don't override layer default!
-#          options.createLayerLocation = historyUrl  # but remember which URL it would have been if layer wants history
-#          options.updateLayerHistory = true
-#          options.updateLayerLocation = historyUrl
-#      else
-#        if u.isString(options.history)
-#          # We allow the developer to pass GETable URLs as { history } option.
-#          options.createLayerHistory = true
-#          options.createLayerLocation = options.history
-#          options.updateLayerHistory = true
-#          options.updateLayerLocation = options.history
-#        else
-#          options.createLayerHistory = false
-#          options.updateLayerHistory = false
-#
-#    else
-#      # failure
-#      if isReloadable # e.g. GET returns 500 Internal Server Error
-#        if options.history is false
-#          options.createLayerHistory = false
-#          options.updateLayerHistory = false
-#        else
-#          options.createLayerHistory = undefined    # don't override layer default!
-#          options.createLayerLocation = historyUrl  # but remember which URL it would have been if layer wants history
-#          options.updateLayerHistory = true
-#          options.updateLayerLocation = historyUrl
-#      else # e.g. POST returns 500 Internal Server Error
-#        options.createLayerHistory = false
-#        options.updateLayerHistory = false
-
-
-    # response.title might contain an X-Up-Title header
-    if shouldExtractTitle(options) && response.title
-      options.title = response.title
+      options.location ?= locationFromExchange
+      options.title ?= response.title
 
     extract(selector, response.text, options)
 

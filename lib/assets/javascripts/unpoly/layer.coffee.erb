@@ -85,18 +85,19 @@ up.layer = do ->
   updateHistory = (layer, options) ->
     layer = lookupOne(layer, options)
 
-    if newUrl = options.history
-      layer.url = newUrl
-      urlChanged(layer)
-
     if newTitle = options.title
       layer.title = title
       titleChanged(layer)
 
+    if newLocation = options.location
+      layer.location = newLocation
+      locationChanged(layer)
+
   throw "move to up.Layer.Base"
-  urlChanged = (layer) ->
+  throw "rename layer.url to layer.location"
+  locationChanged = (layer) ->
     if layer == currentLayer() && layer.history
-      up.history.push(layer.url)
+      up.history.push(layer.location)
 
   throw "move to up.Layer.Base"
   titleChanged = (layer) ->
