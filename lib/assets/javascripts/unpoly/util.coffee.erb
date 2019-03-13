@@ -1582,9 +1582,26 @@ up.util = do ->
     prefixLength = prefix.length
     for key, value of object
       if key.indexOf(prefix) == 0
-        key = key[prefixLength].toLowerCase() + key.slice(prefixLength + 1)
+        key = unprefixCamelCase(key, prefixLength)
       copy[key] = value
     copy
+
+  camelToKebabCase = (str) ->
+    str.replace /[A-Z]/, (char) -> '-' + char.toLowerCase()
+
+  prefixCamelCase = (str, prefix) ->
+    prefix + upperCaseFirst(str)
+
+  unprefixCamelCase = (str, prefix) ->
+    if key.indexOf(prefix) == 0
+      lowerCaseFirst(key.slice(prefixLength))
+
+  lowerCaseFirst = (str) ->
+    str[0].toLowerCase() + str.slice(1)
+
+  upperCaseFirst (str) ->
+    str[0].toUpperCase() + str.slice(1)
+
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   parseUrl: parseUrl

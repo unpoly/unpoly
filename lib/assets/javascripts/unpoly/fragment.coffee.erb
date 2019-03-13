@@ -197,13 +197,9 @@ up.fragment = do ->
 
     successOptions = u.merge(options, target: selectorOrElement)
 
-#    failureOptions = u.copy(options)
-#    if u.isString(options.history) && u.isMissing(options.failHistory)
-#      failureOptions.failHistory = null
-
     # For all other keys we accept the success options as defaults.
-    # They can be overriden by their failVariant keys.
-    failureOptions = u.unprefixKeys(options, 'fail')
+    # They can be overriden by their failVariant keys, e.g. { failTarget } overrides { target }.
+    failureOptions = deriveFailureOptions(options)
 
     successCascade = new up.ExtractCascade(successOptions)
     failureCascade = new up.ExtractCascade(failureOptions)
@@ -250,6 +246,27 @@ up.fragment = do ->
 
   isProcessable = (response) ->
     (response instanceof up.Response) && !response.isFatalError()
+
+  deriveFailureOptions = (successOptions) ->
+    # `successOptions` is an object like
+    #
+    #     { foo: 1, failFoo: undefined, bar: 2, failBar: 3, baz: 4 }
+    #
+    # We want to use the failVariant keys where they exists and are defined.
+    # Hence the result should be:
+    #
+    #     { foo: 1, bar: 3, baz: 4 }
+    #
+    # Note how we *don't* override `foo` with `undefined`.
+
+    failureOptions = u.copy(successOptions)
+    for key, value of failureOptions
+      # Keep key/value unless there is a defined failOverride
+      if unprefixedKey = u.unprefixCamelCase(key, 'fail')
+        failValue = u.pluckKey(failureOptions, key)
+        unless u.isUndefined(failValue)
+          failureOptions[unprefixedKey] = failValue
+    failureOptions
 
   ###**
   Infers history-related options from request/response and calls up.extract()

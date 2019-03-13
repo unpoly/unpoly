@@ -189,6 +189,9 @@ up.form = do ->
     form = e.get(formOrSelector)
     form = e.closest(form, 'form')
 
+    parser = new up.OptionParser(options, link, fail: true)
+
+
     target = options.target ? form.getAttribute('up-target') ? 'body'
     url = options.url ? form.getAttribute('action') ? up.browser.url()
     options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
@@ -207,7 +210,10 @@ up.form = do ->
     options.origin ?= form
     options.layer ?= form.getAttribute('up-layer')
     options.failLayer ?= form.getAttribute('up-fail-layer')
-    options.params = up.Params.fromForm(form)
+
+    # Take params from form, but allow to pass additional params as { params }
+    options.params = Params.fromForm(form).addAll(options.params)
+
     options = u.merge(options, up.motion.animateOptions(options, form))
 
     throw "parse layer flavor, position, width ..."
@@ -225,7 +231,7 @@ up.form = do ->
         form.submit()
         return u.unresolvablePromise()
 
-      promise = up.replace(target, url, options)
+      promise = up.change(options)
       u.always promise, -> up.feedback.stop(form)
       promise
 

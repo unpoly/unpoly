@@ -217,10 +217,13 @@ class up.Params
     The name of the new entry.
   @param {any} value
     The value of the new entry.
+  @return {up.Params}
+    The modified `up.Params` instance.
   @experimental
   ###
   add: (name, value) ->
     @entries.push({name, value})
+    return this
 
   ###**
   Adds all entries from the given list of params.
@@ -229,6 +232,8 @@ class up.Params
 
   @function up.Params#addAll
   @param {Object|Array|string|up.Params|undefined} params
+  @return {up.Params}
+    The modified `up.Params` instance.
   @experimental
   ###
   addAll: (raw) ->
@@ -247,6 +252,7 @@ class up.Params
       @addAllFromObject(raw)
     else
       up.fail("Unsupport params type: %o", raw)
+    return this
 
   addAllFromObject: (object) ->
     for key, value of object
@@ -285,21 +291,27 @@ class up.Params
     The name of the entry to set.
   @param {any} value
     The new value of the entry.
+  @return {up.Params}
+    The modified `up.Params` instance.
   @experimental
   ###
   set: (name, value) ->
     @delete(name)
     @add(name, value)
+    return this
 
   ###**
   Deletes all entries with the given `name`.
 
   @function up.Params#delete
   @param {string} name
+  @return {up.Params}
+    The modified `up.Params` instance.
   @experimental
   ###
   delete: (name) ->
     @entries = u.reject(@entries, @matchEntryFn(name))
+    return this
 
   matchEntryFn: (name) ->
     (entry) -> entry.name == name

@@ -152,71 +152,45 @@ up.link = do ->
   follow = (link, options) ->
     options = u.options(options)
 
-    throw "Write up.OptionParser"
-
-    parser = new up.OptionParser(options, link)
-    parser.attr('url', attribute: ['up-href', 'href'])
-    parser.attr('target', fail: true)
-    parser.attr('fallback', parser: e.booleanOrStringAttr, fail: true)
-    parser.attr('reveal', parser: e.booleanOrStringAttr, default: true, fail: true)
-
-    # Form has this edge case:
-    # options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
-
-
-
-
-
-    options.url ?= link.getAttribute('up-href') ? link.getAttribute('href')
-    options.target ?= link.getAttribute('up-target')
-    options.failTarget ?= link.getAttribute('up-fail-target')
-    options.fallback ?= e.booleanOrStringAttr(link, 'up-fallback')
-    options.transition ?= e.booleanOrStringAttr(link, 'up-transition')
-    options.failTransition ?= e.booleanOrStringAttr(link, 'up-fail-transition')
-    options.history ?= e.booleanOrStringAttr(link, 'up-history')
-    options.location ?= link.getAttribute('up-location')
-    options.title ?= link.getAttribute('up-title')
-    options.reveal ?= e.booleanOrStringAttr(link, 'up-reveal') ? true
-    options.failReveal ?= e.booleanOrStringAttr(link, 'up-fail-reveal') ? true
-
-    options.cache ?= e.booleanAttr(link, 'up-cache')
-
-    # TODO: Find a more efficient way to parse fail options
-    options.restoreScroll ?= e.booleanAttr(link, 'up-restore-scroll') # the option may contain an Object, but not the attr
-    options.failRestoreScroll ?= e.booleanAttr(link, 'up-fail-restore-scroll')
-
+    parser = new up.OptionParser(options, link, fail: true)
+    parser.string('url', attr: ['up-href', 'href'])
+    parser.string('target')
+    parser.booleanOrString('fallback')
+    parser.json('params')
+    parser.boolean('cache')
+    parser.string('confirm')
+    parser.booleanOrString('reveal', default: true)
+    parser.boolean('restoreScroll')
+    parser.booleanOrString('transition')
+    # { history } is actually a boolean, but we keep the deprecated string
+    # variant which should now be passed as { location }.
+    parser.booleanOrString('history')
+    parser.string('location')
+    parser.string('title')
     options.method = followMethod(link, options)
-    options.origin ?= link
-
-    # Layer options
-    options.layer ?= link.getAttribute('up-layer')
-    options.failLayer ?= link.getAttribute('up-fail-layer')
-    options.peel ?= e.booleanOrStringAttr(form, 'up-peel') ? true
-    options.failPeel ?= e.booleanOrStringAttr(form, 'up-fail-peel') ? true
-    options.layer ?= link.getAttribute('up-layer')
-    options.flavor ?= link.getAttribute('up-flavor')
-    options.align ?= link.getAttribute('up-align')
-    options.position ?= link.getAttribute('up-position')
-    options.class ?= link.getAttribute('up-class')
-    options.size ?= link.getAttribute('up-size')
-    options.dismissable ?= e.booleanAttr(link, 'up-dismissible')
-    options.feedback ?= e.booleanAttr(link, 'up-feedback') ? true
+    options.orgin ?= link
+    parser.string('layer')
+    parser.string('flavor')
+    parser.json('context')
+    parser.boolean('peel')
+    parser.string('align')
+    parser.string('position')
+    parser.string('class')
+    parser.string('size')
+    parser.boolean('closable') # Deprecated. Is handled by up.Layer.
+    parser.boolean('dismissable')
+    parser.boolean('feedback', default: true)
     options.feedback = false if options.preload
-    options.context ?= e.jsonAttr(link, 'up-context')
-    options.onConfirmed ?= up.layer.closeHandlerAttr(link, 'up-on-confirmed')
-    options.onDismissed ?= up.layer.closeHandlerAttr(link, 'up-on-dismissed')
-
-    options.confirm ?= link.getAttribute('up-confirm')
-    options = u.merge(options, up.motion.animateOptions(options, link))
+    parser.parse(up.layer.closeHandlerAttr, 'onConfirmed')
+    parser.parse(up.layer.closeHandlerAttr, 'onDismissed')
+    u.assign(options, up.motion.animateOptions(options, link))
 
     promise = up.browser.whenConfirmed(options)
     promise = promise.then ->
       up.event.whenEmitted('up:link:follow', log: 'Following link', u.merge(options, target: link))
     promise = promise.then ->
-      up.feedback.start(link) unless options.feedback
-      changeResult = up.change(options)
-      u.always(changeResult, -> up.feedback.stop(link)) unless options.feedback
-      changeResult
+      changeFn = -> up.change(options)
+      up.feedback.around(link, options, changeFn)
     promise
 
   ###**

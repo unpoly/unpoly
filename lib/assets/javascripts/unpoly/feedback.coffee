@@ -264,6 +264,19 @@ up.feedback = do ->
   stop = (element) ->
     findActivatableArea(element).classList.remove(CLASS_ACTIVE)
 
+  around = (element, options, fn) ->
+    showFeedback = (options.feedback != false)
+
+    if showFeedback
+      start(element)
+
+    fnPromise = fn()
+
+    if showFeedback
+      u.always(fnPromise, -> stop(link))
+
+    fnPromise
+
   ###**
   Marks this element as a navigation component, such as a menu or navigation bar.
 
@@ -349,5 +362,6 @@ up.feedback = do ->
   config: config
   start: start
   stop: stop
+  around: around
 
 up.legacy.renamedModule 'navigation', 'feedback'

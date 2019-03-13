@@ -6,6 +6,11 @@ u = up.util
 
 class up.Layer extends up.Record
 
+  constructor: (options) ->
+    if u.isGiven(options.closable)
+      up.legacy.warn('Layer options { closable } has been renamed to { dismissable }')
+      options.dismissable = options.closable
+
   @keys: ->
     keys = [
       'flavor',
