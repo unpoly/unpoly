@@ -75,8 +75,6 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
       else
         step.oldElement.insertAdjacentElement('beforeend', wrapper)
 
-      throw "support :destroy pseudoClass"
-
       for child in wrapper.children
         up.hello(child, options) # emits up:fragment:inserted
 

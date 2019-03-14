@@ -192,8 +192,22 @@ up.form = do ->
     parser = new up.OptionParser(options, link, fail: true)
 
 
-    target = options.target ? form.getAttribute('up-target') ? 'body'
+    # --- DIFFERENT FROM LINK ---
     url = options.url ? form.getAttribute('action') ? up.browser.url()
+    options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
+
+    # Take params from form, but allow to pass additional params as { params }
+    options.params = Params.fromForm(form).addAll(options.params)
+
+
+    if options.validate
+      options.headers ||= {}
+      options.headers[up.protocol.config.validateHeader] = options.validate
+
+
+
+    # --- SAME ---
+    target = options.target ? form.getAttribute('up-target') ? 'body'
     options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
     options.reveal ?= e.booleanOrStringAttr(form, 'up-reveal') ? true
     options.failReveal ?= e.booleanOrStringAttr(form, 'up-fail-reveal') ? true
@@ -211,19 +225,22 @@ up.form = do ->
     options.layer ?= form.getAttribute('up-layer')
     options.failLayer ?= form.getAttribute('up-fail-layer')
 
-    # Take params from form, but allow to pass additional params as { params }
-    options.params = Params.fromForm(form).addAll(options.params)
-
     options = u.merge(options, up.motion.animateOptions(options, form))
 
     throw "parse layer flavor, position, width ..."
 
-    if options.validate
-      options.headers ||= {}
-      options.headers[up.protocol.config.validateHeader] = options.validate
+
+
+    promise = up.browser.whenConfirmed(options)
+    promise = promise.then ->
+      throw "Allow event handlers to maniuplate options"
+      up.event.whenEmitted('up:form:submit', log: 'Submitting form', target: form)
+    promise = promise.then ->
 
     up.event.whenEmitted('up:form:submit', log: 'Submitting form', target: form).then ->
       up.feedback.start(form)
+
+      throw "Get rid of non-pushState handling? I don't want to blow up layers for this, and it's easy to prevent the case in a fully Unpoly'd app; However we could no longer boot Unpoly if loaded with a non-pushState method"
 
       # If we can't update the location URL, fall back to a vanilla form submission.
       unless up.browser.canPushState() || options.history == false

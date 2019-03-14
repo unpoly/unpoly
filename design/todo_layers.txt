@@ -11,7 +11,7 @@
 - Test that [up-dismiss][up-follow] outside a layer will follow
 - Documentation
 - can we unify parsing of form and link options? there will be no other when we remove modal, link, ...
-- Do layers really need both [up-class] and [up-size] ? Setting size is the only use case for class.
+- Do layers really need both [up-class] and [up-size] ? Setting size is the only use case for class. Except maybe furter variants like -borderless?
 - Change up.visit() docs: Will now update the current page, or { layer } option. Maybe deprecate in favor of up.change().
 - What is up.browser.navigate() ?
 - Is { navigate } is really the best name for the option? Maybe { solo } or similar?
@@ -20,7 +20,11 @@
 - Deprecate up.extract(). It takes a selector, and that is now mostly optional.
 - Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
 - up.reload() with an element should update the element in whatever layer it lives in
-- Document { history / location } changes
+- Document changes in options { history } (now boolean) and { location } (now a string) changes
+- Deprecate all up.modal/popup functions and delegate to layer as good as possible
+- Implement X-Up-Dismiss-Layer, X-Up-Accept-Layer
+- Test context
+- Do we need an API to change context from JS? from server via header?
 
 
 Finishing up
@@ -60,4 +64,4 @@ Later?
   - e.g. up.layer.current instead of up.layer.current()
 - Support [up-target][up-class] and [up-target][up-fail-class] to set a class on the new fragment
   - But think how that would go together with [up-layer="new"][up-class="warning"]
-
+- Support :destroy pseudo-class up up.change() target

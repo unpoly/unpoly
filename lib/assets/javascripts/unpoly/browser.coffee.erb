@@ -192,7 +192,7 @@ up.browser = do ->
     if options.preload || u.isBlank(options.confirm) || window.confirm(options.confirm)
       Promise.resolve()
     else
-      throw "Standard error for cancelation"
+      throw "TODO: Reject with documented standard error for cancelation"
       Promise.reject(new Error('User canceled action'))
 
   ###**

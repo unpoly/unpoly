@@ -19,7 +19,8 @@ class up.TaskQueue
   asap: (task) ->
     nextTask = ->
       if task.canceled
-        throw "Standard error for cancelation"
+        throw "Reject with standard error for cancelation"
+        throw "Do we still need cancelation? Because layers now just queue things"
         return Promise.reject('canceled')
       else
         return task()

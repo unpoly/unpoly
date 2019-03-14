@@ -156,6 +156,7 @@ up.link = do ->
     parser.string('url', attr: ['up-href', 'href'])
     parser.string('target')
     parser.booleanOrString('fallback')
+    parser.json('headers')
     parser.json('params')
     parser.boolean('cache')
     parser.string('confirm')
@@ -187,8 +188,10 @@ up.link = do ->
 
     promise = up.browser.whenConfirmed(options)
     promise = promise.then ->
+      throw "Allow event handlers to maniuplate options"
       up.event.whenEmitted('up:link:follow', log: 'Following link', u.merge(options, target: link))
     promise = promise.then ->
+      throw "fall back to vanilla link follow if we cannot pushState. Or remove that case."
       changeFn = -> up.change(options)
       up.feedback.around(link, options, changeFn)
     promise
