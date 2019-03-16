@@ -26,9 +26,8 @@ up.browser = do ->
   @param {object|Array|FormData|string} [options.params]
   @internal
   ###
-  navigate = (url, options) ->
-    requestOpts = u.merge(options, { url })
-    request = new up.Request(requestOpts)
+  navigate = (options) ->
+    request = new up.Request(options)
     request.navigate()
 
   ###**

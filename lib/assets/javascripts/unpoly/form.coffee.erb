@@ -189,68 +189,19 @@ up.form = do ->
     form = e.get(formOrSelector)
     form = e.closest(form, 'form')
 
-    parser = new up.OptionParser(options, link, fail: true)
-
-
-    # --- DIFFERENT FROM LINK ---
-    url = options.url ? form.getAttribute('action') ? up.browser.url()
-    options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
-
+    parser = new up.OptionParser(form, options)
+    parser.string('url', attr: ['up-action', 'action'])
+    parser.string('method', attr: ['up-method', 'data-method', 'method'], default: 'POST')
+    parser.string('failTarget', default: e.toSelector(form))
     # Take params from form, but allow to pass additional params as { params }
-    options.params = Params.fromForm(form).addAll(options.params)
+    options.params = up.Params.fromForm(form).addAll(options.params)
 
-
-    if options.validate
-      options.headers ||= {}
-      options.headers[up.protocol.config.validateHeader] = options.validate
-
-
-
-    # --- SAME ---
-    target = options.target ? form.getAttribute('up-target') ? 'body'
-    options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
-    options.reveal ?= e.booleanOrStringAttr(form, 'up-reveal') ? true
-    options.failReveal ?= e.booleanOrStringAttr(form, 'up-fail-reveal') ? true
-    options.peel ?= e.booleanOrStringAttr(form, 'up-peel') ? true
-    options.failPeel ?= e.booleanOrStringAttr(form, 'up-fail-peel') ? true
-    options.fallback ?= e.booleanOrStringAttr(form, 'up-fallback')
-    options.history ?= e.booleanOrStringAttr(form, 'up-history') ? true
-    options.transition ?= e.booleanOrStringAttr(form, 'up-transition')
-    options.failTransition ?= e.booleanOrStringAttr(form, 'up-fail-transition')
-    options.method ?= form.getAttribute('up-method') ? form.getAttribute('data-method') ? form.getAttribute('method') ? 'post'
-    options.cache ?= e.booleanAttr(form, 'up-cache')
-    options.restoreScroll ?= e.booleanAttr(form, 'up-restore-scroll') # the option supports an object value, but not the attr
-    options.failRestoreScroll ?= booleanAttr(form, 'up-fail-restore-scroll')
-    options.origin ?= form
-    options.layer ?= form.getAttribute('up-layer')
-    options.failLayer ?= form.getAttribute('up-fail-layer')
-
-    options = u.merge(options, up.motion.animateOptions(options, form))
-
-    throw "parse layer flavor, position, width ..."
-
-
-
-    promise = up.browser.whenConfirmed(options)
-    promise = promise.then ->
-      throw "Allow event handlers to maniuplate options"
-      up.event.whenEmitted('up:form:submit', log: 'Submitting form', target: form)
-    promise = promise.then ->
-
-    up.event.whenEmitted('up:form:submit', log: 'Submitting form', target: form).then ->
-      up.feedback.start(form)
-
-      throw "Get rid of non-pushState handling? I don't want to blow up layers for this, and it's easy to prevent the case in a fully Unpoly'd app; However we could no longer boot Unpoly if loaded with a non-pushState method"
-
-      # If we can't update the location URL, fall back to a vanilla form submission.
-      unless up.browser.canPushState() || options.history == false
-        # Don't use up.browser.navigate(); It cannot deal with file inputs.
-        form.submit()
-        return u.unresolvablePromise()
-
-      promise = up.change(options)
-      u.always promise, -> up.feedback.stop(form)
-      promise
+    # Now that we have extracted everything form-specific into options, we can call
+    # up.link.follow(). This will also parse the myriads of other options that are
+    # possible on the <form> element.
+    options.eventName = 'up:form:submit'
+    options.eventLog = 'Submitting form'
+    return up.link.follow(form, options)
 
   ###**
   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
@@ -398,25 +349,20 @@ up.form = do ->
     field = e.get(fieldOrSelector)
     options = u.options(options)
     options.origin = field
+    options.history = false
+    options.target = findValidateTarget(field, options)
 
     # The protocol doesn't define whether the validation results in a status code.
     # Hence we use the same options for both success and failure.
-    options.target = findValidateTarget(field, options)
-    options.failTarget = options.target
-    options.reveal ?= false
-    options.failReveal = options.reveal
-    options.peel ?= false
-    options.failPeel = options.peel
-    options.transition ?= false
-    options.failTransition = options.transition
+    options.allowFailOverrides = false
 
-    options.history = false
     # Make sure the X-Up-Validate header is present, so the server-side
     # knows that it should not persist the form submission
     options.validate = field.getAttribute('name') || ':none'
-    options = u.merge(options, up.motion.animateOptions(options, field))
-    promise = up.submit(field, options)
-    promise
+    options.headers ||= {}
+    options.headers[up.protocol.config.validateHeader] = options.validate
+
+    return submit(field, options)
 
   switcherValues = (field) ->
     value = undefined

@@ -260,12 +260,13 @@ up.fragment = do ->
     # Note how we *don't* override `foo` with `undefined`.
 
     failureOptions = u.copy(successOptions)
-    for key, value of failureOptions
-      # Keep key/value unless there is a defined failOverride
-      if unprefixedKey = u.unprefixCamelCase(key, 'fail')
-        failValue = u.pluckKey(failureOptions, key)
-        unless u.isUndefined(failValue)
-          failureOptions[unprefixedKey] = failValue
+    if failureOptions.allowFailOverrides != false
+      for key, value of failureOptions
+        # Keep key/value unless there is a defined failOverride
+        if unprefixedKey = u.unprefixCamelCase(key, 'fail')
+          failValue = u.pluckKey(failureOptions, key)
+          unless u.isUndefined(failValue)
+            failureOptions[unprefixedKey] = failValue
     failureOptions
 
   ###**

@@ -24,22 +24,6 @@
 - Deprecate all up.modal/popup functions and delegate to layer as good as possible
 - Implement X-Up-Dismiss-Layer, X-Up-Accept-Layer
 - Test context
-- Do we need an API to change context from JS? from server via header?
-- Context should inherit from parent layer
-- The current "context merges into params" logic only works for non-root layers without { history }
-  - Yes, reloading a GET URL would restore context, but only for this one request! All subsequent links would not have context.
-  - Options
-    - Only allow context for history-less, non-root layers
-      - This would also force the entire ancestry being either free of context or free of history
-      - With this we could no longer allow context for
-    - Put context into a header so reloading would always lose the context entirely
-    - Put context into the URL, but as context[foo], context[bar] so we can restore it on reload
-      - Would still lose inherited context
-      - Also I hate the aesthetics of it
-- Context is generally broken for new tabs
-  - We could render it into all links and forms, but at what cost!
-    - Maybe have [up-write-context]
-  - Would only work with a params-based solution (see above)
 
 
 Finishing up
@@ -80,3 +64,4 @@ Later?
 - Support [up-target][up-class] and [up-target][up-fail-class] to set a class on the new fragment
   - But think how that would go together with [up-layer="new"][up-class="warning"]
 - Support :destroy pseudo-class up up.change() target
+- Do we need an API to change context from JS? from server via header?

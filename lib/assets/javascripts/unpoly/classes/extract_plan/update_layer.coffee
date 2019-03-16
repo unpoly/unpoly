@@ -28,11 +28,18 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     if @options.peel
       promise = promise.then -> up.layer.peel(@options.layer)
 
-    historyOptions = u.only(@options, 'title', 'location')
-    throw "i need to update my own history, not that of the topmost layer"
-    up.layer.updateHistory(historyOptions)
+    historyOptions = u.only(@options, 'history', 'title', 'location')
 
-    promise.then ->
+    if historyOptions.history && !up.browser.canPushState()
+      if @options.layer.isRoot()
+        up.browser.navigate(@options)
+        return u.unresolvablePromise()
+      else
+        options.history = false
+
+    @updateHistory(historyOptions)
+
+    promise = promise.then =>
       swapPromises = @steps.map (step) ->
         # Note that we must copy the options hash instead of changing it in-place, since the
         # async swapElements() is scheduled for the next microtask and we must not change the options
@@ -41,9 +48,6 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
         return @swapStep(step, swapOptions)
 
       return Promise.all(swapPromises)
-
-    throw "wtf everythingThatFragmentDoes??"
-    everythingThatFragmentDoes()
 
     return promise
 

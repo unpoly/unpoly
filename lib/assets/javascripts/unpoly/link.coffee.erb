@@ -152,7 +152,7 @@ up.link = do ->
   follow = (link, options) ->
     options = u.options(options)
 
-    parser = new up.OptionParser(options, link, fail: true)
+    parser = new up.OptionParser(link, options, fail: true)
     parser.string('url', attr: ['up-href', 'href'])
     parser.string('target')
     parser.booleanOrString('fallback')
@@ -168,7 +168,7 @@ up.link = do ->
     parser.booleanOrString('history')
     parser.string('location')
     parser.string('title')
-    options.method = followMethod(link, options)
+    options.method ?= followMethod(link, options)
     options.orgin ?= link
     parser.string('layer')
     parser.string('flavor')
@@ -186,12 +186,13 @@ up.link = do ->
     parser.parse(up.layer.closeHandlerAttr, 'onDismissed')
     u.assign(options, up.motion.animateOptions(options, link))
 
+    options.eventName ?= 'up:link:follow'
+    options.eventLog ?= 'Following link'
+
     promise = up.browser.whenConfirmed(options)
     promise = promise.then ->
-      throw "Allow event handlers to maniuplate options"
-      up.event.whenEmitted('up:link:follow', log: 'Following link', u.merge(options, target: link))
+      up.event.whenEmitted(options.eventName, log: options.eventLog, { options, target: link })
     promise = promise.then ->
-      throw "fall back to vanilla link follow if we cannot pushState. Or remove that case."
       changeFn = -> up.change(options)
       up.feedback.around(link, options, changeFn)
     promise

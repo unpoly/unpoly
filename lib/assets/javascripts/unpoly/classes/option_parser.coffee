@@ -3,7 +3,7 @@ stringAttr = (element, attr) ->
 
 class up.OptionParser
 
-  constructor: (@options, @element, @parserOptions = {}) ->
+  constructor: (@element, @options, @parserOptions = {}) ->
 
   string: (key, keyOptions) ->
     @parse(stringAttr, key, keyOptions)

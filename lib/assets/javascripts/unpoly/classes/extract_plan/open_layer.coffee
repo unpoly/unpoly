@@ -16,7 +16,7 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
     newLayerContent = @responseDoc.selectForInsertion(@options.target) or @notApplicable()
     @setSource(newLayerContent, @options.source)
 
-    historyOptions = u.only(@options, 'title', 'location')
+    historyOptions = u.only(@options, 'history', 'title', 'location')
 
     onContentAttached = ->
       # Calling up.hello() will compile the new content
@@ -27,5 +27,9 @@ class up.ExtractPlan.OpenLayer extends up.ExtractPlan
       @updateHistory(historyOptions)
 
     openOptions = u.merge(@options, { onContentAttached, content: newLayerContent })
+
+    unless up.browser.canPushState()
+      openOptions.history = false
+
     return up.layer.open(openOptions)
 

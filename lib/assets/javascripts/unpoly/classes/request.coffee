@@ -108,8 +108,6 @@ class up.Request extends up.Record
     super(options)
     @params = new up.Params(@params) # copies, which we want
 
-    @params.addAll(@preflightLayer?.context)
-
     @normalize()
     @aborted = false
     @deferred = u.newDeferred()
@@ -181,6 +179,9 @@ class up.Request extends up.Record
     xhrHeaders['X-Requested-With'] ||= 'XMLHttpRequest' unless @isCrossDomain()
     if csrfToken = @csrfToken()
       xhrHeaders[pc.csrfHeader] = csrfToken
+
+    if context = @preflightLayer?.context
+      xhrHeaders[pc.contextHeader] = JSON.stringify(context)
 
     @xhr.open(xhrMethod, xhrUrl)
 

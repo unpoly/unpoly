@@ -103,6 +103,16 @@ class up.Response extends up.Record
   ###
   constructor: (options) ->
     super(options)
+#    @removeUpParamsFromUrl()
+#
+#  removeUpParamsFromUrl: ->
+#    [base, query] = @url.split('?')
+#    if query
+#      params = new up.Params(query)
+#      params.delete('up[target]')
+#      params.delete('up[fail-target]')
+#      params.delete('up[context]')
+#      @url = params.toURL(base)
 
   ###**
   Returns whether the server responded with a 2xx HTTP status.

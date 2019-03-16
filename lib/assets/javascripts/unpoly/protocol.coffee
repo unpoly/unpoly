@@ -270,6 +270,7 @@ up.protocol = do ->
     locationHeader: 'X-Up-Location'
     validateHeader: 'X-Up-Validate'
     titleHeader: 'X-Up-Title'
+    contextHeader: 'X-Up-Context' # TODO: Docs
     methodHeader: 'X-Up-Method'
     methodCookie: '_up_method'
     methodParam: '_method'
