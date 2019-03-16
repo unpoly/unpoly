@@ -6,6 +6,7 @@ module Unpoly
     #
     # Available through the `#up` method in all controllers, helpers and views.
     class Inspector
+      include Memoized
 
       def initialize(controller)
         @controller = controller
@@ -30,8 +31,8 @@ module Unpoly
       #
       # Server-side code is free to optimize its successful response by only returning HTML
       # that matches this selector.
-      def target
-        request.headers['X-Up-Target']
+      memoize def target
+        request.headers['X-Up-Target'] || up_params['target']
       end
 
       ##
@@ -44,8 +45,8 @@ module Unpoly
       #
       # Server-side code is free to optimize its response by only returning HTML
       # that matches this selector.
-      def fail_target
-        request.headers['X-Up-Fail-Target']
+      memoize def fail_target
+        request.headers['X-Up-Fail-Target'] || up_params['fail-target']
       end
 
       ##
@@ -101,8 +102,8 @@ module Unpoly
       # If the current form submission is a [validation](https://unpoly.com/input-up-validate),
       # this returns the name attribute of the form field that has triggered
       # the validation.
-      def validate_name
-        request.headers['X-Up-Validate']
+      memoize def validate_name
+        request.headers['X-Up-Validate'] || up_params['validate']
       end
 
       ##
@@ -114,18 +115,66 @@ module Unpoly
         response.headers['X-Up-Title'] = new_title
       end
 
+      memoize def context
+        if json = context_json
+          JSON.parse(json)
+        end
+      end
+
+      def redirect_to(options, *args)
+        if up?
+          url = url_for(options)
+          # Since our JS has no way to inject those headers into the redirect request,
+          # we transport the headers over params.
+          header_params = {
+            'up[target]' => target,
+            'up[fail-target]' => fail_target,
+            'up[context]' => context_json
+          }.compact
+          url = append_params_to_url(url, header_params)
+          controller.send(:redirect_to, url, *args)
+        else
+          controller.send(:redirect_to, options, *args)
+        end
+      end
+
+      def request_url_without_up_params
+        original_url = request.original_url
+
+        if original_url =~ /\bup(\[|%5B])/
+          uri = URI.parse(original_url)
+          params = Rack::Utils.parse_query(uri.query)
+          # We only used the up[...] params to transport headers, but we don't
+          # want them to appear in a history URL.
+          params = params.except('up[target]', 'up[fail-target]', 'up[context]')
+          append_params_to_url(uri.path, params)
+        else
+          original_url
+        end
+      end
+
       private
 
-      def request
-        @controller.request
+      def append_params_to_url(url, params)
+        if params.present?
+          url = url.dup
+          separator = url.include?('?') ? '&' : '?'
+          url << separator
+          url << params.to_query
+        end
+        url
       end
 
-      def params
-        @controller.params
+      def context_json
+        request.headers['X-Up-Context'] || up_params['context']
       end
 
-      def response
-        @controller.response
+      attr_reader :controller
+
+      delegate :request, :params, :response, to: :controller
+
+      def up_params
+        params['up'] || {}
       end
 
       def query_target(actual_target, tested_target)

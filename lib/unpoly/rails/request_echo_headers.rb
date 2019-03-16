@@ -20,7 +20,7 @@ module Unpoly
       private
       
       def set_up_request_echo_headers
-        headers['X-Up-Location'] = request.original_url
+        headers['X-Up-Location'] = up.request.original_url
         headers['X-Up-Method'] = request.method
       end
 
