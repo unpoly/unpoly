@@ -311,7 +311,7 @@ up.fragment = do ->
     extract(selector, response.text, options)
 
   shouldExtractTitle = (options) ->
-    not (options.title is false || u.isString(options.title)
+    not (options.title is false || u.isString(options.title))
 
   ###**
   Updates a selector on the current page with the
@@ -609,7 +609,7 @@ up.fragment = do ->
   the element won't be removed until after the animation has completed.
 
   Emits events [`up:fragment:destroyed`](/up:fragment:destroyed).
-  
+
   @function up.destroy
   @param {string|Element|jQuery} selectorOrElement
   @param {string} [options.history]
