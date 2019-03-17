@@ -26,6 +26,9 @@
 - Test context
 - Do we want an ExtractPlan.BackButton? Turbolinks keep [up-keep] for back.
 - Deprecate the entire up.history API
+- up.layer.* should just be class props of up.Layer
+  - Then we also stop copying configs. Drawer-config is just up.Layer.Drawer.config.
+  - We can still move inheritable methods to up.Layer.Base extends up.Layer
 
 
 Finishing up

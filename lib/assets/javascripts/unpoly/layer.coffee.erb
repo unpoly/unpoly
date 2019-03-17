@@ -56,44 +56,12 @@ up.layer = do ->
   build = (options) ->
     flavor = options.flavor ? config.flavor
     Implementation = config[flavor].implementation
-    return new Implementation(options)
+    return new Implementation(stack, options)
 
   prompt = (options) ->
     return new Promise (onConfirm, onDismiss) ->
       options = u.merge(options, { onConfirm, onDismiss, })
       open(options)
-
-  throw "move to up.Layer.Base"
-  updateHistory = (layer, options) ->
-    layer = lookupOne(layer, options)
-
-    if newTitle = options.title
-      layer.title = title
-      titleChanged(layer)
-
-    if newLocation = options.location
-      layer.location = newLocation
-      locationChanged(layer)
-
-  throw "move to up.Layer.Base"
-  throw "rename layer.url to layer.location"
-  locationChanged = (layer) ->
-    if layer == currentLayer() && layer.history
-      up.history.push(layer.location)
-
-  throw "move to up.Layer.Base"
-  titleChanged = (layer) ->
-    if layer == currentLayer() && layer.history # history option also says if we're updating title
-      document.title = layer.title
-
-  sync = (options) ->
-    lookupOne(options).sync()
-
-  dismiss = (options) ->
-    lookupOne(options).dismiss(options)
-
-  confirm = (options) ->
-    lookupOne(options).confirm(options)
 
   layersContainer = ->
     selector = '.up-layers'
@@ -149,16 +117,6 @@ up.layer = do ->
       when 'closest'
         stack.selfAndAncestors(givenOriginLayer())
 
-  peel = (layer) ->
-    layer = lookup(layer)[0]
-    ancestors = u.copy(up.stack.ancestors(layer))
-
-    for ancestor in ancestors by -1
-      asap ->
-        dismiss(layer: ancestor, emitEvents: false)
-
-    return queue.cursor
-
   up.event.onEscape (event) ->
     if currentLayer().dismissable
       u.muteRejection dismiss()
@@ -178,22 +136,16 @@ up.layer = do ->
   up.on 'up:framework:reset', reset
 
   root: -> stack.root()
+  current: currentLayer
+  forElement: forElement
   all: -> stack.all()
   parent: -> stack.parent()
   ancestors: -> stack.ancestors()
   selfAndAncestors: -> stack.selfAndAncestors()
-  current: currentLayer
-  resolve: lookup
-  firstElement: firstElement
-  allElements: allElements
-  updateHistory: updateHistory
-  peel: peel
-  sync: sync
+  lookup: lookupOne
+  lookupAll: lookupAll
   config: config
   defaultTargets: defaultTargets
   open: open
   container: layersContainer
   build: build
-  dismiss: dismiss
-  confirm: confirm
-

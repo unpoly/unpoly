@@ -50,6 +50,12 @@ class up.Layer extends up.Record
     onConfirmed: null
     onContentAttached: null
 
+  isCurrent: ->
+    @stack.isCurrent(this)
+
+  isRoot: ->
+    @stack.isRoot(this)
+
   defaultTargets: ->
     @constructor.defaults().targets
 
@@ -195,3 +201,27 @@ class up.Layer extends up.Record
   sync: ->
     # no-op
 
+  updateHistory: (options) ->
+    if newTitle = options.title
+      @title = newTitle
+      @titleChanged()
+
+    if newLocation = options.location
+      @location = newLocation
+      @locationChanged()
+
+  affectsGlobalHistory: ->
+    @history && @isCurrent()
+
+  locationChanged: ->
+    if @affectsGlobalHistory()
+      up.history.push(@location)
+
+  titleChanged: ->
+    if @affectsGlobalHistory()
+      document.title = @title
+
+  peel: ->
+    ancestors = u.reverse(@stack.ancestors(this))
+    dismissals = ancestors.map (ancestor) -> ancestor.dismiss(emitEvents: false)
+    return @stack.asap(dismissals...)

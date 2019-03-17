@@ -26,7 +26,7 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     promise = Promise.resolve()
 
     if @options.peel
-      promise = promise.then -> up.layer.peel(@options.layer)
+      promise = promise.then => @options.layer.peel()
 
     historyOptions = u.only(@options, 'title', 'location')
 

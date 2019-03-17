@@ -7,8 +7,8 @@ class up.LayerStack extends up.Config
     @layers ||= []
     @queue = new up.TaskQueue()
 
-  asap: (task) ->
-    @queue.asap(task)
+  asap: (tasks...) ->
+    @queue.asap(tasks...)
 
   isRoot: (layer) ->
     @layers[0] == layer
@@ -25,8 +25,8 @@ class up.LayerStack extends up.Config
   remove: (layer) ->
     u.remove(@layers, layer)
 
-  removeDescendants: (layer) ->
-    @layers = selfAndAncestors(layer)
+#  removeDescendants: (layer) ->
+#    @layers = selfAndAncestors(layer)
 
   push: (layer) ->
     @layers.push(layer)

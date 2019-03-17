@@ -37,7 +37,7 @@ class up.ExtractCascade
           @plans.push(new up.ExtractPlan.OpenLayer(plan))
 
     else
-      for layer in up.layer.resolve(@options.layer)
+      for layer in up.layer.lookupAll(@options.layer)
         @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
           @plans.push(new up.ExtractPlan.UpdateLayer(plan))
 

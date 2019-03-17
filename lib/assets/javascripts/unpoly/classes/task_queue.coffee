@@ -16,14 +16,14 @@ class up.TaskQueue
     @tasks = []
     @cursor = Promise.resolve()
 
-  asap: (task) ->
-    nextTask = ->
-      if task.canceled
-        throw "Reject with standard error for cancelation"
-        throw "Do we still need cancelation? Because layers now just queue things"
-        return Promise.reject('canceled')
-      else
-        return task()
-
+  asap: (tasks...) ->
+    for task in tasks
+      nextTask = ->
+        if task.canceled
+          throw "Reject with standard error for cancelation"
+          throw "Do we still need cancelation? Because layers now just queue things"
+          return Promise.reject('canceled')
+        else
+          return task()
     @cursor = u.always @cursor, nextTask
     return @cursor
