@@ -24,6 +24,8 @@
 - Deprecate all up.modal/popup functions and delegate to layer as good as possible
 - Implement X-Up-Dismiss-Layer, X-Up-Accept-Layer
 - Test context
+- Do we want an ExtractPlan.BackButton? Turbolinks keep [up-keep] for back.
+- Deprecate the entire up.history API
 
 
 Finishing up
@@ -65,3 +67,6 @@ Later?
   - But think how that would go together with [up-layer="new"][up-class="warning"]
 - Support :destroy pseudo-class up up.change() target
 - Do we need an API to change context from JS? from server via header?
+- Make all module names uppercase.
+  - In a ES6 world this would not even be so bad, or even necessary. import { Event } from 'up'. Event.emit(...).
+  - Even consider dropping shortcuts so we always do up.Fragment.change(), up.Event.emit(...)

@@ -5,27 +5,19 @@ class up.Layer.WithViewport extends up.Layer
   # It makes only sense to have a single body shifter
   @bodyShifter: new up.BodyShifter()
 
-  open: (parentElement, initialInnerContent) ->
+  create: (parentElement, initialInnerContent, options) ->
     @createElement(parentElement)
     @backdropElement = affix(@element, '.up-layer-backdrop')
     @viewportElement = affix(@element, '.up-layer-viewport')
-    @frameInnerContent(@viewportElement, initialInnerContent)
+    @frameInnerContent(@viewportElement, initialInnerContent, options)
 
     @shiftBody()
-    return @startOpenAnimation()
+    return @startOpenAnimation(options)
 
-  close: ->
-    return @startCloseAnimation().then =>
+  destroy: (options) ->
+    return @startCloseAnimation(options).then =>
       @destroyElement()
       @unshiftBody()
-
-  startOpenAnimation: ->
-    animateOptions = @openAnimateOptions()
-
-    return Promise.all([
-      up.animate(@viewportElement, @evalOption(@openAnimation), animateOptions),
-      up.animate(@backdropElement, @evalOption(@backdropOpenAnimation), animateOptions),
-    ])
 
   shiftBody: ->
     @constructor.bodyShifter.shift()
@@ -33,9 +25,22 @@ class up.Layer.WithViewport extends up.Layer
   unshiftBody: ->
     @constructor.bodyShifter.unshift()
 
-  startCloseAnimation: ->
-    animateOptions = @closeAnimateOptions()
+  startOpenAnimation: (options = {}) ->
+    animateOptions = @openAnimateOptions(options)
+    viewportAnimation = options.animation ? @evalOption(@openAnimation)
+    backdropAnimation = options.backdropAnimation ? @evalOption(@backdropOpenAnimation)
+
     return Promise.all([
-      up.animate(@viewportElement, @evalOption(@closeAnimation), animateOptions),
-      up.animate(@backdropElement, @evalOption(@backdropCloseAnimation), animateOptions),
+      up.animate(@viewportElement, viewportAnimation, animateOptions),
+      up.animate(@backdropElement, backdropAnimation, animateOptions),
+    ])
+
+  startCloseAnimation: (options = {}) ->
+    animateOptions = @closeAnimateOptions(options)
+    viewportAnimation = options.animation ? @evalOption(@closeAnimation)
+    backdropAnimation = options.backdropAnimation ? @evalOption(@backdropCloseAnimation)
+
+    return Promise.all([
+      up.animate(@viewportElement, viewportAnimation, animateOptions),
+      up.animate(@backdropElement, backdropAnimation, animateOptions),
     ])

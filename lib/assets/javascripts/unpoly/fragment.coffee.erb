@@ -41,6 +41,24 @@ up.fragment = do ->
     else
       up.browser.url()
 
+  setSource = (selectorOrElement, sourceUrl) ->
+    if sourceUrl
+      sourceUrl = u.normalizeUrl(sourceUrl)
+      element.setAttribute('up-source', sourceUrl)
+
+  change = (options) ->
+    if u.isString(options.content)
+      options.content = e.createFromHtml(options.content)
+    # up.change() is a new function that takes these forms:
+    # - up.change(target: ..., url: ...)
+    # - up.change(target: ..., html: ...)
+    # - up.change(html: ...)
+    # - up.change(url: ...)
+    # if we would offer { content } for up.change():
+    # - we could only allow a single target (no ",", no hungries)
+    # - would also enable up.reload(Element)
+    throw "implement up.change()"
+
   ###**
   Replaces elements on the current page with corresponding elements
   from a new page fetched from the server.
@@ -725,6 +743,7 @@ up.fragment = do ->
   extract: extract
   first: first
   source: source
+  setSource: setSource
   hello: hello
   emitInserted: emitFragmentInserted
   emitDestroyed: emitFragmentDestroyed

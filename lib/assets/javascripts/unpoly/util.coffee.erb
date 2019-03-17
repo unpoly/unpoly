@@ -1297,21 +1297,21 @@ up.util = do ->
 #      promise.then -> raceDone.resolve()
 #    raceDone.promise()
 
-  ###**
-  Returns `'left'` if the center of the given element is in the left 50% of the screen.
-  Otherwise returns `'right'`.
-
-  @function up.util.horizontalScreenHalf
-  @internal
-  ###
-  horizontalScreenHalf = (element) ->
-    elementDims = element.getBoundingClientRect()
-    elementMid = elementDims.left + 0.5 * elementDims.width
-    screenMid = 0.5 * up.viewport.rootWidth()
-    if elementMid < screenMid
-      'left'
-    else
-      'right'
+#  ###**
+#  Returns `'left'` if the center of the given element is in the left 50% of the screen.
+#  Otherwise returns `'right'`.
+#
+#  @function up.util.horizontalScreenHalf
+#  @internal
+#  ###
+#  horizontalScreenHalf = (element) ->
+#    elementDims = element.getBoundingClientRect()
+#    elementMid = elementDims.left + 0.5 * elementDims.width
+#    screenMid = 0.5 * up.viewport.rootWidth()
+#    if elementMid < screenMid
+#      'left'
+#    else
+#      'right'
 
   ###**
   Flattens the given `array` a single level deep.
@@ -1698,7 +1698,7 @@ up.util = do ->
   previewable: previewable
   # parsePath: parsePath
   evalOption: evalOption
-  horizontalScreenHalf: horizontalScreenHalf
+  # horizontalScreenHalf: horizontalScreenHalf
   flatten: flatten
   isTruthy: isTruthy
   newDeferred: newDeferred

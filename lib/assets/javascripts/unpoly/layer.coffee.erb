@@ -21,13 +21,13 @@ up.layer = do ->
 
   stack = new up.LayerStack(-> layers: [new up.layers.Root()])
 
-  registerFlavor = (implementation, store = config) ->
-    name = implementation.flavor
+  registerFlavor = (Implementation, store = config) ->
+    name = Implementation.flavor
     # Since the layer class names are not public API, we make their static
     # config property accessible through up.layer.config. E.g. up.layer.config.dialog
     # is set to up.layer.Dialog.config.
-    subConfig = implementation.config
-    subConfig.implementation = implementation
+    subConfig = Implementation.config
+    subConfig.Implementation = Implementation
     store[name] = subConfig
 
   defaultTargets = (options = {}) ->
@@ -35,7 +35,7 @@ up.layer = do ->
 
   flavorImplementation = (options = {}) ->
     flavor = options.flavor ? config.flavor
-    implementation = config[flavor].implementation or up.fail("Unknown layer flavor: #{flavor}")
+    config[flavor].Implementation or up.fail("Unknown layer flavor: #{flavor}")
 
   closeHandlerAttr = (link, attr) ->
     if code = link.getAttribute(attr)
@@ -46,35 +46,17 @@ up.layer = do ->
     stack.reset()
     queue.reset()
 
-  open = (options = {}) ->
-    if options.content
-      openWithContent(options)
-    else
-      # up.change() is a new function that takes these forms:
-      # - up.change(target: ..., url: ...)
-      # - up.change(target: ..., html: ...)
-      # - up.change(html: ...)
-      # - up.change(url: ...)
-      # if we would offer { content } for up.change():
-      # - we could only allow a single target (no ",", no hungries)
-      # - would also enable up.reload(Element)
-      throw "implement up.change()"
-      up.change(options)
+  open = (options) ->
+    options = u.options(options, layer: 'new')
 
-  openWithContent = (options) ->
-    options = u.options(options)
-    options.flavor ?= config.flavor
+    # Even if we are given { content} we need to pipe this through up.change()
+    # since a lot of options processing is happening there.
+    up.change(options)
 
-    if u.isString(options.content)
-      options.content = e.createFromHtml(options.content)
-
-    implementation = config[options.flavor].implementation
-
-    throw "implement up:layer:open event in up.Layer"
-
-    # implementation constructor will take care of default options
-    layer = new options.implementation(options)
-    return layer.open(layersContainer(), content)
+  build = (options) ->
+    flavor = options.flavor ? config.flavor
+    Implementation = config[flavor].implementation
+    return new Implementation(options)
 
   prompt = (options) ->
     return new Promise (onConfirm, onDismiss) ->
@@ -209,3 +191,9 @@ up.layer = do ->
   sync: sync
   config: config
   defaultTargets: defaultTargets
+  open: open
+  container: layersContainer
+  build: build
+  dismiss: dismiss
+  confirm: confirm
+

@@ -7,10 +7,5 @@ class up.ExtractPlan
 
   constructor: (@options) ->
 
-  setSource: (element, sourceUrl) ->
-    unless sourceUrl is false
-      sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
-      element.setAttribute('up-source', sourceUrl)
-
   notApplicable: ->
     throw up.ExtractPlan.NOT_APPLICABLE

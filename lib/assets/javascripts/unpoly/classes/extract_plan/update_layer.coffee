@@ -28,9 +28,9 @@ class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
     if @options.peel
       promise = promise.then -> up.layer.peel(@options.layer)
 
-    historyOptions = u.only(@options, 'history', 'title', 'location')
+    historyOptions = u.only(@options, 'title', 'location')
 
-    if historyOptions.history && !up.browser.canPushState()
+    if @options.history && !up.browser.canPushState()
       if @options.layer.isRoot()
         up.browser.navigate(@options)
         return u.unresolvablePromise()

@@ -13,11 +13,11 @@ class up.Layer.Root extends up.Layer
     super(stack, options)
     @element = document.documentElement
 
-  open: ->
-    throw new Error('Cannot open another root layer')
+  create: ->
+    throw new Error('Cannot create another root layer')
 
-  close: ->
-    throw new Error('Cannot close the root layer')
+  destroy: ->
+    throw new Error('Cannot destroy the root layer')
 
   allElements: (selector) ->
     matches = super(selector)

@@ -23,18 +23,18 @@ up.legacy = do ->
       warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
       u.renameKey(object, oldKey, newKey)
 
-#  # Maps old event name to new event name
-#  renamedEvents = {}
-#
-#  renamedEvent = (oldName, newName) ->
-#    renamedEvents[oldName] = newName
-#
-#  fixEventName = (eventName) ->
-#    if newEventName = renamedEvents[eventName]
-#      warn("Event #{eventName} has been renamed to #{newEventName}")
-#      newEventName
-#    else
-#      eventName
+  # Maps old event name to new event name
+  renamedEvents = {}
+
+  renamedEvent = (oldName, newName) ->
+    renamedEvents[oldName] = newName
+
+  fixEventName = (eventName) ->
+    if newEventName = renamedEvents[eventName]
+      warn("Event #{eventName} has been renamed to #{newEventName}")
+      newEventName
+    else
+      eventName
 
   renamedModule = (oldName, newName) ->
     Object.defineProperty up, oldName, get: ->
@@ -53,8 +53,8 @@ up.legacy = do ->
   renamedModule: renamedModule
 #  renamedProperty: renamedProperty
 #  removedProperty: removedProperty
-#  renamedEvent: renamedEvent
-#  fixEventName: fixEventName
+  renamedEvent: renamedEvent
+  fixEventName: fixEventName
   fixKey: fixKey
   warn: warn
 

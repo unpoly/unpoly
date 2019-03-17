@@ -2,27 +2,29 @@
 
 class up.Layer.WithTether extends up.Layer
 
-  open: (parentElement, initialInnerContent) ->
+  create: (parentElement, initialInnerContent, options = {}) ->
     @createElement(parentElement)
-    @frameInnerContent(@element, initialInnerContent)
+    @frameInnerContent(@element, initialInnerContent, options)
     @tether = new up.Tether(
       element: @frameElement
       anchor: @origin
       align: @align
       position: @position
     )
-    return @startOpenAnimation()
+    return @startOpenAnimation(options)
 
-  close: ->
-    return @startCloseAnimation().then =>
+  destroy: (options = {}) ->
+    return @startCloseAnimation(options).then =>
       @tether.stop()
       @destroyElement()
 
   sync: ->
     @tether.sync()
 
-  startOpenAnimation: ->
-    return up.animate(@frameElement, @evalOption(@openAnimation), @openAnimateOptions())
+  startOpenAnimation: (options = {}) ->
+    frameAnimation = options.animation ? @evalOption(@openAnimation)
+    return up.animate(@frameElement, frameAnimation, @openAnimateOptions())
 
-  startCloseAnimation: ->
-    return up.animate(@frameElement, @evalOption(@closeAnimation), @closeAnimateOptions())
+  startCloseAnimation: (options = {}) ->
+    frameAnimation = options.animation ? @evalOption(@closeAnimation)
+    return up.animate(@frameElement, frameAnimation, @closeAnimateOptions())

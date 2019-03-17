@@ -75,7 +75,7 @@ class up.EventListener
 
     # Event names are given in all arg variants
     eventNames = u.splitValues(args.shift())
-    # eventNames = u.map(eventNames, up.legacy.fixEventName)
+    eventNames = u.map(eventNames, up.legacy.fixEventName)
 
     # A selector is given if the user wants to delegate events.
     # It might be undefined.

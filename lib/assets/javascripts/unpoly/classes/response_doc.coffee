@@ -8,6 +8,7 @@ class up.ResponseDoc
       @parsedRoot = @retrieveElement(document, e.createDocumentFromHtml)
 
     else if content = options.content
+      # TODO: Instead of up.ResponseDoc wrapping content, maybe the extract plans can deal with both { content } or { responseDoc }. Or a different implementation of up.ResponseDoc.
       content = @retrieveElement(content, e.createFromHtml)
       target = options.target or throw "must pass a { target }"
       @parsedRoot = e.createFromSelector(target)

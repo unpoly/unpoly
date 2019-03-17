@@ -114,12 +114,12 @@ class up.Layer extends up.Record
       )
       affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
-  frameInnerContent: (parentElement, innerContentElement) ->
+  frameInnerContent: (parentElement, innerContentElement, options) ->
     @frameElement = affix(parentElement, '.up-layer-frame')
     @contentElement = affix(@frameElement, '.up-layer-content')
     @contentElement.appendChild(innerContentElement)
     @createDismissElement(@frameElement)
-    @onContentAttached?()
+    options.onContentAttached?(layer)
 
   openAnimateOptions: ->
     easing: @openEasing
@@ -181,7 +181,7 @@ class up.Layer extends up.Record
             if closedCallback = options.closedCallback
               # Callback option only gets the resolution value.
               # Also see up.layer.closeHandlerAttr()
-              closedCallback.call(origin, options.value)
+              closedCallback.call(origin, options.value, eventProps)
 
             # Global event gets the full event props
             up.emit(options.closedEvent, eventProps)
