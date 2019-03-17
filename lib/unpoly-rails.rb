@@ -1,3 +1,4 @@
+require 'memoized'
 require 'unpoly/rails/version'
 require 'unpoly/rails/engine'
 require 'unpoly/rails/request_echo_headers'

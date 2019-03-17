@@ -1,15 +1,17 @@
-#= require ./record
-#= require ./config
+#= require ../record
+#= require ../config
 
 e = up.element
 u = up.util
 
 class up.Layer extends up.Record
 
-  constructor: (options) ->
+  constructor: (@stack, options) ->
     if u.isGiven(options.closable)
       up.legacy.warn('Layer options { closable } has been renamed to { dismissable }')
       options.dismissable = options.closable
+
+    @flavor = @constructor.flavor or up.fail('Layer flavor must implement a static { flavor } property')
 
   @keys: ->
     keys = [
@@ -47,10 +49,6 @@ class up.Layer extends up.Record
     onDismissed: null
     onConfirmed: null
     onContentAttached: null
-
-  constructor: (@stack, options) ->
-    super(options)
-    @flavor = @constructor.flavor or up.fail('Layer flavor must implement a static { flavor } property')
 
   defaultTargets: ->
     @constructor.defaults().targets
