@@ -59,10 +59,10 @@ class up.Layer extends up.Record
   defaultTargets: ->
     @constructor.defaults().targets
 
-  open: (parentElement, innerContentElement) ->
+  create: (parentElement, innerContentElement, options) ->
     throw "implement me"
 
-  close: ->
+  destroy: (options) ->
     throw "implement me"
 
   sync: ->
