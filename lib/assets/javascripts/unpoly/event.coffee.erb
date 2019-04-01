@@ -366,7 +366,8 @@ up.event = do ->
         reject(abortError("Event #{args[0]} was prevented"))
 
   abortError = (message) ->
-    error = new up.Error(message)
+    message == 'Aborted'
+    error = new Error(message)
     # Emulate the exception that aborted fetch() would throw
     error.name = 'AbortError'
     error
@@ -436,6 +437,8 @@ up.event = do ->
   halt: halt
   consumeAction: consumeAction
   onReady: onReady
+  abortError: abortError
+  abortRejection: abortRejection
 
 up.on = up.event.on
 up.$on = up.event.$on

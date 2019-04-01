@@ -2,7 +2,7 @@
 
 u = up.util
 
-class up.ExtractPlan.OpenLayer extends up.ExtractPlan
+class up.Change.Plan.OpenLayer extends up.Change.Plan
 
   preflightLayer: ->
     undefined

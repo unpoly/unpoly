@@ -191,8 +191,7 @@ up.browser = do ->
     if options.preload || u.isBlank(options.confirm) || window.confirm(options.confirm)
       Promise.resolve()
     else
-      throw "TODO: Reject with documented standard error for cancelation"
-      Promise.reject(new Error('User canceled action'))
+      up.Event.abortRejection('User canceled action')
 
   ###**
   Returns whether Unpoly supports the current browser.

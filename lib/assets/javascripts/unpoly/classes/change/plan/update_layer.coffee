@@ -3,7 +3,7 @@
 u = up.util
 e = up.element
 
-class up.ExtractPlan.UpdateLayer extends up.ExtractPlan
+class up.Change.Plan.UpdateLayer extends up.Change.Plan
 
   constructor: (options) ->
     super(options)

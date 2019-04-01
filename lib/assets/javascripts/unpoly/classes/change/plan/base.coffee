@@ -1,11 +1,13 @@
+#= require ../namespace
+
 u = up.util
 e = up.element
 
-class up.ExtractPlan
+class up.Change.Plan
 
   @NOT_APPLICABLE: 'n/a'
 
   constructor: (@options) ->
 
   notApplicable: ->
-    throw up.ExtractPlan.NOT_APPLICABLE
+    throw up.Change.Plan.NOT_APPLICABLE

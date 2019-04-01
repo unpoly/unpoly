@@ -46,18 +46,14 @@ up.fragment = do ->
       sourceUrl = u.normalizeUrl(sourceUrl)
       element.setAttribute('up-source', sourceUrl)
 
-  change = (options) ->
-    if u.isString(options.content)
-      options.content = e.createFromHtml(options.content)
-    # up.change() is a new function that takes these forms:
-    # - up.change(target: ..., url: ...)
-    # - up.change(target: ..., html: ...)
-    # - up.change(html: ...)
-    # - up.change(url: ...)
-    # if we would offer { content } for up.change():
-    # - we could only allow a single target (no ",", no hungries)
-    # - would also enable up.reload(Element)
-    throw "implement up.change()"
+  # TODO: Documentation
+  makeChange = (options) ->
+    if options.content || options.document
+      change = new up.Change.FromContent(options)
+    else
+      options.url ?= up.browser.url()
+      change =new up.Change.FromURL(options)
+    return change.execute()
 
   ###**
   Replaces elements on the current page with corresponding elements
@@ -204,132 +200,13 @@ up.fragment = do ->
   @stable
   ###
   replace = (selectorOrElement, url, options) ->
-    options = u.options(options)
-
-    options.inspectResponse = fullLoad = -> up.browser.navigate(url, u.only(options, 'method', 'params'))
-    options.navigate ?= true
-
-    if !up.browser.canPushState() && options.history != false
-      fullLoad() unless options.preload
-      return u.unresolvablePromise()
-
-    successOptions = u.merge(options, target: selectorOrElement)
-
-    # For all other keys we accept the success options as defaults.
-    # They can be overriden by their failVariant keys, e.g. { failTarget } overrides { target }.
-    failureOptions = deriveFailureOptions(options)
-
-    successCascade = new up.ExtractCascade(successOptions)
-    failureCascade = new up.ExtractCascade(failureOptions)
-
-    improvedTarget = successCascade.preflightTarget()
-    improvedFailTarget = failureCascade.preflightTarget()
-    preflightLayer = successCascade.preflightLayer()
-
-    requestAttrs = u.only options,
-      'method',
-      'data', # deprecated
-      'params',
-      'cache',
-      'preload',
-      'headers',
-      'timeout',
-      'navigate'
-
-    u.assign requestAttrs,
+    # TODO: Deprecate up.replace()
+    options = u.options(options
+      target: selectorOrElement
       url: url
-      target: improvedTarget
-      failTarget: improvedFailTarget
-      preflightLayer: preflightLayer
-
-    request = new up.Request(requestAttrs)
-
-    onRequestSuccess = (response) ->
-      processResponse(improvedTarget, request, response, successOptions)
-
-    onRequestFailure = (response) ->
-      rejection = -> Promise.reject(response)
-      if isProcessable(response)
-        promise = processResponse(improvedFailTarget, request, response, failureOptions)
-        # Although processResponse() we will perform a successful replacement of options.failTarget,
-        # we still want to reject the promise that's returned to our API client.
-        u.always(promise, rejection)
-      else
-        rejection()
-
-    promise = up.request(request)
-    unless options.preload
-      promise = promise.then(onRequestSuccess, onRequestFailure)
-    return promise
-
-  isProcessable = (response) ->
-    (response instanceof up.Response) && !response.isFatalError()
-
-  deriveFailureOptions = (successOptions) ->
-    # `successOptions` is an object like
-    #
-    #     { foo: 1, failFoo: undefined, bar: 2, failBar: 3, baz: 4 }
-    #
-    # We want to use the failVariant keys where they exists and are defined.
-    # Hence the result should be:
-    #
-    #     { foo: 1, bar: 3, baz: 4 }
-    #
-    # Note how we *don't* override `foo` with `undefined`.
-
-    failureOptions = u.copy(successOptions)
-    if failureOptions.allowFailOverrides != false
-      for key, value of failureOptions
-        # Keep key/value unless there is a defined failOverride
-        if unprefixedKey = u.unprefixCamelCase(key, 'fail')
-          failValue = u.pluckKey(failureOptions, key)
-          unless u.isUndefined(failValue)
-            failureOptions[unprefixedKey] = failValue
-    failureOptions
-
-  ###**
-  Infers history-related options from request/response and calls up.extract()
-  with the response body.
-
-  @internal
-  ###
-  processResponse = (selector, request, response, options) ->
-    responseUrl = response.url
-    locationFromExchange = responseUrl
-
-    if hash = request.hash
-      options.hash = hash
-      locationFromExchange += hash
-
-    isReloadable = (response.method == 'GET')
-
-    if u.isString(options.history)
-      up.legacy.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
-      delete options.history
-      options.location = options.history
-
-    if isReloadable
-      # Remember where we got the fragment from so we can up.reload() it later.
-      options.source = responseUrl
-    else
-      # Keep the source of the previous fragment (e.g. the form that was submitted into failure).
-      options.source = 'keep'
-      # Since the current URL is not retrievable over the GET-only address bar,
-      # we can only provide history if a location URL is passed as an option.
-      options.history = !options.location
-
-    # Accept { history: false } as a shortcut to disable all history-related options.
-    if options.history == false
-      options.location = null
-      options.title = null
-    else
-      options.location ?= locationFromExchange
-      options.title ?= response.title
-
-    extract(selector, response.text, options)
-
-  shouldExtractTitle = (options) ->
-    not (options.title is false || u.isString(options.title))
+    )
+    change = new up.Change.FromURL(options)
+    return change.execute()
 
   ###**
   Updates a selector on the current page with the
@@ -370,16 +247,13 @@ up.fragment = do ->
   @stable
   ###
   extract = (selectorOrElement, html, options) ->
-    up.puts 'Extracting %s from %d bytes of HTML', selectorOrElement, html?.length
-    options = u.options(options) # copy
-    options.target = selectorOrElement
-    options.content = html
-    changeNow(options)
-
-
-  changeNow = (options) ->
-    new up.ExtractCascade(options).execute()
-
+    # TODO: Deprecate up.extract()
+    options = u.options(options,
+      target: selectorOrElement
+      content:html
+    )
+    change = new up.Change.FromContent(options)
+    return change.execute()
 
   ###**
   Elements with an `up-keep` attribute will be persisted during
@@ -725,8 +599,9 @@ up.fragment = do ->
   ###
   reload = (selectorOrElement, options) ->
     options = u.options(options, cache: false)
-    sourceUrl = options.url || source(selectorOrElement)
-    replace(selectorOrElement, sourceUrl, options)
+    options.url ?= source(selectorOrElement)
+    options.target = selectorOrElement
+    return change(options)
 
   up.on 'up:app:boot', ->
     body = document.body
@@ -740,6 +615,7 @@ up.fragment = do ->
   replace: replace
   reload: reload
   destroy: destroy
+  change: makeChange
   extract: extract
   first: first
   source: source
@@ -749,12 +625,12 @@ up.fragment = do ->
   emitDestroyed: emitFragmentDestroyed
   emitKeep: emitFragmentKeep
   emitKept: emitFragmentKept
-  shouldExtractTitle: shouldExtractTitle
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract
 up.reload = up.fragment.reload
 up.destroy = up.fragment.destroy
+up.change = up.fragment.change
 up.hello = up.fragment.hello
 
 up.first = (args...) ->

@@ -1,6 +1,8 @@
+#= require ./namespace
+
 u = up.util
 
-class up.ExtractCascade
+class up.Change.FromContent
 
   BODY_TARGET_PATTERN = /(^|\s|,)(body|html)(,|\s|$)/i
 
@@ -74,7 +76,8 @@ class up.ExtractCascade
     if @options.saveScroll
       up.viewport.saveScroll()
 
-    if up.fragment.shouldExtractTitle(@options) && responseTitle = @responseDoc.title()
+    shouldExtractTitle = not (@options.title is false || u.isString(@options.title))
+    if shouldExtractTitle && responseTitle = @responseDoc.title()
       @options.title = responseTitle
 
     # options.target ?= fallbacks(options.flavor)
@@ -106,7 +109,7 @@ class up.ExtractCascade
       try
         opts.attempt(plan)
       catch e
-        if e == up.ExtractPlan.NOT_APPLICABLE
+        if e == up.Change.Plan.NOT_APPLICABLE
           if index < @plans.length - 1
             # Retry with next plan
           else
@@ -115,15 +118,3 @@ class up.ExtractCascade
         else
           # Any other exception is re-thrown
           throw e
-
-#  @forOptions: (options) ->
-#    options.extractCascade ||= new @(options)
-#
-#  @execute: (options, responseDoc) ->
-#    @forOptions(options).execute(responseDoc)
-#
-#  @preflightTarget: (options) ->
-#    @forOptions(options).preflightTarget()
-#
-#  @preflightLayer: (options) ->
-#    @forOptions(options).preflightLayer()

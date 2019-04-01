@@ -10,6 +10,7 @@ class up.ResponseDoc
     else if content = options.content
       # TODO: Instead of up.ResponseDoc wrapping content, maybe the extract plans can deal with both { content } or { responseDoc }. Or a different implementation of up.ResponseDoc.
       content = @retrieveElement(content, e.createFromHtml)
+      # If given { content } we will wrap it in a <div> that always matches the given { target }
       target = options.target or throw "must pass a { target }"
       @parsedRoot = e.createFromSelector(target)
       @parsedRoot.appendChild(content)
@@ -17,10 +18,10 @@ class up.ResponseDoc
     else
       throw "must pass either { document } or { content }"
 
-  retrieveElement: (element, parser) ->
+  retrieveElement: (element, stringParser) ->
     if u.isString(element)
       element = @wrapNoscriptInHtml(element)
-      element = parser(element)
+      element = stringParser(element)
     element
 
   title: ->

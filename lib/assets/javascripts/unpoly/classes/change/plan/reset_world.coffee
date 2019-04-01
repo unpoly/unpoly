@@ -2,7 +2,7 @@
 
 u = up.util
 
-class up.ExtractPlan.ResetWorld extends up.ExtractPlan.UpdateLayer
+class up.Change.Plan.ResetWorld extends up.Change.Plan.UpdateLayer
 
   preflightLayer: ->
     up.layer.root()
