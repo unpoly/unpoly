@@ -31,7 +31,7 @@ class up.ResponseDoc
       # TODO: Instead of up.ResponseDoc wrapping content, maybe the extract plans can deal with both { content } or { responseDoc }. Or a different implementation of up.ResponseDoc.
       content = @retrieveRoot(content, e.createFromHtml)
       # If given { content } we will wrap it in a <div> that always matches the given { target }
-      target = options.target or throw "must pass a { target }"
+      target = options.target or throw "must pass a { target } when passing { content }"
       @parsedRoot = e.createFromSelector(target)
       @parsedRoot.appendChild(content)
 

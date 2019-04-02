@@ -12,9 +12,8 @@ class up.Change.FromContent
     @options.hungry ?= true
     @options.keep ?= true
     @options.saveScroll ?= true
+    @options.peel ?= true
     @options.layer ?= @defaultLayerOption()
-
-    throw "should @options.peel be a default? or only for user-clicks?"
 
     @buildPlans()
 

@@ -502,6 +502,15 @@ up.util = do ->
     up.browser.canJQuery() && (object instanceof jQuery)
 
   ###**
+  @function up.util.isElementish
+  @param object
+  @return {boolean}
+  @internal
+  ###
+  isElementish = (object) ->
+    isElement(object) || isJQuery(object)
+
+  ###**
   Returns whether the given argument is an object with a `then` method.
 
   @function up.util.isPromise
@@ -1662,6 +1671,7 @@ up.util = do ->
   isNumber: isNumber
   isElement: isElement
   isJQuery: isJQuery
+  isElementish: isElementish
   isPromise: isPromise
   isOptions: isOptions
   isArray: isArray

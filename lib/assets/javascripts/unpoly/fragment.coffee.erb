@@ -23,8 +23,8 @@ up.fragment = do ->
     config.reset()
 
   setSource = (element, sourceUrl) ->
-    unless sourceUrl is false
-      sourceUrl = u.normalizeUrl(sourceUrl) if u.isPresent(sourceUrl)
+    if sourceUrl
+      sourceUrl = u.normalizeUrl(sourceUrl)
       element.setAttribute("up-source", sourceUrl)
 
   ###**
@@ -32,22 +32,19 @@ up.fragment = do ->
 
   @method up.fragment.source
   @param {string|Element|jQuery} selectorOrElement
+  @return {string|undefined}
   @experimental
   ###
-  source = (selectorOrElement) ->
-    element = e.get(selectorOrElement)
+  source = (selectorOrElement, options) ->
+    setLayerOption(setLayerOption, options)
+    element = first(selectorOrElement, options)
     if element = e.closest(element, '[up-source]')
       element.getAttribute("up-source")
-    else
-      up.browser.url()
-
-  setSource = (selectorOrElement, sourceUrl) ->
-    if sourceUrl
-      sourceUrl = u.normalizeUrl(sourceUrl)
-      element.setAttribute('up-source', sourceUrl)
 
   # TODO: Documentation
   makeChange = (options) ->
+    setLayerOption(options.target, options)
+
     if options.content || options.document
       change = new up.Change.FromContent(options)
     else if options.url
@@ -363,23 +360,22 @@ up.fragment = do ->
   event.
 
   @function up.hello
-  @param {string|Element|jQuery} selectorOrElement
-  @param {string|Element|jQuery} [options.origin]
-  @param {string|Element|jQuery} [options.kept]
+  @param {Element|jQuery} selectorOrElement
+  @param {Element|jQuery} [options.origin]
   @return {Element}
     The compiled element
   @stable
   ###
-  hello = (selectorOrElement, options) ->
-    element = e.get(selectorOrElement)
+  hello = (element, options) ->
+    element = e.get(element)
     options = u.options(options, keepPlans: [])
+
     keptElements = []
     for plan in options.keepPlans
       emitFragmentKept(plan)
       keptElements.push(plan.oldElement)
 
     responseDoc = options?.responseDoc
-
     responseDoc?.unwrapNoscripts(element)
     up.syntax.compile(element, skip: keptElements)
     responseDoc?.unwrapScripts(element)
@@ -437,7 +433,7 @@ up.fragment = do ->
     up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
   isRealElement = (element) ->
-    !e.closest(element, '.up-destroying') && !e.matches(element, '.up-layer')
+    !e.closest(element, '.up-destroying') && !e.matches(element, '.up-layer, .up-layers, .up-bounds')
 
   ###**
   Returns the first element matching the given selector, but
@@ -493,9 +489,23 @@ up.fragment = do ->
     all(args...)[0]
 
   # TODO: Expose up.fragment.all() as experimental API
-  all = (selector, options = {}) ->
-    candidates = up.layer.allElements(selector, options)
-    u.filter(candidates, isRealElement)
+  all = (args...) ->
+    options = u.extractOptions(args)
+
+    if args.size == 1
+      if u.isElementish(args[0])
+        # up.fragment.all(element) should just return [element]
+        candidates = [args[0]]
+      else
+        # up.fragment.all(lookup, [options]) should lookup the selector
+        # in the current layer
+        candidates = up.layer.allElements(args[0], options)
+    else
+      # up.fragment.all(rootElement, selector) should find selector within
+      # the descendants of rootElement regardless of rootElement's layer.
+      candidates = e.all(args...)
+
+    return u.filter(candidates, isRealElement)
 
   ###**
   @function up.fragment.createPlaceHolder
@@ -534,7 +544,9 @@ up.fragment = do ->
   @stable
   ###
   destroy = (selectorOrElement, options = {}) ->
-    element = e.get(selectorOrElement)
+    setLayerOption(setLayerOption, options)
+
+    element = first(selectorOrElement, options)
 
     unless element
       return Promise.resolve()
@@ -558,6 +570,13 @@ up.fragment = do ->
   shouldLogDestruction = (element, options) ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
     options.log != false && !e.matches(element, '.up-placeholder, .up-tooltip, .up-modal, .up-popup')
+
+  setLayerOption = (selectorOrElement, options) ->
+    # up.fragment functions usually only see elements in the current layer.
+    # However, if we are passed an actual Element or jQuery collection,
+    # we operate in the given element's layer.
+    if !options.layer && u.isElementish(selectorOrElement)
+      options.layer = up.layer.forElement(selectorOrElement)
 
   ###**
   Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
@@ -612,10 +631,10 @@ up.fragment = do ->
   ###
   reload = (selectorOrElement, options) ->
     options = u.options(options, cache: false)
+    setLayerOption(selectorOrElement, options)
     options.url ?= source(selectorOrElement)
     options.target = selectorOrElement
     return change(options)
-
 
   ###**
   Fetches this given URL with JavaScript and [replaces](/up.replace) the
@@ -637,7 +656,7 @@ up.fragment = do ->
   @stable
   ###
   visit = (url, options = {}) ->
-    # TODO: Deprecate up.visit()
+    # TODO: Move up.visit() to up.layer.visit() or up.Layer#visit()
     up.change(u.merge(options, { url }))
 
   up.on 'up:app:boot', ->

@@ -19,19 +19,19 @@
 - Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
 - Document changes in options { history } (now boolean) and { location } (now a string) changes
 - Deprecate all up.modal/popup functions and delegate to layer as good as possible
-- Rethink running inline scripts like we do with noscript
-  - People could run a script like
-        if (up.Layer.current.context.flightPicker) {
-          up.Layer.current.accept({ flight_id: 5 })
-        }
 - Implement X-Up-Dismiss-Layer, X-Up-Accept-Layer
 - Test layer { context }
 - Deprecate the entire up.history API
+  - add to CHANGELOG
+  - Deprecate API symbols
 - up.layer.* should just be class props of up.Layer
   - Then we also stop copying configs. Drawer-config is just up.Layer.Drawer.config.
   - We can still move inheritable methods to up.Layer.Base extends up.Layer
 - Rethink whether up.Layer.close() should be an API instead of up.Layer.current.close()
-- up.Layer.current() vs. up.Layer.current
+- Rename up.Layer.current() to up.Layer.current
+- TODO: Test that up.change() can be called with { target: Element }
+- TODO: Test that up.change() can be called with { target: Element } and will find in any layer
+- TODO: Test that up.change() without { layer } option will only find in current layer
 
 
 Finishing up
