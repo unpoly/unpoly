@@ -4,6 +4,7 @@ class up.Layer.WithTether extends up.Layer
 
   create: (parentElement, initialInnerContent, options = {}) ->
     @createElement(parentElement)
+    @element.classList.add('up-layer-with-tether')
     @frameInnerContent(@element, initialInnerContent, options)
     @tether = new up.Tether(
       element: @frameElement
@@ -23,8 +24,10 @@ class up.Layer.WithTether extends up.Layer
 
   startOpenAnimation: (options = {}) ->
     frameAnimation = options.animation ? @evalOption(@openAnimation)
-    return up.animate(@frameElement, frameAnimation, @openAnimateOptions())
+    return @withAnimatingClass =>
+      return up.animate(@frameElement, frameAnimation, @openAnimateOptions())
 
   startCloseAnimation: (options = {}) ->
     frameAnimation = options.animation ? @evalOption(@closeAnimation)
-    return up.animate(@frameElement, frameAnimation, @closeAnimateOptions())
+    return @withAnimatingClass =>
+      return up.animate(@frameElement, frameAnimation, @closeAnimateOptions())

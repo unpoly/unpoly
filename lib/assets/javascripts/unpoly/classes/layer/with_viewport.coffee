@@ -7,6 +7,7 @@ class up.Layer.WithViewport extends up.Layer
 
   create: (parentElement, initialInnerContent, options) ->
     @createElement(parentElement)
+    @element.classList.add('.up-layer-with-viewport')
     @backdropElement = affix(@element, '.up-layer-backdrop')
     @viewportElement = affix(@element, '.up-layer-viewport')
     @frameInnerContent(@viewportElement, initialInnerContent, options)
@@ -30,17 +31,19 @@ class up.Layer.WithViewport extends up.Layer
     viewportAnimation = options.animation ? @evalOption(@openAnimation)
     backdropAnimation = options.backdropAnimation ? @evalOption(@backdropOpenAnimation)
 
-    return Promise.all([
-      up.animate(@viewportElement, viewportAnimation, animateOptions),
-      up.animate(@backdropElement, backdropAnimation, animateOptions),
-    ])
+    return @withAnimatingClass =>
+      return Promise.all([
+        up.animate(@viewportElement, viewportAnimation, animateOptions),
+        up.animate(@backdropElement, backdropAnimation, animateOptions),
+      ])
 
   startCloseAnimation: (options = {}) ->
     animateOptions = @closeAnimateOptions(options)
     viewportAnimation = options.animation ? @evalOption(@closeAnimation)
     backdropAnimation = options.backdropAnimation ? @evalOption(@backdropCloseAnimation)
 
-    return Promise.all([
-      up.animate(@viewportElement, viewportAnimation, animateOptions),
-      up.animate(@backdropElement, backdropAnimation, animateOptions),
-    ])
+    return @withAnimatingClass =>
+      return Promise.all([
+        up.animate(@viewportElement, viewportAnimation, animateOptions),
+        up.animate(@backdropElement, backdropAnimation, animateOptions),
+      ])

@@ -133,6 +133,13 @@ class up.Layer extends up.Record
     easing: @closeEasing
     duration: @closeDuration
 
+  withAnimatingClass: (startAnimation) ->
+    @markAsAnimating(true)
+    return startAnimation.then => @markAsAnimating(false)
+
+  markAsAnimating: (state) ->
+    e.toggleClass(@element, 'up-layer-animating', state)
+
   evalOption: (option) ->
     u.evalOption(option, this)
 
