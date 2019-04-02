@@ -41,6 +41,7 @@ class up.ResponseDoc
   retrieveRoot: (element, stringParser) ->
     if u.isString(element)
       element = @noscriptWrapper.wrap(element)
+      element = @scriptWrapper.wrap(element)
       element = stringParser(element)
     element
 
