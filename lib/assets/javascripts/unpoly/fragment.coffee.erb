@@ -482,7 +482,13 @@ up.fragment = do ->
   @experimental
   ###
   first = (args...) ->
-    throw "this needs to delegate to up.layer"
+    # TODO: Change docs
+    all(args...)[0]
+
+  # TODO: Expose up.fragment.all() as experimental API
+  all = (selector, options = {}) ->
+    candidates = up.layer.allElements(selector, options)
+    u.filter(candidates, isRealElement)
 
   ###**
   @function up.fragment.createPlaceHolder
@@ -603,6 +609,30 @@ up.fragment = do ->
     options.target = selectorOrElement
     return change(options)
 
+
+  ###**
+  Fetches this given URL with JavaScript and [replaces](/up.replace) the
+  current `<body>` element with the response's `<body>` element.
+
+  \#\#\# Example
+
+  This would replace the current page with the response for `/users`:
+
+      up.visit('/users')
+
+  @function up.visit
+  @param {string} url
+    The URL to visit.
+  @param {string} [options.target]
+    The selector to replace.
+  @param {Object} [options]
+    See options for [`up.replace()`](/up.replace)
+  @stable
+  ###
+  visit = (url, options = {}) ->
+    # TODO: Deprecate up.visit()
+    up.change(u.merge(options, { url }))
+
   up.on 'up:app:boot', ->
     body = document.body
     setSource(body, up.browser.url())
@@ -621,6 +651,7 @@ up.fragment = do ->
   source: source
   setSource: setSource
   hello: hello
+  visit: visit
   emitInserted: emitFragmentInserted
   emitDestroyed: emitFragmentDestroyed
   emitKeep: emitFragmentKeep
@@ -632,6 +663,8 @@ up.reload = up.fragment.reload
 up.destroy = up.fragment.destroy
 up.change = up.fragment.change
 up.hello = up.fragment.hello
+up.visit = up.fragment.visit
+
 
 up.first = (args...) ->
   up.legacy.warn('up.first() has been renamed to up.fragment.first()')

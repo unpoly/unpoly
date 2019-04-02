@@ -43,10 +43,6 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
 up.proxy = do ->
 
   u = up.util
-  e = up.element
-
-  waitingLink = undefined
-  preloadDelayTimer = undefined
 
   slowDelayTimer = undefined
   slowEventEmitted = undefined
@@ -89,7 +85,6 @@ up.proxy = do ->
   ###
   config = new up.Config ->
     slowDelay: 300
-    preloadDelay: 75
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
     maxRequests: 4
@@ -134,17 +129,12 @@ up.proxy = do ->
       if response = cache.get(candidate)
         return response
 
-  cancelPreloadDelay = ->
-    clearTimeout(preloadDelayTimer)
-    preloadDelayTimer = null
-
   cancelSlowDelay = ->
     clearTimeout(slowDelayTimer)
     slowDelayTimer = null
 
   reset = ->
     waitingLink = null
-    cancelPreloadDelay()
     cancelSlowDelay()
     abortRequests()
     slowEventEmitted = false
@@ -587,62 +577,6 @@ up.proxy = do ->
   ###
   clearCache = cache.clear
 
-  # up.legacy.renamedEvent('up:proxy:received', 'up:proxy:loaded')
-
-  preloadAfterDelay = (link) ->
-    delay = e.numberAttr(link, 'up-delay') || config.preloadDelay
-    unless link == waitingLink
-      waitingLink = link
-      cancelPreloadDelay()
-      curriedPreload = ->
-        u.muteRejection preload(link)
-        waitingLink = null
-      startPreloadDelay(curriedPreload, delay)
-
-  startPreloadDelay = (block, delay) ->
-    preloadDelayTimer = setTimeout(block, delay)
-
-  stopPreload = (link) ->
-    if link == waitingLink
-      waitingLink = undefined
-      cancelPreloadDelay()
-
-  ###**
-  Preloads the given link.
-
-  When the link is clicked later, the response will already be cached,
-  making the interaction feel instant.
-
-  @function up.proxy.preload
-  @param {string|Element|jQuery} linkOrSelector
-    The element whose destination should be preloaded.
-  @param {Object} options
-    Options that will be passed to the function making the HTTP requests.
-  @return
-    A promise that will be fulfilled when the request was loaded and cached
-  @experimental
-  ###
-  preload = (linkOrSelector, options) ->
-    link = e.get(linkOrSelector)
-
-    if up.link.isSafe(link)
-      preloadEventAttrs = { log: ['Preloading link %o', link], target: link }
-      up.event.whenEmitted('up:link:preload', preloadEventAttrs).then ->
-        up.link.follow(link, u.merge(options, preload: true))
-    else
-      Promise.reject(new Error("Won't preload unsafe link"))
-
-  ###**
-  This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
-
-  @event up:link:preload
-  @param {Element} event.target
-    The link element that will be preloaded.
-  @param event.preventDefault()
-    Event listeners may call this method to prevent the link from being preloaded.
-  @stable
-  ###
-
   ###**
   @internal
   ###
@@ -658,32 +592,11 @@ up.proxy = do ->
       method = 'POST'
     method
 
-  ###**
-  Links with an `up-preload` attribute will silently fetch their target
-  when the user hovers over the click area, or when the user puts her
-  mouse/finger down (before releasing).
-
-  When the link is clicked later, the response will already be cached,
-  making the interaction feel instant.   
-
-  @selector a[up-preload]
-  @param [up-delay=75]
-    The number of milliseconds to wait between hovering
-    and preloading. Increasing this will lower the load in your server,
-    but will also make the interaction feel less instant.
-  @stable
-  ###
-  up.compiler 'a[up-preload], [up-href][up-preload]', (link) ->
-    if up.link.isSafe(link)
-      link.addEventListener 'mouseenter', (event) ->
-        if up.link.shouldProcessEvent(event, link)
-          preloadAfterDelay(link)
-      link.addEventListener 'mouseleave', ->
-        stopPreload(link)
-
   up.on 'up:framework:reset', reset
 
-  preload: preload # TODO: Rename to up.proxy.preloadLink() or move to up.link.preload()
+  preload: (args...) ->
+    up.legacy.warn('up.proxy.preload() has been renamed to up.link.preload()')
+    up.link.preload(args...)
   ajax: ajax
   request: makeRequest
   get: get # TODO: Rename to up.proxy.cache.get()

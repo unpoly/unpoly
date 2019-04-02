@@ -117,6 +117,9 @@ up.layer = do ->
       when 'closest'
         stack.selfAndAncestors(givenOriginLayer())
 
+  allElements = (selector, options) ->
+    lookupOne(options).allElements(selector)
+
   up.event.onEscape (event) ->
     if currentLayer().dismissable
       u.muteRejection dismiss()

@@ -76,32 +76,31 @@ up.link = do ->
   u = up.util
   e = up.element
 
-  SELECTORS = ['[up-target]', '[up-follow]']
+  preloadDelayTimer = undefined
+  waitingLink = undefined
+
+  config = new up.Config ->
+    preloadDelay: 75
+    selectors: ['[up-target]', '[up-follow]']
+
+  preloadDelay = new up.LinkPreloadDelay()
 
   fullSelector = ->
-    SELECTORS.join(',')
-  
+    config.selectors.join(',')
+
   ###**
-  Fetches this given URL with JavaScript and [replaces](/up.replace) the
-  current `<body>` element with the response's `<body>` element.
-
-  \#\#\# Example
-
-  This would replace the current page with the response for `/users`:
-
-      up.visit('/users')
-
-  @function up.visit
-  @param {string} url
-    The URL to visit.
-  @param {string} [options.target]
-    The selector to replace.
-  @param {Object} [options]
-    See options for [`up.replace()`](/up.replace)
-  @stable
+  @property up.link.config
+  @param {number} [config.preloadDelay=75]
+    The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
+    starts preloading.
   ###
-  visit = (url, options = {}) ->
-    up.change(u.merge(options, { url }))
+  reset = ->
+    config.reset()
+    preloadDelay.reset()
+
+  consumeFollowEvent = (event, link) ->
+    up.event.consumeAction(event)
+    u.muteRejection follow(link)
 
   ###**
   Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the current page with HTML from the response.
@@ -210,10 +209,41 @@ up.link = do ->
   @stable
   ###
 
-  # TODO: Move up.proxy.preload() to up.link.preload()
+  ###**
+  Preloads the given link.
 
+  When the link is clicked later, the response will already be cached,
+  making the interaction feel instant.
+
+  @function up.link.preload
+  @param {string|Element|jQuery} link
+    The element or selector whose destination should be preloaded.
+  @param {Object} options
+    See options for `up.follow()`.
+  @return
+    A promise that will be fulfilled when the request was loaded and cached
+  @experimental
+  ###
   preload = (link, options) ->
-    follow(link, u.merge(options, preload: true))
+    link = e.get(linkOrSelector)
+
+    if up.link.isSafe(link)
+      preloadEventAttrs = { log: ['Preloading link %o', link], target: link }
+      up.event.whenEmitted('up:link:preload', preloadEventAttrs).then ->
+        follow(link, u.merge(options, preload: true))
+    else
+      Promise.reject(new Error("Won't preload unsafe link"))
+
+  ###**
+  This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
+
+  @event up:link:preload
+  @param {Element} event.target
+    The link element that will be preloaded.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the link from being preloaded.
+  @stable
+  ###
 
   ###**
   Returns the HTTP method that should be used when following the given link.
@@ -466,7 +496,7 @@ up.link = do ->
   @stable
   ###
 
-  up.on 'click', fullSelector(), (event, link) ->
+  up.on 'click', fullSelector, (event, link) ->
     if shouldProcessEvent(event, link)
       if e.matches(link, '[up-instant]')
         # If the link was already processed on mousedown, we still need
@@ -478,16 +508,12 @@ up.link = do ->
       # For tests
       allowDefault(event)
 
-  up.on 'mousedown', fullSelector(), (event, link) ->
+  up.on 'mousedown', fullSelector, (event, link) ->
     if shouldProcessEvent(event, link) && e.matches(link, '[up-instant]')
       consumeFollowEvent(event, link)
     else
       # For tests
       allowDefault(event)
-
-  consumeFollowEvent = (event, link) ->
-    up.event.consumeAction(event)
-    u.muteRejection follow(link)
 
   ###**
   By adding an `up-instant` attribute to a link, the destination will be
@@ -603,8 +629,25 @@ up.link = do ->
       area.removeAttribute('up-expand')
       makeFollowable(area)
 
+  ###**
+  Links with an `up-preload` attribute will silently fetch their target
+  when the user hovers over the click area, or when the user puts her
+  mouse/finger down (before releasing).
+
+  When the link is clicked later, the response will already be cached,
+  making the interaction feel instant.
+
+  @selector a[up-preload]
+  @param [up-delay=75]
+    The number of milliseconds to wait between hovering
+    and preloading. Increasing this will lower the load in your server,
+    but will also make the interaction feel less instant.
+  @stable
+  ###
+  up.compiler 'a[up-preload], [up-href][up-preload]', (link) ->
+    preloadDelay.observeLink(link)
+
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  visit: visit
   follow: follow
   makeFollowable: makeFollowable
   isSafe: isSafe
@@ -613,5 +656,4 @@ up.link = do ->
   followMethod: followMethod
   allowDefault: allowDefault
 
-up.visit = up.link.visit
 up.follow = up.link.follow
