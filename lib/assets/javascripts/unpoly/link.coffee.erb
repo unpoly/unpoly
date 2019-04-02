@@ -181,7 +181,7 @@ up.link = do ->
     parser.boolean('dismissable')
     parser.boolean('feedback', default: true)
     options.feedback = false if options.preload
-    parser.parse(up.layer.closeHandlerAttr, 'onConfirmed')
+    parser.parse(up.layer.closeHandlerAttr, 'onAccepted')
     parser.parse(up.layer.closeHandlerAttr, 'onDismissed')
     u.assign(options, up.motion.animateOptions(options, link))
 

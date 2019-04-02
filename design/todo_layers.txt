@@ -4,7 +4,9 @@
 - Unfortunate naming: { confirm } vs. { onConfirmed }. Maybe use { accept } for layers?
 - .up-layer-viewport should have { overscroll-behavior: contain }
 - u.only and u.except should take an array
-- up.reload() should work without a target
+- up.reload()
+  - should work without a target
+  - up.reload() with an element should update the element in whatever layer it lives in
 - Simplify z-index for layers
   - I think we only need a z-index on .up-layers and let stacking context do the rest
 - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
@@ -15,15 +17,21 @@
 - What is up.browser.navigate() ?
 - Is { navigate } is really the best name for the option? Maybe { solo } or similar?
 - Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
-- up.reload() with an element should update the element in whatever layer it lives in
 - Document changes in options { history } (now boolean) and { location } (now a string) changes
 - Deprecate all up.modal/popup functions and delegate to layer as good as possible
+- Rethink running inline scripts like we do with noscript
+  - People could run a script like
+        if (up.Layer.current.context.flightPicker) {
+          up.Layer.current.accept({ flight_id: 5 })
+        }
 - Implement X-Up-Dismiss-Layer, X-Up-Accept-Layer
-- Test context
+- Test layer { context }
 - Deprecate the entire up.history API
 - up.layer.* should just be class props of up.Layer
   - Then we also stop copying configs. Drawer-config is just up.Layer.Drawer.config.
   - We can still move inheritable methods to up.Layer.Base extends up.Layer
+- Rethink whether up.Layer.close() should be an API instead of up.Layer.current.close()
+- up.Layer.current() vs. up.Layer.current
 
 
 Finishing up

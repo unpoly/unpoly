@@ -4,44 +4,6 @@ e = up.element
 class up.ResponseDoc
 
   constructor: (options) ->
-    if document = options.document
-      @parsedRoot = @retrieveElement(document, e.createDocumentFromHtml)
-
-    else if content = options.content
-      # TODO: Instead of up.ResponseDoc wrapping content, maybe the extract plans can deal with both { content } or { responseDoc }. Or a different implementation of up.ResponseDoc.
-      content = @retrieveElement(content, e.createFromHtml)
-      # If given { content } we will wrap it in a <div> that always matches the given { target }
-      target = options.target or throw "must pass a { target }"
-      @parsedRoot = e.createFromSelector(target)
-      @parsedRoot.appendChild(content)
-
-    else
-      throw "must pass either { document } or { content }"
-
-  retrieveElement: (element, stringParser) ->
-    if u.isString(element)
-      element = @wrapNoscriptInHtml(element)
-      element = stringParser(element)
-    element
-
-  title: ->
-    @parsedRoot.querySelector("head title")?.textContent
-
-  has: (selector) ->
-    !!@first(selector)
-
-  selectForInsertion: (selector) ->
-    if element = @first(selector)
-      @prepareForInsertion(element)
-      element
-
-  first: (selector) ->
-    e.first(@parsedRoot, selector)
-
-  prepareForInsertion: (element) ->
-    @unwrapNoscriptInElement(element)
-
-  wrapNoscriptInHtml: (html) ->
     # We wrap <noscript> tags into a <div> for two reasons:
     #
     # (1) IE11 and Edge cannot find <noscript> tags with jQuery or querySelector() or
@@ -56,16 +18,43 @@ class up.ResponseDoc
     #
     # We will unwrap the wrapped <noscript> tags when a fragment is requested with
     # #first(), and only in the requested fragment.
-    noscriptPattern = /<noscript[^>]*>((.|\s)*?)<\/noscript>/ig
-    return html.replace noscriptPattern, (match, content) =>
-      @didWrapNoscript = true
-      '<div class="up-noscript" data-html="' + u.escapeHtml(content) + '"></div>'
+    @noscriptWrapper = new up.HtmlWrapper('noscript')
 
-  unwrapNoscriptInElement: (element) ->
-    return unless @didWrapNoscript
-    wrappedNoscripts = element.querySelectorAll('.up-noscript')
-    for wrappedNoscript in wrappedNoscripts
-      wrappedContent = wrappedNoscript.getAttribute('data-html')
-      noscript = document.createElement('noscript')
-      noscript.textContent = wrappedContent
-      wrappedNoscript.parentNode.replaceChild(noscript, wrappedNoscript)
+    # We wrap <script> tags into a <div> because <script> tags parsed by
+    # HTMLParser will not execute their content once appended to the DOM.
+    @scriptWrapper = new up.HtmlWrapper('script', guard: @isInlineScript)
+
+    if document = options.document
+      @parsedRoot = @retrieveRoot(document, e.createDocumentFromHtml)
+
+    else if content = options.content
+      # TODO: Instead of up.ResponseDoc wrapping content, maybe the extract plans can deal with both { content } or { responseDoc }. Or a different implementation of up.ResponseDoc.
+      content = @retrieveRoot(content, e.createFromHtml)
+      # If given { content } we will wrap it in a <div> that always matches the given { target }
+      target = options.target or throw "must pass a { target }"
+      @parsedRoot = e.createFromSelector(target)
+      @parsedRoot.appendChild(content)
+
+    else
+      throw "must pass either { document } or { content }"
+
+  retrieveRoot: (element, stringParser) ->
+    if u.isString(element)
+      element = @noscriptWrapper.wrap(element)
+      element = stringParser(element)
+    element
+
+  title: ->
+    @parsedRoot.querySelector("head title")?.textContent
+
+  first: (selector) ->
+    e.first(@parsedRoot, selector)
+
+  unwrapNoscripts: (element) ->
+    @noscriptWrapper.unwrap(element)
+
+  unwrapScripts: (element) ->
+    @scriptWrapper.unwrap(element)
+
+  isInlineScript: (element) ->
+    element.hasAttribute('src')

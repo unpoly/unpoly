@@ -377,7 +377,13 @@ up.fragment = do ->
     for plan in options.keepPlans
       emitFragmentKept(plan)
       keptElements.push(plan.oldElement)
+
+    responseDoc = options?.responseDoc
+
+    responseDoc?.unwrapNoscripts(element)
     up.syntax.compile(element, skip: keptElements)
+    responseDoc?.unwrapScripts(element)
+
     emitFragmentInserted(element, options)
     element
 

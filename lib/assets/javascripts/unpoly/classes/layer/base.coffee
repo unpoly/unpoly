@@ -46,8 +46,8 @@ class up.Layer extends up.Record
     dismissAriaLabel: 'Dismiss dialog'
     dismissible: true
     onCreated: null
+    onAccepted: null
     onDismissed: null
-    onConfirmed: null
     onContentAttached: null
 
   isCurrent: ->
@@ -123,7 +123,7 @@ class up.Layer extends up.Record
     @contentElement = affix(@frameElement, '.up-layer-content')
     @contentElement.appendChild(innerContentElement)
     @createDismissElement(@frameElement)
-    options.onContentAttached?(layer)
+    options.onContentAttached?(layer, innerContentElement)
 
   openAnimateOptions: ->
     easing: @openEasing
@@ -139,12 +139,12 @@ class up.Layer extends up.Record
   destroyElement: ->
     e.remove(@element)
 
-  confirm: (options) ->
+  accept: (options) ->
     @closeVariant(u.merge(options,
-      valueAttr: 'up-confirm'
-      closeEvent: 'up:layer:confirm'
-      closedEvent: 'up:layer:confirmed'
-      closedCallback: @onConfirmed
+      valueAttr: 'up-accept'
+      closeEvent: 'up:layer:accept'
+      closedEvent: 'up:layer:accepted'
+      closedCallback: @onAccepted
     ))
 
   dismiss: (options) ->

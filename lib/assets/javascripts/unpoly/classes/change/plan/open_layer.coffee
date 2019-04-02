@@ -15,7 +15,7 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
   execute: ->
     # Selecting the content needs to happen sync, since our caller
     # might expect and catch up.ExtractPlan.NOT_APPLICABLE.
-    content = @responseDoc.selectForInsertion(@options.target) or @notApplicable()
+    content = @responseDoc.first(@options.target) or @notApplicable()
 
     # If we cannot push state for some reason, we prefer disabling history for
     # child layers instead of blowing up the entire stack with a full page load.
@@ -25,11 +25,13 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
     layer = up.layer.build(@options)
 
     promise = up.event.whenEmitted('up:layer:open', { layer, log: 'Opening layer' })
-    promise = promise.then => layer.create(up.layer.container(), content, { @onContentAttached })
+    promise = promise.then =>
+      layer.create(up.layer.container(), content, { @onContentAttached })
+
     promise = promise.then -> up.emit('up:layer:opened', { layer, log: 'Layer opened' })
     promise
 
-  onContentAttached: (layer) =>
+  onContentAttached: (layer, content) =>
     up.fragment.setSource(content, @options.source)
 
     # Calling up.hello() will compile the new content

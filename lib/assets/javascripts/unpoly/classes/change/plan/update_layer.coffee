@@ -40,27 +40,22 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
     @updateHistory(historyOptions)
 
     promise = promise.then =>
-      swapPromises = @steps.map (step) ->
-        # Note that we must copy the options hash instead of changing it in-place, since the
-        # async swapElements() is scheduled for the next microtask and we must not change the options
-        # for the previous iteration.
-        swapOptions = u.merge(@options, step)
-        return @swapStep(step, swapOptions)
+      swapPromises = @steps.map (step) -> @swapStep(step)
 
       return Promise.all(swapPromises)
 
     return promise
 
-  swapStep: (step, options) ->
+  swapStep: (step) ->
     up.puts('Swapping fragment %s', step.selector)
 
     # When the server responds with an error, or when the request method is not
     # reloadable (not GET), we keep the same source as before.
-    if options.source == 'keep'
-      options.source = up.fragment.source(step.oldElement)
+    if step.source == 'keep'
+      step.source = up.fragment.source(step.oldElement)
 
     # Remember where the element came from in case someone needs to up.reload(newElement) later.
-    @setSource(step.newElement, options.source)
+    @setSource(step.newElement, step.source)
 
     if step.pseudoClass
       # We're either appending or prepending. No keepable elements must be honored.
@@ -80,23 +75,23 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
         step.oldElement.insertAdjacentElement('beforeend', wrapper)
 
       for child in wrapper.children
-        up.hello(child, options) # emits up:fragment:inserted
+        up.hello(child, step) # emits up:fragment:inserted
 
       # Reveal element that was being prepended/appended.
       # Since we will animate (not morph) it's OK to allow animation of scrolling
       # if options.scrollBehavior is given.
-      promise = up.viewport.scrollAfterInsertFragment(wrapper, options)
+      promise = up.viewport.scrollAfterInsertFragment(wrapper, step)
 
       # Since we're adding content instead of replacing, we'll only
       # animate newElement instead of morphing between oldElement and newElement
-      promise = u.always(promise, up.animate(wrapper, step.transition, options))
+      promise = u.always(promise, up.animate(wrapper, step.transition, step))
 
       # Remove the wrapper now that is has served it purpose
       promise = promise.then -> e.unwrap(wrapper)
 
       return promise
 
-    else if keepPlan = @findKeepPlan(step.oldElement, step.newElement, options)
+    else if keepPlan = @findKeepPlan(step.oldElement, step.newElement, step)
       # Since we're keeping the element that was requested to be swapped,
       # there is nothing left to do here, except notify event listeners.
       up.fragment.emitKept(keepPlan)
@@ -105,36 +100,42 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
     else
       # This needs to happen before up.syntax.clean() below.
       # Otherwise we would run destructors for elements we want to keep.
-      options.keepPlans = @transferKeepableElements(step.oldElement, step.newElement, options)
+      @transferKeepableElements(step)
 
       parent = step.oldElement.parentNode
 
-      morphOptions = u.merge options,
+      morphOptions = u.merge step,
         beforeStart: ->
           up.fragment.markAsDestroying(step.oldElement)
-        afterInsert: ->
-          up.hello(step.newElement, options)
+        afterInsert: =>
+          up.hello(step.newElement, step)
         beforeDetach: ->
           up.syntax.clean(step.oldElement)
         afterDetach: ->
           e.remove(step.oldElement) # clean up jQuery data
-          up.fragment.emitDestroyed(fragment.oldElement, parent: parent, log: false)
+          up.fragment.emitDestroyed(step.oldElement, parent: parent, log: false)
 
       return up.morph(step.oldElement, step.newElement, step.transition, morphOptions)
 
   # Returns a object detailling a keep operation iff the given element is [up-keep] and
   # we can find a matching partner in newElement. Otherwise returns undefined.
-  findKeepPlan: (element, newElement, options) ->
+  #
+  # @param {Element} options.oldElement
+  # @param {Element} options.newElement
+  # @param {boolean} options.keep
+  # @param {boolean} options.descendantsOnly
+  #
+  findKeepPlan: (options) ->
     return unless options.keep
 
-    keepable = element
+    keepable = options.oldElement
     if partnerSelector = e.booleanOrStringAttr(keepable, 'up-keep')
       u.isString(partnerSelector) or partnerSelector = '&'
       partnerSelector = e.resolveSelector(partnerSelector, keepable)
       if options.descendantsOnly
-        partner = e.first(newElement, partnerSelector)
+        partner = e.first(options.newElement, partnerSelector)
       else
-        partner = e.subtree(newElement, partnerSelector)[0]
+        partner = e.subtree(options.newElement, partnerSelector)[0]
       if partner && e.matches(partner, '[up-keep]')
         plan =
           oldElement: keepable # the element that should be kept
@@ -143,15 +144,14 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
 
         return plan unless up.fragment.emitKeep(plan).defaultPrevented
 
-
   # This will find all [up-keep] descendants in oldElement, overwrite their partner
   # element in newElement and leave a visually identical clone in oldElement for a later transition.
   # Returns an array of keepPlans.
-  transferKeepableElements: (oldElement, newElement, options) ->
+  transferKeepableElements: (step) ->
     keepPlans = []
-    if options.keep
-      for keepable in oldElement.querySelectorAll('[up-keep]')
-        if plan = @findKeepPlan(keepable, newElement, u.merge(options, descendantsOnly: true))
+    if step.keep
+      for keepable in step.oldElement.querySelectorAll('[up-keep]')
+        if plan = @findKeepPlan(u.merge(step, oldElement: keepable, descendantsOnly: true))
           # plan.oldElement is now keepable
 
           # Replace keepable with its clone so it looks good in a transition between
@@ -164,15 +164,16 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
           # replace the matching element with keepable so it will eventually return to the DOM.
           e.replace(plan.newElement, keepable)
           keepPlans.push(plan)
-    keepPlans
 
+    step.keepPlans = keepPlans
 
   parseSteps: ->
     resolvedSelector = e.resolveSelector(@options.target, @options.origin)
     disjunction = u.splitValues(resolvedSelector, ',')
 
     @steps = disjunction.map (target, i) =>
-      expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/) or up.fail('Could not parse selector "%s"', target)
+      expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/) or
+        up.fail('Could not parse selector "%s"', target)
 
       # When extracting multiple selectors, we only want to reveal the first element.
       # So we set the { reveal } option to false for the next iteration.
@@ -190,18 +191,19 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
 
   findOld: ->
     for step in @steps
-      step.oldElement = up.layer.firstElement(@options.layer, step.selector) or @notApplicable()
+      # Try to find fragments matchin step.selector within step.layer
+      step.oldElement = up.fragment.first(step.selector, step) or @notApplicable()
     @resolveOldNesting()
 
   findNew: ->
     for step in @steps
-      # The responseDoc has no layers. It's always just the page.
-      step.newElement = @responseDoc.selectForInsertion(step.selector) or @notApplicable()
+      # The responseDoc has no layers.
+      step.newElement = @responseDoc.first(step.selector) or @notApplicable()
 
   addHungrySteps: ->
     if @options.hungry
-      throw "replace with up.fragment.all(..., layer: @options.layer)"
-      hungries = up.layer.allElements(@options.layer, up.radio.hungrySelector())
+      # Find all [up-hungry] fragments within @options.layer
+      hungries = up.fragment.all(up.radio.hungrySelector(), @options)
       transition = up.radio.config.hungryTransition ? @options.transition
       for hungry in hungries
         selector = e.toSelector(hungry)

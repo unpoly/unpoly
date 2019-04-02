@@ -115,6 +115,9 @@ up.layer = do ->
   allElements = (selector, options) ->
     lookupOne(options).allElements(selector)
 
+  firstElement = (selector, options) ->
+    lookupOne(options).firstElement(selector)
+
   up.event.onEscape (event) ->
     if currentLayer().dismissable
       u.muteRejection dismiss()
@@ -142,6 +145,8 @@ up.layer = do ->
   selfAndAncestors: -> stack.selfAndAncestors()
   lookup: lookupOne
   lookupAll: lookupAll
+  allElements: allElements
+  firstElement: firstElement
   config: config
   defaultTargets: defaultTargets
   open: open
