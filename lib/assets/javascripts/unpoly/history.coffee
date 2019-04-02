@@ -138,7 +138,6 @@ up.history = do ->
   manipulate = (method, url) ->
     if up.browser.canPushState() && config.enabled
       state = buildState()
-      throw "page title should be part of state?"
       window.history[method](state, '', url)
       observeNewUrl(currentUrl())
       true

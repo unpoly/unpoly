@@ -44,7 +44,6 @@ up.layer = do ->
   reset = ->
     config.reset(deep: true)
     stack.reset()
-    queue.reset()
 
   open = (options) ->
     options = u.options(options, layer: 'new')
@@ -62,10 +61,6 @@ up.layer = do ->
     return new Promise (onConfirm, onDismiss) ->
       options = u.merge(options, { onConfirm, onDismiss, })
       open(options)
-
-  layersContainer = ->
-    selector = '.up-layers'
-    e.first(selector) || e.affix(document.body, selector)
 
   currentLayer = ->
     stack.current()
@@ -150,5 +145,5 @@ up.layer = do ->
   config: config
   defaultTargets: defaultTargets
   open: open
-  container: layersContainer
+  container: -> stack.container()
   build: build

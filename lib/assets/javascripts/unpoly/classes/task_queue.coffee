@@ -1,15 +1,11 @@
 class up.TaskQueue
 
   constructor: ->
-    @reset()
-
-  cancel: ->
-    # TODO: DO we really need .cancel()?
-    for task in @tasks
-      task.canceled = true
+    @initialize()
 
   reset: ->
-    @cancel()
+    for task in @tasks
+      task.canceled = true
     @initialize()
 
   initialize: ->
@@ -20,9 +16,8 @@ class up.TaskQueue
     for task in tasks
       nextTask = ->
         if task.canceled
-          throw "Reject with standard error for cancelation"
           throw "Do we still need cancelation? Because layers now just queue things"
-          return Promise.reject('canceled')
+          return up.event.abortRejection()
         else
           return task()
     @cursor = u.always @cursor, nextTask

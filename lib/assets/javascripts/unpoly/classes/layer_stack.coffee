@@ -1,4 +1,7 @@
 u = up.util
+e = up.element
+
+CONTAINER_SELECTOR = '.up-layers'
 
 class up.LayerStack extends up.Config
 
@@ -13,8 +16,8 @@ class up.LayerStack extends up.Config
   isRoot: (layer) ->
     @layers[0] == layer
 
-  isCurrentRoot: ->
-    @layers.length == 1
+#  isCurrentRoot: ->
+#    @layers.length == 1
 
   size: ->
     @layers.length
@@ -24,6 +27,11 @@ class up.LayerStack extends up.Config
 
   remove: (layer) ->
     u.remove(@layers, layer)
+
+  reset: ->
+    @queue.reset()
+    if c = @container()
+      e.remove(c)
 
 #  removeDescendants: (layer) ->
 #    @layers = selfAndAncestors(layer)
@@ -51,3 +59,6 @@ class up.LayerStack extends up.Config
 
   current: ->
     u.last(@layers)
+
+  container: ->
+    e.first(CONTAINER_SELECTOR) || e.affix(document.body, CONTAINER_SELECTOR)
