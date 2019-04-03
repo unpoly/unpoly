@@ -22,6 +22,7 @@
 - up.layer.* should just be class props of up.Layer
   - Then we also stop copying configs. Drawer-config is just up.Layer.Drawer.config.
   - We can still move inheritable methods to up.Layer.Base extends up.Layer
+
 - Rethink whether up.Layer.close() should be an API instead of up.Layer.current.close()
 - Rename up.Layer.current() to up.Layer.current
 - TODO: Test that up.change() can be called with { target: Element }

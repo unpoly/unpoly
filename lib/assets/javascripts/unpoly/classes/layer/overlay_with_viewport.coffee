@@ -1,11 +1,11 @@
 #= require ./base
 
-class up.Layer.WithViewport extends up.Layer
+class up.Layer.OverlayWithViewport extends up.Layer.Overlay
 
   # It makes only sense to have a single body shifter
   @bodyShifter: new up.BodyShifter()
 
-  create: (parentElement, initialInnerContent, options) ->
+  openNow: (parentElement, initialInnerContent, options) ->
     @createElement(parentElement)
     @element.classList.add('.up-layer-with-viewport')
     @backdropElement = affix(@element, '.up-layer-backdrop')
@@ -15,7 +15,7 @@ class up.Layer.WithViewport extends up.Layer
     @shiftBody()
     return @startOpenAnimation(options)
 
-  destroy: (options) ->
+  closeNow: (options) ->
     return @startCloseAnimation(options).then =>
       @destroyElement()
       @unshiftBody()

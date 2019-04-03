@@ -1,6 +1,6 @@
 #= require ./base
 
-class up.Layer.Modal extends up.Layer
+class up.Layer.Modal extends up.Layer.OverlayWithViewport
 
   @flavor: 'modal'
 

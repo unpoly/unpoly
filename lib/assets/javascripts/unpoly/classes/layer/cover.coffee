@@ -1,6 +1,6 @@
 #= require ./base
 
-class up.Layer.Cover extends up.Layer.WithViewport
+class up.Layer.Cover extends up.Layer.OverlayWithViewport
 
   @flavor: 'cover'
 

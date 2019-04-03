@@ -1,6 +1,6 @@
 #= require ./popup
 
-class up.Layer.Popup extends up.Layer.WithTether
+class up.Layer.Popup extends up.Layer.OverlayWithTether
 
   @flavor: 'popup'
 

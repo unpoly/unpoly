@@ -1,6 +1,6 @@
 #= require './base'
 
-class up.Layer.Drawer extends up.Layer.WithViewport
+class up.Layer.Drawer extends up.Layer.OverlayWithViewport
 
   @flavor: 'drawer'
 

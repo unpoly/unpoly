@@ -1,8 +1,8 @@
 #= require ./base
 
-class up.Layer.WithTether extends up.Layer
+class up.Layer.OverlayWithTether extends up.Layer.Overlay
 
-  create: (parentElement, initialInnerContent, options = {}) ->
+  openNow: (parentElement, initialInnerContent, options = {}) ->
     @createElement(parentElement)
     @element.classList.add('up-layer-with-tether')
     @frameInnerContent(@element, initialInnerContent, options)
@@ -14,7 +14,7 @@ class up.Layer.WithTether extends up.Layer
     )
     return @startOpenAnimation(options)
 
-  destroy: (options = {}) ->
+  closeNow: (options = {}) ->
     return @startCloseAnimation(options).then =>
       @tether.stop()
       @destroyElement()

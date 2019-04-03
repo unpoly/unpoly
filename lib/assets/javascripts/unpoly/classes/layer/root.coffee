@@ -11,19 +11,14 @@ class up.Layer.Root extends up.Layer
 
   constructor: (stack, options) ->
     super(stack, options)
-    @element = document.documentElement
-
-  create: ->
-    throw new Error('Cannot create another root layer')
-
-  destroy: ->
-    throw new Error('Cannot destroy the root layer')
 
   contains: (element) =>
     # Test that the closest parent is the document and not another layer.
     e.closest(element, '.up-layer, html') == e.root()
 
   allElements: (selector) ->
-    matches = super(selector)
+    matches = e.all(selector)
+    # Since our @element also contains all the other layers we need
+    # to filter matches to exclude elements that belong to another layer.
     matches = u.select(matches, @contains)
     return matches
