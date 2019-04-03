@@ -19,7 +19,11 @@ class up.Layer.Root extends up.Layer
   destroy: ->
     throw new Error('Cannot destroy the root layer')
 
+  contains: (element) =>
+    # Test that the closest parent is the document and not another layer.
+    e.closest(element, '.up-layer, html') == e.root()
+
   allElements: (selector) ->
     matches = super(selector)
-    matches = u.reject(matches, (match) -> e.closest(match, '.up-layer'))
+    matches = u.select(matches, @contains)
     return matches

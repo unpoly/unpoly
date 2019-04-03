@@ -51,7 +51,7 @@ class up.Layer extends up.Record
     onContentAttached: null
 
   isCurrent: ->
-    @stack.isCurrent(this)
+    @stack.current() == this
 
   isRoot: ->
     @stack.isRoot(this)
@@ -77,37 +77,41 @@ class up.Layer extends up.Record
       'up-size': @size,
     )
     @element.classList.add(@class) if @class
+    @element.addEventListener 'mousedown', @onElementMouseDown
+    @element.addEventListener 'click', @onElementClick
 
-    e.on @element, 'mousedown', (event) ->
-      if event.closest('.up-layer-frame')
-        # User clicked inside the layer's frame. We will let the event bubble
-        # up to the document where up.link handlers will process [up-follow][up-instant]
-        # for a link inside the frame.
+  onElementMouseDown: (event) =>
+    target = event.target
+    if target.closest('.up-layer-frame')
+      # User clicked inside the layer's frame. We will let the event bubble
+      # up to the document where up.link handlers will process [up-follow][up-instant]
+      # for a link inside the frame.
+    else
+      # User clicked outside the layer's frame. We prevent further bubbling
+      # to not hit the body or the document. The user may also dismiss this layer by
+      # clicking outside the frame, but that is handled an click, not mousedown.
+      up.event.halt(event)
+
+  onElementClick: (event) =>
+    target = event.target
+    closePromise = if target.closest('.up-layer-frame')
+      # User clicked inside the layer's frame.
+      if dismisser = target.closest('[up-dismiss]')
+        closePromise = up.layer.dismiss({ layer: this, origin: dismisser })
+      else if confirmer = target.closest('[up-confirm]')
+        closePromise = up.layer.confirm({ layer: this, origin: confirmer })
       else
-        # User clicked outside the layer's frame. We prevent further bubbling
-        # to not hit the body or the document. The user may also dismiss this layer by
-        # clicking outside the frame, but that is handled an click, not mousedown.
-        up.event.halt(event)
+        # User clicked inside the layer's frame, but not on a link that would
+        # close this modal. We will let the event bubble up to the document where
+        # up.link handlers will process [up-follow] for a link inside the frame.
+    else
+      # User clicked outside the layer's frame.
+      if @dismissable
+        closePromise = up.layer.dismiss({ layer: this, origin: @element })
 
-    e.on @element, 'click', (event) =>
-      closePromise = if event.closest('.up-layer-frame')
-        # User clicked inside the layer's frame.
-        if dismisser = event.closest('[up-dismiss]')
-          closePromise = up.layer.dismiss({ layer: this, origin: dismisser })
-        else if confirmer = event.closest('[up-confirm]')
-          closePromise = up.layer.confirm({ layer: this, origin: confirmer })
-        else
-          # User clicked inside the layer's frame, but not on a link that would
-          # close this modal. We will let the event bubble up to the document where
-          # up.link handlers will process [up-follow] for a link inside the frame.
-      else
-        # User clicked outside the layer's frame.
-        if @dismissable
-          closePromise = up.layer.dismiss({ layer: this, origin: @element })
-
-      if closePromise
-        u.muteRejection(closePromise)
-        up.event.halt(event)
+    if closePromise
+      u.muteRejection(closePromise)
+      up.event.halt(event)
 
   createDismissElement: (parentElement) ->
     if @dismissable
@@ -142,7 +146,7 @@ class up.Layer extends up.Record
     u.evalOption(option, this)
 
   destroyElement: ->
-    e.remove(@element)
+    up.destroy(@element)
 
   accept: (options) ->
     @closeVariant(u.merge(options,
@@ -201,10 +205,7 @@ class up.Layer extends up.Record
     @allElements(selector)[0]
 
   allElements: (selector) ->
-    e.all(@element, selector)
-
-  sync: ->
-    # no-op
+    e.all(@contentElement, selector)
 
   updateHistory: (options) ->
     if newTitle = options.title
@@ -227,6 +228,4 @@ class up.Layer extends up.Record
       document.title = @title
 
   peel: ->
-    ancestors = u.reverse(@stack.ancestors(this))
-    dismissals = ancestors.map (ancestor) -> ancestor.dismiss(emitEvents: false)
-    return @stack.asap(dismissals...)
+    @stack.peel(this)

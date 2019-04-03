@@ -65,59 +65,12 @@ up.layer = do ->
   currentLayer = ->
     stack.current()
 
-  forElement = (element) ->
-    element = e.get(element)
-
-    for layer in stack.all() by -1
-      if layer.contains(element)
-        return element
-
-  lookupOne = (options) ->
-    lookupAll(options)[0]
-
-  lookupAll = (options) ->
-    value = options.value
-
-    unless value
-      return [stack.root()]
-
-    if value instanceof up.Layer
-      return [value]
-
-    if u.isElement(value) || u.isJQuery(value)
-      return [forElement(value)]
-
-    givenOriginLayer = ->
-      if origin = options.origin
-        forElement(origin)
-      else
-        up.fail('Updating layer %s requires { origin } option', value)
-
-    return switch value
-      when 'root'
-        [stack.root()]
-      when 'page'
-        up.legacy.warn('Layer "page" has been renamed to "root"')
-        [stack.root()]
-      when 'current'
-        [currentLayer()]
-      when 'any'
-        u.reverse(stack.all())
-      when 'origin'
-        [givenOriginLayer()]
-      when 'parent'
-        [stack.parent(givenOriginLayer())]
-      when 'ancestors'
-        stack.ancestors(givenOriginLayer())
-      when 'closest'
-        stack.selfAndAncestors(givenOriginLayer())
-
   allElements = (selector, options) ->
-    layers = lookupAll(options)
+    layers = @stack.lookupAll(options)
     u.flatMap layers, (layer) -> layer.allElements(selector)
 
   firstElement = (selector, options) ->
-    layers = lookupAll(options)
+    layers = @stack.lookupAll(options)
     u.findResult layers, -> layer.firstElement(selector)
 
   up.event.onEscape (event) ->
@@ -140,7 +93,7 @@ up.layer = do ->
 
   root: -> stack.root()
   current: currentLayer
-  forElement: forElement
+  forElement: (args...) -> stack.forElement(args...)
   all: -> stack.all()
   parent: -> stack.parent()
   ancestors: -> stack.ancestors()
