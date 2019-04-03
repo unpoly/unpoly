@@ -78,8 +78,6 @@ class up.Layer extends up.Record
     )
     @element.classList.add(@class) if @class
 
-    throw "CSS styles that make .up-layer full height"
-
     e.on @element, 'mousedown', (event) ->
       if event.closest('.up-layer-frame')
         # User clicked inside the layer's frame. We will let the event bubble

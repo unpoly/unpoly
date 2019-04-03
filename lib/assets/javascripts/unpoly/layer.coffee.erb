@@ -113,10 +113,12 @@ up.layer = do ->
         stack.selfAndAncestors(givenOriginLayer())
 
   allElements = (selector, options) ->
-    lookupOne(options).allElements(selector)
+    layers = lookupAll(options)
+    u.flatMap layers, (layer) -> layer.allElements(selector)
 
   firstElement = (selector, options) ->
-    lookupOne(options).firstElement(selector)
+    layers = lookupAll(options)
+    u.findResult layers, -> layer.firstElement(selector)
 
   up.event.onEscape (event) ->
     if currentLayer().dismissable
