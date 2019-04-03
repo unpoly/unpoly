@@ -1,33 +1,26 @@
+- Get tests green again
 - Deprecate up.replace(). It takes a selector, and that is now mostly optional.
 - Deprecate up.extract(). It takes a selector, and that is now mostly optional.
 - Deprecate up.visit
-- u.only and u.except should take an array
 - up.reload()
   - should work without a target
 - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
 - Test that [up-dismiss][up-follow] inside a layer will dismiss
 - Test that [up-dismiss][up-follow] outside a layer will follow
-- Documentation
-- Do layers really need both [up-class] and [up-size] ? Setting size is the only use case for class. Except maybe furter variants like -borderless?
 - What is up.browser.navigate() ?
 - Is { navigate } is really the best name for the option? Maybe { solo } or similar?
 - Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
 - Document changes in options { history } (now boolean) and { location } (now a string) changes
 - Deprecate all up.modal/popup functions and delegate to layer as good as possible
 - Implement X-Up-Dismiss-Layer, X-Up-Accept-Layer
-- Test layer { context }
+- Test layer { context } transmission
 - Deprecate the entire up.history API
   - add to CHANGELOG
   - Deprecate API symbols
-- up.layer.* should just be class props of up.Layer
-  - Then we also stop copying configs. Drawer-config is just up.Layer.Drawer.config.
-  - We can still move inheritable methods to up.Layer.Base extends up.Layer
-
-- Rethink whether up.Layer.close() should be an API instead of up.Layer.current.close()
-- Rename up.Layer.current() to up.Layer.current
 - TODO: Test that up.change() can be called with { target: Element }
 - TODO: Test that up.change() can be called with { target: Element } and will find in any layer
 - TODO: Test that up.change() without { layer } option will only find in current layer
+- Documentation
 
 
 Finishing up
@@ -36,11 +29,9 @@ Finishing up
 - Remove unused files after we copied all documentation
   - popup
   - modal
-
 - Grep for TODO
 - Test in all browsers
 - Migrate cards
-
 
 
 Accessibility

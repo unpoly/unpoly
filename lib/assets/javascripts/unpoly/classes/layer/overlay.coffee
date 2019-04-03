@@ -14,7 +14,7 @@ class up.Layer.Overlay extends up.Layer
   createElement: (parentElement) ->
     @element = e.affix(parentElement, '.up-layer',
       'up-dismissable': @dismissable
-      'up-flavor': @flavor
+      'up-flavor': @constructor.flavor
       'up-align': @align
       'up-position': @position,
       'up-size': @size,

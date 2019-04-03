@@ -11,18 +11,19 @@ class up.Layer extends up.Record
       up.legacy.warn('Layer options { closable } has been renamed to { dismissable }')
       options.dismissable = options.closable
 
-    @flavor = @constructor.flavor or up.fail('Layer flavor must implement a static { flavor } property')
+    super(options)
 
-  @keys: ->
-    keys = [
-      'flavor',
-      'context'
-    ]
-    configKeys = Object.keys(up.layer.config)
-    return keys.concat(configKeys)
+    # Make sure that we have a new context object for each layer instance.
+    # This will end up as the up.layer.context property.
+    @context ?= {}
 
   @defaults: ->
-    u.merge(super.defaults?(), @config)
+    defaults = @config
+    # Reverse-merge @config with the config property of our inheritance
+    # chain. We need to do this manually, super() does not help us here.
+    if (proto = Object.getPrototypeOf(this)) && proto.defaults
+      defaults = u.merge(proto.defaults(), defaults)
+    defaults
 
   @config: new up.Config ->
     history: false
@@ -68,6 +69,9 @@ class up.Layer extends up.Record
   dismiss: ->
     # no-op so users can blindly dismiss even though they might be on the root layer
 
+  peel: ->
+    @stack.peel(this)
+
   evalOption: (option) ->
     u.evalOption(option, this)
 
@@ -93,6 +97,3 @@ class up.Layer extends up.Record
   titleChanged: ->
     if @affectsGlobalHistory()
       document.title = @title
-
-  peel: ->
-    @stack.peel(this)

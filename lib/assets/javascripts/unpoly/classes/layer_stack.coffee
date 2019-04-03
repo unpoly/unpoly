@@ -26,6 +26,7 @@ class up.LayerStack extends up.Config
     u.remove(@layers, layer)
 
   reset: ->
+    super()
     @queue.reset()
     if c = @container()
       e.remove(c)

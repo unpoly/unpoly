@@ -177,7 +177,7 @@ up.link = do ->
     parser.string('position')
     parser.string('class')
     parser.string('size')
-    parser.boolean('closable') # Deprecated. Is handled by up.Layer.
+    parser.boolean('closable') # Deprecated. Is handled by up.layer.
     parser.boolean('dismissable')
     parser.boolean('feedback', default: true)
     options.feedback = false if options.preload

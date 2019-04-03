@@ -1,6 +1,6 @@
 up.layer = do ->
 
-  DEFAULT_FLAVOR_IMPLEMENTATIONS = [
+  DEFAULT_IMPLEMENTATIONS = [
     up.Layer.Root
     up.Layer.Modal
     up.Layer.Popup
@@ -11,21 +11,20 @@ up.layer = do ->
   config = new up.Config ->
     newConfig =
       flavor: 'modal'
-      targets: ['[up-layer-target]']
       all: up.layer.Base.config
 
-    for implementation in DEFAULT_FLAVOR_IMPLEMENTATIONS
+    for implementation in DEFAULT_IMPLEMENTATIONS
       registerFlavor(implementation, newConfig)
 
     return newConfig
 
-  stack = new up.LayerStack(-> layers: [new up.layers.Root()])
+  stack = new up.LayerStack(-> layers: [new up.Layer.Root()])
 
   registerFlavor = (Implementation, store = config) ->
     name = Implementation.flavor
     # Since the layer class names are not public API, we make their static
-    # config property accessible through up.layer.config. E.g. up.layer.config.dialog
-    # is set to up.layer.Dialog.config.
+    # config property accessible through up.layer.config. E.g.
+    # up.layer.config.dialog = up.layer.Dialog.config.
     subConfig = Implementation.config
     subConfig.Implementation = Implementation
     store[name] = subConfig
@@ -54,9 +53,10 @@ up.layer = do ->
 
   build = (options) ->
     flavor = options.flavor ? config.flavor
-    Implementation = config[flavor].implementation
+    Implementation = config[flavor].Implementation
     return new Implementation(stack, options)
 
+  # TODO: Docs for up.layer.prompt()
   prompt = (options) ->
     return new Promise (onAccept, onDismiss) ->
       options = u.merge(options, { onAccept, onDismiss })
@@ -64,6 +64,18 @@ up.layer = do ->
 
   currentLayer = ->
     stack.current()
+
+  # TODO: Docs for up.layer.accept()
+  accept = (args...) ->
+    currentLayer().accept(args...)
+
+  # TODO: Docs for up.layer.dismiss()
+  dismiss = (args...) ->
+    currentLayer().dismiss(args...)
+
+  # TODO: Docs for up.layer.sync()
+  sync = (args...) ->
+    currentLayer().sync(args...)
 
   allElements = (selector, options) ->
     layers = @stack.lookupAll(options)
@@ -82,7 +94,7 @@ up.layer = do ->
   # TODO: Docs for [up-popup]
   # TODO: Docs for [up-drawer]
   # TODO: Docs for [up-cover]
-  for implementation in DEFAULT_FLAVOR_IMPLEMENTATIONS
+  for implementation in DEFAULT_IMPLEMENTATIONS
     if attr = implementation.attr
       up.link.targetMacro attr,
         'up-layer': 'new'
@@ -91,16 +103,13 @@ up.layer = do ->
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
-  root: -> stack.root()
-  current: currentLayer
   forElement: (args...) -> stack.forElement(args...)
   all: -> stack.all()
+  root: -> stack.root()
   parent: -> stack.parent()
-  ancestors: -> stack.ancestors()
-  selfAndAncestors: -> stack.selfAndAncestors()
-  lookup: lookupOne
-  lookupAll: lookupAll
-
+  current: currentLayer
+  lookup: (args...) -> stack.lookupOne(args...)
+  lookupAll: (args...) -> stack.lookupAll(args...)
   allElements: allElements
   firstElement: firstElement
   config: config
@@ -108,3 +117,9 @@ up.layer = do ->
   open: open
   container: -> stack.container()
   build: build
+  accept: accept
+  dismiss: dismiss
+  sync: sync
+
+# TODO: Docs for up.context
+u.getter(up, 'context', -> up.layer.current().context)
