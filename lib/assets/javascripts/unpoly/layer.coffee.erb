@@ -58,8 +58,8 @@ up.layer = do ->
     return new Implementation(stack, options)
 
   prompt = (options) ->
-    return new Promise (onConfirm, onDismiss) ->
-      options = u.merge(options, { onConfirm, onDismiss, })
+    return new Promise (onAccept, onDismiss) ->
+      options = u.merge(options, { onAccept, onDismiss })
       open(options)
 
   currentLayer = ->
