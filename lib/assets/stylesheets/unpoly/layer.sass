@@ -90,9 +90,16 @@
     +large-shadow
 
 +flavor('drawer')
-  .up-layer-viewport
-    // Allow frame to grow from the left, up to its max-width of 100%
-    justify-content: flex-start
+  &[up-position=left]
+    .up-layer-viewport
+      // Allow frame to grow from the left, up to its max-width of 100%
+      justify-content: flex-start
+
+  &[up-position=right]
+    .up-layer-viewport
+      // Allow frame to grow from the right, up to its max-width of 100%
+      justify-content: flex-end
+
   .up-layer-frame
     min-height: 100vh
     +large-shadow
