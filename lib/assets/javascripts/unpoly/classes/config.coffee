@@ -1,6 +1,6 @@
 u = up.util
 
-class up.Config
+class up.Config extends up.Class
 
   constructor: (@blueprintFn = (-> {})) ->
     @reset()

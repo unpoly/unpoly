@@ -7,23 +7,20 @@ class up.LayerStack extends up.Config
 
   constructor: (blueprintFn) ->
     super(blueprintFn)
-    @layers ||= []
+    @all ||= []
     @queue = new up.TaskQueue()
 
   asap: (tasks...) ->
     @queue.asap(tasks...)
 
-  isRoot: (layer) ->
-    @layers[0] == layer
-
-  size: ->
-    @layers.length
+  isRoot: (layer = @current()) ->
+    @all[0] == layer
 
   at: (i) ->
-    @layers[i]
+    @all[i]
 
   remove: (layer) ->
-    u.remove(@layers, layer)
+    u.remove(@all, layer)
 
   reset: ->
     super()
@@ -32,33 +29,30 @@ class up.LayerStack extends up.Config
       e.remove(c)
 
   push: (layer) ->
-    @layers.push(layer)
-
-  root: ->
-    @layers[0]
+    @all.push(layer)
 
   parent: (layer) ->
     layerIndex = @indexOf(layer)
-    @layers[layerIndex - 1]
+    @all[layerIndex - 1]
 
   selfAndAncestors: (layer) ->
     layerIndex = @indexOf(layer)
-    @layers.slice(0, layerIndex + 1)
+    @all.slice(0, layerIndex + 1)
 
   ancestors: (layer) ->
     layerIndex = @indexOf(layer)
-    @layers.slice(0, layerIndex)
-
-  all: ->
-    @layers
+    @all.slice(0, layerIndex)
 
   allReversed: ->
     u.reverse(@all())
 
-  current: ->
-    u.last(@layers)
+  @getter 'root', ->
+    @all[0]
 
-  container: ->
+  @getter 'current', ->
+    u.last(@all)
+
+  @getter 'container', ->
     unless @containerElement
       @containerElement = e.createFromSelector(CONTAINER_SELECTOR)
       @attachContainer()
@@ -75,7 +69,7 @@ class up.LayerStack extends up.Config
     value = options.layer
 
     unless value
-      return [@current()]
+      return [@current]
 
     if value instanceof up.Layer
       return [value]
@@ -84,7 +78,7 @@ class up.LayerStack extends up.Config
       return [@forElement(value)]
 
     givenOriginLayer = ->
-      if origin = nameOrOptions.origin
+      if origin = options.origin
         @forElement(origin)
       else
         up.fail('Updating layer %s requires { origin } option', value)
@@ -94,9 +88,9 @@ class up.LayerStack extends up.Config
         [@root()]
       when 'page'
         up.legacy.warn('Layer "page" has been renamed to "root"')
-        [@root()]
+        [@root]
       when 'current'
-        [@current()]
+        [@current]
       when 'any'
         @allReversed()
       when 'origin'
@@ -115,7 +109,12 @@ class up.LayerStack extends up.Config
       if layer.contains(element)
         return element
 
+  dismissAll: ->
+    @peel(@root)
+
   peel: ->
+    throw "shouldn't peeling also change @all synchronously?"
+
     ancestors = u.reverse(@ancestors(this))
-    dismissals = ancestors.map (ancestor) -> ancestor.dismiss(emitEvents: false)
+    dismissals = ancestors.map (ancestor) -> ancestor.dismiss()
     return @asap(dismissals...)

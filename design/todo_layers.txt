@@ -28,6 +28,7 @@
 - Layer callbacks: onOpened
 - Check if more API should be moved to getter-style
 - Shorten { location }, history.location, X-Up-Location to { url }, history.url, X-Up-Url?
+- Should there be dismiss-Handlers?
 
 
 Finishing up

@@ -17,6 +17,11 @@ class up.Layer extends up.Record
     # This will end up as the up.layer.context property.
     @context ?= {}
 
+    # If an ancestor layer was opened with the wish to not affect history,
+    # this child layer should not affect it either.
+    if parent = @parent
+      @history &&= parent.history
+
   @defaults: ->
     defaults = @config
     # Reverse-merge @config with the config property of our inheritance
@@ -52,10 +57,10 @@ class up.Layer extends up.Record
     onContentAttached: null
 
   isCurrent: ->
-    @stack.current() == this
+    @stack.current == this
 
   isRoot: ->
-    @stack.isRoot(this)
+    @stack.root == this
 
   defaultTargets: ->
     @constructor.defaults().targets
@@ -81,19 +86,49 @@ class up.Layer extends up.Record
   updateHistory: (options) ->
     if newTitle = options.title
       @title = newTitle
-      @titleChanged()
 
     if newLocation = options.location
       @location = newLocation
-      @locationChanged()
+
+    @renderHistory()
 
   affectsGlobalHistory: ->
     @history && @isCurrent()
 
-  locationChanged: ->
-    if @affectsGlobalHistory()
+  renderHistory: ->
+    unless @affectsGlobalHistory()
+      return
+
+    if @location
       up.history.push(@location)
 
-  titleChanged: ->
-    if @affectsGlobalHistory()
+    if @title
       document.title = @title
+
+  @getter 'parent', ->
+    @stack.parent(this)
+
+  contains: (element) =>
+    # Test that the closest parent is the document and not another layer.
+    e.closest(element, '.up-layer, html') == @element
+
+  on: (args...) ->
+    return @buildEventListenerGroup(args).bind()
+
+  off: (args...) ->
+    return @buildEventListenerGroup(args).unbind()
+
+  buildEventListenerGroup: (args) ->
+    group = up.EventListenerGroup.fromBindArgs(args)
+    group.guard = @eventGuard
+    group.element = @element
+    group
+
+  emit: (args...) ->
+    emitter = up.EventEmitter.fromEmitArgs(args)
+    emitter.element ?= @element
+    emitter.boundary = @element
+    return emitter.emit()
+
+  eventGuard: (event) =>
+    @contains(event.target)

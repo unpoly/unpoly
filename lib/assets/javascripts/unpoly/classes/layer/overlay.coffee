@@ -3,6 +3,7 @@
 e = up.element
 u = up.util
 
+# Base class for all non-root layer flavors
 class up.Layer.Overlay extends up.Layer
 
   openNow: (parentElement, innerContentElement, options) ->
@@ -109,7 +110,6 @@ class up.Layer.Overlay extends up.Layer
 
   closeVariant: (value, options) ->
     origin = options.origin
-    emitEvents = options.emitEvents ? true
 
     if origin && u.isUndefined(value)
       value = e.jsonAttr(origin, options.valueAttr)
@@ -123,7 +123,11 @@ class up.Layer.Overlay extends up.Layer
     # Abort all pending requests targeting the layer we're now closing.
     up.proxy.abort(preflightLayer: this)
 
-    if !emitEvents || up.event.nobodyPrevents(options.closeEvent, eventProps)
+    if up.event.nobodyPrevents(options.closeEvent, eventProps)
+      throw "closing a layer should close all descendants, and they should NOT be able to prevent!"
+
+
+
       # Synchronously remove the layer from the stack so other sync calls
       # immediately see the updated stack. Everything after that is just optics.
       @stack.remove(this)
@@ -131,18 +135,17 @@ class up.Layer.Overlay extends up.Layer
       return @stack.asap ->
         promise = @closeNow()
 
-        if emitEvents
-          promise = promise.then ->
-            # Wait for the callbacks until the closing animation ends,
-            # so user-provided code doesn't run too wildly out of order.
+        promise = promise.then ->
+          # Wait for the callbacks until the closing animation ends,
+          # so user-provided code doesn't run too wildly out of order.
 
-            if closedCallback = options.closedCallback
-              # Callback option only gets the resolution value.
-              # Also see up.layer.closeHandlerAttr()
-              closedCallback(value, eventProps)
+          @parent.renderHistory()
 
-            # Global event gets the full event props
-            up.emit(options.closedEvent, eventProps)
+          if closedCallback = options.closedCallback
+            # Also see up.layer.closeHandlerAttr()
+            closedCallback(value, eventProps)
+
+          up.emit(options.closedEvent, eventProps)
 
         return promise
 

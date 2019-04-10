@@ -3,6 +3,8 @@
 #= require ./unpoly/legacy
 #= require ./unpoly/browser
 #= require ./unpoly/element
+#= require ./unpoly/classes/class
+#= require ./unpoly/classes/record
 #= require_tree ./unpoly/classes
 #= require ./unpoly/framework
 #= require ./unpoly/event

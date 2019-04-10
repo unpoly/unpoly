@@ -85,6 +85,7 @@ class up.Request extends up.Record
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
       'preflightLayer',
+      'context',
       'navigate',
     ]
 
@@ -107,6 +108,8 @@ class up.Request extends up.Record
     up.legacy.fixKey(options, 'data', 'params')
     super(options)
     @params = new up.Params(@params) # copies, which we want
+
+    @context ?= @preflightLayer?.context
 
     @normalize()
     @aborted = false
@@ -180,8 +183,8 @@ class up.Request extends up.Record
     if csrfToken = @csrfToken()
       xhrHeaders[pc.csrfHeader] = csrfToken
 
-    if context = @preflightLayer?.context
-      xhrHeaders[pc.contextHeader] = JSON.stringify(context)
+    if @context
+      xhrHeaders[pc.contextHeader] = JSON.stringify(@context)
 
     @xhr.open(xhrMethod, xhrUrl)
 
@@ -277,7 +280,12 @@ class up.Request extends up.Record
     @isSafe() && !u.isFormData(@params)
 
   cacheKey: =>
-    [@url, @method, @params.toQuery(), @target].join('|')
+    [ @url,
+      @method,
+      @params.toQuery(),
+      @target,
+      JSON.stringify(@context)
+    ].join('|')
 
   @wrap: (value) ->
     u.wrapValue(value, @)

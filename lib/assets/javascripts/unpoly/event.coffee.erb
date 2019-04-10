@@ -58,7 +58,7 @@ up.event = do ->
   reset = ->
     # Resets the list of registered event listeners to the
     # moment when the framework was booted.
-    for element in [window, document, document.documentElement, document.body]
+    for element in [window, document, e.root, document.body]
       up.EventListener.unbindNonDefault(element)
 
   ###**
@@ -210,7 +210,7 @@ up.event = do ->
     # browsers and return a no-op destructor
     return (->) unless up.browser.isSupported()
 
-    up.EventListener.bind(args, options)
+    up.EventListenerGroup.fromBindArgs(args, options).bind()
 
   ###**
   Unbinds an event listener previously bound with [`up.on()`](/up.on).
@@ -233,7 +233,7 @@ up.event = do ->
   @stable
   ###
   unbind = (args...) ->
-    up.EventListener.unbind(args)
+    up.EventListenerGroup.fromBindArgs(args).unbind()
 
   ###**
   Emits a event with the given name and properties.
@@ -274,59 +274,7 @@ up.event = do ->
   @stable
   ###
   emit = (args...) ->
-    if args[0].addEventListener
-      target = args.shift()
-    else if u.isJQuery(args[0])
-      target = e.get(args.shift())
-
-    eventName = args[0]
-    eventProps = args[1] || {}
-
-    if targetFromProps = u.pluckKey(eventProps, 'target')
-      target = targetFromProps
-    target ?= document
-
-    logEmission(eventName, eventProps)
-
-    event = buildEvent(eventName, eventProps)
-    target.dispatchEvent(event)
-
-    return event
-
-  buildEvent = (name, props) ->
-    event = document.createEvent('Event')
-    event.initEvent(name, true, true) # name, bubbles, cancelable
-    u.assign(event, props)
-
-    # IE11 does not set { defaultPrevented: true } after #preventDefault()
-    # was called on a custom event.
-    # See discussion here: https://stackoverflow.com/questions/23349191
-    if up.browser.isIE11()
-      event.preventDefault = ->
-        Object.defineProperty(event, 'defaultPrevented', get: -> true)
-
-    event
-
-  logEmission = (eventName, eventProps) ->
-    return unless up.log.isEnabled()
-
-    message = u.pluckKey(eventProps, 'log')
-
-    if u.isArray(message)
-      [message, messageArgs...] = message
-    else
-      messageArgs = []
-
-    if u.isString(message)
-      if u.isPresent(eventProps)
-        up.puts "#{message} (%s (%o))", messageArgs..., eventName, eventProps
-      else
-        up.puts "#{message} (%s)", messageArgs..., eventName
-    else if message == true
-      if u.isPresent(eventProps)
-        up.puts 'Event %s (%o)', eventName, eventProps
-      else
-        up.puts 'Event %s', eventName
+    up.EventEmitter.fromEmitArgs(args).emit()
 
   ###**
   [Emits an event](/up.emit) and returns whether no listener

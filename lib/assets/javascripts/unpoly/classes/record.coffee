@@ -1,6 +1,6 @@
 u = up.util
 
-class up.Record
+class up.Record extends up.Class
 
   @keys: ->
     # Return an array of property names

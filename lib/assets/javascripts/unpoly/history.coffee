@@ -117,10 +117,8 @@ up.history = do ->
   @experimental
   ###
   push = (url, options = {}) ->
-    options = u.options(options, force: false)
-    force = options.force ? false
     url = normalizeUrl(url)
-    if (force || !isCurrentLocation(url))
+    if (options.force || !isCurrentLocation(url))
       if manipulate('pushState', url)
         up.emit('up:history:pushed', url: url, log: "Advanced to location #{url}")
       else

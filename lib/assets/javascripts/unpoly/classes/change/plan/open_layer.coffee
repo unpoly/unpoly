@@ -26,7 +26,9 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
 
     promise = up.event.whenEmitted('up:layer:open', { layer, log: 'Opening layer' })
     promise = promise.then =>
-      layer.openNow(up.layer.container(), content, { @onContentAttached })
+      layer.openNow(up.layer.container, content, { @onContentAttached })
+
+      throw "who pushes new layer into stack?"
 
     promise = promise.then =>
       up.emit('up:layer:opened', { layer, log: 'Layer opened' })

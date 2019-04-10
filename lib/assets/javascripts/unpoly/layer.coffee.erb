@@ -65,19 +65,19 @@ up.layer = do ->
       open(options)
 
   currentLayer = ->
-    stack.current()
+    stack.current
 
   # TODO: Docs for up.layer.accept()
   accept = (args...) ->
-    currentLayer().accept(args...)
+    stack.current.accept(args...)
 
   # TODO: Docs for up.layer.dismiss()
   dismiss = (args...) ->
-    currentLayer().dismiss(args...)
+    stack.current.dismiss(args...)
 
   # TODO: Docs for up.layer.sync()
   sync = (args...) ->
-    currentLayer().sync(args...)
+    stack.current.sync(args...)
 
   allElements = (selector, options) ->
     layers = @stack.lookupAll(options)
@@ -88,7 +88,7 @@ up.layer = do ->
     u.findResult layers, -> layer.firstElement(selector)
 
   up.event.onEscape (event) ->
-    if currentLayer().dismissable
+    if stack.current.dismissable
       u.muteRejection dismiss()
       up.event.halt(event)
 
@@ -109,7 +109,7 @@ up.layer = do ->
     forElement: (args...) -> stack.forElement(args...)
     lookup: (args...) -> stack.lookupOne(args...)
     lookupAll: (args...) -> stack.lookupAll(args...)
-    container: -> stack.container()
+    get_container: -> stack.container
     attachContainer: -> stack.attachContainer()
     allElements: allElements
     firstElement: firstElement
@@ -121,12 +121,16 @@ up.layer = do ->
     dismiss: dismiss
     sync: sync
     closeHandlerAttr: closeHandlerAttr
-    get_root: -> stack.root()
+    dismissAll: -> stack.dismissAll()
+    isRoot: -> stack.isRoot()
+    get_root: -> stack.root
+    get_all: -> stack.all
     get_current: currentLayer
-    get_location: -> currentLayer().location
-    get_position: -> currentLayer().position
-    get_element: -> currentLayer().element
-    get_context: -> currentLayer().context
+    get_location: -> stack.current.location
+    get_position: -> stack.current.position
+    get_element: -> stack.current.element
+    get_context: -> stack.current.context
+    contains: (args...) -> stack.current.contains(args...)
 
 # TODO: Docs for up.context
 u.getter(up, 'context', -> up.layer.context)

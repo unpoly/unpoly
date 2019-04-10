@@ -8,6 +8,8 @@ class up.Change.Plan.ResetWorld extends up.Change.Plan.UpdateLayer
     up.layer.root
 
   constructor: (options) ->
+    throw "Resetting the world is now preventable by preventing up:layer:dismiss"
+
     options = u.merge(options,
       layer: @preflightLayer(),
       target: 'body',
