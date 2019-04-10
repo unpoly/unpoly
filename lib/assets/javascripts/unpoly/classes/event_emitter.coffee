@@ -1,27 +1,32 @@
 u = up.util
 e = up.element
 
-class up.EventEmitter
+class up.EventEmitter extends up.Record
 
-  constructor: (@element, @eventName, @eventProps) ->
+  @keys: ->
+    [
+      'element',
+      'eventName',
+      'eventProps',
+      'boundary'
+    ]
 
   emit: ->
     @logEmission()
-
-    uid = u.uid()
-    if @boundary
-      @eventProps.upUid = uid
-      @stopStopping = up.on @boundary, @eventName, (event) ->
-        if event.upUid == uid
-          event.stopPropagation()
-
+    destroyBoundary = @createBoundary()
     event = @buildEvent()
     @element.dispatchEvent(event)
-
-    if @boundary
-      @stopStopping()
-
+    destroyBoundary?()
     return event
+
+  createBoundary: ->
+    if @boundary
+      uid = u.uid()
+      @eventProps.upUid = uid
+      stopEvent = (event) ->
+        if event.upUid == uid
+          event.stopPropagation()
+      return up.on(@boundary, @eventName, stopEvent)
 
   buildEvent: ->
     event = document.createEvent('Event')
@@ -58,7 +63,7 @@ class up.EventEmitter
       else
         up.puts('Event %s', @eventName)
 
-  @parseEmitArgs: (args) ->
+  @fromEmitArgs: (args) ->
     if args[0].addEventListener
       element = args.shift()
     else if u.isJQuery(args[0])
@@ -71,4 +76,4 @@ class up.EventEmitter
       element = elementFromProps
     element ?= document
 
-    new @(element, eventName, eventProps)
+    new @({ element, eventName, eventProps })

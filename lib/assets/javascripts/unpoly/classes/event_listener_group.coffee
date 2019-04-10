@@ -2,25 +2,36 @@
 
 u = up.util
 
-class up.EventListenerGroup
+class up.EventListenerGroup extends up.Record
 
-  constructor: (@elements, @eventNames, @selector, @callback, @options) ->
+  @keys: ->
+    [
+      'elements',
+      'eventNames',
+      'selector',
+      'callback',
+      'jQuery',
+      'guard'
+    ]
 
   bind: ->
     unbindFns = []
 
     for element in @elements
       for eventName in @eventNames
-        listener = new up.EventListener(element, eventName, @selector, @callback, @options)
+        listener = new up.EventListener(@listenerAttributes(element, eventName))
         listener.bind()
         unbindFns.push(listener.unbind)
 
     u.sequence(unbindFns)
 
+  listenerAttributes: (element, eventName) ->
+    u.merge(@attributes,  { element, eventName })
+
   unbind: ->
     for element in @elements
       for eventName in @eventNames
-        if listener = up.EventListener.fromElement(element, eventName, @selector, @callback)
+        if listener = up.EventListener.fromElement(@listenerAttributes(element, eventName))
           listener.unbind()
 
   ###
@@ -57,4 +68,5 @@ class up.EventListenerGroup
     # It might be undefined.
     selector = args[0]
 
-    new @(elements, eventNames, selector, callback, options)
+    attributes = u.merge({ elements, eventNames, selector, callback }, options)
+    new @(attributes)

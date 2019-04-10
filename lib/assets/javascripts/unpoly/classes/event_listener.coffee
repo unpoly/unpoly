@@ -1,11 +1,21 @@
 u = up.util
 e = up.element
 
-class up.EventListener
+class up.EventListener extends up.Record
 
-  constructor: (@element, @eventName, @selector, @callback, options = {}) ->
-    { @jQuery } = options
-    @key = @constructor.buildKey(@eventName, @selector, @callback)
+  @keys: ->
+    [
+      'element',
+      'eventName',
+      'selector',
+      'callback',
+      'jQuery',
+      'guard'
+    ]
+
+  constructor: (attributes) ->
+    super(attributes)
+    @key = @constructor.buildKey(attributes)
     @isDefault = up.framework.isBooting()
 
   bind: ->
@@ -47,20 +57,20 @@ class up.EventListener
 
       @callback.apply(element, args)
 
-  @fromElement: (element, eventName, selector, callback) ->
+  @fromElement: (attributes) ->
     if map = element.upEventListeners
-      key = @buildKey(eventName, selector, callback)
+      key = @buildKey(attributes)
       return map[key]
 
-  @buildKey: (eventName, selector, callback) ->
+  @buildKey: (attributes) ->
     # Give the callback function a numeric identifier so it
     # can become part of the upEventListeners key.
-    callback.upUid ||= u.uid()
+    attributes.callback.upUid ||= u.uid()
 
     return [
-      eventName,
-      selector,
-      callback.upUid
+      attributes.eventName,
+      attributes.selector,
+      attributes.callback.upUid
     ].join('|')
 
   @unbindNonDefault: (element) ->
