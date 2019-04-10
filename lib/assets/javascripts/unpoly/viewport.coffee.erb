@@ -403,11 +403,11 @@ up.viewport = do ->
 
   rootWidth = ->
     # This should happen on the <html> element, regardless of document.scrollingElement
-    e.root().clientWidth
+    e.root.clientWidth
 
   rootHeight = ->
   # This should happen on the <html> element, regardless of document.scrollingElement
-    e.root().clientHeight
+    e.root.clientHeight
 
   isRoot = (element) ->
     e.matches(element, rootSelector())

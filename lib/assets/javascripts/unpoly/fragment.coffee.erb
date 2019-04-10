@@ -653,12 +653,16 @@ up.fragment = do ->
   @stable
   ###
   visit = (url, options = {}) ->
-    # TODO: Move up.visit() to up.layer.visit() or up.Layer#visit()
     up.change(u.merge(options, { url }))
+
+  BODY_TARGET_PATTERN = /(^|\s|,)(body|html)(,|\s|$)/i
+
+  targetsBody = (selector) ->
+    BODY_TARGET_PATTERN.test(selector)
 
   up.on 'up:app:boot', ->
     body = document.body
-    setSource(body, up.browser.url())
+    setSource(body, up.history.location)
     hello(body)
 
   up.on 'up:framework:reset', reset
@@ -679,6 +683,7 @@ up.fragment = do ->
   emitDestroyed: emitFragmentDestroyed
   emitKeep: emitFragmentKeep
   emitKept: emitFragmentKept
+  targetsBody: targetsBody
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract
@@ -687,7 +692,6 @@ up.destroy = up.fragment.destroy
 up.change = up.fragment.change
 up.hello = up.fragment.hello
 up.visit = up.fragment.visit
-
 
 up.first = (args...) ->
   up.legacy.warn('up.first() has been renamed to up.fragment.first()')

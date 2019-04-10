@@ -588,7 +588,7 @@ up.motion = do ->
   registerAnimation('move-to-bottom', (element, options) ->
     e.setStyle(element, translateCss(0, 0))
     box = element.getBoundingClientRect()
-    travelDistance = e.root().clientHeight - box.top
+    travelDistance = e.root.clientHeight - box.top
     animateNow(element, translateCss(0, travelDistance), options)
   )
 

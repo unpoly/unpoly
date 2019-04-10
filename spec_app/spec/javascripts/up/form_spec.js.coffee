@@ -360,7 +360,7 @@ describe 'up.form', ->
                 """
 
           next =>
-            expect(up.browser.url()).toMatchUrl('/redirect-target')
+            expect(up.history.location).toMatchUrl('/redirect-target')
             expect('.response').toHaveText('new-text')
             # See that containers outside the form have not changed
             expect('.before').not.toHaveText('old-before')
@@ -389,7 +389,7 @@ describe 'up.form', ->
                 """
 
           next =>
-            expect(up.browser.url()).toEqual(@hrefBeforeExample)
+            expect(up.history.location).toEqual(@hrefBeforeExample)
             expect('.response').toHaveText('old-text')
             expect('form').toHaveText('error-messages')
             # See that containers outside the form have not changed
@@ -417,24 +417,24 @@ describe 'up.form', ->
                 """
 
           next =>
-            expect(up.browser.url()).toMatchUrl('/other-path')
+            expect(up.history.location).toMatchUrl('/other-path')
 
         describe 'with { history } option', ->
 
           it 'uses the given URL as the new browser location if the request succeeded', asyncSpec (next) ->
             up.submit(@$form, history: '/given-path')
             next => @respondWith('<div class="response">new-text</div>')
-            next => expect(up.browser.url()).toMatchUrl('/given-path')
+            next => expect(up.history.location).toMatchUrl('/given-path')
 
           it 'keeps the current browser location if the request failed', asyncSpec (next) ->
             up.submit(@$form, history: '/given-path', failTarget: '.response')
             next => @respondWith('<div class="response">new-text</div>', status: 500)
-            next => expect(up.browser.url()).toEqual(@hrefBeforeExample)
+            next => expect(up.history.location).toEqual(@hrefBeforeExample)
 
           it 'keeps the current browser location if the option is set to false', asyncSpec (next) ->
             up.submit(@$form, history: false)
             next => @respondWith('<div class="response">new-text</div>')
-            next =>expect(up.browser.url()).toEqual(@hrefBeforeExample)
+            next =>expect(up.history.location).toEqual(@hrefBeforeExample)
 
         describe 'revealing', ->
 

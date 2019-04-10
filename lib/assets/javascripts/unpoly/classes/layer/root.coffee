@@ -11,10 +11,11 @@ class up.Layer.Root extends up.Layer
 
   constructor: (stack, options) ->
     super(stack, options)
+    @element = e.root
 
   contains: (element) =>
     # Test that the closest parent is the document and not another layer.
-    e.closest(element, '.up-layer, html') == e.root()
+    e.closest(element, '.up-layer, html') == @element
 
   allElements: (selector) ->
     matches = e.all(selector)

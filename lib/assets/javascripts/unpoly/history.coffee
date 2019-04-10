@@ -58,12 +58,12 @@ up.history = do ->
   @function up.history.url
   @experimental
   ###
-  currentUrl = (normalizeOptions) ->
-    normalizeUrl(up.browser.url(), normalizeOptions)
+  currentLocation = (normalizeOptions) ->
+    normalizeUrl(location.href, normalizeOptions)
 
-  isCurrentUrl = (url) ->
+  isCurrentLocation = (url) ->
     normalizeOptions = { stripTrailingSlash: true }
-    normalizeUrl(url, normalizeOptions) == currentUrl(normalizeOptions)
+    normalizeUrl(url, normalizeOptions) == currentLocation(normalizeOptions)
 
   ###**
   Remembers the given URL so we can offer `up.history.previousUrl()`.
@@ -120,7 +120,7 @@ up.history = do ->
     options = u.options(options, force: false)
     force = options.force ? false
     url = normalizeUrl(url)
-    if (force || !isCurrentUrl(url))
+    if (force || !isCurrentLocation(url))
       if manipulate('pushState', url)
         up.emit('up:history:pushed', url: url, log: "Advanced to location #{url}")
       else
@@ -139,7 +139,7 @@ up.history = do ->
     if up.browser.canPushState() && config.enabled
       state = buildState()
       window.history[method](state, '', url)
-      observeNewUrl(currentUrl())
+      observeNewUrl(currentLocation())
       true
     else
       false
@@ -149,7 +149,7 @@ up.history = do ->
 
   restoreStateOnPop = (state) ->
     if state?.fromUp
-      url = currentUrl()
+      url = currentLocation()
 
       # We can't let people prevent this event, since `popstate` is also unpreventable.
       up.emit('up:history:restore', url: url, log: "Restoring location #{url}")
@@ -163,13 +163,13 @@ up.history = do ->
         restoreScroll: config.restoreScroll
         layer: 'page'       # Don't replace elements in a modal that might still be open
       replaced.then ->
-        url = currentUrl()
+        url = currentLocation()
         up.emit('up:history:restored', url: url, log: "Restored location #{url}")
     else
       up.puts 'Ignoring a state not pushed by Unpoly (%o)', state
 
   pop = (event) ->
-    observeNewUrl(currentUrl())
+    observeNewUrl(currentLocation())
     up.viewport.saveScroll(url: previousUrl)
     state = event.state
     restoreStateOnPop(state)
@@ -201,7 +201,7 @@ up.history = do ->
       register = ->
         window.history.scrollRestoration = 'manual' if up.browser.canControlScrollRestoration()
         window.addEventListener('popstate', pop)
-        replace(currentUrl(), force: true)
+        replace(currentLocation(), force: true)
 
       if jasmine?
         # Can't delay this in tests.
@@ -247,11 +247,12 @@ up.history = do ->
 
   up.on 'up:framework:reset', reset
 
-  config: config
-  push: push
-  replace: replace
-  url: currentUrl
-  isUrl: isCurrentUrl
-  previousUrl: -> previousUrl
-  normalizeUrl: normalizeUrl
+  u.literal
+    config: config
+    push: push
+    replace: replace
+    location: currentLocation
+    isLocation: isCurrentLocation
+    previousUrl: -> previousUrl
+    normalizeUrl: normalizeUrl
 

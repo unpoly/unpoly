@@ -39,6 +39,8 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
 
     @updateHistory(historyOptions)
 
+
+
     promise = promise.then =>
       swapPromises = @steps.map (step) -> @swapStep(step)
 
@@ -114,6 +116,10 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
           up.fragment.markAsDestroying(step.oldElement)
         afterInsert: =>
           @responseDoc.activateElement(step.newElement, step)
+          # Make sure that we didn't lose the .up-layers container
+          # while replacing <body> or <html>
+          if up.fragment.targetsBody(step.selector)
+            up.layer.attachContainer()
         beforeDetach: ->
           up.syntax.clean(step.oldElement)
         afterDetach: ->
@@ -173,7 +179,8 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
     step.keepPlans = keepPlans
 
   parseSteps: ->
-    resolvedSelector = e.resolveSelector(@options.target, @options.origin)
+    # resolveSelector was already called by up.Change.FromContent
+    resolvedSelector = @options.target
     disjunction = u.splitValues(resolvedSelector, ',')
 
     @steps = disjunction.map (target, i) =>

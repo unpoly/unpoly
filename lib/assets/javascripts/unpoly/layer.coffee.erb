@@ -109,12 +109,13 @@ up.layer = do ->
     forElement: (args...) -> stack.forElement(args...)
     lookup: (args...) -> stack.lookupOne(args...)
     lookupAll: (args...) -> stack.lookupAll(args...)
+    container: -> stack.container()
+    attachContainer: -> stack.attachContainer()
     allElements: allElements
     firstElement: firstElement
     config: config
     defaultTargets: defaultTargets
     open: open
-    container: -> stack.container()
     build: build
     accept: accept
     dismiss: dismiss
@@ -122,7 +123,10 @@ up.layer = do ->
     closeHandlerAttr: closeHandlerAttr
     get_root: -> stack.root()
     get_current: currentLayer
-    get_url: -> currentLayer().url
+    get_location: -> currentLayer().location
+    get_position: -> currentLayer().position
+    get_element: -> currentLayer().element
+    get_context: -> currentLayer().context
 
 # TODO: Docs for up.context
-u.getter(up, 'context', -> up.layer.current.context)
+u.getter(up, 'context', -> up.layer.context)

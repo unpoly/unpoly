@@ -20,29 +20,29 @@ describe 'up.history', ->
           history.replaceState?({}, 'title', '/host/path/')
           expect(up.history.url()).toMatchUrl('/host/path/')
 
-    describe 'up.history.isUrl', ->
+    describe 'up.history.isLocation', ->
 
       describeCapability 'canPushState', ->
 
         it 'returns true if the given path is the current URL', ->
           history.replaceState?({}, 'title', '/host/path/')
-          expect(up.history.isUrl('/host/path/')).toBe(true)
+          expect(up.history.isLocation('/host/path/')).toBe(true)
 
         it 'returns false if the given path is not the current URL', ->
           history.replaceState?({}, 'title', '/host/path/')
-          expect(up.history.isUrl('/host/other-path/')).toBe(false)
+          expect(up.history.isLocation('/host/other-path/')).toBe(false)
 
         it 'returns true if the given full URL is the current URL', ->
           history.replaceState?({}, 'title', '/host/path/')
-          expect(up.history.isUrl("http://#{location.host}/host/path/")).toBe(true)
+          expect(up.history.isLocation("http://#{location.host}/host/path/")).toBe(true)
 
         it 'returns true if the given path is the current URL, but without a trailing slash', ->
           history.replaceState?({}, 'title', '/host/path/')
-          expect(up.history.isUrl('/host/path')).toBe(true)
+          expect(up.history.isLocation('/host/path')).toBe(true)
 
         it 'returns true if the given path is the current URL, but with a trailing slash', ->
           history.replaceState?({}, 'title', '/host/path')
-          expect(up.history.isUrl('/host/path/')).toBe(true)
+          expect(up.history.isLocation('/host/path/')).toBe(true)
 
   describe 'unobtrusive behavior', ->
 

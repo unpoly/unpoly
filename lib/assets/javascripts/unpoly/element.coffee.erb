@@ -1077,50 +1077,50 @@ up.element = do ->
     # From https://github.com/jquery/jquery/blame/9cb162f6b62b6d4403060a0f0d2065d3ae96bbcc/src/css/hiddenVisibleSelectors.js#L12
     !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length)
 
-  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  # also document :has()!
-  first: first # same as document.querySelector
-  all: all # same as document.querySelectorAll
-  subtree: subtree # practical
-  closest: closest # needed for IE11
-  matches: matches # needed for IE11
-  ancestor: ancestor # not practical. we use it to implement closest
-  get: getOne # practical for code that also works with jQuery
-  list: getList # practical for composing multiple collections, or wrapping.
-  remove: remove # needed for IE11
-  toggle: toggle # practical
-  toggleClass: toggleClass # practical
-  hide: hide # practical
-  show: show # practical
-  metaContent: metaContent # internal
-  replace: replace # needed for IE11
-  insertBefore: insertBefore # internal shortcut, people can use insertAdjacentElement and i don't want to support insertAfter when I don't need it.
-  createFromSelector: createFromSelector # practical for element creation.
-  setAttrs: setAttrs # practical
-  affix: affix # practical for element creation
-  toSelector: toSelector # practical
-  isSingleton: isSingleton # internal
-  attributeSelector: attributeSelector # internal
-  createDocumentFromHtml: createDocumentFromHtml # internal
-  createFromHtml: createFromHtml # practical for element creation
-  root: getRoot # internal
-  paint: paint # internal
-  concludeCssTransition: concludeCssTransition # internal
-  hasCssTransition: hasCssTransition # internal
-  fixedToAbsolute: fixedToAbsolute # internal
-  setMissingAttrs: setMissingAttrs # internal
-  unwrap: unwrap # practical for jQuery migration
-  # presentAttr: presentAttr # experimental
-  booleanAttr: booleanAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
-  numberAttr: numberAttr # practical
-  jsonAttr: jsonAttr # practical
-  booleanOrStringAttr: booleanOrStringAttr
-  setTemporaryStyle: setTemporaryStyle # practical
-  style: computedStyle # practical.
-  styleNumber: computedStyleNumber # practical.
-  inlineStyle: inlineStyle # internal
-  setStyle: setInlineStyle # practical.
-  resolveSelector: resolveSelector # internal
-  none: -> NONE # internal
-  isVisible: isVisible # practical
-
+  u.literal
+    <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
+    # also document :has()!
+    first: first # same as document.querySelector
+    all: all # same as document.querySelectorAll
+    subtree: subtree # practical
+    closest: closest # needed for IE11
+    matches: matches # needed for IE11
+    ancestor: ancestor # not practical. we use it to implement closest
+    get: getOne # practical for code that also works with jQuery
+    list: getList # practical for composing multiple collections, or wrapping.
+    remove: remove # needed for IE11
+    toggle: toggle # practical
+    toggleClass: toggleClass # practical
+    hide: hide # practical
+    show: show # practical
+    metaContent: metaContent # internal
+    replace: replace # needed for IE11
+    insertBefore: insertBefore # internal shortcut, people can use insertAdjacentElement and i don't want to support insertAfter when I don't need it.
+    createFromSelector: createFromSelector # practical for element creation.
+    setAttrs: setAttrs # practical
+    affix: affix # practical for element creation
+    toSelector: toSelector # practical
+    isSingleton: isSingleton # internal
+    attributeSelector: attributeSelector # internal
+    createDocumentFromHtml: createDocumentFromHtml # internal
+    createFromHtml: createFromHtml # practical for element creation
+    get_root: getRoot # internal
+    paint: paint # internal
+    concludeCssTransition: concludeCssTransition # internal
+    hasCssTransition: hasCssTransition # internal
+    fixedToAbsolute: fixedToAbsolute # internal
+    setMissingAttrs: setMissingAttrs # internal
+    unwrap: unwrap # practical for jQuery migration
+    # presentAttr: presentAttr # experimental
+    booleanAttr: booleanAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
+    numberAttr: numberAttr # practical
+    jsonAttr: jsonAttr # practical
+    booleanOrStringAttr: booleanOrStringAttr
+    setTemporaryStyle: setTemporaryStyle # practical
+    style: computedStyle # practical.
+    styleNumber: computedStyleNumber # practical.
+    inlineStyle: inlineStyle # internal
+    setStyle: setInlineStyle # practical.
+    resolveSelector: resolveSelector # internal
+    none: -> NONE # internal
+    isVisible: isVisible # practical

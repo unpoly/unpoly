@@ -4,8 +4,6 @@ u = up.util
 
 class up.Change.FromContent
 
-  BODY_TARGET_PATTERN = /(^|\s|,)(body|html)(,|\s|$)/i
-
   constructor: (options) ->
     @options = u.options(options)
     @options.target = e.resolveSelector(@options.target, @options.origin)
@@ -34,12 +32,16 @@ class up.Change.FromContent
       layerDefaultTargets = up.layer.defaultTargets(u.only(@options, 'flavor'))
       @eachTargetCandidatePlan layerDefaultTargets, (plan) =>
         # We cannot open a <body> in a new layer
-        unless @targetsBody(plan)
+        unless up.fragment.targetsBody(plan.target)
           @plans.push(new up.ExtractPlan.OpenLayer(plan))
 
     else
       for layer in up.layer.lookupAll(@options.layer)
         @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
+          # Since the last plan is always SwapBody, we don't need to
+          # add other plans that would also swap the body.
+          continue if up.fragment.targetsBody(plan.target)
+
           @plans.push(new up.ExtractPlan.UpdateLayer(plan))
 
     # Make sure we always succeed
@@ -47,16 +49,8 @@ class up.Change.FromContent
 
   eachTargetCandidatePlan: (layerDefaultTargets, planOptions, fn) ->
     for target, i in @buildTargetCandidates(layerDefaultTargets)
-      # Since the last plan is always SwapBody, we don't need to
-      # add other plans that would also swap the body.
-      continue if @targetsBody(target)
-
       plan = u.merge(@options, planOptions, { target })
-
       fn(plan)
-
-  targetsBody: (plan) ->
-    BODY_TARGET_PATTERN.test(plan.target)
 
   buildTargetCandidates: (layerDefaultTargets) ->
     targetCandidates = [@options.target, @options.fallback, layerDefaultTargets]

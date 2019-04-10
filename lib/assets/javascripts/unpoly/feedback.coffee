@@ -103,13 +103,7 @@ up.feedback = do ->
     urls
 
   buildCurrentUrlSet = ->
-    urls = [
-      up.browser.url(),      # The URL displayed in the address bar
-      up.modal.url(),        # Even when a modal does not change the address bar, we consider the URL of its content
-      up.modal.coveredUrl(), # The URL of the page behind the modal
-      up.popup.url(),        # Even when a popup does not change the address bar, we consider the URL of its content
-      up.popup.coveredUrl()  # The URL of the page behind the popup
-    ]
+    urls = u.map(up.layer.all, 'location')
     new up.UrlSet(urls, { normalizeUrl })
 
   updateAllNavigationSectionsIfLocationChanged = ->

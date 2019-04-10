@@ -59,7 +59,14 @@ class up.LayerStack extends up.Config
     u.last(@layers)
 
   container: ->
-    e.first(CONTAINER_SELECTOR) || e.affix(document.body, CONTAINER_SELECTOR)
+    unless @containerElement
+      @containerElement = e.createFromSelector(CONTAINER_SELECTOR)
+      @attachContainer()
+    @containerElement
+
+  attachContainer: ->
+    if @containerElement
+      document.body.appendChild(@containerElement)
 
   lookupOne: (args...) ->
     @lookupAll(args...)[0]
