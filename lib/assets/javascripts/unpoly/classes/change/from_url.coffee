@@ -84,6 +84,8 @@ class up.Change.FromURL
     new up.Change.FromContent(options).execute()
 
   augmentOptionsFromResponse: (response, options) ->
+    options.document = response.text
+
     responseUrl = response.url
     locationFromExchange = responseUrl
 
@@ -116,7 +118,8 @@ class up.Change.FromURL
       options.location ?= locationFromExchange
       options.title ?= response.title
 
-    options.document = response.text
+    options.acceptLayer = response.acceptLayer
+    options.dismissLayer = response.dismissLayer
 
 
   failedResponseHasContent: (response) ->

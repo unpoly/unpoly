@@ -5,7 +5,7 @@ u = up.util
 class up.Change.Plan.ResetWorld extends up.Change.Plan.UpdateLayer
 
   preflightLayer: ->
-    up.layer.root()
+    up.layer.root
 
   constructor: (options) ->
     options = u.merge(options,
@@ -14,5 +14,7 @@ class up.Change.Plan.ResetWorld extends up.Change.Plan.UpdateLayer
       peel: true
       keep: false
       resetScroll: true
+      acceptLayer: undefined
+      dismissLayer: undefined
     )
     super(options)

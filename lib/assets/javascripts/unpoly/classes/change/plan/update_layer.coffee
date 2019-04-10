@@ -44,6 +44,11 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
 
       return Promise.all(swapPromises)
 
+    promise = promise.then =>
+      @handleLayerChangeRequests()
+      # don't delay `promise` until layer change requests have finished closing
+      return undefined
+
     return promise
 
   swapStep: (step) ->
@@ -75,7 +80,7 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
         step.oldElement.insertAdjacentElement('beforeend', wrapper)
 
       for child in wrapper.children
-        up.hello(child, step) # emits up:fragment:inserted
+        @responseDoc.activateElement(child, step) # emits up:fragment:inserted
 
       # Reveal element that was being prepended/appended.
       # Since we will animate (not morph) it's OK to allow animation of scrolling
@@ -108,7 +113,7 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
         beforeStart: ->
           up.fragment.markAsDestroying(step.oldElement)
         afterInsert: =>
-          up.hello(step.newElement, step)
+          @responseDoc.activateElement(step.newElement, step)
         beforeDetach: ->
           up.syntax.clean(step.oldElement)
         afterDetach: ->

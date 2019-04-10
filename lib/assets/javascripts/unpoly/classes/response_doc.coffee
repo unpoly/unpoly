@@ -24,6 +24,9 @@ class up.ResponseDoc
     # HTMLParser will not execute their content once appended to the DOM.
     @scriptWrapper = new up.HtmlWrapper('script', guard: @isInlineScript)
 
+    if @response = options.response
+      options.document = @response
+
     if document = options.document
       @parsedRoot = @retrieveRoot(document, e.createDocumentFromHtml)
 
@@ -51,11 +54,15 @@ class up.ResponseDoc
   first: (selector) ->
     e.first(@parsedRoot, selector)
 
-  unwrapNoscripts: (element) ->
-    @noscriptWrapper.unwrap(element)
-
-  unwrapScripts: (element) ->
-    @scriptWrapper.unwrap(element)
-
   isInlineScript: (element) ->
     element.hasAttribute('src')
+
+  activateElement: (element, options) ->
+    # Restore <noscript> tags so they become available to compilers
+    @noscriptWrapper.unwrap(element)
+
+    # Compile the new fragment
+    up.hello(element, options)
+
+    # Run any <script> tags that were within the element
+    @scriptWrapper.unwrap(element)

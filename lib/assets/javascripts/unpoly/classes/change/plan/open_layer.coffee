@@ -28,16 +28,21 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
     promise = promise.then =>
       layer.openNow(up.layer.container(), content, { @onContentAttached })
 
-    promise = promise.then -> up.emit('up:layer:opened', { layer, log: 'Layer opened' })
+    promise = promise.then =>
+      up.emit('up:layer:opened', { layer, log: 'Layer opened' })
+      @handleLayerChangeRequests()
+      # don't delay `promise` until layer change requests have finished closing
+      return undefined
+
     promise
 
   onContentAttached: (layer, content) =>
     up.fragment.setSource(content, @options.source)
 
-    # Calling up.hello() will compile the new content
-    # and emit an up:fragment:inserted event.
-    up.hello(content, @options)
-
     # Call updateHistory() with the original options so it contains
     # non-layer keys like { title } or { location }
     layer.updateHistory(@options)
+
+    # Calling up.hello() will compile the new content
+    # and emit an up:fragment:inserted event.
+    @responseDoc.activateElement(content, @options)

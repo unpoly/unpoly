@@ -91,33 +91,33 @@ class up.Layer.Overlay extends up.Layer
   allElements: (selector) ->
     e.all(@contentElement, selector)
 
-  accept: (options) ->
-    @closeVariant(u.merge(options,
+  accept: (value, options) ->
+    @closeVariant(value, u.merge(options,
       valueAttr: 'up-accept'
       closeEvent: 'up:layer:accept'
       closedEvent: 'up:layer:accepted'
       closedCallback: @onAccepted
     ))
 
-  dismiss: (options) ->
-    @closeVariant(u.merge(options,
+  dismiss: (value, options) ->
+    @closeVariant(value, u.merge(options,
       valueAttr: 'up-dismiss'
       closeEvent: 'up:layer:dismiss'
       closedEvent: 'up:layer:dismissed'
       closedCallback: @onDismissed
     ))
 
-  closeVariant: (options) ->
+  closeVariant: (value, options) ->
     origin = options.origin
     emitEvents = options.emitEvents ? true
 
-    if origin
-      options.value ?= e.jsonAttr(origin, options.valueAttr)
+    if origin && u.isUndefined(value)
+      value = e.jsonAttr(origin, options.valueAttr)
 
     eventProps =
       target: @element
       layer: this
-      value: options.value
+      value: value
       origin: origin
 
     # Abort all pending requests targeting the layer we're now closing.
@@ -129,17 +129,22 @@ class up.Layer.Overlay extends up.Layer
       @stack.remove(this)
 
       return @stack.asap ->
-        @closeNow().then ->
-          if emitEvents
+        promise = @closeNow()
+
+        if emitEvents
+          promise = promise.then ->
             # Wait for the callbacks until the closing animation ends,
             # so user-provided code doesn't run too wildly out of order.
 
             if closedCallback = options.closedCallback
               # Callback option only gets the resolution value.
               # Also see up.layer.closeHandlerAttr()
-              closedCallback.call(origin, options.value, eventProps)
+              closedCallback(value, eventProps)
 
             # Global event gets the full event props
             up.emit(options.closedEvent, eventProps)
+
+        return promise
+
     else
       return up.event.abortRejection()

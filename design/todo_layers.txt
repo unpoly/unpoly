@@ -21,6 +21,19 @@
 - TODO: Test that up.change() can be called with { target: Element } and will find in any layer
 - TODO: Test that up.change() without { layer } option will only find in current layer
 - Documentation
+- Macht es Sinn, dass Context ein Objekt ist vs. ein Name?
+  - up-modal="selector":
+    - Würde man nicht lieber haben up-modal="context"
+    - oder up-modal="name"
+    - => Nein, wir wollen alten Kram nicht brechen
+- Separate { query } and [up-query] options
+- up.on needs to register to current layer element, not <document>!
+  - also { layer } option
+- up.emit needs to emit on the current layer element, not <document>!
+  - also { layer } option
+- Layer callbacks: onOpened
+- up.layer.url
+- Body replacen sollte nicht die Layer vernichten
 
 
 Finishing up
@@ -64,3 +77,4 @@ Later?
 - Make all module names uppercase.
   - In a ES6 world this would not even be so bad, or even necessary. import { Event } from 'up'. Event.emit(...).
   - Even consider dropping shortcuts so we always do up.Fragment.change(), up.Event.emit(...)
+- Should up.reload / up.change etc. resolve to the updated elements?

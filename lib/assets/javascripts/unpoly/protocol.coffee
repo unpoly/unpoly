@@ -184,22 +184,36 @@ up.protocol = do ->
   @internal
   ###
   locationFromXhr = (xhr) ->
-    xhr.getResponseHeader(config.locationHeader) || xhr.responseURL
+    extractHeader(xhr, config.locationHeader) || xhr.responseURL
 
   ###**
   @function up.protocol.titleFromXhr
   @internal
   ###
   titleFromXhr = (xhr) ->
-    xhr.getResponseHeader(config.titleHeader)
+    extractHeader(xhr, config.titleHeader)
 
   ###**
   @function up.protocol.methodFromXhr
   @internal
   ###
   methodFromXhr = (xhr) ->
-    if method = xhr.getResponseHeader(config.methodHeader)
-      u.normalizeMethod(method)
+    extractHeader(xhr, config.methodHeader, u.normalizeMethod(method))
+
+  acceptLayerFromXhr = (xhr) ->
+    # Even if acceptance has no value, the server will send
+    # X-Up-Accept-Layer: null
+    extractHeader(xhr, config.acceptLayerHeader, JSON.parse)
+
+  dismissLayerFromXhr = (xhr) ->
+    # Even if acceptance has no value, the server will send
+    # X-Up-Dismiss-Layer: null
+    extractHeader(xhr, config.dismissLayerHeader, JSON.parse)
+
+  extractHeader = (xhr, header, parseFn = u.identity) ->
+    if value = xhr.getResponseHeader(header)
+      return parseFn(value)
+
 
   ###**
   Server-side companion libraries like unpoly-rails set this cookie so we
@@ -226,6 +240,8 @@ up.protocol = do ->
   @param {String} [config.failTargetHeader='X-Up-Fail-Target']
   @param {String} [config.locationHeader='X-Up-Location']
   @param {String} [config.titleHeader='X-Up-Title']
+  @param {String} [config.acceptLayerHeader='X-Up-Accept-Layer']
+  @param {String} [config.dismissLayerHeader='X-Up-Dismiss-Layer']
   @param {String} [config.validateHeader='X-Up-Validate']
   @param {String} [config.methodHeader='X-Up-Method']
   @param {String} [config.methodCookie='_up_method']
@@ -294,6 +310,8 @@ up.protocol = do ->
   locationFromXhr: locationFromXhr
   titleFromXhr: titleFromXhr
   methodFromXhr: methodFromXhr
+  acceptLayerFromXhr: acceptLayerFromXhr
+  dismissLayerFromXhr: dismissLayerFromXhr
   csrfParam :csrfParam
   csrfToken: csrfToken
   initialRequestMethod: initialRequestMethod

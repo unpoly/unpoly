@@ -38,7 +38,9 @@ up.layer = do ->
 
   closeHandlerAttr = (link, attr) ->
     if code = link.getAttribute(attr)
-      return new Function('value', code).bind(link)
+      # Emulate the behavior of the `onclick` attribute,
+      # where `this` refers to the clicked element.
+      return new Function('value', 'event', code).bind(link)
 
   reset = ->
     config.reset(deep: true)
@@ -103,23 +105,24 @@ up.layer = do ->
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
-  forElement: (args...) -> stack.forElement(args...)
-  all: -> stack.all()
-  root: -> stack.root()
-  parent: -> stack.parent()
-  current: currentLayer
-  lookup: (args...) -> stack.lookupOne(args...)
-  lookupAll: (args...) -> stack.lookupAll(args...)
-  allElements: allElements
-  firstElement: firstElement
-  config: config
-  defaultTargets: defaultTargets
-  open: open
-  container: -> stack.container()
-  build: build
-  accept: accept
-  dismiss: dismiss
-  sync: sync
+  u.literal
+    forElement: (args...) -> stack.forElement(args...)
+    lookup: (args...) -> stack.lookupOne(args...)
+    lookupAll: (args...) -> stack.lookupAll(args...)
+    allElements: allElements
+    firstElement: firstElement
+    config: config
+    defaultTargets: defaultTargets
+    open: open
+    container: -> stack.container()
+    build: build
+    accept: accept
+    dismiss: dismiss
+    sync: sync
+    closeHandlerAttr: closeHandlerAttr
+    get_root: -> stack.root()
+    get_current: currentLayer
+    get_url: -> currentLayer().url
 
 # TODO: Docs for up.context
-u.getter(up, 'context', -> up.layer.current().context)
+u.getter(up, 'context', -> up.layer.current.context)
