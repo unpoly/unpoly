@@ -38,22 +38,19 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
         return up.layer.asap ->
           return layer.peel()
 
-    historyOptions = u.only(@options, 'title', 'location')
-
-    if @options.history && !up.browser.canPushState()
+    if @options.location && !up.browser.canPushState()
       if isRoot()
         up.browser.navigate(@options)
         return u.unresolvablePromise()
       else
-        # If we cannot push state for some reason, we prefer disabling history for
-        # child layers instead of blowing up the entire stack with a full page load.
-        @options.history = false
+        # If we cannot push state for some reason, we prefer not updating the address
+        # bar in child layers instead of blowing up the entire stack with a full page load.
+        @options.location = null
 
-    @updateHistory(historyOptions)
+    @updateHistory(@options)
 
     promise = promise.then =>
       swapPromises = @steps.map (step) -> @swapStep(step)
-
       return Promise.all(swapPromises)
 
     promise = promise.then =>

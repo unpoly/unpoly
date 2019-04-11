@@ -18,11 +18,6 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
     content = @responseDoc.first(@options.target) or @notApplicable()
 
     return up.layer.asap ->
-      # If we cannot push state for some reason, we prefer disabling history for
-      # child layers instead of blowing up the entire stack with a full page load.
-      unless up.browser.canPushState()
-        options.history = false
-
       unless @options.currentLayer.isOpen()
         return up.asyncFail('Could not open %o in new layer: Parent layer was closed', @options.target)
 
@@ -49,9 +44,14 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
   onContentAttached: (layer, content) =>
     up.fragment.setSource(content, @options.source)
 
+    # If we cannot push state for some reason, we prefer disabling history for
+    # child layers instead of blowing up the entire stack with a full page load.
+    unless up.browser.canPushState()
+      @options.history = false
+
     # Call updateHistory() with the original options so it contains
     # non-layer keys like { title } or { location }
-    layer.updateHistory(@options)
+    @updateHistory(@options)
 
     # Calling up.hello() will compile the new content
     # and emit an up:fragment:inserted event.
