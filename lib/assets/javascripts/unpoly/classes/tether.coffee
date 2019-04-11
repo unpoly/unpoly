@@ -4,8 +4,8 @@ e = up.element
 class up.Tether
 
   constructor: (options) ->
-    @element = options.element or u.fail("Missing { element } option")
-    @anchor = options.anchor or u.fail("Missing { anchor } option")
+    @element = options.element or up.fail("Missing { element } option")
+    @anchor = options.anchor or up.fail("Missing { anchor } option")
 
     [@position, @align] = options.position.split('-')
     if @align

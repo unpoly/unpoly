@@ -3,7 +3,7 @@
 u = up.util
 e = up.element
 
-class up.Change.Plan
+class up.Change.Plan extends up.Class
 
   @NOT_APPLICABLE: 'n/a'
 

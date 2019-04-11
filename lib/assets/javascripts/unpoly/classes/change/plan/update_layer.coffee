@@ -10,13 +10,21 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
     @parseSteps()
 
   preflightLayer: ->
-    @options.layer
+    # Make sure this plan is applicable before returning a layer
+    @findOld()
+    return @options.layer
 
   preflightTarget: ->
+    # Make sure this plan is applicable before returning a target
     @findOld()
     return @targetWithoutPseudoClasses()
 
   execute: ->
+    layer = @options.layer
+
+    unless layer.isOpen()
+      return up.asyncFail('Could not update %o: Target layer was closed', @options.target)
+
     @findOld()
     @findNew()
     # Only when we have a match in the required selectors, we
@@ -26,20 +34,22 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
     promise = Promise.resolve()
 
     if @options.peel
-      promise = promise.then => @options.layer.peel()
+      promise = promise.then ->
+        return up.layer.asap ->
+          return layer.peel()
 
     historyOptions = u.only(@options, 'title', 'location')
 
     if @options.history && !up.browser.canPushState()
-      if @options.layer.isRoot()
+      if isRoot()
         up.browser.navigate(@options)
         return u.unresolvablePromise()
       else
-        options.history = false
+        # If we cannot push state for some reason, we prefer disabling history for
+        # child layers instead of blowing up the entire stack with a full page load.
+        @options.history = false
 
     @updateHistory(historyOptions)
-
-
 
     promise = promise.then =>
       swapPromises = @steps.map (step) -> @swapStep(step)
@@ -202,15 +212,19 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
         reveal: doReveal
 
   findOld: ->
+    return if @foundOld
     for step in @steps
       # Try to find fragments matchin step.selector within step.layer
       step.oldElement = up.fragment.first(step.selector, step) or @notApplicable()
     @resolveOldNesting()
+    @foundOld = true
 
   findNew: ->
+    return if @foundNew
     for step in @steps
       # The responseDoc has no layers.
       step.newElement = @responseDoc.first(step.selector) or @notApplicable()
+    @foundNew = true
 
   addHungrySteps: ->
     if @options.hungry

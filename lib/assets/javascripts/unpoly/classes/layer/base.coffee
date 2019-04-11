@@ -132,3 +132,6 @@ class up.Layer extends up.Record
 
   eventGuard: (event) =>
     @contains(event.target)
+
+  isOpen: ->
+    @stack.isOpen(this)

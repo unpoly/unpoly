@@ -49,7 +49,7 @@ up.layer = do ->
   open = (options) ->
     options = u.options(options, layer: 'new')
 
-    # Even if we are given { content} we need to pipe this through up.change()
+    # Even if we are given { content } we need to pipe this through up.change()
     # since a lot of options processing is happening there.
     up.change(options)
 
@@ -64,21 +64,6 @@ up.layer = do ->
       options = u.merge(options, { onAccept, onDismiss })
       open(options)
 
-  currentLayer = ->
-    stack.current
-
-  # TODO: Docs for up.layer.accept()
-  accept = (args...) ->
-    stack.current.accept(args...)
-
-  # TODO: Docs for up.layer.dismiss()
-  dismiss = (args...) ->
-    stack.current.dismiss(args...)
-
-  # TODO: Docs for up.layer.sync()
-  sync = (args...) ->
-    stack.current.sync(args...)
-
   allElements = (selector, options) ->
     layers = @stack.lookupAll(options)
     u.flatMap layers, (layer) -> layer.allElements(selector)
@@ -86,6 +71,14 @@ up.layer = do ->
   firstElement = (selector, options) ->
     layers = @stack.lookupAll(options)
     u.findResult layers, -> layer.firstElement(selector)
+
+  accept = (args...) ->
+    @stack.asap =>
+      @stack.current.accept(args...)
+
+  dismiss = (args...) ->
+    @stack.asap =>
+      @stack.current.dismiss(args...)
 
   up.event.onEscape (event) ->
     if stack.current.dismissable
@@ -117,15 +110,16 @@ up.layer = do ->
     defaultTargets: defaultTargets
     open: open
     build: build
-    accept: accept
-    dismiss: dismiss
-    sync: sync
+    accept: (args...) -> stack.current.accept(args...)
+    dismiss: (args...) -> stack.current.dismiss(args...)
+    sync: (args...) -> stack.current.sync(args...)
     closeHandlerAttr: closeHandlerAttr
-    dismissAll: -> stack.dismissAll()
     isRoot: -> stack.isRoot()
+    push: (args...) -> stack.push(args...)
+    asap: (args...) -> stack.asap(args...)
     get_root: -> stack.root
     get_all: -> stack.all
-    get_current: currentLayer
+    get_current: -> stack.current
     get_location: -> stack.current.location
     get_position: -> stack.current.position
     get_element: -> stack.current.element

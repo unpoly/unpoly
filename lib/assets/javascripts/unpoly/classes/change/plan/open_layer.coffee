@@ -5,38 +5,46 @@ u = up.util
 class up.Change.Plan.OpenLayer extends up.Change.Plan
 
   preflightLayer: ->
-    undefined
+    'new'
 
   preflightTarget: ->
-    # The target will always "exist" in the current page, since
-    # we're opening a new layer just for that.
+    # The target will always exist in the current page, since
+    # we're opening a new layer that will always match the target.
     @options.target
 
   execute: ->
     # Selecting the content needs to happen sync, since our caller
-    # might expect and catch up.ExtractPlan.NOT_APPLICABLE.
+    # might want catch up.ExtractPlan.NOT_APPLICABLE.
     content = @responseDoc.first(@options.target) or @notApplicable()
 
-    # If we cannot push state for some reason, we prefer disabling history for
-    # child layers instead of blowing up the entire stack with a full page load.
-    unless up.browser.canPushState()
-      options.history = false
+    return up.layer.asap ->
+      # If we cannot push state for some reason, we prefer disabling history for
+      # child layers instead of blowing up the entire stack with a full page load.
+      unless up.browser.canPushState()
+        options.history = false
 
-    layer = up.layer.build(@options)
+      unless @options.currentLayer.isOpen()
+        return up.asyncFail('Could not open %o in new layer: Parent layer was closed', @options.target)
 
-    promise = up.event.whenEmitted('up:layer:open', { layer, log: 'Opening layer' })
-    promise = promise.then =>
-      layer.openNow(up.layer.container, content, { @onContentAttached })
+      layer = up.layer.build(@options)
 
-      throw "who pushes new layer into stack?"
+      promise = up.event.whenEmitted('up:layer:open', { layer, log: 'Opening layer' })
 
-    promise = promise.then =>
-      up.emit('up:layer:opened', { layer, log: 'Layer opened' })
-      @handleLayerChangeRequests()
-      # don't delay `promise` until layer change requests have finished closing
-      return undefined
+      promise = promise.then =>
+        # Make sure that the ground layer doesn't already have a child layer.
+        @options.currentLayer.peel()
 
-    promise
+      promise = promise.then =>
+        up.layer.push(layer)
+        layer.openNow(up.layer.container, content, { @onContentAttached })
+
+      promise = promise.then =>
+        up.emit('up:layer:opened', { layer, log: 'Layer opened' })
+        @handleLayerChangeRequests()
+        # don't delay `promise` until layer change requests have finished closing
+        return undefined
+
+      promise
 
   onContentAttached: (layer, content) =>
     up.fragment.setSource(content, @options.source)

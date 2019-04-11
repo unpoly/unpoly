@@ -7,7 +7,7 @@ window.describeCapability = (capabilities, examples) ->
     if fn = up.browser[c]
       fn()
     else
-      u.fail("Unknown capability: up.browser.#{c}()")
+      up.fail("Unknown capability: up.browser.#{c}()")
     up.browser[c]()
   if allSupported
     examples()

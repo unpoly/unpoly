@@ -6,9 +6,11 @@ u = up.util
 # Base class for all non-root layer flavors
 class up.Layer.Overlay extends up.Layer
 
+  # TODO: Rename openNow to something that doesn't have the sync/async connotation
   openNow: (parentElement, innerContentElement, options) ->
     throw "implement me"
 
+  # TODO: Rename closeNow to something that doesn't have the sync/async connotation
   closeNow: (options) ->
     throw "implement me"
 
@@ -123,31 +125,28 @@ class up.Layer.Overlay extends up.Layer
     # Abort all pending requests targeting the layer we're now closing.
     up.proxy.abort(preflightLayer: this)
 
-    if up.event.nobodyPrevents(options.closeEvent, eventProps)
-      throw "closing a layer should close all descendants, and they should NOT be able to prevent!"
+    if up.event.nobodyPrevents(options.closeEvent, eventProps) || options.preventable == false
+      unless @isOpen()
+        return Promise.resolve()
 
-
-
-      # Synchronously remove the layer from the stack so other sync calls
-      # immediately see the updated stack. Everything after that is just optics.
       @stack.remove(this)
 
-      return @stack.asap ->
-        promise = @closeNow()
+      promise = @peel()
 
-        promise = promise.then ->
-          # Wait for the callbacks until the closing animation ends,
-          # so user-provided code doesn't run too wildly out of order.
+      promise = promise.then =>
+        @parent.renderHistory()
+        return @closeNow()
 
-          @parent.renderHistory()
+      promise = promise.then =>
+        # Wait for the callbacks until the closing animation ends,
+        # so user-provided code doesn't run too wildly out of order.
+        if closedCallback = options.closedCallback
+          # Also see up.layer.closeHandlerAttr()
+          closedCallback(value, eventProps)
 
-          if closedCallback = options.closedCallback
-            # Also see up.layer.closeHandlerAttr()
-            closedCallback(value, eventProps)
+        up.emit(options.closedEvent, eventProps)
 
-          up.emit(options.closedEvent, eventProps)
-
-        return promise
+      return promise
 
     else
       return up.event.abortRejection()

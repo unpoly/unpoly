@@ -30,11 +30,6 @@ up.log = do ->
     Debugging information includes which elements are being [compiled](/up.syntax)
     and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
-  @param {boolean} [options.collapse=false]
-    Whether debugging information is printed as a collapsed tree.
-
-    Set this to `true` if you are overwhelmed by the debugging information Unpoly
-    prints to the developer console.
   @param {string} [options.prefix='[UP] ']
     A string to prepend to Unpoly's logging messages so you can distinguish it from your own messages.
   @stable
@@ -42,7 +37,7 @@ up.log = do ->
   config = new up.Config ->
     prefix: '[UP] '
     enabled: sessionStore.get('enabled')
-    collapse: false
+    toast: true
 
   reset = ->
     config.reset()
@@ -170,8 +165,7 @@ up.log = do ->
   group = (message, args...) ->
     block = args.pop() # Coffeescript copies the arguments array
     if config.enabled && message
-      fn = if config.collapse then 'groupCollapsed' else 'group'
-      console[fn](prefix(message), args...)
+      console.group(prefix(message), args...)
       try
         block()
       finally
@@ -230,6 +224,52 @@ up.log = do ->
   disable = ->
     setEnabled(false)
 
+  ###**
+  Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+  with the given message.
+
+  The message will also be printed to the [error log](/up.log.error). Also a notification will be shown at the bottom of the screen.
+
+  The message may contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions).
+
+  \#\#\# Examples
+
+      up.fail('Division by zero')
+      up.fail('Unexpected result %o', result)
+
+  @function up.fail
+  @param {string} message
+    A message with details about the error.
+
+    The message can contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
+    like `%s` or `%o`.
+  @param {Array<string>} vars...
+    A list of variables to replace any substitution marks in the error message.
+  @experimental
+  ###
+  fail = (args...) ->
+    if u.isArray(args[0])
+      messageArgs = args[0]
+      toastOptions = args[1] || {}
+    else
+      messageArgs = args
+      toastOptions = {}
+
+    error(messageArgs...)
+
+    if config.toast
+      up.event.onReady(-> up.toast.open(messageArgs, toastOptions))
+
+    asString = sprintf(messageArgs...)
+    throw new Error(asString)
+
+  ###**
+  @function up.asyncFail
+  @internal
+  ###
+  asyncFail = (args...) ->
+    u.rejectOnError -> fail(args...)
+
   puts: puts
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
@@ -241,8 +281,11 @@ up.log = do ->
   config: config
   enable: enable
   disable: disable
+  fail: fail
+  asyncFail: asyncFail
   isEnabled: -> config.enabled
 
 up.puts = up.log.puts
 up.warn = up.log.warn
-
+up.fail = up.log.fail
+up.asyncFail = up.log.asyncFail

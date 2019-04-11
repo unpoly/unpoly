@@ -6,6 +6,13 @@ class up.Change.FromContent
 
   constructor: (options) ->
     @options = u.options(options)
+    # Remember the layer that was current when the request was made, so changes
+    # with `{ layer: 'new' }` will know what to stack on. The current layer might
+    # change until the queued layer change is executed.
+    #
+    # The `{ currentLayer }` option might also be set from `new up.Change.FromURL()`
+    # since the current layer might change before the response is received.
+    @options.currentLayer ?= up.layer.current
     @options.target = e.resolveSelector(@options.target, @options.origin)
     @options.hungry ?= true
     @options.keep ?= true
@@ -73,21 +80,24 @@ class up.Change.FromContent
     if shouldExtractTitle && responseTitle = @responseDoc.title()
       @options.title = responseTitle
 
-    # options.target ?= fallbacks(options.flavor)
-
     @buildResponseDoc()
 
-    @seekPlan
+    return @seekPlan
       attempt: (plan) -> plan.execute()
       noneApplicable: => @executeNotApplicable()
 
   executeNotApplicable: ->
     if @options.inspectResponse
       inspectAction = { label: 'Open response', callback: @options.inspectResponse }
-    up.fail("Could not match target in current page and response", action: inspectAction)
+    up.asyncFail("Could not match target in current page and response", action: inspectAction)
 
   buildResponseDoc: ->
     @responseDoc = new up.ResponseDoc(@options)
+
+  preflightLayer: ->
+    @seekPlan
+      attempt: (plan) -> plan.preflightLayer()
+      noneApplicable: => @preflightTargetNotApplicable()
 
   preflightTarget: ->
     @seekPlan
@@ -100,14 +110,14 @@ class up.Change.FromContent
   seekPlan: (opts) ->
     for plan, index in @plans
       try
-        opts.attempt(plan)
+        return opts.attempt(plan)
       catch e
         if e == up.Change.Plan.NOT_APPLICABLE
           if index < @plans.length - 1
             # Retry with next plan
           else
             # No next plan to try
-            opts.noneApplicable()
+            return opts.noneApplicable()
         else
           # Any other exception is re-thrown
           throw e

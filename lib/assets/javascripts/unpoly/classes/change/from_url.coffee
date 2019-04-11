@@ -4,6 +4,9 @@ class up.Change.FromURL
 
   constructor: (options) ->
     @successOptions = u.options(options)
+    # Remember the layer that was current when the request was made,
+    # so changes with `{ layer: 'new' }` will know what to stack on.
+    @successOptions.currentLayer = up.layer.current
     @successOptions.inspectResponse = @fullLoad
     @successOptions.navigate ?= true # TODO: Better name for { navigate }
     @deriveFailureOptions()
@@ -41,12 +44,11 @@ class up.Change.FromURL
     return promise
 
   buildRequest: ->
-    successCascade = new up.Change.FromContent(@successOptions)
-    failureCascade = new up.Change.FromContent(@failureOptions)
+    successPreview = new up.Change.FromContent(@successOptions)
+    failurePreview = new up.Change.FromContent(@failureOptions)
 
-    improvedTarget = successCascade.preflightTarget()
-    improvedFailTarget = failureCascade.preflightTarget()
-    preflightLayer = successCascade.preflightLayer()
+    @successOptions.layer = successPreview.preflightLayer()
+    @failureOptions.layer = failurePreview.preflightLayer()
 
     requestAttrs = u.only @successOptions,
       'url',
@@ -60,9 +62,9 @@ class up.Change.FromURL
       'navigate'
 
     u.assign requestAttrs,
-      target: improvedTarget
-      failTarget: improvedFailTarget
-      preflightLayer: preflightLayer
+      target: successPreview.preflightTarget()
+      failTarget: failurePreview.preflightTarget()
+      preflightLayer: @successOptions.layer
 
     @request = new up.Request(requestAttrs)
 

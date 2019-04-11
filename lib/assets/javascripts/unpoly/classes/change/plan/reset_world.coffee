@@ -5,6 +5,7 @@ u = up.util
 class up.Change.Plan.ResetWorld extends up.Change.Plan.UpdateLayer
 
   preflightLayer: ->
+    # The root layer always exists.
     up.layer.root
 
   constructor: (options) ->

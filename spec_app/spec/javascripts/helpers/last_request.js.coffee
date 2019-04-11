@@ -3,7 +3,7 @@ $ = jQuery
 
 beforeEach ->
   @lastRequest = ->
-    jasmine.Ajax.requests.mostRecent() or u.fail('There is no last request')
+    jasmine.Ajax.requests.mostRecent() or up.fail('There is no last request')
 
   @respondWith = (args...) ->
     firstArg = args.shift()

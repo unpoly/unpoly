@@ -5,13 +5,23 @@ CONTAINER_SELECTOR = '.up-layers'
 
 class up.LayerStack extends up.Config
 
+  @ensureOrdered: (fn) ->
+    return (args...) ->
+      unless @queue.ordered
+        up.fail('...')
+      return fn.apply(this, args)
+
   constructor: (blueprintFn) ->
     super(blueprintFn)
     @all ||= []
     @queue = new up.TaskQueue()
 
-  asap: (tasks...) ->
-    @queue.asap(tasks...)
+  ensureOrdered: ->
+    unless @queue.ordered
+      up.fail('...')
+
+  asap: (args...) ->
+    @queue.asap(args...)
 
   isRoot: (layer = @current()) ->
     @all[0] == layer
@@ -20,6 +30,7 @@ class up.LayerStack extends up.Config
     @all[i]
 
   remove: (layer) ->
+    @ensureOrdered()
     u.remove(@all, layer)
 
   reset: ->
@@ -29,7 +40,14 @@ class up.LayerStack extends up.Config
       e.remove(c)
 
   push: (layer) ->
+    @ensureOrdered()
     @all.push(layer)
+
+  indexOf: (layer) ->
+    @all.indexOf(layer)
+
+  isOpen: (layer) ->
+    @indexOf(layer) >= 0
 
   parent: (layer) ->
     layerIndex = @indexOf(layer)
@@ -62,59 +80,21 @@ class up.LayerStack extends up.Config
     if @containerElement
       document.body.appendChild(@containerElement)
 
-  lookupOne: (args...) ->
-    @lookupAll(args...)[0]
+  lookupOne: (options) ->
+    new up.LayerLookup(this, options).first()
 
   lookupAll: (options) ->
-    value = options.layer
-
-    unless value
-      return [@current]
-
-    if value instanceof up.Layer
-      return [value]
-
-    if u.isElement(value) || u.isJQuery(value)
-      return [@forElement(value)]
-
-    givenOriginLayer = ->
-      if origin = options.origin
-        @forElement(origin)
-      else
-        up.fail('Updating layer %s requires { origin } option', value)
-
-    return switch value
-      when 'root'
-        [@root()]
-      when 'page'
-        up.legacy.warn('Layer "page" has been renamed to "root"')
-        [@root]
-      when 'current'
-        [@current]
-      when 'any'
-        @allReversed()
-      when 'origin'
-        [givenOriginLayer()]
-      when 'parent'
-        [@parent(givenOriginLayer())]
-      when 'ancestors'
-        @ancestors(givenOriginLayer())
-      when 'closest'
-        @selfAndAncestors(givenOriginLayer())
+    new up.LayerLookup(this, options).all()
 
   forElement: (element) ->
     element = e.get(element)
+    u.find @allReversed(), (layer) ->
+      layer.contains(element)
 
-    for layer in @allReversed()
-      if layer.contains(element)
-        return element
-
-  dismissAll: ->
-    @peel(@root)
-
-  peel: ->
-    throw "shouldn't peeling also change @all synchronously?"
-
-    ancestors = u.reverse(@ancestors(this))
-    dismissals = ancestors.map (ancestor) -> ancestor.dismiss()
-    return @asap(dismissals...)
+  peel: (layer) ->
+    @ensureOrdered()
+    promise = Promise.resolve()
+    for ancestor in u.reverse(@ancestors(layer))
+      promise = u.always promise, ->
+        ancestor.dismiss(preventable: false)
+    return promise
