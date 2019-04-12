@@ -21,10 +21,6 @@
 - TODO: Test that up.change() without { layer } option will only find in current layer
 - Documentation
 - Separate { query } and [up-query] options
-- up.on needs to register to current layer element, not <document>!
-  - also { layer } option
-- up.emit needs to emit on the current layer element, not <document>!
-  - also { layer } option
 - Layer callbacks: onOpened
 - Check if more API should be moved to getter-style
 - Shorten { location }, history.location, X-Up-Location to { url }, history.url, X-Up-Url?
@@ -36,7 +32,6 @@
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 - Is there really no better word for { flavor }? Like { dialog } (Material) or { overlay } (Unpoly)?
 - Can we offer some way for custom layer flavors?
-- TODO: Rewrite [up-close] to [up-dismiss]
 - TODO: Back button
   - Consolidate like on paper notes?
   - Close all layers?
