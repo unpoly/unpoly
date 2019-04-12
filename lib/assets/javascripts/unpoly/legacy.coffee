@@ -50,6 +50,10 @@ up.legacy = do ->
       warnedMessages[message] = true
       up.warn(message)
 
+  deprecated = (deprecatedExpression, replacementExpression) ->
+    warn("#{deprecatedExpression} has been deprecated. Use #{replacementExpression} instead.")
+
+  deprecated: deprecated
   renamedModule: renamedModule
 #  renamedProperty: renamedProperty
 #  removedProperty: removedProperty
@@ -57,4 +61,3 @@ up.legacy = do ->
   fixEventName: fixEventName
   fixKey: fixKey
   warn: warn
-

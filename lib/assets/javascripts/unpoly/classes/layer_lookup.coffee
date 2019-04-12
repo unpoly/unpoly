@@ -40,11 +40,11 @@ class up.LayerLookup
       when 'origin'
         [@givenOriginLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]
       when 'parent'
-        [@stack.parent(@givenBaseLayer())]
+        [@stack.parentOf(@givenBaseLayer())]
       when 'ancestors'
-        @stack.ancestors(@givenBaseLayer())
+        @stack.ancestorsOf(@givenBaseLayer())
       when 'closest'
-        @stack.selfAndAncestors(@givenBaseLayer())
+        @stack.selfAndAncestorsOf(@givenBaseLayer())
 
   first: ->
     @all()[0]

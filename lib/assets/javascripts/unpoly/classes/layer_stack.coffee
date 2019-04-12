@@ -49,15 +49,15 @@ class up.LayerStack extends up.Config
   isOpen: (layer) ->
     @indexOf(layer) >= 0
 
-  parent: (layer) ->
+  parentOf: (layer) ->
     layerIndex = @indexOf(layer)
     @all[layerIndex - 1]
 
-  selfAndAncestors: (layer) ->
+  selfAndAncestorsOf: (layer) ->
     layerIndex = @indexOf(layer)
     @all.slice(0, layerIndex + 1)
 
-  ancestors: (layer) ->
+  ancestorsOf: (layer) ->
     layerIndex = @indexOf(layer)
     @all.slice(0, layerIndex)
 
@@ -69,6 +69,9 @@ class up.LayerStack extends up.Config
 
   @getter 'current', ->
     u.last(@all)
+
+  @getter 'parent', ->
+    @parentOf(@current)
 
   @getter 'container', ->
     unless @containerElement

@@ -120,7 +120,9 @@ up.layer = do ->
     get_root: -> stack.root
     get_all: -> stack.all
     get_current: -> stack.current
+    get_parent: -> stack.parent(current)
     get_location: -> stack.current.location
+    get_flavor: -> stack.current.flavor
     get_position: -> stack.current.position
     get_element: -> stack.current.element
     get_context: -> stack.current.context

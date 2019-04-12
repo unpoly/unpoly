@@ -45,7 +45,7 @@ class up.Layer.Overlay extends up.Layer
     target = event.target
     closePromise = if target.closest('.up-layer-frame')
       # User clicked inside the layer's frame.
-      if dismisser = target.closest('[up-dismiss]')
+      if dismisser = @closestDismisser(target)
         closePromise = up.layer.dismiss({ layer: this, origin: dismisser })
       else if confirmer = target.closest('[up-confirm]')
         closePromise = up.layer.confirm({ layer: this, origin: confirmer })
@@ -61,6 +61,12 @@ class up.Layer.Overlay extends up.Layer
     if closePromise
       u.muteRejection(closePromise)
       up.event.halt(event)
+
+  closestDismisser: (element) ->
+    dismisser = element.closest('[up-dismiss], [up-close]')
+    if e.matches(dismisser, '[up-close]')
+      up.legacy.deprecated('[up-close]', '[up-dismiss]')
+    return dismisser
 
   createDismissElement: (parentElement) ->
     if @dismissable
