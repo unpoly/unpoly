@@ -415,7 +415,7 @@ up.form = do ->
   switchTargets = (switcher, options = {}) ->
     targetSelector = options.target ? switcher.getAttribute('up-switch')
     form = closestContainer(switcher)
-    u.isPresent(targetSelector) or up.fail("No switch target given for %o", switcher)
+    targetSelector or up.fail("No switch target given for %o", switcher)
     fieldValues = switcherValues(switcher)
 
     u.each e.all(form, targetSelector), (target) ->

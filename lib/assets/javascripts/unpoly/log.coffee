@@ -114,7 +114,7 @@ up.log = do ->
   @internal
   ###
   sprintfWithFormattedArgs = (formatter, message, args...) ->
-    return '' if u.isBlank(message)
+    return '' unless message
 
     i = 0
     message.replace CONSOLE_PLACEHOLDERS, ->

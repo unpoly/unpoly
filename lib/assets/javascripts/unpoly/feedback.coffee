@@ -75,7 +75,7 @@ up.feedback = do ->
     config.navs.join(',')
 
   normalizeUrl = (url) ->
-    if u.isPresent(url)
+    if url
       u.normalizeUrl(url, stripTrailingSlash: true)
 
   sectionUrls = (section) ->

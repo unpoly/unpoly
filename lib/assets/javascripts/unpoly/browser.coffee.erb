@@ -175,8 +175,7 @@ up.browser = do ->
     'scrollRestoration' of history
 
   popCookie = (name) ->
-    value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
-    if u.isPresent(value)
+    if value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
       document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
     value
 
@@ -188,7 +187,7 @@ up.browser = do ->
   @internal
   ###
   whenConfirmed = (options) ->
-    if options.preload || u.isBlank(options.confirm) || window.confirm(options.confirm)
+    if options.preload || !options.confirm || window.confirm(options.confirm)
       Promise.resolve()
     else
       up.Event.abortRejection('User canceled action')

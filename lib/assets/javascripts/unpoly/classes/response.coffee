@@ -149,7 +149,7 @@ class up.Response extends up.Record
   @experimental
   ###
   isFatalError: ->
-    @isError() && u.isBlank(@text)
+    @isError() && !@text
 
   ###**
   Returns the HTTP header value with the given name.

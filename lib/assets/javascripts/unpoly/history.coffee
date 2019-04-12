@@ -236,7 +236,7 @@ up.history = do ->
   @stable
   ###
   up.macro 'a[up-back], [up-href][up-back]', (link) ->
-    if u.isPresent(previousUrl)
+    if previousUrl
       e.setMissingAttrs link,
         'up-href': previousUrl,
         'up-restore-scroll': ''

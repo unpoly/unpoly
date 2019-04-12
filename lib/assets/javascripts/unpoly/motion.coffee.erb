@@ -555,7 +555,7 @@ up.motion = do ->
   ###
   isNone = (animationOrTransition) ->
     # false, undefined, '', null and the string "none" are all ways to skip animations
-    !animationOrTransition || animationOrTransition == 'none' || u.isBlank(animationOrTransition)
+    !animationOrTransition || animationOrTransition == 'none'
 
   registerAnimation('fade-in', (element, options) ->
     e.setStyle(element, opacity: 0)
