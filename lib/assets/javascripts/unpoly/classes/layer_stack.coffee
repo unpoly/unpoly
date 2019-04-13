@@ -5,20 +5,18 @@ CONTAINER_SELECTOR = '.up-layers'
 
 class up.LayerStack extends up.Config
 
-  @ensureOrdered: (fn) ->
-    return (args...) ->
-      unless @queue.ordered
-        up.fail('...')
-      return fn.apply(this, args)
-
   constructor: (blueprintFn) ->
     super(blueprintFn)
     @all ||= []
     @queue = new up.TaskQueue()
 
   ensureOrdered: ->
+    # This is not always correct in an scenario where multiple microtasks
+    # might compete for the next layer change lock. It will however make
+    # a developer notice who completely forgets to lock.
     unless @queue.ordered
-      up.fail('...')
+      up.fail('Layer changes must happen within up.layer.asap()')
+    return fn.apply(this, args)
 
   asap: (args...) ->
     @queue.asap(args...)
