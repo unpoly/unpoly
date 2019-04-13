@@ -20,6 +20,9 @@ up.layer = do ->
 
   stack = new up.LayerStack(-> layers: [new up.Layer.Root()])
 
+  isOverlayFlavor = (name) ->
+    name != 'root' && name != 'page' && !!config[name]
+
   registerFlavor = (Implementation, store = config) ->
     name = Implementation.flavor
     # Since the layer class names are not public API, we make their static
@@ -92,8 +95,7 @@ up.layer = do ->
   for implementation in DEFAULT_IMPLEMENTATIONS
     if attr = implementation.attr
       up.link.targetMacro attr,
-        'up-layer': 'new'
-        'up-flavor': implementation.flavor
+        'up-layer': implementation.flavor
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
@@ -117,6 +119,8 @@ up.layer = do ->
     isRoot: -> stack.isRoot()
     push: (args...) -> stack.push(args...)
     asap: (args...) -> stack.asap(args...)
+    flavor: registerFlavor
+    isOverlayFlavor: isOverlayFlavor
     get_root: -> stack.root
     get_all: -> stack.all
     get_current: -> stack.current

@@ -18,12 +18,18 @@ class up.Change.FromContent
     @options.keep ?= true
     @options.saveScroll ?= true
     @options.peel ?= true
-    @options.layer ?= @defaultLayerOption()
-
+    @extractFlavorFromLayerOption()
+    @setDefaultLayer()
     @buildPlans()
 
-  # Called when no `@options.layer` is given.
-  defaultLayerOption: ->
+  extractFlavorFromLayerOption: ->
+    if up.layer.isOverlayFlavor(@options.layer)
+      @options.flavor = @options.layer
+      @options.layer = 'new'
+
+  setDefaultLayer: ->
+    return if @options.layer
+
     if @options.flavor
       # Allow users to omit [up-layer=new] if they provide [up-flavor=dialog]
       'new'

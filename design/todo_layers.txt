@@ -32,11 +32,12 @@
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 - Is there really no better word for { flavor }? Like { dialog } (Material) or { overlay } (Unpoly)?
 - Can we offer some way for custom layer flavors?
-- TODO: Back button
-  - Consolidate like on paper notes?
-  - Close all layers?
+- Test that back button closes all layers
 - Check new layer styles visually
-
+- Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
+- Should layer.location be layer.url, history.location be history.url ?
+  - The { opt } needs to stay { location } since we already need { url } for the requested source
+- Should [up-href] be [up-url] to match { url }?
 
 Finishing up
 ------------
@@ -80,3 +81,4 @@ Later?
   - In a ES6 world this would not even be so bad, or even necessary. import { Event } from 'up'. Event.emit(...).
   - Even consider dropping shortcuts so we always do up.Fragment.change(), up.Event.emit(...)
 - Should up.reload / up.change etc. resolve to the updated elements?
+
