@@ -38,6 +38,9 @@
 - Should layer.location be layer.url, history.location be history.url ?
   - The { opt } needs to stay { location } since we already need { url } for the requested source
 - Should [up-href] be [up-url] to match { url }?
+- Fix up-guide
+  - Simplify content-link, modal-link, drawer-link
+  - up_modal.sass
 
 Finishing up
 ------------
