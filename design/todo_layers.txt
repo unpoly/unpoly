@@ -1,5 +1,3 @@
-Deprecate up.replace(). It takes a selector, and that is now mostly optional.
-- Deprecate up.extract(). It takes a selector, and that is now mostly optional.
 - up.reload()
   - should work without a target
 - What is up.browser.navigate() ?

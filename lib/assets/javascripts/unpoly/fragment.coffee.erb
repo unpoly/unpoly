@@ -198,7 +198,7 @@ up.fragment = do ->
   @stable
   ###
   replace = (selectorOrElement, url, options) ->
-    # TODO: Deprecate up.replace()
+    up.legacy.deprecated('up.replace(target, url)', 'up.change({ target: target, url: url })')
     options = u.options(options
       target: selectorOrElement
       url: url
@@ -245,10 +245,10 @@ up.fragment = do ->
   @stable
   ###
   extract = (selectorOrElement, html, options) ->
-    # TODO: Deprecate up.extract()
+    up.legacy.deprecated('up.extract(target, html)', 'up.change({ target: target, document: html })')
     options = u.options(options,
       target: selectorOrElement
-      content:html
+      document: html
     )
     change = new up.Change.FromContent(options)
     return change.execute()
