@@ -40,10 +40,18 @@ up.layer = do ->
     config[flavor].Implementation or up.fail("Unknown layer flavor: #{flavor}")
 
   openedCallbackAttr = (link, attr) ->
-    e.callbackAttr(link, attr, ['layer', 'event'])
+    if code = link.getAttribute(attr)
+      # Emulate the behavior of the `onclick` attribute,
+      # where `this` refers to the clicked element.
+      new Function('event', code).bind(link)
 
   closedCallbackAttr = (link, attr) ->
-    e.callbackAttr(link, attr, ['value', 'event'])
+    if code = link.getAttribute(attr)
+      # Allow callbacks to refer to `value` directly instead of through `event.value`.
+      callback = new Function('event', 'value', code)
+      # Emulate the behavior of the `onclick` attribute,
+      # where `this` refers to the clicked element.
+      return (event) -> callback.call(link, event, event.value)
 
   reset = ->
     config.reset(deep: true)
@@ -63,8 +71,10 @@ up.layer = do ->
 
   # TODO: Docs for up.layer.prompt()
   prompt = (options) ->
-    return new Promise (onAccept, onDismiss) ->
-      options = u.merge(options, { onAccept, onDismiss })
+    return new Promise (resolve, reject) ->
+      options = u.merge options,
+        onAccepted: (event) -> resolve(event.value)
+        onRejected: (event) -> reject(event.value)
       open(options)
 
   allElements = (selector, options) ->

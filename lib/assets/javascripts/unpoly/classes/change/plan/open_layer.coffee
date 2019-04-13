@@ -35,15 +35,15 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
 
       promise = promise.then =>
         openedEvent = up.emit('up:layer:opened', { layer, log: 'Layer opened' })
-        layer.onOpened?(layer, openedEvent)
+        layer.onOpened?(openedEvent)
         @handleLayerChangeRequests()
         # don't delay `promise` until layer change requests have finished closing
         return undefined
 
       promise
 
-  onContentAttached: (layer, content) =>
-    up.fragment.setSource(content, @options.source)
+  onContentAttached: (event) =>
+    up.fragment.setSource(event.content, @options.source)
 
     # If we cannot push state for some reason, we prefer disabling history for
     # child layers instead of blowing up the entire stack with a full page load.

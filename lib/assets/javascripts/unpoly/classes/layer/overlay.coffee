@@ -98,12 +98,12 @@ class up.Layer.Overlay extends up.Layer
       affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
   frameInnerContent: (parentElement, options) ->
-    innerContentElement = options.content
+    content = options.content
     @frameElement = affix(parentElement, '.up-layer-frame')
     @contentElement = affix(@frameElement, '.up-layer-content')
-    @contentElement.appendChild(innerContentElement)
+    @contentElement.appendChild(content)
     @createDismissElement(@frameElement)
-    options.onContentAttached?(layer, innerContentElement)
+    options.onContentAttached?({ layer, content })
 
   openAnimateOptions: ->
     easing: @openEasing
@@ -172,7 +172,7 @@ class up.Layer.Overlay extends up.Layer
         # so user-provided code doesn't run too wildly out of order.
         if closedCallback = options.closedCallback
           # Also see up.layer.closedCallbackAttr()
-          closedCallback(value, eventProps)
+          closedCallback(eventProps)
 
         up.emit(options.closedEvent, eventProps)
 
