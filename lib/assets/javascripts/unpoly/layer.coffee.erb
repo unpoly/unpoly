@@ -39,11 +39,11 @@ up.layer = do ->
     flavor = options.flavor ? config.flavor
     config[flavor].Implementation or up.fail("Unknown layer flavor: #{flavor}")
 
-  closeHandlerAttr = (link, attr) ->
-    if code = link.getAttribute(attr)
-      # Emulate the behavior of the `onclick` attribute,
-      # where `this` refers to the clicked element.
-      return new Function('value', 'event', code).bind(link)
+  openedCallbackAttr = (link, attr) ->
+    e.callbackAttr(link, attr, ['layer', 'event'])
+
+  closedCallbackAttr = (link, attr) ->
+    e.callbackAttr(link, attr, ['value', 'event'])
 
   reset = ->
     config.reset(deep: true)
@@ -115,7 +115,8 @@ up.layer = do ->
     accept: (args...) -> stack.current.accept(args...)
     dismiss: (args...) -> stack.current.dismiss(args...)
     sync: (args...) -> stack.current.sync(args...)
-    closeHandlerAttr: closeHandlerAttr
+    openedCallbackAttr: openedCallbackAttr
+    closedCallbackAttr: closedCallbackAttr
     isRoot: -> stack.isRoot()
     push: (args...) -> stack.push(args...)
     asap: (args...) -> stack.asap(args...)

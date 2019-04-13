@@ -880,6 +880,17 @@ up.element = do ->
       JSON.parse(json)
 
   ###**
+  @function up.element.callbackAttr
+
+  @internal
+  ###
+  callbackAttr = (element, attr, codeParams) ->
+    if code = element.getAttribute(attr)
+      # Emulate the behavior of the `onclick` attribute,
+      # where `this` refers to the clicked element.
+      return new Function(codeParams..., code).bind(element)
+
+  ###**
   Temporarily sets the inline CSS styles on the given element.
 
   Returns a function that restores the original inline styles when called.
@@ -1115,6 +1126,7 @@ up.element = do ->
     booleanAttr: booleanAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
     numberAttr: numberAttr # practical
     jsonAttr: jsonAttr # practical
+    callbackAttr: callbackAttr # internal
     booleanOrStringAttr: booleanOrStringAttr
     setTemporaryStyle: setTemporaryStyle # practical
     style: computedStyle # practical.

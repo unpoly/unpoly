@@ -21,26 +21,18 @@
 - TODO: Test that up.change() without { layer } option will only find in current layer
 - Documentation
 - Separate { query } and [up-query] options
-- Layer callbacks: onOpened
 - Check if more API should be moved to getter-style
-- Shorten { location }, history.location, X-Up-Location to { url }, history.url, X-Up-Url?
 - Should there be dismiss-Handlers?
 - Do new new-Layer-Requests cancel all new-Layer-Requests that are still in flight?
   => We cancel all that { navigate }
 - Docs: up:form:submit event now has { options } to manipulate
 - Docs: up:link:follow event now has { options } to manipulate
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
-- Is there really no better word for { flavor }? Like { dialog } (Material) or { overlay } (Unpoly)?
 - Can we offer some way for custom layer flavors?
 - Test that back button closes all layers
 - Check new layer styles visually
 - Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
-- Should layer.location be layer.url, history.location be history.url ?
-  - The { opt } needs to stay { location } since we already need { url } for the requested source
 - Should [up-href] be [up-url] to match { url }?
-- Fix up-guide
-  - Simplify content-link, modal-link, drawer-link
-  - up_modal.sass
 
 Finishing up
 ------------
@@ -51,6 +43,9 @@ Finishing up
 - Grep for TODO
 - Test in all browsers
 - Migrate cards
+- Fix up-guide
+  - Simplify content-link, modal-link, drawer-link
+  - up_modal.sass
 
 
 Accessibility

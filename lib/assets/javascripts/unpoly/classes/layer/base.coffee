@@ -51,10 +51,10 @@ class up.Layer extends up.Record
     dismissLabel: '×'
     dismissAriaLabel: 'Dismiss dialog'
     dismissible: true
-    onCreated: null
     onAccepted: null
     onDismissed: null
     onContentAttached: null
+    onOpened: null
 
   isCurrent: ->
     @stack.current == this

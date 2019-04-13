@@ -147,7 +147,7 @@ class up.Layer.Overlay extends up.Layer
         # Wait for the callbacks until the closing animation ends,
         # so user-provided code doesn't run too wildly out of order.
         if closedCallback = options.closedCallback
-          # Also see up.layer.closeHandlerAttr()
+          # Also see up.layer.closedCallbackAttr()
           closedCallback(value, eventProps)
 
         up.emit(options.closedEvent, eventProps)

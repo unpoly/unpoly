@@ -34,7 +34,8 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
         layer.openNow(up.layer.container, content, { @onContentAttached })
 
       promise = promise.then =>
-        up.emit('up:layer:opened', { layer, log: 'Layer opened' })
+        openedEvent = up.emit('up:layer:opened', { layer, log: 'Layer opened' })
+        layer.onOpened?(layer, openedEvent)
         @handleLayerChangeRequests()
         # don't delay `promise` until layer change requests have finished closing
         return undefined
