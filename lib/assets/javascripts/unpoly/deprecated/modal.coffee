@@ -13,7 +13,7 @@ up.modal = u.literal
     up.follow(link, u.merge(options, { flavor: 'modal' }))
 
   extract: (target, html, options = {}) ->
-    up.legacy.deprecated('up.modal.extract(target, html)', 'up.change({ target: target, document: html, flavor: "modal" })')
+    up.legacy.deprecated('up.modal.extract(target, html)', 'up.change(target, { document: html, flavor: "modal" })')
     up.change(u.merge(options, { target, document: html, flavor: 'modal' }))
 
   close: (options = {}) ->

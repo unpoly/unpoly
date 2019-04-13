@@ -1,5 +1,3 @@
-- up.reload()
-  - should work without a target
 - What is up.browser.navigate() ?
 - Is { navigate } is really the best name for the option? Maybe { solo } or similar?
   - Keeping { navigate } means we could also use it for A11Y things
@@ -13,6 +11,8 @@
 - Check new layer styles visually
 - Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
 - Should [up-href] be [up-url] to match { url }?
+- Expose up.fragment.all() as experimental API
+
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
   - Documentation from Diff

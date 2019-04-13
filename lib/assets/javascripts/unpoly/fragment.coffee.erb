@@ -32,18 +32,26 @@ up.fragment = do ->
 
   @method up.fragment.source
   @param {string|Element|jQuery} selectorOrElement
+  @param {Object} options
   @return {string|undefined}
   @experimental
   ###
-  source = (selectorOrElement, options) ->
-    setLayerOption(setLayerOption, options)
-    element = first(selectorOrElement, options)
-    if element = e.closest(element, '[up-source]')
-      element.getAttribute("up-source")
+  source = (selectorOrElement, options = {}) ->
+    setLayerOption(selectorOrElement, options)
+    element = first(options.target, options)
+    if sourceElement = e.closest(element, '[up-source]')
+      sourceElement.getAttribute("up-source")
 
-  # TODO: Documentation
+  ###*
+  @function up.change
+  @param {string|Element|jQuery} selectorOrElement
+  @param {Object} options
+    Copy from replace()
+    New options like { document } or { content } or { url } or { target }
+  @stable
+  ###
   makeChange = (options) ->
-    setLayerOption(options.target, options)
+    options = parseOptionalSelectorAndOptions(options)
 
     if options.content || options.document
       change = new up.Change.FromContent(options)
@@ -198,7 +206,7 @@ up.fragment = do ->
   @stable
   ###
   replace = (selectorOrElement, url, options) ->
-    up.legacy.deprecated('up.replace(target, url)', 'up.change({ target: target, url: url })')
+    up.legacy.deprecated('up.replace(target, url)', 'up.change(target, { url: url })')
     options = u.options(options
       target: selectorOrElement
       url: url
@@ -245,7 +253,7 @@ up.fragment = do ->
   @stable
   ###
   extract = (selectorOrElement, html, options) ->
-    up.legacy.deprecated('up.extract(target, html)', 'up.change({ target: target, document: html })')
+    up.legacy.deprecated('up.extract(target, html)', 'up.change(target, { document: html })')
     options = u.options(options,
       target: selectorOrElement
       document: html
@@ -485,7 +493,6 @@ up.fragment = do ->
     # TODO: Change docs
     all(args...)[0]
 
-  # TODO: Expose up.fragment.all() as experimental API
   all = (args...) ->
     options = u.extractOptions(args)
 
@@ -541,7 +548,7 @@ up.fragment = do ->
   @stable
   ###
   destroy = (selectorOrElement, options = {}) ->
-    setLayerOption(setLayerOption, options)
+    setLayerOption(selectorOrElement, options)
 
     element = first(selectorOrElement, options)
 
@@ -574,6 +581,15 @@ up.fragment = do ->
     # we operate in the given element's layer.
     if !options.layer && u.isElementish(selectorOrElement)
       options.layer = up.layer.forElement(selectorOrElement)
+
+  parseOptionalSelectorAndOptions = (args...) ->
+    options = u.extractOptions(args)
+    if selectorOrElement = args[0]
+      options.target = selectorOrElement
+
+    setLayerOption(options.target, options)
+
+    options
 
   ###**
   Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
@@ -618,7 +634,7 @@ up.fragment = do ->
   don't usually need to give an URL when reloading.
 
   @function up.reload
-  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} [selectorOrElement]
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace)
   @param {string} [options.url]
@@ -626,11 +642,10 @@ up.fragment = do ->
     This defaults to the URL from which the fragment was originally loaded.
   @stable
   ###
-  reload = (selectorOrElement, options) ->
-    options = u.options(options, cache: false)
-    setLayerOption(selectorOrElement, options)
+  reload = (args...) ->
+    options = parseOptionalSelectorAndOptions(args)
+    options.cache ?= false
     options.url ?= source(selectorOrElement)
-    options.target = selectorOrElement
     return change(options)
 
   ###**
@@ -696,7 +711,7 @@ up.hello = up.fragment.hello
 up.visit = up.fragment.visit
 
 up.first = (args...) ->
-  up.legacy.warn('up.first() has been renamed to up.fragment.first()')
+  up.legacy.deprecated('up.first()', 'up.fragment.first()')
   up.fragment.first(args...)
 
 up.legacy.renamedModule 'flow', 'fragment'
