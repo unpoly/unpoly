@@ -10,13 +10,8 @@ class up.LayerStack extends up.Config
     @all ||= []
     @queue = new up.TaskQueue()
 
-  ensureOrdered: ->
-    # This is not always correct in an scenario where multiple microtasks
-    # might compete for the next layer change lock. It will however make
-    # a developer notice who completely forgets to lock.
-    unless @queue.ordered
-      up.fail('Layer changes must happen within up.layer.asap()')
-    return fn.apply(this, args)
+  ensureWithinAsap: ->
+    @queue.ensureWithinAsap('Layer changes must happen within up.layer.asap()')
 
   asap: (args...) ->
     @queue.asap(args...)
@@ -28,7 +23,7 @@ class up.LayerStack extends up.Config
     @all[i]
 
   remove: (layer) ->
-    @ensureOrdered()
+    @ensureWithinAsap()
     u.remove(@all, layer)
 
   reset: ->
@@ -38,7 +33,7 @@ class up.LayerStack extends up.Config
       e.remove(c)
 
   push: (layer) ->
-    @ensureOrdered()
+    @ensureWithinAsap()
     @all.push(layer)
 
   indexOf: (layer) ->

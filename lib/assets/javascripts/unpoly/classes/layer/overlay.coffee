@@ -137,6 +137,7 @@ class up.Layer.Overlay extends up.Layer
 
       @stack.remove(this)
 
+      # Also close any child-layers we might have.
       promise = @peel()
 
       promise = promise.then =>

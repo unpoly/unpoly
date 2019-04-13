@@ -1,3 +1,5 @@
+u = up.util
+
 class up.TaskQueue
 
   constructor: ->
@@ -7,8 +9,23 @@ class up.TaskQueue
     @cursor = Promise.resolve()
 
   asap: (task) ->
-    previewable = u.previewable(task)
-    @cursor = u.always(@cursor, previewable)
-    # Return the previewable task's promise instead of @cursor
-    # so rejections will be passed through.
-    return previewable.promise
+    trackedTask = u.asyncWrap(task, @taskStarted, @taskFinished)
+
+    # Use don't use @cursor.then() since @cursor might be a failed promise
+    # from the previous task.
+    @cursor = u.always(@cursor, trackedTask)
+
+    return @cursor
+
+  ensureWithinAsap: (error) ->
+    # This is not always correct in an scenario where multiple microtasks
+    # might compete for the next layer change lock. It will however make
+    # a developer notice who completely forgets to queue their changes
+    # using @asap().
+    @taskRunning or up.fail(error)
+
+  taskStarted: =>
+    @taskRunning = true
+
+  taskFinished: =>
+    @taskRunning = false
