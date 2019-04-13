@@ -1,38 +1,38 @@
-- Get tests green again
-- Deprecate up.replace(). It takes a selector, and that is now mostly optional.
+Deprecate up.replace(). It takes a selector, and that is now mostly optional.
 - Deprecate up.extract(). It takes a selector, and that is now mostly optional.
 - up.reload()
   - should work without a target
-- Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
-- Test that [up-dismiss][up-follow] inside a layer will dismiss
-- Test that [up-dismiss][up-follow] outside a layer will follow
 - What is up.browser.navigate() ?
 - Is { navigate } is really the best name for the option? Maybe { solo } or similar?
-  - We could also use it for A11Y things
+  - Keeping { navigate } means we could also use it for A11Y things
 - Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
-- Document changes in options { history } (now boolean) and { location } (now a string) changes
-- Deprecate all up.modal/popup functions and delegate to layer as good as possible
-- Test layer { context } transmission
-- Deprecate the entire up.history API
-  - add to CHANGELOG
-  - Deprecate API symbols
-- TODO: Test that up.change() can be called with { target: Element }
-- TODO: Test that up.change() can be called with { target: Element } and will find in any layer
-- TODO: Test that up.change() without { layer } option will only find in current layer
-- Documentation
 - Separate { query } and [up-query] options
 - Check if more API should be moved to getter-style
-- Should there be dismiss-Handlers?
-- Do new new-Layer-Requests cancel all new-Layer-Requests that are still in flight?
-  => We cancel all that { navigate }
-- Docs: up:form:submit event now has { options } to manipulate
-- Docs: up:link:follow event now has { options } to manipulate
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 - Can we offer some way for custom layer flavors?
-- Test that back button closes all layers
+  - Consider name & signature for openNow
+  - Consider name & signature for closeNow
 - Check new layer styles visually
 - Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
 - Should [up-href] be [up-url] to match { url }?
+- Docs
+  - Document changes in options { history } (now boolean) and { location } (now a string) changes
+  - Documentation from Diff
+  - Docs: up:form:submit event now has { options } to manipulate
+  - Docs: up:link:follow event now has { options } to manipulate
+- Tests
+  - Get tests green again
+  - Test layer { context } transmission
+  - Test that back button closes all layers
+  - Test that up.change() can be called with { target: Element }
+  - Test that up.change() can be called with { target: Element } and will find in any layer
+  - Test that up.change() without { layer } option will only find in current layer
+  - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
+  - Test that [up-dismiss][up-follow] inside a layer will dismiss
+  - Test that [up-dismiss][up-follow] outside a layer will follow
+- CHANGELOG
+  - Removal of up.history
+
 
 Finishing up
 ------------
@@ -45,6 +45,7 @@ Finishing up
 - Migrate cards
 - Fix up-guide
   - Simplify content-link, modal-link, drawer-link
+    - This should just be layer-link
   - up_modal.sass
 
 
