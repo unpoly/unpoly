@@ -5,12 +5,12 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
   # It makes only sense to have a single body shifter
   @bodyShifter: new up.BodyShifter()
 
-  openNow: (parentElement, initialInnerContent, options) ->
-    @createElement(parentElement)
+  openNow: (options) ->
+    @createElement()
     @element.classList.add('.up-layer-with-viewport')
     @backdropElement = affix(@element, '.up-layer-backdrop')
     @viewportElement = affix(@element, '.up-layer-viewport')
-    @frameInnerContent(@viewportElement, initialInnerContent, options)
+    @frameInnerContent(@viewportElement, options)
 
     @shiftBody()
     return @startOpenAnimation(options)

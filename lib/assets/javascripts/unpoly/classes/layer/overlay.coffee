@@ -3,18 +3,40 @@
 e = up.element
 u = up.util
 
-# Base class for all non-root layer flavors
+###**
+Base class for all non-root layer flavors
+
+@class up.Layer.Overlay
+###
 class up.Layer.Overlay extends up.Layer
 
   # TODO: Rename openNow to something that doesn't have the sync/async connotation
-  openNow: (parentElement, innerContentElement, options) ->
+  ###**
+  @function up.Layer.Overlay#openNow
+  @param {Element} options.parent
+  @param {Element} options.content
+  @param {string|Object|Function(element, options): Promise} [options.animation]
+  @param {string|Object|Function(element, options): Promise} [options.backdropAnimation]
+  @param {string} [options.easing]
+  @param {number} [options.duration]
+  @param {number} [options.delay]
+  ###
+  openNow: (options) ->
     throw "implement me"
 
   # TODO: Rename closeNow to something that doesn't have the sync/async connotation
+  ###**
+  @function up.Layer.Overlay#closeNow
+  @param {string|Object|Function(element, options): Promise} [options.animation]
+  @param {string|Object|Function(element, options): Promise} [options.backdropAnimation]
+  @param {string} [options.easing]
+  @param {number} [options.duration]
+  @param {number} [options.delay]
+  ###
   closeNow: (options) ->
     throw "implement me"
 
-  createElement: (parentElement) ->
+  createElement: (parentElement = @stack.container) ->
     @element = e.affix(parentElement, '.up-layer',
       'up-dismissable': @dismissable
       'up-flavor': @constructor.flavor
@@ -75,7 +97,8 @@ class up.Layer.Overlay extends up.Layer
       )
       affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
-  frameInnerContent: (parentElement, innerContentElement, options) ->
+  frameInnerContent: (parentElement, options) ->
+    innerContentElement = options.content
     @frameElement = affix(parentElement, '.up-layer-frame')
     @contentElement = affix(@frameElement, '.up-layer-content')
     @contentElement.appendChild(innerContentElement)

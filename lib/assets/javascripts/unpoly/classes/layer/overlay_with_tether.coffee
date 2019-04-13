@@ -2,10 +2,10 @@
 
 class up.Layer.OverlayWithTether extends up.Layer.Overlay
 
-  openNow: (parentElement, initialInnerContent, options = {}) ->
-    @createElement(parentElement)
+  openNow: (options) ->
+    @createElement()
     @element.classList.add('up-layer-with-tether')
-    @frameInnerContent(@element, initialInnerContent, options)
+    @frameInnerContent(@element, options)
     @tether = new up.Tether(
       element: @frameElement
       anchor: @origin
@@ -14,7 +14,7 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
     )
     return @startOpenAnimation(options)
 
-  closeNow: (options = {}) ->
+  closeNow: (options) ->
     return @startCloseAnimation(options).then =>
       @tether.stop()
       @destroyElement()
