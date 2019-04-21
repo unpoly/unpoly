@@ -1,6 +1,4 @@
 - What is up.browser.navigate() ?
-- Is { navigate } is really the best name for the option? Maybe { solo } or similar?
-  - Keeping { navigate } means we could also use it for A11Y things
 - Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
 - Separate { query } and [up-query] options
 - Check if more API should be moved to getter-style
@@ -11,8 +9,17 @@
 - Check new layer styles visually
 - Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
 - Should [up-href] be [up-url] to match { url }?
+- Can we really deprecate up:history?
+  - No, we need the events
 - Expose up.fragment.all() as experimental API
-
+- Das mit der LayerQueue/ASAP ist immer noch nicht geil
+  - Mindestens sollte es einen Test geben dass async Callbacks nicht die Resolution des Layer-Changes verzögern
+  - Wenn up.Layer public API wird dann muss es auch #dismissNow etc. geben und #dismiss muss sich das Lock holen
+  - Nochmal überlegen, ob nicht doch alle Layer-Changes async sein könnten
+    - Dann wäre das Problem komplett weg
+    - In der Praxis kann es eh nicht oft passieren, dass Zugriffe parallel passieren (außer evtl. peel)
+- Tests gegen https://github.com/unpoly/unpoly/issues/79
+  - We might need to register all link handlers to a new .up-modal instead of the document
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
   - Documentation from Diff
@@ -28,8 +35,6 @@
   - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
   - Test that [up-dismiss][up-follow] inside a layer will dismiss
   - Test that [up-dismiss][up-follow] outside a layer will follow
-- CHANGELOG
-  - Removal of up.history
 
 
 Finishing up
@@ -79,3 +84,17 @@ Later?
   - Even consider dropping shortcuts so we always do up.Fragment.change(), up.Event.emit(...)
 - Should up.reload / up.change etc. resolve to the updated elements?
 
+
+Decisions
+---------
+
+- Entscheiden ob ich die [up-modal], [up-drawer], etc. Shortcuts behalten möchte
+  - Für Docs?
+  - Verwirrend dass es mehrere Möglichkeiten gibt, das gleiche zu machen?
+  - up-layer="new"
+  => Ja, behalten
+- The up.layer package object should be a looked up to "current", since TK naturally expected this to be the current layer
+  => Das bringt nichts, dann kann man ja eben nicht sich was wergmerken
+- Is { navigate } is really the best name for the option? Maybe { solo } or similar?
+  - Keeping { navigate } means we could also use it for A11Y things
+  => Gibt keine bessere Idee

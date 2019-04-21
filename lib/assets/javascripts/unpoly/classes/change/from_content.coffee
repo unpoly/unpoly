@@ -30,10 +30,7 @@ class up.Change.FromContent
   setDefaultLayer: ->
     return if @options.layer
 
-    if @options.flavor
-      # Allow users to omit [up-layer=new] if they provide [up-flavor=dialog]
-      'new'
-    else if @options.origin
+    if @options.origin
       # Links update their own layer by default.
       'origin'
     else
