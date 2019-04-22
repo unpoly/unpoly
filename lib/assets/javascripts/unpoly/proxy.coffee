@@ -221,7 +221,6 @@ up.proxy = do ->
     if request.navigate
       abortRequests(navigate: true)
 
-
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.
     if (request.cache != false) && (cachedRequest = get(request))
