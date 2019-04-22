@@ -7,7 +7,6 @@
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 - Check new layer styles visually
 - Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
-- Should [up-href] be [up-url] to match { url }?
 - Can we really deprecate up:history?
   - No, we need the events
 - Das mit der LayerQueue/ASAP ist immer noch nicht geil
@@ -101,4 +100,7 @@ Decisions
   - mode: Evtl. habe ich später mal nicht-modale Layer?
   - mode: 'modal' ist doof
   => Es ist nichts wirklich besser
+- Should [up-href] be [up-url] to match { url }?
+  - No, it matches HTML5 or XHTML2
+
 

@@ -132,6 +132,9 @@ up.layer = do ->
     asap: (args...) -> stack.asap(args...)
     flavor: registerFlavor
     isOverlayFlavor: isOverlayFlavor
+    on: (args...) -> stack.current.on(args...)
+    off: (args...) -> stack.current.off(args...)
+    emit: (args...) -> stack.current.emit(args...)
     get_root: -> stack.root
     get_all: -> stack.all
     get_current: -> stack.current
