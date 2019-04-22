@@ -1,11 +1,13 @@
 - What is up.browser.navigate() ?
 - Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
-- Separate { query } and [up-query] options
+- Params
+  - Separate { query } and [up-query] options
+  - NEVER move URL query to payload params
+  - GET submissions: Form values override (set, not add) values from query
 - Check if more API should be moved to getter-style
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
-- Can we offer some way for custom layer flavors?
-  - Consider name & signature for openNow
-  - Consider name & signature for closeNow
+- { flavor } umbenennen in { mode }, { scheme } oder { interface }
+  - mode: Evtl. habe ich später mal nicht-modale Layer?
 - Check new layer styles visually
 - Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
 - Should [up-href] be [up-url] to match { url }?
