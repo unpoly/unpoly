@@ -1,4 +1,3 @@
-- What is up.browser.navigate() ?
 - Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
 - Params
   - Separate { query } and [up-query] options
@@ -6,14 +5,11 @@
   - GET submissions: Form values override (set, not add) values from query
 - Check if more API should be moved to getter-style
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
-- { flavor } umbenennen in { mode }, { scheme } oder { interface }
-  - mode: Evtl. habe ich später mal nicht-modale Layer?
 - Check new layer styles visually
 - Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
 - Should [up-href] be [up-url] to match { url }?
 - Can we really deprecate up:history?
   - No, we need the events
-- Expose up.fragment.all() as experimental API
 - Das mit der LayerQueue/ASAP ist immer noch nicht geil
   - Mindestens sollte es einen Test geben dass async Callbacks nicht die Resolution des Layer-Changes verzögern
   - Wenn up.Layer public API wird dann muss es auch #dismissNow etc. geben und #dismiss muss sich das Lock holen
@@ -27,6 +23,7 @@
   - Documentation from Diff
   - Docs: up:form:submit event now has { options } to manipulate
   - Docs: up:link:follow event now has { options } to manipulate
+  - Expose up.fragment.all() as experimental API
 - Tests
   - Get tests green again
   - Test layer { context } transmission
@@ -100,3 +97,8 @@ Decisions
 - Is { navigate } is really the best name for the option? Maybe { solo } or similar?
   - Keeping { navigate } means we could also use it for A11Y things
   => Gibt keine bessere Idee
+- { flavor } umbenennen in { mode }, { scheme } oder { interface }
+  - mode: Evtl. habe ich später mal nicht-modale Layer?
+  - mode: 'modal' ist doof
+  => Es ist nichts wirklich besser
+

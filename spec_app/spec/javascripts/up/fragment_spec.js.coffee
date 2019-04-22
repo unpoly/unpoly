@@ -1558,7 +1558,7 @@ describe 'up.fragment', ->
           up.replace('.selector', '/path')
 
           next =>
-            expect(up.browser.navigate).toHaveBeenCalledWith('/path', jasmine.anything())
+            expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
 
     describe 'up.extract', ->
 
@@ -2539,7 +2539,7 @@ describe 'up.fragment', ->
           up.reload('.element')
 
           next =>
-            expect(up.browser.navigate).toHaveBeenCalledWith('/source', jasmine.anything())
+            expect(up.browser.loadPage).toHaveBeenCalledWith('/source', jasmine.anything())
 
     describe 'up.fragment.layerOf', ->
 

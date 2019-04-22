@@ -20,15 +20,15 @@ up.browser = do ->
   u = up.util
 
   ###**
-  @method up.browser.navigate
+  @method up.browser.loadPage
   @param {string} url
   @param {string} [options.method='get']
   @param {object|Array|FormData|string} [options.params]
   @internal
   ###
-  navigate = (options) ->
+  loadPage = (options) ->
     request = new up.Request(options)
-    request.navigate()
+    request.loadPage()
 
   ###**
   For mocking in specs.
@@ -218,7 +218,7 @@ up.browser = do ->
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url
-  navigate: navigate
+  loadPage: loadPage
   submitForm: submitForm
   canPushState: canPushState
   canFormData: canFormData

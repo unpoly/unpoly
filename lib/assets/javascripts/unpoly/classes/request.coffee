@@ -218,7 +218,7 @@ class up.Request extends up.Record
     else
       @deferred.reject(response)
 
-  navigate: =>
+  loadPage: =>
     # GET forms cannot have an URL with a query section in their [action] attribute.
     # The query section would be overridden by the serialized input values on submission.
     @transferSearchToParams()

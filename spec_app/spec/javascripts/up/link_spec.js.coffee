@@ -513,7 +513,7 @@ describe 'up.link', ->
           up.follow($link)
 
           next =>
-            expect(up.browser.navigate).toHaveBeenCalledWith('/path', jasmine.anything())
+            expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
 
         it 'uses the method from a data-method attribute', asyncSpec (next) ->
           $link = $fixture('a[href="/path"][data-method="PUT"]')
@@ -521,7 +521,7 @@ describe 'up.link', ->
           up.follow($link)
 
           next =>
-            expect(up.browser.navigate).toHaveBeenCalledWith('/path', { method: 'PUT' })
+            expect(up.browser.loadPage).toHaveBeenCalledWith('/path', { method: 'PUT' })
 
     describe 'up.link.shouldProcessEvent', ->
 

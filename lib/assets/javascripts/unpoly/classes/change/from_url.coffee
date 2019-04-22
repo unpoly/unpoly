@@ -130,4 +130,4 @@ class up.Change.FromURL
     (response instanceof up.Response) && !response.isFatalError()
 
   fullLoad: =>
-    up.browser.navigate(@successOptions.url, u.only(@successOptions, 'method', 'params'))
+    up.browser.loadPage(@successOptions.url, u.only(@successOptions, 'method', 'params'))

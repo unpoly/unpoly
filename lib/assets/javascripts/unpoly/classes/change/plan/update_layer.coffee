@@ -40,7 +40,7 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
 
     if @options.location && !up.browser.canPushState()
       if isRoot()
-        up.browser.navigate(@options)
+        up.browser.loadPage(@options)
         return u.unresolvablePromise()
       else
         # If we cannot push state for some reason, we prefer not updating the address
