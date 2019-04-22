@@ -342,6 +342,7 @@ up.proxy = do ->
         slowEventEmitted = false
 
   abortRequests = (requestOrConditions = {}) ->
+    throw "should also abort queued requests"
     for request in pendingRequests
       if request == requestOrConditions || u.contains(request, requestOrConditions)
         request.abort()
