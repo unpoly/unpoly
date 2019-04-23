@@ -6,9 +6,12 @@
 - Check if more API should be moved to getter-style
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 - Check new layer styles visually
+- Nested layers should have more padding
+- u.previewable can die when we keep up.Task
 - Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
 - Can we really deprecate up:history?
   - No, we need the events
+- up.layer.prompt => up.layer.ask
 - Das mit der LayerQueue/ASAP ist immer noch nicht geil
   - Mindestens sollte es einen Test geben dass async Callbacks nicht die Resolution des Layer-Changes verzögern
   - Wenn up.Layer public API wird dann muss es auch #dismissNow etc. geben und #dismiss muss sich das Lock holen
