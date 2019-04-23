@@ -1,5 +1,38 @@
 u = up.util
 
+class up.Task extends up.Class
+
+  constructor: ({ @onStart, @onAbort, @data, @lock }) ->
+    @deferred = u.deferred()
+
+  @get 'promise', ->
+    @deferred.promise()
+
+  abort: ->
+    @onAbort?()
+    @deferred.reject(up.event.abortError())
+
+  start: ->
+    @lock ||= u.uid()
+    innerPromise = @onStart(@lock)
+    @deferred.resolve(innerPromise)
+    return @promise
+
+  matches: (conditions) ->
+    conditions == this || (@data && u.contains(data, conditions))
+
+  @fromAsapArgs: (args) ->
+    if args[0] instanceof this
+      task = args[0]
+    else
+      onStart = u.extractCallback(args)
+      lock = args[0]
+      new up.Task({ onStart, lock })
+    return task
+
+#  @wrap: (value) ->
+#    u.wrapValue(value, @)
+
 class up.TaskQueue2
 
   constructor: ->
@@ -8,19 +41,19 @@ class up.TaskQueue2
   reset: ->
     @queuedTasks = []
     @currentTask = null
-    @currentLock = null
 
   asap: (args...) ->
-    task = u.extractCallback(args)
-    lock = args[0]
+    task = up.Task.fromAsapArgs(args)
 
-    return Promise.resolve().then ->
-      if lock
-        return @reuseLock(lock, task)
-      else if @isBusy()
-        return @queueTask(task)
-      else
-        return @runThisTask(task)
+    if task.lock
+      @reuseLock(task)
+    else if @isBusy()
+      @queueTask(task)
+    else
+      @runThisTask(task)
+
+    return task.promise
+
 
   isBusy: ->
     !!@currentTask
@@ -33,40 +66,39 @@ class up.TaskQueue2
     if task = @queuedTasks.shift()
       @runThisTask(task)
 
-  reuseLock: (lock, task) ->
-    unless lock == @currentLock
+  reuseLock: (task) ->
+    unless lock == @currentTask?.lock
       throw new Error('Lock expired')
 
     # Don't set @currentTask, it's already occupied by the task that
     # originally retrieved the lock.
 
-    return @callTask(task)
+    return task.start()
 
   queueTask: (task) ->
     task = u.previewable(task)
     @queuedTasks.push(task)
-    return task.promise
 
   runThisTask: (task) ->
     @currentTask = task
-    @currentLock = u.uid()
 
-    returnValue = @callTask(Task)
+    task.start()
 
     if u.isPromise(returnValue)
       u.always(returnValue, @taskDone)
     else
       @taskDone()
 
-    return returnValue
-
-  callTask: (task) ->
-    task.call(@currentLock)
-
   taskDone: =>
     @currentTask = null
-    @currentLock = null
     u.microtask(@poke)
 
-  cancelAll: ->
-    throw "implement me"
+  abortAll: ->
+    @abort({})
+
+  abort: (conditions) ->
+    candidates = u.compact([@currentTask, @queuedTasks...])
+
+    for task in candidates
+      if task.matches(conditions)
+        task.abort()
