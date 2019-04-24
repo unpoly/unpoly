@@ -216,6 +216,11 @@ up.browser = do ->
       canPromise() &&
       canAnimationFrame()
 
+  hasSlowConnection = ->
+    # https://wicg.github.io/netinfo/
+    netInfo = navigator.connection
+    netInfo.effectiveType?.includes('2g') || netInfo.saveData
+
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   url: url
   loadPage: loadPage
@@ -229,4 +234,5 @@ up.browser = do ->
   whenConfirmed: whenConfirmed
   isSupported: isSupported
   popCookie: popCookie
+  hasSlowConnection: hasSlowConnection
   isIE11: isIE11

@@ -218,7 +218,7 @@ up.proxy = do ->
     # assume the user is writing a change.
     clearCache() unless request.isSafe()
 
-    if request.navigate
+    if request.navigate && !request.preload
       abortRequests(navigate: true)
 
     # If we have an existing promise matching this new request,
@@ -410,6 +410,7 @@ up.proxy = do ->
   ###
 
   loadOrQueue = (request) ->
+    throw "wtf is pendingForegroundRequestCount"
     if pendingForegroundRequestCount < config.maxRequests
       load(request)
     else

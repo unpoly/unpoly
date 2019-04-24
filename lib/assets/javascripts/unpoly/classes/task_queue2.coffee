@@ -11,6 +11,7 @@ class up.Task extends up.Class
   abort: ->
     @onAbort?()
     @deferred.reject(up.event.abortError())
+    @promise
 
   start: ->
     @lock ||= u.uid()
@@ -85,20 +86,32 @@ class up.TaskQueue2
     task.start()
 
     if u.isPromise(returnValue)
-      u.always(returnValue, @taskDone)
+      u.always(returnValue, => @taskDone(task))
     else
-      @taskDone()
+      @taskDone(task)
 
-  taskDone: =>
-    @currentTask = null
+  taskDone: (task) ->
+    if @currentTask == task
+      @currentTask = null
     u.microtask(@poke)
 
-  abortAll: ->
-    @abort({})
+  poke:
+    throw "Implement me"
 
-  abort: (conditions) ->
-    candidates = u.compact([@currentTask, @queuedTasks...])
+  abortAll: (conditions = {}) ->
+    whenAborted = []
 
-    for task in candidates
+    @queuedTasks = u.select @queuedTasks, (task) ->
       if task.matches(conditions)
-        task.abort()
+        whenAborted.push task.abort()
+        false
+      else
+        true
+
+    if @currentTask && @currentTask.matches?(conditions)
+      # Although aborting @currentTask will eventually set @currentTask to null,
+      # the abort function should be sync.
+      whenAborted.push @currentTask.abort()
+      @currentTask = null
+
+    Promise.all(whenAborted)

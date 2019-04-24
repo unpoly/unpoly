@@ -18,6 +18,18 @@
   - Nochmal überlegen, ob nicht doch alle Layer-Changes async sein könnten
     - Dann wäre das Problem komplett weg
     - In der Praxis kann es eh nicht oft passieren, dass Zugriffe parallel passieren (außer evtl. peel)
+- TaskQueue in Proxy
+  - Use TaskQueue for proxy foreground requests
+    - z.B. { concurrency: 3 }
+    - Weiterhin abbrechen von { navigate: true }
+  - Use a different TaskQueue for preload requests
+    - z.B. { preloadConcurrency: 2}
+    - z.B. { preloadQueueSize: 5 }
+    - z.B. { preloadEnabled: defaultPreloadEnabled() }
+    - z.B. { preloadTimeout: 10 }
+    - Requests sind LIFO => Neue Requests werden immer oben einsortiert
+    - Wenn preloadQueueSize erreicht ist, wird Platz gemacht indem nicht gestartete Requests abgebrochen werden
+  - abortRequests() sollte dann in beiden Queues aborten
 - Tests gegen https://github.com/unpoly/unpoly/issues/79
   - We might need to register all link handlers to a new .up-modal instead of the document
 - Docs
