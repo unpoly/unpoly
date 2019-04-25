@@ -123,7 +123,7 @@ class up.Layer.Overlay extends up.Layer
   allElements: (selector) ->
     e.all(@contentElement, selector)
 
-  accept: (value, options) ->
+  accept: (value, options = {}) ->
     @closeVariant(value, u.merge(options,
       valueAttr: 'up-accept'
       closeEvent: 'up:layer:accept'
@@ -131,7 +131,7 @@ class up.Layer.Overlay extends up.Layer
       closedCallback: @onAccepted
     ))
 
-  dismiss: (value, options) ->
+  dismiss: (value, options = {}) ->
     @closeVariant(value, u.merge(options,
       valueAttr: 'up-dismiss'
       closeEvent: 'up:layer:dismiss'
@@ -140,43 +140,43 @@ class up.Layer.Overlay extends up.Layer
     ))
 
   closeVariant: (value, options) ->
-    origin = options.origin
+    @stack.asap options, (lock) ->
+      origin = options.origin
 
-    if origin && u.isUndefined(value)
-      value = e.jsonAttr(origin, options.valueAttr)
+      if origin && u.isUndefined(value)
+        value = e.jsonAttr(origin, options.valueAttr)
 
-    eventProps =
-      target: @element
-      layer: this
-      value: value
-      origin: origin
+      eventProps =
+        target: @element
+        layer: this
+        value: value
+        origin: origin
 
-    # Abort all pending requests targeting the layer we're now closing.
-    up.proxy.abort(preflightLayer: this)
+      # Abort all pending requests targeting the layer we're now closing.
+      up.proxy.abort(preflightLayer: this)
 
-    if up.event.nobodyPrevents(options.closeEvent, eventProps) || options.preventable == false
-      unless @isOpen()
-        return Promise.resolve()
+      if up.event.nobodyPrevents(options.closeEvent, eventProps) || options.preventable == false
+        unless @isOpen()
+          return Promise.resolve()
 
-      @stack.remove(this)
+        # Also close any child-layers we might have.
+        promise = @peel({ lock })
 
-      # Also close any child-layers we might have.
-      promise = @peel()
+        promise = promise.then =>
+          @stack.remove(this, { lock })
+          @parent.renderHistory()
+          return @closeNow()
 
-      promise = promise.then =>
-        @parent.renderHistory()
-        return @closeNow()
+        promise = promise.then =>
+          # Wait for the callbacks until the closing animation ends,
+          # so user-provided code doesn't run too wildly out of order.
+          if closedCallback = options.closedCallback
+            # Also see up.layer.closedCallbackAttr()
+            closedCallback(eventProps)
 
-      promise = promise.then =>
-        # Wait for the callbacks until the closing animation ends,
-        # so user-provided code doesn't run too wildly out of order.
-        if closedCallback = options.closedCallback
-          # Also see up.layer.closedCallbackAttr()
-          closedCallback(eventProps)
+          up.emit(options.closedEvent, eventProps)
 
-        up.emit(options.closedEvent, eventProps)
+        return promise
 
-      return promise
-
-    else
-      return up.event.abortRejection()
+      else
+        return up.event.abortRejection()

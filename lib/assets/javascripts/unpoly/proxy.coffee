@@ -295,7 +295,7 @@ up.proxy = do ->
   ajax = (args...) ->
     up.legacy.deprecated('up.ajax()', 'up.request()')
     new Promise (resolve, reject) ->
-      pickResponseText = (response) -> resolve(response.text)
+      pickResponseText = (response) -> return response.text
       makeRequest(args...).then(pickResponseText, reject)
 
   ###**

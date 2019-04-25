@@ -85,14 +85,6 @@ up.layer = do ->
     layers = @stack.lookupAll(options)
     u.findResult layers, -> layer.firstElement(selector)
 
-  accept = (args...) ->
-    @stack.asap =>
-      @stack.current.accept(args...)
-
-  dismiss = (args...) ->
-    @stack.asap =>
-      @stack.current.dismiss(args...)
-
   up.event.onEscape (event) ->
     if stack.current.dismissable
       u.muteRejection dismiss()

@@ -17,7 +17,7 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
     # might want catch up.ExtractPlan.NOT_APPLICABLE.
     content = @responseDoc.first(@options.target) or @notApplicable()
 
-    return up.layer.asap ->
+    return up.layer.asap @options, (lock) ->
       unless @options.currentLayer.isOpen()
         return up.asyncFail('Could not open %o in new layer: Parent layer was closed', @options.target)
 
@@ -27,10 +27,10 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
 
       promise = promise.then =>
         # Make sure that the ground layer doesn't already have a child layer.
-        @options.currentLayer.peel()
+        @options.currentLayer.peel({ lock })
 
       promise = promise.then =>
-        up.layer.push(layer)
+        up.layer.push(layer, { lock })
         layer.openNow({ content, @onContentAttached })
 
       promise = promise.then =>

@@ -15,12 +15,17 @@ class up.Task extends up.Class
 
   start: ->
     @lock ||= u.uid()
+    # Pass @lock to the start function so it can re-enter the same lock
+    # through queue.asap(lock, fn)
     innerPromise = @onStart(@lock)
     @deferred.resolve(innerPromise)
     return @promise
 
   matches: (conditions) ->
-    conditions == this || (@data && u.contains(data, conditions))
+    conditions == true ||
+      conditions == this ||
+      (@data && u.contains(data, conditions)) ||
+      (@data && conditions == @data)
 
   @fromAsapArgs: (args) ->
     if args[0] instanceof this
@@ -28,6 +33,8 @@ class up.Task extends up.Class
     else
       onStart = u.extractCallback(args)
       lock = args[0]
+      if lockFromProp = task.lock
+        task = lockFromProp
       new up.Task({ onStart, lock })
     return task
 
@@ -36,28 +43,31 @@ class up.Task extends up.Class
 
 class up.TaskQueue2
 
-  constructor: ->
+  constructor: (options = {}) ->
+    @maxConcurrency = options.concurrency ? 1
     @reset()
 
   reset: ->
     @queuedTasks = []
-    @currentTask = null
+    @currentTasks = []
 
   asap: (args...) ->
     task = up.Task.fromAsapArgs(args)
 
     if task.lock
       @reuseLock(task)
-    else if @isBusy()
-      @queueTask(task)
+    else if @hasConcurrencyLeft()
+      @runTaskNow(task)
     else
-      @runThisTask(task)
+      @queueTask(task)
 
     return task.promise
 
+  hasConcurrencyLeft: ->
+    @maxConcurrency == -1 || @currentTasks.length < @maxConcurrency
 
   isBusy: ->
-    !!@currentTask
+    @currentTask.length > 0
 
   poke: =>
     unless @currentTask
@@ -68,20 +78,22 @@ class up.TaskQueue2
       @runThisTask(task)
 
   reuseLock: (task) ->
-    unless lock == @currentTask?.lock
+    unless u.detect(@currentTasks, (currentTask) -> currentTask.lock == task.lock)
       throw new Error('Lock expired')
 
-    # Don't set @currentTask, it's already occupied by the task that
+    # Don't adjust @currentTasks, it's already occupied by the task that
     # originally retrieved the lock.
 
     return task.start()
 
   queueTask: (task) ->
-    task = u.previewable(task)
     @queuedTasks.push(task)
 
-  runThisTask: (task) ->
-    @currentTask = task
+  pluckTask: ->
+    @queuedTasks.shift()
+
+  runTaskNow: (task) ->
+    @currentTasks.push(task)
 
     task.start()
 
@@ -91,27 +103,43 @@ class up.TaskQueue2
       @taskDone(task)
 
   taskDone: (task) ->
-    if @currentTask == task
-      @currentTask = null
+    u.remove(@currentTasks, task)
     u.microtask(@poke)
 
-  poke:
-    throw "Implement me"
+  poke: ->
+    if @hasConcurrencyLeft() && (task = @pluckTask())
+      @runTaskNow(task)
 
-  abortAll: (conditions = {}) ->
-    whenAborted = []
+  abortList: (list, conditions) ->
+    copy = u.copy(list)
 
-    @queuedTasks = u.select @queuedTasks, (task) ->
+    copy.forEach (task) ->
       if task.matches(conditions)
-        whenAborted.push task.abort()
-        false
-      else
-        true
+        task.abort()
+        # Although the task will eventually remove itself from the queue,
+        # we want to keep our sync signature and adjust the list sync.
+        u.remove(list, task)
 
-    if @currentTask && @currentTask.matches?(conditions)
-      # Although aborting @currentTask will eventually set @currentTask to null,
-      # the abort function should be sync.
-      whenAborted.push @currentTask.abort()
-      @currentTask = null
+  abort: (conditions = true) ->
+    @abortList(@currentTasks, conditions)
+    @abortList(@queuedTasks, conditions)
 
-    Promise.all(whenAborted)
+class up.PreloadQueue extends up.TaskQueue
+
+  constructor: (options) ->
+    super(options)
+    @maxQueueSize = options.queueSize ? -1
+
+  hasQueueSpaceLeft: ->
+    @maxQueueSize == -1 || @queuedTasks.length < @maxQueueSize
+
+  queueTask: (task) ->
+    # If the queue is already at capacity, we drop the oldest task.
+    unless @hasQueueSpaceLeft()
+      oldestTask = u.last(@queuedTasks)
+      @abort(oldestTask)
+
+    # Preloading mostly happens as the user hovers over a link, so we should
+    # start preloading ASAP. Since we already reached maximum concurrency in this
+    # method, we at put queue the new task to the top of the queue.
+    @queuedTasks.unshift(task)

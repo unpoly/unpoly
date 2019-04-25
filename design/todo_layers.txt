@@ -18,6 +18,7 @@
   - Nochmal überlegen, ob nicht doch alle Layer-Changes async sein könnten
     - Dann wäre das Problem komplett weg
     - In der Praxis kann es eh nicht oft passieren, dass Zugriffe parallel passieren (außer evtl. peel)
+- Wer setzt { navigate: true }? Sollte nicht up.change() machen, sondern follow, submit, etc.
 - TaskQueue in Proxy
   - Use TaskQueue for proxy foreground requests
     - z.B. { concurrency: 3 }

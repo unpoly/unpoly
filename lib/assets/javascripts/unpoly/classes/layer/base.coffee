@@ -74,8 +74,8 @@ class up.Layer extends up.Record
   dismiss: ->
     # no-op so users can blindly dismiss even though they might be on the root layer
 
-  peel: ->
-    @stack.peel(this)
+  peel: (options) ->
+    @stack.peel(this, options)
 
   evalOption: (option) ->
     u.evalOption(option, this)

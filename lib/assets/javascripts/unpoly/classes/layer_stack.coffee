@@ -8,10 +8,7 @@ class up.LayerStack extends up.Config
   constructor: (blueprintFn) ->
     super(blueprintFn)
     @all ||= []
-    @queue = new up.TaskQueue()
-
-  ensureWithinAsap: ->
-    @queue.ensureWithinAsap('Layer changes must happen within up.layer.asap()')
+    @queue = new up.TaskQueue2()
 
   asap: (args...) ->
     @queue.asap(args...)
@@ -22,19 +19,27 @@ class up.LayerStack extends up.Config
   at: (i) ->
     @all[i]
 
-  remove: (layer) ->
-    @ensureWithinAsap()
-    u.remove(@all, layer)
+  remove: (layer, options = {}) ->
+    @asap options, ->
+      u.remove(@all, layer)
+
+  push: (layer, options) ->
+    @asap options, ->
+      @all.push(layer)
+
+  peel: (layer, options = {}) ->
+    @asap options, (lock) ->
+      promise = Promise.resolve()
+      for ancestor in u.reverse(@ancestors(layer))
+        promise = promise.then ->
+          ancestor.dismiss(preventable: false, { lock })
+      return promise
 
   reset: ->
     super()
     @queue.reset()
     if c = @container()
       e.remove(c)
-
-  push: (layer) ->
-    @ensureWithinAsap()
-    @all.push(layer)
 
   indexOf: (layer) ->
     @all.indexOf(layer)
@@ -87,10 +92,3 @@ class up.LayerStack extends up.Config
     u.find @allReversed(), (layer) ->
       layer.contains(element)
 
-  peel: (layer) ->
-    @ensureOrdered()
-    promise = Promise.resolve()
-    for ancestor in u.reverse(@ancestors(layer))
-      promise = u.always promise, ->
-        ancestor.dismiss(preventable: false)
-    return promise
