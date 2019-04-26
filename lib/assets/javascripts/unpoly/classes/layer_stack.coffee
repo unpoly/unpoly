@@ -19,7 +19,7 @@ class up.LayerStack extends up.Config
   at: (i) ->
     @all[i]
 
-  remove: (layer, options = {}) ->
+  remove: (layer, options) ->
     @asap options, ->
       u.remove(@all, layer)
 

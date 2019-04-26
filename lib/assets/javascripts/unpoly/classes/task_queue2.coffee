@@ -41,10 +41,10 @@ class up.Task extends up.Class
 #  @wrap: (value) ->
 #    u.wrapValue(value, @)
 
-class up.TaskQueue2
+class up.TaskQueue2 extends up.Class
 
   constructor: (options = {}) ->
-    @maxConcurrency = options.concurrency ? 1
+    @concurrency = options.concurrency ? 1
     @reset()
 
   reset: ->
@@ -64,7 +64,8 @@ class up.TaskQueue2
     return task.promise
 
   hasConcurrencyLeft: ->
-    @maxConcurrency == -1 || @currentTasks.length < @maxConcurrency
+    concurrency = u.evalOption(@concurrency) ? 1
+    return concurrency == -1 || @currentTasks.length < concurrency
 
   isBusy: ->
     @currentTask.length > 0
@@ -89,7 +90,7 @@ class up.TaskQueue2
   queueTask: (task) ->
     @queuedTasks.push(task)
 
-  pluckTask: ->
+  pluckNextTask: ->
     @queuedTasks.shift()
 
   runTaskNow: (task) ->
@@ -107,7 +108,7 @@ class up.TaskQueue2
     u.microtask(@poke)
 
   poke: ->
-    if @hasConcurrencyLeft() && (task = @pluckTask())
+    if @hasConcurrencyLeft() && (task = @pluckNextTask())
       @runTaskNow(task)
 
   abortList: (list, conditions) ->
@@ -128,18 +129,20 @@ class up.PreloadQueue extends up.TaskQueue
 
   constructor: (options) ->
     super(options)
-    @maxQueueSize = options.queueSize ? -1
 
   hasQueueSpaceLeft: ->
-    @maxQueueSize == -1 || @queuedTasks.length < @maxQueueSize
+    queueSize = u.evalOption(@queueSize) ? -1
+    return queueSize == -1 || @queuedTasks.length < queueSize
 
   queueTask: (task) ->
     # If the queue is already at capacity, we drop the oldest task.
     unless @hasQueueSpaceLeft()
-      oldestTask = u.last(@queuedTasks)
+      oldestTask = @queuedTasks[0]
       @abort(oldestTask)
 
+    super(task)
+
+  pluckNextTask: (task) ->
     # Preloading mostly happens as the user hovers over a link, so we should
-    # start preloading ASAP. Since we already reached maximum concurrency in this
-    # method, we at put queue the new task to the top of the queue.
-    @queuedTasks.unshift(task)
+    # start preloading ASAP. Hence we always prefer the youngest task in the queue.
+    @queuedTasks.pop(task)

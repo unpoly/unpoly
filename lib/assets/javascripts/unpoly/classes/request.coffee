@@ -201,13 +201,13 @@ class up.Request extends up.Record
 
     @xhr.send(xhrPayload)
 
-  abort: =>
+  abort: (message) =>
     @xhr?.abort()
     @setAbortedState()
 
-  setAbortedState: =>
+  setAbortedState: (message = 'Request was aborted') =>
     @aborted = true
-    @deferred.reject(up.event.abortError('Request was aborted'))
+    @deferred.reject(up.event.abortError(message))
 
   responseReceived: =>
     @respondWith(@extractResponseFromXhr())

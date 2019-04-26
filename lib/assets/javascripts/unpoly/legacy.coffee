@@ -2,15 +2,15 @@ u = up.util
 
 up.legacy = do ->
 
-#  renamedProperty = (object, oldKey, newKey) ->
-#    warning = -> warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
-#    Object.defineProperty object, oldKey,
-#      get: ->
-#        warning()
-#        @[newKey]
-#      set: (newValue) ->
-#        warning()
-#        @[newKey] = newValue
+  renamedProperty = (object, oldKey, newKey) ->
+    warning = -> warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+    Object.defineProperty object, oldKey,
+      get: ->
+        warning()
+        @[newKey]
+      set: (newValue) ->
+        warning()
+        @[newKey] = newValue
 
 #  removedProperty = (object, key) ->
 #    failure = -> up.fail('Deprecated: Property { %s } is no longer supported (found in %o)', key, object)
@@ -55,7 +55,7 @@ up.legacy = do ->
 
   deprecated: deprecated
   renamedModule: renamedModule
-#  renamedProperty: renamedProperty
+  renamedProperty: renamedProperty
 #  removedProperty: removedProperty
   renamedEvent: renamedEvent
   fixEventName: fixEventName

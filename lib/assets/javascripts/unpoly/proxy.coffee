@@ -47,9 +47,6 @@ up.proxy = do ->
   slowDelayTimer = undefined
   slowEventEmitted = undefined
 
-  pendingRequests = []
-  queuedRequests = []
-
   ###**
   @property up.proxy.config
   @param {number} [config.preloadDelay=75]
@@ -87,9 +84,15 @@ up.proxy = do ->
     slowDelay: 300
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
-    maxRequests: 4
     wrapMethods: ['PATCH', 'PUT', 'DELETE']
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
+    concurrency: 4
+    preloadConcurrency: 2
+    preloadQueueSize: 5
+    preloadEnabled: !up.browser.hasSlowConnection()
+    preloadTimeout: 10
+
+  up.legacy.renamedProperty(config, 'maxRequests', 'concurrency')
 
   cache = new up.Cache
     size: -> config.cacheSize
@@ -97,6 +100,17 @@ up.proxy = do ->
     key: (request) -> up.Request.wrap(request).cacheKey()
     cachable: (request) -> up.Request.wrap(request).isCachable()
     # logPrefix: 'up.proxy'
+
+  preloadQueue = new up.TaskQueue2(
+    concurrency: -> config.concurrency
+  )
+
+  foregroundQueue = new up.TaskQueue2(
+    concurrency: -> config.preloadConcurrency
+    queueSize: -> config.preloadQueueSize
+  )
+
+
 
   ###**
   Returns a cached response for the given request.
@@ -134,14 +148,13 @@ up.proxy = do ->
     slowDelayTimer = null
 
   reset = ->
-    waitingLink = null
     cancelSlowDelay()
     abortRequests()
     slowEventEmitted = false
+    preloadQueue.reset()
+    foregroundQueue.reset()
     config.reset()
     cache.clear()
-    pendingRequests = []
-    queuedRequests = []
 
   reset()
 
@@ -213,6 +226,12 @@ up.proxy = do ->
 
     # If requestOrOptions is not already an up.Request, instantiate one.
     request = up.Request.wrap(requestOrOptions)
+
+    if request.preload
+      request.timeout ?= config.preloadTimeout
+      unless config.preloadEnabled
+        request.abort()
+        return request
 
     # We clear the entire cache before an unsafe request, since we
     # assume the user is writing a change.
@@ -410,11 +429,7 @@ up.proxy = do ->
   ###
 
   loadOrQueue = (request) ->
-    throw "wtf is pendingForegroundRequestCount"
-    if pendingForegroundRequestCount < config.maxRequests
-      load(request)
-    else
-      queue(request)
+    queue = queueForRequest(request)
 
     # Cache the request for calls for calls with the same URL, method, params
     # and target. See up.Request#cacheKey().
@@ -425,29 +440,30 @@ up.proxy = do ->
     # same properties might succeed.
     request.catch -> remove(request)
 
-    # Track unfinished requests so we can offer cancel() and other features.
-    pendingRequests.push(request)
-    request.finally -> u.remove(pendingRequests, request)
+    queue.asap(taskForRequest(request))
 
-  queue = (request) ->
-    up.puts('Queuing request for %s %s', request.method, request.url)
-    queuedRequests.push(request)
-    request
+  queueForRequest = (request) ->
+    if request.preload
+      preloadQueue
+    else
+      foregroundQueue
+
+  taskForRequest = (request) ->
+    return new up.Task(
+      data: request
+      onStart: -> load(request)
+      onAbort: -> request.abort()
+    )
 
   load = (request) ->
     eventProps =
       request: request
       log: ['Loading %s %s', request.method, request.url]
 
-    if up.event.nobodyPrevents('up:proxy:load', eventProps)
+    up.event.whenEmitted('up:proxy:load', eventProps).then ->
       request.send()
       u.always(request, responseReceived)
-      u.always(request, pokeQueue)
       return request
-    else
-      # Poke the queue in a Microtask so we can return a rejection for the abortion.
-      u.microtask(pokeQueue)
-      return up.event.abortRejection('Event up:proxy:load was prevented')
 
   ###**
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
