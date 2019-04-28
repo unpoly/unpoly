@@ -44,9 +44,6 @@ up.proxy = do ->
 
   u = up.util
 
-  slowDelayTimer = undefined
-  slowEventEmitted = undefined
-
   ###**
   @property up.proxy.config
   @param {number} [config.preloadDelay=75]
@@ -101,16 +98,12 @@ up.proxy = do ->
     cachable: (request) -> up.Request.wrap(request).isCachable()
     # logPrefix: 'up.proxy'
 
-  preloadQueue = new up.TaskQueue2(
+  foregroundQueue = new up.ProxyForegroundQueue
     concurrency: -> config.concurrency
-  )
 
-  foregroundQueue = new up.TaskQueue2(
+  preloadQueue = new up.ProxyPreloadQueue
     concurrency: -> config.preloadConcurrency
-    queueSize: -> config.preloadQueueSize
-  )
-
-
+    size: -> config.preloadQueueSize
 
   ###**
   Returns a cached response for the given request.
@@ -143,20 +136,13 @@ up.proxy = do ->
       if response = cache.get(candidate)
         return response
 
-  cancelSlowDelay = ->
-    clearTimeout(slowDelayTimer)
-    slowDelayTimer = null
-
   reset = ->
     cancelSlowDelay()
     abortRequests()
-    slowEventEmitted = false
     preloadQueue.reset()
     foregroundQueue.reset()
     config.reset()
     cache.clear()
-
-  reset()
 
   ###**
   Makes an AJAX request to the given URL.
@@ -321,17 +307,21 @@ up.proxy = do ->
   Returns `true` if the proxy is not currently waiting
   for a request to finish. Returns `false` otherwise.
 
+  [Preload requests](/up.link.preload) will not be considered for this check.
+
   @function up.proxy.isIdle
   @return {boolean}
     Whether the proxy is idle
   @experimental
   ###
   isIdle = ->
-    countPendingForegroundRequests() == 0
+    not isBusy()
 
   ###**
   Returns `true` if the proxy is currently waiting
   for a request to finish. Returns `false` otherwise.
+
+  [Preload requests](/up.link.preload) will not be considered for this check.
 
   @function up.proxy.isBusy
   @return {boolean}
@@ -339,32 +329,11 @@ up.proxy = do ->
   @experimental
   ###
   isBusy = ->
-    not isIdle()
-
-  countPendingForegroundRequests = ->
-    u.reject(pendingRequests, 'preload').length
-
-  processSpinnerEvents = ->
-    if isBusy()
-      unless slowDelayTimer
-        # Since the emission of up:proxy:slow might be delayed by config.slowDelay,
-        # we wrap the mission in a function for scheduling below.
-        emission = ->
-          if isBusy() # a fast response might have beaten the delay
-            up.emit('up:proxy:slow', log: 'Proxy is slow to respond')
-            slowEventEmitted = true
-        slowDelayTimer = u.timer(config.slowDelay, emission)
-    else
-      cancelSlowDelay()
-      if slowEventEmitted
-        up.emit('up:proxy:recover', log: 'Proxy has recovered from slow response')
-        slowEventEmitted = false
+    foregroundQueue.isBusy()
 
   abortRequests = (requestOrConditions = {}) ->
-    throw "should also abort queued requests"
-    for request in pendingRequests
-      if request == requestOrConditions || u.contains(request, requestOrConditions)
-        request.abort()
+    for queue in [foregroundQueue, preloadQueue]
+      queue.abort(requestOrConditions)
 
   ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
@@ -532,12 +501,6 @@ up.proxy = do ->
 
   @event up:proxy:fatal
   ###
-
-  pokeQueue = ->
-    if queuedRequest = queuedRequests.shift()
-      load(queuedRequest)
-    # Don't return the promise from the loader above
-    return undefined
 
   ###**
   Makes the proxy assume that `newRequest` has the same response as the
