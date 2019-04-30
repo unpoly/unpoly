@@ -23,8 +23,7 @@ class up.TaskQueue extends up.Class
     else
       @queueTask(task)
 
-    # TODO: Consider turning up.Task into a Thenable and return the task. This could also replace up.previewable().
-    return task.promise
+    return task
 
   hasConcurrencyLeft: ->
     concurrency = u.evalOption(@concurrency) ? 1
@@ -62,11 +61,11 @@ class up.TaskQueue extends up.Class
     task.start()
 
     if u.isPromise(returnValue)
-      u.always(returnValue, => @taskDone(task))
+      u.always(returnValue, => @onTaskDone(task))
     else
-      @taskDone(task)
+      @onTaskDone(task)
 
-  taskDone: (task) ->
+  onTaskDone: (task) ->
     u.remove(@currentTasks, task)
     u.microtask(@poke)
 
@@ -83,6 +82,8 @@ class up.TaskQueue extends up.Class
         # Although the task will eventually remove itself from the queue,
         # we want to keep our sync signature and adjust the list sync.
         u.remove(list, task)
+
+    return
 
   abort: (conditions = true) ->
     @abortList(@currentTasks, conditions)

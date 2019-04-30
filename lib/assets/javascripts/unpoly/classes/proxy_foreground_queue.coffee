@@ -20,7 +20,9 @@ class up.ProxyForegroundQueue extends up.TaskQueue
 
   checkSlow: =>
     currentSlow = @isSlow()
-    return if @emittedSlow == currentSlow
+
+    if @emittedSlow == currentSlow
+      return
 
     @emittedSlow = currentSlow
 

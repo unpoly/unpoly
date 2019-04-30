@@ -17,30 +17,33 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
     # might want catch up.ExtractPlan.NOT_APPLICABLE.
     content = @responseDoc.first(@options.target) or @notApplicable()
 
-    return up.layer.asap @options, (lock) ->
-      unless @options.currentLayer.isOpen()
-        return up.asyncFail('Could not open %o in new layer: Parent layer was closed', @options.target)
+    return up.layer.asap @options, (lock) =>
+      @executeNow(content, lock)
 
-      layer = up.layer.build(@options)
+  executeNow: (content, lock) ->
+    unless @options.currentLayer.isOpen()
+      return up.asyncFail('Could not open %o in new layer: Parent layer was closed', @options.target)
 
-      promise = up.event.whenEmitted('up:layer:open', { layer, log: 'Opening layer' })
+    layer = up.layer.build(@options)
 
-      promise = promise.then =>
-        # Make sure that the ground layer doesn't already have a child layer.
-        @options.currentLayer.peel({ lock })
+    promise = up.event.whenEmitted('up:layer:open', { layer, log: 'Opening layer' })
 
-      promise = promise.then =>
-        up.layer.push(layer, { lock })
-        layer.openNow({ content, @onContentAttached })
+    promise = promise.then =>
+      # Make sure that the ground layer doesn't already have a child layer.
+      @options.currentLayer.peel({ lock })
 
-      promise = promise.then =>
-        openedEvent = up.emit('up:layer:opened', { layer, log: 'Layer opened' })
-        layer.onOpened?(openedEvent)
-        @handleLayerChangeRequests()
-        # don't delay `promise` until layer change requests have finished closing
-        return undefined
+    promise = promise.then =>
+      up.layer.push(layer, { lock })
+      layer.openNow({ content, @onContentAttached })
 
-      promise
+    promise = promise.then =>
+      openedEvent = up.emit('up:layer:opened', { layer, log: 'Layer opened' })
+      layer.onOpened?(openedEvent)
+      @handleLayerChangeRequests()
+      # don't delay `promise` until layer change requests have finished closing
+      return undefined
+
+    promise
 
   onContentAttached: (event) =>
     up.fragment.setSource(event.content, @options.source)

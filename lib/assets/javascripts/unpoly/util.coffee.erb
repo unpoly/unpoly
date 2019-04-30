@@ -1217,30 +1217,30 @@ up.util = do ->
 #      path.push(match[1] || match[2] || match[3] || match[4])
 #    path
 
-  ###**
-  Given an async function that will return a promise, returns a proxy function
-  with an additional `.promise` attribute.
-
-  When the proxy is called, the inner function is called.
-  The proxy's `.promise` attribute is available even before the function is called
-  and will resolve when the inner function's returned promise resolves.
-
-  If the inner function does not return a promise, the proxy's `.promise` attribute
-  will resolve as soon as the inner function returns.
-
-  @function up.util.previewable
-  @internal
-  ###
-  previewable = (fun) ->
-    deferred = newDeferred()
-    preview = (args...) ->
-      funValue = fun(args...)
-      # If funValue is again a Promise, it will defer resolution of `deferred`
-      # until `funValue` is resolved.
-      deferred.resolve(funValue)
-      funValue
-    preview.promise = deferred.promise()
-    preview
+#  ###**
+#  Given an async function that will return a promise, returns a proxy function
+#  with an additional `.promise` attribute.
+#
+#  When the proxy is called, the inner function is called.
+#  The proxy's `.promise` attribute is available even before the function is called
+#  and will resolve when the inner function's returned promise resolves.
+#
+#  If the inner function does not return a promise, the proxy's `.promise` attribute
+#  will resolve as soon as the inner function returns.
+#
+#  @function up.util.previewable
+#  @internal
+#  ###
+#  previewable = (fun) ->
+#    deferred = newDeferred()
+#    preview = (args...) ->
+#      funValue = fun(args...)
+#      # If funValue is again a Promise, it will defer resolution of `deferred`
+#      # until `funValue` is resolved.
+#      deferred.resolve(funValue)
+#      funValue
+#    preview.promise = deferred.promise()
+#    preview
 
   ###**
   @function up.util.sequence
@@ -1571,8 +1571,12 @@ up.util = do ->
   upperCaseFirst = (str) ->
     str[0].toUpperCase() + str.slice(1)
 
-  defineGetter = (object, property, get) ->
-    Object.defineProperty(object, property, { get })
+  defineGetter = (object, prop, get) ->
+    Object.defineProperty(object, prop, { get })
+
+  defineDelegates = (object, props, targetProp) ->
+    for prop in wrapArray(props)
+      defineGetter(object, prop, -> this[targetProp][prop])
 
   literal = (obj) ->
     result = {}
@@ -1682,7 +1686,7 @@ up.util = do ->
   escapeHtml: escapeHtml
   escapeRegexp: escapeRegexp
   sequence: sequence
-  previewable: previewable
+  # previewable: previewable
   # parsePath: parsePath
   evalOption: evalOption
   # horizontalScreenHalf: horizontalScreenHalf
@@ -1719,6 +1723,7 @@ up.util = do ->
   upperCaseFirst: upperCaseFirst
   lowerCaseFirst: lowerCaseFirst
   getter: defineGetter
+  delegate: defineDelegates
   literal: literal
   asyncWrap: asyncWrap
 

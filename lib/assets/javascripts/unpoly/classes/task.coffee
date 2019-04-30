@@ -8,8 +8,7 @@ class up.Task extends up.Class
     @deferred = u.newDeferred()
     @spawnTime = new Date()
 
-  @get 'promise', ->
-    @deferred.promise()
+  @delegate ['then', 'catch', 'always'], 'deferred'
 
   abort: (message) ->
     @onAbort?(message)

@@ -115,14 +115,7 @@ class up.Request extends up.Record
     @aborted = false
     @deferred = u.newDeferred()
 
-  then: ->
-    @deferred.then(arguments...)
-
-  catch: ->
-    @deferred.then(arguments...)
-
-  finally: ->
-    @deferred.then(arguments...)
+  @delegate ['then', 'catch', 'always'], 'deferred'
 
   normalize: =>
     @method = u.normalizeMethod(@method)
