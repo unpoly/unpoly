@@ -4,34 +4,16 @@
   - NEVER move URL query to payload params
   - GET submissions: Form values override (set, not add) values from query
 - Check if more API should be moved to getter-style
-- Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 - Check new layer styles visually
 - Nested layers should have more padding
-- u.previewable can die when we keep up.Task
 - Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
+  - Does not really work with up.Change.Base
+    - notApplicable gibt's auch, aber ist nicht sync
+    - Signaturen
+    - up.Change.Addition statt Base?
 - Can we really deprecate up:history?
   - No, we need the events
-- up.layer.prompt => up.layer.ask
-- Das mit der LayerQueue/ASAP ist immer noch nicht geil
-  - Mindestens sollte es einen Test geben dass async Callbacks nicht die Resolution des Layer-Changes verzögern
-  - Wenn up.Layer public API wird dann muss es auch #dismissNow etc. geben und #dismiss muss sich das Lock holen
-  - Nochmal überlegen, ob nicht doch alle Layer-Changes async sein könnten
-    - Dann wäre das Problem komplett weg
-    - In der Praxis kann es eh nicht oft passieren, dass Zugriffe parallel passieren (außer evtl. peel)
 - Wer setzt { navigate: true }? Sollte nicht up.change() machen, sondern follow, submit, etc.
-- TaskQueue in Proxy
-  - Use TaskQueue for proxy foreground requests
-    - z.B. { concurrency: 3 }
-    - Weiterhin abbrechen von { navigate: true }
-  - Use a different TaskQueue for preload requests
-    - z.B. { preloadConcurrency: 2}
-    - z.B. { preloadQueueSize: 5 }
-    - z.B. { preloadEnabled: defaultPreloadEnabled() }
-      - Auch bei explitizem up.preload() oder nur bei hover?
-    - z.B. { preloadTimeout: 10 }
-    - Requests sind LIFO => Neue Requests werden immer oben einsortiert
-    - Wenn preloadQueueSize erreicht ist, wird Platz gemacht indem nicht gestartete Requests abgebrochen werden
-  - abortRequests() sollte dann in beiden Queues aborten
 - Tests gegen https://github.com/unpoly/unpoly/issues/79
   - We might need to register all link handlers to a new .up-modal instead of the document
 - There should be a preload() function in up.proxy, but that should also take a request
@@ -53,6 +35,8 @@
   - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
   - Test that [up-dismiss][up-follow] inside a layer will dismiss
   - Test that [up-dismiss][up-follow] outside a layer will follow
+- Decide whether to keep LayerStack as separate class (or should it just be up.layer)
+- Rename ...Url to ...URL, ...Json to JSON
 
 
 Finishing up
