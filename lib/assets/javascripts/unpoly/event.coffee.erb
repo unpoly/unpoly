@@ -111,7 +111,7 @@ up.event = do ->
       <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
       <span class='person' up-data='{ "age": 22, "name": "Jim" }'>Jim</span>
 
-  The JSON will parsed and handed to your event handler as a third argument:
+  The JSON will be parsed and handed to your event handler as a third argument:
 
       up.on('click', '.person', function(event, element, data) {
         console.log("This is %o who is %o years old", data.name, data.age)
