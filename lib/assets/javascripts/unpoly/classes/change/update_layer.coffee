@@ -1,18 +1,19 @@
-#= require ./base
+#= require ./addition
 
 u = up.util
 e = up.element
 
-class up.Change.Plan.UpdateLayer extends up.Change.Plan
+class up.Change.UpdateLayer extends up.Change.Addition
 
   constructor: (options) ->
     super(options)
+    @layer = options.layer
     @parseSteps()
 
   preflightLayer: ->
     # Make sure this plan is applicable before returning a layer
     @findOld()
-    return @options.layer
+    return @layer
 
   preflightTarget: ->
     # Make sure this plan is applicable before returning a target
@@ -20,9 +21,9 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
     return @targetWithoutPseudoClasses()
 
   execute: ->
-    layer = @options.layer
+    layer = @layer
 
-    unless layer.isOpen()
+    unless @layer.isOpen()
       return up.asyncFail('Could not update %o: Target layer was closed', @options.target)
 
     @findOld()
@@ -225,7 +226,7 @@ class up.Change.Plan.UpdateLayer extends up.Change.Plan
 
   addHungrySteps: ->
     if @options.hungry
-      # Find all [up-hungry] fragments within @options.layer
+      # Find all [up-hungry] fragments within @layer
       hungries = up.fragment.all(up.radio.hungrySelector(), @options)
       transition = up.radio.config.hungryTransition ? @options.transition
       for hungry in hungries

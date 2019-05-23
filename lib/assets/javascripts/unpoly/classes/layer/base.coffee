@@ -90,20 +90,7 @@ class up.Layer extends up.Record
     if newLocation = options.location
       @location = newLocation
 
-    @renderHistory()
-
-  affectsGlobalHistory: ->
-    @history && @isCurrent()
-
-  renderHistory: ->
-    unless @affectsGlobalHistory()
-      return
-
-    if @location
-      up.history.push(@location)
-
-    if @title
-      document.title = @title
+    @stack.syncHistory()
 
   @getter 'parent', ->
     @stack.parent(this)

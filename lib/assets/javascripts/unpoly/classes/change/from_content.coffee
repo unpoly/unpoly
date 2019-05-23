@@ -116,7 +116,7 @@ class up.Change.FromContent
       try
         return opts.attempt(plan)
       catch e
-        if e == up.Change.Plan.NOT_APPLICABLE
+        if e == up.Change.NOT_APPLICABLE
           if index < @plans.length - 1
             # Retry with next plan
           else

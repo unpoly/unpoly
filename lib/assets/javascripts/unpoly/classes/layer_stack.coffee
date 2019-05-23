@@ -60,7 +60,7 @@ class up.LayerStack extends up.Config
     @all.slice(0, layerIndex)
 
   allReversed: ->
-    u.reverse(@all())
+    u.reverse(@all)
 
   @getter 'root', ->
     @all[0]
@@ -76,6 +76,14 @@ class up.LayerStack extends up.Config
       @containerElement = e.createFromSelector(CONTAINER_SELECTOR)
       @attachContainer()
     @containerElement
+
+  syncHistory: ->
+    historyLayers = u.filter(@allReversed(), 'history')
+    location = u.findResult(historyLayers, 'location')
+    title = u.findResult(historyLayers, 'title')
+    document.title = title
+    # up.history.push() only adds a history entry if we are not already at the given URL
+    up.history.push(location)
 
   attachContainer: ->
     if @containerElement

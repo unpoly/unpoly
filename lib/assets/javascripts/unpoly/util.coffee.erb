@@ -782,6 +782,12 @@ up.util = do ->
     else
       {}
 
+  parseArgAndOptions = (args, argKey) ->
+    options = extractOptions(args)
+    if isDefined(args[0])
+      options[argKey] = args[0]
+    options
+
   ###**
   Passes each element in the given [array-like value](/up.util.isList) to the given function.
   Returns the first element for which the function returns a truthy value.
@@ -1608,6 +1614,7 @@ up.util = do ->
 #  deepAssign: deepAssign
 #  deepMerge: deepMerge
   options: newOptions
+  parseArgAndOption: parseArgAndOptions
   each: each
   eachIterator: eachIterator
   map: map
@@ -1624,7 +1631,7 @@ up.util = do ->
     up.legacy.warn('up.util.all() has been renamed to up.util.every()')
     every.apply(null, arguments)
   detect: ->
-    up.legacy.warn('up.util.find() has been renamed to up.util.find()')
+    up.legacy.warn('up.util.detect() has been renamed to up.util.find()')
     findInList.apply(null, arguments)
   find: findInList
   select: ->

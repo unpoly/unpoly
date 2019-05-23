@@ -1,16 +1,14 @@
-#= require ./base
+#= require ./addition
 
 u = up.util
 
-class up.Change.Plan.ResetWorld extends up.Change.Plan.UpdateLayer
+class up.Change.ResetWorld extends up.Change.Addition
 
   preflightLayer: ->
     # The root layer always exists.
     up.layer.root
 
   constructor: (options) ->
-    throw "Resetting the world is now preventable by preventing up:layer:dismiss"
-
     options = u.merge(options,
       layer: @preflightLayer(),
       target: 'body',

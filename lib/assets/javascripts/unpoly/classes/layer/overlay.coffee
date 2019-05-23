@@ -124,11 +124,12 @@ class up.Layer.Overlay extends up.Layer
     e.all(@contentElement, selector)
 
   accept: (value, options = {}) ->
+    new up.Change.AcceptLayer
     @closeVariant(value, u.merge(options,
       valueAttr: 'up-accept'
       closeEvent: 'up:layer:accept'
       closedEvent: 'up:layer:accepted'
-      closedCallback: @onAccepted
+      closedCallback: 'onAccepted'
     ))
 
   dismiss: (value, options = {}) ->
@@ -136,7 +137,7 @@ class up.Layer.Overlay extends up.Layer
       valueAttr: 'up-dismiss'
       closeEvent: 'up:layer:dismiss'
       closedEvent: 'up:layer:dismissed'
-      closedCallback: @onDismissed
+      closedCallback: 'onDismissed'
     ))
 
   closeVariant: (value, options) ->
@@ -164,7 +165,7 @@ class up.Layer.Overlay extends up.Layer
 
         promise = promise.then =>
           @stack.remove(this, { lock })
-          @parent.renderHistory()
+          @stack.syncHistory()
           return @closeNow()
 
         promise = promise.then =>

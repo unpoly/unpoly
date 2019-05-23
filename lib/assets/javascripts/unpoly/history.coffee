@@ -62,6 +62,8 @@ up.history = do ->
     normalizeUrl(location.href, normalizeOptions)
 
   isCurrentLocation = (url) ->
+    # Some web frameworks care about a trailing slash, some consider it optional.
+    # Only for the equality test (is this the current URL) we consider it optional.
     normalizeOptions = { stripTrailingSlash: true }
     normalizeUrl(url, normalizeOptions) == currentLocation(normalizeOptions)
 
@@ -249,7 +251,7 @@ up.history = do ->
     config: config
     push: push
     replace: replace
-    location: currentLocation
+    get_location: currentLocation
     isLocation: isCurrentLocation
     previousUrl: -> previousUrl
     normalizeUrl: normalizeUrl

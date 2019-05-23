@@ -35,8 +35,12 @@
   - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
   - Test that [up-dismiss][up-follow] inside a layer will dismiss
   - Test that [up-dismiss][up-follow] outside a layer will follow
+  - Test that peeling is not preventable by preventing up:layer:dismiss
+  - Test that opening/updating an layer can reset the world if selector is unavailable
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 - Rename ...Url to ...URL, ...Json to JSON
+- up.layer.lookup should either accept a scalar or be renamed up.layer.forOptions()
+- Rename selectorOrElement to target everywhere
 
 
 Finishing up

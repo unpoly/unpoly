@@ -1,17 +1,12 @@
-#= require ../namespace
+#= require ./namespace
 
-u = up.util
-e = up.element
-
-class up.Change.Plan extends up.Class
-
-  @NOT_APPLICABLE: 'n/a'
+class up.Change.Addition extends up.Class
 
   constructor: (@options) ->
     @responseDoc = @options.responseDoc
 
   notApplicable: ->
-    throw up.Change.Plan.NOT_APPLICABLE
+    throw up.Change.NOT_APPLICABLE
 
   handleLayerChangeRequests: ->
     # Since we're not passing a { lock } these changes will be queued.

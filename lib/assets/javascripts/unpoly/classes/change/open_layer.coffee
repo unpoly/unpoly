@@ -1,8 +1,8 @@
-#= require ./base
+#= require ./addition
 
 u = up.util
 
-class up.Change.Plan.OpenLayer extends up.Change.Plan
+class up.Change.OpenLayer extends up.Change.Addition
 
   preflightLayer: ->
     'new'
@@ -14,7 +14,7 @@ class up.Change.Plan.OpenLayer extends up.Change.Plan
 
   execute: ->
     # Selecting the content needs to happen sync, since our caller
-    # might want catch up.ExtractPlan.NOT_APPLICABLE.
+    # might want catch up.Change.NOT_APPLICABLE.
     content = @responseDoc.first(@options.target) or @notApplicable()
 
     return up.layer.asap @options, (lock) =>
