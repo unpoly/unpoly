@@ -69,7 +69,7 @@ class up.Layer.Overlay extends up.Layer
       # User clicked inside the layer's frame.
       if dismisser = @closestDismisser(target)
         closePromise = up.layer.dismiss({ layer: this, origin: dismisser })
-      else if confirmer = target.closest('[up-confirm]')
+      else if confirmer = @closestConfirmer(target)
         closePromise = up.layer.confirm({ layer: this, origin: confirmer })
       else
         # User clicked inside the layer's frame, but not on a link that would
@@ -89,6 +89,9 @@ class up.Layer.Overlay extends up.Layer
     if e.matches(dismisser, '[up-close]')
       up.legacy.deprecated('[up-close]', '[up-dismiss]')
     return dismisser
+
+  closestConfirmer: (element) ->
+    return element.closest('[up-confirm]')
 
   createDismissElement: (parentElement) ->
     if @dismissable
@@ -124,60 +127,7 @@ class up.Layer.Overlay extends up.Layer
     e.all(@contentElement, selector)
 
   accept: (value, options = {}) ->
-    new up.Change.AcceptLayer
-    @closeVariant(value, u.merge(options,
-      valueAttr: 'up-accept'
-      closeEvent: 'up:layer:accept'
-      closedEvent: 'up:layer:accepted'
-      closedCallback: 'onAccepted'
-    ))
+    new up.Change.AcceptLayer({ value, options... }).execute()
 
   dismiss: (value, options = {}) ->
-    @closeVariant(value, u.merge(options,
-      valueAttr: 'up-dismiss'
-      closeEvent: 'up:layer:dismiss'
-      closedEvent: 'up:layer:dismissed'
-      closedCallback: 'onDismissed'
-    ))
-
-  closeVariant: (value, options) ->
-    @stack.asap options, (lock) ->
-      origin = options.origin
-
-      if origin && u.isUndefined(value)
-        value = e.jsonAttr(origin, options.valueAttr)
-
-      eventProps =
-        target: @element
-        layer: this
-        value: value
-        origin: origin
-
-      # Abort all pending requests targeting the layer we're now closing.
-      up.proxy.abort(preflightLayer: this)
-
-      if up.event.nobodyPrevents(options.closeEvent, eventProps) || options.preventable == false
-        unless @isOpen()
-          return Promise.resolve()
-
-        # Also close any child-layers we might have.
-        promise = @peel({ lock })
-
-        promise = promise.then =>
-          @stack.remove(this, { lock })
-          @stack.syncHistory()
-          return @closeNow()
-
-        promise = promise.then =>
-          # Wait for the callbacks until the closing animation ends,
-          # so user-provided code doesn't run too wildly out of order.
-          if closedCallback = options.closedCallback
-            # Also see up.layer.closedCallbackAttr()
-            closedCallback(eventProps)
-
-          up.emit(options.closedEvent, eventProps)
-
-        return promise
-
-      else
-        return up.event.abortRejection()
+    new up.Change.DismissLayer({ value, options... }).execute()

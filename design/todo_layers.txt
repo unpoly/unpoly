@@ -6,17 +6,14 @@
 - Check if more API should be moved to getter-style
 - Check new layer styles visually
 - Nested layers should have more padding
-- Consider moving up.Layer.Overlay#closeVariant to up.Change.Plan.DismissLayer/up.Change.Plan.AcceptLayer
-  - Does not really work with up.Change.Base
-    - notApplicable gibt's auch, aber ist nicht sync
-    - Signaturen
-    - up.Change.Addition statt Base?
-- Can we really deprecate up:history?
-  - No, we need the events
-- Wer setzt { navigate: true }? Sollte nicht up.change() machen, sondern follow, submit, etc.
 - Tests gegen https://github.com/unpoly/unpoly/issues/79
   - We might need to register all link handlers to a new .up-modal instead of the document
 - There should be a preload() function in up.proxy, but that should also take a request
+- Decide whether to keep LayerStack as separate class (or should it just be up.layer)
+- Rename ...Url to ...URL, ...Json to JSON
+- up.layer.lookup should either accept a scalar or be renamed up.layer.forOptions()
+- Rename selectorOrElement to target everywhere
+
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
   - Documentation from Diff
@@ -25,6 +22,7 @@
   - Docs: up:link:follow event now has { options } to manipulate
   - Expose up.fragment.all() as experimental API
   - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
+  - { navigate }
 - Tests
   - Get tests green again
   - Test layer { context } transmission
@@ -37,10 +35,6 @@
   - Test that [up-dismiss][up-follow] outside a layer will follow
   - Test that peeling is not preventable by preventing up:layer:dismiss
   - Test that opening/updating an layer can reset the world if selector is unavailable
-- Decide whether to keep LayerStack as separate class (or should it just be up.layer)
-- Rename ...Url to ...URL, ...Json to JSON
-- up.layer.lookup should either accept a scalar or be renamed up.layer.forOptions()
-- Rename selectorOrElement to target everywhere
 
 
 Finishing up

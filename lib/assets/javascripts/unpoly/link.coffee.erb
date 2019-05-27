@@ -159,6 +159,7 @@ up.link = do ->
     parser.json('headers')
     parser.json('params')
     parser.boolean('cache')
+    parser.boolean('navigate', default: true)
     parser.string('confirm')
     parser.booleanOrString('reveal', default: true)
     parser.boolean('restoreScroll')

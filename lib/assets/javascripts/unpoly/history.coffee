@@ -55,7 +55,7 @@ up.history = do ->
   ###**
   Returns a normalized URL for the current history entry.
 
-  @function up.history.url
+  @property up.history.location
   @experimental
   ###
   currentLocation = (normalizeOptions) ->

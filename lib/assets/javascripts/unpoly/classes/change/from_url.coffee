@@ -8,7 +8,6 @@ class up.Change.FromURL
     # so changes with `{ layer: 'new' }` will know what to stack on.
     @successOptions.currentLayer = up.layer.current
     @successOptions.inspectResponse = @fullLoad
-    @successOptions.navigate ?= true # TODO: Better name for { navigate }
     @deriveFailureOptions()
 
   deriveFailureOptions: ->
