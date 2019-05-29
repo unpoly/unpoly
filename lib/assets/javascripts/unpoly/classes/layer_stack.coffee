@@ -20,11 +20,11 @@ class up.LayerStack extends up.Config
     @all[i]
 
   remove: (layer, options) ->
-    @asap options, ->
+    @asap options, =>
       u.remove(@all, layer)
 
   push: (layer, options) ->
-    @asap options, ->
+    @asap options, =>
       @all.push(layer)
 
   peel: (layer, options = {}) ->
