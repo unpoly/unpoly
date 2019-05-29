@@ -1,8 +1,5 @@
-- Check if more API should be moved to getter-style
 - Check new layer styles visually
   - Nested layers should have more padding
-- Tests gegen https://github.com/unpoly/unpoly/issues/79
-  - We might need to register all link handlers to a new .up-modal instead of the document
 - There should be a preload() function in up.proxy, but that should also take a request
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 - Rename ...Url to ...URL, ...Json to JSON
@@ -29,6 +26,8 @@
   - Test that [up-dismiss][up-follow] outside a layer will follow
   - Test that peeling is not preventable by preventing up:layer:dismiss
   - Test that opening/updating an layer can reset the world if selector is unavailable
+  - Test against https://github.com/unpoly/unpoly/issues/79
+    - We might need to register all link handlers to a new .up-modal instead of the document
 
 
 Finishing up

@@ -445,7 +445,7 @@ up.viewport = do ->
 
   We have no control whether developers set the property on <body> or
   <html>. The developer also won't know what is going to be the
-  [scrolling element](/up.viewport.root()) on the user's brower.
+  [scrolling element](/up.viewport.root) on the user's brower.
 
   @function wasChosenAsOverflowingElement
   @internal
@@ -781,31 +781,32 @@ up.viewport = do ->
 
   up.on 'up:framework:reset', reset
 
-  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  reveal: reveal
-  revealHash: revealHash
-  firstHashTarget: firstHashTarget
-  scroll: scroll
-  config: config
-  closest: closest
-  subtree: getSubtree
-  around: getAround
-  all: getAll
-  rootSelector: rootSelector
-  root: getRoot
-  rootWidth: rootWidth
-  rootHeight: rootHeight
-  rootHasVerticalScrollbar: rootHasVerticalScrollbar
-  rootOverflowElement: rootOverflowElement
-  isRoot: isRoot
-  scrollbarWidth: scrollbarWidth
-  scrollTops: scrollTops
-  saveScroll: saveScroll
-  restoreScroll: restoreScroll
-  scrollAfterInsertFragment: scrollAfterInsertFragment
-  anchoredRight: anchoredRight
-  fixedElements: fixedElements
-  absolutize: absolutize
+  u.literal
+    <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
+    reveal: reveal
+    revealHash: revealHash
+    firstHashTarget: firstHashTarget
+    scroll: scroll
+    config: config
+    closest: closest
+    subtree: getSubtree
+    around: getAround
+    all: getAll
+    rootSelector: rootSelector
+    get_root: getRoot
+    rootWidth: rootWidth
+    rootHeight: rootHeight
+    rootHasVerticalScrollbar: rootHasVerticalScrollbar
+    rootOverflowElement: rootOverflowElement
+    isRoot: isRoot
+    scrollbarWidth: scrollbarWidth
+    scrollTops: scrollTops
+    saveScroll: saveScroll
+    restoreScroll: restoreScroll
+    scrollAfterInsertFragment: scrollAfterInsertFragment
+    anchoredRight: anchoredRight
+    fixedElements: fixedElements
+    absolutize: absolutize
 
 up.scroll = up.viewport.scroll
 up.reveal = up.viewport.reveal

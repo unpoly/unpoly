@@ -37,7 +37,7 @@ describe 'up.viewport', ->
           @$container.remove()
 
         $documentViewport = ->
-          $(up.viewport.root())
+          $(up.viewport.root)
 
         it 'reveals the given element', asyncSpec (next) ->
           up.reveal(@$elements[0])
@@ -430,7 +430,7 @@ describe 'up.viewport', ->
       it 'returns a list of all viewports on the screen', ->
         viewportElement = $fixture('[up-viewport]')[0]
         results = up.viewport.all()
-        expect(results).toMatchList([viewportElement, up.viewport.root()])
+        expect(results).toMatchList([viewportElement, up.viewport.root])
 
     describe 'up.viewport.subtree', ->
 
@@ -558,7 +558,7 @@ describe 'up.viewport', ->
       it 'returns the scrolling element if the developer set { overflow-y: visible } on both <html> and <body>', ->
         @html.style.overflowY = 'visible'
         @body.style.overflowY = 'visible'
-        expect(up.viewport.rootOverflowElement()).toBe(up.viewport.root())
+        expect(up.viewport.rootOverflowElement()).toBe(up.viewport.root)
 
     describe 'up.viewport.absolutize', ->
 
