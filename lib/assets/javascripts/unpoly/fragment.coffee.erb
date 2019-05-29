@@ -54,12 +54,11 @@ up.fragment = do ->
     options = parseTargetAndOptions(options)
 
     if options.content || options.document
-      change = new up.Change.FromContent(options)
+      return new up.Change.FromContent(options).execute()
     else if options.url
-      change = new up.Change.FromURL(options)
+      return new up.Change.FromURL(options).execute()
     else
       up.fail('up.change() requires either { content }, { document } or { url } option')
-    return change.execute()
 
   ###**
   Replaces elements on the current page with corresponding elements
@@ -207,9 +206,7 @@ up.fragment = do ->
   ###
   replace = (target, url, options) ->
     up.legacy.deprecated('up.replace(target, url)', 'up.change(target, { url: url })')
-    options = u.options(options, { target, url })
-    change = new up.Change.FromURL(options)
-    return change.execute()
+    return makeChange(target, u.merge(options, { url }))
 
   ###**
   Updates a selector on the current page with the
@@ -249,11 +246,9 @@ up.fragment = do ->
     and all animation has finished.
   @stable
   ###
-  extract = (target, html, options) ->
+  extract = (target, document, options) ->
     up.legacy.deprecated('up.extract(target, html)', 'up.change(target, { document: html })')
-    options = u.options(options, { target, document: html })
-    change = new up.Change.FromContent(options)
-    return change.execute()
+    return makeChange(target, { document, options ...})
 
   ###**
   Elements with an `up-keep` attribute will be persisted during
@@ -368,19 +363,18 @@ up.fragment = do ->
     The compiled element
   @stable
   ###
-  hello = (element, options) ->
+  hello = (element, options = {}) ->
     element = e.get(element)
-    options = u.options(options, keepPlans: [])
 
-    keptElements = []
-    for plan in options.keepPlans
+    keepPlans = options.keepPlans || []
+    skip = keepPlans.map (plan) ->
       emitFragmentKept(plan)
-      keptElements.push(plan.oldElement)
+      return plan.oldElement
 
-    up.syntax.compile(element, skip: keptElements)
-
+    up.syntax.compile(element, { skip })
     emitFragmentInserted(element, options)
-    element
+
+    return element
 
   ###**
   When any page fragment has been [inserted or updated](/up.replace),
@@ -492,11 +486,12 @@ up.fragment = do ->
 
     if args.size == 1
       if u.isElementish(args[0])
-        # up.fragment.all(element) should just return [element]
+        # up.fragment.all(element, [options]) should just return [element].
+        # Any options are ignored.
         candidates = [args[0]]
       else
-        # up.fragment.all(lookup, [options]) should lookup the selector
-        # in the current layer
+        # up.fragment.all(selector, [options]) should lookup the selector
+        # in the current layer, or in options.layer if given.
         candidates = up.layer.allElements(args[0], options)
     else
       # up.fragment.all(rootElement, selector) should find selector within
@@ -504,13 +499,6 @@ up.fragment = do ->
       candidates = e.all(args...)
 
     return u.filter(candidates, isRealElement)
-
-  ###**
-  @function up.fragment.createPlaceHolder
-  @internal
-  ###
-  createPlaceholder = (selector, container = document.body) ->
-    e.affix(container, selector, class: 'up-placeholder')
 
   ###**
   Destroys the given element or selector.
@@ -545,14 +533,13 @@ up.fragment = do ->
     setLayerOption(selectorOrElement, options)
 
     if options.element = first(selectorOrElement, options)
-      change = up.Change.DestroyFragment(options)
-      change.execute()
+      return new up.Change.DestroyFragment(options).execute()
     else
       return Promise.resolve()
 
   shouldLogDestruction = (element, options) ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
-    options.log != false && !e.matches(element, '.up-placeholder, .up-tooltip, .up-modal, .up-popup')
+    options.log != false && !e.matches(element, '.up-placeholder, .up-modal')
 
   setLayerOption = (selectorOrElement, options) ->
     # up.fragment functions usually only see elements in the current layer.
@@ -564,7 +551,7 @@ up.fragment = do ->
       options.layer = up.layer.lookup(options)
 
   parseTargetAndOptions = (args) ->
-    options = parseArgAndOptions(args, 'target')
+    options = u.parseArgAndOptions(args, 'target')
     setLayerOption(options.target, options)
     options
 
@@ -623,7 +610,7 @@ up.fragment = do ->
     options = parseTargetAndOptions(args)
     options.cache ?= false
     options.url ?= source(selectorOrElement)
-    return change(options)
+    return makeChange(options)
 
   ###**
   Fetches this given URL with JavaScript and [replaces](/up.replace) the
@@ -662,7 +649,6 @@ up.fragment = do ->
   up.on 'up:framework:reset', reset
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  createPlaceholder: createPlaceholder
   replace: replace
   reload: reload
   destroy: destroy

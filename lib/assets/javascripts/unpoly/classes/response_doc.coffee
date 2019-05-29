@@ -24,9 +24,6 @@ class up.ResponseDoc
     # HTMLParser will not execute their content once appended to the DOM.
     @scriptWrapper = new up.HtmlWrapper('script', guard: @isInlineScript)
 
-    if @response = options.response
-      options.document = @response
-
     if document = options.document
       @parsedRoot = @retrieveRoot(document, e.createDocumentFromHtml)
 

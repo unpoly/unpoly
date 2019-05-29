@@ -127,7 +127,7 @@ class up.Layer.Overlay extends up.Layer
     e.all(@contentElement, selector)
 
   accept: (value, options = {}) ->
-    new up.Change.AcceptLayer({ value, options... }).execute()
+    new up.Change.AcceptLayer(u.merge(options, { value })).execute()
 
   dismiss: (value, options = {}) ->
-    new up.Change.DismissLayer({ value, options... }).execute()
+    new up.Change.DismissLayer(u.merge(options, { value })).execute()
