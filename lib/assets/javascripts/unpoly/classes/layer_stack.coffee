@@ -22,10 +22,12 @@ class up.LayerStack extends up.Config
   remove: (layer, options) ->
     @asap options, =>
       u.remove(@all, layer)
+      @updateOverlayCount()
 
   push: (layer, options) ->
     @asap options, =>
       @all.push(layer)
+      @updateOverlayCount()
 
   peel: (layer, options = {}) ->
     @asap options, (lock) ->
@@ -74,8 +76,12 @@ class up.LayerStack extends up.Config
   @getter 'overlayContainer', ->
     unless @overlayContainer
       @overlayContainer = e.createFromSelector(OVERLAY_CONTAINER_SELECTOR)
+      @updateOverlayCount()
       @attachOverlayContainer()
     @overlayContainer
+
+  updateOverlayCount: ->
+    @overlayContainer.setAttribute('up-count', @all.length - 1)
 
   syncHistory: ->
     historyLayers = u.filter(@allReversed(), 'history')
