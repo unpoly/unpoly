@@ -37,7 +37,7 @@ class up.Layer.Overlay extends up.Layer
     throw "implement me"
 
   createElement: (parentElement = @stack.container) ->
-    @element = e.affix(parentElement, '.up-layer',
+    @element = e.affix(parentElement, '.up-overlay',
       'up-dismissable': @dismissable
       'up-flavor': @constructor.flavor
       'up-align': @align
@@ -53,7 +53,7 @@ class up.Layer.Overlay extends up.Layer
 
   onElementMouseDown: (event) =>
     target = event.target
-    if target.closest('.up-layer-frame')
+    if target.closest('.up-overlay-frame')
       # User clicked inside the layer's frame. We will let the event bubble
       # up to the document where up.link handlers will process [up-follow][up-instant]
       # for a link inside the frame.
@@ -65,7 +65,7 @@ class up.Layer.Overlay extends up.Layer
 
   onElementClick: (event) =>
     target = event.target
-    closePromise = if target.closest('.up-layer-frame')
+    closePromise = if target.closest('.up-overlay-frame')
       # User clicked inside the layer's frame.
       if dismisser = @closestDismisser(target)
         closePromise = up.layer.dismiss({ layer: this, origin: dismisser })
@@ -95,15 +95,15 @@ class up.Layer.Overlay extends up.Layer
 
   createDismissElement: (parentElement) ->
     if @dismissable
-      @dismissElement = affix(parentElement, '.up-layer-dismiss[up-dismiss]',
+      @dismissElement = affix(parentElement, '.up-overlay-dismiss[up-dismiss]',
         'aria-label': @dismissAriaLabel
       )
       affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
   frameInnerContent: (parentElement, options) ->
     content = options.content
-    @frameElement = affix(parentElement, '.up-layer-frame')
-    @contentElement = affix(@frameElement, '.up-layer-content')
+    @frameElement = affix(parentElement, '.up-overlay-frame')
+    @contentElement = affix(@frameElement, '.up-overlay-content')
     @contentElement.appendChild(content)
     @createDismissElement(@frameElement)
     options.onContentAttached?({ layer, content })

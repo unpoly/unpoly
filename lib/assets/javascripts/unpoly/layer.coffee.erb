@@ -106,8 +106,8 @@ up.layer = do ->
     forElement: (args...) -> stack.forElement(args...)
     lookup: (args...) -> stack.lookupOne(args...)
     lookupAll: (args...) -> stack.lookupAll(args...)
-    get_container: -> stack.container
-    attachContainer: -> stack.attachContainer()
+    get_overlayContainer: -> stack.overlayContainer
+    attachOverlayContainer: -> stack.attachOverlayContainer()
     allElements: allElements
     firstElement: firstElement
     config: config

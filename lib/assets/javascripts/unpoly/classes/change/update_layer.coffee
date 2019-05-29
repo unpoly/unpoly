@@ -125,10 +125,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
           up.fragment.markAsDestroying(step.oldElement)
         afterInsert: =>
           @responseDoc.activateElement(step.newElement, step)
-          # Make sure that we didn't lose the .up-layers container
+          # Make sure that we didn't lose the .up-overlays container
           # while replacing <body> or <html>
           if up.fragment.targetsBody(step.selector)
-            up.layer.attachContainer()
+            up.layer.attachOverlayContainer()
         beforeDetach: ->
           up.syntax.clean(step.oldElement)
         afterDetach: ->

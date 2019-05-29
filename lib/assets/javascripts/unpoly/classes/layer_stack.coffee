@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-CONTAINER_SELECTOR = '.up-layers'
+OVERLAY_CONTAINER_SELECTOR = '.up-overlays'
 
 class up.LayerStack extends up.Config
 
@@ -71,11 +71,11 @@ class up.LayerStack extends up.Config
   @getter 'parent', ->
     @parentOf(@current)
 
-  @getter 'container', ->
-    unless @containerElement
-      @containerElement = e.createFromSelector(CONTAINER_SELECTOR)
-      @attachContainer()
-    @containerElement
+  @getter 'overlayContainer', ->
+    unless @overlayContainer
+      @overlayContainer = e.createFromSelector(OVERLAY_CONTAINER_SELECTOR)
+      @attachOverlayContainer()
+    @overlayContainer
 
   syncHistory: ->
     historyLayers = u.filter(@allReversed(), 'history')
@@ -85,9 +85,9 @@ class up.LayerStack extends up.Config
     # up.history.push() only adds a history entry if we are not already at the given URL
     up.history.push(location)
 
-  attachContainer: ->
-    if @containerElement
-      document.body.appendChild(@containerElement)
+  attachOverlayContainer: ->
+    if @overlayContainer
+      document.body.appendChild(@overlayContainer)
 
   lookupOne: (args...) ->
     new up.LayerLookup(this, args...).first()

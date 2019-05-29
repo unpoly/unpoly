@@ -426,7 +426,7 @@ up.fragment = do ->
     up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
   isRealElement = (element) ->
-    !e.closest(element, '.up-destroying') && !e.matches(element, '.up-layer, .up-layers, .up-bounds')
+    !e.closest(element, '.up-destroying') && !e.matches(element, '.up-overlay, .up-overlays, .up-bounds')
 
   ###**
   Returns the first element matching the given selector, but
