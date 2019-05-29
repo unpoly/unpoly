@@ -89,11 +89,11 @@ class up.LayerStack extends up.Config
     if @containerElement
       document.body.appendChild(@containerElement)
 
-  lookupOne: (options) ->
-    new up.LayerLookup(this, options).first()
+  lookupOne: (args...) ->
+    new up.LayerLookup(this, args...).first()
 
-  lookupAll: (options) ->
-    new up.LayerLookup(this, options).all()
+  lookupAll: (args...) ->
+    new up.LayerLookup(this, args...).all()
 
   forElement: (element) ->
     element = e.get(element)

@@ -6,7 +6,6 @@
 - There should be a preload() function in up.proxy, but that should also take a request
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 - Rename ...Url to ...URL, ...Json to JSON
-- up.layer.lookup should either accept a scalar or be renamed up.layer.forOptions()
 - Rename selectorOrElement to target everywhere
 
 - Docs

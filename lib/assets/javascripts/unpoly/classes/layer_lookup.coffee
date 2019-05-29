@@ -2,7 +2,8 @@ u = up.util
 
 class up.LayerLookup
 
-  constructor: (@stack, options) ->
+  constructor: (@stack, args...) ->
+    options = u.parseArgAndOptions(args, 'layer')
     @value = options.layer
     @customCurrent = options.currentLayer
     @origin = options.origin
