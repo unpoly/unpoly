@@ -96,7 +96,7 @@ class up.Layer extends up.Record
     @stack.parent(this)
 
   contains: (element) =>
-    # Test that the closest parent is the document and not another layer.
+    # Test that the closest parent is the element and not another layer.
     e.closest(element, '.up-layer, html') == @element
 
   on: (args...) ->
