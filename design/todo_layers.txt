@@ -1,10 +1,6 @@
-- Params
-  - Separate { query } and [up-query] options
-  - NEVER move URL query to payload params
-  - GET submissions: Form values override (set, not add) values from query
 - Check if more API should be moved to getter-style
 - Check new layer styles visually
-- Nested layers should have more padding
+  - Nested layers should have more padding
 - Tests gegen https://github.com/unpoly/unpoly/issues/79
   - We might need to register all link handlers to a new .up-modal instead of the document
 - There should be a preload() function in up.proxy, but that should also take a request
@@ -103,5 +99,9 @@ Decisions
   => Es ist nichts wirklich besser
 - Should [up-href] be [up-url] to match { url }?
   - No, it matches HTML5 or XHTML2
+- Params
+  - Separate { query } and [up-query] options
+  - NEVER move URL query to payload params
+  - GET submissions: Form values should override, not append (set, not add) values from query
 
 
