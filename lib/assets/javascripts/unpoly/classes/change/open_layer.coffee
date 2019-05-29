@@ -57,6 +57,5 @@ class up.Change.OpenLayer extends up.Change.Addition
     # non-layer keys like { title } or { location }
     @updateHistory(@options)
 
-    # Calling up.hello() will compile the new content
-    # and emit an up:fragment:inserted event.
+    # Compile the new content and emit up:fragment:inserted.
     @responseDoc.activateElement(content, @options)

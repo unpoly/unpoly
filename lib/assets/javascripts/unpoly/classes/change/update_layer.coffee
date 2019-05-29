@@ -70,7 +70,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       step.source = up.fragment.source(step.oldElement)
 
     # Remember where the element came from in case someone needs to up.reload(newElement) later.
-    @setSource(step.newElement, step.source)
+    up.fragment.setSource(step.newElement, step.source)
 
     if step.pseudoClass
       # We're either appending or prepending. No keepable elements must be honored.
@@ -90,7 +90,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
         step.oldElement.insertAdjacentElement('beforeend', wrapper)
 
       for child in wrapper.children
-        @responseDoc.activateElement(child, step) # emits up:fragment:inserted
+        # Compile the new content and emit up:fragment:inserted.
+        @responseDoc.activateElement(child, step)
 
       # Reveal element that was being prepended/appended.
       # Since we will animate (not morph) it's OK to allow animation of scrolling

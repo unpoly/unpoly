@@ -1,4 +1,3 @@
-- Go through all public API of up.fragment and check if it still makes sense or if it only works for current layer.
 - Params
   - Separate { query } and [up-query] options
   - NEVER move URL query to payload params
