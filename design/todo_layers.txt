@@ -1,17 +1,6 @@
 - Check new layer styles visually
   - Nested layers should have more padding
-- There should be a preload() function in up.proxy, but that should also take a request
-- Decide whether to keep LayerStack as separate class (or should it just be up.layer)
 
-- Docs
-  - Document changes in options { history } (now boolean) and { location } (now a string) changes
-  - Documentation from Diff
-  - up.preload() can now fail if preloading is disabled
-  - Docs: up:form:submit event now has { options } to manipulate
-  - Docs: up:link:follow event now has { options } to manipulate
-  - Expose up.fragment.all() as experimental API
-  - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
-  - { navigate }
 - Tests
   - Get tests green again
   - Test layer { context } transmission
@@ -26,6 +15,16 @@
   - Test that opening/updating an layer can reset the world if selector is unavailable
   - Test against https://github.com/unpoly/unpoly/issues/79
     - We might need to register all link handlers to a new .up-modal instead of the document
+
+- Docs
+  - Document changes in options { history } (now boolean) and { location } (now a string) changes
+  - Documentation from Diff
+  - up.preload() can now fail if preloading is disabled
+  - Docs: up:form:submit event now has { options } to manipulate
+  - Docs: up:link:follow event now has { options } to manipulate
+  - Expose up.fragment.all() as experimental API
+  - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
+  - { navigate }
 
 
 Finishing up
@@ -74,6 +73,10 @@ Later?
   - In a ES6 world this would not even be so bad, or even necessary. import { Event } from 'up'. Event.emit(...).
   - Even consider dropping shortcuts so we always do up.Fragment.change(), up.Event.emit(...)
 - Should up.reload / up.change etc. resolve to the updated elements?
+- There should be a preload() function in up.proxy, but that should also take a request
+  - For this we also need to decide whether up.proxy.preload() would reject unsafe requests
+- { layer: 'swap' } - replaces the current overlay with the new layer
+- { layer: 'solo' } - replaces all overlays with the new overlay
 
 
 Decisions
