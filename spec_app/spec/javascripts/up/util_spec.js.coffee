@@ -398,10 +398,10 @@ describe 'up.util', ->
 #        path = up.util.parsePath('foo.bar[baz]["bam"][\'qux\']')
 #        expect(path).toEqual ['foo', 'bar', 'baz', 'bam', 'qux']
 
-    describe 'up.util.parseUrl', ->
+    describe 'up.util.parseURL', ->
 
       it 'parses a full URL', ->
-        url = up.util.parseUrl('https://subdomain.domain.tld:123/path?search#hash')
+        url = up.util.parseURL('https://subdomain.domain.tld:123/path?search#hash')
         expect(url.protocol).toEqual('https:')
         expect(url.hostname).toEqual('subdomain.domain.tld')
         expect(url.port).toEqual('123')
@@ -410,7 +410,7 @@ describe 'up.util', ->
         expect(url.hash).toEqual('#hash')
 
       it 'parses an absolute path', ->
-        url = up.util.parseUrl('/qux/foo?search#bar')
+        url = up.util.parseURL('/qux/foo?search#bar')
         expect(url.protocol).toEqual(location.protocol)
         expect(url.hostname).toEqual(location.hostname)
         expect(url.port).toEqual(location.port)
@@ -421,7 +421,7 @@ describe 'up.util', ->
       it 'parses a relative path', ->
         up.history.config.enabled = true
         up.history.replace('/qux/')
-        url = up.util.parseUrl('foo?search#bar')
+        url = up.util.parseURL('foo?search#bar')
         expect(url.protocol).toEqual(location.protocol)
         expect(url.hostname).toEqual(location.hostname)
         expect(url.port).toEqual(location.port)
@@ -432,7 +432,7 @@ describe 'up.util', ->
       it 'allows to pass a link element', ->
         link = document.createElement('a')
         link.href = '/qux/foo?search#bar'
-        url = up.util.parseUrl(link)
+        url = up.util.parseURL(link)
         expect(url.protocol).toEqual(location.protocol)
         expect(url.hostname).toEqual(location.hostname)
         expect(url.port).toEqual(location.port)
@@ -442,7 +442,7 @@ describe 'up.util', ->
 
       it 'allows to pass a link element as a jQuery collection', ->
         $link = $('<a></a>').attr(href: '/qux/foo?search#bar')
-        url = up.util.parseUrl($link)
+        url = up.util.parseURL($link)
         expect(url.protocol).toEqual(location.protocol)
         expect(url.hostname).toEqual(location.hostname)
         expect(url.port).toEqual(location.port)
@@ -899,39 +899,39 @@ describe 'up.util', ->
         value = document.body
         expect(up.util.isBlank(value)).toBe(false)
 
-    describe 'up.util.normalizeUrl', ->
+    describe 'up.util.normalizeURL', ->
 
       it 'normalizes a relative path', ->
         up.history.config.enabled = true
         up.history.replace('/qux/')
-        expect(up.util.normalizeUrl('foo')).toBe("http://#{location.hostname}:#{location.port}/qux/foo")
+        expect(up.util.normalizeURL('foo')).toBe("http://#{location.hostname}:#{location.port}/qux/foo")
 
       it 'normalizes an absolute path', ->
-        expect(up.util.normalizeUrl('/foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
+        expect(up.util.normalizeURL('/foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
 
       it 'normalizes a full URL', ->
-        expect(up.util.normalizeUrl('http://example.com/foo/bar')).toBe('http://example.com/foo/bar')
+        expect(up.util.normalizeURL('http://example.com/foo/bar')).toBe('http://example.com/foo/bar')
 
       it 'preserves a query string', ->
-        expect(up.util.normalizeUrl('http://example.com/foo/bar?key=value')).toBe('http://example.com/foo/bar?key=value')
+        expect(up.util.normalizeURL('http://example.com/foo/bar?key=value')).toBe('http://example.com/foo/bar?key=value')
 
       it 'strips a query string with { search: false } option', ->
-        expect(up.util.normalizeUrl('http://example.com/foo/bar?key=value', search: false)).toBe('http://example.com/foo/bar')
+        expect(up.util.normalizeURL('http://example.com/foo/bar?key=value', search: false)).toBe('http://example.com/foo/bar')
 
       it 'does not strip a trailing slash by default', ->
-        expect(up.util.normalizeUrl('/foo/')).toEqual("http://#{location.hostname}:#{location.port}/foo/")
+        expect(up.util.normalizeURL('/foo/')).toEqual("http://#{location.hostname}:#{location.port}/foo/")
 
       it 'normalizes redundant segments', ->
-        expect(up.util.normalizeUrl('/foo/../foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
+        expect(up.util.normalizeURL('/foo/../foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
 
       it 'strips a #hash by default', ->
-        expect(up.util.normalizeUrl('http://example.com/foo/bar#fragment')).toBe('http://example.com/foo/bar')
+        expect(up.util.normalizeURL('http://example.com/foo/bar#fragment')).toBe('http://example.com/foo/bar')
 
       it 'preserves a #hash with { hash: true } option', ->
-        expect(up.util.normalizeUrl('http://example.com/foo/bar#fragment', hash: true)).toBe('http://example.com/foo/bar#fragment')
+        expect(up.util.normalizeURL('http://example.com/foo/bar#fragment', hash: true)).toBe('http://example.com/foo/bar#fragment')
 
       it 'puts a #hash behind the query string', ->
-        expect(up.util.normalizeUrl('http://example.com/foo/bar?key=value#fragment', hash: true)).toBe('http://example.com/foo/bar?key=value#fragment')
+        expect(up.util.normalizeURL('http://example.com/foo/bar?key=value#fragment', hash: true)).toBe('http://example.com/foo/bar?key=value#fragment')
 
     describe 'up.util.find', ->
 
@@ -1037,16 +1037,16 @@ describe 'up.util', ->
         expect(up.util.isCrossDomain('foo')).toBe(false)
 
       it 'returns false for a fully qualified URL with the same protocol and hostname as the current location', ->
-        fullUrl = "#{location.protocol}//#{location.host}/foo"
-        expect(up.util.isCrossDomain(fullUrl)).toBe(false)
+        fullURL = "#{location.protocol}//#{location.host}/foo"
+        expect(up.util.isCrossDomain(fullURL)).toBe(false)
 
       it 'returns true for a fully qualified URL with a different protocol than the current location', ->
-        fullUrl = "otherprotocol://#{location.host}/foo"
-        expect(up.util.isCrossDomain(fullUrl)).toBe(true)
+        fullURL = "otherprotocol://#{location.host}/foo"
+        expect(up.util.isCrossDomain(fullURL)).toBe(true)
 
       it 'returns false for a fully qualified URL with a different hostname than the current location', ->
-        fullUrl = "#{location.protocol}//other-host.tld/foo"
-        expect(up.util.isCrossDomain(fullUrl)).toBe(true)
+        fullURL = "#{location.protocol}//other-host.tld/foo"
+        expect(up.util.isCrossDomain(fullURL)).toBe(true)
 
     describe 'up.util.isOptions', ->
 

@@ -10,14 +10,14 @@ describe 'up.proxy', ->
       it 'makes a request with the given URL and params', ->
         up.request('/foo', params: { key: 'value' }, method: 'post')
         request = @lastRequest()
-        expect(request.url).toMatchUrl('/foo')
+        expect(request.url).toMatchURL('/foo')
         expect(request.data()).toEqual(key: ['value'])
         expect(request.method).toEqual('POST')
 
       it 'also allows to pass the URL as a { url } option instead', ->
         up.request(url: '/foo', params: { key: 'value' }, method: 'post')
         request = @lastRequest()
-        expect(request.url).toMatchUrl('/foo')
+        expect(request.url).toMatchURL('/foo')
         expect(request.data()).toEqual(key: ['value'])
         expect(request.method).toEqual('POST')
 
@@ -26,7 +26,7 @@ describe 'up.proxy', ->
         up.request(requestArg)
 
         jasmineRequest = @lastRequest()
-        expect(jasmineRequest.url).toMatchUrl('/foo')
+        expect(jasmineRequest.url).toMatchURL('/foo')
         expect(jasmineRequest.data()).toEqual(key: ['value'])
         expect(jasmineRequest.method).toEqual('POST')
 
@@ -53,13 +53,13 @@ describe 'up.proxy', ->
           )
 
           promise.then (response) ->
-            expect(response.request.url).toMatchUrl('/url')
+            expect(response.request.url).toMatchURL('/url')
             expect(response.request.params).toEqual(new up.Params(key: 'value'))
             expect(response.request.method).toEqual('POST')
             expect(response.request.target).toEqual('.target')
             expect(response.request.hash).toBeBlank()
 
-            expect(response.url).toMatchUrl('/url') # If the server signaled a redirect with X-Up-Location, this would be reflected here
+            expect(response.url).toMatchURL('/url') # If the server signaled a redirect with X-Up-Location, this would be reflected here
             expect(response.method).toEqual('POST') # If the server sent a X-Up-Method header, this would be reflected here
             expect(response.text).toEqual('response-text')
             expect(response.status).toEqual(201)
@@ -88,14 +88,14 @@ describe 'up.proxy', ->
 
         u.task =>
           request = @lastRequest()
-          expect(request.url).toMatchUrl('/url')
+          expect(request.url).toMatchURL('/url')
 
           @respondWith('response-text')
 
           promise.then (response) ->
-            expect(response.request.url).toMatchUrl('/url')
+            expect(response.request.url).toMatchURL('/url')
             expect(response.request.hash).toEqual('#hash')
-            expect(response.url).toMatchUrl('/url')
+            expect(response.url).toMatchURL('/url')
             done()
 
       describe 'when the server responds with an X-Up-Method header', ->
@@ -116,9 +116,9 @@ describe 'up.proxy', ->
             )
 
             promise.then (response) ->
-              expect(response.request.url).toMatchUrl('/url')
+              expect(response.request.url).toMatchURL('/url')
               expect(response.request.method).toEqual('POST')
-              expect(response.url).toMatchUrl('/redirect')
+              expect(response.url).toMatchURL('/redirect')
               expect(response.method).toEqual('GET')
               done()
 
@@ -133,9 +133,9 @@ describe 'up.proxy', ->
                 'X-Up-Location': '/response-url'
 
             promise.then (response) ->
-              expect(response.request.url).toMatchUrl('/request-url')
+              expect(response.request.url).toMatchURL('/request-url')
               expect(response.request.hash).toEqual('#request-hash')
-              expect(response.url).toMatchUrl('/response-url')
+              expect(response.url).toMatchURL('/response-url')
               done()
 
         it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
@@ -221,9 +221,9 @@ describe 'up.proxy', ->
               responseURL: '/response-url'
 
             promise.then (response) ->
-              expect(response.request.url).toMatchUrl('/request-url')
+              expect(response.request.url).toMatchURL('/request-url')
               expect(response.request.hash).toEqual('#request-hash')
-              expect(response.url).toMatchUrl('/response-url')
+              expect(response.url).toMatchURL('/response-url')
               done()
 
         it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
@@ -329,7 +329,7 @@ describe 'up.proxy', ->
           promise = up.request(url: '/path', method: 'get', params: givenParams)
 
           u.task =>
-            expect(@lastRequest().url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
+            expect(@lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
             expect(@lastRequest().data()).toBeBlank()
 
             @respondWith('response-text')
@@ -337,7 +337,7 @@ describe 'up.proxy', ->
             promise.then (response) ->
               # See that the response object has been updated by moving the data options
               # to the URL. This is important for up.fragment code that works on response.request.
-              expect(response.request.url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
+              expect(response.request.url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
               expect(response.request.params).toBeBlank()
               done()
 
@@ -582,7 +582,7 @@ describe 'up.proxy', ->
           u.task =>
             expect(listener.calls.count()).toBe(2)
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-            expect(@lastRequest().url).toMatchUrl('/path2')
+            expect(@lastRequest().url).toMatchURL('/path2')
             done()
 
         it 'allows up:proxy:load listeners to manipulate the request headers', (done) ->
@@ -1035,7 +1035,7 @@ describe 'up.proxy', ->
 
         next.after 75, =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
-          expect(@lastRequest().url).toMatchUrl('/foo')
+          expect(@lastRequest().url).toMatchURL('/foo')
           expect(@lastRequest()).toHaveRequestMethod('GET')
           expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
 

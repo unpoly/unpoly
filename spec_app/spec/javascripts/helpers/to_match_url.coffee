@@ -3,12 +3,12 @@ $ = jQuery
 
 beforeEach ->
   jasmine.addMatchers
-    toMatchUrl: (util, customEqualityTesters) ->
+    toMatchURL: (util, customEqualityTesters) ->
       compare: (actual, expected, normalizeOptions = {}) ->
         pass = true
         pass &&= u.isString(actual)
         pass &&= u.isString(expected)
-        pass &&= u.normalizeUrl(actual, normalizeOptions) == u.normalizeUrl(expected, normalizeOptions)
+        pass &&= u.normalizeURL(actual, normalizeOptions) == u.normalizeURL(expected, normalizeOptions)
         { pass }
 
 

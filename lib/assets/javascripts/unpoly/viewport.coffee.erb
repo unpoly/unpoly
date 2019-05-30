@@ -82,7 +82,7 @@ up.viewport = do ->
 
   lastScrollTops = new up.Cache
     size: 30,
-    key: up.history.normalizeUrl
+    key: up.history.normalizeURL
 
   scrollingController = new up.MotionController('scrolling')
 
@@ -543,12 +543,12 @@ up.viewport = do ->
   restoreScroll = (options = {}) ->
     url = up.history.url()
     viewports = if options.around then getAround(options.around) else getAll()
-    scrollTopsForUrl = options.scrollTops || lastScrollTops.get(url) || {}
+    scrollTopsForURL = options.scrollTops || lastScrollTops.get(url) || {}
 
-    up.log.group 'Restoring scroll positions for URL %s to %o', url, scrollTopsForUrl, ->
+    up.log.group 'Restoring scroll positions for URL %s to %o', url, scrollTopsForURL, ->
       allScrollPromises = u.map viewports, (viewport) ->
         key = scrollTopKey(viewport)
-        scrollTop = scrollTopsForUrl[key] || 0
+        scrollTop = scrollTopsForURL[key] || 0
         scroll(viewport, scrollTop, duration: 0)
 
       Promise.all(allScrollPromises)

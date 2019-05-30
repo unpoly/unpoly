@@ -60,13 +60,13 @@ up.feedback = do ->
     currentClasses: ['up-current']
     navs: ['[up-nav]']
 
-  previousUrlSet = undefined
-  currentUrlSet = undefined
+  previousURLSet = undefined
+  currentURLSet = undefined
 
   reset = ->
     config.reset()
-    previousUrlSet = undefined
-    currentUrlSet = undefined
+    previousURLSet = undefined
+    currentURLSet = undefined
 
   CLASS_ACTIVE = 'up-active'
   SELECTOR_LINK = 'a, [up-href]'
@@ -74,20 +74,20 @@ up.feedback = do ->
   navSelector = ->
     config.navs.join(',')
 
-  normalizeUrl = (url) ->
+  normalizeURL = (url) ->
     if url
-      u.normalizeUrl(url, stripTrailingSlash: true)
+      u.normalizeURL(url, stripTrailingSlash: true)
 
-  sectionUrls = (section) ->
+  sectionURLs = (section) ->
     # Check if we have computed the URLs before.
     # Computation is sort of expensive (multiplied by number of links),
     # so we cache the results in a data attribute.
-    unless urls = section.upNormalizedUrls
-      urls = buildSectionUrls(section)
-      section.upNormalizedUrls = urls
+    unless urls = section.upNormalizedURLs
+      urls = buildSectionURLs(section)
+      section.upNormalizedURLs = urls
     urls
 
-  buildSectionUrls = (section) ->
+  buildSectionURLs = (section) ->
     urls = []
 
     # A link with an unsafe method will never be higlighted with .up-current,
@@ -98,18 +98,18 @@ up.feedback = do ->
           # Allow to include multiple space-separated URLs in [up-alias]
           for url in u.splitValues(value)
             unless url == '#'
-              url = normalizeUrl(url)
+              url = normalizeURL(url)
               urls.push(url)
     urls
 
-  buildCurrentUrlSet = ->
+  buildCurrentURLSet = ->
     urls = u.map(up.layer.all, 'location')
-    new up.UrlSet(urls, { normalizeUrl })
+    new up.URLSet(urls, { normalizeURL })
 
   updateAllNavigationSectionsIfLocationChanged = ->
-    previousUrlSet = currentUrlSet
-    currentUrlSet = buildCurrentUrlSet()
-    unless u.isEqual(currentUrlSet, previousUrlSet)
+    previousURLSet = currentURLSet
+    currentURLSet = buildCurrentURLSet()
+    unless u.isEqual(currentURLSet, previousURLSet)
       updateAllNavigationSections(document.body)
 
   updateAllNavigationSections = (root) ->
@@ -132,12 +132,12 @@ up.feedback = do ->
       updateAllNavigationSections(fragment)
 
   updateCurrentClassForLinks = (links) ->
-    currentUrlSet ||= buildCurrentUrlSet()
+    currentURLSet ||= buildCurrentURLSet()
     u.each links, (link) ->
-      urls = sectionUrls(link)
+      urls = sectionURLs(link)
 
       classList = link.classList
-      if currentUrlSet.matchesAny(urls)
+      if currentURLSet.matchesAny(urls)
         for klass in config.currentClasses
           # Once we drop IE11 support in 2020 we can call add() with multiple arguments
           classList.add(klass)

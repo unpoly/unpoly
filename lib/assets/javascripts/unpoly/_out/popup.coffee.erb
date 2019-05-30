@@ -110,7 +110,7 @@ up.popup = do ->
   ###**
   Returns the URL of the page or modal behind the popup.
 
-  @function up.popup.coveredUrl
+  @function up.popup.coveredURL
   @return {string}
   @experimental
   ###
@@ -125,7 +125,7 @@ up.popup = do ->
     align: null
     sticky: null
     url: null
-    coveredUrl: null
+    coveredURL: null
     coveredTitle: null
 
   chain = new up.DivertibleChain()
@@ -138,7 +138,7 @@ up.popup = do ->
 
   discardHistory = ->
     state.coveredTitle = null
-    state.coveredUrl = null
+    state.coveredURL = null
 
   createHiddenFrame = (targetSelector) ->
     state.tether = new up.Tether(u.only(state, 'anchor', 'position', 'align'))
@@ -264,7 +264,7 @@ up.popup = do ->
         state.position = position
         state.align = align
         if options.history
-          state.coveredUrl = up.browser.url()
+          state.coveredURL = up.browser.url()
           state.coveredTitle = document.title
         state.sticky = options.sticky
         if html
@@ -324,7 +324,7 @@ up.popup = do ->
     
     options = u.options(options,
       animation: config.closeAnimation
-      history: state.coveredUrl,
+      history: state.coveredURL,
       title: state.coveredTitle
     )
     animateOptions = up.motion.animateOptions(options, duration: config.closeDuration, easing: config.closeEasing)
@@ -333,7 +333,7 @@ up.popup = do ->
     up.event.whenEmitted('up:popup:close', anchor: state.anchor, log: 'Closing popup').then ->
       state.phase = 'closing'
       state.url = null
-      state.coveredUrl = null
+      state.coveredURL = null
       state.coveredTitle = null
 
       up.destroy(state.popup, options).then ->
@@ -508,7 +508,7 @@ up.popup = do ->
   attach: attachAsap
   close: closeAsap
   url: -> state.url
-  coveredUrl: -> state.coveredUrl
+  coveredURL: -> state.coveredURL
   config: config
   contains: contains
   isOpen: isOpen

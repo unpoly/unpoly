@@ -120,21 +120,21 @@ class up.Request extends up.Record
   normalize: =>
     @method = u.normalizeMethod(@method)
     @headers ||= {}
-    @extractHashFromUrl()
+    @extractHashFromURL()
 
     if u.methodAllowsPayload(@method)
       @transferSearchToParams()
     else
-      @transferParamsToUrl()
+      @transferParamsToURL()
 
-  extractHashFromUrl: =>
-    urlParts = u.parseUrl(@url)
+  extractHashFromURL: =>
+    urlParts = u.parseURL(@url)
     # Remember the #hash for later revealing.
     # It will be lost during normalization.
     @hash = u.presence(urlParts.hash)
-    @url = u.normalizeUrl(urlParts, hash: false)
+    @url = u.normalizeURL(urlParts, hash: false)
 
-  transferParamsToUrl: =>
+  transferParamsToURL: =>
     unless u.isBlank(@params)
       # GET methods are not allowed to have a payload, so we transfer { params } params to the URL.
       @url = @params.toURL(@url)
@@ -145,7 +145,7 @@ class up.Request extends up.Record
     paramsFromQuery = up.Params.fromURL(@url)
     unless u.isBlank(paramsFromQuery)
       @params.addAll(paramsFromQuery)
-      @url = u.normalizeUrl(@url, search: false)
+      @url = u.normalizeURL(@url, search: false)
 
   isSafe: =>
     up.proxy.isSafeMethod(@method)
@@ -160,7 +160,7 @@ class up.Request extends up.Record
     @xhr = new XMLHttpRequest()
 
     xhrHeaders = u.copy(@headers)
-    xhrUrl = @url
+    xhrURL = @url
     xhrParams = u.copy(@params)
     xhrMethod = up.proxy.wrapMethod(@method, xhrParams)
 
@@ -179,7 +179,7 @@ class up.Request extends up.Record
     if @context
       xhrHeaders[pc.contextHeader] = JSON.stringify(@context)
 
-    @xhr.open(xhrMethod, xhrUrl)
+    @xhr.open(xhrMethod, xhrURL)
 
     for header, value of xhrHeaders
       @xhr.setRequestHeader(header, value)

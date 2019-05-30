@@ -2,7 +2,6 @@
   - Nested layers should have more padding
 - There should be a preload() function in up.proxy, but that should also take a request
 - Decide whether to keep LayerStack as separate class (or should it just be up.layer)
-- Rename ...Url to ...URL, ...Json to JSON
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes

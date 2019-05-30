@@ -16,8 +16,8 @@ up.popup = u.literal
     up.legacy.deprecated('up.popup.url()', 'up.layer.location')
     up.layer.location
 
-  coveredUrl: ->
-    up.legacy.deprecated('up.popup.coveredUrl()', 'up.layer.parent.location')
+  coveredURL: ->
+    up.legacy.deprecated('up.popup.coveredURL()', 'up.layer.parent.location')
     up.layer.parent.location
 
   get_config: ->

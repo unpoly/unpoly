@@ -78,7 +78,7 @@ describe 'up.modal', ->
           expect('.up-modal-dialog .middle').toHaveText('new-middle')
           expect('.up-modal-dialog .before').not.toBeAttached()
           expect('.up-modal-dialog .after').not.toBeAttached()
-          expect(location.pathname).toMatchUrl('/foo')
+          expect(location.pathname).toMatchURL('/foo')
           done()
 
       it "doesn't create an .up-modal frame and replaces { failTarget } if the server returns a non-200 response", (done) ->
@@ -234,7 +234,7 @@ describe 'up.modal', ->
           u.task =>
             # The second modal has survived
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-            expect(@lastRequest().url).toMatchUrl('/path2')
+            expect(@lastRequest().url).toMatchURL('/path2')
 
             # We send the response for 2
             @respondWith('<div class="container">response2</div>')
@@ -251,7 +251,7 @@ describe 'up.modal', ->
                 u.timer 180, =>
                   # Now that the second modal has opened, we make the request to /path3
                   expect(jasmine.Ajax.requests.count()).toEqual(2)
-                  expect(@lastRequest().url).toMatchUrl('/path3')
+                  expect(@lastRequest().url).toMatchURL('/path3')
 
                   @respondWith('<div class="container">response3</div>')
 
@@ -395,7 +395,7 @@ describe 'up.modal', ->
             promise = promiseState(openPromise)
             promise.then (result) => expect(result.state).toEqual('pending')
 
-    describe 'up.modal.coveredUrl', ->
+    describe 'up.modal.coveredURL', ->
 
       describeCapability 'canPushState', ->
 
@@ -403,14 +403,14 @@ describe 'up.modal', ->
           up.history.config.enabled = true
           up.history.replace('/foo')
 
-          expect(up.modal.coveredUrl()).toBeMissing()
+          expect(up.modal.coveredURL()).toBeMissing()
           visitPromise = up.modal.visit('/bar', target: '.container')
           u.task =>
             @respondWith('<div class="container">text</div>')
             visitPromise.then ->
-              expect(up.modal.coveredUrl()).toMatchUrl('/foo')
+              expect(up.modal.coveredURL()).toMatchURL('/foo')
               up.modal.close().then ->
-                expect(up.modal.coveredUrl()).toBeMissing()
+                expect(up.modal.coveredURL()).toBeMissing()
                 done()
 
     describe 'up.modal.flavors', ->
@@ -485,7 +485,7 @@ describe 'up.modal', ->
 
         next =>
           lastRequest = @lastRequest()
-          expect(lastRequest.url).toMatchUrl('/path')
+          expect(lastRequest.url).toMatchURL('/path')
           @respondWith '<div class="target">new content</div>'
 
         next =>
@@ -830,7 +830,7 @@ describe 'up.modal', ->
             origin: $('.inside'), history: '/new-location') # Provoke auto-close
 
         next =>
-          expect(location.href).toMatchUrl '/new-location'
+          expect(location.href).toMatchURL '/new-location'
 
       it 'does not auto-close the modal when a replacement from inside the modal affects a selector inside the modal', asyncSpec (next) ->
         $fixture('.outside').text('old outside')

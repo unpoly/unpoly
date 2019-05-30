@@ -87,8 +87,8 @@ class up.Change.FromURL
   augmentOptionsFromResponse: (response, options) ->
     options.document = response.text
 
-    responseUrl = response.url
-    locationFromExchange = responseUrl
+    responseURL = response.url
+    locationFromExchange = responseURL
 
     if hash = @request.hash
       options.hash = hash
@@ -103,7 +103,7 @@ class up.Change.FromURL
 
     if isReloadable
       # Remember where we got the fragment from so we can up.reload() it later.
-      options.source = responseUrl
+      options.source = responseURL
     else
       # Keep the source of the previous fragment (e.g. the form that was submitted into failure).
       options.source = 'keep'

@@ -134,7 +134,7 @@ describe 'up.fragment', ->
           it "encodes the given params into the URL of a GET request", asyncSpec (next) ->
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
             up.replace('.middle', '/path', method: 'get', params: givenParams)
-            next => expect(@lastRequest().url).toMatchUrl('/path?foo-key=foo-value&bar-key=bar-value')
+            next => expect(@lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
 
         it 'uses a HTTP method given as { method } option', asyncSpec (next) ->
           up.replace('.middle', '/path', method: 'put')
@@ -224,13 +224,13 @@ describe 'up.fragment', ->
             promise = up.replace('.middle', '/path')
             @respond()
             promise.then ->
-              expect(location.href).toMatchUrl('/path')
+              expect(location.href).toMatchURL('/path')
               done()
 
           it 'does not add a history entry after non-GET requests', asyncSpec (next) ->
             up.replace('.middle', '/path', method: 'post')
             next => @respond()
-            next => expect(location.href).toMatchUrl(@hrefBeforeExample)
+            next => expect(location.href).toMatchURL(@hrefBeforeExample)
 
           it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', asyncSpec (next) ->
             up.replace('.middle', '/requested-path', method: 'post')
@@ -238,44 +238,44 @@ describe 'up.fragment', ->
               'X-Up-Method': 'GET'
               'X-Up-Location': '/signaled-path'
             )
-            next => expect(location.href).toMatchUrl('/signaled-path')
+            next => expect(location.href).toMatchURL('/signaled-path')
 
           it 'does not a history entry after a failed GET-request', asyncSpec (next) ->
             up.replace('.middle', '/path', method: 'post', failTarget: '.middle')
             next => @respond(status: 500)
-            next => expect(location.href).toMatchUrl(@hrefBeforeExample)
+            next => expect(location.href).toMatchURL(@hrefBeforeExample)
 
           it 'does not add a history entry with { history: false } option', asyncSpec (next) ->
             up.replace('.middle', '/path', history: false)
             next => @respond()
-            next => expect(location.href).toMatchUrl(@hrefBeforeExample)
+            next => expect(location.href).toMatchURL(@hrefBeforeExample)
 
           it "detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec (next) ->
             up.replace('.middle', '/path')
             next => @respond(responseHeaders: { 'X-Up-Location': '/other-path' })
-            next => expect(location.href).toMatchUrl('/other-path')
+            next => expect(location.href).toMatchURL('/other-path')
 
           it 'adds params from a { params } option to the URL of a GET request', asyncSpec (next) ->
             up.replace('.middle', '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
             next => @respond()
-            next => expect(location.href).toMatchUrl('/path?foo-key=foo%20value&bar-key=bar%20value')
+            next => expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
 
           describe 'if a URL is given as { history } option', ->
 
             it 'uses that URL as the new location after a GET request', asyncSpec (next) ->
               up.replace('.middle', '/path', history: '/given-path')
               next => @respond(failTarget: '.middle')
-              next => expect(location.href).toMatchUrl('/given-path')
+              next => expect(location.href).toMatchURL('/given-path')
 
             it 'adds a history entry after a non-GET request', asyncSpec (next) ->
               up.replace('.middle', '/path', method: 'post', history: '/given-path')
               next => @respond(failTarget: '.middle')
-              next => expect(location.href).toMatchUrl('/given-path')
+              next => expect(location.href).toMatchURL('/given-path')
 
             it 'does not add a history entry after a failed non-GET request', asyncSpec (next) ->
               up.replace('.middle', '/path', method: 'post', history: '/given-path', failTarget: '.middle')
               next => @respond(failTarget: '.middle', status: 500)
-              next => expect(location.href).toMatchUrl(@hrefBeforeExample)
+              next => expect(location.href).toMatchURL(@hrefBeforeExample)
 
         describe 'source', ->
 
@@ -293,25 +293,25 @@ describe 'up.fragment', ->
               @respond()
             next =>
               expect($('.middle')).toHaveText('new-middle')
-              expect(up.fragment.source('.middle')).toMatchUrl('/previous-source')
+              expect(up.fragment.source('.middle')).toMatchURL('/previous-source')
 
           describe 'if a URL is given as { source } option', ->
 
             it 'uses that URL as the source for a GET request', asyncSpec (next) ->
               up.replace('.middle', '/path', source: '/given-path')
               next => @respond()
-              next => expect(up.fragment.source('.middle')).toMatchUrl('/given-path')
+              next => expect(up.fragment.source('.middle')).toMatchURL('/given-path')
 
             it 'uses that URL as the source after a non-GET request', asyncSpec (next) ->
               up.replace('.middle', '/path', method: 'post', source: '/given-path')
               next => @respond()
-              next => expect(up.fragment.source('.middle')).toMatchUrl('/given-path')
+              next => expect(up.fragment.source('.middle')).toMatchURL('/given-path')
 
             it 'ignores the option and reuses the previous source after a failed non-GET request', asyncSpec (next) ->
               @$oldMiddle.attr('up-source', '/previous-source')
               up.replace('.middle', '/path', method: 'post', source: '/given-path', failTarget: '.middle')
               next => @respond(status: 500)
-              next => expect(up.fragment.source('.middle')).toMatchUrl('/previous-source')
+              next => expect(up.fragment.source('.middle')).toMatchURL('/previous-source')
 
         describe 'document title', ->
 
@@ -2464,7 +2464,7 @@ describe 'up.fragment', ->
         $fixture('.element')
         up.destroy('.element', history: '/new-path').then ->
           u.timer 100, ->
-            expect(location.href).toMatchUrl('/new-path')
+            expect(location.href).toMatchURL('/new-path')
             done()
 
       it 'allows to pass a new document title as { title } option', (done) ->

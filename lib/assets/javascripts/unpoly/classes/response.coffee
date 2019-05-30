@@ -103,9 +103,9 @@ class up.Response extends up.Record
   ###
   constructor: (options) ->
     super(options)
-#    @removeUpParamsFromUrl()
+#    @removeUpParamsFromURL()
 #
-#  removeUpParamsFromUrl: ->
+#  removeUpParamsFromURL: ->
 #    [base, query] = @url.split('?')
 #    if query
 #      params = new up.Params(query)

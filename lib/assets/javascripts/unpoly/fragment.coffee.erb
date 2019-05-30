@@ -22,10 +22,10 @@ up.fragment = do ->
   reset = ->
     config.reset()
 
-  setSource = (element, sourceUrl) ->
-    if sourceUrl
-      sourceUrl = u.normalizeUrl(sourceUrl)
-      element.setAttribute("up-source", sourceUrl)
+  setSource = (element, sourceURL) ->
+    if sourceURL
+      sourceURL = u.normalizeURL(sourceURL)
+      element.setAttribute("up-source", sourceURL)
 
   ###**
   Returns the URL the given element was retrieved from.

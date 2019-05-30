@@ -206,7 +206,7 @@ up.modal = do ->
   ###**
   Returns the URL of the page behind the modal overlay.
 
-  @function up.modal.coveredUrl
+  @function up.modal.coveredURL
   @return {string}
   @experimental
   ###
@@ -219,7 +219,7 @@ up.modal = do ->
     closable: null
     flavor: null
     url: null
-    coveredUrl: null
+    coveredURL: null
     coveredTitle: null
     position: null
 
@@ -241,7 +241,7 @@ up.modal = do ->
 
   discardHistory = ->
     state.coveredTitle = null
-    state.coveredUrl = null
+    state.coveredURL = null
 
   part = (name) ->
     selector = ".up-modal-#{name}"
@@ -460,7 +460,7 @@ up.modal = do ->
         state.closable = options.closable
         state.position = options.position
         if options.history
-          state.coveredUrl = up.browser.url()
+          state.coveredURL = up.browser.url()
           state.coveredTitle = document.title
         extractOptions = u.merge(options, animation: false)
         if html
@@ -530,7 +530,7 @@ up.modal = do ->
 
     destroyOptions = u.options(
       u.except(options, 'animation', 'duration', 'easing', 'delay'),
-      history: state.coveredUrl,
+      history: state.coveredURL,
       title: state.coveredTitle
     )
 
@@ -540,7 +540,7 @@ up.modal = do ->
       # since up.feedback listens to up:fragment:destroyed and then
       # re-assigns .up-current classes.
       state.url = null
-      state.coveredUrl = null
+      state.coveredURL = null
       state.coveredTitle = null
 
       promise = animate(viewportCloseAnimation, backdropCloseAnimation, animateOptions)
@@ -817,7 +817,7 @@ up.modal = do ->
   extract: extractAsap
   close: closeAsap
   url: -> state.url
-  coveredUrl: -> state.coveredUrl
+  coveredURL: -> state.coveredURL
   config: config
   flavors: flavors
   contains: contains

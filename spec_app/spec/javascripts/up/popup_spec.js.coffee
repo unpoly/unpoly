@@ -122,26 +122,26 @@ describe 'up.popup', ->
             expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:close', 'up:popup:closed', 'up:popup:open', 'up:popup:opened']
             expect($('.target')).toHaveText('response2')
 
-    describe 'up.popup.coveredUrl', ->
+    describe 'up.popup.coveredURL', ->
 
       describeCapability 'canPushState', ->
 
         it 'returns the URL behind the popup', asyncSpec (next) ->
           up.history.config.enabled = true
           up.history.replace('/foo')
-          expect(up.popup.coveredUrl()).toBeMissing()
+          expect(up.popup.coveredURL()).toBeMissing()
 
           $popupLink = $fixture('a[href="/bar"][up-popup=".container"][up-history="true"]')
           Trigger.clickSequence($popupLink)
 
           next =>
             @respondWith('<div class="container">text</div>')
-            expect(up.popup.coveredUrl()).toMatchUrl('/foo')
+            expect(up.popup.coveredURL()).toMatchURL('/foo')
 
             next.await up.popup.close()
 
           next =>
-            expect(up.popup.coveredUrl()).toBeMissing()
+            expect(up.popup.coveredURL()).toBeMissing()
 
     describe 'up.popup.close', ->
 
@@ -368,7 +368,7 @@ describe 'up.popup', ->
             origin: $('.inside'), history: '/new-location') # Provoke auto-close
 
         next =>
-          expect(location.href).toMatchUrl '/new-location'
+          expect(location.href).toMatchURL '/new-location'
 
       it 'does not auto-close the popup when a replacement from inside the popup affects a selector inside the popup', asyncSpec (next) ->
         $fixture('.outside').text('old outside')

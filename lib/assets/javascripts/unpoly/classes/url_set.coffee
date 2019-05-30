@@ -1,20 +1,20 @@
 u = up.util
 
-class up.UrlSet
+class up.URLSet
 
   constructor: (@urls, options = {}) ->
-    @normalizeUrl = options.normalizeUrl || u.normalizeUrl
-    @urls = u.map(@urls, @normalizeUrl)
+    @normalizeURL = options.normalizeURL || u.normalizeURL
+    @urls = u.map(@urls, @normalizeURL)
     @urls = u.compact(@urls)
 
-  matches: (testUrl) =>
-    if testUrl.indexOf('*') >= 0
-      @doesMatchPattern(testUrl)
+  matches: (testURL) =>
+    if testURL.indexOf('*') >= 0
+      @doesMatchPattern(testURL)
     else
-      @doesMatchFully(testUrl)
+      @doesMatchFully(testURL)
 
-  doesMatchFully: (testUrl) =>
-    u.contains(@urls, testUrl)
+  doesMatchFully: (testURL) =>
+    u.contains(@urls, testURL)
 
   doesMatchPattern: (pattern) =>
     placeholder = "__ASTERISK__"
@@ -25,8 +25,8 @@ class up.UrlSet
 
     u.find @urls, (url) -> pattern.test(url)
 
-  matchesAny: (testUrls) =>
-    u.find(testUrls, @matches)
+  matchesAny: (testURLs) =>
+    u.find(testURLs, @matches)
 
   "#{u.isEqual.key}": (otherSet) =>
     u.isEqual(@urls, otherSet?.urls)

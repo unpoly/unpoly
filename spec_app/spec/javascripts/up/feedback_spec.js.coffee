@@ -260,8 +260,8 @@ describe 'up.feedback', ->
             $unrelatedLink = $nav.affix('a[href="/baz"]')
             up.hello($nav)
 
-            expect(up.history.location).toMatchUrl('/foo')
-            expect(up.popup.coveredUrl()).toBeMissing()
+            expect(up.history.location).toMatchURL('/foo')
+            expect(up.popup.coveredURL()).toBeMissing()
 
             next =>
               Trigger.clickSequence($popupLink)
@@ -270,8 +270,8 @@ describe 'up.feedback', ->
               @respondWith('<div class="main">new-text</div>')
 
             next =>
-              expect(up.history.location).toMatchUrl('/foo') # popup did not change history
-              expect(up.popup.url()).toMatchUrl('/bar') # popup still knows which URL it is displaying
+              expect(up.history.location).toMatchURL('/foo') # popup did not change history
+              expect(up.popup.url()).toMatchURL('/bar') # popup still knows which URL it is displaying
               expect($backgroundLink).toHaveClass('up-current')
               expect($popupLink).toHaveClass('up-current')
               expect($unrelatedLink).not.toHaveClass('up-current')

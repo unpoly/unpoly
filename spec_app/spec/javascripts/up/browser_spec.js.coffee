@@ -24,7 +24,7 @@ describe 'up.browser', ->
           expect($form).toBeAttached()
           # GET forms cannot have an URL with a query section in their [action] attribute.
           # The query section would be overridden by the serialized input values on submission.
-          expect($form.attr('action')).toMatchUrl('/foo')
+          expect($form.attr('action')).toMatchURL('/foo')
 
           expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
           expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
@@ -37,7 +37,7 @@ describe 'up.browser', ->
           expect($form).toBeAttached()
           # GET forms cannot have an URL with a query section in their [action] attribute.
           # The query section would be overridden by the serialized input values on submission.
-          expect($form.attr('action')).toMatchUrl('/foo')
+          expect($form.attr('action')).toMatchURL('/foo')
           expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
           expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
 
@@ -49,7 +49,7 @@ describe 'up.browser', ->
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           expect($form).toBeAttached()
-          expect($form.attr('action')).toMatchUrl('/foo')
+          expect($form.attr('action')).toMatchURL('/foo')
           expect($form.attr('method')).toEqual('POST')
           expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
           expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
@@ -60,7 +60,7 @@ describe 'up.browser', ->
           expect(submitForm).toHaveBeenCalled()
           $form = $('form.up-page-loader')
           expect($form).toBeAttached()
-          expect($form.attr('action')).toMatchUrl('/foo')
+          expect($form.attr('action')).toMatchURL('/foo')
           expect($form.attr('method')).toEqual('POST')
           expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
           expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()

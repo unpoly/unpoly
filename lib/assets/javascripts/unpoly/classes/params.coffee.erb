@@ -516,7 +516,7 @@ class up.Params
   ###
   @fromURL: (url) ->
     params = new @()
-    urlParts = u.parseUrl(url)
+    urlParts = u.parseURL(url)
     if query = urlParts.search
       query = query.replace(/^\?/, '')
       params.addAll(query)

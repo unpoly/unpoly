@@ -65,7 +65,7 @@ up.util = do ->
   
   By default hashes are ignored, search queries are included.
   
-  @function up.util.normalizeUrl
+  @function up.util.normalizeURL
   @param {boolean} [options.hash=false]
     Whether to include an `#hash` anchor in the normalized URL
   @param {boolean} [options.search=true]
@@ -74,8 +74,8 @@ up.util = do ->
     Whether to strip a trailing slash from the pathname
   @internal
   ###
-  normalizeUrl = (urlOrAnchor, options) ->
-    parts = parseUrl(urlOrAnchor)
+  normalizeURL = (urlOrAnchor, options) ->
+    parts = parseURL(urlOrAnchor)
     normalized = parts.protocol + "//" + parts.hostname
     normalized += ":#{parts.port}" unless isStandardPort(parts.protocol, parts.port)
     pathname = parts.pathname
@@ -85,10 +85,10 @@ up.util = do ->
     normalized += parts.hash if options?.hash == true
     normalized
 
-  isCrossDomain = (targetUrl) ->
-    currentUrl = parseUrl(location.href)
-    targetUrl = parseUrl(targetUrl)
-    currentUrl.protocol != targetUrl.protocol || currentUrl.hostname != targetUrl.hostname
+  isCrossDomain = (targetURL) ->
+    currentURL = parseURL(location.href)
+    targetURL = parseURL(targetURL)
+    currentURL.protocol != targetURL.protocol || currentURL.hostname != targetURL.hostname
 
   ###**
   Parses the given URL into components such as hostname and path.
@@ -96,14 +96,14 @@ up.util = do ->
   If the given URL is not fully qualified, it is assumed to be relative
   to the current page.
 
-  @function up.util.parseUrl
+  @function up.util.parseURL
   @return {Object}
     The parsed URL as an object with
     `protocol`, `hostname`, `port`, `pathname`, `search` and `hash`
     properties.
   @stable
   ###
-  parseUrl = (urlOrLink) ->
+  parseURL = (urlOrLink) ->
     if isJQuery(urlOrLink)
       # In case someone passed us a $link, unwrap it
       link = up.element.get(urlOrLink)
@@ -1601,8 +1601,14 @@ up.util = do ->
     return promise
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  parseUrl: parseUrl
-  normalizeUrl: normalizeUrl
+  parseURL: parseURL
+  parseUrl: ->
+    up.legacy.warn('up.util.parseUrl() has been renamed to up.util.parseURL()')
+    parseURL.apply(null, arguments)
+  normalizeUrl: ->
+    up.legacy.warn('up.util.normalizeUrl() has been renamed to up.util.normalizeURL()')
+    normalizeURL.apply(null, arguments)
+  normalizeURL: normalizeURL
   normalizeMethod: normalizeMethod
   methodAllowsPayload: methodAllowsPayload
 #  isGoodSelector: isGoodSelector

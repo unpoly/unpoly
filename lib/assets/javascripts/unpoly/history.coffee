@@ -37,20 +37,20 @@ up.history = do ->
   were applied by [`up.history.push()`](/up.history.replace) or
   [`up.history.replace()`](/up.history.replace).
 
-  @function up.history.previousUrl
+  @function up.history.previousURL
   @internal
   ###
-  previousUrl = undefined
-  nextPreviousUrl = undefined
+  previousURL = undefined
+  nextPreviousURL = undefined
 
   reset = ->
     config.reset()
-    previousUrl = undefined
-    nextPreviousUrl = undefined
+    previousURL = undefined
+    nextPreviousURL = undefined
 
-  normalizeUrl = (url, normalizeOptions = {}) ->
+  normalizeURL = (url, normalizeOptions = {}) ->
     normalizeOptions.hash = true
-    u.normalizeUrl(url, normalizeOptions)
+    u.normalizeURL(url, normalizeOptions)
 
   ###**
   Returns a normalized URL for the current history entry.
@@ -59,25 +59,25 @@ up.history = do ->
   @experimental
   ###
   currentLocation = (normalizeOptions) ->
-    normalizeUrl(location.href, normalizeOptions)
+    normalizeURL(location.href, normalizeOptions)
 
   isCurrentLocation = (url) ->
     # Some web frameworks care about a trailing slash, some consider it optional.
     # Only for the equality test (is this the current URL) we consider it optional.
     normalizeOptions = { stripTrailingSlash: true }
-    normalizeUrl(url, normalizeOptions) == currentLocation(normalizeOptions)
+    normalizeURL(url, normalizeOptions) == currentLocation(normalizeOptions)
 
   ###**
-  Remembers the given URL so we can offer `up.history.previousUrl()`.
+  Remembers the given URL so we can offer `up.history.previousURL()`.
 
-  @function observeNewUrl
+  @function observeNewURL
   @internal
   ###
-  observeNewUrl = (url) ->
-    if nextPreviousUrl
-      previousUrl = nextPreviousUrl
-      nextPreviousUrl = undefined
-    nextPreviousUrl = url
+  observeNewURL = (url) ->
+    if nextPreviousURL
+      previousURL = nextPreviousURL
+      nextPreviousURL = undefined
+    nextPreviousURL = url
 
   ###**
   Replaces the current history entry and updates the
@@ -119,7 +119,7 @@ up.history = do ->
   @experimental
   ###
   push = (url, options = {}) ->
-    url = normalizeUrl(url)
+    url = normalizeURL(url)
     if (options.force || !isCurrentLocation(url))
       if manipulate('pushState', url)
         up.emit('up:history:pushed', url: url, log: "Advanced to location #{url}")
@@ -139,7 +139,7 @@ up.history = do ->
     if up.browser.canPushState() && config.enabled
       state = buildState()
       window.history[method](state, '', url)
-      observeNewUrl(currentLocation())
+      observeNewURL(currentLocation())
       true
     else
       false
@@ -169,8 +169,8 @@ up.history = do ->
       up.puts 'Ignoring a state not pushed by Unpoly (%o)', state
 
   pop = (event) ->
-    observeNewUrl(currentLocation())
-    up.viewport.saveScroll(url: previousUrl)
+    observeNewURL(currentLocation())
+    up.viewport.saveScroll(url: previousURL)
     state = event.state
     restoreStateOnPop(state)
 
@@ -238,9 +238,9 @@ up.history = do ->
   @stable
   ###
   up.macro 'a[up-back], [up-href][up-back]', (link) ->
-    if previousUrl
+    if previousURL
       e.setMissingAttrs link,
-        'up-href': previousUrl,
+        'up-href': previousURL,
         'up-restore-scroll': ''
       link.removeAttribute('up-back')
       up.link.makeFollowable(link)
@@ -253,6 +253,6 @@ up.history = do ->
     replace: replace
     get_location: currentLocation
     isLocation: isCurrentLocation
-    previousUrl: -> previousUrl
-    normalizeUrl: normalizeUrl
+    previousURL: -> previousURL
+    normalizeURL: normalizeURL
 
