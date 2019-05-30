@@ -295,7 +295,7 @@ up.form = do ->
   The unobtrusive variant of this is the [`up-autosubmit`](/form-up-autosubmit) attribute.
 
   @function up.autosubmit
-  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} target
     The field or form to observe.
   @param {Object} [options]
     See options for [`up.observe()`](/up.observe)
@@ -303,8 +303,8 @@ up.form = do ->
     A destructor function that removes the observe watch when called.
   @stable
   ###
-  autosubmit = (selectorOrElement, options) ->
-    observe(selectorOrElement, options, -> submit(selectorOrElement))
+  autosubmit = (target, options) ->
+    observe(target, options, -> submit(target))
 
   findValidateTarget = (field, options) ->
     option = options.target ? field.getAttribute('up-validate')

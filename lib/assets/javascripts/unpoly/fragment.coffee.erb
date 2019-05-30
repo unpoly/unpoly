@@ -31,23 +31,23 @@ up.fragment = do ->
   Returns the URL the given element was retrieved from.
 
   @method up.fragment.source
-  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} target
   @param {Object} options
   @return {string|undefined}
   @experimental
   ###
-  source = (selectorOrElement, options = {}) ->
-    setLayerOption(selectorOrElement, options)
-    element = first(selectorOrElement, options)
+  source = (target, options = {}) ->
+    setLayerOption(target, options)
+    element = first(target, options)
     if sourceElement = e.closest(element, '[up-source]')
       sourceElement.getAttribute("up-source")
 
   ###*
   @function up.change
-  @param {string|Element|jQuery} [selectorOrElement]
+  @param {string|Element|jQuery} [target]
   @param {Object} options
-    Copy from replace()
-    New options like { document } or { content } or { url } or { target }
+    TODO: Copy from replace()
+    TODO: New options like { document } or { content } or { url } or { target }
   @stable
   ###
   makeChange = (options) ->
@@ -138,7 +138,7 @@ up.fragment = do ->
   element that replaces it.
 
   @function up.replace
-  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} target
     The CSS selector to update. You can also pass a DOM element or jQuery element
     here, in which case a selector will be inferred from the element's class and ID.
   @param {string} url
@@ -237,7 +237,7 @@ up.fragment = do ->
   discarded, since it didn't match the selector.
 
   @function up.extract
-  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} target
   @param {string} html
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace).
@@ -357,7 +357,7 @@ up.fragment = do ->
   event.
 
   @function up.hello
-  @param {Element|jQuery} selectorOrElement
+  @param {Element|jQuery} target
   @param {Element|jQuery} [options.origin]
   @return {Element}
     The compiled element
@@ -512,7 +512,7 @@ up.fragment = do ->
   Emits events [`up:fragment:destroyed`](/up:fragment:destroyed).
 
   @function up.destroy
-  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} target
   @param {string} [options.history]
     A URL that will be pushed as a new history entry when the element begins destruction.
   @param {string} [options.title]
@@ -529,10 +529,10 @@ up.fragment = do ->
     A promise that will be fulfilled once the element has been removed from the DOM.
   @stable
   ###
-  destroy = (selectorOrElement, options = {}) ->
-    setLayerOption(selectorOrElement, options)
+  destroy = (target, options = {}) ->
+    setLayerOption(target, options)
 
-    if options.element = first(selectorOrElement, options)
+    if options.element = first(target, options)
       return new up.Change.DestroyFragment(options).execute()
     else
       return Promise.resolve()
@@ -541,12 +541,12 @@ up.fragment = do ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
     options.log != false && !e.matches(element, '.up-placeholder, .up-modal')
 
-  setLayerOption = (selectorOrElement, options) ->
+  setLayerOption = (target, options) ->
     # up.fragment functions usually only see elements in the current layer.
     # However, if we are passed an actual Element or jQuery collection,
     # we operate in the given element's layer.
-    if !options.layer && u.isElementish(selectorOrElement)
-      options.layer = up.layer.forElement(selectorOrElement)
+    if !options.layer && u.isElementish(target)
+      options.layer = up.layer.forElement(target)
     else
       options.layer = up.layer.lookup(options)
 
@@ -598,7 +598,7 @@ up.fragment = do ->
   don't usually need to give an URL when reloading.
 
   @function up.reload
-  @param {string|Element|jQuery} [selectorOrElement]
+  @param {string|Element|jQuery} [target]
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace)
   @param {string} [options.url]
@@ -609,7 +609,7 @@ up.fragment = do ->
   reload = (args...) ->
     options = parseTargetAndOptions(args)
     options.cache ?= false
-    options.url ?= source(selectorOrElement)
+    options.url ?= source(target)
     return makeChange(options)
 
   ###**

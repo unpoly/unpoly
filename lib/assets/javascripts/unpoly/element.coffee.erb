@@ -1040,25 +1040,24 @@ up.element = do ->
   for that element.
 
   @function up.element.resolveSelector
-  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} target
   @param {string|Element|jQuery} origin
     The element that this selector resolution is relative to.
     That element's selector will be substituted for `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @return {string}
   @internal
   ###
-  resolveSelector = (selectorOrElement, origin) ->
-    if u.isString(selectorOrElement)
-      selector = selectorOrElement
-      if u.contains(selector, '&')
+  resolveSelector = (target, origin) ->
+    if u.isString(target)
+      if u.contains(target, '&')
         if u.isPresent(origin) # isPresent returns false for empty jQuery collection
           originSelector = toSelector(origin)
-          selector = selector.replace(/\&/, originSelector)
+          target = target.replace(/\&/, originSelector)
         else
-          up.fail("Found origin reference (%s) in selector %s, but no origin was given", '&', selector)
+          up.fail("Found origin reference (%s) in selector %s, but no origin was given", '&', target)
     else
-      selector = toSelector(selectorOrElement)
-    selector
+      target = toSelector(target)
+    return target
 
   ###**
   Returns whether the given element is currently visible.

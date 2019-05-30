@@ -345,12 +345,12 @@ up.viewport = do ->
   if no closer viewport exists.
 
   @function up.viewport.closest
-  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} target
   @return {Element}
   @experimental
   ###
-  closest = (selectorOrElement) ->
-    element = e.get(selectorOrElement)
+  closest = (target) ->
+    element = e.get(target)
     e.closest(element, allSelector())
 
   ###**
@@ -358,16 +358,16 @@ up.viewport = do ->
   given selector or element.
 
   @function up.viewport.subtree
-  @param {string|Element|jQuery} selectorOrElement
+  @param {string|Element|jQuery} target
   @return List<Element>
   @internal
   ###
-  getSubtree = (selectorOrElement) ->
-    element = e.get(selectorOrElement)
+  getSubtree = (target) ->
+    element = e.get(target)
     e.subtree(element, allSelector())
 
-  getAround = (selectorOrElement) ->
-    element = e.get(selectorOrElement)
+  getAround = (target) ->
+    element = e.get(target)
     e.list(closest(element), getSubtree(element))
 
   ###**
