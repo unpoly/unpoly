@@ -3,12 +3,12 @@ e = up.element
 
 OVERLAY_CONTAINER_SELECTOR = '.up-overlays'
 
-class up.LayerStack extends up.Config
+class up.LayerStack extends up.Class
 
-  constructor: (blueprintFn) ->
-    super(blueprintFn)
-    @all ||= []
-    @queue = new up.TaskQueue2()
+  constructor: ->
+    @queue = new up.TaskQueue()
+    @all = []
+    @all.push(new up.Layer.Root(this))
 
   asap: (args...) ->
     @queue.asap(args...)
@@ -36,9 +36,10 @@ class up.LayerStack extends up.Config
       return promise
 
   reset: ->
-    super()
+    @all = [this.root]
+
     @queue.reset()
-    if c = @container()
+    if c = @_overlayContainer
       e.remove(c)
 
   indexOf: (layer) ->
@@ -72,10 +73,10 @@ class up.LayerStack extends up.Config
     @parentOf(@current)
 
   @getter 'overlayContainer', ->
-    unless @overlayContainer
-      @overlayContainer = e.createFromSelector(OVERLAY_CONTAINER_SELECTOR)
+    unless @_overlayContainer
+      @_overlayContainer = e.createFromSelector(OVERLAY_CONTAINER_SELECTOR)
       @attachOverlayContainer()
-    @overlayContainer
+    @_overlayContainer
 
   syncHistory: ->
     historyLayers = u.filter(@allReversed(), 'history')
@@ -86,8 +87,8 @@ class up.LayerStack extends up.Config
     up.history.push(location)
 
   attachOverlayContainer: ->
-    if @overlayContainer
-      document.body.appendChild(@overlayContainer)
+    if @_overlayContainer
+      document.body.appendChild(@_overlayContainer)
 
   lookupOne: (args...) ->
     new up.LayerLookup(this, args...).first()

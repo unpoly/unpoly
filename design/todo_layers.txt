@@ -1,3 +1,5 @@
+- Don't allow to replace <html> ever. Force to replace <body> instead.
+
 - Check new layer styles visually
   - Nested layers should have more padding
 

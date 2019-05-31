@@ -137,7 +137,6 @@ up.proxy = do ->
         return response
 
   reset = ->
-    cancelSlowDelay()
     abortRequests()
     preloadQueue.reset()
     foregroundQueue.reset()

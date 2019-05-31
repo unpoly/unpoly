@@ -1,4 +1,5 @@
 #= require ./base
+#= require ./overlay
 
 class up.Layer.OverlayWithTether extends up.Layer.Overlay
 

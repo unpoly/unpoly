@@ -235,7 +235,7 @@ describe 'up.syntax', ->
         up.hello(fixture('.element'))
         expect(traces).toEqual ['baz', 'foo' , 'bar']
 
-      it 'allows to macros to have priorities of their own', ->
+      it 'allows to macros to have priorities of their own (higher priority is run first)', ->
         traces = []
         up.macro '.element', { priority: 1 }, -> traces.push('foo')
         up.macro '.element', { priority: 2 }, -> traces.push('bar')

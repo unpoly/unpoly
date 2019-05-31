@@ -1,7 +1,4 @@
-up.legacy.renamedEvent('up:popup:open', 'up:layer:open')
-up.legacy.renamedEvent('up:popup:opened', 'up:layer:opened')
-up.legacy.renamedEvent('up:popup:close', 'up:layer:dismiss')
-up.legacy.renamedEvent('up:popup:closed', 'up:layer:dismissed')
+u = up.util
 
 up.popup = u.literal
   attach: (element, options = {}) ->
@@ -35,3 +32,8 @@ up.popup = u.literal
   sync: ->
     up.legacy.deprecated('up.popup.sync()', 'up.layer.sync()')
     up.layer.sync()
+
+up.legacy.renamedEvent('up:popup:open', 'up:layer:open')
+up.legacy.renamedEvent('up:popup:opened', 'up:layer:opened')
+up.legacy.renamedEvent('up:popup:close', 'up:layer:dismiss')
+up.legacy.renamedEvent('up:popup:closed', 'up:layer:dismissed')

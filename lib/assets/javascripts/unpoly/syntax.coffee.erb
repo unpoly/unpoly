@@ -26,7 +26,11 @@ up.syntax = do ->
 
   SYSTEM_MACRO_PRIORITIES = {
     '[up-back]': -100        # sets [up-href] to previous URL
-    '[up-drawer]': -200      # sets [up-modal] and makes link followable
+    '[up-drawer]': -200      #
+    '[up-modal]': -200       #
+    '[up-cover]': -200       #
+    '[up-popup]': -200       #
+    '[up-tooltip]': -200     #
     '[up-dash]': -200        # sets [up-href] unless already set, also other [up-*] attributes
     '[up-expand]': -300      # distributes [up-*] attributes to parents
     '[data-method]': -400,   # converts [data-method] to [up-method] only if link has followable [up-*] attributes

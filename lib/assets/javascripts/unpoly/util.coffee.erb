@@ -1568,8 +1568,8 @@ up.util = do ->
     prefix + upperCaseFirst(str)
 
   unprefixCamelCase = (str, prefix) ->
-    if key.indexOf(prefix) == 0
-      lowerCaseFirst(key.slice(prefixLength))
+    if str.indexOf(prefix) == 0
+      lowerCaseFirst(str.slice(prefix.length))
 
   lowerCaseFirst = (str) ->
     str[0].toLowerCase() + str.slice(1)
@@ -1581,7 +1581,7 @@ up.util = do ->
     Object.defineProperty(object, prop, { get })
 
   defineDelegates = (object, props, targetProp) ->
-    for prop in wrapArray(props)
+    for prop in wrapList(props)
       defineGetter(object, prop, -> this[targetProp][prop])
 
   literal = (obj) ->
@@ -1620,7 +1620,7 @@ up.util = do ->
 #  deepAssign: deepAssign
 #  deepMerge: deepMerge
   options: newOptions
-  parseArgAndOption: parseArgAndOptions
+  parseArgAndOptions: parseArgAndOptions
   each: each
   eachIterator: eachIterator
   map: map
@@ -1739,4 +1739,6 @@ up.util = do ->
   delegate: defineDelegates
   literal: literal
   asyncWrap: asyncWrap
+  reverse: reverse
+
 

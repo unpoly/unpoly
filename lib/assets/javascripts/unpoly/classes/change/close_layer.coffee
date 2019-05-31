@@ -1,3 +1,8 @@
+#= require ./removal
+
+u = up.util
+e = up.element
+
 class up.Change.CloseLayer extends up.Change.Removal
 
 constructor: (options) ->

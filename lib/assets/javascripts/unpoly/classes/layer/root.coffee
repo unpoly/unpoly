@@ -1,10 +1,12 @@
 #= require ./base
 
+e = up.element
+
 class up.Layer.Root extends up.Layer
 
   @config: new up.Config ->
     history: true
-    targets: ['body'] # this replaces up.fragment.config.targets
+    targets: ['body'] # this replaces up.fragment.config.fallbacks
     dismissable: false
 
   @flavor: 'root'

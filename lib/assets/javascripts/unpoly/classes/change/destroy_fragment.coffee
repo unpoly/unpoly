@@ -9,13 +9,13 @@ class up.Change.DestroyFragment extends up.Change.Removal
     @element = @options.element
 
   execute: ->
-    @layer.updateHistory(options)
+    @layer.updateHistory(@options)
     up.fragment.markAsDestroying(@element)
     @animate().then(@wipe)
 
   animate: ->
     animateOptions = up.motion.animateOptions(@options)
-    up.motion.animate(@element, options.animation, animateOptions)
+    up.motion.animate(@element, @options.animation, animateOptions)
 
   wipe: =>
     parent = @element.parentNode

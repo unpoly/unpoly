@@ -1,3 +1,5 @@
+u = up.util
+
 up.layer = do ->
 
   DEFAULT_IMPLEMENTATIONS = [
@@ -8,21 +10,6 @@ up.layer = do ->
     up.Layer.Cover
   ]
 
-  config = new up.Config ->
-    newConfig =
-      flavor: 'modal'
-      all: up.layer.Base.config
-
-    for implementation in DEFAULT_IMPLEMENTATIONS
-      registerFlavor(implementation, newConfig)
-
-    return newConfig
-
-  stack = new up.LayerStack(-> layers: [new up.Layer.Root()])
-
-  isOverlayFlavor = (name) ->
-    name != 'root' && name != 'page' && !!config[name]
-
   registerFlavor = (Implementation, store = config) ->
     name = Implementation.flavor
     # Since the layer class names are not public API, we make their static
@@ -31,6 +18,21 @@ up.layer = do ->
     subConfig = Implementation.config
     subConfig.Implementation = Implementation
     store[name] = subConfig
+
+  config = new up.Config ->
+    newConfig =
+      flavor: 'modal'
+      all: up.Layer.config
+
+    for implementation in DEFAULT_IMPLEMENTATIONS
+      registerFlavor(implementation, newConfig)
+
+    return newConfig
+
+  stack = new up.LayerStack()
+
+  isOverlayFlavor = (name) ->
+    name != 'root' && name != 'page' && !!config[name]
 
   defaultTargets = (options = {}) ->
     flavorImplementation(options).defaults().targets

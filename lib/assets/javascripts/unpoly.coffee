@@ -8,7 +8,6 @@
 #= require_tree ./unpoly/classes
 #= require ./unpoly/framework
 #= require ./unpoly/event
-#= require ./unpoly/cookie
 #= require ./unpoly/protocol
 #= require ./unpoly/log
 #= require ./unpoly/toast
@@ -21,8 +20,6 @@
 #= require ./unpoly/link
 #= require ./unpoly/form
 #= require ./unpoly/layer
-#= require ./unpoly/modal
-#= require ./unpoly/popup
 #= require ./unpoly/tooltip
 #= require ./unpoly/feedback
 #= require ./unpoly/radio

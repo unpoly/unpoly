@@ -1,7 +1,4 @@
-up.legacy.renamedEvent('up:modal:open', 'up:layer:open')
-up.legacy.renamedEvent('up:modal:opened', 'up:layer:opened')
-up.legacy.renamedEvent('up:modal:close', 'up:layer:dismiss')
-up.legacy.renamedEvent('up:modal:closed', 'up:layer:dismissed')
+u = up.util
 
 up.modal = u.literal
   visit: (url, options = {}) ->
@@ -45,3 +42,8 @@ up.modal = u.literal
 
   flavor: ->
     throw 'up.modal.flavor() has been removed without replacement'
+
+up.legacy.renamedEvent('up:modal:open', 'up:layer:open')
+up.legacy.renamedEvent('up:modal:opened', 'up:layer:opened')
+up.legacy.renamedEvent('up:modal:close', 'up:layer:dismiss')
+up.legacy.renamedEvent('up:modal:closed', 'up:layer:dismissed')

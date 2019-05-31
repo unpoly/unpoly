@@ -26,7 +26,7 @@ class up.EventListenerGroup extends up.Record
     u.sequence(unbindFns)
 
   listenerAttributes: (element, eventName) ->
-    u.merge(@attributes,  { element, eventName })
+    u.merge(@attributes(), { element, eventName })
 
   unbind: ->
     for element in @elements
