@@ -35,7 +35,6 @@ class up.EventListener extends up.Record
     # 2. event.target is the element that received an event, which might be a
     #    child of `selector`.
     # 3. There is only a single event bubbling up the DOM, so we are only called once.
-
     element = event.target
     element = e.closest(element, @selector) if @selector
 

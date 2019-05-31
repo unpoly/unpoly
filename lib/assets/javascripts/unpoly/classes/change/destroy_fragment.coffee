@@ -21,4 +21,5 @@ class up.Change.DestroyFragment extends up.Change.Removal
     parent = @element.parentNode
     up.syntax.clean(@element)
     e.remove(@element)
-    up.fragment.emitDestroyed(element, { parent, log: @options.log })
+    up.fragment.emitDestroyed(@element, { parent, log: @options.log })
+

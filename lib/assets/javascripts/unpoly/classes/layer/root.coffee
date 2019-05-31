@@ -14,6 +14,7 @@ class up.Layer.Root extends up.Layer
   constructor: (stack, options) ->
     super(stack, options)
     @element = e.root
+    @location = up.browser.location
 
   allElements: (selector) ->
     matches = e.all(selector)

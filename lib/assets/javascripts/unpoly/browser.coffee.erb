@@ -38,8 +38,8 @@ up.browser = do ->
   submitForm = (form) ->
     form.submit()
 
-  url = ->
-    location.href
+  location = ->
+    window.location.href
 
   isIE10OrWorse = u.memoize ->
     !window.atob
@@ -221,18 +221,19 @@ up.browser = do ->
     netInfo = navigator.connection
     netInfo.effectiveType?.includes('2g') || netInfo.saveData
 
-  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-  url: url
-  loadPage: loadPage
-  submitForm: submitForm
-  canPushState: canPushState
-  canFormData: canFormData
-  canInspectFormData: canInspectFormData
-  canCustomElements: canCustomElements
-  canJQuery: canJQuery
-  canControlScrollRestoration: canControlScrollRestoration
-  whenConfirmed: whenConfirmed
-  isSupported: isSupported
-  popCookie: popCookie
-  hasSlowConnection: hasSlowConnection
-  isIE11: isIE11
+  u.literal
+    <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
+    get_location: location
+    loadPage: loadPage
+    submitForm: submitForm
+    canPushState: canPushState
+    canFormData: canFormData
+    canInspectFormData: canInspectFormData
+    canCustomElements: canCustomElements
+    canJQuery: canJQuery
+    canControlScrollRestoration: canControlScrollRestoration
+    whenConfirmed: whenConfirmed
+    isSupported: isSupported
+    popCookie: popCookie
+    hasSlowConnection: hasSlowConnection
+    isIE11: isIE11

@@ -19,6 +19,8 @@ class up.Layer extends up.Record
     # This will end up as the up.layer.context property.
     @context ?= {}
 
+    console.debug("  Layer attrs after defaults:", this)
+
     # If an ancestor layer was opened with the wish to not affect history,
     # this child layer should not affect it either.
     if parent = @parent

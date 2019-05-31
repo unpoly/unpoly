@@ -17,6 +17,7 @@
   - Test that opening/updating an layer can reset the world if selector is unavailable
   - Test against https://github.com/unpoly/unpoly/issues/79
     - We might need to register all link handlers to a new .up-modal instead of the document
+  - Test defaults inheritance in layer hierarchy
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
