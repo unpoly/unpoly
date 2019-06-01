@@ -1,6 +1,7 @@
 #= require ./namespace
 
 u = up.util
+e = up.element
 
 class up.Change.FromContent
 
@@ -44,19 +45,15 @@ class up.Change.FromContent
       @eachTargetCandidatePlan layerDefaultTargets, (plan) =>
         # We cannot open a <body> in a new layer
         unless up.fragment.targetsBody(plan.target)
-          @plans.push(new up.ExtractPlan.OpenLayer(plan))
+          @plans.push(new up.Change.OpenLayer(plan))
 
     else
       for layer in up.layer.lookupAll(@options.layer)
         @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
-          # Since the last plan is always SwapBody, we don't need to
-          # add other plans that would also swap the body.
-          continue if up.fragment.targetsBody(plan.target)
-
-          @plans.push(new up.ExtractPlan.UpdateLayer(plan))
+          @plans.push(new up.Change.UpdateLayer(plan))
 
     # Make sure we always succeed
-    @plans.push(new ExtractPlan.ResetWorld(@options))
+    @plans.push(new up.Change.ResetWorld(@options))
 
   eachTargetCandidatePlan: (layerDefaultTargets, planOptions, fn) ->
     for target, i in @buildTargetCandidates(layerDefaultTargets)

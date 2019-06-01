@@ -1,5 +1,7 @@
 #= require ./namespace
 
+u = up.util
+
 class up.Change.FromURL
 
   constructor: (options) ->

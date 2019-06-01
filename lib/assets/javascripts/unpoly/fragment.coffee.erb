@@ -47,8 +47,8 @@ up.fragment = do ->
     TODO: New options like { document } or { content } or { url } or { target }
   @stable
   ###
-  makeChange = (options) ->
-    options = parseTargetAndOptions(options)
+  makeChange = (args...) ->
+    options = parseTargetAndOptions(args)
 
     if options.content || options.document
       return new up.Change.FromContent(options).execute()

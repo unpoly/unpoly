@@ -1587,7 +1587,7 @@ up.util = do ->
     Object.defineProperty(object, prop, { get })
 
   defineDelegates = (object, props, targetProp) ->
-    for prop in wrapList(props)
+    wrapList(props).forEach (prop) ->
       defineGetter(object, prop, -> this[targetProp][prop])
 
   literal = (obj) ->
@@ -1747,5 +1747,7 @@ up.util = do ->
   literal: literal
   asyncWrap: asyncWrap
   reverse: reverse
+  unprefixCamelCase: unprefixCamelCase
+
 
 
