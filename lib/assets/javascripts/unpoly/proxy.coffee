@@ -330,9 +330,9 @@ up.proxy = do ->
   isBusy = ->
     foregroundQueue.isBusy()
 
-  abortRequests = (requestOrConditions = {}) ->
+  abortRequests = (conditions) ->
     for queue in [foregroundQueue, preloadQueue]
-      queue.abort(requestOrConditions)
+      queue.abort(conditions)
 
   ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)

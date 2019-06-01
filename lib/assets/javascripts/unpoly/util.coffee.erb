@@ -1040,20 +1040,26 @@ up.util = do ->
 
   If `value` is an array, this returns whether `subValue` is an element of `value`.
 
-  If `value` is an object, this returns whether `value`'s entries are a superset
-  of `subValue`'s entries.
-
   @function up.util.contains
-  @param {Array|string|Object} value
-  @param {Array|string|Object} subValue
+  @param {Array|string} value
+  @param {Array|string} subValue
   @stable
   ###
   contains = (value, subValue) ->
-    if u.isObject(value)
-      reducedValue = only(value, keys(subValue)...)
-      isEqual(value, reducedValue)
-    else
-      value.indexOf(subValue) >= 0
+    value.indexOf(subValue) >= 0
+
+  ###**
+  Returns whether `object`'s entries are a superset
+  of `subObject`'s entries.
+
+  @function up.util.objectContains
+  @param {Object} object
+  @param {Object} subObject
+  @internal
+  ###
+  objectContains = (object, subObject) ->
+    reducedValue = only(object, Object.keys(subObject)...)
+    isEqual(subObject, reducedValue)
 
   ###**
   Returns a copy of the given object that only contains
@@ -1681,6 +1687,7 @@ up.util = do ->
     scheduleTimer.apply(null, arguments)
   escapePressed: escapePressed
   contains: contains
+  objectContains: objectContains
   toArray: toArray
   only: only
   except: except
