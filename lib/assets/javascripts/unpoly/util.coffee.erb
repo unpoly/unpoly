@@ -1590,6 +1590,15 @@ up.util = do ->
     wrapList(props).forEach (prop) ->
       defineGetter(object, prop, -> this[targetProp][prop])
 
+  defineDelegates = (object, props, targetProp) ->
+    wrapList(props).forEach (prop) ->
+      defineGetter object, prop, ->
+        target = this[targetProp]
+        value = target[prop]
+        if isFunction(value)
+          value = value.bind(target)
+        return value
+
   literal = (obj) ->
     result = {}
     for key, value of obj
