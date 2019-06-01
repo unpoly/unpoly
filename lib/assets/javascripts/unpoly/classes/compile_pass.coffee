@@ -74,10 +74,7 @@ class up.CompilePass
       result
 
   select: (selector) ->
-    if u.isFunction(selector)
-      selector = selector()
-
-    matches = e.subtree(@root, selector)
+    matches = e.subtree(@root, u.evalOption(selector))
     if @skipSubtrees
       matches = u.reject(matches, @isInSkippedSubtree)
 

@@ -28,6 +28,7 @@
   - Expose up.fragment.all() as experimental API
   - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
   - { navigate }
+  - Document that up.on selector can be a function
 
 
 Finishing up
