@@ -220,12 +220,14 @@ describe 'up.fragment', ->
           beforeEach ->
             up.history.config.enabled = true
 
-          it 'should set the browser location to the given URL', (done) ->
+          it 'should set the browser location to the given URL', asyncSpec (next) ->
             promise = up.replace('.middle', '/path')
-            @respond()
-            promise.then ->
+            next =>
+              @respond()
+              next.await(promise)
+            next =>
+              console.debug("-- before expect --")
               expect(location.href).toMatchURL('/path')
-              done()
 
           it 'does not add a history entry after non-GET requests', asyncSpec (next) ->
             up.replace('.middle', '/path', method: 'post')
@@ -279,12 +281,13 @@ describe 'up.fragment', ->
 
         describe 'source', ->
 
-          it 'remembers the source the fragment was retrieved from', (done) ->
+          it 'remembers the source the fragment was retrieved from', asyncSpec (next) ->
             promise = up.replace('.middle', '/path')
-            @respond()
-            promise.then ->
+            next =>
+              @respond()
+              next.await(promise)
+            next =>
               expect($('.middle').attr('up-source')).toMatch(/\/path$/)
-              done()
 
           it 'reuses the previous source for a non-GET request (since that is reloadable)', asyncSpec (next) ->
             @$oldMiddle.attr('up-source', '/previous-source')

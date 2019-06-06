@@ -198,7 +198,7 @@ up.protocol = do ->
   @internal
   ###
   methodFromXhr = (xhr) ->
-    extractHeader(xhr, config.methodHeader, u.normalizeMethod(method))
+    extractHeader(xhr, config.methodHeader, u.normalizeMethod)
 
   acceptLayerFromXhr = (xhr) ->
     # Even if acceptance has no value, the server will send

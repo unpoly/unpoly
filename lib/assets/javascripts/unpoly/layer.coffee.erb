@@ -80,11 +80,11 @@ up.layer = do ->
       open(options)
 
   allElements = (selector, options) ->
-    layers = @stack.lookupAll(options)
+    layers = stack.lookupAll(options)
     u.flatMap layers, (layer) -> layer.allElements(selector)
 
   firstElement = (selector, options) ->
-    layers = @stack.lookupAll(options)
+    layers = stack.lookupAll(options)
     u.findResult layers, -> layer.firstElement(selector)
 
   up.event.onEscape (event) ->

@@ -35,6 +35,7 @@ up.fragment = do ->
   ###
   source = (target, options = {}) ->
     setLayerOption(target, options)
+    console.debug("first(%o, %o)", target, options)
     element = first(target, options)
     if sourceElement = e.closest(element, '[up-source]')
       sourceElement.getAttribute("up-source")
@@ -49,6 +50,8 @@ up.fragment = do ->
   ###
   makeChange = (args...) ->
     options = parseTargetAndOptions(args)
+
+    console.debug("makeChange(%o)", options)
 
     if options.content || options.document
       return new up.Change.FromContent(options).execute()
@@ -482,16 +485,20 @@ up.fragment = do ->
   all = (args...) ->
     options = u.extractOptions(args)
 
-    if args.size == 1
+    if args.length == 1
+      console.debug("all: arg.size == 1")
       if u.isElementish(args[0])
+        console.debug("all: isElementish")
         # up.fragment.all(element, [options]) should just return [element].
         # Any options are ignored.
         candidates = [args[0]]
       else
+        console.debug("all: NOT isElementish")
         # up.fragment.all(selector, [options]) should lookup the selector
         # in the current layer, or in options.layer if given.
         candidates = up.layer.allElements(args[0], options)
     else
+      console.debug("all: args.size is %o", args.length)
       # up.fragment.all(rootElement, selector) should find selector within
       # the descendants of rootElement regardless of rootElement's layer.
       candidates = e.all(args...)

@@ -33,6 +33,7 @@ class up.Change.FromURL
             @failureOptions[unprefixedKey] = failValue
 
   execute: ->
+    console.debug("Executing up.Change.FromURL(%o)", this)
     if !up.browser.canPushState() && @successOptions.history != false
       @fullLoad() unless @successOptions.preload
       return u.unresolvablePromise()

@@ -30,6 +30,7 @@
   - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
   - { navigate }
   - Document that up.on selector can be a function
+  - I think the slow/recover events changed
 
 
 Finishing up

@@ -1,5 +1,6 @@
 #= require ./base
 
+u = up.util
 e = up.element
 
 class up.Layer.Root extends up.Layer

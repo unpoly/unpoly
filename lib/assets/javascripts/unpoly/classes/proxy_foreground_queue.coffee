@@ -13,6 +13,7 @@ class up.ProxyForegroundQueue extends up.TaskQueue
     @emittedSlow = false
 
   asap: (args...) ->
+    console.debug("foreground queue: asap(%o)", u.copy(args))
     promise = super(args...)
     slowDelay = u.evalOption(@slowDelay)
     u.setTimer(slowDelay, @checkSlow)
