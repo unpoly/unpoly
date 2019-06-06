@@ -58,7 +58,7 @@ class up.TaskQueue extends up.Class
   runTaskNow: (task) ->
     @currentTasks.push(task)
 
-    task.start()
+    returnValue = task.start()
 
     if u.isPromise(returnValue)
       u.always(returnValue, => @onTaskDone(task))

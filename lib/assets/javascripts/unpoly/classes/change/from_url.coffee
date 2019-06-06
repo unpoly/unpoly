@@ -33,14 +33,14 @@ class up.Change.FromURL
             @failureOptions[unprefixedKey] = failValue
 
   execute: ->
-    if !up.browser.canPushState() && options.history != false
-      fullLoad() unless options.preload
+    if !up.browser.canPushState() && @successOptions.history != false
+      @fullLoad() unless @successOptions.preload
       return u.unresolvablePromise()
 
     @buildRequest()
 
     promise = up.request(@request)
-    unless options.preload
+    unless @successOptions.preload
       promise = promise.then(@onRequestSuccess, @onRequestFailure)
     return promise
 

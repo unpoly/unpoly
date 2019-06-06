@@ -74,14 +74,14 @@ class up.Change.FromContent
     targetCandidates
 
   execute: ->
+    @buildResponseDoc()
+
     if @options.saveScroll
       up.viewport.saveScroll()
 
     shouldExtractTitle = not (@options.title is false || u.isString(@options.title))
     if shouldExtractTitle && responseTitle = @responseDoc.title()
       @options.title = responseTitle
-
-    @buildResponseDoc()
 
     return @seekPlan
       attempt: (plan) -> plan.execute()

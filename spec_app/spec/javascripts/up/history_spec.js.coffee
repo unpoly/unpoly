@@ -12,13 +12,13 @@ describe 'up.history', ->
 
       it 'should have tests'
 
-    describe 'up.history.url', ->
+    describe 'up.history.location', ->
 
       describeCapability 'canPushState', ->
 
         it 'does not strip a trailing slash from the current URL', ->
           history.replaceState?({}, 'title', '/host/path/')
-          expect(up.history.url()).toMatchURL('/host/path/')
+          expect(up.history.location).toMatchURL('/host/path/')
 
     describe 'up.history.isLocation', ->
 

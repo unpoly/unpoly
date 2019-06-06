@@ -248,8 +248,6 @@ up.proxy = do ->
       # If no existing promise is available, we make a network request.
       loadOrQueue(request)
 
-    processSpinnerEvents()
-
     # The request is also a promise for its response.
     return request
 

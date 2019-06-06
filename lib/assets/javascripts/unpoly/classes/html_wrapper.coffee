@@ -1,6 +1,6 @@
 class up.HtmlWrapper
 
-  constructor: (@tagName, options) ->
+  constructor: (@tagName, options = {}) ->
     openTag = "<#{@tagName}[^>]*>"
     closeTag = "<\/#{@tagName}>"
     innerHTML = "(.|\\s)*?"

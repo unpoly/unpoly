@@ -521,7 +521,7 @@ up.viewport = do ->
   @experimental
   ###
   saveScroll = (options = {}) ->
-    url = options.url ? up.history.url()
+    url = options.url ? up.history.location
     tops = options.tops ? scrollTops()
     lastScrollTops.set(url, tops)
 
@@ -541,7 +541,7 @@ up.viewport = do ->
   @experimental
   ###
   restoreScroll = (options = {}) ->
-    url = up.history.url()
+    url = up.history.location
     viewports = if options.around then getAround(options.around) else getAll()
     scrollTopsForURL = options.scrollTops || lastScrollTops.get(url) || {}
 
