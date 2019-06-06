@@ -28,9 +28,9 @@ class up.LayerStack extends up.Class
       @all.push(layer)
 
   peel: (layer, options = {}) ->
-    @asap options, (lock) ->
+    @asap options, (lock) =>
       promise = Promise.resolve()
-      for ancestor in u.reverse(@ancestors(layer))
+      for ancestor in u.reverse(@ancestorsOf(layer))
         promise = promise.then ->
           ancestor.dismiss(preventable: false, { lock })
       return promise

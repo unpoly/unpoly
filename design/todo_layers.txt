@@ -18,6 +18,7 @@
   - Test against https://github.com/unpoly/unpoly/issues/79
     - We might need to register all link handlers to a new .up-modal instead of the document
   - Test defaults inheritance in layer hierarchy
+  - Test for up.TaskQueue, up.TaskQueue#asap variants, lock reusing, lock serialization
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes

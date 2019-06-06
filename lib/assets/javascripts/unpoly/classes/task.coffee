@@ -7,6 +7,7 @@ class up.Task extends up.Class
   constructor: ({ @onStart, @onAbort, @data, @lock }) ->
     @deferred = u.newDeferred()
     @spawnTime = new Date()
+    # @uid = u.uid() # TODO: Remove
 
   @delegate ['then', 'catch', 'always'], 'deferred'
 
@@ -31,11 +32,14 @@ class up.Task extends up.Class
 
   @fromAsapArgs: (args) ->
     if args[0] instanceof this
-      task = args[0]
+      # TaskQueue.asap(task)
+      return args[0]
     else
+      # TaskQueue.asap(onStart)
+      # TaskQueue.asap(lock, onStart)
+      # TaskQueue.asap({ lock }, onStart)
       onStart = u.extractCallback(args)
       lock = args[0]
-      if lockFromProp = task.lock
-        task = lockFromProp
-      new up.Task({ onStart, lock })
-    return task
+      if u.isObject(lock)
+        lock = lock.lock
+      return new up.Task({ onStart, lock })

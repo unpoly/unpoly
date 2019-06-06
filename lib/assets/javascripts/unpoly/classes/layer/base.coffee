@@ -7,8 +7,6 @@ u = up.util
 class up.Layer extends up.Record
 
   constructor: (@stack, options = {}) ->
-    console.debug("new up.Layer(%o, %o)", @stack, options)
-
     if u.isGiven(options.closable)
       up.legacy.warn('Layer options { closable } has been renamed to { dismissable }')
       options.dismissable = options.closable
@@ -18,8 +16,6 @@ class up.Layer extends up.Record
     # Make sure that we have a new context object for each layer instance.
     # This will end up as the up.layer.context property.
     @context ?= {}
-
-    console.debug("  Layer attrs after defaults:", this)
 
     # If an ancestor layer was opened with the wish to not affect history,
     # this child layer should not affect it either.

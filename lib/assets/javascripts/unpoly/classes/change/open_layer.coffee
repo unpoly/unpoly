@@ -24,7 +24,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     unless @options.currentLayer.isOpen()
       return up.asyncFail('Could not open %o in new layer: Parent layer was closed', @options.target)
 
-    layer = up.layer.build(@options)
+    @layer = up.layer.build(@options)
 
     promise = up.event.whenEmitted('up:layer:open', { layer, log: 'Opening layer' })
 
@@ -34,11 +34,11 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     promise = promise.then =>
       up.layer.push(layer, { lock })
-      layer.openNow({ content, @onContentAttached })
+      @layer.openNow({ content, @onContentAttached })
 
     promise = promise.then =>
       openedEvent = up.emit('up:layer:opened', { layer, log: 'Layer opened' })
-      layer.onOpened?(openedEvent)
+      @layer.onOpened?(openedEvent)
       @handleLayerChangeRequests()
       # don't delay `promise` until layer change requests have finished closing
       return undefined
@@ -55,7 +55,7 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     # Call updateHistory() with the original options so it contains
     # non-layer keys like { title } or { location }
-    @updateHistory(@options)
+    @layer.updateHistory(@options)
 
     # Compile the new content and emit up:fragment:inserted.
     @responseDoc.activateElement(content, @options)

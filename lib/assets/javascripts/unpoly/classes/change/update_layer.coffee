@@ -48,10 +48,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
         # bar in child layers instead of blowing up the entire stack with a full page load.
         @options.location = null
 
-    @updateHistory(@options)
+    @layer.updateHistory(@options)
 
     promise = promise.then =>
-      swapPromises = @steps.map (step) -> @swapStep(step)
+      swapPromises = @steps.map(@swapStep)
       return Promise.all(swapPromises)
 
     promise = promise.then =>
@@ -61,7 +61,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     return promise
 
-  swapStep: (step) ->
+  swapStep: (step) =>
     up.puts('Swapping fragment %s', step.selector)
 
     # When the server responds with an error, or when the request method is not

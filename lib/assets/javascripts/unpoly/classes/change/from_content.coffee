@@ -21,7 +21,9 @@ class up.Change.FromContent
     @options.peel ?= true
     @extractFlavorFromLayerOption()
     @setDefaultLayer()
-    @buildPlans()
+
+  ensurePlansBuilt: ->
+    @plans or @buildPlans()
 
   extractFlavorFromLayerOption: ->
     if up.layer.isOverlayFlavor(@options.layer)
@@ -50,6 +52,7 @@ class up.Change.FromContent
     else
       for layer in up.layer.lookupAll(@options.layer)
         @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
+          # console.debug("UpdateLayer(%o)", plan)
           @plans.push(new up.Change.UpdateLayer(plan))
 
     # Make sure we always succeed
@@ -80,7 +83,7 @@ class up.Change.FromContent
       up.viewport.saveScroll()
 
     shouldExtractTitle = not (@options.title is false || u.isString(@options.title))
-    if shouldExtractTitle && responseTitle = @responseDoc.title()
+    if shouldExtractTitle && responseTitle = @options.responseDoc.title()
       @options.title = responseTitle
 
     return @seekPlan
@@ -93,7 +96,7 @@ class up.Change.FromContent
     up.asyncFail("Could not match target in current page and response", action: inspectAction)
 
   buildResponseDoc: ->
-    @responseDoc = new up.ResponseDoc(@options)
+    @options.responseDoc = new up.ResponseDoc(@options)
 
   preflightLayer: ->
     @seekPlan
@@ -109,6 +112,7 @@ class up.Change.FromContent
     up.fail("Could not find target in current page")
 
   seekPlan: (opts) ->
+    @ensurePlansBuilt()
     for plan, index in @plans
       try
         return opts.attempt(plan)
