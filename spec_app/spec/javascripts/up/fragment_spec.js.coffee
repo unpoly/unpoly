@@ -226,7 +226,6 @@ describe 'up.fragment', ->
               @respond()
               next.await(promise)
             next =>
-              console.debug("-- before expect --")
               expect(location.href).toMatchURL('/path')
 
           it 'does not add a history entry after non-GET requests', asyncSpec (next) ->
@@ -252,6 +251,11 @@ describe 'up.fragment', ->
             next => @respond()
             next => expect(location.href).toMatchURL(@hrefBeforeExample)
 
+          it 'does not add a history entry with { location: false } option', asyncSpec (next) ->
+            up.replace('.middle', '/path', location: false)
+            next => @respond()
+            next => expect(location.href).toMatchURL(@hrefBeforeExample)
+
           it "detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec (next) ->
             up.replace('.middle', '/path')
             next => @respond(responseHeaders: { 'X-Up-Location': '/other-path' })
@@ -262,20 +266,21 @@ describe 'up.fragment', ->
             next => @respond()
             next => expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
 
-          describe 'if a URL is given as { history } option', ->
+          describe 'if a URL is given as { location } option', ->
 
             it 'uses that URL as the new location after a GET request', asyncSpec (next) ->
-              up.replace('.middle', '/path', history: '/given-path')
+              up.replace('.middle', '/path', location: '/given-path')
               next => @respond(failTarget: '.middle')
-              next => expect(location.href).toMatchURL('/given-path')
+              next =>
+                expect(location.href).toMatchURL('/given-path')
 
             it 'adds a history entry after a non-GET request', asyncSpec (next) ->
-              up.replace('.middle', '/path', method: 'post', history: '/given-path')
+              up.replace('.middle', '/path', method: 'post', location: '/given-path')
               next => @respond(failTarget: '.middle')
               next => expect(location.href).toMatchURL('/given-path')
 
             it 'does not add a history entry after a failed non-GET request', asyncSpec (next) ->
-              up.replace('.middle', '/path', method: 'post', history: '/given-path', failTarget: '.middle')
+              up.replace('.middle', '/path', method: 'post', location: '/given-path', failTarget: '.middle')
               next => @respond(failTarget: '.middle', status: 500)
               next => expect(location.href).toMatchURL(@hrefBeforeExample)
 
@@ -409,8 +414,9 @@ describe 'up.fragment', ->
               expect(document.title).toBe('Title from HTML')
 
           it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec (next) ->
+            console.debug("-- spec start ---")
             $fixture('.container').text('old container text')
-            document.title = 'old document title'
+            oldTitle = document.title
             up.replace('.container', '/path', history: false, title: true)
 
             next =>
@@ -429,11 +435,11 @@ describe 'up.fragment', ->
 
             next =>
               expect($('.container')).toHaveText('new container text')
-              expect(document.title).toBe('old document title')
+              expect(document.title).toBe(oldTitle)
 
           it "does not extract the title from the response or HTTP header if history isn't updated", asyncSpec (next) ->
             $fixture('.container').text('old container text')
-            document.title = 'old document title'
+            oldTitle = document.title
             up.replace('.container', '/path', history: false)
 
             next =>
@@ -454,7 +460,7 @@ describe 'up.fragment', ->
               """
 
             next =>
-              expect(document.title).toBe('old document title')
+              expect(document.title).toEqual(oldTitle)
 
           it 'allows to pass an explicit title as { title } option', asyncSpec (next) ->
             $fixture('.container').text('old container text')

@@ -59,7 +59,7 @@ up.history = do ->
   @experimental
   ###
   currentLocation = (normalizeOptions) ->
-    normalizeURL(location.href, normalizeOptions)
+    normalizeURL(up.browser.location, normalizeOptions)
 
   isCurrentLocation = (url) ->
     # Some web frameworks care about a trailing slash, some consider it optional.

@@ -48,6 +48,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
         # bar in child layers instead of blowing up the entire stack with a full page load.
         @options.location = null
 
+    console.debug("updateHistory(%o)", @options)
+
     @layer.updateHistory(@options)
 
     promise = promise.then =>

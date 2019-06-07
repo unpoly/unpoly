@@ -23,8 +23,10 @@ class up.Change.FromURL
     #     { foo: 1, bar: 3, baz: 4 }
     #
     # Note how we *don't* override `foo` with `undefined`.
+    mode = @successOptions.failOptions ? 'derive'
+
     @failureOptions = u.copy(@successOptions)
-    if @failureOptions.allowFailOverrides != false
+    if mode == 'derive'
       for key, value of @failureOptions
         # Keep key/value unless there is a defined failOverride
         if unprefixedKey = u.unprefixCamelCase(key, 'fail')
@@ -52,18 +54,7 @@ class up.Change.FromURL
     @successOptions.layer = successPreview.preflightLayer()
     @failureOptions.layer = failurePreview.preflightLayer()
 
-    requestAttrs = u.only @successOptions,
-      'url',
-      'method',
-      'data', # deprecated
-      'params',
-      'cache',
-      'preload',
-      'headers',
-      'timeout',
-      'navigate'
-
-    u.assign requestAttrs,
+    requestAttrs = u.merge @successOptions,
       target: successPreview.preflightTarget()
       failTarget: failurePreview.preflightTarget()
       preflightLayer: @successOptions.layer
@@ -101,23 +92,23 @@ class up.Change.FromURL
 
     if u.isString(options.history)
       up.legacy.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
-      delete options.history
       options.location = options.history
+      delete options.history
 
     if isReloadable
       # Remember where we got the fragment from so we can up.reload() it later.
-      options.source = responseURL
+      options.source ?= responseURL
     else
       # Keep the source of the previous fragment (e.g. the form that was submitted into failure).
-      options.source = 'keep'
+      options.source ?= 'keep'
       # Since the current URL is not retrievable over the GET-only address bar,
       # we can only provide history if a location URL is passed as an option.
       options.history = !options.location
 
     # Accept { history: false } as a shortcut to disable all history-related options.
     if options.history == false
-      options.location = null
-      options.title = null
+      options.location = false
+      options.title = false
     else
       options.location ?= locationFromExchange
       options.title ?= response.title

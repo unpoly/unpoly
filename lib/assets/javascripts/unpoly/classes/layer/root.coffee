@@ -7,7 +7,6 @@ class up.Layer.Root extends up.Layer
 
   @config: new up.Config ->
     history: true
-    targets: ['body'] # this replaces up.fragment.config.fallbacks
     dismissable: false
 
   @flavor: 'root'
@@ -16,6 +15,7 @@ class up.Layer.Root extends up.Layer
     super(stack, options)
     @element = e.root
     @location = up.browser.location
+    @title = document.title
 
   allElements: (selector) ->
     matches = e.all(selector)

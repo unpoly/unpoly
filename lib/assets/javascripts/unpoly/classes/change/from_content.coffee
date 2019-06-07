@@ -83,7 +83,7 @@ class up.Change.FromContent
       up.viewport.saveScroll()
 
     shouldExtractTitle = not (@options.title is false || u.isString(@options.title))
-    if shouldExtractTitle && responseTitle = @options.responseDoc.title()
+    if shouldExtractTitle && (responseTitle = @options.responseDoc.title())
       @options.title = responseTitle
 
     return @seekPlan
@@ -116,8 +116,8 @@ class up.Change.FromContent
     for plan, index in @plans
       try
         return opts.attempt(plan)
-      catch e
-        if e == up.Change.NOT_APPLICABLE
+      catch error
+        if error == up.Change.NOT_APPLICABLE
           if index < @plans.length - 1
             # Retry with next plan
           else
@@ -125,4 +125,4 @@ class up.Change.FromContent
             return opts.noneApplicable()
         else
           # Any other exception is re-thrown
-          throw e
+          throw error

@@ -486,19 +486,15 @@ up.fragment = do ->
     options = u.extractOptions(args)
 
     if args.length == 1
-      console.debug("all: arg.size == 1")
       if u.isElementish(args[0])
-        console.debug("all: isElementish")
         # up.fragment.all(element, [options]) should just return [element].
         # Any options are ignored.
         candidates = [args[0]]
       else
-        console.debug("all: NOT isElementish")
         # up.fragment.all(selector, [options]) should lookup the selector
         # in the current layer, or in options.layer if given.
         candidates = up.layer.allElements(args[0], options)
     else
-      console.debug("all: args.size is %o", args.length)
       # up.fragment.all(rootElement, selector) should find selector within
       # the descendants of rootElement regardless of rootElement's layer.
       candidates = e.all(args...)
@@ -614,7 +610,7 @@ up.fragment = do ->
   reload = (args...) ->
     options = parseTargetAndOptions(args)
     options.cache ?= false
-    options.url ?= source(target)
+    options.url ?= source(options.target)
     return makeChange(options)
 
   ###**

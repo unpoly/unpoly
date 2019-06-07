@@ -1,7 +1,15 @@
 - Don't allow to replace <html> ever. Force to replace <body> instead.
-
 - Check new layer styles visually
   - Nested layers should have more padding
+- Remove up.history.popTargets without replacment
+- Do we want up.layer.config.overlay ?
+- is up.log.enable() still sticky?
+- Muss nach FromContent:
+    if options.history == false
+      options.location = false
+      options.title = false
+- Rename Response#url to Response#location
+
 
 - Tests
   - Get tests green again

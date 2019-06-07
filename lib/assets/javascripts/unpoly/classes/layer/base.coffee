@@ -85,9 +85,11 @@ class up.Layer extends up.Record
 
   updateHistory: (options) ->
     if newTitle = options.title
+      console.debug("Got new TITLE: %o", newTitle)
       @title = newTitle
 
     if newLocation = options.location
+      console.debug("Got new location: %o", newLocation)
       @location = newLocation
 
     @stack.syncHistory()
