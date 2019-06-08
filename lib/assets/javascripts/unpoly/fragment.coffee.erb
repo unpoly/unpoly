@@ -403,8 +403,8 @@ up.fragment = do ->
     keepable = keepPlan.oldElement
     eventAttrs =
       target: keepable
-      newFragment: plan.newElement
-      newData: plan.newData
+      newFragment: keepPlan.newElement
+      newData: keepPlan.newData
       log: ['Keeping element %o', keepable]
 
     up.emit('up:fragment:keep', eventAttrs)

@@ -391,9 +391,9 @@ describe 'up.fragment', ->
               expect($('.container')).toHaveText('new container text')
               expect(document.title).toBe('Title from header')
 
-          it "sets the document title to the response <title> with { history: false, title: true } options (bugfix)", asyncSpec (next) ->
+          it "sets the document title to the response <title> with { location: false, title: true } options (bugfix)", asyncSpec (next) ->
             $fixture('.container').text('old container text')
-            up.replace('.container', '/path', history: false, title: true)
+            up.replace('.container', '/path', location: false, title: true)
 
             next =>
               @respondWith """
@@ -486,14 +486,15 @@ describe 'up.fragment', ->
 
         describe 'selector processing', ->
 
-          it 'replaces multiple selectors separated with a comma', (done) ->
+          it 'replaces multiple selectors separated with a comma', asyncSpec (next) ->
             promise = up.replace('.middle, .after', '/path')
-            @respond()
-            promise.then ->
+            next =>
+              @respond()
+              next.await(promise)
+            next =>
               expect($('.before')).toHaveText('old-before')
               expect($('.middle')).toHaveText('new-middle')
               expect($('.after')).toHaveText('new-after')
-              done()
 
           describe 'nested selector merging', ->
 
@@ -680,6 +681,7 @@ describe 'up.fragment', ->
 
                 expect(revealStub).toHaveBeenCalled()
                 revealArg = revealStub.calls.mostRecent().args[0]
+                console.debug("revealArg is %o", revealArg)
                 expect(revealArg).toMatchSelector('.revealee')
 
 
@@ -828,50 +830,56 @@ describe 'up.fragment', ->
 
           it 'replaces the body if asked to replace the "html" selector'
 
-          it 'prepends instead of replacing when the target has a :before pseudo-selector', (done) ->
+          it 'prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec (next) ->
             promise = up.replace('.middle:before', '/path')
-            @respond()
-            promise.then ->
+            next =>
+              @respond()
+              next.await(promise)
+            next =>
               expect($('.before')).toHaveText('old-before')
               expect($('.middle')).toHaveText('new-middleold-middle')
               expect($('.after')).toHaveText('old-after')
-              done()
 
-          it 'appends instead of replacing when the target has a :after pseudo-selector', (done) ->
+          it 'appends instead of replacing when the target has a :after pseudo-selector', asyncSpec (next) ->
             promise = up.replace('.middle:after', '/path')
-            @respond()
-            promise.then ->
+            next =>
+              @respond()
+              next.await(promise)
+            next =>
               expect($('.before')).toHaveText('old-before')
               expect($('.middle')).toHaveText('old-middlenew-middle')
               expect($('.after')).toHaveText('old-after')
-              done()
 
-          it "lets the developer choose between replacing/prepending/appending for each selector", (done) ->
+          it "lets the developer choose between replacing/prepending/appending for each selector", asyncSpec (next) ->
             promise = up.replace('.before:before, .middle, .after:after', '/path')
-            @respond()
-            promise.then ->
+            next =>
+              @respond()
+              next.await(promise)
+            next =>
               expect($('.before')).toHaveText('new-beforeold-before')
               expect($('.middle')).toHaveText('new-middle')
               expect($('.after')).toHaveText('old-afternew-after')
               done()
 
-          it 'understands non-standard CSS selector extensions such as :has(...)', (done) ->
+          it 'understands non-standard CSS selector extensions such as :has(...)', asyncSpec (next) ->
             $first = $fixture('.boxx#first')
             $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
             $second = $fixture('.boxx#second')
             $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
 
             promise = up.replace('.boxx:has(.first-child)', '/path')
-            @respondWith """
-              <div class="boxx" id="first">
-                <span class="first-child">new first</span>
-              </div>
-              """
 
-            promise.then ->
+            next =>
+              @respondWith """
+                <div class="boxx" id="first">
+                  <span class="first-child">new first</span>
+                </div>
+                """
+              next.await(promise)
+
+            next =>
               expect($('#first span')).toHaveText('new first')
               expect($('#second span')).toHaveText('old second')
-              done()
 
           describe 'when selectors are missing on the page before the request was made', ->
 
@@ -1114,7 +1122,7 @@ describe 'up.fragment', ->
 
           describe 'inline scripts', ->
 
-            it 'does not execute inline script tags', (done) ->
+            it 'does not execute inline script tags', asyncSpec (next) ->
               @responseText = """
                 <div class="middle">
                   new-middle
@@ -1125,13 +1133,15 @@ describe 'up.fragment', ->
                 """
 
               promise = up.replace('.middle', '/path')
-              @respond()
 
-              promise.then ->
+              next =>
+                @respond()
+                next.await(promise)
+
+              next =>
                 expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                done()
 
-            it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', (done) ->
+            it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', asyncSpec (next) ->
               @responseText = """
                 <div class="middle">
                   <div>new-middle-before</div>
@@ -1143,13 +1153,13 @@ describe 'up.fragment', ->
                 """
 
               promise = up.replace('.middle', '/path')
-              @respond()
 
-              u.task ->
-                promiseState(promise).then (result) ->
-                  expect(result.state).toEqual('fulfilled')
-                  expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                  done()
+              next =>
+                @respond()
+                next.await(promise)
+
+              next =>
+                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
 
           describe 'linked scripts', ->
 
@@ -1157,36 +1167,26 @@ describe 'up.fragment', ->
               # Add a cache-buster to each path so the browser cache is guaranteed to be irrelevant
               @linkedScriptPath = "/assets/fixtures/linked_script.js?cache-buster=#{Math.random().toString()}"
 
-            it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', (done) ->
+            it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', asyncSpec (next) ->
               @responseText = """
                 <div class="middle">
                   new-middle
-                  <script type="text/javascript" src="#{@linkedScriptPath}">
-                    alert("inside")
-                  </script>
+                  <script type="text/javascript" src="#{@linkedScriptPath}"></script>
                 </div>
                 """
 
               promise = up.replace('.middle', '/path')
-              @respond()
 
-              promise.then =>
+              next =>
+                @respond()
+                next.await(promise)
 
-                # Must respond to this request, since jQuery makes them async: false
-                if u.contains(@lastRequest().url, 'linked_script')
-                  @respondWith('window.scriptTagExecuted()')
-
-                # Now wait for jQuery to parse out <script> tags and fetch the linked scripts.
-                # This actually happens with jasmine_ajax's fake XHR object.
-                u.task =>
-                  expect(jasmine.Ajax.requests.count()).toEqual(1)
-                  expect(@lastRequest().url).not.toContain('linked_script')
-                  expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                  done()
+              next =>
+                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
 
           describe '<noscript> tags', ->
 
-            it 'parses <noscript> contents as text, not DOM nodes (since it will be placed in a scripting-capable browser)', (done) ->
+            it 'parses <noscript> contents as text, not DOM nodes (since it will be placed in a scripting-capable browser)', asyncSpec (next) ->
               @responseText = """
                 <div class="middle">
                   <noscript>
@@ -1196,15 +1196,16 @@ describe 'up.fragment', ->
                 """
 
               promise = up.replace('.middle', '/path')
-              @respond()
 
-              promise.then ->
+              next =>
+                @respond()
+
+              next =>
                 $noscript = $('.middle noscript')
                 text = $noscript.text().trim()
                 expect(text).toEqual('<img src="foo.png">')
-                done()
 
-            it 'parses <noscript> contents with multiple lines as text, not DOM nodes', (done) ->
+            it 'parses <noscript> contents with multiple lines as text, not DOM nodes', asyncSpec (next) ->
               @responseText = """
                 <div class="middle">
                   <noscript>
@@ -1215,15 +1216,17 @@ describe 'up.fragment', ->
                 """
 
               promise = up.replace('.middle', '/path')
-              @respond()
 
-              promise.then ->
+              next =>
+                @respond()
+                next.await(promise)
+
+              next =>
                 $noscript = $('.middle noscript')
                 text = $noscript.text().trim()
                 expect(text).toMatch(/<img src="foo\.png">\s+<img src="bar\.png">/)
-                done()
 
-            it 'parses multiple <noscript> tags in the same fragment as text, not DOM nodes', (done) ->
+            it 'parses multiple <noscript> tags in the same fragment as text, not DOM nodes', asyncSpec (next) ->
               @responseText = """
                 <div class="middle">
                   <noscript>
@@ -1236,16 +1239,18 @@ describe 'up.fragment', ->
                 """
 
               promise = up.replace('.middle', '/path')
-              @respond()
 
-              promise.then ->
+              next =>
+                @respond()
+                next.await(promise)
+
+              next =>
                 $noscripts = $('.middle noscript')
                 expect($noscripts.length).toBe(2)
                 text0 = $noscripts[0].textContent.trim()
                 text1 = $noscripts[1].textContent.trim()
                 expect(text0).toEqual('<img src="foo.png">')
                 expect(text1).toEqual('<img src="bar.png">')
-                done()
 
           if up.browser.canCustomElements()
 
@@ -1262,7 +1267,7 @@ describe 'up.fragment', ->
 
                 window.customElements.define('test-component-activation', TestComponent)
 
-              it 'activates custom elements in inserted fragments', (done) ->
+              it 'activates custom elements in inserted fragments', asyncSpec (next) ->
                 @responseText = """
                   <div class="middle">
                     <test-component-activation></test-component-activation>
@@ -1270,13 +1275,15 @@ describe 'up.fragment', ->
                   """
 
                 promise = up.replace('.middle', '/path')
-                @respond()
 
-                promise.then ->
+                next =>
+                  @respond()
+                  next.await(promise)
+
+                next =>
                   expect('.middle test-component-activation').toHaveText('text from component')
-                  done()
 
-              it 'does not activate custom elements outside of inserted fragments', (done) ->
+              it 'does not activate custom elements outside of inserted fragments', asyncSpec (next) ->
                 constructorSpy = jasmine.createSpy('constructor called')
                 up.on('test-component:new', constructorSpy)
 
@@ -1293,11 +1300,13 @@ describe 'up.fragment', ->
                   """
 
                 promise = up.replace('.middle', '/path')
-                @respond()
 
-                promise.then =>
+                next =>
+                  @respond()
+                  next.await(promise)
+
+                next =>
                   expect(constructorSpy.calls.count()).toBe(1)
-                  done()
 
 
         describe 'with { restoreScroll: true } option', ->
@@ -1532,23 +1541,14 @@ describe 'up.fragment', ->
                 expect(@revealMock).not.toHaveBeenCalled()
 
 
-          it 'reveals a new element that is being appended', (done) ->
+          it 'reveals a new element that is being appended', asyncSpec (next) ->
             promise = up.replace('.middle:after', '/path', reveal: true)
-            @respond()
-            promise.then =>
-              expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
-              # Text nodes are wrapped in a .up-insertion container so we can
-              # animate them and measure their position/size for scrolling.
-              # This is not possible for container-less text nodes.
-              expect(@revealedHTML).toEqual ['<div class="up-insertion">new-middle</div>']
-              # Show that the wrapper is done after the insertion.
-              expect($('.up-insertion')).not.toBeAttached()
-              done()
 
-          it 'reveals a new element that is being prepended', (done) ->
-            promise = up.replace('.middle:before', '/path', reveal: true)
-            @respond()
-            promise.then =>
+            next =>
+              @respond()
+              next.await(promise)
+
+            next =>
               expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
               # Text nodes are wrapped in a .up-insertion container so we can
               # animate them and measure their position/size for scrolling.
@@ -1556,7 +1556,22 @@ describe 'up.fragment', ->
               expect(@revealedHTML).toEqual ['<div class="up-insertion">new-middle</div>']
               # Show that the wrapper is done after the insertion.
               expect($('.up-insertion')).not.toBeAttached()
-              done()
+
+          it 'reveals a new element that is being prepended', asyncSpec (next) ->
+            promise = up.replace('.middle:before', '/path', reveal: true)
+
+            next =>
+              @respond()
+              next.await(promise)
+
+            next =>
+              expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
+              # Text nodes are wrapped in a .up-insertion container so we can
+              # animate them and measure their position/size for scrolling.
+              # This is not possible for container-less text nodes.
+              expect(@revealedHTML).toEqual ['<div class="up-insertion">new-middle</div>']
+              # Show that the wrapper is done after the insertion.
+              expect($('.up-insertion')).not.toBeAttached()
 
         it 'uses a { failTransition } option if the request failed'
 
@@ -1591,40 +1606,48 @@ describe 'up.fragment', ->
           expect($('.middle')).toHaveText('new-middle')
           expect($('.after')).toHaveText('old-after')
 
-      it "throws an error if the selector can't be found on the current page", (done) ->
+      it "rejects if the selector can't be found on the current page", (done) ->
         html = '<div class="foo-bar">text</div>'
         promise = up.extract('.foo-bar', html)
-        promiseState(promise).then (result) =>
-          expect(result.state).toEqual('rejected')
-          expect(result.value).toMatch(/Could not find selector in current page, modal or popup/i)
-          done()
 
-      it "throws an error if the selector can't be found in the given HTML string", (done) ->
+        u.task ->
+          promiseState(promise).then (result) =>
+            expect(result.state).toEqual('rejected')
+            expect(result.value).toMatch(/Could not find selector in current page, modal or popup/i)
+            done()
+
+      it "rejects if the selector can't be found in the given HTML string", (done) ->
         $fixture('.foo-bar')
         promise = up.extract('.foo-bar', '')
-        promiseState(promise).then (result) =>
-          expect(result.state).toEqual('rejected')
-          expect(result.value).toMatch(/Could not find selector in response/i)
-          done()
+
+        u.task ->
+          promiseState(promise).then (result) =>
+            expect(result.state).toEqual('rejected')
+            expect(result.value).toMatch(/Could not find selector in response/i)
+            done()
 
       it "ignores an element that matches the selector but also matches .up-destroying", (done) ->
         html = '<div class="foo-bar">text</div>'
         $fixture('.foo-bar.up-destroying')
         promise = up.extract('.foo-bar', html)
-        promiseState(promise).then (result) =>
-          expect(result.state).toEqual('rejected')
-          expect(result.value).toMatch(/Could not find selector/i)
-          done()
+
+        u.task ->
+          promiseState(promise).then (result) =>
+            expect(result.state).toEqual('rejected')
+            expect(result.value).toMatch(/Could not find selector/i)
+            done()
 
       it "ignores an element that matches the selector but also has a parent matching .up-destroying", (done) ->
         html = '<div class="foo-bar">text</div>'
         $parent = $fixture('.up-destroying')
         $child = $fixture('.foo-bar').appendTo($parent)
         promise = up.extract('.foo-bar', html)
-        promiseState(promise).then (result) =>
-          expect(result.state).toEqual('rejected')
-          expect(result.value).toMatch(/Could not find selector/i)
-          done()
+
+        u.task ->
+          promiseState(promise).then (result) =>
+            expect(result.state).toEqual('rejected')
+            expect(result.value).toMatch(/Could not find selector/i)
+            done()
 
       it 'only replaces the first element matching the selector', asyncSpec (next) ->
         html = '<div class="foo-bar">text</div>'

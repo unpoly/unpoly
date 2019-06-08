@@ -8,6 +8,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
   constructor: (options) ->
     super(options)
     @layer = options.layer
+    @originalTarget = options.target
     @parseSteps()
 
   preflightLayer: ->
@@ -18,13 +19,13 @@ class up.Change.UpdateLayer extends up.Change.Addition
   preflightTarget: ->
     # Make sure this plan is applicable before returning a target
     @findOld()
-    return @targetWithoutPseudoClasses()
+    return @compressedTarget()
 
   execute: ->
     layer = @layer
 
     unless @layer.isOpen()
-      return up.asyncFail('Could not update %o: Target layer was closed', @options.target)
+      return up.asyncFail('Could not update %o: Target layer was closed', @originalTarget)
 
     @findOld()
     @findNew()
@@ -191,8 +192,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   parseSteps: ->
     # resolveSelector was already called by up.Change.FromContent
-    resolvedSelector = @options.target
-    disjunction = u.splitValues(resolvedSelector, ',')
+    disjunction = u.splitValues(@originalTarget, ',')
 
     @steps = disjunction.map (target, i) =>
       expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/) or
@@ -265,5 +265,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     @steps = compressed
 
-  targetWithoutPseudoClasses: ->
-    u.map(@steps, 'selector').join(', ')
+  compressedTarget: ->
+    serializeStep = (step) -> u.compact([step.selector, step.pseudoClass]).join(':')
+    return u.map(@steps, serializeStep).join(', ')
