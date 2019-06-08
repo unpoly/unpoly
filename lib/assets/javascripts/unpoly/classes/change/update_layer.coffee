@@ -261,7 +261,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
           rivalStep.pseudoClass || !rivalElement.contains(candidateElement)
 
     # If we revealed before, we should do so now
-    compressed[0].reveal = @steps[0]
+    compressed[0].reveal = @steps[0].reveal
 
     @steps = compressed
 
