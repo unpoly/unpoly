@@ -859,7 +859,6 @@ describe 'up.fragment', ->
               expect($('.before')).toHaveText('new-beforeold-before')
               expect($('.middle')).toHaveText('new-middle')
               expect($('.after')).toHaveText('old-afternew-after')
-              done()
 
           it 'understands non-standard CSS selector extensions such as :has(...)', asyncSpec (next) ->
             $first = $fixture('.boxx#first')
@@ -895,9 +894,12 @@ describe 'up.fragment', ->
 
             it 'rejects the promise if all alternatives are exhausted', (done) ->
               promise = up.replace('.unknown', '/path', fallback: '.more-unknown')
-              promise.catch (e) ->
-                expect(e).toBeError(/Could not find target in current page/i)
-                done()
+
+              u.task ->
+                promiseState(promise).then (result) ->
+                  expect(result.state).toEqual('rejected')
+                  expect(e).toBeError(/Could not find target in current page/i)
+                  done()
 
             it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
               $fixture('.target').text('old target')

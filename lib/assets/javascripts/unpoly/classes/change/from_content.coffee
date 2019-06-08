@@ -105,7 +105,9 @@ class up.Change.FromContent
 
   preflightTarget: ->
     @seekPlan
-      attempt: (plan) -> plan.preflightTarget()
+      attempt: (plan) ->
+        console.debug("seeking preflightTarget on %o", plan)
+        plan.preflightTarget()
       noneApplicable: => @preflightTargetNotApplicable()
 
   preflightTargetNotApplicable: ->
