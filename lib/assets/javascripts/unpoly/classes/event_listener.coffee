@@ -3,7 +3,7 @@ e = up.element
 
 class up.EventListener extends up.Record
 
-  @keys: ->
+  keys: ->
     [
       'element',
       'eventName',

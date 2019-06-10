@@ -71,7 +71,7 @@ class up.Request extends up.Record
   @param {Object|undefined} timeout
   @stable
   ###
-  @keys: ->
+  keys: ->
     [
       'method',
       'url',

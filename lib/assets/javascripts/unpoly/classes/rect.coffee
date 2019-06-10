@@ -2,7 +2,7 @@ u = up.util
 
 class up.Rect extends up.Record
 
-  @keys: ->
+  keys: ->
     [
       'left',
       'top',

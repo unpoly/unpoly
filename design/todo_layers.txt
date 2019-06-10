@@ -9,6 +9,9 @@
       options.location = false
       options.title = false
 - Rename Response#url to Response#location
+- Layer closed events werden aktuell noch auf dem geschlossenen layer ausgeführt
+  - das ist gut für das story-pattern
+  - das wäre für ein anderes pattern wo ich im layer des openers höre nicht gut
 
 
 - Tests
@@ -116,5 +119,8 @@ Decisions
   - Separate { query } and [up-query] options
   - NEVER move URL query to payload params
   - GET submissions: Form values should override, not append (set, not add) values from query
+- Do I really want up.Change.ResetWorld instead of <body> as root's default target?
+  - Yes, if we cannot match an overlay target we want to reset the world
+  - One could argue that we only need ResetWorld when we're creating a layer or updating an overlay
 
 

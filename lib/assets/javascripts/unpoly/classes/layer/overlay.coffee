@@ -10,6 +10,49 @@ Base class for all non-root layer flavors
 ###
 class up.Layer.Overlay extends up.Layer
 
+  keys: ->
+    super.concat [
+      'position',
+      'align',
+      'size',
+      'origin', # for tethered anchor element
+      'class',
+      'openAnimation',
+      'closeAnimation',
+      'openDuration',
+      'closeDuration',
+      'openEasing',
+      'closeEasing',
+      'backdropOpenAnimation',
+      'backdropCloseAnimation',
+      'dismissLabel',
+      'dismissAriaLabel',
+      'dismissible',
+      'onAccepted',
+      'onDismissed',
+      'onContentAttached',
+      'onOpened'
+    ]
+
+  config: new up.Config ->
+    position: null
+    align: null
+    size: null
+    targets: []
+    openAnimation: 'fade-in'
+    closeAnimation: 'fade-out'
+    openDuration: null
+    closeDuration: null
+    openEasing: null
+    closeEasing: null
+    backdropOpenAnimation: 'fade-in'
+    backdropCloseAnimation: 'fade-out'
+    dismissLabel: '×'
+    dismissAriaLabel: 'Dismiss dialog'
+    dismissible: true
+    throw "config.reset will only reset keys mentioned here"
+    throw "und jetzt sollen die flavors doch auch ihren eigenen config-hash kriegen -- d.h. die müssen alle @config selbst definieren"
+
   # TODO: Rename openNow to something that doesn't have the sync/async connotation
   ###**
   @function up.Layer.Overlay#openNow

@@ -6,8 +6,7 @@ e = up.element
 class up.Layer.Root extends up.Layer
 
   @config: new up.Config ->
-    history: true
-    dismissable: false
+    targets: []
 
   @flavor: 'root'
 

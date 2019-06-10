@@ -4,7 +4,7 @@ u = up.util
 
 class up.EventListenerGroup extends up.Record
 
-  @keys: ->
+  keys: ->
     [
       'elements',
       'eventNames',

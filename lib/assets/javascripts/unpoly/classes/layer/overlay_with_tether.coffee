@@ -3,6 +3,9 @@
 
 class up.Layer.OverlayWithTether extends up.Layer.Overlay
 
+  config: new up.Config ->
+    origin: null # only for tether
+
   openNow: (options) ->
     @createElement()
     @element.classList.add('up-layer-with-tether')

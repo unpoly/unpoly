@@ -6,6 +6,18 @@ u = up.util
 
 class up.Layer extends up.Record
 
+  keys: ->
+    [
+      'history'
+      'location'
+      'title',
+      'flavor',
+      'context'
+    ]
+
+  defaults: ->
+    context: {}
+
   constructor: (@stack, options = {}) ->
     if u.isGiven(options.closable)
       up.legacy.warn('Layer options { closable } has been renamed to { dismissable }')
@@ -13,48 +25,24 @@ class up.Layer extends up.Record
 
     super(options)
 
-    # Make sure that we have a new context object for each layer instance.
-    # This will end up as the up.layer.context property.
-    @context ?= {}
+    unless @flavor
+      throw "missing { flavor } option"
 
     # If an ancestor layer was opened with the wish to not affect history,
     # this child layer should not affect it either.
     if parent = @parent
       @history &&= parent.history
 
-  @defaults: ->
-    defaults = @config
-    # Reverse-merge @config with the config property of our inheritance
-    # chain. We need to do this manually, super() does not help us here.
-    if (proto = Object.getPrototypeOf(this)) && proto.defaults
-      defaults = u.merge(proto.defaults(), defaults)
-    defaults
+#  @defaults: ->
+#    return @config
 
-  @config: new up.Config ->
-    history: false
-    location: null
-    title: null
-    origin: null
-    position: null
-    align: null
-    size: null
-    class: null
-    targets: []
-    openAnimation: 'fade-in'
-    closeAnimation: 'fade-out'
-    openDuration: null
-    closeDuration: null
-    openEasing: null
-    closeEasing: null
-    backdropOpenAnimation: 'fade-in'
-    backdropCloseAnimation: 'fade-out'
-    dismissLabel: '×'
-    dismissAriaLabel: 'Dismiss dialog'
-    dismissible: true
-    onAccepted: null
-    onDismissed: null
-    onContentAttached: null
-    onOpened: null
+#    defaults = @config
+#    # Reverse-merge @config with the config property of our inheritance
+#    # chain. We need to do this manually, super() does not help us here.
+#    throw "i don't think that even works. there is no way to get the superclass of a JS class"
+#    if (proto = Object.getPrototypeOf(this)) && proto.defaults
+#      defaults = u.merge(proto.defaults(), defaults)
+#    defaults
 
   isCurrent: ->
     @stack.current == this
@@ -63,7 +51,7 @@ class up.Layer extends up.Record
     @stack.root == this
 
   defaultTargets: ->
-    @constructor.defaults().targets
+    up.layer.defaultTargets({ @flavor })
 
   sync: ->
     # no-op so users can blindly sync without knowing the current flavor
