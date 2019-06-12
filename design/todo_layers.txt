@@ -1,9 +1,9 @@
 - Don't allow to replace <html> ever. Force to replace <body> instead.
 - Check new layer styles visually
   - Nested layers should have more padding
-- Remove up.history.popTargets without replacment
-- Do we want up.layer.config.overlay ?
-- is up.log.enable() still sticky?
+- Should we keep up.history.popTargets?
+  - Should this always reset the world?
+  - up.config.root.targets might not be appropriate
 - Muss nach FromContent:
     if options.history == false
       options.location = false
@@ -12,6 +12,7 @@
 - Layer closed events werden aktuell noch auf dem geschlossenen layer ausgeführt
   - das ist gut für das story-pattern
   - das wäre für ein anderes pattern wo ich im layer des openers höre nicht gut
+    => gibt es dafür wirklich einen case?
 
 
 - Tests
