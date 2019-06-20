@@ -330,6 +330,7 @@ up.proxy = do ->
   isBusy = ->
     foregroundQueue.isBusy()
 
+  # TODO: Document up.proxy.abort(). Also document whether it is sync or async.
   abortRequests = (conditions) ->
     for queue in [foregroundQueue, preloadQueue]
       queue.abort(conditions)

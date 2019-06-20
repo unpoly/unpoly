@@ -15,6 +15,14 @@ class up.Layer.Root extends up.Layer
     @element = e.root
     @location = up.browser.location
     @title = document.title
+    @history = true
+
+#  # Since the developer cannot instantiate the root layer herself and set
+#  # the { targets } property, we dynamically retrieve the configured targets
+#  # at runtime. We we set it in the constructor it might be reconfigured
+#  # by the developer afterwards.
+#  @getter 'targets', ->
+#    up.layer.config.root.targets
 
   allElements: (selector) ->
     matches = e.all(selector)

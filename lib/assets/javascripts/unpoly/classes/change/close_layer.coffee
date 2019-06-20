@@ -28,6 +28,8 @@ execute: ->
     # Abort all pending requests targeting the layer we're now closing.
     up.proxy.abort(preflightLayer: this)
 
+    # TODO: Is up.proxy.abort sync or async?
+
     if up.event.nobodyPrevents(@closeEvent, eventProps) || @preventable == false
       unless @isOpen()
         return Promise.resolve()

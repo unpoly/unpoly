@@ -13,6 +13,9 @@
   - das ist gut für das story-pattern
   - das wäre für ein anderes pattern wo ich im layer des openers höre nicht gut
     => gibt es dafür wirklich einen case?
+- Deprecate shortcuts like [up-modal] for shrink the API surface
+  - people can use [up-layer=modal]
+  - the original shortcuts could then be backwards compatible (up-layer="solo" up-flavor="modal")
 
 
 - Tests
@@ -31,6 +34,7 @@
     - We might need to register all link handlers to a new .up-modal instead of the document
   - Test defaults inheritance in layer hierarchy
   - Test for up.TaskQueue, up.TaskQueue#asap variants, lock reusing, lock serialization
+  - Test that a layer cannot have history: true if its parent has history: false
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
