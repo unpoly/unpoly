@@ -81,16 +81,6 @@ class up.LayerStack extends up.Class
       @attachOverlayContainer()
     @_overlayContainer
 
-  syncHistory: ->
-    historyLayers = u.filter(@allReversed(), 'history')
-    location = u.findResult(historyLayers, 'location')
-    title = u.findResult(historyLayers, 'title')
-    console.debug("Setting document.title to %o", title)
-    document.title = title
-    # up.history.push() only adds a history entry if we are not already at the given URL
-    console.debug("Pushing history: %o", location)
-    up.history.push(location)
-
   attachOverlayContainer: ->
     if @_overlayContainer
       document.body.appendChild(@_overlayContainer)

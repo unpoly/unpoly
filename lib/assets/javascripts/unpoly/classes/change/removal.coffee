@@ -1,3 +1,4 @@
-#= require ./namespace
+#= require ./change
 
-class up.Change.Removal extends up.Class
+class up.Change.Removal extends up.Change
+

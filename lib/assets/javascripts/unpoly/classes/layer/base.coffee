@@ -9,8 +9,6 @@ class up.Layer extends up.Record
   keys: ->
     [
       'history'
-      'location'
-      'title',
       'flavor',
       'context'
     ]
@@ -71,17 +69,6 @@ class up.Layer extends up.Record
   firstElement: (selector) ->
     @allElements(selector)[0]
 
-  updateHistory: (options) ->
-    if newTitle = options.title
-      console.debug("Got new TITLE: %o", newTitle)
-      @title = newTitle
-
-    if newLocation = options.location
-      console.debug("Got new location: %o", newLocation)
-      @location = newLocation
-
-    @stack.syncHistory()
-
   @getter 'parent', ->
     @stack.parentOf(this)
 
@@ -112,3 +99,34 @@ class up.Layer extends up.Record
 
   isOpen: ->
     @stack.isOpen(this)
+
+  saveHistory: ->
+    return unless @history
+
+    @savedTitle = document.title
+    @savedLocation = up.history.location
+
+  restoreHistory: ->
+    if @savedLocation
+      up.history.push(@savedLocation)
+      @savedLocation = null
+
+    if @savedTitle
+      document.title = @savedTitle
+      @savedTitle = null
+
+  updateHistory: (change) ->
+    return unless @history
+
+    if @isCurrent()
+      if change.location
+        up.history.push(change.location)
+      if change.title
+        document.title = change.title
+    else
+      # Only if this layer is overshadowed by a child layer, we store location
+      # and title for later calls of @restoreHistory().
+      if change.location
+        @savedLocation = change.location
+      if change.title
+        @savedTitle = change.title

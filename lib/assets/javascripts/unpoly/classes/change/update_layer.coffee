@@ -9,6 +9,11 @@ class up.Change.UpdateLayer extends up.Change.Addition
     super(options)
     @layer = options.layer
     @originalTarget = options.target
+    @peel = options.peel
+    @reveal = options.reveal
+    @location = options.location
+    @hungry = options.hungry
+    @transition = options.transition
     @parseSteps()
 
   preflightLayer: ->
@@ -22,38 +27,31 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return @compressedTarget()
 
   execute: ->
-    layer = @layer
-
-    unless @layer.isOpen()
-      return up.asyncFail('Could not update %o: Target layer was closed', @originalTarget)
-
     @findOld()
     @findNew()
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
     @addHungrySteps()
 
+    # If we cannot push state on the root layer, a full page load will fix this.
+    if @location && !up.browser.canPushState() && @layer.isRoot()
+      up.browser.loadPage(@options)
+      return u.unresolvablePromise()
+
+    unless @layer.isOpen()
+      return up.asyncFail('Could not update %o: Target layer was closed', @originalTarget)
+
     promise = Promise.resolve()
 
-    if @options.peel
-      promise = promise.then ->
-        return up.layer.asap ->
-          return layer.peel()
-
-    if @options.location && !up.browser.canPushState()
-      if isRoot()
-        up.browser.loadPage(@options)
-        return u.unresolvablePromise()
-      else
-        # If we cannot push state for some reason, we prefer not updating the address
-        # bar in child layers instead of blowing up the entire stack with a full page load.
-        @options.location = null
-
-    console.debug("updateHistory(%o)", @options)
-
-    @layer.updateHistory(@options)
+    # Fragment updates should only be serialized through the layer queue
+    # if we need to peel.
+    if @peel && !@layer.isCurrent()
+      promise = promise.then =>
+        return layer.peel(@lock)
 
     promise = promise.then =>
+      console.debug("updateHistory(%o)", @options)
+      @layer.updateHistory(@options)
       swapPromises = @steps.map(@swapStep)
       return Promise.all(swapPromises)
 
@@ -200,7 +198,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
       # When extracting multiple selectors, we only want to reveal the first element.
       # So we set the { reveal } option to false for the next iteration.
-      doReveal = if i == 0 then @options.reveal else false
+      doReveal = if i == 0 then @reveal else false
 
       selector = expressionParts[1]
       if selector == 'html'
@@ -228,10 +226,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @foundNew = true
 
   addHungrySteps: ->
-    if @options.hungry
+    if @hungry
       # Find all [up-hungry] fragments within @layer
       hungries = up.fragment.all(up.radio.hungrySelector(), @options)
-      transition = up.radio.config.hungryTransition ? @options.transition
+      transition = up.radio.config.hungryTransition ? @transition
       for hungry in hungries
         selector = e.toSelector(hungry)
         if newHungry = @responseDoc.first(selector)

@@ -6,50 +6,61 @@ e = up.element
 class up.Change.CloseLayer extends up.Change.Removal
 
 constructor: (options) ->
+  super(options)
   @layer = options.layer
   @lock = options.lock
   @origin = options.origin
   @value = options.value
   @preventable = options.preventable
 
+valueAttr: null       # implement in child class
+closeEvent: null      # implement in child class
+closedEvent: null     # implement in child class
+closedCallback: null  # implement in child class
+
 execute: ->
-  up.layer.asap @lock, (lock) =>
-    origin = @origin
+  @asap(@executeNow)
 
-    if origin && u.isUndefined(value)
-      value = e.jsonAttr(origin, @valueAttr)
+executeNow: (lock) =>
+  if @origin && u.isUndefined(value)
+    value = e.jsonAttr(@origin, @valueAttr)
 
-    eventProps =
-      target: @layer.element
-      layer: this
-      value: value
-      origin: origin
+  eventProps =
+    target: @layer.element
+    layer: @layer
+    value: value
+    origin: @origin
+    lock: @lock
 
-    # Abort all pending requests targeting the layer we're now closing.
-    up.proxy.abort(preflightLayer: this)
+  # Abort all pending requests targeting the layer we're now closing.
+  up.proxy.abort(preflightLayer: this)
 
-    # TODO: Is up.proxy.abort sync or async?
+  # TODO: Is up.proxy.abort sync or async?
 
-    if up.event.nobodyPrevents(@closeEvent, eventProps) || @preventable == false
-      unless @isOpen()
-        return Promise.resolve()
+  if up.event.nobodyPrevents(@closeEvent, eventProps) || @preventable == false
+    unless @isOpen()
+      return Promise.resolve()
 
-      # Also close any child-layers we might have.
-      promise = @peel({ lock })
+    # Also close any child-layers we might have.
+    promise = @peel({ lock })
 
-      promise = promise.then =>
-        @stack.remove(this, { lock })
-        @stack.syncHistory()
-        return @closeNow()
+    promise = promise.then =>
+      @stack.remove(this, { lock })
 
-      promise = promise.then =>
-        # Wait for the callbacks until the closing animation ends,
-        # so user-provided code doesn't run too wildly out of order.
-        @layer[@closedCallback](eventProps)
+    promise = promise.then =>
+      @stack.current.restoreHistory()
+      return @closeNow()
 
-        up.emit(@closedEvent, eventProps)
+    promise = promise.then =>
+      # Wait for the callbacks until the closing animation ends,
+      # so user-provided code doesn't run too wildly out of order.
+      # However, we won't delay our own promise to prevent deadlocking
+      # on the layer queue.
+      @layer[@closedCallback](eventProps)
 
-      return promise
+      up.emit(@closedEvent, eventProps)
 
-    else
-      return up.event.abortRejection()
+    return promise
+
+  else
+    return up.event.abortRejection()

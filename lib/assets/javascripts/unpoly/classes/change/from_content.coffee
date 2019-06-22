@@ -1,4 +1,4 @@
-#= require ./namespace
+#= require ./change
 
 u = up.util
 e = up.element
@@ -35,10 +35,10 @@ class up.Change.FromContent
 
     if @options.origin
       # Links update their own layer by default.
-      'origin'
+      @options.layer = 'origin'
     else
       # If no origin is given, we assume the highest layer.
-      'current'
+      @options.layer = 'current'
 
   buildPlans: ->
     @plans = []

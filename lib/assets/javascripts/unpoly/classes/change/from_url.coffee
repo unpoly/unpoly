@@ -1,4 +1,4 @@
-#= require ./namespace
+#= require ./change
 
 u = up.util
 

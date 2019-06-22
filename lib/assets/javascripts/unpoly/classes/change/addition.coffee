@@ -1,12 +1,10 @@
-#= require ./namespace
+#= require ./change
 
-class up.Change.Addition extends up.Class
+class up.Change.Addition extends up.Change
 
-  constructor: (@options) ->
-    @responseDoc = @options.responseDoc
-
-  notApplicable: ->
-    throw up.Change.NOT_APPLICABLE
+  constructor: (options) ->
+    super(options)
+    @responseDoc = options.responseDoc
 
   handleLayerChangeRequests: ->
     # Since we're not passing a { lock } these changes will be queued.

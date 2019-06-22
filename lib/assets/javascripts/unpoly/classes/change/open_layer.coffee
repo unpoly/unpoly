@@ -4,25 +4,30 @@ u = up.util
 
 class up.Change.OpenLayer extends up.Change.Addition
 
+  constructor: (options) ->
+    super(options)
+    @target = options.target
+    @source = options.source
+    @currentLayer = options.currentLayer
+
   preflightLayer: ->
     'new'
 
   preflightTarget: ->
     # The target will always exist in the current page, since
     # we're opening a new layer that will always match the target.
-    @options.target
+    @target
 
   execute: ->
     # Selecting the content needs to happen sync, since our caller
     # might want catch up.Change.NOT_APPLICABLE.
-    content = @responseDoc.first(@options.target) or @notApplicable()
+    @content = @responseDoc.first(@target) or @notApplicable()
 
-    return up.layer.asap @options, (lock) =>
-      @executeNow(content, lock)
+    return @asap(@executeNow)
 
-  executeNow: (content, lock) ->
-    unless @options.currentLayer.isOpen()
-      return up.asyncFail('Could not open %o in new layer: Parent layer was closed', @options.target)
+  executeNow: (lock) =>
+    unless @currentLayer.isOpen()
+      return up.asyncFail('Could not open %o in new layer: Parent layer was closed', @target)
 
     @layer = up.layer.build(@options)
 
@@ -30,10 +35,11 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     promise = promise.then =>
       # Make sure that the ground layer doesn't already have a child layer.
-      @options.currentLayer.peel({ lock })
+      @currentLayer.peel({ lock })
 
     promise = promise.then =>
       up.layer.push(layer, { lock })
+      @handleHistory()
       @layer.openNow({ content, @onContentAttached })
 
     promise = promise.then =>
@@ -45,17 +51,18 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     promise
 
-  onContentAttached: (event) =>
-    up.fragment.setSource(event.content, @options.source)
+  handleHistory: ->
+    @layer.parent.saveHistory()
 
     # If we cannot push state for some reason, we prefer disabling history for
     # child layers instead of blowing up the entire stack with a full page load.
     unless up.browser.canPushState()
       @options.history = false
 
-    # Call updateHistory() with the original options so it contains
-    # non-layer keys like { title } or { location }
     @layer.updateHistory(@options)
 
+  onContentAttached: =>
+    up.fragment.setSource(@content, @source)
+
     # Compile the new content and emit up:fragment:inserted.
-    @responseDoc.activateElement(content, @options)
+    @responseDoc.activateElement(@content, @options)
