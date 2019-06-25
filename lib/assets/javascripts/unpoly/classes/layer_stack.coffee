@@ -6,11 +6,7 @@ OVERLAY_CONTAINER_SELECTOR = '.up-overlays'
 class up.LayerStack extends up.Class
 
   constructor: ->
-    @queue = new up.TaskQueue()
     @resetAll()
-
-  asap: (args...) ->
-    @queue.asap(args...)
 
   isRoot: (layer = @current()) ->
     @all[0] == layer
@@ -18,26 +14,19 @@ class up.LayerStack extends up.Class
   at: (i) ->
     @all[i]
 
-  remove: (layer, options) ->
-    @asap options, =>
-      u.remove(@all, layer)
+  remove: (layer) ->
+    u.remove(@all, layer)
 
-  push: (layer, options) ->
-    @asap options, =>
-      @all.push(layer)
+  push: (layer) ->
+    @all.push(layer)
 
-  peel: (layer, options = {}) ->
-    @asap options, (lock) =>
-      promise = Promise.resolve()
-      for ancestor in u.reverse(@ancestorsOf(layer))
-        promise = promise.then ->
-          ancestor.dismiss(preventable: false, { lock })
-      return promise
+  peel: (layer) ->
+    for ancestor in u.reverse(@ancestorsOf(layer))
+        ancestor.dismiss(preventable: false)
 
   reset: ->
     @resetAll()
 
-    @queue.reset()
     if c = @_overlayContainer
       e.remove(c)
 
@@ -95,4 +84,3 @@ class up.LayerStack extends up.Class
     element = e.get(element)
     u.find @allReversed(), (layer) ->
       layer.contains(element)
-

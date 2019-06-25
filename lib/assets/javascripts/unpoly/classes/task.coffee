@@ -4,7 +4,7 @@ u = up.util
 
 class up.Task extends up.Class
 
-  constructor: ({ @onStart, @onAbort, @data, @lock }) ->
+  constructor: ({ @onStart, @onAbort, @data }) ->
     @deferred = u.newDeferred()
     @spawnTime = new Date()
     # @uid = u.uid() # TODO: Remove
@@ -17,10 +17,7 @@ class up.Task extends up.Class
     @promise
 
   start: ->
-    @lock ||= u.uid()
-    # Pass @lock to the start function so it can re-enter the same lock
-    # through queue.asap(lock, fn)
-    innerPromise = @onStart(@lock)
+    innerPromise = @onStart()
     @deferred.resolve(innerPromise)
     return @promise
 
@@ -36,10 +33,5 @@ class up.Task extends up.Class
       return args[0]
     else
       # TaskQueue.asap(onStart)
-      # TaskQueue.asap(lock, onStart)
-      # TaskQueue.asap({ lock }, onStart)
       onStart = u.extractCallback(args)
-      lock = args[0]
-      if u.isObject(lock)
-        lock = lock.lock
-      return new up.Task({ onStart, lock })
+      return new up.Task({ onStart })

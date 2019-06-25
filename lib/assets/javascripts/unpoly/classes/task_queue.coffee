@@ -18,10 +18,7 @@ class up.TaskQueue extends up.Class
 
     console.debug("up.TaskQueue#asap(%o)", task)
 
-    if task.lock
-      console.debug("reusing lock for %o", task)
-      @reuseLock(task)
-    else if @hasConcurrencyLeft()
+    if @hasConcurrencyLeft()
       console.debug("running now: %o", task)
       @runTaskNow(task)
     else
@@ -44,15 +41,6 @@ class up.TaskQueue extends up.Class
   startNextTask: ->
     if task = @queuedTasks.shift()
       @startTask(task)
-
-  reuseLock: (task) ->
-    unless u.detect(@currentTasks, (currentTask) -> currentTask.lock == task.lock)
-      throw new Error('Lock expired')
-
-    # Don't adjust @currentTasks, it's already occupied by the task that
-    # originally retrieved the lock.
-
-    return task.start()
 
   queueTask: (task) ->
     @queuedTasks.push(task)

@@ -157,7 +157,6 @@ up.layer = do ->
     closedCallbackAttr: closedCallbackAttr
     isRoot: -> stack.isRoot()
     push: (args...) -> stack.push(args...)
-    asap: (args...) -> stack.asap(args...)
     flavor: registerFlavor
     isOverlayFlavor: isOverlayFlavor
     on: (args...) -> stack.current.on(args...)

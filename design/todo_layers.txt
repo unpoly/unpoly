@@ -1,3 +1,4 @@
+- Make all LayerStack operations sync and get rid of locking
 - Don't allow to replace <html> ever. Force to replace <body> instead.
 - Check new layer styles visually
   - Nested layers should have more padding
@@ -14,9 +15,10 @@
   - das wäre für ein anderes pattern wo ich im layer des openers höre nicht gut
     => gibt es dafür wirklich einen case?
 - Deprecate shortcuts like [up-modal] for shrink the API surface
-  - people can use [up-layer=modal]
+  - people can use [up-layer=modal] to open a new modal
   - the original shortcuts could then be backwards compatible (up-layer="solo" up-flavor="modal")
 - up.change, up.destroy and up.reload should pass on a { lock } option to all eventual calls of up.layer.asap()
+- Is { peel: true } a good default for up.change()? E.g. up.destroy() does not peel
 
 
 - Tests
@@ -37,6 +39,7 @@
   - Test for up.TaskQueue, up.TaskQueue#asap variants, lock reusing, lock serialization
   - Test that a layer cannot have history: true if its parent has history: false
   - Test that making a layer change in an { onAccepted } callback will not deadlock the acceptance change
+  - Test that layers are assigned .up-destroyed class while closing
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes

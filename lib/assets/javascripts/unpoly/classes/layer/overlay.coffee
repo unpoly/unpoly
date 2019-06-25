@@ -163,6 +163,9 @@ class up.Layer.Overlay extends up.Layer
     @markAsAnimating(true)
     return startAnimation.then => @markAsAnimating(false)
 
+  markAsDestroying: ->
+    up.fragment.markAsDestroying(@element)
+
   markAsAnimating: (state) ->
     e.toggleClass(@element, 'up-layer-animating', state)
 

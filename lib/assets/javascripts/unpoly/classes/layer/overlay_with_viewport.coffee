@@ -17,6 +17,7 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     return @startOpenAnimation(options)
 
   closeNow: (options) ->
+    @markAsDestroying()
     return @startCloseAnimation(options).then =>
       @destroyElement()
       @unshiftBody()
@@ -48,3 +49,17 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
         up.animate(@viewportElement, viewportAnimation, animateOptions),
         up.animate(@backdropElement, backdropAnimation, animateOptions),
       ])
+
+#  startCloseAnimation: (options = {}) ->
+#    animateOptions = @closeAnimateOptions(options)
+#    viewportAnimation = options.animation ? @evalOption(@closeAnimation)
+#    backdropAnimation = options.backdropAnimation ? @evalOption(@backdropCloseAnimation)
+#
+#    viewportDestroyOptions = u.merge(animateOptions, animation: viewportAnimation)
+#    backdropDestroyOptions = u.merge(animateOptions, animation: backdropAnimation)
+#
+#    return @withAnimatingClass =>
+#      return Promise.all([
+#        up.destroy(@viewportElement, viewportDestroyOptions),
+#        up.destroy(@backdropElement, backdropDestroyOptions),
+#      ])
