@@ -23,6 +23,7 @@
 - { peel } option for up.destroy
 - Have up.layer.build delegate to up.Layer class
 - Rename { navigate } to { solo }. Then MAYBE use { navigate } to mass-set { peel, solo, feedback }.
+- Florian hatte Requirement nur Klick auf Backdrop zu vermeiden.
 
 
 - Tests
