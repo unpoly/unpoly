@@ -17,8 +17,12 @@
 - Deprecate shortcuts like [up-modal] for shrink the API surface
   - people can use [up-layer=modal] to open a new modal
   - the original shortcuts could then be backwards compatible (up-layer="solo" up-flavor="modal")
-- up.change, up.destroy and up.reload should pass on a { lock } option to all eventual calls of up.layer.asap()
-- Is { peel: true } a good default for up.change()? E.g. up.destroy() does not peel
+- Is { peel: true } a good default for up.change()?
+  - E.g. up.destroy() does not peel because it is not a change
+  - Only user interactions ({ navigate: true }? follow? submit? UJS handlers?) should trigger peeling
+- { peel } option for up.destroy
+- Have up.layer.build delegate to up.Layer class
+- Rename { navigate } to { solo }. Then MAYBE use { navigate } to mass-set { peel, solo, feedback }.
 
 
 - Tests
@@ -40,6 +44,8 @@
   - Test that a layer cannot have history: true if its parent has history: false
   - Test that making a layer change in an { onAccepted } callback will not deadlock the acceptance change
   - Test that layers are assigned .up-destroyed class while closing
+  - Test that default targets are selectable per layer-type
+  - Test that default targets are also fallbacks per layer-type
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes

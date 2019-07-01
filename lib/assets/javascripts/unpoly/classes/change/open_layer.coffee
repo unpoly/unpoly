@@ -23,11 +23,8 @@ class up.Change.OpenLayer extends up.Change.Addition
     # might want catch up.Change.NOT_APPLICABLE.
     @content = @responseDoc.first(@target) or @notApplicable()
 
-    return @asap(@executeNow)
-
-  executeNow: (lock) =>
     unless @currentLayer.isOpen()
-      return up.asyncFail('Could not open %o in new layer: Parent layer was closed', @target)
+      @notApplicable('Could not open %o in new layer: Parent layer was closed', @target)
 
     @layer = up.layer.build(@options)
 
@@ -35,16 +32,16 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     promise = promise.then =>
       # Make sure that the ground layer doesn't already have a child layer.
-      @currentLayer.peel({ lock })
-
-    promise = promise.then =>
-      up.layer.push(layer, { lock })
+      @currentLayer.peel()
+      # Don't wait for peeling to finish.
+      up.layer.push(layer)
       @handleHistory()
-      @layer.openNow({ content, @onContentAttached })
+      return @layer.openNow({ @content, @onContentAttached })
 
     promise = promise.then =>
       openedEvent = up.emit('up:layer:opened', { layer, log: 'Layer opened' })
       @layer.onOpened?(openedEvent)
+      # don't delay `promise` until layer close callbacks have finished
       @handleLayerChangeRequests()
       # don't delay `promise` until layer change requests have finished closing
       return undefined

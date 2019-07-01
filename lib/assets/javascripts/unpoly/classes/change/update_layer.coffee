@@ -39,17 +39,14 @@ class up.Change.UpdateLayer extends up.Change.Addition
       return u.unresolvablePromise()
 
     unless @layer.isOpen()
-      return up.asyncFail('Could not update %o: Target layer was closed', @originalTarget)
+      @notApplicable('Could not update %o: Target layer was closed', @originalTarget)
 
     promise = Promise.resolve()
 
-    # Fragment updates should only be serialized through the layer queue
-    # if we need to peel.
-    if @peel && !@layer.isCurrent()
-      promise = promise.then =>
-        return layer.peel(@lock)
-
     promise = promise.then =>
+      if @peel
+        layer.peel()
+        # Don't wait for peeling to finish
       console.debug("updateHistory(%o)", @options)
       @layer.updateHistory(@options)
       swapPromises = @steps.map(@swapStep)

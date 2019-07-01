@@ -16,7 +16,10 @@ class up.Layer extends up.Record
   defaults: ->
     context: {}
 
-  constructor: (@stack, options = {}) ->
+  constructor: (options = {}) ->
+    console.debug("up.Layer constructor with", { options })
+    @stack = options.stack
+
     if u.isGiven(options.closable)
       up.legacy.warn('Layer options { closable } has been renamed to { dismissable }')
       options.dismissable = options.closable
@@ -49,7 +52,7 @@ class up.Layer extends up.Record
     @stack.root == this
 
   defaultTargets: ->
-    up.layer.defaultTargets({ @flavor })
+    up.layer.defaultTargets(@flavor)
 
   sync: ->
     # no-op so users can blindly sync without knowing the current flavor

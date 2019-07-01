@@ -6,4 +6,16 @@ beforeEach ->
     toHaveText: (util, customEqualityTesters) ->
       compare: (element, expectedText) ->
         element = up.element.get(element)
-        pass: element && (element.textContent?.trim() == expectedText.trim())
+        actualText = element?.textContent?.trim()
+        expectedText = expectedText.trim()
+
+        result = {}
+        result.pass = (element && actualText == expectedText)
+
+        if result.pass
+          result.message = up.log.sprintf('Expected element %o to not have text %s', element, actualText)
+        else
+          result.message = up.log.sprintf('Expected element %o to have text %s, but its text was %s', element, expectedText, actualText)
+
+        return result
+

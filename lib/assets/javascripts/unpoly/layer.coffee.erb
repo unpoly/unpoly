@@ -11,63 +11,87 @@ up.layer = do ->
   ]
 
   registerFlavor = (Implementation, store = config) ->
-    name = Implementation.flavor
-    # Since the layer class names are not public API, we make their static
-    # config property accessible through up.layer.config. E.g.
-    # up.layer.config.dialog = up.layer.Dialog.config.
-    subConfig = Implementation.config
-    subConfig.Implementation = Implementation
-    store[name] = subConfig
+    flavor = Implementation.flavor
+    store[flavor] ||= {}
+    store[flavor].Implementation = Implementation
 
   config = new up.Config ->
-    flavor: 'modal'
-    all:
-      targets: []
-    root:
-      targets: ['body']
-    overlay:
-      targets: []
-      position: null
-      align: null
-      size: null
-      openAnimation: 'fade-in'
-      closeAnimation: 'fade-out'
-      openDuration: null
-      closeDuration: null
-      openEasing: null
-      closeEasing: null
-      backdropOpenAnimation: 'fade-in'
-      backdropCloseAnimation: 'fade-out'
-      dismissLabel: '×'
-      dismissAriaLabel: 'Dismiss dialog'
-      dismissible: true
-
     newConfig =
       flavor: 'modal'
-      all: up.Layer.config
+      resetWorld: true
+      all:
+        targets: []
+      root:
+        targets: ['body']
+      overlay:
+        targets: []
+        position: null
+        align: null
+        size: null
+        openAnimation: 'fade-in'
+        closeAnimation: 'fade-out'
+        openDuration: null
+        closeDuration: null
+        openEasing: null
+        closeEasing: null
+        backdropOpenAnimation: 'fade-in'
+        backdropCloseAnimation: 'fade-out'
+        dismissLabel: '×'
+        dismissAriaLabel: 'Dismiss dialog'
+        dismissible: true
+      popup:
+        position: 'bottom'
+        align: 'left'
+      drawer:
+        position: 'left'
+        openAnimation: (layer) ->
+          switch layer.position
+            when 'left' then 'move-from-left'
+            when 'right' then 'move-from-right'
+        closeAnimation: (layer) ->
+          switch layer.position
+            when 'left' then 'move-to-left'
+            when 'right' then 'move-to-right'
 
     for implementation in DEFAULT_IMPLEMENTATIONS
       registerFlavor(implementation, newConfig)
 
     return newConfig
 
-  stack = new up.LayerStack()
+  stack = null
+
+  initStack = ->
+    console.debug("Init stack start")
+    stack = new up.LayerStack()
+    console.debug("Init stack done")
 
   isOverlayFlavor = (name) ->
     name != 'root' && name != 'page' && !!config[name]
 
-  flavorFromOptions = (options) ->
-    options.flavor ? config.flavor
+#  flavorFromOptions = (options) ->
+#    options.flavor ? config.flavor
 
-  defaultTargets = (options = {}) ->
-    flavor = flavorFromOptions(options)
+  defaultTargets = (flavor) ->
+    return u.flatMap flavorConfigs(flavor), (prop) -> config[prop].targets
 
+  ###**
+  Returns an array of config objects that apply to the given flavor name.
+
+  The config objects are in descending order of specificity.
+  ###
+  flavorConfigs = (flavor = config.flavor) ->
     if flavor == 'root'
-      props = ['root', 'all']
+      return ['root', 'all']
     else
-      props = [flavor, 'overlay', 'all']
+      return [flavor, 'overlay', 'all']
 
-    return u.flatMap props, (prop) -> config[prop].targets
+  build = (options) ->
+    flavor = options.flavor ? config.flavor
+    Implementation = config[flavor].Implementation
+    configs = u.reverse(flavorConfigs(flavor))
+    options = u.merge(configs..., { flavor, stack }, options)
+    console.debug("building with", { options })
+    return new Implementation(options)
 
 #  flavorImplementation = (options = {}) ->
 #    flavor = options.flavor ? config.flavor
@@ -88,9 +112,7 @@ up.layer = do ->
       return (event) -> callback.call(link, event, event.value)
 
   reset = ->
-    config.reset(deep: true)
-    throw "no guaranteee that configs are being reset in inheritance order"
-
+    config.reset()
     stack.reset()
 
   open = (options) ->
@@ -100,10 +122,6 @@ up.layer = do ->
     # since a lot of options processing is happening there.
     up.change(options)
 
-  build = (options) ->
-    flavor = options.flavor ? config.flavor
-    Implementation = config[flavor].Implementation
-    return new Implementation(stack, options)
 
   # TODO: Docs for up.layer.ask()
   ask = (options) ->
@@ -163,7 +181,7 @@ up.layer = do ->
     off: (args...) -> stack.current.off(args...)
     emit: (args...) -> stack.current.emit(args...)
     get_root: -> stack.root
-    get_all: -> stack.all
+    get_all: -> stack.layers
     get_current: -> stack.current
     get_parent: -> stack.parent(current)
     get_location: -> stack.current.location
@@ -172,6 +190,10 @@ up.layer = do ->
     get_element: -> stack.current.element
     get_context: -> stack.current.context
     contains: (args...) -> stack.current.contains(args...)
+    initStack: initStack
 
 # TODO: Docs for up.context
 u.getter(up, 'context', -> up.layer.context)
+
+# We need to run this after up.layer is defined.
+up.layer.initStack()

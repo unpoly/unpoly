@@ -2,10 +2,11 @@
 
 u = up.util
 
-class up.Change.FromURL
+class up.Change.FromURL extends up.Change
 
   constructor: (options) ->
-    @successOptions = u.options(options)
+    super(options)
+    @successOptions = u.copy(@options)
     # Remember the layer that was current when the request was made,
     # so changes with `{ layer: 'new' }` will know what to stack on.
     @successOptions.currentLayer = up.layer.current
@@ -51,8 +52,12 @@ class up.Change.FromURL
     successPreview = new up.Change.FromContent(@successOptions)
     failurePreview = new up.Change.FromContent(@failureOptions)
 
+    console.debug("Getting preflightLayer for success")
     @successOptions.layer = successPreview.preflightLayer()
+    console.debug("Getting preflightLayer for failure")
     @failureOptions.layer = failurePreview.preflightLayer()
+
+    console.debug("Getting preflightTarget for success and failure")
 
     requestAttrs = u.merge @successOptions,
       target: successPreview.preflightTarget()

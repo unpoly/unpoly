@@ -144,14 +144,13 @@ describe 'up.fragment', ->
 
           it 'replaces the first fallback instead of the given selector', asyncSpec (next) ->
             up.fragment.config.fallbacks = ['.fallback']
-            $fixture('.fallback')
-
-            # can't have the example replace the Jasmine test runner UI
-            extractSpy = up.fragment.knife.mock('extract').and.returnValue(Promise.resolve())
+            $fixture('.fallback').text('old fallback text')
 
             next => up.replace('.middle', '/path')
             next => @respond(status: 500)
-            next => expect(extractSpy).toHaveBeenCalledWith('.fallback', jasmine.any(String), jasmine.any(Object))
+            next =>
+              expect($('.middle')).toHaveText('old-middle')
+              expect($('.fallback')).toHaveText('new-middle')
 
           it 'uses a target selector given as { failTarget } option', asyncSpec (next) ->
             next =>
@@ -883,7 +882,7 @@ describe 'up.fragment', ->
           describe 'when selectors are missing on the page before the request was made', ->
 
             beforeEach ->
-              up.fragment.config.fallbacks = []
+              up.layer.config.all.targets = []
 
             it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
               $fixture('.box').text('old box')
@@ -893,12 +892,13 @@ describe 'up.fragment', ->
               next => expect('.box').toHaveText('new box')
 
             it 'rejects the promise if all alternatives are exhausted', (done) ->
+              console.debug("----")
               promise = up.replace('.unknown', '/path', fallback: '.more-unknown')
 
               u.task ->
                 promiseState(promise).then (result) ->
                   expect(result.state).toEqual('rejected')
-                  expect(e).toBeError(/Could not find target in current page/i)
+                  expect(result.value).toBeError(/Could not find target in current page/i)
                   done()
 
             it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
@@ -966,7 +966,7 @@ describe 'up.fragment', ->
                 u.task =>
                   promiseState(promise).then (result) ->
                     expect(result.state).toEqual('rejected')
-                    expect(result.value).toBeError(/Could not find target in current page/i)
+                    expect(result.value).toBeError(/Could not match target in current page and response/i)
                     done()
 
             it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->

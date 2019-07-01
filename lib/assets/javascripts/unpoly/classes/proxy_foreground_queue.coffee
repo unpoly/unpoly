@@ -15,7 +15,7 @@ class up.ProxyForegroundQueue extends up.TaskQueue
   asap: (fn) ->
     promise = super(fn)
     slowDelay = u.evalOption(@slowDelay)
-    u.setTimer(slowDelay, @checkSlow)
+    u.timer(slowDelay, @checkSlow)
     promise
 
   checkSlow: =>

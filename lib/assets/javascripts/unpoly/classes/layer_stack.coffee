@@ -6,60 +6,61 @@ OVERLAY_CONTAINER_SELECTOR = '.up-overlays'
 class up.LayerStack extends up.Class
 
   constructor: ->
-    @resetAll()
+    @resetLayers()
 
   isRoot: (layer = @current()) ->
-    @all[0] == layer
+    @layers[0] == layer
 
   at: (i) ->
-    @all[i]
+    @layers[i]
 
   remove: (layer) ->
-    u.remove(@all, layer)
+    u.remove(@layers, layer)
 
   push: (layer) ->
-    @all.push(layer)
+    @layers.push(layer)
 
   peel: (layer) ->
     for ancestor in u.reverse(@ancestorsOf(layer))
         ancestor.dismiss(preventable: false)
 
   reset: ->
-    @resetAll()
+    @resetLayers()
 
     if c = @_overlayContainer
       e.remove(c)
 
-  resetAll: ->
-    @all = []
-    @all.push(new up.Layer.Root(this))
+  resetLayers: ->
+    @layers = []
+    rootLayer = up.layer.build(flavor: 'root', stack: this)
+    @layers.push(rootLayer)
 
   indexOf: (layer) ->
-    @all.indexOf(layer)
+    @layers.indexOf(layer)
 
   isOpen: (layer) ->
     @indexOf(layer) >= 0
 
   parentOf: (layer) ->
     layerIndex = @indexOf(layer)
-    @all[layerIndex - 1]
+    @layers[layerIndex - 1]
 
   selfAndAncestorsOf: (layer) ->
     layerIndex = @indexOf(layer)
-    @all.slice(0, layerIndex + 1)
+    @layers.slice(0, layerIndex + 1)
 
   ancestorsOf: (layer) ->
     layerIndex = @indexOf(layer)
-    @all.slice(0, layerIndex)
+    @layers.slice(0, layerIndex)
 
   allReversed: ->
-    u.reverse(@all)
+    u.reverse(@layers)
 
   @getter 'root', ->
-    @all[0]
+    @layers[0]
 
   @getter 'current', ->
-    u.last(@all)
+    u.last(@layers)
 
   @getter 'parent', ->
     @parentOf(@current)
@@ -70,6 +71,12 @@ class up.LayerStack extends up.Class
       @attachOverlayContainer()
     @_overlayContainer
 
+  ###**
+  Attaches the overlay container to the body.
+
+  Also re-attaches the container to the body in case it was detached
+  by swapping the body element.
+  ###
   attachOverlayContainer: ->
     if @_overlayContainer
       document.body.appendChild(@_overlayContainer)

@@ -5,13 +5,10 @@ e = up.element
 
 class up.Layer.Root extends up.Layer
 
-  @config: new up.Config ->
-    targets: []
-
   @flavor: 'root'
 
-  constructor: (stack, options) ->
-    super(stack, options)
+  constructor: (options) ->
+    super(options)
     @element = e.root
     @location = up.browser.location
     @title = document.title
@@ -28,5 +25,5 @@ class up.Layer.Root extends up.Layer
     matches = e.all(selector)
     # Since our @element also contains all the other layers we need
     # to filter matches to exclude elements that belong to another layer.
-    matches = u.select(matches, @contains)
+    matches = u.filter(matches, @contains)
     return matches

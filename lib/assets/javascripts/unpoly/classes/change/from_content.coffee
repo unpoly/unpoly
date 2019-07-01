@@ -3,10 +3,10 @@
 u = up.util
 e = up.element
 
-class up.Change.FromContent
+class up.Change.FromContent extends up.Change
 
   constructor: (options) ->
-    @options = u.options(options)
+    super(options)
     # Remember the layer that was current when the request was made, so changes
     # with `{ layer: 'new' }` will know what to stack on. The current layer might
     # change until the queued layer change is executed.
@@ -42,21 +42,26 @@ class up.Change.FromContent
 
   buildPlans: ->
     @plans = []
+    console.debug("Building plans")
     if @options.layer == 'new'
-      layerDefaultTargets = up.layer.defaultTargets(u.only(@options, 'flavor'))
+      layerDefaultTargets = up.layer.defaultTargets(@options.flavor)
       @eachTargetCandidatePlan layerDefaultTargets, (plan) =>
         # We cannot open a <body> in a new layer
         unless up.fragment.targetsBody(plan.target)
+          console.debug("Adding plan: OpenLayer(%o)", plan)
           @plans.push(new up.Change.OpenLayer(plan))
 
     else
       for layer in up.layer.lookupAll(@options.layer)
         @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
           # console.debug("UpdateLayer(%o)", plan)
+          console.debug("Adding plan: UpdateLayer(%o)", plan)
           @plans.push(new up.Change.UpdateLayer(plan))
 
     # Make sure we always succeed
-    @plans.push(new up.Change.ResetWorld(@options))
+    if up.layer.config.resetWorld
+      console.debug("Adding plan: ResetWorld")
+      @plans.push(new up.Change.ResetWorld(@options))
 
   eachTargetCandidatePlan: (layerDefaultTargets, planOptions, fn) ->
     for target, i in @buildTargetCandidates(layerDefaultTargets)
@@ -93,7 +98,7 @@ class up.Change.FromContent
   executeNotApplicable: ->
     if @options.inspectResponse
       inspectAction = { label: 'Open response', callback: @options.inspectResponse }
-    up.asyncFail("Could not match target in current page and response", action: inspectAction)
+    up.fail("Could not match target in current page and response", action: inspectAction)
 
   buildResponseDoc: ->
     @options.responseDoc = new up.ResponseDoc(@options)
@@ -115,6 +120,7 @@ class up.Change.FromContent
 
   seekPlan: (opts) ->
     @ensurePlansBuilt()
+    console.debug("seekPlan on %o plans", @plans.length)
     for plan, index in @plans
       try
         return opts.attempt(plan)

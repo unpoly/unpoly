@@ -54,9 +54,9 @@ up.fragment = do ->
     console.debug("makeChange(%o)", options)
 
     if options.content || options.document
-      return new up.Change.FromContent(options).execute()
+      return new up.Change.FromContent(options).executeAsync()
     else if options.url
-      return new up.Change.FromURL(options).execute()
+      return new up.Change.FromURL(options).executeAsync()
     else
       up.fail('up.change() requires either { content }, { document } or { url } option')
 
@@ -534,7 +534,7 @@ up.fragment = do ->
     setLayerOption(target, options)
 
     if options.element = first(target, options)
-      return new up.Change.DestroyFragment(options).execute()
+      return new up.Change.DestroyFragment(options).executeAsync()
     else
       return Promise.resolve()
 

@@ -160,7 +160,9 @@ up.link = do ->
     parser.json('params')
     parser.boolean('cache')
     parser.boolean('navigate', default: true)
+    options.navigate = false if options.preload
     parser.string('confirm')
+    options.confirm = undefined if options.preload
     parser.booleanOrString('reveal', default: true)
     parser.boolean('restoreScroll')
     parser.booleanOrString('transition')
@@ -174,7 +176,7 @@ up.link = do ->
     parser.string('layer')
     parser.string('flavor')
     parser.json('context')
-    parser.boolean('peel')
+    parser.boolean('peel', default: true)
     parser.string('align')
     parser.string('position')
     parser.string('class')

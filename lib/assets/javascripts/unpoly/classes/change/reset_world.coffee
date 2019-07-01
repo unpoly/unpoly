@@ -12,8 +12,6 @@ class up.Change.ResetWorld extends up.Change.Addition
     @options.target
 
   constructor: (options) ->
-    throw "Do I really want this default step instead of <body> as root's default target?"
-    throw "Replace up.layer.config.all with up.layer.config.overlay"
     options = u.merge(options,
       layer: @preflightLayer(),
       target: 'body',

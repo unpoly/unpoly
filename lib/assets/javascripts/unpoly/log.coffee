@@ -103,14 +103,14 @@ up.log = do ->
   ###**
   See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
 
-  @function up.browser.sprintf
+  @function up.log.sprintf
   @internal
   ###
   sprintf = (message, args...) ->
     sprintfWithFormattedArgs(u.identity, message, args...)
 
   ###**
-  @function up.browser.sprintfWithFormattedArgs
+  @function up.log.sprintfWithFormattedArgs
   @internal
   ###
   sprintfWithFormattedArgs = (formatter, message, args...) ->
