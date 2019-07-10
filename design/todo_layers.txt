@@ -1,5 +1,3 @@
-- Make all LayerStack operations sync and get rid of locking
-- Don't allow to replace <html> ever. Force to replace <body> instead.
 - Check new layer styles visually
   - Nested layers should have more padding
 - Should we keep up.history.popTargets?
@@ -26,10 +24,16 @@
 - Check if all events are emitted on a close element
   - so they can be observed with up.on(element)
   - e.g. up:layer:open is being emitted on document, but it should be emitted on the parent layer element
-- Allow to emit an event with a response: X-Up-Event: flight:picked { flight_id: 5 }
+- Allow to emit an event with a response: X-Up-Layer-Event: flight:picked { flight_id: 5 }
+  - Integration: up.layer.emit()
 - Make sure all Change#execute() functions check if they're still applicable (or if the layer has been removed)
 - Allow to pass up.Layer instances as arguments to up.emit(), up.on(), up.first() and up.all()
   - This requires some more changes than I thought
+- Update Rails integration
+  - up.layer.accept(value)
+  - up.layer.dismiss(value)
+- Reconsider whether up.first and up.all without element reference should only see the current layer
+  - Isn't this surprising to the developer?
 
 
 - Tests
@@ -147,5 +151,6 @@ Decisions
 - Do I really want up.Change.ResetWorld instead of <body> as root's default target?
   - Yes, if we cannot match an overlay target we want to reset the world
   - One could argue that we only need ResetWorld when we're creating a layer or updating an overlay
+- Should up.emit without an element emit on the document or on the current layer? => Keep it on document, as it is now!
 
 

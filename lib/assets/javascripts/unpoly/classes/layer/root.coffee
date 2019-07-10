@@ -9,10 +9,14 @@ class up.Layer.Root extends up.Layer
 
   constructor: (options) ->
     super(options)
-    @element = e.root
     @location = up.browser.location
     @title = document.title
     @history = true
+
+  # Always return the current documentElement, since the developer
+  # might replace it with a new version.
+  @getter 'element', ->
+    e.root
 
 #  # Since the developer cannot instantiate the root layer herself and set
 #  # the { targets } property, we dynamically retrieve the configured targets
