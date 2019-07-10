@@ -489,7 +489,7 @@ up.fragment = do ->
       if u.isElementish(args[0])
         # up.fragment.all(element, [options]) should just return [element].
         # Any options are ignored.
-        candidates = [args[0]]
+        candidates = [e.get(args[0])]
       else
         # up.fragment.all(selector, [options]) should lookup the selector
         # in the current layer, or in options.layer if given.

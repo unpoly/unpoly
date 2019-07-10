@@ -7,18 +7,18 @@ class up.EventEmitter extends up.Record
     [
       'element',
       'event',
-      'boundary'
+      # 'boundary'
     ]
 
   emit: ->
     @logEmission()
-    destroyBoundary = @createBoundary()
+    # destroyBoundary = @createBoundary()
     @element.dispatchEvent(@event)
-    if destroyBoundary
-      destroyBoundary()
-      # Even with a { boundary } we want event listeners bound to document
-      # to receive our event.
-      document.dispatchEvent(@event)
+#    if destroyBoundary
+#      destroyBoundary()
+#      # Even with a { boundary } we want event listeners bound to document
+#      # to receive our event.
+#      document.dispatchEvent(@event)
     return @event
 
   whenEmitted: ->
@@ -29,14 +29,14 @@ class up.EventEmitter extends up.Record
       else
         resolve()
 
-  createBoundary: ->
-    if @boundary
-      uid = u.uid()
-      @eventProps.upUid = uid
-      stopEvent = (event) ->
-        if event.upUid == uid
-          event.stopPropagation()
-      return up.on(@boundary, @eventName, stopEvent)
+#  createBoundary: ->
+#    if @boundary
+#      uid = u.uid()
+#      @eventProps.upUid = uid
+#      stopEvent = (event) ->
+#        if event.upUid == uid
+#          event.stopPropagation()
+#      return up.on(@boundary, @eventName, stopEvent)
 
   logEmission: ->
     return unless up.log.isEnabled()

@@ -87,25 +87,24 @@ class up.Layer extends up.Record
 
   buildEventListenerGroup: (args) ->
     group = up.EventListenerGroup.fromBindArgs(args)
-    group.guard = @eventGuard
+    group.guard = @containsEventTarget
     group.element = @element
     group
 
-  buildEmitter: ->
+  containsEventTarget: (event) =>
+    @contains(event.target)
+
+  buildEventEmitter: ->
     emitter = up.EventEmitter.fromEmitArgs(args)
     emitter.element ?= @element
-    throw "Do we need up.layer.emit() with boundaries if people can use up.layer.on()?"
-    emitter.boundary = @element
+    # emitter.boundary = @element
     return emitter
 
   emit: (args...) ->
-    return @buildEmitter(args).emit()
+    return @buildEventEmitter(args).emit()
 
   whenEmitted: (args...) ->
-    return @buildEmitter(args).whenEmitted()
-
-  eventGuard: (event) =>
-    @contains(event.target)
+    return @buildEventEmitter(args).whenEmitted()
 
   isOpen: ->
     @stack.isOpen(this)

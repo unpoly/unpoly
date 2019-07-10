@@ -28,8 +28,13 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @layer = up.layer.build(@options)
 
-    # There is no @layer.onOpen() handler.
-    promise = @currentLayer.whenEmitted('up:layer:open', @eventProps())
+    # The initial up:layer:open event is emitted on the document, since the layer
+    # element has not been attached yet and there is no other element it should be
+    # emitted on. We don't want to emit it on @layer.parent.element since developers
+    # might confuse this with the event for @layer.parent itself opening.
+    #
+    # There is no @layer.onOpen() handler to accompany the DOM event.
+    promise = up.event.whenEmitted('up:layer:open', @eventProps())
 
     promise = promise.then =>
       # Make sure that the ground layer doesn't already have a child layer.
@@ -41,7 +46,7 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     promise = promise.then =>
       openedEvent = up.event.build('up:layer:opened', @eventProps())
-      @currentLayer.emit(openedEvent)
+      @layer.emit(openedEvent)
       @layer.onOpened?(openedEvent)
 
       # don't delay `promise` until layer close callbacks have finished
@@ -72,4 +77,4 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     openingEvent = up.event.build('up:layer:opening', @eventProps())
     @layer.onOpening?(openingEvent)
-    @currentLayer.emit(openingEvent)
+    @layer.emit(openingEvent)

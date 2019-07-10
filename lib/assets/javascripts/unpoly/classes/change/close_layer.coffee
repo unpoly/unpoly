@@ -43,10 +43,7 @@ class up.Change.CloseLayer extends up.Change.Removal
     # TODO: Is up.proxy.abort sync or async?
 
     @layer[@closeCallbackName]?(closeEvent)
-    throw """
-      Where should we emit close-related events?"
-    """
-    @layer.parent.emit(closeEvent)
+    @layer.emit(closeEvent) # will bubble up to document
 
     if !@closeEvent.defaultPrevented || !@preventable
       promise = Promise.resolve()
@@ -60,15 +57,16 @@ class up.Change.CloseLayer extends up.Change.Removal
         @stack.remove(@layer)
         @stack.current.restoreHistory()
         @layer[@closingCallbackName]?(closingEvent)
-        @layer.parent.emit(closingEvent)
+        @layer.emit(closingEvent) # will bubble up to document
         return @closeNow()
 
       promise = promise.then =>
-        # Wait for the callbacks until the closing animation ends, so events will be
-        # fired at the same moment as our promise (or up.layer.ask()) resolves.
-        # TODO: Reconsider whether changes should wait for animations to resolve
         @layer[@closedCallbackName](closedEvent)
-        @layer.parent.emit(closedEvent)
+        @layer.emit(closedEvent)
+        # Since @layer.element is now detached, the event will no longer bubble up to
+        # the document where global event listeners can receive it. So we explicitely emit
+        # the event a second time on the document.
+        up.emit(closedEvent)
 
       return promise
 
