@@ -71,21 +71,34 @@
       - To be 100% consistent, we would need to introduce up:fragment:destroying (up:fragment:destroyed is already emitted later)
     - We could also do this for layers only right now and rework the fragment evens later
 - Make sure all Change#execute() functions check if they're still applicable (or if the layer has been removed)
-- up.layer.open() should have more JS-callbacks
-  - onOpen => no, that makes no sense
-  - onOpening
-  - onOpened
-  - onAccept
-  - onAccepting
-  - onAccepted
-  - onReject
-  - onRejecting
-  - onRejected
-- JS-callbacks like onOpen need to default to no-op or we need to test their existence
-- Emits emitted with up.layer.emit() are currently not observable by binding to up.document
-  - Because they set { boundary } to an element that stops the event
-  - Consider re-emitting an event with { boundary } to document
-    This way listeners can choose to either use document.addEventListener() or up.layer.root.on()
+- Should layer-related events be emitted on the layer or the parent layer?
+  - This is really only relevant for global event handlers that are not passed to the open() method, so the story pattern is save
+  - We emit open-related events on the parent, so there is some symmetry to also open close-related events there
+    - If we reversed this (emit close-related events on the closing layer)
+      AND a parent layer is interested in their child closing, it could bind to the newly opened layer.
+  - What about an layer that does not want to be dismissed if it has changes?
+    - That can use up.on('up:layer:close')
+  - Or should up.layer.emit events bubble up the layer hierarchy?
+    - That kinda breaks the abstraction that layers are isolated
+  - A lot of other options are controlled from the view of the parent layer
+  - Or should we nest layer elements for this one reason?
+    - Would not be great for accessibility, it's easier to hide individual layers as it is now
+    - Would again break isolation
+  - At least the closed event needs to be emitted on the parent! Since the layer is no longer there
+  - What's your expectation for up.layer.on('up:layer:accepted', fn) ?
+  - One strategy: Use the new layer when possible
+    | up:layer:open      | parent layer (no choice)  |
+    | up:layer:opening   | new layer                 |
+    | up:layer:opened    | new layer                 |
+    | up:layer:accept    | new layer                 |
+    | up:layer:accepting | new layer                 |
+    | up:layer:accepted  | parent layer (no choice)  |
+- Was clasht:
+
+    layer.on('up:layer:accepted')
+    up.layer.open({ onAccepted: ... })
+
+- Allow to pass up.Layer instances as arguments to up.emit(), up.on(), up.first() and up.all()
 
 
 - Tests

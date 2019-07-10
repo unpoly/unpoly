@@ -45,20 +45,6 @@ class up.Change.CloseLayer extends up.Change.Removal
     @layer[@closeCallbackName]?(closeEvent)
     throw """
       Where should we emit close-related events?"
-      - This is really only relevant for global event handlers that are not passed to the open() method
-      - We emit open-related events on the parent, so there is some symmetry to also open close-related events there
-        - If we reversed this (emit close-related events on the closing layer)
-          AND a parent layer is interested in their child closing, it could bind to the newly opened layer.
-      - What about an layer that does not want to be dismissed if it has changes?
-        - That can use up.on('up:layer:close')
-      - Or should up.layer.emit events bubble up the layer hierarchy?
-        - That kinda breaks the abstraction that layers are isolated
-      - A lot of other options are controlled from the view of the parent layer
-      - Or should we nest layer elements for this one reason?
-        - Would not be great for accessibility, it's easier to hide individual layers as it is now
-        - Would again break isolation
-      - At least the closed event needs to be emitted on the parent! Since the layer is no longer there
-      - What's your expectation for up.layer.on('up:layer:close', fn) ?
     """
     @layer.parent.emit(closeEvent)
 
