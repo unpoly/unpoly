@@ -10,10 +10,6 @@
       options.location = false
       options.title = false
 - Rename Response#url to Response#location
-- Layer closed events werden aktuell noch auf dem geschlossenen layer ausgeführt
-  - das ist gut für das story-pattern
-  - das wäre für ein anderes pattern wo ich im layer des openers höre nicht gut
-    => gibt es dafür wirklich einen case?
 - Deprecate shortcuts like [up-modal] for shrink the API surface
   - people can use [up-layer=modal] to open a new modal
   - the original shortcuts could then be backwards compatible (up-layer="solo" up-flavor="modal")
@@ -24,6 +20,72 @@
 - Have up.layer.build delegate to up.Layer class
 - Rename { navigate } to { solo }. Then MAYBE use { navigate } to mass-set { peel, solo, feedback }.
 - Florian hatte Requirement nur Klick auf Backdrop zu vermeiden.
+  - [X] close-Event sollte { origin } haben
+  - [X] close-Event sollte { layer } haben
+  - Wir sollten das ganze Layer compilen, nicht nur den content
+- Check if all events are emitted on a close element
+  - so they can be observed with up.element.on()
+  - e.g. up:layer:open is being emitted on document, but it should be emitted on the parent layer element
+- Should events like up:fragment:inserted also be emitted with up.layer.emit()?
+  - So they will never bubble up to the parent.
+  - Do we really need the weirdly behaving up.layer.emit() with boundaries if people can use up.layer.on()?
+- Allow to emit an event with a response: X-Up-Emit: flight:picked { flight_id: 5 }
+- Should "something:opened" event wait until the animation is done?
+  - Current state
+    - up:fragment:inserted    BEFORE animation starts
+    - up:fragment:destroyed   AFTER animation ends
+    - up:modal:opened         AFTER animation ends
+    - up:modal:closed         AFTER animation ends
+  - Emitting these events earlier would minimize the window for concurrency issues.
+    Example:
+
+        up.layer.open({
+          url: '/foo',
+          onOpened: (event) => {
+            up.layer.on('flight:selected', () => up.layer.close())
+          }
+        })
+
+    A save way to write this (event with late events) would also be
+
+        up.layer.open({
+          url: '/foo',
+          onOpened: (event) => {
+            event.layer.on('flight:selected', () => event.layer.close())
+          }
+        })
+  - Should promises resolve earlier as well?
+  - What about elements that are being removed but are still in an animation/transition?
+  - What about callers who really want to wait until an animation is done?
+    - An alternative would be to emit new events
+      - up:fragment:inserting
+      - up:layer:opening
+      - up:layer:closing
+      - up:fragment:destroying
+    - It's a little hard to distinguish between "open" and "opening", but language-wise it's OK
+      - Command: open the modal!
+      - I'm in the process: modal opening!
+      - I'm done: Modal opened!
+    - Introducing gerund-form events would be backwards-compatible
+      - To be 100% consistent, we would need to introduce up:fragment:inserting and emit up:fragment:inserted later
+      - To be 100% consistent, we would need to introduce up:fragment:destroying (up:fragment:destroyed is already emitted later)
+    - We could also do this for layers only right now and rework the fragment evens later
+- Make sure all Change#execute() functions check if they're still applicable (or if the layer has been removed)
+- up.layer.open() should have more JS-callbacks
+  - onOpen => no, that makes no sense
+  - onOpening
+  - onOpened
+  - onAccept
+  - onAccepting
+  - onAccepted
+  - onReject
+  - onRejecting
+  - onRejected
+- JS-callbacks like onOpen need to default to no-op or we need to test their existence
+- Emits emitted with up.layer.emit() are currently not observable by binding to up.document
+  - Because they set { boundary } to an element that stops the event
+  - Consider re-emitting an event with { boundary } to document
+    This way listeners can choose to either use document.addEventListener() or up.layer.root.on()
 
 
 - Tests
@@ -95,6 +157,8 @@ Bootstrap integration
 Later?
 ------
 
+- Instead of a single event listener slot per layer, allow layer.addEventListener('closing')?
+  - How is this different from up.layer.on('up:layer:closing') ?
 - Do we want an ExtractPlan.BackButton? Turbolinks keep [up-keep] for back.
 - Turn property-like API symbols into getter
   - e.g. up.layer.root instead of up.layer.root()

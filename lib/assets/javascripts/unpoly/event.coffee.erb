@@ -235,6 +235,9 @@ up.event = do ->
   unbind = (args...) ->
     up.EventListenerGroup.fromBindArgs(args).unbind()
 
+  buildEmitter = (args) ->
+    return up.EventEmitter.fromEmitArgs(args)
+
   ###**
   Emits a event with the given name and properties.
 
@@ -274,7 +277,21 @@ up.event = do ->
   @stable
   ###
   emit = (args...) ->
-    up.EventEmitter.fromEmitArgs(args).emit()
+    buildEmitter(args).emit()
+
+  build = (name, props) ->
+    event = document.createEvent('Event')
+    event.initEvent(name, true, true) # name, bubbles, cancelable
+    u.assign(event, props)
+
+    # IE11 does not set { defaultPrevented: true } after #preventDefault()
+    # was called on a custom event.
+    # See discussion here: https://stackoverflow.com/questions/23349191
+    if up.browser.isIE11()
+      event.preventDefault = ->
+        u.getter(event, 'defaultPrevented', get: -> true)
+
+    return event
 
   ###**
   [Emits an event](/up.emit) and returns whether no listener
@@ -307,11 +324,7 @@ up.event = do ->
   @internal
   ###
   whenEmitted = (args...) ->
-    new Promise (resolve, reject) ->
-      if nobodyPrevents(args...)
-        resolve()
-      else
-        reject(abortError("Event #{args[0]} was prevented"))
+    buildEmitter(args).whenEmitted()
 
   abortError = (message) ->
     message == 'Aborted'

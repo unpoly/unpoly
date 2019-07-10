@@ -91,11 +91,18 @@ class up.Layer extends up.Record
     group.element = @element
     group
 
-  emit: (args...) ->
+  buildEmitter: ->
     emitter = up.EventEmitter.fromEmitArgs(args)
     emitter.element ?= @element
+    throw "Do we need up.layer.emit() with boundaries if people can use up.layer.on()?"
     emitter.boundary = @element
-    return emitter.emit()
+    return emitter
+
+  emit: (args...) ->
+    return @buildEmitter(args).emit()
+
+  whenEmitted: (args...) ->
+    return @buildEmitter(args).whenEmitted()
 
   eventGuard: (event) =>
     @contains(event.target)

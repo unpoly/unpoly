@@ -185,9 +185,14 @@ up.link = do ->
     parser.boolean('dismissable')
     parser.boolean('feedback', default: true)
     options.feedback = false if options.preload
-    parser.parse(up.layer.openedCallbackAttr, 'onOpened')
-    parser.parse(up.layer.closedCallbackAttr, 'onAccepted')
-    parser.parse(up.layer.closedCallbackAttr, 'onDismissed')
+    parser.parse(up.layer.openCallbackAttr, 'onOpening')
+    parser.parse(up.layer.openCallbackAttr, 'onOpened')
+    parser.parse(up.layer.closeCallbackAttr, 'onAccept')
+    parser.parse(up.layer.closeCallbackAttr, 'onAccepting')
+    parser.parse(up.layer.closeCallbackAttr, 'onAccepted')
+    parser.parse(up.layer.closeCallbackAttr, 'onDismiss')
+    parser.parse(up.layer.closeCallbackAttr, 'onDismissing')
+    parser.parse(up.layer.closeCallbackAttr, 'onDismissed')
     u.assign(options, up.motion.animateOptions(options, link))
 
     options.eventName ?= 'up:link:follow'

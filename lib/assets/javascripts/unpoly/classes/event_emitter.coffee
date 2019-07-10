@@ -6,18 +6,28 @@ class up.EventEmitter extends up.Record
   keys: ->
     [
       'element',
-      'eventName',
-      'eventProps',
+      'event',
       'boundary'
     ]
 
   emit: ->
     @logEmission()
     destroyBoundary = @createBoundary()
-    event = @buildEvent()
-    @element.dispatchEvent(event)
-    destroyBoundary?()
-    return event
+    @element.dispatchEvent(@event)
+    if destroyBoundary
+      destroyBoundary()
+      # Even with a { boundary } we want event listeners bound to document
+      # to receive our event.
+      document.dispatchEvent(@event)
+    return @event
+
+  whenEmitted: ->
+    return new Promise (resolve, reject) ->
+      event = @emit()
+      if event.defaultPrevented
+        reject(up.event.abortError("Event #{args[0]} was prevented"))
+      else
+        resolve()
 
   createBoundary: ->
     if @boundary
@@ -27,20 +37,6 @@ class up.EventEmitter extends up.Record
         if event.upUid == uid
           event.stopPropagation()
       return up.on(@boundary, @eventName, stopEvent)
-
-  buildEvent: ->
-    event = document.createEvent('Event')
-    event.initEvent(@eventName, true, true) # name, bubbles, cancelable
-    u.assign(event, @eventProps)
-
-    # IE11 does not set { defaultPrevented: true } after #preventDefault()
-    # was called on a custom event.
-    # See discussion here: https://stackoverflow.com/questions/23349191
-    if up.browser.isIE11()
-      event.preventDefault = ->
-        u.getter(event, 'defaultPrevented', get: -> true)
-
-    return event
 
   logEmission: ->
     return unless up.log.isEnabled()
@@ -52,16 +48,18 @@ class up.EventEmitter extends up.Record
     else
       messageArgs = []
 
+    name = @event.name
+
     if u.isString(message)
       if u.isPresent(@eventProps)
-        up.puts("#{message} (%s (%o))", messageArgs..., @eventName, @eventProps)
+        up.puts("#{message} (%s (%o))", messageArgs..., name, @event)
       else
-        up.puts("#{message} (%s)", messageArgs..., @eventName)
+        up.puts("#{message} (%s)", messageArgs..., name)
     else if message == true
       if u.isPresent(@eventProps)
-        up.puts('Event %s (%o)', @eventName, @eventProps)
+        up.puts('Event %s (%o)', name, @event)
       else
-        up.puts('Event %s', @eventName)
+        up.puts('Event %s', name)
 
   @fromEmitArgs: (args) ->
     if args[0].addEventListener
@@ -69,11 +67,11 @@ class up.EventEmitter extends up.Record
     else if u.isJQuery(args[0])
       element = e.get(args.shift())
 
-    eventName = args[0]
-    eventProps = args[1] || {}
+    if args[0].preventDefault
+      event = args[0]
+    else
+      event = up.event.build(args[0], args[1])
 
-    if elementFromProps = u.pluckKey(eventProps, 'target')
-      element = elementFromProps
-    element ?= document
+    element ?= event.target || document
 
-    new @({ element, eventName, eventProps })
+    new @({ element, event })

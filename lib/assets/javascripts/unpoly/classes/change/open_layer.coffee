@@ -28,19 +28,22 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @layer = up.layer.build(@options)
 
-    promise = up.event.whenEmitted('up:layer:open', { layer, log: 'Opening layer' })
+    # There is no @layer.onOpen() handler.
+    promise = @currentLayer.whenEmitted('up:layer:open', @eventProps())
 
     promise = promise.then =>
       # Make sure that the ground layer doesn't already have a child layer.
       @currentLayer.peel()
       # Don't wait for peeling to finish.
-      up.layer.push(layer)
+      up.layer.push(@layer)
       @handleHistory()
       return @layer.openNow({ @content, @onContentAttached })
 
     promise = promise.then =>
-      openedEvent = up.emit('up:layer:opened', { layer, log: 'Layer opened' })
+      openedEvent = up.event.build('up:layer:opened', @eventProps())
+      @currentLayer.emit(openedEvent)
       @layer.onOpened?(openedEvent)
+
       # don't delay `promise` until layer close callbacks have finished
       @handleLayerChangeRequests()
       # don't delay `promise` until layer change requests have finished closing
@@ -58,8 +61,15 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @layer.updateHistory(@options)
 
+  eventProps: =>
+    { @layer, log: true}
+
   onContentAttached: =>
     up.fragment.setSource(@content, @source)
 
     # Compile the new content and emit up:fragment:inserted.
     @responseDoc.activateElement(@content, @options)
+
+    openingEvent = up.event.build('up:layer:opening', @eventProps())
+    @layer.onOpening?(openingEvent)
+    @currentLayer.emit(openingEvent)

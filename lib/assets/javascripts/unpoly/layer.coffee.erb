@@ -97,13 +97,13 @@ up.layer = do ->
 #    flavor = options.flavor ? config.flavor
 #    config[flavor].Implementation or up.fail("Unknown layer flavor: #{flavor}")
 
-  openedCallbackAttr = (link, attr) ->
+  openCallbackAttr = (link, attr) ->
     if code = link.getAttribute(attr)
       # Emulate the behavior of the `onclick` attribute,
       # where `this` refers to the clicked element.
       new Function('event', code).bind(link)
 
-  closedCallbackAttr = (link, attr) ->
+  closeCallbackAttr = (link, attr) ->
     if code = link.getAttribute(attr)
       # Allow callbacks to refer to `value` directly instead of through `event.value`.
       callback = new Function('event', 'value', code)
@@ -171,8 +171,8 @@ up.layer = do ->
     accept: (args...) -> stack.current.accept(args...)
     dismiss: (args...) -> stack.current.dismiss(args...)
     sync: (args...) -> stack.current.sync(args...)
-    openedCallbackAttr: openedCallbackAttr
-    closedCallbackAttr: closedCallbackAttr
+    openCallbackAttr: openCallbackAttr
+    closeCallbackAttr: closeCallbackAttr
     isRoot: -> stack.isRoot()
     push: (args...) -> stack.push(args...)
     flavor: registerFlavor
