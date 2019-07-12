@@ -95,6 +95,10 @@ class up.Response extends up.Record
       'request',
       'xhr',
       'title',
+      'acceptLayer'
+      'dismissLayer'
+      'event'
+      'layerEvent'
     ]
 
   ###**

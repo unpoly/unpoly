@@ -49,10 +49,12 @@ class up.Change.OpenLayer extends up.Change.Addition
       @layer.emit(openedEvent)
       @layer.onOpened?(openedEvent)
 
-      # don't delay `promise` until layer close callbacks have finished
-      @handleLayerChangeRequests()
       # don't delay `promise` until layer change requests have finished closing
-      return undefined
+      @handleLayerChangeRequests()
+
+      # Resolve the promise with the layer instance, so callers can do:
+      # layer = await up.layer.open(...)
+      return @layer
 
     promise
 

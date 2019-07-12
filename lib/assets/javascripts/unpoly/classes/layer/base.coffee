@@ -88,7 +88,7 @@ class up.Layer extends up.Record
   buildEventListenerGroup: (args) ->
     group = up.EventListenerGroup.fromBindArgs(args)
     group.guard = @containsEventTarget
-    group.element = @element
+    group.element ||= @element
     group
 
   containsEventTarget: (event) =>

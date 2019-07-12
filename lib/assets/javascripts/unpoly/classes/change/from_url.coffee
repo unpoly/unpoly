@@ -120,6 +120,8 @@ class up.Change.FromURL extends up.Change
 
     options.acceptLayer = response.acceptLayer
     options.dismissLayer = response.dismissLayer
+    options.event = response.event
+    options.layerEvent = response.layerEvent
 
 
   failedResponseHasContent: (response) ->

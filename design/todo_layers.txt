@@ -20,18 +20,24 @@
 - Florian hatte Requirement nur Klick auf Backdrop zu vermeiden.
   - [X] close-Event sollte { origin } haben
   - [X] close-Event sollte { layer } haben
-  - Wir sollten das ganze Layer compilen, nicht nur den content
+  - Wir sollten das ganze Layer compilen, nicht nur den content => Schwierig
+  - Ist { dismissable: true } genug zur Config?
+    - { dismissLink: true }
+    - { backdropDismisses: true }
 - Check if all events are emitted on a close element
   - so they can be observed with up.on(element)
   - e.g. up:layer:open is being emitted on document, but it should be emitted on the parent layer element
-- Allow to emit an event with a response: X-Up-Layer-Event: flight:picked { flight_id: 5 }
-  - Integration: up.layer.emit()
+- Allow to emit an event with a response
+  - X-Up-Event: app:message:new  # globaler Event auf document
+  - X-Up-Layer-Event: flight:picked { flight_id: 5 }  # event auf layer element
 - Make sure all Change#execute() functions check if they're still applicable (or if the layer has been removed)
 - Allow to pass up.Layer instances as arguments to up.emit(), up.on(), up.first() and up.all()
   - This requires some more changes than I thought
 - Update Rails integration
   - up.layer.accept(value)
   - up.layer.dismiss(value)
+  - up.layer.emit(name, props)
+  - up.emit(name, props)
 - Reconsider whether up.first and up.all without element reference should only see the current layer
   - Isn't this surprising to the developer?
 

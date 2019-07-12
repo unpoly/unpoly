@@ -210,10 +210,22 @@ up.protocol = do ->
     # X-Up-Dismiss-Layer: null
     extractHeader(xhr, config.dismissLayerHeader, JSON.parse)
 
+  eventHeaderFromXhr = (xhr) ->
+    extractHeader(xhr, config.eventHeader, parseEvent)
+
+  layerEventHeaderFromXhr = (xhr) ->
+    extractHeader(xhr, config.layerEventHeader, parseEvent)
+
   extractHeader = (xhr, header, parseFn = u.identity) ->
     if value = xhr.getResponseHeader(header)
       return parseFn(value)
 
+  parseEvent = (str) ->
+    pattern = /^([^ ]+)(?: ([\s\S]*))?$/
+    match = pattern.exec(str)
+    eventName = match[1]
+    eventProps = JSON.parse(match[2] || 'null')
+    return up.event.build(eventName, eventProps)
 
   ###**
   Server-side companion libraries like unpoly-rails set this cookie so we
@@ -242,6 +254,8 @@ up.protocol = do ->
   @param {String} [config.titleHeader='X-Up-Title']
   @param {String} [config.acceptLayerHeader='X-Up-Accept-Layer']
   @param {String} [config.dismissLayerHeader='X-Up-Dismiss-Layer']
+  @param {String} [config.eventHeader='X-Up-Event']
+  @param {String} [config.layerEventHeader='X-Up-Layer-Event']
   @param {String} [config.validateHeader='X-Up-Validate']
   @param {String} [config.methodHeader='X-Up-Method']
   @param {String} [config.methodCookie='_up_method']
@@ -293,6 +307,10 @@ up.protocol = do ->
     csrfParam: -> e.metaContent('csrf-param')
     csrfToken: -> e.metaContent('csrf-token')
     csrfHeader: 'X-CSRF-Token'
+    acceptLayerHeader: 'X-Up-Accept-Layer'
+    dismissLayerHeader: 'X-Up-Dismiss-Layer'
+    eventHeader: 'X-Up-Event'
+    layerEventHeader: 'X-Up-Layer-Event'
 
   csrfParam = ->
     u.evalOption(config.csrfParam)
@@ -312,6 +330,8 @@ up.protocol = do ->
   methodFromXhr: methodFromXhr
   acceptLayerFromXhr: acceptLayerFromXhr
   dismissLayerFromXhr: dismissLayerFromXhr
+  eventHeaderFromXhr: eventHeaderFromXhr
+  layerEventHeaderFromXhr: layerEventHeaderFromXhr
   csrfParam :csrfParam
   csrfToken: csrfToken
   initialRequestMethod: initialRequestMethod
