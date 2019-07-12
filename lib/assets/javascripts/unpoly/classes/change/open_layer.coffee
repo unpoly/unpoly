@@ -72,6 +72,10 @@ class up.Change.OpenLayer extends up.Change.Addition
     { @layer, log: true}
 
   onContentAttached: =>
+    # Event handlers for [up-target] etc. are registered to each layer instead of
+    # only once to the document. See https://github.com/unpoly/unpoly/issues/79
+    up.layer.applyHandlers(@layer)
+
     up.fragment.setSource(@content, @source)
 
     # Compile the new content and emit up:fragment:inserted.

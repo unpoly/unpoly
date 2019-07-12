@@ -506,7 +506,7 @@ up.link = do ->
   @stable
   ###
 
-  up.on 'click', fullSelector, (event, link) ->
+  up.layer.onEach 'click', fullSelector, (event, link) ->
     if shouldProcessEvent(event, link)
       if e.matches(link, '[up-instant]')
         # If the link was already processed on mousedown, we still need
@@ -518,7 +518,7 @@ up.link = do ->
       # For tests
       allowDefault(event)
 
-  up.on 'mousedown', fullSelector, (event, link) ->
+  up.layer.onEach 'mousedown', fullSelector, (event, link) ->
     if shouldProcessEvent(event, link) && e.matches(link, '[up-instant]')
       consumeFollowEvent(event, link)
     else

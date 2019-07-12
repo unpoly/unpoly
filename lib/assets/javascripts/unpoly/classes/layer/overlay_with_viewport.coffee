@@ -10,6 +10,8 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     @createElement()
     @element.classList.add('.up-overlay-with-viewport')
     @backdropElement = affix(@element, '.up-overlay-backdrop')
+    if @dismissable
+      @backdropElement.setAttribute('up-dismiss', '')
     @viewportElement = affix(@element, '.up-overlay-viewport')
     @frameInnerContent(@viewportElement, options)
 

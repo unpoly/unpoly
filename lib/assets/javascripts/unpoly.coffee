@@ -17,9 +17,9 @@
 #= require ./unpoly/fragment
 #= require ./unpoly/motion
 #= require ./unpoly/proxy
+#= require ./unpoly/layer
 #= require ./unpoly/link
 #= require ./unpoly/form
-#= require ./unpoly/layer
 #= require ./unpoly/tooltip
 #= require ./unpoly/feedback
 #= require ./unpoly/radio
