@@ -40,6 +40,10 @@
   - up.emit(name, props)
 - Reconsider whether up.first and up.all without element reference should only see the current layer
   - Isn't this surprising to the developer?
+- Review up.Request#preflightLayer
+  - This should always be set, even for new layers
+  - Emit layer-bound proxy events with up.layer.emit(), not up.emit()
+  - Why is it Request#preflightLayer instead of #layer?
 
 
 - Tests
