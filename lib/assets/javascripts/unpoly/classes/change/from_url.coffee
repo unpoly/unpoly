@@ -95,11 +95,6 @@ class up.Change.FromURL extends up.Change
 
     isReloadable = (response.method == 'GET')
 
-    if u.isString(options.history)
-      up.legacy.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
-      options.location = options.history
-      delete options.history
-
     if isReloadable
       # Remember where we got the fragment from so we can up.reload() it later.
       options.source ?= responseURL
@@ -110,19 +105,12 @@ class up.Change.FromURL extends up.Change
       # we can only provide history if a location URL is passed as an option.
       options.history = !options.location
 
-    # Accept { history: false } as a shortcut to disable all history-related options.
-    if options.history == false
-      options.location = false
-      options.title = false
-    else
-      options.location ?= locationFromExchange
-      options.title ?= response.title
-
+    options.location ?= locationFromExchange
+    options.title ?= response.title
     options.acceptLayer = response.acceptLayer
     options.dismissLayer = response.dismissLayer
     options.event = response.event
     options.layerEvent = response.layerEvent
-
 
   failedResponseHasContent: (response) ->
     # Check if the failed response wasn't cause by a fatal error

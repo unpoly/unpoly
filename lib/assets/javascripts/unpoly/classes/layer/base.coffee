@@ -127,18 +127,25 @@ class up.Layer extends up.Record
   asCurrent: (fn) ->
     @stack.asCurrent(this, fn)
 
-  updateHistory: (change) ->
+  updateHistory: (options) ->
+    # If the layer has history disabled we won't change location or title
+    # regardless of what's in options.
     return unless @history
 
+    # Accept { history: false } as a shortcut to disable all history-related options.
+    if options.history == false
+      options.location = false
+      options.title = false
+
     if @isCurrent()
-      if change.location
-        up.history.push(change.location)
-      if change.title
-        document.title = change.title
+      if options.location
+        up.history.push(options.location)
+      if options.title
+        document.title = options.title
     else
       # Only if this layer is overshadowed by a child layer, we store location
       # and title for later calls of @restoreHistory().
-      if change.location
-        @savedLocation = change.location
-      if change.title
-        @savedTitle = change.title
+      if options.location
+        @savedLocation = options.location
+      if options.title
+        @savedTitle = options.title
