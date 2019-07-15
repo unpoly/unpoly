@@ -108,7 +108,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
       return promise
 
-    else if keepPlan = @findKeepPlan(step.oldElement, step.newElement, step)
+    else if keepPlan = @findKeepPlan(step)
       # Since we're keeping the element that was requested to be swapped,
       # there is nothing left to do here, except notify event listeners.
       up.fragment.emitKept(keepPlan)
