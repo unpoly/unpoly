@@ -1522,6 +1522,10 @@ describe 'up.fragment', ->
 
               next =>
                 @respond()
+
+              next =>
+                expect(@revealedText).toEqual ['two']
+
                 up.replace('.middle', '/path#three', reveal: true)
                 # response is already cached
 

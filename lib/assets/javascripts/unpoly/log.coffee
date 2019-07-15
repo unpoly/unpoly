@@ -16,7 +16,6 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
 up.log = do ->
 
   u = up.util
-  b = up.browser
 
   sessionStore = new up.store.Session('up.log')
 

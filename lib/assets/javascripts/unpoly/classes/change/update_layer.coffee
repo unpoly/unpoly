@@ -62,6 +62,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   swapStep: (step) =>
     up.puts('Swapping fragment %s', step.selector)
+    console.debug(">>>> Swap step details are %o", step)
 
     # When the server responds with an error, or when the request method is not
     # reloadable (not GET), we keep the same source as before.
@@ -90,7 +91,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
       for child in wrapper.children
         # Compile the new content and emit up:fragment:inserted.
-        @responseDoc.activateElement(child, { @layer })
+        # @responseDoc.activateElement(child, { layer: @layer, keep: step.keep })
+        @responseDoc.activateElement(child, step)
 
       # Reveal element that was being prepended/appended.
       # Since we will animate (not morph) it's OK to allow animation of scrolling

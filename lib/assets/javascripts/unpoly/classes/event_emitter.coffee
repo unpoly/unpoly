@@ -41,7 +41,7 @@ class up.EventEmitter extends up.Record
   logEmission: ->
     return unless up.log.isEnabled()
 
-    message = u.pluckKey(@eventProps, 'log')
+    message = u.pluckKey(@event, 'log')
 
     if u.isArray(message)
       [message, messageArgs...] = message
@@ -51,15 +51,9 @@ class up.EventEmitter extends up.Record
     name = @event.name
 
     if u.isString(message)
-      if u.isPresent(@eventProps)
-        up.puts("#{message} (%s (%o))", messageArgs..., name, @event)
-      else
-        up.puts("#{message} (%s)", messageArgs..., name)
+      up.puts("#{message} (%s (%o))", messageArgs..., name, @event)
     else if message == true
-      if u.isPresent(@eventProps)
-        up.puts('Event %s (%o)', name, @event)
-      else
-        up.puts('Event %s', name)
+      up.puts('Event %s (%o)', name, @event)
 
   @fromEmitArgs: (args) ->
     if args[0].addEventListener
