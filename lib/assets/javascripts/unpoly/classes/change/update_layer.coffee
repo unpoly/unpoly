@@ -45,10 +45,11 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     promise = promise.then =>
       if @peel
-        layer.peel()
+        @layer.peel()
         # Don't wait for peeling to finish
       console.debug("updateHistory(%o)", @options)
       @layer.updateHistory(@options)
+      # swapPromises = layer.asCurrent(=> @steps.map(@swapStep))
       swapPromises = @steps.map(@swapStep)
       return Promise.all(swapPromises)
 
@@ -89,7 +90,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
       for child in wrapper.children
         # Compile the new content and emit up:fragment:inserted.
-        @responseDoc.activateElement(child, step)
+        @responseDoc.activateElement(child, { @layer })
 
       # Reveal element that was being prepended/appended.
       # Since we will animate (not morph) it's OK to allow animation of scrolling

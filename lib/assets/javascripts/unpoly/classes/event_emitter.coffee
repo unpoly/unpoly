@@ -22,7 +22,7 @@ class up.EventEmitter extends up.Record
     return @event
 
   whenEmitted: ->
-    return new Promise (resolve, reject) ->
+    return new Promise (resolve, reject) =>
       event = @emit()
       if event.defaultPrevented
         reject(up.event.abortError("Event #{args[0]} was prevented"))
@@ -70,8 +70,11 @@ class up.EventEmitter extends up.Record
     if args[0].preventDefault
       event = args[0]
     else
-      event = up.event.build(args[0], args[1])
+      eventName = args[0]
+      eventProps = args[1] || {}
+      element ||= u.pluckKey(eventProps, 'target')
+      event = up.event.build(eventName, eventProps)
 
-    element ?= event.target || document
+    element ||= document
 
     new @({ element, event })

@@ -505,25 +505,25 @@ up.link = do ->
     within the response.
   @stable
   ###
-
-  up.layer.onEach 'click', fullSelector, (event, link) ->
-    if shouldProcessEvent(event, link)
-      if e.matches(link, '[up-instant]')
-        # If the link was already processed on mousedown, we still need
-        # to prevent this later click event's chain.
-        up.event.halt(event)
+  up.on 'up:framework:boot', ->
+    up.layer.onEach 'click', fullSelector, (event, link) ->
+      if shouldProcessEvent(event, link)
+        if e.matches(link, '[up-instant]')
+          # If the link was already processed on mousedown, we still need
+          # to prevent this later click event's chain.
+          up.event.halt(event)
+        else
+          consumeFollowEvent(event, link)
       else
-        consumeFollowEvent(event, link)
-    else
-      # For tests
-      allowDefault(event)
+        # For tests
+        allowDefault(event)
 
-  up.layer.onEach 'mousedown', fullSelector, (event, link) ->
-    if shouldProcessEvent(event, link) && e.matches(link, '[up-instant]')
-      consumeFollowEvent(event, link)
-    else
-      # For tests
-      allowDefault(event)
+    up.layer.onEach 'mousedown', fullSelector, (event, link) ->
+      if shouldProcessEvent(event, link) && e.matches(link, '[up-instant]')
+        consumeFollowEvent(event, link)
+      else
+        # For tests
+        allowDefault(event)
 
   ###**
   By adding an `up-instant` attribute to a link, the destination will be

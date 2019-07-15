@@ -41,6 +41,7 @@ up.framework = do ->
   ###
   boot = ->
     if up.browser.isSupported()
+      up.emit('up:framework:boot', log: 'Boot framework')
       # This is called synchronously after all Unpoly modules have been parsed
       # and executed. User code hasn't been executed yet. Use this moment to
       # tell everyone to snapshot

@@ -2,7 +2,6 @@
 
 u = up.util
 e = up.element
-p = up.protocol
 
 ###**
 Instances of `up.Request` normalizes properties of an [`AJAX request`](/up.request)
@@ -170,14 +169,14 @@ class up.Request extends up.Record
       delete xhrHeaders['Content-Type'] # let the browser set the content type
       xhrPayload = xhrParams.toFormData()
 
-    xhrHeaders[p.config.targetHeader] = @target if @target
-    xhrHeaders[p.config.failTargetHeader] = @failTarget if @failTarget
+    xhrHeaders[up.protocol.config.targetHeader] = @target if @target
+    xhrHeaders[up.protocol.config.failTargetHeader] = @failTarget if @failTarget
     xhrHeaders['X-Requested-With'] ||= 'XMLHttpRequest' unless @isCrossDomain()
     if csrfToken = @csrfToken()
-      xhrHeaders[p.config.csrfHeader] = csrfToken
+      xhrHeaders[up.protocol.config.csrfHeader] = csrfToken
 
     if @context
-      xhrHeaders[p.config.contextHeader] = JSON.stringify(@context)
+      xhrHeaders[up.protocol.config.contextHeader] = JSON.stringify(@context)
 
     @xhr.open(xhrMethod, xhrURL)
 
@@ -227,12 +226,12 @@ class up.Request extends up.Record
       # Browser forms can only have GET or POST methods.
       # When we want to make a request with another method, most backend
       # frameworks allow to pass the method as a param.
-      addField(name: p.config.methodParam, value: @method)
+      addField(name: up.protocol.config.methodParam, value: @method)
       formMethod = 'POST'
 
     e.setAttrs(form, method: formMethod, action: @url)
 
-    if (csrfParam = p.csrfParam()) && (csrfToken = @csrfToken())
+    if (csrfParam = up.protocol.csrfParam()) && (csrfToken = @csrfToken())
       addField(name: csrfParam, value: csrfToken)
 
     # @params will be undefined for GET requests, since we have already
@@ -246,7 +245,7 @@ class up.Request extends up.Record
   # Returns a csrfToken if this request requires it
   csrfToken: =>
     if !@isSafe() && !@isCrossDomain()
-      p.csrfToken()
+      up.protocol.csrfToken()
 
   isCrossDomain: =>
     u.isCrossDomain(@url)
@@ -259,16 +258,16 @@ class up.Request extends up.Record
       status: @xhr.status
       request: this
       xhr: @xhr
-      title: p.titleFromXhr(@xhr)
-      acceptLayer: p.acceptLayerFromXhr(@xhr)
-      dismissLayer: p.dismissLayerFromXhr(@xhr)
-      event: p.eventFromXhr(@xhr)
-      layerEvent: p.layerEventFromXhr(@xhr)
+      title: up.protocol.titleFromXhr(@xhr)
+      acceptLayer: up.protocol.acceptLayerFromXhr(@xhr)
+      dismissLayer: up.protocol.dismissLayerFromXhr(@xhr)
+      event: up.protocol.eventFromXhr(@xhr)
+      layerEvent: up.protocol.layerEventFromXhr(@xhr)
 
-    if urlFromServer = p.locationFromXhr(@xhr)
+    if urlFromServer = up.protocol.locationFromXhr(@xhr)
       responseAttrs.url = urlFromServer
       # If the server changes a URL, it is expected to signal a new method as well.
-      responseAttrs.method = p.methodFromXhr(@xhr) ? 'GET'
+      responseAttrs.method = up.protocol.methodFromXhr(@xhr) ? 'GET'
 
     return new up.Response(responseAttrs)
 

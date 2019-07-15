@@ -124,6 +124,9 @@ class up.Layer extends up.Record
       document.title = @savedTitle
       @savedTitle = null
 
+  asCurrent: (fn) ->
+    @stack.asCurrent(this, fn)
+
   updateHistory: (change) ->
     return unless @history
 

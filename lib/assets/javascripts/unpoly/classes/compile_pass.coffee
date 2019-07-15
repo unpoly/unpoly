@@ -14,10 +14,16 @@ class up.CompilePass
     unless @skipSubtrees.length && @root.querySelector('[up-keep]')
       @skipSubtrees = undefined
 
+    # If a caller has already looked up the layer we don't want to look it up again.
+    @layer = options.layer || up.layer.of(@root)
+
   compile: ->
     up.log.group "Compiling fragment %o", @root, =>
-      for compiler in @compilers
-        @runCompiler(compiler)
+      # If we're compiling a fragment in a background layer, we want
+      # up.layer.current to resolve to that background layer, not the leaf layer.
+      @layer.asCurrent =>
+        for compiler in @compilers
+          @runCompiler(compiler)
 
   runCompiler: (compiler) ->
     matches = @select(compiler.selector)

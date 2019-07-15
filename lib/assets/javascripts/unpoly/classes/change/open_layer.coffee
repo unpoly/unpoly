@@ -79,7 +79,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     up.fragment.setSource(@content, @source)
 
     # Compile the new content and emit up:fragment:inserted.
-    @responseDoc.activateElement(@content, @options)
+    @responseDoc.activateElement(@content, { @layer })
 
     openingEvent = up.event.build('up:layer:opening', @eventProps())
     @layer.onOpening?(openingEvent)

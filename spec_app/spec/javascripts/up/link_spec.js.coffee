@@ -509,7 +509,7 @@ describe 'up.link', ->
 
         it 'navigates to the given link without JavaScript', asyncSpec (next) ->
           $link = $fixture('a[href="/path"]')
-          spyOn(up.browser, 'navigate')
+          spyOn(up.browser, 'loadPage')
           up.follow($link)
 
           next =>
@@ -517,7 +517,7 @@ describe 'up.link', ->
 
         it 'uses the method from a data-method attribute', asyncSpec (next) ->
           $link = $fixture('a[href="/path"][data-method="PUT"]')
-          spyOn(up.browser, 'navigate')
+          spyOn(up.browser, 'loadPage')
           up.follow($link)
 
           next =>

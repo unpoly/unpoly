@@ -6,7 +6,7 @@ OVERLAY_CONTAINER_SELECTOR = '.up-overlays'
 class up.LayerStack extends up.Class
 
   constructor: ->
-    @resetLayers()
+    @reset()
 
   isRoot: (layer = @current()) ->
     @layers[0] == layer
@@ -26,6 +26,8 @@ class up.LayerStack extends up.Class
 
   reset: ->
     @resetLayers()
+
+    @currentOverrides = []
 
     if c = @_overlayContainer
       e.remove(c)
@@ -60,6 +62,9 @@ class up.LayerStack extends up.Class
     @layers[0]
 
   @getter 'current', ->
+    u.last(@currentOverrides) || @leaf
+
+  @getter 'leaf', ->
     u.last(@layers)
 
   @getter 'parent', ->
@@ -87,7 +92,14 @@ class up.LayerStack extends up.Class
   lookupAll: (args...) ->
     new up.LayerLookup(this, args...).all()
 
-  forElement: (element) ->
+  of: (element) ->
     element = e.get(element)
     u.find @allReversed(), (layer) ->
       layer.contains(element)
+
+  asCurrent: (layer, fn) ->
+    try
+      @currentOverrides.push(layer)
+      return fn()
+    finally
+      @currentOverrides.pop()

@@ -210,10 +210,10 @@ up.protocol = do ->
     # X-Up-Dismiss-Layer: null
     extractHeader(xhr, config.dismissLayerHeader, JSON.parse)
 
-  eventHeaderFromXhr = (xhr) ->
+  eventFromXhr = (xhr) ->
     extractHeader(xhr, config.eventHeader, parseEvent)
 
-  layerEventHeaderFromXhr = (xhr) ->
+  layerEventFromXhr = (xhr) ->
     extractHeader(xhr, config.layerEventHeader, parseEvent)
 
   extractHeader = (xhr, header, parseFn = u.identity) ->
@@ -330,8 +330,8 @@ up.protocol = do ->
   methodFromXhr: methodFromXhr
   acceptLayerFromXhr: acceptLayerFromXhr
   dismissLayerFromXhr: dismissLayerFromXhr
-  eventHeaderFromXhr: eventHeaderFromXhr
-  layerEventHeaderFromXhr: layerEventHeaderFromXhr
+  eventFromXhr: eventFromXhr
+  layerEventFromXhr: layerEventFromXhr
   csrfParam :csrfParam
   csrfToken: csrfToken
   initialRequestMethod: initialRequestMethod

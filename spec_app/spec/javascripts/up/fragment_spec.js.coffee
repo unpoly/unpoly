@@ -1056,7 +1056,7 @@ describe 'up.fragment', ->
                 $target = $fixture('.target').text('old target')
                 $fallback = $fixture('.fallback').text('old fallback')
                 promise = up.replace('.target', '/path', fallback: '.fallback')
-                navigate = spyOn(up.browser, 'navigate')
+                loadPage = spyOn(up.browser, 'loadPage')
 
                 u.task =>
                   @respondWith '<div class="unexpected">new unexpected</div>'
@@ -1066,12 +1066,12 @@ describe 'up.fragment', ->
                   expect($toast).toBeAttached()
                   $inspectLink = $toast.find(".up-toast-action:contains('Open response')")
                   expect($inspectLink).toBeAttached()
-                  expect(navigate).not.toHaveBeenCalled()
+                  expect(loadPage).not.toHaveBeenCalled()
 
                   Trigger.clickSequence($inspectLink)
 
                   u.task =>
-                    expect(navigate).toHaveBeenCalledWith('/path', {})
+                    expect(loadPage).toHaveBeenCalledWith('/path', {})
                     done()
 
             it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
@@ -1580,7 +1580,7 @@ describe 'up.fragment', ->
       describeFallback 'canPushState', ->
 
         it 'makes a full page load', asyncSpec (next) ->
-          spyOn(up.browser, 'navigate')
+          spyOn(up.browser, 'loadPage')
           up.replace('.selector', '/path')
 
           next =>
@@ -2569,7 +2569,7 @@ describe 'up.fragment', ->
 
         it 'makes a page load from the closest known source URL', asyncSpec (next) ->
           $fixture('.container[up-source="/source"] .element').find('.element').text('old text')
-          spyOn(up.browser, 'navigate')
+          spyOn(up.browser, 'loadPage')
           up.reload('.element')
 
           next =>

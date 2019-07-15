@@ -13,7 +13,7 @@ class up.LayerLookup
 
   givenOriginLayer: ->
     if @origin
-      return @stack.forElement(@origin)
+      return @stack.of(@origin)
 
   givenBaseLayer: ->
     @customCurrent || @givenOriginLayer() || @stack.current
@@ -26,7 +26,7 @@ class up.LayerLookup
       return [@value]
 
     if u.isElement(value) || u.isJQuery(value)
-      return [@forElement(value)]
+      return [@of(value)]
 
     return switch value
       when 'root'

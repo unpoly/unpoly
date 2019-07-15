@@ -371,7 +371,7 @@ up.fragment = do ->
       emitFragmentKept(plan)
       return plan.oldElement
 
-    up.syntax.compile(element, { skip })
+    up.syntax.compile(element, { skip, layer: options.layer })
     emitFragmentInserted(element, options)
 
     return element
@@ -547,7 +547,7 @@ up.fragment = do ->
     # However, if we are passed an actual Element or jQuery collection,
     # we operate in the given element's layer.
     if !options.layer && u.isElementish(target)
-      options.layer = up.layer.forElement(target)
+      options.layer = up.layer.of(target)
     else
       options.layer = up.layer.lookup(options)
 

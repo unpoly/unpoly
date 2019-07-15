@@ -1,6 +1,11 @@
 u = up.util
 $ = jQuery
 
+beforeAll ->
+  up.on 'click', 'a[href]', (event) ->
+    event.preventDefault()
+    console.error('Prevented default click behavior on link %o', event.target)
+
 beforeEach ->
   up.layer.config.all.targets = ['.default-fallback']
   up.layer.config.root.targets = [] # no 'body'

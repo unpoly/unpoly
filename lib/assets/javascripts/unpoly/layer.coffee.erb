@@ -60,10 +60,7 @@ up.layer = do ->
 
   stack = null
 
-  initStack = ->
-    console.debug("Init stack start")
-    stack = new up.LayerStack()
-    console.debug("Init stack done")
+  handlers = []
 
   isOverlayFlavor = (name) ->
     name != 'root' && name != 'page' && !!config[name]
@@ -156,20 +153,21 @@ up.layer = do ->
       u.muteRejection dismiss()
       up.event.halt(event)
 
-  # TODO: Docs for [up-modal]
-  # TODO: Docs for [up-popup]
-  # TODO: Docs for [up-drawer]
-  # TODO: Docs for [up-cover]
-  for implementation in DEFAULT_IMPLEMENTATIONS
-    if attr = implementation.attr
-      up.link.targetMacro attr,
-        'up-layer': implementation.flavor
+  up.on 'up:framework:boot', ->
+    # TODO: Docs for [up-modal]
+    # TODO: Docs for [up-popup]
+    # TODO: Docs for [up-drawer]
+    # TODO: Docs for [up-cover]
+    for implementation in DEFAULT_IMPLEMENTATIONS
+      if attr = implementation.attr
+        up.link.targetMacro attr,
+          'up-layer': implementation.flavor
 
   registerCloseHandler = (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
     registerHandler 'click up:link:follow', "[#{attribute}]", (event) ->
       origin = event.target
-      layer = stack.forElement(origin)
+      layer = stack.of(origin)
       # To make a view usable both as a root layer and as an overlay, the programmer might
       # define a fallback like this:
       #
@@ -182,21 +180,24 @@ up.layer = do ->
         u.muteRejection closeFn(layer, { value, origin })
         up.event.halt(event)
 
-  registerCloseHandler 'up-accept', (layer, closeOptions) ->
-    return layer.accept(closeOptions)
+  up.on 'up:framework:boot', ->
+    stack = new up.LayerStack()
 
-  registerCloseHandler 'up-dismiss', (layer, closeOptions) ->
-    return layer.dismiss(closeOptions)
+    registerCloseHandler 'up-accept', (layer, closeOptions) ->
+      return layer.accept(closeOptions)
 
-  registerCloseHandler 'up-close', (layer, closeOptions) ->
-    up.legacy.deprecated('[up-close]', '[up-dismiss]')
-    return layer.dismiss(closeOptions)
+    registerCloseHandler 'up-dismiss', (layer, closeOptions) ->
+      return layer.dismiss(closeOptions)
+
+    registerCloseHandler 'up-close', (layer, closeOptions) ->
+      up.legacy.deprecated('[up-close]', '[up-dismiss]')
+      return layer.dismiss(closeOptions)
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
   u.literal
-    forElement: (args...) -> stack.forElement(args...)
+    of: (args...) -> stack.of(args...)
     lookup: (args...) -> stack.lookupOne(args...)
     lookupAll: (args...) -> stack.lookupAll(args...)
     get_overlayContainer: -> stack.overlayContainer
@@ -230,10 +231,6 @@ up.layer = do ->
     get_element: -> stack.current.element
     get_context: -> stack.current.context
     contains: (args...) -> stack.current.contains(args...)
-    initStack: initStack
 
 # TODO: Docs for up.context
 u.getter(up, 'context', -> up.layer.context)
-
-# We need to run this after up.layer is defined.
-up.layer.initStack()

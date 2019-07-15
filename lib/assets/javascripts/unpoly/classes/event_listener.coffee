@@ -39,7 +39,7 @@ class up.EventListener extends up.Record
     if @selector
       element = e.closest(element, u.evalOption(@selector))
 
-    if @guard && !@guard()
+    if @guard && !@guard(event)
       return
 
     if element

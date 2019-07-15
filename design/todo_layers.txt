@@ -44,6 +44,18 @@
   - This should always be set, even for new layers
   - Emit layer-bound proxy events with up.layer.emit(), not up.emit()
   - Why is it Request#preflightLayer instead of #layer?
+- Das mit dem impliziten up.layer.foo() ist up.layer.current.foo() ist nicht so toll
+  - Ich weiß nicht ob wir es korrekter machen können
+    - Z.b. während dem Update von Hintergrund-Layer ist up.layer nicht der aktualisierte Layer
+      - Evtl. up.layer.current umbiegen während Compilation
+      - Evtl. up.layer.current umbiegen während up-on-accepted Callbacks
+      - up.layer.face oder up.layer.leaf für wirklich den letzten Callback, ohne Umbiegung
+    - Evtl. müssen wir den Case mit [up-on-accepted] auch aufgeben
+    - Mindestens sollten wir es für Entwickler, die sich die Mühe geben wollen, MÖGLICH machen
+      - up.layer.of(Element) oder up.layer.get(Element) oder up.layer.for(Element)
+      - Compiler kriegen { layer } in ihrem data-Argument?
+      - up-on-accepted kriegt noch `layer` als Argument?
+- Present tense events have event log messages with gerund
 
 
 - Tests
