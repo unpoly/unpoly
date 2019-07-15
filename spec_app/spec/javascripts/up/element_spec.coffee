@@ -634,6 +634,14 @@ describe 'up.element', ->
       expect(element.tagName).toEqual('H1')
       expect(element.textContent).toEqual('Full story')
 
+    it 'can create <noscript> tags (bugfix)', ->
+      html = """
+        <noscript>alternative content</noscript>
+        """
+      element = up.element.createFromHtml(html)
+      expect(element.tagName).toEqual('NOSCRIPT')
+      expect(element.textContent).toEqual('alternative content')
+
   describe 'up.element.fixedToAbsolute', ->
 
     it "changes the given element's position from fixed to absolute, without changing its rendered position", ->

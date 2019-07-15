@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 class up.HtmlWrapper
 
@@ -19,7 +20,7 @@ class up.HtmlWrapper
 
   unwrap: (element) ->
     return unless @didWrap
-    for wrappedChild in element.querySelectorAll(".#{@tagName}")
+    for wrappedChild in element.querySelectorAll(".#{@className}")
       originalHtml = wrappedChild.getAttribute('data-html')
       restoredElement = e.createFromHtml(originalHtml)
       if @guard(restoredElement)

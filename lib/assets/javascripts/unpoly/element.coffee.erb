@@ -675,8 +675,12 @@ up.element = do ->
   @experimental
   ###
   createFromHtml = (html) ->
-    doc = createDocumentFromHtml(html)
-    return doc.body.children[0]
+    # We cannot use createDocumentFromHtml() here, since up.ResponseDoc
+    # needs to create <noscript> elements with that, and DOMParser cannot
+    # create those.
+    mother = document.createElement('div')
+    mother.innerHTML = html
+    return mother.children[0]
 
   ###**
   @function up.element.root

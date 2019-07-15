@@ -2574,26 +2574,3 @@ describe 'up.fragment', ->
 
           next =>
             expect(up.browser.loadPage).toHaveBeenCalledWith('/source', jasmine.anything())
-
-    describe 'up.fragment.layerOf', ->
-
-      it 'returns "popup" for an element in a popup over the page', ->
-        $popup = $fixture('.up-popup')
-        $element = $popup.affix('.element')
-        expect(up.fragment.layerOf($element[0])).toEqual('popup')
-
-      it 'returns "popup" for an element in a popup over a modal', ->
-        $modal = $fixture('.up-modal')
-        $popupInModal = $modal.affix('.up-popup')
-        $element = $popupInModal.affix('.element')
-        expect(up.fragment.layerOf($element[0])).toEqual('popup')
-
-      it 'returns "modal" for an element in a modal', ->
-        $modal = $fixture('.up-modal')
-        $element = $modal.affix('.element')
-        expect(up.fragment.layerOf($element[0])).toEqual('modal')
-
-      it 'returns "page" for an element below a modal or popup', ->
-        $element = $fixture('.element')
-        expect(up.fragment.layerOf($element[0])).toEqual('page')
-
