@@ -647,8 +647,7 @@ up.fragment = do ->
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
     get_config: ->
-      up.legacy.deprecated('up.fragment.config', 'up.layer.config.all')
-      up.layer.config.all
+      up.fail('up.fragment.config has been removed. You may instead configure default targets in up.layer.config. Also Unpoly will now always replace the <body> if no target matches.')
     replace: replace
     reload: reload
     destroy: destroy

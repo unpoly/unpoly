@@ -58,6 +58,8 @@ class up.Change.FromContent extends up.Change
     if up.layer.config.resetWorld
       @plans.push(new up.Change.ResetWorld(@options))
 
+    console.debug("Plans are %o", @plans)
+
   eachTargetCandidatePlan: (layerDefaultTargets, planOptions, fn) ->
     for target, i in @buildTargetCandidates(layerDefaultTargets)
       target = e.resolveSelector(target, @options.origin)
@@ -70,9 +72,6 @@ class up.Change.FromContent extends up.Change
     targetCandidates = u.filter(targetCandidates, u.isTruthy)
     targetCandidates = u.flatten(targetCandidates)
     targetCandidates = u.uniq(targetCandidates)
-
-    if targetCandidates.length == 0
-      up.fail('No target selector given layer layer %s', this.layer)
 
     if @options.fallback == false || @options.content
       # Use the first defined candidate, but not @target (which might be missing)

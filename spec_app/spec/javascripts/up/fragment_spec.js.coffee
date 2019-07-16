@@ -142,15 +142,21 @@ describe 'up.fragment', ->
 
         describe 'when the server responds with an error', ->
 
-          it 'replaces the first fallback instead of the given selector', asyncSpec (next) ->
-            up.fragment.config.fallbacks = ['.fallback']
+          it 'replaces the first default target instead of the given selector', asyncSpec (next) ->
+            up.layer.config.root.targets = ['.fallback']
             $fixture('.fallback').text('old fallback text')
+
+            @responseText = """
+              <div class='fallback'>
+                new fallback text
+              </div>
+            """
 
             next => up.replace('.middle', '/path')
             next => @respond(status: 500)
             next =>
               expect($('.middle')).toHaveText('old-middle')
-              expect($('.fallback')).toHaveText('new-middle')
+              expect($('.fallback')).toHaveText('new fallback text')
 
           it 'uses a target selector given as { failTarget } option', asyncSpec (next) ->
             next =>

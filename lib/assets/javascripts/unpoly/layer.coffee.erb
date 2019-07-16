@@ -15,6 +15,7 @@ up.layer = do ->
     store[flavor] ||= {}
     store[flavor].Implementation = Implementation
 
+  # TODO: Document up.layer.config
   config = new up.Config ->
     newConfig =
       flavor: 'modal'
