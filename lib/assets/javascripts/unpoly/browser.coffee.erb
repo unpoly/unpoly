@@ -190,7 +190,7 @@ up.browser = do ->
     if options.preload || !options.confirm || window.confirm(options.confirm)
       Promise.resolve()
     else
-      up.Event.abortRejection('User canceled action')
+      up.event.abortRejection('User canceled action')
 
   ###**
   Returns whether Unpoly supports the current browser.

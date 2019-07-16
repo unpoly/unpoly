@@ -466,44 +466,44 @@ describe 'up.link', ->
         describe 'with { confirm } option', ->
 
           it 'follows the link after the user OKs a confirmation dialog', asyncSpec (next) ->
-            spyOn(up, 'replace')
+            spyOn(up, 'change')
             spyOn(window, 'confirm').and.returnValue(true)
             $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Do you really want to go there?')
 
             next =>
               expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
-              expect(up.replace).toHaveBeenCalled()
+              expect(up.change).toHaveBeenCalled()
 
           it 'does not follow the link if the user cancels the confirmation dialog', asyncSpec (next) ->
-            spyOn(up, 'replace')
+            spyOn(up, 'change')
             spyOn(window, 'confirm').and.returnValue(false)
             $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Do you really want to go there?')
 
             next =>
               expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
-              expect(up.replace).not.toHaveBeenCalled()
+              expect(up.change).not.toHaveBeenCalled()
 
           it 'does not show a confirmation dialog if the option is not a present string', asyncSpec (next) ->
-            spyOn(up, 'replace')
+            spyOn(up, 'change')
             spyOn(window, 'confirm')
             $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: '')
 
             next =>
               expect(window.confirm).not.toHaveBeenCalled()
-              expect(up.replace).toHaveBeenCalled()
+              expect(up.change).toHaveBeenCalled()
 
           it 'does not show a confirmation dialog when preloading', asyncSpec (next) ->
-            spyOn(up, 'replace')
+            spyOn(up, 'change')
             spyOn(window, 'confirm')
             $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Are you sure?', preload: true)
 
             next =>
               expect(window.confirm).not.toHaveBeenCalled()
-              expect(up.replace).toHaveBeenCalled()
+              expect(up.change).toHaveBeenCalled()
 
       describeFallback 'canPushState', ->
 
@@ -521,7 +521,7 @@ describe 'up.link', ->
           up.follow($link)
 
           next =>
-            expect(up.browser.loadPage).toHaveBeenCalledWith('/path', { method: 'PUT' })
+            expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.objectContaining(method: 'PUT'))
 
     describe 'up.link.shouldProcessEvent', ->
 

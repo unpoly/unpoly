@@ -16,7 +16,7 @@
   - Only user interactions ({ navigate: true }? follow? submit? UJS handlers?) should trigger peeling
 - { peel } option for up.destroy
 - Have up.layer.build delegate to up.Layer class
-- Rename { navigate } to { solo }. Then MAYBE use { navigate } to mass-set { peel, solo, feedback }.
+- Rename { navigate } to { solo }. Then MAYBE use { navigate } to mass-set { peel, solo, feedback, reveal }.
 - Florian hatte Requirement nur Klick auf Backdrop zu vermeiden.
   - [X] close-Event sollte { origin } haben
   - [X] close-Event sollte { layer } haben
@@ -55,7 +55,9 @@
       - up.layer.of(Element) oder up.layer.get(Element) oder up.layer.for(Element)
       - Compiler kriegen { layer } in ihrem data-Argument?
       - up-on-accepted kriegt noch `layer` als Argument?
-- Present tense events have event log messages with gerund
+- Present tense events still have event log messages with gerund
+- up.layer.lookup and up.layer.lookupAll sound like they would take a value, but they only take an options hash
+
 
 
 - Tests

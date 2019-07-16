@@ -13,6 +13,20 @@ class up.Change.FromURL extends up.Change
     @successOptions.inspectResponse = @fullLoad
     @deriveFailureOptions()
 
+  @PREFLIGHT_KEYS: [
+    'url',
+    'method',
+    'origin',
+    'headers',
+    'query', # TODO
+    'params',
+    'cache',
+    'navigate',
+    'confirm',
+    'feedback',
+    'origin',
+  ]
+
   deriveFailureOptions: ->
     # `successOptions` is an object like
     #
@@ -24,16 +38,38 @@ class up.Change.FromURL extends up.Change
     #     { foo: 1, bar: 3, baz: 4 }
     #
     # Note how we *don't* override `foo` with `undefined`.
-    mode = @successOptions.failOptions ? 'derive'
+    mode = @successOptions.failOptions ? 'explicit'
 
-    @failureOptions = u.copy(@successOptions)
-    if mode == 'derive'
-      for key, value of @failureOptions
-        # Keep key/value unless there is a defined failOverride
-        if unprefixedKey = u.unprefixCamelCase(key, 'fail')
-          failValue = u.pluckKey(@failureOptions, key)
-          unless u.isUndefined(failValue)
-            @failureOptions[unprefixedKey] = failValue
+    switch mode
+      when 'explicit'
+        # In explicit mode the developer needs to pass all failVariant
+        # keys that should be used for failed responses. From the succcess options
+        # we only inherit keys that need to be known before the request goes out,
+        # like { method }, { url } or { params }.
+        preflightOptions = u.only(@successOptions, @constructor.PREFLIGHT_KEYS...)
+        @failureOptions = u.merge(preflightOptions, @explicitFailureOptions())
+      when 'inherit'
+        # In inherit mode all success options are copied and can then be
+        # overridden with failVariant keys.
+        @failureOptions = u.merge(@successOptions, @explicitFailureOptions())
+      when 'mirror'
+        # In mirror mode we use the same options for failure that we use for success.
+        # This is useful for up.validate(), where we want to always use the form's
+        # success options regardless of the response status.
+        @failureOptions = u.copy(@successOptions)
+
+  explicitFailureOptions: ->
+    opts = {}
+    for key, value of @successOptions
+      # Keep key/value unless there is a defined failOverride
+      if unprefixedKey = u.unprefixCamelCase(key, 'fail')
+        failValue = @successOptions[key]
+        # up.OptionParser sets keys to undefined, even if neither options nor element
+        # produces that option. Hence we ignore undefined values. To override it with
+        # an empty value, the developer needs to pass null instead.
+        unless u.isUndefined(failValue)
+          opts[unprefixedKey] = failValue
+    return opts
 
   execute: ->
     if !up.browser.canPushState() && @successOptions.history != false
@@ -48,6 +84,9 @@ class up.Change.FromURL extends up.Change
     return promise
 
   buildRequest: ->
+    console.debug("buildRequest with successOptions %o", @successOptions)
+    console.debug("buildRequest with failureOptions %o", @failureOptions)
+
     successPreview = new up.Change.FromContent(@successOptions)
     failurePreview = new up.Change.FromContent(@failureOptions)
 
@@ -83,6 +122,8 @@ class up.Change.FromURL extends up.Change
 
     responseURL = response.url
     locationFromExchange = responseURL
+
+    console.debug("TODO: Restore old behavior from master that respects response success/failure")
 
     if hash = @request.hash
       options.hash = hash

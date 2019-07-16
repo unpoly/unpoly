@@ -49,7 +49,7 @@ class up.Change.FromContent extends up.Change
           @plans.push(new up.Change.OpenLayer(plan))
 
     else
-      for layer in up.layer.lookupAll(@options.layer)
+      for layer in up.layer.lookupAll(@options)
         @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
           # console.debug("UpdateLayer(%o)", plan)
           @plans.push(new up.Change.UpdateLayer(plan))

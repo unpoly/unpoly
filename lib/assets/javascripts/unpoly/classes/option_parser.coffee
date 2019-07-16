@@ -33,8 +33,7 @@ class up.OptionParser
       failAttrs = u.compact(u.map(attrs, @deriveFailAttrName))
       failKeyOptions = u.merge(keyOptions,
         attr: failAttrs,
-        fail: false,
-        default: undefined
+        fail: false
       )
       @parse(attrValueFn, failKey, failKeyOptions)
 
