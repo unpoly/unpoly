@@ -1568,7 +1568,7 @@ up.util = do ->
 #    unprefixed
 
   camelToKebabCase = (str) ->
-    str.replace /[A-Z]/, (char) -> '-' + char.toLowerCase()
+    str.replace /[A-Z]/g, (char) -> '-' + char.toLowerCase()
 
   prefixCamelCase = (str, prefix) ->
     prefix + upperCaseFirst(str)
@@ -1755,7 +1755,7 @@ up.util = do ->
   literal: literal
   asyncWrap: asyncWrap
   reverse: reverse
+  prefixCamelCase: prefixCamelCase
   unprefixCamelCase: unprefixCamelCase
-
-
+  camelToKebabCase: camelToKebabCase
 

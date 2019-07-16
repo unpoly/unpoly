@@ -413,7 +413,6 @@ describe 'up.fragment', ->
               expect(document.title).toBe('Title from HTML')
 
           it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec (next) ->
-            console.debug("-- spec start ---")
             $fixture('.container').text('old container text')
             oldTitle = document.title
             up.replace('.container', '/path', history: false, title: true)
@@ -680,7 +679,6 @@ describe 'up.fragment', ->
 
                 expect(revealStub).toHaveBeenCalled()
                 revealArg = revealStub.calls.mostRecent().args[0]
-                console.debug("revealArg is %o", revealArg)
                 expect(revealArg).toMatchSelector('.revealee')
 
 
@@ -892,7 +890,6 @@ describe 'up.fragment', ->
               next => expect('.box').toHaveText('new box')
 
             it 'rejects the promise if all alternatives are exhausted', (done) ->
-              console.debug("----")
               promise = up.replace('.unknown', '/path', fallback: '.more-unknown')
 
               u.task ->
@@ -1619,17 +1616,17 @@ describe 'up.fragment', ->
         u.task ->
           promiseState(promise).then (result) =>
             expect(result.state).toEqual('rejected')
-            expect(result.value).toMatch(/Could not find selector in current page, modal or popup/i)
+            expect(result.value).toMatch(/Could not match target in current page/i)
             done()
 
       it "rejects if the selector can't be found in the given HTML string", (done) ->
         $fixture('.foo-bar')
-        promise = up.extract('.foo-bar', '')
+        promise = up.extract('.foo-bar', 'html without match')
 
         u.task ->
           promiseState(promise).then (result) =>
             expect(result.state).toEqual('rejected')
-            expect(result.value).toMatch(/Could not find selector in response/i)
+            expect(result.value).toMatch(/Could not match target in current page and response/i)
             done()
 
       it "ignores an element that matches the selector but also matches .up-destroying", (done) ->

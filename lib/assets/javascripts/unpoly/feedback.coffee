@@ -267,7 +267,7 @@ up.feedback = do ->
     fnPromise = fn()
 
     if showFeedback
-      u.always(fnPromise, -> stop(link))
+      u.always(fnPromise, -> stop(element))
 
     fnPromise
 

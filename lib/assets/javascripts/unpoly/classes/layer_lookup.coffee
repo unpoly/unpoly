@@ -25,10 +25,10 @@ class up.LayerLookup
     if @value instanceof up.Layer
       return [@value]
 
-    if u.isElement(value) || u.isJQuery(value)
-      return [@of(value)]
+    if u.isElement(@value) || u.isJQuery(@value)
+      return [@of(@value)]
 
-    return switch value
+    return switch @value
       when 'root'
         [@stack.root]
       when 'page'

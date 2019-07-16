@@ -47,7 +47,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
       if @peel
         @layer.peel()
         # Don't wait for peeling to finish
-      console.debug("updateHistory(%o)", @options)
       @layer.updateHistory(@options)
       # swapPromises = layer.asCurrent(=> @steps.map(@swapStep))
       swapPromises = @steps.map(@swapStep)
@@ -62,7 +61,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   swapStep: (step) =>
     up.puts('Swapping fragment %s', step.selector)
-    console.debug(">>>> Swap step details are %o", step)
 
     # When the server responds with an error, or when the request method is not
     # reloadable (not GET), we keep the same source as before.

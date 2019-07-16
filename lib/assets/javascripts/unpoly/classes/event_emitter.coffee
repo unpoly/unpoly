@@ -25,7 +25,7 @@ class up.EventEmitter extends up.Record
     return new Promise (resolve, reject) =>
       event = @emit()
       if event.defaultPrevented
-        reject(up.event.abortError("Event #{args[0]} was prevented"))
+        reject(up.event.abortError("Event #{event.type} was prevented"))
       else
         resolve()
 
@@ -48,7 +48,7 @@ class up.EventEmitter extends up.Record
     else
       messageArgs = []
 
-    name = @event.name
+    name = @event.type
 
     if u.isString(message)
       up.puts("#{message} (%s (%o))", messageArgs..., name, @event)

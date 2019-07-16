@@ -17,7 +17,6 @@ class up.Layer extends up.Record
     context: {}
 
   constructor: (options = {}) ->
-    console.debug("up.Layer constructor with", { options })
     @stack = options.stack
 
     if u.isGiven(options.closable)

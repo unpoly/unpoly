@@ -212,8 +212,6 @@ up.proxy = do ->
     # If requestOrOptions is not already an up.Request, instantiate one.
     request = up.Request.wrap(requestOrOptions)
 
-    console.debug("makeRequest: %o", request)
-
     if request.preload
       request.timeout ?= config.preloadTimeout
       unless config.preloadEnabled
@@ -413,10 +411,8 @@ up.proxy = do ->
 
   queueForRequest = (request) ->
     if request.preload
-      console.debug("queue: preload")
       preloadQueue
     else
-      console.debug("queue: foreground")
       foregroundQueue
 
   taskForRequest = (request) ->
@@ -427,8 +423,6 @@ up.proxy = do ->
     )
 
   load = (request) ->
-    console.debug("Loading request NOW: %o", request)
-
     eventProps =
       request: request
       log: ['Loading %s %s', request.method, request.url]

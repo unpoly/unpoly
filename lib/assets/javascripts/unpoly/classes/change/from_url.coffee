@@ -36,7 +36,6 @@ class up.Change.FromURL extends up.Change
             @failureOptions[unprefixedKey] = failValue
 
   execute: ->
-    console.debug("Executing up.Change.FromURL(%o)", this)
     if !up.browser.canPushState() && @successOptions.history != false
       @fullLoad() unless @successOptions.preload
       return u.unresolvablePromise()
@@ -52,12 +51,8 @@ class up.Change.FromURL extends up.Change
     successPreview = new up.Change.FromContent(@successOptions)
     failurePreview = new up.Change.FromContent(@failureOptions)
 
-    console.debug("Getting preflightLayer for success")
     @successOptions.layer = successPreview.preflightLayer()
-    console.debug("Getting preflightLayer for failure")
     @failureOptions.layer = failurePreview.preflightLayer()
-
-    console.debug("Getting preflightTarget for success and failure")
 
     requestAttrs = u.merge @successOptions,
       target: successPreview.preflightTarget()

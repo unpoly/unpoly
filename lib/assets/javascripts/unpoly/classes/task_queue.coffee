@@ -16,13 +16,9 @@ class up.TaskQueue extends up.Class
   asap: (args...) ->
     task = up.Task.fromAsapArgs(args)
 
-    console.debug("up.TaskQueue#asap(%o)", task)
-
     if @hasConcurrencyLeft()
-      console.debug("running now: %o", task)
       @runTaskNow(task)
     else
-      console.debug("queuing now: %o", task)
       @queueTask(task)
 
     return task

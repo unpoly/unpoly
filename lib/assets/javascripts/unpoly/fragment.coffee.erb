@@ -35,7 +35,6 @@ up.fragment = do ->
   ###
   source = (target, options = {}) ->
     setLayerOption(target, options)
-    console.debug("first(%o, %o)", target, options)
     element = first(target, options)
     if sourceElement = e.closest(element, '[up-source]')
       sourceElement.getAttribute("up-source")
@@ -50,8 +49,6 @@ up.fragment = do ->
   ###
   makeChange = (args...) ->
     options = parseTargetAndOptions(args)
-
-    console.debug("makeChange(%o)", options)
 
     if options.content || options.document
       return new up.Change.FromContent(options).executeAsync()

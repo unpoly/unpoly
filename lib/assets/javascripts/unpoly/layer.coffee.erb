@@ -87,7 +87,6 @@ up.layer = do ->
     Implementation = config[flavor].Implementation
     configs = u.reverse(flavorConfigs(flavor))
     options = u.merge(configs..., { flavor, stack }, options)
-    console.debug("building with", { options })
     return new Implementation(options)
 
 #  flavorImplementation = (options = {}) ->

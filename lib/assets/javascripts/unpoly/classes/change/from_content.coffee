@@ -14,7 +14,6 @@ class up.Change.FromContent extends up.Change
     # The `{ currentLayer }` option might also be set from `new up.Change.FromURL()`
     # since the current layer might change before the response is received.
     @options.currentLayer ?= up.layer.current
-    @options.target = e.resolveSelector(@options.target, @options.origin)
     @options.hungry ?= true
     @options.keep ?= true
     @options.saveScroll ?= true
@@ -42,29 +41,26 @@ class up.Change.FromContent extends up.Change
 
   buildPlans: ->
     @plans = []
-    console.debug("Building plans")
     if @options.layer == 'new'
       layerDefaultTargets = up.layer.defaultTargets(@options.flavor)
       @eachTargetCandidatePlan layerDefaultTargets, (plan) =>
         # We cannot open a <body> in a new layer
         unless up.fragment.targetsBody(plan.target)
-          console.debug("Adding plan: OpenLayer(%o)", plan)
           @plans.push(new up.Change.OpenLayer(plan))
 
     else
       for layer in up.layer.lookupAll(@options.layer)
         @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
           # console.debug("UpdateLayer(%o)", plan)
-          console.debug("Adding plan: UpdateLayer(%o)", plan)
           @plans.push(new up.Change.UpdateLayer(plan))
 
     # Make sure we always succeed
     if up.layer.config.resetWorld
-      console.debug("Adding plan: ResetWorld")
       @plans.push(new up.Change.ResetWorld(@options))
 
   eachTargetCandidatePlan: (layerDefaultTargets, planOptions, fn) ->
     for target, i in @buildTargetCandidates(layerDefaultTargets)
+      target = e.resolveSelector(target, @options.origin)
       plan = u.merge(@options, planOptions, { target })
       fn(plan)
 
@@ -74,6 +70,9 @@ class up.Change.FromContent extends up.Change
     targetCandidates = u.filter(targetCandidates, u.isTruthy)
     targetCandidates = u.flatten(targetCandidates)
     targetCandidates = u.uniq(targetCandidates)
+
+    if targetCandidates.length == 0
+      up.fail('No target selector given layer layer %s', this.layer)
 
     if @options.fallback == false || @options.content
       # Use the first defined candidate, but not @target (which might be missing)
@@ -111,7 +110,6 @@ class up.Change.FromContent extends up.Change
   preflightTarget: ->
     @seekPlan
       attempt: (plan) ->
-        console.debug("seeking preflightTarget on %o", plan)
         plan.preflightTarget()
       noneApplicable: => @preflightTargetNotApplicable()
 
@@ -120,7 +118,6 @@ class up.Change.FromContent extends up.Change
 
   seekPlan: (opts) ->
     @ensurePlansBuilt()
-    console.debug("seekPlan on %o plans", @plans.length)
     for plan, index in @plans
       try
         return opts.attempt(plan)

@@ -149,10 +149,11 @@ up.link = do ->
   @stable
   ###
   follow = (link, options) ->
+    link = e.get(link)
     options = u.options(options)
 
     # TODO: Document new follow options like onOpened, [up-on-opened]
-    parser = new up.OptionParser(link, options, fail: true)
+    parser = new up.OptionParser(options, link, fail: true)
     parser.string('url', attr: ['up-href', 'href'])
     parser.string('target')
     parser.booleanOrString('fallback')
@@ -172,7 +173,7 @@ up.link = do ->
     parser.string('location')
     parser.string('title')
     options.method ?= followMethod(link, options)
-    options.orgin ?= link
+    options.origin ?= link
     parser.string('layer')
     parser.string('flavor')
     parser.json('context')
@@ -200,7 +201,7 @@ up.link = do ->
 
     promise = up.browser.whenConfirmed(options)
     promise = promise.then ->
-      up.event.whenEmitted(options.eventName, log: options.eventLog, { options, target: link })
+      up.event.whenEmitted(link, options.eventName, { options: options, log: options.eventLog })
     promise = promise.then ->
       changeFn = -> up.change(options)
       up.feedback.around(link, options, changeFn)
