@@ -246,7 +246,7 @@ describe 'up.fragment', ->
             )
             next => expect(location.href).toMatchURL('/signaled-path')
 
-          it 'does not a history entry after a failed GET-request', asyncSpec (next) ->
+          it 'does not add a history entry after a failed GET-request', asyncSpec (next) ->
             up.replace('.middle', '/path', method: 'post', failTarget: '.middle')
             next => @respond(status: 500)
             next => expect(location.href).toMatchURL(@hrefBeforeExample)
@@ -919,15 +919,15 @@ describe 'up.fragment', ->
                 expect('.target').toHaveText('old target')
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.fragment.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
-              up.fragment.config.fallbacks = ['.existing']
+            it "tries the layer's default target if options.fallback is missing", asyncSpec (next) ->
+              up.layer.config.all.targets = ['.existing']
               $fixture('.existing').text('old existing')
               up.replace('.unknown', '/path')
               next => @respondWith '<div class="existing">new existing</div>'
               next => expect('.existing').toHaveText('new existing')
 
-            it 'does not try a selector from up.fragment.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
-              up.fragment.config.fallbacks = ['.existing']
+            it "does not try the layer's default targets and rejects the promise if options.fallback is false", (done) ->
+              up.layer.config.all.targets = ['.existing']
               $fixture('.existing').text('old existing')
               up.replace('.unknown', '/path', fallback: false).catch (e) ->
                 expect(e).toBeError(/Could not find target in current page/i)
@@ -936,9 +936,9 @@ describe 'up.fragment', ->
           describe 'when selectors are missing on the page after the request was made', ->
 
             beforeEach ->
-              up.fragment.config.fallbacks = []
+              up.layer.config.all.targets = []
 
-            it 'tries selectors from options.fallback before swapping elements', asyncSpec (next) ->
+            it 'tries the selector in options.fallback before swapping elements', asyncSpec (next) ->
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target', '/path', fallback: '.fallback')
@@ -989,8 +989,8 @@ describe 'up.fragment', ->
                 expect('.target').toHaveText('old target')
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.fragment.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
-              up.fragment.config.fallbacks = ['.fallback']
+            it "tries the layer's default targets if options.fallback is missing", asyncSpec (next) ->
+              up.layer.config.all.targets = ['.fallback']
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target', '/path')
@@ -1005,8 +1005,8 @@ describe 'up.fragment', ->
               next =>
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'does not try a selector from up.fragment.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
-              up.fragment.config.fallbacks = ['.fallback']
+            it "tries the layer's default targets  and rejects the promise if options.fallback is false", (done) ->
+              up.layer.config.all.fallbacks = ['.fallback']
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: false)
@@ -1019,15 +1019,15 @@ describe 'up.fragment', ->
                 """
 
                 promise.catch (e) ->
-                  expect(e).toBeError(/Could not find target in current page/i)
+                  expect(e).toBeError(/Could not match target/i)
                   done()
 
           describe 'when selectors are missing in the response', ->
 
             beforeEach ->
-              up.fragment.config.fallbacks = []
+              up.layer.config.all.targets = []
 
-            it 'tries selectors from options.fallback before swapping elements', asyncSpec (next) ->
+            it "tries the selector in options.fallback before swapping elements", asyncSpec (next) ->
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target', '/path', fallback: '.fallback')
@@ -1052,7 +1052,7 @@ describe 'up.fragment', ->
                   @respondWith '<div class="unexpected">new unexpected</div>'
 
                 promise.catch (e) ->
-                  expect(e).toBeError(/Could not find target in response/i)
+                  expect(e).toBeError(/Could not match target/i)
                   done()
 
               it 'shows a link to open the unexpected response', (done) ->
@@ -1094,8 +1094,8 @@ describe 'up.fragment', ->
                 expect('.target2').toHaveText('old target2')
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'tries a selector from up.fragment.config.fallbacks if options.fallback is missing', asyncSpec (next) ->
-              up.fragment.config.fallbacks = ['.fallback']
+            it "tries the layer's default targets if options.fallback is missing", asyncSpec (next) ->
+              up.layer.config.all.targets = ['.fallback']
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
               up.replace('.target', '/path')
@@ -1107,8 +1107,8 @@ describe 'up.fragment', ->
                 expect('.target').toHaveText('old target')
                 expect('.fallback').toHaveText('new fallback')
 
-            it 'does not try a selector from up.fragment.config.fallbacks and rejects the promise if options.fallback is false', (done) ->
-              up.fragment.config.fallbacks = ['.fallback']
+            it "does not try the layer's default targets and rejects the promise if options.fallback is false", (done) ->
+              up.layer.config.all.targets = ['.fallback']
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: false)
@@ -1117,7 +1117,7 @@ describe 'up.fragment', ->
                 @respondWith '<div class="fallback">new fallback</div>'
 
               promise.catch (e) ->
-                expect(e).toBeError(/Could not find target in response/i)
+                expect(e).toBeError(/Could not match target/i)
                 done()
 
         describe 'execution of scripts', ->
@@ -1407,13 +1407,13 @@ describe 'up.fragment', ->
               up.replace('.middle', '/path', failTarget: '.fail-target', reveal: false, failReveal: true)
 
               next =>
-              @respondWith
-                status: 500
-                responseText: """
-                  <div class="fail-target">
-                    new fail target text
-                  </div>
-                  """
+                @respondWith
+                  status: 500
+                  responseText: """
+                    <div class="fail-target">
+                      new fail target text
+                    </div>
+                    """
 
               next =>
                 expect(@revealedText).toEqual ['new fail target text']
@@ -1643,7 +1643,7 @@ describe 'up.fragment', ->
         u.task ->
           promiseState(promise).then (result) =>
             expect(result.state).toEqual('rejected')
-            expect(result.value).toMatch(/Could not find selector/i)
+            expect(result.value).toMatch(/Could not match target/i)
             done()
 
       it "ignores an element that matches the selector but also has a parent matching .up-destroying", (done) ->
@@ -1655,7 +1655,7 @@ describe 'up.fragment', ->
         u.task ->
           promiseState(promise).then (result) =>
             expect(result.state).toEqual('rejected')
-            expect(result.value).toMatch(/Could not find selector/i)
+            expect(result.value).toMatch(/Could not match target/i)
             done()
 
       it 'only replaces the first element matching the selector', asyncSpec (next) ->

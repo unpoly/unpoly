@@ -96,7 +96,7 @@ class up.Change.FromContent extends up.Change
   executeNotApplicable: ->
     if @options.inspectResponse
       inspectAction = { label: 'Open response', callback: @options.inspectResponse }
-    up.fail("Could not match target in current page and response", action: inspectAction)
+    up.fail(["Could not match target in current page and response"], action: inspectAction)
 
   buildResponseDoc: ->
     @options.responseDoc = new up.ResponseDoc(@options)

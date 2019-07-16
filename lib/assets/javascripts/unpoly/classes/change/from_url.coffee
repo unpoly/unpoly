@@ -123,7 +123,7 @@ class up.Change.FromURL extends up.Change
     responseURL = response.url
     locationFromExchange = responseURL
 
-    console.debug("TODO: Restore old behavior from master that respects response success/failure")
+    # console.debug("TODO: Restore old behavior from master that respects response success/failure")
 
     if hash = @request.hash
       options.hash = hash
@@ -139,9 +139,10 @@ class up.Change.FromURL extends up.Change
       options.source ?= 'keep'
       # Since the current URL is not retrievable over the GET-only address bar,
       # we can only provide history if a location URL is passed as an option.
-      options.history = !options.location
+      options.history = !!options.location
 
     options.location ?= locationFromExchange
+
     options.title ?= response.title
     options.acceptLayer = response.acceptLayer
     options.dismissLayer = response.dismissLayer
