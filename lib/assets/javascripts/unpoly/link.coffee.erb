@@ -337,7 +337,6 @@ up.link = do ->
     method = followMethod(selectorOrLink, options)
     up.proxy.isSafeMethod(method)
 
-
   targetMacro = (queryAttr, fixedResultAttrs) ->
     up.macro "[#{queryAttr}]", (element) ->
       target = e.optionalTarget(element, queryAttr)
@@ -667,7 +666,6 @@ up.link = do ->
   isFollowable: isFollowable
   shouldProcessEvent: shouldProcessEvent
   followMethod: followMethod
-  allowDefault: allowDefault
   targetMacro: targetMacro
 
 up.follow = up.link.follow

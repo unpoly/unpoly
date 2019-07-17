@@ -890,7 +890,7 @@ describe 'up.link', ->
       beforeEach ->
         @$link = $fixture('a[href="/follow-path"][up-follow]')
         @followSpy = up.link.knife.mock('follow').and.returnValue(Promise.resolve())
-        @defaultSpy = spyOn(up.link, 'allowDefault').and.callFake((event) -> event.preventDefault())
+        @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
       it "calls up.follow with the clicked link", asyncSpec (next) ->
         Trigger.click(@$link)
