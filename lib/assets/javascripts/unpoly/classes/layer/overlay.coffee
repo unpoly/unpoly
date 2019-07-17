@@ -60,14 +60,14 @@ class up.Layer.Overlay extends up.Layer
   closeNow: (options) ->
     throw "implement me"
 
-  createElement: (parentElement = @stack.container) ->
-    @element = e.affix(parentElement, '.up-overlay',
+  createElement: (parentElement = @stack.overlayContainer) ->
+    attrs = u.compactObject
       'up-dismissable': @dismissable
       'up-flavor': @constructor.flavor
       'up-align': @align
       'up-position': @position,
       'up-size': @size,
-    )
+    @element = e.affix(parentElement, '.up-overlay', attrs)
     @element.classList.add(@class) if @class
 
   destroyElement: ->
@@ -82,11 +82,11 @@ class up.Layer.Overlay extends up.Layer
 
   frameInnerContent: (parentElement, options) ->
     content = options.content
-    @frameElement = affix(parentElement, '.up-overlay-frame')
-    @contentElement = affix(@frameElement, '.up-overlay-content')
+    @frameElement = e.affix(parentElement, '.up-overlay-frame')
+    @contentElement = e.affix(@frameElement, '.up-overlay-content')
     @contentElement.appendChild(content)
     @createDismissElement(@frameElement)
-    options.onContentAttached?({ layer, content })
+    options.onContentAttached?({ layer: this, content })
 
   openAnimateOptions: ->
     easing: @openEasing
@@ -98,7 +98,7 @@ class up.Layer.Overlay extends up.Layer
 
   withAnimatingClass: (startAnimation) ->
     @markAsAnimating(true)
-    return startAnimation.then => @markAsAnimating(false)
+    return startAnimation().then => @markAsAnimating(false)
 
   markAsDestroying: ->
     up.fragment.markAsDestroying(@element)

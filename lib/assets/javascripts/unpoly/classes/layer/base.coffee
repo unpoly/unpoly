@@ -85,19 +85,16 @@ class up.Layer extends up.Record
     return @buildEventListenerGroup(args).unbind()
 
   buildEventListenerGroup: (args) ->
-    group = up.EventListenerGroup.fromBindArgs(args)
-    group.guard = @containsEventTarget
-    group.element ||= @element
-    group
+    return up.EventListenerGroup.fromBindArgs(args,
+      guard: @containsEventTarget,
+      elements: [@element]
+    )
 
   containsEventTarget: (event) =>
     @contains(event.target)
 
-  buildEventEmitter: ->
-    emitter = up.EventEmitter.fromEmitArgs(args)
-    emitter.element ?= @element
-    # emitter.boundary = @element
-    return emitter
+  buildEventEmitter: (args) ->
+    return up.EventEmitter.fromEmitArgs(args, element: @element)
 
   emit: (args...) ->
     return @buildEventEmitter(args).emit()

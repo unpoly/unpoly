@@ -146,6 +146,7 @@ up.layer = do ->
 
   applyHandlers = (layer) ->
     for handler in handlers
+      console.debug("applyHandler: %o, %o", layer, handler)
       layer.on(handler...)
 
   up.event.onEscape (event) ->
@@ -218,9 +219,10 @@ up.layer = do ->
     flavor: registerFlavor
     isOverlayFlavor: isOverlayFlavor
     on: (args...) -> stack.current.on(args...)
-    onEach: registerHandler
     off: (args...) -> stack.current.off(args...)
     emit: (args...) -> stack.current.emit(args...)
+    onEach: registerHandler
+    applyHandlers: applyHandlers
     get_root: -> stack.root
     get_all: -> stack.layers
     get_current: -> stack.current

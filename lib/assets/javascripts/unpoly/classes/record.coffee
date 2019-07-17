@@ -12,7 +12,7 @@ class up.Record extends up.Class
     u.assign(this, @defaults(), @attributes(options))
 
   attributes: (source = @) ->
-    u.only(source, @keys()...)
+    u.pick(source, @keys())
 
   "#{u.copy.key}": ->
     @variant()

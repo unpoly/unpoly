@@ -57,6 +57,10 @@
       - up-on-accepted kriegt noch `layer` als Argument?
 - Present tense events still have event log messages with gerund
 - up.layer.lookup and up.layer.lookupAll sound like they would take a value, but they only take an options hash
+- Rename some config options
+  - up.link.config.selectors => up.link.config.followSelectors
+  - introduce up.link.config.instantSelectors
+  - up.radio.config.hungry => up.radio.config.hungrySelectors
 
 
 

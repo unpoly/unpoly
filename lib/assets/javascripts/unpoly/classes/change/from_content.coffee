@@ -27,6 +27,10 @@ class up.Change.FromContent extends up.Change
   extractFlavorFromLayerOption: ->
     if up.layer.isOverlayFlavor(@options.layer)
       @options.flavor = @options.layer
+
+    # If user passes a { flavor } option without a { layer } option
+    # we assume they want to open a new layer.
+    if @options.flavor
       @options.layer = 'new'
 
   setDefaultLayer: ->
@@ -43,7 +47,7 @@ class up.Change.FromContent extends up.Change
     @plans = []
     if @options.layer == 'new'
       layerDefaultTargets = up.layer.defaultTargets(@options.flavor)
-      @eachTargetCandidatePlan layerDefaultTargets, (plan) =>
+      @eachTargetCandidatePlan layerDefaultTargets, {}, (plan) =>
         # We cannot open a <body> in a new layer
         unless up.fragment.targetsBody(plan.target)
           @plans.push(new up.Change.OpenLayer(plan))
@@ -58,7 +62,7 @@ class up.Change.FromContent extends up.Change
     if up.layer.config.resetWorld
       @plans.push(new up.Change.ResetWorld(@options))
 
-    console.debug("Plans are %o", @plans)
+    console.debug("Change.FromContent: Plans are %o", @plans)
 
   eachTargetCandidatePlan: (layerDefaultTargets, planOptions, fn) ->
     for target, i in @buildTargetCandidates(layerDefaultTargets)
@@ -69,8 +73,8 @@ class up.Change.FromContent extends up.Change
   buildTargetCandidates: (layerDefaultTargets) ->
     targetCandidates = [@options.target, @options.fallback, layerDefaultTargets]
     # Remove undefined, null and { fallback: false } from the list
-    targetCandidates = u.filter(targetCandidates, u.isTruthy)
     targetCandidates = u.flatten(targetCandidates)
+    targetCandidates = u.filter(targetCandidates, u.isTruthy)
     targetCandidates = u.uniq(targetCandidates)
 
     if @options.fallback == false || @options.content

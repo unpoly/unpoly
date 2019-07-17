@@ -265,7 +265,7 @@ up.viewport = do ->
     resetScrollOpt = options.resetScroll
     restoreScrollOpt = options.restoreScroll
 
-    animateOptions = u.only(options, 'scrollBehavior', 'scrollSpeed')
+    animateOptions = u.pick(options, ['scrollBehavior', 'scrollSpeed'])
 
     if resetScrollOpt
       return resetScroll(around: element)

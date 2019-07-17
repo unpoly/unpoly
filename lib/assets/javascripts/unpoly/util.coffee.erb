@@ -124,7 +124,7 @@ up.util = do ->
     unless link.pathname[0] == '/'
       # Only copy the link into an object when we need to (to change a property).
       # Note that we're parsing a lot of URLs for [up-active].
-      link = only(link, 'protocol', 'hostname', 'port', 'pathname', 'search', 'hash')
+      link = pick(link, ['protocol', 'hostname', 'port', 'pathname', 'search', 'hash'])
       link.pathname = '/' + link.pathname
 
     link
@@ -878,6 +878,9 @@ up.util = do ->
   compact = (array) ->
     filterList array, isGiven
 
+  compactObject = (object) ->
+    pickBy(object, isGiven)
+
   ###**
   Returns the given array without duplicates.
 
@@ -1058,7 +1061,7 @@ up.util = do ->
   @internal
   ###
   objectContains = (object, subObject) ->
-    reducedValue = only(object, Object.keys(subObject)...)
+    reducedValue = pick(object, Object.keys(subObject))
     isEqual(subObject, reducedValue)
 
   ###**
@@ -1071,11 +1074,22 @@ up.util = do ->
   @stable
   ###
   only = (object, properties...) ->
+    pick(object, properties)
+
+  pick = (object, properties) ->
     filtered = {}
     for property in properties
       if property of object
         filtered[property] = object[property]
     filtered
+
+  pickBy = (object, tester) ->
+    tester = iteratee(tester)
+    filtered = {}
+    for key, value of object
+      if tester(value, key, object)
+        filtered[key] = object[key]
+    return filtered
 
   ###**
   Returns a copy of the given object that contains all except
@@ -1662,6 +1676,7 @@ up.util = do ->
   reject: reject
   intersect: intersect
   compact: compact
+  compactObject: compactObject
   uniq: uniq
   uniqBy: uniqBy
   last: last
@@ -1699,6 +1714,8 @@ up.util = do ->
   objectContains: objectContains
   toArray: toArray
   only: only
+  pick: pick
+  pickBy: pickBy
   except: except
 #  pickBy: pickBy
   unresolvablePromise: unresolvablePromise

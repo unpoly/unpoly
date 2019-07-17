@@ -46,7 +46,7 @@ class up.Change.FromURL extends up.Change
         # keys that should be used for failed responses. From the succcess options
         # we only inherit keys that need to be known before the request goes out,
         # like { method }, { url } or { params }.
-        preflightOptions = u.only(@successOptions, @constructor.PREFLIGHT_KEYS...)
+        preflightOptions = u.pick(@successOptions, @constructor.PREFLIGHT_KEYS)
         @failureOptions = u.merge(preflightOptions, @explicitFailureOptions())
       when 'inherit'
         # In inherit mode all success options are copied and can then be
@@ -166,4 +166,4 @@ class up.Change.FromURL extends up.Change
     (response instanceof up.Response) && !response.isFatalError()
 
   fullLoad: =>
-    up.browser.loadPage(@successOptions.url, u.only(@successOptions, 'method', 'params'))
+    up.browser.loadPage(@successOptions.url, u.pick(@successOptions, ['method', 'params']))

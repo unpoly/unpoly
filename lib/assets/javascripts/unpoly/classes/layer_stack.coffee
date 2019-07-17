@@ -25,6 +25,8 @@ class up.LayerStack extends up.Class
         ancestor.dismiss(preventable: false)
 
   reset: ->
+    up.Layer.OverlayWithViewport.bodyShifter.unshift()
+
     @resetLayers()
 
     @currentOverrides = []

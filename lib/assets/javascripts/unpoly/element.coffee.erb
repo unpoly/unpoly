@@ -989,7 +989,7 @@ up.element = do ->
     if u.isString(keyOrKeys)
       style[keyOrKeys]
     else # array
-      u.only(style, keyOrKeys...)
+      u.pick(style, keyOrKeys)
 
   ###**
   Sets the given CSS properties as inline styles on the given element.

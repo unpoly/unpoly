@@ -1,6 +1,8 @@
 #= require ./base
 #= require ./overlay
 
+e = up.element
+
 class up.Layer.OverlayWithViewport extends up.Layer.Overlay
 
   # It makes only sense to have a single body shifter
@@ -9,10 +11,10 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
   openNow: (options) ->
     @createElement()
     @element.classList.add('.up-overlay-with-viewport')
-    @backdropElement = affix(@element, '.up-overlay-backdrop')
+    @backdropElement = e.affix(@element, '.up-overlay-backdrop')
     if @dismissable
       @backdropElement.setAttribute('up-dismiss', '')
-    @viewportElement = affix(@element, '.up-overlay-viewport')
+    @viewportElement = e.affix(@element, '.up-overlay-viewport')
     @frameInnerContent(@viewportElement, options)
 
     @shiftBody()

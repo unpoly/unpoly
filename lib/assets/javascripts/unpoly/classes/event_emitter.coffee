@@ -55,7 +55,7 @@ class up.EventEmitter extends up.Record
     else if message == true
       up.puts('Event %s (%o)', name, @event)
 
-  @fromEmitArgs: (args) ->
+  @fromEmitArgs: (args, options) ->
     if args[0].addEventListener
       element = args.shift()
     else if u.isJQuery(args[0])
@@ -71,4 +71,5 @@ class up.EventEmitter extends up.Record
 
     element ||= document
 
-    new @({ element, event })
+    attributes = u.merge({ element, event }, options)
+    new @(attributes)
