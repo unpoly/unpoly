@@ -81,7 +81,7 @@ up.link = do ->
 
   config = new up.Config ->
     preloadDelay: 75
-    selectors: ['[up-target]', '[up-follow]']
+    selectors: ['a[up-target]', '[up-href][up-target]', 'a[up-follow]', '[up-href][up-follow]']
 
   preloadDelay = new up.LinkPreloadDelay()
 
@@ -338,12 +338,11 @@ up.link = do ->
     up.proxy.isSafeMethod(method)
 
   targetMacro = (queryAttr, fixedResultAttrs) ->
-    up.macro "[#{queryAttr}]", (element) ->
-      target = e.optionalTarget(element, queryAttr)
+    up.macro "[#{queryAttr}]", (link) ->
       optionalTarget = link.getAttribute(queryAttr)
       resultAttrs = u.merge(fixedResultAttrs, 'up-target': optionalTarget)
-      e.setMissingAttrs(resultAttrs)
-      e.removeAttribute(queryAttr)
+      e.setMissingAttrs(link, resultAttrs)
+      link.removeAttribute(queryAttr)
 
   ###**
   [Follows](/up.follow) this link with JavaScript and replaces a CSS selector

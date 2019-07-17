@@ -590,7 +590,7 @@ up.form = do ->
     By default only responses to `GET` requests are cached for a few minutes.
   @stable
   ###
-  up.on 'submit', 'form[up-target]', (event, form) ->
+  up.on 'submit', 'form[up-target], form[up-follow]', (event, form) ->
     up.event.consumeAction(event)
     u.muteRejection submit(form)
 

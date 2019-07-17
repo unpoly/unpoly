@@ -147,7 +147,8 @@ Later?
   - For this we also need to decide whether up.proxy.preload() would reject unsafe requests
 - { layer: 'swap' } - replaces the current overlay with the new layer
 - { layer: 'solo' } - replaces all overlays with the new overlay
-
+- form[up-target] without a target now looks funny
+  - I now have form[up-follow] as a workaround
 
 Decisions
 ---------
