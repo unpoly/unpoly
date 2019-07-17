@@ -586,16 +586,6 @@ describe 'up.link', ->
         up.link.makeFollowable($link[0])
         expect($link.attr('up-follow')).toBeMissing()
 
-      it "does not add [up-follow] to a link that is already [up-modal]", ->
-        $link = $fixture('a[href="/path"][up-modal=".target"]').text('label')
-        up.link.makeFollowable($link[0])
-        expect($link.attr('up-follow')).toBeMissing()
-
-      it "does not add [up-follow] to a link that is already [up-popup]", ->
-        $link = $fixture('a[href="/path"][up-popup=".target"]').text('label')
-        up.link.makeFollowable($link[0])
-        expect($link.attr('up-follow')).toBeMissing()
-
     describe 'up.visit', ->
 
       it 'should have tests'
