@@ -953,33 +953,33 @@ describe 'up.link', ->
         expect($link.attr('up-instant')).toEqual('')
         expect($link.attr('up-target')).toEqual('.target')
 
-      it "adds [up-follow] attribute if [up-dash]'s value is 'true'", ->
-        $link = $fixture('a[href="/path"][up-dash="true"]').text('label')
-        up.hello($link)
-        expect($link.attr('up-follow')).toEqual('')
-
-      it "adds [up-follow] attribute if [up-dash] is present, but has no value", ->
-        $link = $fixture('a[href="/path"][up-dash]').text('label')
-        up.hello($link)
-        expect($link.attr('up-follow')).toEqual('')
-
-      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-target] is present", ->
-        $link = $fixture('a[href="/path"][up-dash="true"][up-target=".target"]').text('label')
-        up.hello($link)
-        expect($link.attr('up-follow')).toBeMissing()
-        expect($link.attr('up-target')).toEqual('.target')
-
-      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-modal] is present", ->
-        $link = $fixture('a[href="/path"][up-dash="true"][up-modal=".target"]').text('label')
-        up.hello($link)
-        expect($link.attr('up-follow')).toBeMissing()
-        expect($link.attr('up-modal')).toEqual('.target')
-
-      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-popup] is present", ->
-        $link = $fixture('a[href="/path"][up-dash="true"][up-popup=".target"]').text('label')
-        up.hello($link)
-        expect($link.attr('up-follow')).toBeMissing()
-        expect($link.attr('up-popup')).toEqual('.target')
+#      it "adds [up-follow] attribute if [up-dash]'s value is 'true'", ->
+#        $link = $fixture('a[href="/path"][up-dash="true"]').text('label')
+#        up.hello($link)
+#        expect($link.attr('up-follow')).toEqual('')
+#
+#      it "adds [up-follow] attribute if [up-dash] is present, but has no value", ->
+#        $link = $fixture('a[href="/path"][up-dash]').text('label')
+#        up.hello($link)
+#        expect($link.attr('up-follow')).toEqual('')
+#
+#      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-target] is present", ->
+#        $link = $fixture('a[href="/path"][up-dash="true"][up-target=".target"]').text('label')
+#        up.hello($link)
+#        expect($link.attr('up-follow')).toBeMissing()
+#        expect($link.attr('up-target')).toEqual('.target')
+#
+#      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-modal] is present", ->
+#        $link = $fixture('a[href="/path"][up-dash="true"][up-modal=".target"]').text('label')
+#        up.hello($link)
+#        expect($link.attr('up-follow')).toBeMissing()
+#        expect($link.attr('up-modal')).toEqual('.target')
+#
+#      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-popup] is present", ->
+#        $link = $fixture('a[href="/path"][up-dash="true"][up-popup=".target"]').text('label')
+#        up.hello($link)
+#        expect($link.attr('up-follow')).toBeMissing()
+#        expect($link.attr('up-popup')).toEqual('.target')
 
       it "removes the [up-dash] attribute when it's done", ->
         $link = $fixture('a[href="/path"]').text('label')
@@ -1020,10 +1020,10 @@ describe 'up.link', ->
       it 'can be used to enlarge the click area of a link', asyncSpec (next) ->
         $area = $fixture('div[up-expand] a[href="/path"]')
         up.hello($area)
-        spyOn(up, 'replace')
+        spyOn(up, 'change')
         Trigger.clickSequence($area)
         next =>
-          expect(up.replace).toHaveBeenCalled()
+          expect(up.change).toHaveBeenCalled()
 
       it 'does nothing when the user clicks another link in the expanded area', asyncSpec (next) ->
         $area = $fixture('div[up-expand]')
@@ -1049,17 +1049,17 @@ describe 'up.link', ->
       it 'does not trigger multiple replaces when the user clicks on the expanded area of an [up-instant] link (bugfix)', asyncSpec (next) ->
         $area = $fixture('div[up-expand] a[href="/path"][up-follow][up-instant]')
         up.hello($area)
-        spyOn(up, 'replace')
+        spyOn(up, 'change')
         Trigger.clickSequence($area)
         next =>
-          expect(up.replace.calls.count()).toEqual(1)
+          expect(up.change.calls.count()).toEqual(1)
 
       it 'does not add an up-follow attribute if the expanded link is [up-dash] with a selector (bugfix)', ->
         $area = $fixture('div[up-expand] a[href="/path"][up-dash=".element"]')
         up.hello($area)
         expect($area.attr('up-follow')).toBeMissing()
 
-      it 'does not an up-follow attribute if the expanded link is [up-dash] without a selector (bugfix)', ->
+      it 'does add an up-follow attribute if the expanded link is [up-dash] without a selector (bugfix)', ->
         $area = $fixture('div[up-expand] a[href="/path"][up-dash]')
         up.hello($area)
         expect($area.attr('up-follow')).toEqual('')
