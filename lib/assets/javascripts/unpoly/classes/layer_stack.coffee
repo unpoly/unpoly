@@ -33,6 +33,7 @@ class up.LayerStack extends up.Class
 
     if c = @_overlayContainer
       e.remove(c)
+      @_overlayContainer = null
 
   resetLayers: ->
     @layers = []

@@ -22,4 +22,8 @@ afterEach (done) ->
       # then start the next example.
       up.util.task ->
         $('.up-toast').remove()
+
+        if $('.up-overlay').length
+          throw "Overlay was not removed after reset"
+
         done()

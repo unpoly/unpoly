@@ -203,6 +203,7 @@ up.history = do ->
       register = ->
         window.history.scrollRestoration = 'manual' if up.browser.canControlScrollRestoration()
         window.addEventListener('popstate', pop)
+        # Replace the vanilla state of the initial page load with an Unpoly-enabled state
         replace(currentLocation(), force: true)
 
       if jasmine?

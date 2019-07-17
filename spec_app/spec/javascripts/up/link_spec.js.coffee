@@ -69,7 +69,7 @@ describe 'up.link', ->
         it 'adds history entries and allows the user to use the back- and forward-buttons', asyncSpec (next) ->
           up.history.config.enabled = true
 
-          waitForBrowser = 100
+          waitForBrowser = 150
 
           # By default, up.history will replace the <body> tag when
           # the user presses the back-button. We reconfigure this
@@ -162,6 +162,8 @@ describe 'up.link', ->
 
           up.proxy.config.cacheExpiry = 0
 
+          waitForBrowser = 150
+
           respondWith = (text) =>
             @respondWith """
               <div class="container">
@@ -203,7 +205,7 @@ describe 'up.link', ->
 
             history.back()
 
-          next.after 100, =>
+          next.after waitForBrowser, =>
             respondWith('restored text from one')
 
           next =>
@@ -212,7 +214,7 @@ describe 'up.link', ->
 
             history.forward()
 
-          next.after 100, =>
+          next.after waitForBrowser, =>
             respondWith('restored text from two')
 
           next =>
@@ -228,6 +230,8 @@ describe 'up.link', ->
           up.history.config.popTargets = ['.container']
 
           up.proxy.config.cacheExpiry = 0
+
+          waitForBrowser = 150
 
           respondWith = (text) =>
             @respondWith """
@@ -274,7 +278,7 @@ describe 'up.link', ->
 
             history.back()
 
-          next.after 100, =>
+          next.after waitForBrowser, =>
             respondWith('restored text from two')
 
           next =>
@@ -284,7 +288,7 @@ describe 'up.link', ->
 
             history.forward()
 
-          next.after 100, =>
+          next.after waitForBrowser, =>
             respondWith('restored text from two with hash')
 
           next =>
