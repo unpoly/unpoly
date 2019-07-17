@@ -176,8 +176,8 @@ up.link = do ->
     # { history } is actually a boolean, but we keep the deprecated string
     # variant which should now be passed as { location }.
     parser.booleanOrString('history')                 # success only
-    parser.string('location')                         # success only
-    parser.string('title')                            # success only
+    parser.booleanOrString('location')                # success only
+    parser.booleanOrString('title')                   # success only
     parser.string('layer')                            # success only
     parser.string('flavor')                           # success only
     parser.json('context')                            # success only

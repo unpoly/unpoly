@@ -17,9 +17,10 @@ up.history = do ->
   Configures behavior when the user goes back or forward in browser history.
 
   @property up.history.config
-  @param {Array} [config.popTargets=['body']]
-    An array of CSS selectors to replace when the user goes
-    back in history.
+  @param {Array} [config.popTargets=[]]
+    A list of possible CSS selectors to [replace](/up.change) when the user goes back in history.
+
+    If this array is empty, the [root layer's default targets](/up.layer.config.root) will be replaced.
   @param {boolean} [config.restoreScroll=true]
     Whether to restore the known scroll positions
     when the user goes back or forward in history.
@@ -27,7 +28,7 @@ up.history = do ->
   ###
   config = new up.Config ->
     enabled: true
-    popTargets: ['body']
+    popTargets: [] # will be prepended to the root layer's default target
     restoreScroll: true
 
   ###**
@@ -154,14 +155,15 @@ up.history = do ->
       # We can't let people prevent this event, since `popstate` is also unpreventable.
       up.emit('up:history:restore', url: url, log: "Restoring location #{url}")
 
-      popSelector = config.popTargets.join(', ')
-      replaced = up.replace popSelector, url,
-        history: false,     # don't push a new state
-        title: true,        # do extract the title from the response
-        reveal: false,
-        saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
+      replaced = up.change
+        layer: 'root'        # Don't replace elements in a modal that might still be open
+        peel: true           # Close all overlays
+        target: config.popTargets,
+        url: url
+        location: false,    # don't push a new state
         restoreScroll: config.restoreScroll
-        layer: 'page'       # Don't replace elements in a modal that might still be open
+        saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
+        keep: false
       replaced.then ->
         url = currentLocation()
         up.emit('up:history:restored', url: url, log: "Restored location #{url}")

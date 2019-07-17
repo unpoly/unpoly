@@ -133,21 +133,32 @@ class up.Change.FromURL extends up.Change
 
     if isReloadable
       # Remember where we got the fragment from so we can up.reload() it later.
-      options.source ?= responseURL
+      options.source = @improveHistoryValue(options.source, responseURL)
     else
       # Keep the source of the previous fragment (e.g. the form that was submitted into failure).
-      options.source ?= 'keep'
+      options.source = @improveHistoryValue(options.source, 'keep')
       # Since the current URL is not retrievable over the GET-only address bar,
       # we can only provide history if a location URL is passed as an option.
       options.history = !!options.location
 
-    options.location ?= locationFromExchange
-
-    options.title ?= response.title
+    options.location = @improveHistoryValue(options.location, locationFromExchange)
+    options.title = @improveHistoryValue(options.title, response.title)
     options.acceptLayer = response.acceptLayer
     options.dismissLayer = response.dismissLayer
     options.event = response.event
     options.layerEvent = response.layerEvent
+
+  # Values we want to keep:
+  # - false (no update)
+  # - string (forced update)
+  # Values we want to override:
+  # - true (do update with defaults)
+  # - missing (do with defaults)
+  improveHistoryValue: (value, newValue) ->
+    if value == false || u.isString(value)
+      value
+    else
+      newValue
 
   failedResponseHasContent: (response) ->
     # Check if the failed response wasn't cause by a fatal error
