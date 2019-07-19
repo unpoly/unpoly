@@ -347,6 +347,15 @@ describe 'up.feedback', ->
           next =>
             expect($area).not.toHaveClass('up-active')
 
+        it 'removes .up-active when a link with [up-confirm] was not confirmed', asyncSpec (next) ->
+          $link = $fixture('a[href="/foo"][up-modal=".main"][up-confirm="Really follow?"]')
+          spyOn(up.browser, 'whenConfirmed').and.returnValue(Promise.reject('User aborted'))
+
+          Trigger.clickSequence($link)
+
+          next =>
+            expect($link).not.toHaveClass('up-active')
+
         it 'marks clicked modal openers as .up-active while the modal is loading', asyncSpec (next) ->
           $link = $fixture('a[href="/foo"][up-modal=".main"]')
           fixture('.main')
