@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.60.0"
+    version: "0.60.1"
   };
 
 }).call(this);
@@ -2920,10 +2920,10 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
     
     \#\#\# Example
     
-      element = up.element.createFromHtml('<div class="foo"><span>text</span></div>')
-      element.className // returns 'foo'
-      element.children[0] // returns <span> element
-      element.children[0].textContent // returns 'text'
+        element = up.element.createFromHtml('<div class="foo"><span>text</span></div>')
+        element.className // returns 'foo'
+        element.children[0] // returns <span> element
+        element.children[0].textContent // returns 'text'
     
     @function up.element.createFromHtml
     @experimental
@@ -4755,7 +4755,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
         };
       })(this));
       if (!options.preload) {
-        promise = promise.then(function() {
+        u.always(promise, function() {
           return up.feedback.stop(link);
         });
       }
@@ -6386,7 +6386,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
       this.cancel = bind(this.cancel, this);
       this.animationFrame = bind(this.animationFrame, this);
       this.start = bind(this.start, this);
-      this.behavior = (ref = (ref1 = options.behavior) != null ? ref1 : options.scrollBehavior) != null ? ref : 'instant';
+      this.behavior = (ref = (ref1 = options.behavior) != null ? ref1 : options.scrollBehavior) != null ? ref : 'auto';
       this.speed = ((ref2 = (ref3 = options.speed) != null ? ref3 : options.scrollSpeed) != null ? ref2 : up.viewport.config.scrollSpeed) * SPEED_CALIBRATION;
     }
 
@@ -6862,9 +6862,9 @@ There are some advantages to using `up.on()`:
 
   - You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
   - The event target is automatically passed as a second argument.
-  - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`)
+  - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`).
   - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements.
-  - You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
+  - You may use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
     to observed elements. If an `[up-data]` attribute is set, its value will automatically be
     parsed as JSON and passed as a third argument.
   - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
@@ -6942,7 +6942,7 @@ There are some advantages to using `up.on()`:
         <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
         <span class='person' up-data='{ "age": 22, "name": "Jim" }'>Jim</span>
     
-    The JSON will parsed and handed to your event handler as a third argument:
+    The JSON will be parsed and handed to your event handler as a third argument:
     
         up.on('click', '.person', function(event, element, data) {
           console.log("This is %o who is %o years old", data.name, data.age)
@@ -7461,7 +7461,7 @@ This fixes two edge cases you might or might not care about:
 2. Some browsers have a bug where the initial request method is used for all
    subsequently pushed states. That means if the user reloads the page on a later
    GET state, the browser will wrongly attempt a POST request.
-   This issue affects Safari 9 and 10 (last tested in 2017-08).
+   This issue affects Safari 9-12 (last tested in 2019-03).
    Modern Firefoxes, Chromes and IE10+ don't have this behavior.
 
 In order to allow Unpoly to detect the HTTP method of the initial page load,
@@ -8074,7 +8074,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     \#\#\# Cleaning up after yourself
     
     If your compiler returns a function, Unpoly will use this as a *destructor* to
-    clean up if the element leaves the DOM. Note that in Unpoly the same DOM ad JavaScript environment
+    clean up if the element leaves the DOM. Note that in Unpoly the same DOM and JavaScript environment
     will persist through many page loads, so it's important to not create
     [memory leaks](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
     
@@ -8118,7 +8118,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
           { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
         ]'></div>
     
-    The JSON will parsed and handed to your compiler as a second argument:
+    The JSON will be parsed and handed to your compiler as a second argument:
     
         up.compiler('.google-map', function(element, pins) {
           var map = new google.maps.Map(element)
@@ -8442,7 +8442,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
           { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
         ]'></div>
     
-    The JSON will parsed and handed to your compiler as a second argument:
+    The JSON will be parsed and handed to your compiler as a second argument:
     
         up.compiler('.google-map', function(element, pins) {
           var map = new google.maps.Map(element)
@@ -8850,7 +8850,7 @@ layout, such as navigation bars or headers. Unpoly will respect these sticky
 elements when [revealing updated fragments](/up.reveal).
 
 You should also [tell Unpoly](/up.viewport.config#config.viewports) when your application has more than one viewport,
-you should so Unpoly can pick the right viewport to scroll for each fragment update.
+so Unpoly can pick the right viewport to scroll for each fragment update.
 
 
 \#\#\# Bootstrap integration
@@ -9846,7 +9846,7 @@ is built from `up.fragment` functions. You may use them to extend Unpoly from yo
       Whether to [reveal](/up.reveal) the new fragment when the server responds with an error.
     
       You can also pass a CSS selector for the element to reveal.
-    @param {number} [options.revealPadding}
+    @param {number} [options.revealPadding]
     
     @param {boolean} [options.restoreScroll=false]
       If set to true, Unpoly will try to restore the scroll position
@@ -11043,7 +11043,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
       scrollNew = function() {
         var scrollOptions;
         scrollOptions = u.merge(options, {
-          behavior: 'instant'
+          scrollBehavior: 'auto'
         });
         return up.viewport.scrollAfterInsertFragment(newElement, scrollOptions);
       };
@@ -11523,7 +11523,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     
     \#\#\# Example
     
-        up.request('/search', params: { query: 'sunshine' }).then(function(response) {
+        up.request('/search', { params: { query: 'sunshine' } }).then(function(response) {
           console.log('The response text is %o', response.text)
         }).catch(function() {
           console.error('The request failed')
@@ -11611,7 +11611,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
     
     \#\#\# Example
     
-        up.request('/search', params: { query: 'sunshine' }).then(function(text) {
+        up.request('/search', { params: { query: 'sunshine' } }).then(function(text) {
           console.log('The response text is %o', text)
         }).catch(function() {
           console.error('The request failed')
@@ -12094,11 +12094,11 @@ This makes for an unfriendly experience:
 Unpoly fixes this by letting you annotate links with an [`up-target`](/a-up-target)
 attribute. The value of this attribute is a CSS selector that indicates which page
 fragment to update. The server **still renders full HTML pages**, but we only use
-the targeted ragments and discard the rest:
+the targeted fragments and discard the rest:
 
 ![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620" class="picture has_border is_sepia has_padding"}
 
-With this model, following links feel smooth. All transient DOM changes outside the updated fragment are preserved.
+With this model, following links feels smooth. All transient DOM changes outside the updated fragment are preserved.
 Pages also load much faster since the DOM, CSS and Javascript environments do not need to be
 destroyed and recreated for every request.
 
@@ -12193,7 +12193,7 @@ new page is loading.
     Calling `up.follow()` with this link will replace the page's `.main` fragment
     as if the user had clicked on the link:
     
-        var link = document.querSelector('a')
+        var link = document.querySelector('a')
         up.follow(link)
     
     @function up.follow
@@ -12289,6 +12289,12 @@ new page is loading.
       }
       if (options.confirm == null) {
         options.confirm = link.getAttribute('up-confirm');
+      }
+      if (options.scrollBehavior == null) {
+        options.scrollBehavior = link.getAttribute('up-scroll-behavior');
+      }
+      if (options.scrollSpeed == null) {
+        options.scrollSpeed = link.getAttribute('up-scroll-speed');
       }
       options = u.merge(options, up.motion.animateOptions(options, link));
       return up.browser.whenConfirmed(options).then(function() {
@@ -12676,7 +12682,7 @@ new page is loading.
     });
 
     /***
-    Add an `[up-expand]` attribute to any element to enlarge the click area of an
+    Add an `[up-expand]` attribute to any element to enlarge the click area of a
     descendant link.
     
     `[up-expand]` honors all the Unppoly attributes in expanded links, like
