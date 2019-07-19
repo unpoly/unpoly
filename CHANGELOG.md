@@ -6,6 +6,13 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+0.60.1
+------
+
+- When user does not confirm an [`[up-confirm]`](/a-up-target#up-confirm) link,
+  the link's [`.up-active`](/a.up-active) class is now removed (fixes #89)
+
+
 0.60.0
 ------
 
