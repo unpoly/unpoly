@@ -154,7 +154,7 @@ This fixes two edge cases you might or might not care about:
 2. Some browsers have a bug where the initial request method is used for all
    subsequently pushed states. That means if the user reloads the page on a later
    GET state, the browser will wrongly attempt a POST request.
-   This issue affects Safari 9 and 10 (last tested in 2017-08).
+   This issue affects Safari 9-12 (last tested in 2019-03).
    Modern Firefoxes, Chromes and IE10+ don't have this behavior.
 
 In order to allow Unpoly to detect the HTTP method of the initial page load,

@@ -86,7 +86,7 @@ up.syntax = do ->
   \#\#\# Cleaning up after yourself
 
   If your compiler returns a function, Unpoly will use this as a *destructor* to
-  clean up if the element leaves the DOM. Note that in Unpoly the same DOM ad JavaScript environment
+  clean up if the element leaves the DOM. Note that in Unpoly the same DOM and JavaScript environment
   will persist through many page loads, so it's important to not create
   [memory leaks](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
 
@@ -130,7 +130,7 @@ up.syntax = do ->
         { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
       ]'></div>
 
-  The JSON will parsed and handed to your compiler as a second argument:
+  The JSON will be parsed and handed to your compiler as a second argument:
 
       up.compiler('.google-map', function(element, pins) {
         var map = new google.maps.Map(element)
@@ -420,7 +420,7 @@ up.syntax = do ->
         { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
       ]'></div>
 
-  The JSON will parsed and handed to your compiler as a second argument:
+  The JSON will be parsed and handed to your compiler as a second argument:
 
       up.compiler('.google-map', function(element, pins) {
         var map = new google.maps.Map(element)

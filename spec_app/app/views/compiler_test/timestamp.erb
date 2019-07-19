@@ -1,0 +1,9 @@
+<script>
+  up.compiler('.timestamp', (element) => {
+    var now = new Date()
+    element.innerText = now
+  })
+</script>
+
+<div class="timestamp">
+  Uncompiled

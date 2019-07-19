@@ -24,11 +24,11 @@ This makes for an unfriendly experience:
 Unpoly fixes this by letting you annotate links with an [`up-target`](/a-up-target)
 attribute. The value of this attribute is a CSS selector that indicates which page
 fragment to update. The server **still renders full HTML pages**, but we only use
-the targeted ragments and discard the rest:
+the targeted fragments and discard the rest:
 
 ![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620" class="picture has_border is_sepia has_padding"}
 
-With this model, following links feel smooth. All transient DOM changes outside the updated fragment are preserved.
+With this model, following links feels smooth. All transient DOM changes outside the updated fragment are preserved.
 Pages also load much faster since the DOM, CSS and Javascript environments do not need to be
 destroyed and recreated for every request.
 
@@ -579,7 +579,7 @@ up.link = do ->
     'up-instant': ''
 
   ###**
-  Add an `[up-expand]` attribute to any element to enlarge the click area of an
+  Add an `[up-expand]` attribute to any element to enlarge the click area of a
   descendant link.
 
   `[up-expand]` honors all the Unppoly attributes in expanded links, like

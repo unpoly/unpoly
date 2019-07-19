@@ -148,7 +148,7 @@ up.proxy = do ->
 
   \#\#\# Example
 
-      up.request('/search', params: { query: 'sunshine' }).then(function(response) {
+      up.request('/search', { params: { query: 'sunshine' } }).then(function(response) {
         console.log('The response text is %o', response.text)
       }).catch(function() {
         console.error('The request failed')
@@ -258,7 +258,7 @@ up.proxy = do ->
 
   \#\#\# Example
 
-      up.request('/search', params: { query: 'sunshine' }).then(function(text) {
+      up.request('/search', { params: { query: 'sunshine' } }).then(function(text) {
         console.log('The response text is %o', text)
       }).catch(function() {
         console.error('The request failed')

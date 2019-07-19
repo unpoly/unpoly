@@ -13,26 +13,33 @@ The methods documented below are available in all controllers, views and helpers
 
 To test whether the current request is a [fragment update](https://unpoly.com/up.link):
 
-    up?
+```ruby
+up?
+```
 
 To retrieve the CSS selector that is being [updated](https://unpoly.com/up.link):
 
-    up.target
+```ruby
+up.target
+```
 
 The Unpoly frontend will expect an HTML response containing an element that matches this selector. If no such element is found, an error is shown to the user.
 
 Server-side code is free to optimize its response by only returning HTML that matches this selector:
 
-    if up.target?('.sidebar')
-      = render 'expensive_sidebar_partial'
-    end
-
+```ruby
+if up.target?('.sidebar')
+  = render 'expensive_sidebar_partial'
+end
+```
 
 ### Pushing a document title to the client
 
 To force Unpoly to set a document title when processing the response:
 
-    up.title = 'Title from server'
+```ruby
+up.title = 'Title from server'
+```
 
 This is useful when you skip rendering the `<head>` in an Unpoly request.
 
@@ -40,26 +47,30 @@ This is useful when you skip rendering the `<head>` in an Unpoly request.
 
 To test whether the current request is a [form validation](https://unpoly.com/input-up-validate):
 
-    up.validate?
+```ruby
+up.validate?
+```
 
 When detecting a validation request, the server is expected to validate (but not save) the form submission and render a new copy of the form with validation errors. A typical saving action should behave like this:
 
-    class UsersController < ApplicationController
+```ruby
+class UsersController < ApplicationController
 
-      def create
-        user_params = params[:user].permit(:email, :password)
-        @user = User.new(user_params)
-        if up.validate?
-          @user.valid?  # run validations, but don't save to the database
-          render 'form' # render form with error messages
-        elsif @user.save?
-          sign_in @user
-        else
-          render 'form', status: :bad_request
-        end
-      end
-
+  def create
+    user_params = params[:user].permit(:email, :password)
+    @user = User.new(user_params)
+    if up.validate?
+      @user.valid?  # run validations, but don't save to the database
+      render 'form' # render form with error messages
+    elsif @user.save?
+      sign_in @user
+    else
+      render 'form', status: :bad_request
     end
+  end
+
+end
+```
 
 ### Automatic redirect detection
 
@@ -90,20 +101,21 @@ We recommend to use either 400 (bad request) or 422 (unprocessable entity).
 
 To do so in Rails, pass a [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option):
 
-    class UsersController < ApplicationController
+```ruby
+class UsersController < ApplicationController
 
-      def create
-        user_params = params[:user].permit(:email, :password)
-        @user = User.new(user_params)
-        if @user.save?
-          sign_in @user
-        else
-          render 'form', status: :bad_request
-        end
-      end
-
+  def create
+    user_params = params[:user].permit(:email, :password)
+    @user = User.new(user_params)
+    if @user.save?
+      sign_in @user
+    else
+      render 'form', status: :bad_request
     end
+  end
 
+end
+```
 
 Development
 -----------
