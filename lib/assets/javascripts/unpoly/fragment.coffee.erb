@@ -68,7 +68,8 @@ up.fragment = do ->
       guardEvent.options = options
       promise = promise.then -> up.event.whenEmitted(options.origin, guardEvent)
 
-    promise = up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
+    promise = promise.then ->
+      up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
 
     return promise
 

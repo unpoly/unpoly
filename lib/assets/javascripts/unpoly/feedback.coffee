@@ -271,12 +271,12 @@ up.feedback = do ->
       if u.isBoolean(feedbackOpt)
         element = options.origin
       else
-        element = up.fragment.all(feedbackOpt)
+        element = up.fragment.first(feedbackOpt)
 
     if element
-      around(element, fn)
+      return around(element, fn)
     else
-      Promise.resolve()
+      return fn()
 
 
   ###**

@@ -957,10 +957,11 @@ describe 'up.fragment', ->
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: '.fallback')
-              $target.remove()
-              $fallback.remove()
 
               u.task =>
+                $target.remove()
+                $fallback.remove()
+
                 @respondWith """
                   <div class="target">new target</div>
                   <div class="fallback">new fallback</div>
@@ -1010,9 +1011,10 @@ describe 'up.fragment', ->
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
               promise = up.replace('.target', '/path', fallback: false)
-              $target.remove()
 
               u.task =>
+                $target.remove()
+
                 @respondWith """
                   <div class="target">new target</div>
                   <div class="fallback">new fallback</div>
