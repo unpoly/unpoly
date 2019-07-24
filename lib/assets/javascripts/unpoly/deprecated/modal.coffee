@@ -14,8 +14,8 @@ up.modal = u.literal
     up.change(u.merge(options, { target, document: html, flavor: 'modal' }))
 
   close: (options = {}) ->
-    up.legacy.deprecated('up.modal.close()', 'up.layer.close()')
-    up.layer.close(options)
+    up.legacy.deprecated('up.modal.close()', 'up.layer.dismiss() or up.layer.accept()')
+    up.layer.dismiss(options)
 
   url: ->
     up.legacy.deprecated('up.modal.url()', 'up.layer.location')

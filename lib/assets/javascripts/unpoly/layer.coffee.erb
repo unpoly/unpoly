@@ -64,7 +64,7 @@ up.layer = do ->
   handlers = []
 
   isOverlayFlavor = (name) ->
-    name != 'root' && name != 'page' && !!config[name]
+    name != 'root' && name != 'overlay' && !!config[name]
 
 #  flavorFromOptions = (options) ->
 #    options.flavor ? config.flavor

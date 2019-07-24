@@ -28,6 +28,9 @@ class up.LayerLookup
     if u.isElement(@value) || u.isJQuery(@value)
       return [@of(@value)]
 
+    if up.layer.isOverlayFlavor(@value)
+      return @stack.allReversed().map (layer) => layer.flavor == @value
+
     return switch @value
       when 'root'
         [@stack.root]
@@ -46,6 +49,8 @@ class up.LayerLookup
         @stack.ancestorsOf(@givenBaseLayer())
       when 'closest'
         @stack.selfAndAncestorsOf(@givenBaseLayer())
+      else
+        up.fail("Unknown option value: { layer : '%s' }", @value)
 
   first: ->
     @all()[0]

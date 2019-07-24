@@ -3,6 +3,11 @@
 - Should we keep up.history.popTargets?
   - Should this always reset the world?
   - up.config.root.targets might not be appropriate
+  - but the layer targets will always be options after .popTargets
+- up.history.replace() is kinda dangerous API
+  - the current layer still has the previous URL
+- Move up.browser.location to up.history.location
+
 - Muss nach FromContent:
     if options.history == false
       options.location = false
@@ -22,8 +27,9 @@
   - [X] close-Event sollte { layer } haben
   - Wir sollten das ganze Layer compilen, nicht nur den content => Schwierig
   - Ist { dismissable: true } genug zur Config?
-    - { dismissLink: true }
-    - { backdropDismisses: true }
+    - { buttonDismissable: true }
+    - { escapeDismissable: true }
+    - { backdropDismissable: true }
 - Check if all events are emitted on a close element
   - so they can be observed with up.on(element)
   - e.g. up:layer:open is being emitted on document, but it should be emitted on the parent layer element

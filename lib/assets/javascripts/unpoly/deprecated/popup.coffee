@@ -6,8 +6,8 @@ up.popup = u.literal
     up.follow(link, u.merge(options, { flavor: 'popup' }))
 
   close: (options = {}) ->
-    up.legacy.deprecated('up.popup.close()', 'up.layer.close()')
-    up.layer.close(options)
+    up.legacy.deprecated('up.popup.close()', 'up.layer.dismiss() or up.layer.accept()')
+    up.layer.dismiss(options)
 
   url: ->
     up.legacy.deprecated('up.popup.url()', 'up.layer.location')

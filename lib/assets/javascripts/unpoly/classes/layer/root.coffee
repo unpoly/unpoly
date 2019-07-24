@@ -9,8 +9,6 @@ class up.Layer.Root extends up.Layer
 
   constructor: (options) ->
     super(options)
-    @location = up.browser.location
-    @title = document.title
     @history = true
 
   # Always return the current documentElement, since the developer

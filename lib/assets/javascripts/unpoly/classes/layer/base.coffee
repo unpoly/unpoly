@@ -128,7 +128,10 @@ class up.Layer extends up.Record
     # regardless of what's in options.
     return unless @history
 
-    # Accept { history: false } as a shortcut to disable all history-related options.
+    # When the layer is opened, the { history } option defines whether the
+    # layer enables handling of location and title i general.
+    # When updating history, accept { history: false } as a shortcut to
+    # disable all history-related options.
     if options.history == false
       options.location = false
       options.title = false
@@ -145,3 +148,15 @@ class up.Layer extends up.Record
         @savedLocation = options.location
       if options.title
         @savedTitle = options.title
+
+  @getter 'title', ->
+    if @isCurrent()
+      document.title
+    else
+      @savedTitle
+
+  @getter 'location', ->
+    if @isCurrent()
+      up.browser.location
+    else
+      @savedLocation
