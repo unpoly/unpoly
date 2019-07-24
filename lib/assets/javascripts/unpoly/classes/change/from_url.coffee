@@ -13,6 +13,8 @@ class up.Change.FromURL extends up.Change
     @successOptions.inspectResponse = @fullLoad
     @deriveFailureOptions()
 
+  # These options are used before the request is sent.
+  # Hence there is no failVariant.
   @PREFLIGHT_KEYS: [
     'url',
     'method',

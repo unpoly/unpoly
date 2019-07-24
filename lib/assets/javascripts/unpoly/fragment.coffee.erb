@@ -56,10 +56,13 @@ up.fragment = do ->
       options.feedback = false
 
     if options.navigate
-      options.peel ?= true
       options.solo ?= true
       options.feedback ?= true
+
+      options.peel ?= true
       options.reveal ?= true
+      options.failPeel ?= true
+      options.failReveal ?= true
 
     promise = up.browser.whenConfirmed(options)
 

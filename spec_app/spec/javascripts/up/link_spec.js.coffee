@@ -470,24 +470,20 @@ describe 'up.link', ->
         describe 'with { confirm } option', ->
 
           it 'follows the link after the user OKs a confirmation dialog', asyncSpec (next) ->
-            spyOn(up, 'change')
             spyOn(window, 'confirm').and.returnValue(true)
             $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Do you really want to go there?')
 
             next =>
               expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
-              expect(up.change).toHaveBeenCalled()
 
           it 'does not follow the link if the user cancels the confirmation dialog', asyncSpec (next) ->
-            spyOn(up, 'change')
             spyOn(window, 'confirm').and.returnValue(false)
             $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Do you really want to go there?')
 
             next =>
               expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
-              expect(up.change).not.toHaveBeenCalled()
 
           it 'does not show a confirmation dialog if the option is not a present string', asyncSpec (next) ->
             spyOn(up, 'change')
@@ -1054,15 +1050,16 @@ describe 'up.link', ->
         next =>
           expect(up.change.calls.count()).toEqual(1)
 
-      it 'does not add an up-follow attribute if the expanded link is [up-dash] with a selector (bugfix)', ->
+      it 'makes the expanded area followable if the expanded link is [up-dash] with a selector (bugfix)', ->
         $area = $fixture('div[up-expand] a[href="/path"][up-dash=".element"]')
         up.hello($area)
-        expect($area.attr('up-follow')).toBeMissing()
+        expect($area).toBeFollowable()
+        expect($area.attr('up-target')).toEqual('.element')
 
-      it 'does add an up-follow attribute if the expanded link is [up-dash] without a selector (bugfix)', ->
+      it 'makes the expanded area followable if the expanded link is [up-dash] without a selector (bugfix)', ->
         $area = $fixture('div[up-expand] a[href="/path"][up-dash]')
         up.hello($area)
-        expect($area.attr('up-follow')).toEqual('')
+        expect($area).toBeFollowable()
 
       describe 'with a CSS selector in the property value', ->
 
