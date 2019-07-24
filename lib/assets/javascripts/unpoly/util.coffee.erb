@@ -1531,12 +1531,12 @@ up.util = do ->
     else
       x*(4 - x*2)-1
 
-  wrapValue = (object, constructor) ->
-    if object instanceof constructor
+  wrapValue = (constructor, args...) ->
+    if args[0] instanceof constructor
       # This object has gone through instantiation and normalization before.
-      object
+      args[0]
     else
-      new constructor(object)
+      new constructor(args...)
 
 #  wrapArray = (objOrArray) ->
 #    if isUndefined(objOrArray)

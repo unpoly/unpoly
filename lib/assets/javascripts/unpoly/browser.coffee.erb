@@ -26,8 +26,8 @@ up.browser = do ->
   @param {object|Array|FormData|string} [options.params]
   @internal
   ###
-  loadPage = (options) ->
-    request = new up.Request(options)
+  loadPage = (args...) ->
+    request = new up.Request(args...)
     request.loadPage()
 
   ###**

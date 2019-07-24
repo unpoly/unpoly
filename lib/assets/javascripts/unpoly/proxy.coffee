@@ -199,18 +199,7 @@ up.proxy = do ->
   @stable
   ###
   makeRequest = (args...) ->
-    # Allow to pass the URL as a first argument instead of a { url } property.
-    url = args.shift() if u.isString(args[0])
-
-    # We cannot use u.extractOptions() since sometimes the last argument
-    # is an up.Request instead of a basic object.
-    requestOrOptions = args.shift() || {}
-
-    # If the URL was passed as a first argument, set it as the request's { url } property.
-    requestOrOptions.url = url if url
-
-    # If requestOrOptions is not already an up.Request, instantiate one.
-    request = up.Request.wrap(requestOrOptions)
+    request = up.Request.wrap(args...)
 
     if request.preload
       request.timeout ?= config.preloadTimeout

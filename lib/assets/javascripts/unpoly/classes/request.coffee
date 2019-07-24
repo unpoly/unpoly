@@ -104,7 +104,10 @@ class up.Request extends up.Record
   @param {number} [attrs.timeout]
   @internal
   ###
-  constructor: (options) ->
+  constructor: (args...) ->
+    options = u.extractOptions(args)
+    options.url ||= args[0]
+
     up.legacy.fixKey(options, 'data', 'params')
     super(options)
     @params = new up.Params(@params) # copies, which we want
@@ -286,5 +289,5 @@ class up.Request extends up.Record
       JSON.stringify(@context)
     ].join('|')
 
-  @wrap: (value) ->
-    u.wrapValue(value, @)
+  @wrap: (args...) ->
+    u.wrapValue(@, args...)
