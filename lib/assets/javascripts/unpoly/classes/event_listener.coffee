@@ -58,7 +58,7 @@ class up.EventListener extends up.Record
       @callback.apply(element, args)
 
   @fromElement: (attributes) ->
-    if map = element.upEventListeners
+    if map = attributes.element.upEventListeners
       key = @buildKey(attributes)
       return map[key]
 
