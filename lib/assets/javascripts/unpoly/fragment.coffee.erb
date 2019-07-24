@@ -50,6 +50,29 @@ up.fragment = do ->
   makeChange = (args...) ->
     options = parseTargetAndOptions(args)
 
+    if options.preload
+      options.solo = false
+      options.confirm = false
+      options.feedback = false
+
+    if options.navigate
+      options.peel ?= true
+      options.solo ?= true
+      options.feedback ?= true
+      options.reveal ?= true
+
+    promise = up.browser.whenConfirmed(options)
+
+    if guardEvent = options.guardEvent
+      # Allow guard event handlers to manipulate options for the default behavior
+      guardEvent.options = options
+      promise = promise.then -> up.event.whenEmitted(options.origin, guardEvent)
+
+    promise = up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
+
+    return promise
+
+  makeChangeNow = (options) ->
     if options.content || options.document
       return new up.Change.FromContent(options).executeAsync()
     else if options.url

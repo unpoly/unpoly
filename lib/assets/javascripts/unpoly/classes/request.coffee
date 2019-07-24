@@ -86,7 +86,7 @@ class up.Request extends up.Record
       # If that layer is closed we will cancel all pending requests targeting that layer.
       'preflightLayer',
       'context',
-      'navigate',
+      'solo',
     ]
 
   ###**
@@ -209,6 +209,10 @@ class up.Request extends up.Record
       @deferred.resolve(response)
     else
       @deferred.reject(response)
+
+  navigate: =>
+    up.legacy.deprecated('up.Request#navigate()', 'up.Request#loadPage()')
+    @loadPage()
 
   loadPage: =>
     # GET forms cannot have an URL with a query section in their [action] attribute.

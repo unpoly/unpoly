@@ -21,7 +21,7 @@ class up.Change.FromURL extends up.Change
     'query', # TODO
     'params',
     'cache',
-    'navigate',
+    'solo',
     'confirm',
     'feedback',
     'origin',

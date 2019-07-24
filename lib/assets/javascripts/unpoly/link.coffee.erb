@@ -162,15 +162,13 @@ up.link = do ->
     parser.json('query') # TODO                       # preflight
     parser.json('params')                             # preflight
     parser.boolean('cache')                           # preflight (but failed responses will be uncached)
-    parser.boolean('navigate', default: true)         # preflight (will be renamed to solo)
-    options.navigate = false if options.preload
+    parser.boolean('navigate', default: true)         # macro to set multiple options, see up.change()
+    parser.boolean('solo')                            # preflight
     parser.string('confirm')                          # preflight
-    options.confirm = undefined if options.preload
-    parser.boolean('feedback', default: true)         # preflight
-    options.feedback = false if options.preload
+    parser.boolean('feedback')                        # preflight
     parser.string('target')                           # success only
     parser.booleanOrString('fallback')                # success only
-    parser.booleanOrString('reveal', default: true)   # success only
+    parser.booleanOrString('reveal')                  # success only
     parser.boolean('restoreScroll')                   # success only
     parser.booleanOrString('transition')              # success only
     # { history } is actually a boolean, but we keep the deprecated string
@@ -181,7 +179,7 @@ up.link = do ->
     parser.string('layer')                            # success only
     parser.string('flavor')                           # success only
     parser.json('context')                            # success only
-    parser.boolean('peel', default: true)             # success only
+    parser.boolean('peel')                            # success only
     parser.string('align')                            # success only
     parser.string('position')                         # success only
     parser.string('class')                            # success only
@@ -197,17 +195,9 @@ up.link = do ->
     parser.parse(up.layer.closeCallbackAttr, 'onDismissing')  # success only
     parser.parse(up.layer.closeCallbackAttr, 'onDismissed')   # success only
     u.assign(options, up.motion.animateOptions(options, link))
+    options.guardEvent ?= up.event.build('up:link:follow', log: 'Following link')
 
-    options.eventName ?= 'up:link:follow'
-    options.eventLog ?= 'Following link'
-
-    promise = up.browser.whenConfirmed(options)
-    promise = promise.then ->
-      up.event.whenEmitted(link, options.eventName, { options: options, log: options.eventLog })
-    promise = promise.then ->
-      changeFn = -> up.change(options)
-      up.feedback.around(link, options, changeFn)
-    promise
+    return up.change(options)
 
   ###**
   This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.

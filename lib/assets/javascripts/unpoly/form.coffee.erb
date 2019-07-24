@@ -199,8 +199,8 @@ up.form = do ->
     # Now that we have extracted everything form-specific into options, we can call
     # up.link.follow(). This will also parse the myriads of other options that are
     # possible on the <form> element.
-    options.eventName = 'up:form:submit'
-    options.eventLog = 'Submitting form'
+    options.guardEvent = up.event.build('up:form:submit', log: 'Submitting form')
+
     return up.link.follow(form, options)
 
   ###**

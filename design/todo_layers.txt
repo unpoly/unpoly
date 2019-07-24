@@ -61,6 +61,9 @@
   - up.link.config.selectors => up.link.config.followSelectors
   - introduce up.link.config.instantSelectors
   - up.radio.config.hungry => up.radio.config.hungrySelectors
+- up:fragment:inserted should receive the entire document from which the fragment was extracted
+- Rename { document } to { page }?
+- Publish up.Request#loadPage()
 
 
 
@@ -153,6 +156,8 @@ Later?
 - { layer: 'solo' } - replaces all overlays with the new overlay
 - form[up-target] without a target now looks funny
   - I now have form[up-follow] as a workaround
+- When up:procxy:load is prevented, the request should be rejected
+
 
 Decisions
 ---------

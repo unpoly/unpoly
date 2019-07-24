@@ -222,8 +222,8 @@ up.proxy = do ->
     # assume the user is writing a change.
     clearCache() unless request.isSafe()
 
-    if request.navigate && !request.preload
-      abortRequests(navigate: true)
+    if request.solo && !request.preload
+      abortRequests(solo: true)
 
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.
