@@ -150,12 +150,16 @@ class up.Layer extends up.Record
         @savedTitle = options.title
 
   @getter 'title', ->
+    return unless @history
+
     if @isCurrent()
       document.title
     else
       @savedTitle
 
   @getter 'location', ->
+    return unless @history
+
     if @isCurrent()
       up.browser.location
     else
