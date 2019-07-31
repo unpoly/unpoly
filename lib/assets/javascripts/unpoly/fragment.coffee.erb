@@ -390,6 +390,12 @@ up.fragment = do ->
   hello = (element, options = {}) ->
     element = e.get(element)
 
+    # Callers may pass descriptions of child elements that were [kept](/up-keep)
+    # as { options.keepPlans }. For these elements up.hello() emits an event
+    # up:fragment:kept instead of up:fragment:inserted.
+    #
+    # We will also pass an array of kept child elements to up.hello() as { skip }
+    # so they won't be compiled a second time.
     keepPlans = options.keepPlans || []
     skip = keepPlans.map (plan) ->
       emitFragmentKept(plan)

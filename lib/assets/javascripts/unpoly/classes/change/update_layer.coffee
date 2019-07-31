@@ -48,7 +48,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
         @layer.peel()
         # Don't wait for peeling to finish
       @layer.updateHistory(@options)
-      # swapPromises = layer.asCurrent(=> @steps.map(@swapStep))
       swapPromises = @steps.map(@swapStep)
       return Promise.all(swapPromises)
 

@@ -60,13 +60,8 @@ up.feedback = do ->
     currentClasses: ['up-current']
     navs: ['[up-nav]']
 
-  previousURLSet = undefined
-  currentURLSet = undefined
-
   reset = ->
     config.reset()
-    previousURLSet = undefined
-    currentURLSet = undefined
 
   CLASS_ACTIVE = 'up-active'
   SELECTOR_LINK = 'a, [up-href]'
@@ -78,73 +73,41 @@ up.feedback = do ->
     if url
       u.normalizeURL(url, stripTrailingSlash: true)
 
-  sectionURLs = (section) ->
+  linkURLs = (link) ->
     # Check if we have computed the URLs before.
     # Computation is sort of expensive (multiplied by number of links),
-    # so we cache the results in a data attribute.
-    unless urls = section.upNormalizedURLs
-      urls = buildSectionURLs(section)
-      section.upNormalizedURLs = urls
-    urls
+    # so we cache the results in a link property
+    return link.upFeedbackURLs ||= new up.LinkFeedbackURLs(link, normalizeURL)
 
-  buildSectionURLs = (section) ->
-    urls = []
-
-    # A link with an unsafe method will never be higlighted with .up-current,
-    # so we cache an empty array.
-    if up.link.isSafe(section)
-      for attr in ['href', 'up-href', 'up-alias']
-        if value = section.getAttribute(attr)
-          # Allow to include multiple space-separated URLs in [up-alias]
-          for url in u.splitValues(value)
-            unless url == '#'
-              url = normalizeURL(url)
-              urls.push(url)
-    urls
-
-  buildCurrentURLSet = ->
-    urls = u.map(up.layer.all, 'location')
-    new up.URLSet(urls, { normalizeURL })
-
-  updateAllNavigationSectionsIfLocationChanged = ->
-    previousURLSet = currentURLSet
-    currentURLSet = buildCurrentURLSet()
-    unless u.isEqual(currentURLSet, previousURLSet)
-      updateAllNavigationSections(document.body)
-
-  updateAllNavigationSections = (root) ->
-    navs = e.subtree(root, navSelector())
-    sections = u.flatMap navs, (nav) -> e.subtree(nav, SELECTOR_LINK)
-    updateCurrentClassForLinks(sections)
-
-  updateNavigationSectionsInNewFragment = (fragment) ->
+  updateFragment = (fragment, options) ->
     if e.closest(fragment, navSelector())
       # If the new fragment is an [up-nav], or if the new fragment is a child of an [up-nav],
-      # all links in the new fragment are considered sections that we need to update.
+      # all links in the new fragment are considered links that we need to update.
       # Note that:
       # - The [up-nav] element might not be part of this update.
       #   It might already be in the DOM, and only a child was updated.
       # - The fragment might be a link itself
       # - We do not need to update sibling links of fragment that have been processed before.
-      sections = e.subtree(fragment, SELECTOR_LINK)
-      updateCurrentClassForLinks(sections)
+      links = e.subtree(fragment, SELECTOR_LINK)
+      updateLinks(links, options)
     else
-      updateAllNavigationSections(fragment)
+      updateLinksWithinNavs(fragment, options)
 
-  updateCurrentClassForLinks = (links) ->
-    currentURLSet ||= buildCurrentURLSet()
-    u.each links, (link) ->
-      urls = sectionURLs(link)
+  updateLinksWithinNavs = (fragment, options) ->
+    navs = e.subtree(fragment, navSelector())
+    links = u.flatMap navs, (nav) -> e.subtree(nav, SELECTOR_LINK)
+    updateLinks(links, options)
 
-      classList = link.classList
-      if currentURLSet.matchesAny(urls)
-        for klass in config.currentClasses
-          # Once we drop IE11 support in 2020 we can call add() with multiple arguments
-          classList.add(klass)
-      else
-        for klass in config.currentClasses
-          # Once we drop IE11 support in 2020 we can call remove() with multiple arguments
-          classList.remove(klass)
+  updateLinks = (links, options = {}) ->
+    return unless links.length
+
+    layer = options.layer || up.layer.of(links[0])
+    if layerLocation = layer.feedbackLocation
+      u.each links, (link) ->
+        isCurrent = linkURLs(link).isCurrent(layerLocation)
+        # Once we drop IE11 support in 2020 we can call add() with multiple arguments
+        for currentClass in config.currentClasses
+          e.toggleClass(link, currentClass, isCurrent)
 
   ###**
   @function findActivatableArea
@@ -351,12 +314,26 @@ up.feedback = do ->
   @stable
   ###
 
+  updateLayerIfLocationChanged = (layer) ->
+    previousLocation = layer.feedbackLocation
+    newLocation = normalizeURL(layer.location)
+    if !previousLocation || previousLocation != newLocation
+      layer.feedbackLocation = newLocation
+      updateLinksWithinNavs(layer.element, { layer })
+
+  onHistoryChanged = ->
+    leafLayer = up.layer.leaf
+    # We allow Unpoly-unaware code to use the pushState API and change the
+    # leaf layer in the process.
+    if leafLayer.hasLiveHistory()
+      updateLayerIfLocationChanged(leafLayer)
+
   # Even when the modal or popup does not change history, we consider the URLs of the content it displays.
-  up.on 'up:history:pushed up:history:replaced up:history:restored up:modal:opened up:modal:closed up:popup:opened up:popup:closed', (event) -> # take 1 arg to prevent data parsing
-    updateAllNavigationSectionsIfLocationChanged()
+  up.on 'up:history:pushed up:history:replaced up:history:restored', (event) -> # take 1 arg to prevent data parsing
+    onHistoryChanged()
 
   up.on 'up:fragment:inserted', (event, newFragment) ->
-    updateNavigationSectionsInNewFragment(newFragment)
+    updateFragment(newFragment, event)
 
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
@@ -366,5 +343,7 @@ up.feedback = do ->
   stop: stop
   around: around
   aroundForOptions: aroundForOptions
+  updateLayer: updateLayerIfLocationChanged
+  updateFragment: updateFragment
 
 up.legacy.renamedModule 'navigation', 'feedback'

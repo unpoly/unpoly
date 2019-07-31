@@ -5,6 +5,9 @@ class up.Class
   @getter: (prop, get) ->
     u.getter(@prototype, prop, get)
 
+  @accessor: (prop, descriptor) ->
+    Object.defineProperty(@prototype, prop, descriptor)
+
   @delegate: (props, targetProp) ->
     u.delegate(@prototype, props, targetProp)
 

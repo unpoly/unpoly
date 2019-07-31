@@ -14,7 +14,7 @@ describe 'up.feedback', ->
 
     describe '[up-nav]', ->
 
-      it 'marks a child link as .up-current if it links to the current URL', ->
+      it 'marks a child link as .up-current if it links to the current URL xxx', ->
         up.history.replace('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('a[href="/foo"]')

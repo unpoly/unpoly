@@ -1602,10 +1602,6 @@ up.util = do ->
 
   defineDelegates = (object, props, targetProp) ->
     wrapList(props).forEach (prop) ->
-      defineGetter(object, prop, -> this[targetProp][prop])
-
-  defineDelegates = (object, props, targetProp) ->
-    wrapList(props).forEach (prop) ->
       defineGetter object, prop, ->
         target = this[targetProp]
         value = target[prop]

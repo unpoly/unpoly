@@ -47,6 +47,9 @@ class up.Layer extends up.Record
   isCurrent: ->
     @stack.current == this
 
+  isLeaf: ->
+    @stack.leaf == this
+
   isRoot: ->
     @stack.root == this
 
@@ -124,43 +127,50 @@ class up.Layer extends up.Record
     @stack.asCurrent(this, fn)
 
   updateHistory: (options) ->
-    # If the layer has history disabled we won't change location or title
-    # regardless of what's in options.
-    return unless @history
-
     # When the layer is opened, the { history } option defines whether the
     # layer enables handling of location and title i general.
     # When updating history, accept { history: false } as a shortcut to
-    # disable all history-related options.
-    if options.history == false
-      options.location = false
-      options.title = false
+    # neither change { title } nor { location }.
+    return if options.history == false
 
-    if @isCurrent()
-      if options.location
-        up.history.push(options.location)
-      if options.title
-        document.title = options.title
-    else
-      # Only if this layer is overshadowed by a child layer, we store location
-      # and title for later calls of @restoreHistory().
-      if options.location
-        @savedLocation = options.location
-      if options.title
-        @savedTitle = options.title
+    if title = options.title
+      @title = title
 
-  @getter 'title', ->
-    return unless @history
+    if location = options.location
+      @location = location
 
-    if @isCurrent()
-      document.title
-    else
-      @savedTitle
+  @accessor 'title',
+    get: ->
+      if @hasLiveHistory()
+        # Allow Unpoly-unaware code to set the document title directly.
+        # This will implicitely change the current layer's title.
+        document.title
+      else
+        @savedTitle
 
-  @getter 'location', ->
-    return unless @history
+    set: (title) ->
+      @savedTitle = title
 
-    if @isCurrent()
-      up.browser.location
-    else
-      @savedLocation
+      if @hasLiveHistory()
+        document.title = title
+
+  @accessor 'location',
+    get: ->
+      if @hasLiveHistory()
+        # Allow Unpoly-unaware code to use the pushState API directly.
+        # This will implicitely change the current layer's location.
+        up.browser.location
+      else
+        @savedLocation
+
+    set: (location) ->
+      @savedLocation = location
+
+      if @hasLiveHistory()
+        up.history.push(location)
+      else
+        # up.feedback won't receive an up:history:push event
+        up.feedback.updateLayer(layer)
+
+  hasLiveHistory: ->
+    @history && @isLeaf()
