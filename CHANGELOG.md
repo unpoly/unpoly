@@ -6,6 +6,18 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+0.60.2
+------
+
+- When [submitting](/up-form) a form with a GET method, any query parameters in the form's `[action]` URL are now discarded.
+  This matches the standard browser behavior when submitting a form without Unpoly.
+- When [submitting](/up-form) a form with a POST method, any query parameters in the form's `[action]` URL are now kept in the
+  URL, instead of being merged into the form's data payload.
+  This matches the standard browser behavior when submitting a form without Unpoly.
+- New experimental function [`up.Params.stripURL(url)`](/up.Params.stripURL).
+  It returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
+
+
 0.60.1
 ------
 
