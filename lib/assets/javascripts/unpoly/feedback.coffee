@@ -344,6 +344,5 @@ up.feedback = do ->
   around: around
   aroundForOptions: aroundForOptions
   updateLayer: updateLayerIfLocationChanged
-  updateFragment: updateFragment
 
 up.legacy.renamedModule 'navigation', 'feedback'

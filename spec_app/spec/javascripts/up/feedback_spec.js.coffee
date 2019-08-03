@@ -188,15 +188,16 @@ describe 'up.feedback', ->
 
       describeCapability 'canPushState', ->
 
-        describe 'updating .up-current marks wen the URL changes', ->
+        describe 'updating .up-current marks when the URL changes', ->
 
-          it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec (next) ->
+          it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash xxx', asyncSpec (next) ->
             $nav = $fixture('div[up-nav]')
             $link = $nav.affix('a[href="/foo"][up-target=".main"]')
+            fixture('.main')
             up.hello($nav)
 
-            fixture('.main')
-            Trigger.clickSequence($link)
+            next =>
+              Trigger.clickSequence($link)
 
             next =>
               @respondWith
@@ -206,7 +207,7 @@ describe 'up.feedback', ->
             next =>
               expect($link).toHaveClass('up-current')
 
-          it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', asyncSpec (next) ->
+          it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash xxx', asyncSpec (next) ->
             $nav = $fixture('div[up-nav]')
             $link = $nav.affix('a[href="/foo/"][up-target=".main"]')
             up.hello($nav)
@@ -222,7 +223,7 @@ describe 'up.feedback', ->
             next =>
               expect($link).toHaveClass('up-current')
 
-          it 'marks a link as .up-current if it links to an URL currently shown either within or below the modal', asyncSpec (next) ->
+          it 'marks a link as .up-current if it links to an URL currently shown either within or below the modal xxx', asyncSpec (next) ->
             up.history.replace('/foo')
 
             $nav = $fixture('div[up-nav]')
@@ -231,7 +232,8 @@ describe 'up.feedback', ->
             $unrelatedLink = $nav.affix('a[href="/baz"]')
             up.hello($nav)
 
-            Trigger.clickSequence($modalLink)
+            next =>
+              Trigger.clickSequence($modalLink)
 
             next =>
               @respondWith('<div class="main">new-text</div>')
@@ -261,7 +263,6 @@ describe 'up.feedback', ->
             up.hello($nav)
 
             expect(up.history.location).toMatchURL('/foo')
-            expect(up.popup.coveredURL()).toBeMissing()
 
             next =>
               Trigger.clickSequence($popupLink)
