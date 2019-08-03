@@ -35,7 +35,7 @@ up.form = do ->
   @stable
   ###
   config = new up.Config
-    validateTargets: ['fieldset:has(&)', 'label:has(&)', 'form:has(&)']
+    validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0

@@ -1013,13 +1013,13 @@ describe 'up.form', ->
           container.innerHTML = """
             <form action="/users" id="registration">
 
-              <label>
+              <div up-fieldset>
                 <input type="text" name="email" up-validate />
-              </label>
+              </div>
 
-              <label>
+              <div up-fieldset>
                 <input type="password" name="password" up-validate />
-              </label>
+              </div>
 
             </form>
           """
@@ -1030,21 +1030,21 @@ describe 'up.form', ->
             @respondWith """
               <form action="/users" id="registration">
 
-                <label>
+                <div up-fieldset>
                   Validation message
                   <input type="text" name="email" up-validate />
-                </label>
+                </div>
 
-                <label>
+                <div up-fieldset>
                   Validation message
                   <input type="password" name="password" up-validate />
-                </label>
+                </div>
 
               </form>
             """
 
           next =>
-            $labels = $('#registration label')
+            $labels = $('#registration [up-fieldset]')
             expect($labels[0]).not.toHaveText('Validation message')
             expect($labels[1]).toHaveText('Validation message')
 
