@@ -428,6 +428,37 @@ describe 'up.form', ->
           next =>
             expect(@lastRequest().url).toMatchUrl(hrefBeforeSubmit)
 
+        describe 'handling of query params in the [action] URL', ->
+
+          describe 'for forms with GET method', ->
+
+            it 'discards query params from an [action] attribute (like browsers do)', asyncSpec (next) ->
+              # See design/query-params-in-form-actions/cases.html for
+              # a demo of vanilla browser behavior.
+
+              form = fixture('form[method="GET"][action="/action?foo=value-from-action"]')
+              input1 = e.affix(form, 'input[name="foo"][value="value-from-input"]')
+              input2 = e.affix(form, 'input[name="foo"][value="other-value-from-input"]')
+
+              up.submit(form)
+
+              next =>
+                expect(@lastRequest().url).toMatchUrl('/action?foo=value-from-input&foo=other-value-from-input')
+
+          describe 'for forms with POST method' ,->
+
+            it 'keeps all query params in the URL', asyncSpec (next) ->
+
+              form = fixture('form[method="POST"][action="/action?foo=value-from-action"]')
+              input1 = e.affix(form, 'input[name="foo"][value="value-from-input"]')
+              input2 = e.affix(form, 'input[name="foo"][value="other-value-from-input"]')
+
+              up.submit(form)
+
+              next =>
+                expect(@lastRequest().url).toMatchUrl('/action?foo=value-from-action')
+                expect(@lastRequest().data()['foo']).toEqual ['value-from-input', 'other-value-from-input']
+
         describe 'with { history } option', ->
 
           it 'uses the given URL as the new browser location if the request succeeded', asyncSpec (next) ->

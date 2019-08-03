@@ -190,7 +190,6 @@ up.form = do ->
     form = e.closest(form, 'form')
 
     target = options.target ? form.getAttribute('up-target') ? 'body'
-    url = options.url ? form.getAttribute('action') ? up.browser.url()
     options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
     options.reveal ?= e.booleanOrStringAttr(form, 'up-reveal') ? true
     options.failReveal ?= e.booleanOrStringAttr(form, 'up-fail-reveal') ? true
@@ -198,7 +197,7 @@ up.form = do ->
     options.history ?= e.booleanOrStringAttr(form, 'up-history') ? true
     options.transition ?= e.booleanOrStringAttr(form, 'up-transition')
     options.failTransition ?= e.booleanOrStringAttr(form, 'up-fail-transition')
-    options.method ?= form.getAttribute('up-method') ? form.getAttribute('data-method') ? form.getAttribute('method') ? 'post'
+    options.method ?= u.normalizeMethod(form.getAttribute('up-method') ? form.getAttribute('data-method') ? form.getAttribute('method') ? 'post')
     options.cache ?= e.booleanAttr(form, 'up-cache')
     options.restoreScroll ?= e.booleanAttr(form, 'up-restore-scroll') # the option supports an object value, but not the attr
     options.origin ?= form
@@ -212,6 +211,15 @@ up.form = do ->
       options.transition = false
       options.failTransition = false
       options.headers[up.protocol.config.validateHeader] = options.validate
+
+    url = options.url ? form.getAttribute('action') ? up.browser.url()
+
+    if options.method == 'GET'
+      # Only for GET forms, browsers discard all query params from the form's [action] URL.
+      # The URLs search part will be replaced with the serialized form data.
+      # See design/query-params-in-form-actions/cases.html for
+      # a demo of vanilla browser behavior.
+      url = up.Params.stripURL(url)
 
     up.event.whenEmitted('up:form:submit', log: 'Submitting form', target: form).then ->
       up.feedback.start(form)

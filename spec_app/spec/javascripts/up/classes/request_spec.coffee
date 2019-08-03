@@ -17,9 +17,10 @@ describe 'up.Request', ->
       request = new up.Request(url: 'http://host.com/foo?urlKey=urlValue', params: { paramsKey: 'paramsValue' }, method: 'get')
       expect(request.url).toEqual('http://host.com/foo?urlKey=urlValue&paramsKey=paramsValue')
 
-    it 'excludes { params } for HTTP methods that allow a payload', ->
+    it 'keeps query params in the URL for HTTP methods that allow a payload', ->
       request = new up.Request(url: 'http://host.com/foo?key=value', method: 'post')
-      expect(request.url).toEqual('http://host.com/foo')
+      expect(request.url).toEqual('http://host.com/foo?key=value')
+      expect(request.params).toBeBlank()
 
   describe '#method', ->
 
@@ -47,7 +48,3 @@ describe 'up.Request', ->
     it "returns a blank up.Params object for HTTP methods that don't allow a payload", ->
       request = new up.Request(url: 'http://host.com/foo', params: { key: 'value' }, method: 'get')
       expect(request.params).toBeBlank()
-
-    it 'returns the merged { params } and params from the URL for HTTP methods that allow a payload', ->
-      request = new up.Request(url: 'http://host.com/foo?urlKey=urlValue', params: { paramsKey: 'paramsValue' }, method: 'post')
-      expect(request.params).toEqual(new up.Params(paramsKey: 'paramsValue', urlKey: 'urlValue'))
