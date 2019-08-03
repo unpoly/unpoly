@@ -6,6 +6,31 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+0.60.3
+------
+
+[`[up-validate]`](/up-validate) again recognizes the `[up-fieldset]` attribute to find the form fragment
+that should be replaced with validation results.
+
+In the example below, changing the `email` input would only validate the first fieldset:
+
+```html
+<form action="/users" id="registration">
+
+  <div up-fieldset>
+    Validation message
+    <input type="text" name="email" up-validate />
+  </div>
+
+  <div up-fieldset>
+    Validation message
+    <input type="password" name="password" up-validate />
+  </div>
+
+</form>
+```
+
+
 0.60.2
 ------
 
