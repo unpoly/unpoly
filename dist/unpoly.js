@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.60.1"
+    version: "0.60.2"
   };
 
 }).call(this);
@@ -5708,6 +5708,29 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
     };
 
 
+    /**
+    Returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
+    
+    \#\#\# Example
+    
+        var url = up.Params.stripURL('http://foo.com?key=value')
+        // url is now: 'http://foo.com'
+    
+    @function up.Params.stripURL
+    @param {string} url
+      A URL (with or without a query string).
+    @return {string}
+      The given URL without its query string.
+    @experimental
+     */
+
+    Params.stripURL = function(url) {
+      return u.normalizeUrl(url, {
+        search: false
+      });
+    };
+
+
     /***
     If passed an `up.Params` instance, it is returned unchanged.
     Otherwise constructs an `up.Params` instance from the given value.
@@ -5882,9 +5905,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
       this.method = u.normalizeMethod(this.method);
       this.headers || (this.headers = {});
       this.extractHashFromUrl();
-      if (u.methodAllowsPayload(this.method)) {
-        return this.transferSearchToParams();
-      } else {
+      if (!u.methodAllowsPayload(this.method)) {
         return this.transferParamsToUrl();
       }
     };
@@ -12969,21 +12990,20 @@ open dialogs with sub-forms, etc. all without losing form state.
       form = e.get(formOrSelector);
       form = e.closest(form, 'form');
       target = (ref = (ref1 = options.target) != null ? ref1 : form.getAttribute('up-target')) != null ? ref : 'body';
-      url = (ref2 = (ref3 = options.url) != null ? ref3 : form.getAttribute('action')) != null ? ref2 : up.browser.url();
       if (options.failTarget == null) {
-        options.failTarget = (ref4 = form.getAttribute('up-fail-target')) != null ? ref4 : e.toSelector(form);
+        options.failTarget = (ref2 = form.getAttribute('up-fail-target')) != null ? ref2 : e.toSelector(form);
       }
       if (options.reveal == null) {
-        options.reveal = (ref5 = e.booleanOrStringAttr(form, 'up-reveal')) != null ? ref5 : true;
+        options.reveal = (ref3 = e.booleanOrStringAttr(form, 'up-reveal')) != null ? ref3 : true;
       }
       if (options.failReveal == null) {
-        options.failReveal = (ref6 = e.booleanOrStringAttr(form, 'up-fail-reveal')) != null ? ref6 : true;
+        options.failReveal = (ref4 = e.booleanOrStringAttr(form, 'up-fail-reveal')) != null ? ref4 : true;
       }
       if (options.fallback == null) {
         options.fallback = form.getAttribute('up-fallback');
       }
       if (options.history == null) {
-        options.history = (ref7 = e.booleanOrStringAttr(form, 'up-history')) != null ? ref7 : true;
+        options.history = (ref5 = e.booleanOrStringAttr(form, 'up-history')) != null ? ref5 : true;
       }
       if (options.transition == null) {
         options.transition = e.booleanOrStringAttr(form, 'up-transition');
@@ -12992,7 +13012,7 @@ open dialogs with sub-forms, etc. all without losing form state.
         options.failTransition = e.booleanOrStringAttr(form, 'up-fail-transition');
       }
       if (options.method == null) {
-        options.method = (ref8 = (ref9 = (ref10 = form.getAttribute('up-method')) != null ? ref10 : form.getAttribute('data-method')) != null ? ref9 : form.getAttribute('method')) != null ? ref8 : 'post';
+        options.method = u.normalizeMethod((ref6 = (ref7 = (ref8 = form.getAttribute('up-method')) != null ? ref8 : form.getAttribute('data-method')) != null ? ref7 : form.getAttribute('method')) != null ? ref6 : 'post');
       }
       if (options.cache == null) {
         options.cache = e.booleanAttr(form, 'up-cache');
@@ -13016,6 +13036,10 @@ open dialogs with sub-forms, etc. all without losing form state.
         options.transition = false;
         options.failTransition = false;
         options.headers[up.protocol.config.validateHeader] = options.validate;
+      }
+      url = (ref9 = (ref10 = options.url) != null ? ref10 : form.getAttribute('action')) != null ? ref9 : up.browser.url();
+      if (options.method === 'GET') {
+        url = up.Params.stripURL(url);
       }
       return up.event.whenEmitted('up:form:submit', {
         log: 'Submitting form',
