@@ -419,6 +419,15 @@ describe 'up.form', ->
           next =>
             expect(up.browser.url()).toMatchUrl('/other-path')
 
+        it 'submits the form to the current URL if the form has no [action] attribute', asyncSpec (next) ->
+          form = fixture('form')
+          hrefBeforeSubmit = location.href
+
+          up.submit(form)
+
+          next =>
+            expect(@lastRequest().url).toMatchUrl(hrefBeforeSubmit)
+
         describe 'with { history } option', ->
 
           it 'uses the given URL as the new browser location if the request succeeded', asyncSpec (next) ->
