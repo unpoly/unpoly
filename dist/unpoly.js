@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.60.2"
+    version: "0.60.3"
   };
 
 }).call(this);
@@ -5708,7 +5708,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
     };
 
 
-    /**
+    /***
     Returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
     
     \#\#\# Example
@@ -12831,7 +12831,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     @stable
      */
     config = new up.Config({
-      validateTargets: ['fieldset:has(&)', 'label:has(&)', 'form:has(&)'],
+      validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)'],
       fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
       submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
       observeDelay: 0
