@@ -10,6 +10,52 @@ Unreleased
 ----------
 
 - Options removed form modals: up-width, up-max-width, up-height. Use up-size or up-class.
+- TODO ...
+
+
+0.60.3
+------
+
+[`[up-validate]`](/up-validate) again recognizes the `[up-fieldset]` attribute to find the form fragment
+that should be replaced with validation results.
+
+In the example below, changing the `email` input would only validate the first fieldset:
+
+```html
+<form action="/users" id="registration">
+
+  <div up-fieldset>
+    Validation message
+    <input type="text" name="email" up-validate />
+  </div>
+
+  <div up-fieldset>
+    Validation message
+    <input type="password" name="password" up-validate />
+  </div>
+
+</form>
+```
+
+
+0.60.2
+------
+
+- When [submitting](/up-form) a form with a GET method, any query parameters in the form's `[action]` URL are now discarded.
+  This matches the standard browser behavior when submitting a form without Unpoly.
+- When [submitting](/up-form) a form with a POST method, any query parameters in the form's `[action]` URL are now kept in the
+  URL, instead of being merged into the form's data payload.
+  This matches the standard browser behavior when submitting a form without Unpoly.
+- New experimental function [`up.Params.stripURL(url)`](/up.Params.stripURL).
+  It returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
+
+
+0.60.1
+------
+
+- When user does not confirm an [`[up-confirm]`](/a-up-target#up-confirm) link,
+  the link's [`.up-active`](/a.up-active) class is now removed (fixes #89)
+>>>>>>> master
 
 
 0.60.0

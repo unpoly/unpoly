@@ -419,6 +419,46 @@ describe 'up.form', ->
           next =>
             expect(up.history.location).toMatchURL('/other-path')
 
+        it 'submits the form to the current URL if the form has no [action] attribute', asyncSpec (next) ->
+          form = fixture('form')
+          hrefBeforeSubmit = location.href
+
+          up.submit(form)
+
+          next =>
+            expect(@lastRequest().url).toMatchUrl(hrefBeforeSubmit)
+
+        describe 'handling of query params in the [action] URL', ->
+
+          describe 'for forms with GET method', ->
+
+            it 'discards query params from an [action] attribute (like browsers do)', asyncSpec (next) ->
+              # See design/query-params-in-form-actions/cases.html for
+              # a demo of vanilla browser behavior.
+
+              form = fixture('form[method="GET"][action="/action?foo=value-from-action"]')
+              input1 = e.affix(form, 'input[name="foo"][value="value-from-input"]')
+              input2 = e.affix(form, 'input[name="foo"][value="other-value-from-input"]')
+
+              up.submit(form)
+
+              next =>
+                expect(@lastRequest().url).toMatchUrl('/action?foo=value-from-input&foo=other-value-from-input')
+
+          describe 'for forms with POST method' ,->
+
+            it 'keeps all query params in the URL', asyncSpec (next) ->
+
+              form = fixture('form[method="POST"][action="/action?foo=value-from-action"]')
+              input1 = e.affix(form, 'input[name="foo"][value="value-from-input"]')
+              input2 = e.affix(form, 'input[name="foo"][value="other-value-from-input"]')
+
+              up.submit(form)
+
+              next =>
+                expect(@lastRequest().url).toMatchUrl('/action?foo=value-from-action')
+                expect(@lastRequest().data()['foo']).toEqual ['value-from-input', 'other-value-from-input']
+
         describe 'with { history } option', ->
 
           it 'uses the given URL as the new browser location if the request succeeded', asyncSpec (next) ->
@@ -973,13 +1013,13 @@ describe 'up.form', ->
           container.innerHTML = """
             <form action="/users" id="registration">
 
-              <label>
+              <div up-fieldset>
                 <input type="text" name="email" up-validate />
-              </label>
+              </div>
 
-              <label>
+              <div up-fieldset>
                 <input type="password" name="password" up-validate />
-              </label>
+              </div>
 
             </form>
           """
@@ -990,21 +1030,21 @@ describe 'up.form', ->
             @respondWith """
               <form action="/users" id="registration">
 
-                <label>
+                <div up-fieldset>
                   Validation message
                   <input type="text" name="email" up-validate />
-                </label>
+                </div>
 
-                <label>
+                <div up-fieldset>
                   Validation message
                   <input type="password" name="password" up-validate />
-                </label>
+                </div>
 
               </form>
             """
 
           next =>
-            $labels = $('#registration label')
+            $labels = $('#registration [up-fieldset]')
             expect($labels[0]).not.toHaveText('Validation message')
             expect($labels[1]).toHaveText('Validation message')
 

@@ -35,7 +35,7 @@ up.form = do ->
   @stable
   ###
   config = new up.Config ->
-    validateTargets: ['fieldset:has(&)', 'label:has(&)', 'form:has(&)']
+    validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
@@ -192,6 +192,14 @@ up.form = do ->
     parser = new up.OptionParser(options, form)
     parser.string('url', attr: ['up-action', 'action'], default: up.fragment.source(form))
     parser.string('method', attr: ['up-method', 'data-method', 'method'], default: 'POST')
+    options.method = u.normalizeMethod(options.method)
+    if options.method == 'GET'
+      # Only for GET forms, browsers discard all query params from the form's [action] URL.
+      # The URLs search part will be replaced with the serialized form data.
+      # See design/query-params-in-form-actions/cases.html for
+      # a demo of vanilla browser behavior.
+      options.url = up.Params.stripURL(options.url)
+
     parser.string('failTarget', default: e.toSelector(form))
     # Take params from form, but allow to pass additional params as { params }
     options.params = up.Params.fromForm(form).addAll(options.params)
