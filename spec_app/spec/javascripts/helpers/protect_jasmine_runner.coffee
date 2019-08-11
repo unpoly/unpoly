@@ -5,13 +5,13 @@ $ = jQuery
 appendDefaultFallback = (parent) ->
   e.affix(parent, '.default-fallback')
 
-beforeAll ->
-  up.on 'click', 'a[href]', (event) ->
-    event.preventDefault()
-    console.error('Prevented default click behavior for link %o', event.target)
-  up.on 'submit', 'form', (event) ->
-    event.preventDefault()
-    console.error('Prevented default submit behavior for form %o', event.target)
+#beforeAll ->
+#  up.on 'click', 'a[href]', (event) ->
+#    event.preventDefault()
+#    console.error('Prevented default click behavior for link %o', event.target)
+#  up.on 'submit', 'form', (event) ->
+#    event.preventDefault()
+#    console.error('Prevented default submit behavior for form %o', event.target)
 
 beforeEach ->
   up.layer.config.all.targets = ['.default-fallback']
