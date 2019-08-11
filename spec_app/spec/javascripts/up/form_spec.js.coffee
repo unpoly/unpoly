@@ -426,7 +426,7 @@ describe 'up.form', ->
           up.submit(form)
 
           next =>
-            expect(@lastRequest().url).toMatchUrl(hrefBeforeSubmit)
+            expect(@lastRequest().url).toMatchURL(hrefBeforeSubmit)
 
         describe 'handling of query params in the [action] URL', ->
 
@@ -443,7 +443,7 @@ describe 'up.form', ->
               up.submit(form)
 
               next =>
-                expect(@lastRequest().url).toMatchUrl('/action?foo=value-from-input&foo=other-value-from-input')
+                expect(@lastRequest().url).toMatchURL('/action?foo=value-from-input&foo=other-value-from-input')
 
           describe 'for forms with POST method' ,->
 
@@ -456,7 +456,7 @@ describe 'up.form', ->
               up.submit(form)
 
               next =>
-                expect(@lastRequest().url).toMatchUrl('/action?foo=value-from-action')
+                expect(@lastRequest().url).toMatchURL('/action?foo=value-from-action')
                 expect(@lastRequest().data()['foo']).toEqual ['value-from-input', 'other-value-from-input']
 
         describe 'with { history } option', ->
@@ -648,13 +648,13 @@ describe 'up.form', ->
       describeFallback 'canPushState', ->
 
         it 'falls back to a vanilla form submission', asyncSpec (next) ->
-          $form = $fixture('form[action="/path/to"][method="put"][up-target=".response"]')
+          $form = $fixture('form[action="/qux"][method="put"][up-target=".response"]')
           form = $form.get(0)
-          spyOn(form, 'submit')
+          loadPageSpy = spyOn(up.browser, 'loadPage')
 
           up.submit($form)
 
-          next => expect(form.submit).toHaveBeenCalled()
+          next => expect(loadPageSpy).toHaveBeenCalled()
 
   describe 'unobtrusive behavior', ->
 

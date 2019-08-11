@@ -369,6 +369,7 @@ up.form = do ->
     options.validate = field.getAttribute('name') || ':none'
     options.headers ||= {}
     options.headers[up.protocol.config.validateHeader] = options.validate
+    options.reveal ?= false
 
     return submit(field, options)
 

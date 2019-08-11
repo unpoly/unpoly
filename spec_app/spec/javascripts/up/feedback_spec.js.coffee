@@ -14,7 +14,7 @@ describe 'up.feedback', ->
 
     describe '[up-nav]', ->
 
-      it 'marks a child link as .up-current if it links to the current URL xxx', ->
+      it 'marks a child link as .up-current if it links to the current URL', ->
         up.history.replace('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('a[href="/foo"]')
@@ -190,7 +190,7 @@ describe 'up.feedback', ->
 
         describe 'updating .up-current marks when the URL changes', ->
 
-          it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash xxx', asyncSpec (next) ->
+          it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec (next) ->
             $nav = $fixture('div[up-nav]')
             $link = $nav.affix('a[href="/foo"][up-target=".main"]')
             fixture('.main')
@@ -207,7 +207,7 @@ describe 'up.feedback', ->
             next =>
               expect($link).toHaveClass('up-current')
 
-          it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash xxx', asyncSpec (next) ->
+          it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', asyncSpec (next) ->
             $nav = $fixture('div[up-nav]')
             $link = $nav.affix('a[href="/foo/"][up-target=".main"]')
             up.hello($nav)
@@ -223,7 +223,7 @@ describe 'up.feedback', ->
             next =>
               expect($link).toHaveClass('up-current')
 
-          it 'marks a link as .up-current if it links to an URL currently shown either within or below the modal xxx', asyncSpec (next) ->
+          it 'marks a link as .up-current if it links to an URL currently shown either within or below the modal', asyncSpec (next) ->
             up.history.replace('/foo')
 
             $nav = $fixture('div[up-nav]')
