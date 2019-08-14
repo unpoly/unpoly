@@ -1151,6 +1151,20 @@ describe 'up.util', ->
         reverseResult = up.util.merge(null, obj)
         expect(reverseResult).toEqual { a: 1, b: 2 }
 
+    describe 'up.util.mergeDefined', ->
+
+      it 'merges the given objects', ->
+        obj = { a: '1', b: '2' }
+        other = { b: '3', c: '4' }
+        obj = up.util.mergeDefined(obj, other)
+        expect(obj).toEqual { a: '1', b: '3', c: '4' }
+
+      it 'does not override values with an undefined value (unlike up.util.merge)', ->
+        obj = { a: '1', b: '2' }
+        other = { b: undefined, c: '4' }
+        obj = up.util.mergeDefined(obj, other)
+        expect(obj).toEqual { a: '1', b: '2', c: '4' }
+
 #    describe 'up.util.deepMerge', ->
 #
 #      it 'recursively merges the given objects', ->

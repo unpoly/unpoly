@@ -789,6 +789,15 @@ up.element = do ->
 #    u.presence(value)
 
   ###**
+  TODO: Document me
+
+  @function up.element.attr
+  @experimental
+  ###
+  stringAttr = (element, attribute) ->
+    u.nullToUndefined(element.getAttribute(attribute))
+
+  ###**
   Returns the value of the given attribute on the given element, cast as a boolean value.
 
   If the attribute value cannot be cast to `true` or `false`, `undefined` is returned.
@@ -824,7 +833,7 @@ up.element = do ->
   @experimental
   ###
   booleanAttr = (element, attribute, pass) ->
-    value = element.getAttribute(attribute)
+    value = stringAttr(element, attribute)
     switch value
       when 'false'
         false
@@ -1115,6 +1124,7 @@ up.element = do ->
     setMissingAttrs: setMissingAttrs # internal
     unwrap: unwrap # practical for jQuery migration
     # presentAttr: presentAttr # experimental
+    attr: stringAttr
     booleanAttr: booleanAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
     numberAttr: numberAttr # practical
     jsonAttr: jsonAttr # practical

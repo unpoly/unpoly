@@ -1,7 +1,7 @@
 <script>
   var u = up.util;
-  up.compiler('.clamped-open', function($link) {
-    $link.on('click', function(event) {
+  up.compiler('.clamped-open', function(link) {
+    link.addEventListener('click', function(event) {
       event.preventDefault();
       u.task(function() {
         u.task(function() {
@@ -9,7 +9,7 @@
             u.task(function() {
               u.task(function() {
                 u.task(function() {
-                  up.modal.follow($link, {
+                  up.modal.follow(link, {
                     target: '.contents',
                     duration: 1000
                   });

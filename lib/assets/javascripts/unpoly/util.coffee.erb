@@ -621,6 +621,12 @@ up.util = do ->
   isArguments = (value) ->
     Object.prototype.toString.call(value) == '[object Arguments]'
 
+  nullToUndefined = (value) ->
+    if isNull(value)
+      return undefined
+    else
+      return value
+
   ###**
   @function up.util.wrapList
   @return {Array|NodeList|jQuery}
@@ -734,6 +740,21 @@ up.util = do ->
   ###
   merge = (sources...) ->
     assign({}, sources...)
+
+  ###**
+  @function up.util.mergeDefined
+  @param {Array<Object>} sources...
+  @return Object
+  @internal
+  ###
+  mergeDefined = (sources...) ->
+    result = {}
+    for source in sources
+      if source
+        for key, value of source
+          if isDefined(value)
+            result[key] = value
+    result
 
 #  ###**
 #  Creates a new object by recursively merging together the properties from the given objects.
@@ -1642,6 +1663,7 @@ up.util = do ->
   copy: copy
 #  deepCopy: deepCopy
   merge: merge
+  mergeDefined: mergeDefined
 #  deepAssign: deepAssign
 #  deepMerge: deepMerge
   options: newOptions
@@ -1771,4 +1793,6 @@ up.util = do ->
   prefixCamelCase: prefixCamelCase
   unprefixCamelCase: unprefixCamelCase
   camelToKebabCase: camelToKebabCase
+  nullToUndefined: nullToUndefined
+
 

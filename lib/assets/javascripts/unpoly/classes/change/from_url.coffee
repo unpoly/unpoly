@@ -6,6 +6,9 @@ class up.Change.FromURL extends up.Change
 
   constructor: (options) ->
     super(options)
+
+    console.debug("-- FromURL constructor: %o", options.layer)
+
     @successOptions = u.copy(@options)
     # Remember the layer that was current when the request was made,
     # so changes with `{ layer: 'new' }` will know what to stack on.
@@ -86,14 +89,17 @@ class up.Change.FromURL extends up.Change
     return promise
 
   buildRequest: ->
-    console.debug("buildRequest with successOptions %o", @successOptions)
-    console.debug("buildRequest with failureOptions %o", @failureOptions)
+    console.debug("-- buildRequest with successOptions before: %o", @successOptions.layer)
+    console.debug("-- buildRequest with failureOptions before: %o", @failureOptions.layer)
 
     successPreview = new up.Change.FromContent(@successOptions)
     failurePreview = new up.Change.FromContent(@failureOptions)
 
     @successOptions.layer = successPreview.preflightLayer()
     @failureOptions.layer = failurePreview.preflightLayer()
+
+    console.debug("-- buildRequest with successOptions after setting PFL: %o", @successOptions.layer)
+    console.debug("-- buildRequest with failureOptions after setting PFL: %o", @failureOptions.layer)
 
     requestAttrs = u.merge @successOptions,
       target: successPreview.preflightTarget()

@@ -27,7 +27,7 @@ class up.Layer.Overlay extends up.Layer
       'backdropCloseAnimation',
       'dismissLabel',
       'dismissAriaLabel',
-      'dismissible',
+      'dismissable',
       'onAccepted',
       'onDismissed',
       'onContentAttached',
@@ -74,11 +74,12 @@ class up.Layer.Overlay extends up.Layer
     up.destroy(@element)
 
   createDismissElement: (parentElement) ->
+    console.debug("=== createDismissElement for %o (%o)", @dismissable, this)
     if @dismissable
-      @dismissElement = affix(parentElement, '.up-overlay-dismiss[up-dismiss]',
+      @dismissElement = e.affix(parentElement, '.up-overlay-dismiss[up-dismiss]',
         'aria-label': @dismissAriaLabel
       )
-      affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
+      e.affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
   frameInnerContent: (parentElement, options) ->
     content = options.content
@@ -110,7 +111,7 @@ class up.Layer.Overlay extends up.Layer
     e.all(@contentElement, selector)
 
   accept: (value, options = {}) ->
-    new up.Change.AcceptLayer(u.merge(options, { value })).executeAsync()
+    new up.Change.AcceptLayer(u.merge(options, { value: value, layer: this })).executeAsync()
 
   dismiss: (value, options = {}) ->
-    new up.Change.DismissLayer(u.merge(options, { value })).executeAsync()
+    new up.Change.DismissLayer(u.merge(options, { value: value, layer: this })).executeAsync()

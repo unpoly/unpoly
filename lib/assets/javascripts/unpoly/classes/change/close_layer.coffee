@@ -7,7 +7,7 @@ class up.Change.CloseLayer extends up.Change.Removal
 
   constructor: (options) ->
     super(options)
-    @layer = options.layer
+    @layer = up.layer.lookup(options)
     @origin = options.origin
     @value = options.value
     @preventable = options.preventable
@@ -24,11 +24,12 @@ class up.Change.CloseLayer extends up.Change.Removal
   closedCallbackName: null  # implement in child class
 
   execute: ->
+    # debugger
+
     if @origin && u.isUndefined(value)
       value = e.jsonAttr(@origin, @valueAttr)
 
     eventProps =
-      target: @layer.element
       layer: @layer
       value: value
       origin: @origin
@@ -45,23 +46,23 @@ class up.Change.CloseLayer extends up.Change.Removal
     @layer[@closeCallbackName]?(closeEvent)
     @layer.emit(closeEvent) # will bubble up to document
 
-    if !@closeEvent.defaultPrevented || !@preventable
+    if !closeEvent.defaultPrevented || !@preventable
       promise = Promise.resolve()
 
-      unless @isOpen()
+      unless @layer.isOpen()
         return promise
 
       promise = promise.then =>
         # Also close any child-layers we might have.
         @layer.peel()
-        @stack.remove(@layer)
-        @stack.current.restoreHistory()
+        @layer.stack.remove(@layer)
+        @layer.stack.current.restoreHistory()
         @layer[@closingCallbackName]?(closingEvent)
         @layer.emit(closingEvent) # will bubble up to document
-        return @closeNow()
+        return @layer.closeNow()
 
       promise = promise.then =>
-        @layer[@closedCallbackName](closedEvent)
+        @layer[@closedCallbackName]?(closedEvent)
         @layer.emit(closedEvent)
         # Since @layer.element is now detached, the event will no longer bubble up to
         # the document where global event listeners can receive it. So we explicitely emit

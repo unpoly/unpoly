@@ -515,6 +515,8 @@ up.fragment = do ->
   all = (args...) ->
     options = u.extractOptions(args)
 
+    throw "wir rufen es auf mit (Element, Hash) und returnen eben nicht das element"
+
     if args.length == 1
       if u.isElementish(args[0])
         # up.fragment.all(element, [options]) should just return [element].
@@ -563,6 +565,8 @@ up.fragment = do ->
   destroy = (target, options = {}) ->
     setLayerOption(target, options)
 
+    debugger
+
     if options.element = first(target, options)
       return new up.Change.DestroyFragment(options).executeAsync()
     else
@@ -578,12 +582,14 @@ up.fragment = do ->
     # we operate in the given element's layer.
     if !options.layer && u.isElementish(target)
       options.layer = up.layer.of(target)
-    else
-      options.layer = up.layer.lookup(options)
+#    else
+#      options.layer = up.layer.lookup(options)
 
   parseTargetAndOptions = (args) ->
     options = u.parseArgAndOptions(args, 'target')
+    console.debug('-- after parseArgAndOptions: %o', options.layer)
     setLayerOption(options.target, options)
+    console.debug('-- after setLayerOption: %o', options.layer)
     options
 
   ###**

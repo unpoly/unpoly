@@ -734,27 +734,77 @@ describe 'up.element', ->
       newRect = up.Rect.fromElement($element[0])
       expect(newRect).toEqual(oldRect)
 
+  describe 'up.element.attr', ->
+
+    it 'returns the attribute with the given name from the given element', ->
+      element = up.element.createFromHtml('<div foo="bar"></div>')
+      expect(up.element.attr(element, 'foo')).toEqual('bar')
+
+    it 'returns an empty string if the attribute is set without value', ->
+      element = up.element.createFromHtml('<div foo></div>')
+      expect(up.element.attr(element, 'foo')).toEqual('')
+
+    it 'returns undefined if the element does not have the given attribute (unlike Element#getAttribute(), which would return null)', ->
+      element = up.element.createFromHtml('<div></div>')
+      expect(up.element.attr(element, 'foo')).toBeUndefined()
+
   describe 'up.element.booleanAttr', ->
     
     it 'returns true if the attribute value is the string "true"', ->
-      element = fixture('div[foo=true]')
+      element = up.element.createFromHtml('<div foo="true"></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBe(true)
 
     it 'returns true if the attribute value is the name of the attribute', ->
-      element = fixture('div[foo=foo]')
+      element = up.element.createFromHtml('<div foo="foo"></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBe(true)
 
     it 'returns false if the attribute value is the string "false"', ->
-      element = fixture('div[foo=false]')
+      element = up.element.createFromHtml('<div foo="false"></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBe(false)
 
-    it 'returns a missing value if the element has no such attribute', ->
-      element = fixture('div')
-      expect(up.element.booleanAttr(element, 'foo')).toBeMissing()
+    it 'returns undefined if the element has no such attribute', ->
+      element = up.element.createFromHtml('<div></div>')
+      expect(up.element.booleanAttr(element, 'foo')).toBeUndefined()
 
     it 'returns undefined if the attribute value cannot be cast to a boolean', ->
-      element = fixture('div[foo="some text"]')
+      element = up.element.createFromHtml('<div foo="some text"></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBeUndefined()
+
+  describe 'up.element.booleanOrStringAttr', ->
+
+    it 'returns true if the attribute value is the string "true"', ->
+      element = up.element.createFromHtml('<div foo="true"></div>')
+      expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(true)
+
+    it 'returns true if the attribute value is the name of the attribute', ->
+      element = up.element.createFromHtml('<div foo="foo"></div>')
+      expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(true)
+
+    it 'returns false if the attribute value is the string "false"', ->
+      element = up.element.createFromHtml('<div foo="false"></div>')
+      expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(false)
+
+    it 'returns undefined if the element has no such attribute', ->
+      element = up.element.createFromHtml('<div></div>')
+      expect(up.element.booleanOrStringAttr(element, 'foo')).toBeUndefined()
+
+    it "returns the attribute's raw string value if that value cannot be cast to a boolean", ->
+      element = up.element.createFromHtml('<div foo="some text"></div>')
+      expect(up.element.booleanOrStringAttr(element, 'foo')).toEqual('some text')
+
+  describe 'up.element.jsonAttr', ->
+
+    it "returns the given attribute's value parsed as JSON", ->
+      element = up.element.createFromHtml('<div foo=\'{ "key": "value" }\'></div>')
+      expect(up.element.jsonAttr(element, 'foo')).toEqual({ 'key': 'value'})
+
+    it "returns undefined if the given attribute's value is blank", ->
+      element = up.element.createFromHtml('<div foo=""></div>')
+      expect(up.element.jsonAttr(element, 'foo')).toBeUndefined()
+
+    it "returns undefined if the element has no such attribute", ->
+      element = up.element.createFromHtml('<div></div>')
+      expect(up.element.jsonAttr(element, 'foo')).toBeUndefined()
 
   describe 'up.element.setTemporaryStyle', ->
 

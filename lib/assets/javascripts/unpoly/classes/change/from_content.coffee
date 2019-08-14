@@ -45,6 +45,9 @@ class up.Change.FromContent extends up.Change
 
   buildPlans: ->
     @plans = []
+
+    console.debug("buildPlans() for layer %o, opts %o", @options.layer, @options)
+
     if @options.layer == 'new'
       layerDefaultTargets = up.layer.defaultTargets(@options.flavor)
       @eachTargetCandidatePlan layerDefaultTargets, {}, (plan) =>
@@ -120,7 +123,9 @@ class up.Change.FromContent extends up.Change
     up.fail("Could not find target in current page")
 
   seekPlan: (opts) ->
+    console.debug("seekPlan(%o)", opts)
     @ensurePlansBuilt()
+    console.debug("plans are %o", @plans)
     for plan, index in @plans
       try
         return opts.attempt(plan)

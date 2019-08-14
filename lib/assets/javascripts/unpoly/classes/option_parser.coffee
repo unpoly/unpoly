@@ -1,15 +1,12 @@
 u = up.util
 e = up.element
 
-stringAttr = (element, attr) ->
-  element.getAttribute(attr)
-
 class up.OptionParser
 
   constructor: (@options, @element, @parserOptions = {}) ->
 
   string: (key, keyOptions) ->
-    @parse(stringAttr, key, keyOptions)
+    @parse(e.attr, key, keyOptions)
 
   boolean: (key, keyOptions) ->
     @parse(e.booleanAttr, key, keyOptions)

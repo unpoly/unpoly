@@ -28,8 +28,8 @@ class up.LayerLookup
     if u.isElement(@value) || u.isJQuery(@value)
       return [@of(@value)]
 
-    if up.layer.isOverlayFlavor(@value)
-      return @stack.allReversed().map (layer) => layer.flavor == @value
+#    if up.layer.isOverlayFlavor(@value)
+#      return [@value]
 
     return switch @value
       when 'root'
@@ -44,13 +44,13 @@ class up.LayerLookup
       when 'origin'
         [@givenOriginLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]
       when 'parent'
-        [@stack.parentOf(@givenBaseLayer())]
+        u.compact [@stack.parentOf(@givenBaseLayer())]
       when 'ancestors'
         @stack.ancestorsOf(@givenBaseLayer())
       when 'closest'
         @stack.selfAndAncestorsOf(@givenBaseLayer())
       else
-        up.fail("Unknown option value: { layer : '%s' }", @value)
+        up.fail("Unknown option value: { layer: '%s' }", @value)
 
   first: ->
     @all()[0]

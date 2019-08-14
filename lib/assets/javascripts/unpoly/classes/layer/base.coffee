@@ -53,6 +53,9 @@ class up.Layer extends up.Record
   isRoot: ->
     @stack.root == this
 
+  isOpen: ->
+    @stack.isOpen(this)
+
   defaultTargets: ->
     up.layer.defaultTargets(@flavor)
 
@@ -133,11 +136,17 @@ class up.Layer extends up.Record
     # neither change { title } nor { location }.
     return if options.history == false
 
+    console.debug("calling setters")
+
     if title = options.title
+      console.debug("setting title")
       @title = title
+      console.debug("title set")
 
     if location = options.location
+      console.debug("setting location")
       @location = location
+      console.debug("location set")
 
   @accessor 'title',
     get: ->
@@ -166,11 +175,15 @@ class up.Layer extends up.Record
     set: (location) ->
       @savedLocation = location
 
+      console.debug("location setter")
+
       if @hasLiveHistory()
+        console.debug("up.history.push()")
         up.history.push(location)
       else
+        console.debug("up.feedback.updateLayer()")
         # up.feedback won't receive an up:history:push event
-        up.feedback.updateLayer(layer)
+        up.feedback.updateLayer(this)
 
   hasLiveHistory: ->
     @history && @isLeaf()

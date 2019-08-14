@@ -70,7 +70,7 @@
 - up:fragment:inserted should receive the entire document from which the fragment was extracted
 - Rename { document } to { page }?
 - Publish up.Request#loadPage()
-
+- Rename up.element.*fromHtml to ...fromHTML
 
 
 - Tests
@@ -88,7 +88,6 @@
   - Test against https://github.com/unpoly/unpoly/issues/79
     - We might need to register all link handlers to a new .up-modal instead of the document
   - Test defaults inheritance in layer hierarchy
-  - Test for up.TaskQueue, up.TaskQueue#asap variants, lock reusing, lock serialization
   - Test that a layer cannot have history: true if its parent has history: false
   - Test that making a layer change in an { onAccepted } callback will not deadlock the acceptance change
   - Test that layers are assigned .up-destroyed class while closing
@@ -106,6 +105,8 @@
   - { navigate }
   - Document that up.on selector can be a function
   - I think the slow/recover events changed
+  - New gerund-events (up:layer:opening)
+  - { failOptions }
 
 
 Finishing up

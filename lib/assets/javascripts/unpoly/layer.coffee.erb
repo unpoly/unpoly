@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 up.layer = do ->
 
@@ -39,7 +40,7 @@ up.layer = do ->
         backdropCloseAnimation: 'fade-out'
         dismissLabel: '×'
         dismissAriaLabel: 'Dismiss dialog'
-        dismissible: true
+        dismissable: true
       popup:
         position: 'bottom'
         align: 'left'
@@ -70,7 +71,7 @@ up.layer = do ->
 #    options.flavor ? config.flavor
 
   defaultTargets = (flavor) ->
-    return u.flatMap flavorConfigs(flavor), (prop) -> config[prop].targets
+    return u.flatMap flavorConfigs(flavor), 'targets'
 
   ###**
   Returns an array of config objects that apply to the given flavor name.
@@ -79,15 +80,17 @@ up.layer = do ->
   ###
   flavorConfigs = (flavor = config.flavor) ->
     if flavor == 'root'
-      return ['root', 'all']
+      return [config.root, config.all]
     else
-      return [flavor, 'overlay', 'all']
+      return [config[flavor], config.overlay, config.all]
 
   build = (options) ->
+    console.debug("--- build start with options %o", u.copy(options))
     flavor = options.flavor ? config.flavor
     Implementation = config[flavor].Implementation
     configs = u.reverse(flavorConfigs(flavor))
-    options = u.merge(configs..., { flavor, stack }, options)
+    options = u.mergeDefined(configs..., { flavor, stack }, options)
+    console.debug("--- new with options %o", u.copy(options))
     return new Implementation(options)
 
 #  flavorImplementation = (options = {}) ->
@@ -150,8 +153,9 @@ up.layer = do ->
       layer.on(handler...)
 
   up.event.onEscape (event) ->
-    if stack.current.dismissable
-      u.muteRejection dismiss()
+    layer = stack.current
+    if layer.dismissable
+      u.muteRejection layer.dismiss()
       up.event.halt(event)
 
   up.on 'up:framework:boot', ->
@@ -178,7 +182,8 @@ up.layer = do ->
       # If the link is in the root layer, we allow the event to bubble up.
       unless layer.isRoot()
         value = e.jsonAttr(origin, attribute)
-        u.muteRejection closeFn(layer, { value, origin })
+        # u.muteRejection closeFn(layer, { value, origin })
+        closeFn(layer, { value, origin })
         up.event.halt(event)
 
   up.on 'up:framework:boot', ->
