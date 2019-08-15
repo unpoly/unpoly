@@ -25,10 +25,8 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
 
   startOpenAnimation: (options = {}) ->
     frameAnimation = options.animation ? @evalOption(@openAnimation)
-    return @withAnimatingClass =>
-      return up.animate(@frameElement, frameAnimation, @openAnimateOptions())
+    return up.animate(@frameElement, frameAnimation, @openAnimateOptions())
 
   startCloseAnimation: (options = {}) ->
     frameAnimation = options.animation ? @evalOption(@closeAnimation)
-    return @withAnimatingClass =>
-      return up.animate(@frameElement, frameAnimation, @closeAnimateOptions())
+    up.animate(@frameElement, frameAnimation, @closeAnimateOptions())

@@ -36,33 +36,17 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     frameAnimation = options.animation ? @evalOption(@openAnimation)
     backdropAnimation = options.backdropAnimation ? @evalOption(@backdropOpenAnimation)
 
-    return @withAnimatingClass =>
-      return Promise.all([
-        up.animate(@frameElement, frameAnimation, animateOptions),
-        up.animate(@backdropElement, backdropAnimation, animateOptions),
-      ])
+    return Promise.all([
+      up.animate(@frameElement, frameAnimation, animateOptions),
+      up.animate(@backdropElement, backdropAnimation, animateOptions),
+    ])
 
   startCloseAnimation: (options = {}) ->
     animateOptions = @closeAnimateOptions(options)
     frameAnimation = options.animation ? @evalOption(@closeAnimation)
     backdropAnimation = options.backdropAnimation ? @evalOption(@backdropCloseAnimation)
 
-    return @withAnimatingClass =>
-      return Promise.all([
-        up.animate(@frameElement, frameAnimation, animateOptions),
-        up.animate(@backdropElement, backdropAnimation, animateOptions),
-      ])
-
-#  startCloseAnimation: (options = {}) ->
-#    animateOptions = @closeAnimateOptions(options)
-#    viewportAnimation = options.animation ? @evalOption(@closeAnimation)
-#    backdropAnimation = options.backdropAnimation ? @evalOption(@backdropCloseAnimation)
-#
-#    viewportDestroyOptions = u.merge(animateOptions, animation: viewportAnimation)
-#    backdropDestroyOptions = u.merge(animateOptions, animation: backdropAnimation)
-#
-#    return @withAnimatingClass =>
-#      return Promise.all([
-#        up.destroy(@viewportElement, viewportDestroyOptions),
-#        up.destroy(@backdropElement, backdropDestroyOptions),
-#      ])
+    return Promise.all([
+      up.animate(@frameElement, frameAnimation, animateOptions),
+      up.animate(@backdropElement, backdropAnimation, animateOptions),
+    ])

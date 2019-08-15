@@ -97,13 +97,6 @@ class up.Layer.Overlay extends up.Layer
     easing: @closeEasing
     duration: @closeDuration
 
-  withAnimatingClass: (startAnimation) ->
-    @markAsAnimating(true)
-    return startAnimation().then => @markAsAnimating(false)
-
-  markAsAnimating: (state) ->
-    e.toggleClass(@element, 'up-layer-animating', state)
-
   allElements: (selector) ->
     e.all(@contentElement, selector)
 
