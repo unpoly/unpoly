@@ -48,16 +48,6 @@
   // Center .up-overlay-frame within the viewport
   text-align: center
 
-.up-overlay-with-viewport.up-overlay-animating
-  // During opening/closing animations we let the .up-overlay container take over
-  // the scrollbars that would usually be owned by .up-overlay-viewport.
-  // If .up-overlay-viewport had a scrollbar while animating with
-  // "zoom-in" it would look strange that the scrollbar is scaled.
-  &
-    overflow-y: scroll
-  .up-overlay-viewport
-    overflow-y: hidden
-
 .up-overlay-frame
 
   // Make it grow with the width of .up-modal-content

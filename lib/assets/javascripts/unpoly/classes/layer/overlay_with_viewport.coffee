@@ -33,23 +33,23 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
 
   startOpenAnimation: (options = {}) ->
     animateOptions = @openAnimateOptions(options)
-    viewportAnimation = options.animation ? @evalOption(@openAnimation)
+    frameAnimation = options.animation ? @evalOption(@openAnimation)
     backdropAnimation = options.backdropAnimation ? @evalOption(@backdropOpenAnimation)
 
     return @withAnimatingClass =>
       return Promise.all([
-        up.animate(@viewportElement, viewportAnimation, animateOptions),
+        up.animate(@frameElement, frameAnimation, animateOptions),
         up.animate(@backdropElement, backdropAnimation, animateOptions),
       ])
 
   startCloseAnimation: (options = {}) ->
     animateOptions = @closeAnimateOptions(options)
-    viewportAnimation = options.animation ? @evalOption(@closeAnimation)
+    frameAnimation = options.animation ? @evalOption(@closeAnimation)
     backdropAnimation = options.backdropAnimation ? @evalOption(@backdropCloseAnimation)
 
     return @withAnimatingClass =>
       return Promise.all([
-        up.animate(@viewportElement, viewportAnimation, animateOptions),
+        up.animate(@frameElement, frameAnimation, animateOptions),
         up.animate(@backdropElement, backdropAnimation, animateOptions),
       ])
 
