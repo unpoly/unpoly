@@ -514,12 +514,7 @@ up.fragment = do ->
   # TODO: Docs for up.fragment.all
   all = (args...) ->
     options = u.extractOptions(args)
-
-    console.debug("args after extractOptions: %o", args)
-
     lastArg = u.last(args)
-
-    console.debug("lastArg is %o, isElementish = %o", lastArg, u.isElementish(lastArg))
 
     if u.isElementish(lastArg)
       # up.fragment.all([root], element, [options]) should just return [element].
@@ -534,8 +529,6 @@ up.fragment = do ->
       # up.fragment.all(rootElement, selector) should find selector within
       # the descendants of rootElement regardless of rootElement's layer.
       candidates = e.all(args...)
-
-    console.debug("candidates are %o, filtered are %o", candidates, u.filter(candidates, isRealElement))
 
     return u.filter(candidates, isRealElement)
 
@@ -571,13 +564,9 @@ up.fragment = do ->
   destroy = (target, options = {}) ->
     setLayerOption(target, options)
 
-    console.debug("first(%o, %o) => %o", target, options, first(target, options))
-
     if options.element = first(target, options)
-      console.debug("will destroy fragment")
       return new up.Change.DestroyFragment(options).executeAsync()
     else
-      console.debug("fragment not found -- resolving")
       return Promise.resolve()
 
   shouldLogDestruction = (element, options) ->
@@ -595,9 +584,7 @@ up.fragment = do ->
 
   parseTargetAndOptions = (args) ->
     options = u.parseArgAndOptions(args, 'target')
-    console.debug('-- after parseArgAndOptions: %o', options.layer)
     setLayerOption(options.target, options)
-    console.debug('-- after setLayerOption: %o', options.layer)
     options
 
   ###**

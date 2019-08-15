@@ -21,8 +21,11 @@ class up.LayerStack extends up.Class
     @layers.push(layer)
 
   peel: (layer) ->
-    for ancestor in u.reverse(@ancestorsOf(layer))
-        ancestor.dismiss(preventable: false)
+    console.debug("=== Peeling %o", layer)
+    console.debug("... descendants of %o are %o", layer, @descendantsOf(layer))
+    for descendant in @descendantsOf(layer)
+      console.debug("... during peel we decide to close descendant: %o", descendant)
+      descendant.dismiss(preventable: false)
 
   reset: ->
     up.Layer.OverlayWithViewport.bodyShifter.unshift()
@@ -56,7 +59,11 @@ class up.LayerStack extends up.Class
 
   ancestorsOf: (layer) ->
     layerIndex = @indexOf(layer)
-    @layers.slice(0, layerIndex)
+    u.reverse(@layers.slice(0, layerIndex))
+
+  descendantsOf: (layer) ->
+    layerIndex = @indexOf(layer)
+    @layers.slice(layerIndex + 1)
 
   allReversed: ->
     u.reverse(@layers)

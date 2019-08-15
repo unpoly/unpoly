@@ -46,8 +46,6 @@ class up.Change.FromContent extends up.Change
   buildPlans: ->
     @plans = []
 
-    console.debug("buildPlans() for layer %o, opts %o", @options.layer, @options)
-
     if @options.layer == 'new'
       layerDefaultTargets = up.layer.defaultTargets(@options.flavor)
       @eachTargetCandidatePlan layerDefaultTargets, {}, (plan) =>
@@ -58,14 +56,11 @@ class up.Change.FromContent extends up.Change
     else
       for layer in up.layer.lookupAll(@options)
         @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
-          # console.debug("UpdateLayer(%o)", plan)
           @plans.push(new up.Change.UpdateLayer(plan))
 
     # Make sure we always succeed
     if up.layer.config.resetWorld
       @plans.push(new up.Change.ResetWorld(@options))
-
-    console.debug("Change.FromContent: Plans are %o", @plans)
 
   eachTargetCandidatePlan: (layerDefaultTargets, planOptions, fn) ->
     for target, i in @buildTargetCandidates(layerDefaultTargets)
@@ -123,7 +118,6 @@ class up.Change.FromContent extends up.Change
     up.fail("Could not find target in current page")
 
   seekPlan: (opts) ->
-    console.debug("seekPlan(%o)", opts)
     @ensurePlansBuilt()
     console.debug("plans are %o", @plans)
     for plan, index in @plans

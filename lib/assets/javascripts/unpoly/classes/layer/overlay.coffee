@@ -74,7 +74,6 @@ class up.Layer.Overlay extends up.Layer
     up.destroy(@element, options)
 
   createDismissElement: (parentElement) ->
-    console.debug("=== createDismissElement for %o (%o)", @dismissable, this)
     if @dismissable
       @dismissElement = e.affix(parentElement, '.up-overlay-dismiss[up-dismiss]',
         'aria-label': @dismissAriaLabel

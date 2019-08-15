@@ -196,7 +196,6 @@ up.link = do ->
     parser.parse(up.layer.closeCallbackAttr, 'onDismissed')   # success only
     u.assign(options, up.motion.animateOptions(options, link))
     options.guardEvent ?= up.event.build('up:link:follow', log: 'Following link')
-    console.debug("--- up.change(%o)", u.copy(options))
 
     return up.change(options)
 

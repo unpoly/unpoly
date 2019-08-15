@@ -94,7 +94,6 @@ up.feedback = do ->
       updateLinksWithinNavs(fragment, options)
 
   updateLinksWithinNavs = (fragment, options) ->
-    console.debug("updateLinksWithinNavs(%o, %o)", fragment, options)
     navs = e.subtree(fragment, navSelector())
     links = u.flatMap navs, (nav) -> e.subtree(nav, SELECTOR_LINK)
     updateLinks(links, options)
@@ -316,13 +315,11 @@ up.feedback = do ->
   ###
 
   updateLayerIfLocationChanged = (layer) ->
-    console.debug("updateLayerIfLocationChanged(%o)", layer)
     previousLocation = layer.feedbackLocation
     newLocation = normalizeURL(layer.location)
     if !previousLocation || previousLocation != newLocation
       layer.feedbackLocation = newLocation
       updateLinksWithinNavs(layer.element, { layer })
-    console.debug("updateLayerIfLocationChanged(%o) done", layer)
 
   onHistoryChanged = ->
     leafLayer = up.layer.leaf

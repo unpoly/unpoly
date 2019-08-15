@@ -74,8 +74,7 @@
 - Does not work: up.layer.open({ content: 'foo', target: '.content' })
 - Does not work: up.layer.open({ content: '<div>foo</div>', target: '.content' })
 - Is it intuitive to require { target } when changing with { content }? Can we use the default target for that layer, or .target?
-
-
+- When opening multiple overlays, BodyShifter need to count how often "shift()" has been called
 
 - Tests
   - Get tests green again
@@ -97,6 +96,7 @@
   - Test that layers are assigned .up-destroyed class while closing
   - Test that default targets are selectable per layer-type
   - Test that default targets are also fallbacks per layer-type
+  - Test that we can manipulate the layer state quickly: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes

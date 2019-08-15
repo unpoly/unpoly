@@ -37,15 +37,11 @@ class up.Change.OpenLayer extends up.Change.Addition
     promise = up.event.whenEmitted('up:layer:open', @eventProps())
 
     promise = promise.then =>
-      console.debug("open event emitted")
       # Make sure that the ground layer doesn't already have a child layer.
       @currentLayer.peel()
 
-      console.debug("peeled")
-
       # Don't wait for peeling to finish.
       up.layer.push(@layer)
-      console.debug("pushed")
       return @layer.openNow({ @content, @onContentAttached })
 
     promise = promise.then =>
@@ -65,14 +61,10 @@ class up.Change.OpenLayer extends up.Change.Addition
   handleHistory: ->
     @layer.parent.saveHistory()
 
-    console.debug("history saved")
-
     # If we cannot push state for some reason, we prefer disabling history for
     # child layers instead of blowing up the entire stack with a full page load.
     unless up.browser.canPushState()
       @options.history = false
-
-    console.debug("calling updateHistory()")
 
     @layer.updateHistory(@options)
 
@@ -81,7 +73,6 @@ class up.Change.OpenLayer extends up.Change.Addition
 
   onContentAttached: =>
     @handleHistory()
-    console.debug("history handled")
     up.fragment.setSource(@content, @source)
 
     # Event handlers for [up-target] etc. are registered to each layer instead of

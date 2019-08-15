@@ -85,12 +85,10 @@ up.layer = do ->
       return [config[flavor], config.overlay, config.all]
 
   build = (options) ->
-    console.debug("--- build start with options %o", u.copy(options))
     flavor = options.flavor ? config.flavor
     Implementation = config[flavor].Implementation
     configs = u.reverse(flavorConfigs(flavor))
     options = u.mergeDefined(configs..., { flavor, stack }, options)
-    console.debug("--- new with options %o", u.copy(options))
     return new Implementation(options)
 
 #  flavorImplementation = (options = {}) ->
@@ -149,7 +147,6 @@ up.layer = do ->
 
   applyHandlers = (layer) ->
     for handler in handlers
-      console.debug("applyHandler: %o, %o", layer, handler)
       layer.on(handler...)
 
   up.event.onEscape (event) ->

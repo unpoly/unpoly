@@ -24,7 +24,7 @@ class up.Change.CloseLayer extends up.Change.Removal
   closedCallbackName: null  # implement in child class
 
   execute: ->
-    # debugger
+    console.debug("--- Closing layer %o", @layer)
 
     if @origin && u.isUndefined(value)
       value = e.jsonAttr(@origin, @valueAttr)
@@ -54,11 +54,13 @@ class up.Change.CloseLayer extends up.Change.Removal
 
       promise = promise.then =>
         # Also close any child-layers we might have.
+        console.debug("=== Peeling layer %o", @layer)
         @layer.peel()
         @layer.stack.remove(@layer)
         @layer.stack.current.restoreHistory()
         @layer[@closingCallbackName]?(closingEvent)
         @layer.emit(closingEvent) # will bubble up to document
+        console.debug("=== closeNow for layer %o", @layer)
         return @layer.closeNow()
 
       promise = promise.then =>
