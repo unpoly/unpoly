@@ -71,6 +71,9 @@
 - Rename { document } to { page }?
 - Publish up.Request#loadPage()
 - Rename up.element.*fromHtml to ...fromHTML
+- Does not work: up.layer.open({ content: 'foo', target: '.content' })
+- Is it intuitive to require { target } when changing with { content }? Can we use the default target for that layer, or .target?
+
 
 
 - Tests
