@@ -14,6 +14,11 @@ describe 'up.fragment', ->
         result = up.fragment.first('.match')
         expect(result).toBe(match)
 
+      it 'returns the first argument if the first argument is already an element', ->
+        match = fixture('.match')
+        result = up.fragment.first(match)
+        expect(result).toBe(match)
+
       it 'returns undefined if there are no matches', ->
         result = up.fragment.first('.match')
         expect(result).toBeUndefined()
@@ -35,6 +40,12 @@ describe 'up.fragment', ->
           expect(up.fragment.first(parent1, '.match')).toBe(parent1Match)
           expect(up.fragment.first(parent2, '.match')).toBe(parent2Match)
 
+        it 'returns the second argument if the second argument is already an element', ->
+          root = fixture('.root')
+          match = fixture('.match')
+          result = up.fragment.first(root, match)
+          expect(result).toBe(match)
+
       describe 'with { origin } option', ->
 
         it 'resolves an & in the selector string with an selector for the origin'
@@ -46,6 +57,11 @@ describe 'up.fragment', ->
       describe 'with { layer } option', ->
 
         it 'only matches elements in that layer'
+
+        it 'returns the first argument if the first argument is already an element', ->
+          match = fixture('.match')
+          result = up.fragment.first(match, layer: 'root')
+          expect(result).toBe(match)
 
     describe 'up.replace', ->
 

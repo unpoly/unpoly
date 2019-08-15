@@ -16,10 +16,9 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
     return @startOpenAnimation(options)
 
   closeNow: (options) ->
-    @markAsDestroying()
-    return @startCloseAnimation(options).then =>
+    animation = => @startCloseAnimation(options)
+    @destroyElement({ animation }).then =>
       @tether.stop()
-      @destroyElement()
 
   sync: ->
     @tether.sync()

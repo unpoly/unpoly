@@ -70,8 +70,8 @@ class up.Layer.Overlay extends up.Layer
     @element = e.affix(parentElement, '.up-overlay', attrs)
     @element.classList.add(@class) if @class
 
-  destroyElement: ->
-    up.destroy(@element)
+  destroyElement: (options) ->
+    up.destroy(@element, options)
 
   createDismissElement: (parentElement) ->
     console.debug("=== createDismissElement for %o (%o)", @dismissable, this)
@@ -100,9 +100,6 @@ class up.Layer.Overlay extends up.Layer
   withAnimatingClass: (startAnimation) ->
     @markAsAnimating(true)
     return startAnimation().then => @markAsAnimating(false)
-
-  markAsDestroying: ->
-    up.fragment.markAsDestroying(@element)
 
   markAsAnimating: (state) ->
     e.toggleClass(@element, 'up-layer-animating', state)

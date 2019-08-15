@@ -21,11 +21,8 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     return @startOpenAnimation(options)
 
   closeNow: (options) ->
-    @markAsDestroying()
-    return @startCloseAnimation(options).then =>
-      console.debug("=== destroying element")
-      @destroyElement()
-      console.debug("=== unshiftBody()")
+    animation = => @startCloseAnimation(options)
+    @destroyElement({ animation }).then =>
       @unshiftBody()
 
   shiftBody: ->
