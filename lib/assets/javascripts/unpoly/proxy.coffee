@@ -416,7 +416,7 @@ up.proxy = do ->
       request: request
       log: ['Loading %s %s', request.method, request.url]
 
-    up.event.whenEmitted('up:proxy:load', eventProps).then ->
+    return up.event.whenEmitted 'up:proxy:load', eventProps, ->
       request.send()
       u.always(request, responseReceived)
       return request

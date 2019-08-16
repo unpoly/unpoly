@@ -47,21 +47,27 @@ class up.Change.CloseLayer extends up.Change.Removal
     @layer.emit(closeEvent) # will bubble up to document
 
     if !closeEvent.defaultPrevented || !@preventable
-      promise = Promise.resolve()
 
       unless @layer.isOpen()
-        return promise
+        return Promise.resolve()
 
-      promise = promise.then =>
-        # Also close any child-layers we might have.
-        console.debug("=== Peeling layer %o", @layer)
-        @layer.peel()
-        @layer.stack.remove(@layer)
-        @layer.stack.current.restoreHistory()
-        @layer[@closingCallbackName]?(closingEvent)
-        @layer.emit(closingEvent) # will bubble up to document
-        console.debug("=== closeNow for layer %o", @layer)
-        return @layer.closeNow()
+      # All changes that affect the layer stack should happen sync:
+
+      # Close any child-layers we might have.
+      @layer.peel()
+
+      # Remove ourselves from the layer stack.
+      @layer.stack.remove(@layer)
+
+      # Restore the history of the parent layer we just uncovered.
+      @layer.stack.current.restoreHistory()
+
+      # Emit the "closing" event to indicate that the "close" event was not
+      # prevented and the closing animation is about to start.
+      @layer[@closingCallbackName]?(closingEvent)
+      @layer.emit(closingEvent) # will bubble up to document
+
+      promise = @layer.closeNow()
 
       promise = promise.then =>
         @layer[@closedCallbackName]?(closedEvent)

@@ -494,3 +494,11 @@ describe 'up.event', ->
         promiseState(promise).then (result) ->
           expect(result.state).toEqual('rejected')
           done()
+
+      describe '(onEmitted callback)', ->
+
+        it 'allows to pass a function that is called sync after the event was emitted'
+
+        it 'allows the function to return a promise that will delay the promise returned by whenEmitted'
+
+        it 'does not call the function if the event was prevented'

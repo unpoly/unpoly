@@ -7,6 +7,7 @@ class up.EventEmitter extends up.Record
     [
       'element',
       'event',
+      'onEmitted' # only for whenEmitted(event, syncCallback)
       # 'boundary'
     ]
 
@@ -27,7 +28,7 @@ class up.EventEmitter extends up.Record
       if event.defaultPrevented
         reject(up.event.abortError("Event #{event.type} was prevented"))
       else
-        resolve()
+        resolve(@onEmitted?())
 
 #  createBoundary: ->
 #    if @boundary
@@ -56,6 +57,8 @@ class up.EventEmitter extends up.Record
       up.puts('Event %s (%o)', name, @event)
 
   @fromEmitArgs: (args, options) ->
+    onEmitted = u.extractCallback(args)
+
     if args[0].addEventListener
       element = args.shift()
     else if u.isJQuery(args[0])
@@ -71,5 +74,5 @@ class up.EventEmitter extends up.Record
 
     element ||= document
 
-    attributes = u.merge({ element, event }, options)
+    attributes = u.merge({ element, event, onEmitted }, options)
     new @(attributes)

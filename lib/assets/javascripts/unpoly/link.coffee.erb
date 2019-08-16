@@ -232,7 +232,7 @@ up.link = do ->
 
     if up.link.isSafe(link)
       preloadEventAttrs = { log: ['Preloading link %o', link], target: link }
-      up.event.whenEmitted('up:link:preload', preloadEventAttrs).then ->
+      up.event.whenEmitted 'up:link:preload', preloadEventAttrs, ->
         follow(link, u.merge(options, preload: true))
     else
       Promise.reject(new Error("Won't preload unsafe link"))

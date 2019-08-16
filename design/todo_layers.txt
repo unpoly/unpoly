@@ -96,7 +96,9 @@
   - Test that layers are assigned .up-destroyed class while closing
   - Test that default targets are selectable per layer-type
   - Test that default targets are also fallbacks per layer-type
-  - Test that we can manipulate the layer state quickly: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
+  - Test that that all layer methods manipulate the stack in sync (peel, push, remove)
+    - E.g. opening the layer twice in a row fails currently: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
+    - It's OK for animations to run async after that
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes

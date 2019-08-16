@@ -41,15 +41,15 @@ class up.Change.UpdateLayer extends up.Change.Addition
     unless @layer.isOpen()
       @notApplicable('Could not update %o: Target layer was closed', @originalTarget)
 
-    promise = Promise.resolve()
+    if @peel
+      @layer.peel()
+      # Layer#peel() will manipulate the stack sync.
+      # We don't wait for the peeling animation to finish.
 
-    promise = promise.then =>
-      if @peel
-        @layer.peel()
-        # Don't wait for peeling to finish
-      @layer.updateHistory(@options)
-      swapPromises = @steps.map(@swapStep)
-      return Promise.all(swapPromises)
+    @layer.updateHistory(@options)
+    swapPromises = @steps.map(@swapStep)
+
+    promise = Promise.all(swapPromises)
 
     promise = promise.then =>
       @handleLayerChangeRequests()

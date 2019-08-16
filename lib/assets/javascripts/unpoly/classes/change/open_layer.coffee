@@ -34,9 +34,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     # might confuse this with the event for @layer.parent itself opening.
     #
     # There is no @layer.onOpen() handler to accompany the DOM event.
-    promise = up.event.whenEmitted('up:layer:open', @eventProps())
-
-    promise = promise.then =>
+    promise = up.event.whenEmitted 'up:layer:open', @eventProps(), =>
       # Make sure that the ground layer doesn't already have a child layer.
       @currentLayer.peel()
 
