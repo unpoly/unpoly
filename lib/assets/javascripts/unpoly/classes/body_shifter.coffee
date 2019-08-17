@@ -10,10 +10,17 @@ e = up.element
 class up.BodyShifter
 
   constructor: ->
+    @reset()
+
+  reset: ->
     @unshiftFns = []
+    @shiftCount = 0
+    @unshiftNow()
 
   shift: ->
-    return unless up.viewport.rootHasVerticalScrollbar()
+    @shiftCount++
+    unless @shiftCount == 1 && up.viewport.rootHasVerticalScrollbar()
+      return
 
     body = document.body
     overflowElement = up.viewport.rootOverflowElement()
@@ -35,5 +42,12 @@ class up.BodyShifter
     @unshiftFns.push(e.setTemporaryStyle(element, styles))
 
   unshift: ->
+    @shiftCount--
+    if @shiftCount > 0
+      return
+
+    @unshiftNow()
+
+  unshiftNow: ->
     while unshiftFn = @unshiftFns.pop()
       unshiftFn()

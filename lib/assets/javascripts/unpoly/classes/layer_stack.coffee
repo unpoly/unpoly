@@ -28,7 +28,7 @@ class up.LayerStack extends up.Class
       descendant.dismiss(preventable: false)
 
   reset: ->
-    up.Layer.OverlayWithViewport.bodyShifter.unshift()
+    up.Layer.OverlayWithViewport.bodyShifter.reset()
 
     @resetLayers()
 
