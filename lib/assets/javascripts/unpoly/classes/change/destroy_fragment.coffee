@@ -14,14 +14,7 @@ class up.Change.DestroyFragment extends up.Change.Removal
   execute: ->
     @layer.updateHistory(@options)
     up.fragment.markAsDestroying(@element)
-
-    if up.motion.isNone(@animation)
-      # If possible we remove the fragment sync.
-      @wipe()
-    else
-      # If there is motion we need to wait for the animation to end
-      # before we remove the fragment async.
-      @animate().then(@wipe)
+    @animate().then(@wipe)
 
   animate: ->
     animateOptions = up.motion.animateOptions(@options)
