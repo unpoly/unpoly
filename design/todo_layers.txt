@@ -98,6 +98,8 @@
   - Test that that all layer methods manipulate the stack in sync (peel, push, remove)
     - E.g. opening the layer twice in a row fails currently: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
     - It's OK for animations to run async after that
+  - Test that ResetWorld is actually happening
+  - Test that up.change({ content: 'foo' }) works when 'foo' is just text, without a wrapping tag
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes

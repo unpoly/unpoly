@@ -1,24 +1,12 @@
-#= require ./addition
+#= require ./update_layer
 
-u = up.util
+class up.Change.ResetWorld extends up.Change.UpdateLayer
 
-class up.Change.ResetWorld extends up.Change.Addition
-
-  preflightLayer: ->
-    # The root layer always exists.
-    up.layer.root
-
-  preflightTarget: ->
-    @options.target
-
-  constructor: (options) ->
-    options = u.merge(options,
-      layer: @preflightLayer(),
+  constructor: ->
+    super(
+      layer: 'root',
       target: 'body',
-      peel: true
-      keep: false
+      peel: true,
+      keep: false,
       resetScroll: true
-      acceptLayer: undefined
-      dismissLayer: undefined
     )
-    super(options)

@@ -8,7 +8,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
   constructor: (options) ->
     super(options)
     @layer = options.layer
-    @originalTarget = options.target
+    # Plan#target is required by FromContent#firstDefaultTarget
+    @target = options.target
     @peel = options.peel
     @reveal = options.reveal
     @location = options.location
@@ -39,7 +40,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       return u.unresolvablePromise()
 
     unless @layer.isOpen()
-      @notApplicable('Could not update %o: Target layer was closed', @originalTarget)
+      @notApplicable('Could not update %o: Target layer was closed', @target)
 
     if @peel
       @layer.peel()
@@ -187,7 +188,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   parseSteps: ->
     # resolveSelector was already called by up.Change.FromContent
-    disjunction = u.splitValues(@originalTarget, ',')
+    disjunction = u.splitValues(@target, ',')
 
     @steps = disjunction.map (target, i) =>
       expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/) or

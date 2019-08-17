@@ -60,7 +60,7 @@ class up.Change.FromContent extends up.Change
 
     # Make sure we always succeed
     if up.layer.config.resetWorld
-      @plans.push(new up.Change.ResetWorld(@options))
+      @plans.push(new up.Change.ResetWorld())
 
   eachTargetCandidatePlan: (layerDefaultTargets, planOptions, fn) ->
     for target, i in @buildTargetCandidates(layerDefaultTargets)
@@ -88,8 +88,10 @@ class up.Change.FromContent extends up.Change
       up.viewport.saveScroll()
 
     shouldExtractTitle = not (@options.title is false || u.isString(@options.title))
-    if shouldExtractTitle && (responseTitle = @options.responseDoc.title())
+    if shouldExtractTitle && (responseTitle = @responseDoc.title())
       @options.title = responseTitle
+
+    console.debug("FromContent#execute has responseDoc: %o", @responseDoc)
 
     return @seekPlan
       attempt: (plan) -> plan.execute()
@@ -101,7 +103,17 @@ class up.Change.FromContent extends up.Change
     up.fail(["Could not match target in current page and response"], action: inspectAction)
 
   buildResponseDoc: ->
-    @options.responseDoc = new up.ResponseDoc(@options)
+    @ensurePlansBuilt()
+    # ResponseDoc allows to pass innerHTML as { content }, but then it also
+    # requires a { target }. If no { target } is given we use the first plan's target.
+    docOptions = u.options(@options, target: @plans[0].target)
+    console.debug("building responseDoc from %o", docOptions)
+    @responseDoc = new up.ResponseDoc(docOptions)
+    console.debug("built responseDoc from %o", docOptions)
+
+    # We already built the plans at the top of this method.
+    for plan in @plans
+      plan.responseDoc = @responseDoc
 
   preflightLayer: ->
     @seekPlan

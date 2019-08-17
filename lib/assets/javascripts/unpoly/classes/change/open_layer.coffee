@@ -6,6 +6,7 @@ class up.Change.OpenLayer extends up.Change.Addition
 
   constructor: (options) ->
     super(options)
+    # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target
     @source = options.source
     @currentLayer = options.currentLayer
