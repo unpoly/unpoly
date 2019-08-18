@@ -61,6 +61,8 @@
   padding: 20px
   box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.3)
 
+  overflow-x: hidden
+
 .up-overlay-dismiss
   color: #666
   position: absolute
@@ -88,12 +90,12 @@
   &[up-position=left]
     .up-overlay-viewport
       // Allow frame to grow from the left, up to its max-width of 100%
-      justify-content: flex-start
+      text-align: left
 
   &[up-position=right]
     .up-overlay-viewport
       // Allow frame to grow from the right, up to its max-width of 100%
-      justify-content: flex-end
+      text-align: right
 
   .up-overlay-frame
     min-height: 100vh
