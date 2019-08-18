@@ -131,7 +131,7 @@ class up.Layer extends up.Record
 
   updateHistory: (options) ->
     # When the layer is opened, the { history } option defines whether the
-    # layer enables handling of location and title i general.
+    # layer enables handling of location and title in general.
     # When updating history, accept { history: false } as a shortcut to
     # neither change { title } nor { location }.
     return if options.history == false

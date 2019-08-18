@@ -232,6 +232,8 @@ up.layer = do ->
     get_parent: -> stack.parent
     parentOf: (args...) -> stack.parentOf(args...)
     get_location: -> stack.current.location
+    get_history: -> stack.current.history
+    get_title: -> stack.current.title
     get_flavor: -> stack.current.flavor
     get_position: -> stack.current.position
     get_element: -> stack.current.element

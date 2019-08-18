@@ -60,12 +60,18 @@ class up.Change.OpenLayer extends up.Change.Addition
   handleHistory: ->
     @layer.parent.saveHistory()
 
+    # When the layer is opened, the { history } option defines whether the
+    # layer enables handling of location and title in general.
+    # When updating history, accept { history: false } as a shortcut to
+    # neither change { title } nor { location }.
+    historyOptions = u.except(@options, 'history')
+
     # If we cannot push state for some reason, we prefer disabling history for
     # child layers instead of blowing up the entire stack with a full page load.
     unless up.browser.canPushState()
-      @options.history = false
+      historyOptions.history = false
 
-    @layer.updateHistory(@options)
+    @layer.updateHistory(historyOptions)
 
   eventProps: =>
     { @layer, log: true}

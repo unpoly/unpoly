@@ -131,7 +131,7 @@ class up.Change.FromContent extends up.Change
 
   seekPlan: (opts) ->
     @ensurePlansBuilt()
-    console.debug("plans are %o", @plans)
+    console.debug("Change.FromContent#seekPlan(%o): plans are %o", opts, @plans)
     for plan, index in @plans
       try
         return opts.attempt(plan)

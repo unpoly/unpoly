@@ -10,12 +10,12 @@ e = up.element
 class up.BodyShifter
 
   constructor: ->
+    @unshiftFns = []
     @reset()
 
   reset: ->
-    @unshiftFns = []
-    @shiftCount = 0
     @unshiftNow()
+    @shiftCount = 0
 
   shift: ->
     @shiftCount++

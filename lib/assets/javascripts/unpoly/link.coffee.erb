@@ -228,7 +228,7 @@ up.link = do ->
   @experimental
   ###
   preload = (link, options) ->
-    link = e.get(linkOrSelector)
+    link = e.get(link)
 
     if up.link.isSafe(link)
       preloadEventAttrs = { log: ['Preloading link %o', link], target: link }
@@ -650,6 +650,7 @@ up.link = do ->
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   follow: follow
+  preload: preload
   makeFollowable: makeFollowable
   isSafe: isSafe
   isFollowable: isFollowable

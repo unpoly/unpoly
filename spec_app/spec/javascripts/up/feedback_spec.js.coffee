@@ -1,14 +1,12 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.feedback', ->
 
   beforeEach ->
     up.history.config.enabled = true
-    up.modal.config.openAnimation = 'none'
-    up.modal.config.closeAnimation = 'none'
-    up.popup.config.openAnimation = 'none'
-    up.popup.config.closeAnimation = 'none'
+    up.motion.config.enabled = false
 
   describe 'unobtrusive behavior', ->
 
@@ -223,66 +221,73 @@ describe 'up.feedback', ->
             next =>
               expect($link).toHaveClass('up-current')
 
-          it 'marks a link as .up-current if it links to an URL currently shown either within or below the modal', asyncSpec (next) ->
-            up.history.replace('/foo')
+          it "marks a link as .up-current if it links to its own layer's URL, but not when it links to another layer's URL", asyncSpec (next) ->
+            up.history.replace('/background-url')
 
-            $nav = $fixture('div[up-nav]')
-            $backgroundLink = $nav.affix('a[href="/foo"]')
-            $modalLink = $nav.affix('a[href="/bar"][up-modal=".main"]')
-            $unrelatedLink = $nav.affix('a[href="/baz"]')
-            up.hello($nav)
-
-            next =>
-              Trigger.clickSequence($modalLink)
+            nav = fixture('div[up-nav]')
+            @backgroundLinkToBackgroundURL = e.affix(nav, 'a[href="/background-url"]')
+            @backgroundLinkToLayerURL = e.affix(nav, 'a[href="/layer-url"]')
+            @backgroundLinkToOtherURL = e.affix(nav, 'a[href="/other-url"]')
+            up.hello(nav)
 
             next =>
-              @respondWith('<div class="main">new-text</div>')
+              up.layer.open(url: '/layer-url', target: '.layer-content')
 
             next =>
-              expect($backgroundLink).toHaveClass('up-current')
-              expect($modalLink).toHaveClass('up-current')
-              expect($unrelatedLink).not.toHaveClass('up-current')
+              @respondWith """
+                <div class="layer-content" up-nav>
+                  <a href="/background-url">text</a>
+                  <a href="/layer-url">text</a>
+                  <a href="/other-url">text</a>
+                </div>
+              """
+
+            next =>
+              @layerLinkToBackgroundURL = e.first('.layer-content a[href="/background-url"]')
+              @layerLinkToLayerURL = e.first('.layer-content a[href="/layer-url"]')
+              @layerLinkToOtherURL = e.first('.layer-content a[href="/other-url"]')
+
+              expect(@backgroundLinkToBackgroundURL).toHaveClass('up-current')
+              expect(@backgroundLinkToLayerURL).not.toHaveClass('up-current')
+              expect(@backgroundLinkToOtherURL).not.toHaveClass('up-current')
+
+              expect(@layerLinkToBackgroundURL).not.toHaveClass('up-current')
+              expect(@layerLinkToLayerURL).toHaveClass('up-current')
+              expect(@layerLinkToOtherURL).not.toHaveClass('up-current')
+
               next.await up.modal.close()
 
             next =>
-              expect($backgroundLink).toHaveClass('up-current')
-              expect($modalLink).not.toHaveClass('up-current')
-              expect($unrelatedLink).not.toHaveClass('up-current')
+              expect(@backgroundLinkToBackgroundURL).toHaveClass('up-current')
+              expect(@backgroundLinkToLayerURL).not.toHaveClass('up-current')
+              expect(@backgroundLinkToOtherURL).not.toHaveClass('up-current')
 
-          it "marks a link as .up-current if it links to the URL currently either within or below the popup, even if the popup doesn't change history", asyncSpec (next) ->
-            up.history.replace('/foo')
-
-            # This is actually the default. Popups don't change the address bar by default,
-            # but we still want to cause their URL to mark links as current.
-            up.popup.config.history = false
-
-            $nav = $fixture('div[up-nav]')
-            $backgroundLink = $nav.affix('a[href="/foo"]')
-            $popupLink = $nav.affix('a[href="/bar"][up-popup=".main"]')
-            $unrelatedLink = $nav.affix('a[href="/baz"]')
-            up.hello($nav)
-
-            expect(up.history.location).toMatchURL('/foo')
+          it "marks a link as .up-current if it links to its current layer's URL, even if that layer does not render location", asyncSpec (next) ->
+            up.history.replace('/background-url')
 
             next =>
-              Trigger.clickSequence($popupLink)
+              up.layer.open(url: '/layer-url', target: '.layer-content', history: false)
 
             next =>
-              @respondWith('<div class="main">new-text</div>')
+              @respondWith """
+                <div class="layer-content" up-nav>
+                  <a href="/background-url">text</a>
+                  <a href="/layer-url">text</a>
+                  <a href="/other-url">text</a>
+                </div>
+              """
 
             next =>
-              expect(up.history.location).toMatchURL('/foo') # popup did not change history
-              expect(up.popup.url()).toMatchURL('/bar') # popup still knows which URL it is displaying
-              expect($backgroundLink).toHaveClass('up-current')
-              expect($popupLink).toHaveClass('up-current')
-              expect($unrelatedLink).not.toHaveClass('up-current')
+              expect(up.layer.location).toMatchURL('/layer-url')
+              expect(location.href).toMatchURL('/background-url')
 
-              next.await up.popup.close()
+              @layerLinkToBackgroundURL = e.first('.layer-content a[href="/background-url"]')
+              @layerLinkToLayerURL = e.first('.layer-content a[href="/layer-url"]')
+              @layerLinkToOtherURL = e.first('.layer-content a[href="/other-url"]')
 
-            next =>
-              expect($backgroundLink).toHaveClass('up-current')
-              expect($popupLink).not.toHaveClass('up-current')
-              expect($unrelatedLink).not.toHaveClass('up-current')
+              expect(@layerLinkToBackgroundURL).not.toHaveClass('up-current')
+              expect(@layerLinkToLayerURL).toHaveClass('up-current')
+              expect(@layerLinkToOtherURL).not.toHaveClass('up-current')
 
           it "respects links that are added to an existing [up-nav] by a fragment update", asyncSpec (next) ->
             $nav = $fixture('.nav[up-nav]')
@@ -349,7 +354,7 @@ describe 'up.feedback', ->
             expect($area).not.toHaveClass('up-active')
 
         it 'removes .up-active when a link with [up-confirm] was not confirmed', asyncSpec (next) ->
-          $link = $fixture('a[href="/foo"][up-modal=".main"][up-confirm="Really follow?"]')
+          $link = $fixture('a[href="/foo"][up-target=".main"][up-confirm="Really follow?"]')
           spyOn(up.browser, 'whenConfirmed').and.returnValue(Promise.reject('User aborted'))
 
           Trigger.clickSequence($link)
@@ -358,7 +363,7 @@ describe 'up.feedback', ->
             expect($link).not.toHaveClass('up-active')
 
         it 'marks clicked modal openers as .up-active while the modal is loading', asyncSpec (next) ->
-          $link = $fixture('a[href="/foo"][up-modal=".main"]')
+          $link = $fixture('a[href="/foo"][up-target=".main"]')
           fixture('.main')
           Trigger.clickSequence($link)
 
@@ -368,12 +373,15 @@ describe 'up.feedback', ->
 
         it 'removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', asyncSpec (next) ->
           $link = $fixture('a[href="/foo"][up-modal=".main"]')
+          up.hello($link)
           up.proxy.preload($link)
 
-          next => @respondWith('<div class="main">new-text</div>')
-          next => Trigger.clickSequence($link)
           next =>
-            expect('.up-modal .main').toHaveText('new-text')
+            @respondWith('<div class="main">new-text</div>')
+          next =>
+            Trigger.clickSequence($link)
+          next =>
+            expect('.up-overlay .main').toHaveText('new-text')
             expect($link).not.toHaveClass('up-active')
 
         it 'removes .up-active from a clicked link if the target is already preloaded (bugfix)', asyncSpec (next) ->
