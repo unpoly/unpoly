@@ -99,6 +99,7 @@
     - It's OK for animations to run async after that
   - Test that ResetWorld is actually happening
   - Test that up.change({ content: 'foo' }) works when 'foo' is just text, without a wrapping tag
+  - Test that we can submit a form into a new layer (success / fail)
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes

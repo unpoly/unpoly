@@ -47,6 +47,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
       # Layer#peel() will manipulate the stack sync.
       # We don't wait for the peeling animation to finish.
 
+    console.debug("layer.updateHistory(%o)", @options)
+
     @layer.updateHistory(@options)
     swapPromises = @steps.map(@swapStep)
 
