@@ -714,15 +714,18 @@ describe 'up.link', ->
 
           describe 'with [up-layer] modifier', ->
 
+            beforeEach ->
+              up.motion.config.enabled = false
+
             it 'allows to name a layer for the update', asyncSpec (next) ->
               $fixture('.document').affix('.target').text('old document text')
-              up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
+              up.modal.extract('.target', "<div class='target'>old modal text</div>")
 
               next =>
                 expect($('.document .target')).toHaveText('old document text')
                 expect($('.up-overlay .target')).toHaveText('old modal text')
 
-                $linkInModal = $('.up-overlay-content').affix('a[href="/bar"][up-target=".target"][up-layer="page"]')
+                $linkInModal = $('.up-overlay-content').affix('a[href="/bar"][up-target=".target"][up-layer="parent"][up-peel="false"]')
                 Trigger.clickSequence($linkInModal)
 
               next =>
@@ -734,13 +737,13 @@ describe 'up.link', ->
 
             it 'ignores [up-layer] if the server responds with an error', asyncSpec (next) ->
               $fixture('.document').affix('.target').text('old document text')
-              up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
+              up.modal.extract('.target', "<div class='target'>old modal text</div>")
 
               next =>
                 expect($('.document .target')).toHaveText('old document text')
                 expect($('.up-overlay .target')).toHaveText('old modal text')
 
-                $linkInModal = $('.up-overlay-content').affix('a[href="/bar"][up-target=".target"][up-fail-target=".target"][up-layer="page"]')
+                $linkInModal = $('.up-overlay-content').affix('a[href="/bar"][up-target=".target"][up-fail-target=".target"][up-layer="parent"][up-peel="false"]')
                 Trigger.clickSequence($linkInModal)
 
               next =>
@@ -754,13 +757,13 @@ describe 'up.link', ->
 
             it 'allows to name a layer for a non-200 response using an [up-fail-layer] modifier', asyncSpec (next) ->
               $fixture('.document').affix('.target').text('old document text')
-              up.modal.extract('.target', "<div class='target'>old modal text</div>", sticky: true)
+              up.modal.extract('.target', "<div class='target'>old modal text</div>")
 
               next =>
                 expect($('.document .target')).toHaveText('old document text')
                 expect($('.up-overlay .target')).toHaveText('old modal text')
 
-                $linkInModal = $('.up-overlay-content').affix('a[href="/bar"][up-target=".target"][up-fail-target=".target"][up-fail-layer="page"]')
+                $linkInModal = $('.up-overlay-content').affix('a[href="/bar"][up-target=".target"][up-fail-target=".target"][up-fail-layer="parent"][up-fail-peel="false"]')
                 Trigger.clickSequence($linkInModal)
 
               next =>
