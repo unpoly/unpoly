@@ -490,14 +490,10 @@ describe 'up.proxy', ->
               expect(request.data()['_method']).toEqual([method])
 #              expect(request.data()['foo']).toEqual('bar')
 
-      describe 'with config.maxRequests set', ->
+      describe 'with config.concurrency set', ->
 
         beforeEach ->
-          @oldMaxRequests = up.proxy.config.maxRequests
-          up.proxy.config.maxRequests = 1
-
-        afterEach ->
-          up.proxy.config.maxRequests = @oldMaxRequests
+          up.proxy.config.concurrency = 1
 
         it 'limits the number of concurrent requests', asyncSpec (next) ->
           responses = []
@@ -567,7 +563,7 @@ describe 'up.proxy', ->
               done()
 
         it 'does not block the queue when a request was prevented', (done) ->
-          up.proxy.config.maxRequests = 1
+          up.proxy.config.concurrency = 1
 
           listener = jasmine.createSpy('listener').and.callFake (event) ->
             # only prevent the first request

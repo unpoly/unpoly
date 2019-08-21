@@ -442,6 +442,7 @@ up.proxy = do ->
       up.proxy.alias(request, newRequest)
 
   responseReceived = (response) ->
+    console.debug("responseReceived(%o)", response)
     request = response.request
 
     if response.isFatalError()

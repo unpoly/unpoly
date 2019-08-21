@@ -7,19 +7,19 @@ class up.Task extends up.Class
   constructor: ({ @onStart, @onAbort, @data }) ->
     @deferred = u.newDeferred()
     @spawnTime = new Date()
-    # @uid = u.uid() # TODO: Remove
+    @uid = u.uid() # TODO: Remove
 
   @delegate ['then', 'catch', 'always'], 'deferred'
 
   abort: (message) ->
     @onAbort?(message)
     @deferred.reject(up.event.abortError(message))
-    @promise
+    @deferred.promise()
 
   start: ->
     innerPromise = @onStart()
     @deferred.resolve(innerPromise)
-    return @promise
+    return @deferred.promise()
 
   matches: (conditions) ->
     conditions == true ||

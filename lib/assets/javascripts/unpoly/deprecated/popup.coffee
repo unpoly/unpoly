@@ -3,7 +3,7 @@ u = up.util
 up.popup = u.literal
   attach: (element, options = {}) ->
     up.legacy.deprecated('up.popup.attach(element, options)', 'up.layer.open({ origin: origin, ...options })')
-    up.follow(link, u.merge(options, { flavor: 'popup' }))
+    up.follow(element, u.merge(options, { flavor: 'popup' }))
 
   close: (options = {}) ->
     up.legacy.deprecated('up.popup.close()', 'up.layer.dismiss() or up.layer.accept()')

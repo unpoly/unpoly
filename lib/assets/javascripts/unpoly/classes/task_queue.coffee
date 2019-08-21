@@ -16,6 +16,8 @@ class up.TaskQueue extends up.Class
   asap: (args...) ->
     task = up.Task.fromAsapArgs(args)
 
+    console.debug("asap(%o) with concurency %o and active count %o", task.uid, @concurrency, @currentTasks.length)
+
     if @hasConcurrencyLeft()
       @runTaskNow(task)
     else
@@ -28,7 +30,7 @@ class up.TaskQueue extends up.Class
     return concurrency == -1 || @currentTasks.length < concurrency
 
   isBusy: ->
-    @currentTask.length > 0
+    @currentTasks.length > 0
 
   poke: =>
     unless @currentTask
@@ -39,15 +41,21 @@ class up.TaskQueue extends up.Class
       @startTask(task)
 
   queueTask: (task) ->
+    console.debug("queueTask(%o)", task.uid)
     @queuedTasks.push(task)
 
   pluckNextTask: ->
     @queuedTasks.shift()
 
   runTaskNow: (task) ->
+    console.debug("runTaskNow(%o)", task.uid)
     @currentTasks.push(task)
 
+    console.debug("active task count is now", @currentTasks.length)
+
     returnValue = task.start()
+
+    console.debug("return value of task %o is %o", task.uid, returnValue)
 
     if u.isPromise(returnValue)
       u.always(returnValue, => @onTaskDone(task))
@@ -55,6 +63,7 @@ class up.TaskQueue extends up.Class
       @onTaskDone(task)
 
   onTaskDone: (task) ->
+    console.debug("onTaskDone(%o)", task.uid)
     u.remove(@currentTasks, task)
     u.microtask(@poke)
 
@@ -75,5 +84,6 @@ class up.TaskQueue extends up.Class
     return
 
   abort: (conditions = true) ->
+    console.debug("abort(%o)", conditions)
     @abortList(@currentTasks, conditions)
     @abortList(@queuedTasks, conditions)

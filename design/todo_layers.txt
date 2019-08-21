@@ -73,6 +73,8 @@
 - Rename up.element.*fromHtml to ...fromHTML
 - I see no up:layer:opened events in the console?
 - Check that up.layer forwards getters for all layer properties to stack.current
+- Easy way to check that an error is an AbortError
+- Easy way to check that an error-Response has content (instead of being fatal or aborted)
 
 - Tests
   - Get tests green again
@@ -100,6 +102,8 @@
   - Test that ResetWorld is actually happening
   - Test that up.change({ content: 'foo' }) works when 'foo' is just text, without a wrapping tag
   - Test that we can submit a form into a new layer (success / fail)
+  - Test up.proxy.cancel()
+  - Test that closing a layer cancels all requests for that layer
 
 - Docs
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
@@ -114,6 +118,7 @@
   - I think the slow/recover events changed
   - New gerund-events (up:layer:opening)
   - { failOptions }
+  - up.link.config
 
 
 Finishing up
