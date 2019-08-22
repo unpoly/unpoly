@@ -114,9 +114,12 @@ class up.Request extends up.Record
 
     @context ?= @preflightLayer?.context
 
+    @uid = u.uid()
+
     @normalize()
     @aborted = false
     @deferred = u.newDeferred()
+    @deferred.promise().then(=> console.log("Request %o fulfilled", @uid)).catch(=> console.log("Request %o rejected", @uid))
 
   @delegate ['then', 'catch', 'always'], 'deferred'
 

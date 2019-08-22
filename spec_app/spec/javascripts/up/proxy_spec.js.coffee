@@ -560,7 +560,7 @@ describe 'up.proxy', ->
 
             promiseState(promise).then (result) ->
               expect(result.state).toEqual('rejected')
-              expect(result.value).toBeError(/prevented/i)
+              expect(result.value).toBeError(/prevented|aborted/i)
               done()
 
         it 'does not block the queue when a request was prevented', (done) ->
@@ -755,15 +755,20 @@ describe 'up.proxy', ->
     describe 'up.ajax', ->
 
       it 'fulfills to the response text in order to match the $.ajax() API as good as possible', (done) ->
+        console.debug("----------- spec start")
         promise = up.ajax('/url')
 
-        u.timer 100, =>
+        u.task =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
           @respondWith('response-text')
 
           promise.then (text) ->
             expect(text).toEqual('response-text')
 
             done()
+
+          promise.catch (reason) ->
+            done.fail(reason)
 
     describe 'up.proxy.preload', ->
 

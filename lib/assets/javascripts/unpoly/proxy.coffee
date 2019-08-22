@@ -238,6 +238,10 @@ up.proxy = do ->
       loadOrQueue(request)
 
     # The request is also a promise for its response.
+    console.debug("makeRequest returns request %o", request.uid)
+
+    request.then(=> console.log("makeRequest: request %o fulfilled", request.uid)).catch(=> console.log("makeRequest: request %o rejected", request.uid))
+
     return request
 
   ###**
@@ -285,9 +289,8 @@ up.proxy = do ->
   ###
   ajax = (args...) ->
     up.legacy.deprecated('up.ajax()', 'up.request()')
-    new Promise (resolve, reject) ->
-      pickResponseText = (response) -> return response.text
-      makeRequest(args...).then(pickResponseText, reject)
+    pickResponseText = (response) -> return response.text
+    makeRequest(args...).then(pickResponseText)
 
   ###**
   Returns `true` if the proxy is not currently waiting
@@ -318,7 +321,7 @@ up.proxy = do ->
     foregroundQueue.isBusy()
 
   # TODO: Document up.proxy.abort(). Also document whether it is sync or async.
-  abortRequests = (conditions) ->
+  abortRequests = (conditions = true) ->
     for queue in [foregroundQueue, preloadQueue]
       queue.abort(conditions)
 

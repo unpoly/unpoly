@@ -1,3 +1,25 @@
+function raceThenables(promises) {
+  return new Promise(function(resolve, reject) {
+    var finished = false
+
+    promises.forEach(function(promise) {
+      promise.then(function(value) {
+        if (!finished) {
+          finished = true
+          resolve(value)
+        }
+      })
+      promise.catch(function(value) {
+        if (!finished) {
+          finished = true
+          reject(value)
+        }
+      })
+    })
+  })
+}
+
+
 function promiseState(promise) {
   var uniqueValue = window['Symbol'] ? Symbol('unique') : Math.random().toString(36)
 
@@ -14,5 +36,8 @@ function promiseState(promise) {
   }
 
   var race = [promise, Promise.resolve(uniqueValue)]
-  return Promise.race(race).then(notifyPendingOrResolved, notifyRejected)
+
+  console.debug("promiseState: racing %o", race)
+
+  return raceThenables(race).then(notifyPendingOrResolved, notifyRejected)
 }

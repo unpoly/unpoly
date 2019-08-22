@@ -16,7 +16,7 @@ class up.TaskQueue extends up.Class
   asap: (args...) ->
     task = up.Task.fromAsapArgs(args)
 
-    console.debug("asap(%o) with concurency %o and active count %o", task.uid, @concurrency, @currentTasks.length)
+    console.debug("asap(%o) with concurerncy %o and active count %o", task.uid, u.evalOption(@concurrency), @currentTasks.length)
 
     if @hasConcurrencyLeft()
       @runTaskNow(task)
@@ -49,17 +49,32 @@ class up.TaskQueue extends up.Class
 
     console.debug("active task count is now", @currentTasks.length)
 
-    returnValue = task.start()
+    task.start()
+    u.always task, => @onTaskDone(task)
 
-    console.debug("return value of task %o is %o", task.uid, returnValue)
-
-    if u.isPromise(returnValue)
-      u.always(returnValue, => @onTaskDone(task))
-    else
-      @onTaskDone(task)
+#    returnValue = task.start()
+#
+#    console.debug("return value of task %o is %o (isPromise == %o)", task.uid, returnValue, u.isPromise(returnValue))
+#
+#    if u.isPromise(returnValue)
+#      u.always(returnValue, => @onTaskDone(task))
+#    else
+#      @onTaskDone(task)
 
   onTaskDone: (task) ->
     console.debug("onTaskDone(%o)", task.uid)
+
+    task.then(=> console.log('onTaskDone: task %o fulfilled', task.uid)).catch(=> console.log('onTaskDone: task %o rejected', task.uid))
+
+    promiseState(task).then (result) =>
+      console.debug("onTaskDone: state of task %o is %o", task.uid, result.state)
+
+    promiseState(task.deferred.promise()).then (result) =>
+      console.debug("onTaskDone: deferred state of task %o is %o", task.uid, result.state)
+
+    promiseState(task.deferred.promise()).then (result) =>
+      console.debug("onTaskDone: deferred.promise state of task %o is %o", task.uid, result.state)
+
     u.remove(@currentTasks, task)
     u.microtask(@poke)
 
