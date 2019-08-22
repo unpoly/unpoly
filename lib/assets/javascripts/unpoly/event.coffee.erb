@@ -333,6 +333,9 @@ up.event = do ->
     error.name = 'AbortError'
     error
 
+  isAbortError = (error) ->
+    error && (error.name == 'AbortError' || (error.isAborted?()))
+
   abortRejection = (message) ->
     Promise.reject(abortError(message))
 
@@ -401,6 +404,7 @@ up.event = do ->
   onReady: onReady
   abortError: abortError
   abortRejection: abortRejection
+  isAbortError: isAbortError
 
 up.on = up.event.on
 up.$on = up.event.$on

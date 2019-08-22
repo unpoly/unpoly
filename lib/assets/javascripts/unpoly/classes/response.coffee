@@ -126,6 +126,7 @@ class up.Response extends up.Record
   @experimental
   ###
   isSuccess: ->
+    # 0 is falsy in JavaScript
     @status && (@status >= 200 && @status <= 299)
 
   ###**
