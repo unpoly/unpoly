@@ -33,12 +33,8 @@ class up.TaskQueue extends up.Class
     @currentTasks.length > 0
 
   poke: =>
-    unless @currentTask
-      @startNextTask()
-
-  startNextTask: ->
     if task = @queuedTasks.shift()
-      @startTask(task)
+      @runTaskNow(task)
 
   queueTask: (task) ->
     console.debug("queueTask(%o)", task.uid)
