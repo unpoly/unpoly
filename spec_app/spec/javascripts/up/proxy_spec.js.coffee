@@ -139,6 +139,7 @@ describe 'up.proxy', ->
               done()
 
         it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
+          console.debug("--- request start")
           up.request('/foo')
 
           next =>

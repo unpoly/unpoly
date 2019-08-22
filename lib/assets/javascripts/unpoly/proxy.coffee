@@ -416,10 +416,16 @@ up.proxy = do ->
       request: request
       log: ['Loading %s %s', request.method, request.url]
 
-    return up.event.whenEmitted 'up:proxy:load', eventProps, ->
+    u.always request, (responseOrError) -> requestSettled(request, responseOrError)
+
+    if up.event.nobodyPrevents('up:proxy:load', eventProps)
+      console.debug("request.send()")
       request.send()
-      u.always(request, responseReceived)
-      return request
+    else
+      console.debug("request.abort()")
+      request.abort()
+
+    return request
 
   ###**
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
@@ -441,28 +447,27 @@ up.proxy = do ->
       )
       up.proxy.alias(request, newRequest)
 
-  responseReceived = (response) ->
-    console.debug("responseReceived(%o)", response)
-    request = response.request
-
-    if response.isFatalError()
-      up.emit 'up:proxy:fatal',
-        log: 'Fatal error during request'
-        request: request
-        response: response
-    else
-      registerAliasForRedirect(response) unless response.isError()
-      up.emit 'up:proxy:loaded',
-        log: ['Server responded with HTTP %d (%d bytes)', response.status, response.text.length]
-        request: request
-        response: response
-
+  requestSettled = (request, value) ->
     # While the request is still in flight, we require the target layer
     # to be able to cancel it when the layers gets closed. We now
     # loose this property, since response.request.preflightLayer.element will
     # prevent the layer DOM tree from garbage collection while the response
     # is cached by up.proxy.
     request.preflightLayer = undefined
+
+    if value.text
+      if value.isSuccess()
+        registerAliasForRedirect(value)
+
+      up.emit 'up:proxy:loaded',
+        log: ['Server responded with HTTP %d (%d bytes)', value.status, value.text.length]
+        request: request
+        response: value
+    else
+      up.emit 'up:proxy:fatal',
+        log: 'Fatal error during request'
+        request: request
+        error: value
 
   ###**
   This event is [emitted](/up.emit) when the response to an
@@ -475,13 +480,14 @@ up.proxy = do ->
 
   @event up:proxy:loaded
   @param {up.Request} event.request
-  @param {up.Response} event.response
+  @param {up.Response|Error} event.error
   @experimental
   ###
 
   ###**
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
-  encounters fatal error like a timeout or loss of network connectivity.
+  encounters fatal error like a timeout, loss of network connectivity,
+  or when the request was [aborted](/up.proxy.abort).
 
   Note that this event will *not* be emitted when the server produces an
   error message with an HTTP status like `500`. When the server can produce

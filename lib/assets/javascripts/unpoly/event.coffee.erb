@@ -327,8 +327,7 @@ up.event = do ->
     buildEmitter(args).whenEmitted()
 
   abortError = (message) ->
-    message == 'Aborted'
-    error = new Error(message)
+    error = new Error('Aborted')
     # Emulate the exception that aborted fetch() would throw
     error.name = 'AbortError'
     error

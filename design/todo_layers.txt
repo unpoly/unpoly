@@ -75,6 +75,8 @@
 - Check that up.layer forwards getters for all layer properties to stack.current
 - Easy way to check that an error is an AbortError
 - Easy way to check that an error-Response has content (instead of being fatal or aborted)
+- Can we save code by no longer having up.proxy wrapping up.Request's promise with more functionality?
+- Can we get rid of the up.Task wrapper and have up.Request implement the interface?
 
 - Tests
   - Get tests green again
@@ -175,7 +177,10 @@ Later?
 - { layer: 'solo' } - replaces all overlays with the new overlay
 - form[up-target] without a target now looks funny
   - I now have form[up-follow] as a workaround
-- When up:procxy:load is prevented, the request should be rejected
+- When up:procxy:load is prevented, the request should be resolved with an AbortError
+- Replace up.Response.isSuccess() with up.Response#ok
+- Replace up.Response.isFatal() with !up.Response#body
+- Emit up:proxy:fatal when responses are aborted due to user or timeout
 
 
 Decisions

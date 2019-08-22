@@ -1,7 +1,5 @@
 u = up.util
 
-# TODO: Can we get rid of the up.Task wrapper and have up.Request implement the interface
-
 class up.Task extends up.Class
 
   constructor: ({ @onStart, @onAbort, @data }) ->
@@ -18,6 +16,7 @@ class up.Task extends up.Class
 
   start: ->
     innerPromise = @onStart()
+    console.debug("task %o returned innerPromise", @uid, innerPromise)
     @deferred.resolve(innerPromise)
     return @deferred.promise()
 

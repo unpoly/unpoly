@@ -196,11 +196,13 @@ class up.Request extends up.Record
 
   abort: (message) =>
     @xhr?.abort()
-    @setAbortedState()
+    @setAbortedState(message)
 
   setAbortedState: (message = 'Request was aborted') =>
+    console.debug("setAbortedState(%o)", message)
     @aborted = true
     @deferred.reject(up.event.abortError(message))
+    console.debug("Request deferred %o was rejected", @deferred)
 
   responseReceived: =>
     @respondWith(@extractResponseFromXhr())
@@ -259,10 +261,10 @@ class up.Request extends up.Record
     responseAttrs =
       method: @method
       url: @url
-      text: @xhr.responseText
-      status: @xhr.status
       request: this
       xhr: @xhr
+      text: @xhr.responseText
+      status: @xhr.status
       title: up.protocol.titleFromXhr(@xhr)
       acceptLayer: up.protocol.acceptLayerFromXhr(@xhr)
       dismissLayer: up.protocol.dismissLayerFromXhr(@xhr)
