@@ -77,6 +77,7 @@
 - Easy way to check that an error-Response has content (instead of being fatal or aborted)
 - Can we save code by no longer having up.proxy wrapping up.Request's promise with more functionality?
 - Can we get rid of the up.Task wrapper and have up.Request implement the interface?
+- Deprecate unpoly-bootstrap3
 
 - Tests
   - Get tests green again
