@@ -14,6 +14,7 @@ describe 'up.modal', ->
 
       it "loads the given link's destination in a dialog window", (done) ->
         $link = $fixture('a[href="/path/to"][up-modal=".middle"]').text('link')
+        up.hello($link)
         promise = up.modal.follow($link)
 
         u.task =>
@@ -418,6 +419,7 @@ describe 'up.modal', ->
       it 'allows to register new modal variants with its own default configuration', asyncSpec (next) ->
         up.modal.flavors.variant = { maxWidth: 200 }
         $link = $fixture('a[href="/path"][up-modal=".target"][up-flavor="variant"]')
+        $up.hello($link)
         Trigger.click($link)
 
         next =>
@@ -433,6 +435,7 @@ describe 'up.modal', ->
       it 'does not change the configuration of non-flavored modals', asyncSpec (next) ->
         up.modal.flavors.variant = { maxWidth: 200 }
         $link = $fixture('a[href="/path"][up-modal=".target"]')
+        $up.hello($link)
         Trigger.click($link)
 
         next =>
@@ -476,11 +479,13 @@ describe 'up.modal', ->
         # actually making a request.
         @stubFollow = =>
           @$link = $fixture('a[href="/path"][up-modal=".target"]')
+          up.hello(@$link)
           @followSpy = up.modal.knife.mock('followAsap').and.returnValue(Promise.resolve())
           @defaultSpy = spyOn(up.link, 'allowDefault').and.callFake((event) -> event.preventDefault())
 
       it 'opens the clicked link in a modal', asyncSpec (next) ->
         @$link = $fixture('a[href="/path"][up-modal=".target"]')
+        up.hello(@$link)
         Trigger.click(@$link)
 
         next =>
@@ -557,6 +562,7 @@ describe 'up.modal', ->
 
         it 'honours the given method', asyncSpec (next) ->
           $link = $fixture('a[href="/path"][up-modal=".target"][up-method="post"]')
+          up.hello($link)
           Trigger.click($link)
 
           next =>
@@ -571,6 +577,7 @@ describe 'up.modal', ->
 
         $container = $fixture('.container').text('old container content')
         $link = $container.affix('a[href="/new-path"][up-modal=".target"]')
+        up.hello($link)
 
         expect(location.pathname).toEqual('/original-path')
 
@@ -597,7 +604,9 @@ describe 'up.modal', ->
         up.motion.config.enabled = false
 
         $link1 = $fixture('a[href="/path1"][up-modal=".target"]')
+        up.hello($link1)
         $link2 = $fixture('a[href="/path2"][up-modal=".target"]')
+        up.hello($link2)
         Trigger.clickSequence($link1)
 
         next =>

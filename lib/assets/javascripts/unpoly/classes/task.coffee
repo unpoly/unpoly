@@ -29,7 +29,7 @@ class up.Task extends up.Class
   matches: (conditions) ->
     conditions == true ||
       conditions == this ||
-      (@data && u.objectContains(data, conditions)) ||
+      (@data && u.objectContains(@data, conditions)) ||
       (@data && conditions == @data)
 
   @fromAsapArgs: (args) ->

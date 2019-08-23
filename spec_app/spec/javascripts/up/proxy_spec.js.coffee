@@ -778,6 +778,7 @@ describe 'up.proxy', ->
           @requestTarget = => @lastRequest().requestHeaders['X-Up-Target']
 
         it "loads and caches the given link's destination", asyncSpec (next) ->
+          console.debug("---------------------")
           $fixture('.target')
           $link = $fixture('a[href="/path"][up-target=".target"]')
 
@@ -785,6 +786,7 @@ describe 'up.proxy', ->
 
           next =>
             cachedPromise = up.proxy.get(url: '/path', target: '.target')
+            debugger
             expect(u.isPromise(cachedPromise)).toBe(true)
 
         it "does not load a link whose method has side-effects", (done) ->
@@ -837,17 +839,20 @@ describe 'up.proxy', ->
 
           it 'includes the [up-modal] selector as an X-Up-Target header and does not replace it with a fallback, since the modal frame always exists', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-modal=".target"]')
+            up.hello($link)
             up.proxy.preload($link)
             next => expect(@requestTarget()).toEqual('.target')
 
           it 'does not create a modal frame', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-modal=".target"]')
+            up.hello($link)
             up.proxy.preload($link)
             next =>
-              expect('.up-modal').not.toBeAttached()
+              expect('.up-overlay').not.toBeAttached()
 
           it 'does not emit an up:modal:open event', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-modal=".target"]')
+            up.hello($link)
             openListener = jasmine.createSpy('listener')
             up.on('up:modal:open', openListener)
             up.proxy.preload($link)
@@ -856,42 +861,45 @@ describe 'up.proxy', ->
 
           it 'does not close a currently open modal', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-modal=".target"]')
+            up.hello($link)
             closeListener = jasmine.createSpy('listener')
             up.on('up:modal:close', closeListener)
 
             up.modal.extract('.content', '<div class="content">Modal content</div>')
 
             next =>
-              expect('.up-modal .content').toBeAttached()
+              expect('.up-overlay .content').toBeAttached()
 
             next =>
               up.proxy.preload($link)
 
             next =>
-              expect('.up-modal .content').toBeAttached()
+              expect('.up-overlay .content').toBeAttached()
               expect(closeListener).not.toHaveBeenCalled()
 
             next =>
               up.modal.close()
 
             next =>
-              expect('.up-modal .content').not.toBeAttached()
+              expect('.up-overlay .content').not.toBeAttached()
               expect(closeListener).toHaveBeenCalled()
 
           it 'does not prevent the opening of other modals while the request is still pending', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-modal=".target"]')
+            up.hello($link)
             up.proxy.preload($link)
 
             next =>
               up.modal.extract('.content', '<div class="content">Modal content</div>')
 
             next =>
-              expect('.up-modal .content').toBeAttached()
+              expect('.up-overlay .content').toBeAttached()
 
           it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
             requestSpy = spyOn(up, 'request')
 
             $link = $fixture('a[href="/path"][up-modal=".target"]')
+            up.hello($link)
             up.proxy.preload($link)
 
             next =>
@@ -904,18 +912,21 @@ describe 'up.proxy', ->
           
           it 'includes the [up-popup] selector as an X-Up-Target header and does not replace it with a fallback, since the popup frame always exists', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-popup=".target"]')
+            up.hello($link)
             up.proxy.preload($link)
             next => expect(@requestTarget()).toEqual('.target')
 
 
           it 'does not create a popup frame', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-popup=".target"]')
+            up.hello($link)
             up.proxy.preload($link)
             next =>
               expect('.up-popup').not.toBeAttached()
 
           it 'does not emit an up:popup:open event', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-popup=".target"]')
+            up.hello($link)
             openListener = jasmine.createSpy('listener')
             up.on('up:popup:open', openListener)
             up.proxy.preload($link)
@@ -924,6 +935,7 @@ describe 'up.proxy', ->
 
           it 'does not close a currently open popup', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-popup=".target"]')
+            up.hello($link)
             closeListener = jasmine.createSpy('listener')
             up.on('up:popup:close', closeListener)
 
@@ -949,6 +961,7 @@ describe 'up.proxy', ->
 
           it 'does not prevent the opening of other popups while the request is still pending', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-popup=".target"]')
+            up.hello($link)
             up.proxy.preload($link)
 
             next =>
@@ -962,6 +975,7 @@ describe 'up.proxy', ->
             requestSpy = spyOn(up, 'request')
 
             $link = $fixture('a[href="/path"][up-popup=".target"]')
+            up.hello($link)
             up.proxy.preload($link)
 
             next =>

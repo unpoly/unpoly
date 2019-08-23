@@ -1,3 +1,7 @@
+// We would prefer to use Promise.race() here.
+// Unfortunately Promise.race() converts *all* non-native thenables to native Promises
+// using Promise.resolve(). This way the thenable takes another microtask tick to fulfill,
+// and can never win the race.
 function raceThenables(promises) {
   return new Promise(function(resolve, reject) {
     var finished = false
@@ -18,7 +22,6 @@ function raceThenables(promises) {
     })
   })
 }
-
 
 function promiseState(promise) {
   var uniqueValue = window['Symbol'] ? Symbol('unique') : Math.random().toString(36)

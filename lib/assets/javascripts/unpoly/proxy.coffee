@@ -394,6 +394,9 @@ up.proxy = do ->
     # and target. See up.Request#cacheKey().
     set(request, request)
 
+    console.debug("setting cache: %o / %o", request)
+    console.debug("getting cache: %o", request)
+
     # Immediately uncache failed requests.
     # We have no control over the server, and another request with the
     # same properties might succeed.

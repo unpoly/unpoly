@@ -571,7 +571,7 @@ up.fragment = do ->
 
   shouldLogDestruction = (element, options) ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
-    options.log != false && !e.matches(element, '.up-placeholder, .up-modal')
+    options.log != false && !e.matches(element, '.up-overlay')
 
   setLayerOption = (target, options) ->
     # up.fragment functions usually only see elements in the current layer.

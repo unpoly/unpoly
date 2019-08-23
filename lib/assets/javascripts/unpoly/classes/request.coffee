@@ -112,7 +112,10 @@ class up.Request extends up.Record
     super(options)
     @params = new up.Params(@params) # copies, which we want
 
-    @context ?= @preflightLayer?.context
+    # Make sure @context is always an object, even if no preflightLayer is given.
+    # Note that @context is a part of our @cacheKey(), since different contexts
+    # might yield different server responses.
+    @context ?= @preflightLayer?.context || {}
 
     @uid = u.uid()
 

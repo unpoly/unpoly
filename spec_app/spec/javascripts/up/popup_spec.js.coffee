@@ -33,7 +33,7 @@ describe 'up.popup', ->
           top: '50px'
 
         $link = $container.affix('a[href="/path/to"][up-popup=".middle"]').text('link')
-
+        up.hello($link)
         up.popup.attach($link)
 
         next =>
@@ -55,6 +55,7 @@ describe 'up.popup', ->
       it 'always makes a request for the given selector, and does not "improve" the selector with a fallback', asyncSpec (next) ->
         $container = $fixture('.container')
         $link = $container.affix('a[href="/path/to"][up-popup=".content"]').text('link')
+        up.hello($link)
         up.popup.attach($link)
         next =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -132,6 +133,7 @@ describe 'up.popup', ->
           expect(up.popup.coveredURL()).toBeMissing()
 
           $popupLink = $fixture('a[href="/bar"][up-popup=".container"][up-history="true"]')
+          up.hello($popupLink)
           Trigger.clickSequence($popupLink)
 
           next =>
@@ -158,6 +160,7 @@ describe 'up.popup', ->
       beforeEach ->
         @stubAttach = =>
           @$link = $fixture('a[href="/path"][up-popup=".target"]')
+          up.hello(@$link)
           @attachSpy = up.popup.knife.mock('attachAsap').and.returnValue(Promise.resolve())
           @defaultSpy = spyOn(up.link, 'allowDefault').and.callFake((event) -> event.preventDefault())
 
@@ -193,7 +196,9 @@ describe 'up.popup', ->
         up.popup.config.closeDuration = 0
 
         $link1 = $fixture('a[href="/path1"][up-popup=".target"]')
+        up.hello($link1)
         $link2 = $fixture('a[href="/path2"][up-popup=".target"]')
+        up.hello($link2)
 
         events = []
         u.each ['up:popup:open', 'up:popup:opened', 'up:popup:close', 'up:popup:closed'], (event) ->
@@ -257,6 +262,7 @@ describe 'up.popup', ->
 
         it 'honours the given method', asyncSpec (next) ->
           $link = $fixture('a[href="/path"][up-popup=".target"][up-method="post"]')
+          up.hello($link)
           Trigger.click($link)
 
           next =>
