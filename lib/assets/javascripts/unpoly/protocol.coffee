@@ -246,7 +246,7 @@ up.protocol = do ->
     The parameter name can be configured as a string or as function that returns the parameter name.
     If no name is set, no token will be sent.
 
-    Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
+    Defaults to the `content` attribute of a `<meta>` tag named `csrf-param`:
 
         <meta name="csrf-param" content="authenticity_token" />
 
