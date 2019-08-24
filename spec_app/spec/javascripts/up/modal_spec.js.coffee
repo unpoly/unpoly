@@ -26,12 +26,12 @@ describe 'up.modal', ->
             """
 
           promise.then =>
-            expect($('.up-modal')).toBeAttached()
-            expect($('.up-modal-dialog')).toBeAttached()
-            expect($('.up-modal-dialog .middle')).toBeAttached()
-            expect($('.up-modal-dialog .middle')).toHaveText('new-middle')
-            expect($('.up-modal-dialog .before')).not.toBeAttached()
-            expect($('.up-modal-dialog .after')).not.toBeAttached()
+            expect($('.up-overlay[up-flavor=modal]')).toBeAttached()
+            expect($('.up-overlay-content')).toBeAttached()
+            expect($('.up-overlay-content .middle')).toBeAttached()
+            expect($('.up-overlay-content .middle')).toHaveText('new-middle')
+            expect($('.up-overlay-content .before')).not.toBeAttached()
+            expect($('.up-overlay-content .after')).not.toBeAttached()
             done()
 
     describe 'up.modal.extract', ->
@@ -47,12 +47,12 @@ describe 'up.modal', ->
           """
 
         promise.then =>
-          expect($('.up-modal')).toBeAttached()
-          expect($('.up-modal-dialog')).toBeAttached()
-          expect($('.up-modal-dialog .middle')).toBeAttached()
-          expect($('.up-modal-dialog .middle')).toHaveText('new-middle')
-          expect($('.up-modal-dialog .before')).not.toBeAttached()
-          expect($('.up-modal-dialog .after')).not.toBeAttached()
+          expect($('.up-overlay[up-flavor=modal]')).toBeAttached()
+          expect($('.up-overlay-content')).toBeAttached()
+          expect($('.up-overlay-content .middle')).toBeAttached()
+          expect($('.up-overlay-content .middle')).toHaveText('new-middle')
+          expect($('.up-overlay-content .before')).not.toBeAttached()
+          expect($('.up-overlay-content .after')).not.toBeAttached()
 
           # Can't change URLs
           expect(location.href).toEqual(oldHref)
@@ -73,16 +73,16 @@ describe 'up.modal', ->
           """
 
         promise.then =>
-          expect('.up-modal').toBeAttached()
-          expect('.up-modal-dialog').toBeAttached()
-          expect('.up-modal-dialog .middle').toBeAttached()
-          expect('.up-modal-dialog .middle').toHaveText('new-middle')
-          expect('.up-modal-dialog .before').not.toBeAttached()
-          expect('.up-modal-dialog .after').not.toBeAttached()
+          expect('.up-overlay').toBeAttached()
+          expect('.up-overlay-content').toBeAttached()
+          expect('.up-overlay-content .middle').toBeAttached()
+          expect('.up-overlay-content .middle').toHaveText('new-middle')
+          expect('.up-overlay-content .before').not.toBeAttached()
+          expect('.up-overlay-content .after').not.toBeAttached()
           expect(location.pathname).toMatchURL('/foo')
           done()
 
-      it "doesn't create an .up-modal frame and replaces { failTarget } if the server returns a non-200 response", (done) ->
+      it "doesn't create a modal frame and replaces { failTarget } if the server returns a non-200 response", (done) ->
         $fixture('.error').text('old error')
 
         promise = up.modal.visit('/foo', target: '.target', failTarget: '.error')
@@ -96,7 +96,7 @@ describe 'up.modal', ->
               """
 
         promise.catch =>
-          expect('.up-modal').not.toBeAttached()
+          expect('.up-overlay').not.toBeAttached()
           expect('.error').toHaveText('new error')
           done()
 
@@ -125,8 +125,8 @@ describe 'up.modal', ->
               @respondWith('<div class="container">text</div>')
 
             promise.then ->
-              $modal = $('.up-modal')
-              $viewport = $modal.find('.up-modal-viewport')
+              $modal = $('.up-overlay')
+              $viewport = $modal.find('.up-overlay-viewport')
               scrollbarWidth = up.viewport.scrollbarWidth()
 
               expect($modal).toBeAttached()
@@ -142,27 +142,27 @@ describe 'up.modal', ->
             expect(true).toBe(true)
             done()
 
-        it "gives the scrollbar to .up-modal instead of .up-modal-viewport while animating, so we don't see scaled scrollbars in a zoom-in animation", (done) ->
-          openPromise = up.modal.extract('.container', '<div class="container">text</div>', animation: 'fade-in', duration: 100)
-
-          u.timer 50, ->
-            $modal = $('.up-modal')
-            $viewport = $modal.find('.up-modal-viewport')
-            expect($modal).toHaveClass('up-modal-animating')
-            expect($modal.css('overflow-y')).toEqual('scroll')
-            expect($viewport.css('overflow-y')).toEqual('hidden')
-
-            openPromise.then ->
-              expect($modal).not.toHaveClass('up-modal-animating')
-              expect($modal.css('overflow-y')).not.toEqual('scroll')
-              expect($viewport.css('overflow-y')).toEqual('scroll')
-              closePromise = up.modal.close(animation: 'fade-out', duration: 400)
-
-              u.timer 50, ->
-                expect($modal).toHaveClass('up-modal-animating')
-                expect($modal.css('overflow-y')).toEqual('scroll')
-                expect($viewport.css('overflow-y')).toEqual('hidden')
-                done()
+#        it "gives the scrollbar to .up-modal instead of .up-modal-viewport while animating, so we don't see scaled scrollbars in a zoom-in animation", (done) ->
+#          openPromise = up.modal.extract('.container', '<div class="container">text</div>', animation: 'fade-in', duration: 100)
+#
+#          u.timer 50, ->
+#            $modal = $('.up-modal')
+#            $viewport = $modal.find('.up-modal-viewport')
+#            expect($modal).toHaveClass('up-modal-animating')
+#            expect($modal.css('overflow-y')).toEqual('scroll')
+#            expect($viewport.css('overflow-y')).toEqual('hidden')
+#
+#            openPromise.then ->
+#              expect($modal).not.toHaveClass('up-modal-animating')
+#              expect($modal.css('overflow-y')).not.toEqual('scroll')
+#              expect($viewport.css('overflow-y')).toEqual('scroll')
+#              closePromise = up.modal.close(animation: 'fade-out', duration: 400)
+#
+#              u.timer 50, ->
+#                expect($modal).toHaveClass('up-modal-animating')
+#                expect($modal.css('overflow-y')).toEqual('scroll')
+#                expect($viewport.css('overflow-y')).toEqual('hidden')
+#                done()
 
         it "does not add right padding to the body if the document's overflow element has overflow-y: hidden", (done) ->
           restoreBody = e.setTemporaryStyle(up.viewport.rootOverflowElement(), overflowY: 'hidden')
@@ -170,7 +170,7 @@ describe 'up.modal', ->
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')
-            expect($('.up-modal')).toBeAttached()
+            expect($('.up-overlay[up-flavor=modal]')).toBeAttached()
             expect(parseInt($body.css('padding-right'))).toBe(0)
 
             up.modal.close().then ->
@@ -184,7 +184,7 @@ describe 'up.modal', ->
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')
-            expect($('.up-modal')).toBeAttached()
+            expect($('.up-overlay[up-flavor=modal]')).toBeAttached()
             expect(parseInt($body.css('padding-right'))).toBe(0)
 
             up.modal.close().then ->
@@ -258,8 +258,8 @@ describe 'up.modal', ->
 
                   u.timer 180, =>
                     expect(jasmine.Ajax.requests.count()).toEqual(2)
-                    expect($('.up-modal').length).toBe(1)
-                    expect($('.up-modal-dialog').length).toBe(1)
+                    expect($('.up-overlay[up-flavor=modal]').length).toBe(1)
+                    expect($('.up-overlay-frame').length).toBe(1)
                     expect($('.container')).toHaveText('response3')
                     bodyPadding = parseInt($('body').css('padding-right'))
                     expect(bodyPadding).toBeAround(scrollbarWidth, 10)
@@ -331,54 +331,54 @@ describe 'up.modal', ->
             # First modal has finished closing, second modal has finished opening.
             expect($('.target')).toHaveText('response2')
 
-        it 'uses the correct flavor config for the first and second modal', asyncSpec (next) ->
-          up.modal.config.openAnimation = 'fade-in'
-          up.modal.config.openDuration = 20
-          up.modal.config.closeAnimation = 'fade-out'
-          up.modal.config.closeDuration = 20
-          up.modal.flavor 'custom-drawer',
-            openAnimation: 'move-from-right'
-            closeAnimation: 'move-to-right'
-
-          animations = []
-          spyOn(up, 'animate').and.callFake (element, animation, options) ->
-            if e.matches(element, '.up-modal-viewport')
-              animations.push
-                text: element.querySelector('.target').innerText.trim()
-                animation: animation
-            deferred = u.newDeferred()
-            u.timer options.duration, -> deferred.resolve()
-            deferred.promise()
-
-          up.modal.extract('.target', '<div class="target">response1</div>')
-
-          next =>
-            expect(animations).toEqual [
-              { animation: 'fade-in', text: 'response1' }
-            ]
-
-          next.after 30, =>
-            # first modal is now done animating
-            expect(animations).toEqual [
-              { animation: 'fade-in', text: 'response1' }
-            ]
-
-            up.modal.extract('.target', '<div class="target">response2</div>', flavor: 'custom-drawer')
-
-          next =>
-            expect(animations).toEqual [
-              { animation: 'fade-in', text: 'response1' },
-              { animation: 'fade-out', text: 'response1' },
-            ]
-
-          next.after 30, =>
-            expect(animations).toEqual [
-              { animation: 'fade-in', text: 'response1' },
-              { animation: 'fade-out', text: 'response1' },
-              { animation: 'move-from-right', text: 'response2' }
-            ]
-
-            expect($('.up-modal').attr('up-flavor')).toEqual('custom-drawer')
+#        it 'uses the correct flavor config for the first and second modal', asyncSpec (next) ->
+#          up.modal.config.openAnimation = 'fade-in'
+#          up.modal.config.openDuration = 20
+#          up.modal.config.closeAnimation = 'fade-out'
+#          up.modal.config.closeDuration = 20
+#          up.modal.flavor 'custom-drawer',
+#            openAnimation: 'move-from-right'
+#            closeAnimation: 'move-to-right'
+#
+#          animations = []
+#          spyOn(up, 'animate').and.callFake (element, animation, options) ->
+#            if e.matches(element, '.up-overlay-viewport')
+#              animations.push
+#                text: element.querySelector('.target').innerText.trim()
+#                animation: animation
+#            deferred = u.newDeferred()
+#            u.timer options.duration, -> deferred.resolve()
+#            deferred.promise()
+#
+#          up.modal.extract('.target', '<div class="target">response1</div>')
+#
+#          next =>
+#            expect(animations).toEqual [
+#              { animation: 'fade-in', text: 'response1' }
+#            ]
+#
+#          next.after 30, =>
+#            # first modal is now done animating
+#            expect(animations).toEqual [
+#              { animation: 'fade-in', text: 'response1' }
+#            ]
+#
+#            up.modal.extract('.target', '<div class="target">response2</div>', flavor: 'custom-drawer')
+#
+#          next =>
+#            expect(animations).toEqual [
+#              { animation: 'fade-in', text: 'response1' },
+#              { animation: 'fade-out', text: 'response1' },
+#            ]
+#
+#          next.after 30, =>
+#            expect(animations).toEqual [
+#              { animation: 'fade-in', text: 'response1' },
+#              { animation: 'fade-out', text: 'response1' },
+#              { animation: 'move-from-right', text: 'response2' }
+#            ]
+#
+#            expect($('.up-overlay').attr('up-flavor')).toEqual('custom-drawer')
 
 
         it 'never resolves the open() promise and shows no error if close() was called before the response was received', asyncSpec (next) ->
@@ -414,38 +414,38 @@ describe 'up.modal', ->
                 expect(up.modal.coveredURL()).toBeMissing()
                 done()
 
-    describe 'up.modal.flavors', ->
-
-      it 'allows to register new modal variants with its own default configuration', asyncSpec (next) ->
-        up.modal.flavors.variant = { maxWidth: 200 }
-        $link = $fixture('a[href="/path"][up-modal=".target"][up-flavor="variant"]')
-        $up.hello($link)
-        Trigger.click($link)
-
-        next =>
-          @respondWith('<div class="target">new text</div>')
-
-        next =>
-          $modal = $('.up-modal')
-          $dialog = $modal.find('.up-modal-dialog')
-          expect($modal).toBeAttached()
-          expect($modal.attr('up-flavor')).toEqual('variant')
-          expect($dialog.attr('style')).toContain('max-width: 200px')
-
-      it 'does not change the configuration of non-flavored modals', asyncSpec (next) ->
-        up.modal.flavors.variant = { maxWidth: 200 }
-        $link = $fixture('a[href="/path"][up-modal=".target"]')
-        $up.hello($link)
-        Trigger.click($link)
-
-        next =>
-          @respondWith('<div class="target">new text</div>')
-
-        next =>
-          $modal = $('.up-modal')
-          $dialog = $modal.find('.up-modal-dialog')
-          expect($modal).toBeAttached()
-          expect($dialog.attr('style')).toBeBlank()
+#    describe 'up.modal.flavors', ->
+#
+#      it 'allows to register new modal variants with its own default configuration', asyncSpec (next) ->
+#        up.modal.flavors.variant = { maxWidth: 200 }
+#        $link = $fixture('a[href="/path"][up-modal=".target"][up-flavor="variant"]')
+#        $up.hello($link)
+#        Trigger.click($link)
+#
+#        next =>
+#          @respondWith('<div class="target">new text</div>')
+#
+#        next =>
+#          $modal = $('.up-modal')
+#          $dialog = $modal.find('.up-modal-dialog')
+#          expect($modal).toBeAttached()
+#          expect($modal.attr('up-flavor')).toEqual('variant')
+#          expect($dialog.attr('style')).toContain('max-width: 200px')
+#
+#      it 'does not change the configuration of non-flavored modals', asyncSpec (next) ->
+#        up.modal.flavors.variant = { maxWidth: 200 }
+#        $link = $fixture('a[href="/path"][up-modal=".target"]')
+#        $up.hello($link)
+#        Trigger.click($link)
+#
+#        next =>
+#          @respondWith('<div class="target">new text</div>')
+#
+#        next =>
+#          $modal = $('.up-modal')
+#          $dialog = $modal.find('.up-modal-dialog')
+#          expect($modal).toBeAttached()
+#          expect($dialog.attr('style')).toBeBlank()
 
     describe 'up.modal.close', ->
 
@@ -453,10 +453,10 @@ describe 'up.modal', ->
         up.modal.extract('.content', '<div class="content">Modal content</div>')
 
         u.task =>
-          expect('.up-modal .content').toBeAttached()
+          expect('.up-overlay[up-flavor=modal] .content').toBeAttached()
 
           up.modal.close().then ->
-            expect('.up-modal .content').not.toBeAttached()
+            expect('.up-overlay[up-flavor=modal] .content').not.toBeAttached()
             done()
 
       it 'does nothing if no modal is open', (done) ->
@@ -494,8 +494,8 @@ describe 'up.modal', ->
           @respondWith '<div class="target">new content</div>'
 
         next =>
-          expect('.up-modal').toBeAttached()
-          expect('.up-modal-content').toHaveText('new content')
+          expect('.up-overlay[up-flavor=modal]').toBeAttached()
+          expect('.up-overlay-content').toHaveText('new content')
 
       describe 'when modifier keys are held', ->
 
@@ -588,7 +588,7 @@ describe 'up.modal', ->
 
         next =>
           expect(location.pathname).toEqual('/new-path')
-          expect('.up-modal .target').toHaveText('modal content')
+          expect('.up-overlay[up-flavor=modal] .target').toHaveText('modal content')
 
           history.back()
 
@@ -598,7 +598,7 @@ describe 'up.modal', ->
         next =>
           expect(location.pathname).toEqual('/original-path')
           expect('.container').toHaveText('restored container content')
-          expect('.up-modal').not.toBeAttached()
+          expect('.up-overlay').not.toBeAttached()
 
       it 'allows to open a modal after closing a previous modal with the escape key (bugfix)', asyncSpec (next) ->
         up.motion.config.enabled = false
@@ -644,17 +644,14 @@ describe 'up.modal', ->
 
         next =>
           expect(up.modal.isOpen()).toBe(true)
-          expect($('.up-modal').attr('up-flavor')).toEqual('drawer')
+          expect($('.up-overlay').attr('up-flavor')).toEqual('drawer')
           windowHeight = up.viewport.rootHeight()
-          modalHeight = $('.up-modal-content').outerHeight()
+          modalHeight = $('.up-overlay-frame').outerHeight()
           expect(modalHeight).toEqual(windowHeight)
-          expect($('.up-modal-content').offset()).toEqual(top: 0, left: 0)
+          expect($('.up-overlay-frame').offset()).toEqual(top: 0, left: 0)
 
-      it 'puts the drawer on the right if the opening link sits in the right 50% of the screen', asyncSpec (next) ->
-        $link = $fixture('a[href="/foo"][up-drawer=".target"]').text('label')
-        $link.css
-          position: 'absolute'
-          right: '0'
+      it 'puts the drawer on the right with [up-position=right]', asyncSpec (next) ->
+        $link = $fixture('a[href="/foo"][up-drawer=".target"][up-position="right"]').text('label')
         up.hello($link)
         Trigger.clickSequence($link)
 
@@ -664,11 +661,11 @@ describe 'up.modal', ->
         next =>
           expect(up.modal.isOpen()).toBe(true)
           windowWidth = up.viewport.rootWidth()
-          modalWidth = $('.up-modal-content').outerWidth()
+          modalWidth = $('.up-overlay-frame').outerWidth()
           scrollbarWidth = up.viewport.scrollbarWidth()
-          expect($('.up-modal-content').offset().left).toBeAround(windowWidth - modalWidth - scrollbarWidth, 1.0)
+          expect($('.up-overlay-frame').offset().left).toBeAround(windowWidth - modalWidth - scrollbarWidth, 1.0)
 
-    describe '[up-close]', ->
+    describe '[up-dismiss]', ->
 
       backgroundClicked = undefined
 
@@ -683,7 +680,7 @@ describe 'up.modal', ->
           up.modal.extract('.target', '<div class="target"><a up-close>text</a></div>', animation: false)
 
           next =>
-            $link = $('.up-modal a[up-close]') # link is within the modal
+            $link = $('.up-overlay a[up-dismiss]') # link is within the modal
             Trigger.clickSequence($link)
 
           next =>
@@ -694,7 +691,7 @@ describe 'up.modal', ->
       describe 'when no modal is open', ->
 
         it 'does nothing and allows the event chain to continue', asyncSpec (next) ->
-          $link = $fixture('a[up-close]') # link is outside the modal
+          $link = $fixture('a[up-dismiss]') # link is outside the modal
           up.hello($link)
           Trigger.clickSequence($link)
 
@@ -707,7 +704,7 @@ describe 'up.modal', ->
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
 
         next =>
-          $closeIcon = $('.up-modal-close')
+          $closeIcon = $('.up-overlay-dismiss')
           Trigger.clickSequence($closeIcon)
 
         next =>
@@ -717,7 +714,7 @@ describe 'up.modal', ->
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
 
         next =>
-          $backdrop = $('.up-modal-backdrop')
+          $backdrop = $('.up-overlay-backdrop')
           Trigger.clickSequence($backdrop)
 
         next =>
@@ -751,7 +748,7 @@ describe 'up.modal', ->
         up.on 'up:modal:close', (e) -> e.preventDefault()
 
         next =>
-          $backdrop = $('.up-modal-backdrop')
+          $backdrop = $('.up-overlay-backdrop')
           Trigger.clickSequence($backdrop)
 
         next =>
@@ -761,26 +758,26 @@ describe 'up.modal', ->
           # the event handler, our handler mutes the rejection.
           expect(window).not.toHaveUnhandledRejections()
 
-      describe 'when opened with { closable: false }', ->
+      describe 'when opened with { dismissable: false }', ->
 
         it 'does not render a close icon', asyncSpec (next) ->
-          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
+          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, dismissable: false)
 
           next =>
-            expect('.up-modal').not.toHaveDescendant('.up-modal-close')
+            expect('.up-overlay').not.toHaveDescendant('.up-overlay-dismiss')
 
         it 'does not close the modal on backdrop click', asyncSpec (next) ->
-          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
+          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, dismissable: false)
 
           next =>
-            $backdrop = $('.up-modal-backdrop')
+            $backdrop = $('.up-overlay-backdrop')
             Trigger.clickSequence($backdrop)
 
           next =>
             expect(up.modal.isOpen()).toBe(true)
 
         it 'does not close the modal when the user presses the escape key', asyncSpec (next) ->
-          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, closable: false)
+          up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, dismissable: false)
 
           next =>
             Trigger.escapeSequence(document.body)
@@ -806,7 +803,7 @@ describe 'up.modal', ->
         next =>
           expect($outside).toBeAttached()
           expect($outside).toHaveText('old outside')
-          expect($('.up-modal-content')).toHaveText('new text')
+          expect($('.up-overlay-content')).toHaveText('new text')
 
       it 'auto-closes the modal when a replacement from inside the modal affects a selector behind the modal', asyncSpec (next) ->
         $fixture('.outside').text('old outside')
@@ -820,7 +817,7 @@ describe 'up.modal', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-modal')).not.toBeAttached()
+          expect($('.up-overlay')).not.toBeAttached()
 
       it 'does not restore the covered URL when auto-closing (since it would override the URL from the triggering update)', asyncSpec (next) ->
         up.history.config.enabled = true
@@ -853,7 +850,7 @@ describe 'up.modal', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-modal')).toBeAttached()
+          expect($('.up-overlay')).toBeAttached()
 
       it 'does not auto-close the modal when a replacement from outside the modal affects a selector outside the modal', asyncSpec (next) ->
         $fixture('.outside').text('old outside')
@@ -867,7 +864,7 @@ describe 'up.modal', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-modal')).toBeAttached()
+          expect($('.up-overlay')).toBeAttached()
 
       it 'does not auto-close the modal when a replacement from outside the modal affects a selector inside the modal', asyncSpec (next) ->
         $fixture('.outside').text('old outside')
@@ -881,7 +878,7 @@ describe 'up.modal', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-modal')).toBeAttached()
+          expect($('.up-overlay')).toBeAttached()
 
       it 'does not auto-close the modal when the new fragment is within a popup', asyncSpec (next) ->
         up.modal.visit('/modal', target: '.modal-content')
@@ -896,8 +893,8 @@ describe 'up.modal', ->
           @respondWith("<div class='popup-content'></div>")
 
         next =>
-          expect($('.up-modal')).toBeAttached()
-          expect($('.up-popup')).toBeAttached()
+          expect($('.up-overlay[up-flavor=modal]')).toBeAttached()
+          expect($('.up-overlay[up-flavor=popup]')).toBeAttached()
 
       it 'does not close the modal when a clicked [up-target] link within the modal links to cached content (bugfix)', asyncSpec (next) ->
         up.modal.extract '.content', """
@@ -907,7 +904,7 @@ describe 'up.modal', ->
           """
 
         next =>
-          $link = $('.up-modal .content a')
+          $link = $('.up-overlay .content a')
           expect($link).toBeAttached()
           up.proxy.preload($link)
 
@@ -919,8 +916,8 @@ describe 'up.modal', ->
           """
 
         next =>
-          Trigger.clickSequence('.up-modal .content a')
+          Trigger.clickSequence('.up-overlay .content a')
 
         next =>
-          expect($('.up-modal')).toBeAttached()
-          expect($('.up-modal .content')).toHaveText('new text')
+          expect($('.up-overlay')).toBeAttached()
+          expect($('.up-overlay .content')).toHaveText('new text')

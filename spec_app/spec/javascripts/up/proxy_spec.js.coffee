@@ -786,7 +786,6 @@ describe 'up.proxy', ->
 
           next =>
             cachedPromise = up.proxy.get(url: '/path', target: '.target')
-            debugger
             expect(u.isPromise(cachedPromise)).toBe(true)
 
         it "does not load a link whose method has side-effects", (done) ->
@@ -922,7 +921,7 @@ describe 'up.proxy', ->
             up.hello($link)
             up.proxy.preload($link)
             next =>
-              expect('.up-popup').not.toBeAttached()
+              expect('.up-overlay[up-flavor=popup]').not.toBeAttached()
 
           it 'does not emit an up:popup:open event', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-popup=".target"]')
@@ -943,20 +942,20 @@ describe 'up.proxy', ->
             up.popup.attach($existingAnchor, target: '.content', html: '<div class="content">popup content</div>')
 
             next =>
-              expect('.up-popup .content').toBeAttached()
+              expect('.up-overlay[up-flavor=popup] .content').toBeAttached()
 
             next =>
               up.proxy.preload($link)
 
             next =>
-              expect('.up-popup .content').toBeAttached()
+              expect('.up-overlay[up-flavor=popup] .content').toBeAttached()
               expect(closeListener).not.toHaveBeenCalled()
 
             next =>
               up.popup.close()
 
             next =>
-              expect('.up-popup .content').not.toBeAttached()
+              expect('.up-overlay[up-flavor=popup] .content').not.toBeAttached()
               expect(closeListener).toHaveBeenCalled()
 
           it 'does not prevent the opening of other popups while the request is still pending', asyncSpec (next) ->
@@ -969,7 +968,7 @@ describe 'up.proxy', ->
               up.popup.attach($anchor, target: '.content', html: '<div class="content">popup content</div>')
 
             next =>
-              expect('.up-popup .content').toBeAttached()
+              expect('.up-overlay[up-flavor=popup] .content').toBeAttached()
 
           it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
             requestSpy = spyOn(up, 'request')
